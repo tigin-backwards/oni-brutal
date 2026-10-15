@@ -35,6 +35,9 @@ namespace OniBrutal.Engine.Rendering
         public int Layer;
         public Camera Camera;
         public PropertySheet Properties;
+        /// Queued by a camera's own rendering callbacks (OnPreCull…), which queue it again
+        /// when that camera renders again.
+        public bool DuringRender;
     }
 
     /// Unity's built-in forward renderer, independent of the graphics device (ARCHITECTURE §3.5).
@@ -80,7 +83,15 @@ namespace OniBrutal.Engine.Rendering
             visibleLastFrame.Remove(r);
         }
 
-        public static void Queue(QueuedMesh m) => queued.Add(m);
+        public static void Queue(QueuedMesh m)
+        {
+            m.DuringRender = Current != null;
+            queued.Add(m);
+        }
+
+        /// The frame's meshes queued by scripts outside camera rendering, kept for captures that
+        /// render the frame again.
+        static readonly List<QueuedMesh> frameQueued = new();
 
         static void RenderFrame()
         {
@@ -89,6 +100,9 @@ namespace OniBrutal.Engine.Rendering
                 VideoPlanes.CopyRenderTextureVideos();
                 RenderScreen();
             }
+            frameQueued.Clear();
+            foreach (var q in queued)
+                if (!q.DuringRender) frameQueued.Add(q);
             queued.Clear();
             UpdateVisibility();
         }
@@ -127,16 +141,34 @@ namespace OniBrutal.Engine.Rendering
         /// ScreenCapture.CaptureScreenshot: written once this frame is complete.
         public static void RequestCapture(string path, int superSize) => captures.Add((path, Math.Max(1, superSize)));
 
-        /// Renders the frame again into a target `scale` times the screen size and writes it
-        /// as PNG.
+        /// Writes the frame as PNG: the back buffer itself, or for a super-sized capture the frame
+        /// rendered again into a target `scale` times the screen size.
         static void Capture(string path, int scale)
         {
             var p = Platform.PlatformServices.Current;
+            if (scale == 1)
+            {
+                // The finished frame, as it is about to be presented.
+                try
+                {
+                    var frame = new Texture2D(p.FramebufferWidth, p.FramebufferHeight, TextureFormat.RGBA32, false);
+                    GraphicsDevice.Current.ReadPixels(null, new RectInt(0, 0, p.FramebufferWidth, p.FramebufferHeight), (Texture2DNative)frame.NativeOrThrow, 0, 0);
+                    System.IO.File.WriteAllBytes(path, frame.EncodeToPNG());
+                    UnityEngine.Object.DestroyImmediate(frame);
+                }
+                catch (Exception e) when (e is System.IO.IOException or UnauthorizedAccessException)
+                {
+                    Debug.LogError($"Failed to store screenshot: {path} ({e.Message})");
+                }
+                return;
+            }
             int w = p.FramebufferWidth * scale, h = p.FramebufferHeight * scale;
             var rt = new RenderTexture(w, h, 24, RenderTextureFormat.ARGB32);
             var native = (RenderTextureNative)rt.NativeOrThrow;
             screenOverride = native;
             screenScale = scale;
+            queued.Clear();
+            queued.AddRange(frameQueued);
             try
             {
                 RenderScreen();
@@ -152,6 +184,7 @@ namespace OniBrutal.Engine.Rendering
             }
             finally
             {
+                queued.Clear();
                 screenOverride = null;
                 screenScale = 1;
                 UnityEngine.Object.DestroyImmediate(rt);

@@ -174,6 +174,9 @@ Known behaviours not yet reproduced, each to be closed by a named milestone:
 - UI Toolkit panel internals (`BaseRuntimePanel`, `PanelRaycaster`'s pickers, `UIDocument`
   members — 13 members) stay absent: uGUI reaches them only through UI Toolkit panels, and the
   game has no UIDocument. Milestone: M6 (confirm unreachable).
+- `ScreenCapture.CaptureScreenshot` with superSize > 1 re-renders the frame into a larger
+  target; in the colony the world composites white there (superSize 1 reads the presented frame
+  and is exact). Only the game's debug screenshot keys use superSize. Milestone: M6.
 - Environment for parity runs: a logged-in Steam client (engine work proceeds with the
   offline Steam test double, ARCHITECTURE §9.7) (the game quits through
   `RestartAppIfNecessary` / `SteamAPI.Init` without one) and the system `libvpx` (VP8 video;

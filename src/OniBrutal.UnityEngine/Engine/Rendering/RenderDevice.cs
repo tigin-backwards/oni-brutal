@@ -105,7 +105,9 @@ namespace OniBrutal.Engine.Rendering
     internal readonly record struct CameraConstants(Matrix4x4 View, Matrix4x4 Projection, Vector3 Position, float Near, float Far, bool Orthographic, Vector2 TargetSize);
 
     /// Keywords: enabled in addition to the material's and the global ones (UI rect clipping).
-    internal readonly record struct DrawRequest(MeshNative Mesh, int SubMesh, Matrix4x4 ObjectToWorld, Material Material, int Pass, PropertySheet Properties, string[] Keywords = null);
+    /// Pass -1 draws the forward-rendering passes of the active subshader, or every pass when
+    /// AllPasses is set (Graphics.Blit).
+    internal readonly record struct DrawRequest(MeshNative Mesh, int SubMesh, Matrix4x4 ObjectToWorld, Material Material, int Pass, PropertySheet Properties, string[] Keywords = null, bool AllPasses = false);
 
     /// GL.Begin modes (GL.TRIANGLES = 4, TRIANGLE_STRIP = 5, QUADS = 7, LINES = 1, LINE_STRIP = 2).
     internal enum ImmediatePrimitive

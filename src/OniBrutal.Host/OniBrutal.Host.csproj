@@ -11,6 +11,7 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../OniBrutal.UnityEngine/OniBrutal.UnityEngine.csproj" />
+    <ProjectReference Include="../OniBrutal.Desktop/OniBrutal.Desktop.csproj" />
     <ProjectReference Include="../Unity.InternalAPIEngineBridge.004/Unity.InternalAPIEngineBridge.004.csproj" />
     <!-- Steamworks.NET built for CoreCLR; replaces the shipped copy (ARCHITECTURE §2.1). -->
     <ProjectReference Include="../ThirdParty/Steamworks.NET/Steamworks.NET.csproj" />

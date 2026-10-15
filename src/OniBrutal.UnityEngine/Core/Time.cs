@@ -70,7 +70,14 @@ namespace UnityEngine
             float clamped = realDelta < s_MaximumDeltaTime ? realDelta : s_MaximumDeltaTime;
             s_DeltaTime = clamped * s_TimeScale;
             s_Time += s_DeltaTime;
+            // Exponential smoothing of deltaTime; the first frame starts the average.
+            s_SmoothDeltaTime = s_FrameCount <= 1 ? s_DeltaTime : s_SmoothDeltaTime + (s_DeltaTime - s_SmoothDeltaTime) * 0.2f;
         }
+
+        static float s_SmoothDeltaTime;
+
+        /// deltaTime smoothed over recent frames.
+        public static float smoothDeltaTime => s_SmoothDeltaTime;
 
         /// Advances fixed time by one step; returns false when fixed time has caught up with time.
         internal static bool BeginFixedStep()

@@ -120,6 +120,12 @@ namespace OniBrutal.Host
         public bool CheckBind;
         public string? DumpScript;
         public int Frames = -1;
+        // Unity's standalone player arguments.
+        public int ScreenWidth = -1, ScreenHeight = -1;
+        public int ScreenFullscreen = -1;
+        public string? WindowMode;
+        /// Development: "frame:path.png" captures the back buffer of that frame.
+        public readonly List<(int Frame, string Path)> Captures = new();
 
         public static Options? Parse(string[] args)
         {
@@ -137,9 +143,20 @@ namespace OniBrutal.Host
                     case "--check-bind": o.CheckBind = true; break;
                     case "--dump-script": o.DumpScript = args[++i]; break;
                     case "--frames": o.Frames = int.Parse(args[++i]); break;
+                    case "-screen-width": o.ScreenWidth = int.Parse(args[++i]); break;
+                    case "-screen-height": o.ScreenHeight = int.Parse(args[++i]); break;
+                    case "-screen-fullscreen": o.ScreenFullscreen = int.Parse(args[++i]); break;
+                    case "-window-mode": o.WindowMode = args[++i]; break;
+                    case "--capture":
+                    {
+                        var spec = args[++i];
+                        int colon = spec.IndexOf(':');
+                        o.Captures.Add((int.Parse(spec[..colon]), spec[(colon + 1)..]));
+                        break;
+                    }
                     default:
                         Console.Error.WriteLine($"Unknown option {args[i]}");
-                        Console.Error.WriteLine("usage: OniBrutal [--game DIR] [--log FILE] [--headless] [--batchmode] [--frames N] [--check-types] [--check-assets] [--check-bind]");
+                        Console.Error.WriteLine("usage: OniBrutal [--game DIR] [--log FILE] [--headless] [--batchmode] [--frames N] [-screen-width W] [-screen-height H] [-screen-fullscreen 0|1] [-window-mode exclusive|borderless|windowed] [--check-types] [--check-assets] [--check-bind]");
                         return null;
                 }
             }

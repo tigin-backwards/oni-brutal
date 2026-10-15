@@ -3,6 +3,8 @@
     <!-- The desktop platform: a GLFW window with its input, and the OpenGL 4.5 core render
          device that executes the game's shader programs (ARCHITECTURE §3.5-3.6). -->
     <RootNamespace>OniBrutal.Desktop</RootNamespace>
+    <!-- Engine-side code: Unity's API carries no nullability annotations (as the engine). -->
+    <Nullable>disable</Nullable>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../OniBrutal.UnityEngine/OniBrutal.UnityEngine.csproj" />

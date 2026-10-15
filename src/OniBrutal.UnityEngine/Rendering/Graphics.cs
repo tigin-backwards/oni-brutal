@@ -327,7 +327,7 @@ namespace OniBrutal.Engine.Rendering
                 props.SetTexture(MainTex, source);
                 props.SetTextureScaleOffset(MainTex, new Vector4(scale.x, scale.y, offset.x, offset.y));
             }
-            GraphicsDevice.Current.Draw(new DrawRequest(Quad, 0, Matrix4x4.identity, mat, pass, props));
+            GraphicsDevice.Current.Draw(new DrawRequest(Quad, 0, Matrix4x4.identity, mat, pass, props, AllPasses: true));
         }
 
         public static void MultiTap(Texture source, RenderTexture dest, Material mat, Vector2[] offsets)

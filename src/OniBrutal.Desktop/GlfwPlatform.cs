@@ -311,7 +311,7 @@ namespace OniBrutal.Desktop
         Vector2 dragStart;
         readonly bool[] buttonsDown = new bool[7];
 
-        static void Queue(EventType type, EventModifiers modifiers, Vector2 guiPosition, Action<Event>? fill = null)
+        static void Queue(EventType type, EventModifiers modifiers, Vector2 guiPosition, Action<Event> fill = null)
         {
             var e = new Event { type = type, rawType = type, modifiers = modifiers, mousePosition = guiPosition };
             fill?.Invoke(e);

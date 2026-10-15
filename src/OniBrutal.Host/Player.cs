@@ -19,7 +19,15 @@ namespace OniBrutal.Host
             AssetSystem.Initialize(dataDir);
             ProjectSettings.Load();
             PlayerLoop.Initialize();
-            OniBrutal.Engine.Platform.PlatformLoop.Install(null);
+            if (options.Headless || options.BatchMode) OniBrutal.Engine.Platform.PlatformLoop.Install(null);
+            else
+            {
+                var platform = new OniBrutal.Desktop.GlfwPlatform(WindowSettingsFor(options));
+                OniBrutal.Engine.Platform.PlatformLoop.Install(platform);
+                var device = new OniBrutal.Desktop.Gl.GlDevice(platform);
+                foreach (var (captureFrame, path) in options.Captures) device.Captures[captureFrame] = path;
+                OniBrutal.Engine.Rendering.GraphicsDevice.Install(device);
+            }
             OniBrutal.Engine.Rendering.FrameRenderer.Install();
             OniBrutal.Engine.UI.CanvasSystem.Install();
             EngineLog.Engine($"Project: {EngineConfig.CompanyName} / {EngineConfig.ProductName} {EngineConfig.Version} (Unity {EngineConfig.UnityVersion})");
@@ -54,6 +62,29 @@ namespace OniBrutal.Host
             EngineLog.Close();
             Environment.Exit(PlayerLoop.ExitCode);
             return PlayerLoop.ExitCode;
+        }
+
+        /// The player window from PlayerSettings (native resolution when so configured),
+        /// overridden by Unity's -screen-* / -window-mode arguments.
+        static OniBrutal.Desktop.WindowSettings WindowSettingsFor(Options options)
+        {
+            var ps = ProjectSettings.PlayerSettings;
+            bool native = ps.Bool("defaultIsNativeResolution");
+            int width = native ? -1 : ps.Int("defaultScreenWidth");
+            int height = native ? -1 : ps.Int("defaultScreenHeight");
+            var mode = (FullScreenMode)ps.Int("fullscreenMode");
+            if (options.ScreenWidth > 0) width = options.ScreenWidth;
+            if (options.ScreenHeight > 0) height = options.ScreenHeight;
+            if (options.ScreenFullscreen == 0) mode = FullScreenMode.Windowed;
+            else if (options.ScreenFullscreen == 1 && mode == FullScreenMode.Windowed) mode = FullScreenMode.FullScreenWindow;
+            mode = options.WindowMode switch
+            {
+                "exclusive" => FullScreenMode.ExclusiveFullScreen,
+                "borderless" => FullScreenMode.FullScreenWindow,
+                "windowed" => FullScreenMode.Windowed,
+                _ => mode,
+            };
+            return new OniBrutal.Desktop.WindowSettings(EngineConfig.ProductName, width, height, mode);
         }
 
         /// Frame pacing: Application.targetFrameRate when set; otherwise the display rate a

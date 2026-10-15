@@ -223,10 +223,14 @@ namespace OniBrutal.Engine
                 }
                 if (bn.Enabled) Enable(c, bn);
             }
-            else if (!native.AwakeCalledForComponent)
+            else
             {
-                native.AwakeCalledForComponent = true;
-                c.EngineAwake();
+                if (!native.AwakeCalledForComponent)
+                {
+                    native.AwakeCalledForComponent = true;
+                    c.EngineAwake();
+                }
+                c.EngineOnEnable(); // components that are not Behaviours: each activation
             }
         }
 
@@ -247,6 +251,7 @@ namespace OniBrutal.Engine
 
         public static void Disable(Component c)
         {
+            if (c.Native is ComponentNative and not BehaviourNative) c.EngineOnDisable(); // non-Behaviours: deactivation
             if (c.Native is not BehaviourNative bn || !bn.IsActiveAndEnabledState) return;
             bn.IsActiveAndEnabledState = false;
             if (bn.Script != null) BehaviourManager.Unregister(bn);

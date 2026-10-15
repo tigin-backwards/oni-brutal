@@ -340,5 +340,45 @@ namespace OniBrutal.Tests
                 Font.textureRebuilt -= handler;
             }
         }
+
+        [Fact]
+        public void TextMeshBuildsAnchoredGeometryForItsMeshRenderer()
+        {
+            var font = LiberationSans;
+            var go = new GameObject("label");
+            var renderer = go.AddComponent<MeshRenderer>();
+            renderer.sharedMaterial = font.material;
+            var tm = go.AddComponent<TextMesh>();
+            tm.font = font;
+            tm.fontSize = 20;
+            tm.text = "Ab\nCd";
+            tm.color = Color.red;
+            tm.anchor = TextAnchor.MiddleCenter;
+            tm.characterSize = 0.5f;
+
+            var native = (OniBrutal.Engine.Text.TextMeshNative)tm.Native;
+            var mesh = native.Geometry();
+            Assert.Equal(16, mesh.VertexCount);
+            Assert.Equal(24, mesh.SubMeshes[0].Indices.Length);
+            Assert.All(mesh.Colors, c => Assert.Equal(Color.red, c));
+            // Middle centre: the block is centred on the origin; 20 px at 0.05 units per pixel.
+            var b = mesh.Bounds;
+            Assert.InRange(b.center.x, -0.15f, 0.15f);
+            Assert.InRange(b.center.y, -0.3f, 0.3f);
+            Assert.InRange(b.size.y, 1.2f, 2.2f);
+            Assert.Equal(b.size, renderer.localBounds.size);
+
+            // Unchanged state reuses the mesh; a text change regenerates it.
+            int version = mesh.Version;
+            native.Geometry();
+            Assert.Equal(version, mesh.Version);
+            tm.anchor = TextAnchor.UpperLeft;
+            tm.text = "Ab";
+            native.Geometry();
+            Assert.Equal(8, mesh.VertexCount);
+            Assert.True(mesh.Bounds.max.y <= 0.01f);
+            Assert.True(mesh.Bounds.min.x >= -0.01f);
+            Object.DestroyImmediate(go);
+        }
     }
 }

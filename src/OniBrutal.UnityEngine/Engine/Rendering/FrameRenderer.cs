@@ -482,14 +482,15 @@ namespace OniBrutal.Engine.Rendering
             }
         }
 
-        /// Material i draws submesh i; extra materials draw the last submesh again.
+        /// Material i draws submesh i; extra materials draw the last submesh again. Without a
+        /// MeshFilter the renderer draws its TextMesh's text.
         static void CollectMesh(MeshRendererNative r, List<DrawItem> draws)
         {
             Mesh mesh = null;
             foreach (var c in r.GameObject.Components)
                 if (c is MeshFilter f && f.Native is MeshFilterNative fn) { mesh = fn.Mesh; break; }
-            if (mesh == null) return;
-            var m = (MeshNative)mesh.NativeOrThrow;
+            var m = mesh != null ? (MeshNative)mesh.NativeOrThrow : MeshRendererNative.TextMesh(r.GameObject)?.Geometry();
+            if (m == null) return;
             int subMeshes = m.SubMeshes.Count;
             for (int i = 0; i < r.Materials.Length; i++)
             {

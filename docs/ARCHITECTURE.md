@@ -144,6 +144,10 @@ past the boot checkpoint needs a Steam client logged in with an account that own
   re-entered each frame if the runtime had to end it. Entering may collect once, and an
   exhausted budget collects where Unity's heap would grow. Only the game's scripted-profiling
   path changes the mode.
+- **D8 TextMesh scale.** Legacy `TextMesh` geometry comes from the same legacy text generator
+  as uGUI `Text`, at 0.1 world units per font pixel times `characterSize`. Unity's exact native
+  scale and line-box metrics for TextMesh are unpublished; only TMP's example scripts create
+  TextMeshes, so no game screen depends on them.
 
 ## 3. The engine API (`OniBrutal.UnityEngine`)
 

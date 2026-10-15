@@ -299,6 +299,16 @@ namespace OniBrutal.Engine.Text
         /// text using this font must regenerate).
         public bool RequestGlyphs(IEnumerable<GlyphKey> keys)
         {
+            bool rebuilt = RequestGlyphsCore(keys);
+            if (rebuilt) AtlasVersion++;
+            return rebuilt;
+        }
+
+        /// Incremented whenever the font texture is rebuilt (glyph UVs move).
+        public int AtlasVersion;
+
+        bool RequestGlyphsCore(IEnumerable<GlyphKey> keys)
+        {
             lock (gate)
             {
                 var t = TextureData;

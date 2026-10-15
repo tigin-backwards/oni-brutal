@@ -514,6 +514,14 @@ namespace OniBrutal.Engine.Rendering
 
     internal sealed class MeshRendererNative : RendererNative
     {
+        /// A MeshRenderer without a MeshFilter draws its GameObject's TextMesh.
+        public static OniBrutal.Engine.Text.TextMeshNative TextMesh(GameObjectNative go)
+        {
+            foreach (var c in go.Components)
+                if (c is TextMesh && c.Native is OniBrutal.Engine.Text.TextMeshNative t) return t;
+            return null;
+        }
+
         public Mesh AdditionalVertexStreams;
 
         protected override Bounds GeometryBounds
@@ -523,7 +531,7 @@ namespace OniBrutal.Engine.Rendering
                 foreach (var c in GameObject.Components)
                     if (c is MeshFilter && c.Native is MeshFilterNative { Mesh: { } mesh } && mesh != null)
                         return ((MeshNative)mesh.NativeOrThrow).Bounds;
-                return default;
+                return TextMesh(GameObject)?.Geometry().Bounds ?? default;
             }
         }
 

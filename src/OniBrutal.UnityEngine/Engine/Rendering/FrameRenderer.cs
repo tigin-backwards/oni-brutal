@@ -87,9 +87,7 @@ namespace OniBrutal.Engine.Rendering
             {
                 VideoPlanes.CopyRenderTextureVideos();
                 RenderScreen();
-                foreach (var (path, scale) in captures) Capture(path, scale);
             }
-            captures.Clear();
             queued.Clear();
             UpdateVisibility();
         }
@@ -125,7 +123,7 @@ namespace OniBrutal.Engine.Rendering
         /// Pixels per screen pixel of the current screen target (superSize during captures).
         public static int ScreenScale => screenScale;
 
-        /// ScreenCapture.CaptureScreenshot: written after this frame is rendered.
+        /// ScreenCapture.CaptureScreenshot: written once this frame is complete.
         public static void RequestCapture(string path, int superSize) => captures.Add((path, Math.Max(1, superSize)));
 
         /// Renders the frame again into a target `scale` times the screen size and writes it
@@ -141,6 +139,7 @@ namespace OniBrutal.Engine.Rendering
             try
             {
                 RenderScreen();
+                RenderScreenLate?.Invoke();
                 var image = new Texture2D(w, h, TextureFormat.RGBA32, false);
                 GraphicsDevice.Current.ReadPixels(native, new RectInt(0, 0, w, h), (Texture2DNative)image.NativeOrThrow, 0, 0);
                 System.IO.File.WriteAllBytes(path, image.EncodeToPNG());
@@ -158,8 +157,15 @@ namespace OniBrutal.Engine.Rendering
             }
         }
 
+        /// Screen drawing after the frame renderer's (IMGUI); captures repeat it.
+        public static event Action RenderScreenLate;
+
         static void EndFrame()
         {
+            // Captures show the finished frame, OnGUI included.
+            if (GraphicsDevice.Current.RendersFrames)
+                foreach (var (path, scale) in captures) Capture(path, scale);
+            captures.Clear();
             TemporaryRenderTextures.EndFrame();
             GraphicsDevice.Current.Present();
         }

@@ -207,4 +207,6 @@ Known behaviours not yet reproduced, each to be closed by a named milestone:
   skipping VR multiview variants whose extension the context lacks, as Unity does) and the launch scene's uGUI canvas
   renders correctly (`--capture 2:out.png`). Engine-side renderer complete: cameras, renderers,
   sprites (incl. 9-slice), particles, canvases (overlay/camera/world), video planes, Graphics/GL/
-  CommandBuffer. ApiCheck: 87 missing members (IMGUI in progress; see open items).
+  CommandBuffer; IMGUI (OnGUI dispatch, built-in skin, layout, windows, text editing) verified
+  on the GPU. ApiCheck: 14 missing members (PlayableGraph.SynchronizeEvaluation and the 13
+  UI Toolkit panel internals; see open items).

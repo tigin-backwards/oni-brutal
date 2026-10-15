@@ -121,6 +121,7 @@ namespace OniBrutal.Engine.Assets
             [RectTransformId] = new TransformBinder(),
             [MonoBehaviourId] = new ScriptBinder(),
             [TextAssetId] = new TextAssetBinder(),
+            [74] = new Mecanim.AnimationClipBinder(), // AnimationClip
             [104] = new SceneSettingsBinder(), // RenderSettings
             [157] = new SceneSettingsBinder(), // LightmapSettings
             [196] = new SceneSettingsBinder(), // NavMeshSettings

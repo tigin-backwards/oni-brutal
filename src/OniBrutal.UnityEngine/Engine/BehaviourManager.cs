@@ -13,6 +13,7 @@ namespace OniBrutal.Engine
             // Engine components with their own native state. One list, so registration never
             // depends on type initialization order.
             [typeof(CanvasGroup)] = () => new CanvasGroupNative(),
+            [typeof(Animator)] = () => new Mecanim.AnimatorNative(),
         };
 
         public static void Register(Type componentType, Func<ComponentNative> factory)

@@ -9,6 +9,9 @@ namespace OniBrutal.Engine.Assets
         static readonly Dictionary<Type, Func<NativeObject>> factories = new()
         {
             [typeof(UnityEngine.TextAsset)] = () => new TextAssetNative(),
+            [typeof(UnityEngine.RuntimeAnimatorController)] = () => new Mecanim.AnimatorControllerNative(),
+            [typeof(UnityEngine.Avatar)] = () => new Mecanim.AvatarNative(),
+            [typeof(UnityEngine.AvatarMask)] = () => new Mecanim.AvatarMaskNative(),
         };
 
         public static NativeObject Create(Type engineType)

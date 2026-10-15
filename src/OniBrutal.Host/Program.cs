@@ -124,8 +124,9 @@ namespace OniBrutal.Host
         public int ScreenWidth = -1, ScreenHeight = -1;
         public int ScreenFullscreen = -1;
         public string? WindowMode;
-        /// Development: "frame:path.png" captures the back buffer of that frame.
-        public readonly List<(int Frame, string Path)> Captures = new();
+        /// Development: "frame:path.png[:superSize]" calls ScreenCapture.CaptureScreenshot in
+        /// that frame.
+        public readonly List<(int Frame, string Path, int Scale)> Captures = new();
 
         public static Options? Parse(string[] args)
         {
@@ -149,9 +150,8 @@ namespace OniBrutal.Host
                     case "-window-mode": o.WindowMode = args[++i]; break;
                     case "--capture":
                     {
-                        var spec = args[++i];
-                        int colon = spec.IndexOf(':');
-                        o.Captures.Add((int.Parse(spec[..colon]), spec[(colon + 1)..]));
+                        var parts = args[++i].Split(':');
+                        o.Captures.Add((int.Parse(parts[0]), parts[1], parts.Length > 2 ? int.Parse(parts[2]) : 1));
                         break;
                     }
                     default:

@@ -341,8 +341,8 @@ namespace OniBrutal.Engine.UI
                 if (!IsOverlay(b.Root) || b.Draws.Count == 0) continue;
                 if (!bound)
                 {
-                    FrameRenderer.Bind(device, RenderTargetBinding.BackBuffer);
-                    device.SetViewport(new Rect(0f, 0f, size.x, size.y));
+                    FrameRenderer.Bind(device, FrameRenderer.ScreenBinding);
+                    device.SetViewport(new Rect(0f, 0f, size.x * FrameRenderer.ScreenScale, size.y * FrameRenderer.ScreenScale));
                     device.SetCamera(new CameraConstants(Matrix4x4.identity, Matrix4x4.Ortho(0f, size.x, 0f, size.y, -1000f, 1000f), Vector3.zero, -1000f, 1000f, true, size));
                     bound = true;
                 }

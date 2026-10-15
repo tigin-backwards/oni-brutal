@@ -310,8 +310,8 @@ namespace OniBrutal.Engine.Rendering
         {
             RenderTexture.active = dest;
             var device = GraphicsDevice.Current;
-            FrameRenderer.Bind(device, RenderTargetBinding.Of(dest == null ? null : (RenderTextureNative)dest.NativeOrThrow));
-            var size = GLState.TargetSize;
+            FrameRenderer.Bind(device, dest == null ? FrameRenderer.ScreenBinding : RenderTargetBinding.Of((RenderTextureNative)dest.NativeOrThrow));
+            var size = dest == null ? GLState.TargetSize * FrameRenderer.ScreenScale : GLState.TargetSize;
             device.SetViewport(new Rect(0f, 0f, size.x, size.y));
             device.SetCamera(new CameraConstants(Matrix4x4.identity, Matrix4x4.Ortho(0f, 1f, 0f, 1f, -1f, 1f), Vector3.zero, -1f, 1f, true, size));
         }

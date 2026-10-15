@@ -554,30 +554,9 @@ namespace OniBrutal.Desktop.Gl
             }
         }
 
-        /// Development captures: frame number → PNG path, written before the frame is shown.
-        public readonly Dictionary<int, string> Captures = new();
-
-        void Capture(string path)
-        {
-            int w = platform.FramebufferWidth, h = platform.FramebufferHeight;
-            var pixels = new byte[w * h * 4];
-            GlApi.BindFramebuffer(ReadFramebuffer, 0);
-            N.glReadBuffer(GlConst.Back);
-            N.glPixelStorei(PackAlignment, 1);
-            fixed (byte* p = pixels) N.glReadPixels(0, 0, w, h, Rgba, UnsignedByte, p);
-            framebufferValid = false;
-            // PNG rows run top-down; the back buffer bottom-up.
-            var raw = new byte[h * (w * 4 + 1)];
-            for (int y = 0; y < h; y++)
-                Buffer.BlockCopy(pixels, (h - 1 - y) * w * 4, raw, y * (w * 4 + 1) + 1, w * 4);
-            System.IO.File.WriteAllBytes(path, Png.Encode(w, h, 4, raw));
-            EngineLog.Engine($"Captured frame {Time.frameCount} to {path}");
-        }
-
         /// Swaps buffers with QualitySettings.vSyncCount as the swap interval.
         public override void Present()
         {
-            if (Captures.Remove(Time.frameCount, out var path)) Capture(path);
             int interval = QualitySettings.vSyncCount;
             if (interval != swapInterval)
             {

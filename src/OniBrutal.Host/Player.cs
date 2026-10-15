@@ -25,7 +25,6 @@ namespace OniBrutal.Host
                 var platform = new OniBrutal.Desktop.GlfwPlatform(WindowSettingsFor(options));
                 OniBrutal.Engine.Platform.PlatformLoop.Install(platform);
                 var device = new OniBrutal.Desktop.Gl.GlDevice(platform);
-                foreach (var (captureFrame, path) in options.Captures) device.Captures[captureFrame] = path;
                 OniBrutal.Engine.Rendering.GraphicsDevice.Install(device);
             }
             OniBrutal.Engine.Rendering.FrameRenderer.Install();
@@ -48,6 +47,8 @@ namespace OniBrutal.Host
                 double now = clock.Elapsed.TotalSeconds;
                 float dt = frame == 0 ? 0f : (float)(now - last);
                 last = now;
+                foreach (var (captureFrame, path, scale) in options.Captures)
+                    if (captureFrame == frame) ScreenCapture.CaptureScreenshot(path, scale);
                 PlayerLoop.RunFrame(dt);
                 frame++;
                 Throttle(clock, now);

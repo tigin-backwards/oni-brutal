@@ -86,23 +86,76 @@ namespace OniBrutal.Engine.Rendering
             if (GraphicsDevice.Current.RendersFrames)
             {
                 VideoPlanes.CopyRenderTextureVideos();
-                var cameras = Cameras.Enabled.ToArray();
-                // Stable sort: offscreen first, then by depth.
-                var order = new List<(int Key, float Depth, int Index, Camera Camera)>();
-                for (int i = 0; i < cameras.Length; i++)
-                {
-                    var n = (CameraNative)cameras[i].Native;
-                    if (n == null || !n.GameObject.ActiveInHierarchy) continue;
-                    bool offscreen = n.TargetTexture != null || n.TargetColorBuffers != null;
-                    order.Add((offscreen ? 0 : 1, n.Depth, i, cameras[i]));
-                }
-                order.Sort((a, b) => a.Key != b.Key ? a.Key.CompareTo(b.Key) : a.Depth != b.Depth ? a.Depth.CompareTo(b.Depth) : a.Index.CompareTo(b.Index));
-                foreach (var entry in order)
-                    if (entry.Camera != null) RenderCamera(entry.Camera);
-                RenderOverlays?.Invoke();
+                RenderScreen();
+                foreach (var (path, scale) in captures) Capture(path, scale);
             }
+            captures.Clear();
             queued.Clear();
             UpdateVisibility();
+        }
+
+        /// Cameras rendering into textures, then those rendering to the screen, each set in
+        /// ascending depth (enable order on ties); then overlay canvases.
+        static void RenderScreen()
+        {
+            var cameras = Cameras.Enabled.ToArray();
+            var order = new List<(int Key, float Depth, int Index, Camera Camera)>();
+            for (int i = 0; i < cameras.Length; i++)
+            {
+                var n = (CameraNative)cameras[i].Native;
+                if (n == null || !n.GameObject.ActiveInHierarchy) continue;
+                bool offscreen = n.TargetTexture != null || n.TargetColorBuffers != null;
+                order.Add((offscreen ? 0 : 1, n.Depth, i, cameras[i]));
+            }
+            order.Sort((a, b) => a.Key != b.Key ? a.Key.CompareTo(b.Key) : a.Depth != b.Depth ? a.Depth.CompareTo(b.Depth) : a.Index.CompareTo(b.Index));
+            foreach (var entry in order)
+                if (entry.Camera != null) RenderCamera(entry.Camera);
+            RenderOverlays?.Invoke();
+        }
+
+        // ----- The screen, and super-sampled captures of it -----
+
+        static readonly List<(string Path, int Scale)> captures = new();
+        static RenderTextureNative screenOverride;
+        static int screenScale = 1;
+
+        /// Where screen rendering goes: the back buffer, or a capture's off-screen target.
+        public static RenderTargetBinding ScreenBinding => screenOverride == null ? RenderTargetBinding.BackBuffer : RenderTargetBinding.Of(screenOverride);
+
+        /// Pixels per screen pixel of the current screen target (superSize during captures).
+        public static int ScreenScale => screenScale;
+
+        /// ScreenCapture.CaptureScreenshot: written after this frame is rendered.
+        public static void RequestCapture(string path, int superSize) => captures.Add((path, Math.Max(1, superSize)));
+
+        /// Renders the frame again into a target `scale` times the screen size and writes it
+        /// as PNG.
+        static void Capture(string path, int scale)
+        {
+            var p = Platform.PlatformServices.Current;
+            int w = p.FramebufferWidth * scale, h = p.FramebufferHeight * scale;
+            var rt = new RenderTexture(w, h, 24, RenderTextureFormat.ARGB32);
+            var native = (RenderTextureNative)rt.NativeOrThrow;
+            screenOverride = native;
+            screenScale = scale;
+            try
+            {
+                RenderScreen();
+                var image = new Texture2D(w, h, TextureFormat.RGBA32, false);
+                GraphicsDevice.Current.ReadPixels(native, new RectInt(0, 0, w, h), (Texture2DNative)image.NativeOrThrow, 0, 0);
+                System.IO.File.WriteAllBytes(path, image.EncodeToPNG());
+                UnityEngine.Object.DestroyImmediate(image);
+            }
+            catch (Exception e) when (e is System.IO.IOException or UnauthorizedAccessException)
+            {
+                Debug.LogError($"Failed to store screenshot: {path} ({e.Message})");
+            }
+            finally
+            {
+                screenOverride = null;
+                screenScale = 1;
+                UnityEngine.Object.DestroyImmediate(rt);
+            }
         }
 
         static void EndFrame()
@@ -176,7 +229,9 @@ namespace OniBrutal.Engine.Rendering
                     effects.Add((mb, effect));
 
             RenderTexture source = null;
-            var size = cam.TargetSize;
+            bool toScreen = cam.TargetTexture == null && cam.TargetColorBuffers == null;
+            int pixelScale = toScreen ? screenScale : 1;
+            var size = cam.TargetSize * pixelScale;
             if (effects.Count > 0)
             {
                 source = RenderTexture.GetTemporary(Math.Max(1, (int)size.x), Math.Max(1, (int)size.y), 24,
@@ -184,7 +239,8 @@ namespace OniBrutal.Engine.Rendering
                 Bind(device, RenderTargetBinding.Of((RenderTextureNative)source.NativeOrThrow));
             }
             else Bind(device, CameraTarget(cam));
-            device.SetViewport(cam.PixelRect);
+            var viewport = cam.PixelRect;
+            device.SetViewport(new Rect(viewport.x * pixelScale, viewport.y * pixelScale, viewport.width * pixelScale, viewport.height * pixelScale));
             var constants = Constants(cam);
             device.SetCamera(constants);
             GLState.BeginCamera(cam);
@@ -245,7 +301,7 @@ namespace OniBrutal.Engine.Rendering
                 var depth = ObjectTable.FindByInstanceId(cam.TargetDepthBuffer.m_RenderTextureInstanceID) as RenderTextureNative;
                 return new RenderTargetBinding(colors, depth, 0);
             }
-            return RenderTargetBinding.Of(cam.TargetTexture != null ? (RenderTextureNative)cam.TargetTexture.NativeOrThrow : null);
+            return cam.TargetTexture != null ? RenderTargetBinding.Of((RenderTextureNative)cam.TargetTexture.NativeOrThrow) : ScreenBinding;
         }
 
         /// Binds a target, creating render textures on first use.

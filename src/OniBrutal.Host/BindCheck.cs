@@ -19,6 +19,8 @@ namespace OniBrutal.Host
             "Resources/unity default resources", "Resources/unity_builtin_extra",
         ];
 
+        static int ShaderVariants;
+
         static readonly HashSet<int> classes = [28, 187, 84, 48, 21, 43, 213, 687078895];
 
         public static int Run(string dataDir)
@@ -48,6 +50,7 @@ namespace OniBrutal.Host
                 }
             }
             foreach (var (type, n) in counts) Console.WriteLine($"{type,-16} {n,6}");
+            Console.WriteLine($"shader variants  {ShaderVariants,6}");
             foreach (var f in failures.Take(60)) Console.WriteLine("FAIL " + f);
             Console.WriteLine($"{failures.Count} failures");
             return failures.Count == 0 ? 0 : 1;
@@ -63,6 +66,27 @@ namespace OniBrutal.Host
                     long actual = t.Memory.Size;
                     t.DropTexels();
                     if (actual != expected) throw new InvalidOperationException($"{t.Name}: {t.Format} {t.Width}x{t.Height} mips {t.MipCount}: {actual} bytes, expected {expected}");
+                    break;
+                }
+                case ShaderNative shader when shader.HasOpenGLCorePrograms:
+                {
+                    int variants = 0;
+                    foreach (var sub in shader.SubShaders)
+                        foreach (var pass in sub.Passes)
+                        {
+                            if (pass.Type != 0) continue;
+                            foreach (var list in pass.Data.Struct("progVertex").Array("m_PlayerSubPrograms"))
+                                foreach (var o in (object?[])list!)
+                                {
+                                    var p = (OniBrutal.Assets.TypeTrees.Fields)o!;
+                                    if (!ShaderPrograms.IsGlCore(p.Get<sbyte>("m_GpuProgramType"))) continue;
+                                    var v = shader.Programs.Variant((int)p.Get<uint>("m_BlobIndex"));
+                                    if (!v.VertexSource.Contains("void main") || !v.FragmentSource.Contains("void main"))
+                                        throw new InvalidOperationException($"shader {shader.ShaderName}: variant {v.BlobIndex} lacks a stage");
+                                    variants++;
+                                }
+                        }
+                    ShaderVariants += variants;
                     break;
                 }
                 case MaterialNative m when m.Shader == null:

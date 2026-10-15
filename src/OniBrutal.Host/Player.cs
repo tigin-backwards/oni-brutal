@@ -77,11 +77,11 @@ namespace OniBrutal.Host
         public static RuntimeInitializeHooks Load(string dataDir)
         {
             using var doc = JsonDocument.Parse(File.ReadAllText(Path.Combine(dataDir, "RuntimeInitializeOnLoads.json")));
-            var list = doc.RootElement.GetProperty("root").EnumerateArray().Select(e =>
+            var list = doc.RootElement.GetProperty("root"u8).EnumerateArray().Select(e =>
             {
-                var ns = e.GetProperty("nameSpace").GetString()!;
-                var cls = e.GetProperty("className").GetString()!;
-                return (e.GetProperty("loadTypes").GetInt32(), e.GetProperty("assemblyName").GetString()!, ns.Length > 0 ? ns + "." + cls : cls, e.GetProperty("methodName").GetString()!);
+                var ns = e.GetProperty("nameSpace"u8).GetString()!;
+                var cls = e.GetProperty("className"u8).GetString()!;
+                return (e.GetProperty("loadTypes"u8).GetInt32(), e.GetProperty("assemblyName"u8).GetString()!, ns.Length > 0 ? ns + "." + cls : cls, e.GetProperty("methodName"u8).GetString()!);
             }).ToArray();
             return new RuntimeInitializeHooks(list);
         }

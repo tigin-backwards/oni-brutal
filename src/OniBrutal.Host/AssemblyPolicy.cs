@@ -89,7 +89,7 @@ namespace OniBrutal.Host
         {
             var json = JsonDocument.Parse(File.ReadAllText(Path.Combine(gameDataDir, "ScriptingAssemblies.json")));
             var loaded = new List<Assembly>();
-            foreach (var entry in json.RootElement.GetProperty("names").EnumerateArray())
+            foreach (var entry in json.RootElement.GetProperty("names"u8).EnumerateArray())
             {
                 var simple = Path.GetFileNameWithoutExtension(entry.GetString()!);
                 if (unitySupportPackages.Contains(simple) || monoClassLibraries.Contains(simple)) continue;

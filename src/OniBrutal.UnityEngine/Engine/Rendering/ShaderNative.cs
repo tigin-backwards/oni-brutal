@@ -82,6 +82,23 @@ namespace OniBrutal.Engine.Rendering
         /// The whole serialized shader, for the device (program blobs and their tables).
         public Fields Data;
 
+        ShaderPrograms programs;
+        bool programsLoaded;
+
+        /// The OpenGLCore programs (null when the shader has none).
+        public ShaderPrograms Programs
+        {
+            get
+            {
+                if (!programsLoaded)
+                {
+                    programs = Data == null ? null : ShaderPrograms.Load(Data);
+                    programsLoaded = true;
+                }
+                return programs;
+            }
+        }
+
         /// Shader (class 48).
         public override void Bind(Fields f, IReferenceResolver resolver)
         {

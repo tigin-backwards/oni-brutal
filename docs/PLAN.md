@@ -174,6 +174,18 @@ Known behaviours not yet reproduced, each to be closed by a named milestone:
   synchronized layers, StateMachineBehaviours, non-legacy clip events); additive layers blend
   as override, no PPtr curves, root motion, culling modes or damped SetFloat. Timeline animation
   playables do not reach the Animator sampler. Milestone: M6 (confirm unreachable).
+- UI Toolkit panel internals (`BaseRuntimePanel`, `PanelRaycaster`'s pickers, `UIDocument`
+  members — 13 members) stay absent: uGUI reaches them only through UI Toolkit panels, and the
+  game has no UIDocument. Milestone: M6 (confirm unreachable).
+- `ScreenCapture.CaptureScreenshot(path, superSize)` (debug screenshot keys, sizes 1–32) needs a
+  super-sampled re-render of the frame. Milestone: M4.
+- `PlayableGraph.SynchronizeEvaluation` (Timeline nested graphs; no Timeline content in the
+  data). Milestone: M6.
+- TextMesh (legacy 3D text) keeps state but builds no geometry; only TMP example scripts use it.
+  Milestone: M6.
+- Environment for full runs: a logged-in Steam client (the game quits through
+  `RestartAppIfNecessary` / `SteamAPI.Init` without one) and the system `libvpx` (VP8 video;
+  `sudo apt install libvpx9`).
 - `GameObject.CreatePrimitive` needs MeshCollider/CapsuleCollider shapes in the surface.
   Milestone: M2 (with the physics module).
 
@@ -199,3 +211,8 @@ Known behaviours not yet reproduced, each to be closed by a named milestone:
   exit 0, clean shutdown with scene unload). Running further (frontend, main menu, devBootSmoke)
   needs a logged-in Steam client on the machine, as for the original game. Test runs use
   `scripts/run.sh` (isolated persistent-data root).
+- M3 in progress (2026-10-15): the OpenGL 4.5 device runs the game's own GLSL (all 583 GLCore
+  variants decode; programs compile on Mesa d3d12 / RTX 3090) and the launch scene's uGUI canvas
+  renders correctly (`--capture 2:out.png`). Engine-side renderer complete: cameras, renderers,
+  sprites (incl. 9-slice), particles, canvases (overlay/camera/world), video planes, Graphics/GL/
+  CommandBuffer. ApiCheck: 87 missing members (IMGUI in progress; see open items).

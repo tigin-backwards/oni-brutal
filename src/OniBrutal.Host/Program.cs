@@ -125,6 +125,10 @@ namespace OniBrutal.Host
         public string? DumpShader;
         public string? DumpScript;
         public int Frames = -1;
+        /// --max-frame-rate N[:FRAMES]: an upper bound on the frame rate whatever the game asks
+        /// for (scripted runs whose schedules count frames), for the first FRAMES frames when
+        /// given; 0 for none.
+        public int MaxFrameRate, MaxFrameRateFrames = int.MaxValue;
         /// Diagnostics: log every first-chance exception with IL offsets per frame (game code
         /// has no symbols, so offsets locate the throwing instruction).
         public bool TraceExceptions;
@@ -158,6 +162,13 @@ namespace OniBrutal.Host
                     case "--trace-exceptions": o.TraceExceptions = true; break;
                     case "--input": o.Input.Add(args[++i]); break;
                     case "--frame-stats": OniBrutal.Engine.PlayerLoop.FrameStats = true; break;
+                    case "--max-frame-rate":
+                        {
+                            var spec = args[++i].Split(':');
+                            o.MaxFrameRate = int.Parse(spec[0]);
+                            if (spec.Length > 1) o.MaxFrameRateFrames = int.Parse(spec[1]);
+                            break;
+                        }
                     case "--dump-render-textures":
                         {
                             var spec = args[++i];
@@ -186,7 +197,7 @@ namespace OniBrutal.Host
                     }
                     default:
                         Console.Error.WriteLine($"Unknown option {args[i]}");
-                        Console.Error.WriteLine("usage: OniBrutal [--game DIR] [--log FILE] [--headless] [--batchmode] [--frames N] [--native-override NAME=PATH] [--trace-exceptions] [--input FRAME:ACTION[:ARGS]] [--frame-stats] [--dump-render-textures FRAME:DIR] [-screen-width W] [-screen-height H] [-screen-fullscreen 0|1] [-window-mode exclusive|borderless|windowed] [--check-types] [--check-assets] [--check-bind] [--check-shaders] [--dump-shader NAME:DIR] [--capture FRAME:PATH[:SCALE]]");
+                        Console.Error.WriteLine("usage: OniBrutal [--game DIR] [--log FILE] [--headless] [--batchmode] [--frames N] [--native-override NAME=PATH] [--trace-exceptions] [--input FRAME:ACTION[:ARGS]] [--frame-stats] [--max-frame-rate N[:FRAMES]] [--dump-render-textures FRAME:DIR] [-screen-width W] [-screen-height H] [-screen-fullscreen 0|1] [-window-mode exclusive|borderless|windowed] [--check-types] [--check-assets] [--check-bind] [--check-shaders] [--dump-shader NAME:DIR] [--capture FRAME:PATH[:SCALE]]");
                         return null;
                 }
             }

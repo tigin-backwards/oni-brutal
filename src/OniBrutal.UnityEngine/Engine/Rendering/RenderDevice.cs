@@ -94,6 +94,10 @@ namespace OniBrutal.Engine.Rendering
 
         /// Shows the frame (swap buffers).
         public abstract void Present();
+
+        /// Diagnostics: the average GPU time per presented frame since the last call, in
+        /// milliseconds; -1 when unknown. The first call starts the measurement.
+        public virtual double TakeGpuFrameMilliseconds() => -1;
     }
 
     /// The colour and depth surfaces drawing goes to; null colours are the back buffer.

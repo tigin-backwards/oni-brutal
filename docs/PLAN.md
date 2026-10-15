@@ -219,3 +219,9 @@ Known behaviours not yet reproduced, each to be closed by a named milestone:
   KAnim batches for Duplicants and buildings, gas, liquids, tiles, HUD, details panels with
   nested canvases and RectMask2D). Next: gameplay soak (cycles at speed 3, dig/build orders,
   save → reload → continue).
+- Performance (2026-10-15), colony at speed 3, 1024×768, Xvfb + Mesa d3d12 / RTX 3090, frame
+  rate from GALLIUM_HUD over the same scripted new game: original Unity player 58 fps mean
+  (min 47, max 64); this engine (release build) 57–62 fps mean (min 38–46, max 65–69), with the
+  frame presented from a presenter thread as Unity presents from its render thread
+  (ARCHITECTURE §3.5). Per-frame CPU: update 1.6 ms, LateUpdate 4.2, canvases 4.8, render 3.7;
+  GPU 4–5 ms.

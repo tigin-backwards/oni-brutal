@@ -152,6 +152,39 @@ namespace OniBrutal.Desktop.Gl
             N.glPixelStorei(UnpackAlignment, 1);
         }
 
+        /// Content updates go through a pixel unpack ring buffer: the driver then copies into
+        /// the texture on the GPU, in order with the draws that read its previous content,
+        /// instead of waiting for those draws before writing from client memory. The ring is
+        /// orphaned when it wraps.
+        const int StagingRingSize = 32 << 20, StagingAlignment = 256;
+        static uint stagingRing;
+        static int stagingOffset = StagingRingSize;
+        static bool staged;
+
+        /// The pointer to pass for the upload's data: an offset into the bound ring, or the
+        /// texels themselves when they do not fit it.
+        static byte* Stage(byte* texels, int size)
+        {
+            staged = size <= StagingRingSize / 4;
+            if (!staged) return texels;
+            if (stagingRing == 0) stagingRing = GlApi.GenBuffer();
+            N.glBindBuffer(PixelUnpackBuffer, new GlBuffer(stagingRing));
+            int offset = (stagingOffset + StagingAlignment - 1) / StagingAlignment * StagingAlignment;
+            if (offset + size > StagingRingSize)
+            {
+                N.glBufferData(PixelUnpackBuffer, StagingRingSize, null, StreamDraw);
+                offset = 0;
+            }
+            N.glBufferSubData(PixelUnpackBuffer, offset, size, texels);
+            stagingOffset = offset + size;
+            return (byte*)offset;
+        }
+
+        static void Unstage()
+        {
+            if (staged) N.glBindBuffer(PixelUnpackBuffer, default);
+        }
+
         static void Swizzle(uint target, uint[] s)
         {
             s ??= [Red, Green, Blue, Alpha];
@@ -175,13 +208,18 @@ namespace OniBrutal.Desktop.Gl
             {
                 int w = Math.Max(1, t.Width >> m), h = Math.Max(1, t.Height >> m);
                 byte* p = memory == null ? null : memory.Pointer + t.MipOffset(m);
-                if (f.Compressed)
+                int size = (int)t.MipSize(m);
+                if (inPlace)
                 {
-                    if (p == null) continue;
-                    if (inPlace) N.glCompressedTexSubImage2D(TexTarget2D, m, 0, 0, w, h, f.Internal, (int)t.MipSize(m), p);
-                    else N.glCompressedTexImage2D(TexTarget2D, m, f.Internal, w, h, 0, (int)t.MipSize(m), p);
+                    byte* source = Stage(p, size);
+                    if (f.Compressed) N.glCompressedTexSubImage2D(TexTarget2D, m, 0, 0, w, h, f.Internal, size, source);
+                    else N.glTexSubImage2D(TexTarget2D, m, 0, 0, w, h, f.Format, f.Type, source);
+                    Unstage();
                 }
-                else if (inPlace) N.glTexSubImage2D(TexTarget2D, m, 0, 0, w, h, f.Format, f.Type, p);
+                else if (f.Compressed)
+                {
+                    if (p != null) N.glCompressedTexImage2D(TexTarget2D, m, f.Internal, w, h, 0, size, p);
+                }
                 else N.glTexImage2D(TexTarget2D, m, (int)f.Internal, w, h, 0, f.Format, f.Type, p);
             }
             g.StorageFormat = t.Format;
@@ -391,3 +429,4 @@ namespace OniBrutal.Desktop.Gl
         public static uint RenderFramebuffer(DeviceTexture g) => g.MultisampleFramebuffer != 0 ? g.MultisampleFramebuffer : g.Framebuffer;
     }
 }
+

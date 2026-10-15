@@ -20,7 +20,7 @@ namespace OniBrutal.Desktop
     /// The player window (GLFW, OpenGL 4.5 core context) and its input devices.
     internal sealed unsafe class GlfwPlatform : IPlatform, IDisposable
     {
-        readonly GlfwWindow window;
+        readonly GlfwWindow window, renderWindow;
         readonly InputStateFeed feed = new();
         FullScreenMode mode;
         int2 windowedPosition, windowedSize;
@@ -30,6 +30,8 @@ namespace OniBrutal.Desktop
         bool closeRequested;
 
         public GlfwWindow Window => window;
+        /// The hidden window whose context the main thread renders with.
+        public GlfwWindow RenderWindow => renderWindow;
 
         readonly bool scripted;
 
@@ -77,7 +79,16 @@ namespace OniBrutal.Desktop
             else if (mode != FullScreenMode.ExclusiveFullScreen) window.CenterToMonitor(monitor);
             windowedPosition = window.Position;
             if (mode == FullScreenMode.MaximizedWindow) window.Maximize();
-            window.MakeContextCurrent();
+            // Rendering happens on this thread in a hidden window's context shared with the
+            // visible one, whose context belongs to the presenter thread (GlPresenter).
+            renderWindow = Glfw.CreateWindow(new GlfwWindow.CreateInfo
+            {
+                Title = settings.Title,
+                Size = new int2(1, 1),
+                Monitor = GlfwMonitor.Null,
+                Share = window,
+            });
+            renderWindow.MakeContextCurrent();
             window.Visible = true;
             window.Focus();
 
@@ -95,7 +106,9 @@ namespace OniBrutal.Desktop
             }
             window.OnClose += _ => closeRequested = true;
             window.OnFramebufferSize += (_, size) => framebufferSize = window.FramebufferSize;
-            Glfw.MonitorCallback += (_, _) => desktopMode = null;
+            Glfw.MonitorCallback += (_, _) => RefreshWindowState();
+            // The window may have moved to another monitor.
+            window.OnPosition += (_, _) => RefreshWindowState();
             RefreshWindowState();
             InputState.Instance.MousePresent = true;
         }
@@ -107,11 +120,13 @@ namespace OniBrutal.Desktop
         // frame and each GLFW query is a round trip to the display server.
         int2 framebufferSize;
         OniBrutal.Engine.Platform.DisplayMode? desktopMode;
+        float? dpi;
 
         void RefreshWindowState()
         {
             framebufferSize = window.FramebufferSize;
             desktopMode = null;
+            dpi = null;
         }
 
         public int FramebufferWidth => framebufferSize.X;
@@ -122,14 +137,12 @@ namespace OniBrutal.Desktop
         public bool Focused => scripted || window.IsFocused;
 
         /// Monitor DPI from its physical size (0 when the monitor does not report one, as Unity).
-        public float Dpi
+        public float Dpi => dpi ??= MonitorDpi(CurrentMonitor);
+
+        static float MonitorDpi(GlfwMonitor m)
         {
-            get
-            {
-                var m = CurrentMonitor;
-                var mm = m.PhysicalSize;
-                return mm.X <= 0 ? 0f : m.Size.X / (mm.X / 25.4f);
-            }
+            var mm = m.PhysicalSize;
+            return mm.X <= 0 ? 0f : m.Size.X / (mm.X / 25.4f);
         }
 
         GlfwMonitor CurrentMonitor
@@ -272,11 +285,14 @@ namespace OniBrutal.Desktop
             set => Glfw.SetClipboard(value ?? "");
         }
 
-        public void SwapBuffers() => window.SwapBuffers();
+        /// Runs first when the platform is disposed, while the windows still exist.
+        public event Action Closing;
 
         public void Dispose()
         {
+            Closing?.Invoke();
             if (!customCursor.IsNull()) customCursor.Dispose();
+            renderWindow.Dispose();
             window.Dispose();
             Glfw.Terminate();
         }

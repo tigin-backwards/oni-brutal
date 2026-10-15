@@ -54,7 +54,7 @@ namespace OniBrutal.Host
                 options.Input.Apply(frame);
                 PlayerLoop.RunFrame(dt);
                 frame++;
-                Throttle(clock, now);
+                Throttle(clock, now, platform != null, frame <= options.MaxFrameRateFrames ? options.MaxFrameRate : 0);
             }
 
             // Unity's quit: OnApplicationQuit, then every object is destroyed, then the process
@@ -108,11 +108,17 @@ namespace OniBrutal.Host
             return new OniBrutal.Desktop.WindowSettings(EngineConfig.ProductName, width, height, mode) { IgnoreUserInput = options.Input.Any };
         }
 
-        /// Frame pacing: Application.targetFrameRate when set; otherwise the display rate a
-        /// windowed player would have under vsync (60 Hz without a display).
-        static void Throttle(Stopwatch clock, double frameStart)
+        /// Frame pacing as in Unity's desktop player: with vSync the swap paces frames (the
+        /// presenter's wait for the previous frame), otherwise Application.targetFrameRate when
+        /// set, otherwise none. Without a display there is no swap; frames are paced at
+        /// targetFrameRate or 60 Hz. --max-frame-rate bounds the rate in any case.
+        static void Throttle(Stopwatch clock, double frameStart, bool display, int maxFrameRate)
         {
-            int target = PlayerLoop.TargetFrameRate > 0 ? PlayerLoop.TargetFrameRate : 60;
+            int target = PlayerLoop.TargetFrameRate;
+            if (display && QualitySettings.vSyncCount > 0) target = 0;
+            else if (!display && target <= 0) target = 60;
+            if (maxFrameRate > 0 && (target <= 0 || target > maxFrameRate)) target = maxFrameRate;
+            if (target <= 0) return;
             double remaining = 1.0 / target - (clock.Elapsed.TotalSeconds - frameStart);
             if (remaining > 0.001) Thread.Sleep(TimeSpan.FromSeconds(remaining));
         }

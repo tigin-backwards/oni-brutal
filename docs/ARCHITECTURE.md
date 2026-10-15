@@ -331,6 +331,26 @@ renderer, restricted to what the game uses (*usage §1*):
   (`Hidden/BlitCopy` from `unity_builtin_extra`), `GL` immediate mode, `CommandBuffer`.
 - Gamma colour space (`m_ActiveColorSpace=0`): no sRGB conversions.
 
+**Presentation and frame pacing.** Unity's player records rendering on the main thread and
+presents from its render thread (`kGfxThreadingModeClientWorkerJobs` on GLCore), so a swap that
+blocks — vsync, or a display path that reads the frame back, as Mesa's d3d12 driver does under
+X11 — overlaps the next frame's game work. We keep all GL calls on the main thread but present
+the same way: the main thread renders with the context of a hidden window shared with the
+visible one, into an offscreen back buffer (colour texture + depth-stencil); `Present` fences the
+frame and hands it to a presenter thread current on the window's context, which waits for the
+fence on the GPU, blits to the window, swaps with `QualitySettings.vSyncCount` as the interval,
+and finishes. One frame is in flight: presenting waits until the previous frame has been
+presented, and two back buffers alternate. Back-buffer reads (`ReadPixels` of the screen,
+captures) read the offscreen buffer of the current frame. Pacing follows Unity's desktop
+player: with vSync the swap paces frames; otherwise `Application.targetFrameRate` when set;
+otherwise none. Without a display (`--headless`, `--batchmode`) frames are paced at
+`targetFrameRate` or 60 Hz.
+
+Texture content updates into storage of unchanged size and format (`Apply` on the game's
+per-frame property textures) go through a pixel-unpack ring buffer: the driver copies into the
+texture on the GPU, ordered after the draws that read its previous content, instead of
+stalling until those draws finish to write from client memory.
+
 **UI rendering.** `Canvas` implements Unity's canvas batching: per root canvas, walk
 `CanvasRenderer`s in hierarchy order, apply `CanvasGroup` alpha, `RectMask2D` clip rects
 (`_ClipRect` + `UNITY_UI_CLIP_RECT`) and stencil masks (materials from uGUI's own
@@ -403,7 +423,8 @@ HTTP and FMOD threads call into the engine. Our rules:
    (`Instantiate`, `AddComponent`, `Destroy`, `SetParent`, transform setters, activation),
    rendering and GPU resource APIs, scene loading.
 4. Worker-thread writes into `GetRawTextureData` arrays are allowed (plain CPU memory until
-   `Apply`). GL calls happen only on the main thread.
+   `Apply`). GL calls happen only on the main thread, apart from the presenter thread's copy
+   and swap on the window's own context (§3.5).
 5. Reverse P/Invoke: SimDLL's error callback is created by game code per call; exceptions
    crossing it are fatal on CoreCLR, which matches Unity's crash behaviour on that path.
 
@@ -437,7 +458,9 @@ and `ilspycmd -il` locate the throwing instruction); `--capture FRAME:PATH[:SCAL
 screenshot through `ScreenCapture.CaptureScreenshot`; `--input FRAME:ACTION[:ARGS]` feeds scripted
 mouse/keyboard/text input through the window's input path; `--dump-render-textures FRAME:DIR` writes
 the screen and every live render texture as PNG at the end of a frame; `--dump-shader NAME:DIR`
-writes a shader's GLCore variants and pass state; `--frame-stats` logs per-phase frame times;
+writes a shader's GLCore variants and pass state; `--frame-stats` logs per-phase frame times
+and the GPU time per frame (timer queries); `--max-frame-rate N[:FRAMES]` bounds the frame rate
+(for the first FRAMES frames) so scripted schedules that count frames hold on unpaced displays;
 `--check-*` run the corpus gates.
 
 ## 8. Repository layout

@@ -102,13 +102,12 @@ namespace OniBrutal.Desktop.Gl
         CameraConstants camera;
         Material passMaterial;
         int passIndex;
-        int swapInterval = -1;
         static readonly GlGetProcAddressFunc loader = name => Glfw.GetProcAddress(new ReadOnlySpan<byte>(name, int.MaxValue)[..new ReadOnlySpan<byte>(name, int.MaxValue).IndexOf((byte)0)]);
 
         public GlDevice(GlfwPlatform platform)
         {
             this.platform = platform;
-            platform.Window.MakeContextCurrent();
+            platform.RenderWindow.MakeContextCurrent();
             if (!Glad.Initialize(loader)) throw new InvalidOperationException("OpenGL entry points could not be loaded.");
             caps.Name = GlApi.GetString(RendererName);
             caps.Vendor = GlApi.GetString(Vendor);
@@ -141,7 +140,14 @@ namespace OniBrutal.Desktop.Gl
             immediateIndices = GlApi.GenBuffer();
             CreateDefaults();
             GlStateCache.Invalidate();
+            presenter = new GlPresenter(platform.Window);
+            platform.Closing += presenter.Dispose;
         }
+
+        readonly GlPresenter presenter;
+
+        /// The framebuffer drawing to the screen goes to this frame.
+        uint BackBuffer => presenter.BackBuffer(platform.FramebufferWidth, platform.FramebufferHeight);
 
         public override GraphicsCaps Caps => caps;
         public override bool RendersFrames => true;
@@ -206,7 +212,7 @@ namespace OniBrutal.Desktop.Gl
             var t = target;
             if (t.Colors == null || t.Colors.Length == 0 || t.Colors[0] == null)
             {
-                GlApi.BindFramebuffer(Framebuffer, 0);
+                GlApi.BindFramebuffer(Framebuffer, BackBuffer);
                 return;
             }
             if (t.Colors.Length == 1 && (t.Depth == null || t.Depth == t.Colors[0]))
@@ -533,7 +539,7 @@ namespace OniBrutal.Desktop.Gl
 
         public override void ReadPixels(RenderTextureNative source, RectInt rect, Texture2DNative destination, int destX, int destY)
         {
-            uint framebuffer = 0;
+            uint framebuffer = BackBuffer;
             if (source != null)
             {
                 var g = GlTextures.Ensure(source);
@@ -541,7 +547,6 @@ namespace OniBrutal.Desktop.Gl
                 framebuffer = g.Framebuffer;
             }
             GlApi.BindFramebuffer(ReadFramebuffer, framebuffer);
-            if (framebuffer == 0) N.glReadBuffer(GlConst.Back);
             int w = Math.Min(rect.width, destination.Width - destX), h = Math.Min(rect.height, destination.Height - destY);
             if (w <= 0 || h <= 0 || !TextureFormats.CanEncode(destination.Format) || destination.Memory == null) return;
             var pixels = new float[w * h * 4];
@@ -586,16 +591,71 @@ namespace OniBrutal.Desktop.Gl
             }
         }
 
-        /// Swaps buffers with QualitySettings.vSyncCount as the swap interval.
+        /// Hands the frame to the presenter, which swaps with QualitySettings.vSyncCount as the
+        /// swap interval.
         public override void Present()
         {
-            int interval = QualitySettings.vSyncCount;
-            if (interval != swapInterval)
+            if (gpuTiming) EndGpuTiming();
+            presenter.Present(QualitySettings.vSyncCount);
+            framebufferValid = false;
+            if (gpuTiming) BeginGpuTiming();
+        }
+
+        // ----- GPU frame timing (diagnostics) -----
+
+        const uint TimeElapsed = 0x88BF, QueryResult = 0x8866, QueryResultAvailable = 0x8867;
+        const int TimingSlots = 4;
+        readonly uint[] timingQueries = new uint[TimingSlots];
+        readonly bool[] timingPending = new bool[TimingSlots];
+        int timingSlot = -1;
+        bool gpuTiming;
+        double gpuTotal;
+        int gpuFrames;
+
+        /// GPU time of the commands between consecutive presents, averaged over the frames
+        /// whose results arrived since the last call; -1 before any.
+        public override double TakeGpuFrameMilliseconds()
+        {
+            if (!gpuTiming)
             {
-                Glfw.SwapInterval(interval);
-                swapInterval = interval;
+                gpuTiming = true;
+                fixed (uint* q = timingQueries) N.glGenQueries(TimingSlots, (GlQuery*)q);
+                BeginGpuTiming();
+                return -1;
             }
-            platform.SwapBuffers();
+            double ms = gpuFrames > 0 ? gpuTotal / gpuFrames : -1;
+            gpuTotal = 0;
+            gpuFrames = 0;
+            return ms;
+        }
+
+        void BeginGpuTiming()
+        {
+            timingSlot = (timingSlot + 1) % TimingSlots;
+            if (timingPending[timingSlot]) CollectGpuTiming(timingSlot);
+            N.glBeginQuery(TimeElapsed, new GlQuery(timingQueries[timingSlot]));
+        }
+
+        void EndGpuTiming()
+        {
+            N.glEndQuery(TimeElapsed);
+            timingPending[timingSlot] = true;
+            for (int i = 0; i < TimingSlots; i++)
+                if (i != timingSlot && timingPending[i])
+                {
+                    uint available = 0;
+                    N.glGetQueryObjectuiv(timingQueries[i], QueryResultAvailable, &available);
+                    if (available != 0) CollectGpuTiming(i);
+                }
+        }
+
+        void CollectGpuTiming(int slot)
+        {
+            ulong ns = 0;
+            N.glGetQueryObjectui64v(timingQueries[slot], QueryResult, &ns);
+            timingPending[slot] = false;
+            gpuTotal += ns / 1e6;
+            gpuFrames++;
         }
     }
 

@@ -1,3 +1,4 @@
+using System.Linq;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -160,8 +161,43 @@ namespace OniBrutal.Engine.Rendering
         /// Screen drawing after the frame renderer's (IMGUI); captures repeat it.
         public static event Action RenderScreenLate;
 
+        /// Diagnostics (`--dump-render-textures FRAME:DIR`): every created 2D render texture and
+        /// the screen written as PNG at the end of that frame.
+        public static int DumpFrame = -1;
+        public static string DumpDirectory;
+
+        static void DumpRenderTextures()
+        {
+            System.IO.Directory.CreateDirectory(DumpDirectory);
+            var device = GraphicsDevice.Current;
+            var p = Platform.PlatformServices.Current;
+            void Write(RenderTextureNative source, int w, int h, string name)
+            {
+                try
+                {
+                    var image = new Texture2D(w, h, TextureFormat.RGBA32, false);
+                    device.ReadPixels(source, new RectInt(0, 0, w, h), (Texture2DNative)image.NativeOrThrow, 0, 0);
+                    System.IO.File.WriteAllBytes(System.IO.Path.Combine(DumpDirectory, name + ".png"), image.EncodeToPNG());
+                    UnityEngine.Object.DestroyImmediate(image);
+                }
+                catch (Exception e)
+                {
+                    EngineLog.Engine($"render texture dump: {name}: {e.Message}");
+                }
+            }
+            Write(null, p.FramebufferWidth, p.FramebufferHeight, "_screen");
+            foreach (var native in ObjectTable.Snapshot())
+            {
+                if (native is not RenderTextureNative rt || !rt.Created || rt.Dimension != TextureKind.Tex2D || rt.Width <= 0 || rt.Height <= 0) continue;
+                if (rt.ColorFormat == UnityEngine.Experimental.Rendering.GraphicsFormat.None) continue;
+                var safe = string.Concat((rt.Name.Length > 0 ? rt.Name : "rt").Select(ch => char.IsLetterOrDigit(ch) ? ch : '_'));
+                Write(rt, rt.Width, rt.Height, $"{safe}_{rt.InstanceId}_{rt.Width}x{rt.Height}_{rt.ColorFormat}");
+            }
+        }
+
         static void EndFrame()
         {
+            if (Time.frameCount == DumpFrame && GraphicsDevice.Current.RendersFrames) DumpRenderTextures();
             // Captures show the finished frame, OnGUI included.
             if (GraphicsDevice.Current.RendersFrames)
                 foreach (var (path, scale) in captures) Capture(path, scale);
@@ -247,11 +283,22 @@ namespace OniBrutal.Engine.Rendering
                     cam.AllowHDR ? RenderTextureFormat.DefaultHDR : RenderTextureFormat.Default);
                 Bind(device, RenderTargetBinding.Of((RenderTextureNative)source.NativeOrThrow));
             }
-            else Bind(device, CameraTarget(cam));
+            var cameraTarget = source != null ? RenderTargetBinding.Of((RenderTextureNative)source.NativeOrThrow) : CameraTarget(cam);
+            if (source == null) Bind(device, cameraTarget);
             var viewport = cam.PixelRect;
-            device.SetViewport(new Rect(viewport.x * pixelScale, viewport.y * pixelScale, viewport.width * pixelScale, viewport.height * pixelScale));
+            var pixelViewport = new Rect(viewport.x * pixelScale, viewport.y * pixelScale, viewport.width * pixelScale, viewport.height * pixelScale);
+            device.SetViewport(pixelViewport);
             var constants = Constants(cam);
             device.SetCamera(constants);
+            // Camera-event command buffers may retarget or change matrices; the camera's own
+            // passes continue on its target with its matrices afterwards, as in Unity.
+            void Event(CameraEvent evt)
+            {
+                if (!Execute(camera, cam, evt)) return;
+                Bind(device, cameraTarget);
+                device.SetViewport(pixelViewport);
+                device.SetCamera(constants);
+            }
             GLState.BeginCamera(cam);
 
             switch (cam.ClearFlags)
@@ -268,16 +315,16 @@ namespace OniBrutal.Engine.Rendering
             }
 
             VideoPlanes.Draw(camera, cam, nearPlane: false);
-            Execute(camera, cam, CameraEvent.BeforeForwardOpaque);
+            Event(CameraEvent.BeforeForwardOpaque);
             DrawQueue(device, draws, opaque: true);
-            Execute(camera, cam, CameraEvent.AfterForwardOpaque);
-            Execute(camera, cam, CameraEvent.BeforeSkybox);
-            Execute(camera, cam, CameraEvent.AfterSkybox);
-            Execute(camera, cam, CameraEvent.BeforeImageEffectsOpaque);
-            Execute(camera, cam, CameraEvent.AfterImageEffectsOpaque);
-            Execute(camera, cam, CameraEvent.BeforeForwardAlpha);
+            Event(CameraEvent.AfterForwardOpaque);
+            Event(CameraEvent.BeforeSkybox);
+            Event(CameraEvent.AfterSkybox);
+            Event(CameraEvent.BeforeImageEffectsOpaque);
+            Event(CameraEvent.AfterImageEffectsOpaque);
+            Event(CameraEvent.BeforeForwardAlpha);
             DrawQueue(device, draws, opaque: false);
-            Execute(camera, cam, CameraEvent.AfterForwardAlpha);
+            Event(CameraEvent.AfterForwardAlpha);
             VideoPlanes.Draw(camera, cam, nearPlane: true);
 
             SendToEnabled(cam.GameObject, s => s.OnPostRender);
@@ -326,10 +373,12 @@ namespace OniBrutal.Engine.Rendering
         static CameraConstants Constants(CameraNative cam)
             => new(cam.WorldToCamera, cam.Projection, Hierarchy.Position(cam.GameObject.Transform), cam.Near, cam.Far, cam.Orthographic, cam.TargetSize);
 
-        static void Execute(Camera camera, CameraNative cam, CameraEvent evt)
+        /// Runs the camera's command buffers for an event; true when any ran.
+        static bool Execute(Camera camera, CameraNative cam, CameraEvent evt)
         {
-            if (!cam.CommandBuffers.TryGetValue(evt, out var list)) return;
+            if (!cam.CommandBuffers.TryGetValue(evt, out var list) || list.Count == 0) return false;
             foreach (var buffer in list.ToArray()) CommandExecution.Run(buffer, camera);
+            return true;
         }
 
         // ----- Culling and draw lists -----

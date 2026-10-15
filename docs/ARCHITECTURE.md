@@ -435,7 +435,10 @@ Development diagnostics (host options, never needed by players): `--trace-except
 first-chance exception with per-frame IL offsets (the game ships without symbols; the offset
 and `ilspycmd -il` locate the throwing instruction); `--capture FRAME:PATH[:SCALE]` writes a
 screenshot through `ScreenCapture.CaptureScreenshot`; `--input FRAME:ACTION[:ARGS]` feeds scripted
-mouse/keyboard/text input through the window's input path; `--check-*` run the corpus gates.
+mouse/keyboard/text input through the window's input path; `--dump-render-textures FRAME:DIR` writes
+the screen and every live render texture as PNG at the end of a frame; `--dump-shader NAME:DIR`
+writes a shader's GLCore variants and pass state; `--frame-stats` logs per-phase frame times;
+`--check-*` run the corpus gates.
 
 ## 8. Repository layout
 

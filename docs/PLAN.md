@@ -166,4 +166,10 @@ screens and features) fully ticked or with documented deviations only.
 ## Status
 
 - Planning: complete (this document, `ARCHITECTURE.md`, `research/*`).
-- M0: next.
+- **M0: complete** (2026-10-15). `scripts/check.sh`: solution builds clean; 24 engine unit
+  tests pass; ApiCheck: 0 missing types, 757 missing members (743 type refs / 3098 member
+  refs); host `--check-types`: all 36 loaded assemblies type-load on CoreCLR, Steamworks.NET
+  port verified against the shipped binary (tools/AssemblyDiff), Newtonsoft.Json /
+  BinaryFormatter / IBM437 verified through the game's own code. The engine already contains the
+  core of M2 (object model, lifecycle, coroutines, cloning) because type completeness required it.
+- M1: next.

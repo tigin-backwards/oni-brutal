@@ -8,6 +8,9 @@ namespace UnityEngine
         /// null when the type has no engine-side copy.
         internal virtual Object EngineCloneAsset() => null;
 
+        /// Marks an asset as modified for the editor's save tracking; a player tracks nothing.
+        internal void MarkDirty() { }
+
         public static Object Instantiate(Object original) => Cloner.Instantiate(original, null, false, null, null);
         public static Object Instantiate(Object original, Transform parent) => Cloner.Instantiate(original, parent, false, null, null);
         public static Object Instantiate(Object original, Transform parent, bool instantiateInWorldSpace) => Cloner.Instantiate(original, parent, instantiateInWorldSpace, null, null);

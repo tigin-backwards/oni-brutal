@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>OniBrutal</AssemblyName>
+    <RootNamespace>OniBrutal.Host</RootNamespace>
+    <!-- BinaryFormatter: the game clones worldgen settings with it (ARCHITECTURE §2.1). -->
+    <EnableUnsafeBinaryFormatterSerialization>true</EnableUnsafeBinaryFormatterSerialization>
+    <ServerGarbageCollector>false</ServerGarbageCollector>
+    <ConcurrentGarbageCollection>true</ConcurrentGarbageCollection>
+    <TieredPGO>true</TieredPGO>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../OniBrutal.UnityEngine/OniBrutal.UnityEngine.csproj" />
+    <ProjectReference Include="../Unity.InternalAPIEngineBridge.004/Unity.InternalAPIEngineBridge.004.csproj" />
+    <!-- Steamworks.NET built for CoreCLR; replaces the shipped copy (ARCHITECTURE §2.1). -->
+    <ProjectReference Include="../ThirdParty/Steamworks.NET/Steamworks.NET.csproj" />
+    <ProjectReference Include="../../tools/FacadeGen/FacadeGen.csproj" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- Out-of-band framework pieces that Mono's class libraries provided in-box. -->
+    <PackageReference Include="System.Security.Permissions" />
+    <PackageReference Include="System.Runtime.Serialization.Formatters" />
+    <PackageReference Include="System.CodeDom" />
+  </ItemGroup>
+  <!-- The UnityEngine.*Module facades the game binds to, next to the host in engine/. -->
+  <Target Name="EmitFacades" AfterTargets="Build">
+    <Exec Command="dotnet &quot;$(ArtifactsPath)/bin/FacadeGen/$(Configuration.ToLowerInvariant())/FacadeGen.dll&quot; emit &quot;$(MSBuildThisFileDirectory)../Facades/unity-module-map.tsv&quot; &quot;$(OutDir)engine&quot; &quot;$(OutDir)OniBrutal.UnityEngine.dll&quot;" />
+  </Target>
+</Project>

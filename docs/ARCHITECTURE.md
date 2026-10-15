@@ -66,16 +66,23 @@ completeness.
 **Assembly identity.** Unity assemblies are referenced as version `0.0.0.0`, no public key.
 Our facades carry the same names and version `0.0.0.0`.
 
-**Load context.** The host creates one `AssemblyLoadContext` ("game") with a resolver:
+**Load context.** The game runs in the **default** AssemblyLoadContext, so its `Type.GetType`,
+`Assembly.Load` and `AppDomain` queries behave as under Unity. `src/OniBrutal.Host/AssemblyPolicy.cs`
+resolves names the framework does not provide:
 
-1. `UnityEngine*` → our facade directory (never `Managed/`).
-2. Names provided by the .NET 10 shared framework (including Mono-profile names such as
-   `mscorlib`, `System`, `System.Core`, `netstandard`, `System.Xml`, …, which .NET carries as
-   facades) → the framework. The copies in `Managed/` are never loaded.
-3. Everything else (game and third-party assemblies) → `Managed/`.
+1. Names in the .NET shared framework always win, so Mono's BCL copies in `Managed/` are never
+   loaded. Mono class libraries the framework lacks (`I18N*`, `Mono.Security`, …) are refused.
+2. `UnityEngine` and `UnityEngine.*Module` resolve only to our facades in `engine/`; Unity's
+   originals are never loaded (a module without a facade is one nothing references).
+3. Unity's own support packages (Burst, Collections, Mathematics, MemoryProfiler, Profiling.Core,
+   Multiplayer.Center.Common) are not loaded: they implement engine features we replace and no
+   game assembly references them.
+4. Everything else loads from `Managed/` (game, third-party libraries, and Unity's package code
+   uGUI/TMP/Timeline). Our Steamworks.NET port and the engine bridge ship with the host and
+   therefore take precedence.
 
-Exceptions to (2) are decided per assembly from evidence in `runtime.md` and recorded in
-`src/OniBrutal.Host/AssemblyPolicy.cs` with the reason.
+The scripting assemblies of `ScriptingAssemblies.json` are preloaded before any game code runs,
+as the player does.
 
 **Native libraries.** `ResolvingUnmanagedDll` on the game ALC maps the game's `DllImport`
 names (`SimDLL`, `fmodstudio`, `resonanceaudio`, `steam_api`, `cimgui`, …) to

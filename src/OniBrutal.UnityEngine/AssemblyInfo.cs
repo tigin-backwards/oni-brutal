@@ -6,5 +6,9 @@ using System.Runtime.CompilerServices;
 [assembly: InternalsVisibleTo("UnityEngine.UI")]
 [assembly: InternalsVisibleTo("Unity.TextMeshPro")]
 [assembly: InternalsVisibleTo("Unity.Timeline")]
+[assembly: InternalsVisibleTo("Unity.InternalAPIEngineBridge.004")]
 // Engine tests exercise engine internals directly.
 [assembly: InternalsVisibleTo("OniBrutal.UnityEngine.Tests")]
+
+// The host configures the engine (paths, log, player loop).
+[assembly: InternalsVisibleTo("OniBrutal")]

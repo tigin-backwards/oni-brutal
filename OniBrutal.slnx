@@ -1,0 +1,21 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/OniBrutal.Host/OniBrutal.Host.csproj" />
+    <Project Path="src/OniBrutal.UnityEngine/OniBrutal.UnityEngine.csproj" />
+    <Project Path="src/Unity.InternalAPIEngineBridge.004/Unity.InternalAPIEngineBridge.004.csproj" />
+  </Folder>
+  <Folder Name="/src/ThirdParty/">
+    <Project Path="src/ThirdParty/Steamworks.NET/Steamworks.NET.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/OniBrutal.UnityEngine.Tests/OniBrutal.UnityEngine.Tests.csproj" />
+  </Folder>
+  <Folder Name="/tools/">
+    <Project Path="tools/ApiCheck/ApiCheck.csproj" />
+    <Project Path="tools/AssemblyDiff/AssemblyDiff.csproj" />
+    <Project Path="tools/FacadeGen/FacadeGen.csproj" />
+    <Project Path="tools/Inventory/Inventory.csproj" />
+    <Project Path="tools/SurfaceGen/SurfaceGen.csproj" />
+    <Project Path="tools/UnityApi/UnityApi.csproj" />
+  </Folder>
+</Solution>

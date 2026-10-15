@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Steamworks.NET 20.1.0 (upstream commit 53d17180582752d7d8c9a757742da3a52dfc33d4), the version
+       the game ships, rebuilt for CoreCLR. See PORT.md for the one change. -->
+  <PropertyGroup>
+    <AssemblyName>com.rlabrecque.steamworks.net</AssemblyName>
+    <RootNamespace>Steamworks</RootNamespace>
+    <AssemblyVersion>0.0.0.0</AssemblyVersion>
+    <FileVersion>20.1.0.0</FileVersion>
+    <Nullable>disable</Nullable>
+    <!-- Upstream code, kept as is: its warnings are not ours to fix. -->
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <NoWarn>$(NoWarn);CS0169;CS0414;CS0618;CS0649;CS0168;CS8981;CS0108</NoWarn>
+    <!-- The compilation symbols Unity defines for a 64-bit Linux standalone player, which select
+         the Linux API surface and the small (4-byte) callback packing. -->
+    <DefineConstants>$(DefineConstants);UNITY_STANDALONE_LINUX;UNITY_STANDALONE;UNITY_64;UNITY_5_3_OR_NEWER;UNITY_2017_1_OR_NEWER;UNITY_2020_1_OR_NEWER;UNITY_2021_1_OR_NEWER;UNITY_2022_1_OR_NEWER;UNITY_6000_0_OR_NEWER</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../OniBrutal.UnityEngine/OniBrutal.UnityEngine.csproj" />
+  </ItemGroup>
+</Project>

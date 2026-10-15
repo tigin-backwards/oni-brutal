@@ -5,7 +5,8 @@ set -euo pipefail
 source "$(dirname "$0")/env.sh"
 config="${1:-debug}"
 dotnet build "$root/tools/FacadeGen" -c Release -v q -nologo
-dotnet build "$root/src/OniBrutal.UnityEngine" -c "$config" -v q -nologo
+dotnet build "$root/src/Unity.InternalAPIEngineBridge.004" -c "$config" -v q -nologo
 mkdir -p "$root/out/engine"
 cp "$root/out/bin/OniBrutal.UnityEngine/$config/OniBrutal.UnityEngine.dll" "$root/out/bin/OniBrutal.UnityEngine/$config/OniBrutal.UnityEngine.pdb" "$root/out/engine/"
+cp "$root/out/bin/Unity.InternalAPIEngineBridge.004/$config/Unity.InternalAPIEngineBridge.004.dll" "$root/out/engine/"
 dotnet "$root/out/bin/FacadeGen/release/FacadeGen.dll" emit "$root/src/Facades/unity-module-map.tsv" "$root/out/engine" "$root/out/engine/OniBrutal.UnityEngine.dll"

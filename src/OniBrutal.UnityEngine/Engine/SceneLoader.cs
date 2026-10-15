@@ -96,17 +96,7 @@ namespace OniBrutal.Engine
             }
             foreach (var root in scene.Roots) Walk(root, true);
 
-            var scripts = new List<(Component c, int order, int seq)>();
-            int seq = 0;
-            foreach (var go in active)
-                foreach (var c in go.Components)
-                {
-                    if (c is MonoBehaviour mb) scripts.Add((mb, ((BehaviourNative)mb.Native).ExecutionOrder, seq++));
-                    else Lifecycle.AwakeAndEnable(c);
-                }
-            scripts.Sort((a, b) => a.order != b.order ? a.order.CompareTo(b.order) : a.seq.CompareTo(b.seq));
-            foreach (var (c, _, _) in scripts)
-                if (c.Native is ComponentNative cn && cn.GameObject.ActiveInHierarchy) Lifecycle.AwakeAndEnable(c);
+            Lifecycle.AwakeAndEnableAll(active);
         }
 
         /// Player shutdown: every scene's objects are destroyed (OnDisable, OnDestroy), the

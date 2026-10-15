@@ -17,6 +17,12 @@ namespace OniBrutal.Tests
         void OnDestroy() => Log.Add(label + ":OnDestroy");
     }
 
+    /// Awakes before default-order scripts (script execution order -5, set by the test).
+    public class EarlyRecorder : MonoBehaviour
+    {
+        void Awake() => Recorder.Log.Add("early:Awake");
+    }
+
     public class Base : MonoBehaviour
     {
         public static readonly List<string> Log = new();
@@ -129,6 +135,23 @@ namespace OniBrutal.Tests
             Assert.Null(parent.GetComponentInChildren<Recorder>());
             Assert.NotNull(parent.GetComponentInChildren<Recorder>(true));
             Assert.NotNull(child.GetComponent<System.IDisposable>() == null ? child.transform : null);
+        }
+
+        [Fact]
+        public void ActivationAwakesScriptsInExecutionOrder()
+        {
+            OniBrutal.Engine.ScriptInfo.SetExecutionOrder(typeof(EarlyRecorder).FullName!, -5);
+            Recorder.Log.Clear();
+            var root = new GameObject("root");
+            root.SetActive(false);
+            var child = new GameObject("child");
+            child.transform.SetParent(root.transform);
+            child.AddComponent<Recorder>().label = "a";
+            child.AddComponent<EarlyRecorder>();
+            root.SetActive(true);
+            // The later component with the lower order awakes first, across the whole batch.
+            Assert.Equal(["early:Awake", "a:Awake", "a:OnEnable"], Recorder.Log);
+            Object.DestroyImmediate(root);
         }
 
         [Fact]

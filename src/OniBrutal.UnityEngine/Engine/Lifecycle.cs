@@ -178,15 +178,7 @@ namespace OniBrutal.Engine
             if (now == go.ActiveInHierarchy) return;
             var changed = new List<GameObjectNative>();
             SetFlags(go, now, changed);
-            if (now)
-            {
-                foreach (var g in changed)
-                    foreach (var c in g.Components)
-                    {
-                        if (!g.ActiveInHierarchy) break; // deactivated by an earlier callback
-                        if (c.Native != null) AwakeAndEnable(c);
-                    }
-            }
+            if (now) AwakeAndEnableAll(changed);
             else
             {
                 foreach (var g in changed)
@@ -196,6 +188,25 @@ namespace OniBrutal.Engine
                     StopCoroutinesOn(g);
                 }
             }
+        }
+
+        /// Awake/OnEnable for objects that just became active (scene load, Instantiate,
+        /// SetActive): engine components first, then scripts in script execution order, hierarchy
+        /// order within an order. A component whose GameObject an earlier callback deactivated
+        /// is skipped.
+        public static void AwakeAndEnableAll(List<GameObjectNative> activated)
+        {
+            var scripts = new List<(Component c, int order, int seq)>();
+            int seq = 0;
+            foreach (var g in activated)
+                foreach (var c in g.Components)
+                {
+                    if (c is MonoBehaviour mb) scripts.Add((mb, (mb.Native as BehaviourNative)?.ExecutionOrder ?? 0, seq++));
+                    else if (g.ActiveInHierarchy && c.Native != null) AwakeAndEnable(c);
+                }
+            scripts.Sort((a, b) => a.order != b.order ? a.order.CompareTo(b.order) : a.seq.CompareTo(b.seq));
+            foreach (var (c, _, _) in scripts)
+                if (c.Native is ComponentNative cn && cn.GameObject.ActiveInHierarchy) AwakeAndEnable(c);
         }
 
         static void SetFlags(GameObjectNative go, bool active, List<GameObjectNative> changed)

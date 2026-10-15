@@ -109,6 +109,13 @@ namespace OniBrutal.Engine
                 if (c.Native is ComponentNative cn && cn.GameObject.ActiveInHierarchy) Lifecycle.AwakeAndEnable(c);
         }
 
+        /// Player shutdown: every scene's objects are destroyed (OnDisable, OnDestroy), the
+        /// DontDestroyOnLoad ones included.
+        public static void UnloadAll()
+        {
+            foreach (var scene in Scenes.WithDontDestroyOnLoad().ToArray()) Unload(scene);
+        }
+
         /// Destroys a scene's objects (DontDestroyOnLoad objects live in their own scene).
         static void Unload(SceneRecord scene)
         {

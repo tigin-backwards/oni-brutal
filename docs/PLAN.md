@@ -192,4 +192,10 @@ Known behaviours not yet reproduced, each to be closed by a named milestone:
   port verified against the shipped binary (tools/AssemblyDiff), Newtonsoft.Json /
   BinaryFormatter / IBM437 verified through the game's own code. The engine already contains the
   core of M2 (object model, lifecycle, coroutines, cloning) because type completeness required it.
-- M1: next.
+- M1: corpus gate passing (`--check-assets`), rendering data binds (`--check-bind`: 7064
+  objects).
+- M2 (2026-10-15): headless boot runs launchscene → LaunchInitializer → SteamManager and exits
+  the way the original player does outside Steam (`SteamAPI.RestartAppIfNecessary` → `App.Quit`,
+  exit 0, clean shutdown with scene unload). Running further (frontend, main menu, devBootSmoke)
+  needs a logged-in Steam client on the machine, as for the original game. Test runs use
+  `scripts/run.sh` (isolated persistent-data root).

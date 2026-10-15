@@ -9,6 +9,7 @@ namespace OniBrutal.Engine.Assets
         static readonly Dictionary<Type, Func<NativeObject>> factories = new()
         {
             [typeof(UnityEngine.TextAsset)] = () => new TextAssetNative(),
+            [typeof(UnityEngine.AssetBundle)] = () => new AssetBundleNative(),
             [typeof(UnityEngine.Texture2D)] = () => new Rendering.Texture2DNative(),
             [typeof(UnityEngine.Texture2DArray)] = () => new Rendering.Texture2DArrayNative(),
             [typeof(UnityEngine.Texture3D)] = () => new Rendering.Texture3DNative(),

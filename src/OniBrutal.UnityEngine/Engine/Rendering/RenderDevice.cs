@@ -104,7 +104,8 @@ namespace OniBrutal.Engine.Rendering
 
     internal readonly record struct CameraConstants(Matrix4x4 View, Matrix4x4 Projection, Vector3 Position, float Near, float Far, bool Orthographic, Vector2 TargetSize);
 
-    internal readonly record struct DrawRequest(MeshNative Mesh, int SubMesh, Matrix4x4 ObjectToWorld, Material Material, int Pass, PropertySheet Properties);
+    /// Keywords: enabled in addition to the material's and the global ones (UI rect clipping).
+    internal readonly record struct DrawRequest(MeshNative Mesh, int SubMesh, Matrix4x4 ObjectToWorld, Material Material, int Pass, PropertySheet Properties, string[] Keywords = null);
 
     /// GL.Begin modes (GL.TRIANGLES = 4, TRIANGLE_STRIP = 5, QUADS = 7, LINES = 1, LINE_STRIP = 2).
     internal enum ImmediatePrimitive

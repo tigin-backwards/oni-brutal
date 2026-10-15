@@ -97,6 +97,15 @@ namespace OniBrutal.Engine.Assets
         /// Forgets a destroyed or unloaded object.
         public static void Forget(AssetSource source) => loaded.Remove(new Key(source.File, source.PathId));
 
+        /// Forgets every object loaded from a file (its bundle was unloaded).
+        public static void ForgetFile(string fileKey)
+        {
+            var keys = new List<Key>();
+            foreach (var k in loaded.Keys)
+                if (k.File == fileKey) keys.Add(k);
+            foreach (var k in keys) loaded.Remove(k);
+        }
+
         public static IEnumerable<Object> Loaded => loaded.Values;
 
         sealed class FileResolver(SerializedFile file) : IReferenceResolver

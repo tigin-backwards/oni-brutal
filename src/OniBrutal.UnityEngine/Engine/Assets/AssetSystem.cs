@@ -63,20 +63,46 @@ namespace OniBrutal.Engine.Assets
             => fileId == 0 ? from : Get(from.Externals[fileId - 1].Path);
 
         /// Mounts an AssetBundle's nodes (SerializedFiles and resource streams).
-        public static List<string> MountBundle(UnityFsArchive archive)
+        public static List<string> MountBundle(UnityFsArchive archive) => Mount(ReadNodes(archive));
+
+        /// Decompresses an archive's nodes (any thread): (node key, bytes).
+        public static List<(string Key, byte[] Data)> ReadNodes(UnityFsArchive archive)
+        {
+            var nodes = new List<(string, byte[])>();
+            foreach (var node in archive.Nodes) nodes.Add(("archive:/" + node.Path, archive.Read(node)));
+            return nodes;
+        }
+
+        /// Mounts decompressed nodes; returns the keys of the serialized files among them.
+        public static List<string> Mount(List<(string Key, byte[] Data)> nodes)
         {
             var serialized = new List<string>();
             lock (gate)
             {
-                foreach (var node in archive.Nodes)
+                foreach (var (key, data) in nodes)
                 {
-                    var key = "archive:/" + node.Path;
-                    bundleNodes[key] = archive.Read(node);
-                    if (!node.Path.EndsWith(".resS", StringComparison.Ordinal) && !node.Path.EndsWith(".resource", StringComparison.Ordinal))
+                    bundleNodes[key] = data;
+                    if (!key.EndsWith(".resS", StringComparison.Ordinal) && !key.EndsWith(".resource", StringComparison.Ordinal))
                         serialized.Add(key);
                 }
             }
             return serialized;
+        }
+
+        /// Forgets a bundle's nodes and the files parsed from them.
+        public static void UnmountBundle(IEnumerable<string> nodeKeys)
+        {
+            lock (gate)
+                foreach (var key in nodeKeys)
+                {
+                    bundleNodes.Remove(key);
+                    files.Remove(key);
+                }
+        }
+
+        public static bool IsMounted(string nodeKey)
+        {
+            lock (gate) return bundleNodes.ContainsKey(nodeKey);
         }
 
         /// Reads `size` bytes at `offset` of a streamed resource file (.resS / .resource).

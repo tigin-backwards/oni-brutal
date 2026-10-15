@@ -15,6 +15,7 @@ namespace OniBrutal.Engine.Rendering
         public Material Material;
         public int Pass = -1;
         public PropertySheet Properties;
+        public string[] Keywords;
         public int Queue;
         public int SortingLayerValue;
         public int SortingOrder;
@@ -355,7 +356,7 @@ namespace OniBrutal.Engine.Rendering
                 return a.Sequence.CompareTo(b.Sequence);
             });
             foreach (var d in list)
-                device.Draw(new DrawRequest(d.Mesh, d.SubMesh, d.ObjectToWorld, d.Material, d.Pass, d.Properties));
+                device.Draw(new DrawRequest(d.Mesh, d.SubMesh, d.ObjectToWorld, d.Material, d.Pass, d.Properties, d.Keywords));
         }
     }
 

@@ -14,6 +14,8 @@ namespace OniBrutal.Engine
             // depends on type initialization order.
             [typeof(CanvasGroup)] = () => new CanvasGroupNative(),
             [typeof(Camera)] = () => new Rendering.CameraNative(),
+            [typeof(Canvas)] = () => new UI.CanvasNative(),
+            [typeof(CanvasRenderer)] = () => new UI.CanvasRendererNative(),
             [typeof(Renderer)] = () => new Rendering.RendererNative(),
             [typeof(MeshRenderer)] = () => new Rendering.MeshRendererNative(),
             [typeof(SpriteRenderer)] = () => new Rendering.SpriteRendererNative(),

@@ -21,6 +21,7 @@ namespace OniBrutal.Host
             PlayerLoop.Initialize();
             OniBrutal.Engine.Platform.PlatformLoop.Install(null);
             OniBrutal.Engine.Rendering.FrameRenderer.Install();
+            OniBrutal.Engine.UI.CanvasSystem.Install();
             EngineLog.Engine($"Project: {EngineConfig.CompanyName} / {EngineConfig.ProductName} {EngineConfig.Version} (Unity {EngineConfig.UnityVersion})");
 
             var hooks = RuntimeInitializeHooks.Load(dataDir);
@@ -44,8 +45,14 @@ namespace OniBrutal.Host
                 Throttle(clock, now);
             }
 
+            // Unity's quit: OnApplicationQuit, then every object is destroyed, then the process
+            // ends (threads the game started do not keep it alive).
             PlayerLoop.SendApplicationQuit();
+            SceneLoader.UnloadAll();
+            Lifecycle.ProcessDestroyQueue();
             EngineLog.Engine($"Exiting after {frame} frames with code {PlayerLoop.ExitCode}");
+            EngineLog.Close();
+            Environment.Exit(PlayerLoop.ExitCode);
             return PlayerLoop.ExitCode;
         }
 

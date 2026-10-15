@@ -1,6 +1,7 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="src/OniBrutal.Assets/OniBrutal.Assets.csproj" />
+    <Project Path="src/OniBrutal.Desktop/OniBrutal.Desktop.csproj" />
     <Project Path="src/OniBrutal.Host/OniBrutal.Host.csproj" />
     <Project Path="src/OniBrutal.UnityEngine/OniBrutal.UnityEngine.csproj" />
     <Project Path="src/Unity.InternalAPIEngineBridge.004/Unity.InternalAPIEngineBridge.004.csproj" />

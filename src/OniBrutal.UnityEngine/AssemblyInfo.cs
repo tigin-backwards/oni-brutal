@@ -10,5 +10,8 @@ using System.Runtime.CompilerServices;
 // Engine tests exercise engine internals directly.
 [assembly: InternalsVisibleTo("OniBrutal.UnityEngine.Tests")]
 
+// The desktop platform implements the engine's platform and render device.
+[assembly: InternalsVisibleTo("OniBrutal.Desktop")]
+
 // The host configures the engine (paths, log, player loop).
 [assembly: InternalsVisibleTo("OniBrutal")]

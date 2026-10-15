@@ -50,6 +50,7 @@ namespace OniBrutal.Host
                 last = now;
                 foreach (var (captureFrame, path, scale) in options.Captures)
                     if (captureFrame == frame) ScreenCapture.CaptureScreenshot(path, scale);
+                options.Input.Apply(frame);
                 PlayerLoop.RunFrame(dt);
                 frame++;
                 Throttle(clock, now);

@@ -426,7 +426,8 @@ Our engine logs through `Brutal.Logging` into the same Player.log-style file
 Development diagnostics (host options, never needed by players): `--trace-exceptions` logs every
 first-chance exception with per-frame IL offsets (the game ships without symbols; the offset
 and `ilspycmd -il` locate the throwing instruction); `--capture FRAME:PATH[:SCALE]` writes a
-screenshot through `ScreenCapture.CaptureScreenshot`; `--check-*` run the corpus gates.
+screenshot through `ScreenCapture.CaptureScreenshot`; `--input FRAME:ACTION[:ARGS]` feeds scripted
+mouse/keyboard/text input through the window's input path; `--check-*` run the corpus gates.
 
 ## 8. Repository layout
 

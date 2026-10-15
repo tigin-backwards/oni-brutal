@@ -126,6 +126,7 @@ namespace OniBrutal.Host
         /// Diagnostics: log every first-chance exception with IL offsets per frame (game code
         /// has no symbols, so offsets locate the throwing instruction).
         public bool TraceExceptions;
+        public readonly ScriptedInput Input = new();
         // Unity's standalone player arguments.
         public int ScreenWidth = -1, ScreenHeight = -1;
         public int ScreenFullscreen = -1;
@@ -152,6 +153,7 @@ namespace OniBrutal.Host
                     case "--dump-script": o.DumpScript = args[++i]; break;
                     case "--frames": o.Frames = int.Parse(args[++i]); break;
                     case "--trace-exceptions": o.TraceExceptions = true; break;
+                    case "--input": o.Input.Add(args[++i]); break;
                     case "--native-override":
                         {
                             var spec = args[++i];
@@ -172,7 +174,7 @@ namespace OniBrutal.Host
                     }
                     default:
                         Console.Error.WriteLine($"Unknown option {args[i]}");
-                        Console.Error.WriteLine("usage: OniBrutal [--game DIR] [--log FILE] [--headless] [--batchmode] [--frames N] [--native-override NAME=PATH] [--trace-exceptions] [-screen-width W] [-screen-height H] [-screen-fullscreen 0|1] [-window-mode exclusive|borderless|windowed] [--check-types] [--check-assets] [--check-bind] [--check-shaders] [--capture FRAME:PATH[:SCALE]]");
+                        Console.Error.WriteLine("usage: OniBrutal [--game DIR] [--log FILE] [--headless] [--batchmode] [--frames N] [--native-override NAME=PATH] [--trace-exceptions] [--input FRAME:ACTION[:ARGS]] [-screen-width W] [-screen-height H] [-screen-fullscreen 0|1] [-window-mode exclusive|borderless|windowed] [--check-types] [--check-assets] [--check-bind] [--check-shaders] [--capture FRAME:PATH[:SCALE]]");
                         return null;
                 }
             }

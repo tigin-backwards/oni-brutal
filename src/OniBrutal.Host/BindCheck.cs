@@ -81,7 +81,7 @@ namespace OniBrutal.Host
                                     var p = (OniBrutal.Assets.TypeTrees.Fields)o!;
                                     if (!ShaderPrograms.IsGlCore(p.Get<sbyte>("m_GpuProgramType"))) continue;
                                     var v = shader.Programs.Variant((int)p.Get<uint>("m_BlobIndex"));
-                                    if (!v.VertexSource.Contains("void main") || !v.FragmentSource.Contains("void main"))
+                                    if (!v.VertexSource.Contains("void main") || !v.FragmentSource.Contains("void main") || (v.GeometrySource != null && !v.GeometrySource.Contains("void main")))
                                         throw new InvalidOperationException($"shader {shader.ShaderName}: variant {v.BlobIndex} lacks a stage");
                                     variants++;
                                 }

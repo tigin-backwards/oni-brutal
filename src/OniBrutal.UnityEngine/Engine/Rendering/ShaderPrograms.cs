@@ -15,6 +15,8 @@ namespace OniBrutal.Engine.Rendering
         public string[] Keywords;
         public string VertexSource;
         public string FragmentSource;
+        /// Null for programs without a geometry stage.
+        public string GeometrySource;
         /// Vertex channels the program reads (bit per channel: position 0x1, normal 0x2,
         /// tangent 0x4, color 0x8, texcoord n 0x10 << n).
         public uint ChannelMask;
@@ -89,25 +91,42 @@ namespace OniBrutal.Engine.Rendering
             var source = Encoding.UTF8.GetString(data.Slice(pos + 4, textLength));
             pos += 4 + ((textLength + 3) & ~3);
             uint channels = BitConverter.ToUInt32(data[pos..]);
-            var (vertex, fragment) = Split(source);
-            return new ShaderVariant { BlobIndex = blobIndex, Keywords = keywords, VertexSource = vertex, FragmentSource = fragment, ChannelMask = channels };
+            var stages = Split(source);
+            return new ShaderVariant
+            {
+                BlobIndex = blobIndex,
+                Keywords = keywords,
+                VertexSource = stages["VERTEX"],
+                FragmentSource = stages["FRAGMENT"],
+                GeometrySource = stages.GetValueOrDefault("GEOMETRY"),
+                ChannelMask = channels,
+            };
         }
 
-        /// The stage sections of Unity's combined GLSL: the text inside `#ifdef VERTEX` and
-        /// `#ifdef FRAGMENT`, each ending at the last `#endif` of its section.
-        public static (string Vertex, string Fragment) Split(string source)
+        static readonly string[] stageNames = ["VERTEX", "FRAGMENT", "GEOMETRY", "HULL", "DOMAIN"];
+
+        /// The stage sections of Unity's combined GLSL: the text inside each `#ifdef STAGE`
+        /// section, which ends at the last `#endif` before the next section (or the end).
+        public static Dictionary<string, string> Split(string source)
         {
-            const string vertexTag = "#ifdef VERTEX\n", fragmentTag = "#ifdef FRAGMENT\n";
-            int v = source.IndexOf(vertexTag, StringComparison.Ordinal);
-            int f = source.IndexOf(fragmentTag, StringComparison.Ordinal);
-            if (v < 0 || f < 0) throw new InvalidDataException("GLSL program without VERTEX and FRAGMENT sections.");
-            string Section(int start, int end)
+            var starts = new List<(int Index, string Stage)>();
+            foreach (var stage in stageNames)
             {
+                int i = source.IndexOf("#ifdef " + stage + "\n", StringComparison.Ordinal);
+                if (i >= 0) starts.Add((i, stage));
+            }
+            starts.Sort((a, b) => a.Index.CompareTo(b.Index));
+            var result = new Dictionary<string, string>(StringComparer.Ordinal);
+            for (int k = 0; k < starts.Count; k++)
+            {
+                int start = starts[k].Index + ("#ifdef " + starts[k].Stage + "\n").Length;
+                int end = k + 1 < starts.Count ? starts[k + 1].Index : source.Length;
                 int close = source.LastIndexOf("#endif", end - 1, end - start, StringComparison.Ordinal);
                 if (close < start) throw new InvalidDataException("Unterminated GLSL stage section.");
-                return source[start..close];
+                result[starts[k].Stage] = source[start..close];
             }
-            return (Section(v + vertexTag.Length, f), Section(f + fragmentTag.Length, source.Length));
+            if (!result.ContainsKey("VERTEX") || !result.ContainsKey("FRAGMENT")) throw new InvalidDataException("GLSL program without VERTEX and FRAGMENT sections.");
+            return result;
         }
 
         /// GPU program types of the OpenGLCore platform (GLCore32, GLCore41, GLCore43). Player

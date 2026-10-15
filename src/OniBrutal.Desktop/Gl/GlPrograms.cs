@@ -95,21 +95,46 @@ namespace OniBrutal.Desktop.Gl
             return section[..versionEnd] + extensions + section[versionEnd..];
         }
 
+        /// Extensions the context offers (GL_EXTENSIONS).
+        public static HashSet<string> Extensions = new(StringComparer.Ordinal);
+
+        /// A variant is supported when every extension its stages require is available (VR
+        /// multiview variants need GL_OVR_multiview2, for instance).
+        public static bool Supported(ShaderVariant variant)
+        {
+            foreach (var source in new[] { variant.VertexSource, variant.FragmentSource, variant.GeometrySource })
+            {
+                if (source == null) continue;
+                foreach (var line in source.Split('\n'))
+                {
+                    var t = line.Trim();
+                    if (!t.StartsWith("#extension ", StringComparison.Ordinal) || !t.EndsWith(": require", StringComparison.Ordinal)) continue;
+                    var name = t["#extension ".Length..t.IndexOf(':')].Trim();
+                    if (!Extensions.Contains(name)) return false;
+                }
+            }
+            return true;
+        }
+
         static DeviceProgram Build(ShaderNative shader, ShaderVariant variant)
         {
             var program = new DeviceProgram();
+            if (!Supported(variant)) return program;
             uint vs = GlApi.CompileShader(VertexShader, Prepare(variant.VertexSource), out var vlog);
             uint fs = GlApi.CompileShader(FragmentShader, Prepare(variant.FragmentSource), out var flog);
-            if (vs == 0 || fs == 0)
+            uint gs = 0;
+            string glog = "";
+            if (variant.GeometrySource != null) gs = GlApi.CompileShader(GeometryShader, Prepare(variant.GeometrySource), out glog);
+            if (vs == 0 || fs == 0 || (variant.GeometrySource != null && gs == 0))
             {
-                Debug.LogError($"Shader '{shader.ShaderName}' variant {variant.BlobIndex} [{string.Join(" ", variant.Keywords)}] failed to compile:\n{vlog}\n{flog}");
-                if (vs != 0) N.glDeleteShader(new GlShader(vs));
-                if (fs != 0) N.glDeleteShader(new GlShader(fs));
+                Debug.LogError($"Shader '{shader.ShaderName}' variant {variant.BlobIndex} [{string.Join(" ", variant.Keywords)}] failed to compile:\n{vlog}\n{flog}\n{glog}");
+                foreach (var id in new[] { vs, fs, gs })
+                    if (id != 0) N.glDeleteShader(new GlShader(id));
                 return program;
             }
-            program.Id = GlApi.LinkProgram(vs, fs, out var llog);
-            N.glDeleteShader(new GlShader(vs));
-            N.glDeleteShader(new GlShader(fs));
+            program.Id = GlApi.LinkProgram(vs, fs, gs, out var llog);
+            foreach (var id in new[] { vs, fs, gs })
+                if (id != 0) N.glDeleteShader(new GlShader(id));
             if (program.Id == 0)
             {
                 Debug.LogError($"Shader '{shader.ShaderName}' variant {variant.BlobIndex} failed to link:\n{llog}");

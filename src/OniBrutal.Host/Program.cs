@@ -36,6 +36,7 @@ namespace OniBrutal.Host
             if (options.CheckTypes) return CheckTypes(assemblies);
             if (options.CheckAssets) return AssetCheck.Run(dataDir);
             if (options.CheckBind) return BindCheck.Run(dataDir);
+            if (options.CheckShaders) return ShaderCheck.Run(dataDir);
             if (options.DumpScript != null) return AssetCheck.Dump(dataDir, options.DumpScript);
 
             return Player.Run(options, dataDir);
@@ -118,6 +119,7 @@ namespace OniBrutal.Host
         public bool CheckTypes;
         public bool CheckAssets;
         public bool CheckBind;
+        public bool CheckShaders;
         public string? DumpScript;
         public int Frames = -1;
         // Unity's standalone player arguments.
@@ -142,6 +144,7 @@ namespace OniBrutal.Host
                     case "--check-types": o.CheckTypes = true; break;
                     case "--check-assets": o.CheckAssets = true; break;
                     case "--check-bind": o.CheckBind = true; break;
+                    case "--check-shaders": o.CheckShaders = true; break;
                     case "--dump-script": o.DumpScript = args[++i]; break;
                     case "--frames": o.Frames = int.Parse(args[++i]); break;
                     case "-screen-width": o.ScreenWidth = int.Parse(args[++i]); break;

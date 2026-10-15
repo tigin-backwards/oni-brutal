@@ -93,6 +93,7 @@ namespace OniBrutal.Desktop.Gl
             for (uint i = 0; i < extensions; i++)
             {
                 var e = GlApi.GetStringi(Extensions, i);
+                GlPrograms.Extensions.Add(e);
                 if (e == "GL_EXT_texture_compression_s3tc") caps.S3tc = true;
                 if (e == "GL_ARB_texture_compression_bptc") caps.Bptc = true;
                 if (e == "GL_ARB_texture_compression_rgtc") caps.Rgtc = true;

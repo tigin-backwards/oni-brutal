@@ -30,6 +30,11 @@ namespace OniBrutal.Engine
 
         public uint Current => ~state;
 
+        /// The hash of a string's UTF-8 bytes, as Unity's name hashes (Animator.StringToHash,
+        /// animation binding paths); "" hashes to 0.
+        public static uint Of(string s)
+            => string.IsNullOrEmpty(s) ? 0 : Compute(System.Text.Encoding.UTF8.GetBytes(s));
+
         public static uint Compute(ReadOnlySpan<byte> data)
         {
             var crc = new Crc32();

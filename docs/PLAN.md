@@ -170,6 +170,10 @@ Known behaviours not yet reproduced, each to be closed by a named milestone:
 - CPU texel reads (`GetPixel*`) cover uncompressed formats and BC1/BC3/BC4/BC5; BC6H/BC7,
   ETC/EAC, ASTC and PVRTC throw. No readable texture in the build uses them (all 2682 textures
   checked by `--check-bind`). Milestone: M6 (confirm).
+- Animator: data-driven features absent from the build throw at load (blend trees, layer masks,
+  synchronized layers, StateMachineBehaviours, non-legacy clip events); additive layers blend
+  as override, no PPtr curves, root motion, culling modes or damped SetFloat. Timeline animation
+  playables do not reach the Animator sampler. Milestone: M6 (confirm unreachable).
 - `GameObject.CreatePrimitive` needs MeshCollider/CapsuleCollider shapes in the surface.
   Milestone: M2 (with the physics module).
 

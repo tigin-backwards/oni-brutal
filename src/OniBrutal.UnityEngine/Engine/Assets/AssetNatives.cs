@@ -18,6 +18,9 @@ namespace OniBrutal.Engine.Assets
             [typeof(UnityEngine.Mesh)] = () => new Rendering.MeshNative(),
             [typeof(UnityEngine.Sprite)] = () => new Rendering.SpriteNative(),
             [typeof(UnityEngine.U2D.SpriteAtlas)] = () => new Rendering.SpriteAtlasNative(),
+            [typeof(UnityEngine.RuntimeAnimatorController)] = () => new Mecanim.AnimatorControllerNative(),
+            [typeof(UnityEngine.Avatar)] = () => new Mecanim.AvatarNative(),
+            [typeof(UnityEngine.AvatarMask)] = () => new Mecanim.AvatarMaskNative(),
         };
 
         public static NativeObject Create(Type engineType)

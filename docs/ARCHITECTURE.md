@@ -219,7 +219,7 @@ Initialization  time update (Time.*), pending scene-load completion
 EarlyUpdate     platform events → Input state; Screen size changes
 FixedUpdate     0..n steps (accumulator, maximumDeltaTime clamp), coroutines WaitForFixedUpdate
 Update          Start for pending components; Update; coroutines (null, WaitForSeconds, custom yields)
-PreLateUpdate   LateUpdate
+PreLateUpdate   Animators (DirectorUpdateAnimationBegin/End); LateUpdate
 PostLateUpdate  Canvas.willRenderCanvases (uGUI layout/graphic rebuild) → render all cameras
                 → screen-space-overlay canvases → WaitForEndOfFrame coroutines → present
                 → deferred Destroy processing

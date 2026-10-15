@@ -24,6 +24,7 @@ namespace OniBrutal.Engine
             [typeof(Rigidbody)] = () => new RigidbodyNative(),
             [typeof(BoxCollider2D)] = () => new BoxCollider2DNative(),
             [typeof(Rigidbody2D)] = () => new Rigidbody2DNative(),
+            [typeof(Animator)] = () => new Mecanim.AnimatorNative(),
         };
 
         public static void Register(Type componentType, Func<ComponentNative> factory)

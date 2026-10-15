@@ -27,10 +27,22 @@ namespace OniBrutal.Desktop
 
         public GlfwWindow Window => window;
 
+        const int GLFW_ANY_PLATFORM = 0x00060000;
+
         public GlfwPlatform(WindowSettings settings)
         {
             Glfw.ErrorCallback += (code, description) => Debug.LogWarning($"GLFW {code}: {description}");
-            if (!Glfw.Init()) throw new InvalidOperationException("GLFW could not initialize (no display available).");
+            // Unity's Linux player is an X11 client (XWayland under Wayland compositors), where
+            // window positions exist; prefer GLFW's X11 backend, else whatever GLFW finds.
+            bool initialized = false;
+            if (OperatingSystem.IsLinux() && Environment.GetEnvironmentVariable("DISPLAY") is { Length: > 0 }
+                && Glfw.IsPlatformSupported(Brutal.GlfwApi.GlfwPlatform.X11))
+            {
+                Glfw.SetInitHint(GlfwInitHint.Platform, (int)Brutal.GlfwApi.GlfwPlatform.X11);
+                initialized = Glfw.Init();
+                if (!initialized) Glfw.SetInitHint(GlfwInitHint.Platform, GLFW_ANY_PLATFORM);
+            }
+            if (!initialized && !Glfw.Init()) throw new InvalidOperationException("GLFW could not initialize (no display available).");
             Glfw.DefaultWindowHints();
             Glfw.WindowHint(GlfwWindowHint.ClientApi, GLFW_OPENGL_API);
             Glfw.WindowHint(GlfwWindowHint.ContextVersionMajor, 4);

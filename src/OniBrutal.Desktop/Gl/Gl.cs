@@ -50,6 +50,7 @@ namespace OniBrutal.Desktop.Gl
         public const uint Sampler2D = 0x8B5E, Sampler3D = 0x8B5F, SamplerCube = 0x8B60, Sampler2DShadow = 0x8B62, Sampler2DArray = 0x8DC1, Sampler2DMultisample = 0x9108, IntSampler2D = 0x8DCA, UnsignedIntSampler2D = 0x8DD2;
         public const uint Vendor = 0x1F00, RendererName = 0x1F01, Version = 0x1F02, ShadingLanguageVersion = 0x8B8C, Extensions = 0x1F03, NumExtensions = 0x821D;
         public const uint MaxTextureSize = 0x0D33, MaxDrawBuffers = 0x8824, MaxTextureImageUnits = 0x8872, MaxCombinedTextureImageUnits = 0x8B4D, MaxSamples = 0x8D57;
+        public const uint UniformBufferOffsetAlignment = 0x8A34;
         public const uint VertexShader = 0x8B31, FragmentShader = 0x8B30, GeometryShader = 0x8DD9;
     }
 

@@ -94,14 +94,28 @@ namespace OniBrutal.Desktop
                 window.OnCursorEnter += (_, entered) => InputState.Instance.MousePresent = entered;
             }
             window.OnClose += _ => closeRequested = true;
+            window.OnFramebufferSize += (_, size) => framebufferSize = window.FramebufferSize;
+            Glfw.MonitorCallback += (_, _) => desktopMode = null;
+            RefreshWindowState();
             InputState.Instance.MousePresent = true;
         }
 
         // ----- IPlatform -----
 
         public bool HasDisplay => true;
-        public int FramebufferWidth => window.FramebufferSize.X;
-        public int FramebufferHeight => window.FramebufferSize.Y;
+        // Window and monitor state is cached: Screen/Display properties are read many times per
+        // frame and each GLFW query is a round trip to the display server.
+        int2 framebufferSize;
+        OniBrutal.Engine.Platform.DisplayMode? desktopMode;
+
+        void RefreshWindowState()
+        {
+            framebufferSize = window.FramebufferSize;
+            desktopMode = null;
+        }
+
+        public int FramebufferWidth => framebufferSize.X;
+        public int FramebufferHeight => framebufferSize.Y;
         public FullScreenMode FullScreenMode => mode;
         /// Scripted runs behave as a focused window with the mouse over it, whatever the desktop
         /// is doing.
@@ -129,7 +143,7 @@ namespace OniBrutal.Desktop
 
         static OniBrutal.Engine.Platform.DisplayMode ModeOf(GlfwVidMode m) => new(m.Width, m.Height, (uint)m.RefreshRate, 1);
 
-        public OniBrutal.Engine.Platform.DisplayMode DesktopMode => ModeOf(CurrentMonitor.VideoMode);
+        public OniBrutal.Engine.Platform.DisplayMode DesktopMode => desktopMode ??= ModeOf(CurrentMonitor.VideoMode);
 
         public OniBrutal.Engine.Platform.DisplayMode[] DisplayModes
         {
@@ -176,11 +190,13 @@ namespace OniBrutal.Desktop
             }
             mode = newMode;
             window.Refresh();
+            RefreshWindowState();
         }
 
         public bool PollEvents(InputState input)
         {
             Glfw.PollEvents();
+            framebufferSize = window.FramebufferSize;
             return !closeRequested;
         }
 

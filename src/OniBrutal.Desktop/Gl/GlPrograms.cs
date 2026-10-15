@@ -52,6 +52,8 @@ namespace OniBrutal.Desktop.Gl
         public readonly List<UniformBinding> Uniforms = new();
         public readonly List<SamplerBinding> Samplers = new();
         public int[] BlockSizes = Array.Empty<int>();
+        /// Per-draw uniform block contents, reused.
+        public byte[][] BlockScratch;
     }
 
     /// A shader's compiled programs by variant blob index.

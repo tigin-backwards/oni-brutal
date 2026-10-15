@@ -1,3 +1,4 @@
+using System.Linq;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
@@ -67,7 +68,32 @@ namespace OniBrutal.Desktop.Gl
         readonly GlfwPlatform platform;
         readonly GlCaps caps = new();
         readonly uint immediateBuffer, immediateIndices;
-        readonly List<uint> uniformBuffers = new();
+        /// Every draw's uniform blocks are sub-allocated from one ring buffer and bound by range;
+        /// the buffer is reallocated (orphaned) only when the ring wraps, not per draw.
+        const int UniformRingSize = 16 << 20;
+        uint uniformRing;
+        int uniformRingOffset = UniformRingSize;
+        int uniformAlignment = 256;
+
+        void BindUniformBlock(uint index, byte[] data)
+        {
+            if (uniformRing == 0)
+            {
+                uniformRing = GlApi.GenBuffer();
+                uniformAlignment = Math.Max(1, GlApi.GetInteger(UniformBufferOffsetAlignment));
+            }
+            GlApi.BindBuffer(UniformBuffer, uniformRing);
+            int size = Math.Max(data.Length, 16);
+            int offset = (uniformRingOffset + uniformAlignment - 1) / uniformAlignment * uniformAlignment;
+            if (offset + size > UniformRingSize)
+            {
+                N.glBufferData(UniformBuffer, UniformRingSize, null, StreamDraw);
+                offset = 0;
+            }
+            GlApi.BufferSubData<byte>(UniformBuffer, offset, data);
+            N.glBindBufferRange(UniformBuffer, index, new GlBuffer(uniformRing), offset, size);
+            uniformRingOffset = offset + size;
+        }
         readonly Dictionary<string, DeviceTexture> defaults = new();
         readonly Dictionary<ShaderPass, PassState> passStates = new();
         readonly Dictionary<string, uint> mrtFramebuffers = new();
@@ -341,16 +367,10 @@ namespace OniBrutal.Desktop.Gl
         void Bind(DeviceProgram program, DrawInputs inputs)
         {
             N.glUseProgram(new GlProgram(program.Id));
-            var blocks = new byte[program.BlockSizes.Length][];
-            for (int i = 0; i < blocks.Length; i++) blocks[i] = new byte[program.BlockSizes[i]];
+            var blocks = program.BlockScratch ??= program.BlockSizes.Select(n => new byte[n]).ToArray();
+            foreach (var b in blocks) Array.Clear(b);
             GlUniforms.Apply(program, inputs, blocks);
-            for (int i = 0; i < blocks.Length; i++)
-            {
-                while (uniformBuffers.Count <= i) uniformBuffers.Add(GlApi.GenBuffer());
-                GlApi.BindBuffer(UniformBuffer, uniformBuffers[i]);
-                GlApi.BufferData<byte>(UniformBuffer, blocks[i], StreamDraw);
-                N.glBindBufferBase(UniformBuffer, (uint)i, new GlBuffer(uniformBuffers[i]));
-            }
+            for (int i = 0; i < blocks.Length; i++) BindUniformBlock((uint)i, blocks[i]);
             // Render textures are made ready for sampling first (MSAA resolve, mip generation):
             // that work binds framebuffers and textures of its own.
             var devices = new DeviceTexture[program.Samplers.Count];

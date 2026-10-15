@@ -194,7 +194,9 @@ namespace OniBrutal.Engine.UI
             foreach (var c in enabled)
                 if (IsLive(c) && c.GameObject.ActiveInHierarchy && (RootOf(c) == c || c.OverrideSorting))
                     batches.Add(new CanvasBatch { Canvas = c, Root = RootOf(c) });
-            foreach (var b in batches) Collect(b, b.Canvas.GameObject, b.Canvas, isBatchRoot: true, new Counter());
+            // Geometry is in the root canvas's space: RectMask2D (shipped uGUI) computes its clip
+            // rects in the root-most canvas's space, nested canvases included.
+            foreach (var b in batches) Collect(b, b.Canvas.GameObject, b.Root, isBatchRoot: true, new Counter());
             // Render order: by sorting layer, sorting order, then enable order.
             batches.Sort((a, b) =>
             {
@@ -220,7 +222,6 @@ namespace OniBrutal.Engine.UI
             if (!go.ActiveInHierarchy) return;
             var canvasHere = CanvasOn(go);
             if (!isBatchRoot && canvasHere != null && canvasHere.OverrideSorting) return;
-            if (canvasHere != null) space = canvasHere;
             var pops = new List<CanvasRendererNative>();
             foreach (var comp in go.Components)
             {

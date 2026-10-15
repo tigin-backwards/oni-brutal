@@ -333,9 +333,23 @@ sensitivity / dead-zone smoothing.
 ### 3.7 Text and fonts
 
 TMP runs as shipped. The engine provides what it needs: `Font`, `TextCore` data types,
-`FontEngine` (backed by FreeType from `Ahwoo.BRUTAL.FreeType`'s natives through our own
-P/Invokes, plus SDF generation) used only for dynamic atlases, and `TextGenerator` for the
-legacy `UI.Text` (debug/mod screens).
+`FontEngine` used only for dynamic atlases, and `TextGenerator` for the legacy `UI.Text`
+(debug/mod screens).
+
+- **FreeType** is the system `libfreetype.so.6` through our own P/Invokes (Unity links it
+  statically; the game ships none). OpenType layout data FreeType does not expose (GPOS
+  `kern`/`mark`/`mkmk`, GSUB `liga`, GDEF classes, legacy `kern`, OS/2) is read from the sfnt
+  tables in managed code.
+- **Atlases**: Unity's MaxRects packer over TMP's free/used rect lists (glyph + padding on each
+  side); SDF modes rasterize the outline (×8/16/32 supersampled for `SDF8/16/32`) and run
+  Gustavson's anti-aliased EDT; the field is 0.5 on the outline with spread = padding + 1
+  (TMP's `_GradientScale`), measured against the game's own SDF atlases.
+- **Legacy fonts** (class 128) render glyphs on demand into the font's own `Font Texture`
+  (Alpha8, from 256², grown when a rebuild with the current frame's glyphs still overflows)
+  and raise `Font.textureRebuilt` on rebuilds. Fonts without data (the built-in
+  `LegacyRuntime`) use the built-in default face, Liberation Sans — the face Unity embeds for
+  it (LegacyRuntime's serialized metrics are Liberation Sans's) — taken from the game's own
+  Liberation Sans font asset; other data-less fonts first try the OS fonts in `m_FontNames`.
 
 ### 3.8 Audio, video, other modules
 

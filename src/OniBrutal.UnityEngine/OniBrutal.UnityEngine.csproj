@@ -14,5 +14,7 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../OniBrutal.Assets/OniBrutal.Assets.csproj" />
+    <!-- stb_image: PNG/JPEG decoding for ImageConversion.LoadImage. -->
+    <PackageReference Include="Ahwoo.BRUTAL.Stb" />
   </ItemGroup>
 </Project>

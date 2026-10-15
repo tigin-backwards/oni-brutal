@@ -160,5 +160,23 @@ namespace OniBrutal.Tests
             block.SetInt("_Count", 3);
             Assert.Equal(3f, block.GetFloat("_Count"));
         }
+    
+
+        [Fact]
+        public void PngRoundTripsThroughLoadImage()
+        {
+            var source = new Texture2D(3, 2, TextureFormat.RGBA32, false);
+            source.SetPixels32([
+                new Color32(255, 0, 0, 255), new Color32(0, 255, 0, 128), new Color32(0, 0, 255, 0),
+                new Color32(10, 20, 30, 40), new Color32(50, 60, 70, 80), new Color32(90, 100, 110, 120)]);
+            var png = source.EncodeToPNG();
+            var loaded = new Texture2D(2, 2);
+            Assert.True(loaded.LoadImage(png));
+            Assert.Equal(TextureFormat.ARGB32, loaded.format);
+            Assert.Equal(3, loaded.width);
+            Assert.Equal(2, loaded.height);
+            Assert.Equal(source.GetPixels32(), loaded.GetPixels32(0));
+            Assert.False(loaded.LoadImage([1, 2, 3]));
+        }
     }
 }

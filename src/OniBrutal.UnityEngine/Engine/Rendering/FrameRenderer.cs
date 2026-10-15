@@ -65,6 +65,7 @@ namespace OniBrutal.Engine.Rendering
         {
             if (installed) return;
             installed = true;
+            Particles.ParticleSystemRendererNative.CameraProjection = camera => ((CameraNative)camera.NativeOrThrow).Projection;
             PlayerLoop.Render += RenderFrame;
             PlayerLoop.Present += EndFrame;
         }
@@ -84,6 +85,7 @@ namespace OniBrutal.Engine.Rendering
         {
             if (GraphicsDevice.Current.RendersFrames)
             {
+                VideoPlanes.CopyRenderTextureVideos();
                 var cameras = Cameras.Enabled.ToArray();
                 // Stable sort: offscreen first, then by depth.
                 var order = new List<(int Key, float Depth, int Index, Camera Camera)>();
@@ -200,6 +202,7 @@ namespace OniBrutal.Engine.Rendering
                     break;
             }
 
+            VideoPlanes.Draw(camera, cam, nearPlane: false);
             Execute(camera, cam, CameraEvent.BeforeForwardOpaque);
             DrawQueue(device, draws, opaque: true);
             Execute(camera, cam, CameraEvent.AfterForwardOpaque);
@@ -210,6 +213,7 @@ namespace OniBrutal.Engine.Rendering
             Execute(camera, cam, CameraEvent.BeforeForwardAlpha);
             DrawQueue(device, draws, opaque: false);
             Execute(camera, cam, CameraEvent.AfterForwardAlpha);
+            VideoPlanes.Draw(camera, cam, nearPlane: true);
 
             SendToEnabled(cam.GameObject, s => s.OnPostRender);
             Camera.onPostRender?.Invoke(camera);
@@ -382,6 +386,9 @@ namespace OniBrutal.Engine.Rendering
                 case SpriteRendererNative s:
                     CollectSprite(s, draws);
                     break;
+                case Particles.ParticleSystemRendererNative p:
+                    CollectParticles(p, camera, draws);
+                    break;
                 default:
                     External?.Invoke(r, camera, draws);
                     break;
@@ -401,6 +408,23 @@ namespace OniBrutal.Engine.Rendering
             SortingOrder = r.SortingOrder,
             WorldBounds = r.WorldBounds,
         };
+
+        static readonly System.Runtime.CompilerServices.ConditionalWeakTable<RendererNative, MeshNative> particleMeshes = new();
+
+        /// The particles built for this camera (world space): submesh i with material i.
+        static void CollectParticles(Particles.ParticleSystemRendererNative r, Camera camera, List<DrawItem> draws)
+        {
+            var mesh = particleMeshes.GetValue(r, _ => new MeshNative());
+            if (!r.BuildGeometry(camera, mesh, out var objectToWorld)) return;
+            for (int i = 0; i < mesh.SubMeshes.Count && i < r.Materials.Length; i++)
+            {
+                var material = r.Materials[i];
+                if (material == null || mesh.SubMeshes[i].Indices.Length == 0) continue;
+                var item = Item(r, mesh, i, material, r.PropertyBlock);
+                item.ObjectToWorld = objectToWorld;
+                draws.Add(item);
+            }
+        }
 
         /// Material i draws submesh i; extra materials draw the last submesh again.
         static void CollectMesh(MeshRendererNative r, List<DrawItem> draws)

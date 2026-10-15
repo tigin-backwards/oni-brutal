@@ -25,7 +25,8 @@ var ourDir = positional[1];
 var prefixes = positional[2].Split(',', StringSplitOptions.RemoveEmptyEntries);
 var consumers = positional.Skip(3).ToArray();
 
-bool IsProvider(string asm) => prefixes.Any(p => asm == p || asm.StartsWith(p, StringComparison.Ordinal));
+// A provider ending in '.' is a prefix; otherwise it names one assembly exactly.
+bool IsProvider(string asm) => prefixes.Any(p => p.EndsWith('.') ? asm.StartsWith(p, StringComparison.Ordinal) : asm == p);
 
 var ours = new OurAssemblies(ourDir);
 var missingTypes = new SortedDictionary<string, SortedSet<string>>(StringComparer.Ordinal);

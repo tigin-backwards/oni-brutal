@@ -36,8 +36,11 @@ static int MakeMap(string managedDir, string outPath)
         {
             var td = md.GetTypeDefinition(h);
             if (!td.GetDeclaringType().IsNil) continue;
-            if ((td.Attributes & TypeAttributes.VisibilityMask) != TypeAttributes.Public) continue;
-            lines.Add($"{module}\t{Names.Full(md, h)}");
+            var name = Names.Full(md, h);
+            if (name == "<Module>" || name.Contains('<')) continue;
+            // Internal types too: the shipped packages reach them through InternalsVisibleTo.
+            bool isPublic = (td.Attributes & TypeAttributes.VisibilityMask) == TypeAttributes.Public;
+            lines.Add($"{module}\t{name}\t{(isPublic ? "public" : "internal")}");
         }
     }
     File.WriteAllLines(outPath, lines);
@@ -48,10 +51,12 @@ static int MakeMap(string managedDir, string outPath)
 static int Emit(string mapPath, string outDir, string[] implementations)
 {
     var moduleOf = new Dictionary<string, string>(StringComparer.Ordinal);
+    var unityPublic = new HashSet<string>(StringComparer.Ordinal);
     foreach (var line in File.ReadLines(mapPath))
     {
-        var tab = line.IndexOf('\t');
-        moduleOf[line[(tab + 1)..]] = line[..tab];
+        var parts = line.Split('\t');
+        moduleOf[parts[1]] = parts[0];
+        if (parts[2] == "public") unityPublic.Add(parts[1]);
     }
 
     // module -> (implementing assembly, type) list
@@ -67,11 +72,17 @@ static int Emit(string mapPath, string outDir, string[] implementations)
         {
             var td = md.GetTypeDefinition(h);
             if (!td.GetDeclaringType().IsNil) continue;
-            if ((td.Attributes & TypeAttributes.VisibilityMask) != TypeAttributes.Public) continue;
+            bool isPublic = (td.Attributes & TypeAttributes.VisibilityMask) == TypeAttributes.Public;
             var name = Names.Full(md, h);
             if (!moduleOf.TryGetValue(name, out var module))
             {
-                errors.Add($"{impl.Name}: public type {name} is not part of Unity's API");
+                // Engine-internal types are not forwarded; a public type must be Unity's.
+                if (isPublic) errors.Add($"{impl.Name}: public type {name} is not part of Unity's API");
+                continue;
+            }
+            if (isPublic && !unityPublic.Contains(name))
+            {
+                errors.Add($"{impl.Name}: type {name} is internal in Unity but public here");
                 continue;
             }
             if (!forwards.TryGetValue(module, out var list)) forwards[module] = list = new();
@@ -117,7 +128,7 @@ static class Names
             {
                 var nt = md.GetTypeDefinition(nh);
                 var vis = nt.Attributes & TypeAttributes.VisibilityMask;
-                if (vis != TypeAttributes.NestedPublic) continue;
+                if (vis != TypeAttributes.NestedPublic && vis != TypeAttributes.NestedAssembly && vis != TypeAttributes.NestedFamORAssem) continue;
                 var path = prefix + md.GetString(nt.Name);
                 result.Add(path);
                 Walk(nh, path + "/");

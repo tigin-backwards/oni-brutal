@@ -45,6 +45,9 @@ void Require(Type? t)
     }
     var asm = t.Assembly.GetName().Name!;
     if (!IsEngine(asm)) return;
+    // Compiler-generated types (fixed buffers, closures) are not declarable; they belong to
+    // the hand-written body of their declaring type.
+    if (t.Name.Contains('<')) return;
     var key = asm + "|" + t.FullName;
     if (required.TryAdd(key, t)) { requiredSet.Add(t); queue.Enqueue(t); }
 }
@@ -107,6 +110,27 @@ while (queue.Count > 0)
     // consumer references the interface itself; BCL interfaces carry no engine requirements.
     if (t.IsGenericTypeDefinition)
         foreach (var gp in t.GetGenericArguments()) foreach (var c in gp.GetGenericParameterConstraints()) Require(c);
+    // Whatever the generated header mentions must exist: abstract member signatures of
+    // externally derivable types, and types named by contract attributes.
+    if ((t.IsPublic || t.IsNestedPublic) && !t.IsSealed && !t.IsInterface)
+    {
+        const BindingFlags declared = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly;
+        foreach (var m in t.GetMethods(declared))
+        {
+            if (!m.IsAbstract || !(m.IsPublic || m.IsFamily || m.IsFamilyOrAssembly)) continue;
+            Require(m.ReturnType);
+            foreach (var p in m.GetParameters()) Require(p.ParameterType);
+        }
+    }
+    // Types of serialized fields: the asset loader deserializes them, so they must exist with
+    // Unity's shape (public instance fields, or [SerializeField] ones).
+    if (!t.IsEnum && !t.IsInterface)
+        foreach (var f in t.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly))
+            if (f.IsPublic || f.GetCustomAttributesData().Any(a => a.AttributeType.FullName == "UnityEngine.SerializeField"))
+                Require(f.FieldType);
+    foreach (var a in t.GetCustomAttributesData())
+        if (Shapes.IsContractAttribute(a.AttributeType.FullName!))
+            foreach (var arg in a.ConstructorArguments) if (arg.Value is Type at) Require(at);
     // A delegate's or interface's shape is its signatures; an enum needs nothing more.
     if (typeof(MulticastDelegate).FullName == t.BaseType?.FullName)
     {
@@ -340,6 +364,8 @@ static class Shapes
 
     /// Class/struct declaration: modifiers, base, directly-added interfaces, constraints, contract
     /// attributes and abstract members. Bodies of everything else are written by hand in partial parts.
+    public static bool IsContractAttribute(string fullName) => ContractAttributes.Contains(fullName);
+
     static string Header(Type t, string indent)
     {
         var sb = new StringBuilder();
@@ -378,14 +404,18 @@ static class Shapes
         }
         sb.AppendLine($"{indent}{Visibility(t)} {mods}partial {kind} {SimpleName(t)}{(bases.Count > 0 ? " : " + string.Join(", ", bases) : "")}{Constraints(gps)}\n{indent}{{");
         const BindingFlags declared = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly;
-        foreach (var p in t.GetProperties(declared))
+        // Abstract members are part of the contract only where consumers can derive from the
+        // type; Unity's internal types are reachable only through InternalsVisibleTo friends,
+        // which use members, not derivation.
+        bool externallyDerivable = (t.IsPublic || t.IsNestedPublic) && !t.IsSealed;
+        foreach (var p in externallyDerivable ? t.GetProperties(declared) : [])
         {
             var acc = p.GetMethod ?? p.SetMethod!;
             if (!acc.IsAbstract || !(acc.IsPublic || acc.IsFamily || acc.IsFamilyOrAssembly)) continue;
             var vis = acc.IsPublic ? "public" : "protected";
             sb.AppendLine($"{indent}    {vis} abstract {Cs(p.PropertyType)} {p.Name} {{ {(p.GetMethod != null ? "get; " : "")}{(p.SetMethod != null ? "set; " : "")}}}");
         }
-        foreach (var m in t.GetMethods(declared).Where(m => m.IsAbstract && !m.IsSpecialName && (m.IsPublic || m.IsFamily || m.IsFamilyOrAssembly)))
+        foreach (var m in (externallyDerivable ? t.GetMethods(declared) : []).Where(m => m.IsAbstract && !m.IsSpecialName && (m.IsPublic || m.IsFamily || m.IsFamilyOrAssembly)))
         {
             var vis = m.IsPublic ? "public" : "protected";
             var mgps = m.IsGenericMethodDefinition ? m.GetGenericArguments() : [];

@@ -52,7 +52,7 @@ namespace OniBrutal.Engine
         /// Diagnostics (`--frame-stats`): average phase times logged every 60 frames.
         public static bool FrameStats;
         static readonly System.Diagnostics.Stopwatch statClock = new();
-        static readonly double[] statTotals = new double[5]; // update, render, gui, end of frame, present
+        static readonly double[] statTotals = new double[9]; // render, gui, end of frame, present, early+fixed, scripts' Update (+starts, coroutines, director), animation+LateUpdate, post-late update (canvases…), particles
         static int statFrames;
 
         static void Mark(int phase)
@@ -65,7 +65,8 @@ namespace OniBrutal.Engine
         static void EndStats()
         {
             if (!FrameStats || ++statFrames < 60) return;
-            EngineLog.Engine($"frame stats (ms/frame over 60): update {statTotals[0] / 60:F2}, render {statTotals[1] / 60:F2}, gui {statTotals[2] / 60:F2}, end of frame {statTotals[3] / 60:F2}, present {statTotals[4] / 60:F2}");
+            double T(int i) => statTotals[i] / 60;
+            EngineLog.Engine($"frame stats (ms/frame over 60): early+fixed {T(4):F2}, update {T(5):F2}, late {T(6):F2}, post-late {T(7):F2}, particles {T(8):F2}, render {T(0):F2}, gui {T(1):F2}, end of frame {T(2):F2}, present {T(3):F2}");
             Array.Clear(statTotals);
             statFrames = 0;
         }
@@ -96,6 +97,7 @@ namespace OniBrutal.Engine
                 }
             }
 
+            Mark(4);
             BehaviourManager.RunStarts();
             BehaviourManager.RunUpdate();
             // Update.ScriptRunDelayedDynamicFrameRate: Start for behaviours enabled during
@@ -104,24 +106,27 @@ namespace OniBrutal.Engine
             Coroutines.RunUpdatePhase();
             DirectorUpdate?.Invoke();
 
+            Mark(5);
             AnimationUpdate?.Invoke();
             BehaviourManager.RunLateUpdate();
 
             Lifecycle.ProcessDestroyQueue();
+            Mark(6);
             PostLateUpdate?.Invoke();
+            Mark(7);
             ParticleUpdate?.Invoke();
-            Mark(0);
+            Mark(8);
             Render?.Invoke();
-            Mark(1);
+            Mark(0);
             GUI?.Invoke();
-            Mark(2);
+            Mark(1);
             Time.FrameRendered();
             Coroutines.RunEndOfFramePhase();
             Lifecycle.ProcessDestroyQueue();
             EngineLog.FlushToMainThread();
-            Mark(3);
+            Mark(2);
             Present?.Invoke();
-            Mark(4);
+            Mark(3);
             EndStats();
         }
 

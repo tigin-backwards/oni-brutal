@@ -56,7 +56,7 @@ namespace OniBrutal.Engine.UI
         static CanvasNative CanvasOn(GameObjectNative go)
         {
             foreach (var comp in go.Components)
-                if (comp.Native is CanvasNative c && IsLive(c)) return c;
+                if (comp is Canvas && comp.Native is CanvasNative c && IsLive(c)) return c;
             return null;
         }
 
@@ -241,12 +241,18 @@ namespace OniBrutal.Engine.UI
             }
             // CanvasGroups multiply down the hierarchy; one that ignores its parents restarts it.
             foreach (var c in go.Components)
-                if (c.Native is CanvasGroupNative { IsActiveAndEnabledState: true } g)
+                if (c is CanvasGroup && c.Native is CanvasGroupNative { IsActiveAndEnabledState: true } g)
                     groupAlpha = g.IgnoreParentGroups ? g.Alpha : groupAlpha * g.Alpha;
+            if (groupAlpha <= 0f && !HasGroupThatIgnoresParents(go))
+            {
+                // Fully transparent through its CanvasGroups: nothing below is rendered.
+                MarkNotRendered(go);
+                return;
+            }
             List<CanvasRendererNative> pops = null;
             foreach (var comp in go.Components)
             {
-                if (comp.Native is not CanvasRendererNative r || r.Destroyed) continue;
+                if (comp is not CanvasRenderer || comp.Native is not CanvasRendererNative r || r.Destroyed) continue;
                 r.AbsoluteDepth = -1;
                 r.RelativeDepth = -1;
                 r.BuiltToCanvas = worldToNearest * r.GameObject.Transform.LocalToWorld;
@@ -261,6 +267,33 @@ namespace OniBrutal.Engine.UI
             if (pops != null)
                 foreach (var r in pops)
                     foreach (var m in r.PopMaterials) batch.Draws.Add(new CanvasDraw(r, space, m, pop: true, groupAlpha));
+        }
+
+        /// A CanvasGroup below that ignores its parents' groups can make part of a transparent
+        /// subtree visible again.
+        static bool HasGroupThatIgnoresParents(GameObjectNative go)
+        {
+            foreach (var child in go.Transform.Children)
+            {
+                var g = child.GameObject;
+                if (!g.ActiveInHierarchy) continue;
+                foreach (var c in g.Components)
+                    if (c is CanvasGroup && c.Native is CanvasGroupNative { IsActiveAndEnabledState: true, IgnoreParentGroups: true }) return true;
+                if (HasGroupThatIgnoresParents(g)) return true;
+            }
+            return false;
+        }
+
+        /// Elements under a fully transparent CanvasGroup are not rendered (depth -1).
+        static void MarkNotRendered(GameObjectNative go)
+        {
+            foreach (var comp in go.Components)
+                if (comp is CanvasRenderer && comp.Native is CanvasRendererNative r)
+                {
+                    r.AbsoluteDepth = -1;
+                    r.RelativeDepth = -1;
+                }
+            foreach (var child in go.Transform.Children) MarkNotRendered(child.GameObject);
         }
 
         // ----- Drawing -----
@@ -282,7 +315,7 @@ namespace OniBrutal.Engine.UI
             float alpha = 1f;
             for (var t = go.Transform; t != null; t = t.Parent)
                 foreach (var c in t.GameObject.Components)
-                    if (c.Native is CanvasGroupNative { IsActiveAndEnabledState: true } g)
+                    if (c is CanvasGroup && c.Native is CanvasGroupNative { IsActiveAndEnabledState: true } g)
                     {
                         alpha *= g.Alpha;
                         if (g.IgnoreParentGroups) return alpha;

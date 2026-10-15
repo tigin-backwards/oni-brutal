@@ -17,6 +17,9 @@ namespace OniBrutal.Desktop.Gl
         public int SamplerVersion = -1;
         public int Width, Height, Depth;
         public int Levels = 1;
+        /// The format the 2D storage was specified with (uploads into unchanged storage update it
+        /// in place).
+        public TextureFormat StorageFormat = (TextureFormat)(-1);
 
         // Render textures.
         public uint Framebuffer;
@@ -160,20 +163,28 @@ namespace OniBrutal.Desktop.Gl
 
         static void Upload2D(Texture2DNative t, DeviceTexture g)
         {
+            bool fresh = g.Id == 0 || g.Target != TexTarget2D;
             Begin(g, TexTarget2D);
             var f = Of(t.Format);
             var memory = t.Memory;
             int levels = Math.Max(1, t.MipCount);
+            // Content changes into storage of the same size, format and mip count update it in
+            // place: respecifying storage reallocates it on the driver side.
+            bool inPlace = !fresh && memory != null && g.StorageFormat == t.Format && g.Width == t.Width && g.Height == t.Height && g.Levels == levels;
             for (int m = 0; m < levels; m++)
             {
                 int w = Math.Max(1, t.Width >> m), h = Math.Max(1, t.Height >> m);
                 byte* p = memory == null ? null : memory.Pointer + t.MipOffset(m);
                 if (f.Compressed)
                 {
-                    if (p != null) N.glCompressedTexImage2D(TexTarget2D, m, f.Internal, w, h, 0, (int)t.MipSize(m), p);
+                    if (p == null) continue;
+                    if (inPlace) N.glCompressedTexSubImage2D(TexTarget2D, m, 0, 0, w, h, f.Internal, (int)t.MipSize(m), p);
+                    else N.glCompressedTexImage2D(TexTarget2D, m, f.Internal, w, h, 0, (int)t.MipSize(m), p);
                 }
+                else if (inPlace) N.glTexSubImage2D(TexTarget2D, m, 0, 0, w, h, f.Format, f.Type, p);
                 else N.glTexImage2D(TexTarget2D, m, (int)f.Internal, w, h, 0, f.Format, f.Type, p);
             }
+            g.StorageFormat = t.Format;
             N.glTexParameteri(TexTarget2D, TextureBaseLevel, 0);
             N.glTexParameteri(TexTarget2D, TextureMaxLevel, levels - 1);
             Swizzle(TexTarget2D, f.Swizzle);

@@ -17,6 +17,13 @@ namespace OniBrutal.Tests
         void OnDestroy() => Log.Add(label + ":OnDestroy");
     }
 
+    /// Looks up a sibling from OnDestroy, like the game's SaveLoadRoot (KPrefabID).
+    public class SiblingChecker : MonoBehaviour
+    {
+        public static bool SawSibling;
+        void OnDestroy() => SawSibling = GetComponent<Recorder>() != null && GetComponentInChildren<Base>(true) != null;
+    }
+
     public class LateRecorder : MonoBehaviour
     {
         void Start() => Recorder.Log.Add("late:Start");
@@ -172,6 +179,19 @@ namespace OniBrutal.Tests
             Assert.Null(parent.GetComponentInChildren<Recorder>());
             Assert.NotNull(parent.GetComponentInChildren<Recorder>(true));
             Assert.NotNull(child.GetComponent<System.IDisposable>() == null ? child.transform : null);
+        }
+
+        [Fact]
+        public void OnDestroySeesTheWholeSubtreeAlive()
+        {
+            var go = new GameObject("root", typeof(Recorder), typeof(SiblingChecker));
+            var child = new GameObject("child", typeof(Base));
+            child.transform.SetParent(go.transform);
+            SiblingChecker.SawSibling = false;
+            Object.DestroyImmediate(go);
+            Assert.True(SiblingChecker.SawSibling);
+            Assert.True(go == null);
+            Assert.True(child == null);
         }
 
         [Fact]

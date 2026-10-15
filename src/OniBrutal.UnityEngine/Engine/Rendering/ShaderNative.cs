@@ -149,9 +149,11 @@ namespace OniBrutal.Engine.Rendering
             ShaderRegistry.Register(this);
         }
 
+        /// ShaderLab tag names are case-insensitive (the serialized data stores some upper-case,
+        /// e.g. "QUEUE").
         static Dictionary<string, string> TagMap(Fields tagMap)
         {
-            var map = new Dictionary<string, string>(StringComparer.Ordinal);
+            var map = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             foreach (Fields pair in tagMap.Array("tags")) map[pair.String("first")] = pair.String("second");
             return map;
         }

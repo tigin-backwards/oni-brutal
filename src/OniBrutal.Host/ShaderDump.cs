@@ -45,7 +45,7 @@ namespace OniBrutal.Host
                             var blend = state.Struct("rtBlend0");
                             string B(string field) => $"{field}={blend.Struct(field).Float("val")}";
                             File.WriteAllText(Path.Combine(dir, $"s{s}p{p}_state.txt"),
-                                string.Join("\n", new[] { V("zTest"), V("zWrite"), V("culling"), B("srcBlend"), B("destBlend"), B("srcBlendAlpha"), B("destBlendAlpha"), B("colMask") }) + "\n");
+                                "tags=" + string.Join(";", native.SubShaders[s].Tags.Select(kv => kv.Key + "=" + kv.Value)) + "\n" + string.Join("\n", new[] { V("zTest"), V("zWrite"), V("culling"), B("srcBlend"), B("destBlend"), B("srcBlendAlpha"), B("destBlendAlpha"), B("colMask") }) + "\n");
                             foreach (var list in pass.Data.Struct("progVertex").Array("m_PlayerSubPrograms")!)
                                 foreach (OniBrutal.Assets.TypeTrees.Fields sub in (object[])list!)
                                 {

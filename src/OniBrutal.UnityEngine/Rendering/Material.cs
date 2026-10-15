@@ -356,7 +356,7 @@ namespace OniBrutal.Engine.Rendering
         public MaterialGlobalIlluminationFlags GlobalIlluminationFlags = MaterialGlobalIlluminationFlags.EmissiveIsBlack;
         public bool EnableInstancing;
         public bool DoubleSidedGI;
-        public readonly Dictionary<string, string> Tags = new(StringComparer.Ordinal);
+        public readonly Dictionary<string, string> Tags = new(StringComparer.OrdinalIgnoreCase);
         public readonly HashSet<string> DisabledPasses = new(StringComparer.Ordinal);
 
         /// Bumped on every change that affects rendering.

@@ -11,7 +11,11 @@ namespace OniBrutal.Desktop
     /// Window startup settings: Unity's player defaults from PlayerSettings, overridable with
     /// Unity's standard command-line arguments (-screen-width, -screen-height,
     /// -screen-fullscreen, -window-mode).
-    internal sealed record WindowSettings(string Title, int Width, int Height, FullScreenMode Mode);
+    internal sealed record WindowSettings(string Title, int Width, int Height, FullScreenMode Mode)
+    {
+        /// Development runs driven by scripted input ignore the window's own mouse and keyboard.
+        public bool IgnoreUserInput { get; init; }
+    }
 
     /// The player window (GLFW, OpenGL 4.5 core context) and its input devices.
     internal sealed unsafe class GlfwPlatform : IPlatform, IDisposable
@@ -26,6 +30,8 @@ namespace OniBrutal.Desktop
         bool closeRequested;
 
         public GlfwWindow Window => window;
+
+        readonly bool scripted;
 
         const int GLFW_ANY_PLATFORM = 0x00060000;
 
@@ -75,12 +81,18 @@ namespace OniBrutal.Desktop
             window.Visible = true;
             window.Focus();
 
-            window.OnKey += OnKey;
-            window.OnChar += (_, codepoint) => feed.Text((uint)codepoint, Modifiers());
-            window.OnMouseButton += OnMouseButton;
-            window.OnCursorPos += (_, pos) => feed.MouseMoved(ToPixels(pos));
-            window.OnScroll += (_, offset) => feed.Scrolled(new Vector2((float)offset.X, (float)offset.Y), MouseGuiPosition());
-            window.OnCursorEnter += (_, entered) => InputState.Instance.MousePresent = entered;
+            // Scripted runs (host --input) take input only from the script.
+            scripted = settings.IgnoreUserInput;
+            if (scripted) InputState.Instance.MousePresent = true;
+            else
+            {
+                window.OnKey += OnKey;
+                window.OnChar += (_, codepoint) => feed.Text((uint)codepoint, Modifiers());
+                window.OnMouseButton += OnMouseButton;
+                window.OnCursorPos += (_, pos) => feed.MouseMoved(ToPixels(pos));
+                window.OnScroll += (_, offset) => feed.Scrolled(new Vector2((float)offset.X, (float)offset.Y), MouseGuiPosition());
+                window.OnCursorEnter += (_, entered) => InputState.Instance.MousePresent = entered;
+            }
             window.OnClose += _ => closeRequested = true;
             InputState.Instance.MousePresent = true;
         }
@@ -91,7 +103,9 @@ namespace OniBrutal.Desktop
         public int FramebufferWidth => window.FramebufferSize.X;
         public int FramebufferHeight => window.FramebufferSize.Y;
         public FullScreenMode FullScreenMode => mode;
-        public bool Focused => window.IsFocused;
+        /// Scripted runs behave as a focused window with the mouse over it, whatever the desktop
+        /// is doing.
+        public bool Focused => scripted || window.IsFocused;
 
         /// Monitor DPI from its physical size (0 when the monitor does not report one, as Unity).
         public float Dpi

@@ -371,17 +371,30 @@ namespace OniBrutal.Engine
             DestroySubtree(go);
         }
 
-        static void DestroySubtree(GameObjectNative go)
+        /// OnDestroy for every component of the subtree first, then the objects are released:
+        /// while the callbacks run, every object of the subtree is still alive (OnDestroy code
+        /// looks up sibling components, as in Unity).
+        static void DestroySubtree(GameObjectNative root)
         {
-            if (go.Destroyed) return;
-            go.Destroyed = true;
-            foreach (var c in go.Components)
-                if (c.Native is ComponentNative cn && !cn.Destroyed) DestroyComponent(c, cn, detach: false);
-            foreach (var child in go.Transform.Children) DestroySubtree(child.GameObject);
-            go.Managed.Unbind();
+            var released = new List<Object>();
+            void Callbacks(GameObjectNative go)
+            {
+                if (go.Destroyed) return;
+                go.Destroyed = true;
+                foreach (var c in go.Components)
+                    if (c.Native is ComponentNative cn && !cn.Destroyed)
+                    {
+                        DestroyComponent(c, cn, detach: false, unbind: false);
+                        released.Add(c);
+                    }
+                foreach (var child in go.Transform.Children) Callbacks(child.GameObject);
+                released.Add(go.Managed);
+            }
+            Callbacks(root);
+            foreach (var o in released) o.Unbind();
         }
 
-        static void DestroyComponent(Component c, ComponentNative native, bool detach)
+        static void DestroyComponent(Component c, ComponentNative native, bool detach, bool unbind = true)
         {
             native.Destroyed = true;
             if (native is BehaviourNative bn)
@@ -408,7 +421,7 @@ namespace OniBrutal.Engine
                     go.Components = shrunk;
                 }
             }
-            c.Unbind();
+            if (unbind) c.Unbind();
         }
     }
 }

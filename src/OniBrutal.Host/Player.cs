@@ -105,7 +105,7 @@ namespace OniBrutal.Host
                 "windowed" => FullScreenMode.Windowed,
                 _ => mode,
             };
-            return new OniBrutal.Desktop.WindowSettings(EngineConfig.ProductName, width, height, mode);
+            return new OniBrutal.Desktop.WindowSettings(EngineConfig.ProductName, width, height, mode) { IgnoreUserInput = options.Input.Any };
         }
 
         /// Frame pacing: Application.targetFrameRate when set; otherwise the display rate a

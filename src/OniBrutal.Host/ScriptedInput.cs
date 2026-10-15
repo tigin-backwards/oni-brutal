@@ -8,11 +8,15 @@ namespace OniBrutal.Host
     /// `--input FRAME:ACTION[:ARGS]` (development and test runs): input delivered through the
     /// same feed as the window's, before the given frame. Positions are screen pixels with the
     /// origin at the top left (as in captures). Actions: `move:X,Y`, `click:X,Y` (left button
-    /// down, up the next frame), `key:KEYCODE` (down, up the next frame), `text:STRING`.
+    /// down, up the next frame), `key:KEYCODE` (down, up the next frame), `text:STRING`. A run
+    /// with a script ignores the window's own mouse and keyboard, so it is reproducible.
     sealed class ScriptedInput
     {
         readonly SortedDictionary<int, List<Action>> byFrame = new();
         readonly InputStateFeed feed = new();
+
+        /// A script is present: the run ignores the window's own input.
+        public bool Any => byFrame.Count > 0;
 
         public void Add(string spec)
         {

@@ -351,8 +351,12 @@ namespace OniBrutal.Desktop.Gl
                 GlApi.BufferData<byte>(UniformBuffer, blocks[i], StreamDraw);
                 N.glBindBufferBase(UniformBuffer, (uint)i, new GlBuffer(uniformBuffers[i]));
             }
-            foreach (var s in program.Samplers)
+            // Render textures are made ready for sampling first (MSAA resolve, mip generation):
+            // that work binds framebuffers and textures of its own.
+            var devices = new DeviceTexture[program.Samplers.Count];
+            for (int i = 0; i < devices.Length; i++)
             {
+                var s = program.Samplers[i];
                 DeviceTexture device = null;
                 if (inputs.TryTexture(s.PropertyId, out var binding) && binding.Texture != null && binding.Texture.Native is TextureNative tn)
                 {
@@ -365,9 +369,15 @@ namespace OniBrutal.Desktop.Gl
                     string name = inputs.Shader.PropertiesById.TryGetValue(s.PropertyId, out var prop) ? prop.DefaultTexture : "white";
                     device = DefaultTexture(name, s.Target);
                 }
-                N.glActiveTexture(Texture0 + (uint)s.Unit);
-                GlApi.BindTexture(device.Target, device.Id);
+                devices[i] = device;
             }
+            for (int i = 0; i < devices.Length; i++)
+            {
+                N.glActiveTexture(Texture0 + (uint)program.Samplers[i].Unit);
+                GlApi.BindTexture(devices[i].Target, devices[i].Id);
+            }
+            // Drawing goes to the current target even if preparing a texture rebound it.
+            BindTarget();
         }
 
         void SetAttribute(int location, bool enabled)

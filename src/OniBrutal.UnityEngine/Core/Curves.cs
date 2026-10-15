@@ -251,6 +251,7 @@ namespace UnityEngine
 
         public int colorKeyCount => m_ColorKeys.Length;
         public int alphaKeyCount => m_AlphaKeys.Length;
+        internal AlphaKey[] AlphaKeysInternal => m_AlphaKeys;
 
         internal void SetAlphaKeys(AlphaKey[] keys)
         {

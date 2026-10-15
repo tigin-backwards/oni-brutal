@@ -178,14 +178,18 @@ namespace OniBrutal.Engine.UI
             public CanvasNative Canvas;
             public CanvasNative Root;
             public readonly List<CanvasDraw> Draws = new();
+            /// The root canvas's local-to-world matrix and its inverse (geometry space).
+            public Matrix4x4 SpaceToWorld, WorldToSpace;
         }
 
-        internal readonly struct CanvasDraw(CanvasRendererNative renderer, CanvasNative space, Material material, bool pop)
+        internal readonly struct CanvasDraw(CanvasRendererNative renderer, CanvasNative space, Material material, bool pop, float groupAlpha)
         {
             public readonly CanvasRendererNative Renderer = renderer;
             public readonly CanvasNative Space = space;
             public readonly Material Material = material;
             public readonly bool Pop = pop;
+            /// Alpha inherited from CanvasGroups.
+            public readonly float GroupAlpha = groupAlpha;
         }
 
         static void Build()
@@ -196,7 +200,14 @@ namespace OniBrutal.Engine.UI
                     batches.Add(new CanvasBatch { Canvas = c, Root = RootOf(c) });
             // Geometry is in the root canvas's space: RectMask2D (shipped uGUI) computes its clip
             // rects in the root-most canvas's space, nested canvases included.
-            foreach (var b in batches) Collect(b, b.Canvas.GameObject, b.Root, isBatchRoot: true, new Counter());
+            foreach (var b in batches)
+            {
+                b.SpaceToWorld = b.Root.GameObject.Transform.LocalToWorld;
+                b.WorldToSpace = b.SpaceToWorld.inverse;
+                var above = b.Canvas.GameObject.Transform.Parent;
+                float alpha = above == null ? 1f : InheritedAlpha(above.GameObject);
+                Collect(b, b.Canvas.GameObject, b.Root, isBatchRoot: true, new Counter(), b.Canvas, b.Canvas.GameObject.Transform.LocalToWorld.inverse, alpha);
+            }
             // Render order: by sorting layer, sorting order, then enable order.
             batches.Sort((a, b) =>
             {
@@ -217,28 +228,39 @@ namespace OniBrutal.Engine.UI
 
         /// Depth-first in hierarchy order; nested sort roots are skipped (they are batches of
         /// their own); an element's pop materials draw after its children.
-        static void Collect(CanvasBatch batch, GameObjectNative go, CanvasNative space, bool isBatchRoot, Counter depth)
+        static void Collect(CanvasBatch batch, GameObjectNative go, CanvasNative space, bool isBatchRoot, Counter depth,
+            CanvasNative nearest, Matrix4x4 worldToNearest, float groupAlpha)
         {
             if (!go.ActiveInHierarchy) return;
             var canvasHere = CanvasOn(go);
             if (!isBatchRoot && canvasHere != null && canvasHere.OverrideSorting) return;
-            var pops = new List<CanvasRendererNative>();
+            if (canvasHere != null && canvasHere != nearest)
+            {
+                nearest = canvasHere;
+                worldToNearest = go.Transform.LocalToWorld.inverse;
+            }
+            // CanvasGroups multiply down the hierarchy; one that ignores its parents restarts it.
+            foreach (var c in go.Components)
+                if (c.Native is CanvasGroupNative { IsActiveAndEnabledState: true } g)
+                    groupAlpha = g.IgnoreParentGroups ? g.Alpha : groupAlpha * g.Alpha;
+            List<CanvasRendererNative> pops = null;
             foreach (var comp in go.Components)
             {
                 if (comp.Native is not CanvasRendererNative r || r.Destroyed) continue;
                 r.AbsoluteDepth = -1;
                 r.RelativeDepth = -1;
-                r.BuiltToCanvas = ToCanvas(r);
+                r.BuiltToCanvas = worldToNearest * r.GameObject.Transform.LocalToWorld;
                 if (r.Cull || r.Geometry == null || r.Geometry.Indices.Length == 0) continue;
                 r.AbsoluteDepth = depth.Value;
                 r.RelativeDepth = depth.Value;
                 depth.Value++;
-                foreach (var m in r.Materials) batch.Draws.Add(new CanvasDraw(r, space, m, pop: false));
-                if (r.HasPopInstruction) pops.Add(r);
+                foreach (var m in r.Materials) batch.Draws.Add(new CanvasDraw(r, space, m, pop: false, groupAlpha));
+                if (r.HasPopInstruction) (pops ??= new()).Add(r);
             }
-            foreach (var child in go.Transform.Children) Collect(batch, child.GameObject, space, isBatchRoot: false, depth);
-            foreach (var r in pops)
-                foreach (var m in r.PopMaterials) batch.Draws.Add(new CanvasDraw(r, space, m, pop: true));
+            foreach (var child in go.Transform.Children) Collect(batch, child.GameObject, space, isBatchRoot: false, depth, nearest, worldToNearest, groupAlpha);
+            if (pops != null)
+                foreach (var r in pops)
+                    foreach (var m in r.PopMaterials) batch.Draws.Add(new CanvasDraw(r, space, m, pop: true, groupAlpha));
         }
 
         // ----- Drawing -----
@@ -268,15 +290,15 @@ namespace OniBrutal.Engine.UI
             return alpha;
         }
 
-        static DrawItem Item(in CanvasDraw d, bool overlay)
+        static DrawItem Item(CanvasBatch b, in CanvasDraw d, bool overlay)
         {
             var r = d.Renderer;
-            float alpha = r.Color.a * InheritedAlpha(r.GameObject);
+            float alpha = r.Color.a * d.GroupAlpha;
             // An element whose inherited alpha (renderer alpha × CanvasGroups) is zero is not
             // drawn, as in Unity (screens hidden through a CanvasGroup stay active).
             if (d.Material == null || alpha <= 0f) return null;
-            var spaceToWorld = d.Space.GameObject.Transform.LocalToWorld;
-            var mesh = BuildMesh(r, spaceToWorld.inverse * r.GameObject.Transform.LocalToWorld, new Color(r.Color.r, r.Color.g, r.Color.b, alpha));
+            var spaceToWorld = b.SpaceToWorld;
+            var mesh = BuildMesh(r, b.WorldToSpace * r.GameObject.Transform.LocalToWorld, new Color(r.Color.r, r.Color.g, r.Color.b, alpha));
             var props = new PropertySheet();
             var texture = r.Texture ?? d.Material.mainTexture;
             if (!d.Pop && r.Texture != null) props.SetTexture(MainTex, r.Texture);
@@ -323,7 +345,7 @@ namespace OniBrutal.Engine.UI
             }
             foreach (var d in b.Draws)
             {
-                if (Item(d, overlay) is not { } item) continue;
+                if (Item(b, d, overlay) is not { } item) continue;
                 if (run.Count > 0 && !SameState(run[0].Item, item)) Flush();
                 run.Add((item, d.Renderer));
             }

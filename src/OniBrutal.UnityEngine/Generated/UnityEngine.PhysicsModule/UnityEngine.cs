@@ -6,7 +6,15 @@ namespace UnityEngine
     public partial class BoxCollider : global::UnityEngine.Collider
     {
     }
+    [global::UnityEngine.RequireComponent(typeof(global::UnityEngine.Transform))]
+    public partial class CapsuleCollider : global::UnityEngine.Collider
+    {
+    }
     public partial class Collider : global::UnityEngine.Component
+    {
+    }
+    [global::UnityEngine.RequireComponent(typeof(global::UnityEngine.Transform))]
+    public partial class MeshCollider : global::UnityEngine.Collider
     {
     }
     public partial class Physics

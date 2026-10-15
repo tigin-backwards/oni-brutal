@@ -1,7 +1,7 @@
 // Computes the Unity API surface our engine must provide, and emits the declarations whose
 // shape is fully determined by Unity's API (enums with their values, interfaces, delegates).
 //
-// usage: SurfaceGen <unityManagedDir> <outDir> <generatedCodeDir>
+// usage: SurfaceGen <unityManagedDir> <outDir> <generatedCodeDir> [engineRequiredTypes.tsv]
 //
 // Required types = every type the consumer assemblies reference in a Unity engine assembly,
 // closed over: declaring types, base types, implemented interfaces, generic constraints, and the
@@ -59,6 +59,17 @@ Type? Lookup(string asm, string fullName)
     if (!IsEngine(asm)) return null;
     return mlc.LoadFromAssemblyName(asm).GetType(fullName, throwOnError: true);
 }
+
+// Types Unity's own behaviour creates although no consumer names them (e.g. the colliders
+// GameObject.CreatePrimitive adds), listed as "Module<TAB>FullName" with comments.
+if (args.Length > 3)
+    foreach (var line in File.ReadAllLines(args[3]))
+    {
+        var entry = line.Split('#')[0].Trim();
+        if (entry.Length == 0) continue;
+        var parts = entry.Split('\t', StringSplitOptions.RemoveEmptyEntries);
+        Require(Lookup(parts[0], parts[1]));
+    }
 
 foreach (var consumer in consumers)
 {

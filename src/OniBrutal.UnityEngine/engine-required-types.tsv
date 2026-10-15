@@ -1,0 +1,4 @@
+# Unity types the engine itself creates or returns although no game assembly names them.
+# Module<TAB>Full name   # why
+UnityEngine.PhysicsModule	UnityEngine.MeshCollider	# GameObject.CreatePrimitive (Plane, Quad)
+UnityEngine.PhysicsModule	UnityEngine.CapsuleCollider	# GameObject.CreatePrimitive (Capsule, Cylinder)

@@ -24,6 +24,8 @@ namespace OniBrutal.Engine
             [typeof(UnityEngine.Rendering.SortingGroup)] = () => new Rendering.SortingGroupNative(),
             [typeof(SphereCollider)] = () => new SphereColliderNative(),
             [typeof(BoxCollider)] = () => new BoxColliderNative(),
+            [typeof(CapsuleCollider)] = () => new CapsuleColliderNative(),
+            [typeof(MeshCollider)] = () => new MeshColliderNative(),
             [typeof(Rigidbody)] = () => new RigidbodyNative(),
             [typeof(BoxCollider2D)] = () => new BoxCollider2DNative(),
             [typeof(Rigidbody2D)] = () => new Rigidbody2DNative(),

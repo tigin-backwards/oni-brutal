@@ -186,8 +186,6 @@ Known behaviours not yet reproduced, each to be closed by a named milestone:
 - Environment for full runs: a logged-in Steam client (the game quits through
   `RestartAppIfNecessary` / `SteamAPI.Init` without one) and the system `libvpx` (VP8 video;
   `sudo apt install libvpx9`).
-- `GameObject.CreatePrimitive` needs MeshCollider/CapsuleCollider shapes in the surface.
-  Milestone: M2 (with the physics module).
 
 ## Tracking
 

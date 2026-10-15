@@ -34,6 +34,8 @@ namespace OniBrutal.Host
             EngineLog.Engine($"Preloaded {assemblies.Count} scripting assemblies");
 
             if (options.CheckTypes) return CheckTypes(assemblies);
+            if (options.CheckAssets) return AssetCheck.Run(dataDir);
+            if (options.DumpScript != null) return AssetCheck.Dump(dataDir, options.DumpScript);
 
             Console.Error.WriteLine("The player loop is not available yet (milestone M2).");
             return 2;
@@ -114,6 +116,8 @@ namespace OniBrutal.Host
         public bool Headless;
         public bool BatchMode;
         public bool CheckTypes;
+        public bool CheckAssets;
+        public string? DumpScript;
         public int Frames = -1;
 
         public static Options? Parse(string[] args)
@@ -128,10 +132,12 @@ namespace OniBrutal.Host
                     case "--headless": o.Headless = true; break;
                     case "--batchmode": o.BatchMode = true; break;
                     case "--check-types": o.CheckTypes = true; break;
+                    case "--check-assets": o.CheckAssets = true; break;
+                    case "--dump-script": o.DumpScript = args[++i]; break;
                     case "--frames": o.Frames = int.Parse(args[++i]); break;
                     default:
                         Console.Error.WriteLine($"Unknown option {args[i]}");
-                        Console.Error.WriteLine("usage: OniBrutal [--game DIR] [--log FILE] [--headless] [--batchmode] [--frames N] [--check-types]");
+                        Console.Error.WriteLine("usage: OniBrutal [--game DIR] [--log FILE] [--headless] [--batchmode] [--frames N] [--check-types] [--check-assets]");
                         return null;
                 }
             }

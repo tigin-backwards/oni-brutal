@@ -41,6 +41,9 @@ namespace UnityEngine
         public float outWeight { get => m_OutWeight; set => m_OutWeight = value; }
 
         internal int WeightedModeBits => m_WeightedMode;
+
+        internal static Keyframe FromSerialized(float time, float value, float inTangent, float outTangent, int weightedMode, float inWeight, float outWeight)
+            => new() { m_Time = time, m_Value = value, m_InTangent = inTangent, m_OutTangent = outTangent, m_WeightedMode = weightedMode, m_InWeight = inWeight, m_OutWeight = outWeight };
     }
 
     public partial class AnimationCurve
@@ -211,6 +214,19 @@ namespace UnityEngine
         private AlphaKey[] m_AlphaKeys = { new(1f, 0f), new(1f, 1f) };
 
         public Gradient() { }
+
+        /// From the serialized form: eight packed keys (color rgb + alpha a) with times in
+        /// 1/65535 units, of which the first numColor / numAlpha are used.
+        internal void SetFromSerialized(Color[] keys, ushort[] colorTimes, ushort[] alphaTimes, int mode, int numColor, int numAlpha)
+        {
+            Mode = mode;
+            numColor = Math.Clamp(numColor, 1, 8);
+            numAlpha = Math.Clamp(numAlpha, 1, 8);
+            m_ColorKeys = new GradientColorKey[numColor];
+            for (int i = 0; i < numColor; i++) m_ColorKeys[i] = new GradientColorKey(new Color(keys[i].r, keys[i].g, keys[i].b, 1f), colorTimes[i] / 65535f);
+            m_AlphaKeys = new AlphaKey[numAlpha];
+            for (int i = 0; i < numAlpha; i++) m_AlphaKeys[i] = new AlphaKey(keys[i].a, alphaTimes[i] / 65535f);
+        }
 
         internal void CopyFrom(Gradient other)
         {

@@ -46,8 +46,9 @@ namespace OniBrutal.Engine.Serialization
     /// a primitive, string, enum, a UnityEngine.Object subclass (as a reference), one of Unity's
     /// built-in serializable value types, a [Serializable] non-abstract class or struct from game
     /// or engine code (closed generics included; BCL types excluded), or a T[] / List&lt;T&gt; of
-    /// those (no nested collections). Base-class fields come first. Nested composites stop at a
-    /// depth of 10.
+    /// those (no nested collections). Base-class fields come first. A composite field whose type can
+    /// reach the type declaring it (a composition cycle) is not serialized at all; other nested
+    /// composites stop at a depth of 10.
     internal static class SerializedLayout
     {
         public const int MaxDepth = 10;
@@ -64,7 +65,7 @@ namespace OniBrutal.Engine.Serialization
 
         static readonly HashSet<Type> builtinClasses =
         [
-            typeof(AnimationCurve), typeof(Gradient), typeof(RectOffset),
+            typeof(AnimationCurve), typeof(Gradient), typeof(RectOffset), typeof(GUIStyle),
         ];
 
         /// The serialized fields of a MonoBehaviour/ScriptableObject type, base classes first,
@@ -85,6 +86,45 @@ namespace OniBrutal.Engine.Serialization
         {
             if (shape.Fields == null) shape.Fields = CollectFields(shape.Type, stopAtEngine: false);
             return shape.Fields;
+        }
+
+        static readonly ConcurrentDictionary<Type, HashSet<Type>> reachable = new();
+
+        /// Composite types reachable from `type` through serialized fields (including itself).
+        static HashSet<Type> ReachableComposites(Type type)
+        {
+            if (reachable.TryGetValue(type, out var set)) return set;
+            set = new HashSet<Type>();
+            var stack = new Stack<Type>();
+            stack.Push(type);
+            while (stack.Count > 0)
+            {
+                var t = stack.Pop();
+                if (!set.Add(t)) continue;
+                foreach (var f in CandidateFields(t))
+                {
+                    var c = CompositeTypeOf(f.FieldType);
+                    if (c != null) stack.Push(c);
+                }
+            }
+            reachable[type] = set;
+            return set;
+        }
+
+        /// The composite type a field stores (directly or as array/list elements), if any.
+        static Type CompositeTypeOf(Type fieldType)
+        {
+            var shape = ShapeOf(fieldType);
+            if (shape == null) return null;
+            if (shape.Kind is ValueKind.Array or ValueKind.List) shape = shape.Element;
+            return shape.Kind == ValueKind.Composite ? shape.Type : null;
+        }
+
+        static IEnumerable<FieldInfo> CandidateFields(Type type)
+        {
+            for (var t = type; t != null && t != typeof(object); t = t.BaseType)
+                foreach (var f in t.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly))
+                    if (IsSerializedField(f)) yield return f;
         }
 
         static ValueShape Build(Type type)
@@ -173,6 +213,9 @@ namespace OniBrutal.Engine.Serialization
                     if (!IsSerializedField(f)) continue;
                     var shape = ShapeOf(f.FieldType);
                     if (shape == null) continue;
+                    // Infinite recursion disqualifies a field: its composite type leads back to
+                    // the type being laid out.
+                    if (!stopAtEngine && CompositeTypeOf(f.FieldType) is { } composite && ReachableComposites(composite).Contains(type)) continue;
                     result.Add(new FieldShape { Field = f, Name = f.Name, Shape = shape });
                 }
             }

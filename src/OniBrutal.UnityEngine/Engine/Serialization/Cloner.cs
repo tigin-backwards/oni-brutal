@@ -257,6 +257,7 @@ namespace OniBrutal.Engine.Serialization
                 var src = value as RectOffset;
                 return src == null ? new RectOffset() : new RectOffset(src.left, src.right, src.top, src.bottom);
             }
+            if (type == typeof(GUIStyle)) return value is GUIStyle style ? new GUIStyle(style) : new GUIStyle();
             throw new InvalidOperationException("Unknown built-in serialized class " + type);
         }
     }

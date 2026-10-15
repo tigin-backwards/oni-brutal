@@ -12,4 +12,7 @@
     <!-- Serialized fields are assigned by the asset deserializer and the cloner through reflection. -->
     <NoWarn>$(NoWarn);CS0649</NoWarn>
   </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../OniBrutal.Assets/OniBrutal.Assets.csproj" />
+  </ItemGroup>
 </Project>

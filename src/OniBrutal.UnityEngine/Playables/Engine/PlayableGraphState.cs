@@ -45,6 +45,11 @@ namespace OniBrutal.Engine.Playables
         bool evaluating;
         ulong frameId;
 
+        /// The last frame (Time.frameCount) in which another graph evaluated this graph and
+        /// synchronized it (SynchronizeEvaluation); its director leaves it to that graph while
+        /// the synchronization is renewed each frame.
+        public int SynchronizedFrame = -1;
+
         PlayableGraphState(string name) { Name = name; }
 
         // ---- handles -------------------------------------------------------------------------

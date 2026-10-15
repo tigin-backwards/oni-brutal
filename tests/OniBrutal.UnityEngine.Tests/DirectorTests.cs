@@ -47,8 +47,65 @@ namespace OniBrutal.Tests
         }
     }
 
+    /// Timeline's DirectorControlPlayable in miniature: evaluates a nested director's graph
+    /// from within its own graph's evaluation and synchronizes the two.
+    public class NestedControlBehaviour : PlayableBehaviour
+    {
+        public PlayableDirector Nested;
+
+        public override void ProcessFrame(Playable playable, FrameData info, object playerData)
+        {
+            Nested.time = playable.GetTime();
+            Nested.playableGraph.Evaluate();
+            Nested.playableGraph.SynchronizeEvaluation(playable.GetGraph());
+        }
+    }
+
+    public class NestedControlAsset : PlayableAsset
+    {
+        public PlayableDirector Nested;
+
+        public override double duration => 10.0;
+
+        public override Playable CreatePlayable(PlayableGraph graph, GameObject owner)
+        {
+            var playable = ScriptPlayable<NestedControlBehaviour>.Create(graph);
+            playable.GetBehaviour().Nested = Nested;
+            var output = ScriptPlayableOutput.Create(graph, "Control");
+            output.SetSourcePlayable(playable);
+            return playable;
+        }
+    }
+
     public class DirectorTests : EngineTest
     {
+        [Fact]
+        public void SynchronizedNestedGraphIsNotAdvancedByItsOwnDirector()
+        {
+            var (nested, asset, _) = Setup(DirectorWrapMode.Hold);
+            nested.Play();
+            var parentGo = new GameObject("Parent");
+            parentGo.SetActive(false);
+            var parent = parentGo.AddComponent<PlayableDirector>();
+            parent.playOnAwake = false;
+            parentGo.SetActive(true);
+            var control = ScriptableObject.CreateInstance<NestedControlAsset>();
+            control.Nested = nested;
+            parent.playableAsset = control;
+            parent.Play();
+
+            // In the first frame the nested director (created first) still updates on its own;
+            // once synchronized, the nested graph is evaluated once per frame, by the parent.
+            Frame(0.1f);
+            var behaviour = asset.Last;
+            int first = behaviour.ProcessedTimes.Count;
+            for (int i = 0; i < 3; i++) Frame(0.1f);
+            Assert.Equal(first + 3, behaviour.ProcessedTimes.Count);
+            Assert.Equal(parent.time, nested.time, 5);
+            Object.DestroyImmediate(parentGo);
+            Object.DestroyImmediate(nested.gameObject);
+        }
+
         static (PlayableDirector director, RecordingAsset asset, List<string> events) Setup(DirectorWrapMode mode)
         {
             var go = new GameObject("Director");

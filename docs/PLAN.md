@@ -174,8 +174,6 @@ Known behaviours not yet reproduced, each to be closed by a named milestone:
 - UI Toolkit panel internals (`BaseRuntimePanel`, `PanelRaycaster`'s pickers, `UIDocument`
   members — 13 members) stay absent: uGUI reaches them only through UI Toolkit panels, and the
   game has no UIDocument. Milestone: M6 (confirm unreachable).
-- `PlayableGraph.SynchronizeEvaluation` (Timeline nested graphs; no Timeline content in the
-  data). Milestone: M6.
 - Environment for full runs: a logged-in Steam client (the game quits through
   `RestartAppIfNecessary` / `SteamAPI.Init` without one) and the system `libvpx` (VP8 video;
   `sudo apt install libvpx9`).
@@ -208,5 +206,4 @@ Known behaviours not yet reproduced, each to be closed by a named milestone:
   renders correctly (`--capture 2:out.png`). Engine-side renderer complete: cameras, renderers,
   sprites (incl. 9-slice), particles, canvases (overlay/camera/world), video planes, Graphics/GL/
   CommandBuffer; IMGUI (OnGUI dispatch, built-in skin, layout, windows, text editing) verified
-  on the GPU. ApiCheck: 14 missing members (PlayableGraph.SynchronizeEvaluation and the 13
-  UI Toolkit panel internals; see open items).
+  on the GPU. ApiCheck: 13 missing members (the UI Toolkit panel internals; see open items).

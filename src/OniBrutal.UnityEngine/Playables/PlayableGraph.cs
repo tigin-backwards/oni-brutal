@@ -33,6 +33,16 @@ namespace UnityEngine.Playables
         /// (FrameData.evaluationType is Evaluate).
         public void Evaluate(float deltaTime) => State.Evaluate(deltaTime, FrameData.EvaluationType.Evaluate);
 
+        /// Timeline's nested directors: after evaluating this graph from within `playable`'s
+        /// evaluation, this graph's evaluation belongs to that graph, so this graph's own
+        /// director stops advancing it while the synchronization is renewed every frame.
+        internal void SynchronizeEvaluation(PlayableGraph playable)
+        {
+            var state = State;
+            PlayableGraphState.Get(playable);
+            state.SynchronizedFrame = Time.frameCount;
+        }
+
         public IExposedPropertyTable GetResolver() => State.Resolver;
 
         public void SetResolver(IExposedPropertyTable value) => State.Resolver = value;

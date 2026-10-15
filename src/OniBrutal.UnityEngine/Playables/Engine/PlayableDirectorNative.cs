@@ -313,6 +313,9 @@ namespace OniBrutal.Engine.Playables
         {
             if (!HasGraph) return;
             var state = PlayableGraphState.Get(graph);
+            // While a parent timeline evaluates this graph (it synchronized it this frame or the
+            // last, whichever director updates first), the parent controls time and evaluation.
+            if (state.SynchronizedFrame >= UnityEngine.Time.frameCount - 1 && state.SynchronizedFrame >= 0) return;
             if (playing && UpdateMode != DirectorClock.Manual)
             {
                 double dt = UpdateMode == DirectorClock.GameTime ? UnityEngine.Time.deltaTime

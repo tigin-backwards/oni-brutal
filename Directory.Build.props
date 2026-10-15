@@ -1,0 +1,16 @@
+<Project>
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <Deterministic>true</Deterministic>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <!-- All engine and tool output lands in one tree so the host, facades and tests agree on paths. -->
+    <ArtifactsPath>$(MSBuildThisFileDirectory)out</ArtifactsPath>
+    <!-- Game install used by tools, tests and the host's default. Override with -p:OniGameDir=... -->
+    <OniGameDir Condition="'$(OniGameDir)' == ''">$(HOME)/projects/oni-linux</OniGameDir>
+  </PropertyGroup>
+</Project>

@@ -167,6 +167,11 @@ Known behaviours not yet reproduced, each to be closed by a named milestone:
 - Playables evaluation of animation/audio clip playables throws NotSupportedException (no
   Unity animation/audio engine); only reachable through Timeline content, which the game does
   not ship. Milestone: M6 (confirm unreachable or implement).
+- CPU texel reads (`GetPixel*`) cover uncompressed formats and BC1/BC3/BC4/BC5; BC6H/BC7,
+  ETC/EAC, ASTC and PVRTC throw. No readable texture in the build uses them (all 2682 textures
+  checked by `--check-bind`). Milestone: M6 (confirm).
+- `GameObject.CreatePrimitive` needs MeshCollider/CapsuleCollider shapes in the surface.
+  Milestone: M2 (with the physics module).
 
 ## Tracking
 

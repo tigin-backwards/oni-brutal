@@ -10,3 +10,4 @@ dotnet build "$root/OniBrutal.slnx" -v q -nologo
 "$root/scripts/apicheck.sh" > "$root/out/apicheck-summary.txt" || true; head -2 "$root/out/apicheck-summary.txt"
 "$root/out/bin/OniBrutal.Host/debug/OniBrutal" --game "$game" --check-types --log "$root/out/check-types.log" | grep -vE '^(ok   [A-Za-z0-9.-]+ +[0-9]+ types|from )'
 "$root/out/bin/OniBrutal.Host/debug/OniBrutal" --game "$game" --check-assets --log "$root/out/check-assets.log" | grep -v '^\[engine\]'
+"$root/out/bin/OniBrutal.Host/debug/OniBrutal" --game "$game" --check-bind --log "$root/out/check-bind.log" | grep -v '^\[engine\]'

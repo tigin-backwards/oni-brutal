@@ -9,6 +9,15 @@ namespace OniBrutal.Engine.Assets
         static readonly Dictionary<Type, Func<NativeObject>> factories = new()
         {
             [typeof(UnityEngine.TextAsset)] = () => new TextAssetNative(),
+            [typeof(UnityEngine.Texture2D)] = () => new Rendering.Texture2DNative(),
+            [typeof(UnityEngine.Texture2DArray)] = () => new Rendering.Texture2DArrayNative(),
+            [typeof(UnityEngine.Texture3D)] = () => new Rendering.Texture3DNative(),
+            [typeof(UnityEngine.RenderTexture)] = () => new Rendering.RenderTextureNative(),
+            [typeof(UnityEngine.Shader)] = () => new Rendering.ShaderNative(),
+            [typeof(UnityEngine.Material)] = () => new Rendering.MaterialNative(),
+            [typeof(UnityEngine.Mesh)] = () => new Rendering.MeshNative(),
+            [typeof(UnityEngine.Sprite)] = () => new Rendering.SpriteNative(),
+            [typeof(UnityEngine.U2D.SpriteAtlas)] = () => new Rendering.SpriteAtlasNative(),
         };
 
         public static NativeObject Create(Type engineType)
@@ -21,6 +30,14 @@ namespace OniBrutal.Engine.Assets
 
     internal sealed class TextAssetNative : NativeObject
     {
-        public byte[] Bytes = Array.Empty<byte>();
+        /// Pinned, so TextAsset.GetData can alias it with a NativeArray.
+        public byte[] Bytes = Pinned(ReadOnlySpan<byte>.Empty);
+
+        public static byte[] Pinned(ReadOnlySpan<byte> data)
+        {
+            var bytes = GC.AllocateUninitializedArray<byte>(data.Length, pinned: true);
+            data.CopyTo(bytes);
+            return bytes;
+        }
     }
 }

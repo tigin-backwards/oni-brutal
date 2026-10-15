@@ -11,7 +11,7 @@ namespace UnityEngine
 
         public TextAsset(string text)
         {
-            Bind(new TextAssetNative { Bytes = Encoding.UTF8.GetBytes(text ?? "") });
+            Bind(new TextAssetNative { Bytes = TextAssetNative.Pinned(Encoding.UTF8.GetBytes(text ?? "")) });
         }
 
         TextAssetNative Data => (TextAssetNative)NativeOrThrow;
@@ -33,6 +33,14 @@ namespace UnityEngine
         public byte[] bytes => (byte[])Data.Bytes.Clone();
 
         public long dataSize => Data.Bytes.LongLength;
+
+        /// The raw bytes as a NativeArray aliasing the asset's memory (length = bytes / size of T).
+        public unsafe NativeArray<T> GetData<T>() where T : struct
+        {
+            var bytes = Data.Bytes;
+            int length = bytes.Length / System.Runtime.CompilerServices.Unsafe.SizeOf<T>();
+            return new NativeArray<T>(System.Runtime.CompilerServices.Unsafe.AsPointer(ref System.Runtime.InteropServices.MemoryMarshal.GetArrayDataReference(bytes)), length, owned: false);
+        }
 
         public override string ToString() => text;
     }

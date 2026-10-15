@@ -90,6 +90,23 @@ namespace UnityEngine
             get => PlatformServices.Current.CursorLockState;
             set => PlatformServices.Current.CursorLockState = value;
         }
+
+        /// A hardware cursor from a texture (null restores the system arrow). The texture must be
+        /// readable, as Unity requires.
+        public static void SetCursor(Texture2D texture, Vector2 hotspot, CursorMode cursorMode)
+        {
+            if (texture == null)
+            {
+                PlatformServices.Current.SetDefaultCursor();
+                return;
+            }
+            if (!texture.isReadable)
+            {
+                Debug.LogError("Invalid texture used for cursor - check importer settings or texture creation. Texture must be RGBA32, readable, have alphaIsTransparency enabled and have no mip chain.");
+                return;
+            }
+            PlatformServices.Current.SetCursorImage(texture.GetPixels32(), texture.width, texture.height, hotspot);
+        }
     }
 }
 

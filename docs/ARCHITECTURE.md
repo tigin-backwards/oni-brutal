@@ -135,6 +135,10 @@ past the boot checkpoint needs a Steam client logged in with an account that own
   timeout at shutdown.
 - **D5 `Process.MainModule`** is the host executable; `App.Restart` relaunches the host (we make
   the host the executable that is relaunched, so this works as intended).
+- **D6 Runtime tight sprite meshes.** `Sprite.Create(…, SpriteMeshType.Tight)` traces alpha
+  outlines in Unity with an unpublished algorithm; the engine creates the full-rect mesh
+  instead. Rendered pixels are identical (the omitted area is fully transparent); only
+  `sprite.vertices`/`triangles` differ. Sprites loaded from data keep their baked meshes.
 
 ## 3. The engine API (`OniBrutal.UnityEngine`)
 

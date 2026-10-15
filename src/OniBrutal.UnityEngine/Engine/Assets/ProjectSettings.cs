@@ -23,6 +23,8 @@ namespace OniBrutal.Engine.Assets
         public static Fields PlayerSettings { get; private set; }
         public static Fields QualitySettings { get; private set; }
         public static Fields GraphicsSettings { get; private set; }
+        /// ShaderNameRegistry: ShaderLab name → shader object (Shader.Find).
+        public static IReadOnlyDictionary<string, PPtr> ShaderNames { get; private set; } = new Dictionary<string, PPtr>();
 
         public static void Load()
         {
@@ -55,6 +57,10 @@ namespace OniBrutal.Engine.Assets
 
             QualitySettings = Read("QualitySettings");
             GraphicsSettings = Read("GraphicsSettings");
+            var shaderNames = new Dictionary<string, PPtr>(StringComparer.Ordinal);
+            foreach (Fields pair in Read("ShaderNameRegistry").Struct("m_Shaders").Array("m_ObjectToName"))
+                shaderNames[pair.String("second")] = pair.PPtr("first");
+            ShaderNames = shaderNames;
 
             LoadScriptExecutionOrders();
         }

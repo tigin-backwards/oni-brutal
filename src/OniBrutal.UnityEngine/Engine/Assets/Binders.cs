@@ -150,7 +150,7 @@ namespace OniBrutal.Engine.Assets
             var r = request.Open();
             var name = System.Text.Encoding.UTF8.GetString(r.ReadSpan(r.ReadInt32()));
             r.Align(4);
-            var bytes = r.ReadBytes(r.ReadInt32());
+            var bytes = TextAssetNative.Pinned(r.ReadSpan(r.ReadInt32()));
             r.Align(4);
             if (r.Remaining != 0) throw new InvalidDataException($"TextAsset {name}: {r.Remaining} bytes left.");
             return ObjectLoader.CreateNative<TextAsset>(typeof(TextAsset), new TextAssetNative { Name = name, Bytes = bytes });

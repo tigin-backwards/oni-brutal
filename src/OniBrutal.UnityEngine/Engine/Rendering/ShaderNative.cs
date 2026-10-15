@@ -72,6 +72,8 @@ namespace OniBrutal.Engine.Rendering
         public const uint OpenGLCorePlatform = 15;
 
         public string ShaderName = "";
+        /// The device's compiled programs (see MeshNative.Gpu).
+        public object Gpu;
         public ShaderProperty[] Properties = Array.Empty<ShaderProperty>();
         public Dictionary<int, ShaderProperty> PropertiesById = new();
         public SubShader[] SubShaders = Array.Empty<SubShader>();
@@ -212,26 +214,27 @@ namespace OniBrutal.Engine.Rendering
     }
 
     /// Shader.Find's name table: shaders already loaded, then the project's ShaderNameRegistry.
+    /// Entries are weak: the table does not keep unused shaders loaded.
     internal static class ShaderRegistry
     {
-        static readonly Dictionary<string, ShaderNative> loaded = new(StringComparer.Ordinal);
+        static readonly Dictionary<string, WeakReference<ShaderNative>> loaded = new(StringComparer.Ordinal);
 
         public static void Register(ShaderNative shader)
         {
-            lock (loaded) loaded[shader.ShaderName] = shader;
+            lock (loaded) loaded[shader.ShaderName] = new WeakReference<ShaderNative>(shader);
         }
 
         public static void Unregister(ShaderNative shader)
         {
             lock (loaded)
-                if (loaded.TryGetValue(shader.ShaderName, out var s) && s == shader) loaded.Remove(shader.ShaderName);
+                if (loaded.TryGetValue(shader.ShaderName, out var w) && w.TryGetTarget(out var s) && s == shader) loaded.Remove(shader.ShaderName);
         }
 
         public static Shader Find(string name)
         {
             if (name == null) return null;
             lock (loaded)
-                if (loaded.TryGetValue(name, out var s) && s.Managed is Shader live && live != null) return live;
+                if (loaded.TryGetValue(name, out var w) && w.TryGetTarget(out var s) && s.Managed is Shader live && live != null) return live;
             var pptr = ProjectSettings.ShaderNames.GetValueOrDefault(name);
             if (pptr.IsNull) return null;
             return ObjectLoader.Resolve(ProjectSettings.Managers, pptr) as Shader;

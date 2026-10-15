@@ -115,6 +115,7 @@ namespace OniBrutal.Desktop.Gl
             {
                 g = new DeviceTexture();
                 t.Gpu = g;
+                GraphicsDevice.Adopt(t, g);
             }
             switch (t)
             {

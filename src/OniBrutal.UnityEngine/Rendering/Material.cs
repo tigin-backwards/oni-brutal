@@ -67,7 +67,11 @@ namespace UnityEngine
         public static Texture GetGlobalTexture(string name) => GetGlobalTexture(PropertyToID(name));
         public static Texture GetGlobalTexture(int nameID) => ShaderGlobals.Properties.Textures.TryGetValue(nameID, out var t) ? t.Texture : null;
 
-        internal override void EngineOnDestroy() => ShaderRegistry.Unregister(Data);
+        internal override void EngineOnDestroy()
+        {
+            ShaderRegistry.Unregister(Data);
+            GraphicsDevice.Release(ref Data.Gpu);
+        }
     }
 
     public partial class Material

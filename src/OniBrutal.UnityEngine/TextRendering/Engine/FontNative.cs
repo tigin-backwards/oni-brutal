@@ -177,7 +177,40 @@ namespace OniBrutal.Engine.Text
         void AddFace(byte[] data, int index)
         {
             if (data == null || data.Length == 0) return;
-            if (FontFace.TryOpen(data, index, out var face) == FontEngineError.Success) faces.Add(face);
+            if (FontFace.TryOpen(data, index, out var face) != FontEngineError.Success) return;
+            faces.Add(face);
+            lock (allFaces) allFaces.Add((new WeakReference<FontNative>(this), face));
+        }
+
+        /// Every open face with its font, so faces of fonts the garbage collector reclaimed
+        /// (unloaded assets) are closed on the main thread.
+        static readonly List<(WeakReference<FontNative> Owner, FontFace Face)> allFaces = new();
+
+        /// Closes this font's faces (Font destroyed); they reopen if the font is used again.
+        public void ReleaseFaces()
+        {
+            lock (gate)
+            {
+                if (faces == null) return;
+                lock (allFaces) allFaces.RemoveAll(e => faces.Contains(e.Face));
+                foreach (var face in faces) face.Dispose();
+                faces = null;
+            }
+        }
+
+        /// Closes the faces of fonts that no longer exist. Returns how many.
+        public static int ReleaseOrphanFaces()
+        {
+            var orphans = new List<FontFace>();
+            lock (allFaces)
+                allFaces.RemoveAll(e =>
+                {
+                    if (e.Owner.TryGetTarget(out _)) return false;
+                    orphans.Add(e.Face);
+                    return true;
+                });
+            foreach (var face in orphans) face.Dispose();
+            return orphans.Count;
         }
 
         /// Line metrics at a pixel size, from the serialized values at m_FontSize.

@@ -11,7 +11,9 @@ namespace OniBrutal.Engine.Rendering
     {
         static readonly int MainTex = ShaderPropertyIds.Get("_MainTex");
         static readonly int AlphaParam = ShaderPropertyIds.Get("_AlphaParam");
-        static readonly Dictionary<Texture2D, uint> copied = new();
+        /// The frame texture update last copied, per frame texture (weak: the textures belong to
+        /// their players).
+        static readonly System.Runtime.CompilerServices.ConditionalWeakTable<Texture2D, System.Runtime.CompilerServices.StrongBox<uint>> copied = new();
         static Material composite;
         static MeshNative quad;
 
@@ -26,8 +28,9 @@ namespace OniBrutal.Engine.Rendering
                 if (p.RenderMode != VideoRenderTarget.RenderTexture || p.TargetTexture == null) continue;
                 var frame = VideoOutputs.RenderTextureContent(p.TargetTexture, out var aspect);
                 if (frame == null) continue;
-                if (copied.TryGetValue(frame, out var count) && count == frame.updateCount) continue;
-                copied[frame] = frame.updateCount;
+                var copiedUpdate = copied.GetValue(frame, _ => new System.Runtime.CompilerServices.StrongBox<uint>(uint.MaxValue));
+                if (copiedUpdate.Value == frame.updateCount) continue;
+                copiedUpdate.Value = frame.updateCount;
                 var target = p.TargetTexture;
                 var previous = RenderTexture.active;
                 var device = GraphicsDevice.Current;

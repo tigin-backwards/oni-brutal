@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -162,12 +163,37 @@ namespace OniBrutal.Engine.Rendering
 
         public static void Install(RenderDevice device) => Current = device;
 
+        /// Device resources by the engine object whose Gpu slot holds them. An owner the garbage
+        /// collector reclaims without being destroyed (an asset reclaimed by
+        /// Resources.UnloadUnusedAssets, a renderer's private mesh) has its resource released by
+        /// ReleaseOrphans. Main thread only, like all device work.
+        static readonly Dictionary<object, WeakReference<object>> owners = new(ReferenceEqualityComparer.Instance);
+
+        /// Records that `owner`'s Gpu slot now holds `gpu` (called by the device on creation).
+        public static void Adopt(object owner, object gpu) => owners[gpu] = new WeakReference<object>(owner);
+
         /// Releases an object's device resource and clears the slot.
         public static void Release(ref object gpu)
         {
             if (gpu == null) return;
+            owners.Remove(gpu);
             Current.ReleaseResource(gpu);
             gpu = null;
+        }
+
+        /// Releases the resources of owners that no longer exist. Returns how many.
+        public static int ReleaseOrphans()
+        {
+            List<object> orphans = null;
+            foreach (var (gpu, owner) in owners)
+                if (!owner.TryGetTarget(out _)) (orphans ??= new()).Add(gpu);
+            if (orphans == null) return 0;
+            foreach (var gpu in orphans)
+            {
+                owners.Remove(gpu);
+                Current.ReleaseResource(gpu);
+            }
+            return orphans.Count;
         }
     }
 }

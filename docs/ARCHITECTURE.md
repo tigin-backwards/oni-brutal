@@ -148,6 +148,11 @@ past the boot checkpoint needs a Steam client logged in with an account that own
   as uGUI `Text`, at 0.1 world units per font pixel times `characterSize`. Unity's exact native
   scale and line-box metrics for TextMesh are unpublished; only TMP's example scripts create
   TextMeshes, so no game screen depends on them.
+- **D9 UnloadUnusedAssets and ScriptableObject callbacks.** Unloading probes reachability with
+  the runtime's collector (the object table holds candidates weakly for one collection), so a
+  reclaimed object cannot run code. ScriptableObjects whose type declares `OnDisable` or
+  `OnDestroy` (Unity calls both when it unloads one) are therefore never unloaded. No
+  ScriptableObject in the game declares either.
 
 ## 3. The engine API (`OniBrutal.UnityEngine`)
 

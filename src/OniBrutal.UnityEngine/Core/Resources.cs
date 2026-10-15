@@ -100,11 +100,10 @@ namespace UnityEngine
             return typed;
         }
 
-        /// Unity destroys loaded assets that nothing references. Here loaded assets stay resident
-        /// and the operation completes at once; reachability-based unloading is tracked in
-        /// docs/PLAN.md (open items).
+        /// Unloads every asset nothing references (see AssetUnloader); completes at once.
         public static AsyncOperation UnloadUnusedAssets()
         {
+            AssetUnloader.UnloadUnused();
             var op = new AsyncOperation();
             op.Complete();
             return op;

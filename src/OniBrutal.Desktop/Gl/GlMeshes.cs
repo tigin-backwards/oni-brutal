@@ -47,6 +47,7 @@ namespace OniBrutal.Desktop.Gl
             {
                 d = new DeviceMesh();
                 m.Gpu = d;
+                GraphicsDevice.Adopt(m, d);
             }
             if (d.Version == m.Version) return d;
             uint usage = m.Dynamic ? DynamicDraw : StaticDraw;

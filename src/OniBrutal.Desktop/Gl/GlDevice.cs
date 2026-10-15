@@ -534,6 +534,7 @@ namespace OniBrutal.Desktop.Gl
             {
                 case DeviceTexture t: t.Delete(); break;
                 case DeviceMesh m: m.Delete(); break;
+                case DeviceProgramSet p: p.Delete(); break;
             }
         }
 

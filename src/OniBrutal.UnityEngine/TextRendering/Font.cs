@@ -13,6 +13,8 @@ namespace UnityEngine
 
         FontNative Data => (FontNative)NativeOrThrow;
 
+        internal override void EngineOnDestroy() => Data.ReleaseFaces();
+
         /// Raised after a dynamic font's texture was rebuilt (glyphs moved or were dropped);
         /// every text using the font must be regenerated.
         public static event Action<Font> textureRebuilt;

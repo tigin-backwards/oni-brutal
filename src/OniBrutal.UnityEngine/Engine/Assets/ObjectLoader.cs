@@ -30,7 +30,13 @@ namespace OniBrutal.Engine.Assets
     {
         readonly record struct Key(string File, long PathId);
 
-        static readonly Dictionary<Key, Object> loaded = new();
+        /// Loaded objects by identity, as table handles: the cache does not keep them alive, so
+        /// Resources.UnloadUnusedAssets can reclaim assets nothing else references.
+        static readonly Dictionary<Key, IntPtr> loaded = new();
+        /// Instance ids of assets, kept when they are unloaded so a reload gets the same id (as
+        /// Unity's persistent-object remapper does).
+        static readonly Dictionary<Key, int> assetIds = new();
+
         static readonly Queue<Action> afterLoad = new();
         static int depth;
 
@@ -44,7 +50,11 @@ namespace OniBrutal.Engine.Assets
         {
             if (pathId == 0) return null;
             var key = new Key(AssetSystem.KeyOf(file), pathId);
-            if (loaded.TryGetValue(key, out var existing)) return existing;
+            if (loaded.TryGetValue(key, out var handle))
+            {
+                if (ObjectTable.Resolve(handle)?.Managed is { } existing) return existing;
+                loaded.Remove(key);
+            }
             if (!file.ObjectsById.TryGetValue(pathId, out var info)) return null; // missing reference
 
             var type = file.TypeOf(info);
@@ -62,9 +72,14 @@ namespace OniBrutal.Engine.Assets
             {
                 var obj = binder.Create(request);
                 var native = obj.NativeOrThrow;
+                // Objects loaded from files have positive instance ids; an asset keeps its id.
+                int id;
+                if (!request.Persistent) id = ObjectTable.NewInstanceId(true);
+                else if (!assetIds.TryGetValue(key, out id)) assetIds[key] = id = ObjectTable.NewInstanceId(true);
+                ObjectTable.SetInstanceId(native, id);
                 native.IsPersistent = request.Persistent;
                 native.Source = new AssetSource(key.File, pathId);
-                loaded[key] = obj;
+                loaded[key] = obj.Handle;
                 binder.Fill(obj, request);
                 return obj;
             }
@@ -106,7 +121,23 @@ namespace OniBrutal.Engine.Assets
             foreach (var k in keys) loaded.Remove(k);
         }
 
-        public static IEnumerable<Object> Loaded => loaded.Values;
+        /// The live objects loaded from any of the given files.
+        public static List<Object> LoadedFrom(HashSet<string> fileKeys)
+        {
+            var result = new List<Object>();
+            foreach (var (key, handle) in loaded)
+                if (fileKeys.Contains(key.File) && ObjectTable.Resolve(handle)?.Managed is { } obj && obj != null) result.Add(obj);
+            return result;
+        }
+
+        /// Drops cache entries of objects that no longer exist.
+        public static void Prune()
+        {
+            var dead = new List<Key>();
+            foreach (var (key, handle) in loaded)
+                if (ObjectTable.Resolve(handle) == null) dead.Add(key);
+            foreach (var key in dead) loaded.Remove(key);
+        }
 
         sealed class FileResolver(SerializedFile file) : IReferenceResolver
         {

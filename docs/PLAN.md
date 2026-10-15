@@ -161,9 +161,6 @@ screens and features) fully ticked or with documented deviations only.
 
 Known behaviours not yet reproduced, each to be closed by a named milestone:
 
-- `Resources.UnloadUnusedAssets` keeps loaded assets resident (Unity destroys unreferenced
-  assets, so a later load yields a fresh instance). Needs reachability tracking of persistent
-  objects (weak table references + engine-side references). Milestone: M2.
 - Playables evaluation of animation/audio clip playables throws NotSupportedException (no
   Unity animation/audio engine); only reachable through Timeline content, which the game does
   not ship. Milestone: M6 (confirm unreachable or implement).

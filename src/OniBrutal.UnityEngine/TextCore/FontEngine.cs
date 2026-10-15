@@ -71,7 +71,9 @@ namespace UnityEngine.TextCore.LowLevel
             var native = (FontNative)font.NativeOrThrow;
             var data = native.FaceData;
             if (data == null || data.Length == 0) return FontEngineError.Invalid_File;
-            return Load(native, () => data, pointSize, faceIndex);
+            // Keyed by instance id (stable across unload and reload), like Unity's face cache,
+            // which does not keep the Font loaded.
+            return Load(native.InstanceId, () => data, pointSize, faceIndex);
         }
 
         /// Makes the face of `source` current at `pointSize`, opening it on first use; faces

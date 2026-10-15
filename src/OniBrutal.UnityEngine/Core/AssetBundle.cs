@@ -165,8 +165,8 @@ namespace OniBrutal.Engine.Assets
             if (unloadAllLoadedObjects)
             {
                 var files = new HashSet<string>(native.NodeKeys, StringComparer.Ordinal);
-                foreach (var obj in ObjectLoader.Loaded.ToArray())
-                    if (obj != null && obj != bundle && obj.Native is { } n && files.Contains(n.Source.File)) Object.DestroyImmediate(obj, true);
+                foreach (var obj in ObjectLoader.LoadedFrom(files))
+                    if (obj != bundle) Object.DestroyImmediate(obj, true);
             }
             foreach (var key in native.NodeKeys) ObjectLoader.ForgetFile(key);
             AssetSystem.UnmountBundle(native.NodeKeys);

@@ -54,34 +54,44 @@ namespace OniBrutal.Desktop.Gl
         public int[] BlockSizes = Array.Empty<int>();
     }
 
+    /// A shader's compiled programs by variant blob index.
+    internal sealed unsafe class DeviceProgramSet
+    {
+        public readonly Dictionary<int, DeviceProgram> Programs = new();
+
+        public void Delete()
+        {
+            foreach (var p in Programs.Values)
+                if (p.Id != 0) N.glDeleteProgram(new GlProgram(p.Id));
+            Programs.Clear();
+        }
+    }
+
     /// Compiles Unity's GLSL variants and binds their inputs by name, as the program text
     /// declares them (HLSLcc names: `hlslcc_mtx4x4X` for matrix X as four column vectors,
     /// `in_POSITION0`… for vertex inputs).
     internal static unsafe class GlPrograms
     {
-        static readonly Dictionary<(ShaderNative, int), DeviceProgram> cache = new();
         static readonly string[] attributeNames =
         [
             "in_POSITION0", "in_NORMAL0", "in_TANGENT0", "in_COLOR0",
             "in_TEXCOORD0", "in_TEXCOORD1", "in_TEXCOORD2", "in_TEXCOORD3", "in_TEXCOORD4", "in_TEXCOORD5", "in_TEXCOORD6", "in_TEXCOORD7",
         ];
 
+        /// The shader's program for a variant blob, built on first use and kept in the shader's
+        /// Gpu slot.
         public static DeviceProgram Get(ShaderNative shader, int blobIndex)
         {
-            if (cache.TryGetValue((shader, blobIndex), out var p)) return p;
+            if (shader.Gpu is not DeviceProgramSet set)
+            {
+                set = new DeviceProgramSet();
+                shader.Gpu = set;
+                GraphicsDevice.Adopt(shader, set);
+            }
+            if (set.Programs.TryGetValue(blobIndex, out var p)) return p;
             p = Build(shader, shader.Programs.Variant(blobIndex));
-            cache[(shader, blobIndex)] = p;
+            set.Programs[blobIndex] = p;
             return p;
-        }
-
-        public static void Forget(ShaderNative shader)
-        {
-            foreach (var key in new List<(ShaderNative, int)>(cache.Keys))
-                if (key.Item1 == shader)
-                {
-                    if (cache[key] is { Id: not 0 } p) N.glDeleteProgram(new GlProgram(p.Id));
-                    cache.Remove(key);
-                }
         }
 
         /// GLSL 1.50 needs extensions for the explicit uniform locations and block bindings

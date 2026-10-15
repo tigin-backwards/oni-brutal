@@ -98,6 +98,9 @@ namespace OniBrutal.Engine
 
             BehaviourManager.RunStarts();
             BehaviourManager.RunUpdate();
+            // Update.ScriptRunDelayedDynamicFrameRate: Start for behaviours enabled during
+            // Update (so they start before LateUpdate), then coroutines resumed after Update.
+            BehaviourManager.RunStarts();
             Coroutines.RunUpdatePhase();
             DirectorUpdate?.Invoke();
 

@@ -175,6 +175,7 @@ namespace OniBrutal.Engine.Serialization
                 {
                     var value = Cloner.NewInstance(shape.Type);
                     ReadFields(value, SerializedLayout.CompositeFields(shape), r, resolver, depth + 1);
+                    SerializedLayout.AfterDeserialize(value);
                     return value;
                 }
                 case ValueKind.Array:

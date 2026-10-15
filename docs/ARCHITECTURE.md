@@ -227,7 +227,9 @@ One thread, Unity's order (*usage §1.3, §3.5*), driven by `OniBrutal.Host`:
 Initialization  time update (Time.*), pending scene-load completion
 EarlyUpdate     platform events → Input state; Screen size changes
 FixedUpdate     0..n steps (accumulator, maximumDeltaTime clamp), coroutines WaitForFixedUpdate
-Update          Start for pending components; Update; coroutines (null, WaitForSeconds, custom yields)
+Update          Start for pending components; Update; Start for components enabled during Update
+                (ScriptRunDelayedDynamicFrameRate); coroutines (null, WaitForSeconds, custom yields).
+                Update/LateUpdate/FixedUpdate reach a behaviour only after its Start.
 PreLateUpdate   Animators (DirectorUpdateAnimationBegin/End); LateUpdate
 PostLateUpdate  Canvas.willRenderCanvases (uGUI layout/graphic rebuild) → render all cameras
                 → screen-space-overlay canvases → WaitForEndOfFrame coroutines → present

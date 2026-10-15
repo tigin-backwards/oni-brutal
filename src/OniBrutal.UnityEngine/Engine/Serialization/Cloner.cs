@@ -214,12 +214,14 @@ namespace OniBrutal.Engine.Serialization
         {
             if (depth > SerializedLayout.MaxDepth) return shape.IsValueType ? Activator.CreateInstance(shape.Type) : null;
             var dst = NewInstance(shape.Type);
+            if (value != null) SerializedLayout.BeforeSerialize(value);
             foreach (var f in SerializedLayout.CompositeFields(shape))
             {
                 var fieldValue = value == null ? null : f.Field.GetValue(value);
                 if (value == null && f.Shape.IsValueType) fieldValue = f.Field.GetValue(dst); // keep the new instance's default
                 f.Field.SetValue(dst, CopyValue(fieldValue, f.Shape, remap, depth + 1));
             }
+            SerializedLayout.AfterDeserialize(dst);
             return dst;
         }
 

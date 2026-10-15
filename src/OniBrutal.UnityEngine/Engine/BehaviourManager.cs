@@ -103,8 +103,10 @@ namespace OniBrutal.Engine
                 foreach (var list in byOrder.Values)
                     foreach (var b in list.ToArray())
                     {
-                        // Disabled or destroyed earlier in this phase: skip.
-                        if (!b.IsActiveAndEnabledState || pendingRemove.Contains(b)) continue;
+                        // Disabled or destroyed earlier in this phase: skip. A behaviour whose Start
+                        // has not run yet (enabled after this frame's Start pass) gets its update
+                        // callbacks only after Start, as in Unity.
+                        if (!b.IsActiveAndEnabledState || pendingRemove.Contains(b) || !b.StartCalled) continue;
                         Lifecycle.Invoke(selector(b.Script), (MonoBehaviour)b.Managed);
                     }
             }

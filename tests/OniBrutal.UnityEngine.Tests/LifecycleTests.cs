@@ -17,6 +17,43 @@ namespace OniBrutal.Tests
         void OnDestroy() => Log.Add(label + ":OnDestroy");
     }
 
+    public class LateRecorder : MonoBehaviour
+    {
+        void Start() => Recorder.Log.Add("late:Start");
+        void LateUpdate() => Recorder.Log.Add("late:LateUpdate");
+    }
+
+    /// Instantiates a LateRecorder from its Update, once.
+    public class Spawner : MonoBehaviour
+    {
+        bool done;
+        void Update()
+        {
+            if (done) return;
+            done = true;
+            new GameObject("spawned").AddComponent<LateRecorder>();
+            Recorder.Log.Add("spawned");
+        }
+    }
+
+    /// A Klei-style tag: only the name is serialized; the hash is rebuilt after deserialization.
+    [System.Serializable]
+    public struct HashedName : ISerializationCallbackReceiver
+    {
+        [SerializeField] string name;
+        int hash;
+        public HashedName(string n) { name = n; hash = n.GetHashCode(); }
+        public int Hash => hash;
+        public void OnBeforeSerialize() { }
+        public void OnAfterDeserialize() => hash = name?.GetHashCode() ?? 0;
+    }
+
+    public class HashedNameHolder : MonoBehaviour
+    {
+        public HashedName single;
+        public System.Collections.Generic.List<HashedName> more = new();
+    }
+
     /// Awakes before default-order scripts (script execution order -5, set by the test).
     public class EarlyRecorder : MonoBehaviour
     {
@@ -135,6 +172,32 @@ namespace OniBrutal.Tests
             Assert.Null(parent.GetComponentInChildren<Recorder>());
             Assert.NotNull(parent.GetComponentInChildren<Recorder>(true));
             Assert.NotNull(child.GetComponent<System.IDisposable>() == null ? child.transform : null);
+        }
+
+        [Fact]
+        public void BehaviourCreatedDuringUpdateStartsBeforeLateUpdate()
+        {
+            Recorder.Log.Clear();
+            var go = new GameObject("spawner", typeof(Spawner));
+            Frame();
+            // Unity's delayed-start pass after Update: Start, then the same frame's LateUpdate.
+            Assert.Equal(["spawned", "late:Start", "late:LateUpdate"], Recorder.Log);
+            Object.DestroyImmediate(go);
+            Object.DestroyImmediate(GameObject.Find("spawned"));
+        }
+
+        [Fact]
+        public void InstantiateCallsCallbacksOnNestedSerializedValues()
+        {
+            var go = new GameObject("holder");
+            var h = go.AddComponent<HashedNameHolder>();
+            h.single = new HashedName("Minion");
+            h.more.Add(new HashedName("BaseMinion"));
+            var copy = Object.Instantiate(go).GetComponent<HashedNameHolder>();
+            Assert.Equal(h.single.Hash, copy.single.Hash);
+            Assert.Equal(h.more[0].Hash, copy.more[0].Hash);
+            Object.DestroyImmediate(copy.gameObject);
+            Object.DestroyImmediate(go);
         }
 
         [Fact]

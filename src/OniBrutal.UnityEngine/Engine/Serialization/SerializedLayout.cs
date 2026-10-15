@@ -51,6 +51,23 @@ namespace OniBrutal.Engine.Serialization
     /// composites stop at a depth of 10.
     internal static class SerializedLayout
     {
+        /// Unity calls ISerializationCallbackReceiver on every serialized class or struct value
+        /// that implements it, nested ones included: OnBeforeSerialize before its fields are
+        /// read, OnAfterDeserialize once its fields are written. Exceptions are logged.
+        public static void BeforeSerialize(object value)
+        {
+            if (value is not UnityEngine.ISerializationCallbackReceiver r) return;
+            try { r.OnBeforeSerialize(); }
+            catch (System.Exception e) { UnityEngine.Debug.LogException(e); }
+        }
+
+        public static void AfterDeserialize(object value)
+        {
+            if (value is not UnityEngine.ISerializationCallbackReceiver r) return;
+            try { r.OnAfterDeserialize(); }
+            catch (System.Exception e) { UnityEngine.Debug.LogException(e); }
+        }
+
         public const int MaxDepth = 10;
 
         static readonly ConcurrentDictionary<Type, ValueShape> shapes = new();

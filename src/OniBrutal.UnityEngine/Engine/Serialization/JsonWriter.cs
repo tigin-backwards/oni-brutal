@@ -36,7 +36,10 @@ namespace OniBrutal.Engine.Serialization
             var w = new JsonWriter(prettyPrint);
             var type = obj.GetType();
             if (obj is Object)
+            {
+                SerializedLayout.BeforeSerialize(obj);
                 w.WriteFields(obj, SerializedLayout.ScriptFields(type), ScriptData.TopLevelDepth);
+            }
             else
             {
                 var shape = SerializedLayout.ShapeOf(type);
@@ -53,6 +56,7 @@ namespace OniBrutal.Engine.Serialization
                         bool hasFields = !type.IsPrimitive && !type.IsEnum && type != typeof(string) && !type.IsArray
                                          && !(type.IsGenericType && type.GetGenericTypeDefinition() == typeof(System.Collections.Generic.List<>));
                         var fields = hasFields ? SerializedLayout.CompositeFields(new ValueShape { Type = type, Kind = ValueKind.Composite, IsValueType = type.IsValueType }) : Array.Empty<FieldShape>();
+                        SerializedLayout.BeforeSerialize(obj);
                         w.WriteFields(obj, fields, ScriptData.TopLevelDepth);
                         break;
                     default:
@@ -168,7 +172,9 @@ namespace OniBrutal.Engine.Serialization
                 case ValueKind.BuiltinStruct: WriteBuiltinStruct(value); break;
                 case ValueKind.BuiltinClass: WriteBuiltinClass(value ?? Activator.CreateInstance(shape.Type)); break;
                 case ValueKind.Composite:
-                    WriteFields(value ?? Cloner.NewInstance(shape.Type), SerializedLayout.CompositeFields(shape), depth + 1);
+                    var composite = value ?? Cloner.NewInstance(shape.Type);
+                    SerializedLayout.BeforeSerialize(composite);
+                    WriteFields(composite, SerializedLayout.CompositeFields(shape), depth + 1);
                     break;
                 case ValueKind.Array:
                 case ValueKind.List:

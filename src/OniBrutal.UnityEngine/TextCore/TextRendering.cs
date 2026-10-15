@@ -1,5 +1,3 @@
-using System;
-
 // UnityEngine.TextRenderingModule data types (legacy text generator: uGUI Text, TextMesh).
 namespace UnityEngine
 {
@@ -92,13 +90,5 @@ namespace UnityEngine
             uv2 = new Vector4(0f, 0f, 0f, 0f),
             uv3 = new Vector4(0f, 0f, 0f, 0f),
         };
-    }
-
-    public partial class TextGenerator
-    {
-        // Unity's Dispose releases the native generator. This TextGenerator has no native
-        // generator (and no layout members yet), so there is nothing to release; disposing
-        // twice is harmless, as in Unity.
-        void IDisposable.Dispose() { }
     }
 }

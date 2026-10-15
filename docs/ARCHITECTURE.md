@@ -234,6 +234,12 @@ PostLateUpdate  Canvas.willRenderCanvases (uGUI layout/graphic rebuild) → rend
                 → deferred Destroy processing
 ```
 
+Quit (`Application.Quit`, or `--frames N` in test runs): `OnApplicationQuit` to every active
+behaviour, every scene unloaded (OnDisable/OnDestroy), the graphics device and window closed,
+the log closed, then the process ends with `_exit(code)`: game threads may still be inside
+native plugins (SimDLL worldgen), and running the plugins' static destructors under them crashes
+or deadlocks. The game registers no `ProcessExit` handlers.
+
 Coroutines are Unity's state machine: an `IEnumerator` is advanced immediately by
 `StartCoroutine`; nested `IEnumerator`/`Coroutine` yields wait for the child;
 `CustomYieldInstruction` is re-polled each frame via `keepWaiting` (the shared cached

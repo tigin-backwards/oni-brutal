@@ -19,10 +19,11 @@ namespace OniBrutal.Host
             AssetSystem.Initialize(dataDir);
             ProjectSettings.Load();
             PlayerLoop.Initialize();
+            OniBrutal.Desktop.GlfwPlatform? platform = null;
             if (options.Headless || options.BatchMode) OniBrutal.Engine.Platform.PlatformLoop.Install(null);
             else
             {
-                var platform = new OniBrutal.Desktop.GlfwPlatform(WindowSettingsFor(options));
+                platform = new OniBrutal.Desktop.GlfwPlatform(WindowSettingsFor(options));
                 OniBrutal.Engine.Platform.PlatformLoop.Install(platform);
                 var device = new OniBrutal.Desktop.Gl.GlDevice(platform);
                 OniBrutal.Engine.Rendering.GraphicsDevice.Install(device);
@@ -61,11 +62,28 @@ namespace OniBrutal.Host
             PlayerLoop.SendApplicationQuit();
             SceneLoader.UnloadAll();
             Lifecycle.ProcessDestroyQueue();
+            // The graphics device and window go before the process exits, as in Unity's player
+            // (a GL context left current into process exit can hang driver exit handlers).
+            if (platform != null)
+            {
+                OniBrutal.Engine.Rendering.GraphicsDevice.Install(new OniBrutal.Engine.Rendering.NullRenderDevice());
+                platform.Dispose();
+            }
             EngineLog.Engine($"Exiting after {frame} frames with code {PlayerLoop.ExitCode}");
             EngineLog.Close();
-            Environment.Exit(PlayerLoop.ExitCode);
+            Console.Out.Flush();
+            Console.Error.Flush();
+            // The process ends here without running native libraries' exit-time teardown: game
+            // threads may still be inside native plugins (worldgen settling in SimDLL), and the
+            // plugins' static destructors would free state under them. Unity's player likewise
+            // ends without waiting for or tearing down under foreign threads. The game registers
+            // no ProcessExit handlers.
+            ProcessExit(PlayerLoop.ExitCode);
             return PlayerLoop.ExitCode;
         }
+
+        [System.Runtime.InteropServices.DllImport("libc", EntryPoint = "_exit")]
+        static extern void ProcessExit(int status);
 
         /// The player window from PlayerSettings (native resolution when so configured),
         /// overridden by Unity's -screen-* / -window-mode arguments.

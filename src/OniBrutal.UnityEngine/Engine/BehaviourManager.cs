@@ -25,6 +25,8 @@ namespace OniBrutal.Engine
             [typeof(BoxCollider2D)] = () => new BoxCollider2DNative(),
             [typeof(Rigidbody2D)] = () => new Rigidbody2DNative(),
             [typeof(Animator)] = () => new Mecanim.AnimatorNative(),
+            [typeof(UnityEngine.Video.VideoPlayer)] = () => new Video.VideoPlayerNative(),
+            [typeof(UnityEngine.Playables.PlayableDirector)] = () => new Playables.PlayableDirectorNative(),
         };
 
         public static void Register(Type componentType, Func<ComponentNative> factory)

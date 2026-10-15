@@ -6,8 +6,8 @@ namespace UnityEngine.Playables
     /// A versioned reference to a graph (OniBrutal.Engine.Playables.PlayableGraphState documents
     /// the evaluation rules). Every method except IsValid throws on an invalid graph.
     ///
-    /// Play/Stop are deliberately absent: a playing graph is advanced every frame by the director
-    /// update of the player loop, which does not exist yet.
+    /// Play/Stop are deliberately absent: only graphs owned by a PlayableDirector are advanced
+    /// by the director update (PlayableDirectorNative).
     public partial struct PlayableGraph
     {
         internal IntPtr m_Handle;

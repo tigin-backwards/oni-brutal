@@ -342,8 +342,13 @@ legacy `UI.Text` (debug/mod screens).
 - Audio: FMOD through the game's own `FMODUnity` + native `libfmodstudio.so`; the engine
   supplies what FMODUnity needs (paths, Transform, components, Timeline/Playables types).
 - Video: `VideoPlayer` decodes VP8 WebM from `resources.resource` with our own EBML demuxer and
-  libvpx (system library via P/Invoke), uploading planes to textures and converting with the
-  build's own `Hidden/VideoDecode` shader.
+  libvpx (the system's `libvpx.so.6`–`.9`, loaded at first use through our own function-pointer
+  P/Invokes; a missing library is a logged error when a video is prepared) on a decode thread
+  per player. Frames are converted to RGBA on the CPU with the exact formula of the build's own
+  `Hidden/VideoDecode` shader (BT.601 limited range, bilinear chroma) into a CPU `Texture2D`
+  that the device uploads; a GPU path running that shader on the planes can replace the
+  converter. The game's clips have no audio tracks (and the game sets `audioOutputMode = None`);
+  video audio is not played.
 - `Animator`: AnimatorController state machine + AnimationClip curve evaluation for the
   properties the game animates (UI). `ParticleSystem`: the modules the prefabs actually enable.
 - `UnityWebRequest` → `HttpClient`; `ImageConversion` → stb_image / stb_image_write

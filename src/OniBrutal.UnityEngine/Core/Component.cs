@@ -16,6 +16,8 @@ namespace UnityEngine
 
         /// Engine hooks for engine-implemented components (cameras, renderers, canvases…).
         internal virtual void EngineAwake() { }
+        /// Applies the defaults of a component created by AddComponent (not loaded from data).
+        internal virtual void EngineReset() { }
         internal virtual void EngineOnEnable() { }
         internal virtual void EngineOnDisable() { }
 

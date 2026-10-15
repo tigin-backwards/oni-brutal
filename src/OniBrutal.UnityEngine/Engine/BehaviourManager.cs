@@ -13,6 +13,12 @@ namespace OniBrutal.Engine
             // Engine components with their own native state. One list, so registration never
             // depends on type initialization order.
             [typeof(CanvasGroup)] = () => new CanvasGroupNative(),
+            [typeof(Renderer)] = () => new Rendering.RendererNative(),
+            [typeof(MeshRenderer)] = () => new Rendering.MeshRendererNative(),
+            [typeof(SpriteRenderer)] = () => new Rendering.SpriteRendererNative(),
+            [typeof(MeshFilter)] = () => new Rendering.MeshFilterNative(),
+            [typeof(Light)] = () => new Rendering.LightNative(),
+            [typeof(UnityEngine.Rendering.SortingGroup)] = () => new Rendering.SortingGroupNative(),
             [typeof(SphereCollider)] = () => new SphereColliderNative(),
             [typeof(BoxCollider)] = () => new BoxColliderNative(),
             [typeof(Rigidbody)] = () => new RigidbodyNative(),

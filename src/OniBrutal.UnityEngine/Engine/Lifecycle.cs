@@ -90,6 +90,7 @@ namespace OniBrutal.Engine
                     }
 
             var component = CreateComponent(go, type);
+            component.EngineReset();
             if (go.ActiveInHierarchy) AwakeAndEnable(component);
             return component;
         }

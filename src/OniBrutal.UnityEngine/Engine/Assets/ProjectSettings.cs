@@ -34,6 +34,7 @@ namespace OniBrutal.Engine.Assets
             var tags = Read("TagManager");
             Layers.Install(tags.Array("layers").Cast<string>().ToArray());
             Tags.InstallList(tags.Array("tags").Cast<string>().ToArray());
+            Rendering.SortingLayers.Install(tags.Array("m_SortingLayers").Cast<Fields>().Select(l => (l.String("name"), (int)l.Get<uint>("uniqueID"))));
 
             var time = Read("TimeManager");
             var fixedStep = time.Struct("Fixed Timestep");

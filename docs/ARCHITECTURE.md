@@ -1,0 +1,414 @@
+# Architecture
+
+This document fixes the shape of the system: what we replace, what we keep, how the pieces
+fit, and the rules each piece follows. `docs/PLAN.md` sequences the work. The evidence behind
+every decision is in `docs/research/` (`assets.md`, `unity-usage.md`, `runtime.md`,
+`brutal-api.md`); section references like *usage §1.3* point there.
+
+## 1. Goal and boundary
+
+Run Oxygen Not Included's **original, unmodified** managed code and data on stock .NET 10
+CoreCLR, with Unity's engine replaced by our own implementation built on BRUTAL.
+
+**What "the Unity layer" is.** Unity ships a game as three things:
+
+1. the native player (`UnityPlayer.so`: object system, serialization, renderer, input, …);
+2. the engine's managed API: `UnityEngine.*Module.dll` (thin C# over the native player);
+3. the Mono runtime and its class libraries (`MonoBleedingEdge`, `Managed/mscorlib.dll`, …).
+
+We replace **all three**: (1) and (2) with our engine, (3) with .NET 10.
+
+**What we keep, unmodified, as game code:**
+
+| Assembly | Why it stays |
+|---|---|
+| `Assembly-CSharp`, `Assembly-CSharp-firstpass` | The game. |
+| `UnityEngine.UI.dll`, `Unity.TextMeshPro.dll`, `Unity.Timeline.dll` | Package code compiled into the game, running only on the public `UnityEngine.*` API. The shipped TextMeshPro is a **Klei fork** (`KForceUpdateDirty`, `TMP_StyleSheet.instance`); the game subclasses uGUI types and depends on their protected surface and internal ordering (*usage §8*). Reimplementing them would re-derive behaviour the game was tuned against and lose Klei's changes. They are treated exactly like `Assembly-CSharp`: IL we execute, not engine we replace. |
+| `FMODUnity*.dll`, `com.rlabrecque.steamworks.net.dll`, `ImGui.NET.dll`, `Newtonsoft.Json`, `VYaml`, `LibNoiseDotNet`, `Ionic.Zip`, `ArabicSupport`, … | Third-party game dependencies. |
+| Native plugins (`libSimDLL.so`, `libfmodstudio.so`, `libresonanceaudio.so`, `libsteam_api.so`, `cimgui.so`) | The game's own natives, P/Invoked by game code. |
+| All data files (`globalgamemanagers*`, `level*`, `*.assets`, `.resS`, `resources.resource`, `StreamingAssets/**`, `Resources/unity default resources`, `Resources/unity_builtin_extra`) | Loaded read-only by our asset layer. |
+
+Nothing from `UnityPlayer.so`, `UnityEngine.*Module.dll`, or Mono is loaded.
+
+The reference install is the Linux build at `~/projects/oni-linux` (Unity 6000.3.5f2,
+`m_GraphicsAPIs = [OpenGLCore]`). The target platform is **linux-x64**. Windows needs
+Windows-matching native plugins and shader data (the Windows build carries D3D11 programs
+only), so it is out of scope until Linux is at parity.
+
+## 2. Process and assembly structure
+
+```
+OniBrutal.Host (exe)                      entry point; ALC setup; main loop; CLI flags
+ ├─ UnityEngine.*Module.dll  (generated)  type-forwarding facades, one per Unity module name
+ │     └──forwards to──┐
+ ├─ OniBrutal.UnityEngine.dll             THE engine API: every public UnityEngine.* / UnityEngine.*.*
+ │     │                                  type the game, uGUI, TMP, Timeline and FMODUnity reference
+ │     ├─ OniBrutal.Assets.dll            Unity file formats: SerializedFile, UnityFS, type trees,
+ │     │                                  LZ4/LZMA, object readers, managed-layout builder. No engine types.
+ │     ├─ OniBrutal.Graphics.dll          GL 4.5 core device: buffers, textures, programs, state,
+ │     │                                  framebuffers; Unity shader-blob runtime. No engine types.
+ │     ├─ OniBrutal.Platform.dll          GLFW window, GL context, input events, clipboard, cursors,
+ │     │                                  display modes, timing.
+ │     └─ BRUTAL packages                 Ahwoo.BRUTAL.{Core,Glfw,OpenGl,Numerics,Stb,…}
+ └─ game assemblies from Managed/ (unmodified)
+```
+
+**Why facades.** Game IL binds to `[UnityEngine.CoreModule]UnityEngine.GameObject`,
+`[UnityEngine.UIModule]UnityEngine.Canvas`, and so on. CoreCLR follows `TypeForwardedTo`, so a
+facade named `UnityEngine.CoreModule` that forwards to `OniBrutal.UnityEngine` binds every
+reference exactly as compiled, while the implementation lives in one assembly with ordinary
+`internal` access between subsystems (Unity itself relies on `InternalsVisibleTo` between its
+modules; we avoid needing that). The facade sources are **generated** by `tools/FacadeGen` from
+the original module assemblies (to learn which type lives in which module) intersected with the
+types we implement. A facade `UnityEngine.dll` (forwarding everything) is also generated for
+completeness.
+
+**Assembly identity.** Unity assemblies are referenced as version `0.0.0.0`, no public key.
+Our facades carry the same names and version `0.0.0.0`.
+
+**Load context.** The host creates one `AssemblyLoadContext` ("game") with a resolver:
+
+1. `UnityEngine*` → our facade directory (never `Managed/`).
+2. Names provided by the .NET 10 shared framework (including Mono-profile names such as
+   `mscorlib`, `System`, `System.Core`, `netstandard`, `System.Xml`, …, which .NET carries as
+   facades) → the framework. The copies in `Managed/` are never loaded.
+3. Everything else (game and third-party assemblies) → `Managed/`.
+
+Exceptions to (2) are decided per assembly from evidence in `runtime.md` and recorded in
+`src/OniBrutal.Host/AssemblyPolicy.cs` with the reason.
+
+**Native libraries.** `ResolvingUnmanagedDll` on the game ALC maps the game's `DllImport`
+names (`SimDLL`, `fmodstudio`, `resonanceaudio`, `steam_api`, `cimgui`, …) to
+`OxygenNotIncluded_Data/Plugins/lib*.so`. BRUTAL installs its own per-assembly resolvers;
+we never call `SetDllImportResolver` on BRUTAL assemblies. The Vulkan loader name quirk in
+`brutal-api.md` does not affect us (no Vulkan).
+
+### 2.1 Replacing Mono: runtime compatibility (*runtime §0*)
+
+Binding and JIT are clean: every BCL reference in the game resolves on .NET 10 and all ~82k
+game methods JIT. The differences that remain are behaviours Mono's class libraries provided
+and .NET 10 ships out-of-band. The host restores them the way .NET documents for
+.NET Framework-era code. Nothing in game IL is touched.
+
+| Mono provided | Host provides | Needed by |
+|---|---|---|
+| CAS types in mscorlib | `System.Security.Permissions` package in the host's deps | Newtonsoft.Json 7 (save header, settings, mods.json, key bindings) |
+| In-box BinaryFormatter | `System.Runtime.Serialization.Formatters` package + `EnableUnsafeBinaryFormatterSerialization` | `ObjectCloner.SerializingCloner` (every worldgen settings clone) |
+| Code pages via `I18N*` | `Encoding.RegisterProvider(CodePagesEncodingProvider.Instance)` before game code | Ionic.Zip static constructors (IBM437) |
+| `System.CodeDom` | `System.CodeDom` package (binding only; never executed) | Ionic.Zip SFX path (dead) |
+| Assemblies preloaded by the player | Host eagerly loads every assembly in `ScriptingAssemblies.json` that we serve, before any game type initializes | `App..cctor` / `KSerialization.Manager` assembly snapshots |
+
+**Steamworks.NET.** One explicit-layout union in `com.rlabrecque.steamworks.net` 20.1.0
+(`SteamDatagramRelayAuthTicket+ExtraField+OptionValue`, `byte[]` overlapping `long`) is
+accepted by Mono and rejected by CoreCLR's type loader; the game's whole-domain
+`GetTypes()` scans then crash. This is a third-party library that does not support our runtime,
+so we port it: build Steamworks.NET **20.1.0 from upstream source** (MIT) under the same
+assembly name and version, with that one union changed to a CoreCLR-valid layout. The port
+lives in `src/ThirdParty/Steamworks.NET/` with the upstream commit pinned and the diff
+documented. The host serves it instead of the shipped copy.
+
+**Steam itself** is required, as for the original game: `SteamAPI.Init()` failure makes
+`SteamManager` call `Application.Quit(2)`, and our `Application.Quit` honours it. Running
+past the boot checkpoint needs a Steam client logged in with an account that owns the game.
+
+**Documented deviations** (inherent to the runtime swap; not fixable without patching game IL):
+
+- **D1 State-machine parameters in saves.** `StateMachineSerializer` matches parameter context
+  types by `Type.FullName`, whose generic arguments are assembly-qualified
+  (`mscorlib, Version=4.0.0.0` on Mono, `System.Private.CoreLib, Version=10.0.0.0` on CoreCLR).
+  Saves written by the original game load with those parameters at defaults; saves we write
+  are self-consistent but carry the CoreCLR names. Everything else in saves (KSerialization
+  body, Sim blob, header) is runtime-independent.
+- **D2 Number formatting.** `double`/`float.ToString()` without a format prints the shortest
+  round-trippable string on .NET (Mono printed 15 significant digits) — cosmetic.
+- **D3 `string.GetHashCode`** is randomized per process; the only persisted use is the version
+  stamp of local (unpackaged) mods in `mods.json`.
+- **D4 `Thread.Abort`** throws on CoreCLR; reached only by `ThreadedHttps.End` after a 2 s join
+  timeout at shutdown.
+- **D5 `Process.MainModule`** is the host executable; `App.Restart` relaunches the host (we make
+  the host the executable that is relaunched, so this works as intended).
+
+## 3. The engine API (`OniBrutal.UnityEngine`)
+
+### 3.1 Surface rule
+
+The public surface is **exactly** what the consumers reference, with Unity's names, member
+kinds, signatures, `virtual`/`sealed`-ness, and base types, verified by `tools/ApiCheck`
+(conformance gate, §9). We do not add public API Unity doesn't have. Internals are free-form.
+
+The consumer set is: `Assembly-CSharp`, `Assembly-CSharp-firstpass`, `UnityEngine.UI`,
+`Unity.TextMeshPro`, `Unity.Timeline`, `FMODUnity*`, `ImGui.NET`, Steamworks.NET.
+
+Members are implemented **completely or not at all**. A member that is not yet implemented
+does not exist; the runtime then fails with `MissingMethodException`, which names it exactly,
+and ApiCheck lists it. There are no `throw new NotImplementedException()` placeholders and no
+silent no-ops. Where Unity's behaviour is legitimately a no-op on this platform (e.g.
+`Gizmos.*` in a player, `Handheld.*`), the member is implemented as that no-op with a comment
+citing why.
+
+### 3.2 Object model
+
+- **Engine state lives on the "native side", never in managed fields of public types.** Like
+  Unity, `UnityEngine.Object` has only private value-type fields: `IntPtr m_CachedPtr` (here a
+  `GCHandle` to the engine's internal `NativeObject` record) and `int m_InstanceID`. Public
+  engine classes (`GameObject`, `Component`, `Transform`, `Behaviour`, `MonoBehaviour`, …)
+  declare **no other instance fields** unless Unity's own class declares them (e.g. the
+  managed fields of `MonoBehaviour`). Reason: game code reflects over the full field set of
+  components — `Localization.SetFont` walks `Instance|Public|NonPublic` fields recursively and
+  follows `GameObject` fields into `GetComponents()` (*runtime §7.4*), and KSerialization builds
+  templates over `Object`/`Component`/`Behaviour` fields with `GetCustomAttributes`. Managed
+  back-references there would recurse forever or be serialized.
+- The `NativeObject` record holds the alive/destroyed flag, name, hide flags, owning asset (if
+  loaded from a file), and for GameObjects/Components the scene-graph data. **Fake-null
+  semantics** follow Unity: `==`, `!=`, `op_Implicit(bool)` and `Equals` treat destroyed objects
+  (and C#-created `UnityEngine.Object`s with no record) as null; these checks are lock-free
+  reads usable from any thread.
+- Value types used by saves keep Unity's exact field shape: `Vector2/3/4` (`x,y,z,w` public
+  fields), `Color` (`r,g,b,a`), `Color32` (`r,g,b,a` bytes), `Quaternion` (`x,y,z,w`), and **no
+  public settable instance properties** on `Color32`/`Vector4` (KSerialization's OptOut rule
+  would serialize them). No full type name we define may also exist in a game assembly.
+- `GameObject` owns an ordered component list; `Transform`/`RectTransform` is always first.
+  `GetComponent*` matches by assignability, including interfaces, in component order.
+  Lookups are cached per (GameObject, Type).
+- **Activation and messages** follow Unity's player semantics (*usage §3*):
+  - Message methods (`Awake`, `OnEnable`, `Start`, `Update`, `LateUpdate`, `FixedUpdate`,
+    `OnDisable`, `OnDestroy`, `OnApplicationFocus/Quit`, `OnRenderImage`, `OnPreCull`,
+    `OnPostRender`, `OnRectTransformDimensionsChange`, `OnTransformParentChanged`,
+    `OnBecameVisible/Invisible`, `OnValidate` (editor-only: never), `OnGUI`, …) are discovered
+    per type **by name, most-derived declaration only, any accessibility**, and bound once into
+    open delegates. A base implementation runs only if the derived one calls it.
+  - `Awake` runs when a component's GameObject first becomes active in hierarchy (or at
+    load/instantiate time if already active), then `OnEnable`; `Start` runs before that
+    component's first `Update`, deferred to the next Start phase. Activation and deactivation
+    recurse in Unity's order (Awake/OnEnable for the whole subtree, parent first; OnDisable
+    children-first when deactivating).
+  - `Destroy` is deferred to the end of the frame; `DestroyImmediate` is synchronous,
+    children first, with `OnDisable` then `OnDestroy`.
+  - Exceptions in a message are logged through `Debug.LogException` and do not stop the frame,
+    as in Unity.
+- **Script execution order** comes from `MonoScript.m_ExecutionOrder` in
+  `globalgamemanagers.assets`; within one order, update order is the order components became
+  enabled, matching Unity's behaviour list.
+- `ScriptableObject` and `MonoBehaviour` instances are created with
+  `RuntimeHelpers.GetUninitializedObject` + the parameterless constructor, as Unity does
+  (field initializers run, then deserialization overwrites serialized fields).
+
+### 3.3 Player loop
+
+One thread, Unity's order (*usage §1.3, §3.5*), driven by `OniBrutal.Host`:
+
+```
+Initialization  time update (Time.*), pending scene-load completion
+EarlyUpdate     platform events → Input state; Screen size changes
+FixedUpdate     0..n steps (accumulator, maximumDeltaTime clamp), coroutines WaitForFixedUpdate
+Update          Start for pending components; Update; coroutines (null, WaitForSeconds, custom yields)
+PreLateUpdate   LateUpdate
+PostLateUpdate  Canvas.willRenderCanvases (uGUI layout/graphic rebuild) → render all cameras
+                → screen-space-overlay canvases → WaitForEndOfFrame coroutines → present
+                → deferred Destroy processing
+```
+
+Coroutines are Unity's state machine: an `IEnumerator` is advanced immediately by
+`StartCoroutine`; nested `IEnumerator`/`Coroutine` yields wait for the child;
+`CustomYieldInstruction` is re-polled each frame via `keepWaiting` (the shared cached
+`WaitForSecondsRealtime` instance must behave exactly as Unity's managed implementation does).
+
+### 3.4 Serialization and assets
+
+**Readers (`OniBrutal.Assets`)** parse SerializedFile v22 (big-endian header, little-endian
+data), UnityFS bundles (LZMA, LZ4/LZ4HC block and blocks-info compression), `.resS`/`.resource`
+streaming, and resolve PPtrs (`fileID` → externals, `pathID`). Built-in files map to
+`OxygenNotIncluded_Data/Resources/`.
+
+**Native classes** (GameObject, Transform, Material, Shader, Texture2D, Sprite, SpriteAtlas,
+Mesh, TextAsset, Font, Canvas, CanvasRenderer, Camera, RectTransform, VideoClip, AnimationClip,
+AnimatorController, ParticleSystem, …) are read with the **Unity 6000.3.5f2 release type
+trees** (`cache/typetree/InfoJson_6000.3.5f2.json`, vendored into the repo as a compressed
+resource), because player files strip type trees. A generic type-tree walker produces a typed
+field view; per-class "binders" copy fields into engine objects. Every object must consume
+exactly its byte size; a mismatch is an error, never ignored.
+
+**Script classes (MonoBehaviour / ScriptableObject payloads)** have no type tree. We build the
+layout from the **actual managed type** following Unity's serialization rules:
+serializable fields are instance fields that are public or `[SerializeField]`, not
+`[NonSerialized]`, not static/const/readonly, of a serializable type (primitives, enums by
+underlying type, `string`, `UnityEngine.Object` subclasses as PPtr, `[Serializable]`
+non-abstract classes/structs (generic allowed), arrays and `List<T>` of these (no nested
+collections), and Unity's built-in serializable structs: Vector2/3/4(Int), Quaternion,
+Matrix4x4, Color, Color32, Rect(Int), Bounds(Int), LayerMask, AnimationCurve, Gradient,
+RectOffset, GUIStyle, Hash128, …); depth limit 10; `[FormerlySerializedAs]` irrelevant for
+reading (names come from our layout, the data has none). Alignment follows Unity's rules
+(4-byte align after bool/byte/char/short runs, after strings and arrays). The exact-size
+check over all ~18.8k MonoBehaviours in the build is the proof that the rules are right.
+
+The layout builder is shared by three users: **file deserialization, `Object.Instantiate`
+cloning, and `JsonUtility`**. Cloning is serialization-shaped, not a shallow copy: only
+serialized fields are copied; references to objects inside the cloned hierarchy are remapped
+to the clones; external references are kept; `ISerializationCallbackReceiver` hooks run
+(`OnBeforeSerialize` on the source, `OnAfterDeserialize` on the clone). Non-serialized fields
+of the clone keep their constructor/initializer values.
+
+**Loading model.** Scenes (`level0..2`) are loaded in full on `SceneManager.LoadScene`.
+Other files load objects **lazily by PPtr**: an object is materialized the first time it is
+referenced, with its dependencies. `Resources.Load` uses the `ResourceManager.m_Container` map;
+`AssetBundle.LoadFromFile(Async)` mounts a UnityFS archive as additional files.
+`Resources.UnloadUnusedAssets` releases GPU resources of unreferenced loaded assets.
+
+### 3.5 Rendering
+
+**Device: OpenGL 4.5 core via `Brutal.OpenGl` + GLFW.** This build's only graphics API is
+OpenGLCore, and every shader ships as GLSL 150 text produced by Unity's HLSLcc, with
+per-variant parameter tables (*assets §5*). Executing those programs directly on GL is the most
+faithful possible renderer: no shader is hand-ported, so every Klei visual effect keeps its
+exact logic. (Vulkan is the alternative BRUTAL emphasises; it would require compiling this
+GLSL with relaxed default-uniform-block rules and re-deriving Unity's GL binding model on top.
+GL 4.5 is available on Linux drivers and on WSLg hardware via Mesa d3d12 (verified: GL 4.6 core
+on an RTX 3090 with `GALLIUM_DRIVER=d3d12`).)
+
+**Shader runtime (`OniBrutal.Graphics`).** From `SerializedShader`: properties, subshaders,
+passes, tags, render state (blend/ZTest/ZWrite/Cull/ColorMask/Stencil/Offset — each either a
+constant or a reference to a material property, e.g. `[_SrcAlpha]`), keyword space, and the
+platform-15 program blobs (LZ4). For each pass, variant selection matches Unity's
+(local+global enabled keywords → best matching subprogram). Programs are compiled and linked
+on first use and cached by (shader, pass, variant). Uniform binding follows the subprogram's
+`SerializedProgramParameters` (vector/matrix params by name and array size, textures by name
+→ sampler unit, constant buffers with member offsets, built-in `unity_*`/`hlslcc_mtx4x4*`
+matrices). Fixed-function GLSL helpers Unity injects (`#ifdef VERTEX`/`FRAGMENT` sections) are
+split exactly as Unity's GL device does.
+
+**Engine renderer (`OniBrutal.UnityEngine`, Rendering namespace).** Unity's built-in forward
+renderer, restricted to what the game uses (*usage §1*):
+
+- Cameras render in ascending `depth`; per camera: `OnPreCull` → cull (layer mask, Renderer
+  enabled/visible) → sort (opaque front-to-back by queue, transparent back-to-front along view
+  Z for `TransparencySortMode.Orthographic`, ties in submission order) → command buffers at
+  their `CameraEvent`s → draw → `OnRenderImage` chain (component order, temporary RTs) →
+  `OnPostRender`.
+- Draw sources: `MeshRenderer`+`MeshFilter`, `SpriteRenderer`, `ParticleSystemRenderer`,
+  `CanvasRenderer` (world-space and screen-space-camera canvases), and the per-frame
+  `Graphics.DrawMesh` queue (cleared after the frame; `camera` argument restricts it).
+- Unity's built-in shader constants are maintained per draw/camera (`unity_ObjectToWorld`,
+  `unity_MatrixVP`, `_ProjectionParams`, `_ScreenParams`, `_Time`, `_ZBufferParams`, …) with GL
+  clip-space conventions as Unity's GLCore device sets them.
+- `RenderTexture` (incl. MRT via `SetTargetBuffers`, temporaries pool, `active`), `Texture2D`
+  (CPU copy + `GetRawTextureData<T>` aliasing NativeArray, `Apply`, DXT/BC upload,
+  `LoadRawTextureData(IntPtr)`), `Texture2DArray`, `Texture3D`, `Mesh` (dynamic buffers,
+  submeshes, topologies), `Material`/`MaterialPropertyBlock`/`Shader` globals, `Graphics.Blit`
+  (`Hidden/BlitCopy` from `unity_builtin_extra`), `GL` immediate mode, `CommandBuffer`.
+- Gamma colour space (`m_ActiveColorSpace=0`): no sRGB conversions.
+
+**UI rendering.** `Canvas` implements Unity's canvas batching: per root canvas, walk
+`CanvasRenderer`s in hierarchy order, apply `CanvasGroup` alpha, `RectMask2D` clip rects
+(`_ClipRect` + `UNITY_UI_CLIP_RECT`) and stencil masks (materials from uGUI's own
+`StencilMaterial`), and draw in order (no reordering across materials; Unity's batch
+merging is an optimisation we may add only where it cannot change the result).
+
+### 3.6 Platform
+
+`OniBrutal.Platform` wraps `Brutal.Glfw`: one window with a GL 4.5 core context, vsync,
+resize, fullscreen/windowed modes (`Screen.*`), monitors/resolutions, DPI, keyboard
+(GLFW key → Unity `KeyCode`), text input (UTF-32 via our own char-callback handling where
+BRUTAL's 16-bit truncation would corrupt input), mouse buttons/position (bottom-left origin)
+and scroll, hardware cursors from `Texture2D`, clipboard, focus events. Legacy Input Manager
+axes/buttons come from `globalgamemanagers` `InputManager` settings, with Unity's gravity /
+sensitivity / dead-zone smoothing.
+
+### 3.7 Text and fonts
+
+TMP runs as shipped. The engine provides what it needs: `Font`, `TextCore` data types,
+`FontEngine` (backed by FreeType from `Ahwoo.BRUTAL.FreeType`'s natives through our own
+P/Invokes, plus SDF generation) used only for dynamic atlases, and `TextGenerator` for the
+legacy `UI.Text` (debug/mod screens).
+
+### 3.8 Audio, video, other modules
+
+- Audio: FMOD through the game's own `FMODUnity` + native `libfmodstudio.so`; the engine
+  supplies what FMODUnity needs (paths, Transform, components, Timeline/Playables types).
+- Video: `VideoPlayer` decodes VP8 WebM from `resources.resource` with our own EBML demuxer and
+  libvpx (system library via P/Invoke), uploading planes to textures and converting with the
+  build's own `Hidden/VideoDecode` shader.
+- `Animator`: AnimatorController state machine + AnimationClip curve evaluation for the
+  properties the game animates (UI). `ParticleSystem`: the modules the prefabs actually enable.
+- `UnityWebRequest` → `HttpClient`; `ImageConversion` → stb_image / stb_image_write
+  (`Ahwoo.BRUTAL.Stb`); `JsonUtility` → the shared layout builder; `Physics.Raycast` → the
+  colliders present in data; IMGUI → clipboard and the event/GUI surface the code paths touch.
+
+## 4. Threading
+
+The game relies on release-player leniency (*runtime §6*): worker, path-prober, worldgen,
+HTTP and FMOD threads call into the engine. Our rules:
+
+1. **Free-threaded:** math/value types; `Application` path and platform getters (immutable
+   after startup); `Object ==`/`!=`/`bool`/`name`/`GetInstanceID`; `Component.transform` /
+   `gameObject`; `GetComponent(s)`; `Transform.position` and other transform **reads**;
+   `TextAsset.text`/`bytes`; `Resources.Load` (loading is serialized by a lock and completes
+   on the calling thread, as the game's lazy `Db.Get` needs); `Debug.Log*`.
+2. **`Debug.Log*` from other threads** invokes `logMessageReceivedThreaded` on the caller and
+   queues `logMessageReceived` to the main thread, as Unity does (KCrashReporter listens there).
+3. **Main thread only** (asserted in all builds, the failure is an exception with a clear
+   message, as Unity's "can only be called from the main thread"): structural mutation
+   (`Instantiate`, `AddComponent`, `Destroy`, `SetParent`, transform setters, activation),
+   rendering and GPU resource APIs, scene loading.
+4. Worker-thread writes into `GetRawTextureData` arrays are allowed (plain CPU memory until
+   `Apply`). GL calls happen only on the main thread.
+5. Reverse P/Invoke: SimDLL's error callback is created by game code per call; exceptions
+   crossing it are fatal on CoreCLR, which matches Unity's crash behaviour on that path.
+
+## 5. Numerics
+
+`Vector2/3/4`, `Quaternion`, `Matrix4x4`, `Color`, `Mathf`, … are implemented with Unity's
+formulas (including `Mathf.Approximately`, `RoundToInt` banker's rounding, `Random.Range`
+inclusive/exclusive rules, `Quaternion.Euler` order ZXY). Bit-exact float results are out of
+scope; algorithmic equivalence is not.
+
+## 6. Configuration and paths
+
+`Application.dataPath` = `<game>/OxygenNotIncluded_Data`, `streamingAssetsPath` =
+`<dataPath>/StreamingAssets`, `persistentDataPath` = `~/.config/unity3d/Klei/Oxygen Not
+Included` (Unity's Linux rule: `$XDG_CONFIG_HOME/unity3d/<company>/<product>`), `platform` =
+`RuntimePlatform.LinuxPlayer`, `isEditor` = false, `isPlaying` = true. Company/product/version
+come from `globalgamemanagers` PlayerSettings. The host takes `--game <dir>` (default
+`~/projects/oni-linux`), `--headless` (no window, no GL: logic-only frames for tests),
+`--frames N`, `--screenshot <dir>` (debug captures), and `--log <file>`.
+
+## 7. Logging and diagnostics
+
+`Debug.Log*` and the logger/handler surface behave as Unity's (the game replaces the handler).
+Our engine logs through `Brutal.Logging` into the same Player.log-style file
+(`~/.config/unity3d/Klei/Oxygen Not Included/Player.log`), with engine messages tagged
+`[engine]`. GL debug output is enabled in debug builds.
+
+## 8. Repository layout
+
+```
+docs/                     PLAN.md, ARCHITECTURE.md, research/, decisions are recorded inline
+src/OniBrutal.Assets/     file formats and readers
+src/OniBrutal.Graphics/   GL device and Unity shader runtime
+src/OniBrutal.Platform/   window/input
+src/OniBrutal.UnityEngine/ engine API implementation (namespaces mirror Unity's)
+src/OniBrutal.Host/       executable
+src/Facades/              generated UnityEngine.*Module facade projects (do not edit)
+src/Unity.InternalAPIEngineBridge.004/  engine-side bridge that the shipped TMP calls into
+src/ThirdParty/Steamworks.NET/          upstream 20.1.0 source port (see §2.1)
+tests/                    xunit: OniBrutal.Assets.Tests, OniBrutal.UnityEngine.Tests, …
+tools/Inventory, tools/ApiCheck, tools/FacadeGen
+cache/ (ignored)          decompiled code, BRUTAL clone, inventories, type trees
+```
+
+Build settings in `Directory.Build.props`: `net10.0`, nullable, `AllowUnsafeBlocks`,
+`TreatWarningsAsErrors` for our projects, BRUTAL analyzer configuration (documented
+suppressions only), central package versions in `Directory.Packages.props`.
+
+## 9. Verification
+
+1. **Conformance:** `tools/ApiCheck` over the consumer set; the count of missing members only
+   goes down. Each milestone states which areas must reach zero.
+2. **Asset corpus test:** every object in every data file (and in bundles) deserializes to
+   exactly its byte size, natives and MonoBehaviours alike.
+3. **Unit tests** for math, serialization rules, cloning, lifecycle ordering, coroutine
+   semantics, layout of uGUI (via the shipped DLL), shader variant selection.
+4. **Headless boot runs** asserting the scene/bootstrap sequence reaches defined checkpoints
+   with zero logged exceptions.
+5. **Visual checks:** `--screenshot` captures at checkpoints, reviewed against reference
+   screenshots of the real game.
+6. **Gameplay soak:** new colony → N cycles → save → reload → continue, no exceptions.

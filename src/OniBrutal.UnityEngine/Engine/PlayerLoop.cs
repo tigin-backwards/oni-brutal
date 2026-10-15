@@ -20,6 +20,7 @@ namespace OniBrutal.Engine
     {
         public static event Action FrameStart;          // pending scene loads complete here
         public static event Action EarlyUpdate;         // platform events, input state
+        public static event Action DirectorUpdate;      // PlayableDirectors (Update.DirectorUpdate, after scripts and coroutines)
         public static event Action AnimationUpdate;     // Animators (PreLateUpdate.DirectorUpdateAnimationBegin/End, before LateUpdate)
         public static event Action FixedAnimationUpdate; // Fixed-mode Animators (FixedUpdate.DirectorFixedUpdate, after script FixedUpdate)
         public static event Action PostLateUpdate;      // e.g. canvas update (willRenderCanvases)
@@ -75,6 +76,7 @@ namespace OniBrutal.Engine
             BehaviourManager.RunStarts();
             BehaviourManager.RunUpdate();
             Coroutines.RunUpdatePhase();
+            DirectorUpdate?.Invoke();
 
             AnimationUpdate?.Invoke();
             BehaviourManager.RunLateUpdate();

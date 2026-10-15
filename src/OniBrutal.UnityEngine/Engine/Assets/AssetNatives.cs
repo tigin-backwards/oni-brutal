@@ -22,6 +22,7 @@ namespace OniBrutal.Engine.Assets
             [typeof(UnityEngine.RuntimeAnimatorController)] = () => new Mecanim.AnimatorControllerNative(),
             [typeof(UnityEngine.Avatar)] = () => new Mecanim.AvatarNative(),
             [typeof(UnityEngine.AvatarMask)] = () => new Mecanim.AvatarMaskNative(),
+            [typeof(UnityEngine.Video.VideoClip)] = () => new Video.VideoClipNative(),
         };
 
         public static NativeObject Create(Type engineType)

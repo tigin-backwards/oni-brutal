@@ -30,6 +30,8 @@ namespace OniBrutal.Engine
             [typeof(Animator)] = () => new Mecanim.AnimatorNative(),
             [typeof(ParticleSystem)] = () => new Particles.ParticleSystemNative(),
             [typeof(ParticleSystemRenderer)] = () => new Particles.ParticleSystemRendererNative(),
+            [typeof(UnityEngine.Video.VideoPlayer)] = () => new Video.VideoPlayerNative(),
+            [typeof(UnityEngine.Playables.PlayableDirector)] = () => new Playables.PlayableDirectorNative(),
         };
 
         public static void Register(Type componentType, Func<ComponentNative> factory)

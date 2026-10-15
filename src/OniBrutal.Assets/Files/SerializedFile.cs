@@ -1,0 +1,164 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text;
+using OniBrutal.Assets.IO;
+using OniBrutal.Assets.TypeTrees;
+
+namespace OniBrutal.Assets.Files
+{
+    /// A Unity SerializedFile (format version 22: scenes, .assets, bundle CABs).
+    public sealed class SerializedFile
+    {
+        public sealed record SerializedType(int ClassId, bool IsStripped, short ScriptTypeIndex, TypeTreeNode? Tree);
+        public sealed record ObjectInfo(long PathId, long ByteStart, int ByteSize, int TypeIndex);
+        public sealed record External(string Path, Guid Guid, int Type);
+        public sealed record ScriptTypeRef(int FileIndex, long PathId);
+
+        public string Name { get; }
+        public int Version { get; private set; }
+        public string UnityVersion { get; private set; } = "";
+        public int TargetPlatform { get; private set; }
+        public bool EnableTypeTree { get; private set; }
+        public List<SerializedType> Types { get; } = new();
+        public List<ObjectInfo> Objects { get; } = new();
+        public Dictionary<long, ObjectInfo> ObjectsById { get; } = new();
+        public List<ScriptTypeRef> ScriptTypes { get; } = new();
+        public List<External> Externals { get; } = new();
+
+        readonly byte[] bytes;
+        long dataOffset;
+        bool bigEndianData;
+
+        SerializedFile(string name, byte[] bytes)
+        {
+            Name = name;
+            this.bytes = bytes;
+        }
+
+        public static SerializedFile Open(string path) => Parse(Path.GetFileName(path), File.ReadAllBytes(path));
+
+        public static SerializedFile Parse(string name, byte[] bytes)
+        {
+            var f = new SerializedFile(name, bytes);
+            f.ReadMetadata();
+            return f;
+        }
+
+        void ReadMetadata()
+        {
+            var r = new DataReader(bytes) { BigEndian = true };
+            r.ReadUInt32(); // metadata size (legacy)
+            r.ReadUInt32(); // file size (legacy)
+            Version = (int)r.ReadUInt32();
+            dataOffset = r.ReadUInt32();
+            if (Version < 22) throw new InvalidDataException($"{Name}: SerializedFile version {Version} is not supported (22+).");
+            bigEndianData = r.ReadByte() != 0;
+            r.Skip(3);
+            r.ReadUInt32();          // metadata size
+            r.ReadInt64();           // file size
+            dataOffset = r.ReadInt64();
+            r.ReadInt64();           // reserved
+            r.BigEndian = bigEndianData;
+
+            UnityVersion = r.ReadCString();
+            TargetPlatform = r.ReadInt32();
+            EnableTypeTree = r.ReadBool();
+
+            int typeCount = r.ReadInt32();
+            for (int i = 0; i < typeCount; i++) Types.Add(ReadType(r, isRefType: false));
+
+            int objectCount = r.ReadInt32();
+            for (int i = 0; i < objectCount; i++)
+            {
+                r.Align(4);
+                var info = new ObjectInfo(r.ReadInt64(), r.ReadInt64(), (int)r.ReadUInt32(), r.ReadInt32());
+                Objects.Add(info);
+                ObjectsById[info.PathId] = info;
+            }
+
+            int scriptCount = r.ReadInt32();
+            for (int i = 0; i < scriptCount; i++)
+            {
+                int fileIndex = r.ReadInt32();
+                r.Align(4);
+                ScriptTypes.Add(new ScriptTypeRef(fileIndex, r.ReadInt64()));
+            }
+
+            int externalCount = r.ReadInt32();
+            for (int i = 0; i < externalCount; i++)
+            {
+                r.ReadCString(); // asset path (unused in players)
+                var guid = new Guid(r.ReadSpan(16));
+                int type = r.ReadInt32();
+                Externals.Add(new External(r.ReadCString(), guid, type));
+            }
+
+            int refTypeCount = r.ReadInt32();
+            for (int i = 0; i < refTypeCount; i++) ReadType(r, isRefType: true);
+            r.ReadCString(); // user information
+        }
+
+        SerializedType ReadType(DataReader r, bool isRefType)
+        {
+            int classId = r.ReadInt32();
+            bool stripped = r.ReadBool();
+            short scriptIndex = r.ReadInt16();
+            if (isRefType || classId == 114 || classId < 0 || scriptIndex >= 0) r.Skip(16); // script id
+            r.Skip(16); // old type hash
+            TypeTreeNode? tree = null;
+            if (EnableTypeTree)
+            {
+                tree = ReadTypeTree(r);
+                if (isRefType)
+                {
+                    r.ReadCString(); r.ReadCString(); r.ReadCString(); // class, namespace, assembly
+                }
+                else
+                {
+                    int depCount = r.ReadInt32();
+                    r.Skip(depCount * 4);
+                }
+            }
+            return new SerializedType(classId, stripped, scriptIndex, tree);
+        }
+
+        /// Blob format: node count, string buffer size, fixed-size nodes, string buffer. Name and
+        /// type offsets with the top bit set index Unity's common strings table.
+        static TypeTreeNode ReadTypeTree(DataReader r)
+        {
+            int nodeCount = r.ReadInt32();
+            int stringSize = r.ReadInt32();
+            var raw = new (ushort version, byte level, byte typeFlags, uint typeOffset, uint nameOffset, int byteSize, int index, uint metaFlag)[nodeCount];
+            for (int i = 0; i < nodeCount; i++)
+            {
+                raw[i] = (r.ReadUInt16(), r.ReadByte(), r.ReadByte(), r.ReadUInt32(), r.ReadUInt32(), r.ReadInt32(), r.ReadInt32(), r.ReadUInt32());
+                r.ReadUInt64(); // ref type hash
+            }
+            var strings = r.ReadBytes(stringSize);
+            string Str(uint offset)
+            {
+                if ((offset & 0x80000000) != 0) return CommonStrings.Get((int)(offset & 0x7FFFFFFF));
+                int end = Array.IndexOf(strings, (byte)0, (int)offset);
+                return Encoding.UTF8.GetString(strings, (int)offset, end - (int)offset);
+            }
+            var stack = new Stack<(TypeTreeNode node, int level)>();
+            TypeTreeNode root = null!;
+            foreach (var n in raw)
+            {
+                var node = new TypeTreeNode { TypeName = Str(n.typeOffset), Name = Str(n.nameOffset), ByteSize = n.byteSize, Version = n.version, TypeFlags = n.typeFlags, MetaFlag = n.metaFlag };
+                while (stack.Count > 0 && stack.Peek().level >= n.level) stack.Pop();
+                if (stack.Count == 0) root = node;
+                else stack.Peek().node.Children.Add(node);
+                stack.Push((node, n.level));
+            }
+            return root;
+        }
+
+        /// A reader over one object's data.
+        public DataReader OpenObject(ObjectInfo info)
+            => new(bytes, checked((int)(dataOffset + info.ByteStart)), info.ByteSize) { BigEndian = bigEndianData };
+
+        public SerializedType TypeOf(ObjectInfo info) => Types[info.TypeIndex];
+    }
+}

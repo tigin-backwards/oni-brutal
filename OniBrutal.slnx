@@ -1,5 +1,6 @@
 <Solution>
   <Folder Name="/src/">
+    <Project Path="src/OniBrutal.Assets/OniBrutal.Assets.csproj" />
     <Project Path="src/OniBrutal.Host/OniBrutal.Host.csproj" />
     <Project Path="src/OniBrutal.UnityEngine/OniBrutal.UnityEngine.csproj" />
     <Project Path="src/Unity.InternalAPIEngineBridge.004/Unity.InternalAPIEngineBridge.004.csproj" />
@@ -8,6 +9,7 @@
     <Project Path="src/ThirdParty/Steamworks.NET/Steamworks.NET.csproj" />
   </Folder>
   <Folder Name="/tests/">
+    <Project Path="tests/OniBrutal.Assets.Tests/OniBrutal.Assets.Tests.csproj" />
     <Project Path="tests/OniBrutal.UnityEngine.Tests/OniBrutal.UnityEngine.Tests.csproj" />
   </Folder>
   <Folder Name="/tools/">

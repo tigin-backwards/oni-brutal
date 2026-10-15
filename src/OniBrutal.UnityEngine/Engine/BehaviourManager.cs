@@ -28,6 +28,8 @@ namespace OniBrutal.Engine
             [typeof(BoxCollider2D)] = () => new BoxCollider2DNative(),
             [typeof(Rigidbody2D)] = () => new Rigidbody2DNative(),
             [typeof(Animator)] = () => new Mecanim.AnimatorNative(),
+            [typeof(ParticleSystem)] = () => new Particles.ParticleSystemNative(),
+            [typeof(ParticleSystemRenderer)] = () => new Particles.ParticleSystemRendererNative(),
         };
 
         public static void Register(Type componentType, Func<ComponentNative> factory)

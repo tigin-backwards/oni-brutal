@@ -11,7 +11,7 @@ namespace OniBrutal.Engine
     ///   FixedUpdate     Start; 0..n fixed steps (FixedUpdate, WaitForFixedUpdate)
     ///   Update          Start; Update; yield null / WaitForSeconds / AsyncOperation
     ///   PreLateUpdate   Animators; LateUpdate
-    ///   PostLateUpdate  destroy queue; canvases and cameras render; WaitForEndOfFrame; destroy
+    ///   PostLateUpdate  destroy queue; canvases; particle systems; cameras render; WaitForEndOfFrame; destroy
     ///                   queue; present
     ///
     /// Subsystems attach to the phases through the hooks below, so this class stays the single
@@ -23,6 +23,7 @@ namespace OniBrutal.Engine
         public static event Action AnimationUpdate;     // Animators (PreLateUpdate.DirectorUpdateAnimationBegin/End, before LateUpdate)
         public static event Action FixedAnimationUpdate; // Fixed-mode Animators (FixedUpdate.DirectorFixedUpdate, after script FixedUpdate)
         public static event Action PostLateUpdate;      // e.g. canvas update (willRenderCanvases)
+        public static event Action ParticleUpdate;      // ParticleSystems (PostLateUpdate.ParticleSystemEndUpdateAll, after LateUpdate, before rendering)
         public static event Action Render;              // cameras, overlay canvases
         public static event Action Present;             // swap buffers
 
@@ -80,6 +81,7 @@ namespace OniBrutal.Engine
 
             Lifecycle.ProcessDestroyQueue();
             PostLateUpdate?.Invoke();
+            ParticleUpdate?.Invoke();
             Render?.Invoke();
             Time.FrameRendered();
             Coroutines.RunEndOfFramePhase();

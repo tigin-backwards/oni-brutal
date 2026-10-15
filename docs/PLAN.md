@@ -206,4 +206,5 @@ Known behaviours not yet reproduced, each to be closed by a named milestone:
   renders correctly (`--capture 2:out.png`). Engine-side renderer complete: cameras, renderers,
   sprites (incl. 9-slice), particles, canvases (overlay/camera/world), video planes, Graphics/GL/
   CommandBuffer; IMGUI (OnGUI dispatch, built-in skin, layout, windows, text editing) verified
-  on the GPU. ApiCheck: 13 missing members (the UI Toolkit panel internals; see open items).
+  on the GPU; shipped uGUI and TMP (SDF atlas, rich text, dynamic glyphs) render through the GL
+  device. ApiCheck: 13 missing members (the UI Toolkit panel internals; see open items).

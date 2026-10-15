@@ -139,6 +139,11 @@ past the boot checkpoint needs a Steam client logged in with an account that own
   outlines in Unity with an unpublished algorithm; the engine creates the full-rect mesh
   instead. Rendered pixels are identical (the omitted area is fully transparent); only
   `sprite.vertices`/`triangles` differ. Sprites loaded from data keep their baked meshes.
+- **D7 `GarbageCollector.GCMode`.** CoreCLR's collector cannot be switched off; Disabled and
+  Manual hold a no-GC region (`GC.TryStartNoGCRegion`, budget a quarter of available memory),
+  re-entered each frame if the runtime had to end it. Entering may collect once, and an
+  exhausted budget collects where Unity's heap would grow. Only the game's scripted-profiling
+  path changes the mode.
 
 ## 3. The engine API (`OniBrutal.UnityEngine`)
 

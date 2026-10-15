@@ -56,6 +56,8 @@ namespace OniBrutal.Engine.Assets
             QualitySettings = Read("QualitySettings");
             GraphicsSettings = Read("GraphicsSettings");
 
+            PhysicsWorld.Configure(Read("PhysicsManager"));
+
             LoadScriptExecutionOrders();
         }
 

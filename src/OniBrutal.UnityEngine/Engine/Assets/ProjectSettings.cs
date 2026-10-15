@@ -62,6 +62,8 @@ namespace OniBrutal.Engine.Assets
                 shaderNames[pair.String("second")] = pair.PPtr("first");
             ShaderNames = shaderNames;
 
+            PhysicsWorld.Configure(Read("PhysicsManager"));
+
             LoadScriptExecutionOrders();
         }
 

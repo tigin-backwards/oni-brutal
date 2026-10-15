@@ -13,6 +13,11 @@ namespace OniBrutal.Engine
             // Engine components with their own native state. One list, so registration never
             // depends on type initialization order.
             [typeof(CanvasGroup)] = () => new CanvasGroupNative(),
+            [typeof(SphereCollider)] = () => new SphereColliderNative(),
+            [typeof(BoxCollider)] = () => new BoxColliderNative(),
+            [typeof(Rigidbody)] = () => new RigidbodyNative(),
+            [typeof(BoxCollider2D)] = () => new BoxCollider2DNative(),
+            [typeof(Rigidbody2D)] = () => new Rigidbody2DNative(),
         };
 
         public static void Register(Type componentType, Func<ComponentNative> factory)

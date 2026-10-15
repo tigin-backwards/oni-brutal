@@ -16,9 +16,4 @@ namespace UnityEngine
     {
         public Animation() { }
     }
-
-    public class SphereCollider : Collider
-    {
-        public SphereCollider() { }
-    }
 }

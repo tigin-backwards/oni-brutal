@@ -161,6 +161,11 @@ namespace UnityEngine
 
         CanvasRendererNative Data => (CanvasRendererNative)NativeOrThrow;
 
+        internal override void EngineOnDestroy()
+        {
+            if (Data.Baked is { } baked) baked.ReleaseResources();
+        }
+
         /// Takes a copy of the mesh's geometry (Unity copies it into the canvas batch).
         public void SetMesh(Mesh mesh)
         {
@@ -623,6 +628,12 @@ namespace OniBrutal.Engine.UI
     internal sealed class CanvasRendererNative : ComponentNative
     {
         public CanvasGeometry Geometry;
+        /// The geometry baked into its canvas's space with its colour (CanvasSystem), reused
+        /// while geometry, placement and colour are unchanged.
+        public MeshNative Baked;
+        public CanvasGeometry BakedGeometry;
+        public Matrix4x4 BakedToSpace;
+        public Color BakedColor;
         public Material[] Materials = Array.Empty<Material>();
         public Material[] PopMaterials = Array.Empty<Material>();
         public bool HasPopInstruction;

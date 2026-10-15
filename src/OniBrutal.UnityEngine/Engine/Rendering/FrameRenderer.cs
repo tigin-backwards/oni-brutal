@@ -167,6 +167,9 @@ namespace OniBrutal.Engine.Rendering
                 foreach (var (path, scale) in captures) Capture(path, scale);
             captures.Clear();
             TemporaryRenderTextures.EndFrame();
+            // Device resources of objects the collector reclaimed (private meshes of destroyed
+            // renderers and the like).
+            GraphicsDevice.ReleaseOrphans();
             GraphicsDevice.Current.Present();
         }
 

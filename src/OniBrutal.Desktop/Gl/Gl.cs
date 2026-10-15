@@ -142,6 +142,11 @@ namespace OniBrutal.Desktop.Gl
             fixed (T* p = data) N.glBufferData(target, (nint)(data.Length * sizeof(T)), p, usage);
         }
 
+        public static void BufferSubData<T>(uint target, nint offset, ReadOnlySpan<T> data) where T : unmanaged
+        {
+            fixed (T* p = data) N.glBufferSubData(target, offset, (nint)(data.Length * sizeof(T)), p);
+        }
+
         public static uint CompileShader(uint type, string source, out string log)
         {
             var shader = N.glCreateShader((GlShaderType)type);

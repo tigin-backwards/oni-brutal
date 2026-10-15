@@ -49,10 +49,32 @@ namespace OniBrutal.Engine
             started = true;
         }
 
+        /// Diagnostics (`--frame-stats`): average phase times logged every 60 frames.
+        public static bool FrameStats;
+        static readonly System.Diagnostics.Stopwatch statClock = new();
+        static readonly double[] statTotals = new double[5]; // update, render, gui, end of frame, present
+        static int statFrames;
+
+        static void Mark(int phase)
+        {
+            if (!FrameStats) return;
+            statTotals[phase] += statClock.Elapsed.TotalMilliseconds;
+            statClock.Restart();
+        }
+
+        static void EndStats()
+        {
+            if (!FrameStats || ++statFrames < 60) return;
+            EngineLog.Engine($"frame stats (ms/frame over 60): update {statTotals[0] / 60:F2}, render {statTotals[1] / 60:F2}, gui {statTotals[2] / 60:F2}, end of frame {statTotals[3] / 60:F2}, present {statTotals[4] / 60:F2}");
+            Array.Clear(statTotals);
+            statFrames = 0;
+        }
+
         /// Runs one frame. realDelta is the wall time since the previous frame.
         public static void RunFrame(float realDelta)
         {
             if (!started) throw new InvalidOperationException("PlayerLoop.Initialize must run first");
+            if (FrameStats) statClock.Restart();
             Time.BeginFrame(realDelta);
             FrameStart?.Invoke();
 
@@ -85,13 +107,19 @@ namespace OniBrutal.Engine
             Lifecycle.ProcessDestroyQueue();
             PostLateUpdate?.Invoke();
             ParticleUpdate?.Invoke();
+            Mark(0);
             Render?.Invoke();
+            Mark(1);
             GUI?.Invoke();
+            Mark(2);
             Time.FrameRendered();
             Coroutines.RunEndOfFramePhase();
             Lifecycle.ProcessDestroyQueue();
             EngineLog.FlushToMainThread();
+            Mark(3);
             Present?.Invoke();
+            Mark(4);
+            EndStats();
         }
 
         /// Unity sends OnApplicationQuit to every active MonoBehaviour before shutting down.

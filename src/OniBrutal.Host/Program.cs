@@ -154,6 +154,7 @@ namespace OniBrutal.Host
                     case "--frames": o.Frames = int.Parse(args[++i]); break;
                     case "--trace-exceptions": o.TraceExceptions = true; break;
                     case "--input": o.Input.Add(args[++i]); break;
+                    case "--frame-stats": OniBrutal.Engine.PlayerLoop.FrameStats = true; break;
                     case "--native-override":
                         {
                             var spec = args[++i];
@@ -174,7 +175,7 @@ namespace OniBrutal.Host
                     }
                     default:
                         Console.Error.WriteLine($"Unknown option {args[i]}");
-                        Console.Error.WriteLine("usage: OniBrutal [--game DIR] [--log FILE] [--headless] [--batchmode] [--frames N] [--native-override NAME=PATH] [--trace-exceptions] [--input FRAME:ACTION[:ARGS]] [-screen-width W] [-screen-height H] [-screen-fullscreen 0|1] [-window-mode exclusive|borderless|windowed] [--check-types] [--check-assets] [--check-bind] [--check-shaders] [--capture FRAME:PATH[:SCALE]]");
+                        Console.Error.WriteLine("usage: OniBrutal [--game DIR] [--log FILE] [--headless] [--batchmode] [--frames N] [--native-override NAME=PATH] [--trace-exceptions] [--input FRAME:ACTION[:ARGS]] [--frame-stats] [-screen-width W] [-screen-height H] [-screen-fullscreen 0|1] [-window-mode exclusive|borderless|windowed] [--check-types] [--check-assets] [--check-bind] [--check-shaders] [--capture FRAME:PATH[:SCALE]]");
                         return null;
                 }
             }

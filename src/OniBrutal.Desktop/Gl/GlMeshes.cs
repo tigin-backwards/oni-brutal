@@ -20,6 +20,9 @@ namespace OniBrutal.Desktop.Gl
     {
         public int Version = -1;
         public readonly uint[] Buffers = new uint[(int)Channel.Count];
+        /// Allocated sizes in bytes; uploads that fit reuse the storage (glBufferSubData).
+        public readonly long[] Capacities = new long[(int)Channel.Count];
+        public long IndexCapacity;
         public readonly int[] Components = new int[(int)Channel.Count];
         /// Colours given as Color32 are unsigned bytes, normalized by the shader input.
         public bool ByteColors;
@@ -33,9 +36,11 @@ namespace OniBrutal.Desktop.Gl
                 {
                     GlApi.DeleteBuffer(Buffers[i]);
                     Buffers[i] = 0;
+                    Capacities[i] = 0;
                 }
             if (IndexBuffer != 0) GlApi.DeleteBuffer(IndexBuffer);
             IndexBuffer = 0;
+            IndexCapacity = 0;
         }
     }
 
@@ -93,7 +98,7 @@ namespace OniBrutal.Desktop.Gl
             int i = (int)c;
             if (d.Buffers[i] == 0) d.Buffers[i] = GlApi.GenBuffer();
             GlApi.BindBuffer(ArrayBuffer, d.Buffers[i]);
-            GlApi.BufferData<T>(ArrayBuffer, data, usage);
+            d.Capacities[i] = Fill<T>(ArrayBuffer, data, d.Capacities[i], usage);
             d.Components[i] = components;
         }
 
@@ -135,8 +140,22 @@ namespace OniBrutal.Desktop.Gl
             }
             if (d.IndexBuffer == 0) d.IndexBuffer = GlApi.GenBuffer();
             GlApi.BindBuffer(ElementArrayBuffer, d.IndexBuffer);
-            GlApi.BufferData<int>(ElementArrayBuffer, all.ToArray(), usage);
+            d.IndexCapacity = Fill<int>(ElementArrayBuffer, all.ToArray(), d.IndexCapacity, usage);
             d.SubMeshes = subs;
+        }
+
+        /// Writes data into the bound buffer: in place when it fits the current storage, else
+        /// into new storage. Returns the storage size.
+        static long Fill<T>(uint target, T[] data, long capacity, uint usage) where T : unmanaged
+        {
+            long bytes = (long)data.Length * sizeof(T);
+            if (bytes > 0 && bytes <= capacity)
+            {
+                GlApi.BufferSubData<T>(target, 0, data);
+                return capacity;
+            }
+            GlApi.BufferData<T>(target, data, usage);
+            return bytes;
         }
     }
 }

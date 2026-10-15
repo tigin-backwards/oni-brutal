@@ -303,12 +303,21 @@ namespace OniBrutal.Engine.UI
 
         static readonly string[] ClipKeywords = ["UNITY_UI_CLIP_RECT"];
 
-        /// The element's geometry in its canvas's space with its colour applied.
+        /// The element's geometry in its canvas's space with its colour applied; rebuilt only
+        /// when the geometry, its placement or its colour changed.
         static MeshNative BuildMesh(CanvasRendererNative r, Matrix4x4 toSpace, Color color)
         {
             var g = r.Geometry;
+            if (r.Baked != null && ReferenceEquals(r.BakedGeometry, g) && r.BakedToSpace.Equals(toSpace) && r.BakedColor.Equals(color))
+                return r.Baked;
             int n = g.Positions.Length;
-            var mesh = new MeshNative { VertexCount = n, Positions = new Vector3[n], Colors = new Color[n] };
+            var mesh = r.Baked ??= new MeshNative { Dynamic = true };
+            mesh.VertexCount = n;
+            mesh.Positions = new Vector3[n];
+            mesh.Colors = new Color[n];
+            r.BakedGeometry = g;
+            r.BakedToSpace = toSpace;
+            r.BakedColor = color;
             for (int i = 0; i < n; i++)
             {
                 mesh.Positions[i] = toSpace.MultiplyPoint3x4(g.Positions[i]);
@@ -324,6 +333,7 @@ namespace OniBrutal.Engine.UI
             mesh.Tangents = g.Tangents;
             mesh.SubMeshes = new List<SubMeshData> { new SubMeshData { Indices = g.Indices } };
             mesh.RecalculateBounds();
+            mesh.Changed();
             return mesh;
         }
 

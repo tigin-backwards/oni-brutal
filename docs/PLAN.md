@@ -212,3 +212,10 @@ Known behaviours not yet reproduced, each to be closed by a named milestone:
   CommandBuffer; IMGUI (OnGUI dispatch, built-in skin, layout, windows, text editing) verified
   on the GPU; shipped uGUI and TMP (SDF atlas, rich text, dynamic glyphs) render through the GL
   device. ApiCheck: 13 missing members (the UI Toolkit panel internals; see open items).
+- M4/M5 in progress (2026-10-15), driven by scripted runs (`--input`, offline Steam test
+  double): main menu, options, the new-game flow (game mode, asteroid style, destination,
+  worldgen with SimDLL, Duplicant selection, embark) and the colony run without exceptions; the
+  colony renders as the original (world composite with light buffer and property textures,
+  KAnim batches for Duplicants and buildings, gas, liquids, tiles, HUD, details panels with
+  nested canvases and RectMask2D). Next: gameplay soak (cycles at speed 3, dig/build orders,
+  save → reload → continue).

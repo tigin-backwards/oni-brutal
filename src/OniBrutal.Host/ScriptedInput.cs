@@ -8,7 +8,7 @@ namespace OniBrutal.Host
     /// `--input FRAME:ACTION[:ARGS]` (development and test runs): input delivered through the
     /// same feed as the window's, before the given frame. Positions are screen pixels with the
     /// origin at the top left (as in captures). Actions: `move:X,Y`, `click:X,Y` (left button
-    /// down, up the next frame), `key:KEYCODE` (down, up the next frame), `text:STRING`. A run
+    /// down, up the next frame), `press:X,Y` / `release:X,Y` (left button, for drags), `key:KEYCODE` (down, up the next frame), `text:STRING`. A run
     /// with a script ignores the window's own mouse and keyboard, so it is reproducible.
     sealed class ScriptedInput
     {
@@ -31,6 +31,8 @@ namespace OniBrutal.Host
                     At(frame, () => { Move(Point(arg)); feed.MouseDown(0, 0, Gui(Point(arg))); });
                     At(frame + 1, () => feed.MouseUp(0, 0, Gui(Point(arg))));
                     break;
+                case "press": At(frame, () => { Move(Point(arg)); feed.MouseDown(0, 0, Gui(Point(arg))); }); break;
+                case "release": At(frame, () => { Move(Point(arg)); feed.MouseUp(0, 0, Gui(Point(arg))); }); break;
                 case "key":
                     var key = Enum.Parse<KeyCode>(arg);
                     At(frame, () => feed.KeyDown(key, 0, repeat: false, Vector2.zero));

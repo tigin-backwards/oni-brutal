@@ -272,7 +272,9 @@ namespace OniBrutal.Engine.UI
         {
             var r = d.Renderer;
             float alpha = r.Color.a * InheritedAlpha(r.GameObject);
-            if (d.Material == null || (r.CullTransparentMesh && alpha <= 0f)) return null;
+            // An element whose inherited alpha (renderer alpha × CanvasGroups) is zero is not
+            // drawn, as in Unity (screens hidden through a CanvasGroup stay active).
+            if (d.Material == null || alpha <= 0f) return null;
             var spaceToWorld = d.Space.GameObject.Transform.LocalToWorld;
             var mesh = BuildMesh(r, spaceToWorld.inverse * r.GameObject.Transform.LocalToWorld, new Color(r.Color.r, r.Color.g, r.Color.b, alpha));
             var props = new PropertySheet();
@@ -303,6 +305,132 @@ namespace OniBrutal.Engine.UI
         }
 
         static readonly string[] ClipKeywords = ["UNITY_UI_CLIP_RECT"];
+
+        // ----- Batching -----
+
+        /// The batch's draws with consecutive draws of identical state (material, keywords,
+        /// property values) merged into one mesh, as Unity's canvas batching does; the drawing
+        /// order is unchanged.
+        static List<DrawItem> Batched(CanvasBatch b, bool overlay)
+        {
+            var items = new List<DrawItem>();
+            var run = new List<(DrawItem Item, CanvasRendererNative Renderer)>();
+            void Flush()
+            {
+                if (run.Count == 1) items.Add(run[0].Item);
+                else if (run.Count > 1) items.Add(Merge(run));
+                run.Clear();
+            }
+            foreach (var d in b.Draws)
+            {
+                if (Item(d, overlay) is not { } item) continue;
+                if (run.Count > 0 && !SameState(run[0].Item, item)) Flush();
+                run.Add((item, d.Renderer));
+            }
+            Flush();
+            return items;
+        }
+
+        static bool SameState(DrawItem a, DrawItem b)
+        {
+            if (a.Material != b.Material || !ReferenceEquals(a.Keywords, b.Keywords)) return false;
+            var x = a.Properties;
+            var y = b.Properties;
+            if (x.Textures.Count != y.Textures.Count || x.Vectors.Count != y.Vectors.Count || x.Floats.Count != y.Floats.Count) return false;
+            foreach (var (id, t) in x.Textures)
+                if (!y.Textures.TryGetValue(id, out var u) || !ReferenceEquals(t.Texture, u.Texture) || t.ScaleOffset != u.ScaleOffset) return false;
+            foreach (var (id, v) in x.Vectors)
+                if (!y.Vectors.TryGetValue(id, out var w) || v != w) return false;
+            foreach (var (id, f) in x.Floats)
+                if (!y.Floats.TryGetValue(id, out var g) || f != g) return false;
+            return true;
+        }
+
+        sealed class MergedRun
+        {
+            public MeshNative[] Parts = Array.Empty<MeshNative>();
+            public int[] Versions = Array.Empty<int>();
+            public readonly MeshNative Mesh = new() { Dynamic = true };
+        }
+
+        /// Merged meshes by the run's first renderer and material, reused while the parts are
+        /// the same meshes at the same versions.
+        static readonly System.Runtime.CompilerServices.ConditionalWeakTable<CanvasRendererNative, Dictionary<Material, MergedRun>> merged = new();
+
+        static DrawItem Merge(List<(DrawItem Item, CanvasRendererNative Renderer)> run)
+        {
+            var first = run[0];
+            var runs = merged.GetValue(first.Renderer, _ => new Dictionary<Material, MergedRun>());
+            if (!runs.TryGetValue(first.Item.Material, out var m)) runs[first.Item.Material] = m = new MergedRun();
+            bool same = m.Parts.Length == run.Count;
+            for (int i = 0; same && i < run.Count; i++)
+                same = ReferenceEquals(m.Parts[i], run[i].Item.Mesh) && m.Versions[i] == run[i].Item.Mesh.Version;
+            if (!same)
+            {
+                m.Parts = new MeshNative[run.Count];
+                m.Versions = new int[run.Count];
+                for (int i = 0; i < run.Count; i++)
+                {
+                    m.Parts[i] = run[i].Item.Mesh;
+                    m.Versions[i] = run[i].Item.Mesh.Version;
+                }
+                Concatenate(m.Parts, m.Mesh);
+            }
+            var item = first.Item;
+            item.Mesh = m.Mesh;
+            return item;
+        }
+
+        static void Concatenate(MeshNative[] parts, MeshNative mesh)
+        {
+            int vertices = 0, indices = 0;
+            bool normals = false, tangents = false;
+            var uvs = new bool[4];
+            foreach (var p in parts)
+            {
+                vertices += p.VertexCount;
+                indices += p.SubMeshes[0].Indices.Length;
+                normals |= p.Normals != null;
+                tangents |= p.Tangents != null;
+                for (int u = 0; u < 4; u++) uvs[u] |= p.Uvs[u] != null;
+            }
+            var positions = new Vector3[vertices];
+            var colors = new Color[vertices];
+            var normalData = normals ? new Vector3[vertices] : null;
+            var tangentData = tangents ? new Vector4[vertices] : null;
+            var uvData = new Vector4[4][];
+            for (int u = 0; u < 4; u++) uvData[u] = uvs[u] ? new Vector4[vertices] : null;
+            var indexData = new int[indices];
+            int v = 0, k = 0;
+            foreach (var p in parts)
+            {
+                int n = p.VertexCount;
+                Array.Copy(p.Positions, 0, positions, v, n);
+                Array.Copy(p.Colors, 0, colors, v, n);
+                if (normalData != null)
+                    for (int i = 0; i < n; i++) normalData[v + i] = p.Normals != null ? p.Normals[i] : new Vector3(0f, 0f, -1f);
+                if (tangentData != null)
+                    for (int i = 0; i < n; i++) tangentData[v + i] = p.Tangents != null ? p.Tangents[i] : new Vector4(1f, 0f, 0f, -1f);
+                for (int u = 0; u < 4; u++)
+                    if (uvData[u] != null && p.Uvs[u] != null) Array.Copy(p.Uvs[u], 0, uvData[u], v, n);
+                foreach (int index in p.SubMeshes[0].Indices) indexData[k++] = index + v;
+                v += n;
+            }
+            mesh.Clear();
+            mesh.VertexCount = vertices;
+            mesh.Positions = positions;
+            mesh.Colors = colors;
+            mesh.Normals = normalData;
+            mesh.Tangents = tangentData;
+            for (int u = 0; u < 4; u++)
+            {
+                mesh.Uvs[u] = uvData[u];
+                mesh.UvDimensions[u] = uvData[u] != null ? 4 : 0;
+            }
+            mesh.SubMeshes = new List<SubMeshData> { new SubMeshData { Indices = indexData } };
+            mesh.RecalculateBounds();
+            mesh.Changed();
+        }
 
         /// The element's geometry in its canvas's space with its colour applied; rebuilt only
         /// when the geometry, its placement or its colour changed.
@@ -357,9 +485,8 @@ namespace OniBrutal.Engine.UI
                     device.SetCamera(new CameraConstants(Matrix4x4.identity, Matrix4x4.Ortho(0f, size.x, 0f, size.y, -1000f, 1000f), Vector3.zero, -1000f, 1000f, true, size));
                     bound = true;
                 }
-                foreach (var d in b.Draws)
-                    if (Item(d, overlay: true) is { } item)
-                        device.Draw(new DrawRequest(item.Mesh, 0, item.ObjectToWorld, item.Material, -1, item.Properties, item.Keywords));
+                foreach (var item in Batched(b, overlay: true))
+                    device.Draw(new DrawRequest(item.Mesh, 0, item.ObjectToWorld, item.Material, -1, item.Properties, item.Keywords));
             }
         }
 
@@ -375,9 +502,8 @@ namespace OniBrutal.Engine.UI
                 if (root.RenderMode == RenderMode.WorldSpace && (cam.CullingMask & (1 << b.Canvas.GameObject.Layer)) == 0) continue;
                 var sorting = SortingOf(b);
                 var center = Hierarchy.Position(b.Canvas.GameObject.Transform);
-                foreach (var d in b.Draws)
+                foreach (var item in Batched(b, overlay: false))
                 {
-                    if (Item(d, overlay: false) is not { } item) continue;
                     item.SortingLayerValue = SortingLayers.ValueOf(sorting.SortingLayerId);
                     item.SortingOrder = sorting.SortingOrder;
                     item.WorldBounds = new Bounds(center, Vector3.zero);

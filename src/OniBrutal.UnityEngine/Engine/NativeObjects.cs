@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using OniBrutal.Assets.TypeTrees;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -24,6 +25,14 @@ namespace OniBrutal.Engine
 
         /// Copies engine-side state for Instantiate (each record type adds its own state).
         public virtual void CopyStateFrom(NativeObject source) { }
+
+        /// Serialized data of an engine object loaded from an asset file, kept until the owning
+        /// subsystem's Bind consumes it.
+        public OniBrutal.Assets.TypeTrees.Fields Serialized;
+
+        /// Builds engine state from serialized data once references can be resolved. Record types
+        /// of subsystems that bind their data override it and clear Serialized.
+        public virtual void Bind(OniBrutal.Assets.TypeTrees.Fields data, OniBrutal.Engine.Serialization.IReferenceResolver resolver) { }
     }
 
     /// Identity of an object loaded from a file: the file and the object's pathID in it.

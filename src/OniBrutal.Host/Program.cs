@@ -37,8 +37,7 @@ namespace OniBrutal.Host
             if (options.CheckAssets) return AssetCheck.Run(dataDir);
             if (options.DumpScript != null) return AssetCheck.Dump(dataDir, options.DumpScript);
 
-            Console.Error.WriteLine("The player loop is not available yet (milestone M2).");
-            return 2;
+            return Player.Run(options, dataDir);
         }
 
         /// M0 gate: every type of every loaded assembly must load, as the game's whole-domain

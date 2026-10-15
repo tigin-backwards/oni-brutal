@@ -1,0 +1,85 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using OniBrutal.Assets.Files;
+using OniBrutal.Assets.TypeTrees;
+using UnityEngine;
+
+namespace OniBrutal.Engine.Assets
+{
+    /// The project's settings managers from globalgamemanagers (and the MonoScript table in
+    /// globalgamemanagers.assets), installed into the engine before any game code runs.
+    internal static class ProjectSettings
+    {
+        public sealed record ResourceEntry(string Path, PPtr Target);
+        public sealed record InputAxis(string Name, string NegativeButton, string PositiveButton, string AltNegativeButton, string AltPositiveButton,
+            float Gravity, float Dead, float Sensitivity, bool Snap, bool Invert, int Type, int Axis, int JoyNum);
+
+        public static SerializedFile Managers { get; private set; }
+        public static IReadOnlyList<string> BuildScenes { get; private set; } = Array.Empty<string>();
+        public static IReadOnlyList<ResourceEntry> ResourceContainer { get; private set; } = Array.Empty<ResourceEntry>();
+        public static IReadOnlyList<InputAxis> InputAxes { get; private set; } = Array.Empty<InputAxis>();
+        public static Fields PlayerSettings { get; private set; }
+        public static Fields QualitySettings { get; private set; }
+        public static Fields GraphicsSettings { get; private set; }
+
+        public static void Load()
+        {
+            Managers = AssetSystem.Get("globalgamemanagers");
+            EngineConfig.UnityVersion = Managers.UnityVersion;
+
+            var tags = Read("TagManager");
+            Layers.Install(tags.Array("layers").Cast<string>().ToArray());
+            Tags.InstallList(tags.Array("tags").Cast<string>().ToArray());
+
+            var time = Read("TimeManager");
+            var fixedStep = time.Struct("Fixed Timestep");
+            var rate = fixedStep.Struct("m_Rate");
+            float fixedSeconds = (float)((double)fixedStep.Get<long>("m_Count") * rate.Get<uint>("m_Denominator") / rate.Get<uint>("m_Numerator"));
+            Time.Configure(fixedSeconds, time.Float("Maximum Allowed Timestep"), time.Float("m_TimeScale"), time.Float("Maximum Particle Timestep"));
+
+            BuildScenes = Read("BuildSettings").Array("scenes").Cast<string>().ToArray();
+
+            ResourceContainer = Read("ResourceManager").Array("m_Container").Cast<Fields>()
+                .Select(p => new ResourceEntry(p.String("first"), p.PPtr("second"))).ToArray();
+
+            InputAxes = Read("InputManager").Array("m_Axes").Cast<Fields>().Select(a => new InputAxis(
+                a.String("m_Name"), a.String("negativeButton"), a.String("positiveButton"), a.String("altNegativeButton"), a.String("altPositiveButton"),
+                a.Float("gravity"), a.Float("dead"), a.Float("sensitivity"), a.Bool("snap"), a.Bool("invert"), a.Int("type"), a.Int("axis"), a.Int("joyNum"))).ToArray();
+
+            PlayerSettings = Read("PlayerSettings");
+            EngineConfig.CompanyName = PlayerSettings.String("companyName");
+            EngineConfig.ProductName = PlayerSettings.String("productName");
+            EngineConfig.Version = PlayerSettings.String("bundleVersion");
+
+            QualitySettings = Read("QualitySettings");
+            GraphicsSettings = Read("GraphicsSettings");
+
+            LoadScriptExecutionOrders();
+        }
+
+        static Fields Read(string managerName)
+        {
+            int id = TypeTreeDatabase.GetByName(managerName).Id;
+            var obj = Managers.Objects.FirstOrDefault(o => Managers.TypeOf(o).ClassId == id)
+                      ?? throw new InvalidDataException("globalgamemanagers has no " + managerName);
+            return TypeTreeReader.ReadNative(id, Managers.OpenObject(obj));
+        }
+
+        /// Script execution order comes from each MonoScript's m_ExecutionOrder.
+        static void LoadScriptExecutionOrders()
+        {
+            var scripts = AssetSystem.Get("globalgamemanagers.assets");
+            foreach (var obj in scripts.Objects)
+            {
+                if (scripts.TypeOf(obj).ClassId != 115) continue;
+                var f = TypeTreeReader.ReadNative(115, scripts.OpenObject(obj));
+                int order = f.Int("m_ExecutionOrder");
+                if (order == 0) continue;
+                var ns = f.String("m_Namespace");
+                ScriptInfo.SetExecutionOrder(ns.Length > 0 ? ns + "." + f.String("m_ClassName") : f.String("m_ClassName"), order);
+            }
+        }
+    }
+}

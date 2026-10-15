@@ -95,6 +95,28 @@ namespace OniBrutal.Engine
         public static void Install(IEnumerable<string> customTags) => custom = new HashSet<string>(customTags, StringComparer.Ordinal);
 
         public static bool IsDefined(string tag) => tag != null && (builtIn.Contains(tag) || custom.Contains(tag));
+
+        static string[] customList = Array.Empty<string>();
+
+        public static void InstallList(string[] customTags)
+        {
+            customList = customTags;
+            Install(customTags);
+        }
+
+        /// GameObject.m_Tag: Unity's built-in tag indices, then custom tags from 20000.
+        public static string FromIndex(ushort index) => index switch
+        {
+            0 => "Untagged",
+            1 => "Respawn",
+            2 => "Finish",
+            3 => "EditorOnly",
+            5 => "MainCamera",
+            6 => "Player",
+            7 => "GameController",
+            >= 20000 when index - 20000 < customList.Length => customList[index - 20000],
+            _ => throw new System.IO.InvalidDataException($"Unknown tag index {index}."),
+        };
     }
 
     /// SendMessage and BroadcastMessage.

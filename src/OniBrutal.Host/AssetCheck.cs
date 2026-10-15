@@ -101,6 +101,13 @@ namespace OniBrutal.Host
             }
 
             Console.WriteLine($"native objects: {natives}, script objects: {behaviours} ({perClass.Count} classes)");
+            var classIds = opened.SelectMany(f => f.Objects.Select(o => f.TypeOf(o).ClassId)).Distinct().OrderBy(i => i);
+            foreach (var id in classIds)
+            {
+                if (id is MonoBehaviourId or MonoScriptId or 1 or 4 or 224 or 104 or 157 or 196) continue;
+                var name = TypeTreeDatabase.Get(id).Name;
+                if (OniBrutal.Engine.Assets.Binders.EngineTypeOf(name) == null) Console.WriteLine($"NO ENGINE TYPE {name} ({id})");
+            }
             foreach (var u in unresolved) Console.WriteLine("UNRESOLVED script " + u);
             foreach (var f in failures.Take(60)) Console.WriteLine("FAIL " + f);
             Console.WriteLine($"{failures.Count} failures, {unresolved.Count} unresolved scripts");

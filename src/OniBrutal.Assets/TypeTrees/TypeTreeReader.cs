@@ -108,6 +108,8 @@ namespace OniBrutal.Assets.TypeTrees
             }
             if (node.TypeName.StartsWith("PPtr<", StringComparison.Ordinal))
                 return new PPtr(r.ReadInt32(), r.ReadInt64());
+            // Containers (vector, map, set, staticvector) are a wrapper around one Array node.
+            if (node.Children.Count == 1 && node.Children[0].IsArray) return ReadValue(node.Children[0], r);
             return ReadFields(node, r);
         }
 

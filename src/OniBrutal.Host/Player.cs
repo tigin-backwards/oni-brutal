@@ -20,6 +20,7 @@ namespace OniBrutal.Host
             ProjectSettings.Load();
             PlayerLoop.Initialize();
             OniBrutal.Engine.Platform.PlatformLoop.Install(null);
+            OniBrutal.Engine.Rendering.FrameRenderer.Install();
             EngineLog.Engine($"Project: {EngineConfig.CompanyName} / {EngineConfig.ProductName} {EngineConfig.Version} (Unity {EngineConfig.UnityVersion})");
 
             var hooks = RuntimeInitializeHooks.Load(dataDir);

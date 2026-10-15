@@ -194,6 +194,10 @@ namespace UnityEngine
 
         public void SetMaterials(List<Material> materials) => SetSharedMaterials(materials);
 
+        internal override void EngineAwake() => FrameRenderer.Register(RendererData);
+
+        internal override void EngineOnDestroy() => FrameRenderer.Unregister(RendererData);
+
         public bool HasPropertyBlock() => RendererData.PropertyBlock is { IsEmpty: false };
 
         /// Copies the block's values (null clears them).
@@ -583,6 +587,84 @@ namespace OniBrutal.Engine.Rendering
             }
         }
 
+        MeshNative geometry;
+        (Sprite Sprite, Color Color, bool FlipX, bool FlipY, SpriteDrawKind Mode, Vector2 Size, SpriteRenderData Render) geometryKey;
+
+        /// The drawn geometry: the sprite's mesh (Simple) or a 9-slice grid of `Size` (Sliced),
+        /// with flips applied to positions and the colour in vertex colours.
+        public MeshNative GeometryMesh(SpriteNative s)
+        {
+            var key = (Sprite, Color, FlipX, FlipY, DrawMode, Size, s.Render);
+            if (geometry != null && key.Equals(geometryKey)) return geometry;
+            geometryKey = key;
+            geometry ??= new MeshNative();
+            Vector2[] positions, uvs;
+            int[] triangles;
+            if (DrawMode == SpriteDrawKind.Sliced) SlicedGrid(s, out positions, out uvs, out triangles);
+            else
+            {
+                positions = s.Vertices;
+                uvs = s.ComputeUvs();
+                triangles = Array.ConvertAll(s.Triangles, t => (int)t);
+            }
+            float fx = FlipX ? -1f : 1f, fy = FlipY ? -1f : 1f;
+            var g = geometry;
+            g.VertexCount = positions.Length;
+            g.Positions = new Vector3[positions.Length];
+            g.Colors = new Color[positions.Length];
+            var uv0 = new Vector4[positions.Length];
+            for (int i = 0; i < positions.Length; i++)
+            {
+                g.Positions[i] = new Vector3(positions[i].x * fx, positions[i].y * fy, 0f);
+                g.Colors[i] = Color;
+                uv0[i] = uvs[i];
+            }
+            g.Uvs[0] = uv0;
+            g.UvDimensions[0] = 2;
+            // Flipping one axis reverses the winding; keep triangles front-facing.
+            if (FlipX != FlipY)
+                for (int i = 0; i + 2 < triangles.Length; i += 3) (triangles[i + 1], triangles[i + 2]) = (triangles[i + 2], triangles[i + 1]);
+            g.SubMeshes = new List<SubMeshData> { new SubMeshData { Indices = triangles } };
+            g.RecalculateBounds();
+            return g;
+        }
+
+        /// 4×4 vertices: borders keep their size in units (scaled down when Size is smaller than
+        /// both borders), the centre stretches.
+        void SlicedGrid(SpriteNative s, out Vector2[] positions, out Vector2[] uvs, out int[] triangles)
+        {
+            float ppu = s.PixelsPerUnit;
+            var border = s.Border / ppu;
+            var pivot = s.Pivot;
+            float left = -pivot.x * Size.x, bottom = -pivot.y * Size.y;
+            float w = Math.Abs(Size.x), h = Math.Abs(Size.y);
+            float bl = border.x, br = border.z, bb = border.y, bt = border.w;
+            if (bl + br > w && bl + br > 0f) { float k = w / (bl + br); bl *= k; br *= k; }
+            if (bb + bt > h && bb + bt > 0f) { float k = h / (bb + bt); bb *= k; bt *= k; }
+            float[] xs = [left, left + bl, left + w - br, left + w];
+            float[] ys = [bottom, bottom + bb, bottom + h - bt, bottom + h];
+            var outer = s.OuterUvs();
+            var inner = s.InnerUvs();
+            float[] us = [outer.x, inner.x, inner.z, outer.z];
+            float[] vs = [outer.y, inner.y, inner.w, outer.w];
+            positions = new Vector2[16];
+            uvs = new Vector2[16];
+            for (int y = 0; y < 4; y++)
+                for (int x = 0; x < 4; x++)
+                {
+                    positions[y * 4 + x] = new Vector2(xs[x], ys[y]);
+                    uvs[y * 4 + x] = new Vector2(us[x], vs[y]);
+                }
+            var list = new List<int>(54);
+            for (int y = 0; y < 3; y++)
+                for (int x = 0; x < 3; x++)
+                {
+                    int i = y * 4 + x;
+                    list.AddRange([i, i + 4, i + 1, i + 1, i + 4, i + 5]);
+                }
+            triangles = list.ToArray();
+        }
+
         public override void CopyStateFrom(NativeObject source)
         {
             base.CopyStateFrom(source);
@@ -609,6 +691,7 @@ namespace OniBrutal.Engine.Rendering
             FlipX = f.Bool("m_FlipX");
             FlipY = f.Bool("m_FlipY");
             DrawMode = (SpriteDrawKind)f.Int("m_DrawMode");
+            if (DrawMode == SpriteDrawKind.Tiled) throw new System.IO.InvalidDataException("Tiled sprite renderers are not supported.");
             var size = f.Struct("m_Size");
             Size = new Vector2(size.Float("x"), size.Float("y"));
             AdaptiveModeThreshold = f.Float("m_AdaptiveModeThreshold");

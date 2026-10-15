@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -70,6 +71,57 @@ namespace OniBrutal.Engine.Rendering
 
         /// Compiles every shader program in advance (Shader.WarmupAllShaders).
         public abstract void WarmupShaders();
+
+        /// Subsequent drawing goes to these surfaces.
+        public abstract void SetRenderTarget(in RenderTargetBinding target);
+
+        /// Viewport in pixels of the current target.
+        public abstract void SetViewport(Rect pixels);
+
+        public abstract void Clear(bool color, bool depth, Color backgroundColor, float depthValue);
+
+        /// View and projection (Unity convention; the device applies its clip-space rules) for
+        /// the following draws, with the camera's built-in shader constants.
+        public abstract void SetCamera(in CameraConstants camera);
+
+        /// Draws one submesh with a material pass (-1: every pass), the renderer's property
+        /// block (may be null) and global shader state.
+        public abstract void Draw(in DrawRequest draw);
+
+        /// Draws GL immediate-mode geometry with the pass activated by SetPass.
+        public abstract void DrawImmediate(ImmediatePrimitive primitive, ReadOnlySpan<ImmediateVertex> vertices, Matrix4x4 modelView, Matrix4x4 projection);
+
+        /// Shows the frame (swap buffers).
+        public abstract void Present();
+    }
+
+    /// The colour and depth surfaces drawing goes to; null colours are the back buffer.
+    internal readonly record struct RenderTargetBinding(RenderTextureNative[] Colors, RenderTextureNative Depth, int MipLevel)
+    {
+        public static readonly RenderTargetBinding BackBuffer = new(null, null, 0);
+        public static RenderTargetBinding Of(RenderTextureNative texture) => texture == null ? BackBuffer : new([texture], texture, 0);
+    }
+
+    internal readonly record struct CameraConstants(Matrix4x4 View, Matrix4x4 Projection, Vector3 Position, float Near, float Far, bool Orthographic, Vector2 TargetSize);
+
+    internal readonly record struct DrawRequest(MeshNative Mesh, int SubMesh, Matrix4x4 ObjectToWorld, Material Material, int Pass, PropertySheet Properties);
+
+    /// GL.Begin modes (GL.TRIANGLES = 4, TRIANGLE_STRIP = 5, QUADS = 7, LINES = 1, LINE_STRIP = 2).
+    internal enum ImmediatePrimitive
+    {
+        Lines = 1,
+        LineStrip = 2,
+        Triangles = 4,
+        TriangleStrip = 5,
+        Quads = 7,
+    }
+
+    internal struct ImmediateVertex
+    {
+        public Vector3 Position;
+        public Color Color;
+        /// Texture coordinates per unit (GL.MultiTexCoord); unit 0 is GL.TexCoord.
+        public Vector4 Uv0, Uv1, Uv2, Uv3, Uv4, Uv5, Uv6, Uv7;
     }
 
     /// Unity's null graphics device (-nographics): it accepts all work and produces nothing; no
@@ -88,6 +140,15 @@ namespace OniBrutal.Engine.Rendering
 
         // The null device has no programs to compile.
         public override void WarmupShaders() { }
+
+        // The null device accepts all rendering work and produces no output.
+        public override void SetRenderTarget(in RenderTargetBinding target) { }
+        public override void SetViewport(Rect pixels) { }
+        public override void Clear(bool color, bool depth, Color backgroundColor, float depthValue) { }
+        public override void SetCamera(in CameraConstants camera) { }
+        public override void Draw(in DrawRequest draw) { }
+        public override void DrawImmediate(ImmediatePrimitive primitive, ReadOnlySpan<ImmediateVertex> vertices, Matrix4x4 modelView, Matrix4x4 projection) { }
+        public override void Present() { }
     }
 
     internal static class GraphicsDevice

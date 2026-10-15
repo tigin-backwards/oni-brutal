@@ -21,7 +21,7 @@ namespace UnityEngine
             var key = path.ToLowerInvariant();
             foreach (var entry in ProjectSettings.ResourceContainer)
             {
-                if (entry.Path != key) continue;
+                if (entry.Path != key || ObjectLoader.IsScriptAsset(ProjectSettings.Managers, entry.Target)) continue;
                 var obj = ObjectLoader.Resolve(ProjectSettings.Managers, entry.Target);
                 if (obj != null && systemTypeInstance.IsInstanceOfType(obj)) return obj;
             }
@@ -46,6 +46,7 @@ namespace UnityEngine
             foreach (var entry in ProjectSettings.ResourceContainer)
             {
                 if (!(key.Length == 0 || entry.Path == key || entry.Path.StartsWith(key + "/", StringComparison.Ordinal))) continue;
+                if (ObjectLoader.IsScriptAsset(ProjectSettings.Managers, entry.Target)) continue;
                 var obj = ObjectLoader.Resolve(ProjectSettings.Managers, entry.Target);
                 if (obj != null && systemTypeInstance.IsInstanceOfType(obj) && !result.Contains(obj)) result.Add(obj);
             }

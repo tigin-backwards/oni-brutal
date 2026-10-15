@@ -80,6 +80,17 @@ namespace OniBrutal.Engine.Assets
         /// which Unity calls after the whole object graph is in place).
         public static void AfterLoad(Action action) => afterLoad.Enqueue(action);
 
+        /// The native class of the object a PPtr designates, without loading it (-1 if missing).
+        public static int ClassIdOf(SerializedFile from, PPtr pptr)
+        {
+            if (pptr.IsNull) return -1;
+            var file = AssetSystem.ResolveExternal(from, pptr.FileId);
+            return file.ObjectsById.TryGetValue(pptr.PathId, out var info) ? file.TypeOf(info).ClassId : -1;
+        }
+
+        /// MonoScripts exist in player data but have no managed object in a player.
+        public static bool IsScriptAsset(SerializedFile from, PPtr pptr) => ClassIdOf(from, pptr) == 115;
+
         public static Object Resolve(SerializedFile from, PPtr pptr)
             => pptr.IsNull ? null : Load(AssetSystem.ResolveExternal(from, pptr.FileId), pptr.PathId);
 

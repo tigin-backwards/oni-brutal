@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 
 namespace OniBrutal.Engine
@@ -20,6 +21,7 @@ namespace OniBrutal.Engine
         static int nextGeneration;
         static int nextRuntimeId;   // runtime-created objects: negative ids, like Unity
         static int nextPersistentId; // objects loaded from files: positive ids
+        static readonly System.Collections.Generic.Dictionary<int, NativeObject> byInstanceId = new();
 
         public static IntPtr Register(NativeObject obj)
         {
@@ -40,6 +42,7 @@ namespace OniBrutal.Engine
                 obj.Generation = ++nextGeneration;
                 obj.Slot = index;
                 Volatile.Write(ref slots[index], obj);
+                byInstanceId[obj.InstanceId] = obj;
                 return Pack(index, obj.Generation);
             }
         }
@@ -51,6 +54,7 @@ namespace OniBrutal.Engine
                 var table = slots;
                 if (obj.Slot <= 0 || !ReferenceEquals(table[obj.Slot], obj)) return;
                 Volatile.Write(ref table[obj.Slot], null);
+                if (byInstanceId.TryGetValue(obj.InstanceId, out var o) && ReferenceEquals(o, obj)) byInstanceId.Remove(obj.InstanceId);
                 if (freeCount == freeSlots.Length) Array.Resize(ref freeSlots, freeSlots.Length * 2);
                 freeSlots[freeCount++] = obj.Slot;
                 obj.Slot = 0;
@@ -67,6 +71,12 @@ namespace OniBrutal.Engine
             if ((uint)index >= (uint)table.Length) return null;
             var obj = Volatile.Read(ref table[index]);
             return obj != null && obj.Generation == generation ? obj : null;
+        }
+
+        /// The live object with this instance id, if any.
+        public static NativeObject FindByInstanceId(int instanceId)
+        {
+            lock (gate) return byInstanceId.GetValueOrDefault(instanceId);
         }
 
         static IntPtr Pack(int index, int generation) => (IntPtr)(((long)generation << 32) | (uint)index);

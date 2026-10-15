@@ -13,6 +13,7 @@ namespace OniBrutal.Engine
             // Engine components with their own native state. One list, so registration never
             // depends on type initialization order.
             [typeof(CanvasGroup)] = () => new CanvasGroupNative(),
+            [typeof(Camera)] = () => new Rendering.CameraNative(),
             [typeof(Renderer)] = () => new Rendering.RendererNative(),
             [typeof(MeshRenderer)] = () => new Rendering.MeshRendererNative(),
             [typeof(SpriteRenderer)] = () => new Rendering.SpriteRendererNative(),

@@ -268,6 +268,30 @@ namespace OniBrutal.Engine.UI
                     foreach (var m in r.PopMaterials) batch.Draws.Add(new CanvasDraw(r, space, m, pop: true, groupAlpha));
         }
 
+        /// Diagnostics (`--probe-ui`): the elements of the last build drawn at a screen point
+        /// (pixels from the bottom left), in drawing order, with what they draw.
+        public static string Probe(Vector2 screen)
+        {
+            var text = new System.Text.StringBuilder($"canvas elements at ({screen.x}, {screen.y}):");
+            foreach (var b in batches)
+            {
+                if (!IsOverlay(b.Root)) continue;
+                var p = b.WorldToSpace.MultiplyPoint3x4(new Vector3(screen.x, screen.y, 0f));
+                foreach (var d in b.Draws)
+                {
+                    var mesh = d.Renderer.Baked;
+                    if (mesh == null || mesh.VertexCount == 0) continue;
+                    var bounds = mesh.Bounds;
+                    if (p.x < bounds.min.x || p.x > bounds.max.x || p.y < bounds.min.y || p.y > bounds.max.y) continue;
+                    var path = new System.Text.StringBuilder();
+                    for (var t = d.Renderer.GameObject.Transform; t != null; t = t.Parent) path.Insert(0, "/" + t.GameObject.Name);
+                    var texture = d.Renderer.Texture ?? d.Material?.mainTexture;
+                    text.Append($"\n  {path} depth {d.Renderer.AbsoluteDepth} material {d.Material?.name} ({d.Material?.shader?.name}) texture {texture?.name ?? "none"} colour {d.Renderer.Color} group alpha {d.GroupAlpha}{(d.Pop ? " pop" : "")}");
+                }
+            }
+            return text.ToString();
+        }
+
         // ----- Drawing -----
 
         static readonly int MainTex = ShaderPropertyIds.Get("_MainTex");

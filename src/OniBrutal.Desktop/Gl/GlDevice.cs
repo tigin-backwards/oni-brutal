@@ -68,31 +68,23 @@ namespace OniBrutal.Desktop.Gl
         readonly GlfwPlatform platform;
         readonly GlCaps caps = new();
         readonly uint immediateBuffer, immediateIndices;
-        /// Every draw's uniform blocks are sub-allocated from one ring buffer and bound by range;
-        /// the buffer is reallocated (orphaned) only when the ring wraps, not per draw.
-        const int UniformRingSize = 16 << 20;
-        uint uniformRing;
-        int uniformRingOffset = UniformRingSize;
-        int uniformAlignment = 256;
+        /// Every draw's uniform blocks are written to a stream buffer and bound by range.
+        const int UniformStreamSize = 16 << 20;
+        GlStreamBuffer uniformStream;
 
         void BindUniformBlock(uint index, byte[] data)
         {
-            if (uniformRing == 0)
-            {
-                uniformRing = GlApi.GenBuffer();
-                uniformAlignment = Math.Max(1, GlApi.GetInteger(UniformBufferOffsetAlignment));
-            }
-            GlApi.BindBuffer(UniformBuffer, uniformRing);
+            uniformStream ??= new GlStreamBuffer(UniformBuffer, UniformStreamSize, GlApi.GetInteger(UniformBufferOffsetAlignment));
             int size = Math.Max(data.Length, 16);
-            int offset = (uniformRingOffset + uniformAlignment - 1) / uniformAlignment * uniformAlignment;
-            if (offset + size > UniformRingSize)
+            int offset;
+            if (data.Length >= size) offset = uniformStream.Write(data);
+            else
             {
-                N.glBufferData(UniformBuffer, UniformRingSize, null, StreamDraw);
-                offset = 0;
+                Span<byte> padded = stackalloc byte[size];
+                data.CopyTo(padded);
+                offset = uniformStream.Write(padded);
             }
-            GlApi.BufferSubData<byte>(UniformBuffer, offset, data);
-            N.glBindBufferRange(UniformBuffer, index, new GlBuffer(uniformRing), offset, size);
-            uniformRingOffset = offset + size;
+            N.glBindBufferRange(UniformBuffer, index, new GlBuffer(uniformStream.Id), offset, size);
         }
         readonly Dictionary<string, DeviceTexture> defaults = new();
         readonly Dictionary<ShaderPass, PassState> passStates = new();
@@ -596,6 +588,8 @@ namespace OniBrutal.Desktop.Gl
         public override void Present()
         {
             if (gpuTiming) EndGpuTiming();
+            uniformStream?.FenceFrame();
+            GlTextures.EndFrame();
             presenter.Present(QualitySettings.vSyncCount);
             framebufferValid = false;
             if (gpuTiming) BeginGpuTiming();

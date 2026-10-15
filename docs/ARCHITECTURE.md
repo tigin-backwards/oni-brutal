@@ -338,18 +338,22 @@ X11 — overlaps the next frame's game work. We keep all GL calls on the main th
 the same way: the main thread renders with the context of a hidden window shared with the
 visible one, into an offscreen back buffer (colour texture + depth-stencil); `Present` fences the
 frame and hands it to a presenter thread current on the window's context, which waits for the
-fence on the GPU, blits to the window, swaps with `QualitySettings.vSyncCount` as the interval,
-and finishes. One frame is in flight: presenting waits until the previous frame has been
+fence on its own thread (neither context's GPU queue waits on the other's), blits to the window,
+swaps with `QualitySettings.vSyncCount` as the interval, and finishes. One frame is in flight: presenting waits until the previous frame has been
 presented, and two back buffers alternate. Back-buffer reads (`ReadPixels` of the screen,
 captures) read the offscreen buffer of the current frame. Pacing follows Unity's desktop
 player: with vSync the swap paces frames; otherwise `Application.targetFrameRate` when set;
 otherwise none. Without a display (`--headless`, `--batchmode`) frames are paced at
 `targetFrameRate` or 60 Hz.
 
-Texture content updates into storage of unchanged size and format (`Apply` on the game's
-per-frame property textures) go through a pixel-unpack ring buffer: the driver copies into the
-texture on the GPU, ordered after the draws that read its previous content, instead of
-stalling until those draws finish to write from client memory.
+Per-draw uniform blocks and texture content updates into storage of unchanged size and format
+(`Apply` on the game's per-frame property textures) are streamed through ring buffers that stay
+persistently mapped for the device's lifetime (`GlStreamBuffer`, ARB_buffer_storage): data is
+copied into the mapping, uniform blocks are bound by range, texture updates are copied by the
+driver from the ring on the GPU (ordered after the draws that read the previous content), and a
+fence per frame keeps a region from being reused before the GPU has consumed it. Storage is never
+respecified (no orphaning), so the driver neither stalls on the buffer nor recycles orphaned
+allocations.
 
 **UI rendering.** `Canvas` implements Unity's canvas batching: per root canvas, walk
 `CanvasRenderer`s in hierarchy order, apply `CanvasGroup` alpha, `RectMask2D` clip rects
@@ -461,7 +465,8 @@ the screen and every live render texture as PNG at the end of a frame; `--dump-s
 writes a shader's GLCore variants and pass state; `--frame-stats` logs per-phase frame times
 and the GPU time per frame (timer queries); `--max-frame-rate N[:FRAMES]` bounds the frame rate
 (for the first FRAMES frames) so scripted schedules that count frames hold on unpaced displays;
-`--check-*` run the corpus gates.
+`--probe-ui FRAME:X,Y` logs the canvas elements drawn at a window point with their hierarchy
+path, material, texture, colour and group alpha; `--check-*` run the corpus gates.
 
 ## 8. Repository layout
 

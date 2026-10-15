@@ -51,6 +51,9 @@ namespace OniBrutal.Host
                 last = now;
                 foreach (var (captureFrame, path, scale) in options.Captures)
                     if (captureFrame == frame) ScreenCapture.CaptureScreenshot(path, scale);
+                foreach (var (probeFrame, x, y) in options.Probes)
+                    if (probeFrame == frame && platform != null)
+                        EngineLog.Engine(OniBrutal.Engine.UI.CanvasSystem.Probe(new Vector2(x, platform.FramebufferHeight - y)));
                 options.Input.Apply(frame);
                 PlayerLoop.RunFrame(dt);
                 frame++;

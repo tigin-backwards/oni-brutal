@@ -152,31 +152,22 @@ namespace OniBrutal.Desktop.Gl
             N.glPixelStorei(UnpackAlignment, 1);
         }
 
-        /// Content updates go through a pixel unpack ring buffer: the driver then copies into
+        /// Content updates go through a pixel unpack stream buffer: the driver then copies into
         /// the texture on the GPU, in order with the draws that read its previous content,
-        /// instead of waiting for those draws before writing from client memory. The ring is
-        /// orphaned when it wraps.
-        const int StagingRingSize = 32 << 20, StagingAlignment = 256;
-        static uint stagingRing;
-        static int stagingOffset = StagingRingSize;
+        /// instead of waiting for those draws before writing from client memory.
+        const int StagingStreamSize = 32 << 20;
+        static GlStreamBuffer staging;
         static bool staged;
 
-        /// The pointer to pass for the upload's data: an offset into the bound ring, or the
-        /// texels themselves when they do not fit it.
+        /// The pointer to pass for the upload's data: an offset into the bound stream buffer, or
+        /// the texels themselves when they do not fit it.
         static byte* Stage(byte* texels, int size)
         {
-            staged = size <= StagingRingSize / 4;
+            staging ??= new GlStreamBuffer(PixelUnpackBuffer, StagingStreamSize, 256);
+            staged = size <= staging.MaxWrite;
             if (!staged) return texels;
-            if (stagingRing == 0) stagingRing = GlApi.GenBuffer();
-            N.glBindBuffer(PixelUnpackBuffer, new GlBuffer(stagingRing));
-            int offset = (stagingOffset + StagingAlignment - 1) / StagingAlignment * StagingAlignment;
-            if (offset + size > StagingRingSize)
-            {
-                N.glBufferData(PixelUnpackBuffer, StagingRingSize, null, StreamDraw);
-                offset = 0;
-            }
-            N.glBufferSubData(PixelUnpackBuffer, offset, size, texels);
-            stagingOffset = offset + size;
+            int offset = staging.Write(texels, size);
+            N.glBindBuffer(PixelUnpackBuffer, new GlBuffer(staging.Id));
             return (byte*)offset;
         }
 
@@ -184,6 +175,9 @@ namespace OniBrutal.Desktop.Gl
         {
             if (staged) N.glBindBuffer(PixelUnpackBuffer, default);
         }
+
+        /// The frame's texture updates have all been issued.
+        public static void EndFrame() => staging?.FenceFrame();
 
         static void Swizzle(uint target, uint[] s)
         {

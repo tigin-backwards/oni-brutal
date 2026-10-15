@@ -11,14 +11,15 @@ namespace OniBrutal.Desktop.Gl
     /// Presentation on a thread of its own, as Unity's player presents from its render thread:
     /// the main thread draws each frame into an offscreen back buffer of the rendering context;
     /// the presenter thread, current on the window's context (shared with it), waits for that
-    /// frame on the GPU, copies it to the window and swaps. A swap that blocks (vsync, or a
-    /// display path that reads the frame back) then overlaps the next frame's work instead of
-    /// stalling it. One frame is in flight: presenting a frame first waits until the previous
+    /// frame's commands to complete, copies it to the window and swaps. A swap that blocks
+    /// (vsync, or a display path that reads the frame back) then overlaps the next frame's work
+    /// instead of stalling it. One frame is in flight: presenting a frame first waits until the previous
     /// one has been presented, so the main thread never draws into a buffer still being shown.
     internal sealed unsafe class GlPresenter : IDisposable
     {
         const uint SyncGpuCommandsComplete = 0x9117;
-        const ulong TimeoutIgnored = ulong.MaxValue;
+        const uint TimeoutExpired = 0x911B;
+        const ulong WaitSliceNanoseconds = 100_000_000;
 
         /// One offscreen back buffer: colour texture and depth-stencil renderbuffer, attached to
         /// a framebuffer of the rendering context; the presenter attaches the same texture to a
@@ -163,8 +164,10 @@ namespace OniBrutal.Desktop.Gl
                 Glfw.SwapInterval(interval);
                 swapInterval = interval;
             }
-            // The frame's commands complete on the GPU before the copy reads them.
-            N.glWaitSync(fence, default, TimeoutIgnored);
+            // The frame's commands complete before the copy reads them. The wait is on this
+            // thread rather than on the window context's GPU queue, so neither context's queue
+            // ever waits on the other's.
+            while (N.glClientWaitSync(fence, default, WaitSliceNanoseconds) == TimeoutExpired) { }
             N.glDeleteSync(fence);
             if (b.PresentGeneration != b.Generation)
             {

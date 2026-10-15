@@ -132,6 +132,29 @@ namespace OniBrutal.Tests
         }
 
         [Fact]
+        public void ChildSearchJudgesActivityRelativeToTheStartingObject()
+        {
+            // root (inactive) → a (active) → b (Recorder); root → c (inactive) → d (Recorder).
+            var root = new GameObject("root");
+            var a = new GameObject("a");
+            a.transform.SetParent(root.transform);
+            var b = new GameObject("b", typeof(Recorder));
+            b.transform.SetParent(a.transform);
+            var c = new GameObject("c");
+            c.transform.SetParent(root.transform);
+            var d = new GameObject("d", typeof(Recorder));
+            d.transform.SetParent(c.transform);
+            c.SetActive(false);
+            root.SetActive(false);
+            Assert.Same(b.GetComponent<Recorder>(), root.GetComponentInChildren<Recorder>());
+            Assert.Single(root.GetComponentsInChildren<Recorder>());
+            Assert.Equal(2, root.GetComponentsInChildren<Recorder>(true).Length);
+            // The starting object is searched even when it is inactive itself.
+            Assert.NotNull(d.GetComponentInChildren<Recorder>());
+            Object.DestroyImmediate(root);
+        }
+
+        [Fact]
         public void SetParentKeepsWorldPosition()
         {
             var parent = new GameObject("p");

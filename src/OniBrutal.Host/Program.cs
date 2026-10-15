@@ -39,6 +39,7 @@ namespace OniBrutal.Host
             if (options.CheckShaders) return ShaderCheck.Run(dataDir);
             if (options.DumpScript != null) return AssetCheck.Dump(dataDir, options.DumpScript);
 
+            if (options.TraceExceptions) ExceptionTrace.Install();
             return Player.Run(options, dataDir);
         }
 
@@ -122,6 +123,9 @@ namespace OniBrutal.Host
         public bool CheckShaders;
         public string? DumpScript;
         public int Frames = -1;
+        /// Diagnostics: log every first-chance exception with IL offsets per frame (game code
+        /// has no symbols, so offsets locate the throwing instruction).
+        public bool TraceExceptions;
         // Unity's standalone player arguments.
         public int ScreenWidth = -1, ScreenHeight = -1;
         public int ScreenFullscreen = -1;
@@ -147,6 +151,15 @@ namespace OniBrutal.Host
                     case "--check-shaders": o.CheckShaders = true; break;
                     case "--dump-script": o.DumpScript = args[++i]; break;
                     case "--frames": o.Frames = int.Parse(args[++i]); break;
+                    case "--trace-exceptions": o.TraceExceptions = true; break;
+                    case "--native-override":
+                        {
+                            var spec = args[++i];
+                            int eq = spec.IndexOf('=');
+                            if (eq <= 0) throw new ArgumentException("--native-override expects NAME=PATH");
+                            AssemblyPolicy.NativeOverrides[spec[..eq]] = Path.GetFullPath(spec[(eq + 1)..]);
+                            break;
+                        }
                     case "-screen-width": o.ScreenWidth = int.Parse(args[++i]); break;
                     case "-screen-height": o.ScreenHeight = int.Parse(args[++i]); break;
                     case "-screen-fullscreen": o.ScreenFullscreen = int.Parse(args[++i]); break;
@@ -159,7 +172,7 @@ namespace OniBrutal.Host
                     }
                     default:
                         Console.Error.WriteLine($"Unknown option {args[i]}");
-                        Console.Error.WriteLine("usage: OniBrutal [--game DIR] [--log FILE] [--headless] [--batchmode] [--frames N] [-screen-width W] [-screen-height H] [-screen-fullscreen 0|1] [-window-mode exclusive|borderless|windowed] [--check-types] [--check-assets] [--check-bind] [--check-shaders] [--capture FRAME:PATH[:SCALE]]");
+                        Console.Error.WriteLine("usage: OniBrutal [--game DIR] [--log FILE] [--headless] [--batchmode] [--frames N] [--native-override NAME=PATH] [--trace-exceptions] [-screen-width W] [-screen-height H] [-screen-fullscreen 0|1] [-window-mode exclusive|borderless|windowed] [--check-types] [--check-assets] [--check-bind] [--check-shaders] [--capture FRAME:PATH[:SCALE]]");
                         return null;
                 }
             }

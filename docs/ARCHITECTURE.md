@@ -423,6 +423,11 @@ Our engine logs through `Brutal.Logging` into the same Player.log-style file
 (`~/.config/unity3d/Klei/Oxygen Not Included/Player.log`), with engine messages tagged
 `[engine]`. GL debug output is enabled in debug builds.
 
+Development diagnostics (host options, never needed by players): `--trace-exceptions` logs every
+first-chance exception with per-frame IL offsets (the game ships without symbols; the offset
+and `ilspycmd -il` locate the throwing instruction); `--capture FRAME:PATH[:SCALE]` writes a
+screenshot through `ScreenCapture.CaptureScreenshot`; `--check-*` run the corpus gates.
+
 ## 8. Repository layout
 
 ```
@@ -457,3 +462,12 @@ suppressions only), central package versions in `Directory.Packages.props`.
 5. **Visual checks:** `--screenshot` captures at checkpoints, reviewed against reference
    screenshots of the real game.
 6. **Gameplay soak:** new colony → N cycles → save → reload → continue, no exceptions.
+7. **Offline Steam test double** (`tools/SteamStub`, `scripts/run-offline.sh`). The game
+   requires a logged-in Steam client (`SteamAPI_Init`); on machines without one, test runs
+   load a generated stand-in for `libsteam_api.so` through the host's dev-only
+   `--native-override steam_api=PATH`. Every entry point Steamworks.NET binds exists and
+   returns zero except a small table describing a logged-in owner of the base game (no DLC,
+   no Workshop items, English); no callback is ever delivered. It is test infrastructure,
+   not part of the product: it lets M4–M6 engine behaviour be exercised; Steam-specific game
+   behaviour (DLC ownership, Workshop mods, achievements, cloud) is verified only with the
+   real client.

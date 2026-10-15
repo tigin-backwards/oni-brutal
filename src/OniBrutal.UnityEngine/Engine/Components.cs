@@ -35,18 +35,24 @@ namespace OniBrutal.Engine
                 if (type.IsInstanceOfType(c)) results.Add(c);
         }
 
-        /// Depth-first pre-order over this object and its descendants; GameObjects that are not
-        /// active in the hierarchy are skipped unless includeInactive.
+        /// Depth-first pre-order over this object and its descendants. The object the search
+        /// starts from is always searched; without includeInactive, a descendant that is not
+        /// active itself is skipped with its subtree, so activity is judged relative to the
+        /// starting object (Unity's rule: the shipped MainMenu deactivates its DLC ad and then
+        /// finds the ad's KButton with GetComponentInChildren).
         public static object InChildren(GameObjectNative go, Type type, bool includeInactive)
         {
-            if (includeInactive || go.ActiveInHierarchy)
-            {
-                var found = First(go, type);
-                if (found != null) return found;
-            }
+            var found = First(go, type);
+            return found ?? InDescendants(go, type, includeInactive);
+        }
+
+        static object InDescendants(GameObjectNative go, Type type, bool includeInactive)
+        {
             foreach (var child in go.Transform.Children)
             {
-                var found = InChildren(child.GameObject, type, includeInactive);
+                var g = child.GameObject;
+                if (!includeInactive && !g.ActiveSelf) continue;
+                var found = First(g, type) ?? InDescendants(g, type, includeInactive);
                 if (found != null) return found;
             }
             return null;
@@ -54,8 +60,19 @@ namespace OniBrutal.Engine
 
         public static void AllInChildren(GameObjectNative go, Type type, bool includeInactive, IList results)
         {
-            if (includeInactive || go.ActiveInHierarchy) All(go, type, results);
-            foreach (var child in go.Transform.Children) AllInChildren(child.GameObject, type, includeInactive, results);
+            All(go, type, results);
+            AllInDescendants(go, type, includeInactive, results);
+        }
+
+        static void AllInDescendants(GameObjectNative go, Type type, bool includeInactive, IList results)
+        {
+            foreach (var child in go.Transform.Children)
+            {
+                var g = child.GameObject;
+                if (!includeInactive && !g.ActiveSelf) continue;
+                All(g, type, results);
+                AllInDescendants(g, type, includeInactive, results);
+            }
         }
 
         /// This object, then its ancestors.

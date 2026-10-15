@@ -72,9 +72,15 @@ namespace OniBrutal.Host
             return image == null ? context.LoadFromAssemblyPath(path) : context.LoadFromStream(new MemoryStream(image));
         }
 
+        /// Development and test runs only (`--native-override NAME=PATH`): a native library
+        /// loaded instead of the game's plugin of that name, e.g. the offline Steam test double
+        /// (tools/SteamStub).
+        public static readonly Dictionary<string, string> NativeOverrides = new(StringComparer.Ordinal);
+
         /// The game's native plugins live in Plugins/ (the Unity player searches there).
         static IntPtr ResolveNative(Assembly requester, string name)
         {
+            if (NativeOverrides.TryGetValue(name, out var overridePath)) return NativeLibrary.Load(overridePath);
             foreach (var candidate in new[] { $"lib{name}.so", $"{name}.so", name })
             {
                 var path = Path.Combine(pluginsDir, candidate);

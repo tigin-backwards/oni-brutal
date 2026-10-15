@@ -174,7 +174,8 @@ Known behaviours not yet reproduced, each to be closed by a named milestone:
 - UI Toolkit panel internals (`BaseRuntimePanel`, `PanelRaycaster`'s pickers, `UIDocument`
   members — 13 members) stay absent: uGUI reaches them only through UI Toolkit panels, and the
   game has no UIDocument. Milestone: M6 (confirm unreachable).
-- Environment for full runs: a logged-in Steam client (the game quits through
+- Environment for parity runs: a logged-in Steam client (engine work proceeds with the
+  offline Steam test double, ARCHITECTURE §9.7) (the game quits through
   `RestartAppIfNecessary` / `SteamAPI.Init` without one) and the system `libvpx` (VP8 video;
   `sudo apt install libvpx9`).
 

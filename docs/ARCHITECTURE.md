@@ -95,7 +95,7 @@ we never call `SetDllImportResolver` on BRUTAL assemblies. The Vulkan loader nam
 Binding and JIT are clean: every BCL reference in the game resolves on .NET 10 and all ~82k
 game methods JIT. The differences that remain are behaviours Mono's class libraries provided
 and .NET 10 ships out-of-band. The host restores them the way .NET documents for
-.NET Framework-era code. Nothing in game IL is touched.
+.NET Framework-era code where it can. No game IL is touched.
 
 | Mono provided | Host provides | Needed by |
 |---|---|---|
@@ -103,6 +103,7 @@ and .NET 10 ships out-of-band. The host restores them the way .NET documents for
 | In-box BinaryFormatter | `System.Runtime.Serialization.Formatters` package + `EnableUnsafeBinaryFormatterSerialization` | `ObjectCloner.SerializingCloner` (every worldgen settings clone) |
 | Code pages via `I18N*` | `Encoding.RegisterProvider(CodePagesEncodingProvider.Instance)` before game code | Ionic.Zip static constructors (IBM437) |
 | `System.CodeDom` | `System.CodeDom` package (binding only; never executed) | Ionic.Zip SFX path (dead) |
+| Reflection writes to `static readonly` fields (and reads that observe them) | Static fields of assemblies from `Managed/` are loaded with `InitOnly` cleared (Field-table flags only; IL untouched; such images load from memory, so their `Assembly.Location` is empty, which no game code reads) | `Localization.OverloadStrings` (translations of `STRINGS.UI.PERMIT_RARITY`), `LocString.CreateLocStringKeys` |
 | Assemblies preloaded by the player | Host eagerly loads every assembly in `ScriptingAssemblies.json` that we serve, before any game type initializes | `App..cctor` / `KSerialization.Manager` assembly snapshots |
 
 **Steamworks.NET.** One explicit-layout union in `com.rlabrecque.steamworks.net` 20.1.0

@@ -1,0 +1,103 @@
+using System;
+using System.Linq;
+using OniBrutal.Engine.Platform;
+
+namespace UnityEngine
+{
+    public partial class Screen
+    {
+        static IPlatform P => PlatformServices.Current;
+
+        public static int width => P.FramebufferWidth;
+        public static int height => P.FramebufferHeight;
+        public static float dpi => P.Dpi;
+
+        public static bool fullScreen
+        {
+            get => P.FullScreenMode != FullScreenMode.Windowed;
+            set => SetResolution(width, height, value ? FullScreenMode.FullScreenWindow : FullScreenMode.Windowed);
+        }
+
+        public static FullScreenMode fullScreenMode
+        {
+            get => P.FullScreenMode;
+            set => SetResolution(width, height, value);
+        }
+
+        public static Resolution currentResolution => ToResolution(P.DesktopMode);
+
+        /// Supported fullscreen modes of the monitor, smallest first.
+        public static Resolution[] resolutions => P.DisplayModes
+            .OrderBy(m => m.Width).ThenBy(m => m.Height).ThenBy(m => (double)m.RefreshNumerator / Math.Max(1u, m.RefreshDenominator))
+            .Select(ToResolution).ToArray();
+
+        static Resolution ToResolution(DisplayMode m)
+            => new() { width = m.Width, height = m.Height, refreshRateRatio = new RefreshRate { numerator = m.RefreshNumerator, denominator = m.RefreshDenominator } };
+
+        public static void SetResolution(int width, int height, FullScreenMode fullscreenMode, RefreshRate preferredRefreshRate)
+            => P.SetResolution(width, height, fullscreenMode, preferredRefreshRate.numerator, preferredRefreshRate.denominator);
+
+        public static void SetResolution(int width, int height, FullScreenMode fullscreenMode)
+            => P.SetResolution(width, height, fullscreenMode, 0, 1);
+
+        public static void SetResolution(int width, int height, bool fullscreen)
+            => SetResolution(width, height, fullscreen ? FullScreenMode.FullScreenWindow : FullScreenMode.Windowed);
+    }
+
+    public partial struct Resolution
+    {
+        private int m_Width;
+        private int m_Height;
+        private RefreshRate m_RefreshRate;
+
+        public int width { get => m_Width; set => m_Width = value; }
+        public int height { get => m_Height; set => m_Height = value; }
+        public RefreshRate refreshRateRatio { get => m_RefreshRate; set => m_RefreshRate = value; }
+
+        public override string ToString() => $"{m_Width} x {m_Height} @ {m_RefreshRate}Hz";
+    }
+
+    /// The player has one display: the window's monitor.
+    public partial class Display
+    {
+        public static Display[] displays = { new Display() };
+
+        public static Display main => displays[0];
+
+        Display() { }
+
+        public int renderingWidth => PlatformServices.Current.FramebufferWidth;
+        public int renderingHeight => PlatformServices.Current.FramebufferHeight;
+        public int systemWidth => PlatformServices.Current.DesktopMode.Width;
+        public int systemHeight => PlatformServices.Current.DesktopMode.Height;
+        public bool active => true;
+
+        /// Screen position relative to the display under it, display index in z. With one display
+        /// that is the position itself on display 0.
+        public static Vector3 RelativeMouseAt(Vector3 inputMouseCoordinates) => new(inputMouseCoordinates.x, inputMouseCoordinates.y, 0f);
+    }
+
+    public partial class Cursor
+    {
+        public static bool visible
+        {
+            get => PlatformServices.Current.CursorVisible;
+            set => PlatformServices.Current.CursorVisible = value;
+        }
+
+        public static CursorLockMode lockState
+        {
+            get => PlatformServices.Current.CursorLockState;
+            set => PlatformServices.Current.CursorLockState = value;
+        }
+    }
+}
+
+namespace UnityEngineInternal
+{
+    internal partial class DisplayInternal
+    {
+        /// Display index > 0 that exists (the player has only the main display).
+        internal static bool IsASecondaryDisplayIndex(int displayIndex) => displayIndex > 0 && displayIndex < UnityEngine.Display.displays.Length;
+    }
+}

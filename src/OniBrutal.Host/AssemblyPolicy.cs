@@ -67,7 +67,9 @@ namespace OniBrutal.Host
             if (IsUnityEngineModule(simple)) return null;
             if (unitySupportPackages.Contains(simple) || monoClassLibraries.Contains(simple)) return null;
             var path = Path.Combine(managedDir, simple + ".dll");
-            return File.Exists(path) ? context.LoadFromAssemblyPath(path) : null;
+            if (!File.Exists(path)) return null;
+            var image = MonoFieldSemantics.Adjust(path);
+            return image == null ? context.LoadFromAssemblyPath(path) : context.LoadFromStream(new MemoryStream(image));
         }
 
         /// The game's native plugins live in Plugins/ (the Unity player searches there).

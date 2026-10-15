@@ -22,6 +22,7 @@ namespace OniBrutal.Host
             OniBrutal.Engine.Platform.PlatformLoop.Install(null);
             OniBrutal.Engine.Rendering.FrameRenderer.Install();
             OniBrutal.Engine.UI.CanvasSystem.Install();
+            OniBrutal.Engine.IMGUI.GUIManager.Install();
             EngineLog.Engine($"Project: {EngineConfig.CompanyName} / {EngineConfig.ProductName} {EngineConfig.Version} (Unity {EngineConfig.UnityVersion})");
 
             var hooks = RuntimeInitializeHooks.Load(dataDir);

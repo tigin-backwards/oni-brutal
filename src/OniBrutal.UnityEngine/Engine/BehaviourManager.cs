@@ -118,6 +118,7 @@ namespace OniBrutal.Engine
             update.Add(b);
             lateUpdate.Add(b);
             fixedUpdate.Add(b);
+            IMGUI.GUIManager.Register(b); // OnGUI behaviours
         }
 
         public static void Unregister(BehaviourNative b)
@@ -125,6 +126,7 @@ namespace OniBrutal.Engine
             update.Remove(b);
             lateUpdate.Remove(b);
             fixedUpdate.Remove(b);
+            IMGUI.GUIManager.Unregister(b);
         }
 
         public static void ScheduleStart(BehaviourNative b)

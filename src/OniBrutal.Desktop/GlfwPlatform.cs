@@ -400,7 +400,8 @@ namespace OniBrutal.Desktop
     internal static class KeyMap
     {
         public static bool IsKeypad(KeyCode k) => k is >= KeyCode.Keypad0 and <= KeyCode.KeypadEquals;
-        public static bool IsFunction(KeyCode k) => k is >= KeyCode.UpArrow and <= KeyCode.F15 or KeyCode.Delete or KeyCode.Insert;
+        // Unity flags Backspace as a function key too (its text editing key bindings expect it).
+        public static bool IsFunction(KeyCode k) => k is >= KeyCode.UpArrow and <= KeyCode.F15 or KeyCode.Delete or KeyCode.Insert or KeyCode.Backspace;
 
         public static KeyCode ToUnity(GlfwKey key) => key switch
         {

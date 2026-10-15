@@ -229,6 +229,10 @@ namespace OniBrutal.Engine.Assets
             {
                 type = null;
             }
+            // UnityEngine and its modules are facades over this assembly; without them (no host
+            // facade directory) their script classes (e.g. GUISkin) are found here directly.
+            if (type == null && (asmName == "UnityEngine" || asmName.StartsWith("UnityEngine.", StringComparison.Ordinal)))
+                type = typeof(Object).Assembly.GetType(fullName, false);
             if (type != null) ScriptInfo.SetExecutionOrder(type.FullName!, f.Int("m_ExecutionOrder"));
             cache[key] = type;
             return type;

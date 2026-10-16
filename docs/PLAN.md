@@ -221,8 +221,14 @@ Known behaviours not yet reproduced, each to be closed by a named milestone:
   worldgen with SimDLL, Duplicant selection, embark) and the colony run without exceptions; the
   colony renders as the original (world composite with light buffer and property textures,
   KAnim batches for Duplicants and buildings, gas, liquids, tiles, HUD, details panels with
-  nested canvases and RectMask2D). Next: gameplay soak (cycles at speed 3, dig/build orders,
-  save → reload → continue).
+  nested canvases and RectMask2D).
+- **M5: exit met** (2026-10-16). Scripted run (release build, offline Steam test double, debug-mode
+  scratch copy of the game for the Dev Life Support building): new colony, dig orders, a building
+  placed, ten cycles at speed 3 with an autosave each cycle and zero exceptions; Load Game →
+  colony → Cycle 8 autosave → unpause → play on to the Cycle 9 autosave, zero exceptions.
+  Without life support or food production the colony is lost as in the original (no orders:
+  suffocation at cycle 3–4 in both; Dev Life Support only: starvation at cycle 9–10).
+  Construction with materials, other tools and overlays continue under M6 (docs/PARITY.md).
 - Performance (2026-10-15), colony at speed 3, 1024×768, Xvfb + Mesa d3d12 / RTX 3090, frame
   rate from GALLIUM_HUD over the same scripted new game: original Unity player 58 fps mean
   (min 47, max 64); this engine (release build) 57–62 fps mean (min 38–46, max 65–69), with the

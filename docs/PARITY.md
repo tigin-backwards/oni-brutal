@@ -13,7 +13,7 @@ Legend: `[x]` verified · `[ ]` not yet verified · `[~]` deviation (see the not
 
 - [x] Launch scene, Klei/Unity splash, `LaunchInitializer`, Steam initialisation (offline test double)
 - [x] Main menu: backdrop, buttons, MOTD/news panels (offline), build watermark
-- [ ] Main menu: Resume Game / Load Game (`LoadScreen`, `InspectSaveScreen`)
+- [x] Main menu: Resume Game / Load Game (`LoadScreen`, colony and save lists)
 - [x] New game flow: `ModeSelectScreen` (Survival / No Sweat), `ClusterCategorySelectionScreen`
 - [x] `ColonyDestinationSelectScreen` (asteroid, seed, settings panels)
 - [ ] Custom game settings and story traits panels
@@ -48,9 +48,11 @@ Legend: `[x]` verified · `[ ]` not yet verified · `[~]` deviation (see the not
 - [ ] `SideDetailsScreen` side screens (per-building settings)
 - [ ] `BuildMenu` / `BuildingGroupScreen` / `ProductInfoScreen` / `MaterialSelectionPanel` (planning and placing buildings)
 - [ ] Management screens: Vitals, Consumables, Priorities (jobs), Schedule (`ScheduleScreen`), Skills (`SkillsScreen`), Research (`ResearchScreen`), Starmap (`StarmapScreen` / `ClusterMapScreen`), Database (`CodexScreen`), Reports (`ReportScreen`)
-- [ ] `PauseScreen`: save (`SaveScreen`, `FileNameDialog`), load, options, quit to menu
+- [x] `PauseScreen`: open, save with overwrite confirmation (41 saves in one run)
+- [ ] `PauseScreen`: save as (`FileNameDialog`), load, options, quit to menu
 - [ ] `PrinterceptorScreen` / care packages (`CarePackageContainer`) at the printing pod's recharge
-- [ ] `GameOverScreen`, `VictoryScreen`, `StoryMessageScreen`, `EventInfoScreen`
+- [x] `GameOverScreen` (colony lost)
+- [ ] `VictoryScreen`, `StoryMessageScreen`, `EventInfoScreen`
 - [ ] Timelapse capture (`ReadPixels` + `EncodeToPNG`)
 - [ ] Camera: pan (keys, edge, drag), zoom, follow, bookmarks (`WorldSelector` for multiple asteroids)
 
@@ -58,7 +60,7 @@ Legend: `[x]` verified · `[ ]` not yet verified · `[~]` deviation (see the not
 
 - [x] Dig (`DigTool`)
 - [ ] Cancel, Deconstruct, Prioritize (`PriorityScreen`), Disinfect, Sweep (`ClearTool`), Mop, Attack, Wrangle (`CaptureTool`), Harvest, Empty Pipe, Disconnect, Copy Settings, Move To
-- [ ] Build placement (`BuildTool`, `BaseUtilityBuildTool` for wires and pipes), rotation, material choice
+- [~] Build placement: a debug-only building placed in instant-build mode; regular construction with materials, `BaseUtilityBuildTool` (wires, pipes), rotation not yet verified
 
 ## Overlays
 
@@ -67,8 +69,8 @@ Legend: `[x]` verified · `[ ]` not yet verified · `[~]` deviation (see the not
 
 ## Simulation and persistence
 
-- [ ] Ten cycles at speed 3 with digging and building, zero exceptions (M5 exit)
-- [ ] Autosave each cycle; save → quit to menu → load → continue (M5 exit)
+- [x] Ten cycles at speed 3 with digging and building, zero exceptions (M5 exit)
+- [x] Autosave each cycle; save → quit to menu → load → continue (M5 exit)
 - [ ] Hi-res texture bundle streaming (`StreamedTextures`)
 
 ## Platform

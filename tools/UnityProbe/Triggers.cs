@@ -92,14 +92,35 @@ namespace SemanticsProbe
                 critter.SetPlayerTargeted(true);
                 Rec.Log("ORDER attack " + critter.name + " at " + critter.transform.GetPosition());
             }
+            // Wrangle: every Duplicant learns Critter Ranching; a second Hatch is marked for capture.
+            foreach (var minion in Components.LiveMinionIdentities.Items)
+            {
+                var resume = minion.GetComponent<MinionResume>();
+                resume.MasterSkill("Farming1");
+                resume.MasterSkill("Ranching1");
+            }
+            var hatch2 = GameUtil.KInstantiate(Assets.GetPrefab("Hatch"), Grid.CellToPosCBC(Grid.OffsetCell(pod, -5, 0), Grid.SceneLayer.Creatures), Grid.SceneLayer.Creatures);
+            hatch2.SetActive(true);
+            yield return null;
+            hatch2.GetComponent<Capturable>().MarkForCapture(true);
+            Rec.Log("ORDER wrangle marked " + hatch2.GetComponent<Capturable>().IsMarkedForCapture + " perk "
+                + Components.LiveMinionIdentities.Items[0].GetComponent<MinionResume>().HasPerk(Db.Get().SkillPerks.CanWrangleCreatures));
             SpeedControlScreen.Instance.SetSpeed(2);
             SpeedControlScreen.Instance.Unpause(false);
-            yield return new WaitForSecondsRealtime(120f);
+            for (int i = 0; i < 6; i++)
+            {
+                yield return new WaitForSecondsRealtime(20f);
+                if (hatch2 == null) { Rec.Log("ORDER wrangle " + i + ": gone"); continue; }
+                Rec.Log("ORDER wrangle " + i + ": cell offset " + (Grid.PosToCell(hatch2) - pod) + " bagged=" + hatch2.HasTag(GameTags.Creatures.Bagged)
+                    + " burrowed=" + hatch2.HasTag(GameTags.Creatures.Burrowed) + " stored=" + hatch2.HasTag(GameTags.Stored)
+                    + " marked=" + hatch2.GetComponent<Capturable>().IsMarkedForCapture);
+            }
             SpeedControlScreen.Instance.Pause(false);
             if (plant == null) Rec.Log("ORDER harvest after: plant gone");
             else Rec.Log("ORDER harvest after: grown " + plant.GetComponent<Growing>().PercentGrown().ToString("F2")
                 + " canBeHarvested=" + plant.GetComponent<Harvestable>().CanBeHarvested + " marked=" + plant.MarkedForHarvest);
             Rec.Log("ORDER disinfect after: germs " + bin.GetComponent<PrimaryElement>().DiseaseCount);
+            Rec.Log("ORDER wrangle after: " + (hatch2 == null ? "gone" : "bagged=" + hatch2.HasTag(GameTags.Creatures.Bagged)));
             Rec.Log("ORDER attack after: " + (critter == null || critter.GetComponent<Health>() == null ? "gone" : "health " + critter.GetComponent<Health>().hitPoints.ToString("F0")));
             Util.KDestroyGameObject(bin);
 

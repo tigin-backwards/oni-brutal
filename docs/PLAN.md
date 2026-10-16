@@ -229,8 +229,7 @@ Environment notes:
   frame presented from a presenter thread as Unity presents from its render thread
   (ARCHITECTURE §3.5). Per-frame CPU: update 1.6 ms, LateUpdate 4.2, canvases 4.8, render 3.7;
   GPU 4–5 ms.
-- M6 in progress (2026-10-16): docs/PARITY.md ticked (Mop, Disinfect, Harvest and Attack orders carried out in both players;
-  Wrangle untested, it needs a rancher). `tools/UnityProbe` (a mod run
+- M6 in progress (2026-10-16): docs/PARITY.md ticked (Mop, Disinfect, Harvest, Attack and Wrangle orders carried out in both players). `tools/UnityProbe` (a mod run
   in both players) compares lifecycle and timing semantics, engine values, the main-menu and
   in-game UI layout (about 3400 elements), victory sequence, event popup, 18 building side
   screens and a Mop order with the original; its findings are fixed or documented (ARCHITECTURE

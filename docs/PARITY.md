@@ -87,7 +87,7 @@ Legend: `[x]` verified · `[ ]` not yet verified · `[~]` deviation (see the not
 - [x] Mop order carried out (tools/UnityProbe: a 30 kg puddle beside the printing pod, Mop tool, 40 s at speed 3): mopped and the order removed in both players
 - [x] Disinfect order carried out (Storage Bin with 100000 food-poisoning germs → 0 within 120 s at speed 3) in both players
 - [x] Harvest (a fully grown Mealwood beside the printing pod, marked Harvest When Ready: harvested, regrowing at 5%) and Attack (a Hatch beside the pod: killed) carried out within 120 s at speed 3, identically in both players (tools/UnityProbe)
-- [~] Wrangle not exercised: it needs a Duplicant with the Critter Ranching skill (same chore system as the orders above)
+- [x] Wrangle carried out in both players (`tools/UnityProbe`): with Critter Ranching learned, a marked Hatch is bagged within 20 s, stays bagged about 100 s on the floor and then wriggles free, as in the original
 - [x] Build placement with materials: Storage Bin and a dragged Ladder from the Base menu; placement refused with "Missing resources" until the colony has the materials (as the original); Duplicants deliver and build
 - [~] `BaseUtilityBuildTool`: the wire tool (Power → Wire, material list, power overlay) opens and responds to a drag as in the original; a placed wire has not been observed in either player's scripted run yet
 - [x] Liquid pipe drag (plumbing overlay, pipe preview, built in instant-build mode); building rotation (O turns the Liquid Valve preview from vertical to horizontal and it is built rotated); build menu search and the grid layout with everything researched

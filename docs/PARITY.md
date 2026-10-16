@@ -54,7 +54,8 @@ Legend: `[x]` verified · `[ ]` not yet verified · `[~]` deviation (see the not
 - [x] `HoverTextScreen` (element hover cards)
 - [x] `SideDetailsScreen`: Ration Box element filter (unticking → "Filters Not Designated"), capacity slider (drag → new capacity), Material tab
 - [x] Liquid Valve flow control side screen: a slider click sets 4673 g/s in both players
-- [ ] Other buildings' side screens (doors, sensors, …)
+- [x] Pneumatic Door access control (Duplicant rows with portraits, Open/Auto/Lock) and Thermo Sensor threshold side screens render and respond (not yet compared with the original)
+- [ ] Other buildings' side screens compared with the original beyond the valve and storage bin
 - [x] `BuildMenu` / `BuildingGroupScreen` / `ProductInfoScreen` / `MaterialSelectionPanel`: category menus, building info, material choice and placement (Storage Bin, Ladder, Dev Life Support, wire tool)
 - [x] Management screens opened by hotkey and compared with the original: Vitals, Consumables, Priorities (jobs), Schedule (`ScheduleScreen`), Skills (`SkillsScreen`, Duplicant portrait in a stencil mask), Database (`CodexScreen`), Reports (`ReportScreen`)
 - [x] Research and Starmap buttons before a Research Station / Telescope exists: locked, with the original's tooltips

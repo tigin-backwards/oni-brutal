@@ -62,7 +62,8 @@ Legend: `[x]` verified · `[ ]` not yet verified · `[~]` deviation (see the not
 ## Tools
 
 - [x] Dig (`DigTool`)
-- [ ] Cancel, Deconstruct, Prioritize (`PriorityScreen`), Disinfect, Sweep (`ClearTool`), Mop, Attack, Wrangle (`CaptureTool`), Harvest, Empty Pipe, Disconnect, Copy Settings, Move To
+- [x] Activation with tool label, filter panel and overlay: Cancel, Deconstruct, Prioritize (`PriorityScreen`), Disinfect (germ overlay), Sweep (`ClearTool`), Mop, Attack, Wrangle (`CaptureTool`), Harvest, Empty Pipe, Disconnect (compared with the original where its scripted run activated the same tool)
+- [ ] Tool orders carried out (beyond Dig), Copy Settings, Move To
 - [x] Build placement with materials: Storage Bin and a dragged Ladder from the Base menu; placement refused with "Missing resources" until the colony has the materials (as the original); Duplicants deliver and build
 - [ ] `BaseUtilityBuildTool` (wires, pipes), rotation, other categories
 

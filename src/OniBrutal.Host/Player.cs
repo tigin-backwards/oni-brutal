@@ -54,6 +54,8 @@ namespace OniBrutal.Host
                 foreach (var (probeFrame, x, y) in options.Probes)
                     if (probeFrame == frame && platform != null)
                         EngineLog.Engine(OniBrutal.Engine.UI.CanvasSystem.Probe(new Vector2(x, platform.FramebufferHeight - y)));
+                foreach (var (dumpFrame, spec) in options.ComponentDumps)
+                    if (dumpFrame == frame) EngineLog.Engine(ComponentDump(spec));
                 foreach (var (dumpFrame, path) in options.HierarchyDumps)
                     if (dumpFrame == frame) EngineLog.Engine($"mouse {Input.mousePosition} dt {Time.unscaledDeltaTime}\n" + HierarchyDump(path));
                 options.Input.Apply(frame);
@@ -105,6 +107,28 @@ namespace OniBrutal.Host
                 for (int i = 0; i < t.childCount; i++) Walk(t.GetChild(i), depth + 1);
             }
             Walk(root.transform, 1);
+            return text.ToString();
+        }
+
+        /// Diagnostics (`--dump-component`): a component's serialized fields (public or
+        /// [SerializeField], not [NonSerialized]) and their current values.
+        static string ComponentDump(string spec)
+        {
+            int bar = spec.LastIndexOf('|');
+            var go = GameObject.Find(spec[..bar]);
+            if (go == null) return $"component {spec}: GameObject not found";
+            var component = go.GetComponents<Component>().FirstOrDefault(c => c != null && c.GetType().Name == spec[(bar + 1)..]);
+            if (component == null) return $"component {spec}: not found";
+            var text = new System.Text.StringBuilder($"component {spec}:");
+            for (var t = component.GetType(); t != null && t != typeof(MonoBehaviour) && t != typeof(Component); t = t.BaseType)
+                foreach (var f in t.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly))
+                {
+                    bool serialized = (f.IsPublic || f.IsDefined(typeof(SerializeField), false)) && !f.IsDefined(typeof(NonSerializedAttribute), false);
+                    if (!serialized) continue;
+                    var v = f.GetValue(component);
+                    var shown = v is LayerMask m ? $"LayerMask {m.value} (0x{m.value:X})" : v?.ToString() ?? "null";
+                    text.Append($"\n  {t.Name}.{f.Name} = {shown}");
+                }
             return text.ToString();
         }
 

@@ -151,6 +151,9 @@ namespace OniBrutal.Host
         /// --report-builtin-assets FILE: at exit, the objects the run loaded from Unity's built-in
         /// resource files (tab-separated).
         public string? BuiltinReport;
+        /// --dump-component FRAME:PATH|TYPE: logs the serialized fields of a component (by type
+        /// name) on the GameObject at PATH as of that frame.
+        public readonly List<(int Frame, string Spec)> ComponentDumps = new();
 
         public static Options? Parse(string[] args)
         {
@@ -200,6 +203,13 @@ namespace OniBrutal.Host
                     case "-screen-height": o.ScreenHeight = int.Parse(args[++i]); break;
                     case "-screen-fullscreen": o.ScreenFullscreen = int.Parse(args[++i]); break;
                     case "-window-mode": o.WindowMode = args[++i]; break;
+                    case "--dump-component":
+                    {
+                        var spec = args[++i];
+                        int colon = spec.IndexOf(':');
+                        o.ComponentDumps.Add((int.Parse(spec[..colon]), spec[(colon + 1)..]));
+                        break;
+                    }
                     case "--report-builtin-assets": o.BuiltinReport = args[++i]; break;
                     case "--dump-hierarchy":
                     {
@@ -222,7 +232,7 @@ namespace OniBrutal.Host
                     }
                     default:
                         Console.Error.WriteLine($"Unknown option {args[i]}");
-                        Console.Error.WriteLine("usage: OniBrutal [--game DIR] [--log FILE] [--headless] [--batchmode] [--frames N] [--native-override NAME=PATH] [--trace-exceptions] [--input FRAME:ACTION[:ARGS]] [--frame-stats] [--max-frame-rate N[:FRAMES]] [--dump-render-textures FRAME:DIR] [-screen-width W] [-screen-height H] [-screen-fullscreen 0|1] [-window-mode exclusive|borderless|windowed] [--check-types] [--check-assets] [--check-bind] [--check-shaders] [--dump-shader NAME:DIR] [--capture FRAME:PATH[:SCALE]] [--probe-ui FRAME:X,Y] [--dump-hierarchy FRAME:PATH] [--report-builtin-assets FILE]");
+                        Console.Error.WriteLine("usage: OniBrutal [--game DIR] [--log FILE] [--headless] [--batchmode] [--frames N] [--native-override NAME=PATH] [--trace-exceptions] [--input FRAME:ACTION[:ARGS]] [--frame-stats] [--max-frame-rate N[:FRAMES]] [--dump-render-textures FRAME:DIR] [-screen-width W] [-screen-height H] [-screen-fullscreen 0|1] [-window-mode exclusive|borderless|windowed] [--check-types] [--check-assets] [--check-bind] [--check-shaders] [--dump-shader NAME:DIR] [--capture FRAME:PATH[:SCALE]] [--probe-ui FRAME:X,Y] [--dump-hierarchy FRAME:PATH] [--report-builtin-assets FILE] [--dump-component FRAME:PATH|TYPE]");
                         return null;
                 }
             }

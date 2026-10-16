@@ -92,7 +92,7 @@ Legend: `[x]` verified · `[ ]` not yet verified · `[~]` deviation (see the not
 ## Platform
 
 - [x] Window, input (mouse, keyboard, text), cursor images
-- [ ] Clipboard (seed and colony-name fields)
+- [x] Clipboard: select all, copy and paste in the destination coordinates field (as the original)
 - [x] Frame rate at parity with the original (PLAN §Status, Performance)
 - [x] Windowed → fullscreen (borderless) switching at runtime
 - [ ] Exclusive fullscreen, resolution changes at runtime

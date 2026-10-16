@@ -10,10 +10,4 @@ namespace UnityEngine
     {
         private ComputeShader() { }
     }
-
-    /// The legacy Animation component (Unity also makes it enumerable over its states).
-    public sealed class Animation : Behaviour
-    {
-        public Animation() { }
-    }
 }

@@ -45,6 +45,7 @@ Legend: `[x]` verified · `[ ]` not yet verified · `[~]` deviation (see the not
 
 - [x] World composite: terrain, tiles, backwall, gas, liquids, light buffer, property textures, fog of war
 - [x] Duplicants and buildings (KAnim batches), printing pod, status items, name displays
+- [x] Thought and conversation bubbles: pop-in by the legacy `Animation` component (the game's only legacy clips), icons inside the bubble at the clip's final scale
 - [x] `TopLeftControlScreen`, `DateTime` (cycle clock), `MeterScreen` (Duplicants, stress, rations)
 - [x] `SpeedControlScreen` (pause, speeds 1–3)
 - [x] `ColonyDiagnosticScreen` panel, `PinnedResourcesPanel` / resources panel
@@ -88,7 +89,7 @@ Legend: `[x]` verified · `[ ]` not yet verified · `[~]` deviation (see the not
 - [x] Build menu categories that become available later (Utilities, Automation, Shipping, Rocketry) appear and lay out as in the original
 - [x] `ResearchScreen` tree and `StarmapScreen` open as in the original
 - [x] Overlay legends (`OverlayLegend`) shown with every overlay compared above
-- [ ] Overlay filter toggles
+- [x] Overlay filter toggles: Temperature overlay modes (Absolute, Relative with its range slider, Thermal Tolerance, State Change) switch the view and legend as the original
 
 ## Simulation and persistence
 

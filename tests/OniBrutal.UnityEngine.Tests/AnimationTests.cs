@@ -315,5 +315,95 @@ namespace OniBrutal.Tests
             Assert.Equal(0.5f, d.upperArmTwist);
             Assert.Equal("", d.m_RootMotionBoneName);
         }
+
+        /// The game's thought-bubble pop-in (sharedassets0 #6504): a legacy clip scaling "bg" and
+        /// "positioner" over 1.083 s.
+        static (GameObject Root, Transform Bg, Transform Positioner, Animation Animation) ThoughtBubble()
+        {
+            var clip = Load<AnimationClip>("sharedassets0.assets", 6504);
+            var root = new GameObject("Thought Bubble");
+            var bg = new GameObject("bg").transform;
+            bg.SetParent(root.transform, false);
+            var positioner = new GameObject("positioner").transform;
+            positioner.SetParent(root.transform, false);
+            root.SetActive(false);
+            var animation = root.AddComponent<Animation>();
+            animation.clip = clip;
+            animation.AddClip(clip, clip.name);
+            return (root, bg, positioner, animation);
+        }
+
+        [Fact]
+        public void LegacyClipLoadsItsEditorCurves()
+        {
+            var clip = Load<AnimationClip>("sharedassets0.assets", 6504);
+            Assert.True(clip.legacy);
+            Assert.Equal("thought_bubble", clip.name);
+            Assert.Equal(1.0833334f, clip.length, 5);
+            Assert.False(clip.empty);
+        }
+
+        [Fact]
+        public void LegacyAnimationPlaysAutomaticallyOnEachActivation()
+        {
+            var (root, bg, positioner, animation) = ThoughtBubble();
+            Assert.True(animation.playAutomatically);
+            root.SetActive(true);
+            Assert.True(animation.isPlaying);
+            Frame(0f);
+            // Keys: positioner (0,0) until 0.25 s, then (0.5, 0.5) at 0.5 s.
+            Assert.Equal(Vector3.forward, positioner.localScale);
+            for (int i = 0; i < 30; i++) Frame(1f / 60f);
+            Assert.Equal(0.5f, positioner.localScale.x, 4);
+            Assert.True(animation.IsPlaying("thought_bubble"));
+
+            // Past the end (Default wrap → Once): the last frame stays, the state stops and rewinds.
+            for (int i = 0; i < 40; i++) Frame(1f / 60f);
+            Assert.False(animation.isPlaying);
+            Assert.Equal(0f, animation["thought_bubble"].time);
+            Assert.Equal(0.6287977f, bg.localScale.x, 5);
+            Assert.Equal(0.65016603f, bg.localScale.y, 5);
+            Assert.Equal(0.5f, positioner.localScale.x, 5);
+
+            // Activating again plays from the start.
+            root.SetActive(false);
+            root.SetActive(true);
+            Frame(1f / 60f);
+            Assert.True(animation.isPlaying);
+            Assert.Equal(0f, bg.localScale.x);
+        }
+
+        [Fact]
+        public void LegacyAnimationWrapModesAndManualControl()
+        {
+            var (root, _, positioner, animation) = ThoughtBubble();
+            animation.playAutomatically = false;
+            root.SetActive(true);
+            Assert.False(animation.isPlaying);
+
+            var state = animation["thought_bubble"];
+            Assert.Same(animation.clip, animation.GetClip("thought_bubble"));
+            Assert.Equal(1, animation.GetClipCount());
+            state.wrapMode = WrapMode.Loop;
+            Assert.True(animation.Play());
+            for (int i = 0; i < 95; i++) Frame(1f / 60f); // 1.5833 s → 0.5 s into the second loop
+            Assert.True(animation.isPlaying);
+            Assert.Equal(0.5f, positioner.localScale.x, 3);
+
+            state.wrapMode = WrapMode.ClampForever;
+            state.time = 5f;
+            Frame(0f);
+            Assert.True(animation.isPlaying);
+            Assert.Equal(0.5f, positioner.localScale.x, 5);
+
+            // Sample writes the current time without advancing it.
+            animation.Stop();
+            Assert.False(animation.isPlaying);
+            state.enabled = true;
+            state.time = 0.1f;
+            animation.Sample();
+            Assert.Equal(0f, positioner.localScale.x);
+            Assert.Equal(0.1f, state.time);
+        }
     }
 }

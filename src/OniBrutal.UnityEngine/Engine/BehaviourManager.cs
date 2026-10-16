@@ -30,6 +30,7 @@ namespace OniBrutal.Engine
             [typeof(BoxCollider2D)] = () => new BoxCollider2DNative(),
             [typeof(Rigidbody2D)] = () => new Rigidbody2DNative(),
             [typeof(Animator)] = () => new Mecanim.AnimatorNative(),
+            [typeof(Animation)] = () => new Mecanim.AnimationNative(),
             [typeof(ParticleSystem)] = () => new Particles.ParticleSystemNative(),
             [typeof(ParticleSystemRenderer)] = () => new Particles.ParticleSystemRendererNative(),
             [typeof(UnityEngine.Video.VideoPlayer)] = () => new Video.VideoPlayerNative(),

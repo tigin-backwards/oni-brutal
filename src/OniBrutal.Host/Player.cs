@@ -95,7 +95,7 @@ namespace OniBrutal.Host
         /// Diagnostics (`--dump-hierarchy`): the subtree at a path, one line per GameObject.
         static string HierarchyDump(string path)
         {
-            var root = GameObject.Find(path);
+            var root = FindIncludingInactive(path);
             if (root == null) return $"hierarchy {path}: not found";
             var text = new System.Text.StringBuilder($"hierarchy {path}:");
             void Walk(Transform t, int depth)
@@ -110,12 +110,39 @@ namespace OniBrutal.Host
             return text.ToString();
         }
 
+        /// A GameObject by path, inactive objects included (GameObject.Find sees active ones
+        /// only): the deepest active prefix by GameObject.Find, the rest by walking children. A
+        /// `*` segment matches the first child that leads to a match.
+        static GameObject? FindIncludingInactive(string path)
+        {
+            var parts = path.TrimStart('/').Split('/');
+            static Transform? Descend(Transform t, ReadOnlySpan<string> rest)
+            {
+                if (rest.Length == 0) return t;
+                for (int i = 0; i < t.childCount; i++)
+                {
+                    var child = t.GetChild(i);
+                    if (rest[0] != "*" && child.name != rest[0]) continue;
+                    var found = Descend(child, rest[1..]);
+                    if (found != null) return found;
+                }
+                return null;
+            }
+            for (int n = parts.Length; n > 0; n--)
+            {
+                if (parts[..n].Contains("*")) continue;
+                var found = GameObject.Find("/" + string.Join('/', parts[..n]));
+                if (found != null) return Descend(found.transform, parts[n..])?.gameObject;
+            }
+            return null;
+        }
+
         /// Diagnostics (`--dump-component`): a component's serialized fields (public or
         /// [SerializeField], not [NonSerialized]) and their current values.
         static string ComponentDump(string spec)
         {
             int bar = spec.LastIndexOf('|');
-            var go = GameObject.Find(spec[..bar]);
+            var go = FindIncludingInactive(spec[..bar]);
             if (go == null) return $"component {spec}: GameObject not found";
             var component = go.GetComponents<Component>().FirstOrDefault(c => c != null && c.GetType().Name == spec[(bar + 1)..]);
             if (component == null) return $"component {spec}: not found";

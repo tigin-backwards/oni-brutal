@@ -111,7 +111,7 @@ Legend: `[x]` verified · `[ ]` not yet verified · `[~]` deviation (see the not
 - [x] Exclusive fullscreen (`-window-mode exclusive`, or a script request): as in Unity's Linux player it gives a fullscreen window, and the game reports FullScreenWindow like the original
 - [x] Focus loss and regain: switching X focus to another window and back delivers OnApplicationFocus(false/true) (held keys released), no exceptions
 - [x] Audio output: FMOD initialises and mixes through ALSA (verified with a private ALSA configuration whose default device writes PCM to a file through a null sink: the main-menu music is present). Without libpulse or an ALSA device, FMOD runs without output in both players
-- [ ] Audio content compared with the original (positional world sounds, mixer snapshots)
+- [x] Audio content compared with the original, recorded in real time through a private paced ALSA sink (`scripts/audio-sink/record.sh`): main-menu music matches the original's (10 ms RMS envelopes correlate 0.97, aligned waveforms 0.90 over 30 s, level ratio 0.9997); colony ambience on the same seed has the original's level (RMS 0.035–0.040 against 0.036–0.043), stereo balance and spectrum (band energy shares within a few percent)
 
 ## Deviations
 

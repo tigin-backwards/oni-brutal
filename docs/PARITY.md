@@ -77,7 +77,9 @@ Legend: `[x]` verified · `[ ]` not yet verified · `[~]` deviation (see the not
 - [x] Dig (`DigTool`)
 - [x] Activation with tool label, filter panel and overlay: Cancel, Deconstruct, Prioritize (`PriorityScreen`), Disinfect (germ overlay), Sweep (`ClearTool`), Mop, Attack, Wrangle (`CaptureTool`), Harvest, Empty Pipe, Disconnect (compared with the original where its scripted run activated the same tool)
 - [x] Move To (`MoveToLocationTool`): the target sets the "Move to" errand and the Duplicant walks there; an unreachable target keeps the tool active with "UNREACHABLE" (seen in the original)
-- [ ] Tool orders carried out (beyond Dig), Copy Settings
+- [x] Deconstruct (instant-build mode: the Storage Bin goes, its material drops as debris), Sweep (marker on the debris), Cancel (removes the sweep order; the filter gains Sweep & Mop / Dig Orders)
+- [x] Copy Settings: Storage Bin capacity set by a slider click (9911 kg in both players) copied onto a second bin as in the original; the element filter lists only Critter Egg at that point in both, so All Standard changes nothing in either
+- [ ] Mop, Disinfect, Attack, Wrangle, Harvest orders carried out
 - [x] Build placement with materials: Storage Bin and a dragged Ladder from the Base menu; placement refused with "Missing resources" until the colony has the materials (as the original); Duplicants deliver and build
 - [~] `BaseUtilityBuildTool`: the wire tool (Power → Wire, material list, power overlay) opens and responds to a drag as in the original; a placed wire has not been observed in either player's scripted run yet
 - [ ] Pipes, rotation, other categories

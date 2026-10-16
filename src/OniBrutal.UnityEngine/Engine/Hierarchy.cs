@@ -123,12 +123,9 @@ namespace OniBrutal.Engine
             return new Vector3(rs.m00, rs.m11, rs.m22);
         }
 
-        public static int GetSiblingIndex(TransformNative t)
-        {
-            if (t.Parent != null) return Array.IndexOf(t.Parent.Children, t);
-            var scene = t.GameObject.Scene;
-            return scene != null ? scene.Roots.IndexOf(t.GameObject) : 0;
-        }
+        /// Root objects report 0: Unity's player does not expose an order of scene roots (the
+        /// editor's root order); observed with tools/UnityProbe, including after SetAsFirstSibling.
+        public static int GetSiblingIndex(TransformNative t) => t.Parent != null ? Array.IndexOf(t.Parent.Children, t) : 0;
 
         public static void SetSiblingIndex(TransformNative t, int index)
         {

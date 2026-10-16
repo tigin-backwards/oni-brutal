@@ -117,6 +117,8 @@ Legend: `[x]` verified · `[ ]` not yet verified · `[~]` deviation (see the not
 ## Engine semantics
 
 - [x] Lifecycle and timing measured in both players with `tools/UnityProbe` (a mod): Destroy timing (objects and direct children disabled at once, deeper ones at destruction, deepest first), objects awaiting destruction not re-enabled, request order of destruction, component Destroy, `Time.frameCount`/`renderedFrameCount`, startup frames (mods load at frame 2, frontend from frame 3), `yield return null` resuming the next frame, Start and LateUpdate in the same frame for behaviours created by coroutines: output identical apart from a time-based wait landing on another frame at another frame rate
+- [x] Values (tools/UnityProbe): vector/colour/matrix formatting, maths, JsonUtility (see ARCHITECTURE D10), hierarchy queries, SetParent, Instantiate callback order, SendMessage, root sibling indices — identical
+- [x] Main-menu UI layout (tools/UnityProbe UiDump): every RectTransform's rect and world corners and every text's content, size and preferred size across all canvases, compared with the original at 1024×768 — identical apart from TextMeshPro auto-size and one preferred width differing by 0.1 (float rounding)
 - [x] Local mods load (KMod, `Assembly.LoadFrom`, Harmony patches applied on CoreCLR); see ARCHITECTURE D3 for their version stamp
 
 ## Debug mode

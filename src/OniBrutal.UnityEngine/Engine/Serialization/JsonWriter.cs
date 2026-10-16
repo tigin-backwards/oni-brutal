@@ -19,7 +19,7 @@ namespace OniBrutal.Engine.Serialization
     ///   values get ".0", decimal notation for exponents -6 &lt; e &lt;= 21, otherwise "1.5e-7";
     ///   zero (either sign) is "0.0". Unity's RapidJSON (1.1.0) reads past its power-of-ten table
     ///   when rounding the last digits of long outputs, so its last digit can exceed ours there
-    ///   (ARCHITECTURE D9); the values round-trip identically.
+    ///   (ARCHITECTURE D10); the values round-trip identically.
     /// - Built-in types are written with their native transfer names, including
     ///   "serializedVersion" (as a string) for versioned types: Rect, LayerMask, Color32,
     ///   AnimationCurve and its keys, Gradient.

@@ -55,9 +55,13 @@ namespace OniBrutal.Engine.Serialization
             var rootClone = CloneStructure(rootNative, null, remap);
             rootClone.Name = rootNative.Name + "(Clone)";
 
-            // 2. Serialized state of scripts, with references remapped into the clone.
+            // 2. Serialized state of scripts, with references remapped into the clone; references
+            //    held by engine components are remapped the same way.
             foreach (var (src, dst) in remap)
                 if (src is MonoBehaviour && dst is MonoBehaviour) CopyScript(src, dst, remap);
+            Object Map(Object o) => o is not null && remap.TryGetValue(o, out var mapped) ? mapped : o;
+            foreach (var dst in remap.Values)
+                if (dst is Component && dst is not MonoBehaviour) dst.NativeOrThrow.RemapReferences(Map);
 
             // 3. Placement.
             var t = rootClone.Transform;

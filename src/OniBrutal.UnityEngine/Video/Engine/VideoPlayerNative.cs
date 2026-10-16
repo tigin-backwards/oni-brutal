@@ -125,6 +125,12 @@ namespace OniBrutal.Engine.Video
             SendFrameReadyEvents = f.Bool("m_FrameReadyEventEnabled");
         }
 
+        public override void RemapReferences(Func<Object, Object> map)
+        {
+            TargetCamera = (Camera)map(TargetCamera);
+            TargetMaterialRenderer = (Renderer)map(TargetMaterialRenderer);
+        }
+
         public override void CopyStateFrom(NativeObject source)
         {
             base.CopyStateFrom(source);

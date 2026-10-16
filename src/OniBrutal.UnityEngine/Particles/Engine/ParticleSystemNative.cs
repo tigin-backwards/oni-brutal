@@ -88,6 +88,11 @@ namespace OniBrutal.Engine.Particles
 
         /// Instantiate copies the modules; the clone starts stopped (Unity copies serialized
         /// state, not the simulation). Sub-emitter references are not remapped into the clone.
+        public override void RemapReferences(Func<UnityEngine.Object, UnityEngine.Object> map)
+        {
+            foreach (var sub in Config.SubEmitters) sub.Emitter = (ParticleSystem)map(sub.Emitter);
+        }
+
         public override void CopyStateFrom(NativeObject source) => Config = ((ParticleSystemNative)source).Config.Clone();
 
         // ---- State queries ----

@@ -557,6 +557,8 @@ namespace OniBrutal.Engine.UI
         public int RenderOrder;
         public int EnableSequence;
 
+        public override void RemapReferences(Func<Object, Object> map) => WorldCamera = (Camera)map(WorldCamera);
+
         public override void CopyStateFrom(NativeObject source)
         {
             base.CopyStateFrom(source);

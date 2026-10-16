@@ -39,5 +39,30 @@ namespace OniBrutal.Tests
             nestedCanvas.overrideSorting = true;
             Assert.Equal(7, nestedCanvas.sortingOrder);
         }
+
+        [Fact]
+        public void InstantiateRemapsTheCanvasCameraIntoTheClone()
+        {
+            // The game's virtual cursor: a camera-space canvas whose camera is in the same prefab.
+            var root = new GameObject("Controller");
+            var camera = new GameObject("Camera").AddComponent<Camera>();
+            camera.transform.SetParent(root.transform, false);
+            var canvasGo = new GameObject("Canvas", typeof(RectTransform));
+            canvasGo.transform.SetParent(root.transform, false);
+            var canvas = canvasGo.AddComponent<Canvas>();
+            canvas.renderMode = RenderMode.ScreenSpaceCamera;
+            canvas.worldCamera = camera;
+            var outside = new GameObject("Outside").AddComponent<Camera>();
+
+            var clone = Object.Instantiate(root);
+            var cloneCanvas = clone.GetComponentInChildren<Canvas>();
+            var cloneCamera = clone.GetComponentInChildren<Camera>();
+            Assert.Same(cloneCamera, cloneCanvas.worldCamera);
+            Assert.NotSame(camera, cloneCamera);
+
+            // A reference to an object outside the cloned hierarchy is kept.
+            canvas.worldCamera = outside;
+            Assert.Same(outside, Object.Instantiate(root).GetComponentInChildren<Canvas>().worldCamera);
+        }
     }
 }

@@ -160,7 +160,7 @@ past the boot checkpoint needs a Steam client logged in with an account that own
   reclaimed object cannot run code. ScriptableObjects whose type declares `OnDisable` or
   `OnDestroy` (Unity calls both when it unloads one) are therefore never unloaded. No
   ScriptableObject in the game declares either.
-- **D9 JsonUtility digits.** Unity's JSON writer is RapidJSON 1.1.0, whose Grisu2 rounding of
+- **D10 JsonUtility digits.** Unity's JSON writer is RapidJSON 1.1.0, whose Grisu2 rounding of
   the last digits of long outputs indexes past a ten-entry table and multiplies by whatever
   bytes follow it in `UnityPlayer.so` (identified by matching 35 observed outputs). The engine
   implements the corrected algorithm, so for such values its last digit can be smaller than

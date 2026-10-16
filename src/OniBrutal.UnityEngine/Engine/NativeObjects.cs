@@ -26,6 +26,11 @@ namespace OniBrutal.Engine
         /// Copies engine-side state for Instantiate (each record type adds its own state).
         public virtual void CopyStateFrom(NativeObject source) { }
 
+        /// After Instantiate copied the state: references to objects of the cloned hierarchy
+        /// are redirected to their clones (`map` returns its argument for anything else), as
+        /// Unity does for every reference a component holds.
+        public virtual void RemapReferences(System.Func<UnityEngine.Object, UnityEngine.Object> map) { }
+
         /// Serialized data of an engine object loaded from an asset file, kept until the owning
         /// subsystem's Bind consumes it.
         public OniBrutal.Assets.TypeTrees.Fields Serialized;

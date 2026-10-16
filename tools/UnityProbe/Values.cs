@@ -40,6 +40,10 @@ namespace SemanticsProbe
 
         public static IEnumerator Run()
         {
+            Rec.Log("=== values: screen");
+            V("Screen", Screen.width + "x" + Screen.height + " current " + Screen.currentResolution.width + "x" + Screen.currentResolution.height + " fullScreenMode " + Screen.fullScreenMode);
+            V("Display.main", Display.displays[0].systemWidth);
+
             Rec.Log("=== values: formatting");
             V("Vector3", new Vector3(1.23456f, -2f, 1e-5f));
             V("Vector2", new Vector2(0.5f, 100.25f));
@@ -97,6 +101,13 @@ namespace SemanticsProbe
             V("sibling index", c2.transform.GetSiblingIndex() + " " + root.transform.childCount);
             c2.transform.SetAsFirstSibling();
             V("after SetAsFirstSibling", root.transform.GetChild(0).name);
+
+            var ra = new GameObject("RA"); var rb = new GameObject("RB"); var rc = new GameObject("RC");
+            V("root sibling indices", ra.transform.GetSiblingIndex() + " " + rb.transform.GetSiblingIndex() + " " + rc.transform.GetSiblingIndex());
+            rc.transform.SetAsFirstSibling();
+            V("root after SetAsFirstSibling", ra.transform.GetSiblingIndex() + " " + rb.transform.GetSiblingIndex() + " " + rc.transform.GetSiblingIndex());
+            UnityEngine.Object.DontDestroyOnLoad(rb);
+            V("root after DontDestroyOnLoad", ra.transform.GetSiblingIndex() + " " + rb.transform.GetSiblingIndex() + " " + rc.transform.GetSiblingIndex());
 
             Rec.Log("=== values: instantiate order");
             var proto = new GameObject("P0");

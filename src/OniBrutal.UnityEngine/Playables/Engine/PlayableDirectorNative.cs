@@ -79,6 +79,14 @@ namespace OniBrutal.Engine.Playables
             }
         }
 
+        public override void RemapReferences(Func<Object, Object> map)
+        {
+            var bindings = new List<KeyValuePair<Object, Object>>(SceneBindings);
+            SceneBindings.Clear();
+            foreach (var (key, value) in bindings) SceneBindings[map(key)] = map(value);
+            foreach (var name in new List<PropertyName>(ExposedReferences.Keys)) ExposedReferences[name] = map(ExposedReferences[name]);
+        }
+
         public override void CopyStateFrom(NativeObject source)
         {
             base.CopyStateFrom(source);

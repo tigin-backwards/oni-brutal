@@ -106,7 +106,7 @@ Legend: `[x]` verified · `[ ]` not yet verified · `[~]` deviation (see the not
 - [x] Frame rate at parity with the original (PLAN §Status, Performance)
 - [x] Windowed → fullscreen (borderless) switching at runtime
 - [x] Resolution changes at runtime (window resized)
-- [ ] Exclusive fullscreen
+- [x] Exclusive fullscreen (`-window-mode exclusive`, or a script request): as in Unity's Linux player it gives a fullscreen window, and the game reports FullScreenWindow like the original
 - [x] Focus loss and regain: switching X focus to another window and back delivers OnApplicationFocus(false/true) (held keys released), no exceptions
 - [x] Audio output: FMOD initialises and mixes through ALSA (verified with a private ALSA configuration whose default device writes PCM to a file through a null sink: the main-menu music is present). Without libpulse or an ALSA device, FMOD runs without output in both players
 - [ ] Audio content compared with the original (positional world sounds, mixer snapshots)

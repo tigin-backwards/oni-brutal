@@ -65,7 +65,7 @@ namespace OniBrutal.Desktop
 
             var monitor = Glfw.PrimaryMonitor;
             var desktop = monitor.VideoMode;
-            mode = settings.Mode;
+            mode = Supported(settings.Mode);
             int width = settings.Width > 0 ? settings.Width : desktop.Width;
             int height = settings.Height > 0 ? settings.Height : desktop.Height;
             if (mode is FullScreenMode.FullScreenWindow) Glfw.WindowHint(GlfwWindowHint.Decorated, GLFW_FALSE);
@@ -192,8 +192,14 @@ namespace OniBrutal.Desktop
             (2048, 1536), (2560, 1600), (2880, 1800), (3200, 1800), (2560, 1920), (2560, 2048), (3200, 2048), (3840, 2160),
         ];
 
+        /// Unity supports exclusive fullscreen only in its Windows player; elsewhere a request for
+        /// it gives a fullscreen window (as the Linux player reports: FullScreenWindow).
+        static FullScreenMode Supported(FullScreenMode mode)
+            => mode == FullScreenMode.ExclusiveFullScreen && !OperatingSystem.IsWindows() ? FullScreenMode.FullScreenWindow : mode;
+
         public void SetResolution(int width, int height, FullScreenMode newMode, uint refreshNumerator, uint refreshDenominator)
         {
+            newMode = Supported(newMode);
             var monitor = CurrentMonitor;
             var desktop = monitor.VideoMode;
             if (mode is FullScreenMode.Windowed or FullScreenMode.MaximizedWindow)

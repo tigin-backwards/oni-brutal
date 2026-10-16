@@ -67,13 +67,16 @@ Legend: `[x]` verified · `[ ]` not yet verified · `[~]` deviation (see the not
 - [ ] `VictoryScreen`, `StoryMessageScreen`, `EventInfoScreen`
 - [ ] Timelapse capture (`ReadPixels` + `EncodeToPNG`)
 - [x] Camera: wheel zoom out/in, keyboard pan, Home (camera return)
-- [ ] Camera: edge and drag pan, follow, bookmarks (`WorldSelector` for multiple asteroids)
+- [x] Camera: right- and middle-button drag pan move the view by the same pixel offsets as the original (−200,−100 and −250,+200, the latter clamped at the world edge, measured by image registration); Ctrl+1 / Shift+1 bookmark returns to the exact view in both. ONI has no edge pan (the edge padding only clamps the camera)
+- [x] Camera follow: stress meter click selects and focuses a Duplicant, Follow Cam zooms in and keeps the Duplicant centred while it walks
+- [ ] `WorldSelector` (multiple asteroids, Spaced Out DLC)
 
 ## Tools
 
 - [x] Dig (`DigTool`)
 - [x] Activation with tool label, filter panel and overlay: Cancel, Deconstruct, Prioritize (`PriorityScreen`), Disinfect (germ overlay), Sweep (`ClearTool`), Mop, Attack, Wrangle (`CaptureTool`), Harvest, Empty Pipe, Disconnect (compared with the original where its scripted run activated the same tool)
-- [ ] Tool orders carried out (beyond Dig), Copy Settings, Move To
+- [x] Move To (`MoveToLocationTool`): the target sets the "Move to" errand and the Duplicant walks there; an unreachable target keeps the tool active with "UNREACHABLE" (seen in the original)
+- [ ] Tool orders carried out (beyond Dig), Copy Settings
 - [x] Build placement with materials: Storage Bin and a dragged Ladder from the Base menu; placement refused with "Missing resources" until the colony has the materials (as the original); Duplicants deliver and build
 - [~] `BaseUtilityBuildTool`: the wire tool (Power → Wire, material list, power overlay) opens and responds to a drag as in the original; a placed wire has not been observed in either player's scripted run yet
 - [ ] Pipes, rotation, other categories

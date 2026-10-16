@@ -7,8 +7,9 @@ namespace OniBrutal.Host
 {
     /// `--input FRAME:ACTION[:ARGS]` (development and test runs): input delivered through the
     /// same feed as the window's, before the given frame. Positions are screen pixels with the
-    /// origin at the top left (as in captures). Actions: `move:X,Y`, `click:X,Y` (left button
-    /// down, up the next frame), `press:X,Y` / `release:X,Y` (left button, for drags), `key:KEYCODE` (down, up the next frame),
+    /// origin at the top left (as in captures). Actions: `move:X,Y`, `click:X,Y[,BUTTON]` (button
+    /// down, up the next frame; left unless BUTTON is 1 right or 2 middle), `press:X,Y[,BUTTON]` /
+    /// `release:X,Y[,BUTTON]` (for drags), `key:KEYCODE` (down, up the next frame),
     /// `keydown:KEYCODE` / `keyup:KEYCODE` (held keys, e.g. modifiers for chords), `scroll:DX,DY` (wheel
     /// steps at the pointer), `text:STRING`. A run
     /// with a script ignores the window's own mouse and keyboard, so it is reproducible.
@@ -30,11 +31,11 @@ namespace OniBrutal.Host
             {
                 case "move": At(frame, () => Move(Point(arg))); break;
                 case "click":
-                    At(frame, () => { Move(Point(arg)); feed.MouseDown(0, 0, Gui(Point(arg))); });
-                    At(frame + 1, () => feed.MouseUp(0, 0, Gui(Point(arg))));
+                    At(frame, () => { Move(Point(arg)); feed.MouseDown(Button(arg), 0, Gui(Point(arg))); });
+                    At(frame + 1, () => feed.MouseUp(Button(arg), 0, Gui(Point(arg))));
                     break;
-                case "press": At(frame, () => { Move(Point(arg)); feed.MouseDown(0, 0, Gui(Point(arg))); }); break;
-                case "release": At(frame, () => { Move(Point(arg)); feed.MouseUp(0, 0, Gui(Point(arg))); }); break;
+                case "press": At(frame, () => { Move(Point(arg)); feed.MouseDown(Button(arg), 0, Gui(Point(arg))); }); break;
+                case "release": At(frame, () => { Move(Point(arg)); feed.MouseUp(Button(arg), 0, Gui(Point(arg))); }); break;
                 case "key":
                     var key = Enum.Parse<KeyCode>(arg);
                     At(frame, () => feed.KeyDown(key, Modifiers(), repeat: false, Vector2.zero));
@@ -81,6 +82,14 @@ namespace OniBrutal.Host
         {
             if (byFrame.TryGetValue(frame, out var list))
                 foreach (var a in list) a();
+        }
+
+        /// The button of a `click`/`press`/`release`: an optional third component (0 left,
+        /// 1 right, 2 middle), left when absent.
+        static int Button(string arg)
+        {
+            var xyb = arg.Split(',');
+            return xyb.Length > 2 ? int.Parse(xyb[2]) : 0;
         }
 
         static Vector2 Point(string arg)

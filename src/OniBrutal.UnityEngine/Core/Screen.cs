@@ -27,9 +27,9 @@ namespace UnityEngine
         public static Resolution currentResolution => ToResolution(P.DesktopMode);
 
         /// Supported fullscreen modes of the monitor, smallest first.
-        public static Resolution[] resolutions => P.DisplayModes
-            .OrderBy(m => m.Width).ThenBy(m => m.Height).ThenBy(m => (double)m.RefreshNumerator / Math.Max(1u, m.RefreshDenominator))
-            .Select(ToResolution).ToArray();
+        /// The platform's modes in its order (sorted by width for modes a display reports, as
+        /// Unity documents; its standard-resolution table in Unity's own order).
+        public static Resolution[] resolutions => P.DisplayModes.Select(ToResolution).ToArray();
 
         static Resolution ToResolution(DisplayMode m)
             => new() { width = m.Width, height = m.Height, refreshRateRatio = new RefreshRate { numerator = m.RefreshNumerator, denominator = m.RefreshDenominator } };

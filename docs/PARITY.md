@@ -32,7 +32,8 @@ Legend: `[x]` verified · `[ ]` not yet verified · `[~]` deviation (see the not
 
 - [x] `OptionsMenuScreen` and its Graphics, Audio, Game, Data Communication, Feedback and Credits screens (compared with the original)
 - [x] `GraphicsOptionsScreen`: fullscreen switching at runtime (window resized, UI re-laid out, "Accept Changes?"), resolution label as the original ("@ 0Hz" under Xvfb in both)
-- [ ] `GraphicsOptionsScreen`: resolution list choice, UI scale, colour mode
+- [x] `GraphicsOptionsScreen`: resolution dropdown (placement and the same mode list as the original on a single-mode display), choosing a resolution resizes the window with "Accept Changes?"
+- [ ] `GraphicsOptionsScreen`: UI scale, colour mode
 - [ ] `AudioOptionsScreen`: volumes, device
 - [ ] `GameOptionsScreen`: autosave interval, temperature unit, camera speed, save/cloud settings
 - [x] `InputBindingsScreen`: rebinding (conflict notice when a key is taken), persistence across restarts (`keybindings.json`)
@@ -97,7 +98,8 @@ Legend: `[x]` verified · `[ ]` not yet verified · `[~]` deviation (see the not
 - [x] Clipboard: select all, copy and paste in the destination coordinates field (as the original)
 - [x] Frame rate at parity with the original (PLAN §Status, Performance)
 - [x] Windowed → fullscreen (borderless) switching at runtime
-- [ ] Exclusive fullscreen, resolution changes at runtime
+- [x] Resolution changes at runtime (window resized)
+- [ ] Exclusive fullscreen
 - [x] Focus loss and regain: switching X focus to another window and back delivers OnApplicationFocus(false/true) (held keys released), no exceptions
 - [ ] Audio (FMOD): music, ambience, UI and world sounds. Not verifiable on the development machine: FMOD loads and initialises in both players, but no PulseAudio client library is installed, so neither produces output
 

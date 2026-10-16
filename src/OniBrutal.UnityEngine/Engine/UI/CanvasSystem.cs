@@ -46,7 +46,9 @@ namespace OniBrutal.Engine.UI
             var c = canvas.Data;
             if (!enabled.Contains(c)) enabled.Add(c);
             c.EnableSequence = ++sequence;
-            UpdateRootTransform(c);
+            // A root canvas's rect is driven by the canvas update (before willRenderCanvases), not
+            // on enable: a canvas enabled at the root and reparented in the same call (uGUI's
+            // Dropdown clones its canvas-bearing template, then nests it) keeps its own anchoring.
         }
 
         public static void Disable(Canvas canvas) => enabled.Remove(canvas.Data);

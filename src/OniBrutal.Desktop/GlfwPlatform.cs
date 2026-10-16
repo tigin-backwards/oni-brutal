@@ -1,3 +1,4 @@
+using System.Linq;
 using System;
 using System.Collections.Generic;
 using Brutal.GlfwApi;
@@ -168,9 +169,28 @@ namespace OniBrutal.Desktop
                     var mode = ModeOf(m);
                     if (!list.Contains(mode)) list.Add(mode);
                 }
-                return list.ToArray();
+                if (list.Count > 1)
+                    return list.OrderBy(m => m.Width).ThenBy(m => m.Height).ThenBy(m => (double)m.RefreshNumerator / Math.Max(1u, m.RefreshDenominator)).ToArray();
+                // A display that reports only its current mode (virtual displays such as Xvfb or
+                // WSLg): Unity's Linux player then offers its table of standard resolutions that
+                // fit the desktop, at 60 Hz, in this order (observed from the original player;
+                // modes under 720 lines are not observable through the game and are omitted).
+                var desktop = DesktopMode;
+                var standard = new List<OniBrutal.Engine.Platform.DisplayMode>();
+                foreach (var (w, h) in StandardResolutions)
+                    if (w <= desktop.Width && h <= desktop.Height) standard.Add(new(w, h, 60, 1));
+                return standard.Count > 0 ? standard.ToArray() : list.ToArray();
             }
         }
+
+        static readonly (int Width, int Height)[] StandardResolutions =
+        [
+            (960, 720), (1152, 720), (1280, 720), (1024, 768), (1152, 768), (1280, 768), (1366, 768), (1280, 800),
+            (1152, 864), (1280, 864), (1440, 900), (1600, 900), (1280, 960), (1440, 960), (1280, 1024), (1600, 1024),
+            (1400, 1050), (1680, 1050), (1920, 1080), (2560, 1080), (2048, 1152), (1600, 1200), (1920, 1200),
+            (1792, 1344), (1856, 1392), (1920, 1440), (2160, 1440), (2304, 1440), (2560, 1440), (3440, 1440),
+            (2048, 1536), (2560, 1600), (2880, 1800), (3200, 1800), (2560, 1920), (2560, 2048), (3200, 2048), (3840, 2160),
+        ];
 
         public void SetResolution(int width, int height, FullScreenMode newMode, uint refreshNumerator, uint refreshDenominator)
         {

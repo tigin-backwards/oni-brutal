@@ -165,8 +165,9 @@ namespace OniBrutal.Engine.Assets
             if (unloadAllLoadedObjects)
             {
                 var files = new HashSet<string>(native.NodeKeys, StringComparer.Ordinal);
+                // Components go with their GameObjects (destroying one directly is refused).
                 foreach (var obj in ObjectLoader.LoadedFrom(files))
-                    if (obj != bundle) Object.DestroyImmediate(obj, true);
+                    if (obj != bundle && obj is not Component && obj != null) Object.DestroyImmediate(obj, true);
             }
             foreach (var key in native.NodeKeys) ObjectLoader.ForgetFile(key);
             AssetSystem.UnmountBundle(native.NodeKeys);

@@ -23,7 +23,8 @@ Legend: `[x]` verified · `[ ]` not yet verified · `[~]` deviation (see the not
 - [x] `ModsScreen` (empty list, Steam Workshop / Disable All / Close; no Workshop items with the test double) as the original
 - [x] `ScenariosMenu`: not reachable in this build (no code opens it)
 - [x] `LockerMenuScreen` (Supply Closet, offline) and its Duplicants outfit screen
-- [ ] `PatchNotesScreen`, `KleiItemDropScreen`, `KleiInventoryScreen` contents (need network/Steam services)
+- [x] Supply Closet "All" (`KleiInventoryScreen`: blueprint categories, building diorama with the animate-in, details) and Wardrobe (`OutfitBrowserScreen`; its initial outfit is random) as the original
+- [x] `PatchNotesScreen`: unreachable in this build (`ShouldShowScreen` returns false); `KleiItemDropScreen`: needs claimable items from a Klei account (the offline test double has no valid ticket), unreachable in both players
 - [x] `RetiredColonyInfoScreen`: colony list, achievements, colony detail (Duplicants with portraits, buildings, oxygen graph); colony cards show the timelapse thumbnail
 - [x] Tutorial videos (`VideoScreen` from a message's video widget, render-texture output) play as the original, with libvpx available (verified with Ubuntu's libvpx9 unpacked locally)
 - [x] Intro short on first launch: this build sets no intro short (`MainMenu.IntroShortName`), so neither player plays one (no `PlayShortOnLaunch` pref written by either)
@@ -60,7 +61,8 @@ Legend: `[x]` verified · `[ ]` not yet verified · `[~]` deviation (see the not
 - [x] Management screens opened by hotkey and compared with the original: Vitals, Consumables, Priorities (jobs), Schedule (`ScheduleScreen`), Skills (`SkillsScreen`, Duplicant portrait in a stencil mask), Database (`CodexScreen`), Reports (`ReportScreen`)
 - [x] Research and Starmap buttons before a Research Station / Telescope exists: locked, with the original's tooltips
 - [x] Research tree interaction: hover, tooltips, selecting a tech (instant completion in debug mode) as the original
-- [ ] Research progress over time at a real Research Station; `ClusterMapScreen` (Spaced Out DLC, not owned with the test double)
+- [ ] Research progress over time at a real Research Station
+- [x] `ClusterMapScreen`, `WorldSelector`: Spaced Out content is not installed in this game copy (no `StreamingAssets/dlc`), unreachable in both players
 - [x] `PauseScreen`: open, save with overwrite confirmation (41 saves in one run)
 - [x] `PauseScreen` → Main Menu ("Save and quit" prompt) → front end with Resume Game; the front end comes back at the smaller UI scale as in the original (once, ours returned to the normal scale a few seconds later; not reproduced since)
 - [x] `PauseScreen`: Save As (save slots, New Save, typed name in `FileNameDialog`), Load (colony list, colony view, Load Game → the save loads in game)
@@ -72,7 +74,6 @@ Legend: `[x]` verified · `[ ]` not yet verified · `[~]` deviation (see the not
 - [x] Camera: wheel zoom out/in, keyboard pan, Home (camera return)
 - [x] Camera: right- and middle-button drag pan move the view by the same pixel offsets as the original (−200,−100 and −250,+200, the latter clamped at the world edge, measured by image registration); Ctrl+1 / Shift+1 bookmark returns to the exact view in both. ONI has no edge pan (the edge padding only clamps the camera)
 - [x] Camera follow: stress meter click selects and focuses a Duplicant, Follow Cam zooms in and keeps the Duplicant centred while it walks
-- [ ] `WorldSelector` (multiple asteroids, Spaced Out DLC)
 
 ## Tools
 

@@ -61,6 +61,12 @@ namespace OniBrutal.Engine
         public GameObjectNative GameObject;
         /// EngineAwake has run (components that are not Behaviours).
         public bool AwakeCalledForComponent;
+        /// EngineOnEnable has run and EngineOnDisable has not run since (components that are not
+        /// Behaviours).
+        public bool EngineEnabled;
+        /// Destroy was called on the component or its GameObject (or an ancestor) and it awaits
+        /// destruction: as in Unity it is disabled at once and is not enabled again.
+        public bool DestroyPending;
     }
 
     internal class BehaviourNative : ComponentNative

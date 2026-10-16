@@ -24,6 +24,15 @@ namespace OniBrutal.Tests
         void OnDestroy() => SawSibling = GetComponent<Recorder>() != null && GetComponentInChildren<Base>(true) != null;
     }
 
+    /// Records whether another object is still alive in its own OnDisable and OnDestroy.
+    public class PeerWatcher : MonoBehaviour
+    {
+        public string label = "";
+        public Object peer;
+        void OnDisable() => Recorder.Log.Add(label + ":OnDisable peer " + (peer == null ? "gone" : "alive"));
+        void OnDestroy() => Recorder.Log.Add(label + ":OnDestroy peer " + (peer == null ? "gone" : "alive"));
+    }
+
     public class LateRecorder : MonoBehaviour
     {
         void Start() => Recorder.Log.Add("late:Start");
@@ -156,6 +165,83 @@ namespace OniBrutal.Tests
             Assert.False(go);
             Assert.Equal(0, go.GetInstanceID());
             Assert.Contains(":OnDestroy", Recorder.Log);
+        }
+
+        // Destroy's timing as observed in Unity's player (a probe mod in the original game):
+        // behaviours are disabled at the call, destroyed at the end of the frame in request order.
+
+        [Fact]
+        public void DestroyDisablesTheObjectAndItsChildrenAtOnceAndDeeperOnesAtDestruction()
+        {
+            Recorder Make(string label, Transform parent)
+            {
+                var go = new GameObject(label);
+                go.transform.SetParent(parent);
+                var r = go.AddComponent<Recorder>();
+                r.label = label;
+                return r;
+            }
+            var d0 = Make("d0", null);
+            var d1 = Make("d1", d0.transform);
+            var d2 = Make("d2", d1.transform);
+            var d3 = Make("d3", d2.transform);
+            Recorder.Log.Clear();
+            Object.Destroy(d0.gameObject);
+            Assert.Equal(["d0:OnDisable", "d1:OnDisable"], Recorder.Log);
+            Assert.True(d0.gameObject.activeSelf);
+            Assert.True(d1.gameObject.activeInHierarchy);
+            Assert.False(d0.enabled);
+            Assert.False(d1.isActiveAndEnabled);
+            Assert.True(d3.isActiveAndEnabled);
+            Frame();
+            // d2 and d3 stay enabled for the rest of the frame (Start, Update).
+            Assert.Equal(["d0:OnDisable", "d1:OnDisable", "d3:OnDisable", "d2:OnDisable", "d0:OnDestroy", "d1:OnDestroy", "d2:OnDestroy", "d3:OnDestroy"],
+                Recorder.Log.FindAll(e => e.EndsWith(":OnDisable") || e.EndsWith(":OnDestroy")));
+        }
+
+        [Fact]
+        public void ObjectsAwaitingDestructionAreNotEnabledAgain()
+        {
+            var parent = new GameObject("p");
+            var child = new GameObject("x");
+            child.transform.SetParent(parent.transform);
+            var x = child.AddComponent<Recorder>(); x.label = "x";
+            Recorder.Log.Clear();
+            Object.Destroy(child);
+            parent.SetActive(false);
+            parent.SetActive(true);
+            x.enabled = true;
+            Assert.Equal(["x:OnDisable"], Recorder.Log);
+            Assert.False(x.isActiveAndEnabled);
+            Frame();
+            Assert.Equal(["x:OnDisable", "x:OnDestroy"], Recorder.Log);
+        }
+
+        [Fact]
+        public void DestroyingAComponentDisablesItAtOnce()
+        {
+            var go = new GameObject("a");
+            var r = go.AddComponent<Recorder>();
+            Recorder.Log.Clear();
+            Object.Destroy(r);
+            Assert.Equal([":OnDisable"], Recorder.Log);
+            Assert.False(r.enabled);
+            Frame();
+            Assert.Equal([":OnDisable", ":OnDestroy"], Recorder.Log);
+            Assert.True(r == null);
+            Assert.True(go != null);
+        }
+
+        [Fact]
+        public void PendingDestructionsRunInRequestOrderOneAfterAnother()
+        {
+            var b = new GameObject("b").AddComponent<PeerWatcher>(); b.label = "b";
+            var c = new GameObject("c").AddComponent<PeerWatcher>(); c.label = "c";
+            b.peer = c; c.peer = b;
+            Object.Destroy(b.gameObject);
+            Object.Destroy(c.gameObject);
+            Frame();
+            Assert.Equal(["b:OnDisable peer alive", "c:OnDisable peer alive", "b:OnDestroy peer alive", "c:OnDestroy peer gone"], Recorder.Log);
         }
 
         [Fact]

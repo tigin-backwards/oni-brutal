@@ -225,7 +225,7 @@ namespace OniBrutal.Engine
         public static void AwakeAndEnable(Component c)
         {
             var native = c.Native as ComponentNative;
-            if (native == null) return;
+            if (native == null || native.DestroyPending) return;
             if (native is BehaviourNative bn)
             {
                 if (!bn.AwakeCalled)
@@ -244,6 +244,7 @@ namespace OniBrutal.Engine
                     native.AwakeCalledForComponent = true;
                     c.EngineAwake();
                 }
+                native.EngineEnabled = true;
                 c.EngineOnEnable(); // components that are not Behaviours: each activation
             }
         }
@@ -265,7 +266,11 @@ namespace OniBrutal.Engine
 
         public static void Disable(Component c)
         {
-            if (c.Native is ComponentNative and not BehaviourNative) c.EngineOnDisable(); // non-Behaviours: deactivation
+            if (c.Native is ComponentNative { EngineEnabled: true } cn and not BehaviourNative)
+            {
+                cn.EngineEnabled = false;
+                c.EngineOnDisable(); // non-Behaviours: deactivation
+            }
             if (c.Native is not BehaviourNative bn || !bn.IsActiveAndEnabledState) return;
             bn.IsActiveAndEnabledState = false;
             if (bn.Script != null) BehaviourManager.Unregister(bn);
@@ -310,6 +315,40 @@ namespace OniBrutal.Engine
             if (native.DestroyRequested) return;
             native.DestroyRequested = true;
             pendingDestroy.Add(obj);
+            DisableForDestroy(obj);
+        }
+
+        /// Destroy disables part of what it will destroy at once (OnDisable now, OnDestroy at the
+        /// end of the frame), as observed in Unity's player: the behaviours of the GameObject and
+        /// of its direct children, or the one component. Until destruction they report
+        /// enabled = false and activation does not enable them again, while the GameObjects keep
+        /// their active flags. Deeper descendants stay enabled until the destruction itself.
+        static void DisableForDestroy(Object obj)
+        {
+            switch (obj)
+            {
+                case GameObject go:
+                    var native = (GameObjectNative)go.Native;
+                    DisableComponentsForDestroy(native);
+                    foreach (var child in native.Transform.Children) DisableComponentsForDestroy(child.GameObject);
+                    break;
+                case Transform:
+                    break; // refused at destruction
+                case Component c when c.Native is ComponentNative cn:
+                    cn.DestroyPending = true;
+                    if (cn is BehaviourNative) Disable(c);
+                    break;
+            }
+        }
+
+        static void DisableComponentsForDestroy(GameObjectNative g)
+        {
+            foreach (var c in g.Components)
+                if (c.Native is ComponentNative cn)
+                {
+                    cn.DestroyPending = true;
+                    if (cn is BehaviourNative) Disable(c);
+                }
         }
 
         /// End-of-frame processing of Destroy requests (player loop).
@@ -365,13 +404,29 @@ namespace OniBrutal.Engine
         static void DestroyGameObject(GameObjectNative go)
         {
             var t = go.Transform;
-            // 1. Leave the active state (OnDisable for the whole subtree).
-            if (go.ActiveInHierarchy) ApplyActive(go, false);
+            // 1. Leave the active state: OnDisable for what is still enabled, deepest objects
+            //    first (as Unity's player orders it when destroying).
+            if (go.ActiveInHierarchy) DeactivateForDestroy(go);
             // 2. Detach from parent or scene.
             if (t.Parent != null) Hierarchy.RemoveChild(t.Parent, t);
             else if (go.Scene != null) Scenes.RemoveRoot(go.Scene, go);
             // 3. Destroy the subtree.
             DestroySubtree(go);
+        }
+
+        static void DeactivateForDestroy(GameObjectNative go)
+        {
+            var changed = new List<GameObjectNative>();
+            SetFlags(go, false, changed);
+            void PostOrder(GameObjectNative g)
+            {
+                foreach (var child in g.Transform.Children)
+                    if (changed.Contains(child.GameObject)) PostOrder(child.GameObject);
+                foreach (var c in g.Components)
+                    if (c.Native != null) Disable(c);
+                StopCoroutinesOn(g);
+            }
+            PostOrder(go);
         }
 
         /// OnDestroy for every component of the subtree first, then the objects are released:

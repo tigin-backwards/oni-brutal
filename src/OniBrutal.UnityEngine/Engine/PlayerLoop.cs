@@ -55,16 +55,27 @@ namespace OniBrutal.Engine
         static readonly double[] statTotals = new double[9]; // render, gui, end of frame, present, early+fixed, scripts' Update (+starts, coroutines, director), animation+LateUpdate, post-late update (canvases…), particles
         static int statFrames;
 
+        static readonly double[] framePhases = new double[9];
+
         static void Mark(int phase)
         {
             if (!FrameStats) return;
-            statTotals[phase] += statClock.Elapsed.TotalMilliseconds;
+            double ms = statClock.Elapsed.TotalMilliseconds;
+            statTotals[phase] += ms;
+            framePhases[phase] += ms;
             statClock.Restart();
         }
 
         static void EndStats()
         {
-            if (!FrameStats || ++statFrames < 60) return;
+            if (!FrameStats) return;
+            // Single slow frames (hitches) are logged with their own breakdown.
+            double total = 0;
+            foreach (var v in framePhases) total += v;
+            if (total > 250)
+                EngineLog.Engine($"slow frame {Time.frameCount} ({total:F0} ms): early+fixed {framePhases[4]:F0}, update {framePhases[5]:F0}, late {framePhases[6]:F0}, post-late {framePhases[7]:F0}, render {framePhases[0]:F0}, gui {framePhases[1]:F0}, end of frame {framePhases[2]:F0}, present {framePhases[3]:F0}");
+            Array.Clear(framePhases);
+            if (++statFrames < 60) return;
             double T(int i) => statTotals[i] / 60;
             EngineLog.Engine($"frame stats (ms/frame over 60): early+fixed {T(4):F2}, update {T(5):F2}, late {T(6):F2}, post-late {T(7):F2}, particles {T(8):F2}, render {T(0):F2}, gui {T(1):F2}, end of frame {T(2):F2}, present {T(3):F2}, gpu {OniBrutal.Engine.Rendering.GraphicsDevice.Current.TakeGpuFrameMilliseconds():F2}");
             Array.Clear(statTotals);

@@ -562,6 +562,8 @@ namespace OniBrutal.Desktop.Gl
             framebufferValid = false;
         }
 
+        public override void Upload(TextureNative texture) => GlTextures.Ensure(texture);
+
         public override void ReleaseResource(object gpu)
         {
             switch (gpu)

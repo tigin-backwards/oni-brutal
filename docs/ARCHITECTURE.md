@@ -346,6 +346,11 @@ player: with vSync the swap paces frames; otherwise `Application.targetFrameRate
 otherwise none. Without a display (`--headless`, `--batchmode`) frames are paced at
 `targetFrameRate` or 60 Hz.
 
+Textures loaded from asset files are uploaded as part of loading, as in Unity (the load queues
+them; the main thread uploads them before the next frame renders), not on first draw: first
+draws of screens with many textures (the research tree) would otherwise hitch for a second and
+throw off the game's time-based UI animation. Non-readable textures drop their CPU copy then.
+
 Per-draw uniform blocks are streamed through a ring buffer that stays persistently mapped for the
 device's lifetime (`GlStreamBuffer`, ARB_buffer_storage): data is copied into the mapping, blocks
 are bound by range, and a fence per frame keeps a region from being reused before the GPU has
@@ -469,7 +474,7 @@ mouse/keyboard/wheel/text input through the window's input path (held keys for c
 Ctrl+F4); `--dump-render-textures FRAME:DIR` writes
 the screen and every live render texture as PNG at the end of a frame; `--dump-shader NAME:DIR`
 writes a shader's GLCore variants and pass state; `--frame-stats` logs per-phase frame times
-and the GPU time per frame (timer queries); `--max-frame-rate N[:FRAMES]` bounds the frame rate
+and the GPU time per frame (timer queries), and any frame over 250 ms with its own breakdown; `--max-frame-rate N[:FRAMES]` bounds the frame rate
 (for the first FRAMES frames) so scripted schedules that count frames hold on unpaced displays;
 `--probe-ui FRAME:X,Y` logs the canvas elements drawn at a window point with their hierarchy
 path, material, texture, colour and group alpha; `--dump-hierarchy FRAME:PATH` logs a subtree's

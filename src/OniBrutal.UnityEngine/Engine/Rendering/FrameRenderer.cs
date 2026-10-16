@@ -97,6 +97,7 @@ namespace OniBrutal.Engine.Rendering
         {
             if (GraphicsDevice.Current.RendersFrames)
             {
+                GraphicsDevice.UploadPending();
                 VideoPlanes.CopyRenderTextureVideos();
                 RenderScreen();
             }

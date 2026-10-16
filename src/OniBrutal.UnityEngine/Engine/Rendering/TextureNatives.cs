@@ -149,11 +149,15 @@ namespace OniBrutal.Engine.Rendering
 
         public bool HasTexels => memory != null || source != null;
 
+        /// Texels from an asset file. As in Unity, a loaded texture is uploaded to the graphics
+        /// device as part of loading (on the main thread before the next frame renders), not on
+        /// its first draw.
         protected void SetSource(TexelSource s)
         {
             memory?.Free();
             memory = null;
             source = s;
+            GraphicsDevice.QueueUpload(this);
         }
 
         /// Replaces the texels with freshly allocated memory of `size` bytes, filled with `fill`.

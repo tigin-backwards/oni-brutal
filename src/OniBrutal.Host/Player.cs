@@ -55,7 +55,7 @@ namespace OniBrutal.Host
                     if (probeFrame == frame && platform != null)
                         EngineLog.Engine(OniBrutal.Engine.UI.CanvasSystem.Probe(new Vector2(x, platform.FramebufferHeight - y)));
                 foreach (var (dumpFrame, path) in options.HierarchyDumps)
-                    if (dumpFrame == frame) EngineLog.Engine(HierarchyDump(path));
+                    if (dumpFrame == frame) EngineLog.Engine($"mouse {Input.mousePosition} dt {Time.unscaledDeltaTime}\n" + HierarchyDump(path));
                 options.Input.Apply(frame);
                 PlayerLoop.RunFrame(dt);
                 frame++;
@@ -96,7 +96,7 @@ namespace OniBrutal.Host
             void Walk(Transform t, int depth)
             {
                 var go = t.gameObject;
-                var rect = t is RectTransform rt ? $" rect {rt.rect} anchored {rt.anchoredPosition}" : "";
+                var rect = (t is RectTransform rt ? $" rect {rt.rect} anchored {rt.anchoredPosition}" : "") + (t.localScale != Vector3.one ? $" scale {t.localScale}" : "") + $" world {t.position}";
                 var comps = string.Join(",", go.GetComponents<Component>().Where(c => c != null && c is not Transform).Select(c => c is Behaviour b && !b.enabled ? c.GetType().Name + "(off)" : c.GetType().Name));
                 text.Append($"\n{new string(' ', depth * 2)}{go.name} self={go.activeSelf} hier={go.activeInHierarchy}{rect} [{comps}]");
                 for (int i = 0; i < t.childCount; i++) Walk(t.GetChild(i), depth + 1);

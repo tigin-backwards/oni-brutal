@@ -66,6 +66,9 @@ namespace OniBrutal.Engine.Rendering
         /// Frees the device resource held in an object's Gpu slot.
         public abstract void ReleaseResource(object gpu);
 
+        /// Makes a texture resident on the device with its current content.
+        public virtual void Upload(TextureNative texture) { }
+
         /// Activates a material pass for immediate drawing (GL, Graphics.DrawMeshNow). The pass
         /// index has been validated against the material's shader.
         public abstract bool SetPass(Material material, int pass);
@@ -183,6 +186,21 @@ namespace OniBrutal.Engine.Rendering
             owners.Remove(gpu);
             Current.ReleaseResource(gpu);
             gpu = null;
+        }
+
+        /// Textures loaded since the last frame, uploaded before it renders (any thread may load).
+        static readonly System.Collections.Concurrent.ConcurrentQueue<WeakReference<TextureNative>> pendingUploads = new();
+
+        public static void QueueUpload(TextureNative texture)
+        {
+            if (Current.RendersFrames) pendingUploads.Enqueue(new WeakReference<TextureNative>(texture));
+        }
+
+        /// Uploads the textures loaded since the last call (main thread).
+        public static void UploadPending()
+        {
+            while (pendingUploads.TryDequeue(out var weak))
+                if (weak.TryGetTarget(out var texture) && !texture.Destroyed) Current.Upload(texture);
         }
 
         /// Releases the resources of owners that no longer exist. Returns how many.

@@ -1,3 +1,4 @@
+using System.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -81,6 +82,8 @@ namespace OniBrutal.Engine.Assets
                 native.Source = new AssetSource(key.File, pathId);
                 loaded[key] = obj.Handle;
                 binder.Fill(obj, request);
+                if (key.File.StartsWith("Resources/", StringComparison.Ordinal))
+                    lock (builtinLoads) builtinLoads.Add((key.File, pathId, type.ClassId, obj.GetType().Name, native is Rendering.ShaderNative shader ? shader.ShaderName : native.Name));
                 return obj;
             }
             finally
@@ -89,6 +92,15 @@ namespace OniBrutal.Engine.Assets
                 if (depth == 0)
                     while (afterLoad.Count > 0) afterLoad.Dequeue()();
             }
+        }
+
+        /// Diagnostics: every object loaded from Unity's built-in resource files
+        /// (`unity default resources`, `unity_builtin_extra`): file, path id, class id, type, name.
+        static readonly HashSet<(string File, long PathId, int ClassId, string Type, string Name)> builtinLoads = new();
+
+        public static List<(string File, long PathId, int ClassId, string Type, string Name)> BuiltinLoads()
+        {
+            lock (builtinLoads) return builtinLoads.OrderBy(b => b.File).ThenBy(b => b.Type).ThenBy(b => b.Name).ToList();
         }
 
         /// Work to run once the outermost load finishes (e.g. ScriptableObject Awake/OnEnable,

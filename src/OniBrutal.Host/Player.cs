@@ -64,6 +64,9 @@ namespace OniBrutal.Host
 
             // Unity's quit: OnApplicationQuit, then every object is destroyed, then the process
             // ends (threads the game started do not keep it alive).
+            if (options.BuiltinReport != null)
+                File.WriteAllLines(options.BuiltinReport, OniBrutal.Engine.Assets.ObjectLoader.BuiltinLoads()
+                    .Select(b => $"{b.File}\t{b.PathId}\t{b.ClassId}\t{b.Type}\t{b.Name}"));
             PlayerLoop.SendApplicationQuit();
             SceneLoader.UnloadAll();
             Lifecycle.ProcessDestroyQueue();

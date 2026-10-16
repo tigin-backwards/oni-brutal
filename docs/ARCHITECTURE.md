@@ -478,7 +478,8 @@ and the GPU time per frame (timer queries), and any frame over 250 ms with its o
 (for the first FRAMES frames) so scripted schedules that count frames hold on unpaced displays;
 `--probe-ui FRAME:X,Y` logs the canvas elements drawn at a window point with their hierarchy
 path, material, texture, colour and group alpha; `--dump-hierarchy FRAME:PATH` logs a subtree's
-active flags, rects and components; `--check-*` run the corpus gates.
+active flags, rects and components; `--report-builtin-assets FILE` writes the objects a run loaded
+from Unity's built-in resource files (docs/LICENSING.md); `--check-*` run the corpus gates.
 
 ## 8. Repository layout
 

@@ -65,6 +65,38 @@ namespace UnityEngine.Rendering
             Commands.Add(new SetRenderTargetCommand((RenderTargetIdentifier[])colors.Clone(), depth));
         }
 
+        public void SetViewport(Rect pixelRect) => Commands.Add(new SetViewportCommand(pixelRect));
+
+        /// Replaces the view and projection matrices for the commands that follow (the camera's
+        /// are restored after the buffer).
+        public void SetViewProjectionMatrices(Matrix4x4 view, Matrix4x4 proj) => Commands.Add(new SetViewProjectionCommand(view, proj));
+
+        /// Draws only inside a pixel rectangle (origin bottom left) until DisableScissorRect.
+        public void EnableScissorRect(Rect scissor) => Commands.Add(new ScissorCommand(scissor));
+
+        public void DisableScissorRect() => Commands.Add(new ScissorCommand(null));
+
+        public void DrawMesh(Mesh mesh, Matrix4x4 matrix, Material material) => DrawMesh(mesh, matrix, material, 0, -1, null);
+
+        public void DrawMesh(Mesh mesh, Matrix4x4 matrix, Material material, int submeshIndex) => DrawMesh(mesh, matrix, material, submeshIndex, -1, null);
+
+        public void DrawMesh(Mesh mesh, Matrix4x4 matrix, Material material, int submeshIndex, int shaderPass) => DrawMesh(mesh, matrix, material, submeshIndex, shaderPass, null);
+
+        /// Draws the mesh with the material at execution time; the property block is copied now.
+        public void DrawMesh(Mesh mesh, Matrix4x4 matrix, Material material, int submeshIndex, int shaderPass, MaterialPropertyBlock properties)
+        {
+            if (mesh == null) throw new ArgumentNullException(nameof(mesh));
+            if (material == null) throw new ArgumentNullException(nameof(material));
+            if (submeshIndex < 0 || submeshIndex >= Math.Max(1, mesh.subMeshCount)) throw new ArgumentOutOfRangeException(nameof(submeshIndex), submeshIndex, "Invalid submesh index.");
+            PropertySheet copy = null;
+            if (properties != null && !properties.isEmpty)
+            {
+                copy = new PropertySheet();
+                copy.CopyFrom(properties.Sheet);
+            }
+            Commands.Add(new DrawMeshCommand(mesh, matrix, material, submeshIndex, shaderPass, copy));
+        }
+
         public void ClearRenderTarget(bool clearDepth, bool clearColor, Color backgroundColor) => ClearRenderTarget(clearDepth, clearColor, backgroundColor, 1f);
 
         public void ClearRenderTarget(bool clearDepth, bool clearColor, Color backgroundColor, float depth)
@@ -145,9 +177,65 @@ namespace OniBrutal.Engine.Rendering
 
     internal static class CommandExecution
     {
+        /// Runs the buffer's commands. Scissoring and matrices set by the buffer last until its
+        /// end.
         public static void Run(CommandBuffer buffer, Camera camera)
         {
-            foreach (var command in buffer.Commands.ToArray()) command.Execute(camera);
+            var device = GraphicsDevice.Current;
+            try
+            {
+                foreach (var command in buffer.Commands.ToArray()) command.Execute(camera);
+            }
+            finally
+            {
+                device.SetScissor(null);
+            }
+        }
+
+        /// Graphics.ExecuteCommandBuffer: the commands run now, outside any camera; the active
+        /// render target is restored afterwards.
+        public static void RunImmediately(CommandBuffer buffer)
+        {
+            var device = GraphicsDevice.Current;
+            if (!device.RendersFrames) return;
+            var active = RenderTexture.active;
+            var size = GLState.TargetSize;
+            device.SetCamera(new CameraConstants(Matrix4x4.identity, Matrix4x4.identity, Vector3.zero, -1f, 1f, true, size));
+            try
+            {
+                Run(buffer, null);
+            }
+            finally
+            {
+                RenderTexture.active = active;
+            }
+        }
+    }
+
+    sealed class SetViewportCommand(Rect pixels) : RenderCommand
+    {
+        public override void Execute(Camera camera) => GraphicsDevice.Current.SetViewport(pixels);
+    }
+
+    sealed class SetViewProjectionCommand(Matrix4x4 view, Matrix4x4 projection) : RenderCommand
+    {
+        public override void Execute(Camera camera)
+            => GraphicsDevice.Current.SetCamera(new CameraConstants(view, projection, view.inverse.GetColumn(3), -1f, 1f, projection.m33 == 1f, GLState.TargetSize));
+    }
+
+    sealed class ScissorCommand(Rect? pixels) : RenderCommand
+    {
+        public override void Execute(Camera camera) => GraphicsDevice.Current.SetScissor(pixels);
+    }
+
+    sealed class DrawMeshCommand(Mesh mesh, Matrix4x4 matrix, Material material, int subMesh, int pass, PropertySheet properties) : RenderCommand
+    {
+        public override void Execute(Camera camera)
+        {
+            if (mesh == null || material == null) return;
+            var m = (MeshNative)mesh.NativeOrThrow;
+            if (subMesh >= m.SubMeshes.Count) return;
+            GraphicsDevice.Current.Draw(new DrawRequest(m, subMesh, matrix, material, pass, properties));
         }
     }
 

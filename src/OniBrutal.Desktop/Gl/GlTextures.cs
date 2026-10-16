@@ -390,7 +390,9 @@ namespace OniBrutal.Desktop.Gl
                 N.glClearStencil(0);
                 mask |= DepthBufferBit | (depthOnly ? 0 : StencilBufferBit);
             }
+            if (GlDevice.ScissorActive) GlApi.Enable(ScissorTest, false);
             N.glClear(mask);
+            if (GlDevice.ScissorActive) GlApi.Enable(ScissorTest, true);
             GlStateCache.Invalidate();
         }
 

@@ -178,5 +178,67 @@ namespace OniBrutal.Tests
             Assert.Equal(source.GetPixels32(), loaded.GetPixels32(0));
             Assert.False(loaded.LoadImage([1, 2, 3]));
         }
+
+        [Fact]
+        public void RenderTextureDescriptorDescribesTemporaryTextures()
+        {
+            // The dev tools' (ImGui) target: an 8-bit linear RGBA texture without depth.
+            var desc = new RenderTextureDescriptor(64, 32, UnityEngine.Experimental.Rendering.GraphicsFormat.R8G8B8A8_UNorm, 0);
+            Assert.Equal(1, desc.msaaSamples);
+            Assert.Equal(1, desc.volumeDepth);
+            Assert.False(desc.sRGB);
+            desc.sRGB = true;
+            Assert.Equal(UnityEngine.Experimental.Rendering.GraphicsFormat.R8G8B8A8_SRGB, desc.graphicsFormat);
+            desc.sRGB = false;
+            Assert.Equal(RenderTextureFormat.ARGB32, desc.colorFormat);
+            desc.depthBufferBits = 20;
+            Assert.Equal(24, desc.depthBufferBits);
+
+            var rt = RenderTexture.GetTemporary(desc);
+            Assert.Equal(64, rt.width);
+            Assert.Equal(32, rt.height);
+            Assert.Equal(24, rt.depth);
+            Assert.Equal(desc.graphicsFormat, rt.descriptor.graphicsFormat);
+            RenderTexture.ReleaseTemporary(rt);
+            // The same description is served from the pool.
+            Assert.Same(rt, RenderTexture.GetTemporary(desc));
+            RenderTexture.ReleaseTemporary(rt);
+
+            var own = new RenderTexture(desc);
+            Assert.Equal(64, own.width);
+            Object.DestroyImmediate(own);
+        }
+
+        /// A shader from Unity's built-in resources in the game install (ONI_GAME_DIR).
+        static Shader BuiltinShader(string name)
+        {
+            var game = System.Environment.GetEnvironmentVariable("ONI_GAME_DIR")
+                       ?? System.IO.Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile), "projects", "oni-linux");
+            OniBrutal.Engine.Assets.AssetSystem.Initialize(System.IO.Path.Combine(game, "OxygenNotIncluded_Data"));
+            var file = OniBrutal.Engine.Assets.AssetSystem.Get("unity_builtin_extra");
+            foreach (var info in file.Objects)
+                if (file.TypeOf(info).ClassId == 48 && OniBrutal.Engine.Assets.ObjectLoader.Load(file, info.PathId) is Shader shader && shader.name == name)
+                    return shader;
+            throw new System.InvalidOperationException($"Built-in shader {name} not found.");
+        }
+
+        [Fact]
+        public void CommandBufferRecordsMeshDrawsAndScissoring()
+        {
+            var mesh = new Mesh { indexFormat = UnityEngine.Rendering.IndexFormat.UInt32 };
+            Assert.Equal(UnityEngine.Rendering.IndexFormat.UInt32, mesh.indexFormat);
+            mesh.vertices = [Vector3.zero, Vector3.right, Vector3.up];
+            mesh.triangles = [0, 1, 2];
+            var material = new Material(BuiltinShader("Hidden/BlitCopy"));
+            var cb = new UnityEngine.Rendering.CommandBuffer { name = "test" };
+            cb.SetViewport(new Rect(0, 0, 10, 10));
+            cb.SetViewProjectionMatrices(Matrix4x4.identity, Matrix4x4.Ortho(0, 10, 10, 0, -10, 10));
+            cb.EnableScissorRect(new Rect(1, 1, 5, 5));
+            cb.DrawMesh(mesh, Matrix4x4.identity, material, 0, 0, new MaterialPropertyBlock());
+            cb.DisableScissorRect();
+            Assert.Equal(5, cb.sizeInBytes);
+            Assert.Throws<System.ArgumentOutOfRangeException>(() => cb.DrawMesh(mesh, Matrix4x4.identity, material, 3, 0, null));
+            Graphics.ExecuteCommandBuffer(cb);
+        }
     }
 }

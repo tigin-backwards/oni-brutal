@@ -82,6 +82,10 @@ namespace OniBrutal.Engine.Rendering
         /// Viewport in pixels of the current target.
         public abstract void SetViewport(Rect pixels);
 
+        /// Restricts drawing to a pixel rectangle of the target (origin bottom left); null draws
+        /// everywhere. Clears are not restricted.
+        public abstract void SetScissor(Rect? pixels);
+
         public abstract void Clear(bool color, bool depth, Color backgroundColor, float depthValue);
 
         /// View and projection (Unity convention; the device applies its clip-space rules) for
@@ -155,6 +159,7 @@ namespace OniBrutal.Engine.Rendering
         // The null device accepts all rendering work and produces no output.
         public override void SetRenderTarget(in RenderTargetBinding target) { }
         public override void SetViewport(Rect pixels) { }
+        public override void SetScissor(Rect? pixels) { }
         public override void Clear(bool color, bool depth, Color backgroundColor, float depthValue) { }
         public override void SetCamera(in CameraConstants camera) { }
         public override void Draw(in DrawRequest draw) { }

@@ -7,7 +7,7 @@ dotnet build "$root/tools/ApiCheck" -c Release -v q -nologo >/dev/null
 providers="$(cut -f1 "$root/src/Facades/unity-module-map.tsv" | sort -u | paste -sd,),UnityEngine,Unity.InternalAPIEngineBridge.004"
 dotnet "$root/out/bin/ApiCheck/release/ApiCheck.dll" "$managed" "$root/out/engine" "$providers" \
   Assembly-CSharp.dll Assembly-CSharp-firstpass.dll UnityEngine.UI.dll Unity.TextMeshPro.dll Unity.Timeline.dll \
-  FMODUnity.dll FMODUnityResonance.dll FMODUnityHaptics.dll ImGui.NET.dll com.rlabrecque.steamworks.net.dll \
+  FMODUnity.dll FMODUnityResonance.dll FMODUnityHaptics.dll ImGui.NET.dll ImGui.dll com.rlabrecque.steamworks.net.dll \
   --json "$root/out/apicheck.json" > "$root/out/apicheck.txt"
 status=$?
 head -2 "$root/out/apicheck.txt"

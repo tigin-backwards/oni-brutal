@@ -114,6 +114,11 @@ Legend: `[x]` verified · `[ ]` not yet verified · `[~]` deviation (see the not
 - [x] Audio output: FMOD initialises and mixes through ALSA (verified with a private ALSA configuration whose default device writes PCM to a file through a null sink: the main-menu music is present). Without libpulse or an ALSA device, FMOD runs without output in both players
 - [x] Audio content compared with the original, recorded in real time through a private paced ALSA sink (`scripts/audio-sink/record.sh`): main-menu music matches the original's (10 ms RMS envelopes correlate 0.97, aligned waveforms 0.90 over 30 s, level ratio 0.9997); colony ambience on the same seed has the original's level (RMS 0.035–0.040 against 0.036–0.043), stereo balance and spectrum (band energy shares within a few percent)
 
+## Debug mode
+
+- [x] Dev tools (debug mode, Ctrl+\`): `ImGuiRenderer` creates its target (`RenderTextureDescriptor`, `GetTemporary`) as in the original; the game's Linux `cimgui.so` has no `SetKAssertCB`, so both players log `EntryPointNotFoundException` and then crash natively in `igRender` (the dev tools do not work in the Linux build). The command-buffer path ImGui draws with (`DrawMesh`, scissor rectangles, view/projection matrices, `Graphics.ExecuteCommandBuffer`) is implemented for a cimgui that has the entry point
+- [x] Instant build (Ctrl+F4), Dev Life Support, Dev Generator in the build menu
+
 ## Deviations
 
 - `SystemInfo.supportsComputeShaders` is false (the engine implements no compute shaders; the game reads it only for its hardware metrics and an unused image-effect check). `SystemInfo.graphicsMemorySize` is the dedicated video memory (the original printed a slightly lower figure here, likely the memory available at the time).

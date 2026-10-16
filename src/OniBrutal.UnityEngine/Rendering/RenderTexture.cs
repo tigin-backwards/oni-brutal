@@ -331,11 +331,125 @@ namespace UnityEngine
             return TemporaryRenderTextures.Get(Describe(width, height, depthBuffer, RenderTextureFormats.Resolve(format)));
         }
 
+        public static RenderTexture GetTemporary(RenderTextureDescriptor desc)
+        {
+            if (desc.width <= 0) throw new ArgumentException("RenderTextureDesc width must be greater than zero.", "desc.width");
+            if (desc.height <= 0) throw new ArgumentException("RenderTextureDesc height must be greater than zero.", "desc.height");
+            return TemporaryRenderTextures.Get(desc.ToNative());
+        }
+
+        public RenderTexture(RenderTextureDescriptor desc)
+        {
+            if (desc.width <= 0) throw new ArgumentException("RenderTextureDesc width must be greater than zero.", "desc.width");
+            if (desc.height <= 0) throw new ArgumentException("RenderTextureDesc height must be greater than zero.", "desc.height");
+            Bind(desc.ToNative());
+        }
+
+        /// The texture's description.
+        public RenderTextureDescriptor descriptor => RenderTextureDescriptor.Of(Data);
+
         public static void ReleaseTemporary(RenderTexture temp)
         {
             if (temp == null) return;
             TemporaryRenderTextures.Release(temp);
         }
+    }
+
+    /// Everything that describes a render texture, for GetTemporary and the constructor.
+    public partial struct RenderTextureDescriptor
+    {
+        public int width { get; set; }
+        public int height { get; set; }
+        public int msaaSamples { get; set; }
+        public int volumeDepth { get; set; }
+        public int mipCount { get; set; }
+        public GraphicsFormat graphicsFormat { get; set; }
+        public bool useMipMap { get; set; }
+        public bool autoGenerateMips { get; set; }
+        public bool enableRandomWrite { get; set; }
+
+        int depthBits;
+
+        /// 0, 16, 24 or 32 (other values round up to the next of these).
+        public int depthBufferBits
+        {
+            get => depthBits;
+            set => depthBits = value <= 0 ? 0 : value <= 16 ? 16 : value <= 24 ? 24 : 32;
+        }
+
+        public RenderTextureFormat colorFormat
+        {
+            get => RenderTextureFormats.FromGraphicsFormat(graphicsFormat);
+            set => graphicsFormat = RenderTextureFormats.ToGraphicsFormat(value, sRGB);
+        }
+
+        /// The colour format stores sRGB-encoded values; setting it picks the sRGB or linear
+        /// variant of the format.
+        public bool sRGB
+        {
+            get => graphicsFormat is GraphicsFormat.R8G8B8A8_SRGB or GraphicsFormat.B8G8R8A8_SRGB;
+            set => graphicsFormat = (graphicsFormat, value) switch
+            {
+                (GraphicsFormat.R8G8B8A8_UNorm, true) => GraphicsFormat.R8G8B8A8_SRGB,
+                (GraphicsFormat.R8G8B8A8_SRGB, false) => GraphicsFormat.R8G8B8A8_UNorm,
+                (GraphicsFormat.B8G8R8A8_UNorm, true) => GraphicsFormat.B8G8R8A8_SRGB,
+                (GraphicsFormat.B8G8R8A8_SRGB, false) => GraphicsFormat.B8G8R8A8_UNorm,
+                _ => graphicsFormat,
+            };
+        }
+
+        public RenderTextureDescriptor(int width, int height) : this(width, height, RenderTextureFormat.Default, 0) { }
+
+        public RenderTextureDescriptor(int width, int height, RenderTextureFormat colorFormat) : this(width, height, colorFormat, 0) { }
+
+        /// RenderTextureReadWrite.Default: sRGB in a linear-colour-space project only.
+        public RenderTextureDescriptor(int width, int height, RenderTextureFormat colorFormat, int depthBufferBits)
+            : this(width, height, RenderTextureFormats.ToGraphicsFormat(colorFormat, QualitySettings.activeColorSpace == ColorSpace.Linear), depthBufferBits) { }
+
+        public RenderTextureDescriptor(int width, int height, GraphicsFormat colorFormat, int depthBufferBits)
+        {
+            this = default;
+            this.width = width;
+            this.height = height;
+            graphicsFormat = colorFormat;
+            this.depthBufferBits = depthBufferBits;
+            msaaSamples = 1;
+            volumeDepth = 1;
+            mipCount = -1;
+            autoGenerateMips = true;
+        }
+
+        internal RenderTextureNative ToNative()
+        {
+            if (msaaSamples is not (1 or 2 or 4 or 8)) throw new ArgumentException("RenderTextureDesc msaaSamples must be 1, 2, 4, or 8.", "desc.msaaSamples");
+            return new RenderTextureNative
+            {
+                Width = width,
+                Height = height,
+                Format = graphicsFormat == GraphicsFormat.None ? RenderTextureFormat.Depth : RenderTextureFormats.FromGraphicsFormat(graphicsFormat),
+                ColorFormat = graphicsFormat,
+                Srgb = sRGB,
+                DepthBits = depthBufferBits,
+                DepthStencilFormat = RenderTextureFormats.DepthFormat(depthBufferBits),
+                AntiAliasing = msaaSamples,
+                UseMipMap = useMipMap,
+                AutoGenerateMips = autoGenerateMips,
+                EnableRandomWrite = enableRandomWrite,
+                Dimension = TextureKind.Tex2D,
+                VolumeDepth = volumeDepth,
+                MipCount = mipCount > 0 ? mipCount : 1,
+            };
+        }
+
+        internal static RenderTextureDescriptor Of(RenderTextureNative t) => new(t.Width, t.Height, t.ColorFormat, t.DepthBits)
+        {
+            msaaSamples = Math.Max(1, t.AntiAliasing),
+            volumeDepth = t.VolumeDepth,
+            mipCount = t.MipCount,
+            useMipMap = t.UseMipMap,
+            autoGenerateMips = t.AutoGenerateMips,
+            enableRandomWrite = t.EnableRandomWrite,
+        };
     }
 
     public partial struct RenderBuffer

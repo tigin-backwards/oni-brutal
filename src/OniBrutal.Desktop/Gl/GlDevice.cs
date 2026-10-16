@@ -281,9 +281,27 @@ namespace OniBrutal.Desktop.Gl
             N.glViewport((int)pixels.x, (int)pixels.y, (int)pixels.width, (int)pixels.height);
         }
 
+        /// The scissor rectangle in effect (CommandBuffer.EnableScissorRect), or null.
+        static Rect? scissor;
+
+        public static bool ScissorActive => scissor != null;
+
+        public override void SetScissor(Rect? pixels)
+        {
+            scissor = pixels;
+            if (pixels is { } r)
+            {
+                GlApi.Enable(ScissorTest, true);
+                N.glScissor((int)r.x, (int)r.y, Math.Max(0, (int)r.width), Math.Max(0, (int)r.height));
+            }
+            else GlApi.Enable(ScissorTest, false);
+        }
+
         public override void Clear(bool color, bool depth, Color backgroundColor, float depthValue)
         {
             BindTarget();
+            // Clears fill the whole target.
+            if (scissor != null) GlApi.Enable(ScissorTest, false);
             uint mask = 0;
             if (color)
             {
@@ -300,6 +318,7 @@ namespace OniBrutal.Desktop.Gl
                 mask |= DepthBufferBit | StencilBufferBit;
             }
             if (mask != 0) N.glClear(mask);
+            if (scissor != null) GlApi.Enable(ScissorTest, true);
             GlStateCache.Invalidate();
         }
 

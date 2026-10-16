@@ -761,6 +761,9 @@ namespace UnityEngine
     public partial class RenderTexture : global::UnityEngine.Texture
     {
     }
+    public partial struct RenderTextureDescriptor
+    {
+    }
     public enum RenderTextureFormat
     {
         ARGB32 = 0,

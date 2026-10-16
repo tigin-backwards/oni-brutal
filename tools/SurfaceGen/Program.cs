@@ -21,7 +21,7 @@ var genDir = args[2];
 string[] consumers =
 [
     "Assembly-CSharp", "Assembly-CSharp-firstpass", "UnityEngine.UI", "Unity.TextMeshPro", "Unity.Timeline",
-    "FMODUnity", "FMODUnityResonance", "FMODUnityHaptics", "ImGui.NET", "com.rlabrecque.steamworks.net",
+    "FMODUnity", "FMODUnityResonance", "FMODUnityHaptics", "ImGui.NET", "ImGui", "com.rlabrecque.steamworks.net",
 ];
 bool IsEngine(string asm) => asm.StartsWith("UnityEngine.", StringComparison.Ordinal) && asm.EndsWith("Module", StringComparison.Ordinal);
 

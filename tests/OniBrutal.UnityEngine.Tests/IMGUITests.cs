@@ -38,6 +38,7 @@ namespace OniBrutal.Tests
         public override void WarmupShaders() { }
         public override void SetRenderTarget(in OniBrutal.Engine.Rendering.RenderTargetBinding target) { }
         public override void SetViewport(Rect pixels) { }
+        public override void SetScissor(Rect? pixels) { }
         public override void Clear(bool color, bool depth, Color backgroundColor, float depthValue) { }
         public override void SetCamera(in OniBrutal.Engine.Rendering.CameraConstants camera) { }
         public override void Draw(in OniBrutal.Engine.Rendering.DrawRequest draw) { }

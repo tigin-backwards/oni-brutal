@@ -93,6 +93,11 @@ namespace UnityEngine.Rendering
         WebGPU = 28,
         Switch2 = 29,
     }
+    public enum IndexFormat
+    {
+        UInt16 = 0,
+        UInt32 = 1,
+    }
     public enum LightProbeUsage
     {
         Off = 0,

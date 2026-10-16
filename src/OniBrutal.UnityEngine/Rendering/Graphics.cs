@@ -25,6 +25,14 @@ namespace UnityEngine
             Blits.Blit(source, dest, mat, pass, Vector2.one, Vector2.zero);
         }
 
+        /// Runs the command buffer now (outside camera rendering).
+        public static void ExecuteCommandBuffer(UnityEngine.Rendering.CommandBuffer buffer)
+        {
+            if (buffer == null) throw new ArgumentNullException(nameof(buffer));
+            Threads.AssertMainThread("ExecuteCommandBuffer");
+            CommandExecution.RunImmediately(buffer);
+        }
+
         public static void Blit(Texture source, Material mat) => Blit(source, mat, -1);
 
         public static void Blit(Texture source, Material mat, int pass) => Blit(source, null, mat, pass);

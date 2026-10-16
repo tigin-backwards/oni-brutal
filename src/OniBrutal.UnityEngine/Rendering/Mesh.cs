@@ -30,6 +30,14 @@ namespace UnityEngine
             set { var m = Data; m.Bounds = value; m.Changed(); }
         }
 
+        /// The index buffer's element size. Indices are kept as 32-bit values either way; the
+        /// format is recorded for the device and for serialization.
+        public UnityEngine.Rendering.IndexFormat indexFormat
+        {
+            get => (UnityEngine.Rendering.IndexFormat)Data.IndexFormat;
+            set { var m = Data; m.IndexFormat = (int)value; m.Changed(); }
+        }
+
         /// Marks the mesh for frequent updates (a device buffer usage hint).
         public void MarkDynamic() { var m = Data; m.Dynamic = true; m.Changed(); }
 

@@ -25,7 +25,8 @@ Legend: `[x]` verified · `[ ]` not yet verified · `[~]` deviation (see the not
 - [ ] `PatchNotesScreen`, `KleiItemDropScreen`, `KleiInventoryScreen` contents (need network/Steam services)
 - [x] `RetiredColonyInfoScreen`: colony list, achievements, colony detail (Duplicants with portraits, buildings, oxygen graph; "Timelapse Unavailable", see the preview open item)
 - [x] Tutorial videos (`VideoScreen` from a message's video widget, render-texture output) play as the original, with libvpx available (verified with Ubuntu's libvpx9 unpacked locally)
-- [ ] Intro short on first launch, victory videos
+- [x] Intro short on first launch: this build sets no intro short (`MainMenu.IntroShortName`), so neither player plays one (no `PlayShortOnLaunch` pref written by either)
+- [ ] Victory videos (same `VideoScreen` path as the verified tutorial videos)
 
 ## Options
 
@@ -71,7 +72,8 @@ Legend: `[x]` verified · `[ ]` not yet verified · `[~]` deviation (see the not
 - [x] Activation with tool label, filter panel and overlay: Cancel, Deconstruct, Prioritize (`PriorityScreen`), Disinfect (germ overlay), Sweep (`ClearTool`), Mop, Attack, Wrangle (`CaptureTool`), Harvest, Empty Pipe, Disconnect (compared with the original where its scripted run activated the same tool)
 - [ ] Tool orders carried out (beyond Dig), Copy Settings, Move To
 - [x] Build placement with materials: Storage Bin and a dragged Ladder from the Base menu; placement refused with "Missing resources" until the colony has the materials (as the original); Duplicants deliver and build
-- [ ] `BaseUtilityBuildTool` (wires, pipes), rotation, other categories
+- [~] `BaseUtilityBuildTool`: the wire tool (Power → Wire, material list, power overlay) opens and responds to a drag as in the original; a placed wire has not been observed in either player's scripted run yet
+- [ ] Pipes, rotation, other categories
 
 ## Overlays
 

@@ -16,7 +16,7 @@ Legend: `[x]` verified · `[ ]` not yet verified · `[~]` deviation (see the not
 - [x] Main menu: Resume Game / Load Game (`LoadScreen`, colony and save lists)
 - [x] New game flow: `ModeSelectScreen` (Survival / No Sweat), `ClusterCategorySelectionScreen`
 - [x] `ColonyDestinationSelectScreen` (asteroid, seed, settings panels)
-- [ ] Custom game settings and story traits panels
+- [x] Story Traits list, Game Settings panel (seed, difficulty steppers, checkboxes respond)
 - [x] `WorldGenScreen` (threaded worldgen with SimDLL settle, progress)
 - [x] Worldgen parity: the same coordinates (typed into the destination screen) generate the same terrain as the original player
 - [x] `CharacterSelectionController` / `CharacterContainer` (Duplicant cards, reroll, embark)
@@ -34,7 +34,7 @@ Legend: `[x]` verified · `[ ]` not yet verified · `[~]` deviation (see the not
 - [ ] `GraphicsOptionsScreen`: resolution list choice, UI scale, colour mode
 - [ ] `AudioOptionsScreen`: volumes, device
 - [ ] `GameOptionsScreen`: autosave interval, temperature unit, camera speed, save/cloud settings
-- [ ] `ControlsScreen` / `InputBindingsScreen`: rebinding, persistence
+- [x] `InputBindingsScreen`: rebinding (conflict notice when a key is taken), persistence across restarts (`keybindings.json`)
 - [x] `LanguageOptionsScreen`: built-in languages listed; choosing Chinese prompts in Chinese, restarts through `Restarter`, and the menus come back in Chinese (CJK font)
 - [x] Settings persistence across restarts (`kplayerprefs.yaml`: temperature unit)
 

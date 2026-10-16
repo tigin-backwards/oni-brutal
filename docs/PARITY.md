@@ -106,6 +106,8 @@ Legend: `[x]` verified · `[ ]` not yet verified · `[~]` deviation (see the not
 
 ## Deviations
 
+- `SystemInfo.supportsComputeShaders` is false (the engine implements no compute shaders; the game reads it only for its hardware metrics and an unused image-effect check). `SystemInfo.graphicsMemorySize` is the dedicated video memory (the original printed a slightly lower figure here, likely the memory available at the time).
+
 - Floating-point results are not bit-exact (out of scope, ARCHITECTURE §5).
 - Runtime deviations inherent to CoreCLR (ARCHITECTURE §2.1).
 - `ScreenCapture.CaptureScreenshot` with superSize > 1 (debug screenshot keys only): open item, PLAN.

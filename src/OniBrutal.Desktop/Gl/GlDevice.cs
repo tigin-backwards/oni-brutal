@@ -16,7 +16,7 @@ namespace OniBrutal.Desktop.Gl
     internal sealed class GlCaps : GraphicsCaps
     {
         public string Name = "", Vendor = "", VersionString = "";
-        public int MaxTexture = 16384, MaxTargets = 8;
+        public int MaxTexture = 16384, MaxTargets = 8, MemoryMB;
         public bool S3tc, Bptc, Rgtc;
 
         public override GraphicsDeviceType DeviceType => GraphicsDeviceType.OpenGLCore;
@@ -25,7 +25,7 @@ namespace OniBrutal.Desktop.Gl
         public override string DeviceVersion => "OpenGL " + VersionString;
         public override int DeviceId => 0;
         public override int VendorId => 0;
-        public override int MemorySizeMB => 0;
+        public override int MemorySizeMB => MemoryMB;
         public override int ShaderLevel => 50;
         public override int MaxTextureSize => MaxTexture;
         public override int MaxRenderTargets => MaxTargets;
@@ -122,6 +122,7 @@ namespace OniBrutal.Desktop.Gl
                 }
             }
             caps.Rgtc |= true; // core since OpenGL 3.0
+            caps.MemoryMB = QueryVideoMemoryMB();
             EngineLog.Engine($"OpenGL: {caps.VersionString} / {caps.Name} / {caps.Vendor}");
 
             GlVertexArray vao = default;
@@ -140,6 +141,33 @@ namespace OniBrutal.Desktop.Gl
 
         /// The framebuffer drawing to the screen goes to this frame.
         uint BackBuffer => presenter.BackBuffer(platform.FramebufferWidth, platform.FramebufferHeight);
+
+        /// Video memory in MB (SystemInfo.graphicsMemorySize): the dedicated memory the NVIDIA or
+        /// AMD memory-info extension reports, else Mesa's renderer query; 0 when the driver
+        /// reports none. (The extensions come first: Mesa's figure can include shared memory.)
+        static int QueryVideoMemoryMB()
+        {
+            if (GlPrograms.Extensions.Contains("GL_NVX_gpu_memory_info"))
+            {
+                int kb = 0;
+                N.glGetIntegerv(0x9047, &kb); // GPU_MEMORY_INFO_DEDICATED_VIDMEM_NVX
+                if (kb > 0) return kb / 1024;
+            }
+            if (GlPrograms.Extensions.Contains("GL_ATI_meminfo"))
+            {
+                int* info = stackalloc int[4];
+                N.glGetIntegerv(0x87FC, info); // TEXTURE_FREE_MEMORY_ATI
+                if (info[0] > 0) return info[0] / 1024;
+            }
+            const int GlxRendererVideoMemoryMesa = 0x8187;
+            var query = (delegate* unmanaged[Cdecl]<int, uint*, int>)Glfw.GetProcAddress("glXQueryCurrentRendererIntegerMESA"u8);
+            if (query != null)
+            {
+                uint mb = 0;
+                if (query(GlxRendererVideoMemoryMesa, &mb) != 0 && mb > 0) return (int)mb;
+            }
+            return 0;
+        }
 
         public override GraphicsCaps Caps => caps;
         public override bool RendersFrames => true;

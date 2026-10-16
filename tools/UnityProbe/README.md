@@ -16,3 +16,14 @@ player's own mods folder:
 3. Start the original once so it lists the mod in `mods/mods.json`, set the entry's `enabled` to
    `true` and `enabledForDlc` to `[""]`, and start it again.
 4. Read the `PROBE` lines in `Player.log`.
+
+What it records (each line prefixed `PROBE f<frame>`): lifecycle scenarios (Destroy, activation,
+coroutines, start/late-update timing), engine values (`VAL …`: formatting, maths, JSON,
+hierarchy queries, Instantiate order, SendMessage, screen), and UI layout dumps (`UI …`) of the
+front end 8 s after it loads and of the in-game overlay canvases once the clock has run for 120
+frames. Compare the two players' outputs with frame numbers taken relative to each scenario
+header.
+
+Under this engine a local mod's version stamp changes at every launch (ARCHITECTURE D3), so the
+game asks for a restart at the main menu; dismiss it with Escape and re-enable the mod in
+`mods.json` before the next run.

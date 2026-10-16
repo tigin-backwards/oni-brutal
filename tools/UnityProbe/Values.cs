@@ -109,6 +109,27 @@ namespace SemanticsProbe
             UnityEngine.Object.DontDestroyOnLoad(rb);
             V("root after DontDestroyOnLoad", ra.transform.GetSiblingIndex() + " " + rb.transform.GetSiblingIndex() + " " + rc.transform.GetSiblingIndex());
 
+            Rec.Log("=== values: root canvas sizing");
+            var cgo = new GameObject("ProbeCanvas", typeof(RectTransform));
+            var crt = (RectTransform)cgo.transform;
+            V("before AddComponent<Canvas>", crt.rect);
+            var cv = cgo.AddComponent<Canvas>();
+            cv.renderMode = RenderMode.ScreenSpaceOverlay;
+            V("after AddComponent<Canvas>", crt.rect + " " + crt.position);
+            var child = new GameObject("Child", typeof(RectTransform));
+            child.transform.SetParent(cgo.transform, false);
+            ((RectTransform)child.transform).anchorMin = Vector2.zero;
+            ((RectTransform)child.transform).anchorMax = Vector2.one;
+            V("child right away", ((RectTransform)child.transform).rect);
+            var offCanvas = new GameObject("InactiveCanvas", typeof(RectTransform));
+            offCanvas.SetActive(false);
+            offCanvas.AddComponent<Canvas>();
+            V("inactive canvas", ((RectTransform)offCanvas.transform).rect);
+            offCanvas.SetActive(true);
+            V("after activation", ((RectTransform)offCanvas.transform).rect);
+            yield return null;
+            V("canvas next frame", crt.rect + " " + ((RectTransform)child.transform).rect);
+
             Rec.Log("=== values: instantiate order");
             var proto = new GameObject("P0");
             proto.AddComponent<OrderRec>();

@@ -51,7 +51,7 @@ Legend: `[x]` verified · `[ ]` not yet verified · `[~]` deviation (see the not
 - [x] `HoverTextScreen` (element hover cards)
 - [x] `SideDetailsScreen`: Ration Box element filter (unticking → "Filters Not Designated"), capacity slider (drag → new capacity), Material tab
 - [ ] Other buildings' side screens
-- [ ] `BuildMenu` / `BuildingGroupScreen` / `ProductInfoScreen` / `MaterialSelectionPanel` (planning and placing buildings)
+- [x] `BuildMenu` / `BuildingGroupScreen` / `ProductInfoScreen` / `MaterialSelectionPanel`: category menus, building info, material choice and placement (Storage Bin, Ladder, Dev Life Support, wire tool)
 - [x] Management screens opened by hotkey and compared with the original: Vitals, Consumables, Priorities (jobs), Schedule (`ScheduleScreen`), Skills (`SkillsScreen`, Duplicant portrait in a stencil mask), Database (`CodexScreen`), Reports (`ReportScreen`)
 - [x] Research and Starmap buttons before a Research Station / Telescope exists: locked, with the original's tooltips
 - [x] Research tree interaction: hover, tooltips, selecting a tech (instant completion in debug mode) as the original
@@ -59,7 +59,7 @@ Legend: `[x]` verified · `[ ]` not yet verified · `[~]` deviation (see the not
 - [x] `PauseScreen`: open, save with overwrite confirmation (41 saves in one run)
 - [x] `PauseScreen` → Main Menu ("Save and quit" prompt) → front end with Resume Game; the front end comes back at the smaller UI scale as in the original (once, ours returned to the normal scale a few seconds later; not reproduced since)
 - [x] `PauseScreen`: Save As (save slots, New Save, typed name in `FileNameDialog`), Load (colony list, colony view, Load Game → the save loads in game)
-- [ ] `PauseScreen`: Options
+- [x] `PauseScreen`: Options (the same options screens as the main menu)
 - [x] Printing pod recharge (cycle 3–4): "New Printables are available", pod side screen "Choose a Blueprint" → selection screen with Duplicants and a care package → Print → the new Duplicant arrives
 - [x] `GameOverScreen` (colony lost)
 - [ ] `VictoryScreen`, `StoryMessageScreen`, `EventInfoScreen`
@@ -82,7 +82,8 @@ Legend: `[x]` verified · `[ ]` not yet verified · `[~]` deviation (see the not
 - [x] Research-gated overlays with everything unlocked (debug instant-build mode, compared with the original in the same mode): Exosuits, Automation, Shipping, and the remaining Shift+F overlays
 - [x] Build menu categories that become available later (Utilities, Automation, Shipping, Rocketry) appear and lay out as in the original
 - [x] `ResearchScreen` tree and `StarmapScreen` open as in the original
-- [ ] Overlay legends (`OverlayLegend`) and filters
+- [x] Overlay legends (`OverlayLegend`) shown with every overlay compared above
+- [ ] Overlay filter toggles
 
 ## Simulation and persistence
 
@@ -97,7 +98,7 @@ Legend: `[x]` verified · `[ ]` not yet verified · `[~]` deviation (see the not
 - [x] Frame rate at parity with the original (PLAN §Status, Performance)
 - [x] Windowed → fullscreen (borderless) switching at runtime
 - [ ] Exclusive fullscreen, resolution changes at runtime
-- [ ] Focus loss and regain (audio pause, input release)
+- [x] Focus loss and regain: switching X focus to another window and back delivers OnApplicationFocus(false/true) (held keys released), no exceptions
 - [ ] Audio (FMOD): music, ambience, UI and world sounds. Not verifiable on the development machine: FMOD loads and initialises in both players, but no PulseAudio client library is installed, so neither produces output
 
 ## Deviations

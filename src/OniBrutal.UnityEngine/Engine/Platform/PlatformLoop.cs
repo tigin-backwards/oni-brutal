@@ -32,6 +32,7 @@ namespace OniBrutal.Engine.Platform
             if (platform.Focused != focused)
             {
                 focused = platform.Focused;
+                EngineLog.Engine(focused ? "application focus gained" : "application focus lost");
                 // Unity releases held keys when focus is lost.
                 if (!focused) InputState.Instance.Reset();
                 PlayerLoop.SendApplicationFocus(focused);

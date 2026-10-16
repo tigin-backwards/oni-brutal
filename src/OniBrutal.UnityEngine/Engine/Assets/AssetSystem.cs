@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
@@ -65,13 +66,19 @@ namespace OniBrutal.Engine.Assets
         /// Mounts an AssetBundle's nodes (SerializedFiles and resource streams).
         public static List<string> MountBundle(UnityFsArchive archive) => Mount(ReadNodes(archive));
 
-        /// Decompresses an archive's nodes (any thread): (node key, bytes).
+        /// Decompresses an archive's nodes (any thread): (node key, bytes). As in Unity, a bundle's
+        /// nodes live under a directory named after its serialized file: `CAB-x` and `CAB-x.resS`
+        /// are `archive:/CAB-x/CAB-x` and `archive:/CAB-x/CAB-x.resS` (the paths its objects and
+        /// other bundles' externals use).
         public static List<(string Key, byte[] Data)> ReadNodes(UnityFsArchive archive)
         {
+            var main = archive.Nodes.FirstOrDefault(n => !IsResourceNode(n.Path))?.Path ?? archive.Nodes.FirstOrDefault()?.Path ?? "";
             var nodes = new List<(string, byte[])>();
-            foreach (var node in archive.Nodes) nodes.Add(("archive:/" + node.Path, archive.Read(node)));
+            foreach (var node in archive.Nodes) nodes.Add(("archive:/" + main + "/" + node.Path, archive.Read(node)));
             return nodes;
         }
+
+        static bool IsResourceNode(string path) => path.EndsWith(".resS", StringComparison.Ordinal) || path.EndsWith(".resource", StringComparison.Ordinal);
 
         /// Mounts decompressed nodes; returns the keys of the serialized files among them.
         public static List<string> Mount(List<(string Key, byte[] Data)> nodes)
@@ -82,8 +89,7 @@ namespace OniBrutal.Engine.Assets
                 foreach (var (key, data) in nodes)
                 {
                     bundleNodes[key] = data;
-                    if (!key.EndsWith(".resS", StringComparison.Ordinal) && !key.EndsWith(".resource", StringComparison.Ordinal))
-                        serialized.Add(key);
+                    if (!IsResourceNode(key)) serialized.Add(key);
                 }
             }
             return serialized;

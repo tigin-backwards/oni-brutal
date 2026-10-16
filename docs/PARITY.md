@@ -21,7 +21,8 @@ Legend: `[x]` verified · `[ ]` not yet verified · `[~]` deviation (see the not
 - [x] Worldgen parity: the same coordinates (typed into the destination screen) generate the same terrain as the original player
 - [x] `CharacterSelectionController` / `CharacterContainer` (Duplicant cards, reroll, embark)
 - [ ] `ScenariosMenu`, `ModsScreen` (no Workshop items with the test double)
-- [ ] `CreditsScreen`, `PatchNotesScreen`, `KleiItemDropScreen`, `LockerMenuScreen` / `KleiInventoryScreen` (need network/Steam services)
+- [x] `LockerMenuScreen` (Supply Closet, offline) and its Duplicants outfit screen
+- [ ] `PatchNotesScreen`, `KleiItemDropScreen`, `KleiInventoryScreen` contents (need network/Steam services)
 - [x] `RetiredColonyInfoScreen`: colony list, achievements, colony detail (Duplicants with portraits, buildings, oxygen graph; "Timelapse Unavailable", see the preview open item)
 - [x] Tutorial videos (`VideoScreen` from a message's video widget, render-texture output) play as the original, with libvpx available (verified with Ubuntu's libvpx9 unpacked locally)
 - [ ] Intro short on first launch, victory videos
@@ -81,7 +82,7 @@ Legend: `[x]` verified · `[ ]` not yet verified · `[~]` deviation (see the not
 
 - [x] Ten cycles at speed 3 with digging and building, zero exceptions (M5 exit)
 - [x] Autosave each cycle; save → quit to menu → load → continue (M5 exit)
-- [ ] Hi-res texture bundle streaming (`StreamedTextures`)
+- [x] Hi-res texture bundle streaming (`StreamedTextures`): bundles load while the Supply Closet is open; the Duplicant outfit screen renders from them
 
 ## Platform
 

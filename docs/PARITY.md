@@ -20,7 +20,8 @@ Legend: `[x]` verified · `[ ]` not yet verified · `[~]` deviation (see the not
 - [x] `WorldGenScreen` (threaded worldgen with SimDLL settle, progress)
 - [x] Worldgen parity: the same coordinates (typed into the destination screen) generate the same terrain as the original player
 - [x] `CharacterSelectionController` / `CharacterContainer` (Duplicant cards, reroll, embark)
-- [ ] `ScenariosMenu`, `ModsScreen` (no Workshop items with the test double)
+- [x] `ModsScreen` (empty list, Steam Workshop / Disable All / Close; no Workshop items with the test double) as the original
+- [x] `ScenariosMenu`: not reachable in this build (no code opens it)
 - [x] `LockerMenuScreen` (Supply Closet, offline) and its Duplicants outfit screen
 - [ ] `PatchNotesScreen`, `KleiItemDropScreen`, `KleiInventoryScreen` contents (need network/Steam services)
 - [x] `RetiredColonyInfoScreen`: colony list, achievements, colony detail (Duplicants with portraits, buildings, oxygen graph; "Timelapse Unavailable", see the preview open item)

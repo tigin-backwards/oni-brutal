@@ -65,37 +65,42 @@ namespace SemanticsProbe
 
             // Harvest, Disinfect and Attack orders carried out.
             var podPos = Components.Telepads.Items[0].transform.GetPosition();
-            HarvestDesignatable plant = null;
-            foreach (var h in Components.HarvestDesignatables.Items)
-                if (h != null && h.GetComponent<Growing>() != null && (plant == null || Vector3.Distance(h.transform.GetPosition(), podPos) < Vector3.Distance(plant.transform.GetPosition(), podPos)))
-                    plant = h;
+            // A Mealwood planted beside the printing pod, fully grown.
+            var mealwood = GameUtil.KInstantiate(Assets.GetPrefab("BasicSingleHarvestPlant"), Grid.CellToPosCBC(Grid.OffsetCell(pod, -3, 0), Grid.SceneLayer.BuildingBack), Grid.SceneLayer.BuildingBack);
+            mealwood.SetActive(true);
+            yield return null;
+            var plant = mealwood.GetComponent<HarvestDesignatable>();
             if (plant != null)
             {
                 plant.GetComponent<Growing>().OverrideMaturityLevel(1f);
                 plant.SetHarvestWhenReady(true);
-                Rec.Log("ORDER harvest " + plant.name + " grown " + plant.GetComponent<Growing>().PercentGrown().ToString("F2"));
+                Rec.Log("ORDER harvest " + plant.name + " grown " + plant.GetComponent<Growing>().PercentGrown().ToString("F2")
+                    + " canBeHarvested=" + plant.GetComponent<Harvestable>().CanBeHarvested + " marked=" + plant.MarkedForHarvest);
             }
             var bin = Assets.GetBuildingDef("StorageLocker").Build(Grid.OffsetCell(pod, -4, 0), Orientation.Neutral, null, Assets.GetBuildingDef("StorageLocker").DefaultElements(), 293.15f, playsound: false);
             yield return null;
             bin.GetComponent<PrimaryElement>().AddDisease(Db.Get().Diseases.GetIndex(Db.Get().Diseases.FoodGerms.id), 100000, "probe");
             bin.GetComponent<Disinfectable>().MarkForDisinfect();
             Rec.Log("ORDER disinfect germs " + bin.GetComponent<PrimaryElement>().DiseaseCount);
-            FactionAlignment critter = null;
-            foreach (var f in FindObjectsByType<FactionAlignment>(FindObjectsSortMode.None))
-                if (f.HasTag(GameTags.Creature) && f.IsAlignmentActive() && (critter == null || Vector3.Distance(f.transform.GetPosition(), podPos) < Vector3.Distance(critter.transform.GetPosition(), podPos)))
-                    critter = f;
+            // A Hatch beside the printing pod (on the floor the Duplicants stand on).
+            var hatch = GameUtil.KInstantiate(Assets.GetPrefab("Hatch"), Grid.CellToPosCBC(Grid.OffsetCell(pod, 3, 0), Grid.SceneLayer.Creatures), Grid.SceneLayer.Creatures);
+            hatch.SetActive(true);
+            yield return null;
+            var critter = hatch.GetComponent<FactionAlignment>();
             if (critter != null)
             {
                 critter.SetPlayerTargeted(true);
-                Rec.Log("ORDER attack " + critter.name);
+                Rec.Log("ORDER attack " + critter.name + " at " + critter.transform.GetPosition());
             }
             SpeedControlScreen.Instance.SetSpeed(2);
             SpeedControlScreen.Instance.Unpause(false);
             yield return new WaitForSecondsRealtime(120f);
             SpeedControlScreen.Instance.Pause(false);
-            if (plant != null) Rec.Log("ORDER harvest after: grown " + plant.GetComponent<Growing>().PercentGrown().ToString("F2"));
+            if (plant == null) Rec.Log("ORDER harvest after: plant gone");
+            else Rec.Log("ORDER harvest after: grown " + plant.GetComponent<Growing>().PercentGrown().ToString("F2")
+                + " canBeHarvested=" + plant.GetComponent<Harvestable>().CanBeHarvested + " marked=" + plant.MarkedForHarvest);
             Rec.Log("ORDER disinfect after: germs " + bin.GetComponent<PrimaryElement>().DiseaseCount);
-            if (critter != null) Rec.Log("ORDER attack after: " + (critter == null || critter.GetComponent<Health>() == null ? "gone" : "health " + critter.GetComponent<Health>().hitPoints.ToString("F0")));
+            Rec.Log("ORDER attack after: " + (critter == null || critter.GetComponent<Health>() == null ? "gone" : "health " + critter.GetComponent<Health>().hitPoints.ToString("F0")));
             Util.KDestroyGameObject(bin);
 
             // Research by a Duplicant: a Research Station powered by a Dev Generator through a

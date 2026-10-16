@@ -177,15 +177,6 @@ Known behaviours not yet reproduced, each to be closed by a named milestone:
 - `ScreenCapture.CaptureScreenshot` with superSize > 1 re-renders the frame into a larger
   target; in the colony the world composites white there (superSize 1 reads the presented frame
   and is exact). Only the game's debug screenshot keys use superSize. Milestone: M6.
-- Save preview / timelapse images (`Timelapser`): under Xvfb + Mesa d3d12 both players write a
-  black image (the original's opaque, ours transparent). The image comes only from the overlay
-  camera's effect chain: the base camera's last effect (`CameraRenderTexture`) writes a global
-  texture, not its target, and the overlay camera renders with clear flags Nothing and the
-  serialized timelapse culling mask 0, so its effects (all pass-through of their source) see only
-  what the camera's image-effect source starts with. In ours that is a pooled temporary texture.
-  The original must start it from the target's content with the base camera having rendered into
-  the target directly; to confirm against the original on a native GPU before changing the
-  image-effect setup. Milestone: M6.
 - Rare corrupt geometry (a world-sized white/black triangle in a frame) and one device removal
   ("D3D12: Removing Device") were seen in long runs on Mesa d3d12 under WSL. The same seeded
   26000-frame scenario on llvmpipe (software GL) shows none in 18 captures, and the original Unity

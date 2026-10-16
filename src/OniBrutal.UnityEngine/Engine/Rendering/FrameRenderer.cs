@@ -89,9 +89,14 @@ namespace OniBrutal.Engine.Rendering
             queued.Add(m);
         }
 
-        /// The frame's meshes queued by scripts outside camera rendering, kept for captures that
-        /// render the frame again.
+        /// The frame's meshes queued by scripts outside camera rendering. Like Unity's
+        /// intermediate renderers they last until the frame ends: cameras rendered by scripts
+        /// after the frame's rendering (end-of-frame coroutines) draw them too, and captures
+        /// render them again.
         static readonly List<QueuedMesh> frameQueued = new();
+
+        /// The frame's own camera pass is running.
+        static bool inFrameRender;
 
         static void RenderFrame()
         {
@@ -99,7 +104,15 @@ namespace OniBrutal.Engine.Rendering
             {
                 GraphicsDevice.UploadPending();
                 VideoPlanes.CopyRenderTextureVideos();
-                RenderScreen();
+                inFrameRender = true;
+                try
+                {
+                    RenderScreen();
+                }
+                finally
+                {
+                    inFrameRender = false;
+                }
             }
             frameQueued.Clear();
             foreach (var q in queued)
@@ -236,6 +249,7 @@ namespace OniBrutal.Engine.Rendering
             if (GraphicsDevice.Current.RendersFrames)
                 foreach (var (path, scale) in captures) Capture(path, scale);
             captures.Clear();
+            frameQueued.Clear();
             TemporaryRenderTextures.EndFrame();
             // Device resources of objects the collector reclaimed (private meshes of destroyed
             // renderers and the like).
@@ -434,7 +448,10 @@ namespace OniBrutal.Engine.Rendering
                 MarkVisible(r);
                 for (int i = before; i < draws.Count; i++) draws[i].Sequence = sequence++;
             }
-            foreach (var q in queued)
+            // Cameras rendered by scripts after the frame's pass also draw the frame's meshes
+            // (captures have already put them back in the queue).
+            bool afterFrame = !inFrameRender && screenOverride == null;
+            foreach (var q in afterFrame ? frameQueued.Concat(queued) : queued)
             {
                 if (q.Camera != null && q.Camera != camera) continue;
                 if ((cam.CullingMask & (1 << q.Layer)) == 0 || q.Mesh == null || q.Material == null) continue;

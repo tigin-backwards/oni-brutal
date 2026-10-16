@@ -115,6 +115,7 @@ namespace OniBrutal.Host
         /// `*` segment matches the first child that leads to a match.
         static GameObject? FindIncludingInactive(string path)
         {
+            if (!path.Contains('*') && GameObject.Find(path) is { } direct) return direct;
             var parts = path.TrimStart('/').Split('/');
             static Transform? Descend(Transform t, ReadOnlySpan<string> rest)
             {

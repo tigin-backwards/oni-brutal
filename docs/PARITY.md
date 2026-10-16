@@ -66,7 +66,7 @@ Legend: `[x]` verified · `[ ]` not yet verified · `[~]` deviation (see the not
 - [x] Printing pod recharge (cycle 3–4): "New Printables are available", pod side screen "Choose a Blueprint" → selection screen with Duplicants and a care package → Print → the new Duplicant arrives
 - [x] `GameOverScreen` (colony lost)
 - [ ] `VictoryScreen`, `StoryMessageScreen`, `EventInfoScreen`
-- [ ] Timelapse capture (`ReadPixels` + `EncodeToPNG`)
+- [x] Timelapse capture and save preview (`Timelapser`: base and overlay cameras rendered from an end-of-frame coroutine into a render texture, `ReadPixels` + `EncodeToPNG`): the world around the printing pod as in the original's images
 - [x] Camera: wheel zoom out/in, keyboard pan, Home (camera return)
 - [x] Camera: right- and middle-button drag pan move the view by the same pixel offsets as the original (−200,−100 and −250,+200, the latter clamped at the world edge, measured by image registration); Ctrl+1 / Shift+1 bookmark returns to the exact view in both. ONI has no edge pan (the edge padding only clamps the camera)
 - [x] Camera follow: stress meter click selects and focuses a Duplicant, Follow Cam zooms in and keeps the Duplicant centred while it walks

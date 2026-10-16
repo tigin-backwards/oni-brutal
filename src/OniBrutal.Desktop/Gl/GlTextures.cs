@@ -343,6 +343,7 @@ namespace OniBrutal.Desktop.Gl
                 }
             }
             CheckFramebuffer(rt);
+            ClearNewSurfaces(depthOnly, rt.DepthBits > 0);
             if (samples > 1 && !depthOnly)
             {
                 // Rendering goes to multisampled surfaces, resolved into the texture when it is read.
@@ -362,9 +363,35 @@ namespace OniBrutal.Desktop.Gl
                     N.glFramebufferRenderbuffer(Framebuffer, DepthStencilAttachment, Renderbuffer, new GlRenderbuffer(g.DepthRenderbuffer));
                 }
                 CheckFramebuffer(rt);
+                ClearNewSurfaces(false, rt.DepthBits > 0);
             }
             GlApi.BindFramebuffer(Framebuffer, 0);
             GlDevice.InvalidateFramebufferBinding();
+        }
+
+        /// New render surfaces start cleared, as Unity's: colour (0, 0, 0, 0), depth at the far
+        /// plane, stencil 0. GL leaves new storage undefined; a pass that depth-tests against a
+        /// never-written depth buffer (an image effect blitting into a fresh camera target)
+        /// must find it at the far plane.
+        static void ClearNewSurfaces(bool depthOnly, bool hasDepth)
+        {
+            uint mask = 0;
+            if (!depthOnly)
+            {
+                N.glColorMask(true, true, true, true);
+                N.glClearColor(0f, 0f, 0f, 0f);
+                mask |= ColorBufferBit;
+            }
+            if (depthOnly || hasDepth)
+            {
+                N.glDepthMask(true);
+                N.glStencilMask(0xFF);
+                N.glClearDepth(1.0);
+                N.glClearStencil(0);
+                mask |= DepthBufferBit | (depthOnly ? 0 : StencilBufferBit);
+            }
+            N.glClear(mask);
+            GlStateCache.Invalidate();
         }
 
         static void CheckFramebuffer(RenderTextureNative rt)

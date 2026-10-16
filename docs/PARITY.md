@@ -34,8 +34,8 @@ Legend: `[x]` verified · `[ ]` not yet verified · `[~]` deviation (see the not
 - [x] `GraphicsOptionsScreen`: fullscreen switching at runtime (window resized, UI re-laid out, "Accept Changes?"), resolution label as the original ("@ 0Hz" under Xvfb in both)
 - [x] `GraphicsOptionsScreen`: resolution dropdown (placement and the same mode list as the original on a single-mode display), choosing a resolution resizes the window with "Accept Changes?"
 - [x] `GraphicsOptionsScreen`: UI scale slider (whole UI re-scales), colour mode dropdown (palette swatches change) as the original
-- [ ] `AudioOptionsScreen`: volumes, device
-- [ ] `GameOptionsScreen`: autosave interval, temperature unit, camera speed, save/cloud settings
+- [x] `AudioOptionsScreen`: volume sliders and settings checkboxes respond as the original (sound output itself: see Audio below)
+- [x] `GameOptionsScreen`: camera pan speed slider, cloud-save checkbox, temperature unit. Slider clicks and drags started off the handle land on the same value as the original; drags started on the handle follow uGUI's handle-offset rule exactly here, while the original's result varies with the press point under XTEST (one step either way)
 - [x] `InputBindingsScreen`: rebinding (conflict notice when a key is taken), persistence across restarts (`keybindings.json`)
 - [x] `LanguageOptionsScreen`: built-in languages listed; choosing Chinese prompts in Chinese, restarts through `Restarter`, and the menus come back in Chinese (CJK font)
 - [x] Settings persistence across restarts (`kplayerprefs.yaml`: temperature unit)

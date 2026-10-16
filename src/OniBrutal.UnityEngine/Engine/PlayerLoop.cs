@@ -119,6 +119,9 @@ namespace OniBrutal.Engine
 
             Mark(5);
             AnimationUpdate?.Invoke();
+            // Behaviours enabled after the Update pass (by coroutines, animation events) start
+            // before LateUpdate and get it this frame (observed in Unity's player).
+            BehaviourManager.RunStarts();
             BehaviourManager.RunLateUpdate();
 
             Lifecycle.ProcessDestroyQueue();
@@ -131,7 +134,6 @@ namespace OniBrutal.Engine
             Mark(0);
             GUI?.Invoke();
             Mark(1);
-            Time.FrameRendered();
             Coroutines.RunEndOfFramePhase();
             Lifecycle.ProcessDestroyQueue();
             EngineLog.FlushToMainThread();

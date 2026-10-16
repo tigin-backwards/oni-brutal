@@ -396,6 +396,59 @@ namespace OniBrutal.Tests
             Assert.Equal(["start", "after null", "nested", "nested resumed", "after nested"], r.Log);
         }
 
+        public class UpdateStarter : MonoBehaviour
+        {
+            public readonly List<string> Log = new();
+            bool started;
+
+            void Update()
+            {
+                Log.Add("update " + Time.frameCount);
+                if (started) return;
+                started = true;
+                StartCoroutine(Co());
+            }
+
+            IEnumerator Co()
+            {
+                Log.Add("co start " + Time.frameCount);
+                yield return null;
+                Log.Add("co resumed " + Time.frameCount);
+            }
+        }
+
+        [Fact]
+        public void YieldNullFromACoroutineStartedInUpdateResumesNextFrame()
+        {
+            // Observed in Unity's player (tools/UnityProbe): the coroutine pass after Update does
+            // not resume a wait that began earlier in the same frame.
+            var r = new GameObject("r").AddComponent<UpdateStarter>();
+            Frame();
+            int f = Time.frameCount;
+            Frame();
+            Assert.Equal([$"update {f}", $"co start {f}", $"update {f + 1}", $"co resumed {f + 1}"], r.Log);
+        }
+
+        public class CoroutineSpawner : MonoBehaviour
+        {
+            public IEnumerator Spawn()
+            {
+                yield return null;
+                new GameObject("late").AddComponent<LateRecorder>();
+                Recorder.Log.Add("spawned " + Time.frameCount);
+            }
+        }
+
+        [Fact]
+        public void BehavioursCreatedByCoroutinesStartAndLateUpdateThatFrame()
+        {
+            Recorder.Log.Clear();
+            var s = new GameObject("s").AddComponent<CoroutineSpawner>();
+            s.StartCoroutine(s.Spawn());
+            Frame();
+            Assert.Equal([$"spawned {Time.frameCount}", "late:Start", "late:LateUpdate"], Recorder.Log);
+        }
+
         [Fact]
         public void DeactivationStopsCoroutines()
         {

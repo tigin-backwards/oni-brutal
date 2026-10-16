@@ -17,6 +17,8 @@ namespace SemanticsProbe
             Object.DontDestroyOnLoad(go);
             go.AddComponent<Probe>();
             go.AddComponent<QuitLog>().Tag = "ddol-at-load";
+            go.AddComponent<FrameLog>();
+            Rec.Log("OnLoad renderedFrameCount=" + Time.renderedFrameCount + " scene=" + UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
         }
 
         public static void GameQuitPrefix()
@@ -68,6 +70,35 @@ namespace SemanticsProbe
         void LateUpdate() => Rec.Log("U LateUpdate");
         void OnDisable() => Rec.Log("U OnDisable");
         void OnDestroy() => Rec.Log("U OnDestroy");
+    }
+
+    /// When `yield return null` resumes, for coroutines started from Start, Update and LateUpdate.
+    public class CoTiming : MonoBehaviour
+    {
+        int updates, lates;
+        IEnumerator Co(string from)
+        {
+            Rec.Log("co[" + from + "] started");
+            yield return null;
+            Rec.Log("co[" + from + "] after 1st null");
+            yield return null;
+            Rec.Log("co[" + from + "] after 2nd null");
+            yield return new WaitForEndOfFrame();
+            Rec.Log("co[" + from + "] after WaitForEndOfFrame");
+            yield return null;
+            Rec.Log("co[" + from + "] after null following end of frame");
+        }
+        void Start() { Rec.Log("CoTiming Start"); StartCoroutine(Co("Start")); }
+        void Update() { Rec.Log("CoTiming Update"); if (updates++ == 1) StartCoroutine(Co("Update")); }
+        void LateUpdate() { Rec.Log("CoTiming LateUpdate"); if (lates++ == 3) StartCoroutine(Co("LateUpdate")); if (lates > 8) enabled = false; }
+    }
+
+    /// The first frames: frame counters and the active scene at Update and LateUpdate.
+    public class FrameLog : MonoBehaviour
+    {
+        int n;
+        void Update() { if (n < 12) Rec.Log("Update rendered=" + Time.renderedFrameCount + " scene=" + UnityEngine.SceneManagement.SceneManager.GetActiveScene().name); }
+        void LateUpdate() { if (n++ < 12) Rec.Log("LateUpdate rendered=" + Time.renderedFrameCount + " scene=" + UnityEngine.SceneManagement.SceneManager.GetActiveScene().name); }
     }
 
     public class QuitLog : MonoBehaviour
@@ -171,6 +202,9 @@ namespace SemanticsProbe
             yield return null;
             quitVictim = Make("QV", null);
             new GameObject("late").AddComponent<QuitLog>().Tag = "scene-late";
+            Rec.Log("=== scenario 11: coroutine timing");
+            new GameObject("CoTiming").AddComponent<CoTiming>();
+            for (int i = 0; i < 10; i++) yield return null;
             Rec.Log("=== done");
         }
     }

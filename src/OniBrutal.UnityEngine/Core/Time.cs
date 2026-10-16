@@ -65,6 +65,9 @@ namespace UnityEngine
         internal static void BeginFrame(float realDelta)
         {
             s_FrameCount++;
+            // Every frame renders (no on-demand rendering): Unity counts it from its start, so
+            // both counters agree during the frame (observed in the player).
+            s_RenderedFrameCount++;
             s_UnscaledDeltaTime = realDelta;
             s_UnscaledTime += realDelta;
             float clamped = realDelta < s_MaximumDeltaTime ? realDelta : s_MaximumDeltaTime;
@@ -90,8 +93,6 @@ namespace UnityEngine
         }
 
         internal static void EndFixedStep() => s_InFixedTimeStep = false;
-
-        internal static void FrameRendered() => s_RenderedFrameCount++;
 
         internal static void LevelLoaded() => s_LevelLoadTime = s_Time;
 

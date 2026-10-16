@@ -18,6 +18,8 @@ namespace OniBrutal.Engine
         public Coroutine Handle;
         public CoroutineWait Wait;
         public float ResumeTime;
+        /// The frame in which the current wait began.
+        public int WaitFrame;
         public AsyncOperation Operation;
         public List<CoroutineState> Waiters;
     }
@@ -26,8 +28,10 @@ namespace OniBrutal.Engine
     ///
     /// A coroutine runs synchronously from StartCoroutine until its first yield. Yielded
     /// IEnumerators (including CustomYieldInstructions) run nested, inline. `null` (and any
-    /// unrecognized value) resumes after the next frame's Update; WaitForSeconds resumes after
-    /// Update once scaled time has passed; WaitForFixedUpdate after FixedUpdate; WaitForEndOfFrame
+    /// unrecognized value) resumes after the next frame's Update, even when the coroutine
+    /// started waiting before this frame's coroutine pass (started from Update or a late Start:
+    /// observed in Unity's player); WaitForSeconds resumes after Update once scaled time has
+    /// passed, from the next frame on; WaitForFixedUpdate after FixedUpdate; WaitForEndOfFrame
     /// at the end of the frame; a Coroutine when that coroutine finishes; an AsyncOperation after
     /// Update once it is done. An exception ends the coroutine and is logged.
     internal static class Coroutines
@@ -116,6 +120,7 @@ namespace OniBrutal.Engine
         static void WaitIn(List<CoroutineState> list, CoroutineState state, CoroutineWait wait)
         {
             state.Wait = wait;
+            state.WaitFrame = Time.frameCount;
             list.Add(state);
         }
 
@@ -183,8 +188,9 @@ namespace OniBrutal.Engine
             }
         }
 
-        /// After Update: yield null, WaitForSeconds, AsyncOperation.
-        public static void RunUpdatePhase() => RunPhase(ref updateWaiters, s => s.Wait switch
+        /// After Update: yield null, WaitForSeconds, AsyncOperation; never in the frame the wait
+        /// began.
+        public static void RunUpdatePhase() => RunPhase(ref updateWaiters, s => s.WaitFrame < Time.frameCount && s.Wait switch
         {
             CoroutineWait.Seconds => Time.time >= s.ResumeTime,
             CoroutineWait.AsyncOperation => s.Operation.isDone,

@@ -177,10 +177,13 @@ Known behaviours not yet reproduced, each to be closed by a named milestone:
 - `ScreenCapture.CaptureScreenshot` with superSize > 1 re-renders the frame into a larger
   target; in the colony the world composites white there (superSize 1 reads the presented frame
   and is exact). Only the game's debug screenshot keys use superSize. Milestone: M6.
-- Save preview / timelapse images (`Timelapser`, a camera rendered into a 512×768 target and
-  read back): in this environment the original's image is black with opaque alpha, ours black
-  with zero alpha, i.e. something the original draws into that target (opaque, black) is not
-  drawn here. Milestone: M6.
+- Save preview / timelapse images (`Timelapser`): under Xvfb + Mesa d3d12 both players write a
+  black image; the original's is opaque, ours fully transparent, so its Load screen shows a black
+  preview where ours shows "NO PREVIEW". The image is produced only by the Overlay camera's
+  effect chain (clear flags Nothing; baseCamera's last effect writes a global texture, not its
+  target), whose intermediate starts with whatever the temporary-texture pool hands out; the
+  alpha difference comes from that unspecified content. To revisit with a real GPU display,
+  where the original's preview should show the colony. Milestone: M6.
 - Environment for parity runs: a logged-in Steam client (engine work proceeds with the
   offline Steam test double, ARCHITECTURE §9.7) (the game quits through
   `RestartAppIfNecessary` / `SteamAPI.Init` without one) and the system `libvpx` (VP8 video;

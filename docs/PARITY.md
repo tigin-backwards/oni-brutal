@@ -53,7 +53,8 @@ Legend: `[x]` verified · `[ ]` not yet verified · `[~]` deviation (see the not
 - [x] Research and Starmap buttons before a Research Station / Telescope exists: locked, with the original's tooltips
 - [ ] `ResearchScreen`, `StarmapScreen` / `ClusterMapScreen` contents (need a Research Station / Telescope)
 - [x] `PauseScreen`: open, save with overwrite confirmation (41 saves in one run)
-- [ ] `PauseScreen`: save as (`FileNameDialog`), load, options, quit to menu
+- [x] `PauseScreen` → Main Menu ("Save and quit" prompt) → front end with Resume Game; the front end comes back at the smaller UI scale as in the original (once, ours returned to the normal scale a few seconds later; not reproduced since)
+- [ ] `PauseScreen`: save as (`FileNameDialog`), load, options
 - [ ] `PrinterceptorScreen` / care packages (`CarePackageContainer`) at the printing pod's recharge
 - [x] `GameOverScreen` (colony lost)
 - [ ] `VictoryScreen`, `StoryMessageScreen`, `EventInfoScreen`
@@ -71,7 +72,7 @@ Legend: `[x]` verified · `[ ]` not yet verified · `[~]` deviation (see the not
 ## Overlays
 
 - [x] F1–F11 compared with the original (same keys, same frame of play): Oxygen, Power, Temperature, Materials (`TileMode`), Light, Plumbing (`LiquidConduit`), Ventilation (`GasConduit`), Decor, Germs (`Disease`), Farming (`Crop`), Rooms (with room highlight under the cursor)
-- [ ] Exosuits (`Suit`), Automation (`Logic`), Shipping (`SolidConveyor`), Radiation, Heat flow, Thermal conductivity, Priorities, Harvest (Shift+F1–F4 select nothing new in either player at this point; open through the overlay bar)
+- [ ] Exosuits (`Suit`), Automation (`Logic`), Shipping (`SolidConveyor`), Radiation, Heat flow, Thermal conductivity, Priorities, Harvest: unlocked by research (not in the overlay bar at cycle 1 in either player)
 - [ ] Overlay legends (`OverlayLegend`) and filters
 
 ## Simulation and persistence

@@ -18,6 +18,7 @@ Legend: `[x]` verified · `[ ]` not yet verified · `[~]` deviation (see the not
 - [x] `ColonyDestinationSelectScreen` (asteroid, seed, settings panels)
 - [ ] Custom game settings and story traits panels
 - [x] `WorldGenScreen` (threaded worldgen with SimDLL settle, progress)
+- [x] Worldgen parity: the same coordinates (typed into the destination screen) generate the same terrain as the original player
 - [x] `CharacterSelectionController` / `CharacterContainer` (Duplicant cards, reroll, embark)
 - [ ] `ScenariosMenu`, `ModsScreen` (no Workshop items with the test double)
 - [ ] `CreditsScreen`, `PatchNotesScreen`, `KleiItemDropScreen`, `LockerMenuScreen` / `KleiInventoryScreen` (need network/Steam services)
@@ -48,7 +49,8 @@ Legend: `[x]` verified · `[ ]` not yet verified · `[~]` deviation (see the not
 - [ ] `SideDetailsScreen` side screens (per-building settings)
 - [ ] `BuildMenu` / `BuildingGroupScreen` / `ProductInfoScreen` / `MaterialSelectionPanel` (planning and placing buildings)
 - [x] Management screens opened by hotkey and compared with the original: Vitals, Consumables, Priorities (jobs), Schedule (`ScheduleScreen`), Skills (`SkillsScreen`, Duplicant portrait in a stencil mask), Database (`CodexScreen`), Reports (`ReportScreen`)
-- [ ] Research (`ResearchScreen`), Starmap (`StarmapScreen` / `ClusterMapScreen`): their hotkeys open nothing at cycle 1 in either player; verify through the HUD buttons
+- [x] Research and Starmap buttons before a Research Station / Telescope exists: locked, with the original's tooltips
+- [ ] `ResearchScreen`, `StarmapScreen` / `ClusterMapScreen` contents (need a Research Station / Telescope)
 - [x] `PauseScreen`: open, save with overwrite confirmation (41 saves in one run)
 - [ ] `PauseScreen`: save as (`FileNameDialog`), load, options, quit to menu
 - [ ] `PrinterceptorScreen` / care packages (`CarePackageContainer`) at the printing pod's recharge
@@ -61,7 +63,8 @@ Legend: `[x]` verified · `[ ]` not yet verified · `[~]` deviation (see the not
 
 - [x] Dig (`DigTool`)
 - [ ] Cancel, Deconstruct, Prioritize (`PriorityScreen`), Disinfect, Sweep (`ClearTool`), Mop, Attack, Wrangle (`CaptureTool`), Harvest, Empty Pipe, Disconnect, Copy Settings, Move To
-- [~] Build placement: a debug-only building placed in instant-build mode; regular construction with materials, `BaseUtilityBuildTool` (wires, pipes), rotation not yet verified
+- [x] Build placement with materials: Storage Bin and a dragged Ladder from the Base menu; placement refused with "Missing resources" until the colony has the materials (as the original); Duplicants deliver and build
+- [ ] `BaseUtilityBuildTool` (wires, pipes), rotation, other categories
 
 ## Overlays
 

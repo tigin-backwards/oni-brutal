@@ -229,6 +229,7 @@ Environment notes:
   frame presented from a presenter thread as Unity presents from its render thread
   (ARCHITECTURE §3.5). Per-frame CPU: update 1.6 ms, LateUpdate 4.2, canvases 4.8, render 3.7;
   GPU 4–5 ms.
+  Re-measured 2026-10-16 after M6 work: 58.6 fps mean (min 38, max 70) in the same scenario.
 - M6 in progress (2026-10-16): docs/PARITY.md ticked (Mop, Disinfect, Harvest, Attack and Wrangle orders carried out in both players). `tools/UnityProbe` (a mod run
   in both players) compares lifecycle and timing semantics, engine values, the main-menu and
   in-game UI layout (about 3400 elements), victory sequence, event popup, 18 building side

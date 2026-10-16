@@ -184,6 +184,11 @@ Known behaviours not yet reproduced, each to be closed by a named milestone:
   target), whose intermediate starts with whatever the temporary-texture pool hands out; the
   alpha difference comes from that unspecified content. To revisit with a real GPU display,
   where the original's preview should show the colony. Milestone: M6.
+- Rare corrupt geometry (a world-sized white/black triangle in a frame) and one device removal
+  ("D3D12: Removing Device") were seen in long runs on Mesa d3d12 under WSL. The same seeded
+  26000-frame scenario on llvmpipe (software GL) shows none in 18 captures, and the original Unity
+  player also renders glitches on d3d12 here (a black world frame, a garbled starmap), which points
+  at the driver. To confirm on native GPU drivers. Milestone: M6.
 - Environment for parity runs: a logged-in Steam client (engine work proceeds with the
   offline Steam test double, ARCHITECTURE §9.7) (the game quits through
   `RestartAppIfNecessary` / `SteamAPI.Init` without one) and the system `libvpx` (VP8 video;

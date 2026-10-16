@@ -15,6 +15,11 @@ pcm.!default {
     slave.pcm "nullsink"
     file "|/usr/bin/python3 $here/pace.py $out"
     format "raw"
+    # FMOD only opens devices ALSA lists.
+    hint {
+        show on
+        description "Private paced recording"
+    }
 }
 pcm.nullsink {
     type null

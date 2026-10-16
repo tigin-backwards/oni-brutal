@@ -9,7 +9,8 @@ namespace OniBrutal.Host
     /// same feed as the window's, before the given frame. Positions are screen pixels with the
     /// origin at the top left (as in captures). Actions: `move:X,Y`, `click:X,Y` (left button
     /// down, up the next frame), `press:X,Y` / `release:X,Y` (left button, for drags), `key:KEYCODE` (down, up the next frame),
-    /// `keydown:KEYCODE` / `keyup:KEYCODE` (held keys, e.g. modifiers for chords), `text:STRING`. A run
+    /// `keydown:KEYCODE` / `keyup:KEYCODE` (held keys, e.g. modifiers for chords), `scroll:DX,DY` (wheel
+    /// steps at the pointer), `text:STRING`. A run
     /// with a script ignores the window's own mouse and keyboard, so it is reproducible.
     sealed class ScriptedInput
     {
@@ -46,6 +47,10 @@ namespace OniBrutal.Host
                 case "keyup":
                     var up = Enum.Parse<KeyCode>(arg);
                     At(frame, () => { held.Remove(up); feed.KeyUp(up, Modifiers(), Vector2.zero); });
+                    break;
+                case "scroll":
+                    var delta = Point(arg);
+                    At(frame, () => feed.Scrolled(delta, Gui(pointer)));
                     break;
                 case "text":
                     At(frame, () => { foreach (var r in arg.EnumerateRunes()) feed.Text((uint)r.Value, 0); });
@@ -87,7 +92,14 @@ namespace OniBrutal.Host
         static float Height => OniBrutal.Engine.Platform.PlatformServices.Current.FramebufferHeight;
 
         /// Top-left pixel position → the feed's screen position (origin bottom left).
-        void Move(Vector2 topLeft) => feed.MouseMoved(new Vector2(topLeft.x, Height - topLeft.y));
+        void Move(Vector2 topLeft)
+        {
+            pointer = topLeft;
+            feed.MouseMoved(new Vector2(topLeft.x, Height - topLeft.y));
+        }
+
+        /// Where the script last put the pointer (top-left origin).
+        Vector2 pointer;
 
         /// GUI positions have the origin at the top left, like the script's.
         static Vector2 Gui(Vector2 topLeft) => topLeft;

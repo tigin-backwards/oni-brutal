@@ -59,7 +59,8 @@ Legend: `[x]` verified · `[ ]` not yet verified · `[~]` deviation (see the not
 - [x] `GameOverScreen` (colony lost)
 - [ ] `VictoryScreen`, `StoryMessageScreen`, `EventInfoScreen`
 - [ ] Timelapse capture (`ReadPixels` + `EncodeToPNG`)
-- [ ] Camera: pan (keys, edge, drag), zoom, follow, bookmarks (`WorldSelector` for multiple asteroids)
+- [x] Camera: wheel zoom out/in, keyboard pan, Home (camera return)
+- [ ] Camera: edge and drag pan, follow, bookmarks (`WorldSelector` for multiple asteroids)
 
 ## Tools
 

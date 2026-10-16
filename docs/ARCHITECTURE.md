@@ -136,8 +136,9 @@ past the boot checkpoint needs a Steam client logged in with an account that own
   use is the version stamp of local and dev (unpackaged) mods in `mods.json`
   (`KMod.Local.Subscribe`: `directoryName.GetHashCode()`). The stamp differs at every launch, so
   `KMod.Manager` treats the mod as changed: it is marked for reinstall and, having no archive to
-  reinstall from, is disabled at the next launch. Local and dev mods therefore have to be
-  re-enabled in the Mods screen each launch; Steam Workshop mods (published ids) are unaffected.
+  reinstall from, is disabled at the next launch; the main menu also opens a "restart required"
+  dialog for it. Local and dev mods therefore have to be re-enabled in the Mods screen each
+  launch; Steam Workshop mods (published ids) are unaffected.
 - **D4 `Thread.Abort`** throws on CoreCLR; reached only by `ThreadedHttps.End` after a 2 s join
   timeout at shutdown.
 - **D5 `Process.MainModule`** is the host executable; `App.Restart` relaunches the host (we make

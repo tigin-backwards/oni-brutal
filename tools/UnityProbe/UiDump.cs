@@ -43,6 +43,7 @@ namespace SemanticsProbe
             {
                 gameDone = true;
                 Dump("game", true);
+                Triggers.Ready = true;
             }
         }
 

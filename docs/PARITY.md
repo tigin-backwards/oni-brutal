@@ -28,7 +28,7 @@ Legend: `[x]` verified · `[ ]` not yet verified · `[~]` deviation (see the not
 - [x] `RetiredColonyInfoScreen`: colony list, achievements, colony detail (Duplicants with portraits, buildings, oxygen graph); colony cards show the timelapse thumbnail
 - [x] Tutorial videos (`VideoScreen` from a message's video widget, render-texture output) play as the original, with libvpx available (verified with Ubuntu's libvpx9 unpacked locally)
 - [x] Intro short on first launch: this build sets no intro short (`MainMenu.IntroShortName`), so neither player plays one (no `PlayShortOnLaunch` pref written by either)
-- [ ] Victory videos (same `VideoScreen` path as the verified tutorial videos)
+- [x] Victory videos: the Thriving sequence's short and victory loop with its message panel (`VideoScreen.PlayShortWithVictoryLoop`), triggered with tools/UnityProbe in both players and captured at the same points
 
 ## Options
 
@@ -69,7 +69,8 @@ Legend: `[x]` verified · `[ ]` not yet verified · `[~]` deviation (see the not
 - [x] `PauseScreen`: Options (the same options screens as the main menu)
 - [x] Printing pod recharge (cycle 3–4): "New Printables are available", pod side screen "Choose a Blueprint" → selection screen with Duplicants and a care package → Print → the new Duplicant arrives
 - [x] `GameOverScreen` (colony lost)
-- [ ] `VictoryScreen`, `StoryMessageScreen`, `EventInfoScreen`
+- [x] `StoryMessageScreen` ("IMPERATIVE ACHIEVED" alert, Proceed → camera sequence) as the original, triggered with tools/UnityProbe; `VictoryScreen` is never opened in this build (prefab field only)
+- [~] `EventInfoScreen.ShowPopup` (story-trait popup) runs without error in both players; at the captured moment neither shows the popup yet, so its rendering is not compared
 - [x] Timelapse capture and save preview (`Timelapser`: base and overlay cameras rendered from an end-of-frame coroutine into a render texture, `ReadPixels` + `EncodeToPNG`): the world around the printing pod as in the original's images
 - [x] Camera: wheel zoom out/in, keyboard pan, Home (camera return)
 - [x] Camera: right- and middle-button drag pan move the view by the same pixel offsets as the original (−200,−100 and −250,+200, the latter clamped at the world edge, measured by image registration); Ctrl+1 / Shift+1 bookmark returns to the exact view in both. ONI has no edge pan (the edge padding only clamps the camera)

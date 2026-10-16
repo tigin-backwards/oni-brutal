@@ -19,6 +19,7 @@ namespace SemanticsProbe
             go.AddComponent<QuitLog>().Tag = "ddol-at-load";
             go.AddComponent<FrameLog>();
             go.AddComponent<UiDump>();
+            go.AddComponent<Triggers>();
             Rec.Log("OnLoad renderedFrameCount=" + Time.renderedFrameCount + " scene=" + UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
         }
 

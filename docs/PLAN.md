@@ -174,9 +174,6 @@ Known behaviours not yet reproduced, each to be closed by a named milestone:
 - UI Toolkit panel internals (`BaseRuntimePanel`, `PanelRaycaster`'s pickers, `UIDocument`
   members — 13 members) stay absent: uGUI reaches them only through UI Toolkit panels, and the
   game has no UIDocument. Milestone: M6 (confirm unreachable).
-- `ScreenCapture.CaptureScreenshot` with superSize > 1 re-renders the frame into a larger
-  target; in the colony the world composites white there (superSize 1 reads the presented frame
-  and is exact). Only the game's debug screenshot keys use superSize. Milestone: M6.
 - Rare corrupt geometry (a world-sized white/black triangle in a frame) and one device removal
   ("D3D12: Removing Device") were seen in long runs on Mesa d3d12 under WSL. The same seeded
   26000-frame scenario on llvmpipe (software GL) shows none in 18 captures, and the original Unity

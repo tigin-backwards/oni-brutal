@@ -8,7 +8,8 @@ namespace OniBrutal.Host
     /// `--input FRAME:ACTION[:ARGS]` (development and test runs): input delivered through the
     /// same feed as the window's, before the given frame. Positions are screen pixels with the
     /// origin at the top left (as in captures). Actions: `move:X,Y`, `click:X,Y` (left button
-    /// down, up the next frame), `press:X,Y` / `release:X,Y` (left button, for drags), `key:KEYCODE` (down, up the next frame), `text:STRING`. A run
+    /// down, up the next frame), `press:X,Y` / `release:X,Y` (left button, for drags), `key:KEYCODE` (down, up the next frame),
+    /// `keydown:KEYCODE` / `keyup:KEYCODE` (held keys, e.g. modifiers for chords), `text:STRING`. A run
     /// with a script ignores the window's own mouse and keyboard, so it is reproducible.
     sealed class ScriptedInput
     {
@@ -35,14 +36,34 @@ namespace OniBrutal.Host
                 case "release": At(frame, () => { Move(Point(arg)); feed.MouseUp(0, 0, Gui(Point(arg))); }); break;
                 case "key":
                     var key = Enum.Parse<KeyCode>(arg);
-                    At(frame, () => feed.KeyDown(key, 0, repeat: false, Vector2.zero));
-                    At(frame + 1, () => feed.KeyUp(key, 0, Vector2.zero));
+                    At(frame, () => feed.KeyDown(key, Modifiers(), repeat: false, Vector2.zero));
+                    At(frame + 1, () => feed.KeyUp(key, Modifiers(), Vector2.zero));
+                    break;
+                case "keydown":
+                    var down = Enum.Parse<KeyCode>(arg);
+                    At(frame, () => { held.Add(down); feed.KeyDown(down, Modifiers(), repeat: false, Vector2.zero); });
+                    break;
+                case "keyup":
+                    var up = Enum.Parse<KeyCode>(arg);
+                    At(frame, () => { held.Remove(up); feed.KeyUp(up, Modifiers(), Vector2.zero); });
                     break;
                 case "text":
                     At(frame, () => { foreach (var r in arg.EnumerateRunes()) feed.Text((uint)r.Value, 0); });
                     break;
                 default: throw new ArgumentException($"Unknown --input action '{parts[1]}'");
             }
+        }
+
+        readonly HashSet<KeyCode> held = new();
+
+        /// Event modifiers of the keys the script holds down.
+        EventModifiers Modifiers()
+        {
+            EventModifiers m = 0;
+            if (held.Contains(KeyCode.LeftShift) || held.Contains(KeyCode.RightShift)) m |= EventModifiers.Shift;
+            if (held.Contains(KeyCode.LeftControl) || held.Contains(KeyCode.RightControl)) m |= EventModifiers.Control;
+            if (held.Contains(KeyCode.LeftAlt) || held.Contains(KeyCode.RightAlt)) m |= EventModifiers.Alt;
+            return m;
         }
 
         void At(int frame, Action action)

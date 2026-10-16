@@ -137,10 +137,21 @@ namespace OniBrutal.Desktop.Gl
             GlApi.Enable(StencilTest, stencil);
             if (stencil)
             {
-                N.glStencilFuncSeparate(Brutal.OpenGlApi.GlFace.Front, (Brutal.OpenGlApi.GlFunc)Compare(r.FComp == 0 ? 8 : r.FComp), r.StencilRef, (uint)r.ReadMask);
-                N.glStencilFuncSeparate(Brutal.OpenGlApi.GlFace.Back, (Brutal.OpenGlApi.GlFunc)Compare(r.BComp == 0 ? 8 : r.BComp), r.StencilRef, (uint)r.ReadMask);
-                N.glStencilOpSeparate(Brutal.OpenGlApi.GlFace.Front, StencilOp(r.FFail), StencilOp(r.FZFail), StencilOp(r.FPass));
-                N.glStencilOpSeparate(Brutal.OpenGlApi.GlFace.Back, StencilOp(r.BFail), StencilOp(r.BZFail), StencilOp(r.BPass));
+                // Faces with the same state are set with one call. Separate calls with identical
+                // values are equivalent in GL, but Mesa's d3d12 driver then fails stencil tests it
+                // should pass (masked UI portraits disappear).
+                if (r.FComp == r.BComp && r.FFail == r.BFail && r.FZFail == r.BZFail && r.FPass == r.BPass)
+                {
+                    N.glStencilFunc((Brutal.OpenGlApi.GlFunc)Compare(r.FComp == 0 ? 8 : r.FComp), r.StencilRef, (uint)r.ReadMask);
+                    N.glStencilOp((Brutal.OpenGlApi.GlStencilOp)StencilOp(r.FFail), (Brutal.OpenGlApi.GlStencilOp)StencilOp(r.FZFail), (Brutal.OpenGlApi.GlStencilOp)StencilOp(r.FPass));
+                }
+                else
+                {
+                    N.glStencilFuncSeparate(Brutal.OpenGlApi.GlFace.Front, (Brutal.OpenGlApi.GlFunc)Compare(r.FComp == 0 ? 8 : r.FComp), r.StencilRef, (uint)r.ReadMask);
+                    N.glStencilFuncSeparate(Brutal.OpenGlApi.GlFace.Back, (Brutal.OpenGlApi.GlFunc)Compare(r.BComp == 0 ? 8 : r.BComp), r.StencilRef, (uint)r.ReadMask);
+                    N.glStencilOpSeparate(Brutal.OpenGlApi.GlFace.Front, StencilOp(r.FFail), StencilOp(r.FZFail), StencilOp(r.FPass));
+                    N.glStencilOpSeparate(Brutal.OpenGlApi.GlFace.Back, StencilOp(r.BFail), StencilOp(r.BZFail), StencilOp(r.BPass));
+                }
                 N.glStencilMask((uint)r.WriteMask);
             }
         }

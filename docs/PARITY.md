@@ -47,7 +47,8 @@ Legend: `[x]` verified · `[ ]` not yet verified · `[~]` deviation (see the not
 - [x] `HoverTextScreen` (element hover cards)
 - [ ] `SideDetailsScreen` side screens (per-building settings)
 - [ ] `BuildMenu` / `BuildingGroupScreen` / `ProductInfoScreen` / `MaterialSelectionPanel` (planning and placing buildings)
-- [ ] Management screens: Vitals, Consumables, Priorities (jobs), Schedule (`ScheduleScreen`), Skills (`SkillsScreen`), Research (`ResearchScreen`), Starmap (`StarmapScreen` / `ClusterMapScreen`), Database (`CodexScreen`), Reports (`ReportScreen`)
+- [x] Management screens opened by hotkey and compared with the original: Vitals, Consumables, Priorities (jobs), Schedule (`ScheduleScreen`), Skills (`SkillsScreen`, Duplicant portrait in a stencil mask), Database (`CodexScreen`), Reports (`ReportScreen`)
+- [ ] Research (`ResearchScreen`), Starmap (`StarmapScreen` / `ClusterMapScreen`): their hotkeys open nothing at cycle 1 in either player; verify through the HUD buttons
 - [x] `PauseScreen`: open, save with overwrite confirmation (41 saves in one run)
 - [ ] `PauseScreen`: save as (`FileNameDialog`), load, options, quit to menu
 - [ ] `PrinterceptorScreen` / care packages (`CarePackageContainer`) at the printing pod's recharge
@@ -64,7 +65,8 @@ Legend: `[x]` verified · `[ ]` not yet verified · `[~]` deviation (see the not
 
 ## Overlays
 
-- [ ] Oxygen, Power, Temperature, Materials (`TileMode`), Light, Plumbing (`LiquidConduit`), Ventilation (`GasConduit`), Decor, Germs (`Disease`), Farming (`Crop`), Rooms, Exosuits (`Suit`), Automation (`Logic`), Shipping (`SolidConveyor`), Radiation, Heat flow, Thermal conductivity, Priorities, Harvest
+- [x] F1–F11 compared with the original (same keys, same frame of play): Oxygen, Power, Temperature, Materials (`TileMode`), Light, Plumbing (`LiquidConduit`), Ventilation (`GasConduit`), Decor, Germs (`Disease`), Farming (`Crop`), Rooms (with room highlight under the cursor)
+- [ ] Exosuits (`Suit`), Automation (`Logic`), Shipping (`SolidConveyor`), Radiation, Heat flow, Thermal conductivity, Priorities, Harvest (Shift+F1–F4 select nothing new in either player at this point; open through the overlay bar)
 - [ ] Overlay legends (`OverlayLegend`) and filters
 
 ## Simulation and persistence

@@ -157,6 +157,7 @@ namespace OniBrutal.Desktop.Gl
             Make("", 128, 128, 128, 128);
             Make("bump", 128, 128, 255, 128);
             Make("red", 255, 0, 0, 255);
+            Make(Unbound, 0, 0, 0, 255);
         }
 
         void Make(string name, byte r, byte g, byte b, byte a)
@@ -180,6 +181,8 @@ namespace OniBrutal.Desktop.Gl
             N.glTexParameteri(TexTarget3D, TextureMaxLevel, 0);
             defaults["3d:" + name] = volume;
         }
+
+        const string Unbound = "<unbound>";
 
         DeviceTexture DefaultTexture(string name, uint target)
         {
@@ -384,7 +387,11 @@ namespace OniBrutal.Desktop.Gl
                 }
                 if (device == null)
                 {
-                    string name = inputs.Shader.PropertiesById.TryGetValue(s.PropertyId, out var prop) ? prop.DefaultTexture : "white";
+                    // A declared property falls back to its default texture. A sampler the shader
+                    // does not declare, with no global set, has no texture bound in Unity's GLCore
+                    // player and reads (0, 0, 0, 1) as GL defines for a missing texture (the
+                    // overlay compositor relies on an unset _MRT2 reading black).
+                    string name = inputs.Shader.PropertiesById.TryGetValue(s.PropertyId, out var prop) ? prop.DefaultTexture : Unbound;
                     device = DefaultTexture(name, s.Target);
                 }
                 devices[i] = device;

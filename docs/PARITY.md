@@ -62,7 +62,7 @@ Legend: `[x]` verified · `[ ]` not yet verified · `[~]` deviation (see the not
 - [x] Research and Starmap buttons before a Research Station / Telescope exists: locked, with the original's tooltips
 - [x] Research tree interaction: hover, tooltips, selecting a tech (instant completion in debug mode) as the original
 - [x] Research progress: Basic Farming at 7.5/15 points (set through `Research`) shows the same progress bar and search results in the research screen as the original
-- [ ] Research points accumulated by a Duplicant at a powered Research Station
+- [x] Research by a Duplicant at a powered Research Station (tools/UnityProbe: station, Dev Generator and wire built beside the start room, 500 kg dirt, Basic Farming active, 150 s at speed 3): 60% of Basic Farming and the dirt used up in both players
 - [x] `ClusterMapScreen`, `WorldSelector`: Spaced Out content is not installed in this game copy (no `StreamingAssets/dlc`), unreachable in both players
 - [x] `PauseScreen`: open, save with overwrite confirmation (41 saves in one run)
 - [x] `PauseScreen` → Main Menu ("Save and quit" prompt) → front end with Resume Game; the front end comes back at the smaller UI scale as in the original (once, ours returned to the normal scale a few seconds later; not reproduced since)

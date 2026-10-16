@@ -233,8 +233,8 @@ Known behaviours not yet reproduced, each to be closed by a named milestone:
   frame presented from a presenter thread as Unity presents from its render thread
   (ARCHITECTURE §3.5). Per-frame CPU: update 1.6 ms, LateUpdate 4.2, canvases 4.8, render 3.7;
   GPU 4–5 ms.
-- M6 in progress (2026-10-16): docs/PARITY.md ticked except research by a Duplicant at a
-  powered station and the Disinfect/Attack/Wrangle/Harvest orders. `tools/UnityProbe` (a mod run
+- M6 in progress (2026-10-16): docs/PARITY.md ticked; Harvest/Attack orders behave the same as in
+  the original without completing in the probe's window, Wrangle untested (needs a rancher). `tools/UnityProbe` (a mod run
   in both players) compares lifecycle and timing semantics, engine values, the main-menu and
   in-game UI layout (about 3400 elements), victory sequence, event popup, 18 building side
   screens and a Mop order with the original; its findings are fixed or documented (ARCHITECTURE

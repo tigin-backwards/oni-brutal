@@ -98,6 +98,61 @@ namespace SemanticsProbe
             if (critter != null) Rec.Log("ORDER attack after: " + (critter == null || critter.GetComponent<Health>() == null ? "gone" : "health " + critter.GetComponent<Health>().hitPoints.ToString("F0")));
             Util.KDestroyGameObject(bin);
 
+            // Research by a Duplicant: a Research Station powered by a Dev Generator through a
+            // wire, stocked with dirt, Basic Farming active.
+            Research.Instance.SetActiveResearch(Db.Get().Techs.Get("FarmingTech"), true);
+            var stationDef = Assets.GetBuildingDef("ResearchCenter");
+            var generatorDef = Assets.GetBuildingDef("DevGenerator");
+            int stationCell = Grid.OffsetCell(pod, 6, 0), generatorCell = Grid.OffsetCell(pod, 10, 0);
+            // Clear the space beside the start room to air (the floor row stays).
+            for (int dx = 4; dx <= 13; dx++)
+                for (int dy = 0; dy <= 3; dy++)
+                    SimMessages.ReplaceAndDisplaceElement(Grid.OffsetCell(pod, dx, dy), SimHashes.Oxygen, CellEventLogger.Instance.DebugTool, 1f, 293.15f);
+            for (int dx = 4; dx <= 13; dx++)
+                SimMessages.ReplaceAndDisplaceElement(Grid.OffsetCell(pod, dx, -1), SimHashes.SandStone, CellEventLogger.Instance.DebugTool, 1000f, 293.15f);
+            yield return new WaitForSecondsRealtime(1f);
+            var station = stationDef.Build(stationCell, Orientation.Neutral, null, stationDef.DefaultElements(), 293.15f, playsound: false);
+            var generator = generatorDef == null ? null : generatorDef.Build(generatorCell, Orientation.Neutral, null, generatorDef.DefaultElements(), 293.15f, playsound: false);
+            yield return null;
+            int input = Grid.OffsetCell(stationCell, stationDef.PowerInputOffset);
+            int output = generatorDef == null ? -1 : Grid.OffsetCell(generatorCell, generatorDef.PowerOutputOffset);
+            Rec.Log("RESEARCH ports input " + Grid.CellToXY(input) + " output " + (output < 0 ? "none" : Grid.CellToXY(output).ToString()));
+            if (output >= 0 && Grid.CellRow(input) == Grid.CellRow(output))
+            {
+                var wireDef = Assets.GetBuildingDef("Wire");
+                int from = Math.Min(Grid.CellColumn(input), Grid.CellColumn(output)), to = Math.Max(Grid.CellColumn(input), Grid.CellColumn(output));
+                var wires = new System.Collections.Generic.List<(GameObject Wire, int Cell, UtilityConnections Connections)>();
+                for (int x = from; x <= to; x++)
+                {
+                    int c = Grid.XYToCell(x, Grid.CellRow(input));
+                    var wire = wireDef.Build(c, Orientation.Neutral, null, wireDef.DefaultElements(), 293.15f, playsound: false);
+                    wires.Add((wire, c, (x > from ? UtilityConnections.Left : 0) | (x < to ? UtilityConnections.Right : 0)));
+                }
+                // The wires' tile visualizers apply their own connections when they spawn.
+                yield return null;
+                foreach (var (wire, c, connections) in wires)
+                {
+                    wire.GetComponent<KAnimGraphTileVisualizer>().Connections = connections;
+                    Game.Instance.electricalConduitSystem.SetConnections(connections, c, true);
+                }
+                Game.Instance.electricalConduitSystem.ForceRebuildNetworks();
+            }
+            station.GetComponent<Storage>().AddOre(SimHashes.Dirt, 500f, 293.15f, byte.MaxValue, 0);
+            var farming = Research.Instance.Get(Db.Get().Techs.Get("FarmingTech"));
+            Rec.Log("RESEARCH before " + farming.PercentageCompleteResearchType("basic").ToString("F3"));
+            SpeedControlScreen.Instance.SetSpeed(2);
+            SpeedControlScreen.Instance.Unpause(false);
+            yield return new WaitForSecondsRealtime(150f);
+            SpeedControlScreen.Instance.Pause(false);
+            Rec.Log("RESEARCH after " + farming.PercentageCompleteResearchType("basic").ToString("F3") + " complete=" + farming.IsComplete()
+                    + " powered=" + station.GetComponent<EnergyConsumer>().IsPowered + " operational=" + station.GetComponent<Operational>().IsOperational
+                    + " dirt=" + station.GetComponent<Storage>().GetMassAvailable(SimHashes.Dirt).ToString("F0"));
+            foreach (var item in station.GetComponent<KSelectable>().GetStatusItemGroup())
+                Rec.Log("RESEARCH status " + item.item.Id);
+            if (generator != null)
+                foreach (var item in generator.GetComponent<KSelectable>().GetStatusItemGroup())
+                    Rec.Log("RESEARCH generator status " + item.item.Id);
+
             // Side screens: each building is built finished next to the printing pod, selected,
             // captured and removed.
             int cell = Grid.OffsetCell(pod, 4, 0);

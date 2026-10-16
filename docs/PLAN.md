@@ -177,6 +177,10 @@ Known behaviours not yet reproduced, each to be closed by a named milestone:
 - `ScreenCapture.CaptureScreenshot` with superSize > 1 re-renders the frame into a larger
   target; in the colony the world composites white there (superSize 1 reads the presented frame
   and is exact). Only the game's debug screenshot keys use superSize. Milestone: M6.
+- Save preview / timelapse images (`Timelapser`, a camera rendered into a 512×768 target and
+  read back): in this environment the original's image is black with opaque alpha, ours black
+  with zero alpha, i.e. something the original draws into that target (opaque, black) is not
+  drawn here. Milestone: M6.
 - Environment for parity runs: a logged-in Steam client (engine work proceeds with the
   offline Steam test double, ARCHITECTURE §9.7) (the game quits through
   `RestartAppIfNecessary` / `SteamAPI.Init` without one) and the system `libvpx` (VP8 video;

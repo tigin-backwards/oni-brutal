@@ -101,7 +101,8 @@ Legend: `[x]` verified · `[ ]` not yet verified · `[~]` deviation (see the not
 - [x] Resolution changes at runtime (window resized)
 - [ ] Exclusive fullscreen
 - [x] Focus loss and regain: switching X focus to another window and back delivers OnApplicationFocus(false/true) (held keys released), no exceptions
-- [ ] Audio (FMOD): music, ambience, UI and world sounds. Not verifiable on the development machine: FMOD loads and initialises in both players, but no PulseAudio client library is installed, so neither produces output
+- [x] Audio output: FMOD initialises and mixes through ALSA (verified with a private ALSA configuration whose default device writes PCM to a file through a null sink: the main-menu music is present). Without libpulse or an ALSA device, FMOD runs without output in both players
+- [ ] Audio content compared with the original (positional world sounds, mixer snapshots)
 
 ## Deviations
 

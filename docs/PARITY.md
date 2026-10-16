@@ -27,14 +27,13 @@ Legend: `[x]` verified · `[ ]` not yet verified · `[~]` deviation (see the not
 
 ## Options
 
-- [ ] `OptionsMenuScreen`
+- [x] `OptionsMenuScreen` and its Graphics, Audio, Game, Data Communication, Feedback and Credits screens (compared with the original)
 - [ ] `GraphicsOptionsScreen`: resolution list, fullscreen/windowed switching, UI scale, colour mode
 - [ ] `AudioOptionsScreen`: volumes, device
 - [ ] `GameOptionsScreen`: autosave interval, temperature unit, camera speed, save/cloud settings
 - [ ] `ControlsScreen` / `InputBindingsScreen`: rebinding, persistence
-- [ ] `LanguageOptionsScreen`: language switch (font swap, restart)
-- [ ] `MetricsOptionsScreen`, `FeedbackScreen`
-- [ ] Settings persistence across restarts (`kplayerprefs.yaml`)
+- [x] `LanguageOptionsScreen`: built-in languages listed; choosing Chinese prompts in Chinese, restarts through `Restarter`, and the menus come back in Chinese (CJK font)
+- [x] Settings persistence across restarts (`kplayerprefs.yaml`: temperature unit)
 
 ## Colony HUD and screens
 

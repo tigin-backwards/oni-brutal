@@ -14,6 +14,8 @@ namespace OniBrutal.Host
         {
             var options = Options.Parse(args);
             if (options == null) return 2;
+            // For the Restarter next to the host (App.Restart): the arguments to start again with.
+            Environment.SetEnvironmentVariable("ONI_BRUTAL_RESTART_ARGS", string.Join(" ", args.Select(a => "'" + a.Replace("'", "'\\''") + "'")));
 
             var dataDir = Path.Combine(options.GameDir, "OxygenNotIncluded_Data");
             if (!Directory.Exists(dataDir))

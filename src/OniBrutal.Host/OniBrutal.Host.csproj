@@ -23,6 +23,10 @@
     <PackageReference Include="System.Runtime.Serialization.Formatters" />
     <PackageReference Include="System.CodeDom" />
   </ItemGroup>
+  <ItemGroup>
+    <!-- The helper App.Restart starts from the player's directory. -->
+    <None Include="Restarter" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
   <!-- The UnityEngine.*Module facades the game binds to, next to the host in engine/. -->
   <Target Name="EmitFacades" AfterTargets="Build">
     <Exec Command="dotnet &quot;$(ArtifactsPath)/bin/FacadeGen/$(Configuration.ToLowerInvariant())/FacadeGen.dll&quot; emit &quot;$(MSBuildThisFileDirectory)../Facades/unity-module-map.tsv&quot; &quot;$(OutDir)engine&quot; &quot;$(OutDir)OniBrutal.UnityEngine.dll&quot;" />

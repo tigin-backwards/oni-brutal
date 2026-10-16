@@ -449,6 +449,11 @@ come from `globalgamemanagers` PlayerSettings. The host takes `--game <dir>` (de
 `~/projects/oni-linux`), `--headless` (no window, no GL: logic-only frames for tests),
 `--frames N`, `--screenshot <dir>` (debug captures), and `--log <file>`.
 
+The host directory carries a `Restarter`, as Klei's player directory does: `App.Restart` (language
+change) starts it with the player's executable path and quits. Ours waits for the player to exit
+and starts it again with the arguments it was started with (recorded by the host in
+`ONI_BRUTAL_RESTART_ARGS`).
+
 ## 7. Logging and diagnostics
 
 `Debug.Log*` and the logger/handler surface behave as Unity's (the game replaces the handler).

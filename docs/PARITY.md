@@ -28,7 +28,8 @@ Legend: `[x]` verified · `[ ]` not yet verified · `[~]` deviation (see the not
 ## Options
 
 - [x] `OptionsMenuScreen` and its Graphics, Audio, Game, Data Communication, Feedback and Credits screens (compared with the original)
-- [ ] `GraphicsOptionsScreen`: resolution list, fullscreen/windowed switching, UI scale, colour mode
+- [x] `GraphicsOptionsScreen`: fullscreen switching at runtime (window resized, UI re-laid out, "Accept Changes?"), resolution label as the original ("@ 0Hz" under Xvfb in both)
+- [ ] `GraphicsOptionsScreen`: resolution list choice, UI scale, colour mode
 - [ ] `AudioOptionsScreen`: volumes, device
 - [ ] `GameOptionsScreen`: autosave interval, temperature unit, camera speed, save/cloud settings
 - [ ] `ControlsScreen` / `InputBindingsScreen`: rebinding, persistence
@@ -82,9 +83,10 @@ Legend: `[x]` verified · `[ ]` not yet verified · `[~]` deviation (see the not
 - [x] Window, input (mouse, keyboard, text), cursor images
 - [ ] Clipboard (seed and colony-name fields)
 - [x] Frame rate at parity with the original (PLAN §Status, Performance)
-- [ ] Fullscreen / borderless / windowed switching and resolution changes at runtime
+- [x] Windowed → fullscreen (borderless) switching at runtime
+- [ ] Exclusive fullscreen, resolution changes at runtime
 - [ ] Focus loss and regain (audio pause, input release)
-- [ ] Audio (FMOD): music, ambience, UI and world sounds
+- [ ] Audio (FMOD): music, ambience, UI and world sounds. Not verifiable on the development machine: FMOD loads and initialises in both players, but no PulseAudio client library is installed, so neither produces output
 
 ## Deviations
 

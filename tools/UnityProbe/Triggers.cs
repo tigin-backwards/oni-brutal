@@ -31,6 +31,13 @@ namespace SemanticsProbe
             Rec.Log("CAPTURE " + name);
         }
 
+        static readonly string[] SideScreenBuildings =
+        {
+            "Door", "LogicTemperatureSensor", "LogicSwitch", "LogicTimer", "StorageLocker", "LiquidValve", "Bed", "ManualGenerator",
+            "ResearchCenter", "MicrobeMusher", "Outhouse", "AirFilter", "Electrolyzer", "BatterySmart", "FlowerVase", "SmartReservoir",
+            "Refrigerator", "CookingStation", "PlanterBox", "LogicPressureSensorGas",
+        };
+
         static void States(string when)
         {
             var all = FindObjectsByType<StoryMessageScreen>(FindObjectsInactive.Include, FindObjectsSortMode.None);
@@ -41,6 +48,43 @@ namespace SemanticsProbe
         {
             // After any scripted input of the drivers (they click through the embark screens).
             yield return new WaitForSecondsRealtime(12f);
+            // Side screens: each building is built finished next to the printing pod, selected,
+            // captured and removed.
+            int podCell = Grid.PosToCell(Components.Telepads.Items[0].transform.GetPosition());
+            int cell = Grid.OffsetCell(podCell, 4, 0);
+            foreach (var id in SideScreenBuildings)
+            {
+                var def = Assets.GetBuildingDef(id);
+                if (def == null) { Rec.Log("SIDE missing " + id); continue; }
+                var go = def.Build(cell, Orientation.Neutral, null, def.DefaultElements(), 293.15f, playsound: false);
+                yield return null;
+                var sel = go.GetComponent<KSelectable>();
+                SelectTool.Instance.Select(sel, true);
+                yield return new WaitForSecondsRealtime(1.5f);
+                Rec.Log("SIDE " + id + " go active=" + go.activeInHierarchy + " pos=" + go.transform.position + " cell=" + cell + " selectable=" + (sel != null && sel.IsSelectable)
+                        + " selected=" + (SelectTool.Instance.selected == sel) + " details=" + (DetailsScreen.Instance != null && DetailsScreen.Instance.gameObject.activeInHierarchy));
+                Capture("s_" + id);
+                yield return null; // the screenshot is taken at the end of the frame
+                yield return null;
+                SelectTool.Instance.Select(null, true);
+                Util.KDestroyGameObject(go);
+                yield return new WaitForSecondsRealtime(0.5f);
+            }
+
+            // Research in progress: half of Basic Farming's points, then the research screen.
+            Research.Instance.SetActiveResearch(Db.Get().Techs.Get("FarmingTech"), true);
+            Research.Instance.AddResearchPoints("basic", 7.5f);
+            // The menu's research button is locked without a research station: show the screen.
+            var research = (KScreen)typeof(ManagementMenu).GetField("researchScreen", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(ManagementMenu.Instance);
+            research.Show(true);
+            ((ResearchScreen)research).ZoomToTech("FarmingTech", true);
+            yield return new WaitForSecondsRealtime(3f);
+            Capture("r1_research");
+            yield return null;
+            yield return null;
+            research.Show(false);
+            yield return new WaitForSecondsRealtime(2f);
+
             // A story-trait popup, as the Mega Brain Tank shows when it is discovered.
             Rec.Log("TRIGGER event popup");
             var popup = EventInfoScreen.ShowPopup(EventInfoDataHelper.GenerateStoryTraitData(
@@ -48,6 +92,8 @@ namespace SemanticsProbe
                 STRINGS.CODEX.STORY_TRAITS.CLOSE_BUTTON, "braintankdiscovered_kanim", EventInfoDataHelper.PopupType.BEGIN));
             yield return new WaitForSecondsRealtime(3f);
             Capture("e1_event");
+            yield return null;
+            yield return null;
             popup.Deactivate();
             yield return new WaitForSecondsRealtime(2f);
             var tracker = SaveGame.Instance.GetComponent<ColonyAchievementTracker>();
@@ -60,6 +106,8 @@ namespace SemanticsProbe
             States("after 1 s");
             yield return new WaitForSecondsRealtime(2f);
             Capture("v1_story");
+            yield return null;
+            yield return null;
             foreach (var sms in FindObjectsByType<StoryMessageScreen>(FindObjectsInactive.Include, FindObjectsSortMode.None))
                 Rec.Log("STATE StoryMessageScreen " + sms.name + " active=" + sms.gameObject.activeInHierarchy + " self=" + sms.gameObject.activeSelf + " parent=" + (sms.transform.parent == null ? "none" : sms.transform.parent.name + " active=" + sms.transform.parent.gameObject.activeInHierarchy));
             foreach (var eis in FindObjectsByType<EventInfoScreen>(FindObjectsInactive.Include, FindObjectsSortMode.None))

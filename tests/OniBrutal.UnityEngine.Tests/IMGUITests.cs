@@ -126,6 +126,17 @@ namespace OniBrutal.Tests
         }
 
         [Fact]
+        public void UnpoppedEventsAreDroppedAtTheEndOfTheFrame()
+        {
+            while (Event.PopEvent(new Event())) { }
+            Queue(EventType.MouseDown, new Vector2(5f, 5f));
+            Assert.Equal(1, Event.GetEventCount());
+            Frame();
+            Assert.Equal(0, Event.GetEventCount());
+            Assert.False(Event.PopEvent(new Event()));
+        }
+
+        [Fact]
         public void GUIFunctionsNeedOnGUI()
         {
             Assert.Throws<ArgumentException>(() => GUI.skin);

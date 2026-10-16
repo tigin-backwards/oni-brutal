@@ -56,12 +56,13 @@ Legend: `[x]` verified · `[ ]` not yet verified · `[~]` deviation (see the not
 - [x] `SideDetailsScreen`: Ration Box element filter (unticking → "Filters Not Designated"), capacity slider (drag → new capacity), Material tab
 - [x] Liquid Valve flow control side screen: a slider click sets 4673 g/s in both players
 - [x] Pneumatic Door access control (Duplicant rows with portraits, Open/Auto/Lock) and Thermo Sensor threshold side screens render and respond (not yet compared with the original)
-- [ ] Other buildings' side screens compared with the original beyond the valve and storage bin
+- [x] Side screens of 18 buildings built and selected by tools/UnityProbe in both players (door access, thermo/atmo sensors, signal switch, storage bin, liquid valve, cot and outhouse assignment, manual generator and smart battery thresholds, research station, microbe musher and electric grill orders, deodorizer, electrolyzer, flower pot and planter box seeds, refrigerator) match the original
 - [x] `BuildMenu` / `BuildingGroupScreen` / `ProductInfoScreen` / `MaterialSelectionPanel`: category menus, building info, material choice and placement (Storage Bin, Ladder, Dev Life Support, wire tool)
 - [x] Management screens opened by hotkey and compared with the original: Vitals, Consumables, Priorities (jobs), Schedule (`ScheduleScreen`), Skills (`SkillsScreen`, Duplicant portrait in a stencil mask), Database (`CodexScreen`), Reports (`ReportScreen`)
 - [x] Research and Starmap buttons before a Research Station / Telescope exists: locked, with the original's tooltips
 - [x] Research tree interaction: hover, tooltips, selecting a tech (instant completion in debug mode) as the original
-- [ ] Research progress over time at a real Research Station
+- [x] Research progress: Basic Farming at 7.5/15 points (set through `Research`) shows the same progress bar and search results in the research screen as the original
+- [ ] Research points accumulated by a Duplicant at a powered Research Station
 - [x] `ClusterMapScreen`, `WorldSelector`: Spaced Out content is not installed in this game copy (no `StreamingAssets/dlc`), unreachable in both players
 - [x] `PauseScreen`: open, save with overwrite confirmation (41 saves in one run)
 - [x] `PauseScreen` → Main Menu ("Save and quit" prompt) → front end with Resume Game; the front end comes back at the smaller UI scale as in the original (once, ours returned to the normal scale a few seconds later; not reproduced since)
@@ -70,7 +71,7 @@ Legend: `[x]` verified · `[ ]` not yet verified · `[~]` deviation (see the not
 - [x] Printing pod recharge (cycle 3–4): "New Printables are available", pod side screen "Choose a Blueprint" → selection screen with Duplicants and a care package → Print → the new Duplicant arrives
 - [x] `GameOverScreen` (colony lost)
 - [x] `StoryMessageScreen` ("IMPERATIVE ACHIEVED" alert, Proceed → camera sequence) as the original, triggered with tools/UnityProbe; `VictoryScreen` is never opened in this build (prefab field only)
-- [~] `EventInfoScreen.ShowPopup` (story-trait popup) runs without error in both players; at the captured moment neither shows the popup yet, so its rendering is not compared
+- [x] `EventInfoScreen.ShowPopup` (the Somnium Synthesizer story-trait popup) as the original, triggered with tools/UnityProbe
 - [x] Timelapse capture and save preview (`Timelapser`: base and overlay cameras rendered from an end-of-frame coroutine into a render texture, `ReadPixels` + `EncodeToPNG`): the world around the printing pod as in the original's images
 - [x] Camera: wheel zoom out/in, keyboard pan, Home (camera return)
 - [x] Camera: right- and middle-button drag pan move the view by the same pixel offsets as the original (−200,−100 and −250,+200, the latter clamped at the world edge, measured by image registration); Ctrl+1 / Shift+1 bookmark returns to the exact view in both. ONI has no edge pan (the edge padding only clamps the camera)

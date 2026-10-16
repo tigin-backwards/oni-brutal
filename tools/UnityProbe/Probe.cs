@@ -19,6 +19,7 @@ namespace SemanticsProbe
             go.AddComponent<QuitLog>().Tag = "ddol-at-load";
             go.AddComponent<FrameLog>();
             go.AddComponent<UiDump>();
+            go.AddComponent<EventQueueLog>();
             go.AddComponent<Triggers>();
             Rec.Log("OnLoad renderedFrameCount=" + Time.renderedFrameCount + " scene=" + UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
         }
@@ -93,6 +94,15 @@ namespace SemanticsProbe
         void Start() { Rec.Log("CoTiming Start"); StartCoroutine(Co("Start")); }
         void Update() { Rec.Log("CoTiming Update"); if (updates++ == 1) StartCoroutine(Co("Update")); }
         void LateUpdate() { Rec.Log("CoTiming LateUpdate"); if (lates++ == 3) StartCoroutine(Co("LateUpdate")); if (lates > 8) enabled = false; }
+    }
+
+    /// The length of the input event queue (Event.PopEvent) at Update and LateUpdate, when
+    /// it is not empty (at most 40 lines).
+    public class EventQueueLog : MonoBehaviour
+    {
+        int lines;
+        void Update() { int n = Event.GetEventCount(); if (n > 0 && lines++ < 40) Rec.Log("EVQ Update " + n); }
+        void LateUpdate() { int n = Event.GetEventCount(); if (n > 0 && lines++ < 40) Rec.Log("EVQ LateUpdate " + n); }
     }
 
     /// The first frames: frame counters and the active scene at Update and LateUpdate.

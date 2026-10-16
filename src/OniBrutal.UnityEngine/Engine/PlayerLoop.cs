@@ -139,6 +139,7 @@ namespace OniBrutal.Engine
             EngineLog.FlushToMainThread();
             Mark(2);
             Present?.Invoke();
+            Event.DiscardUnconsumed();
             Mark(3);
             EndStats();
         }

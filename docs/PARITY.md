@@ -22,7 +22,7 @@ Legend: `[x]` verified · `[ ]` not yet verified · `[~]` deviation (see the not
 - [x] `CharacterSelectionController` / `CharacterContainer` (Duplicant cards, reroll, embark)
 - [ ] `ScenariosMenu`, `ModsScreen` (no Workshop items with the test double)
 - [ ] `CreditsScreen`, `PatchNotesScreen`, `KleiItemDropScreen`, `LockerMenuScreen` / `KleiInventoryScreen` (need network/Steam services)
-- [ ] `RetiredColonyInfoScreen` (colony summaries)
+- [x] `RetiredColonyInfoScreen`: colony list, achievements, colony detail (Duplicants with portraits, buildings, oxygen graph; "Timelapse Unavailable", see the preview open item)
 - [x] Tutorial videos (`VideoScreen` from a message's video widget, render-texture output) play as the original, with libvpx available (verified with Ubuntu's libvpx9 unpacked locally)
 - [ ] Intro short on first launch, victory videos
 
@@ -47,7 +47,8 @@ Legend: `[x]` verified · `[ ]` not yet verified · `[~]` deviation (see the not
 - [x] Notifications (`NotificationScreen`), tutorial messages
 - [x] `DetailsScreen` (selection: status, properties tabs with nested canvases and RectMask2D)
 - [x] `HoverTextScreen` (element hover cards)
-- [ ] `SideDetailsScreen` side screens (per-building settings)
+- [x] `SideDetailsScreen`: Ration Box element filter (unticking → "Filters Not Designated"), capacity slider (drag → new capacity), Material tab
+- [ ] Other buildings' side screens
 - [ ] `BuildMenu` / `BuildingGroupScreen` / `ProductInfoScreen` / `MaterialSelectionPanel` (planning and placing buildings)
 - [x] Management screens opened by hotkey and compared with the original: Vitals, Consumables, Priorities (jobs), Schedule (`ScheduleScreen`), Skills (`SkillsScreen`, Duplicant portrait in a stencil mask), Database (`CodexScreen`), Reports (`ReportScreen`)
 - [x] Research and Starmap buttons before a Research Station / Telescope exists: locked, with the original's tooltips

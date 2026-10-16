@@ -14,9 +14,12 @@ namespace OniBrutal.Engine.Serialization
     ///   serializable class or built-in class is written as a default-constructed instance.
     /// - Object references are {"instanceID":N} (0 for null or destroyed).
     /// - Enums and chars are numbers; bools are true/false.
-    /// - Floats and doubles use the shortest digits that round-trip, laid out by RapidJSON's
-    ///   Prettify: integral values get ".0", decimal notation for exponents -6 &lt; e &lt;= 21,
-    ///   otherwise "1.5e-7"; zero is "0.0" / "-0.0".
+    /// - Floats are widened to double; doubles get RapidJSON's Grisu2 digits (observed in Unity's
+    ///   output: 0.2f is written 0.20000000298023225), laid out by RapidJSON's Prettify: integral
+    ///   values get ".0", decimal notation for exponents -6 &lt; e &lt;= 21, otherwise "1.5e-7";
+    ///   zero (either sign) is "0.0". Unity's RapidJSON (1.1.0) reads past its power-of-ten table
+    ///   when rounding the last digits of long outputs, so its last digit can exceed ours there
+    ///   (ARCHITECTURE D9); the values round-trip identically.
     /// - Built-in types are written with their native transfer names, including
     ///   "serializedVersion" (as a string) for versioned types: Rect, LayerMask, Color32,
     ///   AnimationCurve and its keys, Gradient.
@@ -447,24 +450,20 @@ namespace OniBrutal.Engine.Serialization
             sb.Append('"');
         }
 
-        internal static string FormatFloat(float v)
-        {
-            if (float.IsNaN(v) || float.IsInfinity(v)) return NonFinite(v);
-            if (v == 0f) return float.IsNegative(v) ? "-0.0" : "0.0";
-            return Prettify(v.ToString("R", CultureInfo.InvariantCulture));
-        }
+        internal static string FormatFloat(float v) => FormatDouble(v);
 
         internal static string FormatDouble(double v)
         {
             if (double.IsNaN(v) || double.IsInfinity(v)) return NonFinite(v);
-            if (v == 0d) return double.IsNegative(v) ? "-0.0" : "0.0";
-            return Prettify(v.ToString("R", CultureInfo.InvariantCulture));
+            if (v == 0d) return "0.0"; // negative zero too (observed)
+            var (digits, k) = Grisu2.Digits(Math.Abs(v));
+            return Prettify((v < 0 ? "-" : "") + digits + "E" + k.ToString(CultureInfo.InvariantCulture));
         }
 
         /// RapidJSON's spelling for non-finite numbers (kWriteNanAndInfFlag).
         static string NonFinite(double v) => double.IsNaN(v) ? "NaN" : v > 0 ? "Infinity" : "-Infinity";
 
-        /// Re-lays out .NET's shortest round-trip digits the way RapidJSON's Prettify does.
+        /// Lays out digits × 10^exponent ("123E-5") the way RapidJSON's Prettify does.
         static string Prettify(string roundTrip)
         {
             bool negative = roundTrip[0] == '-';

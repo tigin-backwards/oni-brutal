@@ -108,8 +108,8 @@ namespace UnityEngine
         {
             if (string.IsNullOrEmpty(format)) format = "F2";
             formatProvider ??= CultureInfo.InvariantCulture.NumberFormat;
-            return string.Format("({0}, {1}, {2}, {3})", x.ToString(format, formatProvider), y.ToString(format, formatProvider),
-                z.ToString(format, formatProvider), w.ToString(format, formatProvider));
+            return string.Format("({0}, {1}, {2}, {3})", UnityFormat.Number(x, format, formatProvider), UnityFormat.Number(y, format, formatProvider),
+                UnityFormat.Number(z, format, formatProvider), UnityFormat.Number(w, format, formatProvider));
         }
     }
 }

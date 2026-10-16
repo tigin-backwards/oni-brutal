@@ -108,8 +108,8 @@ namespace UnityEngine
         {
             if (string.IsNullOrEmpty(format)) format = "F2";
             formatProvider ??= CultureInfo.InvariantCulture.NumberFormat;
-            return string.Format("(x:{0}, y:{1}, width:{2}, height:{3})", x.ToString(format, formatProvider), y.ToString(format, formatProvider),
-                width.ToString(format, formatProvider), height.ToString(format, formatProvider));
+            return string.Format("(x:{0}, y:{1}, width:{2}, height:{3})", UnityFormat.Number(x, format, formatProvider), UnityFormat.Number(y, format, formatProvider),
+                UnityFormat.Number(width, format, formatProvider), UnityFormat.Number(height, format, formatProvider));
         }
     }
 
@@ -162,8 +162,8 @@ namespace UnityEngine
         public string ToString(string format, IFormatProvider formatProvider)
         {
             formatProvider ??= CultureInfo.InvariantCulture.NumberFormat;
-            return string.Format("(x:{0}, y:{1}, width:{2}, height:{3})", x.ToString(format, formatProvider), y.ToString(format, formatProvider),
-                width.ToString(format, formatProvider), height.ToString(format, formatProvider));
+            return string.Format("(x:{0}, y:{1}, width:{2}, height:{3})", UnityFormat.Number(x, format, formatProvider), UnityFormat.Number(y, format, formatProvider),
+                UnityFormat.Number(width, format, formatProvider), UnityFormat.Number(height, format, formatProvider));
         }
     }
 
@@ -198,8 +198,8 @@ namespace UnityEngine
         public string ToString(string format, IFormatProvider formatProvider)
         {
             formatProvider ??= CultureInfo.InvariantCulture.NumberFormat;
-            return string.Format("RectOffset (l:{0} r:{1} t:{2} b:{3})", left.ToString(format, formatProvider), right.ToString(format, formatProvider),
-                top.ToString(format, formatProvider), bottom.ToString(format, formatProvider));
+            return string.Format("RectOffset (l:{0} r:{1} t:{2} b:{3})", UnityFormat.Number(left, format, formatProvider), UnityFormat.Number(right, format, formatProvider),
+                UnityFormat.Number(top, format, formatProvider), UnityFormat.Number(bottom, format, formatProvider));
         }
     }
 }

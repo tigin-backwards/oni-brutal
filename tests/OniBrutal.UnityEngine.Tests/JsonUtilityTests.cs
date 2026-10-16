@@ -83,19 +83,33 @@ namespace OniBrutal.Tests
                 JsonUtility.ToJson(data, true));
         }
 
+        // Outputs of Unity's player (tools/UnityProbe), where its digit generation is well-defined.
         [Theory]
         [InlineData(1f, "1.0")]
-        [InlineData(0.1f, "0.1")]
+        [InlineData(0.1f, "0.10000000149011612")]
+        [InlineData(0.4f, "0.4000000059604645")]
         [InlineData(-2.5f, "-2.5")]
         [InlineData(100000f, "100000.0")]
-        [InlineData(1e21f, "1e21")]
-        [InlineData(1.5e-7f, "1.5e-7")]
-        [InlineData(0.000001f, "0.000001")]
-        [InlineData(123.456f, "123.456")]
-        [InlineData(3.4028235e38f, "3.4028235e38")]
-        [InlineData(-0f, "-0.0")]
-        public void FloatsUseShortestRoundTripDigits(float value, string expected)
+        [InlineData(1.5e-7f, "1.500000053056283e-7")]
+        [InlineData(123.456f, "123.45600128173828")]
+        [InlineData(1e-45f, "1.401298464324817e-45")]
+        [InlineData(16777216f, "16777216.0")]
+        [InlineData(2.71828f, "2.718280076980591")]
+        [InlineData(-0f, "0.0")]
+        public void FloatsAreWrittenAsDoublesWithRapidJsonDigits(float value, string expected)
             => Assert.Equal(expected, OniBrutal.Engine.Serialization.JsonWriter.FormatFloat(value));
+
+        [Theory]
+        [InlineData(0.1, "0.1")]
+        [InlineData(1e21, "1e21")]
+        [InlineData(1e22, "1e22")]
+        [InlineData(5e-324, "5e-324")]
+        [InlineData(1.7976931348623157e308, "1.7976931348623157e308")]
+        [InlineData(0.3333333333333333, "0.3333333333333333")]
+        [InlineData(9007199254740992.0, "9007199254740992.0")]
+        [InlineData(-0.0, "0.0")]
+        public void DoublesUseRapidJsonDigits(double value, string expected)
+            => Assert.Equal(expected, OniBrutal.Engine.Serialization.JsonWriter.FormatDouble(value));
 
         [Fact]
         public void BuiltinStructsEnumsAndReferences()

@@ -270,7 +270,7 @@ namespace UnityEngine
         {
             if (string.IsNullOrEmpty(format)) format = "F5";
             formatProvider ??= CultureInfo.InvariantCulture.NumberFormat;
-            string F(float v) => v.ToString(format, formatProvider);
+            string F(float v) => UnityFormat.Number(v, format, formatProvider);
             return $"{F(m00)}\t{F(m01)}\t{F(m02)}\t{F(m03)}\n{F(m10)}\t{F(m11)}\t{F(m12)}\t{F(m13)}\n{F(m20)}\t{F(m21)}\t{F(m22)}\t{F(m23)}\n{F(m30)}\t{F(m31)}\t{F(m32)}\t{F(m33)}\n";
         }
     }

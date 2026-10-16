@@ -128,7 +128,10 @@ past the boot checkpoint needs a Steam client logged in with an account that own
   are self-consistent but carry the CoreCLR names. Everything else in saves (KSerialization
   body, Sim blob, header) is runtime-independent.
 - **D2 Number formatting.** `double`/`float.ToString()` without a format prints the shortest
-  round-trippable string on .NET (Mono printed 15 significant digits) — cosmetic.
+  round-trippable string on .NET (Mono printed 15 significant digits), and a negative value
+  that rounds to zero keeps its sign ("-0.0" where Mono printed "0.0") — cosmetic, in game
+  code's own formatting. The engine's own `ToString` methods (vectors, colours, matrices, rects)
+  format as Unity's Mono player does.
 - **D3 `string.GetHashCode`** is randomized per process (Mono's is stable); the only persisted
   use is the version stamp of local and dev (unpackaged) mods in `mods.json`
   (`KMod.Local.Subscribe`: `directoryName.GetHashCode()`). The stamp differs at every launch, so
@@ -157,6 +160,12 @@ past the boot checkpoint needs a Steam client logged in with an account that own
   reclaimed object cannot run code. ScriptableObjects whose type declares `OnDisable` or
   `OnDestroy` (Unity calls both when it unloads one) are therefore never unloaded. No
   ScriptableObject in the game declares either.
+- **D9 JsonUtility digits.** Unity's JSON writer is RapidJSON 1.1.0, whose Grisu2 rounding of
+  the last digits of long outputs indexes past a ten-entry table and multiplies by whatever
+  bytes follow it in `UnityPlayer.so` (identified by matching 35 observed outputs). The engine
+  implements the corrected algorithm, so for such values its last digit can be smaller than
+  Unity's (0.2f: …224 here, …225 in Unity); both parse back to the same number. The game writes
+  JSON with `JsonUtility` only for its scripted performance capture.
 
 ## 3. The engine API (`OniBrutal.UnityEngine`)
 

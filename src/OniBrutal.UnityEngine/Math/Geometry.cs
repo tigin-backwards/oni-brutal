@@ -185,7 +185,7 @@ namespace UnityEngine
         {
             if (string.IsNullOrEmpty(format)) format = "F2";
             formatProvider ??= CultureInfo.InvariantCulture.NumberFormat;
-            return string.Format("(normal:{0}, distance:{1})", m_Normal.ToString(format, formatProvider), m_Distance.ToString(format, formatProvider));
+            return string.Format("(normal:{0}, distance:{1})", m_Normal.ToString(format, formatProvider), UnityFormat.Number(m_Distance, format, formatProvider));
         }
 
         public override bool Equals(object other) => other is Plane p && Equals(p);

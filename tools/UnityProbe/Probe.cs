@@ -205,6 +205,7 @@ namespace SemanticsProbe
             Rec.Log("=== scenario 11: coroutine timing");
             new GameObject("CoTiming").AddComponent<CoTiming>();
             for (int i = 0; i < 10; i++) yield return null;
+            yield return Values.Run();
             Rec.Log("=== done");
         }
     }

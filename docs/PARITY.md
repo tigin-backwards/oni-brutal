@@ -23,7 +23,8 @@ Legend: `[x]` verified · `[ ]` not yet verified · `[~]` deviation (see the not
 - [ ] `ScenariosMenu`, `ModsScreen` (no Workshop items with the test double)
 - [ ] `CreditsScreen`, `PatchNotesScreen`, `KleiItemDropScreen`, `LockerMenuScreen` / `KleiInventoryScreen` (need network/Steam services)
 - [ ] `RetiredColonyInfoScreen` (colony summaries)
-- [ ] Intro and tutorial videos (`VideoScreen`; needs system libvpx)
+- [x] Tutorial videos (`VideoScreen` from a message's video widget, render-texture output) play as the original, with libvpx available (verified with Ubuntu's libvpx9 unpacked locally)
+- [ ] Intro short on first launch, victory videos
 
 ## Options
 

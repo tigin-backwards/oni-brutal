@@ -37,7 +37,9 @@ namespace OniBrutal.Engine.Rendering
                 FrameRenderer.Bind(device, RenderTargetBinding.Of((RenderTextureNative)target.NativeOrThrow));
                 var size = new Vector2(target.width, target.height);
                 device.SetViewport(new Rect(0f, 0f, size.x, size.y));
-                device.Clear(true, false, Color.black, 1f);
+                // Depth too: the composite pass depth-tests, and the target's depth buffer (the
+                // game's video render textures have one) is otherwise never cleared.
+                device.Clear(true, true, Color.black, 1f);
                 device.SetCamera(new CameraConstants(Matrix4x4.identity, Matrix4x4.Ortho(0f, size.x, 0f, size.y, -1f, 1f), Vector3.zero, -1f, 1f, true, size));
                 var r = Fit(new Vector2(frame.width, frame.height), new Rect(0f, 0f, size.x, size.y), aspect);
                 DrawQuad(frame, 1f, Matrix4x4.TRS(new Vector3(r.x, r.y, 0f), Quaternion.identity, new Vector3(r.width, r.height, 1f)));

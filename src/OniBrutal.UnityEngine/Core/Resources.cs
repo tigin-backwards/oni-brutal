@@ -12,13 +12,17 @@ namespace UnityEngine
         /// share a path the first one of the requested type is returned.
         public static Object Load(string path) => Load(path, typeof(Object));
 
+        /// Resource paths compare case-insensitively, and backslashes separate folders as slashes do
+        /// (the game's tutorial video ids use them: "tutorials\locomotion").
+        static string Key(string path) => path.Replace('\\', '/').ToLowerInvariant();
+
         public static T Load<T>(string path) where T : Object => (T)Load(path, typeof(T));
 
         public static Object Load(string path, Type systemTypeInstance)
         {
             Threads.AssertMainThread("Resources.Load");
             if (path == null) throw new ArgumentNullException(nameof(path));
-            var key = path.ToLowerInvariant();
+            var key = Key(path);
             foreach (var entry in ProjectSettings.ResourceContainer)
             {
                 if (entry.Path != key || ObjectLoader.IsScriptAsset(ProjectSettings.Managers, entry.Target)) continue;
@@ -41,7 +45,7 @@ namespace UnityEngine
         public static Object[] LoadAll(string path, Type systemTypeInstance)
         {
             Threads.AssertMainThread("Resources.LoadAll");
-            var key = path.ToLowerInvariant().TrimEnd('/');
+            var key = Key(path).TrimEnd('/');
             var result = new List<Object>();
             foreach (var entry in ProjectSettings.ResourceContainer)
             {

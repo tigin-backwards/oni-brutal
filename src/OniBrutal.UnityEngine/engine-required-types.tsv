@@ -1,4 +1,6 @@
-# Unity types the engine itself creates or returns although no game assembly names them.
+# Unity types the engine provides although no game assembly names them: ones it creates or
+# returns itself, and ones that widely used mod libraries (PLib) call.
 # Module<TAB>Full name   # why
 UnityEngine.PhysicsModule	UnityEngine.MeshCollider	# GameObject.CreatePrimitive (Plane, Quad)
 UnityEngine.PhysicsModule	UnityEngine.CapsuleCollider	# GameObject.CreatePrimitive (Capsule, Cylinder)
+UnityEngine.CoreModule	UnityEngine.RectTransform+Edge	# PLib layout (RectTransform.SetInsetAndSizeFromParentEdge)

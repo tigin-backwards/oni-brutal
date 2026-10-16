@@ -750,6 +750,16 @@ namespace UnityEngine
     }
     public partial class RectTransform
     {
+        public enum Edge
+        {
+            Left = 0,
+            Right = 1,
+            Top = 2,
+            Bottom = 3,
+        }
+    }
+    public partial class RectTransform
+    {
         public delegate void ReapplyDrivenProperties(global::UnityEngine.RectTransform driven);
     }
     public partial struct RefreshRate : global::System.IEquatable<global::UnityEngine.RefreshRate>, global::System.IComparable<global::UnityEngine.RefreshRate>

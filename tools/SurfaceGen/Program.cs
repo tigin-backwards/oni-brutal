@@ -60,8 +60,9 @@ Type? Lookup(string asm, string fullName)
     return mlc.LoadFromAssemblyName(asm).GetType(fullName, throwOnError: true);
 }
 
-// Types Unity's own behaviour creates although no consumer names them (e.g. the colliders
-// GameObject.CreatePrimitive adds), listed as "Module<TAB>FullName" with comments.
+// Types no consumer names that the engine still provides: ones Unity's own behaviour creates
+// (e.g. the colliders GameObject.CreatePrimitive adds) and ones mod libraries use, listed as
+// "Module<TAB>FullName" with comments.
 if (args.Length > 3)
     foreach (var line in File.ReadAllLines(args[3]))
     {

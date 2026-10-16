@@ -54,7 +54,8 @@ Legend: `[x]` verified · `[ ]` not yet verified · `[~]` deviation (see the not
 - [ ] `BuildMenu` / `BuildingGroupScreen` / `ProductInfoScreen` / `MaterialSelectionPanel` (planning and placing buildings)
 - [x] Management screens opened by hotkey and compared with the original: Vitals, Consumables, Priorities (jobs), Schedule (`ScheduleScreen`), Skills (`SkillsScreen`, Duplicant portrait in a stencil mask), Database (`CodexScreen`), Reports (`ReportScreen`)
 - [x] Research and Starmap buttons before a Research Station / Telescope exists: locked, with the original's tooltips
-- [ ] Research progress with a real Research Station; `ClusterMapScreen` (Spaced Out DLC, not owned with the test double)
+- [x] Research tree interaction: hover, tooltips, selecting a tech (instant completion in debug mode) as the original
+- [ ] Research progress over time at a real Research Station; `ClusterMapScreen` (Spaced Out DLC, not owned with the test double)
 - [x] `PauseScreen`: open, save with overwrite confirmation (41 saves in one run)
 - [x] `PauseScreen` → Main Menu ("Save and quit" prompt) → front end with Resume Game; the front end comes back at the smaller UI scale as in the original (once, ours returned to the normal scale a few seconds later; not reproduced since)
 - [x] `PauseScreen`: Save As (save slots, New Save, typed name in `FileNameDialog`), Load (colony list, colony view, Load Game → the save loads in game)

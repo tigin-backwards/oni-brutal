@@ -97,7 +97,8 @@ namespace UnityEngine
             set => Data.OverrideSorting = value;
         }
 
-        /// Nested canvases without overrideSorting sort with their root.
+        /// Nested canvases without overrideSorting sort with the nearest enclosing canvas that
+        /// overrides sorting, or their root.
         public int sortingOrder
         {
             get => SortingSource.SortingOrder;
@@ -116,14 +117,9 @@ namespace UnityEngine
             set => Data.SortingLayerId = SortingLayers.IdOf(value);
         }
 
-        CanvasNative SortingSource
-        {
-            get
-            {
-                var d = Data;
-                return d.OverrideSorting ? d : CanvasSystem.RootOf(d);
-            }
-        }
+        /// The canvas whose sorting this one uses: itself when it overrides sorting, otherwise the
+        /// nearest enclosing canvas that does, or the root (the unit it is drawn and raycast with).
+        CanvasNative SortingSource => CanvasSystem.SortingCanvasOf(Data);
 
         /// Position of the canvas in the frame's canvas render order.
         public int renderOrder => Data.RenderOrder;

@@ -56,7 +56,8 @@ Legend: `[x]` verified · `[ ]` not yet verified · `[~]` deviation (see the not
 - [ ] `ResearchScreen`, `StarmapScreen` / `ClusterMapScreen` contents (need a Research Station / Telescope)
 - [x] `PauseScreen`: open, save with overwrite confirmation (41 saves in one run)
 - [x] `PauseScreen` → Main Menu ("Save and quit" prompt) → front end with Resume Game; the front end comes back at the smaller UI scale as in the original (once, ours returned to the normal scale a few seconds later; not reproduced since)
-- [ ] `PauseScreen`: save as (`FileNameDialog`), load, options
+- [x] `PauseScreen`: Save As (save slots, New Save, typed name in `FileNameDialog`), Load (colony list, colony view, Load Game → the save loads in game)
+- [ ] `PauseScreen`: Options
 - [x] Printing pod recharge (cycle 3–4): "New Printables are available", pod side screen "Choose a Blueprint" → selection screen with Duplicants and a care package → Print → the new Duplicant arrives
 - [x] `GameOverScreen` (colony lost)
 - [ ] `VictoryScreen`, `StoryMessageScreen`, `EventInfoScreen`

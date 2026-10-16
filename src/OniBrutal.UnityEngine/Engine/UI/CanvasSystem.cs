@@ -69,6 +69,21 @@ namespace OniBrutal.Engine.UI
             return root;
         }
 
+        /// The canvas whose sorting layer and order a canvas uses: the nearest live canvas at or
+        /// above it that overrides sorting, or its root.
+        public static CanvasNative SortingCanvasOf(CanvasNative canvas)
+        {
+            if (canvas.OverrideSorting) return canvas;
+            var result = canvas;
+            for (var t = canvas.GameObject.Transform.Parent; t != null; t = t.Parent)
+                if (CanvasOn(t.GameObject) is { } c)
+                {
+                    result = c;
+                    if (c.OverrideSorting) return c;
+                }
+            return result;
+        }
+
         /// The nearest live canvas at or above a GameObject.
         public static CanvasNative NearestCanvas(GameObjectNative go)
         {

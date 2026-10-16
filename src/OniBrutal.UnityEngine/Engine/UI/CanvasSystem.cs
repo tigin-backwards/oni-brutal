@@ -286,7 +286,8 @@ namespace OniBrutal.Engine.UI
                     var path = new System.Text.StringBuilder();
                     for (var t = d.Renderer.GameObject.Transform; t != null; t = t.Parent) path.Insert(0, "/" + t.GameObject.Name);
                     var texture = d.Renderer.Texture ?? d.Material?.mainTexture;
-                    text.Append($"\n  {path} depth {d.Renderer.AbsoluteDepth} material {d.Material?.name} ({d.Material?.shader?.name}) texture {texture?.name ?? "none"} colour {d.Renderer.Color} group alpha {d.GroupAlpha}{(d.Pop ? " pop" : "")}");
+                    var tnat = texture == null ? null : texture.Native as TextureNative;
+                    text.Append($"\n  {path} depth {d.Renderer.AbsoluteDepth} material {d.Material?.name} ({d.Material?.shader?.name}) texture {texture?.name ?? "none"}{(texture == null ? "" : $" [native {(tnat == null ? "null" : $"#{tnat.InstanceId} v{tnat.ContentVersion} gpu {tnat.Gpu?.GetType().Name ?? "none"}")}]")} colour {d.Renderer.Color} group alpha {d.GroupAlpha}{(d.Pop ? " pop" : "")}");
                 }
             }
             return text.ToString();

@@ -596,7 +596,6 @@ namespace OniBrutal.Desktop.Gl
         {
             if (gpuTiming) EndGpuTiming();
             uniformStream?.FenceFrame();
-            GlTextures.EndFrame();
             presenter.Present(QualitySettings.vSyncCount);
             framebufferValid = false;
             if (gpuTiming) BeginGpuTiming();

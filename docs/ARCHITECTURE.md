@@ -346,14 +346,14 @@ player: with vSync the swap paces frames; otherwise `Application.targetFrameRate
 otherwise none. Without a display (`--headless`, `--batchmode`) frames are paced at
 `targetFrameRate` or 60 Hz.
 
-Per-draw uniform blocks and texture content updates into storage of unchanged size and format
-(`Apply` on the game's per-frame property textures) are streamed through ring buffers that stay
-persistently mapped for the device's lifetime (`GlStreamBuffer`, ARB_buffer_storage): data is
-copied into the mapping, uniform blocks are bound by range, texture updates are copied by the
-driver from the ring on the GPU (ordered after the draws that read the previous content), and a
-fence per frame keeps a region from being reused before the GPU has consumed it. Storage is never
-respecified (no orphaning), so the driver neither stalls on the buffer nor recycles orphaned
-allocations.
+Per-draw uniform blocks are streamed through a ring buffer that stays persistently mapped for the
+device's lifetime (`GlStreamBuffer`, ARB_buffer_storage): data is copied into the mapping, blocks
+are bound by range, and a fence per frame keeps a region from being reused before the GPU has
+consumed it; the storage is never respecified (no orphaning). Texture content updates into
+storage of unchanged size and format (`Apply` on the game's per-frame property textures) use
+`glTexSubImage2D` from client memory. Routing them through a pixel-unpack buffer (orphaned or
+persistently mapped) halved their cost but corrupted textures on Mesa's d3d12 driver in long runs
+(white sprite-atlas pages, world-sized garbage triangles, device removal), so it is not used.
 
 **UI rendering.** `Canvas` implements Unity's canvas batching: per root canvas, walk
 `CanvasRenderer`s in hierarchy order, apply `CanvasGroup` alpha, `RectMask2D` clip rects

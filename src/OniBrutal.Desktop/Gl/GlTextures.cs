@@ -152,33 +152,6 @@ namespace OniBrutal.Desktop.Gl
             N.glPixelStorei(UnpackAlignment, 1);
         }
 
-        /// Content updates go through a pixel unpack stream buffer: the driver then copies into
-        /// the texture on the GPU, in order with the draws that read its previous content,
-        /// instead of waiting for those draws before writing from client memory.
-        const int StagingStreamSize = 32 << 20;
-        static GlStreamBuffer staging;
-        static bool staged;
-
-        /// The pointer to pass for the upload's data: an offset into the bound stream buffer, or
-        /// the texels themselves when they do not fit it.
-        static byte* Stage(byte* texels, int size)
-        {
-            staging ??= new GlStreamBuffer(PixelUnpackBuffer, StagingStreamSize, 256);
-            staged = size <= staging.MaxWrite;
-            if (!staged) return texels;
-            int offset = staging.Write(texels, size);
-            N.glBindBuffer(PixelUnpackBuffer, new GlBuffer(staging.Id));
-            return (byte*)offset;
-        }
-
-        static void Unstage()
-        {
-            if (staged) N.glBindBuffer(PixelUnpackBuffer, default);
-        }
-
-        /// The frame's texture updates have all been issued.
-        public static void EndFrame() => staging?.FenceFrame();
-
         static void Swizzle(uint target, uint[] s)
         {
             s ??= [Red, Green, Blue, Alpha];
@@ -205,10 +178,8 @@ namespace OniBrutal.Desktop.Gl
                 int size = (int)t.MipSize(m);
                 if (inPlace)
                 {
-                    byte* source = Stage(p, size);
-                    if (f.Compressed) N.glCompressedTexSubImage2D(TexTarget2D, m, 0, 0, w, h, f.Internal, size, source);
-                    else N.glTexSubImage2D(TexTarget2D, m, 0, 0, w, h, f.Format, f.Type, source);
-                    Unstage();
+                    if (f.Compressed) N.glCompressedTexSubImage2D(TexTarget2D, m, 0, 0, w, h, f.Internal, size, p);
+                    else N.glTexSubImage2D(TexTarget2D, m, 0, 0, w, h, f.Format, f.Type, p);
                 }
                 else if (f.Compressed)
                 {

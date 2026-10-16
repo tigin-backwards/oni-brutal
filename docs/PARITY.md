@@ -84,7 +84,8 @@ Legend: `[x]` verified · `[ ]` not yet verified · `[~]` deviation (see the not
 - [x] Move To (`MoveToLocationTool`): the target sets the "Move to" errand and the Duplicant walks there; an unreachable target keeps the tool active with "UNREACHABLE" (seen in the original)
 - [x] Deconstruct (instant-build mode: the Storage Bin goes, its material drops as debris), Sweep (marker on the debris), Cancel (removes the sweep order; the filter gains Sweep & Mop / Dig Orders)
 - [x] Copy Settings: Storage Bin capacity set by a slider click (9911 kg in both players) copied onto a second bin as in the original; the element filter lists only Critter Egg at that point in both, so All Standard changes nothing in either
-- [ ] Mop, Disinfect, Attack, Wrangle, Harvest orders carried out
+- [x] Mop order carried out (tools/UnityProbe: a 30 kg puddle beside the printing pod, Mop tool, 40 s at speed 3): mopped and the order removed in both players
+- [ ] Disinfect, Attack, Wrangle, Harvest orders carried out
 - [x] Build placement with materials: Storage Bin and a dragged Ladder from the Base menu; placement refused with "Missing resources" until the colony has the materials (as the original); Duplicants deliver and build
 - [~] `BaseUtilityBuildTool`: the wire tool (Power → Wire, material list, power overlay) opens and responds to a drag as in the original; a placed wire has not been observed in either player's scripted run yet
 - [x] Liquid pipe drag (plumbing overlay, pipe preview, built in instant-build mode); building rotation (O turns the Liquid Valve preview from vertical to horizontal and it is built rotated); build menu search and the grid layout with everything researched

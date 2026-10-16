@@ -48,10 +48,24 @@ namespace SemanticsProbe
         {
             // After any scripted input of the drivers (they click through the embark screens).
             yield return new WaitForSecondsRealtime(12f);
+            // A Mop order carried out: a puddle beside the printing pod, marked with the Mop tool,
+            // then the game runs at speed 3.
+            int pod = Grid.PosToCell(Components.Telepads.Items[0].transform.GetPosition());
+            int puddle = Grid.OffsetCell(pod, 3, 0);
+            SimMessages.AddRemoveSubstance(puddle, SimHashes.Water, CellEventLogger.Instance.FallingWaterAddToSim, 30f, 293.15f, byte.MaxValue, 0);
+            yield return new WaitForSecondsRealtime(1f);
+            Rec.Log("ORDER mop cell " + Grid.Element[puddle].id + " " + Grid.Mass[puddle].ToString("F1") + " kg");
+            typeof(MopTool).GetMethod("OnDragTool", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(MopTool.Instance, new object[] { puddle, 0 });
+            Rec.Log("ORDER mop placed " + (Grid.Objects[puddle, 8] != null));
+            SpeedControlScreen.Instance.SetSpeed(2);
+            SpeedControlScreen.Instance.Unpause(false);
+            yield return new WaitForSecondsRealtime(40f);
+            SpeedControlScreen.Instance.Pause(false);
+            Rec.Log("ORDER mop after: cell " + Grid.Element[puddle].id + " " + Grid.Mass[puddle].ToString("F1") + " kg, order left " + (Grid.Objects[puddle, 8] != null));
+
             // Side screens: each building is built finished next to the printing pod, selected,
             // captured and removed.
-            int podCell = Grid.PosToCell(Components.Telepads.Items[0].transform.GetPosition());
-            int cell = Grid.OffsetCell(podCell, 4, 0);
+            int cell = Grid.OffsetCell(pod, 4, 0);
             foreach (var id in SideScreenBuildings)
             {
                 var def = Assets.GetBuildingDef(id);

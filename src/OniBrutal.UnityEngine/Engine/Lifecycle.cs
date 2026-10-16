@@ -188,6 +188,9 @@ namespace OniBrutal.Engine
                     StopCoroutinesOn(g);
                 }
             }
+            // A RectTransform appearing or disappearing changes its dimensions as far as layout is
+            // concerned: Unity notifies it and its parent (layout groups re-lay out their children).
+            if (go.Transform is RectTransformNative rt && !go.Destroyed) rt.SendDimensionsChange();
         }
 
         /// Awake/OnEnable for objects that just became active (scene load, Instantiate,

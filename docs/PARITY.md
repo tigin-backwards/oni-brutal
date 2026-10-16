@@ -53,7 +53,7 @@ Legend: `[x]` verified · `[ ]` not yet verified · `[~]` deviation (see the not
 - [ ] `BuildMenu` / `BuildingGroupScreen` / `ProductInfoScreen` / `MaterialSelectionPanel` (planning and placing buildings)
 - [x] Management screens opened by hotkey and compared with the original: Vitals, Consumables, Priorities (jobs), Schedule (`ScheduleScreen`), Skills (`SkillsScreen`, Duplicant portrait in a stencil mask), Database (`CodexScreen`), Reports (`ReportScreen`)
 - [x] Research and Starmap buttons before a Research Station / Telescope exists: locked, with the original's tooltips
-- [ ] `ResearchScreen`, `StarmapScreen` / `ClusterMapScreen` contents (need a Research Station / Telescope)
+- [ ] Research progress with a real Research Station; `ClusterMapScreen` (Spaced Out DLC, not owned with the test double)
 - [x] `PauseScreen`: open, save with overwrite confirmation (41 saves in one run)
 - [x] `PauseScreen` → Main Menu ("Save and quit" prompt) → front end with Resume Game; the front end comes back at the smaller UI scale as in the original (once, ours returned to the normal scale a few seconds later; not reproduced since)
 - [x] `PauseScreen`: Save As (save slots, New Save, typed name in `FileNameDialog`), Load (colony list, colony view, Load Game → the save loads in game)
@@ -76,7 +76,9 @@ Legend: `[x]` verified · `[ ]` not yet verified · `[~]` deviation (see the not
 ## Overlays
 
 - [x] F1–F11 compared with the original (same keys, same frame of play): Oxygen, Power, Temperature, Materials (`TileMode`), Light, Plumbing (`LiquidConduit`), Ventilation (`GasConduit`), Decor, Germs (`Disease`), Farming (`Crop`), Rooms (with room highlight under the cursor)
-- [ ] Exosuits (`Suit`), Automation (`Logic`), Shipping (`SolidConveyor`), Radiation, Heat flow, Thermal conductivity, Priorities, Harvest: unlocked by research (not in the overlay bar at cycle 1 in either player)
+- [x] Research-gated overlays with everything unlocked (debug instant-build mode, compared with the original in the same mode): Exosuits, Automation, Shipping, and the remaining Shift+F overlays
+- [x] Build menu categories that become available later (Utilities, Automation, Shipping, Rocketry) appear and lay out as in the original
+- [x] `ResearchScreen` tree and `StarmapScreen` open as in the original
 - [ ] Overlay legends (`OverlayLegend`) and filters
 
 ## Simulation and persistence

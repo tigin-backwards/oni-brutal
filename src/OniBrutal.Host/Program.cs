@@ -145,6 +145,9 @@ namespace OniBrutal.Host
         /// --probe-ui FRAME:X,Y: logs the canvas elements drawn at a window point (top-left
         /// origin, as --input) as of that frame.
         public readonly List<(int Frame, float X, float Y)> Probes = new();
+        /// --dump-hierarchy FRAME:PATH: logs the subtree at a GameObject path (GameObject.Find
+        /// syntax) as of that frame: active flags, rect transforms, components.
+        public readonly List<(int Frame, string Path)> HierarchyDumps = new();
 
         public static Options? Parse(string[] args)
         {
@@ -194,6 +197,13 @@ namespace OniBrutal.Host
                     case "-screen-height": o.ScreenHeight = int.Parse(args[++i]); break;
                     case "-screen-fullscreen": o.ScreenFullscreen = int.Parse(args[++i]); break;
                     case "-window-mode": o.WindowMode = args[++i]; break;
+                    case "--dump-hierarchy":
+                    {
+                        var spec = args[++i];
+                        int colon = spec.IndexOf(':');
+                        o.HierarchyDumps.Add((int.Parse(spec[..colon]), spec[(colon + 1)..]));
+                        break;
+                    }
                     case "--probe-ui":
                     {
                         var parts = args[++i].Split(':', ',');
@@ -208,7 +218,7 @@ namespace OniBrutal.Host
                     }
                     default:
                         Console.Error.WriteLine($"Unknown option {args[i]}");
-                        Console.Error.WriteLine("usage: OniBrutal [--game DIR] [--log FILE] [--headless] [--batchmode] [--frames N] [--native-override NAME=PATH] [--trace-exceptions] [--input FRAME:ACTION[:ARGS]] [--frame-stats] [--max-frame-rate N[:FRAMES]] [--dump-render-textures FRAME:DIR] [-screen-width W] [-screen-height H] [-screen-fullscreen 0|1] [-window-mode exclusive|borderless|windowed] [--check-types] [--check-assets] [--check-bind] [--check-shaders] [--dump-shader NAME:DIR] [--capture FRAME:PATH[:SCALE]] [--probe-ui FRAME:X,Y]");
+                        Console.Error.WriteLine("usage: OniBrutal [--game DIR] [--log FILE] [--headless] [--batchmode] [--frames N] [--native-override NAME=PATH] [--trace-exceptions] [--input FRAME:ACTION[:ARGS]] [--frame-stats] [--max-frame-rate N[:FRAMES]] [--dump-render-textures FRAME:DIR] [-screen-width W] [-screen-height H] [-screen-fullscreen 0|1] [-window-mode exclusive|borderless|windowed] [--check-types] [--check-assets] [--check-bind] [--check-shaders] [--dump-shader NAME:DIR] [--capture FRAME:PATH[:SCALE]] [--probe-ui FRAME:X,Y] [--dump-hierarchy FRAME:PATH]");
                         return null;
                 }
             }

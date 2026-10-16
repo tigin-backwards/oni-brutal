@@ -24,7 +24,7 @@ namespace OniBrutal.Engine
         public Action<MonoBehaviour, bool> OnApplicationFocus, OnApplicationPause;
         public Action<MonoBehaviour> OnApplicationQuit;
         public Action<MonoBehaviour> OnTransformParentChanged, OnTransformChildrenChanged;
-        public Action<MonoBehaviour> OnRectTransformDimensionsChange, OnBeforeTransformParentChanged;
+        public Action<MonoBehaviour> OnRectTransformDimensionsChange, OnChildRectTransformDimensionsChange, OnBeforeTransformParentChanged;
         public Action<MonoBehaviour> OnCanvasGroupChanged, OnCanvasHierarchyChanged, OnDidApplyAnimationProperties;
         public Action<MonoBehaviour> OnBecameVisible, OnBecameInvisible;
 
@@ -61,6 +61,7 @@ namespace OniBrutal.Engine
             info.OnTransformParentChanged = Void(type, "OnTransformParentChanged");
             info.OnTransformChildrenChanged = Void(type, "OnTransformChildrenChanged");
             info.OnRectTransformDimensionsChange = Void(type, "OnRectTransformDimensionsChange");
+            info.OnChildRectTransformDimensionsChange = Void(type, "OnChildRectTransformDimensionsChange");
             info.OnBeforeTransformParentChanged = Void(type, "OnBeforeTransformParentChanged");
             info.OnCanvasGroupChanged = Void(type, "OnCanvasGroupChanged");
             info.OnCanvasHierarchyChanged = Void(type, "OnCanvasHierarchyChanged");

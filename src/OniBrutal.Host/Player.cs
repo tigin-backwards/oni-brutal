@@ -54,6 +54,8 @@ namespace OniBrutal.Host
                 foreach (var (probeFrame, x, y) in options.Probes)
                     if (probeFrame == frame && platform != null)
                         EngineLog.Engine(OniBrutal.Engine.UI.CanvasSystem.Probe(new Vector2(x, platform.FramebufferHeight - y)));
+                foreach (var (dumpFrame, path) in options.HierarchyDumps)
+                    if (dumpFrame == frame) EngineLog.Engine(HierarchyDump(path));
                 options.Input.Apply(frame);
                 PlayerLoop.RunFrame(dt);
                 frame++;
@@ -83,6 +85,24 @@ namespace OniBrutal.Host
             // no ProcessExit handlers.
             ProcessExit(PlayerLoop.ExitCode);
             return PlayerLoop.ExitCode;
+        }
+
+        /// Diagnostics (`--dump-hierarchy`): the subtree at a path, one line per GameObject.
+        static string HierarchyDump(string path)
+        {
+            var root = GameObject.Find(path);
+            if (root == null) return $"hierarchy {path}: not found";
+            var text = new System.Text.StringBuilder($"hierarchy {path}:");
+            void Walk(Transform t, int depth)
+            {
+                var go = t.gameObject;
+                var rect = t is RectTransform rt ? $" rect {rt.rect} anchored {rt.anchoredPosition}" : "";
+                var comps = string.Join(",", go.GetComponents<Component>().Where(c => c != null && c is not Transform).Select(c => c is Behaviour b && !b.enabled ? c.GetType().Name + "(off)" : c.GetType().Name));
+                text.Append($"\n{new string(' ', depth * 2)}{go.name} self={go.activeSelf} hier={go.activeInHierarchy}{rect} [{comps}]");
+                for (int i = 0; i < t.childCount; i++) Walk(t.GetChild(i), depth + 1);
+            }
+            Walk(root.transform, 1);
+            return text.ToString();
         }
 
         [System.Runtime.InteropServices.DllImport("libc", EntryPoint = "_exit")]

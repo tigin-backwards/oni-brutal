@@ -472,7 +472,8 @@ writes a shader's GLCore variants and pass state; `--frame-stats` logs per-phase
 and the GPU time per frame (timer queries); `--max-frame-rate N[:FRAMES]` bounds the frame rate
 (for the first FRAMES frames) so scripted schedules that count frames hold on unpaced displays;
 `--probe-ui FRAME:X,Y` logs the canvas elements drawn at a window point with their hierarchy
-path, material, texture, colour and group alpha; `--check-*` run the corpus gates.
+path, material, texture, colour and group alpha; `--dump-hierarchy FRAME:PATH` logs a subtree's
+active flags, rects and components; `--check-*` run the corpus gates.
 
 ## 8. Repository layout
 

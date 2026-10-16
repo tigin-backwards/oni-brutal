@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <AssemblyName>SemanticsProbe</AssemblyName>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <OniManaged Condition="'$(OniManaged)' == ''">$(HOME)/projects/oni-linux/OxygenNotIncluded_Data/Managed</OniManaged>
+    <EnableDefaultCompileItems>true</EnableDefaultCompileItems>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="$(OniManaged)/UnityEngine.CoreModule.dll" Private="false" />
+    <Reference Include="$(OniManaged)/UnityEngine.dll" Private="false" />
+    <Reference Include="$(OniManaged)/Assembly-CSharp.dll" Private="false" />
+    <Reference Include="$(OniManaged)/Assembly-CSharp-firstpass.dll" Private="false" />
+    <Reference Include="$(OniManaged)/0Harmony.dll" Private="false" />
+  </ItemGroup>
+</Project>
+

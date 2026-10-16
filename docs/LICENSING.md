@@ -24,13 +24,11 @@ These are Unity *packages* compiled into the game build; the game's own code ref
 | `UnityEngine.UI.dll` (uGUI) | every menu, button, panel, layout, scroll view, mask |
 | `Unity.TextMeshPro.dll` | all text layout and rendering |
 | `Unity.Timeline.dll` | referenced; the game ships no Timeline content |
-| `Unity.Collections.dll`, `Unity.Collections.LowLevel.ILSupport.dll`, `Unity.Burst.dll`, `Unity.Burst.Unsafe.dll`, `Unity.Mathematics.dll` | native containers and maths used by game code |
-| `Unity.Profiling.Core.dll`, `Unity.MemoryProfiler.dll`, `Unity.Multiplayer.Center.Common.dll` | referenced, incidental |
+| `Unity.Collections.dll`, `Unity.Collections.LowLevel.ILSupport.dll`, `Unity.Burst.dll`, `Unity.Burst.Unsafe.dll`, `Unity.Mathematics.dll`, `Unity.Profiling.Core.dll`, `Unity.MemoryProfiler.dll`, `Unity.Multiplayer.Center.Common.dll` | not referenced by any game assembly (only by each other): never loaded, can be left out. The game's `NativeArray` use is `UnityEngine.CoreModule`'s, which this engine implements |
 
-Current versions of uGUI, TextMeshPro, Timeline, Collections and Burst are, to our knowledge,
+Current versions of uGUI, TextMeshPro and Timeline are, to our knowledge,
 distributed under the Unity Companion License (use only with the Unity engine); they are the
-main candidates for replacement. Older uGUI source was published under MIT. The licence of
-`Unity.Mathematics` should be checked for the shipped version.
+main candidates for replacement. Older uGUI source was published under MIT.
 
 ## Unity data the game reads
 

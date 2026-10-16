@@ -24,7 +24,7 @@ Legend: `[x]` verified · `[ ]` not yet verified · `[~]` deviation (see the not
 - [x] `ScenariosMenu`: not reachable in this build (no code opens it)
 - [x] `LockerMenuScreen` (Supply Closet, offline) and its Duplicants outfit screen
 - [ ] `PatchNotesScreen`, `KleiItemDropScreen`, `KleiInventoryScreen` contents (need network/Steam services)
-- [x] `RetiredColonyInfoScreen`: colony list, achievements, colony detail (Duplicants with portraits, buildings, oxygen graph; "Timelapse Unavailable", see the preview open item)
+- [x] `RetiredColonyInfoScreen`: colony list, achievements, colony detail (Duplicants with portraits, buildings, oxygen graph); colony cards show the timelapse thumbnail
 - [x] Tutorial videos (`VideoScreen` from a message's video widget, render-texture output) play as the original, with libvpx available (verified with Ubuntu's libvpx9 unpacked locally)
 - [x] Intro short on first launch: this build sets no intro short (`MainMenu.IntroShortName`), so neither player plays one (no `PlayShortOnLaunch` pref written by either)
 - [ ] Victory videos (same `VideoScreen` path as the verified tutorial videos)

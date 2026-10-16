@@ -159,30 +159,26 @@ screens and features) fully ticked or with documented deviations only.
 
 ## Open items
 
-Known behaviours not yet reproduced, each to be closed by a named milestone:
+Known behaviours not reproduced, all confirmed unreachable by the game (M6):
 
-- Playables evaluation of animation/audio clip playables throws NotSupportedException (no
-  Unity animation/audio engine); only reachable through Timeline content, which the game does
-  not ship. Milestone: M6 (confirm unreachable or implement).
+- Playables evaluation of animation/audio clip playables throws NotSupportedException; only
+  Timeline content reaches it, and no game assembly references Timeline or PlayableDirector.
 - CPU texel reads (`GetPixel*`) cover uncompressed formats and BC1/BC3/BC4/BC5; BC6H/BC7,
   ETC/EAC, ASTC and PVRTC throw. No readable texture in the build uses them (all 2682 textures
-  checked by `--check-bind`). Milestone: M6 (confirm).
+  checked by `--check-bind`).
 - Animator: data-driven features absent from the build throw at load (blend trees, layer masks,
-  synchronized layers, StateMachineBehaviours, non-legacy clip events); additive layers blend
-  as override, no PPtr curves, root motion, culling modes or damped SetFloat. Timeline animation
-  playables do not reach the Animator sampler. Milestone: M6 (confirm unreachable).
-- UI Toolkit panel internals (`BaseRuntimePanel`, `PanelRaycaster`'s pickers, `UIDocument`
-  members — 13 members) stay absent: uGUI reaches them only through UI Toolkit panels, and the
-  game has no UIDocument. Milestone: M6 (confirm unreachable).
-- Rare corrupt geometry (a world-sized white/black triangle in a frame) and one device removal
-  ("D3D12: Removing Device") were seen in long runs on Mesa d3d12 under WSL. The same seeded
-  26000-frame scenario on llvmpipe (software GL) shows none in 18 captures, and the original Unity
-  player also renders glitches on d3d12 here (a black world frame, a garbled starmap), which points
-  at the driver. To confirm on native GPU drivers. Milestone: M6.
-- Environment for parity runs: a logged-in Steam client (engine work proceeds with the
-  offline Steam test double, ARCHITECTURE §9.7) (the game quits through
-  `RestartAppIfNecessary` / `SteamAPI.Init` without one) and the system `libvpx` (VP8 video;
-  `sudo apt install libvpx9`).
+  synchronized layers, StateMachineBehaviours, non-legacy clip events); every animation asset of
+  the game loads (`AnimationTests.EveryAnimationAssetInTheGameLoads`).
+- UI Toolkit panel internals (13 members) stay absent: uGUI reaches them only through UI Toolkit
+  panels, and no game assembly references UIDocument.
+
+Environment notes:
+
+- Rare corrupt geometry and one device removal were seen in long runs on Mesa d3d12 under WSL;
+  llvmpipe runs show none, and the original player crashes and glitches on d3d12 here too (a
+  double fault inside the driver during a probe run, black world frames). To confirm on native
+  GPU drivers.
+- Parity runs use the offline Steam test double (ARCHITECTURE §9.7) and need `libvpx` for video.
 
 ## Tracking
 
@@ -240,3 +236,5 @@ Known behaviours not yet reproduced, each to be closed by a named milestone:
   screens and a Mop order with the original; its findings are fixed or documented (ARCHITECTURE
   D2, D3, D10). ApiCheck (ImGui assembly now included): 13 missing members, the UI Toolkit
   panel internals.
+- **M6: exit met** (2026-10-16): docs/PARITY.md fully ticked or with documented deviations
+  (ARCHITECTURE D1–D10).

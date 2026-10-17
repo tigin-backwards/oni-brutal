@@ -95,8 +95,9 @@ we never call `SetDllImportResolver` on BRUTAL assemblies. The Vulkan loader nam
 Binding and JIT are clean: every BCL reference in the game resolves on .NET 10 and all ~82k
 game methods JIT. The differences that remain are behaviours Mono's class libraries provided
 and .NET 10 ships out-of-band. The host restores them the way .NET documents for
-.NET Framework-era code where it can. One game method is patched at run time (D3, a local mod's
-version stamp); no other game IL is touched.
+.NET Framework-era code where it can. Two serialization paths of the game are patched at run
+time where they persist runtime-specific values (D1 state-machine parameter names, D3 a local
+mod's version stamp); no other game IL is touched.
 
 | Mono provided | Host provides | Needed by |
 |---|---|---|
@@ -122,12 +123,18 @@ past the boot checkpoint needs a Steam client logged in with an account that own
 
 **Documented deviations** (inherent to the runtime swap; not fixable without patching game IL):
 
-- **D1 State-machine parameters in saves.** `StateMachineSerializer` matches parameter context
-  types by `Type.FullName`, whose generic arguments are assembly-qualified
-  (`mscorlib, Version=4.0.0.0` on Mono, `System.Private.CoreLib, Version=10.0.0.0` on CoreCLR).
-  Saves written by the original game load with those parameters at defaults; saves we write
-  are self-consistent but carry the CoreCLR names. Everything else in saves (KSerialization
-  body, Sim blob, header) is runtime-independent.
+- **D1 State-machine parameters in saves.** `StateMachineSerializer` stores and matches
+  parameters by their context type's `Type.FullName`, whose generic arguments are
+  assembly-qualified (`mscorlib` on Mono, `System.Private.CoreLib` here; Unity modules versus the
+  engine assembly). Unpatched, no parameter of a save from the original matched and all loaded
+  at their defaults: a large colony (DeCrew, cycle 17628) lost all fifteen Duplicants within
+  four cycles, its food and suit docks unreachable, where the original keeps it alive.
+  **Resolved by a patch:** the host (`StateMachineSaveNames`) has the serializer use the names
+  the original player writes (`OniBrutal.Engine.MonoTypeNames`, each type argument's assembly
+  taken from the game's own Mono class libraries in `Managed/` or the engine facades), so saves
+  load fully in both players in both directions. Saves written by this player before the patch
+  carry CoreCLR names; their state-machine parameters load at defaults once. Everything else in
+  saves (KSerialization body, Sim blob, header) is runtime-independent.
 - **D2 Number formatting.** `double`/`float.ToString()` without a format prints the shortest
   round-trippable string on .NET (Mono printed 15 significant digits), and a negative value
   that rounds to zero keeps its sign ("-0.0" where Mono printed "0.0") — cosmetic, in game
@@ -141,7 +148,7 @@ past the boot checkpoint needs a Steam client logged in with an account that own
   that one call with Mono's algorithm (`OniBrutal.Engine.MonoStringHash`, the .NET Framework
   64-bit hash, checked against the original player with tools/UnityProbe). Stamps are then
   stable and equal to the original player's, so `mods.json` works in both players. This is
-  the host's only change to game code; game code's other `GetHashCode` calls stay
+  one of the host's two changes to game code (with D1); game code's other `GetHashCode` calls stay
   randomized, and none of them is persisted. A `mods.json` written before the patch carries
   random stamps: each local mod asks for a restart once and has to be re-enabled once.
 - **D4 `Thread.Abort`** throws on CoreCLR; reached only by `ThreadedHttps.End` after a 2 s join

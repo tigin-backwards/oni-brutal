@@ -44,6 +44,7 @@ namespace OniBrutal.Host
 
             if (options.TraceExceptions) ExceptionTrace.Install();
             ModVersionStamp.Install();
+            StateMachineSaveNames.Install(dataDir, AppContext.BaseDirectory);
             return Player.Run(options, dataDir);
         }
 

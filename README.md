@@ -67,9 +67,10 @@ the game install, so the install must be present.
 ## Known differences
 
 Number formatting in a few game paths and a handful of smaller gaps are documented as
-deviations in `docs/ARCHITECTURE.md` (D1–D10). One of them, D3 (local mods disabled at every
-launch), is fixed by the host's only patch to game code. Floating-point results are not
-bit-identical to Mono's, and are not meant to be.
+deviations in `docs/ARCHITECTURE.md` (D1–D10). Two of them are fixed by small run-time patches
+the host applies to game code, the only ones it makes: D1 (state-machine values in saves from
+the original player loaded at defaults) and D3 (local mods disabled at every launch).
+Floating-point results are not bit-identical to Mono's, and are not meant to be.
 
 ## Documents
 

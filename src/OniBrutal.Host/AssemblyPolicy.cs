@@ -116,6 +116,6 @@ namespace OniBrutal.Host
                 .Select(p => Path.GetFileNameWithoutExtension(p)!),
             StringComparer.OrdinalIgnoreCase);
 
-        static bool IsFrameworkAssembly(string simple) => framework.Contains(simple);
+        internal static bool IsFrameworkAssembly(string simple) => framework.Contains(simple);
     }
 }

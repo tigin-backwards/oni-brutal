@@ -34,11 +34,11 @@ namespace OniBrutal.Desktop.Gl
             for (int i = 0; i < Buffers.Length; i++)
                 if (Buffers[i] != 0)
                 {
-                    GlApi.DeleteBuffer(Buffers[i]);
+                    GlBindings.DeleteBuffer(Buffers[i]);
                     Buffers[i] = 0;
                     Capacities[i] = 0;
                 }
-            if (IndexBuffer != 0) GlApi.DeleteBuffer(IndexBuffer);
+            if (IndexBuffer != 0) GlBindings.DeleteBuffer(IndexBuffer);
             IndexBuffer = 0;
             IndexCapacity = 0;
         }
@@ -97,7 +97,7 @@ namespace OniBrutal.Desktop.Gl
         {
             int i = (int)c;
             if (d.Buffers[i] == 0) d.Buffers[i] = GlApi.GenBuffer();
-            GlApi.BindBuffer(ArrayBuffer, d.Buffers[i]);
+            GlBindings.BindBuffer(ArrayBuffer, d.Buffers[i]);
             d.Capacities[i] = Fill<T>(ArrayBuffer, data, d.Capacities[i], usage);
             d.Components[i] = components;
         }
@@ -139,7 +139,7 @@ namespace OniBrutal.Desktop.Gl
                 subs[s] = (start, all.Count - start, mode, sm.BaseVertex);
             }
             if (d.IndexBuffer == 0) d.IndexBuffer = GlApi.GenBuffer();
-            GlApi.BindBuffer(ElementArrayBuffer, d.IndexBuffer);
+            GlBindings.BindBuffer(ElementArrayBuffer, d.IndexBuffer);
             d.IndexCapacity = Fill<int>(ElementArrayBuffer, all.ToArray(), d.IndexCapacity, usage);
             d.SubMeshes = subs;
         }

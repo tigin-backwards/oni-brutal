@@ -64,7 +64,11 @@ namespace OniBrutal.Desktop.Gl
         public void Delete()
         {
             foreach (var p in Programs.Values)
-                if (p.Id != 0) N.glDeleteProgram(new GlProgram(p.Id));
+                if (p.Id != 0)
+                {
+                    GlBindings.ForgetProgram(p.Id);
+                    N.glDeleteProgram(new GlProgram(p.Id));
+                }
             Programs.Clear();
         }
     }
@@ -159,7 +163,7 @@ namespace OniBrutal.Desktop.Gl
 
         static void Reflect(DeviceProgram p)
         {
-            N.glUseProgram(new GlProgram(p.Id));
+            GlBindings.UseProgram(p.Id);
             int blocks = GlApi.GetProgram(p.Id, ActiveUniformBlocks);
             p.BlockSizes = new int[blocks];
             for (uint b = 0; b < blocks; b++)

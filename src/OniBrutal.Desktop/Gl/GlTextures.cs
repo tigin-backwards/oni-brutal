@@ -34,7 +34,7 @@ namespace OniBrutal.Desktop.Gl
 
         public void Delete()
         {
-            if (Id != 0) GlApi.DeleteTexture(Id);
+            if (Id != 0) GlBindings.DeleteTexture(Id);
             if (Framebuffer != 0) GlApi.DeleteFramebuffer(Framebuffer);
             if (MultisampleFramebuffer != 0) GlApi.DeleteFramebuffer(MultisampleFramebuffer);
             if (DepthRenderbuffer != 0) GlApi.DeleteRenderbuffer(DepthRenderbuffer);
@@ -143,12 +143,12 @@ namespace OniBrutal.Desktop.Gl
         {
             if (g.Id == 0 || g.Target != target)
             {
-                if (g.Id != 0) GlApi.DeleteTexture(g.Id);
+                if (g.Id != 0) GlBindings.DeleteTexture(g.Id);
                 g.Id = GlApi.GenTexture();
                 g.Target = target;
                 g.SamplerVersion = -1;
             }
-            GlApi.BindTexture(target, g.Id);
+            GlBindings.BindTexture(target, g.Id);
             N.glPixelStorei(UnpackAlignment, 1);
         }
 
@@ -173,7 +173,7 @@ namespace OniBrutal.Desktop.Gl
                                && g.Width == t.Width && g.Height == t.Height && g.Levels == levels;
             if (!sameStorage && g.Id != 0)
             {
-                GlApi.DeleteTexture(g.Id);
+                GlBindings.DeleteTexture(g.Id);
                 g.Id = 0;
             }
             Begin(g, TexTarget2D);
@@ -266,7 +266,7 @@ namespace OniBrutal.Desktop.Gl
         {
             var target = g.Target;
             if (target == TexTarget2DMultisample) return;
-            GlApi.BindTexture(target, g.Id);
+            GlBindings.BindTexture(target, g.Id);
             bool mips = g.Levels > 1;
             uint min = t.FilterMode switch
             {
@@ -313,7 +313,7 @@ namespace OniBrutal.Desktop.Gl
             g.DepthOnly = depthOnly;
             g.Description = new RenderTextureNative { ColorFormat = rt.ColorFormat, DepthBits = rt.DepthBits };
             g.SamplerVersion = -1;
-            GlApi.BindTexture(TexTarget2D, g.Id);
+            GlBindings.BindTexture(TexTarget2D, g.Id);
             if (depthOnly)
                 N.glTexImage2D(TexTarget2D, 0, (int)DepthComponent32F, rt.Width, rt.Height, 0, DepthComponent, Float, null);
             else
@@ -417,7 +417,7 @@ namespace OniBrutal.Desktop.Gl
             }
             if (g.Levels > 1 && rt.AutoGenerateMips)
             {
-                GlApi.BindTexture(TexTarget2D, g.Id);
+                GlBindings.BindTexture(TexTarget2D, g.Id);
                 N.glGenerateMipmap(TexTarget2D);
             }
         }

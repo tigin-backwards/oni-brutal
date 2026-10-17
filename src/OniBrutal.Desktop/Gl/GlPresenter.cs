@@ -72,7 +72,7 @@ namespace OniBrutal.Desktop.Gl
                 b.Color = GlApi.GenTexture();
                 b.Depth = GlApi.GenRenderbuffer();
             }
-            GlApi.BindTexture(TexTarget2D, b.Color);
+            GlBindings.BindTexture(TexTarget2D, b.Color);
             N.glTexImage2D(TexTarget2D, 0, (int)Rgba8, width, height, 0, Rgba, UnsignedByte, null);
             N.glTexParameteri(TexTarget2D, TextureMinFilter, (int)Nearest);
             N.glTexParameteri(TexTarget2D, TextureMagFilter, (int)Nearest);

@@ -78,6 +78,8 @@ namespace OniBrutal.Engine
             if (++statFrames < 60) return;
             double T(int i) => statTotals[i] / 60;
             EngineLog.Engine($"frame stats (ms/frame over 60): early+fixed {T(4):F2}, update {T(5):F2}, late {T(6):F2}, post-late {T(7):F2}, particles {T(8):F2}, render {T(0):F2}, gui {T(1):F2}, end of frame {T(2):F2}, present {T(3):F2}, gpu {OniBrutal.Engine.Rendering.GraphicsDevice.Current.TakeGpuFrameMilliseconds():F2}");
+            var counters = OniBrutal.Engine.Rendering.GraphicsDevice.Current.TakeFrameCounters(60);
+            if (counters != null) EngineLog.Engine("frame counts (per frame over 60): " + counters);
             Array.Clear(statTotals);
             statFrames = 0;
         }

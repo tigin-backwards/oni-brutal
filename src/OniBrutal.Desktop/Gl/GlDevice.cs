@@ -131,6 +131,7 @@ namespace OniBrutal.Desktop.Gl
             N.glFrontFace((GlFrontFace)Cw);
             immediateBuffer = GlApi.GenBuffer();
             immediateIndices = GlApi.GenBuffer();
+            GlBindings.Invalidate();
             CreateDefaults();
             GlStateCache.Invalidate();
             presenter = new GlPresenter(platform.Window);
@@ -192,19 +193,19 @@ namespace OniBrutal.Desktop.Gl
         {
             var t = new DeviceTexture { Id = GlApi.GenTexture(), Target = TexTarget2D, Width = 1, Height = 1 };
             byte* px = stackalloc byte[4] { r, g, b, a };
-            GlApi.BindTexture(TexTarget2D, t.Id);
+            GlBindings.BindTexture(TexTarget2D, t.Id);
             N.glTexImage2D(TexTarget2D, 0, (int)Rgba8, 1, 1, 0, Rgba, UnsignedByte, px);
             N.glTexParameteri(TexTarget2D, TextureMinFilter, (int)Linear);
             N.glTexParameteri(TexTarget2D, TextureMaxLevel, 0);
             defaults[name] = t;
             // Array and 3D defaults with the same colour.
             var array = new DeviceTexture { Id = GlApi.GenTexture(), Target = TexTarget2DArray };
-            GlApi.BindTexture(TexTarget2DArray, array.Id);
+            GlBindings.BindTexture(TexTarget2DArray, array.Id);
             N.glTexImage3D(TexTarget2DArray, 0, (int)Rgba8, 1, 1, 1, 0, Rgba, UnsignedByte, px);
             N.glTexParameteri(TexTarget2DArray, TextureMaxLevel, 0);
             defaults["array:" + name] = array;
             var volume = new DeviceTexture { Id = GlApi.GenTexture(), Target = TexTarget3D };
-            GlApi.BindTexture(TexTarget3D, volume.Id);
+            GlBindings.BindTexture(TexTarget3D, volume.Id);
             N.glTexImage3D(TexTarget3D, 0, (int)Rgba8, 1, 1, 1, 0, Rgba, UnsignedByte, px);
             N.glTexParameteri(TexTarget3D, TextureMaxLevel, 0);
             defaults["3d:" + name] = volume;
@@ -407,14 +408,15 @@ namespace OniBrutal.Desktop.Gl
                 BindAttributes(program, mesh);
                 var sm = mesh.SubMeshes[draw.SubMesh];
                 if (sm.Count == 0) continue;
-                GlApi.BindBuffer(ElementArrayBuffer, mesh.IndexBuffer);
+                GlBindings.BindBuffer(ElementArrayBuffer, mesh.IndexBuffer);
+                draws++;
                 N.glDrawElementsBaseVertex(sm.Mode, sm.Count, UnsignedInt, (void*)(sm.Offset * 4L), sm.BaseVertex);
             }
         }
 
         void Bind(DeviceProgram program, DrawInputs inputs)
         {
-            N.glUseProgram(new GlProgram(program.Id));
+            GlBindings.UseProgram(program.Id);
             var blocks = program.BlockScratch ??= program.BlockSizes.Select(n => new byte[n]).ToArray();
             foreach (var b in blocks) Array.Clear(b);
             GlUniforms.Apply(program, inputs, blocks);
@@ -445,8 +447,7 @@ namespace OniBrutal.Desktop.Gl
             }
             for (int i = 0; i < devices.Length; i++)
             {
-                N.glActiveTexture(Texture0 + (uint)program.Samplers[i].Unit);
-                GlApi.BindTexture(devices[i].Target, devices[i].Id);
+                GlBindings.BindTexture(program.Samplers[i].Unit, devices[i].Target, devices[i].Id);
             }
             // Drawing goes to the current target even if preparing a texture rebound it.
             BindTarget();
@@ -476,7 +477,7 @@ namespace OniBrutal.Desktop.Gl
                     else N.glVertexAttrib4f((uint)location, 0f, 0f, 0f, 0f);
                     continue;
                 }
-                GlApi.BindBuffer(ArrayBuffer, mesh.Buffers[c]);
+                GlBindings.BindBuffer(ArrayBuffer, mesh.Buffers[c]);
                 SetAttribute(location, true);
                 if (c == (int)Channel.Color && mesh.ByteColors)
                     N.glVertexAttribPointer((uint)location, 4, UnsignedByte, true, 4, null);
@@ -538,7 +539,7 @@ namespace OniBrutal.Desktop.Gl
                     data[o + 10 + u * 4] = uvs[u].w;
                 }
             }
-            GlApi.BindBuffer(ArrayBuffer, immediateBuffer);
+            GlBindings.BindBuffer(ArrayBuffer, immediateBuffer);
             GlApi.BufferData<float>(ArrayBuffer, data, StreamDraw);
             for (int c = 0; c < (int)Channel.Count; c++)
             {
@@ -564,8 +565,9 @@ namespace OniBrutal.Desktop.Gl
                     int b = q * 4;
                     indices.AsSpan(q * 6, 6).SetValues(b, b + 1, b + 2, b, b + 2, b + 3);
                 }
-                GlApi.BindBuffer(ElementArrayBuffer, immediateIndices);
+                GlBindings.BindBuffer(ElementArrayBuffer, immediateIndices);
                 GlApi.BufferData<int>(ElementArrayBuffer, indices, StreamDraw);
+                draws++;
                 N.glDrawElements(Triangles, indices.Length, UnsignedInt, null);
             }
             else
@@ -577,6 +579,7 @@ namespace OniBrutal.Desktop.Gl
                     ImmediatePrimitive.TriangleStrip => TriangleStrip,
                     _ => Triangles,
                 };
+                draws++;
                 N.glDrawArrays(mode, 0, vertices.Length);
             }
         }
@@ -657,6 +660,16 @@ namespace OniBrutal.Desktop.Gl
         readonly uint[] timingQueries = new uint[TimingSlots];
         readonly bool[] timingPending = new bool[TimingSlots];
         int timingSlot = -1;
+        int draws;
+
+        public override string TakeFrameCounters(int frames)
+        {
+            string text = $"draws {draws / frames}, program binds {GlBindings.ProgramBinds / frames}, texture binds {GlBindings.TextureBinds / frames}, buffer binds {GlBindings.BufferBinds / frames}, skipped binds {GlBindings.Skipped / frames}";
+            draws = 0;
+            GlBindings.ProgramBinds = GlBindings.TextureBinds = GlBindings.BufferBinds = GlBindings.Skipped = 0;
+            return text;
+        }
+
         bool gpuTiming;
         double gpuTotal;
         int gpuFrames;

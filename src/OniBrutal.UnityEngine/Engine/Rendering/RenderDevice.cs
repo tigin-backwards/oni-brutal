@@ -105,6 +105,10 @@ namespace OniBrutal.Engine.Rendering
         /// Diagnostics: the average GPU time per presented frame since the last call, in
         /// milliseconds; -1 when unknown. The first call starts the measurement.
         public virtual double TakeGpuFrameMilliseconds() => -1;
+
+        /// Diagnostics: device work per frame (draws, binds) averaged over `frames`, since the
+        /// last call; null when not counted.
+        public virtual string TakeFrameCounters(int frames) => null;
     }
 
     /// The colour and depth surfaces drawing goes to; null colours are the back buffer.

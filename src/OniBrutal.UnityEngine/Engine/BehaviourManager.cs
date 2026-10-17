@@ -147,20 +147,20 @@ namespace OniBrutal.Engine
             startQueue.Remove(b);
         }
 
-        /// Runs Start for behaviours scheduled before this call, in execution order. A behaviour
-        /// that is not active-and-enabled at that point keeps its Start for when it is enabled.
+        /// Runs Start for behaviours scheduled before this call, in the order they were scheduled
+        /// (when they became active and enabled), as Unity's delayed-call queue does: script
+        /// execution order does not reorder pending Starts (measured in the original player while
+        /// a large save loads: World, order 6, starts before Game, order -10, because it was
+        /// enabled first). Execution order still shapes Start order indirectly, through the Awake/OnEnable
+        /// order of a batch activated together. A behaviour that is not active-and-enabled at
+        /// that point keeps its Start for when it is enabled.
         public static void RunStarts()
         {
             while (startQueue.Count > 0)
             {
                 var batch = startQueue.ToArray();
                 startQueue.Clear();
-                // Stable sort by execution order.
-                var ordered = new List<BehaviourNative>(batch);
-                var indexed = new Dictionary<BehaviourNative, int>();
-                for (int i = 0; i < ordered.Count; i++) indexed[ordered[i]] = i;
-                ordered.Sort((a, b) => a.ExecutionOrder != b.ExecutionOrder ? a.ExecutionOrder.CompareTo(b.ExecutionOrder) : indexed[a].CompareTo(indexed[b]));
-                foreach (var b in ordered)
+                foreach (var b in batch)
                 {
                     b.StartPending = false;
                     if (b.StartCalled || b.Destroyed) continue;

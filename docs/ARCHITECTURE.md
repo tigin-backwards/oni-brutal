@@ -233,7 +233,9 @@ citing why.
     as in Unity.
 - **Script execution order** comes from `MonoScript.m_ExecutionOrder` in
   `globalgamemanagers.assets`; within one order, update order is the order components became
-  enabled, matching Unity's behaviour list.
+  enabled, matching Unity's behaviour list. Pending `Start` calls are not sorted by it: they run in
+  the order the behaviours were scheduled (became active and enabled), as Unity's delayed-call
+  queue does.
 - `ScriptableObject` and `MonoBehaviour` instances are created with
   `RuntimeHelpers.GetUninitializedObject` + the parameterless constructor, as Unity does
   (field initializers run, then deserialization overwrites serialized fields).

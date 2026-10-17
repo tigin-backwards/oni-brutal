@@ -76,6 +76,16 @@ namespace OniBrutal.Tests
         void Awake() => Recorder.Log.Add("early:Awake");
     }
 
+    public class LateStarter : MonoBehaviour
+    {
+        void Start() => Recorder.Log.Add("late:Start");
+    }
+
+    public class EarlyStarter : MonoBehaviour
+    {
+        void Start() => Recorder.Log.Add("early:Start");
+    }
+
     public class Base : MonoBehaviour
     {
         public static readonly List<string> Log = new();
@@ -321,6 +331,22 @@ namespace OniBrutal.Tests
             // The later component with the lower order awakes first, across the whole batch.
             Assert.Equal(["early:Awake", "a:Awake", "a:OnEnable"], Recorder.Log);
             Object.DestroyImmediate(root);
+        }
+
+        [Fact]
+        public void PendingStartsRunInTheOrderTheyWereScheduled()
+        {
+            // As in the original player loading a save: World (order 6) is enabled before Game
+            // (order -10) and starts first; execution order does not reorder pending Starts.
+            OniBrutal.Engine.ScriptInfo.SetExecutionOrder(typeof(LateStarter).FullName!, 6);
+            OniBrutal.Engine.ScriptInfo.SetExecutionOrder(typeof(EarlyStarter).FullName!, -10);
+            Recorder.Log.Clear();
+            var late = new GameObject("late", typeof(LateStarter));
+            var early = new GameObject("early", typeof(EarlyStarter));
+            OniBrutal.Engine.BehaviourManager.RunStarts();
+            Assert.Equal(["late:Start", "early:Start"], Recorder.Log);
+            Object.DestroyImmediate(late);
+            Object.DestroyImmediate(early);
         }
 
         [Fact]

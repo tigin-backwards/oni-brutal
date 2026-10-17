@@ -44,6 +44,10 @@ namespace SemanticsProbe
             V("Screen", Screen.width + "x" + Screen.height + " current " + Screen.currentResolution.width + "x" + Screen.currentResolution.height + " fullScreenMode " + Screen.fullScreenMode);
             V("Display.main", Display.displays[0].systemWidth);
 
+            // Mono's string hash (persisted by KMod.Local as a local mod's version stamp).
+            foreach (var text in new[] { "", "a", "ab", "abc", "abcd", "SemanticsProbe", "onimaxxing-sim", "Ünïcødé 漢字", "nul\0after", "a\0", "\0" })
+                V("strhash " + text.Replace("\0", "\\0"), text.GetHashCode());
+
             Rec.Log("=== values: formatting");
             V("Vector3", new Vector3(1.23456f, -2f, 1e-5f));
             V("Vector2", new Vector2(0.5f, 100.25f));

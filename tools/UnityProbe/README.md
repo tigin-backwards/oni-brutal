@@ -24,6 +24,5 @@ front end 8 s after it loads and of the in-game overlay canvases once the clock 
 frames. Compare the two players' outputs with frame numbers taken relative to each scenario
 header.
 
-Under this engine a local mod's version stamp changes at every launch (ARCHITECTURE D3), so the
-game asks for a restart at the main menu; dismiss it with Escape and re-enable the mod in
-`mods.json` before the next run.
+Both players write the same version stamp for the mod (ARCHITECTURE D3), so one `mods.json`
+serves both.

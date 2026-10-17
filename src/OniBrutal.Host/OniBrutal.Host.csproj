@@ -18,6 +18,13 @@
     <ProjectReference Include="../../tools/FacadeGen/FacadeGen.csproj" ReferenceOutputAssembly="false" />
   </ItemGroup>
   <ItemGroup>
+    <!-- The game's Harmony, loaded from Managed/ at run time; patches KMod.Local (ModVersionStamp). -->
+    <Reference Include="0Harmony">
+      <HintPath>$(OniGameDir)/OxygenNotIncluded_Data/Managed/0Harmony.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
     <!-- Out-of-band framework pieces that Mono's class libraries provided in-box. -->
     <PackageReference Include="System.Security.Permissions" />
     <PackageReference Include="System.Runtime.Serialization.Formatters" />

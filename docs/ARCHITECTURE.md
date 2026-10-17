@@ -95,7 +95,8 @@ we never call `SetDllImportResolver` on BRUTAL assemblies. The Vulkan loader nam
 Binding and JIT are clean: every BCL reference in the game resolves on .NET 10 and all ~82k
 game methods JIT. The differences that remain are behaviours Mono's class libraries provided
 and .NET 10 ships out-of-band. The host restores them the way .NET documents for
-.NET Framework-era code where it can. No game IL is touched.
+.NET Framework-era code where it can. One game method is patched at run time (D3, a local mod's
+version stamp); no other game IL is touched.
 
 | Mono provided | Host provides | Needed by |
 |---|---|---|
@@ -132,13 +133,17 @@ past the boot checkpoint needs a Steam client logged in with an account that own
   that rounds to zero keeps its sign ("-0.0" where Mono printed "0.0") — cosmetic, in game
   code's own formatting. The engine's own `ToString` methods (vectors, colours, matrices, rects)
   format as Unity's Mono player does.
-- **D3 `string.GetHashCode`** is randomized per process (Mono's is stable); the only persisted
+- **D3 `string.GetHashCode`** is randomized per process (Mono's is stable). Its only persisted
   use is the version stamp of local and dev (unpackaged) mods in `mods.json`
-  (`KMod.Local.Subscribe`: `directoryName.GetHashCode()`). The stamp differs at every launch, so
-  `KMod.Manager` treats the mod as changed: it is marked for reinstall and, having no archive to
-  reinstall from, is disabled at the next launch; the main menu also opens a "restart required"
-  dialog for it. Local and dev mods therefore have to be re-enabled in the Mods screen each
-  launch; Steam Workshop mods (published ids) are unaffected.
+  (`KMod.Local.Subscribe`: `directoryName.GetHashCode()`). Left alone, the stamp differs at
+  every launch, so `KMod.Manager` treats the mod as changed, asks for a restart and disables
+  it. **Resolved by a patch:** the host (`ModVersionStamp`) uses the game's Harmony to replace
+  that one call with Mono's algorithm (`OniBrutal.Engine.MonoStringHash`, the .NET Framework
+  64-bit hash, checked against the original player with tools/UnityProbe). Stamps are then
+  stable and equal to the original player's, so `mods.json` works in both players. This is
+  the host's only change to game code; game code's other `GetHashCode` calls stay
+  randomized, and none of them is persisted. A `mods.json` written before the patch carries
+  random stamps: each local mod asks for a restart once and has to be re-enabled once.
 - **D4 `Thread.Abort`** throws on CoreCLR; reached only by `ThreadedHttps.End` after a 2 s join
   timeout at shutdown.
 - **D5 `Process.MainModule`** is the host executable; `App.Restart` relaunches the host (we make

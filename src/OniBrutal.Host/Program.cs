@@ -43,6 +43,7 @@ namespace OniBrutal.Host
             if (options.DumpScript != null) return AssetCheck.Dump(dataDir, options.DumpScript);
 
             if (options.TraceExceptions) ExceptionTrace.Install();
+            ModVersionStamp.Install();
             return Player.Run(options, dataDir);
         }
 

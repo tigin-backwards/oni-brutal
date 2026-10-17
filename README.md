@@ -66,10 +66,10 @@ the game install, so the install must be present.
 
 ## Known differences
 
-Number formatting in a few game paths, `string.GetHashCode` being randomized, and a handful of
-smaller gaps are documented as deviations in `docs/ARCHITECTURE.md` (D1–D10). The one players
-will notice is D3: local and dev mods ask for a restart at every launch and come up disabled.
-Floating-point results are not bit-identical to Mono's, and are not meant to be.
+Number formatting in a few game paths and a handful of smaller gaps are documented as
+deviations in `docs/ARCHITECTURE.md` (D1–D10). One of them, D3 (local mods disabled at every
+launch), is fixed by the host's only patch to game code. Floating-point results are not
+bit-identical to Mono's, and are not meant to be.
 
 ## Documents
 

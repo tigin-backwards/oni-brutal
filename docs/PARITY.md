@@ -126,6 +126,8 @@ Legend: `[x]` verified · `[ ]` not yet verified · `[~]` deviation (see the not
 - [x] Main-menu UI layout (tools/UnityProbe UiDump): every RectTransform's rect and world corners and every text's content, size and preferred size across all canvases, compared with the original at 1024×768 — identical apart from TextMeshPro auto-size and one preferred width differing by 0.1 (float rounding)
 - [x] In-game HUD layout (UiDump once the game clock has run 120 frames after embarking): 3415 RectTransforms of the overlay canvases (HUD, management screens, research tree) compared with the original — differences only 0.1-pixel rounding, the hover card's state at the pointer and game-state texts
 - [x] Local mods load (KMod, `Assembly.LoadFrom`, Harmony patches applied on CoreCLR) and stay enabled across launches, with the version stamp the original writes (ARCHITECTURE D3; OniMcp checked over three consecutive launches)
+- [x] Crash screen (`KCrashReporter`, opened by a mod's `Debug.LogError` at the main menu): identical to the original at 1024×768, including the text and buttons running past the right edge
+- [x] Large save (DeCrew, base game, cycle 17628, 138 MB): loads without exceptions to the same screen as the original (about 1 min here, 3 min 50 s in the original); frame rate there 26.7 fps against 25.8
 - [x] A third-party mod built on PLib (OniMcp 0.2.5, an in-game MCP server: Harmony patches, PLib options, `HttpListener`, `ScreenCapture`): its patches verify healthy, its server answers, it loads a save, reads colony and Duplicant state, runs the game and takes screenshots, with no exceptions (PLib needed `RectTransform.SetInsetAndSizeFromParentEdge`)
 
 ## Debug mode

@@ -46,6 +46,10 @@ namespace UnityEngine
         public bool activeSelf => GameObjectNative.ActiveSelf;
         public bool activeInHierarchy => GameObjectNative.ActiveInHierarchy;
 
+        // The scene the object belongs to; invalid (handle 0) for assets such as prefabs. Mods use
+        // it (the game does not).
+        public SceneManagement.Scene scene => new(GameObjectNative.Scene);
+
         public void SetActive(bool value)
         {
             Threads.AssertMainThread("SetActive");

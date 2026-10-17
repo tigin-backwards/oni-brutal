@@ -350,6 +350,20 @@ namespace OniBrutal.Tests
         }
 
         [Fact]
+        public void GameObjectSceneIsTheSceneItBelongsTo()
+        {
+            var go = new GameObject("in scene");
+            var child = new GameObject("child");
+            child.transform.SetParent(go.transform);
+            Assert.Equal(UnityEngine.SceneManagement.SceneManager.GetActiveScene(), go.scene);
+            Assert.Equal(go.scene, child.scene);
+            Object.DontDestroyOnLoad(go);
+            Assert.Equal("DontDestroyOnLoad", go.scene.name);
+            Assert.Equal(go.scene, child.scene);
+            Object.DestroyImmediate(go);
+        }
+
+        [Fact]
         public void ChildSearchJudgesActivityRelativeToTheStartingObject()
         {
             // root (inactive) → a (active) → b (Recorder); root → c (inactive) → d (Recorder).

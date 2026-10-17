@@ -414,6 +414,7 @@ namespace OniBrutal.Desktop.Gl
                 SetAbsentChannels(program, mesh);
                 draws++;
                 N.glDrawElementsBaseVertex(sm.Mode, sm.Count, UnsignedInt, (void*)(sm.Offset * 4L), sm.BaseVertex);
+                ForgetConstantsOfArrays(program, mesh);
             }
         }
 
@@ -474,6 +475,17 @@ namespace OniBrutal.Desktop.Gl
                 int location = program.Attributes[c];
                 if (location < 0 || mesh.Components[c] != 0) continue;
                 SetConstant(location, c == (int)Channel.Color ? ConstantWhite : c == (int)Channel.Position ? ConstantPoint : ConstantZero);
+            }
+        }
+
+        /// A draw leaves the current value of every attribute it read from an enabled array
+        /// undefined (OpenGL 4.5 §10.3.9), so those constants must be set again before use.
+        void ForgetConstantsOfArrays(DeviceProgram program, DeviceMesh mesh)
+        {
+            for (int c = 0; c < (int)Channel.Count; c++)
+            {
+                int location = program.Attributes[c];
+                if (location >= 0 && location < constants.Length && mesh.Components[c] != 0) constants[location] = 0;
             }
         }
 
@@ -575,6 +587,7 @@ namespace OniBrutal.Desktop.Gl
                 GlApi.BufferData<int>(ElementArrayBuffer, indices, StreamDraw);
                 draws++;
                 N.glDrawElements(Triangles, indices.Length, UnsignedInt, null);
+                Array.Clear(constants);
             }
             else
             {
@@ -587,6 +600,7 @@ namespace OniBrutal.Desktop.Gl
                 };
                 draws++;
                 N.glDrawArrays(mode, 0, vertices.Length);
+                Array.Clear(constants);
             }
         }
 

@@ -10,6 +10,17 @@ namespace OniBrutal.Tests
     public class CommandBufferTests : EngineTest
     {
         [Fact]
+        public void MaterialListsItsTextureProperties()
+        {
+            var game = System.Environment.GetEnvironmentVariable("ONI_GAME_DIR")
+                       ?? System.IO.Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile), "projects", "oni-linux");
+            AssetSystem.Initialize(System.IO.Path.Combine(game, "OxygenNotIncluded_Data"));
+            var material = new Material(Shader.Find("Hidden/Internal-GUITextureClip"));
+            Assert.Contains("_MainTex", material.GetTexturePropertyNames());
+            Assert.Contains(Shader.PropertyToID("_MainTex"), material.GetTexturePropertyNameIDs());
+        }
+
+        [Fact]
         public void DrawsAfterABlitKeepTheCameraMatrices()
         {
             // The game copies its render targets and then draws the liquid with the camera's

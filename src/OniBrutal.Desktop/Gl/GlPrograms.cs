@@ -324,6 +324,8 @@ namespace OniBrutal.Desktop.Gl
     internal static unsafe class GlUniforms
     {
         static readonly float[] scratch = new float[4 * 1024];
+        /// Array uniforms tightly packed for glUniform*fv.
+        static readonly float[] packedScratch = new float[4 * 1024];
 
         static int Components(uint type) => type switch
         {
@@ -532,13 +534,27 @@ namespace OniBrutal.Desktop.Gl
                         uint ui = (uint)o[0];
                         N.glUniform1uiv(u.Location, 1, &ui);
                     }
+                    else if (u.Size > 1)
+                    {
+                        // An array in one call from its base location, elements tightly packed:
+                        // GL gives no other element a location that is safe to assume.
+                        int comps = Components(u.Type);
+                        var packed = packedScratch.AsSpan(0, u.Size * comps);
+                        for (int i = 0; i < u.Size; i++)
+                            for (int c = 0; c < comps; c++) packed[i * comps + c] = o[i * 4 + c];
+                        fixed (float* pp = packed)
+                        {
+                            switch (comps)
+                            {
+                                case 1: N.glUniform1fv(u.Location, u.Size, pp); break;
+                                case 2: N.glUniform2fv(u.Location, u.Size, pp); break;
+                                default: N.glUniform3fv(u.Location, u.Size, pp); break;
+                            }
+                        }
+                    }
                     else switch (Components(u.Type))
                     {
-                        case 1:
-                            if (u.Size > 1)
-                                for (int i = 0; i < u.Size; i++) N.glUniform1fv(u.Location + i, 1, f + i * 4);
-                            else N.glUniform1fv(u.Location, 1, f);
-                            break;
+                        case 1: N.glUniform1fv(u.Location, 1, f); break;
                         case 2: N.glUniform2fv(u.Location, 1, f); break;
                         case 3: N.glUniform3fv(u.Location, 1, f); break;
                         default: N.glUniform4fv(u.Location, 1, f); break;

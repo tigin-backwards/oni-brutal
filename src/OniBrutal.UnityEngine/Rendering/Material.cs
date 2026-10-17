@@ -285,6 +285,33 @@ namespace UnityEngine
         public Texture GetTexture(string name) => GetTexture(Shader.PropertyToID(name));
         public Texture GetTexture(int nameID) => Sheet.Textures.TryGetValue(nameID, out var t) && t.Texture != null ? t.Texture : null;
 
+        /// The material's texture properties (its saved ones and its shader's), assigned or not.
+        public string[] GetTexturePropertyNames()
+        {
+            var names = new List<string>();
+            GetTexturePropertyNames(names);
+            return names.ToArray();
+        }
+
+        public void GetTexturePropertyNames(List<string> outNames)
+        {
+            outNames.Clear();
+            foreach (var id in Sheet.Textures.Keys) outNames.Add(ShaderPropertyIds.NameOf(id));
+        }
+
+        public int[] GetTexturePropertyNameIDs()
+        {
+            var ids = new List<int>();
+            GetTexturePropertyNameIDs(ids);
+            return ids.ToArray();
+        }
+
+        public void GetTexturePropertyNameIDs(List<int> outNames)
+        {
+            outNames.Clear();
+            outNames.AddRange(Sheet.Textures.Keys);
+        }
+
         public Vector2 GetTextureOffset(string name) => GetTextureOffset(Shader.PropertyToID(name));
         public Vector2 GetTextureOffset(int nameID) => Sheet.Textures.TryGetValue(nameID, out var t) ? new Vector2(t.ScaleOffset.z, t.ScaleOffset.w) : Vector2.zero;
         public Vector2 GetTextureScale(string name) => GetTextureScale(Shader.PropertyToID(name));

@@ -191,9 +191,10 @@ identical to before; liquids (Cool Abyss) as before. Texture uploads no longer g
 persistent pixel-unpack ring: with the GPU a frame or two behind the render thread, staged
 uploads corrupted background textures under Mesa's d3d12 driver (white-out probe: three events
 per run, with or without explicit flushing; none with a full wait per frame or with uploads from
-memory). The uniform ring is unaffected in every run. Open: one diagnostic run that made the main
-thread wait for the GL thread every frame ended in a segmentation fault at frame ~19k; no run of
-the shipping configuration has crashed.
+memory). The uniform ring is unaffected in every run. One diagnostic run that made the main thread
+wait for the GL thread every frame, on a build still staging uploads through that ring, ended in
+a segmentation fault at frame ~19k; with uploads from memory two such runs passed 24k frames
+without one, and no run of the shipping configuration has crashed.
 
 ### M8 (proposed) — Windows
 

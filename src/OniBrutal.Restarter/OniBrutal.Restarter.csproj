@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Restarter.exe for the Windows player: the helper the game's App.Restart starts from the
+       player's directory (the Linux player uses the shell script src/OniBrutal.Host/Restarter). -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>Restarter</AssemblyName>
+    <RootNamespace>OniBrutal.Restarter</RootNamespace>
+  </PropertyGroup>
+</Project>

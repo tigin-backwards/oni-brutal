@@ -15,7 +15,7 @@ namespace UnityEngine
         public static string processorType => cpuModel.Value;
         public static int systemMemorySize => memoryMB.Value;
         public static string operatingSystem => osName.Value;
-        public static OperatingSystemFamily operatingSystemFamily => OperatingSystemFamily.Linux;
+        public static OperatingSystemFamily operatingSystemFamily => OperatingSystem.IsWindows() ? OperatingSystemFamily.Windows : OperatingSystemFamily.Linux;
         public static DeviceType deviceType => DeviceType.Desktop;
         public static string deviceModel => deviceModelName.Value;
 
@@ -42,8 +42,18 @@ namespace UnityEngine
         public static bool SupportsTextureFormat(TextureFormat format) => Gfx.SupportsTexture(format);
         public static bool SupportsRenderTextureFormat(RenderTextureFormat format) => Gfx.SupportsRenderTexture(format);
 
+        /// A value under HKEY_LOCAL_MACHINE (Windows), or null.
+        static string MachineRegistryString(string key, string name)
+        {
+            if (!OperatingSystem.IsWindows()) return null;
+            using var k = Microsoft.Win32.Registry.LocalMachine.OpenSubKey(key);
+            return (k?.GetValue(name) as string)?.Trim();
+        }
+
         static readonly Lazy<string> cpuModel = new(() =>
         {
+            if (OperatingSystem.IsWindows())
+                return MachineRegistryString(@"HARDWARE\DESCRIPTION\System\CentralProcessor\0", "ProcessorNameString") ?? RuntimeInformation.ProcessArchitecture.ToString();
             try
             {
                 var line = File.ReadLines("/proc/cpuinfo").FirstOrDefault(l => l.StartsWith("model name", StringComparison.Ordinal));
@@ -55,9 +65,25 @@ namespace UnityEngine
             }
         });
 
-        /// Physical memory in MB (Linux: MemTotal).
+        [StructLayout(LayoutKind.Sequential)]
+        struct MemoryStatusEx
+        {
+            public uint Length, MemoryLoad;
+            public ulong TotalPhys, AvailPhys, TotalPageFile, AvailPageFile, TotalVirtual, AvailVirtual, AvailExtendedVirtual;
+        }
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        static extern bool GlobalMemoryStatusEx(ref MemoryStatusEx status);
+
+        /// Physical memory in MB (Linux: MemTotal; Windows: GlobalMemoryStatusEx).
         static readonly Lazy<int> memoryMB = new(() =>
         {
+            if (OperatingSystem.IsWindows())
+            {
+                var status = new MemoryStatusEx { Length = (uint)Marshal.SizeOf<MemoryStatusEx>() };
+                if (GlobalMemoryStatusEx(ref status)) return (int)(status.TotalPhys / (1024 * 1024));
+                return (int)(GC.GetGCMemoryInfo().TotalAvailableMemoryBytes / (1024 * 1024));
+            }
             try
             {
                 var line = File.ReadLines("/proc/meminfo").First(l => l.StartsWith("MemTotal:", StringComparison.Ordinal));
@@ -70,9 +96,16 @@ namespace UnityEngine
             }
         });
 
-        /// Unity on Linux: "<distribution> <version> <architecture>" with the kernel version.
+        /// Unity on Linux: "<distribution> <version> <architecture>" with the kernel version; on
+        /// Windows: "Windows 10  (10.0.19045) 64bit", Windows 11 from build 22000.
         static readonly Lazy<string> osName = new(() =>
         {
+            if (OperatingSystem.IsWindows())
+            {
+                var v = Environment.OSVersion.Version;
+                string name = v.Major == 10 && v.Build >= 22000 ? "Windows 11" : $"Windows {(v.Major == 10 ? "10" : v.Major + "." + v.Minor)}";
+                return $"{name}  ({v.Major}.{v.Minor}.{v.Build}) {(Environment.Is64BitOperatingSystem ? "64bit" : "32bit")}";
+            }
             string distro = "Linux";
             try
             {
@@ -83,8 +116,17 @@ namespace UnityEngine
             return $"Linux {Environment.OSVersion.Version} {distro} {(Environment.Is64BitOperatingSystem ? "64bit" : "32bit")}";
         });
 
+        /// Linux: the DMI product name; Windows: "<product> (<manufacturer>)" from the BIOS
+        /// description, as Unity reports them.
         static readonly Lazy<string> deviceModelName = new(() =>
         {
+            if (OperatingSystem.IsWindows())
+            {
+                var product = MachineRegistryString(@"HARDWARE\DESCRIPTION\System\BIOS", "SystemProductName");
+                var maker = MachineRegistryString(@"HARDWARE\DESCRIPTION\System\BIOS", "SystemManufacturer");
+                if (string.IsNullOrEmpty(product)) return "PC";
+                return string.IsNullOrEmpty(maker) ? product : $"{product} ({maker})";
+            }
             try
             {
                 var name = File.ReadAllText("/sys/devices/virtual/dmi/id/product_name").Trim();

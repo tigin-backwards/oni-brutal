@@ -25,6 +25,9 @@ namespace OniBrutal.Host
             {
                 platform = new OniBrutal.Desktop.GlfwPlatform(WindowSettingsFor(options));
                 OniBrutal.Engine.Platform.PlatformLoop.Install(platform);
+                OniBrutal.Desktop.Gl.GlDevice.DebugOutput = options.GlDebug;
+                OniBrutal.Desktop.Gl.GlDevice.SwapIntervalOverride = options.VSyncCount;
+                OniBrutal.Desktop.Gl.GlGpuProfile.Enabled = options.GpuProfile;
                 var device = new OniBrutal.Desktop.Gl.GlDevice(platform);
                 OniBrutal.Engine.Rendering.GraphicsDevice.Install(device);
             }
@@ -160,8 +163,23 @@ namespace OniBrutal.Host
             return text.ToString();
         }
 
+        /// Ends the process at once, without static destructors or other exit handlers: _exit on
+        /// Linux, TerminateProcess of the current process on Windows (ExitProcess would run the
+        /// plugins' DLL detach code, under their own threads, as static destructors would).
+        static void ProcessExit(int status)
+        {
+            if (OperatingSystem.IsWindows()) TerminateProcess(GetCurrentProcess(), (uint)status);
+            else LinuxExit(status);
+        }
+
         [System.Runtime.InteropServices.DllImport("libc", EntryPoint = "_exit")]
-        static extern void ProcessExit(int status);
+        static extern void LinuxExit(int status);
+
+        [System.Runtime.InteropServices.DllImport("kernel32.dll")]
+        static extern IntPtr GetCurrentProcess();
+
+        [System.Runtime.InteropServices.DllImport("kernel32.dll")]
+        static extern bool TerminateProcess(IntPtr process, uint exitCode);
 
         /// The player window from PlayerSettings (native resolution when so configured),
         /// overridden by Unity's -screen-* / -window-mode arguments.
@@ -183,7 +201,7 @@ namespace OniBrutal.Host
                 "windowed" => FullScreenMode.Windowed,
                 _ => mode,
             };
-            return new OniBrutal.Desktop.WindowSettings(EngineConfig.ProductName, width, height, mode) { IgnoreUserInput = options.Input.Any };
+            return new OniBrutal.Desktop.WindowSettings(EngineConfig.ProductName, width, height, mode) { IgnoreUserInput = options.Input.Any, DebugContext = options.GlDebug };
         }
 
         /// Frame pacing as in Unity's desktop player: with vSync the swap paces frames (the

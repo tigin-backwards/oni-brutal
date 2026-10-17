@@ -3,13 +3,14 @@ using System.Runtime.InteropServices;
 
 namespace OniBrutal.Engine.Text
 {
-    /// P/Invokes into the system FreeType 2 library (libfreetype.so.6; Unity links FreeType
-    /// statically, the game ships none). Struct layouts are FreeType's public records for LP64
-    /// (FT_Long/FT_Pos/FT_Fixed are C `long`, 64-bit); only the leading fields we read are
-    /// declared where FreeType documents the rest as private.
+    /// P/Invokes into FreeType 2 (BRUTAL's build, Ahwoo.BRUTAL.FreeType: freetype.dll /
+    /// libfreetype.so; Unity links FreeType statically, the game ships none). Struct layouts are
+    /// FreeType's public records; FT_Long/FT_Pos/FT_Fixed are C `long` (CLong: 64-bit on Linux,
+    /// 32-bit on Windows) and FT_ULong is CULong. Only the leading fields we read are declared
+    /// where FreeType documents the rest as private.
     internal static unsafe class FT
     {
-        const string Lib = "libfreetype.so.6";
+        const string Lib = "freetype";
 
         // FT_LOAD_* (GlyphLoadFlags has the same values).
         public const int LOAD_DEFAULT = 0, LOAD_NO_SCALE = 1, LOAD_NO_HINTING = 2, LOAD_RENDER = 4, LOAD_NO_BITMAP = 8,
@@ -25,24 +26,24 @@ namespace OniBrutal.Engine.Text
         // FT_Glyph_Format 'outl'.
         public const uint GLYPH_FORMAT_OUTLINE = 0x6F75746C;
 
-        public const nint FACE_FLAG_KERNING = 1 << 6;
+        public const long FACE_FLAG_KERNING = 1 << 6;
 
         [StructLayout(LayoutKind.Sequential)]
         public struct Vector
         {
-            public nint x, y;
+            public CLong x, y;
         }
 
         [StructLayout(LayoutKind.Sequential)]
         public struct BBox
         {
-            public nint xMin, yMin, xMax, yMax;
+            public CLong xMin, yMin, xMax, yMax;
         }
 
         [StructLayout(LayoutKind.Sequential)]
         public struct Matrix
         {
-            public nint xx, xy, yx, yy;
+            public CLong xx, xy, yx, yy;
         }
 
         [StructLayout(LayoutKind.Sequential)]
@@ -78,7 +79,7 @@ namespace OniBrutal.Engine.Text
         [StructLayout(LayoutKind.Sequential)]
         public struct GlyphMetrics
         {
-            public nint width, height, horiBearingX, horiBearingY, horiAdvance, vertBearingX, vertBearingY, vertAdvance;
+            public CLong width, height, horiBearingX, horiBearingY, horiAdvance, vertBearingX, vertBearingY, vertAdvance;
         }
 
         [StructLayout(LayoutKind.Sequential)]
@@ -90,8 +91,8 @@ namespace OniBrutal.Engine.Text
             public uint glyph_index;
             public Generic generic;
             public GlyphMetrics metrics;
-            public nint linearHoriAdvance;
-            public nint linearVertAdvance;
+            public CLong linearHoriAdvance;
+            public CLong linearVertAdvance;
             public Vector advance;
             public uint format;
             public Bitmap bitmap;
@@ -104,7 +105,7 @@ namespace OniBrutal.Engine.Text
         public struct SizeMetrics
         {
             public ushort x_ppem, y_ppem;
-            public nint x_scale, y_scale, ascender, descender, height, max_advance;
+            public CLong x_scale, y_scale, ascender, descender, height, max_advance;
         }
 
         [StructLayout(LayoutKind.Sequential)]
@@ -118,11 +119,11 @@ namespace OniBrutal.Engine.Text
         [StructLayout(LayoutKind.Sequential)]
         public struct FaceRec
         {
-            public nint num_faces;
-            public nint face_index;
-            public nint face_flags;
-            public nint style_flags;
-            public nint num_glyphs;
+            public CLong num_faces;
+            public CLong face_index;
+            public CLong face_flags;
+            public CLong style_flags;
+            public CLong num_glyphs;
             public byte* family_name;
             public byte* style_name;
             public int num_fixed_sizes;
@@ -145,18 +146,18 @@ namespace OniBrutal.Engine.Text
         }
 
         [DllImport(Lib)] public static extern int FT_Init_FreeType(out IntPtr library);
-        [DllImport(Lib)] public static extern int FT_New_Memory_Face(IntPtr library, byte* fileBase, nint fileSize, nint faceIndex, out FaceRec* face);
-        [DllImport(Lib)] public static extern int FT_New_Face(IntPtr library, byte* path, nint faceIndex, out FaceRec* face);
+        [DllImport(Lib)] public static extern int FT_New_Memory_Face(IntPtr library, byte* fileBase, CLong fileSize, CLong faceIndex, out FaceRec* face);
+        [DllImport(Lib)] public static extern int FT_New_Face(IntPtr library, byte* path, CLong faceIndex, out FaceRec* face);
         [DllImport(Lib)] public static extern int FT_Done_Face(FaceRec* face);
         [DllImport(Lib)] public static extern int FT_Set_Pixel_Sizes(FaceRec* face, uint pixelWidth, uint pixelHeight);
-        [DllImport(Lib)] public static extern uint FT_Get_Char_Index(FaceRec* face, nuint charcode);
-        [DllImport(Lib)] public static extern uint FT_Face_GetCharVariantIndex(FaceRec* face, nuint charcode, nuint variantSelector);
+        [DllImport(Lib)] public static extern uint FT_Get_Char_Index(FaceRec* face, CULong charcode);
+        [DllImport(Lib)] public static extern uint FT_Face_GetCharVariantIndex(FaceRec* face, CULong charcode, CULong variantSelector);
         [DllImport(Lib)] public static extern int FT_Load_Glyph(FaceRec* face, uint glyphIndex, int loadFlags);
         [DllImport(Lib)] public static extern int FT_Render_Glyph(GlyphSlotRec* slot, int renderMode);
         [DllImport(Lib)] public static extern void FT_GlyphSlot_Embolden(GlyphSlotRec* slot);
         [DllImport(Lib)] public static extern void FT_GlyphSlot_Oblique(GlyphSlotRec* slot);
         [DllImport(Lib)] public static extern void FT_Outline_Get_CBox(Outline* outline, out BBox cbox);
-        [DllImport(Lib)] public static extern void FT_Outline_Translate(Outline* outline, nint xOffset, nint yOffset);
+        [DllImport(Lib)] public static extern void FT_Outline_Translate(Outline* outline, CLong xOffset, CLong yOffset);
         [DllImport(Lib)] public static extern void FT_Outline_Transform(Outline* outline, Matrix* matrix);
         [DllImport(Lib)] public static extern int FT_Outline_Get_Bitmap(IntPtr library, Outline* outline, Bitmap* bitmap);
 

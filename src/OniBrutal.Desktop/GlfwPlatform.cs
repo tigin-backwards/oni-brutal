@@ -16,6 +16,9 @@ namespace OniBrutal.Desktop
     {
         /// Development runs driven by scripted input ignore the window's own mouse and keyboard.
         public bool IgnoreUserInput { get; init; }
+        /// Diagnostics (--gl-debug): a debug context, whose driver reports errors and
+        /// performance problems through GL debug output.
+        public bool DebugContext { get; init; }
     }
 
     /// The player window (GLFW, OpenGL 4.5 core context) and its input devices.
@@ -58,10 +61,13 @@ namespace OniBrutal.Desktop
             Glfw.WindowHint(GlfwWindowHint.ContextVersionMinor, 5);
             Glfw.WindowHint(GlfwWindowHint.OpenGlProfile, GLFW_OPENGL_CORE_PROFILE);
             Glfw.WindowHint(GlfwWindowHint.OpenGlForwardCompat, GLFW_TRUE);
+            Glfw.WindowHint(GlfwWindowHint.OpenGlDebugContext, settings.DebugContext ? GLFW_TRUE : GLFW_FALSE);
             Glfw.WindowHint(GlfwWindowHint.DepthBits, 24);
             Glfw.WindowHint(GlfwWindowHint.StencilBits, 8);
             Glfw.WindowHint(GlfwWindowHint.Doublebuffer, GLFW_TRUE);
             Glfw.WindowHint(GlfwWindowHint.Visible, GLFW_FALSE);
+            // Scripted runs take no input from the desktop and do not take its focus either.
+            Glfw.WindowHint(GlfwWindowHint.FocusOnShow, settings.IgnoreUserInput ? GLFW_FALSE : GLFW_TRUE);
 
             var monitor = Glfw.PrimaryMonitor;
             var desktop = monitor.VideoMode;
@@ -91,7 +97,7 @@ namespace OniBrutal.Desktop
             });
             renderWindow.MakeContextCurrent();
             window.Visible = true;
-            window.Focus();
+            if (!settings.IgnoreUserInput) window.Focus();
 
             // Scripted runs (host --input) take input only from the script.
             scripted = settings.IgnoreUserInput;

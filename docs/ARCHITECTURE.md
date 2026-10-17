@@ -377,9 +377,10 @@ diagnostics. A command that throws is logged and the frame goes on, as an except
 used to unwind only that draw. The GL thread renders into an offscreen back buffer (colour
 texture + depth-stencil); at present it fences the frame and hands it to a presenter thread
 current on the window's context, which waits for the fence on its own thread (neither context's
-GPU queue waits on the other's), blits to the window, swaps with `QualitySettings.vSyncCount` as
-the interval, and finishes; presenting waits until the previous frame has been presented, and
-two back buffers alternate. Back-buffer reads (`ReadPixels` of the screen,
+GPU queue waits on the other's), blits to the window, fences the copy and swaps with
+`QualitySettings.vSyncCount` as the interval. Up to two frames are queued for presentation, as
+Unity's default of two queued frames, and three back buffers rotate; the GL thread waits (on the
+GPU) for a buffer's copy fence before drawing into it again. Back-buffer reads (`ReadPixels` of the screen,
 captures) read the offscreen buffer of the current frame. Pacing follows Unity's desktop
 player: with vSync the swap paces frames; otherwise `Application.targetFrameRate` when set;
 otherwise none. Without a display (`--headless`, `--batchmode`) frames are paced at
@@ -421,8 +422,9 @@ TMP runs as shipped. The engine provides what it needs: `Font`, `TextCore` data 
 `FontEngine` used only for dynamic atlases, and `TextGenerator` for the legacy `UI.Text`
 (debug/mod screens).
 
-- **FreeType** is the system `libfreetype.so.6` through our own P/Invokes (Unity links it
-  statically; the game ships none). OpenType layout data FreeType does not expose (GPOS
+- **FreeType** is BRUTAL's build (`Ahwoo.BRUTAL.FreeType`: `libfreetype.so` / `freetype.dll`)
+  through our own P/Invokes (Unity links FreeType statically; the game ships none); its records'
+  C `long` fields are `CLong`, 64-bit on Linux and 32-bit on Windows. OpenType layout data FreeType does not expose (GPOS
   `kern`/`mark`/`mkmk`, GSUB `liga`, GDEF classes, legacy `kern`, OS/2) is read from the sfnt
   tables in managed code.
 - **Atlases**: Unity's MaxRects packer over TMP's free/used rect lists (glyph + padding on each
@@ -486,17 +488,33 @@ scope; algorithmic equivalence is not.
 ## 6. Configuration and paths
 
 `Application.dataPath` = `<game>/OxygenNotIncluded_Data`, `streamingAssetsPath` =
-`<dataPath>/StreamingAssets`, `persistentDataPath` = `~/.config/unity3d/Klei/Oxygen Not
-Included` (Unity's Linux rule: `$XDG_CONFIG_HOME/unity3d/<company>/<product>`), `platform` =
-`RuntimePlatform.LinuxPlayer`, `isEditor` = false, `isPlaying` = true. Company/product/version
+`<dataPath>/StreamingAssets`, `isEditor` = false, `isPlaying` = true. On Linux,
+`persistentDataPath` = `~/.config/unity3d/Klei/Oxygen Not Included` (Unity's Linux rule:
+`$XDG_CONFIG_HOME/unity3d/<company>/<product>`) and `platform` = `LinuxPlayer`. On Windows the
+player is the Windows one: `platform` = `WindowsPlayer`, `persistentDataPath` =
+`%USERPROFILE%/AppData/LocalLow/<company>/<product>` (the LocalLow known folder),
+`temporaryCachePath` under `%TEMP%`, all paths with forward slashes as Unity reports them; the
+game itself keeps saves, mods and its settings under `Documents\Klei\OxygenNotIncluded`
+(`Environment.GetFolderPath`). The Windows build is the same game build as the Linux one
+(ChangeList 744825) and its shaders carry OpenGL programs next to the Direct3D ones, so the same
+device runs its data. Natives resolve per platform (`Plugins/x86_64/<name>.dll` on Windows,
+`Plugins/lib<name>.so` on Linux); Steamworks.NET is built per runtime identifier (library name
+and callback packing differ); FreeType comes from BRUTAL's package on both. Company/product/version
 come from `globalgamemanagers` PlayerSettings. The host takes `--game <dir>` (default
 `~/projects/oni-linux`), `--headless` (no window, no GL: logic-only frames for tests),
 `--frames N`, `--screenshot <dir>` (debug captures), and `--log <file>`.
 
-The host directory carries a `Restarter`, as Klei's player directory does: `App.Restart` (language
-change) starts it with the player's executable path and quits. Ours waits for the player to exit
-and starts it again with the arguments it was started with (recorded by the host in
-`ONI_BRUTAL_RESTART_ARGS`).
+The host directory carries a `Restarter` (`Restarter.exe` on Windows, a .NET program), as Klei's
+player directory does: `App.Restart` (language change) starts it with the player's executable
+path and quits. Ours waits for the player to exit and starts it again with the arguments it was
+started with (recorded by the host in `ONI_BRUTAL_RESTART_ARGS`, shell-quoted, and
+`ONI_BRUTAL_RESTART_ARGV`, JSON, with `ONI_BRUTAL_RESTART_PID`).
+
+Test runs (not the product): `--run-home DIR` keeps a run's per-user data under DIR (Unity's
+paths, and on Windows the Documents and local application data folders the game asks .NET for),
+`--audio-wav DIR` sends the game's audio to `DIR/fmodoutput.wav` (FMOD's WAV writer) instead of
+the sound device, and the offline Steam double (`tools/SteamStub`, an ELF library or a PE DLL
+written directly) stands in for the Steam client. `scripts/run-windows.sh` uses all three.
 
 ## 7. Logging and diagnostics
 

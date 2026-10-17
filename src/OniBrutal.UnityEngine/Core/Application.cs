@@ -17,7 +17,8 @@ namespace UnityEngine
         public static string version => EngineConfig.Version;
         public static string unityVersion => EngineConfig.UnityVersion;
 
-        public static RuntimePlatform platform => RuntimePlatform.LinuxPlayer;
+        /// The player of the operating system the engine runs on.
+        public static RuntimePlatform platform => OperatingSystem.IsWindows() ? RuntimePlatform.WindowsPlayer : RuntimePlatform.LinuxPlayer;
         public static bool isEditor => false;
         public static bool isPlaying => true;
         public static bool isBatchMode => EngineConfig.IsBatchMode;
@@ -32,7 +33,8 @@ namespace UnityEngine
             set => PlayerLoop.TargetFrameRate = value;
         }
 
-        /// Unity's Linux player derives the language from the locale environment.
+        /// Unity's players derive the language from the user's UI language (Windows) or the
+        /// locale environment (Linux), which the current UI culture reflects.
         public static SystemLanguage systemLanguage => Languages.FromCulture(CultureInfo.CurrentUICulture);
 
         /// Quits at the end of the frame, after OnApplicationQuit, with this exit code.

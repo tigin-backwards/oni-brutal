@@ -16,5 +16,7 @@
     <ProjectReference Include="../OniBrutal.Assets/OniBrutal.Assets.csproj" />
     <!-- stb_image: PNG/JPEG decoding for ImageConversion.LoadImage. -->
     <PackageReference Include="Ahwoo.BRUTAL.Stb" />
+    <!-- FreeType (native only): glyph rasterization for TextCore and legacy fonts. -->
+    <PackageReference Include="Ahwoo.BRUTAL.FreeType" />
   </ItemGroup>
 </Project>

@@ -6,11 +6,13 @@ managed assemblies load unchanged. They bind to generated `UnityEngine.*Module` 
 forward to our engine, `src/OniBrutal.UnityEngine`. Windowing, input and OpenGL come from
 BRUTAL's GLFW and OpenGL bindings.
 
-The repository has no game code or assets in it. You need your own copy of the Linux build.
+The repository has no game code or assets in it. You need your own copy of the game: the Linux
+build, and for the Windows player the Windows build (Steam) as well.
 
 ## Requirements
 
-- Linux x64 with an OpenGL 4.5 driver.
+- Linux x64 with an OpenGL 4.5 driver. The Windows player (below) is built from Linux or WSL and
+  runs on Windows x64 with an OpenGL 4.5 driver and the .NET 10 runtime.
 - The .NET SDK pinned in `global.json` (10.0.402; later patch releases also work). If
   `~/.dotnet/dotnet` exists, the scripts use it.
 - The Linux build of Oxygen Not Included. It is expected at `~/projects/oni-linux`; to use another
@@ -52,6 +54,22 @@ option prints the full list (`scripts/run.sh --help`).
 The offline stub reports that you own the base game, with no DLC and no Workshop items. It is a
 test double for machines without Steam, not a way to play.
 
+## Windows
+
+```sh
+scripts/build-windows.sh       # out/win: OniBrutal.exe, Restarter.exe, the Steam test double
+scripts/run-windows.sh         # from WSL: a test run of the Windows player on the Windows build
+```
+
+The Windows player runs the Windows build's own data: its shaders carry OpenGL programs next to
+the Direct3D ones. `run-windows.sh` copies `out/win` to `%TEMP%\oni-brutal` and starts it through
+WSL with the Windows build from Steam (`ONI_WIN_GAME_DIR` to change it). Test runs keep away from
+your own game data, Steam account and speakers: `--run-home` gives the game a separate Documents,
+AppData and LocalLow under `%TEMP%\oni-brutal\run-home` (`ONI_RUN_HOME`), the offline Steam
+double replaces `steam_api64.dll`, and `--audio-wav` writes the game's sound to
+`fmodoutput.wav` there. To play, run `out/win/host/OniBrutal.exe --game "<game directory>"` on
+Windows with Steam running.
+
 ## Verify
 
 ```sh
@@ -71,6 +89,9 @@ deviations in `docs/ARCHITECTURE.md` (D1–D10). Two of them are fixed by small 
 the host applies to game code, the only ones it makes: D1 (state-machine values in saves from
 the original player loaded at defaults) and D3 (local mods disabled at every launch).
 Floating-point results are not bit-identical to Mono's, and are not meant to be.
+
+On Windows the game's videos do not play yet (no libvpx there), and frame rates on NVIDIA's
+OpenGL driver are lower than they should be in large colonies (see `docs/PLAN.md`, M8).
 
 ## Documents
 

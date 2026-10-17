@@ -192,7 +192,12 @@ namespace OniBrutal.Desktop.Gl
                         g.RecordedShape = shape;
                         g.RecordedSampler = -1;
                         string name = rt.Name;
-                        worker.Post(() => EnsureRenderTexture(g, shape, name));
+                        worker.Post(() =>
+                    {
+                        long t = GlTimings.Now;
+                        EnsureRenderTexture(g, shape, name);
+                        GlTimings.Targets += GlTimings.Now - t;
+                    });
                     }
                     break;
                 }
@@ -202,7 +207,14 @@ namespace OniBrutal.Desktop.Gl
                     g.RecordedContent = tt.ContentVersion;
                     g.RecordedTarget = upload.Target;
                     g.RecordedSampler = -1;
-                    worker.Post(() => upload.Execute(g));
+                    worker.Post(() =>
+                    {
+                        long t = GlTimings.Now;
+                        uint q = GlGpuProfile.Enabled ? GlGpuProfile.Begin() : 0;
+                        upload.Execute(g);
+                        if (GlGpuProfile.Enabled) GlGpuProfile.End($"texture upload {upload.Width}x{upload.Height} {upload.Format}", q);
+                        GlTimings.TextureUploads += GlTimings.Now - t;
+                    });
                     break;
                 }
             }
@@ -484,6 +496,13 @@ namespace OniBrutal.Desktop.Gl
         {
             if (!g.Dirty) return;
             g.Dirty = false;
+            uint q = GlGpuProfile.Enabled ? GlGpuProfile.Begin() : 0;
+            PrepareDirty(g, autoGenerateMips);
+            if (GlGpuProfile.Enabled) GlGpuProfile.End($"render texture resolve/mips {g.Width}x{g.Height}", q);
+        }
+
+        static void PrepareDirty(DeviceTexture g, bool autoGenerateMips)
+        {
             if (g.MultisampleFramebuffer != 0)
             {
                 GlApi.BindFramebuffer(ReadFramebuffer, g.MultisampleFramebuffer);

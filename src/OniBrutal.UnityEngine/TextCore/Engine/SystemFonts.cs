@@ -5,8 +5,9 @@ using UnityEngine.TextCore.LowLevel;
 
 namespace OniBrutal.Engine.Text
 {
-    /// The operating system's installed fonts: font files under the XDG font directories
-    /// (what Unity's Linux player scans), and their faces' family and style names.
+    /// The operating system's installed fonts: font files under the XDG font directories on Linux,
+    /// the system and per-user font folders on Windows (what Unity's players scan), and their
+    /// faces' family and style names.
     internal static class SystemFonts
     {
         static string[] paths;
@@ -15,6 +16,12 @@ namespace OniBrutal.Engine.Text
 
         static IEnumerable<string> Directories()
         {
+            if (OperatingSystem.IsWindows())
+            {
+                yield return Environment.GetFolderPath(Environment.SpecialFolder.Fonts);
+                yield return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Microsoft", "Windows", "Fonts");
+                yield break;
+            }
             var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
             var dataHome = Environment.GetEnvironmentVariable("XDG_DATA_HOME");
             if (string.IsNullOrEmpty(dataHome)) dataHome = Path.Combine(home, ".local", "share");

@@ -23,6 +23,11 @@
       <HintPath>$(OniGameDir)/OxygenNotIncluded_Data/Managed/0Harmony.dll</HintPath>
       <Private>false</Private>
     </Reference>
+    <!-- The game's FMOD wrapper, loaded from Managed/ at run time; AudioCapture (test runs only). -->
+    <Reference Include="FMODUnity">
+      <HintPath>$(OniGameDir)/OxygenNotIncluded_Data/Managed/FMODUnity.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <!-- Out-of-band framework pieces that Mono's class libraries provided in-box. -->

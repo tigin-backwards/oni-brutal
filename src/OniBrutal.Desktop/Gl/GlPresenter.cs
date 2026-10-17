@@ -9,12 +9,14 @@ using N = Brutal.OpenGlApi.OpenGl.Native;
 namespace OniBrutal.Desktop.Gl
 {
     /// Presentation on a thread of its own, as Unity's player presents from its render thread:
-    /// the main thread draws each frame into an offscreen back buffer of the rendering context;
+    /// the GL thread draws each frame into an offscreen back buffer of the rendering context;
     /// the presenter thread, current on the window's context (shared with it), waits for that
     /// frame's commands to complete, copies it to the window and swaps. A swap that blocks
-    /// (vsync, or a display path that reads the frame back) then overlaps the next frame's work
-    /// instead of stalling it. One frame is in flight: presenting a frame first waits until the previous
-    /// one has been presented, so the main thread never draws into a buffer still being shown.
+    /// (vsync, or a display path that reads the frame back) then overlaps the next frames' work
+    /// instead of stalling it. Up to two frames are queued for presentation, as Unity's default
+    /// of two queued frames: with vsync, frames that take longer than a refresh interval are
+    /// shown at the next vblank without holding up the frames after them. Three back buffers
+    /// rotate, so the GL thread never draws into a buffer that is queued or being shown.
     internal sealed unsafe class GlPresenter : IDisposable
     {
         const uint SyncGpuCommandsComplete = 0x9117;
@@ -31,17 +33,22 @@ namespace OniBrutal.Desktop.Gl
             // Presenter side.
             public uint PresentFramebuffer;
             public int PresentGeneration = -1;
+            /// Signalled when the presenter's copy has read the buffer: the GL thread waits for it
+            /// (on the GPU) before drawing into the buffer again.
+            public GlSync CopyDone;
+            public bool HasCopyDone;
         }
 
         readonly GlfwWindow window;
-        readonly Buffer[] buffers = [new(), new()];
+        const int MaxQueued = 2;
+        readonly Buffer[] buffers = [new(), new(), new()];
         int current;
         readonly Thread thread;
         readonly object gate = new();
-        // Handed to the presenter under the gate.
-        Buffer pending;
-        GlSync pendingFence;
-        int pendingInterval;
+        // Handed to the presenter under the gate; a frame counts as queued until it has been
+        // presented.
+        readonly System.Collections.Generic.Queue<(Buffer Buffer, GlSync Fence, int Interval)> queue = new();
+        int queued;
         bool stopping;
         Exception failure;
         int swapInterval = -1;
@@ -58,11 +65,19 @@ namespace OniBrutal.Desktop.Gl
         public uint BackBuffer(int width, int height)
         {
             var b = buffers[current];
+            if (b.HasCopyDone)
+            {
+                N.glWaitSync(b.CopyDone, default, TimeoutIgnored);
+                N.glDeleteSync(b.CopyDone);
+                b.HasCopyDone = false;
+            }
             width = Math.Max(1, width);
             height = Math.Max(1, height);
             if (b.Framebuffer == 0 || b.Width != width || b.Height != height) Allocate(b, width, height);
             return b.Framebuffer;
         }
+
+        const ulong TimeoutIgnored = ulong.MaxValue;
 
         static void Allocate(Buffer b, int width, int height)
         {
@@ -89,8 +104,8 @@ namespace OniBrutal.Desktop.Gl
             GlStateCache.Invalidate();
         }
 
-        /// Hands the frame drawn into the current back buffer to the presenter and moves on to
-        /// the other buffer once the previous frame has been presented.
+        /// Hands the frame drawn into the current back buffer to the presenter, once fewer than
+        /// two frames are queued, and moves on to the next buffer.
         public void Present(int interval)
         {
             var b = buffers[current];
@@ -99,21 +114,20 @@ namespace OniBrutal.Desktop.Gl
             N.glFlush();
             lock (gate)
             {
-                while (pending != null && failure == null) Monitor.Wait(gate);
+                while (queued >= MaxQueued && failure == null) Monitor.Wait(gate);
                 if (failure != null) throw new InvalidOperationException("Presenting failed.", failure);
-                pending = b;
-                pendingFence = fence;
-                pendingInterval = interval;
+                queue.Enqueue((b, fence, interval));
+                queued++;
                 Monitor.PulseAll(gate);
             }
-            current ^= 1;
+            current = (current + 1) % buffers.Length;
         }
 
         /// Waits until every frame handed over has been presented.
         public void WaitIdle()
         {
             lock (gate)
-                while (pending != null && failure == null) Monitor.Wait(gate);
+                while (queued > 0 && failure == null) Monitor.Wait(gate);
         }
 
         void Run()
@@ -123,21 +137,17 @@ namespace OniBrutal.Desktop.Gl
                 window.MakeContextCurrent();
                 while (true)
                 {
-                    Buffer b;
-                    GlSync fence;
-                    int interval;
+                    (Buffer Buffer, GlSync Fence, int Interval) frame;
                     lock (gate)
                     {
-                        while (pending == null && !stopping) Monitor.Wait(gate);
-                        if (pending == null) break;
-                        b = pending;
-                        fence = pendingFence;
-                        interval = pendingInterval;
+                        while (queue.Count == 0 && !stopping) Monitor.Wait(gate);
+                        if (queue.Count == 0) break;
+                        frame = queue.Dequeue();
                     }
-                    PresentBuffer(b, fence, interval);
+                    PresentBuffer(frame.Buffer, frame.Fence, frame.Interval);
                     lock (gate)
                     {
-                        pending = null;
+                        queued--;
                         Monitor.PulseAll(gate);
                     }
                 }
@@ -147,7 +157,8 @@ namespace OniBrutal.Desktop.Gl
                 lock (gate)
                 {
                     failure = e;
-                    pending = null;
+                    queue.Clear();
+                    queued = 0;
                     Monitor.PulseAll(gate);
                 }
             }
@@ -179,9 +190,11 @@ namespace OniBrutal.Desktop.Gl
             GlApi.BindFramebuffer(ReadFramebuffer, b.PresentFramebuffer);
             GlApi.BindFramebuffer(DrawFramebuffer, 0);
             N.glBlitFramebuffer(0, 0, b.Width, b.Height, 0, 0, b.Width, b.Height, ColorBufferBit, Nearest);
+            // The GL thread draws into the buffer again only after the copy has read it.
+            b.CopyDone = N.glFenceSync(SyncGpuCommandsComplete, default);
+            b.HasCopyDone = true;
+            N.glFlush();
             window.SwapBuffers();
-            // The copy has read the buffer before the main thread may draw into it again.
-            N.glFinish();
         }
 
         /// Presents what was handed over, then stops the thread and releases the window's

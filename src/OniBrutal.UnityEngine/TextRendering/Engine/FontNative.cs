@@ -288,15 +288,15 @@ namespace OniBrutal.Engine.Text
             var face = LoadStyled(key);
             if (face == null) return default;
             var slot = face.Slot;
-            var g = new LegacyGlyph { Exists = true, Advance = slot->advance.x / 64f };
+            var g = new LegacyGlyph { Exists = true, Advance = slot->advance.x.Value / 64f };
             if (ShouldRoundAdvanceValue) g.Advance = (float)Math.Round(g.Advance, MidpointRounding.AwayFromZero);
             if (slot->format == FT.GLYPH_FORMAT_OUTLINE)
             {
                 // The bitmap FreeType renders covers the outline's control box rounded out to
                 // whole pixels.
                 FT.FT_Outline_Get_CBox(&slot->outline, out var box);
-                int xMin = (int)Math.Floor(box.xMin / 64.0), yMin = (int)Math.Floor(box.yMin / 64.0);
-                int xMax = (int)Math.Ceiling(box.xMax / 64.0), yMax = (int)Math.Ceiling(box.yMax / 64.0);
+                int xMin = (int)Math.Floor(box.xMin.Value / 64.0), yMin = (int)Math.Floor(box.yMin.Value / 64.0);
+                int xMax = (int)Math.Ceiling(box.xMax.Value / 64.0), yMax = (int)Math.Ceiling(box.yMax.Value / 64.0);
                 if (slot->outline.n_points > 0 && xMax > xMin && yMax > yMin)
                 {
                     g.Left = xMin;

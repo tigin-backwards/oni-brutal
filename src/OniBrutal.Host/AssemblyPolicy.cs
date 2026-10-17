@@ -47,7 +47,9 @@ namespace OniBrutal.Host
         public static void Install(string gameDataDir, string hostDir)
         {
             managedDir = Path.Combine(gameDataDir, "Managed");
-            pluginsDir = Path.Combine(gameDataDir, "Plugins");
+            // Unity's Windows player keeps 64-bit plugins in Plugins/x86_64; the Linux build in Plugins.
+            var x64 = Path.Combine(gameDataDir, "Plugins", "x86_64");
+            pluginsDir = Directory.Exists(x64) ? x64 : Path.Combine(gameDataDir, "Plugins");
             engineDir = Path.Combine(hostDir, "engine");
             AssemblyLoadContext.Default.Resolving += Resolve;
             AssemblyLoadContext.Default.ResolvingUnmanagedDll += ResolveNative;
@@ -81,7 +83,8 @@ namespace OniBrutal.Host
         static IntPtr ResolveNative(Assembly requester, string name)
         {
             if (NativeOverrides.TryGetValue(name, out var overridePath)) return NativeLibrary.Load(overridePath);
-            foreach (var candidate in new[] { $"lib{name}.so", $"{name}.so", name })
+            var candidates = OperatingSystem.IsWindows() ? new[] { $"{name}.dll", name } : new[] { $"lib{name}.so", $"{name}.so", name };
+            foreach (var candidate in candidates)
             {
                 var path = Path.Combine(pluginsDir, candidate);
                 if (File.Exists(path)) return NativeLibrary.Load(path);

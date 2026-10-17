@@ -69,6 +69,34 @@ namespace OniBrutal.Desktop.Gl
     {
         public static float MaxAnisotropy;
 
+        /// Diagnostics (--gl-debug): log the driver's debug output (each distinct message the
+        /// first few times, with the frame), from a debug context.
+        public static bool DebugOutput;
+
+        /// Diagnostics (--vsync-count N): the swap interval whatever QualitySettings says; -1 for
+        /// QualitySettings.vSyncCount.
+        public static int SwapIntervalOverride = -1;
+
+        static readonly System.Collections.Concurrent.ConcurrentDictionary<uint, int> debugCounts = new();
+
+        [System.Runtime.InteropServices.UnmanagedCallersOnly(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+        static void OnDebugMessage(uint source, uint type, uint id, uint severity, int length, byte* message, void* user)
+        {
+            int n = debugCounts.AddOrUpdate(id, 1, (_, c) => c + 1);
+            if (n > 3) return;
+            var text = length >= 0 ? System.Text.Encoding.UTF8.GetString(message, length) : new string((sbyte*)message);
+            EngineLog.Engine($"gl debug (frame {UnityEngine.Time.frameCount}, source 0x{source:X}, type 0x{type:X}, id {id}, severity 0x{severity:X}, #{n}): {text}");
+        }
+
+        static void EnableDebugOutput()
+        {
+            const uint DebugOutputSynchronous = 0x8242, DebugOutputState = 0x92E0;
+            N.glEnable((GlCapability)DebugOutputState);
+            N.glEnable((GlCapability)DebugOutputSynchronous);
+            N.glDebugMessageCallback((nint*)(delegate* unmanaged[Cdecl]<uint, uint, uint, uint, int, byte*, void*, void>)&OnDebugMessage, null);
+            EngineLog.Engine("GL debug output enabled");
+        }
+
         readonly GlfwPlatform platform;
         readonly GlCaps caps = new();
         readonly GlWorker worker;
@@ -106,6 +134,7 @@ namespace OniBrutal.Desktop.Gl
             }
             caps.Rgtc |= true; // core since OpenGL 3.0
             caps.MemoryMB = QueryVideoMemoryMB();
+            if (DebugOutput) EnableDebugOutput();
             EngineLog.Engine($"OpenGL: {caps.VersionString} / {caps.Name} / {caps.Vendor}");
 
             GlVertexArray vao = default;
@@ -121,6 +150,14 @@ namespace OniBrutal.Desktop.Gl
             presenter = new GlPresenter(platform.Window);
             // From here on the context belongs to the GL thread.
             worker = new GlWorker(platform.RenderWindow, CommandFailed);
+            // A frame's GPU time is measured from its first commands, not from the previous
+            // present: in between the GL thread waits for the main thread's next frame.
+            worker.BatchStarting = () =>
+            {
+                if (!gpuTimingArmed) return;
+                gpuTimingArmed = false;
+                BeginGpuTiming();
+            };
             platform.Closing += () =>
             {
                 worker.Dispose();
@@ -235,9 +272,11 @@ namespace OniBrutal.Desktop.Gl
             var bound = new BoundTarget(colors, depth, platform.FramebufferWidth, platform.FramebufferHeight);
             worker.Post(() =>
             {
+                long t = GlTimings.Now;
                 target = bound;
                 framebufferValid = false;
                 BindTarget();
+                GlTimings.Targets += GlTimings.Now - t;
             });
         }
 
@@ -327,6 +366,7 @@ namespace OniBrutal.Desktop.Gl
         {
             worker.Post(() =>
             {
+                uint q = GlGpuProfile.Enabled ? GlGpuProfile.Begin() : 0;
                 BindTarget();
                 // Clears fill the whole target.
                 if (scissor != null) GlApi.Enable(ScissorTest, false);
@@ -348,6 +388,7 @@ namespace OniBrutal.Desktop.Gl
                 if (mask != 0) N.glClear(mask);
                 if (scissor != null) GlApi.Enable(ScissorTest, true);
                 GlStateCache.Invalidate();
+                if (GlGpuProfile.Enabled) GlGpuProfile.End("clear", q);
             });
         }
 
@@ -425,6 +466,8 @@ namespace OniBrutal.Desktop.Gl
         /// Everything a draw's program reads, recorded on the main thread.
         sealed class ProgramInputs
         {
+            /// Shader and pass (diagnostics, --gpu-profile).
+            public string Label;
             public DeviceProgram Program;
             public ResolvedState State;
             public float[] Values;
@@ -486,7 +529,15 @@ namespace OniBrutal.Desktop.Gl
                 if (program.Id == 0) continue;
                 inputs.Shader = passShader;
                 var recorded = Record(program, StateOf(pass), inputs);
-                worker.Post(() => ExecuteDraw(recorded, mesh, layout, sm));
+                if (GlGpuProfile.Enabled) recorded.Label = passShader.ShaderName + "/" + (pass.Name.Length > 0 ? pass.Name : "pass");
+                worker.Post(() =>
+                {
+                    long t = GlTimings.Now;
+                    uint q = GlGpuProfile.Enabled ? GlGpuProfile.Begin() : 0;
+                    ExecuteDraw(recorded, mesh, layout, sm);
+                    if (GlGpuProfile.Enabled) GlGpuProfile.End(recorded.Label, q);
+                    GlTimings.Draws += GlTimings.Now - t;
+                });
             }
         }
 
@@ -655,7 +706,13 @@ namespace OniBrutal.Desktop.Gl
                 }
             }
             int count = vertices.Length;
-            worker.Post(() => ExecuteImmediate(recorded, primitive, data, count, indices));
+            if (GlGpuProfile.Enabled) recorded.Label = "immediate " + shader.ShaderName;
+            worker.Post(() =>
+            {
+                uint q = GlGpuProfile.Enabled ? GlGpuProfile.Begin() : 0;
+                ExecuteImmediate(recorded, primitive, data, count, indices);
+                if (GlGpuProfile.Enabled) GlGpuProfile.End(recorded.Label, q);
+            });
         }
 
         void ExecuteImmediate(ProgramInputs recorded, ImmediatePrimitive primitive, float[] data, int count, int[] indices)
@@ -778,17 +835,20 @@ namespace OniBrutal.Desktop.Gl
         /// QualitySettings.vSyncCount as the swap interval.
         public override void Present()
         {
-            int interval = QualitySettings.vSyncCount;
+            int interval = SwapIntervalOverride >= 0 ? SwapIntervalOverride : QualitySettings.vSyncCount;
             int width = platform.FramebufferWidth, height = platform.FramebufferHeight;
             worker.Post(() =>
             {
                 if (gpuTiming) EndGpuTiming();
                 uniformStream?.FenceFrame();
+                if (GlGpuProfile.Enabled) GlGpuProfile.FrameEnd();
                 // The back buffer of a frame that drew nothing to the screen still exists.
                 presenter.BackBuffer(width, height);
+                long t = GlTimings.Now;
                 presenter.Present(interval);
+                GlTimings.Present += GlTimings.Now - t;
                 framebufferValid = false;
-                if (gpuTiming) BeginGpuTiming();
+                gpuTimingArmed = gpuTiming;
             });
             worker.Submit();
         }
@@ -804,7 +864,8 @@ namespace OniBrutal.Desktop.Gl
 
         public override string TakeFrameCounters(int frames) => worker.Call(() =>
         {
-            string text = $"draws {draws / frames}, program binds {GlBindings.ProgramBinds / frames}, texture binds {GlBindings.TextureBinds / frames}, buffer binds {GlBindings.BufferBinds / frames}, vertex array binds {GlBindings.VertexArrayBinds / frames}, skipped binds {GlBindings.Skipped / frames}, uniforms sent {GlUniforms.UniformsSent / frames}, unchanged uniforms {GlUniforms.UniformsSkipped / frames}, texture uploads {GlTextures.Uploads / (double)frames:F1} ({GlTextures.UploadBytes / frames / 1024} KiB)";
+            var profile = GlGpuProfile.Take(frames);
+            string text = (profile != null ? profile + "\n" : "") + GlTimings.Take(frames) + $"; draws {draws / frames}, program binds {GlBindings.ProgramBinds / frames}, texture binds {GlBindings.TextureBinds / frames}, buffer binds {GlBindings.BufferBinds / frames}, vertex array binds {GlBindings.VertexArrayBinds / frames}, skipped binds {GlBindings.Skipped / frames}, uniforms sent {GlUniforms.UniformsSent / frames}, unchanged uniforms {GlUniforms.UniformsSkipped / frames}, texture uploads {GlTextures.Uploads / (double)frames:F1} ({GlTextures.UploadBytes / frames / 1024} KiB)";
             draws = 0;
             GlUniforms.UniformsSent = GlUniforms.UniformsSkipped = 0;
             GlTextures.Uploads = GlTextures.UploadBytes = 0;
@@ -812,11 +873,11 @@ namespace OniBrutal.Desktop.Gl
             return text;
         });
 
-        bool gpuTiming;
+        bool gpuTiming, gpuTimingArmed;
         double gpuTotal;
         int gpuFrames;
 
-        /// GPU time of the commands between consecutive presents, averaged over the frames
+        /// GPU time of a frame's commands (from the first to the present), averaged over the frames
         /// whose results arrived since the last call; -1 before any.
         public override double TakeGpuFrameMilliseconds() => worker.Call(() =>
         {

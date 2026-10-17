@@ -10,9 +10,16 @@
     <!-- Upstream code, kept as is: its warnings are not ours to fix. -->
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     <NoWarn>$(NoWarn);CS0169;CS0414;CS0618;CS0649;CS0168;CS8981;CS0108</NoWarn>
-    <!-- The compilation symbols Unity defines for a 64-bit Linux standalone player, which select
-         the Linux API surface and the small (4-byte) callback packing. -->
-    <DefineConstants>$(DefineConstants);UNITY_STANDALONE_LINUX;UNITY_STANDALONE;UNITY_64;UNITY_5_3_OR_NEWER;UNITY_2017_1_OR_NEWER;UNITY_2020_1_OR_NEWER;UNITY_2021_1_OR_NEWER;UNITY_2022_1_OR_NEWER;UNITY_6000_0_OR_NEWER</DefineConstants>
+    <!-- The compilation symbols Unity defines for a 64-bit standalone player of the target
+         platform: on Linux they select libsteam_api and the small (4-byte) callback packing, on
+         Windows steam_api64 and the large (8-byte) packing, as in the game's per-platform
+         builds of this library. -->
+    <!-- Platform-specific: a referencing player built for a runtime identifier gets this
+         library built for the same one. -->
+    <RuntimeIdentifiers>linux-x64;win-x64</RuntimeIdentifiers>
+    <SteamworksPlatform>UNITY_STANDALONE_LINUX</SteamworksPlatform>
+    <SteamworksPlatform Condition="$(RuntimeIdentifier.StartsWith('win'))">UNITY_STANDALONE_WIN</SteamworksPlatform>
+    <DefineConstants>$(DefineConstants);$(SteamworksPlatform);UNITY_STANDALONE;UNITY_64;UNITY_5_3_OR_NEWER;UNITY_2017_1_OR_NEWER;UNITY_2020_1_OR_NEWER;UNITY_2021_1_OR_NEWER;UNITY_2022_1_OR_NEWER;UNITY_6000_0_OR_NEWER</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../../OniBrutal.UnityEngine/OniBrutal.UnityEngine.csproj" />

@@ -41,6 +41,9 @@ namespace OniBrutal.Desktop.Gl
         /// an exception in a draw on the main thread used to unwind only that draw.
         readonly Action<Exception> commandFailed;
 
+        /// Runs on the GL thread before each handed-over batch of commands executes.
+        public Action BatchStarting;
+
         public GlWorker(GlfwWindow context, Action<Exception> commandFailed)
         {
             this.commandFailed = commandFailed;
@@ -132,11 +135,14 @@ namespace OniBrutal.Desktop.Gl
                         if (submitted == null) break;
                         frame = submitted;
                     }
+                    BatchStarting?.Invoke();
+                    long start = GlTimings.Now;
                     foreach (var command in frame.Commands)
                     {
                         try { command(); }
                         catch (Exception e) { commandFailed(e); }
                     }
+                    GlTimings.Busy += GlTimings.Now - start;
                     frame.Reset();
                     lock (gate)
                     {

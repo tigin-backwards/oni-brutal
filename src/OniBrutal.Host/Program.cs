@@ -14,8 +14,12 @@ namespace OniBrutal.Host
         {
             var options = Options.Parse(args);
             if (options == null) return 2;
-            // For the Restarter next to the host (App.Restart): the arguments to start again with.
+            // For the Restarter next to the host (App.Restart): the arguments to start again with
+            // (shell-quoted for the Linux script; as a JSON array with the process id for the
+            // Windows one) and the process to wait for.
             Environment.SetEnvironmentVariable("ONI_BRUTAL_RESTART_ARGS", string.Join(" ", args.Select(a => "'" + a.Replace("'", "'\\''") + "'")));
+            Environment.SetEnvironmentVariable("ONI_BRUTAL_RESTART_ARGV", System.Text.Json.JsonSerializer.Serialize(args));
+            Environment.SetEnvironmentVariable("ONI_BRUTAL_RESTART_PID", Environment.ProcessId.ToString(System.Globalization.CultureInfo.InvariantCulture));
 
             var dataDir = Path.Combine(options.GameDir, "OxygenNotIncluded_Data");
             if (!Directory.Exists(dataDir))
@@ -43,6 +47,8 @@ namespace OniBrutal.Host
             if (options.DumpScript != null) return AssetCheck.Dump(dataDir, options.DumpScript);
 
             if (options.TraceExceptions) ExceptionTrace.Install();
+            if (options.RunHome != null) RunHome.Install(options.RunHome);
+            if (options.AudioWav != null) AudioCapture.Install(options.AudioWav);
             ModVersionStamp.Install();
             StateMachineSaveNames.Install(dataDir, AppContext.BaseDirectory);
             return Player.Run(options, dataDir);
@@ -118,7 +124,16 @@ namespace OniBrutal.Host
 
     internal sealed class Options
     {
-        public string GameDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "projects", "oni-linux");
+        public string GameDir = OperatingSystem.IsWindows()
+            ? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "OxygenNotIncluded")
+            : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "projects", "oni-linux");
+        /// Test runs (`--run-home DIR`): the player's per-user data (Unity's persistent and cache
+        /// paths, and on Windows the Documents and local application data folders the game reads)
+        /// under DIR instead of the user's (RunHome).
+        public string? RunHome;
+        /// Test runs (`--audio-wav DIR`): the game's audio written to DIR/fmodoutput.wav instead of
+        /// the sound device (AudioCapture).
+        public string? AudioWav;
         public string? LogPath;
         public bool Headless;
         public bool BatchMode;
@@ -136,6 +151,12 @@ namespace OniBrutal.Host
         /// Diagnostics: log every first-chance exception with IL offsets per frame (game code
         /// has no symbols, so offsets locate the throwing instruction).
         public bool TraceExceptions;
+        /// Diagnostics (--gl-debug): the driver's GL debug output in the log (debug context).
+        public bool GlDebug;
+        /// Diagnostics (--vsync-count N): the swap interval regardless of the quality settings.
+        public int VSyncCount = -1;
+        /// Diagnostics (--gpu-profile): GPU time by operation with the frame counters.
+        public bool GpuProfile;
         public readonly ScriptedInput Input = new();
         // Unity's standalone player arguments.
         public int ScreenWidth = -1, ScreenHeight = -1;
@@ -166,6 +187,8 @@ namespace OniBrutal.Host
                 {
                     case "--game": o.GameDir = args[++i]; break;
                     case "--log": o.LogPath = args[++i]; break;
+                    case "--run-home": o.RunHome = Path.GetFullPath(args[++i]); break;
+                    case "--audio-wav": o.AudioWav = Path.GetFullPath(args[++i]); break;
                     case "--headless": o.Headless = true; break;
                     case "--batchmode": o.BatchMode = true; break;
                     case "--check-types": o.CheckTypes = true; break;
@@ -176,6 +199,9 @@ namespace OniBrutal.Host
                     case "--dump-script": o.DumpScript = args[++i]; break;
                     case "--frames": o.Frames = int.Parse(args[++i]); break;
                     case "--trace-exceptions": o.TraceExceptions = true; break;
+                    case "--gl-debug": o.GlDebug = true; break;
+                    case "--vsync-count": o.VSyncCount = int.Parse(args[++i]); break;
+                    case "--gpu-profile": o.GpuProfile = true; break;
                     case "--input": o.Input.Add(args[++i]); break;
                     case "--frame-stats": OniBrutal.Engine.PlayerLoop.FrameStats = true; break;
                     case "--max-frame-rate":
@@ -228,13 +254,19 @@ namespace OniBrutal.Host
                     }
                     case "--capture":
                     {
-                        var parts = args[++i].Split(':');
-                        o.Captures.Add((int.Parse(parts[0]), parts[1], parts.Length > 2 ? int.Parse(parts[2]) : 1));
+                        // FRAME:PATH[:SCALE]; the path may hold a colon itself (a Windows drive).
+                        var spec = args[++i];
+                        int colon = spec.IndexOf(':');
+                        var path = spec[(colon + 1)..];
+                        int scale = 1;
+                        int last = path.LastIndexOf(':');
+                        if (last > 0 && int.TryParse(path[(last + 1)..], out int s)) { scale = s; path = path[..last]; }
+                        o.Captures.Add((int.Parse(spec[..colon]), path, scale));
                         break;
                     }
                     default:
                         Console.Error.WriteLine($"Unknown option {args[i]}");
-                        Console.Error.WriteLine("usage: OniBrutal [--game DIR] [--log FILE] [--headless] [--batchmode] [--frames N] [--native-override NAME=PATH] [--trace-exceptions] [--input FRAME:ACTION[:ARGS]] [--frame-stats] [--max-frame-rate N[:FRAMES]] [--dump-render-textures FRAME:DIR] [-screen-width W] [-screen-height H] [-screen-fullscreen 0|1] [-window-mode exclusive|borderless|windowed] [--check-types] [--check-assets] [--check-bind] [--check-shaders] [--dump-shader NAME:DIR] [--capture FRAME:PATH[:SCALE]] [--probe-ui FRAME:X,Y] [--dump-hierarchy FRAME:PATH] [--report-builtin-assets FILE] [--dump-component FRAME:PATH|TYPE]");
+                        Console.Error.WriteLine("usage: OniBrutal [--game DIR] [--log FILE] [--run-home DIR] [--audio-wav DIR] [--headless] [--batchmode] [--frames N] [--native-override NAME=PATH] [--trace-exceptions] [--gl-debug] [--vsync-count N] [--gpu-profile] [--input FRAME:ACTION[:ARGS]] [--frame-stats] [--max-frame-rate N[:FRAMES]] [--dump-render-textures FRAME:DIR] [-screen-width W] [-screen-height H] [-screen-fullscreen 0|1] [-window-mode exclusive|borderless|windowed] [--check-types] [--check-assets] [--check-bind] [--check-shaders] [--dump-shader NAME:DIR] [--capture FRAME:PATH[:SCALE]] [--probe-ui FRAME:X,Y] [--dump-hierarchy FRAME:PATH] [--report-builtin-assets FILE] [--dump-component FRAME:PATH|TYPE]");
                         return null;
                 }
             }
@@ -242,7 +274,8 @@ namespace OniBrutal.Host
         }
     }
 
-    /// Unity's player paths for this game on Linux.
+    /// Unity's player paths for this game: the Linux player's (XDG directories) or the Windows
+    /// player's (LocalLow, the temporary folder; with forward slashes, as Unity reports them).
     internal static class Paths
     {
         public static void Configure(string dataDir, Options options)
@@ -251,18 +284,57 @@ namespace OniBrutal.Host
             var info = File.ReadAllLines(Path.Combine(dataDir, "app.info"));
             EngineConfig.CompanyName = info.Length > 0 ? info[0] : "";
             EngineConfig.ProductName = info.Length > 1 ? info[1] : "";
+            if (OperatingSystem.IsWindows()) ConfigureWindows(dataDir, options.RunHome);
+            else ConfigureLinux(dataDir, options.RunHome);
+            EngineConfig.ConsoleLogPath = EngineConfig.PersistentDataPath + "/Player.log";
+            EngineConfig.IsBatchMode = options.BatchMode;
+            EngineConfig.Headless = options.Headless;
+        }
+
+        static void ConfigureLinux(string dataDir, string? runHome)
+        {
             EngineConfig.DataPath = dataDir;
             EngineConfig.StreamingAssetsPath = Path.Combine(dataDir, "StreamingAssets");
             // Unity's Linux player: $XDG_CONFIG_HOME/unity3d/<company>/<product>, defaulting to ~/.config.
-            var config = Environment.GetEnvironmentVariable("XDG_CONFIG_HOME");
-            if (string.IsNullOrEmpty(config)) config = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".config");
+            var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            var config = runHome != null ? Path.Combine(runHome, "config") : Environment.GetEnvironmentVariable("XDG_CONFIG_HOME");
+            if (string.IsNullOrEmpty(config)) config = Path.Combine(home, ".config");
             EngineConfig.PersistentDataPath = Path.Combine(config, "unity3d", EngineConfig.CompanyName, EngineConfig.ProductName);
-            EngineConfig.ConsoleLogPath = Path.Combine(EngineConfig.PersistentDataPath, "Player.log");
-            var cache = Environment.GetEnvironmentVariable("XDG_CACHE_HOME");
-            if (string.IsNullOrEmpty(cache)) cache = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".cache");
+            var cache = runHome != null ? Path.Combine(runHome, "cache") : Environment.GetEnvironmentVariable("XDG_CACHE_HOME");
+            if (string.IsNullOrEmpty(cache)) cache = Path.Combine(home, ".cache");
             EngineConfig.TemporaryCachePath = Path.Combine(cache, EngineConfig.CompanyName, EngineConfig.ProductName);
-            EngineConfig.IsBatchMode = options.BatchMode;
-            EngineConfig.Headless = options.Headless;
+        }
+
+        static void ConfigureWindows(string dataDir, string? runHome)
+        {
+            static string Unity(string path) => path.Replace('\\', '/');
+            EngineConfig.DataPath = Unity(Path.GetFullPath(dataDir));
+            EngineConfig.StreamingAssetsPath = EngineConfig.DataPath + "/StreamingAssets";
+            var localLow = runHome != null ? Path.Combine(runHome, "AppData", "LocalLow") : WindowsFolders.LocalAppDataLow();
+            EngineConfig.PersistentDataPath = Unity(Path.Combine(localLow, EngineConfig.CompanyName, EngineConfig.ProductName));
+            var temp = runHome != null ? Path.Combine(runHome, "AppData", "Local", "Temp") : Path.GetTempPath();
+            EngineConfig.TemporaryCachePath = Unity(Path.Combine(temp, EngineConfig.CompanyName, EngineConfig.ProductName));
+        }
+    }
+
+    /// Windows known folders .NET's SpecialFolder does not name.
+    internal static class WindowsFolders
+    {
+        static readonly Guid LocalAppDataLowId = new("A520A1A4-1780-4FF6-BD18-167343C5AF16");
+
+        [System.Runtime.InteropServices.DllImport("shell32.dll")]
+        static extern int SHGetKnownFolderPath(in Guid id, uint flags, IntPtr token, out IntPtr path);
+
+        [System.Runtime.InteropServices.DllImport("ole32.dll")]
+        static extern void CoTaskMemFree(IntPtr p);
+
+        /// %USERPROFILE%\AppData\LocalLow, where Unity's Windows player keeps persistent data.
+        public static string LocalAppDataLow()
+        {
+            int hr = SHGetKnownFolderPath(LocalAppDataLowId, 0, IntPtr.Zero, out var p);
+            if (hr != 0) throw new InvalidOperationException($"The LocalLow folder could not be found (0x{hr:X8}).");
+            try { return System.Runtime.InteropServices.Marshal.PtrToStringUni(p)!; }
+            finally { CoTaskMemFree(p); }
         }
     }
 }

@@ -196,15 +196,51 @@ wait for the GL thread every frame, on a build still staging uploads through tha
 a segmentation fault at frame ~19k; with uploads from memory two such runs passed 24k frames
 without one, and no run of the shipping configuration has crashed.
 
-### M8 (proposed) — Windows
+### M8 — Windows (started 2026-10-17)
 
-The Windows build ships D3D11 programs only, and different native plugins (`SimDLL.dll`,
-FMOD, `steam_api64.dll`). Unity produced the Linux build's GLSL with HLSLcc (DXBC → GLSL; MIT,
-Unity-Technologies/HLSLcc), so the Windows build's DXBC can be translated at load (cached) into
-the same kind of GLSL the OpenGL device already runs, rather than writing a D3D11 device
-(BRUTAL binds OpenGL and Vulkan, not Direct3D). Remaining work: Windows-side natives resolution
-in AssemblyPolicy, paths and persistent-data roots, the Steam stub for Windows, and a parity
-baseline against the Windows player.
+Findings: the Windows build (`OxygenNotIncluded.exe`, Steam) is the same game build as the
+Linux one (KleiVersion.ChangeList 744825); its assemblies differ only in a Windows-only field
+(`Global.saveFolderTestResult`) and the Epic Online Services library name. Every shader in its
+data carries OpenGLCore programs next to the D3D11 ones (platforms 4 and 15), so the OpenGL
+device runs the Windows data as it is; no DXBC translation is needed for the game. (The D3D11
+programs keep only signature and code chunks, RDEF stripped; translating them, for mod bundles
+built only for D3D11, would take names from Unity's per-program parameter tables.)
+
+Work:
+- Engine, Windows semantics: `Application.platform` WindowsPlayer; `persistentDataPath`
+  `%USERPROFILE%/AppData/LocalLow/<company>/<product>` and the other paths with forward slashes,
+  as Unity reports them; `PlayerPrefs` in the registry (HKCU\Software\<company>\<product>, names
+  suffixed with Unity's hash); system fonts from the Windows font folder; `SystemInfo` strings.
+- Host: natives as `<name>.dll` from `Plugins/x86_64`; the GLFW and libvpx natives for win-x64;
+  the game's `Documents\Klei` root, which the game reads through `Environment.GetFolderPath`.
+- Test infrastructure: the offline Steam double as a PE DLL (`steam_api64`), written by the
+  generator directly (no native toolchain on either side); a run home that keeps test runs out
+  of the user's Documents, LocalLow and registry; audio kept off the speakers; runs started
+  from WSL through interop.
+- Parity: the Linux original is the reference (same build); saves cross-load between the
+  platforms; frame rate on the native driver.
+
+Done (2026-10-17): the Windows player (`scripts/build-windows.sh`, `scripts/run-windows.sh`) runs
+the Windows build on the native driver (NVIDIA RTX 3090, OpenGL 4.5): type-load, asset, bind and
+shader checks pass (119 shaders, every variant compiles); the menu renders as on Linux; DeCrew
+loads and plays without exceptions; Regrettable Dimension played 28k frames at speed 3 with no
+exceptions and no white-out, seven autosaves, audio to the run home's WAV file; the user's own
+Documents, LocalLow and Steam account untouched. FreeType moved to BRUTAL's package on both
+platforms (the system library on Linux before); its `long` fields are `CLong`. Presentation
+queues two frames (three buffers) with a copy fence instead of a `glFinish` per frame.
+
+Open:
+- Frame rate on NVIDIA's OpenGL driver: DeCrew ~26 fps against 35 under WSL (Mesa d3d12 on the
+  same GPU). `--gpu-profile` puts 33 of 46 GPU ms in `Klei/BatchedAnimation`: binding a different
+  texture for the vertex stage between draws (each animation batch has its own data textures)
+  serializes the draws (~37 µs each whatever their size); keeping them bound brings the frame to
+  6 ms. Next: bindless textures (`GL_ARB_bindless_texture`) for sampler uniforms where the driver
+  has them, the binding path otherwise.
+- Videos on Windows: there is no system libvpx there and no BRUTAL package for it. Next: a
+  managed VP8 decoder (RFC 6386; output is bit-exact by specification), checked frame by frame
+  against libvpx on Linux for every video of the game, which also removes the Linux dependency.
+- Parity runs: save cross-load between the platforms, menus and options, mods, the Windows
+  original as reference where it can run without the user's own data and account.
 
 ## Open items
 

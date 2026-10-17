@@ -172,14 +172,14 @@ namespace UnityEngine.TextCore.LowLevel
         {
             uint index = face.GlyphIndex(c);
             if (index == 0 || !face.Load(index, FT.LOAD_NO_HINTING | FT.LOAD_NO_BITMAP)) return 0f;
-            return face.Slot->metrics.horiBearingY / 64f;
+            return face.Slot->metrics.horiBearingY.Value / 64f;
         }
 
         static unsafe float GlyphAdvance(FontFace face, char c)
         {
             uint index = face.GlyphIndex(c);
             if (index == 0 || !face.Load(index, FT.LOAD_NO_HINTING | FT.LOAD_NO_BITMAP)) return 0f;
-            return face.Slot->metrics.horiAdvance / 64f;
+            return face.Slot->metrics.horiAdvance.Value / 64f;
         }
 
         /// "Family - Style" for each face of the current font file; null when there is none.
@@ -251,7 +251,7 @@ namespace UnityEngine.TextCore.LowLevel
             if (!s_Face.Load(index, (int)flags)) return false;
             var m = s_Face.Slot->metrics;
             float k = (flags & GlyphLoadFlags.LOAD_NO_SCALE) != 0 ? 1f : 1f / 64f;
-            glyph = new Glyph(index, new GlyphMetrics(m.width * k, m.height * k, m.horiBearingX * k, m.horiBearingY * k, m.horiAdvance * k), GlyphRect.zero, 1f, 0)
+            glyph = new Glyph(index, new GlyphMetrics(m.width.Value * k, m.height.Value * k, m.horiBearingX.Value * k, m.horiBearingY.Value * k, m.horiAdvance.Value * k), GlyphRect.zero, 1f, 0)
             {
                 classDefinitionType = (GlyphClassDefinitionType)s_Face.Tables.GlyphClass(index),
             };

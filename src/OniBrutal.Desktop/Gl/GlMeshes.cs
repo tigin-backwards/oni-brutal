@@ -110,7 +110,14 @@ namespace OniBrutal.Desktop.Gl
             d.SubMeshes = Indices(m, out upload.Indices);
             if (!layout.SameAs(d.Layout)) d.Layout = layout;
             d.RecordedVersion = m.Version;
-            worker.Post(() => Upload(d, upload));
+            worker.Post(() =>
+            {
+                long t = GlTimings.Now;
+                uint q = GlGpuProfile.Enabled ? GlGpuProfile.Begin() : 0;
+                Upload(d, upload);
+                if (GlGpuProfile.Enabled) GlGpuProfile.End("mesh upload", q);
+                GlTimings.MeshUploads += GlTimings.Now - t;
+            });
             return d;
         }
 

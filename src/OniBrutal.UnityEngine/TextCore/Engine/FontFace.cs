@@ -33,7 +33,7 @@ namespace OniBrutal.Engine.Text
             result = null;
             if (data == null || data.Length == 0) return FontEngineError.Invalid_File;
             var pin = GCHandle.Alloc(data, GCHandleType.Pinned);
-            int error = FT.FT_New_Memory_Face(FT.Library, (byte*)pin.AddrOfPinnedObject(), data.Length, faceIndex, out var face);
+            int error = FT.FT_New_Memory_Face(FT.Library, (byte*)pin.AddrOfPinnedObject(), new CLong(data.Length), new CLong(faceIndex), out var face);
             if (error != 0)
             {
                 pin.Free();
@@ -49,7 +49,7 @@ namespace OniBrutal.Engine.Text
 
         public FT.FaceRec* Handle => face;
 
-        public int FaceCount => (int)face->num_faces;
+        public int FaceCount => (int)face->num_faces.Value;
         public string FamilyName => FT.String(face->family_name);
         public string StyleName => FT.String(face->style_name);
         public int UnitsPerEm => face->units_per_EM;
@@ -58,7 +58,7 @@ namespace OniBrutal.Engine.Text
         public short Height => face->height;
         public short UnderlinePosition => face->underline_position;
         public short UnderlineThickness => face->underline_thickness;
-        public bool IsScalable => (face->face_flags & 1) != 0;
+        public bool IsScalable => (face->face_flags.Value & 1) != 0;
 
         public FontEngineError SetPixelSize(int size)
         {
@@ -69,9 +69,9 @@ namespace OniBrutal.Engine.Text
             return FontEngineError.Success;
         }
 
-        public uint GlyphIndex(uint unicode) => FT.FT_Get_Char_Index(face, unicode);
+        public uint GlyphIndex(uint unicode) => FT.FT_Get_Char_Index(face, new CULong(unicode));
 
-        public uint VariantGlyphIndex(uint unicode, uint selector) => FT.FT_Face_GetCharVariantIndex(face, unicode, selector);
+        public uint VariantGlyphIndex(uint unicode, uint selector) => FT.FT_Face_GetCharVariantIndex(face, new CULong(unicode), new CULong(selector));
 
         public FT.GlyphSlotRec* Slot => face->glyph;
 
@@ -91,14 +91,14 @@ namespace OniBrutal.Engine.Text
             var bytes = System.Text.Encoding.UTF8.GetBytes(path + "\0");
             fixed (byte* p = bytes)
             {
-                if (FT.FT_New_Face(FT.Library, p, 0, out var first) != 0) return Array.Empty<(string, string)>();
-                int count = (int)first->num_faces;
+                if (FT.FT_New_Face(FT.Library, p, new CLong(0), out var first) != 0) return Array.Empty<(string, string)>();
+                int count = (int)first->num_faces.Value;
                 var names = new (string, string)[count];
                 names[0] = (FT.String(first->family_name), FT.String(first->style_name));
                 FT.FT_Done_Face(first);
                 for (int i = 1; i < count; i++)
                 {
-                    if (FT.FT_New_Face(FT.Library, p, i, out var f) != 0) continue;
+                    if (FT.FT_New_Face(FT.Library, p, new CLong(i), out var f) != 0) continue;
                     names[i] = (FT.String(f->family_name), FT.String(f->style_name));
                     FT.FT_Done_Face(f);
                 }
@@ -151,7 +151,7 @@ namespace OniBrutal.Engine.Text
             var g = CopyBitmap(&slot->bitmap);
             g.BearingX = slot->bitmap_left;
             g.BearingY = slot->bitmap_top;
-            g.Advance = slot->metrics.horiAdvance / 64f;
+            g.Advance = slot->metrics.horiAdvance.Value / 64f;
             return g;
         }
 
@@ -159,10 +159,10 @@ namespace OniBrutal.Engine.Text
         {
             int scale = (m & Mode32x) != 0 ? 32 : (m & Mode16x) != 0 ? 16 : (m & Mode8x) != 0 ? 8 : 1;
             bool antialiased = (m & ModeSdfaa) != 0;
-            var g = new GlyphBitmap { Advance = slot->metrics.horiAdvance / 64f };
+            var g = new GlyphBitmap { Advance = slot->metrics.horiAdvance.Value / 64f };
             if (slot->format != FT.GLYPH_FORMAT_OUTLINE) return null;
             FT.FT_Outline_Get_CBox(&slot->outline, out var box);
-            int xMin = FloorPx(box.xMin), yMin = FloorPx(box.yMin), xMax = CeilPx(box.xMax), yMax = CeilPx(box.yMax);
+            int xMin = FloorPx(box.xMin.Value), yMin = FloorPx(box.yMin.Value), xMax = CeilPx(box.xMax.Value), yMax = CeilPx(box.yMax.Value);
             int w = xMax - xMin, h = yMax - yMin;
             g.BearingX = xMin;
             g.BearingY = yMax;
@@ -174,10 +174,10 @@ namespace OniBrutal.Engine.Text
             }
             int pw = w + 2 * padding, ph = h + 2 * padding;
             int bw = pw * scale, bh = ph * scale;
-            FT.FT_Outline_Translate(&slot->outline, (nint)(padding - xMin) * 64, (nint)(padding - yMin) * 64);
+            FT.FT_Outline_Translate(&slot->outline, new CLong((nint)(padding - xMin) * 64), new CLong((nint)(padding - yMin) * 64));
             if (scale != 1)
             {
-                var matrix = new FT.Matrix { xx = scale << 16, yy = scale << 16 };
+                var matrix = new FT.Matrix { xx = new CLong(scale << 16), yy = new CLong(scale << 16) };
                 FT.FT_Outline_Transform(&slot->outline, &matrix);
             }
             var coverage = Rasterize(&slot->outline, bw, bh, antialiased);

@@ -148,7 +148,8 @@ namespace OniBrutal.Engine
         }
 
         /// Runs Start for behaviours scheduled before this call, in the order they were scheduled
-        /// (when they became active and enabled), as Unity's delayed-call queue does: script
+        /// (when their activation began, before Awake; or when enabled later), as Unity's
+        /// delayed-call queue does: script
         /// execution order does not reorder pending Starts (measured in the original player while
         /// a large save loads: World, order 6, starts before Game, order -10, because it was
         /// enabled first). Execution order still shapes Start order indirectly, through the Awake/OnEnable

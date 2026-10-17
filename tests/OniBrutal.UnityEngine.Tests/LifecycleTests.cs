@@ -76,6 +76,27 @@ namespace OniBrutal.Tests
         void Awake() => Recorder.Log.Add("early:Awake");
     }
 
+    /// Creates another object from its Awake, like the game's Game (GameScreenManager) and
+    /// SpawnScreen (the new-colony screen).
+    public class AwakeCreator : MonoBehaviour
+    {
+        void Awake()
+        {
+            Recorder.Log.Add("outer:Awake");
+            new GameObject("inner", typeof(InnerStarter));
+        }
+
+        void OnEnable() => Recorder.Log.Add("outer:OnEnable");
+        void Start() => Recorder.Log.Add("outer:Start");
+    }
+
+    public class InnerStarter : MonoBehaviour
+    {
+        void Awake() => Recorder.Log.Add("inner:Awake");
+        void OnEnable() => Recorder.Log.Add("inner:OnEnable");
+        void Start() => Recorder.Log.Add("inner:Start");
+    }
+
     public class LateStarter : MonoBehaviour
     {
         void Start() => Recorder.Log.Add("late:Start");
@@ -347,6 +368,22 @@ namespace OniBrutal.Tests
             Assert.Equal(["late:Start", "early:Start"], Recorder.Log);
             Object.DestroyImmediate(late);
             Object.DestroyImmediate(early);
+        }
+
+        [Fact]
+        public void AnObjectCreatedInAwakeStartsAfterItsCreator()
+        {
+            // Measured in the original player: Start is queued when activation begins, before
+            // Awake, so the outer object starts first although the inner one is enabled first.
+            // (Loading a save, Game starts before the new-colony screen its Awake creates and
+            // destroys that screen before the screen's Start renames the colony.)
+            Recorder.Log.Clear();
+            var outer = new GameObject("outer", typeof(AwakeCreator));
+            Assert.Equal(["outer:Awake", "inner:Awake", "inner:OnEnable", "outer:OnEnable"], Recorder.Log);
+            OniBrutal.Engine.BehaviourManager.RunStarts();
+            Assert.Equal(["outer:Awake", "inner:Awake", "inner:OnEnable", "outer:OnEnable", "outer:Start", "inner:Start"], Recorder.Log);
+            Object.DestroyImmediate(outer);
+            Object.DestroyImmediate(GameObject.Find("inner"));
         }
 
         [Fact]

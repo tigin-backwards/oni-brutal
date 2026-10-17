@@ -231,6 +231,11 @@ namespace OniBrutal.Engine
                 if (!bn.AwakeCalled)
                 {
                     bn.AwakeCalled = true;
+                    // Start is queued when activation begins, before Awake (measured in Unity's
+                    // player): objects an Awake creates start after their creator, although they
+                    // are enabled first. A behaviour that Awake leaves disabled is skipped when the
+                    // queue runs and queued again when enabled.
+                    if (bn.Script != null && bn.Enabled && !bn.StartCalled && !bn.StartPending) BehaviourManager.ScheduleStart(bn);
                     c.EngineAwake();
                     if (bn.Script?.Awake != null) Invoke(bn.Script.Awake, (MonoBehaviour)c);
                     if (c.Native == null || !native.GameObject.ActiveInHierarchy) return;

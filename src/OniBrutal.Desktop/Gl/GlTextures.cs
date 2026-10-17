@@ -165,6 +165,35 @@ namespace OniBrutal.Desktop.Gl
         /// and each level is filled with sub-image uploads: defining levels one by one
         /// (glTexImage2D) makes drivers reallocate the texture as the chain grows. A texture whose
         /// size, format or mip count changes gets a new texture name.
+        /// Texture content uploads and their bytes since the last frame counters (--frame-stats).
+        public static long Uploads, UploadBytes;
+
+        const uint PixelUnpackBuffer = 0x88EC;
+        const int UploadStreamSize = 32 << 20;
+        static GlStreamBuffer uploadStream;
+
+        /// Fences the frame's uploads (at present).
+        public static void FenceFrame() => uploadStream?.FenceFrame();
+
+        /// Texel data for glTex(Compressed)SubImage: copied into the persistent upload ring so the
+        /// driver reads it from a buffer and the call returns without copying; data larger than
+        /// the ring allows is passed directly. Returns the pointer argument for the call, with the
+        /// pixel-unpack buffer bound when it is an offset (Unbind after the call).
+        static byte* Stage(byte* data, long length, out bool staged)
+        {
+            uploadStream ??= new GlStreamBuffer(PixelUnpackBuffer, UploadStreamSize, 4);
+            staged = length <= uploadStream.MaxWrite;
+            if (!staged) return data;
+            int offset = uploadStream.Write(data, (int)length);
+            N.glBindBuffer(PixelUnpackBuffer, new GlBuffer(uploadStream.Id));
+            return (byte*)offset;
+        }
+
+        static void Unstage(bool staged)
+        {
+            if (staged) N.glBindBuffer(PixelUnpackBuffer, default);
+        }
+
         static void Upload2D(Texture2DNative t, DeviceTexture g)
         {
             var f = Of(t.Format);
@@ -189,13 +218,17 @@ namespace OniBrutal.Desktop.Gl
                 g.Levels = levels;
             }
             var memory = t.Memory;
+            if (memory != null) Uploads++;
             if (memory != null)
                 for (int m = 0; m < levels; m++)
                 {
                     int w = Math.Max(1, t.Width >> m), h = Math.Max(1, t.Height >> m);
-                    byte* p = memory.Pointer + t.MipOffset(m);
-                    if (f.Compressed) N.glCompressedTexSubImage2D(TexTarget2D, m, 0, 0, w, h, f.Internal, (int)t.MipSize(m), p);
+                    UploadBytes += t.MipSize(m);
+                    long length = t.MipSize(m);
+                    byte* p = Stage(memory.Pointer + t.MipOffset(m), length, out bool staged);
+                    if (f.Compressed) N.glCompressedTexSubImage2D(TexTarget2D, m, 0, 0, w, h, f.Internal, (int)length, p);
                     else N.glTexSubImage2D(TexTarget2D, m, 0, 0, w, h, f.Format, f.Type, p);
+                    Unstage(staged);
                 }
             g.ContentVersion = t.ContentVersion;
             // Unity keeps no CPU copy of textures that are not readable.

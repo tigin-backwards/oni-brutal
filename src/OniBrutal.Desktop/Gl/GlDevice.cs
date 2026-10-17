@@ -648,6 +648,7 @@ namespace OniBrutal.Desktop.Gl
         {
             if (gpuTiming) EndGpuTiming();
             uniformStream?.FenceFrame();
+            GlTextures.FenceFrame();
             presenter.Present(QualitySettings.vSyncCount);
             framebufferValid = false;
             if (gpuTiming) BeginGpuTiming();
@@ -664,9 +665,10 @@ namespace OniBrutal.Desktop.Gl
 
         public override string TakeFrameCounters(int frames)
         {
-            string text = $"draws {draws / frames}, program binds {GlBindings.ProgramBinds / frames}, texture binds {GlBindings.TextureBinds / frames}, buffer binds {GlBindings.BufferBinds / frames}, skipped binds {GlBindings.Skipped / frames}, uniforms sent {GlUniforms.UniformsSent / frames}, unchanged uniforms {GlUniforms.UniformsSkipped / frames}";
+            string text = $"draws {draws / frames}, program binds {GlBindings.ProgramBinds / frames}, texture binds {GlBindings.TextureBinds / frames}, buffer binds {GlBindings.BufferBinds / frames}, skipped binds {GlBindings.Skipped / frames}, uniforms sent {GlUniforms.UniformsSent / frames}, unchanged uniforms {GlUniforms.UniformsSkipped / frames}, texture uploads {GlTextures.Uploads / (double)frames:F1} ({GlTextures.UploadBytes / frames / 1024} KiB)";
             draws = 0;
             GlUniforms.UniformsSent = GlUniforms.UniformsSkipped = 0;
+            GlTextures.Uploads = GlTextures.UploadBytes = 0;
             GlBindings.ProgramBinds = GlBindings.TextureBinds = GlBindings.BufferBinds = GlBindings.Skipped = 0;
             return text;
         }

@@ -13,7 +13,10 @@ stage="$(wslpath "$win_temp")/oni-brutal"
 mkdir -p "$stage"
 rm -rf "$stage/host" "$stage/steamstub"
 cp -r "$root/out/win/host" "$root/out/win/steamstub" "$stage/"
+# ONI_STEAM_STUB=PATH: another steam_api64.dll for the run (a local test setup's).
+[ -n "${ONI_STEAM_STUB:-}" ] && cp "$ONI_STEAM_STUB" "$stage/steamstub/steam_api64.dll"
+stub=steamstub
 run_home="${ONI_RUN_HOME:-$win_temp\\oni-brutal\\run-home}"
 game="${ONI_WIN_GAME_DIR:-C:\\Program Files (x86)\\Steam\\steamapps\\common\\OxygenNotIncluded}"
 exec "$stage/host/OniBrutal.exe" --game "$game" --run-home "$run_home" --audio-wav "$run_home" \
-  --native-override "steam_api64=$win_temp\\oni-brutal\\steamstub\\steam_api64.dll" "$@"
+  --native-override "steam_api64=$win_temp\\oni-brutal\\$stub\\steam_api64.dll" "$@"

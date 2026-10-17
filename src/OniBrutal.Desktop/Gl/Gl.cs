@@ -102,6 +102,14 @@ namespace OniBrutal.Desktop.Gl
             return b.Id;
         }
 
+        /// A buffer object usable with the direct-state-access calls right away.
+        public static uint CreateBuffer()
+        {
+            GlBuffer b = default;
+            N.glCreateBuffers(1, &b);
+            return b.Id;
+        }
+
         public static void DeleteBuffer(uint id)
         {
             var b = new GlBuffer(id);

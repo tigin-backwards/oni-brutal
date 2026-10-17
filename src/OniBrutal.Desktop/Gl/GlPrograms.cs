@@ -54,6 +54,9 @@ namespace OniBrutal.Desktop.Gl
         public int[] BlockSizes = Array.Empty<int>();
         /// Per-draw uniform block contents, reused.
         public byte[][] BlockScratch;
+        /// Programs with the same attribute locations share a layout id (vertex arrays are
+        /// built per mesh and layout).
+        public int LayoutId;
         /// The values last given to each default-block uniform (indexed like Uniforms): a
         /// program keeps its uniform state, so an unchanged value is not sent again.
         public float[][] Sent;
@@ -160,9 +163,13 @@ namespace OniBrutal.Desktop.Gl
                 return program;
             }
             for (int i = 0; i < attributeNames.Length; i++) program.Attributes[i] = GlApi.AttribLocation(program.Id, attributeNames[i]);
+            var layout = string.Join(",", program.Attributes);
+            if (!layouts.TryGetValue(layout, out program.LayoutId)) layouts[layout] = program.LayoutId = layouts.Count;
             Reflect(program);
             return program;
         }
+
+        static readonly Dictionary<string, int> layouts = new();
 
         static void Reflect(DeviceProgram p)
         {

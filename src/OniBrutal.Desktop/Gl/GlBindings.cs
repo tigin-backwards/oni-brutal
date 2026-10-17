@@ -20,10 +20,10 @@ namespace OniBrutal.Desktop.Gl
         static uint program;
         static int activeUnit;
         static readonly uint[,] textures = new uint[Units, 4];
-        static uint arrayBuffer, elementBuffer;
+        static uint arrayBuffer, elementBuffer, vertexArray;
 
         /// Binds issued and skipped since the last TakeCounts (for --frame-stats).
-        public static int ProgramBinds, TextureBinds, BufferBinds, Skipped;
+        public static int ProgramBinds, TextureBinds, BufferBinds, VertexArrayBinds, Skipped;
 
         /// After code outside this class changed bindings (context creation): nothing is known.
         public static void Invalidate()
@@ -32,7 +32,7 @@ namespace OniBrutal.Desktop.Gl
             activeUnit = -1;
             for (int u = 0; u < Units; u++)
                 for (int t = 0; t < targets.Length; t++) textures[u, t] = uint.MaxValue;
-            arrayBuffer = elementBuffer = uint.MaxValue;
+            arrayBuffer = elementBuffer = vertexArray = uint.MaxValue;
         }
 
         static GlBindings() => Invalidate();
@@ -66,13 +66,17 @@ namespace OniBrutal.Desktop.Gl
             N.glBindTexture(target, id);
         }
 
-        /// Binds a texture for sampling on a unit.
+        /// Binds a texture for sampling on a unit (glBindTextureUnit: the active unit stays).
         public static void BindTexture(int unit, uint target, uint id)
         {
             int t = TargetIndex(target);
-            if (t >= 0 && unit < Units && textures[unit, t] == id) { Skipped++; return; }
-            ActiveUnit(unit);
-            BindTexture(target, id);
+            if (t >= 0 && unit < Units)
+            {
+                if (textures[unit, t] == id) { Skipped++; return; }
+                textures[unit, t] = id;
+            }
+            TextureBinds++;
+            N.glBindTextureUnit((uint)unit, id);
         }
 
         public static void BindBuffer(uint target, uint id)
@@ -89,6 +93,27 @@ namespace OniBrutal.Desktop.Gl
             }
             BufferBinds++;
             N.glBindBuffer(target, new GlBuffer(id));
+        }
+
+        /// The element buffer binding belongs to the vertex array, so it is unknown after a switch.
+        public static void BindVertexArray(uint id)
+        {
+            if (vertexArray == id) { Skipped++; return; }
+            vertexArray = id;
+            elementBuffer = uint.MaxValue;
+            VertexArrayBinds++;
+            N.glBindVertexArray(new GlVertexArray(id));
+        }
+
+        public static void DeleteVertexArray(uint id)
+        {
+            if (vertexArray == id)
+            {
+                vertexArray = uint.MaxValue;
+                elementBuffer = uint.MaxValue;
+            }
+            var a = new GlVertexArray(id);
+            N.glDeleteVertexArrays(1, &a);
         }
 
         public static void DeleteTexture(uint id)

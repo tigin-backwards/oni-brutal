@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using OniBrutal.Engine.Rendering;
+using Brutal.OpenGlApi;
 using UnityEngine;
 using N = Brutal.OpenGlApi.OpenGl.Native;
 using static OniBrutal.Desktop.Gl.GlConst;
@@ -28,9 +29,18 @@ namespace OniBrutal.Desktop.Gl
         public bool ByteColors;
         public uint IndexBuffer;
         public (int Offset, int Count, uint Mode, int BaseVertex)[] SubMeshes = Array.Empty<(int, int, uint, int)>();
+        /// Changes when the channels present or their formats change (vertex arrays are rebuilt).
+        public int LayoutVersion;
+        /// Vertex arrays by program attribute layout, with the LayoutVersion they were built for.
+        public Dictionary<int, (uint VertexArray, int Version)> VertexArrays;
 
         public void Delete()
         {
+            if (VertexArrays != null)
+            {
+                foreach (var (vao, _) in VertexArrays.Values) GlBindings.DeleteVertexArray(vao);
+                VertexArrays = null;
+            }
             for (int i = 0; i < Buffers.Length; i++)
                 if (Buffers[i] != 0)
                 {
@@ -56,6 +66,9 @@ namespace OniBrutal.Desktop.Gl
             }
             if (d.Version == m.Version) return d;
             uint usage = m.Dynamic ? DynamicDraw : StaticDraw;
+            Span<int> before = stackalloc int[(int)Channel.Count];
+            d.Components.CopyTo(before);
+            bool byteColorsBefore = d.ByteColors;
             Upload(d, Channel.Position, m.Positions, 3, usage);
             Upload(d, Channel.Normal, m.Normals, 3, usage);
             Upload(d, Channel.Tangent, m.Tangents, 4, usage);
@@ -77,8 +90,53 @@ namespace OniBrutal.Desktop.Gl
                 Upload(d, Channel.Uv0 + u, uv, uv == null ? 0 : Math.Max(1, m.UvDimensions[u]), usage, stride4: true);
             }
             UploadIndices(d, m, usage);
+            if (!before.SequenceEqual(d.Components) || byteColorsBefore != d.ByteColors) d.LayoutVersion++;
             d.Version = m.Version;
             return d;
+        }
+
+        /// The mesh's vertex array for a program's attribute layout: buffers, formats and the
+        /// index buffer recorded once, so a draw binds one object. Channels the mesh lacks are
+        /// disabled and read the context's constant attribute values.
+        public static uint VertexArray(DeviceMesh d, DeviceProgram p)
+        {
+            d.VertexArrays ??= new();
+            if (d.VertexArrays.TryGetValue(p.LayoutId, out var entry) && entry.Version == d.LayoutVersion) return entry.VertexArray;
+            uint vao = entry.VertexArray;
+            if (vao == 0)
+            {
+                GlVertexArray created = default;
+                N.glCreateVertexArrays(1, &created);
+                vao = created.Id;
+            }
+            for (int c = 0; c < (int)Channel.Count; c++)
+            {
+                int location = p.Attributes[c];
+                if (location < 0) continue;
+                uint loc = (uint)location;
+                int components = d.Components[c];
+                if (components == 0)
+                {
+                    N.glDisableVertexArrayAttrib(vao, loc);
+                    continue;
+                }
+                N.glEnableVertexArrayAttrib(vao, loc);
+                if (c == (int)Channel.Color && d.ByteColors)
+                {
+                    N.glVertexArrayVertexBuffer(vao, loc, new GlBuffer(d.Buffers[c]), 0, 4);
+                    N.glVertexArrayAttribFormat(vao, loc, 4, UnsignedByte, true, 0);
+                }
+                else
+                {
+                    int size = Math.Abs(components);
+                    N.glVertexArrayVertexBuffer(vao, loc, new GlBuffer(d.Buffers[c]), 0, components < 0 ? 16 : size * 4);
+                    N.glVertexArrayAttribFormat(vao, loc, size, Float, false, 0);
+                }
+                N.glVertexArrayAttribBinding(vao, loc, loc);
+            }
+            N.glVertexArrayElementBuffer(vao, new GlBuffer(d.IndexBuffer));
+            d.VertexArrays[p.LayoutId] = (vao, d.LayoutVersion);
+            return vao;
         }
 
         static void Upload<T>(DeviceMesh d, Channel c, T[] data, int components, uint usage, bool stride4 = false) where T : unmanaged
@@ -96,9 +154,8 @@ namespace OniBrutal.Desktop.Gl
         static void Store<T>(DeviceMesh d, Channel c, T[] data, int components, uint usage) where T : unmanaged
         {
             int i = (int)c;
-            if (d.Buffers[i] == 0) d.Buffers[i] = GlApi.GenBuffer();
-            GlBindings.BindBuffer(ArrayBuffer, d.Buffers[i]);
-            d.Capacities[i] = Fill<T>(ArrayBuffer, data, d.Capacities[i], usage);
+            if (d.Buffers[i] == 0) d.Buffers[i] = GlApi.CreateBuffer();
+            d.Capacities[i] = Fill<T>(d.Buffers[i], data, d.Capacities[i], usage);
             d.Components[i] = components;
         }
 
@@ -138,23 +195,26 @@ namespace OniBrutal.Desktop.Gl
                 }
                 subs[s] = (start, all.Count - start, mode, sm.BaseVertex);
             }
-            if (d.IndexBuffer == 0) d.IndexBuffer = GlApi.GenBuffer();
-            GlBindings.BindBuffer(ElementArrayBuffer, d.IndexBuffer);
-            d.IndexCapacity = Fill<int>(ElementArrayBuffer, all.ToArray(), d.IndexCapacity, usage);
+            if (d.IndexBuffer == 0) d.IndexBuffer = GlApi.CreateBuffer();
+            d.IndexCapacity = Fill<int>(d.IndexBuffer, all.ToArray(), d.IndexCapacity, usage);
             d.SubMeshes = subs;
         }
 
-        /// Writes data into the bound buffer: in place when it fits the current storage, else
+        /// Writes data into a buffer (direct state access: no binding changes, so the bound
+        /// vertex array keeps its index buffer): in place when it fits the current storage, else
         /// into new storage. Returns the storage size.
-        static long Fill<T>(uint target, T[] data, long capacity, uint usage) where T : unmanaged
+        static long Fill<T>(uint buffer, T[] data, long capacity, uint usage) where T : unmanaged
         {
             long bytes = (long)data.Length * sizeof(T);
-            if (bytes > 0 && bytes <= capacity)
+            fixed (T* p = data)
             {
-                GlApi.BufferSubData<T>(target, 0, data);
-                return capacity;
+                if (bytes > 0 && bytes <= capacity)
+                {
+                    N.glNamedBufferSubData(new GlBuffer(buffer), 0, (nint)bytes, p);
+                    return capacity;
+                }
+                N.glNamedBufferData(new GlBuffer(buffer), (nint)bytes, p, usage);
             }
-            GlApi.BufferData<T>(target, data, usage);
             return bytes;
         }
     }

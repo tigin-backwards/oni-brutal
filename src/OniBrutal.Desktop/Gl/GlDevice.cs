@@ -68,6 +68,8 @@ namespace OniBrutal.Desktop.Gl
         readonly GlfwPlatform platform;
         readonly GlCaps caps = new();
         readonly uint immediateBuffer, immediateIndices;
+        /// The vertex array immediate geometry is drawn with (mesh draws use the mesh's own).
+        readonly uint immediateVertexArray;
         /// Every draw's uniform blocks are written to a stream buffer and bound by range.
         const int UniformStreamSize = 16 << 20;
         GlStreamBuffer uniformStream;
@@ -128,6 +130,7 @@ namespace OniBrutal.Desktop.Gl
             GlVertexArray vao = default;
             N.glGenVertexArrays(1, &vao);
             N.glBindVertexArray(vao);
+            immediateVertexArray = vao.Id;
             N.glFrontFace((GlFrontFace)Cw);
             immediateBuffer = GlApi.GenBuffer();
             immediateIndices = GlApi.GenBuffer();
@@ -405,10 +408,10 @@ namespace OniBrutal.Desktop.Gl
                 inputs.Shader = passShader;
                 GlStateCache.Apply(StateOf(pass), inputs);
                 Bind(program, inputs);
-                BindAttributes(program, mesh);
                 var sm = mesh.SubMeshes[draw.SubMesh];
                 if (sm.Count == 0) continue;
-                GlBindings.BindBuffer(ElementArrayBuffer, mesh.IndexBuffer);
+                GlBindings.BindVertexArray(GlMeshes.VertexArray(mesh, program));
+                SetAbsentChannels(program, mesh);
                 draws++;
                 N.glDrawElementsBaseVertex(sm.Mode, sm.Count, UnsignedInt, (void*)(sm.Offset * 4L), sm.BaseVertex);
             }
@@ -461,30 +464,32 @@ namespace OniBrutal.Desktop.Gl
             else N.glDisableVertexAttribArray((uint)location);
         }
 
-        /// Missing channels read Unity's defaults: white colour, zero normal/tangent/uv.
-        void BindAttributes(DeviceProgram program, DeviceMesh mesh)
+        /// Channels a mesh lacks read Unity's defaults (white colour, position (0,0,0,1), zero
+        /// normal/tangent/uv) from the context's constant attribute values, which the vertex
+        /// array leaves disabled.
+        void SetAbsentChannels(DeviceProgram program, DeviceMesh mesh)
         {
             for (int c = 0; c < (int)Channel.Count; c++)
             {
                 int location = program.Attributes[c];
-                if (location < 0) continue;
-                int components = mesh.Components[c];
-                if (components == 0)
-                {
-                    SetAttribute(location, false);
-                    if (c == (int)Channel.Color) N.glVertexAttrib4f((uint)location, 1f, 1f, 1f, 1f);
-                    else if (c == (int)Channel.Position) N.glVertexAttrib4f((uint)location, 0f, 0f, 0f, 1f);
-                    else N.glVertexAttrib4f((uint)location, 0f, 0f, 0f, 0f);
-                    continue;
-                }
-                GlBindings.BindBuffer(ArrayBuffer, mesh.Buffers[c]);
-                SetAttribute(location, true);
-                if (c == (int)Channel.Color && mesh.ByteColors)
-                    N.glVertexAttribPointer((uint)location, 4, UnsignedByte, true, 4, null);
-                else if (components < 0)
-                    N.glVertexAttribPointer((uint)location, -components, Float, false, 16, null);
-                else
-                    N.glVertexAttribPointer((uint)location, components, Float, false, components * 4, null);
+                if (location < 0 || mesh.Components[c] != 0) continue;
+                SetConstant(location, c == (int)Channel.Color ? ConstantWhite : c == (int)Channel.Position ? ConstantPoint : ConstantZero);
+            }
+        }
+
+        const byte ConstantZero = 1, ConstantWhite = 2, ConstantPoint = 3;
+        /// The constant value each attribute location holds (0: unknown).
+        readonly byte[] constants = new byte[16];
+
+        void SetConstant(int location, byte value)
+        {
+            if (location < constants.Length && constants[location] == value) return;
+            if (location < constants.Length) constants[location] = value;
+            switch (value)
+            {
+                case ConstantWhite: N.glVertexAttrib4f((uint)location, 1f, 1f, 1f, 1f); break;
+                case ConstantPoint: N.glVertexAttrib4f((uint)location, 0f, 0f, 0f, 1f); break;
+                default: N.glVertexAttrib4f((uint)location, 0f, 0f, 0f, 0f); break;
             }
         }
 
@@ -520,6 +525,7 @@ namespace OniBrutal.Desktop.Gl
             };
             GlStateCache.Apply(StateOf(pass), inputs);
             Bind(program, inputs);
+            GlBindings.BindVertexArray(immediateVertexArray);
 
             // Interleaved: position, colour, eight texture coordinates.
             const int stride = sizeof(float) * (3 + 4 + 32);
@@ -548,7 +554,7 @@ namespace OniBrutal.Desktop.Gl
                 if (c == (int)Channel.Normal || c == (int)Channel.Tangent)
                 {
                     SetAttribute(location, false);
-                    N.glVertexAttrib4f((uint)location, 0f, 0f, 0f, 0f);
+                    SetConstant(location, ConstantZero);
                     continue;
                 }
                 SetAttribute(location, true);
@@ -665,11 +671,11 @@ namespace OniBrutal.Desktop.Gl
 
         public override string TakeFrameCounters(int frames)
         {
-            string text = $"draws {draws / frames}, program binds {GlBindings.ProgramBinds / frames}, texture binds {GlBindings.TextureBinds / frames}, buffer binds {GlBindings.BufferBinds / frames}, skipped binds {GlBindings.Skipped / frames}, uniforms sent {GlUniforms.UniformsSent / frames}, unchanged uniforms {GlUniforms.UniformsSkipped / frames}, texture uploads {GlTextures.Uploads / (double)frames:F1} ({GlTextures.UploadBytes / frames / 1024} KiB)";
+            string text = $"draws {draws / frames}, program binds {GlBindings.ProgramBinds / frames}, texture binds {GlBindings.TextureBinds / frames}, buffer binds {GlBindings.BufferBinds / frames}, vertex array binds {GlBindings.VertexArrayBinds / frames}, skipped binds {GlBindings.Skipped / frames}, uniforms sent {GlUniforms.UniformsSent / frames}, unchanged uniforms {GlUniforms.UniformsSkipped / frames}, texture uploads {GlTextures.Uploads / (double)frames:F1} ({GlTextures.UploadBytes / frames / 1024} KiB)";
             draws = 0;
             GlUniforms.UniformsSent = GlUniforms.UniformsSkipped = 0;
             GlTextures.Uploads = GlTextures.UploadBytes = 0;
-            GlBindings.ProgramBinds = GlBindings.TextureBinds = GlBindings.BufferBinds = GlBindings.Skipped = 0;
+            GlBindings.ProgramBinds = GlBindings.TextureBinds = GlBindings.BufferBinds = GlBindings.VertexArrayBinds = GlBindings.Skipped = 0;
             return text;
         }
 

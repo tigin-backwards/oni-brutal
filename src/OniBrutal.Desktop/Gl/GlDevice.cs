@@ -85,7 +85,10 @@ namespace OniBrutal.Desktop.Gl
             int n = debugCounts.AddOrUpdate(id, 1, (_, c) => c + 1);
             if (n > 3) return;
             var text = length >= 0 ? System.Text.Encoding.UTF8.GetString(message, length) : new string((sbyte*)message);
-            EngineLog.Engine($"gl debug (frame {UnityEngine.Time.frameCount}, source 0x{source:X}, type 0x{type:X}, id {id}, severity 0x{severity:X}, #{n}): {text}");
+            const uint DebugTypeError = 0x824C;
+            // Errors come with the GL thread's stack: the command that caused them.
+            var where = type == DebugTypeError ? "\n" + Environment.StackTrace : "";
+            EngineLog.Engine($"gl debug (frame {UnityEngine.Time.frameCount}, source 0x{source:X}, type 0x{type:X}, id {id}, severity 0x{severity:X}, #{n}): {text}{where}");
         }
 
         static void EnableDebugOutput()
@@ -134,6 +137,8 @@ namespace OniBrutal.Desktop.Gl
             }
             caps.Rgtc |= true; // core since OpenGL 3.0
             caps.MemoryMB = QueryVideoMemoryMB();
+            GlBindless.Initialize();
+            EngineLog.Engine(GlBindless.Enabled ? "textures: bindless (ARB_bindless_texture)" : "textures: bound to units");
             if (DebugOutput) EnableDebugOutput();
             EngineLog.Engine($"OpenGL: {caps.VersionString} / {caps.Name} / {caps.Vendor}");
 
@@ -491,6 +496,11 @@ namespace OniBrutal.Desktop.Gl
                 if (inputs.TryTexture(s.PropertyId, out var binding) && binding.Texture != null && binding.Texture.Native is TextureNative tn)
                 {
                     var device = GlTextures.Prepare(worker, tn);
+                    if (device.RecordedEmpty)
+                    {
+                        r.Textures[i] = new SamplerTexture(DefaultTexture(Unbound, s.Target), false, false);
+                        continue;
+                    }
                     if (device.RecordedTarget == s.Target)
                     {
                         var rt = tn as RenderTextureNative;
@@ -588,11 +598,23 @@ namespace OniBrutal.Desktop.Gl
             // that work binds framebuffers and textures of its own.
             foreach (var t in recorded.Textures)
                 if (t.RenderTexture) GlTextures.PrepareForSampling(t.Texture, t.AutoGenerateMips);
-            for (int i = 0; i < recorded.Textures.Length; i++)
+            if (GlBindless.Enabled)
             {
-                var t = recorded.Textures[i].Texture;
-                GlBindings.BindTexture(program.Samplers[i].Unit, t.Target, t.Id);
+                var handles = program.SamplerHandles ??= new ulong[program.Samplers.Count];
+                for (int i = 0; i < recorded.Textures.Length; i++)
+                {
+                    ulong h = GlBindless.Handle(recorded.Textures[i].Texture);
+                    if (handles[i] == h) continue;
+                    handles[i] = h;
+                    GlBindless.SetSampler(program.Id, program.Samplers[i].Location, h);
+                }
             }
+            else
+                for (int i = 0; i < recorded.Textures.Length; i++)
+                {
+                    var t = recorded.Textures[i].Texture;
+                    GlBindings.BindTexture(program.Samplers[i].Unit, t.Target, t.Id);
+                }
             // Drawing goes to the current target even if preparing a texture rebound it.
             BindTarget();
         }

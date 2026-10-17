@@ -230,12 +230,12 @@ platforms (the system library on Linux before); its `long` fields are `CLong`. P
 queues two frames (three buffers) with a copy fence instead of a `glFinish` per frame.
 
 Open:
-- Frame rate on NVIDIA's OpenGL driver: DeCrew ~26 fps against 35 under WSL (Mesa d3d12 on the
-  same GPU). `--gpu-profile` puts 33 of 46 GPU ms in `Klei/BatchedAnimation`: binding a different
-  texture for the vertex stage between draws (each animation batch has its own data textures)
-  serializes the draws (~37 µs each whatever their size); keeping them bound brings the frame to
-  6 ms. Next: bindless textures (`GL_ARB_bindless_texture`) for sampler uniforms where the driver
-  has them, the binding path otherwise.
+- Frame rate on NVIDIA's OpenGL driver (done): DeCrew ran at ~26 fps against 35 under WSL (Mesa
+  d3d12 on the same GPU). `--gpu-profile` put 33 of 46 GPU ms in `Klei/BatchedAnimation`: binding
+  a different texture for the vertex stage between draws (each animation batch has its own data
+  textures) serialized the draws (~37 µs each whatever their size). With bindless textures
+  (`GL_ARB_bindless_texture`) the frame's GPU time is 6 ms and DeCrew runs at ~42 fps, bounded by
+  the main thread (~23.5 ms); paused captures match the binding path within run-to-run variation.
 - Videos on Windows: there is no system libvpx there and no BRUTAL package for it. Next: a
   managed VP8 decoder (RFC 6386; output is bit-exact by specification), checked frame by frame
   against libvpx on Linux for every video of the game, which also removes the Linux dependency.

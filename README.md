@@ -90,8 +90,7 @@ the host applies to game code, the only ones it makes: D1 (state-machine values 
 the original player loaded at defaults) and D3 (local mods disabled at every launch).
 Floating-point results are not bit-identical to Mono's, and are not meant to be.
 
-On Windows the game's videos do not play yet (no libvpx there), and frame rates on NVIDIA's
-OpenGL driver are lower than they should be in large colonies (see `docs/PLAN.md`, M8).
+On Windows the game's videos do not play yet (no libvpx there; see `docs/PLAN.md`, M8).
 
 ## Documents
 

@@ -157,6 +157,8 @@ namespace OniBrutal.Host
         public int VSyncCount = -1;
         /// Diagnostics (--gpu-profile): GPU time by operation with the frame counters.
         public bool GpuProfile;
+        /// Diagnostics (--no-bindless): textures bound to units even where bindless textures exist.
+        public bool NoBindless;
         public readonly ScriptedInput Input = new();
         // Unity's standalone player arguments.
         public int ScreenWidth = -1, ScreenHeight = -1;
@@ -202,6 +204,7 @@ namespace OniBrutal.Host
                     case "--gl-debug": o.GlDebug = true; break;
                     case "--vsync-count": o.VSyncCount = int.Parse(args[++i]); break;
                     case "--gpu-profile": o.GpuProfile = true; break;
+                    case "--no-bindless": o.NoBindless = true; break;
                     case "--input": o.Input.Add(args[++i]); break;
                     case "--frame-stats": OniBrutal.Engine.PlayerLoop.FrameStats = true; break;
                     case "--max-frame-rate":
@@ -266,7 +269,7 @@ namespace OniBrutal.Host
                     }
                     default:
                         Console.Error.WriteLine($"Unknown option {args[i]}");
-                        Console.Error.WriteLine("usage: OniBrutal [--game DIR] [--log FILE] [--run-home DIR] [--audio-wav DIR] [--headless] [--batchmode] [--frames N] [--native-override NAME=PATH] [--trace-exceptions] [--gl-debug] [--vsync-count N] [--gpu-profile] [--input FRAME:ACTION[:ARGS]] [--frame-stats] [--max-frame-rate N[:FRAMES]] [--dump-render-textures FRAME:DIR] [-screen-width W] [-screen-height H] [-screen-fullscreen 0|1] [-window-mode exclusive|borderless|windowed] [--check-types] [--check-assets] [--check-bind] [--check-shaders] [--dump-shader NAME:DIR] [--capture FRAME:PATH[:SCALE]] [--probe-ui FRAME:X,Y] [--dump-hierarchy FRAME:PATH] [--report-builtin-assets FILE] [--dump-component FRAME:PATH|TYPE]");
+                        Console.Error.WriteLine("usage: OniBrutal [--game DIR] [--log FILE] [--run-home DIR] [--audio-wav DIR] [--headless] [--batchmode] [--frames N] [--native-override NAME=PATH] [--trace-exceptions] [--gl-debug] [--vsync-count N] [--gpu-profile] [--no-bindless] [--input FRAME:ACTION[:ARGS]] [--frame-stats] [--max-frame-rate N[:FRAMES]] [--dump-render-textures FRAME:DIR] [-screen-width W] [-screen-height H] [-screen-fullscreen 0|1] [-window-mode exclusive|borderless|windowed] [--check-types] [--check-assets] [--check-bind] [--check-shaders] [--dump-shader NAME:DIR] [--capture FRAME:PATH[:SCALE]] [--probe-ui FRAME:X,Y] [--dump-hierarchy FRAME:PATH] [--report-builtin-assets FILE] [--dump-component FRAME:PATH|TYPE]");
                         return null;
                 }
             }

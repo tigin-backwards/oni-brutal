@@ -62,6 +62,8 @@ namespace OniBrutal.Desktop.Gl
         /// The values last given to each default-block uniform (indexed like Uniforms): a
         /// program keeps its uniform state, so an unchanged value is not sent again.
         public float[][] Sent;
+        /// The bindless handle each sampler was last given (GlBindless).
+        public ulong[] SamplerHandles;
     }
 
     /// A shader's compiled programs by variant blob index.
@@ -116,7 +118,13 @@ namespace OniBrutal.Desktop.Gl
             var extensions = "";
             if (section.Contains("UNITY_LOCATION(", StringComparison.Ordinal)) extensions += "#extension GL_ARB_explicit_uniform_location : require\n";
             if (section.Contains("UNITY_BINDING(", StringComparison.Ordinal)) extensions += "#extension GL_ARB_shading_language_420pack : require\n";
-            return section[..versionEnd] + extensions + section[versionEnd..];
+            var body = section[versionEnd..];
+            if (GlBindless.Enabled)
+            {
+                body = GlBindless.Prepare(body, out var bindless);
+                extensions += bindless;
+            }
+            return section[..versionEnd] + extensions + body;
         }
 
         /// Extensions the context offers (GL_EXTENSIONS).
@@ -196,7 +204,7 @@ namespace OniBrutal.Desktop.Gl
                 {
                     int location = GlApi.UniformLocation(p.Id, rawName);
                     var s = new SamplerBinding { Location = location, Unit = unit++, Target = SamplerTarget(type), PropertyId = ShaderPropertyIds.Get(name) };
-                    N.glUniform1i(location, s.Unit);
+                    if (!GlBindless.Enabled) N.glUniform1i(location, s.Unit);
                     p.Samplers.Add(s);
                     continue;
                 }

@@ -15,6 +15,9 @@ namespace OniBrutal.Desktop.Gl
         // Main thread: the versions and render texture shape already recorded for the GL thread,
         // and the target the texture has (sampler matching).
         public int RecordedContent = -1, RecordedSampler = -1;
+        /// The texture has no image (zero width or height, as `new Texture2D(0, 0)` before it is
+        /// filled): GL can make none, and samplers read it as no texture.
+        public bool RecordedEmpty;
         public RenderShape? RecordedShape;
         public uint RecordedTarget = TexTarget2D;
 
@@ -36,8 +39,14 @@ namespace OniBrutal.Desktop.Gl
         /// Rendered to since the last resolve / mip generation.
         public bool Dirty;
 
+        /// Bindless (GlBindless): the sampler object the texture's sampler settings select, and the
+        /// resident handles made for it by sampler object.
+        public uint Sampler;
+        public System.Collections.Generic.Dictionary<uint, ulong> Handles;
+
         public void Delete()
         {
+            GlBindless.Release(this);
             if (Id != 0) GlBindings.DeleteTexture(Id);
             if (Framebuffer != 0) GlApi.DeleteFramebuffer(Framebuffer);
             if (MultisampleFramebuffer != 0) GlApi.DeleteFramebuffer(MultisampleFramebuffer);
@@ -203,6 +212,12 @@ namespace OniBrutal.Desktop.Gl
                 }
                 case TexelTextureNative tt when g.RecordedContent != tt.ContentVersion:
                 {
+                    g.RecordedEmpty = tt.Width <= 0 || tt.Height <= 0 || tt.Depth <= 0;
+                    if (g.RecordedEmpty)
+                    {
+                        g.RecordedContent = tt.ContentVersion;
+                        break;
+                    }
                     var upload = TexelUpload.Take(tt);
                     g.RecordedContent = tt.ContentVersion;
                     g.RecordedTarget = upload.Target;
@@ -218,7 +233,7 @@ namespace OniBrutal.Desktop.Gl
                     break;
                 }
             }
-            if (g.RecordedSampler != t.SamplerVersion)
+            if (!g.RecordedEmpty && g.RecordedSampler != t.SamplerVersion)
             {
                 g.RecordedSampler = t.SamplerVersion;
                 var sampler = new SamplerSettings(t.FilterMode, t.WrapU, t.WrapV, t.WrapW, t.MipBias, t.Aniso);
@@ -230,11 +245,13 @@ namespace OniBrutal.Desktop.Gl
         /// Texture content uploads and their bytes since the last frame counters (--frame-stats).
         public static long Uploads, UploadBytes;
 
-        static void Begin(DeviceTexture g, uint target)
+        /// Binds the texture for an upload; one that will specify its image again (respecify)
+        /// and has bindless handles, which fix its layout, gets a new name first.
+        static void Begin(DeviceTexture g, uint target, bool respecify = true)
         {
-            if (g.Id == 0 || g.Target != target)
+            if (g.Id == 0 || g.Target != target || (respecify && GlBindless.HasHandles(g)))
             {
-                if (g.Id != 0) GlBindings.DeleteTexture(g.Id);
+                if (g.Id != 0) { GlBindless.Release(g); GlBindings.DeleteTexture(g.Id); }
                 g.Id = GlApi.GenTexture();
                 g.Target = target;
             }
@@ -268,10 +285,11 @@ namespace OniBrutal.Desktop.Gl
                                && g.Width == t.Width && g.Height == t.Height && g.Levels == levels;
             if (!sameStorage && g.Id != 0)
             {
+                GlBindless.Release(g);
                 GlBindings.DeleteTexture(g.Id);
                 g.Id = 0;
             }
-            Begin(g, TexTarget2D);
+            Begin(g, TexTarget2D, respecify: !sameStorage);
             if (!sameStorage)
             {
                 N.glTexStorage2D(TexTarget2D, levels, f.Internal, t.Width, t.Height);
@@ -360,6 +378,11 @@ namespace OniBrutal.Desktop.Gl
         {
             var target = g.Target;
             if (target == TexTarget2DMultisample) return;
+            if (GlBindless.Enabled)
+            {
+                g.Sampler = GlSamplers.Get(t, g.Levels > 1, target);
+                return;
+            }
             GlBindings.BindTexture(target, g.Id);
             bool mips = g.Levels > 1;
             uint min = t.FilterMode switch
@@ -378,7 +401,7 @@ namespace OniBrutal.Desktop.Gl
                 N.glTexParameterf(target, TextureMaxAnisotropy, t.FilterMode == FilterMode.Point ? 1f : Math.Clamp(t.Aniso, 1, GlDevice.MaxAnisotropy));
         }
 
-        static uint Wrap(TextureWrapMode m) => m switch
+        internal static uint Wrap(TextureWrapMode m) => m switch
         {
             TextureWrapMode.Clamp => ClampToEdge,
             TextureWrapMode.Mirror => MirroredRepeat,

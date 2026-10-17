@@ -28,6 +28,7 @@ namespace OniBrutal.Host
                 OniBrutal.Desktop.Gl.GlDevice.DebugOutput = options.GlDebug;
                 OniBrutal.Desktop.Gl.GlDevice.SwapIntervalOverride = options.VSyncCount;
                 OniBrutal.Desktop.Gl.GlGpuProfile.Enabled = options.GpuProfile;
+                OniBrutal.Desktop.Gl.GlBindless.Disabled = options.NoBindless;
                 var device = new OniBrutal.Desktop.Gl.GlDevice(platform);
                 OniBrutal.Engine.Rendering.GraphicsDevice.Install(device);
             }

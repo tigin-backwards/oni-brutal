@@ -359,6 +359,17 @@ renderer, restricted to what the game uses (*usage §1*):
   (`Hidden/BlitCopy` from `unity_builtin_extra`), `GL` immediate mode, `CommandBuffer`.
 - Gamma colour space (`m_ActiveColorSpace=0`): no sRGB conversions.
 
+**Textures for sampling.** Where the driver has `GL_ARB_bindless_texture` (NVIDIA's, for one),
+sampler uniforms are set to resident handles of (texture, sampler object) pairs and draws change
+no texture bindings: on NVIDIA's OpenGL driver a draw whose vertex stage reads other textures
+than the previous draw's waits for it (the game's animation batches each have their own data
+textures; in a large colony that was ~33 of 46 GPU ms per frame, 2.5 with handles). Programs are
+compiled with `#extension GL_ARB_bindless_texture` and the default `layout(bindless_sampler)`
+qualifier ahead of their uniforms; sampling state then lives in sampler objects, and a texture
+whose image is specified again is recreated under a new name (a handle fixes its layout).
+Elsewhere (Mesa's d3d12 driver under WSL) textures are bound to units. A texture without an
+image (zero width or height) is sampled as no texture, (0, 0, 0, 1).
+
 **Render thread, presentation and frame pacing.** Unity's player records rendering on the main
 thread and executes it on a render thread (`kGfxThreadingModeClientWorkerJobs` on GLCore), and
 presents from there, so GL work and a swap that blocks — vsync, or a display path that reads the

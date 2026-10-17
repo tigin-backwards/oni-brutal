@@ -72,38 +72,44 @@ namespace OniBrutal.Desktop.Gl
         }
     }
 
-    /// Applies resolved state with redundant-call elimination.
+    /// A pass's fixed-function state with its property references resolved.
+    internal struct ResolvedState : IEquatable<ResolvedState>
+    {
+        public int Src, Dst, SrcA, DstA, Op, OpA, Mask, ZTest, ZWrite, Cull, AlphaToMask;
+        public float OffsetFactor, OffsetUnits;
+        public int StencilRef, ReadMask, WriteMask, FComp, FPass, FFail, FZFail, BComp, BPass, BFail, BZFail;
+
+        public bool Equals(ResolvedState o) => Src == o.Src && Dst == o.Dst && SrcA == o.SrcA && DstA == o.DstA && Op == o.Op && OpA == o.OpA && Mask == o.Mask
+            && ZTest == o.ZTest && ZWrite == o.ZWrite && Cull == o.Cull && AlphaToMask == o.AlphaToMask && OffsetFactor == o.OffsetFactor && OffsetUnits == o.OffsetUnits
+            && StencilRef == o.StencilRef && ReadMask == o.ReadMask && WriteMask == o.WriteMask && FComp == o.FComp && FPass == o.FPass && FFail == o.FFail
+            && FZFail == o.FZFail && BComp == o.BComp && BPass == o.BPass && BFail == o.BFail && BZFail == o.BZFail;
+
+        public override bool Equals(object obj) => obj is ResolvedState o && Equals(o);
+        public override int GetHashCode() => HashCode.Combine(Src, Dst, ZTest, ZWrite, Cull, StencilRef, FComp, Mask);
+
+        /// Resolves a pass's state for a draw (main thread).
+        public static ResolvedState Of(PassState s, DrawInputs d) => new()
+        {
+            Src = (int)s.SrcBlend.Resolve(d), Dst = (int)s.DstBlend.Resolve(d), SrcA = (int)s.SrcBlendAlpha.Resolve(d), DstA = (int)s.DstBlendAlpha.Resolve(d),
+            Op = (int)s.BlendOp.Resolve(d), OpA = (int)s.BlendOpAlpha.Resolve(d), Mask = (int)s.ColorMask.Resolve(d),
+            ZTest = (int)s.ZTest.Resolve(d), ZWrite = (int)s.ZWrite.Resolve(d), Cull = (int)s.Cull.Resolve(d), AlphaToMask = (int)s.AlphaToMask.Resolve(d),
+            OffsetFactor = s.OffsetFactor.Resolve(d), OffsetUnits = s.OffsetUnits.Resolve(d),
+            StencilRef = (int)s.StencilRef.Resolve(d), ReadMask = (int)s.StencilReadMask.Resolve(d), WriteMask = (int)s.StencilWriteMask.Resolve(d),
+            FComp = (int)s.FrontComp.Resolve(d), FPass = (int)s.FrontPass.Resolve(d), FFail = (int)s.FrontFail.Resolve(d), FZFail = (int)s.FrontZFail.Resolve(d),
+            BComp = (int)s.BackComp.Resolve(d), BPass = (int)s.BackPass.Resolve(d), BFail = (int)s.BackFail.Resolve(d), BZFail = (int)s.BackZFail.Resolve(d),
+        };
+    }
+
+    /// Applies resolved state with redundant-call elimination (GL thread).
     internal static unsafe class GlStateCache
     {
-        struct Resolved : IEquatable<Resolved>
-        {
-            public int Src, Dst, SrcA, DstA, Op, OpA, Mask, ZTest, ZWrite, Cull, AlphaToMask;
-            public float OffsetFactor, OffsetUnits;
-            public int StencilRef, ReadMask, WriteMask, FComp, FPass, FFail, FZFail, BComp, BPass, BFail, BZFail;
-
-            public bool Equals(Resolved o) => Src == o.Src && Dst == o.Dst && SrcA == o.SrcA && DstA == o.DstA && Op == o.Op && OpA == o.OpA && Mask == o.Mask
-                && ZTest == o.ZTest && ZWrite == o.ZWrite && Cull == o.Cull && AlphaToMask == o.AlphaToMask && OffsetFactor == o.OffsetFactor && OffsetUnits == o.OffsetUnits
-                && StencilRef == o.StencilRef && ReadMask == o.ReadMask && WriteMask == o.WriteMask && FComp == o.FComp && FPass == o.FPass && FFail == o.FFail
-                && FZFail == o.FZFail && BComp == o.BComp && BPass == o.BPass && BFail == o.BFail && BZFail == o.BZFail;
-        }
-
-        static Resolved current;
+        static ResolvedState current;
         static bool valid;
 
         public static void Invalidate() => valid = false;
 
-        public static void Apply(PassState s, DrawInputs d)
+        public static void Apply(in ResolvedState r)
         {
-            var r = new Resolved
-            {
-                Src = (int)s.SrcBlend.Resolve(d), Dst = (int)s.DstBlend.Resolve(d), SrcA = (int)s.SrcBlendAlpha.Resolve(d), DstA = (int)s.DstBlendAlpha.Resolve(d),
-                Op = (int)s.BlendOp.Resolve(d), OpA = (int)s.BlendOpAlpha.Resolve(d), Mask = (int)s.ColorMask.Resolve(d),
-                ZTest = (int)s.ZTest.Resolve(d), ZWrite = (int)s.ZWrite.Resolve(d), Cull = (int)s.Cull.Resolve(d), AlphaToMask = (int)s.AlphaToMask.Resolve(d),
-                OffsetFactor = s.OffsetFactor.Resolve(d), OffsetUnits = s.OffsetUnits.Resolve(d),
-                StencilRef = (int)s.StencilRef.Resolve(d), ReadMask = (int)s.StencilReadMask.Resolve(d), WriteMask = (int)s.StencilWriteMask.Resolve(d),
-                FComp = (int)s.FrontComp.Resolve(d), FPass = (int)s.FrontPass.Resolve(d), FFail = (int)s.FrontFail.Resolve(d), FZFail = (int)s.FrontZFail.Resolve(d),
-                BComp = (int)s.BackComp.Resolve(d), BPass = (int)s.BackPass.Resolve(d), BFail = (int)s.BackFail.Resolve(d), BZFail = (int)s.BackZFail.Resolve(d),
-            };
             if (valid && r.Equals(current)) return;
             current = r;
             valid = true;

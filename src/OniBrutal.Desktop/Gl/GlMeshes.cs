@@ -16,23 +16,36 @@ namespace OniBrutal.Desktop.Gl
         Count,
     }
 
+    /// The vertex channels a mesh provides: components per channel (0: absent; negative: UVs
+    /// stored as Vector4 whatever their dimension) and whether colours are bytes. Replaced, not
+    /// changed, when a mesh's channels change; vertex arrays are built per layout.
+    internal sealed class MeshLayout
+    {
+        public readonly int[] Components = new int[(int)Channel.Count];
+        /// Colours given as Color32 are unsigned bytes, normalized by the shader input.
+        public bool ByteColors;
+
+        public bool SameAs(MeshLayout o) => o != null && ByteColors == o.ByteColors && Components.AsSpan().SequenceEqual(o.Components);
+    }
+
     /// A mesh on the device: one buffer per channel, one index buffer holding every submesh.
+    /// The buffers belong to the GL thread; the main thread records versions, layout and
+    /// submesh ranges.
     internal sealed class DeviceMesh
     {
-        public int Version = -1;
+        // Main thread.
+        public int RecordedVersion = -1;
+        public MeshLayout Layout = new();
+        public (int Offset, int Count, uint Mode, int BaseVertex)[] SubMeshes = Array.Empty<(int, int, uint, int)>();
+
+        // GL thread.
         public readonly uint[] Buffers = new uint[(int)Channel.Count];
         /// Allocated sizes in bytes; uploads that fit reuse the storage (glBufferSubData).
         public readonly long[] Capacities = new long[(int)Channel.Count];
         public long IndexCapacity;
-        public readonly int[] Components = new int[(int)Channel.Count];
-        /// Colours given as Color32 are unsigned bytes, normalized by the shader input.
-        public bool ByteColors;
         public uint IndexBuffer;
-        public (int Offset, int Count, uint Mode, int BaseVertex)[] SubMeshes = Array.Empty<(int, int, uint, int)>();
-        /// Changes when the channels present or their formats change (vertex arrays are rebuilt).
-        public int LayoutVersion;
-        /// Vertex arrays by program attribute layout, with the LayoutVersion they were built for.
-        public Dictionary<int, (uint VertexArray, int Version)> VertexArrays;
+        /// Vertex arrays by program attribute layout, with the mesh layout they were built for.
+        public Dictionary<int, (uint VertexArray, MeshLayout Layout)> VertexArrays;
 
         public void Delete()
         {
@@ -54,9 +67,18 @@ namespace OniBrutal.Desktop.Gl
         }
     }
 
+    /// A mesh's vertex and index data as it was when recorded (copies), for the GL thread.
+    internal sealed class MeshUpload
+    {
+        public readonly Array[] Channels = new Array[(int)Channel.Count];
+        public int[] Indices;
+        public uint Usage;
+    }
+
     internal static unsafe class GlMeshes
     {
-        public static DeviceMesh Ensure(MeshNative m)
+        /// The device mesh (main thread), with changed data recorded for the GL thread.
+        public static DeviceMesh Prepare(GlWorker worker, MeshNative m)
         {
             if (m.Gpu is not DeviceMesh d)
             {
@@ -64,44 +86,73 @@ namespace OniBrutal.Desktop.Gl
                 m.Gpu = d;
                 GraphicsDevice.Adopt(m, d);
             }
-            if (d.Version == m.Version) return d;
-            uint usage = m.Dynamic ? DynamicDraw : StaticDraw;
-            Span<int> before = stackalloc int[(int)Channel.Count];
-            d.Components.CopyTo(before);
-            bool byteColorsBefore = d.ByteColors;
-            Upload(d, Channel.Position, m.Positions, 3, usage);
-            Upload(d, Channel.Normal, m.Normals, 3, usage);
-            Upload(d, Channel.Tangent, m.Tangents, 4, usage);
-            if (m.Colors != null && m.ColorsAreBytes)
+            if (d.RecordedVersion == m.Version) return d;
+            var upload = new MeshUpload { Usage = m.Dynamic ? DynamicDraw : StaticDraw };
+            var layout = new MeshLayout();
+            AddChannel(upload, layout, Channel.Position, m.Positions, 3);
+            AddChannel(upload, layout, Channel.Normal, m.Normals, 3);
+            AddChannel(upload, layout, Channel.Tangent, m.Tangents, 4);
+            if (m.Colors != null && m.Colors.Length > 0 && m.ColorsAreBytes)
             {
                 var bytes = new Color32[m.Colors.Length];
                 for (int i = 0; i < bytes.Length; i++) bytes[i] = m.Colors[i];
-                Store(d, Channel.Color, bytes, 4, usage);
-                d.ByteColors = true;
+                upload.Channels[(int)Channel.Color] = bytes;
+                layout.Components[(int)Channel.Color] = 4;
+                layout.ByteColors = true;
             }
-            else
-            {
-                Upload(d, Channel.Color, m.Colors, 4, usage);
-                d.ByteColors = false;
-            }
+            else AddChannel(upload, layout, Channel.Color, m.Colors, 4);
             for (int u = 0; u < MeshNative.UvChannels; u++)
             {
                 var uv = m.Uvs[u];
-                Upload(d, Channel.Uv0 + u, uv, uv == null ? 0 : Math.Max(1, m.UvDimensions[u]), usage, stride4: true);
+                // UVs are stored as Vector4 whatever their dimension.
+                AddChannel(upload, layout, Channel.Uv0 + u, uv, uv == null ? 0 : -Math.Max(1, m.UvDimensions[u]));
             }
-            UploadIndices(d, m, usage);
-            if (!before.SequenceEqual(d.Components) || byteColorsBefore != d.ByteColors) d.LayoutVersion++;
-            d.Version = m.Version;
+            d.SubMeshes = Indices(m, out upload.Indices);
+            if (!layout.SameAs(d.Layout)) d.Layout = layout;
+            d.RecordedVersion = m.Version;
+            worker.Post(() => Upload(d, upload));
             return d;
         }
 
-        /// The mesh's vertex array for a program's attribute layout: buffers, formats and the
-        /// index buffer recorded once, so a draw binds one object. Channels the mesh lacks are
-        /// disabled and read the context's constant attribute values.
-        public static uint VertexArray(DeviceMesh d, DeviceProgram p)
+        static void AddChannel<T>(MeshUpload upload, MeshLayout layout, Channel c, T[] data, int components) where T : unmanaged
+        {
+            if (data == null || data.Length == 0) return;
+            upload.Channels[(int)c] = (T[])data.Clone();
+            layout.Components[(int)c] = components;
+        }
+
+        /// Writes the recorded data into the mesh's buffers (GL thread).
+        static void Upload(DeviceMesh d, MeshUpload upload)
+        {
+            for (int i = 0; i < upload.Channels.Length; i++)
+            {
+                switch (upload.Channels[i])
+                {
+                    case null: continue;
+                    case Vector3[] v: Store(d, i, v, upload.Usage); break;
+                    case Vector4[] v: Store(d, i, v, upload.Usage); break;
+                    case Color[] v: Store(d, i, v, upload.Usage); break;
+                    case Color32[] v: Store(d, i, v, upload.Usage); break;
+                }
+            }
+            if (d.IndexBuffer == 0) d.IndexBuffer = GlApi.CreateBuffer();
+            d.IndexCapacity = Fill(d.IndexBuffer, upload.Indices, d.IndexCapacity, upload.Usage);
+        }
+
+        static void Store<T>(DeviceMesh d, int i, T[] data, uint usage) where T : unmanaged
+        {
+            if (d.Buffers[i] == 0) d.Buffers[i] = GlApi.CreateBuffer();
+            d.Capacities[i] = Fill(d.Buffers[i], data, d.Capacities[i], usage);
+        }
+
+        /// The mesh's vertex array for a program's attribute layout and a mesh layout (GL
+        /// thread): buffers, formats and the index buffer recorded once, so a draw binds one
+        /// object. Channels the mesh lacks are disabled and read the context's constant
+        /// attribute values.
+        public static uint VertexArray(DeviceMesh d, MeshLayout layout, DeviceProgram p)
         {
             d.VertexArrays ??= new();
-            if (d.VertexArrays.TryGetValue(p.LayoutId, out var entry) && entry.Version == d.LayoutVersion) return entry.VertexArray;
+            if (d.VertexArrays.TryGetValue(p.LayoutId, out var entry) && entry.Layout == layout) return entry.VertexArray;
             uint vao = entry.VertexArray;
             if (vao == 0)
             {
@@ -114,14 +165,14 @@ namespace OniBrutal.Desktop.Gl
                 int location = p.Attributes[c];
                 if (location < 0) continue;
                 uint loc = (uint)location;
-                int components = d.Components[c];
+                int components = layout.Components[c];
                 if (components == 0)
                 {
                     N.glDisableVertexArrayAttrib(vao, loc);
                     continue;
                 }
                 N.glEnableVertexArrayAttrib(vao, loc);
-                if (c == (int)Channel.Color && d.ByteColors)
+                if (c == (int)Channel.Color && layout.ByteColors)
                 {
                     N.glVertexArrayVertexBuffer(vao, loc, new GlBuffer(d.Buffers[c]), 0, 4);
                     N.glVertexArrayAttribFormat(vao, loc, 4, UnsignedByte, true, 0);
@@ -135,32 +186,13 @@ namespace OniBrutal.Desktop.Gl
                 N.glVertexArrayAttribBinding(vao, loc, loc);
             }
             N.glVertexArrayElementBuffer(vao, new GlBuffer(d.IndexBuffer));
-            d.VertexArrays[p.LayoutId] = (vao, d.LayoutVersion);
+            d.VertexArrays[p.LayoutId] = (vao, layout);
             return vao;
         }
 
-        static void Upload<T>(DeviceMesh d, Channel c, T[] data, int components, uint usage, bool stride4 = false) where T : unmanaged
-        {
-            if (data == null || data.Length == 0)
-            {
-                d.Components[(int)c] = 0;
-                return;
-            }
-            Store(d, c, data, components, usage);
-            // UVs are stored as Vector4 whatever their dimension.
-            if (stride4) d.Components[(int)c] = -components;
-        }
-
-        static void Store<T>(DeviceMesh d, Channel c, T[] data, int components, uint usage) where T : unmanaged
-        {
-            int i = (int)c;
-            if (d.Buffers[i] == 0) d.Buffers[i] = GlApi.CreateBuffer();
-            d.Capacities[i] = Fill<T>(d.Buffers[i], data, d.Capacities[i], usage);
-            d.Components[i] = components;
-        }
-
-        /// Quads become two triangles each, as Unity's GL device draws them.
-        static void UploadIndices(DeviceMesh d, MeshNative m, uint usage)
+        /// Every submesh's indices in one list; quads become two triangles each, as Unity's GL
+        /// device draws them.
+        static (int, int, uint, int)[] Indices(MeshNative m, out int[] indices)
         {
             var all = new List<int>();
             var subs = new (int, int, uint, int)[m.SubMeshes.Count];
@@ -195,9 +227,8 @@ namespace OniBrutal.Desktop.Gl
                 }
                 subs[s] = (start, all.Count - start, mode, sm.BaseVertex);
             }
-            if (d.IndexBuffer == 0) d.IndexBuffer = GlApi.CreateBuffer();
-            d.IndexCapacity = Fill<int>(d.IndexBuffer, all.ToArray(), d.IndexCapacity, usage);
-            d.SubMeshes = subs;
+            indices = all.ToArray();
+            return subs;
         }
 
         /// Writes data into a buffer (direct state access: no binding changes, so the bound

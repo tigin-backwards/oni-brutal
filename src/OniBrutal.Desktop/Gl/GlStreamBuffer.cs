@@ -5,7 +5,7 @@ using N = Brutal.OpenGlApi.OpenGl.Native;
 
 namespace OniBrutal.Desktop.Gl
 {
-    /// Per-draw data streamed to the GPU (uniform blocks, texture updates) through one ring
+    /// Per-draw data streamed to the GPU (uniform blocks) through one ring
     /// buffer that stays mapped for the device's lifetime (ARB_buffer_storage, persistent and
     /// coherent). Data is copied straight into the mapping; a fence per frame records which
     /// part of the ring the GPU may still read, and a region is reused only after the frames

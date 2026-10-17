@@ -52,8 +52,10 @@ namespace OniBrutal.Desktop.Gl
         public readonly List<UniformBinding> Uniforms = new();
         public readonly List<SamplerBinding> Samplers = new();
         public int[] BlockSizes = Array.Empty<int>();
-        /// Per-draw uniform block contents, reused.
-        public byte[][] BlockScratch;
+        /// Floats of the default-block uniforms' values, recorded per draw in uniform order.
+        public int LooseLength;
+        /// Bytes of the uniform blocks recorded per draw, one after another (each at least 16).
+        public int BlocksLength;
         /// Programs with the same attribute locations share a layout id (vertex arrays are
         /// built per mesh and layout).
         public int LayoutId;
@@ -166,6 +168,9 @@ namespace OniBrutal.Desktop.Gl
             var layout = string.Join(",", program.Attributes);
             if (!layouts.TryGetValue(layout, out program.LayoutId)) layouts[layout] = program.LayoutId = layouts.Count;
             Reflect(program);
+            foreach (var u in program.Uniforms)
+                if (u.Block < 0) program.LooseLength += GlUniforms.Length(u);
+            foreach (var size in program.BlockSizes) program.BlocksLength += Math.Max(size, 16);
             return program;
         }
 
@@ -488,34 +493,77 @@ namespace OniBrutal.Desktop.Gl
             MemoryMarshal.Cast<Matrix4x4, float>(new ReadOnlySpan<Matrix4x4>(in m)).CopyTo(o);
         }
 
-        /// Sets every loose uniform and returns the filled block buffers.
+        /// The number of floats Resolve gives for a uniform.
+        public static int Length(UniformBinding u)
+        {
+            if (u.IsMatrix)
+            {
+                int matrices = Math.Max(1, u.Size / 4);
+                return u.Source == UniformSource.Property && matrices > 1 ? matrices * 16 : 16;
+            }
+            if (u.Source != UniformSource.Property) return 4;
+            if (u.Size > 1) return u.Size * 4;
+            return Components(u.Type) == 1 ? 1 : 4;
+        }
+
         /// Default-block uniforms sent and skipped since the last frame counters (--frame-stats).
         public static int UniformsSent, UniformsSkipped;
 
-        public static void Apply(DeviceProgram p, DrawInputs d, byte[][] blocks)
+        /// Resolves a draw's uniforms (main thread): default-block values into `values` in
+        /// uniform order, block members into `blocks` (laid out as DeviceProgram.BlocksLength).
+        public static void Record(DeviceProgram p, DrawInputs d, Span<float> values, Span<byte> blocks)
         {
             Span<float> o = scratch;
+            Span<int> blockStarts = stackalloc int[p.BlockSizes.Length];
+            for (int b = 0, at = 0; b < blockStarts.Length; b++)
+            {
+                blockStarts[b] = at;
+                at += Math.Max(p.BlockSizes[b], 16);
+            }
+            int next = 0;
+            foreach (var u in p.Uniforms)
+            {
+                int length = Length(u);
+                if (u.Block >= 0)
+                {
+                    int n = Resolve(u, d, o);
+                    if (n != length) throw new InvalidOperationException($"Uniform '{u.Name}': {n} values resolved, {length} expected.");
+                    WriteBlock(blocks.Slice(blockStarts[u.Block], p.BlockSizes[u.Block]), u, o[..n]);
+                    continue;
+                }
+                var target = values.Slice(next, length);
+                next += length;
+                // Slots a value leaves unwritten (padding of float arrays) compare equal from draw to draw.
+                target.Clear();
+                int written = Resolve(u, d, target);
+                if (written != length) throw new InvalidOperationException($"Uniform '{u.Name}': {written} values resolved, {length} expected.");
+            }
+        }
+
+        /// Sets the default-block uniforms recorded for a draw (GL thread), skipping values the
+        /// program already holds.
+        public static void Send(DeviceProgram p, ReadOnlySpan<float> values)
+        {
             Span<int> ints = stackalloc int[4];
             var sent = p.Sent ??= new float[p.Uniforms.Count][];
+            int next = 0;
             for (int index = 0; index < p.Uniforms.Count; index++)
             {
                 var u = p.Uniforms[index];
-                int n = Resolve(u, d, o);
-                if (u.Block >= 0)
-                {
-                    WriteBlock(blocks[u.Block], u, o[..n]);
-                    continue;
-                }
+                if (u.Block >= 0) continue;
+                int n = Length(u);
+                var o = values.Slice(next, n);
+                next += n;
                 if (u.Location < 0) continue;
                 var last = sent[index];
-                if (last != null && MemoryMarshal.Cast<float, int>(last.AsSpan()).SequenceEqual(MemoryMarshal.Cast<float, int>(o[..n]))) // bitwise: -0 and NaNs are values too
+                if (last != null && MemoryMarshal.Cast<float, int>(last.AsSpan()).SequenceEqual(MemoryMarshal.Cast<float, int>(o))) // bitwise: -0 and NaNs are values too
                 {
                     UniformsSkipped++;
                     continue;
                 }
                 UniformsSent++;
                 if (last == null || last.Length != n) sent[index] = last = new float[n];
-                o[..n].CopyTo(last);
+                o.CopyTo(last);
                 fixed (float* f = o)
                 {
                     if (u.IsMatrix || u.Size > 1 && Components(u.Type) == 4) N.glUniform4fv(u.Location, n / 4, f);
@@ -564,9 +612,9 @@ namespace OniBrutal.Desktop.Gl
         }
 
         /// std140: element i of an array at offset + i * stride; matrices are four columns.
-        static void WriteBlock(byte[] block, UniformBinding u, ReadOnlySpan<float> values)
+        static void WriteBlock(Span<byte> block, UniformBinding u, ReadOnlySpan<float> values)
         {
-            var target = MemoryMarshal.Cast<byte, float>(block.AsSpan());
+            var target = MemoryMarshal.Cast<byte, float>(block);
             int components = u.IsMatrix ? 4 : Math.Min(4, Components(u.Type));
             int elements = u.IsMatrix ? values.Length / 4 : Math.Max(1, u.Size);
             int stride = u.ArrayStride > 0 ? u.ArrayStride / 4 : 4;

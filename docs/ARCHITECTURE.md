@@ -359,23 +359,34 @@ renderer, restricted to what the game uses (*usage §1*):
   (`Hidden/BlitCopy` from `unity_builtin_extra`), `GL` immediate mode, `CommandBuffer`.
 - Gamma colour space (`m_ActiveColorSpace=0`): no sRGB conversions.
 
-**Presentation and frame pacing.** Unity's player records rendering on the main thread and
-presents from its render thread (`kGfxThreadingModeClientWorkerJobs` on GLCore), so a swap that
-blocks — vsync, or a display path that reads the frame back, as Mesa's d3d12 driver does under
-X11 — overlaps the next frame's game work. We keep all GL calls on the main thread but present
-the same way: the main thread renders with the context of a hidden window shared with the
-visible one, into an offscreen back buffer (colour texture + depth-stencil); `Present` fences the
-frame and hands it to a presenter thread current on the window's context, which waits for the
-fence on its own thread (neither context's GPU queue waits on the other's), blits to the window,
-swaps with `QualitySettings.vSyncCount` as the interval, and finishes. One frame is in flight: presenting waits until the previous frame has been
-presented, and two back buffers alternate. Back-buffer reads (`ReadPixels` of the screen,
+**Render thread, presentation and frame pacing.** Unity's player records rendering on the main
+thread and executes it on a render thread (`kGfxThreadingModeClientWorkerJobs` on GLCore), and
+presents from there, so GL work and a swap that blocks — vsync, or a display path that reads the
+frame back, as Mesa's d3d12 driver does under X11 — overlap the next frame's game work. We do
+the same (`GlWorker`): the device's methods run on the main thread and record commands; a GL
+thread that owns the rendering context (a hidden window's, shared with the visible one)
+executes them. Recording resolves everything a draw reads from engine objects, so the main
+thread can change them while the GL thread works: the program variant, the pass state with its
+property references, every uniform value (into a per-frame arena), the textures each sampler
+gets, and the mesh's layout and submesh range; changed texels and vertex data are copied when
+recorded (a non-readable texture hands over its memory, as it keeps no CPU copy). `Present`
+hands the frame to the GL thread once the previous frame has been executed, so one frame is in
+flight. Work whose result the main thread needs waits for the GL thread: `ReadPixels` and
+captures, compiling a program variant the first time it is used, `Shader.WarmupAllShaders`,
+diagnostics. A command that throws is logged and the frame goes on, as an exception in a draw
+used to unwind only that draw. The GL thread renders into an offscreen back buffer (colour
+texture + depth-stencil); at present it fences the frame and hands it to a presenter thread
+current on the window's context, which waits for the fence on its own thread (neither context's
+GPU queue waits on the other's), blits to the window, swaps with `QualitySettings.vSyncCount` as
+the interval, and finishes; presenting waits until the previous frame has been presented, and
+two back buffers alternate. Back-buffer reads (`ReadPixels` of the screen,
 captures) read the offscreen buffer of the current frame. Pacing follows Unity's desktop
 player: with vSync the swap paces frames; otherwise `Application.targetFrameRate` when set;
 otherwise none. Without a display (`--headless`, `--batchmode`) frames are paced at
 `targetFrameRate` or 60 Hz.
 
 Textures loaded from asset files are uploaded as part of loading, as in Unity (the load queues
-them; the main thread uploads them before the next frame renders), not on first draw: first
+them; the main thread records their upload before the next frame renders), not on first draw: first
 draws of screens with many textures (the research tree) would otherwise hitch for a second and
 throw off the game's time-based UI animation. Non-readable textures drop their CPU copy then.
 
@@ -460,8 +471,8 @@ HTTP and FMOD threads call into the engine. Our rules:
    (`Instantiate`, `AddComponent`, `Destroy`, `SetParent`, transform setters, activation),
    rendering and GPU resource APIs, scene loading.
 4. Worker-thread writes into `GetRawTextureData` arrays are allowed (plain CPU memory until
-   `Apply`). GL calls happen only on the main thread, apart from the presenter thread's copy
-   and swap on the window's own context (§3.5).
+   `Apply`). GL calls happen only on the GL thread, apart from the presenter thread's copy
+   and swap on the window's own context (§3.5); the device records them on the main thread.
 5. Reverse P/Invoke: SimDLL's error callback is created by game code per call; exceptions
    crossing it are fatal on CoreCLR, which matches Unity's crash behaviour on that path.
 

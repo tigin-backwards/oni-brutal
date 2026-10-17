@@ -177,6 +177,16 @@ namespace OniBrutal.Engine.Rendering
             source = null;
         }
 
+        /// The texels, now owned by the caller (the device uploading a non-readable texture);
+        /// the texture keeps none, as after DropTexels.
+        public PixelMemory TakeTexels()
+        {
+            var taken = Memory;
+            memory = null;
+            source = null;
+            return taken;
+        }
+
         public abstract long SliceSize { get; }
 
         public override void ReleaseResources()

@@ -157,7 +157,7 @@ original.
 **Exit:** a parity checklist (`docs/PARITY.md`, written at the start of M6 from the game's
 screens and features) fully ticked or with documented deviations only.
 
-### M7 (proposed) — Render thread
+### M7 — Render thread (done 2026-10-17)
 
 Why: on large colonies the main thread spends about 37% of its time issuing GL work (DeCrew,
 cycle 17628: ~1700 draws and ~2 MiB of texture uploads per frame), in series with game code.
@@ -183,6 +183,17 @@ caps. One frame of latency at most, as Unity's render thread.
 
 Exit: identical captures and probe output in the parity scenarios; DeCrew frame time bounded by
 the slower thread (estimate ~25 ms, from ~38).
+
+Result (`GlWorker`, ARCHITECTURE §3.5): DeCrew 34.6 fps (from 25.8; the original 26), main-thread
+render 6.2 ms (recording) and present 0.2 ms (from 13.8 and 3.3); Regrettable Dimension played
+28k frames at speed 3: 36.0 fps (from 25.6), no exceptions, no white-out. Paused captures are
+identical to before; liquids (Cool Abyss) as before. Texture uploads no longer go through the
+persistent pixel-unpack ring: with the GPU a frame or two behind the render thread, staged
+uploads corrupted background textures under Mesa's d3d12 driver (white-out probe: three events
+per run, with or without explicit flushing; none with a full wait per frame or with uploads from
+memory). The uniform ring is unaffected in every run. Open: one diagnostic run that made the main
+thread wait for the GL thread every frame ended in a segmentation fault at frame ~19k; no run of
+the shipping configuration has crashed.
 
 ### M8 (proposed) — Windows
 

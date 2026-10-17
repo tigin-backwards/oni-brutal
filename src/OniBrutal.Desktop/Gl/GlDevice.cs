@@ -60,39 +60,20 @@ namespace OniBrutal.Desktop.Gl
 
     /// Unity's OpenGLCore device: executes the game's GLSL programs with Unity's conventions
     /// (clip space and texture origin as OpenGL, clockwise front faces, no projection flip).
+    ///
+    /// The device's methods run on the main thread and record; GL work runs on the GL thread
+    /// (GlWorker). Recording resolves everything a draw reads from engine objects (programs,
+    /// state, uniform values, textures, mesh data) so that the main thread can go on changing
+    /// them; methods marked "GL thread" run only inside recorded commands.
     internal sealed unsafe class GlDevice : RenderDevice
     {
         public static float MaxAnisotropy;
-        static bool framebufferValid;
 
         readonly GlfwPlatform platform;
         readonly GlCaps caps = new();
-        readonly uint immediateBuffer, immediateIndices;
-        /// The vertex array immediate geometry is drawn with (mesh draws use the mesh's own).
-        readonly uint immediateVertexArray;
-        /// Every draw's uniform blocks are written to a stream buffer and bound by range.
-        const int UniformStreamSize = 16 << 20;
-        GlStreamBuffer uniformStream;
-
-        void BindUniformBlock(uint index, byte[] data)
-        {
-            uniformStream ??= new GlStreamBuffer(UniformBuffer, UniformStreamSize, GlApi.GetInteger(UniformBufferOffsetAlignment));
-            int size = Math.Max(data.Length, 16);
-            int offset;
-            if (data.Length >= size) offset = uniformStream.Write(data);
-            else
-            {
-                Span<byte> padded = stackalloc byte[size];
-                data.CopyTo(padded);
-                offset = uniformStream.Write(padded);
-            }
-            N.glBindBufferRange(UniformBuffer, index, new GlBuffer(uniformStream.Id), offset, size);
-        }
+        readonly GlWorker worker;
         readonly Dictionary<string, DeviceTexture> defaults = new();
         readonly Dictionary<ShaderPass, PassState> passStates = new();
-        readonly Dictionary<string, uint> mrtFramebuffers = new();
-        readonly bool[] attributeEnabled = new bool[16];
-        RenderTargetBinding target = RenderTargetBinding.BackBuffer;
         CameraConstants camera;
         Material passMaterial;
         int passIndex;
@@ -138,13 +119,27 @@ namespace OniBrutal.Desktop.Gl
             CreateDefaults();
             GlStateCache.Invalidate();
             presenter = new GlPresenter(platform.Window);
-            platform.Closing += presenter.Dispose;
+            // From here on the context belongs to the GL thread.
+            worker = new GlWorker(platform.RenderWindow, CommandFailed);
+            platform.Closing += () =>
+            {
+                worker.Dispose();
+                presenter.Dispose();
+            };
         }
 
         readonly GlPresenter presenter;
 
-        /// The framebuffer drawing to the screen goes to this frame.
-        uint BackBuffer => presenter.BackBuffer(platform.FramebufferWidth, platform.FramebufferHeight);
+        /// A recorded command threw (GL thread): the error is logged and the GL thread's caches
+        /// of context state are dropped, since the command may have stopped part way.
+        void CommandFailed(Exception e)
+        {
+            Debug.LogException(e);
+            GlBindings.Invalidate();
+            GlStateCache.Invalidate();
+            framebufferValid = false;
+            Array.Clear(constants);
+        }
 
         /// Video memory in MB (SystemInfo.graphicsMemorySize): the dedicated memory the NVIDIA or
         /// AMD memory-info extension reports, else Mesa's renderer query; 0 when the driver
@@ -176,8 +171,6 @@ namespace OniBrutal.Desktop.Gl
         public override GraphicsCaps Caps => caps;
         public override bool RendersFrames => true;
 
-        public static void InvalidateFramebufferBinding() => framebufferValid = false;
-
         // ----- Default textures (shader property defaults) -----
 
         void CreateDefaults()
@@ -194,7 +187,7 @@ namespace OniBrutal.Desktop.Gl
 
         void Make(string name, byte r, byte g, byte b, byte a)
         {
-            var t = new DeviceTexture { Id = GlApi.GenTexture(), Target = TexTarget2D, Width = 1, Height = 1 };
+            var t = new DeviceTexture { Id = GlApi.GenTexture(), Target = TexTarget2D, RecordedTarget = TexTarget2D, Width = 1, Height = 1 };
             byte* px = stackalloc byte[4] { r, g, b, a };
             GlBindings.BindTexture(TexTarget2D, t.Id);
             N.glTexImage2D(TexTarget2D, 0, (int)Rgba8, 1, 1, 0, Rgba, UnsignedByte, px);
@@ -202,12 +195,12 @@ namespace OniBrutal.Desktop.Gl
             N.glTexParameteri(TexTarget2D, TextureMaxLevel, 0);
             defaults[name] = t;
             // Array and 3D defaults with the same colour.
-            var array = new DeviceTexture { Id = GlApi.GenTexture(), Target = TexTarget2DArray };
+            var array = new DeviceTexture { Id = GlApi.GenTexture(), Target = TexTarget2DArray, RecordedTarget = TexTarget2DArray };
             GlBindings.BindTexture(TexTarget2DArray, array.Id);
             N.glTexImage3D(TexTarget2DArray, 0, (int)Rgba8, 1, 1, 1, 0, Rgba, UnsignedByte, px);
             N.glTexParameteri(TexTarget2DArray, TextureMaxLevel, 0);
             defaults["array:" + name] = array;
-            var volume = new DeviceTexture { Id = GlApi.GenTexture(), Target = TexTarget3D };
+            var volume = new DeviceTexture { Id = GlApi.GenTexture(), Target = TexTarget3D, RecordedTarget = TexTarget3D };
             GlBindings.BindTexture(TexTarget3D, volume.Id);
             N.glTexImage3D(TexTarget3D, 0, (int)Rgba8, 1, 1, 1, 0, Rgba, UnsignedByte, px);
             N.glTexParameteri(TexTarget3D, TextureMaxLevel, 0);
@@ -225,55 +218,78 @@ namespace OniBrutal.Desktop.Gl
 
         // ----- Targets -----
 
+        /// A render target as recorded: the device textures (null colours: the back buffer, of
+        /// the window's framebuffer size when recorded).
+        sealed record BoundTarget(DeviceTexture[] Colors, DeviceTexture Depth, int BackBufferWidth, int BackBufferHeight);
+
         public override void SetRenderTarget(in RenderTargetBinding binding)
         {
-            target = binding;
-            framebufferValid = false;
-            BindTarget();
+            DeviceTexture[] colors = null;
+            DeviceTexture depth = null;
+            if (binding.Colors != null && binding.Colors.Length > 0 && binding.Colors[0] != null)
+            {
+                colors = new DeviceTexture[binding.Colors.Length];
+                for (int i = 0; i < colors.Length; i++) colors[i] = GlTextures.Prepare(worker, binding.Colors[i]);
+                if (binding.Depth != null) depth = binding.Depth == binding.Colors[0] ? colors[0] : GlTextures.Prepare(worker, binding.Depth);
+            }
+            var bound = new BoundTarget(colors, depth, platform.FramebufferWidth, platform.FramebufferHeight);
+            worker.Post(() =>
+            {
+                target = bound;
+                framebufferValid = false;
+                BindTarget();
+            });
         }
 
+        // GL thread.
+        static bool framebufferValid;
+        BoundTarget target = new(null, null, 1, 1);
+        readonly Dictionary<string, uint> mrtFramebuffers = new();
+
+        public static void InvalidateFramebufferBinding() => framebufferValid = false;
+
+        /// The framebuffer standing in for the back buffer this frame (GL thread).
+        uint BackBuffer => presenter.BackBuffer(target.BackBufferWidth, target.BackBufferHeight);
+
+        /// Binds the current target's framebuffer (GL thread).
         void BindTarget()
         {
             if (framebufferValid) return;
             framebufferValid = true;
             var t = target;
-            if (t.Colors == null || t.Colors.Length == 0 || t.Colors[0] == null)
+            if (t.Colors == null)
             {
                 GlApi.BindFramebuffer(Framebuffer, BackBuffer);
                 return;
             }
             if (t.Colors.Length == 1 && (t.Depth == null || t.Depth == t.Colors[0]))
             {
-                var g = GlTextures.Ensure(t.Colors[0]);
-                g.Dirty = true;
-                GlApi.BindFramebuffer(Framebuffer, GlTextures.RenderFramebuffer(g));
+                t.Colors[0].Dirty = true;
+                GlApi.BindFramebuffer(Framebuffer, GlTextures.RenderFramebuffer(t.Colors[0]));
                 return;
             }
             // Multiple render targets: a framebuffer combining the colour textures with the depth
             // buffer of the depth target.
             var key = new System.Text.StringBuilder();
-            var colors = new DeviceTexture[t.Colors.Length];
-            for (int i = 0; i < colors.Length; i++)
+            foreach (var c in t.Colors)
             {
-                colors[i] = GlTextures.Ensure(t.Colors[i]);
-                colors[i].Dirty = true;
-                key.Append(colors[i].Id).Append(',');
+                c.Dirty = true;
+                key.Append(c.Id).Append(',');
             }
-            var depth = t.Depth != null ? GlTextures.Ensure(t.Depth) : null;
-            key.Append(depth?.DepthRenderbuffer ?? 0);
+            key.Append(t.Depth?.DepthRenderbuffer ?? 0);
             if (!mrtFramebuffers.TryGetValue(key.ToString(), out var fb))
             {
                 fb = GlApi.GenFramebuffer();
                 GlApi.BindFramebuffer(Framebuffer, fb);
-                var buffers = stackalloc GlEnum[colors.Length];
-                for (int i = 0; i < colors.Length; i++)
+                var buffers = stackalloc GlEnum[t.Colors.Length];
+                for (int i = 0; i < t.Colors.Length; i++)
                 {
-                    N.glFramebufferTexture2D(Framebuffer, ColorAttachment0 + (uint)i, TexTarget2D, colors[i].Id, 0);
+                    N.glFramebufferTexture2D(Framebuffer, ColorAttachment0 + (uint)i, TexTarget2D, t.Colors[i].Id, 0);
                     buffers[i] = ColorAttachment0 + (uint)i;
                 }
-                N.glDrawBuffers(colors.Length, buffers);
-                if (depth is { DepthRenderbuffer: not 0 })
-                    N.glFramebufferRenderbuffer(Framebuffer, DepthStencilAttachment, Renderbuffer, new GlRenderbuffer(depth.DepthRenderbuffer));
+                N.glDrawBuffers(t.Colors.Length, buffers);
+                if (t.Depth is { DepthRenderbuffer: not 0 })
+                    N.glFramebufferRenderbuffer(Framebuffer, DepthStencilAttachment, Renderbuffer, new GlRenderbuffer(t.Depth.DepthRenderbuffer));
                 mrtFramebuffers[key.ToString()] = fb;
             }
             GlApi.BindFramebuffer(Framebuffer, fb);
@@ -281,49 +297,58 @@ namespace OniBrutal.Desktop.Gl
 
         public override void SetViewport(UnityEngine.Rect pixels)
         {
-            BindTarget();
-            N.glViewport((int)pixels.x, (int)pixels.y, (int)pixels.width, (int)pixels.height);
+            worker.Post(() =>
+            {
+                BindTarget();
+                N.glViewport((int)pixels.x, (int)pixels.y, (int)pixels.width, (int)pixels.height);
+            });
         }
 
-        /// The scissor rectangle in effect (CommandBuffer.EnableScissorRect), or null.
+        /// The scissor rectangle in effect (CommandBuffer.EnableScissorRect), or null (GL thread).
         static Rect? scissor;
 
         public static bool ScissorActive => scissor != null;
 
         public override void SetScissor(Rect? pixels)
         {
-            scissor = pixels;
-            if (pixels is { } r)
+            worker.Post(() =>
             {
-                GlApi.Enable(ScissorTest, true);
-                N.glScissor((int)r.x, (int)r.y, Math.Max(0, (int)r.width), Math.Max(0, (int)r.height));
-            }
-            else GlApi.Enable(ScissorTest, false);
+                scissor = pixels;
+                if (pixels is { } r)
+                {
+                    GlApi.Enable(ScissorTest, true);
+                    N.glScissor((int)r.x, (int)r.y, Math.Max(0, (int)r.width), Math.Max(0, (int)r.height));
+                }
+                else GlApi.Enable(ScissorTest, false);
+            });
         }
 
         public override void Clear(bool color, bool depth, Color backgroundColor, float depthValue)
         {
-            BindTarget();
-            // Clears fill the whole target.
-            if (scissor != null) GlApi.Enable(ScissorTest, false);
-            uint mask = 0;
-            if (color)
+            worker.Post(() =>
             {
-                N.glColorMask(true, true, true, true);
-                N.glClearColor(backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);
-                mask |= ColorBufferBit;
-            }
-            if (depth)
-            {
-                N.glDepthMask(true);
-                N.glStencilMask(0xFF);
-                N.glClearDepth(depthValue);
-                N.glClearStencil(0);
-                mask |= DepthBufferBit | StencilBufferBit;
-            }
-            if (mask != 0) N.glClear(mask);
-            if (scissor != null) GlApi.Enable(ScissorTest, true);
-            GlStateCache.Invalidate();
+                BindTarget();
+                // Clears fill the whole target.
+                if (scissor != null) GlApi.Enable(ScissorTest, false);
+                uint mask = 0;
+                if (color)
+                {
+                    N.glColorMask(true, true, true, true);
+                    N.glClearColor(backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);
+                    mask |= ColorBufferBit;
+                }
+                if (depth)
+                {
+                    N.glDepthMask(true);
+                    N.glStencilMask(0xFF);
+                    N.glClearDepth(depthValue);
+                    N.glClearStencil(0);
+                    mask |= DepthBufferBit | StencilBufferBit;
+                }
+                if (mask != 0) N.glClear(mask);
+                if (scissor != null) GlApi.Enable(ScissorTest, true);
+                GlStateCache.Invalidate();
+            });
         }
 
         protected override void ApplyCamera(in CameraConstants c) => camera = c;
@@ -387,6 +412,59 @@ namespace OniBrutal.Desktop.Gl
         static bool KeywordEnabled(string keyword, MaterialNative material, string[] extra)
             => material.Keywords.Contains(keyword) || ShaderGlobals.Keywords.Contains(keyword) || (extra != null && Array.IndexOf(extra, keyword) >= 0);
 
+        /// A shader variant's program: compiled on the GL thread the first time it is used.
+        DeviceProgram Program(ShaderNative shader, int blob)
+        {
+            if (shader.Gpu is DeviceProgramSet set && set.Programs.TryGetValue(blob, out var p)) return p;
+            return worker.Call(() => GlPrograms.Get(shader, blob));
+        }
+
+        /// A sampler's texture as recorded: render textures are made ready for sampling first.
+        readonly record struct SamplerTexture(DeviceTexture Texture, bool RenderTexture, bool AutoGenerateMips);
+
+        /// Everything a draw's program reads, recorded on the main thread.
+        sealed class ProgramInputs
+        {
+            public DeviceProgram Program;
+            public ResolvedState State;
+            public float[] Values;
+            public int ValuesOffset;
+            public byte[] Blocks;
+            public int BlocksOffset;
+            public SamplerTexture[] Textures;
+        }
+
+        ProgramInputs Record(DeviceProgram program, PassState state, DrawInputs inputs)
+        {
+            var arena = worker.Arena;
+            var r = new ProgramInputs { Program = program, State = ResolvedState.Of(state, inputs) };
+            (r.Values, r.ValuesOffset) = arena.Floats(program.LooseLength);
+            (r.Blocks, r.BlocksOffset) = arena.Bytes(program.BlocksLength);
+            GlUniforms.Record(program, inputs, r.Values.AsSpan(r.ValuesOffset, program.LooseLength), r.Blocks.AsSpan(r.BlocksOffset, program.BlocksLength));
+            r.Textures = new SamplerTexture[program.Samplers.Count];
+            for (int i = 0; i < r.Textures.Length; i++)
+            {
+                var s = program.Samplers[i];
+                if (inputs.TryTexture(s.PropertyId, out var binding) && binding.Texture != null && binding.Texture.Native is TextureNative tn)
+                {
+                    var device = GlTextures.Prepare(worker, tn);
+                    if (device.RecordedTarget == s.Target)
+                    {
+                        var rt = tn as RenderTextureNative;
+                        r.Textures[i] = new SamplerTexture(device, rt != null, rt?.AutoGenerateMips ?? false);
+                        continue;
+                    }
+                }
+                // A declared property falls back to its default texture. A sampler the shader
+                // does not declare, with no global set, has no texture bound in Unity's GLCore
+                // player and reads (0, 0, 0, 1) as GL defines for a missing texture (the
+                // overlay compositor relies on an unset _MRT2 reading black).
+                string name = inputs.Shader.PropertiesById.TryGetValue(s.PropertyId, out var prop) ? prop.DefaultTexture : Unbound;
+                r.Textures[i] = new SamplerTexture(DefaultTexture(name, s.Target), false, false);
+            }
+            return r;
+        }
+
         public override void Draw(in DrawRequest draw)
         {
             if (draw.Material == null || draw.Mesh == null) return;
@@ -395,63 +473,74 @@ namespace OniBrutal.Desktop.Gl
             var shader = (ShaderNative)material.Shader.NativeOrThrow;
             if (!shader.HasOpenGLCorePrograms) return;
             if (draw.SubMesh < 0 || draw.SubMesh >= draw.Mesh.SubMeshes.Count) return;
-            BindTarget();
-            var mesh = GlMeshes.Ensure(draw.Mesh);
+            var mesh = GlMeshes.Prepare(worker, draw.Mesh);
+            var layout = mesh.Layout;
+            var sm = mesh.SubMeshes[draw.SubMesh];
             var inputs = new DrawInputs { ObjectToWorld = draw.ObjectToWorld, Camera = camera, Block = draw.Properties, Material = material };
             var keywords = draw.Keywords;
             foreach (var (passShader, pass) in Passes(shader, material, draw.Pass, draw.AllPasses))
             {
                 int blob = ShaderPrograms.SelectVariant(pass.Data, passShader.KeywordNames, k => KeywordEnabled(k, material, keywords));
                 if (blob < 0) continue;
-                var program = GlPrograms.Get(passShader, blob);
+                var program = Program(passShader, blob);
                 if (program.Id == 0) continue;
                 inputs.Shader = passShader;
-                GlStateCache.Apply(StateOf(pass), inputs);
-                Bind(program, inputs);
-                var sm = mesh.SubMeshes[draw.SubMesh];
-                if (sm.Count == 0) continue;
-                GlBindings.BindVertexArray(GlMeshes.VertexArray(mesh, program));
-                SetAbsentChannels(program, mesh);
-                draws++;
-                N.glDrawElementsBaseVertex(sm.Mode, sm.Count, UnsignedInt, (void*)(sm.Offset * 4L), sm.BaseVertex);
-                ForgetConstantsOfArrays(program, mesh);
+                var recorded = Record(program, StateOf(pass), inputs);
+                worker.Post(() => ExecuteDraw(recorded, mesh, layout, sm));
             }
         }
 
-        void Bind(DeviceProgram program, DrawInputs inputs)
+        // GL thread.
+        readonly uint immediateBuffer, immediateIndices;
+        /// The vertex array immediate geometry is drawn with (mesh draws use the mesh's own).
+        readonly uint immediateVertexArray;
+        readonly bool[] attributeEnabled = new bool[16];
+        /// Every draw's uniform blocks are written to a stream buffer and bound by range.
+        const int UniformStreamSize = 16 << 20;
+        GlStreamBuffer uniformStream;
+
+        void BindUniformBlock(uint index, ReadOnlySpan<byte> data)
         {
+            uniformStream ??= new GlStreamBuffer(UniformBuffer, UniformStreamSize, GlApi.GetInteger(UniformBufferOffsetAlignment));
+            int offset = uniformStream.Write(data);
+            N.glBindBufferRange(UniformBuffer, index, new GlBuffer(uniformStream.Id), offset, data.Length);
+        }
+
+        void ExecuteDraw(ProgramInputs recorded, DeviceMesh mesh, MeshLayout layout, (int Offset, int Count, uint Mode, int BaseVertex) sm)
+        {
+            BindTarget();
+            GlStateCache.Apply(recorded.State);
+            Bind(recorded);
+            if (sm.Count == 0) return;
+            var program = recorded.Program;
+            GlBindings.BindVertexArray(GlMeshes.VertexArray(mesh, layout, program));
+            SetAbsentChannels(program, layout);
+            draws++;
+            N.glDrawElementsBaseVertex(sm.Mode, sm.Count, UnsignedInt, (void*)(sm.Offset * 4L), sm.BaseVertex);
+            ForgetConstantsOfArrays(program, layout);
+        }
+
+        /// Program, uniforms and textures of a recorded draw (GL thread).
+        void Bind(ProgramInputs recorded)
+        {
+            var program = recorded.Program;
             GlBindings.UseProgram(program.Id);
-            var blocks = program.BlockScratch ??= program.BlockSizes.Select(n => new byte[n]).ToArray();
-            foreach (var b in blocks) Array.Clear(b);
-            GlUniforms.Apply(program, inputs, blocks);
-            for (int i = 0; i < blocks.Length; i++) BindUniformBlock((uint)i, blocks[i]);
+            GlUniforms.Send(program, recorded.Values.AsSpan(recorded.ValuesOffset, program.LooseLength));
+            int at = recorded.BlocksOffset;
+            for (int i = 0; i < program.BlockSizes.Length; i++)
+            {
+                int size = Math.Max(program.BlockSizes[i], 16);
+                BindUniformBlock((uint)i, recorded.Blocks.AsSpan(at, size));
+                at += size;
+            }
             // Render textures are made ready for sampling first (MSAA resolve, mip generation):
             // that work binds framebuffers and textures of its own.
-            var devices = new DeviceTexture[program.Samplers.Count];
-            for (int i = 0; i < devices.Length; i++)
+            foreach (var t in recorded.Textures)
+                if (t.RenderTexture) GlTextures.PrepareForSampling(t.Texture, t.AutoGenerateMips);
+            for (int i = 0; i < recorded.Textures.Length; i++)
             {
-                var s = program.Samplers[i];
-                DeviceTexture device = null;
-                if (inputs.TryTexture(s.PropertyId, out var binding) && binding.Texture != null && binding.Texture.Native is TextureNative tn)
-                {
-                    device = GlTextures.Ensure(tn);
-                    if (tn is RenderTextureNative rt) GlTextures.PrepareForSampling(rt, device);
-                    if (device.Target != s.Target) device = null;
-                }
-                if (device == null)
-                {
-                    // A declared property falls back to its default texture. A sampler the shader
-                    // does not declare, with no global set, has no texture bound in Unity's GLCore
-                    // player and reads (0, 0, 0, 1) as GL defines for a missing texture (the
-                    // overlay compositor relies on an unset _MRT2 reading black).
-                    string name = inputs.Shader.PropertiesById.TryGetValue(s.PropertyId, out var prop) ? prop.DefaultTexture : Unbound;
-                    device = DefaultTexture(name, s.Target);
-                }
-                devices[i] = device;
-            }
-            for (int i = 0; i < devices.Length; i++)
-            {
-                GlBindings.BindTexture(program.Samplers[i].Unit, devices[i].Target, devices[i].Id);
+                var t = recorded.Textures[i].Texture;
+                GlBindings.BindTexture(program.Samplers[i].Unit, t.Target, t.Id);
             }
             // Drawing goes to the current target even if preparing a texture rebound it.
             BindTarget();
@@ -468,24 +557,24 @@ namespace OniBrutal.Desktop.Gl
         /// Channels a mesh lacks read Unity's defaults (white colour, position (0,0,0,1), zero
         /// normal/tangent/uv) from the context's constant attribute values, which the vertex
         /// array leaves disabled.
-        void SetAbsentChannels(DeviceProgram program, DeviceMesh mesh)
+        void SetAbsentChannels(DeviceProgram program, MeshLayout layout)
         {
             for (int c = 0; c < (int)Channel.Count; c++)
             {
                 int location = program.Attributes[c];
-                if (location < 0 || mesh.Components[c] != 0) continue;
+                if (location < 0 || layout.Components[c] != 0) continue;
                 SetConstant(location, c == (int)Channel.Color ? ConstantWhite : c == (int)Channel.Position ? ConstantPoint : ConstantZero);
             }
         }
 
         /// A draw leaves the current value of every attribute it read from an enabled array
         /// undefined (OpenGL 4.5 §10.3.9), so those constants must be set again before use.
-        void ForgetConstantsOfArrays(DeviceProgram program, DeviceMesh mesh)
+        void ForgetConstantsOfArrays(DeviceProgram program, MeshLayout layout)
         {
             for (int c = 0; c < (int)Channel.Count; c++)
             {
                 int location = program.Attributes[c];
-                if (location >= 0 && location < constants.Length && mesh.Components[c] != 0) constants[location] = 0;
+                if (location >= 0 && location < constants.Length && layout.Components[c] != 0) constants[location] = 0;
             }
         }
 
@@ -525,9 +614,8 @@ namespace OniBrutal.Desktop.Gl
             var pass = sub.Passes[passIndex];
             int blob = ShaderPrograms.SelectVariant(pass.Data, shader.KeywordNames, k => KeywordEnabled(k, material, null));
             if (blob < 0) return;
-            var program = GlPrograms.Get(shader, blob);
+            var program = Program(shader, blob);
             if (program.Id == 0) return;
-            BindTarget();
             var inputs = new DrawInputs
             {
                 ObjectToWorld = modelView,
@@ -535,9 +623,7 @@ namespace OniBrutal.Desktop.Gl
                 Material = material,
                 Shader = shader,
             };
-            GlStateCache.Apply(StateOf(pass), inputs);
-            Bind(program, inputs);
-            GlBindings.BindVertexArray(immediateVertexArray);
+            var recorded = Record(program, StateOf(pass), inputs);
 
             // Interleaved: position, colour, eight texture coordinates.
             const int stride = sizeof(float) * (3 + 4 + 32);
@@ -557,6 +643,29 @@ namespace OniBrutal.Desktop.Gl
                     data[o + 10 + u * 4] = uvs[u].w;
                 }
             }
+            int[] indices = null;
+            if (primitive == ImmediatePrimitive.Quads)
+            {
+                int quads = vertices.Length / 4;
+                indices = new int[quads * 6];
+                for (int q = 0; q < quads; q++)
+                {
+                    int b = q * 4;
+                    indices.AsSpan(q * 6, 6).SetValues(b, b + 1, b + 2, b, b + 2, b + 3);
+                }
+            }
+            int count = vertices.Length;
+            worker.Post(() => ExecuteImmediate(recorded, primitive, data, count, indices));
+        }
+
+        void ExecuteImmediate(ProgramInputs recorded, ImmediatePrimitive primitive, float[] data, int count, int[] indices)
+        {
+            const int stride = sizeof(float) * (3 + 4 + 32);
+            var program = recorded.Program;
+            BindTarget();
+            GlStateCache.Apply(recorded.State);
+            Bind(recorded);
+            GlBindings.BindVertexArray(immediateVertexArray);
             GlBindings.BindBuffer(ArrayBuffer, immediateBuffer);
             GlApi.BufferData<float>(ArrayBuffer, data, StreamDraw);
             for (int c = 0; c < (int)Channel.Count; c++)
@@ -574,20 +683,12 @@ namespace OniBrutal.Desktop.Gl
                 int size = c == (int)Channel.Position ? 3 : 4;
                 N.glVertexAttribPointer((uint)location, size, Float, false, stride, (void*)offset);
             }
-            if (primitive == ImmediatePrimitive.Quads)
+            if (indices != null)
             {
-                int quads = vertices.Length / 4;
-                var indices = new int[quads * 6];
-                for (int q = 0; q < quads; q++)
-                {
-                    int b = q * 4;
-                    indices.AsSpan(q * 6, 6).SetValues(b, b + 1, b + 2, b, b + 2, b + 3);
-                }
                 GlBindings.BindBuffer(ElementArrayBuffer, immediateIndices);
                 GlApi.BufferData<int>(ElementArrayBuffer, indices, StreamDraw);
                 draws++;
                 N.glDrawElements(Triangles, indices.Length, UnsignedInt, null);
-                Array.Clear(constants);
             }
             else
             {
@@ -599,28 +700,37 @@ namespace OniBrutal.Desktop.Gl
                     _ => Triangles,
                 };
                 draws++;
-                N.glDrawArrays(mode, 0, vertices.Length);
-                Array.Clear(constants);
+                N.glDrawArrays(mode, 0, count);
             }
+            Array.Clear(constants);
         }
 
         // ----- Read-back, resources, presentation -----
 
+        /// Waits for the GL thread to render everything recorded so far, then reads.
         public override void ReadPixels(RenderTextureNative source, RectInt rect, Texture2DNative destination, int destX, int destY)
         {
-            uint framebuffer = BackBuffer;
-            if (source != null)
-            {
-                var g = GlTextures.Ensure(source);
-                GlTextures.PrepareForSampling(source, g);
-                framebuffer = g.Framebuffer;
-            }
-            GlApi.BindFramebuffer(ReadFramebuffer, framebuffer);
             int w = Math.Min(rect.width, destination.Width - destX), h = Math.Min(rect.height, destination.Height - destY);
             if (w <= 0 || h <= 0 || !TextureFormats.CanEncode(destination.Format) || destination.Memory == null) return;
-            var pixels = new float[w * h * 4];
-            N.glPixelStorei(PackAlignment, 4);
-            fixed (float* p = pixels) N.glReadPixels(rect.x, rect.y, w, h, Rgba, Float, p);
+            var device = source != null ? GlTextures.Prepare(worker, source) : null;
+            bool autoMips = source?.AutoGenerateMips ?? false;
+            int fbWidth = platform.FramebufferWidth, fbHeight = platform.FramebufferHeight;
+            var pixels = worker.Call(() =>
+            {
+                uint framebuffer;
+                if (device != null)
+                {
+                    GlTextures.PrepareForSampling(device, autoMips);
+                    framebuffer = device.Framebuffer;
+                }
+                else framebuffer = presenter.BackBuffer(fbWidth, fbHeight);
+                GlApi.BindFramebuffer(ReadFramebuffer, framebuffer);
+                var read = new float[w * h * 4];
+                N.glPixelStorei(PackAlignment, 4);
+                fixed (float* p = read) N.glReadPixels(rect.x, rect.y, w, h, Rgba, Float, p);
+                framebufferValid = false;
+                return read;
+            });
             var mip = destination.Memory.Slice(destination.MipOffset(0), destination.MipSize(0));
             for (int y = 0; y < h; y++)
                 for (int x = 0; x < w; x++)
@@ -629,52 +739,61 @@ namespace OniBrutal.Desktop.Gl
                     TextureFormats.Encode(destination.Format, mip, destination.Width, destX + x, destY + y,
                         new Color(pixels[o], pixels[o + 1], pixels[o + 2], pixels[o + 3]));
                 }
-            framebufferValid = false;
         }
 
-        public override void Upload(TextureNative texture) => GlTextures.Ensure(texture);
+        public override void Upload(TextureNative texture) => GlTextures.Prepare(worker, texture);
 
         public override void ReleaseResource(object gpu)
         {
             switch (gpu)
             {
-                case DeviceTexture t: t.Delete(); break;
-                case DeviceMesh m: m.Delete(); break;
-                case DeviceProgramSet p: p.Delete(); break;
+                case DeviceTexture t: worker.Post(t.Delete); break;
+                case DeviceMesh m: worker.Post(m.Delete); break;
+                case DeviceProgramSet p: worker.Post(p.Delete); break;
             }
         }
 
         /// Compiles every variant of every loaded shader.
         public override void WarmupShaders()
         {
+            var shaders = new List<ShaderNative>();
             foreach (var native in ObjectTable.Snapshot())
+                if (native is ShaderNative shader && shader.HasOpenGLCorePrograms) shaders.Add(shader);
+            worker.Call(() =>
             {
-                if (native is not ShaderNative shader || !shader.HasOpenGLCorePrograms) continue;
-                foreach (var sub in shader.SubShaders)
-                    foreach (var pass in sub.Passes)
-                    {
-                        if (pass.Type != 0) continue;
-                        foreach (var list in pass.Data.Struct("progVertex").Array("m_PlayerSubPrograms"))
-                            foreach (OniBrutal.Assets.TypeTrees.Fields sub2 in (object[])list)
-                                if (ShaderPrograms.IsGlCore(sub2.Get<sbyte>("m_GpuProgramType")))
-                                    GlPrograms.Get(shader, (int)sub2.Get<uint>("m_BlobIndex"));
-                    }
-            }
+                foreach (var shader in shaders)
+                    foreach (var sub in shader.SubShaders)
+                        foreach (var pass in sub.Passes)
+                        {
+                            if (pass.Type != 0) continue;
+                            foreach (var list in pass.Data.Struct("progVertex").Array("m_PlayerSubPrograms"))
+                                foreach (OniBrutal.Assets.TypeTrees.Fields sub2 in (object[])list)
+                                    if (ShaderPrograms.IsGlCore(sub2.Get<sbyte>("m_GpuProgramType")))
+                                        GlPrograms.Get(shader, (int)sub2.Get<uint>("m_BlobIndex"));
+                        }
+            });
         }
 
-        /// Hands the frame to the presenter, which swaps with QualitySettings.vSyncCount as the
-        /// swap interval.
+        /// Hands the frame to the GL thread, which presents it through the presenter with
+        /// QualitySettings.vSyncCount as the swap interval.
         public override void Present()
         {
-            if (gpuTiming) EndGpuTiming();
-            uniformStream?.FenceFrame();
-            GlTextures.FenceFrame();
-            presenter.Present(QualitySettings.vSyncCount);
-            framebufferValid = false;
-            if (gpuTiming) BeginGpuTiming();
+            int interval = QualitySettings.vSyncCount;
+            int width = platform.FramebufferWidth, height = platform.FramebufferHeight;
+            worker.Post(() =>
+            {
+                if (gpuTiming) EndGpuTiming();
+                uniformStream?.FenceFrame();
+                // The back buffer of a frame that drew nothing to the screen still exists.
+                presenter.BackBuffer(width, height);
+                presenter.Present(interval);
+                framebufferValid = false;
+                if (gpuTiming) BeginGpuTiming();
+            });
+            worker.Submit();
         }
 
-        // ----- GPU frame timing (diagnostics) -----
+        // ----- GPU frame timing (diagnostics, GL thread) -----
 
         const uint TimeElapsed = 0x88BF, QueryResult = 0x8866, QueryResultAvailable = 0x8867;
         const int TimingSlots = 4;
@@ -683,7 +802,7 @@ namespace OniBrutal.Desktop.Gl
         int timingSlot = -1;
         int draws;
 
-        public override string TakeFrameCounters(int frames)
+        public override string TakeFrameCounters(int frames) => worker.Call(() =>
         {
             string text = $"draws {draws / frames}, program binds {GlBindings.ProgramBinds / frames}, texture binds {GlBindings.TextureBinds / frames}, buffer binds {GlBindings.BufferBinds / frames}, vertex array binds {GlBindings.VertexArrayBinds / frames}, skipped binds {GlBindings.Skipped / frames}, uniforms sent {GlUniforms.UniformsSent / frames}, unchanged uniforms {GlUniforms.UniformsSkipped / frames}, texture uploads {GlTextures.Uploads / (double)frames:F1} ({GlTextures.UploadBytes / frames / 1024} KiB)";
             draws = 0;
@@ -691,7 +810,7 @@ namespace OniBrutal.Desktop.Gl
             GlTextures.Uploads = GlTextures.UploadBytes = 0;
             GlBindings.ProgramBinds = GlBindings.TextureBinds = GlBindings.BufferBinds = GlBindings.VertexArrayBinds = GlBindings.Skipped = 0;
             return text;
-        }
+        });
 
         bool gpuTiming;
         double gpuTotal;
@@ -699,7 +818,7 @@ namespace OniBrutal.Desktop.Gl
 
         /// GPU time of the commands between consecutive presents, averaged over the frames
         /// whose results arrived since the last call; -1 before any.
-        public override double TakeGpuFrameMilliseconds()
+        public override double TakeGpuFrameMilliseconds() => worker.Call(() =>
         {
             if (!gpuTiming)
             {
@@ -712,7 +831,7 @@ namespace OniBrutal.Desktop.Gl
             gpuTotal = 0;
             gpuFrames = 0;
             return ms;
-        }
+        });
 
         void BeginGpuTiming()
         {

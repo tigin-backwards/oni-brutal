@@ -270,6 +270,14 @@ the log closed, then the process ends with `_exit(code)`: game threads may still
 native plugins (SimDLL worldgen), and running the plugins' static destructors under them crashes
 or deadlocks. The game registers no `ProcessExit` handlers.
 
+Pending Starts run in the order they were queued, as Unity's delayed-call queue does: a
+behaviour is queued when its activation begins, before its Awake (or when it is enabled later),
+not by script execution order. Both were measured in the original player: a large save's World
+(order 6) starts before Game (order -10), and an object an Awake creates starts after its creator
+although it is enabled first. (Loading a save, Game's Awake creates the screens, among them the
+new-colony screen; Game starts first and destroys that screen, whose Start would otherwise name
+the colony anew and move its saves to a new folder.)
+
 Coroutines are Unity's state machine: an `IEnumerator` is advanced immediately by
 `StartCoroutine`; nested `IEnumerator`/`Coroutine` yields wait for the child;
 `CustomYieldInstruction` is re-polled each frame via `keepWaiting` (the shared cached
@@ -454,9 +462,10 @@ TMP runs as shipped. The engine provides what it needs: `Font`, `TextCore` data 
 - Audio: FMOD through the game's own `FMODUnity` + native `libfmodstudio.so`; the engine
   supplies what FMODUnity needs (paths, Transform, components, Timeline/Playables types).
 - Video: `VideoPlayer` decodes VP8 WebM from `resources.resource` with our own EBML demuxer and
-  libvpx (the system's `libvpx.so.6`–`.9`, loaded at first use through our own function-pointer
-  P/Invokes; a missing library is a logged error when a video is prepared) on a decode thread
-  per player. Frames are converted to RGBA on the CPU with the exact formula of the build's own
+  our own VP8 decoder (`Video/Engine/Vp8`, a port of RFC 6386's reference decoder; VP8 decoding is
+  exact by specification, and every frame of the game's 18 clips decodes to the same planes as
+  libvpx, which the tests use as reference) on a decode thread per player, so no codec library
+  is needed on either platform. Frames are converted to RGBA on the CPU with the exact formula of the build's own
   `Hidden/VideoDecode` shader (BT.601 limited range, bilinear chroma) into a CPU `Texture2D`
   that the device uploads; a GPU path running that shader on the planes can replace the
   converter. The game's clips have no audio tracks (and the game sets `audioOutputMode = None`);

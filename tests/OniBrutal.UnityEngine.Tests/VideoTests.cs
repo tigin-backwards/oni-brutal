@@ -42,12 +42,6 @@ namespace OniBrutal.Tests
 
         static VideoClip Clip(string name) => AllClips().Find(c => c.name == name) ?? throw new InvalidOperationException("No clip " + name);
 
-        static void RequireLibvpx()
-        {
-            var error = Vpx.EnsureLoaded();
-            if (error != null) Assert.Skip(error);
-        }
-
         [Fact]
         public void EveryClipDemuxesToItsDeclaredFrames()
         {
@@ -102,7 +96,6 @@ namespace OniBrutal.Tests
         [Fact]
         public unsafe void FirstFrameDecodesToAnImage()
         {
-            RequireLibvpx();
             var clip = Clip("Artifact_loop");
             var go = new GameObject("Video");
             var vp = go.AddComponent<VideoPlayer>();
@@ -147,7 +140,6 @@ namespace OniBrutal.Tests
         [Fact]
         public void PlaybackStateTransitionsAndEvents()
         {
-            RequireLibvpx();
             var clip = Clip("Artifact_loop"); // 341 frames at 30 fps
             var go = new GameObject("Video");
             var vp = go.AddComponent<VideoPlayer>();
@@ -235,7 +227,6 @@ namespace OniBrutal.Tests
         [Fact]
         public void RenderTextureTargetReceivesFramesAndExternalTimeDrivesTheClock()
         {
-            RequireLibvpx();
             var clip = Clip("Stay_loop");
             var go = new GameObject("Video");
             go.SetActive(false);

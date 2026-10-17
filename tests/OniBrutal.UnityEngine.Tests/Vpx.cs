@@ -3,8 +3,9 @@ using System.Runtime.InteropServices;
 
 namespace OniBrutal.Engine.Video
 {
-    /// The system's libvpx (VP8 decoder), bound by our own function-pointer P/Invokes. The library
-    /// is not shipped with the game or the engine: it is looked up under its sonames
+    /// Test reference (Vp8DecoderTests): the system's libvpx (VP8 decoder), bound by our own
+    /// function-pointer P/Invokes; the engine decodes with its own Vp8Decoder. The library is not
+    /// shipped with the game, the engine or the tests: it is looked up under its sonames
     /// (libvpx.so.9 … libvpx.so.6, then libvpx.so) through the platform loader, which honours
     /// LD_LIBRARY_PATH. Every libvpx since 1.8 has the same decoder ABI (VPX_DECODER_ABI_VERSION 12).
     internal static unsafe class Vpx

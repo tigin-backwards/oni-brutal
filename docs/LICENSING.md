@@ -62,3 +62,12 @@ package's licence.
 
 Klei's game code and assets; `libSimDLL.so`; FMOD (`libfmodstudio.so`, FMOD's own licence);
 Steamworks (`libsteam_api.so`, Steamworks.NET under MIT); `cimgui.so` (Dear ImGui, MIT).
+
+## Third-party code in this repository
+
+- `src/OniBrutal.UnityEngine/Video/Engine/Vp8/`: a port of the VP8 reference decoder ("dixie")
+  published in RFC 6386, Section 20, © 2010–2011 Google Inc., BSD-style licence with an
+  additional patent grant (`src/ThirdParty/rfc6386/LICENSE`, `PATENTS`).
+- `src/ThirdParty/Steamworks.NET`: Steamworks.NET 20.1.0, MIT.
+- Native libraries from BRUTAL's packages (GLFW, glad, stb, FreeType with libpng and zlib), under
+  their own licences as shipped in those packages.

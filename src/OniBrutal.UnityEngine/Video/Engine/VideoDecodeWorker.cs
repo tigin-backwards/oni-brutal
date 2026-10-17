@@ -190,13 +190,13 @@ namespace OniBrutal.Engine.Video
 
         unsafe void Run()
         {
-            Vpx.Decoder decoder = null;
+            Vp8.Vp8Decoder decoder = null;
             try
             {
                 var s = load();
                 Volatile.Write(ref stream, s);
                 int frameBytes = s.Width * s.Height * 4;
-                decoder = new Vpx.Decoder(Math.Clamp(Environment.ProcessorCount / 2, 1, 8));
+                decoder = new Vp8.Vp8Decoder();
                 int decodedUpTo = -1; // the last frame fed to the decoder
                 int myGeneration = -1, next = 0, wrap = 0;
                 while (true)
@@ -236,9 +236,9 @@ namespace OniBrutal.Engine.Video
                     if (StaleOrDisposed(myGeneration)) continue;
 
                     int index = next++;
-                    var image = decoder.Decode(FrameBytes(s, index));
+                    bool shown = decoder.Decode(FrameBytes(s, index));
                     decodedUpTo = index;
-                    if (image == null) continue; // a frame with nothing to show
+                    if (!shown) continue; // a frame with nothing to show
 
                     byte[] buffer;
                     lock (gate)
@@ -257,11 +257,10 @@ namespace OniBrutal.Engine.Video
                         }
                     }
 
-                    if (image->Format != Vpx.ImageFormatI420) throw new InvalidOperationException($"libvpx returned image format 0x{image->Format:x}, not I420.");
-                    if (image->DisplayWidth != s.Width || image->DisplayHeight != s.Height)
-                        throw new InvalidOperationException($"A decoded frame is {image->DisplayWidth}x{image->DisplayHeight}; the stream declares {s.Width}x{s.Height}.");
+                    if (decoder.Width != s.Width || decoder.Height != s.Height)
+                        throw new InvalidOperationException($"A decoded frame is {decoder.Width}x{decoder.Height}; the stream declares {s.Width}x{s.Height}.");
                     fixed (byte* dst = buffer)
-                        VideoFrameConverter.I420ToRgba32(image->PlaneY, image->StrideY, image->PlaneU, image->StrideU, image->PlaneV, image->StrideV,
+                        VideoFrameConverter.I420ToRgba32(decoder.PlaneY, decoder.StrideY, decoder.PlaneU, decoder.StrideU, decoder.PlaneV, decoder.StrideV,
                             s.Width, s.Height, dst);
 
                     lock (gate)

@@ -236,9 +236,10 @@ Open:
   textures) serialized the draws (~37 µs each whatever their size). With bindless textures
   (`GL_ARB_bindless_texture`) the frame's GPU time is 6 ms and DeCrew runs at ~42 fps, bounded by
   the main thread (~23.5 ms); paused captures match the binding path within run-to-run variation.
-- Videos on Windows: there is no system libvpx there and no BRUTAL package for it. Next: a
-  managed VP8 decoder (RFC 6386; output is bit-exact by specification), checked frame by frame
-  against libvpx on Linux for every video of the game, which also removes the Linux dependency.
+- Videos on Windows (done): there is no system libvpx there and no BRUTAL package for it, so the
+  engine decodes VP8 itself, a port of RFC 6386's reference decoder; every frame of the game's
+  18 clips decodes to the same planes as libvpx, which is now only the tests' reference (the
+  dependency is gone on Linux too).
 - Parity runs: save cross-load between the platforms, menus and options, mods, the Windows
   original as reference where it can run without the user's own data and account.
 

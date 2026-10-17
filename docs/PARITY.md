@@ -106,8 +106,12 @@ Legend: `[x]` verified · `[ ]` not yet verified · `[~]` deviation (see the not
 - [x] Ten cycles at speed 3 with digging and building, zero exceptions (M5 exit)
 - [x] Autosave each cycle; save → quit to menu → load → continue (M5 exit)
 - [x] Hi-res texture bundle streaming (`StreamedTextures`): bundles load while the Supply Closet is open; the Duplicant outfit screen renders from them
+- [x] A loaded colony keeps its name and its saves' place: autosaves go next to the loaded save (`cloud_save_files/<id>/Regrettable/auto_save/Regrettable Cycle 162.sav`), the same path and active-save pointer as the original. Before, this player saved loaded colonies under a new random name in `save_files`: the new-colony screen that Game's Awake creates started before Game, and its colony-name field renamed the colony and moved the save pointer; in the original Game starts first and destroys that screen. Start is now queued when activation begins, before Awake, as measured in the original (an object an Awake creates starts after its creator)
+- [x] Videos decode with the engine's own VP8 decoder (a port of RFC 6386's reference decoder): every frame of the game's 18 clips matches libvpx plane for plane, on Linux and Windows alike without a codec library
 
 ## Platform
+
+- [x] Windows (the Windows build from Steam, OpenGL on NVIDIA's driver): type-load, asset, bind and shader checks; the menu as on Linux; DeCrew and Regrettable Dimension played (28k frames at speed 3: no exceptions, no white-out, autosaves); test runs isolated from the user's Documents, LocalLow, Steam account and speakers. Frame rate on DeCrew ~42 fps with bindless textures (26 before: NVIDIA serializes draws whose vertex-stage textures change)
 
 - [x] Window, input (mouse, keyboard, text), cursor images
 - [x] Clipboard: select all, copy and paste in the destination coordinates field (as the original)

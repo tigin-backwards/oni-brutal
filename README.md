@@ -18,8 +18,8 @@ build, and for the Windows player the Windows build (Steam) as well.
 - The Linux build of Oxygen Not Included. It is expected at `~/projects/oni-linux`; to use another
   location, set `ONI_GAME_DIR` for the scripts and tests, and pass `-p:OniGameDir=...` to
   `dotnet build`.
-- `libvpx` (e.g. `apt install libvpx9`) to play the game's videos. Without it, video players
-  report an error and show nothing, and three video tests are skipped.
+- `libvpx` only for the test that compares the engine's VP8 decoder with it (skipped without
+  it); the engine decodes the game's videos itself.
 - To use the offline Steam stub: `python3` and binutils (`as`, `ld`).
 
 ## Build
@@ -90,7 +90,6 @@ the host applies to game code, the only ones it makes: D1 (state-machine values 
 the original player loaded at defaults) and D3 (local mods disabled at every launch).
 Floating-point results are not bit-identical to Mono's, and are not meant to be.
 
-On Windows the game's videos do not play yet (no libvpx there; see `docs/PLAN.md`, M8).
 
 ## Documents
 
@@ -99,5 +98,6 @@ On Windows the game's videos do not play yet (no libvpx there; see `docs/PLAN.md
 - `docs/PARITY.md`: what has been compared against the original player, and how.
 - `docs/ENGINE-CONVENTIONS.md`: coding rules for the engine.
 - `docs/LICENSING.md`: what we redistribute, and what we rely on the user's install for.
+- `docs/GAME-UPDATES.md`: one-off checks to run again when the game updates.
 - `tools/UnityProbe`: a mod that records how the original player behaves, so the same
   scenarios can be compared in both players.

@@ -328,12 +328,6 @@ namespace OniBrutal.Engine.Video
                 ReportError("VideoPlayer render mode MaterialOverride is not supported.");
                 return;
             }
-            var vpxError = Vpx.EnsureLoaded();
-            if (vpxError != null)
-            {
-                ReportError(vpxError);
-                return;
-            }
             if (clipData.AudioChannelCounts.Length > 0 && AudioOutputMode != VideoAudioOutputMode.None)
                 Debug.LogError($"VideoClip {clipData.Name} has audio tracks; video audio playback is not supported, the video plays without sound.", Managed);
             worker = new VideoDecodeWorker(() => VideoStream.FromWebm(clipData.ReadMovie()), clipData.Name, Looping);

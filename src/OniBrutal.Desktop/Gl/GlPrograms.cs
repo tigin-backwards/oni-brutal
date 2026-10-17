@@ -54,6 +54,9 @@ namespace OniBrutal.Desktop.Gl
         public int[] BlockSizes = Array.Empty<int>();
         /// Per-draw uniform block contents, reused.
         public byte[][] BlockScratch;
+        /// The values last given to each default-block uniform (indexed like Uniforms): a
+        /// program keeps its uniform state, so an unchanged value is not sent again.
+        public float[][] Sent;
     }
 
     /// A shader's compiled programs by variant blob index.
@@ -477,12 +480,17 @@ namespace OniBrutal.Desktop.Gl
         }
 
         /// Sets every loose uniform and returns the filled block buffers.
+        /// Default-block uniforms sent and skipped since the last frame counters (--frame-stats).
+        public static int UniformsSent, UniformsSkipped;
+
         public static void Apply(DeviceProgram p, DrawInputs d, byte[][] blocks)
         {
             Span<float> o = scratch;
             Span<int> ints = stackalloc int[4];
-            foreach (var u in p.Uniforms)
+            var sent = p.Sent ??= new float[p.Uniforms.Count][];
+            for (int index = 0; index < p.Uniforms.Count; index++)
             {
+                var u = p.Uniforms[index];
                 int n = Resolve(u, d, o);
                 if (u.Block >= 0)
                 {
@@ -490,6 +498,15 @@ namespace OniBrutal.Desktop.Gl
                     continue;
                 }
                 if (u.Location < 0) continue;
+                var last = sent[index];
+                if (last != null && MemoryMarshal.Cast<float, int>(last.AsSpan()).SequenceEqual(MemoryMarshal.Cast<float, int>(o[..n]))) // bitwise: -0 and NaNs are values too
+                {
+                    UniformsSkipped++;
+                    continue;
+                }
+                UniformsSent++;
+                if (last == null || last.Length != n) sent[index] = last = new float[n];
+                o[..n].CopyTo(last);
                 fixed (float* f = o)
                 {
                     if (u.IsMatrix || u.Size > 1 && Components(u.Type) == 4) N.glUniform4fv(u.Location, n / 4, f);

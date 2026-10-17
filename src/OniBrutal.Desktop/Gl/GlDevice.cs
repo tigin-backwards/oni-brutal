@@ -664,8 +664,9 @@ namespace OniBrutal.Desktop.Gl
 
         public override string TakeFrameCounters(int frames)
         {
-            string text = $"draws {draws / frames}, program binds {GlBindings.ProgramBinds / frames}, texture binds {GlBindings.TextureBinds / frames}, buffer binds {GlBindings.BufferBinds / frames}, skipped binds {GlBindings.Skipped / frames}";
+            string text = $"draws {draws / frames}, program binds {GlBindings.ProgramBinds / frames}, texture binds {GlBindings.TextureBinds / frames}, buffer binds {GlBindings.BufferBinds / frames}, skipped binds {GlBindings.Skipped / frames}, uniforms sent {GlUniforms.UniformsSent / frames}, unchanged uniforms {GlUniforms.UniformsSkipped / frames}";
             draws = 0;
+            GlUniforms.UniformsSent = GlUniforms.UniformsSkipped = 0;
             GlBindings.ProgramBinds = GlBindings.TextureBinds = GlBindings.BufferBinds = GlBindings.Skipped = 0;
             return text;
         }

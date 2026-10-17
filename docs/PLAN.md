@@ -165,6 +165,14 @@ Unity records on the main thread and executes on a render thread; we execute inl
 why CoreCLR's faster game code does not show as frame rate (26 fps against the original's 26).
 Profile and counters: `--frame-stats` (draws, binds, uniforms, uploads).
 
+Done first (2026-10-16), each measured on DeCrew: bindings cache, uniform value cache, texture
+uploads through a pixel-unpack ring, vertex array per mesh layout and `glBindTextureUnit`. They
+remove ~45k GL calls per frame but leave render time at ~13 ms: timing the device on Mesa d3d12
+(WSL) shows `Draw` at ~12.5 ms per frame, of which draw calls 3.9 ms with single calls stalling
+2–3 ms (the driver waiting for the GPU), texture uploads 2.3 ms, uniforms 1.2 ms, texture binds
+0.9 ms. The stalls are a property of this driver; the same measurement on a native driver
+decides how much a render thread gains there.
+
 Design: `RenderDevice` calls become commands in a per-frame list, executed by a GL thread that
 owns the render context (the presenter thread or a new one) while the main thread runs the next
 frame. Everything a command reads is captured at record time: resolved uniform values and

@@ -157,6 +157,35 @@ original.
 **Exit:** a parity checklist (`docs/PARITY.md`, written at the start of M6 from the game's
 screens and features) fully ticked or with documented deviations only.
 
+### M7 (proposed) — Render thread
+
+Why: on large colonies the main thread spends about 37% of its time issuing GL work (DeCrew,
+cycle 17628: ~1700 draws and ~2 MiB of texture uploads per frame), in series with game code.
+Unity records on the main thread and executes on a render thread; we execute inline, which is
+why CoreCLR's faster game code does not show as frame rate (26 fps against the original's 26).
+Profile and counters: `--frame-stats` (draws, binds, uniforms, uploads).
+
+Design: `RenderDevice` calls become commands in a per-frame list, executed by a GL thread that
+owns the render context (the presenter thread or a new one) while the main thread runs the next
+frame. Everything a command reads is captured at record time: resolved uniform values and
+texture/mesh references with content versions (texel and vertex data copied into the upload
+rings when their version changes, as uploads do now), render state, targets. Sync points wait
+for the GL thread: `ReadPixels`/captures, `GetPixels` of render textures, shader warmup, device
+caps. One frame of latency at most, as Unity's render thread.
+
+Exit: identical captures and probe output in the parity scenarios; DeCrew frame time bounded by
+the slower thread (estimate ~25 ms, from ~38).
+
+### M8 (proposed) — Windows
+
+The Windows build ships D3D11 programs only, and different native plugins (`SimDLL.dll`,
+FMOD, `steam_api64.dll`). Unity produced the Linux build's GLSL with HLSLcc (DXBC → GLSL; MIT,
+Unity-Technologies/HLSLcc), so the Windows build's DXBC can be translated at load (cached) into
+the same kind of GLSL the OpenGL device already runs, rather than writing a D3D11 device
+(BRUTAL binds OpenGL and Vulkan, not Direct3D). Remaining work: Windows-side natives resolution
+in AssemblyPolicy, paths and persistent-data roots, the Steam stub for Windows, and a parity
+baseline against the Windows player.
+
 ## Open items
 
 Known behaviours not reproduced, all confirmed unreachable by the game (M6):

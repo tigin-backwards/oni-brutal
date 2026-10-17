@@ -1,5 +1,10 @@
+using System;
+using OniBrutal.Engine;
+using OniBrutal.Engine.Assets;
+using OniBrutal.Engine.Rendering;
 using UnityEngine;
 using Xunit;
+using Object = UnityEngine.Object;
 
 namespace OniBrutal.Tests
 {
@@ -63,6 +68,67 @@ namespace OniBrutal.Tests
             // A reference to an object outside the cloned hierarchy is kept.
             canvas.worldCamera = outside;
             Assert.Same(outside, Object.Instantiate(root).GetComponentInChildren<Canvas>().worldCamera);
+        }
+
+        [Fact]
+        public void AnElementDestroyedOrClearedAfterTheCanvasBuildIsNotDrawn()
+        {
+            // The game's video screen, ending on its own, destroys its elements at once after the
+            // canvases were built for the frame (both in PostLateUpdate); the frame still renders.
+            var game = Environment.GetEnvironmentVariable("ONI_GAME_DIR")
+                       ?? System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "projects", "oni-linux");
+            AssetSystem.Initialize(System.IO.Path.Combine(game, "OxygenNotIncluded_Data"));
+            ProjectSettings.Load();
+            FrameRenderer.Install();
+            OniBrutal.Engine.UI.CanvasSystem.Install();
+            var device = new RecordingDevice();
+            var previous = GraphicsDevice.Current;
+            GraphicsDevice.Install(device);
+            var canvasGo = new GameObject("Overlay", typeof(RectTransform));
+            Action destroy = null;
+            int exceptions = 0;
+            Application.LogCallback count = (_, _, type) => { if (type == LogType.Exception) exceptions++; };
+            Application.logMessageReceived += count;
+            try
+            {
+                canvasGo.AddComponent<Canvas>().renderMode = RenderMode.ScreenSpaceOverlay;
+                var element = new GameObject("Element", typeof(RectTransform));
+                element.transform.SetParent(canvasGo.transform, false);
+                var renderer = element.AddComponent<CanvasRenderer>();
+                renderer.SetMesh(new Mesh { vertices = [Vector3.zero, new Vector3(0f, 100f), new Vector3(100f, 0f)], triangles = [0, 1, 2] });
+                renderer.materialCount = 1;
+                renderer.SetMaterial(new Material(Shader.Find("UI/Default")), 0);
+                Frame();
+                Assert.NotEmpty(device.MeshDraws);
+
+                // Cleared after the build (VideoScreen.Stop clears its RawImage's texture).
+                device.MeshDraws.Clear();
+                destroy = () => renderer.Clear();
+                PlayerLoop.PostLateUpdate += destroy;
+                Frame();
+                Assert.Empty(device.MeshDraws);
+                PlayerLoop.PostLateUpdate -= destroy;
+                renderer.SetMesh(new Mesh { vertices = [Vector3.zero, new Vector3(0f, 100f), new Vector3(100f, 0f)], triangles = [0, 1, 2] });
+                renderer.materialCount = 1;
+                renderer.SetMaterial(new Material(Shader.Find("UI/Default")), 0);
+                Frame();
+                Assert.NotEmpty(device.MeshDraws);
+
+                // Destroyed after the build.
+                device.MeshDraws.Clear();
+                destroy = () => Object.DestroyImmediate(element);
+                PlayerLoop.PostLateUpdate += destroy;
+                Frame();
+                Assert.Empty(device.MeshDraws);
+                Assert.Equal(0, exceptions);
+            }
+            finally
+            {
+                Application.logMessageReceived -= count;
+                if (destroy != null) PlayerLoop.PostLateUpdate -= destroy;
+                Object.DestroyImmediate(canvasGo);
+                GraphicsDevice.Install(previous);
+            }
         }
     }
 }

@@ -340,6 +340,10 @@ namespace OniBrutal.Engine.UI
         static DrawItem Item(CanvasBatch b, in CanvasDraw d, bool overlay)
         {
             var r = d.Renderer;
+            // An element destroyed, culled or cleared after the build (later in PostLateUpdate:
+            // the game's video screen clears and tears itself down when its video ends) is not
+            // drawn, as the build would not have collected it.
+            if (r.Destroyed || r.Cull || r.Geometry == null || r.Geometry.Indices.Length == 0) return null;
             float alpha = r.Color.a * d.GroupAlpha;
             // An element whose inherited alpha (renderer alpha × CanvasGroups) is zero is not
             // drawn, as in Unity (screens hidden through a CanvasGroup stay active).

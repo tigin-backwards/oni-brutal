@@ -85,15 +85,34 @@ namespace OniBrutal.Engine
         }
 
         /// Runs one frame. realDelta is the wall time since the previous frame.
+        /// Runs an engine phase's subscribers, each on its own: an exception in one (an engine
+        /// fault) is logged and the frame goes on, as Unity's native engine never ends the game
+        /// over a managed exception. (Game callbacks inside are guarded one by one already.)
+        static void RunPhase(Action phase)
+        {
+            if (phase == null) return;
+            foreach (var subscriber in phase.GetInvocationList())
+            {
+                try
+                {
+                    ((Action)subscriber)();
+                }
+                catch (Exception e)
+                {
+                    Debug.LogException(e);
+                }
+            }
+        }
+
         public static void RunFrame(float realDelta)
         {
             if (!started) throw new InvalidOperationException("PlayerLoop.Initialize must run first");
             if (FrameStats) statClock.Restart();
             Time.BeginFrame(realDelta);
-            FrameStart?.Invoke();
+            RunPhase(FrameStart);
 
             EngineLog.FlushToMainThread();
-            EarlyUpdate?.Invoke();
+            RunPhase(EarlyUpdate);
 
             BehaviourManager.RunStarts();
             while (Time.BeginFixedStep())
@@ -101,7 +120,7 @@ namespace OniBrutal.Engine
                 try
                 {
                     BehaviourManager.RunFixedUpdate();
-                    FixedAnimationUpdate?.Invoke();
+                    RunPhase(FixedAnimationUpdate);
                     Coroutines.RunFixedUpdatePhase();
                 }
                 finally
@@ -117,10 +136,10 @@ namespace OniBrutal.Engine
             // Update (so they start before LateUpdate), then coroutines resumed after Update.
             BehaviourManager.RunStarts();
             Coroutines.RunUpdatePhase();
-            DirectorUpdate?.Invoke();
+            RunPhase(DirectorUpdate);
 
             Mark(5);
-            AnimationUpdate?.Invoke();
+            RunPhase(AnimationUpdate);
             // Behaviours enabled after the Update pass (by coroutines, animation events) start
             // before LateUpdate and get it this frame (observed in Unity's player).
             BehaviourManager.RunStarts();
@@ -128,13 +147,13 @@ namespace OniBrutal.Engine
 
             Lifecycle.ProcessDestroyQueue();
             Mark(6);
-            PostLateUpdate?.Invoke();
+            RunPhase(PostLateUpdate);
             Mark(7);
-            ParticleUpdate?.Invoke();
+            RunPhase(ParticleUpdate);
             Mark(8);
-            Render?.Invoke();
+            RunPhase(Render);
             Mark(0);
-            GUI?.Invoke();
+            RunPhase(GUI);
             Mark(1);
             Coroutines.RunEndOfFramePhase();
             Lifecycle.ProcessDestroyQueue();

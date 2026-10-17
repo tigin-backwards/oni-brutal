@@ -243,6 +243,19 @@ Open:
 - Parity runs: save cross-load between the platforms, menus and options, mods, the Windows
   original as reference where it can run without the user's own data and account.
 
+### M9 (deferred until gameplay parity and performance) — Without Unity's packages
+
+Nothing tied to Unity: replace the two Unity packages the game still loads from `Managed/`,
+uGUI (`UnityEngine.UI.dll`, Unity Companion License) and TextMeshPro (`Unity.TextMeshPro.dll`),
+with our own assemblies of the same names. They must keep the types, members and serialized
+fields the game binds to: its code calls 83 uGUI types (364 members) and 34 TextMeshPro types
+(152 members, `tools/Inventory`), Klei's classes derive from them (`LocText` is a
+`TextMeshProUGUI`), and its prefabs serialize their components by field layout. The packages
+are about 55k lines together. Oracles: the UiDump layout comparison (every RectTransform and
+text metric against the original) and the screen captures of the parity scenarios. Unity's
+built-in resource files the player reads (UI shaders, default resources) are the other Unity
+data at run time (docs/LICENSING.md).
+
 ## Open items
 
 Known behaviours not reproduced, all confirmed unreachable by the game (M6):

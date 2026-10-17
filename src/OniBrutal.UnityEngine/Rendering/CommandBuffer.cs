@@ -245,7 +245,13 @@ namespace OniBrutal.Engine.Rendering
         {
             var src = source.Resolve();
             var dst = dest.Resolve() as RenderTexture;
+            // The blit draws with its own matrices; later draws of the buffer keep the camera's
+            // (or the buffer's own SetViewProjectionMatrices), as in Unity. The destination
+            // stays the active target.
+            var device = GraphicsDevice.Current;
+            var matrices = device.Camera;
             Blits.Blit(src, dst, material, pass, Vector2.one, Vector2.zero);
+            device.SetCamera(matrices);
         }
     }
 

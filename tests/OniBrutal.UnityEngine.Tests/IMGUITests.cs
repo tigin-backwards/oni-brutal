@@ -40,8 +40,10 @@ namespace OniBrutal.Tests
         public override void SetViewport(Rect pixels) { }
         public override void SetScissor(Rect? pixels) { }
         public override void Clear(bool color, bool depth, Color backgroundColor, float depthValue) { }
-        public override void SetCamera(in OniBrutal.Engine.Rendering.CameraConstants camera) { }
-        public override void Draw(in OniBrutal.Engine.Rendering.DrawRequest draw) { }
+        protected override void ApplyCamera(in OniBrutal.Engine.Rendering.CameraConstants camera) { }
+        /// Mesh draws with the view and projection in effect.
+        public readonly List<(Material Material, Matrix4x4 View, Matrix4x4 Projection)> MeshDraws = new();
+        public override void Draw(in OniBrutal.Engine.Rendering.DrawRequest draw) => MeshDraws.Add((draw.Material, Camera.View, Camera.Projection));
         public override void DrawImmediate(OniBrutal.Engine.Rendering.ImmediatePrimitive primitive, ReadOnlySpan<OniBrutal.Engine.Rendering.ImmediateVertex> vertices, Matrix4x4 modelView, Matrix4x4 projection)
             => Draws.Add((pass, vertices.ToArray(), projection));
         public override void Present() { }

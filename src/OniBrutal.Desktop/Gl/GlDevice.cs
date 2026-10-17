@@ -326,7 +326,7 @@ namespace OniBrutal.Desktop.Gl
             GlStateCache.Invalidate();
         }
 
-        public override void SetCamera(in CameraConstants c) => camera = c;
+        protected override void ApplyCamera(in CameraConstants c) => camera = c;
 
         // ----- Drawing -----
 

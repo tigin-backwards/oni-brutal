@@ -90,7 +90,16 @@ namespace OniBrutal.Engine.Rendering
 
         /// View and projection (Unity convention; the device applies its clip-space rules) for
         /// the following draws, with the camera's built-in shader constants.
-        public abstract void SetCamera(in CameraConstants camera);
+        public void SetCamera(in CameraConstants camera)
+        {
+            Camera = camera;
+            ApplyCamera(camera);
+        }
+
+        /// The constants the following draws use (the last SetCamera).
+        public CameraConstants Camera { get; private set; }
+
+        protected abstract void ApplyCamera(in CameraConstants camera);
 
         /// Draws one submesh with a material pass (-1: every pass), the renderer's property
         /// block (may be null) and global shader state.
@@ -165,7 +174,7 @@ namespace OniBrutal.Engine.Rendering
         public override void SetViewport(Rect pixels) { }
         public override void SetScissor(Rect? pixels) { }
         public override void Clear(bool color, bool depth, Color backgroundColor, float depthValue) { }
-        public override void SetCamera(in CameraConstants camera) { }
+        protected override void ApplyCamera(in CameraConstants camera) { }
         public override void Draw(in DrawRequest draw) { }
         public override void DrawImmediate(ImmediatePrimitive primitive, ReadOnlySpan<ImmediateVertex> vertices, Matrix4x4 modelView, Matrix4x4 projection) { }
         public override void Present() { }

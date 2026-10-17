@@ -364,6 +364,22 @@ namespace OniBrutal.Tests
         }
 
         [Fact]
+        public void FindObjectOfTypeFindsActiveObjectsUnlessAskedForInactive()
+        {
+            var active = new GameObject("active", typeof(Recorder));
+            var inactive = new GameObject("inactive", typeof(Recorder));
+            inactive.SetActive(false);
+            Assert.Same(active.GetComponent<Recorder>(), Object.FindObjectOfType<Recorder>());
+            Assert.Single(Object.FindObjectsOfType<Recorder>());
+            Assert.Equal(2, Object.FindObjectsOfType<Recorder>(includeInactive: true).Length);
+            Assert.Same(active.GetComponent<Recorder>(), Object.FindObjectOfType(typeof(Recorder)));
+            Object.DestroyImmediate(active);
+            Assert.Same(inactive.GetComponent<Recorder>(), Object.FindObjectOfType<Recorder>(includeInactive: true));
+            Assert.Null(Object.FindObjectOfType<Recorder>());
+            Object.DestroyImmediate(inactive);
+        }
+
+        [Fact]
         public void ChildSearchJudgesActivityRelativeToTheStartingObject()
         {
             // root (inactive) → a (active) → b (Recorder); root → c (inactive) → d (Recorder).

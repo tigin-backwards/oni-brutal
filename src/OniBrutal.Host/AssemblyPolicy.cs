@@ -16,7 +16,7 @@ namespace OniBrutal.Host
     /// 2. Unity engine assemblies (UnityEngine, UnityEngine.*Module) resolve to our facades in
     ///    engine/, which forward to OniBrutal.UnityEngine; the engine bridge ships with the host.
     /// 3. Unity's packages (UnityEngine.UI, TextMeshPro, Timeline) load from Managed/, or, with
-    ///    `--ui-packages DIR`, this project's replacements from DIR (PLAN M9).
+    ///    `--ui-packages DIR`, this project's replacements found in DIR (PLAN M9).
     /// 4. Everything else — the game and its third-party libraries — loads from Managed/.
     ///
     /// The game runs in the default load context, so its Type.GetType, Assembly.Load and
@@ -76,11 +76,10 @@ namespace OniBrutal.Host
             if (IsEngineAssembly(simple)) return context.LoadFromAssemblyPath(Path.Combine(engineDir, simple + ".dll"));
             if (IsUnityEngineModule(simple)) return null;
             if (unitySupportPackages.Contains(simple) || monoClassLibraries.Contains(simple)) return null;
-            if (packagesDir != null && replacedPackages.Contains(simple))
-            {
-                var replacement = Path.Combine(packagesDir, simple + ".dll");
-                return File.Exists(replacement) ? context.LoadFromAssemblyPath(replacement) : null;
-            }
+            // A replacement present in the packages directory wins; a package without one loads
+            // as shipped (one package can be compared while the others are Unity's).
+            if (packagesDir != null && replacedPackages.Contains(simple) && File.Exists(Path.Combine(packagesDir, simple + ".dll")))
+                return context.LoadFromAssemblyPath(Path.Combine(packagesDir, simple + ".dll"));
             var path = Path.Combine(managedDir, simple + ".dll");
             if (!File.Exists(path)) return null;
             var image = MonoFieldSemantics.Adjust(path);
@@ -117,8 +116,7 @@ namespace OniBrutal.Host
                 if (unitySupportPackages.Contains(simple) || monoClassLibraries.Contains(simple)) continue;
                 if (IsFrameworkAssembly(simple)) continue;
                 if (IsUnityEngineModule(simple)) continue; // ours load on demand through the facades
-                bool replaced = packagesDir != null && replacedPackages.Contains(simple);
-                if (replaced && !File.Exists(Path.Combine(packagesDir!, simple + ".dll"))) continue;
+                bool replaced = packagesDir != null && replacedPackages.Contains(simple) && File.Exists(Path.Combine(packagesDir, simple + ".dll"));
                 if (!replaced && !IsEngineAssembly(simple) && !File.Exists(Path.Combine(managedDir, simple + ".dll"))) continue;
                 loaded.Add(Assembly.Load(new AssemblyName(simple)));
             }

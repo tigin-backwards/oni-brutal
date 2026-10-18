@@ -35,7 +35,7 @@ namespace OniBrutal.Host
             EngineLog.Open(options.LogPath ?? EngineConfig.ConsoleLogPath);
             EngineLog.Engine($"OniBrutal host starting: game={options.GameDir} .NET={Environment.Version}");
 
-            AssemblyPolicy.Install(dataDir, AppContext.BaseDirectory);
+            AssemblyPolicy.Install(dataDir, AppContext.BaseDirectory, options.UiPackages);
             var assemblies = AssemblyPolicy.PreloadScriptingAssemblies(dataDir);
             EngineLog.Engine($"Preloaded {assemblies.Count} scripting assemblies");
 
@@ -138,6 +138,8 @@ namespace OniBrutal.Host
         public bool Headless;
         public bool BatchMode;
         public bool CheckTypes;
+        /// This project's replacements of Unity's packages, loaded from this directory (PLAN M9).
+        public string? UiPackages;
         public bool CheckAssets;
         /// With --check-assets: where to list the script classes the data uses.
         public string? ListDataScripts;
@@ -181,6 +183,9 @@ namespace OniBrutal.Host
         /// --dump-component FRAME:PATH|TYPE: logs the serialized fields of a component (by type
         /// name) on the GameObject at PATH as of that frame.
         public readonly List<(int Frame, string Spec)> ComponentDumps = new();
+        /// --dump-ui FRAME:PATH: writes every active UI element (rects, canvas renderer output,
+        /// package component state) as of that frame (PLAN M9's differential oracle).
+        public readonly List<(int Frame, string Path)> UiDumps = new();
 
         public static Options? Parse(string[] args)
         {
@@ -198,6 +203,7 @@ namespace OniBrutal.Host
                     case "--check-types": o.CheckTypes = true; break;
                     case "--check-assets": o.CheckAssets = true; break;
                     case "--list-data-scripts": o.ListDataScripts = args[++i]; break;
+                    case "--ui-packages": o.UiPackages = Path.GetFullPath(args[++i]); break;
                     case "--check-bind": o.CheckBind = true; break;
                     case "--check-shaders": o.CheckShaders = true; break;
                     case "--dump-shader": o.DumpShader = args[++i]; break;
@@ -252,6 +258,13 @@ namespace OniBrutal.Host
                         o.HierarchyDumps.Add((int.Parse(spec[..colon]), spec[(colon + 1)..]));
                         break;
                     }
+                    case "--dump-ui":
+                    {
+                        var spec = args[++i];
+                        int colon = spec.IndexOf(':');
+                        o.UiDumps.Add((int.Parse(spec[..colon]), spec[(colon + 1)..]));
+                        break;
+                    }
                     case "--probe-ui":
                     {
                         var parts = args[++i].Split(':', ',');
@@ -272,7 +285,7 @@ namespace OniBrutal.Host
                     }
                     default:
                         Console.Error.WriteLine($"Unknown option {args[i]}");
-                        Console.Error.WriteLine("usage: OniBrutal [--game DIR] [--log FILE] [--run-home DIR] [--audio-wav DIR] [--headless] [--batchmode] [--frames N] [--native-override NAME=PATH] [--trace-exceptions] [--gl-debug] [--vsync-count N] [--gpu-profile] [--no-bindless] [--input FRAME:ACTION[:ARGS]] [--frame-stats] [--max-frame-rate N[:FRAMES]] [--dump-render-textures FRAME:DIR] [-screen-width W] [-screen-height H] [-screen-fullscreen 0|1] [-window-mode exclusive|borderless|windowed] [--check-types] [--check-assets [--list-data-scripts FILE]] [--check-bind] [--check-shaders] [--dump-shader NAME:DIR] [--capture FRAME:PATH[:SCALE]] [--probe-ui FRAME:X,Y] [--dump-hierarchy FRAME:PATH] [--report-builtin-assets FILE] [--dump-component FRAME:PATH|TYPE]");
+                        Console.Error.WriteLine("usage: OniBrutal [--game DIR] [--log FILE] [--run-home DIR] [--audio-wav DIR] [--headless] [--batchmode] [--frames N] [--native-override NAME=PATH] [--trace-exceptions] [--gl-debug] [--vsync-count N] [--gpu-profile] [--no-bindless] [--input FRAME:ACTION[:ARGS]] [--frame-stats] [--max-frame-rate N[:FRAMES]] [--dump-render-textures FRAME:DIR] [-screen-width W] [-screen-height H] [-screen-fullscreen 0|1] [-window-mode exclusive|borderless|windowed] [--check-types] [--ui-packages DIR] [--check-assets [--list-data-scripts FILE]] [--check-bind] [--check-shaders] [--dump-shader NAME:DIR] [--capture FRAME:PATH[:SCALE]] [--probe-ui FRAME:X,Y] [--dump-ui FRAME:PATH] [--dump-hierarchy FRAME:PATH] [--report-builtin-assets FILE] [--dump-component FRAME:PATH|TYPE]");
                         return null;
                 }
             }

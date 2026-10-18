@@ -15,8 +15,9 @@ namespace OniBrutal.Host
     ///    in Managed/ (mscorlib, System.*, Mono.Security, I18N…) are never loaded.
     /// 2. Unity engine assemblies (UnityEngine, UnityEngine.*Module) resolve to our facades in
     ///    engine/, which forward to OniBrutal.UnityEngine; the engine bridge ships with the host.
-    /// 3. Everything else — the game and its third-party libraries, including Unity's package
-    ///    code (UnityEngine.UI, TextMeshPro, Timeline) — loads from Managed/.
+    /// 3. Unity's packages (UnityEngine.UI, TextMeshPro, Timeline) load from Managed/, or, with
+    ///    `--ui-packages DIR`, this project's replacements from DIR (PLAN M9).
+    /// 4. Everything else — the game and its third-party libraries — loads from Managed/.
     ///
     /// The game runs in the default load context, so its Type.GetType, Assembly.Load and
     /// AppDomain queries behave as they did under Unity.
@@ -44,8 +45,15 @@ namespace OniBrutal.Host
         static string pluginsDir = "";
         static string engineDir = "";
 
-        public static void Install(string gameDataDir, string hostDir)
+        /// The Unity packages this project replaces (PLAN M9).
+        static readonly HashSet<string> replacedPackages = new(StringComparer.Ordinal) { "UnityEngine.UI", "Unity.TextMeshPro", "Unity.Timeline" };
+
+        /// Where the replacements load from; null loads the shipped packages from Managed/.
+        static string? packagesDir;
+
+        public static void Install(string gameDataDir, string hostDir, string? uiPackagesDir = null)
         {
+            packagesDir = uiPackagesDir;
             managedDir = Path.Combine(gameDataDir, "Managed");
             // Unity's Windows player keeps 64-bit plugins in Plugins/x86_64; the Linux build in Plugins.
             var x64 = Path.Combine(gameDataDir, "Plugins", "x86_64");
@@ -68,6 +76,11 @@ namespace OniBrutal.Host
             if (IsEngineAssembly(simple)) return context.LoadFromAssemblyPath(Path.Combine(engineDir, simple + ".dll"));
             if (IsUnityEngineModule(simple)) return null;
             if (unitySupportPackages.Contains(simple) || monoClassLibraries.Contains(simple)) return null;
+            if (packagesDir != null && replacedPackages.Contains(simple))
+            {
+                var replacement = Path.Combine(packagesDir, simple + ".dll");
+                return File.Exists(replacement) ? context.LoadFromAssemblyPath(replacement) : null;
+            }
             var path = Path.Combine(managedDir, simple + ".dll");
             if (!File.Exists(path)) return null;
             var image = MonoFieldSemantics.Adjust(path);
@@ -104,7 +117,9 @@ namespace OniBrutal.Host
                 if (unitySupportPackages.Contains(simple) || monoClassLibraries.Contains(simple)) continue;
                 if (IsFrameworkAssembly(simple)) continue;
                 if (IsUnityEngineModule(simple)) continue; // ours load on demand through the facades
-                if (!IsEngineAssembly(simple) && !File.Exists(Path.Combine(managedDir, simple + ".dll"))) continue;
+                bool replaced = packagesDir != null && replacedPackages.Contains(simple);
+                if (replaced && !File.Exists(Path.Combine(packagesDir!, simple + ".dll"))) continue;
+                if (!replaced && !IsEngineAssembly(simple) && !File.Exists(Path.Combine(managedDir, simple + ".dll"))) continue;
                 loaded.Add(Assembly.Load(new AssemblyName(simple)));
             }
             return loaded;

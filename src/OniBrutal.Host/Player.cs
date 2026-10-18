@@ -58,6 +58,8 @@ namespace OniBrutal.Host
                 foreach (var (probeFrame, x, y) in options.Probes)
                     if (probeFrame == frame && platform != null)
                         EngineLog.Engine(OniBrutal.Engine.UI.CanvasSystem.Probe(new Vector2(x, platform.FramebufferHeight - y)));
+                foreach (var (dumpFrame, path) in options.UiDumps)
+                    if (dumpFrame == frame) OniBrutal.Engine.UI.UiDump.Write(path);
                 foreach (var (dumpFrame, spec) in options.ComponentDumps)
                     if (dumpFrame == frame) EngineLog.Engine(ComponentDump(spec));
                 foreach (var (dumpFrame, path) in options.HierarchyDumps)

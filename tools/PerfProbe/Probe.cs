@@ -11,6 +11,7 @@ namespace PerfProbe
     {
         public override void OnLoad(HarmonyLib.Harmony harmony)
         {
+            Worldgen.Install(harmony, path);
             var keeper = new GameObject("PerfProbe");
             Object.DontDestroyOnLoad(keeper);
             keeper.AddComponent<Runner>();
@@ -21,6 +22,7 @@ namespace PerfProbe
     {
         System.Collections.IEnumerator Start()
         {
+            if (Worldgen.Mode == "run") yield return Worldgen.Run();
             while (Game.Instance == null || SpeedControlScreen.Instance == null) yield return null;
             Debug.Log($"PERF colony f{Time.frameCount} cycle {GameClock.Instance.GetCycle()}");
             float windowStart = Time.realtimeSinceStartup;

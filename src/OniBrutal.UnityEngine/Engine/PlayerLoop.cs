@@ -54,6 +54,7 @@ namespace OniBrutal.Engine
         static readonly System.Diagnostics.Stopwatch statClock = new();
         static readonly double[] statTotals = new double[9]; // render, gui, end of frame, present, early+fixed, scripts' Update (+starts, coroutines, director), animation+LateUpdate, post-late update (canvases…), particles
         static int statFrames;
+        static int statWindows;
 
         static readonly double[] framePhases = new double[9];
 
@@ -80,6 +81,13 @@ namespace OniBrutal.Engine
             EngineLog.Engine($"frame stats (ms/frame over 60): early+fixed {T(4):F2}, update {T(5):F2}, late {T(6):F2}, post-late {T(7):F2}, particles {T(8):F2}, render {T(0):F2}, gui {T(1):F2}, end of frame {T(2):F2}, present {T(3):F2}, gpu {OniBrutal.Engine.Rendering.GraphicsDevice.Current.TakeGpuFrameMilliseconds():F2}");
             var counters = OniBrutal.Engine.Rendering.GraphicsDevice.Current.TakeFrameCounters(60);
             if (counters != null) EngineLog.Engine("frame counts (per frame over 60): " + counters);
+            if (++statWindows % 10 == 0)
+            {
+                // Every 600 frames: the process's memory and the managed heap, to tell growth from a steady state.
+                var gc = GC.GetGCMemoryInfo();
+                using var self = System.Diagnostics.Process.GetCurrentProcess();
+                EngineLog.Engine($"memory: working set {self.WorkingSet64 >> 20} MiB, private {self.PrivateMemorySize64 >> 20} MiB, managed heap {gc.HeapSizeBytes >> 20} MiB (committed {gc.TotalCommittedBytes >> 20} MiB), collections {GC.CollectionCount(0)}/{GC.CollectionCount(1)}/{GC.CollectionCount(2)}");
+            }
             Array.Clear(statTotals);
             statFrames = 0;
         }

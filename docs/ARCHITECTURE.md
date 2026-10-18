@@ -551,7 +551,7 @@ mouse/keyboard/wheel/text input through the window's input path (held keys for c
 Ctrl+F4); `--dump-render-textures FRAME:DIR` writes
 the screen and every live render texture as PNG at the end of a frame; `--dump-shader NAME:DIR`
 writes a shader's GLCore variants and pass state; `--frame-stats` logs per-phase frame times
-and the GPU time per frame (timer queries), and any frame over 250 ms with its own breakdown; `--max-frame-rate N[:FRAMES]` bounds the frame rate
+and the GPU time per frame (timer queries), any frame over 250 ms with its own breakdown, and every 600 frames the process memory and the managed heap; `--max-frame-rate N[:FRAMES]` bounds the frame rate
 (for the first FRAMES frames) so scripted schedules that count frames hold on unpaced displays;
 `--probe-ui FRAME:X,Y` logs the canvas elements drawn at a window point with their hierarchy
 path, material, texture, colour and group alpha; `--dump-hierarchy FRAME:PATH` logs a subtree's

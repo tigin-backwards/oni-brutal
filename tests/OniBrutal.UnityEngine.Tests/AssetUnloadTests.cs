@@ -21,11 +21,13 @@ namespace OniBrutal.Tests
             }
         }
 
-        // sharedassets0.assets: the Liberation Sans font.
+        // sharedassets0.assets: the Droid Sans font, which nothing else in the tests' data keeps
+        // loaded (Liberation Sans is held from TextMeshPro's settings: their default font asset's
+        // dynamic fallback is generated from it).
         static Font LoadFont()
         {
             AssetSystem.Initialize(DataDir);
-            return (Font)ObjectLoader.Load(AssetSystem.Get("sharedassets0.assets"), 6529);
+            return (Font)ObjectLoader.Load(AssetSystem.Get("sharedassets0.assets"), 6528);
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]

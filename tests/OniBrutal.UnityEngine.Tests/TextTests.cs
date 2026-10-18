@@ -279,6 +279,77 @@ namespace OniBrutal.Tests
         }
 
         [Fact]
+        public void TextGeneratorCachesUntilTheInputChanges()
+        {
+            var font = LiberationSans;
+            var gen = new TextGenerator(4);
+            var settings = Settings(font, new Vector2(300f, 100f));
+            Assert.True(gen.Populate("Cached", settings));
+            var first = gen.GetVerticesArray();
+            Assert.Equal(first.Length, gen.vertexCount);
+            Assert.Equal(14, gen.fontSizeUsedForBestFit);
+            Assert.True(gen.Populate("Cached", settings));
+            Assert.Equal(first, gen.GetVerticesArray());
+            Assert.True(gen.Populate("Changed!", settings));
+            Assert.NotEqual(first.Length, gen.vertexCount);
+            var copies = new List<UILineInfo>();
+            gen.GetLines(copies);
+            Assert.Equal(gen.lineCount, copies.Count);
+
+            // Best fit picks the largest size that fits, within the limits.
+            settings.resizeTextForBestFit = true;
+            settings.resizeTextMinSize = 4;
+            settings.resizeTextMaxSize = 60;
+            settings.generationExtents = new Vector2(500f, 20f);
+            Assert.True(gen.Populate("Fit", settings));
+            int size = gen.fontSizeUsedForBestFit;
+            Assert.InRange(size, 4, 59);
+            Assert.True(gen.rectExtents.height <= 20.001f);
+            settings.generationExtents = new Vector2(500f, 1f);
+            gen.Populate("Fit", settings);
+            Assert.Equal(4, gen.fontSizeUsedForBestFit);
+        }
+
+        [Fact]
+        public void TextGeneratorFailsWithoutAFont()
+        {
+            var gen = new TextGenerator();
+            var settings = Settings(LiberationSans, new Vector2(300f, 100f));
+            Assert.True(gen.Populate("Text", settings));
+            settings.font = null;
+            Assert.False(gen.Populate("Text", settings));
+            Assert.Empty(gen.verts);
+            Assert.Equal(0, gen.lineCount);
+        }
+
+        [Fact]
+        public void TextGeneratorDropsOverridesOnNonDynamicFonts()
+        {
+            var font = new Font();
+            font.name = "Bitmap";
+            var logs = new List<(string message, LogType type)>();
+            Application.LogCallback record = (message, _, type) => logs.Add((message, type));
+            Application.logMessageReceived += record;
+            try
+            {
+                var gen = new TextGenerator();
+                var settings = Settings(font, new Vector2(300f, 100f));
+                settings.fontStyle = FontStyle.Bold;
+                settings.resizeTextForBestFit = true;
+                Assert.False(gen.PopulateWithErrors("Text", settings, null));
+                Assert.Contains(("Font size and style overrides are only supported for dynamic fonts. Font 'Bitmap' is not dynamic.", LogType.Warning), logs);
+                Assert.Contains(("BestFit is only supported for dynamic fonts. Font 'Bitmap' is not dynamic.", LogType.Warning), logs);
+                Assert.Contains(logs, l => l.type == LogType.Error && l.message.EndsWith("is not dynamic, which is required to override its size"));
+                Assert.Contains(logs, l => l.type == LogType.Error && l.message.EndsWith("is not dynamic, which is required to override its style"));
+            }
+            finally
+            {
+                Application.logMessageReceived -= record;
+                Object.DestroyImmediate(font);
+            }
+        }
+
+        [Fact]
         public void TextGeneratorTruncatesAndParsesRichText()
         {
             var font = LiberationSans;

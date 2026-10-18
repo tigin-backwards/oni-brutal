@@ -4,6 +4,190 @@ using OniBrutal.Engine.Text;
 
 namespace UnityEngine
 {
+    /// The legacy text generator: lays a string out with TextGenerationSettings into vertices,
+    /// character infos and line infos. The result is cached: Populate regenerates only when the
+    /// string or the settings change, or after Invalidate.
+    public sealed partial class TextGenerator
+    {
+        readonly List<UIVertex> vertexList;
+        readonly List<UICharInfo> characterList;
+        readonly List<UILineInfo> lineList;
+        readonly IList<UIVertex> vertexView;
+        readonly IList<UICharInfo> characterView;
+        readonly IList<UILineInfo> lineView;
+
+        bool cacheValid;
+        string cachedText;
+        TextGenerationSettings cachedSettings;
+        TextGenerationError cachedError;
+        Rect extents;
+        int sizeUsed;
+
+        public TextGenerator() : this(50)
+        {
+        }
+
+        /// initialCapacity: the number of characters the output lists are sized for.
+        public TextGenerator(int initialCapacity)
+        {
+            int characters = Math.Max(0, initialCapacity) + 1;
+            vertexList = new List<UIVertex>(characters * 4);
+            characterList = new List<UICharInfo>(characters);
+            lineList = new List<UILineInfo>(8);
+            vertexView = vertexList.AsReadOnly();
+            characterView = characterList.AsReadOnly();
+            lineView = lineList.AsReadOnly();
+        }
+
+        /// The tab stop in multiples of the space advance (TextMesh sets its own).
+        internal float TabSize { get; set; } = 4f;
+
+        public IList<UIVertex> verts => vertexView;
+        public IList<UICharInfo> characters => characterView;
+        public IList<UILineInfo> lines => lineView;
+        public int vertexCount => vertexList.Count;
+        public int characterCount => characterList.Count;
+        /// The character infos include one for the caret position after the last character.
+        public int characterCountVisible => characterList.Count - 1;
+        public int lineCount => lineList.Count;
+        public Rect rectExtents => extents;
+        public int fontSizeUsedForBestFit => sizeUsed;
+
+        public void GetVertices(List<UIVertex> vertices) => CopyInto(vertexList, vertices);
+        public void GetCharacters(List<UICharInfo> characters) => CopyInto(characterList, characters);
+        public void GetLines(List<UILineInfo> lines) => CopyInto(lineList, lines);
+        public UIVertex[] GetVerticesArray() => vertexList.ToArray();
+        public UICharInfo[] GetCharactersArray() => characterList.ToArray();
+        public UILineInfo[] GetLinesArray() => lineList.ToArray();
+
+        static void CopyInto<T>(List<T> source, List<T> destination)
+        {
+            if (destination == null) throw new ArgumentNullException(nameof(destination));
+            destination.Clear();
+            destination.AddRange(source);
+        }
+
+        /// Marks the cached result stale, so the next Populate regenerates.
+        public void Invalidate() => cacheValid = false;
+
+        // The outputs are managed lists; there is nothing to release.
+        public void Dispose()
+        {
+        }
+
+        public float GetPreferredWidth(string str, TextGenerationSettings settings)
+        {
+            settings.horizontalOverflow = HorizontalWrapMode.Overflow;
+            settings.verticalOverflow = VerticalWrapMode.Overflow;
+            settings.updateBounds = true;
+            Populate(str, settings);
+            return extents.width;
+        }
+
+        public float GetPreferredHeight(string str, TextGenerationSettings settings)
+        {
+            settings.verticalOverflow = VerticalWrapMode.Overflow;
+            settings.updateBounds = true;
+            Populate(str, settings);
+            return extents.height;
+        }
+
+        public bool Populate(string str, TextGenerationSettings settings) => PopulateCached(str, settings) == TextGenerationError.None;
+
+        /// As Populate, logging why generation failed against context.
+        public bool PopulateWithErrors(string str, TextGenerationSettings settings, GameObject context)
+        {
+            var error = PopulateCached(str, settings);
+            if (error == TextGenerationError.None)
+                return true;
+            if ((error & TextGenerationError.CustomSizeOnNonDynamicFont) != 0)
+                Debug.LogError($"Font '{settings.font}' is not dynamic, which is required to override its size", context);
+            if ((error & TextGenerationError.CustomStyleOnNonDynamicFont) != 0)
+                Debug.LogError($"Font '{settings.font}' is not dynamic, which is required to override its style", context);
+            return false;
+        }
+
+        TextGenerationError PopulateCached(string str, TextGenerationSettings settings)
+        {
+            if (cacheValid && str == cachedText && settings.Equals(cachedSettings))
+                return cachedError;
+            cachedError = Generate(str, settings);
+            cachedText = str;
+            cachedSettings = settings;
+            cacheValid = true;
+            return cachedError;
+        }
+
+        TextGenerationError Generate(string str, TextGenerationSettings settings)
+        {
+            vertexList.Clear();
+            characterList.Clear();
+            lineList.Clear();
+            extents = default;
+            sizeUsed = 0;
+
+            var font = settings.font;
+            if (font == null)
+                return TextGenerationError.NoFont;
+            var native = (FontNative)font.NativeOrThrow;
+
+            var error = TextGenerationError.None;
+            if (!native.Dynamic)
+            {
+                // Size and style come from a non-dynamic font's own texture; overrides are dropped.
+                if (settings.fontSize != 0 || settings.fontStyle != FontStyle.Normal)
+                {
+                    if (settings.fontSize != 0) error |= TextGenerationError.CustomSizeOnNonDynamicFont;
+                    if (settings.fontStyle != FontStyle.Normal) error |= TextGenerationError.CustomStyleOnNonDynamicFont;
+                    Debug.LogWarning($"Font size and style overrides are only supported for dynamic fonts. Font '{font.name}' is not dynamic.", font);
+                    settings.fontSize = 0;
+                    settings.fontStyle = FontStyle.Normal;
+                }
+                if (settings.resizeTextForBestFit)
+                {
+                    Debug.LogWarning($"BestFit is only supported for dynamic fonts. Font '{font.name}' is not dynamic.", font);
+                    settings.resizeTextForBestFit = false;
+                }
+            }
+
+            int size = native.Dynamic && settings.fontSize > 0 ? settings.fontSize : (int)native.FontSize;
+            float scale = settings.scaleFactor > 0f ? settings.scaleFactor : 1f;
+            // Unity's native generator takes no null string; it lays out as empty text.
+            var layout = new TextLayout(native, str ?? string.Empty, settings, scale, TabSize);
+            if (settings.resizeTextForBestFit)
+                size = LargestFittingSize(layout, settings.resizeTextMinSize, Math.Max(settings.resizeTextMaxSize, settings.resizeTextMinSize));
+            else
+                layout.Run(size);
+            sizeUsed = size;
+
+            if (layout.Emit(vertexList, characterList, lineList, out extents))
+                Font.InvokeTextureRebuilt_Internal(font);
+            return error;
+        }
+
+        /// The largest size in [min, max] at which the text fits, or min when none does; the
+        /// layout is left run at that size. Bisects, since a larger size never fits where a
+        /// smaller one does not.
+        static int LargestFittingSize(TextLayout layout, int min, int max)
+        {
+            int best = min, low = min, high = max, lastRun = int.MinValue;
+            while (low <= high)
+            {
+                int mid = low + (high - low) / 2;
+                layout.Run(mid);
+                lastRun = mid;
+                if (layout.Fits)
+                {
+                    best = mid;
+                    low = mid + 1;
+                }
+                else
+                    high = mid - 1;
+            }
+            if (lastRun != best) layout.Run(best);
+            return best;
+        }
+    }
 }
 
 namespace OniBrutal.Engine.Text

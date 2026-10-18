@@ -103,7 +103,10 @@ raises once per frame before canvases render, and on `Canvas.ForceUpdateCanvases
   plain forms log an error instead.
 - Registering during the layout phase for a graphic rebuild is allowed and takes effect in the
   same pass.
-- `UnRegisterCanvasElementFor…` and `DisableCanvasElementForRebuild` remove an element.
+- `UnRegisterCanvasElementForRebuild` removes an element from both queues and calls its
+  `LayoutComplete` and then its `GraphicUpdateComplete` at once (measured: the shipped package
+  calls them even for an element that was only in the graphic queue).
+  `DisableCanvasElementForRebuild` removes an element without calling them.
 - `IsRebuildingLayout()` and `IsRebuildingGraphics()` report the current phase.
 
 ### Graphic

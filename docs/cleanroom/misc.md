@@ -136,11 +136,14 @@ Behaviour of `TextGenerator`, as documented:
   differ from the last generation, or after `Invalidate()`. Otherwise it returns the previous
   result. It returns true on success.
 - **`PopulateWithErrors(str, settings, context)`** does the same, and on failure logs an error
-  against `context`:
-  - for a size override on a non-dynamic font: "Font '{font}' is not dynamic, which is required
-    to override its size";
-  - for a style override: "Font '{font}' is not dynamic, which is required to override its
-    style".
+  against `context`. The two errors it knows are a size or a style override on a non-dynamic
+  font:
+  - "Font '{font}' is not dynamic, which is required to override its size";
+  - "Font '{font}' is not dynamic, which is required to override its style".
+
+  Generation drops those overrides first (below), so these errors do not occur in practice.
+  Generating with a non-dynamic font and overrides succeeds, with the warnings only, and
+  `PopulateWithErrors` returns true. Only a missing font fails.
 - **Non-dynamic fonts:**
   - A font size or style override is dropped (size 0, style Normal), with the warning
     "Font size and style overrides are only supported for dynamic fonts. Font '{name}' is not

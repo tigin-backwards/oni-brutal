@@ -486,5 +486,23 @@ namespace OniBrutal.Tests
             float s = 14f / t.font.faceInfo.pointSize * t.font.faceInfo.scale;
             Assert.Equal(s * expectedFactor, t.textInfo.meshInfo[0].uvs0[0].w, 5);
         }
+
+        [Fact]
+        public void AdvancesIncludeTheSpacingAndLineLengthsEndAtTheGlyph()
+        {
+            var t = Text("ab", width: 400f, height: 50f);
+            t.characterSpacing = 10f;
+            t.ForceMeshUpdate();
+            var info = t.textInfo;
+            var b = info.characterInfo[1];
+            var gm = b.textElement.glyph.metrics;
+            float spacing = 10f * 0.01f * t.fontSize;
+            // xAdvance and the rendered width include the spacing after the last character.
+            Assert.Equal(b.origin + gm.horizontalAdvance * b.scale + spacing, b.xAdvance, 3);
+            Assert.Equal(b.xAdvance - info.characterInfo[0].origin, t.renderedWidth, 3);
+            // maxAdvance ends at its glyph advance; length at its glyph's right edge.
+            Assert.Equal(b.origin + gm.horizontalAdvance * b.scale, info.lineInfo[0].maxAdvance, 3);
+            Assert.Equal(b.origin + (gm.horizontalBearingX + gm.width) * b.scale - info.characterInfo[0].origin, info.lineInfo[0].length, 3);
+        }
     }
 }

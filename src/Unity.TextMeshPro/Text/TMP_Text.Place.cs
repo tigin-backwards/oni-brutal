@@ -180,7 +180,9 @@ namespace TMPro
                     p.OffsetY = offsetY;
                     float origin = pen + offsetX;
                     ci.origin = origin;
-                    ci.xAdvance = (float)((double)pen + p.GlyphAdvance) + offsetX;
+                    // The advance includes the spacing after the character (measured on the
+                    // shipped package).
+                    ci.xAdvance = (float)((double)pen + p.Advance) + offsetX;
                     ci.baseLine = baselineRel + offsetY;
                     ci.ascender = (float)((double)line.Baseline + p.Ascender) + offsetY;
                     ci.descender = (float)((double)line.Baseline + p.Descender) + offsetY;
@@ -250,8 +252,31 @@ namespace TMPro
                 li.baseline = baseline;
                 li.descender = baseline + line.Descender;
                 li.lineHeight = line.FontLineHeight;
-                li.length = line.Length;
-                li.maxAdvance = line.LastVisible >= 0 ? chars[line.LastVisible].xAdvance - lineLeft : 0f;
+                // maxAdvance is where the last visible character's glyph advance ends (in the
+                // rect, without its spacing); length is from the line's start to the right edge of
+                // that character's glyph (synthesized bold widening it), without padding (both
+                // measured on the shipped package).
+                if (line.LastVisible >= 0)
+                {
+                    ref var last = ref pl[line.LastVisible];
+                    float end = (float)((double)last.Pen + last.GlyphAdvance) + last.OffsetX;
+                    li.maxAdvance = end;
+                    ref var lastEl = ref parsed.Elements[last.Element];
+                    float right;
+                    if (lastEl.Kind == ElementKind.Character && lastEl.Element?.glyph != null)
+                    {
+                        var gm = lastEl.Element.glyph.metrics;
+                        float bold = last.Bold ? BoldPadding(chars[line.LastVisible].fontAsset) : 0f;
+                        right = (float)((double)last.Pen + last.MonoOffset + ((double)gm.horizontalBearingX + gm.width + bold) * last.Scale * last.XScale) + last.OffsetX;
+                    }
+                    else right = (float)((double)last.Pen + last.MonoOffset + last.Right) + last.OffsetX;
+                    li.length = right - (lineLeft + line.StartX);
+                }
+                else
+                {
+                    li.maxAdvance = 0f;
+                    li.length = 0f;
+                }
                 li.width = line.Width;
                 li.marginLeft = line.MarginLeft;
                 li.marginRight = line.MarginRight;

@@ -234,6 +234,9 @@ the velocity is 0.
     instruction resets itself so it can be yielded again.
   - Also check `WaitUntil` and `WaitWhile` (predicate wrappers) for Unity's private names, and
     rename them.
+  - The deadline is shared by every coroutine that yields the same instance. The game caches
+    instances and yields one from several coroutines at once, and they then share one deadline.
+    The deadline is armed by the first query and cleared once it has passed.
 - **`UI/RectTransform.cs`, `SetInsetAndSizeFromParentEdge(edge, inset, size)`:**
   - Both anchors are set to the edge on that edge's axis: 0 for Left and Bottom, 1 for Right
     and Top.
@@ -251,7 +254,10 @@ the velocity is 0.
   Rename the helper. Behaviour must not change; the existing tests cover it.
 - **`Math/Quaternion.cs`:**
   - `==` is true when the dot product exceeds 1 − `kEpsilon`.
-  - `eulerAngles` returns each angle normalised into [0°, 360°).
+  - `eulerAngles` returns each angle normalised into [0°, 360°), with a tolerance: an angle
+    less than 0.0001 rad (in degrees) below 0 stays as it is, and an angle within that
+    tolerance below 360° is not wrapped. Only angles further outside the range get 360° added
+    or subtracted.
 
   Restructure the private helpers that do this (`IsEqualUsingDot`, `MakePositive`) under your
   own names.

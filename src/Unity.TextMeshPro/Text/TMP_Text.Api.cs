@@ -125,8 +125,30 @@ namespace TMPro
             if (m_fontAsset == null) return 0f;
             float rectWidth = float.IsInfinity(width) ? float.PositiveInfinity : width;
             LayoutUnadjusted(rectWidth);
+            // The pens are summed in the rect's coordinates, from its left edge (measured: the
+            // shipped package's preferred widths round so).
+            var pl = s_Placements;
+            float left = LayoutRect.xMin + m_margin.x;
             double max = 0.0;
-            for (int k = 0; k < s_LineCount; k++) max = Math.Max(max, (double)s_Lines[k].MarginLeft + s_Lines[k].StartX + s_Lines[k].Length);
+            for (int k = 0; k < s_LineCount; k++)
+            {
+                ref var line = ref s_Lines[k];
+                if (line.LastVisible < 0) continue;
+                float start = left + line.MarginLeft + line.StartX;
+                float x = start;
+                for (int i = line.First; i <= line.LastVisible; i++)
+                {
+                    ref var p = ref pl[i];
+                    x += p.PreSpace;
+                    if (!float.IsNaN(p.SetPen)) x = start + p.SetPen;
+                    if (i == line.LastVisible) break;
+                    // Tab stops are where the layout put the next character.
+                    if (m_Parsed.Elements[p.Element].Unicode == 9) x = start + (pl[i + 1].X - line.StartX);
+                    else x += p.PreferredAdvance;
+                }
+                float end = x + pl[line.LastVisible].PreferredGlyphAdvance;
+                max = Math.Max(max, (double)end - start + line.MarginLeft + line.StartX);
+            }
             return RoundUp(max + m_margin.x + m_margin.z);
         }
 

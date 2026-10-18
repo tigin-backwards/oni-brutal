@@ -126,10 +126,16 @@ namespace TMPro
             double baseline = (double)p.BaselineRel + p.KernY;
             // Each value is one expression evaluated in double precision and stored as a float
             // (as the shipped package's arithmetic on the game's runtime is).
-            x0 = (float)(pen + ((double)gm.horizontalBearingX - pad - stylePad) * xs) + p.OffsetX;
-            x1 = (float)(pen + ((double)gm.horizontalBearingX + gm.width + pad + stylePad) * xs) + p.OffsetX;
-            y1 = (float)(baseline + ((double)gm.horizontalBearingY + pad) * s) + p.OffsetY;
-            y0 = (float)(baseline + ((double)gm.horizontalBearingY - gm.height - pad) * s) + p.OffsetY;
+            // The top-left corner comes from the pen and the baseline; the others from it and the
+            // quad's scaled size (measured: the shipped package's vertices round so).
+            float left = (float)(pen + ((double)gm.horizontalBearingX - pad - stylePad) * xs);
+            float top = (float)(baseline + ((double)gm.horizontalBearingY + pad) * s);
+            float width = (float)(((double)gm.width + 2.0 * (pad + stylePad)) * xs);
+            float height = (float)(((double)gm.height + 2.0 * pad) * s);
+            x0 = left + p.OffsetX;
+            x1 = (left + width) + p.OffsetX;
+            y1 = top + p.OffsetY;
+            y0 = (top - height) + p.OffsetY;
         }
 
         void WriteCharacter(ref TMP_CharacterInfo ci, ref Placement p, ref ParsedElement el, ref TMP_MeshInfo mi, int v, float sdfFactor)

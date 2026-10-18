@@ -382,6 +382,8 @@ namespace OniBrutal.Engine.Rendering
         /// The device's program variant per pass and draw keyword list, with the material and
         /// global keyword versions it was selected for.
         public Dictionary<(ShaderPass Pass, string[] DrawKeywords), (int MaterialVersion, int GlobalVersion, int Blob)> Variants;
+        /// The device's values resolved from this material per program (GlUniforms).
+        public object DeviceCache;
         public int CustomRenderQueue = -1;
         public MaterialGlobalIlluminationFlags GlobalIlluminationFlags = MaterialGlobalIlluminationFlags.EmissiveIsBlack;
         public bool EnableInstancing;

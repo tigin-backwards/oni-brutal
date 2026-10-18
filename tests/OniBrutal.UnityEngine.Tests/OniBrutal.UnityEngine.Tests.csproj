@@ -16,5 +16,6 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../../src/OniBrutal.UnityEngine/OniBrutal.UnityEngine.csproj" />
+    <ProjectReference Include="../../src/OniBrutal.Desktop/OniBrutal.Desktop.csproj" />
   </ItemGroup>
 </Project>

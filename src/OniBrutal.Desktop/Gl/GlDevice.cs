@@ -514,16 +514,26 @@ namespace OniBrutal.Desktop.Gl
             var r = arena.Next(newInputs ??= NewInputs);
             r.Label = null;
             r.Program = program;
-            r.State = ResolvedState.Of(state, inputs);
             (r.Values, r.ValuesOffset) = arena.Floats(program.LooseLength);
             (r.Blocks, r.BlocksOffset) = arena.Bytes(program.BlocksLength);
-            GlUniforms.Record(program, inputs, r.Values.AsSpan(r.ValuesOffset, program.LooseLength), r.Blocks.AsSpan(r.BlocksOffset, program.BlocksLength));
+            var materialValues = GlUniforms.Record(program, inputs, r.Values.AsSpan(r.ValuesOffset, program.LooseLength), r.Blocks.AsSpan(r.BlocksOffset, program.BlocksLength));
+            r.State = ResolvedState.Of(state, inputs, materialValues);
             r.TextureCount = program.Samplers.Count;
             if (r.Textures.Length < r.TextureCount) r.Textures = new SamplerTexture[r.TextureCount];
             for (int i = 0; i < r.TextureCount; i++)
             {
                 var s = program.Samplers[i];
-                if (inputs.TryTexture(s.PropertyId, out var binding) && binding.Texture != null && binding.Texture.Native is TextureNative tn)
+                // The draw's block first, then what the material and globals give (resolved once).
+                TextureBinding binding;
+                bool found;
+                if (inputs.Block != null && inputs.Block.Textures.TryGetValue(s.PropertyId, out binding)) found = true;
+                else if (materialValues != null)
+                {
+                    found = materialValues.Found[i];
+                    binding = materialValues.Textures[i];
+                }
+                else found = inputs.TryTexture(s.PropertyId, out binding);
+                if (found && binding.Texture != null && binding.Texture.Native is TextureNative tn)
                 {
                     var device = GlTextures.Prepare(worker, tn);
                     if (device.RecordedEmpty)

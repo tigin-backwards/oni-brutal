@@ -63,7 +63,18 @@ namespace OniBrutal.Desktop.Gl
             BackPass = new(back.Struct("pass"));
             BackFail = new(back.Struct("fail"));
             BackZFail = new(back.Struct("zFail"));
+            var ids = new System.Collections.Generic.List<int>();
+            foreach (var v in new[] { SrcBlend, DstBlend, SrcBlendAlpha, DstBlendAlpha, BlendOp, BlendOpAlpha, ColorMask, ZTest, ZWrite, Cull, OffsetFactor, OffsetUnits, AlphaToMask,
+                         StencilRef, StencilReadMask, StencilWriteMask, FrontComp, FrontPass, FrontFail, FrontZFail, BackComp, BackPass, BackFail, BackZFail })
+                if (v.PropertyId != 0 && !ids.Contains(v.PropertyId)) ids.Add(v.PropertyId);
+            PropertyIds = ids.ToArray();
         }
+
+        /// The properties the state reads ([_Prop] references).
+        public readonly int[] PropertyIds;
+
+        /// The state of a pass that reads no properties, resolved once.
+        public ResolvedState? Constant;
 
         static bool IsDefault(Fields op)
         {
@@ -87,8 +98,37 @@ namespace OniBrutal.Desktop.Gl
         public override bool Equals(object obj) => obj is ResolvedState o && Equals(o);
         public override int GetHashCode() => HashCode.Combine(Src, Dst, ZTest, ZWrite, Cull, StencilRef, FComp, Mask);
 
-        /// Resolves a pass's state for a draw (main thread).
-        public static ResolvedState Of(PassState s, DrawInputs d) => new()
+        /// Resolves a pass's state for a draw (main thread): once for a pass that reads no
+        /// properties; from the material's values (resolved with them) unless the draw's block
+        /// sets a property the state reads.
+        public static ResolvedState Of(PassState s, DrawInputs d, MaterialValues values)
+        {
+            if (s.PropertyIds.Length == 0) return s.Constant ??= Resolve(s, d);
+            if (values == null || BlockSetsAny(d.Block, s.PropertyIds)) return Resolve(s, d);
+            if (values.StateFor == s) return values.State;
+            var block = d.Block;
+            d.Block = null;
+            try
+            {
+                values.State = Resolve(s, d);
+            }
+            finally
+            {
+                d.Block = block;
+            }
+            values.StateFor = s;
+            return values.State;
+        }
+
+        static bool BlockSetsAny(PropertySheet block, int[] ids)
+        {
+            if (block == null || block.IsEmpty) return false;
+            foreach (int id in ids)
+                if (block.Floats.ContainsKey(id) || block.Ints.ContainsKey(id)) return true;
+            return false;
+        }
+
+        static ResolvedState Resolve(PassState s, DrawInputs d) => new()
         {
             Src = (int)s.SrcBlend.Resolve(d), Dst = (int)s.DstBlend.Resolve(d), SrcA = (int)s.SrcBlendAlpha.Resolve(d), DstA = (int)s.DstBlendAlpha.Resolve(d),
             Op = (int)s.BlendOp.Resolve(d), OpA = (int)s.BlendOpAlpha.Resolve(d), Mask = (int)s.ColorMask.Resolve(d),

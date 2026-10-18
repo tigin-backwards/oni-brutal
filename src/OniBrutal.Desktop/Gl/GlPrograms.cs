@@ -68,6 +68,29 @@ namespace OniBrutal.Desktop.Gl
         public ulong[] SamplerHandles;
     }
 
+    /// What a material and the global properties give one program: its default-block values
+    /// and uniform-block bytes, and its samplers' textures, as of the versions they were
+    /// resolved at (main thread).
+    internal sealed class MaterialValues
+    {
+        public int MaterialVersion = -1, GlobalsVersion = -1;
+        public readonly float[] Loose;
+        public readonly byte[] Blocks;
+        public readonly TextureBinding[] Textures;
+        public readonly bool[] Found;
+        /// The pass state resolved from the same values, for StateFor (ResolvedState.Of).
+        public ResolvedState State;
+        public PassState StateFor;
+
+        public MaterialValues(DeviceProgram p)
+        {
+            Loose = new float[p.LooseLength];
+            Blocks = new byte[p.BlocksLength];
+            Textures = new TextureBinding[p.Samplers.Count];
+            Found = new bool[p.Samplers.Count];
+        }
+    }
+
     /// A shader's compiled programs by variant blob index.
     internal sealed unsafe class DeviceProgramSet
     {
@@ -522,7 +545,68 @@ namespace OniBrutal.Desktop.Gl
 
         /// Resolves a draw's uniforms (main thread): default-block values into `values` in
         /// uniform order, block members into `blocks` (laid out as DeviceProgram.BlocksLength).
-        public static void Record(DeviceProgram p, DrawInputs d, Span<float> values, Span<byte> blocks)
+        /// What the material and the globals give is resolved once per program and material
+        /// version (MaterialValues); a draw resolves its per-draw values (matrices, time, texture
+        /// sizes) and the properties its own block sets. Returns the material's values (null
+        /// without a material).
+        public static MaterialValues Record(DeviceProgram p, DrawInputs d, Span<float> values, Span<byte> blocks)
+        {
+            if (d.Material == null)
+            {
+                blocks.Clear();
+                RecordAll(p, d, values, blocks, perDraw: false, null);
+                return null;
+            }
+            var cached = ValuesOf(p, d);
+            cached.Loose.AsSpan().CopyTo(values);
+            cached.Blocks.AsSpan().CopyTo(blocks);
+            var block = d.Block is { IsEmpty: false } b ? b : null;
+            RecordAll(p, d, values, blocks, perDraw: true, block);
+            return cached;
+        }
+
+        /// The material's and the globals' values for a program, resolved again when either has
+        /// changed since.
+        static MaterialValues ValuesOf(DeviceProgram p, DrawInputs d)
+        {
+            var material = d.Material;
+            var entries = (Dictionary<DeviceProgram, MaterialValues>)(material.DeviceCache ??= new Dictionary<DeviceProgram, MaterialValues>());
+            int materialVersion = material.Properties.Version, globalsVersion = ShaderGlobals.Properties.Version;
+            if (entries.TryGetValue(p, out var e) && e.MaterialVersion == materialVersion && e.GlobalsVersion == globalsVersion) return e;
+            if (e == null) entries[p] = e = new MaterialValues(p);
+            var block = d.Block;
+            d.Block = null;
+            try
+            {
+                Array.Clear(e.Blocks);
+                RecordAll(p, d, e.Loose, e.Blocks, perDraw: false, null);
+                for (int i = 0; i < p.Samplers.Count; i++)
+                    e.Found[i] = d.TryTexture(p.Samplers[i].PropertyId, out e.Textures[i]);
+            }
+            finally
+            {
+                d.Block = block;
+            }
+            e.StateFor = null;
+            e.MaterialVersion = materialVersion;
+            e.GlobalsVersion = globalsVersion;
+            return e;
+        }
+
+        static bool OwnValue(UniformBinding u, PropertySheet block) => u.Source != UniformSource.Property || (block != null && Sets(block, u));
+
+        /// Whether a draw's block sets the property a uniform reads.
+        static bool Sets(PropertySheet block, UniformBinding u)
+        {
+            int id = u.PropertyId;
+            if (u.IsMatrix) return u.Size / 4 > 1 ? block.MatrixArrays.ContainsKey(id) : block.Matrices.ContainsKey(id);
+            if (Components(u.Type) == 1) return u.Size > 1 ? block.FloatArrays.ContainsKey(id) : block.Floats.ContainsKey(id) || block.Ints.ContainsKey(id);
+            return u.Size > 1 ? block.VectorArrays.ContainsKey(id) : block.Vectors.ContainsKey(id);
+        }
+
+        /// Resolves uniforms into their places: all of them, or with perDraw those a draw resolves
+        /// itself (not read from properties, or set by its block).
+        static void RecordAll(DeviceProgram p, DrawInputs d, Span<float> values, Span<byte> blocks, bool perDraw, PropertySheet block)
         {
             Span<float> o = scratch;
             Span<int> blockStarts = stackalloc int[p.BlockSizes.Length];
@@ -537,6 +621,7 @@ namespace OniBrutal.Desktop.Gl
                 int length = Length(u);
                 if (u.Block >= 0)
                 {
+                    if (perDraw && !OwnValue(u, block)) continue;
                     int n = Resolve(u, d, o);
                     if (n != length) throw new InvalidOperationException($"Uniform '{u.Name}': {n} values resolved, {length} expected.");
                     WriteBlock(blocks.Slice(blockStarts[u.Block], p.BlockSizes[u.Block]), u, o[..n]);
@@ -544,6 +629,7 @@ namespace OniBrutal.Desktop.Gl
                 }
                 var target = values.Slice(next, length);
                 next += length;
+                if (perDraw && !OwnValue(u, block)) continue;
                 // Slots a value leaves unwritten (padding of float arrays) compare equal from draw to draw.
                 target.Clear();
                 int written = Resolve(u, d, target);

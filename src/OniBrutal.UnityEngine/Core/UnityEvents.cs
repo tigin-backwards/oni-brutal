@@ -75,7 +75,7 @@ namespace UnityEngine.Events
                 case PersistentListenerMode.Bool: return UnityEventBase.GetValidMethodInfo(type, m_MethodName, [typeof(bool)]);
                 case PersistentListenerMode.Object:
                 {
-                    // A value-type parameter can never receive a UnityEngine.Object.
+                    // A value type can never hold a UnityEngine.Object.
                     var argumentType = m_Arguments.ObjectArgumentType;
                     return argumentType.IsValueType ? null : UnityEventBase.GetValidMethodInfo(type, m_MethodName, [argumentType]);
                 }
@@ -101,7 +101,7 @@ namespace UnityEngine.Events
                 PersistentListenerMode.Float => owner.BindParameterless(EventCallbacks.Bind(target, method, args.FloatArgument)),
                 PersistentListenerMode.String => owner.BindParameterless(EventCallbacks.Bind(target, method, args.StringArgument)),
                 PersistentListenerMode.Bool => owner.BindParameterless(EventCallbacks.Bind(target, method, args.BoolArgument)),
-                _ => owner.BindParameterless(EventCallbacks.BindObject(target, method, args.ObjectArgument)),
+                _ => owner.BindParameterless(EventCallbacks.BindObject(target, method, args.ObjectArgumentType, args.ObjectArgument)),
             };
             listener = new EventListener(callback, method.IsStatic ? null : m_Target);
             return true;
@@ -118,10 +118,8 @@ namespace UnityEngine.Events
 
         internal int Count => m_Calls.Count;
 
+        /// The call at `index`; ArgumentOutOfRangeException outside the serialized calls.
         internal PersistentCall this[int index] => m_Calls[index];
-
-        /// The call at `index`, or null when there is none.
-        internal PersistentCall Find(int index) => (uint)index < (uint)m_Calls.Count ? m_Calls[index] : null;
 
         /// The calls that take part, bound for `owner`, in their serialized order.
         internal EventListener[] Bind(UnityEventBase owner)
@@ -147,9 +145,9 @@ namespace UnityEngine.Events
         /// Every serialized call, whether it takes part or not.
         public int GetPersistentEventCount() => m_PersistentCalls.Count;
 
-        public Object GetPersistentTarget(int index) => m_PersistentCalls.Find(index)?.Target;
+        public Object GetPersistentTarget(int index) => m_PersistentCalls[index].Target;
 
-        public string GetPersistentMethodName(int index) => m_PersistentCalls.Find(index)?.MethodName ?? "";
+        public string GetPersistentMethodName(int index) => m_PersistentCalls[index].MethodName;
 
         public UnityEventCallState GetPersistentListenerState(int index) => m_PersistentCalls[index].CallState;
 
@@ -173,29 +171,35 @@ namespace UnityEngine.Events
             => GetValidMethodInfo(obj.GetType(), functionName, argumentTypes);
 
         /// The method a persistent call binds to: searched from `objectType` up its base types
-        /// (System.Object's own methods excluded), public or not, instance or static; the first
-        /// type that declares `functionName` with exactly `argumentTypes` as its parameters wins.
-        /// Exact types also give Unity's primitive rule: a parameter is primitive exactly when its
-        /// argument type is.
+        /// (System.Object's own methods excluded), public or not, instance or static. On each
+        /// type, the method the default binder picks for `argumentTypes` (widening primitive and
+        /// reference conversions allowed) is taken unless a parameter's primitiveness differs from
+        /// its argument type's (an int does not bind to an object parameter); then the search
+        /// goes on with the base type.
         public static MethodInfo GetValidMethodInfo(Type objectType, string functionName, Type[] argumentTypes)
         {
             const BindingFlags flags = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly;
             for (var type = objectType; type != null && type != typeof(object); type = type.BaseType)
             {
-                foreach (var method in type.GetMethods(flags))
+                MethodInfo method;
+                try
                 {
-                    if (method.Name != functionName || method.ContainsGenericParameters) continue;
-                    if (ParametersAre(method.GetParameters(), argumentTypes)) return method;
+                    method = type.GetMethod(functionName, flags, null, argumentTypes, null);
                 }
+                catch (AmbiguousMatchException)
+                {
+                    // Several equally good overloads on this type: none is chosen here.
+                    method = null;
+                }
+                if (method != null && PrimitivenessMatches(method.GetParameters(), argumentTypes)) return method;
             }
             return null;
         }
 
-        static bool ParametersAre(ParameterInfo[] parameters, Type[] types)
+        static bool PrimitivenessMatches(ParameterInfo[] parameters, Type[] types)
         {
-            if (parameters.Length != types.Length) return false;
             for (int i = 0; i < parameters.Length; i++)
-                if (parameters[i].ParameterType != types[i]) return false;
+                if (parameters[i].ParameterType.IsPrimitive != types[i].IsPrimitive) return false;
             return true;
         }
 
@@ -376,14 +380,27 @@ namespace OniBrutal.Engine
         }
 
         /// A delegate of type TDelegate for `method` on `target` (null for a static method). The
-        /// parameter types match exactly; a method's result, if it has one, is discarded.
+        /// method's parameters accept the delegate's through the default binder's conversions
+        /// (GetValidMethodInfo); the arguments are converted the same way, and a method's result,
+        /// if it has one, is discarded.
         public static TDelegate Create<TDelegate>(object target, MethodInfo method) where TDelegate : Delegate
         {
-            if (method.ReturnType == typeof(void))
+            var delegateParameters = typeof(TDelegate).GetMethod("Invoke").GetParameters();
+            var methodParameters = method.GetParameters();
+            bool direct = method.ReturnType == typeof(void);
+            for (int i = 0; direct && i < methodParameters.Length; i++)
+                direct = methodParameters[i].ParameterType == delegateParameters[i].ParameterType;
+            if (direct)
                 return method.IsStatic ? method.CreateDelegate<TDelegate>() : method.CreateDelegate<TDelegate>(target);
-            var parameters = Array.ConvertAll(method.GetParameters(), p => Expression.Parameter(p.ParameterType, p.Name));
+            var parameters = Array.ConvertAll(delegateParameters, p => Expression.Parameter(p.ParameterType, p.Name));
+            var arguments = new Expression[parameters.Length];
+            for (int i = 0; i < parameters.Length; i++)
+            {
+                var type = methodParameters[i].ParameterType;
+                arguments[i] = parameters[i].Type == type ? parameters[i] : Expression.Convert(parameters[i], type);
+            }
             var instance = method.IsStatic ? null : Expression.Constant(target, method.DeclaringType);
-            return Expression.Lambda<TDelegate>(Expression.Call(instance, method, parameters), parameters).Compile();
+            return Expression.Lambda<TDelegate>(Expression.Call(instance, method, arguments), parameters).Compile();
         }
 
         /// A one-parameter method called with a constant.
@@ -393,13 +410,13 @@ namespace OniBrutal.Engine
             return () => callback(argument);
         }
 
-        /// An Object-mode method: the argument is passed when it is an instance of the method's
-        /// parameter type, null otherwise.
-        public static UnityAction BindObject(object target, MethodInfo method, Object argument)
+        /// An Object-mode method: the argument is passed when it is an instance of the named
+        /// argument type, null otherwise. The method's parameter accepts that type (a reference
+        /// type: the same or a base type).
+        public static UnityAction BindObject(object target, MethodInfo method, Type argumentType, Object argument)
         {
-            var parameterType = method.GetParameters()[0].ParameterType;
-            object value = parameterType.IsInstanceOfType(argument) ? argument : null;
-            var bind = typeof(EventCallbacks).GetMethod(nameof(BindReference), BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(parameterType);
+            object value = argumentType.IsInstanceOfType(argument) ? argument : null;
+            var bind = typeof(EventCallbacks).GetMethod(nameof(BindReference), BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(argumentType);
             return (UnityAction)bind.Invoke(null, [target, method, value]);
         }
 

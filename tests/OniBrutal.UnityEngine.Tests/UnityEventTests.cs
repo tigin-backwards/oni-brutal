@@ -33,6 +33,7 @@ namespace OniBrutal.Tests
         void SetBool(bool b) => Log.Add(label + ":SetBool " + b);
         void SetTransform(Transform t) => Log.Add(label + ":SetTransform " + (t == null ? "null" : t.name));
         void SetObject(Object o) => Log.Add(label + ":SetObject " + (o == null ? "null" : o.name));
+        void SetComponent(Component c) => Log.Add(label + ":SetComponent " + (c == null ? "null" : c.GetType().Name));
         void Pair(int a, string b) => Log.Add(label + ":Pair " + a + " " + b);
         public void Add(int v) => total += v;
         public void Count() => total++;
@@ -161,7 +162,11 @@ namespace OniBrutal.Tests
 
             var r = Receiver("r");
             Assert.Equal(typeof(EventReceiver), UnityEventBase.GetValidMethodInfo(r, "Take", [typeof(object)]).DeclaringType);
-            Assert.Null(UnityEventBase.GetValidMethodInfo(typeof(EventReceiver), "SetFloat", [typeof(int)]));
+            // The default binder's conversions apply: a widening primitive conversion and a
+            // reference conversion to a base type.
+            Assert.Equal(typeof(float), UnityEventBase.GetValidMethodInfo(typeof(EventReceiver), "SetFloat", [typeof(int)]).GetParameters()[0].ParameterType);
+            Assert.Equal(typeof(Component), UnityEventBase.GetValidMethodInfo(typeof(EventReceiver), "SetComponent", [typeof(Transform)]).GetParameters()[0].ParameterType);
+            Assert.Null(UnityEventBase.GetValidMethodInfo(typeof(EventReceiver), "SetFloat", [typeof(string)]));
             // The search stops before System.Object.
             Assert.Null(UnityEventBase.GetValidMethodInfo(typeof(EventReceiver), "MemberwiseClone", Type.EmptyTypes));
 
@@ -170,6 +175,28 @@ namespace OniBrutal.Tests
             Deserialized(evt);
             evt.Invoke();
             Assert.Equal(["r:Take(int) 5"], Log);
+        }
+
+        [Fact]
+        public void ConvertedParametersAreCalledWithConvertedArguments()
+        {
+            var r = Receiver("r");
+            var other = Receiver("other");
+            var ints = new UnityEvent<int>();
+            AddCall(ints, r, "SetFloat");
+            AddCall(ints, r, "SetFloat", PersistentListenerMode.Int, arguments: c => SetArgument(c, "m_IntArgument", 3));
+            Deserialized(ints);
+            ints.Invoke(2);
+            var transforms = new UnityEvent<Transform>();
+            AddCall(transforms, r, "SetComponent");
+            AddCall(transforms, r, "SetComponent", PersistentListenerMode.Object, arguments: c =>
+            {
+                SetArgument(c, "m_ObjectArgument", other);
+                SetArgument(c, "m_ObjectArgumentAssemblyTypeName", typeof(EventReceiver).AssemblyQualifiedName);
+            });
+            Deserialized(transforms);
+            transforms.Invoke(other.transform);
+            Assert.Equal(["r:SetFloat 2", "r:SetFloat 3", "r:SetComponent Transform", "r:SetComponent EventReceiver"], Log);
         }
 
         [Fact]
@@ -307,8 +334,13 @@ namespace OniBrutal.Tests
             Deserialized(evt);
             Assert.Same(r, evt.GetPersistentTarget(0));
             Assert.Equal("Ping", evt.GetPersistentMethodName(0));
-            Assert.Null(evt.GetPersistentTarget(1));
+            Assert.Throws<ArgumentOutOfRangeException>(() => evt.GetPersistentTarget(1));
+            Assert.Throws<ArgumentOutOfRangeException>(() => evt.GetPersistentMethodName(-1));
+            Assert.Throws<ArgumentOutOfRangeException>(() => evt.GetPersistentListenerState(1));
+            // A null method name reads as empty.
+            AddCall(evt, r, null, PersistentListenerMode.Void);
             Assert.Equal("", evt.GetPersistentMethodName(1));
+            Deserialized(evt);
             Assert.Equal(UnityEventCallState.RuntimeOnly, evt.GetPersistentListenerState(0));
 
             evt.Invoke();

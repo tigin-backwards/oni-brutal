@@ -388,6 +388,9 @@ namespace TMPro
                 m_TextComponent.RegisterDirtyVerticesCallback(MarkGeometryChanged);
             }
             EnsureCaret();
+            // The caret draws with the default UI material and a white texture from the start
+            // (measured: the shipped package's caret renderer has them before it draws).
+            if (m_Caret != null) m_Caret.canvasRenderer.SetMaterial(Graphic.defaultGraphicMaterial, Texture2D.whiteTexture);
             UpdateLabel();
         }
 
@@ -425,6 +428,7 @@ namespace TMPro
             rt.anchoredPosition = textRect.anchoredPosition;
             rt.sizeDelta = textRect.sizeDelta;
             rt.pivot = textRect.pivot;
+            go.AddComponent<CanvasRenderer>();
             m_Caret = go.AddComponent<TMP_SelectionCaret>();
             m_Caret.Owner = this;
             var element = go.AddComponent<LayoutElement>();

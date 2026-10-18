@@ -460,10 +460,10 @@ namespace TMPro
             }
         }
 
-        // Letters, digits and symbols make words; apostrophes and hyphens join word characters.
-        static bool IsWordCharacter(char c) => char.IsLetterOrDigit(c) || char.IsSymbol(c);
+        // Letters, digits and hyphens make words; apostrophes join word characters.
+        static bool IsWordCharacter(char c) => char.IsLetterOrDigit(c) || c == '-';
 
-        static bool IsJoiner(char c) => c == '\'' || c == '\u2019' || c == '-';
+        static bool IsJoiner(char c) => c == '\'' || c == '\u2019';
 
         void RecordWords(int count)
         {
@@ -471,26 +471,34 @@ namespace TMPro
             var chars = info.characterInfo;
             int words = 0;
             int start = -1;
+            void Add(int first, int last)
+            {
+                info.EnsureWords(words + 1);
+                info.wordInfo[words] = new TMP_WordInfo { textComponent = this, firstCharacterIndex = first, lastCharacterIndex = last, characterCount = last - first + 1 };
+                words++;
+            }
             for (int i = 0; i <= count; i++)
             {
-                bool word = i < count && (IsWordCharacter(chars[i].character) || (IsJoiner(chars[i].character) && start >= 0 && i + 1 < count && IsWordCharacter(chars[i + 1].character)));
-                if (word && chars[i].elementType == TMP_TextElementType.Sprite) word = false;
-                if (word && start < 0) start = i;
-                if (!word && start >= 0)
+                bool word = i < count && chars[i].elementType != TMP_TextElementType.Sprite
+                    && (IsWordCharacter(chars[i].character) || (IsJoiner(chars[i].character) && start >= 0 && i + 1 < count && IsWordCharacter(chars[i + 1].character)));
+                if (word)
                 {
-                    info.EnsureWords(words + 1);
-                    info.wordInfo[words] = new TMP_WordInfo { textComponent = this, firstCharacterIndex = start, lastCharacterIndex = i - 1, characterCount = i - start };
-                    words++;
+                    if (start < 0) start = i;
+                    continue;
+                }
+                if (start >= 0)
+                {
+                    Add(start, i - 1);
                     start = -1;
                 }
+                // A text that starts with a character that is neither a word character nor
+                // punctuation (white space, a symbol, a sprite) begins with an empty word
+                // (first 0, last -1); a text without words is one word of its first character
+                // (measured: the shipped package records them so).
+                else if (i == 0 && count > 0 && (chars[0].elementType == TMP_TextElementType.Sprite || !char.IsPunctuation(chars[0].character)))
+                    Add(0, -1);
             }
-            // A text without word characters is one word.
-            if (words == 0 && count > 0)
-            {
-                info.EnsureWords(1);
-                info.wordInfo[0] = new TMP_WordInfo { textComponent = this, firstCharacterIndex = 0, lastCharacterIndex = count - 1, characterCount = count };
-                words = 1;
-            }
+            if (words == 0 && count > 0) Add(0, 0);
             info.wordCount = words;
             var lines = s_Lines;
             for (int k = 0; k < info.lineCount; k++)

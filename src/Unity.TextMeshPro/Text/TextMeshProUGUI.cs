@@ -195,13 +195,15 @@ namespace TMPro
         // The text's lossy scale (y) its geometry has the SDF scale for (-1: none generated).
         float m_GeneratedScale = -1f;
 
-        // Before the canvases render: when the text's lossy scale changed since its geometry was
-        // generated, the SDF scale of its vertices (uv0.w) is multiplied by the change and
-        // uploaded, without a new layout; from or to a scale of 0 the text is generated again
-        // (measured on the shipped package).
+        // Before the canvases render: when the text's lossy scale (y) changed by more than a
+        // factor of 1.25 (either way) since its SDF scale was last set, the SDF scale of its
+        // vertices (uv0.w) is multiplied by the change and uploaded, without a new layout;
+        // smaller changes are left alone. From or to a scale of 0 the text is generated again.
+        // A text marked isTextObjectScaleStatic is not checked. (All measured on the shipped
+        // package.)
         void RescaleIfScaleChanged()
         {
-            if (this == null || !isActiveAndEnabled || m_GeneratedScale < 0f || m_textInfo == null) return;
+            if (this == null || !isActiveAndEnabled || m_IsTextObjectScaleStatic || m_GeneratedScale < 0f || m_textInfo == null) return;
             float scale = CurrentScale();
             if (scale == m_GeneratedScale) return;
             if (scale == 0f || m_GeneratedScale == 0f)
@@ -210,6 +212,7 @@ namespace TMPro
                 return;
             }
             float ratio = scale / m_GeneratedScale;
+            if (ratio >= 0.8f && ratio <= 1.25f) return;
             m_GeneratedScale = scale;
             var info = m_textInfo;
             int count = Mathf.Min(Mathf.Max(1, Parsed.Materials.Count), info.meshInfo.Length);

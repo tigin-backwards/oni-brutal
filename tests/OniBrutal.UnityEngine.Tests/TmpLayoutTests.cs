@@ -333,7 +333,14 @@ namespace OniBrutal.Tests
                 Canvas.ForceUpdateCanvases();
                 float w = t.textInfo.meshInfo[0].uvs0[0].w;
                 int before = generated;
-                // A scale change multiplies uv0.w, without a new layout; only y counts.
+                // Changes up to a factor of 1.25 either way are left alone.
+                mid.transform.localScale = new Vector3(0.8f, 0.8f, 1f);
+                Canvas.ForceUpdateCanvases();
+                Assert.Equal(w, t.textInfo.meshInfo[0].uvs0[0].w);
+                mid.transform.localScale = new Vector3(1.25f, 1.25f, 1f);
+                Canvas.ForceUpdateCanvases();
+                Assert.Equal(w, t.textInfo.meshInfo[0].uvs0[0].w);
+                // A larger change multiplies uv0.w, without a new layout; only y counts.
                 mid.transform.localScale = new Vector3(0.5f, 0.5f, 1f);
                 Canvas.ForceUpdateCanvases();
                 Assert.Equal(w * 0.5f, t.textInfo.meshInfo[0].uvs0[0].w, 6);
@@ -349,6 +356,11 @@ namespace OniBrutal.Tests
                 Canvas.ForceUpdateCanvases();
                 Assert.Equal(w, t.textInfo.meshInfo[0].uvs0[0].w, 6);
                 Assert.Equal(before + 2, generated);
+                // A text whose scale is marked static is not checked.
+                t.isTextObjectScaleStatic = true;
+                mid.transform.localScale = new Vector3(0.5f, 0.5f, 1f);
+                Canvas.ForceUpdateCanvases();
+                Assert.Equal(w, t.textInfo.meshInfo[0].uvs0[0].w, 6);
             }
             finally
             {
@@ -379,6 +391,22 @@ namespace OniBrutal.Tests
             Assert.Equal(0, t.textInfo.meshInfo[0].vertexCount);
             // Its buffer is the spare quad.
             Assert.Equal(4, t.textInfo.meshInfo[0].vertices.Length);
+        }
+
+        [Theory]
+        [InlineData("kg ", "0-1")]
+        [InlineData(" kg", "0--1 1-2")]
+        [InlineData(". kg", "2-3")]
+        [InlineData("+ See All (0)", "0--1 2-4 6-8 11-11")]
+        [InlineData("it's a-b", "0-3 5-7")]
+        [InlineData("'x a_b", "1-1 3-3 5-5")]
+        [InlineData("...", "0-0")]
+        [InlineData(" ", "0--1")]
+        public void WordsAreRecordedAsTheShippedPackageRecordsThem(string text, string expected)
+        {
+            var t = Text(text, width: 300f, height: 100f);
+            var info = t.textInfo;
+            Assert.Equal(expected, string.Join(" ", info.wordInfo.Take(info.wordCount).Select(w => $"{w.firstCharacterIndex}-{w.lastCharacterIndex}")));
         }
     }
 }

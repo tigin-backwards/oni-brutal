@@ -114,6 +114,7 @@ Legend: `[x]` verified · `[ ]` not yet verified · `[~]` deviation (see the not
 - [x] Windows (the Windows build from Steam, OpenGL on NVIDIA's driver): type-load, asset, bind and shader checks; the menu as on Linux; DeCrew and Regrettable Dimension played (28k frames at speed 3: no exceptions, no white-out, autosaves); test runs isolated from the user's Documents, LocalLow, Steam account and speakers. Frame rate on DeCrew ~42 fps with bindless textures (26 before: NVIDIA serializes draws whose vertex-stage textures change)
 - [x] Windows, a new colony: New Game → Survival → Standard → Terra, world generation through the Windows `SimDLL.dll` (8.6 s), Duplicant selection, embark, intro, then cycles 1–3 at fast speed with the initial save, autosaves in the colony's own cloud folder and the timelapse snapshots: no exceptions. A tutorial video ("Digging for Resources") plays in the game with the engine's VP8 decoder
 - [x] Saves across platforms: an autosave written by this player on Windows loads and plays in the original player on Linux (no exceptions)
+- [x] Windows, Spaced Out with every DLC (U57: cycle 17078, 22 Duplicants, sandbox, the Steam double owning all DLC): the DLC intro video, the save loads, plays at speed 3 from cycle 17078 to 17086 with an autosave each cycle (30k frames): no exceptions
 
 - [x] Window, input (mouse, keyboard, text), cursor images
 - [x] Clipboard: select all, copy and paste in the destination coordinates field (as the original)

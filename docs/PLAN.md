@@ -243,18 +243,86 @@ Open:
 - Parity runs: save cross-load between the platforms, menus and options, mods, the Windows
   original as reference where it can run without the user's own data and account.
 
-### M9 (deferred until gameplay parity and performance) — Without Unity's packages
+### M9 — Without Unity's packages (started 2026-10-18)
 
-Nothing tied to Unity: replace the two Unity packages the game still loads from `Managed/`,
-uGUI (`UnityEngine.UI.dll`, Unity Companion License) and TextMeshPro (`Unity.TextMeshPro.dll`),
-with our own assemblies of the same names. They must keep the types, members and serialized
-fields the game binds to: its code calls 83 uGUI types (364 members) and 34 TextMeshPro types
-(152 members, `tools/Inventory`), Klei's classes derive from them (`LocText` is a
-`TextMeshProUGUI`), and its prefabs serialize their components by field layout. The packages
-are about 55k lines together. Oracles: the UiDump layout comparison (every RectTransform and
-text metric against the original) and the screen captures of the parity scenarios. Unity's
-built-in resource files the player reads (UI shaders, default resources) are the other Unity
-data at run time (docs/LICENSING.md).
+The goal is that nothing tied to Unity is loaded. Three Unity packages still load from
+`Managed/`:
+- **uGUI** (`UnityEngine.UI.dll`);
+- **TextMeshPro** (`Unity.TextMeshPro.dll`);
+- **Timeline** (`Unity.Timeline.dll`), which is referenced but has no content in the game.
+
+All three are under the Unity Companion License. They are replaced by this project's
+assemblies of the same names, built into the host's `engine/` folder.
+`AssemblyPolicy` already prefers an assembly found there over `Managed/`, so neither the game
+nor the host needs a change to pick them up.
+
+**What has to be kept:**
+- **What the game calls:** 83 uGUI types (281 member references) and 34 TextMeshPro types
+  (118), as `tools/Inventory` reports.
+- **What it derives from:** Klei's classes derive from 15 of these types, for example `LocText`
+  from `TextMeshProUGUI`, `KInputTextField` from `TMP_InputField`, `KScrollRect` from
+  `ScrollRect`, and a `PointerInputModule`. Their virtual and protected members, and the order
+  in which those are called, are part of the contract.
+- **Serialized layout:** prefabs serialize these components by field layout, read through the
+  managed type. Field names, types and order must match the shipped assemblies.
+- **The shipped packages' calls into the engine:** they currently exercise the engine's
+  internal API as well (for example uGUI's UI Toolkit bridge). The replacements may drop
+  whatever they do not need.
+
+**Process: clean room** (`docs/cleanroom/README.md`). This project's specification side has
+read decompiled uGUI and TextMeshPro, so the replacements are written by separate
+implementations, one functional specification per area. The implementations may use:
+- **Metadata:** `tools/PackageShapes` generates, from the shipped assemblies' metadata, the
+  type headers, enums, interfaces and delegates, the public and protected member signatures
+  the game needs, and the exact serialized fields. Like `tools/SurfaceGen`, it never reads
+  method bodies.
+- **Unity's public documentation:** the uGUI and TextMeshPro manuals and API references.
+- **The shipped packages as a black box:** `--ui-packages shipped|ours` picks which assemblies
+  a run loads. A differential dump records the results of both on the same screens, and the
+  implementations are judged on the difference. They never read the shipped code.
+
+**Stages**, each closed by the gate below:
+1. **Tooling:**
+   - `tools/PackageShapes`;
+   - the host switch;
+   - the differential dump. `tools/UnityProbe` UiDump is extended to record, per element: the
+     rect, the Graphic's generated vertices (count and a hash with a float tolerance), the
+     material, the clipping and masking state, the TextMeshPro text info (characters, lines,
+     words, bounds, the size auto-sizing chose), and the selectable state;
+   - scripted flows covering the main menu, options, new game, the colony HUD, the management
+     screens, text input, scrolling and dropdowns.
+2. **uGUI**, in four specifications:
+   - the event system (event data, raycasters, input modules, `ExecuteEvents`, selection,
+     navigation);
+   - graphics (`Graphic`, `MaskableGraphic`, `Image` with its simple, sliced, tiled and filled
+     modes, `RawImage`, the legacy `Text`, `VertexHelper`, the canvas update registry, `Mask`,
+     `RectMask2D`, stencil materials, clipping);
+   - layout (layout groups, fitters, `LayoutElement`, `LayoutRebuilder` and `LayoutUtility`,
+     `CanvasScaler`);
+   - controls (`Selectable`, `Button`, `Toggle` and `ToggleGroup`, `Slider`, `Scrollbar`,
+     `ScrollRect`, `InputField`, `Dropdown`).
+3. **TextMeshPro**, in three specifications:
+   - assets (font assets, including dynamic atlases through the engine's `FontEngine`, sprite
+     assets, style sheets, settings, materials and `ShaderUtilities`);
+   - text layout and mesh generation (`TMP_Text`, `TextMeshProUGUI`, `TextMeshPro`: rich text,
+     wrapping, overflow, auto-size, alignment, kerning, the text-info structures);
+   - `TMP_InputField` and `TMP_Dropdown`.
+4. **Timeline:** only the types and members the game references. There is no content.
+
+**Gate per stage:**
+- `scripts/check.sh`, with ApiCheck extended to the replaced packages as providers: no
+  missing members.
+- The differential dump on every scripted screen: no differences beyond float rounding (0.01
+  px; vertex hashes at that tolerance), or each difference explained and accepted in
+  `docs/PARITY.md`.
+- The scripted flows without exceptions, and captures compared with those of the shipped
+  packages.
+- The DeCrew and U57 frame rates no worse than with the shipped packages.
+
+**Exit criterion:** a run loads no assembly from `Managed/` that comes from Unity, and
+`docs/LICENSING.md` lists no Unity code loaded at run time. Unity's built-in resource files
+(UI shaders, default resources) remain the only Unity data, and they are read from the user's
+install.
 
 ## Open items
 

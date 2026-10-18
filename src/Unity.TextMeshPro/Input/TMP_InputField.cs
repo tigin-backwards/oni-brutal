@@ -1,0 +1,1290 @@
+using System;
+using System.Text;
+using System.Text.RegularExpressions;
+using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
+
+namespace TMPro
+{
+    // An editable text: a TMP text in a viewport, a placeholder, and a caret and selection drawn
+    // by a child graphic. ActivateInputField starts editing in the next LateUpdate; while focused,
+    // each LateUpdate drains the keyboard events (Event.PopEvent) and applies the editing keys and
+    // typed characters (validated); the text scrolls to keep the caret visible.
+    public partial class TMP_InputField
+    {
+        enum EditState
+        {
+            Continue,
+            Finish,
+        }
+
+        // The zero-width space appended to the shown text, so that the caret has a character to
+        // stand before at the end of the text.
+        const char EndMarker = '​';
+
+        bool m_AllowInput;
+        bool m_ShouldActivateNextUpdate;
+        bool m_WasCanceled;
+        bool m_TextChangedSinceActivation;
+        string m_OriginalText = "";
+        int m_StringPosition, m_StringSelectPosition;
+        float m_BlinkStart;
+        bool m_CaretVisible;
+        TMP_SelectionCaret m_Caret;
+        readonly Event m_ProcessingEvent = new();
+        bool m_PreventCallback;
+        bool m_IsSelectAll;
+        bool m_Dragging;
+        Vector2 m_ScrollOffset;
+
+        protected TMP_InputField()
+        {
+            m_Text = "";
+            m_ContentType = ContentType.Standard;
+            m_InputType = InputType.Standard;
+            m_AsteriskChar = '*';
+            m_KeyboardType = TouchScreenKeyboardType.Default;
+            m_LineType = LineType.SingleLine;
+            m_CharacterValidation = CharacterValidation.None;
+            m_RegexValue = "";
+            m_GlobalPointSize = 14f;
+            m_CharacterLimit = 0;
+            m_OnEndEdit = new SubmitEvent();
+            m_OnSubmit = new SubmitEvent();
+            m_OnSelect = new SelectionEvent();
+            m_OnDeselect = new SelectionEvent();
+            m_OnTextSelection = new TextSelectionEvent();
+            m_OnEndTextSelection = new TextSelectionEvent();
+            m_OnValueChanged = new OnChangeEvent();
+            m_OnTouchScreenKeyboardStatusChanged = new TouchScreenKeyboardEvent();
+            m_CaretColor = new Color(50f / 255f, 50f / 255f, 50f / 255f, 1f);
+            m_SelectionColor = new Color(168f / 255f, 206f / 255f, 255f / 255f, 192f / 255f);
+            m_CaretBlinkRate = 0.85f;
+            m_CaretWidth = 1;
+            m_RichText = true;
+            m_ScrollSensitivity = 1f;
+            m_LineLimit = 0;
+            m_ShouldActivateOnSelect = true;
+            m_RestoreOriginalTextOnEscape = true;
+        }
+
+        // ----- Settings -----
+
+        public string text
+        {
+            get => m_Text;
+            set => SetText(value, true);
+        }
+
+        public void SetTextWithoutNotify(string input) => SetText(input, false);
+
+        void SetText(string value, bool sendCallback)
+        {
+            if (value == null) value = "";
+            value = value.Replace("\0", "");
+            if (m_Text == value) return;
+            if (m_LineType == LineType.SingleLine) value = value.Replace("\n", "").Replace("\t", "");
+            if (m_CharacterLimit > 0 && value.Length > m_CharacterLimit) value = value.Substring(0, m_CharacterLimit);
+            m_Text = value;
+            if (m_StringPosition > m_Text.Length) m_StringPosition = m_StringSelectPosition = m_Text.Length;
+            else if (m_StringSelectPosition > m_Text.Length) m_StringSelectPosition = m_Text.Length;
+            if (sendCallback) SendOnValueChanged();
+            UpdateLabel();
+        }
+
+        public bool isFocused => m_AllowInput;
+
+        public float caretBlinkRate
+        {
+            get => m_CaretBlinkRate;
+            set
+            {
+                m_CaretBlinkRate = value;
+                if (m_AllowInput) m_BlinkStart = Time.unscaledTime;
+            }
+        }
+
+        public int caretWidth
+        {
+            get => m_CaretWidth;
+            set
+            {
+                if (m_CaretWidth == value) return;
+                m_CaretWidth = value;
+                MarkGeometryChanged();
+            }
+        }
+
+        public RectTransform textViewport { get => m_TextViewport; set => m_TextViewport = value; }
+
+        public TMP_Text textComponent
+        {
+            get => m_TextComponent;
+            set
+            {
+                m_TextComponent = value;
+                UpdateLabel();
+            }
+        }
+
+        public Graphic placeholder
+        {
+            get => m_Placeholder;
+            set
+            {
+                m_Placeholder = value;
+                UpdateLabel();
+            }
+        }
+
+        public Scrollbar verticalScrollbar { get => m_VerticalScrollbar; set => m_VerticalScrollbar = value; }
+
+        public float scrollSensitivity { get => m_ScrollSensitivity; set => m_ScrollSensitivity = value; }
+
+        public Color caretColor
+        {
+            get => m_CustomCaretColor ? m_CaretColor : (m_TextComponent != null ? m_TextComponent.color : m_CaretColor);
+            set
+            {
+                m_CaretColor = value;
+                MarkGeometryChanged();
+            }
+        }
+
+        public bool customCaretColor { get => m_CustomCaretColor; set => m_CustomCaretColor = value; }
+
+        public Color selectionColor
+        {
+            get => m_SelectionColor;
+            set
+            {
+                m_SelectionColor = value;
+                MarkGeometryChanged();
+            }
+        }
+
+        public SubmitEvent onEndEdit { get => m_OnEndEdit; set => m_OnEndEdit = value; }
+        public SubmitEvent onSubmit { get => m_OnSubmit; set => m_OnSubmit = value; }
+        public SelectionEvent onSelect { get => m_OnSelect; set => m_OnSelect = value; }
+        public SelectionEvent onDeselect { get => m_OnDeselect; set => m_OnDeselect = value; }
+        public TextSelectionEvent onTextSelection { get => m_OnTextSelection; set => m_OnTextSelection = value; }
+        public TextSelectionEvent onEndTextSelection { get => m_OnEndTextSelection; set => m_OnEndTextSelection = value; }
+        public OnChangeEvent onValueChanged { get => m_OnValueChanged; set => m_OnValueChanged = value; }
+        public TouchScreenKeyboardEvent onTouchScreenKeyboardStatusChanged { get => m_OnTouchScreenKeyboardStatusChanged; set => m_OnTouchScreenKeyboardStatusChanged = value; }
+        public OnValidateInput onValidateInput { get => m_OnValidateInput; set => m_OnValidateInput = value; }
+
+        public int characterLimit
+        {
+            get => m_CharacterLimit;
+            set
+            {
+                if (m_CharacterLimit == value) return;
+                m_CharacterLimit = Math.Max(0, value);
+                if (m_CharacterLimit > 0 && m_Text.Length > m_CharacterLimit) text = m_Text.Substring(0, m_CharacterLimit);
+                UpdateLabel();
+            }
+        }
+
+        public float pointSize
+        {
+            get => m_GlobalPointSize;
+            set
+            {
+                m_GlobalPointSize = Math.Max(0f, value);
+                SetGlobalPointSize(m_GlobalPointSize);
+            }
+        }
+
+        public TMP_FontAsset fontAsset
+        {
+            get => m_GlobalFontAsset;
+            set
+            {
+                m_GlobalFontAsset = value;
+                SetGlobalFontAsset(value);
+            }
+        }
+
+        public bool onFocusSelectAll { get => m_OnFocusSelectAll; set => m_OnFocusSelectAll = value; }
+
+        public bool resetOnDeActivation { get => m_ResetOnDeActivation; set => m_ResetOnDeActivation = value; }
+
+        public bool keepTextSelectionVisible { get => m_KeepTextSelectionVisible; set => m_KeepTextSelectionVisible = value; }
+
+        public bool restoreOriginalTextOnEscape { get => m_RestoreOriginalTextOnEscape; set => m_RestoreOriginalTextOnEscape = value; }
+
+        public bool isRichTextEditingAllowed { get => m_isRichTextEditingAllowed; set => m_isRichTextEditingAllowed = value; }
+
+        public ContentType contentType
+        {
+            get => m_ContentType;
+            set
+            {
+                if (m_ContentType == value) return;
+                m_ContentType = value;
+                EnforceContentType();
+            }
+        }
+
+        public LineType lineType
+        {
+            get => m_LineType;
+            set
+            {
+                if (m_LineType == value) return;
+                m_LineType = value;
+                SetTextComponentWrapMode();
+                SetToCustomIfContentTypeIsNot(ContentType.Standard, ContentType.Autocorrected);
+            }
+        }
+
+        public int lineLimit
+        {
+            get => m_LineLimit;
+            set => m_LineLimit = m_LineType == LineType.SingleLine ? 1 : Math.Max(0, value);
+        }
+
+        public InputType inputType
+        {
+            get => m_InputType;
+            set
+            {
+                if (m_InputType == value) return;
+                m_InputType = value;
+                SetToCustom();
+            }
+        }
+
+        public TouchScreenKeyboardType keyboardType
+        {
+            get => m_KeyboardType;
+            set
+            {
+                if (m_KeyboardType == value) return;
+                m_KeyboardType = value;
+                SetToCustom();
+            }
+        }
+
+        public CharacterValidation characterValidation
+        {
+            get => m_CharacterValidation;
+            set
+            {
+                if (m_CharacterValidation == value) return;
+                m_CharacterValidation = value;
+                SetToCustom();
+            }
+        }
+
+        public TMP_InputValidator inputValidator
+        {
+            get => m_InputValidator;
+            set
+            {
+                m_InputValidator = value;
+                SetToCustom(CharacterValidation.CustomValidator);
+            }
+        }
+
+        public bool readOnly { get => m_ReadOnly; set => m_ReadOnly = value; }
+
+        public bool richText
+        {
+            get => m_RichText;
+            set
+            {
+                m_RichText = value;
+                SetTextComponentRichTextMode();
+            }
+        }
+
+        public bool multiLine => m_LineType == LineType.MultiLineNewline || m_LineType == LineType.MultiLineSubmit;
+
+        public char asteriskChar
+        {
+            get => m_AsteriskChar;
+            set
+            {
+                m_AsteriskChar = value;
+                UpdateLabel();
+            }
+        }
+
+        public bool wasCanceled => m_WasCanceled;
+
+        public bool shouldHideMobileInput { get => m_HideMobileInput; set => m_HideMobileInput = value; }
+
+        public bool shouldHideSoftKeyboard { get => m_HideSoftKeyboard; set => m_HideSoftKeyboard = value; }
+
+        public virtual bool shouldActivateOnSelect { get => m_ShouldActivateOnSelect; set => m_ShouldActivateOnSelect = value; }
+
+        // ----- Caret and selection -----
+
+        public int caretPosition
+        {
+            get => m_StringSelectPosition;
+            set
+            {
+                selectionAnchorPosition = value;
+                selectionFocusPosition = value;
+            }
+        }
+
+        public int selectionAnchorPosition
+        {
+            get => m_StringPosition;
+            set
+            {
+                m_StringPosition = Mathf.Clamp(value, 0, m_Text.Length);
+                MarkGeometryChanged();
+            }
+        }
+
+        public int selectionFocusPosition
+        {
+            get => m_StringSelectPosition;
+            set
+            {
+                m_StringSelectPosition = Mathf.Clamp(value, 0, m_Text.Length);
+                MarkGeometryChanged();
+            }
+        }
+
+        public int stringPosition
+        {
+            get => m_StringSelectPosition;
+            set => caretPosition = value;
+        }
+
+        public int selectionStringAnchorPosition { get => selectionAnchorPosition; set => selectionAnchorPosition = value; }
+
+        public int selectionStringFocusPosition { get => selectionFocusPosition; set => selectionFocusPosition = value; }
+
+        bool HasSelection => m_StringPosition != m_StringSelectPosition;
+
+        int SelectionStart => Math.Min(m_StringPosition, m_StringSelectPosition);
+
+        int SelectionEnd => Math.Max(m_StringPosition, m_StringSelectPosition);
+
+        // ----- Lifecycle -----
+
+        protected override void Awake()
+        {
+            base.Awake();
+        }
+
+        protected override void OnEnable()
+        {
+            base.OnEnable();
+            if (m_Text == null) m_Text = "";
+            if (m_TextComponent != null)
+            {
+                SetTextComponentWrapMode();
+                SetTextComponentRichTextMode();
+                m_TextComponent.RegisterDirtyVerticesCallback(MarkGeometryChanged);
+            }
+            EnsureCaret();
+            UpdateLabel();
+        }
+
+        protected override void OnDisable()
+        {
+            m_ShouldActivateNextUpdate = false;
+            DeactivateInputField();
+            if (m_TextComponent != null) m_TextComponent.UnregisterDirtyVerticesCallback(MarkGeometryChanged);
+            CanvasUpdateRegistry.UnRegisterCanvasElementForRebuild(this);
+            base.OnDisable();
+        }
+
+        protected override void OnDestroy()
+        {
+            CanvasUpdateRegistry.UnRegisterCanvasElementForRebuild(this);
+            base.OnDestroy();
+        }
+
+        // The caret graphic: a child of the viewport (its first), filling it, drawn under the
+        // text.
+        void EnsureCaret()
+        {
+            if (m_Caret != null || m_TextComponent == null) return;
+            var parent = m_TextViewport != null ? m_TextViewport : m_TextComponent.rectTransform.parent as RectTransform;
+            if (parent == null) return;
+            var go = new GameObject("Caret", typeof(RectTransform));
+            go.hideFlags = HideFlags.DontSave;
+            go.layer = gameObject.layer;
+            var rt = (RectTransform)go.transform;
+            rt.SetParent(parent, false);
+            rt.SetAsFirstSibling();
+            var textRect = m_TextComponent.rectTransform;
+            rt.anchorMin = textRect.anchorMin;
+            rt.anchorMax = textRect.anchorMax;
+            rt.anchoredPosition = textRect.anchoredPosition;
+            rt.sizeDelta = textRect.sizeDelta;
+            rt.pivot = textRect.pivot;
+            m_Caret = go.AddComponent<TMP_SelectionCaret>();
+            m_Caret.Owner = this;
+            var element = go.AddComponent<LayoutElement>();
+            element.ignoreLayout = true;
+        }
+
+        // ----- Activation -----
+
+        public void ActivateInputField()
+        {
+            if (m_TextComponent == null || m_TextComponent.font == null || !IsActive() || !IsInteractable()) return;
+            if (isFocused) return;
+            m_ShouldActivateNextUpdate = true;
+        }
+
+        void ActivateNow()
+        {
+            if (EventSystem.current == null) return;
+            if (EventSystem.current.currentSelectedGameObject != gameObject) EventSystem.current.SetSelectedGameObject(gameObject);
+            m_AllowInput = true;
+            m_OriginalText = m_Text;
+            m_WasCanceled = false;
+            m_TextChangedSinceActivation = false;
+            if (m_OnFocusSelectAll)
+            {
+                m_StringPosition = 0;
+                m_StringSelectPosition = m_Text.Length;
+                m_IsSelectAll = true;
+            }
+            else
+            {
+                m_StringPosition = m_StringSelectPosition = m_Text.Length;
+            }
+            m_BlinkStart = Time.unscaledTime;
+            m_CaretVisible = true;
+            onFocus?.Invoke();
+            UpdateLabel();
+        }
+
+        public void DeactivateInputField() => DeactivateInputField(false);
+
+        public void DeactivateInputField(bool clearSelection)
+        {
+            m_ShouldActivateNextUpdate = false;
+            if (!m_AllowInput) return;
+            m_AllowInput = false;
+            if (m_WasCanceled && m_RestoreOriginalTextOnEscape) text = m_OriginalText;
+            if (m_ResetOnDeActivation || clearSelection) m_StringPosition = m_StringSelectPosition = 0;
+            m_IsSelectAll = false;
+            SendOnEndEdit();
+            UpdateLabel();
+            MarkGeometryChanged();
+        }
+
+        public override void OnSelect(BaseEventData eventData)
+        {
+            base.OnSelect(eventData);
+            m_OnSelect?.Invoke(m_Text);
+            if (m_ShouldActivateOnSelect) ActivateInputField();
+        }
+
+        public override void OnDeselect(BaseEventData eventData)
+        {
+            DeactivateInputField();
+            base.OnDeselect(eventData);
+            m_OnDeselect?.Invoke(m_Text);
+        }
+
+        public virtual void OnPointerClick(PointerEventData eventData)
+        {
+            if (eventData.button != PointerEventData.InputButton.Left) return;
+            ActivateInputField();
+        }
+
+        public override void OnPointerDown(PointerEventData eventData)
+        {
+            if (eventData.button != PointerEventData.InputButton.Left) return;
+            bool hadFocus = isFocused;
+            base.OnPointerDown(eventData);
+            if (!hadFocus) return;
+            // A click in a focused field moves the caret to the clicked character.
+            int index = PositionFromScreen(eventData.position, eventData.pressEventCamera);
+            if (index < 0) return;
+            m_StringSelectPosition = index;
+            if (!(Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))) m_StringPosition = index;
+            MarkGeometryChanged();
+            eventData.Use();
+        }
+
+        public virtual void OnBeginDrag(PointerEventData eventData)
+        {
+            if (!isFocused || eventData.button != PointerEventData.InputButton.Left) return;
+            m_Dragging = true;
+        }
+
+        public virtual void OnDrag(PointerEventData eventData)
+        {
+            if (!m_Dragging || !isFocused) return;
+            int index = PositionFromScreen(eventData.position, eventData.pressEventCamera);
+            if (index < 0) return;
+            m_StringSelectPosition = index;
+            MarkGeometryChanged();
+            eventData.Use();
+        }
+
+        public virtual void OnEndDrag(PointerEventData eventData)
+        {
+            if (eventData.button != PointerEventData.InputButton.Left) return;
+            m_Dragging = false;
+            if (HasSelection) m_OnEndTextSelection?.Invoke(m_Text, SelectionStart, SelectionEnd);
+        }
+
+        public virtual void OnSubmit(BaseEventData eventData)
+        {
+            if (!IsActive() || !IsInteractable()) return;
+            if (!isFocused) m_ShouldActivateNextUpdate = true;
+        }
+
+        public virtual void OnCancel(BaseEventData eventData)
+        {
+            if (!IsActive() || !IsInteractable()) return;
+            if (isFocused)
+            {
+                m_WasCanceled = true;
+                DeactivateInputField();
+            }
+        }
+
+        public virtual void OnScroll(PointerEventData eventData)
+        {
+            if (m_TextComponent == null || !multiLine) return;
+            float delta = eventData.scrollDelta.y * m_ScrollSensitivity;
+            m_ScrollOffset.y = Mathf.Max(0f, m_ScrollOffset.y - delta);
+            ApplyScroll();
+        }
+
+        // Keyboard input is handled in LateUpdate.
+        public virtual void OnUpdateSelected(BaseEventData eventData)
+        {
+            if (!isFocused) return;
+            eventData.Use();
+        }
+
+        // ----- Editing -----
+
+        protected virtual void LateUpdate()
+        {
+            if (m_ShouldActivateNextUpdate)
+            {
+                m_ShouldActivateNextUpdate = false;
+                if (!isFocused)
+                {
+                    ActivateNow();
+                    return;
+                }
+            }
+            if (!isFocused) return;
+            bool changed = false;
+            while (Event.PopEvent(m_ProcessingEvent))
+            {
+                var type = m_ProcessingEvent.rawType;
+                if (type != EventType.KeyDown) continue;
+                string before = m_Text;
+                var state = KeyPressed(m_ProcessingEvent);
+                if (m_Text != before) changed = true;
+                if (state == EditState.Finish)
+                {
+                    if (!m_WasCanceled) SendOnSubmit();
+                    DeactivateInputField();
+                    break;
+                }
+            }
+            if (changed) UpdateLabel();
+            // The text laid out for the current content places the caret: scroll to it.
+            if (m_TextComponent != null && !m_TextComponent.havePropertiesChanged) KeepCaretVisible();
+            UpdateBlink();
+        }
+
+        public void ProcessEvent(Event e) => KeyPressed(e);
+
+        EditState KeyPressed(Event evt)
+        {
+            var modifiers = evt.modifiers;
+            bool ctrl = SystemInfo.operatingSystemFamily == OperatingSystemFamily.MacOSX ? (modifiers & EventModifiers.Command) != 0 : (modifiers & EventModifiers.Control) != 0;
+            bool shift = (modifiers & EventModifiers.Shift) != 0;
+            bool alt = (modifiers & EventModifiers.Alt) != 0;
+            bool ctrlOnly = ctrl && !alt && !shift;
+            switch (evt.keyCode)
+            {
+                case KeyCode.Backspace: Backspace(ctrl); return EditState.Continue;
+                case KeyCode.Delete: ForwardDelete(ctrl); return EditState.Continue;
+                case KeyCode.Home: MoveTextStart(shift); return EditState.Continue;
+                case KeyCode.End: MoveTextEnd(shift); return EditState.Continue;
+                case KeyCode.A when ctrlOnly: SelectAll(); return EditState.Continue;
+                case KeyCode.C when ctrlOnly:
+                    if (m_InputType != InputType.Password && HasSelection) GUIUtility.systemCopyBuffer = SelectedText();
+                    return EditState.Continue;
+                case KeyCode.V when ctrlOnly:
+                    Append(GUIUtility.systemCopyBuffer ?? "");
+                    return EditState.Continue;
+                case KeyCode.X when ctrlOnly:
+                    if (m_InputType != InputType.Password && HasSelection) GUIUtility.systemCopyBuffer = SelectedText();
+                    DeleteSelection();
+                    return EditState.Continue;
+                case KeyCode.LeftArrow: MoveLeft(shift, ctrl); return EditState.Continue;
+                case KeyCode.RightArrow: MoveRight(shift, ctrl); return EditState.Continue;
+                case KeyCode.UpArrow: MoveUp(shift); return EditState.Continue;
+                case KeyCode.DownArrow: MoveDown(shift); return EditState.Continue;
+                case KeyCode.Return:
+                case KeyCode.KeypadEnter:
+                    if (m_LineType != LineType.MultiLineNewline) return EditState.Finish;
+                    break;
+                case KeyCode.Escape:
+                    m_WasCanceled = true;
+                    return EditState.Finish;
+            }
+            char c = evt.character;
+            if (!multiLine && (c == '\t' || c == '\r' || c == '\n')) return EditState.Continue;
+            if (c == '\r' || c == 3) c = '\n';
+            if (IsValidChar(c)) Append(c);
+            return EditState.Continue;
+        }
+
+        bool IsValidChar(char c)
+        {
+            if (c == 0) return false;
+            if (c == 127) return false;
+            if (c == '\t' || c == '\n') return multiLine || c == '\t';
+            return !char.IsControl(c);
+        }
+
+        string SelectedText() => HasSelection ? m_Text.Substring(SelectionStart, SelectionEnd - SelectionStart) : "";
+
+        protected virtual void Append(string input)
+        {
+            if (m_ReadOnly || input == null) return;
+            foreach (char c in input)
+            {
+                if (c >= ' ' || c == '\t' || c == '\r' || c == '\n') Append(c == '\r' ? '\n' : c);
+            }
+        }
+
+        // Inserts a typed character at the caret (replacing the selection) once it passes the
+        // validation: the content type's, a custom validator's (which inserts it itself) or the
+        // onValidateInput callback's.
+        protected virtual void Append(char input)
+        {
+            if (m_ReadOnly) return;
+            if (HasSelection) DeleteSelectionInternal();
+            if (m_CharacterLimit > 0 && m_Text.Length >= m_CharacterLimit) return;
+            if (m_CharacterValidation == CharacterValidation.CustomValidator)
+            {
+                if (m_InputValidator == null) return;
+                string t = m_Text;
+                int pos = m_StringSelectPosition;
+                m_InputValidator.Validate(ref t, ref pos, input);
+                if (t == m_Text) return;
+                if (m_CharacterLimit > 0 && t.Length > m_CharacterLimit) return;
+                m_Text = t;
+                m_StringPosition = m_StringSelectPosition = Mathf.Clamp(pos, 0, m_Text.Length);
+                SendOnValueChanged();
+                UpdateLabel();
+                return;
+            }
+            if (m_OnValidateInput != null) input = m_OnValidateInput(m_Text, m_StringSelectPosition, input);
+            else if (m_CharacterValidation != CharacterValidation.None) input = Validate(m_Text, m_StringSelectPosition, input);
+            if (input == 0) return;
+            Insert(input);
+        }
+
+        void Insert(char c)
+        {
+            if (m_ReadOnly) return;
+            m_Text = m_Text.Insert(m_StringSelectPosition, c.ToString());
+            m_StringSelectPosition++;
+            m_StringPosition = m_StringSelectPosition;
+            m_IsSelectAll = false;
+            SendOnValueChanged();
+            UpdateLabel();
+        }
+
+        // The documented validations of the content types.
+        protected char Validate(string text, int pos, char ch)
+        {
+            switch (m_CharacterValidation)
+            {
+                case CharacterValidation.None:
+                    return ch;
+                case CharacterValidation.Digit:
+                    return ch >= '0' && ch <= '9' ? ch : (char)0;
+                case CharacterValidation.Integer:
+                case CharacterValidation.Decimal:
+                {
+                    bool sign = text.Length > 0 && text[0] == '-';
+                    bool cursorBeforeSign = sign && pos == 0;
+                    if (cursorBeforeSign) return (char)0;
+                    if (ch >= '0' && ch <= '9') return ch;
+                    if (ch == '-' && pos == 0 && !sign) return ch;
+                    if (m_CharacterValidation == CharacterValidation.Decimal && (ch == '.' || ch == ',') && text.IndexOf('.') < 0 && text.IndexOf(',') < 0) return ch;
+                    return (char)0;
+                }
+                case CharacterValidation.Alphanumeric:
+                    return (ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z') || (ch >= '0' && ch <= '9') ? ch : (char)0;
+                case CharacterValidation.Name:
+                {
+                    char prev = pos > 0 && pos <= text.Length ? text[pos - 1] : ' ';
+                    char next = pos < text.Length ? text[pos] : '\n';
+                    if (char.IsLetter(ch))
+                    {
+                        // Each word starts with a capital, the rest is lower case.
+                        if (prev == ' ' || pos == 0) return char.ToUpper(ch);
+                        return char.ToLower(ch);
+                    }
+                    if (ch == '\'')
+                        return prev != ' ' && prev != '\'' && next != '\'' && !text.Contains("'") ? ch : (char)0;
+                    if (ch == ' ')
+                        return prev != ' ' && prev != '\'' && next != ' ' && next != '\'' && pos != 0 ? ch : (char)0;
+                    return (char)0;
+                }
+                case CharacterValidation.EmailAddress:
+                {
+                    if ((ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z') || (ch >= '0' && ch <= '9')) return ch;
+                    if (ch == '@' && text.IndexOf('@') == -1) return ch;
+                    const string allowed = "!#$%&'*+-/=?^_`{|}~";
+                    if (allowed.IndexOf(ch) != -1) return ch;
+                    if (ch == '.')
+                    {
+                        char prev = pos > 0 && pos <= text.Length ? text[pos - 1] : ' ';
+                        char next = pos < text.Length ? text[pos] : '\n';
+                        return prev != '.' && next != '.' ? ch : (char)0;
+                    }
+                    return (char)0;
+                }
+                case CharacterValidation.Regex:
+                    return !string.IsNullOrEmpty(m_RegexValue) && Regex.IsMatch(ch.ToString(), m_RegexValue) ? ch : (char)0;
+            }
+            return ch;
+        }
+
+        void Backspace(bool word)
+        {
+            if (m_ReadOnly) return;
+            if (HasSelection)
+            {
+                DeleteSelection();
+                return;
+            }
+            if (m_StringSelectPosition <= 0) return;
+            int start = word ? PreviousWordStart(m_StringSelectPosition) : m_StringSelectPosition - 1;
+            if (!word && start > 0 && char.IsLowSurrogate(m_Text[start]) && char.IsHighSurrogate(m_Text[start - 1])) start--;
+            m_Text = m_Text.Remove(start, m_StringSelectPosition - start);
+            m_StringPosition = m_StringSelectPosition = start;
+            SendOnValueChanged();
+            UpdateLabel();
+        }
+
+        void ForwardDelete(bool word)
+        {
+            if (m_ReadOnly) return;
+            if (HasSelection)
+            {
+                DeleteSelection();
+                return;
+            }
+            if (m_StringSelectPosition >= m_Text.Length) return;
+            int end = word ? NextWordEnd(m_StringSelectPosition) : m_StringSelectPosition + 1;
+            if (!word && end < m_Text.Length && char.IsLowSurrogate(m_Text[end])) end++;
+            m_Text = m_Text.Remove(m_StringSelectPosition, end - m_StringSelectPosition);
+            SendOnValueChanged();
+            UpdateLabel();
+        }
+
+        void DeleteSelection()
+        {
+            if (m_ReadOnly || !HasSelection) return;
+            DeleteSelectionInternal();
+            SendOnValueChanged();
+            UpdateLabel();
+        }
+
+        void DeleteSelectionInternal()
+        {
+            int start = SelectionStart, end = SelectionEnd;
+            m_Text = m_Text.Remove(start, end - start);
+            m_StringPosition = m_StringSelectPosition = start;
+            m_IsSelectAll = false;
+        }
+
+        protected void SelectAll()
+        {
+            m_IsSelectAll = true;
+            m_StringPosition = 0;
+            m_StringSelectPosition = m_Text.Length;
+            MarkGeometryChanged();
+        }
+
+        public void MoveTextStart(bool shift)
+        {
+            m_StringSelectPosition = 0;
+            if (!shift) m_StringPosition = 0;
+            MarkGeometryChanged();
+        }
+
+        public void MoveTextEnd(bool shift)
+        {
+            m_StringSelectPosition = m_Text.Length;
+            if (!shift) m_StringPosition = m_StringSelectPosition;
+            MarkGeometryChanged();
+        }
+
+        public void MoveToStartOfLine(bool shift, bool ctrl)
+        {
+            if (ctrl)
+            {
+                MoveTextStart(shift);
+                return;
+            }
+            int line = m_Text.LastIndexOf('\n', Math.Max(0, m_StringSelectPosition - 1));
+            m_StringSelectPosition = line < 0 || m_StringSelectPosition == 0 ? 0 : line + 1;
+            if (!shift) m_StringPosition = m_StringSelectPosition;
+            MarkGeometryChanged();
+        }
+
+        public void MoveToEndOfLine(bool shift, bool ctrl)
+        {
+            if (ctrl)
+            {
+                MoveTextEnd(shift);
+                return;
+            }
+            int line = m_Text.IndexOf('\n', m_StringSelectPosition);
+            m_StringSelectPosition = line < 0 ? m_Text.Length : line;
+            if (!shift) m_StringPosition = m_StringSelectPosition;
+            MarkGeometryChanged();
+        }
+
+        void MoveLeft(bool shift, bool ctrl)
+        {
+            if (HasSelection && !shift)
+            {
+                m_StringPosition = m_StringSelectPosition = SelectionStart;
+                MarkGeometryChanged();
+                return;
+            }
+            int p = ctrl ? PreviousWordStart(m_StringSelectPosition) : m_StringSelectPosition - 1;
+            if (!ctrl && p > 0 && p < m_Text.Length && char.IsLowSurrogate(m_Text[p])) p--;
+            m_StringSelectPosition = Math.Max(0, p);
+            if (!shift) m_StringPosition = m_StringSelectPosition;
+            MarkGeometryChanged();
+        }
+
+        void MoveRight(bool shift, bool ctrl)
+        {
+            if (HasSelection && !shift)
+            {
+                m_StringPosition = m_StringSelectPosition = SelectionEnd;
+                MarkGeometryChanged();
+                return;
+            }
+            int p = ctrl ? NextWordEnd(m_StringSelectPosition) : m_StringSelectPosition + 1;
+            if (!ctrl && p < m_Text.Length && char.IsLowSurrogate(m_Text[p])) p++;
+            m_StringSelectPosition = Math.Min(m_Text.Length, p);
+            if (!shift) m_StringPosition = m_StringSelectPosition;
+            MarkGeometryChanged();
+        }
+
+        void MoveUp(bool shift) => MoveVertical(shift, -1);
+
+        void MoveDown(bool shift) => MoveVertical(shift, 1);
+
+        // Moves the caret to the nearest character of the line above or below.
+        void MoveVertical(bool shift, int direction)
+        {
+            if (!multiLine || m_TextComponent == null)
+            {
+                if (direction < 0) MoveTextStart(shift);
+                else MoveTextEnd(shift);
+                return;
+            }
+            var info = m_TextComponent.textInfo;
+            int ci = Mathf.Clamp(m_StringSelectPosition, 0, Math.Max(0, info.characterCount - 1));
+            if (info.characterCount == 0) return;
+            int line = info.characterInfo[ci].lineNumber + direction;
+            if (line < 0) { MoveTextStart(shift); return; }
+            if (line >= info.lineCount) { MoveTextEnd(shift); return; }
+            float x = info.characterInfo[ci].origin;
+            int target = TMP_TextUtilities.FindNearestCharacterOnLine(m_TextComponent, new Vector3(x, 0f, 0f), line);
+            if (target < 0) return;
+            m_StringSelectPosition = Mathf.Clamp(info.characterInfo[target].index, 0, m_Text.Length);
+            if (!shift) m_StringPosition = m_StringSelectPosition;
+            MarkGeometryChanged();
+        }
+
+        int PreviousWordStart(int pos)
+        {
+            int p = pos - 1;
+            while (p > 0 && !char.IsLetterOrDigit(m_Text[p])) p--;
+            while (p > 0 && char.IsLetterOrDigit(m_Text[p - 1])) p--;
+            return Math.Max(0, p);
+        }
+
+        int NextWordEnd(int pos)
+        {
+            int p = pos;
+            while (p < m_Text.Length && !char.IsLetterOrDigit(m_Text[p])) p++;
+            while (p < m_Text.Length && char.IsLetterOrDigit(m_Text[p])) p++;
+            return p;
+        }
+
+        // ----- Events -----
+
+        void SendOnValueChanged()
+        {
+            m_TextChangedSinceActivation = true;
+            if (m_PreventCallback) return;
+            m_OnValueChanged?.Invoke(m_Text);
+        }
+
+        protected void SendOnEndEdit() => m_OnEndEdit?.Invoke(m_Text);
+
+        protected void SendOnSubmit() => m_OnSubmit?.Invoke(m_Text);
+
+        // ----- Display -----
+
+        // Shows the text (as asterisks for passwords; tags shown literally unless rich-text
+        // editing is allowed) with the end marker, and the placeholder when it is empty.
+        protected void UpdateLabel()
+        {
+            if (m_TextComponent == null || m_TextComponent.font == null || m_PreventCallback) return;
+            m_PreventCallback = true;
+            string shown;
+            if (m_InputType == InputType.Password) shown = new string(m_AsteriskChar, m_Text.Length);
+            else shown = m_Text;
+            bool empty = string.IsNullOrEmpty(m_Text);
+            if (m_Placeholder != null) m_Placeholder.enabled = empty;
+            m_TextComponent.text = shown + EndMarker;
+            m_PreventCallback = false;
+            MarkGeometryChanged();
+        }
+
+        public void ForceLabelUpdate() => UpdateLabel();
+
+        void SetTextComponentWrapMode()
+        {
+            if (m_TextComponent == null) return;
+            m_TextComponent.textWrappingMode = multiLine ? TextWrappingModes.Normal : TextWrappingModes.PreserveWhitespaceNoWrap;
+        }
+
+        void SetTextComponentRichTextMode()
+        {
+            if (m_TextComponent == null) return;
+            m_TextComponent.richText = m_RichText;
+        }
+
+        public void SetGlobalPointSize(float pointSize)
+        {
+            if (m_Placeholder is TMP_Text placeholderText) placeholderText.fontSize = pointSize;
+            if (m_TextComponent != null) m_TextComponent.fontSize = pointSize;
+        }
+
+        public void SetGlobalFontAsset(TMP_FontAsset fontAsset)
+        {
+            if (fontAsset == null) return;
+            if (m_Placeholder is TMP_Text placeholderText) placeholderText.font = fontAsset;
+            if (m_TextComponent != null) m_TextComponent.font = fontAsset;
+        }
+
+        void EnforceContentType()
+        {
+            switch (m_ContentType)
+            {
+                case ContentType.Standard:
+                    m_InputType = InputType.Standard;
+                    m_KeyboardType = TouchScreenKeyboardType.Default;
+                    m_CharacterValidation = CharacterValidation.None;
+                    break;
+                case ContentType.Autocorrected:
+                    m_InputType = InputType.AutoCorrect;
+                    m_KeyboardType = TouchScreenKeyboardType.Default;
+                    m_CharacterValidation = CharacterValidation.None;
+                    break;
+                case ContentType.IntegerNumber:
+                    m_LineType = LineType.SingleLine;
+                    m_InputType = InputType.Standard;
+                    m_KeyboardType = TouchScreenKeyboardType.NumberPad;
+                    m_CharacterValidation = CharacterValidation.Integer;
+                    break;
+                case ContentType.DecimalNumber:
+                    m_LineType = LineType.SingleLine;
+                    m_InputType = InputType.Standard;
+                    m_KeyboardType = TouchScreenKeyboardType.NumbersAndPunctuation;
+                    m_CharacterValidation = CharacterValidation.Decimal;
+                    break;
+                case ContentType.Alphanumeric:
+                    m_LineType = LineType.SingleLine;
+                    m_InputType = InputType.Standard;
+                    m_KeyboardType = TouchScreenKeyboardType.ASCIICapable;
+                    m_CharacterValidation = CharacterValidation.Alphanumeric;
+                    break;
+                case ContentType.Name:
+                    m_LineType = LineType.SingleLine;
+                    m_InputType = InputType.Standard;
+                    m_KeyboardType = TouchScreenKeyboardType.Default;
+                    m_CharacterValidation = CharacterValidation.Name;
+                    break;
+                case ContentType.EmailAddress:
+                    m_LineType = LineType.SingleLine;
+                    m_InputType = InputType.Standard;
+                    m_KeyboardType = TouchScreenKeyboardType.EmailAddress;
+                    m_CharacterValidation = CharacterValidation.EmailAddress;
+                    break;
+                case ContentType.Password:
+                    m_LineType = LineType.SingleLine;
+                    m_InputType = InputType.Password;
+                    m_KeyboardType = TouchScreenKeyboardType.Default;
+                    m_CharacterValidation = CharacterValidation.None;
+                    break;
+                case ContentType.Pin:
+                    m_LineType = LineType.SingleLine;
+                    m_InputType = InputType.Password;
+                    m_KeyboardType = TouchScreenKeyboardType.NumberPad;
+                    m_CharacterValidation = CharacterValidation.Digit;
+                    break;
+            }
+            SetTextComponentWrapMode();
+        }
+
+        void SetToCustomIfContentTypeIsNot(params ContentType[] allowed)
+        {
+            if (m_ContentType == ContentType.Custom) return;
+            foreach (var t in allowed)
+                if (m_ContentType == t) return;
+            m_ContentType = ContentType.Custom;
+        }
+
+        void SetToCustom()
+        {
+            if (m_ContentType == ContentType.Custom) return;
+            m_ContentType = ContentType.Custom;
+        }
+
+        void SetToCustom(CharacterValidation validation)
+        {
+            if (m_ContentType == ContentType.Custom)
+            {
+                m_CharacterValidation = validation;
+                return;
+            }
+            m_ContentType = ContentType.Custom;
+            m_CharacterValidation = validation;
+        }
+
+        // ----- Caret geometry -----
+
+        void UpdateBlink()
+        {
+            if (m_CaretBlinkRate <= 0f)
+            {
+                if (!m_CaretVisible) { m_CaretVisible = true; MarkGeometryChanged(); }
+                return;
+            }
+            float period = 1f / m_CaretBlinkRate;
+            bool visible = (Time.unscaledTime - m_BlinkStart) % period < period / 2f;
+            if (visible == m_CaretVisible) return;
+            m_CaretVisible = visible;
+            if (!HasSelection) MarkGeometryChanged();
+        }
+
+        // The caret is redrawn in the next graphic rebuild (a change made during one waits
+        // for the next).
+        void MarkGeometryChanged()
+        {
+            if (!IsActive()) return;
+            CanvasUpdateRegistry.TryRegisterCanvasElementForGraphicRebuild(this);
+        }
+
+        public virtual void Rebuild(CanvasUpdate update)
+        {
+            if (update == CanvasUpdate.LatePreRender) UpdateCaretGeometry();
+        }
+
+        public virtual void LayoutComplete() { }
+
+        public virtual void GraphicUpdateComplete() { }
+
+        // The caret (a quad caretWidth wide over the line at the caret) or the selection (a quad
+        // per line it covers), written to the caret graphic's canvas renderer.
+        void UpdateCaretGeometry()
+        {
+            EnsureCaret();
+            if (m_Caret == null) return;
+            var vh = new VertexHelper();
+            if (isFocused && m_TextComponent != null && m_TextComponent.textInfo != null)
+            {
+                if (HasSelection) GenerateSelection(vh);
+                else if (m_CaretVisible) GenerateCaret(vh);
+            }
+            var mesh = m_Caret.WorkMesh;
+            vh.FillMesh(mesh);
+            vh.Dispose();
+            m_Caret.canvasRenderer.SetMesh(mesh);
+        }
+
+        // Local position of the caret before string position `pos` (in the text's space).
+        void CaretGeometry(int pos, out float x, out float top, out float bottom)
+        {
+            var info = m_TextComponent.textInfo;
+            x = 0f;
+            top = bottom = 0f;
+            if (info.characterCount == 0)
+            {
+                var rect = m_TextComponent.rectTransform.rect;
+                x = rect.xMin;
+                top = rect.yMax;
+                bottom = rect.yMin;
+                return;
+            }
+            int index = Mathf.Clamp(pos, 0, info.characterCount - 1);
+            ref var c = ref info.characterInfo[index];
+            ref var line = ref info.lineInfo[c.lineNumber];
+            x = c.origin;
+            top = line.ascender;
+            bottom = line.descender;
+        }
+
+        void GenerateCaret(VertexHelper vh)
+        {
+            CaretGeometry(m_StringSelectPosition, out float x, out float top, out float bottom);
+            float width = Mathf.Max(1, m_CaretWidth);
+            var offset = TextToCaretOffset();
+            Color32 color = caretColor;
+            AddQuad(vh, x + offset.x, bottom + offset.y, x + width + offset.x, top + offset.y, color);
+        }
+
+        void GenerateSelection(VertexHelper vh)
+        {
+            var info = m_TextComponent.textInfo;
+            int start = Mathf.Clamp(SelectionStart, 0, Math.Max(0, info.characterCount - 1));
+            int end = Mathf.Clamp(SelectionEnd, 0, Math.Max(0, info.characterCount - 1));
+            if (info.characterCount == 0) return;
+            var offset = TextToCaretOffset();
+            Color32 color = m_SelectionColor;
+            int i = start;
+            while (i < end)
+            {
+                int line = info.characterInfo[i].lineNumber;
+                float x0 = info.characterInfo[i].origin;
+                int j = i;
+                while (j + 1 < end && info.characterInfo[j + 1].lineNumber == line) j++;
+                float x1 = info.characterInfo[j].xAdvance;
+                ref var li = ref info.lineInfo[line];
+                AddQuad(vh, x0 + offset.x, li.descender + offset.y, x1 + offset.x, li.ascender + offset.y, color);
+                i = j + 1;
+            }
+        }
+
+        static void AddQuad(VertexHelper vh, float x0, float y0, float x1, float y1, Color32 color)
+        {
+            int v = vh.currentVertCount;
+            vh.AddVert(new Vector3(x0, y0, 0f), color, Vector2.zero);
+            vh.AddVert(new Vector3(x0, y1, 0f), color, Vector2.zero);
+            vh.AddVert(new Vector3(x1, y1, 0f), color, Vector2.zero);
+            vh.AddVert(new Vector3(x1, y0, 0f), color, Vector2.zero);
+            vh.AddTriangle(v, v + 1, v + 2);
+            vh.AddTriangle(v + 2, v + 3, v);
+        }
+
+        // The offset from the text's local space to the caret graphic's.
+        Vector2 TextToCaretOffset()
+        {
+            var textRect = m_TextComponent.rectTransform;
+            var caretRect = m_Caret.rectTransform;
+            var p = caretRect.InverseTransformPoint(textRect.TransformPoint(Vector3.zero));
+            return new Vector2(p.x, p.y);
+        }
+
+        // Scrolls the text horizontally (single line) or vertically (multi-line) so that the
+        // caret stays inside the viewport.
+        void KeepCaretVisible()
+        {
+            var viewport = m_TextViewport;
+            if (viewport == null || m_TextComponent == null) return;
+            var info = m_TextComponent.textInfo;
+            if (info.characterCount == 0) return;
+            CaretGeometry(m_StringSelectPosition, out float x, out float top, out float bottom);
+            var textRect = m_TextComponent.rectTransform;
+            var view = viewport.rect;
+            Vector3 caretInView = viewport.InverseTransformPoint(textRect.TransformPoint(new Vector3(x, 0f, 0f)));
+            float shift = 0f;
+            if (!multiLine)
+            {
+                if (caretInView.x > view.xMax) shift = view.xMax - caretInView.x - m_CaretWidth;
+                else if (caretInView.x < view.xMin) shift = view.xMin - caretInView.x;
+                if (shift != 0f) textRect.anchoredPosition += new Vector2(shift, 0f);
+            }
+        }
+
+        void ApplyScroll()
+        {
+            if (m_TextComponent == null) return;
+            var textRect = m_TextComponent.rectTransform;
+            textRect.anchoredPosition = new Vector2(textRect.anchoredPosition.x, m_ScrollOffset.y);
+        }
+
+        // The string position of the character under a screen point.
+        int PositionFromScreen(Vector2 screen, Camera camera)
+        {
+            if (m_TextComponent == null) return -1;
+            if (!TMP_TextUtilities.ScreenToLocal(m_TextComponent, screen, camera, out var local)) return -1;
+            var info = m_TextComponent.textInfo;
+            if (info.characterCount == 0) return 0;
+            int line = 0;
+            for (int k = 0; k < info.lineCount; k++)
+                if (local.y <= info.lineInfo[k].ascender) line = k;
+            int nearest = TMP_TextUtilities.FindNearestCharacterOnLine(m_TextComponent, local, line);
+            if (nearest < 0) return m_Text.Length;
+            ref var c = ref info.characterInfo[nearest];
+            int index = c.index;
+            if (local.x > (c.origin + c.xAdvance) * 0.5f) index++;
+            return Mathf.Clamp(index, 0, m_Text.Length);
+        }
+
+        // ----- Layout element -----
+
+        public virtual void CalculateLayoutInputHorizontal() { }
+
+        public virtual void CalculateLayoutInputVertical() { }
+
+        public virtual float minWidth => 0f;
+
+        public virtual float preferredWidth
+        {
+            get
+            {
+                if (m_TextComponent == null) return 0f;
+                return m_TextComponent.preferredWidth + Padding().x;
+            }
+        }
+
+        public virtual float flexibleWidth => -1f;
+
+        public virtual float minHeight => 0f;
+
+        public virtual float preferredHeight
+        {
+            get
+            {
+                if (m_TextComponent == null) return 0f;
+                return m_TextComponent.preferredHeight + Padding().y;
+            }
+        }
+
+        public virtual float flexibleHeight => -1f;
+
+        public virtual int layoutPriority => 1;
+
+        // The space the viewport and text rect leave around the text inside the field.
+        Vector2 Padding()
+        {
+            var field = (RectTransform)transform;
+            var textRect = m_TextComponent.rectTransform;
+            return new Vector2(Mathf.Max(0f, field.rect.width - textRect.rect.width), Mathf.Max(0f, field.rect.height - textRect.rect.height));
+        }
+    }
+}

@@ -11,6 +11,36 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../OniBrutal.UnityEngine/OniBrutal.UnityEngine.csproj" />
-    <ProjectReference Include="../UnityEngine.UI/UnityEngine.UI.csproj" />
+    <ProjectReference Include="../../tools/FacadeGen/FacadeGen.csproj" ReferenceOutputAssembly="false" Private="false" />
   </ItemGroup>
+
+  <!-- Until this project's uGUI is finished, TextMeshPro compiles against the shipped uGUI as a
+       metadata reference (its public and protected API only) and runs with it, as the game's
+       Managed/ copy. The shipped uGUI binds to Unity's engine modules, so the compiler also needs
+       the module facades (src/Facades, forwarding to the engine) to unify those types with the
+       engine's. They are generated here (obj/facades) from the engine just built; the engine
+       tests copy them to load the shipped uGUI. -->
+  <PropertyGroup>
+    <ShippedUguiPath>$(OniGameDir)/OxygenNotIncluded_Data/Managed/UnityEngine.UI.dll</ShippedUguiPath>
+    <FacadeDir>$(BaseIntermediateOutputPath)facades/</FacadeDir>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>$(ShippedUguiPath)</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+  <Target Name="EmitEngineFacades" AfterTargets="ResolveProjectReferences" BeforeTargets="ResolveAssemblyReferences">
+    <ItemGroup>
+      <_EngineAssembly Include="@(_ResolvedProjectReferencePaths)" Condition="'%(Filename)' == 'OniBrutal.UnityEngine'" />
+    </ItemGroup>
+    <MakeDir Directories="$(FacadeDir)" />
+    <Exec Command="dotnet &quot;$(ArtifactsPath)/bin/FacadeGen/$(Configuration.ToLowerInvariant())/FacadeGen.dll&quot; emit &quot;$(MSBuildThisFileDirectory)../Facades/unity-module-map.tsv&quot; &quot;$(FacadeDir)&quot; &quot;@(_EngineAssembly)&quot;" StandardOutputImportance="low" />
+    <ItemGroup>
+      <_Facade Include="$(FacadeDir)UnityEngine*.dll" />
+      <Reference Include="@(_Facade)">
+        <Private>false</Private>
+      </Reference>
+    </ItemGroup>
+  </Target>
 </Project>

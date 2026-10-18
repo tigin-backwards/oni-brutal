@@ -261,5 +261,43 @@ namespace OniBrutal.Tests
             Assert.True(TMP_TextUtilities.IsIntersectingRectTransform(t.rectTransform, ScreenOf(Vector3.zero), null));
             Assert.False(TMP_TextUtilities.IsIntersectingRectTransform(t.rectTransform, ScreenOf(new Vector3(500f, 0f)), null));
         }
+
+        [Fact]
+        public void SpacingIsInHundredthsOfTheTextsFontSize()
+        {
+            // <size> does not change what the spacing properties and bold spacing measure in.
+            var plain = Text("xx");
+            plain.characterSpacing = 10f;
+            plain.ForceMeshUpdate();
+            var sized = Text("<size=+10>xx");
+            sized.characterSpacing = 10f;
+            sized.ForceMeshUpdate();
+            float spacing = 10f * 0.01f * plain.fontSize;
+            float glyph = plain.textInfo.characterInfo[1].origin - plain.textInfo.characterInfo[0].origin - spacing;
+            float scale = (plain.fontSize + 10f) / plain.fontSize;
+            Assert.Equal(glyph * scale + spacing, sized.textInfo.characterInfo[1].origin - sized.textInfo.characterInfo[0].origin, 3);
+        }
+
+        [Fact]
+        public void WithExtraPaddingABoldQuadIsAsWideAsARegularOne()
+        {
+            var t = Text("x<b>x</b>");
+            t.extraPadding = true;
+            t.ForceMeshUpdate();
+            var v = t.textInfo.meshInfo[0].vertices;
+            var uv = t.textInfo.meshInfo[0].uvs0;
+            Assert.Equal(v[2].x - v[0].x, v[6].x - v[4].x, 3);
+            Assert.True(v[5].y - v[4].y < v[1].y - v[0].y);
+            Assert.Equal(uv[2].x - uv[0].x, uv[6].x - uv[4].x, 5);
+        }
+
+        [Fact]
+        public void ATextThatNeverLaidOutHasOneMaterial()
+        {
+            var go = new GameObject("Text", typeof(RectTransform));
+            var t = go.AddComponent<TextMeshProUGUI>();
+            Assert.Equal(1, t.textInfo.materialCount);
+            Assert.Equal(0, t.textInfo.characterCount);
+        }
     }
 }

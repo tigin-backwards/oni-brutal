@@ -76,11 +76,12 @@ namespace TMPro
             System.Array.Resize(ref uvs2, n);
             System.Array.Resize(ref colors32, n);
             System.Array.Resize(ref triangles, size * 6);
+            // The added vertices get the normal and tangent; their colour stays zero (measured:
+            // the shipped package's grown buffers are so, unlike its new ones).
             for (int i = oldQuads * 4; i < n; i++)
             {
                 normals[i] = s_Normal;
                 tangents[i] = s_Tangent;
-                colors32[i] = s_White;
             }
             for (int q = oldQuads; q < size; q++) SetQuadTriangles(triangles, q);
             if (vertexCount > n) vertexCount = n;

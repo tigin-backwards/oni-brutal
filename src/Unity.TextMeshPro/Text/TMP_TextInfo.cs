@@ -18,6 +18,8 @@ namespace TMPro
             lineInfo = new TMP_LineInfo[InitialLines];
             pageInfo = new TMP_PageInfo[InitialPages];
             meshInfo = new TMP_MeshInfo[1];
+            // The text's own material (measured: a text that never laid out reports one).
+            materialCount = 1;
         }
 
         public TMP_TextInfo(TMP_Text textComponent) : this()

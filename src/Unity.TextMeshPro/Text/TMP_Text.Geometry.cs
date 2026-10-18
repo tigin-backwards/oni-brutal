@@ -118,8 +118,8 @@ namespace TMPro
         private protected void GlyphQuad(ref Placement p, ref ParsedElement el, TMP_FontAsset font, out float x0, out float x1, out float y0, out float y1)
         {
             var gm = el.Element.glyph.metrics;
-            float pad = m_Padding;
             float stylePad = p.Bold ? BoldPadding(font) : 0f;
+            float pad = CharacterPadding(p.Bold, stylePad);
             float s = p.Scale;
             float xs = s * p.XScale;
             double pen = (double)p.Pen + p.MonoOffset;
@@ -138,6 +138,12 @@ namespace TMPro
             y0 = (top - height) + p.OffsetY;
         }
 
+        // The material padding of a character. With extra padding a bold character's is less by
+        // the bold padding, which its quad then adds horizontally and its texture rect on every
+        // side (measured: the shipped package's bold quads are as wide as regular ones and
+        // lower, their texture rect the same).
+        float CharacterPadding(bool bold, float stylePad) => bold && m_enableExtraPadding ? m_Padding - stylePad : m_Padding;
+
         void WriteCharacter(ref TMP_CharacterInfo ci, ref Placement p, ref ParsedElement el, ref TMP_MeshInfo mi, int v, float sdfFactor)
         {
             var glyph = el.Element.glyph;
@@ -146,8 +152,8 @@ namespace TMPro
             var gr = glyph.glyphRect;
             // Synthesized bold widens the quad by the weight's padding; its texture rect grows
             // by it on every side.
-            float pad = m_Padding;
             float stylePad = p.Bold ? BoldPadding(font) : 0f;
+            float pad = CharacterPadding(p.Bold, stylePad);
             float s = p.Scale;
             float xs = s * p.XScale;
             GlyphQuad(ref p, ref el, font, out float x0, out float x1, out float y0, out float y1);

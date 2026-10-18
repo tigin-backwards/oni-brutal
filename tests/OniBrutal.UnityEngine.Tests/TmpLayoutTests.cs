@@ -408,5 +408,19 @@ namespace OniBrutal.Tests
             var info = t.textInfo;
             Assert.Equal(expected, string.Join(" ", info.wordInfo.Take(info.wordCount).Select(w => $"{w.firstCharacterIndex}-{w.lastCharacterIndex}")));
         }
+
+        [Fact]
+        public void NewBuffersAreWhiteAndGrownOnesZero()
+        {
+            var t = Text("a", width: 300f, height: 100f);
+            Assert.Equal(8, t.textInfo.meshInfo[0].vertices.Length);
+            Assert.Equal(255, t.textInfo.meshInfo[0].colors32[4].a);
+            t.text = "abcde";
+            t.ForceMeshUpdate();
+            var mi = t.textInfo.meshInfo[0];
+            Assert.Equal(32, mi.vertices.Length);
+            Assert.Equal(0, mi.colors32[20].a);
+            Assert.Equal(-1f, mi.normals[20].z);
+        }
     }
 }

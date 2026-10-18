@@ -507,7 +507,9 @@ namespace TMPro
             uint c = el.Unicode;
             p.LineBreak = el.Kind == ElementKind.Character && IsLineBreak(c);
             p.Whitespace = el.Kind == ElementKind.Character && (IsWhitespace(c) || p.LineBreak || c == 13 || c == 3);
-            float em = size * 0.01f;
+            // The spacing properties are in hundredths of the text's font size, whatever size
+            // tags say (measured on the shipped package).
+            float em = baseSize * 0.01f;
             if (p.LineBreak || c == 13 || c == 3) return;
 
             float advance, spacing = 0f, preferredAdvance = float.NaN;

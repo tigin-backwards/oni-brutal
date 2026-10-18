@@ -20,3 +20,15 @@ dotnet "$root/out/bin/ApiCheck/release/ApiCheck.dll" "$managed" "$check" UnityEn
   Assembly-CSharp.dll Assembly-CSharp-firstpass.dll FMODUnity.dll FMODUnityResonance.dll FMODUnityHaptics.dll \
   ImGui.NET.dll ImGui.dll com.rlabrecque.steamworks.net.dll --json "$root/out/apicheck-packages.json" > "$root/out/apicheck-packages.txt" || true
 head -2 "$root/out/apicheck-packages.txt"
+# While one package is still Unity's, it calls into this project's other packages (a mixed run of
+# scripts/m9-compare.sh): the shipped TextMeshPro into this uGUI, for example.
+mixed=""
+for p in UnityEngine.UI Unity.TextMeshPro Unity.Timeline; do
+    [ -f "$root/out/packages/$p.dll" ] || mixed="$mixed $p.dll"
+done
+if [ -n "$mixed" ]; then
+    replaced="$(for p in UnityEngine.UI Unity.TextMeshPro Unity.Timeline; do [ -f "$root/out/packages/$p.dll" ] && echo -n "$p,"; done)"
+    dotnet "$root/out/bin/ApiCheck/release/ApiCheck.dll" "$managed" "$check" "${replaced%,}" $mixed \
+      --json "$root/out/apicheck-packages-mixed.json" > "$root/out/apicheck-packages-mixed.txt" || true
+    echo "mixed (shipped$mixed):"; head -2 "$root/out/apicheck-packages-mixed.txt"
+fi

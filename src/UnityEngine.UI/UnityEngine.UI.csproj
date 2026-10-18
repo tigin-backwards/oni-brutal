@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <!-- This project's uGUI: replaces the UnityEngine.UI package the game ships (PLAN M9). The
+         types and serialized fields in Generated/ come from the shipped package's metadata
+         (scripts/regen-packages.sh); everything else is written from docs/cleanroom. -->
+    <AssemblyName>UnityEngine.UI</AssemblyName>
+    <RootNamespace>UnityEngine.UI</RootNamespace>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <Nullable>disable</Nullable>
+    <NoWarn>$(NoWarn);CS0108;CS0114;CS0660;CS0661;CS8981;CS0649;CS0169;CS0414</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../OniBrutal.UnityEngine/OniBrutal.UnityEngine.csproj" />
+  </ItemGroup>
+</Project>

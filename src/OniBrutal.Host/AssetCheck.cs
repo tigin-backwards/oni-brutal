@@ -39,7 +39,9 @@ namespace OniBrutal.Host
             return 0;
         }
 
-        public static int Run(string dataDir)
+        /// The scripts the data uses are written to `scriptList` (assembly, class, objects) when it is
+        /// given: the classes a replacement of a script assembly must provide.
+        public static int Run(string dataDir, string? scriptList = null)
         {
             var scripts = LoadMonoScripts(Path.Combine(dataDir, "globalgamemanagers.assets"));
             var typeCache = new Dictionary<long, Type?>();
@@ -89,7 +91,8 @@ namespace OniBrutal.Host
                         ScriptData.SkipFields(SerializedLayout.ScriptFields(managed), r);
                         if (r.Remaining != 0) throw new InvalidDataException($"{r.Remaining} bytes left of {r.Length}");
                         behaviours++;
-                        perClass[managed.FullName!] = perClass.GetValueOrDefault(managed.FullName!) + 1;
+                        var key = managed.Assembly.GetName().Name + "\t" + managed.FullName;
+                        perClass[key] = perClass.GetValueOrDefault(key) + 1;
                     }
                     catch (Exception e)
                     {
@@ -101,6 +104,8 @@ namespace OniBrutal.Host
             }
 
             Console.WriteLine($"native objects: {natives}, script objects: {behaviours} ({perClass.Count} classes)");
+            if (scriptList != null)
+                File.WriteAllLines(scriptList, perClass.OrderBy(p => p.Key, StringComparer.Ordinal).Select(p => $"{p.Key}\t{p.Value}"));
             var classIds = opened.SelectMany(f => f.Objects.Select(o => f.TypeOf(o).ClassId)).Distinct().OrderBy(i => i);
             foreach (var id in classIds)
             {

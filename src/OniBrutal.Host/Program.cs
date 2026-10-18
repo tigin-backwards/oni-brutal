@@ -40,7 +40,7 @@ namespace OniBrutal.Host
             EngineLog.Engine($"Preloaded {assemblies.Count} scripting assemblies");
 
             if (options.CheckTypes) return CheckTypes(assemblies);
-            if (options.CheckAssets) return AssetCheck.Run(dataDir);
+            if (options.CheckAssets) return AssetCheck.Run(dataDir, options.ListDataScripts);
             if (options.CheckBind) return BindCheck.Run(dataDir);
             if (options.CheckShaders) return ShaderCheck.Run(dataDir);
             if (options.DumpShader != null) return ShaderDump.Run(dataDir, options.DumpShader);
@@ -139,6 +139,8 @@ namespace OniBrutal.Host
         public bool BatchMode;
         public bool CheckTypes;
         public bool CheckAssets;
+        /// With --check-assets: where to list the script classes the data uses.
+        public string? ListDataScripts;
         public bool CheckBind;
         public bool CheckShaders;
         public string? DumpShader;
@@ -195,6 +197,7 @@ namespace OniBrutal.Host
                     case "--batchmode": o.BatchMode = true; break;
                     case "--check-types": o.CheckTypes = true; break;
                     case "--check-assets": o.CheckAssets = true; break;
+                    case "--list-data-scripts": o.ListDataScripts = args[++i]; break;
                     case "--check-bind": o.CheckBind = true; break;
                     case "--check-shaders": o.CheckShaders = true; break;
                     case "--dump-shader": o.DumpShader = args[++i]; break;
@@ -269,7 +272,7 @@ namespace OniBrutal.Host
                     }
                     default:
                         Console.Error.WriteLine($"Unknown option {args[i]}");
-                        Console.Error.WriteLine("usage: OniBrutal [--game DIR] [--log FILE] [--run-home DIR] [--audio-wav DIR] [--headless] [--batchmode] [--frames N] [--native-override NAME=PATH] [--trace-exceptions] [--gl-debug] [--vsync-count N] [--gpu-profile] [--no-bindless] [--input FRAME:ACTION[:ARGS]] [--frame-stats] [--max-frame-rate N[:FRAMES]] [--dump-render-textures FRAME:DIR] [-screen-width W] [-screen-height H] [-screen-fullscreen 0|1] [-window-mode exclusive|borderless|windowed] [--check-types] [--check-assets] [--check-bind] [--check-shaders] [--dump-shader NAME:DIR] [--capture FRAME:PATH[:SCALE]] [--probe-ui FRAME:X,Y] [--dump-hierarchy FRAME:PATH] [--report-builtin-assets FILE] [--dump-component FRAME:PATH|TYPE]");
+                        Console.Error.WriteLine("usage: OniBrutal [--game DIR] [--log FILE] [--run-home DIR] [--audio-wav DIR] [--headless] [--batchmode] [--frames N] [--native-override NAME=PATH] [--trace-exceptions] [--gl-debug] [--vsync-count N] [--gpu-profile] [--no-bindless] [--input FRAME:ACTION[:ARGS]] [--frame-stats] [--max-frame-rate N[:FRAMES]] [--dump-render-textures FRAME:DIR] [-screen-width W] [-screen-height H] [-screen-fullscreen 0|1] [-window-mode exclusive|borderless|windowed] [--check-types] [--check-assets [--list-data-scripts FILE]] [--check-bind] [--check-shaders] [--dump-shader NAME:DIR] [--capture FRAME:PATH[:SCALE]] [--probe-ui FRAME:X,Y] [--dump-hierarchy FRAME:PATH] [--report-builtin-assets FILE] [--dump-component FRAME:PATH|TYPE]");
                         return null;
                 }
             }

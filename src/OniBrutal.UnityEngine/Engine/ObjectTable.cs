@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Threading;
 
 namespace OniBrutal.Engine
@@ -27,7 +28,12 @@ namespace OniBrutal.Engine
         /// Instance id → slot index.
         static readonly Dictionary<int, int> byInstanceId = new();
 
-        static NativeObject At(object entry) => entry as NativeObject ?? (entry is WeakReference<NativeObject> w && w.TryGetTarget(out var o) ? o : null);
+        /// A slot holds null, a NativeObject or a WeakReference<NativeObject>, nothing else. Every
+        /// handle lookup comes through here, so it tests the sealed weak-reference type (one
+        /// method-table compare) instead of casting to NativeObject, whose derived types make
+        /// `as` walk the class hierarchy.
+        static NativeObject At(object entry)
+            => entry is WeakReference<NativeObject> w ? (w.TryGetTarget(out var o) ? o : null) : Unsafe.As<NativeObject>(entry);
 
         public static IntPtr Register(NativeObject obj)
         {

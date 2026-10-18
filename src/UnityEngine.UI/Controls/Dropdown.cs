@@ -342,6 +342,8 @@ namespace UnityEngine.UI
             image.color = Color.clear;
             var button = go.AddComponent<Button>();
             button.onClick.AddListener(Hide);
+            // Measured: the shipped package's blocker also carries a (default) CanvasGroup, last.
+            go.AddComponent<CanvasGroup>();
             return go;
         }
 

@@ -46,6 +46,7 @@ namespace UnityEngine.UI
 
             // Layout: parents before children, each phase over the whole queue.
             inLayout = true;
+            layoutQueue.Iterating = true;
             layoutQueue.SortBy(Depth);
             for (int phase = (int)CanvasUpdate.Prelayout; phase <= (int)CanvasUpdate.PostLayout; phase++)
                 for (int i = 0; i < layoutQueue.Count; i++)
@@ -57,12 +58,14 @@ namespace UnityEngine.UI
                 }
             for (int i = 0; i < layoutQueue.Count; i++)
                 layoutQueue[i]?.LayoutComplete();
+            layoutQueue.Iterating = false;
             layoutQueue.Clear();
             inLayout = false;
 
             ClipperRegistry.instance.Cull();
 
             inGraphics = true;
+            graphicQueue.Iterating = true;
             for (int phase = (int)CanvasUpdate.PreRender; phase < (int)CanvasUpdate.MaxUpdateValue; phase++)
                 for (int i = 0; i < graphicQueue.Count; i++)
                 {
@@ -73,6 +76,7 @@ namespace UnityEngine.UI
                 }
             for (int i = 0; i < graphicQueue.Count; i++)
                 graphicQueue[i]?.GraphicUpdateComplete();
+            graphicQueue.Iterating = false;
             graphicQueue.Clear();
             inGraphics = false;
         }
@@ -146,10 +150,26 @@ namespace UnityEngine.UI
             return true;
         }
 
+        /// Set while the queue is being rebuilt: removals then leave holes.
+        public bool Iterating;
+
+        /// Outside a rebuild the last element takes the removed one's place (measured: the order
+        /// in which the shipped package rebuilds graphics, which decides where a dynamic font
+        /// places the glyphs they request).
         public void Remove(ICanvasElement element)
         {
             if (element == null || !positions.Remove(element, out int i)) return;
-            items[i] = null;
+            int last = items.Count - 1;
+            if (Iterating || i == last)
+            {
+                items[i] = null;
+                if (!Iterating) items.RemoveAt(last);
+                return;
+            }
+            var moved = items[last];
+            items[i] = moved;
+            if (moved != null) positions[moved] = i;
+            items.RemoveAt(last);
         }
 
         public void Compact(Func<ICanvasElement, bool> drop)

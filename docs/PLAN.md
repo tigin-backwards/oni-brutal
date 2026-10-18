@@ -343,6 +343,29 @@ Environment notes:
   thirds, collection pauses likewise), back to back: DeCrew 48–56 fps against 17–20, a cycle every
   210 s against 229–232 s (the simulation, not the frame, now sets the pace); U57 17–18.3 fps
   against 8.3–9.5, a cycle every 219–222 s against 363–368 s.
+- Clean-room rewrites (2026-10-18): code found to be modelled on Unity's managed source was
+  rewritten from functional specifications by separate implementations (docs/cleanroom,
+  docs/LICENSING.md "Provenance"):
+  - the IMGUI module;
+  - UnityEvents;
+  - the UI Toolkit events and runtime;
+  - TextGenerator's front;
+  - the object pools;
+  - HSV conversion;
+  - SmoothDamp;
+  - small routines.
+
+  How the result was checked:
+  - the implementations' tests were run against the old code, and the differences settled in
+    the specifications;
+  - `scripts/check.sh` passes: 281 tests, ApiCheck at 13 missing members;
+  - the main menu's Options opens identically;
+  - DeCrew plays 6,200 frames without exceptions;
+  - typing into the in-game Database search filters it (text input reaches TextMeshPro through
+    `Event.PopEvent`).
+
+  IMGUI members that no game assembly references (`GUI.tooltip`, Toolbar, SelectionGrid,
+  PasswordField) are not implemented.
 - M6 in progress (2026-10-16): docs/PARITY.md ticked (Mop, Disinfect, Harvest, Attack and Wrangle orders carried out in both players). `tools/UnityProbe` (a mod run
   in both players) compares lifecycle and timing semantics, engine values, the main-menu and
   in-game UI layout (about 3400 elements), victory sequence, event popup, 18 building side

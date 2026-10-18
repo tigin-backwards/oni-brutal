@@ -338,6 +338,11 @@ Environment notes:
   no longer searches the scene while the game runs, which had slowed both players): DeCrew 27–34
   fps against 15–18.5, a cycle every 213 s against 237 s (speed 3 allows no less than 200 s);
   U57 12.5–15.5 fps against ~8.5, 232–247 s against 378–393 s.
+  Re-measured after the allocation and per-draw work (pooled draw records, materials' uniform
+  values resolved once per version, DrawMesh sharing its block; allocations down about two
+  thirds, collection pauses likewise), back to back: DeCrew 48–56 fps against 17–20, a cycle every
+  210 s against 229–232 s (the simulation, not the frame, now sets the pace); U57 17–18.3 fps
+  against 8.3–9.5, a cycle every 219–222 s against 363–368 s.
 - M6 in progress (2026-10-16): docs/PARITY.md ticked (Mop, Disinfect, Harvest, Attack and Wrangle orders carried out in both players). `tools/UnityProbe` (a mod run
   in both players) compares lifecycle and timing semantics, engine values, the main-menu and
   in-game UI layout (about 3400 elements), victory sequence, event popup, 18 building side

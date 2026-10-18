@@ -1,0 +1,617 @@
+using System;
+using System.Collections.Generic;
+using OniBrutal.Engine.Text;
+
+namespace UnityEngine
+{
+}
+
+namespace OniBrutal.Engine.Text
+{
+    using UnityEngine;
+
+    [Flags]
+    internal enum TextGenerationError
+    {
+        None = 0,
+        CustomSizeOnNonDynamicFont = 1,
+        CustomStyleOnNonDynamicFont = 2,
+        NoFont = 4,
+    }
+
+    /// Line breaking and placement of one text for TextGenerator.
+    internal sealed class TextLayout
+    {
+        enum Kind : byte { Glyph, Tag, NewLine, Tab, Quad, Hidden }
+
+        struct Item
+        {
+            public Kind Kind;
+            public int CodePoint;
+            public int Size;
+            public FontStyle Style;
+            public Color32 Color;
+            public LegacyGlyph Glyph;
+            public float Advance;
+            /// Quad: uv rectangle.
+            public Rect QuadUv;
+            public bool Whitespace;
+            /// A line may break before this item (CJK ideographs).
+            public bool BreakBefore;
+        }
+
+        struct Line
+        {
+            public int Start, End; // item range [Start, End)
+            public float Width, Ascent, Descent, Height;
+            public bool Wrapped;
+        }
+
+        readonly FontNative font;
+        readonly string text;
+        readonly TextGenerationSettings settings;
+        readonly float scale;
+        readonly float maxWidth, maxHeight;
+        readonly List<Line> lines = new();
+        Item[] items;
+        int keptLines;
+
+        public bool Fits { get; private set; }
+
+        readonly float tabSize;
+
+        public TextLayout(FontNative font, string text, TextGenerationSettings settings, float scale, float tabSize)
+        {
+            this.tabSize = tabSize;
+            this.font = font;
+            this.text = text;
+            this.settings = settings;
+            this.scale = scale;
+            maxWidth = settings.generationExtents.x * scale;
+            maxHeight = settings.generationExtents.y * scale;
+        }
+
+        int PixelSize(int size) => font.Dynamic ? Math.Max(1, (int)Math.Round(size * scale, MidpointRounding.AwayFromZero)) : (int)font.FontSize;
+
+        /// Lays the text out at a base font size (unscaled).
+        public void Run(int baseSize)
+        {
+            BuildItems(baseSize);
+            BreakLines(PixelSize(baseSize));
+            float total = 0f;
+            keptLines = 0;
+            bool verticalFits = true;
+            for (int i = 0; i < lines.Count; i++)
+            {
+                float height = total + lines[i].Height;
+                total += lines[i].Height * settings.lineSpacing;
+                if (height > maxHeight + 0.001f)
+                {
+                    verticalFits = false;
+                    if (settings.verticalOverflow == VerticalWrapMode.Truncate && !settings.generateOutOfBounds) break;
+                }
+                keptLines = i + 1;
+            }
+            bool horizontalFits = true;
+            foreach (var line in lines)
+                if (line.Width > maxWidth + 0.001f) horizontalFits = false;
+            Fits = verticalFits && horizontalFits && !brokeWord;
+        }
+
+        bool brokeWord;
+
+        void BuildItems(int baseSize)
+        {
+            int n = text.Length;
+            items = new Item[n];
+            var color = (Color32)settings.color;
+            int size = baseSize;
+            bool bold = settings.fontStyle is FontStyle.Bold or FontStyle.BoldAndItalic;
+            bool italic = settings.fontStyle is FontStyle.Italic or FontStyle.BoldAndItalic;
+            var colors = new Stack<Color32>();
+            var sizes = new Stack<int>();
+            int boldDepth = 0, italicDepth = 0;
+            var tags = settings.richText ? RichText.Parse(text) : null;
+            for (int i = 0; i < n; i++)
+            {
+                if (tags != null && tags.TryGetValue(i, out var tag))
+                {
+                    for (int k = i; k < i + tag.Length; k++) items[k].Kind = Kind.Tag;
+                    switch (tag.Name)
+                    {
+                        case "b": boldDepth += tag.Closing ? -1 : 1; break;
+                        case "i": italicDepth += tag.Closing ? -1 : 1; break;
+                        case "color":
+                            if (tag.Closing) { if (colors.Count > 0) color = colors.Pop(); }
+                            else { colors.Push(color); color = tag.Color; }
+                            break;
+                        case "size":
+                            if (tag.Closing) { if (sizes.Count > 0) size = sizes.Pop(); }
+                            else { sizes.Push(size); size = tag.Size; }
+                            break;
+                        case "quad":
+                        {
+                            int px = PixelSize(tag.Size > 0 ? tag.Size : size);
+                            float aspect = tag.Uv.height > 0f ? tag.Uv.width / tag.Uv.height : 1f;
+                            items[i] = new Item { Kind = Kind.Quad, Size = px, Color = color, QuadUv = tag.Uv, Advance = px * aspect };
+                            break;
+                        }
+                    }
+                    i += tag.Length - 1;
+                    continue;
+                }
+                char c = text[i];
+                var style = (bold || boldDepth > 0, italic || italicDepth > 0) switch
+                {
+                    (true, true) => FontStyle.BoldAndItalic,
+                    (true, false) => FontStyle.Bold,
+                    (false, true) => FontStyle.Italic,
+                    _ => FontStyle.Normal,
+                };
+                int pixelSize = PixelSize(size);
+                ref var item = ref items[i];
+                item.Size = pixelSize;
+                item.Style = style;
+                item.Color = color;
+                if (c == '\n') { item.Kind = Kind.NewLine; continue; }
+                if (c == '\r') { item.Kind = Kind.Hidden; continue; }
+                if (c == '\t') { item.Kind = Kind.Tab; item.Whitespace = true; continue; }
+                int cp = c;
+                if (char.IsHighSurrogate(c) && i + 1 < n && char.IsLowSurrogate(text[i + 1]))
+                {
+                    cp = char.ConvertToUtf32(c, text[i + 1]);
+                    items[i + 1] = new Item { Kind = Kind.Hidden, Size = pixelSize, Style = style, Color = color };
+                }
+                item.Kind = Kind.Glyph;
+                item.CodePoint = cp;
+                item.Glyph = font.GetGlyph(cp, pixelSize, style);
+                item.Advance = item.Glyph.Exists ? item.Glyph.Advance : 0f;
+                if (!font.Dynamic && item.Glyph.Exists) item.Advance += font.CharacterSpacing;
+                item.Whitespace = c == ' ' || c == '​' || c == '　';
+                item.BreakBefore = IsIdeograph(cp);
+                if (cp >= 0x10000) i++;
+            }
+            // Bitmap fonts carry imported kerning pairs (pixels at their size).
+            if (!font.Dynamic && font.Kerning.Count > 0)
+            {
+                int prev = -1;
+                for (int i = 0; i < n; i++)
+                {
+                    if (items[i].Kind != Kind.Glyph) continue;
+                    if (prev >= 0 && font.Kerning.TryGetValue((items[prev].CodePoint, items[i].CodePoint), out float k)) items[prev].Advance += k;
+                    prev = i;
+                }
+            }
+        }
+
+        static bool IsIdeograph(int cp) =>
+            (cp >= 0x2E80 && cp <= 0x9FFF) || (cp >= 0xAC00 && cp <= 0xD7AF) || (cp >= 0xF900 && cp <= 0xFAFF)
+            || (cp >= 0xFF00 && cp <= 0xFFEF) || (cp >= 0x20000 && cp <= 0x2FFFF);
+
+        float TabStop(float x, int size)
+        {
+            var space = font.GetGlyph(' ', size, FontStyle.Normal);
+            float tab = tabSize * (space.Exists ? space.Advance : size * 0.25f);
+            return tab <= 0f ? x : (float)(Math.Floor(x / tab) + 1) * tab;
+        }
+
+        void BreakLines(int basePixelSize)
+        {
+            lines.Clear();
+            brokeWord = false;
+            bool wrap = settings.horizontalOverflow == HorizontalWrapMode.Wrap && maxWidth > 0f;
+            int start = 0;
+            float x = 0f;
+            int lastBreak = -1; // first item of the next line if broken at the last opportunity
+            for (int i = 0; i < items.Length; i++)
+            {
+                ref var item = ref items[i];
+                switch (item.Kind)
+                {
+                    case Kind.NewLine:
+                        AddLine(start, i + 1, false, basePixelSize);
+                        start = i + 1;
+                        x = 0f;
+                        lastBreak = -1;
+                        continue;
+                    case Kind.Tag:
+                    case Kind.Hidden:
+                        continue;
+                    case Kind.Tab:
+                        item.Advance = TabStop(x, item.Size) - x;
+                        x += item.Advance;
+                        lastBreak = i + 1;
+                        continue;
+                }
+                if (item.Whitespace)
+                {
+                    // Whitespace never wraps; the line may break after it.
+                    x += item.Advance;
+                    lastBreak = i + 1;
+                    continue;
+                }
+                if (item.BreakBefore && i > start) lastBreak = i;
+                if (wrap && x + item.Advance > maxWidth && HasContent(start, i))
+                {
+                    int breakAt = lastBreak > start ? lastBreak : i;
+                    if (breakAt == i && lastBreak <= start) brokeWord = true;
+                    AddLine(start, breakAt, true, basePixelSize);
+                    start = breakAt;
+                    lastBreak = -1;
+                    x = 0f;
+                    for (int k = start; k < i; k++) x += items[k].Kind is Kind.Glyph or Kind.Quad or Kind.Tab ? items[k].Advance : 0f;
+                }
+                x += item.Advance;
+            }
+            AddLine(start, items.Length, false, basePixelSize);
+        }
+
+        bool HasContent(int start, int end)
+        {
+            for (int k = start; k < end; k++)
+                if (items[k].Kind is Kind.Glyph or Kind.Quad or Kind.Tab) return true;
+            return false;
+        }
+
+        void AddLine(int start, int end, bool wrapped, int basePixelSize)
+        {
+            var line = new Line { Start = start, End = end, Wrapped = wrapped };
+            // Width by advances; the whitespace a line was wrapped at does not count.
+            int last = end - 1;
+            if (wrapped)
+                while (last >= start && (items[last].Whitespace || items[last].Kind is Kind.Tag or Kind.Hidden)) last--;
+            for (int k = start; k <= last; k++)
+                if (items[k].Kind is Kind.Glyph or Kind.Quad or Kind.Tab) line.Width += items[k].Advance;
+            // Vertical metrics: the largest size on the line (the base size when empty).
+            int size = 0;
+            for (int k = start; k < end; k++)
+                if (items[k].Kind is Kind.Glyph or Kind.Quad or Kind.Tab) size = Math.Max(size, items[k].Size);
+            if (size == 0) size = basePixelSize;
+            font.LineMetrics(size, out line.Ascent, out line.Descent, out line.Height);
+            lines.Add(line);
+        }
+
+        /// Places the kept lines, requests their glyphs in the font texture and writes the
+        /// vertices, character infos and line infos. True when the font texture was rebuilt.
+        public bool Emit(List<UIVertex> verts, List<UICharInfo> chars, List<UILineInfo> lineInfos, out Rect extents)
+        {
+            var rect = new Rect(-settings.pivot.x * maxWidth, -settings.pivot.y * maxHeight, maxWidth, maxHeight);
+            int count = keptLines;
+            bool rebuilt = false;
+            if (font.Dynamic)
+            {
+                var keys = new List<GlyphKey>();
+                for (int l = 0; l < count; l++)
+                    for (int k = lines[l].Start; k < lines[l].End; k++)
+                        if (items[k].Kind == Kind.Glyph && items[k].Glyph.Width > 0) keys.Add(new GlyphKey(items[k].CodePoint, items[k].Size, items[k].Style));
+                rebuilt = font.RequestGlyphs(keys);
+            }
+
+            // Block height: line advances, the last line by its own height.
+            float blockHeight = 0f;
+            for (int l = 0; l < count; l++) blockHeight += l == count - 1 ? lines[l].Height : lines[l].Height * settings.lineSpacing;
+            // Offset from the block top to the first line's top.
+            float boxTopOffset = 0f;
+            if (settings.alignByGeometry && count > 0)
+            {
+                // The block spans the glyphs' ink (first line's top to last line's bottom)
+                // instead of the font's line boxes.
+                GeometryExtent(0, out float firstTop, out _);
+                GeometryExtent(count - 1, out _, out float lastBottom);
+                float advance = 0f;
+                for (int l = 0; l < count - 1; l++) advance += lines[l].Height * settings.lineSpacing;
+                blockHeight = firstTop - (lastBottom - advance);
+                boxTopOffset = -firstTop;
+            }
+            int anchor = (int)settings.textAnchor;
+            int vertical = anchor / 3, horizontal = anchor % 3;
+            float blockTop = vertical switch
+            {
+                0 => rect.yMax,
+                1 => rect.center.y + blockHeight * 0.5f,
+                _ => rect.yMin + blockHeight,
+            };
+            float lineTop = blockTop + boxTopOffset;
+
+            float minX = float.MaxValue, maxX = float.MinValue;
+            for (int l = 0; l < count; l++)
+            {
+                var line = lines[l];
+                float width = line.Width, inkOffset = 0f;
+                if (settings.alignByGeometry && LineInk(l, out float inkLeft, out float inkRight))
+                {
+                    inkOffset = inkLeft;
+                    width = inkRight - inkLeft;
+                }
+                float x = horizontal switch
+                {
+                    0 => rect.xMin,
+                    1 => rect.center.x - width * 0.5f,
+                    _ => rect.xMax - width,
+                } - inkOffset;
+                minX = Math.Min(minX, x + inkOffset);
+                maxX = Math.Max(maxX, x + inkOffset + width);
+                float baseline = lineTop - line.Ascent;
+                float advanceHeight = line.Height * settings.lineSpacing;
+                lineInfos.Add(new UILineInfo
+                {
+                    startCharIdx = line.Start,
+                    height = (int)Math.Round(advanceHeight, MidpointRounding.AwayFromZero),
+                    topY = lineTop,
+                    leading = advanceHeight - line.Height,
+                });
+                for (int k = line.Start; k < line.End; k++)
+                {
+                    ref var item = ref items[k];
+                    chars.Add(new UICharInfo { cursorPos = new Vector2(x, lineTop), charWidth = item.Kind is Kind.Glyph or Kind.Quad or Kind.Tab ? item.Advance : 0f });
+                    if (item.Kind == Kind.Glyph) EmitGlyph(verts, ref item, x, baseline);
+                    else if (item.Kind == Kind.Quad) EmitQuad(verts, ref item, x, baseline);
+                    if (item.Kind is Kind.Glyph or Kind.Quad or Kind.Tab) x += item.Advance;
+                }
+                if (l == count - 1) chars.Add(new UICharInfo { cursorPos = new Vector2(x, lineTop), charWidth = 0f });
+                lineTop -= advanceHeight;
+            }
+
+            if (!settings.updateBounds) extents = rect;
+            else if (count == 0) extents = new Rect(rect.x, rect.y, 0f, 0f);
+            else extents = new Rect(minX, blockTop - blockHeight, maxX - minX, blockHeight);
+            return rebuilt;
+        }
+
+        /// Ink extent (relative to the line top: top ≥ bottom) of a line's glyphs.
+        void GeometryExtent(int l, out float top, out float bottom)
+        {
+            var line = lines[l];
+            top = float.MinValue;
+            bottom = float.MaxValue;
+            for (int k = line.Start; k < line.End; k++)
+            {
+                if (items[k].Kind != Kind.Glyph || items[k].Glyph.Height == 0) continue;
+                top = Math.Max(top, items[k].Glyph.Top - line.Ascent);
+                bottom = Math.Min(bottom, items[k].Glyph.Top - items[k].Glyph.Height - line.Ascent);
+            }
+            if (top == float.MinValue) { top = 0f; bottom = -line.Height; }
+        }
+
+        /// Horizontal ink extent of a line relative to its pen start.
+        bool LineInk(int l, out float left, out float right)
+        {
+            var line = lines[l];
+            left = float.MaxValue;
+            right = float.MinValue;
+            float x = 0f;
+            for (int k = line.Start; k < line.End; k++)
+            {
+                ref var item = ref items[k];
+                if (item.Kind == Kind.Glyph && item.Glyph.Width > 0)
+                {
+                    left = Math.Min(left, x + item.Glyph.Left);
+                    right = Math.Max(right, x + item.Glyph.Left + item.Glyph.Width);
+                }
+                if (item.Kind is Kind.Glyph or Kind.Quad or Kind.Tab) x += item.Advance;
+            }
+            return left != float.MaxValue;
+        }
+
+        void EmitGlyph(List<UIVertex> verts, ref Item item, float x, float baseline)
+        {
+            if (!item.Glyph.Exists || item.Glyph.Width == 0 || item.Glyph.Height == 0) return;
+            var g = font.Dynamic ? font.PlacedGlyph(new GlyphKey(item.CodePoint, item.Size, item.Style)) : item.Glyph;
+            if (font.Dynamic && !g.InTexture) return;
+            var uv = font.UvOf(g);
+            float x0 = x + g.Left, x1 = x0 + g.Width;
+            float y1 = baseline + g.Top, y0 = y1 - g.Height;
+            Vector2 tl, tr, br, bl;
+            if (g.Flipped)
+            {
+                // Rotated bitmap-font character: uv x runs down the glyph, uv y across it.
+                tl = new Vector2(uv.xMin, uv.yMax);
+                tr = new Vector2(uv.xMin, uv.yMin);
+                br = new Vector2(uv.xMax, uv.yMin);
+                bl = new Vector2(uv.xMax, uv.yMax);
+            }
+            else
+            {
+                tl = new Vector2(uv.xMin, uv.yMax);
+                tr = new Vector2(uv.xMax, uv.yMax);
+                br = new Vector2(uv.xMax, uv.yMin);
+                bl = new Vector2(uv.xMin, uv.yMin);
+            }
+            AddQuad(verts, x0, y0, x1, y1, tl, tr, br, bl, item.Color);
+        }
+
+        void EmitQuad(List<UIVertex> verts, ref Item item, float x, float baseline)
+        {
+            var uv = item.QuadUv;
+            AddQuad(verts, x, baseline, x + item.Advance, baseline + item.Size,
+                new Vector2(uv.xMin, uv.yMax), new Vector2(uv.xMax, uv.yMax), new Vector2(uv.xMax, uv.yMin), new Vector2(uv.xMin, uv.yMin), item.Color);
+        }
+
+        static void AddQuad(List<UIVertex> verts, float x0, float y0, float x1, float y1, Vector2 tl, Vector2 tr, Vector2 br, Vector2 bl, Color32 color)
+        {
+            var v = UIVertex.simpleVert;
+            v.color = color;
+            v.position = new Vector3(x0, y1, 0f); v.uv0 = tl; verts.Add(v);
+            v.position = new Vector3(x1, y1, 0f); v.uv0 = tr; verts.Add(v);
+            v.position = new Vector3(x1, y0, 0f); v.uv0 = br; verts.Add(v);
+            v.position = new Vector3(x0, y0, 0f); v.uv0 = bl; verts.Add(v);
+        }
+    }
+
+    /// Unity's legacy rich text tags: <b>, <i>, <size=N>, <color=…>, <material=N> (each must
+    /// be closed by its matching end tag, else it is plain text) and the self-contained
+    /// <quad …>. Values may be quoted.
+    internal static class RichText
+    {
+        internal struct Tag
+        {
+            public string Name;
+            public bool Closing;
+            public int Length;
+            public Color32 Color;
+            public int Size;
+            public Rect Uv;
+        }
+
+        /// Recognized tags by start index.
+        public static Dictionary<int, Tag> Parse(string text)
+        {
+            var found = new List<(int Start, Tag Tag)>();
+            for (int i = 0; i < text.Length; i++)
+            {
+                if (text[i] != '<') continue;
+                int end = text.IndexOf('>', i + 1);
+                if (end < 0) break;
+                if (TryParse(text.AsSpan(i + 1, end - i - 1), out var tag))
+                {
+                    tag.Length = end - i + 1;
+                    found.Add((i, tag));
+                }
+            }
+            // Match opening and closing tags (stack per name); quads stand alone.
+            var result = new Dictionary<int, Tag>();
+            var open = new Dictionary<string, Stack<int>>();
+            foreach (var (start, tag) in found)
+            {
+                if (tag.Name == "quad") { result[start] = tag; continue; }
+                if (!tag.Closing)
+                {
+                    if (!open.TryGetValue(tag.Name, out var stack)) open[tag.Name] = stack = new Stack<int>();
+                    stack.Push(start);
+                }
+                else if (open.TryGetValue(tag.Name, out var stack) && stack.Count > 0)
+                {
+                    int opening = stack.Pop();
+                    result[opening] = found.Find(f => f.Start == opening).Tag;
+                    result[start] = tag;
+                }
+            }
+            return result;
+        }
+
+        static bool TryParse(ReadOnlySpan<char> body, out Tag tag)
+        {
+            tag = default;
+            if (body.Length == 0) return false;
+            if (body[0] == '/')
+            {
+                var name = body[1..].ToString();
+                if (name is not ("b" or "i" or "size" or "color" or "material")) return false;
+                tag.Name = name;
+                tag.Closing = true;
+                return true;
+            }
+            if (body.SequenceEqual("b") || body.SequenceEqual("i"))
+            {
+                tag.Name = body.ToString();
+                return true;
+            }
+            int eq = body.IndexOf('=');
+            int space = body.IndexOf(' ');
+            var key = (eq >= 0 && (space < 0 || eq < space) ? body[..eq] : space >= 0 ? body[..space] : body).ToString();
+            string value = eq >= 0 && (space < 0 || eq < space) ? Unquote(ValueAt(body, eq + 1)) : null;
+            switch (key)
+            {
+                case "size":
+                    if (value == null || !float.TryParse(value, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float size)) return false;
+                    tag.Name = "size";
+                    tag.Size = (int)size;
+                    return true;
+                case "color":
+                    if (value == null || !TryParseColor(value, out tag.Color)) return false;
+                    tag.Name = "color";
+                    return true;
+                case "material":
+                    if (value == null || !int.TryParse(value, out _)) return false;
+                    tag.Name = "material";
+                    return true;
+                case "quad":
+                {
+                    tag.Name = "quad";
+                    tag.Uv = new Rect(0f, 0f, 1f, 1f);
+                    foreach (var (k, v) in Attributes(body[4..]))
+                    {
+                        float.TryParse(v, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float f);
+                        switch (k)
+                        {
+                            case "size": tag.Size = (int)f; break;
+                            case "x": tag.Uv.x = f; break;
+                            case "y": tag.Uv.y = f; break;
+                            case "width": tag.Uv.width = f; break;
+                            case "height": tag.Uv.height = f; break;
+                        }
+                    }
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        static string ValueAt(ReadOnlySpan<char> body, int start)
+        {
+            var rest = body[start..];
+            if (rest.Length > 0 && (rest[0] == '"' || rest[0] == '\''))
+            {
+                int close = rest[1..].IndexOf(rest[0]);
+                return close < 0 ? rest.ToString() : rest[..(close + 2)].ToString();
+            }
+            int space = rest.IndexOf(' ');
+            return (space < 0 ? rest : rest[..space]).ToString();
+        }
+
+        static string Unquote(string s) => s.Length >= 2 && (s[0] == '"' || s[0] == '\'') && s[^1] == s[0] ? s[1..^1] : s;
+
+        static IEnumerable<(string Key, string Value)> Attributes(ReadOnlySpan<char> s)
+        {
+            var list = new List<(string, string)>();
+            int i = 0;
+            while (i < s.Length)
+            {
+                while (i < s.Length && s[i] == ' ') i++;
+                int eq = s[i..].IndexOf('=');
+                if (eq < 0) break;
+                var key = s.Slice(i, eq).Trim().ToString();
+                var value = ValueAt(s, i + eq + 1);
+                list.Add((key, Unquote(value)));
+                i += eq + 1 + value.Length;
+            }
+            return list;
+        }
+
+        // Unity's named rich-text colours.
+        static readonly Dictionary<string, uint> Named = new(StringComparer.Ordinal)
+        {
+            ["aqua"] = 0x00ffffff, ["black"] = 0x000000ff, ["blue"] = 0x0000ffff, ["brown"] = 0xa52a2aff,
+            ["cyan"] = 0x00ffffff, ["darkblue"] = 0x0000a0ff, ["fuchsia"] = 0xff00ffff, ["green"] = 0x008000ff,
+            ["grey"] = 0x808080ff, ["lightblue"] = 0xadd8e6ff, ["lime"] = 0x00ff00ff, ["magenta"] = 0xff00ffff,
+            ["maroon"] = 0x800000ff, ["navy"] = 0x000080ff, ["olive"] = 0x808000ff, ["orange"] = 0xffa500ff,
+            ["purple"] = 0x800080ff, ["red"] = 0xff0000ff, ["silver"] = 0xc0c0c0ff, ["teal"] = 0x008080ff,
+            ["white"] = 0xffffffff, ["yellow"] = 0xffff00ff,
+        };
+
+        /// #RGB, #RGBA, #RRGGBB, #RRGGBBAA or a colour name.
+        static bool TryParseColor(string value, out Color32 color)
+        {
+            color = default;
+            uint rgba;
+            if (value.StartsWith('#'))
+            {
+                var hex = value[1..];
+                if (!uint.TryParse(hex, System.Globalization.NumberStyles.HexNumber, null, out uint v)) return false;
+                switch (hex.Length)
+                {
+                    case 3: rgba = Expand((v >> 8) & 0xF) << 24 | Expand((v >> 4) & 0xF) << 16 | Expand(v & 0xF) << 8 | 0xFF; break;
+                    case 4: rgba = Expand((v >> 12) & 0xF) << 24 | Expand((v >> 8) & 0xF) << 16 | Expand((v >> 4) & 0xF) << 8 | Expand(v & 0xF); break;
+                    case 6: rgba = v << 8 | 0xFF; break;
+                    case 8: rgba = v; break;
+                    default: return false;
+                }
+            }
+            else if (!Named.TryGetValue(value, out rgba)) return false;
+            color = new Color32((byte)(rgba >> 24), (byte)(rgba >> 16), (byte)(rgba >> 8), (byte)rgba);
+            return true;
+
+            static uint Expand(uint nibble) => nibble * 17;
+        }
+    }
+}

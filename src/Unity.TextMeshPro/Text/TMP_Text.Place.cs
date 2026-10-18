@@ -10,7 +10,6 @@ namespace TMPro
     {
         // Where the visible part ends (the overflow modes and the visibility limits).
         int m_FirstHiddenLine = int.MaxValue;
-        int m_EllipsisIndex = -1;
 
         void Place(Rect rect)
         {
@@ -28,7 +27,6 @@ namespace TMPro
             info.materialCount = parsed.Materials.Count;
             m_firstOverflowCharacterIndex = m_LayoutOverflowIndex;
             m_IsTextTruncated = false;
-            m_EllipsisIndex = -1;
 
             // Which lines are shown: the page on display, and none after an overflow that hides.
             int overflowLine = -1;
@@ -83,6 +81,16 @@ namespace TMPro
                     }
                     default: offsetY = top - textTop; break;
                 }
+            }
+
+            if (m_overflowMode == TextOverflowModes.Ellipsis && m_LayoutOverflowIndex >= 0 && lineCount > 0)
+            {
+                int last = Mathf.Clamp(m_FirstHiddenLine - 1, 0, lineCount - 1);
+                InsertEllipsis(last, ref count, ref lineCount);
+                info.EnsureCharacters(count + 1);
+                info.characterCount = count;
+                info.lineCount = lineCount;
+                m_FirstHiddenLine = lineCount;
             }
 
             // Right-to-left lines mirror their pen positions.
@@ -160,7 +168,7 @@ namespace TMPro
                     ci.pageNumber = line.Page;
                     ci.scale = p.Scale;
                     ci.style = el.State.Style;
-                    float origin = lineLeft + p.X + p.JustifyOffset;
+                    float origin = (float)((double)lineLeft + p.X + p.JustifyOffset);
                     ci.origin = origin;
                     ci.xAdvance = origin + p.GlyphAdvance;
                     ci.baseLine = baseline + p.BaselineShift;
@@ -227,7 +235,6 @@ namespace TMPro
             }
             if (m_TextExtents.max.x < m_TextExtents.min.x) m_TextExtents = Extents.zero;
 
-            if (m_overflowMode == TextOverflowModes.Ellipsis && m_LayoutOverflowIndex >= 0 && lineCount > 0) ApplyEllipsis(rect, Mathf.Max(0, m_FirstHiddenLine - 1));
             if (m_FirstHiddenLine < lineCount) m_IsTextTruncated = true;
 
             RecordWords(count);
@@ -357,29 +364,38 @@ namespace TMPro
             return cap;
         }
 
-        // Text that does not fit ends in "…" on the last shown line: the characters that the
-        // ellipsis would overlap are hidden.
-        void ApplyEllipsis(Rect rect, int lineIndex)
+        // Text that does not fit ends in "…" (U+2026) on its last shown line: the ellipsis
+        // follows the last character after which it fits, and the text ends there.
+        void InsertEllipsis(int lineIndex, ref int count, ref int lineCount)
         {
-            var info = textInfo;
-            var chars = info.characterInfo;
+            var parsed = m_Parsed;
+            if (parsed.Ellipsis.Element == null) return;
             ref var line = ref s_Lines[lineIndex];
             var pl = s_Placements;
-            if (line.Last < line.First) return;
-            var font = chars[line.First].fontAsset ?? m_fontAsset;
-            if (font == null || !font.TryGetLocalCharacter(0x2026, out var ellipsis)) return;
-            float size = pl[line.First].PointSize;
-            float s = size / font.faceInfo.pointSize * font.faceInfo.scale * ellipsis.scale * ellipsis.glyph.scale;
-            float advance = ellipsis.glyph.metrics.horizontalAdvance * s;
-            float limit = rect.xMin + m_margin.x + line.MarginLeft + line.Width;
-            int keep = line.Last;
-            while (keep >= line.First && (!chars[keep].isVisible || chars[keep].xAdvance + advance > limit + 0.0001f || pl[keep].Whitespace)) keep--;
-            m_EllipsisIndex = keep + 1;
-            for (int i = keep + 1; i < info.characterCount; i++) chars[i].isVisible = false;
+            int index = parsed.Count;
+            if (parsed.Elements.Length <= index) System.Array.Resize(ref parsed.Elements, index + 1);
+            parsed.Elements[index] = parsed.Ellipsis;
+            var ellipsis = default(Placement);
+            Measure(ref parsed.Elements[index], ref ellipsis, m_LayoutBaseSize, line.Width);
+            ellipsis.Element = index;
+            int keep = Mathf.Min(line.Last, count - 1);
+            while (keep >= line.First && (!pl[keep].Visible || pl[keep].X + pl[keep].Advance + ellipsis.GlyphAdvance > line.Width + 0.0001f)) keep--;
+            int at = keep + 1;
+            if (s_Placements.Length <= at) System.Array.Resize(ref s_Placements, at + 1);
+            pl = s_Placements;
+            ellipsis.X = keep >= line.First ? pl[keep].X + pl[keep].Advance : line.StartX;
+            pl[at] = ellipsis;
+            line.Last = at;
+            FinishLine(ref line, pl, m_LayoutBaseSize);
+            count = at + 1;
+            lineCount = lineIndex + 1;
             m_IsTextTruncated = true;
         }
 
-        static bool IsWordCharacter(char c) => char.IsLetterOrDigit(c) || c == '\'' || c == '’';
+        // Letters, digits and symbols make words; apostrophes and hyphens join word characters.
+        static bool IsWordCharacter(char c) => char.IsLetterOrDigit(c) || char.IsSymbol(c);
+
+        static bool IsJoiner(char c) => c == '\'' || c == '\u2019' || c == '-';
 
         void RecordWords(int count)
         {
@@ -389,7 +405,7 @@ namespace TMPro
             int start = -1;
             for (int i = 0; i <= count; i++)
             {
-                bool word = i < count && (IsWordCharacter(chars[i].character) || (chars[i].character == '-' && start >= 0 && i + 1 < count && IsWordCharacter(chars[i + 1].character)));
+                bool word = i < count && (IsWordCharacter(chars[i].character) || (IsJoiner(chars[i].character) && start >= 0 && i + 1 < count && IsWordCharacter(chars[i + 1].character)));
                 if (word && chars[i].elementType == TMP_TextElementType.Sprite) word = false;
                 if (word && start < 0) start = i;
                 if (!word && start >= 0)

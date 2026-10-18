@@ -119,12 +119,36 @@ namespace TMPro
             }
         }
 
-        // The texels of padding a glyph quad needs around the glyph for the material's effects.
+        // The texels of padding a glyph quad needs around the glyph: a texel and a quarter for
+        // the edge's antialiasing, plus how far the material's effects reach beyond the glyph
+        // (the face dilation, outline and softness; the underlay and glow when enabled), each
+        // in field units as the shader scales them (the field spans the gradient scale's texels
+        // on either side of the edge). Extra padding covers at least the whole distance field.
         public static float GetPadding(Material material, bool enableExtraPadding, bool isBold)
         {
             if (material == null) return 0f;
-            if (enableExtraPadding) return Float(material, ID_GradientScale, 5f);
-            return 1.25f;
+            float gradient = Float(material, ID_GradientScale, 5f);
+            float reach = 0f;
+            if (material.HasProperty(ID_GradientScale))
+            {
+                float ratioA = Float(material, ID_ScaleRatio_A, 1f);
+                float face = (Float(material, ID_FaceDilate) + Float(material, ID_OutlineWidth) + Float(material, ID_OutlineSoftness)) * ratioA;
+                reach = Mathf.Max(reach, face);
+                if (material.IsKeywordEnabled(Keyword_Underlay))
+                {
+                    float ratioC = Float(material, ID_ScaleRatio_C, 1f);
+                    float offset = Mathf.Max(Mathf.Abs(Float(material, ID_UnderlayOffsetX)), Mathf.Abs(Float(material, ID_UnderlayOffsetY)));
+                    reach = Mathf.Max(reach, (offset + Float(material, ID_UnderlayDilate) + Float(material, ID_UnderlaySoftness)) * ratioC);
+                }
+                if (material.IsKeywordEnabled(Keyword_Glow))
+                {
+                    float ratioB = Float(material, ID_ScaleRatio_B, 1f);
+                    reach = Mathf.Max(reach, (Float(material, ID_GlowOffset) + Float(material, ID_GlowOuter)) * ratioB);
+                }
+            }
+            float padding = 1.25f + Mathf.Max(0f, reach) * gradient;
+            if (enableExtraPadding) padding = Mathf.Max(padding, gradient);
+            return padding;
         }
 
         // Whether the material clips to its rect or mask texture (soft or hard masking).

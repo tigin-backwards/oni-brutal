@@ -14,11 +14,25 @@ namespace TMPro
         // includes (1 for a text not scaled relative to its canvas).
         private protected abstract float SdfScaleFactor();
 
+        // The factor the last generated geometry used (NaN before any).
+        private protected float m_GeneratedSdfFactor = float.NaN;
+
         // Sends the mesh buffers of the first `materialCount` materials to the renderers.
         private protected abstract void UploadGeometry(int materialCount);
 
         // The mesh of a material slot (0: the text's own; others: its sub-meshes).
         private protected abstract Mesh MeshForMaterial(int index);
+
+        // The mesh buffer of the text's own material, created (with its spare quad) when the
+        // text has none yet.
+        private protected void EnsureBuffers()
+        {
+            var info = textInfo;
+            ref var mi = ref info.meshInfo[0];
+            var mesh = MeshForMaterial(0);
+            if (mi.vertices == null || mi.mesh != mesh || mi.QuadCapacity == 0) mi = new TMP_MeshInfo(mesh, 1);
+            mi.material = m_sharedMaterial;
+        }
 
         // Writes the quads of the laid-out text into textInfo.meshInfo.
         private protected void BuildGeometry()
@@ -43,16 +57,16 @@ namespace TMPro
             {
                 ref var mi = ref info.meshInfo[m];
                 var mesh = MeshForMaterial(m);
-                // A buffer holds the quads and one more: allocated to that size, it grows to the
-                // next power of two when a later layout needs more.
-                int capacity = needed[m] + 1;
-                if (mi.vertices == null || mi.mesh != mesh || mi.QuadCapacity == 0) mi = new TMP_MeshInfo(mesh, capacity);
-                else if (mi.QuadCapacity < capacity) mi.ResizeMeshInfo(Mathf.NextPowerOfTwo(capacity));
+                // A new buffer holds the quads and one more; when a later layout needs more quads
+                // than it holds, it grows to the next power of two of that number.
+                if (mi.vertices == null || mi.mesh != mesh || mi.QuadCapacity == 0) mi = new TMP_MeshInfo(mesh, needed[m] + 1);
+                else if (mi.QuadCapacity < needed[m]) mi.ResizeMeshInfo(Mathf.NextPowerOfTwo(needed[m]));
                 mi.material = m < parsed.Materials.Count ? parsed.Materials[m].Material : m_sharedMaterial;
                 mi.vertexCount = 0;
             }
 
             float sdfFactor = SdfScaleFactor();
+            m_GeneratedSdfFactor = sdfFactor;
             for (int i = 0; i < count; i++)
             {
                 ref var ci = ref chars[i];
@@ -113,10 +127,12 @@ namespace TMPro
             float xs = s * p.XScale;
             float origin = ci.origin + p.MonoOffset;
             float baseline = ci.baseLine + p.KernY;
-            float x0 = origin + (gm.horizontalBearingX - pad - stylePad) * xs;
-            float x1 = origin + (gm.horizontalBearingX + gm.width + pad + stylePad) * xs;
-            float y1 = baseline + (gm.horizontalBearingY + pad) * s;
-            float y0 = baseline + (gm.horizontalBearingY - gm.height - pad) * s;
+            // Each value is one expression evaluated in double precision and stored as a float,
+            // as the shipped package's arithmetic on the game's runtime is.
+            float x0 = (float)(origin + ((double)gm.horizontalBearingX - pad - stylePad) * xs);
+            float x1 = (float)(origin + ((double)gm.horizontalBearingX + gm.width + pad + stylePad) * xs);
+            float y1 = (float)(baseline + ((double)gm.horizontalBearingY + pad) * s);
+            float y0 = (float)(baseline + ((double)gm.horizontalBearingY - gm.height - pad) * s);
             float shearTop = 0f, shearBottom = 0f;
             if (p.Italic && !el.AlternateTypeface)
             {
@@ -133,8 +149,8 @@ namespace TMPro
             var atlas = glyph.atlasIndex > 0 && font.atlasTextures != null && glyph.atlasIndex < font.atlasTextures.Length ? font.atlasTextures[glyph.atlasIndex] : null;
             if (atlas != null) { aw = atlas.width; ah = atlas.height; }
             float uvPad = pad + stylePad;
-            float u0 = (gr.x - uvPad) / aw, u1 = (gr.x + gr.width + uvPad) / aw;
-            float v0 = (gr.y - uvPad) / ah, v1 = (gr.y + gr.height + uvPad) / ah;
+            float u0 = (float)((gr.x - (double)uvPad) / aw), u1 = (float)((gr.x + gr.width + (double)uvPad) / aw);
+            float v0 = (float)((gr.y - (double)uvPad) / ah), v1 = (float)((gr.y + gr.height + (double)uvPad) / ah);
             float w = s * sdfFactor * (p.Bold ? -1f : 1f);
             mi.uvs0[v] = new Vector4(u0, v0, 0f, w);
             mi.uvs0[v + 1] = new Vector4(u0, v1, 0f, w);
@@ -159,10 +175,10 @@ namespace TMPro
             float xs = s * p.XScale;
             float origin = ci.origin + p.MonoOffset;
             float baseline = ci.baseLine;
-            float x0 = origin + gm.horizontalBearingX * xs;
-            float x1 = origin + (gm.horizontalBearingX + gm.width) * xs;
-            float y1 = baseline + gm.horizontalBearingY * s;
-            float y0 = baseline + (gm.horizontalBearingY - gm.height) * s;
+            float x0 = (float)(origin + (double)gm.horizontalBearingX * xs);
+            float x1 = (float)(origin + ((double)gm.horizontalBearingX + gm.width) * xs);
+            float y1 = (float)(baseline + (double)gm.horizontalBearingY * s);
+            float y0 = (float)(baseline + ((double)gm.horizontalBearingY - gm.height) * s);
             mi.vertices[v] = new Vector3(x0, y0, 0f);
             mi.vertices[v + 1] = new Vector3(x0, y1, 0f);
             mi.vertices[v + 2] = new Vector3(x1, y1, 0f);

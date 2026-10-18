@@ -63,6 +63,7 @@ namespace TMPro
             else m_textInfo.textComponent = this;
             if (m_fontAsset == null) m_fontAsset = TMP_Settings.defaultFontAsset;
             if (m_sharedMaterial == null && m_fontAsset != null) m_sharedMaterial = m_fontAsset.material;
+            m_fontColor32 = m_fontColor;
             ConvertAlignment();
             m_havePropertiesChanged = true;
         }

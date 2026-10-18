@@ -128,11 +128,14 @@ namespace TMPro
         public int Count;
         public readonly List<MaterialSlot> Materials = new();
         public readonly List<LinkRecord> Links = new();
+        // The ellipsis character (Element null when the fonts have none).
+        public ParsedElement Ellipsis;
 
         public void Clear()
         {
             System.Array.Clear(Elements, 0, Count);
             Count = 0;
+            Ellipsis = default;
             Materials.Clear();
             Links.Clear();
         }

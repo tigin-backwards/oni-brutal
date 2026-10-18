@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace TMPro
@@ -124,10 +125,15 @@ namespace TMPro
             if (m_fontAsset == null) return 0f;
             float rectWidth = float.IsInfinity(width) ? float.PositiveInfinity : width;
             LayoutUnadjusted(rectWidth);
-            float max = 0f;
-            for (int k = 0; k < s_LineCount; k++) max = Mathf.Max(max, s_Lines[k].MarginLeft + s_Lines[k].StartX + s_Lines[k].Length);
-            return max + m_margin.x + m_margin.z;
+            double max = 0.0;
+            for (int k = 0; k < s_LineCount; k++) max = Math.Max(max, (double)s_Lines[k].MarginLeft + s_Lines[k].StartX + s_Lines[k].Length);
+            return RoundUp(max + m_margin.x + m_margin.z);
         }
+
+        // Preferred sizes are rounded up to hundredths (layouts do not change with the last
+        // digits of a float). The sums they come from are taken in double precision, as the
+        // shipped package's are.
+        static float RoundUp(double value) => (float)(Math.Ceiling(value * 100.0) / 100.0);
 
         // A layout at the preferred size without auto-size's adjustments (which stay as they are).
         void LayoutUnadjusted(float width)
@@ -145,10 +151,10 @@ namespace TMPro
         {
             if (m_fontAsset == null) return 0f;
             LayoutUnadjusted(width);
-            if (s_LineCount == 0) return m_margin.y + m_margin.w;
+            if (s_LineCount == 0) return RoundUp(m_margin.y + m_margin.w);
             ref var last = ref s_Lines[s_LineCount - 1];
-            float height = -(last.Baseline + last.Descender);
-            return height + m_margin.y + m_margin.w;
+            double height = -((double)last.Baseline + last.Descender);
+            return RoundUp(height + m_margin.y + m_margin.w);
         }
 
         public virtual float flexibleWidth => -1f;

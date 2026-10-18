@@ -288,15 +288,16 @@ namespace OniBrutal.Tests
             var t = Text("QUIT", width: 300f, height: 100f);
             float s = 14f / 124f;
             var info = t.textInfo;
+            // Preferred sizes round up to hundredths (as the shipped package's do).
             float advance = info.characterInfo[3].xAdvance - info.characterInfo[0].origin;
-            Assert.Equal(advance, t.preferredWidth, 3);
+            Assert.Equal(Mathf.Ceil(advance * 100f) / 100f, t.preferredWidth, 4);
             var face = t.font.faceInfo;
-            Assert.Equal((face.ascentLine - face.descentLine) * s, t.preferredHeight, 3);
+            Assert.Equal(Mathf.Ceil((face.ascentLine - face.descentLine) * s * 100f) / 100f, t.preferredHeight, 4);
             Assert.Equal(new Vector2(t.preferredWidth, t.preferredHeight), t.GetPreferredValues());
             Assert.True(t.renderedWidth > 0f && t.renderedWidth < t.preferredWidth);
             t.margin = new Vector4(5f, 1f, 7f, 2f);
-            Assert.Equal(advance + 12f, t.preferredWidth, 3);
-            Assert.Equal((face.ascentLine - face.descentLine) * s + 3f, t.preferredHeight, 3);
+            Assert.Equal(Mathf.Ceil((advance + 12f) * 100f) / 100f, t.preferredWidth, 4);
+            Assert.Equal(Mathf.Ceil(((face.ascentLine - face.descentLine) * s + 3f) * 100f) / 100f, t.preferredHeight, 4);
         }
     }
 }

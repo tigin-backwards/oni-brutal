@@ -62,6 +62,9 @@ namespace TMPro
             m_ColorStack.Clear();
             m_SizeStack.Clear();
 
+            // The ellipsis of the Ellipsis overflow mode is resolved up front (its material
+            // takes a slot whether or not the text overflows).
+            if (text.overflowMode == TextOverflowModes.Ellipsis) ResolveEllipsis(s);
             if (source == null) source = "";
             // The text's default style (TMP_Text.textStyle) wraps the source.
             var textStyle = text.textStyle;
@@ -226,6 +229,21 @@ namespace TMPro
             e.MaterialIndex = MaterialFor(asset, state, false);
         }
 
+        void ResolveEllipsis(TextState state)
+        {
+            ref var e = ref m_Out.Ellipsis;
+            e = default;
+            e.CaseScale = 1f;
+            e.Kind = ElementKind.Character;
+            e.Unicode = e.SourceUnicode = 0x2026;
+            e.State = state;
+            if (!ResolveGlyph(0x2026, state, out var character, out var asset, out bool alternate)) return;
+            e.Element = character;
+            e.Asset = asset;
+            e.AlternateTypeface = alternate;
+            e.MaterialIndex = MaterialFor(asset, state, false);
+        }
+
         static uint ToUpper(uint u) => u < 0x10000 ? char.ToUpperInvariant((char)u) : u;
 
         static uint ToLower(uint u) => u < 0x10000 ? char.ToLowerInvariant((char)u) : u;
@@ -340,7 +358,10 @@ namespace TMPro
             if (sprite) material = asset.material;
             else if (state.Material != null && asset == state.Font) material = state.Material;
             else if (asset == m_Text.font) return 0;
-            else material = asset.material;
+            else if (asset == state.Font) material = asset.material;
+            // A fallback font draws with the text's material on its own atlas (match material
+            // presets) or with its own material.
+            else material = TMP_Settings.matchMaterialPreset ? FallbackMaterials.Get(m_Text.fontSharedMaterial, (TMP_FontAsset)asset) : asset.material;
             var slots = m_Out.Materials;
             for (int i = 0; i < slots.Count; i++)
                 if (slots[i].Material == material && slots[i].Asset == asset) return i;

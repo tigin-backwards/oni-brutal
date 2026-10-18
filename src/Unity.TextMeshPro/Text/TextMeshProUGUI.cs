@@ -25,6 +25,8 @@ namespace TMPro
             else m_textInfo.textComponent = this;
             if (m_fontAsset == null) m_fontAsset = TMP_Settings.defaultFontAsset;
             if (m_sharedMaterial == null && m_fontAsset != null) m_sharedMaterial = m_fontAsset.material;
+            // The colour is m_fontColor; data may hold an older m_fontColor32.
+            m_fontColor32 = m_fontColor;
             ConvertAlignment();
             // Sub-meshes saved with the object are adopted, in the order of their material slots.
             var existing = GetComponentsInChildren<TMP_SubMeshUI>(true);
@@ -167,6 +169,8 @@ namespace TMPro
             LayoutForRendering();
             if (textInfo.characterCount == 0)
             {
+                // The buffers exist (one spare quad); the renderers draw nothing.
+                EnsureBuffers();
                 ClearRenderedGeometry();
                 for (int i = 0; i < textInfo.meshInfo.Length; i++) textInfo.meshInfo[i].vertexCount = 0;
                 m_havePropertiesChanged = false;

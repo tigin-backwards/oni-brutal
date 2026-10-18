@@ -152,11 +152,19 @@ namespace OniBrutal.Engine.UI
                     if (c.GetType().GetField("materialReferenceIndex")?.GetValue(c) is int m && m >= 0 && m < materials) perMaterial[m]++;
                 }
                 var list = new List<string>();
+                var owner = type.GetField("textComponent")?.GetValue(info);
+                var shared = owner?.GetType().GetProperty("fontSharedMaterial")?.GetValue(owner);
+                var font = owner?.GetType().GetProperty("font")?.GetValue(owner);
+                var fontMaterial = font?.GetType().GetProperty("material")?.GetValue(font);
                 for (int m = 0; m < materials && m < meshes.Length; m++)
                 {
                     var mi = meshes.GetValue(m);
                     int vertices = mi.GetType().GetField("vertexCount")?.GetValue(mi) is int v ? v : -1;
-                    list.Add(vertices + "/" + perMaterial[m]);
+                    // The material: the text's shared one (s), its font's (f), or another (o).
+                    var material = mi.GetType().GetField("material")?.GetValue(mi);
+                    string which = material == null ? "-" : (ReferenceEquals(material, shared) ? "s" : "") + (ReferenceEquals(material, fontMaterial) ? "f" : "");
+                    if (which == "") which = "o";
+                    list.Add(vertices + "/" + perMaterial[m] + which);
                 }
                 text += " meshes=" + string.Join(";", list);
             }

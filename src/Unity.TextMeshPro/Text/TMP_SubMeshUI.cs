@@ -71,10 +71,11 @@ namespace TMPro
 
         internal bool HasGeometry => m_Mesh != null && m_Mesh.vertexCount > 0;
 
-        // A new sub-mesh object under the text, filling its rect, hidden in the hierarchy.
+        // A new sub-mesh object under the text, filling its rect, hidden in the hierarchy. As
+        // in the shipped player, the object keeps the default name ("New Game Object").
         internal static TMP_SubMeshUI AddSubTextObject(TextMeshProUGUI text, int materialIndex)
         {
-            var go = new GameObject("TMP SubMeshUI", typeof(RectTransform));
+            var go = new GameObject("New Game Object", typeof(RectTransform));
             if (TMP_Settings.hideSubTextObjects) go.hideFlags = HideFlags.HideAndDontSave;
             go.layer = text.gameObject.layer;
             var rt = (RectTransform)go.transform;
@@ -91,7 +92,6 @@ namespace TMPro
             var sub = go.AddComponent<TMP_SubMeshUI>();
             sub.m_TextComponent = text;
             sub.m_materialReferenceIndex = materialIndex;
-            sub.raycastTarget = false;
             return sub;
         }
 
@@ -105,7 +105,6 @@ namespace TMPro
             {
                 m_sharedMaterial = material;
                 m_isDefaultMaterial = false;
-                if (material != null) gameObject.name = "TMP SubMeshUI [" + material.name + "]";
                 SetMaterialDirty();
             }
         }
@@ -139,8 +138,15 @@ namespace TMPro
             canvasRenderer.SetMaterial(materialForRendering, 0);
         }
 
+        // A sub-mesh created or reconfigured by its text's mesh generation (inside the canvas's
+        // graphic rebuild) applies its material at once: the rebuild loop takes no new elements.
         public override void SetMaterialDirty()
         {
+            if (CanvasUpdateRegistry.IsRebuildingGraphics())
+            {
+                if (IsActive()) UpdateMaterial();
+                return;
+            }
             m_MaterialDirtyFlag = true;
             base.SetMaterialDirty();
         }

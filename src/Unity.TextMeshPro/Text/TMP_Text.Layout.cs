@@ -106,6 +106,8 @@ namespace TMPro
             m_LineSpacingAdjustment = 0f;
             m_CharWidthAdjustment = 0f;
             if (!m_enableAutoSizing) return m_fontSizeBase > 0f ? m_fontSizeBase : m_fontSize;
+            // An empty text keeps its size.
+            if (m_Parsed.Count == 0) return m_fontSize;
             float min = Mathf.Min(m_fontSizeMin, m_fontSizeMax), max = Mathf.Max(m_fontSizeMin, m_fontSizeMax);
             if (FitsAdjusted(max, rect)) return max;
             int lo = Mathf.CeilToInt(min * 20f - 0.001f), hi = Mathf.FloorToInt(max * 20f + 0.001f) - 1;
@@ -514,7 +516,9 @@ namespace TMPro
                 p.Top = gm.horizontalBearingY * s + shift;
                 p.Bottom = (gm.horizontalBearingY - gm.height) * s + shift;
                 advance = gm.horizontalAdvance * s * p.XScale;
-                p.Visible = !p.Whitespace && glyph != null && c != 0x200B;
+                // Every character that is not white space draws its glyph's quad, the zero-width
+                // space's (an empty glyph) included.
+                p.Visible = !p.Whitespace && glyph != null;
                 float styleSpacing = p.Bold ? font.boldSpacing : font.normalSpacingOffset;
                 spacing = (m_characterSpacing + styleSpacing) * em;
                 if (c == 32 || c == 0xA0) spacing += m_wordSpacing * em;

@@ -309,8 +309,8 @@ namespace OniBrutal.Engine.Serialization
             s.m_Alignment = (TextAnchor)alignment;
             s.m_WordWrap = wordWrap;
             s.m_RichText = richText;
-            s.m_TextClipping = clipping;
-            s.m_ImagePosition = imagePosition;
+            s.m_TextClipping = (TextClipping)clipping;
+            s.m_ImagePosition = (ImagePosition)imagePosition;
             s.m_ContentOffset = contentOffset;
             s.m_FixedWidth = fixedWidth;
             s.m_FixedHeight = fixedHeight;

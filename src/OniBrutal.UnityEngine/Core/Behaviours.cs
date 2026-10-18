@@ -37,6 +37,14 @@ namespace UnityEngine
     public partial class MonoBehaviour
     {
         public bool didAwake => BehaviourNative.AwakeCalled;
+
+        /// Whether OnGUI gets Layout events. Turned off, OnGUI skips the layout pass and may not
+        /// use GUILayout.
+        public bool useGUILayout
+        {
+            get => BehaviourNative.UseGUILayout;
+            set => BehaviourNative.UseGUILayout = value;
+        }
         public bool didStart => BehaviourNative.StartCalled;
 
         public Coroutine StartCoroutine(IEnumerator routine)

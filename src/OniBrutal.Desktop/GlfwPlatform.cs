@@ -403,7 +403,7 @@ namespace OniBrutal.Desktop
 
         static void Queue(EventType type, EventModifiers modifiers, Vector2 guiPosition, Action<Event> fill = null)
         {
-            var e = new Event { type = type, rawType = type, modifiers = modifiers, mousePosition = guiPosition };
+            var e = new Event { type = type, modifiers = modifiers, mousePosition = guiPosition };
             fill?.Invoke(e);
             Event.Enqueue(e);
         }

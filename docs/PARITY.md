@@ -118,7 +118,7 @@ Legend: `[x]` verified · `[ ]` not yet verified · `[~]` deviation (see the not
 
 - [x] Window, input (mouse, keyboard, text), cursor images
 - [x] Clipboard: select all, copy and paste in the destination coordinates field (as the original)
-- [x] Frame rate at parity with the original (PLAN §Status, Performance)
+- [x] Frame rate at parity with the original or above (PLAN §Status, Performance). On Windows (native NVIDIA driver, both players isolated the same way, speed 3, tools/PerfProbe): DeCrew 22–24 fps against the original's 12–13.5, a game cycle every 227 s against 299–305 s; U57 (every DLC) ~12 fps against ~8, a cycle every 261–282 s against 405–407 s
 - [x] Memory at parity with the original: DeCrew (cycle 17630, base game) holds 11.9–12.4 GB resident over five cycles at speed 3, the original 12.9–14.3 GB on the same save and machine. Both grow with the colony (heap dumps a few cycles apart: new debris items and their components; the reports' notes are pruned), with no engine-side growth
 - [x] Windowed → fullscreen (borderless) switching at runtime
 - [x] Resolution changes at runtime (window resized)

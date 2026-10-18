@@ -70,6 +70,22 @@ double replaces `steam_api64.dll`, and `--audio-wav` writes the game's sound to
 `fmodoutput.wav` there. To play, run `out/win/host/OniBrutal.exe --game "<game directory>"` on
 Windows with Steam running.
 
+Comparisons with the original Windows player, under the same isolation:
+
+```sh
+scripts/windows-run-home.sh RUN_HOME SAVE out/bin/PerfProbe/release:-2037174645
+ONI_RUN_HOME='C:\...' scripts/original-windows.sh -screen-width 1024 -screen-height 768 -screen-fullscreen 0
+ONI_RUN_HOME='C:\...' scripts/run-windows.sh -screen-width 1024 -screen-height 768 -screen-fullscreen 0
+```
+
+`windows-run-home.sh` prepares a run home whose only colony the main menu resumes on its own,
+with mods enabled (`tools/PerfProbe` keeps the game at speed 3 and logs `PERF` frame rates). The
+original runs from a renamed copy of the install (`E:\Development\BrutalNotIncluded`, `ORIG_DIR`)
+with BepInEx 6 and `tools/OriginalIsolation`, which gives it the same separate Documents, local
+data and audio file; its first setup copies BepInEx from an existing install
+(`ONI_BEPINEX_SOURCE`). The copy carries its own product name, so Unity's registry and LocalLow
+data are its own too (details in the script).
+
 ## Verify
 
 ```sh

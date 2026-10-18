@@ -602,3 +602,11 @@ suppressions only), central package versions in `Directory.Packages.props`.
    not part of the product: it lets M4–M6 engine behaviour be exercised; Steam-specific game
    behaviour (DLC ownership, Workshop mods, achievements, cloud) is verified only with the
    real client.
+8. **Original-player comparisons on Windows** (`scripts/original-windows.sh`). The original runs
+   from a renamed copy of the install with BepInEx 6 and `tools/OriginalIsolation`, which
+   redirects the same two known folders our host's `--run-home` does and sends FMOD's output to
+   a WAV file; the copy's product name (PlayerSettings) is changed to one of the same length so
+   Unity's registry key and LocalLow folder are the copy's own; the Steam double stands in for
+   Steam. Both players load `tools/PerfProbe`, a game mod that keeps the colony at speed 3 and
+   logs the frame rate from the real-time clock, and resume the save through the game's own
+   `AutoResumeSaveFile` setting (`scripts/windows-run-home.sh`), so the same code measures both.

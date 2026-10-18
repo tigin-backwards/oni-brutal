@@ -329,6 +329,11 @@ Environment notes:
   (ARCHITECTURE §3.5). Per-frame CPU: update 1.6 ms, LateUpdate 4.2, canvases 4.8, render 3.7;
   GPU 4–5 ms.
   Re-measured 2026-10-16 after M6 work: 58.6 fps mean (min 38, max 70) in the same scenario.
+  Windows, 2026-10-18 (RTX 3090, native driver; the original from an isolated renamed copy,
+  scripts/original-windows.sh; both players resuming the same save at speed 3 with
+  tools/PerfProbe measuring): DeCrew (base game, cycle 17628) 22–24 fps, the original 12–13.5,
+  real time per game cycle 227 s against 299–305 s; U57 (Spaced Out and every DLC, cycle 17077)
+  ~12 fps against ~8, 261–282 s per cycle against 405–407 s.
 - M6 in progress (2026-10-16): docs/PARITY.md ticked (Mop, Disinfect, Harvest, Attack and Wrangle orders carried out in both players). `tools/UnityProbe` (a mod run
   in both players) compares lifecycle and timing semantics, engine values, the main-menu and
   in-game UI layout (about 3400 elements), victory sequence, event popup, 18 building side

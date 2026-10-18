@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# Prepares a Windows run home (scripts/run-windows.sh, scripts/original-windows.sh) holding one
+# save as its only colony, which the main menu resumes on its own (the game's AutoResumeSaveFile
+# setting), a 1024x768 window and, optionally, local mods enabled for the base game and Spaced
+# Out. Not part of the product.
+#   scripts/windows-run-home.sh RUN_HOME SAVE [MOD_DIR:STAMP ...]
+# RUN_HOME is a WSL path (it is emptied first); MOD_DIR a built mod folder (mod.yaml with its
+# staticID); STAMP the mod's mods.json version, the Mono string hash of its folder name
+# (ARCHITECTURE D3; tools/PerfProbe: -2037174645).
+set -euo pipefail
+home=$1; save=$2; shift 2
+name=$(basename "$save" .sav)
+d="$home/Documents/Klei/OxygenNotIncluded"
+rm -rf "$home"
+mkdir -p "$d/cloud_save_files/76561197960265729/$name"
+cp "$save" "$d/cloud_save_files/76561197960265729/$name/$name.sav"
+file="$(wslpath -w "$d/cloud_save_files/76561197960265729/$name/$name.sav")"
+printf 'strings:\n  AutoResumeSaveFile: %s\nints:\n  ResolutionWidth: 1024\n  ResolutionHeight: 768\n  RefreshRateNumerator: 60\n  RefreshRateDenominator: 1\n  FullScreen: 0\nfloats: {}\n' "'${file//\'/\'\'}'" > "$d/kplayerprefs.yaml"
+entries=""
+for m in "$@"; do
+  dir=${m%:*}; stamp=${m##*:}
+  id=$(sed -n 's/^staticID: *//p' "$dir/mod.yaml" | tr -d '\r')
+  mkdir -p "$d/mods/Local"
+  cp -r "$dir" "$d/mods/Local/$id"
+  entries="$entries{\"label\":{\"distribution_platform\":0,\"id\":\"$id\",\"title\":\"$id\",\"version\":$stamp},\"status\":1,\"enabled\":true,\"enabledForDlc\":[\"\",\"EXPANSION1_ID\"],\"crash_count\":0,\"reinstall_path\":null,\"staticID\":\"$id\"},"
+done
+[ -n "$entries" ] && echo "{\"version\":1,\"mods\":[${entries%,}],\"mod_load_in_progress\":false}" > "$d/mods/mods.json"
+true

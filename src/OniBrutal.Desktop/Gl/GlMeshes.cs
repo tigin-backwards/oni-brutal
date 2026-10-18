@@ -211,42 +211,53 @@ namespace OniBrutal.Desktop.Gl
 
         /// Every submesh's indices in one list; quads become two triangles each, as Unity's GL
         /// device draws them.
+        static uint Mode(MeshTopology topology) => topology switch
+        {
+            MeshTopology.Lines => Lines,
+            MeshTopology.LineStrip => LineStrip,
+            MeshTopology.Points => Points,
+            _ => Triangles, // quads are drawn as triangles
+        };
+
+        /// Every submesh's indices in one array (quads as two triangles each), with each
+        /// submesh's range. A mesh of one submesh that needs no conversion uploads its own index
+        /// array (index arrays, like the channels, are never written once published).
         static (int, int, uint, int)[] Indices(MeshNative m, out int[] indices)
         {
-            var all = new List<int>();
             var subs = new (int, int, uint, int)[m.SubMeshes.Count];
+            if (subs.Length == 1 && m.SubMeshes[0].Topology != MeshTopology.Quads)
+            {
+                var only = m.SubMeshes[0];
+                indices = only.Indices;
+                subs[0] = (0, only.Indices.Length, Mode(only.Topology), only.BaseVertex);
+                return subs;
+            }
+            int total = 0;
+            foreach (var sm in m.SubMeshes)
+                total += sm.Topology == MeshTopology.Quads ? sm.Indices.Length / 4 * 6 : sm.Indices.Length;
+            indices = new int[total];
+            int at = 0;
             for (int s = 0; s < subs.Length; s++)
             {
                 var sm = m.SubMeshes[s];
-                int start = all.Count;
-                uint mode;
-                switch (sm.Topology)
+                int start = at;
+                if (sm.Topology == MeshTopology.Quads)
+                    for (int q = 0; q + 3 < sm.Indices.Length; q += 4)
+                    {
+                        indices[at++] = sm.Indices[q];
+                        indices[at++] = sm.Indices[q + 1];
+                        indices[at++] = sm.Indices[q + 2];
+                        indices[at++] = sm.Indices[q];
+                        indices[at++] = sm.Indices[q + 2];
+                        indices[at++] = sm.Indices[q + 3];
+                    }
+                else
                 {
-                    case MeshTopology.Quads:
-                        for (int q = 0; q + 3 < sm.Indices.Length; q += 4)
-                            all.AddRange([sm.Indices[q], sm.Indices[q + 1], sm.Indices[q + 2], sm.Indices[q], sm.Indices[q + 2], sm.Indices[q + 3]]);
-                        mode = Triangles;
-                        break;
-                    case MeshTopology.Lines:
-                        all.AddRange(sm.Indices);
-                        mode = Lines;
-                        break;
-                    case MeshTopology.LineStrip:
-                        all.AddRange(sm.Indices);
-                        mode = LineStrip;
-                        break;
-                    case MeshTopology.Points:
-                        all.AddRange(sm.Indices);
-                        mode = Points;
-                        break;
-                    default:
-                        all.AddRange(sm.Indices);
-                        mode = Triangles;
-                        break;
+                    sm.Indices.CopyTo(indices, at);
+                    at += sm.Indices.Length;
                 }
-                subs[s] = (start, all.Count - start, mode, sm.BaseVertex);
+                subs[s] = (start, at - start, Mode(sm.Topology), sm.BaseVertex);
             }
-            indices = all.ToArray();
             return subs;
         }
 

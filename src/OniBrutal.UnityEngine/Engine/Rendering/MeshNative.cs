@@ -17,9 +17,10 @@ namespace OniBrutal.Engine.Rendering
     }
 
     /// A mesh's data, kept as per-attribute arrays (Unity's channel model). The device builds its
-    /// buffers from them when Version changes. A channel array is filled before it is published
-    /// and never written afterwards (a change replaces it, and getters hand out copies): the
-    /// device's uploads hold the arrays themselves until they run on the render thread.
+    /// buffers from them when Version changes. A channel or submesh index array is filled before
+    /// it is published and never written afterwards (a change replaces it, and getters hand out
+    /// copies): the device's uploads hold the arrays themselves until they run on the render
+    /// thread.
     internal sealed class MeshNative : NativeObject
     {
         public const int UvChannels = 8;

@@ -567,29 +567,33 @@ namespace OniBrutal.Engine.Rendering
         /// Transparent: sorting layer/order, queue, then back to front. Ties keep submission order.
         static void DrawQueue(RenderDevice device, List<DrawItem> all, bool opaque)
         {
-            var list = all.FindAll(d => opaque ? d.Queue <= 2500 : d.Queue > 2500);
-            list.Sort((a, b) =>
-            {
-                int c;
-                if (opaque)
-                {
-                    if ((c = a.Queue.CompareTo(b.Queue)) != 0) return c;
-                    if ((c = a.SortingLayerValue.CompareTo(b.SortingLayerValue)) != 0) return c;
-                    if ((c = a.SortingOrder.CompareTo(b.SortingOrder)) != 0) return c;
-                    if ((c = a.Distance.CompareTo(b.Distance)) != 0) return c;
-                }
-                else
-                {
-                    if ((c = a.SortingLayerValue.CompareTo(b.SortingLayerValue)) != 0) return c;
-                    if ((c = a.SortingOrder.CompareTo(b.SortingOrder)) != 0) return c;
-                    if ((c = a.Queue.CompareTo(b.Queue)) != 0) return c;
-                    if ((c = b.Distance.CompareTo(a.Distance)) != 0) return c;
-                }
-                return a.Sequence.CompareTo(b.Sequence);
-            });
+            var list = NewDrawList();
+            foreach (var d in all)
+                if (opaque ? d.Queue <= 2500 : d.Queue > 2500) list.Add(d);
+            list.Sort(opaque ? OpaqueOrder : TransparentOrder);
             foreach (var d in list)
                 device.Draw(new DrawRequest(d.Mesh, d.SubMesh, d.ObjectToWorld, d.Material, d.Pass, d.Properties, d.Keywords));
         }
+
+        static readonly Comparison<DrawItem> OpaqueOrder = (a, b) =>
+        {
+            int c;
+            if ((c = a.Queue.CompareTo(b.Queue)) != 0) return c;
+            if ((c = a.SortingLayerValue.CompareTo(b.SortingLayerValue)) != 0) return c;
+            if ((c = a.SortingOrder.CompareTo(b.SortingOrder)) != 0) return c;
+            if ((c = a.Distance.CompareTo(b.Distance)) != 0) return c;
+            return a.Sequence.CompareTo(b.Sequence);
+        };
+
+        static readonly Comparison<DrawItem> TransparentOrder = (a, b) =>
+        {
+            int c;
+            if ((c = a.SortingLayerValue.CompareTo(b.SortingLayerValue)) != 0) return c;
+            if ((c = a.SortingOrder.CompareTo(b.SortingOrder)) != 0) return c;
+            if ((c = a.Queue.CompareTo(b.Queue)) != 0) return c;
+            if ((c = b.Distance.CompareTo(a.Distance)) != 0) return c;
+            return a.Sequence.CompareTo(b.Sequence);
+        };
     }
 
     /// The draws each renderer class submits.

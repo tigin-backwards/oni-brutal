@@ -8,7 +8,7 @@ def parse(path):
     elements = {}
     for line in open(path, encoding='utf-8'):
         line = line.rstrip('\n')
-        if not line:
+        if not line or line.startswith('  '):  # vertex listings (--dump-ui-vertices)
             continue
         head, *components = line.split(' | ')
         key, _, rest = head.partition('\t')

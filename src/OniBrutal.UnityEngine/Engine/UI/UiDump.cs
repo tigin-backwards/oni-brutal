@@ -46,6 +46,10 @@ namespace OniBrutal.Engine.UI
 
         static readonly Dictionary<Type, List<(string Label, Func<object, object> Get)>> readers = new();
 
+        /// Elements whose path contains this text also get every vertex written
+        /// (`--dump-ui-vertices`).
+        public static string VerticesFilter;
+
         public static void Write(string path)
         {
             var text = new StringBuilder();
@@ -75,6 +79,10 @@ namespace OniBrutal.Engine.UI
                     if (c is CanvasRenderer cr) AppendRenderer(text, (CanvasRendererNative)cr.Native);
                     AppendMembers(text, c);
                 }
+                if (VerticesFilter != null && key.Contains(VerticesFilter, StringComparison.Ordinal)
+                    && go.Managed is GameObject managed && managed.GetComponent<CanvasRenderer>() is { } renderer
+                    && ((CanvasRendererNative)renderer.Native).Geometry is { } geometry)
+                    AppendVertices(text, geometry);
                 text.Append('\n');
             }
             File.WriteAllText(path, text.ToString());
@@ -141,16 +149,46 @@ namespace OniBrutal.Engine.UI
 
         static string C(Color c) => $"{Math.Round(c.r * 255)},{Math.Round(c.g * 255)},{Math.Round(c.b * 255)},{Math.Round(c.a * 255)}";
 
-        /// One vertex as rounded integers: position (0.01), colour (1/255), first texture
-        /// coordinates (1e-4).
-        static (long, long, long, long, long, long) Vertex(CanvasGeometry g, int i)
+        /// One vertex as rounded integers: position (0.01), colour (1/255), the four texture
+        /// coordinate channels (1e-4), normal and tangent (1e-3). TextMeshPro's shaders read data
+        /// from the extra channels, so all of them count.
+        static long[] Vertex(CanvasGeometry g, int i)
         {
+            var values = new List<long>(24);
             var p = g.Positions[i];
+            values.Add((long)Math.Round(p.x * 100)); values.Add((long)Math.Round(p.y * 100)); values.Add((long)Math.Round(p.z * 100));
             var c = g.Colors != null && i < g.Colors.Length ? g.Colors[i] : Color.white;
-            var uv = g.Uvs[0] != null && i < g.Uvs[0].Length ? g.Uvs[0][i] : Vector4.zero;
-            long colour = (long)Math.Round(c.r * 255) << 24 | (long)Math.Round(c.g * 255) << 16 | (long)Math.Round(c.b * 255) << 8 | (long)Math.Round(c.a * 255);
-            return ((long)Math.Round(p.x * 100), (long)Math.Round(p.y * 100), (long)Math.Round(p.z * 100), colour, (long)Math.Round(uv.x * 10000), (long)Math.Round(uv.y * 10000));
+            values.Add((long)Math.Round(c.r * 255) << 24 | (long)Math.Round(c.g * 255) << 16 | (long)Math.Round(c.b * 255) << 8 | (long)Math.Round(c.a * 255));
+            foreach (var channel in g.Uvs)
+            {
+                var uv = channel != null && i < channel.Length ? channel[i] : Vector4.zero;
+                values.Add((long)Math.Round(uv.x * 10000)); values.Add((long)Math.Round(uv.y * 10000));
+                values.Add((long)Math.Round(uv.z * 10000)); values.Add((long)Math.Round(uv.w * 10000));
+            }
+            var n = g.Normals != null && i < g.Normals.Length ? g.Normals[i] : Vector3.zero;
+            values.Add((long)Math.Round(n.x * 1000)); values.Add((long)Math.Round(n.y * 1000)); values.Add((long)Math.Round(n.z * 1000));
+            var t = g.Tangents != null && i < g.Tangents.Length ? g.Tangents[i] : Vector4.zero;
+            values.Add((long)Math.Round(t.x * 1000)); values.Add((long)Math.Round(t.y * 1000)); values.Add((long)Math.Round(t.z * 1000)); values.Add((long)Math.Round(t.w * 1000));
+            return values.ToArray();
         }
+
+        /// Every vertex and the indices of an element, for `--dump-ui-vertices`: what a package
+        /// generated, channel by channel.
+        static void AppendVertices(StringBuilder text, CanvasGeometry g)
+        {
+            for (int i = 0; i < g.Positions.Length; i++)
+            {
+                var c = g.Colors != null && i < g.Colors.Length ? g.Colors[i] : Color.white;
+                text.Append("\n  v").Append(i).Append(" pos ").Append(V(g.Positions[i])).Append(" col ").Append(C(c));
+                for (int k = 0; k < 4; k++)
+                    if (g.Uvs[k] != null && i < g.Uvs[k].Length) text.Append(" uv").Append(k).Append(' ').Append(V(g.Uvs[k][i]));
+                if (g.Normals != null && i < g.Normals.Length) text.Append(" n ").Append(V(g.Normals[i]));
+                if (g.Tangents != null && i < g.Tangents.Length) text.Append(" t ").Append(V(g.Tangents[i]));
+            }
+            text.Append("\n  indices ").Append(string.Join(",", g.Indices));
+        }
+
+        static string V(Vector4 v) => string.Create(CultureInfo.InvariantCulture, $"{v.x:0.####},{v.y:0.####},{v.z:0.####},{v.w:0.####}");
 
         static uint OrderedHash(CanvasGeometry g)
         {
@@ -158,8 +196,7 @@ namespace OniBrutal.Engine.UI
             for (int i = 0; i < g.Positions.Length; i++)
             {
                 // Field by field: tuple hash codes are randomized per process.
-                var (a, b, c, d, e, f) = Vertex(g, i);
-                foreach (long x in (ReadOnlySpan<long>)[a, b, c, d, e, f]) h = Mix(h, (int)x ^ (int)(x >> 32));
+                foreach (long x in Vertex(g, i)) h = Mix(h, (int)x ^ (int)(x >> 32));
             }
             foreach (int i in g.Indices) h = Mix(h, i);
             return h;
@@ -172,7 +209,7 @@ namespace OniBrutal.Engine.UI
             var triangles = new List<string>();
             for (int i = 0; i + 2 < g.Indices.Length; i += 3)
             {
-                var corners = new[] { Vertex(g, g.Indices[i]).ToString(), Vertex(g, g.Indices[i + 1]).ToString(), Vertex(g, g.Indices[i + 2]).ToString() };
+                var corners = new[] { string.Join(",", Vertex(g, g.Indices[i])), string.Join(",", Vertex(g, g.Indices[i + 1])), string.Join(",", Vertex(g, g.Indices[i + 2])) };
                 Array.Sort(corners, StringComparer.Ordinal);
                 triangles.Add(string.Join("|", corners));
             }

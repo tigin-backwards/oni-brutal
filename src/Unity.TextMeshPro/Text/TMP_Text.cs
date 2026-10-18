@@ -642,21 +642,31 @@ namespace TMPro
             }
         }
 
-        // An alignment stored by older data (m_textAlignment) splits into the two alignments:
-        // its low byte is the horizontal one, its high byte the vertical one. A stored 0 leaves
-        // them as they are (measured: the game's data has texts with 0 that the shipped package
-        // shows top left, while a stored 5 becomes horizontal 5, vertical 0).
+        // An alignment stored by older data (m_textAlignment) replaces the two alignments.
+        // The oldest format numbered the alignments 0-15: rows Top, Middle, Bottom and Baseline
+        // of Left, Center, Right and Justified (measured: the game's data has texts with the
+        // values 0 and 5 that the shipped package shows top left and centred). Other values
+        // split into their bytes.
         private protected void ConvertAlignment()
         {
             if (m_textAlignment == TextAlignmentOptions.Converted) return;
-            if (m_textAlignment == 0)
-            {
-                m_textAlignment = TextAlignmentOptions.Converted;
-                return;
-            }
             int a = (int)m_textAlignment;
-            m_HorizontalAlignment = (HorizontalAlignmentOptions)(a & 0xFF);
-            m_VerticalAlignment = (VerticalAlignmentOptions)(a & 0xFF00);
+            if (a >= 0 && a < 16)
+            {
+                m_HorizontalAlignment = (HorizontalAlignmentOptions)(1 << (a & 3));
+                m_VerticalAlignment = (a >> 2) switch
+                {
+                    0 => VerticalAlignmentOptions.Top,
+                    1 => VerticalAlignmentOptions.Middle,
+                    2 => VerticalAlignmentOptions.Bottom,
+                    _ => VerticalAlignmentOptions.Baseline,
+                };
+            }
+            else
+            {
+                m_HorizontalAlignment = (HorizontalAlignmentOptions)(a & 0xFF);
+                m_VerticalAlignment = (VerticalAlignmentOptions)(a & 0xFF00);
+            }
             m_textAlignment = TextAlignmentOptions.Converted;
         }
 

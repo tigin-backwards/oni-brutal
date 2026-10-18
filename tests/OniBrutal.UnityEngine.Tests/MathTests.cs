@@ -190,6 +190,11 @@ namespace OniBrutal.Tests
             Assert.Equal(Vector2.zero, v2);
         }
 
+        // An angle near 360 cannot come out of the decomposition (it yields -180..180), so the
+        // wrap is checked through the private helper.
+        static float WrapThroughEuler(float degrees) =>
+            (float)typeof(Quaternion).GetMethod("WrapDegrees", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static).Invoke(null, [degrees]);
+
         [Fact]
         public void EulerAnglesKeepATolerance()
         {
@@ -198,6 +203,9 @@ namespace OniBrutal.Tests
             Assert.InRange(e.y, -0.0011f, 0f);
             e = Quaternion.Euler(0f, -1f, 0f).eulerAngles;
             Near(359f, e.y, 1e-3f);
+            // Within the tolerance below 360, an angle comes out slightly negative.
+            Assert.Equal(-0.001f, WrapThroughEuler(359.999f), 3);
+            Assert.Equal(359f, WrapThroughEuler(359f), 3);
         }
 
         [Fact]

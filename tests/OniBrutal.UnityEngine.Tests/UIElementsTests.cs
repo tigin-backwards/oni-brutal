@@ -195,13 +195,23 @@ namespace OniBrutal.Tests
         [Fact]
         public void NavigationKeysExcludeMeaningChangingModifiers()
         {
-            Event Key(KeyCode key, EventModifiers modifiers) => new Event { keyCode = key, modifiers = modifiers };
-            Assert.True(Key(KeyCode.LeftArrow, EventModifiers.FunctionKey).ShouldSendNavigationMoveEventRuntime());
-            Assert.False(Key(KeyCode.LeftArrow, EventModifiers.Control).ShouldSendNavigationMoveEventRuntime());
-            Assert.True(Key(KeyCode.Tab, EventModifiers.None).ShouldSendNavigationMoveEventRuntime());
-            Assert.True(Key(KeyCode.Tab, EventModifiers.Shift).ShouldSendNavigationMoveEventRuntime());
-            Assert.False(Key(KeyCode.Tab, EventModifiers.Alt).ShouldSendNavigationMoveEventRuntime());
-            Assert.False(Key(KeyCode.A, EventModifiers.None).ShouldSendNavigationMoveEventRuntime());
+            Event Key(EventType type, KeyCode key, EventModifiers modifiers) => new Event { type = type, keyCode = key, modifiers = modifiers };
+            Assert.True(Key(EventType.KeyDown, KeyCode.Tab, EventModifiers.Control | EventModifiers.Alt).ShouldSendNavigationMoveEventRuntime());
+            Assert.False(Key(EventType.KeyUp, KeyCode.Tab, EventModifiers.None).ShouldSendNavigationMoveEventRuntime());
+            Assert.False(Key(EventType.KeyDown, KeyCode.LeftArrow, EventModifiers.None).ShouldSendNavigationMoveEventRuntime());
+
+            bool Down(KeyCode key, EventModifiers modifiers)
+            {
+                var e = KeyDownEvent.GetPooled('\0', key, modifiers);
+                bool result = e.ShouldSendNavigationMoveEvent();
+                e.Dispose();
+                return result;
+            }
+            Assert.True(Down(KeyCode.Tab, EventModifiers.None));
+            Assert.True(Down(KeyCode.Tab, EventModifiers.Shift | EventModifiers.CapsLock));
+            Assert.False(Down(KeyCode.Tab, EventModifiers.Control));
+            Assert.False(Down(KeyCode.Tab, EventModifiers.FunctionKey));
+            Assert.False(Down(KeyCode.LeftArrow, EventModifiers.None));
         }
 
         [Fact]

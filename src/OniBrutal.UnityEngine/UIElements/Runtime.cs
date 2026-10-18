@@ -160,9 +160,9 @@ namespace UnityEngine.UIElements
 
     internal partial class ClickDetector
     {
-        /// The longest interval in milliseconds between the clicks of a multi-click: the desktop
-        /// platform's double-click interval.
-        internal static int s_DoubleClickTime { get; set; } = 500;
+        /// The double-click interval in milliseconds; -1 means not read yet (a panel's click
+        /// detector reads the system setting, and none exists here).
+        internal static int s_DoubleClickTime { get; set; } = -1;
 
         // Click detectors belong to panels, and none exists here.
         private ClickDetector()
@@ -203,12 +203,12 @@ namespace UnityEngine.UIElements
             public PanelInputRedirection panelInputRedirection => m_PanelInputRedirection;
             public bool autoCreatePanelComponents => m_AutoCreatePanelComponents;
 
-            /// World-space input on every layer at any distance, through the main camera, with
-            /// automatic input redirection and panel components.
+            /// World-space input on every layer but Ignore Raycast at any distance, through the main
+            /// camera, with automatic input redirection and panel components.
             public static Settings Default => new Settings
             {
                 m_ProcessWorldSpaceInput = true,
-                m_InteractionLayers = -1,
+                m_InteractionLayers = ~(1 << 2),
                 m_MaxInteractionDistance = Mathf.Infinity,
                 m_DefaultEventCameraIsMainCamera = true,
                 m_EventCameras = Array.Empty<Camera>(),

@@ -147,29 +147,15 @@ namespace UnityEngine.UIElements
 
     internal static partial class KeyboardEventExtensions
     {
-        /// Whether a key event navigates: an arrow key with no Shift, Control, Alt or Command,
-        /// or Tab (Shift+Tab goes backwards) with no Control, Alt or Command.
-        internal static bool ShouldSendNavigationMoveEventRuntime(this Event e) => IsNavigationKey(e.keyCode, e.modifiers);
+        /// Whether an IMGUI key event moves navigation: any Tab key-down, whatever the modifiers.
+        internal static bool ShouldSendNavigationMoveEventRuntime(this Event e) => e.type == EventType.KeyDown && e.keyCode == KeyCode.Tab;
 
-        internal static bool ShouldSendNavigationMoveEvent(this KeyDownEvent e) => IsNavigationKey(e.keyCode, e.modifiers);
-
-        static bool IsNavigationKey(KeyCode key, EventModifiers modifiers)
+        /// Whether a key-down moves navigation: Tab (Shift+Tab goes backwards) without Control,
+        /// Alt, Command or the function-key flag. Arrow keys do not.
+        internal static bool ShouldSendNavigationMoveEvent(this KeyDownEvent e)
         {
-            // Shift, Control, Alt and Command change a key's meaning; FunctionKey, Numeric and
-            // CapsLock only describe it.
-            const EventModifiers meaningful = EventModifiers.Shift | EventModifiers.Control | EventModifiers.Alt | EventModifiers.Command;
-            switch (key)
-            {
-                case KeyCode.UpArrow:
-                case KeyCode.DownArrow:
-                case KeyCode.LeftArrow:
-                case KeyCode.RightArrow:
-                    return (modifiers & meaningful) == 0;
-                case KeyCode.Tab:
-                    return (modifiers & meaningful & ~EventModifiers.Shift) == 0;
-                default:
-                    return false;
-            }
+            const EventModifiers excluded = EventModifiers.Control | EventModifiers.Alt | EventModifiers.Command | EventModifiers.FunctionKey;
+            return e.keyCode == KeyCode.Tab && (e.modifiers & excluded) == 0;
         }
     }
 

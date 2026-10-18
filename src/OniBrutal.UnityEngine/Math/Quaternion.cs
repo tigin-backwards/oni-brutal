@@ -124,14 +124,14 @@ namespace UnityEngine
             set => this = FromEulerRad(value * Mathf.Deg2Rad);
         }
 
-        /// Folds an angle into [0, 360) with Unity's tolerance of 0.0001 rad (in degrees): an angle
-        /// at most that far below 0 or beyond 360 is returned unchanged; only angles further
-        /// outside the range are shifted by 360.
+        /// Wraps an angle with Unity's tolerance t = 0.0001 rad (in degrees): below -t it gains
+        /// 360, above 360 - t it loses 360 (so an angle just below 360 comes out slightly
+        /// negative), and anything else is returned unchanged.
         static float WrapDegrees(float degrees)
         {
             const float tolerance = 0.0001f * Mathf.Rad2Deg;
             if (degrees < -tolerance) return degrees + 360f;
-            if (degrees > 360f + tolerance) return degrees - 360f;
+            if (degrees > 360f - tolerance) return degrees - 360f;
             return degrees;
         }
 

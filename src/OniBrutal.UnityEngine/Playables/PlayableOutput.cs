@@ -6,9 +6,9 @@ namespace UnityEngine.Playables
     {
         private PlayableOutputHandle m_Handle;
 
-        private static readonly PlayableOutput m_NullPlayableOutput = new PlayableOutput(PlayableOutputHandle.Null);
+        private static readonly PlayableOutput NullInstance = new PlayableOutput(PlayableOutputHandle.Null);
 
-        public static PlayableOutput Null => m_NullPlayableOutput;
+        public static PlayableOutput Null => NullInstance;
 
         internal PlayableOutput(PlayableOutputHandle handle)
         {

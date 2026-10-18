@@ -83,9 +83,14 @@ those points.
   by `m_TargetAssemblyTypeName`, which allows static methods.
 - The search starts at that type and goes up its base types, stopping before
   `System.Object`. It considers public and non-public, instance and static methods.
-- The first type that declares a method with that name and exactly the required parameter
-  types wins. A candidate is rejected when any parameter's "is primitive" differs from the
-  required type's.
+- The first type that declares a matching method wins. A method matches when it has that name
+  and .NET's default binder would accept the required types for its parameters
+  (`Type.GetMethod(name, flags, binder: null, types, modifiers: null)` on that type alone).
+  That allows widening primitive conversions (an `int` for a `float` parameter) and reference
+  conversions (a derived type for a base-type parameter).
+- A candidate is then rejected when any parameter's "is primitive" differs from the required
+  type's: an `int` must not match an `object` parameter. The search then continues with the
+  base type.
 - This search is also the public static `UnityEventBase.GetValidMethodInfo(Type, string, Type[])`.
   The overload taking an object uses the object's type.
 
@@ -100,8 +105,9 @@ those points.
 
 **Persistent-call accessors:**
 - `GetPersistentEventCount()` counts every serialized call, valid or not.
-- `GetPersistentTarget(i)` and `GetPersistentMethodName(i)` read the serialized values; a
-  missing call gives null and the empty string.
+- `GetPersistentTarget(i)` and `GetPersistentMethodName(i)` read the serialized values. An
+  index outside the serialized calls throws `ArgumentOutOfRangeException`, as for the other
+  persistent-call accessors. A call whose method name is null reads as the empty string.
 - `GetPersistentListenerState(i)` returns the call state.
 - `SetPersistentListenerState(i, state)` sets it, then re-resolves the persistent calls before
   the next `Invoke`.

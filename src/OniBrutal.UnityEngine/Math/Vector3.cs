@@ -171,6 +171,31 @@ namespace UnityEngine
         public static Vector3 Min(Vector3 lhs, Vector3 rhs) => new Vector3(Mathf.Min(lhs.x, rhs.x), Mathf.Min(lhs.y, rhs.y), Mathf.Min(lhs.z, rhs.z));
         public static Vector3 Max(Vector3 lhs, Vector3 rhs) => new Vector3(Mathf.Max(lhs.x, rhs.x), Mathf.Max(lhs.y, rhs.y), Mathf.Max(lhs.z, rhs.z));
 
+        public static Vector3 SmoothDamp(Vector3 current, Vector3 target, ref Vector3 currentVelocity, float smoothTime)
+            => SmoothDamp(current, target, ref currentVelocity, smoothTime, Mathf.Infinity, Time.deltaTime);
+
+        public static Vector3 SmoothDamp(Vector3 current, Vector3 target, ref Vector3 currentVelocity, float smoothTime, float maxSpeed)
+            => SmoothDamp(current, target, ref currentVelocity, smoothTime, maxSpeed, Time.deltaTime);
+
+        /// Mathf.SmoothDamp's spring on the whole vector: the offset to the target is limited in
+        /// length to maxSpeed * smoothTime, and a step ending beyond the target (along the
+        /// direction from current to target) lands on it and stops.
+        public static Vector3 SmoothDamp(Vector3 current, Vector3 target, ref Vector3 currentVelocity, float smoothTime, float maxSpeed, float deltaTime)
+        {
+            var spring = new OniBrutal.Engine.SmoothDampSpring(smoothTime, deltaTime);
+            Vector3 offset = ClampMagnitude(current - target, maxSpeed * spring.SmoothTime);
+            Vector3 goal = current - offset;
+            Vector3 impulse = (currentVelocity + offset * spring.Omega) * deltaTime;
+            currentVelocity = (currentVelocity - impulse * spring.Omega) * spring.Decay;
+            Vector3 next = goal + (offset + impulse) * spring.Decay;
+            if (Dot(target - current, next - target) > 0f)
+            {
+                currentVelocity = zero;
+                return target;
+            }
+            return next;
+        }
+
         public static Vector3 operator +(Vector3 a, Vector3 b) => new Vector3(a.x + b.x, a.y + b.y, a.z + b.z);
         public static Vector3 operator -(Vector3 a, Vector3 b) => new Vector3(a.x - b.x, a.y - b.y, a.z - b.z);
         public static Vector3 operator -(Vector3 a) => new Vector3(-a.x, -a.y, -a.z);

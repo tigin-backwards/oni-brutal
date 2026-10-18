@@ -45,6 +45,76 @@ namespace UnityEngine
         public float grayscale => 0.299f * r + 0.587f * g + 0.114f * b;
         public float maxColorComponent => Mathf.Max(Mathf.Max(r, g), b);
 
+        /// Hexcone HSV of a colour: V is the largest component; the dominant component (blue when
+        /// it exceeds both others, else green when it exceeds red, else red) picks H's sector.
+        /// Black gives H = S = 0; a grey keeps the sector offset in H with S = 0.
+        public static void RGBToHSV(Color rgbColor, out float H, out float S, out float V)
+        {
+            float r = rgbColor.r, g = rgbColor.g, b = rgbColor.b;
+            float sector, first, second;
+            if (b > g && b > r) { V = b; sector = 4f; first = r; second = g; }
+            else if (g > r) { V = g; sector = 2f; first = b; second = r; }
+            else { V = r; sector = 0f; first = g; second = b; }
+
+            if (V == 0f)
+            {
+                H = 0f;
+                S = 0f;
+                return;
+            }
+            float spread = V - Mathf.Min(r, Mathf.Min(g, b));
+            if (spread == 0f)
+            {
+                S = 0f;
+                H = (sector + (first - second)) / 6f;
+            }
+            else
+            {
+                S = spread / V;
+                H = (sector + (first - second) / spread) / 6f;
+            }
+            if (H < 0f) H += 1f;
+        }
+
+        public static Color HSVToRGB(float H, float S, float V) => HSVToRGB(H, S, V, true);
+
+        /// Inverse of RGBToHSV with alpha 1. Without hdr the components are clamped to [0, 1].
+        /// H is used as given: sectors outside [-1, 6] give white.
+        public static Color HSVToRGB(float H, float S, float V, bool hdr)
+        {
+            Color result;
+            if (S == 0f)
+                result = new Color(V, V, V, 1f);
+            else if (V == 0f)
+                result = new Color(0f, 0f, 0f, 1f);
+            else
+            {
+                float h = H * 6f;
+                float sector = Mathf.Floor(h);
+                float f = h - sector;
+                float p = V * (1f - S);
+                float q = V * (1f - S * f);
+                float t = V * (1f - S * (1f - f));
+                result = (int)sector switch
+                {
+                    0 or 6 => new Color(V, t, p, 1f),
+                    1 => new Color(q, V, p, 1f),
+                    2 => new Color(p, V, t, 1f),
+                    3 => new Color(p, q, V, 1f),
+                    4 => new Color(t, p, V, 1f),
+                    5 or -1 => new Color(V, p, q, 1f),
+                    _ => new Color(1f, 1f, 1f, 1f),
+                };
+            }
+            if (!hdr)
+            {
+                result.r = Mathf.Clamp01(result.r);
+                result.g = Mathf.Clamp01(result.g);
+                result.b = Mathf.Clamp01(result.b);
+            }
+            return result;
+        }
+
         public static Color Lerp(Color a, Color b, float t) => LerpUnclamped(a, b, Mathf.Clamp01(t));
 
         public static Color LerpUnclamped(Color a, Color b, float t)

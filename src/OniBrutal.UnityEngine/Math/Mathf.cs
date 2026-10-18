@@ -105,8 +105,32 @@ namespace UnityEngine
         public static bool Approximately(float a, float b)
             => Abs(b - a) < Max(1E-06f * Max(Abs(a), Abs(b)), Epsilon * 8f);
 
+        public static float SmoothDamp(float current, float target, ref float currentVelocity, float smoothTime)
+            => SmoothDamp(current, target, ref currentVelocity, smoothTime, Infinity, Time.deltaTime);
 
+        public static float SmoothDamp(float current, float target, ref float currentVelocity, float smoothTime, float maxSpeed)
+            => SmoothDamp(current, target, ref currentVelocity, smoothTime, maxSpeed, Time.deltaTime);
 
+        /// A critically damped spring towards target (Game Programming Gems 4, 1.10). The distance
+        /// still to cover is limited to maxSpeed * smoothTime; a step that would pass the target
+        /// lands on it and stops.
+        public static float SmoothDamp(float current, float target, ref float currentVelocity, float smoothTime, float maxSpeed, float deltaTime)
+        {
+            var spring = new OniBrutal.Engine.SmoothDampSpring(smoothTime, deltaTime);
+            float reach = maxSpeed * spring.SmoothTime;
+            float offset = Clamp(current - target, -reach, reach);
+            float goal = current - offset;
+            float impulse = (currentVelocity + spring.Omega * offset) * deltaTime;
+            currentVelocity = (currentVelocity - spring.Omega * impulse) * spring.Decay;
+            float next = goal + (offset + impulse) * spring.Decay;
+            // Overshoot: the target lies above current exactly when the step ends above it.
+            if (target > current == next > target)
+            {
+                currentVelocity = 0f;
+                return target;
+            }
+            return next;
+        }
 
         public static float Repeat(float t, float length) => Clamp(t - Floor(t / length) * length, 0f, length);
 
@@ -141,6 +165,26 @@ namespace UnityEngine
             int next = NextPowerOfTwo(value);
             int prev = next >> 1;
             return value - prev < next - value ? prev : next;
+        }
+    }
+}
+
+namespace OniBrutal.Engine
+{
+    /// The terms shared by every SmoothDamp overload: the clamped smooth time, the spring's
+    /// angular frequency, and the per-step decay (a cubic approximation of exp(-omega * dt)).
+    internal readonly struct SmoothDampSpring
+    {
+        public readonly float SmoothTime;
+        public readonly float Omega;
+        public readonly float Decay;
+
+        public SmoothDampSpring(float smoothTime, float deltaTime)
+        {
+            SmoothTime = Math.Max(0.0001f, smoothTime);
+            Omega = 2f / SmoothTime;
+            float x = Omega * deltaTime;
+            Decay = 1f / (1f + x + 0.48f * x * x + 0.235f * x * x * x);
         }
     }
 }

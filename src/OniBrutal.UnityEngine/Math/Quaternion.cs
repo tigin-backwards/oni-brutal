@@ -52,8 +52,11 @@ namespace UnityEngine
                 (xz - wy) * point.x + (yz + wx) * point.y + (1f - (xx + yy)) * point.z);
         }
 
+        /// Unity's rotation equality: unit quaternions whose dot product exceeds 1 - kEpsilon
+        /// describe (nearly) the same rotation.
+        static bool DotMeansSameRotation(float dot) => dot > 1f - kEpsilon;
 
-        public static bool operator ==(Quaternion lhs, Quaternion rhs) => IsEqualUsingDot(Dot(lhs, rhs));
+        public static bool operator ==(Quaternion lhs, Quaternion rhs) => DotMeansSameRotation(Dot(lhs, rhs));
         public static bool operator !=(Quaternion lhs, Quaternion rhs) => !(lhs == rhs);
 
         public static float Dot(Quaternion a, Quaternion b) => a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w;
@@ -61,7 +64,7 @@ namespace UnityEngine
         public static float Angle(Quaternion a, Quaternion b)
         {
             float dot = Mathf.Min(Mathf.Abs(Dot(a, b)), 1f);
-            return IsEqualUsingDot(dot) ? 0f : Mathf.Acos(dot) * 2f * Mathf.Rad2Deg;
+            return DotMeansSameRotation(dot) ? 0f : Mathf.Acos(dot) * 2f * Mathf.Rad2Deg;
         }
 
         public static Quaternion Inverse(Quaternion rotation)
@@ -113,8 +116,23 @@ namespace UnityEngine
 
         public Vector3 eulerAngles
         {
-            get => MakePositive(ToEulerRad(this) * Mathf.Rad2Deg);
+            get
+            {
+                var degrees = ToEulerRad(this) * Mathf.Rad2Deg;
+                return new Vector3(WrapDegrees(degrees.x), WrapDegrees(degrees.y), WrapDegrees(degrees.z));
+            }
             set => this = FromEulerRad(value * Mathf.Deg2Rad);
+        }
+
+        /// Folds an angle into [0, 360) with Unity's tolerance of 0.0001 rad (in degrees): an angle
+        /// at most that far below 0 or beyond 360 is returned unchanged; only angles further
+        /// outside the range are shifted by 360.
+        static float WrapDegrees(float degrees)
+        {
+            const float tolerance = 0.0001f * Mathf.Rad2Deg;
+            if (degrees < -tolerance) return degrees + 360f;
+            if (degrees > 360f + tolerance) return degrees - 360f;
+            return degrees;
         }
 
         /// Inverse of FromEulerRad: decomposes R = Ry * Rx * Rz.

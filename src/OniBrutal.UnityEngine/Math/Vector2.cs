@@ -123,8 +123,30 @@ namespace UnityEngine
         public static Vector2 Min(Vector2 lhs, Vector2 rhs) => new Vector2(Mathf.Min(lhs.x, rhs.x), Mathf.Min(lhs.y, rhs.y));
         public static Vector2 Max(Vector2 lhs, Vector2 rhs) => new Vector2(Mathf.Max(lhs.x, rhs.x), Mathf.Max(lhs.y, rhs.y));
 
+        public static Vector2 SmoothDamp(Vector2 current, Vector2 target, ref Vector2 currentVelocity, float smoothTime)
+            => SmoothDamp(current, target, ref currentVelocity, smoothTime, Mathf.Infinity, Time.deltaTime);
 
+        public static Vector2 SmoothDamp(Vector2 current, Vector2 target, ref Vector2 currentVelocity, float smoothTime, float maxSpeed)
+            => SmoothDamp(current, target, ref currentVelocity, smoothTime, maxSpeed, Time.deltaTime);
 
+        /// Mathf.SmoothDamp's spring on the whole vector: the offset to the target is limited in
+        /// length to maxSpeed * smoothTime, and a step ending beyond the target (along the
+        /// direction from current to target) lands on it and stops.
+        public static Vector2 SmoothDamp(Vector2 current, Vector2 target, ref Vector2 currentVelocity, float smoothTime, float maxSpeed, float deltaTime)
+        {
+            var spring = new OniBrutal.Engine.SmoothDampSpring(smoothTime, deltaTime);
+            Vector2 offset = ClampMagnitude(current - target, maxSpeed * spring.SmoothTime);
+            Vector2 goal = current - offset;
+            Vector2 impulse = (currentVelocity + offset * spring.Omega) * deltaTime;
+            currentVelocity = (currentVelocity - impulse * spring.Omega) * spring.Decay;
+            Vector2 next = goal + (offset + impulse) * spring.Decay;
+            if (Dot(target - current, next - target) > 0f)
+            {
+                currentVelocity = zero;
+                return target;
+            }
+            return next;
+        }
 
         public static Vector2 operator +(Vector2 a, Vector2 b) => new Vector2(a.x + b.x, a.y + b.y);
         public static Vector2 operator -(Vector2 a, Vector2 b) => new Vector2(a.x - b.x, a.y - b.y);

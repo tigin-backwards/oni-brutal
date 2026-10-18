@@ -318,8 +318,9 @@ channel meanings must match exactly.
   - Clicking the field selects and activates it.
   - Deselecting it (`OnDeselect`) deactivates it.
 - **Editing:**
-  - Each `LateUpdate` while focused, the field drains the keyboard events with
-    `Event.PopEvent`.
+  - While focused, the field drains the keyboard events with `Event.PopEvent` in
+    `OnUpdateSelected` (measured: not in `LateUpdate`), which the event system's input
+    module sends to the selected object every frame.
   - It handles the documented editing keys: arrows, Home and End, Backspace and Delete,
     Ctrl+A/C/V/X, Enter per line type, and Escape.
   - Typed characters are validated: by `characterValidation`, or by `inputValidator`, which
@@ -332,7 +333,8 @@ channel meanings must match exactly.
   - The placeholder shows when the text is empty.
 
 KInputTextField overrides `LateUpdate` and calls the base implementation, so the base's
-`LateUpdate` must do the work above.
+`LateUpdate` must do its share of the work above (starting a requested activation, caret
+blinking, scrolling the text).
 
 **`TMP_Dropdown`:** like uGUI's `Dropdown`, with TMP texts:
 - **Contents:** `options` (`OptionData`: text and image), `value` and `onValueChanged`.
@@ -349,6 +351,26 @@ KInputTextField overrides `LateUpdate` and calls the base implementation, so the
 - **`FastAction<T>`:** an ordered set of delegates, called in insertion order.
 - **`TMP_Text` exposes** `rectTransform`, `transform` (cached), `mesh` and the `isVolumetricText`
   family as documented.
+
+### Measured on the shipped package
+
+Found by running the implementation's tests and the differential runs against the shipped
+package (M9). They refine the sections above.
+- **Sub-meshes:** `TMP_SubMeshUI` children are named "New Game Object". A sub-mesh that
+  already holds a material the layout uses keeps that material's number; unused ones stay.
+- **Characters:** the zero-width space gets a quad. Character corners include the padding.
+  Small caps keep the text's size and line metrics. Sprites don't raise the line's ascender,
+  and `spriteCount` stays 0.
+- **Stored alignment:** values 0–15 in the game's data use the oldest alignment table; a value
+  set at run time is split into its horizontal and vertical bytes.
+- **Truncation:** Truncate and Ellipsis stop where the first line that doesn't fit begins,
+  leaving a blank record. Truncation keeps the part of a wrapped word that fits.
+- **Auto-size** doesn't choose a size that would break a word, and `preferredHeight` uses the
+  auto-sized size. A margin change keeps the preferred sizes until the text changes.
+- **`textBounds`** spans the characters' advances.
+- **Input field:** `inputValidator` doesn't change `characterValidation`.
+- **Dynamic font assets** use the "TextMeshPro/Mobile/Distance Field" shader.
+- **Timeline:** `TimelineClip` has no public constructor.
 
 ## Verification
 

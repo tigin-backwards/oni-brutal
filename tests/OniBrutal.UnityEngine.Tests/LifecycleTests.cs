@@ -560,6 +560,33 @@ namespace OniBrutal.Tests
             Assert.True(wait.keepWaiting);
             Assert.True(wait.MoveNext());
         }
+
+        [Fact]
+        public void WaitForSecondsRealtimeRearmsAfterItsDeadline()
+        {
+            var wait = new WaitForSecondsRealtime(0.05f);
+            float start = Time.realtimeSinceStartup;
+            Assert.True(wait.keepWaiting);
+            while (wait.keepWaiting)
+                System.Threading.Thread.Sleep(5);
+            Assert.True(Time.realtimeSinceStartup - start >= 0.05f);
+            // Passing the deadline reset the instance: the next query starts a new wait.
+            Assert.True(wait.keepWaiting);
+            wait.waitTime = 0f;
+            wait.Reset();
+            Assert.False(wait.keepWaiting);
+            Assert.Equal(0f, wait.waitTime);
+        }
+
+        [Fact]
+        public void WaitUntilWaitsForItsPredicate()
+        {
+            bool done = false;
+            var wait = new WaitUntil(() => done);
+            Assert.True(wait.keepWaiting);
+            done = true;
+            Assert.False(wait.keepWaiting);
+        }
     }
 
     public class CloneTests : EngineTest

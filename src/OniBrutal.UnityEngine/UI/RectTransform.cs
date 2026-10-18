@@ -137,6 +137,23 @@ namespace UnityEngine
             r.Resolve();
         }
 
+        /// Pins the rect to one edge of its parent: both anchors move to that edge on its axis
+        /// (0 for Left and Bottom, 1 for Right and Top), the size on that axis becomes size, and
+        /// the near side sits inset from the edge whatever the pivot. The other axis is kept.
+        public void SetInsetAndSizeFromParentEdge(Edge edge, float inset, float size)
+        {
+            var r = Rect;
+            int axis = edge == Edge.Top || edge == Edge.Bottom ? 1 : 0;
+            bool farEdge = edge == Edge.Right || edge == Edge.Top;
+            float anchor = farEdge ? 1f : 0f;
+            float pivotOnAxis = r.Pivot[axis];
+            r.AnchorMin[axis] = anchor;
+            r.AnchorMax[axis] = anchor;
+            // With both anchors on the edge the anchor span is empty, so sizeDelta is the size.
+            r.SizeDelta[axis] = size;
+            r.AnchoredPosition[axis] = farEdge ? -inset - size * (1f - pivotOnAxis) : inset + size * pivotOnAxis;
+            r.Resolve();
+        }
 
         internal Rect GetRectInParentSpace()
         {

@@ -119,16 +119,24 @@ namespace UnityEngine
 
         static bool IsAlive(Object o) => (object)o != null && Volatile.Read(ref o.m_CachedPtr) != IntPtr.Zero;
 
+        /// Unity's equality: a destroyed object, or one without a native object, counts as null,
+        /// so it equals null and any other such object; live objects are equal only to themselves.
+        static bool SameOrBothNull(Object x, Object y)
+        {
+            bool xAlive = IsAlive(x), yAlive = IsAlive(y);
+            if (xAlive && yAlive) return ReferenceEquals(x, y);
+            return !xAlive && !yAlive;
+        }
 
         public override bool Equals(object other)
         {
-            if (other is Object o) return CompareBaseObjects(this, o);
+            if (other is Object o) return SameOrBothNull(this, o);
             // Unity: comparing to anything that isn't a UnityEngine.Object is false, except null.
             return other == null && !IsAlive(this);
         }
 
-        public static bool operator ==(Object x, Object y) => CompareBaseObjects(x, y);
-        public static bool operator !=(Object x, Object y) => !CompareBaseObjects(x, y);
+        public static bool operator ==(Object x, Object y) => SameOrBothNull(x, y);
+        public static bool operator !=(Object x, Object y) => !SameOrBothNull(x, y);
         public static implicit operator bool(Object exists) => IsAlive(exists);
 
         // ---- Destruction ----

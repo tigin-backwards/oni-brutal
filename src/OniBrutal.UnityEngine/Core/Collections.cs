@@ -164,3 +164,121 @@ namespace Unity.Collections.LowLevel.Unsafe
     }
 }
 
+
+namespace UnityEngine.Pool
+{
+    /// A stack-based pool: Get hands out the most recently released object or creates one;
+    /// Release keeps objects up to maxSize and destroys the rest.
+    public partial class ObjectPool<T>
+    {
+        readonly Stack<T> idle;
+        readonly Func<T> create;
+        readonly Action<T> onGet;
+        readonly Action<T> onRelease;
+        readonly Action<T> onDestroy;
+        readonly bool checkDoubleRelease;
+        readonly int capacityLimit;
+
+        public ObjectPool(Func<T> createFunc, Action<T> actionOnGet = null, Action<T> actionOnRelease = null, Action<T> actionOnDestroy = null,
+            bool collectionCheck = true, int defaultCapacity = 10, int maxSize = 10000)
+        {
+            if (createFunc == null) throw new ArgumentNullException(nameof(createFunc));
+            if (maxSize <= 0) throw new ArgumentException("Max Size must be greater than 0", nameof(maxSize));
+            idle = new Stack<T>(Math.Max(0, defaultCapacity));
+            create = createFunc;
+            onGet = actionOnGet;
+            onRelease = actionOnRelease;
+            onDestroy = actionOnDestroy;
+            checkDoubleRelease = collectionCheck;
+            capacityLimit = maxSize;
+        }
+
+        /// Every object this pool created and has not destroyed, active or inactive.
+        public int CountAll { get; private set; }
+
+        public int CountActive => CountAll - CountInactive;
+
+        public int CountInactive => idle.Count;
+
+        public T Get()
+        {
+            T item;
+            if (idle.Count > 0)
+                item = idle.Pop();
+            else
+            {
+                item = create();
+                CountAll++;
+            }
+            onGet?.Invoke(item);
+            return item;
+        }
+
+        /// The returned handle releases v back to this pool when disposed.
+        public PooledObject<T> Get(out T v) => new PooledObject<T>(v = Get(), this);
+
+        public void Release(T element)
+        {
+            if (checkDoubleRelease && IsIdle(element))
+                throw new InvalidOperationException("Trying to release an object that has already been released to the pool.");
+            onRelease?.Invoke(element);
+            if (idle.Count < capacityLimit)
+                idle.Push(element);
+            else
+            {
+                onDestroy?.Invoke(element);
+                CountAll--;
+            }
+        }
+
+        public void Clear()
+        {
+            if (onDestroy != null)
+            {
+                foreach (var item in idle)
+                    onDestroy(item);
+            }
+            idle.Clear();
+            CountAll = 0;
+        }
+
+        public void Dispose() => Clear();
+
+        bool IsIdle(T element)
+        {
+            foreach (var item in idle)
+            {
+                if (ReferenceEquals(item, element))
+                    return true;
+            }
+            return false;
+        }
+    }
+
+    /// Returned by the pools' Get(out value): disposing it releases the value to its pool.
+    public partial struct PooledObject<T>
+    {
+        readonly T value;
+        readonly ObjectPool<T> owner;
+
+        internal PooledObject(T value, ObjectPool<T> pool)
+        {
+            this.value = value;
+            owner = pool;
+        }
+
+        void IDisposable.Dispose() => owner.Release(value);
+    }
+
+    /// One shared pool per collection type; collections are cleared when released.
+    public partial class CollectionPool<TCollection, TItem>
+    {
+        static readonly ObjectPool<TCollection> shared = new ObjectPool<TCollection>(() => new TCollection(), null, c => c.Clear());
+
+        public static TCollection Get() => shared.Get();
+
+        public static PooledObject<TCollection> Get(out TCollection value) => shared.Get(out value);
+
+        public static void Release(TCollection toRelease) => shared.Release(toRelease);
+    }
+}

@@ -127,5 +127,45 @@ namespace UnityEngine
         public virtual void Reset() { }
     }
 
+    /// Waits for an amount of unscaled real time. The deadline belongs to the instance: it is
+    /// armed by the first keepWaiting query and cleared once it has passed, so every coroutine
+    /// yielding the same instance at once shares one deadline, and the instance can be yielded
+    /// again afterwards.
+    public partial class WaitForSecondsRealtime
+    {
+        bool deadlineArmed;
+        float deadline;
 
+        public WaitForSecondsRealtime(float time) => waitTime = time;
+
+        public float waitTime { get; set; }
+
+        public override bool keepWaiting
+        {
+            get
+            {
+                float now = Time.realtimeSinceStartup;
+                if (!deadlineArmed)
+                {
+                    deadline = now + waitTime;
+                    deadlineArmed = true;
+                }
+                if (now < deadline) return true;
+                Reset();
+                return false;
+            }
+        }
+
+        public override void Reset() => deadlineArmed = false;
+    }
+
+    /// Suspends a coroutine until the condition returns true; it is evaluated once per query.
+    public partial class WaitUntil
+    {
+        readonly Func<bool> condition;
+
+        public WaitUntil(Func<bool> predicate) => condition = predicate;
+
+        public override bool keepWaiting => !condition();
+    }
 }

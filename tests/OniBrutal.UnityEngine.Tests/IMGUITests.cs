@@ -531,5 +531,295 @@ namespace OniBrutal.Tests
             Frame();
             Assert.Equal(new Rect(80f, 65f, 200f, 100f), windowRect);
         }
+
+        [Fact]
+        public void PopEventLeavesOnGUIItsEventsAndTheRestIsDropped()
+        {
+            var probe = MakeProbe();
+            while (Event.PopEvent(new Event())) { }
+            Queue(EventType.MouseDown, new Vector2(5f, 5f));
+            Queue(EventType.MouseUp, new Vector2(5f, 5f));
+            Assert.Equal(2, Event.GetEventCount());
+            var popped = new Event();
+            Assert.True(Event.PopEvent(popped));
+            Assert.Equal(EventType.MouseDown, popped.type);
+            Assert.Equal(new Vector2(5f, 5f), popped.mousePosition);
+            Assert.Equal(1, Event.GetEventCount());
+            Frame();
+            // OnGUI got both, and the unpopped MouseUp did not survive the frame.
+            Assert.Equal(new[] { EventType.Layout, EventType.MouseDown, EventType.Layout, EventType.MouseUp, EventType.Layout, EventType.Repaint }, probe.Events);
+            Assert.Equal(0, Event.GetEventCount());
+            Frame();
+            Assert.False(Event.PopEvent(new Event()));
+        }
+
+        [Fact]
+        public void BehavioursWithoutGUILayoutGetNoLayoutEvents()
+        {
+            var probe = MakeProbe();
+            probe.useGUILayout = false;
+            Frame();
+            Assert.Equal(new[] { EventType.Repaint }, probe.Events);
+            probe.Events.Clear();
+            Queue(EventType.MouseDown, new Vector2(5f, 5f));
+            Frame();
+            Assert.Equal(new[] { EventType.MouseDown, EventType.Repaint }, probe.Events);
+            // GUILayout is an error there; GUI controls work.
+            bool reached = false, clicked = false;
+            GUIProbe.Body = _ =>
+            {
+                clicked |= GUI.Button(new Rect(0f, 0f, 50f, 20f), "b");
+                GUILayout.Label("not allowed");
+                reached = true;
+            };
+            Frame();
+            Assert.False(reached);
+            Assert.Single(errors);
+            Assert.Contains("useGUILayout", errors[0]);
+            errors.Clear();
+        }
+
+        [Fact]
+        public void ExitGUILeavesTheCallSilently()
+        {
+            var first = MakeProbe();
+            var second = MakeProbe();
+            var log = new List<string>();
+            bool exiting = false;
+            GUIProbe.Body = p =>
+            {
+                if (p != first) { log.Add("second"); return; }
+                GUI.BeginGroup(new Rect(0f, 0f, 10f, 10f));
+                try
+                {
+                    GUIUtility.ExitGUI();
+                }
+                finally
+                {
+                    exiting = GUIUtility.guiIsExiting;
+                }
+                log.Add("after exit");
+            };
+            Frame();
+            Assert.True(exiting);
+            Assert.False(GUIUtility.guiIsExiting);
+            Assert.DoesNotContain("after exit", log);
+            Assert.Contains("second", log);
+            // No error, not even for the group left open.
+            Assert.Empty(errors);
+        }
+
+        [Fact]
+        public void UnbalancedClipsAreReported()
+        {
+            var probe = MakeProbe();
+            GUIProbe.Body = _ => GUI.BeginGroup(new Rect(0f, 0f, 10f, 10f));
+            Frame();
+            Assert.Contains("GUI Error: You are pushing more GUIClips than you are popping. Make sure they are balanced.", errors);
+            errors.Clear();
+        }
+
+        [Fact]
+        public void TabMovesKeyboardFocusThroughTheFields()
+        {
+            var probe = MakeProbe();
+            string a = "one", b = "two";
+            var focused = new List<string>();
+            GUIProbe.Body = _ =>
+            {
+                GUI.SetNextControlName("a");
+                a = GUI.TextField(new Rect(0f, 0f, 100f, 20f), a);
+                GUI.SetNextControlName("b");
+                b = GUI.TextField(new Rect(0f, 30f, 100f, 20f), b);
+                if (Event.current.type == EventType.Repaint) focused.Add(GUI.GetNameOfFocusedControl());
+            };
+            Frame();
+            Assert.Equal(0, GUIUtility.keyboardControl);
+            // A press sends Tab, then its '\t' character; the character is used too.
+            QueueKey(KeyCode.Tab);
+            QueueKey(KeyCode.None, '\t');
+            Frame();
+            Assert.Equal("a", focused[^1]);
+            QueueKey(KeyCode.Tab);
+            QueueKey(KeyCode.None, '\t');
+            Frame();
+            Assert.Equal("b", focused[^1]);
+            QueueKey(KeyCode.Tab, '\0', EventModifiers.Shift);
+            QueueKey(KeyCode.None, '\t', EventModifiers.Shift);
+            Frame();
+            Assert.Equal("a", focused[^1]);
+            Assert.Equal("one", a);
+            Assert.Equal("two", b);
+        }
+
+        [Fact]
+        public void ScrollViewsShowTheirContentAtTheScrollPosition()
+        {
+            var probe = MakeProbe();
+            var position = new Rect(10f, 10f, 100f, 100f);
+            var view = new Rect(0f, 0f, 80f, 400f);
+            var scroll = new Vector2(0f, 50f);
+            Vector2 mouse = default;
+            Rect visible = default;
+            GUIProbe.Body = _ =>
+            {
+                scroll = GUI.BeginScrollView(position, scroll, view);
+                if (Event.current.type == EventType.MouseDown)
+                {
+                    mouse = Event.current.mousePosition;
+                    visible = GUIClip.visibleRect;
+                }
+                GUI.EndScrollView();
+            };
+            Queue(EventType.MouseDown, new Vector2(20f, 20f));
+            Frame();
+            Assert.Equal(new Vector2(0f, 50f), scroll);
+            Assert.Equal(new Vector2(10f, 60f), mouse);
+            Assert.Equal(50f, visible.y);
+            Assert.Equal(100f, visible.height);
+            Assert.True(visible.width < 100f); // the vertical scrollbar takes room
+            // The returned position is clamped to the content.
+            scroll = new Vector2(30f, 1000f);
+            Frame();
+            Assert.Equal(new Vector2(0f, 300f), scroll);
+            // The scroll wheel over the view scrolls it.
+            scroll = new Vector2(0f, 50f);
+            Frame();
+            Event.Enqueue(new Event { type = EventType.ScrollWheel, mousePosition = new Vector2(50f, 50f), delta = new Vector2(0f, 3f) });
+            Frame();
+            Frame();
+            Assert.True(scroll.y > 50f);
+            // ScrollTo brings a rect of the content into view.
+            GUIProbe.Body = _ =>
+            {
+                scroll = GUI.BeginScrollView(position, scroll, view);
+                if (Event.current.type == EventType.Repaint) GUI.ScrollTo(new Rect(0f, 350f, 10f, 20f));
+                GUI.EndScrollView();
+            };
+            Frame();
+            Frame();
+            Assert.Equal(270f, scroll.y);
+        }
+
+        [Fact]
+        public void LayoutScrollViewsLayOutTheirContentAtItsOwnSize()
+        {
+            var probe = MakeProbe();
+            var rects = new Rect[10];
+            Rect viewArea = default;
+            GUIProbe.Body = _ =>
+            {
+                GUILayout.BeginArea(new Rect(0f, 0f, 200f, 100f));
+                GUILayout.BeginScrollView(Vector2.zero, GUIStyle.none, GUIStyle.none);
+                for (int i = 0; i < rects.Length; i++)
+                    rects[i] = GUILayoutUtility.GetRect(100f, 30f, GUILayout.Width(100f), GUILayout.Height(30f));
+                GUILayout.EndScrollView();
+                viewArea = GUILayoutUtility.GetLastRect();
+                GUILayout.EndArea();
+            };
+            Frame();
+            Assert.Equal(new Rect(0f, 90f, 100f, 30f), rects[3]);
+            Assert.Equal(new Rect(0f, 270f, 100f, 30f), rects[9]);
+            // The scroll view itself fills the area.
+            Assert.Equal(new Rect(0f, 0f, 200f, 100f), viewArea);
+        }
+
+        [Fact]
+        public void LayoutWindowsFitTheirContent()
+        {
+            var probe = MakeProbe();
+            var style = new GUIStyle { padding = new RectOffset(5, 5, 20, 5) };
+            var small = new Rect(10f, 10f, 0f, 0f);
+            var large = new Rect(300f, 10f, 500f, 500f);
+            var wide = new Rect(10f, 300f, 0f, 0f);
+            Rect inner = default;
+            GUIProbe.Body = _ =>
+            {
+                small = GUILayout.Window(1, small, id =>
+                {
+                    var r = GUILayoutUtility.GetRect(100f, 40f, GUILayout.Width(100f), GUILayout.Height(40f));
+                    if (Event.current.type == EventType.Repaint) inner = r;
+                }, "", style);
+                large = GUILayout.Window(2, large, id => GUILayoutUtility.GetRect(100f, 40f, GUILayout.Width(100f), GUILayout.Height(40f)), "", style);
+                wide = GUILayout.Window(3, wide, id => GUILayoutUtility.GetRect(100f, 40f, GUILayout.Width(100f), GUILayout.Height(40f)), "", style, GUILayout.Width(300f));
+            };
+            Frame();
+            Frame();
+            Assert.Equal(new Rect(10f, 10f, 110f, 65f), small);
+            Assert.Equal(new Rect(300f, 10f, 110f, 65f), large);
+            Assert.Equal(new Rect(10f, 300f, 300f, 65f), wide);
+            Assert.Equal(new Rect(5f, 20f, 100f, 40f), inner);
+        }
+
+        [Fact]
+        public void GetStyleFindsStylesByNameAndFallsBack()
+        {
+            var warnings = new List<string>();
+            void OnWarning(string message, string stackTrace, LogType type)
+            {
+                if (type == LogType.Warning) warnings.Add(message);
+            }
+            var skin = ScriptableObject.CreateInstance<GUISkin>();
+            skin.name = "TestSkin";
+            var mine = new GUIStyle { name = "Mine" };
+            skin.customStyles = new[] { mine };
+            Application.logMessageReceivedThreaded += OnWarning;
+            try
+            {
+                Assert.Same(skin.button, skin.GetStyle("BUTTON"));
+                Assert.Same(mine, skin.GetStyle("mine"));
+                Assert.Same(mine, skin.FindStyle("MINE"));
+                Assert.Null(skin.FindStyle("missing"));
+                var fallback = skin.GetStyle("missing");
+                Assert.NotNull(fallback);
+                Assert.Contains(warnings, w => w.StartsWith("Unable to find style 'missing' in skin 'TestSkin'"));
+                int count = 0;
+                foreach (GUIStyle s in skin) count++;
+                Assert.Equal(21, count);
+            }
+            finally
+            {
+                Application.logMessageReceivedThreaded -= OnWarning;
+                UnityEngine.Object.DestroyImmediate(skin);
+            }
+            // A string converts to the current skin's style of that name.
+            var probe = MakeProbe();
+            GUIStyle converted = null, button = null;
+            GUIProbe.Body = _ =>
+            {
+                converted = "Button";
+                button = GUI.skin.button;
+            };
+            Frame();
+            Assert.Same(button, converted);
+        }
+
+        [Fact]
+        public void KeyboardEventParsesKeyStrings()
+        {
+            var e = Event.KeyboardEvent("^a");
+            Assert.Equal(EventType.KeyDown, e.type);
+            Assert.Equal(KeyCode.A, e.keyCode);
+            Assert.True(e.control);
+            Assert.False(e.shift);
+            e = Event.KeyboardEvent("#home");
+            Assert.Equal(KeyCode.Home, e.keyCode);
+            Assert.True(e.shift);
+            Assert.True(e.functionKey);
+            e = Event.KeyboardEvent("&%f4");
+            Assert.Equal(KeyCode.F4, e.keyCode);
+            Assert.True(e.alt);
+            Assert.True(e.command);
+            e = Event.KeyboardEvent("[+]");
+            Assert.Equal(KeyCode.KeypadPlus, e.keyCode);
+            Assert.True(e.numeric);
+            e = Event.KeyboardEvent("space");
+            Assert.Equal(KeyCode.Space, e.keyCode);
+            e = Event.KeyboardEvent("#");
+            Assert.Equal(KeyCode.Hash, e.keyCode);
+            Assert.Equal(EventModifiers.None, e.modifiers);
+            Assert.Equal(Event.KeyboardEvent("^a"), Event.KeyboardEvent("^a"));
+            Assert.NotEqual(Event.KeyboardEvent("^a"), Event.KeyboardEvent("a"));
+        }
     }
 }

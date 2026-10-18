@@ -99,8 +99,8 @@ namespace OniBrutal.Engine.IMGUI
         {
             if (!CanDraw || texture == null || rect.width <= 0f || rect.height <= 0f) return;
             vertices.Clear();
-            var abs = GUIClipState.Unclip(rect);
-            var clip = GUIClipState.AbsoluteVisible;
+            var abs = ClipStack.Unclip(rect);
+            var clip = ClipStack.AbsoluteVisible;
             if (border == null || (border.left | border.right | border.top | border.bottom) == 0)
             {
                 AddQuad(abs, uv, color, clip);
@@ -143,7 +143,7 @@ namespace OniBrutal.Engine.IMGUI
         }
 
         static void Add(float x, float y, float u, float v, Color color)
-            => vertices.Add(new ImmediateVertex { Position = GUIClipState.ToScreen(new Vector2(x, y)), Uv0 = new Vector4(u, v, 0f, 0f), Color = color });
+            => vertices.Add(new ImmediateVertex { Position = ClipStack.ToScreen(new Vector2(x, y)), Uv0 = new Vector4(u, v, 0f, 0f), Color = color });
 
         static void Flush(Material material, Texture texture)
         {
@@ -166,11 +166,11 @@ namespace OniBrutal.Engine.IMGUI
             generator.Populate(text, settings);
             var texture = font.material != null ? font.material.mainTexture : null;
             if (texture == null) return;
-            var abs = GUIClipState.Unclip(rect);
-            var clip = GUIClipState.AbsoluteVisible;
+            var abs = ClipStack.Unclip(rect);
+            var clip = ClipStack.AbsoluteVisible;
             if (textClip is { } local)
             {
-                var c = GUIClipState.Unclip(local);
+                var c = ClipStack.Unclip(local);
                 clip = Rect.MinMaxRect(Mathf.Max(clip.xMin, c.xMin), Mathf.Max(clip.yMin, c.yMin), Mathf.Min(clip.xMax, c.xMax), Mathf.Min(clip.yMax, c.yMax));
             }
             vertices.Clear();
@@ -196,10 +196,10 @@ namespace OniBrutal.Engine.IMGUI
         static void AddRotatedGlyph(Rect q, Vector2 tl, Vector2 tr, Vector2 br, Vector2 bl, Color color, Rect clip)
         {
             if (q.xMin < clip.xMin || q.xMax > clip.xMax || q.yMin < clip.yMin || q.yMax > clip.yMax) return;
-            vertices.Add(new ImmediateVertex { Position = GUIClipState.ToScreen(new Vector2(q.xMin, q.yMin)), Uv0 = tl, Color = color });
-            vertices.Add(new ImmediateVertex { Position = GUIClipState.ToScreen(new Vector2(q.xMax, q.yMin)), Uv0 = tr, Color = color });
-            vertices.Add(new ImmediateVertex { Position = GUIClipState.ToScreen(new Vector2(q.xMax, q.yMax)), Uv0 = br, Color = color });
-            vertices.Add(new ImmediateVertex { Position = GUIClipState.ToScreen(new Vector2(q.xMin, q.yMax)), Uv0 = bl, Color = color });
+            vertices.Add(new ImmediateVertex { Position = ClipStack.ToScreen(new Vector2(q.xMin, q.yMin)), Uv0 = tl, Color = color });
+            vertices.Add(new ImmediateVertex { Position = ClipStack.ToScreen(new Vector2(q.xMax, q.yMin)), Uv0 = tr, Color = color });
+            vertices.Add(new ImmediateVertex { Position = ClipStack.ToScreen(new Vector2(q.xMax, q.yMax)), Uv0 = br, Color = color });
+            vertices.Add(new ImmediateVertex { Position = ClipStack.ToScreen(new Vector2(q.xMin, q.yMax)), Uv0 = bl, Color = color });
         }
     }
 

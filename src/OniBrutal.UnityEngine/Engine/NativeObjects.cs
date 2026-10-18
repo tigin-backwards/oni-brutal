@@ -89,8 +89,15 @@ namespace OniBrutal.Engine
         public bool StartPending;
         public ScriptInfo Script;
         public int ExecutionOrder;
+        /// MonoBehaviour.useGUILayout: OnGUI gets Layout events and may use GUILayout.
+        public bool UseGUILayout = true;
 
-        public override void CopyStateFrom(NativeObject source) => Enabled = ((BehaviourNative)source).Enabled;
+        public override void CopyStateFrom(NativeObject source)
+        {
+            var b = (BehaviourNative)source;
+            Enabled = b.Enabled;
+            UseGUILayout = b.UseGUILayout;
+        }
         /// Per-behaviour coroutines (MonoBehaviour only).
         public List<CoroutineState> Coroutines;
     }

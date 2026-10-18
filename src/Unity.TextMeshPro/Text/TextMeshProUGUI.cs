@@ -20,9 +20,13 @@ namespace TMPro
         protected override void Awake()
         {
             base.Awake();
+            // A rect of the default size (100 x 100) becomes 200 x 50 (measured: the shipped
+            // package's texts added at run time are).
+            if (rectTransform.sizeDelta == new Vector2(100f, 100f)) rectTransform.sizeDelta = new Vector2(200f, 50f);
             if (MeshCache == null) MeshCache = new Mesh { name = "TextMeshPro UI Mesh" };
-            if (m_textInfo == null) m_textInfo = new TMP_TextInfo(this);
-            else m_textInfo.textComponent = this;
+            // The text info starts new (the data's serialized one is not used: a text that never
+            // laid out reports one material, as the shipped package's does).
+            m_textInfo = new TMP_TextInfo(this);
             if (m_fontAsset == null) m_fontAsset = TMP_Settings.defaultFontAsset;
             if (m_sharedMaterial == null && m_fontAsset != null) m_sharedMaterial = m_fontAsset.material;
             // The colour is m_fontColor; data may hold an older m_fontColor32.
@@ -268,13 +272,14 @@ namespace TMPro
 
         float CurrentScale() => Mathf.Abs(rectTransform.lossyScale.y);
 
-        // The SDF scale of the vertices includes the text's lossy scale relative to its canvas's
-        // scale factor (1 for a text scaled only by its canvas).
+        // The SDF scale of the vertices includes the text's lossy scale: in a screen space
+        // overlay canvas relative to the canvas's scale factor (1 for a text scaled only by its
+        // canvas), in camera and world space canvases as it is (measured on the shipped package).
         private protected override float SdfScaleFactor()
         {
             var c = CanvasCache;
             float scale = CurrentScale();
-            if (c == null || c.scaleFactor == 0f) return scale;
+            if (c == null || c.scaleFactor == 0f || c.renderMode != RenderMode.ScreenSpaceOverlay) return scale;
             return scale / c.scaleFactor;
         }
 

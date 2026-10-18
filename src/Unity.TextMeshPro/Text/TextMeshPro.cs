@@ -59,8 +59,9 @@ namespace TMPro
             base.Awake();
             if (MeshCache == null) MeshCache = new Mesh { name = "TextMeshPro Mesh" };
             meshFilter.sharedMesh = MeshCache;
-            if (m_textInfo == null) m_textInfo = new TMP_TextInfo(this);
-            else m_textInfo.textComponent = this;
+            // The text info starts new (the data's serialized one is not used: a text that never
+            // laid out reports one material, as the shipped package's does).
+            m_textInfo = new TMP_TextInfo(this);
             if (m_fontAsset == null) m_fontAsset = TMP_Settings.defaultFontAsset;
             if (m_sharedMaterial == null && m_fontAsset != null) m_sharedMaterial = m_fontAsset.material;
             m_fontColor32 = m_fontColor;

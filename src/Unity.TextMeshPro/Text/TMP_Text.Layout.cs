@@ -550,9 +550,8 @@ namespace TMPro
                 float reciprocalScale = size * (1f / face.pointSize) * face.scale * (character?.scale ?? 1f) * (glyph?.scale ?? 1f);
                 preferredAdvance = gm.horizontalAdvance * reciprocalScale * p.XScale;
                 // Every character that is not white space draws its glyph's quad; the zero-width
-                // space draws none (measured: the shipped package's buffer for "\u200B" holds one
-                // spare quad and no vertices are used).
-                p.Visible = !p.Whitespace && glyph != null && c != 0x200B;
+                // space only where white space is preserved (measured on the shipped package).
+                p.Visible = !p.Whitespace && glyph != null && (c != 0x200B || m_TextWrappingMode == TextWrappingModes.PreserveWhitespace || m_TextWrappingMode == TextWrappingModes.PreserveWhitespaceNoWrap);
                 float styleSpacing = p.Bold ? font.boldSpacing : font.normalSpacingOffset;
                 spacing = (m_characterSpacing + styleSpacing) * em;
                 if (c == 32 || c == 0xA0) spacing += m_wordSpacing * em;

@@ -205,6 +205,15 @@ namespace TMPro
                 e.MaterialIndex = 0;
                 return;
             }
+            // A zero-width space the text's font does not have is an empty glyph of that font,
+            // not a fallback's (measured on the shipped package).
+            if (shown == 0x200B && (state.Font ?? m_Text.font) is { } zwFont && !zwFont.TryGetLocalCharacter(shown, out _))
+            {
+                e.Element = EmptyCharacter(zwFont);
+                e.Asset = zwFont;
+                e.MaterialIndex = MaterialFor(zwFont, state, false);
+                return;
+            }
             if (!ResolveGlyph(shown, state, out var character, out var asset, out bool alternate))
             {
                 // Emoji and other characters may come from the sprite assets.
@@ -225,6 +234,16 @@ namespace TMPro
             e.Asset = asset;
             e.AlternateTypeface = alternate;
             e.MaterialIndex = MaterialFor(asset, state, false);
+        }
+
+        static readonly Dictionary<int, TMP_Character> s_EmptyCharacters = new();
+
+        static TMP_Character EmptyCharacter(TMP_FontAsset font)
+        {
+            int id = font.GetInstanceID();
+            if (!s_EmptyCharacters.TryGetValue(id, out var c))
+                s_EmptyCharacters[id] = c = new TMP_Character(0x200B, font, new UnityEngine.TextCore.Glyph(0, new UnityEngine.TextCore.GlyphMetrics(0f, 0f, 0f, 0f, 0f), new UnityEngine.TextCore.GlyphRect(0, 0, 0, 0)));
+            return c;
         }
 
         void ResolveEllipsis(TextState state)

@@ -422,5 +422,69 @@ namespace OniBrutal.Tests
             Assert.Equal(0, mi.colors32[20].a);
             Assert.Equal(-1f, mi.normals[20].z);
         }
+
+        [Fact]
+        public void BuffersGrowToTheNextPowerOfTwoOfTheQuadsPlusOne()
+        {
+            var t = Text("", width: 300f, height: 100f);
+            Assert.Equal(4, t.textInfo.meshInfo[0].vertices.Length);
+            t.text = "a";
+            t.ForceMeshUpdate();
+            Assert.Equal(4, t.textInfo.meshInfo[0].vertices.Length);
+            t.text = "ab";
+            t.ForceMeshUpdate();
+            Assert.Equal(16, t.textInfo.meshInfo[0].vertices.Length);
+            t.text = "abcd";
+            t.ForceMeshUpdate();
+            Assert.Equal(16, t.textInfo.meshInfo[0].vertices.Length);
+            t.text = "abcde";
+            t.ForceMeshUpdate();
+            Assert.Equal(32, t.textInfo.meshInfo[0].vertices.Length);
+        }
+
+        [Fact]
+        public void WherePreservedTheZeroWidthSpaceWritesAnUncountedQuad()
+        {
+            // The text's font has no zero-width space: it is an empty glyph of that font.
+            var t = Text("\u200B", width: 300f, height: 100f);
+            t.textWrappingMode = TextWrappingModes.PreserveWhitespaceNoWrap;
+            t.ForceMeshUpdate();
+            var info = t.textInfo;
+            Assert.True(info.characterInfo[0].isVisible);
+            Assert.Equal(0, info.meshInfo[0].vertexCount);
+            Assert.Equal(1, info.materialCount);
+            Assert.NotEqual(Vector3.zero, info.meshInfo[0].vertices[0]);
+        }
+
+        [Fact]
+        public void ATextAddedToADefaultRectMakesIt200By50()
+        {
+            var go = new GameObject("Text", typeof(RectTransform));
+            go.AddComponent<TextMeshProUGUI>();
+            Assert.Equal(new Vector2(200f, 50f), ((RectTransform)go.transform).sizeDelta);
+        }
+
+        [Theory]
+        [InlineData(RenderMode.ScreenSpaceOverlay, 1f)]
+        [InlineData(RenderMode.WorldSpace, 2f)]
+        public void TheSdfScaleIsRelativeToTheScaleFactorOnlyInOverlayCanvases(RenderMode mode, float expectedFactor)
+        {
+            TmpTestSupport.LoadGameData();
+            var canvasGo = new GameObject("Canvas", typeof(RectTransform));
+            var canvas = canvasGo.AddComponent<Canvas>();
+            canvas.renderMode = mode;
+            canvas.scaleFactor = 2f;
+            if (mode == RenderMode.WorldSpace) canvasGo.transform.localScale = Vector3.one * 2f;
+            var go = new GameObject("Text", typeof(RectTransform));
+            go.transform.SetParent(canvasGo.transform, false);
+            var t = go.AddComponent<TextMeshProUGUI>();
+            t.font = TmpTestSupport.Graystroke;
+            t.fontSize = 14f;
+            t.text = "a";
+            Frame();
+            Canvas.ForceUpdateCanvases();
+            float s = 14f / t.font.faceInfo.pointSize * t.font.faceInfo.scale;
+            Assert.Equal(s * expectedFactor, t.textInfo.meshInfo[0].uvs0[0].w, 5);
+        }
     }
 }

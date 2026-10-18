@@ -47,7 +47,8 @@ namespace TMPro
             Span<int> needed = materialCount <= 32 ? stackalloc int[materialCount] : new int[materialCount];
             for (int i = 0; i < count; i++)
             {
-                if (!chars[i].isVisible) continue;
+                // A visible zero-width space takes no quad of its own (see below).
+                if (!chars[i].isVisible || chars[i].character == '\u200B') continue;
                 needed[chars[i].materialReferenceIndex]++;
             }
             CountDecorations(needed);
@@ -58,15 +59,16 @@ namespace TMPro
                 ref var mi = ref info.meshInfo[m];
                 var mesh = MeshForMaterial(m);
                 // A new buffer holds the quads and one more; when a later layout needs more quads
-                // than it holds, it grows to the next power of two of that number.
+                // than it holds, it grows to the next power of two of that number plus one.
                 if (mi.vertices == null || mi.mesh != mesh || mi.QuadCapacity == 0) mi = new TMP_MeshInfo(mesh, needed[m] + 1);
-                else if (mi.QuadCapacity < needed[m]) mi.ResizeMeshInfo(Mathf.NextPowerOfTwo(needed[m]));
+                else if (mi.QuadCapacity < needed[m]) mi.ResizeMeshInfo(Mathf.NextPowerOfTwo(needed[m] + 1));
                 mi.material = m < parsed.Materials.Count ? parsed.Materials[m].Material : m_sharedMaterial;
                 mi.vertexCount = 0;
             }
 
             float sdfFactor = SdfScaleFactor();
             m_GeneratedSdfFactor = sdfFactor;
+            Span<int> written = materialCount <= 32 ? stackalloc int[materialCount] : new int[materialCount];
             for (int i = 0; i < count; i++)
             {
                 ref var ci = ref chars[i];
@@ -75,10 +77,16 @@ namespace TMPro
                 ref var el = ref parsed.Elements[p.Element];
                 ref var mi = ref info.meshInfo[ci.materialReferenceIndex];
                 int v = mi.vertexCount;
+                // A visible zero-width space (white space preserved) writes its quad where the
+                // next one goes without counting it (measured: an input field's text draws the
+                // padding of its end marker in the spare quad).
+                bool uncounted = ci.character == '\u200B';
+                if (uncounted && v + 4 > mi.vertices.Length) continue;
                 ci.vertexIndex = v;
                 if (el.Kind == ElementKind.Sprite) WriteSprite(ref ci, ref p, ref el, ref mi, v);
                 else WriteCharacter(ref ci, ref p, ref el, ref mi, v, sdfFactor);
-                mi.vertexCount = v + 4;
+                written[ci.materialReferenceIndex] = Math.Max(written[ci.materialReferenceIndex], v + 4);
+                if (!uncounted) mi.vertexCount = v + 4;
             }
             WriteDecorations(sdfFactor);
 
@@ -86,7 +94,7 @@ namespace TMPro
             for (int m = 0; m < materialCount; m++)
             {
                 ref var mi = ref info.meshInfo[m];
-                mi.ClearUnusedVertices(mi.vertexCount);
+                mi.ClearUnusedVertices(Math.Max(mi.vertexCount, written[m]));
                 for (int k = 0; k < mi.vertexCount; k++)
                 {
                     var pos = mi.vertices[k];

@@ -299,5 +299,19 @@ namespace OniBrutal.Tests
             Assert.Equal(1, t.textInfo.materialCount);
             Assert.Equal(0, t.textInfo.characterCount);
         }
+
+        [Fact]
+        public void ItalicGlyphsLeanAroundHalfTheCapHeight()
+        {
+            var upright = Text("a");
+            var italic = Text("<i>a</i>");
+            var u = upright.textInfo.meshInfo[0].vertices;
+            var v = italic.textInfo.meshInfo[0].vertices;
+            var c = italic.textInfo.characterInfo[0];
+            float shear = (v[1].x - v[0].x) / (v[1].y - v[0].y);
+            float pivot = c.baseLine + italic.font.faceInfo.capLine * 0.5f * (14f / italic.font.faceInfo.pointSize * italic.font.faceInfo.scale);
+            Assert.Equal(u[0].x + shear * (v[0].y - pivot), v[0].x, 3);
+            Assert.Equal(u[1].x + shear * (v[1].y - pivot), v[1].x, 3);
+        }
     }
 }

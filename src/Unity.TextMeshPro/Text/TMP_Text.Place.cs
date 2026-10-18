@@ -201,10 +201,11 @@ namespace TMPro
                         y0 = (float)((double)line.Baseline + p.Bottom + p.KernY) + offsetY;
                     }
                     float shear = p.Italic && !el.AlternateTypeface ? ItalicShear(ci.fontAsset) : 0f;
-                    ci.bottomLeft = new Vector3(x0 + shear * (p.Bottom - p.BaselineShift), y0, 0f);
-                    ci.topLeft = new Vector3(x0 + shear * (p.Top - p.BaselineShift), y1, 0f);
-                    ci.topRight = new Vector3(x1 + shear * (p.Top - p.BaselineShift), y1, 0f);
-                    ci.bottomRight = new Vector3(x1 + shear * (p.Bottom - p.BaselineShift), y0, 0f);
+                    float pivot = shear != 0f && ci.fontAsset != null ? ci.fontAsset.faceInfo.capLine * 0.5f * p.FontScale : 0f;
+                    ci.bottomLeft = new Vector3(x0 + shear * (p.Bottom - p.BaselineShift - pivot), y0, 0f);
+                    ci.topLeft = new Vector3(x0 + shear * (p.Top - p.BaselineShift - pivot), y1, 0f);
+                    ci.topRight = new Vector3(x1 + shear * (p.Top - p.BaselineShift - pivot), y1, 0f);
+                    ci.bottomRight = new Vector3(x1 + shear * (p.Bottom - p.BaselineShift - pivot), y0, 0f);
                     ci.aspectRatio = y1 - y0 != 0f ? (x1 - x0) / (y1 - y0) : 0f;
                     ci.color = CharacterColor(ref el);
                     ci.underlineColor = Opaque(el.State.UnderlineColor, ci.color);

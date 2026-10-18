@@ -170,8 +170,11 @@ namespace TMPro
             {
                 float shear = ItalicShear(font);
                 float lineBaseline = ci.baseLine + p.KernY;
-                shearTop = shear * (y1 - lineBaseline);
-                shearBottom = shear * (y0 - lineBaseline);
+                // The glyph leans around half its font's cap height (measured on the shipped
+                // package).
+                float pivot = font.faceInfo.capLine * 0.5f * p.FontScale;
+                shearTop = shear * (y1 - lineBaseline - pivot);
+                shearBottom = shear * (y0 - lineBaseline - pivot);
             }
             mi.vertices[v] = new Vector3(x0 + shearBottom, y0, 0f);
             mi.vertices[v + 1] = new Vector3(x0 + shearTop, y1, 0f);

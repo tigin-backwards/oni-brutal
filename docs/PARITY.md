@@ -148,6 +148,28 @@ Legend: `[x]` verified · `[ ]` not yet verified · `[~]` deviation (see the not
 - [x] Dev tools (debug mode, Ctrl+\`): `ImGuiRenderer` creates its target (`RenderTextureDescriptor`, `GetTemporary`) as in the original; the game's Linux `cimgui.so` has no `SetKAssertCB`, so both players log `EntryPointNotFoundException` and then crash natively in `igRender` (the dev tools do not work in the Linux build). The command-buffer path ImGui draws with (`DrawMesh`, scissor rectangles, view/projection matrices, `Graphics.ExecuteCommandBuffer`) is implemented for a cimgui that has the entry point
 - [x] Instant build (Ctrl+F4), Dev Life Support, Dev Generator in the build menu
 
+## M9: this project's uGUI against the shipped package
+
+`scripts/m9-compare.sh` runs each scenario with Unity's shipped `UnityEngine.UI.dll` and with
+`src/UnityEngine.UI` (written from `docs/cleanroom/ugui.md`), the shipped TextMeshPro in both.
+A difference is accepted when a run of the same scenario with the shipped package on both sides
+(a baseline, `scripts/m9-compare.sh SCENARIO OUT EMPTY-DIR`) shows it too.
+
+- [x] `menu`, `options` (both legacy dropdowns opened and closed, the UI scale slider, the audio
+  sliders and a checkbox), `management` (Priorities with the wheel, Vitals, Consumables): no
+  differences except the main menu's animated DLC glow (`BGGlow`), which differs between two
+  shipped runs as well.
+- [x] `management2` (Skills, Research, Schedule): the research tree's pan and zoom position, which
+  the game animates with real time; two shipped runs differ there too.
+- [x] `colony` (DeCrew, Database search): the search field's TextMeshPro caret, which blinks with
+  real time (and shifts the draw order of everything after it), and notifications whose arrival
+  depends on the simulation's real-time pace.
+- [x] `newgame`: what the game randomizes (the initial coordinates before they are typed, the
+  story shown first, the Duplicants, their name labels) and the world generation's progress at a
+  given frame; every difference also appears between two shipped runs.
+- [~] 2D colliders never block a `GraphicRaycaster` (blocking objects TwoD/All): the engine runs no
+  2D physics queries. The shipped package cannot do it on this engine either.
+
 ## Deviations
 
 - `SystemInfo.supportsComputeShaders` is false (the engine implements no compute shaders; the game reads it only for its hardware metrics and an unused image-effect check). `SystemInfo.graphicsMemorySize` is the dedicated video memory (the original printed a slightly lower figure here, likely the memory available at the time).

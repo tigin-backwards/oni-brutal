@@ -1,8 +1,5 @@
 using System;
 using System.IO;
-using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Runtime.Loader;
 using OniBrutal.Engine.Assets;
 using TMPro;
 using UnityEngine;
@@ -10,27 +7,12 @@ using Object = UnityEngine.Object;
 
 namespace OniBrutal.Tests
 {
-    /// TextMeshPro runs with the game's shipped uGUI until this project's is finished: it loads
-    /// from the game's Managed/ folder, its engine module facades from the test directory.
+    /// The game data the TextMeshPro tests use (fonts, sprite assets, settings).
     static class TmpTestSupport
     {
         internal static string GameDir =>
             Environment.GetEnvironmentVariable("ONI_GAME_DIR")
             ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "projects", "oni-linux");
-
-        [ModuleInitializer]
-        internal static void Install()
-        {
-            AssemblyLoadContext.Default.Resolving += (context, name) =>
-            {
-                string path;
-                if (name.Name == "UnityEngine.UI") path = Path.Combine(GameDir, "OxygenNotIncluded_Data", "Managed", "UnityEngine.UI.dll");
-                else if (name.Name == "UnityEngine" || (name.Name.StartsWith("UnityEngine.", StringComparison.Ordinal) && name.Name.EndsWith("Module", StringComparison.Ordinal)))
-                    path = Path.Combine(AppContext.BaseDirectory, name.Name + ".dll");
-                else return null;
-                return File.Exists(path) ? context.LoadFromAssemblyPath(path) : null;
-            };
-        }
 
         static bool s_Loaded;
 

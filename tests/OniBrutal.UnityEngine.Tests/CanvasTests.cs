@@ -45,6 +45,34 @@ namespace OniBrutal.Tests
             Assert.Equal(7, nestedCanvas.sortingOrder);
         }
 
+        sealed class HierarchyListener : MonoBehaviour
+        {
+            public int Changes;
+            void OnCanvasHierarchyChanged() => Changes++;
+        }
+
+        [Fact]
+        public void EnablingOrDisablingACanvasTellsTheScriptsBelowIt()
+        {
+            var root = new GameObject("Root", typeof(RectTransform)).AddComponent<Canvas>();
+            var nestedGo = new GameObject("Nested", typeof(RectTransform));
+            nestedGo.transform.SetParent(root.transform, false);
+            var nested = nestedGo.AddComponent<Canvas>();
+            var child = new GameObject("Child", typeof(RectTransform));
+            child.transform.SetParent(nestedGo.transform, false);
+            var onCanvas = nestedGo.AddComponent<HierarchyListener>();
+            var below = child.AddComponent<HierarchyListener>();
+            var outside = root.gameObject.AddComponent<HierarchyListener>();
+
+            nested.enabled = false;
+            Assert.Equal(1, onCanvas.Changes);
+            Assert.Equal(1, below.Changes);
+            nested.enabled = true;
+            Assert.Equal(2, below.Changes);
+            // Scripts above the canvas are not told.
+            Assert.Equal(0, outside.Changes);
+        }
+
         [Fact]
         public void InstantiateRemapsTheCanvasCameraIntoTheClone()
         {

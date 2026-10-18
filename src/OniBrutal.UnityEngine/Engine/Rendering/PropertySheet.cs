@@ -54,6 +54,13 @@ namespace OniBrutal.Engine.Rendering
         /// Bumped on every change, so dependents (the device, TMP's CRC checks) can tell.
         public int Version;
 
+        /// The render epoch until which a queued draw shares this sheet (MaterialPropertyBlock).
+        public int SharedEpoch = -1;
+
+        /// Counts rendered frames: draws queued during an epoch are consumed when it ends
+        /// (FrameRenderer.EndFrame). Main thread only.
+        public static int RenderEpoch;
+
         public bool IsEmpty => Floats.Count == 0 && Ints.Count == 0 && Vectors.Count == 0 && Matrices.Count == 0 && Textures.Count == 0
                                && FloatArrays.Count == 0 && VectorArrays.Count == 0 && MatrixArrays.Count == 0;
 

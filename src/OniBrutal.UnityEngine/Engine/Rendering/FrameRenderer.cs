@@ -250,6 +250,8 @@ namespace OniBrutal.Engine.Rendering
                 foreach (var (path, scale) in captures) Capture(path, scale);
             captures.Clear();
             frameQueued.Clear();
+            // The frame's queued draws are done with the property blocks they share.
+            PropertySheet.RenderEpoch++;
             TemporaryRenderTextures.EndFrame();
             // Device resources of objects the collector reclaimed (private meshes of destroyed
             // renderers and the like).

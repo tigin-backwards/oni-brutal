@@ -216,8 +216,8 @@ namespace UnityEngine
         {
             if (properties == null) throw new ArgumentNullException(nameof(properties));
             var r = RendererData;
-            if (r.PropertyBlock == null) properties.Sheet.Clear();
-            else properties.Sheet.CopyFrom(r.PropertyBlock);
+            if (r.PropertyBlock == null) properties.Clear();
+            else properties.Writable.CopyFrom(r.PropertyBlock);
         }
     }
 

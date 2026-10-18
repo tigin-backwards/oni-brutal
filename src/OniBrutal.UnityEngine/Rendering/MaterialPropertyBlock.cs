@@ -6,35 +6,59 @@ namespace UnityEngine
     /// Per-renderer overrides of material properties.
     public partial class MaterialPropertyBlock
     {
-        internal readonly PropertySheet Sheet = new();
+        /// The block's values. Graphics.DrawMesh queues a draw with this sheet itself rather than
+        /// a copy and marks it shared until the frame renders (PropertySheet.SharedEpoch); a change
+        /// to the block before then moves the block to a copy (Writable), so the queued draw keeps
+        /// the values it was given, as Unity's copy at DrawMesh does. ONI draws every animation
+        /// batch through DrawMesh with a block it sets each frame before drawing.
+        internal PropertySheet Sheet { get; private set; } = new();
+
+        /// The sheet, made the block's own first if a queued draw still shares it.
+        internal PropertySheet Writable
+        {
+            get
+            {
+                if (Sheet.SharedEpoch == PropertySheet.RenderEpoch)
+                {
+                    var copy = new PropertySheet();
+                    copy.CopyFrom(Sheet);
+                    Sheet = copy;
+                }
+                return Sheet;
+            }
+        }
 
         public MaterialPropertyBlock() { }
 
         public bool isEmpty => Sheet.IsEmpty;
 
-        public void Clear() => Sheet.Clear();
+        public void Clear()
+        {
+            if (Sheet.SharedEpoch == PropertySheet.RenderEpoch) Sheet = new PropertySheet();
+            else Sheet.Clear();
+        }
 
-        public void SetFloat(string name, float value) => Sheet.SetFloat(Shader.PropertyToID(name), value);
-        public void SetFloat(int nameID, float value) => Sheet.SetFloat(nameID, value);
+        public void SetFloat(string name, float value) => Writable.SetFloat(Shader.PropertyToID(name), value);
+        public void SetFloat(int nameID, float value) => Writable.SetFloat(nameID, value);
         // SetInt writes a float property, as on materials.
-        public void SetInt(string name, int value) => Sheet.SetFloat(Shader.PropertyToID(name), value);
-        public void SetInt(int nameID, int value) => Sheet.SetFloat(nameID, value);
-        public void SetInteger(string name, int value) => Sheet.SetInt(Shader.PropertyToID(name), value);
-        public void SetInteger(int nameID, int value) => Sheet.SetInt(nameID, value);
-        public void SetColor(string name, Color value) => Sheet.SetVector(Shader.PropertyToID(name), value);
-        public void SetColor(int nameID, Color value) => Sheet.SetVector(nameID, value);
-        public void SetVector(string name, Vector4 value) => Sheet.SetVector(Shader.PropertyToID(name), value);
-        public void SetVector(int nameID, Vector4 value) => Sheet.SetVector(nameID, value);
-        public void SetMatrix(string name, Matrix4x4 value) => Sheet.SetMatrix(Shader.PropertyToID(name), value);
-        public void SetMatrix(int nameID, Matrix4x4 value) => Sheet.SetMatrix(nameID, value);
-        public void SetTexture(string name, Texture value) => Sheet.SetTexture(Shader.PropertyToID(name), value);
-        public void SetTexture(int nameID, Texture value) => Sheet.SetTexture(nameID, value);
+        public void SetInt(string name, int value) => Writable.SetFloat(Shader.PropertyToID(name), value);
+        public void SetInt(int nameID, int value) => Writable.SetFloat(nameID, value);
+        public void SetInteger(string name, int value) => Writable.SetInt(Shader.PropertyToID(name), value);
+        public void SetInteger(int nameID, int value) => Writable.SetInt(nameID, value);
+        public void SetColor(string name, Color value) => Writable.SetVector(Shader.PropertyToID(name), value);
+        public void SetColor(int nameID, Color value) => Writable.SetVector(nameID, value);
+        public void SetVector(string name, Vector4 value) => Writable.SetVector(Shader.PropertyToID(name), value);
+        public void SetVector(int nameID, Vector4 value) => Writable.SetVector(nameID, value);
+        public void SetMatrix(string name, Matrix4x4 value) => Writable.SetMatrix(Shader.PropertyToID(name), value);
+        public void SetMatrix(int nameID, Matrix4x4 value) => Writable.SetMatrix(nameID, value);
+        public void SetTexture(string name, Texture value) => Writable.SetTexture(Shader.PropertyToID(name), value);
+        public void SetTexture(int nameID, Texture value) => Writable.SetTexture(nameID, value);
 
         public void SetFloatArray(string name, float[] values) => SetFloatArray(Shader.PropertyToID(name), values);
         public void SetFloatArray(int nameID, float[] values)
         {
             Material.CheckArray(values, values?.Length ?? 0);
-            Sheet.SetFloatArray(nameID, values, values.Length);
+            Writable.SetFloatArray(nameID, values, values.Length);
         }
 
         public void SetFloatArray(string name, List<float> values) => SetFloatArray(Shader.PropertyToID(name), values?.ToArray());
@@ -44,7 +68,7 @@ namespace UnityEngine
         public void SetVectorArray(int nameID, Vector4[] values)
         {
             Material.CheckArray(values, values?.Length ?? 0);
-            Sheet.SetVectorArray(nameID, values, values.Length);
+            Writable.SetVectorArray(nameID, values, values.Length);
         }
 
         public void SetVectorArray(string name, List<Vector4> values) => SetVectorArray(Shader.PropertyToID(name), values?.ToArray());

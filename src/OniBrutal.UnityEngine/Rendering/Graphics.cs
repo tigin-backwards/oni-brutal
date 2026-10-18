@@ -75,18 +75,20 @@ namespace UnityEngine
             => DrawMesh(mesh, matrix, material, layer, camera, submeshIndex, null);
 
         /// Queues the mesh for every camera of this frame (or only `camera`) whose culling mask
-        /// includes `layer`; the property block is copied now. Lighting and shadow arguments
-        /// have no effect in this project (no lights or shadows are rendered).
+        /// includes `layer`; the property block's values are those it has now (the draw shares
+        /// the block's sheet until the frame renders, and a later change to the block moves the
+        /// block to a copy). Lighting and shadow arguments have no effect in this project (no
+        /// lights or shadows are rendered).
         public static void DrawMesh(Mesh mesh, Matrix4x4 matrix, Material material, int layer, Camera camera, int submeshIndex, MaterialPropertyBlock properties)
         {
             if (mesh == null) throw new ArgumentNullException(nameof(mesh));
-            PropertySheet copy = null;
+            PropertySheet shared = null;
             if (properties != null && !properties.isEmpty)
             {
-                copy = new PropertySheet();
-                copy.CopyFrom(properties.Sheet);
+                shared = properties.Sheet;
+                shared.SharedEpoch = PropertySheet.RenderEpoch;
             }
-            FrameRenderer.Queue(new QueuedMesh { Mesh = mesh, Matrix = matrix, Material = material, Layer = layer, Camera = camera, SubMesh = submeshIndex, Properties = copy });
+            FrameRenderer.Queue(new QueuedMesh { Mesh = mesh, Matrix = matrix, Material = material, Layer = layer, Camera = camera, SubMesh = submeshIndex, Properties = shared });
         }
 
         public static void DrawMesh(Mesh mesh, Matrix4x4 matrix, Material material, int layer, Camera camera, int submeshIndex, MaterialPropertyBlock properties, bool castShadows, bool receiveShadows)

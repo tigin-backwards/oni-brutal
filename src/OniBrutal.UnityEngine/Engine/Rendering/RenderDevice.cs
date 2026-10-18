@@ -1,5 +1,5 @@
-using System.Collections.Generic;
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -221,9 +221,16 @@ namespace OniBrutal.Engine.Rendering
                 if (weak.TryGetTarget(out var texture) && !texture.Destroyed) Current.Upload(texture);
         }
 
-        /// Releases the resources of owners that no longer exist. Returns how many.
+        static int collectionsAtLastScan = -1;
+
+        /// Releases the resources of owners that no longer exist. Returns how many. An owner can
+        /// only stop existing in a garbage collection, so the owners are looked at only when one
+        /// has run since the last look.
         public static int ReleaseOrphans()
         {
+            int collections = GC.CollectionCount(0);
+            if (collections == collectionsAtLastScan) return 0;
+            collectionsAtLastScan = collections;
             List<object> orphans = null;
             foreach (var (gpu, owner) in owners)
                 if (!owner.TryGetTarget(out _)) (orphans ??= new()).Add(gpu);

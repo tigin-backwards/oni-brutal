@@ -8,26 +8,32 @@ namespace OniBrutal.Engine
     internal static class Finder
     {
         /// Every GameObject in loaded scenes and DontDestroyOnLoad, in hierarchy order.
-        public static IEnumerable<GameObjectNative> AllSceneGameObjects()
+        public static IEnumerable<GameObjectNative> AllSceneGameObjects() => Collect(activeOnly: false);
+
+        public static IEnumerable<GameObjectNative> ActiveGameObjects() => Collect(activeOnly: true);
+
+        /// The scenes' GameObjects in hierarchy order (pre-order from each root), collected before
+        /// they are returned so callers may change the hierarchy. With activeOnly, inactive
+        /// subtrees are skipped whole: no descendant of an inactive object is active.
+        static List<GameObjectNative> Collect(bool activeOnly)
         {
+            var result = new List<GameObjectNative>();
+            var stack = new Stack<TransformNative>();
             foreach (var scene in Scenes.WithDontDestroyOnLoad())
                 foreach (var root in scene.Roots.ToArray())
-                    foreach (var go in Walk(root))
-                        yield return go;
-        }
-
-        public static IEnumerable<GameObjectNative> ActiveGameObjects()
-        {
-            foreach (var go in AllSceneGameObjects())
-                if (go.ActiveInHierarchy) yield return go;
-        }
-
-        static IEnumerable<GameObjectNative> Walk(GameObjectNative go)
-        {
-            yield return go;
-            foreach (var child in go.Transform.Children)
-                foreach (var g in Walk(child.GameObject))
-                    yield return g;
+                {
+                    stack.Push(root.Transform);
+                    while (stack.Count > 0)
+                    {
+                        var t = stack.Pop();
+                        var go = t.GameObject;
+                        if (activeOnly && !go.ActiveInHierarchy) continue;
+                        result.Add(go);
+                        var children = t.Children;
+                        for (int i = children.Length - 1; i >= 0; i--) stack.Push(children[i]);
+                    }
+                }
+            return result;
         }
 
         /// Objects of `type` that live in scenes: GameObjects and their components. Inactive ones
@@ -35,13 +41,20 @@ namespace OniBrutal.Engine
         public static IEnumerable<UnityEngine.Object> SceneObjects(Type type, bool includeInactive, FindObjectsSortMode sortMode)
         {
             var results = new List<UnityEngine.Object>();
-            foreach (var go in AllSceneGameObjects())
+            bool gameObjects = type.IsAssignableFrom(typeof(GameObject));
+            bool components = type == typeof(UnityEngine.Object) || typeof(Component).IsAssignableFrom(type) || type.IsInterface;
+            // Whether a concrete component class matches: the same few classes recur thousands of times.
+            var matches = new Dictionary<Type, bool>();
+            foreach (var go in Collect(activeOnly: !includeInactive))
             {
-                if (!includeInactive && !go.ActiveInHierarchy) continue;
-                if (type.IsInstanceOfType(go.Managed)) results.Add(go.Managed);
+                if (gameObjects) results.Add(go.Managed);
+                if (!components) continue;
                 foreach (var c in go.Components)
                 {
-                    if (!type.IsInstanceOfType(c)) continue;
+                    if (c is null) continue;
+                    var ct = c.GetType();
+                    if (!matches.TryGetValue(ct, out bool match)) matches[ct] = match = type.IsAssignableFrom(ct);
+                    if (!match) continue;
                     if (!includeInactive && c is Behaviour b && !b.enabled) continue;
                     results.Add(c);
                 }

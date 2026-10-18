@@ -423,10 +423,11 @@ namespace OniBrutal.Engine
         {
             var changed = new List<GameObjectNative>();
             SetFlags(go, false, changed);
+            var deactivated = new HashSet<GameObjectNative>(changed);
             void PostOrder(GameObjectNative g)
             {
                 foreach (var child in g.Transform.Children)
-                    if (changed.Contains(child.GameObject)) PostOrder(child.GameObject);
+                    if (deactivated.Contains(child.GameObject)) PostOrder(child.GameObject);
                 foreach (var c in g.Components)
                     if (c.Native != null) Disable(c);
                 StopCoroutinesOn(g);

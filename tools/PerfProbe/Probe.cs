@@ -3,10 +3,10 @@ using UnityEngine;
 namespace PerfProbe
 {
     /// TEST INFRASTRUCTURE: the same frame-rate measurement in both players. Once a colony is
-    /// loaded it keeps the game running at the fastest speed (closing dialogs and unpausing every
-    /// 60 frames, as autosaves and events pause it) and logs, every 600 frames, the mean frame
-    /// rate over them from the real-time clock, with the cycle. Mods.json stamp: -2037174645
-    /// (the Mono string hash of the folder name PerfProbe, ARCHITECTURE D3).
+    /// loaded it keeps the game running at the fastest speed (when autosaves or events have
+    /// paused it, closing dialogs and unpausing, checked every 60 frames) and logs, every 600
+    /// frames, the mean frame rate over them from the real-time clock, with the cycle. Mods.json
+    /// stamp: -2037174645 (the Mono string hash of the folder name PerfProbe, ARCHITECTURE D3).
     public class Mod : KMod.UserMod2
     {
         public override void OnLoad(HarmonyLib.Harmony harmony)
@@ -29,14 +29,13 @@ namespace PerfProbe
             {
                 yield return null;
                 if (Game.Instance == null) yield break;
-                if (Time.frameCount % 60 == 0)
+                // Only when the game has stopped: the search for dialogs walks the whole scene, a
+                // cost the measurement must not carry.
+                if (Time.frameCount % 60 == 0 && (SpeedControlScreen.Instance.IsPaused || SpeedControlScreen.Instance.GetSpeed() != 2))
                 {
                     foreach (var d in FindObjectsByType<KModalScreen>(FindObjectsSortMode.None)) d.Deactivate();
-                    if (SpeedControlScreen.Instance.IsPaused || SpeedControlScreen.Instance.GetSpeed() != 2)
-                    {
-                        SpeedControlScreen.Instance.SetSpeed(2);
-                        SpeedControlScreen.Instance.Unpause(false);
-                    }
+                    SpeedControlScreen.Instance.SetSpeed(2);
+                    SpeedControlScreen.Instance.Unpause(false);
                 }
                 if (++frames < 600) continue;
                 float now = Time.realtimeSinceStartup;

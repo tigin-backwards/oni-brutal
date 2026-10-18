@@ -59,6 +59,8 @@ namespace OniBrutal.Engine
 
         /// The native side of Components[0].
         public TransformNative Transform;
+        /// Slot in the owning scene's root list while a root, else -1 (SceneRoots).
+        public int RootSlot = -1;
     }
 
     internal class ComponentNative : NativeObject

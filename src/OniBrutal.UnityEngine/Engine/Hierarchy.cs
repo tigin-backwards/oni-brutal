@@ -144,9 +144,10 @@ namespace OniBrutal.Engine
             var scene = t.GameObject.Scene;
             if (scene == null) return;
             int at = scene.Roots.IndexOf(t.GameObject);
+            if (at < 0) return;
             index = Math.Clamp(index, 0, scene.Roots.Count - 1);
             if (at == index) return;
-            scene.Roots.RemoveAt(at);
+            scene.Roots.Remove(t.GameObject);
             scene.Roots.Insert(index, t.GameObject);
         }
     }

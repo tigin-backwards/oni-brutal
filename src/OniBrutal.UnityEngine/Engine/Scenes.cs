@@ -12,8 +12,8 @@ namespace OniBrutal.Engine
         public int BuildIndex = -1;
         public bool IsLoaded;
         public bool IsDontDestroyOnLoad;
-        /// Root transforms in hierarchy order. Main thread only.
-        public readonly List<GameObjectNative> Roots = new();
+        /// Root GameObjects in hierarchy order. Main thread only.
+        public readonly SceneRoots Roots = new();
     }
 
     /// Registry of loaded scenes, the active scene and the DontDestroyOnLoad scene.

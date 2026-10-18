@@ -6,9 +6,9 @@ namespace UnityEngine.Playables
     {
         private PlayableHandle m_Handle;
 
-        private static readonly Playable m_NullPlayable = new Playable(PlayableHandle.Null);
+        private static readonly Playable NullInstance = new Playable(PlayableHandle.Null);
 
-        public static Playable Null => m_NullPlayable;
+        public static Playable Null => NullInstance;
 
         /// A generic playable (no behaviour) with `inputCount` unconnected inputs.
         public static Playable Create(PlayableGraph graph, int inputCount = 0)

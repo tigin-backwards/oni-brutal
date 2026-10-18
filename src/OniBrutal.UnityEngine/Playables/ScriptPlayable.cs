@@ -6,9 +6,9 @@ namespace UnityEngine.Playables
     {
         private PlayableHandle m_Handle;
 
-        private static readonly ScriptPlayable<T> m_NullPlayable = new ScriptPlayable<T>(PlayableHandle.Null);
+        private static readonly ScriptPlayable<T> NullInstance = new ScriptPlayable<T>(PlayableHandle.Null);
 
-        public static ScriptPlayable<T> Null => m_NullPlayable;
+        public static ScriptPlayable<T> Null => NullInstance;
 
         /// A playable owning a new T (created with `new T()`, or ScriptableObject.CreateInstance
         /// for ScriptableObject behaviours).

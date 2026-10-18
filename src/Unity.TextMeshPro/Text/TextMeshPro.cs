@@ -156,9 +156,6 @@ namespace TMPro
 
         private protected override Mesh MeshForMaterial(int index) => null;
 
-        // A world text draws every material through sub-meshes of its own mesh: it has no
-        // sub-mesh objects whose slots persist.
-        internal override void AddSubMeshMaterialSlots(System.Collections.Generic.List<MaterialSlot> slots) { }
 
         void UpdateRendererMaterials()
         {

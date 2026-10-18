@@ -7,7 +7,7 @@ namespace UnityEngine.Timeline
     {
         const double DefaultDuration = 5.0;
 
-        public TimelineClip()
+        internal TimelineClip()
         {
             m_Duration = DefaultDuration;
             m_TimeScale = 1.0;

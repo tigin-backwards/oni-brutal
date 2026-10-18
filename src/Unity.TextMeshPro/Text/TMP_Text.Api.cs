@@ -146,11 +146,22 @@ namespace TMPro
             m_CharWidthAdjustment = widthAdjust;
         }
 
-        // From the first line's ascender to the last line's descender.
+        // From the first line's ascender to the last line's descender. With auto-size, at the
+        // size auto-size chooses for the rect.
         float PreferredHeightAt(float width)
         {
             if (m_fontAsset == null) return 0f;
-            LayoutUnadjusted(width);
+            if (m_enableAutoSizing)
+            {
+                float lineAdjust = m_LineSpacingAdjustment, widthAdjust = m_CharWidthAdjustment;
+                float size = ChooseFontSize(LayoutRect);
+                m_LineSpacingAdjustment = 0f;
+                m_CharWidthAdjustment = 0f;
+                Layout(size, width, float.PositiveInfinity);
+                m_LineSpacingAdjustment = lineAdjust;
+                m_CharWidthAdjustment = widthAdjust;
+            }
+            else LayoutUnadjusted(width);
             if (s_LineCount == 0) return RoundUp(m_margin.y + m_margin.w);
             ref var last = ref s_Lines[s_LineCount - 1];
             double height = (double)s_Lines[0].Ascender - ((double)last.Baseline + last.Descender);

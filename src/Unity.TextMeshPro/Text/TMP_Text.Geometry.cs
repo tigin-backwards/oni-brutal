@@ -113,6 +113,25 @@ namespace TMPro
             return font.boldStyle / 4f * gradient * ratio;
         }
 
+        // The quad of a character: its glyph's box with the padding, relative to the pen and the
+        // baseline and then offset into the rect.
+        private protected void GlyphQuad(ref Placement p, ref ParsedElement el, TMP_FontAsset font, out float x0, out float x1, out float y0, out float y1)
+        {
+            var gm = el.Element.glyph.metrics;
+            float pad = m_Padding;
+            float stylePad = p.Bold ? BoldPadding(font) : 0f;
+            float s = p.Scale;
+            float xs = s * p.XScale;
+            double pen = (double)p.Pen + p.MonoOffset;
+            double baseline = (double)p.BaselineRel + p.KernY;
+            // Each value is one expression evaluated in double precision and stored as a float
+            // (as the shipped package's arithmetic on the game's runtime is).
+            x0 = (float)(pen + ((double)gm.horizontalBearingX - pad - stylePad) * xs) + p.OffsetX;
+            x1 = (float)(pen + ((double)gm.horizontalBearingX + gm.width + pad + stylePad) * xs) + p.OffsetX;
+            y1 = (float)(baseline + ((double)gm.horizontalBearingY + pad) * s) + p.OffsetY;
+            y0 = (float)(baseline + ((double)gm.horizontalBearingY - gm.height - pad) * s) + p.OffsetY;
+        }
+
         void WriteCharacter(ref TMP_CharacterInfo ci, ref Placement p, ref ParsedElement el, ref TMP_MeshInfo mi, int v, float sdfFactor)
         {
             var glyph = el.Element.glyph;
@@ -125,15 +144,7 @@ namespace TMPro
             float stylePad = p.Bold ? BoldPadding(font) : 0f;
             float s = p.Scale;
             float xs = s * p.XScale;
-            double pen = (double)p.Pen + p.MonoOffset;
-            double baseline = (double)p.BaselineRel + p.KernY;
-            // Each value is computed relative to the line, in one expression evaluated in double
-            // precision and stored as a float, then offset into the rect (as the shipped package's
-            // arithmetic on the game's runtime is).
-            float x0 = (float)(pen + ((double)gm.horizontalBearingX - pad - stylePad) * xs) + p.OffsetX;
-            float x1 = (float)(pen + ((double)gm.horizontalBearingX + gm.width + pad + stylePad) * xs) + p.OffsetX;
-            float y1 = (float)(baseline + ((double)gm.horizontalBearingY + pad) * s) + p.OffsetY;
-            float y0 = (float)(baseline + ((double)gm.horizontalBearingY - gm.height - pad) * s) + p.OffsetY;
+            GlyphQuad(ref p, ref el, font, out float x0, out float x1, out float y0, out float y1);
             float shearTop = 0f, shearBottom = 0f;
             if (p.Italic && !el.AlternateTypeface)
             {

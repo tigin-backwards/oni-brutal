@@ -10,6 +10,17 @@ namespace OniBrutal.Tests
     // The input field and dropdown, driven through the player loop and the event queue.
     public class TmpInputTests : EngineTest
     {
+        // An input module that only sends the selected object its update event each frame (as
+        // the game's input module does).
+        sealed class SelectedUpdateModule : BaseInputModule
+        {
+            public override void Process()
+            {
+                var selected = eventSystem.currentSelectedGameObject;
+                if (selected != null) ExecuteEvents.Execute(selected, GetBaseEventData(), ExecuteEvents.updateSelectedHandler);
+            }
+        }
+
         sealed class UpperCaseOnly : TMP_InputValidator
         {
             // Inserts upper-case letters only (as the game's validators insert what they accept).
@@ -25,7 +36,7 @@ namespace OniBrutal.Tests
         static TMP_InputField NewField()
         {
             TmpTestSupport.LoadGameData();
-            if (EventSystem.current == null) new GameObject("EventSystem").AddComponent<EventSystem>();
+            if (EventSystem.current == null) new GameObject("EventSystem", typeof(EventSystem), typeof(SelectedUpdateModule));
             var canvasGo = new GameObject("Canvas", typeof(RectTransform));
             canvasGo.AddComponent<Canvas>().renderMode = RenderMode.ScreenSpaceOverlay;
             var fieldGo = new GameObject("Field", typeof(RectTransform));
@@ -49,8 +60,13 @@ namespace OniBrutal.Tests
             var text = textGo.AddComponent<TextMeshProUGUI>();
             text.font = TmpTestSupport.Graystroke;
             text.fontSize = 14f;
+            var placeholderGo = new GameObject("Placeholder", typeof(RectTransform));
+            placeholderGo.transform.SetParent(area.transform, false);
+            var placeholder = placeholderGo.AddComponent<TextMeshProUGUI>();
+            placeholder.font = TmpTestSupport.Graystroke;
             field.textViewport = areaRect;
             field.textComponent = text;
+            field.placeholder = placeholder;
             fieldGo.SetActive(true);
             return field;
         }
@@ -143,7 +159,7 @@ namespace OniBrutal.Tests
 
             var custom = NewField();
             custom.inputValidator = ScriptableObject.CreateInstance<UpperCaseOnly>();
-            Assert.Equal(TMP_InputField.CharacterValidation.CustomValidator, custom.characterValidation);
+            custom.characterValidation = TMP_InputField.CharacterValidation.CustomValidator;
             custom.ActivateInputField();
             Frame();
             Type(Char('a'), Char('B'), Char('1'), Char('C'));
@@ -163,9 +179,7 @@ namespace OniBrutal.Tests
             Assert.False(field.isFocused);
             Assert.Equal("q", ended);
             // The placeholder shows when the text is empty.
-            var placeholder = new GameObject("Placeholder", typeof(RectTransform)).AddComponent<TextMeshProUGUI>();
-            placeholder.transform.SetParent(field.textViewport, false);
-            field.placeholder = placeholder;
+            var placeholder = (TextMeshProUGUI)field.placeholder;
             Assert.False(placeholder.enabled);
             field.text = "";
             Assert.True(placeholder.enabled);
@@ -175,7 +189,7 @@ namespace OniBrutal.Tests
         public void DropdownShowsItsOptionsAndSetsTheValue()
         {
             TmpTestSupport.LoadGameData();
-            if (EventSystem.current == null) new GameObject("EventSystem").AddComponent<EventSystem>();
+            if (EventSystem.current == null) new GameObject("EventSystem", typeof(EventSystem), typeof(SelectedUpdateModule));
             var canvasGo = new GameObject("Canvas", typeof(RectTransform));
             canvasGo.AddComponent<Canvas>().renderMode = RenderMode.ScreenSpaceOverlay;
             canvasGo.AddComponent<GraphicRaycaster>();
@@ -190,6 +204,7 @@ namespace OniBrutal.Tests
             // The template: a list with a content holding one toggle item with a text.
             var template = new GameObject("Template", typeof(RectTransform));
             template.transform.SetParent(root.transform, false);
+            template.AddComponent<CanvasGroup>();
             var templateRect = (RectTransform)template.transform;
             templateRect.sizeDelta = new Vector2(160f, 150f);
             var content = new GameObject("Content", typeof(RectTransform));
@@ -223,6 +238,7 @@ namespace OniBrutal.Tests
             Assert.Equal(2, changed);
             Assert.Equal("High", caption.text);
 
+            Frame();
             dropdown.Show();
             Assert.True(dropdown.IsExpanded);
             var list = root.transform.Find("Dropdown List");

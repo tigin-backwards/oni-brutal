@@ -642,29 +642,21 @@ namespace TMPro
             }
         }
 
-        // An alignment stored by older data (m_textAlignment, formerly m_lineJustification)
-        // splits into the two alignments. The oldest format numbered the alignments 0-15: rows
-        // Top, Middle, Bottom and Baseline of Left, Center, Right and Justified.
+        // An alignment stored by older data (m_textAlignment) splits into the two alignments:
+        // its low byte is the horizontal one, its high byte the vertical one. A stored 0 leaves
+        // them as they are (measured: the game's data has texts with 0 that the shipped package
+        // shows top left, while a stored 5 becomes horizontal 5, vertical 0).
         private protected void ConvertAlignment()
         {
             if (m_textAlignment == TextAlignmentOptions.Converted) return;
+            if (m_textAlignment == 0)
+            {
+                m_textAlignment = TextAlignmentOptions.Converted;
+                return;
+            }
             int a = (int)m_textAlignment;
-            if (a >= 0 && a < 16)
-            {
-                m_HorizontalAlignment = (HorizontalAlignmentOptions)(1 << (a & 3));
-                m_VerticalAlignment = (a >> 2) switch
-                {
-                    0 => VerticalAlignmentOptions.Top,
-                    1 => VerticalAlignmentOptions.Middle,
-                    2 => VerticalAlignmentOptions.Bottom,
-                    _ => VerticalAlignmentOptions.Baseline,
-                };
-            }
-            else
-            {
-                m_HorizontalAlignment = (HorizontalAlignmentOptions)(a & 0xFF);
-                m_VerticalAlignment = (VerticalAlignmentOptions)(a & 0xFF00);
-            }
+            m_HorizontalAlignment = (HorizontalAlignmentOptions)(a & 0xFF);
+            m_VerticalAlignment = (VerticalAlignmentOptions)(a & 0xFF00);
             m_textAlignment = TextAlignmentOptions.Converted;
         }
 
@@ -787,7 +779,8 @@ namespace TMPro
             {
                 if (m_overflowMode == value) return;
                 m_overflowMode = value;
-                Changed();
+                // Ellipsis resolves its character when the text is parsed.
+                Changed(parse: true);
             }
         }
 
@@ -1079,7 +1072,13 @@ namespace TMPro
             {
                 if (m_margin == value) return;
                 m_margin = value;
+                // The preferred sizes keep their margins until the text or its formatting
+                // changes (as the shipped package's do).
+                float width = m_CachedPreferredWidth, height = m_CachedPreferredHeight, heightWidth = m_CachedPreferredHeightWidth;
                 Changed();
+                m_CachedPreferredWidth = width;
+                m_CachedPreferredHeight = height;
+                m_CachedPreferredHeightWidth = heightWidth;
             }
         }
 

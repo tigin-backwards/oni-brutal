@@ -248,19 +248,30 @@ namespace TMPro
             }
         }
 
-        internal override void AddSubMeshMaterialSlots(List<MaterialSlot> slots)
+        // Materials are numbered by first use in each layout; sub-mesh k draws material k. A
+        // sub-mesh that already has a material the layout uses moves to that material's number
+        // (trading places with the one there), so it keeps its material. Sub-meshes a layout
+        // does not use stay, drawing nothing.
+        void AssignSubMeshes(int materialCount)
         {
-            foreach (var s in m_SubMeshes)
+            for (int k = 1; k < materialCount; k++)
             {
-                if (s == null) continue;
-                var asset = (TMP_Asset)s.fontAsset ?? s.spriteAsset;
-                slots.Add(new MaterialSlot { Material = s.sharedMaterial, Asset = asset, IsSprite = s.spriteAsset != null });
+                var material = Parsed.Materials[k].Material;
+                if (k - 1 < m_SubMeshes.Length && m_SubMeshes[k - 1] != null && m_SubMeshes[k - 1].sharedMaterial == material) continue;
+                for (int j = k; j < m_SubMeshes.Length; j++)
+                {
+                    if (m_SubMeshes[j] == null || m_SubMeshes[j].sharedMaterial != material) continue;
+                    if (m_SubMeshes.Length < k) System.Array.Resize(ref m_SubMeshes, k);
+                    (m_SubMeshes[k - 1], m_SubMeshes[j]) = (m_SubMeshes[j], m_SubMeshes[k - 1]);
+                    break;
+                }
             }
         }
 
         private protected override Mesh MeshForMaterial(int index)
         {
             if (index == 0) return MeshCache ??= new Mesh { name = "TextMeshPro UI Mesh" };
+            if (index == 1) AssignSubMeshes(Parsed.Materials.Count);
             var sub = SubMesh(index);
             return sub.mesh;
         }
@@ -284,6 +295,7 @@ namespace TMPro
             ref var main = ref info.meshInfo[0];
             UploadMesh(ref main, mesh, TMP_VertexDataUpdateFlags.All);
             canvasRenderer.SetMesh(mesh);
+            AssignSubMeshes(materialCount);
             for (int i = 1; i < materialCount; i++)
             {
                 var sub = SubMesh(i);
@@ -403,12 +415,7 @@ namespace TMPro
         public override Vector4 margin
         {
             get => m_margin;
-            set
-            {
-                if (m_margin == value) return;
-                m_margin = value;
-                Changed();
-            }
+            set => base.margin = value;
         }
 
         // ----- Masking -----

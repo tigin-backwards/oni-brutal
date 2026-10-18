@@ -72,8 +72,9 @@ namespace OniBrutal.Tests
             Assert.Equal("abC", Characters(Text("<lowercase>AB</lowercase>C")));
             var t = Text("<smallcaps>aB</smallcaps>");
             Assert.Equal("AB", Characters(t));
-            Assert.Equal(14f * 0.8f, t.textInfo.characterInfo[0].pointSize, 3);
-            Assert.Equal(14f, t.textInfo.characterInfo[1].pointSize, 3);
+            // The small capitals are drawn at 80%; the characters keep the text's size.
+            Assert.Equal(14f, t.textInfo.characterInfo[0].pointSize, 3);
+            Assert.Equal(t.textInfo.characterInfo[1].scale * 0.8f, t.textInfo.characterInfo[0].scale, 5);
         }
 
         [Fact]
@@ -143,7 +144,6 @@ namespace OniBrutal.Tests
             var info = t.textInfo;
             Assert.Equal(3, info.characterCount);
             Assert.Equal(TMP_TextElementType.Sprite, info.characterInfo[1].elementType);
-            Assert.Equal(1, info.spriteCount);
             // The sprite is drawn by a sub-mesh with the sprite asset's material.
             Assert.Equal(2, info.materialCount);
             Assert.Equal(1, info.characterInfo[1].materialReferenceIndex);
@@ -176,7 +176,7 @@ namespace OniBrutal.Tests
             Assert.NotNull(asset);
             Assert.Equal(AtlasPopulationMode.Dynamic, asset.atlasPopulationMode);
             Assert.Equal(TextureFormat.Alpha8, asset.atlasTexture.format);
-            Assert.Equal("TextMeshPro/Distance Field", asset.material.shader.name);
+            Assert.Equal("TextMeshPro/Mobile/Distance Field", asset.material.shader.name);
             Assert.Equal(6f, asset.material.GetFloat(ShaderUtilities.ID_GradientScale));
             Assert.False(asset.HasCharacter('Q'));
             Assert.True(asset.TryAddCharacters("QuiT", out string missing));

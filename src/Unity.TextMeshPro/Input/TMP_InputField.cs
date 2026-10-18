@@ -9,8 +9,9 @@ namespace TMPro
 {
     // An editable text: a TMP text in a viewport, a placeholder, and a caret and selection drawn
     // by a child graphic. ActivateInputField starts editing in the next LateUpdate; while focused,
-    // each LateUpdate drains the keyboard events (Event.PopEvent) and applies the editing keys and
-    // typed characters (validated); the text scrolls to keep the caret visible.
+    // the event system's update of the selected object drains the keyboard events
+    // (Event.PopEvent) and applies the editing keys and typed characters (validated), as the
+    // shipped package does; LateUpdate scrolls the text to keep the caret visible.
     public partial class TMP_InputField
     {
         enum EditState
@@ -283,8 +284,9 @@ namespace TMPro
             get => m_InputValidator;
             set
             {
+                // The validator applies when characterValidation is CustomValidator (setting it
+                // does not change that, as in the shipped package).
                 m_InputValidator = value;
-                SetToCustom(CharacterValidation.CustomValidator);
             }
         }
 
@@ -559,26 +561,8 @@ namespace TMPro
             ApplyScroll();
         }
 
-        // Keyboard input is handled in LateUpdate.
         public virtual void OnUpdateSelected(BaseEventData eventData)
         {
-            if (!isFocused) return;
-            eventData.Use();
-        }
-
-        // ----- Editing -----
-
-        protected virtual void LateUpdate()
-        {
-            if (m_ShouldActivateNextUpdate)
-            {
-                m_ShouldActivateNextUpdate = false;
-                if (!isFocused)
-                {
-                    ActivateNow();
-                    return;
-                }
-            }
             if (!isFocused) return;
             bool changed = false;
             while (Event.PopEvent(m_ProcessingEvent))
@@ -596,6 +580,23 @@ namespace TMPro
                 }
             }
             if (changed) UpdateLabel();
+            eventData.Use();
+        }
+
+        // ----- Editing -----
+
+        protected virtual void LateUpdate()
+        {
+            if (m_ShouldActivateNextUpdate)
+            {
+                m_ShouldActivateNextUpdate = false;
+                if (!isFocused)
+                {
+                    ActivateNow();
+                    return;
+                }
+            }
+            if (!isFocused) return;
             // The text laid out for the current content places the caret: scroll to it.
             if (m_TextComponent != null && !m_TextComponent.havePropertiesChanged) KeepCaretVisible();
             UpdateBlink();

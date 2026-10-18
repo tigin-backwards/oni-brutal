@@ -36,8 +36,17 @@ namespace TMPro
             int pages = lineCount == 0 ? 1 : lines[lineCount - 1].Page + 1;
             int shownPage = m_overflowMode == TextOverflowModes.Page ? Mathf.Clamp(m_pageToDisplay - 1, 0, pages - 1) : -1;
             m_FirstHiddenLine = lineCount;
-            bool hidesOverflow = m_overflowMode == TextOverflowModes.Truncate || m_overflowMode == TextOverflowModes.Ellipsis || m_overflowMode == TextOverflowModes.Linked;
-            if (hidesOverflow && overflowLine >= 0)
+            if ((m_overflowMode == TextOverflowModes.Truncate || m_overflowMode == TextOverflowModes.Ellipsis) && overflowLine >= 0)
+            {
+                Truncate(overflowLine, ref count, ref lineCount);
+                info.EnsureCharacters(count + 1);
+                info.EnsureLines(lineCount + 1);
+                info.characterCount = count;
+                info.lineCount = lineCount;
+                m_FirstHiddenLine = lineCount;
+                m_IsTextTruncated = true;
+            }
+            else if (m_overflowMode == TextOverflowModes.Linked && overflowLine >= 0)
             {
                 // The first line is shown even when it alone overflows.
                 m_FirstHiddenLine = Mathf.Max(overflowLine, 1);
@@ -83,15 +92,6 @@ namespace TMPro
                 }
             }
 
-            if (m_overflowMode == TextOverflowModes.Ellipsis && m_LayoutOverflowIndex >= 0 && lineCount > 0)
-            {
-                int last = Mathf.Clamp(m_FirstHiddenLine - 1, 0, lineCount - 1);
-                InsertEllipsis(last, ref count, ref lineCount);
-                info.EnsureCharacters(count + 1);
-                info.characterCount = count;
-                info.lineCount = lineCount;
-                m_FirstHiddenLine = lineCount;
-            }
 
             // Right-to-left lines mirror their pen positions.
             if (m_isRightToLeft)
@@ -157,6 +157,7 @@ namespace TMPro
                     ref var el = ref parsed.Elements[p.Element];
                     ref var ci = ref chars[i];
                     ci = default;
+                    if (p.Blank) continue;
                     ci.elementType = el.Kind == ElementKind.Sprite ? TMP_TextElementType.Sprite : TMP_TextElementType.Character;
                     ci.character = (char)el.Unicode;
                     ci.index = el.SourceIndex;
@@ -183,8 +184,20 @@ namespace TMPro
                     ci.baseLine = baselineRel + offsetY;
                     ci.ascender = (float)((double)line.Baseline + p.Ascender) + offsetY;
                     ci.descender = (float)((double)line.Baseline + p.Descender) + offsetY;
-                    float x0 = (float)((double)pen + p.MonoOffset + p.Left) + offsetX, x1 = (float)((double)pen + p.MonoOffset + p.Right) + offsetX;
-                    float y1 = (float)((double)line.Baseline + p.Top + p.KernY) + offsetY, y0 = (float)((double)line.Baseline + p.Bottom + p.KernY) + offsetY;
+                    float x0, x1, y0, y1;
+                    if (el.Kind == ElementKind.Character && el.Element?.glyph != null)
+                    {
+                        // A character's corners are its quad's: the glyph's box with the
+                        // material's padding (and synthesized bold's).
+                        GlyphQuad(ref p, ref el, ci.fontAsset, out x0, out x1, out y0, out y1);
+                    }
+                    else
+                    {
+                        x0 = (float)((double)pen + p.MonoOffset + p.Left) + offsetX;
+                        x1 = (float)((double)pen + p.MonoOffset + p.Right) + offsetX;
+                        y1 = (float)((double)line.Baseline + p.Top + p.KernY) + offsetY;
+                        y0 = (float)((double)line.Baseline + p.Bottom + p.KernY) + offsetY;
+                    }
                     float shear = p.Italic && !el.AlternateTypeface ? ItalicShear(ci.fontAsset) : 0f;
                     ci.bottomLeft = new Vector3(x0 + shear * (p.Bottom - p.BaselineShift), y0, 0f);
                     ci.topLeft = new Vector3(x0 + shear * (p.Top - p.BaselineShift), y1, 0f);
@@ -203,21 +216,24 @@ namespace TMPro
                     if (p.Visible)
                     {
                         visibleOnLine++;
+                        // A line's extents span its characters' quads and its ascender to
+                        // descender.
                         extents.min.x = Mathf.Min(extents.min.x, x0);
-                        extents.min.y = Mathf.Min(extents.min.y, y0);
+                        extents.min.y = Mathf.Min(extents.min.y, ci.descender);
                         extents.max.x = Mathf.Max(extents.max.x, x1);
-                        extents.max.y = Mathf.Max(extents.max.y, y1);
+                        extents.max.y = Mathf.Max(extents.max.y, ci.ascender);
                     }
                     // Line feeds count as spaces.
                     if (p.Whitespace) spacesOnLine++;
-                    if (el.Kind == ElementKind.Sprite) info.spriteCount++;
                     if (p.Whitespace) info.spaceCount++;
+                    // The text's extents (textBounds, the rendered size) span the visible
+                    // characters' advances and their ascenders to descenders.
                     if (visible)
                     {
-                        m_TextExtents.min.x = Mathf.Min(m_TextExtents.min.x, x0);
-                        m_TextExtents.min.y = Mathf.Min(m_TextExtents.min.y, y0);
-                        m_TextExtents.max.x = Mathf.Max(m_TextExtents.max.x, x1);
-                        m_TextExtents.max.y = Mathf.Max(m_TextExtents.max.y, y1);
+                        m_TextExtents.min.x = Mathf.Min(m_TextExtents.min.x, ci.origin);
+                        m_TextExtents.min.y = Mathf.Min(m_TextExtents.min.y, ci.descender);
+                        m_TextExtents.max.x = Mathf.Max(m_TextExtents.max.x, ci.xAdvance);
+                        m_TextExtents.max.y = Mathf.Max(m_TextExtents.max.y, ci.ascender);
                     }
                 }
                 ref var li = ref info.lineInfo[k];
@@ -233,7 +249,7 @@ namespace TMPro
                 li.ascender = baseline + line.Ascender;
                 li.baseline = baseline;
                 li.descender = baseline + line.Descender;
-                li.lineHeight = line.Ascender - line.Descender + (k > 0 ? 0f : 0f);
+                li.lineHeight = line.FontLineHeight;
                 li.length = line.Length;
                 li.maxAdvance = line.LastVisible >= 0 ? chars[line.LastVisible].xAdvance - lineLeft : 0f;
                 li.width = line.Width;
@@ -375,30 +391,73 @@ namespace TMPro
 
         // Text that does not fit ends in "…" (U+2026) on its last shown line: the ellipsis
         // follows the last character after which it fits, and the text ends there.
-        void InsertEllipsis(int lineIndex, ref int count, ref int lineCount)
+        // Truncate and Ellipsis stop the text where the first line that does not fit begins (as
+        // the shipped package does, which lays out character by character): the characters of
+        // a word that wrapped onto it stay at the end of the line before, as far as they fit,
+        // and the record where it stopped is blank. Ellipsis replaces the last character after
+        // which the ellipsis fits on that line, followed by the blank record. When the first
+        // line does not fit, nothing is shown.
+        void Truncate(int overflowLine, ref int count, ref int lineCount)
         {
-            var parsed = m_Parsed;
-            if (parsed.Ellipsis.Element == null) return;
-            ref var line = ref s_Lines[lineIndex];
             var pl = s_Placements;
-            int index = parsed.Count;
-            if (parsed.Elements.Length <= index) System.Array.Resize(ref parsed.Elements, index + 1);
-            parsed.Elements[index] = parsed.Ellipsis;
-            var ellipsis = default(Placement);
-            Measure(ref parsed.Elements[index], ref ellipsis, m_LayoutBaseSize, line.Width);
-            ellipsis.Element = index;
-            int keep = Mathf.Min(line.Last, count - 1);
-            while (keep >= line.First && (!pl[keep].Visible || pl[keep].X + pl[keep].Advance + ellipsis.GlyphAdvance > line.Width + 0.0001f)) keep--;
-            int at = keep + 1;
-            if (s_Placements.Length <= at) System.Array.Resize(ref s_Placements, at + 1);
+            if (overflowLine == 0)
+            {
+                count = 0;
+                lineCount = 0;
+                return;
+            }
+            ref var prev = ref s_Lines[overflowLine - 1];
+            ref var next = ref s_Lines[overflowLine];
+            int stop = next.First;
+            if (!prev.EndsWithLineFeed)
+            {
+                float x = pl[prev.Last].X + pl[prev.Last].Advance;
+                for (; stop < count && stop <= next.Last; stop++)
+                {
+                    ref var p = ref pl[stop];
+                    if (p.LineBreak || (p.Visible && x + p.GlyphAdvance > prev.Width + 0.0001f)) break;
+                    p.X = x;
+                    x += p.Advance;
+                }
+            }
+            if (s_Placements.Length <= stop + 1) Array.Resize(ref s_Placements, stop + 2);
             pl = s_Placements;
-            ellipsis.X = keep >= line.First ? pl[keep].X + pl[keep].Advance : line.StartX;
-            pl[at] = ellipsis;
-            line.Last = at;
-            FinishLine(ref line, pl, m_LayoutBaseSize);
-            count = at + 1;
-            lineCount = lineIndex + 1;
-            m_IsTextTruncated = true;
+            if (m_overflowMode == TextOverflowModes.Ellipsis && m_Parsed.Ellipsis.Element != null)
+            {
+                var parsed = m_Parsed;
+                int index = parsed.Count;
+                if (parsed.Elements.Length <= index) Array.Resize(ref parsed.Elements, index + 1);
+                parsed.Elements[index] = parsed.Ellipsis;
+                var ellipsis = default(Placement);
+                Measure(ref parsed.Elements[index], ref ellipsis, m_LayoutBaseSize, prev.Width);
+                ellipsis.Element = index;
+                int at = stop - 1;
+                while (at > prev.First && pl[at].X + ellipsis.GlyphAdvance > prev.Width + 0.0001f) at--;
+                ellipsis.X = pl[at].X;
+                pl[at] = ellipsis;
+                pl[at + 1] = new Placement { Blank = true, Element = pl[at + 1].Element };
+                prev.Last = at + 1;
+                prev.EndsWithLineFeed = false;
+                FinishLine(ref prev, pl, m_LayoutBaseSize);
+                count = at + 2;
+                lineCount = overflowLine;
+                return;
+            }
+            pl[stop] = new Placement { Blank = true, Element = pl[stop].Element };
+            count = stop + 1;
+            if (prev.EndsWithLineFeed)
+            {
+                // The blank record starts a line of its own.
+                next.Last = stop;
+                FinishLine(ref next, pl, m_LayoutBaseSize);
+                lineCount = overflowLine + 1;
+            }
+            else
+            {
+                prev.Last = stop;
+                FinishLine(ref prev, pl, m_LayoutBaseSize);
+                lineCount = overflowLine;
+            }
         }
 
         // Letters, digits and symbols make words; apostrophes and hyphens join word characters.

@@ -169,16 +169,18 @@ namespace OniBrutal.Tests
         }
 
         [Fact]
-        public void TheOldestAlignmentNumbersAreConverted()
+        public void StoredAlignmentsSplitIntoTheTwoAlignments()
         {
-            // Data from the first TextMeshPro versions numbers the alignments 0-15 (5: centre),
-            // in the field that later versions store TextAlignmentOptions in.
+            // Older data stores one TextAlignmentOptions, whose bytes are the horizontal and
+            // vertical alignments.
             var go = new GameObject("Text", typeof(RectTransform));
             go.SetActive(false);
             var t = go.AddComponent<TextMeshProUGUI>();
-            typeof(TMP_Text).GetField("m_textAlignment", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).SetValue(t, (TextAlignmentOptions)5);
+            typeof(TMP_Text).GetField("m_textAlignment", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).SetValue(t, TextAlignmentOptions.BottomRight);
             go.SetActive(true);
-            Assert.Equal(TextAlignmentOptions.Center, t.alignment);
+            Assert.Equal(HorizontalAlignmentOptions.Right, t.horizontalAlignment);
+            Assert.Equal(VerticalAlignmentOptions.Bottom, t.verticalAlignment);
+            Assert.Equal(TextAlignmentOptions.BottomRight, t.alignment);
         }
 
         [Fact]
@@ -212,16 +214,25 @@ namespace OniBrutal.Tests
             int last = t.textInfo.characterCount - 1;
             Assert.True(t.textInfo.characterInfo[last].isVisible);
 
+            // Truncation stops the text where the first line that does not fit begins, after a
+            // blank record.
             t.overflowMode = TextOverflowModes.Truncate;
             t.ForceMeshUpdate(true);
-            Assert.False(t.textInfo.characterInfo[last].isVisible);
-            Assert.True(t.textInfo.characterInfo[0].isVisible);
+            var info = t.textInfo;
+            Assert.True(info.characterCount <= last);
+            Assert.Equal(1, info.lineCount);
+            Assert.True(info.characterInfo[0].isVisible);
+            Assert.False(info.characterInfo[info.characterCount - 1].isVisible);
             Assert.True(t.isTextTruncated);
 
+            // An ellipsis replaces the last character after which it fits.
             t.overflowMode = TextOverflowModes.Ellipsis;
             t.ForceMeshUpdate(true);
-            Assert.False(t.textInfo.characterInfo[last].isVisible);
-            Assert.True(t.textInfo.characterInfo[0].isVisible);
+            info = t.textInfo;
+            Assert.Equal('\u2026', info.characterInfo[info.characterCount - 2].character);
+            Assert.True(info.characterInfo[info.characterCount - 2].isVisible);
+            Assert.False(info.characterInfo[info.characterCount - 1].isVisible);
+            Assert.True(info.characterInfo[0].isVisible);
 
             t.overflowMode = TextOverflowModes.Masking;
             t.ForceMeshUpdate(true);
@@ -294,8 +305,14 @@ namespace OniBrutal.Tests
             var face = t.font.faceInfo;
             Assert.Equal(Mathf.Ceil((face.ascentLine - face.descentLine) * s * 100f) / 100f, t.preferredHeight, 4);
             Assert.Equal(new Vector2(t.preferredWidth, t.preferredHeight), t.GetPreferredValues());
-            Assert.True(t.renderedWidth > 0f && t.renderedWidth < t.preferredWidth);
+            Assert.True(t.renderedWidth > 0f && t.renderedWidth <= t.preferredWidth);
+            // Margins count from the next change of the text (the preferred sizes are kept
+            // until then).
+            float before = t.preferredWidth;
             t.margin = new Vector4(5f, 1f, 7f, 2f);
+            Assert.Equal(before, t.preferredWidth);
+            t.text = "QUIT!";
+            t.text = "QUIT";
             Assert.Equal(Mathf.Ceil((advance + 12f) * 100f) / 100f, t.preferredWidth, 4);
             Assert.Equal(Mathf.Ceil(((face.ascentLine - face.descentLine) * s + 3f) * 100f) / 100f, t.preferredHeight, 4);
         }

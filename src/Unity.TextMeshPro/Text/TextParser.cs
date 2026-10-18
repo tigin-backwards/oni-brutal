@@ -44,8 +44,6 @@ namespace TMPro
 
             var primary = text.font;
             output.Materials.Add(new MaterialSlot { Material = text.fontSharedMaterial, Asset = primary });
-            // The text's existing sub-meshes keep their material slots (in their order).
-            text.AddSubMeshMaterialSlots(output.Materials);
 
             var s = new TextState
             {

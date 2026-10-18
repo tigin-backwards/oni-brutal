@@ -123,7 +123,7 @@ namespace TMPro
             asset.m_AtlasTextures = new[] { texture };
 
             bool sdf = IsSdf(renderMode);
-            var shader = Shader.Find(sdf ? "TextMeshPro/Distance Field" : "TextMeshPro/Bitmap");
+            var shader = Shader.Find(sdf ? "TextMeshPro/Mobile/Distance Field" : "TextMeshPro/Bitmap");
             var material = new Material(shader) { name = texture.name + " Material" };
             material.SetTexture(ShaderUtilities.ID_MainTex, texture);
             material.SetFloat(ShaderUtilities.ID_TextureWidth, atlasWidth);

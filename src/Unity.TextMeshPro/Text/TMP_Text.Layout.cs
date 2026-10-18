@@ -30,6 +30,8 @@ namespace TMPro
             public float KernY;          // glyph placement from kerning pairs (y)
             public float PointSize;
             public bool Visible, Whitespace, LineBreak, Bold, Italic, NoBreak, BreakAfter;
+            // An empty record where truncation stopped (textInfo holds a blank character there).
+            public bool Blank;
             public float LineHeightOverride;  // NaN: none
             public float MarginLeft, MarginRight, Indent, LineIndent;
             public float WidthLimit;     // NaN: none
@@ -38,13 +40,15 @@ namespace TMPro
             // Set by placement: the pen and baseline relative to the line, and the line's offset
             // into the rect.
             public float Pen, BaselineRel, OffsetX, OffsetY;
+            // The font's line height at the character's size.
+            public float FontLineHeight;
         }
 
         private protected struct LineData
         {
             public int First, Last;
             public int FirstVisible, LastVisible;
-            public float Ascender, Descender, Gap, MaxAscent;
+            public float Ascender, Descender, Gap, MaxAscent, FontLineHeight;
             public float Length;         // pen advance to the end of the last visible character
             public float Width;          // the width available to the line
             public float MarginLeft, MarginRight, StartX;
@@ -77,7 +81,6 @@ namespace TMPro
         private protected ParsedText Parsed => m_Parsed;
 
         // The material slots of the text's existing sub-mesh objects, which keep their indices.
-        internal abstract void AddSubMeshMaterialSlots(System.Collections.Generic.List<MaterialSlot> slots);
 
         // The rect the text lays out in (local space).
         private protected abstract Rect LayoutRect { get; }
@@ -111,6 +114,17 @@ namespace TMPro
             if (!m_enableAutoSizing) return m_fontSizeBase > 0f ? m_fontSizeBase : m_fontSize;
             // An empty text keeps its size.
             if (m_Parsed.Count == 0) return m_fontSize;
+            m_FittingAutoSize = true;
+            try { return ChooseFittingSize(rect); }
+            finally { m_FittingAutoSize = false; }
+        }
+
+        // While auto-size searches, a word that has to be broken because it is wider than its
+        // line does not fit.
+        bool m_FittingAutoSize;
+
+        float ChooseFittingSize(Rect rect)
+        {
             float min = Mathf.Min(m_fontSizeMin, m_fontSizeMax), max = Mathf.Max(m_fontSizeMin, m_fontSizeMax);
             if (FitsAdjusted(max, rect)) return max;
             int lo = Mathf.CeilToInt(min * 20f - 0.001f), hi = Mathf.FloorToInt(max * 20f + 0.001f) - 1;
@@ -330,6 +344,7 @@ namespace TMPro
                             break;
                         }
                         end = i - 1;
+                        if (m_FittingAutoSize) fits = false;
                         break;
                     }
                     p.X = x;
@@ -415,6 +430,7 @@ namespace TMPro
                 desc = Mathf.Min(desc, p.Descender);
                 gap = Mathf.Max(gap, p.Gap);
                 maxAscent = Mathf.Max(maxAscent, p.Ascender);
+                line.FontLineHeight = Mathf.Max(line.FontLineHeight, p.FontLineHeight);
                 if (p.Visible)
                 {
                     if (line.FirstVisible < 0) line.FirstVisible = i;
@@ -443,7 +459,10 @@ namespace TMPro
         {
             p = default;
             var state = el.State;
-            float size = PointSizeOf(state, baseSize) * el.CaseScale;
+            // Small caps draw lower-case letters smaller; the character's size and its line
+            // metrics stay those of the text (as the shipped package reports them).
+            float fullSize = PointSizeOf(state, baseSize);
+            float size = fullSize * el.CaseScale;
             float shift = 0f;
             var font = el.Asset as TMP_FontAsset ?? state.Font ?? m_fontAsset;
             var face = font.faceInfo;
@@ -452,21 +471,25 @@ namespace TMPro
             {
                 shift += face.superscriptOffset * fontScale0;
                 size *= face.superscriptSize > 0f ? face.superscriptSize : 1f;
+                fullSize *= face.superscriptSize > 0f ? face.superscriptSize : 1f;
             }
             else if ((state.Style & FontStyles.Subscript) != 0)
             {
                 shift += face.subscriptOffset * fontScale0;
                 size *= face.subscriptSize > 0f ? face.subscriptSize : 1f;
+                fullSize *= face.subscriptSize > 0f ? face.subscriptSize : 1f;
             }
             if (!state.VerticalOffset.IsZero) shift += state.VerticalOffset.Resolve(size, 0f);
             float fontScale = size / face.pointSize * face.scale;
-            p.PointSize = size;
+            float metricScale = el.CaseScale != 1f ? fullSize / face.pointSize * face.scale : fontScale;
+            p.PointSize = fullSize;
             p.FontScale = fontScale;
             p.BaselineShift = shift;
             p.XScale = (1f - m_CharWidthAdjustment) * m_characterHorizontalScale;
-            p.Ascender = face.ascentLine * fontScale + shift;
-            p.Descender = face.descentLine * fontScale + shift;
-            p.Gap = (face.lineHeight - face.ascentLine) * fontScale - shift;
+            p.Ascender = face.ascentLine * metricScale + shift;
+            p.Descender = face.descentLine * metricScale + shift;
+            p.Gap = (face.lineHeight - face.ascentLine) * metricScale - shift;
+            p.FontLineHeight = face.lineHeight * metricScale;
             p.SetPen = float.NaN;
             p.LineHeightOverride = state.HasLineHeight ? state.LineHeight.Resolve(size, face.lineHeight * fontScale) : float.NaN;
             p.WidthLimit = state.HasWidth ? state.Width.Resolve(size, width) : float.NaN;
@@ -504,8 +527,6 @@ namespace TMPro
                 p.Bottom = (gm.horizontalBearingY - gm.height) * s + shift;
                 advance = gm.horizontalAdvance * s * p.XScale;
                 p.Visible = true;
-                p.Ascender = Mathf.Max(p.Ascender, p.Top);
-                p.Descender = Mathf.Min(p.Descender, p.Bottom);
             }
             else
             {

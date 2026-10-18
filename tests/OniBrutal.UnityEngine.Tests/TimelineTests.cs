@@ -22,14 +22,22 @@ namespace OniBrutal.Tests
             public override Playable CreatePlayable(PlayableGraph graph, GameObject owner) => Playable.Create(graph);
         }
 
+        // Clips have no public constructor (they come from the timeline's data).
+        static TimelineClip NewClip() => (TimelineClip)System.Runtime.CompilerServices.RuntimeHelpers.GetUninitializedObject(typeof(TimelineClip));
+
         [Fact]
         public void ATrackHoldsItsClipsInOrder()
         {
+            Assert.Empty(ScriptableObject.CreateInstance<TestTrack>().GetClips());
             var track = ScriptableObject.CreateInstance<TestTrack>();
-            Assert.Empty(track.GetClips());
             var asset = ScriptableObject.CreateInstance<TestClip>();
-            var first = new TimelineClip { start = 1.5, duration = 2.0, asset = asset };
-            var second = new TimelineClip { start = 0.5, duration = 0.25 };
+            var first = NewClip();
+            first.start = 1.5;
+            first.duration = 2.0;
+            first.asset = asset;
+            var second = NewClip();
+            second.start = 0.5;
+            second.duration = 0.25;
             track.Add(first);
             track.Add(second);
             var clips = track.GetClips().ToList();

@@ -254,6 +254,19 @@ citing why.
   copy-on-write component array (`UiParts` for the canvas walk). Searches by type
   (`FindObjectsByType`) walk the scenes and skip inactive subtrees when inactive objects are not
   asked for.
+- **Per-frame allocation.** ONI issues ~1,700 draws a frame (most through `Graphics.DrawMesh`) and
+  rebuilds several meshes every frame, so the render path allocates almost nothing per draw:
+  draw items, draw lists and canvas batches are reused frame to frame (`FrameRenderer.NewDrawItem`,
+  `NewDrawList`; valid until `EndFrame`); queued meshes are values; `DrawMesh` shares the property
+  block's sheet with the queued draw until the frame renders, a later change moving the block to a
+  copy (`PropertySheet.SharedEpoch`); the device's per-draw inputs come from the recording frame's
+  arena (`FrameArena.Next`) with their command delegate made once; mesh uploads hold the mesh's own
+  arrays, which are never written once published (`MeshNative`); colours given as bytes stay bytes.
+- **Resolved once, not per draw.** Program variants are selected once per material, pass and draw
+  keyword list while keywords are unchanged (`MaterialNative.Variants`); what a material and the
+  global properties give a program (uniform values, block bytes, sampler textures, pass state) is
+  resolved once per their versions (`MaterialValues`), a draw resolving only its per-draw values
+  and what its own block overrides; render queues and `_ST` property ids are parsed once.
 
 ### 3.3 Player loop
 

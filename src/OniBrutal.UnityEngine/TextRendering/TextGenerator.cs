@@ -94,7 +94,9 @@ namespace UnityEngine
 
         public bool Populate(string str, TextGenerationSettings settings) => PopulateCached(str, settings) == TextGenerationError.None;
 
-        /// As Populate, logging why generation failed against context.
+        /// As Populate, logging why generation failed against context. Generation drops size and
+        /// style overrides on non-dynamic fonts before laying out, so the two override errors do
+        /// not occur in practice; a missing font fails without a message.
         public bool PopulateWithErrors(string str, TextGenerationSettings settings, GameObject context)
         {
             var error = PopulateCached(str, settings);
@@ -131,14 +133,12 @@ namespace UnityEngine
                 return TextGenerationError.NoFont;
             var native = (FontNative)font.NativeOrThrow;
 
-            var error = TextGenerationError.None;
             if (!native.Dynamic)
             {
-                // Size and style come from a non-dynamic font's own texture; overrides are dropped.
+                // Size and style come from a non-dynamic font's own texture; overrides are dropped
+                // with a warning, and generation goes on and succeeds.
                 if (settings.fontSize != 0 || settings.fontStyle != FontStyle.Normal)
                 {
-                    if (settings.fontSize != 0) error |= TextGenerationError.CustomSizeOnNonDynamicFont;
-                    if (settings.fontStyle != FontStyle.Normal) error |= TextGenerationError.CustomStyleOnNonDynamicFont;
                     Debug.LogWarning($"Font size and style overrides are only supported for dynamic fonts. Font '{font.name}' is not dynamic.", font);
                     settings.fontSize = 0;
                     settings.fontStyle = FontStyle.Normal;
@@ -162,7 +162,7 @@ namespace UnityEngine
 
             if (layout.Emit(vertexList, characterList, lineList, out extents))
                 Font.InvokeTextureRebuilt_Internal(font);
-            return error;
+            return TextGenerationError.None;
         }
 
         /// The largest size in [min, max] at which the text fits, or min when none does; the

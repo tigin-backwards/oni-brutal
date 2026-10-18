@@ -336,11 +336,12 @@ namespace OniBrutal.Tests
                 var settings = Settings(font, new Vector2(300f, 100f));
                 settings.fontStyle = FontStyle.Bold;
                 settings.resizeTextForBestFit = true;
-                Assert.False(gen.PopulateWithErrors("Text", settings, null));
+                settings.fontSize = 20;
+                Assert.True(gen.PopulateWithErrors("Text", settings, null));
                 Assert.Contains(("Font size and style overrides are only supported for dynamic fonts. Font 'Bitmap' is not dynamic.", LogType.Warning), logs);
                 Assert.Contains(("BestFit is only supported for dynamic fonts. Font 'Bitmap' is not dynamic.", LogType.Warning), logs);
-                Assert.Contains(logs, l => l.type == LogType.Error && l.message.EndsWith("is not dynamic, which is required to override its size"));
-                Assert.Contains(logs, l => l.type == LogType.Error && l.message.EndsWith("is not dynamic, which is required to override its style"));
+                Assert.DoesNotContain(logs, l => l.type == LogType.Error);
+                Assert.True(new TextGenerator().Populate("Text", settings));
             }
             finally
             {

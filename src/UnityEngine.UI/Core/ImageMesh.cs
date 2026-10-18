@@ -85,45 +85,42 @@ namespace UnityEngine.UI
             for (int i = 0; i + 2 < triangles.Length; i += 3) vh.AddTriangle(triangles[i], triangles[i + 1], triangles[i + 2]);
         }
 
-        /// Border lines along one axis: [start, start + near, end - far, end], with the borders
-        /// scaled down together when they do not fit.
-        static void Lines(float start, float length, float near, float far, float[] at)
-        {
-            at[0] = start;
-            at[3] = start + length;
-            if (near + far > length && near + far > 0f)
-            {
-                float split = start + length * (near / (near + far));
-                at[1] = split;
-                at[2] = split;
-            }
-            else
-            {
-                at[1] = start + near;
-                at[2] = start + length - far;
-            }
-        }
-
         [ThreadStatic] static float[] xs, ys;
 
-        /// Borders follow the pixel snapping: scaled per axis by the snapped rect's size over the
-        /// rect's.
-        static Vector4 ScaledBorder(Image image, Vector4 border, Rect snapped)
+        /// The borders in the snapped rect: scaled per axis by the snapped rect's size over the
+        /// rect's (they follow the pixel snapping), then scaled down together where they do not
+        /// fit. (Measured: the arithmetic decides whether a quad between borders that meet comes
+        /// out empty, and empty quads are left out.)
+        static Vector4 FittedBorder(Image image, Vector4 border, Rect snapped)
         {
             var original = image.rectTransform.rect;
-            if (original.width != 0f)
+            for (int axis = 0; axis < 2; axis++)
             {
-                float k = snapped.width / original.width;
-                border.x *= k;
-                border.z *= k;
-            }
-            if (original.height != 0f)
-            {
-                float k = snapped.height / original.height;
-                border.y *= k;
-                border.w *= k;
+                if (original.size[axis] != 0f)
+                {
+                    float k = snapped.size[axis] / original.size[axis];
+                    border[axis] *= k;
+                    border[axis + 2] *= k;
+                }
+                float both = border[axis] + border[axis + 2];
+                if (snapped.size[axis] < both && both != 0f)
+                {
+                    float k = snapped.size[axis] / both;
+                    border[axis] *= k;
+                    border[axis + 2] *= k;
+                }
             }
             return border;
+        }
+
+        /// The four lines across one axis, from the rect's start: the outer edges inset by the
+        /// trimmed pixels, the inner ones by the borders.
+        static void Lines(float start, float length, float near, float far, float padNear, float padFar, float[] at)
+        {
+            at[0] = padNear + start;
+            at[1] = near + start;
+            at[2] = length - far + start;
+            at[3] = length - padFar + start;
         }
 
         /// Nine quads (the centre only with fillCenter), column by column, each column bottom to
@@ -140,15 +137,11 @@ namespace UnityEngine.UI
             var inner = DataUtility.GetInnerUV(s);
             var pad = DataUtility.GetPadding(s) / pixelsPerUnit;
             var r = image.GetPixelAdjustedRect();
-            var border = ScaledBorder(image, s.border / pixelsPerUnit, r);
+            var border = FittedBorder(image, s.border / pixelsPerUnit, r);
             xs ??= new float[4];
             ys ??= new float[4];
-            Lines(r.x, r.width, border.x, border.z, xs);
-            Lines(r.y, r.height, border.y, border.w, ys);
-            xs[0] += pad.x;
-            xs[3] -= pad.z;
-            ys[0] += pad.y;
-            ys[3] -= pad.w;
+            Lines(r.x, r.width, border.x, border.z, pad.x, pad.z, xs);
+            Lines(r.y, r.height, border.y, border.w, pad.y, pad.w, ys);
             float[] us = [outer.x, inner.x, inner.z, outer.z];
             float[] vs = [outer.y, inner.y, inner.w, outer.w];
             Color32 c = image.color;
@@ -174,9 +167,9 @@ namespace UnityEngine.UI
             float tileH = (s.rect.height - b.y - b.w) / pixelsPerUnit;
             xs ??= new float[4];
             ys ??= new float[4];
-            var border = ScaledBorder(image, b / pixelsPerUnit, r);
-            Lines(r.x, r.width, border.x, border.z, xs);
-            Lines(r.y, r.height, border.y, border.w, ys);
+            var border = FittedBorder(image, b / pixelsPerUnit, r);
+            Lines(r.x, r.width, border.x, border.z, 0f, 0f, xs);
+            Lines(r.y, r.height, border.y, border.w, 0f, 0f, ys);
             float x1 = xs[1], x2 = xs[2], y1 = ys[1], y2 = ys[2];
             if (tileW <= 0f) tileW = x2 - x1;
             if (tileH <= 0f) tileH = y2 - y1;

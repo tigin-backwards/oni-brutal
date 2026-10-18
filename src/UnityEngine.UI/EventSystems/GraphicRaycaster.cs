@@ -101,6 +101,10 @@ namespace UnityEngine.UI
                 if ((blockingObjects == BlockingObjects.ThreeD || blockingObjects == BlockingObjects.All)
                     && Physics.Raycast(ray, out var hit, reach, m_BlockingMask))
                     blockedAt = hit.distance;
+                // 2D blocking (TwoD, All) needs a 2D physics ray query, which the engine does not
+                // have: it keeps 2D collider shapes but simulates and queries no 2D physics
+                // (Physics/Physics2D.cs). 2D colliders therefore block nothing, with the shipped
+                // package on this engine as well.
             }
 
             hits.Clear();

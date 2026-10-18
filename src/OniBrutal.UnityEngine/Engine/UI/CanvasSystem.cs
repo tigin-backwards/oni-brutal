@@ -55,11 +55,37 @@ namespace OniBrutal.Engine.UI
 
         static bool IsLive(CanvasNative c) => c.IsActiveAndEnabledState && !c.Destroyed;
 
-        static CanvasNative CanvasOn(GameObjectNative go)
+        static CanvasNative CanvasOn(GameObjectNative go) => PartsOf(go).Canvas is { } c && IsLive(c) ? c : null;
+
+        /// A GameObject's canvas components, found once per component list: GameObject.Components
+        /// is copy-on-write, so the list is the same array until a component is added or removed.
+        /// The canvas walks run every frame over the whole UI; their state (enabled, destroyed,
+        /// alpha) is read from the components each time.
+        static UiParts PartsOf(GameObjectNative go)
         {
-            foreach (var comp in go.Components)
-                if (comp is Canvas && comp.Native is CanvasNative c && IsLive(c)) return c;
-            return null;
+            var parts = go.UiParts;
+            var components = go.Components;
+            if (parts != null && parts.Source == components) return parts;
+            parts = new UiParts { Source = components };
+            List<CanvasGroupNative> groups = null;
+            List<CanvasRendererNative> renderers = null;
+            foreach (var comp in components)
+                switch (comp)
+                {
+                    case Canvas when comp.Native is CanvasNative c:
+                        parts.Canvas ??= c;
+                        break;
+                    case CanvasGroup when comp.Native is CanvasGroupNative g:
+                        (groups ??= new()).Add(g);
+                        break;
+                    case CanvasRenderer when comp.Native is CanvasRendererNative r:
+                        (renderers ??= new()).Add(r);
+                        break;
+                }
+            parts.Groups = groups?.ToArray() ?? Array.Empty<CanvasGroupNative>();
+            parts.Renderers = renderers?.ToArray() ?? Array.Empty<CanvasRendererNative>();
+            go.UiParts = parts;
+            return parts;
         }
 
         /// The topmost live canvas at or above this canvas.
@@ -251,11 +277,12 @@ namespace OniBrutal.Engine.UI
             CanvasNative nearest, Matrix4x4 worldToNearest, float groupAlpha)
         {
             if (!go.ActiveInHierarchy) return;
-            var canvasHere = CanvasOn(go);
+            var parts = PartsOf(go);
+            var canvasHere = parts.Canvas is { } here && IsLive(here) ? here : null;
             if (!isBatchRoot && canvasHere != null && canvasHere.OverrideSorting) return;
             // CanvasGroups multiply down the hierarchy; one that ignores its parents restarts it.
-            foreach (var c in go.Components)
-                if (c is CanvasGroup && c.Native is CanvasGroupNative { IsActiveAndEnabledState: true } g)
+            foreach (var g in parts.Groups)
+                if (g.IsActiveAndEnabledState)
                     groupAlpha = g.IgnoreParentGroups ? g.Alpha : groupAlpha * g.Alpha;
             bool hidden = groupAlpha <= 0f;
             if (canvasHere != null && canvasHere != nearest)
@@ -264,9 +291,9 @@ namespace OniBrutal.Engine.UI
                 worldToNearest = go.Transform.LocalToWorld.inverse;
             }
             List<CanvasRendererNative> pops = null;
-            foreach (var comp in go.Components)
+            foreach (var r in parts.Renderers)
             {
-                if (comp is not CanvasRenderer || comp.Native is not CanvasRendererNative r || r.Destroyed) continue;
+                if (r.Destroyed) continue;
                 r.AbsoluteDepth = -1;
                 r.RelativeDepth = -1;
                 if (hidden) continue;
@@ -328,8 +355,8 @@ namespace OniBrutal.Engine.UI
         {
             float alpha = 1f;
             for (var t = go.Transform; t != null; t = t.Parent)
-                foreach (var c in t.GameObject.Components)
-                    if (c is CanvasGroup && c.Native is CanvasGroupNative { IsActiveAndEnabledState: true } g)
+                foreach (var g in PartsOf(t.GameObject).Groups)
+                    if (g.IsActiveAndEnabledState)
                     {
                         alpha *= g.Alpha;
                         if (g.IgnoreParentGroups) return alpha;
@@ -584,5 +611,14 @@ namespace OniBrutal.Engine.UI
                 }
             }
         }
+    }
+
+    /// The canvas components of a GameObject's component list (Source), in component order.
+    internal sealed class UiParts
+    {
+        public Component[] Source;
+        public CanvasNative Canvas;
+        public CanvasGroupNative[] Groups;
+        public CanvasRendererNative[] Renderers;
     }
 }

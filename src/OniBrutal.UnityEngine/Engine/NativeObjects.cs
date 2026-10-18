@@ -61,6 +61,8 @@ namespace OniBrutal.Engine
         public TransformNative Transform;
         /// Slot in the owning scene's root list while a root, else -1 (SceneRoots).
         public int RootSlot = -1;
+        /// Its canvas components, cached by CanvasSystem for the current Components array.
+        public UI.UiParts UiParts;
     }
 
     internal class ComponentNative : NativeObject

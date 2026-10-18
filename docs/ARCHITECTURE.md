@@ -246,6 +246,14 @@ citing why.
 - `ScriptableObject` and `MonoBehaviour` instances are created with
   `RuntimeHelpers.GetUninitializedObject` + the parameterless constructor, as Unity does
   (field initializers run, then deserialization overwrites serialized fields).
+- **Costs at ONI's scale.** A late-game colony holds hundreds of thousands of objects, most of
+  them scene roots (buildings, items, critters), and creates, destroys and re-parents them
+  constantly (an item stored is parented to its storage). Scene roots are therefore an ordered
+  slot list (`SceneRoots`: constant-time removal, compaction into a new array, enumeration
+  safe against it), and per-frame walks cache what they look up per GameObject against its
+  copy-on-write component array (`UiParts` for the canvas walk). Searches by type
+  (`FindObjectsByType`) walk the scenes and skip inactive subtrees when inactive objects are not
+  asked for.
 
 ### 3.3 Player loop
 
@@ -558,6 +566,13 @@ path, material, texture, colour and group alpha; `--dump-hierarchy FRAME:PATH` l
 active flags, rects and components; `--dump-component FRAME:PATH|TYPE` logs a component's serialized fields;
 `--report-builtin-assets FILE` writes the objects a run loaded
 from Unity's built-in resource files (docs/LICENSING.md); `--check-*` run the corpus gates.
+
+CPU profiles: `perf record -e cpu-clock:u -g` (user-mode sampling needs no privileges at the
+default `perf_event_paranoid` 2) with `DOTNET_PerfMapEnabled=1`; the runtime maps JIT code twice
+(W^X), so samples fall in a `memfd:doublemapper` mapping and are resolved against
+`/tmp/perf-PID.map` by address. `dotnet-trace`'s thread-time sampling stops threads at GC safe
+points and charges the time before a safe point to the method that reaches it (it showed lock
+and GC-poll time that perf does not), so it is not used for self time.
 
 ## 8. Repository layout
 

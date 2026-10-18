@@ -49,9 +49,18 @@ namespace OniBrutal.Engine.UI
             // A root canvas's rect is driven by the canvas update (before willRenderCanvases), not
             // on enable: a canvas enabled at the root and reparented in the same call (uGUI's
             // Dropdown clones its canvas-bearing template, then nests it) keeps its own anchoring.
+            HierarchyChanged(c);
         }
 
-        public static void Disable(Canvas canvas) => enabled.Remove(canvas.Data);
+        public static void Disable(Canvas canvas)
+        {
+            enabled.Remove(canvas.Data);
+            HierarchyChanged(canvas.Data);
+        }
+
+        /// Unity tells the scripts on the canvas's object and below (uGUI's graphics, masks and
+        /// raycasters listen) that the canvas they belong to may have changed.
+        static void HierarchyChanged(CanvasNative c) => Messages.SendToSubtree(c.GameObject, s => s.OnCanvasHierarchyChanged);
 
         static bool IsLive(CanvasNative c) => c.IsActiveAndEnabledState && !c.Destroyed;
 

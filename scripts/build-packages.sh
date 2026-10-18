@@ -7,9 +7,14 @@ set -euo pipefail
 source "$(dirname "$0")/env.sh"
 config="${1:-debug}"
 mkdir -p "$root/out/packages"
+# A package not implemented yet does not build: it is left out, and runs keep the shipped one.
 for p in UnityEngine.UI Unity.TextMeshPro Unity.Timeline; do
-    dotnet build "$root/src/$p" -c "$config" -v q -nologo
-    cp "$root/out/bin/$p/$config/$p.dll" "$root/out/bin/$p/$config/$p.pdb" "$root/out/packages/"
+    rm -f "$root/out/packages/$p.dll" "$root/out/packages/$p.pdb"
+    if dotnet build "$root/src/$p" -c "$config" -v q -nologo > "$root/out/build-$p.log" 2>&1; then
+        cp "$root/out/bin/$p/$config/$p.dll" "$root/out/bin/$p/$config/$p.pdb" "$root/out/packages/"
+    else
+        echo "$p: does not build (out/build-$p.log); the shipped package stays in use"
+    fi
 done
 # ApiCheck resolves members through base types into the engine, so it sees both.
 check="$root/out/packages-check"
@@ -27,7 +32,7 @@ for p in UnityEngine.UI Unity.TextMeshPro Unity.Timeline; do
     [ -f "$root/out/packages/$p.dll" ] || mixed="$mixed $p.dll"
 done
 if [ -n "$mixed" ]; then
-    replaced="$(for p in UnityEngine.UI Unity.TextMeshPro Unity.Timeline; do [ -f "$root/out/packages/$p.dll" ] && echo -n "$p,"; done)"
+    replaced="$(for p in UnityEngine.UI Unity.TextMeshPro Unity.Timeline; do if [ -f "$root/out/packages/$p.dll" ]; then echo -n "$p,"; fi; done)"
     dotnet "$root/out/bin/ApiCheck/release/ApiCheck.dll" "$managed" "$check" "${replaced%,}" $mixed \
       --json "$root/out/apicheck-packages-mixed.json" > "$root/out/apicheck-packages-mixed.txt" || true
     echo "mixed (shipped$mixed):"; head -2 "$root/out/apicheck-packages-mixed.txt"

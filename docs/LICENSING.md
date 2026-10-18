@@ -71,3 +71,38 @@ Steamworks (`libsteam_api.so`, Steamworks.NET under MIT); `cimgui.so` (Dear ImGu
 - `src/ThirdParty/Steamworks.NET`: Steamworks.NET 20.1.0, MIT.
 - Native libraries from BRUTAL's packages (GLFW, glad, stb, FreeType with libpng and zlib), under
   their own licences as shipped in those packages.
+
+## Provenance of the engine's code
+
+The engine reimplements Unity's API. Public type and member names, signatures and serialized
+field names follow Unity's, because the game's assemblies bind to them and its data names them.
+They are generated from the shipped assemblies' metadata by `tools/SurfaceGen`, with no method
+bodies.
+
+How the engine's behaviour was found:
+- **Unity's documentation.**
+- **Measurement** of the original player: `tools/UnityProbe` and the side-by-side comparisons in
+  `docs/PARITY.md`.
+- **The game's own data and code** (Klei's assemblies).
+
+Unity's native engine was never read.
+
+A 2026-10-18 audit found regions written too closely after Unity's own managed code:
+- the IMGUI module;
+- UnityEvents;
+- the UI Toolkit event classes and their runtime state;
+- TextGenerator's caching front;
+- the object pools;
+- a few maths and colour helpers;
+- some small routines.
+
+They are rewritten clean-room. Specifications are written from behaviour, and a separate
+implementation works from the specifications alone, without the old code
+(`docs/cleanroom/README.md`, one specification per region).
+
+Rules for new engine code:
+- No code is taken from Unity's C# reference source (reference-only licence) or from decompiled
+  Unity assemblies.
+- Private structure and names are the project's own.
+- When behaviour has to match Unity, the source is the documentation or a measurement, and the
+  code says which.

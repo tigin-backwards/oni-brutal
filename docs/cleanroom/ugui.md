@@ -158,8 +158,8 @@ and declares `ICanvasElement`.
 - `PixelAdjustPoint`.
 - `Raycast(Vector2 sp, Camera eventCamera)`: walks up the hierarchy, from this object to the
   root. Every enabled `ICanvasRaycastFilter` component found on the way must accept the point.
-  A `CanvasGroup` with `ignoreParentGroups` stops the walk above it, after itself, and a
-  `CanvasGroup` that does not block raycasts fails it.
+  Above a `CanvasGroup` with `ignoreParentGroups`, further `CanvasGroup`s are skipped (other
+  filters still count), and a `CanvasGroup` that does not block raycasts fails it.
 - `CrossFadeColor(target, duration, ignoreTimeScale, useAlpha[, useRGB])` tweens the canvas
   renderer's colour, not `color`. A duration of 0 applies the colour at once. A tween advances
   every frame while the graphic is active and stops when it is disabled. Unity runs it as a
@@ -535,7 +535,7 @@ It updates when its rect or its parent's rect changes, and in the update after i
   ignores its parents allowing interaction.
 - **State:** Normal, Highlighted, Pressed, Selected or Disabled.
   - Disabled when not interactable.
-  - Pressed while the pointer that pressed it is down and inside.
+  - Pressed while the pointer that pressed it is down, inside or not.
   - Selected when it is the event system's selection.
   - Highlighted while the pointer is over it.
   - Otherwise Normal.
@@ -648,6 +648,18 @@ It updates when its rect or its parent's rect changes, and in the update after i
   value and hides the list. `Hide()` removes it after an alpha fade of 0.15 s.
 
   The game uses Dropdown in three places.
+
+### Measured on the shipped package
+
+Found by the M9 differential runs; they refine the sections above.
+- **Sliced images:** borders are scaled to the pixel-snapped rect first, then shrunk together
+  where they do not fit; each line is offset from the rect's start. Quads are emitted column
+  by column, and empty quads are left out. Trimmed sprite padding is left out of the quad.
+- **Radial fills** collapse the corners past the cut.
+- **Rebuild queues:** outside a rebuild pass, an element leaving a queue is replaced by the
+  queue's last element (this decides the order a dynamic font packs glyphs in).
+- **Dropdown:** the blocker carries a `CanvasGroup`.
+- **Raycast padding:** positive padding shrinks the hit area (left, bottom, right, top).
 
 ## Verification
 

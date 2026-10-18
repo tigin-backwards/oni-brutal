@@ -316,5 +316,69 @@ namespace OniBrutal.Tests
             Assert.Equal(Mathf.Ceil((advance + 12f) * 100f) / 100f, t.preferredWidth, 4);
             Assert.Equal(Mathf.Ceil(((face.ascentLine - face.descentLine) * s + 3f) * 100f) / 100f, t.preferredHeight, 4);
         }
+
+        [Fact]
+        public void TheSdfScaleFollowsTheLossyScaleBeforeTheCanvasesRender()
+        {
+            var t = Text("abc", width: 300f, height: 100f);
+            var mid = new GameObject("Mid", typeof(RectTransform));
+            mid.transform.SetParent(t.canvas.transform, false);
+            t.transform.SetParent(mid.transform, false);
+            int generated = 0;
+            System.Action<Object> counter = o => { if (o == t) generated++; };
+            TMPro_EventManager.TEXT_CHANGED_EVENT.Add(counter);
+            try
+            {
+                Frame();
+                Canvas.ForceUpdateCanvases();
+                float w = t.textInfo.meshInfo[0].uvs0[0].w;
+                int before = generated;
+                // A scale change multiplies uv0.w, without a new layout; only y counts.
+                mid.transform.localScale = new Vector3(0.5f, 0.5f, 1f);
+                Canvas.ForceUpdateCanvases();
+                Assert.Equal(w * 0.5f, t.textInfo.meshInfo[0].uvs0[0].w, 6);
+                mid.transform.localScale = new Vector3(0.25f, 0.5f, 1f);
+                Canvas.ForceUpdateCanvases();
+                Assert.Equal(w * 0.5f, t.textInfo.meshInfo[0].uvs0[0].w, 6);
+                Assert.Equal(before, generated);
+                // To and from 0 the text is generated again.
+                mid.transform.localScale = new Vector3(0f, 0f, 1f);
+                Canvas.ForceUpdateCanvases();
+                Assert.Equal(0f, t.textInfo.meshInfo[0].uvs0[0].w);
+                mid.transform.localScale = Vector3.one;
+                Canvas.ForceUpdateCanvases();
+                Assert.Equal(w, t.textInfo.meshInfo[0].uvs0[0].w, 6);
+                Assert.Equal(before + 2, generated);
+            }
+            finally
+            {
+                TMPro_EventManager.TEXT_CHANGED_EVENT.Remove(counter);
+            }
+        }
+
+        [Fact]
+        public void ARectWithoutWidthDoesNotWrapThePreferredHeight()
+        {
+            var one = Text("Hello world foo", width: 300f, height: 100f);
+            var none = Text("Hello world foo", width: 0f, height: 100f);
+            var narrow = Text("Hello world foo", width: 1f, height: 100f);
+            Assert.Equal(one.preferredHeight, none.preferredHeight);
+            Assert.True(narrow.preferredHeight > 10f * one.preferredHeight);
+            // GetPreferredValues wraps at the width it is given, and reports the unwrapped width.
+            var size = none.GetPreferredValues(1f, 100f);
+            Assert.Equal(narrow.preferredHeight, size.y);
+            Assert.Equal(one.preferredWidth, size.x);
+        }
+
+        [Fact]
+        public void TheZeroWidthSpaceDrawsNothing()
+        {
+            var t = Text("\u200B", width: 300f, height: 100f);
+            Assert.Equal(1, t.textInfo.characterCount);
+            Assert.False(t.textInfo.characterInfo[0].isVisible);
+            Assert.Equal(0, t.textInfo.meshInfo[0].vertexCount);
+            // Its buffer is the spare quad.
+            Assert.Equal(4, t.textInfo.meshInfo[0].vertices.Length);
+        }
     }
 }

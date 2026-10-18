@@ -49,11 +49,14 @@ namespace TMPro
             foreach (var s in m_SubMeshes)
                 if (s != null && s.isActiveAndEnabled == false && s.HasGeometry) s.enabled = true;
             SetAllDirty();
+            Canvas.willRenderCanvases -= RescaleIfScaleChanged;
+            Canvas.willRenderCanvases += RescaleIfScaleChanged;
         }
 
         protected override void OnDisable()
         {
             base.OnDisable();
+            Canvas.willRenderCanvases -= RescaleIfScaleChanged;
             foreach (var s in m_SubMeshes)
                 if (s != null) s.canvasRenderer.Clear();
         }
@@ -61,6 +64,7 @@ namespace TMPro
         protected override void OnDestroy()
         {
             base.OnDestroy();
+            Canvas.willRenderCanvases -= RescaleIfScaleChanged;
             if (MeshCache != null) Destroy(MeshCache);
             MeshCache = null;
         }
@@ -171,12 +175,14 @@ namespace TMPro
             {
                 // The buffers exist (one spare quad); the renderers draw nothing.
                 EnsureBuffers();
+                m_GeneratedScale = CurrentScale();
                 ClearRenderedGeometry();
                 for (int i = 0; i < textInfo.meshInfo.Length; i++) textInfo.meshInfo[i].vertexCount = 0;
                 m_havePropertiesChanged = false;
                 TMPro_EventManager.ON_TEXT_CHANGED(this);
                 return;
             }
+            m_GeneratedScale = CurrentScale();
             BuildGeometry();
             InvokePreRender();
             UploadGeometry(Mathf.Max(1, Parsed.Materials.Count));
@@ -185,6 +191,36 @@ namespace TMPro
         }
 
         bool m_IgnoreActiveStateNow;
+
+        // The text's lossy scale (y) its geometry has the SDF scale for (-1: none generated).
+        float m_GeneratedScale = -1f;
+
+        // Before the canvases render: when the text's lossy scale changed since its geometry was
+        // generated, the SDF scale of its vertices (uv0.w) is multiplied by the change and
+        // uploaded, without a new layout; from or to a scale of 0 the text is generated again
+        // (measured on the shipped package).
+        void RescaleIfScaleChanged()
+        {
+            if (this == null || !isActiveAndEnabled || m_GeneratedScale < 0f || m_textInfo == null) return;
+            float scale = CurrentScale();
+            if (scale == m_GeneratedScale) return;
+            if (scale == 0f || m_GeneratedScale == 0f)
+            {
+                GenerateTextMesh();
+                return;
+            }
+            float ratio = scale / m_GeneratedScale;
+            m_GeneratedScale = scale;
+            var info = m_textInfo;
+            int count = Mathf.Min(Mathf.Max(1, Parsed.Materials.Count), info.meshInfo.Length);
+            for (int m = 0; m < count; m++)
+            {
+                var uvs = info.meshInfo[m].uvs0;
+                if (uvs == null) continue;
+                for (int i = 0; i < uvs.Length; i++) uvs[i].w *= ratio;
+            }
+            UpdateVertexData(TMP_VertexDataUpdateFlags.Uv0);
+        }
 
         private protected override void RegenerateNow()
         {

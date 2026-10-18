@@ -60,7 +60,8 @@ namespace TMPro
         public Vector2 GetPreferredValues(float width, float height)
         {
             EnsureParsed();
-            return new Vector2(PreferredWidthAt(width), PreferredHeightAt(width));
+            // The width is the unwrapped one (measured: the shipped package's is).
+            return new Vector2(PreferredWidthAt(float.PositiveInfinity), PreferredHeightAt(width));
         }
 
         public Vector2 GetPreferredValues(string text)
@@ -82,7 +83,7 @@ namespace TMPro
             m_text = text ?? "";
             m_ParseRequired = true;
             EnsureParsed();
-            var size = new Vector2(PreferredWidthAt(width), PreferredHeightAt(width));
+            var size = new Vector2(PreferredWidthAt(float.PositiveInfinity), PreferredHeightAt(width));
             m_text = saved;
             m_ParseRequired = true;
             InvalidateLayoutCache();
@@ -110,7 +111,9 @@ namespace TMPro
                 if (m_CachedPreferredHeight < 0f || m_CachedPreferredHeightWidth != width)
                 {
                     EnsureParsed();
-                    m_CachedPreferredHeight = PreferredHeightAt(width);
+                    // A rect without width (not laid out yet) does not wrap the text (measured:
+                    // the shipped package's preferred height is then one line's).
+                    m_CachedPreferredHeight = PreferredHeightAt(width == 0f ? float.PositiveInfinity : width);
                     m_CachedPreferredHeightWidth = width;
                 }
                 return m_CachedPreferredHeight;

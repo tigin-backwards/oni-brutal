@@ -153,7 +153,7 @@ namespace TMPro
             LayoutUnadjusted(width);
             if (s_LineCount == 0) return RoundUp(m_margin.y + m_margin.w);
             ref var last = ref s_Lines[s_LineCount - 1];
-            double height = -((double)last.Baseline + last.Descender);
+            double height = (double)s_Lines[0].Ascender - ((double)last.Baseline + last.Descender);
             return RoundUp(height + m_margin.y + m_margin.w);
         }
 

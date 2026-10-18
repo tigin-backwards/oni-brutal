@@ -125,20 +125,22 @@ namespace TMPro
             float stylePad = p.Bold ? BoldPadding(font) : 0f;
             float s = p.Scale;
             float xs = s * p.XScale;
-            float origin = ci.origin + p.MonoOffset;
-            float baseline = ci.baseLine + p.KernY;
-            // Each value is one expression evaluated in double precision and stored as a float,
-            // as the shipped package's arithmetic on the game's runtime is.
-            float x0 = (float)(origin + ((double)gm.horizontalBearingX - pad - stylePad) * xs);
-            float x1 = (float)(origin + ((double)gm.horizontalBearingX + gm.width + pad + stylePad) * xs);
-            float y1 = (float)(baseline + ((double)gm.horizontalBearingY + pad) * s);
-            float y0 = (float)(baseline + ((double)gm.horizontalBearingY - gm.height - pad) * s);
+            double pen = (double)p.Pen + p.MonoOffset;
+            double baseline = (double)p.BaselineRel + p.KernY;
+            // Each value is computed relative to the line, in one expression evaluated in double
+            // precision and stored as a float, then offset into the rect (as the shipped package's
+            // arithmetic on the game's runtime is).
+            float x0 = (float)(pen + ((double)gm.horizontalBearingX - pad - stylePad) * xs) + p.OffsetX;
+            float x1 = (float)(pen + ((double)gm.horizontalBearingX + gm.width + pad + stylePad) * xs) + p.OffsetX;
+            float y1 = (float)(baseline + ((double)gm.horizontalBearingY + pad) * s) + p.OffsetY;
+            float y0 = (float)(baseline + ((double)gm.horizontalBearingY - gm.height - pad) * s) + p.OffsetY;
             float shearTop = 0f, shearBottom = 0f;
             if (p.Italic && !el.AlternateTypeface)
             {
                 float shear = ItalicShear(font);
-                shearTop = shear * (y1 - baseline);
-                shearBottom = shear * (y0 - baseline);
+                float lineBaseline = ci.baseLine + p.KernY;
+                shearTop = shear * (y1 - lineBaseline);
+                shearBottom = shear * (y0 - lineBaseline);
             }
             mi.vertices[v] = new Vector3(x0 + shearBottom, y0, 0f);
             mi.vertices[v + 1] = new Vector3(x0 + shearTop, y1, 0f);
@@ -173,12 +175,12 @@ namespace TMPro
             var gr = glyph.glyphRect;
             float s = p.Scale;
             float xs = s * p.XScale;
-            float origin = ci.origin + p.MonoOffset;
-            float baseline = ci.baseLine;
-            float x0 = (float)(origin + (double)gm.horizontalBearingX * xs);
-            float x1 = (float)(origin + ((double)gm.horizontalBearingX + gm.width) * xs);
-            float y1 = (float)(baseline + (double)gm.horizontalBearingY * s);
-            float y0 = (float)(baseline + ((double)gm.horizontalBearingY - gm.height) * s);
+            double pen = (double)p.Pen + p.MonoOffset;
+            double baseline = p.BaselineRel;
+            float x0 = (float)(pen + (double)gm.horizontalBearingX * xs) + p.OffsetX;
+            float x1 = (float)(pen + ((double)gm.horizontalBearingX + gm.width) * xs) + p.OffsetX;
+            float y1 = (float)(baseline + (double)gm.horizontalBearingY * s) + p.OffsetY;
+            float y0 = (float)(baseline + ((double)gm.horizontalBearingY - gm.height) * s) + p.OffsetY;
             mi.vertices[v] = new Vector3(x0, y0, 0f);
             mi.vertices[v + 1] = new Vector3(x0, y1, 0f);
             mi.vertices[v + 2] = new Vector3(x1, y1, 0f);

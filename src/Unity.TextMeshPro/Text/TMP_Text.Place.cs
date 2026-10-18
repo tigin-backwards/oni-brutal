@@ -143,8 +143,11 @@ namespace TMPro
             for (int k = 0; k < lineCount; k++)
             {
                 ref var line = ref lines[k];
-                float baseline = offsetY + line.Baseline;
-                float lineLeft = left + line.MarginLeft + line.OffsetX;
+                // Positions are computed relative to the line (the pen from its start, baselines
+                // from the first line's) and offset into the rect afterwards.
+                float offsetX = left + (line.MarginLeft + line.OffsetX);
+                float lineLeft = offsetX;
+                float baseline = line.Baseline + offsetY;
                 bool shown = k >= firstLine && k <= lastLine;
                 var extents = Extents.uninitialized;
                 int visibleOnLine = 0, spacesOnLine = 0;
@@ -168,14 +171,20 @@ namespace TMPro
                     ci.pageNumber = line.Page;
                     ci.scale = p.Scale;
                     ci.style = el.State.Style;
-                    float origin = (float)((double)lineLeft + p.X + p.JustifyOffset);
+                    float pen = p.X + p.JustifyOffset;
+                    float baselineRel = line.Baseline + p.BaselineShift;
+                    p.Pen = pen;
+                    p.BaselineRel = baselineRel;
+                    p.OffsetX = offsetX;
+                    p.OffsetY = offsetY;
+                    float origin = pen + offsetX;
                     ci.origin = origin;
-                    ci.xAdvance = origin + p.GlyphAdvance;
-                    ci.baseLine = baseline + p.BaselineShift;
-                    ci.ascender = baseline + p.Ascender;
-                    ci.descender = baseline + p.Descender;
-                    float x0 = origin + p.MonoOffset + p.Left, x1 = origin + p.MonoOffset + p.Right;
-                    float y1 = baseline + p.Top + p.KernY, y0 = baseline + p.Bottom + p.KernY;
+                    ci.xAdvance = (float)((double)pen + p.GlyphAdvance) + offsetX;
+                    ci.baseLine = baselineRel + offsetY;
+                    ci.ascender = (float)((double)line.Baseline + p.Ascender) + offsetY;
+                    ci.descender = (float)((double)line.Baseline + p.Descender) + offsetY;
+                    float x0 = (float)((double)pen + p.MonoOffset + p.Left) + offsetX, x1 = (float)((double)pen + p.MonoOffset + p.Right) + offsetX;
+                    float y1 = (float)((double)line.Baseline + p.Top + p.KernY) + offsetY, y0 = (float)((double)line.Baseline + p.Bottom + p.KernY) + offsetY;
                     float shear = p.Italic && !el.AlternateTypeface ? ItalicShear(ci.fontAsset) : 0f;
                     ci.bottomLeft = new Vector3(x0 + shear * (p.Bottom - p.BaselineShift), y0, 0f);
                     ci.topLeft = new Vector3(x0 + shear * (p.Top - p.BaselineShift), y1, 0f);

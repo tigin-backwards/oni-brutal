@@ -35,6 +35,9 @@ namespace TMPro
             public float WidthLimit;     // NaN: none
             public HorizontalAlignmentOptions Align;
             public float JustifyOffset;
+            // Set by placement: the pen and baseline relative to the line, and the line's offset
+            // into the rect.
+            public float Pen, BaselineRel, OffsetX, OffsetY;
         }
 
         private protected struct LineData
@@ -348,14 +351,15 @@ namespace TMPro
                 if ((face.ascentLine - face.descentLine) * scale > height + 0.0001f) overflowIndex = 0;
             }
 
-            // 3. Vertical placement: baselines from the top of the text (0).
+            // 3. Vertical placement: baselines relative to the first line's (0).
             float y = 0f;
             int pageIndex = 0;
-            float pageTop = 0f;
+            float textTop = lineCount > 0 ? lines[0].Ascender : 0f;
+            float pageTop = textTop;
             for (int k = 0; k < lineCount; k++)
             {
                 ref var line = ref lines[k];
-                if (k == 0) y = -line.Ascender;
+                if (k == 0) y = 0f;
                 else
                 {
                     ref var prev = ref lines[k - 1];
@@ -373,9 +377,9 @@ namespace TMPro
                 line.Baseline = y;
                 line.LineHeight = line.Ascender - line.Descender;
                 // Vertical overflow: the line's descender below the rect.
-                if (overflowIndex < 0 && -(y + line.Descender) > height + 0.0001f && m_overflowMode != TextOverflowModes.Page)
+                if (overflowIndex < 0 && (double)textTop - ((double)y + line.Descender) > height + 0.0001 && m_overflowMode != TextOverflowModes.Page)
                     overflowIndex = line.First;
-                if (m_overflowMode == TextOverflowModes.Page && k > 0 && (pageTop - (y + line.Descender)) > height + 0.0001f && !pl[line.First].PageBreak)
+                if (m_overflowMode == TextOverflowModes.Page && k > 0 && (double)pageTop - ((double)y + line.Descender) > height + 0.0001 && !pl[line.First].PageBreak)
                 {
                     pageIndex++;
                     pageTop = y + line.Ascender;

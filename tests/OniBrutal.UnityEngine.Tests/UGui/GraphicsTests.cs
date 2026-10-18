@@ -70,15 +70,69 @@ namespace OniBrutal.Tests.UGui
         }
 
         [Fact]
-        public void UnregisteredElementsAreDropped()
+        public void UnregisteringCompletesAtOnce()
         {
             var canvas = NewCanvas();
             var log = new List<string>();
             var r = new Recorder("r", canvas.transform, log);
             CanvasUpdateRegistry.RegisterCanvasElementForGraphicRebuild(r);
             CanvasUpdateRegistry.UnRegisterCanvasElementForRebuild(r);
+            // Both completions at once, even for an element queued for graphics only.
+            Assert.Equal(new[] { "r:LayoutComplete", "r:GraphicUpdateComplete" }, log);
+            log.Clear();
             Canvas.ForceUpdateCanvases();
             Assert.Empty(log);
+        }
+
+        [Fact]
+        public void DisablingRemovesAndCompletesAtOnce()
+        {
+            var canvas = NewCanvas();
+            var log = new List<string>();
+            var d = new Recorder("d", canvas.transform, log);
+            var other = new Recorder("other", canvas.transform, log);
+            CanvasUpdateRegistry.RegisterCanvasElementForLayoutRebuild(d);
+            CanvasUpdateRegistry.RegisterCanvasElementForGraphicRebuild(d);
+            CanvasUpdateRegistry.RegisterCanvasElementForLayoutRebuild(other);
+            CanvasUpdateRegistry.DisableCanvasElementForRebuild(d);
+            Assert.Equal(new[] { "d:LayoutComplete", "d:GraphicUpdateComplete" }, log);
+            log.Clear();
+            Canvas.ForceUpdateCanvases();
+            Assert.Equal(new[] { "other:Prelayout", "other:Layout", "other:PostLayout", "other:LayoutComplete" }, log);
+        }
+
+        sealed class Remover : ICanvasElement
+        {
+            public ICanvasElement Target;
+            public CanvasUpdate When;
+            public Transform transform { get; set; }
+            public void Rebuild(CanvasUpdate executing)
+            {
+                if (executing == When) CanvasUpdateRegistry.DisableCanvasElementForRebuild(Target);
+            }
+            public void LayoutComplete() { }
+            public void GraphicUpdateComplete() { }
+            public bool IsDestroyed() => false;
+        }
+
+        [Fact]
+        public void TheQueueBeingRebuiltCannotLoseElements()
+        {
+            var canvas = NewCanvas();
+            var log = new List<string>();
+            var target = new Recorder("t", canvas.transform, log);
+            var remover = new Remover { Target = target, When = CanvasUpdate.Layout, transform = canvas.transform };
+            CanvasUpdateRegistry.RegisterCanvasElementForLayoutRebuild(remover);
+            CanvasUpdateRegistry.RegisterCanvasElementForLayoutRebuild(target);
+            int errors = 0;
+            Application.LogCallback count = (_, _, type) => { if (type == LogType.Error) errors++; };
+            Application.logMessageReceived += count;
+            try { Canvas.ForceUpdateCanvases(); }
+            finally { Application.logMessageReceived -= count; }
+            // The layout half is refused (logged) and the target still rebuilt; the graphic half
+            // (it was not queued there) completes at once.
+            Assert.Equal(1, errors);
+            Assert.Equal(new[] { "t:Prelayout", "t:GraphicUpdateComplete", "t:Layout", "t:PostLayout", "t:LayoutComplete" }, log);
         }
     }
 

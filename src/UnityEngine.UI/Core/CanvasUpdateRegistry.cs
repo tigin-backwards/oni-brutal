@@ -114,15 +114,34 @@ namespace UnityEngine.UI
             return graphicQueue.Add(element);
         }
 
-        public static void UnRegisterCanvasElementForRebuild(ICanvasElement element)
+        /// Takes the element out of both queues and tells it at once that its layout and graphic
+        /// updates are complete, the layout first (both calls are made whichever queues held it).
+        /// The queue being rebuilt cannot be changed: that half logs an error and is skipped.
+        public static void UnRegisterCanvasElementForRebuild(ICanvasElement element) => instance.Withdraw(element);
+
+        /// The same as UnRegisterCanvasElementForRebuild (measured on the shipped package: both
+        /// completion calls are made here too).
+        public static void DisableCanvasElementForRebuild(ICanvasElement element) => instance.Withdraw(element);
+
+        void Withdraw(ICanvasElement element)
         {
-            var r = instance;
-            r.layoutQueue.Remove(element);
-            r.graphicQueue.Remove(element);
+            if (element == null) return;
+            if (inLayout) RefuseRemoval(element);
+            else
+            {
+                layoutQueue.Remove(element);
+                element.LayoutComplete();
+            }
+            if (inGraphics) RefuseRemoval(element);
+            else
+            {
+                graphicQueue.Remove(element);
+                element.GraphicUpdateComplete();
+            }
         }
 
-        /// Takes the element out of both queues; safe while they are being iterated.
-        public static void DisableCanvasElementForRebuild(ICanvasElement element) => UnRegisterCanvasElementForRebuild(element);
+        static void RefuseRemoval(ICanvasElement element)
+            => Debug.LogError($"Trying to remove {element} from rebuild list while we are already inside a rebuild loop. This is not supported.");
 
         public static bool IsRebuildingLayout() => instance.inLayout;
 

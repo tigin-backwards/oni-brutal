@@ -81,10 +81,11 @@ Keep the scope that file describes. Rewrite the five files' bodies and private s
     - otherwise Left or Right when |x| > |y|, and Up or Down when not.
   - `GetPooled(Direction)` sets the direction, with a zero move.
   - Keyboard events carry character, key code and modifiers.
-  - The internal `ShouldSendNavigationMoveEvent…` helpers answer whether a key event is a
-    navigation key without a modifier that changes its meaning: arrows, and Tab with or
-    without Shift. Read the current callers in uGUI's IL through ApiCheck only if you need the
-    signature.
+  - The internal `ShouldSendNavigationMoveEvent…` helpers:
+    - For a `KeyDownEvent`, the answer is true for Tab without Control, Alt, Command or the
+      function-key flag; Shift is allowed. Arrow keys answer false.
+    - For an IMGUI `Event` (the runtime variant), the answer is true for any Tab `KeyDown`,
+      whatever the modifiers.
 - **`PointerId` and `PointerType` constants** are public API. Keep their values:
   - `maxPointers` 32, `mousePointerId` 0, `invalidPointerId` -1;
   - touch ids start at 1 (20 of them), pen ids follow (2), tracked ids follow (8);
@@ -108,8 +109,22 @@ Keep the scope that file describes. Rewrite the five files' bodies and private s
   - `Pick` returns null;
   - `PickAll` returns null and adds nothing;
   - the dispatch state reports no capture.
-- **Serialized fields:** `PanelInputConfiguration.Settings` keeps its `[SerializeField]` names,
-  which are data.
+- **Serialized fields:** these names are data.
+  - `PanelInputConfiguration` holds `m_Settings`.
+  - `Settings` has, in this order: `m_ProcessWorldSpaceInput` (bool), `m_InteractionLayers`
+    (LayerMask), `m_MaxInteractionDistance` (float), `m_DefaultEventCameraIsMainCamera`
+    (bool), `m_EventCameras` (Camera[]), `m_PanelInputRedirection` (PanelInputRedirection),
+    `m_AutoCreatePanelComponents` (bool).
+  - **`Settings.Default`:**
+    - world-space input on;
+    - interaction layers -5, which is every layer but Ignore Raycast (layer 2);
+    - infinite distance;
+    - the main camera as the event camera, with an empty camera array;
+    - AutoSwitch;
+    - auto-create on.
+  - Each field has a read-only property in camelCase.
+- **`ClickDetector.s_DoubleClickTime`** (internal, used by uGUI) is -1, meaning "not read yet":
+  a panel's click detector would read the system setting, and none exists.
 
 ## 2. TextGenerator's caching front (`TextRendering/TextGenerator.cs`, the `TextGenerator` class up to `Generate`)
 
@@ -254,16 +269,19 @@ the velocity is 0.
   Rename the helper. Behaviour must not change; the existing tests cover it.
 - **`Math/Quaternion.cs`:**
   - `==` is true when the dot product exceeds 1 − `kEpsilon`.
-  - `eulerAngles` returns each angle normalised into [0°, 360°), with a tolerance: an angle
-    less than 0.0001 rad (in degrees) below 0 stays as it is, and an angle within that
-    tolerance below 360° is not wrapped. Only angles further outside the range get 360° added
-    or subtracted.
+  - `eulerAngles` wraps each angle with a tolerance t = 0.0001 rad, in degrees:
+    - an angle below −t gets 360° added;
+    - an angle above 360° − t gets 360° subtracted, so an angle just below 360° comes out as a
+      small negative angle;
+    - any other angle stays as it is.
 
   Restructure the private helpers that do this (`IsEqualUsingDot`, `MakePositive`) under your
   own names.
 - **Renames only** of Unity-named private members:
   - `Core/Attributes.cs` (around lines 32, 85–86, 121);
-  - `Playables/Animation/AnimationPlayables.cs` (`m_NullPlayable`);
+  - `Playables/Animation/AnimationPlayables.cs` (`m_NullPlayable`), and the same names in
+    `Playable.cs`, `ScriptPlayable.cs` and `PlayableOutput.cs` (`m_NullPlayable`,
+    `m_NullPlayableOutput`);
   - `TextCore/GlyphRect.cs` (`s_ZeroGlyphRect`; its `[SerializeField]` names are data and stay).
 
 ## Verification

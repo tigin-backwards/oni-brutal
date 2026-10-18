@@ -23,10 +23,28 @@ namespace OniBrutal.Engine.Rendering
         public float Distance;
         public Bounds WorldBounds;
         public int Sequence;
+
+        public void Clear()
+        {
+            Renderer = null;
+            Mesh = null;
+            SubMesh = 0;
+            ObjectToWorld = default;
+            Material = null;
+            Pass = -1;
+            Properties = null;
+            Keywords = null;
+            Queue = 0;
+            SortingLayerValue = 0;
+            SortingOrder = 0;
+            Distance = 0f;
+            WorldBounds = default;
+            Sequence = 0;
+        }
     }
 
     /// A Graphics.DrawMesh request, drawn by the cameras of the frame it was made in.
-    internal sealed class QueuedMesh
+    internal struct QueuedMesh
     {
         public Mesh Mesh;
         public int SubMesh;
@@ -242,6 +260,48 @@ namespace OniBrutal.Engine.Rendering
             }
         }
 
+        // Draw items and draw lists live until the frame ends (they are collected, sorted and
+        // drawn within a camera render, the overlay pass or a command buffer's execution), so the
+        // frame's are reused by the next frame.
+        static readonly List<DrawItem> itemPool = new();
+        static int itemsUsed;
+
+        static readonly List<List<DrawItem>> listPool = new();
+        static int listsUsed;
+
+        /// An empty draw list for this frame (camera renders, canvas batching).
+        public static List<DrawItem> NewDrawList()
+        {
+            if (listsUsed < listPool.Count)
+            {
+                var list = listPool[listsUsed++];
+                list.Clear();
+                return list;
+            }
+            var made = new List<DrawItem>();
+            listPool.Add(made);
+            listsUsed++;
+            return made;
+        }
+
+        /// A cleared draw item for this frame.
+        public static DrawItem NewDrawItem()
+        {
+            DrawItem d;
+            if (itemsUsed < itemPool.Count)
+            {
+                d = itemPool[itemsUsed];
+                d.Clear();
+            }
+            else
+            {
+                d = new DrawItem();
+                itemPool.Add(d);
+            }
+            itemsUsed++;
+            return d;
+        }
+
         static void EndFrame()
         {
             if (Time.frameCount == DumpFrame && GraphicsDevice.Current.RendersFrames) DumpRenderTextures();
@@ -252,6 +312,8 @@ namespace OniBrutal.Engine.Rendering
             frameQueued.Clear();
             // The frame's queued draws are done with the property blocks they share.
             PropertySheet.RenderEpoch++;
+            itemsUsed = 0;
+            listsUsed = 0;
             TemporaryRenderTextures.EndFrame();
             // Device resources of objects the collector reclaimed (private meshes of destroyed
             // renderers and the like).
@@ -435,7 +497,7 @@ namespace OniBrutal.Engine.Rendering
 
         static List<DrawItem> Cull(Camera camera, CameraNative cam)
         {
-            var draws = new List<DrawItem>();
+            var draws = NewDrawList();
             var frustum = new Frustum(cam.Projection * cam.WorldToCamera);
             int sequence = 0;
             foreach (var r in renderers)
@@ -460,17 +522,16 @@ namespace OniBrutal.Engine.Rendering
                 var mesh = (MeshNative)q.Mesh.NativeOrThrow;
                 var bounds = RendererNative.Transform(mesh.Bounds, q.Matrix);
                 if (!frustum.Intersects(bounds)) continue;
-                draws.Add(new DrawItem
-                {
-                    Mesh = mesh,
-                    SubMesh = Math.Clamp(q.SubMesh, 0, Math.Max(0, mesh.SubMeshes.Count - 1)),
-                    ObjectToWorld = q.Matrix,
-                    Material = q.Material,
-                    Properties = q.Properties,
-                    Queue = q.Material.renderQueue,
-                    WorldBounds = bounds,
-                    Sequence = sequence++,
-                });
+                var item = NewDrawItem();
+                item.Mesh = mesh;
+                item.SubMesh = Math.Clamp(q.SubMesh, 0, Math.Max(0, mesh.SubMeshes.Count - 1));
+                item.ObjectToWorld = q.Matrix;
+                item.Material = q.Material;
+                item.Properties = q.Properties;
+                item.Queue = q.Material.renderQueue;
+                item.WorldBounds = bounds;
+                item.Sequence = sequence++;
+                draws.Add(item);
             }
             int collected = draws.Count;
             CollectDraws?.Invoke(camera, cam, draws);
@@ -562,19 +623,22 @@ namespace OniBrutal.Engine.Rendering
             }
         }
 
-        static DrawItem Item(RendererNative r, MeshNative mesh, int subMesh, Material material, PropertySheet properties) => new()
+        static DrawItem Item(RendererNative r, MeshNative mesh, int subMesh, Material material, PropertySheet properties)
         {
-            Renderer = r,
-            Mesh = mesh,
-            SubMesh = subMesh,
-            ObjectToWorld = r.GameObject.Transform.LocalToWorld,
-            Material = material,
-            Properties = properties,
-            Queue = material.renderQueue,
-            SortingLayerValue = SortingLayers.ValueOf(r.SortingLayerId),
-            SortingOrder = r.SortingOrder,
-            WorldBounds = r.WorldBounds,
-        };
+            var d = FrameRenderer.NewDrawItem();
+            d.Renderer = r;
+            d.Mesh = mesh;
+            d.SubMesh = subMesh;
+            d.ObjectToWorld = r.GameObject.Transform.LocalToWorld;
+            d.Material = material;
+            d.Properties = properties;
+            d.Queue = material.renderQueue;
+            d.SortingLayerValue = SortingLayers.ValueOf(r.SortingLayerId);
+            d.SortingOrder = r.SortingOrder;
+            d.WorldBounds = r.WorldBounds;
+            return d;
+        }
+
 
         static readonly System.Runtime.CompilerServices.ConditionalWeakTable<RendererNative, MeshNative> particleMeshes = new();
 

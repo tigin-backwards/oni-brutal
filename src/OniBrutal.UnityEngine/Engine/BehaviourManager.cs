@@ -98,18 +98,32 @@ namespace OniBrutal.Engine
                 pendingAdd.Clear();
             }
 
+            int depth;
+
+            /// The lists change only in Integrate, before the phase's callbacks run, so they are
+            /// iterated in place; a run started from inside a callback (the player loop never does
+            /// this) leaves the integration to the outer one.
             public void Run()
             {
-                Integrate();
-                foreach (var list in byOrder.Values)
-                    foreach (var b in list.ToArray())
-                    {
-                        // Disabled or destroyed earlier in this phase: skip. A behaviour whose Start
-                        // has not run yet (enabled after this frame's Start pass) gets its update
-                        // callbacks only after Start, as in Unity.
-                        if (!b.IsActiveAndEnabledState || pendingRemove.Contains(b) || !b.StartCalled) continue;
-                        Lifecycle.Invoke(selector(b.Script), (MonoBehaviour)b.Managed);
-                    }
+                if (depth == 0) Integrate();
+                depth++;
+                try
+                {
+                    foreach (var list in byOrder.Values)
+                        for (int i = 0; i < list.Count; i++)
+                        {
+                            var b = list[i];
+                            // Disabled or destroyed earlier in this phase: skip. A behaviour whose
+                            // Start has not run yet (enabled after this frame's Start pass) gets its
+                            // update callbacks only after Start, as in Unity.
+                            if (!b.IsActiveAndEnabledState || pendingRemove.Contains(b) || !b.StartCalled) continue;
+                            Lifecycle.Invoke(selector(b.Script), (MonoBehaviour)b.Managed);
+                        }
+                }
+                finally
+                {
+                    depth--;
+                }
             }
         }
 

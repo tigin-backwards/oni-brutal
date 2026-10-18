@@ -379,6 +379,9 @@ namespace OniBrutal.Engine.Rendering
         public Shader Shader;
         public readonly PropertySheet Properties = new();
         public readonly KeywordSet Keywords = new();
+        /// The device's program variant per pass and draw keyword list, with the material and
+        /// global keyword versions it was selected for.
+        public Dictionary<(ShaderPass Pass, string[] DrawKeywords), (int MaterialVersion, int GlobalVersion, int Blob)> Variants;
         public int CustomRenderQueue = -1;
         public MaterialGlobalIlluminationFlags GlobalIlluminationFlags = MaterialGlobalIlluminationFlags.EmissiveIsBlack;
         public bool EnableInstancing;

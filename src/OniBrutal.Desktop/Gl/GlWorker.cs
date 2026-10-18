@@ -187,11 +187,31 @@ namespace OniBrutal.Desktop.Gl
         int floatCount;
         byte[] bytes = new byte[1 << 18];
         int byteCount;
+        readonly List<object> objects = new();
+        int objectCount;
 
         public void Reset()
         {
             floatCount = 0;
             byteCount = 0;
+            objectCount = 0;
+        }
+
+        /// An object for this frame's commands, reused from the frame's last use when there is
+        /// one of the type at this position (the GL thread is done with it once the frame has
+        /// run); `create` makes one otherwise.
+        public T Next<T>(Func<T> create) where T : class
+        {
+            if (objectCount < objects.Count && objects[objectCount] is T reused)
+            {
+                objectCount++;
+                return reused;
+            }
+            var made = create();
+            if (objectCount < objects.Count) objects[objectCount] = made;
+            else objects.Add(made);
+            objectCount++;
+            return made;
         }
 
         /// `length` floats: the array and the offset of the range in it.

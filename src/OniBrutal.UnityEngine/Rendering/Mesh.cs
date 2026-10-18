@@ -184,7 +184,9 @@ namespace UnityEngine
         {
             get
             {
-                if (!CanAccess("colors") || Data.Colors == null) return Array.Empty<Color32>();
+                if (!CanAccess("colors")) return Array.Empty<Color32>();
+                if (Data.Colors32 != null) return (Color32[])Data.Colors32.Clone();
+                if (Data.Colors == null) return Array.Empty<Color32>();
                 var c = Data.Colors;
                 var result = new Color32[c.Length];
                 for (int i = 0; i < c.Length; i++) result[i] = c[i];
@@ -218,12 +220,7 @@ namespace UnityEngine
             if (!ChannelSizeOk("colors", count)) return;
             var m = Data;
             if (count == 0) m.Colors = null;
-            else
-            {
-                var c = new Color[count];
-                for (int i = 0; i < count; i++) c[i] = values[start + i];
-                m.Colors = c;
-            }
+            else m.SetColors32(Slice(values, start, count));
             m.ColorsAreBytes = true;
             m.Changed();
         }

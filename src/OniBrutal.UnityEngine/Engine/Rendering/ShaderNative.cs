@@ -63,6 +63,11 @@ namespace OniBrutal.Engine.Rendering
         public ShaderPass[] Passes;
         public Dictionary<string, string> Tags;
         public int Lod;
+
+        /// The "Queue" tag parsed (ShaderNative.ParseQueue), Geometry (2000) without one; tags do
+        /// not change after load, and renderers ask for every draw.
+        public int Queue => queue ??= Tags != null && Tags.TryGetValue("Queue", out var q) ? ShaderNative.ParseQueue(q) : 2000;
+        int? queue;
     }
 
     /// A shader: its parsed ShaderLab form plus the compiled program data.
@@ -176,9 +181,7 @@ namespace OniBrutal.Engine.Rendering
         {
             get
             {
-                var s = ActiveSubShader;
-                if (s == null || !s.Tags.TryGetValue("Queue", out var queue)) return 2000;
-                return ParseQueue(queue);
+                return ActiveSubShader?.Queue ?? 2000;
             }
         }
 

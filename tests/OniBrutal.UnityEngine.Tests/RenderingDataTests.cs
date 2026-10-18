@@ -119,6 +119,10 @@ namespace OniBrutal.Tests
             Assert.Empty(mesh.colors32);
             mesh.colors32 = [new Color32(1, 2, 3, 4), new Color32(5, 6, 7, 8), new Color32(9, 10, 11, 12)];
             Assert.Equal(new Color32(5, 6, 7, 8), mesh.colors32[1]);
+            // Colours given in bytes read back as floats too, and float colours as bytes.
+            Assert.Equal((Color)new Color32(9, 10, 11, 12), mesh.colors[2]);
+            mesh.colors = [Color.red, Color.green, Color.blue];
+            Assert.Equal(new Color32(0, 0, 255, 255), mesh.colors32[2]);
 
             mesh.Clear();
             Assert.Equal(0, mesh.vertexCount);

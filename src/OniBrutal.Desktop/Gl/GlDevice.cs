@@ -409,10 +409,11 @@ namespace OniBrutal.Desktop.Gl
             return mode is "" or "Always" or "ForwardBase" or "Vertex" or "SRPDefaultUnlit";
         }
 
-        IEnumerable<(ShaderNative Shader, ShaderPass Pass)> Passes(ShaderNative shader, MaterialNative material, int pass, bool allPasses)
+        /// Adds the passes a draw runs to `passes`.
+        static void Passes(List<(ShaderNative Shader, ShaderPass Pass)> passes, ShaderNative shader, MaterialNative material, int pass, bool allPasses)
         {
             var sub = shader.ActiveSubShader;
-            if (sub == null) yield break;
+            if (sub == null) return;
             for (int i = 0; i < sub.Passes.Length; i++)
             {
                 if (pass >= 0 && i != pass) continue;
@@ -422,11 +423,11 @@ namespace OniBrutal.Desktop.Gl
                 if (p.Type == 1)
                 {
                     var used = ResolveUsePass(p.UseName);
-                    if (used.Pass != null) yield return used;
+                    if (used.Pass != null) passes.Add(used);
                     continue;
                 }
                 if (p.Type != 0) continue; // GrabPass: no shader in this build uses one.
-                yield return (shader, p);
+                passes.Add((shader, p));
             }
         }
 
@@ -468,7 +469,10 @@ namespace OniBrutal.Desktop.Gl
         /// A sampler's texture as recorded: render textures are made ready for sampling first.
         readonly record struct SamplerTexture(DeviceTexture Texture, bool RenderTexture, bool AutoGenerateMips);
 
-        /// Everything a draw's program reads, recorded on the main thread.
+        /// Everything a draw's program reads, recorded on the main thread. Instances belong to
+        /// the frame they are recorded in and are reused by its next recording (FrameArena.Next),
+        /// so a draw allocates nothing: the mesh draw it runs is a field, its command a delegate
+        /// made once per instance.
         sealed class ProgramInputs
         {
             /// Shader and pass (diagnostics, --gpu-profile).
@@ -479,18 +483,44 @@ namespace OniBrutal.Desktop.Gl
             public int ValuesOffset;
             public byte[] Blocks;
             public int BlocksOffset;
-            public SamplerTexture[] Textures;
+            /// Textures[0..TextureCount): the program's samplers.
+            public SamplerTexture[] Textures = Array.Empty<SamplerTexture>();
+            public int TextureCount;
+            // A mesh draw's geometry.
+            public DeviceMesh Mesh;
+            public MeshLayout Layout;
+            public (int Offset, int Count, uint Mode, int BaseVertex) SubMesh;
+            /// Runs the mesh draw (GL thread).
+            public Action RunDraw;
+        }
+
+        ProgramInputs NewInputs()
+        {
+            var r = new ProgramInputs();
+            r.RunDraw = () =>
+            {
+                long t = GlTimings.Now;
+                uint q = GlGpuProfile.Enabled ? GlGpuProfile.Begin() : 0;
+                ExecuteDraw(r, r.Mesh, r.Layout, r.SubMesh);
+                if (GlGpuProfile.Enabled) GlGpuProfile.End(r.Label, q);
+                GlTimings.Draws += GlTimings.Now - t;
+            };
+            return r;
         }
 
         ProgramInputs Record(DeviceProgram program, PassState state, DrawInputs inputs)
         {
             var arena = worker.Arena;
-            var r = new ProgramInputs { Program = program, State = ResolvedState.Of(state, inputs) };
+            var r = arena.Next(newInputs ??= NewInputs);
+            r.Label = null;
+            r.Program = program;
+            r.State = ResolvedState.Of(state, inputs);
             (r.Values, r.ValuesOffset) = arena.Floats(program.LooseLength);
             (r.Blocks, r.BlocksOffset) = arena.Bytes(program.BlocksLength);
             GlUniforms.Record(program, inputs, r.Values.AsSpan(r.ValuesOffset, program.LooseLength), r.Blocks.AsSpan(r.BlocksOffset, program.BlocksLength));
-            r.Textures = new SamplerTexture[program.Samplers.Count];
-            for (int i = 0; i < r.Textures.Length; i++)
+            r.TextureCount = program.Samplers.Count;
+            if (r.Textures.Length < r.TextureCount) r.Textures = new SamplerTexture[r.TextureCount];
+            for (int i = 0; i < r.TextureCount; i++)
             {
                 var s = program.Samplers[i];
                 if (inputs.TryTexture(s.PropertyId, out var binding) && binding.Texture != null && binding.Texture.Native is TextureNative tn)
@@ -518,6 +548,11 @@ namespace OniBrutal.Desktop.Gl
             return r;
         }
 
+        Func<ProgramInputs> newInputs;
+        // Draw's scratch (main thread; a draw records completely before the next starts).
+        readonly DrawInputs drawInputs = new();
+        readonly List<(ShaderNative Shader, ShaderPass Pass)> drawPasses = new();
+
         public override void Draw(in DrawRequest draw)
         {
             if (draw.Material == null || draw.Mesh == null) return;
@@ -529,27 +564,48 @@ namespace OniBrutal.Desktop.Gl
             var mesh = GlMeshes.Prepare(worker, draw.Mesh);
             var layout = mesh.Layout;
             var sm = mesh.SubMeshes[draw.SubMesh];
-            var inputs = new DrawInputs { ObjectToWorld = draw.ObjectToWorld, Camera = camera, Block = draw.Properties, Material = material };
-            var keywords = draw.Keywords;
-            foreach (var (passShader, pass) in Passes(shader, material, draw.Pass, draw.AllPasses))
+            var inputs = drawInputs;
+            inputs.ObjectToWorld = draw.ObjectToWorld;
+            inputs.Camera = camera;
+            inputs.Block = draw.Properties;
+            inputs.Material = material;
+            drawPasses.Clear();
+            Passes(drawPasses, shader, material, draw.Pass, draw.AllPasses);
+            foreach (var (passShader, pass) in drawPasses)
             {
-                int blob = ShaderPrograms.SelectVariant(pass.Data, passShader.KeywordNames, k => KeywordEnabled(k, material, keywords));
+                int blob = Variant(material, passShader, pass, draw.Keywords);
                 if (blob < 0) continue;
                 var program = Program(passShader, blob);
                 if (program.Id == 0) continue;
                 inputs.Shader = passShader;
                 var recorded = Record(program, StateOf(pass), inputs);
                 if (GlGpuProfile.Enabled) recorded.Label = passShader.ShaderName + "/" + (pass.Name.Length > 0 ? pass.Name : "pass");
-                worker.Post(() =>
-                {
-                    long t = GlTimings.Now;
-                    uint q = GlGpuProfile.Enabled ? GlGpuProfile.Begin() : 0;
-                    ExecuteDraw(recorded, mesh, layout, sm);
-                    if (GlGpuProfile.Enabled) GlGpuProfile.End(recorded.Label, q);
-                    GlTimings.Draws += GlTimings.Now - t;
-                });
+                recorded.Mesh = mesh;
+                recorded.Layout = layout;
+                recorded.SubMesh = sm;
+                worker.Post(recorded.RunDraw);
             }
+            inputs.Block = null;
+            inputs.Material = null;
+            inputs.Shader = null;
         }
+
+        /// The pass's program variant for the material's, the draw's and the global keywords,
+        /// selected once per material, pass and draw keyword list while the keywords are unchanged.
+        static int Variant(MaterialNative material, ShaderNative passShader, ShaderPass pass, string[] keywords)
+        {
+            var cache = material.Variants ??= new();
+            var key = (pass, keywords);
+            int materialVersion = material.Keywords.Version, globalVersion = ShaderGlobals.Keywords.Version;
+            if (cache.TryGetValue(key, out var c) && c.MaterialVersion == materialVersion && c.GlobalVersion == globalVersion) return c.Blob;
+            int blob = SelectVariant(material, passShader, pass, keywords);
+            cache[key] = (materialVersion, globalVersion, blob);
+            return blob;
+        }
+
+        // Its own method, so the predicate's closure is allocated only when a variant is selected.
+        static int SelectVariant(MaterialNative material, ShaderNative passShader, ShaderPass pass, string[] keywords)
+            => ShaderPrograms.SelectVariant(pass.Data, passShader.KeywordNames, k => KeywordEnabled(k, material, keywords));
 
         // GL thread.
         readonly uint immediateBuffer, immediateIndices;
@@ -596,12 +652,15 @@ namespace OniBrutal.Desktop.Gl
             }
             // Render textures are made ready for sampling first (MSAA resolve, mip generation):
             // that work binds framebuffers and textures of its own.
-            foreach (var t in recorded.Textures)
+            for (int i = 0; i < recorded.TextureCount; i++)
+            {
+                var t = recorded.Textures[i];
                 if (t.RenderTexture) GlTextures.PrepareForSampling(t.Texture, t.AutoGenerateMips);
+            }
             if (GlBindless.Enabled)
             {
                 var handles = program.SamplerHandles ??= new ulong[program.Samplers.Count];
-                for (int i = 0; i < recorded.Textures.Length; i++)
+                for (int i = 0; i < recorded.TextureCount; i++)
                 {
                     ulong h = GlBindless.Handle(recorded.Textures[i].Texture);
                     if (handles[i] == h) continue;
@@ -610,7 +669,7 @@ namespace OniBrutal.Desktop.Gl
                 }
             }
             else
-                for (int i = 0; i < recorded.Textures.Length; i++)
+                for (int i = 0; i < recorded.TextureCount; i++)
                 {
                     var t = recorded.Textures[i].Texture;
                     GlBindings.BindTexture(program.Samplers[i].Unit, t.Target, t.Id);

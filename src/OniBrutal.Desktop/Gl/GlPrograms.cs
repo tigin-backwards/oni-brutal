@@ -31,6 +31,8 @@ namespace OniBrutal.Desktop.Gl
         public bool IsMatrix;
         public UniformSource Source;
         public int PropertyId;
+        /// TextureScaleOffset: the id of the texture's "<name>_ST" property, found on first use.
+        public int ScaleOffsetId = int.MinValue;
         // Members of uniform blocks.
         public int Block = -1;
         public int Offset;
@@ -436,7 +438,8 @@ namespace OniBrutal.Desktop.Gl
                     v = new Vector4(0f, 0f, 0f, d.ObjectToWorld.determinant < 0f ? -1f : 1f);
                     break;
                 case UniformSource.TextureScaleOffset:
-                    v = d.TryVector(ShaderPropertyIds.Get(ShaderPropertyIds.NameOf(u.PropertyId) + "_ST"), out var st) ? st
+                    if (u.ScaleOffsetId == int.MinValue) u.ScaleOffsetId = ShaderPropertyIds.Get(ShaderPropertyIds.NameOf(u.PropertyId) + "_ST");
+                    v = d.TryVector(u.ScaleOffsetId, out var st) ? st
                         : d.TryTexture(u.PropertyId, out var tb) ? tb.ScaleOffset : TextureBinding.IdentityScaleOffset;
                     break;
                 case UniformSource.TextureTexelSize:

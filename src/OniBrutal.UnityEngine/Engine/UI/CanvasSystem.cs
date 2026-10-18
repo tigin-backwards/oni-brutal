@@ -238,9 +238,20 @@ namespace OniBrutal.Engine.UI
         static void Build()
         {
             batches.Clear();
+            int reused = 0;
             foreach (var c in enabled)
                 if (IsLive(c) && c.GameObject.ActiveInHierarchy && (RootOf(c) == c || c.OverrideSorting))
-                    batches.Add(new CanvasBatch { Canvas = c, Root = RootOf(c) });
+                {
+                    // Batch objects (and their draw lists) are reused from build to build.
+                    CanvasBatch batch;
+                    if (reused < batchPool.Count) batch = batchPool[reused];
+                    else batchPool.Add(batch = new CanvasBatch());
+                    reused++;
+                    batch.Canvas = c;
+                    batch.Root = RootOf(c);
+                    batch.Draws.Clear();
+                    batches.Add(batch);
+                }
             // Geometry is in the root canvas's space: RectMask2D (shipped uGUI) computes its clip
             // rects in the root-most canvas's space, nested canvases included.
             foreach (var b in batches)
@@ -261,6 +272,8 @@ namespace OniBrutal.Engine.UI
             });
             for (int i = 0; i < batches.Count; i++) batches[i].Canvas.RenderOrder = i;
         }
+
+        static readonly List<CanvasBatch> batchPool = new();
 
         static CanvasNative SortingOf(CanvasBatch b) => b.Canvas.OverrideSorting || b.Canvas == b.Root ? b.Canvas : b.Root;
 
@@ -377,7 +390,7 @@ namespace OniBrutal.Engine.UI
             if (d.Material == null || alpha <= 0f) return null;
             var spaceToWorld = b.SpaceToWorld;
             var mesh = BuildMesh(r, b.WorldToSpace * r.GameObject.Transform.LocalToWorld, new Color(r.Color.r, r.Color.g, r.Color.b, alpha));
-            var props = new PropertySheet();
+            var props = SheetFor(r, d.Material, d.Pop);
             var texture = r.Texture ?? d.Material.mainTexture;
             if (!d.Pop && r.Texture != null) props.SetTexture(MainTex, r.Texture);
             if (r.AlphaTexture != null) props.SetTexture(AlphaTex, r.AlphaTexture);
@@ -392,19 +405,35 @@ namespace OniBrutal.Engine.UI
             }
             else props.SetVector(ClipRectId, new Vector4(-32767f, -32767f, 32767f, 32767f));
             props.SetFloat(ZTestMode, overlay ? CompareAlways : CompareLessEqual);
-            return new DrawItem
-            {
-                Mesh = mesh,
-                SubMesh = 0,
-                ObjectToWorld = spaceToWorld,
-                Material = d.Material,
-                Properties = props,
-                Keywords = r.ClipRect != null ? ClipKeywords : null,
-                Queue = d.Material.renderQueue,
-            };
+            var item = FrameRenderer.NewDrawItem();
+            item.Mesh = mesh;
+            item.ObjectToWorld = spaceToWorld;
+            item.Material = d.Material;
+            item.Properties = props;
+            item.Keywords = r.ClipRect != null ? ClipKeywords : null;
+            item.Queue = d.Material.renderQueue;
+            return item;
         }
 
         static readonly string[] ClipKeywords = ["UNITY_UI_CLIP_RECT"];
+
+        /// The property sheet an element's draw with a material fills each frame, kept on the
+        /// element: the frame's draws are recorded before the next frame refills it.
+        static PropertySheet SheetFor(CanvasRendererNative r, Material material, bool pop)
+        {
+            var sheets = r.DrawSheets ??= new();
+            foreach (var (m, p, sheet) in sheets)
+                if (ReferenceEquals(m, material) && p == pop)
+                {
+                    sheet.Clear();
+                    return sheet;
+                }
+            // Materials an element no longer uses are dropped once a few have gathered.
+            if (sheets.Count >= 8) sheets.Clear();
+            var created = new PropertySheet();
+            sheets.Add((material, pop, created));
+            return created;
+        }
 
         // ----- Batching -----
 
@@ -413,7 +442,7 @@ namespace OniBrutal.Engine.UI
         /// order is unchanged.
         static List<DrawItem> Batched(CanvasBatch b, bool overlay)
         {
-            var items = new List<DrawItem>();
+            var items = FrameRenderer.NewDrawList();
             var run = new List<(DrawItem Item, CanvasRendererNative Renderer)>();
             void Flush()
             {

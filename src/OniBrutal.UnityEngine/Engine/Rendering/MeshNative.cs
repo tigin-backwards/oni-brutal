@@ -17,7 +17,9 @@ namespace OniBrutal.Engine.Rendering
     }
 
     /// A mesh's data, kept as per-attribute arrays (Unity's channel model). The device builds its
-    /// buffers from them when Version changes.
+    /// buffers from them when Version changes. A channel array is filled before it is published
+    /// and never written afterwards (a change replaces it, and getters hand out copies): the
+    /// device's uploads hold the arrays themselves until they run on the render thread.
     internal sealed class MeshNative : NativeObject
     {
         public const int UvChannels = 8;
@@ -26,7 +28,39 @@ namespace OniBrutal.Engine.Rendering
         public Vector3[] Positions;
         public Vector3[] Normals;
         public Vector4[] Tangents;
-        public Color[] Colors;
+
+        Color[] colors;
+
+        /// The vertex colours. Colours given as bytes (SetColors32) are kept as given and turned
+        /// into Colors only when something reads them: the device uploads the bytes.
+        public Color[] Colors
+        {
+            get
+            {
+                if (colors == null && Colors32 != null)
+                {
+                    var expanded = new Color[Colors32.Length];
+                    for (int i = 0; i < expanded.Length; i++) expanded[i] = Colors32[i];
+                    colors = expanded;
+                }
+                return colors;
+            }
+            set
+            {
+                colors = value;
+                Colors32 = null;
+            }
+        }
+
+        /// The colours as given in bytes, or null when they were given otherwise.
+        public Color32[] Colors32 { get; private set; }
+
+        public void SetColors32(Color32[] values)
+        {
+            colors = null;
+            Colors32 = values;
+        }
+
         /// Colours were given as Color32 (UNorm8 storage).
         public bool ColorsAreBytes;
         public readonly Vector4[][] Uvs = new Vector4[UvChannels][];
@@ -100,7 +134,8 @@ namespace OniBrutal.Engine.Rendering
             Positions = (Vector3[])o.Positions?.Clone();
             Normals = (Vector3[])o.Normals?.Clone();
             Tangents = (Vector4[])o.Tangents?.Clone();
-            Colors = (Color[])o.Colors?.Clone();
+            if (o.Colors32 != null) SetColors32((Color32[])o.Colors32.Clone());
+            else Colors = (Color[])o.Colors?.Clone();
             ColorsAreBytes = o.ColorsAreBytes;
             for (int i = 0; i < UvChannels; i++)
             {

@@ -200,13 +200,7 @@ namespace OniBrutal.Desktop.Gl
                     {
                         g.RecordedShape = shape;
                         g.RecordedSampler = -1;
-                        string name = rt.Name;
-                        worker.Post(() =>
-                    {
-                        long t = GlTimings.Now;
-                        EnsureRenderTexture(g, shape, name);
-                        GlTimings.Targets += GlTimings.Now - t;
-                    });
+                        PostRenderTexture(worker, g, shape, rt.Name);
                     }
                     break;
                 }
@@ -222,25 +216,37 @@ namespace OniBrutal.Desktop.Gl
                     g.RecordedContent = tt.ContentVersion;
                     g.RecordedTarget = upload.Target;
                     g.RecordedSampler = -1;
-                    worker.Post(() =>
-                    {
-                        long t = GlTimings.Now;
-                        uint q = GlGpuProfile.Enabled ? GlGpuProfile.Begin() : 0;
-                        upload.Execute(g);
-                        if (GlGpuProfile.Enabled) GlGpuProfile.End($"texture upload {upload.Width}x{upload.Height} {upload.Format}", q);
-                        GlTimings.TextureUploads += GlTimings.Now - t;
-                    });
+                    PostUpload(worker, g, upload);
                     break;
                 }
             }
             if (!g.RecordedEmpty && g.RecordedSampler != t.SamplerVersion)
             {
                 g.RecordedSampler = t.SamplerVersion;
-                var sampler = new SamplerSettings(t.FilterMode, t.WrapU, t.WrapV, t.WrapW, t.MipBias, t.Aniso);
-                worker.Post(() => ApplySampler(sampler, g));
+                PostSampler(worker, g, new SamplerSettings(t.FilterMode, t.WrapU, t.WrapV, t.WrapW, t.MipBias, t.Aniso));
             }
             return g;
         }
+
+        // The GL-thread work Prepare posts, each in its own method so that its closure is
+        // allocated only when there is work (Prepare runs for every texture of every draw).
+        static void PostRenderTexture(GlWorker worker, DeviceTexture g, RenderShape shape, string name) => worker.Post(() =>
+        {
+            long t = GlTimings.Now;
+            EnsureRenderTexture(g, shape, name);
+            GlTimings.Targets += GlTimings.Now - t;
+        });
+
+        static void PostUpload(GlWorker worker, DeviceTexture g, TexelUpload upload) => worker.Post(() =>
+        {
+            long t = GlTimings.Now;
+            uint q = GlGpuProfile.Enabled ? GlGpuProfile.Begin() : 0;
+            upload.Execute(g);
+            if (GlGpuProfile.Enabled) GlGpuProfile.End($"texture upload {upload.Width}x{upload.Height} {upload.Format}", q);
+            GlTimings.TextureUploads += GlTimings.Now - t;
+        });
+
+        static void PostSampler(GlWorker worker, DeviceTexture g, SamplerSettings sampler) => worker.Post(() => ApplySampler(sampler, g));
 
         /// Texture content uploads and their bytes since the last frame counters (--frame-stats).
         public static long Uploads, UploadBytes;

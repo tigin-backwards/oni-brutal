@@ -67,7 +67,9 @@ namespace OniBrutal.Desktop.Gl
         }
     }
 
-    /// A mesh's vertex and index data as it was when recorded (copies), for the GL thread.
+    /// A mesh's vertex and index data as it was when recorded, for the GL thread. The channel
+    /// arrays are the mesh's own: MeshNative never writes into a channel array it has published
+    /// (a change replaces the array), so they hold what was recorded until the upload runs.
     internal sealed class MeshUpload
     {
         public readonly Array[] Channels = new Array[(int)Channel.Count];
@@ -92,7 +94,13 @@ namespace OniBrutal.Desktop.Gl
             AddChannel(upload, layout, Channel.Position, m.Positions, 3);
             AddChannel(upload, layout, Channel.Normal, m.Normals, 3);
             AddChannel(upload, layout, Channel.Tangent, m.Tangents, 4);
-            if (m.Colors != null && m.Colors.Length > 0 && m.ColorsAreBytes)
+            if (m.ColorsAreBytes && m.Colors32 is { Length: > 0 } given)
+            {
+                upload.Channels[(int)Channel.Color] = given;
+                layout.Components[(int)Channel.Color] = 4;
+                layout.ByteColors = true;
+            }
+            else if (m.Colors != null && m.Colors.Length > 0 && m.ColorsAreBytes)
             {
                 var bytes = new Color32[m.Colors.Length];
                 for (int i = 0; i < bytes.Length; i++) bytes[i] = m.Colors[i];
@@ -110,21 +118,25 @@ namespace OniBrutal.Desktop.Gl
             d.SubMeshes = Indices(m, out upload.Indices);
             if (!layout.SameAs(d.Layout)) d.Layout = layout;
             d.RecordedVersion = m.Version;
-            worker.Post(() =>
-            {
-                long t = GlTimings.Now;
-                uint q = GlGpuProfile.Enabled ? GlGpuProfile.Begin() : 0;
-                Upload(d, upload);
-                if (GlGpuProfile.Enabled) GlGpuProfile.End("mesh upload", q);
-                GlTimings.MeshUploads += GlTimings.Now - t;
-            });
+            PostUpload(worker, d, upload);
             return d;
         }
+
+        // Its own method, so the closure is allocated only for a changed mesh (Prepare runs for
+        // every draw).
+        static void PostUpload(GlWorker worker, DeviceMesh d, MeshUpload upload) => worker.Post(() =>
+        {
+            long t = GlTimings.Now;
+            uint q = GlGpuProfile.Enabled ? GlGpuProfile.Begin() : 0;
+            Upload(d, upload);
+            if (GlGpuProfile.Enabled) GlGpuProfile.End("mesh upload", q);
+            GlTimings.MeshUploads += GlTimings.Now - t;
+        });
 
         static void AddChannel<T>(MeshUpload upload, MeshLayout layout, Channel c, T[] data, int components) where T : unmanaged
         {
             if (data == null || data.Length == 0) return;
-            upload.Channels[(int)c] = (T[])data.Clone();
+            upload.Channels[(int)c] = data;
             layout.Components[(int)c] = components;
         }
 

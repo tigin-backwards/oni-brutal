@@ -1,0 +1,265 @@
+using System.Linq;
+using TMPro;
+using UnityEngine;
+using UnityEngine.TextCore.LowLevel;
+using Xunit;
+
+namespace OniBrutal.Tests
+{
+    // Rich text, style sheets, sprites and font assets.
+    public class TmpRichTextTests : EngineTest
+    {
+        static TextMeshProUGUI Text(string text, float width = 500f, float height = 200f)
+            => TmpTestSupport.NewText(text, TmpTestSupport.Graystroke, 14f, new Vector2(width, height));
+
+        static string Characters(TMP_Text t) => new(t.textInfo.characterInfo.Take(t.textInfo.characterCount).Select(c => c.character).ToArray());
+
+        [Fact]
+        public void TagsAreRemovedAndApplied()
+        {
+            var t = Text("a<b>b</b><i>c</i><color=#FF000080>d</color><color=red>e</color><#00FF00>f</color>g");
+            Assert.Equal("abcdefg", Characters(t));
+            var c = t.textInfo.characterInfo;
+            Assert.Equal(FontStyles.Bold, c[1].style & FontStyles.Bold);
+            Assert.Equal(FontStyles.Normal, c[2].style & FontStyles.Bold);
+            Assert.Equal(FontStyles.Italic, c[2].style & FontStyles.Italic);
+            Assert.Equal(new Color32(255, 0, 0, 128), c[3].color);
+            Assert.Equal(new Color32(255, 0, 0, 255), c[4].color);
+            Assert.Equal(new Color32(0, 255, 0, 255), c[5].color);
+            Assert.Equal(new Color32(255, 255, 255, 255), c[6].color);
+            // Bold glyphs carry a negative SDF scale (the shader's weight switch).
+            Assert.True(t.textInfo.meshInfo[0].uvs0[c[1].vertexIndex].w < 0f);
+            Assert.True(t.textInfo.meshInfo[0].uvs0[c[0].vertexIndex].w > 0f);
+        }
+
+        [Fact]
+        public void SourceIndicesSkipTheTags()
+        {
+            var t = Text("x<b>y</b>z");
+            var c = t.textInfo.characterInfo;
+            Assert.Equal(0, c[0].index);
+            Assert.Equal(4, c[1].index);
+            Assert.Equal(9, c[2].index);
+        }
+
+        [Fact]
+        public void UnknownTagsAndNoParseAreDrawnAsText()
+        {
+            Assert.Equal("<foo>bar", Characters(Text("<foo>bar")));
+            Assert.Equal("<b>x</b>", Characters(Text("<noparse><b>x</b></noparse>")));
+            var plain = Text("<b>x</b>");
+            plain.richText = false;
+            plain.ForceMeshUpdate(true);
+            Assert.Equal("<b>x</b>", Characters(plain));
+        }
+
+        [Fact]
+        public void SizeTagsScaleTheCharacters()
+        {
+            var t = Text("a<size=28>b</size><size=50%>c</size><size=+7>d</size><size=2em>e</size>");
+            var c = t.textInfo.characterInfo;
+            Assert.Equal(14f, c[0].pointSize, 3);
+            Assert.Equal(28f, c[1].pointSize, 3);
+            Assert.Equal(7f, c[2].pointSize, 3);
+            Assert.Equal(21f, c[3].pointSize, 3);
+            Assert.Equal(28f, c[4].pointSize, 3);
+        }
+
+        [Fact]
+        public void CaseTagsConvertTheCharacters()
+        {
+            Assert.Equal("ABc", Characters(Text("<uppercase>ab</uppercase>c")));
+            Assert.Equal("abC", Characters(Text("<lowercase>AB</lowercase>C")));
+            var t = Text("<smallcaps>aB</smallcaps>");
+            Assert.Equal("AB", Characters(t));
+            Assert.Equal(14f * 0.8f, t.textInfo.characterInfo[0].pointSize, 3);
+            Assert.Equal(14f, t.textInfo.characterInfo[1].pointSize, 3);
+        }
+
+        [Fact]
+        public void EscapesAndLineBreaks()
+        {
+            var t = Text("a\\nb<br>c\\u0041");
+            Assert.Equal("a\nb\ncA", Characters(t));
+            Assert.Equal(3, t.textInfo.lineCount);
+            t.parseCtrlCharacters = false;
+            t.ForceMeshUpdate(true);
+            Assert.StartsWith("a\\nb", Characters(t));
+        }
+
+        [Fact]
+        public void SurrogatePairsAreOneCharacter()
+        {
+            var t = Text("a\U0001F60Ab");
+            Assert.Equal(3, t.textInfo.characterCount);
+            Assert.Equal(3, t.textInfo.characterInfo[2].index);
+        }
+
+        [Fact]
+        public void LinksRecordTheirIdAndText()
+        {
+            var t = Text("see <link=\"WATER\">Water</link> and <link=OXYGEN>Oxygen</link>");
+            var info = t.textInfo;
+            Assert.Equal(2, info.linkCount);
+            Assert.Equal("WATER", info.linkInfo[0].GetLinkID());
+            Assert.Equal("Water", info.linkInfo[0].GetLinkText());
+            Assert.Equal("OXYGEN", info.linkInfo[1].GetLinkID());
+            Assert.Equal("Oxygen", info.linkInfo[1].GetLinkText());
+            Assert.Equal(4, info.linkInfo[0].linkTextfirstCharacterIndex);
+        }
+
+        [Fact]
+        public void StylesInsertTheirDefinitions()
+        {
+            TmpTestSupport.LoadGameData();
+            var sheet = TMP_StyleSheet.instance;
+            Assert.NotNull(sheet);
+            // The game's sheet: "H1" opens <size=2em><b><#40ff80>.
+            Assert.Equal("<size=2em><b><#40ff80>", sheet.GetStyle("H1").styleOpeningDefinition);
+            var t = Text("<style=\"H1\">Big</style> small");
+            var c = t.textInfo.characterInfo;
+            Assert.Equal("Big small", Characters(t));
+            Assert.Equal(28f, c[0].pointSize, 3);
+            Assert.Equal(FontStyles.Bold, c[0].style & FontStyles.Bold);
+            Assert.Equal(new Color32(0x40, 0xff, 0x80, 255), c[0].color);
+            Assert.Equal(14f, c[4].pointSize, 3);
+
+            // Styles added at run time, as the game adds them.
+            sheet.AddStyle(new TMP_Style("zztest", "<color=#0000FF>", "</color>"));
+            sheet.RefreshStyles();
+            var added = Text("<style=zztest>x</style>y");
+            Assert.Equal(new Color32(0, 0, 255, 255), added.textInfo.characterInfo[0].color);
+            Assert.Equal(new Color32(255, 255, 255, 255), added.textInfo.characterInfo[1].color);
+            Assert.Same(sheet.GetStyle("zztest"), sheet.GetStyle(sheet.GetStyle("zztest").hashCode));
+        }
+
+        [Fact]
+        public void SpritesComeFromTheSpriteAsset()
+        {
+            var sprites = TmpTestSupport.FindAsset<TMP_SpriteAsset>("oni_sprite_assets");
+            var t = Text("a<sprite=\"oni_sprite_assets\" index=1>b");
+            t.spriteAsset = sprites;
+            t.ForceMeshUpdate(true);
+            var info = t.textInfo;
+            Assert.Equal(3, info.characterCount);
+            Assert.Equal(TMP_TextElementType.Sprite, info.characterInfo[1].elementType);
+            Assert.Equal(1, info.spriteCount);
+            // The sprite is drawn by a sub-mesh with the sprite asset's material.
+            Assert.Equal(2, info.materialCount);
+            Assert.Equal(1, info.characterInfo[1].materialReferenceIndex);
+            Assert.Same(sprites.material, info.meshInfo[1].material);
+            Assert.Equal(4, info.meshInfo[1].vertexCount);
+            var sub = t.GetComponentInChildren<TMP_SubMeshUI>(true);
+            Assert.NotNull(sub);
+            Assert.Same(sprites.material, sub.sharedMaterial);
+            // Untinted sprites are white.
+            Assert.Equal(new Color32(255, 255, 255, 255), info.meshInfo[1].colors32[0]);
+        }
+
+        [Fact]
+        public void MissingCharactersUseFallbacksThenTheMissingGlyph()
+        {
+            TmpTestSupport.LoadGameData();
+            // "ж" is not in GRAYSTROKE: a global fallback (Noto Sans) draws it in a sub-mesh.
+            var t = Text("aж");
+            var info = t.textInfo;
+            Assert.Equal(2, info.materialCount);
+            Assert.NotSame(t.font, info.characterInfo[1].fontAsset);
+            Assert.True(info.characterInfo[1].fontAsset.HasCharacter('ж'));
+        }
+
+        [Fact]
+        public void DynamicFontAssetsAddCharactersThroughTheFontEngine()
+        {
+            var font = TmpTestSupport.Load<Font>("sharedassets0.assets", 6529);
+            var asset = TMP_FontAsset.CreateFontAsset(font, 48, 5, GlyphRenderMode.SDFAA, 256, 256, AtlasPopulationMode.Dynamic, true);
+            Assert.NotNull(asset);
+            Assert.Equal(AtlasPopulationMode.Dynamic, asset.atlasPopulationMode);
+            Assert.Equal(TextureFormat.Alpha8, asset.atlasTexture.format);
+            Assert.Equal("TextMeshPro/Distance Field", asset.material.shader.name);
+            Assert.Equal(6f, asset.material.GetFloat(ShaderUtilities.ID_GradientScale));
+            Assert.False(asset.HasCharacter('Q'));
+            Assert.True(asset.TryAddCharacters("QuiT", out string missing));
+            Assert.Equal("", missing);
+            Assert.True(asset.HasCharacter('Q'));
+            var q = asset.characterLookupTable['Q'];
+            Assert.True(q.glyph.glyphRect.width > 0);
+            Assert.Equal(48f, asset.faceInfo.pointSize);
+            // Text in a dynamic asset adds its characters on demand.
+            var t = TmpTestSupport.NewText("Wxyz", asset, 20f, new Vector2(300f, 50f));
+            Assert.Equal(4, t.textInfo.characterCount);
+            Assert.True(asset.HasCharacter('W'));
+            Assert.All(t.textInfo.characterInfo.Take(4), c => Assert.Same(asset, c.fontAsset));
+        }
+
+        [Fact]
+        public void ShaderRatiosFollowTheMaterialEffects()
+        {
+            // The game's assets carry the ratios their materials' effects need: recomputing
+            // them gives the stored values.
+            var noto = TmpTestSupport.FindAsset<TMP_FontAsset>("NotoSans-Regular");
+            var material = new Material(noto.material);
+            float a = material.GetFloat(ShaderUtilities.ID_ScaleRatio_A), b = material.GetFloat(ShaderUtilities.ID_ScaleRatio_B), c = material.GetFloat(ShaderUtilities.ID_ScaleRatio_C);
+            ShaderUtilities.UpdateShaderRatios(material);
+            Assert.Equal(a, material.GetFloat(ShaderUtilities.ID_ScaleRatio_A), 4);
+            Assert.Equal(b, material.GetFloat(ShaderUtilities.ID_ScaleRatio_B), 4);
+            Assert.Equal(c, material.GetFloat(ShaderUtilities.ID_ScaleRatio_C), 4);
+            // More outline: a smaller face ratio.
+            material.SetFloat(ShaderUtilities.ID_OutlineWidth, 1f);
+            ShaderUtilities.UpdateShaderRatios(material);
+            Assert.True(material.GetFloat(ShaderUtilities.ID_ScaleRatio_A) < a);
+        }
+
+        [Fact]
+        public void FormattedSetTextReplacesPlaceholders()
+        {
+            var t = Text("");
+            t.SetText("{0} of {1:2}", 3f, 1.23456f);
+            Assert.Equal("3 of 1.23", t.text);
+            t.SetText("{0:1}%", 99.96f);
+            Assert.Equal("100.0%", t.text);
+        }
+
+        [Fact]
+        public void TextChangedEventFollowsEachLayout()
+        {
+            Object changed = null;
+            System.Action<Object> listener = o => changed = o;
+            TMPro_EventManager.TEXT_CHANGED_EVENT.Add(listener);
+            try
+            {
+                var t = Text("abc");
+                Assert.Same(t, changed);
+                Assert.False(t.havePropertiesChanged);
+                t.text = "abcd";
+                Assert.True(t.havePropertiesChanged);
+            }
+            finally { TMPro_EventManager.TEXT_CHANGED_EVENT.Remove(listener); }
+        }
+
+        [Fact]
+        public void HitTestsFindCharactersWordsLinesAndLinks()
+        {
+            var t = Text("one <link=\"L\">two</link>\nthree", width: 400f, height: 200f);
+            t.alignment = TextAlignmentOptions.TopLeft;
+            t.ForceMeshUpdate(true);
+            var info = t.textInfo;
+            // The overlay canvas maps screen points to its local space (no camera).
+            Vector3 ScreenOf(Vector3 local) => t.transform.TransformPoint(local);
+            var w = info.characterInfo[5];
+            var inside = ScreenOf((w.bottomLeft + w.topRight) / 2f);
+            Assert.Equal(5, TMP_TextUtilities.FindIntersectingCharacter(t, inside, null, true));
+            Assert.Equal(1, TMP_TextUtilities.FindIntersectingWord(t, inside, null));
+            Assert.Equal(0, TMP_TextUtilities.FindIntersectingLine(t, inside, null));
+            Assert.Equal(0, TMP_TextUtilities.FindIntersectingLink(t, inside, null));
+            var first = info.characterInfo[0];
+            var onOne = ScreenOf((first.bottomLeft + first.topRight) / 2f);
+            Assert.Equal(-1, TMP_TextUtilities.FindIntersectingLink(t, onOne, null));
+            var third = info.characterInfo[info.lineInfo[1].firstCharacterIndex];
+            Assert.Equal(1, TMP_TextUtilities.FindIntersectingLine(t, ScreenOf((third.bottomLeft + third.topRight) / 2f), null));
+            Assert.Equal(-1, TMP_TextUtilities.FindIntersectingCharacter(t, ScreenOf(new Vector3(190f, -90f)), null, true));
+            Assert.True(TMP_TextUtilities.IsIntersectingRectTransform(t.rectTransform, ScreenOf(Vector3.zero), null));
+            Assert.False(TMP_TextUtilities.IsIntersectingRectTransform(t.rectTransform, ScreenOf(new Vector3(500f, 0f)), null));
+        }
+    }
+}

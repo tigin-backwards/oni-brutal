@@ -17,5 +17,28 @@
   <ItemGroup>
     <ProjectReference Include="../../src/OniBrutal.UnityEngine/OniBrutal.UnityEngine.csproj" />
     <ProjectReference Include="../../src/OniBrutal.Desktop/OniBrutal.Desktop.csproj" />
+    <ProjectReference Include="../../src/Unity.TextMeshPro/Unity.TextMeshPro.csproj" />
+    <ProjectReference Include="../../src/Unity.Timeline/Unity.Timeline.csproj" />
   </ItemGroup>
+  <!-- TextMeshPro runs with the shipped uGUI until this project's is finished: the tests compile
+       against it as a metadata reference and load it from the game's Managed/ folder
+       (TmpTestSupport), with the engine module facades it binds to, which the TextMeshPro project
+       generates. -->
+  <ItemGroup>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>$(OniGameDir)/OxygenNotIncluded_Data/Managed/UnityEngine.UI.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+  <Target Name="ReferenceEngineFacades" AfterTargets="ResolveProjectReferences" BeforeTargets="ResolveAssemblyReferences">
+    <ItemGroup>
+      <_EngineFacade Include="$(ArtifactsPath)/obj/Unity.TextMeshPro/facades/UnityEngine*.dll" />
+      <Reference Include="@(_EngineFacade)">
+        <Private>false</Private>
+      </Reference>
+    </ItemGroup>
+  </Target>
+  <Target Name="CopyEngineFacades" AfterTargets="Build">
+    <Copy SourceFiles="@(_EngineFacade)" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
+  </Target>
 </Project>

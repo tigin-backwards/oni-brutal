@@ -131,6 +131,12 @@ Columns: ms per frame (main thread), count of the objects involved where known, 
   hidden with no group that ignores its parents. While that version holds, its renderers
   already hold -1 and the walk skips it. Verified (ONI_VERIFY_CANVAS_SKIPS=1) on 20,000 skips,
   including runs that open and close the management screens, with no difference.
+- **World rotation and lossy scale cached: 1.1 ms off every frame.** TextMeshPro checks every
+  text's lossyScale each frame (RescaleIfScaleChanged, from willRenderCanvases), and the
+  transform computed it, with its world rotation, by walking up the parents on every read. Both
+  are now kept with the world matrix and invalidated with it (MarkDirty); the arithmetic is
+  unchanged. U57's paused frame went from 11.8 to 10.0 ms (85 → 100 fps), with
+  RescaleIfScaleChanged and the rotation reads from 1.46 to 0.35 ms.
 - **Canvas walk, renderer-free subtrees: not worth it.** Only about 7% of its visits are in
   subtrees without any CanvasRenderer.
 

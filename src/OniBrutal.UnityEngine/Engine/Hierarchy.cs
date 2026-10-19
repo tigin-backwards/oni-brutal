@@ -129,13 +129,7 @@ namespace OniBrutal.Engine
         }
 
         /// World scale with the world rotation removed (exact without skew).
-        public static Vector3 LossyScale(TransformNative t)
-        {
-            var m = t.LocalToWorld;
-            var inv = Matrix4x4.Rotate(Quaternion.Inverse(t.WorldRotation));
-            var rs = inv * m;
-            return new Vector3(rs.m00, rs.m11, rs.m22);
-        }
+        public static Vector3 LossyScale(TransformNative t) => t.LossyScale;
 
         /// Root objects report 0: Unity's player does not expose an order of scene roots (the
         /// editor's root order); observed with tools/UnityProbe, including after SetAsFirstSibling.

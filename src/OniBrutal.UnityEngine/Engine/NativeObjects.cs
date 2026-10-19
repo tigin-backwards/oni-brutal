@@ -118,8 +118,11 @@ namespace OniBrutal.Engine
         public Vector3 LocalScale = Vector3.one;
         public bool HasChanged = true;
 
+        // World data, computed when first read after a change (MarkDirty).
         Matrix4x4 localToWorld;
-        bool worldDirty = true;
+        Quaternion worldRotation;
+        Vector3 lossyScale;
+        bool worldDirty = true, rotationDirty = true, scaleDirty = true;
 
         public override void CopyStateFrom(NativeObject source)
         {
@@ -143,13 +146,40 @@ namespace OniBrutal.Engine
             }
         }
 
-        public Quaternion WorldRotation => Parent != null ? Parent.WorldRotation * LocalRotation : LocalRotation;
+        public Quaternion WorldRotation
+        {
+            get
+            {
+                if (rotationDirty)
+                {
+                    worldRotation = Parent != null ? Parent.WorldRotation * LocalRotation : LocalRotation;
+                    rotationDirty = false;
+                }
+                return worldRotation;
+            }
+        }
+
+        /// The world matrix with the world rotation taken out: its diagonal (Transform.lossyScale).
+        /// TextMeshPro reads it for every text each frame.
+        public Vector3 LossyScale
+        {
+            get
+            {
+                if (scaleDirty)
+                {
+                    var rs = Matrix4x4.Rotate(Quaternion.Inverse(WorldRotation)) * LocalToWorld;
+                    lossyScale = new Vector3(rs.m00, rs.m11, rs.m22);
+                    scaleDirty = false;
+                }
+                return lossyScale;
+            }
+        }
 
         /// Invalidates cached world data for this transform and its descendants, and marks
         /// them changed (Transform.hasChanged).
         public void MarkDirty()
         {
-            worldDirty = true;
+            worldDirty = rotationDirty = scaleDirty = true;
             HasChanged = true;
             foreach (var c in Children) c.MarkDirty();
             OnTransformChanged();

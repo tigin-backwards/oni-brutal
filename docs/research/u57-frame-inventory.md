@@ -85,21 +85,36 @@ Columns: ms per frame (main thread), count of the objects involved where known, 
 | `NativeArray.Copy` (animation batch data) | 0.41 |
 | Instantiate, activation, destroy | 0.6 |
 
+## What the first tweaks measured
+
+- **`fast-particle-collision`: 0.94 → 0.44 ms.** Done (docs/PLAN.md "Game tweaks"). The cost was
+  the collider gather around each radbolt, not the component lookups; the exact skip of gathers
+  with no other radbolt registered nearby (74% of them in U57) is what saved time. Verified on
+  40,000 checks.
+- **Sublimation: no gain, dropped.** 76% of the 2,490 calls a frame are items in full gas cells
+  already marked blocked, for which the method changes nothing; an exact early-out for them
+  (verified on 4 million calls) still costs 2.55 ms against 2.37 without it. What remains
+  (reading the item's position, the cell's mass, its status, element and temperature) costs as
+  much as the whole method: the time is in touching 2,457 scattered objects, not in the lookups
+  skipped. Only processing fewer items would save time, which changes behaviour (class C).
+
+The same applies to the other per-item systems (reachability, critter temperature, requirement
+checks): caching what a call looks up cannot remove the cost of visiting each object. Gains need
+whole loops skipped exactly (as the radbolt gather) or the engine work they cause reduced.
+
 ## Recommendations, in order
 
 1. **Engine, canvas dirty tracking:** about 2 ms. Rebuild the canvas draw lists only when a canvas
    hierarchy, element or group changed. A, engine-side.
-2. **Game tweak `fast-sublimation`:** about 1–1.5 ms. Cache the Pickupable and element per
-   instance and test the sealed/stored early-outs before the lookups. A.
-3. **Game tweak `fast-reachability`:** about 1 ms. Cache cell and offsets for workables on
-   buildings that cannot move. A.
-4. **Game tweak `fast-particle-collision`:** about 0.8 ms on colonies with radbolts. Check
-   collider entries against the live particles before any component lookup. A.
+2. ~~`fast-sublimation`~~: measured, no gain (above).
+3. ~~`fast-reachability`~~: the same per-object cost; not attempted.
+4. **`fast-particle-collision`**: done, 0.5 ms.
 5. **Engine, `GetComponent` cache:** about 0.5 ms. A per-object type-to-component cache,
    invalidated when components are added or removed. A.
 6. **Study:** animation updates (3.2 ms), brain sensors (2.7 ms), cell-change handling (2.8 ms).
    These are the largest game systems, but the work they do is real; any gain needs the per-object
    counts and change rates measured first.
 
-Together 1–5 are about 5–6 ms of the 82 ms frame (about 7%). Most of the frame is game logic that
+What remains promising is engine-side (canvas dirty tracking, about 2 ms) and exact loop skips
+found system by system. Most of the frame is game logic that
 does real work for a colony this size, so no single change makes a large difference.

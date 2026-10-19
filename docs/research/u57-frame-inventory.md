@@ -154,6 +154,38 @@ The same applies to the other per-item systems (reachability, critter temperatur
 checks): caching what a call looks up cannot remove the cost of visiting each object. Gains need
 whole loops skipped exactly (as the radbolt gather) or the engine work they cause reduced.
 
+## A quiet view
+
+Is the frame rate low only where much is on screen? PerfProbe (`camera.txt quiet`, `speed.txt`)
+holds the view on the planetoid's emptiest window. U57's main planetoid is built over nearly
+everywhere (27,186 building cells); its emptiest 48×28-cell window still holds 248 of them.
+
+| U57, quiet view | fps | ms/frame |
+|---|---|---|
+| paused | 83–87 | ~12 |
+| speed 1 | 41–45 | ~23 |
+| speed 3 | 20–22 | ~49 |
+| speed 3, the save's busy view (for comparison) | ~15.5 | ~64 |
+
+The busy view costs about 15 ms more per frame: world rendering (3.9 → 1.0 ms), animation
+batch uploads (1.5 → 0) and animation updates for what is visible. In the quiet view at speed 3,
+the game's own code is 38 of the 49 ms. Most of it is simulation, which has a fixed amount of
+work per game second, so at speed 3 it takes three times the share of each real second that it
+takes at speed 1. Some game systems also run every frame whether or not anything is in view:
+- BrainScheduler, 2.5 ms;
+- CellChangeMonitor, 2.0 ms;
+- AnimEventManager, 1.8 ms: it also detects animations ending, which state machines wait on, so
+  off-screen animations cannot be skipped;
+- KBatchedAnimUpdater, 1.5 ms.
+
+The engine's part of a paused frame was about 4 ms: drawing the HUD, the world pass, the canvas
+walk and script dispatch. The transform cache and dispatch changes above came from this
+measurement.
+
+So a quiet view at speed 3 is limited by the simulation, as the busy view is. Making it faster
+means the game-side work (the per-item systems above, or the data-layout rewrite below), not
+rendering.
+
 ## Data layout: what a rewrite could buy (spike)
 
 The question: how much would rewriting per-item systems over flat arrays (one array per field,

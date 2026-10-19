@@ -83,6 +83,13 @@ namespace OniBrutal.Engine.Rendering
             new Span<byte>(Pointer, checked((int)size)).Fill(fill);
         }
 
+        /// Uninitialized memory (a pooled upload buffer that a copy fills).
+        public PixelMemory(long size)
+        {
+            Size = size;
+            Pointer = (byte*)NativeMemory.AlignedAlloc((nuint)Math.Max(size, 1), 16);
+        }
+
         public PixelMemory(ReadOnlySpan<byte> data)
         {
             Size = data.Length;

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System;
 using Brutal.OpenGlApi;
 using OniBrutal.Engine.Rendering;
@@ -80,9 +81,17 @@ namespace OniBrutal.Desktop.Gl
                 Target = t switch { Texture2DArrayNative => TexTarget2DArray, Texture3DNative => TexTarget3D, _ => TexTarget2D },
             };
             if (!t.Readable) u.Memory = t.TakeTexels();
-            else if (t.Memory is { } m) u.Memory = new PixelMemory(m.Span);
+            else if (t.Memory is { } m)
+            {
+                u.Memory = UploadBuffers.Rent(m.Size);
+                u.Pooled = true;
+                m.Span.CopyTo(u.Memory.Span);
+            }
             return u;
         }
+
+        /// Memory is a pooled copy (returned after the upload) rather than the texture's own.
+        public bool Pooled;
 
         public long MipSize(int mip) => TextureFormats.MipSize(Format, Math.Max(1, Width >> mip), Math.Max(1, Height >> mip))
                                         * (Target == TexTarget3D ? Math.Max(1, Depth >> mip) : 1);
@@ -106,9 +115,75 @@ namespace OniBrutal.Desktop.Gl
             }
             finally
             {
-                Memory?.Free();
+                if (Pooled) UploadBuffers.Return(Memory);
+                else Memory?.Free();
                 Memory = null;
             }
+        }
+    }
+
+    /// Buffers for the texel copies of readable textures, reused by size: the game re-applies
+    /// some textures every frame (a large colony's animation batches, about 20 MB a frame), and a
+    /// fresh allocation for each copy page-faults on every page it writes (4 ms a frame against
+    /// 0.3 for reused memory, measured). The main thread rents, the GL thread returns after
+    /// uploading. At most PoolLimit bytes are kept; beyond that the sizes rented least recently
+    /// are released first, so buffers of textures uploaded once (at load) do not crowd out the
+    /// ones re-uploaded every frame.
+    internal static class UploadBuffers
+    {
+        const long PoolLimit = 128L << 20;
+
+        sealed class SizeClass
+        {
+            public readonly Stack<PixelMemory> Free = new();
+            public long LastRent;
+        }
+
+        static readonly Dictionary<long, SizeClass> classes = new();
+        static long pooled, rents;
+
+        public static PixelMemory Rent(long size)
+        {
+            lock (classes)
+            {
+                if (!classes.TryGetValue(size, out var c)) classes[size] = c = new SizeClass();
+                c.LastRent = ++rents;
+                if (c.Free.Count > 0)
+                {
+                    pooled -= size;
+                    return c.Free.Pop();
+                }
+            }
+            return new PixelMemory(size);
+        }
+
+        public static void Return(PixelMemory memory)
+        {
+            if (memory == null) return;
+            List<PixelMemory> released = null;
+            lock (classes)
+            {
+                var own = classes[memory.Size];
+                while (pooled + memory.Size > PoolLimit)
+                {
+                    // The class rented least recently that still holds buffers.
+                    SizeClass oldest = null;
+                    foreach (var c in classes.Values)
+                        if (c.Free.Count > 0 && (oldest == null || c.LastRent < oldest.LastRent)) oldest = c;
+                    if (oldest == null || oldest.LastRent >= own.LastRent) break;
+                    var victim = oldest.Free.Pop();
+                    pooled -= victim.Size;
+                    (released ??= new()).Add(victim);
+                }
+                if (pooled + memory.Size <= PoolLimit)
+                {
+                    own.Free.Push(memory);
+                    pooled += memory.Size;
+                    memory = null;
+                }
+            }
+            memory?.Free();
+            if (released != null) foreach (var m in released) m.Free();
         }
     }
 

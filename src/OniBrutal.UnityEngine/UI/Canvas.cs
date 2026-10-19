@@ -637,8 +637,9 @@ namespace OniBrutal.Engine.UI
     internal sealed class CanvasRendererNative : ComponentNative
     {
         public CanvasGeometry Geometry;
-        /// Property sheets of the element's draws by material and pop (CanvasSystem.SheetFor).
-        public List<(Material Material, bool Pop, PropertySheet Sheet)> DrawSheets;
+        /// Property sheets of the element's draws by material and pop, with the state each was
+        /// filled for (CanvasSystem.SheetFor).
+        public List<(Material Material, bool Pop, PropertySheet Sheet, CanvasSystem.UiDrawState State)> DrawSheets;
         /// The geometry baked into its canvas's space with its colour (CanvasSystem), reused
         /// while geometry, placement and colour are unchanged.
         public MeshNative Baked;

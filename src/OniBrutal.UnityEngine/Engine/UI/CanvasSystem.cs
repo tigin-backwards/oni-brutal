@@ -399,21 +399,17 @@ namespace OniBrutal.Engine.UI
             if (d.Material == null || alpha <= 0f) return null;
             var spaceToWorld = b.SpaceToWorld;
             var mesh = BuildMesh(r, b.WorldToSpace * r.GameObject.Transform.LocalToWorld, new Color(r.Color.r, r.Color.g, r.Color.b, alpha));
-            var props = SheetFor(r, d.Material, d.Pop);
             var texture = r.Texture ?? d.Material.mainTexture;
-            if (!d.Pop && r.Texture != null) props.SetTexture(MainTex, r.Texture);
-            if (r.AlphaTexture != null) props.SetTexture(AlphaTex, r.AlphaTexture);
-            foreach (var (name, tex) in r.SecondaryTextures)
-                if (name != null) props.SetTexture(ShaderPropertyIds.Get(name), tex);
-            props.SetVector(TextureSampleAdd, texture is Texture2D t2 && t2.format == TextureFormat.Alpha8 ? new Vector4(1f, 1f, 1f, 0f) : Vector4.zero);
-            if (r.ClipRect is { } clip)
-            {
-                props.SetVector(ClipRectId, new Vector4(clip.xMin, clip.yMin, clip.xMax, clip.yMax));
-                props.SetFloat(SoftnessX, r.ClippingSoftness.x);
-                props.SetFloat(SoftnessY, r.ClippingSoftness.y);
-            }
-            else props.SetVector(ClipRectId, new Vector4(-32767f, -32767f, 32767f, 32767f));
-            props.SetFloat(ZTestMode, overlay ? CompareAlways : CompareLessEqual);
+            var state = new UiDrawState(
+                d.Pop ? null : r.Texture,
+                r.AlphaTexture,
+                r.SecondaryTextures,
+                texture is Texture2D t2 && t2.format == TextureFormat.Alpha8 ? new Vector4(1f, 1f, 1f, 0f) : Vector4.zero,
+                r.ClipRect is { } clip ? new Vector4(clip.xMin, clip.yMin, clip.xMax, clip.yMax) : new Vector4(-32767f, -32767f, 32767f, 32767f),
+                r.ClipRect != null ? r.ClippingSoftness : Vector2.zero,
+                r.ClipRect != null,
+                overlay ? CompareAlways : CompareLessEqual);
+            var props = SheetFor(r, d.Material, d.Pop, state);
             var item = FrameRenderer.NewDrawItem();
             item.Mesh = mesh;
             item.ObjectToWorld = spaceToWorld;
@@ -426,21 +422,58 @@ namespace OniBrutal.Engine.UI
 
         static readonly string[] ClipKeywords = ["UNITY_UI_CLIP_RECT"];
 
-        /// The property sheet an element's draw with a material fills each frame, kept on the
-        /// element: the frame's draws are recorded before the next frame refills it.
-        static PropertySheet SheetFor(CanvasRendererNative r, Material material, bool pop)
+        /// What an element's draw puts in its property sheet: the sheet's whole content, so an
+        /// unchanged state leaves the sheet as it is, and equal states mean equal sheets.
+        internal readonly record struct UiDrawState(Texture MainTexture, Texture AlphaTexture, (string Name, Texture2D Texture)[] Secondary,
+                                           Vector4 SampleAdd, Vector4 Clip, Vector2 Softness, bool Clipped, float ZTest)
+        {
+            public void Fill(PropertySheet props)
+            {
+                props.Clear();
+                if (MainTexture != null) props.SetTexture(MainTex, MainTexture);
+                if (AlphaTexture != null) props.SetTexture(AlphaTex, AlphaTexture);
+                foreach (var (name, tex) in Secondary)
+                    if (name != null) props.SetTexture(ShaderPropertyIds.Get(name), tex);
+                props.SetVector(TextureSampleAdd, SampleAdd);
+                props.SetVector(ClipRectId, Clip);
+                if (Clipped)
+                {
+                    props.SetFloat(SoftnessX, Softness.x);
+                    props.SetFloat(SoftnessY, Softness.y);
+                }
+                props.SetFloat(ZTestMode, ZTest);
+            }
+
+            /// Same sheet content. Secondary texture lists are compared by reference; lists equal
+            /// only in content are compared as sheets (SameState).
+            public bool Same(in UiDrawState o)
+                => ReferenceEquals(MainTexture, o.MainTexture) && ReferenceEquals(AlphaTexture, o.AlphaTexture) && ReferenceEquals(Secondary, o.Secondary)
+                   && SampleAdd == o.SampleAdd && Clip == o.Clip && Clipped == o.Clipped && (!Clipped || Softness == o.Softness) && ZTest == o.ZTest;
+        }
+
+        /// The property sheet an element's draw with a material fills, kept on the element: the
+        /// frame's draws are recorded before the next frame refills it. Refilled only when the
+        /// draw's state changed: over 700 elements are drawn each frame in a large colony, nearly
+        /// all of them unchanged.
+        static PropertySheet SheetFor(CanvasRendererNative r, Material material, bool pop, in UiDrawState state)
         {
             var sheets = r.DrawSheets ??= new();
-            foreach (var (m, p, sheet) in sheets)
-                if (ReferenceEquals(m, material) && p == pop)
+            for (int i = 0; i < sheets.Count; i++)
+            {
+                var (m, p, sheet, filled) = sheets[i];
+                if (!ReferenceEquals(m, material) || p != pop) continue;
+                if (!filled.Same(state))
                 {
-                    sheet.Clear();
-                    return sheet;
+                    state.Fill(sheet);
+                    sheets[i] = (m, p, sheet, state);
                 }
+                return sheet;
+            }
             // Materials an element no longer uses are dropped once a few have gathered.
             if (sheets.Count >= 8) sheets.Clear();
             var created = new PropertySheet();
-            sheets.Add((material, pop, created));
+            state.Fill(created);
+            sheets.Add((material, pop, created, state));
             return created;
         }
 
@@ -453,6 +486,7 @@ namespace OniBrutal.Engine.UI
         {
             var items = FrameRenderer.NewDrawList();
             var run = new List<(DrawItem Item, CanvasRendererNative Renderer)>();
+            UiDrawState runState = default;
             void Flush()
             {
                 if (run.Count == 1) items.Add(run[0].Item);
@@ -462,16 +496,29 @@ namespace OniBrutal.Engine.UI
             foreach (var d in b.Draws)
             {
                 if (Item(b, d, overlay) is not { } item) continue;
-                if (run.Count > 0 && !SameState(run[0].Item, item)) Flush();
+                var state = StateOf(d.Renderer, item);
+                if (run.Count > 0 && !SameState(run[0].Item, runState, item, state)) Flush();
+                if (run.Count == 0) runState = state;
                 run.Add((item, d.Renderer));
             }
             Flush();
             return items;
         }
 
-        static bool SameState(DrawItem a, DrawItem b)
+        static UiDrawState StateOf(CanvasRendererNative r, DrawItem item)
         {
-            if (a.Material != b.Material || !ReferenceEquals(a.Keywords, b.Keywords)) return false;
+            foreach (var (_, _, sheet, state) in r.DrawSheets)
+                if (ReferenceEquals(sheet, item.Properties)) return state;
+            throw new InvalidOperationException("A canvas draw's sheet is not the element's.");
+        }
+
+        static bool SameState(DrawItem a, in UiDrawState sa, DrawItem b, in UiDrawState sb)
+        {
+            if (!ReferenceEquals(a.Material, b.Material) || !ReferenceEquals(a.Keywords, b.Keywords)) return false;
+            if (sa.Same(sb)) return true;
+            // Different states mean different sheets, unless secondary textures are involved
+            // (one may name a texture the state also sets): then compare the sheets themselves.
+            if (sa.Secondary.Length == 0 && sb.Secondary.Length == 0) return false;
             var x = a.Properties;
             var y = b.Properties;
             if (x.Textures.Count != y.Textures.Count || x.Vectors.Count != y.Vectors.Count || x.Floats.Count != y.Floats.Count) return false;

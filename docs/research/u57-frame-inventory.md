@@ -111,6 +111,12 @@ Columns: ms per frame (main thread), count of the objects involved where known, 
   movement behind CellChangeMonitor). 3.2 ms is about 0.8 µs per playing animation on screen:
   nothing to skip exactly; it scales with how much of the colony is in view.
 
+- **Cell-change handling: real work.** Per frame 1,300–1,400 transforms are marked moved and
+  280–420 of them enter a new cell, running the game's handlers (object layers, partitioner,
+  decor) that make up most of CellChangeMonitor's 2.8 ms. Nothing to skip exactly; most of the
+  moves are conveyor items interpolated along their rails every frame (SolidConduitFlow
+  RenderEveryTick), which could only be reduced by changing when items move (class C).
+
 The same applies to the other per-item systems (reachability, critter temperature, requirement
 checks): caching what a call looks up cannot remove the cost of visiting each object. Gains need
 whole loops skipped exactly (as the radbolt gather) or the engine work they cause reduced.
@@ -124,8 +130,8 @@ whole loops skipped exactly (as the radbolt gather) or the engine work they caus
 4. **`fast-particle-collision`**: done, 0.5 ms.
 5. **Engine, `GetComponent` cache:** about 0.5 ms. A per-object type-to-component cache,
    invalidated when components are added or removed. A.
-6. **Studied:** animation updates (above: real work). Still to study: brain sensors (2.7 ms),
-   cell-change handling (2.8 ms, driven by the 1,400 moves a frame).
+6. **Studied:** animation updates (above: real work). Cell-change handling (above: real work).
+   Not studied: brain sensors (2.7 ms; critter searches, where gains would change behaviour).
    These are the largest game systems, but the work they do is real; any gain needs the per-object
    counts and change rates measured first.
 

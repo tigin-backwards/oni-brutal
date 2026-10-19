@@ -525,6 +525,9 @@ Environment notes:
   components holding their transform and GameObject, and roots' positions read without their
   world matrix. Three alternating pairs against the build before them: 16.01 fps against 14.74 in
   steady windows (+8.6%).
+  U57 against the original Unity player on Linux (2026-10-19, same machine, save and probe, back
+  to back): original 6.5–6.8 fps in steady windows, this engine 17.0–18.5 without game tweaks and
+  19–20 with them (about 2.7× and 3×); in the autosave window 4.1 against 11.7.
 - Clean-room rewrites (2026-10-18): code found to be modelled on Unity's managed source was
   rewritten from functional specifications by separate implementations (docs/cleanroom,
   docs/LICENSING.md "Provenance"):

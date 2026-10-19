@@ -271,6 +271,22 @@ array read). The game's update buckets accept a batch delegate (UpdateBucketWith
 .batch_update_delegate), which keeps the same items, order and per-item dt: the shape for an
 exact batched sublimation update.
 
+## Against the original player (2026-10-19, Linux)
+
+U57 in the original Unity player (Mono), on the same machine, Xvfb, GPU, resolution and save, the
+same PerfProbe (loading the save through load.txt), against this engine, back to back:
+
+| Player | Steady windows | Window with the autosave |
+|---|---|---|
+| Original Unity player | 6.5–6.8 fps | 4.1 fps |
+| This engine, no game tweaks | 17.0–18.5 fps | 11.7 fps |
+| This engine, every game tweak | 19–20 fps (earlier runs the same day) | — |
+
+About 2.6–2.7 times the original's frame rate from the engine and runtime alone, about 3 times
+with the game tweaks. Run with scratchpad scripts u57-orig.sh (the Linux install with the Windows
+DLC content as symlinks, the DLC-owning Steam double copied into a Plugins folder of its own) and
+u57-linux.sh.
+
 ## Where the 25 fps goal stands (2026-10-19)
 
 U57 at speed 3 on this machine: about 19–20 fps, a 51 ms main-thread frame (with every tweak). The

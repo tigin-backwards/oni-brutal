@@ -8,30 +8,79 @@ namespace OniBrutal.Engine
 {
     /// Component queries with Unity's matching and traversal rules. Read-only over copy-on-write
     /// arrays, so safe from worker threads.
+    ///
+    /// Which components match a type depends only on the components' types, and objects made from
+    /// one prefab share their list of component types: queries look up the matches in that shared
+    /// layout (ComponentLayout) instead of testing every component. In a large colony an object has
+    /// about 30 components and the game queries them constantly (GetComponent, and every event
+    /// handler's GetComponents); testing each one read each component object.
     internal static class Components
     {
+        static readonly bool verify = Environment.GetEnvironmentVariable("ONI_VERIFY_COMPONENT_LAYOUTS") == "1";
+
+        /// The layout of the object's current component list.
+        static ComponentLayout LayoutOf(GameObjectNative go, Component[] components)
+        {
+            var cached = go.Layout;
+            if (cached != null && ReferenceEquals(cached.Source, components)) return cached.Layout;
+            var layout = ComponentLayout.Of(components);
+            go.Layout = new ComponentLayout.Cached(components, layout);
+            return layout;
+        }
+
         /// First component, in component order, assignable to `type` (classes or interfaces).
         public static object First(GameObjectNative go, Type type)
         {
-            foreach (var c in go.Components)
-                if (type.IsInstanceOfType(c)) return c;
-            return null;
+            var components = go.Components;
+            var matches = LayoutOf(go, components).Matches(QueryIds.Of(type), type);
+            var found = matches.Length == 0 ? null : components[matches[0]];
+            if (verify) Verify(go, components, type, found);
+            return found;
         }
 
         /// First<T> and All<T>: the generic queries the game makes constantly (GetComponent<T> is
-        /// among its most frequent engine calls), as a compiled type test instead of
-        /// Type.IsInstanceOfType per component; the same matching.
+        /// among its most frequent engine calls).
         public static T First<T>(GameObjectNative go)
         {
-            foreach (var c in go.Components)
-                if (c is T match) return match;
-            return default;
+            var components = go.Components;
+            var matches = LayoutOf(go, components).Matches(QueryIds.For<T>.Id, typeof(T));
+            if (matches.Length == 0)
+            {
+                if (verify) Verify(go, components, typeof(T), null);
+                return default;
+            }
+            var found = components[matches[0]];
+            if (verify) Verify(go, components, typeof(T), found);
+            // A match is a component of a type assignable to T.
+            return System.Runtime.CompilerServices.Unsafe.As<Component, T>(ref found);
         }
 
         public static void All<T>(GameObjectNative go, List<T> results)
         {
-            foreach (var c in go.Components)
-                if (c is T match) results.Add(match);
+            var components = go.Components;
+            var matches = LayoutOf(go, components).Matches(QueryIds.For<T>.Id, typeof(T));
+            foreach (int i in matches)
+            {
+                var c = components[i];
+                results.Add(System.Runtime.CompilerServices.Unsafe.As<Component, T>(ref c));
+            }
+            if (verify)
+            {
+                int expected = 0;
+                foreach (var c in components) if (c is T) expected++;
+                if (expected != matches.Length) EngineLog.Engine($"component layouts: {go.Name} has {expected} {typeof(T).Name}, the layout {matches.Length}");
+            }
+        }
+
+        static long verified, wrong;
+
+        static void Verify(GameObjectNative go, Component[] components, Type type, Component found)
+        {
+            Component expected = null;
+            foreach (var c in components)
+                if (type.IsInstanceOfType(c)) { expected = c; break; }
+            if (!ReferenceEquals(expected, found)) EngineLog.Engine($"component layouts: {go.Name} {type.Name} gave {found?.GetType().Name ?? "null"}, expected {expected?.GetType().Name ?? "null"} ({++wrong})");
+            if (System.Threading.Interlocked.Increment(ref verified) % 1000000 == 0) EngineLog.Engine($"component layouts: {verified} queries verified, {wrong} wrong");
         }
 
         /// Unity matches the component's class name (script or engine class).
@@ -47,8 +96,8 @@ namespace OniBrutal.Engine
 
         public static void All(GameObjectNative go, Type type, IList results)
         {
-            foreach (var c in go.Components)
-                if (type.IsInstanceOfType(c)) results.Add(c);
+            var components = go.Components;
+            foreach (int i in LayoutOf(go, components).Matches(QueryIds.Of(type), type)) results.Add(components[i]);
         }
 
         /// Depth-first pre-order over this object and its descendants. The object the search
@@ -201,6 +250,89 @@ namespace OniBrutal.Engine
             catch (TargetInvocationException e) when (e.InnerException != null)
             {
                 Debug.LogException(e.InnerException, b);
+            }
+        }
+    }
+
+    /// Small integer ids for the types components are queried by.
+    internal static class QueryIds
+    {
+        static readonly System.Collections.Concurrent.ConcurrentDictionary<Type, int> ids = new();
+        static int next = -1;
+
+        public static int Of(Type type) => ids.GetOrAdd(type, static _ => System.Threading.Interlocked.Increment(ref next));
+
+        public static class For<T>
+        {
+            public static readonly int Id = Of(typeof(T));
+        }
+    }
+
+    /// A list of component types, shared by every object whose components have those types in
+    /// that order, with the indices of the components matching each queried type.
+    internal sealed class ComponentLayout
+    {
+        /// An object's layout with the component list it was made for.
+        internal sealed record Cached(Component[] Source, ComponentLayout Layout);
+
+        readonly Type[] types;
+        /// By query id: matching indices in component order, or null until first asked.
+        int[][] matches = Array.Empty<int[]>();
+
+        ComponentLayout(Type[] types) => this.types = types;
+
+        /// Entries in the match table (tests: it grows with the query ids, not per query).
+        internal int TableLength => matches.Length;
+
+        public int[] Matches(int id, Type type)
+        {
+            var table = System.Threading.Volatile.Read(ref matches);
+            if (id < table.Length && table[id] is { } found) return found;
+            return Compute(id, type);
+        }
+
+        int[] Compute(int id, Type type)
+        {
+            var list = new List<int>();
+            for (int i = 0; i < types.Length; i++)
+                if (type.IsAssignableFrom(types[i])) list.Add(i);
+            var result = list.Count == 0 ? Array.Empty<int>() : list.ToArray();
+            lock (this)
+            {
+                // Copy on write: readers hold the table they read. It grows only for an id past
+                // its end (ids are dense, one per queried type).
+                var table = matches;
+                var copy = new int[id < table.Length ? table.Length : Math.Max(id + 1, table.Length * 2)][];
+                Array.Copy(table, copy, table.Length);
+                copy[id] = result;
+                System.Threading.Volatile.Write(ref matches, copy);
+            }
+            return result;
+        }
+
+        static readonly Dictionary<Type[], ComponentLayout> interned = new(new TypesComparer());
+
+        public static ComponentLayout Of(Component[] components)
+        {
+            var types = new Type[components.Length];
+            for (int i = 0; i < components.Length; i++) types[i] = components[i].GetType();
+            lock (interned)
+            {
+                if (interned.TryGetValue(types, out var layout)) return layout;
+                interned[types] = layout = new ComponentLayout(types);
+                return layout;
+            }
+        }
+
+        sealed class TypesComparer : IEqualityComparer<Type[]>
+        {
+            public bool Equals(Type[] a, Type[] b) => a.AsSpan().SequenceEqual(b);
+
+            public int GetHashCode(Type[] types)
+            {
+                var hash = new HashCode();
+                foreach (var t in types) hash.Add(t);
+                return hash.ToHashCode();
             }
         }
     }

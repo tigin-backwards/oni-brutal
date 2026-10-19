@@ -238,8 +238,14 @@ serve the fetch, sensor and inventory searches together.
 2. ~~`fast-sublimation`~~: measured, no gain (above).
 3. ~~`fast-reachability`~~: the same per-object cost; not attempted.
 4. **`fast-particle-collision`**: done, 0.5 ms.
-5. **Engine, `GetComponent` cache:** about 0.5 ms. A per-object type-to-component cache,
-   invalidated when components are added or removed. A.
+5. **Engine, component queries: done, about 1.7 ms.** Objects with the same list of component
+   types (one prefab's instances) share an interned layout that caches, per queried type, the
+   indices of matching components; an object holds its layout for its current component list
+   (copy-on-write, so a new list gets a new layout). GetComponent and GetComponents read only
+   the components they return, instead of testing about 30 each. Per frame: GetComponent 0.83 →
+   0.11 ms, the event handlers' GetComponents (EventSystem's IntraObjectHandler) 2.77 → 1.83 ms,
+   the shared-generic type checks 1.92 → 0.01 ms. Verified on 47 million queries
+   (ONI_VERIFY_COMPONENT_LAYOUTS=1); peak memory unchanged (14.3 GB against 14.7).
 6. **Studied:** animation updates (above: real work). Cell-change handling (above: real work).
    Not studied: brain sensors (2.7 ms; critter searches, where gains would change behaviour).
    These are the largest game systems, but the work they do is real; any gain needs the per-object

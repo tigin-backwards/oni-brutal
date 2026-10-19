@@ -63,6 +63,8 @@ namespace OniBrutal.Engine
         public int RootSlot = -1;
         /// Its canvas components, cached by CanvasSystem for the current Components array.
         public UI.UiParts UiParts;
+        /// Its component types' shared layout, for the component list it was made for (Components).
+        public ComponentLayout.Cached Layout;
         /// Changes below and at this object (Hierarchy.Touch).
         public long SubtreeVersion;
         /// The SubtreeVersion at which CanvasSystem last walked this object as the top of a

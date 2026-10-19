@@ -141,6 +141,13 @@ Columns: ms per frame (main thread), count of the objects involved where known, 
 - **Script dispatch:** the per-call check for behaviours removed earlier in the phase
   is skipped while none are pending (nearly always), and removals rescan only the lists of the
   removed behaviours' execution orders instead of every list (0.1–0.2 ms a frame).
+- **Animation events, paused entries: no gain, dropped.** AnimEventManager's per-frame loop
+  visits every playing animation (about 6,450 in U57: 1,830 paused, 2,730 looping without
+  events). Testing an entry's paused mode before its destroyed-controller test (equivalent,
+  and the paused entries then skip reading their controller) left the loop at 2.2 ms against 1.95
+  ms. Skipping the looping entries without events would need their elapsed time deferred, and
+  their per-frame float additions replayed, to stay exact.
+- **Animation grid cleanup: 0.48 → 0.12 ms.** Done (`fast-anim-cleanup`, docs/PLAN.md).
 - **Canvas walk, renderer-free subtrees: not worth it.** Only about 7% of its visits are in
   subtrees without any CanvasRenderer.
 

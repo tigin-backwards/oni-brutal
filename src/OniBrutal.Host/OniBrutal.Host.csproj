@@ -23,6 +23,8 @@
     <ProjectReference Include="../UnityEngine.UI/UnityEngine.UI.csproj" ReferenceOutputAssembly="false" OutputItemType="UiPackage" />
     <ProjectReference Include="../Unity.TextMeshPro/Unity.TextMeshPro.csproj" ReferenceOutputAssembly="false" OutputItemType="UiPackage" />
     <ProjectReference Include="../Unity.Timeline/Unity.Timeline.csproj" ReferenceOutputAssembly="false" OutputItemType="UiPackage" />
+    <!-- Game tweaks built against the game's assemblies, beside the host; loaded only when asked for. -->
+    <ProjectReference Include="../OniBrutal.GameTweaks/OniBrutal.GameTweaks.csproj" ReferenceOutputAssembly="false" OutputItemType="GameTweaksAssembly" SetTargetFramework="TargetFramework=netstandard2.1" GlobalPropertiesToRemove="RuntimeIdentifier;SelfContained" />
   </ItemGroup>
   <ItemGroup>
     <!-- The game's Harmony, loaded from Managed/ at run time; patches KMod.Local (ModVersionStamp). -->
@@ -54,6 +56,7 @@
   </ItemGroup>
   <Target Name="CopyUiPackages" AfterTargets="Build">
     <Copy SourceFiles="@(UiPackage);@(UiPackage->'%(RootDir)%(Directory)%(Filename).pdb')" DestinationFolder="$(OutDir)packages" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(GameTweaksAssembly);@(GameTweaksAssembly->'%(RootDir)%(Directory)%(Filename).pdb')" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
   </Target>
   <!-- The UnityEngine.*Module facades the game binds to, next to the host in engine/. -->
   <Target Name="EmitFacades" AfterTargets="Build">

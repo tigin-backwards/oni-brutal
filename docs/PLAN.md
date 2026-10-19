@@ -363,6 +363,15 @@ unchanged.
   another radbolt is registered there, and finds radbolts among the live ones (0.94 → 0.44 ms a
   frame in U57; 40,000 checks verified against the game's own result).
 
+- `off-screen-conveyors` (**changes behaviour**): conveyor items travel along their rails on
+  screen as before; off screen their transforms are not moved each frame (85% of the ~950 moves a
+  frame in U57), and an item skipped while moving is placed at its cell's centre when it stops.
+  While off screen a travelling item's transform, and so the cell the game files it under for
+  partitioner lookups, decor and radiation, lags its place in the conveyor's flow; the flow
+  itself is unaffected. U57: about 2.9 ms a frame (conveyor render tick, cell-change monitor,
+  animation and collider updates). Built against the game's own types in
+  `src/OniBrutal.GameTweaks`, loaded only when one of its tweaks is asked for.
+
 Measured and not kept: the loading side of fast-serialization (a U57 load produced the same
 colony, 3 bytes of time of day apart, in 31.3 s against 31.6), an exact early-out for
 sublimation and a canvas build cache (docs/research/u57-frame-inventory.md).

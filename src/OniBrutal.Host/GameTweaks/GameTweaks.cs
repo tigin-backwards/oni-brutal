@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using HarmonyLib;
 using OniBrutal.Engine;
 
@@ -26,6 +27,18 @@ namespace OniBrutal.Host.GameTweaks
             if (On(NoSaveGc.Name)) Report(NoSaveGc.Name, () => NoSaveGc.Install(harmony));
             if (On(FastSerialization.Name)) Report(FastSerialization.Name, () => FastSerialization.Install(harmony));
             if (On(FastParticleCollision.Name)) Report(FastParticleCollision.Name, () => FastParticleCollision.Install(harmony));
+            // The tweaks built against the game's own types (src/OniBrutal.GameTweaks).
+            var typed = GameTweakNames.Typed.Where(On).ToArray();
+            if (typed.Length > 0)
+            {
+                var patches = System.Reflection.Assembly.LoadFrom(System.IO.Path.Combine(AppContext.BaseDirectory, "OniBrutal.GameTweaks.dll")).GetType("OniBrutal.GameTweaks.Patches")!;
+                var install = patches.GetMethod("Install")!;
+                foreach (var name in typed)
+                    Report(name, () =>
+                    {
+                        if (!(bool)install.Invoke(null, [harmony, name])!) throw new InvalidOperationException($"OniBrutal.GameTweaks has no tweak {name}");
+                    });
+            }
         }
 
         static void Report(string name, Action install)
@@ -45,7 +58,10 @@ namespace OniBrutal.Host.GameTweaks
     /// (Harmony among them) can be resolved, so this class references none of them.
     internal static class GameTweakNames
     {
-        public static readonly string[] All = [FastSaveCompression.Name, BackgroundSave.Name, NoSaveGc.Name, FastSerialization.Name, FastParticleCollision.Name];
+        /// The tweaks in src/OniBrutal.GameTweaks (named here: that assembly is loaded only when asked for).
+        public static readonly string[] Typed = ["off-screen-conveyors"];
+
+        public static readonly string[] All = [FastSaveCompression.Name, BackgroundSave.Name, NoSaveGc.Name, FastSerialization.Name, FastParticleCollision.Name, .. Typed];
 
         public static bool IsKnown(string name) => name == "all" || Array.IndexOf(All, name) >= 0;
     }

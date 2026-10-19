@@ -123,6 +123,7 @@ namespace OniBrutal.Engine
             Array.Copy(comps, grown, comps.Length);
             grown[^1] = component;
             go.Components = grown;
+            if (go.Transform != null) Hierarchy.Touch(go.Transform);
             return component;
         }
 
@@ -149,6 +150,7 @@ namespace OniBrutal.Engine
             comps[0] = rect;
             go.Transform = native;
             go.Components = comps;
+            Hierarchy.Touch(native);
             foreach (var c in comps) c.ForgetTransform();
             old.Unbind();
             native.MarkDirty();
@@ -172,7 +174,11 @@ namespace OniBrutal.Engine
 
         /// Recomputes activeInHierarchy for a subtree after its activeSelf, parent or scene
         /// changed, and runs the resulting lifecycle callbacks.
-        public static void UpdateActiveInHierarchy(GameObjectNative go) => ApplyActive(go, go.ActiveSelf && ParentActive(go));
+        public static void UpdateActiveInHierarchy(GameObjectNative go)
+        {
+            Hierarchy.Touch(go.Transform);
+            ApplyActive(go, go.ActiveSelf && ParentActive(go));
+        }
 
         static void ApplyActive(GameObjectNative go, bool now)
         {
@@ -259,6 +265,7 @@ namespace OniBrutal.Engine
         {
             if (bn.IsActiveAndEnabledState) return;
             bn.IsActiveAndEnabledState = true;
+            Hierarchy.Touch(bn.GameObject.Transform);
             c.EngineOnEnable();
             var script = bn.Script;
             if (script != null)
@@ -279,6 +286,7 @@ namespace OniBrutal.Engine
             }
             if (c.Native is not BehaviourNative bn || !bn.IsActiveAndEnabledState) return;
             bn.IsActiveAndEnabledState = false;
+            Hierarchy.Touch(bn.GameObject.Transform);
             if (bn.Script != null) BehaviourManager.Unregister(bn);
             c.EngineOnDisable();
             if (bn.Script?.OnDisable != null) Invoke(bn.Script.OnDisable, (MonoBehaviour)c);
@@ -484,6 +492,7 @@ namespace OniBrutal.Engine
                     Array.Copy(comps, 0, shrunk, 0, index);
                     Array.Copy(comps, index + 1, shrunk, index, comps.Length - index - 1);
                     go.Components = shrunk;
+                    Hierarchy.Touch(go.Transform);
                 }
             }
             if (unbind) c.Unbind();

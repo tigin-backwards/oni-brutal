@@ -16,6 +16,7 @@ namespace UnityEngine
                 var g = Group;
                 if (g.Alpha == value) return;
                 g.Alpha = value;
+                Hierarchy.Touch(g.GameObject?.Transform);
                 g.Changed();
             }
         }
@@ -52,6 +53,7 @@ namespace UnityEngine
                 var g = Group;
                 if (g.IgnoreParentGroups == value) return;
                 g.IgnoreParentGroups = value;
+                Hierarchy.Touch(g.GameObject?.Transform);
                 g.Changed();
             }
         }

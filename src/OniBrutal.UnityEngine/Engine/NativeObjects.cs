@@ -63,6 +63,12 @@ namespace OniBrutal.Engine
         public int RootSlot = -1;
         /// Its canvas components, cached by CanvasSystem for the current Components array.
         public UI.UiParts UiParts;
+        /// Changes below and at this object (Hierarchy.Touch).
+        public long SubtreeVersion;
+        /// The SubtreeVersion at which CanvasSystem last walked this object as the top of a
+        /// subtree hidden by its CanvasGroups, finding no group that ignores its parents; -1 when
+        /// not known to be so.
+        public long CanvasHiddenAt = -1;
     }
 
     internal class ComponentNative : NativeObject

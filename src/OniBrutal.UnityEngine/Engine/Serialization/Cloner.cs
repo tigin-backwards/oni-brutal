@@ -116,6 +116,7 @@ namespace OniBrutal.Engine.Serialization
             grown[^1] = child;
             parent.Children = grown;
             child.Parent = parent;
+            Hierarchy.Touch(parent);
         }
 
         static GameObjectNative CloneStructure(GameObjectNative src, TransformNative parentClone, Dictionary<Object, Object> remap)

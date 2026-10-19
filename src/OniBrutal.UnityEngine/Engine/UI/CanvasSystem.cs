@@ -289,12 +289,21 @@ namespace OniBrutal.Engine.UI
         sealed class Counter
         {
             public int Value;
+            /// Live CanvasGroups that ignore their parents' groups, met so far in the walk.
+            public int IgnoringGroups;
         }
 
         /// Depth-first in hierarchy order; nested sort roots are skipped (they are batches of
         /// their own); an element's pop materials draw after its children. Elements fully
         /// transparent through their CanvasGroups are not rendered (depth -1); a group below
         /// that ignores its parents' groups can make part of such a subtree visible again.
+        ///
+        /// A hidden subtree's walk only sets its elements' depths to -1. Its top object records
+        /// when it was walked so (CanvasHiddenAt) if no group in it ignores its parents; while
+        /// nothing at or below it changes (SubtreeVersion), its elements still hold -1 and the walk
+        /// is skipped. Most of a large colony's UI is screens hidden this way (about 8,900 of
+        /// 11,500 objects visited a frame in U57). Test runs (ONI_VERIFY_CANVAS_SKIPS=1) check each
+        /// skipped subtree as the walk would have seen it and log differences.
         static void Collect(CanvasBatch batch, GameObjectNative go, CanvasNative space, bool isBatchRoot, Counter depth,
             CanvasNative nearest, Matrix4x4 worldToNearest, float groupAlpha)
         {
@@ -303,10 +312,24 @@ namespace OniBrutal.Engine.UI
             var canvasHere = parts.Canvas is { } here && IsLive(here) ? here : null;
             if (!isBatchRoot && canvasHere != null && canvasHere.OverrideSorting) return;
             // CanvasGroups multiply down the hierarchy; one that ignores its parents restarts it.
+            bool hiddenAbove = groupAlpha <= 0f;
             foreach (var g in parts.Groups)
                 if (g.IsActiveAndEnabledState)
+                {
+                    if (g.IgnoreParentGroups) depth.IgnoringGroups++;
                     groupAlpha = g.IgnoreParentGroups ? g.Alpha : groupAlpha * g.Alpha;
+                }
             bool hidden = groupAlpha <= 0f;
+            // The top of a hidden subtree: skipped while unchanged since a walk found it all hidden.
+            bool hiddenTop = hidden && !hiddenAbove;
+            if (hiddenTop && go.CanvasHiddenAt == go.SubtreeVersion)
+            {
+                if (verifySkips) VerifySkipped(go, isTop: true);
+                return;
+            }
+            go.CanvasHiddenAt = -1;
+            long version = go.SubtreeVersion;
+            int ignoringBefore = depth.IgnoringGroups;
             if (canvasHere != null && canvasHere != nearest)
             {
                 nearest = canvasHere;
@@ -332,6 +355,25 @@ namespace OniBrutal.Engine.UI
             if (pops != null)
                 foreach (var r in pops)
                     foreach (var m in r.PopMaterials) batch.Draws.Add(new CanvasDraw(r, space, m, pop: true, groupAlpha));
+            if (hiddenTop && depth.IgnoringGroups == ignoringBefore) go.CanvasHiddenAt = version;
+        }
+
+        static readonly bool verifySkips = Environment.GetEnvironmentVariable("ONI_VERIFY_CANVAS_SKIPS") == "1";
+        static long skipsVerified, skipsWrong;
+
+        /// A skipped hidden subtree, as the walk would visit it: every element at depth -1 and no
+        /// live group that ignores its parents.
+        static void VerifySkipped(GameObjectNative go, bool isTop)
+        {
+            if (isTop && ++skipsVerified % 10000 == 0) EngineLog.Engine($"canvas skips: {skipsVerified} verified, {skipsWrong} wrong");
+            if (!go.ActiveInHierarchy) return;
+            var parts = PartsOf(go);
+            if (!isTop && parts.Canvas is { } c && IsLive(c) && c.OverrideSorting) return;
+            bool wrong = false;
+            foreach (var g in parts.Groups) wrong |= g.IsActiveAndEnabledState && g.IgnoreParentGroups;
+            foreach (var r in parts.Renderers) wrong |= !r.Destroyed && (r.AbsoluteDepth != -1 || r.RelativeDepth != -1);
+            if (wrong) EngineLog.Engine($"canvas skip wrong ({++skipsWrong}) at {go.Name}");
+            foreach (var child in go.Transform.Children) VerifySkipped(child.GameObject, isTop: false);
         }
 
         /// Diagnostics (`--probe-ui`): the elements of the last build drawn at a screen point

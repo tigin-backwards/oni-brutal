@@ -122,6 +122,15 @@ Columns: ms per frame (main thread), count of the objects involved where known, 
   unchanged; 1.6 million cached answers verified) removed the lookups from the profile but moved
   GlDevice.Draw only from 4.12 to 4.05 ms. The rest of recording resolves values that do change;
   what remains is structural (recording on another thread, pipelined with the next frame).
+- **Canvas walk, hidden screens skipped: 2.1 → 0.8 ms.** Done. Per frame the walk visited
+  11,500 objects: 3,100 inactive, and 8,900 below CanvasGroups at alpha 0 (the game's closed
+  screens stay active, hidden by their groups), whose 5,500 renderers only had their depth set
+  to -1. Each object now carries a version bumped up its ancestor chain at every change that
+  could alter such a walk (children, activation, components, enabled state, canvas and group
+  settings). The top of a hidden subtree remembers the version at which a walk found it all
+  hidden with no group that ignores its parents. While that version holds, its renderers
+  already hold -1 and the walk skips it. Verified (ONI_VERIFY_CANVAS_SKIPS=1) on 20,000 skips,
+  including runs that open and close the management screens, with no difference.
 - **Canvas walk, renderer-free subtrees: not worth it.** Only about 7% of its visits are in
   subtrees without any CanvasRenderer.
 

@@ -94,7 +94,12 @@ namespace UnityEngine
         public bool overrideSorting
         {
             get => Data.OverrideSorting;
-            set => Data.OverrideSorting = value;
+            set
+            {
+                if (Data.OverrideSorting == value) return;
+                Data.OverrideSorting = value;
+                Hierarchy.Touch(Data.GameObject?.Transform);
+            }
         }
 
         /// Nested canvases without overrideSorting sort with the nearest enclosing canvas that

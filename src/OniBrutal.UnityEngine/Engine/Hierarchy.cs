@@ -9,6 +9,14 @@ namespace OniBrutal.Engine
         /// Subscribers notified after a transform's parent changed (canvas hierarchy tracking).
         public static event Action<TransformNative> ParentChanged;
 
+        /// Records a change to what lies at or below a transform (children, activation, components,
+        /// enabled state, canvas and group settings) on it and every ancestor. CanvasSystem skips
+        /// a subtree hidden through its CanvasGroups when nothing in it changed since its last walk.
+        public static void Touch(TransformNative t)
+        {
+            for (; t != null; t = t.Parent) t.GameObject.SubtreeVersion++;
+        }
+
         public static void RemoveChild(TransformNative parent, TransformNative child)
         {
             var children = parent.Children;
@@ -19,6 +27,7 @@ namespace OniBrutal.Engine
             Array.Copy(children, index + 1, shrunk, index, children.Length - index - 1);
             parent.Children = shrunk;
             child.Parent = null;
+            Touch(parent);
         }
 
         static void InsertChild(TransformNative parent, TransformNative child, int index)
@@ -31,6 +40,7 @@ namespace OniBrutal.Engine
             Array.Copy(children, index, grown, index + 1, children.Length - index);
             parent.Children = grown;
             child.Parent = parent;
+            Touch(parent);
         }
 
         public static bool IsAncestorOrSelf(TransformNative ancestor, TransformNative t)

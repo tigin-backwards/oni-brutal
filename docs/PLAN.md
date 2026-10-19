@@ -351,6 +351,14 @@ something without changing what it produces, and each is off unless asked for. M
   per type instead of boxing every value through reflection; alternating saves differ only where
   the sim moved between them.
 
+Loading U57 takes 26–28 s here against 3 min 50 s in the original. Of it, about two thirds is the
+game's own work (KSerialization reading the save, each object's setup) and a quarter the engine
+creating those objects; UnloadUnusedAssets during the load is 1.2 s, almost all its two full
+collections. JIT is not the limit: by the colony 13 s of compiling has happened across all
+threads, yet compiling this project's assemblies ahead of time (ReadyToRun) removed 5,000 of
+69,000 methods and no load time, and turning tiered PGO off cut the JIT to 8 s with the load
+unchanged.
+
 With all four, the autosave freezes the game for 4.8 s instead of 11.7 (the remainder is
 serializing the colony on the main thread, which reads live state, and the colony preview's GPU
 read-back). Not tweaked: the per-item sim systems (Sublimates, ranching, transitions…), which

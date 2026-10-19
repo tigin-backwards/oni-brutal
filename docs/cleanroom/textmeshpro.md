@@ -358,9 +358,29 @@ Found by running the implementation's tests and the differential runs against th
 package (M9). They refine the sections above.
 - **Sub-meshes:** `TMP_SubMeshUI` children are named "New Game Object". A sub-mesh that
   already holds a material the layout uses keeps that material's number; unused ones stay.
-- **Characters:** the zero-width space gets a quad. Character corners include the padding.
-  Small caps keep the text's size and line metrics. Sprites don't raise the line's ascender,
-  and `spriteCount` stays 0.
+- **Characters:** character corners include the padding. Small caps keep the text's size and
+  line metrics. Sprites don't raise the line's ascender, and `spriteCount` stays 0.
+- **Zero-width space:** draws nothing, except where white space is preserved (input fields):
+  there its quad goes in the spare slot without being counted. If the font lacks the
+  character, it uses an empty glyph of the text's own font, not a fallback's.
+- **Buffers:** grow to the next power of two of (quads + 1). Grown slots have colour zero,
+  new buffers are white.
+- **SDF scale refresh:** checked in `Canvas.willRenderCanvases` against the lossy scale's y
+  for which the SDF scale (uv0.w) was last set. Only a change beyond a factor of 1.25 either
+  way acts (0.8 and 1.25 do not); it multiplies uv0.w by the ratio and uploads, without a new
+  layout. A scale to or from 0 regenerates the text. Texts with `isTextObjectScaleStatic` are
+  skipped. Only screen-space-overlay canvases divide the SDF scale by `scaleFactor`.
+- **Spacing and advances:** character, word and line spacing are in hundredths of the text's
+  font size, whatever `<size>` says. `xAdvance` includes the spacing after the character;
+  `lineInfo.maxAdvance` and `length` follow it.
+- **Bold and italic:** with extra padding, a bold quad is as wide as a regular one. Italic
+  glyphs lean around half the cap height, not the baseline.
+- **Words:** a text starting with white space or a symbol records an empty word (0, -1) first.
+- **Unwrapped measurement:** a rect without width doesn't wrap, and
+  `GetPreferredValues(w, h)` returns the unwrapped width. A text added to a default 100 × 100
+  rect makes it 200 × 50. A text never laid out reports one material.
+- **Caret:** its material is set when the field is enabled; its CanvasRenderer is added before
+  the caret graphic.
 - **Stored alignment:** values 0–15 in the game's data use the oldest alignment table; a value
   set at run time is split into its horizontal and vertical bytes.
 - **Truncation:** Truncate and Ellipsis stop where the first line that doesn't fit begins,

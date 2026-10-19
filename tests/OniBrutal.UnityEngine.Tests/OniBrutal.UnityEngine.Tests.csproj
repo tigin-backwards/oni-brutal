@@ -13,6 +13,7 @@
   <ItemGroup>
     <!-- The engine is process-global, like Unity's: tests run one at a time. -->
     <Content Include="xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="TestData/**" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../../src/OniBrutal.UnityEngine/OniBrutal.UnityEngine.csproj" />

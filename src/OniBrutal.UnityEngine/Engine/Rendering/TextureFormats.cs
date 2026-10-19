@@ -101,7 +101,9 @@ namespace OniBrutal.Engine.Rendering
         /// Formats whose texels can be read as Color.
         public static bool CanDecode(TextureFormat format) => format switch
         {
-            TextureFormat.DXT1 or TextureFormat.DXT5 or TextureFormat.BC4 or TextureFormat.BC5 => true,
+            TextureFormat.DXT1 or TextureFormat.DXT5 or TextureFormat.BC4 or TextureFormat.BC5 or TextureFormat.BC6H or TextureFormat.BC7
+                or TextureFormat.ETC_RGB4 or TextureFormat.ETC2_RGB or TextureFormat.ETC2_RGBA1 or TextureFormat.ETC2_RGBA8
+                or TextureFormat.EAC_R or TextureFormat.EAC_R_SIGNED or TextureFormat.EAC_RG or TextureFormat.EAC_RG_SIGNED => true,
             _ => CanEncode(format),
         };
 
@@ -232,12 +234,12 @@ namespace OniBrutal.Engine.Rendering
         public static UnityException UnsupportedFormat(TextureFormat format)
             => new($"Unsupported texture format - Texture2D::GetPixels and SetPixels do not support {format} in this engine.");
 
-        // ----- BC1/BC3/BC4/BC5 block decoding (texel reads of compressed readable textures) -----
+        // ----- Block decoding (texel reads of compressed readable textures) -----
 
         static Color DecodeBlockTexel(TextureFormat format, ReadOnlySpan<byte> mip, int mipWidth, int x, int y)
         {
             int blocksPerRow = (mipWidth + 3) / 4;
-            int bytes = format is TextureFormat.DXT1 or TextureFormat.BC4 ? 8 : 16;
+            TryGetBlock(format, out _, out _, out int bytes);
             var block = mip.Slice(((y / 4) * blocksPerRow + x / 4) * bytes, bytes);
             int px = x & 3, py = y & 3;
             switch (format)
@@ -251,9 +253,26 @@ namespace OniBrutal.Engine.Rendering
                 }
                 case TextureFormat.BC4: return new Color(AlphaBlock(block, px, py), 0f, 0f, 1f);
                 case TextureFormat.BC5: return new Color(AlphaBlock(block, px, py), AlphaBlock(block[8..], px, py), 0f, 1f);
+                case TextureFormat.BC6H: return BlockDecoders.Bc6hUnsigned(block, px, py);
+                case TextureFormat.BC7: return BlockDecoders.Bc7(block, px, py);
+                case TextureFormat.ETC_RGB4: return Rgba8(BlockDecoders.Etc(block, px, py, BlockDecoders.EtcKind.Etc1));
+                case TextureFormat.ETC2_RGB: return Rgba8(BlockDecoders.Etc(block, px, py, BlockDecoders.EtcKind.Etc2));
+                case TextureFormat.ETC2_RGBA1: return Rgba8(BlockDecoders.Etc(block, px, py, BlockDecoders.EtcKind.Etc2PunchThrough));
+                case TextureFormat.ETC2_RGBA8:
+                {
+                    var c = Rgba8(BlockDecoders.Etc(block[8..], px, py, BlockDecoders.EtcKind.Etc2));
+                    c.a = BlockDecoders.EacAlpha(block, px, py) / 255f;
+                    return c;
+                }
+                case TextureFormat.EAC_R: return new Color(BlockDecoders.Eac11(block, px, py, signed: false), 0f, 0f, 1f);
+                case TextureFormat.EAC_R_SIGNED: return new Color(BlockDecoders.Eac11(block, px, py, signed: true), 0f, 0f, 1f);
+                case TextureFormat.EAC_RG: return new Color(BlockDecoders.Eac11(block, px, py, signed: false), BlockDecoders.Eac11(block[8..], px, py, signed: false), 0f, 1f);
+                case TextureFormat.EAC_RG_SIGNED: return new Color(BlockDecoders.Eac11(block, px, py, signed: true), BlockDecoders.Eac11(block[8..], px, py, signed: true), 0f, 1f);
             }
             throw UnsupportedFormat(format);
         }
+
+        static Color Rgba8((int R, int G, int B, int A) c) => new(c.R / 255f, c.G / 255f, c.B / 255f, c.A / 255f);
 
         static Color ColorBlock(ReadOnlySpan<byte> b, int px, int py, bool allowPunchThrough)
         {

@@ -70,6 +70,21 @@ namespace PerfProbe
             while (Game.Instance == null || SpeedControlScreen.Instance == null) yield return null;
             Debug.Log($"PERF colony f{Time.frameCount} cycle {GameClock.Instance.GetCycle()}{RuntimeCounters.Jit()}");
             if (System.IO.File.Exists(System.IO.Path.Combine(Path, "savetest.txt"))) { yield return SaveTest(); yield break; }
+            // `camera.txt`: where the view stays, as world cells `x y` with an optional orthographic
+            // size, or `top` (the active world's top centre: space, for comparing a quiet view).
+            var cameraFile = System.IO.Path.Combine(Path, "camera.txt");
+            if (System.IO.File.Exists(cameraFile))
+            {
+                var words = System.IO.File.ReadAllText(cameraFile).Split(new[] { ' ', '\n', '\r' }, System.StringSplitOptions.RemoveEmptyEntries);
+                var world = ClusterManager.Instance.activeWorld;
+                Vector3 at = words[0] == "top"
+                    ? new Vector3(world.WorldOffset.x + world.WorldSize.x * 0.5f, world.WorldOffset.y + world.WorldSize.y - 12f, 0f)
+                    : new Vector3(float.Parse(words[0], System.Globalization.CultureInfo.InvariantCulture), float.Parse(words[1], System.Globalization.CultureInfo.InvariantCulture), 0f);
+                float size = words.Length > (words[0] == "top" ? 1 : 2) ? float.Parse(words[^1], System.Globalization.CultureInfo.InvariantCulture) : 12f;
+                at.z = CameraController.Instance.transform.position.z;
+                CameraController.Instance.SnapTo(at, size);
+                Debug.Log($"PERF camera at {at} size {size}");
+            }
             // `counts.txt` lists component type names (Assembly-CSharp first, then -firstpass): how
             // many of each exist, active or not, logged once the colony is up.
             var counts = System.IO.Path.Combine(Path, "counts.txt");

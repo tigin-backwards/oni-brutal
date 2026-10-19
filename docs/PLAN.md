@@ -359,6 +359,14 @@ threads, yet compiling this project's assemblies ahead of time (ReadyToRun) remo
 69,000 methods and no load time, and turning tiered PGO off cut the JIT to 8 s with the load
 unchanged.
 
+- `fast-particle-collision`: a radbolt's collision check gathers the colliders around it only when
+  another radbolt is registered there, and finds radbolts among the live ones (0.94 → 0.44 ms a
+  frame in U57; 40,000 checks verified against the game's own result).
+
+Measured and not kept: the loading side of fast-serialization (a U57 load produced the same
+colony, 3 bytes of time of day apart, in 31.3 s against 31.6), an exact early-out for
+sublimation and a canvas build cache (docs/research/u57-frame-inventory.md).
+
 With all four, the autosave freezes the game for 4.8 s instead of 11.7 (the remainder is
 serializing the colony on the main thread, which reads live state, and the colony preview's GPU
 read-back). Not tweaked: the per-item sim systems (Sublimates, ranching, transitions…), which

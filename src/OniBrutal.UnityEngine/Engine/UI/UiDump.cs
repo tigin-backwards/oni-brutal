@@ -39,7 +39,7 @@ namespace OniBrutal.Engine.UI
             ("UnityEngine.UI.LayoutElement", ["minWidth", "minHeight", "preferredWidth", "preferredHeight", "flexibleWidth", "flexibleHeight", "ignoreLayout"]),
             ("UnityEngine.UI.LayoutGroup", ["preferredWidth", "preferredHeight", "minWidth", "minHeight"]),
             ("UnityEngine.UI.CanvasScaler", ["scaleFactor", "uiScaleMode"]),
-            ("TMPro.TMP_Text", ["text", "fontSize", "isTextOverflowing", "firstOverflowCharacterIndex"]),
+            ("TMPro.TMP_Text", ["text", "fontSize", "alignment", "isTextOverflowing", "firstOverflowCharacterIndex", "textInfo"]),
             ("TMPro.TMP_InputField", ["text", "caretPosition", "isFocused"]),
             ("TMPro.TMP_Dropdown", ["value"]),
         ];
@@ -130,9 +130,51 @@ namespace OniBrutal.Engine.UI
             }
         }
 
+        /// The counts of a TextMeshPro text info (public fields, read by name).
+        static readonly string[] textInfoCounts = ["characterCount", "spaceCount", "wordCount", "linkCount", "lineCount", "pageCount", "materialCount", "spriteCount"];
+
+        static string TextInfoCounts(object info)
+        {
+            var type = info.GetType();
+            var parts = new List<string>(textInfoCounts.Length);
+            foreach (var name in textInfoCounts)
+                if (type.GetField(name, BindingFlags.Public | BindingFlags.Instance) is { } f) parts.Add(Convert.ToString(f.GetValue(info), CultureInfo.InvariantCulture));
+            var text = string.Join(",", parts);
+            // Per material: its vertex count, and how many characters use it.
+            if (type.GetField("materialCount")?.GetValue(info) is int materials && materials > 1
+                && type.GetField("meshInfo")?.GetValue(info) is Array meshes
+                && type.GetField("characterInfo")?.GetValue(info) is Array chars && type.GetField("characterCount")?.GetValue(info) is int count)
+            {
+                var perMaterial = new int[materials];
+                for (int i = 0; i < count && i < chars.Length; i++)
+                {
+                    var c = chars.GetValue(i);
+                    if (c.GetType().GetField("materialReferenceIndex")?.GetValue(c) is int m && m >= 0 && m < materials) perMaterial[m]++;
+                }
+                var list = new List<string>();
+                var owner = type.GetField("textComponent")?.GetValue(info);
+                var shared = owner?.GetType().GetProperty("fontSharedMaterial")?.GetValue(owner);
+                var font = owner?.GetType().GetProperty("font")?.GetValue(owner);
+                var fontMaterial = font?.GetType().GetProperty("material")?.GetValue(font);
+                for (int m = 0; m < materials && m < meshes.Length; m++)
+                {
+                    var mi = meshes.GetValue(m);
+                    int vertices = mi.GetType().GetField("vertexCount")?.GetValue(mi) is int v ? v : -1;
+                    // The material: the text's shared one (s), its font's (f), or another (o).
+                    var material = mi.GetType().GetField("material")?.GetValue(mi);
+                    string which = material == null ? "-" : (ReferenceEquals(material, shared) ? "s" : "") + (ReferenceEquals(material, fontMaterial) ? "f" : "");
+                    if (which == "") which = "o";
+                    list.Add(vertices + "/" + perMaterial[m] + which);
+                }
+                text += " meshes=" + string.Join(";", list);
+            }
+            return text;
+        }
+
         static string Value(object v) => v switch
         {
             null => "null",
+            _ when v.GetType().FullName == "TMPro.TMP_TextInfo" => TextInfoCounts(v),
             float f => F(f),
             Vector2 v2 => F(v2.x) + "," + F(v2.y),
             Color c => C(c),
@@ -188,7 +230,8 @@ namespace OniBrutal.Engine.UI
             text.Append("\n  indices ").Append(string.Join(",", g.Indices));
         }
 
-        static string V(Vector4 v) => string.Create(CultureInfo.InvariantCulture, $"{v.x:0.####},{v.y:0.####},{v.z:0.####},{v.w:0.####}");
+        // Round-trip precision (R): the listing is for measuring a package's arithmetic exactly.
+        static string V(Vector4 v) => string.Create(CultureInfo.InvariantCulture, $"{v.x:R},{v.y:R},{v.z:R},{v.w:R}");
 
         static uint OrderedHash(CanvasGeometry g)
         {

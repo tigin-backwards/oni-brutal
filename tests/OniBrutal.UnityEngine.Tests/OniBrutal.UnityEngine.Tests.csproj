@@ -18,5 +18,7 @@
     <ProjectReference Include="../../src/OniBrutal.UnityEngine/OniBrutal.UnityEngine.csproj" />
     <ProjectReference Include="../../src/OniBrutal.Desktop/OniBrutal.Desktop.csproj" />
     <ProjectReference Include="../../src/UnityEngine.UI/UnityEngine.UI.csproj" />
+    <ProjectReference Include="../../src/Unity.TextMeshPro/Unity.TextMeshPro.csproj" />
+    <ProjectReference Include="../../src/Unity.Timeline/Unity.Timeline.csproj" />
   </ItemGroup>
 </Project>

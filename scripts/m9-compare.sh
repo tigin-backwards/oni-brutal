@@ -2,7 +2,7 @@
 # Differential comparison for PLAN M9: runs a scenario with Unity's shipped UI packages and with
 # this project's (PACKAGES_DIR, default out/packages), dumps the UI at the scenario's frames
 # (--dump-ui), and diffs the dumps (scripts/ui-diff.py). Captures are kept for a visual check.
-#   scripts/m9-compare.sh SCENARIO OUTDIR [PACKAGES_DIR]
+#   [SHIPPED_FROM=DIR] scripts/m9-compare.sh SCENARIO OUTDIR [PACKAGES_DIR]
 # A scenario (scripts/m9-scenarios/NAME.sh) sets FRAMES, DUMPS (frame numbers), ARGS (host
 # arguments: --input …) and optionally SAVE (a .sav resumed as the profile's only colony; the
 # scenario's inputs load it). Runs are isolated (a scratch run home, audio to a private sink) and
@@ -33,7 +33,15 @@ run() # NAME [host args]
     echo "$name: exit $?, $(grep -ci exception "$out/$name.log") exception lines"
     rm -f "$out/$name.raw"
 }
-run shipped
+# SHIPPED_FROM=DIR reuses the shipped run of an earlier comparison of the same scenario (its dumps
+# and captures), which does not change while only this project's packages do.
+if [ -n "${SHIPPED_FROM:-}" ]; then
+    for f in $DUMPS; do cp "$SHIPPED_FROM/shipped-$f.txt" "$SHIPPED_FROM/shipped-$f.png" "$out/"; done
+    cp "$SHIPPED_FROM/shipped.log" "$out/" 2>/dev/null || true
+    echo "shipped: reused from $SHIPPED_FROM"
+else
+    run shipped
+fi
 run ours --ui-packages "$packages"
 status=0
 for f in $DUMPS; do

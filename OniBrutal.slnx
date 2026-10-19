@@ -6,6 +6,8 @@
     <Project Path="src/OniBrutal.Restarter/OniBrutal.Restarter.csproj" />
     <Project Path="src/OniBrutal.UnityEngine/OniBrutal.UnityEngine.csproj" />
     <Project Path="src/Unity.InternalAPIEngineBridge.004/Unity.InternalAPIEngineBridge.004.csproj" />
+    <Project Path="src/Unity.TextMeshPro/Unity.TextMeshPro.csproj" />
+    <Project Path="src/Unity.Timeline/Unity.Timeline.csproj" />
     <Project Path="src/UnityEngine.UI/UnityEngine.UI.csproj" />
   </Folder>
   <Folder Name="/src/ThirdParty/">

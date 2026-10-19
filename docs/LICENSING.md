@@ -90,9 +90,20 @@ flags only) of the `InfoJson_6000.3.5f2.json` dump in AssetRipper's public TypeT
 repository (github.com/AssetRipper/TypeTreeDumps). That repository produces its dumps with
 the TypeTreeDumper tool, running the Windows Unity Editor from Unity's download archive.
 
-The repository states no licence. The data is a factual description of a file format, but its
-redistribution terms should be settled before a public release. Alternatives would be a dump
-made by this project, or per-class layouts written from the documented format.
+Neither TypeTreeDumps nor the dumper's output states a licence (AssetRipper's Tpk packer, which
+redistributes the same data, is MIT for its code only). The data is machine-generated from
+Unity's editor, so any rights in it would be Unity's rather than AssetRipper's. It is a factual
+description of a file format, used here only to read the game's files (interoperability).
+Neither of the obvious workarounds changes that:
+- A dump made by this project with the same dumper is the same data, generated from the same
+  editor.
+- The game's own data cannot replace it. Its asset bundles carry type trees for only 8 of the 57
+  native classes the data uses (GameObject, Transform, Material, Texture2D, Shader, TextAsset,
+  MonoScript, AssetBundle; measured 2026-10-18 on the Windows install with every DLC). The
+  `.assets` files carry none.
+
+Before a public release, ask AssetRipper to state terms for TypeTreeDumps, or get advice on the
+interoperability use.
 
 ## Provenance of the engine's code
 

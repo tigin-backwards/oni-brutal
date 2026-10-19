@@ -135,6 +135,51 @@ The same applies to the other per-item systems (reachability, critter temperatur
 checks): caching what a call looks up cannot remove the cost of visiting each object. Gains need
 whole loops skipped exactly (as the radbolt gather) or the engine work they cause reduced.
 
+## Data layout: what a rewrite could buy (spike)
+
+The question: how much would rewriting per-item systems over flat arrays (one array per field,
+indexed per item, as in an entity-component system) save, against the game's objects? A temporary
+PerfProbe mode (not kept) timed the same decisions both ways in U57, every frame, game running at
+speed 3:
+- **Objects:** what the game reads now, through the components.
+- **Arrays:** the same fields copied once into flat arrays, read in a loop. The caches were
+  emptied (64 MB written) before each array pass, so the arrays start cold, as they would after
+  the rest of a frame.
+
+| Per-item pass | Items | Objects | Arrays | Per item |
+|---|---|---|---|---|
+| Sublimation's decision (cell from the position, the cell's mass against the item's limit, emit state, sealed tag, temperature from the sim's element chunk, element's low temperature) | 2,492 | 0.97–1.14 ms | 0.013–0.023 ms | ~400 ns → ~5 ns |
+| A pickupable scan of the kind the fetch and sensor searches make (edible tag, valid cell, mass) | 27,551 | 4.3–4.8 ms | 0.027–0.029 ms | ~160 ns → ~1 ns |
+
+- **The arrays compute the same answers.** Both passes found the same decisions and the same
+  total mass from a fresh copy. Agreement drifted to 98% over a minute because the copies were
+  not kept current.
+- **The object cost is chains of dependent cache misses**, not the instructions. For example,
+  HasTag reads the KPrefabID, its HashSet, the buckets and the entries; the position goes
+  through the transform. The same sublimation pass with the game paused costs 0.40 ms: the
+  running game's own work evicts what the pass needs.
+- **Keeping the arrays current is cheap:** about 200 tag changes and 25 pickupable cell changes
+  a frame across the colony (counted with patches on KPrefabID.AddTag/RemoveTag). Each is one
+  array write.
+
+**What this means.** For the per-item systems (Sublimates 2.4 ms, reachability 2.5, the brain
+sensors' searches inside BrainScheduler's 2.7, critter temperature 1.1, RequireInputs 1.4,
+EnergySim 1.6), almost all of the time is in visiting objects, and a table layout removes that
+cost almost entirely. What would remain is the real work, the few items whose state changes
+(emitting, status changes, events). The upper bound for these systems together is about 10 of
+the frame's 70 ms. The other large costs are rendering, animation, cell-change handlers and the
+save, which this does not touch. So even fully done, U57 would reach about 16–17 fps from 14.
+
+**What a retrofit takes.** The objects stay the owners of the game state (saves, mods and the UI
+read them). A table per system mirrors the fields its decisions read. The table is updated at
+every place those fields change (tag add/remove, cell change, storage change, reservation, mass)
+and read by a replacement of the system's loop that calls the game's own methods only for items
+whose decision says something happens. Correctness depends on finding every write. Each table
+needs a verify mode comparing it to the objects every frame (as the radbolt tweak does), and
+mods that write the fields directly would bypass the mirror. A table for one system costs about
+a day to build and verify; the pickupable table (tags, cell, unreserved amount, storage) would
+serve the fetch, sensor and inventory searches together.
+
 ## Recommendations, in order
 
 1. ~~Canvas dirty tracking~~: measured, the UI changes every frame (above); incremental building

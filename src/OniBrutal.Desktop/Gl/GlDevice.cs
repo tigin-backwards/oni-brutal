@@ -136,6 +136,7 @@ namespace OniBrutal.Desktop.Gl
                 }
             }
             caps.Rgtc |= true; // core since OpenGL 3.0
+            GlTextures.Caps = caps;
             caps.MemoryMB = QueryVideoMemoryMB();
             GlBindless.Initialize();
             EngineLog.Engine(GlBindless.Enabled ? "textures: bindless (ARB_bindless_texture)" : "textures: bound to units");

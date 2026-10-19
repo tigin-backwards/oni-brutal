@@ -103,6 +103,12 @@ namespace UnityEngine
         internal bool ValidateFormat(TextureFormat format)
         {
             if (SystemInfo.SupportsTextureFormat(format)) return true;
+            // As Unity: a compressed format the GPU cannot sample is decompressed for it.
+            if (TextureFormats.IsBlockCompressed(format) && TextureFormats.CanDecode(format))
+            {
+                Debug.LogWarning($"'{format}' is not supported on this platform. Decompressing texture. Use 'SystemInfo.SupportsTextureFormat' C# API to check format support.", this);
+                return true;
+            }
             Debug.LogError($"Texture creation failed. '{format}' is not supported on this platform. Use 'SystemInfo.SupportsTextureFormat' C# API to check format support.", this);
             return false;
         }

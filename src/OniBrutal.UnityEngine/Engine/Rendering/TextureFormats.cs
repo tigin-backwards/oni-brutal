@@ -271,6 +271,33 @@ namespace OniBrutal.Engine.Rendering
         public static UnityException UnsupportedFormat(TextureFormat format)
             => new($"Unsupported texture format - Texture2D::GetPixels and SetPixels do not support {format} in this engine.");
 
+        /// A compressed level decoded for a device that cannot sample its format, as Unity
+        /// decompresses such textures: 8-bit RGBA, or half-float RGBA for BC6H (`halfFloat`).
+        /// Rows are decoded in parallel (each texel decodes its block).
+        public static unsafe void DecodeLevel(TextureFormat format, byte* level, long length, int width, int height, byte* output, bool halfFloat)
+        {
+            nint source = (nint)level, target = (nint)output;
+            System.Threading.Tasks.Parallel.For(0, height, y =>
+            {
+                var mip = new ReadOnlySpan<byte>((byte*)source, (int)length);
+                for (int x = 0; x < width; x++)
+                {
+                    var c = Decode(format, mip, width, x, y);
+                    long i = (long)y * width + x;
+                    if (halfFloat)
+                    {
+                        var p = (Half*)target + i * 4;
+                        p[0] = (Half)c.r; p[1] = (Half)c.g; p[2] = (Half)c.b; p[3] = (Half)c.a;
+                    }
+                    else
+                    {
+                        var p = (byte*)target + i * 4;
+                        p[0] = ToU8(c.r); p[1] = ToU8(c.g); p[2] = ToU8(c.b); p[3] = ToU8(c.a);
+                    }
+                }
+            });
+        }
+
         // ----- Block decoding (texel reads of compressed readable textures) -----
 
         static Color DecodeBlockTexel(TextureFormat format, ReadOnlySpan<byte> mip, int mipWidth, int x, int y)

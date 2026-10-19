@@ -192,16 +192,37 @@ namespace OniBrutal.Desktop.Gl
     }
 
     /// How a Unity texture format is stored and uploaded in GL.
-    internal readonly record struct GlFormat(uint Internal, uint Format, uint Type, bool Compressed, uint[] Swizzle = null);
+    /// `Decompress`: a compressed format the context cannot sample, uploaded decoded (as `Format`/`Type`).
+    internal readonly record struct GlFormat(uint Internal, uint Format, uint Type, bool Compressed, uint[] Swizzle = null, bool Decompress = false);
 
     internal static unsafe class GlTextures
     {
         static readonly uint[] AlphaOnly = [Zero, Zero, Zero, Red];
         static readonly uint[] ArgbBytes = [Green, Blue, Alpha, Red];
 
+        /// The context's compression support (set when the device starts).
+        public static GlCaps Caps;
+
         /// Unity's texture formats in GL: ARGB32 is stored as its bytes and swizzled; Alpha8 is a
         /// red-channel texture read as (0, 0, 0, a); gamma colour space uses no sRGB formats.
-        public static GlFormat Of(TextureFormat f) => f switch
+        /// Compressed formats the context cannot sample are decoded on upload, as Unity
+        /// decompresses them: to RGBA8, BC6H to half-float RGBA.
+        public static GlFormat Of(TextureFormat f)
+        {
+            bool sampled = f switch
+            {
+                TextureFormat.DXT1 or TextureFormat.DXT5 => Caps?.S3tc ?? true,
+                TextureFormat.BC6H or TextureFormat.BC7 => Caps?.Bptc ?? true,
+                TextureFormat.BC4 or TextureFormat.BC5 => Caps?.Rgtc ?? true,
+                _ => true,
+            };
+            if (sampled && Native(f) is { } native) return native;
+            if (TextureFormats.IsBlockCompressed(f) && TextureFormats.CanDecode(f))
+                return f == TextureFormat.BC6H ? new(Rgba16F, Rgba, HalfFloat, false, null, true) : new(Rgba8, Rgba, UnsignedByte, false, null, true);
+            throw new NotSupportedException($"Texture format {f} has no OpenGL equivalent in this device.");
+        }
+
+        static GlFormat? Native(TextureFormat f) => f switch
         {
             TextureFormat.Alpha8 => new(R8, RedFormat, UnsignedByte, false, AlphaOnly),
             TextureFormat.R8 => new(R8, RedFormat, UnsignedByte, false),
@@ -229,8 +250,24 @@ namespace OniBrutal.Desktop.Gl
             TextureFormat.BC5 => new(CompressedRgRgtc2, 0, 0, true),
             TextureFormat.BC6H => new(CompressedRgbBptcUnsignedFloat, 0, 0, true),
             TextureFormat.BC7 => new(CompressedRgbaBptcUnorm, 0, 0, true),
-            _ => throw new NotSupportedException($"Texture format {f} has no OpenGL equivalent in this device."),
+            _ => null,
         };
+
+        /// One level (or slice) of texels in the GL format: decoded first when the format is not sampled.
+        static void Texels(TextureFormat format, GlFormat f, byte* source, long length, int w, int h, Action<IntPtr> upload)
+        {
+            if (!f.Decompress)
+            {
+                upload((IntPtr)source);
+                return;
+            }
+            var decoded = new byte[(long)w * h * (f.Type == HalfFloat ? 8 : 4)];
+            fixed (byte* d = decoded)
+            {
+                TextureFormats.DecodeLevel(format, source, length, w, h, d, halfFloat: f.Type == HalfFloat);
+                upload((IntPtr)d);
+            }
+        }
 
         /// Render texture colour formats.
         public static uint InternalOf(GraphicsFormat f) => f switch
@@ -396,7 +433,7 @@ namespace OniBrutal.Desktop.Gl
                     long length = t.MipSize(m);
                     byte* p = memory.Pointer + t.MipOffset(m);
                     if (f.Compressed) N.glCompressedTexSubImage2D(TexTarget2D, m, 0, 0, w, h, f.Internal, (int)length, p);
-                    else N.glTexSubImage2D(TexTarget2D, m, 0, 0, w, h, f.Format, f.Type, p);
+                    else Texels(t.Format, f, p, length, w, h, d => N.glTexSubImage2D(TexTarget2D, m, 0, 0, w, h, f.Format, f.Type, (void*)d));
                 }
         }
 
@@ -420,7 +457,7 @@ namespace OniBrutal.Desktop.Gl
                 {
                     byte* p = memory.Pointer + s * sliceSize + mipOffset;
                     if (f.Compressed) N.glCompressedTexSubImage3D(TexTarget2DArray, m, 0, 0, s, w, h, 1, f.Internal, mipSize, p);
-                    else N.glTexSubImage3D(TexTarget2DArray, m, 0, 0, s, w, h, 1, f.Format, f.Type, p);
+                    else Texels(t.Format, f, p, mipSize, w, h, d => N.glTexSubImage3D(TexTarget2DArray, m, 0, 0, s, w, h, 1, f.Format, f.Type, (void*)d));
                 }
             }
             N.glTexParameteri(TexTarget2DArray, TextureBaseLevel, 0);
@@ -443,6 +480,14 @@ namespace OniBrutal.Desktop.Gl
                 int w = Math.Max(1, t.Width >> m), h = Math.Max(1, t.Height >> m), d = Math.Max(1, t.Depth >> m);
                 byte* p = memory == null ? null : memory.Pointer + t.MipOffset(m);
                 if (f.Compressed) N.glCompressedTexImage3D(TexTarget3D, m, f.Internal, w, h, d, 0, (int)t.MipSize(m), p);
+                else if (f.Decompress && p != null)
+                {
+                    // Compressed 3D levels are slices of 2D blocks, one after another.
+                    N.glTexImage3D(TexTarget3D, m, (int)f.Internal, w, h, d, 0, f.Format, f.Type, null);
+                    long slice = TextureFormats.MipSize(t.Format, w, h);
+                    for (int z = 0; z < d; z++)
+                        Texels(t.Format, f, p + z * slice, slice, w, h, s => N.glTexSubImage3D(TexTarget3D, m, 0, 0, z, w, h, 1, f.Format, f.Type, (void*)s));
+                }
                 else N.glTexImage3D(TexTarget3D, m, (int)f.Internal, w, h, d, 0, f.Format, f.Type, p);
             }
             N.glTexParameteri(TexTarget3D, TextureBaseLevel, 0);

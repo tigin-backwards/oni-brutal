@@ -164,6 +164,24 @@ namespace OniBrutal.Tests
         }
 
         [Fact]
+        public unsafe void LevelsDecodeForUploadAsTheirTexelReads()
+        {
+            // Two blocks across, one down: an ETC2 RGBA8 level of 8×4 texels.
+            var level = new byte[32];
+            new System.Random(3).NextBytes(level);
+            var rgba = new byte[8 * 4 * 4];
+            fixed (byte* l = level, o = rgba)
+                TextureFormats.DecodeLevel(TextureFormat.ETC2_RGBA8, l, level.Length, 8, 4, o, halfFloat: false);
+            for (int y = 0; y < 4; y++)
+                for (int x = 0; x < 8; x++)
+                {
+                    Color32 c = TextureFormats.Decode(TextureFormat.ETC2_RGBA8, level, 8, x, y);
+                    int i = (y * 8 + x) * 4;
+                    Assert.Equal(new Color32(rgba[i], rgba[i + 1], rgba[i + 2], rgba[i + 3]), c);
+                }
+        }
+
+        [Fact]
         public void PvrtcWithoutAlphaReadsOpaque()
         {
             // Translucent colours with alpha 0 in every word.

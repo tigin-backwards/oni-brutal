@@ -396,6 +396,9 @@ Known behaviours not reproduced, all confirmed unreachable by the game (M6):
   ASTC LDR at every block size and PVRTC, each checked against independent decoders (ASTC exactly
   against ARM's astcenc: `BlockDecodingTests`); ASTC HDR throws. No readable texture in the build
   uses a compressed format other than BC1 and BC3 (all 2682 textures checked by `--check-bind`).
+  Compressed formats the GPU cannot sample (ETC, EAC, ASTC and PVRTC on desktop OpenGL; S3TC or
+  BPTC on a context without them) are created with Unity's "Decompressing texture" warning and
+  uploaded decoded; a GPU round trip (blit and read back) matched the CPU reads exactly for each.
 - Animator: data-driven features absent from the build throw at load (blend trees, layer masks,
   synchronized layers, StateMachineBehaviours, non-legacy clip events); every animation asset of
   the game loads (`AnimationTests.EveryAnimationAssetInTheGameLoads`).

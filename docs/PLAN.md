@@ -392,9 +392,9 @@ Known behaviours not reproduced, all confirmed unreachable by the game (M6):
 
 - Playables evaluation of animation/audio clip playables throws NotSupportedException; only
   Timeline content reaches it, and no game assembly references Timeline or PlayableDirector.
-- CPU texel reads (`GetPixel*`) cover uncompressed formats, BC1 and BC3–BC7, ETC1, ETC2 and EAC
-  (BC6H, BC7, ETC and EAC checked against independent decoders: `BlockDecodingTests`); ASTC and
-  PVRTC throw. No readable texture in the build uses any compressed format but BC1/BC3 (all 2682
+- CPU texel reads (`GetPixel*`) cover uncompressed formats, BC1 and BC3–BC7, ETC1, ETC2, EAC and
+  ASTC LDR at every block size (checked against independent decoders, ASTC exactly against ARM's
+  astcenc: `BlockDecodingTests`); ASTC HDR and PVRTC throw. No readable texture in the build uses any compressed format but BC1/BC3 (all 2682
   textures checked by `--check-bind`).
 - Animator: data-driven features absent from the build throw at load (blend trees, layer masks,
   synchronized layers, StateMachineBehaviours, non-legacy clip events); every animation asset of

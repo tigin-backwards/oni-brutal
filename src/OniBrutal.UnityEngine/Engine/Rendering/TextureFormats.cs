@@ -35,11 +35,26 @@ namespace OniBrutal.Engine.Rendering
                 TextureFormat.DXT1 or TextureFormat.BC4 or TextureFormat.ETC_RGB4 or TextureFormat.ETC2_RGB or TextureFormat.ETC2_RGBA1
                     or TextureFormat.EAC_R or TextureFormat.EAC_R_SIGNED => 8,
                 TextureFormat.DXT5 or TextureFormat.BC5 or TextureFormat.BC6H or TextureFormat.BC7 or TextureFormat.ETC2_RGBA8
-                    or TextureFormat.EAC_RG or TextureFormat.EAC_RG_SIGNED or TextureFormat.ASTC_4x4 or TextureFormat.ASTC_HDR_4x4 => 16,
+                    or TextureFormat.EAC_RG or TextureFormat.EAC_RG_SIGNED => 16,
                 _ => 0,
             };
+            if (blockBytes != 0) return true;
+            // ASTC: 16-byte blocks of 4×4 to 12×12 texels.
+            blockWidth = blockHeight = AstcBlockSize(format);
+            blockBytes = blockWidth == 0 ? 0 : 16;
             return blockBytes != 0;
         }
+
+        static int AstcBlockSize(TextureFormat format) => format switch
+        {
+            TextureFormat.ASTC_4x4 or TextureFormat.ASTC_HDR_4x4 => 4,
+            TextureFormat.ASTC_5x5 or TextureFormat.ASTC_HDR_5x5 => 5,
+            TextureFormat.ASTC_6x6 or TextureFormat.ASTC_HDR_6x6 => 6,
+            TextureFormat.ASTC_8x8 or TextureFormat.ASTC_HDR_8x8 => 8,
+            TextureFormat.ASTC_10x10 or TextureFormat.ASTC_HDR_10x10 => 10,
+            TextureFormat.ASTC_12x12 or TextureFormat.ASTC_HDR_12x12 => 12,
+            _ => 0,
+        };
 
         public static bool IsBlockCompressed(TextureFormat format) => TryGetBlock(format, out int bw, out _, out _) && bw > 1;
 
@@ -103,7 +118,9 @@ namespace OniBrutal.Engine.Rendering
         {
             TextureFormat.DXT1 or TextureFormat.DXT5 or TextureFormat.BC4 or TextureFormat.BC5 or TextureFormat.BC6H or TextureFormat.BC7
                 or TextureFormat.ETC_RGB4 or TextureFormat.ETC2_RGB or TextureFormat.ETC2_RGBA1 or TextureFormat.ETC2_RGBA8
-                or TextureFormat.EAC_R or TextureFormat.EAC_R_SIGNED or TextureFormat.EAC_RG or TextureFormat.EAC_RG_SIGNED => true,
+                or TextureFormat.EAC_R or TextureFormat.EAC_R_SIGNED or TextureFormat.EAC_RG or TextureFormat.EAC_RG_SIGNED
+                or TextureFormat.ASTC_4x4 or TextureFormat.ASTC_5x5 or TextureFormat.ASTC_6x6 or TextureFormat.ASTC_8x8
+                or TextureFormat.ASTC_10x10 or TextureFormat.ASTC_12x12 => true,
             _ => CanEncode(format),
         };
 
@@ -238,10 +255,11 @@ namespace OniBrutal.Engine.Rendering
 
         static Color DecodeBlockTexel(TextureFormat format, ReadOnlySpan<byte> mip, int mipWidth, int x, int y)
         {
-            int blocksPerRow = (mipWidth + 3) / 4;
-            TryGetBlock(format, out _, out _, out int bytes);
-            var block = mip.Slice(((y / 4) * blocksPerRow + x / 4) * bytes, bytes);
-            int px = x & 3, py = y & 3;
+            TryGetBlock(format, out int bw, out int bh, out int bytes);
+            int blocksPerRow = (mipWidth + bw - 1) / bw;
+            var block = mip.Slice(((y / bh) * blocksPerRow + x / bw) * bytes, bytes);
+            int px = x % bw, py = y % bh;
+            if (AstcBlockSize(format) != 0) return AstcDecoder.Decode(block, bw, bh, px, py);
             switch (format)
             {
                 case TextureFormat.DXT1: return ColorBlock(block, px, py, allowPunchThrough: true);

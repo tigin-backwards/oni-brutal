@@ -125,6 +125,12 @@ Columns: ms per frame (main thread), count of the objects involved where known, 
 - **Canvas walk, renderer-free subtrees: not worth it.** Only about 7% of its visits are in
   subtrees without any CanvasRenderer.
 
+- **Parallel draw recording: scoped, not done.** A draw's uniforms are resolved from its inputs,
+  its material and the shader globals, which command buffers change in the middle of a frame;
+  recording draws on worker threads would need a flush at every global change, a per-draw copy of
+  the inputs, and thread-safe material and texture caches. Only value resolution (about 60% of
+  the 3.5 ms) could move, for about 1.5 ms: not worth that risk.
+
 The same applies to the other per-item systems (reachability, critter temperature, requirement
 checks): caching what a call looks up cannot remove the cost of visiting each object. Gains need
 whole loops skipped exactly (as the radbolt gather) or the engine work they cause reduced.

@@ -147,9 +147,9 @@ Columns: ms per frame (main thread), count of the objects involved where known, 
   and the paused entries then skip reading their controller) left the loop at 2.2 ms against 1.95
   ms. Skipping the looping entries without events would need their elapsed time deferred, and
   their per-frame float additions replayed, to stay exact.
-- **Reachability every 4 game seconds: 1.88 → 0.53 ms, not kept.** Errands reacting up to 3 game
-  seconds late is not acceptable. Slowing only stored items (most of the 27,000 pickupables)
-  gained nothing: the test for being stored reads the item, which is most of the check's cost.
+- **Reachability every 4 game seconds: 1.88 → 0.53 ms.** Done (`slow-reachability`, changes
+  behaviour, docs/PLAN.md). Slowing only stored items (most of the 27,000 pickupables) gained
+  nothing: the test for being stored reads the item, which is most of the check's cost.
 - **Animation grid cleanup: 0.48 → 0.12 ms.** Done (`fast-anim-cleanup`, docs/PLAN.md).
 - **Canvas walk, renderer-free subtrees: not worth it.** Only about 7% of its visits are in
   subtrees without any CanvasRenderer.

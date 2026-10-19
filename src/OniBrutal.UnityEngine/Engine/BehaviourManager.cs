@@ -38,20 +38,27 @@ namespace OniBrutal.Engine
             [typeof(TextMesh)] = () => new Text.TextMeshNative(),
         };
 
+        /// The factory each component type resolved to (every Instantiate creates a record per
+        /// component); cleared when a factory is registered.
+        static readonly System.Collections.Concurrent.ConcurrentDictionary<Type, Func<ComponentNative>> resolved = new();
+
         public static void Register(Type componentType, Func<ComponentNative> factory)
         {
             lock (factories) factories[componentType] = factory;
+            resolved.Clear();
         }
 
-        public static ComponentNative Create(Type type)
+        public static ComponentNative Create(Type type) => resolved.GetOrAdd(type, Resolve)();
+
+        static Func<ComponentNative> Resolve(Type type)
         {
             lock (factories)
                 for (var t = type; t != null && t != typeof(Component); t = t.BaseType)
-                    if (factories.TryGetValue(t, out var f)) return f();
-            if (typeof(RectTransform).IsAssignableFrom(type)) return new RectTransformNative();
-            if (typeof(Transform).IsAssignableFrom(type)) return new TransformNative();
-            if (typeof(Behaviour).IsAssignableFrom(type)) return new BehaviourNative();
-            return new ComponentNative();
+                    if (factories.TryGetValue(t, out var f)) return f;
+            if (typeof(RectTransform).IsAssignableFrom(type)) return static () => new RectTransformNative();
+            if (typeof(Transform).IsAssignableFrom(type)) return static () => new TransformNative();
+            if (typeof(Behaviour).IsAssignableFrom(type)) return static () => new BehaviourNative();
+            return static () => new ComponentNative();
         }
     }
 

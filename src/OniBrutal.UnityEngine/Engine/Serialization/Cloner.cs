@@ -1,6 +1,8 @@
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using UnityEngine;
@@ -164,10 +166,59 @@ namespace OniBrutal.Engine.Serialization
         static void CopyScript(Object src, Object dst, Dictionary<Object, Object> remap)
         {
             if (src is ISerializationCallbackReceiver before) Invoke(() => before.OnBeforeSerialize(), src);
-            foreach (var f in SerializedLayout.ScriptFields(src.GetType()))
-                f.Field.SetValue(dst, CopyValue(f.Field.GetValue(src), f.Shape, remap, 1));
+            ScriptCopier(src.GetType())(src, dst, remap);
             if (dst is ISerializationCallbackReceiver after) Invoke(() => after.OnAfterDeserialize(), dst);
         }
+
+        static readonly ConcurrentDictionary<Type, Action<object, object, Dictionary<Object, Object>>> scriptCopiers = new();
+
+        /// A script type's field copy, compiled once: Instantiate copies every serialized field of
+        /// every script in the hierarchy, and the game instantiates continuously (resource chunks,
+        /// splits). It does what CopyValue does field by field, in field order: values (primitives,
+        /// strings, enums, built-in structs) and arrays and lists of them are copied without
+        /// boxing, references are remapped, everything else goes through CopyValue.
+        static Action<object, object, Dictionary<Object, Object>> ScriptCopier(Type type)
+            => scriptCopiers.GetOrAdd(type, static t => CompileScriptCopier(t));
+
+        static Action<object, object, Dictionary<Object, Object>> CompileScriptCopier(Type type)
+        {
+            var srcArg = Expression.Parameter(typeof(object), "src");
+            var dstArg = Expression.Parameter(typeof(object), "dst");
+            var remapArg = Expression.Parameter(typeof(Dictionary<Object, Object>), "remap");
+            var src = Expression.Variable(type, "s");
+            var dst = Expression.Variable(type, "d");
+            var body = new List<Expression>
+            {
+                Expression.Assign(src, Expression.Convert(srcArg, type)),
+                Expression.Assign(dst, Expression.Convert(dstArg, type)),
+            };
+            foreach (var f in SerializedLayout.ScriptFields(type))
+            {
+                var field = f.Field;
+                var read = Expression.Field(src, field);
+                Expression value = f.Shape.Kind switch
+                {
+                    ValueKind.ObjectReference => Expression.Convert(Expression.Call(typeof(Cloner).GetMethod(nameof(Remap), BindingFlags.Static | BindingFlags.NonPublic), Expression.Convert(read, typeof(Object)), remapArg), field.FieldType),
+                    ValueKind.Array when IsPlainValue(f.Shape.Element) => Expression.Call(typeof(Cloner).GetMethod(nameof(CopyPlainArray), BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(field.FieldType.GetElementType()), read),
+                    ValueKind.List when IsPlainValue(f.Shape.Element) => Expression.Call(typeof(Cloner).GetMethod(nameof(CopyPlainList), BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(field.FieldType.GetGenericArguments()[0]), read),
+                    _ when IsPlainValue(f.Shape) => read,
+                    _ => Expression.Convert(Expression.Call(typeof(Cloner).GetMethod(nameof(CopyValue), BindingFlags.Static | BindingFlags.NonPublic),
+                        Expression.Convert(read, typeof(object)), Expression.Constant(f.Shape), remapArg, Expression.Constant(1)), field.FieldType),
+                };
+                body.Add(Expression.Assign(Expression.Field(dst, field), value));
+            }
+            return Expression.Lambda<Action<object, object, Dictionary<Object, Object>>>(Expression.Block([src, dst], body), srcArg, dstArg, remapArg).Compile();
+        }
+
+        /// Values CopyValue returns as they are.
+        static bool IsPlainValue(ValueShape shape) => shape.Kind is not (ValueKind.ObjectReference or ValueKind.BuiltinClass or ValueKind.Composite or ValueKind.Array or ValueKind.List);
+
+        static Object Remap(Object value, Dictionary<Object, Object> remap)
+            => value is not null && remap.TryGetValue(value, out var mapped) ? mapped : value;
+
+        static T[] CopyPlainArray<T>(T[] src) => src == null || src.Length == 0 ? [] : (T[])src.Clone();
+
+        static List<T> CopyPlainList<T>(List<T> src) => src == null ? [] : new List<T>(src);
 
         static void Invoke(Action a, Object context)
         {

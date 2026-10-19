@@ -644,6 +644,44 @@ namespace OniBrutal.Tests
             Assert.Equal(0, clone.notSerializedProperty);
         }
 
+        public class ValueHolder : MonoBehaviour
+        {
+            public int[] numbers;
+            public int[] nullNumbers;
+            public List<float> weights;
+            public List<string> nullNames;
+            public KeyCode key;
+            public Vector3 offset;
+            public List<GameObject> objects;
+        }
+
+        [Fact]
+        public void InstantiateCopiesCollectionsOfValuesAndRemapsReferencesInCollections()
+        {
+            var root = new GameObject("root");
+            var child = new GameObject("child");
+            child.transform.SetParent(root.transform);
+            var outside = new GameObject("outside");
+            var h = root.AddComponent<ValueHolder>();
+            h.numbers = [1, 2, 3];
+            h.weights = new List<float> { 0.5f };
+            h.key = KeyCode.Space;
+            h.offset = new Vector3(1, 2, 3);
+            h.objects = new List<GameObject> { child, outside };
+
+            var clone = Object.Instantiate(h);
+            Assert.Equal([1, 2, 3], clone.numbers);
+            Assert.NotSame(h.numbers, clone.numbers);
+            Assert.Empty(clone.nullNumbers);                // no null collections after serialization
+            Assert.Equal([0.5f], clone.weights);
+            Assert.NotSame(h.weights, clone.weights);
+            Assert.Empty(clone.nullNames);
+            Assert.Equal(KeyCode.Space, clone.key);
+            Assert.Equal(new Vector3(1, 2, 3), clone.offset);
+            Assert.Equal(clone.transform.GetChild(0).gameObject, clone.objects[0]);
+            Assert.Same(outside, clone.objects[1]);
+        }
+
         [Fact]
         public void InstantiateUnderParentWithLocalValues()
         {

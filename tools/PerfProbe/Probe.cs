@@ -15,15 +15,29 @@ namespace PerfProbe
             Worldgen.Install(harmony, path);
             var keeper = new GameObject("PerfProbe");
             Object.DontDestroyOnLoad(keeper);
-            keeper.AddComponent<Runner>();
+            keeper.AddComponent<Runner>().Path = path;
         }
     }
 
     public class Runner : MonoBehaviour
     {
+        /// The mod's folder.
+        public string Path;
+
         System.Collections.IEnumerator Start()
         {
             if (Worldgen.Mode == "run") yield return Worldgen.Run();
+            // `load.txt` in the mod's folder names a save (full path) to load from the main menu,
+            // as the load screen does: for loading a given save in either player.
+            var load = System.IO.Path.Combine(Path, "load.txt");
+            if (System.IO.File.Exists(load))
+            {
+                while (MainMenu.Instance == null) yield return null;
+                for (int i = 0; i < 120; i++) yield return null;
+                var save = System.IO.File.ReadAllText(load).Trim();
+                Debug.Log("PERF loading " + save);
+                LoadScreen.DoLoad(save);
+            }
             while (Game.Instance == null || SpeedControlScreen.Instance == null) yield return null;
             Debug.Log($"PERF colony f{Time.frameCount} cycle {GameClock.Instance.GetCycle()}");
             float windowStart = Time.realtimeSinceStartup;

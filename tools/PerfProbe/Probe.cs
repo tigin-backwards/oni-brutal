@@ -70,6 +70,17 @@ namespace PerfProbe
             while (Game.Instance == null || SpeedControlScreen.Instance == null) yield return null;
             Debug.Log($"PERF colony f{Time.frameCount} cycle {GameClock.Instance.GetCycle()}{RuntimeCounters.Jit()}");
             if (System.IO.File.Exists(System.IO.Path.Combine(Path, "savetest.txt"))) { yield return SaveTest(); yield break; }
+            // `counts.txt` lists component type names (Assembly-CSharp first, then -firstpass): how
+            // many of each exist, active or not, logged once the colony is up.
+            var counts = System.IO.Path.Combine(Path, "counts.txt");
+            if (System.IO.File.Exists(counts))
+                foreach (var name in System.IO.File.ReadAllLines(counts))
+                {
+                    if (name.Trim().Length == 0) continue;
+                    var type = System.Type.GetType(name.Trim() + ", Assembly-CSharp") ?? System.Type.GetType(name.Trim() + ", Assembly-CSharp-firstpass");
+                    if (type == null || !typeof(Object).IsAssignableFrom(type)) Debug.Log($"PERF count {name}: not a component type");
+                    else Debug.Log($"PERF count {name} {FindObjectsByType(type, FindObjectsInactive.Include, FindObjectsSortMode.None).Length}");
+                }
             float windowStart = Time.realtimeSinceStartup;
             int frames = 0;
             long contentions = RuntimeCounters.LockContentions(), paused = RuntimeCounters.GcPauseMs();

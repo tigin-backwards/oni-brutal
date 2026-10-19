@@ -614,11 +614,22 @@ namespace OniBrutal.Engine.UI
                 Tangents = (Vector4[])m.Tangents?.Clone(),
             };
             for (int i = 0; i < 4; i++) g.Uvs[i] = (Vector4[])m.Uvs[i]?.Clone();
-            var indices = new List<int>();
+            // uGUI and TextMeshPro set their meshes on every rebuild: one array, filled in place.
+            int count = 0;
             foreach (var s in m.SubMeshes)
-                if (s.Topology == MeshTopology.Triangles)
-                    foreach (int i in s.Indices) indices.Add(i + s.BaseVertex);
-            g.Indices = indices.ToArray();
+                if (s.Topology == MeshTopology.Triangles) count += s.Indices.Length;
+            var indices = count == 0 ? Array.Empty<int>() : new int[count];
+            int at = 0;
+            foreach (var s in m.SubMeshes)
+            {
+                if (s.Topology != MeshTopology.Triangles) continue;
+                var source = s.Indices;
+                int baseVertex = s.BaseVertex;
+                if (baseVertex == 0) source.CopyTo(indices, at);
+                else for (int i = 0; i < source.Length; i++) indices[at + i] = source[i] + baseVertex;
+                at += source.Length;
+            }
+            g.Indices = indices;
             return g;
         }
     }

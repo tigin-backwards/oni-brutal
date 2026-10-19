@@ -110,6 +110,10 @@ namespace OniBrutal.Engine
 
         public static Vector3 Position(TransformNative t)
         {
+            // A root's world translation is its local position (Matrix4x4.TRS copies it in): no
+            // matrix needed, which a moved object would otherwise rebuild. Most world objects in
+            // the game are roots.
+            if (t.Parent == null) return t.LocalPosition;
             var m = t.LocalToWorld;
             return new Vector3(m.m03, m.m13, m.m23);
         }

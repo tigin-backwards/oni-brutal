@@ -5,7 +5,8 @@ namespace PerfProbe
     /// TEST INFRASTRUCTURE: the same frame-rate measurement in both players. Once a colony is
     /// loaded it keeps the game running at the fastest speed (when autosaves or events have
     /// paused it, closing dialogs and unpausing, checked every 60 frames) and logs, every 600
-    /// frames, the mean frame rate over them from the real-time clock, with the cycle. Mods.json
+    /// frames, the mean frame rate over them from the real-time clock, with the cycle, and (where the
+    /// runtime has them: .NET, not Unity's Mono) the window's lock contentions and GC pause. Mods.json
     /// stamp: -2037174645 (the Mono string hash of the folder name PerfProbe, ARCHITECTURE D3).
     public class Mod : KMod.UserMod2
     {
@@ -27,6 +28,7 @@ namespace PerfProbe
             Debug.Log($"PERF colony f{Time.frameCount} cycle {GameClock.Instance.GetCycle()}");
             float windowStart = Time.realtimeSinceStartup;
             int frames = 0;
+            long contentions = RuntimeCounters.LockContentions(), paused = RuntimeCounters.GcPauseMs();
             while (true)
             {
                 yield return null;
@@ -41,10 +43,24 @@ namespace PerfProbe
                 }
                 if (++frames < 600) continue;
                 float now = Time.realtimeSinceStartup;
-                Debug.Log($"PERF f{Time.frameCount} fps {frames / (now - windowStart):F2} cycle {GameClock.Instance.GetCycle()} paused {SpeedControlScreen.Instance.IsPaused}");
+                long c = RuntimeCounters.LockContentions(), g = RuntimeCounters.GcPauseMs();
+                string runtime = c < 0 ? "" : $" contentions {c - contentions} gc-pause {g - paused} ms";
+                contentions = c; paused = g;
+                Debug.Log($"PERF f{Time.frameCount} fps {frames / (now - windowStart):F2} cycle {GameClock.Instance.GetCycle()} paused {SpeedControlScreen.Instance.IsPaused}{runtime}");
                 windowStart = now;
                 frames = 0;
             }
         }
+    }
+
+    /// .NET's runtime counters, read by reflection: the probe builds against the game's Mono
+    /// libraries, which lack them (-1 there).
+    static class RuntimeCounters
+    {
+        static readonly System.Reflection.PropertyInfo contention = typeof(System.Threading.Monitor).GetProperty("LockContentionCount");
+        static readonly System.Reflection.MethodInfo pause = typeof(System.GC).GetMethod("GetTotalPauseDuration", System.Type.EmptyTypes);
+
+        public static long LockContentions() => contention == null ? -1 : (long)contention.GetValue(null);
+        public static long GcPauseMs() => pause == null ? -1 : (long)((System.TimeSpan)pause.Invoke(null, null)).TotalMilliseconds;
     }
 }

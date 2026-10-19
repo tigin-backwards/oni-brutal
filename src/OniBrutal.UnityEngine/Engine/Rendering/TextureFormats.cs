@@ -8,7 +8,8 @@ namespace OniBrutal.Engine.Rendering
     /// Memory layout and CPU pixel conversion of Unity's texture formats.
     ///
     /// Layout follows Unity's: mip levels are stored largest first, each tightly packed (no row
-    /// padding); block-compressed formats store ceil(w/4)·ceil(h/4) blocks per level.
+    /// padding); block-compressed formats store ceil(w/bw)·ceil(h/bh) blocks per level (PVRTC at
+    /// least 2×2).
     internal static class TextureFormats
     {
         /// Size in bytes of one block and its pixel dimensions (1×1 for uncompressed formats).
@@ -39,10 +40,24 @@ namespace OniBrutal.Engine.Rendering
                 _ => 0,
             };
             if (blockBytes != 0) return true;
+            // PVRTC: 8-byte words of 8×4 (2 bits per texel) or 4×4 texels.
+            if (IsPvrtc(format, out bool twoBpp))
+            {
+                blockWidth = twoBpp ? 8 : 4;
+                blockHeight = 4;
+                blockBytes = 8;
+                return true;
+            }
             // ASTC: 16-byte blocks of 4×4 to 12×12 texels.
             blockWidth = blockHeight = AstcBlockSize(format);
             blockBytes = blockWidth == 0 ? 0 : 16;
             return blockBytes != 0;
+        }
+
+        static bool IsPvrtc(TextureFormat format, out bool twoBpp)
+        {
+            twoBpp = format is TextureFormat.PVRTC_RGB2 or TextureFormat.PVRTC_RGBA2;
+            return twoBpp || format is TextureFormat.PVRTC_RGB4 or TextureFormat.PVRTC_RGBA4;
         }
 
         static int AstcBlockSize(TextureFormat format) => format switch
@@ -76,6 +91,8 @@ namespace OniBrutal.Engine.Rendering
             if (width <= 0 || height <= 0) return 0;
             long bx = (width + bw - 1) / bw;
             long by = (height + bh - 1) / bh;
+            // PVRTC levels hold at least 2×2 words.
+            if (IsPvrtc(format, out _)) { bx = Math.Max(bx, 2); by = Math.Max(by, 2); }
             return bx * by * bytes;
         }
 
@@ -120,7 +137,8 @@ namespace OniBrutal.Engine.Rendering
                 or TextureFormat.ETC_RGB4 or TextureFormat.ETC2_RGB or TextureFormat.ETC2_RGBA1 or TextureFormat.ETC2_RGBA8
                 or TextureFormat.EAC_R or TextureFormat.EAC_R_SIGNED or TextureFormat.EAC_RG or TextureFormat.EAC_RG_SIGNED
                 or TextureFormat.ASTC_4x4 or TextureFormat.ASTC_5x5 or TextureFormat.ASTC_6x6 or TextureFormat.ASTC_8x8
-                or TextureFormat.ASTC_10x10 or TextureFormat.ASTC_12x12 => true,
+                or TextureFormat.ASTC_10x10 or TextureFormat.ASTC_12x12
+                or TextureFormat.PVRTC_RGB2 or TextureFormat.PVRTC_RGBA2 or TextureFormat.PVRTC_RGB4 or TextureFormat.PVRTC_RGBA4 => true,
             _ => CanEncode(format),
         };
 
@@ -146,6 +164,8 @@ namespace OniBrutal.Engine.Rendering
         /// with alpha.
         public static Color Decode(TextureFormat format, ReadOnlySpan<byte> mip, int mipWidth, int x, int y)
         {
+            if (IsPvrtc(format, out bool twoBpp))
+                return PvrtcDecoder.Decode(mip, mipWidth, x, y, twoBpp, hasAlpha: format is TextureFormat.PVRTC_RGBA2 or TextureFormat.PVRTC_RGBA4);
             if (IsBlockCompressed(format)) return DecodeBlockTexel(format, mip, mipWidth, x, y);
             TryGetBlock(format, out _, out _, out int bpp);
             var p = mip.Slice((y * mipWidth + x) * bpp, bpp);

@@ -6,7 +6,8 @@ texture2ddecoder (AssetStudio's decoders, pip install texture2ddecoder) and, for
 Pillow as a second reference. ASTC blocks are instead those ARM's astcenc (pip install
 astc-encoder-py) encodes from varied images at several quality presets, with astcenc's own decode as
 the reference: random ASTC blocks have no reference (texture2ddecoder validates nothing, and astcenc
-rejects some blocks the specification decodes). Output (little-endian): per format, its name (byte length, ASCII),
+rejects some blocks the specification decodes). PVRTC texels depend on neighbouring words, so its
+entries are whole random levels ("PVRTC_RGBA4 16x8"), square and not, whose "block" is the level. Output (little-endian): per format, its name (byte length, ASCII),
 the block size in bytes, the block's width and height in texels, the block count, whether Pillow's
 texels follow (0 or 1), then per block its bytes and the references' texels (BGRA8, row-major, top
 row first; then Pillow's, RGBA8, where present).
@@ -93,6 +94,10 @@ def astc_reference(block, n):
 
 for n in (4, 5, 6, 8, 10, 12):
     formats.append((f"ASTC_{n}x{n}", 16, astc_blocks(n, 160), lambda b, n=n: astc_reference(b, n), None, n, n))
+for name, two, sizes in [("PVRTC_RGBA4", False, [(8, 8), (16, 16), (32, 16), (16, 32)]), ("PVRTC_RGBA2", True, [(16, 8), (16, 16), (32, 16), (16, 32)])]:
+    for w, h in sizes:
+        size = max(w // (8 if two else 4), 2) * max(h // 4, 2) * 8
+        formats.append((f"{name} {w}x{h}", size, list(blocks(size, 12)), lambda b, w=w, h=h, two=two: t.decode_pvrtc(b, w, h, two), None, w, h))
 
 with open(sys.argv[1], "wb") as out:
     for name, size, items, fn, pil, bw, bh in formats:

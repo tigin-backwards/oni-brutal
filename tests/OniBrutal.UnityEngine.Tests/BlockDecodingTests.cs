@@ -52,7 +52,7 @@ namespace OniBrutal.Tests
                 for (int y = 0; y < c.Height; y++)
                     for (int x = 0; x < c.Width; x++)
                     {
-                        var color = TextureFormats.Decode(Enum.Parse<TextureFormat>(format), c.Block, c.Width, x, y);
+                        var color = TextureFormats.Decode(Enum.Parse<TextureFormat>(format.Split(' ')[0]), c.Block, c.Width, x, y);
                         var ours = expectedChannels(color);
                         var theirs = reference(c, x, y);
                         if (theirs == null) continue;
@@ -146,6 +146,31 @@ namespace OniBrutal.Tests
         {
             string report = Compare(format, Rgba8, (c, x, y) => Bgra(c.Reference, c.Width, x, y), 0, false);
             Assert.True(report.Length == 0, report);
+        }
+
+        [Theory]
+        [InlineData("PVRTC_RGBA4 8x8")]
+        [InlineData("PVRTC_RGBA4 16x16")]
+        [InlineData("PVRTC_RGBA4 32x16")]
+        [InlineData("PVRTC_RGBA4 16x32")]
+        [InlineData("PVRTC_RGBA2 16x8")]
+        [InlineData("PVRTC_RGBA2 16x16")]
+        [InlineData("PVRTC_RGBA2 32x16")]
+        [InlineData("PVRTC_RGBA2 16x32")]
+        public void PvrtcMatchesTheReferenceDecoder(string level)
+        {
+            string report = Compare(level, Rgba8, (c, x, y) => Bgra(c.Reference, c.Width, x, y), 0, false);
+            Assert.True(report.Length == 0, report);
+        }
+
+        [Fact]
+        public void PvrtcWithoutAlphaReadsOpaque()
+        {
+            // Translucent colours with alpha 0 in every word.
+            var level = new byte[32];
+            for (int i = 0; i < 4; i++) level[i * 8 + 5] = 0x0F;
+            Assert.Equal(0f, TextureFormats.Decode(TextureFormat.PVRTC_RGBA4, level, 8, 3, 3).a);
+            Assert.Equal(1f, TextureFormats.Decode(TextureFormat.PVRTC_RGB4, level, 8, 3, 3).a);
         }
 
         static byte[] AstcVoidExtent(bool hdr, ushort r, ushort g, ushort b, ushort a)

@@ -21,6 +21,35 @@ namespace PerfProbe
 
     public class Runner : MonoBehaviour
     {
+        /// `savetest.txt` in the mod's folder (our player with the fast-serialization game tweak):
+        /// once the colony is up, pauses and saves in the order the file lists, each with the
+        /// game's serializer (g) or the tweak's (f), for comparing the files; consecutive saves with
+        /// the game's own show what changes between saves by itself. The tweak is switched through
+        /// its test flag by reflection.
+        System.Collections.IEnumerator SaveTest()
+        {
+            SpeedControlScreen.Instance.Pause(false);
+            for (int i = 0; i < 120; i++) yield return null;
+            var flag = System.Type.GetType("OniBrutal.Host.GameTweaks.FastSerialization, OniBrutal")?.GetField("Enabled");
+            if (flag == null) { Debug.Log("PERF savetest: fast-serialization not present"); yield break; }
+            var dir = System.IO.Path.GetDirectoryName(SaveLoader.GetActiveSaveFilePath());
+            // savetest.txt lists the saves to make, g (the game's serializer) or f (the tweak's).
+            var order = System.IO.File.ReadAllText(System.IO.Path.Combine(Path, "savetest.txt")).Split(new[] { ' ', '\n', '\r' }, System.StringSplitOptions.RemoveEmptyEntries);
+            if (order.Length == 0) order = new[] { "g", "g", "f" };
+            for (int n = 0; n < order.Length; n++)
+            {
+                bool fast = order[n] == "f";
+                string name = $"savetest-{n + 1}-{(fast ? "fast" : "game")}";
+                flag.SetValue(null, fast);
+                var watch = System.Diagnostics.Stopwatch.StartNew();
+                SaveLoader.Instance.Save(System.IO.Path.Combine(dir, name + ".sav"), false, false);
+                Debug.Log($"PERF savetest {name} {watch.Elapsed.TotalMilliseconds:F0} ms");
+                for (int i = 0; i < 30; i++) yield return null;
+            }
+            flag.SetValue(null, true);
+            Debug.Log("PERF savetest done");
+        }
+
         /// The mod's folder.
         public string Path;
 
@@ -40,6 +69,7 @@ namespace PerfProbe
             }
             while (Game.Instance == null || SpeedControlScreen.Instance == null) yield return null;
             Debug.Log($"PERF colony f{Time.frameCount} cycle {GameClock.Instance.GetCycle()}");
+            if (System.IO.File.Exists(System.IO.Path.Combine(Path, "savetest.txt"))) { yield return SaveTest(); yield break; }
             float windowStart = Time.realtimeSinceStartup;
             int frames = 0;
             long contentions = RuntimeCounters.LockContentions(), paused = RuntimeCounters.GcPauseMs();

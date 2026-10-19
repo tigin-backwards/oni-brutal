@@ -24,6 +24,7 @@ namespace OniBrutal.Host.GameTweaks
             if (On(FastSaveCompression.Name)) Report(FastSaveCompression.Name, () => FastSaveCompression.Install(harmony, compress: !backgroundSave));
             if (backgroundSave) Report(BackgroundSave.Name, () => BackgroundSave.Install(harmony, fastCompression: On(FastSaveCompression.Name)));
             if (On(NoSaveGc.Name)) Report(NoSaveGc.Name, () => NoSaveGc.Install(harmony));
+            if (On(FastSerialization.Name)) Report(FastSerialization.Name, () => FastSerialization.Install(harmony));
         }
 
         static void Report(string name, Action install)
@@ -43,7 +44,7 @@ namespace OniBrutal.Host.GameTweaks
     /// (Harmony among them) can be resolved, so this class references none of them.
     internal static class GameTweakNames
     {
-        public static readonly string[] All = [FastSaveCompression.Name, BackgroundSave.Name, NoSaveGc.Name];
+        public static readonly string[] All = [FastSaveCompression.Name, BackgroundSave.Name, NoSaveGc.Name, FastSerialization.Name];
 
         public static bool IsKnown(string name) => name == "all" || Array.IndexOf(All, name) >= 0;
     }

@@ -73,6 +73,7 @@ namespace OniBrutal.Engine
             readonly List<BehaviourNative> pendingAdd = new();
             readonly HashSet<BehaviourNative> members = new();
             readonly HashSet<BehaviourNative> pendingRemove = new();
+            readonly List<List<BehaviourNative>> touched = new();
 
             public void Add(BehaviourNative b)
             {
@@ -92,7 +93,15 @@ namespace OniBrutal.Engine
             {
                 if (pendingRemove.Count > 0)
                 {
-                    foreach (var list in byOrder.Values) list.RemoveAll(pendingRemove.Contains);
+                    // A behaviour's execution order is set when it is created, before it is
+                    // added: only the lists of the removed behaviours' orders hold them.
+                    foreach (var b in pendingRemove)
+                        if (byOrder.TryGetValue(b.ExecutionOrder, out var list) && !touched.Contains(list))
+                        {
+                            touched.Add(list);
+                            list.RemoveAll(pendingRemove.Contains);
+                        }
+                    touched.Clear();
                     foreach (var b in pendingRemove) members.Remove(b);
                     pendingRemove.Clear();
                 }
@@ -123,7 +132,7 @@ namespace OniBrutal.Engine
                             // Disabled or destroyed earlier in this phase: skip. A behaviour whose
                             // Start has not run yet (enabled after this frame's Start pass) gets its
                             // update callbacks only after Start, as in Unity.
-                            if (!b.IsActiveAndEnabledState || pendingRemove.Contains(b) || !b.StartCalled) continue;
+                            if (!b.IsActiveAndEnabledState || (pendingRemove.Count != 0 && pendingRemove.Contains(b)) || !b.StartCalled) continue;
                             Lifecycle.Invoke(selector(b.Script), (MonoBehaviour)b.Managed);
                         }
                 }

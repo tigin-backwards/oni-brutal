@@ -135,8 +135,12 @@ Columns: ms per frame (main thread), count of the objects involved where known, 
   text's lossyScale each frame (RescaleIfScaleChanged, from willRenderCanvases), and the
   transform computed it, with its world rotation, by walking up the parents on every read. Both
   are now kept with the world matrix and invalidated with it (MarkDirty); the arithmetic is
-  unchanged. U57's paused frame went from 11.8 to 10.0 ms (85 → 100 fps), with
-  RescaleIfScaleChanged and the rotation reads from 1.46 to 0.35 ms.
+  unchanged. RescaleIfScaleChanged and the rotation reads went from 1.46 to 0.35 ms a frame
+  (perf). U57 paused in a quiet view, back to back over the same frames: 81–90 fps against
+  72–78 before. The machine's other load moves a single build by 10% between runs.
+- **Script dispatch:** the per-call check for behaviours removed earlier in the phase
+  is skipped while none are pending (nearly always), and removals rescan only the lists of the
+  removed behaviours' execution orders instead of every list (0.1–0.2 ms a frame).
 - **Canvas walk, renderer-free subtrees: not worth it.** Only about 7% of its visits are in
   subtrees without any CanvasRenderer.
 

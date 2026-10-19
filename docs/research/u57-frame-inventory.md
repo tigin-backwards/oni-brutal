@@ -154,6 +154,13 @@ Columns: ms per frame (main thread), count of the objects involved where known, 
   docs/PLAN.md). The earlier exact early-out gained nothing because it still entered each item;
   the batch reaches an item's row by a reference compare and reads only its transform and
   temperature component (about 0.3 µs a skip, 1,500 skips a frame).
+- **Animation uploads, identical frames skipped: no gain, dropped.** Of about 2,400 frame changes
+  a frame, 1,100 go to a frame with the same elements, and skipping their dirty mark was
+  meant to save the batch re-writes. Not exact: the verify mode (written record compared with
+  the one on the GPU) found position, frame-count and transform bytes left stale, from objects
+  that change those without marking dirty and rely on frame changes (conveyor loader arms,
+  eggs, leaks). And no gain even unchecked: batch uploads 2.05 → 1.98 ms, while the per-change
+  lookup raised animation updates from 2.34 to 3.10 ms.
 - **Animation grid cleanup: 0.48 → 0.12 ms.** Done (`fast-anim-cleanup`, docs/PLAN.md).
 - **Canvas walk, renderer-free subtrees: not worth it.** Only about 7% of its visits are in
   subtrees without any CanvasRenderer.

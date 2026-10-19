@@ -5,7 +5,9 @@
     <RootNamespace>OniBrutal.Host</RootNamespace>
     <!-- BinaryFormatter: the game clones worldgen settings with it (ARCHITECTURE §2.1). -->
     <EnableUnsafeBinaryFormatterSerialization>true</EnableUnsafeBinaryFormatterSerialization>
-    <ServerGarbageCollector>false</ServerGarbageCollector>
+    <!-- Server GC: collections run on every core, so pauses are about a quarter as long and the
+         autosave hitch about a third (U57, PLAN §Status); about 2 GB more memory there. -->
+    <ServerGarbageCollection>true</ServerGarbageCollection>
     <ConcurrentGarbageCollection>true</ConcurrentGarbageCollection>
     <TieredPGO>true</TieredPGO>
   </PropertyGroup>

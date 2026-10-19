@@ -241,6 +241,25 @@ mods that write the fields directly would bypass the mirror. A table for one sys
 a day to build and verify; the pickupable table (tags, cell, unreserved amount, storage) would
 serve the fetch, sensor and inventory searches together.
 
+## Fast Track (Peter Han's performance mod, MIT) reviewed against this profile
+
+Read for patches that keep the game's results and target what U57 still spends time on:
+
+| Fast Track option | What it does | For us |
+|---|---|---|
+| AnimOpts (KAnimLoopOptimizer) | looping animations whose frames are all identical play once instead | Not same-results: a play-once animation completes (anim-complete events reach state machines) and sound events on its frames stop repeating. A stricter form (only animations without events, held paused) would still freeze children synchronized to a paused parent. Largest candidate left (animation updates 3.4 ms, events 2.2 ms), needs its own verification first. |
+| FastReachability | re-checks reachability only when the object moves or reachable cells change nearby | Depends on its own group prober (a partitioner layer over reachable-cell changes), adds a component and two subscriptions per workable (about 27,000), refreshes work offsets every 4 s and changes the monitor's start state. Not exact; a large subsystem. slow-reachability covers the same cost. |
+| FastUpdatePickups (FetchManagerFastUpdate) | faster data structures in UpdatePickups | Runs on the game's worker jobs already; little main-thread gain. |
+| ConduitOpts (BackgroundConduitUpdater) | conduit network rebuilds on a background thread | Our conduit cost is per-building flow updates, not rebuilds. |
+| FastCellChangeMonitor | tracks only transforms with listeners | Our cell-change cost is mostly the handlers (1.5 of 2.5 ms); at most 0.3–0.5 ms. |
+| Visual options (culling, splashes, idle moves, conduit animation, tile decor) and feature switches (reports, diseases, conversations, achievements) | change what is shown or simulated | Not safe by our rule. |
+
+Also measured for the sublimation table: of about 2,450 sublimating items, 1,880 lie loose in full
+cells, already blocked on pressure, with their temperature in the sim's element chunk (a flat
+array read). The game's update buckets accept a batch delegate (UpdateBucketWithUpdater
+.batch_update_delegate), which keeps the same items, order and per-item dt: the shape for an
+exact batched sublimation update.
+
 ## Recommendations, in order
 
 1. ~~Canvas dirty tracking~~: measured, the UI changes every frame (above); incremental building

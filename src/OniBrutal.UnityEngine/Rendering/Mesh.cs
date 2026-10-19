@@ -78,8 +78,22 @@ namespace UnityEngine
         static T[] Slice<T>(IList<T> values, int start, int count)
         {
             var result = new T[count];
-            for (int i = 0; i < count; i++) result[i] = values[start + i];
+            if (TrySpan(values, out var span)) span.Slice(start, count).CopyTo(result);
+            else for (int i = 0; i < count; i++) result[i] = values[start + i];
             return result;
+        }
+
+        /// The contents of an array or List as a span: the mesh setters copy whole channels, and
+        /// the game rebuilds some meshes from lists every frame (conveyor items), where a copy
+        /// through IList's indexer costs an interface call per element.
+        static bool TrySpan<T>(IList<T> values, out ReadOnlySpan<T> span)
+        {
+            switch (values)
+            {
+                case T[] array: span = array; return true;
+                case List<T> list: span = System.Runtime.InteropServices.CollectionsMarshal.AsSpan(list); return true;
+                default: span = default; return false;
+            }
         }
 
         void SetPositions(IList<Vector3> values, int start, int count)
@@ -246,7 +260,8 @@ namespace UnityEngine
         {
             if (v == null) return null;
             var r = new Vector4[v.Count];
-            for (int i = 0; i < r.Length; i++) r[i] = v[i];
+            if (TrySpan(v, out var span)) for (int i = 0; i < span.Length; i++) r[i] = span[i];
+            else for (int i = 0; i < r.Length; i++) r[i] = v[i];
             return r;
         }
 
@@ -254,7 +269,8 @@ namespace UnityEngine
         {
             if (v == null) return null;
             var r = new Vector4[v.Count];
-            for (int i = 0; i < r.Length; i++) r[i] = v[i];
+            if (TrySpan(v, out var span)) for (int i = 0; i < span.Length; i++) r[i] = span[i];
+            else for (int i = 0; i < r.Length; i++) r[i] = v[i];
             return r;
         }
 

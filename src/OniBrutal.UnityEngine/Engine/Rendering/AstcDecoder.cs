@@ -4,11 +4,14 @@ using UnityEngine;
 
 namespace OniBrutal.Engine.Rendering
 {
-    /// Texel reads from ASTC blocks, LDR profile (GetPixel on compressed readable textures,
-    /// which Unity decodes on the CPU to 8-bit channels), written from the Khronos Data Format
-    /// Specification's ASTC chapter. Channels are the top 8 bits of the 16-bit interpolation, as
-    /// in decoding to an 8-bit format. Blocks the LDR profile cannot decode (reserved encodings,
-    /// HDR endpoint modes or HDR constant colours) read as the error colour, magenta.
+    /// Texel reads from ASTC blocks (GetPixel on compressed readable textures, which Unity decodes
+    /// on the CPU), written from the Khronos Data Format Specification's ASTC chapter.
+    ///
+    /// LDR formats use the LDR profile: channels are the top 8 bits of the 16-bit interpolation,
+    /// as in decoding to an 8-bit format, and blocks it cannot decode (reserved encodings, HDR
+    /// endpoint modes or HDR constant colours) read as the error colour, magenta. HDR formats use
+    /// the HDR profile: channels are half floats, from logarithmic (LNS) values for HDR endpoints
+    /// and from 16-bit unsigned normalized values for LDR ones; errors read as NaN.
     internal static class AstcDecoder
     {
         static readonly Color ErrorColor = new(1f, 0f, 1f, 1f);
@@ -36,27 +39,41 @@ namespace OniBrutal.Engine.Rendering
             }
         }
 
-        public static Color Decode(ReadOnlySpan<byte> data, int blockWidth, int blockHeight, int px, int py)
+        static readonly Color HdrErrorColor = new(float.NaN, float.NaN, float.NaN, float.NaN);
+
+        public static Color Decode(ReadOnlySpan<byte> data, int blockWidth, int blockHeight, int px, int py, bool hdr = false)
+        {
+            var color = DecodeTexel(data, blockWidth, blockHeight, px, py, hdr);
+            return color ?? (hdr ? HdrErrorColor : ErrorColor);
+        }
+
+        static Color? DecodeTexel(ReadOnlySpan<byte> data, int blockWidth, int blockHeight, int px, int py, bool hdr)
         {
             var b = new Block(data);
             int mode = b.Bits(0, 11);
 
-            // Void-extent block: one constant colour.
+            // Void-extent block: one constant colour, half floats when flagged HDR.
             if ((mode & 0x1FF) == 0x1FC)
             {
-                if ((mode & 0x200) != 0 || b.Bits(10, 2) != 3) return ErrorColor; // HDR, or reserved bits not set
+                if (b.Bits(10, 2) != 3) return null; // reserved bits not set
+                if ((mode & 0x200) != 0)
+                {
+                    if (!hdr) return null;
+                    return new Color(HalfBits(b.Bits(64, 16)), HalfBits(b.Bits(80, 16)), HalfBits(b.Bits(96, 16)), HalfBits(b.Bits(112, 16)));
+                }
+                if (hdr) return new Color(Unorm16ToHalf(b.Bits(64, 16)), Unorm16ToHalf(b.Bits(80, 16)), Unorm16ToHalf(b.Bits(96, 16)), Unorm16ToHalf(b.Bits(112, 16)));
                 return new Color((b.Bits(64, 16) >> 8) / 255f, (b.Bits(80, 16) >> 8) / 255f, (b.Bits(96, 16) >> 8) / 255f, (b.Bits(112, 16) >> 8) / 255f);
             }
 
-            if (!BlockMode(mode, out int gridW, out int gridH, out int weightRange, out bool dualPlane)) return ErrorColor;
-            if (gridW > blockWidth || gridH > blockHeight) return ErrorColor;
+            if (!BlockMode(mode, out int gridW, out int gridH, out int weightRange, out bool dualPlane)) return null;
+            if (gridW > blockWidth || gridH > blockHeight) return null;
             int weightCount = gridW * gridH * (dualPlane ? 2 : 1);
-            if (weightCount > 64) return ErrorColor;
+            if (weightCount > 64) return null;
             int weightBits = IseBits(weightRange, weightCount);
-            if (weightBits < 24 || weightBits > 96) return ErrorColor;
+            if (weightBits < 24 || weightBits > 96) return null;
 
             int partitions = b.Bits(11, 2) + 1;
-            if (dualPlane && partitions == 4) return ErrorColor;
+            if (dualPlane && partitions == 4) return null;
             int belowWeights = 128 - weightBits;
             Span<int> cem = stackalloc int[4];
             int colorStart;
@@ -94,15 +111,15 @@ namespace OniBrutal.Engine.Rendering
             for (int i = 0; i < partitions; i++)
             {
                 // The LDR profile decodes only LDR endpoint modes.
-                if (cem[i] is 2 or 3 or 7 or 11 or 14 or 15) return ErrorColor;
+                if (!hdr && IsHdrMode(cem[i])) return null;
                 colorValues += ((cem[i] >> 2) + 1) * 2;
             }
-            if (colorValues > 18) return ErrorColor;
+            if (colorValues > 18) return null;
             int colorBits = belowWeights - colorStart;
             int colorRange = -1;
             for (int r = Ranges.Length - 1; r >= 0; r--)
                 if (IseBits(r, colorValues) <= colorBits) { colorRange = r; break; }
-            if (colorRange < RangeIndexOf6) return ErrorColor;
+            if (colorRange < RangeIndexOf6) return null;
 
             // Endpoints of the texel's partition.
             int texelCount = blockWidth * blockHeight;
@@ -112,8 +129,15 @@ namespace OniBrutal.Engine.Rendering
             for (int i = 0; i < colorValues; i++) values[i] = UnquantizeColor(values[i], colorRange);
             int offset = 0;
             for (int i = 0; i < partition; i++) offset += ((cem[i] >> 2) + 1) * 2;
+            // Endpoints as 16-bit values: LDR ones widened from 8 bits, HDR ones logarithmic.
             Span<int> e0 = stackalloc int[4], e1 = stackalloc int[4];
-            Endpoints(cem[partition], values[offset..], e0, e1);
+            bool rgbHdr = false, alphaHdr = false;
+            if (IsHdrMode(cem[partition])) HdrEndpoints(cem[partition], values[offset..], e0, e1, out rgbHdr, out alphaHdr);
+            else
+            {
+                Endpoints(cem[partition], values[offset..], e0, e1);
+                for (int c = 0; c < 4; c++) { e0[c] *= 257; e1[c] *= 257; }
+            }
 
             // The texel's weights, infilled from the weight grid.
             Span<int> weights = stackalloc int[64];
@@ -126,10 +150,34 @@ namespace OniBrutal.Engine.Rendering
             for (int c = 0; c < 4; c++)
             {
                 int w = c == planeTwoComponent ? plane1 : plane0;
-                int c0 = e0[c] * 257, c1 = e1[c] * 257;
-                rgba[c] = (((c0 * (64 - w) + c1 * w + 32) >> 6) >> 8) / 255f;
+                int v = (e0[c] * (64 - w) + e1[c] * w + 32) >> 6;
+                if (!hdr) rgba[c] = (v >> 8) / 255f;
+                else rgba[c] = (c == 3 ? alphaHdr : rgbHdr) ? LnsToHalf(v) : Unorm16ToHalf(v);
             }
             return new Color(rgba[0], rgba[1], rgba[2], rgba[3]);
+        }
+
+        static bool IsHdrMode(int cem) => cem is 2 or 3 or 7 or 11 or 14 or 15;
+
+        static float HalfBits(int bits) => (float)BitConverter.UInt16BitsToHalf((ushort)bits);
+
+        /// A 16-bit unsigned normalized value as a half float, rounded toward zero (as astcenc).
+        static float Unorm16ToHalf(int v)
+        {
+            if (v == 0xFFFF) return 1f;
+            float f = v / 65535f;
+            float h = (float)(Half)f;
+            if (h > f) h = (float)BitConverter.UInt16BitsToHalf((ushort)(BitConverter.HalfToUInt16Bits((Half)h) - 1));
+            return h;
+        }
+
+        /// An interpolated logarithmic value as a half float: the top five bits are the exponent,
+        /// the mantissa is mapped piecewise linearly; capped at the largest finite half.
+        static float LnsToHalf(int v)
+        {
+            int mantissa = v & 0x7FF, exponent = v >> 11;
+            int mt = mantissa < 512 ? mantissa * 3 : mantissa < 1536 ? mantissa * 4 - 512 : mantissa * 5 - 2048;
+            return HalfBits(Math.Min((exponent << 10) | (mt >> 3), 0x7BFF));
         }
 
         static bool BlockMode(int mode, out int w, out int h, out int range, out bool dualPlane)
@@ -386,6 +434,147 @@ namespace OniBrutal.Engine.Rendering
         }
 
         static void BlueContract(Span<int> e, int r, int g, int b, int a) => Set(e, (r + b) >> 1, (g + b) >> 1, b, a);
+
+        static void SetHdr(Span<int> e, int r, int g, int b, int a)
+        {
+            e[0] = Math.Clamp(r, 0, 0xFFF) << 4; e[1] = Math.Clamp(g, 0, 0xFFF) << 4; e[2] = Math.Clamp(b, 0, 0xFFF) << 4; e[3] = a;
+        }
+
+        /// HDR endpoint modes: 12-bit logarithmic values (as 16 bits); alpha 1.0 (0x7800 in LNS)
+        /// unless the mode has its own.
+        static void HdrEndpoints(int cem, Span<int> v, Span<int> e0, Span<int> e1, out bool rgbHdr, out bool alphaHdr)
+        {
+            rgbHdr = alphaHdr = true;
+            switch (cem)
+            {
+                case 2:
+                {
+                    int y0, y1;
+                    if (v[1] >= v[0]) { y0 = v[0] << 4; y1 = v[1] << 4; }
+                    else { y0 = (v[1] << 4) + 8; y1 = (v[0] << 4) - 8; }
+                    SetHdr(e0, y0, y0, y0, 0x7800); SetHdr(e1, y1, y1, y1, 0x7800);
+                    break;
+                }
+                case 3:
+                {
+                    int y0, y1;
+                    if ((v[0] & 0x80) != 0) { y0 = ((v[1] & 0xE0) << 4) | ((v[0] & 0x7F) << 2); y1 = (v[1] & 0x1F) << 2; }
+                    else { y0 = ((v[1] & 0xF0) << 4) | ((v[0] & 0x7F) << 1); y1 = (v[1] & 0xF) << 1; }
+                    y1 = Math.Min(y1 + y0, 0xFFF);
+                    SetHdr(e0, y0, y0, y0, 0x7800); SetHdr(e1, y1, y1, y1, 0x7800);
+                    break;
+                }
+                case 7: RgbScale(v, e0, e1); break;
+                case 11: Rgb(v, e0, e1); break;
+                case 14:
+                    Rgb(v, e0, e1);
+                    e0[3] = v[6] * 257; e1[3] = v[7] * 257;
+                    alphaHdr = false;
+                    break;
+                case 15:
+                {
+                    Rgb(v, e0, e1);
+                    int v6 = v[6], v7 = v[7];
+                    int selector = ((v6 >> 7) & 1) | ((v7 >> 6) & 2);
+                    v6 &= 0x7F; v7 &= 0x7F;
+                    int a0, a1;
+                    if (selector == 3) { a0 = v6 << 5; a1 = v7 << 5; }
+                    else
+                    {
+                        v6 |= (v7 << (selector + 1)) & 0x780;
+                        v7 &= 0x3F >> selector;
+                        v7 ^= 32 >> selector;
+                        v7 -= 32 >> selector;
+                        v6 <<= 4 - selector;
+                        v7 <<= 4 - selector;
+                        v7 = Math.Clamp(v7 + v6, 0, 0xFFF);
+                        a0 = v6; a1 = v7;
+                    }
+                    e0[3] = a0 << 4; e1[3] = a1 << 4;
+                    break;
+                }
+            }
+        }
+
+        /// HDR RGB, base and scale (mode 7): bit fields placed by a mode selector, the major
+        /// component swapped into red.
+        static void RgbScale(Span<int> v, Span<int> e0, Span<int> e1)
+        {
+            int modeval = ((v[0] & 0xC0) >> 6) | (((v[1] & 0x80) >> 7) << 2) | (((v[2] & 0x80) >> 7) << 3);
+            int major, mode;
+            if ((modeval & 0xC) != 0xC) { major = modeval >> 2; mode = modeval & 3; }
+            else if (modeval != 0xF) { major = modeval & 3; mode = 4; }
+            else { major = 0; mode = 5; }
+            int red = v[0] & 0x3F, green = v[1] & 0x1F, blue = v[2] & 0x1F, scale = v[3] & 0x1F;
+            int bit0 = (v[1] >> 6) & 1, bit1 = (v[1] >> 5) & 1, bit2 = (v[2] >> 6) & 1, bit3 = (v[2] >> 5) & 1;
+            int bit4 = (v[3] >> 7) & 1, bit5 = (v[3] >> 6) & 1, bit6 = (v[3] >> 5) & 1;
+            int oh = 1 << mode;
+            if ((oh & 0x30) != 0) green |= bit0 << 6;
+            if ((oh & 0x3A) != 0) green |= bit1 << 5;
+            if ((oh & 0x30) != 0) blue |= bit2 << 6;
+            if ((oh & 0x3A) != 0) blue |= bit3 << 5;
+            if ((oh & 0x3D) != 0) scale |= bit6 << 5;
+            if ((oh & 0x2D) != 0) scale |= bit5 << 6;
+            if ((oh & 0x04) != 0) scale |= bit4 << 7;
+            if ((oh & 0x3B) != 0) red |= bit4 << 6;
+            if ((oh & 0x04) != 0) red |= bit3 << 6;
+            if ((oh & 0x10) != 0) red |= bit5 << 7;
+            if ((oh & 0x0F) != 0) red |= bit2 << 7;
+            if ((oh & 0x05) != 0) red |= bit1 << 8;
+            if ((oh & 0x0A) != 0) red |= bit0 << 8;
+            if ((oh & 0x05) != 0) red |= bit0 << 9;
+            if ((oh & 0x02) != 0) red |= bit6 << 9;
+            if ((oh & 0x01) != 0) red |= bit3 << 10;
+            if ((oh & 0x02) != 0) red |= bit5 << 10;
+            int shift = mode switch { 0 or 1 => 1, 2 => 2, 3 => 3, 4 => 4, _ => 5 };
+            red <<= shift; green <<= shift; blue <<= shift; scale <<= shift;
+            if (mode != 5) { green = red - green; blue = red - blue; }
+            if (major == 1) (red, green) = (green, red);
+            else if (major == 2) (red, blue) = (blue, red);
+            SetHdr(e1, red, green, blue, 0x7800);
+            SetHdr(e0, red - scale, green - scale, blue - scale, 0x7800);
+        }
+
+        /// HDR RGB direct (mode 11, and the colour of modes 14 and 15).
+        static void Rgb(Span<int> v, Span<int> e0, Span<int> e1)
+        {
+            int modeval = ((v[1] & 0x80) >> 7) | (((v[2] & 0x80) >> 7) << 1) | (((v[3] & 0x80) >> 7) << 2);
+            int major = ((v[4] & 0x80) >> 7) | (((v[5] & 0x80) >> 7) << 1);
+            if (major == 3)
+            {
+                SetHdr(e0, v[0] << 4, v[2] << 4, (v[4] & 0x7F) << 5, 0x7800);
+                SetHdr(e1, v[1] << 4, v[3] << 4, (v[5] & 0x7F) << 5, 0x7800);
+                return;
+            }
+            int a = v[0] | ((v[1] & 0x40) << 2), b0 = v[2] & 0x3F, b1 = v[3] & 0x3F, c = v[1] & 0x3F, d0 = v[4] & 0x7F, d1 = v[5] & 0x7F;
+            int dbits = modeval switch { 0 or 2 => 7, 1 or 3 or 5 or 7 => 6, _ => 5 };
+            int bit0 = (v[2] >> 6) & 1, bit1 = (v[3] >> 6) & 1, bit2 = (v[4] >> 6) & 1, bit3 = (v[5] >> 6) & 1, bit4 = (v[4] >> 5) & 1, bit5 = (v[5] >> 5) & 1;
+            int oh = 1 << modeval;
+            if ((oh & 0xA4) != 0) a |= bit0 << 9;
+            if ((oh & 0x8) != 0) a |= bit2 << 9;
+            if ((oh & 0x50) != 0) a |= bit4 << 9;
+            if ((oh & 0x50) != 0) a |= bit5 << 10;
+            if ((oh & 0xA0) != 0) a |= bit1 << 10;
+            if ((oh & 0xC0) != 0) a |= bit2 << 11;
+            if ((oh & 0x4) != 0) c |= bit1 << 6;
+            if ((oh & 0xE8) != 0) c |= bit3 << 6;
+            if ((oh & 0x20) != 0) c |= bit2 << 7;
+            if ((oh & 0x5B) != 0) { b0 |= bit0 << 6; b1 |= bit1 << 6; }
+            if ((oh & 0x12) != 0) { b0 |= bit2 << 7; b1 |= bit3 << 7; }
+            if ((oh & 0xAF) != 0) { d0 |= bit4 << 5; d1 |= bit5 << 5; }
+            if ((oh & 0x5) != 0) { d0 |= bit2 << 6; d1 |= bit3 << 6; }
+            d0 = SignExtend(d0, dbits);
+            d1 = SignExtend(d1, dbits);
+            int shift = (modeval >> 1) ^ 3;
+            a <<= shift; b0 <<= shift; b1 <<= shift; c <<= shift; d0 <<= shift; d1 <<= shift;
+            int red1 = a, green1 = a - b0, blue1 = a - b1, red0 = a - c, green0 = a - b0 - c - d0, blue0 = a - b1 - c - d1;
+            if (major == 1) { (red0, green0) = (green0, red0); (red1, green1) = (green1, red1); }
+            else if (major == 2) { (red0, blue0) = (blue0, red0); (red1, blue1) = (blue1, red1); }
+            SetHdr(e0, red0, green0, blue0, 0x7800);
+            SetHdr(e1, red1, green1, blue1, 0x7800);
+        }
+
+        static int SignExtend(int value, int bits) => (value << (32 - bits)) >> (32 - bits);
 
         static void Endpoints(int cem, Span<int> v, Span<int> e0, Span<int> e1)
         {

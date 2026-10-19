@@ -31,8 +31,9 @@ namespace OniBrutal.Tests
                 string name = Encoding.ASCII.GetString(r.ReadBytes(r.ReadByte()));
                 int size = r.ReadInt32(), width = r.ReadInt32(), height = r.ReadInt32(), count = r.ReadInt32();
                 bool pillow = r.ReadByte() != 0;
+                int texelBytes = r.ReadByte();
                 for (int i = 0; i < count; i++)
-                    cases.Add(new Case(name, width, height, r.ReadBytes(size), r.ReadBytes(width * height * 4), pillow ? r.ReadBytes(width * height * 4) : null));
+                    cases.Add(new Case(name, width, height, r.ReadBytes(size), r.ReadBytes(width * height * texelBytes), pillow ? r.ReadBytes(width * height * 4) : null));
             }
             return cases;
         }
@@ -160,6 +161,25 @@ namespace OniBrutal.Tests
         public void PvrtcMatchesTheReferenceDecoder(string level)
         {
             string report = Compare(level, Rgba8, (c, x, y) => Bgra(c.Reference, c.Width, x, y), 0, false);
+            Assert.True(report.Length == 0, report);
+        }
+
+        static int[] HalfBits(Color c) => [Bits(c.r), Bits(c.g), Bits(c.b), Bits(c.a)];
+        static int Bits(float v) => BitConverter.HalfToUInt16Bits((Half)v);
+
+        [Theory]
+        [InlineData("ASTC_HDR_4x4")]
+        [InlineData("ASTC_HDR_6x6")]
+        [InlineData("ASTC_HDR_8x8")]
+        [InlineData("ASTC_HDR_12x12")]
+        public void AstcHdrMatchesTheReferenceDecoder(string format)
+        {
+            // Half floats compared bit for bit.
+            string report = Compare(format, HalfBits, (c, x, y) =>
+            {
+                int i = (y * c.Width + x) * 8;
+                return [BitConverter.ToUInt16(c.Reference, i), BitConverter.ToUInt16(c.Reference, i + 2), BitConverter.ToUInt16(c.Reference, i + 4), BitConverter.ToUInt16(c.Reference, i + 6)];
+            }, 0, false);
             Assert.True(report.Length == 0, report);
         }
 

@@ -394,7 +394,7 @@ Known behaviours not reproduced, all confirmed unreachable by the game (M6):
   Timeline content reaches it, and no game assembly references Timeline or PlayableDirector.
 - CPU texel reads (`GetPixel*`) cover uncompressed formats, BC1 and BC3–BC7, ETC1, ETC2, EAC,
   ASTC LDR at every block size and PVRTC, each checked against independent decoders (ASTC exactly
-  against ARM's astcenc: `BlockDecodingTests`); ASTC HDR throws. No readable texture in the build
+  against ARM's astcenc, ASTC HDR to the bit: `BlockDecodingTests`). No readable texture in the build
   uses a compressed format other than BC1 and BC3 (all 2682 textures checked by `--check-bind`).
   Compressed formats the GPU cannot sample (ETC, EAC, ASTC and PVRTC on desktop OpenGL; S3TC or
   BPTC on a context without them) are created with Unity's "Decompressing texture" warning and

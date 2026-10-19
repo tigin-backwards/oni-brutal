@@ -138,6 +138,8 @@ namespace OniBrutal.Engine.Rendering
                 or TextureFormat.EAC_R or TextureFormat.EAC_R_SIGNED or TextureFormat.EAC_RG or TextureFormat.EAC_RG_SIGNED
                 or TextureFormat.ASTC_4x4 or TextureFormat.ASTC_5x5 or TextureFormat.ASTC_6x6 or TextureFormat.ASTC_8x8
                 or TextureFormat.ASTC_10x10 or TextureFormat.ASTC_12x12
+                or TextureFormat.ASTC_HDR_4x4 or TextureFormat.ASTC_HDR_5x5 or TextureFormat.ASTC_HDR_6x6 or TextureFormat.ASTC_HDR_8x8
+                or TextureFormat.ASTC_HDR_10x10 or TextureFormat.ASTC_HDR_12x12
                 or TextureFormat.PVRTC_RGB2 or TextureFormat.PVRTC_RGBA2 or TextureFormat.PVRTC_RGB4 or TextureFormat.PVRTC_RGBA4 => true,
             _ => CanEncode(format),
         };
@@ -306,7 +308,7 @@ namespace OniBrutal.Engine.Rendering
             int blocksPerRow = (mipWidth + bw - 1) / bw;
             var block = mip.Slice(((y / bh) * blocksPerRow + x / bw) * bytes, bytes);
             int px = x % bw, py = y % bh;
-            if (AstcBlockSize(format) != 0) return AstcDecoder.Decode(block, bw, bh, px, py);
+            if (AstcBlockSize(format) != 0) return AstcDecoder.Decode(block, bw, bh, px, py, hdr: format >= TextureFormat.ASTC_HDR_4x4 && format <= TextureFormat.ASTC_HDR_12x12);
             switch (format)
             {
                 case TextureFormat.DXT1: return ColorBlock(block, px, py, allowPunchThrough: true);

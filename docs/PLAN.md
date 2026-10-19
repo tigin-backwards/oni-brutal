@@ -377,13 +377,6 @@ unchanged.
   each time) kept per type; the same answers. U57: CoreCLR's share of a save 19% → 8%, saves
   about 12% shorter (4.17 → 3.66 s averaged over five).
 
-- `slow-reachability` (**changes behaviour**): ReachabilityMonitor re-checks each workable every
-  4 game seconds instead of every second (still spread across frames), so a workable whose
-  reachability changes (a door, a dug or blocked path) is seen up to 3 game seconds later and its
-  errands become available or are dropped that much later. U57: 1.88 → 0.53 ms a frame. A version
-  that slowed only items in storage gained nothing: telling whether an item is stored reads the
-  item, which is most of what the check costs.
-
 - `fast-anim-cleanup`: KBatchedAnimUpdater sweeps 16 chunks of its controller grid each frame for
   destroyed controllers, reading every controller there; the tweak keeps the ids of controllers
   destroyed in the last full round of the sweep and sweeps a chunk only when its dictionary still

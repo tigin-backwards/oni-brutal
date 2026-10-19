@@ -98,14 +98,21 @@ Columns: ms per frame (main thread), count of the objects involved where known, 
   much as the whole method: the time is in touching 2,457 scattered objects, not in the lookups
   skipped. Only processing fewer items would save time, which changes behaviour (class C).
 
+- **Canvas build cache: no gain, dropped.** A cache of the whole canvas build, invalidated by
+  what the build reads (activation, components and children of the objects it visited, element
+  materials, emptiness and culling, groups, canvas sorting), never hit in U57: per frame the UI
+  changes about 6 element states, 4 activations, 2 groups and 2 hierarchies, nearly all inside
+  the one screen-space canvas that holds the whole HUD. Only incremental building (per subtree,
+  depths renumbered) would save time there.
+
 The same applies to the other per-item systems (reachability, critter temperature, requirement
 checks): caching what a call looks up cannot remove the cost of visiting each object. Gains need
 whole loops skipped exactly (as the radbolt gather) or the engine work they cause reduced.
 
 ## Recommendations, in order
 
-1. **Engine, canvas dirty tracking:** about 2 ms. Rebuild the canvas draw lists only when a canvas
-   hierarchy, element or group changed. A, engine-side.
+1. ~~Canvas dirty tracking~~: measured, the UI changes every frame (above); incremental building
+   remains possible but is a larger design.
 2. ~~`fast-sublimation`~~: measured, no gain (above).
 3. ~~`fast-reachability`~~: the same per-object cost; not attempted.
 4. **`fast-particle-collision`**: done, 0.5 ms.
@@ -115,6 +122,5 @@ whole loops skipped exactly (as the radbolt gather) or the engine work they caus
    These are the largest game systems, but the work they do is real; any gain needs the per-object
    counts and change rates measured first.
 
-What remains promising is engine-side (canvas dirty tracking, about 2 ms) and exact loop skips
-found system by system. Most of the frame is game logic that
+What remains is exact loop skips found system by system, and incremental canvas building. Most of the frame is game logic that
 does real work for a colony this size, so no single change makes a large difference.

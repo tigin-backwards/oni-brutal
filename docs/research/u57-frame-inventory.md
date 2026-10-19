@@ -271,6 +271,29 @@ array read). The game's update buckets accept a batch delegate (UpdateBucketWith
 .batch_update_delegate), which keeps the same items, order and per-item dt: the shape for an
 exact batched sublimation update.
 
+## Where the 25 fps goal stands (2026-10-19)
+
+U57 at speed 3 on this machine: about 19–20 fps, a 51 ms main-thread frame (with every tweak). The
+goal of 25 fps needs about 11 ms more. Since it was set: `fast-sublimation` (about 0.45 ms),
+`slow-reachability` (1.35 ms), and before it the component layouts (1.7 ms), the canvas skip of
+hidden screens (1.3 ms), transform caches (1.1 ms) and `fast-anim-cleanup` (0.36 ms).
+
+What is left above 0.3 ms a frame, and why it is not done:
+
+| Candidate | ms | Why not done |
+|---|---|---|
+| Brain sensors and fetch searches (ClosestPickupableSensor, FetchManager) | ~2.6 | Needs a table of pickupable items kept exact by hooking every write to their tags, mass, storage, reservations and cell. Reordering the sensor's two tests is not exact: the path cost goes through the item's offset tracker, which caches and registers partitioner entries. |
+| Draw recording on a worker thread (engine) | ~1.5 | Uniform values resolve from the shader globals command buffers change mid-frame: a flush at every global change, per-draw copies of inputs, thread-safe material and texture caches. |
+| Canvas build and HUD draw lists (engine) | 0.5–0.7 each | Needs incremental building (per-subtree depths renumbered) or per-renderer caching of draw items; each a few tenths. |
+| Animation updates, events, uploads | 2.1–2.3 each | Per-object work. Skipping identical-frame uploads is not exact and gained nothing; event-free looping animations held paused would freeze synchronized children. |
+| Critter temperature, building input checks | 0.9, 1.1 | Each tick recomputes from live state (cell temperatures, power and pipe connections): no no-op to skip, and lowering their rates is not acceptable. |
+| Cell-change handlers, conduit flow, power, ranching, plant absorbers | 0.8–2.3 each | The game's own work per moved object or building; nothing exact to skip found. |
+
+Together the first three are roughly 4–6 ms if all done, which would bring U57 to about 22–23 fps.
+Most of the rest of the frame is game logic spread over many systems, each reading thousands of
+scattered objects; 25 fps would need those systems restructured around flat data (see the
+data-layout spike above), not tweaks.
+
 ## Recommendations, in order
 
 1. ~~Canvas dirty tracking~~: measured, the UI changes every frame (above); incremental building

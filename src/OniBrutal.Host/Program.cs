@@ -50,6 +50,7 @@ namespace OniBrutal.Host
             if (options.RunHome != null) RunHome.Install(options.RunHome);
             if (options.AudioWav != null) AudioCapture.Install(options.AudioWav);
             ModVersionStamp.Install();
+            GameTweaks.GameTweaks.Install(options.GameTweaks);
             StateMachineSaveNames.Install(dataDir, AppContext.BaseDirectory);
             return Player.Run(options, dataDir);
         }
@@ -142,6 +143,8 @@ namespace OniBrutal.Host
         /// packages/ next to the host; ShippedUiPackages loads Unity's from Managed/ instead.
         public string? UiPackages;
         public bool ShippedUiPackages;
+        /// Optional changes to the game's own code (GameTweaks), by name.
+        public readonly HashSet<string> GameTweaks = new(StringComparer.Ordinal);
         public bool CheckAssets;
         /// With --check-assets: where to list the script classes the data uses.
         public string? ListDataScripts;
@@ -207,6 +210,17 @@ namespace OniBrutal.Host
                     case "--list-data-scripts": o.ListDataScripts = args[++i]; break;
                     case "--ui-packages": o.UiPackages = Path.GetFullPath(args[++i]); break;
                     case "--shipped-ui-packages": o.ShippedUiPackages = true; break;
+                    case "--game-tweak":
+                    {
+                        var name = args[++i];
+                        if (!OniBrutal.Host.GameTweaks.GameTweakNames.IsKnown(name))
+                        {
+                            Console.Error.WriteLine($"Unknown game tweak {name}; known: all, {string.Join(", ", OniBrutal.Host.GameTweaks.GameTweakNames.All)}");
+                            return null;
+                        }
+                        o.GameTweaks.Add(name);
+                        break;
+                    }
                     case "--check-bind": o.CheckBind = true; break;
                     case "--check-shaders": o.CheckShaders = true; break;
                     case "--dump-shader": o.DumpShader = args[++i]; break;
@@ -289,7 +303,7 @@ namespace OniBrutal.Host
                     }
                     default:
                         Console.Error.WriteLine($"Unknown option {args[i]}");
-                        Console.Error.WriteLine("usage: OniBrutal [--game DIR] [--log FILE] [--run-home DIR] [--audio-wav DIR] [--headless] [--batchmode] [--frames N] [--native-override NAME=PATH] [--trace-exceptions] [--gl-debug] [--vsync-count N] [--gpu-profile] [--no-bindless] [--input FRAME:ACTION[:ARGS]] [--frame-stats] [--max-frame-rate N[:FRAMES]] [--dump-render-textures FRAME:DIR] [-screen-width W] [-screen-height H] [-screen-fullscreen 0|1] [-window-mode exclusive|borderless|windowed] [--check-types] [--ui-packages DIR | --shipped-ui-packages] [--check-assets [--list-data-scripts FILE]] [--check-bind] [--check-shaders] [--dump-shader NAME:DIR] [--capture FRAME:PATH[:SCALE]] [--probe-ui FRAME:X,Y] [--dump-ui FRAME:PATH] [--dump-ui-vertices PATH-SUBSTRING] [--dump-hierarchy FRAME:PATH] [--report-builtin-assets FILE] [--dump-component FRAME:PATH|TYPE]");
+                        Console.Error.WriteLine("usage: OniBrutal [--game DIR] [--log FILE] [--run-home DIR] [--audio-wav DIR] [--headless] [--batchmode] [--frames N] [--native-override NAME=PATH] [--trace-exceptions] [--gl-debug] [--vsync-count N] [--gpu-profile] [--no-bindless] [--input FRAME:ACTION[:ARGS]] [--frame-stats] [--max-frame-rate N[:FRAMES]] [--dump-render-textures FRAME:DIR] [-screen-width W] [-screen-height H] [-screen-fullscreen 0|1] [-window-mode exclusive|borderless|windowed] [--check-types] [--ui-packages DIR | --shipped-ui-packages] [--game-tweak NAME|all] [--check-assets [--list-data-scripts FILE]] [--check-bind] [--check-shaders] [--dump-shader NAME:DIR] [--capture FRAME:PATH[:SCALE]] [--probe-ui FRAME:X,Y] [--dump-ui FRAME:PATH] [--dump-ui-vertices PATH-SUBSTRING] [--dump-hierarchy FRAME:PATH] [--report-builtin-assets FILE] [--dump-component FRAME:PATH|TYPE]");
                         return null;
                 }
             }

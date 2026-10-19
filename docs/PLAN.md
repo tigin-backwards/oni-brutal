@@ -435,6 +435,10 @@ Environment notes:
   reflection in Instantiate's field copies. U57 measured back to back against the build before
   them: 12.4–12.9 fps against 12.2–12.5 in steady windows; the machine's other load moved the
   same build between 12.5 and 16 fps.
+  With the engine API hot paths (null checks inlined, objects holding their native record,
+  generic component queries without reflection) and server GC, three alternating pairs against
+  the build before this work: 13.71 fps against 12.05 in steady windows (+14%), 10.7–11.1
+  against 9.0–9.4 in the autosave window; every run of the new build above every run of the old.
 - Clean-room rewrites (2026-10-18): code found to be modelled on Unity's managed source was
   rewritten from functional specifications by separate implementations (docs/cleanroom,
   docs/LICENSING.md "Provenance"):

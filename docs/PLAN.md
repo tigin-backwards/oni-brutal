@@ -334,6 +334,28 @@ implementations, one functional specification per area. The implementations may 
 (UI shaders, default resources) remain the only Unity data, and they are read from the user's
 install.
 
+## Game tweaks (opt-in, separate from the engine)
+
+`--game-tweak NAME` (repeatable, or `all`) applies changes to Klei's own code (Harmony patches in
+`src/OniBrutal.Host/GameTweaks`). The engine reproduces Unity; these change how the game does
+something without changing what it produces, and each is off unless asked for. Measured on U57:
+- `fast-save-compression`: saves compressed and decompressed with .NET's zlib instead of
+  Ionic.Zlib, the same zlib format (the original game loads these saves, and ours the
+  original's); compressing 1.3–1.5 s instead of 5.0–5.5, decompressing 1.1–1.5 instead of
+  2.5–3.7, files about 14% larger.
+- `background-save`: the compression and file write run on a background thread from the
+  serialized snapshot; the file is written beside the target and moved over it, and loading,
+  the next save, the load screen's delete and move, and the end of the run wait for it.
+- `no-save-gc`: the forced full collection at the end of every save is removed.
+- `fast-serialization`: KSerialization templates write plain fields through writers compiled
+  per type instead of boxing every value through reflection; alternating saves differ only where
+  the sim moved between them.
+
+With all four, the autosave freezes the game for 4.8 s instead of 11.7 (the remainder is
+serializing the colony on the main thread, which reads live state, and the colony preview's GPU
+read-back). Not tweaked: the per-item sim systems (Sublimates, ranching, transitions…), which
+together make up most of a large colony's frame but are each at most a few percent.
+
 ## Open items
 
 Known behaviours not reproduced, all confirmed unreachable by the game (M6):

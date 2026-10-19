@@ -88,10 +88,9 @@ namespace OniBrutal.Engine
             freeSlots[freeCount++] = index;
         }
 
-        /// An object whose slot is weak during a probe. A managed object refers to its record
-        /// only by handle, so a dependent handle keeps the record alive while the managed object
-        /// is (the record already references the managed object).
-        public readonly record struct Probe(int Slot, int InstanceId, System.Runtime.DependentHandle Link);
+        /// An object whose slot is weak during a probe. The record lives exactly as long as its
+        /// managed object: each references the other (UnityEngine.Object holds its record).
+        public readonly record struct Probe(int Slot, int InstanceId);
 
         /// Makes the given objects' slots weak references; the caller then drops its own
         /// references, collects, and calls Strengthen. Resolution keeps working meanwhile.
@@ -103,7 +102,7 @@ namespace OniBrutal.Engine
                 {
                     if (o.Slot <= 0 || !ReferenceEquals(slots[o.Slot], o) || o.Managed is null) continue;
                     Volatile.Write(ref slots[o.Slot], new WeakReference<NativeObject>(o));
-                    probed.Add(new Probe(o.Slot, o.InstanceId, new System.Runtime.DependentHandle(o.Managed, o)));
+                    probed.Add(new Probe(o.Slot, o.InstanceId));
                 }
             return probed;
         }
@@ -114,9 +113,8 @@ namespace OniBrutal.Engine
         {
             int freed = 0;
             lock (gate)
-                foreach (var (slot, instanceId, link) in probed)
+                foreach (var (slot, instanceId) in probed)
                 {
-                    link.Dispose();
                     if (slots[slot] is not WeakReference<NativeObject> weak) continue;
                     if (weak.TryGetTarget(out var o)) Volatile.Write(ref slots[slot], o);
                     else

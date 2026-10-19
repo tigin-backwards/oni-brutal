@@ -22,14 +22,18 @@ namespace OniBrutal.Engine
     {
         public static int UnloadUnused()
         {
+            var watch = System.Diagnostics.Stopwatch.StartNew();
             var probed = WeakenCandidates();
+            double weaken = watch.Elapsed.TotalMilliseconds;
             GC.Collect();
             GC.WaitForPendingFinalizers();
             GC.Collect();
+            double collect = watch.Elapsed.TotalMilliseconds;
             int unloaded = ObjectTable.Strengthen(probed);
             ObjectLoader.Prune();
             GraphicsDevice.ReleaseOrphans();
             FontNative.ReleaseOrphanFaces();
+            EngineLog.Engine($"UnloadUnusedAssets: {unloaded} of {probed.Count} candidates unloaded in {watch.Elapsed.TotalMilliseconds:F0} ms (probe {weaken:F0}, collection {collect - weaken:F0})");
             return unloaded;
         }
 

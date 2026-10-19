@@ -68,7 +68,7 @@ namespace PerfProbe
                 LoadScreen.DoLoad(save);
             }
             while (Game.Instance == null || SpeedControlScreen.Instance == null) yield return null;
-            Debug.Log($"PERF colony f{Time.frameCount} cycle {GameClock.Instance.GetCycle()}");
+            Debug.Log($"PERF colony f{Time.frameCount} cycle {GameClock.Instance.GetCycle()}{RuntimeCounters.Jit()}");
             if (System.IO.File.Exists(System.IO.Path.Combine(Path, "savetest.txt"))) { yield return SaveTest(); yield break; }
             float windowStart = Time.realtimeSinceStartup;
             int frames = 0;
@@ -105,6 +105,17 @@ namespace PerfProbe
         static readonly System.Reflection.MethodInfo pause = typeof(System.GC).GetMethod("GetTotalPauseDuration", System.Type.EmptyTypes);
 
         public static long LockContentions() => contention == null ? -1 : (long)contention.GetValue(null);
+        static readonly System.Type jitInfo = System.Type.GetType("System.Runtime.JitInfo");
+
+        /// Time spent compiling and methods compiled so far (.NET; empty on Mono).
+        public static string Jit()
+        {
+            if (jitInfo == null) return "";
+            var time = (System.TimeSpan)jitInfo.GetMethod("GetCompilationTime").Invoke(null, new object[] { false });
+            var count = (long)jitInfo.GetMethod("GetCompiledMethodCount").Invoke(null, new object[] { false });
+            return $" jit {time.TotalMilliseconds:F0} ms over {count} methods";
+        }
+
         public static long GcPauseMs() => pause == null ? -1 : (long)((System.TimeSpan)pause.Invoke(null, null)).TotalMilliseconds;
     }
 }

@@ -21,8 +21,36 @@ namespace UnityEngine
         internal virtual void EngineOnEnable() { }
         internal virtual void EngineOnDisable() { }
 
-        public GameObject gameObject => (GameObject)ComponentNative.GameObject.Managed;
-        public Transform transform => (Transform)ComponentNative.GameObject.Components[0];
+        // The game reads transform and gameObject in nearly every per-object update; kept on the
+        // component (one load from an object the caller already holds) instead of walking native
+        // record, GameObject and component list each time. A component's GameObject never
+        // changes; its transform changes only when a Transform becomes a RectTransform
+        // (Lifecycle clears the cache). A destroyed component still throws, as before.
+        GameObject m_GameObject;
+        Transform m_Transform;
+
+        public GameObject gameObject
+        {
+            get
+            {
+                var go = m_GameObject;
+                if (go is not null && Handle != IntPtr.Zero) return go;
+                return m_GameObject = (GameObject)ComponentNative.GameObject.Managed;
+            }
+        }
+
+        public Transform transform
+        {
+            get
+            {
+                var t = m_Transform;
+                if (t is not null && Handle != IntPtr.Zero) return t;
+                return m_Transform = (Transform)ComponentNative.GameObject.Components[0];
+            }
+        }
+
+        /// The GameObject's transform component was replaced (Transform to RectTransform).
+        internal void ForgetTransform() => m_Transform = null;
 
         public string tag
         {

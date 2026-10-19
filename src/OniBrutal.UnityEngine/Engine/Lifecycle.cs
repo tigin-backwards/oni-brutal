@@ -149,6 +149,7 @@ namespace OniBrutal.Engine
             comps[0] = rect;
             go.Transform = native;
             go.Components = comps;
+            foreach (var c in comps) c.ForgetTransform();
             old.Unbind();
             native.MarkDirty();
             return rect;

@@ -81,6 +81,19 @@ Steamworks (`libsteam_api.so`, Steamworks.NET under MIT); `cimgui.so` (Dear ImGu
 - Native libraries from BRUTAL's packages (GLFW, glad, stb, FreeType with libpng and zlib), under
   their own licences as shipped in those packages.
 
+## Provenance of the bundled type trees
+
+`src/OniBrutal.Assets/Data/typetrees-6000.3.5f2.json.gz` describes how Unity 6000.3.5f2 lays
+out each native class's fields in a release build. The game's data files don't include this
+information, so the asset reader needs it. It is a compacted copy (field names, types, sizes and
+flags only) of the `InfoJson_6000.3.5f2.json` dump in AssetRipper's public TypeTreeDumps
+repository (github.com/AssetRipper/TypeTreeDumps). That repository produces its dumps with
+the TypeTreeDumper tool, running the Windows Unity Editor from Unity's download archive.
+
+The repository states no licence. The data is a factual description of a file format, but its
+redistribution terms should be settled before a public release. Alternatives would be a dump
+made by this project, or per-class layouts written from the documented format.
+
 ## Provenance of the engine's code
 
 The engine reimplements Unity's API. Public type and member names, signatures and serialized

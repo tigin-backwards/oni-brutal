@@ -30,6 +30,12 @@
       <HintPath>$(OniGameDir)/OxygenNotIncluded_Data/Managed/0Harmony.dll</HintPath>
       <Private>false</Private>
     </Reference>
+    <!-- The game's zlib, loaded from Managed/ at run time; the background-save game tweak
+         compresses with it as the game does. -->
+    <Reference Include="Ionic.Zip">
+      <HintPath>$(OniGameDir)/OxygenNotIncluded_Data/Managed/Ionic.Zip.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
     <!-- The game's FMOD wrapper, loaded from Managed/ at run time; AudioCapture (test runs only). -->
     <Reference Include="FMODUnity">
       <HintPath>$(OniGameDir)/OxygenNotIncluded_Data/Managed/FMODUnity.dll</HintPath>

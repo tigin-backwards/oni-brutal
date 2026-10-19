@@ -14,9 +14,10 @@ namespace OniBrutal.Host.GameTweaks
     {
         public const string Name = "fast-save-compression";
 
-        public static void Install(Harmony harmony)
+        /// `compress`: false when background-save does the compressing (with this zlib).
+        public static void Install(Harmony harmony, bool compress)
         {
-            harmony.Patch(AccessTools.Method("SaveLoader:CompressContents"), prefix: new HarmonyMethod(typeof(FastSaveCompression), nameof(Compress)));
+            if (compress) harmony.Patch(AccessTools.Method("SaveLoader:CompressContents"), prefix: new HarmonyMethod(typeof(FastSaveCompression), nameof(Compress)));
             harmony.Patch(AccessTools.Method("SaveLoader:DecompressContents"), prefix: new HarmonyMethod(typeof(FastSaveCompression), nameof(Decompress)));
         }
 

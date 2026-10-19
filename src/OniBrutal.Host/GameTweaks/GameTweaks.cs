@@ -11,21 +11,31 @@ namespace OniBrutal.Host.GameTweaks
     /// its class with what it changes and what was measured.
     internal static class GameTweaks
     {
-        static readonly Dictionary<string, Action<Harmony>> available = new(StringComparer.Ordinal)
-        {
-            [FastSaveCompression.Name] = FastSaveCompression.Install,
-        };
+        static bool backgroundSave;
 
         public static void Install(IReadOnlySet<string> requested)
         {
+            bool On(string name) => requested.Contains(name) || requested.Contains("all");
             if (requested.Count == 0) return;
             var harmony = new Harmony("OniBrutal.Host.GameTweaks");
-            foreach (var (name, install) in available)
-            {
-                if (!requested.Contains(name) && !requested.Contains("all")) continue;
-                install(harmony);
-                EngineLog.Engine($"game tweak {name}");
-            }
+            backgroundSave = On(BackgroundSave.Name);
+            // Both replace SaveLoader.CompressContents: with background-save on, it does the
+            // compressing, with .NET's zlib when fast-save-compression is on too.
+            if (On(FastSaveCompression.Name)) Report(FastSaveCompression.Name, () => FastSaveCompression.Install(harmony, compress: !backgroundSave));
+            if (backgroundSave) Report(BackgroundSave.Name, () => BackgroundSave.Install(harmony, fastCompression: On(FastSaveCompression.Name)));
+            if (On(NoSaveGc.Name)) Report(NoSaveGc.Name, () => NoSaveGc.Install(harmony));
+        }
+
+        static void Report(string name, Action install)
+        {
+            install();
+            EngineLog.Engine($"game tweak {name}");
+        }
+
+        /// The end of the run: saves still being written are finished first.
+        public static void Shutdown()
+        {
+            if (backgroundSave) BackgroundSave.WaitAll();
         }
     }
 
@@ -33,7 +43,7 @@ namespace OniBrutal.Host.GameTweaks
     /// (Harmony among them) can be resolved, so this class references none of them.
     internal static class GameTweakNames
     {
-        public static readonly string[] All = [FastSaveCompression.Name];
+        public static readonly string[] All = [FastSaveCompression.Name, BackgroundSave.Name, NoSaveGc.Name];
 
         public static bool IsKnown(string name) => name == "all" || Array.IndexOf(All, name) >= 0;
     }

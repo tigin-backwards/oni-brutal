@@ -85,6 +85,7 @@ namespace OniBrutal.Host
                 OniBrutal.Engine.Rendering.GraphicsDevice.Install(new OniBrutal.Engine.Rendering.NullRenderDevice());
                 platform.Dispose();
             }
+            GameTweaks.GameTweaks.Shutdown();
             EngineLog.Engine($"Exiting after {frame} frames with code {PlayerLoop.ExitCode}");
             EngineLog.Close();
             Console.Out.Flush();

@@ -116,6 +116,8 @@ namespace OniBrutal.Engine
         {
             if (!started) throw new InvalidOperationException("PlayerLoop.Initialize must run first");
             if (FrameStats) statClock.Restart();
+            // The device's texel copies from the last frame finish before scripts can write texels.
+            Rendering.TexelCopies.Fence();
             Time.BeginFrame(realDelta);
             RunPhase(FrameStart);
 

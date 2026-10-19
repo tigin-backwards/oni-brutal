@@ -85,13 +85,16 @@ namespace OniBrutal.Desktop.Gl
             {
                 u.Memory = UploadBuffers.Rent(m.Size);
                 u.Pooled = true;
-                m.Span.CopyTo(u.Memory.Span);
+                u.Copying = TexelCopies.Start(t, m, u.Memory);
             }
             return u;
         }
 
         /// Memory is a pooled copy (returned after the upload) rather than the texture's own.
         public bool Pooled;
+
+        /// The copy into Memory, when it is still being made on another thread (TexelCopies).
+        public System.Threading.Tasks.Task Copying;
 
         public long MipSize(int mip) => TextureFormats.MipSize(Format, Math.Max(1, Width >> mip), Math.Max(1, Height >> mip))
                                         * (Target == TexTarget3D ? Math.Max(1, Depth >> mip) : 1);
@@ -107,6 +110,7 @@ namespace OniBrutal.Desktop.Gl
         /// Uploads into the device texture (GL thread) and frees the texels.
         public void Execute(DeviceTexture g)
         {
+            Copying?.Wait();
             try
             {
                 if (Target == TexTarget2DArray) GlTextures.UploadArray(this, g);

@@ -138,12 +138,25 @@ namespace OniBrutal.Engine.Rendering
 
         public override bool IsReadable => Readable;
 
+        /// The device's snapshot of the texels still being copied (TexelCopies), finished before
+        /// anything reads, writes or replaces them.
+        public System.Threading.Tasks.Task PendingCopy;
+
+        void AwaitCopy()
+        {
+            var p = PendingCopy;
+            if (p == null) return;
+            p.Wait();
+            PendingCopy = null;
+        }
+
         /// Texels, loading them from the asset file on first use. Null after the device took
         /// a non-readable texture's data.
         public PixelMemory Memory
         {
             get
             {
+                AwaitCopy();
                 if (memory == null && source is { } s)
                 {
                     var bytes = s.Read();
@@ -161,6 +174,7 @@ namespace OniBrutal.Engine.Rendering
         /// its first draw.
         protected void SetSource(TexelSource s)
         {
+            AwaitCopy();
             memory?.Free();
             memory = null;
             source = s;
@@ -170,6 +184,7 @@ namespace OniBrutal.Engine.Rendering
         /// Replaces the texels with freshly allocated memory of `size` bytes, filled with `fill`.
         public void Allocate(long size, byte fill)
         {
+            AwaitCopy();
             memory?.Free();
             source = null;
             memory = new PixelMemory(size, fill);
@@ -179,6 +194,7 @@ namespace OniBrutal.Engine.Rendering
         /// (non-readable textures, as in Unity).
         public void DropTexels()
         {
+            AwaitCopy();
             memory?.Free();
             memory = null;
             source = null;
@@ -188,6 +204,7 @@ namespace OniBrutal.Engine.Rendering
         /// the texture keeps none, as after DropTexels.
         public PixelMemory TakeTexels()
         {
+            AwaitCopy();
             var taken = Memory;
             memory = null;
             source = null;

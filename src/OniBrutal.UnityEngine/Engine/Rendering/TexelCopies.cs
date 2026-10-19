@@ -1,0 +1,70 @@
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+
+namespace OniBrutal.Engine.Rendering
+{
+    /// The device's snapshots of readable textures' texels, copied on worker threads. A large
+    /// colony re-applies about 20 MB of textures a frame (its animation batches); the game keeps
+    /// raw pointers into that memory and rewrites it every frame, so the device needs its own copy,
+    /// but nothing requires the main thread to make it.
+    ///
+    /// A copy starts when the device records the upload (during rendering) and must be finished
+    /// before the texels can change again. Every engine access to a texture's texels waits for its
+    /// copy (TexelTextureNative.Memory and the methods replacing the memory), and the next frame
+    /// waits for all of them before any script runs (Fence): the game writes these textures from
+    /// its scripts. The device waits for a copy before uploading it.
+    ///
+    /// Test runs (ONI_VERIFY_TEXEL_COPIES=1): each source is checksummed when its copy starts and
+    /// again at the fence; a difference (a write while copying) is logged.
+    internal static class TexelCopies
+    {
+        /// Below this a copy is cheaper than handing it to another thread.
+        const long AsyncThreshold = 64 << 10;
+
+        static readonly List<Task> pending = new();
+        static readonly bool verify = Environment.GetEnvironmentVariable("ONI_VERIFY_TEXEL_COPIES") == "1";
+        static readonly List<(TexelTextureNative Texture, PixelMemory Source, ulong Sum)> checks = new();
+        static long verified, changed;
+
+        /// Copies `source` (the texture's texels) into `target`; returns the copy in progress, or
+        /// null when it was made at once.
+        public static Task Start(TexelTextureNative texture, PixelMemory source, PixelMemory target)
+        {
+            if (source.Size < AsyncThreshold)
+            {
+                source.Span.CopyTo(target.Span);
+                return null;
+            }
+            if (verify) checks.Add((texture, source, Checksum(source)));
+            var copy = Task.Run(() => source.Span.CopyTo(target.Span));
+            texture.PendingCopy = copy;
+            pending.Add(copy);
+            return copy;
+        }
+
+        /// Every copy finished: called at the start of a frame, before scripts run.
+        public static void Fence()
+        {
+            if (pending.Count == 0) return;
+            Task.WaitAll(pending);
+            pending.Clear();
+            if (!verify) return;
+            foreach (var (texture, source, sum) in checks)
+            {
+                verified++;
+                if (Checksum(source) != sum) EngineLog.Engine($"texel copy: {texture.Name} changed while it was copied ({++changed} of {verified})");
+            }
+            if (verified % 20000 < checks.Count) EngineLog.Engine($"texel copies: {verified} verified, {changed} changed while copying");
+            checks.Clear();
+        }
+
+        static unsafe ulong Checksum(PixelMemory memory)
+        {
+            ulong h = 1469598103934665603UL;
+            var words = System.Runtime.InteropServices.MemoryMarshal.Cast<byte, ulong>(memory.Span);
+            foreach (var w in words) h = (h ^ w) * 1099511628211UL;
+            return h;
+        }
+    }
+}

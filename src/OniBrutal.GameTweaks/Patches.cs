@@ -10,6 +10,7 @@ namespace OniBrutal.GameTweaks
             switch (name)
             {
                 case OffscreenConveyors.Name: OffscreenConveyors.Install(harmony); return true;
+                case FastSaveTypeChecks.Name: FastSaveTypeChecks.Install(harmony); return true;
                 default: return false;
             }
         }

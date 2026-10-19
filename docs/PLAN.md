@@ -372,6 +372,11 @@ unchanged.
   animation and collider updates). Built against the game's own types in
   `src/OniBrutal.GameTweaks`, loaded only when one of its tweaks is asked for.
 
+- `fast-save-type-checks`: SaveLoadRoot.SaveWithoutTransform's per-component attribute check
+  (Type.IsDefined, which reads metadata each time) and type name (Type.ToString, a new string
+  each time) kept per type; the same answers. U57: CoreCLR's share of a save 19% → 8%, saves
+  about 12% shorter (4.17 → 3.66 s averaged over five).
+
 Measured and not kept: the loading side of fast-serialization (a U57 load produced the same
 colony, 3 bytes of time of day apart, in 31.3 s against 31.6), an exact early-out for
 sublimation and a canvas build cache (docs/research/u57-frame-inventory.md).

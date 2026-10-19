@@ -102,8 +102,10 @@ Neither of the obvious workarounds changes that:
   MonoScript, AssetBundle; measured 2026-10-18 on the Windows install with every DLC). The
   `.assets` files carry none.
 
-Before a public release, ask AssetRipper to state terms for TypeTreeDumps, or get advice on the
-interoperability use.
+**Decision (2026-10-18):** the data ships. Under US law, facts and file-format structure are
+not copyrightable, and a mechanical dump has no creative authorship. The project ships only the
+compact subset needed to read the game's files. EU database right is out of scope for this
+project.
 
 ## Provenance of the engine's code
 

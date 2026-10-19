@@ -250,7 +250,11 @@ Open:
 `packages/` next to it; `--shipped-ui-packages` loads Unity's instead (the differential runs'
 reference). Their tests pass against both the shipped packages and ours (47 uGUI, 71
 TextMeshPro and Timeline), ApiCheck finds nothing missing, and the differential runs differ only
-where two shipped runs do or by float rounding (`docs/PARITY.md`). The frame-rate gate is open.
+where two shipped runs do or by float rounding (`docs/PARITY.md`). Frame rates (Windows, PerfProbe,
+speed 3, runs alternated; the machine was busier than for the 48–56 fps measurement, so absolute
+figures are lower, and that build measured the same now): DeCrew 35.3–36.3 fps with ours
+against 32.6–32.9 with the shipped packages; U57 11.7–12.6 against 12.1–12.3, equal within the
+spread.
 
 The goal is that nothing tied to Unity is loaded. Three Unity packages loaded from
 `Managed/`:

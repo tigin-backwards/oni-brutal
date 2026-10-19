@@ -174,6 +174,8 @@ A difference is accepted when a run of the same scenario with the shipped packag
   uGUI. `codex` and `colony` (frames 1550–2200): two research labels (Farm Station, Liquid and
   Gas Cargo) whose preferred width is 0.01 off, float rounding; and in `colony` the Database
   search caret's blink.
+- [x] Frame rate with all three of ours (Windows, PerfProbe, runs alternated): DeCrew
+  35.3–36.3 fps against 32.6–32.9 with the shipped packages; U57 11.7–12.6 against 12.1–12.3.
 - [~] 2D colliders never block a `GraphicRaycaster` (blocking objects TwoD/All): the engine runs no
   2D physics queries. The shipped package cannot do it on this engine either.
 

@@ -16,6 +16,11 @@
     <!-- Steamworks.NET built for CoreCLR; replaces the shipped copy (ARCHITECTURE §2.1). -->
     <ProjectReference Include="../ThirdParty/Steamworks.NET/Steamworks.NET.csproj" />
     <ProjectReference Include="../../tools/FacadeGen/FacadeGen.csproj" ReferenceOutputAssembly="false" />
+    <!-- This project's replacements of Unity's UI packages (PLAN M9), next to the host in
+         packages/; the game binds to them by name at run time (AssemblyPolicy). -->
+    <ProjectReference Include="../UnityEngine.UI/UnityEngine.UI.csproj" ReferenceOutputAssembly="false" OutputItemType="UiPackage" />
+    <ProjectReference Include="../Unity.TextMeshPro/Unity.TextMeshPro.csproj" ReferenceOutputAssembly="false" OutputItemType="UiPackage" />
+    <ProjectReference Include="../Unity.Timeline/Unity.Timeline.csproj" ReferenceOutputAssembly="false" OutputItemType="UiPackage" />
   </ItemGroup>
   <ItemGroup>
     <!-- The game's Harmony, loaded from Managed/ at run time; patches KMod.Local (ModVersionStamp). -->
@@ -39,6 +44,9 @@
     <!-- The helper App.Restart starts from the player's directory. -->
     <None Include="Restarter" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
+  <Target Name="CopyUiPackages" AfterTargets="Build">
+    <Copy SourceFiles="@(UiPackage);@(UiPackage->'%(RootDir)%(Directory)%(Filename).pdb')" DestinationFolder="$(OutDir)packages" SkipUnchangedFiles="true" />
+  </Target>
   <!-- The UnityEngine.*Module facades the game binds to, next to the host in engine/. -->
   <Target Name="EmitFacades" AfterTargets="Build">
     <Exec Command="dotnet &quot;$(ArtifactsPath)/bin/FacadeGen/$(Configuration.ToLowerInvariant())/FacadeGen.dll&quot; emit &quot;$(MSBuildThisFileDirectory)../Facades/unity-module-map.tsv&quot; &quot;$(OutDir)engine&quot; &quot;$(OutDir)OniBrutal.UnityEngine.dll&quot;" />

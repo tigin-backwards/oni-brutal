@@ -12,23 +12,32 @@ versions shipped with the game.
 | `UnityPlayer.so` (the native engine) | `OniBrutal.Host`, `OniBrutal.Desktop` (BRUTAL GLFW/OpenGL) |
 | `UnityEngine.dll`, the 77 `UnityEngine.*Module.dll` | `OniBrutal.UnityEngine` and generated forwarding facades |
 | `Unity.InternalAPIEngineBridge.004.dll` | `src/Unity.InternalAPIEngineBridge.004` |
+| `UnityEngine.UI.dll`, `Unity.TextMeshPro.dll`, `Unity.Timeline.dll` | `src/UnityEngine.UI`, `src/Unity.TextMeshPro`, `src/Unity.Timeline` (clean-room, PLAN M9; below) |
 | Mono runtime and class libraries | stock .NET 10 CoreCLR |
 | `Resources/UnityPlayer.png` | not used |
 
-## Unity code still loaded from the game's `Managed/` folder
+## Unity packages in the game's `Managed/` folder
 
 These are Unity *packages* compiled into the game build; the game's own code references them.
 
-| Assembly | Role in the game |
-|---|---|
-| `UnityEngine.UI.dll` (uGUI) | every menu, button, panel, layout, scroll view, mask |
-| `Unity.TextMeshPro.dll` | all text layout and rendering |
-| `Unity.Timeline.dll` | referenced; the game ships no Timeline content |
-| `Unity.Collections.dll`, `Unity.Collections.LowLevel.ILSupport.dll`, `Unity.Burst.dll`, `Unity.Burst.Unsafe.dll`, `Unity.Mathematics.dll`, `Unity.Profiling.Core.dll`, `Unity.MemoryProfiler.dll`, `Unity.Multiplayer.Center.Common.dll` | not referenced by any game assembly (only by each other): never loaded, can be left out. The game's `NativeArray` use is `UnityEngine.CoreModule`'s, which this engine implements |
+| Assembly | Role in the game | Loaded |
+|---|---|---|
+| `UnityEngine.UI.dll` (uGUI) | every menu, button, panel, layout, scroll view, mask | no: replaced by `src/UnityEngine.UI` (PLAN M9) |
+| `Unity.TextMeshPro.dll` | all text layout and rendering | no: replaced by `src/Unity.TextMeshPro` |
+| `Unity.Timeline.dll` | referenced; the game ships no Timeline content | no: replaced by `src/Unity.Timeline` |
 
-Current versions of uGUI, TextMeshPro and Timeline are, to our knowledge,
-distributed under the Unity Companion License (use only with the Unity engine); they are the
-main candidates for replacement. Older uGUI source was published under MIT.
+The replacements were written clean-room from functional specifications
+(`docs/cleanroom/`); their implementers did not read the shipped code. Their type headers and
+serialized fields are generated from the shipped assemblies' metadata, which the game's data
+binds to. The shipped packages load only with `--shipped-ui-packages`, a development switch for
+the differential comparisons.
+
+| Assembly | Role | Loaded |
+|---|---|---|
+| `Unity.Collections.dll`, `Unity.Collections.LowLevel.ILSupport.dll`, `Unity.Burst.dll`, `Unity.Burst.Unsafe.dll`, `Unity.Mathematics.dll`, `Unity.Profiling.Core.dll`, `Unity.MemoryProfiler.dll`, `Unity.Multiplayer.Center.Common.dll` | not referenced by any game assembly (only by each other) | never; can be left out. The game's `NativeArray` use is `UnityEngine.CoreModule`'s, which this engine implements |
+
+Current versions of uGUI, TextMeshPro and Timeline are, to our knowledge, distributed under the
+Unity Companion License (use only with the Unity engine), which is why they are replaced.
 
 ## Unity data the game reads
 

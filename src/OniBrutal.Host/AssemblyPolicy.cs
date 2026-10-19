@@ -15,8 +15,9 @@ namespace OniBrutal.Host
     ///    in Managed/ (mscorlib, System.*, Mono.Security, I18N…) are never loaded.
     /// 2. Unity engine assemblies (UnityEngine, UnityEngine.*Module) resolve to our facades in
     ///    engine/, which forward to OniBrutal.UnityEngine; the engine bridge ships with the host.
-    /// 3. Unity's packages (UnityEngine.UI, TextMeshPro, Timeline) load from Managed/, or, with
-    ///    `--ui-packages DIR`, this project's replacements found in DIR (PLAN M9).
+    /// 3. Unity's packages (UnityEngine.UI, TextMeshPro, Timeline) are this project's replacements
+    ///    (PLAN M9), from packages/ next to the host or `--ui-packages DIR`; with
+    ///    `--shipped-ui-packages` (differential runs) they load as shipped from Managed/.
     /// 4. Everything else — the game and its third-party libraries — loads from Managed/.
     ///
     /// The game runs in the default load context, so its Type.GetType, Assembly.Load and
@@ -51,9 +52,11 @@ namespace OniBrutal.Host
         /// Where the replacements load from; null loads the shipped packages from Managed/.
         static string? packagesDir;
 
-        public static void Install(string gameDataDir, string hostDir, string? uiPackagesDir = null)
+        /// `uiPackagesDir` null: the replacements the host ships in packages/; `shippedUiPackages`:
+        /// none.
+        public static void Install(string gameDataDir, string hostDir, string? uiPackagesDir = null, bool shippedUiPackages = false)
         {
-            packagesDir = uiPackagesDir;
+            packagesDir = shippedUiPackages ? null : uiPackagesDir ?? Path.Combine(hostDir, "packages");
             managedDir = Path.Combine(gameDataDir, "Managed");
             // Unity's Windows player keeps 64-bit plugins in Plugins/x86_64; the Linux build in Plugins.
             var x64 = Path.Combine(gameDataDir, "Plugins", "x86_64");

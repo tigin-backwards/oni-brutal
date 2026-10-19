@@ -243,18 +243,24 @@ Open:
 - Parity runs: save cross-load between the platforms, menus and options, mods, the Windows
   original as reference where it can run without the user's own data and account.
 
-### M9 — Without Unity's packages (started 2026-10-18)
+### M9 — Without Unity's packages (started 2026-10-18; stages 1–4 done 2026-10-18)
 
-The goal is that nothing tied to Unity is loaded. Three Unity packages still load from
+**Status:** this project's uGUI, TextMeshPro and Timeline are written (`src/UnityEngine.UI`,
+`src/Unity.TextMeshPro`, `src/Unity.Timeline`) and are what the host loads by default, from
+`packages/` next to it; `--shipped-ui-packages` loads Unity's instead (the differential runs'
+reference). Their tests pass against both the shipped packages and ours (47 uGUI, 71
+TextMeshPro and Timeline), ApiCheck finds nothing missing, and the differential runs differ only
+where two shipped runs do or by float rounding (`docs/PARITY.md`). The frame-rate gate is open.
+
+The goal is that nothing tied to Unity is loaded. Three Unity packages loaded from
 `Managed/`:
 - **uGUI** (`UnityEngine.UI.dll`);
 - **TextMeshPro** (`Unity.TextMeshPro.dll`);
 - **Timeline** (`Unity.Timeline.dll`), which is referenced but has no content in the game.
 
 All three are under the Unity Companion License. They are replaced by this project's
-assemblies of the same names, built into the host's `engine/` folder.
-`AssemblyPolicy` already prefers an assembly found there over `Managed/`, so neither the game
-nor the host needs a change to pick them up.
+assemblies of the same names, built into the host's `packages/` folder, which `AssemblyPolicy`
+prefers over `Managed/`.
 
 **What has to be kept:**
 - **What the game calls:** 83 uGUI types (281 member references) and 34 TextMeshPro types
@@ -277,8 +283,8 @@ implementations, one functional specification per area. The implementations may 
   the game needs, and the exact serialized fields. Like `tools/SurfaceGen`, it never reads
   method bodies.
 - **Unity's public documentation:** the uGUI and TextMeshPro manuals and API references.
-- **The shipped packages as a black box:** `--ui-packages shipped|ours` picks which assemblies
-  a run loads. A differential dump records the results of both on the same screens, and the
+- **The shipped packages as a black box:** `--shipped-ui-packages` or `--ui-packages DIR` picks
+  which assemblies a run loads. A differential dump records the results of both on the same screens, and the
   implementations are judged on the difference. They never read the shipped code.
 
 **Stages**, each closed by the gate below:

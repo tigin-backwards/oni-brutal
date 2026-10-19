@@ -148,10 +148,12 @@ Legend: `[x]` verified · `[ ]` not yet verified · `[~]` deviation (see the not
 - [x] Dev tools (debug mode, Ctrl+\`): `ImGuiRenderer` creates its target (`RenderTextureDescriptor`, `GetTemporary`) as in the original; the game's Linux `cimgui.so` has no `SetKAssertCB`, so both players log `EntryPointNotFoundException` and then crash natively in `igRender` (the dev tools do not work in the Linux build). The command-buffer path ImGui draws with (`DrawMesh`, scissor rectangles, view/projection matrices, `Graphics.ExecuteCommandBuffer`) is implemented for a cimgui that has the entry point
 - [x] Instant build (Ctrl+F4), Dev Life Support, Dev Generator in the build menu
 
-## M9: this project's uGUI against the shipped package
+## M9: this project's UI packages against the shipped ones
 
-`scripts/m9-compare.sh` runs each scenario with Unity's shipped `UnityEngine.UI.dll` and with
-`src/UnityEngine.UI` (written from `docs/cleanroom/ugui.md`), the shipped TextMeshPro in both.
+`scripts/m9-compare.sh` runs each scenario with Unity's shipped packages and with this
+project's (`src/UnityEngine.UI`, `src/Unity.TextMeshPro`, `src/Unity.Timeline`, written from
+`docs/cleanroom/`). The uGUI results below were taken with the shipped TextMeshPro on both
+sides; the TextMeshPro results with all three of ours.
 A difference is accepted when a run of the same scenario with the shipped package on both sides
 (a baseline, `scripts/m9-compare.sh SCENARIO OUT EMPTY-DIR`) shows it too.
 
@@ -167,6 +169,11 @@ A difference is accepted when a run of the same scenario with the shipped packag
 - [x] `newgame`: what the game randomizes (the initial coordinates before they are typed, the
   story shown first, the Duplicants, their name labels) and the world generation's progress at a
   given frame; every difference also appears between two shipped runs.
+- [x] TextMeshPro and Timeline, all three packages ours: `menu`, `options-dropdown`,
+  `options-audio`: the DLC glow only. `naming`: the glow and the notification timing seen with
+  uGUI. `codex` and `colony` (frames 1550–2200): two research labels (Farm Station, Liquid and
+  Gas Cargo) whose preferred width is 0.01 off, float rounding; and in `colony` the Database
+  search caret's blink.
 - [~] 2D colliders never block a `GraphicRaycaster` (blocking objects TwoD/All): the engine runs no
   2D physics queries. The shipped package cannot do it on this engine either.
 

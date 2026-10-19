@@ -40,7 +40,7 @@ if [ -n "${SHIPPED_FROM:-}" ]; then
     cp "$SHIPPED_FROM/shipped.log" "$out/" 2>/dev/null || true
     echo "shipped: reused from $SHIPPED_FROM"
 else
-    run shipped
+    run shipped --shipped-ui-packages
 fi
 run ours --ui-packages "$packages"
 status=0

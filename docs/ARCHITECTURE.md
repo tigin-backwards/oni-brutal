@@ -23,7 +23,7 @@ We replace **all three**: (1) and (2) with our engine, (3) with .NET 10.
 | Assembly | Why it stays |
 |---|---|
 | `Assembly-CSharp`, `Assembly-CSharp-firstpass` | The game. |
-| `UnityEngine.UI.dll`, `Unity.TextMeshPro.dll`, `Unity.Timeline.dll` | Package code compiled into the game, running only on the public `UnityEngine.*` API. The shipped TextMeshPro is a **Klei fork** (`KForceUpdateDirty`, `TMP_StyleSheet.instance`); the game subclasses uGUI types and depends on their protected surface and internal ordering (*usage §8*). Reimplementing them would re-derive behaviour the game was tuned against and lose Klei's changes. They are treated exactly like `Assembly-CSharp`: IL we execute, not engine we replace. |
+| `UnityEngine.UI.dll`, `Unity.TextMeshPro.dll`, `Unity.Timeline.dll` | *Superseded by PLAN M9: replaced by this project's clean-room packages; the shipped ones remain the differential reference.* Package code compiled into the game, running only on the public `UnityEngine.*` API. The shipped TextMeshPro is a **Klei fork** (`KForceUpdateDirty`, `TMP_StyleSheet.instance`); the game subclasses uGUI types and depends on their protected surface and internal ordering (*usage §8*). Reimplementing them would re-derive behaviour the game was tuned against and lose Klei's changes. They are treated exactly like `Assembly-CSharp`: IL we execute, not engine we replace. |
 | `FMODUnity*.dll`, `com.rlabrecque.steamworks.net.dll`, `ImGui.NET.dll`, `Newtonsoft.Json`, `VYaml`, `LibNoiseDotNet`, `Ionic.Zip`, `ArabicSupport`, … | Third-party game dependencies. |
 | Native plugins (`libSimDLL.so`, `libfmodstudio.so`, `libresonanceaudio.so`, `libsteam_api.so`, `cimgui.so`) | The game's own natives, P/Invoked by game code. |
 | All data files (`globalgamemanagers*`, `level*`, `*.assets`, `.resS`, `resources.resource`, `StreamingAssets/**`, `Resources/unity default resources`, `Resources/unity_builtin_extra`) | Loaded read-only by our asset layer. |
@@ -77,9 +77,10 @@ resolves names the framework does not provide:
 3. Unity's own support packages (Burst, Collections, Mathematics, MemoryProfiler, Profiling.Core,
    Multiplayer.Center.Common) are not loaded: they implement engine features we replace and no
    game assembly references them.
-4. Everything else loads from `Managed/` (game, third-party libraries, and Unity's package code
-   uGUI/TMP/Timeline). Our Steamworks.NET port and the engine bridge ship with the host and
-   therefore take precedence.
+4. Unity's UI packages (uGUI, TMP, Timeline) are this project's (PLAN M9), from `packages/`
+   next to the host; `--shipped-ui-packages` loads the shipped ones from `Managed/` instead.
+5. Everything else loads from `Managed/` (game and third-party libraries). Our Steamworks.NET
+   port and the engine bridge ship with the host and therefore take precedence.
 
 The scripting assemblies of `ScriptingAssemblies.json` are preloaded before any game code runs,
 as the player does.

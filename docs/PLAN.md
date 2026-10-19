@@ -377,6 +377,13 @@ unchanged.
   each time) kept per type; the same answers. U57: CoreCLR's share of a save 19% → 8%, saves
   about 12% shorter (4.17 → 3.66 s averaged over five).
 
+- `fast-anim-cleanup`: KBatchedAnimUpdater sweeps 16 chunks of its controller grid each frame for
+  destroyed controllers, reading every controller there; the tweak keeps the ids of controllers
+  destroyed in the last full round of the sweep and sweeps a chunk only when its dictionary still
+  holds one, so the same entries go at the same sweep. U57: 94% of chunk sweeps skipped (37,700
+  verified with ONI_TWEAK_VERIFY, no destroyed entry found in a skipped chunk), 0.48 → 0.12 ms a
+  frame.
+
 Measured and not kept: the loading side of fast-serialization (a U57 load produced the same
 colony, 3 bytes of time of day apart, in 31.3 s against 31.6), an exact early-out for
 sublimation and a canvas build cache (docs/research/u57-frame-inventory.md).

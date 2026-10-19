@@ -421,6 +421,20 @@ Environment notes:
   thirds, collection pauses likewise), back to back: DeCrew 48–56 fps against 17–20, a cycle every
   210 s against 229–232 s (the simulation, not the frame, now sets the pace); U57 17–18.3 fps
   against 8.3–9.5, a cycle every 219–222 s against 363–368 s.
+  Where U57's frame goes (2026-10-19, Windows, EventPipe CPU sampling of the main thread, 81 ms
+  frames at the time): about two thirds is the game's own logic (sim step, state machines,
+  conveyor rendering), so even a free engine would leave U57 near 21 fps. Ruled out as limits:
+  GC (about 1.4% of the frame; server GC cuts pauses fourfold and the autosave hitch threefold
+  for about 2 GB more memory, without raising the frame rate), lock contention (about ten waits
+  per 600 frames; the Monitor time EventPipe shows is its safe-point sampling bias, absent from
+  perf on Linux), CPU contention (the process uses under two of sixteen threads) and the draw
+  count (about 1,500 draws a frame from the game's own batching, about 2.5 ms of recording).
+  Engine costs it found and removed: page faults in the texel copies of the textures the game
+  re-applies every frame (about 20 MB a frame; 3.8 ms, now 1.8, with reused buffers), canvas
+  elements' property sheets refilled and compared every frame (over 700 elements), and
+  reflection in Instantiate's field copies. U57 measured back to back against the build before
+  them: 12.4–12.9 fps against 12.2–12.5 in steady windows; the machine's other load moved the
+  same build between 12.5 and 16 fps.
 - Clean-room rewrites (2026-10-18): code found to be modelled on Unity's managed source was
   rewritten from functional specifications by separate implementations (docs/cleanroom,
   docs/LICENSING.md "Provenance"):

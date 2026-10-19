@@ -33,7 +33,7 @@ namespace UnityEngine
         public bool CompareTag(string tag) => gameObject.CompareTag(tag);
 
         public Component GetComponent(Type type) => gameObject.GetComponent(type);
-        public T GetComponent<T>() => (T)(object)Components.First(ComponentNative.GameObject, typeof(T));
+        public T GetComponent<T>() => Components.First<T>(ComponentNative.GameObject);
         public Component GetComponent(string type) => gameObject.GetComponent(type);
 
         public bool TryGetComponent(Type type, out Component component) => gameObject.TryGetComponent(type, out component);

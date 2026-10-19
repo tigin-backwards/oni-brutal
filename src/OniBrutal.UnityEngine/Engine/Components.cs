@@ -18,6 +18,22 @@ namespace OniBrutal.Engine
             return null;
         }
 
+        /// First<T> and All<T>: the generic queries the game makes constantly (GetComponent<T> is
+        /// among its most frequent engine calls), as a compiled type test instead of
+        /// Type.IsInstanceOfType per component; the same matching.
+        public static T First<T>(GameObjectNative go)
+        {
+            foreach (var c in go.Components)
+                if (c is T match) return match;
+            return default;
+        }
+
+        public static void All<T>(GameObjectNative go, List<T> results)
+        {
+            foreach (var c in go.Components)
+                if (c is T match) results.Add(match);
+        }
+
         /// Unity matches the component's class name (script or engine class).
         public static Component FirstByName(GameObjectNative go, string typeName)
         {

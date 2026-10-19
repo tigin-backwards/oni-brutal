@@ -92,13 +92,13 @@ namespace UnityEngine
             return Lifecycle.AddComponent(GameObjectNative, componentType);
         }
 
-        public T GetComponent<T>() => (T)(object)Components.First(GameObjectNative, typeof(T));
+        public T GetComponent<T>() => Components.First<T>(GameObjectNative);
         public Component GetComponent(Type type) => (Component)Components.First(GameObjectNative, type);
         public Component GetComponent(string type) => Components.FirstByName(GameObjectNative, type);
 
         public bool TryGetComponent<T>(out T component)
         {
-            component = (T)(object)Components.First(GameObjectNative, typeof(T));
+            component = Components.First<T>(GameObjectNative);
             return component != null;
         }
 
@@ -111,7 +111,7 @@ namespace UnityEngine
         public T[] GetComponents<T>()
         {
             var list = new List<T>();
-            Components.All(GameObjectNative, typeof(T), list);
+            Components.All(GameObjectNative, list);
             return list.ToArray();
         }
 
@@ -125,7 +125,7 @@ namespace UnityEngine
         public void GetComponents<T>(List<T> results)
         {
             results.Clear();
-            Components.All(GameObjectNative, typeof(T), results);
+            Components.All(GameObjectNative, results);
         }
 
         public void GetComponents(Type type, List<Component> results)

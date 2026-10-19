@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using OniBrutal.Engine;
 
@@ -10,6 +11,13 @@ namespace UnityEngine
         // Unity's only instance field. Here it holds the engine handle (OniBrutal.Engine.ObjectTable);
         // zero means "no native object": never created, or destroyed (fake null).
         private IntPtr m_CachedPtr;
+
+        /// The record m_CachedPtr's handle names, held directly: Native is read on nearly every
+        /// engine call the game makes (transform, gameObject, GetComponent), and a field read
+        /// is cheaper than resolving the handle. It keeps the record alive exactly as long as
+        /// this object, as the table's probe link does (ObjectTable.Weaken), and is cleared with
+        /// the handle.
+        private NativeObject m_Native;
 
         /// Set by the engine around construction of a component or ScriptableObject so that the
         /// base constructor binds the managed object to its native record (Unity creates the
@@ -46,6 +54,7 @@ namespace UnityEngine
         {
             if (native.InstanceId == 0) native.InstanceId = ObjectTable.NewInstanceId(native.IsPersistent);
             native.Managed = this;
+            m_Native = native;
             Volatile.Write(ref m_CachedPtr, ObjectTable.Register(native));
         }
 
@@ -54,6 +63,7 @@ namespace UnityEngine
         {
             var native = Native;
             Volatile.Write(ref m_CachedPtr, IntPtr.Zero);
+            m_Native = null;
             if (native != null) ObjectTable.Unregister(native);
         }
 
@@ -61,7 +71,11 @@ namespace UnityEngine
         internal IntPtr Handle => Volatile.Read(ref m_CachedPtr);
 
         /// The native record, or null if this object is not alive. Safe from any thread.
-        internal NativeObject Native => ObjectTable.Resolve(Volatile.Read(ref m_CachedPtr));
+        internal NativeObject Native
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => Volatile.Read(ref m_CachedPtr) != IntPtr.Zero ? m_Native : null;
+        }
 
         /// The native record of an object that must be alive; throws Unity's error otherwise.
         internal NativeObject NativeOrThrow
@@ -117,10 +131,14 @@ namespace UnityEngine
             return (n is ComponentNative c ? c.GameObject.Name : n.Name) + " (" + GetType().FullName + ")";
         }
 
+        // Inlined into callers: the game null-checks objects everywhere (1.4% of a large colony's
+        // main thread was calls to the comparison).
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static bool IsAlive(Object o) => (object)o != null && Volatile.Read(ref o.m_CachedPtr) != IntPtr.Zero;
 
         /// Unity's equality: a destroyed object, or one without a native object, counts as null,
         /// so it equals null and any other such object; live objects are equal only to themselves.
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static bool SameOrBothNull(Object x, Object y)
         {
             bool xAlive = IsAlive(x), yAlive = IsAlive(y);
@@ -135,8 +153,11 @@ namespace UnityEngine
             return other == null && !IsAlive(this);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(Object x, Object y) => SameOrBothNull(x, y);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(Object x, Object y) => !SameOrBothNull(x, y);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator bool(Object exists) => IsAlive(exists);
 
         // ---- Destruction ----

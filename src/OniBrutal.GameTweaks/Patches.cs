@@ -12,6 +12,7 @@ namespace OniBrutal.GameTweaks
                 case OffscreenConveyors.Name: OffscreenConveyors.Install(harmony); return true;
                 case FastSaveTypeChecks.Name: FastSaveTypeChecks.Install(harmony); return true;
                 case FastAnimCleanup.Name: FastAnimCleanup.Install(harmony); return true;
+                case SlowReachability.Name: SlowReachability.Install(harmony); return true;
                 default: return false;
             }
         }

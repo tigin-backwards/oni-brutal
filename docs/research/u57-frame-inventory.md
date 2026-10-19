@@ -282,14 +282,15 @@ What is left above 0.3 ms a frame, and why it is not done:
 
 | Candidate | ms | Why not done |
 |---|---|---|
-| Brain sensors and fetch searches (ClosestPickupableSensor, FetchManager) | ~2.6 (the item scans about 1.2 of it) | Open. The scans walk the inventory's per-tag sets, whose order sets the tie-breaking, so a table can only sit beside them, and finding an item's row costs a read of the item (one of the five or six reads it saves). It stays exact only by hooking every write to item tags, mass, storage, reservations and cell, many through simulation paths. Reordering the sensor's two tests is not exact: the path cost goes through the item's offset tracker, which caches and registers partitioner entries. |
+| Brain sensors and fetch searches (ClosestPickupableSensor, FetchManager) | 0.06 measured | Ruled out. Timed directly (a stopwatch around the sensors' FindClosestPickupable), the scans cost 0.064 ms a frame in U57 (Bionic power-bank sensors, about 0.2 scans a frame over 700 items); the 0.68 ms the perf profile attributed to the sensor came from stale perf-map entries (the JIT reuses code memory, so a later method's samples can resolve to an earlier symbol). The fetch helpers are 0.1–0.15 ms each. |
 | Draw recording on a worker thread (engine) | ~1.5 | Ruled out. The GL calls already run on the device's worker; what stays on the main thread is resolving each draw's uniform values. The game reuses and changes property blocks and materials between draws of one frame, so moving the resolution needs each draw's inputs copied at call time, which costs about what resolving them does. |
 | Canvas build and HUD draw lists (engine) | 0.5–0.7 each | What remains is visible UI (about 2,600 objects, 670 draws a frame). An unchanged visible subtree still needs its renderers' depths rewritten whenever anything before it changes, and a cached draw list still needs each renderer checked for changes; either reads the same renderers the current walk reads. Expected saving under 0.3 ms each. |
 | Animation updates, events, uploads | 2.1–2.3 each | Per-object work. Skipping identical-frame uploads is not exact and gained nothing; event-free looping animations held paused would freeze synchronized children. |
 | Critter temperature, building input checks | 0.9, 1.1 | Each tick recomputes from live state (cell temperatures, power and pipe connections): no no-op to skip, and lowering their rates is not acceptable. |
 | Cell-change handlers, conduit flow, power, ranching, plant absorbers | 0.8–2.3 each | The game's own work per moved object or building; nothing exact to skip found. |
 
-Together the first three are roughly 4–6 ms if all done, which would bring U57 to about 22–23 fps.
+With those ruled out, no candidate of 0.3 ms or more that keeps the game's results remains: the
+goal's second stop condition. U57 stays at about 19–20 fps.
 Most of the rest of the frame is game logic spread over many systems, each reading thousands of
 scattered objects; 25 fps would need those systems restructured around flat data (see the
 data-layout spike above), not tweaks.

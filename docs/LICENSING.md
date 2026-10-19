@@ -141,3 +141,9 @@ Rules for new engine code:
 - Private structure and names are the project's own.
 - When behaviour has to match Unity, the source is the documentation or a measurement, and the
   code says which.
+
+## This project's own licence
+
+None yet: the repository is unlicensed (all rights reserved) by decision of 2026-10-19, until
+a public release is prepared. That release also needs a clean history (no tooling for the
+original player or a Steam double that owns every DLC in it).

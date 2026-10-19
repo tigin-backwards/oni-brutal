@@ -477,6 +477,12 @@ Environment notes:
   generic component queries without reflection) and server GC, three alternating pairs against
   the build before this work: 13.71 fps against 12.05 in steady windows (+14%), 10.7–11.1
   against 9.0–9.4 in the autosave window; every run of the new build above every run of the old.
+  Then (2026-10-19, measured on Linux, where U57 runs with the Windows install's DLC content and
+  perf profiles without the Windows sampler's bias, docs/research/u57-frame-inventory.md): the
+  device's texture snapshots copied on worker threads (2.2 ms a frame off the main thread),
+  components holding their transform and GameObject, and roots' positions read without their
+  world matrix. Three alternating pairs against the build before them: 16.01 fps against 14.74 in
+  steady windows (+8.6%).
 - Clean-room rewrites (2026-10-18): code found to be modelled on Unity's managed source was
   rewritten from functional specifications by separate implementations (docs/cleanroom,
   docs/LICENSING.md "Provenance"):

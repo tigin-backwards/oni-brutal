@@ -384,6 +384,16 @@ unchanged.
   that slowed only items in storage gained nothing: telling whether an item is stored reads the
   item, which is most of what the check costs.
 
+- `fast-sublimation`: the update buckets of Sublimates get a batch function (the scheduler's
+  batch_update_delegate: same items, order, time steps and sub-ticks) that skips an item's
+  Sim200ms only when it would change nothing: not sealed and no tag changed since its last full
+  update, same cell, warmer than its element's limit in the sim's chunk, cell still full, left
+  blocked on pressure. The skipped update's temperature read side effect (the chunk's heat delta
+  copied to its SimTemperatureTransfer) is made. U57: about 76% of updates skipped, 4.7 million
+  verified with ONI_TWEAK_VERIFY (the full update run instead changed nothing); sublimation
+  1.45 → about 1.0 ms a frame. A skip still reads the item's transform and temperature
+  component, which is what remains.
+
 - `fast-anim-cleanup`: KBatchedAnimUpdater sweeps 16 chunks of its controller grid each frame for
   destroyed controllers, reading every controller there; the tweak keeps the ids of controllers
   destroyed in the last full round of the sweep and sweeps a chunk only when its dictionary still

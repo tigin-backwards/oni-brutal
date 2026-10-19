@@ -150,6 +150,10 @@ Columns: ms per frame (main thread), count of the objects involved where known, 
 - **Reachability every 4 game seconds: 1.88 → 0.53 ms.** Done (`slow-reachability`, changes
   behaviour, docs/PLAN.md). Slowing only stored items (most of the 27,000 pickupables) gained
   nothing: the test for being stored reads the item, which is most of the check's cost.
+- **Sublimation, batched with exact skips: 1.45 → about 1.0 ms.** Done (`fast-sublimation`,
+  docs/PLAN.md). The earlier exact early-out gained nothing because it still entered each item;
+  the batch reaches an item's row by a reference compare and reads only its transform and
+  temperature component (about 0.3 µs a skip, 1,500 skips a frame).
 - **Animation grid cleanup: 0.48 → 0.12 ms.** Done (`fast-anim-cleanup`, docs/PLAN.md).
 - **Canvas walk, renderer-free subtrees: not worth it.** Only about 7% of its visits are in
   subtrees without any CanvasRenderer.

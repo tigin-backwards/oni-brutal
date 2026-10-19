@@ -117,6 +117,14 @@ Columns: ms per frame (main thread), count of the objects involved where known, 
   moves are conveyor items interpolated along their rails every frame (SolidConduitFlow
   RenderEveryTick), which could only be reduced by changing when items move (class C).
 
+- **Draw recording, per-block uniform ownership cache: no gain, dropped.** Caching, per program and
+  block, which uniforms a draw's block sets (valid while the block's set of properties is
+  unchanged; 1.6 million cached answers verified) removed the lookups from the profile but moved
+  GlDevice.Draw only from 4.12 to 4.05 ms. The rest of recording resolves values that do change;
+  what remains is structural (recording on another thread, pipelined with the next frame).
+- **Canvas walk, renderer-free subtrees: not worth it.** Only about 7% of its visits are in
+  subtrees without any CanvasRenderer.
+
 The same applies to the other per-item systems (reachability, critter temperature, requirement
 checks): caching what a call looks up cannot remove the cost of visiting each object. Gains need
 whole loops skipped exactly (as the radbolt gather) or the engine work they cause reduced.

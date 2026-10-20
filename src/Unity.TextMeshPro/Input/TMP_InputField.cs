@@ -629,7 +629,8 @@ namespace TMPro
                     break;
                 }
             }
-            if (changed) UpdateLabel();
+            // Every edit shows its text as it is made; this catches one that did not.
+            if (changed && !ReferenceEquals(m_Text, m_LabelText)) UpdateLabel();
             eventData.Use();
         }
 
@@ -707,14 +708,29 @@ namespace TMPro
 
         string SelectedText() => HasSelection ? m_Text.Substring(SelectionStart, SelectionEnd - SelectionStart) : "";
 
+        // A paste inserts its characters one by one (each validated, each raising
+        // onValueChanged) and shows the result once: the text is laid out once per paste
+        // (measured on the shipped package).
         protected virtual void Append(string input)
         {
             if (m_ReadOnly || input == null) return;
-            foreach (char c in input)
+            m_DeferLabel = true;
+            try
             {
-                if (c >= ' ' || c == '\t' || c == '\r' || c == '\n') Append(c == '\r' ? '\n' : c);
+                foreach (char c in input)
+                {
+                    if (c >= ' ' || c == '\t' || c == '\r' || c == '\n') Append(c == '\r' ? '\n' : c);
+                }
             }
+            finally { m_DeferLabel = false; }
+            UpdateLabel();
         }
+
+        // Set while a paste inserts its characters.
+        bool m_DeferLabel;
+
+        // The text the label last showed.
+        string m_LabelText;
 
         // Inserts a typed character at the caret (replacing the selection) once it passes the
         // validation: the content type's, a custom validator's (which inserts it itself) or the
@@ -728,7 +744,12 @@ namespace TMPro
             if (m_ReadOnly) return;
             if (m_CharacterValidation == CharacterValidation.CustomValidator)
             {
-                if (HasSelection) DeleteSelectionInternal();
+                if (HasSelection)
+                {
+                    DeleteSelectionInternal();
+                    // Shown even if the character is then refused.
+                    UpdateLabel();
+                }
                 if (m_CharacterLimit > 0 && m_Text.Length >= m_CharacterLimit) return;
                 if (m_InputValidator == null) return;
                 string t = m_Text;
@@ -1037,8 +1058,9 @@ namespace TMPro
         // editing is allowed) with the end marker, and the placeholder when it is empty.
         protected void UpdateLabel()
         {
-            if (m_TextComponent == null || m_TextComponent.font == null || m_PreventCallback) return;
+            if (m_TextComponent == null || m_TextComponent.font == null || m_PreventCallback || m_DeferLabel) return;
             m_PreventCallback = true;
+            m_LabelText = m_Text;
             string shown;
             if (m_InputType == InputType.Password) shown = new string(m_AsteriskChar, m_Text.Length);
             else shown = m_Text;
@@ -1046,7 +1068,8 @@ namespace TMPro
             if (m_Placeholder != null) m_Placeholder.enabled = empty;
             m_TextComponent.text = shown + EndMarker;
             // The text is laid out at once, so that the caret's character indices follow the
-            // change (measured: the shipped package's textInfo is current after a key).
+            // change (measured: the shipped package lays it out once per typed character, and
+            // not again in the canvas rebuild).
             m_TextComponent.ForceMeshUpdate();
             m_PreventCallback = false;
             MarkGeometryChanged();

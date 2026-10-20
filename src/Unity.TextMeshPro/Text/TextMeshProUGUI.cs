@@ -242,6 +242,9 @@ namespace TMPro
 
         private protected override void RegenerateNow()
         {
+            // The mesh made now is current: the next canvas rebuild does not lay the text out
+            // again (measured: the shipped package's doesn't, after ForceMeshUpdate).
+            m_VerticesDirty = false;
             m_IgnoreActiveStateNow = true;
             try { GenerateTextMesh(); }
             finally { m_IgnoreActiveStateNow = false; }

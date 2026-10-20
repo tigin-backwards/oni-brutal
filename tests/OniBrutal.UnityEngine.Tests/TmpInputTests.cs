@@ -330,6 +330,43 @@ namespace OniBrutal.Tests
         }
 
         [Fact]
+        public void EachChangeLaysTheTextOutOnceAndAPasteOnce()
+        {
+            var field = NewField();
+            field.ActivateInputField();
+            Frame();
+            var shown = field.textComponent;
+            int layouts = 0, changes = 0;
+            System.Action<Object> count = o => { if (o == shown) layouts++; };
+            TMPro_EventManager.TEXT_CHANGED_EVENT.Add(count);
+            try
+            {
+                field.onValueChanged.AddListener(_ => changes++);
+                // One layout per typed character, none again in the canvas rebuild.
+                Type(Char('a'), Char('b'), Char('c'));
+                Canvas.ForceUpdateCanvases();
+                Assert.Equal(3, layouts);
+                Assert.Equal(4, shown.textInfo.characterCount);
+                // A paste raises onValueChanged per character and lays the text out once.
+                layouts = changes = 0;
+                GUIUtility.systemCopyBuffer = new string('q', 3000);
+                Type(Key(KeyCode.V, 'v', EventModifiers.Control));
+                Canvas.ForceUpdateCanvases();
+                Assert.Equal(1, layouts);
+                Assert.Equal(3000, changes);
+                Assert.Equal(3003, field.text.Length);
+                Assert.Equal(3003, field.caretPosition);
+                Assert.Equal(3004, shown.textInfo.characterCount);
+                // Setting the text lays it out once.
+                layouts = 0;
+                field.text = "hello";
+                Canvas.ForceUpdateCanvases();
+                Assert.Equal(1, layouts);
+            }
+            finally { TMPro_EventManager.TEXT_CHANGED_EVENT.Remove(count); }
+        }
+
+        [Fact]
         public void DeselectingEndsEditing()
         {
             var field = NewField();

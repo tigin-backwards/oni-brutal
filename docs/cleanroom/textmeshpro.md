@@ -513,7 +513,12 @@ from what is described here, the measurement wins and this section is corrected.
      "a" in "a😀b" it is as tall as "a", after "□" as the fallback's □. The selection runs
      from its first character's origin to its last's advance.
    - The text component is laid out when a key changes the text, so `textInfo` and the
-     character indices are current right after it.
+     character indices are current right after it. Counted with `TEXT_CHANGED_EVENT` (test
+     `EachChangeLaysTheTextOutOnceAndAPasteOnce`): three characters typed in one frame lay it
+     out three times; a paste of 3,000 characters raises `onValueChanged` 3,000 times and lays
+     it out once; setting `text` lays it out once. The canvas rebuild after any of these does
+     not lay it out again (a text laid out by `ForceMeshUpdate` is not regenerated in the
+     next rebuild unless it changes again).
    - Not matched: setting `caretPosition` in code does not redraw the shipped package's
      caret until the next change; this implementation redraws it at the next rebuild.
 

@@ -390,6 +390,13 @@ package (M9). They refine the sections above.
 - **`textBounds`** spans the characters' advances.
 - **Input field:** `inputValidator` doesn't change `characterValidation`.
 - **Dynamic font assets** use the "TextMeshPro/Mobile/Distance Field" shader.
+- **A saved material of another atlas:** when a text is loaded, a saved `m_sharedMaterial`
+  whose main texture is not its font's atlas texture is replaced by the font's material.
+  A saved material that does draw the font's atlas is kept, whichever material it is, and so
+  is a material set at run time, whatever its atlas. Re-enabling a text does not check
+  again. (Found in QA: the Duplicant cards' expectation lines are saved with a font other than
+  their material's, RobotoCondensed-Regular Material; kept, the glyphs sampled the wrong
+  atlas. Test `ASavedMaterialOfAnotherAtlasGivesWayToTheFontsMaterial`.)
 - **Timeline:** `TimelineClip` has no public constructor.
 
 ### Corrections from the defect review (2026-10-20)

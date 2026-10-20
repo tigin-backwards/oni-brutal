@@ -37,6 +37,7 @@ namespace OniBrutal.Tests
             ["LiberationSans SDF"] = ("sharedassets0.assets", 17851),
             ["LiberationSans SDF - Fallback"] = ("sharedassets0.assets", 17850),
             ["NotoSans-Regular"] = ("sharedassets0.assets", 20151),
+            ["RobotoCondensed-Regular"] = ("sharedassets0.assets", 20156),
             ["Economica-Bold-OTF SDF"] = ("sharedassets0.assets", 20028),
             ["GRAYSTROKE REGULAR SDF"] = ("sharedassets0.assets", 20032),
             ["oni_sprite_assets"] = ("resources.assets", 177),

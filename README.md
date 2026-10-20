@@ -1,119 +1,136 @@
 # oni-brutal
 
-A replacement for the Unity player that Oxygen Not Included ships with, built on
-[BRUTAL](https://github.com/ahwootech/BRUTAL) and running on stock .NET 10 CoreCLR. The game's own
-managed assemblies load unchanged. They bind to generated `UnityEngine.*Module` facades that
-forward to our engine, `src/OniBrutal.UnityEngine`. Windowing, input and OpenGL come from
-BRUTAL's GLFW and OpenGL bindings.
+A super fast, super sussy replacement for the Unity layer of Oxygen Not Included, artistically
+crafted by Claude.
 
-The repository has no game code or assets in it. You need your own copy of the game: the Linux
-build, and for the Windows player the Windows build (Steam) as well.
+I did this mostly for fun, to see how far Oxygen Not Included's performance can go on a modern
+.NET runtime (CoreCLR). I'd had the idea for a while, but none of the existing C# renderers
+sparked joy. When [BRUTAL](https://github.com/ahwootech/BRUTAL) went open source, it seemed like
+a good excuse to try a sexy new toy.
 
-## Requirements
+Klei's game DLLs load as they are, apart from two small compatibility fixes. Whatever they call
+into Unity for is reimplemented here.
 
-- Linux x64 with an OpenGL 4.5 driver. The Windows player (below) is built from Linux or WSL and
-  runs on Windows x64 with an OpenGL 4.5 driver and the .NET 10 runtime.
-- The .NET SDK pinned in `global.json` (10.0.402; later patch releases also work). If
-  `~/.dotnet/dotnet` exists, the scripts use it.
-- The Linux build of Oxygen Not Included. It is expected at `~/projects/oni-linux`; to use another
-  location, set `ONI_GAME_DIR` for the scripts and tests, and pass `-p:OniGameDir=...` to
-  `dotnet build`.
-- `libvpx` only for the test that compares the engine's VP8 decoder with it (skipped without
-  it); the engine decodes the game's videos itself.
-- To use the offline Steam stub: `python3` and binutils (`as`, `ld`).
+## Setup
 
-## Build
+You need your own copy of the game on Steam, on Linux or Windows (no macOS). Because this replaces
+the engine rather than patching the game, it can't ship as an ordinary Harmony mod. Instead, a setup script hooks it into the game's
+Steam launch options, so you still start the game from Steam as usual.
 
-```sh
-dotnet build OniBrutal.slnx              # debug: engine, host, tools, tests
-dotnet build src/OniBrutal.Host -c Release
-```
+<!-- TODO: release download link, and the exact script names once they exist -->
 
-Both builds write to `out/bin/<project>/<config>/`. The host's output holds everything needed to
-run: the engine, the BRUTAL native libraries, and the facades in `engine/`. After changing the
-engine, rebuild the host, not just the engine project.
+1. Download the latest release, or clone this repository.
+2. Run the setup script:
+   - Linux: `./setup.sh`
+   - Windows: `setup.ps1` (right-click → Run with PowerShell)
 
-`scripts/build-engine.sh [debug|release]` also lays out `out/engine` (the engine and its facades,
-without the host). The API conformance check reads from there.
+   It finds your Oxygen Not Included install through Steam and prints one line for the game's
+   launch options.
+3. In Steam, right-click Oxygen Not Included → Properties → Launch Options, and paste that line.
 
-## Run
+Then press Play in Steam as usual. To go back to the original game, clear the launch options.
 
-```sh
-scripts/run.sh                 # needs a running, logged-in Steam client
-scripts/run-offline.sh         # no Steam: loads tools/SteamStub in place of libsteam_api
-ONI_CONFIG=release scripts/run.sh
-```
+You'll need an OpenGL 4.5 graphics driver. The game uses your normal Steam account, DLCs, saves,
+settings and mods.
 
-Both scripts point `XDG_CONFIG_HOME` and `XDG_CACHE_HOME` at `out/run-home`, so saves, settings
-and mods stay apart from your real profile in `~/.config/unity3d`. Set `ONI_RUN_HOME` to use a
-different directory. Any other arguments go to the host. For example, `--log FILE`,
-`--headless --frames N`, `--capture FRAME:PATH` and `--max-frame-rate N` are useful in testing,
-and Unity's `-screen-width`, `-screen-height` and `-window-mode` flags also work. An unknown
-option prints the full list (`scripts/run.sh --help`).
+## Performance
 
-The offline stub reports that you own the base game, with no DLC and no Workshop items. It is a
-test double for machines without Steam, not a way to play.
+The biggest change is swapping the very garbage Mono runtime that Unity ships for CoreCLR. On
+top of that there are optimizations tuned to the way Oxygen Not Included uses the engine.
 
-## Windows
+On a late-game save (U57: Spaced Out with every DLC, cycle 17,000+), on the same machine, back to back:
 
-```sh
-scripts/build-windows.sh       # out/win: OniBrutal.exe, Restarter.exe, the Steam test double
-scripts/run-windows.sh         # from WSL: a test run of the Windows player on the Windows build
-```
+| | Original | oni-brutal |
+|---|---|---|
+| Frame rate at speed 3 | 6.5–6.8 fps | about 26 fps |
+| Loading the save | 3 min 50 s | 26–28 s |
+| Autosave freeze | <!-- TODO: measure the original --> | 4.8 s with the save tweaks (11.7 s without), compressing and writing moved off the main thread |
 
-The Windows player runs the Windows build's own data: its shaders carry OpenGL programs next to
-the Direct3D ones. `run-windows.sh` copies `out/win` to `%TEMP%\oni-brutal` and starts it through
-WSL with the Windows build from Steam (`ONI_WIN_GAME_DIR` to change it). Test runs keep away from
-your own game data, Steam account and speakers: `--run-home` gives the game a separate Documents,
-AppData and LocalLow under `%TEMP%\oni-brutal\run-home` (`ONI_RUN_HOME`), the offline Steam
-double replaces `steam_api64.dll`, and `--audio-wav` writes the game's sound to
-`fmodoutput.wav` there. To play, run `out/win/host/OniBrutal.exe --game "<game directory>"` on
-Windows with Steam running.
+Garbage-collection hitches are mostly gone: collections now run in the background, spread
+across every core, and their pauses are about a quarter as long.
 
-Comparisons with the original Windows player, under the same isolation:
-
-```sh
-scripts/windows-run-home.sh RUN_HOME SAVE out/bin/PerfProbe/release:-2037174645
-ONI_RUN_HOME='C:\...' scripts/original-windows.sh -screen-width 1024 -screen-height 768 -screen-fullscreen 0
-ONI_RUN_HOME='C:\...' scripts/run-windows.sh -screen-width 1024 -screen-height 768 -screen-fullscreen 0
-```
-
-`windows-run-home.sh` prepares a run home whose only colony the main menu resumes on its own,
-with mods enabled (`tools/PerfProbe` keeps the game at speed 3 and logs `PERF` frame rates). The
-original runs from a renamed copy of the install (`E:\Development\BrutalNotIncluded`, `ORIG_DIR`)
-with BepInEx 6 and `tools/OriginalIsolation`, which gives it the same separate Documents, local
-data and audio file; its first setup copies BepInEx from an existing install
-(`ONI_BEPINEX_SOURCE`). The copy carries its own product name, so Unity's registry and LocalLow
-data are its own too (details in the script).
-
-## Verify
-
-```sh
-scripts/check.sh
-dotnet test tests/OniBrutal.UnityEngine.Tests
-```
-
-`check.sh` is the gate before every commit. It builds the solution and runs both test suites.
-Then it checks the game's assemblies against the engine's API surface, and runs the host's type
-load, asset and binding checks against the installed game. Some tests read shaders and fonts from
-the game install, so the install must be present.
-
-## Known differences
-
-Number formatting in a few game paths and a handful of smaller gaps are documented as
-deviations in `docs/ARCHITECTURE.md` (D1–D10). Two of them are fixed by small run-time patches
-the host applies to game code, the only ones it makes: D1 (state-machine values in saves from
-the original player loaded at defaults) and D3 (local mods disabled at every launch).
-Floating-point results are not bit-identical to Mono's, and are not meant to be.
+<!-- TODO: machine specs. The frame rates are Linux, Xvfb at 1024×768. -->
+<!-- TODO: frame-rate numbers depend on the U57 tweak set; re-check after the setup's defaults are chosen -->
+<!-- TODO: the 26 fps figure is with every tweak, the "changes gameplay" ones included; without any tweak it's 17–18.5 fps -->
 
 
-## Documents
+<!-- TODO: before/after gameplay video showing the frame rate -->
 
-- `docs/PLAN.md`: milestones, their exit criteria, and current status.
-- `docs/ARCHITECTURE.md`: how the pieces fit together, and the deviations.
-- `docs/PARITY.md`: what has been compared against the original player, and how.
-- `docs/ENGINE-CONVENTIONS.md`: coding rules for the engine.
-- `docs/LICENSING.md`: what we redistribute, and what we rely on the user's install for.
-- `docs/GAME-UPDATES.md`: one-off checks to run again when the game updates.
-- `tools/UnityProbe`: a mod that records how the original player behaves, so the same
-  scenarios can be compared in both players.
+### Optional tweaks
+
+These change how some of the game's own code does its work, and are off unless you turn them on
+(`--game-tweak NAME`, or `--game-tweak all`). Most give exactly the same results faster. The
+ones marked **changes gameplay** trade a little exactness for speed.
+
+<!-- TODO: say which ones the setup script turns on by default -->
+
+- `fast-jobs`: the game's worker threads stop waking and waiting on each other for tiny jobs.
+- `fast-anim-events`, `fast-anim-cleanup`, `fast-symbol-overrides`: cheaper animation
+  bookkeeping every frame.
+- `fast-offset-tables`: Duplicants' fetch updates skip items whose work spots haven't changed.
+- `fast-sublimation`: skips sublimating items that are already blocked by full gas cells.
+- `fast-particle-collision`: radbolts stop searching every stored item for other radbolts.
+- `fast-serialization`, `fast-save-type-checks`, `fast-save-compression`, `no-save-gc`,
+  `background-save`: much shorter autosave freezes.
+- `off-screen-conveyors` (**changes gameplay**): items travelling on conveyor rails off screen
+  are only placed where they are once they stop or come into view. The rails carry exactly the
+  same things, but the items' positions on screen and in the world lag behind meanwhile.
+- `slow-reachability` (**changes gameplay**): checks whether jobs and items can be reached less
+  often, so Duplicants may notice a newly blocked or opened path a little later.
+  Temperature and building checks are never delayed.
+
+## Save compatibility
+
+Saves from the original game load here, and saves made here load in the original game. That
+includes saves written with `fast-save-compression`, which was checked both ways on a 690 MB
+colony.
+
+## Mod compatibility
+
+Most mods should theoretically work, since the game's code and its Harmony load as shipped. Mods
+that call Unity's API directly are a coin flip. I haven't tested any of them.
+
+## Could Klei do this?
+
+Possibly. In the age of agents this took about 5 days, so it isn't the insurmountable task it
+might once have looked like.
+
+But it has plenty of bugs, known and unknown. Its only real mandates were to leave no safe
+optimization behind, and not to crash *my* game. Much of the win comes from CoreCLR itself,
+which Unity's own CoreCLR move should bring to the original game too, eventually (it's been in
+Soon™ territory for years).
+
+This also rebuilds only what the game needs to run. Everything that Klei's development workflow
+needs from Unity would be lost:
+- the editor;
+- Unity's shader tooling;
+- the asset bundle build pipeline;
+- profiling and debugging tools;
+- the platforms this doesn't support (macOS);
+- and the general, accumulated knowledge of how Unity behaves.
+
+Unlike RimWorld, which uses very little of Unity, Oxygen Not Included leans on much more of it.
+
+So I'd only seriously look at something like this if Unity's own CoreCLR runtime can't get
+close to the same numbers.
+
+## Contributing
+
+Feel free to slop. [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) has the build, the test harness
+and the rest of the documentation.
+
+## Issues
+
+File an issue, and please attach your log. It's `Player.log` in:
+- Linux: `~/.config/unity3d/Klei/Oxygen Not Included/`
+- Windows: `%USERPROFILE%\AppData\LocalLow\Klei\Oxygen Not Included\`
+
+<!-- TODO: before release: licence; BRUTAL credit, logo and NOTICE.txt (its licence requires them) -->
+
+## Licence
+
+<!-- TODO -->
+
+Built on [BRUTAL](https://github.com/ahwootech/BRUTAL), Copyright (c) 2024 Ahwoo Limited.
+Oxygen Not Included is © Klei Entertainment; this project isn't affiliated with Klei or Unity,
+and contains none of the game's code.

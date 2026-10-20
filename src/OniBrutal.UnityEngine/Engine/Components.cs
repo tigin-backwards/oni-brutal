@@ -68,7 +68,7 @@ namespace OniBrutal.Engine
             {
                 int expected = 0;
                 foreach (var c in components) if (c is T) expected++;
-                if (expected != matches.Length) EngineLog.Engine($"component layouts: {go.Name} has {expected} {typeof(T).Name}, the layout {matches.Length}");
+                if (expected != matches.Length) EngineLog.Engine($"component layouts: {go.Name} has {expected} {typeof(T).Name}, the layout {matches.Length} ({System.Threading.Interlocked.Increment(ref wrong)})");
             }
         }
 

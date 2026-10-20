@@ -551,6 +551,18 @@ Final review pass (four fresh reviewers over the changes since 810508b):
   puts it; a background-save failure cannot fault later saves; a check that could not catch
   anything removed from fast-anim-events.
 
+- Round 5 (after those fixes): nothing new; every check passed and the captures were looked at.
+- Review of those fixes: two mediums fixed. off-screen-conveyors placed an item leaving the rail
+  from the wrong conduit (an item is drawn by the conduit whose last flow points into its cell,
+  between that cell and its own); a component-layout mismatch line of the multi-match path did
+  not reach verify (it now counts and ends with its number). Lows fixed: a damaged node table
+  is invalid data; a failed mapping's retry removes only its own entry and disposes a half-made
+  mapping; a bless records nothing from a failed run or without a frame rate, --bless-from fails
+  on a missing capture, both radbolt reports are required. TextMeshPro, no medium; lows left
+  (a drawn soft hyphen's ascender in the fit check, the truncation record's justify offset, the
+  record alone on its line having no height): edge cases of Flush alignment and fallback fonts
+  the game's texts were not seen to reach.
+
 References (captures, signatures, the frame-rate baseline) live in `out/qa/reference`, made with
 `--bless` once a run's captures and logs have been looked at; they hold game imagery and stay
 local. The U57 stages need content that cannot be published (DLC files, a DLC-owning Steam

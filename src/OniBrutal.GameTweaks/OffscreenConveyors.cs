@@ -45,13 +45,19 @@ namespace OniBrutal.GameTweaks
             if (!contents.pickupableHandle.IsValid() || !skipped.Remove(contents.pickupableHandle.index)) return;
             var pickupable = __instance.GetPickupable(contents.pickupableHandle);
             if (pickupable == null) return;
-            // Where the game's last move put it: between its cell and the one it came from.
-            var flow = __instance.GetConduit(cell_idx).GetLastFlowInfo(__instance);
+            // Where the game's last move put it: an item is drawn by the conduit it came from, whose
+            // last flow points into this cell, between that conduit's cell and this one (as in
+            // RenderEveryTick); an item that did not move this step rests at the cell's centre.
             Vector3 at = Grid.CellToPosCCC(cell_idx, Grid.SceneLayer.SolidConduitContents);
-            if (flow.direction != SolidConduitFlow.FlowDirection.None)
+            foreach (int source in new[] { Grid.CellAbove(cell_idx), Grid.CellBelow(cell_idx), Grid.CellLeft(cell_idx), Grid.CellRight(cell_idx) })
             {
-                int from = SolidConduitFlow.GetCellFromDirection(cell_idx, flow.direction);
-                at = Vector3.Lerp(at, Grid.CellToPosCCC(from, Grid.SceneLayer.SolidConduitContents), __instance.ContinuousLerpPercent);
+                if (!Grid.IsValidCell(source)) continue;
+                var conduit = __instance.GetConduit(source);
+                if (conduit.idx == -1) continue;
+                var flow = conduit.GetLastFlowInfo(__instance);
+                if (flow.direction == SolidConduitFlow.FlowDirection.None || SolidConduitFlow.GetCellFromDirection(source, flow.direction) != cell_idx) continue;
+                at = Vector3.Lerp(Grid.CellToPosCCC(source, Grid.SceneLayer.SolidConduitContents), at, __instance.ContinuousLerpPercent);
+                break;
             }
             pickupable.transform.SetPosition(at);
         }

@@ -133,7 +133,15 @@ namespace OniBrutal.Engine.Assets
             {
                 System.Threading.Interlocked.Increment(ref mappingsMade);
                 var file = MemoryMappedFile.CreateFromFile(Path.Combine(dataDir, k), FileMode.Open, null, 0, MemoryMappedFileAccess.Read);
-                return file.CreateViewAccessor(0, 0, MemoryMappedFileAccess.Read);
+                try
+                {
+                    return file.CreateViewAccessor(0, 0, MemoryMappedFileAccess.Read);
+                }
+                catch
+                {
+                    file.Dispose();
+                    throw;
+                }
             }, System.Threading.LazyThreadSafetyMode.ExecutionAndPublication));
             MemoryMappedViewAccessor mapped;
             try
@@ -142,7 +150,9 @@ namespace OniBrutal.Engine.Assets
             }
             catch
             {
-                streams.TryRemove(key, out _); // a failed mapping is tried again by the next read
+                // A failed mapping is tried again by the next read (only this one is removed: another
+                // thread may have mapped the file since).
+                streams.TryRemove(new KeyValuePair<string, Lazy<MemoryMappedViewAccessor>>(key, view));
                 throw;
             }
             mapped.ReadArray(offset, result, 0, (int)size);

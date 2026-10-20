@@ -33,12 +33,17 @@ done
 # --bless-from=RUN: a past run's dogfood captures and signatures, once looked at, become the
 # references (without running the scenarios again).
 if [ -n "$bless_from" ]; then
+    status=0
     for d in "$bless_from"/dogfood/*/; do
         name=$(basename "$d"); r="$root/out/qa/reference/dogfood/$name"
-        rm -rf "$r"; mkdir -p "$r"; cp "$d"/signatures.txt "$d"/f*.png "$r"/ || echo "FAIL: $name has no signatures or captures to bless"
-        rm -f "$r"/f*-diff.png; echo "blessed $name from $bless_from"
+        rm -rf "$r"; mkdir -p "$r"
+        if cp "$d"/signatures.txt "$d"/f*.png "$r"/; then
+            rm -f "$r"/f*-diff.png; echo "blessed $name from $bless_from"
+        else
+            echo "FAIL: $name has no signatures or captures to bless"; status=1
+        fi
     done
-    exit 0
+    exit $status
 fi
 [ ${#stages[@]} -eq 0 ] && stages=(unit dogfood verify perf)
 qa="$root/out/qa"; ref="$qa/reference"; run="$qa/run-$(date +%Y%m%d-%H%M%S)"
@@ -198,7 +203,10 @@ u57_check()
     local stage=$1 out=$2 status; status=$(cat "$out/exit")
     [ "$status" = 0 ] || fail "$stage: the player exited $status"
     python3 "$tools" signatures "$out/stdout.txt" > "$out/signatures.txt"
-    if [ $bless -eq 1 ]; then cp "$out/signatures.txt" "$ref/$stage-signatures.txt"; ok "$stage: $(wc -l < "$out/signatures.txt") log signatures blessed"; return; fi
+    if [ $bless -eq 1 ]; then
+        [ "$status" = 0 ] || return # a failed run is not a reference
+        cp "$out/signatures.txt" "$ref/$stage-signatures.txt"; ok "$stage: $(wc -l < "$out/signatures.txt") log signatures blessed"; return
+    fi
     if [ ! -f "$ref/$stage-signatures.txt" ]; then fail "$stage: no reference signatures (run with --bless after checking $out)"; return; fi
     local new; new=$(comm -13 <(sort "$ref/$stage-signatures.txt") <(sort "$out/signatures.txt"))
     if [ -n "$new" ]; then fail "$stage: new log signatures:"; echo "$new" | sed 's/^/       /' | tee -a "$run/summary.txt"; else ok "$stage: no new exceptions or errors"; fi
@@ -218,6 +226,9 @@ stage_verify()
     for tweak in fast-anim-events fast-sublimation fast-jobs fast-particle-collision fast-offset-tables fast-anim-cleanup "canvas skips" "component layouts" "texel copies"; do
         echo "$report" | grep -q "$tweak:" || fail "verify: no report from $tweak"
     done
+    # The radbolt tweak checks two things, each with its own report.
+    echo "$report" | grep -q "fast-particle-collision: .*mismatches" || fail "verify: no lookup report from fast-particle-collision"
+    echo "$report" | grep -q "fast-particle-collision: .*wrong skips" || fail "verify: no gather report from fast-particle-collision"
     read -r fps span windows <<< "$(python3 "$tools" perf "$out/stdout.txt")"
     if [ "${span:-0}" -ge 600 ]; then ok "verify: $span game seconds checked"; else fail "verify: only ${span:-0} game seconds checked (10 minutes needed)"; fi
 }
@@ -234,10 +245,10 @@ stage_perf()
     read -r fps span windows <<< "$(python3 "$tools" perf "$out/stdout.txt")"
     local kept; kept=$(grep -aoE '[0-9]+ kept' "$out/stdout.txt" | tail -1 | cut -d' ' -f1)
     if [ "${kept:-0}" -le 1 ]; then ok "perf: multi-target framebuffers kept ${kept:-0}"; else fail "perf: $kept multi-target framebuffers kept"; fi
+    awk -v f="${fps:-0}" 'BEGIN { exit !(f > 0) }' || { fail "perf: no frame rate measured"; return; }
     if [ $bless -eq 1 ]; then echo "$fps" > "$ref/perf-baseline"; ok "perf: $fps fps blessed as the baseline"; return; fi
     [ -f "$ref/perf-baseline" ] || { fail "perf: no baseline (run with --bless after checking $out)"; return; }
     local base; base=$(cat "$ref/perf-baseline")
-    awk -v f="$fps" 'BEGIN { exit !(f > 0) }' || { fail "perf: no frame rate measured"; return; }
     if awk -v f="$fps" -v b="$base" 'BEGIN { exit !(f >= b * 0.85) }'; then ok "perf: $fps fps over $windows windows (baseline $base)"; else fail "perf: $fps fps, below the baseline $base less 15%"; fi
 }
 

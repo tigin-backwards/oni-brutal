@@ -41,11 +41,11 @@ top of that there are optimizations tuned to the way Oxygen Not Included uses th
 
 On a late-game save (U57: Spaced Out with every DLC, cycle 17,000+), on the same machine, back to back:
 
-| | Original | oni-brutal |
-|---|---|---|
-| Frame rate at speed 3 | 6.5–6.8 fps | about 26 fps |
-| Loading the save | 3 min 50 s | 26–28 s |
-| Autosave freeze | <!-- TODO: measure the original --> | 4.8 s with the save tweaks (11.7 s without), compressing and writing moved off the main thread |
+| | Original | oni-brutal | |
+|---|---|---|---|
+| Frame rate at speed 3 | 6.5–6.8 fps | about 26 fps | about 4× |
+| Loading the save | 3 min 50 s | 26–28 s | about 8.5× faster |
+| Autosave freeze | <!-- TODO: measure the original --> | 4.8 s with the save tweaks (11.7 s without), compressing and writing moved off the main thread | <!-- TODO --> |
 
 Garbage-collection hitches are mostly gone: collections now run in the background, spread
 across every core, and their pauses are about a quarter as long.

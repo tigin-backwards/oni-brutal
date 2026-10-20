@@ -25,5 +25,34 @@ namespace OniBrutal.Tests
             camera.targetTexture = new RenderTexture(30, 20, 0);
             Assert.Equal(30, camera.pixelWidth);
         }
-    }
+    
+        [Fact]
+        public void ADestroyedRenderTextureReleasesItsDeviceResource()
+        {
+            // The game's MRT proxy destroys its old targets (through RenderTextureDestroyer, two
+            // frames later) when it recreates them on a resize.
+            var game = System.Environment.GetEnvironmentVariable("ONI_GAME_DIR")
+                       ?? System.IO.Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile), "projects", "oni-linux");
+            OniBrutal.Engine.Assets.AssetSystem.Initialize(System.IO.Path.Combine(game, "OxygenNotIncluded_Data"));
+            OniBrutal.Engine.Assets.ProjectSettings.Load();
+            var device = new RecordingDevice();
+            var previous = OniBrutal.Engine.Rendering.GraphicsDevice.Current;
+            OniBrutal.Engine.Rendering.GraphicsDevice.Install(device);
+            try
+            {
+                var rt = new RenderTexture(96, 40, 24, RenderTextureFormat.ARGB32);
+                var gpu = new object();
+                var native = (OniBrutal.Engine.Rendering.RenderTextureNative)rt.Native;
+                native.Gpu = gpu;
+                OniBrutal.Engine.Rendering.GraphicsDevice.Adopt(native, gpu);
+                Object.Destroy(rt);
+                Frame();
+                Assert.Contains(gpu, device.Released);
+            }
+            finally
+            {
+                OniBrutal.Engine.Rendering.GraphicsDevice.Install(previous);
+            }
+        }
+}
 }

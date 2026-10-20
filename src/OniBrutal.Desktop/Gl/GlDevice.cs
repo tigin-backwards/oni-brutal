@@ -317,6 +317,7 @@ namespace OniBrutal.Desktop.Gl
                 if (key == null) continue; // already deleted through another of its textures
                 mrtFramebuffers.Remove(key);
                 GlApi.DeleteFramebuffer(fb);
+                OniBrutal.Engine.EngineLog.Engine($"multi-target framebuffer deleted with its textures; {mrtFramebuffers.Count} kept");
             }
             texture.MrtFramebuffers.Clear();
             framebufferValid = false;
@@ -370,7 +371,7 @@ namespace OniBrutal.Desktop.Gl
                 N.glDrawBuffers(t.Colors.Length, buffers);
                 if (t.Depth is { DepthRenderbuffer: not 0 })
                     N.glFramebufferRenderbuffer(Framebuffer, DepthStencilAttachment, Renderbuffer, new GlRenderbuffer(t.Depth.DepthRenderbuffer));
-                if (t.Depth != null) (t.Depth.MrtFramebuffers ??= new()).Add(fb);
+                if (t.Depth != null && Array.IndexOf(t.Colors, t.Depth) < 0) (t.Depth.MrtFramebuffers ??= new()).Add(fb);
                 mrtFramebuffers[key.ToString()] = fb;
                 OniBrutal.Engine.EngineLog.Engine($"multi-target framebuffer for {t.Colors.Length} colour targets made; {mrtFramebuffers.Count} kept");
             }

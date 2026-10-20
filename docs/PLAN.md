@@ -489,6 +489,36 @@ Fixes come with a regression test that fails before them. Status: **fixed** (com
 | H4 | fast-sublimation | Watched items of a previous colony stay referenced after loading another save. | fixed: watches are reset with each new colony (and fast-anim-events keys its mirrors weakly) |
 | H5 | background-save | A save is header-only on disk until the background write ends; a crash in that window loses it. | fixed: a run ending by an unhandled exception waits for the write; a hard kill during it loses that save, as killing the game during its own in-place write does |
 | P1 | objects | A destroyed object's access threw MissingReferenceException with the Editor's message; the original player throws NullReferenceException (measured: GetComponent on the game's destroyed KCanvasScaler after a resize, the same exception in both players). | fixed (LifecycleTests) |
+| Q1 | TextMeshPro (QA round 1) | The Duplicant selection screen's expectation, interest and trait lines (RobotoCondensed-Regular SDF) render as garbled glyph fragments with this project's TextMeshPro since it became the default (bisected; correct with the shipped package, which the M9 differential run did not catch). | open: clean room |
+| Q2 | screen (QA round 1) | Screen.resolutions on a virtual display lacked the twelve standard modes under 720 lines that the original lists (measured, PerfProbe measure.txt). | fixed (DisplayModeTests) |
+| Q3 | GL (QA round 1) | A resize in a base-game colony does recreate the world's multi-target textures (no exception there): the cache keeps one framebuffer at the end, the old one deleted with its textures, and the driver was seen reusing a freed texture name for a new target (the collision G1 prevents). | checked (dogfood resize) |
+| Q4 | destroyed render textures (QA round 1) | A destroyed render texture releases its device resource (traced, as the game's RenderTextureDestroyer destroys the old MRT targets two frames later). | checked (CameraTargetTests) |
+
+## QA harness (`scripts/qa.sh`)
+
+One script exercises what the engine and the game tweaks do and fails on a regression; it
+replaces looking for error logs by hand. Stages (each can be run alone):
+- **unit:** the release build, both test suites and `scripts/check.sh` (API conformance with 13
+  known UI Toolkit internals missing, type loading, assets, binding, with this project's UI
+  packages and Unity's shipped ones).
+- **dogfood:** scripted sessions in the game (`scripts/qa-scenarios`, and the M9 scenarios):
+  the menu and options, a new game to embark, a large base-game colony's screens (management,
+  research, Database) and every overlay, typing into text fields, save and load back through
+  the pause menu, window resizes, and clicks that arrive together within one frame. A run fails
+  on a log exception or error whose signature (type, message with numbers normalized, first
+  frame) is not in the scenario's reference, or on a capture differing from the reference in
+  more pixels than the scenario's tolerance.
+- **verify:** U57 with every game tweak and every engine verify mode (canvas skips, component
+  layouts, texel copies) for at least 10 game minutes; every check must report zero mismatches,
+  and each must report.
+- **perf:** U57 with every game tweak: peak memory under 16 GB, the steady frame rate no lower
+  than the reference's less 15% (this machine's noise), and multi-target framebuffers not piling
+  up.
+
+References (captures, signatures, the frame-rate baseline) live in `out/qa/reference`, made with
+`--bless` once a run's captures and logs have been looked at; they hold game imagery and stay
+local. The U57 stages need content that cannot be published (DLC files, a DLC-owning Steam
+double), named in `out/local-tools/qa.env`; without it they are skipped and say so.
 
 ## Open items
 

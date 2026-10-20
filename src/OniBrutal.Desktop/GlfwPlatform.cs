@@ -178,19 +178,27 @@ namespace OniBrutal.Desktop
                 if (list.Count > 1)
                     return list.OrderBy(m => m.Width).ThenBy(m => m.Height).ThenBy(m => (double)m.RefreshNumerator / Math.Max(1u, m.RefreshDenominator)).ToArray();
                 // A display that reports only its current mode (virtual displays such as Xvfb or
-                // WSLg): Unity's Linux player then offers its table of standard resolutions that
-                // fit the desktop, at 60 Hz, in this order (observed from the original player;
-                // modes under 720 lines are not observable through the game and are omitted).
-                var desktop = DesktopMode;
-                var standard = new List<OniBrutal.Engine.Platform.DisplayMode>();
-                foreach (var (w, h) in StandardResolutions)
-                    if (w <= desktop.Width && h <= desktop.Height) standard.Add(new(w, h, 60, 1));
-                return standard.Count > 0 ? standard.ToArray() : list.ToArray();
+                // WSLg): Unity's Linux player then offers its table of standard resolutions.
+                var standard = StandardModes(DesktopMode);
+                return standard.Length > 0 ? standard : list.ToArray();
             }
+        }
+
+        /// Unity's standard resolutions that fit the desktop, at 60 Hz, in its order (measured:
+        /// Screen.resolutions in the original player on a 1280x1024 Xvfb screen, PerfProbe
+        /// measure.txt).
+        internal static OniBrutal.Engine.Platform.DisplayMode[] StandardModes(OniBrutal.Engine.Platform.DisplayMode desktop)
+        {
+            var standard = new List<OniBrutal.Engine.Platform.DisplayMode>();
+            foreach (var (w, h) in StandardResolutions)
+                if (w <= desktop.Width && h <= desktop.Height) standard.Add(new(w, h, 60, 1));
+            return standard.ToArray();
         }
 
         static readonly (int Width, int Height)[] StandardResolutions =
         [
+            (640, 480), (720, 480), (768, 480), (800, 480), (854, 480), (960, 540), (1024, 576), (800, 600),
+            (1024, 600), (960, 640), (1024, 640), (1136, 640),
             (960, 720), (1152, 720), (1280, 720), (1024, 768), (1152, 768), (1280, 768), (1366, 768), (1280, 800),
             (1152, 864), (1280, 864), (1440, 900), (1600, 900), (1280, 960), (1440, 960), (1280, 1024), (1600, 1024),
             (1400, 1050), (1680, 1050), (1920, 1080), (2560, 1080), (2048, 1152), (1600, 1200), (1920, 1200),

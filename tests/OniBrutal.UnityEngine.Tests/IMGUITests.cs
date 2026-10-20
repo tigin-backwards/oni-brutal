@@ -29,7 +29,9 @@ namespace OniBrutal.Tests
         public override OniBrutal.Engine.Rendering.GraphicsCaps Caps { get; } = new OniBrutal.Engine.Rendering.NullCaps();
         public override bool RendersFrames => true;
         public override void ReadPixels(OniBrutal.Engine.Rendering.RenderTextureNative source, RectInt rect, OniBrutal.Engine.Rendering.Texture2DNative destination, int destX, int destY) { }
-        public override void ReleaseResource(object gpu) { }
+        /// Device resources released, in order.
+        public readonly List<object> Released = new();
+        public override void ReleaseResource(object gpu) => Released.Add(gpu);
         public override bool SetPass(Material material, int p)
         {
             pass = material;

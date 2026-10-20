@@ -159,6 +159,8 @@ namespace PerfProbe
                 Debug.Log($"PERF measure raycast at {g.name}: first {(hits.Count > 0 ? hits[0].gameObject.name : "none")}, hits {string.Join(",", hits.ConvertAll(h => h.gameObject.name))}");
             }
             Destroy(canvasGo);
+            var current = Screen.currentResolution;
+            Debug.Log($"PERF measure screen: current {current.width}x{current.height} @{current.refreshRateRatio.value:F2}, window {Screen.width}x{Screen.height}, modes {string.Join(" ", System.Array.ConvertAll(Screen.resolutions, r => $"{r.width}x{r.height}@{r.refreshRateRatio.value:F2}"))}");
             Debug.Log("PERF measure done");
         }
 
@@ -289,7 +291,7 @@ namespace PerfProbe
                 long c = RuntimeCounters.LockContentions(), g = RuntimeCounters.GcPauseMs();
                 string runtime = c < 0 ? "" : $" contentions {c - contentions} gc-pause {g - paused} ms";
                 contentions = c; paused = g;
-                Debug.Log($"PERF f{Time.frameCount} fps {frames / (now - windowStart):F2} cycle {GameClock.Instance.GetCycle()} paused {SpeedControlScreen.Instance.IsPaused}{runtime}");
+                Debug.Log($"PERF f{Time.frameCount} fps {frames / (now - windowStart):F2} cycle {GameClock.Instance.GetCycle()} time {GameClock.Instance.GetTime():F0} paused {SpeedControlScreen.Instance.IsPaused}{runtime}");
                 windowStart = now;
                 frames = 0;
             }

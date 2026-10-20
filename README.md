@@ -56,8 +56,7 @@ across every core, and their pauses are about a quarter as long.
 
 <!-- TODO: before/after gameplay video showing the frame rate -->
 
-Where the frame time goes, and what each change bought:
-[docs/PERFORMANCE.md](docs/PERFORMANCE.md).
+For a more detailed breakdown, see [docs/PERFORMANCE.md](docs/PERFORMANCE.md).
 
 ### Optional tweaks
 

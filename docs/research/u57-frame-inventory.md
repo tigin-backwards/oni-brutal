@@ -307,6 +307,11 @@ u57-linux.sh.
 
 ## Where the 25 fps goal stands (2026-10-19)
 
+**Closed (2026-10-20): met.** With `fast-jobs` and `fast-offset-tables`, U57 at speed 3 runs
+25.0–26.9 fps in the steady windows of alternating runs (mean 26.0; 24.7 without
+fast-offset-tables). Confirmation runs on a busier machine gave 20.7–25.3 (mean 23.2); the
+machine's noise is about ±10–15%. What follows is the state before those two tweaks.
+
 U57 at speed 3 on this machine: about 19–20 fps, a 51 ms main-thread frame (with every tweak). The
 goal of 25 fps needs about 11 ms more. Since it was set: `fast-sublimation` (about 0.45 ms),
 `slow-reachability` (1.35 ms), and before it the component layouts (1.7 ms), the canvas skip of

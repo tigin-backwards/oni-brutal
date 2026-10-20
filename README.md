@@ -81,9 +81,8 @@ ones marked **changes gameplay** trade a little exactness for speed.
 
 ## Save compatibility
 
-Saves from the original game load here, and saves made here load in the original game. That
-includes saves written with `fast-save-compression`, which was checked both ways on a 690 MB
-colony.
+Saves from the original game load here, and saves made here load in the original game
+(including ones written with the `fast-save-compression` tweak).
 
 ## Mod compatibility
 

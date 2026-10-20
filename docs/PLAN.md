@@ -417,6 +417,17 @@ unchanged.
   every tweak with and without it: 24.1–27.8 fps against 20.9–25.2 in steady windows (about
   25.9 against 23.2, +11%).
 
+- `fast-offset-tables`: each Duplicant's fetch update (once a frame in U57) checks the work
+  offsets of every fetchable item (about 27,000) on the job threads and recomputes the stale ones
+  on the main thread, in group then list order. Offsets go stale only where the game changes
+  them: a tracker's cell update, a solid or navigable cell change in its extents, a new tracker
+  (Workable's four assignments), a newly fetchable item. The tweak marks the item at each and
+  checks only the marked fetchable ones, recomputing the stale ones in the same order (the job's
+  schedule with the main thread taking only the first group). 2,000 updates verified with
+  ONI_TWEAK_VERIFY (every item checked as the game does: 0 stale without a mark; about two items
+  recomputed an update). UpdatePickups 1.74 → 1.33 ms a frame; alternating runs, every tweak with
+  and without it: 25.0–26.9 fps against 22.7–27.3 in steady windows (means 26.0 and 24.7).
+
 - `fast-anim-cleanup`: KBatchedAnimUpdater sweeps 16 chunks of its controller grid each frame for
   destroyed controllers, reading every controller there; the tweak keeps the ids of controllers
   destroyed in the last full round of the sweep and sweeps a chunk only when its dictionary still

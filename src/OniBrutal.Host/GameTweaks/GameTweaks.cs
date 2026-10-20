@@ -59,7 +59,7 @@ namespace OniBrutal.Host.GameTweaks
     internal static class GameTweakNames
     {
         /// The tweaks in src/OniBrutal.GameTweaks (named here: that assembly is loaded only when asked for).
-        public static readonly string[] Typed = ["off-screen-conveyors", "fast-save-type-checks", "fast-anim-cleanup", "fast-sublimation", "fast-anim-events", "fast-symbol-overrides", "fast-jobs", "slow-reachability"];
+        public static readonly string[] Typed = ["off-screen-conveyors", "fast-save-type-checks", "fast-anim-cleanup", "fast-sublimation", "fast-anim-events", "fast-symbol-overrides", "fast-jobs", "fast-offset-tables", "slow-reachability"];
 
         public static readonly string[] All = [FastSaveCompression.Name, BackgroundSave.Name, NoSaveGc.Name, FastSerialization.Name, FastParticleCollision.Name, .. Typed];
 

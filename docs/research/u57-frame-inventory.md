@@ -170,6 +170,15 @@ Columns: ms per frame (main thread), count of the objects involved where known, 
   the main thread spending about 5.4 ms a frame inside JobManager.Run (fetch updates, mesh
   batches, amounts, conveyor arms, conduits), mostly waiting for every worker to wake and check
   in. perf does not show it: blocked time is not sampled.
+- **Fetch offset checks: FetchManager.UpdatePickups 1.74 → 1.33 ms (stopwatch).** Done
+  (`fast-offset-tables`, docs/PLAN.md). Each Duplicant's fetch update first checks the work
+  offsets of every fetchable item (about 27,000 in 211 prefab groups) on all job threads, 0.75 ms
+  of the main thread's wall time; about two items an update are actually stale. The tweak marks
+  items where offsets can go stale and checks only those.
+- **Pickup job order: not worth it.** The pickup gathering after it (one job item per prefab,
+  1.2 ms wall for 0.3 ms of work per thread) was run slowest group first: no change in wall time,
+  and the items' total CPU rose from 4.9 to 6.3 ms a frame. Running the large groups together
+  makes them slower: the job is bound by memory, not by its schedule.
 - **Animation grid cleanup: 0.48 → 0.12 ms.** Done (`fast-anim-cleanup`, docs/PLAN.md).
 - **Canvas walk, renderer-free subtrees: not worth it.** Only about 7% of its visits are in
   subtrees without any CanvasRenderer.

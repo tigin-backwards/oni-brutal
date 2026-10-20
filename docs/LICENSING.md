@@ -142,6 +142,14 @@ Rules for new engine code:
 - When behaviour has to match Unity, the source is the documentation or a measurement, and the
   code says which.
 
+## BRUTAL's terms
+
+The BRUTAL License asks every distributed copy for BRUTAL's copyright notice in the credits or
+equivalent (§2.1: the README), its logo before gameplay (§2.2: drawn on the game's main menu by
+`BrutalCredit`, unaltered, as large as the menu's news tiles), and `NOTICE.txt` alongside (§2.3:
+copied next to the player by the build, so every setup and release carries it). The logo and
+notice are Ahwoo's, from ahwootech/brutal-branding.
+
 ## This project's own licence
 
 None yet: the repository is unlicensed (all rights reserved) by decision of 2026-10-19, until

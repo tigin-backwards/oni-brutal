@@ -44,6 +44,7 @@ namespace OniBrutal.Host
             hooks.Run(RuntimeInitializeLoadType.BeforeSceneLoad);
             SceneLoader.LoadNow(0);
             hooks.Run(RuntimeInitializeLoadType.AfterSceneLoad);
+            BrutalCredit.Install();
 
             var clock = Stopwatch.StartNew();
             double last = 0;

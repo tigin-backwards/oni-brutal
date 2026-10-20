@@ -84,6 +84,41 @@ parallel, 10 ms of it uploading textures.
 About two thirds of the frame is the game's own logic, spread over dozens of systems. Each one
 reads thousands of scattered objects, and none of them is above a few milliseconds.
 
+## System by system
+
+This is the main thread's profile before the game tweaks: an 82 ms frame (12 fps), sampled with
+`perf` over 90 s of play. The game's own code was 71% of it (58 ms), this project's engine 13%
+(11 ms), and native code (memory copies, maths, GC) 7%. The last column says what happened to
+each system since.
+
+| System | ms | Objects | Why it costs that | Since |
+|---|---|---|---|---|
+| Rendering (engine) | 6.3 | ~1,500 draws | recording draws; copying 20 MB a frame of animation textures the game re-applies | copies moved to worker threads, records pooled |
+| Animation updates (`KBatchedAnimUpdater`) | 3.2 | 89,794 controllers | advancing each playing animation's frame, every frame | real work, scales with what's on screen |
+| Cell-change monitor | 2.8 | ~1,400 moved objects a frame | each moved object's cell recomputed; the handlers for those entering a new cell | real work; mostly conveyor items (`off-screen-conveyors`) |
+| Duplicant and critter brains | 2.7 | 1,186 critters, 24 Duplicants | sensors, fetch updates, food and tree searches | real work |
+| Animation events | 2.5 | ~6,450 playing animations | reading every playing animation's controller to find its frame events | `fast-anim-events`: 0.9 ms |
+| Reachability | 2.5 | ~27,000 workables | every workable re-checked once a game second | `slow-reachability`: 0.53 ms |
+| Sublimation | 2.4 | 2,457 items | every item five times a game second, most of them already blocked | `fast-sublimation`: about 1.0 ms |
+| Canvas walk (engine) | 2.4 | ~11,000 UI objects | the game's closed screens stay active, hidden only by their groups | hidden screens skipped: 0.8 ms |
+| Plant element absorbers | 1.8 | irrigated plants | the game's event system finding handlers | real work |
+| Animation batch uploads | 1.7 | dirty batches | writing per-instance data into batch textures | `fast-symbol-overrides`: unchanged blocks skipped |
+| Workers doing work | 1.6 | 24 Duplicants, 62 remote worker docks | work ticks, splitting element chunks | real work |
+| Power | 1.6 | 109 generators | per generator, five times a game second | real work |
+| Conveyor rails (sim) | 1.5 | 209 consumers | bridges, consumers, object-layer refreshes | real work |
+| Pipes | 1.5 | 821 consumers | consumers, dispensers, bridges | real work |
+| Building input checks | 1.4 | 1,918 buildings | power and pipe connections, status items | real work |
+| State machine transitions | 1.2 | polled transitions | radiation, fertility, incubation checks | real work |
+| Critter temperature | 1.1 | 1,186 critters | each critter's cells checked every tick | real work |
+| Conveyor items moving | 1.1 | ~950 items | every item in transit moved along its rail, every frame | `off-screen-conveyors` (changes gameplay) |
+| Radbolt collisions | 0.9 | **4 radbolts** | each gathers all 93,840 colliders around it and asks each one if it's a radbolt | `fast-particle-collision`: 0.44 ms |
+| Ranch stations | 0.9 | stations × critters | type checks per ranchable critter | real work |
+| UI input | 0.7 | | raycasts on mouse events | |
+| Moving colliders | 0.7 | | partitioner re-inserts | real work |
+
+"Real work" means the time goes to visiting objects that really do need visiting, and nothing
+exact was found to skip.
+
 ## What the tweaks bought
 
 All are opt-in (`--game-tweak NAME`). The class says whether the game's results stay exactly the

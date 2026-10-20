@@ -73,6 +73,102 @@ namespace OniBrutal.Tests
             Assert.Equal(0, outside.Changes);
         }
 
+        // A root canvas in a screen-space mode is laid out (anchors, pivot, size, position, scale)
+        // the moment it becomes enabled, as measured in the original player (PerfProbe measure.txt):
+        // the game's hover card is built in the same frame its canvas, saved at scale zero, comes on.
+        static GameObject ZeroScaledOverlay(string name, bool active)
+        {
+            var go = new GameObject(name, typeof(RectTransform));
+            go.SetActive(active);
+            go.AddComponent<Canvas>().renderMode = RenderMode.ScreenSpaceOverlay;
+            go.transform.localScale = Vector3.zero;
+            return go;
+        }
+
+        static void AssertLaidOut(GameObject go)
+        {
+            var rt = (RectTransform)go.transform;
+            var screen = new Vector2(Screen.width, Screen.height);
+            Assert.Equal(Vector3.one, rt.localScale);
+            Assert.Equal(screen, rt.sizeDelta);
+            Assert.Equal(Vector2.zero, rt.anchorMin);
+            Assert.Equal(Vector2.zero, rt.anchorMax);
+            Assert.Equal(new Vector2(0.5f, 0.5f), rt.pivot);
+            Assert.Equal(screen * 0.5f, rt.anchoredPosition);
+        }
+
+        [Fact]
+        public void ARootScreenSpaceCanvasIsLaidOutWhenActivated()
+        {
+            var go = ZeroScaledOverlay("Activated", active: false);
+            go.SetActive(true);
+            AssertLaidOut(go);
+
+            var again = ZeroScaledOverlay("Reactivated", active: true);
+            again.SetActive(false);
+            again.SetActive(true);
+            AssertLaidOut(again);
+        }
+
+        [Fact]
+        public void ARootScreenSpaceCanvasIsLaidOutWhenItsComponentIsEnabled()
+        {
+            var go = ZeroScaledOverlay("Toggled", active: true);
+            var canvas = go.GetComponent<Canvas>();
+            canvas.enabled = false;
+            canvas.enabled = true;
+            AssertLaidOut(go);
+        }
+
+        [Fact]
+        public void AnInstantiatedRootScreenSpaceCanvasIsLaidOut()
+        {
+            AssertLaidOut(Object.Instantiate(ZeroScaledOverlay("ActiveSource", active: true)));
+            var fromInactive = Object.Instantiate(ZeroScaledOverlay("InactiveSource", active: false));
+            Assert.Equal(Vector3.zero, fromInactive.transform.localScale);
+            fromInactive.SetActive(true);
+            AssertLaidOut(fromInactive);
+        }
+
+        [Fact]
+        public void AChildParentedKeepingItsWorldScaleUnderAJustActivatedCanvasKeepsScaleOne()
+        {
+            // HoverTextDrawer's pools: new GameObject, a RectTransform, SetParent(screen).
+            var canvas = ZeroScaledOverlay("HoverCanvas", active: false);
+            canvas.SetActive(true);
+            var root = new GameObject("PoolRoot");
+            root.AddComponent<RectTransform>().SetParent(canvas.transform);
+            Assert.Equal(Vector3.one, root.transform.localScale);
+        }
+
+        [Fact]
+        public void NestedWorldSpaceOrMovedCanvasesAreNotLaidOutOnEnable()
+        {
+            var host = new GameObject("Host", typeof(RectTransform));
+            host.AddComponent<Canvas>().renderMode = RenderMode.ScreenSpaceOverlay;
+            var nested = ZeroScaledOverlay("Nested", active: false);
+            nested.transform.SetParent(host.transform, false);
+            nested.transform.localScale = Vector3.zero;
+            nested.SetActive(true);
+            Assert.Equal(Vector3.zero, nested.transform.localScale);
+
+            // AddComponent<Canvas> starts in world space: a Dropdown's template canvas, cloned at
+            // the root and nested again, keeps its anchoring.
+            var worldSpace = new GameObject("WorldSpace", typeof(RectTransform));
+            worldSpace.SetActive(false);
+            worldSpace.AddComponent<Canvas>();
+            worldSpace.transform.localScale = Vector3.zero;
+            worldSpace.SetActive(true);
+            Assert.Equal(Vector3.zero, worldSpace.transform.localScale);
+
+            // Moving an enabled canvas to the root does not lay it out.
+            var moved = ZeroScaledOverlay("Moved", active: true);
+            moved.transform.SetParent(host.transform, false);
+            moved.transform.localScale = Vector3.zero;
+            moved.transform.SetParent(null, false);
+            Assert.Equal(Vector3.zero, moved.transform.localScale);
+        }
+
         [Fact]
         public void InstantiateRemapsTheCanvasCameraIntoTheClone()
         {

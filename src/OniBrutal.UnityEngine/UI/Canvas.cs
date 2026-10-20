@@ -547,7 +547,8 @@ namespace OniBrutal.Engine.UI
 
     internal sealed class CanvasNative : BehaviourNative
     {
-        public RenderMode RenderMode = RenderMode.ScreenSpaceOverlay;
+        // AddComponent<Canvas> starts in world space (measured in the original player).
+        public RenderMode RenderMode = RenderMode.WorldSpace;
         public Camera WorldCamera;
         public float PlaneDistance = 100f;
         public bool PixelPerfect;

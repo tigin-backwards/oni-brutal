@@ -46,9 +46,12 @@ namespace OniBrutal.Engine.UI
             var c = canvas.Data;
             if (!enabled.Contains(c)) enabled.Add(c);
             c.EnableSequence = ++sequence;
-            // A root canvas's rect is driven by the canvas update (before willRenderCanvases), not
-            // on enable: a canvas enabled at the root and reparented in the same call (uGUI's
-            // Dropdown clones its canvas-bearing template, then nests it) keeps its own anchoring.
+            // A root screen-space canvas is laid out the moment it becomes enabled (activation,
+            // the component's enable, an instantiated active copy), as measured in the original
+            // player; the canvas update keeps it current after that. A world-space or nested
+            // canvas is not, so a Dropdown's template canvas (world space, as AddComponent leaves
+            // it) cloned at the root and nested again keeps its own anchoring.
+            if (c.RenderMode != RenderMode.WorldSpace) UpdateRootTransform(c);
             HierarchyChanged(c);
         }
 

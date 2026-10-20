@@ -324,9 +324,13 @@ namespace TMPro
 
         // ----- Caret and selection -----
 
+        // The caret and the selection are kept as string positions (in text). The caret
+        // position and the selection's anchor and focus positions are character indices in the
+        // laid-out text, which tags, escapes and surrogate pairs make differ from them
+        // (measured on the shipped package).
         public int caretPosition
         {
-            get => m_StringSelectPosition;
+            get => CharacterIndexOf(m_StringSelectPosition);
             set
             {
                 selectionAnchorPosition = value;
@@ -336,6 +340,28 @@ namespace TMPro
 
         public int selectionAnchorPosition
         {
+            get => CharacterIndexOf(m_StringPosition);
+            set => selectionStringAnchorPosition = StringIndexOf(value);
+        }
+
+        public int selectionFocusPosition
+        {
+            get => CharacterIndexOf(m_StringSelectPosition);
+            set => selectionStringFocusPosition = StringIndexOf(value);
+        }
+
+        public int stringPosition
+        {
+            get => m_StringSelectPosition;
+            set
+            {
+                selectionStringAnchorPosition = value;
+                selectionStringFocusPosition = value;
+            }
+        }
+
+        public int selectionStringAnchorPosition
+        {
             get => m_StringPosition;
             set
             {
@@ -344,7 +370,7 @@ namespace TMPro
             }
         }
 
-        public int selectionFocusPosition
+        public int selectionStringFocusPosition
         {
             get => m_StringSelectPosition;
             set
@@ -354,15 +380,35 @@ namespace TMPro
             }
         }
 
-        public int stringPosition
+        // The laid-out character a string position is at: the first whose source index is not
+        // before it (the end marker's at the end). Without a layout, the string position.
+        int CharacterIndexOf(int position)
         {
-            get => m_StringSelectPosition;
-            set => caretPosition = value;
+            var info = m_TextComponent != null ? m_TextComponent.textInfo : null;
+            if (info == null || info.characterCount == 0) return position;
+            for (int k = 0; k < info.characterCount; k++)
+                if (info.characterInfo[k].index >= position) return k;
+            return info.characterCount - 1;
         }
 
-        public int selectionStringAnchorPosition { get => selectionAnchorPosition; set => selectionAnchorPosition = value; }
+        // The string position of a laid-out character: where its source begins.
+        int StringIndexOf(int character)
+        {
+            var info = m_TextComponent != null ? m_TextComponent.textInfo : null;
+            if (info == null || info.characterCount == 0) return character;
+            if (character < 0) return 0;
+            if (character >= info.characterCount) return m_Text.Length;
+            return Mathf.Min(info.characterInfo[character].index, m_Text.Length);
+        }
 
-        public int selectionStringFocusPosition { get => selectionFocusPosition; set => selectionFocusPosition = value; }
+        // The text's layout for the current text, laid out now when it is out of date (the
+        // keys handled in one update move over what the previous ones typed).
+        TMP_TextInfo CurrentTextInfo()
+        {
+            if (m_TextComponent == null) return null;
+            if (m_TextComponent.havePropertiesChanged && m_TextComponent.isActiveAndEnabled) m_TextComponent.ForceMeshUpdate();
+            return m_TextComponent.textInfo;
+        }
 
         bool HasSelection => m_StringPosition != m_StringSelectPosition;
 
@@ -882,9 +928,21 @@ namespace TMPro
                 MarkGeometryChanged();
                 return;
             }
-            int p = ctrl ? PreviousWordStart(m_StringSelectPosition) : m_StringSelectPosition - 1;
-            if (!ctrl && p > 0 && p < m_Text.Length && char.IsLowSurrogate(m_Text[p])) p--;
-            m_StringSelectPosition = Math.Max(0, p);
+            // A step moves to the laid-out character before the caret's, where its source begins
+            // (over the tags between them).
+            int p;
+            if (ctrl) p = PreviousWordStart(m_StringSelectPosition);
+            else if (CurrentTextInfo() is { characterCount: > 0 })
+            {
+                int k = CharacterIndexOf(m_StringSelectPosition);
+                p = k > 0 ? StringIndexOf(k - 1) : 0;
+            }
+            else
+            {
+                p = m_StringSelectPosition - 1;
+                if (p > 0 && p < m_Text.Length && char.IsLowSurrogate(m_Text[p])) p--;
+            }
+            m_StringSelectPosition = Mathf.Clamp(p, 0, m_StringSelectPosition);
             if (!shift) m_StringPosition = m_StringSelectPosition;
             MarkGeometryChanged();
         }
@@ -897,9 +955,22 @@ namespace TMPro
                 MarkGeometryChanged();
                 return;
             }
-            int p = ctrl ? NextWordEnd(m_StringSelectPosition) : m_StringSelectPosition + 1;
-            if (!ctrl && p < m_Text.Length && char.IsLowSurrogate(m_Text[p])) p++;
-            m_StringSelectPosition = Math.Min(m_Text.Length, p);
+            // A step moves past the source of the caret's laid-out character (before the tags
+            // that follow it).
+            int p;
+            if (ctrl) p = NextWordEnd(m_StringSelectPosition);
+            else if (CurrentTextInfo() is { characterCount: > 0 } info)
+            {
+                int k = CharacterIndexOf(m_StringSelectPosition);
+                ref var c = ref info.characterInfo[k];
+                p = k < info.characterCount - 1 ? c.index + Math.Max(1, c.stringLength) : m_Text.Length;
+            }
+            else
+            {
+                p = m_StringSelectPosition + 1;
+                if (p < m_Text.Length && char.IsLowSurrogate(m_Text[p])) p++;
+            }
+            m_StringSelectPosition = Mathf.Clamp(p, m_StringSelectPosition, m_Text.Length);
             if (!shift) m_StringPosition = m_StringSelectPosition;
             MarkGeometryChanged();
         }
@@ -917,9 +988,9 @@ namespace TMPro
                 else MoveTextEnd(shift);
                 return;
             }
-            var info = m_TextComponent.textInfo;
-            int ci = Mathf.Clamp(m_StringSelectPosition, 0, Math.Max(0, info.characterCount - 1));
+            var info = CurrentTextInfo();
             if (info.characterCount == 0) return;
+            int ci = Mathf.Clamp(CharacterIndexOf(m_StringSelectPosition), 0, info.characterCount - 1);
             int line = info.characterInfo[ci].lineNumber + direction;
             if (line < 0) { MoveTextStart(shift); return; }
             if (line >= info.lineCount) { MoveTextEnd(shift); return; }
@@ -974,6 +1045,9 @@ namespace TMPro
             bool empty = string.IsNullOrEmpty(m_Text);
             if (m_Placeholder != null) m_Placeholder.enabled = empty;
             m_TextComponent.text = shown + EndMarker;
+            // The text is laid out at once, so that the caret's character indices follow the
+            // change (measured: the shipped package's textInfo is current after a key).
+            m_TextComponent.ForceMeshUpdate();
             m_PreventCallback = false;
             MarkGeometryChanged();
         }
@@ -1141,7 +1215,10 @@ namespace TMPro
             m_Caret.canvasRenderer.SetMesh(mesh);
         }
 
-        // Local position of the caret before string position `pos` (in the text's space).
+        // Local position of the caret at string position `pos` (in the text's space): at the
+        // origin of its laid-out character, as tall as the character before it on the same line
+        // (or its own at a line's start), from that character's ascender to its descender
+        // (measured on the shipped package).
         void CaretGeometry(int pos, out float x, out float top, out float bottom)
         {
             var info = m_TextComponent.textInfo;
@@ -1155,12 +1232,13 @@ namespace TMPro
                 bottom = rect.yMin;
                 return;
             }
-            int index = Mathf.Clamp(pos, 0, info.characterCount - 1);
+            int index = Mathf.Clamp(CharacterIndexOf(pos), 0, info.characterCount - 1);
             ref var c = ref info.characterInfo[index];
-            ref var line = ref info.lineInfo[c.lineNumber];
             x = c.origin;
-            top = line.ascender;
-            bottom = line.descender;
+            ref var height = ref c;
+            if (index > 0 && info.characterInfo[index - 1].lineNumber == c.lineNumber) height = ref info.characterInfo[index - 1];
+            top = height.ascender;
+            bottom = height.descender;
         }
 
         void GenerateCaret(VertexHelper vh)
@@ -1175,8 +1253,8 @@ namespace TMPro
         void GenerateSelection(VertexHelper vh)
         {
             var info = m_TextComponent.textInfo;
-            int start = Mathf.Clamp(SelectionStart, 0, Math.Max(0, info.characterCount - 1));
-            int end = Mathf.Clamp(SelectionEnd, 0, Math.Max(0, info.characterCount - 1));
+            int start = Mathf.Clamp(CharacterIndexOf(SelectionStart), 0, Math.Max(0, info.characterCount - 1));
+            int end = Mathf.Clamp(CharacterIndexOf(SelectionEnd), 0, Math.Max(0, info.characterCount - 1));
             if (info.characterCount == 0) return;
             var offset = TextToCaretOffset();
             Color32 color = m_SelectionColor;
@@ -1256,7 +1334,7 @@ namespace TMPro
             if (nearest < 0) return m_Text.Length;
             ref var c = ref info.characterInfo[nearest];
             int index = c.index;
-            if (local.x > (c.origin + c.xAdvance) * 0.5f) index++;
+            if (local.x > (c.origin + c.xAdvance) * 0.5f) index += Math.Max(1, c.stringLength);
             return Mathf.Clamp(index, 0, m_Text.Length);
         }
 

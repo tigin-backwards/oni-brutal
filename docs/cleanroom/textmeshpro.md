@@ -484,6 +484,31 @@ from what is described here, the measurement wins and this section is corrected.
    pairs make them differ; the caret and the selection are drawn at the laid-out character for
    their string position, and moving up and down starts from that character. Measure a field
    with rich text on, after typing `a<b>c`, an escape, and an emoji.
+   *Measured* (test `TheCaretIsAtTheLaidOutCharacterOfItsStringPosition`):
+   - `caretPosition`, `selectionAnchorPosition` and `selectionFocusPosition` are character
+     indices; `stringPosition`, `selectionStringAnchorPosition` and
+     `selectionStringFocusPosition` string positions. "a<b>c" lays out as "a", "c" and the end
+     marker (source indices 0, 4, 5): at the end the caret is 2 and the string position 5.
+     A string position is at the first character whose source index is not before it.
+     Setting `caretPosition` to 1 sets the string position to 4 (that character's index).
+   - Left moves to the character before, at its source index: 5 → 4 → 0 (over the tag).
+     Right moves past the source of the caret's character: 0 → 1 (before the tag) → 5.
+     Shift+Left from the end: anchor 2 / 5, focus 1 / 4.
+   - A surrogate pair is one character of two positions: "a😀b" (the emoji drawn as the
+     missing glyph □) ends at caret 3, string position 4; Left gives 2 / 3, then 1 / 1. An
+     escape typed as "\" and "n" is parsed into a line feed, one character of two positions:
+     "a\nb" ends at 3 / 4 on the second line; Left gives 2 / 3, then 1 / 1.
+   - Up and down start from the caret's character: in the multi-line "ab<b>cd" + Enter +
+     "ef", Up from the end (7 / 10) goes to "c" (2 / 5), the nearest character above, and
+     Down back. Up on the first line goes to the start.
+   - The caret quad is `caretWidth` wide at its character's origin, from the ascender to the
+     descender of the character before it on the same line (its own at a line's start): after
+     "a" in "a😀b" it is as tall as "a", after "□" as the fallback's □. The selection runs
+     from its first character's origin to its last's advance.
+   - The text component is laid out when a key changes the text, so `textInfo` and the
+     character indices are current right after it.
+   - Not matched: setting `caretPosition` in code does not redraw the shipped package's
+     caret until the next change; this implementation redraws it at the next rebuild.
 
 ## Verification
 

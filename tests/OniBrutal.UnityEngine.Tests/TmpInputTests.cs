@@ -229,6 +229,106 @@ namespace OniBrutal.Tests
             Assert.Equal(0, changes);
         }
 
+        static TMP_InputField Typed(string s, bool multiLine = false)
+        {
+            var field = NewField();
+            if (multiLine)
+            {
+                ((RectTransform)field.transform).sizeDelta = new Vector2(200f, 100f);
+                field.lineType = TMP_InputField.LineType.MultiLineNewline;
+            }
+            field.ActivateInputField();
+            Frame();
+            foreach (char c in s) Type(c == '\n' ? Key(KeyCode.Return, '\n') : Char(c));
+            return field;
+        }
+
+        // The caret graphic's quads (left, bottom, right, top), in its space (the text's here).
+        static Rect[] CaretQuads(TMP_InputField field)
+        {
+            Canvas.ForceUpdateCanvases();
+            var renderer = field.textViewport.GetChild(0).GetComponent<CanvasRenderer>();
+            var p = ((OniBrutal.Engine.UI.CanvasRendererNative)renderer.NativeOrThrow).Geometry?.Positions ?? new Vector3[0];
+            var quads = new Rect[p.Length / 4];
+            for (int q = 0; q < quads.Length; q++)
+                quads[q] = Rect.MinMaxRect(Mathf.Min(p[4 * q].x, p[4 * q + 2].x), Mathf.Min(p[4 * q].y, p[4 * q + 2].y), Mathf.Max(p[4 * q].x, p[4 * q + 2].x), Mathf.Max(p[4 * q].y, p[4 * q + 2].y));
+            return quads;
+        }
+
+        static void AssertCaret(TMP_InputField field, int caret, int position)
+        {
+            Assert.Equal(caret, field.caretPosition);
+            Assert.Equal(position, field.stringPosition);
+        }
+
+        [Fact]
+        public void TheCaretIsAtTheLaidOutCharacterOfItsStringPosition()
+        {
+            // "a<b>c" lays out as a, c and the end marker (source indices 0, 4 and 5).
+            var field = Typed("a<b>c");
+            Assert.Equal("a<b>c", field.text);
+            AssertCaret(field, 2, 5);
+            var info = field.textComponent.textInfo;
+            var caret = CaretQuads(field)[0];
+            Assert.Equal(info.characterInfo[2].origin, caret.xMin, 3);
+            // Left moves to the character before, where its source begins (over the tag).
+            Type(Key(KeyCode.LeftArrow));
+            AssertCaret(field, 1, 4);
+            Assert.Equal(info.characterInfo[1].origin, CaretQuads(field)[0].xMin, 3);
+            Type(Key(KeyCode.LeftArrow));
+            AssertCaret(field, 0, 0);
+            // Right moves past the character's source (before the tag that follows).
+            Type(Key(KeyCode.RightArrow));
+            AssertCaret(field, 1, 1);
+            Type(Key(KeyCode.RightArrow));
+            AssertCaret(field, 2, 5);
+            // The selection's ends are kept both ways; it is drawn over the selected characters.
+            Type(Key(KeyCode.LeftArrow, '\0', EventModifiers.Shift));
+            Assert.Equal(2, field.selectionAnchorPosition);
+            Assert.Equal(1, field.selectionFocusPosition);
+            Assert.Equal(5, field.selectionStringAnchorPosition);
+            Assert.Equal(4, field.selectionStringFocusPosition);
+            var selection = CaretQuads(field);
+            Assert.Single(selection);
+            Assert.Equal(info.characterInfo[1].origin, selection[0].xMin, 3);
+            Assert.Equal(info.characterInfo[2].origin, selection[0].xMax, 3);
+            // Setting the caret position (a character index) sets the string position.
+            field.caretPosition = 1;
+            AssertCaret(field, 1, 4);
+
+            // A surrogate pair (drawn as the missing glyph) is one character of two positions;
+            // the caret is as tall as the character before it.
+            field = Typed("a😀b");
+            AssertCaret(field, 3, 4);
+            Type(Key(KeyCode.LeftArrow));
+            AssertCaret(field, 2, 3);
+            info = field.textComponent.textInfo;
+            caret = CaretQuads(field)[0];
+            Assert.Equal(info.characterInfo[1].ascender, caret.yMax, 3);
+            Assert.Equal(info.characterInfo[1].descender, caret.yMin, 3);
+            Type(Key(KeyCode.LeftArrow));
+            AssertCaret(field, 1, 1);
+            caret = CaretQuads(field)[0];
+            Assert.Equal(info.characterInfo[0].ascender, caret.yMax, 3);
+
+            // An escape ("\n" typed as two characters) is one character.
+            field = Typed("a\\nb");
+            AssertCaret(field, 3, 4);
+            Assert.Equal(2, field.textComponent.textInfo.lineCount);
+            Type(Key(KeyCode.LeftArrow));
+            AssertCaret(field, 2, 3);
+            Type(Key(KeyCode.LeftArrow));
+            AssertCaret(field, 1, 1);
+
+            // Up and down start from the caret's character.
+            field = Typed("ab<b>cd\nef", multiLine: true);
+            AssertCaret(field, 7, 10);
+            Type(Key(KeyCode.UpArrow));
+            AssertCaret(field, 2, 5);
+            Type(Key(KeyCode.DownArrow));
+            AssertCaret(field, 7, 10);
+        }
+
         [Fact]
         public void DeselectingEndsEditing()
         {

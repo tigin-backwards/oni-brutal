@@ -1,3 +1,4 @@
+using OniBrutal.Engine.Platform;
 using System;
 using System.Collections.Generic;
 using OniBrutal.Desktop;
@@ -131,13 +132,13 @@ namespace OniBrutal.Host
         void Move(Vector2 topLeft)
         {
             pointer = topLeft;
-            feed.MouseMoved(new Vector2(topLeft.x, Height - topLeft.y));
+            feed.MouseMoved(PointerPixels.Screen(topLeft, Height));
         }
 
         /// Where the script last put the pointer (top-left origin).
         Vector2 pointer;
 
-        /// GUI positions have the origin at the top left, like the script's.
-        static Vector2 Gui(Vector2 topLeft) => topLeft;
+        /// The GUI position of the pixel the script names (top left origin).
+        static Vector2 Gui(Vector2 topLeft) => PointerPixels.Gui(PointerPixels.Screen(topLeft, Height), Height);
     }
 }

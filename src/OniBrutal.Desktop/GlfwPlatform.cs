@@ -119,6 +119,9 @@ namespace OniBrutal.Desktop
             window.OnPosition += (_, _) => RefreshWindowState();
             RefreshWindowState();
             InputState.Instance.MousePresent = true;
+            // Unity's player starts with the pointer where it is (the game's hover card shows for
+            // what is under it before the mouse first moves); GLFW reports only movements.
+            if (!scripted) feed.MouseMoved(ToPixels(window.CursorPos));
         }
 
         // ----- IPlatform -----
@@ -363,13 +366,12 @@ namespace OniBrutal.Desktop
             var size = window.Size;
             var fb = window.FramebufferSize;
             float sx = size.X == 0 ? 1f : (float)fb.X / size.X, sy = size.Y == 0 ? 1f : (float)fb.Y / size.Y;
-            return new Vector2((float)pos.X * sx, fb.Y - (float)pos.Y * sy);
+            return PointerPixels.Screen(new Vector2((float)pos.X * sx, (float)pos.Y * sy), fb.Y);
         }
 
         Vector2 MouseGuiPosition()
         {
-            var p = InputState.Instance.MousePosition;
-            return new Vector2(p.x, FramebufferHeight - p.y);
+            return PointerPixels.Gui(InputState.Instance.MousePosition, FramebufferHeight);
         }
 
         EventModifiers Modifiers()
@@ -463,7 +465,7 @@ namespace OniBrutal.Desktop
         {
             var previous = State.MousePosition;
             State.MouseMoved(pixels);
-            var gui = new Vector2(pixels.x, OniBrutal.Engine.Platform.PlatformServices.Current.FramebufferHeight - pixels.y);
+            var gui = PointerPixels.Gui(pixels, OniBrutal.Engine.Platform.PlatformServices.Current.FramebufferHeight);
             var delta = new Vector2(pixels.x - previous.x, -(pixels.y - previous.y));
             int dragging = Array.IndexOf(buttonsDown, true);
             Queue(dragging >= 0 ? EventType.MouseDrag : EventType.MouseMove, 0, gui, e =>

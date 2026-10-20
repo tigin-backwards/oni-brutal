@@ -693,5 +693,16 @@ namespace OniBrutal.Tests
             Assert.Equal(parent.transform, clone.transform.parent);
             Assert.Equal(new Vector3(1, 2, 3), clone.transform.localPosition);
         }
-    }
+    
+        [Fact]
+        public void ADestroyedComponentThrowsNullReferenceAsInAPlayer()
+        {
+            // Measured in the original player: GetComponent on a destroyed component (the
+            // game's KCanvasScaler after a resize) throws NullReferenceException.
+            var go = new GameObject("Destroyed");
+            var c = go.AddComponent<BoxCollider>();
+            Object.DestroyImmediate(go);
+            Assert.Throws<System.NullReferenceException>(() => c.GetComponent<Transform>());
+        }
+}
 }

@@ -184,6 +184,18 @@ namespace OniBrutal.Tests
         }
 
         [Fact]
+        public void DescriptorWithMipMapsAndNoMipCountHasTheFullChain()
+        {
+            // mipCount -1 (the default) with useMipMap is the full chain; without it, one level.
+            var desc = new RenderTextureDescriptor(64, 32, UnityEngine.Experimental.Rendering.GraphicsFormat.R8G8B8A8_UNorm, 0) { useMipMap = true };
+            Assert.Equal(7, desc.ToNative().MipCount);
+            desc.mipCount = 3;
+            Assert.Equal(3, desc.ToNative().MipCount);
+            desc.useMipMap = false;
+            Assert.Equal(1, desc.ToNative().MipCount);
+        }
+
+        [Fact]
         public void RenderTextureDescriptorDescribesTemporaryTextures()
         {
             // The dev tools' (ImGui) target: an 8-bit linear RGBA texture without depth.

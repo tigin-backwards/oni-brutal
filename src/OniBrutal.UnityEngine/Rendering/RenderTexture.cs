@@ -437,7 +437,8 @@ namespace UnityEngine
                 EnableRandomWrite = enableRandomWrite,
                 Dimension = TextureKind.Tex2D,
                 VolumeDepth = volumeDepth,
-                MipCount = mipCount > 0 ? mipCount : 1,
+                // Unity: with mip maps, mipCount -1 is the full chain; without, one level.
+                MipCount = !useMipMap ? 1 : mipCount > 0 ? mipCount : TextureFormats.FullMipCount(width, height),
             };
         }
 

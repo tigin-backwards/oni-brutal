@@ -88,8 +88,10 @@ namespace UnityEngine
             }
         }
 
-        static void ThrowNullReference(Object obj)
-            => throw new MissingReferenceException($"The object of type '{obj.GetType().Name}' has been destroyed but you are still trying to access it.\nYour script should either check if it is null or you should not destroy the object.");
+        /// A player build throws a plain NullReferenceException for a destroyed object (measured:
+        /// the original player on GetComponent of a destroyed KCanvasScaler); the detailed
+        /// MissingReferenceException is the Editor's.
+        static void ThrowNullReference(Object obj) => throw new NullReferenceException();
 
         /// 0 once the object is destroyed, as in Unity 6.
         public int GetInstanceID() => Native?.InstanceId ?? 0;

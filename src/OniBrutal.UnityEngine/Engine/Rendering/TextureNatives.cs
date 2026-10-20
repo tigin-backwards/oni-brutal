@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.InteropServices;
+using System.Threading;
 using OniBrutal.Assets.TypeTrees;
 using OniBrutal.Engine.Assets;
 using OniBrutal.Engine.Serialization;
@@ -70,16 +71,20 @@ namespace OniBrutal.Engine.Rendering
     }
 
     /// Texel memory of a texture: unmanaged so that NativeArrays can alias it
-    /// (Texture2D.GetRawTextureData&lt;T&gt;, GetPixelData&lt;T&gt;).
+    /// (Texture2D.GetRawTextureData&lt;T&gt;, GetPixelData&lt;T&gt;). Freed explicitly (Destroy, a
+    /// non-readable texture's upload), or when collected: UnloadUnusedAssets reclaims textures
+    /// nothing references, and those are never destroyed.
     internal sealed unsafe class PixelMemory
     {
         public byte* Pointer { get; private set; }
         public long Size { get; private set; }
 
-        public PixelMemory(long size, byte fill)
+        /// Bytes allocated and not yet freed, process-wide (leak checks).
+        static long liveBytes;
+        public static long LiveBytes => Interlocked.Read(ref liveBytes);
+
+        public PixelMemory(long size, byte fill) : this(size)
         {
-            Size = size;
-            Pointer = (byte*)NativeMemory.AlignedAlloc((nuint)Math.Max(size, 1), 16);
             new Span<byte>(Pointer, checked((int)size)).Fill(fill);
         }
 
@@ -88,14 +93,15 @@ namespace OniBrutal.Engine.Rendering
         {
             Size = size;
             Pointer = (byte*)NativeMemory.AlignedAlloc((nuint)Math.Max(size, 1), 16);
+            Interlocked.Add(ref liveBytes, size);
         }
 
-        public PixelMemory(ReadOnlySpan<byte> data)
+        public PixelMemory(ReadOnlySpan<byte> data) : this(data.Length)
         {
-            Size = data.Length;
-            Pointer = (byte*)NativeMemory.AlignedAlloc((nuint)Math.Max(data.Length, 1), 16);
             data.CopyTo(new Span<byte>(Pointer, data.Length));
         }
+
+        ~PixelMemory() => Free();
 
         public Span<byte> Span => new(Pointer, checked((int)Size));
 
@@ -105,8 +111,10 @@ namespace OniBrutal.Engine.Rendering
         {
             if (Pointer == null) return;
             NativeMemory.AlignedFree(Pointer);
+            Interlocked.Add(ref liveBytes, -Size);
             Pointer = null;
             Size = 0;
+            GC.SuppressFinalize(this);
         }
     }
 

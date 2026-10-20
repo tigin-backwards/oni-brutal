@@ -420,8 +420,12 @@ namespace OniBrutal.Engine.Rendering
             {
                 switch (p.Kind)
                 {
-                    case ShaderPropertyKind.Float or ShaderPropertyKind.Range or ShaderPropertyKind.Int:
+                    case ShaderPropertyKind.Float or ShaderPropertyKind.Range:
                         Properties.Floats.TryAdd(p.Id, p.Default.x);
+                        break;
+                    // An Integer property's value is the material's integer (m_Ints, SetInteger).
+                    case ShaderPropertyKind.Int:
+                        Properties.Ints.TryAdd(p.Id, (int)p.Default.x);
                         break;
                     case ShaderPropertyKind.Color or ShaderPropertyKind.Vector:
                         Properties.Vectors.TryAdd(p.Id, p.Default);

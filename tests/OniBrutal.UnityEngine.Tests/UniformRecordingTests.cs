@@ -72,5 +72,43 @@ namespace OniBrutal.Tests
             Assert.Equal(9f, v[5]);
             Assert.Equal(5f, v[9 + 12]);
         }
-    }
+    
+        static readonly int MainTexId = Shader.PropertyToID("_RecordingTestTex");
+        static readonly int CountId = Shader.PropertyToID("_RecordingTestCount");
+
+        [Fact]
+        public void BlockTextureKeepsTheMaterialsTilingAndOffset()
+        {
+            // MaterialPropertyBlock.SetTexture sets only the texture: X_ST still comes from the
+            // material unless the block sets that vector.
+            var p = new DeviceProgram();
+            p.Uniforms.Add(new UniformBinding { Name = "_RecordingTestTex_ST", Type = FloatVec4, Size = 1, Source = UniformSource.TextureScaleOffset, PropertyId = MainTexId });
+            p.LooseLength = 4;
+            var material = new MaterialNative();
+            material.Properties.SetTexture(MainTexId, null);
+            material.Properties.SetTextureScaleOffset(MainTexId, new Vector4(2f, 3f, 0.25f, 0.5f));
+            var block = new PropertySheet();
+            block.SetTexture(MainTexId, null);
+            var d = new DrawInputs { Material = material, Block = block };
+            Assert.Equal(new[] { 2f, 3f, 0.25f, 0.5f }, Record(p, d));
+
+            block.SetVector(Shader.PropertyToID("_RecordingTestTex_ST"), new Vector4(4f, 4f, 0f, 0f));
+            Assert.Equal(new[] { 4f, 4f, 0f, 0f }, Record(p, d));
+        }
+
+        [Fact]
+        public void BlockIntegerOverridesTheMaterialsValue()
+        {
+            // Block over material over globals, whichever store (float or integer) holds it.
+            var p = new DeviceProgram();
+            p.Uniforms.Add(new UniformBinding { Name = "_RecordingTestCount", Type = IntType, Size = 1, Source = UniformSource.Property, PropertyId = CountId });
+            p.LooseLength = 1;
+            var material = new MaterialNative();
+            material.Properties.SetFloat(CountId, 1f);
+            var block = new PropertySheet();
+            block.SetInt(CountId, 5);
+            Assert.Equal(5f, Record(p, new DrawInputs { Material = material, Block = block })[0]);
+            Assert.Equal(1f, Record(p, new DrawInputs { Material = material })[0]);
+        }
+}
 }

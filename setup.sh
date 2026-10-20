@@ -2,7 +2,7 @@
 # One-time setup for playing Oxygen Not Included on oni-brutal (Linux).
 #
 # Finds the game through Steam's libraries, builds the player into out/player when run from a
-# clone of the repository (a release already has it, next to this script), and prints the line
+# clone of the repository (a release has it in player/ beside this script), and prints the line
 # to paste into the game's Steam launch options. Run it again after updating.
 #   ./setup.sh [GAME_DIR]
 set -euo pipefail
@@ -31,8 +31,8 @@ game="${1:-$(find_game)}"
 [ -x "$game/OxygenNotIncluded" ] || die "$game is the Windows build; on Linux, Steam has to install the Linux one"
 say "Game: $game"
 
-if [ -x "$here/OniBrutal" ]; then
-    player="$here" # a release
+if [ -x "$here/player/OniBrutal" ]; then
+    player="$here/player" # a release
 else
     # A .NET SDK of the version global.json pins (a later patch release works too): one already
     # installed, or one installed into ~/.dotnet (no root needed).

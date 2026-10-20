@@ -1,7 +1,7 @@
 # One-time setup for playing Oxygen Not Included on oni-brutal (Windows).
 #
 # Finds the game through Steam's libraries, builds the player when run from a copy of the
-# repository (a release already has it, next to this script), installs it to
+# repository (a release has it in player\ beside this script), installs it to
 # %LOCALAPPDATA%\oni-brutal\player, and puts the line for the game's Steam launch options on the
 # clipboard. The install location stays the same, so after an update running this again is all
 # that is needed.
@@ -32,8 +32,8 @@ if (-not $Game) { Die "Oxygen Not Included wasn't found in any Steam library; in
 if (-not (Test-Path (Join-Path $Game 'OxygenNotIncluded_Data\Managed'))) { Die "$Game isn't an Oxygen Not Included install (no OxygenNotIncluded_Data\Managed)" }
 Write-Host "Game: $Game"
 
-if (Test-Path (Join-Path $here 'OniBrutal.exe')) {
-    $built = $here # a release
+if (Test-Path (Join-Path $here 'player\OniBrutal.exe')) {
+    $built = Join-Path $here 'player' # a release
 } else {
     # A .NET SDK of the version global.json pins (a later patch release works too): one already
     # installed, or one installed for this user (no administrator needed).

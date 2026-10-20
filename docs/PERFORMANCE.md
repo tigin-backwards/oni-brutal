@@ -10,24 +10,25 @@ Everything here is measured on U57, a Spaced Out colony with every DLC at cycle 
 Duplicants, 1,186 critters, about 62,000 buildings and 90,000 animated objects, played at speed 3.
 
 The machine is a Ryzen 7 9800X3D (8 cores, 16 threads) with an RTX 3090, running Linux under
-WSL2. Both players load the same save at 1024×768, with the same probe mod (`tools/PerfProbe`)
+WSL2. Both players load the same save at 1280×720, with the same probe mod (`tools/PerfProbe`)
 holding speed 3 and logging the frame rate every 600 frames. Background load moves a single
-build by about ±10% between runs, so comparisons are always back to back or alternating.
+build by about ±10% between runs, so comparisons are always back to back with nothing else
+running. The frame-rate ranges are those 600-frame windows, leaving out the first (warm-up) and
+the ones holding an autosave; "about" is their typical value.
 
 ## The numbers
 
 | | Original | oni-brutal | |
 |---|---|---|---|
-| Frame rate, no tweaks | 6.5–6.8&nbsp;fps | 17.0–18.5&nbsp;fps | about 2.7× |
-| Frame rate, `exact` tweaks (the default) | | <!-- TODO: measure --> | |
-| Frame rate, every tweak | | 25–27&nbsp;fps (mean 26) | about 3.9× |
-| Frame rate in the autosave window | 4.1&nbsp;fps | 11.7&nbsp;fps | about 2.9× |
+| Frame rate, no tweaks | about 8&nbsp;fps (7.0–8.2) | about 24&nbsp;fps (22.6–27.7) | about 3× |
+| Frame rate, `exact` tweaks (the default) | | about 29&nbsp;fps (25.3–37.7) | about 3.7× |
+| Frame rate, every tweak | | about 36&nbsp;fps (33.9–39.1) | about 4.5× |
 | Loading the save | 3&nbsp;min&nbsp;50&nbsp;s | 26–28&nbsp;s | about 8.5× faster |
 | Autosave freeze, no tweaks | 47–50&nbsp;s | 9–10&nbsp;s | about 5× shorter |
 | Autosave freeze, `exact` tweaks (the default) | | 2.7–3.1&nbsp;s | about 16× shorter |
 
 With no tweaks it's the same game code doing the same work, so that row is the engine and
-runtime alone: about 2.7 times the original's frame rate.
+runtime alone: about 3 times the original's frame rate.
 
 On Windows, before any tweaks existed, U57 went from about 8.5 fps to 17–18. A smaller base-game
 colony (DeCrew) went from 17–20 fps to 48–56. At that point it was simulating nearly as fast as speed 3

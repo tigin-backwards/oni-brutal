@@ -14,19 +14,21 @@ into Unity for is reimplemented here.
 ## Setup
 
 You need your own copy of the game on Steam, on Linux or Windows (no macOS). Because this replaces
-the engine rather than patching the game, it can't ship as an ordinary Harmony mod. Instead, a setup script hooks it into the game's
-Steam launch options, so you still start the game from Steam as usual.
+the engine rather than patching the game, it can't ship as an ordinary Harmony mod. Instead, a
+setup script hooks it into the game's Steam launch options, so you still start the game from
+Steam as usual.
 
-<!-- TODO: release download link -->
-
-1. Download the latest release, or clone this repository.
-2. Run the setup script:
-   - Linux: `./setup.sh`
+1. Download the latest release from the
+   [releases page](https://github.com/tigin-backwards/oni-brutal/releases/latest):
+   `oni-brutal-…-windows-x64.zip` or `oni-brutal-…-linux-x64.tar.gz`, and extract it anywhere.
+   (Or clone this repository; the setup then builds the player itself, installing the .NET SDK
+   for your user if you don't have it.)
+2. Run the setup script in the extracted `oni-brutal` folder:
    - Windows: right-click `setup.ps1` → Run with PowerShell
+   - Linux: `./setup.sh`
 
-   It finds your Oxygen Not Included install through Steam and prints one line for the game's
-   launch options. From a clone, it also builds the player first, installing the .NET SDK for
-   your user if you don't have it.
+   It finds your Oxygen Not Included install through Steam, and prints one line for the game's
+   launch options, and puts it on your clipboard where it can.
 3. In Steam, right-click Oxygen Not Included → Properties → Launch Options, and paste that line.
 
 Then press Play in Steam as usual. To update, get the new version and run the setup again; the
@@ -44,7 +46,7 @@ On a late-game save (U57: Spaced Out with every DLC, cycle 17,000+), on the same
 
 | | Original | oni-brutal | |
 |---|---|---|---|
-| Frame rate at speed&nbsp;3 | 6.5–6.8&nbsp;fps | about 26&nbsp;fps | about 4× |
+| Frame rate at speed&nbsp;3 | about 8&nbsp;fps | about 29&nbsp;fps | about 3.7× |
 | Loading the save | 3&nbsp;min&nbsp;50&nbsp;s | 26–28&nbsp;s | about 8.5× faster |
 | Autosave freeze | about 48&nbsp;s | about 3&nbsp;s | about 16× shorter |
 
@@ -54,9 +56,8 @@ writing the save faster and moving the compression and file write to a backgroun
 Garbage-collection hitches are mostly gone: collections now run in the background, spread
 across every core, and their pauses are about a quarter as long.
 
-<!-- TODO: machine specs. The frame rates are Linux, Xvfb at 1024×768. -->
-<!-- TODO: frame-rate numbers depend on the U57 tweak set; re-check after the setup's defaults are chosen -->
-<!-- TODO: the 26 fps figure is with every tweak, the "changes gameplay" ones included; without any tweak it's 17–18.5 fps -->
+The frame rate is with the default tweaks; with every tweak on it's about 36 fps. Measured on a
+Ryzen 7 9800X3D with an RTX 3090.
 
 https://github.com/user-attachments/assets/a0fb45c5-121d-4ef9-8310-9d7b556aa089
 
@@ -135,7 +136,6 @@ File an issue, and please attach your log. It's `Player.log` in:
 - Linux: `~/.config/unity3d/Klei/Oxygen Not Included/`
 - Windows: `%USERPROFILE%\AppData\LocalLow\Klei\Oxygen Not Included\`
 
-<!-- TODO: before release: license; BRUTAL credit, logo and NOTICE.txt (its license requires them) -->
 
 ## License
 

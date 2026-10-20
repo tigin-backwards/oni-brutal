@@ -478,11 +478,11 @@ Fixes come with a regression test that fails before them. Status: **fixed** (com
 | T4 | TextMeshPro | Hyphens are not line-break points. | fixed (clean room, 48fc6d8; measured: breaks after "-" and the soft hyphen, not after U+2010/U+2011; TmpLayoutTests) |
 | T5 | TextMeshPro | The input field uses string positions as character indices (caret off after a typed tag or escape). | fixed (clean room, 32ad6b4; TmpInputTests) |
 | S1 | assets | A corrupt or truncated bundle throws out of AssetBundle.LoadFromFile instead of returning null. | fixed: decoders report truncated or damaged blocks as invalid data, the block table is bounds-checked (CompressionTests) |
-| S2 | assets | A failed load leaves a half-built object cached. | open |
+| S2 | assets | A failed load leaves a half-built object cached. | fixed (ObjectLoaderTests) |
 | S3 | assets | Reloading a bundle after Unload(false) reuses instance IDs of live objects. | left: the game only unloads with true |
-| S4 | assets | Reloading a scene reuses surviving level objects. | open: check reach |
-| S5 | assets | TextAsset.text decodes UTF-32 LE as UTF-16. | open |
-| S6 | assets | Concurrent first reads of a resource file can map it twice (one view leaked). | open |
+| S4 | assets | Reloading a scene reuses surviving level objects. | fixed: a level's cached objects are forgotten when it loads again (SceneReloadTests) |
+| S5 | assets | TextAsset.text decodes UTF-32 LE as UTF-16. | left: no UTF-32 text asset in the game, and Unity's detection of one cannot be measured without one |
+| S6 | assets | Concurrent first reads of a resource file can map it twice (one view leaked). | fixed: one mapping per file under concurrent first reads (ResourceStreamTests; the racing form maps it 32 times) |
 | H1 | fast-anim-events | The loop reads the entry count once; the game re-reads it, so an entry an event adds during the loop (a Duplicant's mouth animation started by a speech event) runs one frame behind. Breaks exactness. | fixed: the count is read on every pass; the play speed is read after the events when one restarted the controller; verify mode counts entries added during the loop (0 in a 9,000-frame U57 run) |
 | H2 | off-screen-conveyors | An item kept off screen keeps its stale position when the conduit is emptied or deconstructed (it drops there); handles of items taken off the rail stay in the skipped set. | fixed: an item leaving the rail (RemovePickupable) is placed first; the set is per flow |
 | H3 | fast-particle-collision | Destroyed radbolts stay in the live list unless a gather runs; the list grows. | fixed: destroyed radbolts leave the list on every check |

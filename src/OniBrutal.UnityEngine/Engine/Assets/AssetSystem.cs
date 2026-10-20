@@ -17,7 +17,12 @@ namespace OniBrutal.Engine.Assets
         static readonly object gate = new();
         static readonly Dictionary<string, SerializedFile> files = new(StringComparer.Ordinal);
         static readonly Dictionary<string, byte[]> bundleNodes = new(StringComparer.Ordinal);
-        static readonly ConcurrentDictionary<string, MemoryMappedViewAccessor> streams = new(StringComparer.Ordinal);
+        /// Resource files mapped once each: concurrent first reads (texture and video threads) share
+        /// one mapping (GetOrAdd's factory alone could run twice and leak a whole-file view).
+        static int mappingsMade;
+        /// Resource files mapped so far (tests).
+        internal static int MappingsMade => mappingsMade;
+        static readonly ConcurrentDictionary<string, Lazy<MemoryMappedViewAccessor>> streams = new(StringComparer.Ordinal);
 
         public static string DataDir => dataDir;
 
@@ -124,11 +129,12 @@ namespace OniBrutal.Engine.Assets
                     return result;
                 }
             }
-            var view = streams.GetOrAdd(key, k =>
+            var view = streams.GetOrAdd(key, k => new Lazy<MemoryMappedViewAccessor>(() =>
             {
+                System.Threading.Interlocked.Increment(ref mappingsMade);
                 var file = MemoryMappedFile.CreateFromFile(Path.Combine(dataDir, k), FileMode.Open, null, 0, MemoryMappedFileAccess.Read);
                 return file.CreateViewAccessor(0, 0, MemoryMappedFileAccess.Read);
-            });
+            }, System.Threading.LazyThreadSafetyMode.ExecutionAndPublication)).Value;
             view.ReadArray(offset, result, 0, (int)size);
             return result;
         }

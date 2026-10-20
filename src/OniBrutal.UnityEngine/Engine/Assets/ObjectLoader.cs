@@ -44,7 +44,13 @@ namespace OniBrutal.Engine.Assets
         /// The scene a level file is being loaded into (null when loading assets).
         static readonly Dictionary<string, SceneRecord> sceneOfFile = new(StringComparer.Ordinal);
 
-        public static void BeginSceneFile(SerializedFile file, SceneRecord scene) => sceneOfFile[AssetSystem.KeyOf(file)] = scene;
+        /// Loading a scene makes its objects afresh: what survived the previous load of the same
+        /// level (DontDestroyOnLoad objects, scene settings) is not taken into the new scene.
+        public static void BeginSceneFile(SerializedFile file, SceneRecord scene)
+        {
+            ForgetFile(AssetSystem.KeyOf(file));
+            sceneOfFile[AssetSystem.KeyOf(file)] = scene;
+        }
         public static void EndSceneFile(SerializedFile file) => sceneOfFile.Remove(AssetSystem.KeyOf(file));
 
         public static Object Load(SerializedFile file, long pathId)
@@ -80,8 +86,18 @@ namespace OniBrutal.Engine.Assets
                 ObjectTable.SetInstanceId(native, id);
                 native.IsPersistent = request.Persistent;
                 native.Source = new AssetSource(key.File, pathId);
+                // Cached before filling: the object's own references can lead back to it.
                 loaded[key] = obj.Handle;
-                binder.Fill(obj, request);
+                try
+                {
+                    binder.Fill(obj, request);
+                }
+                catch
+                {
+                    // Not left cached half-built: a later load reads it again (and fails again).
+                    loaded.Remove(key);
+                    throw;
+                }
                 if (key.File.StartsWith("Resources/", StringComparison.Ordinal))
                     lock (builtinLoads) builtinLoads.Add((key.File, pathId, type.ClassId, obj.GetType().Name, native is Rendering.ShaderNative shader ? shader.ShaderName : native.Name));
                 return obj;

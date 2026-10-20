@@ -57,8 +57,9 @@ if (Test-Path (Join-Path $here 'OniBrutal.exe')) {
     Write-Host 'Building the player (a few minutes the first time)...'
     # Self-contained: it carries its own .NET runtime.
     foreach ($project in 'src\OniBrutal.Host', 'src\OniBrutal.Restarter') {
-        & $dotnet build (Join-Path $here $project) -c Release -r win-x64 --self-contained true "-p:OniGameDir=$Game" -v q -nologo "-clp:ErrorsOnly;NoSummary"
-        if ($LASTEXITCODE -ne 0) { Die 'the build failed' }
+        # The output is shown only if the build fails.
+        $output = & $dotnet build (Join-Path $here $project) -c Release -r win-x64 --self-contained true "-p:OniGameDir=$Game" -v q -nologo 2>&1
+        if ($LASTEXITCODE -ne 0) { $output | Write-Host; Die 'the build failed' }
     }
     $player = Join-Path $here 'out\player'
     if (Test-Path $player) { Remove-Item -Recurse -Force $player }
@@ -68,9 +69,13 @@ if (Test-Path (Join-Path $here 'OniBrutal.exe')) {
     foreach ($file in 'Restarter.exe', 'Restarter.dll', 'Restarter.deps.json', 'Restarter.runtimeconfig.json') { Copy-Item (Join-Path $restarter $file) $player }
 }
 
+$launch = "`"$(Join-Path $player 'OniBrutal.exe')`" --game-tweak exact -- %command%"
+# On the clipboard: copied from the console, a long line picks up its wrapping as spaces.
+Set-Clipboard -Value $launch
 Write-Host ''
-Write-Host 'Done. In Steam: right-click Oxygen Not Included -> Properties -> Launch Options, and paste:'
+Write-Host 'Done. The launch options are on your clipboard. In Steam: right-click Oxygen Not Included ->'
+Write-Host 'Properties -> Launch Options, and paste them with Ctrl+V. They are:'
 Write-Host ''
-Write-Host "    `"$(Join-Path $player 'OniBrutal.exe')`" --game-tweak exact -- %command%" -ForegroundColor Green
+Write-Host "    $launch" -ForegroundColor Green
 Write-Host ''
 Write-Host 'Then press Play as usual. To play the original game again, clear the launch options.'

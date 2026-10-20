@@ -54,17 +54,32 @@ else
     say "Building the player (a few minutes the first time)..."
     # Self-contained: it carries its own .NET runtime, so it runs where Steam starts it (a snap's
     # Steam can't see ~/.dotnet).
-    "$dotnet" build "$here/src/OniBrutal.Host" -c Release -r linux-x64 --self-contained true -p:OniGameDir="$game" -v q -nologo "-clp:ErrorsOnly;NoSummary" \
-        || die "the build failed"
+    # The output is shown only if the build fails.
+    if ! output=$("$dotnet" build "$here/src/OniBrutal.Host" -c Release -r linux-x64 --self-contained true -p:OniGameDir="$game" -v q -nologo 2>&1); then
+        printf '%s\n' "$output" >&2
+        die "the build failed"
+    fi
     player="$here/out/player"
     rm -rf "$player"
     cp -r "$here/out/bin/OniBrutal.Host/release_linux-x64" "$player"
     rm -f "$player"/FacadeGen*
 fi
 
+launch="\"$player/OniBrutal\" --game-tweak exact -- %command%"
+# On the clipboard where a clipboard tool exists: copied from a terminal, a long line can pick
+# up its wrapping.
+copied=""
+for tool in "wl-copy" "xclip -selection clipboard" "xsel --clipboard --input"; do
+    command -v "${tool%% *}" >/dev/null 2>&1 && printf '%s' "$launch" | $tool 2>/dev/null && { copied=1; break; }
+done
 say ""
-say "Done. In Steam: right-click Oxygen Not Included → Properties → Launch Options, and paste:"
+if [ -n "$copied" ]; then
+    say "Done. The launch options are on your clipboard. In Steam: right-click Oxygen Not Included →"
+    say "Properties → Launch Options, and paste them. They are:"
+else
+    say "Done. In Steam: right-click Oxygen Not Included → Properties → Launch Options, and paste:"
+fi
 say ""
-say "    \"$player/OniBrutal\" --game-tweak exact -- %command%"
+say "    $launch"
 say ""
 say "Then press Play as usual. To play the original game again, clear the launch options."

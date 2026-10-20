@@ -193,6 +193,47 @@ The same applies to the other per-item systems (reachability, critter temperatur
 checks): caching what a call looks up cannot remove the cost of visiting each object. Gains need
 whole loops skipped exactly (as the radbolt gather) or the engine work they cause reduced.
 
+## Wall-clock time by entry point (2026-10-19, stopwatch probe)
+
+perf's cpu-clock samples miss time a thread spends blocked (waiting for job workers, the native
+sim). A stopwatch around the main thread's entry points (PerfProbe's temporary `walltime.txt`
+mode: Harmony prefix and postfix timing, mean over 600-frame windows) gives the wall time instead.
+U57 at speed 3, every tweak (with fast-jobs, before fast-offset-tables), about 24 fps; nested rows
+are part of the row above them. Calls a frame in brackets where not 1.
+
+| Entry point | ms a frame |
+|---|---|
+| Game.Update | 19.2 |
+| · Game.SimEveryTick | 16.9 |
+| · · StateMachineUpdater.AdvanceOneSimSubTick (7.1 calls) | 12.1 |
+| · · Game.UnsafeSim200ms (0.6) | 4.8 |
+| · · · Game.StepTheSim, the native SimDLL step: a wait, not reducible here (0.6) | 4.4 |
+| · · Pathfinding.UpdateNavGrids (0.6) | 0.4 |
+| Game.LateUpdate | 5.7 |
+| StateMachineUpdater.RenderEveryTick | 4.7 |
+| · BrainScheduler.RenderEveryTick | 4.0 |
+| · · MinionBrain.UpdateBrain (0.9) | 3.1 |
+| · · · Sensors.UpdateSensors | 2.7 |
+| · · · · FetchManager.UpdatePickups (offset job 0.75, pickup job 0.91) | 1.7 |
+| · · Brain.UpdateChores (6) | 1.1 |
+| · · · ChoreConsumer.FindNextChore (39) | 1.2 |
+| Global.LateUpdate | 2.6 |
+| · KBatchedAnimUpdater.LateUpdate | 2.6 |
+| CellChangeMonitor.RenderEveryTick | 1.7 |
+| World.LateUpdate | 1.4 |
+| KAnimBatchManager.UpdateDirty | 1.0 |
+| Global.Update | 0.8 |
+| AnimEventManager.Update | 0.8 |
+| KAnimBatchManager.Render | 0.2 |
+| StateMachineUpdater.Render | 0.2 |
+
+Job runs on the main thread (JobManager.Run, by work item type): pickups 0.91, offset tables 0.75
+(since removed by fast-offset-tables), mesh batches 0.29 (2 runs), amounts 0.46, solid transfer
+arms 0.46, network updates 0.16, conduits 0.19. The pickup job is bound by memory: running its
+largest groups first left its wall time unchanged and raised the items' total CPU from 4.9 to
+6.3 ms. On the GL thread, about 22 ms a frame is busy in parallel with the main thread (texture
+uploads 10.4 ms of it), from --frame-stats.
+
 ## A quiet view
 
 Is the frame rate low only where much is on screen? PerfProbe (`camera.txt quiet`, `speed.txt`)

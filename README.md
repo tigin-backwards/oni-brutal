@@ -101,12 +101,12 @@ Soon™ territory for years).
 
 This also rebuilds only what the game needs to run. Everything that Klei's development workflow
 needs from Unity would be lost:
-- the editor;
-- Unity's shader tooling;
-- the asset bundle build pipeline;
-- profiling and debugging tools;
-- no macOS support yet;
-- and the general, accumulated knowledge of how Unity behaves.
+- the editor
+- Unity's shader tooling
+- the asset bundle build pipeline
+- profiling and debugging tools
+- no macOS support yet
+- the general, accumulated knowledge of how Unity behaves
 
 Unlike RimWorld, which uses very little of Unity, Oxygen Not Included leans on much more of it.
 

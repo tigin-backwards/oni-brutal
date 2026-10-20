@@ -18,12 +18,28 @@
 # Steam double owning the DLC) and QA_U57_SAVE; without it those stages are skipped, and say so.
 # It can also export the machine's GL settings for Xvfb (e.g. GALLIUM_DRIVER), which every run uses.
 # --bless stores this run's captures, signatures and frame rate as the references
-# (out/qa/reference), once they have been looked at.
+# (out/qa/reference), once they have been looked at; --bless-from=RUN stores a past run's.
 set -uo pipefail
 source "$(dirname "$0")/env.sh"
 export PATH="$HOME/.dotnet:$PATH"
-bless=0; stages=()
-for a in "$@"; do [ "$a" = --bless ] && bless=1 || stages+=("$a"); done
+bless=0; stages=(); bless_from=""
+for a in "$@"; do
+    case $a in
+        --bless) bless=1 ;;
+        --bless-from=*) bless_from=${a#--bless-from=} ;;
+        *) stages+=("$a") ;;
+    esac
+done
+# --bless-from=RUN: a past run's dogfood captures and signatures, once looked at, become the
+# references (without running the scenarios again).
+if [ -n "$bless_from" ]; then
+    for d in "$bless_from"/dogfood/*/; do
+        name=$(basename "$d"); r="$root/out/qa/reference/dogfood/$name"
+        rm -rf "$r"; mkdir -p "$r"; cp "$d"/signatures.txt "$d"/f*.png "$r"/ 2>/dev/null
+        rm -f "$r"/f*-diff.png; echo "blessed $name from $bless_from"
+    done
+    exit 0
+fi
 [ ${#stages[@]} -eq 0 ] && stages=(unit dogfood verify perf)
 qa="$root/out/qa"; ref="$qa/reference"; run="$qa/run-$(date +%Y%m%d-%H%M%S)"
 mkdir -p "$run" "$ref"

@@ -124,9 +124,9 @@ File an issue, and please attach your log. It's `Player.log` in:
 - Linux: `~/.config/unity3d/Klei/Oxygen Not Included/`
 - Windows: `%USERPROFILE%\AppData\LocalLow\Klei\Oxygen Not Included\`
 
-<!-- TODO: before release: licence; BRUTAL credit, logo and NOTICE.txt (its licence requires them) -->
+<!-- TODO: before release: license; BRUTAL credit, logo and NOTICE.txt (its license requires them) -->
 
-## Licence
+## License
 
 <!-- TODO -->
 

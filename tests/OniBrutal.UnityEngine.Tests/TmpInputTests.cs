@@ -167,6 +167,69 @@ namespace OniBrutal.Tests
         }
 
         [Fact]
+        public void ARejectedCharacterLeavesTheSelection()
+        {
+            var field = NewField();
+            field.characterValidation = TMP_InputField.CharacterValidation.Integer;
+            field.text = "123";
+            int changes = 0;
+            field.onValueChanged.AddListener(_ => changes++);
+            field.ActivateInputField();
+            Frame();
+            // Select all: the anchor at the end, the caret at the start.
+            Type(Key(KeyCode.A, 'a', EventModifiers.Control));
+            Assert.Equal(3, field.selectionAnchorPosition);
+            Assert.Equal(0, field.caretPosition);
+            Type(Char('x'));
+            Assert.Equal("123", field.text);
+            Assert.Equal(3, field.selectionAnchorPosition);
+            Assert.Equal(0, field.selectionFocusPosition);
+            Assert.Equal(0, changes);
+            // A part of the text, selected backwards.
+            Type(Key(KeyCode.End), Key(KeyCode.LeftArrow, '\0', EventModifiers.Shift), Key(KeyCode.LeftArrow, '\0', EventModifiers.Shift), Char('x'));
+            Assert.Equal("123", field.text);
+            Assert.Equal(3, field.selectionAnchorPosition);
+            Assert.Equal(1, field.selectionFocusPosition);
+            Assert.Equal(0, changes);
+            // Validation sees the text with the selection removed: "-" typed over a selected "-"
+            // is at the start of "12".
+            field.text = "-12";
+            Type(Key(KeyCode.Home), Key(KeyCode.RightArrow, '\0', EventModifiers.Shift), Char('-'));
+            Assert.Equal("-12", field.text);
+            Assert.Equal(1, field.caretPosition);
+
+            // onValidateInput is given that text and the selection's start.
+            var callback = NewField();
+            callback.text = "abc";
+            string seen = null;
+            int seenIndex = -1;
+            callback.onValidateInput = (t, i, c) => { seen = t; seenIndex = i; return (char)0; };
+            callback.ActivateInputField();
+            Frame();
+            Type(Key(KeyCode.End), Key(KeyCode.LeftArrow, '\0', EventModifiers.Shift), Key(KeyCode.LeftArrow, '\0', EventModifiers.Shift), Char('x'));
+            Assert.Equal("a", seen);
+            Assert.Equal(1, seenIndex);
+            Assert.Equal("abc", callback.text);
+            Assert.Equal(3, callback.selectionAnchorPosition);
+            Assert.Equal(1, callback.selectionFocusPosition);
+
+            // A custom validator is handed the text after the selection is removed, which stays
+            // removed when it rejects the character.
+            var custom = NewField();
+            custom.inputValidator = ScriptableObject.CreateInstance<UpperCaseOnly>();
+            custom.characterValidation = TMP_InputField.CharacterValidation.CustomValidator;
+            custom.text = "ABC";
+            changes = 0;
+            custom.onValueChanged.AddListener(_ => changes++);
+            custom.ActivateInputField();
+            Frame();
+            Type(Key(KeyCode.End), Key(KeyCode.LeftArrow, '\0', EventModifiers.Shift), Key(KeyCode.LeftArrow, '\0', EventModifiers.Shift), Char('x'));
+            Assert.Equal("A", custom.text);
+            Assert.Equal(1, custom.caretPosition);
+            Assert.Equal(0, changes);
+        }
+
+        [Fact]
         public void DeselectingEndsEditing()
         {
             var field = NewField();

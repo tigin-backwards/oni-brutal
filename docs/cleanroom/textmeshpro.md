@@ -444,6 +444,23 @@ from what is described here, the measurement wins and this section is corrected.
    changes nothing: the selection stays selected and the text unchanged. Validation sees the
    text as it is before the selection is replaced. Measure in a field with Integer validation
    and its text selected, typing a letter.
+   *Measured* (test `ARejectedCharacterLeavesTheSelection`):
+   - Integer validation, "123" all selected, "x" typed: the text, the selection and
+     `onValueChanged` are untouched; likewise with "23" selected, with `contentType`
+     IntegerNumber, and when `onValidateInput` returns 0.
+   - The last sentence of the correction is wrong: validation sees the text **with the
+     selection removed**, at the position where the selection began. "-" typed over the
+     selected "-" of "-12" is accepted (it is at the start of "12"), giving "-12"; ".2"
+     selected in "1.2" with Decimal and "." typed gives "1."; `onValidateInput` is called with
+     ("a", 1) for "bc" selected in "abc", and with ("", 0) for all of it.
+   - A custom validator (`CustomValidator` with `inputValidator`) is the exception: the
+     selection is removed before it is called and stays removed when it rejects the
+     character ("BC" selected in "ABC", "x" rejected: "A", caret 1, without
+     `onValueChanged`).
+   - With validation None, `inputValidator` is not used; `characterLimit` counts the text
+     with the selection removed ("1234" all selected with a limit of 4 accepts "5").
+   - Ctrl+A puts the selection's anchor at the end and the caret at the start
+     (`selectionAnchorPosition` 3, `caretPosition` 0 for "123").
 4. **Line breaks after hyphens.** Measure whether a line may break after `-` (U+002D) and after
    a soft hyphen (U+00AD), whether the soft hyphen is drawn at a break and hidden elsewhere,
    and whether a non-breaking hyphen (U+2011) prevents a break; implement what is measured.

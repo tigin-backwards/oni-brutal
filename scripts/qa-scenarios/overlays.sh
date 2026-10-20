@@ -12,3 +12,4 @@ ARGS=(--input 620:click:891,197 --input 1600:click:511,500
       --input 2279:keydown:LeftShift --input 2280:key:F1 --input 2283:keyup:LeftShift
       --input 2339:keydown:LeftShift --input 2340:key:F2 --input 2343:keyup:LeftShift
       --input 2390:key:Escape)
+KEPT_MAX=2 # the coloured overlay view adds a three-target set beside the two-target one

@@ -88,7 +88,10 @@ run_scenario() # NAME
 {
     local name=$1 out="$run/dogfood/$1" file
     file="$root/scripts/qa-scenarios/$name.sh"; [ -f "$file" ] || file="$root/scripts/m9-scenarios/$name.sh"
-    SAVE=""; FRAMES=0; DUMPS=""; ARGS=(); TOLERANCE=0.03; DLC=0
+    # Scenario settings: TOLERANCE (fraction of pixels a capture may differ: random Duplicants,
+    # real-time animation), KEPT_MAX (multi-target framebuffers alive at the end: one per target
+    # set whose textures are still referenced), REQUIRE (log lines the run must print).
+    SAVE=""; FRAMES=0; DUMPS=""; ARGS=(); TOLERANCE=0.03; DLC=0; KEPT_MAX=1; REQUIRE=()
     source "$file"
     # DLC=1: the scenario needs the DLC content and a DLC-owning Steam double (qa.env).
     local gamedir="$game" runner=("$root/scripts/run-offline.sh")
@@ -135,9 +138,11 @@ run_scenario() # NAME
         awk -v r="$r" -v w="$worst" 'BEGIN { exit !(r > w) }' && worst=$r
     done
     if [ -n "$bad" ]; then fail "dogfood $name: captures differ beyond $TOLERANCE:$bad"; else [ -z "$new" ] && ok "dogfood $name (largest capture difference $worst)"; fi
-    # Multi-target framebuffers go with their textures: at the end, one for the world's targets.
+    # Multi-target framebuffers go with their textures.
     local kept; kept=$(grep -aoE '[0-9]+ kept' "$out/stdout.txt" | tail -1 | cut -d' ' -f1)
-    [ "${kept:-0}" -le 1 ] || fail "dogfood $name: $kept multi-target framebuffers kept at the end"
+    [ "${kept:-0}" -le "$KEPT_MAX" ] || fail "dogfood $name: $kept multi-target framebuffers kept at the end (at most $KEPT_MAX)"
+    local line
+    for line in "${REQUIRE[@]}"; do grep -aqF "$line" "$out/stdout.txt" || fail "dogfood $name: the log lacks \"$line\""; done
 }
 
 stage_dogfood()

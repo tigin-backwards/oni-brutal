@@ -517,6 +517,15 @@ replaces looking for error logs by hand. Stages (each can be run alone):
   than the reference's less 15% (this machine's noise), and multi-target framebuffers not piling
   up.
 
+QA rounds (2026-10-20):
+- Round 1: the Duplicant cards' garbled text (Q1), the missing standard screen modes (Q2).
+- Round 2: the intro short holding its first frames (Q5); the stale engine copy in the host
+  (Q6). Its captures became the references; 26.2 fps the baseline.
+- Round 3: nothing new in the engine. Calibration: random Duplicants and the research tree's
+  real-time zoom need wider capture tolerances; two framebuffers at the end of overlays (a
+  second target set) and of save-and-load (the first colony's targets stay referenced) are
+  expected. Verify 797 game seconds with zero mismatches, 29.8 fps, peak 13.9 GB.
+
 References (captures, signatures, the frame-rate baseline) live in `out/qa/reference`, made with
 `--bless` once a run's captures and logs have been looked at; they hold game imagery and stay
 local. The U57 stages need content that cannot be published (DLC files, a DLC-owning Steam

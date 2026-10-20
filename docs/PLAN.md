@@ -597,6 +597,7 @@ was fixed, and each fix has a regression test.
 | Blueprints Expanded failed to load, prefab registration aborted, the sandbox menu recursed until the stack overflowed | Unity API the game never calls: `AssetBundle.GetAllLoadedAssetBundles`, `MonoBehaviour.Invoke` and family, `RenderTexture.GetTemporary` with a read/write mode, `Color.darkGray`/`orange`/`violet`, JetBrains annotations | implemented as measured (Invoke: due calls run after Update and after LateUpdate, on disabled and inactive targets too; the colours are CSS's) |
 | Blueprints Expanded's converted UI kept its legacy text | the player's `DestroyImmediate` destroys assets without `allowDestroyingAssets` (bundle and game-data prefabs); the refusal is the editor's | the refusal is gone |
 | Blueprints Expanded's tools threw FieldAccessException | built against publicized game assemblies; Mono does not check access | ARCHITECTURE D11 |
+| Mod Updater went to safe mode | its transpiler swaps an instance call for a static helper and keeps `callvirt`; Mono runs it as a call, CoreCLR rejects the method (reproduced with Harmony alone) | ARCHITECTURE D12 |
 
 After these, the colony loads and plays with every one of the mods and logs no error, in this
 player as in the original. QA round 7 with all of them: unit, dogfood (the resize capture now shows

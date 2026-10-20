@@ -193,6 +193,12 @@ past the boot checkpoint needs a Steam client logged in with an account that own
   still sees itself as loaded from its file: `Assembly.Location` reports the file (mods find
   their folders from it) and its folder is searched for its references. Other mods load as
   before. This is the host's third change to game code (with D1 and D3).
+- **D12 `callvirt` to a static method.** Mono compiles one as a call; CoreCLR's JIT rejects the
+  method ("Method not found: '?'"). C# compilers never emit it, but Harmony transpilers that
+  swap an instance call for a static helper and keep the opcode do (Mod Updater's patch of
+  `KMod.Manager.Subscribe`). **Resolved by a patch** of the game's Harmony (`TranspiledCalls`):
+  the instructions its transpilers produce (`CodeTranspiler.GetResult`) have such calls made
+  calls, as Mono would run them, and each is logged.
 
 ## 3. The engine API (`OniBrutal.UnityEngine`)
 

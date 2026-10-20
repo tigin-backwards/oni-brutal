@@ -51,6 +51,7 @@ namespace OniBrutal.Host
             if (options.AudioWav != null) AudioCapture.Install(options.AudioWav);
             ModVersionStamp.Install();
             ModAccess.Install();
+            TranspiledCalls.Install();
             GameTweaks.GameTweaks.Install(options.GameTweaks);
             StateMachineSaveNames.Install(dataDir, AppContext.BaseDirectory);
             return Player.Run(options, dataDir);

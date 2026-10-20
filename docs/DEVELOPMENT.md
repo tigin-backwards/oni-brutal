@@ -100,11 +100,14 @@ stages need local setup in `out/local-tools/qa.env`, and are skipped without it.
 ## Known differences
 
 A few number formats in game code and a handful of smaller gaps are documented as deviations in
-`docs/ARCHITECTURE.md` (D1–D11). Three are fixed by small patches the host makes to game code,
+`docs/ARCHITECTURE.md` (D1–D12). Three are fixed by small patches the host makes to game code,
 the only ones it makes:
 - D1: state-machine values in saves from the original player loaded at their defaults
 - D3: local mods disabled at every launch
 - D11: mods built against publicized game assemblies failing CoreCLR's access checks
+
+D12 adjusts the game's Harmony instead: a transpiler's `callvirt` to a static method becomes a
+call, as Mono runs it.
 
 Floating-point results aren't bit-identical to Mono's, and aren't meant to be.
 

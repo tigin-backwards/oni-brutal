@@ -17,7 +17,8 @@ namespace OniBrutal.Host.GameTweaks
     /// complete; until then the target holds the header the game wrote, which is what the save
     /// lists read. Whatever reads, replaces or deletes saves waits for the writes in flight first:
     /// loading a save, the next save, the load screen's delete and move, and the end of the run.
-    /// A failed write is logged; the game's own failure dialog does not appear for it.
+    /// A failed write is logged; the game's own failure dialog does not appear for it. A run that
+    /// ends by an unhandled exception waits for the write too.
     internal static class BackgroundSave
     {
         public const string Name = "background-save";
@@ -30,6 +31,15 @@ namespace OniBrutal.Host.GameTweaks
         public static void Install(Harmony harmony, bool fastCompression)
         {
             fast = fastCompression;
+            // A run ending by an unhandled exception still finishes the save in flight (the game
+            // has already truncated its file to the header). A hard kill during the write loses
+            // it, as killing the game during its own in-place write does.
+            AppDomain.CurrentDomain.UnhandledException += (_, _) =>
+            {
+                Task t;
+                lock (gate) t = pending;
+                t.Wait(TimeSpan.FromSeconds(30));
+            };
             harmony.Patch(AccessTools.Method("SaveLoader:CompressContents"), prefix: new HarmonyMethod(typeof(BackgroundSave), nameof(Compress)));
             var wait = new HarmonyMethod(typeof(BackgroundSave), nameof(WaitPrefix));
             harmony.Patch(AccessTools.Method("SaveLoader:Save", [typeof(string), typeof(bool), typeof(bool)]), prefix: wait);

@@ -34,8 +34,10 @@ namespace OniBrutal.GameTweaks
         static readonly Dictionary<KAnimControllerBase, int> watches = new Dictionary<KAnimControllerBase, int>();
         static bool[] stale = new bool[4096];
         static int nextWatch;
-        static readonly Dictionary<List<AnimEventManager.EventPlayerData>, Row[]> mirrors = new Dictionary<List<AnimEventManager.EventPlayerData>, Row[]>();
-        static long checks, wrong;
+        /// Rows by the game's entry list; weak, as each colony's manager has lists of its own.
+        static readonly System.Runtime.CompilerServices.ConditionalWeakTable<List<AnimEventManager.EventPlayerData>, Row[]> mirrors =
+            new System.Runtime.CompilerServices.ConditionalWeakTable<List<AnimEventManager.EventPlayerData>, Row[]>();
+        static long checks, wrong, addedDuringLoop;
 
         /// A controller's inputs to the loop, as last read.
         struct Row
@@ -76,16 +78,15 @@ namespace OniBrutal.GameTweaks
         static bool Update(AnimEventManager __instance, float dt, List<AnimEventManager.AnimData> anim_data, List<AnimEventManager.EventPlayerData> event_data)
         {
             if (dt <= 0f) return false;
-            int count = event_data.Count;
-            if (!mirrors.TryGetValue(event_data, out var rows) || rows.Length < count)
-            {
-                var grown = new Row[Math.Max(count, (rows?.Length ?? 0) * 2)];
-                if (rows != null) Array.Copy(rows, grown, rows.Length);
-                mirrors[event_data] = rows = grown;
-            }
+            mirrors.TryGetValue(event_data, out var rows);
             var finished = finishedCalls(__instance);
-            for (int i = 0; i < count; i++)
+            int i = 0, startCount = event_data.Count;
+            // The count is read on every pass, as the game's loop does: an event can start an
+            // animation (a speech event its Duplicant's mouth), which appends an entry to visit
+            // in this same update.
+            for (; i < event_data.Count; i++)
             {
+                if (rows == null || rows.Length <= i) rows = Grow(event_data, rows);
                 var data = event_data[i];
                 ref var row = ref rows[i];
                 if (!ReferenceEquals(row.Controller, data.controller) || stale[row.Watch]) Refresh(ref row, data.controller);
@@ -96,7 +97,12 @@ namespace OniBrutal.GameTweaks
                 event_data[i] = data;
                 for (int e = 0; e < data.events.Count; e++) data.events[e].Play(data);
                 data.previousFrame = data.currentFrame;
-                data.elapsedTime += dt * row.PlaySpeed;
+                // The speed as the game reads it, after the events: one of them may have started
+                // another animation on this controller, which flags it.
+                float speed = stale[row.Watch] ? data.controller.GetPlaySpeed() : row.PlaySpeed;
+                if (verify && speed != data.controller.GetPlaySpeed())
+                    global::Debug.Log($"{Name}: stale play speed after the events of {data.controller.name} ({++wrong})");
+                data.elapsedTime += dt * speed;
                 event_data[i] = data;
                 if (data.updatingEvents != null)
                     for (int e = 0; e < data.updatingEvents.Count; e++) data.updatingEvents[e].OnUpdate(data);
@@ -108,7 +114,21 @@ namespace OniBrutal.GameTweaks
                     finished.Add(data.controller);
                 }
             }
+            if (verify)
+            {
+                if (i != event_data.Count) global::Debug.Log($"{Name}: the loop ended at entry {i} of {event_data.Count} ({++wrong})");
+                // Entries started by an event during this update, visited in it as the game does.
+                if (event_data.Count > startCount) addedDuringLoop += event_data.Count - startCount;
+            }
             return false;
+        }
+
+        static Row[] Grow(List<AnimEventManager.EventPlayerData> event_data, Row[] rows)
+        {
+            var grown = new Row[Math.Max(event_data.Count, Math.Max(16, (rows?.Length ?? 0) * 2))];
+            if (rows != null) Array.Copy(rows, grown, rows.Length);
+            mirrors.AddOrUpdate(event_data, grown);
+            return grown;
         }
 
         static void Refresh(ref Row row, KBatchedAnimController controller)
@@ -168,7 +188,7 @@ namespace OniBrutal.GameTweaks
                 global::Debug.Log($"{Name}: stale inputs for {(destroyed ? "a destroyed controller" : controller.name)} ({++wrong})");
                 Refresh(ref row, controller);
             }
-            if (checks % 2000000 == 0) global::Debug.Log($"{Name}: {checks} entries checked, {wrong} stale");
+            if (checks % 2000000 == 0) global::Debug.Log($"{Name}: {checks} entries checked, {wrong} stale, {addedDuringLoop} added during the loop");
         }
     }
 }

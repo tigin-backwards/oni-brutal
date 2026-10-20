@@ -25,12 +25,32 @@ namespace OniBrutal.GameTweaks
         /// Items skipped while moving and not yet placed again.
         static readonly HashSet<int> skipped = new HashSet<int>();
 
+        /// The flow `skipped` belongs to; another (a new game) starts it empty.
+        static SolidConduitFlow skippedFor;
+
         public static void Install(Harmony harmony)
-            => harmony.Patch(AccessTools.Method(typeof(SolidConduitFlow), nameof(SolidConduitFlow.RenderEveryTick)), prefix: new HarmonyMethod(typeof(OffscreenConveyors), nameof(RenderEveryTick)));
+        {
+            harmony.Patch(AccessTools.Method(typeof(SolidConduitFlow), nameof(SolidConduitFlow.RenderEveryTick)), prefix: new HarmonyMethod(typeof(OffscreenConveyors), nameof(RenderEveryTick)));
+            harmony.Patch(AccessTools.Method(typeof(SolidConduitFlow), nameof(SolidConduitFlow.RemovePickupable)), prefix: new HarmonyMethod(typeof(OffscreenConveyors), nameof(RemovingPickupable)));
+        }
+
+        /// SolidConduitFlow.RemovePickupable(cell), every way an item leaves the rail (taken by a
+        /// consumer, bridge or filter, emptied, or dumped when the conveyor is deconstructed): a
+        /// skipped item is first placed at its cell, as PlaceIfSkipped would, so it does not
+        /// leave the rail (or drop into the world) where it was last moved.
+        static void RemovingPickupable(SolidConduitFlow __instance, int cell_idx)
+        {
+            if (skipped.Count > 0 && ReferenceEquals(__instance, skippedFor)) PlaceIfSkipped(__instance, cell_idx);
+        }
 
         /// SolidConduitFlow.RenderEveryTick(float), with off-screen moves skipped.
         static bool RenderEveryTick(SolidConduitFlow __instance)
         {
+            if (!ReferenceEquals(__instance, skippedFor))
+            {
+                skipped.Clear();
+                skippedFor = __instance;
+            }
             var updater = Singleton<KBatchedAnimUpdater>.Instance;
             var soa = __instance.GetSOAInfo();
             float lerp = __instance.ContinuousLerpPercent;
@@ -61,7 +81,8 @@ namespace OniBrutal.GameTweaks
             return false;
         }
 
-        /// An item at rest in `cell` that was skipped while moving goes to the cell's centre.
+        /// An item in `cell` (at rest, or leaving the rail) that was skipped while moving goes to the
+        /// cell's centre.
         static void PlaceIfSkipped(SolidConduitFlow flow, int cell)
         {
             var contents = flow.GetContents(cell);

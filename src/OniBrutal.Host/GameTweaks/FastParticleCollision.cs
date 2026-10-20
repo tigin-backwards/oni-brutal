@@ -100,15 +100,19 @@ namespace OniBrutal.Host.GameTweaks
                 if (other != null && !ReferenceEquals(other, self)) EngineLog.Engine($"{Name}: a skipped gather held radbolt {other.name} ({++wrongSkips})");
             }
             ((System.Collections.IList)list).Clear();
-            if ((skipped + gathered) % 20000 == 0) EngineLog.Engine($"{Name}: {skipped} gathers skipped, {gathered} made, {wrongSkips} wrong skips");
+            if ((skipped + gathered) % 20000 == 0) EngineLog.Engine($"{Name}: {skipped} gathers skipped, {gathered} made, {wrongSkips} wrong skips, {live.Count} radbolts registered");
         }
 
         static bool AnotherParticleIn(UnityEngine.Component self, int x, int y, int width, int height)
         {
             lock (live)
-                foreach (var c in live)
+                for (int i = live.Count - 1; i >= 0; i--)
                 {
-                    if (ReferenceEquals(c, self) || c == null) continue;
+                    var c = live[i];
+                    // Destroyed radbolts leave here, every frame a radbolt checks, not only when a
+                    // gather is made (most checks make none).
+                    if (c == null) { live.RemoveAt(i); continue; }
+                    if (ReferenceEquals(c, self)) continue;
                     foreach (var collider in c.gameObject.GetComponents(colliderType))
                     {
                         var (valid, cx, cy, cw, ch) = registration(collider);

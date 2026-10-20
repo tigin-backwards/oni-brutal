@@ -89,6 +89,12 @@ namespace OniBrutal.GameTweaks
             var table = (IDictionary)AccessTools.Field(typeof(SimAndRenderScheduler), "bucketTable").GetValue(scheduler);
             var entry = table["Sublimates SIM_200ms"];
             if (entry == null) return;
+            // A new colony (the game makes a scheduler per game): the previous one's items were
+            // destroyed with their scene, without OnCleanUp, so their watches go here.
+            watches.Clear();
+            freeWatches.Clear();
+            Array.Clear(changed, 0, changed.Length);
+            nextWatch = 0;
             var buckets = (StateMachineUpdater.BaseUpdateBucket[])AccessTools.Field(entry.GetType(), "buckets").GetValue(entry);
             foreach (var bucket in buckets)
             {

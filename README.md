@@ -131,5 +131,4 @@ File an issue, and please attach your log. It's `Player.log` in:
 <!-- TODO -->
 
 Built on [BRUTAL](https://github.com/ahwootech/BRUTAL), Copyright (c) 2024 Ahwoo Limited.
-Oxygen Not Included is © Klei Entertainment; this project isn't affiliated with Klei or Unity,
-and contains none of the game's code.
+Oxygen Not Included is © Klei Entertainment; this project isn't affiliated with Klei or Unity.

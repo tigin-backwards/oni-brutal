@@ -39,6 +39,10 @@ namespace UnityEngine
         public static Color cyan => new Color(0f, 1f, 1f, 1f);
         public static Color magenta => new Color(1f, 0f, 1f, 1f);
         public static Color gray => new Color(0.5f, 0.5f, 0.5f, 1f);
+        // CSS's named colours, as Unity 6 gives them (measured in the original player).
+        public static Color darkGray => new Color(169f / 255f, 169f / 255f, 169f / 255f, 1f);
+        public static Color orange => new Color(1f, 165f / 255f, 0f, 1f);
+        public static Color violet => new Color(238f / 255f, 130f / 255f, 238f / 255f, 1f);
         public static Color grey => new Color(0.5f, 0.5f, 0.5f, 1f);
         public static Color clear => new Color(0f, 0f, 0f, 0f);
 

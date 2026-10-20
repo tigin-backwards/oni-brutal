@@ -149,8 +149,16 @@ namespace UnityEngine
 
         /// RenderTextureReadWrite.Default: sRGB in a linear-colour-space project only.
         internal static RenderTextureNative Describe(int width, int height, int depth, RenderTextureFormat format)
+            => Describe(width, height, depth, format, RenderTextureReadWrite.Default);
+
+        internal static RenderTextureNative Describe(int width, int height, int depth, RenderTextureFormat format, RenderTextureReadWrite readWrite)
         {
-            bool srgb = QualitySettings.activeColorSpace == ColorSpace.Linear;
+            bool srgb = readWrite switch
+            {
+                RenderTextureReadWrite.Linear => false,
+                RenderTextureReadWrite.sRGB => true,
+                _ => QualitySettings.activeColorSpace == ColorSpace.Linear,
+            };
             if ((format == RenderTextureFormat.Depth || format == RenderTextureFormat.Shadowmap) && depth < 16) depth = 16;
             return new RenderTextureNative
             {
@@ -329,6 +337,13 @@ namespace UnityEngine
             if (width <= 0) throw new ArgumentException("RenderTextureDesc width must be greater than zero.", "desc.width");
             if (height <= 0) throw new ArgumentException("RenderTextureDesc height must be greater than zero.", "desc.height");
             return TemporaryRenderTextures.Get(Describe(width, height, depthBuffer, RenderTextureFormats.Resolve(format)));
+        }
+
+        public static RenderTexture GetTemporary(int width, int height, int depthBuffer, RenderTextureFormat format, RenderTextureReadWrite readWrite)
+        {
+            if (width <= 0) throw new ArgumentException("RenderTextureDesc width must be greater than zero.", "desc.width");
+            if (height <= 0) throw new ArgumentException("RenderTextureDesc height must be greater than zero.", "desc.height");
+            return TemporaryRenderTextures.Get(Describe(width, height, depthBuffer, RenderTextureFormats.Resolve(format), readWrite));
         }
 
         public static RenderTexture GetTemporary(RenderTextureDescriptor desc)

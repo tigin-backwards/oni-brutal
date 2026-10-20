@@ -805,6 +805,12 @@ namespace UnityEngine
         BGR101010_XR = 27,
         R16 = 28,
     }
+    public enum RenderTextureReadWrite
+    {
+        Default = 0,
+        Linear = 1,
+        sRGB = 2,
+    }
     [global::UnityEngine.RequireComponent(typeof(global::UnityEngine.Transform))]
     public partial class Renderer : global::UnityEngine.Component
     {

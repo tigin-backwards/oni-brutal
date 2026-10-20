@@ -143,8 +143,10 @@ namespace OniBrutal.Engine
             BehaviourManager.RunStarts();
             BehaviourManager.RunUpdate();
             // Update.ScriptRunDelayedDynamicFrameRate: Start for behaviours enabled during
-            // Update (so they start before LateUpdate), then coroutines resumed after Update.
+            // Update (so they start before LateUpdate), Invoke calls due, then coroutines resumed
+            // after Update.
             BehaviourManager.RunStarts();
+            DelayedCalls.Run();
             Coroutines.RunUpdatePhase();
             RunPhase(DirectorUpdate);
 
@@ -154,6 +156,8 @@ namespace OniBrutal.Engine
             // before LateUpdate and get it this frame (observed in Unity's player).
             BehaviourManager.RunStarts();
             BehaviourManager.RunLateUpdate();
+            // Invoke calls made since the pass after Update.
+            DelayedCalls.Run();
 
             Lifecycle.ProcessDestroyQueue();
             Mark(6);

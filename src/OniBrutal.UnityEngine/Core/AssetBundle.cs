@@ -68,6 +68,9 @@ namespace UnityEngine
 
         public string[] GetAllAssetNames() => Data.Container.Select(c => c.Path).Distinct().ToArray();
 
+        /// Every bundle loaded and not yet unloaded, in load order.
+        public static IEnumerable<AssetBundle> GetAllLoadedAssetBundles() => AssetBundles.Loaded.ToArray();
+
         /// Releases the bundle's files; with unloadAllLoadedObjects, every object loaded from it
         /// is destroyed as well.
         public void Unload(bool unloadAllLoadedObjects)
@@ -109,6 +112,9 @@ namespace OniBrutal.Engine.Assets
         static readonly List<(AssetBundleCreateRequest Request, string Path, Task<List<(string, byte[])>> Read)> pending = new();
         static bool hooked;
 
+        /// The bundles mounted and not unloaded (AssetBundle.GetAllLoadedAssetBundles).
+        public static readonly List<AssetBundle> Loaded = new();
+
         public static AssetBundle Mount(string path, List<(string Key, byte[] Data)> nodes)
         {
             foreach (var (key, _) in nodes)
@@ -128,6 +134,7 @@ namespace OniBrutal.Engine.Assets
                     var native = (AssetBundleNative)bundle.NativeOrThrow;
                     native.File = file;
                     native.NodeKeys = nodes.Select(n => n.Key).ToList();
+                    Loaded.Add(bundle);
                     return bundle;
                 }
             }
@@ -171,6 +178,7 @@ namespace OniBrutal.Engine.Assets
             }
             foreach (var key in native.NodeKeys) ObjectLoader.ForgetFile(key);
             AssetSystem.UnmountBundle(native.NodeKeys);
+            Loaded.Remove(bundle);
             Object.DestroyImmediate(bundle, true);
         }
     }

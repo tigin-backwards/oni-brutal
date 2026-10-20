@@ -53,6 +53,26 @@ namespace UnityEngine
             return Coroutines.Start(this, routine);
         }
 
+        public void Invoke(string methodName, float time)
+        {
+            Threads.AssertMainThread("Invoke");
+            DelayedCalls.Add(this, methodName, time, -1f);
+        }
+
+        public void InvokeRepeating(string methodName, float time, float repeatRate)
+        {
+            Threads.AssertMainThread("InvokeRepeating");
+            DelayedCalls.Add(this, methodName, time, repeatRate);
+        }
+
+        public void CancelInvoke() => DelayedCalls.Cancel(this, null);
+
+        public void CancelInvoke(string methodName) => DelayedCalls.Cancel(this, methodName);
+
+        public bool IsInvoking() => DelayedCalls.IsPending(this, null);
+
+        public bool IsInvoking(string methodName) => DelayedCalls.IsPending(this, methodName);
+
         public Coroutine StartCoroutine(string methodName) => StartCoroutine(methodName, null, false);
         public Coroutine StartCoroutine(string methodName, object value) => StartCoroutine(methodName, value, true);
 

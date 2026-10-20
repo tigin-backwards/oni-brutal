@@ -175,15 +175,12 @@ namespace UnityEngine
 
         public static void DestroyImmediate(Object obj) => DestroyImmediate(obj, false);
 
+        /// In the player an asset is destroyed whether or not allowDestroyingAssets is set (measured
+        /// in the original player on bundle and game-data prefabs; the refusal is the editor's).
         public static void DestroyImmediate(Object obj, bool allowDestroyingAssets)
         {
             Threads.AssertMainThread("DestroyImmediate");
             if (!IsAlive(obj)) return;
-            if (obj.Native.IsPersistent && !allowDestroyingAssets)
-            {
-                Debug.LogError("Destroying assets is not permitted to avoid data loss.\nIf you really want to remove an asset use DestroyImmediate (theObject, true);");
-                return;
-            }
             Lifecycle.DestroyNow(obj);
         }
 

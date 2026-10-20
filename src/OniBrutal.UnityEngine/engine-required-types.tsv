@@ -4,3 +4,10 @@
 UnityEngine.PhysicsModule	UnityEngine.MeshCollider	# GameObject.CreatePrimitive (Plane, Quad)
 UnityEngine.PhysicsModule	UnityEngine.CapsuleCollider	# GameObject.CreatePrimitive (Capsule, Cylinder)
 UnityEngine.CoreModule	UnityEngine.RectTransform+Edge	# PLib layout (RectTransform.SetInsetAndSizeFromParentEdge)
+UnityEngine.CoreModule	UnityEngine.RenderTextureReadWrite	# mod libraries (UtilLibs): RenderTexture.GetTemporary with a read/write mode
+UnityEngine.CoreModule	JetBrains.Annotations.CanBeNullAttribute	# mod libraries (UtilLibs, BlueprintsV2): annotations
+UnityEngine.CoreModule	JetBrains.Annotations.PublicAPIAttribute	# mod libraries: annotations
+UnityEngine.CoreModule	JetBrains.Annotations.UsedImplicitlyAttribute	# mod libraries (DebugButton): annotations
+UnityEngine.CoreModule	JetBrains.Annotations.MeansImplicitUseAttribute	# applied to PublicAPIAttribute
+UnityEngine.CoreModule	JetBrains.Annotations.ImplicitUseKindFlags	# UsedImplicitlyAttribute's arguments
+UnityEngine.CoreModule	JetBrains.Annotations.ImplicitUseTargetFlags	# UsedImplicitlyAttribute's arguments

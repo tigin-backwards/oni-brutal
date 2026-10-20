@@ -908,9 +908,14 @@ namespace TMPro
             MarkGeometryChanged();
         }
 
+        // To the last laid-out character: the end marker, or where a truncated text stopped
+        // (measured: the shipped package's End there gives the stopped-at character's index).
         public void MoveTextEnd(bool shift)
         {
-            m_StringSelectPosition = m_Text.Length;
+            var info = CurrentTextInfo();
+            m_StringSelectPosition = info != null && info.characterCount > 0
+                ? Mathf.Clamp(info.characterInfo[info.characterCount - 1].index, 0, m_Text.Length)
+                : m_Text.Length;
             if (!shift) m_StringPosition = m_StringSelectPosition;
             MarkGeometryChanged();
         }

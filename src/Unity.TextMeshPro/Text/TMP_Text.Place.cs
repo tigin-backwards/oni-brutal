@@ -175,7 +175,24 @@ namespace TMPro
                     ref var el = ref parsed.Elements[p.Element];
                     ref var ci = ref chars[i];
                     ci = default;
-                    if (p.Blank) continue;
+                    if (p.Blank)
+                    {
+                        // The record where truncation stopped: U+0003, at the source index of
+                        // the character it stopped at and the pen position there, not drawn
+                        // (measured on the shipped package; the input field's caret goes there).
+                        float at = p.X + offsetX, baselineAt = line.Baseline + offsetY;
+                        ci.character = (char)3;
+                        ci.index = el.SourceIndex;
+                        ci.lineNumber = k;
+                        ci.pageNumber = line.Page;
+                        ci.origin = ci.xAdvance = at;
+                        ci.baseLine = baselineAt;
+                        ci.ascender = baselineAt + line.Ascender;
+                        ci.descender = baselineAt + line.Descender;
+                        ci.bottomLeft = ci.topLeft = ci.topRight = ci.bottomRight = new Vector3(at, baselineAt, 0f);
+                        ci.vertexIndex = -1;
+                        continue;
+                    }
                     ci.elementType = el.Kind == ElementKind.Sprite ? TMP_TextElementType.Sprite : TMP_TextElementType.Character;
                     ci.character = (char)el.Unicode;
                     ci.index = el.SourceIndex;
@@ -461,6 +478,14 @@ namespace TMPro
             int stop = next.First;
             if (!prev.EndsWithLineFeed)
             {
+                // The line goes on: a soft hyphen drawn where it broke is hidden again
+                // (measured on the shipped package).
+                ref var end = ref pl[prev.Last];
+                if (end.SoftHyphen > 0f && end.Visible)
+                {
+                    end.Visible = false;
+                    end.GlyphAdvance = end.Advance = 0f;
+                }
                 float x = pl[prev.Last].X + pl[prev.Last].Advance;
                 for (; stop < count && stop <= next.Last; stop++)
                 {
@@ -478,8 +503,8 @@ namespace TMPro
                 int at = stop - 1;
                 while (at > prev.First && pl[at].X + ellipsis.GlyphAdvance > prev.Width + 0.0001f) at--;
                 ellipsis.X = pl[at].X;
-                pl[at] = ellipsis;
-                pl[at + 1] = new Placement { Blank = true, Element = pl[at + 1].Element };
+                ReplaceWithEllipsis(ref pl[at], ellipsis);
+                pl[at + 1] = new Placement { Blank = true, Element = pl[at + 1].Element, X = pl[at].X + pl[at].Advance };
                 prev.Last = at + 1;
                 prev.EndsWithLineFeed = false;
                 FinishLine(ref prev, pl, m_LayoutBaseSize);
@@ -487,7 +512,8 @@ namespace TMPro
                 lineCount = overflowLine;
                 return;
             }
-            pl[stop] = new Placement { Blank = true, Element = pl[stop].Element };
+            float blankX = prev.EndsWithLineFeed ? next.StartX : pl[stop - 1].X + pl[stop - 1].Advance;
+            pl[stop] = new Placement { Blank = true, Element = pl[stop].Element, X = blankX };
             count = stop + 1;
             if (prev.EndsWithLineFeed)
             {
@@ -507,6 +533,17 @@ namespace TMPro
         // The ellipsis, as an element after the parsed ones. Its glyph (from whichever font has
         // it) is scaled by the text's own font (measured on the shipped package: a fallback's
         // ellipsis is drawn at the primary font's scale, unlike a typed one).
+        // The ellipsis takes the place of a character, and its source position (measured: the
+        // shipped package records the replaced character's index for it).
+        void ReplaceWithEllipsis(ref Placement replaced, Placement ellipsis)
+        {
+            ref var source = ref m_Parsed.Elements[replaced.Element];
+            ref var e = ref m_Parsed.Elements[ellipsis.Element];
+            e.SourceIndex = source.SourceIndex;
+            e.SourceLength = source.SourceLength;
+            replaced = ellipsis;
+        }
+
         Placement MeasureEllipsis(float width)
         {
             var parsed = m_Parsed;
@@ -544,10 +581,11 @@ namespace TMPro
                 int at = cut - 1;
                 while (at > line.First && pl[at].X + ellipsis.GlyphAdvance > line.Width + 0.0001f) at--;
                 ellipsis.X = pl[at].X;
-                pl[at] = ellipsis;
+                ReplaceWithEllipsis(ref pl[at], ellipsis);
                 stop = at + 1;
             }
-            pl[stop] = new Placement { Blank = true, Element = pl[stop].Element };
+            float blankX = stop > line.First ? pl[stop - 1].X + pl[stop - 1].Advance : line.StartX;
+            pl[stop] = new Placement { Blank = true, Element = pl[stop].Element, X = blankX };
             line.Last = stop;
             line.EndsWithLineFeed = false;
             FinishLine(ref line, pl, m_LayoutBaseSize);

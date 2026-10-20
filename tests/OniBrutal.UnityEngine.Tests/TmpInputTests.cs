@@ -33,7 +33,7 @@ namespace OniBrutal.Tests
             }
         }
 
-        static TMP_InputField NewField()
+        static TMP_InputField NewField(float width = 200f)
         {
             TmpTestSupport.LoadGameData();
             if (EventSystem.current == null) new GameObject("EventSystem", typeof(EventSystem), typeof(SelectedUpdateModule));
@@ -41,7 +41,7 @@ namespace OniBrutal.Tests
             canvasGo.AddComponent<Canvas>().renderMode = RenderMode.ScreenSpaceOverlay;
             var fieldGo = new GameObject("Field", typeof(RectTransform));
             fieldGo.transform.SetParent(canvasGo.transform, false);
-            ((RectTransform)fieldGo.transform).sizeDelta = new Vector2(200f, 30f);
+            ((RectTransform)fieldGo.transform).sizeDelta = new Vector2(width, 30f);
             fieldGo.SetActive(false);
             var field = fieldGo.AddComponent<TMP_InputField>();
             var area = new GameObject("Text Area", typeof(RectTransform));
@@ -364,6 +364,37 @@ namespace OniBrutal.Tests
                 Assert.Equal(1, layouts);
             }
             finally { TMPro_EventManager.TEXT_CHANGED_EVENT.Remove(count); }
+        }
+
+        [Fact]
+        public void InATruncatedTextTheCaretEndsWhereTheTextStops()
+        {
+            // A 100 wide field whose text truncates: "QUIT GAME NOW" stops before the "W".
+            foreach (var mode in new[] { TextOverflowModes.Truncate, TextOverflowModes.Ellipsis })
+            {
+                var field = NewField(100f);
+                field.textComponent.overflowMode = mode;
+                field.ActivateInputField();
+                Frame();
+                foreach (char c in "QUIT GAME NOW") Type(Char(c));
+                var info = field.textComponent.textInfo;
+                Assert.Equal(13, info.characterCount);
+                // The record where it stopped is at the "W"'s source index and the pen there; the
+                // caret at the end is drawn at it.
+                var stopped = info.characterInfo[12];
+                Assert.Equal('\u0003', stopped.character);
+                Assert.Equal(12, stopped.index);
+                Assert.Equal(info.characterInfo[11].xAdvance, stopped.origin, 3);
+                Assert.Equal(12, field.caretPosition);
+                Assert.Equal(stopped.origin, CaretQuads(field)[0].xMin, 3);
+                // The ellipsis has the index of the character it replaced; Left goes there, End
+                // back to where the text stopped.
+                Assert.Equal(11, info.characterInfo[11].index);
+                Type(Key(KeyCode.LeftArrow));
+                AssertCaret(field, 11, 11);
+                Type(Key(KeyCode.End));
+                AssertCaret(field, 12, 12);
+            }
         }
 
         [Fact]

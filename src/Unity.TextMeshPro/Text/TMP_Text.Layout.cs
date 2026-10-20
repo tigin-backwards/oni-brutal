@@ -56,6 +56,9 @@ namespace TMPro
             public int First, Last;
             public int FirstVisible, LastVisible;
             public float Ascender, Descender, Gap, MaxAscent, FontLineHeight;
+            // The descender without a soft hyphen drawn where the line breaks: what the line
+            // must fit in the rect (the hyphen is drawn after the line was found to fit).
+            public float FitDescender;
             public float Length;         // pen advance to the end of the last visible character
             public float Width;          // the width available to the line
             public float MarginLeft, MarginRight, StartX;
@@ -414,7 +417,7 @@ namespace TMPro
                 line.Baseline = y;
                 line.LineHeight = line.Ascender - line.Descender;
                 // Vertical overflow: the line's descender below the rect.
-                if (overflowIndex < 0 && (double)textTop - ((double)y + line.Descender) > height + 0.0001 && m_overflowMode != TextOverflowModes.Page)
+                if (overflowIndex < 0 && (double)textTop - ((double)y + line.FitDescender) > height + 0.0001 && m_overflowMode != TextOverflowModes.Page)
                     overflowIndex = line.First;
                 if (m_overflowMode == TextOverflowModes.Page && k > 0 && (double)pageTop - ((double)y + line.Descender) > height + 0.0001 && !pl[line.First].PageBreak)
                 {
@@ -446,11 +449,21 @@ namespace TMPro
         static void FinishLine(ref LineData line, Placement[] pl, float baseSize)
         {
             float asc = float.NegativeInfinity, desc = float.PositiveInfinity, gap = float.NegativeInfinity, maxAscent = float.NegativeInfinity;
+            float fitDesc = float.PositiveInfinity;
             line.FirstVisible = -1;
             line.LastVisible = -1;
+            line.FontLineHeight = 0f;
+            line.Visible = line.Spaces = 0;
+            // A soft hyphen that is not drawn takes no part in the line's metrics (measured on
+            // the shipped package), unless the line has nothing else.
+            bool onlySoftHyphens = true;
+            for (int i = line.First; i <= line.Last; i++)
+                if (pl[i].SoftHyphen <= 0f) { onlySoftHyphens = false; break; }
             for (int i = line.First; i <= line.Last; i++)
             {
                 ref var p = ref pl[i];
+                if (p.SoftHyphen > 0f && !p.Visible && !onlySoftHyphens) continue;
+                if (p.SoftHyphen <= 0f || onlySoftHyphens) fitDesc = Mathf.Min(fitDesc, p.Descender);
                 asc = Mathf.Max(asc, p.Ascender);
                 desc = Mathf.Min(desc, p.Descender);
                 gap = Mathf.Max(gap, p.Gap);
@@ -466,6 +479,7 @@ namespace TMPro
             }
             line.Ascender = asc;
             line.Descender = desc;
+            line.FitDescender = fitDesc;
             line.Gap = gap;
             line.MaxAscent = maxAscent;
             line.Length = line.LastVisible >= 0 ? pl[line.LastVisible].X + pl[line.LastVisible].GlyphAdvance - line.StartX : 0f;

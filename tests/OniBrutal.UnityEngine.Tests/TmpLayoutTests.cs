@@ -536,6 +536,27 @@ namespace OniBrutal.Tests
             Assert.False(t.textInfo.characterInfo[4].isVisible);
         }
 
+        [Fact]
+        public void AHiddenSoftHyphenTakesNoPartInItsLinesHeight()
+        {
+            // The soft hyphen here comes from a fallback with a taller line: hidden, it does not
+            // make the line taller...
+            Assert.Equal(Text("aaaabbbb", width: 1000f, height: 200f).preferredHeight, Text("aaaa­bbbb", width: 1000f, height: 200f).preferredHeight, 3);
+            // ...and where Truncate goes on with the line it broke at, it is hidden again: one
+            // line high, "aaaa" and the "b" that fits, then the blank record.
+            foreach (var mode in new[] { TextOverflowModes.Truncate, TextOverflowModes.Ellipsis })
+            {
+                var t = Text("aaaa­bbbb", width: 38.79f, height: 20f);
+                t.overflowMode = mode;
+                t.ForceMeshUpdate(true);
+                var info = t.textInfo;
+                Assert.Equal(1, info.lineCount);
+                Assert.Equal(7, info.characterCount);
+                Assert.False(info.characterInfo[4].isVisible);
+                Assert.Equal(mode == TextOverflowModes.Truncate ? "aaaab" : "aaaa…", Shown(info));
+            }
+        }
+
         static TextMeshProUGUI Unwrapped(string text, float width, TextOverflowModes mode, float height = 200f)
         {
             var t = Text(text, width: width, height: height);

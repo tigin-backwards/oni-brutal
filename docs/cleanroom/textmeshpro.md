@@ -522,6 +522,35 @@ from what is described here, the measurement wins and this section is corrected.
    - Not matched: setting `caretPosition` in code does not redraw the shipped package's
      caret until the next change; this implementation redraws it at the next rebuild.
 
+**Measured after the review of these corrections:**
+- **The record where truncation stops** is U+0003, not drawn, with the source index of the
+  character it stopped at, at the pen position there (origin and advance), on its line. An
+  ellipsis has the source index of the character it replaced. In a 100-wide input field whose
+  text truncates (Truncate or Ellipsis), "QUIT GAME NOW" stops before "W": the text is not
+  scrolled, the caret at the end is character 12 (the record, index 12) and is drawn at its
+  origin; Left goes to 11 / 11 (the ellipsis, or "O"); End goes to 12 / 12, the index of the
+  last laid-out character rather than the text's length. Test
+  `InATruncatedTextTheCaretEndsWhereTheTextStops`.
+- **Soft hyphens and the line's height:** a hidden soft hyphen takes no part in its line's
+  ascender, descender or line height ("aaaa", U+00AD, "bbbb" is 14.70 high, as "aaaabbbb",
+  though its soft hyphen comes from a taller fallback). One drawn where the line breaks does
+  (the line is 23.8 high) but is not counted when the line is checked against the rect's
+  height. When Truncate or Ellipsis continue that line (38.79 wide, 20 high), the soft
+  hyphen is hidden again: "aaaa", "b", then the blank record (Ellipsis: "aaaa…"). Test
+  `AHiddenSoftHyphenTakesNoPartInItsLinesHeight`. Not matched: the shipped package
+  sometimes reports a drawn soft hyphen's `character` as "-" (U+002D) and its line 0.035
+  lower.
+- **Password fields** show one asterisk per UTF-16 unit, and the shipped package's caret
+  steps per unit, between the halves of a surrogate pair (a, 😀, b: Left from 4 gives 3, 2,
+  1); a character typed there goes between them, and Backspace removes one unit, leaving a
+  lone high surrogate. This implementation steps the same way but removes a whole pair with
+  Backspace and Delete (deliberately not matched: it would leave a lone surrogate). In a
+  plain field both packages step and delete by pairs.
+- **Not measured** (multi-atlas fonts only, which the game does not use): which material a
+  decoration (underline, strikethrough, highlight) takes when its run starts in atlas k; and
+  the per-atlas material copies are made once per source material and texture, not
+  refreshed when the source material changes later.
+
 ## Verification
 
 1. **Build:**

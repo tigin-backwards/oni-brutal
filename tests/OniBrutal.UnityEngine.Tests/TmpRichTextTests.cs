@@ -221,6 +221,57 @@ namespace OniBrutal.Tests
             foreach (int a in atlases.Where(a => a > 0)) Assert.Contains(asset.atlasTextures[a], subTextures);
         }
 
+        // Sets a serialized field of the text (as the game's data does when it loads).
+        static void SetSerialized(TMP_Text text, string name, object value)
+        {
+            const System.Reflection.BindingFlags flags = System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.DeclaredOnly;
+            for (var t = text.GetType(); t != null; t = t.BaseType)
+                if (t.GetField(name, flags) is { } f) { f.SetValue(text, value); return; }
+            throw new System.MissingFieldException(name);
+        }
+
+        static TextMeshProUGUI Loaded(TMP_FontAsset font, Material material)
+        {
+            var canvasGo = new GameObject("Canvas", typeof(RectTransform));
+            canvasGo.AddComponent<Canvas>().renderMode = RenderMode.ScreenSpaceOverlay;
+            var go = new GameObject("Text", typeof(RectTransform));
+            go.SetActive(false);
+            go.transform.SetParent(canvasGo.transform, false);
+            var t = go.AddComponent<TextMeshProUGUI>();
+            SetSerialized(t, "m_fontAsset", font);
+            SetSerialized(t, "m_sharedMaterial", material);
+            SetSerialized(t, "m_text", "Stress");
+            go.SetActive(true);
+            t.ForceMeshUpdate(true);
+            return t;
+        }
+
+        [Fact]
+        public void ASavedMaterialOfAnotherAtlasGivesWayToTheFontsMaterial()
+        {
+            // The Duplicant cards' expectation lines are saved with one font and another font's
+            // material: the shipped package draws them with their font's material.
+            var noto = TmpTestSupport.FindAsset<TMP_FontAsset>("NotoSans-Regular");
+            var roboto = TmpTestSupport.FindAsset<TMP_FontAsset>("RobotoCondensed-Regular");
+            var t = Loaded(noto, roboto.material);
+            Assert.Same(noto.material, t.fontSharedMaterial);
+            Assert.Same(noto.atlasTexture, t.textInfo.meshInfo[0].material.mainTexture);
+            Canvas.ForceUpdateCanvases();
+            Assert.Same(noto.atlasTexture, t.canvasRenderer.GetMaterial(0).mainTexture);
+            t = Loaded(roboto, noto.material);
+            Assert.Same(roboto.material, t.fontSharedMaterial);
+
+            // A saved material on the font's atlas is kept, whichever material it is.
+            var onAtlas = new Material(roboto.material) { name = "On Noto's atlas" };
+            onAtlas.SetTexture(ShaderUtilities.ID_MainTex, noto.atlasTexture);
+            Assert.Same(onAtlas, Loaded(noto, onAtlas).fontSharedMaterial);
+            // So is a material set at run time, whatever its atlas.
+            var set = TmpTestSupport.NewText("Stress", noto, 14f, new Vector2(300f, 50f));
+            set.fontSharedMaterial = roboto.material;
+            set.ForceMeshUpdate(true);
+            Assert.Same(roboto.material, set.fontSharedMaterial);
+        }
+
         [Fact]
         public void ShaderRatiosFollowTheMaterialEffects()
         {

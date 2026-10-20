@@ -29,6 +29,14 @@ namespace TMPro
             m_textInfo = new TMP_TextInfo(this);
             if (m_fontAsset == null) m_fontAsset = TMP_Settings.defaultFontAsset;
             if (m_sharedMaterial == null && m_fontAsset != null) m_sharedMaterial = m_fontAsset.material;
+            // A saved material that does not draw the font's atlas is replaced by the font's
+            // (measured on the shipped package: the game's data has texts whose font was changed
+            // without their material, drawn with the font's). Only at load: a material set at
+            // run time is kept, whatever its atlas.
+            if (m_fontAsset != null && m_sharedMaterial != null && m_fontAsset.atlasTexture != null
+                && m_sharedMaterial.HasProperty(ShaderUtilities.ID_MainTex)
+                && m_sharedMaterial.GetTexture(ShaderUtilities.ID_MainTex) != m_fontAsset.atlasTexture)
+                m_sharedMaterial = m_fontAsset.material;
             // The colour is m_fontColor; data may hold an older m_fontColor32.
             m_fontColor32 = m_fontColor;
             ConvertAlignment();

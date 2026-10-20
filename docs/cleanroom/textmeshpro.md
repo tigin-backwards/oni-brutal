@@ -428,6 +428,17 @@ from what is described here, the measurement wins and this section is corrected.
    its first atlas fills, or a shipped asset with `atlasIndex > 0` glyphs) draws each glyph from
    its own atlas: one sub-mesh per atlas, each with a material whose main texture is that atlas.
    Measure with a dynamic font asset small enough to fill its first atlas.
+   *Measured* (LiberationSans at 48 pt, padding 5, 64 × 64 atlases, multi-atlas on, "ABCDEF" at
+   20 pt; test `GlyphsInLaterAtlasesDrawFromTheirOwnAtlas`): each atlas holds one letter, so
+   the six letters open atlases 1–6. Every character whose glyph is in atlas k > 0 is drawn in
+   a sub-mesh whose material is a copy of the text's material with atlas k as its main
+   texture (`characterInfo.material` and `meshInfo[n].material` too): `materialCount` 7, the
+   text's own mesh empty, six sub-meshes of one quad. Glyphs in atlas 0 stay in the text's
+   own mesh. Also seen, not matched: the shipped package adds "…" (U+2026) and "_" (U+005F) to
+   a dynamic asset at its first layout, whatever the overflow mode, so they take the first
+   atlas (without multi-atlas, the letters then come from a fallback); its `atlasTextures`
+   array grows by doubling (8 entries for 7 atlases, the last null); and the asset's material
+   and textures are unnamed.
 3. **Rejected characters over a selection.** Typing a character that validation rejects
    (`characterValidation`, `contentType`, `onValidateInput`, a custom `inputValidator`)
    changes nothing: the selection stays selected and the text unchanged. Validation sees the

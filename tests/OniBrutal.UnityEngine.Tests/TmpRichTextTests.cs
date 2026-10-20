@@ -193,6 +193,35 @@ namespace OniBrutal.Tests
         }
 
         [Fact]
+        public void GlyphsInLaterAtlasesDrawFromTheirOwnAtlas()
+        {
+            // A 64 × 64 atlas holds one 48 pt glyph (with its padding): with multi-atlas support
+            // every further glyph opens a new atlas.
+            var font = TmpTestSupport.Load<Font>("sharedassets0.assets", 6529);
+            var asset = TMP_FontAsset.CreateFontAsset(font, 48, 5, GlyphRenderMode.SDFAA, 64, 64, AtlasPopulationMode.Dynamic, true);
+            var t = TmpTestSupport.NewText("ABCDEF", asset, 20f, new Vector2(300f, 50f));
+            var info = t.textInfo;
+            Assert.Equal(6, info.characterCount);
+            Assert.True(asset.atlasTextureCount >= 6);
+            var atlases = info.characterInfo.Take(6).Select(c => c.textElement.glyph.atlasIndex).ToArray();
+            Assert.Equal(6, atlases.Distinct().Count());
+            // One material (and sub-mesh) per atlas, whose main texture is that atlas; the text's
+            // own material is the first atlas's.
+            Assert.Equal(atlases.Distinct().Append(0).Distinct().Count(), info.materialCount);
+            for (int i = 0; i < 6; i++)
+            {
+                var c = info.characterInfo[i];
+                var atlas = asset.atlasTextures[atlases[i]];
+                Assert.Same(atlas, c.material.mainTexture);
+                Assert.Same(atlas, info.meshInfo[c.materialReferenceIndex].material.mainTexture);
+                Assert.Equal(4, info.meshInfo[c.materialReferenceIndex].vertexCount);
+                Assert.Equal(atlases[i] == 0, c.materialReferenceIndex == 0);
+            }
+            var subTextures = t.GetComponentsInChildren<TMP_SubMeshUI>(true).Select(s => s.sharedMaterial.mainTexture).ToArray();
+            foreach (int a in atlases.Where(a => a > 0)) Assert.Contains(asset.atlasTextures[a], subTextures);
+        }
+
+        [Fact]
         public void ShaderRatiosFollowTheMaterialEffects()
         {
             // The game's assets carry the ratios their materials' effects need: recomputing

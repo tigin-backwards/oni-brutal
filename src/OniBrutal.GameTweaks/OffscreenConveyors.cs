@@ -36,11 +36,24 @@ namespace OniBrutal.GameTweaks
 
         /// SolidConduitFlow.RemovePickupable(cell), every way an item leaves the rail (taken by a
         /// consumer, bridge or filter, emptied, or dumped when the conveyor is deconstructed): a
-        /// skipped item is first placed at its cell, as PlaceIfSkipped would, so it does not
-        /// leave the rail (or drop into the world) where it was last moved.
+        /// skipped item is first placed where the game's last move would have put it, so it does
+        /// not leave the rail (or drop into the world) where it was last moved.
         static void RemovingPickupable(SolidConduitFlow __instance, int cell_idx)
         {
-            if (skipped.Count > 0 && ReferenceEquals(__instance, skippedFor)) PlaceIfSkipped(__instance, cell_idx);
+            if (skipped.Count == 0 || !ReferenceEquals(__instance, skippedFor)) return;
+            var contents = __instance.GetContents(cell_idx);
+            if (!contents.pickupableHandle.IsValid() || !skipped.Remove(contents.pickupableHandle.index)) return;
+            var pickupable = __instance.GetPickupable(contents.pickupableHandle);
+            if (pickupable == null) return;
+            // Where the game's last move put it: between its cell and the one it came from.
+            var flow = __instance.GetConduit(cell_idx).GetLastFlowInfo(__instance);
+            Vector3 at = Grid.CellToPosCCC(cell_idx, Grid.SceneLayer.SolidConduitContents);
+            if (flow.direction != SolidConduitFlow.FlowDirection.None)
+            {
+                int from = SolidConduitFlow.GetCellFromDirection(cell_idx, flow.direction);
+                at = Vector3.Lerp(at, Grid.CellToPosCCC(from, Grid.SceneLayer.SolidConduitContents), __instance.ContinuousLerpPercent);
+            }
+            pickupable.transform.SetPosition(at);
         }
 
         /// SolidConduitFlow.RenderEveryTick(float), with off-screen moves skipped.

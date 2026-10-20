@@ -29,7 +29,20 @@ namespace OniBrutal.Assets.Files
 
         public static UnityFsArchive Open(string path) => Parse(File.ReadAllBytes(path));
 
+        /// A damaged or truncated file (sizes, offsets or counts past its end) is invalid data.
         public static UnityFsArchive Parse(byte[] file)
+        {
+            try
+            {
+                return ParseChecked(file);
+            }
+            catch (Exception e) when (e is ArgumentException or IndexOutOfRangeException or OverflowException or OutOfMemoryException or EndOfStreamException)
+            {
+                throw new InvalidDataException("UnityFS: damaged or truncated archive.", e);
+            }
+        }
+
+        static UnityFsArchive ParseChecked(byte[] file)
         {
             var r = new DataReader(file) { BigEndian = true };
             if (r.ReadCString() != "UnityFS") throw new InvalidDataException("Not a UnityFS archive.");

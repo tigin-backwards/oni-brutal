@@ -46,11 +46,13 @@ namespace OniBrutal.Desktop.Gl
         public System.Collections.Generic.Dictionary<uint, ulong> Handles;
 
         /// Multi-target framebuffers this texture is attached to (GlDevice.ForgetFramebuffers).
-        public List<uint> MrtFramebuffers;
+        public List<GlDevice.MrtFramebuffer> MrtFramebuffers;
 
         public void Delete()
         {
             GlDevice.ForgetFramebuffers(this);
+            // A target deleted while bound: the next draw binds the current target again.
+            if (Framebuffer != 0) GlDevice.InvalidateFramebufferBinding();
             GlBindless.Release(this);
             if (Id != 0) GlBindings.DeleteTexture(Id);
             if (Framebuffer != 0) GlApi.DeleteFramebuffer(Framebuffer);

@@ -116,7 +116,6 @@ namespace OniBrutal.GameTweaks
             }
             if (verify)
             {
-                if (i != event_data.Count) global::Debug.Log($"{Name}: the loop ended at entry {i} of {event_data.Count} ({++wrong})");
                 // Entries started by an event during this update, visited in it as the game does.
                 if (event_data.Count > startCount) addedDuringLoop += event_data.Count - startCount;
             }

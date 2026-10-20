@@ -298,28 +298,34 @@ namespace OniBrutal.Desktop.Gl
         // GL thread.
         static bool framebufferValid;
         BoundTarget target = new(null, null, 1, 1);
-        /// Framebuffers combining several colour textures, by the textures' names and the depth
-        /// buffer's; each texture lists the ones it is in, which go when it is deleted (GL thread).
-        static readonly Dictionary<string, uint> mrtFramebuffers = new();
+        /// A framebuffer combining several colour textures (and a depth buffer), with what is
+        /// attached to it.
+        internal sealed class MrtFramebuffer
+        {
+            public string Key;
+            public uint Name;
+            public List<DeviceTexture> Attached = new();
+        }
+
+        /// Multi-target framebuffers by the textures' names and the depth buffer's; each texture
+        /// lists the ones it is attached to, which go when it is deleted (GL thread).
+        static readonly Dictionary<string, MrtFramebuffer> mrtFramebuffers = new();
 
         public static void InvalidateFramebufferBinding() => framebufferValid = false;
 
         /// Deletes the multi-target framebuffers a texture is attached to, before the texture's
-        /// own names are deleted (they could be reused by new textures under the same key).
+        /// own names are deleted (they could be reused by new textures under the same key). Each
+        /// leaves the lists of all its textures, so a GL name reused later is not taken for it.
         internal static void ForgetFramebuffers(DeviceTexture texture)
         {
             if (texture.MrtFramebuffers == null || texture.MrtFramebuffers.Count == 0) return;
-            foreach (var fb in texture.MrtFramebuffers)
+            foreach (var fb in new List<MrtFramebuffer>(texture.MrtFramebuffers))
             {
-                string key = null;
-                foreach (var (k, v) in mrtFramebuffers)
-                    if (v == fb) { key = k; break; }
-                if (key == null) continue; // already deleted through another of its textures
-                mrtFramebuffers.Remove(key);
-                GlApi.DeleteFramebuffer(fb);
+                mrtFramebuffers.Remove(fb.Key);
+                GlApi.DeleteFramebuffer(fb.Name);
+                foreach (var t in fb.Attached) t.MrtFramebuffers?.Remove(fb);
                 OniBrutal.Engine.EngineLog.Engine($"multi-target framebuffer deleted with its textures; {mrtFramebuffers.Count} kept");
             }
-            texture.MrtFramebuffers.Clear();
             framebufferValid = false;
         }
 
@@ -352,9 +358,10 @@ namespace OniBrutal.Desktop.Gl
                 key.Append(c?.Id ?? 0).Append(',');
             }
             key.Append(t.Depth?.DepthRenderbuffer ?? 0);
-            if (!mrtFramebuffers.TryGetValue(key.ToString(), out var fb))
+            if (!mrtFramebuffers.TryGetValue(key.ToString(), out var mrt))
             {
-                fb = GlApi.GenFramebuffer();
+                mrt = new MrtFramebuffer { Key = key.ToString(), Name = GlApi.GenFramebuffer() };
+                uint fb = mrt.Name;
                 GlApi.BindFramebuffer(Framebuffer, fb);
                 var buffers = stackalloc GlEnum[t.Colors.Length];
                 for (int i = 0; i < t.Colors.Length; i++)
@@ -366,16 +373,17 @@ namespace OniBrutal.Desktop.Gl
                     }
                     N.glFramebufferTexture2D(Framebuffer, ColorAttachment0 + (uint)i, TexTarget2D, t.Colors[i].Id, 0);
                     buffers[i] = ColorAttachment0 + (uint)i;
-                    (t.Colors[i].MrtFramebuffers ??= new()).Add(fb);
+                    if (!mrt.Attached.Contains(t.Colors[i])) mrt.Attached.Add(t.Colors[i]);
                 }
                 N.glDrawBuffers(t.Colors.Length, buffers);
                 if (t.Depth is { DepthRenderbuffer: not 0 })
                     N.glFramebufferRenderbuffer(Framebuffer, DepthStencilAttachment, Renderbuffer, new GlRenderbuffer(t.Depth.DepthRenderbuffer));
-                if (t.Depth != null && Array.IndexOf(t.Colors, t.Depth) < 0) (t.Depth.MrtFramebuffers ??= new()).Add(fb);
-                mrtFramebuffers[key.ToString()] = fb;
+                if (t.Depth != null && !mrt.Attached.Contains(t.Depth)) mrt.Attached.Add(t.Depth);
+                foreach (var a in mrt.Attached) (a.MrtFramebuffers ??= new()).Add(mrt);
+                mrtFramebuffers[mrt.Key] = mrt;
                 OniBrutal.Engine.EngineLog.Engine($"multi-target framebuffer for {t.Colors.Length} colour targets made; {mrtFramebuffers.Count} kept");
             }
-            GlApi.BindFramebuffer(Framebuffer, fb);
+            GlApi.BindFramebuffer(Framebuffer, mrt.Name);
         }
 
         public override void SetViewport(UnityEngine.Rect pixels)

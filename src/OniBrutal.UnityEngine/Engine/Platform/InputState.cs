@@ -78,6 +78,7 @@ namespace OniBrutal.Engine.Platform
         public void Reset()
         {
             held.Clear();
+            pending.Clear();
             downThisFrame.Clear();
             upThisFrame.Clear();
             foreach (var a in axes.Values) a.Value = 0f;

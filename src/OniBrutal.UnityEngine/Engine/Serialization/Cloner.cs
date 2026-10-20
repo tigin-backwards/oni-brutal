@@ -73,9 +73,10 @@ namespace OniBrutal.Engine.Serialization
                 t.LocalPosition = position.Value;
                 t.LocalRotation = rotation ?? Quaternion.identity;
             }
+            TransformNative parentNative = null;
             if (parent != null)
             {
-                var p = parent.TransformNative;
+                var p = parentNative = parent.TransformNative;
                 bool keepWorld = position.HasValue || worldPositionStays;
                 if (keepWorld)
                 {
@@ -106,7 +107,7 @@ namespace OniBrutal.Engine.Serialization
             Lifecycle.UpdateActiveInHierarchy(rootClone);
             // The parent's child list changed (measured in the original player; the order against
             // the clone's Awake is not).
-            if (parent != null) Messages.SendToComponents(parent.TransformNative.GameObject, s => s.OnTransformChildrenChanged);
+            if (parentNative is { GameObject: { Destroyed: false } parentObject }) Messages.SendToComponents(parentObject, s => s.OnTransformChildrenChanged);
 
             return remap[original];
         }

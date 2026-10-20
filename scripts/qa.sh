@@ -35,7 +35,7 @@ done
 if [ -n "$bless_from" ]; then
     for d in "$bless_from"/dogfood/*/; do
         name=$(basename "$d"); r="$root/out/qa/reference/dogfood/$name"
-        rm -rf "$r"; mkdir -p "$r"; cp "$d"/signatures.txt "$d"/f*.png "$r"/ 2>/dev/null
+        rm -rf "$r"; mkdir -p "$r"; cp "$d"/signatures.txt "$d"/f*.png "$r"/ || echo "FAIL: $name has no signatures or captures to bless"
         rm -f "$r"/f*-diff.png; echo "blessed $name from $bless_from"
     done
     exit 0
@@ -124,7 +124,7 @@ run_scenario() # NAME
     local rdir="$ref/dogfood/$name"
     if [ $bless -eq 1 ]; then
         rm -rf "$rdir"; mkdir -p "$rdir"; cp "$out/signatures.txt" "$rdir/"
-        for f in $DUMPS; do cp "$out/f$f.png" "$rdir/" 2>/dev/null; done
+        for f in $DUMPS; do cp "$out/f$f.png" "$rdir/" || fail "dogfood $name: no capture f$f to bless"; done
         ok "dogfood $name: blessed ($(($(wc -l < "$out/signatures.txt") - 1)) signatures)"; return
     fi
     if [ ! -d "$rdir" ]; then fail "dogfood $name: no reference (run with --bless after checking $out)"; return; fi
@@ -134,6 +134,7 @@ run_scenario() # NAME
     for f in $DUMPS; do
         if [ ! -f "$out/f$f.png" ]; then bad="$bad f$f(missing)"; continue; fi
         local r; r=$(python3 "$tools" image "$rdir/f$f.png" "$out/f$f.png" "$out/f$f-diff.png" | cut -d' ' -f1)
+        [ -n "$r" ] || r=1.0000 # an unreadable capture or reference is a difference
         awk -v r="$r" -v t="$TOLERANCE" 'BEGIN { exit !(r > t) }' && bad="$bad f$f($r)"
         awk -v r="$r" -v w="$worst" 'BEGIN { exit !(r > w) }' && worst=$r
     done
@@ -190,12 +191,26 @@ u57_run()
     echo $peak > "$out/peak-rss"
 }
 
+# u57_check STAGE OUT: the run ended normally, and logged no exception or error the reference for
+# STAGE lacks (the game's own known ones are in it).
+u57_check()
+{
+    local stage=$1 out=$2 status; status=$(cat "$out/exit")
+    [ "$status" = 0 ] || fail "$stage: the player exited $status"
+    python3 "$tools" signatures "$out/stdout.txt" > "$out/signatures.txt"
+    if [ $bless -eq 1 ]; then cp "$out/signatures.txt" "$ref/$stage-signatures.txt"; ok "$stage: $(wc -l < "$out/signatures.txt") log signatures blessed"; return; fi
+    if [ ! -f "$ref/$stage-signatures.txt" ]; then fail "$stage: no reference signatures (run with --bless after checking $out)"; return; fi
+    local new; new=$(comm -13 <(sort "$ref/$stage-signatures.txt") <(sort "$out/signatures.txt"))
+    if [ -n "$new" ]; then fail "$stage: new log signatures:"; echo "$new" | sed 's/^/       /' | tee -a "$run/summary.txt"; else ok "$stage: no new exceptions or errors"; fi
+}
+
 stage_verify()
 {
     u57_ready || { note "verify: skipped (no out/local-tools/qa.env)"; return; }
     build_release || return
     local out="$run/verify"
     ONI_TWEAK_VERIFY=1 ONI_VERIFY_CANVAS_SKIPS=1 ONI_VERIFY_COMPONENT_LAYOUTS=1 ONI_VERIFY_TEXEL_COPIES=1 u57_run "$out" 7000
+    u57_check verify "$out"
     local report; report=$(python3 "$tools" verify "$out/stdout.txt"); local status=$?
     echo "$report" | sed 's/^/     /' | tee -a "$run/summary.txt"
     [ $status -eq 0 ] || fail "verify: a verify mode reported mismatches"
@@ -213,13 +228,16 @@ stage_perf()
     build_release || return
     local out="$run/perf"
     u57_run "$out" 4800
+    u57_check perf "$out"
     local peak; peak=$(cat "$out/peak-rss")
     if [ "$peak" -lt $((16 * 1024 * 1024)) ]; then ok "perf: peak memory $((peak / 1024)) MB"; else fail "perf: peak memory $((peak / 1024)) MB (16 GB limit)"; fi
     read -r fps span windows <<< "$(python3 "$tools" perf "$out/stdout.txt")"
     local kept; kept=$(grep -aoE '[0-9]+ kept' "$out/stdout.txt" | tail -1 | cut -d' ' -f1)
     if [ "${kept:-0}" -le 1 ]; then ok "perf: multi-target framebuffers kept ${kept:-0}"; else fail "perf: $kept multi-target framebuffers kept"; fi
     if [ $bless -eq 1 ]; then echo "$fps" > "$ref/perf-baseline"; ok "perf: $fps fps blessed as the baseline"; return; fi
-    local base; base=$(cat "$ref/perf-baseline" 2>/dev/null || echo 0)
+    [ -f "$ref/perf-baseline" ] || { fail "perf: no baseline (run with --bless after checking $out)"; return; }
+    local base; base=$(cat "$ref/perf-baseline")
+    awk -v f="$fps" 'BEGIN { exit !(f > 0) }' || { fail "perf: no frame rate measured"; return; }
     if awk -v f="$fps" -v b="$base" 'BEGIN { exit !(f >= b * 0.85) }'; then ok "perf: $fps fps over $windows windows (baseline $base)"; else fail "perf: $fps fps, below the baseline $base less 15%"; fi
 }
 

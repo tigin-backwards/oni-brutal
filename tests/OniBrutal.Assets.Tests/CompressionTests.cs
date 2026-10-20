@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using OniBrutal.Assets.Compression;
 using Xunit;
 
@@ -59,4 +60,32 @@ namespace OniBrutal.Assets.Tests
             }
         }
 }
+}
+
+namespace OniBrutal.Assets.Tests
+{
+    public class ArchiveDamageTests
+    {
+        // Any damage to a bundle (truncation, flipped bytes in its tables) is invalid data, which
+        // AssetBundle.LoadFromFile reports as an archive it cannot open.
+        [Fact]
+        public void DamagedArchivesAreInvalidData()
+        {
+            var dir = System.IO.Path.Combine(System.Environment.GetEnvironmentVariable("ONI_GAME_DIR")
+                ?? System.IO.Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile), "projects", "oni-linux"), "OxygenNotIncluded_Data", "StreamingAssets");
+            var bundle = System.IO.Directory.GetFiles(dir, "*", System.IO.SearchOption.AllDirectories)
+                .Where(f => new System.IO.FileInfo(f).Length > 1000)
+                .First(f => { using var r = System.IO.File.OpenRead(f); var h = new byte[7]; r.ReadExactly(h); return System.Text.Encoding.ASCII.GetString(h) == "UnityFS"; });
+            var bytes = System.IO.File.ReadAllBytes(bundle);
+            var random = new System.Random(3);
+            for (int round = 0; round < 60; round++)
+            {
+                var damaged = round % 3 == 0 ? bytes.AsSpan(0, random.Next(8, bytes.Length)).ToArray() : (byte[])bytes.Clone();
+                if (round % 3 != 0)
+                    for (int k = 0; k < 6; k++) damaged[random.Next(Math.Min(damaged.Length, 512))] ^= (byte)(1 << random.Next(8));
+                try { Files.UnityFsArchive.Parse(damaged); }
+                catch (InvalidDataException) { }
+            }
+        }
+    }
 }

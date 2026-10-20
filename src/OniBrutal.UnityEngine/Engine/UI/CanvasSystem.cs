@@ -220,7 +220,18 @@ namespace OniBrutal.Engine.UI
             foreach (var c in enabled.ToArray()) UpdateRootTransform(c);
             Canvas.SendPreWillRenderCanvases();
             Canvas.SendWillRenderCanvases();
-            Build();
+            if (stats)
+            {
+                long start = System.Diagnostics.Stopwatch.GetTimestamp();
+                Build();
+                statsTicks += System.Diagnostics.Stopwatch.GetTimestamp() - start;
+                if (++statsFrames == 600)
+                {
+                    EngineLog.Engine($"canvas build: {statsTicks * 1000.0 / System.Diagnostics.Stopwatch.Frequency / statsFrames:F3} ms a frame, {statsVisits / statsFrames} objects walked a frame");
+                    statsFrames = 0; statsTicks = 0; statsVisits = 0;
+                }
+            }
+            else Build();
         }
 
         /// A root canvas, or a nested canvas that overrides sorting: drawn and depth-counted as
@@ -312,6 +323,7 @@ namespace OniBrutal.Engine.UI
             CanvasNative nearest, Matrix4x4 worldToNearest, float groupAlpha, bool blocksRaycasts)
         {
             if (!go.ActiveInHierarchy) return;
+            if (stats) statsVisits++;
             var parts = PartsOf(go);
             var canvasHere = parts.Canvas is { } here && IsLive(here) ? here : null;
             if (!isBatchRoot && canvasHere != null && canvasHere.OverrideSorting) return;
@@ -367,6 +379,10 @@ namespace OniBrutal.Engine.UI
         }
 
         static readonly bool verifySkips = Environment.GetEnvironmentVariable("ONI_VERIFY_CANVAS_SKIPS") == "1";
+        /// ONI_CANVAS_STATS=1: the build's time and the objects it walks, a frame, every 600 frames.
+        static readonly bool stats = Environment.GetEnvironmentVariable("ONI_CANVAS_STATS") == "1";
+        static int statsFrames;
+        static long statsTicks, statsVisits;
         static long skipsVerified, skipsWrong;
 
         /// A skipped hidden subtree, as the walk would visit it: every element at depth -1 and no
@@ -375,6 +391,7 @@ namespace OniBrutal.Engine.UI
         {
             if (isTop && ++skipsVerified % 10000 == 0) EngineLog.Engine($"canvas skips: {skipsVerified} verified, {skipsWrong} wrong");
             if (!go.ActiveInHierarchy) return;
+            if (stats) statsVisits++;
             var parts = PartsOf(go);
             if (!isTop && parts.Canvas is { } c && IsLive(c) && c.OverrideSorting) return;
             bool wrong = false;

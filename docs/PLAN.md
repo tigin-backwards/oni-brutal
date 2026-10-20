@@ -526,6 +526,31 @@ QA rounds (2026-10-20):
   second target set) and of save-and-load (the first colony's targets stay referenced) are
   expected. Verify 797 game seconds with zero mismatches, 29.8 fps, peak 13.9 GB.
 
+- Round 4: nothing new. The story-trait panel's preview and the research tree's position vary
+  with timing (tolerances widened, those screens checked by eye).
+
+Final review pass (four fresh reviewers over the changes since 810508b):
+- Engine core: one medium, measured negligible: the hidden-subtree skip no longer covers the
+  Research screen (alpha 0, raycasts still blocked, its raycasters turned off). Measured with
+  ONI_CANVAS_STATS=1 on U57: 1,100 objects walked and 0.75 ms a frame against 1,060 and 0.71
+  with the old rule. Kept: it is what Unity numbers. Lows fixed: a damaged archive's other
+  exceptions are invalid data (fuzz test); Instantiate under a parent its clone's Awake
+  destroys; a failed resource mapping is retried; the late-frame video rule waits while the
+  player is paused and restarts with each request; focus loss drops queued key edges.
+- Rendering and GL: no medium. Lows fixed: a multi-target framebuffer leaves every attached
+  texture's list when deleted (a reused GL name is never taken for it); deleting a bound target
+  invalidates the binding.
+- TextMeshPro: one medium fixed in the clean room (1b23df9: a paste of 3,000 characters laid the
+  text out 3,001 times, 7.9 s; now once, as the shipped package; each change laid out once).
+  Lows fixed: the caret in a truncated text, soft hyphens and line heights (e4ea0cd); password
+  surrogate stepping is the shipped package's too (noted).
+- Tweaks and harness: no exactness break. Harness fixes: each check's summary is kept apart
+  (the radbolt tweak's two), per-incident lines fail verify, verify and perf check the exit code
+  and log signatures, an unreadable capture or reference fails, a missing baseline fails.
+  Tweak lows fixed: a skipped conveyor item leaving the rail is placed where the game's last move
+  puts it; a background-save failure cannot fault later saves; a check that could not catch
+  anything removed from fast-anim-events.
+
 References (captures, signatures, the frame-rate baseline) live in `out/qa/reference`, made with
 `--bless` once a run's captures and logs have been looked at; they hold game imagery and stay
 local. The U57 stages need content that cannot be published (DLC files, a DLC-owning Steam

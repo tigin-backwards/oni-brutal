@@ -137,6 +137,7 @@ namespace OniBrutal.Engine.Video
                 requested = true;
                 skipWrap = 0;
                 skipIndex = 0;
+                lateRun = 0;
                 while (ready.Count > 0) pool.Push(ready.Dequeue().Rgba);
                 Monitor.PulseAll(gate);
                 return generation;
@@ -253,7 +254,9 @@ namespace OniBrutal.Engine.Video
                         // picture moves, as Unity's dropping playback does.
                         if (wrap < skipWrap || (wrap == skipWrap && index < skipIndex))
                         {
-                            if (++lateRun < MaxLateRun) continue;
+                            // Only while the player takes what is queued (not paused): a paused
+                            // player keeps the worker catching up instead.
+                            if (++lateRun < MaxLateRun || ready.Count > 0) continue;
                         }
                         lateRun = 0;
                         while (!disposed && myGeneration == generation && pool.Count == 0 && buffersCreated >= Capacity)

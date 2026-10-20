@@ -134,8 +134,18 @@ namespace OniBrutal.Engine.Assets
                 System.Threading.Interlocked.Increment(ref mappingsMade);
                 var file = MemoryMappedFile.CreateFromFile(Path.Combine(dataDir, k), FileMode.Open, null, 0, MemoryMappedFileAccess.Read);
                 return file.CreateViewAccessor(0, 0, MemoryMappedFileAccess.Read);
-            }, System.Threading.LazyThreadSafetyMode.ExecutionAndPublication)).Value;
-            view.ReadArray(offset, result, 0, (int)size);
+            }, System.Threading.LazyThreadSafetyMode.ExecutionAndPublication));
+            MemoryMappedViewAccessor mapped;
+            try
+            {
+                mapped = view.Value;
+            }
+            catch
+            {
+                streams.TryRemove(key, out _); // a failed mapping is tried again by the next read
+                throw;
+            }
+            mapped.ReadArray(offset, result, 0, (int)size);
             return result;
         }
     }

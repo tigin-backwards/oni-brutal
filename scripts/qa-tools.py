@@ -30,6 +30,9 @@ def signatures(path):
 
 def image(reference, new, diff):
     from PIL import Image, ImageChops
+    import os
+    if not os.path.exists(reference) or not os.path.exists(new):
+        print('1.0000 missing'); return
     a = Image.open(reference).convert('RGB')
     b = Image.open(new).convert('RGB')
     if a.size != b.size:
@@ -41,18 +44,34 @@ def image(reference, new, diff):
     Image.fromarray((m * 255).astype('uint8')).save(diff)
     print(f'{m.mean():.4f}')
 
+# Verify-mode lines: periodic summaries (each kind of check has its own, all counts must be zero)
+# and per-incident lines (any is a failure).
+VERIFY_NAMES = r'(fast-[a-z-]+|canvas skips?|component layouts|texel copies)'
+SUMMARY = re.compile(r'^\d+ [a-z ,\d-]*?\d+ (?:wrong skips|wrong|stale items not marked|stale|mismatches|changed while copying)'
+                     r'(?:, [a-z\d ]+)?$')
+ZERO_COUNTS = re.compile(r'(\d+) (?:wrong skips|wrong|stale items not marked|stale|mismatches|changed while copying)')
+
 def verify(path):
-    last = {}
+    last, incidents = {}, []
     for line in open(path, encoding='utf-8', errors='replace'):
-        m = re.search(r'(fast-[a-z-]+|canvas skips|component layouts|texel copies): (\d+ .*)$', line)
-        if m and re.search(r'\d+ (wrong|stale|mismatches|changed|not marked)', m.group(2)):
-            last[m.group(1)] = m.group(2).strip()
+        if 'canvas skip wrong' in line:
+            incidents.append(line.strip()); continue
+        m = re.search(VERIFY_NAMES + r': (.*)$', line)
+        if not m: continue
+        name, report = m.group(1), m.group(2).strip()
+        if SUMMARY.match(report):
+            # The summary's shape (its words) names the check: one tweak can report several.
+            last[(name, re.sub(r'\d+', 'N', report))] = report
+        elif re.search(r'\(\d+\)$|wrong|stale|mismatch|ran \d+ times|had stale', report):
+            incidents.append(f'{name}: {report}')
     bad = False
-    for name, report in sorted(last.items()):
-        counts = re.findall(r'(\d+) (?:wrong skips|wrong|stale items not marked|stale|mismatches|changed while copying)', report)
-        ok = all(c == '0' for c in counts)
+    for (name, _), report in sorted(last.items()):
+        ok = all(c == '0' for c in ZERO_COUNTS.findall(report))
         bad |= not ok
         print(f'{"ok  " if ok else "FAIL"} {name}: {report}')
+    for i in incidents[:20]:
+        print(f'FAIL incident {i}')
+    bad |= bool(incidents)
     sys.exit(1 if bad else 0)
 
 def perf(path):

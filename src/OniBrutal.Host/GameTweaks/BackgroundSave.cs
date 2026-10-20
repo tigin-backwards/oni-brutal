@@ -71,7 +71,13 @@ namespace OniBrutal.Host.GameTweaks
             file.Position = 0;
             file.ReadExactly(header);
             file.Position = header.Length;
-            lock (gate) pending = pending.ContinueWith(_ => Write(path, header, uncompressed, length), TaskScheduler.Default);
+            // Each write follows the previous one whatever its outcome, and never faults the chain
+            // (a fault would make every later save and load throw).
+            lock (gate) pending = pending.ContinueWith(_ =>
+            {
+                try { Write(path, header, uncompressed, length); }
+                catch (Exception e) { EngineLog.Engine($"background save of {path}: {e}"); }
+            }, TaskScheduler.Default);
             return false;
         }
 
@@ -114,7 +120,7 @@ namespace OniBrutal.Host.GameTweaks
             catch (Exception e)
             {
                 UnityEngine.Debug.LogError($"Background save of {path} failed: {e}");
-                try { File.Delete(temporary); } catch (IOException) { }
+                try { File.Delete(temporary); } catch (Exception) { } // the write's failure is what matters
             }
         }
     }

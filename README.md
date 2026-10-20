@@ -132,10 +132,20 @@ Feel free to slop. See [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md).
 
 ## Issues
 
-File an issue, and please attach your log. It's `Player.log` in:
-- Linux: `~/.config/unity3d/Klei/Oxygen Not Included/`
-- Windows: `%USERPROFILE%\AppData\LocalLow\Klei\Oxygen Not Included\`
+File an issue, and please attach your log and the save you were playing.
 
+The log is `Player.log` in:
+- Windows: `%USERPROFILE%\AppData\LocalLow\Klei\Oxygen Not Included\`
+- Linux: `~/.config/unity3d/Klei/Oxygen Not Included/`
+
+Saves are `.sav` files in a folder named after the colony, under:
+- Windows: `Documents\Klei\OxygenNotIncluded\cloud_save_files\<your Steam ID>\` (or
+  `save_files\` for saves kept off Steam Cloud)
+- Linux: `~/.config/unity3d/Klei/Oxygen Not Included/cloud_save_files/<your Steam ID>/` (or
+  `save_files/`)
+
+With Steam installed as a snap on Linux, both folders are under `~/snap/steam/common/` instead
+of `~`.
 
 ## License
 

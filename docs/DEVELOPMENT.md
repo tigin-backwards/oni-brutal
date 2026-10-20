@@ -50,6 +50,19 @@ on machines without Steam, not for playing.
 To play through Steam like a player does, run `./setup.sh`. It builds a self-contained player
 into `out/player` and prints the launch options line (`OniBrutal --game-tweak exact -- %command%`).
 
+## Releases
+
+```sh
+scripts/release.sh                     # out/release: the Windows zip and the Linux tar.gz
+gh release create vYYYY.MM.DD out/release/oni-brutal-*.zip out/release/oni-brutal-*.tar.gz \
+  --title "oni-brutal YYYY.MM.DD" --notes "..."
+```
+
+The build compiles against the game's assemblies, so it runs where the game is installed (not in
+CI). Each archive holds an `oni-brutal` folder with the setup script, the README, `NOTICE.txt`
+and the self-contained player in `player/`; the setups install a release's player without
+building. Nothing of the game goes into them.
+
 ## Windows
 
 ```sh

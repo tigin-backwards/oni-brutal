@@ -17,15 +17,16 @@ You need your own copy of the game on Steam, on Linux or Windows (no macOS). Bec
 the engine rather than patching the game, it can't ship as an ordinary Harmony mod. Instead, a setup script hooks it into the game's
 Steam launch options, so you still start the game from Steam as usual.
 
-<!-- TODO: release download link, and the exact script names once they exist -->
+<!-- TODO: release download link -->
 
 1. Download the latest release, or clone this repository.
 2. Run the setup script:
    - Linux: `./setup.sh`
-   - Windows: `setup.ps1` (right-click → Run with PowerShell)
+   - Windows: right-click `setup.ps1` → Run with PowerShell
 
    It finds your Oxygen Not Included install through Steam and prints one line for the game's
-   launch options.
+   launch options. From a clone, it also builds the player first, installing the .NET SDK for
+   your user if you don't have it.
 3. In Steam, right-click Oxygen Not Included → Properties → Launch Options, and paste that line.
 
 Then press Play in Steam as usual. To go back to the original game, clear the launch options.
@@ -58,11 +59,10 @@ across every core, and their pauses are about a quarter as long.
 
 ### Optional tweaks
 
-These change how some of the game's own code does its work, and are off unless you turn them on
-(`--game-tweak NAME`, or `--game-tweak all`). Most give exactly the same results faster. The
-ones marked **changes gameplay** trade a little exactness for speed.
-
-<!-- TODO: say which ones the setup script turns on by default -->
+These change how some of the game's own code does its work. Most give exactly the same results,
+faster, and the setup turns those on (`--game-tweak exact` in the launch options). The two marked
+**changes gameplay** trade a little exactness for speed, and are off unless you add them, e.g.
+`--game-tweak exact --game-tweak slow-reachability`, or `--game-tweak all` for everything.
 
 - `fast-jobs`: the game's worker threads stop waking and waiting on each other for tiny jobs.
 - `fast-anim-events`, `fast-anim-cleanup`, `fast-symbol-overrides`: cheaper animation
@@ -115,8 +115,7 @@ close to the same numbers.
 
 ## Contributing
 
-Feel free to slop. [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) has the build, the test harness
-and the rest of the documentation.
+Feel free to slop. See [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md).
 
 ## Issues
 

@@ -200,6 +200,23 @@ namespace OniBrutal.Host
                 switch (args[i])
                 {
                     case "--game": o.GameDir = args[++i]; break;
+                    case "--":
+                    {
+                        // Steam launch options `OniBrutal [options] -- %command%`: Steam's command
+                        // for the game, any wrappers of Steam's (launch wrapper, reaper) followed by
+                        // the game's executable and its arguments. The game directory is the
+                        // executable's; the arguments after it are read as the player's (Unity's
+                        // -screen-width and the like).
+                        int exe = Array.FindIndex(args, i + 1, a => Path.GetFileName(a) is "OxygenNotIncluded" or "OxygenNotIncluded.exe");
+                        if (exe < 0)
+                        {
+                            Console.Error.WriteLine("OniBrutal: no OxygenNotIncluded executable after --; the Steam launch options should end with -- %command%");
+                            return null;
+                        }
+                        o.GameDir = Path.GetDirectoryName(Path.GetFullPath(args[exe]))!;
+                        i = exe;
+                        break;
+                    }
                     case "--log": o.LogPath = args[++i]; break;
                     case "--run-home": o.RunHome = Path.GetFullPath(args[++i]); break;
                     case "--audio-wav": o.AudioWav = Path.GetFullPath(args[++i]); break;
@@ -215,7 +232,7 @@ namespace OniBrutal.Host
                         var name = args[++i];
                         if (!OniBrutal.Host.GameTweaks.GameTweakNames.IsKnown(name))
                         {
-                            Console.Error.WriteLine($"Unknown game tweak {name}; known: all, {string.Join(", ", OniBrutal.Host.GameTweaks.GameTweakNames.All)}");
+                            Console.Error.WriteLine($"Unknown game tweak {name}; known: all, exact (all but {string.Join(", ", OniBrutal.Host.GameTweaks.GameTweakNames.ChangingBehaviour)}), {string.Join(", ", OniBrutal.Host.GameTweaks.GameTweakNames.All)}");
                             return null;
                         }
                         o.GameTweaks.Add(name);
@@ -303,7 +320,7 @@ namespace OniBrutal.Host
                     }
                     default:
                         Console.Error.WriteLine($"Unknown option {args[i]}");
-                        Console.Error.WriteLine("usage: OniBrutal [--game DIR] [--log FILE] [--run-home DIR] [--audio-wav DIR] [--headless] [--batchmode] [--frames N] [--native-override NAME=PATH] [--trace-exceptions] [--gl-debug] [--vsync-count N] [--gpu-profile] [--no-bindless] [--input FRAME:ACTION[:ARGS]] [--frame-stats] [--max-frame-rate N[:FRAMES]] [--dump-render-textures FRAME:DIR] [-screen-width W] [-screen-height H] [-screen-fullscreen 0|1] [-window-mode exclusive|borderless|windowed] [--check-types] [--ui-packages DIR | --shipped-ui-packages] [--game-tweak NAME|all] [--check-assets [--list-data-scripts FILE]] [--check-bind] [--check-shaders] [--dump-shader NAME:DIR] [--capture FRAME:PATH[:SCALE]] [--probe-ui FRAME:X,Y] [--dump-ui FRAME:PATH] [--dump-ui-vertices PATH-SUBSTRING] [--dump-hierarchy FRAME:PATH] [--report-builtin-assets FILE] [--dump-component FRAME:PATH|TYPE]");
+                        Console.Error.WriteLine("usage: OniBrutal [--game DIR] [--log FILE] [--run-home DIR] [--audio-wav DIR] [--headless] [--batchmode] [--frames N] [--native-override NAME=PATH] [--trace-exceptions] [--gl-debug] [--vsync-count N] [--gpu-profile] [--no-bindless] [--input FRAME:ACTION[:ARGS]] [--frame-stats] [--max-frame-rate N[:FRAMES]] [--dump-render-textures FRAME:DIR] [-screen-width W] [-screen-height H] [-screen-fullscreen 0|1] [-window-mode exclusive|borderless|windowed] [--check-types] [--ui-packages DIR | --shipped-ui-packages] [--game-tweak NAME|all|exact] [--check-assets [--list-data-scripts FILE]] [--check-bind] [--check-shaders] [--dump-shader NAME:DIR] [--capture FRAME:PATH[:SCALE]] [--probe-ui FRAME:X,Y] [--dump-ui FRAME:PATH] [--dump-ui-vertices PATH-SUBSTRING] [--dump-hierarchy FRAME:PATH] [--report-builtin-assets FILE] [--dump-component FRAME:PATH|TYPE] [-- STEAM-COMMAND]");
                         return null;
                 }
             }

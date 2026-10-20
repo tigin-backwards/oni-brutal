@@ -16,7 +16,8 @@ namespace OniBrutal.Host.GameTweaks
 
         public static void Install(IReadOnlySet<string> requested)
         {
-            bool On(string name) => requested.Contains(name) || requested.Contains("all");
+            bool On(string name) => requested.Contains(name) || requested.Contains("all")
+                || requested.Contains("exact") && Array.IndexOf(GameTweakNames.ChangingBehaviour, name) < 0;
             if (requested.Count == 0) return;
             var harmony = new Harmony("OniBrutal.Host.GameTweaks");
             backgroundSave = On(BackgroundSave.Name);
@@ -63,6 +64,10 @@ namespace OniBrutal.Host.GameTweaks
 
         public static readonly string[] All = [FastSaveCompression.Name, BackgroundSave.Name, NoSaveGc.Name, FastSerialization.Name, FastParticleCollision.Name, .. Typed];
 
-        public static bool IsKnown(string name) => name == "all" || Array.IndexOf(All, name) >= 0;
+        /// The tweaks that change what the game does (each documented in its class); `exact` turns
+        /// on every tweak but these.
+        public static readonly string[] ChangingBehaviour = ["off-screen-conveyors", "slow-reachability"];
+
+        public static bool IsKnown(string name) => name is "all" or "exact" || Array.IndexOf(All, name) >= 0;
     }
 }

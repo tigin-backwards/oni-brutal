@@ -207,6 +207,11 @@ namespace OniBrutal.Engine.Serialization
                     ValueKind.Array when IsPlainValue(f.Shape.Element) => Expression.Call(typeof(Cloner).GetMethod(nameof(CopyPlainArray), BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(field.FieldType.GetElementType()), read),
                     ValueKind.List when IsPlainValue(f.Shape.Element) => Expression.Call(typeof(Cloner).GetMethod(nameof(CopyPlainList), BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(field.FieldType.GetGenericArguments()[0]), read),
                     _ when IsPlainValue(f.Shape) => read,
+                    // A null serializable class becomes an instance in the source too (below).
+                    ValueKind.Composite when !f.Shape.IsValueType => Expression.Convert(Expression.Call(typeof(Cloner).GetMethod(nameof(CopyValue), BindingFlags.Static | BindingFlags.NonPublic),
+                        Expression.Convert(Expression.Assign(read, Expression.Convert(Expression.Call(typeof(Cloner).GetMethod(nameof(SourceInstance), BindingFlags.Static | BindingFlags.NonPublic),
+                            Expression.Convert(read, typeof(object)), Expression.Constant(f.Shape)), field.FieldType)), typeof(object)),
+                        Expression.Constant(f.Shape), remapArg, Expression.Constant(1)), field.FieldType),
                     _ => Expression.Convert(Expression.Call(typeof(Cloner).GetMethod(nameof(CopyValue), BindingFlags.Static | BindingFlags.NonPublic),
                         Expression.Convert(read, typeof(object)), Expression.Constant(f.Shape), remapArg, Expression.Constant(1)), field.FieldType),
                 };
@@ -270,6 +275,11 @@ namespace OniBrutal.Engine.Serialization
             }
         }
 
+        /// Unity's serializer has no null for a serializable class: serializing a null one
+        /// (Instantiate serializes its source) gives the source a new instance of its own, as
+        /// measured in the original player (PerfProbe measure.txt).
+        static object SourceInstance(object value, ValueShape shape) => value ?? NewInstance(shape.Type);
+
         static object CopyComposite(object value, ValueShape shape, Dictionary<Object, Object> remap, int depth)
         {
             if (depth > SerializedLayout.MaxDepth) return shape.IsValueType ? Activator.CreateInstance(shape.Type) : null;
@@ -278,6 +288,12 @@ namespace OniBrutal.Engine.Serialization
             foreach (var f in SerializedLayout.CompositeFields(shape))
             {
                 var fieldValue = value == null ? null : f.Field.GetValue(value);
+                // Nested in a class (a boxed struct would not write back), as at the top level.
+                if (fieldValue == null && value != null && !shape.IsValueType && f.Shape.Kind == ValueKind.Composite && !f.Shape.IsValueType && depth + 1 <= SerializedLayout.MaxDepth)
+                {
+                    fieldValue = SourceInstance(null, f.Shape);
+                    f.Field.SetValue(value, fieldValue);
+                }
                 if (value == null && f.Shape.IsValueType) fieldValue = f.Field.GetValue(dst); // keep the new instance's default
                 f.Field.SetValue(dst, CopyValue(fieldValue, f.Shape, remap, depth + 1));
             }

@@ -30,6 +30,9 @@ namespace TMPro
             public float KernY;          // glyph placement from kerning pairs (y)
             public float PointSize;
             public bool Visible, Whitespace, LineBreak, Bold, Italic, NoBreak, BreakAfter;
+            // A soft hyphen's advance: it takes no room, and is drawn only where a line breaks
+            // after it (0: not a soft hyphen).
+            public float SoftHyphen;
             // An empty record where truncation stopped (textInfo holds a blank character there).
             public bool Blank;
             public float LineHeightOverride;  // NaN: none
@@ -277,6 +280,9 @@ namespace TMPro
                 if (p.NoBreak) { p.BreakAfter = false; continue; }
                 uint c = parsed.Elements[p.Element].Unicode;
                 if ((p.Whitespace && c != 0xA0 && c != 0x202F && c != 0x2007) || c == 0x200B) { p.BreakAfter = true; continue; }
+                // A line may break after a hyphen-minus or a soft hyphen (not after the hyphen
+                // U+2010 or the non-breaking hyphen U+2011; measured on the shipped package).
+                if (c == 0x2D || c == 0xAD) { p.BreakAfter = true; continue; }
                 if (i + 1 >= count) continue;
                 uint next = parsed.Elements[pl[i + 1].Element].Unicode;
                 if ((IsCjk(c) || IsCjk(next)) && !pl[i + 1].NoBreak)
@@ -349,6 +355,13 @@ namespace TMPro
                         if (lastBreak >= start)
                         {
                             end = lastBreak;
+                            // A soft hyphen where the line breaks is drawn when it fits.
+                            ref var last = ref pl[end];
+                            if (last.SoftHyphen > 0f && last.X + last.SoftHyphen <= lineWidth + 0.0001f)
+                            {
+                                last.Visible = true;
+                                last.GlyphAdvance = last.Advance = last.SoftHyphen;
+                            }
                             break;
                         }
                         end = i - 1;
@@ -584,6 +597,12 @@ namespace TMPro
             if (float.IsNaN(preferredAdvance)) preferredAdvance = advance;
             p.PreferredGlyphAdvance = preferredAdvance;
             p.PreferredAdvance = preferredAdvance + spacing;
+            if (c == 0xAD && el.Kind == ElementKind.Character && p.Visible)
+            {
+                p.SoftHyphen = advance;
+                p.Visible = false;
+                p.GlyphAdvance = p.Advance = p.PreferredGlyphAdvance = p.PreferredAdvance = 0f;
+            }
         }
     }
 }

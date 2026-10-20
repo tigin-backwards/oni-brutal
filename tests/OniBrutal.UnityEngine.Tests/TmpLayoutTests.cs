@@ -505,6 +505,37 @@ namespace OniBrutal.Tests
             Assert.Equal(b.origin + (gm.horizontalBearingX + gm.width) * b.scale - info.characterInfo[0].origin, info.lineInfo[0].length, 3);
         }
 
+        [Fact]
+        public void LinesMayBreakAfterHyphensAndSoftHyphens()
+        {
+            // At 14 pt "aaaa" is 30.23 wide and "aaaa-" 37.79 (measured on the shipped package).
+            static int[] Firsts(TextMeshProUGUI t) => t.textInfo.lineInfo.Take(t.textInfo.lineCount).Select(l => l.firstCharacterIndex).ToArray();
+            // After a hyphen-minus: "aa-bb" would fit the first line, but it breaks after "aa-".
+            Assert.Equal(new[] { 0, 3, 6 }, Firsts(Text("aa-bb-cc-dd", width: 38.79f, height: 200f)));
+            // "-bbb" would fit the second line; the break after the hyphen leaves it alone there.
+            Assert.Equal(new[] { 0, 4, 5 }, Firsts(Text("aaaa-bbbb", width: 30.73f, height: 200f)));
+            // Not after the hyphen U+2010 or the non-breaking hyphen U+2011: the word breaks
+            // between characters.
+            Assert.Equal(new[] { 0, 4, 8 }, Firsts(Text("aaaa‑bbbb", width: 30.73f, height: 200f)));
+            Assert.Equal(new[] { 0, 4, 8 }, Firsts(Text("aaaa‐bbbb", width: 30.73f, height: 200f)));
+
+            // A soft hyphen takes no room and is not drawn...
+            var t = Text("aaaa­bbbb", width: 1000f, height: 200f);
+            Assert.Equal(1, t.textInfo.lineCount);
+            Assert.False(t.textInfo.characterInfo[4].isVisible);
+            Assert.Equal(t.textInfo.characterInfo[4].origin, t.textInfo.characterInfo[5].origin, 4);
+            Assert.Equal(Text("aaaabbbb", width: 1000f).preferredWidth, t.preferredWidth, 3);
+            // ...except where a line breaks after it, when it fits there.
+            t = Text("aaaa­bbbb", width: 38.79f, height: 200f);
+            Assert.Equal(new[] { 0, 5 }, Firsts(t));
+            var shy = t.textInfo.characterInfo[4];
+            Assert.True(shy.isVisible);
+            Assert.Equal(3.472f, shy.xAdvance - shy.origin, 2);
+            t = Text("aaaa­bbbb", width: 30.73f, height: 200f);
+            Assert.Equal(new[] { 0, 5 }, Firsts(t));
+            Assert.False(t.textInfo.characterInfo[4].isVisible);
+        }
+
         static TextMeshProUGUI Unwrapped(string text, float width, TextOverflowModes mode, float height = 200f)
         {
             var t = Text(text, width: width, height: height);

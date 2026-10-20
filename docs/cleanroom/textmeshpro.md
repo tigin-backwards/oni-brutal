@@ -464,6 +464,20 @@ from what is described here, the measurement wins and this section is corrected.
 4. **Line breaks after hyphens.** Measure whether a line may break after `-` (U+002D) and after
    a soft hyphen (U+00AD), whether the soft hyphen is drawn at a break and hidden elsewhere,
    and whether a non-breaking hyphen (U+2011) prevents a break; implement what is measured.
+   *Measured* (14 pt GRAYSTROKE, "aaaa" 30.23 wide, "aaaa-" 37.79; test
+   `LinesMayBreakAfterHyphensAndSoftHyphens`):
+   - A line may break after "-": "aa-bb-cc-dd" in 38.79 gives "aa-" / "bb-" / "cc-dd" (where
+     "aa-bb" would fit), and "aaaa-bbbb" in 30.73 gives "aaaa" / "-" / "bbbb".
+   - Not after the hyphen U+2010 or the non-breaking hyphen U+2011 (both from the fallback
+     here): "aaaa‑bbbb" in 30.73 breaks between characters, "aaaa" / "‑bbb" / "b".
+   - The soft hyphen U+00AD takes no room (the preferred width of "aaaa­bbbb" is that of
+     "aaaabbbb", 60.46) and is not drawn, its corners at its origin. A line may break after
+     it; there it is drawn with its glyph's advance (3.472) when that fits the line (38.79),
+     and stays hidden when it does not (30.73), the break the same.
+   - En and em dashes follow the line-breaking rules' leading and following characters.
+   - Not matched: a line that ends where the text wraps (or is cut) has a `length` that
+     includes the material padding of its last character (0.141 here); a text's last line
+     does not.
 5. **Caret and selection with rich text.** The input field keeps string positions (in its
    text) and character indices (in the laid-out text) apart. Typed tags, escapes and surrogate
    pairs make them differ; the caret and the selection are drawn at the laid-out character for

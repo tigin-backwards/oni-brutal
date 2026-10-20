@@ -205,7 +205,13 @@ namespace TMPro
                     ci.ascender = (float)((double)line.Baseline + p.Ascender) + offsetY;
                     ci.descender = (float)((double)line.Baseline + p.Descender) + offsetY;
                     float x0, x1, y0, y1;
-                    if (el.Kind == ElementKind.Character && el.Element?.glyph != null)
+                    // A soft hyphen that is not drawn has its corners at its origin.
+                    if (p.SoftHyphen > 0f && !p.Visible)
+                    {
+                        x0 = x1 = origin;
+                        y0 = y1 = ci.baseLine;
+                    }
+                    else if (el.Kind == ElementKind.Character && el.Element?.glyph != null)
                     {
                         // A character's corners are its quad's: the glyph's box with the
                         // material's padding (and synthesized bold's).

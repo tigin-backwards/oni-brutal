@@ -117,8 +117,8 @@ close to the same numbers.
 
 The optional tweaks are a different story. They are potential optimizations that probably also
 apply to the original game. I haven't measured them there, though, and their gains could differ
-on Mono. The engine-side wins are another matter: in the original they'd mean changing Unity's
-native engine and its Mono runtime, which Klei can't touch without Unity's source.
+on Mono. The engine-side wins are probably not possible to port to the
+original game, as it would require building Unity from source.
 
 ## Contributing
 

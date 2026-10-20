@@ -81,8 +81,8 @@ ones marked **changes gameplay** trade a little exactness for speed.
 
 ## Save compatibility
 
-Saves from the original game load here, and saves made here load in the original game
-(including ones written with the `fast-save-compression` tweak).
+Saves from the original game should load, and saves made here should still load in the
+original game (including ones written with the `fast-save-compression` tweak).
 
 ## Mod compatibility
 

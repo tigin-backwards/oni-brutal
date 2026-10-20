@@ -29,7 +29,8 @@ Steam launch options, so you still start the game from Steam as usual.
    your user if you don't have it.
 3. In Steam, right-click Oxygen Not Included → Properties → Launch Options, and paste that line.
 
-Then press Play in Steam as usual. To go back to the original game, clear the launch options.
+Then press Play in Steam as usual. To update, get the new version and run the setup again; the
+launch options stay the same. To go back to the original game, clear the launch options.
 
 You'll need an OpenGL 4.5 graphics driver. The game uses your normal Steam account, DLCs, saves,
 settings and mods.

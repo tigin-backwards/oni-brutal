@@ -108,8 +108,6 @@ needs from Unity would be lost:
 - no macOS support yet
 - the general, accumulated knowledge of how Unity behaves
 
-Unlike RimWorld, which uses very little of Unity, Oxygen Not Included leans on much more of it.
-
 So I'd only seriously look at something like this if Unity 7's CoreCLR runtime can't get
 close to the same numbers.
 

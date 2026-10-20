@@ -81,9 +81,98 @@ namespace PerfProbe
         /// The mod's folder.
         public string Path;
 
+        /// Counts OnTransformChildrenChanged.
+        public class ChildWatcher : MonoBehaviour
+        {
+            public int Count;
+            void OnTransformChildrenChanged() => Count++;
+        }
+
+        /// Behaviours the defect review asked about, logged as "PERF measure ...": which changes of
+        /// a transform's children send OnTransformChildrenChanged, and how graphics that draw no
+        /// geometry or sit under a CanvasGroup at alpha 0 are given depths and hit by raycasts.
+        System.Collections.IEnumerator Measure()
+        {
+            var parent = new GameObject("MeasureParent");
+            var watcher = parent.AddComponent<ChildWatcher>();
+            var prefab = new GameObject("MeasurePrefab");
+            int before = watcher.Count;
+            var a = Instantiate(prefab, parent.transform);
+            Debug.Log($"PERF measure children: Instantiate(original, parent) {watcher.Count - before}");
+            before = watcher.Count;
+            Instantiate(prefab, Vector3.zero, Quaternion.identity, parent.transform);
+            Debug.Log($"PERF measure children: Instantiate(original, position, rotation, parent) {watcher.Count - before}");
+            yield return null;
+            before = watcher.Count;
+            Destroy(a);
+            Debug.Log($"PERF measure children: Destroy(child) same frame {watcher.Count - before}");
+            yield return null;
+            Debug.Log($"PERF measure children: Destroy(child) by the next frame {watcher.Count - before}");
+            before = watcher.Count;
+            var b = new GameObject("B");
+            b.transform.SetParent(parent.transform);
+            Debug.Log($"PERF measure children: SetParent {watcher.Count - before}");
+            before = watcher.Count;
+            DestroyImmediate(b);
+            Debug.Log($"PERF measure children: DestroyImmediate(child) {watcher.Count - before}");
+            before = watcher.Count;
+            var inactive = new GameObject("Inactive");
+            inactive.SetActive(false);
+            inactive.transform.SetParent(parent.transform);
+            Debug.Log($"PERF measure children: SetParent of an inactive child {watcher.Count - before}");
+            before = watcher.Count;
+            Destroy(inactive);
+            yield return null;
+            Debug.Log($"PERF measure children: Destroy(inactive child) {watcher.Count - before}");
+            Destroy(parent);
+            Destroy(prefab);
+
+            var canvasGo = new GameObject("MeasureCanvas", typeof(RectTransform));
+            var canvas = canvasGo.AddComponent<Canvas>();
+            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            canvas.sortingOrder = 30000;
+            canvasGo.AddComponent<UnityEngine.UI.GraphicRaycaster>();
+            UnityEngine.UI.Graphic Make(string name, Transform under, Vector2 at, System.Type type)
+            {
+                var go = new GameObject(name, typeof(RectTransform));
+                go.transform.SetParent(under, false);
+                var rt = (RectTransform)go.transform;
+                rt.sizeDelta = new Vector2(80f, 80f);
+                rt.anchoredPosition = at;
+                return (UnityEngine.UI.Graphic)go.AddComponent(type);
+            }
+            var empty = Make("EmptyGraphic", canvasGo.transform, new Vector2(-200f, 0f), typeof(NonDrawingGraphic));
+            var groupGo = new GameObject("AlphaZeroGroup", typeof(RectTransform));
+            groupGo.transform.SetParent(canvasGo.transform, false);
+            groupGo.AddComponent<CanvasGroup>().alpha = 0f;
+            var hidden = Make("UnderAlphaZero", groupGo.transform, new Vector2(200f, 0f), typeof(UnityEngine.UI.Image));
+            var shown = Make("Shown", canvasGo.transform, new Vector2(0f, 200f), typeof(UnityEngine.UI.Image));
+            for (int i = 0; i < 3; i++) yield return null;
+            Debug.Log($"PERF measure depth: empty {empty.depth}, under alpha 0 {hidden.depth}, shown {shown.depth}");
+            var hits = new System.Collections.Generic.List<UnityEngine.EventSystems.RaycastResult>();
+            foreach (var g in new[] { empty, hidden, shown })
+            {
+                var data = new UnityEngine.EventSystems.PointerEventData(UnityEngine.EventSystems.EventSystem.current)
+                    { position = RectTransformUtility.WorldToScreenPoint(null, g.rectTransform.position) };
+                hits.Clear();
+                UnityEngine.EventSystems.EventSystem.current.RaycastAll(data, hits);
+                Debug.Log($"PERF measure raycast at {g.name}: first {(hits.Count > 0 ? hits[0].gameObject.name : "none")}, hits {string.Join(",", hits.ConvertAll(h => h.gameObject.name))}");
+            }
+            Destroy(canvasGo);
+            Debug.Log("PERF measure done");
+        }
+
         System.Collections.IEnumerator Start()
         {
             if (Worldgen.Mode == "run") yield return Worldgen.Run();
+            // `measure.txt`: engine behaviours measured at the main menu, the same in either player
+            // (Measure).
+            if (System.IO.File.Exists(System.IO.Path.Combine(Path, "measure.txt")))
+            {
+                while (MainMenu.Instance == null) yield return null;
+                for (int i = 0; i < 60; i++) yield return null;
+                yield return Measure();
+            }
             // `load.txt` in the mod's folder names a save (full path) to load from the main menu,
             // as the load screen does: for loading a given save in either player.
             var load = System.IO.Path.Combine(Path, "load.txt");

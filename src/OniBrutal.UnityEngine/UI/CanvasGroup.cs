@@ -41,6 +41,7 @@ namespace UnityEngine
                 var g = Group;
                 if (g.BlocksRaycasts == value) return;
                 g.BlocksRaycasts = value;
+                Hierarchy.Touch(g.GameObject?.Transform); // the canvas walk skips only subtrees that stop raycasts
                 g.Changed();
             }
         }

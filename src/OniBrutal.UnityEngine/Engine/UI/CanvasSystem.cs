@@ -268,8 +268,8 @@ namespace OniBrutal.Engine.UI
                 b.SpaceToWorld = b.Root.GameObject.Transform.LocalToWorld;
                 b.WorldToSpace = b.SpaceToWorld.inverse;
                 var above = b.Canvas.GameObject.Transform.Parent;
-                float alpha = above == null ? 1f : InheritedAlpha(above.GameObject);
-                Collect(b, b.Canvas.GameObject, b.Root, isBatchRoot: true, new Counter(), b.Canvas, b.Canvas.GameObject.Transform.LocalToWorld.inverse, alpha);
+                var (alpha, blocks) = above == null ? (1f, true) : InheritedGroups(above.GameObject);
+                Collect(b, b.Canvas.GameObject, b.Root, isBatchRoot: true, new Counter(), b.Canvas, b.Canvas.GameObject.Transform.LocalToWorld.inverse, alpha, blocks);
             }
             // Render order: by sorting layer, sorting order, then enable order.
             batches.Sort((a, b) =>
@@ -294,34 +294,41 @@ namespace OniBrutal.Engine.UI
         }
 
         /// Depth-first in hierarchy order; nested sort roots are skipped (they are batches of
-        /// their own); an element's pop materials draw after its children. Elements fully
-        /// transparent through their CanvasGroups are not rendered (depth -1); a group below
-        /// that ignores its parents' groups can make part of such a subtree visible again.
+        /// their own); an element's pop materials draw after its children. Every live, unculled
+        /// element is given a depth, as in Unity (measured: an element without geometry, the
+        /// game's NonDrawingGraphic, and one under a CanvasGroup at alpha 0 are both numbered and
+        /// hit by raycasts), so raycasts find them; only elements with geometry that are not
+        /// fully transparent through their CanvasGroups are drawn. A group below that ignores its
+        /// parents' groups can make part of a transparent subtree visible again.
         ///
-        /// A hidden subtree's walk only sets its elements' depths to -1. Its top object records
+        /// A hidden subtree whose groups also stop raycasts can never be drawn or hit, so its walk
+        /// only sets its elements' depths to -1 (a raycast-blocking one is numbered). Its top object records
         /// when it was walked so (CanvasHiddenAt) if no group in it ignores its parents; while
         /// nothing at or below it changes (SubtreeVersion), its elements still hold -1 and the walk
         /// is skipped. Most of a large colony's UI is screens hidden this way (about 8,900 of
         /// 11,500 objects visited a frame in U57). Test runs (ONI_VERIFY_CANVAS_SKIPS=1) check each
         /// skipped subtree as the walk would have seen it and log differences.
         static void Collect(CanvasBatch batch, GameObjectNative go, CanvasNative space, bool isBatchRoot, Counter depth,
-            CanvasNative nearest, Matrix4x4 worldToNearest, float groupAlpha)
+            CanvasNative nearest, Matrix4x4 worldToNearest, float groupAlpha, bool blocksRaycasts)
         {
             if (!go.ActiveInHierarchy) return;
             var parts = PartsOf(go);
             var canvasHere = parts.Canvas is { } here && IsLive(here) ? here : null;
             if (!isBatchRoot && canvasHere != null && canvasHere.OverrideSorting) return;
             // CanvasGroups multiply down the hierarchy; one that ignores its parents restarts it.
-            bool hiddenAbove = groupAlpha <= 0f;
+            bool skippedAbove = groupAlpha <= 0f && !blocksRaycasts;
             foreach (var g in parts.Groups)
                 if (g.IsActiveAndEnabledState)
                 {
                     if (g.IgnoreParentGroups) depth.IgnoringGroups++;
                     groupAlpha = g.IgnoreParentGroups ? g.Alpha : groupAlpha * g.Alpha;
+                    blocksRaycasts = g.IgnoreParentGroups ? g.BlocksRaycasts : blocksRaycasts && g.BlocksRaycasts;
                 }
             bool hidden = groupAlpha <= 0f;
-            // The top of a hidden subtree: skipped while unchanged since a walk found it all hidden.
-            bool hiddenTop = hidden && !hiddenAbove;
+            // The top of a hidden subtree that stops raycasts: skipped while unchanged since a walk
+            // found it all hidden (only a group ignoring its parents could let raycasts in again,
+            // and a subtree with one is never skipped).
+            bool hiddenTop = hidden && !blocksRaycasts && !skippedAbove;
             if (hiddenTop && go.CanvasHiddenAt == go.SubtreeVersion)
             {
                 if (verifySkips) VerifySkipped(go, isTop: true);
@@ -341,17 +348,18 @@ namespace OniBrutal.Engine.UI
                 if (r.Destroyed) continue;
                 r.AbsoluteDepth = -1;
                 r.RelativeDepth = -1;
-                if (hidden) continue;
+                if (hidden && !blocksRaycasts) continue;
                 r.BuiltToCanvas = worldToNearest * r.GameObject.Transform.LocalToWorld;
-                if (r.Cull || r.Geometry == null || r.Geometry.Indices.Length == 0) continue;
+                if (r.Cull) continue;
                 r.AbsoluteDepth = depth.Value;
                 r.RelativeDepth = depth.Value;
                 depth.Value++;
+                if (hidden || r.Geometry == null || r.Geometry.Indices.Length == 0) continue;
                 foreach (var m in r.Materials) batch.Draws.Add(new CanvasDraw(r, space, m, pop: false, groupAlpha));
                 if (r.HasPopInstruction) (pops ??= new()).Add(r);
             }
             foreach (var child in go.Transform.Children)
-                Collect(batch, child.GameObject, space, isBatchRoot: false, depth, nearest, worldToNearest, groupAlpha);
+                Collect(batch, child.GameObject, space, isBatchRoot: false, depth, nearest, worldToNearest, groupAlpha, blocksRaycasts);
             if (pops != null)
                 foreach (var r in pops)
                     foreach (var m in r.PopMaterials) batch.Draws.Add(new CanvasDraw(r, space, m, pop: true, groupAlpha));
@@ -415,17 +423,20 @@ namespace OniBrutal.Engine.UI
 
         /// Group alpha inherited through CanvasGroups up to (and including) one that ignores its
         /// parents.
-        static float InheritedAlpha(GameObjectNative go)
+        /// The CanvasGroups' alpha at an object, and whether they let raycasts through.
+        static (float Alpha, bool BlocksRaycasts) InheritedGroups(GameObjectNative go)
         {
             float alpha = 1f;
+            bool blocks = true;
             for (var t = go.Transform; t != null; t = t.Parent)
                 foreach (var g in PartsOf(t.GameObject).Groups)
                     if (g.IsActiveAndEnabledState)
                     {
                         alpha *= g.Alpha;
-                        if (g.IgnoreParentGroups) return alpha;
+                        blocks &= g.BlocksRaycasts;
+                        if (g.IgnoreParentGroups) return (alpha, blocks);
                     }
-            return alpha;
+            return (alpha, blocks);
         }
 
         static DrawItem Item(CanvasBatch b, in CanvasDraw d, bool overlay)

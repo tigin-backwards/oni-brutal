@@ -704,5 +704,37 @@ namespace OniBrutal.Tests
             Object.DestroyImmediate(go);
             Assert.Throws<System.NullReferenceException>(() => c.GetComponent<Transform>());
         }
+
+        public class ChildWatcher : MonoBehaviour
+        {
+            public int Count;
+            void OnTransformChildrenChanged() => Count++;
+        }
+
+        [Fact]
+        public void EveryChangeOfTheChildListIsSent()
+        {
+            // Measured in the original player (PerfProbe measure.txt): Instantiate under a parent,
+            // Destroy (when the child goes, by the next frame), DestroyImmediate and SetParent each
+            // send OnTransformChildrenChanged to the parent once.
+            var parent = new GameObject("Parent");
+            var watcher = parent.AddComponent<ChildWatcher>();
+            var prefab = new GameObject("Prefab");
+            var a = Object.Instantiate(prefab, parent.transform);
+            Assert.Equal(1, watcher.Count);
+            Object.Instantiate(prefab, Vector3.zero, Quaternion.identity, parent.transform);
+            Assert.Equal(2, watcher.Count);
+            Object.Destroy(a);
+            Assert.Equal(2, watcher.Count);
+            Frame();
+            Assert.Equal(3, watcher.Count);
+            var b = new GameObject("B");
+            b.transform.SetParent(parent.transform);
+            Assert.Equal(4, watcher.Count);
+            Object.DestroyImmediate(b);
+            Assert.Equal(5, watcher.Count);
+            Object.Instantiate(prefab);
+            Assert.Equal(5, watcher.Count);
+        }
 }
 }

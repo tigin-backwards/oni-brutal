@@ -104,6 +104,9 @@ namespace OniBrutal.Engine.Serialization
 
             // 4. Lifecycle.
             Lifecycle.UpdateActiveInHierarchy(rootClone);
+            // The parent's child list changed (measured in the original player; the order against
+            // the clone's Awake is not).
+            if (parent != null) Messages.SendToComponents(parent.TransformNative.GameObject, s => s.OnTransformChildrenChanged);
 
             return remap[original];
         }

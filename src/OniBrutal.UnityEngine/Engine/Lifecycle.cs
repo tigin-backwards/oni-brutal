@@ -421,8 +421,14 @@ namespace OniBrutal.Engine
             // 1. Leave the active state: OnDisable for what is still enabled, deepest objects
             //    first (as Unity's player orders it when destroying).
             if (go.ActiveInHierarchy) DeactivateForDestroy(go);
-            // 2. Detach from parent or scene.
-            if (t.Parent != null) Hierarchy.RemoveChild(t.Parent, t);
+            // 2. Detach from parent or scene; the parent's child list changed (measured in the
+            //    original player, for Destroy and DestroyImmediate).
+            var parent = t.Parent;
+            if (parent != null)
+            {
+                Hierarchy.RemoveChild(parent, t);
+                Messages.SendToComponents(parent.GameObject, s => s.OnTransformChildrenChanged);
+            }
             else if (go.Scene != null) Scenes.RemoveRoot(go.Scene, go);
             // 3. Destroy the subtree.
             DestroySubtree(go);

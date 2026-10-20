@@ -392,6 +392,37 @@ package (M9). They refine the sections above.
 - **Dynamic font assets** use the "TextMeshPro/Mobile/Distance Field" shader.
 - **Timeline:** `TimelineClip` has no public constructor.
 
+### Corrections from the defect review (2026-10-20)
+
+A review of this implementation found these behaviours missing or wrong. Each must first be
+measured on the shipped package as a black box (a test, or `--dump-ui` / `--dump-ui-vertices` in
+a differential run, with `--shipped-ui-packages`), then matched. Where the measurement differs
+from what is described here, the measurement wins and this section is corrected.
+
+1. **Horizontal overflow with wrapping off.** With word wrapping off and `Ellipsis` or
+   `Truncate`, a line wider than the rect is cut at the rect's width: the characters that fit
+   are kept, and for `Ellipsis` the last visible characters give way to "…" so it fits. Lines
+   above it are not affected, and a single line is never removed entirely. Measure a one-line
+   label slightly wider than its rect, and a two-line text whose second line is too wide.
+2. **Several atlas textures.** A glyph's `atlasIndex` selects the texture it is drawn from. A
+   font asset whose glyphs span several atlases (a dynamic font with multi-atlas support after
+   its first atlas fills, or a shipped asset with `atlasIndex > 0` glyphs) draws each glyph from
+   its own atlas: one sub-mesh per atlas, each with a material whose main texture is that atlas.
+   Measure with a dynamic font asset small enough to fill its first atlas.
+3. **Rejected characters over a selection.** Typing a character that validation rejects
+   (`characterValidation`, `contentType`, `onValidateInput`, a custom `inputValidator`)
+   changes nothing: the selection stays selected and the text unchanged. Validation sees the
+   text as it is before the selection is replaced. Measure in a field with Integer validation
+   and its text selected, typing a letter.
+4. **Line breaks after hyphens.** Measure whether a line may break after `-` (U+002D) and after
+   a soft hyphen (U+00AD), whether the soft hyphen is drawn at a break and hidden elsewhere,
+   and whether a non-breaking hyphen (U+2011) prevents a break; implement what is measured.
+5. **Caret and selection with rich text.** The input field keeps string positions (in its
+   text) and character indices (in the laid-out text) apart. Typed tags, escapes and surrogate
+   pairs make them differ; the caret and the selection are drawn at the laid-out character for
+   their string position, and moving up and down starts from that character. Measure a field
+   with rich text on, after typing `a<b>c`, an escape, and an emoji.
+
 ## Verification
 
 1. **Build:**

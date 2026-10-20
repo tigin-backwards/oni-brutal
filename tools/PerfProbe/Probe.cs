@@ -54,6 +54,31 @@ namespace PerfProbe
         /// game's serializer (g) or the tweak's (f), for comparing the files; consecutive saves with
         /// the game's own show what changes between saves by itself. The tweak is switched through
         /// its test flag by reflection.
+        /// `autosave.txt`: the game's own autosave (GameClock.DoAutoSave, as at a cycle's end) three
+        /// times, 900 frames apart, each timed as the frames it stalls: the longest frame, and
+        /// the total of frames over 100 ms in the 300 frames after it starts.
+        System.Collections.IEnumerator AutosaveFreeze()
+        {
+            SpeedControlScreen.Instance.Unpause(false);
+            var doAutoSave = HarmonyLib.AccessTools.Method(typeof(GameClock), "DoAutoSave");
+            for (int n = 1; n <= 3; n++)
+            {
+                for (int i = 0; i < 900; i++) yield return null;
+                doAutoSave.Invoke(GameClock.Instance, new object[] { GameClock.Instance.GetCycle() });
+                float longest = 0f, stalled = 0f, last = Time.realtimeSinceStartup;
+                for (int i = 0; i < 300; i++)
+                {
+                    yield return null;
+                    float now = Time.realtimeSinceStartup, frame = (now - last) * 1000f;
+                    last = now;
+                    if (frame > longest) longest = frame;
+                    if (frame > 100f) stalled += frame;
+                }
+                Debug.Log($"PERF autosave {n}: longest frame {longest:F0} ms, frames over 100 ms {stalled:F0} ms");
+            }
+            Debug.Log("PERF autosave done");
+        }
+
         System.Collections.IEnumerator SaveTest()
         {
             SpeedControlScreen.Instance.Pause(false);
@@ -82,6 +107,17 @@ namespace PerfProbe
         public string Path;
 
         /// Counts OnTransformChildrenChanged.
+        /// MonoBehaviour.Invoke targets: each call is logged with the frame and phase it arrived in.
+        public class InvokeTarget : MonoBehaviour
+        {
+            public string Phase = "start";
+            public System.Collections.Generic.List<string> Calls = new();
+            void Update() => Phase = "update";
+            void LateUpdate() => Phase = "late";
+            void Hit() { Calls.Add($"f{Time.frameCount} after {Phase} at {Time.time:F2}"); }
+            void Repeat() { Calls.Add($"repeat f{Time.frameCount}"); }
+        }
+
         public class ChildWatcher : MonoBehaviour
         {
             public int Count;
@@ -91,6 +127,45 @@ namespace PerfProbe
         /// Behaviours the defect review asked about, logged as "PERF measure ...": which changes of
         /// a transform's children send OnTransformChildrenChanged, and how graphics that draw no
         /// geometry or sit under a CanvasGroup at alpha 0 are given depths and hit by raycasts.
+        /// The hover card's drawn widgets: how many are active, and the first one's screen position.
+        static string Widgets()
+        {
+            if (HoverTextScreen.Instance == null) return "none";
+            var root = HoverTextScreen.Instance.transform.childCount > 0 ? HoverTextScreen.Instance.transform.GetChild(0) : null;
+            int active = 0;
+            string first = "";
+            foreach (var t in HoverTextScreen.Instance.GetComponentsInChildren<RectTransform>(false))
+            {
+                if (t == HoverTextScreen.Instance.transform) continue;
+                active++;
+                if (first.Length == 0) first = $" first {t.name} at {t.position}";
+            }
+            return active + first + (root != null ? $" root {root.name} scale {root.localScale}" : "");
+        }
+
+        Vector2 guiPointer = new Vector2(-1f, -1f);
+
+        /// IMGUI's pointer position, from whatever event reaches the probe (Repaint at least).
+        void OnGUI()
+        {
+            if (Event.current != null && (Event.current.type == EventType.Repaint || Event.current.isMouse)) guiPointer = Event.current.mousePosition;
+        }
+
+        System.Collections.IEnumerator Pointer()
+        {
+            for (int n = 0; n < 6; n++)
+            {
+                for (int i = 0; i < 120; i++) yield return null;
+                var events = UnityEngine.EventSystems.EventSystem.current;
+                var tool = PlayerController.Instance != null ? PlayerController.Instance.ActiveTool : null;
+                Debug.Log($"PERF pointer f{Time.frameCount} position {Input.mousePosition} gui {guiPointer} screen {Screen.width}x{Screen.height} present {Input.mousePresent} focused {Application.isFocused}"
+                    + $" over-ui {(events != null ? events.IsPointerOverGameObject().ToString() : "no event system")}"
+                    + $" module {(events != null && events.currentInputModule != null ? events.currentInputModule.GetType().Name : "none")}"
+                    + $" tool {(tool != null ? tool.GetType().Name : "none")} hover-card {(HoverTextScreen.Instance != null && HoverTextScreen.Instance.gameObject.activeInHierarchy)}"
+                    + $" show-hover {(tool != null && tool.ShowHoverUI())} widgets {Widgets()}");
+            }
+        }
+
         System.Collections.IEnumerator Measure()
         {
             var parent = new GameObject("MeasureParent");
@@ -161,6 +236,218 @@ namespace PerfProbe
             Destroy(canvasGo);
             var current = Screen.currentResolution;
             Debug.Log($"PERF measure screen: current {current.width}x{current.height} @{current.refreshRateRatio.value:F2}, window {Screen.width}x{Screen.height}, modes {string.Join(" ", System.Array.ConvertAll(Screen.resolutions, r => $"{r.width}x{r.height}@{r.refreshRateRatio.value:F2}"))}");
+            // SetParent keeping the world transform under a parent scaled to zero (HoverTextDrawer's
+            // pools parent their roots so, under a canvas not yet scaled), and a new overlay
+            // canvas's scale before and after its first frame.
+            var zero = new GameObject("ZeroScaled", typeof(RectTransform));
+            zero.transform.localScale = Vector3.zero;
+            var plain = new GameObject("Plain");
+            plain.transform.SetParent(zero.transform);
+            var rect = new GameObject("Rect");
+            rect.AddComponent<RectTransform>().SetParent(zero.transform);
+            var scaled = new GameObject("Scaled");
+            scaled.transform.localScale = new Vector3(2f, 3f, 4f);
+            scaled.transform.SetParent(zero.transform);
+            Debug.Log($"PERF measure zero parent: plain {plain.transform.localScale} rect {rect.transform.localScale} scaled {scaled.transform.localScale}, lossy {plain.transform.lossyScale}");
+            var halfAxis = new GameObject("HalfZero");
+            halfAxis.transform.localScale = new Vector3(2f, 0f, 1f);
+            var under = new GameObject("UnderHalfZero");
+            under.transform.SetParent(halfAxis.transform);
+            Debug.Log($"PERF measure (2,0,1) parent: {under.transform.localScale}");
+            Destroy(zero); Destroy(halfAxis);
+            var fresh = new GameObject("FreshCanvas", typeof(RectTransform));
+            var freshCanvas = fresh.AddComponent<Canvas>();
+            freshCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            Debug.Log($"PERF measure new overlay canvas scale: at once {fresh.transform.localScale}");
+            yield return null;
+            Debug.Log($"PERF measure new overlay canvas scale: next frame {fresh.transform.localScale}");
+            Destroy(fresh);
+            // An overlay canvas saved at scale zero (as prefab canvases are): when its scale is applied.
+            var saved = new GameObject("SavedCanvas", typeof(RectTransform));
+            saved.SetActive(false);
+            saved.AddComponent<Canvas>().renderMode = RenderMode.ScreenSpaceOverlay;
+            saved.transform.localScale = Vector3.zero;
+            var savedChild = new GameObject("SavedChild", typeof(RectTransform));
+            savedChild.transform.SetParent(saved.transform, false);
+            saved.SetActive(true);
+            var keptChild = new GameObject("KeptChild");
+            keptChild.AddComponent<RectTransform>().SetParent(savedChild.transform);
+            Debug.Log($"PERF measure zero-saved overlay canvas: on activation {saved.transform.localScale}, a child's lossy {savedChild.transform.lossyScale}, kept-world child {keptChild.transform.localScale}");
+            var prefabCanvas = Instantiate(saved);
+            Debug.Log($"PERF measure zero-saved overlay canvas: instantiated {prefabCanvas.transform.localScale}");
+            saved.transform.localScale = Vector3.zero;
+            Debug.Log($"PERF measure zero-saved overlay canvas: zeroed while active {saved.transform.localScale}");
+            yield return null;
+            Debug.Log($"PERF measure zero-saved overlay canvas: next frame {saved.transform.localScale}, instantiated {prefabCanvas.transform.localScale}");
+            Destroy(saved); Destroy(prefabCanvas);
+            // What activation applies besides the scale, and a Dropdown-like clone: a nested,
+            // anchored canvas-bearing template instantiated at the root, then nested again.
+            string Rect(Transform t) { var r = (RectTransform)t; return $"anchors {r.anchorMin}-{r.anchorMax} pivot {r.pivot} size {r.sizeDelta} pos {r.anchoredPosition} scale {r.localScale}"; }
+            var odd = new GameObject("OddCanvas", typeof(RectTransform));
+            odd.SetActive(false);
+            odd.AddComponent<Canvas>().renderMode = RenderMode.ScreenSpaceOverlay;
+            var oddRect = (RectTransform)odd.transform;
+            oddRect.anchorMin = new Vector2(0.2f, 0.3f); oddRect.anchorMax = new Vector2(0.4f, 0.5f); oddRect.pivot = new Vector2(0f, 1f);
+            oddRect.sizeDelta = new Vector2(10f, 20f); oddRect.anchoredPosition = new Vector2(5f, 6f); oddRect.localScale = Vector3.zero;
+            odd.SetActive(true);
+            Debug.Log($"PERF measure odd overlay canvas on activation: {Rect(odd.transform)}");
+            var host = new GameObject("HostCanvas", typeof(RectTransform));
+            host.AddComponent<Canvas>().renderMode = RenderMode.ScreenSpaceOverlay;
+            var template = new GameObject("Template", typeof(RectTransform));
+            template.transform.SetParent(host.transform, false);
+            var templateRect = (RectTransform)template.transform;
+            templateRect.anchorMin = new Vector2(0f, 0f); templateRect.anchorMax = new Vector2(1f, 0f); templateRect.pivot = new Vector2(0.5f, 1f);
+            templateRect.sizeDelta = new Vector2(0f, 150f); templateRect.anchoredPosition = new Vector2(0f, 2f);
+            var nested = template.AddComponent<Canvas>();
+            nested.overrideSorting = true;
+            var clone = Instantiate(template);
+            Debug.Log($"PERF measure clone at the root: {Rect(clone.transform)}");
+            clone.transform.SetParent(host.transform, false);
+            Debug.Log($"PERF measure clone nested again: {Rect(clone.transform)}");
+            yield return null;
+            Debug.Log($"PERF measure clone next frame: {Rect(clone.transform)}");
+            Destroy(odd); Destroy(host); Destroy(clone);
+            // Which enables lay a root canvas out at once.
+            GameObject Zeroed(string name, bool active, bool setMode)
+            {
+                var go = new GameObject(name, typeof(RectTransform));
+                go.SetActive(active);
+                var c = go.AddComponent<Canvas>();
+                if (setMode) c.renderMode = RenderMode.ScreenSpaceOverlay;
+                go.transform.localScale = Vector3.zero;
+                return go;
+            }
+            var defaultMode = Zeroed("DefaultMode", false, false);
+            defaultMode.SetActive(true);
+            Debug.Log($"PERF measure enable: activated, render mode never set {Rect(defaultMode.transform)}");
+            var toggled = Zeroed("Toggled", true, true);
+            toggled.GetComponent<Canvas>().enabled = false;
+            toggled.GetComponent<Canvas>().enabled = true;
+            Debug.Log($"PERF measure enable: component re-enabled {Rect(toggled.transform)}");
+            var reactivated = Zeroed("Reactivated", true, true);
+            reactivated.SetActive(false);
+            reactivated.SetActive(true);
+            Debug.Log($"PERF measure enable: object re-activated {Rect(reactivated.transform)}");
+            var inactivePrefab = Zeroed("InactivePrefab", false, true);
+            var fromInactive = Instantiate(inactivePrefab);
+            Debug.Log($"PERF measure enable: instantiated inactive {Rect(fromInactive.transform)}");
+            fromInactive.SetActive(true);
+            Debug.Log($"PERF measure enable: instantiated inactive, then activated {Rect(fromInactive.transform)}");
+            var activeZero = Zeroed("ActiveZero", true, true);
+            var fromActive = Instantiate(activeZero);
+            Debug.Log($"PERF measure enable: instantiated active zero-scaled {Rect(fromActive.transform)}");
+            var nestedHost = new GameObject("NestedHost", typeof(RectTransform));
+            nestedHost.AddComponent<Canvas>().renderMode = RenderMode.ScreenSpaceOverlay;
+            var underHost = Zeroed("UnderHost", false, true);
+            underHost.transform.SetParent(nestedHost.transform, false);
+            underHost.transform.localScale = Vector3.zero;
+            underHost.SetActive(true);
+            Debug.Log($"PERF measure enable: nested canvas activated {Rect(underHost.transform)}");
+            var moved = Zeroed("MovedOut", true, true);
+            moved.transform.SetParent(nestedHost.transform, false);
+            moved.transform.localScale = Vector3.zero;
+            moved.transform.SetParent(null, false);
+            Debug.Log($"PERF measure enable: active nested canvas moved to the root {Rect(moved.transform)}");
+            var probeDefault = new GameObject("DefaultCanvas", typeof(RectTransform));
+            var defaultCanvas = probeDefault.AddComponent<Canvas>();
+            Debug.Log($"PERF measure enable: AddComponent<Canvas> render mode {defaultCanvas.renderMode}, active default-mode canvas laid out {probeDefault.transform.localScale} size {((RectTransform)probeDefault.transform).sizeDelta}");
+            Destroy(probeDefault);
+            foreach (var g in new[] { defaultMode, toggled, reactivated, inactivePrefab, fromInactive, activeZero, fromActive, nestedHost, moved }) Destroy(g);
+            // Serializable class fields of a component made by AddComponent (the warp conduit
+            // receiver's prefab adds a ConduitSecondaryOutput and never sets its port info).
+            var holder = new GameObject("SerializableHolder");
+            var output = holder.AddComponent<ConduitSecondaryOutput>();
+            Debug.Log($"PERF measure AddComponent serializable class field: active {(output.portInfo == null ? "null" : $"instance {output.portInfo.conduitType}")}");
+            var inactiveHolder = new GameObject("InactiveHolder");
+            inactiveHolder.SetActive(false);
+            var inactiveOutput = inactiveHolder.AddComponent<ConduitSecondaryOutput>();
+            Debug.Log($"PERF measure AddComponent serializable class field: inactive {(inactiveOutput.portInfo == null ? "null" : "instance")}");
+            var copy = Instantiate(holder);
+            Debug.Log($"PERF measure Instantiate serializable class field: source {(output.portInfo == null ? "null" : $"instance {output.portInfo.conduitType}")}, clone {(copy.GetComponent<ConduitSecondaryOutput>().portInfo == null ? "null" : "instance")}");
+            var arrayHolder = new GameObject("ArrayHolder");
+            var interacts = arrayHolder.AddComponent<Activatable>();
+            Debug.Log($"PERF measure AddComponent array field: workAnims {(interacts.workAnims == null ? "null" : "length " + interacts.workAnims.Length)}");
+            var arrayCopy = Instantiate(arrayHolder);
+            Debug.Log($"PERF measure Instantiate array field: source {(interacts.workAnims == null ? "null" : "length " + interacts.workAnims.Length)}, clone {(arrayCopy.GetComponent<Activatable>().workAnims == null ? "null" : "length " + arrayCopy.GetComponent<Activatable>().workAnims.Length)}");
+            // A null array field (inactive, so the component is not awoken).
+            var tileHolder = new GameObject("TileHolder");
+            tileHolder.SetActive(false);
+            var tileable = tileHolder.AddComponent<AnimTileable>();
+            var tileCopy = Instantiate(tileHolder);
+            Debug.Log($"PERF measure Instantiate null array field: source {(tileable.tags == null ? "null" : "length " + tileable.tags.Length)}, clone {(tileCopy.GetComponent<AnimTileable>().tags == null ? "null" : "length " + tileCopy.GetComponent<AnimTileable>().tags.Length)}");
+            Destroy(tileHolder); Destroy(tileCopy);
+            Destroy(copy); Destroy(arrayHolder); Destroy(arrayCopy);
+            Destroy(holder); Destroy(inactiveHolder);
+            Debug.Log($"PERF measure colors: darkGray {Color.darkGray} orange {Color.orange} violet {Color.violet}");
+            // MonoBehaviour.Invoke: when it calls, and on disabled or inactive targets.
+            var enabledTarget = new GameObject("InvokeEnabled").AddComponent<InvokeTarget>();
+            var disabledTarget = new GameObject("InvokeDisabled").AddComponent<InvokeTarget>();
+            disabledTarget.enabled = false;
+            var inactiveTarget = new GameObject("InvokeInactive").AddComponent<InvokeTarget>();
+            var zeroTarget = new GameObject("InvokeZero").AddComponent<InvokeTarget>();
+            var repeatTarget = new GameObject("InvokeRepeat").AddComponent<InvokeTarget>();
+            var started = Time.time;
+            enabledTarget.Invoke("Hit", 0.2f);
+            disabledTarget.Invoke("Hit", 0.2f);
+            inactiveTarget.Invoke("Hit", 0.2f);
+            inactiveTarget.gameObject.SetActive(false);
+            zeroTarget.Invoke("Hit", 0f);
+            repeatTarget.InvokeRepeating("Repeat", 0f, 0.1f);
+            Debug.Log($"PERF measure invoke: started f{Time.frameCount} at {started:F2}, IsInvoking {enabledTarget.IsInvoking("Hit")} {enabledTarget.IsInvoking()}, inactive IsInvoking {inactiveTarget.IsInvoking()}");
+            enabledTarget.Invoke("Missing", 0f);
+            float until = Time.realtimeSinceStartup + 1f;
+            while (Time.realtimeSinceStartup < until) yield return null;
+            repeatTarget.CancelInvoke("Repeat");
+            Debug.Log($"PERF measure invoke: enabled [{string.Join("; ", enabledTarget.Calls)}] disabled [{string.Join("; ", disabledTarget.Calls)}] inactive [{string.Join("; ", inactiveTarget.Calls)}] zero [{string.Join("; ", zeroTarget.Calls)}] repeats {repeatTarget.Calls.Count} after-cancel IsInvoking {repeatTarget.IsInvoking()} timeScale {Time.timeScale}");
+            foreach (var t in new MonoBehaviour[] { enabledTarget, disabledTarget, inactiveTarget, zeroTarget, repeatTarget }) Destroy(t.gameObject);
+            // measure-bundle beside the probe: an asset bundle with UI prefabs. Which of its loaded
+            // objects DestroyImmediate removes without allowDestroyingAssets.
+            var bundlePath = System.IO.Path.Combine(Path, "measure-bundle");
+            if (System.IO.File.Exists(bundlePath))
+            {
+                var bundle = AssetBundle.LoadFromFile(bundlePath);
+                GameObject withText = null, other = null;
+                foreach (var name in bundle.GetAllAssetNames())
+                {
+                    var asset = bundle.LoadAsset<GameObject>(name);
+                    if (asset == null) continue;
+                    if (withText == null && asset.GetComponentInChildren<UnityEngine.UI.Text>(true) != null) withText = asset;
+                    else if (other == null) other = asset;
+                }
+                if (withText != null)
+                {
+                    var text = withText.GetComponentInChildren<UnityEngine.UI.Text>(true);
+                    var textHolder = text.gameObject;
+                    DestroyImmediate(text);
+                    Debug.Log($"PERF measure bundle prefab: component destroyed {text == null}, then AddComponent<Text> {(textHolder.AddComponent<UnityEngine.UI.Text>() != null ? "added" : "null")}");
+                    var child = withText.transform.childCount > 0 ? withText.transform.GetChild(0).gameObject : null;
+                    if (child != null)
+                    {
+                        DestroyImmediate(child);
+                        Debug.Log($"PERF measure bundle prefab: child GameObject destroyed {child == null}");
+                    }
+                }
+                if (other != null)
+                {
+                    DestroyImmediate(other);
+                    Debug.Log($"PERF measure bundle prefab: root GameObject destroyed {other == null}");
+                }
+                var texture = new Texture2D(2, 2);
+                Debug.Log("PERF measure bundle: done");
+                Destroy(texture);
+            }
+            // A prefab from the game's own data (not a scene object, not from a bundle): its
+            // Transform's sibling component destroyed without allowDestroyingAssets.
+            GameObject dataPrefab = null;
+            foreach (var go in Resources.FindObjectsOfTypeAll<GameObject>())
+                if (!go.scene.IsValid() && go.transform.parent == null && go.GetComponents<Component>().Length > 1 && go.name.Length > 0) { dataPrefab = go; break; }
+            if (dataPrefab != null)
+            {
+                var victim = dataPrefab.GetComponents<Component>()[1];
+                var victimType = victim.GetType().Name;
+                DestroyImmediate(victim);
+                Debug.Log($"PERF measure data prefab {dataPrefab.name}: {victimType} destroyed {victim == null}");
+            }
             Debug.Log("PERF measure done");
         }
 
@@ -201,7 +488,11 @@ namespace PerfProbe
             }
             while (Game.Instance == null || SpeedControlScreen.Instance == null) yield return null;
             Debug.Log($"PERF colony f{Time.frameCount} cycle {GameClock.Instance.GetCycle()}{RuntimeCounters.Jit()}");
+            // `pointer.txt`: what the game's hover handling reads (PlayerController.UpdateHover, the
+            // select tool's hover card) while the mouse has not moved, every 120 frames, 6 times.
+            if (System.IO.File.Exists(System.IO.Path.Combine(Path, "pointer.txt"))) StartCoroutine(Pointer());
             if (System.IO.File.Exists(System.IO.Path.Combine(Path, "savetest.txt"))) { yield return SaveTest(); yield break; }
+            if (System.IO.File.Exists(System.IO.Path.Combine(Path, "autosave.txt"))) { yield return AutosaveFreeze(); yield break; }
             // `camera.txt`: where the view stays, as world cells `x y` with an optional orthographic
             // size, `top` (the active world's top centre) or `quiet` (the discovered planetoid with
             // the fewest building cells made active, and its 48×28-cell window with the fewest, for

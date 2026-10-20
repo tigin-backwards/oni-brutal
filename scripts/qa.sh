@@ -230,7 +230,7 @@ stage_verify()
     u57_ready || { note "verify: skipped (no out/local-tools/qa.env)"; return; }
     build_release || return
     local out="$run/verify"
-    ONI_TWEAK_VERIFY=1 ONI_VERIFY_CANVAS_SKIPS=1 ONI_VERIFY_COMPONENT_LAYOUTS=1 ONI_VERIFY_TEXEL_COPIES=1 u57_run "$out" 7000
+    ONI_TWEAK_VERIFY=1 ONI_VERIFY_CANVAS_SKIPS=1 ONI_VERIFY_COMPONENT_LAYOUTS=1 ONI_VERIFY_TEXEL_COPIES=1 u57_run "$out" 9000
     u57_check verify "$out"
     local report; report=$(python3 "$tools" verify "$out/stdout.txt"); local status=$?
     echo "$report" | sed 's/^/     /' | tee -a "$run/summary.txt"

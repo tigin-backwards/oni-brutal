@@ -470,10 +470,10 @@ from what is described here, the measurement wins and this section is corrected.
      "aa-bb" would fit), and "aaaa-bbbb" in 30.73 gives "aaaa" / "-" / "bbbb".
    - Not after the hyphen U+2010 or the non-breaking hyphen U+2011 (both from the fallback
      here): "aaaa‑bbbb" in 30.73 breaks between characters, "aaaa" / "‑bbb" / "b".
-   - The soft hyphen U+00AD takes no room (the preferred width of "aaaa", U+00AD, "bbbb" is that of
-     "aaaabbbb", 60.46) and is not drawn, its corners at its origin. A line may break after
-     it; there it is drawn with its glyph's advance (3.472) when that fits the line (38.79),
-     and stays hidden when it does not (30.73), the break the same.
+   - The soft hyphen U+00AD takes no room (the preferred width of "aaaa", U+00AD, "bbbb" is
+     that of "aaaabbbb", 60.46) and is not drawn, its corners at its origin. A line may break
+     after it; there it is drawn with its glyph's advance (3.472) when that fits the line
+     (38.79), and stays hidden when it does not (30.73), the break the same.
    - Nor after the en and em dashes (U+2013, U+2014) or "/": those words break between
      characters.
    - Not matched: a line that ends where the text wraps (or is cut) has a `length` that

@@ -17,13 +17,19 @@ namespace OniBrutal.Engine
         static StreamWriter file;
         static readonly ConcurrentQueue<(string condition, string stackTrace, LogType type)> pendingMainThread = new();
 
-        /// Opens the log file (overwriting it, as Unity does). Called once by the host.
+        static TextWriter console;
+
+        /// Opens the log file (overwriting it, as Unity does). Called once by the host. Like the
+        /// original player's log, it also takes the process's console output: the game's own
+        /// logger writes its [INFO] lines with Console.WriteLine.
         public static void Open(string path)
         {
             Directory.CreateDirectory(Path.GetDirectoryName(path)!);
             lock (fileLock)
             {
                 file = new StreamWriter(new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.ReadWrite), new UTF8Encoding(false)) { AutoFlush = true };
+                console ??= Console.Out;
+                Console.SetOut(new LogWriter(console));
             }
         }
 
@@ -31,8 +37,53 @@ namespace OniBrutal.Engine
         {
             lock (fileLock)
             {
+                if (console != null) Console.SetOut(console);
+                console = null;
                 file?.Dispose();
                 file = null;
+            }
+        }
+
+        /// The console's writer while the log is open: each write goes to the original console and
+        /// the log file.
+        sealed class LogWriter(TextWriter console) : TextWriter
+        {
+            public override Encoding Encoding => console.Encoding;
+
+            public override void Write(char value)
+            {
+                lock (fileLock)
+                {
+                    console.Write(value);
+                    file?.Write(value);
+                }
+            }
+
+            public override void Write(string value)
+            {
+                lock (fileLock)
+                {
+                    console.Write(value);
+                    file?.Write(value);
+                }
+            }
+
+            public override void WriteLine(string value)
+            {
+                lock (fileLock)
+                {
+                    console.WriteLine(value);
+                    file?.WriteLine(value);
+                }
+            }
+
+            public override void Flush()
+            {
+                lock (fileLock)
+                {
+                    console.Flush();
+                    file?.Flush();
+                }
             }
         }
 
@@ -41,10 +92,15 @@ namespace OniBrutal.Engine
 
         static void WriteRaw(string text)
         {
+            // To the original console and the log file while the log is open.
             lock (fileLock)
             {
-                file?.WriteLine(text);
-                Console.Out.WriteLine(text);
+                if (file != null && console != null)
+                {
+                    console.WriteLine(text);
+                    file.WriteLine(text);
+                }
+                else Console.Out.WriteLine(text);
             }
         }
 

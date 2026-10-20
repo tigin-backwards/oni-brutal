@@ -10,6 +10,8 @@
     <ServerGarbageCollection>true</ServerGarbageCollection>
     <ConcurrentGarbageCollection>true</ConcurrentGarbageCollection>
     <TieredPGO>true</TieredPGO>
+    <!-- The executable's icon on Windows (Steela; the window icon is OniBrutal.Desktop/Steela.png). -->
+    <ApplicationIcon>Steela.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../OniBrutal.UnityEngine/OniBrutal.UnityEngine.csproj" />

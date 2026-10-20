@@ -85,6 +85,7 @@ namespace OniBrutal.Desktop
             if (mode == FullScreenMode.FullScreenWindow) window.Position = monitor.Position;
             else if (mode != FullScreenMode.ExclusiveFullScreen) window.CenterToMonitor(monitor);
             windowedPosition = window.Position;
+            SetIcon(window);
             if (mode == FullScreenMode.MaximizedWindow) window.Maximize();
             // Rendering happens on this thread in a hidden window's context shared with the
             // visible one, whose context belongs to the presenter thread (GlPresenter).
@@ -145,6 +146,22 @@ namespace OniBrutal.Desktop
 
         /// Monitor DPI from its physical size (0 when the monitor does not report one, as Unity).
         public float Dpi => dpi ??= MonitorDpi(CurrentMonitor);
+
+        /// The window and taskbar icon (Steela, embedded). Wayland has no window icons: the
+        /// compositor takes them from the desktop entry, and GLFW reports an error if asked.
+        static unsafe void SetIcon(GlfwWindow window)
+        {
+            if (Glfw.GetPlatform() == Brutal.GlfwApi.GlfwPlatform.Wayland) return;
+            using var stream = typeof(GlfwPlatform).Assembly.GetManifestResourceStream("Steela.png");
+            var data = new byte[stream.Length];
+            stream.ReadExactly(data);
+            using var image = Brutal.StbApi.Stb.LoadFromMemory(data, 4);
+            fixed (byte* pixels = image.AsSpan())
+            {
+                var icon = new GlfwImage { Width = image.Width, Height = image.Height, Pixels = pixels };
+                Glfw.PInvoke.SetWindowIcon(window, 1, &icon);
+            }
+        }
 
         static float MonitorDpi(GlfwMonitor m)
         {

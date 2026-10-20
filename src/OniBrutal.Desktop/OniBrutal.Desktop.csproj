@@ -13,4 +13,8 @@
     <PackageReference Include="Ahwoo.BRUTAL.Glfw" />
     <PackageReference Include="Ahwoo.BRUTAL.OpenGl" />
   </ItemGroup>
+  <ItemGroup>
+    <!-- The window icon (GlfwPlatform.SetIcon); OniBrutal.Host/Steela.ico is the same image. -->
+    <EmbeddedResource Include="Steela.png" LogicalName="Steela.png" />
+  </ItemGroup>
 </Project>

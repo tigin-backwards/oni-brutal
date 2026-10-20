@@ -112,6 +112,12 @@ needs from Unity would be lost:
 So I'd only seriously look at something like this if Unity 7's CoreCLR runtime can't get
 close to the same numbers.
 
+The optional tweaks are a different story. They only change Klei's own code (as Harmony patches,
+built against the game's own assemblies like any mod), so the same changes are valid in the
+original game. I haven't measured them there, though, and their gains could differ on Mono. The
+engine-side wins are another matter: in the original they'd mean changing Unity's native engine
+and its Mono runtime, which Klei can't touch without Unity's source.
+
 ## Contributing
 
 Feel free to slop. See [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md).

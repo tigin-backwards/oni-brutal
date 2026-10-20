@@ -295,6 +295,10 @@ namespace TMPro
             int lineCount = 0;
             bool fits = true;
             int overflowIndex = -1;
+            // Without wrapping, Truncate and Ellipsis cut the text at the first visible character
+            // that passes its line's width.
+            bool cutWide = !wrap && (m_overflowMode == TextOverflowModes.Truncate || m_overflowMode == TextOverflowModes.Ellipsis);
+            int horizontalCut = -1;
             int start = 0;
             while (start < count || (lineCount == 0 && count == 0))
             {
@@ -351,6 +355,7 @@ namespace TMPro
                         if (m_FittingAutoSize) fits = false;
                         break;
                     }
+                    if (cutWide && horizontalCut < 0 && p.Visible && x + p.GlyphAdvance > lineWidth + 0.0001f) horizontalCut = i;
                     p.X = x;
                     x += p.Advance;
                     if (p.BreakAfter) lastBreak = i;
@@ -405,18 +410,21 @@ namespace TMPro
                 }
                 line.Page = pageIndex;
             }
+            // A line wider than the rect without wrapping does not fit (for auto-size), but it is
+            // not an overflow: isTextOverflowing stays false (measured on the shipped package).
             if (!wrap)
                 for (int k = 0; k < lineCount; k++)
-                    if (lines[k].Length > lines[k].Width + 0.0001f) { fits = false; if (overflowIndex < 0) overflowIndex = lines[k].First; }
+                    if (lines[k].Length > lines[k].Width + 0.0001f) fits = false;
             if (overflowIndex >= 0) fits = false;
             s_LineCount = lineCount;
             m_LayoutOverflowIndex = overflowIndex;
+            m_LayoutHorizontalCut = horizontalCut;
             m_LayoutCharacterCount = count;
             m_LayoutBaseSize = baseSize;
             return fits;
         }
 
-        int m_LayoutOverflowIndex = -1, m_LayoutCharacterCount;
+        int m_LayoutOverflowIndex = -1, m_LayoutHorizontalCut = -1, m_LayoutCharacterCount;
         float m_LayoutBaseSize;
 
         static bool IsCjk(uint c) =>
@@ -459,7 +467,8 @@ namespace TMPro
         static bool IsLineBreak(uint c) => c == 10 || c == 11 || c == 0x2028 || c == 0x2029;
 
         // The size, advance and glyph box of a character or sprite.
-        void Measure(ref ParsedElement el, ref Placement p, float baseSize, float width)
+        // metricsFont, when given, scales the glyph instead of its own font.
+        void Measure(ref ParsedElement el, ref Placement p, float baseSize, float width, TMP_FontAsset metricsFont = null)
         {
             p = default;
             var state = el.State;
@@ -469,7 +478,7 @@ namespace TMPro
             float size = fullSize * el.CaseScale;
             float shift = 0f;
             var font = el.Asset as TMP_FontAsset ?? state.Font ?? m_fontAsset;
-            var face = font.faceInfo;
+            var face = (metricsFont ?? font).faceInfo;
             float fontScale0 = size / face.pointSize * face.scale;
             if ((state.Style & FontStyles.Superscript) != 0)
             {

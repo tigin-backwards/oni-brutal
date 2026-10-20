@@ -404,6 +404,25 @@ from what is described here, the measurement wins and this section is corrected.
    are kept, and for `Ellipsis` the last visible characters give way to "…" so it fits. Lines
    above it are not affected, and a single line is never removed entirely. Measure a one-line
    label slightly wider than its rect, and a two-line text whose second line is too wide.
+   *Measured* (14 pt GRAYSTROKE, "QUIT GAME", 68.05 wide, in a 65.05 rect; test
+   `WithoutWrappingTruncateAndEllipsisCutALineAtTheRectsWidth`):
+   - The cut is at the first visible character whose glyph advance passes the width ("E"):
+     Truncate keeps "QUIT GAM" and ends with the blank record (9 records, one line).
+   - Ellipsis replaces the last character that fit ("M") with "…": "QUIT GA…" and the blank
+     record. The ellipsis is drawn at the text font's scale even when its glyph comes from a
+     fallback (NotoNaskhArabic, 32 pt: scale 14/124, 2.131 wide, where a typed "…" from the same
+     fallback is 8.26). This holds for the vertical Ellipsis too.
+   - Lines above the cut are not affected; the cut line ends the text: in "QUIT GAME
+     LONGER\nAB" the second line is not shown.
+   - The correction above is wrong on one point: when even a line's first character does not
+     fit, the line is not kept. On the first line nothing is shown (0 characters, 0 lines) in
+     both modes; on a later line Truncate leaves the blank record alone on it, and Ellipsis
+     shows nothing at all.
+   - A cut at the width, and any line wider than the rect without wrapping (Overflow mode
+     too), is not an overflow: `isTextOverflowing` is false and `firstOverflowCharacterIndex`
+     -1; `isTextTruncated` is true.
+   - Not matched: on the cut line the shipped package counts the replaced character in
+     `visibleCharacterCount` besides the ellipsis, and its `length` includes the padding.
 2. **Several atlas textures.** A glyph's `atlasIndex` selects the texture it is drawn from. A
    font asset whose glyphs span several atlases (a dynamic font with multi-atlas support after
    its first atlas fills, or a shipped asset with `atlasIndex > 0` glyphs) draws each glyph from

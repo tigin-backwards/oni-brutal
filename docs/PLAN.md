@@ -579,6 +579,36 @@ References (captures, signatures, the frame-rate baseline) live in `out/qa/refer
 local. The U57 stages need content that cannot be published (DLC files, a DLC-owning Steam
 double), named in `out/local-tools/qa.env`; without it they are skipped and say so.
 
+## Dogfood on a real profile (2026-10-20)
+
+A player's setup end to end on Windows: the repository as a zip, `setup.ps1` with "Run with
+PowerShell" (the .NET SDK installed for the user, a self-contained build), the launch options in
+Steam, and play on the player's own colony (Rustic Homestead) with their 14 mods. Each finding was
+compared with the original player (PerfProbe measure modes, the same save and mods) before it
+was fixed, and each fix has a regression test.
+
+| Finding | Cause (measured in the original) | Fix |
+|---|---|---|
+| Steam could not start the player | the long launch line, copied from the console, picked up its wrapping as spaces | the setups put the line on the clipboard |
+| The hover card never showed until the mouse moved | a root screen-space canvas is laid out when it is enabled; the game builds the card in the frame its canvas (saved at scale 0) comes on, so ours built it at scale 0 | canvases laid out on enable; `AddComponent<Canvas>` starts in world space, as Unity's does |
+| The pointer was one row high | Unity's `Input.mousePosition.y` is height − 1 − row, `Event.mousePosition.y` row + 1 | `PointerPixels`, for the window and scripted input; the position is read when the window opens |
+| The player's log had none of the game's `[INFO]` lines | Klei's logger writes them with `Console.WriteLine`, which Unity's log file receives | the log file takes the console's output |
+| Warp conduit receivers failed on load | `Instantiate` gives a null serializable-class field of the *source* an instance of its own (the game then reads its prefab's ports) | the cloner does the same, nested fields included; a null array stays null in the source, as in Unity |
+| Blueprints Expanded failed to load, prefab registration aborted, the sandbox menu recursed until the stack overflowed | Unity API the game never calls: `AssetBundle.GetAllLoadedAssetBundles`, `MonoBehaviour.Invoke` and family, `RenderTexture.GetTemporary` with a read/write mode, `Color.darkGray`/`orange`/`violet`, JetBrains annotations | implemented as measured (Invoke: due calls run after Update and after LateUpdate, on disabled and inactive targets too; the colours are CSS's) |
+| Blueprints Expanded's converted UI kept its legacy text | the player's `DestroyImmediate` destroys assets without `allowDestroyingAssets` (bundle and game-data prefabs); the refusal is the editor's | the refusal is gone |
+| Blueprints Expanded's tools threw FieldAccessException | built against publicized game assemblies; Mono does not check access | ARCHITECTURE D11 |
+
+After these, the colony loads and plays with every one of the mods and logs no error, in this
+player as in the original. QA round 7 with all of them: unit, dogfood (the resize capture now shows
+the hover card under the scripted pointer, as the original would; references re-blessed),
+verify (830 game seconds, every tweak and verify mode without a mismatch; 9,000 frames now, since
+a less loaded machine runs more frames per game second) and perf (13.9 GB peak). Not covered: three mods of the profile that were not enabled use
+API the engine still lacks (ShaderExporter: shader property introspection; MiniBase:
+`Mathf.PerlinNoise`; MakeOldLiquidsGreatAgain: `Shader.SetGlobalFloatArray`). Open: the game's
+error dialog logged that its stack trace's tab character is not in NotoSans-Regular; TextMeshPro
+spaces tabs rather than looking them up as glyphs, so this goes to the clean room (a
+behaviour description checked against the shipped package, then a fresh implementer).
+
 ## Open items
 
 Known behaviours not reproduced, all confirmed unreachable by the game (M6):
@@ -727,4 +757,4 @@ Environment notes:
   D2, D3, D10). ApiCheck (ImGui assembly now included): 13 missing members, the UI Toolkit
   panel internals.
 - **M6: exit met** (2026-10-16): docs/PARITY.md fully ticked or with documented deviations
-  (ARCHITECTURE D1–D10).
+  (ARCHITECTURE D1–D11).

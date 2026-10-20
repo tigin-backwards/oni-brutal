@@ -105,7 +105,7 @@ needs from Unity would be lost:
 - Unity's shader tooling;
 - the asset bundle build pipeline;
 - profiling and debugging tools;
-- the platforms this doesn't support (macOS);
+- no macOS support yet;
 - and the general, accumulated knowledge of how Unity behaves.
 
 Unlike RimWorld, which uses very little of Unity, Oxygen Not Included leans on much more of it.

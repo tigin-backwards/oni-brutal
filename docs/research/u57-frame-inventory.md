@@ -166,6 +166,10 @@ Columns: ms per frame (main thread), count of the objects involved where known, 
   controller. A flat mirror of the three inputs, refreshed by the methods that change them,
   leaves only the entries.
 - **Symbol override uploads of unchanged blocks: 1.47 → 1.20 ms.** Done (`fast-symbol-overrides`).
+- **Job runs: about +11% frame rate.** Done (`fast-jobs`, docs/PLAN.md). Stopwatch timing showed
+  the main thread spending about 5.4 ms a frame inside JobManager.Run (fetch updates, mesh
+  batches, amounts, conveyor arms, conduits), mostly waiting for every worker to wake and check
+  in. perf does not show it: blocked time is not sampled.
 - **Animation grid cleanup: 0.48 → 0.12 ms.** Done (`fast-anim-cleanup`, docs/PLAN.md).
 - **Canvas walk, renderer-free subtrees: not worth it.** Only about 7% of its visits are in
   subtrees without any CanvasRenderer.

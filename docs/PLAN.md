@@ -408,6 +408,15 @@ unchanged.
   are skipped (exact by construction; the setters are the block's only writers). U57: override
   texture writes 0.42 → 0.01 ms a frame; batch uploads 1.47 → 1.20 ms including the checks.
 
+- `fast-jobs`: the game's JobManager wakes every worker for each Run (a kernel semaphore, 15
+  workers here) and waits until all have checked in, however few the items; the main thread
+  runs it about 14 times a frame in U57. The tweak runs the same items on its own workers (same
+  fixed thread indices): it wakes only as many as there are items beyond the caller's first,
+  through a semaphore that spins before blocking, and returns once every item has completed.
+  Each item runs exactly once (20,000 runs verified with ONI_TWEAK_VERIFY). Alternating runs,
+  every tweak with and without it: 24.1–27.8 fps against 20.9–25.2 in steady windows (about
+  25.9 against 23.2, +11%).
+
 - `fast-anim-cleanup`: KBatchedAnimUpdater sweeps 16 chunks of its controller grid each frame for
   destroyed controllers, reading every controller there; the tweak keeps the ids of controllers
   destroyed in the last full round of the sweep and sweeps a chunk only when its dictionary still

@@ -43,9 +43,12 @@ On a late-game save (U57: Spaced Out with every DLC, cycle 17,000+), on the same
 
 | | Original | oni-brutal | |
 |---|---|---|---|
-| Frame rate at speed 3 | 6.5–6.8 fps | about 26 fps | about 4× |
-| Loading the save | 3 min 50 s | 26–28 s | about 8.5× faster |
-| Autosave freeze | <!-- TODO: measure the original --> | 4.8 s with the save tweaks (11.7 s without), compressing and writing moved off the main thread | <!-- TODO --> |
+| Frame rate at speed&nbsp;3 | 6.5–6.8&nbsp;fps | about 26&nbsp;fps | about 4× |
+| Loading the save | 3&nbsp;min&nbsp;50&nbsp;s | 26–28&nbsp;s | about 8.5× faster |
+| Autosave freeze | <!-- TODO: measure the original --> | 4.8&nbsp;s | <!-- TODO --> |
+
+The autosave freeze is 11.7 s without the save tweaks; with them, compressing and writing the
+save move off the main thread.
 
 Garbage-collection hitches are mostly gone: collections now run in the background, spread
 across every core, and their pauses are about a quarter as long.

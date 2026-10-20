@@ -18,12 +18,12 @@ build by about ±10% between runs, so comparisons are always back to back or alt
 
 | | Original | oni-brutal | |
 |---|---|---|---|
-| Frame rate, no tweaks | 6.5–6.8 fps | 17.0–18.5 fps | about 2.7× |
+| Frame rate, no tweaks | 6.5–6.8&nbsp;fps | 17.0–18.5&nbsp;fps | about 2.7× |
 | Frame rate, `exact` tweaks (the default) | | <!-- TODO: measure --> | |
-| Frame rate, every tweak | | 25–27 fps (mean 26) | about 3.9× |
-| Frame rate in the autosave window | 4.1 fps | 11.7 fps | about 2.9× |
-| Loading the save | 3 min 50 s | 26–28 s | about 8.5× faster |
-| Autosave freeze | <!-- TODO: measure --> | 11.7 s without tweaks, 4.8 s with the save tweaks | |
+| Frame rate, every tweak | | 25–27&nbsp;fps (mean 26) | about 3.9× |
+| Frame rate in the autosave window | 4.1&nbsp;fps | 11.7&nbsp;fps | about 2.9× |
+| Loading the save | 3&nbsp;min&nbsp;50&nbsp;s | 26–28&nbsp;s | about 8.5× faster |
+| Autosave freeze, with the save tweaks (11.7&nbsp;s without) | <!-- TODO: measure --> | 4.8&nbsp;s | |
 
 With no tweaks it's the same game code doing the same work, so that row is the engine and
 runtime alone: about 2.7 times the original's frame rate.

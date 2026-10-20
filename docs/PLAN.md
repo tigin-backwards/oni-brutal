@@ -365,7 +365,8 @@ unchanged.
 
 - `off-screen-conveyors` (**changes behaviour**): conveyor items travel along their rails on
   screen as before; off screen their transforms are not moved each frame (85% of the ~950 moves a
-  frame in U57), and an item skipped while moving is placed at its cell's centre when it stops.
+  frame in U57), and an item skipped while moving is placed at its cell's centre when it stops
+  or leaves the rail (taken off, emptied, or dumped by deconstruction).
   While off screen a travelling item's transform, and so the cell the game files it under for
   partitioner lookups, decor and radiation, lags its place in the conveyor's flow; the flow
   itself is unaffected. U57: about 2.9 ms a frame (conveyor render tick, cell-change monitor,
@@ -453,22 +454,22 @@ Fixes come with a regression test that fails before them. Status: **fixed** (com
 
 | ID | Area | Finding | Status |
 |---|---|---|---|
-| A1 | input | A release and a new press of a held key in one frame lost the press (key read as up while held); edges were applied presses-first from two sets. Now applied in order. | fixed |
-| A2 | time | Time.time, unscaledTime and fixedTime were float running sums: several percent off after a few hours, and the fixed-step loop never ends past 2^19 s (a hang). Now double, read as float, as Unity keeps them. | fixed |
-| A3 | web requests | A file:// request whose path the runtime rejects stayed in progress forever. | fixed |
+| A1 | input | A release and a new press of a held key in one frame lost the press (key read as up while held); edges were applied presses-first from two sets. Now applied in order. | fixed (8fb7e5a; InputStateTests) |
+| A2 | time | Time.time, unscaledTime and fixedTime were float running sums: several percent off after a few hours, and the fixed-step loop never ends past 2^19 s (a hang). Now double, read as float, as Unity keeps them. | fixed (8fb7e5a; TimeTests) |
+| A3 | web requests | A file:// request whose path the runtime rejects stayed in progress forever. | fixed (8fb7e5a; WebRequestTests) |
 | A4 | runtime | Float-to-int conversion of NaN or out-of-range values saturates on CoreCLR (Mono gives int.MinValue); the game's own casts differ too (Grid.PosToCell of a NaN position gives a valid cell). | left: a runtime difference in the game's own IL, no NaN source found in play |
 | L2 | hierarchy | No OnTransformChildrenChanged for Instantiate under a parent or a destroyed child; layout groups miss those child-list changes. | open |
-| G1 | GL | The multiple-render-target framebuffer cache is never cleared: after a resize the world's MRT pass (MultipleRenderTargetProxy recreates its targets) renders into deleted textures, or leaks them. | open |
-| G3 | GL | Integer render-texture formats are specified with a float pixel format (GL_INVALID_OPERATION). | open |
-| G4 | GL | Cube and multisample samplers are given 2D textures. | open |
-| G5 | GL | ivec2/ivec3/uvec4 loose uniforms use the wrong glUniform call; uint block members are written as float bits. | open |
-| G6 | GL | The multisample resolve blit is clipped by an active scissor. | open |
-| G7 | GL | A null colour target after the first in a multi-target binding throws. | open |
-| R1 | rendering | Pixel memory of textures reclaimed by UnloadUnusedAssets (without Destroy) is never freed. | open |
-| R2 | rendering | A property block's SetTexture also supplies an identity _ST that overrides the material's tiling and offset. | open |
-| R3 | rendering | Shader Integer properties: the shader default in Floats shadows the material's saved int and SetInteger. | open |
-| R4 | rendering | A camera with SetTargetBuffers takes its size from the screen, not its buffers. | open |
-| R5 | rendering | A RenderTextureDescriptor with useMipMap and mipCount -1 gets one level. | open |
+| G1 | GL | The multiple-render-target framebuffer cache is never cleared: after a resize the world's MRT pass (MultipleRenderTargetProxy recreates its targets) renders into deleted textures, or leaks them. | fixed (the cached framebuffers are deleted with their textures; the count is logged). Not reached on a resize in this game: the resize callbacks stop at the game's own KCanvasScaler exception before the MRT proxy recreates its targets, in the original player too (measured) |
+| G3 | GL | Integer render-texture formats are specified with a float pixel format (GL_INVALID_OPERATION). | fixed: integer formats are no longer offered (SupportsRenderTextureFormat false); no game target uses them |
+| G4 | GL | Cube and multisample samplers are given 2D textures. | fixed: cube samplers get 1×1 default cubes of the declared colour (reached: _Cube, unity_SpecCube0, _LightTexture0); multisample samplers are logged, none seen |
+| G5 | GL | ivec2/ivec3/uvec4 loose uniforms use the wrong glUniform call; uint block members are written as float bits. | fixed (integer scalars, vectors and arrays use their own glUniform*iv/uiv; uint block members as integer bits) |
+| G6 | GL | The multisample resolve blit is clipped by an active scissor. | fixed |
+| G7 | GL | A null colour target after the first in a multi-target binding throws. | fixed (an empty attachment) |
+| R1 | rendering | Pixel memory of textures reclaimed by UnloadUnusedAssets (without Destroy) is never freed. | fixed (PixelMemory frees itself when collected; PixelMemoryTests) |
+| R2 | rendering | A property block's SetTexture also supplies an identity _ST that overrides the material's tiling and offset. | fixed (UniformRecordingTests) |
+| R3 | rendering | Shader Integer properties: the shader default in Floats shadows the material's saved int and SetInteger. | fixed (UniformRecordingTests) |
+| R4 | rendering | A camera with SetTargetBuffers takes its size from the screen, not its buffers. | fixed (CameraTargetTests) |
+| R5 | rendering | A RenderTextureDescriptor with useMipMap and mipCount -1 gets one level. | fixed (RenderingDataTests) |
 | C1 | canvas | A graphic with no geometry (Klei's NonDrawingGraphic, the outfit panel's row hit areas) gets no depth, so it is never raycast. | open: measure Unity first |
 | C2 | canvas | Graphics under a CanvasGroup at alpha 0 get no depth, so they are never raycast (Unity still raycasts them unless blocksRaycasts is off). | open: measure Unity first |
 | T1 | TextMeshPro | With wrapping off, a line wider than the rect makes Ellipsis/Truncate text disappear. | open |
@@ -476,17 +477,18 @@ Fixes come with a regression test that fails before them. Status: **fixed** (com
 | T3 | TextMeshPro | Typing a rejected character over a selection deletes the selection. | open |
 | T4 | TextMeshPro | Hyphens are not line-break points. | open: measure the shipped package first |
 | T5 | TextMeshPro | The input field uses string positions as character indices (caret off after a typed tag or escape). | open |
-| S1 | assets | A corrupt or truncated bundle throws out of AssetBundle.LoadFromFile instead of returning null. | open |
+| S1 | assets | A corrupt or truncated bundle throws out of AssetBundle.LoadFromFile instead of returning null. | fixed: decoders report truncated or damaged blocks as invalid data, the block table is bounds-checked (CompressionTests) |
 | S2 | assets | A failed load leaves a half-built object cached. | open |
 | S3 | assets | Reloading a bundle after Unload(false) reuses instance IDs of live objects. | left: the game only unloads with true |
 | S4 | assets | Reloading a scene reuses surviving level objects. | open: check reach |
 | S5 | assets | TextAsset.text decodes UTF-32 LE as UTF-16. | open |
 | S6 | assets | Concurrent first reads of a resource file can map it twice (one view leaked). | open |
-| H1 | fast-anim-events | The loop reads the entry count once; the game re-reads it, so an entry an event adds during the loop (a Duplicant's mouth animation started by a speech event) runs one frame behind. Breaks exactness. | open |
-| H2 | off-screen-conveyors | An item kept off screen keeps its stale position when the conduit is emptied or deconstructed (it drops there); handles of items taken off the rail stay in the skipped set. | open |
-| H3 | fast-particle-collision | Destroyed radbolts stay in the live list unless a gather runs; the list grows. | open |
-| H4 | fast-sublimation | Watched items of a previous colony stay referenced after loading another save. | open |
-| H5 | background-save | A save is header-only on disk until the background write ends; a crash in that window loses it. | open |
+| H1 | fast-anim-events | The loop reads the entry count once; the game re-reads it, so an entry an event adds during the loop (a Duplicant's mouth animation started by a speech event) runs one frame behind. Breaks exactness. | fixed: the count is read on every pass; the play speed is read after the events when one restarted the controller; verify mode counts entries added during the loop (0 in a 9,000-frame U57 run) |
+| H2 | off-screen-conveyors | An item kept off screen keeps its stale position when the conduit is emptied or deconstructed (it drops there); handles of items taken off the rail stay in the skipped set. | fixed: an item leaving the rail (RemovePickupable) is placed first; the set is per flow |
+| H3 | fast-particle-collision | Destroyed radbolts stay in the live list unless a gather runs; the list grows. | fixed: destroyed radbolts leave the list on every check |
+| H4 | fast-sublimation | Watched items of a previous colony stay referenced after loading another save. | fixed: watches are reset with each new colony (and fast-anim-events keys its mirrors weakly) |
+| H5 | background-save | A save is header-only on disk until the background write ends; a crash in that window loses it. | fixed: a run ending by an unhandled exception waits for the write; a hard kill during it loses that save, as killing the game during its own in-place write does |
+| P1 | objects | A destroyed object's access threw MissingReferenceException with the Editor's message; the original player throws NullReferenceException (measured: GetComponent on the game's destroyed KCanvasScaler after a resize, the same exception in both players). | fixed (LifecycleTests) |
 
 ## Open items
 

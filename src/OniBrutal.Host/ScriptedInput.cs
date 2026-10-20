@@ -11,7 +11,8 @@ namespace OniBrutal.Host
     /// down, up the next frame; left unless BUTTON is 1 right or 2 middle), `press:X,Y[,BUTTON]` /
     /// `release:X,Y[,BUTTON]` (for drags), `key:KEYCODE` (down, up the next frame),
     /// `keydown:KEYCODE` / `keyup:KEYCODE` (held keys, e.g. modifiers for chords), `scroll:DX,DY` (wheel
-    /// steps at the pointer), `text:STRING`. A run
+    /// steps at the pointer), `text:STRING`, `burst:X,Y[,N]` (N clicks delivered before one frame,
+    /// the last held a frame), `resize:W,H` (Screen.SetResolution, windowed). A run
     /// with a script ignores the window's own mouse and keyboard, so it is reproducible.
     sealed class ScriptedInput
     {
@@ -56,6 +57,32 @@ namespace OniBrutal.Host
                 case "text":
                     At(frame, () => { foreach (var r in arg.EnumerateRunes()) feed.Text((uint)r.Value, 0); });
                     break;
+                case "burst":
+                {
+                    // N clicks (down and up) delivered together before one frame, as a fast
+                    // double-click lands at a low frame rate; then held down for a frame and released.
+                    var at = arg.Split(',');
+                    var point = Point(at[0] + "," + at[1]);
+                    int n = at.Length > 2 ? int.Parse(at[2]) : 2;
+                    At(frame, () =>
+                    {
+                        Move(point);
+                        for (int i = 0; i < n; i++)
+                        {
+                            feed.MouseDown(0, 0, Gui(point));
+                            if (i < n - 1) feed.MouseUp(0, 0, Gui(point));
+                        }
+                    });
+                    At(frame + 1, () => feed.MouseUp(0, 0, Gui(point)));
+                    break;
+                }
+                case "resize":
+                {
+                    // The window to W×H, as the game's resolution options do (Screen.SetResolution).
+                    var size = Point(arg);
+                    At(frame, () => Screen.SetResolution((int)size.x, (int)size.y, FullScreenMode.Windowed));
+                    break;
+                }
                 default: throw new ArgumentException($"Unknown --input action '{parts[1]}'");
             }
         }

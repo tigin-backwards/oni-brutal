@@ -151,6 +151,13 @@ namespace PerfProbe
             // `speed.txt`: the game speed kept, 0 (normal) to 2 (fastest, the default), or -1: paused.
             var speedFile = System.IO.Path.Combine(Path, "speed.txt");
             int speed = System.IO.File.Exists(speedFile) ? int.Parse(System.IO.File.ReadAllText(speedFile).Trim()) : 2;
+            // `resize.txt` "FRAMES W H": that many frames into the colony the window goes to W×H
+            // (Screen.SetResolution, windowed); the game's error screen it raises is closed 60
+            // frames later and the screen captured at 120 (resized.png beside the probe), the
+            // same in either player.
+            var resizeFile = System.IO.Path.Combine(Path, "resize.txt");
+            int[] resize = System.IO.File.Exists(resizeFile) ? System.Array.ConvertAll(System.IO.File.ReadAllText(resizeFile).Split(new[] { ' ', '\n' }, System.StringSplitOptions.RemoveEmptyEntries), int.Parse) : null;
+            int colonyFrames = 0;
             float windowStart = Time.realtimeSinceStartup;
             int frames = 0;
             long contentions = RuntimeCounters.LockContentions(), paused = RuntimeCounters.GcPauseMs();
@@ -172,6 +179,22 @@ namespace PerfProbe
                     CameraController.Instance.SnapTo(v.At, v.Size);
                     Debug.Log($"PERF camera moved by the game; put back at {v.At}");
                 }
+                colonyFrames++;
+                if (resize != null && colonyFrames == resize[0])
+                {
+                    Debug.Log($"PERF resize to {resize[1]}x{resize[2]}");
+                    Screen.SetResolution(resize[1], resize[2], FullScreenMode.Windowed);
+                }
+                // The game's error screen for the resize's exception (KCanvasScaler, the same in
+                // the original player) closes, so the capture shows the world at the new size.
+                if (resize != null && colonyFrames == resize[0] + 60)
+                {
+                    KCrashReporter.terminateOnError = false;
+                    var errorCanvas = GameObject.Find(KCrashReporter.error_canvas_name);
+                    if (errorCanvas != null) Destroy(errorCanvas);
+                }
+                if (resize != null && colonyFrames == resize[0] + 120)
+                    ScreenCapture.CaptureScreenshot(System.IO.Path.Combine(Path, "resized.png"));
                 if (++frames < 600) continue;
                 float now = Time.realtimeSinceStartup;
                 long c = RuntimeCounters.LockContentions(), g = RuntimeCounters.GcPauseMs();

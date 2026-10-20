@@ -153,5 +153,6 @@ notice are Ahwoo's, from ahwootech/brutal-branding.
 ## This project's own licence
 
 None yet: the repository is unlicensed (all rights reserved) by decision of 2026-10-19, until
-a public release is prepared. That release also needs a clean history (no tooling for the
-original player or a Steam double that owns every DLC in it).
+a public release is prepared. Its history was cleaned for that (2026-10-20): the code once
+ported from Unity's managed source (see above) and a Steam double that owned every DLC are
+removed from every commit.

@@ -474,7 +474,8 @@ from what is described here, the measurement wins and this section is corrected.
      "aaaabbbb", 60.46) and is not drawn, its corners at its origin. A line may break after
      it; there it is drawn with its glyph's advance (3.472) when that fits the line (38.79),
      and stays hidden when it does not (30.73), the break the same.
-   - En and em dashes follow the line-breaking rules' leading and following characters.
+   - Nor after the en and em dashes (U+2013, U+2014) or "/": those words break between
+     characters.
    - Not matched: a line that ends where the text wraps (or is cut) has a `length` that
      includes the material padding of its last character (0.141 here); a text's last line
      does not.

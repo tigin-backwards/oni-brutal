@@ -227,7 +227,11 @@ namespace OniBrutal.Engine
             bool rectChanged = !hasLastRect || !r.Equals(lastRect);
             lastRect = r;
             hasLastRect = true;
-            if (moved || rectChanged) MarkDirty();
+            if (moved || rectChanged)
+            {
+                MarkDirty();
+                if (UI.CanvasSystem.InCanvasUpdate) UI.CanvasSystem.NoteChangedInUpdate(this);
+            }
             if (!rectChanged) return;
             foreach (var child in Children)
                 if (child is RectTransformNative rc) rc.Resolve();

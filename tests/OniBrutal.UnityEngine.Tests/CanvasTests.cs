@@ -169,6 +169,42 @@ namespace OniBrutal.Tests
             Assert.Equal(Vector3.zero, moved.transform.localScale);
         }
 
+        sealed class DimensionsListener : MonoBehaviour
+        {
+            public static bool InUpdate;
+            public readonly System.Collections.Generic.List<bool> Received = new();
+            void OnRectTransformDimensionsChange() => Received.Add(InUpdate);
+        }
+
+        // As measured in the original player (PerfProbe layout.txt on the main menu's news tiles):
+        // a RectTransform resized or moved during the canvas update (uGUI's layout pass) gets
+        // OnRectTransformDimensionsChange then and again once the update is over, so a layout
+        // element that changes its preferred size on it can ask for another layout pass.
+        [Fact]
+        public void ARectChangedDuringTheCanvasUpdateHearsOfItAgainAfterIt()
+        {
+            OniBrutal.Engine.UI.CanvasSystem.Install();
+            var canvas = new GameObject("Canvas", typeof(RectTransform));
+            canvas.AddComponent<Canvas>().renderMode = RenderMode.ScreenSpaceOverlay;
+            var child = new GameObject("Child", typeof(RectTransform));
+            child.transform.SetParent(canvas.transform, false);
+            var listener = child.AddComponent<DimensionsListener>();
+            Frame();
+            listener.Received.Clear();
+            Canvas.WillRenderCanvases resize = () =>
+            {
+                DimensionsListener.InUpdate = true;
+                ((RectTransform)child.transform).sizeDelta += new Vector2(10f, 0f);
+                DimensionsListener.InUpdate = false;
+            };
+            Canvas.willRenderCanvases += resize;
+            try { Frame(); }
+            finally { Canvas.willRenderCanvases -= resize; }
+            Assert.Equal([true, false], listener.Received);
+            Frame();
+            Assert.Equal([true, false], listener.Received);
+        }
+
         [Fact]
         public void InstantiateRemapsTheCanvasCameraIntoTheClone()
         {

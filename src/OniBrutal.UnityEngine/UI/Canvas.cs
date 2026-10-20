@@ -142,8 +142,7 @@ namespace UnityEngine
 
         public static void ForceUpdateCanvases()
         {
-            SendPreWillRenderCanvases();
-            SendWillRenderCanvases();
+            CanvasSystem.RunCanvasUpdate();
         }
 
         internal static void SendPreWillRenderCanvases() => preWillRenderCanvases?.Invoke();

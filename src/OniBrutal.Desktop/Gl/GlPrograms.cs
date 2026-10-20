@@ -209,6 +209,8 @@ namespace OniBrutal.Desktop.Gl
 
         static readonly Dictionary<string, int> layouts = new();
 
+        static readonly HashSet<string> unsupportedSamplers = new();
+
         static void Reflect(DeviceProgram p)
         {
             GlBindings.UseProgram(p.Id);
@@ -227,6 +229,10 @@ namespace OniBrutal.Desktop.Gl
                 var name = rawName.EndsWith("[0]", StringComparison.Ordinal) ? rawName[..^3] : rawName;
                 if (IsSampler(type))
                 {
+                    // This device samples no multisample textures: such a sampler would read a 2D
+                    // default, which is undefined for it. Reported once a name.
+                    if (type == Sampler2DMultisample && unsupportedSamplers.Add(name))
+                        OniBrutal.Engine.EngineLog.Engine($"shader sampler '{name}' is a multisample sampler; no texture of that kind is bound");
                     int location = GlApi.UniformLocation(p.Id, rawName);
                     var s = new SamplerBinding { Location = location, Unit = unit++, Target = SamplerTarget(type), PropertyId = ShaderPropertyIds.Get(name) };
                     if (!GlBindless.Enabled) N.glUniform1i(location, s.Unit);
@@ -296,6 +302,7 @@ namespace OniBrutal.Desktop.Gl
             Sampler3D => TexTarget3D,
             Sampler2DArray => TexTarget2DArray,
             Sampler2DMultisample => TexTarget2DMultisample,
+            SamplerCube => TexTargetCubeMap,
             _ => TexTarget2D,
         };
     }
@@ -309,16 +316,29 @@ namespace OniBrutal.Desktop.Gl
         public MaterialNative Material;
         public ShaderNative Shader;
 
-        /// Property lookup order: the renderer's block, the material, the globals.
+        /// Property lookup order: the renderer's block, the material, the globals; at each, a
+        /// float (SetFloat, SetInt) or an integer (SetInteger).
         public bool TryFloat(int id, out float v)
         {
-            if (Block != null && Block.Floats.TryGetValue(id, out v)) return true;
-            if (Material != null && Material.Properties.Floats.TryGetValue(id, out v)) return true;
-            if (ShaderGlobals.Properties.Floats.TryGetValue(id, out v)) return true;
-            if (Block != null && Block.Ints.TryGetValue(id, out var i)) { v = i; return true; }
-            if (Material != null && Material.Properties.Ints.TryGetValue(id, out i)) { v = i; return true; }
-            if (ShaderGlobals.Properties.Ints.TryGetValue(id, out i)) { v = i; return true; }
-            v = 0f;
+            if (Block != null && FloatOrInt(Block, id, out v)) return true;
+            if (Material != null && FloatOrInt(Material.Properties, id, out v)) return true;
+            return FloatOrInt(ShaderGlobals.Properties, id, out v);
+        }
+
+        static bool FloatOrInt(PropertySheet sheet, int id, out float v)
+        {
+            if (sheet.Floats.TryGetValue(id, out v)) return true;
+            if (sheet.Ints.TryGetValue(id, out var i)) { v = i; return true; }
+            return false;
+        }
+
+        /// A texture's tiling and offset when no X_ST vector is set: the material's or the
+        /// globals'. A block's SetTexture sets only the texture (as Unity's does).
+        public bool TryTextureScaleOffset(int id, out Vector4 scaleOffset)
+        {
+            if (Material != null && Material.Properties.Textures.TryGetValue(id, out var t)) { scaleOffset = t.ScaleOffset; return true; }
+            if (ShaderGlobals.Properties.Textures.TryGetValue(id, out t)) { scaleOffset = t.ScaleOffset; return true; }
+            scaleOffset = default;
             return false;
         }
 
@@ -364,18 +384,21 @@ namespace OniBrutal.Desktop.Gl
         static readonly float[] scratch = new float[4 * 1024];
         /// Array uniforms tightly packed for glUniform*fv.
         static readonly float[] packedScratch = new float[4 * 1024];
+        /// Integer uniforms tightly packed for glUniform*iv / *uiv.
+        static readonly int[] intScratch = new int[4 * 1024];
 
         static int Components(uint type) => type switch
         {
             FloatType or IntType or UnsignedIntType or BoolType => 1,
-            FloatVec2 or IntVec2 => 2,
-            FloatVec3 or IntVec3 => 3,
+            FloatVec2 or IntVec2 or UintVec2 or BoolVec2 => 2,
+            FloatVec3 or IntVec3 or UintVec3 or BoolVec3 => 3,
             FloatMat4 => 16,
             _ => 4,
         };
 
-        static bool IsInt(uint type) => type is IntType or IntVec2 or IntVec3 or IntVec4 or BoolType;
-        static bool IsUint(uint type) => type is UnsignedIntType or UintVec4;
+        /// Signed integer and bool uniforms (bools are set with glUniform*iv).
+        static bool IsInt(uint type) => type is IntType or IntVec2 or IntVec3 or IntVec4 or BoolType or BoolVec2 or BoolVec3 or BoolVec4;
+        static bool IsUint(uint type) => type is UnsignedIntType or UintVec2 or UintVec3 or UintVec4;
 
         /// Values as floats, `count` elements of `stride` floats (vec4 slots).
         static int Resolve(UniformBinding u, DrawInputs d, Span<float> o)
@@ -463,7 +486,7 @@ namespace OniBrutal.Desktop.Gl
                 case UniformSource.TextureScaleOffset:
                     if (u.ScaleOffsetId == int.MinValue) u.ScaleOffsetId = ShaderPropertyIds.Get(ShaderPropertyIds.NameOf(u.PropertyId) + "_ST");
                     v = d.TryVector(u.ScaleOffsetId, out var st) ? st
-                        : d.TryTexture(u.PropertyId, out var tb) ? tb.ScaleOffset : TextureBinding.IdentityScaleOffset;
+                        : d.TryTextureScaleOffset(u.PropertyId, out var so) ? so : TextureBinding.IdentityScaleOffset;
                     break;
                 case UniformSource.TextureTexelSize:
                 {
@@ -641,7 +664,6 @@ namespace OniBrutal.Desktop.Gl
         /// program already holds.
         public static void Send(DeviceProgram p, ReadOnlySpan<float> values)
         {
-            Span<int> ints = stackalloc int[4];
             var sent = p.Sent ??= new float[p.Uniforms.Count][];
             int next = 0;
             for (int index = 0; index < p.Uniforms.Count; index++)
@@ -663,22 +685,31 @@ namespace OniBrutal.Desktop.Gl
                 o.CopyTo(last);
                 fixed (float* f = o)
                 {
-                    if (u.IsMatrix || u.Size > 1 && Components(u.Type) == 4) N.glUniform4fv(u.Location, n / 4, f);
-                    else if (IsInt(u.Type))
+                    if (IsInt(u.Type) || IsUint(u.Type))
                     {
-                        int count = Math.Min(4, Components(u.Type));
-                        for (int i = 0; i < count; i++) ints[i] = (int)o[i];
-                        fixed (int* ip = ints)
+                        // Scalars, vectors and arrays of them, with the call of their own type
+                        // and size (any other is GL_INVALID_OPERATION), elements tightly packed.
+                        bool unsigned = IsUint(u.Type);
+                        int comps = Components(u.Type), elements = Math.Max(1, u.Size);
+                        for (int e = 0; e < elements; e++)
+                            for (int c = 0; c < comps; c++)
+                                intScratch[e * comps + c] = unsigned ? (int)(uint)o[e * 4 + c] : (int)o[e * 4 + c];
+                        fixed (int* ip = intScratch)
                         {
-                            if (count == 1) N.glUniform1iv(u.Location, 1, ip);
-                            else N.glUniform4iv(u.Location, 1, ip);
+                            switch (comps, unsigned)
+                            {
+                                case (1, false): N.glUniform1iv(u.Location, elements, ip); break;
+                                case (2, false): N.glUniform2iv(u.Location, elements, ip); break;
+                                case (3, false): N.glUniform3iv(u.Location, elements, ip); break;
+                                case (_, false): N.glUniform4iv(u.Location, elements, ip); break;
+                                case (1, true): N.glUniform1uiv(u.Location, elements, (uint*)ip); break;
+                                case (2, true): N.glUniform2uiv(u.Location, elements, (uint*)ip); break;
+                                case (3, true): N.glUniform3uiv(u.Location, elements, (uint*)ip); break;
+                                default: N.glUniform4uiv(u.Location, elements, (uint*)ip); break;
+                            }
                         }
                     }
-                    else if (IsUint(u.Type))
-                    {
-                        uint ui = (uint)o[0];
-                        N.glUniform1uiv(u.Location, 1, &ui);
-                    }
+                    else if (u.IsMatrix || u.Size > 1 && Components(u.Type) == 4) N.glUniform4fv(u.Location, n / 4, f);
                     else if (u.Size > 1)
                     {
                         // An array in one call from its base location, elements tightly packed:
@@ -724,6 +755,7 @@ namespace OniBrutal.Desktop.Gl
                     int dst = start + e * stride + c;
                     if (dst >= target.Length) return;
                     if (IsInt(u.Type)) target[dst] = BitConverter.Int32BitsToSingle((int)values[src + c]);
+                    else if (IsUint(u.Type)) target[dst] = BitConverter.Int32BitsToSingle((int)(uint)values[src + c]);
                     else target[dst] = values[src + c];
                 }
             }

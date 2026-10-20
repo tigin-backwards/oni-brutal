@@ -45,8 +45,12 @@ namespace OniBrutal.Desktop.Gl
         public uint Sampler;
         public System.Collections.Generic.Dictionary<uint, ulong> Handles;
 
+        /// Multi-target framebuffers this texture is attached to (GlDevice.ForgetFramebuffers).
+        public List<uint> MrtFramebuffers;
+
         public void Delete()
         {
+            GlDevice.ForgetFramebuffers(this);
             GlBindless.Release(this);
             if (Id != 0) GlBindings.DeleteTexture(Id);
             if (Framebuffer != 0) GlApi.DeleteFramebuffer(Framebuffer);
@@ -289,10 +293,8 @@ namespace OniBrutal.Desktop.Gl
             GraphicsFormat.B5G5R5A1_UNormPack16 => Rgb5A1,
             GraphicsFormat.A2B10G10R10_UNormPack32 => Rgb10A2,
             GraphicsFormat.B10G11R11_UFloatPack32 => R11G11B10F,
-            GraphicsFormat.R32G32B32A32_SInt => Rgba32I,
-            GraphicsFormat.R32G32_SInt => Rg32I,
-            GraphicsFormat.R32_SInt => R32I,
-            GraphicsFormat.R16G16B16A16_UInt => Rgba16UI,
+            // Integer formats are not offered: their storage, clears, filtering and blending all
+            // differ from the float path this device renders with (no game target uses them).
             _ => throw new NotSupportedException($"Render texture format {f} has no OpenGL equivalent in this device."),
         };
 
@@ -660,7 +662,10 @@ namespace OniBrutal.Desktop.Gl
             {
                 GlApi.BindFramebuffer(ReadFramebuffer, g.MultisampleFramebuffer);
                 GlApi.BindFramebuffer(DrawFramebuffer, g.Framebuffer);
+                // Blits are scissored: the whole texture resolves whatever the scissor in effect.
+                if (GlDevice.ScissorActive) GlApi.Enable(ScissorTest, false);
                 N.glBlitFramebuffer(0, 0, g.Width, g.Height, 0, 0, g.Width, g.Height, ColorBufferBit, Nearest);
+                if (GlDevice.ScissorActive) GlApi.Enable(ScissorTest, true);
                 GlDevice.InvalidateFramebufferBinding();
             }
             if (g.Levels > 1 && autoGenerateMips)

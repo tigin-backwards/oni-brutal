@@ -248,6 +248,14 @@ namespace OniBrutal.Desktop.Gl
             N.glTexImage3D(TexTarget3D, 0, (int)Rgba8, 1, 1, 1, 0, Rgba, UnsignedByte, px);
             N.glTexParameteri(TexTarget3D, TextureMaxLevel, 0);
             defaults["3d:" + name] = volume;
+            // Cube samplers (Standard-shader reflections, point-light cookies): the textures
+            // never give them a cube map, so they read a default cube of the same colour.
+            var cube = new DeviceTexture { Id = GlApi.GenTexture(), Target = TexTargetCubeMap, RecordedTarget = TexTargetCubeMap, Width = 1, Height = 1 };
+            GlBindings.BindTexture(TexTargetCubeMap, cube.Id);
+            for (uint face = 0; face < 6; face++)
+                N.glTexImage2D(TexCubeMapPositiveX + face, 0, (int)Rgba8, 1, 1, 0, Rgba, UnsignedByte, px);
+            N.glTexParameteri(TexTargetCubeMap, TextureMaxLevel, 0);
+            defaults["cube:" + name] = cube;
         }
 
         const string Unbound = "<unbound>";
@@ -255,7 +263,7 @@ namespace OniBrutal.Desktop.Gl
         DeviceTexture DefaultTexture(string name, uint target)
         {
             name ??= "";
-            string prefix = target == TexTarget2DArray ? "array:" : target == TexTarget3D ? "3d:" : "";
+            string prefix = target == TexTarget2DArray ? "array:" : target == TexTarget3D ? "3d:" : target == TexTargetCubeMap ? "cube:" : "";
             return defaults.TryGetValue(prefix + name, out var t) ? t : defaults[prefix + "white"];
         }
 
@@ -272,7 +280,8 @@ namespace OniBrutal.Desktop.Gl
             if (binding.Colors != null && binding.Colors.Length > 0 && binding.Colors[0] != null)
             {
                 colors = new DeviceTexture[binding.Colors.Length];
-                for (int i = 0; i < colors.Length; i++) colors[i] = GlTextures.Prepare(worker, binding.Colors[i]);
+                // A null target after the first (a destroyed buffer) leaves its attachment empty.
+                for (int i = 0; i < colors.Length; i++) colors[i] = binding.Colors[i] == null ? null : GlTextures.Prepare(worker, binding.Colors[i]);
                 if (binding.Depth != null) depth = binding.Depth == binding.Colors[0] ? colors[0] : GlTextures.Prepare(worker, binding.Depth);
             }
             var bound = new BoundTarget(colors, depth, platform.FramebufferWidth, platform.FramebufferHeight);
@@ -289,9 +298,29 @@ namespace OniBrutal.Desktop.Gl
         // GL thread.
         static bool framebufferValid;
         BoundTarget target = new(null, null, 1, 1);
-        readonly Dictionary<string, uint> mrtFramebuffers = new();
+        /// Framebuffers combining several colour textures, by the textures' names and the depth
+        /// buffer's; each texture lists the ones it is in, which go when it is deleted (GL thread).
+        static readonly Dictionary<string, uint> mrtFramebuffers = new();
 
         public static void InvalidateFramebufferBinding() => framebufferValid = false;
+
+        /// Deletes the multi-target framebuffers a texture is attached to, before the texture's
+        /// own names are deleted (they could be reused by new textures under the same key).
+        internal static void ForgetFramebuffers(DeviceTexture texture)
+        {
+            if (texture.MrtFramebuffers == null || texture.MrtFramebuffers.Count == 0) return;
+            foreach (var fb in texture.MrtFramebuffers)
+            {
+                string key = null;
+                foreach (var (k, v) in mrtFramebuffers)
+                    if (v == fb) { key = k; break; }
+                if (key == null) continue; // already deleted through another of its textures
+                mrtFramebuffers.Remove(key);
+                GlApi.DeleteFramebuffer(fb);
+            }
+            texture.MrtFramebuffers.Clear();
+            framebufferValid = false;
+        }
 
         /// The framebuffer standing in for the back buffer this frame (GL thread).
         uint BackBuffer => presenter.BackBuffer(target.BackBufferWidth, target.BackBufferHeight);
@@ -318,8 +347,8 @@ namespace OniBrutal.Desktop.Gl
             var key = new System.Text.StringBuilder();
             foreach (var c in t.Colors)
             {
-                c.Dirty = true;
-                key.Append(c.Id).Append(',');
+                if (c != null) c.Dirty = true;
+                key.Append(c?.Id ?? 0).Append(',');
             }
             key.Append(t.Depth?.DepthRenderbuffer ?? 0);
             if (!mrtFramebuffers.TryGetValue(key.ToString(), out var fb))
@@ -329,13 +358,21 @@ namespace OniBrutal.Desktop.Gl
                 var buffers = stackalloc GlEnum[t.Colors.Length];
                 for (int i = 0; i < t.Colors.Length; i++)
                 {
+                    if (t.Colors[i] == null)
+                    {
+                        buffers[i] = NoneBuffer;
+                        continue;
+                    }
                     N.glFramebufferTexture2D(Framebuffer, ColorAttachment0 + (uint)i, TexTarget2D, t.Colors[i].Id, 0);
                     buffers[i] = ColorAttachment0 + (uint)i;
+                    (t.Colors[i].MrtFramebuffers ??= new()).Add(fb);
                 }
                 N.glDrawBuffers(t.Colors.Length, buffers);
                 if (t.Depth is { DepthRenderbuffer: not 0 })
                     N.glFramebufferRenderbuffer(Framebuffer, DepthStencilAttachment, Renderbuffer, new GlRenderbuffer(t.Depth.DepthRenderbuffer));
+                if (t.Depth != null) (t.Depth.MrtFramebuffers ??= new()).Add(fb);
                 mrtFramebuffers[key.ToString()] = fb;
+                OniBrutal.Engine.EngineLog.Engine($"multi-target framebuffer for {t.Colors.Length} colour targets made; {mrtFramebuffers.Count} kept");
             }
             GlApi.BindFramebuffer(Framebuffer, fb);
         }

@@ -8,7 +8,7 @@ I did this mostly for fun, to see how far Oxygen Not Included's performance can 
 sparked joy. When [BRUTAL](https://github.com/ahwootech/BRUTAL) went open source, it seemed like
 a good excuse to try a sexy new toy.
 
-Klei's game DLLs load as they are, apart from two small compatibility fixes. Whatever they call
+Klei's game DLLs load as they are, apart from three small compatibility fixes. Whatever they call
 into Unity for is reimplemented here.
 
 ## Setup
@@ -90,8 +90,9 @@ original game (including ones written with the `fast-save-compression` tweak).
 
 ## Mod compatibility
 
-Most mods should theoretically work, since the game's code and its Harmony load as shipped. Mods
-that call Unity's API directly are a coin flip. I haven't tested any of them.
+Most mods should work, since the game's code and its Harmony load as shipped. I've tested my own
+set of 14 mods, Blueprints Expanded among them. Mods that call parts of Unity the game itself
+never uses can still hit gaps; if one breaks, file an issue with your log.
 
 ## Could Klei do this?
 

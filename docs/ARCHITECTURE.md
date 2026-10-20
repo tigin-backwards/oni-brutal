@@ -180,6 +180,19 @@ past the boot checkpoint needs a Steam client logged in with an account that own
   implements the corrected algorithm, so for such values its last digit can be smaller than
   Unity's (0.2f: …224 here, …225 in Unity); both parse back to the same number. The game writes
   JSON with `JsonUtility` only for its scripted performance capture.
+- **D11 Mods built against publicized game assemblies.** Many mods are compiled against copies
+  of the game's assemblies with every member made public, and use private members directly. Mono
+  does not check member access at run time; CoreCLR throws FieldAccessException or
+  MethodAccessException when such a method is compiled. **Resolved by a patch** (`ModAccess`):
+  the host replaces the `Assembly.LoadFrom` call in `KMod.DLLLoader.LoadDLLs`, and a mod
+  assembly that names a game member or type its code could not reach (private, internal) is
+  given CoreCLR's `IgnoresAccessChecksTo` attribute for `Assembly-CSharp` and
+  `Assembly-CSharp-firstpass` (Mono.Cecil) and loaded from memory, its symbols with it. The
+  game's own assemblies are not changed (making their members public instead would change what
+  KSerialization saves: its default opt-out mode saves every public field and property). The mod
+  still sees itself as loaded from its file: `Assembly.Location` reports the file (mods find
+  their folders from it) and its folder is searched for its references. Other mods load as
+  before. This is the host's third change to game code (with D1 and D3).
 
 ## 3. The engine API (`OniBrutal.UnityEngine`)
 
@@ -188,6 +201,9 @@ past the boot checkpoint needs a Steam client logged in with an account that own
 The public surface is **exactly** what the consumers reference, with Unity's names, member
 kinds, signatures, `virtual`/`sealed`-ness, and base types, verified by `tools/ApiCheck`
 (conformance gate, §9). We do not add public API Unity doesn't have. Internals are free-form.
+Mods may call Unity API the game never does; types they are known to need are listed in
+`engine-required-types.tsv`, and running `tools/ApiCheck` over a profile's mod assemblies finds
+the members they reference that the engine lacks.
 
 The consumer set is: `Assembly-CSharp`, `Assembly-CSharp-firstpass`, `UnityEngine.UI`,
 `Unity.TextMeshPro`, `Unity.Timeline`, `FMODUnity*`, `ImGui.NET`, Steamworks.NET.

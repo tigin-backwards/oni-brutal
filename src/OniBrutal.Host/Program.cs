@@ -50,6 +50,7 @@ namespace OniBrutal.Host
             if (options.RunHome != null) RunHome.Install(options.RunHome);
             if (options.AudioWav != null) AudioCapture.Install(options.AudioWav);
             ModVersionStamp.Install();
+            ModAccess.Install();
             GameTweaks.GameTweaks.Install(options.GameTweaks);
             StateMachineSaveNames.Install(dataDir, AppContext.BaseDirectory);
             return Player.Run(options, dataDir);

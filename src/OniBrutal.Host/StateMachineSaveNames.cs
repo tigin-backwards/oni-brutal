@@ -18,8 +18,8 @@ namespace OniBrutal.Host
     /// UnityEngine modules), so no saved parameter matched and all loaded at their defaults: in a
     /// large colony, suits, doors and food reachability broke and the Duplicants starved. The
     /// host has the serializer use the names the original player writes (MonoTypeNames), so
-    /// saves from either player load fully in both. This and ModVersionStamp are the host's only
-    /// changes to game code.
+    /// saves from either player load fully in both. This, ModVersionStamp and ModAccess are the
+    /// host's only changes to game code.
     internal static class StateMachineSaveNames
     {
         static string managedDir = "", engineDir = "";

@@ -43,6 +43,9 @@ namespace OniBrutal.Host
         };
 
         static string managedDir = "";
+
+        /// Where the game's assemblies and our engine facades are (ModAccess resolves mods' references there).
+        public static string[] ReferenceDirectories => [managedDir, engineDir];
         static string pluginsDir = "";
         static string engineDir = "";
 

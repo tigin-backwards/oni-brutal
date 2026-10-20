@@ -96,7 +96,7 @@ might once have looked like.
 
 But it has plenty of bugs, known and unknown. Its only real mandates were to leave no safe
 optimization behind, and not to crash *my* game. Much of the win comes from CoreCLR itself,
-which Unity's own CoreCLR move should bring to the original game too, eventually (it's been in
+which Unity 7's CoreCLR move should bring to the original game too, eventually (it's been in
 Soon™ territory for years).
 
 This also rebuilds only what the game needs to run. Everything that Klei's development workflow
@@ -110,7 +110,7 @@ needs from Unity would be lost:
 
 Unlike RimWorld, which uses very little of Unity, Oxygen Not Included leans on much more of it.
 
-So I'd only seriously look at something like this if Unity's own CoreCLR runtime can't get
+So I'd only seriously look at something like this if Unity 7's CoreCLR runtime can't get
 close to the same numbers.
 
 ## Contributing

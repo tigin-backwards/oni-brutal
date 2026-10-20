@@ -472,11 +472,11 @@ Fixes come with a regression test that fails before them. Status: **fixed** (com
 | R5 | rendering | A RenderTextureDescriptor with useMipMap and mipCount -1 gets one level. | fixed (RenderingDataTests) |
 | C1 | canvas | A graphic with no geometry (Klei's NonDrawingGraphic, the outfit panel's row hit areas) gets no depth, so it is never raycast. | fixed: measured, the original numbers it and raycasts hit it; every live unculled element is numbered (CanvasDepthTests) |
 | C2 | canvas | Graphics under a CanvasGroup at alpha 0 get no depth, so they are never raycast (Unity still raycasts them unless blocksRaycasts is off). | fixed: measured, the original numbers it and raycasts hit it; transparent subtrees are numbered unless their groups stop raycasts, which keeps the hidden-subtree skip for those (CanvasDepthTests) |
-| T1 | TextMeshPro | With wrapping off, a line wider than the rect makes Ellipsis/Truncate text disappear. | open |
-| T2 | TextMeshPro | Glyphs in a second or later atlas texture are drawn from the first. | open |
-| T3 | TextMeshPro | Typing a rejected character over a selection deletes the selection. | open |
-| T4 | TextMeshPro | Hyphens are not line-break points. | open: measure the shipped package first |
-| T5 | TextMeshPro | The input field uses string positions as character indices (caret off after a typed tag or escape). | open |
+| T1 | TextMeshPro | With wrapping off, a line wider than the rect makes Ellipsis/Truncate text disappear. | fixed (clean room, 596cf66; measured: the cut line ends the text, a first character that does not fit leaves nothing; TmpLayoutTests) |
+| T2 | TextMeshPro | Glyphs in a second or later atlas texture are drawn from the first. | fixed (clean room, fa0a612; TmpRichTextTests) |
+| T3 | TextMeshPro | Typing a rejected character over a selection deletes the selection. | fixed (clean room, d6cc396; measured: validation sees the text without the selection; TmpInputTests) |
+| T4 | TextMeshPro | Hyphens are not line-break points. | fixed (clean room, 48fc6d8; measured: breaks after "-" and the soft hyphen, not after U+2010/U+2011; TmpLayoutTests) |
+| T5 | TextMeshPro | The input field uses string positions as character indices (caret off after a typed tag or escape). | fixed (clean room, 32ad6b4; TmpInputTests) |
 | S1 | assets | A corrupt or truncated bundle throws out of AssetBundle.LoadFromFile instead of returning null. | fixed: decoders report truncated or damaged blocks as invalid data, the block table is bounds-checked (CompressionTests) |
 | S2 | assets | A failed load leaves a half-built object cached. | open |
 | S3 | assets | Reloading a bundle after Unload(false) reuses instance IDs of live objects. | left: the game only unloads with true |

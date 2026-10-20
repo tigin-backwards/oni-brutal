@@ -165,6 +165,7 @@ Columns: ms per frame (main thread), count of the objects involved where known, 
   docs/PLAN.md). The loop's own entries are compact structs; the cost was reading each
   controller. A flat mirror of the three inputs, refreshed by the methods that change them,
   leaves only the entries.
+- **Symbol override uploads of unchanged blocks: 1.47 → 1.20 ms.** Done (`fast-symbol-overrides`).
 - **Animation grid cleanup: 0.48 → 0.12 ms.** Done (`fast-anim-cleanup`, docs/PLAN.md).
 - **Canvas walk, renderer-free subtrees: not worth it.** Only about 7% of its visits are in
   subtrees without any CanvasRenderer.

@@ -14,6 +14,7 @@ namespace OniBrutal.GameTweaks
                 case FastAnimCleanup.Name: FastAnimCleanup.Install(harmony); return true;
                 case FastSublimation.Name: FastSublimation.Install(harmony); return true;
                 case FastAnimEvents.Name: FastAnimEvents.Install(harmony); return true;
+                case FastSymbolOverrides.Name: FastSymbolOverrides.Install(harmony); return true;
                 case SlowReachability.Name: SlowReachability.Install(harmony); return true;
                 default: return false;
             }

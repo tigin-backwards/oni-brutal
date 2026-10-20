@@ -402,6 +402,12 @@ unchanged.
   the PlayMode setter, SwapAnims, OnDestroy). 18 million entries verified with ONI_TWEAK_VERIFY
   (mirror against controller, 0 stale); the loop 2.07 → 0.90 ms a frame.
 
+- `fast-symbol-overrides`: a controller re-applies its symbol overrides on each dirty mark, and
+  the override block's setters raise its version even when storing the values already held, so
+  the batch re-uploads an unchanged block. Setter calls that would store only the current values
+  are skipped (exact by construction; the setters are the block's only writers). U57: override
+  texture writes 0.42 → 0.01 ms a frame; batch uploads 1.47 → 1.20 ms including the checks.
+
 - `fast-anim-cleanup`: KBatchedAnimUpdater sweeps 16 chunks of its controller grid each frame for
   destroyed controllers, reading every controller there; the tweak keeps the ids of controllers
   destroyed in the last full round of the sweep and sweeps a chunk only when its dictionary still

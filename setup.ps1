@@ -1,8 +1,10 @@
 # One-time setup for playing Oxygen Not Included on oni-brutal (Windows).
 #
-# Finds the game through Steam's libraries, builds the player into out\player when run from a
-# clone of the repository (a release already has it, next to this script), and prints the line
-# to paste into the game's Steam launch options. Run it again after updating.
+# Finds the game through Steam's libraries, builds the player when run from a copy of the
+# repository (a release already has it, next to this script), installs it to
+# %LOCALAPPDATA%\oni-brutal\player, and puts the line for the game's Steam launch options on the
+# clipboard. The install location stays the same, so after an update running this again is all
+# that is needed.
 #   powershell -ExecutionPolicy Bypass -File setup.ps1 [GAME_DIR]
 param([string]$Game)
 $ErrorActionPreference = 'Stop'
@@ -31,7 +33,7 @@ if (-not (Test-Path (Join-Path $Game 'OxygenNotIncluded_Data\Managed'))) { Die "
 Write-Host "Game: $Game"
 
 if (Test-Path (Join-Path $here 'OniBrutal.exe')) {
-    $player = $here # a release
+    $built = $here # a release
 } else {
     # A .NET SDK of the version global.json pins (a later patch release works too): one already
     # installed, or one installed for this user (no administrator needed).
@@ -61,13 +63,18 @@ if (Test-Path (Join-Path $here 'OniBrutal.exe')) {
         $output = & $dotnet build (Join-Path $here $project) -c Release -r win-x64 --self-contained true "-p:OniGameDir=$Game" -v q -nologo 2>&1
         if ($LASTEXITCODE -ne 0) { $output | Write-Host; Die 'the build failed' }
     }
-    $player = Join-Path $here 'out\player'
-    if (Test-Path $player) { Remove-Item -Recurse -Force $player }
-    Copy-Item -Recurse (Join-Path $here 'out\bin\OniBrutal.Host\release_win-x64') $player
-    Remove-Item -Force (Join-Path $player 'Restarter'), (Join-Path $player 'FacadeGen.*') -ErrorAction SilentlyContinue
+    $built = Join-Path $here 'out\bin\OniBrutal.Host\release_win-x64'
+    Remove-Item -Force (Join-Path $built 'Restarter'), (Join-Path $built 'FacadeGen.*') -ErrorAction SilentlyContinue
     $restarter = Join-Path $here 'out\bin\OniBrutal.Restarter\release_win-x64'
-    foreach ($file in 'Restarter.exe', 'Restarter.dll', 'Restarter.deps.json', 'Restarter.runtimeconfig.json') { Copy-Item (Join-Path $restarter $file) $player }
+    foreach ($file in 'Restarter.exe', 'Restarter.dll', 'Restarter.deps.json', 'Restarter.runtimeconfig.json') { Copy-Item (Join-Path $restarter $file) $built }
 }
+
+# Installed to one place, so the launch options never change.
+$player = Join-Path $env:LOCALAPPDATA 'oni-brutal\player'
+if (Get-Process -Name OniBrutal -ErrorAction SilentlyContinue) { Die 'the game is running on oni-brutal; quit it first' }
+if (Test-Path $player) { Remove-Item -Recurse -Force $player }
+New-Item -ItemType Directory -Force (Split-Path $player) | Out-Null
+Copy-Item -Recurse $built $player
 
 $launch = "`"$(Join-Path $player 'OniBrutal.exe')`" --game-tweak exact -- %command%"
 # On the clipboard: copied from the console, a long line picks up its wrapping as spaces.

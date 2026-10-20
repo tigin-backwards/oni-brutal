@@ -75,6 +75,8 @@ namespace OniBrutal.Assets.Files
             int inPos = r.AbsolutePosition;
             foreach (var b in blocks)
             {
+                if (b.compressed < 0 || b.uncompressed < 0 || (long)inPos + b.compressed > file.Length || (long)outPos + b.uncompressed > data.Length)
+                    throw new InvalidDataException("UnityFS: block table runs past the file (truncated archive).");
                 var src = new ReadOnlySpan<byte>(file, inPos, b.compressed);
                 var dst = new Span<byte>(data, outPos, b.uncompressed);
                 DecompressInto(src, dst, (uint)b.flags & CompressionMask);

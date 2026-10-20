@@ -24,7 +24,15 @@ namespace OniBrutal.Assets.Compression
             if (d >= 9 * 5 * 5) throw new InvalidDataException("LZMA: bad properties.");
             int lc = d % 9, lp = d / 9 % 5, pb = d / 45;
             var decoder = new Lzma(lc, lp, pb);
-            decoder.Run(input.Slice(5), output);
+            try
+            {
+                decoder.Run(input.Slice(5), output);
+            }
+            // Anything past the checks above is a damaged stream too.
+            catch (Exception e) when (e is IndexOutOfRangeException or ArgumentException)
+            {
+                throw new InvalidDataException("LZMA: corrupt stream.", e);
+            }
         }
 
         readonly int lc, lp, pb;
@@ -211,6 +219,7 @@ namespace OniBrutal.Assets.Compression
                         {
                             // Short rep: one byte from rep0.
                             state = state < 7 ? 9 : 11;
+                            if (rep0 >= outPos) throw new InvalidDataException("LZMA: rep distance out of range.");
                             output[outPos] = output[outPos - (int)rep0 - 1];
                             outPos++;
                             continue;

@@ -9,6 +9,19 @@ namespace OniBrutal.Assets.Compression
         /// Decodes `source` into exactly `destination.Length` bytes.
         public static void Decode(ReadOnlySpan<byte> source, Span<byte> destination)
         {
+            try
+            {
+                DecodeChecked(source, destination);
+            }
+            // A sequence running past either end: a truncated or damaged block.
+            catch (Exception e) when (e is IndexOutOfRangeException or ArgumentException)
+            {
+                throw new InvalidDataException("LZ4: truncated or corrupt block.", e);
+            }
+        }
+
+        static void DecodeChecked(ReadOnlySpan<byte> source, Span<byte> destination)
+        {
             int src = 0, dst = 0;
             while (src < source.Length)
             {

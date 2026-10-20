@@ -58,7 +58,7 @@ across every core, and their pauses are about a quarter as long.
 <!-- TODO: frame-rate numbers depend on the U57 tweak set; re-check after the setup's defaults are chosen -->
 <!-- TODO: the 26 fps figure is with every tweak, the "changes gameplay" ones included; without any tweak it's 17–18.5 fps -->
 
-![The same late-game colony in the original player (about 8 fps) and in oni-brutal (about 36 fps), side by side](docs/media/side-by-side.webp)
+https://github.com/user-attachments/assets/a0fb45c5-121d-4ef9-8310-9d7b556aa089
 
 The same save, view and machine, recorded back to back; each side's frame rate was measured
 while it was recorded.

@@ -19,7 +19,9 @@
     <ProjectReference Include="../Unity.InternalAPIEngineBridge.004/Unity.InternalAPIEngineBridge.004.csproj" />
     <!-- Steamworks.NET built for CoreCLR; replaces the shipped copy (ARCHITECTURE §2.1). -->
     <ProjectReference Include="../ThirdParty/Steamworks.NET/Steamworks.NET.csproj" />
-    <ProjectReference Include="../../tools/FacadeGen/FacadeGen.csproj" ReferenceOutputAssembly="false" />
+    <!-- A build tool: built for the build machine, not for the player's runtime identifier, so
+         EmitFacades finds it in its plain output folder. -->
+    <ProjectReference Include="../../tools/FacadeGen/FacadeGen.csproj" ReferenceOutputAssembly="false" GlobalPropertiesToRemove="RuntimeIdentifier;SelfContained" />
     <!-- This project's replacements of Unity's UI packages (PLAN M9), next to the host in
          packages/; the game binds to them by name at run time (AssemblyPolicy). -->
     <ProjectReference Include="../UnityEngine.UI/UnityEngine.UI.csproj" ReferenceOutputAssembly="false" OutputItemType="UiPackage" />
@@ -62,6 +64,6 @@
   </Target>
   <!-- The UnityEngine.*Module facades the game binds to, next to the host in engine/. -->
   <Target Name="EmitFacades" AfterTargets="Build">
-    <Exec Command="dotnet &quot;$(ArtifactsPath)/bin/FacadeGen/$(Configuration.ToLowerInvariant())/FacadeGen.dll&quot; emit &quot;$(MSBuildThisFileDirectory)../Facades/unity-module-map.tsv&quot; &quot;$(OutDir)engine&quot; &quot;$(OutDir)OniBrutal.UnityEngine.dll&quot;" />
+    <Exec Command="&quot;$(DOTNET_HOST_PATH)&quot; &quot;$(ArtifactsPath)/bin/FacadeGen/$(Configuration.ToLowerInvariant())/FacadeGen.dll&quot; emit &quot;$(MSBuildThisFileDirectory)../Facades/unity-module-map.tsv&quot; &quot;$(OutDir)engine&quot; &quot;$(OutDir)OniBrutal.UnityEngine.dll&quot;" />
   </Target>
 </Project>

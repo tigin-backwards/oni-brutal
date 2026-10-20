@@ -54,7 +54,7 @@ else
     say "Building the player (a few minutes the first time)..."
     # Self-contained: it carries its own .NET runtime, so it runs where Steam starts it (a snap's
     # Steam can't see ~/.dotnet).
-    "$dotnet" build "$here/src/OniBrutal.Host" -c Release -r linux-x64 --self-contained true -p:OniGameDir="$game" -v q -nologo \
+    "$dotnet" build "$here/src/OniBrutal.Host" -c Release -r linux-x64 --self-contained true -p:OniGameDir="$game" -v q -nologo "-clp:ErrorsOnly;NoSummary" \
         || die "the build failed"
     player="$here/out/player"
     rm -rf "$player"

@@ -28,6 +28,21 @@ namespace TMPro
             return material;
         }
 
+        static readonly Dictionary<(int Source, int Atlas), Material> s_AtlasMaterials = new();
+
+        // A copy of a material drawing another atlas texture of the same font (a font asset
+        // with several atlases), shared by all texts.
+        public static Material ForAtlas(Material source, Texture atlas)
+        {
+            if (source == null) return null;
+            var key = (source.GetInstanceID(), atlas.GetInstanceID());
+            if (s_AtlasMaterials.TryGetValue(key, out var material) && material != null) return material;
+            material = new Material(source) { name = source.name };
+            material.SetTexture(ShaderUtilities.ID_MainTex, atlas);
+            s_AtlasMaterials[key] = material;
+            return material;
+        }
+
         static void Copy(Material from, Material to, int id)
         {
             if (from.HasProperty(id) && to.HasProperty(id)) to.SetFloat(id, from.GetFloat(id));

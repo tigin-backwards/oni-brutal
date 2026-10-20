@@ -179,6 +179,9 @@ namespace TMPro
             {
                 // The buffers exist (one spare quad); the renderers draw nothing.
                 EnsureBuffers();
+                // A material the text uses has its entry even when nothing is drawn (an
+                // ellipsis's, when the cut leaves nothing).
+                if (textInfo.meshInfo.Length < Parsed.Materials.Count) System.Array.Resize(ref textInfo.meshInfo, Parsed.Materials.Count);
                 m_GeneratedScale = CurrentScale();
                 ClearRenderedGeometry();
                 for (int i = 0; i < textInfo.meshInfo.Length; i++) textInfo.meshInfo[i].vertexCount = 0;

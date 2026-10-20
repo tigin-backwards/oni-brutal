@@ -233,7 +233,7 @@ namespace TMPro
             e.Element = character;
             e.Asset = asset;
             e.AlternateTypeface = alternate;
-            e.MaterialIndex = MaterialFor(asset, state, false);
+            e.MaterialIndex = MaterialFor(asset, state, false, AtlasOf(character));
         }
 
         static readonly Dictionary<int, TMP_Character> s_EmptyCharacters = new();
@@ -258,7 +258,7 @@ namespace TMPro
             e.Element = character;
             e.Asset = asset;
             e.AlternateTypeface = alternate;
-            e.MaterialIndex = MaterialFor(asset, state, false);
+            e.MaterialIndex = MaterialFor(asset, state, false, AtlasOf(character));
         }
 
         static uint ToUpper(uint u) => u < 0x10000 ? char.ToUpperInvariant((char)u) : u;
@@ -369,16 +369,24 @@ namespace TMPro
             return true;
         }
 
-        int MaterialFor(TMP_Asset asset, TextState state, bool sprite)
+        // The atlas a character's glyph is drawn from.
+        static int AtlasOf(TMP_TextElement character) => character?.glyph != null ? character.glyph.atlasIndex : 0;
+
+        int MaterialFor(TMP_Asset asset, TextState state, bool sprite, int atlas = 0)
         {
             Material material;
             if (sprite) material = asset.material;
             else if (state.Material != null && asset == state.Font) material = state.Material;
-            else if (asset == m_Text.font) return 0;
+            else if (asset == m_Text.font && atlas == 0) return 0;
+            else if (asset == m_Text.font) material = m_Text.fontSharedMaterial;
             else if (asset == state.Font) material = asset.material;
             // A fallback font draws with the text's material on its own atlas (match material
             // presets) or with its own material.
             else material = TMP_Settings.matchMaterialPreset ? FallbackMaterials.Get(m_Text.fontSharedMaterial, (TMP_FontAsset)asset) : asset.material;
+            // A glyph in a later atlas of its font draws with that material on its atlas, in a
+            // sub-mesh of its own (measured on the shipped package).
+            if (atlas > 0 && asset is TMP_FontAsset font && font.atlasTextures != null && atlas < font.atlasTextures.Length && font.atlasTextures[atlas] != null)
+                material = FallbackMaterials.ForAtlas(material, font.atlasTextures[atlas]);
             var slots = m_Out.Materials;
             for (int i = 0; i < slots.Count; i++)
                 if (slots[i].Material == material && slots[i].Asset == asset) return i;

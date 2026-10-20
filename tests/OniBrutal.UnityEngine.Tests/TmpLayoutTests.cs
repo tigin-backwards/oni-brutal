@@ -504,5 +504,106 @@ namespace OniBrutal.Tests
             Assert.Equal(b.origin + gm.horizontalAdvance * b.scale, info.lineInfo[0].maxAdvance, 3);
             Assert.Equal(b.origin + (gm.horizontalBearingX + gm.width) * b.scale - info.characterInfo[0].origin, info.lineInfo[0].length, 3);
         }
+
+        [Fact]
+        public void LinesMayBreakAfterHyphensAndSoftHyphens()
+        {
+            // At 14 pt "aaaa" is 30.23 wide and "aaaa-" 37.79 (measured on the shipped package).
+            static int[] Firsts(TextMeshProUGUI t) => t.textInfo.lineInfo.Take(t.textInfo.lineCount).Select(l => l.firstCharacterIndex).ToArray();
+            // After a hyphen-minus: "aa-bb" would fit the first line, but it breaks after "aa-".
+            Assert.Equal(new[] { 0, 3, 6 }, Firsts(Text("aa-bb-cc-dd", width: 38.79f, height: 200f)));
+            // "-bbb" would fit the second line; the break after the hyphen leaves it alone there.
+            Assert.Equal(new[] { 0, 4, 5 }, Firsts(Text("aaaa-bbbb", width: 30.73f, height: 200f)));
+            // Not after the hyphen U+2010 or the non-breaking hyphen U+2011: the word breaks
+            // between characters.
+            Assert.Equal(new[] { 0, 4, 8 }, Firsts(Text("aaaa‑bbbb", width: 30.73f, height: 200f)));
+            Assert.Equal(new[] { 0, 4, 8 }, Firsts(Text("aaaa‐bbbb", width: 30.73f, height: 200f)));
+
+            // A soft hyphen takes no room and is not drawn...
+            var t = Text("aaaa­bbbb", width: 1000f, height: 200f);
+            Assert.Equal(1, t.textInfo.lineCount);
+            Assert.False(t.textInfo.characterInfo[4].isVisible);
+            Assert.Equal(t.textInfo.characterInfo[4].origin, t.textInfo.characterInfo[5].origin, 4);
+            Assert.Equal(Text("aaaabbbb", width: 1000f).preferredWidth, t.preferredWidth, 3);
+            // ...except where a line breaks after it, when it fits there.
+            t = Text("aaaa­bbbb", width: 38.79f, height: 200f);
+            Assert.Equal(new[] { 0, 5 }, Firsts(t));
+            var shy = t.textInfo.characterInfo[4];
+            Assert.True(shy.isVisible);
+            Assert.Equal(3.472f, shy.xAdvance - shy.origin, 2);
+            t = Text("aaaa­bbbb", width: 30.73f, height: 200f);
+            Assert.Equal(new[] { 0, 5 }, Firsts(t));
+            Assert.False(t.textInfo.characterInfo[4].isVisible);
+        }
+
+        static TextMeshProUGUI Unwrapped(string text, float width, TextOverflowModes mode, float height = 200f)
+        {
+            var t = Text(text, width: width, height: height);
+            t.textWrappingMode = TextWrappingModes.NoWrap;
+            t.overflowMode = mode;
+            t.ForceMeshUpdate(true);
+            return t;
+        }
+
+        static string Shown(TMP_TextInfo info) => new(info.characterInfo.Take(info.characterCount).Where(c => c.isVisible).Select(c => c.character).ToArray());
+
+        [Fact]
+        public void WithoutWrappingTruncateAndEllipsisCutALineAtTheRectsWidth()
+        {
+            // "QUIT GAME" at 14 pt is 68.05 wide; in 65.05 its "E" passes the width (measured on
+            // the shipped package).
+            const float width = 65.05f;
+            var t = Unwrapped("QUIT GAME", width, TextOverflowModes.Truncate);
+            var info = t.textInfo;
+            // The characters that fit stay, then the blank record.
+            Assert.Equal(9, info.characterCount);
+            Assert.Equal(1, info.lineCount);
+            Assert.Equal("QUITGAM", Shown(info));
+            Assert.False(info.characterInfo[8].isVisible);
+            Assert.True(t.isTextTruncated);
+            // A cut at the width is not an overflow.
+            Assert.False(t.isTextOverflowing);
+            Assert.Equal(-1, t.firstOverflowCharacterIndex);
+
+            // Ellipsis: the last character that fit gives way to the ellipsis, drawn at the text
+            // font's scale (2.131 wide here, although its glyph comes from a fallback).
+            t = Unwrapped("QUIT GAME", width, TextOverflowModes.Ellipsis);
+            info = t.textInfo;
+            Assert.Equal(9, info.characterCount);
+            Assert.Equal("QUITGA…", Shown(info));
+            var ellipsis = info.characterInfo[7];
+            Assert.Equal('…', ellipsis.character);
+            Assert.Equal(16.557f, ellipsis.origin, 2);
+            Assert.Equal(2.131f, ellipsis.xAdvance - ellipsis.origin, 2);
+            Assert.False(info.characterInfo[8].isVisible);
+            Assert.False(t.isTextOverflowing);
+
+            // Lines above the cut keep their characters; the line cut ends the text.
+            t = Unwrapped("AB\nQUIT GAME LONGER", width, TextOverflowModes.Ellipsis);
+            info = t.textInfo;
+            Assert.Equal(2, info.lineCount);
+            Assert.Equal(12, info.characterCount);
+            Assert.Equal("ABQUITGA…", Shown(info));
+            t = Unwrapped("QUIT GAME LONGER\nAB", width, TextOverflowModes.Truncate);
+            info = t.textInfo;
+            Assert.Equal(1, info.lineCount);
+            Assert.Equal(9, info.characterCount);
+            Assert.Equal("QUITGAM", Shown(info));
+
+            // When even the first character does not fit, nothing is shown.
+            Assert.Equal(0, Unwrapped("QUIT GAME", 5f, TextOverflowModes.Truncate).textInfo.characterCount);
+            Assert.Equal(0, Unwrapped("QUIT GAME", 5f, TextOverflowModes.Ellipsis).textInfo.characterCount);
+            // On a later line Truncate leaves the blank record there; Ellipsis shows nothing.
+            t = Unwrapped("I\nQUIT", 5f, TextOverflowModes.Truncate);
+            Assert.Equal(2, t.textInfo.lineCount);
+            Assert.Equal("I", Shown(t.textInfo));
+            Assert.Equal(0, Unwrapped("I\nQUIT", 5f, TextOverflowModes.Ellipsis).textInfo.characterCount);
+            Assert.Equal("I…", Shown(Unwrapped("I\nQUIT", 10f, TextOverflowModes.Ellipsis).textInfo));
+
+            // Overflow draws the whole line, and does not report it either.
+            t = Unwrapped("QUIT GAME", width, TextOverflowModes.Overflow);
+            Assert.Equal("QUITGAME", Shown(t.textInfo));
+            Assert.False(t.isTextOverflowing);
+        }
     }
 }

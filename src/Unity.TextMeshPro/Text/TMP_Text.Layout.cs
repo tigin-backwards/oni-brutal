@@ -30,6 +30,9 @@ namespace TMPro
             public float KernY;          // glyph placement from kerning pairs (y)
             public float PointSize;
             public bool Visible, Whitespace, LineBreak, Bold, Italic, NoBreak, BreakAfter;
+            // A soft hyphen's advance: it takes no room, and is drawn only where a line breaks
+            // after it (0: not a soft hyphen).
+            public float SoftHyphen;
             // An empty record where truncation stopped (textInfo holds a blank character there).
             public bool Blank;
             public float LineHeightOverride;  // NaN: none
@@ -277,6 +280,9 @@ namespace TMPro
                 if (p.NoBreak) { p.BreakAfter = false; continue; }
                 uint c = parsed.Elements[p.Element].Unicode;
                 if ((p.Whitespace && c != 0xA0 && c != 0x202F && c != 0x2007) || c == 0x200B) { p.BreakAfter = true; continue; }
+                // A line may break after a hyphen-minus or a soft hyphen (not after the hyphen
+                // U+2010 or the non-breaking hyphen U+2011; measured on the shipped package).
+                if (c == 0x2D || c == 0xAD) { p.BreakAfter = true; continue; }
                 if (i + 1 >= count) continue;
                 uint next = parsed.Elements[pl[i + 1].Element].Unicode;
                 if ((IsCjk(c) || IsCjk(next)) && !pl[i + 1].NoBreak)
@@ -295,6 +301,10 @@ namespace TMPro
             int lineCount = 0;
             bool fits = true;
             int overflowIndex = -1;
+            // Without wrapping, Truncate and Ellipsis cut the text at the first visible character
+            // that passes its line's width.
+            bool cutWide = !wrap && (m_overflowMode == TextOverflowModes.Truncate || m_overflowMode == TextOverflowModes.Ellipsis);
+            int horizontalCut = -1;
             int start = 0;
             while (start < count || (lineCount == 0 && count == 0))
             {
@@ -345,12 +355,20 @@ namespace TMPro
                         if (lastBreak >= start)
                         {
                             end = lastBreak;
+                            // A soft hyphen where the line breaks is drawn when it fits.
+                            ref var last = ref pl[end];
+                            if (last.SoftHyphen > 0f && last.X + last.SoftHyphen <= lineWidth + 0.0001f)
+                            {
+                                last.Visible = true;
+                                last.GlyphAdvance = last.Advance = last.SoftHyphen;
+                            }
                             break;
                         }
                         end = i - 1;
                         if (m_FittingAutoSize) fits = false;
                         break;
                     }
+                    if (cutWide && horizontalCut < 0 && p.Visible && x + p.GlyphAdvance > lineWidth + 0.0001f) horizontalCut = i;
                     p.X = x;
                     x += p.Advance;
                     if (p.BreakAfter) lastBreak = i;
@@ -405,18 +423,21 @@ namespace TMPro
                 }
                 line.Page = pageIndex;
             }
+            // A line wider than the rect without wrapping does not fit (for auto-size), but it is
+            // not an overflow: isTextOverflowing stays false (measured on the shipped package).
             if (!wrap)
                 for (int k = 0; k < lineCount; k++)
-                    if (lines[k].Length > lines[k].Width + 0.0001f) { fits = false; if (overflowIndex < 0) overflowIndex = lines[k].First; }
+                    if (lines[k].Length > lines[k].Width + 0.0001f) fits = false;
             if (overflowIndex >= 0) fits = false;
             s_LineCount = lineCount;
             m_LayoutOverflowIndex = overflowIndex;
+            m_LayoutHorizontalCut = horizontalCut;
             m_LayoutCharacterCount = count;
             m_LayoutBaseSize = baseSize;
             return fits;
         }
 
-        int m_LayoutOverflowIndex = -1, m_LayoutCharacterCount;
+        int m_LayoutOverflowIndex = -1, m_LayoutHorizontalCut = -1, m_LayoutCharacterCount;
         float m_LayoutBaseSize;
 
         static bool IsCjk(uint c) =>
@@ -459,7 +480,8 @@ namespace TMPro
         static bool IsLineBreak(uint c) => c == 10 || c == 11 || c == 0x2028 || c == 0x2029;
 
         // The size, advance and glyph box of a character or sprite.
-        void Measure(ref ParsedElement el, ref Placement p, float baseSize, float width)
+        // metricsFont, when given, scales the glyph instead of its own font.
+        void Measure(ref ParsedElement el, ref Placement p, float baseSize, float width, TMP_FontAsset metricsFont = null)
         {
             p = default;
             var state = el.State;
@@ -469,7 +491,7 @@ namespace TMPro
             float size = fullSize * el.CaseScale;
             float shift = 0f;
             var font = el.Asset as TMP_FontAsset ?? state.Font ?? m_fontAsset;
-            var face = font.faceInfo;
+            var face = (metricsFont ?? font).faceInfo;
             float fontScale0 = size / face.pointSize * face.scale;
             if ((state.Style & FontStyles.Superscript) != 0)
             {
@@ -575,6 +597,12 @@ namespace TMPro
             if (float.IsNaN(preferredAdvance)) preferredAdvance = advance;
             p.PreferredGlyphAdvance = preferredAdvance;
             p.PreferredAdvance = preferredAdvance + spacing;
+            if (c == 0xAD && el.Kind == ElementKind.Character && p.Visible)
+            {
+                p.SoftHyphen = advance;
+                p.Visible = false;
+                p.GlyphAdvance = p.Advance = p.PreferredGlyphAdvance = p.PreferredAdvance = 0f;
+            }
         }
     }
 }

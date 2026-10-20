@@ -404,24 +404,111 @@ from what is described here, the measurement wins and this section is corrected.
    are kept, and for `Ellipsis` the last visible characters give way to "…" so it fits. Lines
    above it are not affected, and a single line is never removed entirely. Measure a one-line
    label slightly wider than its rect, and a two-line text whose second line is too wide.
+   *Measured* (14 pt GRAYSTROKE, "QUIT GAME", 68.05 wide, in a 65.05 rect; test
+   `WithoutWrappingTruncateAndEllipsisCutALineAtTheRectsWidth`):
+   - The cut is at the first visible character whose glyph advance passes the width ("E"):
+     Truncate keeps "QUIT GAM" and ends with the blank record (9 records, one line).
+   - Ellipsis replaces the last character that fit ("M") with "…": "QUIT GA…" and the blank
+     record. The ellipsis is drawn at the text font's scale even when its glyph comes from a
+     fallback (NotoNaskhArabic, 32 pt: scale 14/124, 2.131 wide, where a typed "…" from the same
+     fallback is 8.26). This holds for the vertical Ellipsis too.
+   - Lines above the cut are not affected; the cut line ends the text: in "QUIT GAME
+     LONGER\nAB" the second line is not shown.
+   - The correction above is wrong on one point: when even a line's first character does not
+     fit, the line is not kept. On the first line nothing is shown (0 characters, 0 lines) in
+     both modes; on a later line Truncate leaves the blank record alone on it, and Ellipsis
+     shows nothing at all.
+   - A cut at the width, and any line wider than the rect without wrapping (Overflow mode
+     too), is not an overflow: `isTextOverflowing` is false and `firstOverflowCharacterIndex`
+     -1; `isTextTruncated` is true.
+   - Not matched: on the cut line the shipped package counts the replaced character in
+     `visibleCharacterCount` besides the ellipsis, and its `length` includes the padding.
 2. **Several atlas textures.** A glyph's `atlasIndex` selects the texture it is drawn from. A
    font asset whose glyphs span several atlases (a dynamic font with multi-atlas support after
    its first atlas fills, or a shipped asset with `atlasIndex > 0` glyphs) draws each glyph from
    its own atlas: one sub-mesh per atlas, each with a material whose main texture is that atlas.
    Measure with a dynamic font asset small enough to fill its first atlas.
+   *Measured* (LiberationSans at 48 pt, padding 5, 64 × 64 atlases, multi-atlas on, "ABCDEF" at
+   20 pt; test `GlyphsInLaterAtlasesDrawFromTheirOwnAtlas`): each atlas holds one letter, so
+   the six letters open atlases 1–6. Every character whose glyph is in atlas k > 0 is drawn in
+   a sub-mesh whose material is a copy of the text's material with atlas k as its main
+   texture (`characterInfo.material` and `meshInfo[n].material` too): `materialCount` 7, the
+   text's own mesh empty, six sub-meshes of one quad. Glyphs in atlas 0 stay in the text's
+   own mesh. Also seen, not matched: the shipped package adds "…" (U+2026) and "_" (U+005F) to
+   a dynamic asset at its first layout, whatever the overflow mode, so they take the first
+   atlas (without multi-atlas, the letters then come from a fallback); its `atlasTextures`
+   array grows by doubling (8 entries for 7 atlases, the last null); and the asset's material
+   and textures are unnamed.
 3. **Rejected characters over a selection.** Typing a character that validation rejects
    (`characterValidation`, `contentType`, `onValidateInput`, a custom `inputValidator`)
    changes nothing: the selection stays selected and the text unchanged. Validation sees the
    text as it is before the selection is replaced. Measure in a field with Integer validation
    and its text selected, typing a letter.
+   *Measured* (test `ARejectedCharacterLeavesTheSelection`):
+   - Integer validation, "123" all selected, "x" typed: the text, the selection and
+     `onValueChanged` are untouched; likewise with "23" selected, with `contentType`
+     IntegerNumber, and when `onValidateInput` returns 0.
+   - The last sentence of the correction is wrong: validation sees the text **with the
+     selection removed**, at the position where the selection began. "-" typed over the
+     selected "-" of "-12" is accepted (it is at the start of "12"), giving "-12"; ".2"
+     selected in "1.2" with Decimal and "." typed gives "1."; `onValidateInput` is called with
+     ("a", 1) for "bc" selected in "abc", and with ("", 0) for all of it.
+   - A custom validator (`CustomValidator` with `inputValidator`) is the exception: the
+     selection is removed before it is called and stays removed when it rejects the
+     character ("BC" selected in "ABC", "x" rejected: "A", caret 1, without
+     `onValueChanged`).
+   - With validation None, `inputValidator` is not used; `characterLimit` counts the text
+     with the selection removed ("1234" all selected with a limit of 4 accepts "5").
+   - Ctrl+A puts the selection's anchor at the end and the caret at the start
+     (`selectionAnchorPosition` 3, `caretPosition` 0 for "123").
 4. **Line breaks after hyphens.** Measure whether a line may break after `-` (U+002D) and after
    a soft hyphen (U+00AD), whether the soft hyphen is drawn at a break and hidden elsewhere,
    and whether a non-breaking hyphen (U+2011) prevents a break; implement what is measured.
+   *Measured* (14 pt GRAYSTROKE, "aaaa" 30.23 wide, "aaaa-" 37.79; test
+   `LinesMayBreakAfterHyphensAndSoftHyphens`):
+   - A line may break after "-": "aa-bb-cc-dd" in 38.79 gives "aa-" / "bb-" / "cc-dd" (where
+     "aa-bb" would fit), and "aaaa-bbbb" in 30.73 gives "aaaa" / "-" / "bbbb".
+   - Not after the hyphen U+2010 or the non-breaking hyphen U+2011 (both from the fallback
+     here): "aaaa‑bbbb" in 30.73 breaks between characters, "aaaa" / "‑bbb" / "b".
+   - The soft hyphen U+00AD takes no room (the preferred width of "aaaa", U+00AD, "bbbb" is
+     that of "aaaabbbb", 60.46) and is not drawn, its corners at its origin. A line may break
+     after it; there it is drawn with its glyph's advance (3.472) when that fits the line
+     (38.79), and stays hidden when it does not (30.73), the break the same.
+   - Nor after the en and em dashes (U+2013, U+2014) or "/": those words break between
+     characters.
+   - Not matched: a line that ends where the text wraps (or is cut) has a `length` that
+     includes the material padding of its last character (0.141 here); a text's last line
+     does not.
 5. **Caret and selection with rich text.** The input field keeps string positions (in its
    text) and character indices (in the laid-out text) apart. Typed tags, escapes and surrogate
    pairs make them differ; the caret and the selection are drawn at the laid-out character for
    their string position, and moving up and down starts from that character. Measure a field
    with rich text on, after typing `a<b>c`, an escape, and an emoji.
+   *Measured* (test `TheCaretIsAtTheLaidOutCharacterOfItsStringPosition`):
+   - `caretPosition`, `selectionAnchorPosition` and `selectionFocusPosition` are character
+     indices; `stringPosition`, `selectionStringAnchorPosition` and
+     `selectionStringFocusPosition` string positions. "a<b>c" lays out as "a", "c" and the end
+     marker (source indices 0, 4, 5): at the end the caret is 2 and the string position 5.
+     A string position is at the first character whose source index is not before it.
+     Setting `caretPosition` to 1 sets the string position to 4 (that character's index).
+   - Left moves to the character before, at its source index: 5 → 4 → 0 (over the tag).
+     Right moves past the source of the caret's character: 0 → 1 (before the tag) → 5.
+     Shift+Left from the end: anchor 2 / 5, focus 1 / 4.
+   - A surrogate pair is one character of two positions: "a😀b" (the emoji drawn as the
+     missing glyph □) ends at caret 3, string position 4; Left gives 2 / 3, then 1 / 1. An
+     escape typed as "\" and "n" is parsed into a line feed, one character of two positions:
+     "a\nb" ends at 3 / 4 on the second line; Left gives 2 / 3, then 1 / 1.
+   - Up and down start from the caret's character: in the multi-line "ab<b>cd" + Enter +
+     "ef", Up from the end (7 / 10) goes to "c" (2 / 5), the nearest character above, and
+     Down back. Up on the first line goes to the start.
+   - The caret quad is `caretWidth` wide at its character's origin, from the ascender to the
+     descender of the character before it on the same line (its own at a line's start): after
+     "a" in "a😀b" it is as tall as "a", after "□" as the fallback's □. The selection runs
+     from its first character's origin to its last's advance.
+   - The text component is laid out when a key changes the text, so `textInfo` and the
+     character indices are current right after it.
+   - Not matched: setting `caretPosition` in code does not redraw the shipped package's
+     caret until the next change; this implementation redraws it at the next rebuild.
 
 ## Verification
 

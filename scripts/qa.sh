@@ -34,14 +34,14 @@ done
 # references (without running the scenarios again).
 if [ -n "$bless_from" ]; then
     status=0
+    [ -d "$bless_from/dogfood" ] || { echo "FAIL: no dogfood runs in $bless_from"; exit 1; }
     for d in "$bless_from"/dogfood/*/; do
         name=$(basename "$d"); r="$root/out/qa/reference/dogfood/$name"
-        rm -rf "$r"; mkdir -p "$r"
-        if cp "$d"/signatures.txt "$d"/f*.png "$r"/; then
-            rm -f "$r"/f*-diff.png; echo "blessed $name from $bless_from"
-        else
-            echo "FAIL: $name has no signatures or captures to bless"; status=1
+        if ! head -1 "$d/signatures.txt" 2>/dev/null | grep -qx 'exit 0' || ! ls "$d"/f*.png > /dev/null 2>&1; then
+            echo "FAIL: $name did not end cleanly or has no captures; not blessed"; status=1; continue
         fi
+        rm -rf "$r"; mkdir -p "$r"; cp "$d"/signatures.txt "$d"/f*.png "$r"/
+        rm -f "$r"/f*-diff.png "$r"/moving-*.png; echo "blessed $name from $bless_from"
     done
     exit $status
 fi
@@ -96,7 +96,9 @@ run_scenario() # NAME
     # Scenario settings: TOLERANCE (fraction of pixels a capture may differ: random Duplicants,
     # real-time animation), KEPT_MAX (multi-target framebuffers alive at the end: one per target
     # set whose textures are still referenced), REQUIRE (log lines the run must print).
-    SAVE=""; FRAMES=0; DUMPS=""; ARGS=(); TOLERANCE=0.03; DLC=0; KEPT_MAX=1; REQUIRE=()
+    # MOVING: captures that must each differ from the one before (a playing video; its content at
+    # a given frame follows its audio clock, so it is not compared with a reference).
+    SAVE=""; FRAMES=0; DUMPS=""; ARGS=(); TOLERANCE=0.03; DLC=0; KEPT_MAX=1; REQUIRE=(); MOVING=""
     source "$file"
     # DLC=1: the scenario needs the DLC content and a DLC-owning Steam double (qa.env).
     local gamedir="$game" runner=("$root/scripts/run-offline.sh")
@@ -128,15 +130,26 @@ run_scenario() # NAME
     { echo "exit $status"; python3 "$tools" signatures "$out/stdout.txt"; } > "$out/signatures.txt"
     local rdir="$ref/dogfood/$name"
     if [ $bless -eq 1 ]; then
+        [ $status -eq 0 ] || { fail "dogfood $name: the player exited $status; not blessed"; return; }
+        local f; for f in $DUMPS; do [ -f "$out/f$f.png" ] || { fail "dogfood $name: no capture f$f; not blessed"; return; }; done
         rm -rf "$rdir"; mkdir -p "$rdir"; cp "$out/signatures.txt" "$rdir/"
-        for f in $DUMPS; do cp "$out/f$f.png" "$rdir/" || fail "dogfood $name: no capture f$f to bless"; done
+        for f in $DUMPS; do cp "$out/f$f.png" "$rdir/"; done
         ok "dogfood $name: blessed ($(($(wc -l < "$out/signatures.txt") - 1)) signatures)"; return
     fi
     if [ ! -d "$rdir" ]; then fail "dogfood $name: no reference (run with --bless after checking $out)"; return; fi
     local new; new=$(comm -13 <(sort "$rdir/signatures.txt") <(sort "$out/signatures.txt"))
     if [ -n "$new" ]; then fail "dogfood $name: new log signatures:"; echo "$new" | sed 's/^/       /' | tee -a "$run/summary.txt"; fi
     local worst=0 bad=""
+    local previous=""
+    for f in $MOVING; do
+        if [ -n "$previous" ]; then
+            local m; m=$(python3 "$tools" image "$out/f$previous.png" "$out/f$f.png" "$out/moving-$f.png" | cut -d' ' -f1)
+            awk -v m="${m:-0}" 'BEGIN { exit !(m > 0.1) }' || fail "dogfood $name: f$f hardly differs from f$previous (${m:-?}): the video is not playing"
+        fi
+        previous=$f
+    done
     for f in $DUMPS; do
+        case " $MOVING " in *" $f "*) continue ;; esac
         if [ ! -f "$out/f$f.png" ]; then bad="$bad f$f(missing)"; continue; fi
         local r; r=$(python3 "$tools" image "$rdir/f$f.png" "$out/f$f.png" "$out/f$f-diff.png" | cut -d' ' -f1)
         [ -n "$r" ] || r=1.0000 # an unreadable capture or reference is a difference
@@ -243,10 +256,14 @@ stage_perf()
     local peak; peak=$(cat "$out/peak-rss")
     if [ "$peak" -lt $((16 * 1024 * 1024)) ]; then ok "perf: peak memory $((peak / 1024)) MB"; else fail "perf: peak memory $((peak / 1024)) MB (16 GB limit)"; fi
     read -r fps span windows <<< "$(python3 "$tools" perf "$out/stdout.txt")"
+    local status; status=$(cat "$out/exit")
     local kept; kept=$(grep -aoE '[0-9]+ kept' "$out/stdout.txt" | tail -1 | cut -d' ' -f1)
     if [ "${kept:-0}" -le 1 ]; then ok "perf: multi-target framebuffers kept ${kept:-0}"; else fail "perf: $kept multi-target framebuffers kept"; fi
     awk -v f="${fps:-0}" 'BEGIN { exit !(f > 0) }' || { fail "perf: no frame rate measured"; return; }
-    if [ $bless -eq 1 ]; then echo "$fps" > "$ref/perf-baseline"; ok "perf: $fps fps blessed as the baseline"; return; fi
+    if [ $bless -eq 1 ]; then
+        [ "$status" = 0 ] && [ "$peak" -lt $((16 * 1024 * 1024)) ] || { fail "perf: a failed run is not a baseline"; return; }
+        echo "$fps" > "$ref/perf-baseline"; ok "perf: $fps fps blessed as the baseline"; return
+    fi
     [ -f "$ref/perf-baseline" ] || { fail "perf: no baseline (run with --bless after checking $out)"; return; }
     local base; base=$(cat "$ref/perf-baseline")
     if awk -v f="$fps" -v b="$base" 'BEGIN { exit !(f >= b * 0.85) }'; then ok "perf: $fps fps over $windows windows (baseline $base)"; else fail "perf: $fps fps, below the baseline $base less 15%"; fi

@@ -563,6 +563,17 @@ Final review pass (four fresh reviewers over the changes since 810508b):
   record alone on its line having no height): edge cases of Flush alignment and fallback fonts
   the game's texts were not seen to reach.
 
+- Round 6 (after those fixes): nothing new. The intro's capture at one frame showed the clip's
+  red alarm lighting at a different moment (its timing follows its audio clock), so the video
+  captures are now checked for motion (each must differ from the one before) instead of against
+  a reference. Verify 835 game seconds with zero mismatches, 27.6 fps, peak 14.4 GB.
+- Review of that delta: nothing high or medium. Lows fixed: the node bounds check cannot
+  overflow; a failed run is never blessed (dogfood, perf baseline, --bless-from), and a
+  partial bless keeps the previous reference.
+
+Rounds 5 and 6 found nothing new and the last review pass found nothing high or medium: the QA
+stop condition holds (2026-10-20).
+
 References (captures, signatures, the frame-rate baseline) live in `out/qa/reference`, made with
 `--bless` once a run's captures and logs have been looked at; they hold game imagery and stay
 local. The U57 stages need content that cannot be published (DLC files, a DLC-owning Steam

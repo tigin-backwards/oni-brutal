@@ -4,5 +4,5 @@
 DLC=1
 FRAMES=900
 DUMPS="300 450 600 880"
-TOLERANCE=0.5
+MOVING="300 450 600" # each a different moment of the video (its timing follows its audio clock)
 ARGS=(--input 800:click:948,75)

@@ -97,7 +97,7 @@ namespace OniBrutal.Assets.Files
                 outPos += b.uncompressed;
             }
             foreach (var n in nodes)
-                if (n.Offset < 0 || n.Size < 0 || n.Offset + n.Size > data.Length)
+                if (n.Offset < 0 || n.Size < 0 || n.Offset > data.Length || n.Size > data.Length - n.Offset)
                     throw new InvalidDataException($"UnityFS: node {n.Path} runs past the archive's data.");
             return new UnityFsArchive(revision, nodes, data);
         }

@@ -493,6 +493,8 @@ Fixes come with a regression test that fails before them. Status: **fixed** (com
 | Q2 | screen (QA round 1) | Screen.resolutions on a virtual display lacked the twelve standard modes under 720 lines that the original lists (measured, PerfProbe measure.txt). | fixed (DisplayModeTests) |
 | Q3 | GL (QA round 1) | A resize in a base-game colony does recreate the world's multi-target textures (no exception there): the cache keeps one framebuffer at the end, the old one deleted with its textures, and the driver was seen reusing a freed texture name for a new target (the collision G1 prevents). | checked (dogfood resize) |
 | Q4 | destroyed render textures (QA round 1) | A destroyed render texture releases its device resource (traced, as the game's RenderTextureDestroyer destroys the old MRT targets two frames later). | checked (CameraTargetTests) |
+| Q5 | video (QA round 2) | The Spaced Out intro short held its first frames for about 14 s: it starts seconds behind its audio clock (loading a 1080p clip, the menu's first frames), every decoded frame was then late and the worker converted none until it caught up (this managed VP8 decoder runs 1080p at about 45 fps). The original plays it at once. Now a late frame is converted every fourth one, so the picture moves while catching up, as dropping playback does. | fixed (VideoTests; dogfood intro) |
+| Q6 | host (QA round 2) | The host carries its own copy of the engine assembly: scripts/build-engine.sh alone does not reach the player. The harness builds engine, packages, host and probe before every stage. | fixed (qa.sh) |
 
 ## QA harness (`scripts/qa.sh`)
 

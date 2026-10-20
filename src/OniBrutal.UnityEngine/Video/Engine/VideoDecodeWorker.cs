@@ -76,6 +76,9 @@ namespace OniBrutal.Engine.Video
     internal sealed class VideoDecodeWorker : IDisposable
     {
         const int Capacity = 3;
+        /// Late frames in a row after which one is converted anyway.
+        const int MaxLateRun = 4;
+        int lateRun;
 
         readonly Func<VideoStream> load;
         readonly Thread thread;
@@ -244,7 +247,15 @@ namespace OniBrutal.Engine.Video
                     lock (gate)
                     {
                         if (myGeneration != generation) continue;
-                        if (wrap < skipWrap || (wrap == skipWrap && index < skipIndex)) continue;
+                        // A frame already late is not converted, unless the worker has been
+                        // behind for MaxLateRun frames: catching up (a long movie starting
+                        // seconds behind its clock) it still delivers every few frames, so the
+                        // picture moves, as Unity's dropping playback does.
+                        if (wrap < skipWrap || (wrap == skipWrap && index < skipIndex))
+                        {
+                            if (++lateRun < MaxLateRun) continue;
+                        }
+                        lateRun = 0;
                         while (!disposed && myGeneration == generation && pool.Count == 0 && buffersCreated >= Capacity)
                             Monitor.Wait(gate);
                         if (disposed) return;

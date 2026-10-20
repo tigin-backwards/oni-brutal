@@ -72,6 +72,37 @@ namespace OniBrutal.Tests
         }
 
         [Fact]
+        public void ADecoderBehindTheClockStillDeliversFrames()
+        {
+            // A 1080p intro behind its audio clock (seconds of loading) is decoded faster than
+            // real time but every frame is late until it catches up: the picture must still move,
+            // as Unity's dropping playback does, not hold its first frame.
+            var clip = AllClips().OrderBy(c => c.frameCount).First();
+            var native = (VideoClipNative)clip.Native;
+            var worker = new VideoDecodeWorker(() => VideoStream.FromWebm(native.ReadMovie()), clip.name, looping: false);
+            try
+            {
+                worker.Start(0);
+                worker.SkipBefore(0, int.MaxValue); // every frame is late
+                var indices = new List<int>();
+                var watch = Stopwatch.StartNew();
+                while (watch.Elapsed.TotalSeconds < 20 && indices.Count < 3)
+                {
+                    var f = worker.Dequeue();
+                    if (f == null) { Thread.Sleep(2); continue; }
+                    indices.Add(f.Index);
+                    worker.Recycle(f);
+                }
+                Assert.True(indices.Count >= 3, $"{indices.Count} frames while every frame was late");
+                Assert.True(indices[1] > indices[0] && indices[2] > indices[1]);
+            }
+            finally
+            {
+                worker.Dispose();
+            }
+        }
+
+        [Fact]
         public unsafe void ConversionFollowsVideoDecodeAndFlipsRows()
         {
             // 2×2 grey picture (one neutral chroma sample): top row Y 16 and Y 235, bottom row

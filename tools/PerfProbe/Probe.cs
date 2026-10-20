@@ -175,6 +175,19 @@ namespace PerfProbe
                 for (int i = 0; i < 60; i++) yield return null;
                 yield return Measure();
             }
+            // `menuresize.txt` "W H": at the main menu the window goes to W×H and 120 frames later
+            // the screen is captured (menuresized.png), the same in either player.
+            var menuResize = System.IO.Path.Combine(Path, "menuresize.txt");
+            if (System.IO.File.Exists(menuResize))
+            {
+                var size = System.Array.ConvertAll(System.IO.File.ReadAllText(menuResize).Split(new[] { ' ', '\n' }, System.StringSplitOptions.RemoveEmptyEntries), int.Parse);
+                while (MainMenu.Instance == null) yield return null;
+                for (int i = 0; i < 120; i++) yield return null;
+                Screen.SetResolution(size[0], size[1], FullScreenMode.Windowed);
+                for (int i = 0; i < (size.Length > 2 ? size[2] : 120); i++) yield return null;
+                ScreenCapture.CaptureScreenshot(System.IO.Path.Combine(Path, "menuresized.png"));
+                for (int i = 0; i < 10; i++) yield return null;
+            }
             // `load.txt` in the mod's folder names a save (full path) to load from the main menu,
             // as the load screen does: for loading a given save in either player.
             var load = System.IO.Path.Combine(Path, "load.txt");

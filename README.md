@@ -46,9 +46,9 @@ On a late-game save (U57: Spaced Out with every DLC, cycle 17,000+), on the same
 |---|---|---|---|
 | Frame rate at speed&nbsp;3 | 6.5–6.8&nbsp;fps | about 26&nbsp;fps | about 4× |
 | Loading the save | 3&nbsp;min&nbsp;50&nbsp;s | 26–28&nbsp;s | about 8.5× faster |
-| Autosave freeze | <!-- TODO: measure the original --> | 4.8&nbsp;s | <!-- TODO --> |
+| Autosave freeze | about 48&nbsp;s | about 3&nbsp;s | about 16× shorter |
 
-The autosave freeze is 11.7 s without the save tweaks; with them, compressing and writing the
+The autosave freeze is about 9 s without the save tweaks; with them, compressing and writing the
 save move off the main thread.
 
 Garbage-collection hitches are mostly gone: collections now run in the background, spread

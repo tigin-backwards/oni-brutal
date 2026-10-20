@@ -23,7 +23,8 @@ build by about ±10% between runs, so comparisons are always back to back or alt
 | Frame rate, every tweak | | 25–27&nbsp;fps (mean 26) | about 3.9× |
 | Frame rate in the autosave window | 4.1&nbsp;fps | 11.7&nbsp;fps | about 2.9× |
 | Loading the save | 3&nbsp;min&nbsp;50&nbsp;s | 26–28&nbsp;s | about 8.5× faster |
-| Autosave freeze, with the save tweaks (11.7&nbsp;s without) | <!-- TODO: measure --> | 4.8&nbsp;s | |
+| Autosave freeze, no tweaks | 47–50&nbsp;s | 9–10&nbsp;s | about 5× shorter |
+| Autosave freeze, `exact` tweaks (the default) | | 2.7–3.1&nbsp;s | about 16× shorter |
 
 With no tweaks it's the same game code doing the same work, so that row is the engine and
 runtime alone: about 2.7 times the original's frame rate.
@@ -31,6 +32,10 @@ runtime alone: about 2.7 times the original's frame rate.
 On Windows, before any tweaks existed, U57 went from about 8.5 fps to 17–18. A smaller base-game
 colony (DeCrew) went from 17–20 fps to 48–56. At that point it was simulating nearly as fast as speed 3
 allows, so the frame rate was no longer what held it back.
+
+The autosave rows time the game's own autosave (what it runs at a cycle's end), three times in a
+row, as the frames it stalls: the longest frame, the save's main-thread pause. The first one in
+each player is slower (6–10 s in ours, as code warms up) and is left out of the ranges.
 
 ## Why the engine alone is faster
 

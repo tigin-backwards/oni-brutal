@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 
@@ -7,7 +8,7 @@ namespace OniBrutal.Host
     /// The BRUTAL License (§2.2) asks for BRUTAL's logo, unaltered except for scaling, to be shown
     /// before gameplay and no less prominently than other parties' logos; its maintainers note a
     /// main menu placement meets that. The logo (ahwootech/brutal-branding) is drawn on the game's
-    /// main menu, about the size of the menu's Klei banner, with a caption. Only while the main
+    /// main menu as one more of its news tiles, their size, with a caption. Only while the main
     /// menu is up; nothing in the game is changed.
     internal sealed class BrutalCredit : MonoBehaviour
     {
@@ -17,6 +18,7 @@ namespace OniBrutal.Host
         Texture2D logo = null!;
         GUIStyle? headerStyle, captionStyle;
         Func<object?> mainMenu = () => null;
+        Func<object?> videoScreen = () => null;
 
         public static void Install()
         {
@@ -36,34 +38,83 @@ namespace OniBrutal.Host
             // The game's MainMenu.Instance, read without referencing the game's assembly.
             var instance = Type.GetType("MainMenu, Assembly-CSharp")?.GetProperty("Instance", BindingFlags.Public | BindingFlags.Static);
             mainMenu = instance == null ? () => null : () => instance.GetValue(null);
+            // VideoScreen.Instance: the intros and cutscenes play over the menu.
+            var video = Type.GetType("VideoScreen, Assembly-CSharp")?.GetField("Instance", BindingFlags.Public | BindingFlags.Static);
+            videoScreen = video == null ? () => null : () => video.GetValue(null);
+        }
+
+        Transform? motd;
+
+        /// The screen rects (GUI space, from the top left) of the main menu's news tiles, the
+        /// children of its "MOTD" row or column.
+        List<Rect> NewsTiles(MonoBehaviour menu)
+        {
+            var tiles = new List<Rect>();
+            if (motd == null) motd = Find(menu.transform, "MOTD");
+            if (motd == null) return tiles;
+            var corners = new Vector3[4];
+            foreach (Transform child in motd)
+            {
+                if (!child.gameObject.activeInHierarchy || child is not RectTransform rect) continue;
+                rect.GetWorldCorners(corners);
+                // Overlay canvases: world space is screen pixels from the bottom left.
+                tiles.Add(new Rect(corners[0].x, Screen.height - corners[1].y, corners[2].x - corners[0].x, corners[1].y - corners[0].y));
+            }
+            return tiles;
+        }
+
+        static Transform? Find(Transform t, string name)
+        {
+            if (t.name == name) return t;
+            foreach (Transform child in t)
+                if (Find(child, name) is { } found) return found;
+            return null;
         }
 
         void OnGUI()
         {
             if (Event.current.type != EventType.Repaint || mainMenu() is not MonoBehaviour menu || menu == null || !menu.isActiveAndEnabled) return;
-            // A tile like the menu's news tiles ("It's Klei Fest!", "Out Now!"), as wide as they are,
-            // in the free strip of cave art between them and the game's title.
-            float unit = Screen.height / 768f;
-            float width = 250f * unit, pad = 8f * unit;
+            if (videoScreen() is MonoBehaviour video && video != null && video.isActiveAndEnabled) return;
+            // One more tile beside the menu's news tiles ("It's Klei Fest!", "Out Now!"), their size:
+            // left of the row they form on a wide screen, right of the first of the column they
+            // form on a narrow one.
+            var tiles = NewsTiles(menu);
+            if (tiles.Count == 0 || tiles[0].width < 1f) return;
+            bool row = tiles.Count > 1 && Mathf.Abs(tiles[1].x - tiles[0].x) > Mathf.Abs(tiles[1].y - tiles[0].y);
+            float gap = 8f * Screen.height / 1440f;
+            Rect tile;
+            if (row)
+            {
+                var first = tiles[0];
+                foreach (var t in tiles) if (t.x < first.x) first = t;
+                tile = new Rect(first.x - first.width - gap, first.y, first.width, first.height);
+            }
+            else
+            {
+                var first = tiles[0];
+                foreach (var t in tiles) if (t.y < first.y) first = t;
+                tile = new Rect(first.xMax + gap, first.y, first.width, first.height);
+            }
+            float unit = tile.width / 300f;
+            float pad = 8f * unit;
             headerStyle ??= new GUIStyle(GUI.skin.label) { alignment = TextAnchor.MiddleCenter, fontStyle = FontStyle.Bold };
             captionStyle ??= new GUIStyle(GUI.skin.label) { wordWrap = true, alignment = TextAnchor.UpperCenter };
-            headerStyle.fontSize = Mathf.RoundToInt(15f * unit);
+            headerStyle.fontSize = Mathf.Max(9, Mathf.RoundToInt(15f * unit));
             headerStyle.normal.textColor = new Color(0.94f, 0.47f, 0.47f);
-            captionStyle.fontSize = Mathf.RoundToInt(11f * unit);
+            captionStyle.fontSize = Mathf.Max(8, Mathf.RoundToInt(12f * unit));
             captionStyle.normal.textColor = new Color(0.9f, 0.9f, 0.92f);
-            float inner = width - 2f * pad;
+            float inner = tile.width - 2f * pad;
             float headerHeight = 24f * unit;
             float logoHeight = inner * logo.height / logo.width;
-            float captionHeight = captionStyle.CalcHeight(new GUIContent(Caption), inner);
-            var tile = new Rect(Screen.width * 0.5f - width * 0.5f - 60f * unit, 20f * unit, width, headerHeight + logoHeight + captionHeight + 4f * pad);
             var tint = GUI.color;
             GUI.color = new Color(0.17f, 0.19f, 0.26f, 0.92f);
             GUI.DrawTexture(tile, Texture2D.whiteTexture);
             GUI.color = tint;
-            GUI.Label(new Rect(tile.x, tile.y + pad * 0.5f, width, headerHeight), "Legally Required!", headerStyle);
+            GUI.Label(new Rect(tile.x, tile.y + pad * 0.5f, tile.width, headerHeight), "Legally Required!", headerStyle);
             float y = tile.y + headerHeight + pad;
             GUI.DrawTexture(new Rect(tile.x + pad, y, inner, logoHeight), logo, ScaleMode.ScaleToFit);
-            GUI.Label(new Rect(tile.x + pad, y + logoHeight + pad, inner, captionHeight), Caption, captionStyle);
+            y += logoHeight + pad;
+            GUI.Label(new Rect(tile.x + pad, y, inner, tile.yMax - y - pad * 0.5f), Caption, captionStyle);
         }
     }
 }

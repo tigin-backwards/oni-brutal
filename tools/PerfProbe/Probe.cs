@@ -13,9 +13,55 @@ namespace PerfProbe
         public override void OnLoad(HarmonyLib.Harmony harmony)
         {
             Worldgen.Install(harmony, path);
+            if (System.IO.File.Exists(System.IO.Path.Combine(path, "layout.txt"))) LayoutTrace.Install(harmony);
             var keeper = new GameObject("PerfProbe");
             Object.DontDestroyOnLoad(keeper);
             keeper.AddComponent<Runner>().Path = path;
+        }
+    }
+
+    /// `layout.txt`: the main menu's message-of-the-day row, traced: the dimension changes its
+    /// tiles receive, the layout rebuilds asked for under it, and its layout passes, each with
+    /// the frame (the order of events, compared between the players).
+    static class LayoutTrace
+    {
+        static int lines;
+        static bool UnderMotd(Transform t)
+        {
+            for (; t != null; t = t.parent) if (t.name == "MOTD") return true;
+            return false;
+        }
+        static void Log(string text) { if (lines++ < 400) Debug.Log($"PERF layout f{Time.frameCount} {text}"); }
+
+        public static void Install(HarmonyLib.Harmony harmony)
+        {
+            var element = HarmonyLib.AccessTools.Method("MotdBox_ImageButtonLayoutElement:OnRectTransformDimensionsChange");
+            harmony.Patch(element, postfix: new HarmonyLib.HarmonyMethod(typeof(LayoutTrace), nameof(Dimensions)));
+            var mark = typeof(UnityEngine.UI.LayoutRebuilder).GetMethod("MarkLayoutForRebuild", new[] { typeof(RectTransform) });
+            harmony.Patch(mark, prefix: new HarmonyLib.HarmonyMethod(typeof(LayoutTrace), nameof(Mark)));
+            var calc = typeof(UnityEngine.UI.HorizontalLayoutGroup).GetMethod("SetLayoutHorizontal");
+            harmony.Patch(calc, postfix: new HarmonyLib.HarmonyMethod(typeof(LayoutTrace), nameof(Horizontal)));
+            var registry = typeof(UnityEngine.UI.CanvasUpdateRegistry).GetMethod("IsRebuildingLayout");
+            Debug.Log($"PERF layout tracing installed (IsRebuildingLayout {(registry != null ? "present" : "absent")})");
+        }
+
+        static void Dimensions(Component __instance)
+        {
+            var rt = (RectTransform)__instance.transform;
+            var le = (UnityEngine.UI.LayoutElement)__instance;
+            Log($"tile {__instance.transform.parent?.name} size {rt.rect.size} preferredWidth {le.preferredWidth} active {__instance.gameObject.activeInHierarchy} rebuilding {UnityEngine.UI.CanvasUpdateRegistry.IsRebuildingLayout()}");
+        }
+
+        static void Mark(RectTransform rect)
+        {
+            if (rect != null && UnderMotd(rect)) Log($"mark {rect.name} rebuilding {UnityEngine.UI.CanvasUpdateRegistry.IsRebuildingLayout()}");
+        }
+
+        static void Horizontal(Component __instance)
+        {
+            if (__instance.name != "MOTD") return;
+            var g = (UnityEngine.UI.HorizontalLayoutGroup)__instance;
+            Log($"MOTD row laid out: preferredWidth {g.preferredWidth}, first child at {((RectTransform)__instance.transform.GetChild(0)).anchoredPosition}");
         }
     }
 

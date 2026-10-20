@@ -4,7 +4,7 @@ A super fast, super sussy replacement for the Unity layer of Oxygen Not Included
 crafted by Claude.
 
 I did this mostly for fun, to see how far Oxygen Not Included's performance can go on a modern
-.NET runtime (CoreCLR). I'd had the idea for a while, but none of the existing C# renderers
+.NET runtime (CoreCLR). I've had the idea for a while, but none of the existing C# renderers
 sparked joy. When [BRUTAL](https://github.com/ahwootech/BRUTAL) went open source, it seemed like
 a good excuse to try a sexy new toy.
 
@@ -54,8 +54,10 @@ across every core, and their pauses are about a quarter as long.
 <!-- TODO: frame-rate numbers depend on the U57 tweak set; re-check after the setup's defaults are chosen -->
 <!-- TODO: the 26 fps figure is with every tweak, the "changes gameplay" ones included; without any tweak it's 17–18.5 fps -->
 
-
 <!-- TODO: before/after gameplay video showing the frame rate -->
+
+Where the frame time goes, and what each change bought:
+[docs/PERFORMANCE.md](docs/PERFORMANCE.md).
 
 ### Optional tweaks
 

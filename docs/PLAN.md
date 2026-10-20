@@ -444,6 +444,50 @@ serializing the colony on the main thread, which reads live state, and the colon
 read-back). Not tweaked: the per-item sim systems (Sublimates, ranching, transitions…), which
 together make up most of a large colony's frame but are each at most a few percent.
 
+## Defect review (2026-10-20)
+
+A read-only review of every area of our code, one reviewer per area. Each reviewer gave a
+failure scenario per finding, and each finding was checked against the code before acting on it.
+Fixes come with a regression test that fails before them. Status: **fixed** (commit),
+**open** (to do), or **left** (with the reason).
+
+| ID | Area | Finding | Status |
+|---|---|---|---|
+| A1 | input | A release and a new press of a held key in one frame lost the press (key read as up while held); edges were applied presses-first from two sets. Now applied in order. | fixed |
+| A2 | time | Time.time, unscaledTime and fixedTime were float running sums: several percent off after a few hours, and the fixed-step loop never ends past 2^19 s (a hang). Now double, read as float, as Unity keeps them. | fixed |
+| A3 | web requests | A file:// request whose path the runtime rejects stayed in progress forever. | fixed |
+| A4 | runtime | Float-to-int conversion of NaN or out-of-range values saturates on CoreCLR (Mono gives int.MinValue); the game's own casts differ too (Grid.PosToCell of a NaN position gives a valid cell). | left: a runtime difference in the game's own IL, no NaN source found in play |
+| L2 | hierarchy | No OnTransformChildrenChanged for Instantiate under a parent or a destroyed child; layout groups miss those child-list changes. | open |
+| G1 | GL | The multiple-render-target framebuffer cache is never cleared: after a resize the world's MRT pass (MultipleRenderTargetProxy recreates its targets) renders into deleted textures, or leaks them. | open |
+| G3 | GL | Integer render-texture formats are specified with a float pixel format (GL_INVALID_OPERATION). | open |
+| G4 | GL | Cube and multisample samplers are given 2D textures. | open |
+| G5 | GL | ivec2/ivec3/uvec4 loose uniforms use the wrong glUniform call; uint block members are written as float bits. | open |
+| G6 | GL | The multisample resolve blit is clipped by an active scissor. | open |
+| G7 | GL | A null colour target after the first in a multi-target binding throws. | open |
+| R1 | rendering | Pixel memory of textures reclaimed by UnloadUnusedAssets (without Destroy) is never freed. | open |
+| R2 | rendering | A property block's SetTexture also supplies an identity _ST that overrides the material's tiling and offset. | open |
+| R3 | rendering | Shader Integer properties: the shader default in Floats shadows the material's saved int and SetInteger. | open |
+| R4 | rendering | A camera with SetTargetBuffers takes its size from the screen, not its buffers. | open |
+| R5 | rendering | A RenderTextureDescriptor with useMipMap and mipCount -1 gets one level. | open |
+| C1 | canvas | A graphic with no geometry (Klei's NonDrawingGraphic, the outfit panel's row hit areas) gets no depth, so it is never raycast. | open: measure Unity first |
+| C2 | canvas | Graphics under a CanvasGroup at alpha 0 get no depth, so they are never raycast (Unity still raycasts them unless blocksRaycasts is off). | open: measure Unity first |
+| T1 | TextMeshPro | With wrapping off, a line wider than the rect makes Ellipsis/Truncate text disappear. | open |
+| T2 | TextMeshPro | Glyphs in a second or later atlas texture are drawn from the first. | open |
+| T3 | TextMeshPro | Typing a rejected character over a selection deletes the selection. | open |
+| T4 | TextMeshPro | Hyphens are not line-break points. | open: measure the shipped package first |
+| T5 | TextMeshPro | The input field uses string positions as character indices (caret off after a typed tag or escape). | open |
+| S1 | assets | A corrupt or truncated bundle throws out of AssetBundle.LoadFromFile instead of returning null. | open |
+| S2 | assets | A failed load leaves a half-built object cached. | open |
+| S3 | assets | Reloading a bundle after Unload(false) reuses instance IDs of live objects. | left: the game only unloads with true |
+| S4 | assets | Reloading a scene reuses surviving level objects. | open: check reach |
+| S5 | assets | TextAsset.text decodes UTF-32 LE as UTF-16. | open |
+| S6 | assets | Concurrent first reads of a resource file can map it twice (one view leaked). | open |
+| H1 | fast-anim-events | The loop reads the entry count once; the game re-reads it, so an entry an event adds during the loop (a Duplicant's mouth animation started by a speech event) runs one frame behind. Breaks exactness. | open |
+| H2 | off-screen-conveyors | An item kept off screen keeps its stale position when the conduit is emptied or deconstructed (it drops there); handles of items taken off the rail stay in the skipped set. | open |
+| H3 | fast-particle-collision | Destroyed radbolts stay in the live list unless a gather runs; the list grows. | open |
+| H4 | fast-sublimation | Watched items of a previous colony stay referenced after loading another save. | open |
+| H5 | background-save | A save is header-only on disk until the background write ends; a crash in that window loses it. | open |
+
 ## Open items
 
 Known behaviours not reproduced, all confirmed unreachable by the game (M6):

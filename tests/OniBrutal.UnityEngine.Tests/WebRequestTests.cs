@@ -128,6 +128,16 @@ namespace OniBrutal.Tests
         }
 
         [Fact]
+        public void FileRequestThatCannotBeReadStillCompletes()
+        {
+            // A path the runtime rejects outright (a NUL character) fails the request; it does
+            // not leave it in progress.
+            var request = UnityWebRequest.Get("file:///tmp/oni%00brutal");
+            Pump(request.SendWebRequest());
+            Assert.Equal(UnityWebRequest.Result.ConnectionError, request.result);
+        }
+
+        [Fact]
         public void RefusedConnection()
         {
             var request = UnityWebRequest.Get($"http://127.0.0.1:{FreePort()}/");

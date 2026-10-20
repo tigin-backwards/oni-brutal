@@ -341,7 +341,9 @@ namespace OniBrutal.Engine
             {
                 bytes = File.ReadAllBytes(uri.LocalPath);
             }
-            catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+            // Any path the file cannot be read from (missing, unreadable, or one the runtime
+            // rejects, such as one with a NUL character).
+            catch (Exception)
             {
                 Finish(UnityWebRequest.Result.ConnectionError, WebRequestError.CannotConnectToHost);
                 return;

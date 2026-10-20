@@ -14,8 +14,8 @@ namespace OniBrutal.Engine.Platform
         readonly HashSet<KeyCode> held = new();
         readonly HashSet<KeyCode> downThisFrame = new();
         readonly HashSet<KeyCode> upThisFrame = new();
-        readonly HashSet<KeyCode> pendingDown = new();
-        readonly HashSet<KeyCode> pendingUp = new();
+        /// Key edges since the previous frame, in the order they happened (true: pressed).
+        readonly List<(KeyCode Key, bool Down)> pending = new();
         Vector2 mousePosition, previousMousePosition, pendingScroll;
         public Vector2 MouseDelta { get; private set; }
         public Vector2 ScrollDelta { get; private set; }
@@ -41,15 +41,9 @@ namespace OniBrutal.Engine.Platform
 
         // ---- Platform side ----
 
-        public void KeyPressed(KeyCode key)
-        {
-            pendingDown.Add(key);
-        }
+        public void KeyPressed(KeyCode key) => pending.Add((key, true));
 
-        public void KeyReleased(KeyCode key)
-        {
-            pendingUp.Add(key);
-        }
+        public void KeyReleased(KeyCode key) => pending.Add((key, false));
 
         /// Bottom-left origin, in pixels.
         public void MouseMoved(Vector2 position) => mousePosition = position;
@@ -60,16 +54,13 @@ namespace OniBrutal.Engine.Platform
         {
             downThisFrame.Clear();
             upThisFrame.Clear();
-            foreach (var k in pendingDown)
+            // In order: a release and a new press of a held key in one frame report both edges
+            // and leave it held.
+            foreach (var (k, down) in pending)
             {
-                if (held.Add(k)) downThisFrame.Add(k);
+                if (down ? held.Add(k) : held.Remove(k)) (down ? downThisFrame : upThisFrame).Add(k);
             }
-            foreach (var k in pendingUp)
-            {
-                if (held.Remove(k) || pendingDown.Contains(k)) upThisFrame.Add(k);
-            }
-            pendingDown.Clear();
-            pendingUp.Clear();
+            pending.Clear();
             MouseDelta = mousePosition - previousMousePosition;
             previousMousePosition = mousePosition;
             ScrollDelta = pendingScroll;

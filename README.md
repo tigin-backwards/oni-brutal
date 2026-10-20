@@ -34,6 +34,10 @@ Steam as usual.
 Then press Play in Steam as usual. To update, get the new version and run the setup again; the
 launch options stay the same. To go back to the original game, clear the launch options.
 
+On Linux, Steam installed as a Flatpak or a snap runs games in a sandbox that can't see most of
+your home folder; the setup notices and installs the player inside the sandbox's own folder.
+(Snap is tested; Flatpak isn't yet.)
+
 You'll need an OpenGL 4.5 graphics driver. The game uses your normal Steam account, DLCs, saves,
 settings and mods.
 
@@ -145,7 +149,7 @@ Saves are `.sav` files in a folder named after the colony, under:
   `save_files/`)
 
 With Steam installed as a snap on Linux, both folders are under `~/snap/steam/common/` instead
-of `~`.
+of `~`. With Flatpak Steam, `~/.config/` becomes `~/.var/app/com.valvesoftware.Steam/config/`.
 
 ## License
 

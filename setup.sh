@@ -65,6 +65,30 @@ else
     rm -f "$player"/FacadeGen*
 fi
 
+# Steam in a sandbox runs the game where only some of the home folder can be read: a Flatpak
+# Steam sees its own ~/.var/app folder, a snap Steam no hidden folders. The player is installed
+# into the sandbox's own folder then (ONI_STEAM_SANDBOX=flatpak|snap|none overrides the guess
+# made from where the game is installed).
+sandbox="${ONI_STEAM_SANDBOX:-}"
+if [ -z "$sandbox" ]; then
+    case "$game" in
+        "$HOME/.var/app/com.valvesoftware.Steam/"*) sandbox=flatpak ;;
+        "$HOME/snap/steam/"*) sandbox=snap ;;
+        *) sandbox=none ;;
+    esac
+fi
+case "$sandbox" in
+    flatpak) inside="$HOME/.var/app/com.valvesoftware.Steam/data/oni-brutal/player" ;;
+    snap) inside="$HOME/snap/steam/common/oni-brutal/player" ;;
+    *) inside="" ;;
+esac
+if [ -n "$inside" ]; then
+    rm -rf "$inside"; mkdir -p "$(dirname "$inside")"
+    cp -r "$player" "$inside"
+    player="$inside"
+    say "Steam runs as a $sandbox here: the player is installed where it can see it ($player)."
+fi
+
 launch="\"$player/OniBrutal\" --game-tweak exact -- %command%"
 # On the clipboard where a clipboard tool exists: copied from a terminal, a long line can pick
 # up its wrapping.

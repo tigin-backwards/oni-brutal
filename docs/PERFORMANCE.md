@@ -151,7 +151,7 @@ Measured ideas that didn't pay off, so nobody needs to try them again:
 
 ## What's left
 
-The rest is real game work. The biggest per-object costs are animation updates, cell-change
+The biggest per-object costs are animation updates, cell-change
 handlers, brains, conduits, power and critter temperature, at 1–3 ms each. It's spread thin, and
 the time goes to cache misses chasing object references, not to computation.
 
@@ -159,7 +159,7 @@ I measured how much flat arrays would help over reading the game's objects. Subl
 decision dropped from about 400 ns to about 5 ns per item, and a pickupable scan from about
 160 ns to about 1 ns. Rewriting the per-item systems that way could save up to about 10 ms of a
 70 ms frame. But mods and the UI write the same game state, so it would mean rewriting the game's
-systems rather than tweaking them, and I haven't done it.
+systems rather than tweaking them.
 
 ## Loading
 

@@ -95,8 +95,8 @@ original game (including ones written with the `fast-save-compression` tweak).
 ## Mod compatibility
 
 Most mods should work, since the game's code and its Harmony load as shipped. I've tested my own
-set of 14 mods. Mods that call parts of Unity the game itself
-never uses can still hit gaps; if one breaks, file an issue with your log.
+set of 14 mods. Mods that call parts of Unity the game itself never uses can still hit gaps; if
+one breaks, file an issue with your log.
 
 ## Could Klei do this?
 

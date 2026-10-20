@@ -394,6 +394,14 @@ unchanged.
   1.45 → about 1.0 ms a frame. A skip still reads the item's transform and temperature
   component, which is what remains.
 
+- `fast-anim-events`: AnimEventManager's per-frame loop over every playing animation (about 6,450
+  in U57) reads each controller for whether it is destroyed, its frame index (current animation,
+  play mode) and play speed. The tweak runs the same loop in the same order with the same
+  arithmetic, taking those inputs from a mirror per entry, refreshed when the entry's controller
+  changes or the controller is flagged by any method that changes them (StartQueuedAnim, Queue,
+  the PlayMode setter, SwapAnims, OnDestroy). 18 million entries verified with ONI_TWEAK_VERIFY
+  (mirror against controller, 0 stale); the loop 2.07 → 0.90 ms a frame.
+
 - `fast-anim-cleanup`: KBatchedAnimUpdater sweeps 16 chunks of its controller grid each frame for
   destroyed controllers, reading every controller there; the tweak keeps the ids of controllers
   destroyed in the last full round of the sweep and sweeps a chunk only when its dictionary still

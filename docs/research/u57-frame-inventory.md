@@ -161,6 +161,10 @@ Columns: ms per frame (main thread), count of the objects involved where known, 
   that change those without marking dirty and rely on frame changes (conveyor loader arms,
   eggs, leaks). And no gain even unchecked: batch uploads 2.05 → 1.98 ms, while the per-change
   lookup raised animation updates from 2.34 to 3.10 ms.
+- **Animation events, controller inputs mirrored: 2.07 → 0.90 ms.** Done (`fast-anim-events`,
+  docs/PLAN.md). The loop's own entries are compact structs; the cost was reading each
+  controller. A flat mirror of the three inputs, refreshed by the methods that change them,
+  leaves only the entries.
 - **Animation grid cleanup: 0.48 → 0.12 ms.** Done (`fast-anim-cleanup`, docs/PLAN.md).
 - **Canvas walk, renderer-free subtrees: not worth it.** Only about 7% of its visits are in
   subtrees without any CanvasRenderer.

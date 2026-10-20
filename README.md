@@ -153,7 +153,7 @@ of `~`. With Flatpak Steam, `~/.config/` becomes `~/.var/app/com.valvesoftware.S
 
 ## License
 
-<!-- TODO -->
+All rights reserved.
 
 Built on [BRUTAL](https://github.com/ahwootech/BRUTAL), Copyright (c) 2024 Ahwoo Limited.
 Oxygen Not Included is © Klei Entertainment; this project isn't affiliated with Klei or Unity.

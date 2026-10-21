@@ -227,9 +227,13 @@ past the boot checkpoint needs a Steam client logged in with an account that own
   answers a load of another file with the assembly already loaded under that simple name,
   whatever the versions (`mono_domain_assembly_search` compares names ignoring version, key and
   case). CoreCLR refuses the second version, and KMod then drops the whole mod (a mod shipping its
-  own copy of a library another mod loaded first). **Resolved in** `ModAccess.LoadFrom`: such a
-  file is given the loaded assembly, and the substitution is logged; `--check-types` loads two
-  versions of an emitted assembly.
+  own copy of a library another mod loaded first). Mono's binding of a reference to such an
+  assembly searches the same way, so a mod built against PLib 4.22 runs with an older PLib another
+  mod loaded; CoreCLR fails the reference ("manifest definition does not match"). **Resolved in**
+  `ModAccess`: such a file is given the loaded assembly (`LoadFrom`), and a reference CoreCLR cannot
+  bind is given the assembly loaded under its simple name (the default context's Resolving event);
+  each substitution is logged. `--check-types` loads two versions of an emitted assembly and binds a
+  third that references the second.
 - **D16 Exceptions nothing catches on other threads.** They end a CoreCLR process; Unity's
   player keeps running (measured with PerfProbe in the original: a thread's exception is logged,
   by UnityEngine's AppDomain.UnhandledException handler calling Debug.LogException; a thread-pool
@@ -263,6 +267,16 @@ past the boot checkpoint needs a Steam client logged in with an account that own
   class that has the recompiled method's handle (instantiations sharing code share their method
   handle). `--check-types` patches an emitted generic class's method for one argument and calls
   it for another past tier-up.
+- **D19 Patch methods' frames.** Harmony calls a mod's prefixes, postfixes and finalizers from
+  the replacement it builds for the patched method, a dynamic method owned by 0Harmony. CoreCLR's
+  JIT inlines a small patch method into it, so what the patch method calls sees 0Harmony as its
+  caller (`Assembly.GetCallingAssembly()`): Traffic Visualizer's SquareLib looks for its icons in
+  0Harmony's folder, and the game stopped loading. On Mono the patch method keeps its frame (the
+  mod works in the original player). **Resolved in** `PatchFrames`: before Harmony builds a
+  replacement, each patch method of a mod is marked not to be inlined (MonoMod's
+  `TryDisableInlining`, which Harmony applies to the patched method itself); this project's own
+  patches are left as they were. `--check-types` calls `GetCallingAssembly` from a helper an
+  emitted mod's postfix calls.
 
 ## 3. The engine API (`OniBrutal.UnityEngine`)
 

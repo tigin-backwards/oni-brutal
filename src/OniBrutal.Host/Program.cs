@@ -57,6 +57,7 @@ namespace OniBrutal.Host
             TranspiledTryEntries.Install();
             UnboxedMethods.Install();
             SharedGenerics.Install();
+            PatchFrames.Install();
             MonoEnumFormat.Install();
             GameTweaks.GameTweaks.Install(options.GameTweaks);
             StateMachineSaveNames.Install(dataDir, AppContext.BaseDirectory);
@@ -221,6 +222,40 @@ namespace OniBrutal.Host
                 }
                 return missed == 0 ? "every call ran the patch" : throw new InvalidOperationException($"{missed} calls ran the original");
             });
+            Check("GetCallingAssembly in a helper a Harmony postfix calls (PatchFrames)", () =>
+            {
+                PatchFrames.Install();
+                // Assembly A: the patched method. B: a helper returning GetCallingAssembly(). C: the
+                // mod, whose postfix calls the helper and keeps what it returned.
+                System.Reflection.Emit.ModuleBuilder Module(string name) => System.Reflection.Emit.AssemblyBuilder.DefineDynamicAssembly(new AssemblyName(name), System.Reflection.Emit.AssemblyBuilderAccess.Run).DefineDynamicModule(name);
+                var a = Module("CheckTarget").DefineType("Target", TypeAttributes.Public | TypeAttributes.Abstract | TypeAttributes.Sealed);
+                var run = a.DefineMethod("Run", MethodAttributes.Public | MethodAttributes.Static, typeof(int), [typeof(int)]);
+                var il = run.GetILGenerator();
+                il.Emit(System.Reflection.Emit.OpCodes.Ldarg_0); il.Emit(System.Reflection.Emit.OpCodes.Ldc_I4_1); il.Emit(System.Reflection.Emit.OpCodes.Add); il.Emit(System.Reflection.Emit.OpCodes.Ret);
+                var target = a.CreateType();
+                var b = Module("CheckHelper").DefineType("Helper", TypeAttributes.Public | TypeAttributes.Abstract | TypeAttributes.Sealed);
+                var who = b.DefineMethod("Who", MethodAttributes.Public | MethodAttributes.Static, typeof(Assembly), Type.EmptyTypes);
+                il = who.GetILGenerator();
+                il.Emit(System.Reflection.Emit.OpCodes.Call, typeof(Assembly).GetMethod(nameof(Assembly.GetCallingAssembly))!); il.Emit(System.Reflection.Emit.OpCodes.Ret);
+                var helper = b.CreateType();
+                var cModule = Module("CheckMod");
+                var c = cModule.DefineType("Mod", TypeAttributes.Public | TypeAttributes.Abstract | TypeAttributes.Sealed);
+                var seen = c.DefineField("Seen", typeof(Assembly), FieldAttributes.Public | FieldAttributes.Static);
+                var postfix = c.DefineMethod("Postfix", MethodAttributes.Public | MethodAttributes.Static, typeof(void), Type.EmptyTypes);
+                il = postfix.GetILGenerator();
+                il.Emit(System.Reflection.Emit.OpCodes.Call, helper.GetMethod("Who")!); il.Emit(System.Reflection.Emit.OpCodes.Stsfld, seen); il.Emit(System.Reflection.Emit.OpCodes.Ret);
+                var mod = c.CreateType();
+                new HarmonyLib.Harmony("OniBrutal.Host.Check").Patch(target.GetMethod("Run"), postfix: new HarmonyLib.HarmonyMethod(mod.GetMethod("Postfix")));
+                var results = new HashSet<string>();
+                var runMethod = target.GetMethod("Run")!;
+                for (int round = 0; round < 60; round++)
+                {
+                    for (int i = 0; i < 200; i++) runMethod.Invoke(null, [i]);
+                    results.Add(((Assembly)mod.GetField("Seen")!.GetValue(null)!).GetName().Name!);
+                    System.Threading.Thread.Sleep(20);
+                }
+                return results.Count == 1 && results.Contains("CheckMod") ? "the postfix's assembly calls, as in Mono" : throw new InvalidOperationException($"the caller was {string.Join(", ", results)}");
+            });
             Check("Exceptions nothing catches on other threads (UnhandledExceptions)", () =>
             {
                 UnhandledExceptions.Install();
@@ -244,15 +279,19 @@ namespace OniBrutal.Host
                 }
                 return raised == 1 ? "the process goes on; the thread's raised UnhandledException, the pool's did not" : throw new InvalidOperationException($"UnhandledException raised {raised} times");
             });
-            Check("A mod's copy of a library another version of which is loaded (ModAccess)", () =>
+            Check("A mod's copy of a library, and references to it, when another version is loaded (ModAccess)", () =>
             {
+                ModAccess.Install();
                 var dir = Directory.CreateTempSubdirectory("oni-brutal-check-").FullName;
                 try
                 {
+                    Type? marker2 = null;
                     string Emit(string version)
                     {
                         var builder = new System.Reflection.Emit.PersistedAssemblyBuilder(new AssemblyName("OniBrutalCheckLibrary") { Version = new Version(version) }, typeof(object).Assembly);
-                        builder.DefineDynamicModule("OniBrutalCheckLibrary").DefineType("Marker", TypeAttributes.Public).CreateType();
+                        var marker = builder.DefineDynamicModule("OniBrutalCheckLibrary").DefineType("Marker", TypeAttributes.Public);
+                        marker.CreateType();
+                        if (version == "2.0.0.0") marker2 = marker;
                         var path = Path.Combine(dir, version, "OniBrutalCheckLibrary.dll");
                         Directory.CreateDirectory(Path.GetDirectoryName(path)!);
                         builder.Save(path);
@@ -260,7 +299,21 @@ namespace OniBrutal.Host
                     }
                     var first = ModAccess.LoadFrom(Emit("1.0.0.0"));
                     var second = ModAccess.LoadFrom(Emit("2.0.0.0"));
-                    return ReferenceEquals(first, second) ? "the loaded version stands in, as in Mono" : throw new InvalidOperationException("two versions loaded");
+                    if (!ReferenceEquals(first, second)) throw new InvalidOperationException("two versions loaded");
+                    // A mod built against version 2, with its copy beside it, while version 1 is the
+                    // one loaded: its reference binds to version 1.
+                    var user = new System.Reflection.Emit.PersistedAssemblyBuilder(new AssemblyName("OniBrutalCheckUser"), typeof(object).Assembly);
+                    var use = user.DefineDynamicModule("OniBrutalCheckUser").DefineType("Use", TypeAttributes.Public | TypeAttributes.Abstract | TypeAttributes.Sealed);
+                    var get = use.DefineMethod("Get", MethodAttributes.Public | MethodAttributes.Static, typeof(Type), Type.EmptyTypes);
+                    var il = get.GetILGenerator();
+                    il.Emit(System.Reflection.Emit.OpCodes.Ldtoken, marker2!);
+                    il.Emit(System.Reflection.Emit.OpCodes.Call, typeof(Type).GetMethod(nameof(Type.GetTypeFromHandle))!);
+                    il.Emit(System.Reflection.Emit.OpCodes.Ret);
+                    use.CreateType();
+                    var userPath = Path.Combine(dir, "2.0.0.0", "OniBrutalCheckUser.dll");
+                    user.Save(userPath);
+                    var bound = (Type)Assembly.LoadFrom(userPath).GetType("Use")!.GetMethod("Get")!.Invoke(null, null)!;
+                    return ReferenceEquals(bound.Assembly, first) ? "the loaded version stands in for files and references, as in Mono" : throw new InvalidOperationException($"the reference bound to {bound.Assembly.GetName().Version}");
                 }
                 finally
                 {

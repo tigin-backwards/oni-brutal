@@ -36,8 +36,12 @@ namespace OniBrutal.Host
         static readonly ConcurrentDictionary<string, Assembly> byPath = new(StringComparer.OrdinalIgnoreCase);
         static readonly List<string> directories = new();
 
+        static bool installed;
+
         public static void Install()
         {
+            if (installed) return;
+            installed = true;
             var harmony = new Harmony("OniBrutal.Host.ModAccess");
             var loadDlls = AccessTools.Method("KMod.DLLLoader:LoadDLLs")
                 ?? throw new MissingMethodException("KMod.DLLLoader", "LoadDLLs");
@@ -105,20 +109,33 @@ namespace OniBrutal.Host
             {
                 return null;
             }
-            if (name.GetPublicKeyToken() is { Length: > 0 }) return null;
+            if (name.GetPublicKeyToken() is { Length: > 0 } || Loaded(name.Name) is not { } assembly) return null;
+            if (assembly.GetName().Version != name.Version)
+                EngineLog.Engine($"mod access: {path} is {name.Name} {name.Version}; {assembly.GetName().Version}, already loaded, stands in for it (as in Mono)");
+            return assembly;
+        }
+
+        /// The assembly loaded in the default context under this simple name (compared ignoring
+        /// case, as Mono compares), or null.
+        static Assembly? Loaded(string? simpleName)
+        {
             foreach (var assembly in AssemblyLoadContext.Default.Assemblies)
-            {
-                if (assembly.IsDynamic || !string.Equals(assembly.GetName().Name, name.Name, StringComparison.OrdinalIgnoreCase)) continue;
-                if (assembly.GetName().Version != name.Version)
-                    EngineLog.Engine($"mod access: {path} is {name.Name} {name.Version}; {assembly.GetName().Version}, already loaded, stands in for it (as in Mono)");
-                return assembly;
-            }
+                if (!assembly.IsDynamic && string.Equals(assembly.GetName().Name, simpleName, StringComparison.OrdinalIgnoreCase)) return assembly;
             return null;
         }
 
-        /// The folders of rewritten mods are searched as Assembly.LoadFrom's would be.
+        /// A reference CoreCLR could not bind: one to an assembly without a strong name binds, as in
+        /// Mono, to the assembly loaded under its simple name whatever their versions (a mod built
+        /// against PLib 4.22 when another mod's older PLib is the one loaded); then the folders of
+        /// rewritten mods are searched as Assembly.LoadFrom's would be.
         static Assembly? Resolve(AssemblyLoadContext context, AssemblyName name)
         {
+            if (name.GetPublicKeyToken() is not { Length: > 0 } && Loaded(name.Name) is { } loaded)
+            {
+                if (loaded.GetName().Version != name.Version)
+                    EngineLog.Engine($"mod access: a reference to {name.Name} {name.Version} binds to {loaded.GetName().Version}, already loaded (as in Mono)");
+                return loaded;
+            }
             string[] dirs;
             lock (directories) dirs = directories.ToArray();
             foreach (var dir in dirs)

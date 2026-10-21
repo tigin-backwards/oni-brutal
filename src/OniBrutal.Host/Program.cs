@@ -59,6 +59,7 @@ namespace OniBrutal.Host
             SharedGenerics.Install();
             PatchFrames.Install();
             PInvokePatches.Install();
+            PatchDependents.Install();
             MonoEnumFormat.Install();
             GameTweaks.GameTweaks.Install(options.GameTweaks);
             StateMachineSaveNames.Install(dataDir, AppContext.BaseDirectory);
@@ -269,6 +270,30 @@ namespace OniBrutal.Host
                 int pid = OperatingSystem.IsLinux() ? OtherExport() : Environment.ProcessId;
                 return skipped == 1000 && pid == Environment.ProcessId ? "the prefix runs; other P/Invokes bind as before" : throw new InvalidOperationException($"skipped {skipped}, getpid {pid}");
             });
+            Check("A Harmony prefix on a method an earlier patch's replacement calls (PatchDependents)", () =>
+            {
+                PatchDependents.Install();
+                // B: a small static method; A calls it. A is patched first (its replacement is compiled
+                // optimized), then B gets a prefix, as True Tiles patches GetConnectionBits and then
+                // MatchesDef.
+                var module = System.Reflection.Emit.AssemblyBuilder.DefineDynamicAssembly(new AssemblyName("OniBrutal.Host.LaterCheck"),
+                    System.Reflection.Emit.AssemblyBuilderAccess.Run).DefineDynamicModule("LaterCheck");
+                var type = module.DefineType("Later", TypeAttributes.Public | TypeAttributes.Abstract | TypeAttributes.Sealed);
+                var b = type.DefineMethod("B", MethodAttributes.Public | MethodAttributes.Static, typeof(int), [typeof(int)]);
+                var il = b.GetILGenerator();
+                il.Emit(System.Reflection.Emit.OpCodes.Ldarg_0); il.Emit(System.Reflection.Emit.OpCodes.Ldc_I4_2); il.Emit(System.Reflection.Emit.OpCodes.Mul); il.Emit(System.Reflection.Emit.OpCodes.Ret);
+                var a = type.DefineMethod("A", MethodAttributes.Public | MethodAttributes.Static, typeof(int), [typeof(int)]);
+                il = a.GetILGenerator();
+                il.Emit(System.Reflection.Emit.OpCodes.Ldarg_0); il.Emit(System.Reflection.Emit.OpCodes.Call, b); il.Emit(System.Reflection.Emit.OpCodes.Ldc_I4_1); il.Emit(System.Reflection.Emit.OpCodes.Add); il.Emit(System.Reflection.Emit.OpCodes.Ret);
+                var later = type.CreateType();
+                var harmony = new HarmonyLib.Harmony("OniBrutal.Host.Check");
+                harmony.Patch(later.GetMethod("A"), postfix: new HarmonyLib.HarmonyMethod(typeof(Program), nameof(CountA)));
+                harmony.Patch(later.GetMethod("B"), prefix: new HarmonyLib.HarmonyMethod(typeof(Program), nameof(CountB)));
+                var run = later.GetMethod("A")!;
+                int before = prefixedB;
+                for (int i = 0; i < 100; i++) run.Invoke(null, [i]);
+                return prefixedB - before == 100 ? "the later prefix runs from the earlier replacement" : throw new InvalidOperationException($"B's prefix ran {prefixedB - before} of 100 calls");
+            });
             Check("Exceptions nothing catches on other threads (UnhandledExceptions)", () =>
             {
                 UnhandledExceptions.Install();
@@ -410,6 +435,10 @@ namespace OniBrutal.Host
             public T? last;
             public T Draw(T item) { last = item; return item; }
         }
+
+        static int prefixedB, countedA;
+        static void CountA() => countedA++;
+        static void CountB() => prefixedB++;
 
         static int drawn;
         static void CountDraw() => drawn++;

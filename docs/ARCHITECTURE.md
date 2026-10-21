@@ -286,6 +286,16 @@ past the boot checkpoint needs a Steam client logged in with an account that own
   `PInvokePatches`: a missing export or library does not fail the preparation of a P/Invoke; the
   detour goes on the method's own entry, other P/Invokes bind as before, and calling the original
   still fails as on Mono. `--check-types` patches a P/Invoke to a missing export.
+- **D21 Patches of methods an earlier replacement calls.** Harmony compiles a patched method's
+  replacement fully optimized, and CoreCLR's JIT inlines small methods it calls; a method patched
+  later is marked not to be inlined from then on, but a replacement compiled before keeps its old
+  body inlined and the later patch never runs there (True Tiles patches
+  `BlockTileRenderer.GetConnectionBits`, then `MatchesDef`, which it calls: no tile connected to its
+  neighbours). On Mono the later patch takes effect (the mod works in the original player).
+  **Resolved in** `PatchDependents`: the methods each replacement calls are recorded from the
+  instructions Harmony builds it from (`CodeTranspiler.GetResult`), and the first time a method is
+  patched, the replacements already made that call it are rebuilt, as Harmony rebuilds one when a
+  patch is added. `--check-types` patches a caller, then a method it calls, and calls the caller.
 
 ## 3. The engine API (`OniBrutal.UnityEngine`)
 

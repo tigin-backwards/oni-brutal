@@ -76,21 +76,46 @@ namespace OniBrutal.Host
             if (__result.Length == 0 && locations.TryGetValue(__instance, out var path)) __result = path;
         }
 
-        /// A mod's assembly, rewritten when it reaches into the game's non-public members.
+        /// A mod's assembly, rewritten when it reaches into the game's non-public members, and with
+        /// its static readonly fields writable as Mono's are.
         internal static Assembly LoadFrom(string path)
         {
             path = Path.GetFullPath(path);
             if (byPath.TryGetValue(path, out var loaded)) return loaded;
             if (AlreadyLoaded(path) is { } existing) return existing;
             var reason = Unreachable(path);
-            if (reason == null) return Assembly.LoadFrom(path);
-            var image = AddIgnoresAccessChecks(path, out var symbols);
-            var assembly = AssemblyLoadContext.Default.LoadFromStream(new MemoryStream(image), symbols == null ? null : new MemoryStream(symbols));
+            byte[]? image, symbols = null;
+            if (reason != null)
+            {
+                image = AddIgnoresAccessChecks(path, out symbols);
+                // Its static readonly fields stay writable, as the game's are (MonoFieldSemantics).
+                MonoFieldSemantics.Adjust(image, path);
+                EngineLog.Engine($"mod access: {Path.GetFileName(path)} uses the game's non-public {reason}; loaded with access checks to the game's assemblies off");
+            }
+            else
+            {
+                // Mono lets reflection write a mod's static readonly fields too: the game's
+                // LocString.CreateLocStringKeys writes back every LocString field of a mod's strings
+                // class (PLib's PLocalization.Register), which mods often declare static readonly.
+                image = MonoFieldSemantics.Adjust(path);
+                if (image == null) return Assembly.LoadFrom(path);
+                var pdb = Path.ChangeExtension(path, ".pdb");
+                if (File.Exists(pdb)) symbols = File.ReadAllBytes(pdb);
+            }
+            Assembly assembly;
+            try
+            {
+                assembly = AssemblyLoadContext.Default.LoadFromStream(new MemoryStream(image), symbols == null ? null : new MemoryStream(symbols));
+            }
+            catch (BadImageFormatException) when (symbols != null)
+            {
+                // Symbols the runtime cannot read (a Windows PDB): the assembly loads without them.
+                assembly = AssemblyLoadContext.Default.LoadFromStream(new MemoryStream(image));
+            }
             locations[assembly] = path;
             byPath[path] = assembly;
             lock (directories)
                 if (!directories.Contains(Path.GetDirectoryName(path)!)) directories.Add(Path.GetDirectoryName(path)!);
-            EngineLog.Engine($"mod access: {Path.GetFileName(path)} uses the game's non-public {reason}; loaded with access checks to the game's assemblies off");
             return assembly;
         }
 

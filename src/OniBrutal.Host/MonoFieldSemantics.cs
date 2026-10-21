@@ -25,9 +25,11 @@ namespace OniBrutal.Host
         const ushort Literal = (ushort)FieldAttributes.Literal;
 
         /// The image with static fields made writable, or null when it has none to change.
-        public static byte[]? Adjust(string path)
+        public static byte[]? Adjust(string path) => Adjust(File.ReadAllBytes(path), path);
+
+        /// The same for an image in memory (changed in place), named by `path` in errors.
+        public static byte[]? Adjust(byte[] image, string path)
         {
-            var image = File.ReadAllBytes(path);
             int changed = 0;
             using (var pe = new PEReader(new MemoryStream(image, writable: false)))
             {

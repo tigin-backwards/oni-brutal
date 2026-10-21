@@ -58,6 +58,7 @@ namespace OniBrutal.Host
             UnboxedMethods.Install();
             SharedGenerics.Install();
             PatchFrames.Install();
+            PInvokePatches.Install();
             MonoEnumFormat.Install();
             GameTweaks.GameTweaks.Install(options.GameTweaks);
             StateMachineSaveNames.Install(dataDir, AppContext.BaseDirectory);
@@ -131,6 +132,8 @@ namespace OniBrutal.Host
                 return string.Join(",", (List<string>)copy!);
             });
             Check("Code page IBM437 (Ionic.Zip)", () => Encoding.GetEncoding("IBM437").EncodingName);
+            Check("System.Configuration's settings classes (mods' generated Properties.Settings)", () =>
+                (Type.GetType("System.Configuration.ApplicationSettingsBase, System", throwOnError: true)!).Assembly.GetName().Name!);
             Check("A Harmony patch of a value type's GetHashCode after tier-up (UnboxedMethods)", () =>
             {
                 UnboxedMethods.Install();
@@ -256,6 +259,16 @@ namespace OniBrutal.Host
                 }
                 return results.Count == 1 && results.Contains("CheckMod") ? "the postfix's assembly calls, as in Mono" : throw new InvalidOperationException($"the caller was {string.Join(", ", results)}");
             });
+            Check("A Harmony prefix on a P/Invoke whose export is missing (PInvokePatches)", () =>
+            {
+                PInvokePatches.Install();
+                new HarmonyLib.Harmony("OniBrutal.Host.Check").Patch(typeof(Program).GetMethod(nameof(MissingExport), BindingFlags.NonPublic | BindingFlags.Static),
+                    prefix: new HarmonyLib.HarmonyMethod(typeof(Program), nameof(SkipMissing)));
+                for (int i = 0; i < 1000; i++) MissingExport();
+                // A P/Invoke never called before still binds to its own export (libc's: Linux).
+                int pid = OperatingSystem.IsLinux() ? OtherExport() : Environment.ProcessId;
+                return skipped == 1000 && pid == Environment.ProcessId ? "the prefix runs; other P/Invokes bind as before" : throw new InvalidOperationException($"skipped {skipped}, getpid {pid}");
+            });
             Check("Exceptions nothing catches on other threads (UnhandledExceptions)", () =>
             {
                 UnhandledExceptions.Install();
@@ -320,6 +333,32 @@ namespace OniBrutal.Host
                     try { Directory.Delete(dir, true); } catch (IOException) { } catch (UnauthorizedAccessException) { }
                 }
             });
+            Check("Reflection writing a mod's static readonly field after its type is initialized (ModAccess)", () =>
+            {
+                ModAccess.Install();
+                var dir = Directory.CreateTempSubdirectory("oni-brutal-check-").FullName;
+                try
+                {
+                    var builder = new System.Reflection.Emit.PersistedAssemblyBuilder(new AssemblyName("OniBrutalCheckStrings"), typeof(object).Assembly);
+                    var strings = builder.DefineDynamicModule("OniBrutalCheckStrings").DefineType("Strings", TypeAttributes.Public | TypeAttributes.Abstract | TypeAttributes.Sealed);
+                    var field = strings.DefineField("NAME", typeof(string), FieldAttributes.Public | FieldAttributes.Static | FieldAttributes.InitOnly);
+                    var cctor = strings.DefineTypeInitializer().GetILGenerator();
+                    cctor.Emit(System.Reflection.Emit.OpCodes.Ldstr, "before");
+                    cctor.Emit(System.Reflection.Emit.OpCodes.Stsfld, field);
+                    cctor.Emit(System.Reflection.Emit.OpCodes.Ret);
+                    strings.CreateType();
+                    var path = Path.Combine(dir, "OniBrutalCheckStrings.dll");
+                    builder.Save(path);
+                    var name = ModAccess.LoadFrom(path).GetType("Strings")!.GetField("NAME")!;
+                    if ((string)name.GetValue(null)! != "before") throw new InvalidOperationException("type initializer did not run");
+                    name.SetValue(null, "after");
+                    return (string)name.GetValue(null)! == "after" ? "the write holds, as in Mono" : throw new InvalidOperationException("the write was lost");
+                }
+                finally
+                {
+                    try { Directory.Delete(dir, true); } catch (IOException) { } catch (UnauthorizedAccessException) { }
+                }
+            });
             // Last: once a mod patches enum formatting, enum names go through it for the process.
             Check("A Harmony patch of Enum.ToString() alone (MonoEnumFormat)", () =>
             {
@@ -355,6 +394,16 @@ namespace OniBrutal.Host
             });
             return failures;
         }
+
+        /// CheckRuntimeServices' P/Invokes: one whose export no library has, one that exists.
+        [System.Runtime.InteropServices.DllImport("libc", EntryPoint = "oni_brutal_missing_export")]
+        static extern void MissingExport();
+
+        [System.Runtime.InteropServices.DllImport("libc", EntryPoint = "getpid")]
+        static extern int OtherExport();
+
+        static int skipped;
+        static bool SkipMissing() { skipped++; return false; }
 
         sealed class SharedPool<T> where T : class
         {

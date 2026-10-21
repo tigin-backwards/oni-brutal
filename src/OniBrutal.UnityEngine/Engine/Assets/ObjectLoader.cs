@@ -145,8 +145,15 @@ namespace OniBrutal.Engine.Assets
         /// MonoScripts exist in player data but have no managed object in a player.
         public static bool IsScriptAsset(SerializedFile from, PPtr pptr) => ClassIdOf(from, pptr) == 115;
 
+        /// A reference into another bundle that is not loaded resolves to null, as in Unity (a mod's
+        /// prefab referring to a material in a dependency bundle the mod never loads; the original
+        /// player loads such prefabs without complaint).
         public static Object Resolve(SerializedFile from, PPtr pptr)
-            => pptr.IsNull ? null : Load(AssetSystem.ResolveExternal(from, pptr.FileId), pptr.PathId);
+        {
+            if (pptr.IsNull) return null;
+            var file = AssetSystem.TryResolveExternal(from, pptr.FileId);
+            return file == null ? null : Load(file, pptr.PathId);
+        }
 
         /// Forgets a destroyed or unloaded object.
         public static void Forget(AssetSource source) => loaded.Remove(new Key(source.File, source.PathId));

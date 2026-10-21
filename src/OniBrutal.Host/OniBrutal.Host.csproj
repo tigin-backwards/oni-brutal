@@ -53,6 +53,7 @@
     <PackageReference Include="System.Security.Permissions" />
     <PackageReference Include="System.Runtime.Serialization.Formatters" />
     <PackageReference Include="System.CodeDom" />
+    <PackageReference Include="System.Configuration.ConfigurationManager" />
     <!-- Rewrites mod assemblies built against publicized game assemblies (ModAccess, ARCHITECTURE D11). -->
     <PackageReference Include="Mono.Cecil" />
   </ItemGroup>

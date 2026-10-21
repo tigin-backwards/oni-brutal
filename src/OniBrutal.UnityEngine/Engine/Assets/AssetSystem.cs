@@ -68,6 +68,18 @@ namespace OniBrutal.Engine.Assets
         public static SerializedFile ResolveExternal(SerializedFile from, int fileId)
             => fileId == 0 ? from : Get(from.Externals[fileId - 1].Path);
 
+        /// ResolveExternal, or null for another bundle's file that is not mounted.
+        public static SerializedFile TryResolveExternal(SerializedFile from, int fileId)
+        {
+            if (fileId == 0) return from;
+            var path = from.Externals[fileId - 1].Path;
+            var key = Canonical(path);
+            if (key.StartsWith("archive:/", StringComparison.Ordinal))
+                lock (gate)
+                    if (!files.ContainsKey(key) && !bundleNodes.ContainsKey(key)) return null;
+            return Get(path);
+        }
+
         /// Mounts an AssetBundle's nodes (SerializedFiles and resource streams).
         public static List<string> MountBundle(UnityFsArchive archive) => Mount(ReadNodes(archive));
 

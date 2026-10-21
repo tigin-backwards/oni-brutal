@@ -106,7 +106,8 @@ mod's version stamp); no other game IL is touched.
 | In-box BinaryFormatter | `System.Runtime.Serialization.Formatters` package + `EnableUnsafeBinaryFormatterSerialization` | `ObjectCloner.SerializingCloner` (every worldgen settings clone) |
 | Code pages via `I18N*` | `Encoding.RegisterProvider(CodePagesEncodingProvider.Instance)` before game code | Ionic.Zip static constructors (IBM437) |
 | `System.CodeDom` | `System.CodeDom` package (binding only; never executed) | Ionic.Zip SFX path (dead) |
-| Reflection writes to `static readonly` fields (and reads that observe them) | Static fields of assemblies from `Managed/` are loaded with `InitOnly` cleared (Field-table flags only; IL untouched; such images load from memory, so their `Assembly.Location` is empty, which no game code reads) | `Localization.OverloadStrings` (translations of `STRINGS.UI.PERMIT_RARITY`), `LocString.CreateLocStringKeys` |
+| Settings classes (`System.Configuration.ApplicationSettingsBase`, in Mono's `System.dll`) | `System.Configuration.ConfigurationManager` package | mods' generated `Properties.Settings` classes (a mod whose types fail to load is dropped by KMod) |
+| Reflection writes to `static readonly` fields (and reads that observe them) | Static fields of assemblies from `Managed/` and of mods' assemblies (`ModAccess`; the game's `LocString.CreateLocStringKeys` writes back mods' strings classes) are loaded with `InitOnly` cleared (Field-table flags only; IL untouched; such images load from memory, so their `Assembly.Location` is empty, which no game code reads) | `Localization.OverloadStrings` (translations of `STRINGS.UI.PERMIT_RARITY`), `LocString.CreateLocStringKeys` |
 | Assemblies preloaded by the player | Host eagerly loads every assembly in `ScriptingAssemblies.json` that we serve, before any game type initializes | `App..cctor` / `KSerialization.Manager` assembly snapshots |
 
 **Steamworks.NET.** One explicit-layout union in `com.rlabrecque.steamworks.net` 20.1.0
@@ -277,6 +278,14 @@ past the boot checkpoint needs a Steam client logged in with an account that own
   `TryDisableInlining`, which Harmony applies to the patched method itself); this project's own
   patches are left as they were. `--check-types` calls `GetCallingAssembly` from a helper an
   emitted mod's postfix calls.
+- **D20 Patching a P/Invoke whose export is missing.** MonoMod prepares a method before
+  detouring it; for a P/Invoke, CoreCLR then binds the native export, and a missing one fails the
+  patch. Mono binds a P/Invoke at its first call, so mods patch one the platform lacks to keep it
+  from being called: Debug Buttons and ONI Together skip `KImGuiUtil.SetKAssertCB`, which the
+  game's Linux cimgui does not export, and load in the original player. **Resolved in**
+  `PInvokePatches`: a missing export or library does not fail the preparation of a P/Invoke; the
+  detour goes on the method's own entry, other P/Invokes bind as before, and calling the original
+  still fails as on Mono. `--check-types` patches a P/Invoke to a missing export.
 
 ## 3. The engine API (`OniBrutal.UnityEngine`)
 

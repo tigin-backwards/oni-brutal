@@ -32,30 +32,33 @@ log lacks.
 | True Tiles | its 2022.3 asset bundle loads |
 | Unified Background, Preset Manager, Choose Neural Vacillator, Mod Profile Manager | issue #2's set, 0 errors with the mods above |
 
-## Runs (top-100 sweep, batch 0)
+## Runs (top-100 sweep)
+
+Each batch of about 25 ran together. Batch 3, with Backwalls and Rooms Expanded, ran at 13 fps, where
+the original ran 7.
 
 Bigger Camera Zoom Out · Mod Updater · Build Over Plants · Show Building Ranges · DGSM · Research
 Queue · Falling Sand · Better Automation Overlay · No Drop · Duplicant Stat Selector · Queue For
 Sinks · Sweep By Type · select last care package · Customizable speed · Move This Here · Airlock
 Door · GasOverlay · Bigger Building Menu · Plan Buildings Without Materials · MovableFeatures ·
 Blueprints fixed · ChainedDeconstruction · Waste Not, Want Not · Geyser Calculated Average Output
-Tooltip
-
-## Loads (top-100 sweep, batches 1–3: play test pending)
-
-Printing Pod Refresh · Mod Manager · WGSM · Wounded Go To Med Bed · Crack Reacher · Element Capture
-Capsule · Pliers fixed · Fast Save · Suppress Notifications · Clean Floors · Better Air Filters ·
-最后的补给包-Fix · Efficient Supply · Pip Plant Overlay · Smart Drag Tool · No Manual Delivery · Combined
-Conduit Display · Sandbox Tools · Buildable Natural Tile · Starmap Queue · PrintPod Select ·
-Favorite Resources · bottle emptier extend · No Long Commutes · Blueprints Expanded · Natural Plant
-Box · Insulated Door · Smart Mop · Full Miner Yield · Dup Stats Configurator · Wallpaper · Flow
-Splitters · Ronivans Legacy - Industrial Revolution · Scaffolds · Speed Control 202107 · AI
-Improvements · Capsule 2.0 · More Marble Sculptures · Cluster Generation Manager · Customize Geyser
-· Butcher & Fishing Stations · Squirrel Wheel · Wall Pumps and Vents · Enable achievements · Pipe
-Flow Overlay · Demolish Neutronium · Simpler Pip Plant Rule · Smart Pumps · Tiny Door · FreeCamera ·
-Remove Sandbox Lock Mode · Freezer · Sealed Pitcher Pump · Drains · Auto-Eject · Immigrants Reroll ·
+Tooltip · Printing Pod Refresh · Mod Manager · WGSM · Wounded Go To Med Bed · Crack Reacher ·
+Element Capture Capsule · Pliers fixed · Fast Save · Suppress Notifications · Clean Floors · Better
+Air Filters · 最后的补给包-Fix · Efficient Supply · Pip Plant Overlay · Smart Drag Tool · No Manual
+Delivery · Combined Conduit Display · Sandbox Tools · Customize Geyser · Butcher & Fishing Stations
+· Squirrel Wheel · Wall Pumps and Vents · Enable achievements · Pipe Flow Overlay · Demolish
+Neutronium · Simpler Pip Plant Rule · Smart Pumps · Tiny Door · FreeCamera · Remove Sandbox Lock
+Mode · Freezer · Sealed Pitcher Pump · Drains · Auto-Eject · Immigrants Reroll ·
 ConvenientScheduling · Rooms Expanded · Backwalls · No Research Alerts · Settings Change Tool ·
 Steel Ladder
+
+## Loads (top-100 sweep, play test pending)
+
+Starmap Queue · Buildable Natural Tile · PrintPod Select · Favorite Resources · bottle emptier
+extend · No Long Commutes · Blueprints Expanded · Natural Plant Box · Insulated Door · Smart Mop ·
+Full Miner Yield · Dup Stats Configurator · Wallpaper · Flow Splitters · Ronivans Legacy -
+Industrial Revolution · Scaffolds · Speed Control 202107 · AI Improvements · Capsule 2.0 · More
+Marble Sculptures · Cluster Generation Manager
 
 ## Broken upstream
 

@@ -50,7 +50,7 @@ namespace OniBrutal.Engine.Mecanim
     {
         public override Object Create(LoadRequest request)
         {
-            var f = TypeTreeReader.ReadNative(request.ClassId, request.Open());
+            var f = request.ReadNative();
             var native = new AnimationClipNative
             {
                 Name = f.String("m_Name"),

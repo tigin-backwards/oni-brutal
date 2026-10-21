@@ -22,6 +22,17 @@ namespace OniBrutal.Engine.Assets
         public SceneRecord Scene;
         public bool Persistent => Scene == null;
         public OniBrutal.Assets.IO.DataReader Open() => File.OpenObject(Info);
+
+        /// The object's fields, read as the file lays them out: with the type tree the file
+        /// carries (an asset bundle, a mod's included, can come from another Unity version, whose
+        /// layout of a class differs; Unity reads such a file by its tree), else the release one.
+        public OniBrutal.Assets.TypeTrees.Fields ReadNative()
+        {
+            var tree = File.TypeOf(Info).Tree;
+            return tree != null
+                ? OniBrutal.Assets.TypeTrees.TypeTreeReader.ReadObject(tree, Open(), OniBrutal.Assets.TypeTrees.TypeTreeDatabase.TrailingBytes(ClassId))
+                : OniBrutal.Assets.TypeTrees.TypeTreeReader.ReadNative(ClassId, Open());
+        }
     }
 
     /// Materializes engine objects from asset files, lazily by PPtr. Each object is registered
@@ -237,7 +248,7 @@ namespace OniBrutal.Engine.Assets
             var info = TypeTreeDatabase.Get(classId);
             var engineType = EngineTypeOf(info.Name)
                 ?? throw new InvalidDataException($"No engine type for native class {info.Name} ({classId}).");
-            b = typeof(Component).IsAssignableFrom(engineType) ? new StoredComponentBinder(engineType, classId) : new StoredAssetBinder(engineType, classId);
+            b = typeof(Component).IsAssignableFrom(engineType) ? new StoredComponentBinder(engineType) : new StoredAssetBinder(engineType);
             generic[classId] = b;
             return b;
         }

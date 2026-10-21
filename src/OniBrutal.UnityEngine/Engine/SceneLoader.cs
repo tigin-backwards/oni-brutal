@@ -125,7 +125,7 @@ namespace OniBrutal.Engine
     {
         public override Object Create(LoadRequest request)
         {
-            var native = new NativeObject { Serialized = TypeTreeReader.ReadNative(request.ClassId, request.Open()) };
+            var native = new NativeObject { Serialized = request.ReadNative() };
             return ObjectLoader.CreateNative<Object>(typeof(SceneSettingsObject), native);
         }
 

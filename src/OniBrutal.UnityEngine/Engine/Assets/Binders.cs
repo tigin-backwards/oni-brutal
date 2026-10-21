@@ -14,7 +14,7 @@ namespace OniBrutal.Engine.Assets
     {
         public override Object Create(LoadRequest request)
         {
-            var f = TypeTreeReader.ReadNative(request.ClassId, request.Open());
+            var f = request.ReadNative();
             var native = new GameObjectNative
             {
                 Name = f.String("m_Name"),
@@ -47,7 +47,7 @@ namespace OniBrutal.Engine.Assets
     {
         public override Object Create(LoadRequest request)
         {
-            var f = TypeTreeReader.ReadNative(request.ClassId, request.Open());
+            var f = request.ReadNative();
             bool rect = request.ClassId == 224;
             var native = rect ? new RectTransformNative() : new TransformNative();
             native.LocalRotation = ToQuaternion(f.Struct("m_LocalRotation"));
@@ -162,11 +162,11 @@ namespace OniBrutal.Engine.Assets
     /// Components of engine classes whose subsystem consumes the serialized data (Camera,
     /// Canvas, renderers…): the component is created and attached; its data stays on the native
     /// record for that subsystem.
-    internal sealed class StoredComponentBinder(Type engineType, int classId) : Binder
+    internal sealed class StoredComponentBinder(Type engineType) : Binder
     {
         public override Object Create(LoadRequest request)
         {
-            var f = TypeTreeReader.ReadNative(classId, request.Open());
+            var f = request.ReadNative();
             var native = ComponentNatives.Create(engineType);
             native.Serialized = f;
             if (native is BehaviourNative bn && f.Contains("m_Enabled")) bn.Enabled = f.Get<byte>("m_Enabled") != 0;
@@ -183,11 +183,11 @@ namespace OniBrutal.Engine.Assets
 
     /// Assets of engine classes (materials, textures, meshes…): created with their data; the
     /// owning subsystem builds engine resources from it.
-    internal sealed class StoredAssetBinder(Type engineType, int classId) : Binder
+    internal sealed class StoredAssetBinder(Type engineType) : Binder
     {
         public override Object Create(LoadRequest request)
         {
-            var f = TypeTreeReader.ReadNative(classId, request.Open());
+            var f = request.ReadNative();
             var native = AssetNatives.Create(engineType);
             native.Name = f.Contains("m_Name") ? f.String("m_Name") : "";
             native.Serialized = f;

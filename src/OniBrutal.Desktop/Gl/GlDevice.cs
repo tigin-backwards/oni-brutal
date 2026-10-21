@@ -961,10 +961,7 @@ namespace OniBrutal.Desktop.Gl
                         foreach (var pass in sub.Passes)
                         {
                             if (pass.Type != 0) continue;
-                            foreach (var list in pass.Data.Struct("progVertex").Array("m_PlayerSubPrograms"))
-                                foreach (OniBrutal.Assets.TypeTrees.Fields sub2 in (object[])list)
-                                    if (ShaderPrograms.IsGlCore(sub2.Get<sbyte>("m_GpuProgramType")))
-                                        GlPrograms.Get(shader, (int)sub2.Get<uint>("m_BlobIndex"));
+                            foreach (var variant in pass.Variants) GlPrograms.Get(shader, variant.BlobIndex);
                         }
             });
         }

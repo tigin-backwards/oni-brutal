@@ -50,25 +50,27 @@ Delivery · Combined Conduit Display · Sandbox Tools · Customize Geyser · But
 Neutronium · Simpler Pip Plant Rule · Smart Pumps · Tiny Door · FreeCamera · Remove Sandbox Lock
 Mode · Freezer · Sealed Pitcher Pump · Drains · Auto-Eject · Immigrants Reroll ·
 ConvenientScheduling · Rooms Expanded · Backwalls · No Research Alerts · Settings Change Tool ·
-Steel Ladder
+Steel Ladder · Starmap Queue · Buildable Natural Tile · PrintPod Select · Favorite Resources · No
+Long Commutes · Blueprints Expanded · Natural Plant Box · Insulated Door · Smart Mop · Full Miner
+Yield · Dup Stats Configurator · Wallpaper · Flow Splitters · Ronivans Legacy - Industrial
+Revolution · Scaffolds · Speed Control 202107 · AI Improvements · Capsule 2.0 · More Marble
+Sculptures · Cluster Generation Manager
 
-## Loads (top-100 sweep, play test pending)
+## In progress
 
-Starmap Queue · Buildable Natural Tile · PrintPod Select · Favorite Resources · bottle emptier
-extend · No Long Commutes · Blueprints Expanded · Natural Plant Box · Insulated Door · Smart Mop ·
-Full Miner Yield · Dup Stats Configurator · Wallpaper · Flow Splitters · Ronivans Legacy -
-Industrial Revolution · Scaffolds · Speed Control 202107 · AI Improvements · Capsule 2.0 · More
-Marble Sculptures · Cluster Generation Manager
+| Mod | What it needs |
+|---|---|
+| Oxygen Not Included Together | `AssetBundle.LoadFromMemory` and `GetAllScenePaths`, a `Random.ColorHSV` overload, IMGUI's `GUI.ModalWindow` and `GUILayout.Toolbar` |
 
 ## Broken upstream
 
-In both players, the game's crash reporter stops the run before the colony.
+Each fails the same way in the original player.
 
 | Mod | Error |
 |---|---|
 | Deconstructable POI Props | Harmony patch of `Deconstructable.TriggerDestroy`, which now has two overloads (ambiguous match) |
 | Refresh Immigrants | `STRINGS.UI.TOOLS.FILTERLAYERS.ALL` is no longer a field |
-| Oxygen Not Included Together | `SetKAssertCB` is missing from the game's cimgui library |
+| Bottle Emptier Extend | calls `TreeFilterable.GetTags()`, which the game no longer has |
 
 ## Translations
 

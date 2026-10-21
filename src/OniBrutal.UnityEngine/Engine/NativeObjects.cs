@@ -148,6 +148,23 @@ namespace OniBrutal.Engine
             }
         }
 
+        /// World to local. A transform with a zero scale component (Rocketry Expanded scales a UI
+        /// image by (1, 1), z 0) has no inverse; Unity then inverts each level's scale per axis,
+        /// with 0 for a zero axis, as measured in the original player (InverseTransformPoint,
+        /// worldToLocalMatrix, nested). A regular matrix gives the same as its inverse.
+        public Matrix4x4 WorldToLocal
+        {
+            get
+            {
+                var m = LocalToWorld;
+                if (m.determinant != 0f) return m.inverse;
+                var s = LocalScale;
+                var inverseScale = new Vector3(s.x != 0f ? 1f / s.x : 0f, s.y != 0f ? 1f / s.y : 0f, s.z != 0f ? 1f / s.z : 0f);
+                var local = Matrix4x4.Scale(inverseScale) * Matrix4x4.Rotate(Quaternion.Inverse(LocalRotation)) * Matrix4x4.Translate(-LocalPosition);
+                return Parent != null ? local * Parent.WorldToLocal : local;
+            }
+        }
+
         public Quaternion WorldRotation
         {
             get

@@ -351,6 +351,43 @@ namespace OniBrutal.Tests
             }
         }
 
+        // Measured in the original player: a zero scale component inverts to zero on that axis, per
+        // level, instead of the singular matrix's all-zero inverse (Rocketry Expanded scales a UI
+        // image by (1, 1), z 0, which then caught every click).
+        [Fact]
+        public void ZeroScaleAxesInvertToZero()
+        {
+            var a = new GameObject("a").transform;
+            a.position = new Vector3(100, 50, 0);
+            a.localScale = new Vector3(1, 1, 0);
+            Near(new Vector3(50, 10, 0), a.InverseTransformPoint(new Vector3(150, 60, 7)));
+            Near(new Vector3(3, 4, 0), a.InverseTransformVector(new Vector3(3, 4, 5)));
+            Near(new Vector3(3, 4, 5), a.InverseTransformDirection(new Vector3(3, 4, 5)));
+            Assert.Equal(0f, a.worldToLocalMatrix.m22);
+            Assert.Equal(-100f, a.worldToLocalMatrix.m03);
+            a.localScale = new Vector3(2, 0, 3);
+            Near(new Vector3(25, 0, 2.3333f), a.InverseTransformPoint(new Vector3(150, 60, 7)));
+            a.localScale = Vector3.zero;
+            Near(Vector3.zero, a.InverseTransformPoint(new Vector3(150, 60, 7)));
+            var parent = new GameObject("parent").transform;
+            parent.localScale = new Vector3(2, 2, 0);
+            var child = new GameObject("child").transform;
+            child.SetParent(parent, false);
+            child.localPosition = new Vector3(10, 20, 30);
+            Near(new Vector3(20, 40, 0), child.position);
+            Near(new Vector3(10, 10, -30), child.InverseTransformPoint(new Vector3(40, 60, 9)));
+
+            var canvas = new GameObject("canvas").AddComponent<Canvas>();
+            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            var image = new GameObject("image", typeof(RectTransform)).GetComponent<RectTransform>();
+            image.SetParent(canvas.transform, false);
+            image.sizeDelta = new Vector2(24, 24);
+            image.localScale = new Vector3(1, 1, 0);
+            var centre = new Vector2(image.position.x, image.position.y);
+            Assert.True(RectTransformUtility.RectangleContainsScreenPoint(image, centre + new Vector2(10, 10)));
+            Assert.False(RectTransformUtility.RectangleContainsScreenPoint(image, centre + new Vector2(-300, -200)));
+        }
+
         [Fact]
         public void GradientsTakeColorAndAlphaKeys()
         {

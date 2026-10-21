@@ -228,6 +228,16 @@ namespace PerfProbe
             }
         }
 
+        /// The EventSystem's first raycast hits at the pointer: path, raycaster, depth.
+        static string Hits(UnityEngine.EventSystems.EventSystem events)
+        {
+            if (events == null) return "";
+            var results = new System.Collections.Generic.List<UnityEngine.EventSystems.RaycastResult>();
+            events.RaycastAll(new UnityEngine.EventSystems.PointerEventData(events) { position = Input.mousePosition }, results);
+            string Path(Transform t) => t == null ? "" : Path(t.parent) + "/" + t.name;
+            return string.Join("; ", results.GetRange(0, System.Math.Min(4, results.Count)).ConvertAll(r => $"{Path(r.gameObject.transform)} by {(r.module == null ? "none" : r.module.GetType().Name)} depth {r.depth} sort {r.sortingOrder}"));
+        }
+
         System.Collections.IEnumerator Pointer()
         {
             for (int n = 0; n < 6; n++)
@@ -239,7 +249,7 @@ namespace PerfProbe
                     + $" over-ui {(events != null ? events.IsPointerOverGameObject().ToString() : "no event system")}"
                     + $" module {(events != null && events.currentInputModule != null ? events.currentInputModule.GetType().Name : "none")}"
                     + $" tool {(tool != null ? tool.GetType().Name : "none")} hover-card {(HoverTextScreen.Instance != null && HoverTextScreen.Instance.gameObject.activeInHierarchy)}"
-                    + $" show-hover {(tool != null && tool.ShowHoverUI())} widgets {Widgets()}");
+                    + $" show-hover {(tool != null && tool.ShowHoverUI())} widgets {Widgets()} hits [{Hits(events)}]");
             }
         }
 
@@ -530,6 +540,7 @@ namespace PerfProbe
             MeasureDefaultControls();
             MeasureMissingScripts();
             MeasureLineRenderer();
+            MeasureZeroScale();
             if (System.IO.File.Exists(System.IO.Path.Combine(Path, "gui.txt"))) measureGuiFrames = 3;
             // PlayerPrefs (a mod keeps its settings in them): defaults, and the values written to the
             // player's prefs file by Save (read from the file after the run).
@@ -751,6 +762,38 @@ namespace PerfProbe
             }
             Walk(root.transform, root.name);
             Destroy(root);
+        }
+
+        // Transforms with a zero scale component (Rocketry Expanded scales a UI image by (1, 1),
+        // z 0): inverse transforms, the inverse matrix, and UI hit tests.
+        void MeasureZeroScale()
+        {
+            var a = new GameObject("PerfZeroA").transform;
+            a.position = new Vector3(100, 50, 0);
+            a.localScale = new Vector3(1, 1, 0);
+            Debug.Log($"PERF measure zeroscale point {a.InverseTransformPoint(new Vector3(150, 60, 7)):F3} vector {a.InverseTransformVector(new Vector3(3, 4, 5)):F3} direction {a.InverseTransformDirection(new Vector3(3, 4, 5)):F3} matrix {a.worldToLocalMatrix.ToString("F3").Replace("\n", " ")}");
+            a.localScale = new Vector3(2, 0, 3);
+            Debug.Log($"PERF measure zeroscale y0 point {a.InverseTransformPoint(new Vector3(150, 60, 7)):F3}");
+            a.localScale = Vector3.zero;
+            Debug.Log($"PERF measure zeroscale all point {a.InverseTransformPoint(new Vector3(150, 60, 7)):F3}");
+            var parent = new GameObject("PerfZeroParent").transform;
+            parent.localScale = new Vector3(2, 2, 0);
+            var child = new GameObject("PerfZeroChild").transform;
+            child.SetParent(parent, false);
+            child.localPosition = new Vector3(10, 20, 30);
+            child.localScale = new Vector3(1, 1, 1);
+            Debug.Log($"PERF measure zeroscale nested point {child.InverseTransformPoint(new Vector3(40, 60, 9)):F3} position {child.position:F3}");
+            Destroy(a.gameObject); Destroy(child.gameObject); Destroy(parent.gameObject);
+            var canvas = new GameObject("PerfZeroCanvas").AddComponent<Canvas>();
+            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            var img = new GameObject("PerfZeroImage", typeof(RectTransform)).GetComponent<RectTransform>();
+            img.SetParent(canvas.transform, false);
+            img.sizeDelta = new Vector2(24, 24);
+            img.anchoredPosition = Vector2.zero;
+            img.localScale = new Vector3(1, 1, 0);
+            var centre = new Vector2(Screen.width / 2f, Screen.height / 2f);
+            Debug.Log($"PERF measure zeroscale ui: centre {RectTransformUtility.RectangleContainsScreenPoint(img, centre)} inside {RectTransformUtility.RectangleContainsScreenPoint(img, centre + new Vector2(10, 10))} outside {RectTransformUtility.RectangleContainsScreenPoint(img, new Vector2(10, 10))} local {(RectTransformUtility.ScreenPointToLocalPointInRectangle(img, new Vector2(10, 10), null, out var local) ? local.ToString("F2") : "false")}");
+            Destroy(canvas.gameObject);
         }
 
         // LineRenderer geometry (mods draw lasers and debug lines with it): BakeMesh of several

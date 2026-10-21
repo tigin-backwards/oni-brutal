@@ -117,7 +117,7 @@ namespace UnityEngine
         internal int sortingGroupOrder => SortingGroups.GroupOf(RendererData) is { } g ? g.OrderOf(RendererData) : 0;
 
         public Matrix4x4 localToWorldMatrix => RendererData.GameObject.Transform.LocalToWorld;
-        public Matrix4x4 worldToLocalMatrix => RendererData.GameObject.Transform.LocalToWorld.inverse;
+        public Matrix4x4 worldToLocalMatrix => RendererData.GameObject.Transform.WorldToLocal;
 
         /// World-space bounds; an assigned value overrides them until ResetBounds.
         public Bounds bounds

@@ -100,7 +100,7 @@ namespace UnityEngine
         }
 
         public Matrix4x4 localToWorldMatrix => TransformNative.LocalToWorld;
-        public Matrix4x4 worldToLocalMatrix => TransformNative.LocalToWorld.inverse;
+        public Matrix4x4 worldToLocalMatrix => TransformNative.WorldToLocal;
 
         public void SetPositionAndRotation(Vector3 position, Quaternion rotation)
         {
@@ -136,7 +136,7 @@ namespace UnityEngine
 
         public Vector3 TransformPoint(Vector3 position) => TransformNative.LocalToWorld.MultiplyPoint3x4(position);
         public Vector3 TransformPoint(float x, float y, float z) => TransformPoint(new Vector3(x, y, z));
-        public Vector3 InverseTransformPoint(Vector3 position) => TransformNative.LocalToWorld.inverse.MultiplyPoint3x4(position);
+        public Vector3 InverseTransformPoint(Vector3 position) => TransformNative.WorldToLocal.MultiplyPoint3x4(position);
         public Vector3 InverseTransformPoint(float x, float y, float z) => InverseTransformPoint(new Vector3(x, y, z));
 
         /// Rotation only; scale does not apply to directions.
@@ -148,7 +148,7 @@ namespace UnityEngine
         /// Rotation and scale, no translation.
         public Vector3 TransformVector(Vector3 vector) => TransformNative.LocalToWorld.MultiplyVector(vector);
         public Vector3 TransformVector(float x, float y, float z) => TransformVector(new Vector3(x, y, z));
-        public Vector3 InverseTransformVector(Vector3 vector) => TransformNative.LocalToWorld.inverse.MultiplyVector(vector);
+        public Vector3 InverseTransformVector(Vector3 vector) => TransformNative.WorldToLocal.MultiplyVector(vector);
         public Vector3 InverseTransformVector(float x, float y, float z) => InverseTransformVector(new Vector3(x, y, z));
 
         // ---- Movement ----

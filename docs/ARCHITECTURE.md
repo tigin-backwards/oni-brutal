@@ -230,6 +230,15 @@ past the boot checkpoint needs a Steam client logged in with an account that own
   own copy of a library another mod loaded first). **Resolved in** `ModAccess.LoadFrom`: such a
   file is given the loaded assembly, and the substitution is logged; `--check-types` loads two
   versions of an emitted assembly.
+- **D16 Exceptions nothing catches on other threads.** They end a CoreCLR process; Unity's
+  player keeps running (measured with PerfProbe in the original: a thread's exception is logged,
+  by UnityEngine's AppDomain.UnhandledException handler calling Debug.LogException; a thread-pool
+  item's and an async void method's are dropped silently, with no UnhandledException; Mono passes
+  IsTerminating true). Sgt_Imalas' UtilLibs checks for updates from an async void method that
+  throws when offline. **Resolved by** .NET 10's `ExceptionHandling.SetUnhandledExceptionHandler`
+  (`UnhandledExceptions`): a thread's exception raises UnhandledException (and is logged as
+  Unity's are), a thread pool's is dropped, the main thread's still ends the process;
+  `--check-types` throws on both kinds of thread.
 
 ## 3. The engine API (`OniBrutal.UnityEngine`)
 

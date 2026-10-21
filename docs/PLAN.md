@@ -626,6 +626,7 @@ original player (PerfProbe's measure mode) or reproduced with Harmony alone befo
 | MiniBase: `Mathf.PerlinNoise` missing | worldgen, out of scope for compatibility, but cheap | Unity's noise as measured (lattice values and slopes, period, symmetry): Ken Perlin's improved noise at z = 0 of the coordinates' absolute values, (n + 0.69) / 1.483; equal to the player's to four decimals |
 | Rocketry Expanded: its elements had numbers for names, so lookups by name failed (KeyNotFoundException, "must have material associated with it", ground rendering) | its shared ElementUtil names SimHashes values by patching Mono's private `Enum.InternalFormat`, which CoreCLR does not have (checked against Mono's `system/enum.cs`) | ARCHITECTURE D14; with it, U57 and Rocketry Expanded log no error in either player (ours 19 fps, the original 5 to 6) |
 | Rocketry Expanded: types and a member missing | JetBrains annotations (`ContractAnnotation`, `ItemNotNull`, `MustUseReturnValue`, `NotNull`, `Pure`), `GradientAlphaKey`, `Gradient.SetKeys` | implemented; the gradient's alpha keys are public now, as Unity's are |
+| A review of every Mono emulation against Mono's source (Unity's fork, MIT) | an exception on a background thread ended the process where Unity's player goes on; enum formatting patched through `Enum.ToString()` alone, or found by `[HarmonyPatch]` attributes, did not apply everywhere; a mod's copy of a library already loaded in another version dropped the mod | ARCHITECTURE D14 to D16, each with a host check |
 | The BRUTAL tile stayed bright over the new game's screens, Options and the other modal screens | drawn with IMGUI, it sits above every canvas; the game's modal screens dim and cover the menu | hidden while a modal screen is open (KScreenManager's stack) |
 | The Windows setup's window closed on a red error | Run with PowerShell closes the window when the script ends; from inside the zip Explorer runs the script alone, and a folder name with an apostrophe breaks the menu's quoting (both reproduced with Explorer's command line) | `setup.cmd` to double-click (runs the script with `-File`, pauses); the script waits when started from the menu and says to extract the zip |
 
@@ -635,6 +636,15 @@ Rephysicalized and the dogfood profile's) now finds nothing missing but ShaderEx
 as in the original. Open: `RenderTexture.active` does not make the texture the target of GL
 immediate calls (`GL.Clear` after setting it clears the previous target; Unity's clears the
 texture); the game only reads pixels through it, which works.
+
+Open from the review, by likelihood: standard number formats with a precision ("F1", "N2")
+round differently (Mono rounds a float to 7 significant digits, a double to 15, before applying
+them; temperatures shown to a tenth can differ by one in the last digit); float-to-int casts of
+NaN and out-of-range values saturate on .NET 9 and later; a HashSet emptied by removals refills
+in another order; culture-aware comparisons use ICU rather than Mono's collator; state machine
+save names of mod generics with framework type arguments name another assembly. True Tiles
+1.3.1 (its last GitHub release) fails in both players on the current game; the Workshop build is
+untested.
 
 ## Open items
 

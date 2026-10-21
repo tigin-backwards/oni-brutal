@@ -4,6 +4,7 @@ using System.Linq;
 using System.IO;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using OniBrutal.Engine;
 
 namespace OniBrutal.Host
@@ -34,6 +35,7 @@ namespace OniBrutal.Host
             Paths.Configure(dataDir, options);
             EngineLog.Open(options.LogPath ?? EngineConfig.ConsoleLogPath);
             EngineLog.Engine($"OniBrutal host starting: game={options.GameDir} .NET={Environment.Version}");
+            UnhandledExceptions.Install();
 
             AssemblyPolicy.Install(dataDir, AppContext.BaseDirectory, options.UiPackages, options.ShippedUiPackages);
             var assemblies = AssemblyPolicy.PreloadScriptingAssemblies(dataDir);
@@ -163,6 +165,29 @@ namespace OniBrutal.Host
                     System.Threading.Thread.Sleep(20);
                 }
                 return misses == 0 ? "no lookup missed" : throw new InvalidOperationException($"{misses} lookups missed");
+            });
+            Check("Exceptions nothing catches on other threads (UnhandledExceptions)", () =>
+            {
+                UnhandledExceptions.Install();
+                int raised = 0;
+                UnhandledExceptionEventHandler count = (_, args) =>
+                {
+                    if (args.ExceptionObject is InvalidOperationException { Message: "check" }) Interlocked.Increment(ref raised);
+                };
+                AppDomain.CurrentDomain.UnhandledException += count;
+                try
+                {
+                    var thread = new Thread(() => throw new InvalidOperationException("check"));
+                    thread.Start();
+                    thread.Join();
+                    ThreadPool.QueueUserWorkItem(_ => throw new InvalidOperationException("check"));
+                    Thread.Sleep(500);
+                }
+                finally
+                {
+                    AppDomain.CurrentDomain.UnhandledException -= count;
+                }
+                return raised == 1 ? "the process goes on; the thread's raised UnhandledException, the pool's did not" : throw new InvalidOperationException($"UnhandledException raised {raised} times");
             });
             Check("A mod's copy of a library another version of which is loaded (ModAccess)", () =>
             {

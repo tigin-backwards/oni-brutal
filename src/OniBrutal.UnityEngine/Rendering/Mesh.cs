@@ -110,7 +110,8 @@ namespace UnityEngine
                 Debug.LogError("Mesh.vertices is too small. The supplied vertex array has less vertices than are referenced by the triangles array.", this);
                 return;
             }
-            if (count != m.VertexCount)
+            bool resized = count != m.VertexCount;
+            if (resized)
             {
                 // Other channels follow the new vertex count, keeping their leading values.
                 m.Normals = Resize(m.Normals, count);
@@ -120,7 +121,9 @@ namespace UnityEngine
             }
             m.VertexCount = count;
             m.Positions = count == 0 ? null : Slice(values, start, count);
-            if ((flags & MeshUpdateFlags.DontRecalculateBounds) == 0) m.RecalculateBounds();
+            // The bounds follow the vertices only when their number changes (measured in the
+            // original player: the same number of new positions keeps the bounds).
+            if (resized && (flags & MeshUpdateFlags.DontRecalculateBounds) == 0) m.RecalculateBounds();
             else m.Changed();
         }
 
@@ -396,8 +399,10 @@ namespace UnityEngine
                 if (!CanAccess("triangles")) return;
                 if (!ValidateIndices(value ?? Array.Empty<int>(), MeshTopology.Triangles, 0)) return;
                 var m = Data;
-                m.SubMeshes = new List<SubMeshData> { new SubMeshData { Indices = (int[])(value ?? Array.Empty<int>()).Clone() } };
-                m.RecalculateBounds();
+                var s = new SubMeshData { Indices = (int[])(value ?? Array.Empty<int>()).Clone() };
+                s.Bounds = m.SubMeshBounds(s);
+                m.SubMeshes = new List<SubMeshData> { s };
+                m.Changed();
             }
         }
 
@@ -469,19 +474,9 @@ namespace UnityEngine
             s.Indices = (int[])indices.Clone();
             s.Topology = topology;
             s.BaseVertex = baseVertex;
-            if (calculateBounds)
-            {
-                s.Bounds = m.SubMeshBounds(s);
-                m.Bounds = default;
-                bool first = true;
-                foreach (var sm in m.SubMeshes)
-                {
-                    if (sm.Indices.Length == 0) continue;
-                    if (first) m.Bounds = sm.Bounds;
-                    else m.Bounds.Encapsulate(sm.Bounds);
-                    first = false;
-                }
-            }
+            // The submesh's bounds only: the mesh's stay as they were (measured in the original
+            // player, after setting them and after a RecalculateBounds alike).
+            if (calculateBounds) s.Bounds = m.SubMeshBounds(s);
             m.Changed();
         }
 

@@ -9,7 +9,7 @@ namespace OniBrutal.Host
     /// before gameplay and no less prominently than other parties' logos; its maintainers note a
     /// main menu placement meets that. The logo (ahwootech/brutal-branding) is drawn on the game's
     /// main menu as one more of its news tiles, their size, with a caption. Only while the main
-    /// menu is up; nothing in the game is changed.
+    /// menu is up and nothing covers it; nothing in the game is changed.
     internal sealed class BrutalCredit : MonoBehaviour
     {
         const string Caption = "This logo is only here because the people who made BRUTAL require it to be here. "
@@ -19,6 +19,7 @@ namespace OniBrutal.Host
         GUIStyle? headerStyle, captionStyle;
         Func<object?> mainMenu = () => null;
         Func<object?> videoScreen = () => null;
+        Func<bool> modalOpen = () => false;
 
         public static void Install()
         {
@@ -41,6 +42,21 @@ namespace OniBrutal.Host
             // VideoScreen.Instance: the intros and cutscenes play over the menu.
             var video = Type.GetType("VideoScreen, Assembly-CSharp")?.GetField("Instance", BindingFlags.Public | BindingFlags.Static);
             videoScreen = video == null ? () => null : () => video.GetValue(null);
+            // A modal screen open over the menu (the new game's steps, Load Game, Options, Mods)
+            // dims and covers the news tiles: KScreenManager.Instance's screen stack.
+            var manager = Type.GetType("KScreenManager, Assembly-CSharp-firstpass");
+            var managerInstance = manager?.GetProperty("Instance", BindingFlags.Public | BindingFlags.Static);
+            var stack = manager?.GetField("screenStack", BindingFlags.NonPublic | BindingFlags.Instance);
+            var modals = new[] { Type.GetType("KModalScreen, Assembly-CSharp"), Type.GetType("KModalButtonMenu, Assembly-CSharp") };
+            if (managerInstance != null && stack != null)
+                modalOpen = () =>
+                {
+                    if (stack.GetValue(managerInstance.GetValue(null)) is not System.Collections.IEnumerable screens) return false;
+                    foreach (var screen in screens)
+                        if (screen is MonoBehaviour { isActiveAndEnabled: true } open && Array.Exists(modals, m => m != null && m.IsInstanceOfType(open)))
+                            return true;
+                    return false;
+                };
         }
 
         Transform? motd;
@@ -75,6 +91,7 @@ namespace OniBrutal.Host
         {
             if (Event.current.type != EventType.Repaint || mainMenu() is not MonoBehaviour menu || menu == null || !menu.isActiveAndEnabled) return;
             if (videoScreen() is MonoBehaviour video && video != null && video.isActiveAndEnabled) return;
+            if (modalOpen()) return;
             // One more tile beside the menu's news tiles ("It's Klei Fest!", "Out Now!"), their size:
             // left of the row they form (above its last tile when the row fills the screen's
             // width), right of the first of the column the other menu layout stacks them in.

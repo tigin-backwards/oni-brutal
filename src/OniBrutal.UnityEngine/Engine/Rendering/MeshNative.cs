@@ -89,7 +89,7 @@ namespace OniBrutal.Engine.Rendering
             Array.Clear(Uvs);
             Array.Clear(UvDimensions);
             SubMeshes = new List<SubMeshData> { new SubMeshData() };
-            Bounds = default;
+            // The bounds stay (measured in the original player).
             Changed();
         }
 

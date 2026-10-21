@@ -97,5 +97,80 @@ namespace OniBrutal.Tests
             Assert.Equal(Color.blue, mesh.colors[2]);
             Object.DestroyImmediate(mesh);
         }
+
+        // When a mesh's bounds change (measured in the original player): with the number of vertices,
+        // and by RecalculateBounds; not with new positions for as many vertices, triangles (their
+        // submesh's bounds only) or Clear.
+        [Fact]
+        public void MeshBoundsFollowTheVertexCountOnly()
+        {
+            var far = new System.Collections.Generic.List<Vector3> { new(0, 0, 0), new(4, 0, 0), new(0, 4, 0), new(20, 20, 0) };
+            var wide = new Vector3[] { new(0, 0, 0), new(3, 0, 0), new(0, 3, 0), new(9, 9, 0) };
+            var tenTen = new Bounds(new Vector3(10, 10, 0), new Vector3(20, 20, 0));
+            var mesh = new Mesh();
+            mesh.SetVertices(far);
+            Assert.Equal(tenTen, mesh.bounds);
+            mesh.vertices = wide;
+            Assert.Equal(tenTen, mesh.bounds);
+            mesh.SetTriangles(new[] { 0, 1, 2 }, 0);
+            mesh.triangles = new[] { 0, 1, 3 };
+            Assert.Equal(tenTen, mesh.bounds);
+            mesh.RecalculateBounds();
+            Assert.Equal(new Bounds(new Vector3(4.5f, 4.5f, 0), new Vector3(9, 9, 0)), mesh.bounds);
+            mesh.Clear();
+            Assert.Equal(new Bounds(new Vector3(4.5f, 4.5f, 0), new Vector3(9, 9, 0)), mesh.bounds);
+            mesh.SetVertices(far);
+            mesh.SetVertices(new System.Collections.Generic.List<Vector3> { new(0, 0, 0), new(1, 0, 0), new(0, 1, 0) });
+            Assert.Equal(new Bounds(new Vector3(0.5f, 0.5f, 0), new Vector3(1, 1, 0)), mesh.bounds);
+            mesh.bounds = new Bounds(new Vector3(100, 100, 0), Vector3.one);
+            mesh.SetTriangles(new[] { 0, 1, 2 }, 0, true);
+            Assert.Equal(new Vector3(100, 100, 0), mesh.bounds.center);
+            Object.DestroyImmediate(mesh);
+        }
+
+        // Fast Save's timelapse images (measured in the original player): RGBA32's graphics format
+        // whatever isSRGB says, ARGB32's unnamed 88; PNGs from raw rows (bottom row first) with a
+        // row stride, BGRA swizzled and R8 as grey.
+        [Fact]
+        public void PngsOfRawTexelsDecodeTheirFormat()
+        {
+            Assert.Equal(UnityEngine.Experimental.Rendering.GraphicsFormat.R8G8B8A8_UNorm, UnityEngine.Experimental.Rendering.GraphicsFormatUtility.GetGraphicsFormat(TextureFormat.RGBA32, true));
+            Assert.Equal((UnityEngine.Experimental.Rendering.GraphicsFormat)88, UnityEngine.Experimental.Rendering.GraphicsFormatUtility.GetGraphicsFormat(TextureFormat.ARGB32, false));
+            Assert.Equal(UnityEngine.Experimental.Rendering.GraphicsFormat.R8G8B8_UNorm, UnityEngine.Experimental.Rendering.GraphicsFormatUtility.GetGraphicsFormat(TextureFormat.RGB24, false));
+            var check = new Texture2D(1, 1);
+            var rgb = ImageConversion.EncodeArrayToPNG(new byte[] { 255, 0, 0, 0, 255, 0, 9, 9, 0, 0, 255, 10, 20, 30, 9, 9 }, UnityEngine.Experimental.Rendering.GraphicsFormat.R8G8B8_UNorm, 2, 2, 8);
+            Assert.True(check.LoadImage(rgb));
+            Assert.Equal(new Color32[] { new(255, 0, 0, 255), new(0, 255, 0, 255), new(0, 0, 255, 255), new(10, 20, 30, 255) }, check.GetPixels32());
+            Assert.True(check.LoadImage(ImageConversion.EncodeArrayToPNG(new byte[] { 255, 0, 0, 255 }, UnityEngine.Experimental.Rendering.GraphicsFormat.B8G8R8A8_UNorm, 1, 1)));
+            Assert.Equal(new Color32(0, 0, 255, 255), check.GetPixels32()[0]);
+            Assert.True(check.LoadImage(ImageConversion.EncodeArrayToPNG(new byte[] { 0, 100, 200, 255 }, UnityEngine.Experimental.Rendering.GraphicsFormat.R8_UNorm, 2, 2)));
+            Assert.Equal(new Color32(100, 100, 100, 255), check.GetPixels32()[1]);
+            Object.DestroyImmediate(check);
+        }
+
+        // A read-back is done three frames after the request (callback then) and its data is gone
+        // the frame after (measured in the original player).
+        [Fact]
+        public void ReadbacksAreDoneThreeFramesLaterAndReadableForThatFrame()
+        {
+            var texture = new Texture2D(2, 1, TextureFormat.RGBA32, false);
+            texture.SetPixels32(new Color32[] { new(10, 20, 30, 40), new(50, 60, 70, 80) });
+            texture.Apply();
+            int calls = 0;
+            var request = UnityEngine.Rendering.AsyncGPUReadback.Request(texture, 0, TextureFormat.RGBA32, _ => calls++);
+            Assert.False(request.done);
+            Assert.False(request.hasError);
+            Assert.Equal(2, request.width);
+            Frame();
+            Frame();
+            Assert.False(request.done);
+            Frame();
+            Assert.True(request.done);
+            Assert.Equal(1, calls);
+            Assert.Equal(new byte[] { 10, 20, 30, 40, 50, 60, 70, 80 }, request.GetData<byte>().ToArray());
+            Frame();
+            Assert.Throws<InvalidOperationException>(() => request.GetData<byte>());
+            Object.DestroyImmediate(texture);
+        }
     }
 }

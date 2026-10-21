@@ -606,10 +606,33 @@ the hover card under the scripted pointer, as the original would; references re-
 verify (830 game seconds, every tweak and verify mode without a mismatch; 9,000 frames now, since
 a less loaded machine runs more frames per game second) and perf (13.9 GB peak). Not covered: three mods of the profile that were not enabled use
 API the engine still lacks (ShaderExporter: shader property introspection; MiniBase:
-`Mathf.PerlinNoise`; MakeOldLiquidsGreatAgain: `Shader.SetGlobalFloatArray`). Open: the game's
+`Mathf.PerlinNoise`, out of scope like every worldgen mod; MakeOldLiquidsGreatAgain:
+`Shader.SetGlobalFloatArray`). Open: the game's
 error dialog logged that its stack trace's tab character is not in NotoSans-Regular; TextMeshPro
 spaces tabs rather than looking them up as glyphs, so this goes to the clean room (a
 behaviour description checked against the shipped package, then a fresh implementer).
+
+## Player reports (2026-10-21)
+
+Issue #1: Fast Track crashed on loading a colony, on Windows. Each finding was measured in the
+original player (PerfProbe's measure mode) or reproduced with Harmony alone before it was fixed.
+
+| Finding | Cause | Fix |
+|---|---|---|
+| Fast Track: MissingMethodException in Game.OnPrefabInit | `Renderer.allowOcclusionWhenDynamic`, `motionVectorGenerationMode` and the Mesh setters taking `MeshUpdateFlags` were missing (ApiCheck covered only the game's assemblies) | implemented as measured: defaults true and Object; of the flags, only DontRecalculateBounds changes anything |
+| Fast Track: every starmap entity's registration threw (KeyNotFoundException in ClusterGrid.RegisterEntity) | its patch of `AxialI.GetHashCode` was inlined past once callers tiered up: MonoMod marks the unboxing stub of a value type's virtual method, the JIT inlines the unboxed MethodDesc (reproduced with Harmony alone) | ARCHITECTURE D13; the host's `--check-types` patches an emitted value type and fails on a missed lookup |
+| Fast Save: types and members missing | `AsyncGPUReadback`, `SystemInfo.supportsAsyncGPUReadback`, `GraphicsFormatUtility.GetGraphicsFormat`, `ImageConversion.EncodeArrayToPNG` | implemented as measured: a read-back is done three frames after the request and its data readable that frame only; the graphics format table as reported in the game's gamma colour space (isSRGB changes nothing); PNGs from raw rows with a stride, BGRA swizzled, R8 as grey |
+| Mesh bounds changed where Unity's do not | found while measuring the flags: Unity recomputes a mesh's bounds when its number of vertices changes and on RecalculateBounds, not for new positions of as many vertices, not for triangles (their submesh's bounds only), not on Clear | the engine follows those rules |
+| MiniBase: `Mathf.PerlinNoise` missing | worldgen, out of scope for compatibility, but cheap | Unity's noise as measured (lattice values and slopes, period, symmetry): Ken Perlin's improved noise at z = 0 of the coordinates' absolute values, (n + 0.69) / 1.483; equal to the player's to four decimals |
+| The BRUTAL tile stayed bright over the new game's screens, Options and the other modal screens | drawn with IMGUI, it sits above every canvas; the game's modal screens dim and cover the menu | hidden while a modal screen is open (KScreenManager's stack) |
+| The Windows setup's window closed on a red error | Run with PowerShell closes the window when the script ends; from inside the zip Explorer runs the script alone, and a folder name with an apostrophe breaks the menu's quoting (both reproduced with Explorer's command line) | `setup.cmd` to double-click (runs the script with `-File`, pauses); the script waits when started from the menu and says to extract the zip |
+
+`tools/ApiCheck` over 126 mod assemblies (Fast Track, Fast Save, Peter Han's other mods,
+Rephysicalized and the dogfood profile's) now finds nothing missing but ShaderExporter's shader introspection and
+`Shader.SetGlobalFloatArray`. Rephysicalized's public build loads and plays with the same errors
+as in the original. Open: `RenderTexture.active` does not make the texture the target of GL
+immediate calls (`GL.Clear` after setting it clears the previous target; Unity's clears the
+texture); the game only reads pixels through it, which works.
 
 ## Open items
 

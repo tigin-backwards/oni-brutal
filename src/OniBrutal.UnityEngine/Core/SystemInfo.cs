@@ -34,6 +34,8 @@ namespace UnityEngine
         public static bool supports3DTextures => Gfx.Supports3DTextures;
         public static bool supportsInstancing => Gfx.SupportsInstancing;
         public static bool supportsComputeShaders => Gfx.SupportsComputeShaders;
+        /// Texture read-backs (AsyncGPUReadback) on any device that renders.
+        public static bool supportsAsyncGPUReadback => Gfx.DeviceType != GraphicsDeviceType.Null;
         public static bool supportsShadows => true;
         public static bool supportsSparseTextures => false;
         public static NPOTSupport npotSupport => NPOTSupport.Full;

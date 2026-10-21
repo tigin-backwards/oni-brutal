@@ -216,5 +216,21 @@ namespace OniBrutal.Tests
             Assert.False(q == Quaternion.Euler(10f, 20f, 31f));
             Assert.True(q != Quaternion.identity);
         }
+
+        // MiniBase's worldgen. Values sampled from Unity's Mathf.PerlinNoise in the original player
+        // (to 4 decimals): the same noise, close enough for worldgen, not bit for bit.
+        [Theory]
+        [InlineData(0.13f, 0.29f, 0.4690f)]
+        [InlineData(0.50f, 0.29f, 0.3934f)]
+        [InlineData(0.87f, 0.29f, 0.3178f)]
+        [InlineData(1.24f, 0.29f, 0.5787f)]
+        [InlineData(1.3f, 2.7f, 0.5702f)]
+        [InlineData(-1.3f, -2.7f, 0.5702f)]
+        [InlineData(257.3f, 2.7f, 0.5702f)]
+        [InlineData(3f, 7f, 0.4653f)]
+        public void PerlinNoiseIsUnitysNoise(float x, float y, float unity)
+        {
+            Assert.InRange(Mathf.PerlinNoise(x, y), unity - 0.0002f, unity + 0.0002f);
+        }
     }
 }

@@ -494,7 +494,168 @@ namespace PerfProbe
                 DestroyImmediate(victim);
                 Debug.Log($"PERF measure data prefab {dataPrefab.name}: {victimType} destroyed {victim == null}");
             }
+            yield return MeasureModRendering();
             Debug.Log("PERF measure done");
+        }
+
+        // Members mods call (Fast Track, Fast Save): renderer defaults, the mesh update flags, GPU
+        // readback, PNGs from raw arrays.
+        System.Collections.IEnumerator MeasureModRendering()
+        {
+            var go = new GameObject("MeasureRenderer");
+            var renderer = go.AddComponent<MeshRenderer>();
+            Debug.Log($"PERF measure renderer: allowOcclusionWhenDynamic {renderer.allowOcclusionWhenDynamic} motionVectorGenerationMode {renderer.motionVectorGenerationMode}");
+            renderer.allowOcclusionWhenDynamic = false;
+            renderer.motionVectorGenerationMode = MotionVectorGenerationMode.ForceNoMotion;
+            Debug.Log($"PERF measure renderer: after setting {renderer.allowOcclusionWhenDynamic} {renderer.motionVectorGenerationMode}");
+            Destroy(go);
+
+            var mesh = new Mesh();
+            mesh.SetVertices(new System.Collections.Generic.List<Vector3> { new Vector3(0, 0, 0), new Vector3(1, 0, 0), new Vector3(0, 1, 0), new Vector3(5, 5, 0) });
+            mesh.SetTriangles(new[] { 0, 1, 3 }, 0);
+            var fewer = new System.Collections.Generic.List<Vector3> { new Vector3(0, 0, 0), new Vector3(2, 0, 0), new Vector3(0, 2, 0) };
+            mesh.SetVertices(fewer, 0, 3, UnityEngine.Rendering.MeshUpdateFlags.DontValidateIndices);
+            Debug.Log($"PERF measure mesh: fewer vertices than indexed, DontValidateIndices: vertexCount {mesh.vertexCount} bounds {mesh.bounds}");
+            mesh.SetVertices(fewer, 0, 3);
+            Debug.Log($"PERF measure mesh: the same without flags: vertexCount {mesh.vertexCount} bounds {mesh.bounds}");
+            var wide = new System.Collections.Generic.List<Vector3> { new Vector3(0, 0, 0), new Vector3(3, 0, 0), new Vector3(0, 3, 0), new Vector3(9, 9, 0) };
+            mesh.SetVertices(wide, 0, 4, UnityEngine.Rendering.MeshUpdateFlags.DontRecalculateBounds);
+            Debug.Log($"PERF measure mesh: DontRecalculateBounds: vertexCount {mesh.vertexCount} last {mesh.vertices[3]} bounds {mesh.bounds}");
+            mesh.SetVertices(wide, 0, 4, UnityEngine.Rendering.MeshUpdateFlags.DontValidateIndices);
+            Debug.Log($"PERF measure mesh: DontValidateIndices, all four: bounds {mesh.bounds}");
+            var far = new System.Collections.Generic.List<Vector3> { new Vector3(0, 0, 0), new Vector3(4, 0, 0), new Vector3(0, 4, 0), new Vector3(20, 20, 0) };
+            mesh.SetVertices(far, 0, 4, UnityEngine.Rendering.MeshUpdateFlags.Default);
+            Debug.Log($"PERF measure mesh: Default, all four: bounds {mesh.bounds}");
+            mesh.SetVertices(wide);
+            Debug.Log($"PERF measure mesh: no flags, all four: bounds {mesh.bounds}");
+            mesh.SetVertices(far, 0, 4, UnityEngine.Rendering.MeshUpdateFlags.DontNotifyMeshUsers);
+            Debug.Log($"PERF measure mesh: DontNotifyMeshUsers, all four: bounds {mesh.bounds}");
+            mesh.SetVertices(wide, 1, 3, UnityEngine.Rendering.MeshUpdateFlags.Default);
+            Debug.Log($"PERF measure mesh: Default, a range: vertexCount {mesh.vertexCount} bounds {mesh.bounds}");
+            mesh.SetUVs(0, new System.Collections.Generic.List<Vector2> { Vector2.zero, Vector2.one, Vector2.up, Vector2.right }, 1, 3, UnityEngine.Rendering.MeshUpdateFlags.DontValidateIndices);
+            mesh.SetColors(new System.Collections.Generic.List<Color> { Color.red, Color.green, Color.blue, Color.white }, 1, 3, UnityEngine.Rendering.MeshUpdateFlags.DontValidateIndices);
+            Debug.Log($"PERF measure mesh: uv {string.Join(" ", mesh.uv)} colors {string.Join(" ", mesh.colors)}");
+            mesh.SetUVs(0, new System.Collections.Generic.List<Vector2> { Vector2.zero, Vector2.one, Vector2.up, Vector2.right }, 0, 4, UnityEngine.Rendering.MeshUpdateFlags.DontValidateIndices);
+            mesh.SetColors(new System.Collections.Generic.List<Color> { Color.red, Color.green, Color.blue, Color.white }, 0, 4, UnityEngine.Rendering.MeshUpdateFlags.DontRecalculateBounds);
+            Debug.Log($"PERF measure mesh: all four: uv {string.Join(" ", mesh.uv)} colors {string.Join(" ", mesh.colors)} bounds {mesh.bounds}");
+            Destroy(mesh);
+            var bare = new Mesh();
+            bare.SetVertices(far);
+            Debug.Log($"PERF measure mesh bounds: no triangles, SetVertices: {bare.bounds}");
+            bare.vertices = wide.ToArray();
+            Debug.Log($"PERF measure mesh bounds: no triangles, vertices =: {bare.bounds}");
+            bare.SetTriangles(new[] { 0, 1, 2 }, 0);
+            Debug.Log($"PERF measure mesh bounds: SetTriangles 0 1 2: {bare.bounds}");
+            bare.vertices = far.ToArray();
+            Debug.Log($"PERF measure mesh bounds: with triangles, vertices =: {bare.bounds}");
+            bare.SetVertices(wide);
+            Debug.Log($"PERF measure mesh bounds: with triangles, SetVertices: {bare.bounds}");
+            bare.SetTriangles(new[] { 0, 1, 3 }, 0, false);
+            Debug.Log($"PERF measure mesh bounds: SetTriangles without calculateBounds: {bare.bounds}");
+            bare.triangles = new[] { 0, 1, 3 };
+            Debug.Log($"PERF measure mesh bounds: triangles =: {bare.bounds}");
+            bare.RecalculateBounds();
+            Debug.Log($"PERF measure mesh bounds: RecalculateBounds: {bare.bounds}");
+            var three = new System.Collections.Generic.List<Vector3> { new Vector3(0, 0, 0), new Vector3(1, 0, 0), new Vector3(0, 1, 0) };
+            bare.Clear();
+            Debug.Log($"PERF measure mesh bounds: Clear: {bare.bounds}");
+            bare.SetVertices(far);
+            Debug.Log($"PERF measure mesh bounds: after Clear, SetVertices far: {bare.bounds}");
+            bare.SetVertices(three);
+            Debug.Log($"PERF measure mesh bounds: no triangles, 4 -> 3 vertices: {bare.bounds}");
+            bare.SetVertices(wide);
+            Debug.Log($"PERF measure mesh bounds: no triangles, 3 -> 4 vertices: {bare.bounds}");
+            bare.SetTriangles(new[] { 0, 1, 2 }, 0, true);
+            Debug.Log($"PERF measure mesh bounds: SetTriangles 0 1 2 calculateBounds: {bare.bounds}");
+            bare.bounds = new Bounds(new Vector3(100, 100, 0), Vector3.one);
+            bare.SetTriangles(new[] { 0, 1, 3 }, 0, true);
+            Debug.Log($"PERF measure mesh bounds: bounds set, then SetTriangles 0 1 3: {bare.bounds}");
+            bare.subMeshCount = 2;
+            bare.SetTriangles(new[] { 0, 1, 2 }, 1, true);
+            Debug.Log($"PERF measure mesh bounds: second submesh 0 1 2: {bare.bounds}");
+            bare.SetVertices(far);
+            Debug.Log($"PERF measure mesh bounds: with triangles, SetVertices far (4 -> 4): {bare.bounds}");
+            Destroy(bare);
+
+            var noise = new System.Text.StringBuilder();
+            for (int j = 0; j < 16; j++)
+                for (int i = 0; i < 16; i++)
+                    noise.Append(' ').Append(Mathf.PerlinNoise(i * 0.37f + 0.13f, j * 0.53f + 0.29f).ToString("F4", System.Globalization.CultureInfo.InvariantCulture));
+            for (int i = 0; i < 16; i++)
+                noise.Append(' ').Append(Mathf.PerlinNoise(-3.7f + i * 1.9f, 250.1f + i * 0.77f).ToString("F4", System.Globalization.CultureInfo.InvariantCulture));
+            Debug.Log($"PERF measure perlin:{noise}");
+            // Its lattice: the value at whole coordinates and the slope there along x and y.
+            var lattice = new System.Text.StringBuilder();
+            for (int j = 0; j < 16; j++)
+                for (int i = 0; i < 16; i++)
+                {
+                    float at = Mathf.PerlinNoise(i, j);
+                    lattice.Append(' ').Append(at.ToString("R", System.Globalization.CultureInfo.InvariantCulture))
+                        .Append(',').Append(((Mathf.PerlinNoise(i + 0.01f, j) - at) / 0.01f).ToString("F4", System.Globalization.CultureInfo.InvariantCulture))
+                        .Append(',').Append(((Mathf.PerlinNoise(i, j + 0.01f) - at) / 0.01f).ToString("F4", System.Globalization.CultureInfo.InvariantCulture));
+                }
+            Debug.Log($"PERF measure perlin lattice:{lattice}");
+            var period = new System.Text.StringBuilder();
+            foreach (float shift in new[] { 16f, 64f, 128f, 256f, 512f, 1024f })
+                period.Append($" {shift}:{Mathf.PerlinNoise(1.3f + shift, 2.7f):F4}/{Mathf.PerlinNoise(1.3f, 2.7f + shift):F4}");
+            Debug.Log($"PERF measure perlin period: base {Mathf.PerlinNoise(1.3f, 2.7f):F4}{period} negative {Mathf.PerlinNoise(-1.3f, -2.7f):F4}");
+            Debug.Log($"PERF measure readback: supportsAsyncGPUReadback {SystemInfo.supportsAsyncGPUReadback}");
+            Debug.Log($"PERF measure formats: RGBA32 {UnityEngine.Experimental.Rendering.GraphicsFormatUtility.GetGraphicsFormat(TextureFormat.RGBA32, false)} sRGB {UnityEngine.Experimental.Rendering.GraphicsFormatUtility.GetGraphicsFormat(TextureFormat.RGBA32, true)} ARGB32 {UnityEngine.Experimental.Rendering.GraphicsFormatUtility.GetGraphicsFormat(TextureFormat.ARGB32, false)} RGB24 {UnityEngine.Experimental.Rendering.GraphicsFormatUtility.GetGraphicsFormat(TextureFormat.RGB24, false)}");
+            var raw = new byte[] { 255, 0, 0, 255, 0, 255, 0, 128, 0, 0, 255, 0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120 };
+            var png = ImageConversion.EncodeArrayToPNG(raw, UnityEngine.Experimental.Rendering.GraphicsFormatUtility.GetGraphicsFormat(TextureFormat.RGBA32, false), 3, 2);
+            var check = new Texture2D(1, 1);
+            Debug.Log($"PERF measure png: {png.Length} bytes, loads {check.LoadImage(png)} {check.width}x{check.height} {string.Join(" ", check.GetPixels32())}");
+            var rgb = new byte[] { 255, 0, 0, 0, 255, 0, 9, 9, 0, 0, 255, 10, 20, 30, 9, 9 };
+            var png3 = ImageConversion.EncodeArrayToPNG(rgb, UnityEngine.Experimental.Rendering.GraphicsFormat.R8G8B8_UNorm, 2, 2, 8);
+            Debug.Log($"PERF measure png: RGB rows of 8 bytes: {(png3 == null ? "null" : png3.Length + " bytes, loads " + check.LoadImage(png3) + " " + check.width + "x" + check.height + " " + check.format + " " + string.Join(" ", check.GetPixels32()))}");
+            var gray = ImageConversion.EncodeArrayToPNG(new byte[] { 0, 100, 200, 255 }, UnityEngine.Experimental.Rendering.GraphicsFormat.R8_UNorm, 2, 2);
+            Debug.Log($"PERF measure png: R8: {(gray == null ? "null" : gray.Length + " bytes, loads " + check.LoadImage(gray) + " " + check.format + " " + string.Join(" ", check.GetPixels32()))}");
+            var bgra = ImageConversion.EncodeArrayToPNG(new byte[] { 255, 0, 0, 255 }, UnityEngine.Experimental.Rendering.GraphicsFormat.B8G8R8A8_UNorm, 1, 1);
+            Debug.Log($"PERF measure png: BGRA: {(bgra == null ? "null" : bgra.Length + " bytes, loads " + check.LoadImage(bgra) + " " + string.Join(" ", check.GetPixels32()))}");
+            var srgb = ImageConversion.EncodeArrayToPNG(new byte[] { 100, 150, 200, 255 }, UnityEngine.Experimental.Rendering.GraphicsFormat.R8G8B8A8_SRGB, 1, 1);
+            Debug.Log($"PERF measure png: SRGB: {(srgb == null ? "null" : srgb.Length + " bytes, loads " + check.LoadImage(srgb) + " " + string.Join(" ", check.GetPixels32()))}");
+            var table = new System.Text.StringBuilder();
+            foreach (TextureFormat f in System.Enum.GetValues(typeof(TextureFormat)))
+                table.Append($" {(int)f}:{(int)UnityEngine.Experimental.Rendering.GraphicsFormatUtility.GetGraphicsFormat(f, false)}/{(int)UnityEngine.Experimental.Rendering.GraphicsFormatUtility.GetGraphicsFormat(f, true)}");
+            Debug.Log($"PERF measure formats: table{table}");
+            Destroy(check);
+
+            // A render texture filled with one colour, read back asynchronously.
+            var rt = new RenderTexture(4, 2, 0, RenderTextureFormat.ARGB32);
+            rt.Create();
+            var fill = new Texture2D(4, 2, TextureFormat.RGBA32, false);
+            var texels = new Color32[8];
+            for (int i = 0; i < texels.Length; i++) texels[i] = new Color32(255, 128, 64, 255);
+            fill.SetPixels32(texels);
+            fill.Apply();
+            Graphics.Blit(fill, rt);
+            Destroy(fill);
+            if (SystemInfo.supportsAsyncGPUReadback)
+            {
+                var request = UnityEngine.Rendering.AsyncGPUReadback.Request(rt, 0, TextureFormat.RGBA32);
+                Debug.Log($"PERF measure readback: requested, done {request.done} hasError {request.hasError} {request.width}x{request.height}x{request.depth} layers {request.layerCount}");
+                int frames = 0;
+                while (!request.done && frames < 120) { frames++; yield return null; }
+                var data = request.GetData<byte>();
+                Debug.Log($"PERF measure readback: done after {frames} frames, hasError {request.hasError}, {data.Length} bytes, first {data[0]} {data[1]} {data[2]} {data[3]}");
+                yield return null;
+                try { Debug.Log($"PERF measure readback: data a frame later {request.GetData<byte>().Length}"); }
+                catch (System.Exception e) { Debug.Log($"PERF measure readback: data a frame later {e.GetType().Name}: {e.Message}"); }
+            }
+            var cleared = new RenderTexture(2, 2, 0, RenderTextureFormat.ARGB32);
+            cleared.Create();
+            var old = RenderTexture.active;
+            RenderTexture.active = cleared;
+            GL.Clear(true, true, new Color(1f, 0.5f, 0.25f, 1f));
+            var read = new Texture2D(2, 2, TextureFormat.RGBA32, false);
+            read.ReadPixels(new Rect(0, 0, 2, 2), 0, 0);
+            RenderTexture.active = old;
+            Debug.Log($"PERF measure active render texture: GL.Clear then ReadPixels {read.GetPixels32()[0]}");
+            Destroy(read);
+            cleared.Release();
+            Destroy(cleared);
+            rt.Release();
+            Destroy(rt);
         }
 
         System.Collections.IEnumerator Start()

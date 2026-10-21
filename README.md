@@ -1,6 +1,6 @@
 # oni-brutal
 
-A super fast, super sussy replacement for the Unity layer of Oxygen Not Included, artistically
+A super fast, super sussy replacement for the Unity layer of Oxygen Not Included, artisanally
 crafted by Claude.
 
 I did this mostly for fun, to see how far Oxygen Not Included's performance can go on a modern

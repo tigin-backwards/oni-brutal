@@ -250,6 +250,7 @@ namespace OniBrutal.Engine.UI
             }
             if (changedInUpdate.Count == 0) return;
             var changed = changedInUpdate.ToArray();
+            if (stats) statsRenotified += changed.Length;
             changedInUpdate.Clear();
             changedSet.Clear();
             foreach (var rect in changed)
@@ -268,8 +269,8 @@ namespace OniBrutal.Engine.UI
                 statsTicks += System.Diagnostics.Stopwatch.GetTimestamp() - start;
                 if (++statsFrames == 600)
                 {
-                    EngineLog.Engine($"canvas build: {statsTicks * 1000.0 / System.Diagnostics.Stopwatch.Frequency / statsFrames:F3} ms a frame, {statsVisits / statsFrames} objects walked a frame");
-                    statsFrames = 0; statsTicks = 0; statsVisits = 0;
+                    EngineLog.Engine($"canvas build: {statsTicks * 1000.0 / System.Diagnostics.Stopwatch.Frequency / statsFrames:F3} ms a frame, {statsVisits / statsFrames} objects walked a frame, {statsRenotified / (double)statsFrames:F1} rects told of changes after the update");
+                    statsFrames = 0; statsTicks = 0; statsVisits = 0; statsRenotified = 0;
                 }
             }
             else Build();
@@ -423,7 +424,7 @@ namespace OniBrutal.Engine.UI
         /// ONI_CANVAS_STATS=1: the build's time and the objects it walks, a frame, every 600 frames.
         static readonly bool stats = Environment.GetEnvironmentVariable("ONI_CANVAS_STATS") == "1";
         static int statsFrames;
-        static long statsTicks, statsVisits;
+        static long statsTicks, statsVisits, statsRenotified;
         static long skipsVerified, skipsWrong;
 
         /// A skipped hidden subtree, as the walk would visit it: every element at depth -1 and no

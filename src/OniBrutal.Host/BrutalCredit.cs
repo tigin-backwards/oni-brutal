@@ -76,7 +76,7 @@ namespace OniBrutal.Host
             if (Event.current.type != EventType.Repaint || mainMenu() is not MonoBehaviour menu || menu == null || !menu.isActiveAndEnabled) return;
             if (videoScreen() is MonoBehaviour video && video != null && video.isActiveAndEnabled) return;
             // One more tile beside the menu's news tiles ("It's Klei Fest!", "Out Now!"), their size:
-            // left of the row they form (above its first tile when the row fills the screen's
+            // left of the row they form (above its last tile when the row fills the screen's
             // width), right of the first of the column the other menu layout stacks them in.
             var tiles = NewsTiles(menu);
             if (tiles.Count == 0 || tiles[0].width < 1f) return;
@@ -88,8 +88,14 @@ namespace OniBrutal.Host
                 var first = tiles[0];
                 foreach (var t in tiles) if (t.x < first.x) first = t;
                 tile = new Rect(first.x - first.width - gap, first.y, first.width, first.height);
-                // On a narrow screen the row fills the bottom: above its first tile instead.
-                if (tile.x < gap) tile = new Rect(first.x, first.y - first.height - gap, first.width, first.height);
+                // On a narrow screen the row fills the bottom, its left end reaching under the menu's
+                // buttons: above its last tile instead, over the background.
+                if (tile.x < gap)
+                {
+                    var last = tiles[0];
+                    foreach (var t in tiles) if (t.x > last.x) last = t;
+                    tile = new Rect(last.x, last.y - last.height - gap, last.width, last.height);
+                }
             }
             else
             {

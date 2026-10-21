@@ -304,9 +304,11 @@ past the boot checkpoint needs a Steam client logged in with an account that own
   `UserMod2` check pass, and Wireless Power runs). CoreCLR refuses the class when it loads, so
   `GetTypes` throws and KMod drops the whole mod. **Resolved in** `MissingInterfaceMethods`:
   before `ModAccess` loads a mod's assembly, it is loaded once in a collectible context that binds
-  only to assemblies already loaded. The methods CoreCLR reports missing get an explicit
-  implementation that throws the `TypeLoadException` CoreCLR would have. The class loads, and
-  calling the missing method fails. Where Mono fails earlier (an interface check of the class),
+  only to assemblies already loaded, and that context is collected before the real load (until
+  then `AppDomain.GetAssemblies` lists its copy, and PLib, which picks its instance from there,
+  ran the copy, whose `Location` is empty: Threshold Walls). The methods CoreCLR reports missing
+  get an explicit implementation that throws the `TypeLoadException` CoreCLR would have. The class
+  loads, and calling the missing method fails. Where Mono fails earlier (an interface check of the class),
   ours goes on. `--check-types` loads a mod built against an older shape of an interface and
   calls the method it lacks.
 

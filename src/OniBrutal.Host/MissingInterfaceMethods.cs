@@ -29,7 +29,8 @@ namespace OniBrutal.Host
         /// `symbols` (portable PDB bytes or null) are rewritten to match.
         public static byte[]? Adjust(byte[] image, ref byte[]? symbols, string path)
         {
-            var missing = Probe(image);
+            var missing = Probe(image, out var probe);
+            Collect(probe);
             if (missing.Count == 0) return null;
             var (completed, newSymbols, added) = Complete(image, symbols, path, missing);
             if (added.Count == 0) return null;
@@ -40,10 +41,12 @@ namespace OniBrutal.Host
         }
 
         /// Type full name (CLR form, nested with '+') → the method names CoreCLR finds missing.
-        static Dictionary<string, (string Message, HashSet<string> Methods)> Probe(byte[] image)
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+        static Dictionary<string, (string Message, HashSet<string> Methods)> Probe(byte[] image, out WeakReference probe)
         {
             var result = new Dictionary<string, (string Message, HashSet<string> Methods)>(StringComparer.Ordinal);
             var context = new ProbeContext();
+            probe = new WeakReference(context);
             try
             {
                 var assembly = context.LoadFromStream(new MemoryStream(image));
@@ -71,6 +74,19 @@ namespace OniBrutal.Host
                 context.Unload();
             }
             return result;
+        }
+
+        /// The probe's copy of the assembly is gone before the real one loads: until its context is
+        /// collected, AppDomain.GetAssemblies lists it too, and a mod library that picks its
+        /// instance from there (PLib) would run the probe's copy, whose Location is empty.
+        static void Collect(WeakReference probe)
+        {
+            for (int i = 0; probe.IsAlive && i < 20; i++)
+            {
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+            }
+            if (probe.IsAlive) EngineLog.Engine("mod types: a probe's load context was not collected; its copy of the mod stays listed");
         }
 
         /// Binds a probed mod's references only to assemblies already loaded, so probing loads

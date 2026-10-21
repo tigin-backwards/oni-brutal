@@ -415,6 +415,10 @@ namespace OniBrutal.Host
                     Directory.CreateDirectory(Path.GetDirectoryName(modPath)!);
                     mod.Save(modPath);
                     var type = ModAccess.LoadFrom(modPath).GetTypes().Single(t => t.Name == "Impl");
+                    // The probe's copy is gone: a library that picks its instance from the
+                    // process's assemblies (PLib) must find the loaded one only.
+                    int copies = AppDomain.CurrentDomain.GetAssemblies().Count(a => a.GetName().Name == "OniBrutalCheckOldMod");
+                    if (copies != 1) throw new InvalidOperationException($"{copies} copies of the mod are listed");
                     var instance = Activator.CreateInstance(type)!;
                     if ((int)type.GetMethod("Old")!.Invoke(instance, null)! != 7) throw new InvalidOperationException("the mod's own method changed");
                     var newMethod = current.GetType("IThing")!.GetMethod("New")!;

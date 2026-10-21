@@ -95,7 +95,14 @@ found to skip.
 ## Where a frame goes now
 
 Main-thread time at about 24 fps with every tweak, from a stopwatch around each entry point,
-averaged over 600-frame windows. Indented rows are part of the row above.
+averaged over 600-frame windows. A bar under another is part of it.
+
+![Where a frame goes, as a flame graph](media/frame-flamegraph.svg)
+
+<details>
+<summary>The numbers</summary>
+
+Indented rows are part of the row above. `scripts/flamegraph.py` draws the graph from this table.
 
 | Entry point | ms a frame |
 |---|---|
@@ -112,6 +119,8 @@ averaged over 600-frame windows. Indented rows are part of the row above.
 | `World.LateUpdate` | 1.4 |
 | Animation batch uploads | 1.0 |
 | Animation events | 0.8 |
+
+</details>
 
 Rendering is mostly off the main thread now. The GL thread is busy for about 22 ms a frame in
 parallel, 10 ms of it uploading textures.

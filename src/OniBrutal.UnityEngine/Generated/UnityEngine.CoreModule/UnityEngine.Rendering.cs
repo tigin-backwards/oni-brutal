@@ -2,6 +2,12 @@
 #nullable disable
 namespace UnityEngine.Rendering
 {
+    public static partial class AsyncGPUReadback
+    {
+    }
+    public partial struct AsyncGPUReadbackRequest
+    {
+    }
     public enum CameraEvent
     {
         BeforeDepthTexture = 0,
@@ -104,6 +110,16 @@ namespace UnityEngine.Rendering
         BlendProbes = 1,
         UseProxyVolume = 2,
         CustomProvided = 4,
+    }
+    [global::System.Flags]
+    public enum MeshUpdateFlags
+    {
+        Default = 0,
+        DontValidateIndices = 1,
+        DontResetBoneBounds = 2,
+        DontNotifyMeshUsers = 4,
+        DontRecalculateBounds = 8,
+        DontValidateLodRanges = 16,
     }
     public enum ReflectionProbeUsage
     {

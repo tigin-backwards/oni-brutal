@@ -669,6 +669,12 @@ namespace UnityEngine
     public partial class MonoBehaviour : global::UnityEngine.Behaviour
     {
     }
+    public enum MotionVectorGenerationMode
+    {
+        Camera = 0,
+        Object = 1,
+        ForceNoMotion = 2,
+    }
     [global::System.AttributeUsage(global::System.AttributeTargets.Property | global::System.AttributeTargets.Field, Inherited = true, AllowMultiple = false)]
     public sealed partial class MultilineAttribute : global::UnityEngine.PropertyAttribute
     {

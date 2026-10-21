@@ -52,6 +52,7 @@ namespace OniBrutal.Host
             ModVersionStamp.Install();
             ModAccess.Install();
             TranspiledCalls.Install();
+            UnboxedMethods.Install();
             GameTweaks.GameTweaks.Install(options.GameTweaks);
             StateMachineSaveNames.Install(dataDir, AppContext.BaseDirectory);
             return Player.Run(options, dataDir);
@@ -87,6 +88,9 @@ namespace OniBrutal.Host
             return failures == 0 ? 0 : 1;
         }
 
+        /// CheckRuntimeServices' patch of a value type's GetHashCode.
+        static void PatchedHash(ref int __result) => __result = -1;
+
         /// The services Mono provided in-box, exercised through the game's own code paths
         /// (ARCHITECTURE §2.1): Newtonsoft.Json (save header), BinaryFormatter (worldgen settings
         /// cloning), code pages (Ionic.Zip).
@@ -121,6 +125,44 @@ namespace OniBrutal.Host
                 return string.Join(",", (List<string>)copy!);
             });
             Check("Code page IBM437 (Ionic.Zip)", () => Encoding.GetEncoding("IBM437").EncodingName);
+            Check("A Harmony patch of a value type's GetHashCode after tier-up (UnboxedMethods)", () =>
+            {
+                UnboxedMethods.Install();
+                // The value type is emitted (dynamic code is optimized whatever this build is): an
+                // int field and GetHashCode returning it, patched to return -1 for every key.
+                var module = System.Reflection.Emit.AssemblyBuilder.DefineDynamicAssembly(new AssemblyName("OniBrutal.Host.Check"),
+                    System.Reflection.Emit.AssemblyBuilderAccess.Run).DefineDynamicModule("Check");
+                var builder = module.DefineType("PatchedHash", TypeAttributes.Public | TypeAttributes.Sealed | TypeAttributes.SequentialLayout, typeof(ValueType));
+                var value = builder.DefineField("Value", typeof(int), FieldAttributes.Public);
+                var hash = builder.DefineMethod(nameof(GetHashCode), MethodAttributes.Public | MethodAttributes.Virtual | MethodAttributes.HideBySig, typeof(int), Type.EmptyTypes);
+                var il = hash.GetILGenerator();
+                il.Emit(System.Reflection.Emit.OpCodes.Ldarg_0);
+                il.Emit(System.Reflection.Emit.OpCodes.Ldfld, value);
+                il.Emit(System.Reflection.Emit.OpCodes.Ret);
+                builder.DefineMethodOverride(hash, typeof(object).GetMethod(nameof(GetHashCode))!);
+                var type = builder.CreateType();
+                new HarmonyLib.Harmony("OniBrutal.Host.Check").Patch(type.GetMethod(nameof(GetHashCode)),
+                    postfix: new HarmonyLib.HarmonyMethod(typeof(Program), nameof(PatchedHash)));
+                // Keys hashed by the patch at tier 0, then looked up for long enough that the
+                // dictionary's methods (CoreLib's, which inline the key's GetHashCode) reach tier 1:
+                // a lookup inlining the original body misses.
+                var keys = new object[100];
+                var dictionary = (System.Collections.IDictionary)Activator.CreateInstance(typeof(Dictionary<,>).MakeGenericType(type, typeof(int)))!;
+                for (int i = 0; i < keys.Length; i++)
+                {
+                    keys[i] = Activator.CreateInstance(type)!;
+                    type.GetField("Value")!.SetValue(keys[i], i);
+                    dictionary[keys[i]] = i;
+                }
+                int misses = 0;
+                for (int round = 0; round < 100; round++)
+                {
+                    for (int i = 0; i < 10000; i++)
+                        if (!dictionary.Contains(keys[i % keys.Length])) misses++;
+                    System.Threading.Thread.Sleep(20);
+                }
+                return misses == 0 ? "no lookup missed" : throw new InvalidOperationException($"{misses} lookups missed");
+            });
             return failures;
         }
     }

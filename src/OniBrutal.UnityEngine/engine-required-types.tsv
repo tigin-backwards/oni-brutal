@@ -11,3 +11,7 @@ UnityEngine.CoreModule	JetBrains.Annotations.UsedImplicitlyAttribute	# mod libra
 UnityEngine.CoreModule	JetBrains.Annotations.MeansImplicitUseAttribute	# applied to PublicAPIAttribute
 UnityEngine.CoreModule	JetBrains.Annotations.ImplicitUseKindFlags	# UsedImplicitlyAttribute's arguments
 UnityEngine.CoreModule	JetBrains.Annotations.ImplicitUseTargetFlags	# UsedImplicitlyAttribute's arguments
+UnityEngine.CoreModule	UnityEngine.MotionVectorGenerationMode	# mods (Fast Track): Renderer.motionVectorGenerationMode
+UnityEngine.CoreModule	UnityEngine.Rendering.MeshUpdateFlags	# mods (Fast Track): Mesh.SetVertices/SetUVs/SetColors with flags
+UnityEngine.CoreModule	UnityEngine.Rendering.AsyncGPUReadback	# mods (Fast Save): timelapse images read back asynchronously
+UnityEngine.CoreModule	UnityEngine.Rendering.AsyncGPUReadbackRequest	# AsyncGPUReadback.Request's result

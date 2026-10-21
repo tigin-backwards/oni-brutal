@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using OniBrutal.Engine;
 using OniBrutal.Engine.Rendering;
+using UnityEngine.Rendering;
 
 namespace UnityEngine
 {
@@ -96,7 +97,7 @@ namespace UnityEngine
             }
         }
 
-        void SetPositions(IList<Vector3> values, int start, int count)
+        void SetPositions(IList<Vector3> values, int start, int count, MeshUpdateFlags flags = MeshUpdateFlags.Default)
         {
             if (!CanAccess("vertices")) return;
             CheckRange(values?.Count ?? 0, start, count);
@@ -119,7 +120,8 @@ namespace UnityEngine
             }
             m.VertexCount = count;
             m.Positions = count == 0 ? null : Slice(values, start, count);
-            m.RecalculateBounds();
+            if ((flags & MeshUpdateFlags.DontRecalculateBounds) == 0) m.RecalculateBounds();
+            else m.Changed();
         }
 
         static T[] Resize<T>(T[] array, int count)
@@ -140,6 +142,11 @@ namespace UnityEngine
         public void SetVertices(List<Vector3> inVertices, int start, int length) => SetPositions(inVertices, start, length);
         public void SetVertices(Vector3[] inVertices) => SetPositions(inVertices, 0, inVertices?.Length ?? 0);
         public void SetVertices(Vector3[] inVertices, int start, int length) => SetPositions(inVertices, start, length);
+        // Of the update flags only DontRecalculateBounds changes anything here: the index check
+        // stays (as in Unity, DontValidateIndices does not skip it), and nothing caches what the
+        // others would skip.
+        public void SetVertices(List<Vector3> inVertices, int start, int length, MeshUpdateFlags flags) => SetPositions(inVertices, start, length, flags);
+        public void SetVertices(Vector3[] inVertices, int start, int length, MeshUpdateFlags flags) => SetPositions(inVertices, start, length, flags);
 
         public void GetVertices(List<Vector3> vertices)
         {
@@ -157,6 +164,8 @@ namespace UnityEngine
         public void SetNormals(List<Vector3> inNormals) => SetNormalsImpl(inNormals, 0, inNormals?.Count ?? 0);
         public void SetNormals(List<Vector3> inNormals, int start, int length) => SetNormalsImpl(inNormals, start, length);
         public void SetNormals(Vector3[] inNormals) => SetNormalsImpl(inNormals, 0, inNormals?.Length ?? 0);
+        public void SetNormals(List<Vector3> inNormals, int start, int length, MeshUpdateFlags flags) => SetNormalsImpl(inNormals, start, length);
+        public void SetNormals(Vector3[] inNormals, int start, int length, MeshUpdateFlags flags) => SetNormalsImpl(inNormals, start, length);
 
         void SetNormalsImpl(IList<Vector3> values, int start, int count)
         {
@@ -177,6 +186,8 @@ namespace UnityEngine
         public void SetTangents(List<Vector4> inTangents) => SetTangentsImpl(inTangents, 0, inTangents?.Count ?? 0);
         public void SetTangents(List<Vector4> inTangents, int start, int length) => SetTangentsImpl(inTangents, start, length);
         public void SetTangents(Vector4[] inTangents) => SetTangentsImpl(inTangents, 0, inTangents?.Length ?? 0);
+        public void SetTangents(List<Vector4> inTangents, int start, int length, MeshUpdateFlags flags) => SetTangentsImpl(inTangents, start, length);
+        public void SetTangents(Vector4[] inTangents, int start, int length, MeshUpdateFlags flags) => SetTangentsImpl(inTangents, start, length);
 
         void SetTangentsImpl(IList<Vector4> values, int start, int count)
         {
@@ -215,6 +226,10 @@ namespace UnityEngine
         public void SetColors(List<Color32> inColors) => SetColors32Impl(inColors, 0, inColors?.Count ?? 0);
         public void SetColors(List<Color32> inColors, int start, int length) => SetColors32Impl(inColors, start, length);
         public void SetColors(Color32[] inColors) => SetColors32Impl(inColors, 0, inColors?.Length ?? 0);
+        public void SetColors(List<Color> inColors, int start, int length, MeshUpdateFlags flags) => SetColorsImpl(inColors, start, length);
+        public void SetColors(Color[] inColors, int start, int length, MeshUpdateFlags flags) => SetColorsImpl(inColors, start, length);
+        public void SetColors(List<Color32> inColors, int start, int length, MeshUpdateFlags flags) => SetColors32Impl(inColors, start, length);
+        public void SetColors(Color32[] inColors, int start, int length, MeshUpdateFlags flags) => SetColors32Impl(inColors, start, length);
 
         void SetColorsImpl(IList<Color> values, int start, int count)
         {
@@ -288,6 +303,9 @@ namespace UnityEngine
         public void SetUVs(int channel, List<Vector2> uvs, int start, int length) => SetUVsChecked(channel, 2, Widen(uvs), start, length);
         public void SetUVs(int channel, List<Vector3> uvs, int start, int length) => SetUVsChecked(channel, 3, Widen(uvs), start, length);
         public void SetUVs(int channel, List<Vector4> uvs, int start, int length) => SetUVsChecked(channel, 4, Copy(uvs), start, length);
+        public void SetUVs(int channel, List<Vector2> uvs, int start, int length, MeshUpdateFlags flags) => SetUVsChecked(channel, 2, Widen(uvs), start, length);
+        public void SetUVs(int channel, List<Vector3> uvs, int start, int length, MeshUpdateFlags flags) => SetUVsChecked(channel, 3, Widen(uvs), start, length);
+        public void SetUVs(int channel, List<Vector4> uvs, int start, int length, MeshUpdateFlags flags) => SetUVsChecked(channel, 4, Copy(uvs), start, length);
 
         /// List overloads log an invalid channel; array overloads throw (as in Unity).
         void SetUVsChecked(int channel, int dimension, Vector4[] values, int start, int count)
@@ -306,6 +324,9 @@ namespace UnityEngine
         public void SetUVs(int channel, Vector2[] uvs, int start, int length) => SetUvsArray(channel, 2, Widen(uvs), start, length);
         public void SetUVs(int channel, Vector3[] uvs, int start, int length) => SetUvsArray(channel, 3, Widen(uvs), start, length);
         public void SetUVs(int channel, Vector4[] uvs, int start, int length) => SetUvsArray(channel, 4, Copy(uvs), start, length);
+        public void SetUVs(int channel, Vector2[] uvs, int start, int length, MeshUpdateFlags flags) => SetUvsArray(channel, 2, Widen(uvs), start, length);
+        public void SetUVs(int channel, Vector3[] uvs, int start, int length, MeshUpdateFlags flags) => SetUvsArray(channel, 3, Widen(uvs), start, length);
+        public void SetUVs(int channel, Vector4[] uvs, int start, int length, MeshUpdateFlags flags) => SetUvsArray(channel, 4, Copy(uvs), start, length);
 
         void SetUvsArray(int channel, int dimension, Vector4[] values, int start, int count)
         {

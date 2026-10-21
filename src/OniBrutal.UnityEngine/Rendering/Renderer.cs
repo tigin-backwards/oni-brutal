@@ -78,6 +78,20 @@ namespace UnityEngine
             set => RendererData.RendererPriority = value;
         }
 
+        /// Kept for the scripts that set it: this engine does no occlusion culling.
+        public bool allowOcclusionWhenDynamic
+        {
+            get => RendererData.AllowOcclusionWhenDynamic;
+            set => RendererData.AllowOcclusionWhenDynamic = value;
+        }
+
+        /// Kept for the scripts that set it: this engine renders no motion vectors.
+        public MotionVectorGenerationMode motionVectorGenerationMode
+        {
+            get => RendererData.MotionVectors;
+            set => RendererData.MotionVectors = value;
+        }
+
         public int sortingLayerID
         {
             get => RendererData.SortingLayerId;
@@ -429,6 +443,8 @@ namespace OniBrutal.Engine.Rendering
         public ReflectionProbeUsage ReflectionProbeUsage = ReflectionProbeUsage.BlendProbes;
         public uint RenderingLayerMask = 1;
         public int RendererPriority;
+        public bool AllowOcclusionWhenDynamic = true;
+        public MotionVectorGenerationMode MotionVectors = MotionVectorGenerationMode.Object;
         public int SortingLayerId;
         public short SortingOrder;
         public Material[] Materials = Array.Empty<Material>();
@@ -483,6 +499,8 @@ namespace OniBrutal.Engine.Rendering
             ReflectionProbeUsage = r.ReflectionProbeUsage;
             RenderingLayerMask = r.RenderingLayerMask;
             RendererPriority = r.RendererPriority;
+            AllowOcclusionWhenDynamic = r.AllowOcclusionWhenDynamic;
+            MotionVectors = r.MotionVectors;
             SortingLayerId = r.SortingLayerId;
             SortingOrder = r.SortingOrder;
             Materials = (Material[])r.Materials.Clone();
@@ -506,6 +524,8 @@ namespace OniBrutal.Engine.Rendering
             ReflectionProbeUsage = (ReflectionProbeUsage)f.Get<byte>("m_ReflectionProbeUsage");
             RenderingLayerMask = f.Get<uint>("m_RenderingLayerMask");
             RendererPriority = f.Int("m_RendererPriority");
+            if (f.Contains("m_DynamicOccludee")) AllowOcclusionWhenDynamic = f.Get<byte>("m_DynamicOccludee") != 0;
+            if (f.Contains("m_MotionVectors")) MotionVectors = (MotionVectorGenerationMode)f.Get<byte>("m_MotionVectors");
             SetMaterials(f.Array("m_Materials").Cast<OniBrutal.Assets.TypeTrees.PPtr>().Select(p => resolver.Resolve(p) as Material).ToArray());
             SortingLayerId = f.Int("m_SortingLayerID");
             SortingOrder = f.Get<short>("m_SortingOrder");

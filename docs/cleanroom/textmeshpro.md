@@ -385,7 +385,11 @@ package (M9). They refine the sections above.
   `GetPreferredValues(w, h)` returns the unwrapped width. A text added to a default 100 × 100
   rect makes it 200 × 50. A text never laid out reports one material.
 - **Caret:** its material is set when the field is enabled; its CanvasRenderer is added before
-  the caret graphic.
+  the caret graphic. The caret graphic is created only when the field is enabled with a text
+  component. A field given its text component after it was enabled has no caret until it is
+  enabled again (measured: a mod builds its field in code, then assigns the viewport and text).
+  Canvas updates and frames don't create the caret, and nothing is logged; a rebuild with no
+  caret draws none.
 - **Stored alignment:** values 0–15 in the game's data use the oldest alignment table; a value
   set at run time is split into its horizontal and vertical bytes.
 - **Truncation:** Truncate and Ellipsis stop where the first line that doesn't fit begins,

@@ -456,7 +456,9 @@ namespace TMPro
         }
 
         // The caret graphic: a child of the viewport (its first), filling it, drawn under the
-        // text.
+        // text. It is created only here, when the field is enabled with a text component: a
+        // field given its text component later has none until it is enabled again, and
+        // nothing else creates it (a graphic created in a canvas rebuild would be logged).
         void EnsureCaret()
         {
             if (m_Caret != null || m_TextComponent == null) return;
@@ -1226,10 +1228,10 @@ namespace TMPro
         public virtual void GraphicUpdateComplete() { }
 
         // The caret (a quad caretWidth wide over the line at the caret) or the selection (a quad
-        // per line it covers), written to the caret graphic's canvas renderer.
+        // per line it covers), written to the caret graphic's canvas renderer. With no caret
+        // graphic, nothing is drawn.
         void UpdateCaretGeometry()
         {
-            EnsureCaret();
             if (m_Caret == null) return;
             var vh = new VertexHelper();
             if (isFocused && m_TextComponent != null && m_TextComponent.textInfo != null)

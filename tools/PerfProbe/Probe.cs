@@ -563,6 +563,8 @@ namespace PerfProbe
             MeasureLineRenderer();
             MeasureZeroScale();
             yield return MeasureZeroScaledMenu();
+            yield return MeasureLateInputField();
+            MeasureThirdHundredApis();
             if (System.IO.File.Exists(System.IO.Path.Combine(Path, "gui.txt"))) measureGuiFrames = 3;
             // PlayerPrefs (a mod keeps its settings in them): defaults, and the values written to the
             // player's prefs file by Save (read from the file after the run).
@@ -874,6 +876,93 @@ namespace PerfProbe
                 + $" contains(105,-10)={RectTransformUtility.RectangleContainsScreenPoint(paddedRect, below120 + new Vector2(105, 0), null, new Vector4(-10, -10, -10, -10))}"
                 + $" contains(left105,right+10)={RectTransformUtility.RectangleContainsScreenPoint(paddedRect, below120 + new Vector2(-105, 0), null, new Vector4(0, 0, 10, 0))}"
                 + $" contains(right105,right+10)={RectTransformUtility.RectangleContainsScreenPoint(paddedRect, below120 + new Vector2(105, 0), null, new Vector4(0, 0, 10, 0))}");
+            Destroy(canvas.gameObject);
+        }
+
+        // The Unity API of the third hundred Workshop mods: MinMaxCurve, the main and emission
+        // modules' setters, the noise module, Texture2D.blackTexture, Screen.safeArea and
+        // Mesh.RecalculateNormals.
+        void MeasureThirdHundredApis()
+        {
+            string Curve(ParticleSystem.MinMaxCurve c) => $"mode {c.mode} constant {c.constant} min {c.constantMin} max {c.constantMax} mult {c.curveMultiplier} curve {(c.curve == null ? "null" : c.curve.length.ToString())} curveMin {(c.curveMin == null ? "null" : c.curveMin.length.ToString())} curveMax {(c.curveMax == null ? "null" : c.curveMax.length.ToString())} eval {c.Evaluate(0.5f)}/{c.Evaluate(0.5f, 0.25f)}";
+            Debug.Log($"PERF measure minmaxcurve 3: {Curve(new ParticleSystem.MinMaxCurve(3f))}");
+            Debug.Log($"PERF measure minmaxcurve 1,2: {Curve(new ParticleSystem.MinMaxCurve(1f, 2f))}");
+            var ramp = AnimationCurve.Linear(0, 0, 1, 4);
+            Debug.Log($"PERF measure minmaxcurve 2*ramp: {Curve(new ParticleSystem.MinMaxCurve(2f, ramp))}");
+            Debug.Log($"PERF measure minmaxcurve 1*(ramp,const1): {Curve(new ParticleSystem.MinMaxCurve(1f, ramp, AnimationCurve.Constant(0, 1, 1)))}");
+            ParticleSystem.MinMaxCurve implicitCurve = 7f;
+            Debug.Log($"PERF measure minmaxcurve implicit 7: {Curve(implicitCurve)} default: {Curve(default)}");
+            var mc = new ParticleSystem.MinMaxCurve(5f); mc.constantMin = 1f;
+            Debug.Log($"PERF measure minmaxcurve set min on constant: {Curve(mc)}");
+            var go = new GameObject("PerfApiParticles");
+            var ps = go.AddComponent<ParticleSystem>();
+            var main = ps.main; var emission = ps.emission; var noise = ps.noise;
+            Debug.Log($"PERF measure particle defaults: lifetime [{Curve(main.startLifetime)}] rate [{Curve(emission.rateOverTime)}] speed {main.simulationSpeed} prewarm {main.prewarm} max {main.maxParticles} noise enabled {noise.enabled} strength [{Curve(noise.strength)}] mult {noise.strengthMultiplier}");
+            main.startLifetime = 2.5f; emission.rateOverTime = 40f; main.simulationSpeed = 0.5f; main.prewarm = true; main.maxParticles = -3; noise.strength = 0.75f;
+            Debug.Log($"PERF measure particle set: lifetime [{Curve(main.startLifetime)}] rate [{Curve(emission.rateOverTime)}] speed {main.simulationSpeed} prewarm {main.prewarm} max {main.maxParticles} noise enabled {noise.enabled} strength [{Curve(noise.strength)}] mult {noise.strengthMultiplier} playbackSpeed {ps.playbackSpeed}");
+            main.maxParticles = 250;
+            Debug.Log($"PERF measure particle max 250: {main.maxParticles}");
+            Destroy(go);
+            var black = Texture2D.blackTexture;
+            Debug.Log($"PERF measure blackTexture: {black.name} {black.width}x{black.height} {black.format} mips {black.mipmapCount} readable {black.isReadable} pixel {(black.isReadable ? ((Color32)black.GetPixel(0, 0)).ToString() : "-")} same {ReferenceEquals(black, Texture2D.blackTexture)} filter {black.filterMode} wrap {black.wrapMode}");
+            Debug.Log($"PERF measure safeArea: {Screen.safeArea} screen {Screen.width}x{Screen.height}");
+            var mesh = new Mesh();
+            // Two triangles sharing vertex 0, of different areas and angles at it, and a lone one.
+            mesh.vertices = new[] { new Vector3(0, 0, 0), new Vector3(1, 0, 0), new Vector3(0, 1, 0), new Vector3(0, 0, 3), new Vector3(5, 5, 5), new Vector3(6, 5, 5), new Vector3(5, 6, 5) };
+            mesh.triangles = new[] { 0, 1, 2, 0, 3, 1, 4, 6, 5 };
+            mesh.RecalculateNormals();
+            Debug.Log($"PERF measure normals: {string.Join(" ", System.Array.ConvertAll(mesh.normals, n => n.ToString("F5")))}");
+            var dup = new Mesh();
+            dup.vertices = new[] { new Vector3(0, 0, 0), new Vector3(1, 0, 0), new Vector3(0, 1, 0), new Vector3(0, 0, 0), new Vector3(0, 0, 3), new Vector3(1, 0, 0) };
+            dup.triangles = new[] { 0, 1, 2, 3, 4, 5 };
+            dup.RecalculateNormals();
+            Debug.Log($"PERF measure normals split: {string.Join(" ", System.Array.ConvertAll(dup.normals, n => n.ToString("F5")))}");
+            var degenerate = new Mesh();
+            degenerate.vertices = new[] { new Vector3(0, 0, 0), new Vector3(1, 0, 0), new Vector3(2, 0, 0), new Vector3(9, 9, 9) };
+            degenerate.triangles = new[] { 0, 1, 2 };
+            degenerate.RecalculateNormals();
+            Debug.Log($"PERF measure normals degenerate: {string.Join(" ", System.Array.ConvertAll(degenerate.normals, n => n.ToString("F5")))}");
+            Destroy(mesh); Destroy(dup); Destroy(degenerate);
+        }
+
+        // An input field built in code with its text component assigned after it was enabled (as
+        // ONI Together builds its chat field): whether the caret exists after a canvas update, a
+        // frame, and a disable and enable, and whether anything is logged.
+        System.Collections.IEnumerator MeasureLateInputField()
+        {
+            var logged = new System.Collections.Generic.List<string>();
+            Application.LogCallback catcher = (text, trace, type) => { if (type != LogType.Log) logged.Add(type + ": " + text); };
+            Application.logMessageReceived += catcher;
+            var canvas = new GameObject("PerfInputCanvas").AddComponent<Canvas>();
+            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            var field = new GameObject("PerfInput", typeof(UnityEngine.UI.Image), typeof(TMPro.TMP_InputField));
+            field.transform.SetParent(canvas.transform, false);
+            ((RectTransform)field.transform).sizeDelta = new Vector2(300, 30);
+            var input = field.GetComponent<TMPro.TMP_InputField>();
+            var viewport = new GameObject("TextViewport", typeof(UnityEngine.UI.RectMask2D), typeof(UnityEngine.UI.Image));
+            viewport.transform.SetParent(field.transform, false);
+            var viewportRect = (RectTransform)viewport.transform;
+            viewportRect.anchorMin = Vector2.zero; viewportRect.anchorMax = Vector2.one;
+            var text = new GameObject("Text", typeof(TMPro.TextMeshProUGUI));
+            text.transform.SetParent(viewport.transform, false);
+            input.textViewport = viewportRect;
+            input.textComponent = text.GetComponent<TMPro.TextMeshProUGUI>();
+            string Children() => string.Join(",", System.Linq.Enumerable.Select(System.Linq.Enumerable.Range(0, viewport.transform.childCount), i => viewport.transform.GetChild(i).name));
+            var line = new System.Text.StringBuilder($"PERF measure late input field: assigned [{Children()}]");
+            input.text = "hello";
+            Canvas.ForceUpdateCanvases();
+            line.Append($" forced [{Children()}]");
+            yield return null;
+            yield return null;
+            line.Append($" frames [{Children()}]");
+            field.SetActive(false);
+            field.SetActive(true);
+            line.Append($" reenabled [{Children()}]");
+            Canvas.ForceUpdateCanvases();
+            yield return null;
+            line.Append($" after [{Children()}] logged [{string.Join(" | ", logged)}]");
+            Application.logMessageReceived -= catcher;
+            Debug.Log(line.ToString());
             Destroy(canvas.gameObject);
         }
 

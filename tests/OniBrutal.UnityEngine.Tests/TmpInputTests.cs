@@ -398,6 +398,69 @@ namespace OniBrutal.Tests
         }
 
         [Fact]
+        public void AFieldGivenItsTextAfterEnablingHasNoCaretUntilEnabledAgain()
+        {
+            // Built in code as a mod builds its chat field: the field is enabled before it has
+            // a viewport and a text.
+            TmpTestSupport.LoadGameData();
+            if (EventSystem.current == null) new GameObject("EventSystem", typeof(EventSystem), typeof(SelectedUpdateModule));
+            var logs = new List<(string message, LogType type)>();
+            Application.LogCallback record = (message, _, type) => logs.Add((message, type));
+            Application.logMessageReceived += record;
+            try
+            {
+                var canvasGo = new GameObject("Canvas", typeof(RectTransform));
+                canvasGo.AddComponent<Canvas>().renderMode = RenderMode.ScreenSpaceOverlay;
+                var fieldGo = new GameObject("Field", typeof(RectTransform));
+                fieldGo.transform.SetParent(canvasGo.transform, false);
+                ((RectTransform)fieldGo.transform).sizeDelta = new Vector2(200f, 30f);
+                fieldGo.AddComponent<Image>();
+                var field = fieldGo.AddComponent<TMP_InputField>();
+                var viewportGo = new GameObject("TextViewport", typeof(RectTransform));
+                viewportGo.transform.SetParent(fieldGo.transform, false);
+                var viewport = (RectTransform)viewportGo.transform;
+                viewport.anchorMin = Vector2.zero;
+                viewport.anchorMax = Vector2.one;
+                viewport.sizeDelta = Vector2.zero;
+                viewportGo.AddComponent<RectMask2D>();
+                viewportGo.AddComponent<Image>();
+                var textGo = new GameObject("Text", typeof(RectTransform));
+                textGo.transform.SetParent(viewportGo.transform, false);
+                var text = textGo.AddComponent<TextMeshProUGUI>();
+                text.font = TmpTestSupport.Graystroke;
+                field.textViewport = viewport;
+                field.textComponent = text;
+                field.text = "hello";
+
+                string[] Children()
+                {
+                    var names = new string[viewport.childCount];
+                    for (int i = 0; i < names.Length; i++) names[i] = viewport.GetChild(i).name;
+                    return names;
+                }
+
+                // Canvas updates and frames don't create the caret.
+                Canvas.ForceUpdateCanvases();
+                Frame();
+                Frame();
+                Assert.Equal(new[] { "Text" }, Children());
+
+                // Enabled again with its text, the field has its caret.
+                fieldGo.SetActive(false);
+                fieldGo.SetActive(true);
+                Canvas.ForceUpdateCanvases();
+                Frame();
+                Assert.Equal(new[] { "Caret", "Text" }, Children());
+
+                Assert.Empty(logs);
+            }
+            finally
+            {
+                Application.logMessageReceived -= record;
+            }
+        }
+
+        [Fact]
         public void DeselectingEndsEditing()
         {
             var field = NewField();

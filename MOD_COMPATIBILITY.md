@@ -27,10 +27,11 @@ log lacks.
 | Mod | Notes |
 |---|---|
 | Fast Track | 0 errors; about 30 fps, where the original runs 5–6 |
-| Rocketry Expanded | 0 errors on U57 and on the Twinkleverse save it was played with |
+| Rocketry Expanded | 0 errors on U57 and on the Twinkleverse save it was played with; clicks select what is under the cursor (its flat-scaled world selector) |
 | Synchronized Building Groups | side screen and group dialog are the same as in the original |
 | Better Info Cards | its hover cards draw as in the original (needed ARCHITECTURE D17, D18) |
-| True Tiles | its 2022.3 asset bundle loads |
+| True Tiles | its 2022.3 asset bundle loads; tiles connect as in the original (needed ARCHITECTURE D21) |
+| Oxygen Not Included Together | menu and U57 colony, 0 errors (needed its IMGUI and asset bundle API, ARCHITECTURE D20, and the TMP caret fix); a multiplayer session not tested (needs two Steam accounts) |
 | Unified Background, Preset Manager, Choose Neural Vacillator, Mod Profile Manager | issue #2's set, 0 errors with the mods above |
 
 ## Runs (top-100 sweep)
@@ -79,12 +80,6 @@ Generator · AllBiomesWorld - Fuleria · Duplicant Status Bar · Big box · Wran
 Incubator · Customize Buildings · Paint Walls · Suit Recharger · Storage Pod · Rebuildable AETN ·
 Better Repair · Real Insulation Tile · Closest Material · Solar System Worlds · Hideable Heavy-Watt
 · Asphalt Tile
-
-## In progress
-
-| Mod | What it needs |
-|---|---|
-| Oxygen Not Included Together | `AssetBundle.LoadFromMemory` and `GetAllScenePaths`, a `Random.ColorHSV` overload, IMGUI's `GUI.ModalWindow` and `GUILayout.Toolbar` |
 
 ## Broken upstream
 

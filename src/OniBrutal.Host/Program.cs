@@ -54,7 +54,9 @@ namespace OniBrutal.Host
             ModVersionStamp.Install();
             ModAccess.Install();
             TranspiledCalls.Install();
+            TranspiledTryEntries.Install();
             UnboxedMethods.Install();
+            SharedGenerics.Install();
             MonoEnumFormat.Install();
             GameTweaks.GameTweaks.Install(options.GameTweaks);
             StateMachineSaveNames.Install(dataDir, AppContext.BaseDirectory);
@@ -166,6 +168,59 @@ namespace OniBrutal.Host
                 }
                 return misses == 0 ? "no lookup missed" : throw new InvalidOperationException($"{misses} lookups missed");
             });
+            Check("A transpiler leaving a value on the stack before a try block (TranspiledTryEntries)", () =>
+            {
+                TranspiledTryEntries.Install();
+                new HarmonyLib.Harmony("OniBrutal.Host.Check").Patch(typeof(Program).GetMethod(nameof(Guarded), BindingFlags.NonPublic | BindingFlags.Static),
+                    transpiler: new HarmonyLib.HarmonyMethod(typeof(Program), nameof(LeaveValueBehind)));
+                int doubled = Guarded(21);
+                return doubled == 42 ? "the method compiles and runs as in Mono" : throw new InvalidOperationException($"returned {doubled}");
+            });
+            Check("A Harmony patch of a generic class's method for one reference type argument (SharedGenerics)", () =>
+            {
+                SharedGenerics.Install();
+                // Emitted (dynamic code is optimized whatever this build is): Pool<T>.Draw, and a
+                // caller of Pool<string>.Draw; the patch is made on Pool<object>.Draw, whose code
+                // Pool<string> shares, as Better Info Cards patches HoverTextDrawer.Pool<MonoBehaviour>.
+                var module = System.Reflection.Emit.AssemblyBuilder.DefineDynamicAssembly(new AssemblyName("OniBrutal.Host.SharedCheck"),
+                    System.Reflection.Emit.AssemblyBuilderAccess.Run).DefineDynamicModule("SharedCheck");
+                var pool = module.DefineType("Pool", TypeAttributes.Public | TypeAttributes.Sealed);
+                var t = pool.DefineGenericParameters("T")[0];
+                t.SetGenericParameterAttributes(GenericParameterAttributes.ReferenceTypeConstraint);
+                var last = pool.DefineField("last", t, FieldAttributes.Public);
+                pool.DefineDefaultConstructor(MethodAttributes.Public);
+                var draw = pool.DefineMethod("Draw", MethodAttributes.Public | MethodAttributes.HideBySig, t, [t]);
+                var il = draw.GetILGenerator();
+                il.Emit(System.Reflection.Emit.OpCodes.Ldarg_0);
+                il.Emit(System.Reflection.Emit.OpCodes.Ldarg_1);
+                il.Emit(System.Reflection.Emit.OpCodes.Stfld, last);
+                il.Emit(System.Reflection.Emit.OpCodes.Ldarg_1);
+                il.Emit(System.Reflection.Emit.OpCodes.Ret);
+                var poolType = pool.CreateType();
+                var caller = module.DefineType("Caller", TypeAttributes.Public | TypeAttributes.Sealed | TypeAttributes.Abstract);
+                var stringPool = poolType.MakeGenericType(typeof(string));
+                var run = caller.DefineMethod("Run", MethodAttributes.Public | MethodAttributes.Static, typeof(void), [stringPool]);
+                il = run.GetILGenerator();
+                il.Emit(System.Reflection.Emit.OpCodes.Ldarg_0);
+                il.Emit(System.Reflection.Emit.OpCodes.Ldstr, "x");
+                il.Emit(System.Reflection.Emit.OpCodes.Call, stringPool.GetMethod("Draw")!);
+                il.Emit(System.Reflection.Emit.OpCodes.Pop);
+                il.Emit(System.Reflection.Emit.OpCodes.Ret);
+                var callerType = caller.CreateType();
+                new HarmonyLib.Harmony("OniBrutal.Host.Check").Patch(poolType.MakeGenericType(typeof(object)).GetMethod("Draw"),
+                    postfix: new HarmonyLib.HarmonyMethod(typeof(Program), nameof(CountDraw)));
+                var instance = Activator.CreateInstance(stringPool)!;
+                var runMethod = callerType.GetMethod("Run")!;
+                int missed = 0;
+                for (int round = 0; round < 100; round++)
+                {
+                    int before = drawn;
+                    for (int i = 0; i < 1000; i++) runMethod.Invoke(null, [instance]);
+                    missed += 1000 - (drawn - before);
+                    System.Threading.Thread.Sleep(20);
+                }
+                return missed == 0 ? "every call ran the patch" : throw new InvalidOperationException($"{missed} calls ran the original");
+            });
             Check("Exceptions nothing catches on other threads (UnhandledExceptions)", () =>
             {
                 UnhandledExceptions.Install();
@@ -247,6 +302,36 @@ namespace OniBrutal.Host
             });
             return failures;
         }
+
+        sealed class SharedPool<T> where T : class
+        {
+            public T? last;
+            public T Draw(T item) { last = item; return item; }
+        }
+
+        static int drawn;
+        static void CountDraw() => drawn++;
+
+        /// CheckRuntimeServices' method whose transpiled copy enters its try block with a value on the stack.
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+        static int Guarded(int value)
+        {
+            try
+            {
+                value = checked(value * 2);
+            }
+            finally
+            {
+                guardedRuns++;
+            }
+            return value;
+        }
+
+        static int guardedRuns;
+
+        /// The transpiler: a value pushed first and never used, as Better Info Cards leaves one.
+        static IEnumerable<HarmonyLib.CodeInstruction> LeaveValueBehind(IEnumerable<HarmonyLib.CodeInstruction> instructions) =>
+            instructions.Prepend(new HarmonyLib.CodeInstruction(System.Reflection.Emit.OpCodes.Ldc_I4_7));
 
         /// CheckRuntimeServices' patch of Enum.ToString(), as element mods write theirs.
         static void NamedDay(Enum __instance, ref string __result)

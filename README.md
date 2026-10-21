@@ -63,7 +63,7 @@ across every core, and their pauses are about a quarter as long.
 
 Measured on a Ryzen 7 9800X3D with an RTX 3090.
 
-https://github.com/user-attachments/assets/a0fb45c5-121d-4ef9-8310-9d7b556aa089
+https://github.com/user-attachments/assets/8b82ce9e-010b-4f8c-85c8-57148be4927d
 
 The same save, view and machine, recorded back to back; each side's frame rate was measured
 while it was recorded.

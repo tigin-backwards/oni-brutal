@@ -78,6 +78,27 @@ namespace PerfProbe
             return count;
         }
 
+        /// `truetiles.txt` beside the probe: once the colony is up, what True Tiles holds and which
+        /// main textures the game's tile renderers draw with.
+        static void ReportTileTextures()
+        {
+            var flags = System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Static;
+            var assetsType = FindType("TrueTiles.Cmps.TileAssets");
+            var instance = assetsType?.GetProperty("Instance", flags)?.GetValue(null);
+            var table = instance == null ? null : assetsType.GetField("textureAssets", flags)?.GetValue(instance) as System.Collections.IDictionary;
+            Debug.Log($"PERF truetiles assets: {(assetsType == null ? "no TileAssets" : instance == null ? "no instance" : table == null ? "no table" : table.Count + " defs")}");
+            var renderer = World.Instance.blockTileRenderer;
+            var infos = typeof(Rendering.BlockTileRenderer).GetField("renderInfo", flags).GetValue(renderer) as System.Collections.IDictionary;
+            var counts = new System.Collections.Generic.Dictionary<string, int>();
+            foreach (var info in infos.Values)
+            {
+                var material = info.GetType().GetField("material", flags).GetValue(info) as Material;
+                var name = material == null ? "null" : material.HasProperty("_MainTex") && material.GetTexture("_MainTex") is { } t ? t.name : "none";
+                counts[name] = counts.TryGetValue(name, out var n) ? n + 1 : 1;
+            }
+            Debug.Log($"PERF truetiles renderers: {infos.Count} [{string.Join(", ", System.Linq.Enumerable.Take(System.Linq.Enumerable.Select(counts, kv => kv.Key + "×" + kv.Value), 30))}]");
+        }
+
         /// The view camera.txt asked for, held there.
         (Vector3 At, float Size)? view;
 
@@ -541,6 +562,7 @@ namespace PerfProbe
             MeasureMissingScripts();
             MeasureLineRenderer();
             MeasureZeroScale();
+            yield return MeasureZeroScaledMenu();
             if (System.IO.File.Exists(System.IO.Path.Combine(Path, "gui.txt"))) measureGuiFrames = 3;
             // PlayerPrefs (a mod keeps its settings in them): defaults, and the values written to the
             // player's prefs file by Save (read from the file after the run).
@@ -793,6 +815,65 @@ namespace PerfProbe
             img.localScale = new Vector3(1, 1, 0);
             var centre = new Vector2(Screen.width / 2f, Screen.height / 2f);
             Debug.Log($"PERF measure zeroscale ui: centre {RectTransformUtility.RectangleContainsScreenPoint(img, centre)} inside {RectTransformUtility.RectangleContainsScreenPoint(img, centre + new Vector2(10, 10))} outside {RectTransformUtility.RectangleContainsScreenPoint(img, new Vector2(10, 10))} local {(RectTransformUtility.ScreenPointToLocalPointInRectangle(img, new Vector2(10, 10), null, out var local) ? local.ToString("F2") : "false")}");
+            Destroy(canvas.gameObject);
+        }
+
+        // A menu popping in from scale 0 (the game's OptionsMenu Content): which of its buttons the
+        // EventSystem hits while the parent's scale is 0, half, and 1.
+        System.Collections.IEnumerator MeasureZeroScaledMenu()
+        {
+            var canvas = new GameObject("PerfZeroMenuCanvas").AddComponent<Canvas>();
+            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            canvas.sortingOrder = 30000;
+            canvas.gameObject.AddComponent<UnityEngine.UI.GraphicRaycaster>();
+            var content = new GameObject("Content", typeof(RectTransform)).GetComponent<RectTransform>();
+            content.SetParent(canvas.transform, false);
+            content.sizeDelta = new Vector2(400, 300);
+            UnityEngine.UI.Image Button(string name, Vector2 position)
+            {
+                var b = new GameObject(name, typeof(RectTransform)).AddComponent<UnityEngine.UI.Image>();
+                b.rectTransform.SetParent(content, false);
+                b.rectTransform.sizeDelta = new Vector2(200, 30);
+                b.rectTransform.anchoredPosition = position;
+                return b;
+            }
+            Button("Centre", Vector2.zero);
+            Button("Below", new Vector2(0, -50));
+            Button("Above", new Vector2(0, 50));
+            var events = UnityEngine.EventSystems.EventSystem.current;
+            var centre = new Vector2(Screen.width / 2f, Screen.height / 2f);
+            string Hit(Vector2 point)
+            {
+                if (events == null) return "no event system";
+                var results = new System.Collections.Generic.List<UnityEngine.EventSystems.RaycastResult>();
+                events.RaycastAll(new UnityEngine.EventSystems.PointerEventData(events) { position = point }, results);
+                return string.Join(",", results.FindAll(r => r.gameObject.transform.IsChildOf(canvas.transform)).ConvertAll(r => r.gameObject.name));
+            }
+            foreach (var scale in new[] { Vector3.one, Vector3.zero, Vector3.one * 0.5f, new Vector3(0, 1, 1), new Vector3(1, 0, 1), Vector3.one })
+            {
+                content.localScale = scale;
+                yield return null;
+                yield return null;
+                var line = new System.Text.StringBuilder($"PERF measure zeroscale menu scale {scale}:");
+                foreach (var (label, offset) in new[] { ("centre", Vector2.zero), ("below50", new Vector2(0, -50)), ("above50", new Vector2(0, 50)), ("right90", new Vector2(90, 0)), ("far", new Vector2(-400, 250)) })
+                    line.Append($" {label}=[{Hit(centre + offset)}]");
+                line.Append($" contains(below,centre)={RectTransformUtility.RectangleContainsScreenPoint((RectTransform)content.Find("Below"), centre)} contains(below,above50)={RectTransformUtility.RectangleContainsScreenPoint((RectTransform)content.Find("Below"), centre + new Vector2(0, 50))}");
+                Debug.Log(line.ToString());
+            }
+            // Raycast padding (positive shrinks the hit area) and the offset of RectangleContainsScreenPoint.
+            var padded = Button("Padded", new Vector2(0, -120));
+            padded.raycastPadding = new Vector4(10, 5, 10, 5);
+            yield return null;
+            yield return null;
+            var below120 = centre + new Vector2(0, -120);
+            var paddedRect = padded.rectTransform;
+            Debug.Log($"PERF measure zeroscale padding: in95=[{Hit(below120 + new Vector2(95, 0))}] in85=[{Hit(below120 + new Vector2(85, 0))}] up13=[{Hit(below120 + new Vector2(0, 13))}] up8=[{Hit(below120 + new Vector2(0, 8))}]"
+                + $" contains(105,+10)={RectTransformUtility.RectangleContainsScreenPoint(paddedRect, below120 + new Vector2(105, 0), null, new Vector4(10, 10, 10, 10))}"
+                + $" contains(95,+10)={RectTransformUtility.RectangleContainsScreenPoint(paddedRect, below120 + new Vector2(95, 0), null, new Vector4(10, 10, 10, 10))}"
+                + $" contains(95,-10)={RectTransformUtility.RectangleContainsScreenPoint(paddedRect, below120 + new Vector2(95, 0), null, new Vector4(-10, -10, -10, -10))}"
+                + $" contains(105,-10)={RectTransformUtility.RectangleContainsScreenPoint(paddedRect, below120 + new Vector2(105, 0), null, new Vector4(-10, -10, -10, -10))}"
+                + $" contains(left105,right+10)={RectTransformUtility.RectangleContainsScreenPoint(paddedRect, below120 + new Vector2(-105, 0), null, new Vector4(0, 0, 10, 0))}"
+                + $" contains(right105,right+10)={RectTransformUtility.RectangleContainsScreenPoint(paddedRect, below120 + new Vector2(105, 0), null, new Vector4(0, 0, 10, 0))}");
             Destroy(canvas.gameObject);
         }
 
@@ -1115,6 +1196,7 @@ namespace PerfProbe
             }
             while (Game.Instance == null || SpeedControlScreen.Instance == null) yield return null;
             Debug.Log($"PERF colony f{Time.frameCount} cycle {GameClock.Instance.GetCycle()}{RuntimeCounters.Jit()}");
+            if (System.IO.File.Exists(System.IO.Path.Combine(Path, "truetiles.txt"))) ReportTileTextures();
             // `pointer.txt`: what the game's hover handling reads (PlayerController.UpdateHover, the
             // select tool's hover card) while the mouse has not moved, every 120 frames, 6 times.
             if (System.IO.File.Exists(System.IO.Path.Combine(Path, "pointer.txt"))) StartCoroutine(Pointer());

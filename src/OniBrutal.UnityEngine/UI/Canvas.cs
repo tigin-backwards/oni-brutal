@@ -406,14 +406,41 @@ namespace UnityEngine
 
         public static bool RectangleContainsScreenPoint(RectTransform rect, Vector2 screenPoint, Camera cam) => RectangleContainsScreenPoint(rect, screenPoint, cam, Vector4.zero);
 
-        /// The point projected onto the rect's plane lies inside the rect grown by offset
-        /// (left, bottom, right, top).
+        /// Whether the screen point lies in the rect (shrunk by offset: left, bottom, right, top, as
+        /// a graphic's raycastPadding) as drawn: its four corners projected to the screen, edges
+        /// included. As measured in the original player, a rect collapsed by a zero scale then
+        /// contains only what it collapsed to: the point (a menu popping in from scale 0), or the
+        /// line (a scale of 0 on one axis); one flattened in z only (Rocketry Expanded's scale
+        /// (1, 1), z 0) is tested as drawn.
         public static bool RectangleContainsScreenPoint(RectTransform rect, Vector2 screenPoint, Camera cam, Vector4 offset)
         {
             if (rect == null) return false;
-            if (!ScreenPointToLocalPointInRectangle(rect, screenPoint, cam, out var local)) return false;
             var r = rect.rect;
-            return local.x >= r.xMin - offset.x && local.x <= r.xMax + offset.z && local.y >= r.yMin - offset.y && local.y <= r.yMax + offset.w;
+            var toWorld = rect.localToWorldMatrix;
+            Vector2 Screen(float x, float y) => WorldToScreenPoint(cam, toWorld.MultiplyPoint3x4(new Vector3(x, y, 0f)));
+            float x0 = r.xMin + offset.x, y0 = r.yMin + offset.y, x1 = r.xMax - offset.z, y1 = r.yMax - offset.w;
+            if (x0 > x1 || y0 > y1) return false;
+            Vector2 a = Screen(x0, y0), b = Screen(x0, y1), c = Screen(x1, y1), d = Screen(x1, y0);
+            return InTriangle(screenPoint, a, b, c) || InTriangle(screenPoint, a, c, d);
+        }
+
+        /// Point in triangle, edges included; a degenerate triangle contains the points of its edges.
+        static bool InTriangle(Vector2 p, Vector2 a, Vector2 b, Vector2 c)
+        {
+            static float Cross(Vector2 o, Vector2 u, Vector2 v) => (u.x - o.x) * (v.y - o.y) - (u.y - o.y) * (v.x - o.x);
+            float area = Cross(a, b, c);
+            if (Mathf.Abs(area) < 1e-6f) return OnSegment(p, a, b) || OnSegment(p, b, c) || OnSegment(p, c, a);
+            float s1 = Cross(a, b, p), s2 = Cross(b, c, p), s3 = Cross(c, a, p);
+            return area > 0f ? s1 >= 0f && s2 >= 0f && s3 >= 0f : s1 <= 0f && s2 <= 0f && s3 <= 0f;
+        }
+
+        static bool OnSegment(Vector2 p, Vector2 a, Vector2 b)
+        {
+            const float near = 1e-3f;
+            var ab = b - a;
+            float length = ab.sqrMagnitude;
+            float t = length > 0f ? Mathf.Clamp01(Vector2.Dot(p - a, ab) / length) : 0f;
+            return (p - (a + ab * t)).sqrMagnitude < near;
         }
 
         public static bool ScreenPointToWorldPointInRectangle(RectTransform rect, Vector2 screenPoint, Camera cam, out Vector3 worldPoint)

@@ -386,6 +386,38 @@ namespace OniBrutal.Tests
             var centre = new Vector2(image.position.x, image.position.y);
             Assert.True(RectTransformUtility.RectangleContainsScreenPoint(image, centre + new Vector2(10, 10)));
             Assert.False(RectTransformUtility.RectangleContainsScreenPoint(image, centre + new Vector2(-300, -200)));
+
+            // A menu popping in from scale 0 (measured): its collapsed buttons contain only the point
+            // they collapsed to; at half scale, their halved rects.
+            var content = new GameObject("content", typeof(RectTransform)).GetComponent<RectTransform>();
+            content.SetParent(canvas.transform, false);
+            var below = new GameObject("below", typeof(RectTransform)).GetComponent<RectTransform>();
+            below.SetParent(content, false);
+            below.sizeDelta = new Vector2(200, 30);
+            below.anchoredPosition = new Vector2(0, -50);
+            var at = new Vector2(content.position.x, content.position.y);
+            content.localScale = Vector3.zero;
+            Assert.True(RectTransformUtility.RectangleContainsScreenPoint(below, at));
+            Assert.False(RectTransformUtility.RectangleContainsScreenPoint(below, at + new Vector2(0, 50)));
+            Assert.False(RectTransformUtility.RectangleContainsScreenPoint(below, at + new Vector2(90, 0)));
+            content.localScale = new Vector3(0.5f, 0.5f, 0.5f);
+            Assert.False(RectTransformUtility.RectangleContainsScreenPoint(below, at));
+            Assert.True(RectTransformUtility.RectangleContainsScreenPoint(below, at + new Vector2(0, -25)));
+            // Collapsed on one axis: the line it collapsed to.
+            content.localScale = new Vector3(0, 1, 1);
+            Assert.True(RectTransformUtility.RectangleContainsScreenPoint(below, at + new Vector2(0, -50)));
+            Assert.False(RectTransformUtility.RectangleContainsScreenPoint(below, at + new Vector2(10, -50)));
+            content.localScale = new Vector3(1, 0, 1);
+            Assert.True(RectTransformUtility.RectangleContainsScreenPoint(below, at + new Vector2(90, 0)));
+            Assert.False(RectTransformUtility.RectangleContainsScreenPoint(below, at + new Vector2(90, -5)));
+            content.localScale = Vector3.one;
+            Assert.True(RectTransformUtility.RectangleContainsScreenPoint(below, at + new Vector2(0, -50)));
+            Assert.False(RectTransformUtility.RectangleContainsScreenPoint(below, at));
+            // The offset shrinks the rect (left, bottom, right, top), as a graphic's raycastPadding.
+            var shrunk = new Vector4(10, 10, 10, 10);
+            Assert.False(RectTransformUtility.RectangleContainsScreenPoint(below, at + new Vector2(95, -50), null, shrunk));
+            Assert.True(RectTransformUtility.RectangleContainsScreenPoint(below, at + new Vector2(85, -50), null, shrunk));
+            Assert.True(RectTransformUtility.RectangleContainsScreenPoint(below, at + new Vector2(105, -50), null, -shrunk));
         }
 
         [Fact]

@@ -404,8 +404,13 @@ It updates when its rect or its parent's rect changes, and in the update after i
   - **Display:** only graphics of the raycaster's canvas, on the pointer's display.
   - **Candidates:** for each graphic of its canvas (`GraphicRegistry`) that is a raycast
     target, has a non-zero depth (has been drawn) and is not culled, the pointer must be
-    inside the graphic's rect, including `raycastPadding`, using the canvas's event camera
-    for non-overlay canvases. The graphic's `Raycast` must pass.
+    inside the graphic's rect, as `RectTransformUtility.RectangleContainsScreenPoint(rect,
+    point, eventCamera, raycastPadding)` tests it (the padding as its offset). Use the
+    canvas's event camera for non-overlay canvases. The graphic's `Raycast` must pass.
+    - This test is on the rect as drawn on the screen. As measured, a graphic collapsed by
+      a zero scale (a menu popping in from scale 0) is hit only on the point or line it
+      collapsed to, not everywhere. Mapping the pointer into the rect's local space does
+      not give this: a zero scale maps every point onto the pivot.
   - **Order:** the hits are sorted by depth, the highest first. With
     `ignoreReversedGraphics`, graphics facing away from the camera are skipped.
   - **Blocking:** with blocking objects, a 2D or 3D physics hit nearer than the canvas cuts

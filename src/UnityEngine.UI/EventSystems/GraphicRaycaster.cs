@@ -156,19 +156,11 @@ namespace UnityEngine.UI
             {
                 var g = graphics[i];
                 if (!g.raycastTarget || g.canvasRenderer.cull || g.depth == -1) continue;
-                if (!ContainsPadded(g.rectTransform, point, camera, g.raycastPadding)) continue;
+                if (!RectTransformUtility.RectangleContainsScreenPoint(g.rectTransform, point, camera, g.raycastPadding)) continue;
                 if (camera != null && camera.WorldToScreenPoint(g.rectTransform.position).z > camera.farClipPlane) continue;
                 if (g.Raycast(point, camera)) results.Add(g);
             }
             results.Sort((a, b) => b.depth.CompareTo(a.depth));
-        }
-
-        /// The point lies in the rect inset by the padding (left, bottom, right, top).
-        static bool ContainsPadded(RectTransform rect, Vector2 point, Camera camera, Vector4 padding)
-        {
-            if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(rect, point, camera, out var local)) return false;
-            var r = rect.rect;
-            return local.x >= r.xMin + padding.x && local.x <= r.xMax - padding.z && local.y >= r.yMin + padding.y && local.y <= r.yMax - padding.w;
         }
     }
 }

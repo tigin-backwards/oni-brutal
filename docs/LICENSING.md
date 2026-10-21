@@ -150,9 +150,5 @@ equivalent (§2.1: the README), its logo before gameplay (§2.2: drawn on the ga
 copied next to the player by the build, so every setup and release carries it). The logo and
 notice are Ahwoo's, from ahwootech/brutal-branding.
 
-## This project's own licence
-
-None yet: the repository is unlicensed (all rights reserved) by decision of 2026-10-19, until
-a public release is prepared. Its history was cleaned for that (2026-10-20): the code once
-ported from Unity's managed source (see above) and a Steam double that owned every DLC are
-removed from every commit.
+## This project's license
+All Rights Reserved.

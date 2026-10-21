@@ -9,6 +9,9 @@ namespace UnityEngine
     public partial class Collider2D : global::UnityEngine.Behaviour
     {
     }
+    public sealed partial class EdgeCollider2D : global::UnityEngine.Collider2D
+    {
+    }
     public partial class Physics2D
     {
     }

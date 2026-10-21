@@ -35,3 +35,4 @@ UnityEngine.ParticleSystemModule	UnityEngine.ParticleSystem+MinMaxCurve	# mods (
 UnityEngine.ParticleSystemModule	UnityEngine.ParticleSystemCurveMode	# MinMaxCurve.mode
 UnityEngine.ParticleSystemModule	UnityEngine.ParticleSystem+NoiseModule	# mods (Decor Pack S): ParticleSystem.noise
 UnityEngine.CoreModule	UnityEngine.PlayerPrefs	# mods: settings kept in PlayerPrefs (DuplicantStatusBar-style UIs)
+UnityEngine.Physics2DModule	UnityEngine.EdgeCollider2D	# mods' bundles (Aki's Snow Things): a prefab's edge collider

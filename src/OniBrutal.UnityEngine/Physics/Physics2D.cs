@@ -171,6 +171,28 @@ namespace OniBrutal.Engine
         }
     }
 
+    /// An EdgeCollider2D's open line (points in local space) and its radius.
+    internal sealed class EdgeCollider2DNative : Collider2DNative
+    {
+        public Vector2[] Points = Array.Empty<Vector2>();
+        public float EdgeRadius;
+
+        public override void CopyStateFrom(NativeObject source)
+        {
+            base.CopyStateFrom(source);
+            var s = (EdgeCollider2DNative)source;
+            Points = (Vector2[])s.Points.Clone();
+            EdgeRadius = s.EdgeRadius;
+        }
+
+        public override void Bind(Fields data, IReferenceResolver resolver)
+        {
+            base.Bind(data, resolver);
+            Points = data.Array("m_Points").Cast<Fields>().Select(TransformBinder.ToVector2).ToArray();
+            EdgeRadius = data.Float("m_EdgeRadius");
+        }
+    }
+
     internal sealed class Rigidbody2DNative : ComponentNative
     {
         public Vector2 LinearVelocity;

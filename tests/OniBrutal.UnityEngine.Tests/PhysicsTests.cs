@@ -112,6 +112,19 @@ namespace OniBrutal.Tests
         }
 
         [Fact]
+        public void EdgeCollider2DKeepsItsLineWhenCloned()
+        {
+            var go = new GameObject("edge");
+            var edge = (EdgeCollider2DNative)go.AddComponent<EdgeCollider2D>().Native;
+            edge.Points = new[] { Vector2.zero, new Vector2(2f, 1f) };
+            edge.EdgeRadius = 0.25f;
+            var copy = (EdgeCollider2DNative)Object.Instantiate(go).GetComponent<EdgeCollider2D>().Native;
+            Assert.Equal(edge.Points, copy.Points);
+            Assert.NotSame(edge.Points, copy.Points);
+            Assert.Equal(0.25f, copy.EdgeRadius);
+        }
+
+        [Fact]
         public void GravityComesFromThePhysicsManager()
         {
             var game = System.Environment.GetEnvironmentVariable("ONI_GAME_DIR")

@@ -22,6 +22,7 @@ build "$root/src/OniBrutal.Host" win-x64
 build "$root/src/OniBrutal.Restarter" win-x64
 win="$out/windows/oni-brutal"
 stage "$win" setup.ps1
+cp "$root/setup.cmd" "$win/"
 cp -r "$root/out/bin/OniBrutal.Host/release_win-x64/." "$win/player/"
 rm -f "$win/player/Restarter" "$win/player/"FacadeGen*
 cp "$root/out/bin/OniBrutal.Restarter/release_win-x64/Restarter."{exe,dll,deps.json,runtimeconfig.json} "$win/player/"

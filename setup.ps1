@@ -5,12 +5,17 @@
 # %LOCALAPPDATA%\oni-brutal\player, and puts the line for the game's Steam launch options on the
 # clipboard. The install location stays the same, so after an update running this again is all
 # that is needed.
-#   powershell -ExecutionPolicy Bypass -File setup.ps1 [GAME_DIR]
+#   setup.cmd [GAME_DIR], or powershell -ExecutionPolicy Bypass -File setup.ps1 [GAME_DIR]
 param([string]$Game)
 $ErrorActionPreference = 'Stop'
 $here = $PSScriptRoot
 
-function Die($message) { Write-Host "setup: $message" -ForegroundColor Red; exit 1 }
+# Explorer's "Run with PowerShell" closes the window as soon as the script ends; started that way
+# (its command sets the process's execution policy), the window stays open until Enter.
+$fromExplorer = [Environment]::CommandLine -match 'Set-ExecutionPolicy -Scope Process Bypass'
+function Finish($code) { if ($fromExplorer) { Read-Host 'Press Enter to close' | Out-Null }; exit $code }
+function Die($message) { Write-Host "setup: $message" -ForegroundColor Red; Finish 1 }
+trap { Die $_ }
 
 # The game: the argument, or the first Steam library holding it.
 function Find-Game {
@@ -34,6 +39,9 @@ Write-Host "Game: $Game"
 
 if (Test-Path (Join-Path $here 'player\OniBrutal.exe')) {
     $built = Join-Path $here 'player' # a release
+} elseif (-not (Test-Path (Join-Path $here 'global.json'))) {
+    # Opened from inside the zip, Explorer runs this script alone from a temporary folder.
+    Die 'extract the whole zip first (right-click it -> Extract All), then run setup.cmd from the extracted folder'
 } else {
     # A .NET SDK of the version global.json pins (a later patch release works too): one already
     # installed, or one installed for this user (no administrator needed).
@@ -86,3 +94,4 @@ Write-Host ''
 Write-Host "    $launch" -ForegroundColor Green
 Write-Host ''
 Write-Host 'Then press Play as usual. To play the original game again, clear the launch options.'
+Finish 0

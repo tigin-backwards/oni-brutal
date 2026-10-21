@@ -24,7 +24,7 @@ Steam as usual.
    (Or clone this repository; the setup then builds the player itself, installing the .NET SDK
    for your user if you don't have it.)
 2. Run the setup script in the extracted `oni-brutal` folder:
-   - Windows: right-click `setup.ps1` → Run with PowerShell
+   - Windows: double-click `setup.cmd` (it runs `setup.ps1` and keeps the window open)
    - Linux: `./setup.sh`
 
    It finds your Oxygen Not Included install through Steam, and prints one line for the game's

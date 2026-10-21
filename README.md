@@ -50,8 +50,8 @@ On a late-game save (U57: Spaced Out with every DLC, cycle 17,000+), on the same
 
 | | Original | oni-brutal | |
 |---|---|---|---|
-| Frame rate at speed&nbsp;3 (default tweaks) | about 8&nbsp;fps | about 29&nbsp;fps | about 3.7× |
-| Frame rate at speed&nbsp;3 (every tweak) | about 8&nbsp;fps | about 36&nbsp;fps | about 4.5× |
+| Frame rate at speed&nbsp;3 (default tweaks) | about 9.5&nbsp;fps | about 47&nbsp;fps | about 5× |
+| Frame rate at speed&nbsp;3 (every tweak) | about 9.5&nbsp;fps | about 54&nbsp;fps | about 5.7× |
 | Loading the save | 3&nbsp;min&nbsp;50&nbsp;s | 26–28&nbsp;s | about 8.5× faster |
 | Autosave freeze | about 48&nbsp;s | about 3&nbsp;s | about 16× shorter |
 

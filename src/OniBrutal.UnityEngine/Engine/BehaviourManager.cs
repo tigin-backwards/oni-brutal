@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace OniBrutal.Engine
@@ -29,6 +30,7 @@ namespace OniBrutal.Engine
             [typeof(Rigidbody)] = () => new RigidbodyNative(),
             [typeof(BoxCollider2D)] = () => new BoxCollider2DNative(),
             [typeof(PolygonCollider2D)] = () => new PolygonCollider2DNative(),
+            [typeof(EdgeCollider2D)] = () => new EdgeCollider2DNative(),
             [typeof(Rigidbody2D)] = () => new Rigidbody2DNative(),
             [typeof(Animator)] = () => new Mecanim.AnimatorNative(),
             [typeof(Animation)] = () => new Mecanim.AnimationNative(),
@@ -69,8 +71,11 @@ namespace OniBrutal.Engine
     /// enabled. Changes made while a phase is running take effect from the next phase.
     internal static class BehaviourManager
     {
-        sealed class PhaseList(Func<ScriptInfo, Action<MonoBehaviour>> selector)
+        sealed class PhaseList(string name, Func<ScriptInfo, Action<MonoBehaviour>> selector)
         {
+            public readonly string Name = name;
+            /// With frame stats on: each script's wall time in this phase since the last report.
+            public readonly Dictionary<ScriptInfo, long> Times = new();
             readonly SortedDictionary<int, List<BehaviourNative>> byOrder = new();
             readonly List<BehaviourNative> pendingAdd = new();
             readonly HashSet<BehaviourNative> members = new();
@@ -135,7 +140,14 @@ namespace OniBrutal.Engine
                             // Start has not run yet (enabled after this frame's Start pass) gets its
                             // update callbacks only after Start, as in Unity.
                             if (!b.IsActiveAndEnabledState || (pendingRemove.Count != 0 && pendingRemove.Contains(b)) || !b.StartCalled) continue;
+                            if (!PlayerLoop.FrameStats)
+                            {
+                                Lifecycle.Invoke(selector(b.Script), (MonoBehaviour)b.Managed);
+                                continue;
+                            }
+                            long start = System.Diagnostics.Stopwatch.GetTimestamp();
                             Lifecycle.Invoke(selector(b.Script), (MonoBehaviour)b.Managed);
+                            Times[b.Script] = Times.GetValueOrDefault(b.Script) + System.Diagnostics.Stopwatch.GetTimestamp() - start;
                         }
                 }
                 finally
@@ -145,9 +157,9 @@ namespace OniBrutal.Engine
             }
         }
 
-        static readonly PhaseList update = new(s => s.Update);
-        static readonly PhaseList lateUpdate = new(s => s.LateUpdate);
-        static readonly PhaseList fixedUpdate = new(s => s.FixedUpdate);
+        static readonly PhaseList update = new("Update", s => s.Update);
+        static readonly PhaseList lateUpdate = new("LateUpdate", s => s.LateUpdate);
+        static readonly PhaseList fixedUpdate = new("FixedUpdate", s => s.FixedUpdate);
         static readonly List<BehaviourNative> startQueue = new();
 
         public static void Register(BehaviourNative b)
@@ -215,6 +227,21 @@ namespace OniBrutal.Engine
                     }
                 }
             }
+        }
+
+        /// Frame stats: the scripts' update callbacks that took the most wall time since the last
+        /// call, as "Type.Phase ms" per frame over the given frames; the totals restart.
+        public static string TakeScriptTimes(int frames, int count)
+        {
+            var all = new List<(string Name, double Ms)>();
+            double toMs = 1000.0 / System.Diagnostics.Stopwatch.Frequency / frames;
+            foreach (var phase in new[] { update, lateUpdate, fixedUpdate })
+            {
+                foreach (var (script, ticks) in phase.Times) all.Add(($"{script.Type.Name}.{phase.Name}", ticks * toMs));
+                phase.Times.Clear();
+            }
+            all.Sort((a, b) => b.Ms.CompareTo(a.Ms));
+            return string.Join(", ", all.Take(count).Select(t => $"{t.Name} {t.Ms:F2}"));
         }
 
         public static void RunUpdate() => update.Run();

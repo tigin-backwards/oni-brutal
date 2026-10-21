@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Draws docs/PERFORMANCE.md's "Where a frame goes now" table as a flame graph (SVG).
-  scripts/flamegraph.py [FPS]      writes docs/media/frame-flamegraph.svg (FPS: 24 by default)
+  scripts/flamegraph.py [FPS]      writes docs/media/frame-flamegraph.svg (FPS: 54 by default)
 Rows are read from the table: `·` prefixes give the nesting, the second column the milliseconds.
 The top bar is the whole frame at FPS; what the listed entry points leave of it is drawn as the
 rest of the frame, and each bar's own time is what its children leave of it."""
@@ -99,7 +99,7 @@ def svg(root, fps):
 
 
 if __name__ == '__main__':
-    fps = float(sys.argv[1]) if len(sys.argv) > 1 else 24.0
+    fps = float(sys.argv[1]) if len(sys.argv) > 1 else 54.0
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     open(OUT, 'w', encoding='utf-8').write(svg(tree(rows()), fps))
     print('wrote', OUT)

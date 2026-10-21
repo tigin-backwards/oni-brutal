@@ -86,6 +86,7 @@ namespace OniBrutal.Engine
                 // Every 600 frames: the process's memory and the managed heap, to tell growth from a steady state.
                 var gc = GC.GetGCMemoryInfo();
                 using var self = System.Diagnostics.Process.GetCurrentProcess();
+                EngineLog.Engine("script time (ms/frame over 600): " + BehaviourManager.TakeScriptTimes(600, 25));
                 EngineLog.Engine($"memory: working set {self.WorkingSet64 >> 20} MiB, private {self.PrivateMemorySize64 >> 20} MiB, managed heap {gc.HeapSizeBytes >> 20} MiB (committed {gc.TotalCommittedBytes >> 20} MiB), collections {GC.CollectionCount(0)}/{GC.CollectionCount(1)}/{GC.CollectionCount(2)}, paused {GC.GetTotalPauseDuration().TotalMilliseconds:F0} ms in all");
             }
             Array.Clear(statTotals);

@@ -20,15 +20,15 @@ the ones holding an autosave; "about" is their typical value.
 
 | | Original | oni-brutal | |
 |---|---|---|---|
-| Frame rate, no tweaks | about 8&nbsp;fps (7.0–8.2) | about 24&nbsp;fps (22.6–27.7) | about 3× |
-| Frame rate, `exact` tweaks (the default) | | about 29&nbsp;fps (25.3–37.7) | about 3.7× |
-| Frame rate, every tweak | | about 36&nbsp;fps (33.9–39.1) | about 4.5× |
+| Frame rate, no tweaks | about 9.5&nbsp;fps (9.2–9.8) | about 33&nbsp;fps (31.9–35.0) | about 3.5× |
+| Frame rate, `exact` tweaks (the default) | | about 47&nbsp;fps (44.9–51.3) | about 5× |
+| Frame rate, every tweak | | about 54&nbsp;fps (52.5–57.2) | about 5.7× |
 | Loading the save | 3&nbsp;min&nbsp;50&nbsp;s | 26–28&nbsp;s | about 8.5× faster |
 | Autosave freeze, no tweaks | 47–50&nbsp;s | 9–10&nbsp;s | about 5× shorter |
 | Autosave freeze, `exact` tweaks (the default) | | 2.7–3.1&nbsp;s | about 16× shorter |
 
 With no tweaks it's the same game code doing the same work, so that row is the engine and
-runtime alone: about 3 times the original's frame rate.
+runtime alone: about 3.5 times the original's frame rate.
 
 On Windows, before any tweaks existed, U57 went from about 8.5 fps to 17–18. A smaller base-game
 colony (DeCrew) went from 17–20 fps to 48–56. At that point it was simulating nearly as fast as speed 3
@@ -94,8 +94,10 @@ found to skip.
 
 ## Where a frame goes now
 
-Main-thread time at about 24 fps with every tweak, from a stopwatch around each entry point,
-averaged over 600-frame windows. A bar under another is part of it.
+Main-thread time at about 54 fps with every tweak, so about 18.5 ms a frame, averaged over
+600-frame windows. The scripts' own times come from the engine timing each script's update
+(`--frame-stats`), and the game methods inside them from a stopwatch around each one (PerfProbe's
+`walltime.txt`). A bar under another is part of it.
 
 ![Where a frame goes, as a flame graph](media/frame-flamegraph.svg)
 
@@ -106,24 +108,27 @@ Indented rows are part of the row above. `scripts/flamegraph.py` draws the graph
 
 | Entry point | ms a frame |
 |---|---|
-| `Game.Update` | 19.2 |
-| · `Game.SimEveryTick` | 16.9 |
-| · · state machine sim sub-ticks (about 7 a frame) | 12.1 |
-| · · `Game.UnsafeSim200ms` | 4.8 |
-| · · · waiting on the native simulation step (SimDLL) | 4.4 |
-| `Game.LateUpdate` | 5.7 |
-| `StateMachineUpdater.RenderEveryTick` | 4.7 |
-| · Duplicant and critter brains | 4.0 |
-| `Global.LateUpdate` (animation updates) | 2.6 |
-| `CellChangeMonitor.RenderEveryTick` | 1.7 |
-| `World.LateUpdate` | 1.4 |
-| Animation batch uploads | 1.0 |
-| Animation events | 0.8 |
+| `Game.Update` | 7.9 |
+| · `Game.SimEveryTick` | 6.0 |
+| · · state machine sim sub-ticks | 4.2 |
+| · · `Game.UnsafeSim200ms` | 1.8 |
+| · · · waiting on the native simulation step (SimDLL) | 1.6 |
+| `Game.LateUpdate` | 3.7 |
+| · Duplicant and critter brains | 2.4 |
+| · · fetch updates | 1.0 |
+| Rendering (engine) | 2.7 |
+| `Global.LateUpdate` (animation updates) | 1.4 |
+| `World.LateUpdate` (animation batch uploads) | 0.8 |
+| UI canvases (engine) | 0.7 |
+| `PropertyTextures.LateUpdate` | 0.5 |
+| `Global.Update` (animation events) | 0.4 |
+| `EventSystem.Update` (UI input) | 0.4 |
 
 </details>
 
-Rendering is mostly off the main thread now. The GL thread is busy for about 22 ms a frame in
-parallel, 10 ms of it uploading textures.
+The rest of the frame is the smaller scripts and the engine's own frame work. Rendering is
+mostly off the main thread: the GL thread works in parallel with it. The path prober, which runs
+on its own thread, costs the main thread about 0.02 ms a frame to hand out its work.
 
 About two thirds of what's left is the game's own logic, spread over dozens of systems. Each one
 reads thousands of scattered objects, and none takes more than a few milliseconds.

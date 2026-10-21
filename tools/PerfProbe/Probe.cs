@@ -1289,6 +1289,8 @@ namespace PerfProbe
             // `pointer.txt`: what the game's hover handling reads (PlayerController.UpdateHover, the
             // select tool's hover card) while the mouse has not moved, every 120 frames, 6 times.
             if (System.IO.File.Exists(System.IO.Path.Combine(Path, "pointer.txt"))) StartCoroutine(Pointer());
+            // `walltime.txt`: wall time of thin game methods inside the scripts' updates (WallTime).
+            if (System.IO.File.Exists(System.IO.Path.Combine(Path, "walltime.txt"))) StartCoroutine(WallTime.Run(10));
             if (System.IO.File.Exists(System.IO.Path.Combine(Path, "savetest.txt"))) { yield return SaveTest(); yield break; }
             if (System.IO.File.Exists(System.IO.Path.Combine(Path, "autosave.txt"))) { yield return AutosaveFreeze(); yield break; }
             // `camera.txt`: where the view stays, as world cells `x y` with an optional orthographic

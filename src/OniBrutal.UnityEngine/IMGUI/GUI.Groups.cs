@@ -95,6 +95,18 @@ namespace UnityEngine
         public static Rect Window(int id, Rect clientRect, WindowFunction func, GUIContent title, GUIStyle style)
             => Windows.Declare(id, clientRect, func, title, style, false, null);
 
+        public static Rect ModalWindow(int id, Rect clientRect, WindowFunction func, string text) => ModalWindow(id, clientRect, func, GUIContent.Scratch(text), skin.window);
+        public static Rect ModalWindow(int id, Rect clientRect, WindowFunction func, Texture image) => ModalWindow(id, clientRect, func, GUIContent.Scratch(image), skin.window);
+        public static Rect ModalWindow(int id, Rect clientRect, WindowFunction func, GUIContent content) => ModalWindow(id, clientRect, func, content, skin.window);
+        public static Rect ModalWindow(int id, Rect clientRect, WindowFunction func, string text, GUIStyle style) => ModalWindow(id, clientRect, func, GUIContent.Scratch(text), style);
+        public static Rect ModalWindow(int id, Rect clientRect, WindowFunction func, Texture image, GUIStyle style) => ModalWindow(id, clientRect, func, GUIContent.Scratch(image), style);
+
+        /// A window drawn in front of every other window that, while shown, takes all mouse and
+        /// keyboard input: other windows and the controls outside it get none. Only one is
+        /// shown at a time (the last one called).
+        public static Rect ModalWindow(int id, Rect clientRect, WindowFunction func, GUIContent content, GUIStyle style)
+            => Windows.Declare(id, clientRect, func, content, style, false, null, true);
+
         /// Inside a window function: a press in the whole window and a drag move it.
         public static void DragWindow() => DragWindow(new Rect(0f, 0f, 10000f, 10000f));
 

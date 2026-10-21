@@ -70,7 +70,7 @@ namespace UnityEngine
         public static bool guiIsExiting => GUIStateData.Exiting;
 
         /// The player has no modal windows.
-        public static bool hasModalWindow => false;
+        public static bool hasModalWindow => GUIManager.HasModalWindow;
 
         /// GUI points are screen pixels in the player.
         internal static float pixelsPerPoint => 1f;

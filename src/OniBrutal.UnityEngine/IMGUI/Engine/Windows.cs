@@ -21,6 +21,8 @@ namespace OniBrutal.Engine.IMGUI
         public GUIStyle Style = GUIStyle.none;
         /// GUILayout.Window: sized to its content.
         public bool Fitted;
+        /// GUI.ModalWindow: in front of every window, and the only one taking input.
+        public bool Modal;
         public GUILayoutOption[] Options;
         /// The size the last GUILayout.Window call asked for.
         public Vector2 Requested;
@@ -43,10 +45,14 @@ namespace OniBrutal.Engine.IMGUI
     /// GUI.Window and the window functions.
     internal static class Windows
     {
+        /// The modal window last declared; only one is shown at a time. GUIManager.Modal
+        /// checks that it is still alive.
+        public static WindowRecord ActiveModal;
+
         /// GUI.Window / GUILayout.Window: records the call and returns the window's rect, moved
         /// by dragging since the last call, otherwise `rect` (a fitted window gets the size its
         /// content allows).
-        public static Rect Declare(int id, Rect rect, GUI.WindowFunction func, GUIContent title, GUIStyle style, bool fitted, GUILayoutOption[] options)
+        public static Rect Declare(int id, Rect rect, GUI.WindowFunction func, GUIContent title, GUIStyle style, bool fitted, GUILayoutOption[] options, bool modal = false)
         {
             GUIStateData.RequireGUI();
             var p = GUIStateData.Participant;
@@ -65,6 +71,9 @@ namespace OniBrutal.Engine.IMGUI
             w.Style = style ?? GUIStyle.none;
             w.Fitted = fitted;
             w.Options = options;
+            w.Modal = modal;
+            if (modal) ActiveModal = w;
+            else if (ActiveModal == w) ActiveModal = null;
             w.Skin = GUIStateData.Skin;
             w.Color = GUIStateData.Color;
             w.BackgroundColor = GUIStateData.BackgroundColor;

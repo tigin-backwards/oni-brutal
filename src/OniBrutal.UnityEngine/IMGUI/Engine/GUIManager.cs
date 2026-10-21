@@ -50,6 +50,7 @@ namespace OniBrutal.Engine.IMGUI
                 if (w.Touched) continue;
                 Windows.RemoveAt(i);
                 w.Scope.Release();
+                if (IMGUI.Windows.ActiveModal == w) IMGUI.Windows.ActiveModal = null;
                 if (FocusedWindow == w) FocusedWindow = null;
             }
         }
@@ -62,7 +63,11 @@ namespace OniBrutal.Engine.IMGUI
         public void Release()
         {
             Scope.Release();
-            foreach (var w in Windows) w.Scope.Release();
+            foreach (var w in Windows)
+            {
+                w.Scope.Release();
+                if (IMGUI.Windows.ActiveModal == w) IMGUI.Windows.ActiveModal = null;
+            }
             Windows.Clear();
             FocusedWindow = null;
         }
@@ -118,6 +123,7 @@ namespace OniBrutal.Engine.IMGUI
             participants.Clear();
             byBehaviour.Clear();
             InputEvents.Reset();
+            Windows.ActiveModal = null;
             swallowTabCharacter = false;
             lastMouse = Vector2.zero;
         }
@@ -172,6 +178,15 @@ namespace OniBrutal.Engine.IMGUI
             {
                 foreach (var p in ordered)
                     if (p.Alive) Send(p, e);
+                // The modal window is drawn last, in front of every other window.
+                if (type == EventType.Repaint && Modal() is { } shown) Windows.Call(shown, e);
+                return;
+            }
+            if (Modal() is { } modal)
+            {
+                // While a modal window is shown, input goes to it alone.
+                SendModal(modal, e);
+                if (type == EventType.MouseDown && e.rawType != EventType.Used) GUIStateData.KeyboardControl = 0;
                 return;
             }
             for (int i = ordered.Count - 1; i >= 0; i--)
@@ -236,10 +251,57 @@ namespace OniBrutal.Engine.IMGUI
             TabFocus(p.Scope, e);
         }
 
+        /// The modal window shown, if any: the last one declared, while its behaviour is alive
+        /// and keeps declaring it.
+        static WindowRecord Modal()
+        {
+            var w = Windows.ActiveModal;
+            if (w == null) return null;
+            if (w.Owner.Alive && byBehaviour.TryGetValue(w.Owner.Behaviour, out var p) && p == w.Owner && p.Windows.Contains(w)) return w;
+            return null;
+        }
+
+        /// GUIUtility.hasModalWindow.
+        public static bool HasModalWindow => Modal() != null;
+
+        /// An input event while a modal window is shown: its behaviour's Layout pass, then the
+        /// modal window alone gets the event.
+        static void SendModal(WindowRecord modal, Event e)
+        {
+            var p = modal.Owner;
+            if (p.UsesLayout)
+            {
+                var layout = Pass(EventType.Layout, e);
+                p.UntouchWindows();
+                Call(p, layout);
+                p.PruneWindows();
+                RunWindows(p, layout);
+                // Its behaviour stopped showing it.
+                if (Modal() != modal) return;
+            }
+            bool down = e.rawType == EventType.MouseDown && modal.Contains(e.ScreenPosition);
+            Windows.Call(modal, e);
+            TabFocus(modal.Scope, e);
+            if (down)
+            {
+                p.FocusedWindow = modal;
+                p.BringToFront(modal);
+                if (e.rawType != EventType.Used) e.Use();
+            }
+        }
+
+        /// A behaviour's windows for one event, back to front. A modal window that is not the
+        /// one shown is skipped; the shown one is drawn after every behaviour (Dispatch).
         static void RunWindows(GUIParticipant p, Event e)
         {
+            bool repaint = e.rawType == EventType.Repaint;
             for (int i = p.Windows.Count - 1; i >= 0; i--)
-                if (i < p.Windows.Count) Windows.Call(p.Windows[i], e);
+            {
+                if (i >= p.Windows.Count) continue;
+                var w = p.Windows[i];
+                if (w.Modal && (repaint || w != Windows.ActiveModal)) continue;
+                Windows.Call(w, e);
+            }
         }
 
         /// The window an input event goes to: for mouse events the window whose control holds
@@ -258,7 +320,7 @@ namespace OniBrutal.Engine.IMGUI
                     return holder != null && holder.Owner == p ? (holder, false) : (null, false);
                 }
                 foreach (var w in p.Windows)
-                    if (w.Contains(e.ScreenPosition)) return (w, true);
+                    if (!w.Modal && w.Contains(e.ScreenPosition)) return (w, true);
                 return (null, false);
             }
             if (type is EventType.KeyDown or EventType.KeyUp)

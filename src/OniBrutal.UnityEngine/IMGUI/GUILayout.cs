@@ -57,6 +57,50 @@ namespace UnityEngine
         public static bool Toggle(bool value, GUIContent content, GUIStyle style, params GUILayoutOption[] options)
             => GUI.Toggle(GUILayoutUtility.GetRect(content, style, options), value, content, style);
 
+        // ----- Toolbars -----
+
+        public static int Toolbar(int selected, string[] texts, params GUILayoutOption[] options) => Toolbar(selected, Controls.Contents(texts), Skin.button, options);
+        public static int Toolbar(int selected, Texture[] images, params GUILayoutOption[] options) => Toolbar(selected, Controls.Contents(images), Skin.button, options);
+        public static int Toolbar(int selected, GUIContent[] contents, params GUILayoutOption[] options) => Toolbar(selected, contents, Skin.button, options);
+        public static int Toolbar(int selected, string[] texts, GUIStyle style, params GUILayoutOption[] options) => Toolbar(selected, Controls.Contents(texts), style, options);
+        public static int Toolbar(int selected, Texture[] images, GUIStyle style, params GUILayoutOption[] options) => Toolbar(selected, Controls.Contents(images), style, options);
+
+        /// A toolbar that takes the available width (unless the options say otherwise) and the
+        /// height of one row of its buttons.
+        public static int Toolbar(int selected, GUIContent[] contents, GUIStyle style, params GUILayoutOption[] options)
+        {
+            style ??= GUIStyle.none;
+            var pass = GUILayoutUtility.Pass;
+            Rect rect;
+            if (pass.Recording)
+            {
+                float width = 0f, height = 0f;
+                if (contents != null)
+                {
+                    foreach (var c in contents)
+                    {
+                        var size = style.CalcSize(c ?? GUIContent.none);
+                        width += size.x;
+                        height = Mathf.Max(height, size.y);
+                    }
+                }
+                // It stretches by default; options given after this one still override it.
+                var all = new GUILayoutOption[(options?.Length ?? 0) + 1];
+                all[0] = ExpandWidth(true);
+                options?.CopyTo(all, 1);
+                var item = LayoutItem.Leaf(style, width, width, height, height, all);
+                // Measured: the row sits flush with its area (no leading or side margins), and
+                // the style's bottom margin separates it from what follows.
+                item.MarginLeft = item.MarginRight = item.MarginTop = 0;
+                rect = pass.Leaf(item);
+            }
+            else
+            {
+                rect = pass.Leaf(null);
+            }
+            return GUI.Toolbar(rect, selected, contents, style);
+        }
+
         // ----- Text -----
 
         public static string TextField(string text, params GUILayoutOption[] options) => TextField(text, -1, Skin.textField, options);

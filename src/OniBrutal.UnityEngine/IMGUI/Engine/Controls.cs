@@ -17,6 +17,7 @@ namespace OniBrutal.Engine.IMGUI
         public const int DragWindow = 0x4C1A_0009;
         public const int Window = 0x4C1A_000A;
         public const int Group = 0x4C1A_000B;
+        public const int Toolbar = 0x4C1A_000C;
     }
 
     /// The input handling and drawing of the built-in controls. Every control draws only on
@@ -113,6 +114,45 @@ namespace OniBrutal.Engine.IMGUI
             GUIStateData.RequireGUI();
             int id = GUIUtility.GetControlID(ControlHints.Toggle, FocusType.Passive, position);
             return Pressable(position, id, content, style ?? GUIStyle.none, value) ? !value : value;
+        }
+
+        /// A row of buttons splitting `position`'s width equally, the one at `selected` drawn
+        /// "on". Returns the index of a clicked button, otherwise `selected`; GUI.changed is
+        /// set only when the click picks another button.
+        public static int Toolbar(Rect position, int selected, GUIContent[] contents, GUIStyle style)
+        {
+            GUIStateData.RequireGUI();
+            style ??= GUIStyle.none;
+            int count = contents?.Length ?? 0;
+            if (count == 0) return selected;
+            float width = position.width / count;
+            int result = selected;
+            bool changedBefore = GUIStateData.Changed;
+            for (int i = 0; i < count; i++)
+            {
+                var r = new Rect(position.x + i * width, position.y, width, position.height);
+                int id = GUIUtility.GetControlID(ControlHints.Toolbar, FocusType.Passive, r);
+                if (Pressable(r, id, contents[i] ?? GUIContent.none, style, i == selected)) result = i;
+            }
+            if (result == selected) GUIStateData.Changed = changedBefore;
+            return result;
+        }
+
+        /// The contents of a string or texture toolbar.
+        public static GUIContent[] Contents(string[] texts)
+        {
+            if (texts == null) return null;
+            var contents = new GUIContent[texts.Length];
+            for (int i = 0; i < texts.Length; i++) contents[i] = new GUIContent(texts[i]);
+            return contents;
+        }
+
+        public static GUIContent[] Contents(Texture[] images)
+        {
+            if (images == null) return null;
+            var contents = new GUIContent[images.Length];
+            for (int i = 0; i < images.Length; i++) contents[i] = new GUIContent(images[i]);
+            return contents;
         }
 
         // ----- Sliders and scrollbars -----

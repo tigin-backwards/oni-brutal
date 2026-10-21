@@ -155,6 +155,18 @@ namespace UnityEngine
         public static bool Toggle(Rect position, bool value, Texture image, GUIStyle style) => Toggle(position, value, GUIContent.Scratch(image), style);
         public static bool Toggle(Rect position, bool value, GUIContent content, GUIStyle style) => Controls.Toggle(position, value, content, style);
 
+        // ----- Toolbars -----
+
+        public static int Toolbar(Rect position, int selected, string[] texts) => Toolbar(position, selected, Controls.Contents(texts), skin.button);
+        public static int Toolbar(Rect position, int selected, Texture[] images) => Toolbar(position, selected, Controls.Contents(images), skin.button);
+        public static int Toolbar(Rect position, int selected, GUIContent[] contents) => Toolbar(position, selected, contents, skin.button);
+        public static int Toolbar(Rect position, int selected, string[] texts, GUIStyle style) => Toolbar(position, selected, Controls.Contents(texts), style);
+        public static int Toolbar(Rect position, int selected, Texture[] images, GUIStyle style) => Toolbar(position, selected, Controls.Contents(images), style);
+
+        /// A row of buttons, one per content, the one at `selected` drawn "on". Returns the
+        /// index of the button clicked, otherwise `selected`.
+        public static int Toolbar(Rect position, int selected, GUIContent[] contents, GUIStyle style) => Controls.Toolbar(position, selected, contents, style);
+
         // ----- Text -----
 
         public static string TextField(Rect position, string text) => TextFields.Edit(position, text, -1, skin.textField, false);

@@ -823,5 +823,152 @@ namespace OniBrutal.Tests
             Assert.Equal(Event.KeyboardEvent("^a"), Event.KeyboardEvent("^a"));
             Assert.NotEqual(Event.KeyboardEvent("^a"), Event.KeyboardEvent("a"));
         }
+    
+        [Fact]
+        public void LayoutToolbarTakesTheAvailableWidthAndOneButtonRow()
+        {
+            var probe = MakeProbe();
+            Rect bar = default, next = default, narrow = default;
+            float buttonHeight = 0f;
+            int buttonMargin = 0;
+            GUIProbe.Body = _ =>
+            {
+                buttonHeight = GUI.skin.button.CalcSize(new GUIContent("One")).y;
+                buttonMargin = GUI.skin.button.margin.bottom;
+                GUILayout.BeginArea(new Rect(0f, 0f, 400f, 300f));
+                GUILayout.Toolbar(0, new[] { "One", "Two", "Three" });
+                if (Event.current.type == EventType.Repaint) bar = GUILayoutUtility.GetLastRect();
+                next = GUILayoutUtility.GetRect(10f, 10f);
+                GUILayout.EndArea();
+                GUILayout.BeginArea(new Rect(0f, 100f, 400f, 100f));
+                GUILayout.Toolbar(0, new[] { "One", "Two", "Three" }, GUILayout.Width(300f));
+                if (Event.current.type == EventType.Repaint) narrow = GUILayoutUtility.GetLastRect();
+                GUILayout.EndArea();
+            };
+            Frame();
+            // Measured in the original player with the game's skin: (0, 0, 400 x 19), the next
+            // control at y = 23. The height is the button style's one-line height (padding 3 + 3
+            // plus the font's line, 13 there); the legacy text generator here gives the built-in
+            // font a taller line (about 14.9), so the height is checked against the style's own
+            // CalcSize, and the gap against its margin (4).
+            Assert.Equal(new Rect(0f, 0f, 400f, buttonHeight), bar);
+            Assert.Equal(4, buttonMargin);
+            Assert.Equal(buttonHeight + buttonMargin, next.y);
+            Assert.Equal(300f, narrow.width);
+            Assert.Equal(buttonHeight, narrow.height);
+        }
+
+        [Fact]
+        public void ToolbarReturnsTheClickedIndex()
+        {
+            var probe = MakeProbe();
+            int selected = 0;
+            bool changed = false;
+            GUIProbe.Body = _ =>
+            {
+                selected = GUI.Toolbar(new Rect(0f, 0f, 300f, 20f), selected, new[] { "A", "B", "C" });
+                if (GUI.changed) changed = true;
+            };
+            Frame();
+            Assert.Equal(0, selected);
+            Queue(EventType.MouseDown, new Vector2(250f, 10f));
+            Queue(EventType.MouseUp, new Vector2(250f, 10f));
+            Frame();
+            Assert.Equal(2, selected);
+            Assert.True(changed);
+            Queue(EventType.MouseDown, new Vector2(150f, 10f));
+            Queue(EventType.MouseUp, new Vector2(150f, 10f));
+            Frame();
+            Assert.Equal(1, selected);
+            // Clicking the selected button keeps it and does not change anything.
+            changed = false;
+            Queue(EventType.MouseDown, new Vector2(150f, 10f));
+            Queue(EventType.MouseUp, new Vector2(150f, 10f));
+            Frame();
+            Assert.Equal(1, selected);
+            Assert.False(changed);
+        }
+
+        [Fact]
+        public void ModalWindowRunsAfterOnGUIAndTakesTheInputAlone()
+        {
+            var probe = MakeProbe();
+            var order = new List<string>();
+            bool showModal = false, outsideClicked = false, insideClicked = false, windowClicked = false;
+            bool hasModalInOnGUI = false;
+            var modalRect = new Rect(100f, 100f, 200f, 100f);
+            GUIProbe.Body = _ =>
+            {
+                hasModalInOnGUI = GUIUtility.hasModalWindow;
+                order.Add("ongui:" + Name(Event.current.type));
+                if (GUI.Button(new Rect(0f, 0f, 50f, 20f), "outside")) outsideClicked = true;
+                GUI.Window(1, new Rect(0f, 300f, 100f, 100f), id =>
+                {
+                    if (GUI.Button(new Rect(10f, 30f, 50f, 20f), "w")) windowClicked = true;
+                }, "plain");
+                if (!showModal) return;
+                modalRect = GUI.ModalWindow(2, modalRect, id =>
+                {
+                    order.Add("modal:" + Name(Event.current.type));
+                    if (GUI.Button(new Rect(10f, 30f, 50f, 20f), "in")) insideClicked = true;
+                }, "Modal", GUI.skin.window);
+            };
+            Frame();
+            Assert.False(GUIUtility.hasModalWindow);
+            showModal = true;
+            Frame();
+            Assert.True(GUIUtility.hasModalWindow);
+            order.Clear();
+            Frame();
+            Assert.Equal(new[] { "ongui:Layout", "modal:Layout", "ongui:Repaint", "modal:Repaint" }, order);
+            Assert.Equal(new Rect(100f, 100f, 200f, 100f), modalRect);
+            Assert.True(hasModalInOnGUI);
+
+            // A button outside the modal window, and one in another window, do not react.
+            Queue(EventType.MouseDown, new Vector2(10f, 10f));
+            Queue(EventType.MouseUp, new Vector2(10f, 10f));
+            Queue(EventType.MouseDown, new Vector2(20f, 340f));
+            Queue(EventType.MouseUp, new Vector2(20f, 340f));
+            order.Clear();
+            Frame();
+            Assert.False(outsideClicked);
+            Assert.False(windowClicked);
+            Assert.DoesNotContain("ongui:" + Name(EventType.MouseDown), order);
+            Assert.Contains("modal:" + Name(EventType.MouseDown), order);
+            // Its own button does.
+            Queue(EventType.MouseDown, new Vector2(120f, 140f));
+            Queue(EventType.MouseUp, new Vector2(120f, 140f));
+            Frame();
+            Assert.True(insideClicked);
+
+            // Once it is no longer shown, the input reaches the rest again.
+            showModal = false;
+            Frame();
+            Assert.False(GUIUtility.hasModalWindow);
+            Queue(EventType.MouseDown, new Vector2(10f, 10f));
+            Queue(EventType.MouseUp, new Vector2(10f, 10f));
+            Queue(EventType.MouseDown, new Vector2(20f, 340f));
+            Queue(EventType.MouseUp, new Vector2(20f, 340f));
+            Frame();
+            Assert.True(outsideClicked);
+            Assert.True(windowClicked);
+        }
+
+        [Fact]
+        public void ModalWindowDrawsInFrontOfOtherWindows()
+        {
+            var probe = MakeProbe();
+            var order = new List<string>();
+            GUIProbe.Body = _ =>
+            {
+                GUI.ModalWindow(1, new Rect(100f, 100f, 100f, 100f), id => order.Add("modal:" + Name(Event.current.type)), "m");
+                GUI.Window(2, new Rect(0f, 0f, 100f, 100f), id => order.Add("window:" + Name(Event.current.type)), "w");
+            };
+            Frame();
+            order.Clear();
+            Frame();
+            // The plain window was declared later (so it would be in front), but the modal one draws last.
+            Assert.Equal(new[] { "window:Repaint", "modal:Repaint" }, order.FindAll(o => o.EndsWith("Repaint")));
+        }
     }
 }

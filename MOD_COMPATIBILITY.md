@@ -4,7 +4,8 @@ This tracks the mods we have run in this player, and what happened.
 
 **Where the list comes from:**
 - mods players have reported (GitHub issues, Discord);
-- the 100 most-subscribed Workshop mods in onimaxxing's catalog that are not flagged as malware.
+- the 200 most-subscribed Workshop mods in onimaxxing's catalog that it does not flag (malware,
+  not loading, breaking).
 
 Worldgen mods are out of scope.
 
@@ -56,6 +57,29 @@ Yield · Dup Stats Configurator · Wallpaper · Flow Splitters · Ronivans Legac
 Revolution · Scaffolds · Speed Control 202107 · AI Improvements · Capsule 2.0 · More Marble
 Sculptures · Cluster Generation Manager
 
+## Runs (the second hundred)
+
+The next hundred by subscriptions (Workshop ranks 115–226), in batches of about 20, run as
+local installs. Two of them, Liquid Bottler and Auto Drop Gas Bottler Filler, both add a
+liquid bottler; the game reports the duplicate (any player would).
+
+Replace Floors · Traffic Visualizer · Debug Buttons · Thermal Tooltips · Aquatic Farm · Drywall
+Hides Pipes · Research Manager · Dupery Fixed · Material Selection Properties · Algae Grower ·
+MaterialColor · Reveal Map · Planning Tool · Stairs · Germicidal UV Lamps · Critter Inventory ·
+Decor Pack I - Classy Glass · More AirFilter · Visual Fixes N Tweaks · Smart Dig · The Duplicant
+Reacharound · Free Resource Buildings - Updated · No Mop Limits · More Small Sculptures · Rotate
+Everything · Double Sweeper Range · Double Bed · BalanceGasPumpConsumption · Better Refresh · Geyser
+Control · EmptyWorlds (SkyBlock) · PAUSE on ready to print · Advanced Electrolyzers · Deselect New
+Materials · Big Storage: Restoraged · Schedule Master · Better Deselect · Drag Area More Visible ·
+Pipette · Achievement Enabler · Oil Well - Any Water · Conveyor Rail Filter · Liquid Bottler · Piped
+Everything · Rational Priority · Mass Move Tool · Free Resource Buildings Branch · Colorful
+Shinebugs · 刷新打印舱 · Athletic Manual Generator · Better Air Filters updated · 技能自定义-fix · 技能自定义 ·
+Auto Drop Gas Bottler Filler and Liquid Filler · Pliers 2021 · Faster Jetpacks · Multiple Power
+Generator · AllBiomesWorld - Fuleria · Duplicant Status Bar · Big box · Wrangle & Carry · Smart Egg
+Incubator · Customize Buildings · Paint Walls · Suit Recharger · Storage Pod · Rebuildable AETN ·
+Better Repair · Real Insulation Tile · Closest Material · Solar System Worlds · Hideable Heavy-Watt
+· Asphalt Tile
+
 ## In progress
 
 | Mod | What it needs |
@@ -71,6 +95,12 @@ Each fails the same way in the original player.
 | Deconstructable POI Props | Harmony patch of `Deconstructable.TriggerDestroy`, which now has two overloads (ambiguous match) |
 | Refresh Immigrants | `STRINGS.UI.TOOLS.FILTERLAYERS.ALL` is no longer a field |
 | Bottle Emptier Extend | calls `TreeFilterable.GetTags()`, which the game no longer has |
+| 自动收获 Fixed, automatic harvest, Expanded Lights | Harmony patches whose targets now have overloads (ambiguous match) |
+| Stats Unlimited | a Harmony patch whose target method is gone |
+| Map Overlay | `OverlayModes.Mode.CreateDefaultFilters` returns another type now |
+| Portal Network | its animations fail to load, and its asset loading throws |
+| Self-sealing Airlocks Revived, Fast Insulated Self Sealing AirLock | call `SimMessages.SetCellProperties(int, byte)`, which the game no longer has |
+| Font Loader for Traditional Chinese, 字型模組。新 | use TextMeshPro's `FaceInfo`, which the game's TextMeshPro lacks |
 
 ## Translations
 

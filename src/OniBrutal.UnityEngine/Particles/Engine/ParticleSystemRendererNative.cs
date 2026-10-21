@@ -89,7 +89,8 @@ namespace OniBrutal.Engine.Particles
             base.Bind(f, resolver);
             Serialized = null;
             string owner = GameObject?.Name ?? "?";
-            void Unsupported(string what) => throw new InvalidDataException($"ParticleSystemRenderer on {owner}: {what} is not supported.");
+            // As ParticleConfig.Read: what the game's data never uses is logged and left out.
+            void Unsupported(string what) => EngineLog.Engine($"particles: ParticleSystemRenderer on {owner}: {what} is not drawn as Unity draws it");
             RenderMode = I(f, "m_RenderMode");
             SortMode = I(f, "m_SortMode");
             Alignment = I(f, "m_RenderAlignment");
@@ -101,10 +102,21 @@ namespace OniBrutal.Engine.Particles
             SortingFudge = F(f, "m_SortingFudge");
             NormalDirection = F(f, "m_NormalDirection");
             Pivot = V3(f, "m_Pivot");
-            if (RenderMode is 4) Unsupported("mesh particles");
-            if (RenderMode is < 0 or > 5) Unsupported($"render mode {RenderMode}");
-            if (SortMode is < 0 or > 4) Unsupported($"sort mode {SortMode}");
-            if (Alignment == 4 && RenderMode == 0) Unsupported("velocity-aligned billboards");
+            if (RenderMode is 4 or < 0 or > 5)
+            {
+                Unsupported(RenderMode == 4 ? "mesh particles (not drawn)" : $"render mode {RenderMode} (not drawn)");
+                RenderMode = 5;
+            }
+            if (SortMode is < 0 or > 4)
+            {
+                Unsupported($"sort mode {SortMode} (unsorted)");
+                SortMode = 0;
+            }
+            if (Alignment == 4 && RenderMode == 0)
+            {
+                Unsupported("velocity-aligned billboards (view-aligned)");
+                Alignment = 0;
+            }
             if (V3(f, "m_Flip") != Vector3.zero) Unsupported("particle flipping");
             if (CameraVelocityScale != 0f) Unsupported("camera velocity stretching");
             if (B(f, "m_FreeformStretching")) Unsupported("freeform stretching");

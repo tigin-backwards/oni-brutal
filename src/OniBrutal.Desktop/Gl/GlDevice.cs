@@ -662,7 +662,7 @@ namespace OniBrutal.Desktop.Gl
 
         // Its own method, so the predicate's closure is allocated only when a variant is selected.
         static int SelectVariant(MaterialNative material, ShaderNative passShader, ShaderPass pass, string[] keywords)
-            => ShaderPrograms.SelectVariant(pass.Data, passShader.KeywordNames, k => KeywordEnabled(k, material, keywords));
+            => ShaderPrograms.SelectVariant(pass, k => KeywordEnabled(k, material, keywords));
 
         // GL thread.
         readonly uint immediateBuffer, immediateIndices;
@@ -801,7 +801,7 @@ namespace OniBrutal.Desktop.Gl
             var sub = shader.ActiveSubShader;
             if (sub == null || passIndex >= sub.Passes.Length) return;
             var pass = sub.Passes[passIndex];
-            int blob = ShaderPrograms.SelectVariant(pass.Data, shader.KeywordNames, k => KeywordEnabled(k, material, null));
+            int blob = ShaderPrograms.SelectVariant(pass, k => KeywordEnabled(k, material, null));
             if (blob < 0) return;
             var program = Program(shader, blob);
             if (program.Id == 0) return;

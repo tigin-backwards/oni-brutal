@@ -56,7 +56,11 @@ namespace OniBrutal.Engine.Rendering
         public Dictionary<string, string> Tags;
         /// The pass's SerializedPass data (render state and programs) for the device.
         public Fields Data;
+        /// Its OpenGLCore program variants: blob index and keywords (ShaderPrograms.SelectVariant).
+        public ProgramVariant[] Variants = Array.Empty<ProgramVariant>();
     }
+
+    internal readonly record struct ProgramVariant(int BlobIndex, string[] Keywords);
 
     internal sealed class SubShader
     {
@@ -115,7 +119,9 @@ namespace OniBrutal.Engine.Rendering
             ShaderName = parsed.String("m_Name");
             if (Name.Length == 0) Name = ShaderName;
             FallbackName = parsed.String("m_FallbackName");
-            KeywordNames = parsed.Array("m_KeywordNames").Cast<string>().ToArray();
+            // Shaders built before Unity 2021.2 (a mod's bundle) name their keywords per pass.
+            bool legacy = ShaderPrograms.IsLegacy(f);
+            KeywordNames = legacy ? Array.Empty<string>() : parsed.Array("m_KeywordNames").Cast<string>().ToArray();
 
             var props = parsed.Struct("m_PropInfo").Array("m_Props").Cast<Fields>().Select(p =>
             {
@@ -147,6 +153,7 @@ namespace OniBrutal.Engine.Rendering
                     UseName = p.String("m_UseName"),
                     Tags = TagMap(p.Struct("m_Tags")),
                     Data = p,
+                    Variants = legacy ? ShaderPrograms.LegacyVariants(p) : ShaderPrograms.Variants(p, KeywordNames),
                 }).ToArray(),
             }).ToArray();
 

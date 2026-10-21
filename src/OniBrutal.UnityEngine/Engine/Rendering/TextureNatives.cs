@@ -247,7 +247,11 @@ namespace OniBrutal.Engine.Rendering
             Srgb = f.Int("m_ColorSpace") == 1;
             Dimension = (TextureKind)f.Int("m_TextureDimension");
             ReadSettings(f.Struct("m_TextureSettings"));
-            if (f.Int("m_ImageCount") != 1) throw new System.IO.InvalidDataException($"Texture2D {Name}: {f.Int("m_ImageCount")} images.");
+            // No image at all: a placeholder saved without texels (a dynamic font's atlas, 0×0,
+            // filled at run time), which loads empty.
+            int images = f.Int("m_ImageCount");
+            if (images != 1 && !(images == 0 && f.Int("m_CompleteImageSize") == 0))
+                throw new System.IO.InvalidDataException($"Texture2D {Name}: {images} images.");
             if (f.Int("m_MipsStripped") != 0) throw new System.IO.InvalidDataException($"Texture2D {Name}: stripped mips are not supported.");
             SetSource(TexelSource.From(f));
         }

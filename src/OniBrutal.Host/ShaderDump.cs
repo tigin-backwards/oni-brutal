@@ -49,17 +49,15 @@ namespace OniBrutal.Host
                             string B(string field) => $"{field}={blend.Struct(field).Float("val")}{(blend.Struct(field).String("name") is { Length: > 0 } n && n != "<noninit>" ? "[" + n + "]" : "")}";
                             File.WriteAllText(Path.Combine(dir, $"s{s}p{p}_state.txt"),
                                 "tags=" + string.Join(";", native.SubShaders[s].Tags.Select(kv => kv.Key + "=" + kv.Value)) + "\n" + string.Join("\n", new[] { V("zTest"), V("zWrite"), V("culling"), B("srcBlend"), B("destBlend"), B("srcBlendAlpha"), B("destBlendAlpha"), B("colMask") }) + "\n");
-                            foreach (var list in pass.Data.Struct("progVertex").Array("m_PlayerSubPrograms")!)
-                                foreach (OniBrutal.Assets.TypeTrees.Fields sub in (object[])list!)
-                                {
-                                    if (!ShaderPrograms.IsGlCore(sub.Get<sbyte>("m_GpuProgramType"))) continue;
-                                    var v = native.Programs.Variant((int)sub.Get<uint>("m_BlobIndex"));
-                                    var keys = v.Keywords.Length == 0 ? "default" : string.Join("+", v.Keywords);
-                                    var path = Path.Combine(dir, $"s{s}p{p}_{v.BlobIndex}_{keys}");
-                                    File.WriteAllText(path + ".vert", v.VertexSource);
-                                    File.WriteAllText(path + ".frag", v.FragmentSource);
-                                    written++;
-                                }
+                            foreach (var variant in pass.Variants)
+                            {
+                                var v = native.Programs.Variant(variant.BlobIndex);
+                                var keys = v.Keywords.Length == 0 ? "default" : string.Join("+", v.Keywords);
+                                var path = Path.Combine(dir, $"s{s}p{p}_{v.BlobIndex}_{keys}");
+                                File.WriteAllText(path + ".vert", v.VertexSource);
+                                File.WriteAllText(path + ".frag", v.FragmentSource);
+                                written++;
+                            }
                         }
                     Console.WriteLine($"{name}: {written} variants written to {dir}");
                     return 0;

@@ -508,6 +508,20 @@ namespace OniBrutal.Engine.Particles
                     position = new Vector3(R(Salt.ShapeA) - 0.5f, R(Salt.ShapeB) - 0.5f, R(Salt.ShapeC) - 0.5f);
                     direction = Vector3.forward;
                     break;
+                case ShapeKind.Sphere:
+                {
+                    // Outward from the centre, uniform over the shell's volume (thickness 1 fills the
+                    // sphere, 0 emits from its surface); the arc sweeps around Z as the circle's does.
+                    float z = 2f * R(Salt.ShapeA) - 1f;
+                    float angle = R(Salt.ShapeC) * s.Arc * Mathf.Deg2Rad;
+                    float ring = MathF.Sqrt(Math.Max(0f, 1f - z * z));
+                    var radial = new Vector3(ring * MathF.Cos(angle), ring * MathF.Sin(angle), z);
+                    float inner = 1f - Mathf.Clamp01(s.RadiusThickness);
+                    float cube = inner * inner * inner;
+                    position = radial * (s.Radius * MathF.Cbrt(cube + R(Salt.ShapeB) * (1f - cube)));
+                    direction = radial;
+                    break;
+                }
                 case ShapeKind.Circle:
                 {
                     float angle = R(Salt.ShapeA) * s.Arc * Mathf.Deg2Rad;

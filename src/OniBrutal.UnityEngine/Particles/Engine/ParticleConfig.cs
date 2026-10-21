@@ -11,7 +11,7 @@ namespace OniBrutal.Engine.Particles
     /// ParticleSystemShapeType values the simulation implements.
     internal static class ShapeKind
     {
-        public const int Cone = 4, Box = 5, Circle = 10, MeshRenderer = 13;
+        public const int Sphere = 0, Cone = 4, Box = 5, Circle = 10, MeshRenderer = 13;
     }
 
     /// A burst of the emission module: count particles at time (seconds into each loop),
@@ -168,7 +168,9 @@ namespace OniBrutal.Engine.Particles
         /// when enabled, so unsupported content fails at load instead of rendering wrongly.
         public static ParticleConfig Read(Fields f, IReferenceResolver resolver, string owner)
         {
-            void Unsupported(string what) => throw new InvalidDataException($"ParticleSystem on {owner}: {what} is not supported.");
+            // Features the game's data never uses are not simulated (mods' effects may use them):
+            // each is logged and the system runs without it, as described where it is met.
+            void Unsupported(string what) => EngineLog.Engine($"particles: ParticleSystem on {owner}: {what} is not simulated");
 
             var c = new ParticleConfig
             {
@@ -177,7 +179,9 @@ namespace OniBrutal.Engine.Particles
                 SimulationSpeed = F(f, "simulationSpeed"),
                 StopAction = I(f, "stopAction"),
                 CullingMode = I(f, "cullingMode"),
-                EmitterVelocityMode = I(f, "emitterVelocityMode"),
+                // Bundles from before Unity 2022 (a mod's) store the mode as useRigidbodyForVelocity,
+                // when there were only these two modes.
+                EmitterVelocityMode = f.Contains("emitterVelocityMode") ? I(f, "emitterVelocityMode") : B(f, "useRigidbodyForVelocity") ? 1 : 0,
                 Looping = B(f, "looping"),
                 Prewarm = B(f, "prewarm"),
                 PlayOnAwake = B(f, "playOnAwake"),
@@ -189,7 +193,11 @@ namespace OniBrutal.Engine.Particles
                 RandomSeed = unchecked((uint)I(f, "randomSeed")),
             };
             if (I(f, "ringBufferMode") != 0) Unsupported("ring buffer mode");
-            if (c.SimulationSpace is not (0 or 1)) Unsupported("custom simulation space");
+            if (c.SimulationSpace is not (0 or 1))
+            {
+                Unsupported("custom simulation space (simulated in local space)");
+                c.SimulationSpace = 0;
+            }
 
             var init = f.Struct("InitialModule");
             c.StartLifetime = MinMaxCurveData.Read(init.Struct("startLifetime"));
@@ -202,14 +210,15 @@ namespace OniBrutal.Engine.Particles
             c.StartRotationY = MinMaxCurveData.Read(init.Struct("startRotationY"));
             c.StartRotationZ = MinMaxCurveData.Read(init.Struct("startRotation"));
             c.RandomizeRotationDirection = F(init, "randomizeRotationDirection");
-            c.GravitySource = I(init, "gravitySource");
+            // Older bundles predate 2D-physics gravity and custom emitter velocity.
+            c.GravitySource = init.Contains("gravitySource") ? I(init, "gravitySource") : 0;
             c.MaxParticles = Math.Max(0, I(init, "maxNumParticles"));
-            c.CustomEmitterVelocity = V3(init, "customEmitterVelocity");
+            c.CustomEmitterVelocity = init.Contains("customEmitterVelocity") ? V3(init, "customEmitterVelocity") : Vector3.zero;
             c.Size3D = B(init, "size3D");
             c.Rotation3D = B(init, "rotation3D");
             c.GravityModifier = MinMaxCurveData.Read(init.Struct("gravityModifier"));
             // The project's 2D gravity is not modelled; no data combines it with a non-zero modifier.
-            if (c.GravitySource != 0 && !c.GravityModifier.IsZero) Unsupported("2D-physics gravity");
+            if (c.GravitySource != 0 && !c.GravityModifier.IsZero) Unsupported("2D-physics gravity (3D gravity used)");
 
             var shape = f.Struct("ShapeModule");
             var s = c.Shape = new ShapeData
@@ -235,18 +244,20 @@ namespace OniBrutal.Engine.Particles
                 {
                     case ShapeKind.Box:
                         break;
+                    case ShapeKind.Sphere:
                     case ShapeKind.Cone:
                     case ShapeKind.Circle:
                         // Only random placement around the arc/radius (mode Random).
-                        if (I(shape.Struct("radius"), "mode") != 0 || I(shape.Struct("arc"), "mode") != 0) Unsupported("shape radius/arc modes other than Random");
+                        if (I(shape.Struct("radius"), "mode") != 0 || I(shape.Struct("arc"), "mode") != 0) Unsupported("shape radius/arc modes other than Random (Random used)");
                         break;
                     case ShapeKind.MeshRenderer:
                         // With no MeshRenderer assigned the shape has nothing to sample, and Unity
                         // emits from the emitter origin along +Z (the shape module is skipped).
-                        if (!shape.PPtr("m_MeshRenderer").IsNull) Unsupported("mesh renderer shapes");
+                        if (!shape.PPtr("m_MeshRenderer").IsNull) Unsupported("mesh renderer shapes (emitted from the origin)");
                         break;
                     default:
-                        Unsupported($"shape type {s.Type}");
+                        Unsupported($"shape type {s.Type} (emitted from the origin)");
+                        s.Enabled = false;
                         break;
                 }
             }
@@ -307,10 +318,15 @@ namespace OniBrutal.Engine.Particles
             c.Cycles = F(uv, "cycles");
             if (c.UvEnabled)
             {
-                if (I(uv, "mode") != 0) Unsupported("sprite-mode texture sheet animation");
-                if (I(uv, "animationType") != 0) Unsupported("single-row texture sheet animation");
-                if (c.UvTimeMode is not (0 or 2)) Unsupported("speed-driven texture sheet animation");
-                if (F(uv, "flipU") != 0f || F(uv, "flipV") != 0f) Unsupported("texture sheet UV flipping");
+                string unsupported = I(uv, "mode") != 0 ? "sprite-mode texture sheet animation"
+                    : I(uv, "animationType") != 0 ? "single-row texture sheet animation"
+                    : c.UvTimeMode is not (0 or 2) ? "speed-driven texture sheet animation"
+                    : F(uv, "flipU") != 0f || F(uv, "flipV") != 0f ? "texture sheet UV flipping" : null;
+                if (unsupported != null)
+                {
+                    Unsupported(unsupported + " (the module is off)");
+                    c.UvEnabled = false;
+                }
             }
 
             var trail = f.Struct("TrailModule");
@@ -327,11 +343,16 @@ namespace OniBrutal.Engine.Particles
             c.TrailColorOverTrail = MinMaxGradientData.Read(trail.Struct("colorOverTrail"));
             if (c.TrailsEnabled)
             {
-                if (I(trail, "mode") != 0) Unsupported("ribbon trails");
-                if (I(trail, "textureMode") != 0) Unsupported("trail texture modes other than Stretch");
-                if (B(trail, "worldSpace") && c.SimulationSpace == 0) Unsupported("world-space trails of a local-space system");
-                if (c.TrailSizeAffectsLifetime) Unsupported("trail lifetime scaled by particle size");
-                if (B(trail, "generateLightingData")) Unsupported("trail lighting data");
+                string unsupported = I(trail, "mode") != 0 ? "ribbon trails"
+                    : I(trail, "textureMode") != 0 ? "trail texture modes other than Stretch"
+                    : B(trail, "worldSpace") && c.SimulationSpace == 0 ? "world-space trails of a local-space system"
+                    : c.TrailSizeAffectsLifetime ? "trail lifetime scaled by particle size" : null;
+                if (unsupported != null)
+                {
+                    Unsupported(unsupported + " (no trails)");
+                    c.TrailsEnabled = false;
+                }
+                else if (B(trail, "generateLightingData")) Unsupported("trail lighting data");
             }
 
             var sub = f.Struct("SubModule");
@@ -342,7 +363,11 @@ namespace OniBrutal.Engine.Particles
                 Properties = I(e, "properties"),
                 EmitProbability = F(e, "emitProbability"),
             }).ToArray();
-            if (B(sub, "enabled")) Unsupported("sub emitters");
+            if (B(sub, "enabled"))
+            {
+                Unsupported("sub emitters");
+                c.SubEmitters = Array.Empty<SubEmitterData>();
+            }
 
             foreach (var module in new[]
             {

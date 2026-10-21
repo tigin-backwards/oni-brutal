@@ -51,7 +51,8 @@ namespace OniBrutal.Engine
                 if (!components) continue;
                 foreach (var c in go.Components)
                 {
-                    if (c is null) continue;
+                    // A missing script has no object to find.
+                    if (c is null or MissingScript) continue;
                     var ct = c.GetType();
                     if (!matches.TryGetValue(ct, out bool match)) matches[ct] = match = type.IsAssignableFrom(ct);
                     if (!match) continue;

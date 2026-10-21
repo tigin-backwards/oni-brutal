@@ -14,6 +14,7 @@ namespace OniBrutal.Engine
     /// layout (ComponentLayout) instead of testing every component. In a large colony an object has
     /// about 30 components and the game queries them constantly (GetComponent, and every event
     /// handler's GetComponents); testing each one read each component object.
+    /// Queries give null where a MissingScript holds a component's place.
     internal static class Components
     {
         static readonly bool verify = Environment.GetEnvironmentVariable("ONI_VERIFY_COMPONENT_LAYOUTS") == "1";
@@ -35,7 +36,7 @@ namespace OniBrutal.Engine
             var matches = LayoutOf(go, components).Matches(QueryIds.Of(type), type);
             var found = matches.Length == 0 ? null : components[matches[0]];
             if (verify) Verify(go, components, type, found);
-            return found;
+            return found is MissingScript ? null : found;
         }
 
         /// First<T> and All<T>: the generic queries the game makes constantly (GetComponent<T> is
@@ -51,6 +52,7 @@ namespace OniBrutal.Engine
             }
             var found = components[matches[0]];
             if (verify) Verify(go, components, typeof(T), found);
+            if (found is MissingScript) return default;
             // A match is a component of a type assignable to T.
             return System.Runtime.CompilerServices.Unsafe.As<Component, T>(ref found);
         }
@@ -62,6 +64,7 @@ namespace OniBrutal.Engine
             foreach (int i in matches)
             {
                 var c = components[i];
+                if (c is MissingScript) c = null;
                 results.Add(System.Runtime.CompilerServices.Unsafe.As<Component, T>(ref c));
             }
             if (verify)
@@ -88,6 +91,7 @@ namespace OniBrutal.Engine
         {
             foreach (var c in go.Components)
             {
+                if (c is MissingScript) continue;
                 var t = c.GetType();
                 if (t.Name == typeName || t.FullName == typeName) return c;
             }
@@ -97,7 +101,7 @@ namespace OniBrutal.Engine
         public static void All(GameObjectNative go, Type type, IList results)
         {
             var components = go.Components;
-            foreach (int i in LayoutOf(go, components).Matches(QueryIds.Of(type), type)) results.Add(components[i]);
+            foreach (int i in LayoutOf(go, components).Matches(QueryIds.Of(type), type)) results.Add(components[i] is MissingScript ? null : components[i]);
         }
 
         /// Depth-first pre-order over this object and its descendants. The object the search

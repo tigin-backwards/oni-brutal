@@ -75,16 +75,13 @@ namespace OniBrutal.Host
                         foreach (var pass in sub.Passes)
                         {
                             if (pass.Type != 0) continue;
-                            foreach (var list in pass.Data.Struct("progVertex").Array("m_PlayerSubPrograms"))
-                                foreach (var o in (object?[])list!)
-                                {
-                                    var p = (OniBrutal.Assets.TypeTrees.Fields)o!;
-                                    if (!ShaderPrograms.IsGlCore(p.Get<sbyte>("m_GpuProgramType"))) continue;
-                                    var v = shader.Programs.Variant((int)p.Get<uint>("m_BlobIndex"));
-                                    if (!v.VertexSource.Contains("void main") || !v.FragmentSource.Contains("void main") || (v.GeometrySource != null && !v.GeometrySource.Contains("void main")))
-                                        throw new InvalidOperationException($"shader {shader.ShaderName}: variant {v.BlobIndex} lacks a stage");
-                                    variants++;
-                                }
+                            foreach (var variant in pass.Variants)
+                            {
+                                var v = shader.Programs.Variant(variant.BlobIndex);
+                                if (!v.VertexSource.Contains("void main") || !v.FragmentSource.Contains("void main") || (v.GeometrySource != null && !v.GeometrySource.Contains("void main")))
+                                    throw new InvalidOperationException($"shader {shader.ShaderName}: variant {v.BlobIndex} lacks a stage");
+                                variants++;
+                            }
                         }
                     ShaderVariants += variants;
                     break;

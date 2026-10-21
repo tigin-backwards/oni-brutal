@@ -25,7 +25,9 @@ namespace OniBrutal.Engine.Rendering
     /// The OpenGLCore programs of a shader (platform 15): LZ4-compressed segments holding a
     /// table of (offset, length, segment) entries. Program entries are: version, GPU program
     /// type, four stats, the variant's keywords, the GLSL source of all stages (sections
-    /// `#ifdef VERTEX` … `#ifdef FRAGMENT` …), then the vertex channel mask.
+    /// `#ifdef VERTEX` … `#ifdef FRAGMENT` …), then the vertex channel mask. Shaders built before
+    /// Unity 2021.2 (mods' bundles; Unity 6 loads them) list global then local keywords, and keep
+    /// the channel mask in the parsed form's subprograms instead.
     internal sealed class ShaderPrograms
     {
         const int GlCorePlatformIndexNotFound = -1;
@@ -33,10 +35,13 @@ namespace OniBrutal.Engine.Rendering
         readonly byte[][] segments;
         readonly (int Offset, int Length, int Segment)[] entries;
         readonly Dictionary<int, ShaderVariant> variants = new();
+        /// Legacy shaders: each blob's channel mask, from the parsed form (null otherwise).
+        readonly Dictionary<int, uint> legacyChannels;
 
-        ShaderPrograms(byte[][] segments)
+        ShaderPrograms(byte[][] segments, Dictionary<int, uint> legacyChannels)
         {
             this.segments = segments;
+            this.legacyChannels = legacyChannels;
             var table = segments[0];
             int count = BitConverter.ToInt32(table, 0);
             entries = new (int, int, int)[count];
@@ -59,8 +64,21 @@ namespace OniBrutal.Engine.Rendering
                 segs[s] = new byte[decompressed[s]];
                 Lz4.Decode(blob.AsSpan((int)offsets[s], (int)compressed[s]), segs[s]);
             }
-            return new ShaderPrograms(segs);
+            Dictionary<int, uint> legacyChannels = null;
+            if (IsLegacy(shader))
+            {
+                legacyChannels = new Dictionary<int, uint>();
+                foreach (Fields sub in shader.Struct("m_ParsedForm").Array("m_SubShaders"))
+                    foreach (Fields pass in sub.Array("m_Passes"))
+                        foreach (Fields program in pass.Struct("progVertex").Array("m_SubPrograms"))
+                            if (IsGlCore(Convert.ToInt32(program["m_GpuProgramType"])))
+                                legacyChannels[(int)Convert.ToUInt32(program["m_BlobIndex"])] = Convert.ToUInt32(program.Struct("m_Channels")["m_SourceMap"]);
+            }
+            return new ShaderPrograms(segs, legacyChannels);
         }
+
+        /// A shader serialized before Unity 2021.2: no shader-wide keyword list.
+        public static bool IsLegacy(Fields shader) => !shader.Struct("m_ParsedForm").Contains("m_KeywordNames");
 
         public ShaderVariant Variant(int blobIndex)
         {
@@ -78,24 +96,28 @@ namespace OniBrutal.Engine.Rendering
             var (offset, length, segment) = entries[blobIndex];
             var data = segments[segment].AsSpan(offset, length);
             int pos = 24;
-            int keywordCount = BitConverter.ToInt32(data[pos..]);
-            pos += 4;
-            var keywords = new string[keywordCount];
-            for (int i = 0; i < keywordCount; i++)
+            var keywords = new List<string>();
+            // Legacy entries list global keywords, then local ones.
+            for (int list = 0; list < (legacyChannels != null ? 2 : 1); list++)
             {
-                int len = BitConverter.ToInt32(data[pos..]);
-                keywords[i] = Encoding.UTF8.GetString(data.Slice(pos + 4, len));
-                pos += 4 + ((len + 3) & ~3);
+                int keywordCount = BitConverter.ToInt32(data[pos..]);
+                pos += 4;
+                for (int i = 0; i < keywordCount; i++)
+                {
+                    int len = BitConverter.ToInt32(data[pos..]);
+                    keywords.Add(Encoding.UTF8.GetString(data.Slice(pos + 4, len)));
+                    pos += 4 + ((len + 3) & ~3);
+                }
             }
             int textLength = BitConverter.ToInt32(data[pos..]);
             var source = Encoding.UTF8.GetString(data.Slice(pos + 4, textLength));
             pos += 4 + ((textLength + 3) & ~3);
-            uint channels = BitConverter.ToUInt32(data[pos..]);
+            uint channels = legacyChannels != null ? legacyChannels.GetValueOrDefault(blobIndex) : BitConverter.ToUInt32(data[pos..]);
             var stages = Split(source);
             return new ShaderVariant
             {
                 BlobIndex = blobIndex,
-                Keywords = keywords,
+                Keywords = keywords.ToArray(),
                 VertexSource = stages["VERTEX"],
                 FragmentSource = stages["FRAGMENT"],
                 GeometrySource = stages.GetValueOrDefault("GEOMETRY"),
@@ -133,30 +155,59 @@ namespace OniBrutal.Engine.Rendering
         /// program lists hold every platform's programs, told apart by type.
         public static bool IsGlCore(int gpuProgramType) => gpuProgramType is 6 or 7 or 8;
 
-        /// The blob index of the variant Unity selects for a pass given the enabled keywords:
-        /// among the pass's OpenGLCore player programs, an exact match of the enabled keywords the pass
-        /// knows; otherwise the one with most matches, then fewest extra keywords, then the
-        /// earliest.
-        public static int SelectVariant(Fields pass, string[] shaderKeywords, Func<string, bool> isEnabled)
+        /// A pass's OpenGLCore player programs, with the shader's keyword names.
+        public static ProgramVariant[] Variants(Fields pass, string[] shaderKeywords)
         {
-            var program = pass.Struct("progVertex");
-            int best = -1, bestMatches = -1, bestExtras = int.MaxValue;
-            foreach (var list in program.Array("m_PlayerSubPrograms"))
+            var result = new List<ProgramVariant>();
+            foreach (var list in pass.Struct("progVertex").Array("m_PlayerSubPrograms"))
                 foreach (Fields sub in (object[])list)
                 {
                     if (!IsGlCore(sub.Get<sbyte>("m_GpuProgramType"))) continue;
                     var indices = sub.Get<ushort[]>("m_KeywordIndices") ?? Array.Empty<ushort>();
-                    int matches = 0, extras = 0;
-                    foreach (var k in indices)
-                        if (isEnabled(shaderKeywords[k])) matches++;
-                        else extras++;
-                    if (matches > bestMatches || (matches == bestMatches && extras < bestExtras))
-                    {
-                        best = (int)sub.Get<uint>("m_BlobIndex");
-                        bestMatches = matches;
-                        bestExtras = extras;
-                    }
+                    result.Add(new ProgramVariant((int)sub.Get<uint>("m_BlobIndex"), Array.ConvertAll(indices, k => shaderKeywords[k])));
                 }
+            return result.ToArray();
+        }
+
+        /// A legacy pass's OpenGLCore programs: their global and local keyword indices name
+        /// keywords through the pass's name table.
+        public static ProgramVariant[] LegacyVariants(Fields pass)
+        {
+            var names = new Dictionary<int, string>();
+            foreach (Fields pair in pass.Array("m_NameIndices")) names[Convert.ToInt32(pair["second"])] = pair.String("first");
+            var result = new List<ProgramVariant>();
+            foreach (Fields sub in pass.Struct("progVertex").Array("m_SubPrograms"))
+            {
+                if (!IsGlCore(Convert.ToInt32(sub["m_GpuProgramType"]))) continue;
+                var keywords = new List<string>();
+                foreach (var list in new[] { "m_GlobalKeywordIndices", "m_LocalKeywordIndices" })
+                    foreach (var k in sub.Get<ushort[]>(list) ?? Array.Empty<ushort>())
+                        keywords.Add(names.TryGetValue(k, out var name) ? name : throw new InvalidDataException($"Shader pass keyword index {k} has no name."));
+                result.Add(new ProgramVariant((int)Convert.ToUInt32(sub["m_BlobIndex"]), keywords.ToArray()));
+            }
+            return result.ToArray();
+        }
+
+        /// The blob index of the variant Unity selects for a pass given the enabled keywords:
+        /// among the pass's OpenGLCore programs, an exact match of the enabled keywords the pass
+        /// knows; otherwise the one with most matches, then fewest extra keywords, then the
+        /// earliest.
+        public static int SelectVariant(ShaderPass pass, Func<string, bool> isEnabled)
+        {
+            int best = -1, bestMatches = -1, bestExtras = int.MaxValue;
+            foreach (var variant in pass.Variants)
+            {
+                int matches = 0, extras = 0;
+                foreach (var k in variant.Keywords)
+                    if (isEnabled(k)) matches++;
+                    else extras++;
+                if (matches > bestMatches || (matches == bestMatches && extras < bestExtras))
+                {
+                    best = variant.BlobIndex;
+                    bestMatches = matches;
+                    bestExtras = extras;
+                }
+            }
             return best;
         }
     }

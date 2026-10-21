@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using OniBrutal.Assets.IO;
@@ -195,6 +196,142 @@ namespace OniBrutal.Engine.Serialization
             }
             throw new InvalidOperationException("Unhandled value kind " + shape.Kind);
         }
+
+        // ---- Reading by a file's type tree ----
+        //
+        // A file that carries type trees (an asset bundle) whose layout of a script differs from
+        // the class's (a mod's bundle built against another version of a package, or of the mod)
+        // is read as Unity reads it: field by field as the tree lists them, each matched to the
+        // class's field by name; fields the class lacks are read and dropped, fields the data lacks
+        // keep their constructed values.
+
+        /// Whether data laid out by these nodes reads with these fields as they stand.
+        public static bool Matches(FieldShape[] fields, IReadOnlyList<TypeTreeNode> nodes, int depth = TopLevelDepth)
+        {
+            int i = 0;
+            foreach (var f in fields)
+            {
+                if (IsBeyondDepth(f.Shape, depth)) continue;
+                if (i >= nodes.Count || nodes[i].Name != f.Name || !Matches(f.Shape, nodes[i], depth)) return false;
+                i++;
+            }
+            return i == nodes.Count;
+        }
+
+        static bool Matches(ValueShape shape, TypeTreeNode node, int depth) => shape.Kind switch
+        {
+            ValueKind.Composite => Matches(SerializedLayout.CompositeFields(shape), node.Children, depth + 1),
+            ValueKind.Array or ValueKind.List => ArrayData(node) is { } data
+                && (shape.Element.Kind != ValueKind.Composite || Matches(SerializedLayout.CompositeFields(shape.Element), data.Children, depth + 1)),
+            _ => LeafMatches(shape, node),
+        };
+
+        /// The element node of an array field (a container wrapping one "Array" node), or null.
+        static TypeTreeNode ArrayData(TypeTreeNode node)
+        {
+            var array = node.IsArray ? node : node.Children.Count == 1 && node.Children[0].IsArray ? node.Children[0] : null;
+            return array != null && array.Children.Count == 2 ? array.Children[1] : null;
+        }
+
+        /// Whether a leaf node holds the binary form this shape reads (the tree's type names).
+        static bool LeafMatches(ValueShape shape, TypeTreeNode node)
+        {
+            var kind = shape.Kind == ValueKind.Enum ? shape.EnumUnderlying : shape.Kind;
+            return kind switch
+            {
+                ValueKind.Bool => node.TypeName == "bool",
+                ValueKind.SByte => node.TypeName is "SInt8",
+                ValueKind.Byte => node.TypeName is "UInt8" or "char",
+                ValueKind.Short => node.TypeName is "SInt16" or "short",
+                ValueKind.UShort or ValueKind.Char => node.TypeName is "UInt16" or "unsigned short",
+                ValueKind.Int => node.TypeName is "int" or "SInt32",
+                ValueKind.UInt => node.TypeName is "unsigned int" or "UInt32",
+                ValueKind.Long => node.TypeName is "SInt64" or "long long",
+                ValueKind.ULong => node.TypeName is "UInt64" or "unsigned long long",
+                ValueKind.Float => node.TypeName == "float",
+                ValueKind.Double => node.TypeName == "double",
+                ValueKind.String => node.TypeName == "string",
+                ValueKind.ObjectReference => node.TypeName.StartsWith("PPtr<", StringComparison.Ordinal),
+                // Built-in values keep their native layouts across versions.
+                _ => true,
+            };
+        }
+
+        /// Reads a script object's fields as these nodes lay them out (see above).
+        public static void ReadFieldsByTree(object target, FieldShape[] fields, IReadOnlyList<TypeTreeNode> nodes, DataReader r, IReferenceResolver resolver, int depth = TopLevelDepth)
+        {
+            foreach (var node in nodes)
+            {
+                FieldShape field = null;
+                foreach (var f in fields)
+                    if (f.Name == node.Name) { field = f; break; }
+                if (field == null || IsBeyondDepth(field.Shape, depth))
+                {
+                    TypeTreeReader.ReadValue(node, r);
+                    continue;
+                }
+                if (TryReadByTree(field.Shape, node, r, resolver, depth, out var value)) field.Field.SetValue(target, value);
+                if (node.AlignAfter) r.Align(4);
+            }
+        }
+
+        /// One value as its node lays it out; false (the data read and dropped) when the node holds
+        /// a different kind of value than the field.
+        static bool TryReadByTree(ValueShape shape, TypeTreeNode node, DataReader r, IReferenceResolver resolver, int depth, out object value)
+        {
+            switch (shape.Kind)
+            {
+                case ValueKind.Composite when node.Children.Count > 0 && !LeafLike(node):
+                {
+                    var composite = Cloner.NewInstance(shape.Type);
+                    ReadFieldsByTree(composite, SerializedLayout.CompositeFields(shape), node.Children, r, resolver, depth + 1);
+                    SerializedLayout.AfterDeserialize(composite);
+                    value = composite;
+                    return true;
+                }
+                case ValueKind.Array or ValueKind.List when ArrayData(node) is { } data:
+                {
+                    var array = node.IsArray ? node : node.Children[0];
+                    int count = CheckedCount(r);
+                    var items = new object[count];
+                    bool ok = true;
+                    for (int i = 0; i < count; i++)
+                    {
+                        ok &= TryReadByTree(shape.Element, data, r, resolver, depth, out items[i]);
+                        if (data.AlignAfter) r.Align(4);
+                    }
+                    if (array.AlignAfter) r.Align(4);
+                    if (!ok) { value = null; return false; }
+                    if (shape.Kind == ValueKind.Array)
+                    {
+                        var typed = Array.CreateInstance(shape.Element.Type, count);
+                        for (int i = 0; i < count; i++) typed.SetValue(items[i], i);
+                        value = typed;
+                    }
+                    else
+                    {
+                        var list = (IList)Activator.CreateInstance(shape.Type);
+                        foreach (var item in items) list.Add(item);
+                        value = list;
+                    }
+                    return true;
+                }
+                default:
+                    if (shape.Kind is ValueKind.Composite or ValueKind.Array or ValueKind.List || !LeafMatches(shape, node))
+                    {
+                        TypeTreeReader.ReadValue(node, r);
+                        value = null;
+                        return false;
+                    }
+                    // The same binary form: read as the class reads it, without the alignment
+                    // ReadFields adds after a field (the node's own flag says).
+                    value = ReadValue(shape, r, resolver, depth);
+                    return true;
+            }
+        }
+
+        /// A node read as a whole value though it has children (strings, references).
+        static bool LeafLike(TypeTreeNode node) => node.TypeName == "string" || node.TypeName.StartsWith("PPtr<", StringComparison.Ordinal);
 
         static Vector3 ReadVector3(DataReader r) => new(r.ReadSingle(), r.ReadSingle(), r.ReadSingle());
 

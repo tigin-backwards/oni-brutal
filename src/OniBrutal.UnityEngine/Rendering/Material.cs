@@ -478,7 +478,12 @@ namespace OniBrutal.Engine.Rendering
             // A shader stripped from the build leaves a null reference; Unity substitutes its
             // error shader.
             Shader = resolver.Resolve(f.PPtr("m_Shader")) as Shader ?? ShaderRegistry.Find("Hidden/InternalErrorShader");
-            Keywords.Set(f.Array("m_ValidKeywords").Cast<string>().Concat(f.Array("m_InvalidKeywords").Cast<string>()));
+            // Unity 2021.2 split the keywords into valid and invalid lists; a material from an
+            // earlier version (a mod's bundle) has them space-separated in one string.
+            if (f.Contains("m_ValidKeywords"))
+                Keywords.Set(f.Array("m_ValidKeywords").Cast<string>().Concat(f.Array("m_InvalidKeywords").Cast<string>()));
+            else
+                Keywords.Set(f.String("m_ShaderKeywords").Split(' ', StringSplitOptions.RemoveEmptyEntries));
             GlobalIlluminationFlags = (MaterialGlobalIlluminationFlags)f.Get<uint>("m_LightmapFlags");
             EnableInstancing = f.Bool("m_EnableInstancingVariants");
             DoubleSidedGI = f.Bool("m_DoubleSidedGI");
@@ -498,7 +503,9 @@ namespace OniBrutal.Engine.Rendering
                     ScaleOffset = new Vector4(scale.Float("x"), scale.Float("y"), offset.Float("x"), offset.Float("y")),
                 };
             }
-            foreach (Fields pair in saved.Array("m_Ints")) Properties.Ints[ShaderPropertyIds.Get(pair.String("first"))] = pair.Int("second");
+            // Integer properties came with Unity 2021.1.
+            if (saved.Contains("m_Ints"))
+                foreach (Fields pair in saved.Array("m_Ints")) Properties.Ints[ShaderPropertyIds.Get(pair.String("first"))] = pair.Int("second");
             foreach (Fields pair in saved.Array("m_Floats")) Properties.Floats[ShaderPropertyIds.Get(pair.String("first"))] = pair.Float("second");
             foreach (Fields pair in saved.Array("m_Colors"))
             {

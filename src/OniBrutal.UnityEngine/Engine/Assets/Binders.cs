@@ -98,13 +98,25 @@ namespace OniBrutal.Engine.Assets
 
         static readonly System.Runtime.CompilerServices.ConditionalWeakTable<Object, Pending> pending = new();
 
+        /// The MonoBehaviour fields before a script's own (m_GameObject, m_Enabled, m_Script, m_Name).
+        static readonly int BaseFieldCount = TypeTreeDatabase.Get(114).Tree!.Children.Count;
+
         public override Object Create(LoadRequest request)
         {
             var r = request.Open();
             var baseFields = TypeTreeReader.ReadFields(TypeTreeDatabase.Get(114).Tree!, r);
-            var type = ScriptTable.Resolve(request.File, baseFields.PPtr("m_Script"))
-                       ?? throw new InvalidDataException($"{request.File.Name}:{request.Info.PathId}: script type not found.");
+            var type = ScriptTable.Resolve(request.File, baseFields.PPtr("m_Script"), out var className);
             Object obj;
+            if (type == null && !baseFields.PPtr("m_GameObject").IsNull)
+            {
+                // A behaviour whose script class is not loaded (a mod's bundle built with classes
+                // the mod does not ship) stays on its GameObject as a missing script, with Unity's
+                // warnings (measured in the original: one naming the class, and one naming the
+                // object once the behaviour is attached).
+                if (className != null) EngineLog.Message(LogType.Warning, $"The referenced script ({className}) on this Behaviour is missing!", "");
+                type = typeof(MissingScript);
+            }
+            if (type == null) throw new InvalidDataException($"{request.File.Name}:{request.Info.PathId}: script type not found.");
             if (!baseFields.PPtr("m_GameObject").IsNull)
             {
                 if (!typeof(MonoBehaviour).IsAssignableFrom(type)) throw new InvalidDataException($"{type} attached to a GameObject is not a MonoBehaviour.");
@@ -129,9 +141,21 @@ namespace OniBrutal.Engine.Assets
             pending.Remove(obj);
             if (obj.Native is ComponentNative cn)
                 cn.GameObject = (GameObjectNative)request.Resolver.Resolve(p.Base.PPtr("m_GameObject")).NativeOrThrow;
+            if (obj is MissingScript)
+            {
+                // Its data has no class to go to.
+                EngineLog.Message(LogType.Warning, $"The referenced script on this Behaviour (Game Object '{((ComponentNative)obj.Native).GameObject.Name}') is missing!", "");
+                return;
+            }
             var r = request.Open();
             r.Position = p.DataStart;
-            ScriptData.ReadFields(obj, SerializedLayout.ScriptFields(obj.GetType()), r, request.Resolver);
+            var fields = SerializedLayout.ScriptFields(obj.GetType());
+            // A file whose tree lays the script out differently (a mod's bundle built against
+            // another version of the class) is read by its tree, field by name, as Unity reads it.
+            var tree = request.File.TypeOf(request.Info).Tree;
+            var nodes = tree?.Children.GetRange(BaseFieldCount, tree.Children.Count - BaseFieldCount);
+            if (nodes != null && !ScriptData.Matches(fields, nodes)) ScriptData.ReadFieldsByTree(obj, fields, nodes, r, request.Resolver);
+            else ScriptData.ReadFields(obj, fields, r, request.Resolver);
             if (r.Remaining != 0) throw new InvalidDataException($"{obj.GetType()}: {r.Remaining} bytes of script data left.");
             if (obj is ISerializationCallbackReceiver receiver)
             {
@@ -205,14 +229,23 @@ namespace OniBrutal.Engine.Assets
     /// globalgamemanagers.assets; bundles carry their own.
     internal static class ScriptTable
     {
-        static readonly Dictionary<(string, long), Type> cache = new();
+        static readonly Dictionary<(string, long), (Type Type, string Name)> cache = new();
 
-        public static Type Resolve(SerializedFile from, PPtr script)
+        public static Type Resolve(SerializedFile from, PPtr script) => Resolve(from, script, out _);
+
+        /// The script's class, or null when it is not loaded; `className` is the class the
+        /// MonoScript names (null for a null reference).
+        public static Type Resolve(SerializedFile from, PPtr script, out string className)
         {
+            className = null;
             if (script.IsNull) return null;
             var file = AssetSystem.ResolveExternal(from, script.FileId);
             var key = (AssetSystem.KeyOf(file), script.PathId);
-            if (cache.TryGetValue(key, out var t)) return t;
+            if (cache.TryGetValue(key, out var t))
+            {
+                className = t.Name;
+                return t.Type;
+            }
             var info = file.ObjectsById[script.PathId];
             var tree = file.TypeOf(info).Tree;
             var f = tree != null ? TypeTreeReader.ReadObject(tree, file.OpenObject(info)) : TypeTreeReader.ReadNative(115, file.OpenObject(info));
@@ -234,7 +267,8 @@ namespace OniBrutal.Engine.Assets
             if (type == null && (asmName == "UnityEngine" || asmName.StartsWith("UnityEngine.", StringComparison.Ordinal)))
                 type = typeof(Object).Assembly.GetType(fullName, false);
             if (type != null) ScriptInfo.SetExecutionOrder(type.FullName!, f.Int("m_ExecutionOrder"));
-            cache[key] = type;
+            cache[key] = (type, fullName);
+            className = fullName;
             return type;
         }
     }

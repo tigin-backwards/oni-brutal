@@ -14,8 +14,6 @@ namespace OniBrutal.Engine
     {
         static int pendingBuildIndex = -1;
 
-        public static event Action<SceneRecord> SceneLoaded;
-
         static SceneLoader() => PlayerLoop.FrameStart += CompletePendingLoad;
 
         public static int BuildIndexOf(string nameOrPath)
@@ -50,7 +48,8 @@ namespace OniBrutal.Engine
         /// Replaces the loaded scenes with build scene `index` (the first scene uses this directly).
         public static SceneRecord LoadNow(int index)
         {
-            foreach (var old in Scenes.Loaded.ToArray()) Unload(old);
+            var previous = UnityEngine.SceneManagement.SceneManager.GetActiveScene();
+            foreach (var old in Scenes.Loaded.ToArray()) Unload(old, notify: true);
 
             var path = ProjectSettings.BuildScenes[index];
             var scene = Scenes.Create(Path.GetFileNameWithoutExtension(path), path, index);
@@ -79,7 +78,8 @@ namespace OniBrutal.Engine
             Time.LevelLoaded();
             Activate(scene);
             EngineLog.Engine($"Loaded scene {scene.Name} ({gameObjects.Count} GameObjects)");
-            SceneLoaded?.Invoke(scene);
+            UnityEngine.SceneManagement.SceneManager.RaiseActiveSceneChanged(previous, scene);
+            UnityEngine.SceneManagement.SceneManager.RaiseSceneLoaded(scene);
             return scene;
         }
 
@@ -103,14 +103,16 @@ namespace OniBrutal.Engine
         /// DontDestroyOnLoad ones included.
         public static void UnloadAll()
         {
-            foreach (var scene in Scenes.WithDontDestroyOnLoad().ToArray()) Unload(scene);
+            foreach (var scene in Scenes.WithDontDestroyOnLoad().ToArray()) Unload(scene, notify: false);
         }
 
-        /// Destroys a scene's objects (DontDestroyOnLoad objects live in their own scene).
-        static void Unload(SceneRecord scene)
+        /// Destroys a scene's objects (DontDestroyOnLoad objects live in their own scene); a scene
+        /// a load replaces is announced (SceneManager.sceneUnloaded) before it goes.
+        static void Unload(SceneRecord scene, bool notify)
         {
             foreach (var root in scene.Roots.ToArray())
                 if (root.Managed != null && root.Managed.Native != null) Lifecycle.DestroyNow(root.Managed);
+            if (notify) UnityEngine.SceneManagement.SceneManager.RaiseSceneUnloaded(scene);
             Scenes.Remove(scene);
         }
     }

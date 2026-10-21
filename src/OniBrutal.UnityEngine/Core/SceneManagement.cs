@@ -56,6 +56,26 @@ namespace UnityEngine.SceneManagement
     {
         public static int sceneCount => Scenes.Loaded.Count;
 
+        public static event Events.UnityAction<Scene, LoadSceneMode> sceneLoaded;
+        public static event Events.UnityAction<Scene> sceneUnloaded;
+        public static event Events.UnityAction<Scene, Scene> activeSceneChanged;
+
+        // As measured in the original player, in one frame: sceneUnloaded for the scene a single
+        // load replaces (still valid while it runs), activeSceneChanged from it (no longer valid) to
+        // the new scene (loaded), then sceneLoaded. Unity calls them from native code, which logs a
+        // handler's exception and goes on.
+        internal static void RaiseSceneUnloaded(SceneRecord scene) => Raise(() => sceneUnloaded?.Invoke(new Scene(scene)));
+
+        internal static void RaiseActiveSceneChanged(Scene previous, SceneRecord scene) => Raise(() => activeSceneChanged?.Invoke(previous, new Scene(scene)));
+
+        internal static void RaiseSceneLoaded(SceneRecord scene) => Raise(() => sceneLoaded?.Invoke(new Scene(scene), LoadSceneMode.Single));
+
+        static void Raise(Action raise)
+        {
+            try { raise(); }
+            catch (Exception e) { Debug.LogException(e); }
+        }
+
         public static Scene GetActiveScene() => new(Scenes.Active);
 
         /// Single-mode load; completes at the start of the next frame.

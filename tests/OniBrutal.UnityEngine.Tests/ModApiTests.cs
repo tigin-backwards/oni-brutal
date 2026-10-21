@@ -130,6 +130,137 @@ namespace OniBrutal.Tests
 
         // Rocketry Expanded builds gradients with SetKeys: both key sets, sorted by time, evaluated
         // between them.
+        // Measured in the original player (PerfProbe's measure mode); mods' shared UI code parses
+        // its colours so.
+        [Theory]
+        [InlineData("#FF0000", 255, 0, 0, 255)]
+        [InlineData("#f00", 255, 0, 0, 255)]
+        [InlineData("#F008", 255, 0, 0, 136)]
+        [InlineData("#FF000080", 255, 0, 0, 128)]
+        [InlineData(" #FF0000", 255, 0, 0, 255)]
+        [InlineData("#FF0000 ", 255, 0, 0, 255)]
+        [InlineData("RED", 255, 0, 0, 255)]
+        [InlineData("grey", 128, 128, 128, 255)]
+        [InlineData("lightblue", 173, 216, 230, 255)]
+        [InlineData("#abc", 170, 187, 204, 255)]
+        [InlineData("#ABCDEF12", 171, 205, 239, 18)]
+        public void HtmlColorsParseAsInUnity(string text, byte r, byte g, byte b, byte a)
+        {
+            Assert.True(ColorUtility.TryParseHtmlString(text, out var color));
+            Assert.Equal(new Color32(r, g, b, a), (Color32)color);
+        }
+
+        [Theory]
+        [InlineData("#12345")]
+        [InlineData("#1234567")]
+        [InlineData("FF0000")]
+        [InlineData("#GG0000")]
+        [InlineData("")]
+        [InlineData(null)]
+        [InlineData("gray")]
+        [InlineData("pink")]
+        [InlineData("clear")]
+        public void OtherHtmlColorsAreWhiteAndRefused(string text)
+        {
+            Assert.False(ColorUtility.TryParseHtmlString(text, out var color));
+            Assert.Equal(Color.white, color);
+        }
+
+        // LineRenderer geometry as measured in the original player (BakeMesh with an orthographic
+        // camera at z -10 looking along +Z), start colour red, end colour half-transparent blue.
+        static (Vector3[] Positions, Vector2[] Uvs, Color32[] Colors, int[] Indices) Line(Action<LineRenderer> setup)
+        {
+            var line = new GameObject("line").AddComponent<LineRenderer>();
+            line.startColor = new Color(1, 0, 0, 1);
+            line.endColor = new Color(0, 0, 1, 0.5f);
+            setup(line);
+            var mesh = new OniBrutal.Engine.Rendering.MeshNative();
+            var native = (OniBrutal.Engine.Rendering.LineRendererNative)line.NativeOrThrow;
+            if (!native.BuildGeometry(new Vector3(0, 0, -10), Vector3.forward, Vector3.right, Vector3.up, false, mesh)) return (Array.Empty<Vector3>(), Array.Empty<Vector2>(), Array.Empty<Color32>(), Array.Empty<int>());
+            return (mesh.Positions, mesh.Uvs[0].Select(u => new Vector2(u.x, u.y)).ToArray(), mesh.Colors.Select(c => (Color32)c).ToArray(), mesh.SubMeshes[0].Indices);
+        }
+
+        static void Near(Vector3 expected, Vector3 actual) => Assert.True((expected - actual).magnitude < 1e-3f, $"expected {expected}, got {actual}");
+
+        [Fact]
+        public void LineRenderersDefaultToTwoPointsOfUnitWidth()
+        {
+            var line = new GameObject("line").AddComponent<LineRenderer>();
+            Assert.Equal(2, line.positionCount);
+            Assert.Equal(new Vector3(0, 0, 1), line.GetPosition(1));
+            Assert.Equal(1f, line.startWidth);
+            Assert.Equal(1f, line.endWidth);
+            Assert.True(line.useWorldSpace);
+            Assert.Equal(LineAlignment.View, line.alignment);
+            Assert.Equal(Vector2.one, line.textureScale);
+            Assert.Equal((Color32)Color.white, (Color32)line.startColor);
+        }
+
+        [Fact]
+        public void LineCornersAreMiteredAndClamped()
+        {
+            var two = Line(l => l.SetPositions(new[] { Vector3.zero, new Vector3(10, 0, 0) }));
+            Near(new Vector3(0, -0.5f, 0), two.Positions[0]);
+            Near(new Vector3(0, 0.5f, 0), two.Positions[1]);
+            Assert.Equal(new[] { 0, 1, 2, 1, 3, 2 }, two.Indices);
+            Assert.Equal(new Vector2(0, 1), two.Uvs[0]);
+            Assert.Equal(new Color32(0, 0, 255, 128), two.Colors[3]);
+
+            var corner = Line(l => { l.positionCount = 3; l.SetPositions(new[] { Vector3.zero, new Vector3(10, 0, 0), new Vector3(10, 10, 0) }); });
+            Near(new Vector3(10.5f, -0.5f, 0), corner.Positions[2]);
+            Near(new Vector3(9.5f, 0.5f, 0), corner.Positions[3]);
+            Assert.Equal(new Color32(128, 0, 128, 192), corner.Colors[2]);
+
+            var acute = Line(l => { l.positionCount = 3; l.SetPositions(new[] { Vector3.zero, new Vector3(10, 0, 0), new Vector3(0, 2, 0) }); });
+            Near(new Vector3(11.4927f, -0.1478f, 0), acute.Positions[2]);
+            Near(new Vector3(8.5073f, 0.1478f, 0), acute.Positions[3]);
+
+            var loop = Line(l => { l.positionCount = 4; l.SetPositions(new[] { Vector3.zero, new Vector3(10, 0, 0), new Vector3(10, 10, 0), new Vector3(0, 10, 0) }); l.loop = true; });
+            Assert.Equal(10, loop.Positions.Length);
+            Near(new Vector3(-0.5f, -0.5f, 0), loop.Positions[0]);
+            Near(new Vector3(0.5f, 0.5f, 0), loop.Positions[9]);
+            Assert.Equal(new Vector2(0.25f, 1), loop.Uvs[2]);
+
+            Assert.Empty(Line(l => { l.positionCount = 1; l.SetPosition(0, Vector3.one); }).Positions);
+            var depth = Line(l => l.SetPositions(new[] { Vector3.zero, new Vector3(0, 0, 10) }));
+            Near(new Vector3(-0.3536f, 0.3536f, 0), depth.Positions[0]);
+        }
+
+        [Fact]
+        public void LineWidthsColoursAndUvsFollowTheLength()
+        {
+            var curve = Line(l => { l.positionCount = 3; l.SetPositions(new[] { Vector3.zero, new Vector3(4, 0, 0), new Vector3(10, 0, 0) }); l.widthMultiplier = 2; l.widthCurve = new AnimationCurve(new Keyframe(0, 1), new Keyframe(1, 0.2f)); });
+            Near(new Vector3(4, 0.7184f, 0), curve.Positions[3]);
+            Near(new Vector3(10, 0.2f, 0), curve.Positions[5]);
+            Assert.Equal(new Color32(153, 0, 102, 204), curve.Colors[2]);
+
+            var widths = Line(l => { l.startWidth = 2; l.endWidth = 0.5f; l.SetPositions(new[] { Vector3.zero, new Vector3(10, 0, 0) }); });
+            Near(new Vector3(0, 1, 0), widths.Positions[1]);
+            Near(new Vector3(10, 0.25f, 0), widths.Positions[3]);
+
+            Vector3[] three = { Vector3.zero, new Vector3(4, 0, 0), new Vector3(10, 0, 0) };
+            var tile = Line(l => { l.positionCount = 3; l.SetPositions(three); l.widthMultiplier = 0.5f; l.textureMode = LineTextureMode.Tile; l.textureScale = new Vector2(2, 1); });
+            Assert.Equal(new[] { 0f, 0f, 8f, 8f, 20f, 20f }, tile.Uvs.Select(u => u.x));
+            var repeat = Line(l => { l.positionCount = 3; l.SetPositions(three); l.textureMode = LineTextureMode.RepeatPerSegment; });
+            Assert.Equal(new[] { 0f, 0f, 1f, 1f, 2f, 2f }, repeat.Uvs.Select(u => u.x));
+            var distribute = Line(l => { l.positionCount = 3; l.SetPositions(three); l.textureMode = LineTextureMode.DistributePerSegment; });
+            Assert.Equal(new[] { 0f, 0f, 0.5f, 0.5f, 1f, 1f }, distribute.Uvs.Select(u => u.x));
+
+            var gradient = Line(l =>
+            {
+                l.positionCount = 3;
+                l.SetPositions(new[] { Vector3.zero, new Vector3(2, 0, 0), new Vector3(10, 0, 0) });
+                var g = new Gradient();
+                g.SetKeys(new[] { new GradientColorKey(Color.red, 0), new GradientColorKey(Color.green, 0.5f), new GradientColorKey(Color.blue, 1) }, new[] { new GradientAlphaKey(1, 0), new GradientAlphaKey(0.2f, 1) });
+                l.colorGradient = g;
+            });
+            Assert.Equal(new Color32(153, 102, 0, 214), gradient.Colors[2]);
+            Assert.Equal(new Color32(0, 0, 255, 51), gradient.Colors[4]);
+
+            var local = Line(l => { l.useWorldSpace = false; l.transform.position = new Vector3(5, 5, 0); l.SetPositions(new[] { Vector3.zero, new Vector3(10, 0, 0) }); });
+            Near(new Vector3(5, 4.5f, 0), local.Positions[0]);
+        }
+
         [Fact]
         public void GradientsTakeColorAndAlphaKeys()
         {

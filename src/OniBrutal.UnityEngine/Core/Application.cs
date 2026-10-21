@@ -40,7 +40,8 @@ namespace UnityEngine
         /// Quits at the end of the frame, after OnApplicationQuit, with this exit code.
         public static void Quit(int exitCode)
         {
-            EngineLog.Engine($"Application.Quit({exitCode}) requested");
+            // The caller, as the game quits from several places (crash reports, smoke tests, menus).
+            EngineLog.Engine($"Application.Quit({exitCode}) requested by\n{EngineLog.CaptureStackTrace()}");
             PlayerLoop.RequestQuit(exitCode);
         }
 

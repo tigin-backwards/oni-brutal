@@ -646,6 +646,29 @@ save names of mod generics with framework type arguments name another assembly. 
 1.3.1 (its last GitHub release) fails in both players on the current game; the Workshop build is
 untested.
 
+## Issue #2 and the popular-mods sweep (2026-10-21)
+
+Issue #2 listed mods turning red on the mods screen, with logs. The top 100 Workshop mods (from
+onimaxxing's catalog, the ones not flagged as malware) were then run in our player on U57.
+Each finding was measured in the original player or checked against its log before it was fixed.
+
+| Finding | Cause | Fix |
+|---|---|---|
+| True Tiles 1.4.1 stopped the game before the menu; the mods it ran with were blamed for the crash | its bundle (Unity 2022.3) was read with this Unity's layouts, not the file's own type trees | native objects in a file that carries type trees are read with them, as Unity reads a file from another version |
+| Backwalls, Capsule 2.0, Cluster Generation Manager: bundles from Unity 2020.3 failed to load | older layouts of script data, Material keywords, placeholder textures (0 images), ParticleSystem (`useRigidbodyForVelocity`), and shaders (keywords per pass, two keyword lists per program) | each read in its old form; Unity 6 loads all of them (measured with Backwalls) |
+| Cluster Generation Manager, Backwalls: "script type not found" | bundle prefabs referencing classes the mod does not ship | a missing script holds its place and is null to component queries, with Unity's two warnings (measured: slot order, GetComponent, Instantiate, FindObjectsByType) |
+| Better Info Cards failed to load (InvalidProgramException) | its transpiler leaves a value on the stack before a try block, which Mono compiles | ARCHITECTURE D17 |
+| Better Info Cards: NullReferenceException every frame once hovering had gone on a few seconds | its patch of `HoverTextDrawer.Pool<MonoBehaviour>.Draw` (shared generic code) was lost when tiering recompiled that code | ARCHITECTURE D18 |
+| Popular mods' API missing | `Canvas.pixelRect`, `ColorUtility.TryParseHtmlString`, `Texture.allowThreadedTextureCreation`, `SceneManager.sceneLoaded`/`sceneUnloaded`/`activeSceneChanged`, `LineRenderer` | implemented as measured |
+| Six mods on Ony's shared library (DGSM, WGSM, NoDrop, SmartMop, FavoriteResources, Mod Manager) | uGUI `DefaultControls` missing | clean-room specification from measurement, implemented from it |
+| About 19 mods embedding an old PLib | `TMP_Text.ignoreRectMaskCulling` missing (Klei's own no-op in the shipped TMP) | clean-room specification, implemented from it |
+| Capsule 2.0's effects | particle features the game never uses (clamp velocity, collision, lights, …) were refused at load | loaded without them, each logged; the Sphere shape is implemented |
+
+Not ours (the same in the original player): cimgui's `SetKAssertCB` (absent from the game's Linux
+cimgui.so too), TMP `FaceInfo`/`characterDictionary`/`TMP_TextElement.width` (absent from the
+shipped TMP; old PLib's code that uses them is not reached), `InputField.onEndEdit`'s old
+`SubmitEvent` signature.
+
 ## Open items
 
 Known behaviours not reproduced, all confirmed unreachable by the game (M6):

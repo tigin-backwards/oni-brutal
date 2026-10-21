@@ -12,6 +12,12 @@ namespace UnityEngine
     {
         public static readonly int GenerateAllMips = -1;
 
+        /// Whether Unity may create textures' GPU resources off its render thread (false by
+        /// default, measured in the original player). It changes when Unity's native code does
+        /// that work, not what scripts observe; the engine uploads textures created on any thread
+        /// before the next frame renders either way, so the value is only kept.
+        public static bool allowThreadedTextureCreation { get; set; }
+
         protected Texture() { }
 
         internal TextureNative TextureData => (TextureNative)NativeOrThrow;

@@ -158,6 +158,14 @@ namespace OniBrutal.Engine.UI
             return ScreenSize;
         }
 
+        public static Rect PixelRect(CanvasNative root)
+        {
+            if (root.RenderMode == RenderMode.ScreenSpaceCamera && root.WorldCamera != null)
+                return root.WorldCamera.pixelRect;
+            var size = ScreenSize;
+            return new Rect(0f, 0f, size.x, size.y);
+        }
+
         /// Screen-space root canvases fill the screen (or their camera's view at planeDistance):
         /// size = screen / scaleFactor, scale = scaleFactor (overlay), anchored at the centre.
         public static void UpdateRootTransform(CanvasNative canvas)

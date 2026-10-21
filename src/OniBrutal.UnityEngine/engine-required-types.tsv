@@ -21,3 +21,12 @@ UnityEngine.CoreModule	JetBrains.Annotations.MustUseReturnValueAttribute	# mods 
 UnityEngine.CoreModule	JetBrains.Annotations.NotNullAttribute	# mods (Rocketry Expanded): annotations
 UnityEngine.CoreModule	JetBrains.Annotations.PureAttribute	# mods (Rocketry Expanded): annotations
 UnityEngine.CoreModule	UnityEngine.GradientAlphaKey	# mods (Rocketry Expanded): Gradient.SetKeys
+UnityEngine.CoreModule	UnityEngine.SceneManagement.LoadSceneMode	# mods: SceneManager.sceneLoaded's argument
+UnityEngine.CoreModule	UnityEngine.LineRenderer	# mods: Capsule 2.0's prefabs (its mining laser), debug lines in Aki's FUtility
+UnityEngine.CoreModule	UnityEngine.LineAlignment	# LineRenderer.alignment
+UnityEngine.CoreModule	UnityEngine.LineTextureMode	# LineRenderer.textureMode
+UnityEngine.CoreModule	UnityEngine.SpriteMaskInteraction	# LineRenderer.maskInteraction
+UnityEngine.ParticleSystemModule	UnityEngine.ParticleSystem+MinMaxGradient	# mods (Capsule 2.0): ParticleSystem.MainModule.startColor
+UnityEngine.ParticleSystemModule	UnityEngine.ParticleSystemGradientMode	# MinMaxGradient.mode
+UnityEngine.ParticleSystemModule	UnityEngine.ParticleCollisionEvent	# mods (Capsule 2.0): collision handlers
+UnityEngine.ParticleSystemModule	UnityEngine.ParticlePhysicsExtensions	# mods (Capsule 2.0): GetCollisionEvents

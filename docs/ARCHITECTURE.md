@@ -239,6 +239,30 @@ past the boot checkpoint needs a Steam client logged in with an account that own
   (`UnhandledExceptions`): a thread's exception raises UnhandledException (and is logged as
   Unity's are), a thread pool's is dropped, the main thread's still ends the process;
   `--check-types` throws on both kinds of thread.
+- **D17 A try block entered with values on the stack.** ECMA-335 requires an empty evaluation
+  stack where a try block starts; CoreCLR's JIT refuses a method that enters one with values on
+  it (InvalidProgramException when Harmony applies the patch), and Mono compiles it. Harmony
+  transpilers that insert a call returning a value nobody uses produce such methods (Better Info
+  Cards' patch of `SelectToolHoverTextCard.UpdateHoverElements` leaves a `KSelectable` behind
+  before a `foreach`; the mod failed to load). **Resolved by a patch** of the game's Harmony
+  (`TranspiledTryEntries`, beside D12's): in the instructions its transpilers produce, values a
+  try block is entered with and never consumes are popped before it. They are dead, since `leave`
+  and `throw`, the only ways out of a try, empty the stack. A method whose try block does use them,
+  or that the analysis cannot follow, is left as it was, and each change is logged.
+  `--check-types` transpiles a method so and runs it.
+- **D18 Patches of a generic class's shared code.** A method of a generic class instantiated
+  over reference types runs code that every such instantiation shares, on Mono as on CoreCLR, so
+  a patch of one instantiation's method applies to all (Better Info Cards patches
+  `HoverTextDrawer.Pool<MonoBehaviour>.Draw`, which the game never instantiates, to see the
+  widgets its `Pool<Image>` and `Pool<LocText>` draw). When tiered compilation recompiles that
+  shared code, MonoMod moves its detour to the new code only for a recompiled method equal to the
+  patched one; the shared code's is the canonical method (`Pool<__Canon>.Draw`), so the patch
+  stopped running once the method tiered up (Better Info Cards: NullReferenceException every
+  frame after a few seconds of hovering). **Resolved** in `SharedGenerics`, which subscribes to
+  MonoMod's method-compiled event and hands MonoMod's handler every patched method of a generic
+  class that has the recompiled method's handle (instantiations sharing code share their method
+  handle). `--check-types` patches an emitted generic class's method for one argument and calls
+  it for another past tier-up.
 
 ## 3. The engine API (`OniBrutal.UnityEngine`)
 
@@ -439,7 +463,8 @@ renderer, restricted to what the game uses (*usage §1*):
   their `CameraEvent`s → draw → `OnRenderImage` chain (component order, temporary RTs) →
   `OnPostRender`.
 - Draw sources: `MeshRenderer`+`MeshFilter`, `SpriteRenderer`, `ParticleSystemRenderer`,
-  `CanvasRenderer` (world-space and screen-space-camera canvases), and the per-frame
+  `LineRenderer` (mods' lines: its strip as Unity's BakeMesh measures it, corners mitered; rounded
+  corners and caps are drawn square), `CanvasRenderer` (world-space and screen-space-camera canvases), and the per-frame
   `Graphics.DrawMesh` queue (cleared after the frame; `camera` argument restricts it).
 - Unity's built-in shader constants are maintained per draw/camera (`unity_ObjectToWorld`,
   `unity_MatrixVP`, `_ProjectionParams`, `_ScreenParams`, `_Time`, `_ZBufferParams`, …) with GL
@@ -555,7 +580,10 @@ TMP runs as shipped. The engine provides what it needs: `Font`, `TextCore` data 
   converter. The game's clips have no audio tracks (and the game sets `audioOutputMode = None`);
   video audio is not played.
 - `Animator`: AnimatorController state machine + AnimationClip curve evaluation for the
-  properties the game animates (UI). `ParticleSystem`: the modules the prefabs actually enable.
+  properties the game animates (UI). `ParticleSystem`: the modules the prefabs actually enable. Features no game data
+  uses (mods' effects: clamp velocity, collision, lights, sub emitters, other shapes and
+  texture-sheet or trail variants…) are not simulated; the system loads without each and logs it
+  once (`[engine] particles: … is not simulated`).
 - `UnityWebRequest` → `HttpClient`; `ImageConversion` → stb_image / stb_image_write
   (`Ahwoo.BRUTAL.Stb`); `JsonUtility` → the shared layout builder; `Physics.Raycast` → the
   colliders present in data; IMGUI → clipboard and the event/GUI surface the code paths touch.

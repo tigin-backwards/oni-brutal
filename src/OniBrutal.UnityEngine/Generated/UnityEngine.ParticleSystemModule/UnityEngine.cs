@@ -2,6 +2,12 @@
 #nullable disable
 namespace UnityEngine
 {
+    public partial struct ParticleCollisionEvent
+    {
+    }
+    public static partial class ParticlePhysicsExtensions
+    {
+    }
     [global::UnityEngine.RequireComponent(typeof(global::UnityEngine.Transform))]
     public sealed partial class ParticleSystem : global::UnityEngine.Component
     {
@@ -20,6 +26,13 @@ namespace UnityEngine
     }
     public partial class ParticleSystem
     {
+        [global::System.Serializable]
+        public partial struct MinMaxGradient
+        {
+        }
+    }
+    public partial class ParticleSystem
+    {
         public partial struct ShapeModule
         {
         }
@@ -29,6 +42,14 @@ namespace UnityEngine
         public partial struct SubEmittersModule
         {
         }
+    }
+    public enum ParticleSystemGradientMode
+    {
+        Color = 0,
+        Gradient = 1,
+        TwoColors = 2,
+        TwoGradients = 3,
+        RandomColor = 4,
     }
     [global::UnityEngine.RequireComponent(typeof(global::UnityEngine.Transform))]
     public sealed partial class ParticleSystemRenderer : global::UnityEngine.Renderer

@@ -621,6 +621,9 @@ namespace OniBrutal.Engine.Rendering
                 case Particles.ParticleSystemRendererNative p:
                     CollectParticles(p, camera, draws);
                     break;
+                case LineRendererNative l:
+                    CollectLine(l, camera, draws);
+                    break;
                 default:
                     External?.Invoke(r, camera, draws);
                     break;
@@ -657,6 +660,24 @@ namespace OniBrutal.Engine.Rendering
                 if (material == null || mesh.SubMeshes[i].Indices.Length == 0) continue;
                 var item = Item(r, mesh, i, material, r.PropertyBlock);
                 item.ObjectToWorld = objectToWorld;
+                draws.Add(item);
+            }
+        }
+
+        static readonly System.Runtime.CompilerServices.ConditionalWeakTable<RendererNative, MeshNative> lineMeshes = new();
+
+        /// The line's strip built for this camera (world space), drawn with each material.
+        static void CollectLine(LineRendererNative r, Camera camera, List<DrawItem> draws)
+        {
+            var mesh = lineMeshes.GetValue(r, _ => new MeshNative());
+            var view = (TransformNative)camera.transform.NativeOrThrow;
+            var rotation = view.WorldRotation;
+            if (!r.BuildGeometry(Hierarchy.Position(view), rotation * Vector3.forward, rotation * Vector3.right, rotation * Vector3.up, !camera.orthographic, mesh)) return;
+            foreach (var material in r.Materials)
+            {
+                if (material == null) continue;
+                var item = Item(r, mesh, 0, material, r.PropertyBlock);
+                item.ObjectToWorld = Matrix4x4.identity;
                 draws.Add(item);
             }
         }

@@ -622,6 +622,23 @@ namespace UnityEngine
     public sealed partial class Light : global::UnityEngine.Behaviour
     {
     }
+    public enum LineAlignment
+    {
+        View = 0,
+        Local = 1,
+        TransformZ = 1,
+    }
+    public sealed partial class LineRenderer : global::UnityEngine.Renderer
+    {
+    }
+    public enum LineTextureMode
+    {
+        Stretch = 0,
+        Tile = 1,
+        DistributePerSegment = 2,
+        RepeatPerSegment = 3,
+        Static = 4,
+    }
     public enum LogType
     {
         Error = 0,
@@ -953,6 +970,12 @@ namespace UnityEngine
     }
     public sealed partial class Sprite : global::UnityEngine.Object
     {
+    }
+    public enum SpriteMaskInteraction
+    {
+        None = 0,
+        VisibleInsideMask = 1,
+        VisibleOutsideMask = 2,
     }
     public enum SpriteMeshType
     {

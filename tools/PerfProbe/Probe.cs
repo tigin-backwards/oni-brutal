@@ -495,6 +495,10 @@ namespace PerfProbe
                 Debug.Log($"PERF measure data prefab {dataPrefab.name}: {victimType} destroyed {victim == null}");
             }
             yield return MeasureModRendering();
+            MeasurePopularModApis();
+            MeasureDefaultControls();
+            MeasureMissingScripts();
+            MeasureLineRenderer();
             // Exceptions nothing catches on other threads (mods' background work): a thread, a
             // thread-pool item, an async void method's continuation.
             new System.Threading.Thread(() => throw new System.InvalidOperationException("PERF thread exception")).Start();
@@ -505,10 +509,23 @@ namespace PerfProbe
             Debug.Log("PERF measure done");
         }
 
+        /// A type by assembly-qualified name among the loaded assemblies (Mono's Type.GetType does
+        /// not find a mod's, which KMod loads with LoadFrom).
+        static System.Type FindType(string qualifiedName)
+        {
+            var parts = qualifiedName.Split(',');
+            var name = parts[0].Trim();
+            var assembly = parts.Length > 1 ? parts[1].Trim() : null;
+            foreach (var a in System.AppDomain.CurrentDomain.GetAssemblies())
+                if (assembly == null || a.GetName().Name == assembly)
+                    if (a.GetType(name) is { } found) return found;
+            return null;
+        }
+
         System.Collections.IEnumerator Select(string typeName)
         {
             for (int i = 0; i < 200; i++) yield return null;
-            var type = System.Type.GetType(typeName);
+            var type = FindType(typeName);
             if (type == null) { Debug.Log($"PERF select {typeName}: no such type"); yield break; }
             KSelectable target = null;
             foreach (var found in FindObjectsByType(type, FindObjectsSortMode.InstanceID))
@@ -539,6 +556,242 @@ namespace PerfProbe
             }
             if (DetailsScreen.Instance != null) Walk(DetailsScreen.Instance.transform, DetailsScreen.Instance.name, 0);
             for (int i = 0; i < 10; i++) yield return null;
+            // A second line: a side screen type (assembly-qualified) and the path of a button in it,
+            // pressed as a left click is (pointer down and up on it), then the screen captured
+            // 60 frames later (select-pressed.png).
+            var lines = System.IO.File.ReadAllLines(System.IO.Path.Combine(Path, "select.txt"));
+            if (lines.Length < 2 || lines[1].Trim().Length == 0) yield break;
+            var parts = lines[1].Trim().Split('|');
+            var screenType = FindType(parts[0]);
+            Component screen = null;
+            if (screenType != null)
+                foreach (var found in FindObjectsByType(screenType, FindObjectsSortMode.None))
+                    if (found is Component c && c.gameObject.activeInHierarchy) { screen = c; break; }
+            var button = screen != null ? screen.transform.Find(parts[1]) : null;
+            if (button == null) { Debug.Log($"PERF select press: no {parts[1]} in an active {parts[0]}"); yield break; }
+            var pointer = new UnityEngine.EventSystems.PointerEventData(UnityEngine.EventSystems.EventSystem.current) { button = UnityEngine.EventSystems.PointerEventData.InputButton.Left, position = button.position };
+            UnityEngine.EventSystems.ExecuteEvents.Execute(button.gameObject, pointer, UnityEngine.EventSystems.ExecuteEvents.pointerDownHandler);
+            UnityEngine.EventSystems.ExecuteEvents.Execute(button.gameObject, pointer, UnityEngine.EventSystems.ExecuteEvents.pointerUpHandler);
+            Debug.Log($"PERF select pressed {button.name} under {screen.name}");
+            for (int i = 0; i < 60; i++) yield return null;
+            ScreenCapture.CaptureScreenshot(System.IO.Path.Combine(Path, "select-pressed.png"));
+            logged = 0;
+            if (DetailsScreen.Instance != null) Walk(DetailsScreen.Instance.transform, DetailsScreen.Instance.name, 0);
+            for (int i = 0; i < 10; i++) yield return null;
+        }
+
+        // Unity API the most subscribed mods call (DGSM, No Drop, Better Info Cards, Mod Manager).
+        void MeasurePopularModApis()
+        {
+            var colors = new System.Text.StringBuilder();
+            foreach (var text in new[] { "#FF0000", "#f00", "#F008", "#FF000080", "#12345", "#1234567", "FF0000", "#GG0000", " #FF0000", "#FF0000 ", "", "red", "Red", "RED", "cyan", "blue", "darkblue", "lightblue", "purple", "yellow", "lime", "fuchsia", "white", "silver", "grey", "gray", "black", "orange", "brown", "maroon", "green", "olive", "navy", "teal", "aqua", "magenta", "clear", "pink", "#ABCDEF12", "#abc", "#ABCD" })
+            {
+                bool ok = ColorUtility.TryParseHtmlString(text, out var c);
+                colors.Append($" [{text}]={ok}:{(Color32)c}");
+            }
+            Debug.Log($"PERF measure htmlcolor:{colors}");
+            try { Debug.Log($"PERF measure htmlcolor null: {ColorUtility.TryParseHtmlString(null, out var n)} {n}"); }
+            catch (System.Exception e) { Debug.Log($"PERF measure htmlcolor null: {e.GetType().Name}"); }
+            Debug.Log($"PERF measure allowThreadedTextureCreation {Texture.allowThreadedTextureCreation}");
+            foreach (var canvas in FindObjectsByType<Canvas>(FindObjectsSortMode.InstanceID))
+                if (canvas.isActiveAndEnabled)
+                    Debug.Log($"PERF measure canvas {canvas.name} root {canvas.isRootCanvas} mode {canvas.renderMode} pixelRect {canvas.pixelRect} scale {canvas.scaleFactor} screen {Screen.width}x{Screen.height}");
+            var worldCanvas = new GameObject("PerfWorldCanvas").AddComponent<Canvas>();
+            worldCanvas.renderMode = RenderMode.WorldSpace;
+            Debug.Log($"PERF measure canvas world space: pixelRect {worldCanvas.pixelRect} camera {(worldCanvas.worldCamera == null ? "null" : worldCanvas.worldCamera.name)} main {(Camera.main == null ? "null" : Camera.main.pixelRect.ToString())}");
+            var cameraCanvas = new GameObject("PerfCameraCanvas").AddComponent<Canvas>();
+            cameraCanvas.renderMode = RenderMode.ScreenSpaceCamera;
+            Debug.Log($"PERF measure canvas camera mode without a camera: pixelRect {cameraCanvas.pixelRect}");
+            Destroy(worldCanvas.gameObject);
+            Destroy(cameraCanvas.gameObject);
+            UnityEngine.SceneManagement.SceneManager.activeSceneChanged += (from, to) => Debug.Log($"PERF measure scene activeSceneChanged f{Time.frameCount} [{from.name}|{from.IsValid()}|{from.buildIndex}] -> [{to.name}|{to.buildIndex}|{to.isLoaded}]");
+            UnityEngine.SceneManagement.SceneManager.sceneLoaded += (scene, mode) => Debug.Log($"PERF measure scene sceneLoaded f{Time.frameCount} {scene.name} {mode} active {UnityEngine.SceneManagement.SceneManager.GetActiveScene().name}");
+            UnityEngine.SceneManagement.SceneManager.sceneUnloaded += scene => Debug.Log($"PERF measure scene sceneUnloaded f{Time.frameCount} [{scene.name}|{scene.IsValid()}]");
+        }
+
+        // uGUI's DefaultControls (the dropdown and scroll view mods build from code): each object
+        // made, with what it carries, for the clean-room specification.
+        void MeasureDefaultControls()
+        {
+            // Each resource a sprite named after its field, so the dump shows where each goes.
+            Sprite Named(string name)
+            {
+                var sprite = Sprite.Create(new Texture2D(4, 4), new Rect(0, 0, 4, 4), new Vector2(0.5f, 0.5f));
+                sprite.name = name;
+                return sprite;
+            }
+            var resources = new UnityEngine.UI.DefaultControls.Resources
+            {
+                standard = Named("standard"), background = Named("background"), inputField = Named("inputField"),
+                knob = Named("knob"), checkmark = Named("checkmark"), dropdown = Named("dropdown"), mask = Named("mask"),
+            };
+            Debug.Log($"PERF measure controls factory {UnityEngine.UI.DefaultControls.factory?.GetType().FullName ?? "null"}");
+            Dump(UnityEngine.UI.DefaultControls.CreatePanel(resources), "panel");
+            Dump(UnityEngine.UI.DefaultControls.CreateButton(resources), "button");
+            Dump(UnityEngine.UI.DefaultControls.CreateText(resources), "text");
+            Dump(UnityEngine.UI.DefaultControls.CreateImage(resources), "image");
+            Dump(UnityEngine.UI.DefaultControls.CreateRawImage(resources), "rawimage");
+            Dump(UnityEngine.UI.DefaultControls.CreateSlider(resources), "slider");
+            Dump(UnityEngine.UI.DefaultControls.CreateScrollbar(resources), "scrollbar");
+            Dump(UnityEngine.UI.DefaultControls.CreateToggle(resources), "toggle");
+            Dump(UnityEngine.UI.DefaultControls.CreateInputField(resources), "inputfield");
+            Dump(UnityEngine.UI.DefaultControls.CreateDropdown(resources), "dropdown");
+            Dump(UnityEngine.UI.DefaultControls.CreateScrollView(resources), "scrollview");
+            var empty = new UnityEngine.UI.DefaultControls.Resources();
+            Dump(UnityEngine.UI.DefaultControls.CreateDropdown(empty), "dropdown-empty");
+            Dump(UnityEngine.UI.DefaultControls.CreateScrollView(empty), "scrollview-empty");
+        }
+
+        static string V2(Vector2 v) => $"({v.x:0.###},{v.y:0.###})";
+
+        static void Dump(GameObject root, string what)
+        {
+            void Walk(Transform t, string path)
+            {
+                var line = new System.Text.StringBuilder($"PERF measure controls {what} {path} active={t.gameObject.activeSelf} layer={t.gameObject.layer}");
+                foreach (var c in t.GetComponents<Component>())
+                {
+                    line.Append(" | ").Append(c.GetType().Name);
+                    switch (c)
+                    {
+                        case RectTransform r:
+                            line.Append($" amin{V2(r.anchorMin)} amax{V2(r.anchorMax)} pivot{V2(r.pivot)} size{V2(r.sizeDelta)} pos{V2(r.anchoredPosition)}"); break;
+                        case UnityEngine.UI.Image i:
+                            line.Append($" sprite={(i.sprite == null ? "null" : i.sprite.name)} type={i.type} color={(Color32)i.color} raycast={i.raycastTarget} fillCenter={i.fillCenter} preserve={i.preserveAspect} fill={i.fillMethod}/{i.fillAmount} ppu={i.pixelsPerUnitMultiplier} material={(i.material == null ? "null" : i.material.name)}"); break;
+                        case UnityEngine.UI.RawImage ri:
+                            line.Append($" texture={(ri.texture == null ? "null" : ri.texture.name)} color={(Color32)ri.color} uv={ri.uvRect} raycast={ri.raycastTarget}"); break;
+                        case UnityEngine.UI.Text x:
+                            line.Append($" text=[{x.text}] font={(x.font == null ? "null" : x.font.name)} size={x.fontSize} style={x.fontStyle} align={x.alignment} color={(Color32)x.color} rich={x.supportRichText} raycast={x.raycastTarget} hover={x.horizontalOverflow} vover={x.verticalOverflow} spacing={x.lineSpacing} best={x.resizeTextForBestFit} geomAlign={x.alignByGeometry}"); break;
+                        case UnityEngine.UI.Slider sl:
+                            line.Append($" dir={sl.direction} min={sl.minValue} max={sl.maxValue} value={sl.value} whole={sl.wholeNumbers} fill={sl.fillRect?.name} handle={sl.handleRect?.name} target={sl.targetGraphic?.name} transition={sl.transition} colors={(Color32)sl.colors.normalColor}/{(Color32)sl.colors.highlightedColor}/{(Color32)sl.colors.pressedColor}/{(Color32)sl.colors.selectedColor}/{(Color32)sl.colors.disabledColor} nav={sl.navigation.mode}"); break;
+                        case UnityEngine.UI.InputField inf:
+                            line.Append($" textComponent={inf.textComponent?.name} placeholder={inf.placeholder?.name} text=[{inf.text}] content={inf.contentType} lineType={inf.lineType} limit={inf.characterLimit} blink={inf.caretBlinkRate} caretWidth={inf.caretWidth} selection={(Color32)inf.selectionColor} readOnly={inf.readOnly} target={inf.targetGraphic?.name} transition={inf.transition} colors={(Color32)inf.colors.normalColor}/{(Color32)inf.colors.highlightedColor}/{(Color32)inf.colors.pressedColor}/{(Color32)inf.colors.selectedColor}/{(Color32)inf.colors.disabledColor}"); break;
+                        case UnityEngine.UI.Dropdown d:
+                            line.Append($" template={d.template?.name} caption={d.captionText?.name} captionImage={d.captionImage?.name} item={d.itemText?.name} itemImage={d.itemImage?.name} options=[{string.Join(",", d.options.ConvertAll(o => o.text))}] value={d.value} target={d.targetGraphic?.name} transition={d.transition} colors={(Color32)d.colors.normalColor}/{(Color32)d.colors.highlightedColor}/{(Color32)d.colors.pressedColor}/{(Color32)d.colors.selectedColor}/{(Color32)d.colors.disabledColor} nav={d.navigation.mode} fade={d.alphaFadeSpeed}"); break;
+                        case UnityEngine.UI.ScrollRect sr:
+                            line.Append($" content={sr.content?.name} viewport={sr.viewport?.name} h={sr.horizontal} v={sr.vertical} hbar={sr.horizontalScrollbar?.name} vbar={sr.verticalScrollbar?.name} hvis={sr.horizontalScrollbarVisibility} vvis={sr.verticalScrollbarVisibility} hspace={sr.horizontalScrollbarSpacing} vspace={sr.verticalScrollbarSpacing} move={sr.movementType} elastic={sr.elasticity} inertia={sr.inertia} decel={sr.decelerationRate} sens={sr.scrollSensitivity}"); break;
+                        case UnityEngine.UI.Scrollbar sb:
+                            line.Append($" dir={sb.direction} handle={sb.handleRect?.name} size={sb.size} value={sb.value} steps={sb.numberOfSteps} target={sb.targetGraphic?.name} transition={sb.transition} colors={(Color32)sb.colors.normalColor}/{(Color32)sb.colors.highlightedColor}/{(Color32)sb.colors.pressedColor}/{(Color32)sb.colors.selectedColor}/{(Color32)sb.colors.disabledColor} nav={sb.navigation.mode}"); break;
+                        case UnityEngine.UI.Toggle tg:
+                            line.Append($" isOn={tg.isOn} graphic={tg.graphic?.name} target={tg.targetGraphic?.name} group={(tg.group == null ? "null" : tg.group.name)} transition={tg.transition} toggleTransition={tg.toggleTransition} colors={(Color32)tg.colors.normalColor}/{(Color32)tg.colors.highlightedColor}/{(Color32)tg.colors.pressedColor}/{(Color32)tg.colors.selectedColor}/{(Color32)tg.colors.disabledColor} nav={tg.navigation.mode}"); break;
+                        case UnityEngine.UI.Mask m:
+                            line.Append($" show={m.showMaskGraphic}"); break;
+                        case UnityEngine.UI.Selectable sel:
+                            line.Append($" target={sel.targetGraphic?.name} transition={sel.transition} colors={(Color32)sel.colors.normalColor}/{(Color32)sel.colors.highlightedColor}/{(Color32)sel.colors.pressedColor}/{(Color32)sel.colors.selectedColor}/{(Color32)sel.colors.disabledColor} fade={sel.colors.fadeDuration} mult={sel.colors.colorMultiplier} nav={sel.navigation.mode}"); break;
+                        case CanvasRenderer cr:
+                            line.Append($" cull={cr.cullTransparentMesh}"); break;
+                    }
+                }
+                Debug.Log(line.ToString());
+                foreach (Transform child in t) Walk(child, path + "/" + child.name);
+            }
+            Walk(root.transform, root.name);
+            Destroy(root);
+        }
+
+        // LineRenderer geometry (mods draw lasers and debug lines with it): BakeMesh of several
+        // configurations seen by an orthographic camera looking along +Z.
+        void MeasureLineRenderer()
+        {
+            var camera = new GameObject("PerfLineCamera").AddComponent<Camera>();
+            camera.orthographic = true;
+            camera.transform.position = new Vector3(0, 0, -10);
+            camera.enabled = false;
+            var fresh = new GameObject("PerfLineDefaults").AddComponent<LineRenderer>();
+            var defaultPositions = new Vector3[fresh.positionCount];
+            fresh.GetPositions(defaultPositions);
+            Debug.Log($"PERF measure line defaults: count {fresh.positionCount} positions [{string.Join(" ", defaultPositions)}] width {fresh.startWidth}/{fresh.endWidth} mult {fresh.widthMultiplier} curve [{string.Join(" ", System.Array.ConvertAll(fresh.widthCurve.keys, k => $"{k.time}:{k.value}"))}] colors {(Color32)fresh.startColor}/{(Color32)fresh.endColor} world {fresh.useWorldSpace} loop {fresh.loop} corner {fresh.numCornerVertices} cap {fresh.numCapVertices} align {fresh.alignment} texture {fresh.textureMode} scale {fresh.textureScale} material {(fresh.sharedMaterial == null ? "null" : fresh.sharedMaterial.name)} shadows {fresh.shadowCastingMode} gradient [{string.Join(" ", System.Array.ConvertAll(fresh.colorGradient.colorKeys, k => $"{k.time}:{(Color32)k.color}"))}|{string.Join(" ", System.Array.ConvertAll(fresh.colorGradient.alphaKeys, k => $"{k.time}:{k.alpha}"))}]");
+            Destroy(fresh.gameObject);
+
+            void Bake(string what, System.Action<LineRenderer> setup, bool useTransform = false)
+            {
+                var go = new GameObject("PerfLine " + what);
+                var line = go.AddComponent<LineRenderer>();
+                line.startColor = new Color(1, 0, 0, 1);
+                line.endColor = new Color(0, 0, 1, 0.5f);
+                setup(line);
+                var mesh = new Mesh();
+                line.BakeMesh(mesh, camera, useTransform);
+                var v = mesh.vertices;
+                var uv = mesh.uv;
+                var c = mesh.colors32;
+                var n = mesh.normals;
+                var t = mesh.triangles;
+                var sb = new System.Text.StringBuilder($"PERF measure line {what}: {v.Length} vertices {t.Length / 3} triangles");
+                for (int i = 0; i < v.Length; i++)
+                    sb.Append($" | {v[i].x:0.####},{v[i].y:0.####},{v[i].z:0.####} uv {(i < uv.Length ? $"{uv[i].x:0.####},{uv[i].y:0.####}" : "-")} c {(i < c.Length ? $"{c[i].r},{c[i].g},{c[i].b},{c[i].a}" : "-")}{(i < n.Length ? $" n {n[i].x:0.##},{n[i].y:0.##},{n[i].z:0.##}" : "")}");
+                sb.Append(" | tris ").Append(string.Join(",", t));
+                Debug.Log(sb.ToString());
+                Destroy(mesh);
+                Destroy(go);
+            }
+            Bake("two", l => { l.positionCount = 2; l.SetPositions(new[] { new Vector3(0, 0, 0), new Vector3(10, 0, 0) }); l.widthMultiplier = 1; });
+            Bake("corner", l => { l.positionCount = 3; l.SetPositions(new[] { new Vector3(0, 0, 0), new Vector3(10, 0, 0), new Vector3(10, 10, 0) }); l.widthMultiplier = 1; });
+            Bake("corner-round", l => { l.positionCount = 3; l.SetPositions(new[] { new Vector3(0, 0, 0), new Vector3(10, 0, 0), new Vector3(10, 10, 0) }); l.widthMultiplier = 1; l.numCornerVertices = 2; l.numCapVertices = 2; });
+            Bake("acute", l => { l.positionCount = 3; l.SetPositions(new[] { new Vector3(0, 0, 0), new Vector3(10, 0, 0), new Vector3(0, 2, 0) }); l.widthMultiplier = 1; });
+            Bake("curve", l => { l.positionCount = 3; l.SetPositions(new[] { new Vector3(0, 0, 0), new Vector3(4, 0, 0), new Vector3(10, 0, 0) }); l.widthMultiplier = 2; l.widthCurve = new AnimationCurve(new Keyframe(0, 1), new Keyframe(1, 0.2f)); });
+            Bake("widths", l => { l.positionCount = 2; l.SetPositions(new[] { new Vector3(0, 0, 0), new Vector3(10, 0, 0) }); l.startWidth = 2; l.endWidth = 0.5f; });
+            Bake("tile", l => { l.positionCount = 3; l.SetPositions(new[] { new Vector3(0, 0, 0), new Vector3(4, 0, 0), new Vector3(10, 0, 0) }); l.widthMultiplier = 0.5f; l.textureMode = LineTextureMode.Tile; l.textureScale = new Vector2(2, 1); });
+            Bake("per-segment", l => { l.positionCount = 3; l.SetPositions(new[] { new Vector3(0, 0, 0), new Vector3(4, 0, 0), new Vector3(10, 0, 0) }); l.textureMode = LineTextureMode.RepeatPerSegment; });
+            Bake("distribute", l => { l.positionCount = 3; l.SetPositions(new[] { new Vector3(0, 0, 0), new Vector3(4, 0, 0), new Vector3(10, 0, 0) }); l.textureMode = LineTextureMode.DistributePerSegment; });
+            Bake("transformz", l => { l.positionCount = 2; l.SetPositions(new[] { new Vector3(0, 0, 0), new Vector3(10, 0, 0) }); l.alignment = LineAlignment.TransformZ; });
+            Bake("loop", l => { l.positionCount = 4; l.SetPositions(new[] { new Vector3(0, 0, 0), new Vector3(10, 0, 0), new Vector3(10, 10, 0), new Vector3(0, 10, 0) }); l.loop = true; });
+            Bake("view-depth", l => { l.positionCount = 2; l.SetPositions(new[] { new Vector3(0, 0, 0), new Vector3(0, 0, 10) }); });
+            Bake("local", l => { l.useWorldSpace = false; l.transform.position = new Vector3(5, 5, 0); l.transform.rotation = Quaternion.Euler(0, 0, 90); l.positionCount = 2; l.SetPositions(new[] { new Vector3(0, 0, 0), new Vector3(10, 0, 0) }); });
+            Bake("local-transform", l => { l.useWorldSpace = false; l.transform.position = new Vector3(5, 5, 0); l.transform.rotation = Quaternion.Euler(0, 0, 90); l.positionCount = 2; l.SetPositions(new[] { new Vector3(0, 0, 0), new Vector3(10, 0, 0) }); }, useTransform: true);
+            Bake("world-transform", l => { l.transform.position = new Vector3(5, 5, 0); l.positionCount = 2; l.SetPositions(new[] { new Vector3(0, 0, 0), new Vector3(10, 0, 0) }); }, useTransform: true);
+            Bake("gradient", l => { l.positionCount = 3; l.SetPositions(new[] { new Vector3(0, 0, 0), new Vector3(2, 0, 0), new Vector3(10, 0, 0) }); var g = new Gradient(); g.SetKeys(new[] { new GradientColorKey(Color.red, 0), new GradientColorKey(Color.green, 0.5f), new GradientColorKey(Color.blue, 1) }, new[] { new GradientAlphaKey(1, 0), new GradientAlphaKey(0.2f, 1) }); l.colorGradient = g; });
+            Bake("one", l => { l.positionCount = 1; l.SetPosition(0, Vector3.one); });
+            Bake("duplicate", l => { l.positionCount = 3; l.SetPositions(new[] { new Vector3(0, 0, 0), new Vector3(0, 0, 0), new Vector3(10, 0, 0) }); });
+            Destroy(camera.gameObject);
+        }
+
+        // `missing-scripts` beside the probe names an asset bundle whose prefabs reference script
+        // classes that do not exist at run time (a mod's): how Unity loads them.
+        void MeasureMissingScripts()
+        {
+            var file = System.IO.Path.Combine(Path, "missing-scripts");
+            if (!System.IO.File.Exists(file)) return;
+            var bundle = AssetBundle.LoadFromFile(System.IO.File.ReadAllText(file).Trim());
+            Debug.Log($"PERF measure missing scripts: bundle {(bundle == null ? "null" : bundle.name)}");
+            if (bundle == null) return;
+            foreach (var go in bundle.LoadAllAssets<GameObject>())
+            {
+                void Walk(Transform t, string path)
+                {
+                    var components = t.GetComponents<Component>();
+                    int nulls = 0;
+                    foreach (var c in components) if (c == null) nulls++;
+                    var behaviours = t.GetComponents<MonoBehaviour>();
+                    int nullBehaviours = 0;
+                    foreach (var b in behaviours) if (b == null) nullBehaviours++;
+                    if (nulls > 0 || nullBehaviours > 0)
+                    {
+                        // The slots in order (each component's type, "null" for a missing one), and
+                        // what the single queries give.
+                        var order = string.Join(",", System.Array.ConvertAll(components, c => ReferenceEquals(c, null) ? "null" : c == null ? "fake-null" : c.GetType().Name));
+                        var first = t.GetComponent<MonoBehaviour>();
+                        var firstText = ReferenceEquals(first, null) ? "null" : first == null ? "fake-null" : first.GetType().Name;
+                        Debug.Log($"PERF measure missing scripts: {path} components {components.Length} null {nulls} behaviours {behaviours.Length} null {nullBehaviours} order [{order}] GetComponent<MonoBehaviour> {firstText} GetComponent<Behaviour> {(t.GetComponent<Behaviour>() is { } b2 ? b2.GetType().Name : "null")} InChildren<MonoBehaviour> {(t.GetComponentInChildren<MonoBehaviour>(true) is { } b3 ? b3.GetType().Name : "null")}");
+                    }
+                    foreach (Transform child in t) Walk(child, path + "/" + child.name);
+                }
+                Walk(go.transform, go.name);
+                // A clone keeps the missing scripts' places (or not).
+                var clone = Instantiate(go);
+                void WalkClone(Transform t, string path)
+                {
+                    var components = t.GetComponents<Component>();
+                    int nulls = 0;
+                    foreach (var c in components) if (ReferenceEquals(c, null) || c == null) nulls++;
+                    if (nulls > 0) Debug.Log($"PERF measure missing scripts: clone {path} components {components.Length} null {nulls}");
+                    foreach (Transform child in t) WalkClone(child, path + "/" + child.name);
+                }
+                WalkClone(clone.transform, go.name);
+                Debug.Log($"PERF measure missing scripts: FindObjectsByType<MonoBehaviour> nulls {System.Array.FindAll(FindObjectsByType<MonoBehaviour>(FindObjectsInactive.Include, FindObjectsSortMode.None), m => m == null).Length}");
+                Destroy(clone);
+            }
+            bundle.Unload(true);
         }
 
         static async void AsyncVoidThrows()
@@ -805,7 +1058,7 @@ namespace PerfProbe
             // side screens logged with their sizes: for comparing a mod's side screen in either
             // player.
             var selectFile = System.IO.Path.Combine(Path, "select.txt");
-            if (System.IO.File.Exists(selectFile)) yield return Select(System.IO.File.ReadAllText(selectFile).Trim());
+            if (System.IO.File.Exists(selectFile)) yield return Select(System.IO.File.ReadAllLines(selectFile)[0].Trim());
             // `speed.txt`: the game speed kept, 0 (normal) to 2 (fastest, the default), or -1: paused.
             var speedFile = System.IO.Path.Combine(Path, "speed.txt");
             int speed = System.IO.File.Exists(speedFile) ? int.Parse(System.IO.File.ReadAllText(speedFile).Trim()) : 2;

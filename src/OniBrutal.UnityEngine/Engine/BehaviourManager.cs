@@ -33,6 +33,7 @@ namespace OniBrutal.Engine
             [typeof(Animation)] = () => new Mecanim.AnimationNative(),
             [typeof(ParticleSystem)] = () => new Particles.ParticleSystemNative(),
             [typeof(ParticleSystemRenderer)] = () => new Particles.ParticleSystemRendererNative(),
+            [typeof(LineRenderer)] = () => new Rendering.LineRendererNative(),
             [typeof(UnityEngine.Video.VideoPlayer)] = () => new Video.VideoPlayerNative(),
             [typeof(UnityEngine.Playables.PlayableDirector)] = () => new Playables.PlayableDirectorNative(),
             [typeof(TextMesh)] = () => new Text.TextMeshNative(),

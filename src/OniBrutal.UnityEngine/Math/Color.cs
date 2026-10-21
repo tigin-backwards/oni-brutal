@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Runtime.InteropServices;
 
@@ -219,6 +220,50 @@ namespace UnityEngine
 
     public partial class ColorUtility
     {
+        /// The names Unity accepts, case-insensitively, as measured in the original player
+        /// (PerfProbe's measure mode: "grey" is one, "gray", "pink" and "clear" are not).
+        static readonly Dictionary<string, Color32> HtmlNames = new(StringComparer.OrdinalIgnoreCase)
+        {
+            ["red"] = new(255, 0, 0, 255), ["cyan"] = new(0, 255, 255, 255), ["blue"] = new(0, 0, 255, 255),
+            ["darkblue"] = new(0, 0, 139, 255), ["lightblue"] = new(173, 216, 230, 255), ["purple"] = new(128, 0, 128, 255),
+            ["yellow"] = new(255, 255, 0, 255), ["lime"] = new(0, 255, 0, 255), ["fuchsia"] = new(255, 0, 255, 255),
+            ["white"] = new(255, 255, 255, 255), ["silver"] = new(192, 192, 192, 255), ["grey"] = new(128, 128, 128, 255),
+            ["black"] = new(0, 0, 0, 255), ["orange"] = new(255, 165, 0, 255), ["brown"] = new(165, 42, 42, 255),
+            ["maroon"] = new(128, 0, 0, 255), ["green"] = new(0, 128, 0, 255), ["olive"] = new(128, 128, 0, 255),
+            ["navy"] = new(0, 0, 128, 255), ["teal"] = new(0, 128, 128, 255), ["aqua"] = new(0, 255, 255, 255),
+            ["magenta"] = new(255, 0, 255, 255),
+        };
+
+        /// "#RGB", "#RGBA", "#RRGGBB", "#RRGGBBAA" or a name, surrounding white space ignored; white
+        /// (and false) for anything else, null included (measured).
+        public static bool TryParseHtmlString(string htmlString, out Color color)
+        {
+            bool parsed = TryParseHtml(htmlString?.Trim(), out var c);
+            color = parsed ? c : Color.white;
+            return parsed;
+        }
+
+        static bool TryParseHtml(string text, out Color32 color)
+        {
+            color = default;
+            if (string.IsNullOrEmpty(text)) return false;
+            if (text[0] != '#') return HtmlNames.TryGetValue(text, out color);
+            var digits = text.AsSpan(1);
+            if (digits.Length is not (3 or 4 or 6 or 8)) return false;
+            foreach (char d in digits)
+                if (!char.IsAsciiHexDigit(d)) return false;
+            bool shorthand = digits.Length <= 4;
+            int width = shorthand ? 1 : 2, count = digits.Length / width;
+            Span<byte> channels = stackalloc byte[4] { 0, 0, 0, 255 };
+            for (int i = 0; i < count; i++)
+            {
+                int value = int.Parse(digits.Slice(i * width, width), NumberStyles.AllowHexSpecifier, CultureInfo.InvariantCulture);
+                channels[i] = (byte)(shorthand ? value * 17 : value);
+            }
+            color = new Color32(channels[0], channels[1], channels[2], channels[3]);
+            return true;
+        }
+
         public static string ToHtmlStringRGB(Color color)
         {
             Color32 c = new Color(Mathf.Clamp01(color.r), Mathf.Clamp01(color.g), Mathf.Clamp01(color.b), 1f);

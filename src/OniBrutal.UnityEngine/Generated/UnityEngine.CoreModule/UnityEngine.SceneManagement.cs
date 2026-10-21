@@ -2,6 +2,11 @@
 #nullable disable
 namespace UnityEngine.SceneManagement
 {
+    public enum LoadSceneMode
+    {
+        Single = 0,
+        Additive = 1,
+    }
     [global::System.Serializable]
     public partial struct Scene
     {

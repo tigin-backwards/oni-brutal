@@ -140,6 +140,11 @@ namespace UnityEngine
         /// The size the canvas renders at: the screen, or its camera's pixel size.
         public Vector2 renderingDisplaySize => CanvasSystem.DisplaySize(RootData);
 
+        /// The rect the canvas renders into, in pixels: its root's camera view, or the screen (the
+        /// original reports the screen for overlay canvases, nested ones too, and for camera
+        /// canvases whose camera fills it; PerfProbe's measure mode).
+        public Rect pixelRect => CanvasSystem.PixelRect(RootData);
+
         public static void ForceUpdateCanvases()
         {
             CanvasSystem.RunCanvasUpdate();

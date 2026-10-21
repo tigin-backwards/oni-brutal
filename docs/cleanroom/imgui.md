@@ -222,7 +222,7 @@ another type. `QueryStateObject` returns it without creating, or null.
 - `GUIToScreenPoint`, `GUIToScreenRect`, `ScreenToGUIPoint`, `ScreenToGUIRect` convert through
   the clip stack and `GUI.matrix`.
 - `RotateAroundPivot` and `ScaleAroundPivot` multiply `GUI.matrix` as documented.
-- `hasModalWindow` is false.
+- `hasModalWindow` is true while a modal window (`GUI.ModalWindow`) is shown, false otherwise.
 - `pixelsPerPoint` is 1.
 
 ### Groups, clipping and the matrix

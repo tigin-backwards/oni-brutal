@@ -311,6 +311,27 @@ For the controls above:
 - **`BringWindowToFront`, `BringWindowToBack`, `FocusWindow`, `UnfocusWindow`:** as
   documented.
 
+**`GUI.ModalWindow(id, rect, func, text[, style])`** (mods use it; measured in the original
+player through PerfProbe):
+- It is a window as above: its function is called after the calling behaviour's OnGUI, once per
+  event (Layout and Repaint each frame), and the call returns the rect (unchanged unless dragged).
+- As Unity documents: only one modal window is shown at a time, it is drawn in front of every
+  other window, and while it is shown, input goes to it alone: other windows and the controls
+  outside it get no mouse or keyboard events.
+- The style defaults to the skin's `window` style.
+
+**`GUI.Toolbar(rect, selected, contents[, style])`** and **`GUILayout.Toolbar(selected,
+contents[, style], options)`**, with string, texture and GUIContent overloads:
+- A row of buttons, one per content, splitting the rect's width equally; each button is drawn with
+  the style (default: the skin's `button` style; the game's skin has no separate end-button
+  styles). The button at `selected` is drawn in its "on" state.
+- A click on a button returns its index (and sets `GUI.changed` when it differs from `selected`);
+  otherwise the call returns `selected`.
+- **Layout (measured):** the GUILayout version takes the available width (it stretches) and the
+  style's height for one line: in a 400-wide area it took (0, 0, 400 × 19) with the default skin,
+  and the next control started at y = 23 (the style's margin); with `GUILayout.Width(300)` it is
+  300 wide.
+
 ### GUILayout
 
 **Passes:**

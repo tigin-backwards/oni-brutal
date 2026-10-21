@@ -164,23 +164,69 @@ namespace OniBrutal.Host
                 }
                 return misses == 0 ? "no lookup missed" : throw new InvalidOperationException($"{misses} lookups missed");
             });
-            // Last: once a mod patches InternalFormat, enum names go through it for the process.
-            Check("A Harmony patch of Mono's Enum.InternalFormat (MonoEnumFormat)", () =>
+            Check("A mod's copy of a library another version of which is loaded (ModAccess)", () =>
+            {
+                var dir = Directory.CreateTempSubdirectory("oni-brutal-check-").FullName;
+                try
+                {
+                    string Emit(string version)
+                    {
+                        var builder = new System.Reflection.Emit.PersistedAssemblyBuilder(new AssemblyName("OniBrutalCheckLibrary") { Version = new Version(version) }, typeof(object).Assembly);
+                        builder.DefineDynamicModule("OniBrutalCheckLibrary").DefineType("Marker", TypeAttributes.Public).CreateType();
+                        var path = Path.Combine(dir, version, "OniBrutalCheckLibrary.dll");
+                        Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+                        builder.Save(path);
+                        return path;
+                    }
+                    var first = ModAccess.LoadFrom(Emit("1.0.0.0"));
+                    var second = ModAccess.LoadFrom(Emit("2.0.0.0"));
+                    return ReferenceEquals(first, second) ? "the loaded version stands in, as in Mono" : throw new InvalidOperationException("two versions loaded");
+                }
+                finally
+                {
+                    try { Directory.Delete(dir, true); } catch (IOException) { } catch (UnauthorizedAccessException) { }
+                }
+            });
+            // Last: once a mod patches enum formatting, enum names go through it for the process.
+            Check("A Harmony patch of Enum.ToString() alone (MonoEnumFormat)", () =>
             {
                 MonoEnumFormat.Install();
-                var internalFormat = HarmonyLib.AccessTools.Method(typeof(Enum), "InternalFormat")
+                new HarmonyLib.Harmony("OniBrutal.Host.Check").Patch(HarmonyLib.AccessTools.Method(typeof(Enum), nameof(Enum.ToString), Type.EmptyTypes),
+                    postfix: new HarmonyLib.HarmonyMethod(typeof(Program), nameof(NamedDay)));
+                var value = (DayOfWeek)100;
+                var texts = new[] { value.ToString(), value.ToString("G"), value.ToString((string?)null), string.Format("{0}", value), string.Format("{0:G}", value), new StringBuilder().AppendFormat("{0}", value).ToString() };
+                foreach (var text in texts)
+                    if (text != "Named") throw new InvalidOperationException($"formatted as {string.Join(", ", texts)}");
+                return value.ToString("D") == "100" ? "every \"G\" formatting path reaches it" : throw new InvalidOperationException("\"D\" renamed");
+            });
+            Check("A Harmony patch of Mono's Enum.InternalFormat (MonoEnumFormat)", () =>
+            {
+                // As [HarmonyPatch(typeof(Enum), "InternalFormat")] finds it.
+                var internalFormat = HarmonyLib.AccessTools.DeclaredMethod(typeof(Enum), "InternalFormat")
                     ?? throw new InvalidOperationException("no InternalFormat to patch");
                 new HarmonyLib.Harmony("OniBrutal.Host.Check").Patch(internalFormat,
                     postfix: new HarmonyLib.HarmonyMethod(typeof(Program), nameof(NamedValue)));
                 var value = (AttributeTargets)0x40000000;
                 // The game's and mods' code targets .NET Framework, where an interpolated string is
                 // string.Format (this host's would use .NET's interpolation handler instead).
-                var texts = new[] { value.ToString(), value.ToString("G"), string.Format("{0}", value), string.Concat("", value), Enum.Format(typeof(AttributeTargets), value, "G") };
+                var texts = new[] { value.ToString(), value.ToString("G"), string.Format("{0}", value), string.Concat("", value), Enum.Format(typeof(AttributeTargets), value, "G"), Enum.Format(typeof(AttributeTargets), 0x40000000, "G") };
                 foreach (var text in texts)
                     if (text != "Named") throw new InvalidOperationException($"formatted as {string.Join(", ", texts)}");
+                try
+                {
+                    Enum.Format(typeof(AttributeTargets), value, "");
+                    throw new InvalidOperationException("Enum.Format accepted an empty format");
+                }
+                catch (FormatException) { }
                 return AttributeTargets.Class.ToString() == "Class" ? "every \"G\" formatting path names the value" : throw new InvalidOperationException("other values renamed");
             });
             return failures;
+        }
+
+        /// CheckRuntimeServices' patch of Enum.ToString(), as element mods write theirs.
+        static void NamedDay(Enum __instance, ref string __result)
+        {
+            if (__instance is DayOfWeek day && (int)day == 100) __result = "Named";
         }
 
         /// CheckRuntimeServices' patch of Enum.InternalFormat, as element mods write theirs.

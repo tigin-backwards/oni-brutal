@@ -73,10 +73,11 @@ namespace OniBrutal.Host
         }
 
         /// A mod's assembly, rewritten when it reaches into the game's non-public members.
-        static Assembly LoadFrom(string path)
+        internal static Assembly LoadFrom(string path)
         {
             path = Path.GetFullPath(path);
             if (byPath.TryGetValue(path, out var loaded)) return loaded;
+            if (AlreadyLoaded(path) is { } existing) return existing;
             var reason = Unreachable(path);
             if (reason == null) return Assembly.LoadFrom(path);
             var image = AddIgnoresAccessChecks(path, out var symbols);
@@ -87,6 +88,32 @@ namespace OniBrutal.Host
                 if (!directories.Contains(Path.GetDirectoryName(path)!)) directories.Add(Path.GetDirectoryName(path)!);
             EngineLog.Engine($"mod access: {Path.GetFileName(path)} uses the game's non-public {reason}; loaded with access checks to the game's assemblies off");
             return assembly;
+        }
+
+        /// Mono loads a file whose assembly has no strong name as the assembly already loaded with
+        /// its simple name, whatever their versions (mono_domain_assembly_search: names compared
+        /// ignoring version, key and case); CoreCLR refuses a second version, and the game then
+        /// drops the mod (a mod shipping its own copy of a library another mod loaded first).
+        static Assembly? AlreadyLoaded(string path)
+        {
+            AssemblyName name;
+            try
+            {
+                name = AssemblyName.GetAssemblyName(path);
+            }
+            catch (BadImageFormatException)
+            {
+                return null;
+            }
+            if (name.GetPublicKeyToken() is { Length: > 0 }) return null;
+            foreach (var assembly in AssemblyLoadContext.Default.Assemblies)
+            {
+                if (assembly.IsDynamic || !string.Equals(assembly.GetName().Name, name.Name, StringComparison.OrdinalIgnoreCase)) continue;
+                if (assembly.GetName().Version != name.Version)
+                    EngineLog.Engine($"mod access: {path} is {name.Name} {name.Version}; {assembly.GetName().Version}, already loaded, stands in for it (as in Mono)");
+                return assembly;
+            }
+            return null;
         }
 
         /// The folders of rewritten mods are searched as Assembly.LoadFrom's would be.

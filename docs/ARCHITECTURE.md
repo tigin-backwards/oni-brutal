@@ -209,16 +209,27 @@ past the boot checkpoint needs a Steam client logged in with an account that own
   `PlatformTriple.TryDisableInlining` (`UnboxedMethods`): the unboxed MethodDesc is marked too
   (CoreCLR 10's layout; the host's `--check-types` patches an emitted value type's
   `GetHashCode` and fails if dictionary lookups miss after tier-up).
-- **D14 Mono's `Enum.InternalFormat`.** Mods that add elements name their `SimHashes` values by
-  patching Mono's private `Enum.InternalFormat(RuntimeType eT, Object value)`, which Mono's
-  `Enum.ToString` and `Enum.Format` call for the "G" format with the enum's type and its
-  underlying value (Mono's `system/enum.cs`). CoreCLR has no such method (Rocketry Expanded's
-  ElementUtil: the patch failed, element names came out as numbers, lookups by name failed).
-  **Resolved by a patch** of `AccessTools.Method` (`MonoEnumFormat`): looked up on `Enum`, the
-  name gives a stand-in with Mono's signature, and from then on `Enum`'s "G" formatting
-  (`ToString`, its obsolete overloads, `Format`, the span formatting `string.Format` uses) goes
-  through it; without such a mod nothing is patched. `--check-types` patches the stand-in as the
-  mods do and checks each path.
+- **D14 Mono's enum formatting.** Mods that add elements name their `SimHashes` values by
+  patching enum formatting: Mono's private `Enum.InternalFormat(RuntimeType eT, Object value)`, or
+  `Enum.ToString()`. In Mono's `system/enum.cs`, `ToString()` is
+  `InternalFormat(GetType(), GetValue())` (the enum's type and underlying value);
+  `ToString(format)` with "G" or none, the obsolete overloads and the IFormattable route
+  `string.Format` takes all call the virtual `ToString()`; `Format(type, value, "G")` calls
+  `InternalFormat`. CoreCLR has no InternalFormat, and its `ToString(format)` and span formatting
+  do not go through `ToString()` (Rocketry Expanded's ElementUtil: the patch failed, element names
+  came out as numbers, lookups by name failed). **Resolved by patches** of `AccessTools.Method`
+  and `AccessTools.DeclaredMethod` (the latter is how `[HarmonyPatch]` attributes resolve) and of
+  Harmony's `PatchProcessor.Patch` (`MonoEnumFormat`): looked up on `Enum`, the name gives a
+  stand-in with Mono's signature, and once a mod patches it or `Enum.ToString()` the formatting is
+  routed as Mono routes it; without such a mod nothing is patched. `--check-types` patches both
+  as mods do and checks each path.
+- **D15 A second version of a loaded assembly.** For an assembly without a strong name, Mono
+  answers a load of another file with the assembly already loaded under that simple name,
+  whatever the versions (`mono_domain_assembly_search` compares names ignoring version, key and
+  case). CoreCLR refuses the second version, and KMod then drops the whole mod (a mod shipping its
+  own copy of a library another mod loaded first). **Resolved in** `ModAccess.LoadFrom`: such a
+  file is given the loaded assembly, and the substitution is logged; `--check-types` loads two
+  versions of an emitted assembly.
 
 ## 3. The engine API (`OniBrutal.UnityEngine`)
 

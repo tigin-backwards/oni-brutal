@@ -495,7 +495,56 @@ namespace PerfProbe
                 Debug.Log($"PERF measure data prefab {dataPrefab.name}: {victimType} destroyed {victim == null}");
             }
             yield return MeasureModRendering();
+            // Exceptions nothing catches on other threads (mods' background work): a thread, a
+            // thread-pool item, an async void method's continuation.
+            new System.Threading.Thread(() => throw new System.InvalidOperationException("PERF thread exception")).Start();
+            System.Threading.ThreadPool.QueueUserWorkItem(_ => throw new System.InvalidOperationException("PERF pool exception"));
+            System.Threading.Tasks.Task.Run(() => AsyncVoidThrows());
+            for (int i = 0; i < 120; i++) yield return null;
+            Debug.Log($"PERF measure threads: still running after background exceptions, thread {System.Threading.Thread.CurrentThread.ManagedThreadId}");
             Debug.Log("PERF measure done");
+        }
+
+        System.Collections.IEnumerator Select(string typeName)
+        {
+            for (int i = 0; i < 200; i++) yield return null;
+            var type = System.Type.GetType(typeName);
+            if (type == null) { Debug.Log($"PERF select {typeName}: no such type"); yield break; }
+            KSelectable target = null;
+            foreach (var found in FindObjectsByType(type, FindObjectsSortMode.InstanceID))
+                if (found is Component c && c.GetComponent<KSelectable>() is { } selectable && c.gameObject.GetMyWorldId() == ClusterManager.Instance.activeWorldId)
+                {
+                    target = selectable;
+                    break;
+                }
+            if (target == null) { Debug.Log($"PERF select {typeName}: none on the active world"); yield break; }
+            // Dialogs over the colony (the save's mod differences) closed first.
+            foreach (var dialog in FindObjectsByType<KModalScreen>(FindObjectsSortMode.None)) dialog.Deactivate();
+            for (int i = 0; i < 10; i++) yield return null;
+            CameraController.Instance.SnapTo(target.transform.position, 8f);
+            SelectTool.Instance.Select(target);
+            Debug.Log($"PERF select {target.name} at {target.transform.position}");
+            for (int i = 0; i < 90; i++) yield return null;
+            ScreenCapture.CaptureScreenshot(System.IO.Path.Combine(Path, "select.png"));
+            int logged = 0;
+            void Walk(Transform t, string path, int depth)
+            {
+                if (!t.gameObject.activeInHierarchy || logged > 300) return;
+                if (t is RectTransform r && depth <= 6)
+                {
+                    logged++;
+                    Debug.Log($"PERF select ui {path} {r.rect.width:F0}x{r.rect.height:F0} at {r.position.x:F0},{r.position.y:F0}");
+                }
+                foreach (Transform child in t) Walk(child, path + "/" + child.name, depth + 1);
+            }
+            if (DetailsScreen.Instance != null) Walk(DetailsScreen.Instance.transform, DetailsScreen.Instance.name, 0);
+            for (int i = 0; i < 10; i++) yield return null;
+        }
+
+        static async void AsyncVoidThrows()
+        {
+            await System.Threading.Tasks.Task.Delay(10);
+            throw new System.InvalidOperationException("PERF async void exception");
         }
 
         // Members mods call (Fast Track, Fast Save): renderer defaults, the mesh update flags, GPU
@@ -750,6 +799,13 @@ namespace PerfProbe
                     if (type == null || !typeof(Object).IsAssignableFrom(type)) Debug.Log($"PERF count {name}: not a component type");
                     else Debug.Log($"PERF count {name} {FindObjectsByType(type, FindObjectsInactive.Include, FindObjectsSortMode.None).Length}");
                 }
+            // `select.txt`: an assembly-qualified component type; 200 frames into the colony the first
+            // selectable object with it on the active world is selected, the view centred on it,
+            // and 90 frames later the screen captured (select.png) and the details screen's active
+            // side screens logged with their sizes: for comparing a mod's side screen in either
+            // player.
+            var selectFile = System.IO.Path.Combine(Path, "select.txt");
+            if (System.IO.File.Exists(selectFile)) yield return Select(System.IO.File.ReadAllText(selectFile).Trim());
             // `speed.txt`: the game speed kept, 0 (normal) to 2 (fastest, the default), or -1: paused.
             var speedFile = System.IO.Path.Combine(Path, "speed.txt");
             int speed = System.IO.File.Exists(speedFile) ? int.Parse(System.IO.File.ReadAllText(speedFile).Trim()) : 2;

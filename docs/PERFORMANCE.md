@@ -13,8 +13,10 @@ The machine is a Ryzen 7 9800X3D (8 cores, 16 threads) with an RTX 3090, running
 WSL2. Both players load the same save at 1280×720, with the same probe mod (`tools/PerfProbe`)
 holding speed 3 and logging the frame rate every 600 frames. Background load moves a single
 build by about ±10% between runs, so comparisons are always back to back with nothing else
-running. The frame-rate ranges are those 600-frame windows, leaving out the first (warm-up) and
-the ones holding an autosave; "about" is their typical value.
+running. Nothing records the screen during these runs: encoding a recording of it on the same
+machine cost about a third of the frame rate with every tweak (36 fps against 54). The
+frame-rate ranges are those 600-frame windows, leaving out the first (warm-up) and the ones
+holding an autosave; "about" is their typical value.
 
 ## The numbers
 

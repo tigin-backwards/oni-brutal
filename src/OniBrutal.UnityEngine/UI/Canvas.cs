@@ -196,6 +196,10 @@ namespace UnityEngine
         public Color GetColor() => Data.Color;
 
         public float GetAlpha() => Data.Color.a;
+
+        /// The alpha of the CanvasGroups above the renderer (up to one that ignores its parents),
+        /// as Unity documents it; the renderer's own alpha is not part of it.
+        public float GetInheritedAlpha() => CanvasSystem.InheritedGroups(Data.GameObject).Alpha;
         public void SetAlpha(float alpha) { var d = Data; d.Color.a = alpha; d.Changed(); }
 
         public int materialCount

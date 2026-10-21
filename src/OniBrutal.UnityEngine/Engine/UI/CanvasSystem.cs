@@ -491,7 +491,7 @@ namespace OniBrutal.Engine.UI
         /// Group alpha inherited through CanvasGroups up to (and including) one that ignores its
         /// parents.
         /// The CanvasGroups' alpha at an object, and whether they let raycasts through.
-        static (float Alpha, bool BlocksRaycasts) InheritedGroups(GameObjectNative go)
+        internal static (float Alpha, bool BlocksRaycasts) InheritedGroups(GameObjectNative go)
         {
             float alpha = 1f;
             bool blocks = true;

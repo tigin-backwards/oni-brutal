@@ -14,6 +14,12 @@ namespace UnityEngine
     }
     public partial class ParticleSystem
     {
+        public partial struct ColorOverLifetimeModule
+        {
+        }
+    }
+    public partial class ParticleSystem
+    {
         public partial struct EmissionModule
         {
         }

@@ -98,7 +98,17 @@ namespace UnityEngine
 
         public static Quaternion rotation => Quaternion.Normalize(new Quaternion(Range(-1f, 1f), Range(-1f, 1f), Range(-1f, 1f), Range(-1f, 1f)));
 
+        // Every overload draws hue, saturation, value and alpha in that order, alpha from 1 to 1
+        // when not given (measured in the original player: four draws whatever the overload).
         public static Color ColorHSV() => ColorHSV(0f, 1f, 0f, 1f, 0f, 1f, 1f, 1f);
+
+        public static Color ColorHSV(float hueMin, float hueMax) => ColorHSV(hueMin, hueMax, 0f, 1f, 0f, 1f, 1f, 1f);
+
+        public static Color ColorHSV(float hueMin, float hueMax, float saturationMin, float saturationMax)
+            => ColorHSV(hueMin, hueMax, saturationMin, saturationMax, 0f, 1f, 1f, 1f);
+
+        public static Color ColorHSV(float hueMin, float hueMax, float saturationMin, float saturationMax, float valueMin, float valueMax)
+            => ColorHSV(hueMin, hueMax, saturationMin, saturationMax, valueMin, valueMax, 1f, 1f);
 
         public static Color ColorHSV(float hueMin, float hueMax, float saturationMin, float saturationMax, float valueMin, float valueMax, float alphaMin, float alphaMax)
         {

@@ -718,6 +718,9 @@ namespace UnityEngine
     public partial struct Plane : global::System.IEquatable<global::UnityEngine.Plane>, global::System.IFormattable
     {
     }
+    public partial class PlayerPrefs
+    {
+    }
     public enum PrimitiveType
     {
         Sphere = 0,

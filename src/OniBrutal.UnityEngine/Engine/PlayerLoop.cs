@@ -179,11 +179,13 @@ namespace OniBrutal.Engine
             EndStats();
         }
 
-        /// Unity sends OnApplicationQuit to every active MonoBehaviour before shutting down.
+        /// Unity sends OnApplicationQuit to every active MonoBehaviour before shutting down, then
+        /// saves PlayerPrefs.
         public static void SendApplicationQuit()
         {
             foreach (var go in Finder.AllSceneGameObjects())
                 Messages.SendToComponents(go, s => s.OnApplicationQuit);
+            PlayerPrefs.SaveOnQuit();
         }
 
         public static void SendApplicationFocus(bool focus)

@@ -28,6 +28,7 @@ namespace OniBrutal.Engine
             [typeof(MeshCollider)] = () => new MeshColliderNative(),
             [typeof(Rigidbody)] = () => new RigidbodyNative(),
             [typeof(BoxCollider2D)] = () => new BoxCollider2DNative(),
+            [typeof(PolygonCollider2D)] = () => new PolygonCollider2DNative(),
             [typeof(Rigidbody2D)] = () => new Rigidbody2DNative(),
             [typeof(Animator)] = () => new Mecanim.AnimatorNative(),
             [typeof(Animation)] = () => new Mecanim.AnimationNative(),

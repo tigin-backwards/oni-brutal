@@ -195,6 +195,37 @@ namespace PerfProbe
         void OnGUI()
         {
             if (Event.current != null && (Event.current.type == EventType.Repaint || Event.current.isMouse)) guiPointer = Event.current.mousePosition;
+            if (measureGuiFrames > 0) MeasureGui();
+        }
+
+        /// `gui.txt` beside the probe: IMGUI's toolbar and modal window, over a few frames.
+        int measureGuiFrames;
+        readonly System.Collections.Generic.List<string> modalCalls = new();
+
+        void MeasureGui()
+        {
+            var e = Event.current;
+            if (e.type == EventType.Layout && measureGuiFrames == 3)
+            {
+                string Style(string name) { var st = GUI.skin.FindStyle(name); return st == null ? "none" : $"{st.name} fixed {st.fixedWidth}x{st.fixedHeight} margin {st.margin} padding {st.padding} border {st.border} stretch {st.stretchWidth}"; }
+                Debug.Log($"PERF measure gui styles: button [{Style("button")}] left [{Style("buttonleft")}] mid [{Style("buttonmid")}] right [{Style("buttonright")}] window [{Style("window")}]");
+            }
+            GUILayout.BeginArea(new Rect(10, 10, 400, 200));
+            int selected = GUILayout.Toolbar(1, new[] { "A", "BB", "CCC" });
+            var toolbar = GUILayoutUtility.GetLastRect();
+            GUILayout.Label("after");
+            var after = GUILayoutUtility.GetLastRect();
+            int wide = GUILayout.Toolbar(0, new[] { "Long label one", "x" }, GUILayout.Width(300));
+            var wideRect = GUILayoutUtility.GetLastRect();
+            GUILayout.EndArea();
+            var modal = GUI.ModalWindow(4242, new Rect(100, 100, 200, 120), id => { modalCalls.Add($"{Event.current.type}:{id}"); GUI.Label(new Rect(10, 30, 100, 20), "in modal"); }, "Modal");
+            if (e.type == EventType.Repaint)
+            {
+                Debug.Log($"PERF measure gui toolbar f{Time.frameCount}: selected {selected} rect {toolbar} after {after} wide {wide} {wideRect} buttons {GUI.skin.button.CalcSize(new GUIContent("A"))} {GUI.skin.button.CalcSize(new GUIContent("BB"))} {GUI.skin.button.CalcSize(new GUIContent("CCC"))}");
+                Debug.Log($"PERF measure gui modal f{Time.frameCount}: returned {modal} calls [{string.Join(",", modalCalls)}]");
+                modalCalls.Clear();
+                measureGuiFrames--;
+            }
         }
 
         System.Collections.IEnumerator Pointer()
@@ -499,6 +530,22 @@ namespace PerfProbe
             MeasureDefaultControls();
             MeasureMissingScripts();
             MeasureLineRenderer();
+            if (System.IO.File.Exists(System.IO.Path.Combine(Path, "gui.txt"))) measureGuiFrames = 3;
+            // PlayerPrefs (a mod keeps its settings in them): defaults, and the values written to the
+            // player's prefs file by Save (read from the file after the run).
+            Debug.Log($"PERF measure prefs defaults: int {PlayerPrefs.GetInt("PerfProbeMissing")} float {PlayerPrefs.GetFloat("PerfProbeMissing")} string [{PlayerPrefs.GetString("PerfProbeMissing")}] has {PlayerPrefs.HasKey("PerfProbeMissing")} default-arg {PlayerPrefs.GetInt("PerfProbeMissing", 7)}");
+            PlayerPrefs.SetInt("PerfProbeInt", -42);
+            PlayerPrefs.SetFloat("PerfProbeFloat", 1.5f);
+            PlayerPrefs.SetFloat("PerfProbeFloatThird", 1f / 3f);
+            PlayerPrefs.SetString("PerfProbeString", "héllo, <x> & \"y\"\nline2");
+            PlayerPrefs.SetString("PerfProbeEmpty", "");
+            PlayerPrefs.SetInt("PerfProbeRetyped", 5);
+            PlayerPrefs.SetString("PerfProbeRetyped", "now a string");
+            Debug.Log($"PERF measure prefs read back: int {PlayerPrefs.GetInt("PerfProbeInt")} float {PlayerPrefs.GetFloat("PerfProbeFloat"):R} string [{PlayerPrefs.GetString("PerfProbeString")}] retyped as int {PlayerPrefs.GetInt("PerfProbeRetyped")} as string [{PlayerPrefs.GetString("PerfProbeRetyped")}] int as float {PlayerPrefs.GetFloat("PerfProbeInt")} has {PlayerPrefs.HasKey("PerfProbeInt")}");
+            PlayerPrefs.SetInt("PerfProbeDeleted", 1);
+            PlayerPrefs.DeleteKey("PerfProbeDeleted");
+            PlayerPrefs.Save();
+            Debug.Log($"PERF measure prefs saved: deleted has {PlayerPrefs.HasKey("PerfProbeDeleted")}");
             // Exceptions nothing catches on other threads (mods' background work): a thread, a
             // thread-pool item, an async void method's continuation.
             new System.Threading.Thread(() => throw new System.InvalidOperationException("PERF thread exception")).Start();
@@ -593,6 +640,23 @@ namespace PerfProbe
             try { Debug.Log($"PERF measure htmlcolor null: {ColorUtility.TryParseHtmlString(null, out var n)} {n}"); }
             catch (System.Exception e) { Debug.Log($"PERF measure htmlcolor null: {e.GetType().Name}"); }
             Debug.Log($"PERF measure allowThreadedTextureCreation {Texture.allowThreadedTextureCreation}");
+            // Random.ColorHSV against the same seed's plain draws: which draws it takes, in what order.
+            Random.InitState(1234);
+            var hsv = Random.ColorHSV(0f, 1f, 0f, 1f, 0f, 1f);
+            var after = Random.value;
+            Random.InitState(1234);
+            var draws = new float[8];
+            for (int i = 0; i < draws.Length; i++) draws[i] = Random.value;
+            Debug.Log($"PERF measure colorhsv: {hsv.r:R},{hsv.g:R},{hsv.b:R},{hsv.a:R} next {after:R} draws {string.Join(",", System.Array.ConvertAll(draws, d => d.ToString("R")))}");
+            Random.InitState(1234);
+            var hsv2 = Random.ColorHSV(0.2f, 0.4f, 0.5f, 0.6f, 0.7f, 0.9f);
+            var hsva = Random.ColorHSV(0.2f, 0.4f, 0.5f, 0.6f, 0.7f, 0.9f, 0.1f, 0.3f);
+            var plain = Random.ColorHSV();
+            Debug.Log($"PERF measure colorhsv ranges: {hsv2.r:R},{hsv2.g:R},{hsv2.b:R},{hsv2.a:R} alpha {hsva.r:R},{hsva.g:R},{hsva.b:R},{hsva.a:R} plain {plain.r:R},{plain.g:R},{plain.b:R},{plain.a:R}");
+            Random.InitState(1234);
+            var w = new float[20];
+            for (int i = 0; i < w.Length; i++) w[i] = Random.value;
+            Debug.Log($"PERF measure colorhsv draws20 {string.Join(",", System.Array.ConvertAll(w, d => d.ToString("R")))}");
             foreach (var canvas in FindObjectsByType<Canvas>(FindObjectsSortMode.InstanceID))
                 if (canvas.isActiveAndEnabled)
                     Debug.Log($"PERF measure canvas {canvas.name} root {canvas.isRootCanvas} mode {canvas.renderMode} pixelRect {canvas.pixelRect} scale {canvas.scaleFactor} screen {Screen.width}x{Screen.height}");
@@ -791,7 +855,18 @@ namespace PerfProbe
                 Debug.Log($"PERF measure missing scripts: FindObjectsByType<MonoBehaviour> nulls {System.Array.FindAll(FindObjectsByType<MonoBehaviour>(FindObjectsInactive.Include, FindObjectsSortMode.None), m => m == null).Length}");
                 Destroy(clone);
             }
+            Debug.Log($"PERF measure bundle scenes: [{string.Join(",", bundle.GetAllScenePaths())}] assets {bundle.GetAllAssetNames().Length}");
+            // The same bytes from memory while the file's bundle is loaded, then after unloading it.
+            var bytes = System.IO.File.ReadAllBytes(System.IO.File.ReadAllText(file).Trim());
+            var twice = AssetBundle.LoadFromMemory(bytes);
+            Debug.Log($"PERF measure bundle from memory while loaded: {(twice == null ? "null" : twice.name)}");
             bundle.Unload(true);
+            var fromMemory = AssetBundle.LoadFromMemory(bytes);
+            Debug.Log($"PERF measure bundle from memory: {(fromMemory == null ? "null" : fromMemory.name)} assets {(fromMemory == null ? -1 : fromMemory.GetAllAssetNames().Length)} scenes [{(fromMemory == null ? "" : string.Join(",", fromMemory.GetAllScenePaths()))}] loaded {System.Linq.Enumerable.Count(AssetBundle.GetAllLoadedAssetBundles(), b => b == fromMemory)}");
+            if (fromMemory != null) fromMemory.Unload(true);
+            try { Debug.Log($"PERF measure bundle from null memory: {(AssetBundle.LoadFromMemory(null) == null ? "null" : "bundle")}"); }
+            catch (System.Exception e) { Debug.Log($"PERF measure bundle from null memory: {e.GetType().Name}"); }
+            Debug.Log($"PERF measure bundle from junk memory: {(AssetBundle.LoadFromMemory(new byte[] { 1, 2, 3, 4 }) == null ? "null" : "bundle")}");
         }
 
         static async void AsyncVoidThrows()

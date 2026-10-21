@@ -54,6 +54,10 @@ namespace UnityEngine
             public Color color { get => m_ColorMax; set => m_ColorMax = value; }
             public Gradient gradient { get => m_GradientMax; set => m_GradientMax = value; }
 
+            public static implicit operator MinMaxGradient(Color color) => new(color);
+
+            public static implicit operator MinMaxGradient(Gradient gradient) => new(gradient);
+
             public Color Evaluate(float time) => Evaluate(time, 1f);
 
             /// The colour at a normalized time; lerpFactor picks between the min and max values
@@ -77,6 +81,28 @@ namespace UnityEngine
                 m_GradientMin = d.MinGradient,
                 m_GradientMax = d.MaxGradient,
             };
+        }
+
+        public ColorOverLifetimeModule colorOverLifetime => new(this);
+
+        /// The colour each particle is multiplied by over its lifetime.
+        public partial struct ColorOverLifetimeModule
+        {
+            internal ParticleSystem m_ParticleSystem;
+
+            internal ColorOverLifetimeModule(ParticleSystem particleSystem) => m_ParticleSystem = particleSystem;
+
+            public bool enabled
+            {
+                get => m_ParticleSystem.Data.Config.ColorEnabled;
+                set => m_ParticleSystem.Data.Config.ColorEnabled = value;
+            }
+
+            public MinMaxGradient color
+            {
+                get => MinMaxGradient.FromData(m_ParticleSystem.Data.Config.ColorOverLifetime ?? MinMaxGradientData.White());
+                set => m_ParticleSystem.Data.Config.ColorOverLifetime = value.ToData();
+            }
         }
 
         public partial struct MainModule

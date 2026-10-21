@@ -30,3 +30,5 @@ UnityEngine.ParticleSystemModule	UnityEngine.ParticleSystem+MinMaxGradient	# mod
 UnityEngine.ParticleSystemModule	UnityEngine.ParticleSystemGradientMode	# MinMaxGradient.mode
 UnityEngine.ParticleSystemModule	UnityEngine.ParticleCollisionEvent	# mods (Capsule 2.0): collision handlers
 UnityEngine.ParticleSystemModule	UnityEngine.ParticlePhysicsExtensions	# mods (Capsule 2.0): GetCollisionEvents
+UnityEngine.ParticleSystemModule	UnityEngine.ParticleSystem+ColorOverLifetimeModule	# mods: ParticleSystem.colorOverLifetime
+UnityEngine.CoreModule	UnityEngine.PlayerPrefs	# mods: settings kept in PlayerPrefs (DuplicantStatusBar-style UIs)

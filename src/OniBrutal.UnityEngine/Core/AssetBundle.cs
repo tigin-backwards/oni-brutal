@@ -33,6 +33,26 @@ namespace UnityEngine
             return AssetBundles.Mount(path, nodes);
         }
 
+        /// Loads a bundle from its file's bytes, as LoadFromFile does (measured in the original
+        /// player: null for null; Unity's errors, naming the bundle 'Memory', for bytes that are no
+        /// bundle and for a bundle whose files are already loaded).
+        public static AssetBundle LoadFromMemory(byte[] binary)
+        {
+            Threads.AssertMainThread("AssetBundle.LoadFromMemory");
+            if (binary == null) return null;
+            List<(string Key, byte[] Data)> nodes;
+            try
+            {
+                nodes = AssetSystem.ReadNodes(UnityFsArchive.Parse(binary));
+            }
+            catch (Exception e) when (e is IOException or InvalidDataException)
+            {
+                Debug.LogError("Failed to decompress data for the AssetBundle 'Memory'.");
+                return null;
+            }
+            return AssetBundles.Mount("Memory", nodes);
+        }
+
         /// Reads and decompresses the bundle on a worker thread; it is mounted on the main thread
         /// at the start of a later frame, when the request completes.
         public static AssetBundleCreateRequest LoadFromFileAsync(string path)
@@ -68,8 +88,38 @@ namespace UnityEngine
 
         public string[] GetAllAssetNames() => Data.Container.Select(c => c.Path).Distinct().ToArray();
 
+        /// The scenes of a streamed-scene bundle; none for an asset bundle (measured).
+        public string[] GetAllScenePaths() => Data.IsStreamedSceneBundle ? Data.Container.Select(c => c.Path).Distinct().ToArray() : Array.Empty<string>();
+
+        public Object[] LoadAllAssets() => LoadAllAssets(typeof(Object));
+
+        public T[] LoadAllAssets<T>() where T : Object => LoadAllAssets(typeof(T)).Cast<T>().ToArray();
+
+        /// Every asset of the bundle of the type, sub-assets included, in the bundle's order.
+        public Object[] LoadAllAssets(Type type)
+        {
+            if (type == null) throw new NullReferenceException("The input type cannot be null.");
+            var d = Data;
+            var result = new List<Object>();
+            var seen = new HashSet<Object>();
+            foreach (var (_, pptr) in d.Container)
+            {
+                if (ObjectLoader.IsScriptAsset(d.File, pptr)) continue;
+                var obj = ObjectLoader.Resolve(d.File, pptr);
+                if (obj != null && type.IsInstanceOfType(obj) && seen.Add(obj)) result.Add(obj);
+            }
+            return result.ToArray();
+        }
+
         /// Every bundle loaded and not yet unloaded, in load order.
         public static IEnumerable<AssetBundle> GetAllLoadedAssetBundles() => AssetBundles.Loaded.ToArray();
+
+        /// Unloads every loaded bundle.
+        public static void UnloadAllAssetBundles(bool unloadAllObjects)
+        {
+            Threads.AssertMainThread("AssetBundle.UnloadAllAssetBundles");
+            foreach (var bundle in AssetBundles.Loaded.ToArray()) AssetBundles.Unload(bundle, unloadAllObjects);
+        }
 
         /// Releases the bundle's files; with unloadAllLoadedObjects, every object loaded from it
         /// is destroyed as well.
@@ -97,11 +147,13 @@ namespace OniBrutal.Engine.Assets
         public List<(string Path, PPtr Pointer)> Container = new();
         public SerializedFile File;
         public List<string> NodeKeys = new();
+        public bool IsStreamedSceneBundle;
 
         /// AssetBundle (class 142).
         public override void Bind(Fields f, IReferenceResolver resolver)
         {
             Serialized = null;
+            IsStreamedSceneBundle = f.Contains("m_IsStreamedSceneAssetBundle") && f.Bool("m_IsStreamedSceneAssetBundle");
             foreach (Fields pair in f.Array("m_Container"))
                 Container.Add((pair.String("first"), pair.Struct("second").PPtr("asset")));
         }

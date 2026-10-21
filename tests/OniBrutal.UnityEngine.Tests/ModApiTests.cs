@@ -261,6 +261,96 @@ namespace OniBrutal.Tests
             Near(new Vector3(5, 4.5f, 0), local.Positions[0]);
         }
 
+        // Measured in the original player with Random.InitState(1234): ColorHSV takes four draws
+        // (hue, saturation, value, alpha) whatever the overload.
+        [Fact]
+        public void ColorHsvDrawsHueSaturationValueAndAlpha()
+        {
+            UnityEngine.Random.InitState(1234);
+            var c = UnityEngine.Random.ColorHSV(0f, 1f, 0f, 1f, 0f, 1f);
+            Assert.Equal(0.0035922532f, UnityEngine.Random.value, 6);
+            Assert.Equal(0.623438537f, c.r, 5);
+            Assert.Equal(0.137176186f, c.g, 5);
+            Assert.Equal(0.5177638f, c.b, 5);
+            Assert.Equal(1f, c.a);
+            UnityEngine.Random.InitState(1234);
+            var ranged = UnityEngine.Random.ColorHSV(0.2f, 0.4f, 0.5f, 0.6f, 0.7f, 0.9f);
+            var alpha = UnityEngine.Random.ColorHSV(0.2f, 0.4f, 0.5f, 0.6f, 0.7f, 0.9f, 0.1f, 0.3f);
+            var plain = UnityEngine.Random.ColorHSV();
+            Assert.Equal(0.82468766f, ranged.g, 5);
+            Assert.Equal(0.229389668f, alpha.a, 5);
+            Assert.Equal(0.2551408f, plain.r, 5);
+        }
+
+        // Measured in the original player: a bundle's bytes load as its file does, not twice, and
+        // null or junk give null.
+        [Fact]
+        public void BundlesLoadFromMemory()
+        {
+            AssetSystem.Initialize(DataDir);
+            var bytes = File.ReadAllBytes(Path.Combine(DataDir, "StreamingAssets", "hires_base_bundle"));
+            Assert.Null(AssetBundle.LoadFromMemory(null));
+            Assert.Null(AssetBundle.LoadFromMemory(new byte[] { 1, 2, 3, 4 }));
+            var bundle = AssetBundle.LoadFromMemory(bytes);
+            Assert.NotNull(bundle);
+            try
+            {
+                Assert.Null(AssetBundle.LoadFromMemory(bytes));
+                Assert.Empty(bundle.GetAllScenePaths());
+                var all = bundle.LoadAllAssets();
+                Assert.NotEmpty(all);
+                Assert.All(bundle.LoadAllAssets<Texture2D>(), t => Assert.IsType<Texture2D>(t));
+                Assert.Equal(all.OfType<Texture2D>().Count(), bundle.LoadAllAssets<Texture2D>().Length);
+            }
+            finally
+            {
+                bundle.Unload(true);
+            }
+        }
+
+        // The prefs file as the original player writes it (measured): entries it does not know are
+        // kept, strings are base64 UTF-8, floats have six significant digits, a key set with another
+        // type is replaced and reads as the default for the old type.
+        [Fact]
+        public void PlayerPrefsKeepUnitysFile()
+        {
+            var dir = Directory.CreateTempSubdirectory("oni-brutal-prefs-").FullName;
+            var saved = OniBrutal.Engine.EngineConfig.PersistentDataPath;
+            try
+            {
+                OniBrutal.Engine.EngineConfig.PersistentDataPath = dir;
+                File.WriteAllText(Path.Combine(dir, "prefs"), "<unity_prefs version_major=\"1\" version_minor=\"1\">\n\t<pref name=\"Screenmanager Resolution Width\" type=\"int\">1280</pref>\n</unity_prefs>");
+                PlayerPrefs.Reload();
+                Assert.Equal(1280, PlayerPrefs.GetInt("Screenmanager Resolution Width"));
+                Assert.Equal(0, PlayerPrefs.GetInt("Missing"));
+                Assert.Equal(7, PlayerPrefs.GetInt("Missing", 7));
+                Assert.Equal("", PlayerPrefs.GetString("Missing"));
+                PlayerPrefs.SetInt("PerfProbeInt", -42);
+                PlayerPrefs.SetFloat("PerfProbeFloatThird", 1f / 3f);
+                PlayerPrefs.SetString("PerfProbeString", "héllo, <x> & \"y\"\nline2");
+                PlayerPrefs.SetInt("PerfProbeRetyped", 5);
+                PlayerPrefs.SetString("PerfProbeRetyped", "now a string");
+                Assert.Equal(0, PlayerPrefs.GetInt("PerfProbeRetyped"));
+                Assert.Equal(0f, PlayerPrefs.GetFloat("PerfProbeInt"));
+                PlayerPrefs.Save();
+                var text = File.ReadAllText(Path.Combine(dir, "prefs"));
+                Assert.StartsWith("<unity_prefs version_major=\"1\" version_minor=\"1\">\n\t<pref name=\"Screenmanager Resolution Width\" type=\"int\">1280</pref>", text);
+                Assert.Contains("\t<pref name=\"PerfProbeString\" type=\"string\">aMOpbGxvLCA8eD4gJiAieSIKbGluZTI=</pref>", text);
+                Assert.Contains("\t<pref name=\"PerfProbeFloatThird\" type=\"float\">0.333333</pref>", text);
+                Assert.Contains("\t<pref name=\"PerfProbeRetyped\" type=\"string\">bm93IGEgc3RyaW5n</pref>", text);
+                Assert.EndsWith("</unity_prefs>", text);
+                PlayerPrefs.Reload();
+                Assert.Equal("héllo, <x> & \"y\"\nline2", PlayerPrefs.GetString("PerfProbeString"));
+                Assert.Equal(-42, PlayerPrefs.GetInt("PerfProbeInt"));
+            }
+            finally
+            {
+                OniBrutal.Engine.EngineConfig.PersistentDataPath = saved;
+                PlayerPrefs.Reload();
+                Directory.Delete(dir, true);
+            }
+        }
+
         [Fact]
         public void GradientsTakeColorAndAlphaKeys()
         {

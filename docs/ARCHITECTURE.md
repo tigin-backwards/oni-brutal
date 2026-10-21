@@ -296,6 +296,19 @@ past the boot checkpoint needs a Steam client logged in with an account that own
   instructions Harmony builds it from (`CodeTranspiler.GetResult`), and the first time a method is
   patched, the replacements already made that call it are rebuilt, as Harmony rebuilds one when a
   patch is added. `--check-types` patches a caller, then a method it calls, and calls the caller.
+- **D22 Classes missing a method of an interface they list.** A mod built against an older game
+  can have a class that no longer implements every method of a game interface (Wireless Power's
+  side screen lacks the new `ISliderControl.GetSliderTooltip(int)`). Mono loads the class and fails
+  only when it is checked or used through the interface (measured in the original player: "VTable
+  setup of type … failed" from `IsAssignableFrom` with an interface; KMod's `GetTypes` and
+  `UserMod2` check pass, and Wireless Power runs). CoreCLR refuses the class when it loads, so
+  `GetTypes` throws and KMod drops the whole mod. **Resolved in** `MissingInterfaceMethods`:
+  before `ModAccess` loads a mod's assembly, it is loaded once in a collectible context that binds
+  only to assemblies already loaded. The methods CoreCLR reports missing get an explicit
+  implementation that throws the `TypeLoadException` CoreCLR would have. The class loads, and
+  calling the missing method fails. Where Mono fails earlier (an interface check of the class),
+  ours goes on. `--check-types` loads a mod built against an older shape of an interface and
+  calls the method it lacks.
 
 ## 3. The engine API (`OniBrutal.UnityEngine`)
 

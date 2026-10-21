@@ -76,8 +76,9 @@ namespace OniBrutal.Host
             if (__result.Length == 0 && locations.TryGetValue(__instance, out var path)) __result = path;
         }
 
-        /// A mod's assembly, rewritten when it reaches into the game's non-public members, and with
-        /// its static readonly fields writable as Mono's are.
+        /// A mod's assembly, rewritten when it reaches into the game's non-public members, with its
+        /// static readonly fields writable as Mono's are, and with any class that misses a method
+        /// of an interface it lists still loadable, as on Mono.
         internal static Assembly LoadFrom(string path)
         {
             path = Path.GetFullPath(path);
@@ -98,10 +99,13 @@ namespace OniBrutal.Host
                 // LocString.CreateLocStringKeys writes back every LocString field of a mod's strings
                 // class (PLib's PLocalization.Register), which mods often declare static readonly.
                 image = MonoFieldSemantics.Adjust(path);
-                if (image == null) return Assembly.LoadFrom(path);
                 var pdb = Path.ChangeExtension(path, ".pdb");
                 if (File.Exists(pdb)) symbols = File.ReadAllBytes(pdb);
             }
+            // A class missing a method of a game interface it lists loads, as on Mono
+            // (MissingInterfaceMethods).
+            if (MissingInterfaceMethods.Adjust(image ?? File.ReadAllBytes(path), ref symbols, path) is { } completed) image = completed;
+            if (image == null) return Assembly.LoadFrom(path);
             Assembly assembly;
             try
             {

@@ -384,6 +384,55 @@ namespace OniBrutal.Host
                     try { Directory.Delete(dir, true); } catch (IOException) { } catch (UnauthorizedAccessException) { }
                 }
             });
+            Check("A mod's class missing a method of a game interface it lists (MissingInterfaceMethods)", () =>
+            {
+                ModAccess.Install();
+                var dir = Directory.CreateTempSubdirectory("oni-brutal-check-").FullName;
+                try
+                {
+                    // The game's interface as the mod was built against (Old) and as it is now (New).
+                    System.Reflection.Emit.TypeBuilder Api(string method, string folder)
+                    {
+                        var builder = new System.Reflection.Emit.PersistedAssemblyBuilder(new AssemblyName("OniBrutalCheckApi"), typeof(object).Assembly);
+                        var thing = builder.DefineDynamicModule("OniBrutalCheckApi").DefineType("IThing", TypeAttributes.Public | TypeAttributes.Interface | TypeAttributes.Abstract);
+                        thing.DefineMethod(method, MethodAttributes.Public | MethodAttributes.Abstract | MethodAttributes.Virtual | MethodAttributes.NewSlot | MethodAttributes.HideBySig, typeof(int), method == "New" ? [typeof(int)] : Type.EmptyTypes);
+                        thing.CreateType();
+                        Directory.CreateDirectory(Path.Combine(dir, folder));
+                        builder.Save(Path.Combine(dir, folder, "OniBrutalCheckApi.dll"));
+                        return thing;
+                    }
+                    var oldThing = Api("Old", "old");
+                    Api("New", "new");
+                    var current = Assembly.LoadFrom(Path.Combine(dir, "new", "OniBrutalCheckApi.dll"));
+                    var mod = new System.Reflection.Emit.PersistedAssemblyBuilder(new AssemblyName("OniBrutalCheckOldMod"), typeof(object).Assembly);
+                    var impl = mod.DefineDynamicModule("OniBrutalCheckOldMod").DefineType("Impl", TypeAttributes.Public, typeof(object), [oldThing]);
+                    var old = impl.DefineMethod("Old", MethodAttributes.Public | MethodAttributes.Virtual | MethodAttributes.Final | MethodAttributes.NewSlot | MethodAttributes.HideBySig, typeof(int), Type.EmptyTypes);
+                    var il = old.GetILGenerator();
+                    il.Emit(System.Reflection.Emit.OpCodes.Ldc_I4_7); il.Emit(System.Reflection.Emit.OpCodes.Ret);
+                    impl.DefineDefaultConstructor(MethodAttributes.Public);
+                    impl.CreateType();
+                    var modPath = Path.Combine(dir, "mod", "OniBrutalCheckOldMod.dll");
+                    Directory.CreateDirectory(Path.GetDirectoryName(modPath)!);
+                    mod.Save(modPath);
+                    var type = ModAccess.LoadFrom(modPath).GetTypes().Single(t => t.Name == "Impl");
+                    var instance = Activator.CreateInstance(type)!;
+                    if ((int)type.GetMethod("Old")!.Invoke(instance, null)! != 7) throw new InvalidOperationException("the mod's own method changed");
+                    var newMethod = current.GetType("IThing")!.GetMethod("New")!;
+                    try
+                    {
+                        newMethod.Invoke(instance, [1]);
+                    }
+                    catch (TargetInvocationException e) when (e.InnerException is TypeLoadException)
+                    {
+                        return "the class loads; calling the missing method throws TypeLoadException";
+                    }
+                    throw new InvalidOperationException("the missing method did not throw");
+                }
+                finally
+                {
+                    try { Directory.Delete(dir, true); } catch (IOException) { } catch (UnauthorizedAccessException) { }
+                }
+            });
             // Last: once a mod patches enum formatting, enum names go through it for the process.
             Check("A Harmony patch of Enum.ToString() alone (MonoEnumFormat)", () =>
             {

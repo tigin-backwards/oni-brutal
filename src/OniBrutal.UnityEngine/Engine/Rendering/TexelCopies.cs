@@ -15,17 +15,22 @@ namespace OniBrutal.Engine.Rendering
     /// waits for all of them before any script runs (Fence): the game writes these textures from
     /// its scripts. The device waits for a copy before uploading it.
     ///
-    /// Test runs (ONI_VERIFY_TEXEL_COPIES=1): each source is checksummed when its copy starts and
-    /// again at the fence; a difference (a write while copying) is logged.
+    /// Test runs (ONI_VERIFY_TEXEL_COPIES=1): each source is checksummed when its copy starts, and
+    /// the copy as soon as it is made; a difference means the copy read texels being written (a
+    /// torn copy) and is logged at the fence. A write after the copy, which waited for it (every
+    /// engine access does), changes neither.
     internal static class TexelCopies
     {
         /// Below this a copy is cheaper than handing it to another thread.
         const long AsyncThreshold = 64 << 10;
 
         static readonly List<Task> pending = new();
-        static readonly bool verify = Environment.GetEnvironmentVariable("ONI_VERIFY_TEXEL_COPIES") == "1";
-        static readonly List<(TexelTextureNative Texture, PixelMemory Source, ulong Sum)> checks = new();
-        static long verified, changed;
+        internal static bool Verify = Environment.GetEnvironmentVariable("ONI_VERIFY_TEXEL_COPIES") == "1";
+        static readonly List<(TexelTextureNative Texture, ulong Sum, Task<ulong> Copied)> checks = new();
+        static long verified, torn;
+
+        /// Copies found torn so far (verify mode).
+        internal static long Torn => torn;
 
         /// Copies `source` (the texture's texels) into `target`; returns the copy in progress, or
         /// null when it was made at once.
@@ -36,8 +41,15 @@ namespace OniBrutal.Engine.Rendering
                 source.Span.CopyTo(target.Span);
                 return null;
             }
-            if (verify) checks.Add((texture, source, Checksum(source)));
-            var copy = Task.Run(() => source.Span.CopyTo(target.Span));
+            Task copy;
+            if (Verify)
+            {
+                ulong sum = Checksum(source);
+                var copied = Task.Run(() => { source.Span.CopyTo(target.Span); return Checksum(target); });
+                checks.Add((texture, sum, copied));
+                copy = copied;
+            }
+            else copy = Task.Run(() => source.Span.CopyTo(target.Span));
             texture.PendingCopy = copy;
             pending.Add(copy);
             return copy;
@@ -49,13 +61,13 @@ namespace OniBrutal.Engine.Rendering
             if (pending.Count == 0) return;
             Task.WaitAll(pending);
             pending.Clear();
-            if (!verify) return;
-            foreach (var (texture, source, sum) in checks)
+            if (!Verify) return;
+            foreach (var (texture, sum, copied) in checks)
             {
                 verified++;
-                if (Checksum(source) != sum) EngineLog.Engine($"texel copy: {texture.Name} changed while it was copied ({++changed} of {verified})");
+                if (copied.Result != sum) EngineLog.Engine($"texel copy: {texture.Name} was written while it was copied ({++torn} of {verified})");
             }
-            if (verified % 20000 < checks.Count) EngineLog.Engine($"texel copies: {verified} verified, {changed} changed while copying");
+            if (verified % 20000 < checks.Count) EngineLog.Engine($"texel copies: {verified} verified, {torn} changed while copying");
             checks.Clear();
         }
 

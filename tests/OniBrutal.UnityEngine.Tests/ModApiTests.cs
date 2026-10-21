@@ -434,6 +434,85 @@ namespace OniBrutal.Tests
             Assert.Equal(0.5f, middle.a, 3);
         }
 
+        // The third hundred Workshop mods' API (measured in the original player): MinMaxCurve's
+        // slots and Evaluate, the modules' defaults and setters, blackTexture, safeArea.
+        [Fact]
+        public void MinMaxCurvesUseTheMaxSlotAndLerpOnlyBetweenTwoValues()
+        {
+            var constant = new ParticleSystem.MinMaxCurve(3f);
+            Assert.Equal((ParticleSystemCurveMode.Constant, 3f, 0f, 3f, 0f), (constant.mode, constant.constant, constant.constantMin, constant.constantMax, constant.curveMultiplier));
+            Assert.Equal(3f, constant.Evaluate(0.5f, 0.25f));
+            var two = new ParticleSystem.MinMaxCurve(1f, 2f);
+            Assert.Equal((ParticleSystemCurveMode.TwoConstants, 2f), (two.mode, two.constant));
+            Assert.Equal(2f, two.Evaluate(0.5f));
+            Assert.Equal(1.25f, two.Evaluate(0.5f, 0.25f));
+            var ramp = AnimationCurve.Linear(0, 0, 1, 4);
+            var curve = new ParticleSystem.MinMaxCurve(2f, ramp);
+            Assert.Same(ramp, curve.curveMax);
+            Assert.Null(curve.curveMin);
+            Assert.Equal(4f, curve.Evaluate(0.5f, 0.25f));
+            var curves = new ParticleSystem.MinMaxCurve(1f, ramp, AnimationCurve.Constant(0, 1, 1));
+            Assert.Equal(1f, curves.Evaluate(0.5f));
+            Assert.Equal(1.75f, curves.Evaluate(0.5f, 0.25f), 4);
+            ParticleSystem.MinMaxCurve seven = 7f;
+            Assert.Equal(7f, seven.constantMax);
+
+            var ps = new GameObject("particles").AddComponent<ParticleSystem>();
+            var main = ps.main;
+            var emission = ps.emission;
+            var noise = ps.noise;
+            Assert.Equal((5f, 0f, 1f), (main.startLifetime.constant, main.startLifetime.constantMin, main.startLifetime.curveMultiplier));
+            Assert.Equal(10f, emission.rateOverTime.constant);
+            Assert.Equal((1f, false, 1000), (main.simulationSpeed, main.prewarm, main.maxParticles));
+            Assert.Equal((false, 1f, 1f), (noise.enabled, noise.strength.constant, noise.strengthMultiplier));
+            main.startLifetime = 2.5f;
+            emission.rateOverTime = 40f;
+            main.simulationSpeed = 0.5f;
+            main.prewarm = true;
+            main.maxParticles = -3;
+            noise.strength = 0.75f;
+            Assert.Equal((ParticleSystemCurveMode.Constant, 2.5f, 1f), (main.startLifetime.mode, main.startLifetime.constant, main.startLifetime.curveMultiplier));
+            Assert.Equal(40f, emission.rateOverTime.constant);
+            Assert.Equal((0.5f, true, 0), (main.simulationSpeed, main.prewarm, main.maxParticles));
+            Assert.Equal((false, 0.75f, 0.75f), (noise.enabled, noise.strength.constant, noise.strengthMultiplier));
+            Object.DestroyImmediate(ps.gameObject);
+
+            var black = Texture2D.blackTexture;
+            Assert.Same(black, Texture2D.blackTexture);
+            Assert.Equal(("UnityBlack", 4, 4, TextureFormat.RGBA32), (black.name, black.width, black.height, black.format));
+            Assert.Equal(new Color32(0, 0, 0, 0), black.GetPixels32()[0]);
+            Assert.Equal(new Rect(0, 0, Screen.width, Screen.height), Screen.safeArea);
+        }
+
+        // RecalculateNormals (measured in the original player): area-weighted face normals summed
+        // per index, no merging by position, zero where no proper triangle uses a vertex.
+        [Fact]
+        public void RecalculatedNormalsAreAreaWeightedPerIndex()
+        {
+            var mesh = new Mesh
+            {
+                vertices = new[] { new Vector3(0, 0, 0), new Vector3(1, 0, 0), new Vector3(0, 1, 0), new Vector3(0, 0, 3), new Vector3(5, 5, 5), new Vector3(6, 5, 5), new Vector3(5, 6, 5) },
+                triangles = new[] { 0, 1, 2, 0, 3, 1, 4, 6, 5 },
+            };
+            mesh.RecalculateNormals();
+            var n = mesh.normals;
+            var shared = new Vector3(0, 0.94868f, 0.31623f);
+            Assert.True((n[0] - shared).magnitude < 1e-4f && (n[1] - shared).magnitude < 1e-4f);
+            Assert.Equal(new Vector3(0, 0, 1), n[2]);
+            Assert.Equal(new Vector3(0, 1, 0), n[3]);
+            Assert.Equal(new Vector3(0, 0, -1), n[4]);
+            var split = new Mesh { vertices = new[] { Vector3.zero, Vector3.right, Vector3.up, Vector3.zero, new Vector3(0, 0, 3), Vector3.right }, triangles = new[] { 0, 1, 2, 3, 4, 5 } };
+            split.RecalculateNormals();
+            Assert.Equal(new Vector3(0, 0, 1), split.normals[0]);
+            Assert.Equal(new Vector3(0, 1, 0), split.normals[3]);
+            var degenerate = new Mesh { vertices = new[] { Vector3.zero, Vector3.right, new Vector3(2, 0, 0), new Vector3(9, 9, 9) }, triangles = new[] { 0, 1, 2 } };
+            degenerate.RecalculateNormals();
+            Assert.All(degenerate.normals, v => Assert.Equal(Vector3.zero, v));
+            Object.DestroyImmediate(mesh);
+            Object.DestroyImmediate(split);
+            Object.DestroyImmediate(degenerate);
+        }
+
         // Fast Save's timelapse images (measured in the original player): RGBA32's graphics format
         // whatever isSRGB says, ARGB32's unnamed 88; PNGs from raw rows (bottom row first) with a
         // row stride, BGRA swizzled and R8 as grey.

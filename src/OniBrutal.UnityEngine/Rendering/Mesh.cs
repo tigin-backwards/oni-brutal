@@ -164,6 +164,33 @@ namespace UnityEngine
             set => SetNormalsImpl(value, 0, value?.Length ?? 0);
         }
 
+        /// Each vertex's normal is the normalized sum of the face normals of the triangles that
+        /// index it, weighted by their area (the unnormalized cross products), as measured in the
+        /// original player. Vertices are not merged by position; a vertex no triangle uses, or
+        /// only degenerate ones, gets a zero normal.
+        public void RecalculateNormals()
+        {
+            if (!CanAccess("normals")) return;
+            var m = Data;
+            var positions = m.Positions ?? Array.Empty<Vector3>();
+            var sums = new Vector3[positions.Length];
+            foreach (var s in m.SubMeshes)
+            {
+                if (s.Topology != MeshTopology.Triangles) continue;
+                for (int i = 0; i + 2 < s.Indices.Length; i += 3)
+                {
+                    int a = s.Indices[i] + s.BaseVertex, b = s.Indices[i + 1] + s.BaseVertex, c = s.Indices[i + 2] + s.BaseVertex;
+                    var face = Vector3.Cross(positions[b] - positions[a], positions[c] - positions[a]);
+                    sums[a] += face;
+                    sums[b] += face;
+                    sums[c] += face;
+                }
+            }
+            for (int i = 0; i < sums.Length; i++) sums[i] = sums[i].normalized;
+            m.Normals = sums.Length == 0 ? null : sums;
+            m.Changed();
+        }
+
         public void SetNormals(List<Vector3> inNormals) => SetNormalsImpl(inNormals, 0, inNormals?.Count ?? 0);
         public void SetNormals(List<Vector3> inNormals, int start, int length) => SetNormalsImpl(inNormals, start, length);
         public void SetNormals(Vector3[] inNormals) => SetNormalsImpl(inNormals, 0, inNormals?.Length ?? 0);

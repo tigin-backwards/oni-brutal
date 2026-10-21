@@ -83,7 +83,8 @@ namespace OniBrutal.Engine.Particles
         public AnimationCurve MinCurve = new();
         public AnimationCurve MaxCurve = new();
 
-        public static MinMaxCurveData Const(float value) => new() { Mode = Constant, Scalar = value, MinScalar = value };
+        /// A constant: its value in the scalar, the minimum 0 (as a new component reports it).
+        public static MinMaxCurveData Const(float value) => new() { Mode = Constant, Scalar = value };
 
         public static MinMaxCurveData Read(Fields f)
         {

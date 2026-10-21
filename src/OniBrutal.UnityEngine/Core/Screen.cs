@@ -10,6 +10,9 @@ namespace UnityEngine
 
         public static int width => P.FramebufferWidth;
         public static int height => P.FramebufferHeight;
+
+        /// The whole screen: a desktop player has no notches or rounded corners (measured).
+        public static Rect safeArea => new(0f, 0f, width, height);
         public static float dpi => P.Dpi;
 
         public static bool fullScreen

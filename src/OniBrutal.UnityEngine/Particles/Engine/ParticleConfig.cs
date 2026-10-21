@@ -107,6 +107,11 @@ namespace OniBrutal.Engine.Particles
         public bool EmissionEnabled = true;
         public MinMaxCurveData RateOverTime = MinMaxCurveData.Const(10f);
         public MinMaxCurveData RateOverDistance = MinMaxCurveData.Const(0f);
+
+        // Noise module: not simulated (no game data enables it); its settings are kept for
+        // scripts that read them back.
+        public bool NoiseEnabled;
+        public MinMaxCurveData NoiseStrength = MinMaxCurveData.Const(1f);
         public BurstData[] Bursts = Array.Empty<BurstData>();
 
         // Size over lifetime.
@@ -376,6 +381,7 @@ namespace OniBrutal.Engine.Particles
                 "RotationBySpeedModule", "CollisionModule", "TriggerModule", "LightsModule", "CustomDataModule",
             })
                 if (B(f.Struct(module), "enabled")) Unsupported(module);
+            c.NoiseEnabled = B(f.Struct("NoiseModule"), "enabled");
 
             return c;
         }

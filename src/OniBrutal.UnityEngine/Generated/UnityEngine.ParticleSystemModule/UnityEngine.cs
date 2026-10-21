@@ -33,7 +33,20 @@ namespace UnityEngine
     public partial class ParticleSystem
     {
         [global::System.Serializable]
+        public partial struct MinMaxCurve
+        {
+        }
+    }
+    public partial class ParticleSystem
+    {
+        [global::System.Serializable]
         public partial struct MinMaxGradient
+        {
+        }
+    }
+    public partial class ParticleSystem
+    {
+        public partial struct NoiseModule
         {
         }
     }
@@ -48,6 +61,13 @@ namespace UnityEngine
         public partial struct SubEmittersModule
         {
         }
+    }
+    public enum ParticleSystemCurveMode
+    {
+        Constant = 0,
+        Curve = 1,
+        TwoCurves = 2,
+        TwoConstants = 3,
     }
     public enum ParticleSystemGradientMode
     {

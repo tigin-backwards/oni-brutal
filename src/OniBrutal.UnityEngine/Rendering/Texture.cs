@@ -190,21 +190,24 @@ namespace UnityEngine
 
         public override bool isReadable => Data.Readable;
 
-        static Texture2D s_White, s_Gray;
+        static Texture2D s_White, s_Gray, s_Black;
 
         /// 4×4 opaque white, shared engine texture.
         public static Texture2D whiteTexture => s_White ??= Builtin("UnityWhite", new Color32(255, 255, 255, 255));
 
+        /// 4×4 transparent black (alpha 0), shared engine texture, readable (measured).
+        public static Texture2D blackTexture => s_Black ??= Builtin("UnityBlack", new Color32(0, 0, 0, 0), readable: true);
+
         /// 4×4 half-grey with half alpha, shared engine texture.
         public static Texture2D grayTexture => s_Gray ??= Builtin("UnityGrey", new Color32(128, 128, 128, 128));
 
-        static Texture2D Builtin(string name, Color32 color)
+        static Texture2D Builtin(string name, Color32 color, bool readable = false)
         {
             var t = new Texture2D(4, 4, TextureFormat.RGBA32, false) { name = name, hideFlags = HideFlags.HideAndDontSave };
             var pixels = new Color32[16];
             Array.Fill(pixels, color);
             t.SetPixels32(pixels);
-            t.Apply(false, true);
+            t.Apply(false, !readable);
             return t;
         }
 

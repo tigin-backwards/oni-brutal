@@ -899,7 +899,7 @@ namespace PerfProbe
             var main = ps.main; var emission = ps.emission; var noise = ps.noise;
             Debug.Log($"PERF measure particle defaults: lifetime [{Curve(main.startLifetime)}] rate [{Curve(emission.rateOverTime)}] speed {main.simulationSpeed} prewarm {main.prewarm} max {main.maxParticles} noise enabled {noise.enabled} strength [{Curve(noise.strength)}] mult {noise.strengthMultiplier}");
             main.startLifetime = 2.5f; emission.rateOverTime = 40f; main.simulationSpeed = 0.5f; main.prewarm = true; main.maxParticles = -3; noise.strength = 0.75f;
-            Debug.Log($"PERF measure particle set: lifetime [{Curve(main.startLifetime)}] rate [{Curve(emission.rateOverTime)}] speed {main.simulationSpeed} prewarm {main.prewarm} max {main.maxParticles} noise enabled {noise.enabled} strength [{Curve(noise.strength)}] mult {noise.strengthMultiplier} playbackSpeed {ps.playbackSpeed}");
+            Debug.Log($"PERF measure particle set: lifetime [{Curve(main.startLifetime)}] rate [{Curve(emission.rateOverTime)}] speed {main.simulationSpeed} prewarm {main.prewarm} max {main.maxParticles} noise enabled {noise.enabled} strength [{Curve(noise.strength)}] mult {noise.strengthMultiplier}");
             main.maxParticles = 250;
             Debug.Log($"PERF measure particle max 250: {main.maxParticles}");
             Destroy(go);

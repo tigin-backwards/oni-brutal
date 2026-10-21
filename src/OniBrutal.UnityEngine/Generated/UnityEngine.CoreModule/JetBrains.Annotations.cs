@@ -6,6 +6,10 @@ namespace JetBrains.Annotations
     public sealed partial class CanBeNullAttribute : global::System.Attribute
     {
     }
+    [global::System.AttributeUsage(global::System.AttributeTargets.Method, AllowMultiple = true)]
+    public sealed partial class ContractAnnotationAttribute : global::System.Attribute
+    {
+    }
     [global::System.Flags]
     public enum ImplicitUseKindFlags
     {
@@ -23,12 +27,28 @@ namespace JetBrains.Annotations
         Members = 2,
         WithMembers = 3,
     }
+    [global::System.AttributeUsage(global::System.AttributeTargets.Method | global::System.AttributeTargets.Property | global::System.AttributeTargets.Field | global::System.AttributeTargets.Parameter | global::System.AttributeTargets.Delegate)]
+    public sealed partial class ItemNotNullAttribute : global::System.Attribute
+    {
+    }
     [global::System.AttributeUsage(global::System.AttributeTargets.Class | global::System.AttributeTargets.Parameter | global::System.AttributeTargets.GenericParameter)]
     public sealed partial class MeansImplicitUseAttribute : global::System.Attribute
     {
     }
+    [global::System.AttributeUsage(global::System.AttributeTargets.Method)]
+    public sealed partial class MustUseReturnValueAttribute : global::System.Attribute
+    {
+    }
+    [global::System.AttributeUsage(global::System.AttributeTargets.Class | global::System.AttributeTargets.Method | global::System.AttributeTargets.Property | global::System.AttributeTargets.Field | global::System.AttributeTargets.Event | global::System.AttributeTargets.Interface | global::System.AttributeTargets.Parameter | global::System.AttributeTargets.Delegate | global::System.AttributeTargets.GenericParameter)]
+    public sealed partial class NotNullAttribute : global::System.Attribute
+    {
+    }
     [global::System.AttributeUsage(global::System.AttributeTargets.All, Inherited = false)]
     public sealed partial class PublicAPIAttribute : global::System.Attribute
+    {
+    }
+    [global::System.AttributeUsage(global::System.AttributeTargets.Method)]
+    public sealed partial class PureAttribute : global::System.Attribute
     {
     }
     [global::System.AttributeUsage(global::System.AttributeTargets.All, Inherited = false)]

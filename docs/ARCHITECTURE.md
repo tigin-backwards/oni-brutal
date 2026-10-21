@@ -209,6 +209,16 @@ past the boot checkpoint needs a Steam client logged in with an account that own
   `PlatformTriple.TryDisableInlining` (`UnboxedMethods`): the unboxed MethodDesc is marked too
   (CoreCLR 10's layout; the host's `--check-types` patches an emitted value type's
   `GetHashCode` and fails if dictionary lookups miss after tier-up).
+- **D14 Mono's `Enum.InternalFormat`.** Mods that add elements name their `SimHashes` values by
+  patching Mono's private `Enum.InternalFormat(RuntimeType eT, Object value)`, which Mono's
+  `Enum.ToString` and `Enum.Format` call for the "G" format with the enum's type and its
+  underlying value (Mono's `system/enum.cs`). CoreCLR has no such method (Rocketry Expanded's
+  ElementUtil: the patch failed, element names came out as numbers, lookups by name failed).
+  **Resolved by a patch** of `AccessTools.Method` (`MonoEnumFormat`): looked up on `Enum`, the
+  name gives a stand-in with Mono's signature, and from then on `Enum`'s "G" formatting
+  (`ToString`, its obsolete overloads, `Format`, the span formatting `string.Format` uses) goes
+  through it; without such a mod nothing is patched. `--check-types` patches the stand-in as the
+  mods do and checks each path.
 
 ## 3. The engine API (`OniBrutal.UnityEngine`)
 

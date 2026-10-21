@@ -128,6 +128,22 @@ namespace OniBrutal.Tests
             Object.DestroyImmediate(mesh);
         }
 
+        // Rocketry Expanded builds gradients with SetKeys: both key sets, sorted by time, evaluated
+        // between them.
+        [Fact]
+        public void GradientsTakeColorAndAlphaKeys()
+        {
+            var gradient = new Gradient();
+            gradient.SetKeys(new[] { new GradientColorKey(Color.blue, 1f), new GradientColorKey(Color.red, 0f) },
+                new[] { new GradientAlphaKey(0f, 1f), new GradientAlphaKey(1f, 0f) });
+            Assert.Equal(0f, gradient.colorKeys[0].time);
+            Assert.Equal(1f, gradient.alphaKeys[0].alpha);
+            var middle = gradient.Evaluate(0.5f);
+            Assert.Equal(0.5f, middle.r, 3);
+            Assert.Equal(0.5f, middle.b, 3);
+            Assert.Equal(0.5f, middle.a, 3);
+        }
+
         // Fast Save's timelapse images (measured in the original player): RGBA32's graphics format
         // whatever isSRGB says, ARGB32's unnamed 88; PNGs from raw rows (bottom row first) with a
         // row stride, BGRA swizzled and R8 as grey.

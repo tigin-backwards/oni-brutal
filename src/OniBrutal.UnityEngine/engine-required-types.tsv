@@ -15,3 +15,9 @@ UnityEngine.CoreModule	UnityEngine.MotionVectorGenerationMode	# mods (Fast Track
 UnityEngine.CoreModule	UnityEngine.Rendering.MeshUpdateFlags	# mods (Fast Track): Mesh.SetVertices/SetUVs/SetColors with flags
 UnityEngine.CoreModule	UnityEngine.Rendering.AsyncGPUReadback	# mods (Fast Save): timelapse images read back asynchronously
 UnityEngine.CoreModule	UnityEngine.Rendering.AsyncGPUReadbackRequest	# AsyncGPUReadback.Request's result
+UnityEngine.CoreModule	JetBrains.Annotations.ContractAnnotationAttribute	# mods (Rocketry Expanded): annotations
+UnityEngine.CoreModule	JetBrains.Annotations.ItemNotNullAttribute	# mods (Rocketry Expanded): annotations
+UnityEngine.CoreModule	JetBrains.Annotations.MustUseReturnValueAttribute	# mods (Rocketry Expanded): annotations
+UnityEngine.CoreModule	JetBrains.Annotations.NotNullAttribute	# mods (Rocketry Expanded): annotations
+UnityEngine.CoreModule	JetBrains.Annotations.PureAttribute	# mods (Rocketry Expanded): annotations
+UnityEngine.CoreModule	UnityEngine.GradientAlphaKey	# mods (Rocketry Expanded): Gradient.SetKeys

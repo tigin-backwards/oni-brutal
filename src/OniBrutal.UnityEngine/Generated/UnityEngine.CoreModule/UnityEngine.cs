@@ -193,6 +193,9 @@ namespace UnityEngine
     public partial class Gradient : global::System.IEquatable<global::UnityEngine.Gradient>
     {
     }
+    public partial struct GradientAlphaKey
+    {
+    }
     public partial struct GradientColorKey
     {
     }

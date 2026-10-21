@@ -49,4 +49,43 @@ namespace JetBrains.Annotations
 
         public ImplicitUseTargetFlags TargetFlags { get; }
     }
+
+    public sealed partial class ContractAnnotationAttribute
+    {
+        public ContractAnnotationAttribute(string contract) : this(contract, false) { }
+
+        public ContractAnnotationAttribute(string contract, bool forceFullStates)
+        {
+            Contract = contract;
+            ForceFullStates = forceFullStates;
+        }
+
+        public string Contract { get; }
+
+        public bool ForceFullStates { get; }
+    }
+
+    public sealed partial class ItemNotNullAttribute
+    {
+        public ItemNotNullAttribute() { }
+    }
+
+    public sealed partial class MustUseReturnValueAttribute
+    {
+        public MustUseReturnValueAttribute() { }
+
+        public MustUseReturnValueAttribute(string justification) => Justification = justification;
+
+        public string Justification { get; }
+    }
+
+    public sealed partial class NotNullAttribute
+    {
+        public NotNullAttribute() { }
+    }
+
+    public sealed partial class PureAttribute
+    {
+        public PureAttribute() { }
+    }
 }

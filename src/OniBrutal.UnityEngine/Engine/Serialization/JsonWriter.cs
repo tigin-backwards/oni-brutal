@@ -352,18 +352,18 @@ namespace OniBrutal.Engine.Serialization
         void WriteGradient(Gradient g)
         {
             var colors = g.colorKeys;
-            var alphas = g.AlphaKeysInternal;
+            var alphas = g.alphaKeys;
             StartObject();
             Version(2);
             for (int i = 0; i < 8; i++)
             {
                 var c = i < colors.Length ? colors[i].color : default;
-                float a = i < alphas.Length ? alphas[i].Alpha : 0f;
+                float a = i < alphas.Length ? alphas[i].alpha : 0f;
                 Name("key" + i);
                 Vector(("r", c.r), ("g", c.g), ("b", c.b), ("a", a));
             }
             for (int i = 0; i < 8; i++) Member("ctime" + i, i < colors.Length ? (int)MathF.Round(colors[i].time * 65535f) : 0);
-            for (int i = 0; i < 8; i++) Member("atime" + i, i < alphas.Length ? (int)MathF.Round(alphas[i].Time * 65535f) : 0);
+            for (int i = 0; i < 8; i++) Member("atime" + i, i < alphas.Length ? (int)MathF.Round(alphas[i].time * 65535f) : 0);
             Member("m_Mode", g.Mode);
             Member("m_ColorSpace", -1);
             Member("m_NumColorKeys", colors.Length);

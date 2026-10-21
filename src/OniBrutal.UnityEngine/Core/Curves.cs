@@ -200,18 +200,25 @@ namespace UnityEngine
         }
     }
 
+    public partial struct GradientAlphaKey
+    {
+        public float alpha;
+        public float time;
+
+        public GradientAlphaKey(float alpha, float time)
+        {
+            this.alpha = alpha;
+            this.time = time;
+        }
+    }
+
     public partial class Gradient
     {
-        internal struct AlphaKey
-        {
-            public float Alpha, Time;
-            public AlphaKey(float alpha, float time) { Alpha = alpha; Time = time; }
-        }
 
         /// Unity's gradient modes as stored in data: 0 Blend, 1 Fixed, 2 PerceptualBlend.
         internal int Mode;
         private GradientColorKey[] m_ColorKeys = { new(Color.white, 0f), new(Color.white, 1f) };
-        private AlphaKey[] m_AlphaKeys = { new(1f, 0f), new(1f, 1f) };
+        private GradientAlphaKey[] m_AlphaKeys = { new(1f, 0f), new(1f, 1f) };
 
         public Gradient() { }
 
@@ -224,15 +231,15 @@ namespace UnityEngine
             numAlpha = Math.Clamp(numAlpha, 1, 8);
             m_ColorKeys = new GradientColorKey[numColor];
             for (int i = 0; i < numColor; i++) m_ColorKeys[i] = new GradientColorKey(new Color(keys[i].r, keys[i].g, keys[i].b, 1f), colorTimes[i] / 65535f);
-            m_AlphaKeys = new AlphaKey[numAlpha];
-            for (int i = 0; i < numAlpha; i++) m_AlphaKeys[i] = new AlphaKey(keys[i].a, alphaTimes[i] / 65535f);
+            m_AlphaKeys = new GradientAlphaKey[numAlpha];
+            for (int i = 0; i < numAlpha; i++) m_AlphaKeys[i] = new GradientAlphaKey(keys[i].a, alphaTimes[i] / 65535f);
         }
 
         internal void CopyFrom(Gradient other)
         {
             Mode = other.Mode;
             m_ColorKeys = (GradientColorKey[])other.m_ColorKeys.Clone();
-            m_AlphaKeys = (AlphaKey[])other.m_AlphaKeys.Clone();
+            m_AlphaKeys = (GradientAlphaKey[])other.m_AlphaKeys.Clone();
         }
 
         /// Unity keeps at most 8 keys, sorted by time.
@@ -251,13 +258,24 @@ namespace UnityEngine
 
         public int colorKeyCount => m_ColorKeys.Length;
         public int alphaKeyCount => m_AlphaKeys.Length;
-        internal AlphaKey[] AlphaKeysInternal => m_AlphaKeys;
-
-        internal void SetAlphaKeys(AlphaKey[] keys)
+        /// Unity keeps at most 8 keys, sorted by time.
+        public GradientAlphaKey[] alphaKeys
         {
-            var copy = (AlphaKey[])keys.Clone();
-            Array.Sort(copy, (a, b) => a.Time.CompareTo(b.Time));
-            m_AlphaKeys = copy;
+            get => (GradientAlphaKey[])m_AlphaKeys.Clone();
+            set
+            {
+                if (value == null || value.Length == 0) throw new ArgumentException("Gradient needs at least one alpha key");
+                var keys = (GradientAlphaKey[])value.Clone();
+                if (keys.Length > 8) Array.Resize(ref keys, 8);
+                Array.Sort(keys, (a, b) => a.time.CompareTo(b.time));
+                m_AlphaKeys = keys;
+            }
+        }
+
+        public void SetKeys(GradientColorKey[] colorKeys, GradientAlphaKey[] alphaKeys)
+        {
+            this.colorKeys = colorKeys;
+            this.alphaKeys = alphaKeys;
         }
 
         public Color Evaluate(float time)
@@ -284,15 +302,15 @@ namespace UnityEngine
         float EvaluateAlpha(float t)
         {
             var keys = m_AlphaKeys;
-            if (t <= keys[0].Time) return keys[0].Alpha;
-            if (t >= keys[^1].Time) return keys[^1].Alpha;
+            if (t <= keys[0].time) return keys[0].alpha;
+            if (t >= keys[^1].time) return keys[^1].alpha;
             int hi = 1;
-            while (keys[hi].Time < t) hi++;
+            while (keys[hi].time < t) hi++;
             var a = keys[hi - 1];
             var b = keys[hi];
-            if (Mode == 1) return b.Alpha;
-            float f = (t - a.Time) / (b.Time - a.Time);
-            return a.Alpha + (b.Alpha - a.Alpha) * f;
+            if (Mode == 1) return b.alpha;
+            float f = (t - a.time) / (b.time - a.time);
+            return a.alpha + (b.alpha - a.alpha) * f;
         }
 
         public bool Equals(Gradient other)
@@ -303,7 +321,7 @@ namespace UnityEngine
             for (int i = 0; i < m_ColorKeys.Length; i++)
                 if (!m_ColorKeys[i].color.Equals(other.m_ColorKeys[i].color) || m_ColorKeys[i].time != other.m_ColorKeys[i].time) return false;
             for (int i = 0; i < m_AlphaKeys.Length; i++)
-                if (m_AlphaKeys[i].Alpha != other.m_AlphaKeys[i].Alpha || m_AlphaKeys[i].Time != other.m_AlphaKeys[i].Time) return false;
+                if (m_AlphaKeys[i].alpha != other.m_AlphaKeys[i].alpha || m_AlphaKeys[i].time != other.m_AlphaKeys[i].time) return false;
             return true;
         }
 

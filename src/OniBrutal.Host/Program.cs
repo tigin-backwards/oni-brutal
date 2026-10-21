@@ -53,6 +53,7 @@ namespace OniBrutal.Host
             ModAccess.Install();
             TranspiledCalls.Install();
             UnboxedMethods.Install();
+            MonoEnumFormat.Install();
             GameTweaks.GameTweaks.Install(options.GameTweaks);
             StateMachineSaveNames.Install(dataDir, AppContext.BaseDirectory);
             return Player.Run(options, dataDir);
@@ -163,7 +164,29 @@ namespace OniBrutal.Host
                 }
                 return misses == 0 ? "no lookup missed" : throw new InvalidOperationException($"{misses} lookups missed");
             });
+            // Last: once a mod patches InternalFormat, enum names go through it for the process.
+            Check("A Harmony patch of Mono's Enum.InternalFormat (MonoEnumFormat)", () =>
+            {
+                MonoEnumFormat.Install();
+                var internalFormat = HarmonyLib.AccessTools.Method(typeof(Enum), "InternalFormat")
+                    ?? throw new InvalidOperationException("no InternalFormat to patch");
+                new HarmonyLib.Harmony("OniBrutal.Host.Check").Patch(internalFormat,
+                    postfix: new HarmonyLib.HarmonyMethod(typeof(Program), nameof(NamedValue)));
+                var value = (AttributeTargets)0x40000000;
+                // The game's and mods' code targets .NET Framework, where an interpolated string is
+                // string.Format (this host's would use .NET's interpolation handler instead).
+                var texts = new[] { value.ToString(), value.ToString("G"), string.Format("{0}", value), string.Concat("", value), Enum.Format(typeof(AttributeTargets), value, "G") };
+                foreach (var text in texts)
+                    if (text != "Named") throw new InvalidOperationException($"formatted as {string.Join(", ", texts)}");
+                return AttributeTargets.Class.ToString() == "Class" ? "every \"G\" formatting path names the value" : throw new InvalidOperationException("other values renamed");
+            });
             return failures;
+        }
+
+        /// CheckRuntimeServices' patch of Enum.InternalFormat, as element mods write theirs.
+        static void NamedValue(Type eT, object value, ref string __result)
+        {
+            if (eT == typeof(AttributeTargets) && (AttributeTargets)value == (AttributeTargets)0x40000000) __result = "Named";
         }
     }
 

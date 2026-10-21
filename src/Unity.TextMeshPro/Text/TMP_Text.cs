@@ -1157,6 +1157,10 @@ namespace TMPro
             }
         }
 
+        // Kept for old PLib, which sets it on input fields' text; it changes nothing.
+        [Obsolete("This does nothing. It was added to prevent PLib from breaking after upgrading to Unity 6.3")]
+        public bool ignoreRectMaskCulling { get; set; }
+
         // The bounds of the mesh (padding included).
         public Bounds bounds
         {

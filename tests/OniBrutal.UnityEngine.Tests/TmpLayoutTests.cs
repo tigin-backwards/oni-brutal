@@ -626,5 +626,21 @@ namespace OniBrutal.Tests
             Assert.Equal("QUITGAME", Shown(t.textInfo));
             Assert.False(t.isTextOverflowing);
         }
+
+        [Fact]
+        public void IgnoreRectMaskCullingKeepsItsValueAndChangesNothing()
+        {
+            var t = Text("QUIT");
+            t.ForceMeshUpdate(true);
+            int vertices = t.textInfo.meshInfo[0].vertexCount;
+#pragma warning disable CS0618 // obsolete: kept for old PLib
+            Assert.False(t.ignoreRectMaskCulling);
+            t.ignoreRectMaskCulling = true;
+            Assert.True(t.ignoreRectMaskCulling);
+#pragma warning restore CS0618
+            Assert.False(t.havePropertiesChanged);
+            t.ForceMeshUpdate(true);
+            Assert.Equal(vertices, t.textInfo.meshInfo[0].vertexCount);
+        }
     }
 }

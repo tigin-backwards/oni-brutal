@@ -1,0 +1,6 @@
+# Package types the replacements provide although no game assembly names them: ones widely used
+# mods call. Read by scripts/regen-packages.sh (tools/SurfaceGen packages).
+# Assembly<TAB>Full name   # why
+UnityEngine.UI	UnityEngine.UI.DefaultControls	# mods (Ony's shared library: DGSM, WGSM, NoDrop, SmartMop, FavoriteResources, Mod Manager): CreateDropdown, CreateScrollView
+UnityEngine.UI	UnityEngine.UI.DefaultControls+Resources	# DefaultControls' argument
+UnityEngine.UI	UnityEngine.UI.DefaultControls+IFactoryControls	# DefaultControls.factory

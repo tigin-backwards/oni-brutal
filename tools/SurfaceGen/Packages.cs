@@ -8,11 +8,12 @@ using System.Text;
 /// Packages mode: the shape of the Unity packages this project replaces (uGUI, TextMeshPro,
 /// Timeline), from their metadata only (no method bodies are read).
 ///
-/// usage: SurfaceGen packages <unityManagedDir> <outDir> <generatedRoot> <dataScripts.tsv>
+/// usage: SurfaceGen packages <unityManagedDir> <outDir> <generatedRoot> <dataScripts.tsv> [packageRequiredTypes.tsv]
 ///
 /// Required types = what the game's assemblies reference in the packages, the script classes
-/// the game's data uses (`--check-assets --list-data-scripts`), and the types the game derives
-/// from, closed over declaring and base types, implemented public interfaces, generic
+/// the game's data uses (`--check-assets --list-data-scripts`), the types mods are known to need
+/// (packageRequiredTypes.tsv: assembly, tab, full name; `#` starts a comment), and the types the
+/// game derives from, closed over declaring and base types, implemented public interfaces, generic
 /// constraints, serialized field types and the types in required signatures. Writes:
 ///   <outDir>/package-types.tsv     assembly, kind, full name, base, interfaces
 ///   <outDir>/package-members.tsv   assembly, type, member, how the game uses it (call, override), consumers
@@ -155,6 +156,16 @@ static class Packages
             var parts = line.Split('\t');
             if (parts.Length >= 2 && IsProvider(parts[0])) Require(Lookup(parts[0], parts[1]));
         }
+
+        // Types mods are known to need, though the game does not name them.
+        if (args.Length > 4)
+            foreach (var line in File.ReadAllLines(args[4]))
+            {
+                var text = line.Split('#')[0].Trim();
+                if (text.Length == 0) continue;
+                var parts = text.Split('\t', StringSplitOptions.TrimEntries);
+                Require(Lookup(parts[0], parts[1]) ?? throw new InvalidDataException($"{parts[0]} is not a replaced package"));
+            }
 
         while (queue.Count > 0)
         {

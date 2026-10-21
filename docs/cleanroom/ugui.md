@@ -649,6 +649,136 @@ It updates when its rect or its parent's rect changes, and in the update after i
 
   The game uses Dropdown in three places.
 
+### DefaultControls (measured)
+
+Mods build controls from code with `DefaultControls` (Ony's shared library: `CreateDropdown` and
+`CreateScrollView`). `src/UnityEngine.UI/package-required-types.tsv` brings its shapes into the
+generated files. Its public surface, from the package's metadata:
+- `DefaultControls.Resources`, a struct of seven public `Sprite` fields: `standard`, `background`,
+  `inputField`, `knob`, `checkmark`, `dropdown`, `mask`;
+- `DefaultControls.IFactoryControls`, an interface with
+  `GameObject CreateGameObject(string name, params Type[] components)`;
+- `static IFactoryControls factory { get; }`: a factory that makes a new GameObject with that
+  name and those components added in that order;
+- `CreatePanel`, `CreateButton`, `CreateText`, `CreateImage`, `CreateRawImage`, `CreateSlider`,
+  `CreateScrollbar`, `CreateToggle`, `CreateInputField`, `CreateDropdown`, `CreateScrollView`,
+  each `static GameObject (Resources)`.
+
+Each method returns a new root GameObject with no parent, on layer 0, all of its objects
+active except where stated, every object made through `factory`. The hierarchies below were
+measured in the original player (PerfProbe's measure mode), each sprite field named after
+itself; with empty `Resources` the result is the same with every sprite null. Children are listed
+in sibling order. Components are listed in order. Every object that draws has a `CanvasRenderer`
+right after its `RectTransform`, with `cullTransparentMesh` true.
+
+**Notation.** `rect` gives anchorMin–anchorMax, pivot, sizeDelta and anchoredPosition.
+- Images: material default, raycast target on, fill centre on, preserve aspect off,
+  pixels-per-unit multiplier 1, colour white unless given.
+- Texts: the built-in font `Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf")`, size 14,
+  style Normal, colour (50, 50, 50, 255), rich text on, raycast target on, horizontal overflow
+  Wrap, vertical overflow Truncate, line spacing 1, best fit off, align by geometry off, unless
+  given.
+- Selectables: transition ColorTint, with colours normal (255, 255, 255, 255), highlighted
+  (245, 245, 245, 255), pressed (200, 200, 200, 255), selected (245, 245, 245, 255), disabled
+  (200, 200, 200, 128), colour multiplier 1, fade 0.1 s, navigation Automatic.
+
+- **CreatePanel:** "Panel": rect (0,0)–(1,1), pivot (0.5,0.5), size (0,0), position (0,0).
+  Image: sprite `background`, Sliced, colour (255, 255, 255, 100).
+- **CreateButton:** "Button (Legacy)": rect centre anchors (0.5,0.5), size (160,30). Image:
+  `standard`, Sliced. Button: target graphic its own Image.
+  - "Text (Legacy)": stretched (0,0)–(1,1), size (0,0). Text "Button", aligned MiddleCenter.
+- **CreateText:** "Text (Legacy)": centre anchors, size (160,30). Text "New Text", UpperLeft.
+- **CreateImage:** "Image": centre anchors, size (100,100). Image: no sprite, Simple.
+- **CreateRawImage:** "RawImage": centre anchors, size (100,100). RawImage: no texture, white,
+  uvRect (0,0,1,1).
+- **CreateSlider:** "Slider": centre anchors, size (160,20). It has no CanvasRenderer or Image.
+  Slider: direction LeftToRight, min 0, max 1, value 0, not whole numbers; fill rect "Fill";
+  handle rect "Handle"; target graphic the handle's Image.
+  - "Background": anchors (0,0.25)–(1,0.75), size (0,0). Image `background`, Sliced.
+  - "Fill Area": anchors (0,0.25)–(1,0.75), size (−20,0), position (−5,0). No graphic.
+    - "Fill": anchors (0,0)–(0,1), size (10,0). Image `standard`, Sliced.
+  - "Handle Slide Area": stretched (0,0)–(1,1), size (−20,0). No graphic.
+    - "Handle": anchors (0,0)–(0,1), size (20,0). Image `knob`, Simple.
+- **CreateScrollbar:** "Scrollbar": centre anchors, size (160,20). Image `background`, Sliced.
+  Scrollbar: direction LeftToRight, size 0.2, value 0, steps 0; handle rect "Handle"; target
+  graphic the handle's Image.
+  - "Sliding Area": stretched, size (−20,−20).
+    - "Handle": anchors (0,0)–(0.2,1), size (20,20). Image `standard`, Sliced.
+- **CreateToggle:** "Toggle": centre anchors, size (160,20). No graphic. Toggle: on; graphic
+  "Checkmark"; target graphic "Background"'s Image; no group; toggle transition Fade.
+  - "Background": anchors (0,1)–(0,1), size (20,20), position (10,−10). Image `standard`,
+    Sliced.
+    - "Checkmark": centre anchors, size (20,20). Image `checkmark`, Simple.
+  - "Label": stretched, size (−28,−3), position (9,−0.5). Text "Toggle", UpperLeft.
+- **CreateInputField:** "InputField (Legacy)": centre anchors, size (160,30). Image
+  `inputField`, Sliced. InputField:
+  - text component "Text (Legacy)", placeholder "Placeholder", text empty;
+  - content type Standard, line type SingleLine, character limit 0;
+  - caret blink rate 0.85, caret width 1, selection colour (168, 206, 255, 192), not read-only;
+  - target graphic its own Image.
+
+  Children:
+  - "Placeholder": stretched, size (−20,−13), position (0,−0.5). Text "Enter text...", style
+    Italic, colour (50, 50, 50, 128), UpperLeft, **no font** (null).
+  - "Text (Legacy)": same rect. Text empty, UpperLeft, rich text **off**, horizontal overflow
+    **Overflow**.
+- **CreateDropdown:** "Dropdown (Legacy)": centre anchors, size (160,30). Image `standard`,
+  Sliced. Dropdown:
+  - template "Template", caption text "Label", item text "Item Label", no caption or item
+    image;
+  - options "Option A", "Option B", "Option C", value 0;
+  - target graphic its own Image, alpha fade speed 0.15.
+
+  Children:
+  - "Label": stretched, size (−35,−13), position (−7.5,−0.5). Text "Option A", MiddleLeft.
+  - "Arrow": anchors (1,0.5)–(1,0.5), size (20,20), position (−15,0). Image `dropdown`,
+    Simple.
+  - "Template", **inactive**: anchors (0,0)–(1,0), pivot (0.5,1), size (0,150), position
+    (0,2). Image `standard`, Sliced. ScrollRect:
+    - content "Content", viewport "Viewport";
+    - vertical only, vertical scrollbar "Scrollbar", horizontal visibility Permanent,
+      vertical visibility AutoHideAndExpandViewport, vertical spacing −3, horizontal spacing 0;
+    - movement Clamped, elasticity 0.1, inertia on, deceleration 0.135, sensitivity 1.
+
+    Its children:
+    - "Viewport": stretched, pivot (0,1), size (−18,0). Image `mask`, Sliced. Mask with the
+      graphic hidden.
+      - "Content": anchors (0,1)–(1,1), pivot (0.5,1), size (0,28). No graphic.
+        - "Item": anchors (0,0.5)–(1,0.5), size (0,20). No graphic. Toggle: on; graphic
+          "Item Checkmark"; target "Item Background"'s Image; toggle transition Fade.
+          - "Item Background": stretched, size (0,0). Image, no sprite, Simple, colour
+            (245, 245, 245, 255).
+          - "Item Checkmark": anchors (0,0.5)–(0,0.5), size (20,20), position (10,0). Image
+            `checkmark`, Simple.
+          - "Item Label": stretched, size (−30,−3), position (5,−0.5). Text "Option A",
+            MiddleLeft.
+    - "Scrollbar": anchors (1,0)–(1,1), pivot (1,1), size (20,0). Image `background`,
+      Sliced. Scrollbar: BottomToTop, size 0.2, value 0, handle "Handle", target its Image.
+      - "Sliding Area": stretched, size (−20,−20).
+        - "Handle": anchors (0,0)–(1,0.2), size (20,20). Image `standard`, Sliced.
+- **CreateScrollView:** "Scroll View": centre anchors, size (200,200). Image `background`,
+  Sliced, colour (255, 255, 255, 100). ScrollRect:
+  - content "Content", viewport "Viewport";
+  - horizontal and vertical, scrollbars "Scrollbar Horizontal" and "Scrollbar Vertical", both
+    visibilities AutoHideAndExpandViewport, both spacings −3;
+  - movement Elastic, elasticity 0.1, inertia on, deceleration 0.135, sensitivity 1.
+
+  Children:
+  - "Viewport": stretched, pivot (0,1), size (0,0). Image `mask`, Sliced. Mask with the graphic
+    hidden.
+    - "Content": anchors (0,1)–(1,1), pivot (0,1), size (0,300). No graphic.
+  - "Scrollbar Horizontal": anchors (0,0)–(1,0), pivot (0,0), size (0,20). Image `background`,
+    Sliced. Scrollbar LeftToRight, size 0.2, value 0, handle "Handle".
+    - "Sliding Area": stretched, size (−20,−20).
+      - "Handle": anchors (0,0)–(0.2,1), size (20,20). Image `standard`, Sliced.
+  - "Scrollbar Vertical": anchors (1,0)–(1,1), pivot (1,1), size (20,0). Image `background`,
+    Sliced. Scrollbar BottomToTop, size 0.2, value 0, handle "Handle".
+    - "Sliding Area": stretched, size (−20,−20).
+      - "Handle": anchors (0,0)–(1,0.2), size (20,20). Image `standard`, Sliced.
+
+Every rect not stated otherwise has pivot (0.5,0.5) and position (0,0). Where a size is stated,
+anchors not given are the centre (0.5,0.5).
+
 ### Measured on the shipped package
 
 Found by the M9 differential runs; they refine the sections above.

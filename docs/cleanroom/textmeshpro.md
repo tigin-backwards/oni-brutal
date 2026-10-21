@@ -351,6 +351,11 @@ blinking, scrolling the text).
 - **`FastAction<T>`:** an ordered set of delegates, called in insertion order.
 - **`TMP_Text` exposes** `rectTransform`, `transform` (cached), `mesh` and the `isVolumetricText`
   family as documented.
+- **`TMP_Text.ignoreRectMaskCulling`** (get and set, a `bool`, false by default) keeps the value it
+  is given and changes nothing else. The shipped package marks it
+  `[Obsolete("This does nothing. It was added to prevent PLib from breaking after upgrading to Unity 6.3")]`
+  (a warning, not an error); keep the attribute and its message. Old PLib, embedded in many mods,
+  sets it on input fields' text.
 
 ### Measured on the shipped package
 

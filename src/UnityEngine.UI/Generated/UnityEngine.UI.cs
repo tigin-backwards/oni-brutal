@@ -172,6 +172,29 @@ namespace UnityEngine.UI
             PreferredSize = 2,
         }
     }
+    public static partial class DefaultControls
+    {
+    }
+    public static partial class DefaultControls
+    {
+        public interface IFactoryControls
+        {
+            global::UnityEngine.GameObject CreateGameObject(string name, params global::System.Type[] components);
+        }
+    }
+    public static partial class DefaultControls
+    {
+        public partial struct Resources
+        {
+            public global::UnityEngine.Sprite standard;
+            public global::UnityEngine.Sprite background;
+            public global::UnityEngine.Sprite inputField;
+            public global::UnityEngine.Sprite knob;
+            public global::UnityEngine.Sprite checkmark;
+            public global::UnityEngine.Sprite dropdown;
+            public global::UnityEngine.Sprite mask;
+        }
+    }
     [global::UnityEngine.AddComponentMenu("UI (Canvas)/Legacy/Dropdown", 102)]
     [global::UnityEngine.RequireComponent(typeof(global::UnityEngine.RectTransform))]
     public partial class Dropdown : global::UnityEngine.UI.Selectable, global::UnityEngine.EventSystems.IPointerClickHandler, global::UnityEngine.EventSystems.ISubmitHandler, global::UnityEngine.EventSystems.ICancelHandler

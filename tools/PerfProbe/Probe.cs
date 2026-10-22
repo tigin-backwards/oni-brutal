@@ -1390,6 +1390,17 @@ namespace PerfProbe
                 ScreenCapture.CaptureScreenshot(System.IO.Path.Combine(Path, "menuresized.png"));
                 for (int i = 0; i < 10; i++) yield return null;
             }
+            // `awake.txt`: frames are not held back, the same in both players, for measuring on a
+            // desktop: the game keeps running at full speed while its window is out of focus
+            // (GenericGameSettings.sleepWhenOutOfFocus off), so the result does not depend on
+            // where the user clicks, and vsync is off (QualitySettings.vSyncCount 0).
+            if (System.IO.File.Exists(System.IO.Path.Combine(Path, "awake.txt")))
+            {
+                var sleep = typeof(Klei.GenericGameSettings).GetProperty("sleepWhenOutOfFocus");
+                sleep.GetSetMethod(true).Invoke(Klei.GenericGameSettings.instance, new object[] { false });
+                QualitySettings.vSyncCount = 0;
+                Debug.Log($"PERF awake: sleepWhenOutOfFocus {sleep.GetValue(Klei.GenericGameSettings.instance)}, vSyncCount {QualitySettings.vSyncCount}");
+            }
             // `load.txt` in the mod's folder names a save (full path) to load from the main menu,
             // as the load screen does: for loading a given save in either player.
             var load = System.IO.Path.Combine(Path, "load.txt");

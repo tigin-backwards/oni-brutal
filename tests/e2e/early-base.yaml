@@ -1,17 +1,24 @@
 # From the landing: dig out the cuprite west of the printing pod and the sandstone east of it,
-# then build an outhouse, a research station, a manual generator and a cot from what was dug.
+# then build an outhouse, a manual generator, a research station and a cot from what was dug.
 # Saves the early-base checkpoint.
+#
+# The research station stays unpowered: it only has to exist for the research screen to open.
+# (OniMcp wired it to a power source of its own choosing, 54 wire blueprints and 44 dig orders
+# away, until the runner turned that off.) The outhouse stands inside the dug-out area: at 119
+# its top cells were still sandstone, and OniMcp deferred its blueprint until they were dug.
 from: landing
 steps:
   - expect: {duplicants: 3, buildings: {Headquarters: 1, RationBox: 1}}
   - dig: [110, 207, 118, 209]
   - dig: [131, 207, 135, 209]
   - run: {seconds: 600, until: {pending_digs: 0}}
-  - build: {prefab: Outhouse, at: [119, 207]}
+  - build: {prefab: Outhouse, at: [116, 207]}
   - build: {prefab: ResearchCenter, at: [127, 207]}
   - build: {prefab: ManualGenerator, at: [129, 207]}
   - build: {prefab: Bed, at: [132, 207]}
-  - expect: {pending_construction: 4}
+  - expect:
+      blueprints: {Outhouse: 1, ResearchCenter: 1, ManualGenerator: 1, Bed: 1}
+      pending_construction: 4
   - run: {seconds: 1200, until: {pending_construction: 0}}
   - expect:
       duplicants: 3

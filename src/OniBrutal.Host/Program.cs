@@ -394,8 +394,13 @@ namespace OniBrutal.Host
                     System.Reflection.Emit.TypeBuilder Api(string method, string folder)
                     {
                         var builder = new System.Reflection.Emit.PersistedAssemblyBuilder(new AssemblyName("OniBrutalCheckApi"), typeof(object).Assembly);
-                        var thing = builder.DefineDynamicModule("OniBrutalCheckApi").DefineType("IThing", TypeAttributes.Public | TypeAttributes.Interface | TypeAttributes.Abstract);
-                        thing.DefineMethod(method, MethodAttributes.Public | MethodAttributes.Abstract | MethodAttributes.Virtual | MethodAttributes.NewSlot | MethodAttributes.HideBySig, typeof(int), method == "New" ? [typeof(int)] : Type.EmptyTypes);
+                        var module = builder.DefineDynamicModule("OniBrutalCheckApi");
+                        // The new method takes one of the game's own types (Trashcans' missing
+                        // method names the game's ButtonMenuTextOverride).
+                        var arg = module.DefineType("Arg", TypeAttributes.Public);
+                        arg.CreateType();
+                        var thing = module.DefineType("IThing", TypeAttributes.Public | TypeAttributes.Interface | TypeAttributes.Abstract);
+                        thing.DefineMethod(method, MethodAttributes.Public | MethodAttributes.Abstract | MethodAttributes.Virtual | MethodAttributes.NewSlot | MethodAttributes.HideBySig, typeof(int), method == "New" ? [arg] : Type.EmptyTypes);
                         thing.CreateType();
                         Directory.CreateDirectory(Path.Combine(dir, folder));
                         builder.Save(Path.Combine(dir, folder, "OniBrutalCheckApi.dll"));
@@ -424,13 +429,52 @@ namespace OniBrutal.Host
                     var newMethod = current.GetType("IThing")!.GetMethod("New")!;
                     try
                     {
-                        newMethod.Invoke(instance, [1]);
+                        newMethod.Invoke(instance, [null]);
                     }
                     catch (TargetInvocationException e) when (e.InnerException is TypeLoadException)
                     {
                         return "the class loads; calling the missing method throws TypeLoadException";
                     }
                     throw new InvalidOperationException("the missing method did not throw");
+                }
+                finally
+                {
+                    try { Directory.Delete(dir, true); } catch (IOException) { } catch (UnauthorizedAccessException) { }
+                }
+            });
+            Check("A mod's stack walk through a patched method (MonoStackFrames)", () =>
+            {
+                ModAccess.Install();
+                var dir = Directory.CreateTempSubdirectory("oni-brutal-check-").FullName;
+                try
+                {
+                    // Walk() names the type that declares its caller's frame; Caller() calls it.
+                    var mod = new System.Reflection.Emit.PersistedAssemblyBuilder(new AssemblyName("OniBrutalCheckStackMod"), typeof(object).Assembly);
+                    var type = mod.DefineDynamicModule("OniBrutalCheckStackMod").DefineType("Plants", TypeAttributes.Public);
+                    var walk = type.DefineMethod("Walk", MethodAttributes.Public | MethodAttributes.Static, typeof(string), Type.EmptyTypes);
+                    walk.SetImplementationFlags(MethodImplAttributes.NoInlining);
+                    var il = walk.GetILGenerator();
+                    il.Emit(System.Reflection.Emit.OpCodes.Newobj, typeof(System.Diagnostics.StackTrace).GetConstructor(Type.EmptyTypes)!);
+                    il.Emit(System.Reflection.Emit.OpCodes.Ldc_I4_1);
+                    il.Emit(System.Reflection.Emit.OpCodes.Callvirt, typeof(System.Diagnostics.StackTrace).GetMethod("GetFrame")!);
+                    il.Emit(System.Reflection.Emit.OpCodes.Callvirt, typeof(System.Diagnostics.StackFrame).GetMethod("GetMethod")!);
+                    il.Emit(System.Reflection.Emit.OpCodes.Callvirt, typeof(MemberInfo).GetProperty("ReflectedType")!.GetMethod!);
+                    il.Emit(System.Reflection.Emit.OpCodes.Callvirt, typeof(Type).GetProperty("FullName")!.GetMethod!);
+                    il.Emit(System.Reflection.Emit.OpCodes.Ret);
+                    var caller = type.DefineMethod("Caller", MethodAttributes.Public | MethodAttributes.Static, typeof(string), Type.EmptyTypes);
+                    caller.SetImplementationFlags(MethodImplAttributes.NoInlining);
+                    il = caller.GetILGenerator();
+                    il.Emit(System.Reflection.Emit.OpCodes.Call, walk);
+                    il.Emit(System.Reflection.Emit.OpCodes.Ret);
+                    type.CreateType();
+                    var modPath = Path.Combine(dir, "OniBrutalCheckStackMod.dll");
+                    mod.Save(modPath);
+                    var plants = ModAccess.LoadFrom(modPath).GetType("Plants")!;
+                    new HarmonyLib.Harmony("OniBrutal.Host.Check").Patch(plants.GetMethod("Caller"), prefix: new HarmonyLib.HarmonyMethod(typeof(Program), nameof(NoOp)));
+                    // Measured in the original player: a patched method's frame is declared by
+                    // MonoMod's DynamicMethodDefinition.
+                    var owner = (string)plants.GetMethod("Caller")!.Invoke(null, null)!;
+                    return owner == "MonoMod.Utils.DynamicMethodDefinition" ? "the patched frame is declared by " + owner : throw new InvalidOperationException("the patched frame is declared by " + owner);
                 }
                 finally
                 {
@@ -518,6 +562,8 @@ namespace OniBrutal.Host
             instructions.Prepend(new HarmonyLib.CodeInstruction(System.Reflection.Emit.OpCodes.Ldc_I4_7));
 
         /// CheckRuntimeServices' patch of Enum.ToString(), as element mods write theirs.
+        static void NoOp() { }
+
         static void NamedDay(Enum __instance, ref string __result)
         {
             if (__instance is DayOfWeek day && (int)day == 100) __result = "Named";

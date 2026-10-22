@@ -309,8 +309,17 @@ past the boot checkpoint needs a Steam client logged in with an account that own
   ran the copy, whose `Location` is empty: Threshold Walls). The methods CoreCLR reports missing
   get an explicit implementation that throws the `TypeLoadException` CoreCLR would have. The class
   loads, and calling the missing method fails. Where Mono fails earlier (an interface check of the class),
-  ours goes on. `--check-types` loads a mod built against an older shape of an interface and
-  calls the method it lacks.
+  ours goes on. `--check-types` loads a mod built against an older shape of an interface, whose
+  new method takes one of the game's own types (Trashcans), and calls the method it lacks.
+- **D23 Stack frames of patched methods.** Harmony runs a patched method as a dynamic method that
+  MonoMod creates with an owner type. On Mono, a frame of it reports a method declared by that
+  owner, `MonoMod.Utils.DynamicMethodDefinition` (measured in the original player); CoreCLR's
+  `StackFrame.GetMethod` returns the `DynamicMethod`, whose `DeclaringType` and `ReflectedType`
+  are null. Customize Plants walks the stack for the class whose `CreatePrefab` made a plant, and
+  a null there ended the game's asset setup when another mod had patched a `CreatePrefab` (the
+  save never loaded). **Resolved in** `MonoStackFrames`: a mod's calls to `StackFrame.GetMethod`
+  (found in its metadata) call the host's instead, which reports a dynamic method with an owner
+  as declared by the owner. `--check-types` walks the stack from a patched method of a mod.
 
 ## 3. The engine API (`OniBrutal.UnityEngine`)
 

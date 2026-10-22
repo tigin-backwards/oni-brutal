@@ -77,8 +77,9 @@ namespace OniBrutal.Host
         }
 
         /// A mod's assembly, rewritten when it reaches into the game's non-public members, with its
-        /// static readonly fields writable as Mono's are, and with any class that misses a method
-        /// of an interface it lists still loadable, as on Mono.
+        /// static readonly fields writable as Mono's are, with any class that misses a method of an
+        /// interface it lists still loadable, and with a patched method's stack frame reporting its
+        /// owner type, as on Mono.
         internal static Assembly LoadFrom(string path)
         {
             path = Path.GetFullPath(path);
@@ -105,6 +106,8 @@ namespace OniBrutal.Host
             // A class missing a method of a game interface it lists loads, as on Mono
             // (MissingInterfaceMethods).
             if (MissingInterfaceMethods.Adjust(image ?? File.ReadAllBytes(path), ref symbols, path) is { } completed) image = completed;
+            // A frame of a patched method reports its owner type, as on Mono (MonoStackFrames).
+            if (MonoStackFrames.Adjust(image ?? File.ReadAllBytes(path), ref symbols, path) is { } rewritten) image = rewritten;
             if (image == null) return Assembly.LoadFrom(path);
             Assembly assembly;
             try

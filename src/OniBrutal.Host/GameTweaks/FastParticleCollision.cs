@@ -22,13 +22,22 @@ namespace OniBrutal.Host.GameTweaks
     /// - When it gathers, GetComponent&lt;HighEnergyParticle&gt;() on each collider's GameObject is a
     ///   lookup among the live radbolt components (registered as they are constructed): a radbolt
     ///   carries one HighEnergyParticle (its prefab), so the lookup returns what GetComponent does.
+    /// A radbolt's colliders are its prefab's (HighEnergyParticleConfig adds one), so each radbolt's
+    /// are looked up once, the first time another radbolt checks against it, rather than on every
+    /// check: with many radbolts in flight every one of them checks every other each frame.
     /// With ONI_TWEAK_VERIFY=1 (test runs) the skipped gathers are still made and checked for
     /// another radbolt, and both lookups are compared; differences are logged.
     internal static class FastParticleCollision
     {
         public const string Name = "fast-particle-collision";
 
-        static readonly List<UnityEngine.Component> live = new();
+        /// The live radbolts, each with its colliders once looked up.
+        static readonly List<Live> live = new();
+        sealed class Live(UnityEngine.Component particle)
+        {
+            public readonly UnityEngine.Component Particle = particle;
+            public UnityEngine.Component[]? Colliders;
+        }
         static readonly bool verify = Environment.GetEnvironmentVariable("ONI_TWEAK_VERIFY") == "1";
         static long checks, mismatches, skipped, gathered, wrongSkips;
         static MethodInfo getComponent = null!, gatherEntries = null!;
@@ -52,7 +61,7 @@ namespace OniBrutal.Host.GameTweaks
 
         static void Constructed(UnityEngine.Component __instance)
         {
-            lock (live) live.Add(__instance);
+            lock (live) live.Add(new Live(__instance));
         }
 
         static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
@@ -108,12 +117,13 @@ namespace OniBrutal.Host.GameTweaks
             lock (live)
                 for (int i = live.Count - 1; i >= 0; i--)
                 {
-                    var c = live[i];
+                    var l = live[i];
+                    var c = l.Particle;
                     // Destroyed radbolts leave here, every frame a radbolt checks, not only when a
                     // gather is made (most checks make none).
                     if (c == null) { live.RemoveAt(i); continue; }
                     if (ReferenceEquals(c, self)) continue;
-                    foreach (var collider in c.gameObject.GetComponents(colliderType))
+                    foreach (var collider in l.Colliders ??= c.gameObject.GetComponents(colliderType))
                     {
                         var (valid, cx, cy, cw, ch) = registration(collider);
                         if (valid && cx < x + width && x < cx + cw && cy < y + height && y < cy + ch) return true;
@@ -154,7 +164,7 @@ namespace OniBrutal.Host.GameTweaks
             {
                 for (int i = live.Count - 1; i >= 0; i--)
                 {
-                    var c = live[i];
+                    var c = live[i].Particle;
                     if (c == null) { live.RemoveAt(i); continue; }   // destroyed
                     if (found == null && ReferenceEquals(c.gameObject, go)) found = c;
                 }

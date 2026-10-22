@@ -1,0 +1,160 @@
+"""e2e.py's lanes: ports, lane locks, the perf wait and the job queue."""
+import os, shutil, signal, subprocess, tempfile, threading, time, types, unittest
+
+import helpers  # noqa: F401
+import e2e
+
+
+class Lanes(unittest.TestCase):
+    def test_ports(self):
+        self.assertEqual(e2e.lane_ports(0), (8800, 8801))
+        self.assertEqual(e2e.lane_ports(2), (8820, 8821))
+        self.assertEqual(e2e.lane_ports(5), (8850, 8851))
+
+    def test_allocation_skips_held_and_busy_lanes(self):
+        with tempfile.TemporaryDirectory() as locks:
+            free = lambda port: False
+            a = e2e.allocate_lane(2, locks, busy=free)
+            b = e2e.allocate_lane(2, locks, busy=free)
+            self.assertEqual((a.number, b.number), (2, 3))
+            self.assertEqual((b.mcp_port, b.driver_port), (8830, 8831))
+            # A lane whose port another program holds is skipped.
+            c = e2e.allocate_lane(2, locks, busy=lambda port: port == 8840)
+            self.assertEqual(c.number, 5)
+            a.release()
+            d = e2e.allocate_lane(2, locks, busy=free)
+            self.assertEqual(d.number, 2)
+            for lane in (b, c, d):
+                lane.release()
+
+    def test_all_lanes_held(self):
+        with tempfile.TemporaryDirectory() as locks:
+            held = [e2e.allocate_lane(1, locks, busy=lambda p: False) for _ in range(e2e.MAX_LANES)]
+            self.assertIsNone(e2e.allocate_lane(1, locks, busy=lambda p: False, wait=False))
+            for lane in held:
+                lane.release()
+
+    def test_displays(self):
+        self.assertEqual(e2e.parse_displays(':88,89'), [':88', ':89'])
+        with self.assertRaises(ValueError):
+            e2e.parse_displays(':88,x')
+
+
+@unittest.skipUnless(shutil.which('xvfb-run') and shutil.which('Xvfb'), 'needs xvfb-run')
+class XvfbDisplay(unittest.TestCase):
+    def test_the_display_xvfb_run_gave_the_command(self):
+        # The runner's own DISPLAY (a desktop's) is in xvfb-run's environment, and so in its
+        # Xvfb's: only the command's (with XAUTHORITY) counts.
+        env = dict(os.environ, DISPLAY=':0')
+        env.pop('XAUTHORITY', None)
+        process = subprocess.Popen(['xvfb-run', '-a', 'sleep', '30'], env=env, start_new_session=True)
+        try:
+            stub = types.SimpleNamespace(process=process, display=None, xauthority=None)
+            e2e.Player.find_display(stub)
+            self.assertRegex(stub.display, r'^:\d+$')
+            self.assertNotEqual(stub.display, ':0')
+            self.assertTrue(os.path.exists(stub.xauthority))
+            self.assertTrue(e2e.display_ready(stub.display[1:]))
+        finally:
+            os.killpg(process.pid, signal.SIGTERM)
+            process.wait(10)
+
+
+    @unittest.skipIf(os.path.exists('/tmp/.X89-lock'), 'display :89 is in use')
+    def test_an_explicit_display(self):
+        with tempfile.TemporaryDirectory() as out:
+            stub = types.SimpleNamespace(out=out, xvfb=None)
+            e2e.Player.start_xvfb(stub, ':89')
+            try:
+                self.assertTrue(e2e.display_ready('89'))
+                with self.assertRaises(e2e.SpecFailure):
+                    e2e.Player.start_xvfb(types.SimpleNamespace(out=out, xvfb=None), ':89')
+            finally:
+                os.killpg(stub.xvfb.pid, signal.SIGTERM)
+                stub.xvfb.wait(10)
+
+
+class PerfWait(unittest.TestCase):
+    def test_perf_jobs(self):
+        lines = ['bash scripts/qa.sh', '/bin/bash out/local-tools/sweep11c.sh', 'python3 scripts/e2e.py early-base',
+                 '/home/x/out/bin/OniBrutal.Host/release/OniBrutal --game g', 'perf record -g -p 12',
+                 'bash /home/x/projects/oni-brutal/scripts/qa.sh u57', 'vim scripts/qa.sh.orig',
+                 'bash out/local-tools/measure.sh 3']
+        self.assertEqual(e2e.perf_jobs(lines), ['bash scripts/qa.sh', '/bin/bash out/local-tools/sweep11c.sh',
+                                                'perf record -g -p 12', 'bash /home/x/projects/oni-brutal/scripts/qa.sh u57',
+                                                'bash out/local-tools/measure.sh 3'])
+
+    def test_exclusive_lock_holds_specs_back(self):
+        import fcntl, os
+        with tempfile.TemporaryDirectory() as locks:
+            perf = open(os.path.join(locks, '.lock'), 'w')
+            fcntl.flock(perf, fcntl.LOCK_EX)
+            entered, messages = [], []
+            original_sleep = e2e.time.sleep
+            e2e.time.sleep = lambda s: original_sleep(0.01)
+            try:
+                def spec():
+                    with e2e.machine_lock(locks, perf_wait=False, log=messages.append):
+                        entered.append(True)
+                t = threading.Thread(target=spec)
+                t.start()
+                original_sleep(0.2)
+                self.assertEqual(entered, [])
+                fcntl.flock(perf, fcntl.LOCK_UN)
+                t.join(5)
+                self.assertEqual(entered, [True])
+                self.assertEqual(messages, ['waiting for a perf job: a perf job holds out/e2e/.lock'])
+            finally:
+                e2e.time.sleep = original_sleep
+                perf.close()
+
+    def test_lanes_share_the_lock(self):
+        with tempfile.TemporaryDirectory() as locks:
+            with e2e.machine_lock(locks, perf_wait=False):
+                with e2e.machine_lock(locks, perf_wait=False):
+                    pass
+
+
+class Queue(unittest.TestCase):
+    def test_ours_waits_for_the_original(self):
+        specs = [{'name': 'a'}, {'name': 'b'}]
+        jobs = e2e.plan_jobs(specs, ['original', 'ours'], 2)
+        self.assertEqual([j['id'] for j in jobs], ['a/original-1', 'a/original-2', 'a/ours-1', 'a/ours-2',
+                                                   'b/original-1', 'b/original-2', 'b/ours-1', 'b/ours-2'])
+        self.assertEqual(jobs[2]['after'], ['a/original-1', 'a/original-2'])
+        queue = e2e.JobQueue(jobs)
+        order, lock = [], threading.Lock()
+
+        def worker():
+            while True:
+                job = queue.next()
+                if job is None:
+                    return
+                with lock:
+                    order.append(('start', job['id']))
+                time.sleep(0.02)
+                with lock:
+                    order.append(('done', job['id']))
+                queue.done(job)
+
+        threads = [threading.Thread(target=worker) for _ in range(3)]
+        for t in threads:
+            t.start()
+        for t in threads:
+            t.join(10)
+        started = [j for e, j in order if e == 'start']
+        self.assertEqual(sorted(started), sorted(j['id'] for j in jobs))
+        for spec in 'ab':
+            last_original = max(order.index(('done', f'{spec}/original-{i}')) for i in (1, 2))
+            first_ours = min(order.index(('start', f'{spec}/ours-{i}')) for i in (1, 2))
+            self.assertLess(last_original, first_ours)
+        # b's originals ran beside a's (three lanes), not after a's ours.
+        self.assertLess(order.index(('start', 'b/original-1')), order.index(('done', 'a/ours-1')))
+
+    def test_ours_alone_has_no_dependencies(self):
+        jobs = e2e.plan_jobs([{'name': 'a'}], ['ours'], 2)
+        self.assertEqual([j['after'] for j in jobs], [[], []])
+
+
+if __name__ == '__main__':
+    unittest.main()

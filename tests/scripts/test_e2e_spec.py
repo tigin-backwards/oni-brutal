@@ -190,6 +190,25 @@ class Expectations(unittest.TestCase):
             e2e.compare(3, 'three')
 
 
+class RunStep(unittest.TestCase):
+    def test_a_paused_game_is_resumed_and_paused_again(self):
+        calls = []
+        steps = iter([{'elapsedGameSeconds': 0.0, 'status': 'completed', 'isPaused': True},
+                      {'elapsedGameSeconds': 60.0, 'status': 'completed'},
+                      {'elapsedGameSeconds': 60.0, 'status': 'completed'}])
+
+        class Mcp:
+            def call(self, tool, **args):
+                calls.append(args['action'])
+                return next(steps) if args['action'] == 'step_until' else {}
+        sleep, e2e.time.sleep = e2e.time.sleep, lambda s: None
+        try:
+            self.assertEqual(e2e.run(Mcp(), 120), 120.0)
+        finally:
+            e2e.time.sleep = sleep
+        self.assertEqual(calls, ['step_until', 'resume', 'step_until', 'step_until', 'pause'])
+
+
 class Options(unittest.TestCase):
     def test_plib_config_beside_each_dll_and_shared(self):
         with tempfile.TemporaryDirectory() as profile:

@@ -9,6 +9,7 @@ dotnet build "$root/OniBrutal.slnx" -v q -nologo
 "$root/out/bin/OniBrutal.UnityEngine.Tests/debug/OniBrutal.UnityEngine.Tests" | grep -E 'Total:|FAIL|\[FAIL\]' || true
 "$root/out/bin/OniBrutal.Assets.Tests/debug/OniBrutal.Assets.Tests" | grep -E 'Total:|\[FAIL\]' || true
 "$root/out/bin/ModTriage.Tests/debug/ModTriage.Tests" | grep -E 'Total:|\[FAIL\]' || true
+echo "scripts: $(python3 -m unittest discover -s "$root/tests/scripts" 2>&1 | tail -1)"
 "$root/scripts/build-engine.sh" >/dev/null
 "$root/scripts/apicheck.sh" > "$root/out/apicheck-summary.txt" || true; head -2 "$root/out/apicheck-summary.txt"
 "$root/out/bin/OniBrutal.Host/debug/OniBrutal" --game "$game" --check-types --log "$root/out/check-types.log" | grep -vE '^(ok   [A-Za-z0-9.-]+ +[0-9]+ types|from )'

@@ -120,7 +120,7 @@ class FakeInput:
 
 class FakeMcp:
     def __init__(self, folder):
-        self.folder, self.calls = folder, []
+        self.folder, self.calls, self.port = folder, [], 8820
 
     def call(self, tool, **args):
         self.calls.append((tool, args))

@@ -433,7 +433,7 @@ class Mcp:
     """A minimal client for OniMcp's streamable HTTP endpoint (JSON text results)."""
 
     def __init__(self, port):
-        self.url = f'http://127.0.0.1:{port}/mcp/'
+        self.port, self.url = port, f'http://127.0.0.1:{port}/mcp/'
         self.session = None
 
     def post(self, body):
@@ -1236,7 +1236,18 @@ def build(mcp, prefab, cells, priority=5, material=None):
 
 
 def run(mcp, seconds, until=None, log=None):
-    """Game time at speed 3 in steps of up to a minute, until `until` holds or the time is spent."""
+    """Game time at speed 3 in steps of up to a minute, until `until` holds or the time is spent;
+    the game is paused again afterwards (UI steps happen in paused time)."""
+    resumed = []
+    try:
+        return run_steps(mcp, seconds, until, log, resumed)
+    finally:
+        if resumed:
+            with contextlib.suppress(SpecFailure, OSError):  # never hide the step's own failure
+                mcp.call('game_control', domain='speed', action='pause', confirm=True)
+
+
+def run_steps(mcp, seconds, until, log, resumed):
     spent, stalls = 0.0, 0
     while spent < seconds:
         if until and not unmet(mcp, until):
@@ -1248,7 +1259,11 @@ def run(mcp, seconds, until=None, log=None):
             log(f'  ran {elapsed:.0f} s ({step.get("reason") or step.get("status")})')
         if elapsed <= 0:
             # Just after a load the game's speed controls are not up yet, and a step returns at
-            # once; it stalls for good only if it keeps doing so.
+            # once; it stalls for good only if it keeps doing so. step_until does not unpause
+            # the game the load paused: a paused game is resumed (and paused again below).
+            if isinstance(step, dict) and (step.get('isPaused') or step.get('currentIsPaused')):
+                mcp.call('game_control', domain='speed', action='resume', confirm=True)
+                resumed.append(True)
             stalls += 1
             if stalls >= 10:
                 raise SpecFailure(f'the game did not advance: {json.dumps(step)[:600]}')
@@ -1265,12 +1280,27 @@ def run(mcp, seconds, until=None, log=None):
 
 def screenshot(mcp, out, name):
     """A full-frame screenshot through OniMcp, as OUT/NAME.png; returns its path or None."""
-    result = mcp.call('navigation_control', action='screenshot', filename=f'e2e-{name}', waitFrames=5)
+    # OniMcp's screenshot folder (/tmp/oni-mcp/screenshots) is shared by every lane: the name
+    # carries the lane's port. It answers with the path before the frame is written, so the
+    # file counts once it is newer than the request and its size has settled.
+    asked = time.time() - 1
+    result = mcp.call('navigation_control', action='screenshot', filename=f'e2e-{mcp.port}-{name}', waitFrames=5)
     path = (result.get('path') or result.get('file')) if isinstance(result, dict) else None
-    if path and os.path.exists(path):
-        dest = os.path.join(out, name + os.path.splitext(path)[1])
-        shutil.copy(path, dest)
-        return dest
+    if not path:
+        return None
+    deadline, size = time.time() + 30, -1
+    while time.time() < deadline:
+        try:
+            stat = os.stat(path)
+        except OSError:
+            stat = None
+        if stat and stat.st_mtime >= asked and stat.st_size > 0:
+            if stat.st_size == size:
+                dest = os.path.join(out, name + os.path.splitext(path)[1])
+                shutil.copy(path, dest)
+                return dest
+            size = stat.st_size
+        time.sleep(0.3)
     return None
 
 

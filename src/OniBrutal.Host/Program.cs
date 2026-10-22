@@ -644,6 +644,7 @@ namespace OniBrutal.Host
         // Unity's standalone player arguments.
         public int ScreenWidth = -1, ScreenHeight = -1;
         public int ScreenFullscreen = -1;
+        public int Monitor;
         public string? WindowMode;
         /// Development: "frame:path.png[:superSize]" calls ScreenCapture.CaptureScreenshot in
         /// that frame.
@@ -749,6 +750,7 @@ namespace OniBrutal.Host
                     case "-screen-height": o.ScreenHeight = int.Parse(args[++i]); break;
                     case "-screen-fullscreen": o.ScreenFullscreen = int.Parse(args[++i]); break;
                     case "-window-mode": o.WindowMode = args[++i]; break;
+                    case "-monitor": o.Monitor = int.Parse(args[++i]); break;
                     case "--dump-component":
                     {
                         var spec = args[++i];
@@ -792,7 +794,7 @@ namespace OniBrutal.Host
                     }
                     default:
                         Console.Error.WriteLine($"Unknown option {args[i]}");
-                        Console.Error.WriteLine("usage: OniBrutal [--game DIR] [--log FILE] [--run-home DIR] [--audio-wav DIR] [--headless] [--batchmode] [--frames N] [--native-override NAME=PATH] [--trace-exceptions] [--gl-debug] [--vsync-count N] [--gpu-profile] [--no-bindless] [--input FRAME:ACTION[:ARGS]] [--frame-stats] [--max-frame-rate N[:FRAMES]] [--dump-render-textures FRAME:DIR] [-screen-width W] [-screen-height H] [-screen-fullscreen 0|1] [-window-mode exclusive|borderless|windowed] [--check-types] [--ui-packages DIR | --shipped-ui-packages] [--game-tweak NAME|all|exact] [--check-assets [--list-data-scripts FILE]] [--check-bind] [--check-shaders] [--dump-shader NAME:DIR] [--capture FRAME:PATH[:SCALE]] [--probe-ui FRAME:X,Y] [--dump-ui FRAME:PATH] [--dump-ui-vertices PATH-SUBSTRING] [--dump-hierarchy FRAME:PATH] [--report-builtin-assets FILE] [--dump-component FRAME:PATH|TYPE] [-- STEAM-COMMAND]");
+                        Console.Error.WriteLine("usage: OniBrutal [--game DIR] [--log FILE] [--run-home DIR] [--audio-wav DIR] [--headless] [--batchmode] [--frames N] [--native-override NAME=PATH] [--trace-exceptions] [--gl-debug] [--vsync-count N] [--gpu-profile] [--no-bindless] [--input FRAME:ACTION[:ARGS]] [--frame-stats] [--max-frame-rate N[:FRAMES]] [--dump-render-textures FRAME:DIR] [-screen-width W] [-screen-height H] [-screen-fullscreen 0|1] [-window-mode exclusive|borderless|windowed] [-monitor N] [--check-types] [--ui-packages DIR | --shipped-ui-packages] [--game-tweak NAME|all|exact] [--check-assets [--list-data-scripts FILE]] [--check-bind] [--check-shaders] [--dump-shader NAME:DIR] [--capture FRAME:PATH[:SCALE]] [--probe-ui FRAME:X,Y] [--dump-ui FRAME:PATH] [--dump-ui-vertices PATH-SUBSTRING] [--dump-hierarchy FRAME:PATH] [--report-builtin-assets FILE] [--dump-component FRAME:PATH|TYPE] [-- STEAM-COMMAND]");
                         return null;
                 }
             }

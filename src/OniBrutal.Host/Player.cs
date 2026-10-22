@@ -206,7 +206,7 @@ namespace OniBrutal.Host
                 "windowed" => FullScreenMode.Windowed,
                 _ => mode,
             };
-            return new OniBrutal.Desktop.WindowSettings(EngineConfig.ProductName, width, height, mode) { IgnoreUserInput = options.Input.Any, DebugContext = options.GlDebug };
+            return new OniBrutal.Desktop.WindowSettings(EngineConfig.ProductName, width, height, mode) { IgnoreUserInput = options.Input.Any, DebugContext = options.GlDebug, Monitor = options.Monitor };
         }
 
         /// Frame pacing as in Unity's desktop player: with vSync the swap paces frames (the

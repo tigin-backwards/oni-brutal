@@ -11,7 +11,7 @@ namespace OniBrutal.Desktop
 {
     /// Window startup settings: Unity's player defaults from PlayerSettings, overridable with
     /// Unity's standard command-line arguments (-screen-width, -screen-height,
-    /// -screen-fullscreen, -window-mode).
+    /// -screen-fullscreen, -window-mode, -monitor).
     internal sealed record WindowSettings(string Title, int Width, int Height, FullScreenMode Mode)
     {
         /// Development runs driven by scripted input ignore the window's own mouse and keyboard.
@@ -19,6 +19,8 @@ namespace OniBrutal.Desktop
         /// Diagnostics (--gl-debug): a debug context, whose driver reports errors and
         /// performance problems through GL debug output.
         public bool DebugContext { get; init; }
+        /// -monitor N: the monitor to open on, 1-based as in Unity (0: the primary one).
+        public int Monitor { get; init; }
     }
 
     /// The player window (GLFW, OpenGL 4.5 core context) and its input devices.
@@ -70,6 +72,8 @@ namespace OniBrutal.Desktop
             Glfw.WindowHint(GlfwWindowHint.FocusOnShow, settings.IgnoreUserInput ? GLFW_FALSE : GLFW_TRUE);
 
             var monitor = Glfw.PrimaryMonitor;
+            var monitors = Glfw.GetMonitors();
+            if (settings.Monitor >= 1 && settings.Monitor <= monitors.Length) monitor = monitors[settings.Monitor - 1];
             var desktop = monitor.VideoMode;
             mode = Supported(settings.Mode);
             int width = settings.Width > 0 ? settings.Width : desktop.Width;

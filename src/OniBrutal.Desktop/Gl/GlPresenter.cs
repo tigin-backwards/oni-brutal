@@ -13,10 +13,12 @@ namespace OniBrutal.Desktop.Gl
     /// the presenter thread, current on the window's context (shared with it), waits for that
     /// frame's commands to complete, copies it to the window and swaps. A swap that blocks
     /// (vsync, or a display path that reads the frame back) then overlaps the next frames' work
-    /// instead of stalling it. Up to two frames are queued for presentation, as Unity's default
-    /// of two queued frames: with vsync, frames that take longer than a refresh interval are
-    /// shown at the next vblank without holding up the frames after them. Three back buffers
-    /// rotate, so the GL thread never draws into a buffer that is queued or being shown.
+    /// instead of stalling it. Without vsync up to two frames are queued for presentation. With
+    /// vsync, one, and a frame counts as queued until the GPU has done its swap: the driver
+    /// returns from SwapBuffers at once and queues frames of its own, which came on top of ours.
+    /// Measured on Windows at 60 Hz (a key press to the screen changing, out/local-tools/winlat):
+    /// the original 50 ms, ours 83 ms before, 50 ms so. Three back buffers rotate, so the GL
+    /// thread never draws into a buffer that is queued or being shown.
     internal sealed unsafe class GlPresenter : IDisposable
     {
         const uint SyncGpuCommandsComplete = 0x9117;
@@ -40,7 +42,7 @@ namespace OniBrutal.Desktop.Gl
         }
 
         readonly GlfwWindow window;
-        const int MaxQueued = 2;
+        const int MaxQueued = 2, MaxQueuedWithVsync = 1;
         readonly Buffer[] buffers = [new(), new(), new()];
         int current;
         readonly Thread thread;
@@ -105,7 +107,7 @@ namespace OniBrutal.Desktop.Gl
         }
 
         /// Hands the frame drawn into the current back buffer to the presenter, once fewer than
-        /// two frames are queued, and moves on to the next buffer.
+        /// two frames are queued (one with vsync), and moves on to the next buffer.
         public void Present(int interval)
         {
             var b = buffers[current];
@@ -114,7 +116,7 @@ namespace OniBrutal.Desktop.Gl
             N.glFlush();
             lock (gate)
             {
-                while (queued >= MaxQueued && failure == null) Monitor.Wait(gate);
+                while (queued >= (interval > 0 ? MaxQueuedWithVsync : MaxQueued) && failure == null) Monitor.Wait(gate);
                 if (failure != null) throw new InvalidOperationException("Presenting failed.", failure);
                 queue.Enqueue((b, fence, interval));
                 queued++;
@@ -195,6 +197,14 @@ namespace OniBrutal.Desktop.Gl
             b.HasCopyDone = true;
             N.glFlush();
             window.SwapBuffers();
+            if (interval > 0)
+            {
+                // With vsync the swap is done when the frame is on its way to the display.
+                var swapped = N.glFenceSync(SyncGpuCommandsComplete, default);
+                N.glFlush();
+                while (N.glClientWaitSync(swapped, default, WaitSliceNanoseconds) == TimeoutExpired) { }
+                N.glDeleteSync(swapped);
+            }
         }
 
         /// Presents what was handed over, then stops the thread and releases the window's

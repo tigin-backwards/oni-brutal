@@ -401,6 +401,9 @@ namespace OniBrutal.Host
                         arg.CreateType();
                         var thing = module.DefineType("IThing", TypeAttributes.Public | TypeAttributes.Interface | TypeAttributes.Abstract);
                         thing.DefineMethod(method, MethodAttributes.Public | MethodAttributes.Abstract | MethodAttributes.Virtual | MethodAttributes.NewSlot | MethodAttributes.HideBySig, typeof(int), method == "New" ? [arg] : Type.EmptyTypes);
+                        // A second new method: CoreCLR names one missing method of a class at a time.
+                        if (method == "New")
+                            thing.DefineMethod("Newer", MethodAttributes.Public | MethodAttributes.Abstract | MethodAttributes.Virtual | MethodAttributes.NewSlot | MethodAttributes.HideBySig, typeof(int), Type.EmptyTypes);
                         thing.CreateType();
                         Directory.CreateDirectory(Path.Combine(dir, folder));
                         builder.Save(Path.Combine(dir, folder, "OniBrutalCheckApi.dll"));
@@ -426,16 +429,19 @@ namespace OniBrutal.Host
                     if (copies != 1) throw new InvalidOperationException($"{copies} copies of the mod are listed");
                     var instance = Activator.CreateInstance(type)!;
                     if ((int)type.GetMethod("Old")!.Invoke(instance, null)! != 7) throw new InvalidOperationException("the mod's own method changed");
-                    var newMethod = current.GetType("IThing")!.GetMethod("New")!;
-                    try
+                    foreach (var name in new[] { "New", "Newer" })
                     {
-                        newMethod.Invoke(instance, [null]);
+                        var newMethod = current.GetType("IThing")!.GetMethod(name)!;
+                        try
+                        {
+                            newMethod.Invoke(instance, newMethod.GetParameters().Length == 0 ? null : [null]);
+                            throw new InvalidOperationException($"the missing method {name} did not throw");
+                        }
+                        catch (TargetInvocationException e) when (e.InnerException is TypeLoadException)
+                        {
+                        }
                     }
-                    catch (TargetInvocationException e) when (e.InnerException is TypeLoadException)
-                    {
-                        return "the class loads; calling the missing method throws TypeLoadException";
-                    }
-                    throw new InvalidOperationException("the missing method did not throw");
+                    return "the class loads; calling either missing method throws TypeLoadException";
                 }
                 finally
                 {

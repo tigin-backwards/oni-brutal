@@ -29,14 +29,21 @@ namespace OniBrutal.Host
         /// `symbols` (portable PDB bytes or null) are rewritten to match.
         public static byte[]? Adjust(byte[] image, ref byte[]? symbols, string path)
         {
-            var missing = Probe(image, out var probe);
-            Collect(probe);
-            if (missing.Count == 0) return null;
-            var (completed, newSymbols, added) = Complete(image, symbols, path, missing);
-            if (added.Count == 0) return null;
-            symbols = newSymbols;
-            foreach (var line in added)
-                EngineLog.Engine($"mod types: {Path.GetFileName(path)}: {line} (missing; calling it throws, as using the class does on Mono)");
+            // CoreCLR names one missing method of a class at a time (Trashcans' misses two of
+            // ISidescreenButtonControl's): the completed image is probed again until it loads.
+            byte[]? completed = null;
+            for (int round = 0; round < 64; round++)
+            {
+                var missing = Probe(completed ?? image, out var probe);
+                Collect(probe);
+                if (missing.Count == 0) break;
+                var (next, newSymbols, added) = Complete(completed ?? image, symbols, path, missing);
+                if (added.Count == 0) break;
+                completed = next;
+                symbols = newSymbols;
+                foreach (var line in added)
+                    EngineLog.Engine($"mod types: {Path.GetFileName(path)}: {line} (missing; calling it throws, as using the class does on Mono)");
+            }
             return completed;
         }
 

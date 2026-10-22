@@ -45,6 +45,10 @@ namespace OniBrutal.Desktop.Gl
         public uint Sampler;
         public System.Collections.Generic.Dictionary<uint, ulong> Handles;
 
+        /// The texels last uploaded, for a texture re-uploaded into unchanged storage
+        /// (GlTextures.UploadChanged): the next upload sends only the rows that differ.
+        public byte[] UploadedTexels;
+
         /// Multi-target framebuffers this texture is attached to (GlDevice.ForgetFramebuffers).
         public List<GlDevice.MrtFramebuffer> MrtFramebuffers;
 
@@ -368,8 +372,9 @@ namespace OniBrutal.Desktop.Gl
 
         static void PostSampler(GlWorker worker, DeviceTexture g, SamplerSettings sampler) => worker.Post(() => ApplySampler(sampler, g));
 
-        /// Texture content uploads and their bytes since the last frame counters (--frame-stats).
-        public static long Uploads, UploadBytes;
+        /// Texture content uploads and their bytes since the last frame counters (--frame-stats),
+        /// and re-uploads whose texels had not changed (none sent).
+        public static long Uploads, UploadBytes, UnchangedUploads;
 
         /// Binds the texture for an upload; one that will specify its image again (respecify)
         /// and has bindless handles, which fix its layout, gets a new name first.
@@ -428,7 +433,9 @@ namespace OniBrutal.Desktop.Gl
                 g.Levels = levels;
             }
             var memory = t.Memory;
+            if (memory != null && sameStorage && UploadChanged(t, g, f, levels)) return;
             if (memory != null) Uploads++;
+            if (memory != null && GlGpuProfile.Enabled) GlGpuProfile.CountRepeat(g, $"{t.Width}x{t.Height} {t.Format}", new ReadOnlySpan<byte>(memory.Pointer, (int)memory.Size));
             if (memory != null)
                 for (int m = 0; m < levels; m++)
                 {
@@ -439,6 +446,58 @@ namespace OniBrutal.Desktop.Gl
                     if (f.Compressed) N.glCompressedTexSubImage2D(TexTarget2D, m, 0, 0, w, h, f.Internal, (int)length, p);
                     else Texels(t.Format, f, p, length, w, h, d => N.glTexSubImage2D(TexTarget2D, m, 0, 0, w, h, f.Format, f.Type, (void*)d));
                 }
+        }
+
+        /// Largest texture whose last upload is kept to compare with the next.
+        const long UploadedTexelsLimit = 4 << 20;
+
+        static readonly bool VerifyPartialUploads = Environment.GetEnvironmentVariable("ONI_VERIFY_PARTIAL_UPLOADS") == "1";
+        static long partialVerified, partialWrong;
+
+        /// Uploads only the rows between the first and the last that differ from the texture's
+        /// previous upload, or none: the game re-applies its animation batches' data textures every
+        /// frame, mostly unchanged (2minnow: half of the 256x256 ones identical, about 2% of the
+        /// others' rows changed). One level, uploaded as stored; the first re-upload into unchanged
+        /// storage keeps a copy of the texels and returns false (a full upload).
+        static bool UploadChanged(TexelUpload t, DeviceTexture g, GlFormat f, int levels)
+        {
+            long length = t.MipSize(0);
+            if (levels != 1 || f.Compressed || f.Decompress || length > UploadedTexelsLimit || length % t.Height != 0) return false;
+            var now = new ReadOnlySpan<byte>(t.Memory.Pointer, (int)length);
+            var before = g.UploadedTexels;
+            if (before == null || before.Length != length)
+            {
+                g.UploadedTexels = now.ToArray();
+                return false;
+            }
+            int rowBytes = (int)(length / t.Height), first = 0, last = t.Height - 1;
+            while (first < t.Height && now.Slice(first * rowBytes, rowBytes).SequenceEqual(before.AsSpan(first * rowBytes, rowBytes))) first++;
+            if (first < t.Height)
+            {
+                while (now.Slice(last * rowBytes, rowBytes).SequenceEqual(before.AsSpan(last * rowBytes, rowBytes))) last--;
+                int rows = last - first + 1;
+                N.glTexSubImage2D(TexTarget2D, 0, 0, first, t.Width, rows, f.Format, f.Type, t.Memory.Pointer + (long)first * rowBytes);
+                now.Slice(first * rowBytes, rows * rowBytes).CopyTo(before.AsSpan(first * rowBytes));
+                Uploads++;
+                UploadBytes += (long)rows * rowBytes;
+            }
+            else UnchangedUploads++;
+            if (VerifyPartialUploads) VerifyUploaded(g, f, now);
+            return true;
+        }
+
+        /// The texture's whole level read back from GL against the texels a full upload would
+        /// have sent (ONI_VERIFY_PARTIAL_UPLOADS).
+        static void VerifyUploaded(DeviceTexture g, GlFormat f, ReadOnlySpan<byte> expected)
+        {
+            var read = new byte[expected.Length];
+            // Rows packed without padding, as the texels are (GL pads them to 4 bytes by default).
+            N.glPixelStorei(PackAlignment, 1);
+            fixed (byte* p = read) N.glGetTexImage(TexTarget2D, 0, f.Format, f.Type, p);
+            N.glPixelStorei(PackAlignment, 4);
+            partialVerified++;
+            if (!expected.SequenceEqual(read)) partialWrong++;
+            if (partialVerified % 2000 == 0) OniBrutal.Engine.EngineLog.Engine($"partial uploads: {partialVerified} verified, {partialWrong} wrong");
         }
 
         internal static void UploadArray(TexelUpload t, DeviceTexture g)

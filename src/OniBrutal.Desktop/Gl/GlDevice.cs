@@ -1000,10 +1000,10 @@ namespace OniBrutal.Desktop.Gl
         public override string TakeFrameCounters(int frames) => worker.Call(() =>
         {
             var profile = GlGpuProfile.Take(frames);
-            string text = (profile != null ? profile + "\n" : "") + GlTimings.Take(frames) + $"; draws {draws / frames}, program binds {GlBindings.ProgramBinds / frames}, texture binds {GlBindings.TextureBinds / frames}, buffer binds {GlBindings.BufferBinds / frames}, vertex array binds {GlBindings.VertexArrayBinds / frames}, skipped binds {GlBindings.Skipped / frames}, uniforms sent {GlUniforms.UniformsSent / frames}, unchanged uniforms {GlUniforms.UniformsSkipped / frames}, texture uploads {GlTextures.Uploads / (double)frames:F1} ({GlTextures.UploadBytes / frames / 1024} KiB)";
+            string text = (profile != null ? profile + "\n" : "") + GlTimings.Take(frames) + $"; draws {draws / frames}, program binds {GlBindings.ProgramBinds / frames}, texture binds {GlBindings.TextureBinds / frames}, buffer binds {GlBindings.BufferBinds / frames}, vertex array binds {GlBindings.VertexArrayBinds / frames}, skipped binds {GlBindings.Skipped / frames}, uniforms sent {GlUniforms.UniformsSent / frames}, unchanged uniforms {GlUniforms.UniformsSkipped / frames}, texture uploads {GlTextures.Uploads / (double)frames:F1} ({GlTextures.UploadBytes / frames / 1024} KiB), unchanged {GlTextures.UnchangedUploads / (double)frames:F1}";
             draws = 0;
             GlUniforms.UniformsSent = GlUniforms.UniformsSkipped = 0;
-            GlTextures.Uploads = GlTextures.UploadBytes = 0;
+            GlTextures.Uploads = GlTextures.UploadBytes = GlTextures.UnchangedUploads = 0;
             GlBindings.ProgramBinds = GlBindings.TextureBinds = GlBindings.BufferBinds = GlBindings.VertexArrayBinds = GlBindings.Skipped = 0;
             return text;
         });

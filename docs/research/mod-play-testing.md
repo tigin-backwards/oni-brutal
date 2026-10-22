@@ -283,8 +283,7 @@ local mod.
 
 **Installing mods.**
 - A spec's `mods: [3468585385, …]` installs Workshop builds as Local mods into the run home,
-  using `ws-mods.py profile`'s logic (moved into `scripts/`, decision 5), with OniMcp and
-  E2eDriver added.
+  using `scripts/ws-mods.py profile`'s logic (decision 5), with OniMcp and E2eDriver added.
 - `options: {staticID: {Field: value}}` writes a mod's PLib `config.json` before launch.
 
 **New step kinds** (the existing ones stay):
@@ -485,8 +484,8 @@ and P, then T and K, then S and M. Mods with open GitHub issues come first, what
   expect values). These are what re-runs of ours compare against. They are reproducible from the
   committed spec plus the original player.
 
-**The table.** `modtable.py` (moved into `scripts/`) reads `results.json` instead of its
-hand-written `played` dict.
+**The table.** `scripts/modtable.py` reads `results.json` instead of its hand-written `played`
+dict.
 - Played ✅ plus a note naming what was exercised, for example "trait and attribute buttons, care
   package editor; screens within 1.1 %".
 - ⚠️ plus a note and an issue link, for `played-with-differences`, if decision 2 adopts it.
@@ -496,7 +495,7 @@ hand-written `played` dict.
 - **Our player changes:** a weekly job (or on demand before a release) runs all Played specs in
   ours only, against the stored references. A regression flips that mod's result and opens an
   issue.
-- **A mod updates:** `ws-mods.py download` weekly compares `time_updated` and the DLL hash. On a
+- **A mod updates:** `scripts/ws-mods.py download` weekly compares `time_updated` and the DLL hash. On a
   change the job re-runs the spec in the original, re-blesses, and then runs ours. If the original
   now fails, the spec needs maintenance (agent task), and the row shows "re-check pending".
 - **The game updates (Klei build):** a full re-bless in the original, then ours.
@@ -710,7 +709,7 @@ steps:
 3. E2eDriver is a separate mod.
 4. XTEST through ctypes (nothing to install).
 5. `ws-mods.py` and `modtable.py` move into `scripts/`; e2e.py is committed and depends on no
-   uncommitted tool.
+   uncommitted tool. Done: `scripts/ws-mods.py` and `scripts/modtable.py`.
 6. Specs and results.json go in git; screenshots stay local. Fixture saves stay out of git too
    (`tests/e2e/fixtures/*.sav`).
 7. 4 lanes, and no mod spec starts while a perf run holds the lock.

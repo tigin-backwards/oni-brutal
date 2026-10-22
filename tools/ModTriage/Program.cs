@@ -189,8 +189,10 @@ static string Table(List<(CompatRow row, ModFolder mod, Triage triage)> results)
     sb.AppendLine();
     sb.AppendLine("| Class set | Mods |");
     sb.AppendLine("|---|---|");
-    foreach (var g in results.GroupBy(r => r.triage.ClassString).OrderByDescending(g => g.Count()).ThenBy(g => g.Key, StringComparer.Ordinal))
-        sb.AppendLine($"| {g.Key} | {g.Count()} |");
+    var sets = results.GroupBy(r => r.triage.ClassString).OrderByDescending(g => g.Count()).ThenBy(g => g.Key, StringComparer.Ordinal).ToList();
+    foreach (var g in sets.Where(g => g.Count() >= 3)) sb.AppendLine($"| {g.Key} | {g.Count()} |");
+    var rare = sets.Where(g => g.Count() < 3).ToList();
+    if (rare.Count > 0) sb.AppendLine($"| {rare.Count} other sets | {rare.Sum(g => g.Count())} |");
     sb.AppendLine();
     sb.AppendLine("| Rank | ID | Mod | Classes | Flags | Patch targets by class |");
     sb.AppendLine("|---|---|---|---|---|---|");

@@ -61,9 +61,15 @@ namespace UnityEngine
             }
         }
 
+        /// A nested canvas reports its root's factor (measured in the original with E2eDriver:
+        /// MainMenuIntroShort and the research screen's nested canvases read 0.86 at 1280×720).
         public float scaleFactor
         {
-            get => Data.ScaleFactor;
+            get
+            {
+                var d = Data;
+                return CanvasSystem.RootOf(d).ScaleFactor;
+            }
             set
             {
                 var d = Data;

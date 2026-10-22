@@ -51,6 +51,20 @@ namespace OniBrutal.Tests
             void OnCanvasHierarchyChanged() => Changes++;
         }
 
+        /// A nested canvas reports its root's scale factor, as in the original.
+        [Fact]
+        public void ANestedCanvasReportsItsRootsScaleFactor()
+        {
+            var root = new GameObject("Root", typeof(RectTransform)).AddComponent<Canvas>();
+            root.renderMode = RenderMode.ScreenSpaceOverlay;
+            var nestedGo = new GameObject("Nested", typeof(RectTransform));
+            nestedGo.transform.SetParent(root.transform, false);
+            var nested = nestedGo.AddComponent<Canvas>();
+            root.scaleFactor = 0.86f;
+            Assert.Equal(0.86f, nested.scaleFactor);
+            Assert.Equal(0.86f, root.scaleFactor);
+        }
+
         [Fact]
         public void EnablingOrDisablingACanvasTellsTheScriptsBelowIt()
         {

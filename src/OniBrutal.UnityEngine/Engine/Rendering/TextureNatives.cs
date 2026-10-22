@@ -125,7 +125,8 @@ namespace OniBrutal.Engine.Rendering
         {
             var stream = texture.Struct("m_StreamData");
             var path = stream.String("path");
-            if (path.Length > 0) return new TexelSource(null, path, (long)stream.Get<ulong>("offset"), stream.Get<uint>("size"));
+            // The offset is a UInt32 in older bundles (Unity 2019.4's, as Spooky Pumpkin SO's), a UInt64 in newer ones.
+            if (path.Length > 0) return new TexelSource(null, path, Convert.ToInt64(stream["offset"]), stream.Get<uint>("size"));
             return new TexelSource(texture.Get<byte[]>("image data"), null, 0, 0);
         }
 
@@ -252,7 +253,8 @@ namespace OniBrutal.Engine.Rendering
             int images = f.Int("m_ImageCount");
             if (images != 1 && !(images == 0 && f.Int("m_CompleteImageSize") == 0))
                 throw new System.IO.InvalidDataException($"Texture2D {Name}: {images} images.");
-            if (f.Int("m_MipsStripped") != 0) throw new System.IO.InvalidDataException($"Texture2D {Name}: stripped mips are not supported.");
+            // Older bundles (Unity 2019.4's) have no m_MipsStripped: none stripped.
+            if (f.Contains("m_MipsStripped") && f.Int("m_MipsStripped") != 0) throw new System.IO.InvalidDataException($"Texture2D {Name}: stripped mips are not supported.");
             SetSource(TexelSource.From(f));
         }
     }
@@ -277,7 +279,8 @@ namespace OniBrutal.Engine.Rendering
             MipCount = f.Int("m_MipCount");
             Readable = f.Bool("m_IsReadable");
             ReadSettings(f.Struct("m_TextureSettings"));
-            if (f.Int("m_MipsStripped") != 0) throw new System.IO.InvalidDataException($"Texture2DArray {Name}: stripped mips are not supported.");
+            // Older bundles (Unity 2019.4's) have no m_MipsStripped: none stripped.
+            if (f.Contains("m_MipsStripped") && f.Int("m_MipsStripped") != 0) throw new System.IO.InvalidDataException($"Texture2DArray {Name}: stripped mips are not supported.");
             SetSource(TexelSource.From(f));
         }
     }

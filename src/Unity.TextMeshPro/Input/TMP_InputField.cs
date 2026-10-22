@@ -492,7 +492,10 @@ namespace TMPro
             m_ShouldActivateNextUpdate = true;
         }
 
-        void ActivateNow()
+        // Where editing starts, in the LateUpdate after a request; mods patch it by name (with
+        // isFocused still false on entry). It runs once per activation: LateUpdate skips a field
+        // already focused, and a request on an inactive field is never made.
+        void ActivateInputFieldInternal()
         {
             if (EventSystem.current == null) return;
             if (EventSystem.current.currentSelectedGameObject != gameObject) EventSystem.current.SetSelectedGameObject(gameObject);
@@ -529,6 +532,12 @@ namespace TMPro
             SendOnEndEdit();
             UpdateLabel();
             MarkGeometryChanged();
+            // A focused field ends selected no more, whatever clearSelection says, so selecting it
+            // again activates it. Its OnDeselect calls DeactivateInputField again, which finds it
+            // unfocused. Not while the event system is already changing the selection.
+            var eventSystem = EventSystem.current;
+            if (eventSystem != null && !eventSystem.alreadySelecting && eventSystem.currentSelectedGameObject == gameObject)
+                eventSystem.SetSelectedGameObject(null);
         }
 
         public override void OnSelect(BaseEventData eventData)
@@ -645,7 +654,7 @@ namespace TMPro
                 m_ShouldActivateNextUpdate = false;
                 if (!isFocused)
                 {
-                    ActivateNow();
+                    ActivateInputFieldInternal();
                     return;
                 }
             }

@@ -460,6 +460,122 @@ namespace OniBrutal.Tests
             }
         }
 
+        // The start of editing, which mods patch by name: a private instance method taking nothing.
+        [Fact]
+        public void ActivationStartsInAPrivateMethodModsCanPatch()
+        {
+            var method = typeof(TMP_InputField).GetMethod("ActivateInputFieldInternal",
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance,
+                null, System.Type.EmptyTypes, null);
+            Assert.NotNull(method);
+            Assert.True(method.IsPrivate);
+            Assert.Equal(typeof(void), method.ReturnType);
+            var clear = typeof(TMP_InputField).GetMethod("DeactivateInputField", [typeof(bool)]);
+            Assert.NotNull(clear);
+        }
+
+        // onFocus is invoked by ActivateInputFieldInternal, once per run.
+        [Fact]
+        public void ActivationRunsOnceAndNotAgainWhileFocused()
+        {
+            var field = NewField();
+            int runs = 0;
+            field.onFocus += () => runs++;
+            field.ActivateInputField();
+            Assert.Equal(0, runs);
+            Frame();
+            Assert.Equal(1, runs);
+            Assert.True(field.isFocused);
+            field.ActivateInputField();
+            Frame();
+            Frame();
+            Assert.Equal(1, runs);
+            Assert.True(field.isFocused);
+        }
+
+        [Fact]
+        public void ActivationOfAnInactiveFieldDoesNothing()
+        {
+            var field = NewField();
+            int runs = 0;
+            field.onFocus += () => runs++;
+            field.gameObject.SetActive(false);
+            field.ActivateInputField();
+            Frame();
+            field.gameObject.SetActive(true);
+            Frame();
+            Frame();
+            Assert.Equal(0, runs);
+            Assert.False(field.isFocused);
+        }
+
+        [Fact]
+        public void SelectingActivatesOnlyWithShouldActivateOnSelect()
+        {
+            var on = NewField();
+            int onRuns = 0;
+            on.onFocus += () => onRuns++;
+            EventSystem.current.SetSelectedGameObject(on.gameObject);
+            Assert.False(on.isFocused);
+            Frame();
+            Assert.Equal(1, onRuns);
+            Assert.True(on.isFocused);
+
+            var off = NewField();
+            off.shouldActivateOnSelect = false;
+            int offRuns = 0;
+            off.onFocus += () => offRuns++;
+            EventSystem.current.SetSelectedGameObject(off.gameObject);
+            Frame();
+            Frame();
+            Assert.Equal(0, offRuns);
+            Assert.False(off.isFocused);
+            // Selecting another object deselected the first, which ended its editing.
+            Assert.False(on.isFocused);
+        }
+
+        [Fact]
+        public void DeactivatingASelectedFieldDeselectsIt()
+        {
+            var field = NewField();
+            int runs = 0, deselects = 0;
+            field.onFocus += () => runs++;
+            field.onDeselect.AddListener(_ => deselects++);
+            field.ActivateInputField();
+            Frame();
+            Assert.Same(field.gameObject, EventSystem.current.currentSelectedGameObject);
+            field.DeactivateInputField();
+            Assert.False(field.isFocused);
+            Assert.Null(EventSystem.current.currentSelectedGameObject);
+            Assert.Equal(1, deselects);
+            // Selecting it again activates it, once.
+            EventSystem.current.SetSelectedGameObject(field.gameObject);
+            Assert.False(field.isFocused);
+            Frame();
+            Assert.Equal(2, runs);
+            Assert.True(field.isFocused);
+
+            // An unfocused, unselected field changes no selection.
+            var other = NewField();
+            other.DeactivateInputField(true);
+            Assert.Same(field.gameObject, EventSystem.current.currentSelectedGameObject);
+            Assert.True(field.isFocused);
+        }
+
+        [Fact]
+        public void DisablingEndsEditing()
+        {
+            var field = NewField();
+            string ended = null;
+            field.onEndEdit.AddListener(s => ended = s);
+            field.ActivateInputField();
+            Frame();
+            Type(Char('w'));
+            field.gameObject.SetActive(false);
+            Assert.False(field.isFocused);
+            Assert.Equal("w", ended);
+        }
+
         [Fact]
         public void DeselectingEndsEditing()
         {

@@ -327,6 +327,13 @@ channel meanings must match exactly.
   - `DeactivateInputField()` ends it. It calls `DeactivateInputField(bool clearSelection)` with
     false, so a patch of either overload sees every deactivation. Deselecting the field and
     disabling its GameObject both call `DeactivateInputField()`.
+  - Deactivating a focused field that the event system has selected also deselects it, even
+    with `clearSelection` false. Measured order: `DeactivateInputField()` →
+    `DeactivateInputField(false)`, and within that the deselection runs `OnDeselect`, which calls
+    `DeactivateInputField()` → `DeactivateInputField(false)` again before the outer call
+    returns. Afterwards `currentSelectedGameObject` is no longer the field, so selecting it
+    again activates it as above. On a field that is not focused (and not selected),
+    `DeactivateInputField(true)` changes no selection and makes no nested call.
   - Clicking the field selects and activates it.
   - Deselecting it (`OnDeselect`) deactivates it.
 - **Editing:**
@@ -359,7 +366,15 @@ blinking, scrolling the text).
 
 - **`TMPro_ExtensionMethods`:** `Compare(Vector3, Vector3, accuracy)` and
   `Compare(Quaternion, …)` compare components rounded to `accuracy` decimal places;
-  `Tint(Color32, float)` multiplies RGB.
+  `Tint(Color32, float)` multiplies RGB. Colour helpers mods call (Paint Your Pipes multiplies
+  pipe colours), all public static extension methods, measured in the original player:
+  - `Color32 Multiply(this Color32 c1, Color32 c2)`: each channel, alpha included, is
+    ⌊c1·c2 / 255⌋ (integer division; 1×255 = 1, 1×128 = 0, 128×128 = 64, 255×255 = 255).
+  - `Color32 Tint(this Color32 c1, Color32 c2)`: the same as `Multiply`, alpha included.
+  - `Color MinAlpha(this Color c1, Color c2)`: c1's RGB with the smaller of the two alphas.
+  - `bool Compare(this Color32 a, Color32 b)` and `bool Compare(this Color a, Color b)`: every
+    channel exactly equal (a difference of 1e-7 in one float channel is unequal).
+    `CompareRGB` (both overloads) is the same without alpha.
 - **`FastAction<T>`:** an ordered set of delegates, called in insertion order.
 - **`TMP_Text` exposes** `rectTransform`, `transform` (cached), `mesh` and the `isVolumetricText`
   family as documented.

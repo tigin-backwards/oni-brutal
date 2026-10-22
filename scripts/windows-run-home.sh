@@ -15,7 +15,20 @@ rm -rf "$home"
 mkdir -p "$d/cloud_save_files/76561197960265729/$name"
 cp "$save" "$d/cloud_save_files/76561197960265729/$name/$name.sav"
 file="$(wslpath -w "$d/cloud_save_files/76561197960265729/$name/$name.sav")"
-printf 'strings:\n  AutoResumeSaveFile: %s\nints:\n  ResolutionWidth: 1024\n  ResolutionHeight: 768\n  RefreshRateNumerator: 60\n  RefreshRateDenominator: 1\n  FullScreen: 0\nfloats: {}\n' "'${file//\'/\'\'}'" > "$d/kplayerprefs.yaml"
+# Spaced Out is active when the save is a Spaced Out one: the resumed save skips the menu's own
+# check, and a save of the other mode would load into a game set up without its content (its
+# sound banks, for one: Spaced Out's music events then fail when the colony starts).
+expansion1=$(python3 -I - "$save" <<'PY'
+import json, sys
+head = open(sys.argv[1], 'rb').read(65536).decode('latin1')
+start = head.index('{'); depth = 0
+for i, c in enumerate(head[start:], start):
+    depth += (c == '{') - (c == '}')
+    if depth == 0: break
+print(1 if 'EXPANSION1_ID' in json.loads(head[start:i + 1]).get('dlcIds', []) else 0)
+PY
+)
+printf 'strings:\n  AutoResumeSaveFile: %s\nints:\n  ResolutionWidth: 1024\n  ResolutionHeight: 768\n  RefreshRateNumerator: 60\n  RefreshRateDenominator: 1\n  FullScreen: 0\n  EXPANSION1_ID.ENABLED: %s\nfloats: {}\n' "'${file//\'/\'\'}'" "$expansion1" > "$d/kplayerprefs.yaml"
 entries=""
 for m in "$@"; do
   dir=${m%:*}; stamp=${m##*:}

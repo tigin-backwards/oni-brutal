@@ -364,6 +364,10 @@ unchanged.
   frame in U57; 40,000 checks verified against the game's own result). Each radbolt's colliders
   (its prefab's) are looked up once rather than on every check against it: with many radbolts
   in flight every one checks every other each frame (Gluttony, Linux: 2.9 → 1.5 ms a frame).
+  The gather is made only when a nearby radbolt passes the method's own merge test (collideable,
+  each holding the other's position), not whenever one is near: Gluttony's radbolts travel close
+  together, and 56% of checks gathered against 0.09% now (Linux: 1.5 → 0.9 ms; 1.74 million
+  skips verified, none would have merged).
 
 - `off-screen-conveyors` (**changes behaviour**): conveyor items travel along their rails on
   screen as before; off screen their transforms are not moved each frame (85% of the ~950 moves a

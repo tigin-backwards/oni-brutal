@@ -15,18 +15,22 @@ namespace OniBrutal.Host.GameTweaks
     /// (U57: 0.9 ms a frame for 4 radbolts).
     ///
     /// Two changes, each giving the method the same outcome:
-    /// - The gather is skipped when no other radbolt has a collider registered in those cells (the
+    /// - The gather is skipped unless another radbolt has a collider registered in those cells (the
     ///   colliders' partitioner registrations, KCollider2D.cachedExtents while its entry is valid,
-    ///   are checked against the 3×3 area). The gathered entries only matter when they include
-    ///   another radbolt's collider, so an empty list gives the same result.
+    ///   are checked against the 3×3 area) that the method would merge with: the radbolt is
+    ///   collideable, this one's circle collider holds its position and its collider holds this
+    ///   one's (the method's own test, which changes nothing). The gathered entries only matter
+    ///   through such a collider, so an empty list gives the same result; when there is one, the
+    ///   real gather is made, so the first in the gather's order is the one merged.
     /// - When it gathers, GetComponent&lt;HighEnergyParticle&gt;() on each collider's GameObject is a
     ///   lookup among the live radbolt components (registered as they are constructed): a radbolt
     ///   carries one HighEnergyParticle (its prefab), so the lookup returns what GetComponent does.
     /// A radbolt's colliders are its prefab's (HighEnergyParticleConfig adds one), so each radbolt's
     /// are looked up once, the first time another radbolt checks against it, rather than on every
     /// check: with many radbolts in flight every one of them checks every other each frame.
-    /// With ONI_TWEAK_VERIFY=1 (test runs) the skipped gathers are still made and checked for
-    /// another radbolt, and both lookups are compared; differences are logged.
+    /// With ONI_TWEAK_VERIFY=1 (test runs) the skipped gathers are still made and checked for a
+    /// radbolt the method would have merged with, and both lookups are compared; differences are
+    /// logged.
     internal static class FastParticleCollision
     {
         public const string Name = "fast-particle-collision";
@@ -44,13 +48,19 @@ namespace OniBrutal.Host.GameTweaks
         static Action<object, int, int, int, int, object, object> gather = null!;
         /// A collider's partitioner registration: valid, and the cells it covers.
         static Func<object, (bool Valid, int X, int Y, int W, int H)> registration = null!;
-        static Type colliderType = null!;
+        static Type colliderType = null!, circleType = null!;
+        static Func<object, bool> collideable = null!;
+        /// KCollider2D.Intersects(Vector2), virtual.
+        static Func<object, UnityEngine.Vector2, bool> intersects = null!;
 
         public static void Install(Harmony harmony)
         {
             var particle = AccessTools.TypeByName("HighEnergyParticle");
             getComponent = AccessTools.Method(typeof(UnityEngine.GameObject), nameof(UnityEngine.GameObject.GetComponent), Type.EmptyTypes).MakeGenericMethod(particle);
             colliderType = AccessTools.TypeByName("KCollider2D");
+            circleType = AccessTools.TypeByName("KCircleCollider2D");
+            collideable = CompileCollideable(particle);
+            intersects = CompileIntersects();
             var partitioner = AccessTools.TypeByName("GameScenePartitioner");
             gatherEntries = AccessTools.Method(partitioner, "GatherEntries", [typeof(int), typeof(int), typeof(int), typeof(int), AccessTools.TypeByName("ScenePartitionerLayer"), typeof(List<>).MakeGenericType(AccessTools.TypeByName("ScenePartitionerEntry"))]);
             gather = CompileGather();
@@ -92,7 +102,7 @@ namespace OniBrutal.Host.GameTweaks
         /// radbolt has a collider registered in the area.
         static void GatherIfNeeded(object partitioner, int x, int y, int width, int height, object layer, object list, UnityEngine.Component self)
         {
-            if (AnotherParticleIn(self, x, y, width, height))
+            if (MergeableParticleIn(self, x, y, width, height))
             {
                 gathered++;
                 gather(partitioner, x, y, width, height, layer, list);
@@ -106,14 +116,21 @@ namespace OniBrutal.Host.GameTweaks
                 var obj = AccessTools.Field(entry.GetType(), "obj").GetValue(entry) as UnityEngine.Component;
                 if (obj == null) continue;
                 var other = getComponent.Invoke(obj.gameObject, null) as UnityEngine.Component;
-                if (other != null && !ReferenceEquals(other, self)) EngineLog.Engine($"{Name}: a skipped gather held radbolt {other.name} ({++wrongSkips})");
+                if (other != null && !ReferenceEquals(other, self) && collideable(other)
+                    && intersects(self.GetComponent(circleType), (UnityEngine.Vector2)other.transform.position) && intersects(obj, (UnityEngine.Vector2)self.transform.position))
+                    EngineLog.Engine($"{Name}: a skipped gather held radbolt {other.name}, which would have merged ({++wrongSkips})");
             }
             ((System.Collections.IList)list).Clear();
             if ((skipped + gathered) % 20000 == 0) EngineLog.Engine($"{Name}: {skipped} gathers skipped, {gathered} made, {wrongSkips} wrong skips, {live.Count} radbolts registered");
         }
 
-        static bool AnotherParticleIn(UnityEngine.Component self, int x, int y, int width, int height)
+        /// Whether another live radbolt has a collider registered in the area that CheckCollision would
+        /// merge with (its test, in its order of operands).
+        static bool MergeableParticleIn(UnityEngine.Component self, int x, int y, int width, int height)
         {
+            UnityEngine.Component? circle = null;
+            UnityEngine.Vector2 position = default;
+            bool selfRead = false;
             lock (live)
                 for (int i = live.Count - 1; i >= 0; i--)
                 {
@@ -126,10 +143,35 @@ namespace OniBrutal.Host.GameTweaks
                     foreach (var collider in l.Colliders ??= c.gameObject.GetComponents(colliderType))
                     {
                         var (valid, cx, cy, cw, ch) = registration(collider);
-                        if (valid && cx < x + width && x < cx + cw && cy < y + height && y < cy + ch) return true;
+                        if (!(valid && cx < x + width && x < cx + cw && cy < y + height && y < cy + ch)) continue;
+                        if (!collideable(c)) break;
+                        if (!selfRead)
+                        {
+                            circle = self.GetComponent(circleType);
+                            position = self.transform.position;
+                            selfRead = true;
+                        }
+                        // Without a circle collider the method fails on its first candidate: let it.
+                        if (circle == null) return true;
+                        if (intersects(circle, (UnityEngine.Vector2)c.transform.position) && intersects(collider, position)) return true;
                     }
                 }
             return false;
+        }
+
+        static Func<object, bool> CompileCollideable(Type particle)
+        {
+            var arg = System.Linq.Expressions.Expression.Parameter(typeof(object), "particle");
+            var field = System.Linq.Expressions.Expression.Field(System.Linq.Expressions.Expression.Convert(arg, particle), AccessTools.Field(particle, "isCollideable"));
+            return System.Linq.Expressions.Expression.Lambda<Func<object, bool>>(field, arg).Compile();
+        }
+
+        static Func<object, UnityEngine.Vector2, bool> CompileIntersects()
+        {
+            var arg = System.Linq.Expressions.Expression.Parameter(typeof(object), "collider");
+            var pos = System.Linq.Expressions.Expression.Parameter(typeof(UnityEngine.Vector2), "pos");
+            var call = System.Linq.Expressions.Expression.Call(System.Linq.Expressions.Expression.Convert(arg, colliderType), AccessTools.Method(colliderType, "Intersects", [typeof(UnityEngine.Vector2)]), pos);
+            return System.Linq.Expressions.Expression.Lambda<Func<object, UnityEngine.Vector2, bool>>(call, arg, pos).Compile();
         }
 
         static Action<object, int, int, int, int, object, object> CompileGather()

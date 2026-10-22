@@ -10,7 +10,7 @@ namespace OniBrutal.Host
 {
     /// `--dump-shader NAME:DIR` (diagnostics): writes the GLSL of every OpenGLCore variant of a
     /// shader, one file per pass and blob, named by its keywords, with each pass's render state and
-    /// the shader's properties.
+    /// the shader's properties. NAME `*` writes every shader, each in a folder named after it.
     internal static class ShaderDump
     {
         static readonly string[] files =
@@ -26,6 +26,8 @@ namespace OniBrutal.Host
             AssetSystem.Initialize(dataDir);
             ProjectSettings.Load();
             PlayerLoop.Initialize();
+            bool all = name == "*";
+            int shaders = 0;
             foreach (var fileName in files)
             {
                 var file = AssetSystem.Get(fileName);
@@ -33,7 +35,9 @@ namespace OniBrutal.Host
                 {
                     if (file.TypeOf(info).ClassId != 48 || ObjectLoader.Load(file, info.PathId) is not Shader shader) continue;
                     var native = (ShaderNative)shader.NativeOrThrow;
-                    if (native.ShaderName != name) continue;
+                    if (!all && native.ShaderName != name) continue;
+                    string root = dir;
+                    if (all) dir = Path.Combine(root, string.Join("_", native.ShaderName.Split(Path.GetInvalidFileNameChars().Append('/').ToArray())));
                     Directory.CreateDirectory(dir);
                     File.WriteAllLines(Path.Combine(dir, "properties.txt"), native.Properties.Select(p =>
                         $"{p.Name} {p.Kind} default={(p.Kind == ShaderPropertyKind.Texture ? "\"" + p.DefaultTexture + "\" dim " + p.TextureDimension : p.Default.ToString())}"));
@@ -59,10 +63,13 @@ namespace OniBrutal.Host
                                 written++;
                             }
                         }
-                    Console.WriteLine($"{name}: {written} variants written to {dir}");
-                    return 0;
+                    Console.WriteLine($"{native.ShaderName}: {written} variants written to {dir}");
+                    if (!all) return 0;
+                    dir = root;
+                    shaders++;
                 }
             }
+            if (all && shaders > 0) return 0;
             Console.Error.WriteLine($"No shader named '{name}'.");
             return 1;
         }

@@ -227,7 +227,8 @@ namespace OniBrutal.Engine.Rendering
         public static event Action RenderScreenLate;
 
         /// Diagnostics (`--dump-render-textures FRAME:DIR`): every created 2D render texture and
-        /// the screen written as PNG at the end of that frame.
+        /// the screen written as PNG at the end of that frame, and again (into DIR/fFRAME) whenever
+        /// a file DIR.now appears, which is then removed.
         public static int DumpFrame = -1;
         public static string DumpDirectory;
 
@@ -305,6 +306,14 @@ namespace OniBrutal.Engine.Rendering
         static void EndFrame()
         {
             if (Time.frameCount == DumpFrame && GraphicsDevice.Current.RendersFrames) DumpRenderTextures();
+            if (DumpDirectory != null && Time.frameCount % 30 == 0 && System.IO.File.Exists(DumpDirectory + ".now") && GraphicsDevice.Current.RendersFrames)
+            {
+                System.IO.File.Delete(DumpDirectory + ".now");
+                var directory = DumpDirectory;
+                DumpDirectory = System.IO.Path.Combine(directory, "f" + Time.frameCount);
+                try { DumpRenderTextures(); }
+                finally { DumpDirectory = directory; }
+            }
             // Captures show the finished frame, OnGUI included.
             if (GraphicsDevice.Current.RendersFrames)
                 foreach (var (path, scale) in captures) Capture(path, scale);

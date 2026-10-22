@@ -903,6 +903,30 @@ namespace PerfProbe
 
         static void NoOpPrefix() { }
 
+        static bool awake;
+
+        System.Collections.IEnumerator PointerLog()
+        {
+            for (int i = 0; i < 160; i++)
+            {
+                yield return new WaitForSecondsRealtime(0.25f);
+                Debug.Log($"PERF pointerlog {System.DateTime.Now:HH:mm:ss.f} mousePosition {Input.mousePosition} screen {Screen.width}x{Screen.height}");
+            }
+        }
+
+        struct CursorPoint { public int X, Y; }
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        static extern bool GetCursorPos(out CursorPoint point);
+
+        /// Where Windows puts the cursor, in screen pixels (with awake.txt, to compare with what
+        /// Input.mousePosition reports when the cursor is outside the window).
+        static string OsCursor()
+        {
+            if (Application.platform != RuntimePlatform.WindowsPlayer) return "";
+            return GetCursorPos(out var p) ? $" os cursor ({p.X}, {p.Y})" : "";
+        }
+
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
         static System.Diagnostics.StackFrame[] PatchedVictim() => CaptureFrames();
 
@@ -1394,7 +1418,11 @@ namespace PerfProbe
             // desktop: the game keeps running at full speed while its window is out of focus
             // (GenericGameSettings.sleepWhenOutOfFocus off), so the result does not depend on
             // where the user clicks, and vsync is off (QualitySettings.vSyncCount 0).
-            if (System.IO.File.Exists(System.IO.Path.Combine(Path, "awake.txt")))
+            // `pointerlog.txt`: Input.mousePosition every quarter second for 40 s from the menu, with
+            // the time, to follow a pointer a script moves outside and inside the window.
+            if (System.IO.File.Exists(System.IO.Path.Combine(Path, "pointerlog.txt"))) StartCoroutine(PointerLog());
+            awake = System.IO.File.Exists(System.IO.Path.Combine(Path, "awake.txt"));
+            if (awake)
             {
                 var sleep = typeof(Klei.GenericGameSettings).GetProperty("sleepWhenOutOfFocus");
                 sleep.GetSetMethod(true).Invoke(Klei.GenericGameSettings.instance, new object[] { false });
@@ -1532,6 +1560,7 @@ namespace PerfProbe
                 string runtime = c < 0 ? "" : $" contentions {c - contentions} gc-pause {g - paused} ms";
                 contentions = c; paused = g;
                 Debug.Log($"PERF f{Time.frameCount} fps {frames / (now - windowStart):F2} cycle {GameClock.Instance.GetCycle()} time {GameClock.Instance.GetTime():F0} paused {SpeedControlScreen.Instance.IsPaused}{runtime}");
+                if (awake) Debug.Log($"PERF pointer: mousePosition {Input.mousePosition} present {Input.mousePresent} focused {Application.isFocused}{OsCursor()}");
                 windowStart = now;
                 frames = 0;
             }

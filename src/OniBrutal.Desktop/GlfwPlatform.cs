@@ -89,6 +89,8 @@ namespace OniBrutal.Desktop
             if (mode == FullScreenMode.FullScreenWindow) window.Position = monitor.Position;
             else if (mode != FullScreenMode.ExclusiveFullScreen) window.CenterToMonitor(monitor);
             windowedPosition = window.Position;
+            if (settings.Monitor > 0)
+                OniBrutal.Engine.EngineLog.Engine($"window: monitor {settings.Monitor} of {monitors.Length} at {monitor.Position.X},{monitor.Position.Y}; window at {window.Position.X},{window.Position.Y}");
             SetIcon(window);
             if (mode == FullScreenMode.MaximizedWindow) window.Maximize();
             // Rendering happens on this thread in a hidden window's context shared with the
@@ -274,7 +276,22 @@ namespace OniBrutal.Desktop
         {
             Glfw.PollEvents();
             framebufferSize = window.FramebufferSize;
+            if (!scripted) FollowCursorOutside();
             return !closeRequested;
+        }
+
+        /// Unity's Input.mousePosition follows the pointer outside the window too, relative to the
+        /// window (measured in the original player: (1400, -133) for a pointer beside a 1024x768
+        /// window at the origin, then following it as it moves); GLFW reports movements only over
+        /// the window, so outside it the position is read each frame. No GUI events come from it.
+        void FollowCursorOutside()
+        {
+            // The window's CursorPos is the last position its callbacks reported: asked of GLFW.
+            Glfw.PInvoke.GetCursorPos(window, out double x, out double y);
+            var size = window.Size;
+            if (x >= 0 && y >= 0 && x < size.X && y < size.Y) return;
+            var pixels = ToPixels(new double2(x, y));
+            if (pixels != (Vector2)InputState.Instance.MousePosition) InputState.Instance.MouseMoved(pixels);
         }
 
         public bool CursorVisible

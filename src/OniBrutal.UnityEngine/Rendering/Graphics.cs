@@ -291,6 +291,7 @@ namespace OniBrutal.Engine.Rendering
     internal static class Blits
     {
         static readonly int MainTex = ShaderPropertyIds.Get("_MainTex");
+        static readonly int BlurOffsets = ShaderPropertyIds.Get("_BlurOffsets");
         static Material blitCopy, guiTexture;
         static MeshNative quad;
 
@@ -345,6 +346,11 @@ namespace OniBrutal.Engine.Rendering
             Threads.AssertMainThread("BlitMultiTap");
             BeginFullTarget(dest);
             mat.SetTexture(MainTex, source);
+            // Shaders written for BlitMultiTap (the game's Hidden/BlurEffectConeTap) build their taps
+            // from _BlurOffsets and the first texcoord. Measured in the original (tools/UnityProbe,
+            // MULTITAP): one texel blitted with offsets (3, 1), … spreads to four taps at (±3, ±1),
+            // which is _BlurOffsets = offsets[0] with the first texcoord offset by it as below.
+            Shader.SetGlobalVector(BlurOffsets, new Vector4(offsets[0].x, offsets[0].y, 0f, 0f));
             if (!mat.SetPass(0)) return;
             var texel = source != null ? new Vector2(1f / source.width, 1f / source.height) : Vector2.zero;
             Span<ImmediateVertex> v = stackalloc ImmediateVertex[4];

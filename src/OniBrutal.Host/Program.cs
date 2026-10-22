@@ -61,6 +61,8 @@ namespace OniBrutal.Host
             PInvokePatches.Install();
             PatchDependents.Install();
             MonoEnumFormat.Install();
+            // Special folders' paths are given whether or not they exist, as Mono gives them (D24).
+            MonoFolderPaths.Install();
             GameTweaks.GameTweaks.Install(options.GameTweaks);
             StateMachineSaveNames.Install(dataDir, AppContext.BaseDirectory);
             return Player.Run(options, dataDir);
@@ -498,6 +500,30 @@ namespace OniBrutal.Host
                 finally
                 {
                     try { Directory.Delete(dir, true); } catch (IOException) { } catch (UnauthorizedAccessException) { }
+                }
+            });
+            Check("A special folder that does not exist (MonoFolderPaths)", () =>
+            {
+                MonoFolderPaths.Install();
+                if (OperatingSystem.IsWindows()) return "Windows: unchanged";
+                var home = Directory.CreateTempSubdirectory("oni-brutal-check-").FullName;
+                var saved = (Environment.GetEnvironmentVariable("HOME"), Environment.GetEnvironmentVariable("XDG_CONFIG_HOME"), Environment.GetEnvironmentVariable("XDG_DESKTOP_DIR"));
+                try
+                {
+                    Environment.SetEnvironmentVariable("HOME", home);
+                    Environment.SetEnvironmentVariable("XDG_CONFIG_HOME", Path.Combine(home, ".config"));
+                    Environment.SetEnvironmentVariable("XDG_DESKTOP_DIR", null);
+                    var desktop = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+                    // Harmony's debug log does this with it (FileLog.LogPath).
+                    Directory.CreateDirectory(desktop);
+                    return desktop == Path.Combine(home, "Desktop") ? "~/Desktop is given although it did not exist, as on Mono" : throw new InvalidOperationException($"got '{desktop}'");
+                }
+                finally
+                {
+                    Environment.SetEnvironmentVariable("HOME", saved.Item1);
+                    Environment.SetEnvironmentVariable("XDG_CONFIG_HOME", saved.Item2);
+                    Environment.SetEnvironmentVariable("XDG_DESKTOP_DIR", saved.Item3);
+                    try { Directory.Delete(home, true); } catch (IOException) { } catch (UnauthorizedAccessException) { }
                 }
             });
             // Last: once a mod patches enum formatting, enum names go through it for the process.

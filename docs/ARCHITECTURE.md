@@ -323,6 +323,14 @@ past the boot checkpoint needs a Steam client logged in with an account that own
   assemblies already loaded (an enum default value's type: PLib's mods), and a mod that cannot be
   rewritten loads unchanged. `--check-types` walks the stack from a patched method of a mod
   whose method takes a game enum with a default value.
+- **D24 Special folders that do not exist.** On Linux and macOS, Mono's
+  `Environment.GetFolderPath` gives a special folder's path (its XDG user directory, or the home's
+  `Desktop`, `Documents`…) whether or not it exists; CoreCLR checks unless asked not to and gives
+  "" otherwise. Harmony's debug log creates the Desktop folder from that path, so a mod that turns
+  the log on (Simple Cheat) failed to load on a machine without `~/Desktop`:
+  `Directory.CreateDirectory("")` throws. **Resolved in** `MonoFolderPaths`: the default option
+  is answered without the existence check, as Mono answers it; Windows is unchanged.
+  `--check-types` asks for the Desktop of a home that has none.
 
 ## 3. The engine API (`OniBrutal.UnityEngine`)
 

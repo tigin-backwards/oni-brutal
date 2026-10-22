@@ -179,7 +179,7 @@ after times were measured on Linux under WSL2, where the game's code ran about h
 | Save tweaks: `fast-serialization`, `fast-save-type-checks`, `fast-save-compression`, `no-save-gc`, `background-save` | autosave freeze 11.7 → 4.8 s | exact, and saves still load in the original |
 | `slow-reachability`: reachability re-checked every 4 game seconds instead of every second | 1.88 → 0.53 ms | changes timing |
 | `off-screen-conveyors`: items on rails off screen are placed when they stop or come into view | skips most of about 950 moves a frame | changes positions while off screen |
-| `off-world-fallers`: items that fell out of the bottom of a world are landed where they hang | about 17,500 objects no longer stepped as falling ([case study 3](PERFORMANCE_CASE_STUDY_3.md#objects-falling-forever)) | they stop counting as falling |
+| `off-world-fallers`: items that fell out of the bottom of a world are landed where they hang | A possible perf. fix in degenerate cases where debris kept at the bottom of melted rocket interiors are treated as always falling. See [case study 3](PERFORMANCE_CASE_STUDY_3.md#objects-falling-forever) | they stop counting as falling |
 
 The exact tweaks that skip work each have a verify mode, which recomputes whatever was skipped
 and counts disagreements. `scripts/qa.sh` runs them all on U57 for at least 10 game minutes and

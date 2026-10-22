@@ -52,13 +52,18 @@ namespace OniBrutal.Assets.Files
             r.ReadUInt32(); // file size (legacy)
             Version = (int)r.ReadUInt32();
             dataOffset = r.ReadUInt32();
-            if (Version < 22) throw new InvalidDataException($"{Name}: SerializedFile version {Version} is not supported (22+).");
+            // 20 and 21 (Unity 2019.3-2020.x: mods' older bundles) keep the 32-bit header; 22 added
+            // 64-bit sizes after it. Type trees and reference types read the same from 20 on.
+            if (Version < 20) throw new InvalidDataException($"{Name}: SerializedFile version {Version} is not supported (20+).");
             bigEndianData = r.ReadByte() != 0;
             r.Skip(3);
-            r.ReadUInt32();          // metadata size
-            r.ReadInt64();           // file size
-            dataOffset = r.ReadInt64();
-            r.ReadInt64();           // reserved
+            if (Version >= 22)
+            {
+                r.ReadUInt32();          // metadata size
+                r.ReadInt64();           // file size
+                dataOffset = r.ReadInt64();
+                r.ReadInt64();           // reserved
+            }
             r.BigEndian = bigEndianData;
 
             UnityVersion = r.ReadCString();
@@ -72,7 +77,9 @@ namespace OniBrutal.Assets.Files
             for (int i = 0; i < objectCount; i++)
             {
                 r.Align(4);
-                var info = new ObjectInfo(r.ReadInt64(), r.ReadInt64(), (int)r.ReadUInt32(), r.ReadInt32());
+                long pathId = r.ReadInt64();
+                long byteStart = Version >= 22 ? r.ReadInt64() : r.ReadUInt32();
+                var info = new ObjectInfo(pathId, byteStart, (int)r.ReadUInt32(), r.ReadInt32());
                 Objects.Add(info);
                 ObjectsById[info.PathId] = info;
             }

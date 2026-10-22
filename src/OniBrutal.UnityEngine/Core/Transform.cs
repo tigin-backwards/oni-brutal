@@ -253,11 +253,16 @@ namespace UnityEngine
         public bool IsChildOf(Transform parent)
             => parent != null && Hierarchy.IsAncestorOrSelf(parent.TransformNative, TransformNative);
 
-        /// Finds a descendant by '/'-separated path of child names.
+        /// Finds a descendant by '/'-separated path of child names. As measured in the original
+        /// (tools/UnityProbe): an empty path is the transform itself, one trailing '/' is ignored,
+        /// and any other empty name ("/a", "a//b", "/") finds nothing, even under a child named "".
         public Transform Find(string n)
         {
             if (n == null) throw new ArgumentNullException("Name cannot be null");
-            return Wrap(Finder.FindPath(TransformNative, n.Split('/'), 0));
+            if (n.Length == 0) return this;
+            var parts = (n[^1] == '/' ? n[..^1] : n).Split('/');
+            if (Array.IndexOf(parts, "") >= 0) return null;
+            return Wrap(Finder.FindPath(TransformNative, parts, 0));
         }
 
         public int GetSiblingIndex() => Hierarchy.GetSiblingIndex(TransformNative);

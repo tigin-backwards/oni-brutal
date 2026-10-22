@@ -1112,6 +1112,89 @@ namespace PerfProbe
             Debug.Log("PERF localcanvas: no painting with a local stage");
         }
 
+        static readonly System.Collections.Generic.SortedDictionary<string, int> placeChecks = new System.Collections.Generic.SortedDictionary<string, int>();
+
+        static void PlaceChecked(BuildingDef __instance, bool __result, string fail_reason)
+        {
+            string key = $"{__instance.PrefabID} {(__result ? "ok" : fail_reason)}";
+            placeChecks[key] = placeChecks.TryGetValue(key, out var n) ? n + 1 : 1;
+        }
+
+        System.Collections.IEnumerator BlueprintRoundTrip()
+        {
+            // Long enough after the load for both players' world inventories to have counted every
+            // tag once (the build menu's material checks read them).
+            while (!ClusterManager.Instance.activeWorld.worldInventory.HasValidCount) yield return null;
+            for (int i = 0; i < 60; i++) yield return null;
+            var flags = System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Instance;
+            var state = FindType("BlueprintsV2.BlueprintData.BlueprintState");
+            var assets = FindType("BlueprintsV2.ModAssets");
+            var files = assets?.GetNestedType("BlueprintFileHandling", flags);
+            if (state == null || files == null) { Debug.Log("PERF blueprints: mod types not found"); yield break; }
+            int cx, cy;
+            Grid.PosToXY(CameraController.Instance.transform.position, out cx, out cy);
+            var topLeft = new Vector2I(cx - 10, cy + 6);
+            var bottomRight = new Vector2I(cx + 10, cy - 6);
+            var bp = state.GetMethod("CreateBlueprint", flags).Invoke(null, new object[] { topLeft, bottomRight, null, false });
+            var bpType = bp.GetType();
+            string Counts(object b) => $"{((System.Collections.ICollection)bpType.GetProperty("BuildingConfigurations").GetValue(b)).Count} buildings, {((System.Collections.ICollection)bpType.GetProperty("DigLocations").GetValue(b)).Count} digs";
+            Debug.Log($"PERF blueprints: created {Counts(bp)}");
+            bpType.GetMethod("Rename", flags).Invoke(bp, new object[] { "perfprobe", true });
+            var file = (string)bpType.GetProperty("FilePath").GetValue(bp);
+            Debug.Log($"PERF blueprints: written {(System.IO.File.Exists(file) ? new System.IO.FileInfo(file).Length : -1)} bytes as {System.IO.Path.GetFileName(file)}");
+            var load = new object[] { file, null };
+            bool loaded = (bool)files.GetMethod("LoadBlueprint", flags).Invoke(null, load);
+            var read = load[1];
+            Debug.Log($"PERF blueprints: read back {loaded}: {Counts(read)}");
+            var techItems = Db.Get().TechItems;
+            Debug.Log("PERF blueprints: tech items complete:" + string.Concat(System.Linq.Enumerable.Select(new[] { "Tile", "GasConduit", "InsulatedGasConduit", "LiquidConduitRadiant", "WireRefinedHighWattage", "GasConduitBridge", "InsulationTile", "ExteriorWall" },
+                id => $" {id} {techItems.IsTechItemComplete(id)}")));
+            var tech = techItems.TryGet("InsulatedGasConduit")?.ParentTech;
+            if (tech != null) Debug.Log($"PERF blueprints: InsulatedGasConduit's tech {tech.Id}: complete {tech.IsComplete()} research {Research.Instance.Get(tech)?.IsComplete()}");
+            var inv = ClusterManager.Instance.activeWorld.worldInventory;
+            var invT = HarmonyLib.Traverse.Create(inv);
+            var tags = new System.Collections.Generic.List<string>();
+            foreach (var key in ((System.Collections.IDictionary)invT.Field("Inventory").GetValue()).Keys) tags.Add(key.ToString());
+            Debug.Log($"PERF blueprints: inventory f{Time.frameCount}: valid {inv.HasValidCount} index {invT.Field("accessibleUpdateIndex").GetValue()} of {tags.Count}; BuildableRaw at {tags.IndexOf("BuildableRaw")}, RefinedMetal at {tags.IndexOf("RefinedMetal")}; first {string.Join(",", System.Linq.Enumerable.Take(tags, 8))}");
+            var stateFor = typeof(PlanScreen).GetMethod("GetBuildableStateForDef", flags);
+            foreach (var id in new[] { "GasConduit", "InsulatedGasConduit", "LiquidConduitRadiant", "WireRefinedHighWattage", "InsulationTile", "ExteriorWall" })
+            {
+                var def = Assets.GetBuildingDef(id);
+                Debug.Log($"PERF blueprints: {id}: plan state {stateFor.Invoke(PlanScreen.Instance, new object[] { def })} materials met {ProductInfoScreen.MaterialsMet(def.CraftRecipe)} available {def.IsAvailable()} sandbox {Game.Instance.SandboxModeActive} instant {DebugHandler.InstantBuildMode}"
+                    + string.Concat(System.Linq.Enumerable.Select(def.CraftRecipe.Ingredients, ing => $" [{ing.tag} needs {ing.amount} has {ClusterManager.Instance.activeWorld.worldInventory.GetAmount(ing.tag, true)}]")));
+            }
+            int before = FindObjectsByType<Constructable>(FindObjectsSortMode.None).Length;
+            assets.GetField("SelectedBlueprint", flags).SetValue(null, read);
+            var origin = new Vector2I(cx + 20, cy + 6);
+            state.GetMethod("VisualizeBlueprint", flags, null, new[] { typeof(Vector2I), bpType }, null).Invoke(null, new object[] { origin, read });
+            for (int i = 0; i < 5; i++) yield return null;
+            // Every placement check the game answers while the blueprint is placed, by building
+            // and reason (the most specific overload, which the others call).
+            var placeHarmony = new HarmonyLib.Harmony("PerfProbe.Place");
+            var valid = typeof(BuildingDef).GetMethod("IsValidPlaceLocation", new[] { typeof(GameObject), typeof(int), typeof(Orientation), typeof(bool), typeof(string).MakeByRefType(), typeof(bool) });
+            placeChecks.Clear();
+            placeHarmony.Patch(valid, postfix: new HarmonyLib.HarmonyMethod(typeof(Runner).GetMethod(nameof(PlaceChecked), System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic)));
+            state.GetMethod("UseBlueprint", flags).Invoke(null, new object[] { 0UL, origin, null });
+            placeHarmony.UnpatchAll("PerfProbe.Place");
+            Debug.Log("PERF blueprints: placement checks: " + string.Join("; ", System.Linq.Enumerable.Select(placeChecks, kv => $"{kv.Key} {kv.Value}")));
+            for (int i = 0; i < 60; i++) yield return null;
+            int after = FindObjectsByType<Constructable>(FindObjectsSortMode.None).Length;
+            Debug.Log($"PERF blueprints: placed at {origin.x},{origin.y}: construction sites {before} -> {after}");
+            for (int i = 0; i < 300; i++) yield return null;
+            var byPrefab = new System.Collections.Generic.SortedDictionary<string, int>();
+            foreach (var c in FindObjectsByType<Constructable>(FindObjectsSortMode.None))
+            {
+                var name = c.GetComponent<KPrefabID>().PrefabTag.Name;
+                byPrefab[name] = byPrefab.TryGetValue(name, out var n) ? n + 1 : 1;
+            }
+            Debug.Log($"PERF blueprints: 300 frames later {System.Linq.Enumerable.Sum(byPrefab.Values)} sites: {string.Join(", ", System.Linq.Enumerable.Select(byPrefab, kv => kv.Key + " " + kv.Value))}");
+            CameraController.Instance.SnapTo(Grid.CellToPosCCC(Grid.XYToCell(origin.x + 10, origin.y - 6), Grid.SceneLayer.Building), 10f);
+            foreach (var canvas in FindObjectsByType<Canvas>(FindObjectsSortMode.InstanceID))
+                if (canvas.isRootCanvas && canvas.renderMode != RenderMode.WorldSpace) canvas.enabled = false;
+            for (int i = 0; i < 30; i++) yield return null;
+            ScreenCapture.CaptureScreenshot(System.IO.Path.Combine(Path, "blueprints.png"));
+        }
+
         static readonly System.Collections.Generic.List<string> activationEvents = new System.Collections.Generic.List<string>();
         static void ActivatedInternal(TMPro.TMP_InputField __instance) => activationEvents.Add($"internal f{Time.frameCount} focused {__instance.isFocused}");
         static void DeactivatedNoArgs() => activationEvents.Add($"deactivate() f{Time.frameCount} from {new System.Diagnostics.StackFrame(2).GetMethod()?.Name}");
@@ -1553,6 +1636,9 @@ namespace PerfProbe
             // `localcanvas.txt`: LocalCanvas's artwork stages, and a painting set to its first local
             // image and captured (localcanvas.png).
             if (System.IO.File.Exists(System.IO.Path.Combine(Path, "localcanvas.txt"))) StartCoroutine(LocalCanvasPainting());
+            // `blueprints.txt`: Blueprints Expanded's blueprint of the area in view, written, read
+            // back and placed 30 cells to the right (blueprints.png).
+            if (System.IO.File.Exists(System.IO.Path.Combine(Path, "blueprints.txt"))) StartCoroutine(BlueprintRoundTrip());
             // `pointer.txt`: what the game's hover handling reads (PlayerController.UpdateHover, the
             // select tool's hover card) while the mouse has not moved, every 120 frames, 6 times.
             if (System.IO.File.Exists(System.IO.Path.Combine(Path, "pointer.txt"))) StartCoroutine(Pointer());

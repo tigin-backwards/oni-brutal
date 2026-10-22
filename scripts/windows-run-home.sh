@@ -25,7 +25,9 @@ start = head.index('{'); depth = 0
 for i, c in enumerate(head[start:], start):
     depth += (c == '{') - (c == '}')
     if depth == 0: break
-print(1 if 'EXPANSION1_ID' in json.loads(head[start:i + 1]).get('dlcIds', []) else 0)
+info = json.loads(head[start:i + 1])
+# Older saves (before 7.34ish) list no dlcIds; their cluster names the expansion.
+print(1 if 'EXPANSION1_ID' in (info.get('dlcIds') or []) or str(info.get('clusterId', '')).startswith('expansion1::') else 0)
 PY
 )
 printf 'strings:\n  AutoResumeSaveFile: %s\nints:\n  ResolutionWidth: 1024\n  ResolutionHeight: 768\n  RefreshRateNumerator: 60\n  RefreshRateDenominator: 1\n  FullScreen: 0\n  EXPANSION1_ID.ENABLED: %s\nfloats: {}\n' "'${file//\'/\'\'}'" "$expansion1" > "$d/kplayerprefs.yaml"

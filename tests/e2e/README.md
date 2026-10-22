@@ -23,8 +23,10 @@ scripts/e2e.py --lanes 4 A B C D            # four at once, from a queue
   - E2eDriver on 8801 + 10 L, passed as `E2E_DRIVER_PORT`;
   - its own display, from `xvfb-run -a` by default, or from `--displays :88,:89`.
 
-  Lanes are numbered from `--first-lane` (default 1). A busy lane is skipped: one another runner
-  holds (`out/e2e/.lane-L.lock`), or one whose port another program listens on. At most 6 lanes.
+  Lanes are taken from `--first-lane` (default 1) to `--last-lane` (default 6 lanes on), so
+  `--first-lane 2 --last-lane 3` keeps a runner on lanes 2 and 3. A busy lane is skipped: one
+  another runner holds (`out/e2e/.lane-L.lock`), or one whose port another program listens on.
+  At most 6 lanes.
 - **Machine lock.** A run holds `out/e2e/.lock` shared. A perf job that must not share the machine
   takes it exclusively: `flock out/e2e/.lock scripts/qa.sh`. Runs also wait while `ps` shows a perf
   job (`qa.sh`, the sweep and measurement scripts, `perf record`; see `PERF_JOBS`).
@@ -57,7 +59,11 @@ setup: [...]                     # steps run first; the only place for driver se
 steps: [...]
 ```
 
-Every spec gets OniMcp, and E2eDriver too when a step needs it. PLib reads options from
+Every spec gets OniMcp and, in both players, E2eDriver: `E2eDriver.dll` from its build
+(`E2E_DRIVER`, default `out/bin/E2eDriver/release`) with `tools/E2eDriver/mod.yaml` and
+`mod_info.yaml`, stamped 1399985550 in `mods.json`. A spec with driver steps fails without a
+build of it. Each Local mod's stamp is its folder name's Mono string hash
+(`ws-mods.py mono_hash`), the one KMod computes in both players. PLib reads options from
 `config.json` beside the mod's assembly, or from `mods/config/ASSEMBLY/` when the mod uses the
 shared location. The runner writes both, in every folder of the mod that holds a DLL, because KMod
 may load an archived version.
@@ -80,8 +86,15 @@ paths from a `ui.find` or `ui_dump` of a run, not from guesses.
 - save: early-base                               # saved; --bless copies it into fixtures/
 ```
 
-`expect` and `until` take `buildings: {Prefab: N}`, `duplicants`, `pending_construction`,
-`pending_digs`, `rooms: {Type: N}` and `cycle`. N is a number, or `">=N"`, `"<=N"`, `">N"`, `"<N"`.
+`expect` and `until` take `buildings: {Prefab: N}`, `blueprints: {Prefab: N}` (unfinished
+ones), `duplicants`, `pending_construction`, `pending_digs`, `rooms: {Type: N}` and `cycle`. N is a
+number, or `">=N"`, `"<=N"`, `">N"`, `"<N"`.
+
+`build` places a blueprint through OniMcp's viewport map. OniMcp would also connect a powered
+building to a power source with wire blueprints and dig orders of its own choosing; the runner
+turns that off (`autoConnectPower: false`) unless the step says `wire: true`. A blueprint whose
+cells are not dug yet is deferred by OniMcp until they are: the step fails then, so dig those
+cells in an earlier step.
 
 ### Opening screens
 
@@ -145,10 +158,15 @@ e2e.py). `type` types any printable ASCII, on a US keymap.
 
 `expect_ui` retries for a few frames before it fails. An `expect_state` value is one of:
 - a value;
-- `"OP N"`, where OP is `>=`, `<=`, `>`, `<`, `==` or `!=`;
-- `"OP [F *] NAME"`, where NAME is a value saved with `save_as`, or `original`;
+- `"OP EXPR"`, where OP is `>=`, `<=`, `>`, `<`, `==` or `!=`, and EXPR is made of numbers,
+  names, `+ - * /` and parentheses: a name is a value saved with `save_as`, or `original`
+  (`">= before + 0.95 * dug"`, `">= 0.9 * original"`);
 - `exists` or `missing`;
 - `{contains: X}`, `{equals: X}` or `{save_as: NAME}`.
+
+Besides `file:PATH`, the runner reads `cells:X1,Y1..X2,Y2::EXPR`: the sum of a `state.get`
+expression over a rectangle of cells, `{cell}` standing for each cell's index, as in
+`cells:110,207..118,209::Grid.Mass.get_Item({cell})`.
 
 `== original` is checked after our run, against the value the original player recorded at the same
 step. The original run itself records it and passes.

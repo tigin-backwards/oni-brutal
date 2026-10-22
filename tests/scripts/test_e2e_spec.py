@@ -173,7 +173,7 @@ class Expectations(unittest.TestCase):
         self.assertEqual(self.check(3, '== original', original=4), (False, False))
 
     def test_ui(self):
-        element = e2e.Element({'path': 'a/b', 'rect': [0, 0, 10, 10], 'active': True, 'isOn': False,
+        element = e2e.Element({'path': 'a/b', 'rect': {'x': 0, 'y': 0, 'w': 10, 'h': 10}, 'active': True, 'isOn': False,
                                'interactable': True, 'text': 'Quick Learner (+2)'})
         self.assertEqual(e2e.ui_mismatches(element, {'active': True, 'text': '~Quick Learner'}), [])
         self.assertEqual(e2e.ui_mismatches(element, {'text': '/^Quick .*\\(\\+\\d\\)$/'}), [])
@@ -235,10 +235,13 @@ class Install(unittest.TestCase):
     def test_onimcp_and_driver_beside_the_mods(self):
         with tempfile.TemporaryDirectory() as root:
             onimcp, driver = os.path.join(root, 'onimcp'), os.path.join(root, 'driver')
-            for folder, static in ((onimcp, 'LIghtJUNction.OniMcp'), (driver, 'oni-brutal.E2eDriver')):
-                os.makedirs(folder)
-                with open(os.path.join(folder, 'mod.yaml'), 'w') as f:
-                    f.write(f'title: "x"\nstaticID: "{static}"\n')
+            os.makedirs(onimcp)
+            with open(os.path.join(onimcp, 'mod.yaml'), 'w') as f:
+                f.write('title: "x"\nstaticID: "LIghtJUNction.OniMcp"\n')
+            # E2eDriver: its build's assembly, and its yaml files from tools/E2eDriver.
+            os.makedirs(driver)
+            for name in ('E2eDriver.dll', 'E2eDriver.pdb', 'E2eDriver.deps.json'):
+                open(os.path.join(driver, name), 'w').close()
             fixture = os.path.join(root, 'landing.sav')
             open(fixture, 'w').close()
             lane = e2e.Lane(3, None)
@@ -247,7 +250,9 @@ class Install(unittest.TestCase):
             mods = json.load(open(os.path.join(player.profile, 'mods', 'mods.json')))['mods']
             self.assertEqual([(m['label']['id'], m['staticID'], m['label']['version']) for m in mods],
                              [('OniMcp', 'LIghtJUNction.OniMcp', 312605614),
-                              ('E2eDriver', 'oni-brutal.E2eDriver', e2e.ws_mods().mono_hash('E2eDriver'))])
+                              ('E2eDriver', 'E2eDriver', 1399985550)])
+            installed = os.path.join(player.profile, 'mods', 'Local', 'E2eDriver')
+            self.assertEqual(sorted(os.listdir(installed)), ['E2eDriver.dll', 'mod.yaml', 'mod_info.yaml'])
             config = json.load(open(os.path.join(player.profile, 'OniMcpConfig.json')))
             self.assertEqual(config['Port'], 8830)
             self.assertEqual(lane.driver_port, 8831)

@@ -1,5 +1,6 @@
-"""e2e.py's E2eDriver client against a small fake server speaking §4.2's protocol (JSON lines over
-TCP), and the UI steps built on it, with a fake XTEST input standing in for the X server."""
+"""e2e.py's E2eDriver client against a small fake server speaking its protocol (JSON lines over TCP,
+replies and element descriptions as tools/E2eDriver/README.md gives them), and the UI steps built
+on it, with a fake XTEST input standing in for the X server."""
 import json, os, socket, socketserver, tempfile, threading, unittest
 
 import helpers  # noqa: F401
@@ -18,8 +19,33 @@ class FakeGame:
         self.canvases_hidden = False
         self.lock = threading.Lock()
 
-    def add(self, path, rect, hit=None, **fields):
-        self.elements[path] = dict(path=path, rect=rect, active=True, hit=hit or path, **fields)
+    def add(self, path, rect, hit=None, as_name=None, **fields):
+        """An element as ui.find describes it; RECT is [x, y, w, h], HIT the path on top at its
+        centre (default the element itself)."""
+        x, y, w, h = rect
+        fields.setdefault('key', '/' + path)
+        self.elements[as_name or path] = dict(path=path, name=path.rsplit('/', 1)[-1], active=True,
+                                   rect={'x': x, 'y': y, 'w': w, 'h': h}, center={'x': x + w / 2, 'y': y + h / 2},
+                                   onscreen=True, hit=hit or path, **fields)
+
+    @staticmethod
+    def relation(element, hit):
+        if hit is None:
+            return 'none'
+        if hit == element:
+            return 'self'
+        if hit.startswith(element + '/'):
+            return 'child'
+        return 'ancestor' if element.startswith(hit + '/') else 'other'
+
+    def describe(self, e, hits=0):
+        e = dict(e)
+        hit = e.pop('hit')
+        e['hit'] = {'path': hit, 'relation': self.relation(e['path'], hit), 'raycaster': 'GraphicRaycaster',
+                    'sortingLayer': 0, 'sortingOrder': 0, 'depth': 3, 'distance': 0.0, 'count': 1}
+        if hits:
+            e['hit']['all'] = [{'path': hit, 'relation': e['hit']['relation']}]
+        return e
 
     @staticmethod
     def glob(pattern, path):
@@ -30,60 +56,104 @@ class FakeGame:
 
     def matches(self, args):
         found = []
-        for path, e in self.elements.items():
+        for e in self.elements.values():
+            path = e['path']
             if 'path' in args and not self.glob(args['path'], path):
                 continue
             if 'text' in args and e.get('text') != args['text']:
                 continue
             if 'under' in args and not self.glob(args['under'] + '/**/*', path):
                 continue
-            found.append(dict(e))
+            found.append(e)
         return found
 
     def handle(self, cmd, args):
         with self.lock:
             self.requests.append((cmd, args))
+        if cmd == 'ping':
+            return {'driver': '1', 'player': 'ours', 'scene': 'backend', 'screen': {'w': 1280, 'h': 720},
+                    'paused': True, 'world': True}
         if cmd == 'ui.find':
-            return {'elements': self.matches(args)}
+            found = self.matches(args)
+            limit = args.get('limit', 50)
+            return {'count': len(found), 'elements': [self.describe(e, args.get('hits', 0)) for e in found[:limit]]}
+        if cmd == 'ui.at':
+            on_top = [e for e in self.elements.values()
+                      if e['rect']['x'] <= args['x'] < e['rect']['x'] + e['rect']['w']
+                      and e['rect']['y'] <= args['y'] < e['rect']['y'] + e['rect']['h']]
+            if not on_top:
+                return {'path': None, 'relation': 'none', 'count': 0}
+            hit = on_top[-1]['hit']
+            return {'path': hit, 'relation': None, 'count': 1, 'all': [{'path': hit, 'relation': None}]}
         if cmd == 'ui.dump':
-            return {'lines': [f'{p}\trect {",".join(map(str, e["rect"]))}' for p, e in sorted(self.elements.items())
-                              if p.startswith(args['root'].lstrip('*/')) or args['root'] == '**']}
+            # Every element's ancestors are GameObjects too.
+            objects = {'/'.join(p.split('/')[:i + 1]) for p in self.elements for i in range(p.count('/') + 1)}
+            roots = [p for p in sorted(objects) if self.glob(args['root'], p)]
+            if not roots:
+                raise Failure(f'no element matches {args["root"]}')
+            lines = [f'/{p}\trect {e["rect"]["x"]},{e["rect"]["y"]},{e["rect"]["w"]},{e["rect"]["h"]}'
+                     for p, e in sorted(self.elements.items()) if any(p == r or p.startswith(r + '/') for r in roots)]
+            return {'roots': roots, 'count': len(lines), 'lines': lines}
         if cmd == 'ui.wait':
-            if not self.matches({'path': args['path']}):
-                raise KeyError(f'timeout waiting for {args["path"]}')
-            return {'frames': 1}
+            found = self.matches({'path': args['path']})
+            state = {'frames': 1 if found else args.get('frames', 300), 'count': len(found),
+                     'element': self.describe(found[0]) if found else None}
+            if not found:
+                raise Failure(f'timeout: {args.get("cond", "exists")} not met within {args.get("frames", 300)} frames', state)
+            return state
         if cmd == 'world.to_screen':
             x, y = args['cell']
-            return {'x': x * 10, 'y': 720 - y * 3}
+            return {'x': x * 10, 'y': 720 - y * 3, 'onscreen': 0 <= x * 10 < 1280,
+                    'world': {'x': x + 0.5, 'y': y + 0.5, 'z': -25.5}}
         if cmd == 'screen.to_cell':
-            return [args['x'] // 10, (720 - args['y']) // 3]
+            x, y = args['x'] // 10, (720 - args['y']) // 3
+            return {'cell': y * 256 + x, 'valid': True, 'world': {'x': x + 0.5, 'y': y + 0.5}, 'xy': [x, y], 'worldId': 0}
         if cmd == 'state.get':
             if args['expr'] not in self.state:
-                raise KeyError(f'no member {args["expr"]}')
-            return {'value': self.state[args['expr']]}
+                raise Failure(f'no field or property {args["expr"]} on Research')
+            value = self.state[args['expr']]
+            return {'value': value, 'type': 'System.Int32' if isinstance(value, int) else 'System.Object'}
         if cmd == 'camera.get':
             return dict(self.camera)
         if cmd == 'camera.set':
             self.camera.update(args)
             return dict(self.camera)
-        if cmd in ('canvas.hide', 'canvas.show'):
-            self.canvases_hidden = cmd == 'canvas.hide'
-            return {}
-        if cmd in ('seed', 'setup.call'):
-            return {'done': True}
-        raise KeyError(f'unknown command {cmd}')
+        if cmd == 'canvas.hide':
+            self.canvases_hidden = True
+            return {'hidden': 2, 'canvases': ['ScreenSpaceCanvas', 'ScreenSpaceOverlayCanvas'], 'total': 2}
+        if cmd == 'canvas.show':
+            self.canvases_hidden = False
+            return {'shown': 2}
+        if cmd == 'seed':
+            return {'unity': args['n'], 'util': True, 'krandom': True, 'consumedBefore': 0}
+        if cmd == 'setup.call':
+            return {'value': None, 'type': 'System.Void'}
+        raise Failure(f'unknown command {cmd}')
+
+
+class Failure(Exception):
+    """A command's ok: false reply: its error, and the result it still carries (ui.wait's)."""
+
+    def __init__(self, error, result=None):
+        super().__init__(error)
+        self.error, self.result = error, result
 
 
 class Handler(socketserver.StreamRequestHandler):
     def handle(self):
+        frame = 8861
         for line in self.rfile:
+            frame += 1
             request = json.loads(line)
             if request.get('cmd') == 'noise':  # an unrelated line first, then the reply
-                self.wfile.write(b'{"id": -1, "ok": true, "result": "ignored"}\n')
+                self.wfile.write(b'{"id": -1, "ok": true, "frame": 1, "result": "ignored"}\n')
             try:
-                reply = {'id': request['id'], 'ok': True, 'result': self.server.game.handle(request['cmd'], request.get('args', {}))}
-            except KeyError as e:
-                reply = {'id': request['id'], 'ok': False, 'error': str(e.args[0])}
+                reply = {'id': request['id'], 'ok': True, 'frame': frame,
+                         'result': self.server.game.handle(request['cmd'], request.get('args', {}))}
+            except Failure as e:
+                reply = {'id': request['id'], 'ok': False, 'frame': frame, 'error': e.error}
+                if e.result is not None:
+                    reply['result'] = e.result
             self.wfile.write((json.dumps(reply) + '\n').encode())
 
 
@@ -171,12 +241,14 @@ class DriverTests(unittest.TestCase):
             conn, _ = server.accept()
             with conn, conn.makefile('rw') as f:
                 received.append(json.loads(f.readline()))
-                f.write('{"id": 1, "ok": true, "result": {"x": 3, "y": 4}}\n')
+                f.write('{"id": 1, "ok": true, "frame": 9, "result": {"x": 3, "y": 4, "onscreen": true, '
+                        '"world": {"x": 10.5, "y": 20.5, "z": -25.5}}}\n')
                 f.flush()
         t = threading.Thread(target=serve)
         t.start()
         driver = e2e.Driver(server.getsockname()[1]).connect(5)
         self.assertEqual(driver.to_screen([10, 20]), (3, 4))
+        self.assertEqual(driver.frame, 9)
         t.join(5)
         driver.close()
         server.close()
@@ -185,7 +257,7 @@ class DriverTests(unittest.TestCase):
     def test_errors_and_unrelated_lines(self):
         with self.assertRaises(e2e.DriverError) as caught:
             self.driver.state('Research.Instance.nothing')
-        self.assertIn('no member Research.Instance.nothing', str(caught.exception))
+        self.assertIn('no field or property Research.Instance.nothing on Research', str(caught.exception))
         with self.assertRaises(e2e.DriverError):
             self.driver.request('noise')  # the fake answers an unknown command with an error, after an unrelated line
         self.game.state['x'] = 5
@@ -199,28 +271,52 @@ class DriverTests(unittest.TestCase):
         with self.assertRaises(e2e.DriverError):
             e2e.Driver(port).connect(1)
 
-    def test_find_normalises(self):
-        self.game.add('Canvas/A', [10, 20, 100, 40], text='Hello', isOn=True, interactable=False)
-        self.game.elements['Canvas/B'] = {'path': 'Canvas/B', 'rect': {'x': 1, 'y': 2, 'width': 3, 'height': 4},
-                                          'topHit': {'path': 'Canvas/B/Label'}}
-        self.game.elements['Canvas/C'] = {'path': 'Canvas/C', 'corners': [[0, 0], [0, 10], [20, 10], [20, 0]]}
+    def test_find_reads_the_element_description(self):
+        self.game.add('Canvas/A', [10, 20, 100, 40], text='Hello', isOn=True, interactable=True)
+        self.game.add('Canvas/B', [1, 2, 3, 4], hit='Canvas/B/Label', interactable=True, groupInteractable=False)
+        self.game.add('Canvas/C', [0, 0, 20, 10], hit='Popup/Blocker')
+        self.game.add('Canvas/C/Inner', [0, 0, 5, 5], hit='Canvas/C')
         a, = self.driver.find(path='Canvas/A')
-        self.assertEqual((a.rect, a.center, a.text, a.is_on, a.interactable, a.hit_is_self()),
-                         ((10, 20, 100, 40), (60, 40), 'Hello', True, False, True))
+        self.assertEqual((a.rect, a.center, a.text, a.is_on, a.interactable, a.relation, a.hit_is_self()),
+                         ((10, 20, 100, 40), (60, 40), 'Hello', True, True, 'self', True))
         b, = self.driver.find(path='Canvas/B')
-        self.assertEqual((b.rect, b.hit, b.hit_is_self()), ((1, 2, 3, 4), 'Canvas/B/Label', True))
+        # A non-interactable CanvasGroup above it: no clicks.
+        self.assertEqual((b.rect, b.hit, b.relation, b.hit_is_self(), b.interactable),
+                         ((1, 2, 3, 4), 'Canvas/B/Label', 'child', True, False))
         c, = self.driver.find(path='Canvas/C')
-        self.assertEqual((c.rect, c.hit_is_self()), ((0, 0, 20, 10), False))
-        self.assertFalse(e2e.Element({'path': 'Canvas/B', 'rect': [0, 0, 1, 1], 'hit': 'Canvas/Button'}).hit_is_self())
+        self.assertEqual((c.relation, c.hit_is_self()), ('other', False))
+        inner, = self.driver.find(path='Canvas/C/Inner')
+        self.assertEqual((inner.relation, inner.hit_is_self()), ('ancestor', False))
+        self.assertEqual(len(self.driver.find(path='Canvas/*', limit=1)), 1)
+        self.assertEqual(self.game.requests[-1], ('ui.find', {'path': 'Canvas/*', 'limit': 1}))
+
+    def test_at_and_to_cell(self):
+        self.game.add('Screen/Panel', [0, 0, 100, 100], hit='Screen/Panel/Image')
+        self.assertEqual(self.driver.at(50, 50)['path'], 'Screen/Panel/Image')
+        self.assertEqual(self.driver.at(500, 500)['relation'], 'none')
+        self.assertEqual(self.driver.to_cell(1100, 99), (110, 207))
+
+    def test_wait_timeout_keeps_the_last_state(self):
+        with self.assertRaises(e2e.DriverError) as caught:
+            self.driver.wait('Screen/Never', frames=10)
+        self.assertIn('timeout: exists not met within 10 frames', str(caught.exception))
+        self.assertEqual(caught.exception.result, {'frames': 10, 'count': 0, 'element': None})
+        self.game.add('Screen/Ready', [0, 0, 1, 1])
+        self.assertEqual(self.driver.wait('Screen/Ready', 'stable', stable=5)['element']['path'], 'Screen/Ready')
+        self.assertEqual(self.game.requests[-1], ('ui.wait', {'path': 'Screen/Ready', 'cond': 'stable', 'frames': 300,
+                                                              'stable': 5}))
 
     def test_frames_are_round_trips(self):
         before = len(self.game.requests)
         self.driver.frames(3)
-        self.assertEqual([c for c, _ in self.game.requests[before:]], ['camera.get'] * 3)
+        self.assertEqual([c for c, _ in self.game.requests[before:]], ['ping'] * 3)
 
     def test_dump(self):
         self.game.add('Screen/List/Item', [0, 0, 5, 5])
-        self.assertEqual(self.driver.dump('**/Screen'), 'Screen/List/Item\trect 0,0,5,5\n')
+        self.assertEqual(self.driver.dump('**/Screen'), '/Screen/List/Item\trect 0,0,5,5\n')
+        with self.assertRaises(e2e.DriverError) as caught:
+            self.driver.dump('**/Nope')
+        self.assertIn('no element matches **/Nope', str(caught.exception))
 
     # -- the steps
     def test_click_checks_occlusion(self):
@@ -231,7 +327,7 @@ class DriverTests(unittest.TestCase):
         self.assertEqual(run.input.events, [('click', 125, 110, 'left', ('Shift',))])
         with self.assertRaises(e2e.SpecFailure) as caught:
             run.step('click', {'ui': 'Screen/Covered'}, 2)
-        self.assertEqual(str(caught.exception), 'Screen/Covered is occluded by Popup/Blocker')
+        self.assertEqual(str(caught.exception), 'Screen/Covered is occluded by Popup/Blocker (hits there: Popup/Blocker)')
         self.assertEqual(len(run.input.events), 1)  # no blind click
         with self.assertRaises(e2e.SpecFailure) as caught:
             run.step('click', {'text': 'Nope', 'under': 'Screen'}, 3)
@@ -277,19 +373,30 @@ class DriverTests(unittest.TestCase):
         run.step('type', {'ui': 'Dialog/Input', 'text': 'e2e', 'enter': True}, 1)
         run.step('key', {'code': 'Shift+B'}, 2)
         run.step('drag', {'from': [110, 207], 'to': [118, 209]}, 3)
-        run.step('click_world', {'cell': [150, 212]}, 4)
+        run.step('click_world', {'cell': [100, 212]}, 4)
+        with self.assertRaises(e2e.SpecFailure) as caught:
+            run.step('click_world', {'cell': [150, 212]}, 5)  # x 1500: off the 1280-pixel screen
+        self.assertIn('cell [150, 212] is off screen', str(caught.exception))
         run.step('scroll', {'at': [100, 200], 'notches': -3}, 5)
         self.assertEqual(run.input.events, [('click', 60, 20, 'left', ()), ('type', 'e2e'), ('key', 'Return'),
                                             ('key', 'Shift+B'), ('drag', (1100, 99), (1180, 93)),
-                                            ('click', 1500, 84, 'left', ()), ('scroll', 1000, 120, -3)])
+                                            ('click', 1000, 84, 'left', ()), ('scroll', 1000, 120, -3)])
 
     def test_tool_by_toolbar_name(self):
-        self.game.add('ToolMenu/Tools/SweepByType', [0, 600, 40, 40])
+        # Every toolbar button is an ActionIconToggle: the collection's sibling index tells them apart.
+        row = 'ToolMenu/Row/ActionIconToggle'
+        self.game.add(row, [0, 600, 40, 40], key='/ToolMenu#0/Row#0/ActionIconToggle#0')
+        self.game.add(row, [50, 600, 40, 40], key='/ToolMenu#0/Row#0/ActionIconToggle#1', as_name='second')
+        self.game.state['ToolMenu.Instance.basicTools'] = [
+            {'text': 'Dig', 'icon': 'icon_action_dig', 'toggle': {'path': row}},
+            {'text': 'Sweep', 'icon': 'filtered_clear', 'toggle': {'path': row}}]
+        self.game.state['ToolMenu.Instance.basicTools[1].toggle.transform.GetSiblingIndex()'] = 1
         run = self.run_for()
-        run.step('tool', {'toolbar': 'SweepByType'}, 1)
-        self.assertEqual(run.input.events[0][1:3], (20, 620))
-        with self.assertRaises(e2e.SpecFailure):
+        run.step('tool', {'toolbar': 'filtered_clear'}, 1)
+        self.assertEqual(run.input.events[0][1:3], (70, 620))
+        with self.assertRaises(e2e.SpecFailure) as caught:
             run.step('tool', {'toolbar': 'Nothing'}, 2)
+        self.assertIn('there are Dig (icon_action_dig), Sweep (filtered_clear)', str(caught.exception))
 
     def test_expect_ui_and_state(self):
         self.game.add('Card/Traits', [0, 0, 10, 10], text='Quick Learner, Uncultured')
@@ -309,6 +416,25 @@ class DriverTests(unittest.TestCase):
         open(os.path.join(self.temp.name, 'blueprints', 'e2e.blueprint'), 'w').close()
         run.step('expect_state', {'file:blueprints/e2e.blueprint': 'exists', 'file:blueprints/x': 'missing'}, 5)
 
+    def test_cells_sum_and_arithmetic(self):
+        self.game.state['Grid.WidthInCells'] = 10
+        for cell, mass in ((21, 100.0), (22, 50.5), (31, 1.0), (32, 2.0)):
+            self.game.state[f'Grid.Mass.get_Item({cell})'] = mass
+        self.game.state['inventory'] = 10.0
+        run = self.run_for()
+        run.step('expect_state', {'cells:1,2..2,3::Grid.Mass.get_Item({cell})': {'save_as': 'dug'},
+                                  'inventory': {'save_as': 'before'}}, 1)
+        self.assertEqual(run.saved, {'dug': 153.5, 'before': 10.0})
+        self.game.state['inventory'] = 160.0
+        run.step('expect_state', {'inventory': '>= before + 0.95 * dug'}, 2)
+        with self.assertRaises(e2e.SpecFailure):
+            run.step('expect_state', {'inventory': '> (before + dug) * 1.1'}, 3)
+        with self.assertRaises(e2e.SpecFailure) as caught:
+            run.step('expect_state', {'inventory': '> nothing'}, 4)
+        self.assertIn("no value saved as 'nothing'", str(caught.exception))
+        run.original_values = {'5:inventory': 150.0}
+        run.step('expect_state', {'inventory': '>= 0.9 * original'}, 5)
+
     def test_original_value_is_compared_when_known(self):
         self.game.state['n'] = 4
         run = self.run_for()
@@ -321,7 +447,7 @@ class DriverTests(unittest.TestCase):
         self.game.add('Screen/Selector/Date', [110, 60, 50, 10])
         run = self.run_for()
         run.step('ui_dump', {'name': 'selector', 'root': 'Screen/Selector'}, 1)
-        self.assertTrue(open(os.path.join(self.temp.name, 'selector.ui.txt')).read().startswith('Screen/Selector\t'))
+        self.assertTrue(open(os.path.join(self.temp.name, 'selector.ui.txt')).read().startswith('/Screen/Selector\t'))
         run.step('shot', {'name': 'selector', 'crop': 'Screen/Selector', 'mask': ['Screen/Selector/Date', [0, 0, 5, 5]]}, 2)
         meta = json.load(open(os.path.join(self.temp.name, 'selector.shot.json')))
         self.assertEqual((meta['crop'], meta['masks'], meta['file']),
@@ -329,7 +455,7 @@ class DriverTests(unittest.TestCase):
         self.assertEqual(run.input.events[0], ('move', 1279, 719))  # the pointer off the UI first
         run.step('world_shot', {'name': 'zoomed', 'ortho': 45, 'at': [128, 210]}, 3)
         commands = [c for c, _ in self.game.requests]
-        self.assertEqual(self.game.camera, {'pos': [128.5, 210.5], 'ortho': 45})
+        self.assertEqual(self.game.camera, {'pos': [0, 0], 'cell': [128, 210], 'ortho': 45})
         self.assertLess(commands.index('canvas.hide'), commands.index('canvas.show'))
         self.assertFalse(self.game.canvases_hidden)
         self.assertEqual([e['name'] for e in run.evidence['world_shot']], ['zoomed'])

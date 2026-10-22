@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """End-to-end specs: a colony checkpoint, played through OniMcp and E2eDriver, checked by its outcome.
   scripts/e2e.py [--player ours|original|both] [--repeat N] [--bless] [--lanes N] [--first-lane L]
-                 [--displays :88,:89] [--no-perf-wait] [--results PATH] SPEC...
+                 [--last-lane L] [--displays :88,:89] [--no-perf-wait] [--results PATH]
+                 [--hold | --hold-on-fail] SPEC...
   scripts/e2e.py --check SPEC...             parse and validate specs only
 A spec (tests/e2e/NAME.yaml; tests/e2e/README.md describes every step) starts from a fixture save
 (tests/e2e/fixtures), installs Workshop mods, gives orders through OniMcp's tools (an in-game MCP
@@ -16,10 +17,11 @@ run's saves into tests/e2e/fixtures and its evidence into out/e2e-refs/SPEC, whi
 alone compares against.
 
 Lanes: --lanes N runs specs from a queue on N lanes at once. Lane L's OniMcp listens on
-8800 + 10 L and its E2eDriver on 8801 + 10 L (E2E_DRIVER_PORT); lanes are numbered from
---first-lane (1). Each lane has its own display: xvfb-run -a, or one of --displays. A lane holds
-out/e2e/.lane-L.lock, and out/e2e/.lock shared, so a perf job taking that lock exclusively
-(`flock out/e2e/.lock CMD`) keeps specs from starting; specs also wait while ps shows a perf job.
+8800 + 10 L and its E2eDriver on 8801 + 10 L (E2E_DRIVER_PORT); lanes are taken from
+--first-lane (1) to --last-lane (6 lanes on). Each lane has its own display: xvfb-run -a, or one
+of --displays. A lane holds out/e2e/.lane-L.lock, and out/e2e/.lock shared, so a perf job
+taking that lock exclusively (`flock out/e2e/.lock CMD`) keeps specs from starting; specs also
+wait while ps shows a perf job.
 
 Needs, in the environment or out/local-tools/qa.env: QA_U57_GAME and QA_U57_STEAM (the DLC
 content and a Steam double owning it, as for qa.sh's U57 stages), E2E_ONIMCP (a build of
@@ -28,6 +30,10 @@ folder; default out/bin/E2eDriver/release) for specs that use it and, for --play
 both, E2E_ORIGINAL (the original player's executable, with a DLC-owning Steam double in its
 Plugins). Each run's log, results and evidence are in out/e2e/SPEC/PLAYER-N; out/e2e/results.json
 holds one record per spec run.
+
+--hold keeps each player running after its steps (--hold-on-fail: after a failing step) until
+out/e2e/SPEC/PLAYER-N/hold is removed, for a look through OniMcp and E2eDriver while writing a
+spec.
 """
 import contextlib, ctypes, fcntl, importlib.util, json, os, re, shutil, signal, socket, subprocess, sys
 import threading, time, urllib.error, urllib.request
@@ -37,6 +43,7 @@ SPECS = os.path.join(ROOT, 'tests', 'e2e')
 FIXTURES = os.path.join(SPECS, 'fixtures')
 OUT = os.path.join(ROOT, 'out', 'e2e')
 REFS = os.path.join(ROOT, 'out', 'e2e-refs')
+DRIVER_SOURCE = os.path.join(ROOT, 'tools', 'E2eDriver')  # its mod.yaml and mod_info.yaml
 WIDTH, HEIGHT = 1280, 720
 PROFILE = ('config', 'unity3d', 'Klei', 'Oxygen Not Included')
 # Unity's Mono has ValueTuple in mscorlib but no System.ValueTuple facade, which the
@@ -118,7 +125,7 @@ TOP_KEYS = {'name', 'from', 'mods', 'options', 'setup', 'steps', 'require_log', 
 DRIVER_STEPS = {'click', 'toggle', 'dropdown', 'type', 'drag', 'tool', 'expect_ui', 'expect_state', 'ui_dump',
                 'ui_wait', 'world_shot', 'driver', 'click_world', 'scroll'}
 STEP_KINDS = {'dig', 'build', 'run', 'expect', 'call', 'save', 'shot', 'open', 'key'} | DRIVER_STEPS
-DRIVER_COMMANDS = {'ui.find', 'ui.dump', 'ui.wait', 'world.to_screen', 'screen.to_cell', 'state.get', 'camera.get',
+DRIVER_COMMANDS = {'ping', 'ui.find', 'ui.at', 'ui.dump', 'ui.wait', 'world.to_screen', 'screen.to_cell', 'state.get', 'camera.get',
                    'camera.set', 'canvas.hide', 'canvas.show', 'setup.call', 'seed'}
 
 
@@ -333,18 +340,19 @@ def try_lane(number, lock_dir, busy=port_open):
     return Lane(number, f)
 
 
-def allocate_lane(first, lock_dir=OUT, busy=port_open, wait=True, log=say):
-    """The first free lane from FIRST on (up to MAX_LANES lanes), waiting for one if WAIT."""
+def allocate_lane(first, lock_dir=OUT, busy=port_open, wait=True, log=say, last=None):
+    """The first free lane from FIRST to LAST (default MAX_LANES lanes), waiting for one if WAIT."""
     announced = False
+    last = first + MAX_LANES - 1 if last is None else last
     while True:
-        for number in range(first, first + MAX_LANES):
+        for number in range(first, last + 1):
             lane = try_lane(number, lock_dir, busy)
             if lane:
                 return lane
         if not wait:
             return None
         if not announced:
-            log(f'waiting for a free lane ({first}..{first + MAX_LANES - 1})')
+            log(f'waiting for a free lane ({first}..{last})')
             announced = True
         time.sleep(5)
 
@@ -483,59 +491,59 @@ class Mcp:
 # ---------------------------------------------------------------- E2eDriver
 
 class DriverError(SpecFailure):
-    pass
+    """A request E2eDriver answered with ok: false (or could not answer); RESULT is what it
+    still sent, such as a ui.wait timeout's last state."""
+
+    def __init__(self, message, result=None):
+        super().__init__(message)
+        self.result = result
 
 
 class Element:
-    """One ui.find match, normalised: path, rect (x, y, w, h; pixels, origin top-left), state, and
-    the path of the top raycast hit at its centre."""
+    """One element of a ui.find or ui.wait reply (tools/E2eDriver/README.md, "Element
+    description"): its path, screen rect (x, y, w, h; pixels, origin top-left), centre, state, and
+    the top raycast hit at its centre, with that hit's relation to the element."""
 
     def __init__(self, raw):
         self.raw = raw
         self.path = raw.get('path', '')
-        self.rect = Element.parse_rect(raw.get('rect') if 'rect' in raw else raw.get('corners'))
+        rect = raw.get('rect')
+        self.rect = (float(rect['x']), float(rect['y']), float(rect['w']), float(rect['h'])) if rect else None
         self.active = raw.get('active', True)
-        self.interactable = raw.get('interactable')
+        self.onscreen = raw.get('onscreen')
+        # A button inside a non-interactable CanvasGroup takes no clicks either.
+        interactable = raw.get('interactable')
+        self.interactable = None if interactable is None else bool(interactable and raw.get('groupInteractable', True))
         self.is_on = raw.get('isOn')
+        self.state = raw.get('state')
         self.text = raw.get('text')
-        hit = raw.get('hit', raw.get('topHit', raw.get('raycast')))
-        self.hit = hit.get('path') if isinstance(hit, dict) else hit
-
-    @staticmethod
-    def parse_rect(r):
-        if r is None:
-            return None
-        if isinstance(r, dict):
-            return (float(r['x']), float(r['y']), float(r.get('w', r.get('width'))), float(r.get('h', r.get('height'))))
-        if len(r) == 4 and all(isinstance(v, (int, float)) for v in r):
-            return tuple(float(v) for v in r)
-        if len(r) == 4 and all(isinstance(v, (list, tuple)) for v in r):  # four corners
-            xs, ys = [p[0] for p in r], [p[1] for p in r]
-            return (min(xs), min(ys), max(xs) - min(xs), max(ys) - min(ys))
-        raise DriverError(f'bad rect {r!r}')
+        hit = raw.get('hit') if isinstance(raw.get('hit'), dict) else {}
+        self.hit, self.relation, self.hits = hit.get('path'), hit.get('relation'), hit.get('all') or []
 
     @property
     def center(self):
+        center = self.raw.get('center')
+        if center:
+            return int(round(center['x'])), int(round(center['y']))
         x, y, w, h = self.rect
         return int(round(x + w / 2)), int(round(y + h / 2))
 
     def hit_is_self(self):
-        """The top raycast hit is this element or one of its children."""
-        if not self.hit:
-            return False
-        return self.hit == self.path or self.hit.startswith(self.path.rstrip('/') + '/')
+        """The top raycast hit is this element or one of its children: a click lands on it."""
+        return self.relation in ('self', 'child')
 
 
 class Driver:
-    """E2eDriver's client (§4.2): JSON lines over TCP on 127.0.0.1:E2E_DRIVER_PORT, one request per
-    line, handled on the game's main thread one per frame. A request is
-    {"id": N, "cmd": "ui.find", "args": {...}}; a reply {"id": N, "ok": true, "result": ...} or
-    {"id": N, "ok": false, "error": "..."}."""
+    """E2eDriver's client (tools/E2eDriver/README.md): JSON lines over TCP on
+    127.0.0.1:E2E_DRIVER_PORT, handled on the game's main thread one per frame. A request is
+    {"id": N, "cmd": "ui.find", "args": {...}}; a reply {"id": N, "ok": true, "frame": F,
+    "result": ...} or {"id": N, "ok": false, "frame": F, "error": "...", "result"?: ...}."""
 
     def __init__(self, port, host='127.0.0.1', timeout=60):
         self.address, self.timeout = (host, port), timeout
         self.sock = self.reader = None
         self.next_id = 0
+        self.frame = None  # the game frame of the last reply
         self.lock = threading.Lock()
 
     def connect(self, deadline=60, alive=lambda: True):
@@ -557,7 +565,7 @@ class Driver:
                 self.sock.close()
         self.sock = self.reader = None
 
-    def request(self, cmd, **args):
+    def request(self, cmd, timeout=None, **args):
         if not self.sock:
             raise DriverError('E2eDriver is not connected')
         with self.lock:
@@ -565,58 +573,74 @@ class Driver:
             ident = self.next_id
             line = json.dumps({'id': ident, 'cmd': cmd, 'args': args}) + '\n'
             try:
+                self.sock.settimeout(timeout or self.timeout)
                 self.sock.sendall(line.encode())
                 while True:
                     reply = self.reader.readline()
                     if not reply:
                         raise DriverError(f'E2eDriver closed the connection during {cmd}')
                     reply = json.loads(reply)
+                    # A malformed line is answered with id null; any other id is not ours.
                     if reply.get('id') in (ident, None):
                         break
             except (OSError, ValueError) as e:
                 raise DriverError(f'E2eDriver {cmd}: {e}')
-        if reply.get('ok') is False or reply.get('error'):
-            raise DriverError(f'E2eDriver {cmd} {json.dumps(args)[:300]}: {reply.get("error")}')
+        self.frame = reply.get('frame', self.frame)
+        if not reply.get('ok'):
+            raise DriverError(f'E2eDriver {cmd} {json.dumps(args)[:300]}: {reply.get("error")}', reply.get('result'))
         return reply.get('result')
 
-    # The commands of §4.2.
-    def find(self, path=None, text=None, type=None, under=None):
-        query = {k: v for k, v in (('path', path), ('text', text), ('type', type), ('under', under)) if v is not None}
-        result = self.request('ui.find', **query)
-        items = result.get('elements', []) if isinstance(result, dict) else (result or [])
-        return [Element(e) for e in items]
+    # The commands of the README.
+    def ping(self):
+        return self.request('ping')
+
+    def find(self, path=None, text=None, type=None, under=None, inactive=False, limit=None, hits=None):
+        query = {k: v for k, v in (('path', path), ('text', text), ('type', type), ('under', under),
+                                   ('limit', limit), ('hits', hits)) if v is not None}
+        if inactive:
+            query['inactive'] = True
+        return [Element(e) for e in self.request('ui.find', **query)['elements']]
 
     def find_one(self, query, index=None):
-        found = self.find(path=query.get('ui'), text=query.get('text'), type=query.get('type'), under=query.get('under'))
-        found = [e for e in found if e.active is not False]
+        index = query.get('index', 0) if index is None else index
+        found = self.find(path=query.get('ui'), text=query.get('text'), type=query.get('type'),
+                          under=query.get('under'), limit=max(50, index + 1))
         what = query.get('ui') or f'text {query.get("text")!r}' + (f' under {query["under"]}' if query.get('under') else '')
         if not found:
             raise SpecFailure(f'no active element {what}')
-        index = query.get('index', 0) if index is None else index
         if index >= len(found):
             raise SpecFailure(f'{what}: {len(found)} match(es), wanted index {index}')
         if found[index].rect is None:
             raise SpecFailure(f'{what}: E2eDriver gave no rect')
         return found[index]
 
-    def dump(self, root):
-        result = self.request('ui.dump', root=root)
-        if isinstance(result, dict):
-            result = result.get('text', result.get('lines', ''))
-        return '\n'.join(result) + '\n' if isinstance(result, list) else str(result)
+    def count(self, path):
+        """How many active elements match PATH."""
+        return self.request('ui.find', path=path, limit=0, hit=False)['count']
 
-    def wait(self, path, cond='exists', frames=300):
-        return self.request('ui.wait', path=path, cond=cond, frames=frames)
+    def at(self, x, y, hits=8):
+        """The raycast at a screen point: {path, relation, count, all: [...]}."""
+        return self.request('ui.at', x=x, y=y, hits=hits)
+
+    def dump(self, root):
+        return ''.join(line + '\n' for line in self.request('ui.dump', root=root)['lines'])
+
+    def wait(self, path, cond='exists', frames=300, **more):
+        # The driver holds its queue while it waits: a slow player may take a while.
+        return self.request('ui.wait', timeout=max(self.timeout, frames), path=path, cond=cond, frames=frames, **more)
 
     def to_screen(self, cell):
-        return point(self.request('world.to_screen', cell=list(cell)))
+        result = self.request('world.to_screen', cell=list(cell))
+        if result.get('onscreen') is False:
+            raise SpecFailure(f'cell {list(cell)} is off screen (at {result["x"]}, {result["y"]})')
+        return result['x'], result['y']
 
     def to_cell(self, x, y):
-        return point(self.request('screen.to_cell', x=x, y=y))
+        result = self.request('screen.to_cell', x=x, y=y)
+        return tuple(result['xy']) if result.get('valid') else None
 
     def state(self, expr):
-        result = self.request('state.get', expr=expr)
-        return result.get('value') if isinstance(result, dict) and set(result) <= {'value', 'type'} else result
+        return self.request('state.get', expr=expr)['value']
 
     def camera_get(self):
         return self.request('camera.get')
@@ -636,13 +660,7 @@ class Driver:
     def frames(self, n):
         """Lets N frames pass: each request is answered in its own frame's Update."""
         for _ in range(n):
-            self.request('camera.get')
-
-
-def point(value):
-    if isinstance(value, dict):
-        return value['x'], value['y']
-    return tuple(value[:2])
+            self.request('ping')
 
 
 # ---------------------------------------------------------------- XTEST input
@@ -704,6 +722,11 @@ def key_problems(code):
 
 
 _xauth = threading.Lock()
+# map_state's index in XWindowAttributes read as 32-bit ints on LP64: x, y, width, height,
+# border_width, depth (6 ints), visual (pointer: 2), root (long: 2), class, bit_gravity,
+# win_gravity, backing_store (4), backing_planes, backing_pixel (longs: 4), save_under (1, padded
+# to 2), colormap (long: 2), map_installed (1), map_state.
+XWA_MAP_STATE = 6 + 2 + 2 + 4 + 4 + 2 + 2 + 1
 
 
 class Input:
@@ -724,6 +747,13 @@ class Input:
         xtst.XTestFakeMotionEvent.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_ulong]
         xtst.XTestFakeButtonEvent.argtypes = [ctypes.c_void_p, ctypes.c_uint, ctypes.c_int, ctypes.c_ulong]
         xtst.XTestFakeKeyEvent.argtypes = [ctypes.c_void_p, ctypes.c_uint, ctypes.c_int, ctypes.c_ulong]
+        x11.XDefaultRootWindow.argtypes, x11.XDefaultRootWindow.restype = [ctypes.c_void_p], ctypes.c_ulong
+        x11.XQueryTree.argtypes = [ctypes.c_void_p, ctypes.c_ulong, ctypes.POINTER(ctypes.c_ulong),
+                                   ctypes.POINTER(ctypes.c_ulong), ctypes.POINTER(ctypes.POINTER(ctypes.c_ulong)),
+                                   ctypes.POINTER(ctypes.c_uint)]
+        x11.XGetWindowAttributes.argtypes = [ctypes.c_void_p, ctypes.c_ulong, ctypes.c_void_p]
+        x11.XSetInputFocus.argtypes = [ctypes.c_void_p, ctypes.c_ulong, ctypes.c_int, ctypes.c_ulong]
+        x11.XFree.argtypes = [ctypes.c_void_p]
         # libX11 reads XAUTHORITY when it connects; lanes have their own (xvfb-run's), so set it
         # only around the connect.
         with _xauth:
@@ -743,6 +773,39 @@ class Input:
         self.display = display
         self.frames = frames or (lambda n: time.sleep(n * FRAME_FALLBACK))
         self.held = []
+        self.focused = False
+
+    def focus(self):
+        """Gives the keyboard focus to the player's window. Xvfb runs no window manager, so no
+        window ever gets it: the original Unity player then counts itself unfocused
+        (Application.isFocused false) and drops every key, text included. Mouse input works
+        without. The window is the largest viewable top-level one."""
+        if self.focused:
+            return
+        x11 = self.x11
+        root, parent = ctypes.c_ulong(), ctypes.c_ulong()
+        children, count = ctypes.POINTER(ctypes.c_ulong)(), ctypes.c_uint()
+        if not x11.XQueryTree(self.dpy, x11.XDefaultRootWindow(self.dpy), ctypes.byref(root), ctypes.byref(parent),
+                              ctypes.byref(children), ctypes.byref(count)):
+            return
+        best, area = None, 0
+        attributes = (ctypes.c_int * 64)()  # XWindowAttributes, read by offset below
+        for i in range(count.value):
+            if x11.XGetWindowAttributes(self.dpy, children[i], attributes):
+                # x, y, width, height, border_width, depth, visual*, root, class, bit_gravity,
+                # win_gravity, backing_store, backing_planes, backing_pixel, save_under,
+                # colormap, map_installed, map_state: map_state is IsViewable (2) for a shown window.
+                width, height = attributes[2], attributes[3]
+                map_state = attributes[XWA_MAP_STATE]
+                if map_state == 2 and width * height > area:
+                    best, area = children[i], width * height
+        if count.value:
+            x11.XFree(children)
+        if best:
+            x11.XSetInputFocus(self.dpy, best, 1, 0)  # RevertToPointerRoot, CurrentTime
+            x11.XSync(self.dpy, 0)
+            self.frames(2)
+            self.focused = True
 
     def close(self):
         if self.dpy:
@@ -773,6 +836,7 @@ class Input:
         self._flush()
 
     def key_event(self, name, down):
+        self.focus()
         keycode, _ = self.keycode(name)
         self.xtst.XTestFakeKeyEvent(self.dpy, keycode, 1 if down else 0, 0)
         if down:
@@ -815,6 +879,7 @@ class Input:
             self.frames(2)
 
     def type_text(self, text):
+        self.focus()
         for ch in text:
             name = {'\n': 'Return', '\t': 'Tab', ' ': 'space'}.get(ch, ch)
             keycode, keysym = self.keycode(name)
@@ -948,7 +1013,18 @@ class Player:
             own.append(('E2eDriver', self.env['E2E_DRIVER']))
         for folder, source in own:
             dest = os.path.join(mods_dir, 'Local', folder)
-            shutil.copytree(source, dest)
+            if folder == 'E2eDriver':
+                # The build's assembly, with the mod's yaml files from its source folder.
+                os.makedirs(dest)
+                dll = os.path.join(source, 'E2eDriver.dll')
+                if not os.path.exists(dll):
+                    raise SpecFailure(f'no E2eDriver.dll in {source} (dotnet build tools/E2eDriver -c Release)')
+                shutil.copy(dll, dest)
+                for name in ('mod.yaml', 'mod_info.yaml'):
+                    shutil.copy(next(p for p in (os.path.join(DRIVER_SOURCE, name), os.path.join(source, name))
+                                     if os.path.exists(p)), dest)
+            else:
+                shutil.copytree(source, dest)
             if folder == 'OniMcp' and self.kind == 'original':
                 shutil.copy(VALUETUPLE, dest)
             static = mod_yaml_value(dest, 'staticID') or folder
@@ -975,7 +1051,7 @@ class Player:
             if name in self.env:
                 env[name] = self.env[name]
         if self.kind == 'original':
-            command = [self.env['E2E_ORIGINAL'], *size, '-logFile', self.log]
+            command = [original_player(self.env['E2E_ORIGINAL'], self.lane.number), *size, '-logFile', self.log]
             stdout = os.path.join(self.out, 'stdout.txt')
         else:
             env.update(ONI_GAME_DIR=self.env['QA_U57_GAME'], ONI_RUN_HOME=self.home, ONI_CONFIG='release')
@@ -1066,6 +1142,9 @@ class Player:
         mcp.call('game_control', domain='speed', action='pause', confirm=True)
 
     def stop(self):
+        # The player outlives xvfb-run when its X server goes first: every descendant is known
+        # before anything is signalled, and whatever survives SIGTERM gets SIGKILL.
+        family = [p for process in (self.process, self.xvfb) if process for p in descendants(process.pid)]
         for process in (self.process, self.xvfb):
             if process and process.poll() is None:
                 os.killpg(process.pid, signal.SIGTERM)
@@ -1074,6 +1153,12 @@ class Player:
                 except subprocess.TimeoutExpired:
                     os.killpg(process.pid, signal.SIGKILL)
                     process.wait()
+        deadline = time.time() + 20
+        while time.time() < deadline and any(os.path.exists(f'/proc/{p}') for p in family):
+            time.sleep(0.5)
+        for p in family:
+            with contextlib.suppress(OSError):
+                os.kill(p, signal.SIGKILL)
         deadline = time.time() + 30
         while (port_open(self.lane.mcp_port) or port_open(self.lane.driver_port)) and time.time() < deadline:
             time.sleep(1)
@@ -1084,6 +1169,25 @@ class Player:
         result = subprocess.run([sys.executable, os.path.join(ROOT, 'scripts', 'qa-tools.py'), 'signatures', self.log],
                                 capture_output=True, text=True)
         return set(result.stdout.splitlines())
+
+
+def original_player(executable, lane, root=OUT):
+    """The original player's executable in a folder of the lane's own: Unity's Linux player runs
+    single-instance, locking unity.lock beside its executable ("Player is already running"), so
+    each lane gets a copy of the executable beside links to everything else but that lock."""
+    source = os.path.dirname(os.path.abspath(executable))
+    folder = os.path.join(root, f'.original-{lane}')
+    os.makedirs(folder, exist_ok=True)
+    for name in os.listdir(source):
+        if name == 'unity.lock':
+            continue
+        target = os.path.join(folder, name)
+        if name == os.path.basename(executable):
+            if not os.path.exists(target) or os.path.getmtime(target) < os.path.getmtime(executable):
+                shutil.copy2(executable, target)
+        elif not os.path.lexists(target):
+            os.symlink(os.path.join(source, name), target)
+    return os.path.join(folder, os.path.basename(executable))
 
 
 def mod_yaml_value(folder, key):
@@ -1157,13 +1261,26 @@ def facts(mcp, keys):
     if 'duplicants' in keys or 'cycle' in keys:
         status = mcp.read('oni://colony/status')
         found['duplicants'], found['cycle'] = status.get('duplicantCount', 0), status.get('cycle', 0)
-    if 'pending_construction' in keys:
-        index = mcp.call('world_editor', command='read', path='/active/index.md', format='progress', limit=1)
-        text = index.get('content', '') if isinstance(index, dict) else str(index)
-        match = re.search(r'pending=(\d+)', text)
-        if not match:
-            raise SpecFailure('no construction progress in /active/index.md')
-        found['pending_construction'] = int(match.group(1))
+    if 'pending_construction' in keys or 'blueprints' in keys:
+        # Unfinished blueprints, wires and pipes included: OniMcp connects a powered building it
+        # places to a power source with wire blueprints of its own.
+        counts, offset = {}, 0
+        while True:
+            # OniMcp lists at most 100 rows a read.
+            index = mcp.call('world_editor', command='read', path='/active/index.md', format='progress',
+                             limit=100 if 'blueprints' in keys else 1, offset=offset)
+            text = index.get('content', '') if isinstance(index, dict) else str(index)
+            match = re.search(r'pending=(\d+)', text)
+            if not match:
+                raise SpecFailure('no construction progress in /active/index.md: ' + text[-300:])
+            found['pending_construction'] = int(match.group(1))
+            rows = re.findall(r'^\| \d+ \| (\w+) \| \d+,\d+ \|', text, re.M)
+            for prefab in rows:
+                counts[prefab] = counts.get(prefab, 0) + 1
+            offset += len(rows)
+            if 'blueprints' not in keys or not rows or offset >= found['pending_construction']:
+                break
+        found['blueprints'] = counts
     if 'pending_digs' in keys:
         pending = mcp.call('game_control', domain='speed', action='step_facts').get('pendingOrders', {})
         found['pending_digs'] = pending.get('remainingDigOrders', 0)
@@ -1195,9 +1312,10 @@ def unmet(mcp, expect):
     return misses
 
 
-def edit(mcp, path, search, replace):
+def edit(mcp, path, search, replace, **payload):
+    extra = {'payload': payload} if payload else {}
     result = mcp.call('world_editor', command='edit', path=path, confirm=True,
-                      content=f'<<<<<<< SEARCH\n{search}\n=======\n{replace}\n>>>>>>> REPLACE')
+                      content=f'<<<<<<< SEARCH\n{search}\n=======\n{replace}\n>>>>>>> REPLACE', **extra)
     if not (isinstance(result, dict) and result.get('ok') and not result.get('failed')):
         raise SpecFailure(f'edit of {path} failed: {json.dumps(result)[:1500]}')
     return result
@@ -1208,9 +1326,11 @@ def dig(mcp, rect, priority=5):
     edit(mcp, '/active/ops/orders.md', '', f'挖 x1={x1} y1={y1} x2={x2} y2={y2} priority={priority}')
 
 
-def build(mcp, prefab, cells, priority=5, material=None):
+def build(mcp, prefab, cells, priority=5, material=None, wire=False):
     """Blueprints through the viewport map (OniMcp places exact construction only that way): each
-    cell's token on its map row becomes PREFAB:PRIORITY[#MATERIAL], one row per edit."""
+    cell's token on its map row becomes PREFAB:PRIORITY[#MATERIAL], one row per edit. OniMcp would
+    connect a powered building to a power source with wire blueprints and dig orders of its own
+    choosing (54 wires towards a sulfur cell, in early-base): only with WIRE."""
     token = f'{prefab}:{priority}' + (f'#{material}' if material else '')
     rows = {}
     for x, y in cells:
@@ -1232,7 +1352,25 @@ def build(mcp, prefab, cells, priority=5, material=None):
             if not x0 <= x <= x_end:
                 raise SpecFailure(f'cell {x},{y} is outside the viewport ({x0}..{x_end})')
             parts[tokens[x - x0]] = token
-        edit(mcp, '/active/map/viewport.md', line, head + ': ' + ' '.join(parts))
+        report = edit(mcp, '/active/map/viewport.md', line, head + ': ' + ' '.join(parts), autoConnectPower=wire)
+        for placed in build_results(report):
+            if not placed.get('blueprintsPlaced') and not placed.get('blueprintsAlreadyPresent'):
+                if placed.get('pendingBuildAfterDig'):
+                    # OniMcp digs the cells in the way first, and places the blueprint after.
+                    raise SpecFailure(f'{prefab} at row {y}: cells in the way must be dug first '
+                                      f'({placed.get("autoDigMarked", 0) + placed.get("autoDigAlreadyMarked", 0)} '
+                                      'marked); dig them in an earlier step')
+                raise SpecFailure(f'{prefab} at row {y}: no blueprint placed: {json.dumps(placed)[:600]}')
+
+
+def build_results(report):
+    """The per-token results of a viewport build edit (OniMcp's build_area answers)."""
+    found = []
+    for block in report.get('results', []):
+        for kind in (block.get('result') or {}).get('results', []):
+            if kind.get('kind') == 'build':
+                found += [r.get('result') or {} for r in (kind.get('result') or {}).get('results', [])]
+    return found
 
 
 def run(mcp, seconds, until=None, log=None):
@@ -1332,12 +1470,39 @@ def text_matches(have, want):
     return have == want
 
 
-RELATION = re.compile(r'\s*(>=|<=|>|<|==|!=)\s*(?:(-?\d+(?:\.\d+)?)\s*\*\s*)?([A-Za-z_]\w*|-?\d+(?:\.\d+)?)\s*')
+RELATION = re.compile(r'\s*(>=|<=|>|<|==|!=)\s*([-+*/().\w\s]+?)\s*')
+
+
+def arithmetic(text, names):
+    """TEXT, an expression of numbers, NAMES, + - * / and parentheses, evaluated."""
+    import ast
+    def value(node):
+        if isinstance(node, ast.Constant) and isinstance(node.value, (int, float)):
+            return node.value
+        if isinstance(node, ast.Name):
+            if node.id not in names:
+                raise SpecFailure(f'{text!r}: no value saved as {node.id!r}')
+            v = names[node.id]
+            if not isinstance(v, (int, float)) or isinstance(v, bool):
+                raise SpecFailure(f'{text!r}: {node.id} is {v!r}, not a number')
+            return v
+        if isinstance(node, ast.UnaryOp) and isinstance(node.op, (ast.USub, ast.UAdd)):
+            return -value(node.operand) if isinstance(node.op, ast.USub) else value(node.operand)
+        if isinstance(node, ast.BinOp) and isinstance(node.op, (ast.Add, ast.Sub, ast.Mult, ast.Div)):
+            a, b = value(node.left), value(node.right)
+            return {ast.Add: a + b, ast.Sub: a - b, ast.Mult: a * b}.get(type(node.op)) if not isinstance(node.op, ast.Div) else a / b
+        raise SpecFailure(f'{text!r}: only numbers, saved names, + - * / and parentheses')
+    try:
+        tree = ast.parse(text.strip(), mode='eval')
+    except SyntaxError:
+        raise SpecFailure(f'bad expression {text!r}')
+    return value(tree.body)
 
 
 def state_check(have, wanted, saved, original=None):
-    """Whether a state.get value meets WANTED: a value, "OP N", "OP [F *] NAME" (a value saved
-    with save_as, or `original`: the original player's value at this step), exists / missing,
+    """Whether a state.get value meets WANTED: a value, "OP EXPR" (EXPR of numbers and names,
+    + - * / and parentheses; a name is a value saved with save_as, or `original`: the original
+    player's value at this step), exists / missing,
     or {contains: X}, {equals: X}, {save_as: NAME}. Returns (ok, deferred): deferred when it
     refers to the original and no original value is known yet."""
     if isinstance(wanted, dict):
@@ -1356,20 +1521,14 @@ def state_check(have, wanted, saved, original=None):
     if isinstance(wanted, str):
         match = RELATION.fullmatch(wanted)
         if match:
-            op, factor, operand = match.group(1), match.group(2), match.group(3)
-            if re.fullmatch(r'-?\d+(?:\.\d+)?', operand):
-                reference = float(operand)
-            elif operand == 'original':
+            op, expression = match.group(1), match.group(2)
+            if re.search(r'\boriginal\b', expression):
                 if original is None:
                     return True, True
-                reference = original
-            elif operand in saved:
-                reference = saved[operand]
-            else:
-                raise SpecFailure(f'{wanted!r}: no value saved as {operand!r}')
-            if factor is not None:
-                reference = float(factor) * reference
-            return apply_op(op, have, reference), False
+                if not re.fullmatch(r'\s*original\s*', expression) or isinstance(original, (int, float)):
+                    return apply_op(op, have, arithmetic(expression, dict(saved, original=original))), False
+                return apply_op(op, have, original), False
+            return apply_op(op, have, arithmetic(expression, saved)), False
     if isinstance(wanted, bool) or isinstance(have, bool):
         return type(have) is type(wanted) and have == wanted, False  # 1 is not True
     return have == wanted, False
@@ -1380,10 +1539,11 @@ def state_check(have, wanted, saved, original=None):
 class Run:
     """One spec in one player: the step interpreter."""
 
-    def __init__(self, spec, kind, index, env, lane, log, perf_wait=True, original_values=None):
+    def __init__(self, spec, kind, index, env, lane, log, perf_wait=True, original_values=None, hold=None):
         self.spec, self.kind, self.index, self.env, self.lane, self.log = spec, kind, index, env, lane, log
         self.out = os.path.join(OUT, spec['name'], f'{kind}-{index}')
         self.perf_wait = perf_wait
+        self.hold = hold  # 'fail' or 'end': keep the player up for a look (--hold)
         self.mcp = Mcp(lane.mcp_port)
         self.driver = self.input = None
         self.saves, self.values, self.saved, self.evidence = [], [], {}, {'ui_dump': [], 'shot': [], 'world_shot': []}
@@ -1413,8 +1573,14 @@ class Run:
     def element(self, query):
         """The element QUERY names, which must not be covered by another graphic."""
         element = self.need_driver().find_one(query)
+        if element.onscreen is False:
+            raise SpecFailure(f'{element.path} is off screen (rect {element.rect})')
         if not element.hit_is_self():
-            raise SpecFailure(f'{element.path} is occluded by {element.hit or "nothing (no raycast hit)"}')
+            # The hits under the centre, top first, say what covers it.
+            below = self.driver.at(*element.center, hits=4)
+            stack = ', '.join(f'{h.get("path")}' for h in below.get('all', [])) or 'none'
+            what = element.hit if element.relation in ('other', 'ancestor') else f'nothing ({element.relation})'
+            raise SpecFailure(f'{element.path} is occluded by {what} (hits there: {stack})')
         return element
 
     def click_element(self, query, mods=(), button='left'):
@@ -1437,6 +1603,24 @@ class Run:
                 rects += [list(e.rect) for e in self.need_driver().find(path=path) if e.rect and e.active is not False]
         return rects
 
+    # Dialogs a load may open, by their header text: a fixture saved with other mods than the
+    # spec's opens "MOD DIFFERENCES" in both players. Its OK button is pressed like a player would.
+    LOAD_DIALOGS = ('MOD DIFFERENCES',)
+
+    def dismiss_load_dialogs(self):
+        for _ in range(5):
+            headers = [e for title in self.LOAD_DIALOGS for e in self.driver.find(text=title)]
+            if not headers:
+                return
+            segments = headers[0].path.split('/')
+            dialog = '/'.join(segments[:next((i + 1 for i, s in enumerate(segments) if 'Dialog' in s), 2)])
+            self.log(f'  dismissing {headers[0].text!r} ({dialog})')
+            ok = self.driver.find(path=dialog + '/**/OKButton') or self.driver.find(text='OK', under=dialog)
+            if not ok:
+                raise SpecFailure(f'{dialog}: no OK button to dismiss it')
+            self.click_element({'ui': ok[0].path})
+            self.driver.wait(dialog, 'gone', 120)
+
     # -- steps
     def step(self, kind, value, number):
         mcp = self.mcp
@@ -1444,7 +1628,7 @@ class Run:
             dig(mcp, value)
         elif kind == 'build':
             cells = value.get('cells') or [value['at']]
-            build(mcp, value['prefab'], cells, value.get('priority', 5), value.get('material'))
+            build(mcp, value['prefab'], cells, value.get('priority', 5), value.get('material'), value.get('wire', False))
         elif kind == 'run':
             spent = run(mcp, value['seconds'], value.get('until'), self.log)
             self.log(f'  run: {spent:.0f} game seconds')
@@ -1517,7 +1701,8 @@ class Run:
         elif kind == 'expect_state':
             self.expect_state(value, number)
         elif kind == 'ui_wait':
-            self.need_driver().wait(value['path'], value.get('cond', 'exists'), value.get('frames', 300))
+            more = {k: value[k] for k in ('value', 'stable', 'under') if k in value}
+            self.need_driver().wait(value['path'], value.get('cond', 'exists'), value.get('frames', 300), **more)
         elif kind == 'ui_dump':
             text = self.need_driver().dump(value['root'])
             path = os.path.join(self.out, value['name'] + '.ui.txt')
@@ -1553,15 +1738,28 @@ class Run:
         elif value.get('ui'):
             self.click_element(value)
         else:
-            # A ToolMenu entry by its tool's name: the toolbar button whose path ends in it, else
-            # whose text is it.
-            name = value['toolbar']
-            driver = self.need_driver()
-            found = driver.find(path=f'**/ToolMenu/**/{name}') or driver.find(text=name, under='**/ToolMenu')
-            if not found:
-                raise SpecFailure(f'no toolbar entry {name!r}')
-            self.click_element({'ui': found[0].path})
+            self.click_element(self.toolbar_entry(value['toolbar']))
         self.frames(5)
+
+    def toolbar_entry(self, name):
+        """The toolbar button of a ToolMenu collection named by its text ("Sweep") or icon
+        ("filtered_clear"), as a ui query. Every button is called ActionIconToggle, so it is told
+        apart by its sibling index (the #N of ui.find's key)."""
+        driver = self.need_driver()
+        collections = driver.state('ToolMenu.Instance.basicTools') or []
+        wanted = name.lower()
+        for i, collection in enumerate(collections):
+            if wanted in (str(collection.get('text', '')).lower(), str(collection.get('icon', '')).lower()):
+                break
+        else:
+            names = ', '.join(f'{c.get("text")} ({c.get("icon")})' for c in collections)
+            raise SpecFailure(f'no toolbar entry {name!r}; there are {names}')
+        path = collection['toggle']['path']
+        sibling = driver.state(f'ToolMenu.Instance.basicTools[{i}].toggle.transform.GetSiblingIndex()')
+        for index, element in enumerate(driver.find(path=path)):
+            if element.raw.get('key', '').endswith(f'#{sibling}'):
+                return {'ui': path, 'index': index}
+        raise SpecFailure(f'toolbar entry {name!r} ({path} #{sibling}) is not shown')
 
     def dropdown(self, value):
         element = self.click_element(value)
@@ -1581,10 +1779,17 @@ class Run:
         for attempt in range(tries):
             misses = []
             for path, wanted in value.items():
-                found = [e for e in self.need_driver().find(path=path)]
+                # `active: false` asks about an inactive element, which only inactive: true finds.
+                found = self.need_driver().find(path=path, inactive='active' in wanted)
                 active = [e for e in found if e.active is not False]
                 element = (active or found or [None])[0]
-                misses += [f'{path}: {m}' for m in ui_mismatches(element, wanted)]
+                fields = {k: v for k, v in wanted.items() if k != 'count'}
+                misses += [f'{path}: {m}' for m in ui_mismatches(element, fields)] if fields else []
+                if 'count' in wanted:
+                    # How many active elements match: a value, "OP EXPR" or {save_as: NAME}.
+                    count = self.driver.count(path)
+                    if not state_check(count, wanted['count'], self.saved)[0]:
+                        misses.append(f'{path}: count is {count}, wanted {wanted["count"]}')
             if not misses:
                 return
             self.frames(3)
@@ -1597,6 +1802,19 @@ class Run:
                 return None
             with open(path, encoding='utf-8', errors='replace') as f:
                 return f.read()
+        cells = re.fullmatch(r'cells:(\d+),(\d+)\.\.(\d+),(\d+)::(.+)', expr)
+        if cells:
+            # The sum of EXPR over a rectangle of cells, {cell} standing for each cell's index.
+            x1, y1, x2, y2 = (int(v) for v in cells.groups()[:4])
+            width = self.need_driver().state('Grid.WidthInCells')
+            total = 0
+            for y in range(min(y1, y2), max(y1, y2) + 1):
+                for x in range(min(x1, x2), max(x1, x2) + 1):
+                    v = self.driver.state(cells.group(5).replace('{cell}', str(y * width + x)))
+                    if not isinstance(v, (int, float)) or isinstance(v, bool):
+                        raise SpecFailure(f'{expr}: cell {x},{y} gives {v!r}, not a number')
+                    total += v
+            return total
         return self.need_driver().state(expr)
 
     def expect_state(self, value, number):
@@ -1632,9 +1850,11 @@ class Run:
         driver = self.need_driver()
         camera = {}
         if 'at' in value:
-            camera['pos'] = [value['at'][0] + 0.5, value['at'][1] + 0.5]  # a cell's centre in world units
+            camera['cell'] = list(value['at'])
         if 'ortho' in value:
             camera['ortho'] = value['ortho']
+        if value.get('max'):  # raise the camera controller's maximum orthographic size first
+            camera['max'] = value['max']
         if camera:
             driver.camera_set(**camera)
         self.pointer_away()
@@ -1661,7 +1881,9 @@ class Run:
     def execute(self):
         spec = self.spec
         fixture = os.path.join(FIXTURES, spec['from'] + '.sav')
-        uses_driver = needs_driver(spec)
+        # E2eDriver goes into every run it is built for (the same in both players); a spec with
+        # driver steps needs it.
+        uses_driver = needs_driver(spec) or bool(self.env.get('E2E_DRIVER'))
         outcome, label, failed_kind = None, 'start', None
         self.player = None
         records = None
@@ -1681,6 +1903,7 @@ class Run:
             self.log(f'  loaded {spec["from"]} in {time.time() - started:.0f} s')
             if uses_driver:
                 self.driver = Driver(self.lane.driver_port).connect(120, self.player.alive)
+                self.dismiss_load_dialogs()
             steps = [('setup', i, s) for i, s in enumerate(spec['setup'], 1)] + \
                     [('steps', i, s) for i, s in enumerate(spec['steps'], 1)]
             for block, number, step in steps:
@@ -1704,6 +1927,8 @@ class Run:
             with contextlib.suppress(Exception):
                 screenshot(self.mcp, self.out, 'failure')
         finally:
+            if self.hold and self.player and self.player.alive() and (self.hold == 'end' or outcome):
+                self.held()
             if self.input:
                 with contextlib.suppress(Exception):
                     self.input.close()
@@ -1722,6 +1947,24 @@ class Run:
                 'lane': self.player.lane_record() if self.player else {'lane': self.lane.number},
                 'options_written': self.player.option_files if self.player else [],
                 'log': self.player.log if self.player else None}
+
+
+    HOLD_SECONDS = 3600
+
+    def held(self):
+        """Keeps the player running (--hold) until its hold file is removed, the player exits or
+        an hour passes, so its OniMcp and E2eDriver can be queried by hand."""
+        flag = os.path.join(self.out, 'hold')
+        open(flag, 'w').close()
+        self.log(f'  holding: OniMcp :{self.lane.mcp_port}, E2eDriver :{self.lane.driver_port}, display '
+                 f'{self.player.display}; rm {flag} to go on')
+        if self.driver:
+            self.driver.close()  # others may connect meanwhile; reconnected below
+        end = time.time() + self.HOLD_SECONDS
+        while os.path.exists(flag) and self.player.alive() and time.time() < end:
+            time.sleep(2)
+        with contextlib.suppress(OSError):
+            os.remove(flag)
 
 
 def driver_errors(log):
@@ -1863,10 +2106,11 @@ def usage():
 
 
 def parse_args(argv):
-    opts = {'players': 'ours', 'repeat': 1, 'bless': False, 'lanes': 1, 'first_lane': 1, 'displays': None,
+    opts = {'players': 'ours', 'repeat': 1, 'bless': False, 'hold': None, 'lanes': 1, 'first_lane': 1, 'last_lane': None, 'displays': None,
             'perf_wait': True, 'results': os.path.join(OUT, 'results.json'), 'check': False, 'names': []}
     i = 0
     takes = {'--player': 'players', '--repeat': 'repeat', '--lanes': 'lanes', '--first-lane': 'first_lane',
+             '--last-lane': 'last_lane',
              '--displays': 'displays', '--results': 'results'}
     while i < len(argv):
         a = argv[i]
@@ -1877,6 +2121,8 @@ def parse_args(argv):
             i += 1
         elif a == '--bless':
             opts['bless'] = True
+        elif a in ('--hold', '--hold-on-fail'):
+            opts['hold'] = 'end' if a == '--hold' else 'fail'
         elif a == '--no-perf-wait':
             opts['perf_wait'] = False
         elif a == '--check':
@@ -1888,13 +2134,17 @@ def parse_args(argv):
         i += 1
     if opts['players'] not in ('ours', 'original', 'both'):
         raise SpecError('--player is ours, original or both')
-    for key in ('repeat', 'lanes', 'first_lane'):
+    for key in ('repeat', 'lanes', 'first_lane', 'last_lane'):
+        if opts[key] is None:
+            continue
         try:
             opts[key] = int(opts[key])
         except ValueError:
             raise SpecError(f'--{key.replace("_", "-")} takes a number')
     if not 1 <= opts['lanes'] <= MAX_LANES:
         raise SpecError(f'--lanes is 1..{MAX_LANES}')
+    if opts['last_lane'] is not None and not opts['first_lane'] + opts['lanes'] - 1 <= opts['last_lane']:
+        raise SpecError('--last-lane leaves fewer lanes than --lanes')
     if opts['first_lane'] < 0 or opts['repeat'] < 1:
         raise SpecError('--first-lane is 0 or more, --repeat 1 or more')
     if opts['displays'] is not None:
@@ -1961,7 +2211,7 @@ def main(argv):
         log(f'== {spec["name"]} in {kind} ({index}/{opts["repeat"]})')
         with machine_lock(perf_wait=opts['perf_wait'], log=log):
             result = Run(spec, kind, index, env, lane, log, opts['perf_wait'],
-                         reference.values if reference else None).execute()
+                         reference.values if reference else None, opts['hold']).execute()
         with state:
             results[job['id']] = result
         record.update(result['lane'], out=result['out'], outcome=result['outcome'], saves=result['saves'],
@@ -1987,7 +2237,7 @@ def main(argv):
         return record
 
     def worker(slot):
-        lane = allocate_lane(opts['first_lane'])
+        lane = allocate_lane(opts['first_lane'], last=opts['last_lane'])
         if opts['displays']:
             lane.display = opts['displays'][slot]
         log = lambda s: say(f'[lane {lane.number}] {s}')

@@ -31,6 +31,8 @@ namespace SemanticsProbe
                 {
                     System.IO.File.Delete(trigger);
                     Dump("trigger " + ++triggered, true, true);
+                    DumpMaterials("Klei/Liquid");
+                    MeasureMultiTap();
                 }
             }
             var active = SceneManager.GetActiveScene().name;
@@ -58,6 +60,108 @@ namespace SemanticsProbe
                 Dump("game", true);
                 Triggers.Ready = true;
             }
+        }
+
+        /// Every loaded material using the shader: its float, range and vector properties, with the
+        /// zoom globals the game sets for it.
+        static void DumpMaterials(string shaderName)
+        {
+            Rec.Log("=== materials " + shaderName + ": _WorldCameraPos " + Shader.GetGlobalVector("_WorldCameraPos") + " _CameraZoomInfo " + Shader.GetGlobalVector("_CameraZoomInfo"));
+            foreach (var global in new[] { "_SolidLiquidGasMassTex", "_LiquidTex", "_MaterialDataTex", "_LiquidDataTex" })
+            {
+                var t = Shader.GetGlobalTexture(global);
+                if (t != null) SaveTexture(t, global);
+                Rec.Log("GLOBALTEX " + global + " " + (t == null ? "null" : t.GetType().Name + " " + t.name + " " + t.width + "x" + t.height + " " + t.filterMode + " " + t.wrapMode + " mips " + t.mipmapCount + " aniso " + t.anisoLevel + " bias " + t.mipMapBias.ToString("R", CultureInfo.InvariantCulture)));
+            }
+            foreach (var rt in Resources.FindObjectsOfTypeAll<RenderTexture>())
+                if (rt.name is "MRT0" or "MRT1" or "MRT0_Copy" or "MRT1_Copy")
+                {
+                    Rec.Log("RT " + rt.name + " " + rt.width + "x" + rt.height + " " + rt.format + " " + rt.filterMode + " " + rt.wrapMode);
+                    SaveTexture(rt, rt.name);
+                }
+            foreach (var m in Resources.FindObjectsOfTypeAll<Material>())
+            {
+                if (m.shader == null || m.shader.name != shaderName) continue;
+                var sb = new StringBuilder("MAT " + m.name + " keywords [" + string.Join(" ", m.shaderKeywords) + "]");
+                var shader = m.shader;
+                for (int i = 0; i < shader.GetPropertyCount(); i++)
+                {
+                    var name = shader.GetPropertyName(i);
+                    switch (shader.GetPropertyType(i))
+                    {
+                        case UnityEngine.Rendering.ShaderPropertyType.Float:
+                        case UnityEngine.Rendering.ShaderPropertyType.Range:
+                            sb.Append(' ').Append(name).Append('=').Append(m.GetFloat(name).ToString("R", CultureInfo.InvariantCulture)); break;
+                        case UnityEngine.Rendering.ShaderPropertyType.Vector:
+                        case UnityEngine.Rendering.ShaderPropertyType.Color:
+                            sb.Append(' ').Append(name).Append('=').Append(m.GetVector(name)); break;
+                        case UnityEngine.Rendering.ShaderPropertyType.Texture:
+                            var t = m.GetTexture(name);
+                            sb.Append(' ').Append(name).Append('=').Append(t == null ? "null" : t.name + "(" + t.width + "x" + t.height + " " + t.filterMode + " mips " + t.mipmapCount + ")"); break;
+                    }
+                }
+                Rec.Log(sb.ToString());
+            }
+        }
+
+        /// Where Graphics.BlitMultiTap's taps land with the game's cone-tap blur (Hidden/BlurEffectConeTap,
+        /// which builds its taps from _BlurOffsets): one white texel at (16, 16) of a 32×32 source,
+        /// blitted with distinct offsets, and every lit texel of the result with its value.
+        static void MeasureMultiTap()
+        {
+            var shader = Shader.Find("Hidden/BlurEffectConeTap");
+            if (shader == null) { Rec.Log("MULTITAP no shader"); return; }
+            var material = new Material(shader);
+            var source = new Texture2D(32, 32, TextureFormat.RGBA32, false, true) { filterMode = FilterMode.Point, wrapMode = TextureWrapMode.Clamp };
+            var pixels = new Color32[32 * 32];
+            pixels[16 * 32 + 16] = new Color32(255, 255, 255, 255);
+            source.SetPixels32(pixels);
+            source.Apply();
+            var cases = new[]
+            {
+                new[] { new Vector2(-2f, -2f), new Vector2(-2f, 2f), new Vector2(2f, 2f), new Vector2(2f, -2f) },
+                new[] { new Vector2(3f, 1f), new Vector2(-5f, 4f), new Vector2(6f, -7f), new Vector2(0f, 2f) },
+            };
+            foreach (var offsets in cases)
+            {
+                var dest = RenderTexture.GetTemporary(32, 32, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Linear);
+                dest.filterMode = FilterMode.Point;
+                var previous = RenderTexture.active;
+                RenderTexture.active = dest;
+                GL.Clear(true, true, Color.clear);
+                Graphics.BlitMultiTap(source, dest, material, offsets);
+                RenderTexture.active = dest;
+                var copy = new Texture2D(32, 32, TextureFormat.RGBA32, false, true);
+                copy.ReadPixels(new Rect(0, 0, 32, 32), 0, 0);
+                copy.Apply();
+                RenderTexture.active = previous;
+                var lit = new StringBuilder();
+                var result = copy.GetPixels32();
+                for (int i = 0; i < result.Length; i++)
+                    if (result[i].r > 0) lit.Append(" (").Append(i % 32).Append(',').Append(i / 32).Append(")=").Append(result[i].r);
+                Rec.Log("MULTITAP offsets " + string.Join(" ", System.Array.ConvertAll(offsets, o => o.ToString())) + " lit" + lit);
+                RenderTexture.ReleaseTemporary(dest);
+                Object.Destroy(copy);
+            }
+            Object.Destroy(source);
+            Object.Destroy(material);
+        }
+
+        /// A texture's texels as raw RGBA bytes in the profile folder (texdump-NAME-WxH.rgba), read back through a
+        /// render texture so it works for any texture.
+        static void SaveTexture(Texture t, string name)
+        {
+            var rt = RenderTexture.GetTemporary(t.width, t.height, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Linear);
+            var previous = RenderTexture.active;
+            Graphics.Blit(t, rt);
+            RenderTexture.active = rt;
+            var copy = new Texture2D(t.width, t.height, TextureFormat.RGBA32, false, true);
+            copy.ReadPixels(new Rect(0, 0, t.width, t.height), 0, 0);
+            copy.Apply();
+            RenderTexture.active = previous;
+            RenderTexture.ReleaseTemporary(rt);
+            System.IO.File.WriteAllBytes(System.IO.Path.Combine(Application.persistentDataPath, "texdump-" + name + "-" + t.width + "x" + t.height + ".rgba"), copy.GetRawTextureData());
+            Object.Destroy(copy);
         }
 
         /// Anchors, pivot and size, and the settings of the object's layout components.

@@ -55,7 +55,7 @@ into `out/player` and prints the launch options line (`OniBrutal --game-tweak ex
 ```sh
 scripts/release.sh                     # out/release: the Windows zip and the Linux tar.gz
 gh release create vYYYY.MM.DD out/release/oni-brutal-*.zip out/release/oni-brutal-*.tar.gz \
-  --title "oni-brutal YYYY.MM.DD" --notes "..."
+  --title "YYYY.MM.DD" --notes "..."
 ```
 
 The build compiles against the game's assemblies, so it runs where the game is installed (not in

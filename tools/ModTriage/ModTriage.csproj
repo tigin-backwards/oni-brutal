@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- PLib's top-level type names by namespace, made by the tool's fingerprint mode from PLib DLLs. -->
+    <EmbeddedResource Include="plib-types.txt" LogicalName="plib-types.txt" />
+    <!-- Authors' shared namespaces with their usual size, made by the tool's shared-namespaces mode. -->
+    <EmbeddedResource Include="shared-namespaces.txt" LogicalName="shared-namespaces.txt" />
+  </ItemGroup>
+</Project>

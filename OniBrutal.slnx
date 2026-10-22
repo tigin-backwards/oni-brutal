@@ -17,12 +17,14 @@
   <Folder Name="/tests/">
     <Project Path="tests/OniBrutal.Assets.Tests/OniBrutal.Assets.Tests.csproj" />
     <Project Path="tests/OniBrutal.UnityEngine.Tests/OniBrutal.UnityEngine.Tests.csproj" />
+    <Project Path="tests/ModTriage.Tests/ModTriage.Tests.csproj" />
   </Folder>
   <Folder Name="/tools/">
     <Project Path="tools/ApiCheck/ApiCheck.csproj" />
     <Project Path="tools/AssemblyDiff/AssemblyDiff.csproj" />
     <Project Path="tools/FacadeGen/FacadeGen.csproj" />
     <Project Path="tools/Inventory/Inventory.csproj" />
+    <Project Path="tools/ModTriage/ModTriage.csproj" />
     <Project Path="tools/SurfaceGen/SurfaceGen.csproj" />
     <Project Path="tools/UnityApi/UnityApi.csproj" />
   </Folder>

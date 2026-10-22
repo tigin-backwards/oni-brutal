@@ -361,7 +361,9 @@ unchanged.
 
 - `fast-particle-collision`: a radbolt's collision check gathers the colliders around it only when
   another radbolt is registered there, and finds radbolts among the live ones (0.94 → 0.44 ms a
-  frame in U57; 40,000 checks verified against the game's own result).
+  frame in U57; 40,000 checks verified against the game's own result). Each radbolt's colliders
+  (its prefab's) are looked up once rather than on every check against it: with many radbolts
+  in flight every one checks every other each frame (Gluttony, Linux: 2.9 → 1.5 ms a frame).
 
 - `off-screen-conveyors` (**changes behaviour**): conveyor items travel along their rails on
   screen as before; off screen their transforms are not moved each frame (85% of the ~950 moves a

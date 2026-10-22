@@ -93,6 +93,13 @@ namespace SemanticsProbe
             V("GetComponentsInChildren(true)", string.Join(",", Array.ConvertAll(root.GetComponentsInChildren<BoxCollider>(true), x => x.name)));
             V("GetComponentsInParent", string.Join(",", Array.ConvertAll(c11.GetComponentsInParent<BoxCollider>(true), x => x.name)));
             V("Transform.Find", (root.transform.Find("H1/H11") != null) + " " + (GameObject.Find("H11") != null));
+            // Paths with empty segments; an empty-named child under H2 to tell "itself" from "a child named ''".
+            new GameObject("").transform.SetParent(c2.transform);
+            foreach (var path in new[] { "", "/", "H1/", "/H1", "H1//H11", "H1/H11/", ".", "..", "H2/", "H2//" })
+            {
+                var found = root.transform.Find(path);
+                V("Transform.Find \"" + path + "\"", found == null ? "null" : found == root.transform ? "self" : "'" + found.name + "' under " + (found.parent == null ? "none" : found.parent.name));
+            }
             root.transform.position = new Vector3(10, 0, 0);
             root.transform.localScale = new Vector3(2, 2, 2);
             c2.transform.localPosition = new Vector3(1, 1, 0);

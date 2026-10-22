@@ -63,10 +63,13 @@ On the original save, with the stuck objects:
 
 ## How it differs from U57
 
-- **The gain is smaller:** about 3× against U57's 7×. Gluttony's frame is mostly the
-  simulation's state machine updates for its many Duplicants, critters and machines: plain game
-  logic that CoreCLR runs faster, but that none of the tweaks target. U57's frame had more of the
-  specific costs the tweaks remove (reachability, conveyor items, animation events).
+- **The gain is smaller:** about 3× against U57's 7×. U57's frame had a few large costs the
+  tweaks remove (reachability, sublimation, animation events, conveyor items). Gluttony's is
+  spread thin: its sim sub-ticks run 386 separate update systems for 70 Duplicants, 1,021
+  critters, 74,000 buildings and 558,000 workables, the largest 1.3 ms on Linux and only 13 over
+  0.2 ms. That is plain game logic CoreCLR runs faster, with no single cost for a tweak to
+  remove. [research/gluttony-frame-inventory.md](research/gluttony-frame-inventory.md) has the
+  full inventory.
 - **Loading and saving gain the most.** The save is about twice U57's size, and the original
   takes four minutes to load it and freezes for half a minute on each autosave.
 - **The memory gap is narrow:** about 1.1× here against 1.6× on 2minnow.

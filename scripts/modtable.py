@@ -10,7 +10,7 @@ SWEEPS = os.environ.get('ONI_SWEEP_DIR') or os.path.join(ROOT, 'out')
 if len(sys.argv) != 2: sys.exit(__doc__)
 cat = [l.rstrip('\n').split('\t') for l in open(sys.argv[1], encoding='utf-8')]
 by_id = {r[1]: r for r in cat}
-LAST_RANK = 500
+LAST_RANK = 750
 
 def ids(pattern):
     s = set()
@@ -20,6 +20,9 @@ def ids(pattern):
 
 swept = ids('sweep-b*.txt') | ids('sweep-d*.txt') | ids('sweep-e*.txt') | ids('sweep-f*.txt')
 third = ids('sweep-g*.txt')
+# Ranks 501-750: their colony runs used 2minnow (sweep-o*.txt, rerun without the mods below).
+fifth = ids('sweep-o[0-9].txt')
+fifth_failing = set(ids('sweep-o-excluded.txt'))
 
 played = {
     '2837919908': 'clicks select what is under the cursor (its flat-scaled world selector); played on U57 and the Twinkleverse save it was reported with',
@@ -58,6 +61,16 @@ broken = {
     '2111768571': 'broken upstream (its title says so): its plants call a removed `EntityTemplates.ExtendEntityToBasicPlant` overload',
     '1992978572': 'broken upstream: its filter patch reads the game\'s changed filter type and crashes the game',
     '1823182964': 'broken upstream: CaiLib calls `EntityTemplates.ExtendEntityToBasicPlant` with arguments the game no longer takes, and the save fails to load',
+}
+# Ranks 501-750 that fail as they do in the original (out of the sweep's colony runs).
+broken.update({
+    '2778263368': 'broken upstream: a Harmony transpiler whose target method is gone, and the error dialog quits the game',
+    '2646067420': 'broken upstream: calls `ConsumedElement(Tag, float)`, which the game no longer has, and the error dialog quits the game',
+    '2043689746': 'broken upstream: calls a `SettingLevel` constructor the game no longer has, and the error dialog quits the game',
+})
+# Fails to load in the original only.
+original_only = {
+    '1729794261': 'loads in ours but not in the original: Mono rejects its `PixelPack2` class (an interface method it lacks) at first use, where ours stubs the missing method (ARCHITECTURE D22); left out of the colony runs, which the original\'s error dialog stops',
 }
 unranked = {'3427974009': 'Synchronized Building Groups', '2977728791': 'Preset Manager', '3775625682': 'LocalCanvas-本地画框', '3781314647': 'Morphs Not Included'}
 translations = {'929139073', '927642162', '1198657258', '928606476', '928348692', '1902735059', '1269554374',
@@ -98,9 +111,15 @@ for r in cat:
         rows.append(row(rank, mid, title, N, N, N, 'worldgen mod: out of scope'))
     elif mid in translations:
         rows.append(row(rank, mid, title, N, N, N, 'translation: the game applies one only from a Steam subscription; not testable here'))
+    elif mid in original_only:
+        rows.append(row(rank, mid, title, Y, N, N, original_only[mid]))
+    elif mid in fifth_failing:
+        rows.append(row(rank, mid, title, X, X, N, 'fails to load in the original as well, in its sweep batch'))
     elif mid in third_results:
         loads, colony, note = third_results[mid]
         rows.append(row(rank, mid, title, loads, colony, N, note))
+    elif mid in fifth:
+        rows.append(row(rank, mid, title, Y, Y, N, ''))
     elif mid in swept:
         rows.append(row(rank, mid, title, Y, Y, N, ''))
     elif mid in third:
@@ -122,8 +141,8 @@ out of scope.
 
 **Columns:**
 - **Loads:** reaches the main menu with no error of ours.
-- **Colony:** loaded with its batch of about 25 mods and played 90 seconds of U57, a large Spaced
-  Out colony, with no error of ours.
+- **Colony:** loaded with its batch of about 25 mods and played 90 seconds of a Spaced Out colony,
+  with no error of ours: U57 (late game) for ranks 1–500, 2minnow (mid game) for 501–750.
 - **Played:** a save played with the mod, its screens and logs compared with the original player.
   ⚠️ means played with a small known difference, its issue linked.
 

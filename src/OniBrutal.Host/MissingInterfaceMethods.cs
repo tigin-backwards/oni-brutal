@@ -159,14 +159,16 @@ namespace OniBrutal.Host
                 {
                     if (!methods.Contains(method.Name) || method.HasGenericParameters) continue;
                     if (Implemented(type, interfaceType, method)) continue;
-                    var reference = new Cecil.MethodReference(method.Name, method.ReturnType, interfaceType) { HasThis = true };
-                    foreach (var p in method.Parameters) reference.Parameters.Add(new Cecil.ParameterDefinition(p.ParameterType));
+                    // Built in the mod's module (ImportReference keeps a reference whose declaring
+                    // type is the module's own as it is): its types, the game's, are imported one by one.
+                    var reference = new Cecil.MethodReference(method.Name, Import(module, method.ReturnType), Import(module, interfaceType)) { HasThis = true };
+                    foreach (var p in method.Parameters) reference.Parameters.Add(new Cecil.ParameterDefinition(Import(module, p.ParameterType)));
                     var stub = new Cecil.MethodDefinition($"{interfaceType.FullName}.{method.Name}",
                         Cecil.MethodAttributes.Private | Cecil.MethodAttributes.Final | Cecil.MethodAttributes.Virtual | Cecil.MethodAttributes.HideBySig | Cecil.MethodAttributes.NewSlot,
                         module.ImportReference(Substitute(method.ReturnType, interfaceType)));
                     foreach (var p in method.Parameters)
                         stub.Parameters.Add(new Cecil.ParameterDefinition(p.Name, p.Attributes, module.ImportReference(Substitute(p.ParameterType, interfaceType))));
-                    stub.Overrides.Add(module.ImportReference(reference));
+                    stub.Overrides.Add(reference);
                     var il = stub.Body.GetILProcessor();
                     il.Emit(Cecil.Cil.OpCodes.Ldstr, message);
                     il.Emit(Cecil.Cil.OpCodes.Newobj, exceptionCtor);
@@ -179,6 +181,24 @@ namespace OniBrutal.Host
             using var symbolOutput = new MemoryStream();
             module.Write(output, new Cecil.WriterParameters { WriteSymbols = withSymbols, SymbolStream = withSymbols ? symbolOutput : null, SymbolWriterProvider = withSymbols ? new Cecil.Cil.PortablePdbWriterProvider() : null });
             return (output.ToArray(), withSymbols ? symbolOutput.ToArray() : null, added);
+        }
+
+        /// A type from another module as the module references it; the interface's own generic
+        /// parameters stay as they are (a signature names them by position).
+        static Cecil.TypeReference Import(Cecil.ModuleDefinition module, Cecil.TypeReference type) => type switch
+        {
+            Cecil.GenericParameter => type,
+            Cecil.ByReferenceType r => new Cecil.ByReferenceType(Import(module, r.ElementType)),
+            Cecil.ArrayType a => new Cecil.ArrayType(Import(module, a.ElementType), a.Rank),
+            Cecil.GenericInstanceType gi => ImportInstance(module, gi),
+            _ => module.ImportReference(type),
+        };
+
+        static Cecil.GenericInstanceType ImportInstance(Cecil.ModuleDefinition module, Cecil.GenericInstanceType gi)
+        {
+            var result = new Cecil.GenericInstanceType(module.ImportReference(gi.ElementType));
+            foreach (var a in gi.GenericArguments) result.GenericArguments.Add(Import(module, a));
+            return result;
         }
 
         /// Every interface the type lists, directly, through its base classes or through other

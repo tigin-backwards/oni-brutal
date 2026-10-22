@@ -556,6 +556,8 @@ namespace PerfProbe
                 DestroyImmediate(victim);
                 Debug.Log($"PERF measure data prefab {dataPrefab.name}: {victimType} destroyed {victim == null}");
             }
+            MeasurePatchedFrames();
+            yield return MeasureInputActivation();
             yield return MeasureModRendering();
             MeasurePopularModApis();
             MeasureDefaultControls();
@@ -882,6 +884,30 @@ namespace PerfProbe
         // The Unity API of the third hundred Workshop mods: MinMaxCurve, the main and emission
         // modules' setters, the noise module, Texture2D.blackTexture, Screen.safeArea and
         // Mesh.RecalculateNormals.
+        /// A Harmony-patched method's frame as a stack trace reports it (Customize Plants walks the
+        /// stack for the class whose CreatePrefab created a plant).
+        void MeasurePatchedFrames()
+        {
+            var harmony = new HarmonyLib.Harmony("PerfProbe.Frames");
+            harmony.Patch(typeof(Runner).GetMethod(nameof(PatchedVictim), System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static),
+                prefix: new HarmonyLib.HarmonyMethod(typeof(Runner).GetMethod(nameof(NoOpPrefix), System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)));
+            var frames = PatchedVictim();
+            for (int i = 0; i < 3 && i < frames.Length; i++)
+            {
+                var m = frames[i].GetMethod();
+                Debug.Log($"PERF measure frame {i}: {(m == null ? "null" : $"{m.GetType().FullName} name {m.Name} declaring {m.DeclaringType?.FullName ?? "null"} reflected {m.ReflectedType?.FullName ?? "null"} module {m.Module?.Name ?? "null"} static {m.IsStatic} params {m.GetParameters().Length}")}");
+            }
+            harmony.UnpatchAll("PerfProbe.Frames");
+        }
+
+        static void NoOpPrefix() { }
+
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+        static System.Diagnostics.StackFrame[] PatchedVictim() => CaptureFrames();
+
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+        static System.Diagnostics.StackFrame[] CaptureFrames() => new System.Diagnostics.StackTrace().GetFrames();
+
         void MeasureThirdHundredApis()
         {
             string Curve(ParticleSystem.MinMaxCurve c) => $"mode {c.mode} constant {c.constant} min {c.constantMin} max {c.constantMax} mult {c.curveMultiplier} curve {(c.curve == null ? "null" : c.curve.length.ToString())} curveMin {(c.curveMin == null ? "null" : c.curveMin.length.ToString())} curveMax {(c.curveMax == null ? "null" : c.curveMax.length.ToString())} eval {c.Evaluate(0.5f)}/{c.Evaluate(0.5f, 0.25f)}";
@@ -928,6 +954,71 @@ namespace PerfProbe
         // An input field built in code with its text component assigned after it was enabled (as
         // ONI Together builds its chat field): whether the caret exists after a canvas update, a
         // frame, and a disable and enable, and whether anything is logged.
+        static readonly System.Collections.Generic.List<string> activationEvents = new System.Collections.Generic.List<string>();
+        static void ActivatedInternal(TMPro.TMP_InputField __instance) => activationEvents.Add($"internal f{Time.frameCount} focused {__instance.isFocused}");
+        static void DeactivatedNoArgs() => activationEvents.Add($"deactivate() f{Time.frameCount}");
+        static void DeactivatedBool(bool clearSelection) => activationEvents.Add($"deactivate({clearSelection}) f{Time.frameCount}");
+
+        /// When TMP_InputField's private ActivateInputFieldInternal runs (Favorite Buildings patches
+        /// it, with both DeactivateInputField overloads, to know when the player is typing).
+        System.Collections.IEnumerator MeasureInputActivation()
+        {
+            var flags = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public;
+            var internalMethod = typeof(TMPro.TMP_InputField).GetMethod("ActivateInputFieldInternal", flags);
+            if (internalMethod == null) { Debug.Log("PERF measure activation: no ActivateInputFieldInternal"); yield break; }
+            var harmony = new HarmonyLib.Harmony("PerfProbe.Activation");
+            System.Reflection.MethodInfo Own(string name) => typeof(Runner).GetMethod(name, System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic);
+            harmony.Patch(internalMethod, prefix: new HarmonyLib.HarmonyMethod(Own(nameof(ActivatedInternal))));
+            harmony.Patch(typeof(TMPro.TMP_InputField).GetMethod("DeactivateInputField", System.Type.EmptyTypes), prefix: new HarmonyLib.HarmonyMethod(Own(nameof(DeactivatedNoArgs))));
+            harmony.Patch(typeof(TMPro.TMP_InputField).GetMethod("DeactivateInputField", new[] { typeof(bool) }), prefix: new HarmonyLib.HarmonyMethod(Own(nameof(DeactivatedBool))));
+            var canvas = new GameObject("PerfActivationCanvas").AddComponent<Canvas>();
+            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            var field = new GameObject("PerfActivation", typeof(UnityEngine.UI.Image), typeof(TMPro.TMP_InputField));
+            field.transform.SetParent(canvas.transform, false);
+            var viewport = new GameObject("TextViewport", typeof(UnityEngine.UI.RectMask2D));
+            viewport.transform.SetParent(field.transform, false);
+            var text = new GameObject("Text", typeof(TMPro.TextMeshProUGUI));
+            text.transform.SetParent(viewport.transform, false);
+            var input = field.GetComponent<TMPro.TMP_InputField>();
+            input.textViewport = (RectTransform)viewport.transform;
+            input.textComponent = text.GetComponent<TMPro.TextMeshProUGUI>();
+            yield return null;
+            string Step(string name, System.Action act)
+            {
+                activationEvents.Add($"{name} at f{Time.frameCount}");
+                act();
+                activationEvents.Add($"{name} returned, focused {input.isFocused}");
+                return name;
+            }
+            System.Collections.IEnumerator Frames(int n) { for (int i = 0; i < n; i++) { yield return null; activationEvents.Add($"f{Time.frameCount} focused {input.isFocused}"); } }
+            Step("activate", input.ActivateInputField);
+            yield return Frames(2);
+            Step("activate again", input.ActivateInputField);
+            yield return Frames(2);
+            Step("deactivate", input.DeactivateInputField);
+            yield return Frames(1);
+            Step("deactivate(true)", () => input.DeactivateInputField(true));
+            yield return Frames(1);
+            Step("select", () => UnityEngine.EventSystems.EventSystem.current?.SetSelectedGameObject(field));
+            yield return Frames(2);
+            Step("deselect", () => UnityEngine.EventSystems.EventSystem.current?.SetSelectedGameObject(null));
+            yield return Frames(2);
+            input.shouldActivateOnSelect = false;
+            Step("select without activate-on-select", () => UnityEngine.EventSystems.EventSystem.current?.SetSelectedGameObject(field));
+            yield return Frames(2);
+            UnityEngine.EventSystems.EventSystem.current?.SetSelectedGameObject(null);
+            input.shouldActivateOnSelect = true;
+            field.SetActive(false);
+            Step("activate while inactive", input.ActivateInputField);
+            yield return Frames(2);
+            field.SetActive(true);
+            activationEvents.Add($"reactivated object f{Time.frameCount} focused {input.isFocused}");
+            yield return Frames(2);
+            Debug.Log("PERF measure activation: " + string.Join(" | ", activationEvents));
+            harmony.UnpatchAll("PerfProbe.Activation");
+            Destroy(canvas.gameObject);
+        }
+
         System.Collections.IEnumerator MeasureLateInputField()
         {
             var logged = new System.Collections.Generic.List<string>();

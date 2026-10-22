@@ -314,7 +314,19 @@ channel meanings must match exactly.
   public `Action onFocus`, which the game assigns.
 - **Activation:**
   - `ActivateInputField()` starts editing in the next `LateUpdate`, with focus and caret.
-  - `DeactivateInputField()` ends it.
+  - That start is a private instance method, `void ActivateInputFieldInternal()`, which mods
+    patch by name (Favorite Buildings, to know when the player is typing). Measured in the
+    original player:
+    - After `ActivateInputField()`, it runs once in the same frame's `LateUpdate`, with
+      `isFocused` still false; `isFocused` is true from the next frame.
+    - Selecting the field (`EventSystem.SetSelectedGameObject`) with `shouldActivateOnSelect`
+      on runs it the same way; with it off, selecting neither runs it nor focuses the field.
+    - `ActivateInputField()` on a field already focused does not run it again.
+    - `ActivateInputField()` while the GameObject is inactive does nothing: it does not run,
+      not even once the object is active again, and the field stays unfocused.
+  - `DeactivateInputField()` ends it. It calls `DeactivateInputField(bool clearSelection)` with
+    false, so a patch of either overload sees every deactivation. Deselecting the field and
+    disabling its GameObject both call `DeactivateInputField()`.
   - Clicking the field selects and activates it.
   - Deselecting it (`OnDeselect`) deactivates it.
 - **Editing:**

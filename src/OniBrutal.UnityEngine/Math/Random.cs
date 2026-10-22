@@ -50,11 +50,12 @@ namespace UnityEngine
         /// Uniform in [0, 1], both ends inclusive.
         public static float value => (Next() & 0x007FFFFFu) / 8388607f;
 
-        /// Inclusive range.
+        /// Inclusive range. Measured in the original (tools/UnityProbe, "values: random"): the draw
+        /// weighs min, so Range(a, b) = a·t + b·(1 − t) for the next value t.
         public static float Range(float minInclusive, float maxInclusive)
         {
             float t = value;
-            return minInclusive * (1f - t) + maxInclusive * t;
+            return minInclusive * t + maxInclusive * (1f - t);
         }
 
         /// Exclusive of max when min &lt; max; when min &gt; max the result lies in (max, min].

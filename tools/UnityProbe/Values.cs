@@ -78,6 +78,16 @@ namespace SemanticsProbe
             V("Quaternion.FromToRotation", Quaternion.FromToRotation(Vector3.up, Vector3.left));
             V("Matrix4x4.Ortho", Matrix4x4.Ortho(-1, 1, -2, 2, 0.1f, 10f));
 
+            Rec.Log("=== values: random");
+            UnityEngine.Random.InitState(42); V("UnityEngine.Random.value", UnityEngine.Random.value.ToString("R"));
+            UnityEngine.Random.InitState(42); V("UnityEngine.Random.Range(0f, 1f)", UnityEngine.Random.Range(0f, 1f).ToString("R"));
+            UnityEngine.Random.InitState(42); V("UnityEngine.Random.Range(2f, 10f)", UnityEngine.Random.Range(2f, 10f).ToString("R"));
+            UnityEngine.Random.InitState(42); V("UnityEngine.Random.Range(10f, 2f)", UnityEngine.Random.Range(10f, 2f).ToString("R"));
+            UnityEngine.Random.InitState(42); V("UnityEngine.Random.Range(0, 1000)", UnityEngine.Random.Range(0, 1000));
+            UnityEngine.Random.InitState(42); V("UnityEngine.Random.insideUnitCircle", UnityEngine.Random.insideUnitCircle.ToString("R"));
+            UnityEngine.Random.InitState(42); V("UnityEngine.Random.rotation", UnityEngine.Random.rotation.ToString("R"));
+            UnityEngine.Random.InitState(42); V("UnityEngine.Random.ColorHSV", UnityEngine.Random.ColorHSV().ToString("R"));
+
             Rec.Log("=== values: json");
             string json = JsonUtility.ToJson(new JsonSample());
             V("JsonUtility.ToJson", json);

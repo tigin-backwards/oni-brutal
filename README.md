@@ -78,7 +78,7 @@ For a more detailed breakdown, see [docs/PERFORMANCE.md](docs/PERFORMANCE.md).
 ### Optional tweaks
 
 These change how some of the game's own code does its work. Most give exactly the same results,
-faster, and the setup turns those on (`--game-tweak exact` in the launch options). The two marked
+faster, and the setup turns those on (`--game-tweak exact` in the launch options). The three marked
 **changes gameplay** trade a little exactness for speed, and are off unless you add them, e.g.
 `--game-tweak exact --game-tweak slow-reachability`, or `--game-tweak all` for everything.
 
@@ -96,6 +96,9 @@ faster, and the setup turns those on (`--game-tweak exact` in the launch options
 - `slow-reachability` (**changes gameplay**): checks whether jobs and items can be reached less
   often, so Duplicants may notice a newly blocked or opened path a little later.
   Temperature and building checks are never delayed.
+- `off-world-fallers` (**changes gameplay**): items that fall out through the bottom of a world
+  (a chute out of a rocket interior) hang just below it forever, still being stepped as falling.
+  They are landed where they hang instead, so they stop costing time every tick.
 
 ## Save compatibility
 

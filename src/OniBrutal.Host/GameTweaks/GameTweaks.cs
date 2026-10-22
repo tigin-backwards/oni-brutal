@@ -60,13 +60,13 @@ namespace OniBrutal.Host.GameTweaks
     internal static class GameTweakNames
     {
         /// The tweaks in src/OniBrutal.GameTweaks (named here: that assembly is loaded only when asked for).
-        public static readonly string[] Typed = ["off-screen-conveyors", "fast-save-type-checks", "fast-anim-cleanup", "fast-sublimation", "fast-anim-events", "fast-symbol-overrides", "fast-jobs", "fast-offset-tables", "slow-reachability"];
+        public static readonly string[] Typed = ["off-screen-conveyors", "fast-save-type-checks", "fast-anim-cleanup", "fast-sublimation", "fast-anim-events", "fast-symbol-overrides", "fast-jobs", "fast-offset-tables", "slow-reachability", "off-world-fallers"];
 
         public static readonly string[] All = [FastSaveCompression.Name, BackgroundSave.Name, NoSaveGc.Name, FastSerialization.Name, FastParticleCollision.Name, .. Typed];
 
         /// The tweaks that change what the game does (each documented in its class); `exact` turns
         /// on every tweak but these.
-        public static readonly string[] ChangingBehaviour = ["off-screen-conveyors", "slow-reachability"];
+        public static readonly string[] ChangingBehaviour = ["off-screen-conveyors", "slow-reachability", "off-world-fallers"];
 
         public static bool IsKnown(string name) => name is "all" or "exact" || Array.IndexOf(All, name) >= 0;
     }

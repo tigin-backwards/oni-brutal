@@ -385,6 +385,15 @@ unchanged.
   that slowed only items in storage gained nothing: telling whether an item is stored reads the
   item, which is most of what the check costs.
 
+- `off-world-fallers` (**changes behaviour**): GravityComponents.FixedUpdate leaves an object in
+  place, still falling, when its next position is outside its world, so an item dropped out of
+  the bottom of a rocket interior is stepped forever (Gluttony: 17,552 of them, about 8.5 ms a
+  frame on Linux). An item (its landing is FallerComponents' item landing) falling straight down
+  with no cell under it and no possible later step is landed where it hangs: it stops counting
+  as falling, gets no Landed event, and after a load falls again until its first step. Windows,
+  Gluttony with every tweak: 18.6 → 25.1 fps; the save with those items destroyed runs at about
+  30. See PERFORMANCE_CASE_STUDY_3.md.
+
 - `fast-sublimation`: the update buckets of Sublimates get a batch function (the scheduler's
   batch_update_delegate: same items, order, time steps and sub-ticks) that skips an item's
   Sim200ms only when it would change nothing: not sealed and no tag changed since its last full

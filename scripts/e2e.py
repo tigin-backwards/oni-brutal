@@ -53,6 +53,9 @@ MAX_LANES = 6          # the memory budget's hard maximum (§6.2)
 SHOT_THRESHOLD = 0.02  # fraction of pixels differing (§5.3), set per step after calibration
 WORLD_THRESHOLD = 0.05
 UI_TOLERANCE = 2       # pixels, for ui-diff.py --tolerance
+# ui_dump members every diff leaves out: a Graphic's depth (the order of graphics on its canvas)
+# is numbered differently in our player, whatever is drawn (out/e2e pilot, 2026-10-22).
+IGNORE_FIELDS = ('depth',)
 FRAME_FALLBACK = 0.1   # seconds a "frame" lasts without E2eDriver to count real ones
 # Perf jobs a spec never starts beside (matched against `ps -eo args`): the QA stages, the sweep
 # and measurement scripts, profilers.
@@ -120,7 +123,7 @@ def ws_mods():
 # ---------------------------------------------------------------- specs
 
 TOP_KEYS = {'name', 'from', 'mods', 'options', 'setup', 'steps', 'require_log', 'mask_text', 'tolerance',
-            'thresholds'}
+            'thresholds', 'ignore_fields'}
 # Steps that talk to E2eDriver (a spec with any of them needs it installed).
 DRIVER_STEPS = {'click', 'toggle', 'dropdown', 'type', 'drag', 'tool', 'expect_ui', 'expect_state', 'ui_dump',
                 'ui_wait', 'world_shot', 'driver', 'click_world', 'scroll'}
@@ -1519,6 +1522,9 @@ def state_check(have, wanted, saved, original=None):
     if wanted == 'missing':
         return have is None, False
     if isinstance(wanted, str):
+        quoted = re.fullmatch(r'\s*(==|!=)\s*(["\'])(.*)\2\s*', wanted)
+        if quoted:  # "!= 'AnimalControl'": text, such as an enum's name
+            return (str(have) == quoted.group(3)) == (quoted.group(1) == '=='), False
         match = RELATION.fullmatch(wanted)
         if match:
             op, expression = match.group(1), match.group(2)
@@ -1709,7 +1715,8 @@ class Run:
             with open(path, 'w') as f:
                 f.write(text)
             self.evidence['ui_dump'].append({'name': value['name'], 'root': value['root'],
-                                             'mask_text': value.get('mask_text', [])})
+                                             'mask_text': value.get('mask_text', []),
+                                             'ignore_fields': value.get('ignore_fields', [])})
         elif kind == 'driver':
             (command, args), = value.items()
             args = args if isinstance(args, dict) else {'n': args}
@@ -1783,7 +1790,9 @@ class Run:
                 found = self.need_driver().find(path=path, inactive='active' in wanted)
                 active = [e for e in found if e.active is not False]
                 element = (active or found or [None])[0]
-                fields = {k: v for k, v in wanted.items() if k != 'count'}
+                fields = {k: v for k, v in wanted.items() if k not in ('count', 'any_text')}
+                if 'any_text' in wanted and not any(text_matches(e.text, wanted['any_text']) for e in active):
+                    misses.append(f'{path}: no element with text {wanted["any_text"]!r} among {len(active)}')
                 misses += [f'{path}: {m}' for m in ui_mismatches(element, fields)] if fields else []
                 if 'count' in wanted:
                     # How many active elements match: a value, "OP EXPR" or {save_as: NAME}.
@@ -1802,6 +1811,9 @@ class Run:
                 return None
             with open(path, encoding='utf-8', errors='replace') as f:
                 return f.read()
+        each = re.fullmatch(r'(count|sum):(.+?)\[\*\](\S*)(?:\s+if\s+(.+))?', expr)
+        if each:
+            return self.aggregate(*each.groups())
         cells = re.fullmatch(r'cells:(\d+),(\d+)\.\.(\d+),(\d+)::(.+)', expr)
         if cells:
             # The sum of EXPR over a rectangle of cells, {cell} standing for each cell's index.
@@ -1816,6 +1828,34 @@ class Run:
                     total += v
             return total
         return self.need_driver().state(expr)
+
+    def aggregate(self, how, head, suffix, conditions):
+        """count:HEAD[*] if .A == X and .B != Y, or sum:HEAD[*].SUFFIX [if ...]: HEAD a state.get
+        expression for an array or list (all:Clearable::), each item tested and read by its own
+        request. A condition compares the item's member as text (true/false for booleans)."""
+        driver = self.need_driver()
+        separator = '' if head.endswith('::') else '.'
+        try:
+            n = driver.state(head + separator + 'Length')
+        except DriverError:
+            n = driver.state(head + separator + 'Count')
+        tests = []
+        for condition in re.split(r'\s+and\s+', conditions or '') if conditions else []:
+            match = re.fullmatch(r'(\.\S+)\s*(==|!=)\s*(\S+)', condition.strip())
+            if not match:
+                raise SpecFailure(f'{condition!r}: a condition is .MEMBER == VALUE or .MEMBER != VALUE')
+            tests.append(match.groups())
+        as_text = lambda v: str(v).lower() if isinstance(v, bool) else str(v)
+        total = 0
+        for i in range(n):
+            item = f'{head}[{i}]'
+            if all((as_text(driver.state(item + member)) == want) == (op == '==') for member, op, want in tests):
+                if how == 'count':
+                    total += 1
+                else:
+                    v = driver.state(item + suffix)
+                    total += v if isinstance(v, (int, float)) and not isinstance(v, bool) else 0
+        return total
 
     def expect_state(self, value, number):
         misses = []
@@ -2051,7 +2091,9 @@ def differential(spec, result, reference):
             checks['ui_dump'][name] = {'ok': None, 'note': 'no reference dump'}
             continue
         masks = list(spec.get('mask_text', [])) + list(dump.get('mask_text', []))
-        differences = ui_diff.diff(ui_diff.parse(a), ui_diff.parse(b), tolerance=tolerance, mask_text=masks)
+        fields = list(IGNORE_FIELDS) + list(spec.get('ignore_fields', [])) + list(dump.get('ignore_fields', []))
+        differences = ui_diff.diff(without_fields(ui_diff.parse(a), fields), without_fields(ui_diff.parse(b), fields),
+                                   tolerance=tolerance, mask_text=masks)
         checks['ui_dump'][name] = {'ok': not differences, 'differences': len(differences), 'first': differences[:20]}
         if differences:
             reasons.append(f'ui_dump {name}: {len(differences)} difference(s)')
@@ -2091,6 +2133,15 @@ def differential(spec, result, reference):
             reasons.append(f'step {v["step"]}: {v["expr"]} is {v["value"]}, wanted {v["wanted"]} ({original} in the original)')
     checks['expect_original'] = deferred
     return checks, reasons
+
+
+def without_fields(elements, names):
+    """A parsed dump without the NAME=VALUE members NAMES (such as a Graphic's depth, which
+    counts the graphics drawn before it and so moves with content elsewhere on the canvas)."""
+    if not names:
+        return elements
+    pattern = re.compile(r'\s*\b(?:' + '|'.join(re.escape(n) for n in names) + r')=\S+')
+    return {key: {c: pattern.sub('', v) for c, v in fields.items()} for key, fields in elements.items()}
 
 
 def relative_masks(masks, crop):

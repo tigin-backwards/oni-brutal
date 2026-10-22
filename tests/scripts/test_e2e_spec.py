@@ -166,6 +166,9 @@ class Expectations(unittest.TestCase):
         self.assertEqual(self.check(90.0, '>= 0.95 * before', saved), (False, False))
         with self.assertRaises(e2e.SpecFailure):
             self.check(1, '== later', saved)
+        # Text in quotes, for names such as an enum's.
+        self.assertEqual(self.check('Agriculture', "!= 'AnimalControl'", saved), (True, False))
+        self.assertEqual(self.check('R90', '== "R90"', saved), (True, False))
 
     def test_original_is_deferred(self):
         self.assertEqual(self.check(4, '== original'), (True, True))

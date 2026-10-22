@@ -53,6 +53,7 @@ options:                         # PLib options, merged into the mod's config.js
   SweepByType: {DisableIcons: true}       # by static ID (or Workshop ID)
 require_log: ['\[SweepByType\] options saved']   # regexes: in the original's log -> must be in ours
 mask_text: ['\d+:\d+', 'Cycle \d+']      # masked in every ui_dump's text before the diff
+ignore_fields: [depth]           # NAME=VALUE members left out of every ui_dump's diff
 tolerance: 2                     # ui_dump rect tolerance in pixels (default 2)
 thresholds: {shot: 0.02, world_shot: 0.05}   # pixel fractions (the defaults)
 setup: [...]                     # steps run first; the only place for driver setup.call
@@ -125,7 +126,7 @@ and nothing is clicked. A click is: move, 2 frames of hover, press, 2 frames, re
 - drag: {from: [108, 212], to: [136, 205]}                     # world cells; `mods`, `button`, `steps`
 - click_world: {cell: [150, 212]}
 - scroll: {at: center, notches: -40}                           # or at: [x, y] (a cell), or a UI path
-- tool: {toolbar: SweepByType}            # the ToolMenu entry whose path ends in the name, else its text
+- tool: {toolbar: Sweep}                  # a ToolMenu collection by its text or icon name
 - tool: {ui: "**/ToolMenu/**/SomeButton"}
 - tool: {key: "Alt+S"}
 ```
@@ -156,17 +157,27 @@ e2e.py). `type` types any printable ASCII, on a US keymap.
 - expect_state: {"Research.Instance.queuedTech.Count": "== original"}   # the original's value here
 ```
 
-`expect_ui` retries for a few frames before it fails. An `expect_state` value is one of:
+`expect_ui` checks the first active match; `count` checks how many match (a value, `"OP EXPR"` or
+`{save_as: NAME}`) and `any_text` passes when any match has that text. It retries for a few
+frames before it fails. An `expect_state` value is one of:
 - a value;
 - `"OP EXPR"`, where OP is `>=`, `<=`, `>`, `<`, `==` or `!=`, and EXPR is made of numbers,
   names, `+ - * /` and parentheses: a name is a value saved with `save_as`, or `original`
   (`">= before + 0.95 * dug"`, `">= 0.9 * original"`);
+- `"== 'TEXT'"` or `"!= 'TEXT'"`: text in quotes, for names such as an enum's;
 - `exists` or `missing`;
 - `{contains: X}`, `{equals: X}` or `{save_as: NAME}`.
 
-Besides `file:PATH`, the runner reads `cells:X1,Y1..X2,Y2::EXPR`: the sum of a `state.get`
-expression over a rectangle of cells, `{cell}` standing for each cell's index, as in
-`cells:110,207..118,209::Grid.Mass.get_Item({cell})`.
+Besides `file:PATH`, the runner reads these, each item through its own `state.get`:
+- `cells:X1,Y1..X2,Y2::EXPR`: the sum of EXPR over a rectangle of cells, `{cell}` standing for
+  each cell's index: `cells:119,209..120,210::Grid.Mass.get_Item({cell})`;
+- `count:HEAD[*] if .MEMBER == VALUE and ...`: how many items of an array or list match, as in
+  `count:all:Clearable::[*] if .isMarkedForClear == true`;
+- `sum:HEAD[*].MEMBER if ...`: the sum of a member over the items that match, as in
+  `sum:all:Clearable::[*].GetComponent<PrimaryElement>.Mass if .GetComponent<PrimaryElement>.ElementID == SandStone`.
+
+A condition compares the member's value as text (`true`/`false` for booleans). These read one
+item a frame: a few hundred items take some seconds.
 
 `== original` is checked after our run, against the value the original player recorded at the same
 step. The original run itself records it and passes.
@@ -216,6 +227,10 @@ A run of ours also fails on these differences from the original (§5.3 of the pl
 | `world_shot` | the same, with a default threshold of 5 % |
 | `== original` | ours does not meet the relation to the original's value |
 | an `expect_ui`/`expect_state` failure | the result notes that it held in the original |
+
+A Graphic's `depth` is left out of every `ui_dump` diff (`IGNORE_FIELDS`): our player numbers the
+graphics of a canvas differently, whatever is drawn, so it would fail every screen. A spec or a
+`ui_dump` step adds members with `ignore_fields`, for values that follow random content.
 
 Each check's numbers are in `result.json` under `checks`. A shot's diff mask is `NAME.diff.png`
 in our run's folder: white pixels differ, grey ones are masked.

@@ -239,7 +239,8 @@ namespace OniBrutal.Engine.Serialization
             var kind = shape.Kind == ValueKind.Enum ? shape.EnumUnderlying : shape.Kind;
             return kind switch
             {
-                ValueKind.Bool => node.TypeName == "bool",
+                // Unity 6 bundles (6000.3) name a script's bool fields UInt8: one byte all the same.
+                ValueKind.Bool => node.TypeName is "bool" or "UInt8",
                 ValueKind.SByte => node.TypeName is "SInt8",
                 ValueKind.Byte => node.TypeName is "UInt8" or "char",
                 ValueKind.Short => node.TypeName is "SInt16" or "short",

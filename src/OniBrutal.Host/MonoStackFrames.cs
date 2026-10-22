@@ -38,12 +38,29 @@ namespace OniBrutal.Host
         internal static byte[]? Adjust(byte[] image, ref byte[]? symbols, string path)
         {
             if (!CallsGetMethod(image)) return null;
+            try
+            {
+                return Rewrite(image, ref symbols, path);
+            }
+            catch (Exception e) when (e is Cecil.AssemblyResolutionException or BadImageFormatException or InvalidOperationException or ArgumentException)
+            {
+                // The mod loads as it is: only its stack walks differ from Mono's.
+                EngineLog.Engine($"mod stack frames: {Path.GetFileName(path)} not rewritten ({e.GetType().Name}: {e.Message}); it loads unchanged");
+                return null;
+            }
+        }
+
+        static byte[]? Rewrite(byte[] image, ref byte[]? symbols, string path)
+        {
+            // Writing the module back resolves types of its references (an enum default value's).
+            using var resolver = LoadedFirstResolver.ForMod(path);
             bool withSymbols = symbols != null;
             Cecil.ModuleDefinition module;
             try
             {
                 module = Cecil.ModuleDefinition.ReadModule(new MemoryStream(image), new Cecil.ReaderParameters
                 {
+                    AssemblyResolver = resolver,
                     ReadSymbols = withSymbols,
                     SymbolStream = withSymbols ? new MemoryStream(symbols!) : null,
                     SymbolReaderProvider = withSymbols ? new Cecil.Cil.PortablePdbReaderProvider() : null,
@@ -52,7 +69,7 @@ namespace OniBrutal.Host
             catch (Exception e) when (withSymbols && e is Cecil.Cil.SymbolsNotMatchingException or Cecil.Cil.SymbolsNotFoundException or BadImageFormatException or InvalidOperationException)
             {
                 withSymbols = false;
-                module = Cecil.ModuleDefinition.ReadModule(new MemoryStream(image));
+                module = Cecil.ModuleDefinition.ReadModule(new MemoryStream(image), new Cecil.ReaderParameters { AssemblyResolver = resolver });
             }
             using var owned = module;
             var replacement = module.ImportReference(typeof(MonoStackFrames).GetMethod(nameof(GetMethod))!);

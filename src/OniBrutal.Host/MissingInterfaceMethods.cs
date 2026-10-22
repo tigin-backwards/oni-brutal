@@ -101,36 +101,10 @@ namespace OniBrutal.Host
             }
         }
 
-        /// Resolves a reference to the assembly the runtime bound it to (an assembly already
-        /// loaded with that name: the game's current interfaces), then from the search folders.
-        sealed class LoadedFirstResolver : Cecil.DefaultAssemblyResolver
-        {
-            readonly Dictionary<string, Cecil.AssemblyDefinition> loaded = new(StringComparer.OrdinalIgnoreCase);
-
-            public override Cecil.AssemblyDefinition Resolve(Cecil.AssemblyNameReference name, Cecil.ReaderParameters parameters)
-            {
-                if (loaded.TryGetValue(name.Name, out var cached)) return cached;
-                foreach (var a in AssemblyLoadContext.Default.Assemblies)
-                    if (string.Equals(a.GetName().Name, name.Name, StringComparison.OrdinalIgnoreCase) && a.Location is { Length: > 0 } location && File.Exists(location))
-                        return loaded[name.Name] = Cecil.AssemblyDefinition.ReadAssembly(location, new Cecil.ReaderParameters { AssemblyResolver = this });
-                return base.Resolve(name, parameters);
-            }
-
-            protected override void Dispose(bool disposing)
-            {
-                foreach (var a in loaded.Values) a.Dispose();
-                loaded.Clear();
-                base.Dispose(disposing);
-            }
-        }
-
         static (byte[] Image, byte[]? Symbols, List<string> Added) Complete(byte[] image, byte[]? symbols, string path,
             Dictionary<string, (string Message, HashSet<string> Methods)> missing)
         {
-            var resolver = new LoadedFirstResolver();
-            resolver.AddSearchDirectory(Path.GetDirectoryName(path)!);
-            foreach (var dir in AssemblyPolicy.ReferenceDirectories) resolver.AddSearchDirectory(dir);
-            using var owned = resolver;
+            using var resolver = LoadedFirstResolver.ForMod(path);
             Cecil.ModuleDefinition module;
             bool withSymbols = symbols != null;
             try

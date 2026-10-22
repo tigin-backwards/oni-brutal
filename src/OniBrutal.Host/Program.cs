@@ -448,9 +448,22 @@ namespace OniBrutal.Host
                 var dir = Directory.CreateTempSubdirectory("oni-brutal-check-").FullName;
                 try
                 {
+                    // A game enum in another folder: writing the rewritten mod back resolves it, as
+                    // the type of a parameter's default value (PLib's mods).
+                    var api = new System.Reflection.Emit.PersistedAssemblyBuilder(new AssemblyName("OniBrutalCheckStackApi"), typeof(object).Assembly);
+                    var kindBuilder = api.DefineDynamicModule("OniBrutalCheckStackApi").DefineEnum("Kind", TypeAttributes.Public, typeof(int));
+                    kindBuilder.DefineLiteral("A", 0);
+                    kindBuilder.DefineLiteral("B", 1);
+                    kindBuilder.CreateType();
+                    Directory.CreateDirectory(Path.Combine(dir, "api"));
+                    api.Save(Path.Combine(dir, "api", "OniBrutalCheckStackApi.dll"));
+                    var kind = Assembly.LoadFrom(Path.Combine(dir, "api", "OniBrutalCheckStackApi.dll")).GetType("Kind")!;
                     // Walk() names the type that declares its caller's frame; Caller() calls it.
                     var mod = new System.Reflection.Emit.PersistedAssemblyBuilder(new AssemblyName("OniBrutalCheckStackMod"), typeof(object).Assembly);
                     var type = mod.DefineDynamicModule("OniBrutalCheckStackMod").DefineType("Plants", TypeAttributes.Public);
+                    var pick = type.DefineMethod("Pick", MethodAttributes.Public | MethodAttributes.Static, typeof(void), [kind]);
+                    pick.DefineParameter(1, ParameterAttributes.Optional | ParameterAttributes.HasDefault, "kind").SetConstant(Enum.ToObject(kind, 1));
+                    pick.GetILGenerator().Emit(System.Reflection.Emit.OpCodes.Ret);
                     var walk = type.DefineMethod("Walk", MethodAttributes.Public | MethodAttributes.Static, typeof(string), Type.EmptyTypes);
                     walk.SetImplementationFlags(MethodImplAttributes.NoInlining);
                     var il = walk.GetILGenerator();

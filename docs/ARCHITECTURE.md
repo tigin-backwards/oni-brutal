@@ -319,7 +319,10 @@ past the boot checkpoint needs a Steam client logged in with an account that own
   a null there ended the game's asset setup when another mod had patched a `CreatePrefab` (the
   save never loaded). **Resolved in** `MonoStackFrames`: a mod's calls to `StackFrame.GetMethod`
   (found in its metadata) call the host's instead, which reports a dynamic method with an owner
-  as declared by the owner. `--check-types` walks the stack from a patched method of a mod.
+  as declared by the owner. Writing the rewritten mod resolves its references against the
+  assemblies already loaded (an enum default value's type: PLib's mods), and a mod that cannot be
+  rewritten loads unchanged. `--check-types` walks the stack from a patched method of a mod
+  whose method takes a game enum with a default value.
 
 ## 3. The engine API (`OniBrutal.UnityEngine`)
 

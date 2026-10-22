@@ -132,8 +132,11 @@ namespace PerfProbe
             {
                 for (int i = 0; i < 900; i++) yield return null;
                 doAutoSave.Invoke(GameClock.Instance, new object[] { GameClock.Instance.GetCycle() });
-                float longest = 0f, stalled = 0f, last = Time.realtimeSinceStartup;
-                for (int i = 0; i < 300; i++)
+                // 20 s of real time, whatever the frame rate: the game starts writing a few
+                // seconds after the autosave is asked for (300 frames, as before, ended before it
+                // at 80 fps).
+                float longest = 0f, stalled = 0f, last = Time.realtimeSinceStartup, end = last + 20f;
+                while (Time.realtimeSinceStartup < end)
                 {
                     yield return null;
                     float now = Time.realtimeSinceStartup, frame = (now - last) * 1000f;

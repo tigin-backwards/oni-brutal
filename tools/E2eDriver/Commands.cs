@@ -19,6 +19,7 @@ namespace E2eDriver
             {
                 case "ping": return Ping();
                 case "ui.find": return UiFind(a);
+                case "ui.at": return Ui.Hit((float)(a["x"] ?? throw new DriverError("ui.at needs x")), (float)(a["y"] ?? throw new DriverError("ui.at needs y")), null, (int?)a["hits"] ?? 8);
                 case "ui.dump": return UiDump(a);
                 case "ui.wait": UiWait(request); return null;
                 case "world.to_screen": return WorldToScreen(a);

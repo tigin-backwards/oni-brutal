@@ -160,6 +160,12 @@ Who is answering, and where.
 - `paused`: `SpeedControlScreen.IsPaused`, or `null` before a colony is loaded.
 - `world`: whether a colony's grid is loaded.
 
+### ui.at `{x, y, hits?}`
+
+The raycast at a screen point (top-left pixels): the topmost hit and, in `all`, the top `hits`
+results (default 8), each with its path, raycaster, sorting and depth. For "what is under the
+cursor", for example when a world click seems to be swallowed by the UI.
+
 ### ui.find `{path?, text?, type?, under?, inactive?, limit?, hit?, hits?}`
 
 The elements matching every filter given, in hierarchy order, each one described.

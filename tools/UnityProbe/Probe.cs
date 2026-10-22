@@ -62,6 +62,13 @@ namespace SemanticsProbe
         void OnDestroy() => Log(Tag + " OnDestroy other=" + (Other == null ? "null" : "alive"));
     }
 
+    /// Logs its Start, for the order Starts run in.
+    public class StartLog : MonoBehaviour
+    {
+        public string Tag;
+        void Start() => Rec.Log("START " + Tag);
+    }
+
     public class Upd : MonoBehaviour
     {
         public static bool Armed;
@@ -217,6 +224,15 @@ namespace SemanticsProbe
             Rec.Log("=== scenario 11: coroutine timing");
             new GameObject("CoTiming").AddComponent<CoTiming>();
             for (int i = 0; i < 10; i++) yield return null;
+            Rec.Log("=== scenario 12: Start order of objects made in one frame");
+            for (int i = 0; i < 4; i++) new GameObject("S" + i).AddComponent<StartLog>().Tag = "new" + i;
+            var template = new GameObject("T"); template.SetActive(false); template.AddComponent<StartLog>();
+            for (int i = 0; i < 4; i++) { var clone = Instantiate(template); clone.GetComponent<StartLog>().Tag = "clone" + i; clone.SetActive(true); }
+            var inactive = new GameObject[4];
+            for (int i = 0; i < 4; i++) { inactive[i] = Instantiate(template); inactive[i].GetComponent<StartLog>().Tag = "activated" + i; }
+            for (int i = 0; i < 4; i++) inactive[i].SetActive(true);
+            yield return null;
+            yield return null;
             yield return Values.Run();
             Rec.Log("=== done");
         }

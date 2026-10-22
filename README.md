@@ -46,26 +46,27 @@ settings and mods.
 The biggest change is swapping the very garbage Mono runtime that Unity ships for CoreCLR. On
 top of that there are optimizations tuned to the way Oxygen Not Included uses the engine.
 
-On a late-game save (U57: Spaced Out with every DLC, cycle 17,000+), on the same machine, back to back:
+On a late-game save (U57: Spaced Out with every DLC, cycle 17,000+), on Windows, on the same machine, back to back:
 
 | | Original | oni-brutal | |
 |---|---|---|---|
-| Frame rate at speed&nbsp;3 (default tweaks) | about 9.5&nbsp;fps | about 47&nbsp;fps | about 5× |
-| Frame rate at speed&nbsp;3 (every tweak) | about 9.5&nbsp;fps | about 54&nbsp;fps | about 5.7× |
-| Loading the save | 3&nbsp;min&nbsp;50&nbsp;s | 26–28&nbsp;s | about 8.5× faster |
-| Autosave freeze | about 48&nbsp;s | about 3&nbsp;s | about 16× shorter |
+| Frame rate at speed&nbsp;3 (default tweaks) | about 11&nbsp;fps | about 78&nbsp;fps | about 7× |
+| Frame rate at speed&nbsp;3 (every tweak) | about 11&nbsp;fps | about 84&nbsp;fps | about 7.4× |
+| Loading the save | 2&nbsp;min&nbsp;22&nbsp;s | about 35&nbsp;s | about 4× faster |
+| Autosave freeze | about 26&nbsp;s | about 2.3&nbsp;s | about 11× shorter |
 
-Without the save tweaks the autosave freeze is about 9 s. They bring it down to about 3 s by
+Without the save tweaks the autosave freeze is about 8 s. They bring it down to about 2.3 s by
 writing the save faster and moving the compression and file write to a background thread.
 
 Garbage-collection hitches are mostly gone: collections now run in the background, spread
 across every core, and their pauses are about a quarter as long.
 
 **Note:** This uses more memory compared to the original. On a mid-game colony, memory peaked at
-around 10GB resident compared to 7.5GB in the original. This is expected behavior for faster,
+around 11GB resident compared to 7GB in the original. This is expected behavior for faster,
 parallel collection.
 
-Measured on a Ryzen 7 9800X3D with an RTX 3090.
+Measured on a Ryzen 7 9800X3D with an RTX 3090. A mid-game colony gains less (about 3.5×, from
+26 fps to 91); [docs/PERFORMANCE_CASE_STUDY_2.md](docs/PERFORMANCE_CASE_STUDY_2.md) looks at why.
 
 https://github.com/user-attachments/assets/8b82ce9e-010b-4f8c-85c8-57148be4927d
 

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
-"""Draws docs/PERFORMANCE.md's "Where a frame goes now" table as a flame graph (SVG).
-  scripts/flamegraph.py [FPS]      writes docs/media/frame-flamegraph.svg (FPS: 54 by default)
+"""Draws a performance document's "Where a frame goes" table as a flame graph (SVG).
+  scripts/flamegraph.py FPS [DOC OUT COLONY]
+      defaults: docs/PERFORMANCE.md, docs/media/frame-flamegraph.svg, U57
 Rows are read from the table: `·` prefixes give the nesting, the second column the milliseconds.
 The top bar is the whole frame at FPS; what the listed entry points leave of it is drawn as the
 rest of the frame, and each bar's own time is what its children leave of it."""
@@ -9,6 +10,7 @@ import html, os, re, sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DOC = os.path.join(ROOT, 'docs', 'PERFORMANCE.md')
 OUT = os.path.join(ROOT, 'docs', 'media', 'frame-flamegraph.svg')
+COLONY = 'U57'
 
 WIDTH, ROW, PAD, TOP = 1000, 26, 1, 46
 # Warm flame colours by depth, light enough for dark text.
@@ -18,7 +20,7 @@ REST = '#d9d2c5'
 
 def rows():
     text = open(DOC, encoding='utf-8').read()
-    section = text.split('## Where a frame goes now', 1)[1]
+    section = text.split('## Where a frame goes', 1)[1]
     found = []
     for line in section.splitlines():
         m = re.match(r'\|\s*((?:·\s*)*)(.+?)\s*\|\s*([\d.]+)\s*\|', line)
@@ -57,7 +59,7 @@ def svg(root, fps):
     height = TOP + (depth + 1) * ROW + 30
     out = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{WIDTH}" height="{height}" viewBox="0 0 {WIDTH} {height}" font-family="Segoe UI, Helvetica, Arial, sans-serif">',
            f'<rect width="{WIDTH}" height="{height}" fill="#fffdf8"/>',
-           f'<text x="{WIDTH / 2}" y="22" text-anchor="middle" font-size="16" font-weight="600" fill="#2b2b2b">Where a frame goes (U57, every tweak, about {fps:g} fps)</text>',
+           f'<text x="{WIDTH / 2}" y="22" text-anchor="middle" font-size="16" font-weight="600" fill="#2b2b2b">Where a frame goes ({COLONY}, every tweak, about {fps:g} fps)</text>',
            f'<text x="{WIDTH / 2}" y="38" text-anchor="middle" font-size="11" fill="#666">bar width = milliseconds of main-thread time a frame; a bar under another is part of it</text>']
 
     keyed = []
@@ -93,13 +95,14 @@ def svg(root, fps):
     height = key_top + ((len(keyed) + 1) // 2) * 20 + 22
     out[0] = re.sub(r'height="\d+" viewBox="0 0 (\d+) \d+"', lambda m: f'height="{height}" viewBox="0 0 {m.group(1)} {height}"', out[0])
     out[1] = f'<rect width="{WIDTH}" height="{height}" fill="#fffdf8"/>'
-    out.append(f'<text x="{WIDTH - 6}" y="{height - 8}" text-anchor="end" font-size="10" fill="#999">scripts/flamegraph.py from docs/PERFORMANCE.md</text>')
+    out.append(f'<text x="{WIDTH - 6}" y="{height - 8}" text-anchor="end" font-size="10" fill="#999">scripts/flamegraph.py from {html.escape(os.path.relpath(DOC, ROOT))}</text>')
     out.append('</svg>')
     return '\n'.join(out) + '\n'
 
 
 if __name__ == '__main__':
-    fps = float(sys.argv[1]) if len(sys.argv) > 1 else 54.0
+    fps = float(sys.argv[1])
+    if len(sys.argv) > 4: DOC, OUT, COLONY = os.path.abspath(sys.argv[2]), os.path.abspath(sys.argv[3]), sys.argv[4]
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     open(OUT, 'w', encoding='utf-8').write(svg(tree(rows()), fps))
     print('wrote', OUT)

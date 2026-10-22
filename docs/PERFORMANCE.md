@@ -1,44 +1,66 @@
 # Performance
 
-Where a late-game colony's frame time goes, what made it faster, and what's still in the way.
+How fast oni-brutal runs against the original game, why, and what's still in the way. Two
+colonies stress it differently, so each has its own case study:
+- **U57**, late game, held back by the game's own logic (this document);
+- **2minnow**, mid game, where more of the frame is drawing
+  ([PERFORMANCE_CASE_STUDY_2.md](PERFORMANCE_CASE_STUDY_2.md)).
+
 The raw working notes, dead ends included, are in
 [research/u57-frame-inventory.md](research/u57-frame-inventory.md).
 
-## The test colony
+## How it's measured
 
-Everything here is measured on U57, a Spaced Out colony with every DLC at cycle 17,077: 24
-Duplicants, 1,186 critters, about 62,000 buildings and 90,000 animated objects, played at speed 3.
+On native Windows 11: a Ryzen 7 9800X3D (8 cores, 16 threads), an RTX 3090 with NVIDIA's own
+OpenGL driver. Both players load the same save at 1280×720, windowed, with the same probe mod
+(`tools/PerfProbe`) holding speed 3 and logging the frame rate every 600 frames. The probe also
+turns vsync off and keeps the game from sleeping when its window loses focus (the game slows
+itself down then), the same in both players. The original runs as an isolated copy of the
+installed game; neither touches the user's own saves or Steam account.
 
-The machine is a Ryzen 7 9800X3D (8 cores, 16 threads) with an RTX 3090, running Linux under
-WSL2. Both players load the same save at 1280×720, with the same probe mod (`tools/PerfProbe`)
-holding speed 3 and logging the frame rate every 600 frames. Background load moves a single
-build by about ±10% between runs, so comparisons are always back to back with nothing else
-running. Nothing records the screen during these runs: encoding a recording of it on the same
-machine cost about a third of the frame rate with every tweak (36 fps against 54). The
-frame-rate ranges are those 600-frame windows, leaving out the first (warm-up) and the ones
-holding an autosave; "about" is their typical value.
+Each configuration ran at least twice, back to back, with nothing else running, and the tables
+give the median: runs on a desktop move by up to a quarter when something else wakes up. The
+ranges are the 600-frame windows, leaving out the first three (warm-up) and those holding an
+autosave. Nothing records the screen during these runs.
+
+Earlier numbers were taken on Linux under WSL2, where OpenGL goes through Mesa's Direct3D 12
+backend. That layer makes some driver calls far more expensive than on a native driver (a small
+texture upload cost about 75 µs there against about 2.5 µs on Windows), and the game's own code
+also ran about half as fast. The case studies' deep dives that still come from Linux say so.
 
 ## The numbers
 
+**U57**, a Spaced Out colony with every DLC at cycle 17,077: 24 Duplicants, 1,186 critters, about
+62,000 buildings and 90,000 animated objects.
+
 | | Original | oni-brutal | |
 |---|---|---|---|
-| Frame rate, no tweaks | about 9.5&nbsp;fps (9.2–9.8) | about 33&nbsp;fps (31.9–35.0) | about 3.5× |
-| Frame rate, `exact` tweaks (the default) | | about 47&nbsp;fps (44.9–51.3) | about 5× |
-| Frame rate, every tweak | | about 54&nbsp;fps (52.5–57.2) | about 5.7× |
-| Loading the save | 3&nbsp;min&nbsp;50&nbsp;s | 26–28&nbsp;s | about 8.5× faster |
-| Autosave freeze, no tweaks | 47–50&nbsp;s | 9–10&nbsp;s | about 5× shorter |
-| Autosave freeze, `exact` tweaks (the default) | | 2.7–3.1&nbsp;s | about 16× shorter |
+| Frame rate, no tweaks | about 11.4&nbsp;fps (11.3–11.5) | about 48&nbsp;fps (47.8–48.0) | about 4.2× |
+| Frame rate, `exact` tweaks (the default) | | about 78&nbsp;fps (76–83) | about 6.9× |
+| Frame rate, every tweak | | about 84&nbsp;fps (82–90) | about 7.4× |
+| Loading the save | 2&nbsp;min&nbsp;22&nbsp;s | 35–36&nbsp;s | about 4× faster |
+| Autosave freeze, no tweaks | 26.1–26.4&nbsp;s | 7.7&nbsp;s | about 3.4× shorter |
+| Autosave freeze, `exact` tweaks (the default) | | 2.3&nbsp;s | about 11× shorter |
+| Peak memory | 12.5&nbsp;GB | 16.6–16.9&nbsp;GB | about 1.3× |
 
-With no tweaks it's the same game code doing the same work, so that row is the engine and
-runtime alone: about 3.5 times the original's frame rate.
+**2minnow**, a Spaced Out colony with every DLC at cycle 1,990, with 50 Duplicants.
 
-On Windows, before any tweaks existed, U57 went from about 8.5 fps to 17–18. A smaller base-game
-colony (DeCrew) went from 17–20 fps to 48–56. At that point it was simulating nearly as fast as speed 3
-allows, so the frame rate was no longer what held it back.
+| | Original | oni-brutal | |
+|---|---|---|---|
+| Frame rate, no tweaks | about 26&nbsp;fps (25.2–26.3) | about 75&nbsp;fps (74.4–75.6) | about 2.9× |
+| Frame rate, `exact` tweaks (the default) | | about 91&nbsp;fps (89.7–92) | about 3.5× |
+| Frame rate, every tweak | | about 90&nbsp;fps (87.4–92.2) | about 3.5× |
+| Loading the save | 49&nbsp;s | 26–27&nbsp;s | about 1.9× faster |
+| Autosave freeze, no tweaks | about 5&nbsp;s | 1.6&nbsp;s | about 3× shorter |
+| Autosave freeze, `exact` tweaks (the default) | | 0.6&nbsp;s | about 8× shorter |
+| Peak memory | 7.0&nbsp;GB | 11.0–11.2&nbsp;GB | about 1.6× |
 
-The autosave rows time the game's own autosave (what it runs at a cycle's end), three times in a
-row, as the frames it stalls: the longest frame, the save's main-thread pause. The first one in
-each player is slower (6–10 s in ours, as code warms up) and is left out of the ranges.
+With no tweaks it's the same game code doing the same work, so those rows are the engine and
+runtime alone. The autosave rows time the game's own autosave (what it runs at a cycle's end),
+three times in a row, as the longest frame it stalls; the first one in each player is slower
+(as code warms up) and is left out. Peak memory is the process's working set, sampled every second
+through the load and the autosaves. Ours keeps more: the garbage collector keeps a heap per core
+so it can collect in parallel, and the engine keeps caches that make it faster.
 
 ## Why the engine alone is faster
 
@@ -46,7 +68,8 @@ Most of it is the runtime. The game's code runs on CoreCLR (.NET 10) instead of 
 with a tiered JIT and profile-guided optimization. Its garbage collector runs in parallel on every
 core, its pauses are about a quarter as long, and it's now about 1.4% of a frame.
 
-The rest is the engine itself, profiled on U57 and fixed where the game leans on it hardest:
+The rest is the engine itself, profiled on U57 and fixed where the game leans on it hardest
+(timed on Linux under WSL2):
 
 | Change | Saved per frame |
 |---|---|
@@ -61,8 +84,9 @@ by two thirds.
 
 ## System by system, before the tweaks
 
-This profile is from before any game tweaks: an 82 ms frame (12 fps), sampled with `perf` over
-90 s of play. The game's own code was 71% of the main thread (58 ms), the engine 13% (11 ms),
+This profile is from before any game tweaks, on Linux under WSL2 (where the game's code ran about
+half as fast as on Windows; the proportions are what matter here): an 82 ms frame (12 fps),
+sampled with `perf` over 90 s of play. The game's own code was 71% of the main thread (58 ms), the engine 13% (11 ms),
 and native code (memory copies, maths, GC) 7%. The last column is what happened to each system
 since.
 
@@ -96,10 +120,11 @@ found to skip.
 
 ## Where a frame goes now
 
-Main-thread time at about 54 fps with every tweak, so about 18.5 ms a frame, averaged over
-600-frame windows. The scripts' own times come from the engine timing each script's update
+Main-thread time on Windows at about 79 fps with every tweak, so about 12.6 ms a frame, averaged
+over 600-frame windows. The scripts' own times come from the engine timing each script's update
 (`--frame-stats`), and the game methods inside them from a stopwatch around each one (PerfProbe's
-`walltime.txt`). A bar under another is part of it.
+`walltime.txt`, which times only methods it can patch without slowing them: about 3% overall). A
+bar under another is part of it.
 
 ![Where a frame goes, as a flame graph](media/frame-flamegraph.svg)
 
@@ -110,35 +135,35 @@ Indented rows are part of the row above. `scripts/flamegraph.py` draws the graph
 
 | Entry point | ms a frame |
 |---|---|
-| `Game.Update` | 7.9 |
-| · `Game.SimEveryTick` | 6.0 |
-| · · state machine sim sub-ticks | 4.2 |
-| · · `Game.UnsafeSim200ms` | 1.8 |
-| · · · waiting on the native simulation step (SimDLL) | 1.6 |
-| `Game.LateUpdate` | 3.7 |
-| · Duplicant and critter brains | 2.4 |
-| · · fetch updates | 1.0 |
-| Rendering (engine) | 2.7 |
-| `Global.LateUpdate` (animation updates) | 1.4 |
-| `World.LateUpdate` (animation batch uploads) | 0.8 |
-| UI canvases (engine) | 0.7 |
-| `PropertyTextures.LateUpdate` | 0.5 |
-| `Global.Update` (animation events) | 0.4 |
-| `EventSystem.Update` (UI input) | 0.4 |
+| `Game.Update` | 4.4 |
+| · `Game.SimEveryTick` | 3.8 |
+| · · state machine sim sub-ticks | 2.7 |
+| · · `Game.UnsafeSim200ms` | 1.1 |
+| · · · waiting on the native simulation step (SimDLL) | 1.0 |
+| `Game.LateUpdate` | 2.1 |
+| · Duplicant and critter brains | 1.4 |
+| · · fetch updates | 0.5 |
+| Rendering (engine) | 2.1 |
+| `Global.LateUpdate` (animation updates) | 0.9 |
+| `World.LateUpdate` (animation batch uploads) | 0.6 |
+| UI canvases (engine) | 0.5 |
+| `Global.Update` (animation events) | 0.3 |
+| `PropertyTextures.LateUpdate` | 0.2 |
 
 </details>
 
-The rest of the frame is the smaller scripts and the engine's own frame work. Rendering is
-mostly off the main thread: the GL thread works in parallel with it. The path prober, which runs
-on its own thread, costs the main thread about 0.02 ms a frame to hand out its work.
+The rest of the frame is the smaller scripts and the engine's own frame work. Drawing happens on
+a separate GL thread, busy under 1 ms a frame here. The path prober, which runs on its own
+thread, costs the main thread about 0.02 ms a frame to hand out its work.
 
 About two thirds of what's left is the game's own logic, spread over dozens of systems. Each one
-reads thousands of scattered objects, and none takes more than a few milliseconds.
+reads thousands of scattered objects, and none takes more than a couple of milliseconds.
 
 ## The tweaks
 
 All of them are opt-in (`--game-tweak NAME`). The last column says whether the game's results
-stay exactly the same; the two that don't are left out of `--game-tweak exact`.
+stay exactly the same; the two that don't are left out of `--game-tweak exact`. The before and
+after times were measured on Linux under WSL2, where the game's code ran about half as fast.
 
 | Tweak | Before → after | Results |
 |---|---|---|
@@ -180,12 +205,12 @@ the time goes to cache misses chasing object references, not to computation.
 A spike compared flat arrays against reading the game's objects. Sublimation's
 decision dropped from about 400 ns to about 5 ns per item, and a pickupable scan from about
 160 ns to about 1 ns. Rewriting the per-item systems that way could save up to about 10 ms of a
-70 ms frame. But mods and the UI write the same game state, so it would mean rewriting the game's
+70 ms frame (on Linux, before the tweaks). But mods and the UI write the same game state, so it would mean rewriting the game's
 systems rather than tweaking them.
 
 ## Loading
 
-Loading U57 takes 26–28 s, against 3 min 50 s in the original. About two thirds of that is the
-game's own work (reading the save and setting up each object), and about a quarter is the engine
+Loading U57 takes 35–36 s on Windows, against 2 min 22 s in the original. Profiled on Linux,
+about two thirds of it is the game's own work (reading the save and setting up each object), and about a quarter is the engine
 creating those objects. Unloading unused assets during the load takes another 1.2 s. The JIT
 isn't the bottleneck: compiling ahead of time (ReadyToRun) saved nothing measurable.

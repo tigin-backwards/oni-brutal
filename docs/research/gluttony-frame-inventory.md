@@ -194,3 +194,20 @@ frame is about 9 ms longer (Windows). Per wall second on Linux, against the clea
 `ReachabilityMonitor` +15 ms (the items' reachability), object-layer list refreshes and
 `ObjectLayerIndexer.set_Item` +15 ms (10,000 items in one cell's list), fetch and pickup
 bookkeeping +10 ms. Candidate 6 addresses the first.
+
+## Outcome (2026-10-22)
+
+- 1, radbolt gathers: done. `fast-particle-collision` gathers only when a nearby radbolt passes
+  the merge test; 56% of checks gathered before, 0.09% after. Radbolt checks 1.5 → 0.9 ms.
+  `ParticleOf` was left as a scan: it runs only on the rare gathers now.
+- 6, partitioner cleanup: done as `fast-partitioner-cleanup` (exact). 0.38 → 0.16 ms.
+- 3, dream bubbles: dropped. `NameDisplayScreen.entries` is a public list the game changes in
+  several places (adds, `RemoveAll`, an in-place compaction), and `GetEntry` compares with
+  Unity's destroyed-object equality; an index kept exact through all of that is too fragile for
+  0.2 ms.
+- 4, `GetSMI`: dropped; 0.07 ms on the main thread in the current profile.
+- 2, uniform lookups: not tried; the similar per-block cache gave nothing on U57, and the cost is
+  spread over every draw's uniforms.
+- 7, property textures: dropped; the cost is `LoadRawTextureData`'s copy, and telling whether
+  the bytes changed costs a comparison of the same size.
+- 5 and 8: not tried (bookkeeping heavier than the gain).

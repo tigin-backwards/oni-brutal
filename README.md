@@ -61,10 +61,9 @@ writing the save faster and moving the compression and file write to a backgroun
 Garbage-collection hitches are mostly gone: collections now run in the background, spread
 across every core, and their pauses are about a quarter as long.
 
-**Note:** it uses more memory than the original. On a mid-game Spaced Out colony (cycle 1,990,
-50 Duplicants) it peaked at about 10 GB resident, against about 7.5 GB in the original. The
-garbage collector keeps a heap per core so it can collect in parallel, and the engine keeps
-caches that make it faster.
+**Note:** This uses more memory compared to the original. On a mid-game colony, memory peaked at
+around 10GB resident compared to 7.5GB in the original. This is expected behavior for faster,
+parallel collection.
 
 Measured on a Ryzen 7 9800X3D with an RTX 3090.
 

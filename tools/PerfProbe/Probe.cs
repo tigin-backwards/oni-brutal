@@ -561,6 +561,7 @@ namespace PerfProbe
             }
             MeasurePatchedFrames();
             try { MeasureTmpColors(); } catch (System.MissingMethodException e) { Debug.Log("PERF measure tmp colors: " + e.Message); }
+            try { MeasurePackTextures(); } catch (System.MissingMethodException e) { Debug.Log("PERF measure pack: " + e.Message); }
             yield return MeasureInputActivation();
             yield return MeasureModRendering();
             MeasurePopularModApis();
@@ -1008,6 +1009,109 @@ namespace PerfProbe
             Debug.Log($"PERF measure tmp compare: same {TMPro.TMPro_ExtensionMethods.Compare(f1, f1)} alpha {TMPro.TMPro_ExtensionMethods.Compare(f1, f2)} tiny {TMPro.TMPro_ExtensionMethods.Compare(f1, f3)} rgb-alpha {TMPro.TMPro_ExtensionMethods.CompareRGB(f1, f2)} rgb-tiny {TMPro.TMPro_ExtensionMethods.CompareRGB(f1, f3)}");
         }
 
+        /// Texture2D.PackTextures (LocalCanvas packs players' images into one atlas): the atlas's
+        /// size and format and each texture's rect, for several sets, and whether each texture's
+        /// texels land in its rect.
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+        static void MeasurePackTextures()
+        {
+            Texture2D Solid(int w, int h, int i, TextureFormat format = TextureFormat.RGBA32)
+            {
+                var t = new Texture2D(w, h, format, false);
+                var c = new Color32((byte)(40 + i * 23), (byte)(200 - i * 17), (byte)(i * 51 % 256), 255);
+                var px = new Color32[w * h];
+                for (int k = 0; k < px.Length; k++) px[k] = c;
+                t.SetPixels32(px);
+                t.Apply();
+                return t;
+            }
+            void Case(string name, int[][] sizes, int padding, int maxSize, TextureFormat format = TextureFormat.RGBA32)
+            {
+                var textures = new Texture2D[sizes.Length];
+                for (int i = 0; i < sizes.Length; i++) textures[i] = Solid(sizes[i][0], sizes[i][1], i, format);
+                var atlas = new Texture2D(2, 2);
+                var rects = atlas.PackTextures(textures, padding, maxSize, false);
+                var line = new System.Text.StringBuilder($"PERF measure pack {name}: atlas {atlas.width}x{atlas.height} {atlas.format} mips {atlas.mipmapCount} readable {atlas.isReadable} rects");
+                for (int i = 0; i < rects.Length; i++)
+                {
+                    var r = rects[i];
+                    int cx = (int)((r.x + r.width / 2) * atlas.width), cy = (int)((r.y + r.height / 2) * atlas.height);
+                    var want = textures[i].GetPixel(0, 0);
+                    var got = atlas.isReadable ? atlas.GetPixel(cx, cy) : Color.clear;
+                    bool match = Mathf.Abs(want.r - got.r) < 0.02f && Mathf.Abs(want.g - got.g) < 0.02f && Mathf.Abs(want.b - got.b) < 0.02f;
+                    line.Append($" [{r.x * atlas.width:F1},{r.y * atlas.height:F1} {r.width * atlas.width:F1}x{r.height * atlas.height:F1}{(match ? "" : " MISMATCH")}]");
+                }
+                if (atlas.isReadable) line.Append($" corner {atlas.GetPixel(atlas.width - 1, atlas.height - 1)}");
+                Debug.Log(line.ToString());
+            }
+            Case("four", new[] { new[] { 64, 64 }, new[] { 32, 32 }, new[] { 128, 16 }, new[] { 16, 128 } }, 2, 2048);
+            Case("four-nopad", new[] { new[] { 64, 64 }, new[] { 32, 32 }, new[] { 128, 16 }, new[] { 16, 128 } }, 0, 2048);
+            Case("one", new[] { new[] { 100, 60 } }, 2, 2048);
+            Case("odd", new[] { new[] { 100, 60 }, new[] { 37, 81 }, new[] { 250, 13 }, new[] { 9, 9 }, new[] { 64, 200 } }, 4, 2048);
+            var many = new int[24][];
+            for (int i = 0; i < many.Length; i++) many[i] = new[] { 16 + i * 11 % 97, 16 + i * 29 % 113 };
+            Case("many", many, 2, 2048);
+            Case("over-max", new[] { new[] { 512, 512 }, new[] { 512, 512 }, new[] { 512, 256 } }, 2, 512);
+            Case("same", new[] { new[] { 64, 64 }, new[] { 64, 64 }, new[] { 64, 64 }, new[] { 64, 64 }, new[] { 64, 64 } }, 1, 2048);
+            Case("rgb24", new[] { new[] { 64, 64 }, new[] { 32, 32 } }, 2, 2048, TextureFormat.RGB24);
+            Case("scale-odd", new[] { new[] { 300, 300 }, new[] { 300, 300 }, new[] { 300, 150 } }, 2, 256);
+            // A horizontal ramp packed over the maximum size: how scaled texels are resampled.
+            var ramp = new Texture2D(300, 4, TextureFormat.RGBA32, false);
+            var rampPx = new Color32[300 * 4];
+            for (int y = 0; y < 4; y++) for (int x = 0; x < 300; x++) rampPx[y * 300 + x] = new Color32((byte)(x * 255 / 299), (byte)(x % 2 == 0 ? 255 : 0), 0, 255);
+            ramp.SetPixels32(rampPx);
+            ramp.Apply();
+            var rampAtlas = new Texture2D(2, 2);
+            var rampRect = rampAtlas.PackTextures(new[] { ramp, ramp, ramp }, 0, 256, false)[0];
+            var rampRow = new System.Text.StringBuilder();
+            int rx0 = (int)(rampRect.x * rampAtlas.width), ry0 = (int)(rampRect.y * rampAtlas.height), rw = (int)Mathf.Round(rampRect.width * rampAtlas.width);
+            for (int x = 0; x < Mathf.Min(rw, 24); x++) { var c = rampAtlas.GetPixel(rx0 + x, ry0); rampRow.Append($" {(int)Mathf.Round(c.r * 255)}/{(int)Mathf.Round(c.g * 255)}"); }
+            Debug.Log($"PERF measure pack ramp: atlas {rampAtlas.width}x{rampAtlas.height} rect {rampRect.x * rampAtlas.width},{rampRect.y * rampAtlas.height} {rampRect.width * rampAtlas.width}x{rampRect.height * rampAtlas.height} row{rampRow}");
+            var atlas2 = new Texture2D(2, 2);
+            var r2 = atlas2.PackTextures(new[] { Solid(64, 64, 0), Solid(32, 32, 1) }, 2);
+            Debug.Log($"PERF measure pack default-max: atlas {atlas2.width}x{atlas2.height} mips {atlas2.mipmapCount} rects {r2.Length}");
+            var atlas3 = new Texture2D(2, 2);
+            var r3 = atlas3.PackTextures(new[] { Solid(64, 64, 0), Solid(32, 32, 1) }, 2, 2048, true);
+            Debug.Log($"PERF measure pack no-longer-readable: readable {atlas3.isReadable} rects {r3.Length}");
+        }
+
+        System.Collections.IEnumerator LocalCanvasPainting()
+        {
+            var stages = Db.GetArtableStages();
+            var local = new System.Collections.Generic.List<Database.ArtableStage>();
+            foreach (var stage in stages.resources) if (stage.id.StartsWith("LocalCanvas_")) local.Add(stage);
+            var paintings = FindObjectsByType<Painting>(FindObjectsSortMode.InstanceID);
+            if (paintings.Length == 0)
+            {
+                // None in the save: one built where the view is, as sandbox's instant build does.
+                var def = Assets.GetBuildingDef("Canvas");
+                int cell = Grid.PosToCell(CameraController.Instance.transform.position);
+                var built = def.Build(cell, Orientation.Neutral, null, def.DefaultElements(), 293f, false, GameClock.Instance.GetTime());
+                for (int i = 0; i < 30; i++) yield return null;
+                paintings = new[] { built.GetComponent<Painting>() };
+                Debug.Log($"PERF localcanvas: built a Canvas at cell {cell}");
+            }
+            Debug.Log($"PERF localcanvas: {local.Count} local stages ({string.Join(", ", System.Linq.Enumerable.Take(System.Linq.Enumerable.Select(local, st => st.id + " for " + st.prefabId), 4))}), {paintings.Length} paintings");
+            foreach (var painting in paintings)
+            {
+                var prefab = painting.GetComponent<KPrefabID>().PrefabTag.Name;
+                var stage = local.Find(st => st.prefabId == prefab && st.id.EndsWith("_LookingGreat"));
+                if (stage == null) continue;
+                painting.SetStage(stage.id, false);
+                CameraController.Instance.SnapTo(painting.transform.position, 6f);
+                for (int i = 0; i < 60; i++) yield return null;
+                Debug.Log($"PERF localcanvas: {prefab} at {painting.transform.position} set to {stage.id}, current {painting.CurrentStage}");
+                // The world alone: screen-space UI (an achievement alert covers the view) hidden.
+                foreach (var canvas in FindObjectsByType<Canvas>(FindObjectsSortMode.InstanceID))
+                    if (canvas.isRootCanvas && canvas.renderMode != RenderMode.WorldSpace) canvas.enabled = false;
+                for (int i = 0; i < 5; i++) yield return null;
+                ScreenCapture.CaptureScreenshot(System.IO.Path.Combine(Path, "localcanvas.png"));
+                for (int i = 0; i < 10; i++) yield return null;
+                yield break;
+            }
+            Debug.Log("PERF localcanvas: no painting with a local stage");
+        }
+
         static readonly System.Collections.Generic.List<string> activationEvents = new System.Collections.Generic.List<string>();
         static void ActivatedInternal(TMPro.TMP_InputField __instance) => activationEvents.Add($"internal f{Time.frameCount} focused {__instance.isFocused}");
         static void DeactivatedNoArgs() => activationEvents.Add($"deactivate() f{Time.frameCount} from {new System.Diagnostics.StackFrame(2).GetMethod()?.Name}");
@@ -1446,6 +1550,9 @@ namespace PerfProbe
             while (Game.Instance == null || SpeedControlScreen.Instance == null) yield return null;
             Debug.Log($"PERF colony f{Time.frameCount} cycle {GameClock.Instance.GetCycle()}{RuntimeCounters.Jit()}");
             if (System.IO.File.Exists(System.IO.Path.Combine(Path, "truetiles.txt"))) ReportTileTextures();
+            // `localcanvas.txt`: LocalCanvas's artwork stages, and a painting set to its first local
+            // image and captured (localcanvas.png).
+            if (System.IO.File.Exists(System.IO.Path.Combine(Path, "localcanvas.txt"))) StartCoroutine(LocalCanvasPainting());
             // `pointer.txt`: what the game's hover handling reads (PlayerController.UpdateHover, the
             // select tool's hover card) while the mouse has not moved, every 120 frames, 6 times.
             if (System.IO.File.Exists(System.IO.Path.Combine(Path, "pointer.txt"))) StartCoroutine(Pointer());

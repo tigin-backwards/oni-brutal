@@ -557,6 +557,7 @@ namespace PerfProbe
                 Debug.Log($"PERF measure data prefab {dataPrefab.name}: {victimType} destroyed {victim == null}");
             }
             MeasurePatchedFrames();
+            try { MeasureTmpColors(); } catch (System.MissingMethodException e) { Debug.Log("PERF measure tmp colors: " + e.Message); }
             yield return MeasureInputActivation();
             yield return MeasureModRendering();
             MeasurePopularModApis();
@@ -954,9 +955,35 @@ namespace PerfProbe
         // An input field built in code with its text component assigned after it was enabled (as
         // ONI Together builds its chat field): whether the caret exists after a canvas update, a
         // frame, and a disable and enable, and whether anything is logged.
+        /// TMPro_ExtensionMethods' colour helpers (Paint Your Pipes multiplies pipe colours with
+        /// Multiply): every pair of a set of channel values, and the alpha rules.
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+        static void MeasureTmpColors()
+        {
+            var values = new byte[] { 0, 1, 2, 3, 15, 16, 64, 100, 127, 128, 129, 191, 200, 254, 255 };
+            var multiply = new System.Text.StringBuilder();
+            var tint = new System.Text.StringBuilder();
+            foreach (var a in values)
+                foreach (var b in values)
+                {
+                    var m = TMPro.TMPro_ExtensionMethods.Multiply(new Color32(a, b, a, b), new Color32(b, a, a, 255));
+                    multiply.Append($" {a}x{b}={m.r},{m.g},{m.b},{m.a}");
+                    var t = TMPro.TMPro_ExtensionMethods.Tint(new Color32(a, b, a, b), new Color32(b, a, a, 255));
+                    tint.Append($" {a}x{b}={t.r},{t.g},{t.b},{t.a}");
+                }
+            Debug.Log("PERF measure tmp multiply:" + multiply);
+            Debug.Log("PERF measure tmp tint32:" + tint);
+            var c1 = new Color(0.25f, 0.5f, 0.75f, 0.8f); var c2 = new Color(0.9f, 0.1f, 0.3f, 0.4f);
+            Debug.Log($"PERF measure tmp minalpha: {TMPro.TMPro_ExtensionMethods.MinAlpha(c1, c2)} {TMPro.TMPro_ExtensionMethods.MinAlpha(c2, c1)}");
+            var k1 = new Color32(10, 20, 30, 40); var k2 = new Color32(10, 20, 30, 41); var k3 = new Color32(10, 21, 30, 40);
+            Debug.Log($"PERF measure tmp compare32: same {TMPro.TMPro_ExtensionMethods.Compare(k1, k1)} alpha {TMPro.TMPro_ExtensionMethods.Compare(k1, k2)} green {TMPro.TMPro_ExtensionMethods.Compare(k1, k3)} rgb-alpha {TMPro.TMPro_ExtensionMethods.CompareRGB(k1, k2)} rgb-green {TMPro.TMPro_ExtensionMethods.CompareRGB(k1, k3)}");
+            var f1 = new Color(0.1f, 0.2f, 0.3f, 0.4f); var f2 = new Color(0.1f, 0.2f, 0.3f, 0.5f); var f3 = new Color(0.1f, 0.2000001f, 0.3f, 0.4f);
+            Debug.Log($"PERF measure tmp compare: same {TMPro.TMPro_ExtensionMethods.Compare(f1, f1)} alpha {TMPro.TMPro_ExtensionMethods.Compare(f1, f2)} tiny {TMPro.TMPro_ExtensionMethods.Compare(f1, f3)} rgb-alpha {TMPro.TMPro_ExtensionMethods.CompareRGB(f1, f2)} rgb-tiny {TMPro.TMPro_ExtensionMethods.CompareRGB(f1, f3)}");
+        }
+
         static readonly System.Collections.Generic.List<string> activationEvents = new System.Collections.Generic.List<string>();
         static void ActivatedInternal(TMPro.TMP_InputField __instance) => activationEvents.Add($"internal f{Time.frameCount} focused {__instance.isFocused}");
-        static void DeactivatedNoArgs() => activationEvents.Add($"deactivate() f{Time.frameCount}");
+        static void DeactivatedNoArgs() => activationEvents.Add($"deactivate() f{Time.frameCount} from {new System.Diagnostics.StackFrame(2).GetMethod()?.Name}");
         static void DeactivatedBool(bool clearSelection) => activationEvents.Add($"deactivate({clearSelection}) f{Time.frameCount}");
 
         /// When TMP_InputField's private ActivateInputFieldInternal runs (Favorite Buildings patches
@@ -987,7 +1014,7 @@ namespace PerfProbe
             {
                 activationEvents.Add($"{name} at f{Time.frameCount}");
                 act();
-                activationEvents.Add($"{name} returned, focused {input.isFocused}");
+                activationEvents.Add($"{name} returned, focused {input.isFocused} selected {UnityEngine.EventSystems.EventSystem.current?.currentSelectedGameObject == field}");
                 return name;
             }
             System.Collections.IEnumerator Frames(int n) { for (int i = 0; i < n; i++) { yield return null; activationEvents.Add($"f{Time.frameCount} focused {input.isFocused}"); } }

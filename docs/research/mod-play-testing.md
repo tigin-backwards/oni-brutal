@@ -139,6 +139,9 @@ spec costs to write.
 
 ### 3.2 Assigning classes cheaply: `tools/ModTriage`
 
+Implemented. Its table is `docs/research/mod-triage.md`, which also says where the tool departs
+from this section (shared helper code kept apart, two refinements to the target mapping).
+
 This is a new console tool beside `tools/ApiCheck`, using `System.Reflection.Metadata` in the same
 way: it reads metadata only and never loads the DLL. For each mod (`out/ws/ID/*.dll`, or the
 newest `archived_versions/*` that matches the game) it emits one JSON record:

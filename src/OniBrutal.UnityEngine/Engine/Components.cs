@@ -266,6 +266,9 @@ namespace OniBrutal.Engine
 
         public static int Of(Type type) => ids.GetOrAdd(type, static _ => System.Threading.Interlocked.Increment(ref next));
 
+        /// How many ids have been handed out (ids are global, so other queries count too).
+        public static int Count => System.Threading.Volatile.Read(ref next) + 1;
+
         public static class For<T>
         {
             public static readonly int Id = Of(typeof(T));

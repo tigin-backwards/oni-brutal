@@ -59,7 +59,8 @@ namespace OniBrutal.Tests
                 if (typeof(Component).IsAssignableFrom(t) && !t.IsGenericTypeDefinition) types.Add(t);
             foreach (var t in types) go.GetComponent(t);
             var native = (GameObjectNative)go.NativeOrThrow;
-            int ids = QueryIds.Of(typeof(Component)) + 1;
+            // Ids are global: every query type seen so far in the run has one.
+            int ids = QueryIds.Count;
             Assert.True(native.Layout.Layout.TableLength <= 2 * Math.Max(ids, types.Count) + 2,
                 $"{native.Layout.Layout.TableLength} entries for {types.Count} query types");
         }

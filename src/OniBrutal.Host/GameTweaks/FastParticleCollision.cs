@@ -116,6 +116,8 @@ namespace OniBrutal.Host.GameTweaks
                 var obj = AccessTools.Field(entry.GetType(), "obj").GetValue(entry) as UnityEngine.Component;
                 if (obj == null) continue;
                 var other = getComponent.Invoke(obj.gameObject, null) as UnityEngine.Component;
+                // The lookup ParticleOf would give, checked here too: real gathers are rare now.
+                CheckLookup(obj.gameObject, other);
                 if (other != null && !ReferenceEquals(other, self) && collideable(other)
                     && intersects(self.GetComponent(circleType), (UnityEngine.Vector2)other.transform.position) && intersects(obj, (UnityEngine.Vector2)self.transform.position))
                     EngineLog.Engine($"{Name}: a skipped gather held radbolt {other.name}, which would have merged ({++wrongSkips})");
@@ -201,6 +203,14 @@ namespace OniBrutal.Host.GameTweaks
         /// GameObject.GetComponent&lt;HighEnergyParticle&gt;() for a collider's GameObject.
         static UnityEngine.Component? ParticleOf(UnityEngine.GameObject go)
         {
+            var found = Lookup(go);
+            if (verify) CheckLookup(go, (UnityEngine.Component?)getComponent.Invoke(go, null), found);
+            return found;
+        }
+
+        /// The live radbolt on a GameObject, or null.
+        static UnityEngine.Component? Lookup(UnityEngine.GameObject go)
+        {
             UnityEngine.Component? found = null;
             lock (live)
             {
@@ -211,15 +221,18 @@ namespace OniBrutal.Host.GameTweaks
                     if (found == null && ReferenceEquals(c.gameObject, go)) found = c;
                 }
             }
-            if (verify)
-            {
-                var expected = (UnityEngine.Component?)getComponent.Invoke(go, null);
-                checks++;
-                if (!ReferenceEquals(expected, found) && !(expected == null && found == null))
-                    EngineLog.Engine($"{Name}: mismatch {++mismatches} of {checks} on {go.name}");
-                if (checks % 100000 == 0) EngineLog.Engine($"{Name}: {checks} checks, {mismatches} mismatches");
-            }
             return found;
+        }
+
+        /// Verify mode: ParticleOf's answer against GetComponent's.
+        static void CheckLookup(UnityEngine.GameObject go, UnityEngine.Component? expected) => CheckLookup(go, expected, Lookup(go));
+
+        static void CheckLookup(UnityEngine.GameObject go, UnityEngine.Component? expected, UnityEngine.Component? found)
+        {
+            checks++;
+            if (!ReferenceEquals(expected, found) && !(expected == null && found == null))
+                EngineLog.Engine($"{Name}: mismatch {++mismatches} of {checks} on {go.name}");
+            if (checks % 100000 == 0) EngineLog.Engine($"{Name}: {checks} checks, {mismatches} mismatches");
         }
     }
 }

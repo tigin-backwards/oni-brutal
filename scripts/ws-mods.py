@@ -56,14 +56,15 @@ def unpack(i):
 
 
 def mono_hash(s):
-    """string.GetHashCode as Unity's 64-bit Mono computes it (the .NET Framework algorithm)."""
+    """string.GetHashCode as Unity's 64-bit Mono computes it: the .NET Framework 64-bit algorithm,
+    as OniBrutal.Engine.MonoStringHash (checked against the original player)."""
     def i32(x):
         x &= 0xffffffff
         return x - (1 << 32) if x & 0x80000000 else x
     h1 = h2 = 5381
     for i in range(0, len(s), 2):
-        h1 = i32(((h1 << 5) + h1 + (h1 >> 27)) ^ ord(s[i]))
-        if i + 1 < len(s): h2 = i32(((h2 << 5) + h2 + (h2 >> 27)) ^ ord(s[i + 1]))
+        h1 = i32(((h1 << 5) + h1) ^ ord(s[i]))
+        if i + 1 < len(s): h2 = i32(((h2 << 5) + h2) ^ ord(s[i + 1]))
     return i32(h1 + h2 * 1566083941)
 
 

@@ -1,4 +1,6 @@
+using OniBrutal.Assets.TypeTrees;
 using OniBrutal.Engine;
+using OniBrutal.Engine.Serialization;
 
 namespace UnityEngine
 {
@@ -75,6 +77,17 @@ namespace OniBrutal.Engine
         public bool Interactable = true;
         public bool BlocksRaycasts = true;
         public bool IgnoreParentGroups;
+
+        /// A saved group's settings (a prefab's: the game's port icons are a group that neither
+        /// blocks raycasts nor is interactable, so a build drag can start over them).
+        public override void Bind(Fields f, IReferenceResolver resolver)
+        {
+            Serialized = null;
+            Alpha = f.Float("m_Alpha");
+            Interactable = f.Bool("m_Interactable");
+            BlocksRaycasts = f.Bool("m_BlocksRaycasts");
+            IgnoreParentGroups = f.Bool("m_IgnoreParentGroups");
+        }
 
         public override void CopyStateFrom(NativeObject source)
         {

@@ -9,6 +9,7 @@ out of scope.
 - **Colony:** loaded with its batch of about 25 mods and played 90 seconds of U57, a large Spaced
   Out colony, with no error of ours.
 - **Played:** a save played with the mod, its screens and logs compared with the original player.
+  ⚠️ means played with a small known difference, its issue linked.
 
 "No error of ours" means no error that the original player's log lacks. ❌ means the mod fails the
 same way in the original player (it needs an update from its author). Every run uses the
@@ -82,7 +83,7 @@ installs get developer checks subscribers never see).
 | 62 | [Favorite Resources // by @Ony 👾](https://steamcommunity.com/sharedfiles/filedetails/?id=1872111766) | ✅ | ✅ | ⬜ |  |
 | 63 | [bottle emptier extend](https://steamcommunity.com/sharedfiles/filedetails/?id=1885337332) | ❌ | ❌ | ⬜ | broken upstream: calls `TreeFilterable.GetTags()`, which the game no longer has (same in the original) |
 | 64 | [No 'Long Commutes'](https://steamcommunity.com/sharedfiles/filedetails/?id=1725950119) | ✅ | ✅ | ⬜ |  |
-| 65 | [Blueprints Expanded](https://steamcommunity.com/sharedfiles/filedetails/?id=3468585385) | ✅ | ✅ | ✅ | a blueprint created, written, read back and placed: the same 345 construction sites as in the original |
+| 65 | [Blueprints Expanded](https://steamcommunity.com/sharedfiles/filedetails/?id=3468585385) | ✅ | ✅ | ⬜ | its windows were laid out wrongly ([#6](https://github.com/tigin-backwards/oni-brutal/issues/6), fixed in 2026.10.22.3); played again once its spec runs through the UI. Earlier, a blueprint created, written, read back and placed by its code: the same 345 construction sites as in the original |
 | 66 | [U&F-Translate Fix 翻译修正](https://steamcommunity.com/sharedfiles/filedetails/?id=3374671941) | ⬜ | ⬜ | ⬜ | flagged by onimaxxing (crashesAtStartup); not tested |
 | 67 | [自然种植盒（Natural Plant Box）](https://steamcommunity.com/sharedfiles/filedetails/?id=3243440327) | ✅ | ✅ | ⬜ |  |
 | 68 | [Русификатор (Wiki)](https://steamcommunity.com/sharedfiles/filedetails/?id=1269554374) | ⬜ | ⬜ | ⬜ | translation: the game applies one only from a Steam subscription; not testable here |

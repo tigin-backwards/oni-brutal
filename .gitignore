@@ -5,3 +5,6 @@ obj/
 /out/
 /cache/
 /.cate/
+
+# e2e fixture saves are made locally (scripts/e2e.py --bless), not kept in git
+tests/e2e/fixtures/*.sav

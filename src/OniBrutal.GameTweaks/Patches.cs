@@ -19,6 +19,7 @@ namespace OniBrutal.GameTweaks
                 case FastOffsetTables.Name: FastOffsetTables.Install(harmony); return true;
                 case SlowReachability.Name: SlowReachability.Install(harmony); return true;
                 case OffWorldFallers.Name: OffWorldFallers.Install(harmony); return true;
+                case FastPartitionerCleanup.Name: FastPartitionerCleanup.Install(harmony); return true;
                 default: return false;
             }
         }

@@ -175,6 +175,7 @@ after times were measured on Linux under WSL2, where the game's code ran about h
 | `fast-particle-collision`: a radbolt skips the collider gather when no other radbolt is nearby | 0.94 → 0.44 ms | exact |
 | `fast-offset-tables`: fetch updates recheck only items whose work spots can have changed | 1.74 → 1.33 ms | exact |
 | `fast-anim-cleanup`: the sweep for destroyed animations skips chunks that can't hold any | 0.48 → 0.12 ms | exact |
+| `fast-partitioner-cleanup`: the spatial index's cleanup looks only at entries that were removed | Gluttony: 0.38 → 0.16 ms | exact |
 | `fast-symbol-overrides`: unchanged symbol-override blocks aren't uploaded again | 1.47 → 1.20 ms | exact |
 | Save tweaks: `fast-serialization`, `fast-save-type-checks`, `fast-save-compression`, `no-save-gc`, `background-save` | autosave freeze 11.7 → 4.8 s | exact, and saves still load in the original |
 | `slow-reachability`: reachability re-checked every 4 game seconds instead of every second | 1.88 → 0.53 ms | changes timing |

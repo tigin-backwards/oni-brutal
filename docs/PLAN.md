@@ -391,6 +391,13 @@ unchanged.
   that slowed only items in storage gained nothing: telling whether an item is stored reads the
   item, which is most of what the check costs.
 
+- `fast-partitioner-cleanup`: ScenePartitioner.Sim1000ms looks up every entry of every node
+  dirtied since its last run (every insertion dirties its nodes too) to drop freed handles.
+  Handles are freed only after ScenePartitioner.Remove, so the removed handles are recorded with
+  their nodes and only those are looked up, dropped in descending order of their place in the
+  node's list (the game's scan, given its swap-removal). Gluttony, Linux: 0.38 → 0.16 ms a frame;
+  verified on the original save over 340,000 node scans (2.9 million entries dropped, none left).
+
 - `off-world-fallers` (**changes behaviour**): GravityComponents.FixedUpdate leaves an object in
   place, still falling, when its next position is outside its world, so an item dropped out of
   the bottom of a rocket interior is stepped forever (Gluttony: 17,552 of them, about 8.5 ms a

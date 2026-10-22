@@ -19,6 +19,28 @@ namespace TMPro
             (byte)Mathf.Clamp(c1.b * tint, 0f, 255f),
             c1.a);
 
+        // Each channel, alpha included, is c1·c2 / 255 by integer division (128×128 = 64).
+        public static Color32 Multiply(this Color32 c1, Color32 c2) => new(
+            (byte)(c1.r * c2.r / 255),
+            (byte)(c1.g * c2.g / 255),
+            (byte)(c1.b * c2.b / 255),
+            (byte)(c1.a * c2.a / 255));
+
+        // The same as Multiply, alpha included.
+        public static Color32 Tint(this Color32 c1, Color32 c2) => Multiply(c1, c2);
+
+        // c1's RGB with the smaller of the two alphas.
+        public static Color MinAlpha(this Color c1, Color c2) => new(c1.r, c1.g, c1.b, Math.Min(c1.a, c2.a));
+
+        // Exact equality per channel (no tolerance); the RGB forms ignore alpha.
+        public static bool Compare(this Color32 a, Color32 b) => a.r == b.r && a.g == b.g && a.b == b.b && a.a == b.a;
+
+        public static bool CompareRGB(this Color32 a, Color32 b) => a.r == b.r && a.g == b.g && a.b == b.b;
+
+        public static bool Compare(this Color a, Color b) => a.r == b.r && a.g == b.g && a.b == b.b && a.a == b.a;
+
+        public static bool CompareRGB(this Color a, Color b) => a.r == b.r && a.g == b.g && a.b == b.b;
+
         static bool Same(float a, float b, int accuracy) => Math.Round(a, accuracy) == Math.Round(b, accuracy);
     }
 }

@@ -82,7 +82,7 @@ installs get developer checks subscribers never see).
 | 62 | [Favorite Resources // by @Ony 👾](https://steamcommunity.com/sharedfiles/filedetails/?id=1872111766) | ✅ | ✅ | ⬜ |  |
 | 63 | [bottle emptier extend](https://steamcommunity.com/sharedfiles/filedetails/?id=1885337332) | ❌ | ❌ | ⬜ | broken upstream: calls `TreeFilterable.GetTags()`, which the game no longer has (same in the original) |
 | 64 | [No 'Long Commutes'](https://steamcommunity.com/sharedfiles/filedetails/?id=1725950119) | ✅ | ✅ | ⬜ |  |
-| 65 | [Blueprints Expanded](https://steamcommunity.com/sharedfiles/filedetails/?id=3468585385) | ✅ | ✅ | ⬜ |  |
+| 65 | [Blueprints Expanded](https://steamcommunity.com/sharedfiles/filedetails/?id=3468585385) | ✅ | ✅ | ✅ | a blueprint created, written, read back and placed: the same 345 construction sites as in the original |
 | 66 | [U&F-Translate Fix 翻译修正](https://steamcommunity.com/sharedfiles/filedetails/?id=3374671941) | ⬜ | ⬜ | ⬜ | flagged by onimaxxing (crashesAtStartup); not tested |
 | 67 | [自然种植盒（Natural Plant Box）](https://steamcommunity.com/sharedfiles/filedetails/?id=3243440327) | ✅ | ✅ | ⬜ |  |
 | 68 | [Русификатор (Wiki)](https://steamcommunity.com/sharedfiles/filedetails/?id=1269554374) | ⬜ | ⬜ | ⬜ | translation: the game applies one only from a Steam subscription; not testable here |
@@ -519,6 +519,8 @@ installs get developer checks subscribers never see).
 | 499 | [Filterable Auto-Compost](https://steamcommunity.com/sharedfiles/filedetails/?id=3612606893) | ✅ | ✅ | ⬜ |  |
 | 500 | [Clothing Locker](https://steamcommunity.com/sharedfiles/filedetails/?id=2046407638) | ✅ | ✅ | ⬜ |  |
 | – | [Synchronized Building Groups](https://steamcommunity.com/sharedfiles/filedetails/?id=3427974009) | ✅ | ✅ | ✅ | side screen and group dialog as in the original |
+| – | [LocalCanvas-本地画框](https://steamcommunity.com/sharedfiles/filedetails/?id=3775625682) | ✅ | ✅ | ✅ | a player's images packed and shown on a canvas as in the original (needed `Texture2D.PackTextures`) |
+| – | [Morphs Not Included](https://steamcommunity.com/sharedfiles/filedetails/?id=3781314647) | ✅ | ✅ | ✅ | a colony with its new elements, 0 errors in both players (needed `Shader.GetPropertyCount/Name/Type`) |
 | – | [Preset Manager](https://steamcommunity.com/sharedfiles/filedetails/?id=2977728791) | ✅ | ✅ | ✅ | issue #2's set |
 
 ## Known differences

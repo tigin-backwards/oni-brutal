@@ -24,6 +24,22 @@ namespace UnityEngine
 
         public int passCount => Data.PassCount;
 
+        /// The ShaderLab properties in their declared order, as Unity lists them (measured in the
+        /// original player; Morphs Not Included looks for a material's texture properties).
+        public int GetPropertyCount() => Data.Properties.Length;
+
+        public string GetPropertyName(int propertyIndex) => Property(propertyIndex).Name;
+
+        public UnityEngine.Rendering.ShaderPropertyType GetPropertyType(int propertyIndex) => (UnityEngine.Rendering.ShaderPropertyType)Property(propertyIndex).Kind;
+
+        /// An index out of range throws as Unity's does (the exception's default message).
+        ShaderProperty Property(int index)
+        {
+            var properties = Data.Properties;
+            if (index < 0 || index >= properties.Length) throw new ArgumentOutOfRangeException();
+            return properties[index];
+        }
+
         public int maximumLOD
         {
             get => Data.MaximumLOD;

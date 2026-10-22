@@ -562,6 +562,7 @@ namespace PerfProbe
             MeasurePatchedFrames();
             try { MeasureTmpColors(); } catch (System.MissingMethodException e) { Debug.Log("PERF measure tmp colors: " + e.Message); }
             try { MeasurePackTextures(); } catch (System.MissingMethodException e) { Debug.Log("PERF measure pack: " + e.Message); }
+            try { MeasureShaderProperties(); } catch (System.Exception e) when (e is System.MissingMethodException || e is System.TypeLoadException) { Debug.Log("PERF measure shader props: " + e.Message); }
             yield return MeasureInputActivation();
             yield return MeasureModRendering();
             MeasurePopularModApis();
@@ -1193,6 +1194,30 @@ namespace PerfProbe
                 if (canvas.isRootCanvas && canvas.renderMode != RenderMode.WorldSpace) canvas.enabled = false;
             for (int i = 0; i < 30; i++) yield return null;
             ScreenCapture.CaptureScreenshot(System.IO.Path.Combine(Path, "blueprints.png"));
+        }
+
+        /// Shader.GetPropertyCount/Name/Type (Morphs Not Included looks for a material's texture
+        /// properties with them): five of the game's shaders, and an index out of range.
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+        static void MeasureShaderProperties()
+        {
+            var names = new[] { "Sprites/Default", "UI/Default", "Klei/BatchedAnimation", "Klei/Substance", "TextMeshPro/Distance Field" };
+            foreach (var name in names)
+            {
+                var shader = Shader.Find(name);
+                if (shader == null) { Debug.Log($"PERF measure shader props {name}: not found"); continue; }
+                var line = new System.Text.StringBuilder($"PERF measure shader props {name}: {shader.GetPropertyCount()}:");
+                for (int i = 0; i < shader.GetPropertyCount(); i++) line.Append($" {shader.GetPropertyName(i)}={(int)shader.GetPropertyType(i)}");
+                Debug.Log(line.ToString());
+            }
+            var any = Shader.Find("Sprites/Default");
+            foreach (int index in new[] { -1, any.GetPropertyCount() })
+            {
+                try { Debug.Log($"PERF measure shader props name({index}): {any.GetPropertyName(index)}"); }
+                catch (System.Exception e) { Debug.Log($"PERF measure shader props name({index}): {e.GetType().Name}: {e.Message}"); }
+                try { Debug.Log($"PERF measure shader props type({index}): {any.GetPropertyType(index)}"); }
+                catch (System.Exception e) { Debug.Log($"PERF measure shader props type({index}): {e.GetType().Name}: {e.Message}"); }
+            }
         }
 
         static readonly System.Collections.Generic.List<string> activationEvents = new System.Collections.Generic.List<string>();

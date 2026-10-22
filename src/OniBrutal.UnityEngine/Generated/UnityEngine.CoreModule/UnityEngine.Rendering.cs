@@ -131,6 +131,15 @@ namespace UnityEngine.Rendering
     public partial struct RenderTargetIdentifier : global::System.IEquatable<global::UnityEngine.Rendering.RenderTargetIdentifier>
     {
     }
+    public enum ShaderPropertyType
+    {
+        Color = 0,
+        Vector = 1,
+        Float = 2,
+        Range = 3,
+        Texture = 4,
+        Int = 5,
+    }
     public enum ShadowCastingMode
     {
         Off = 0,

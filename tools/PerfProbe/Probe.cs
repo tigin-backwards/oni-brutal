@@ -562,6 +562,7 @@ namespace PerfProbe
             MeasurePatchedFrames();
             try { MeasureTmpColors(); } catch (System.MissingMethodException e) { Debug.Log("PERF measure tmp colors: " + e.Message); }
             try { MeasurePackTextures(); } catch (System.MissingMethodException e) { Debug.Log("PERF measure pack: " + e.Message); }
+            try { JsonProbe.Measure(); } catch (System.MissingMethodException e) { Debug.Log("PERF measure json: " + e.Message); }
             try { MeasureShaderProperties(); } catch (System.Exception e) when (e is System.MissingMethodException || e is System.TypeLoadException) { Debug.Log("PERF measure shader props: " + e.Message); }
             yield return MeasureInputActivation();
             yield return MeasureModRendering();

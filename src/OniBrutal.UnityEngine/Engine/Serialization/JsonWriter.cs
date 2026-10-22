@@ -134,7 +134,7 @@ namespace OniBrutal.Engine.Serialization
             StartObject();
             foreach (var f in fields)
             {
-                if (ScriptData.IsBeyondDepth(f.Shape, depth)) continue;
+                if (ScriptData.IsBeyondDepth(f.Shape, depth) || !JsonLayout.Known(f.Shape)) continue;
                 Name(f.Name);
                 WriteValue(f.Field.GetValue(target), f.Shape, depth);
             }

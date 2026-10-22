@@ -110,6 +110,17 @@ namespace OniBrutal.Host
             return IntPtr.Zero;
         }
 
+        /// The simple names of the assemblies the game was built with (ScriptingAssemblies.json):
+        /// Unity's serializer knows the types of these only (JsonUtility, JsonLayout).
+        public static HashSet<string> BuildAssemblyNames(string gameDataDir)
+        {
+            var json = JsonDocument.Parse(File.ReadAllText(Path.Combine(gameDataDir, "ScriptingAssemblies.json")));
+            var names = new HashSet<string>(StringComparer.Ordinal);
+            foreach (var entry in json.RootElement.GetProperty("names"u8).EnumerateArray())
+                names.Add(Path.GetFileNameWithoutExtension(entry.GetString()!));
+            return names;
+        }
+
         /// Loads the scripting assemblies up front, as the Unity player does: the game snapshots
         /// AppDomain.GetAssemblies() early and resolves saved type names against that snapshot.
         public static List<Assembly> PreloadScriptingAssemblies(string gameDataDir)

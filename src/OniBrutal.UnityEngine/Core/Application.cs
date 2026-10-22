@@ -155,6 +155,9 @@ namespace OniBrutal.Engine
         public static string Version = "";
         public static string UnityVersion = "";
         public static bool IsBatchMode;
+        /// The assemblies the game was built with (ScriptingAssemblies.json), by simple name; null
+        /// in tests. JsonUtility handles composite types from these only (JsonLayout).
+        public static System.Collections.Generic.HashSet<string> BuildAssemblies;
         public static bool Headless;
     }
 

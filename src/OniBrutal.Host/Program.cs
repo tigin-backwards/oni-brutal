@@ -39,6 +39,7 @@ namespace OniBrutal.Host
 
             AssemblyPolicy.Install(dataDir, AppContext.BaseDirectory, options.UiPackages, options.ShippedUiPackages);
             var assemblies = AssemblyPolicy.PreloadScriptingAssemblies(dataDir);
+            EngineConfig.BuildAssemblies = AssemblyPolicy.BuildAssemblyNames(dataDir);
             EngineLog.Engine($"Preloaded {assemblies.Count} scripting assemblies");
 
             if (options.CheckTypes) return CheckTypes(assemblies);

@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 """Helpers of scripts/qa.sh.
   qa-tools.py signatures LOG              the log's exceptions and errors, one normalized line each
-  qa-tools.py image REFERENCE NEW DIFF    fraction of pixels differing visibly; writes DIFF (a mask)
+  qa-tools.py image REFERENCE NEW DIFF [--crop X,Y,W,H] [--crop-new X,Y,W,H] [--mask X,Y,W,H]...
+                                          fraction of (unmasked) pixels differing visibly; writes
+                                          DIFF (a mask). --crop cuts both (--crop-new the new one
+                                          apart); masks are relative to the crop
   qa-tools.py verify LOG                  each verify mode's last report; exit 1 on a mismatch
   qa-tools.py perf STDOUT                 steady-window frame rates and game time span
 """
@@ -28,21 +31,58 @@ def signatures(path):
     for s in sorted(found):
         print(s)
 
-def image(reference, new, diff):
+def rect(text):
+    x, y, w, h = (int(round(float(v))) for v in text.split(','))
+    return x, y, w, h
+
+def compare_images(reference, new, diff, crop=None, crop_new=None, masks=(), level=40, size_tolerance=2):
+    """The fraction of unmasked pixels whose largest channel difference exceeds LEVEL. CROP
+    (x, y, w, h) cuts both images, CROP_NEW the new one instead; MASKS are rectangles relative to
+    the crop that do not count. Sizes up to SIZE_TOLERANCE pixels apart are trimmed to the
+    smaller. DIFF gets the mask image: differing pixels white, masked ones grey."""
     from PIL import Image, ImageChops
     import os
-    if not os.path.exists(reference) or not os.path.exists(new):
-        print('1.0000 missing'); return
-    a = Image.open(reference).convert('RGB')
-    b = Image.open(new).convert('RGB')
-    if a.size != b.size:
-        print(f'1.0000 size {a.size} against {b.size}')
-        return
-    d = ImageChops.difference(a, b)
     import numpy as np
-    m = np.asarray(d).max(axis=2) > 40
-    Image.fromarray((m * 255).astype('uint8')).save(diff)
-    print(f'{m.mean():.4f}')
+    if not os.path.exists(reference) or not os.path.exists(new):
+        return {'fraction': 1.0, 'note': 'missing'}
+    images = []
+    for path, box in ((reference, crop), (new, crop_new or crop)):
+        image = Image.open(path).convert('RGB')
+        if box:
+            x, y, w, h = (int(round(v)) for v in box)
+            clipped = (max(0, x), max(0, y), min(image.width, x + w), min(image.height, y + h))
+            if clipped[2] <= clipped[0] or clipped[3] <= clipped[1]:
+                return {'fraction': 1.0, 'note': f'crop {list(box)} is off the image'}
+            image = image.crop(clipped)
+        images.append(image)
+    a, b = images
+    if a.size != b.size:
+        if abs(a.width - b.width) > size_tolerance or abs(a.height - b.height) > size_tolerance:
+            return {'fraction': 1.0, 'note': f'size {a.size} against {b.size}'}
+        size = (min(a.width, b.width), min(a.height, b.height))
+        a, b = a.crop((0, 0) + size), b.crop((0, 0) + size)
+    differs = np.asarray(ImageChops.difference(a, b)).max(axis=2) > level
+    counted = np.ones(differs.shape, dtype=bool)
+    for m in masks:
+        x, y, w, h = (int(round(v)) for v in m)
+        counted[max(0, y):max(0, y + h), max(0, x):max(0, x + w)] = False
+    if diff:
+        Image.fromarray(np.where(counted, differs * 255, 128).astype('uint8')).save(diff)
+    total = int(counted.sum())
+    fraction = float((differs & counted).sum()) / total if total else 0.0
+    return {'fraction': round(fraction, 6), 'size': list(a.size), 'masked': int(counted.size - total)}
+
+def image(reference, new, diff, *options):
+    crop = crop_new = None
+    masks, level = [], 40
+    for name, value in zip(options[::2], options[1::2]):
+        if name == '--crop': crop = rect(value)
+        elif name == '--crop-new': crop_new = rect(value)
+        elif name == '--mask': masks.append(rect(value))
+        elif name == '--level': level = int(value)
+        else: sys.exit(f'unknown option {name}')
+    result = compare_images(reference, new, diff, crop, crop_new, masks, level)
+    print(f'{result["fraction"]:.4f}' + (f' {result["note"]}' if 'note' in result else ''))
 
 # Verify-mode lines: periodic summaries (each kind of check has its own, all counts must be zero)
 # and per-incident lines (any is a failure).

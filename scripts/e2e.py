@@ -773,11 +773,18 @@ def plan_jobs(specs, kinds, repeat):
 # ---------------------------------------------------------------- OniMcp
 
 def why_failed(value):
-    """The error, reason and message texts nested anywhere in an OniMcp result: the failure's
-    summary is cut short, and a build's own reason sits several levels down."""
+    """The error, reason and message texts nested anywhere in an OniMcp result, JSON in strings
+    included: the failure's summary is cut short, and a build's own reason sits several levels
+    down, in a JSON text."""
+    if isinstance(value, str) and value.startswith('{'):
+        try:
+            value = json.loads(value)
+        except ValueError:
+            return
     if isinstance(value, dict):
         for key, item in value.items():
-            if key in ('error', 'reason', 'message', 'detail', 'why') and isinstance(item, str):
+            if key in ('error', 'reason', 'message', 'detail', 'why') and isinstance(item, str) \
+                    and not item.startswith('{'):
                 yield item
             else:
                 yield from why_failed(item)

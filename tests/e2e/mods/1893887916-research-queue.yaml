@@ -1,0 +1,46 @@
+# Research Queue (1893887916), classes S, K: a modifier-click on a vanilla screen.
+#
+# What it does: Shift+click on a tech in the research screen adds it, with its missing
+# prerequisites, to the end of the research queue instead of replacing the queue; each queued
+# tech's title shows its place in the queue, "Agriculture [3]". A plain click still replaces
+# the queue, and clicking a queued tech takes it out.
+# How a player reaches it: the research screen (R), which needs a research station (early-base
+# has one).
+# What changes: Research.Instance's queue, and the numbers in the titles.
+from: early-base
+mods: [1893887916]
+steps:
+  - open: {management: research}
+  - ui_wait: {path: "**/FullScreenUICanvases/ResearchScreen", cond: stable}
+  - ui_wait: {path: "**/ResearchScreen/Content/ScrollRectRoot/ScrollContent", cond: stable, frames: 600}
+  - expect_state:
+      "Research.Instance.GetResearchQueue().Count": 0
+      # Where the tree opened, recorded for comparison. The clicks below go to each panel's
+      # centre, clear of the screen's top shadow wherever the tree opens.
+      "ui:**/ScrollRectRoot/ScrollContent::GetComponent<RectTransform>.anchoredPosition": {save_as: view}
+      "ui:**/ScrollRectRoot/ScrollContent::transform.localScale": {save_as: zoom}
+  # Shift+click: Agriculture with its two prerequisites, then Animal Control behind them.
+  - click: {ui: "**/ScrollContent/*\"AGRICULTURE\"* Panel", mods: [Shift]}
+  - expect_state: {"Research.Instance.GetResearchQueue().Count": 3}
+  - click: {ui: "**/ScrollContent/*\"ANIMALCONTROL\"* Panel", mods: [Shift]}
+  - expect_state:
+      "Research.Instance.GetResearchQueue().Count": 5
+      "Research.Instance.GetResearchQueue()[-1].tech.Id": AnimalControl
+  - expect_ui:
+      "**/ScrollContent/*\"AGRICULTURE\"* Panel/Content/TitleBar/TitleLabel": {text: "~[3]"}
+      "**/ScrollContent/*\"ANIMALCONTROL\"* Panel/Content/TitleBar/TitleLabel": {text: "~[5]"}
+  - ui_wait: {path: "**/ScrollContent/*\"AGRICULTURE\"* Panel", cond: stable}
+  - ui_dump: {name: queued, root: "**/ScrollContent/*\"AGRICULTURE\"* Panel"}
+  - shot: {name: queue, crop: "**/FullScreenUICanvases/ResearchScreen/Content", threshold: 0.04}
+  # Clicking a queued tech takes it out of the queue.
+  - click: {ui: "**/ScrollContent/*\"ANIMALCONTROL\"* Panel"}
+  - expect_state: {"Research.Instance.GetResearchQueue().Count": "< 5"}
+  - expect_state:
+      "Research.Instance.GetResearchQueue().Count": "== original"
+      "Research.Instance.GetResearchQueue()[-1].tech.Id": "!= 'AnimalControl'"
+  # A plain click on a tech outside the queue replaces the queue with it and its prerequisites.
+  - click: {ui: "**/ScrollContent/*\"FOODREPURPOSING\"* Panel"}
+  - expect_state:
+      "Research.Instance.GetResearchQueue().Count": "== original"
+      "Research.Instance.GetResearchQueue()[-1].tech.Id": FoodRepurposing
+  - expect_ui: {"**/ScrollContent/*\"ANIMALCONTROL\"* Panel/Content/TitleBar/TitleLabel": {text: "/^[^\\[]*$/"}}

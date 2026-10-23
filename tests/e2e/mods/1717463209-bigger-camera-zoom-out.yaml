@@ -1,0 +1,21 @@
+# Bigger Camera Zoom Out (1717463209), classes K, V.
+#
+# What it does: raises the camera's maximum orthographic size to 200 (the game keeps it to the
+# world's size, about 20 on this asteroid), stops the camera from being kept inside the world,
+# and zooms the starmap out further.
+# How a player reaches it: the mouse wheel over the world.
+# What changes: how far the camera zooms out, and what is drawn at that size (the falloff of
+# issue #4 shows at large sizes).
+from: early-base
+mods: [1717463209]
+steps:
+  - expect_state:
+      "CameraController.Instance.maxOrthographicSize": 200
+      "Camera.main.orthographicSize": "<= 20"
+  - scroll: {at: center, notches: -40}
+  - expect_state: {"CameraController.Instance.targetOrthographicSize": "> 20"}
+  - expect_state: {"CameraController.Instance.targetOrthographicSize": "== original"}
+  # The same views in both players, set through the camera.
+  - world_shot: {name: base, ortho: 12, at: [122, 208]}
+  - world_shot: {name: mid, ortho: 40, at: [122, 208]}
+  - world_shot: {name: far, ortho: 120, at: [122, 208]}

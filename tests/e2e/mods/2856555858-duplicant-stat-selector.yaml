@@ -1,0 +1,71 @@
+# Duplicant Stat Selector (2856555858), classes S, O, M; asset_bundle_ui; issue #5.
+#
+# What it does: adds buttons to each Duplicant card of the printing pod (and of the new-game
+# selection): skin, preset, stat editing and rename in the card's title bar, a trait reroll
+# selector over the reroll button. Stat editing turns the card's interests and traits into
+# editable lists: remove an interest or trait, add one from a searchable popup
+# (DupeSkillsPopUp), move interest points with +/-.
+# How a player reaches it: the printing pod's immigrant screen (here opened through OniMcp once
+# the pod has Duplicants to offer), then the gear button in a card's title bar.
+# What changes: the card's traits; the printed Duplicant gets exactly those.
+#
+# The cards are random, and the seed does not make them the same in both players. So the first
+# card is rerolled as a standard Duplicant (a bionic one has no interests to edit), every check
+# is relational (one trait fewer, the trait clicked is there), and only what does not depend on
+# the cards is compared with the original by structure: the title bar's buttons and the trait
+# popup's search bar.
+from: early-base
+mods: [2856555858]
+setup:
+  - driver: {seed: 12345}
+  - driver: {setup.call: {target: "Immigration.Instance", method: "Sim200ms", args: [100000]}}   # Duplicants on offer now
+steps:
+  - expect_state: {"Immigration.Instance.ImmigrantsAvailable": true}
+  - call: {tool: building_control, args: {domain: side_surface, surface: facility, kind: telepad, action: open_immigrants, confirm: true}}
+  - ui_wait: {path: "**/ImmigrantScreen/Layout", cond: stable}
+  # The game's own model choice and reroll, so the first card is a standard Duplicant.
+  - click: {ui: "**/CharacterContainer[0]/DuplicantModelToggles/ModelDropDown"}
+  - click: {text: "Standard Duplicant", under: "**/CharacterContainer[0]"}
+  - click: {text: "REROLL", under: "**/CharacterContainer[0]"}
+  - expect_state: {"ui:**/CharacterContainer[0]::GetComponent<CharacterContainer>.stats.personality.model.Name": Minion}
+  - expect_ui:
+      "**/CharacterContainer[0]/TitleBar/ChangeDupeStatButton": {interactable: true}
+      "**/CharacterContainer[0]/TitleBar/DupeSkinButton": {interactable: true}
+      "**/CharacterContainer[0]/TitleBar/DupePresetButton": {interactable: true}
+      "**/CharacterContainer[0]/ModifyDupeStats": {exists: false}
+  - ui_dump: {name: title-buttons, root: "**/ImmigrantScreen/**/CharacterContainer[0]/TitleBar/*Button"}
+  - shot: {name: title-bar, crop: "**/ImmigrantScreen/**/CharacterContainer[0]/TitleBar", mask: ["**/CharacterContainer[0]/TitleBar/LabelGroup"]}
+  # The #5 button: stat editing opens.
+  - click: {ui: "**/CharacterContainer[0]/TitleBar/ChangeDupeStatButton"}
+  - expect_ui:
+      "**/CharacterContainer[0]/ModifyDupeStats": {active: true}
+      "**/CharacterContainer[0]/**/TraitContainer/AddButton": {interactable: true}
+      "**/CharacterContainer[0]/**/AptitudeContainer/AddButton": {interactable: true}
+      "**/CharacterContainer[0]/**/TraitContainer/TraitEntry_*": {count: {save_as: traits}}
+      "**/CharacterContainer[0]/**/AptitudeContainer/AptitudeEntry_*": {count: {save_as: interests}}
+  # Remove an interest and a trait.
+  - click: {ui: "**/CharacterContainer[0]/**/AptitudeContainer/AptitudeEntry_*[0]/RemoveButton"}
+  - expect_ui: {"**/CharacterContainer[0]/**/AptitudeContainer/AptitudeEntry_*": {count: "== interests - 1"}}
+  - click: {ui: "**/CharacterContainer[0]/**/TraitContainer/TraitEntry_*[0]/RemoveButton"}
+  - expect_ui: {"**/CharacterContainer[0]/**/TraitContainer/TraitEntry_*": {count: "== traits - 1"}}
+  # Add one from the popup, through its search field.
+  - click: {ui: "**/CharacterContainer[0]/**/TraitContainer/AddButton"}
+  - ui_wait: {path: "**/DupeSkillsPopUp", cond: stable}
+  # The list leaves out the traits the card has, so its rows follow the random card: only the
+  # popup's search bar is compared by structure, the whole popup by pixels.
+  - ui_dump: {name: search-bar, root: "**/DupeSkillsPopUp/SearchBar"}
+  - shot: {name: trait-list, crop: "**/DupeSkillsPopUp", threshold: 0.04}
+  - type: {ui: "**/DupeSkillsPopUp/SearchBar/Input", text: "Early"}
+  - expect_ui: {"**/DupeSkillsPopUp/ScrollArea/Content/PresetEntryPrefab": {count: "<= 3"}}
+  - click: {text: "Early Bird", under: "**/DupeSkillsPopUp"}
+  - expect_ui:
+      "**/DupeSkillsPopUp": {exists: false}
+      "**/CharacterContainer[0]/**/TraitContainer/TraitEntry_EarlyBird": {active: true}
+      "**/CharacterContainer[0]/**/TraitContainer/TraitEntry_*": {count: "== traits"}
+  # Print that card: the new Duplicant has the trait.
+  - click: {ui: "**/ImmigrantScreen/**/CharacterContainer[0]/TitleBar/LabelGroup/Label"}   # selects the card
+  - expect_ui: {"**/ImmigrantScreen/Layout/BottomButtons/ProceedButton": {interactable: true}}
+  - click: {ui: "**/ImmigrantScreen/Layout/BottomButtons/ProceedButton"}
+  - ui_wait: {path: "**/ImmigrantScreen", cond: gone}
+  - run: {seconds: 30, until: {duplicants: 4}}
+  - expect_state: {"Components.LiveMinionIdentities.Items[-1].GetComponent<Traits>.GetTraitIds()": {contains: EarlyBird}}

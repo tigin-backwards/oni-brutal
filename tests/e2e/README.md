@@ -234,3 +234,31 @@ graphics of a canvas differently, whatever is drawn, so it would fail every scre
 
 Each check's numbers are in `result.json` under `checks`. A shot's diff mask is `NAME.diff.png`
 in our run's folder: white pixels differ, grey ones are masked.
+
+## Mod specs and fixtures
+
+A mod's spec is `mods/ID-slug.yaml`, its header the mod card: what the mod does, how a player
+reaches each feature, what changes when it is used. Run it with its path under `tests/e2e`
+(`scripts/e2e.py --player both --bless mods/ID-slug`): the original first, which blesses the
+references, then ours, compared with them.
+
+Fixtures are blessed saves (`--bless` copies a spec's `save:` into `fixtures/`, not kept in git):
+
+- `landing`: a new Spaced Out colony at its printing pod;
+- `early-base` (`early-base.yaml`): dug out on both sides of the pod, with an outhouse, a manual
+  generator, an unpowered research station and a cot. Debris lies on the floors.
+
+What a spec needs beyond them (a researched tech, materials, Duplicants on offer) it sets up in
+`setup:` through E2eDriver, as the pilot specs do, rather than from a later fixture.
+
+Writing a spec, `--hold` keeps the player running after the steps for a look through OniMcp
+(its port) and E2eDriver (`ui.find`, `ui.dump`, `state.get`); `--hold-on-fail` does so after a
+failing step. Paths come from what `ui.find` returns, never from guesses. Things that went wrong
+in the pilot:
+
+- Wait for a screen's moving part to settle (`ui_wait ... cond: stable` on the part that moves,
+  not the screen's root), or a click lands on the wrong thing in one player only.
+- Random content (immigrant cards, names) differs between the players even with `seed`: assert
+  relations, and compare by structure only what does not follow it.
+- Some game actions need the game to have run since the load (Blueprints Expanded placed nothing
+  before): a short `run` before the UI steps is allowed.

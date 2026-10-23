@@ -1,0 +1,35 @@
+# Sweep By Type (1863428350), classes T, S, K, O.
+#
+# What it does: replaces the toolbar's Sweep tool with a filtered one. Choosing it opens a
+# "Select material to sweep" list (TypeSelect) beside the toolbar, by category with a check box
+# for each category and each material; a drag then marks only debris of the checked kinds.
+# A PLib option, Disable Material Icons, is not exercised here.
+# How a player reaches it: the toolbar's Sweep button (or its key).
+# What changes: which debris is marked for sweeping.
+#
+# early-base has sandstone debris (Raw Mineral) and copper ore (Metal Ore) on the floors of the
+# dug-out areas on both sides of the printing pod.
+from: early-base
+mods: [1863428350]
+steps:
+  - expect_state:
+      "count:all:Clearable::[*] if .isMarkedForClear == true": 0
+      "count:all:Clearable::[*] if .GetComponent<PrimaryElement>.ElementID == SandStone": ">= 1"
+      "count:all:Clearable::[*] if .GetComponent<PrimaryElement>.ElementID == Cuprite": ">= 1"
+  - tool: {toolbar: Sweep}
+  - ui_wait: {path: "**/ToolMenu/TypeSelect", cond: stable}
+  - expect_ui:
+      "**/ToolMenu/TypeSelect/Border/Title/Text": {text: "Select material to sweep"}
+      "**/TypeSelect/**/Categories/TypeSelectCategory/SelectCategory": {count: ">= 5"}
+  - ui_dump: {name: types, root: "**/ToolMenu/TypeSelect"}
+  - shot: {name: types, crop: "**/ToolMenu/TypeSelect", threshold: 0.04}
+  - click: {text: "~Raw Mineral", under: "**/ToolMenu/TypeSelect"}
+  - shot: {name: raw-checked, crop: "**/ToolMenu/TypeSelect", threshold: 0.04}
+  - driver: {camera.set: {cell: [122, 208], ortho: 12}}
+  - drag: {from: [106, 207], to: [136, 210]}
+  # Only the sandstone is marked; the copper ore lying beside it is not.
+  - expect_state:
+      "count:all:Clearable::[*] if .isMarkedForClear == true and .GetComponent<PrimaryElement>.ElementID == SandStone": ">= 1"
+      "count:all:Clearable::[*] if .isMarkedForClear == true and .GetComponent<PrimaryElement>.ElementID != SandStone": 0
+  - expect_state:
+      "count:all:Clearable::[*] if .isMarkedForClear == true": "== original"

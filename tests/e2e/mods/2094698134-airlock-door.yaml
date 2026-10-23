@@ -1,0 +1,40 @@
+# Airlock Door (2094698134), class B.
+#
+# What it does: adds the Airlock Door (PAirlockDoor, 3x2, refined metal, 120 W, researched with
+# Improved Ventilation): Duplicants pass through it one side at a time, so no gas or liquid
+# goes through, and each passage costs 1.5 kJ of its 10 kJ charge. Without power it lets
+# nobody through.
+# How a player reaches it: the build menu (Base), then its side screen (door access).
+# What changes: a door that blocks fluids, keeps a charge, and reports its state.
+#
+# setup grants the research and 800 kg of copper (the tech and refined metal early-base lacks).
+# The door is placed in the dug-out corridor west of the printing pod, unwired: early-base has
+# no circuit to connect it to (OniMcp's power auto-connect would lay its own wire route), so the
+# door is checked in its unpowered state, which both players must agree on.
+from: early-base
+mods: [2094698134]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"ImprovedGasPiping\")", method: Purchased}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Copper\").substance", method: SpawnResource, args: [[114.5, 207.5, -12], 800, 300, 255, 0]}}
+steps:
+  - build: {prefab: PAirlockDoor, at: [112, 207], material: Copper}
+  - expect: {blueprints: {PAirlockDoor: 1}}
+  - run: {seconds: 900, until: {buildings: {PAirlockDoor: 1}, pending_construction: 0}}
+  - click_world: {cell: [113, 207]}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Airlock Door"}
+      "**/SimpleInfoScreen/**/StatusItemTemplate/TextLayout/Value": {count: ">= 3"}
+  - expect_state:
+      "selected:AirlockDoor.EnergyCapacity": 10000
+      "selected:AirlockDoor.EnergyPerUse": 1500
+  - shot: {name: details, crop: "**/DetailsScreen", threshold: 0.04}
+  - expect_ui: {"**/SimpleInfoScreen/**/StatusItemTemplate/TextLayout/Value": {any_text: "~No Power Wire Connected"}}
+  - ui_dump: {name: status, root: "**/SimpleInfoScreen/**/ContentStatus"}
+  # Unpowered, it stays shut: no charge, not usable, after Duplicants have had time to try.
+  - run: {seconds: 300}
+  - expect_state:
+      "selected:AirlockDoor.EnergyAvailable": 0
+      "selected:AirlockDoor.IsUsable()": false
+      "selected:AirlockDoor.IsLeftOpen": false
+      "selected:AirlockDoor.IsRightOpen": false

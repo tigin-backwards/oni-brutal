@@ -1,0 +1,22 @@
+# Full Miner Yield (2527442674), class P.
+#
+# What it does: a dug cell drops all of its mass as debris, where the game drops half (a
+# transpiler turns WorldDamage.OnDigComplete's 0.5 into 1).
+# How a player reaches it: any dig order.
+# What changes: the mass of the debris a dig leaves.
+#
+# The cells dug are four of sandstone (5080 kg) at the east end of the dug-out corridor west of
+# the printing pod, within a Duplicant's reach; all the sandstone debris lying in the base is
+# weighed before and after.
+from: early-base
+mods: [2527442674]
+steps:
+  - expect_state:
+      "cells:119,209..120,210::Grid.Mass.get_Item({cell})": {save_as: block}
+      "sum:all:Clearable::[*].GetComponent<PrimaryElement>.Mass if .GetComponent<PrimaryElement>.ElementID == SandStone": {save_as: before}
+  - expect_state: {"cells:119,209..120,210::Grid.Element[{cell}].hardness": "> 0"}   # solid, all of it
+  - dig: [119, 209, 120, 210]
+  - run: {seconds: 900, until: {pending_digs: 0}}
+  # The game alone would leave before + 0.5 * block.
+  - expect_state:
+      "sum:all:Clearable::[*].GetComponent<PrimaryElement>.Mass if .GetComponent<PrimaryElement>.ElementID == SandStone": ">= before + 0.95 * block"

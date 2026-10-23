@@ -1,0 +1,66 @@
+# Blueprints Expanded (3468585385), classes T, S, K, O, V; asset_bundle_ui; issue #6.
+#
+# What it does: adds New Blueprint, Use Blueprint, Take Snapshot and Create Notes to the
+# toolbar. New Blueprint: a drag over buildings, then a naming dialog (BlueprintNameDialogue);
+# the blueprint is written to blueprints/NAME.blueprint. Use Blueprint opens the selector
+# (blueprintSelector: a file list, the blueprint's details and a preview); Place Blueprint
+# puts it on the cursor with a "Current Blueprint State" panel beside the toolbar (rotate,
+# flip, settings), and a click places its buildings as blueprints.
+# How a player reaches it: the toolbar (or its keys).
+# What changes: a blueprint file, then construction sites where it is placed.
+#
+# Its screens were laid out wrongly in ours (#6). Every step here goes through the UI; nothing
+# is called by reflection.
+from: early-base
+mods: [3468585385]
+steps:
+  # Placing needs the game to have run since the load: straight after it, a click placed
+  # nothing (in the original too).
+  - run: {seconds: 5}
+  - driver: {camera.set: {cell: [124, 208], ortho: 10}}
+  # Create: the cot east of the printing pod. It is sandstone, of which early-base has plenty;
+  # a blueprint of its copper ore buildings showed "missing construction materials" and placed
+  # nothing.
+  - tool: {toolbar: New Blueprint}
+  - drag: {from: [132, 207], to: [133, 208]}
+  - ui_wait: {path: "**/BlueprintNameDialogue", cond: stable}
+  - ui_dump: {name: name-dialog, root: "**/BlueprintNameDialogue"}
+  - shot: {name: name-dialog, crop: "**/BlueprintNameDialogue"}
+  - type: {ui: "**/BlueprintNameDialogue/Body/SearchBar/Input", text: "e2e"}
+  - click: {text: "OK", under: "**/BlueprintNameDialogue"}
+  - ui_wait: {path: "**/BlueprintNameDialogue", cond: gone}
+  - expect_state: {"file:blueprints/e2e.blueprint": exists}
+  - key: {code: Escape}
+  # Use: the selector, the blueprint's details, then placing it.
+  - tool: {toolbar: Use Blueprint}
+  - ui_wait: {path: "**/blueprintSelector", cond: stable}
+  - expect_ui: {"**/blueprintSelector/FileHierarchy/ScrollArea/Content/BlueprintEntryPrefab/Label": {text: "e2e"}}
+  - ui_dump: {name: selector, root: "**/blueprintSelector"}
+  - shot: {name: selector, crop: "**/blueprintSelector", threshold: 0.04}
+  - click: {text: "e2e", under: "**/blueprintSelector/FileHierarchy"}
+  - ui_wait: {path: "**/blueprintSelector", cond: stable}
+  - ui_dump: {name: details, root: "**/blueprintSelector"}
+  - shot: {name: details, crop: "**/blueprintSelector", threshold: 0.04}
+  - click: {text: "Place Blueprint", under: "**/blueprintSelector"}
+  - ui_wait: {path: "**/blueprintSelector", cond: gone}
+  - expect_ui: {"**/InfoItemsContainer/CurrentBP/Label": {text: "e2e"}}
+  - ui_dump: {name: use-panel, root: "**/InfoItemsContainer"}
+  - shot: {name: use-panel, crop: "**/InfoItemsContainer", threshold: 0.04}
+  # Place it on the floor of the dug-out corridor west of the printing pod (its floor is the
+  # algae at y 205).
+  - click_world: {cell: [111, 206]}
+  - expect_state: {"all:Constructable::Length": ">= 1"}
+  - expect_state: {"all:Constructable::Length": "== original"}   # the same sites as in the original
+  # Its buildings do not rotate, so the panel's rotate button does nothing until Force
+  # Transformations is ticked; then it turns the blueprint on the cursor, and back.
+  - expect_state: {"type:BlueprintsV2.BlueprintData.BlueprintState::CurrentStateInfo(0).ForceOverrideTransformations": false}
+  - click: {ui: "**/InfoItemsContainer/RotateActions/RotateR"}
+  - expect_state: {"type:BlueprintsV2.BlueprintData.BlueprintState::CurrentStateInfo(0).BlueprintOrientation": Neutral}
+  - click: {ui: "**/InfoItemsContainer/ForceTransformationToggle/Checkbox"}
+  - expect_state: {"type:BlueprintsV2.BlueprintData.BlueprintState::CurrentStateInfo(0).ForceOverrideTransformations": true}
+  - click: {ui: "**/InfoItemsContainer/RotateActions/RotateR"}
+  - expect_state: {"type:BlueprintsV2.BlueprintData.BlueprintState::CurrentStateInfo(0).BlueprintOrientation": R90}
+  - click: {ui: "**/InfoItemsContainer/RotateActions/RotateL"}
+  - expect_state: {"type:BlueprintsV2.BlueprintData.BlueprintState::CurrentStateInfo(0).BlueprintOrientation": Neutral}
+  - click: {ui: "**/InfoItemsContainer/ForceTransformationToggle/Checkbox"}
+  - expect_state: {"type:BlueprintsV2.BlueprintData.BlueprintState::CurrentStateInfo(0).ForceOverrideTransformations": false}

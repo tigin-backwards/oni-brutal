@@ -1,0 +1,21 @@
+# Smart Drag Tool (2590260868), classes T, V.
+#
+# What it does: while a drag tool (dig, build, sweep, cancel...) is dragged, holding the pointer
+# within 5 % of a screen edge pans the camera that way, so a drag can reach past the screen;
+# the drag's size label is drawn white and scaled to the drag and the zoom.
+# How a player reaches it: any drag tool, dragged to the edge of the screen.
+# What changes: the camera follows the drag.
+#
+# A dig drag starts in the dug-out area east of the printing pod and is held at the right edge
+# of the screen (cell 139 lies at x 1252 of 1280 with this camera) for 90 frames.
+from: early-base
+mods: [2590260868]
+steps:
+  - driver: {camera.set: {cell: [122, 208], ortho: 10}}
+  - expect_state: {"Camera.main.transform.position.x": {save_as: x0}}
+  - tool: {toolbar: Dig}
+  - drag: {from: [128, 211], to: [139, 211], hold: 90}
+  # The camera moved right while the drag waited at the edge; the game alone keeps it still.
+  - expect_state: {"Camera.main.transform.position.x": "> x0 + 2"}
+  - expect: {pending_digs: ">= 1"}
+  - key: {code: Escape}

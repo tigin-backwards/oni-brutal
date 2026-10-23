@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2590260868-smart-drag-tool.yaml",
+ "mods": [
+  "2590260868"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a dig drag held at the screen's right edge pans the camera right, as in the original",
+ "updated": "2026-10-23",
+ "commit": "0feba58",
+ "mod_dlls": {
+  "2590260868": {
+   "KSmartDragTool.dll": "4d32e62ebf723661f0bf1fca017994ba0246365978cdd6500205466bd265368f"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261022-220928-e8cb86",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-22T23:08:47",
+    "lane": 13,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261022-231952-4012a2",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T00:09:13",
+    "lane": 12,
+    "reference_run": "20261022-220928-e8cb86",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261022-231952-4012a2",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T00:10:08",
+    "lane": 12,
+    "reference_run": "20261022-220928-e8cb86",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

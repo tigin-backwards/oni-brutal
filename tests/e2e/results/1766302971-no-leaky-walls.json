@@ -1,0 +1,59 @@
+{
+ "spec": "mods/1766302971-no-leaky-walls.yaml",
+ "mods": [
+  "1766302971"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "drywall built in the cell of a finished tile, behind it",
+ "updated": "2026-10-23",
+ "commit": "35e1eb4",
+ "mod_dlls": {
+  "1766302971": {
+   "NoLeakyWalls.dll": "dcead819000c7cb4f67ae1b4d25a54c6bcc949c1a9132f685a194a368c969874"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-161132-b25701",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T17:01:33",
+    "lane": 13,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-172217-fb930a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T17:56:18",
+    "lane": 13,
+    "reference_run": "20261023-161132-b25701",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "wall": 0.005519
+    }
+   },
+   {
+    "run": "20261023-172217-fb930a",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T17:59:43",
+    "lane": 13,
+    "reference_run": "20261023-161132-b25701",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "wall": 0.028678
+    }
+   }
+  ]
+ }
+}

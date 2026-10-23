@@ -1,0 +1,37 @@
+# No Leaky Walls (1766302971), class P.
+#
+# What it does: the Drywall (ExteriorWall) and the Tempshift Plate (ThermalBlock) may be
+# placed anywhere, behind tiles included (postfixes on their CreateBuildingDef set the
+# BuildLocationRule to Anywhere, where the game has NotInTiles), so a wall of tiles can have
+# drywall behind it and no gaps.
+# How a player reaches it: building drywall or a tempshift plate where a tile stands.
+# What changes: where those two can be placed.
+#
+# setup grants Textile Production (Clothing, the Drywall's tech). A tile is built in the
+# dug-out corridor west of the printing pod, then drywall is placed in the same cell from the
+# build menu: the blueprint is accepted and built behind the tile.
+from: early-base
+mods: [1766302971]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"Clothing\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"ExteriorWall\").BuildLocationRule": Anywhere
+      "Assets.GetBuildingDef(\"ThermalBlock\").BuildLocationRule": Anywhere
+  - build: {prefab: Tile, cells: [[110, 208]], material: SandStone}
+  - expect: {blueprints: {Tile: 1}, buildings: {Tile: 8}}
+  - run: {seconds: 900, until: {buildings: {Tile: 9}, pending_construction: 0}}
+  # OniMcp places no blueprint over a building: the drywall is placed through the build menu,
+  # the target kept right of the menu's info card.
+  - driver: {camera.set: {cell: [103, 208], ortho: 8}}
+  - click: {ui: "**/PlanScreen/Toggle:Base"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/ExteriorWall Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/ExteriorWall Group*"}
+  - expect_state: {"PlayerController.Instance.ActiveTool.name": BuildTool}
+  - click_world: {cell: [110, 208]}
+  - key: {code: Escape}
+  - expect: {blueprints: {ExteriorWall: 1}}
+  - run: {seconds: 900, until: {buildings: {ExteriorWall: 1}, pending_construction: 0}}
+  - expect: {buildings: {Tile: 9, ExteriorWall: 1}}
+  - world_shot: {name: wall, ortho: 3, at: [110, 208], mask: [[0, 0, 1280, 170], [0, 420, 1280, 300]]}

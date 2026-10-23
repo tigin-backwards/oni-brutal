@@ -1,0 +1,34 @@
+# Grouped Resources (2880433226), classes S, O.
+#
+# What it does: the pinned resources panel (top right) sorts its rows by category (raw
+# minerals, metal ores, food, ...), shades them in alternating colours and puts a collapsible
+# header over each category (a CategoryManager on PinnedResourcesPanel: prefixes and postfixes
+# on OnPrefabInit, SortRows and CreateRow); the headers start folded, and their state is saved
+# with the colony per asteroid. PLib options: headers on or off, the two colours and their
+# alpha.
+# How a player reaches it: the pinned resources panel; a click on a category header.
+# What changes: the panel's rows, grouped; a header unfolds or folds its rows.
+#
+# setup pins sandstone and cuprite. After a short run the panel shows a header per category,
+# its rows folded away; a click on the Raw Mineral header unfolds sandstone's row.
+from: early-base
+mods: [2880433226]
+setup:
+  - driver: {setup.call: {target: "ClusterManager.Instance.activeWorld.worldInventory.pinnedResources", method: Add, args: [SandStone]}}
+  - driver: {setup.call: {target: "ClusterManager.Instance.activeWorld.worldInventory.pinnedResources", method: Add, args: [Cuprite]}}
+steps:
+  - run: {seconds: 3}
+  - ui_wait: {path: "**/PinnedResourcesPanel/Resources/EntryContainer/Raw Mineral/Header", cond: stable}
+  - expect_ui:
+      "**/EntryContainer/Raw Mineral/Header/Label": {text: "Raw Mineral"}
+      "**/EntryContainer/Metal Ore/Header/Label": {text: "Metal Ore"}
+  - expect_state:
+      "ui:**/EntryContainer/Raw Mineral/Header::GetComponent<MultiToggle>.CurrentState": 0
+  - ui_dump: {name: folded, root: "**/PinnedResourcesPanel/Resources"}
+  - click: {ui: "**/EntryContainer/Raw Mineral/Header"}
+  - expect_state:
+      "ui:**/EntryContainer/Raw Mineral/Header::GetComponent<MultiToggle>.CurrentState": 1
+      "SaveGame.Instance.GetComponent<GroupResources.ResourceHeaderState>.HeaderState.Count": "> 0"
+  - ui_wait: {path: "**/PinnedResourcesPanel/Resources/EntryContainer", cond: stable}
+  - ui_dump: {name: unfolded, root: "**/PinnedResourcesPanel/Resources"}
+  - shot: {name: unfolded, crop: "**/PinnedResourcesPanel", threshold: 0.04}

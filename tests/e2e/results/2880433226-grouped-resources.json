@@ -1,0 +1,73 @@
+{
+ "spec": "mods/2880433226-grouped-resources.yaml",
+ "mods": [
+  "2880433226"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with sandstone and cuprite pinned, the resources panel shows a folded header per category; a click on Raw Mineral unfolds it and the state is saved with the colony; panel dumped folded and unfolded, and shot",
+ "updated": "2026-10-23",
+ "commit": "360de75",
+ "mod_dlls": {
+  "2880433226": {
+   "GroupResources.dll": "e59d83e84b2f2016b1e66cb2bdeffca6837801b50108aa1246d0ec243f224816"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-174707-84bcb2",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T17:47:07",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-175642-ca18df",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T17:56:42",
+    "lane": 17,
+    "reference_run": "20261023-174707-84bcb2",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "folded": {
+      "differences": 0
+     },
+     "unfolded": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "unfolded": 0.0
+    }
+   },
+   {
+    "run": "20261023-175642-ca18df",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T17:58:00",
+    "lane": 17,
+    "reference_run": "20261023-174707-84bcb2",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "folded": {
+      "differences": 0
+     },
+     "unfolded": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "unfolded": 0.0
+    }
+   }
+  ]
+ }
+}

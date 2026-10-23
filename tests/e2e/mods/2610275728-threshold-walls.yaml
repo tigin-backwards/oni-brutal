@@ -1,0 +1,33 @@
+# Threshold Walls (2610275728), classes B, O.
+#
+# What it does: adds five Threshold Walls to the Base menu beside the doors: a drywall-like
+# wall of raw mineral (Luxury), caution-striped (Suits), metal (Refined Objects), plastic
+# (Luxury) and a logic one (Multiplexing). They stand in a cell's back layer, so Duplicants
+# walk through, but mark the edge of a room: the cell is a room boundary (ZoneTile) and
+# counts out of the room's size. A patch keeps Duplicants in such cells from feeling
+# confined. A PLib option draws them over pipes and wires.
+# How a player reaches it: the build menu (Base).
+# What changes: rooms split or trimmed without walls in the way.
+#
+# setup grants Luxury. A Threshold Wall is built of sandstone in the dug-out corridor west of
+# the printing pod and selected: the mod counts its cell, and the cell is a room boundary.
+from: early-base
+mods: [2610275728]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"Luxury\")", method: Purchased}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"Luxury\").unlockedItemIDs": {contains: RomenH_ThresholdWall}
+      "type:RomenH.Thresholds.Threshold::ThresholdCells.Count": 0
+  - build: {prefab: RomenH_ThresholdWall, at: [113, 207], material: SandStone}
+  - expect: {blueprints: {RomenH_ThresholdWall: 1}}
+  - run: {seconds: 900, until: {buildings: {RomenH_ThresholdWall: 1}, pending_construction: 0}}
+  - expect_state:
+      "type:RomenH.Thresholds.Threshold::ThresholdCells.Count": 1
+      "all:ZoneTile::[0].GetComponent<KPrefabID>.PrefabTag.Name": RomenH_ThresholdWall
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: RomenH_ThresholdWall}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Threshold Wall"}
+  - shot: {name: title, crop: "**/DetailsScreen/TitleBar", threshold: 0.04}

@@ -1,0 +1,33 @@
+# Powerless Deodorizers (2548787152), class P.
+#
+# What it does: the game's Deodorizer (AirFilter) needs no power, and gains a logic input
+# that switches it (postfixes on AirFilterConfig.CreateBuildingDef and
+# DoPostConfigureComplete: RequiresPowerInput false, a LogicOperationalController).
+# How a player reaches it: the build menu (Oxygen, Deodorizer), researched with Directed Air
+# Streams.
+# What changes: a Deodorizer that runs unpowered.
+#
+# setup grants Directed Air Streams. A Deodorizer is built on the floor of the dug-out
+# corridor west of the printing pod and selected: it has no power input and is operational
+# without a wire.
+from: early-base
+mods: [2548787152]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"DirectedAirStreams\")", method: Purchased}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"AirFilter\").RequiresPowerInput": false
+      "Assets.GetBuildingDef(\"AirFilter\").LogicInputPorts.Count": 1
+  - build: {prefab: AirFilter, at: [113, 206]}
+  - expect: {blueprints: {AirFilter: 1}}
+  - run: {seconds: 900, until: {buildings: {AirFilter: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [113, 207], ortho: 8}}
+  - click_world: {cell: [113, 206], select: AirFilter}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<EnergyConsumer>": missing
+      "selected:GetComponent<LogicOperationalController>": exists
+      "selected:GetComponent<Operational>.IsOperational": true
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Deodorizer"}
+  - shot: {name: title, crop: "**/DetailsScreen/TitleBar", threshold: 0.04}

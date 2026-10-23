@@ -1,0 +1,21 @@
+# Baator (2582905897), class P (a worldgen mod).
+#
+# What it does: adds the Baator and Coldterra worlds and clusters (worldgen YAML, two biome
+# icons, new temperature ranges through Enum.ToString/Parse prefixes) for a new game, keeps
+# meteor showers on its worlds, and changes elements for every game: radium is a metal with
+# 14 rads per 1000 kg, bitumen a manufactured material, and some disabled elements are
+# enabled (a postfix on ElementLoader.FinaliseElementsTable).
+# How a player reaches it: the new-game screens (its clusters); the elements in any colony.
+# What changes: new worlds; radium and bitumen in other build categories.
+#
+# Worldgen is out of scope here: only the element changes are checked, on early-base (a
+# smaller spec). The biome icons are loaded too.
+from: early-base
+mods: [2582905897]
+steps:
+  - expect_state:
+      "ElementLoader.FindElementByName(\"Radium\").materialCategory.Name": Metal
+      "ElementLoader.FindElementByName(\"Radium\").radiationPer1000Mass": 14
+      "ElementLoader.FindElementByName(\"Bitumen\").materialCategory.Name": ManufacturedMaterial
+      "Assets.GetSprite(\"biomeIconBaator\")": exists
+      "Assets.GetSprite(\"biomeIconBaator\").rect.width": "== original"

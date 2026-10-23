@@ -1,0 +1,59 @@
+{
+ "spec": "mods/2548787152-powerless-deodorizers.yaml",
+ "mods": [
+  "2548787152"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with Directed Air Streams granted, a Deodorizer built from a build order needs no power input, has the logic input and is operational unwired; its title as in the original",
+ "updated": "2026-10-23",
+ "commit": "f01acc2",
+ "mod_dlls": {
+  "2548787152": {
+   "Powerless Deodorizers.dll": "d722060a848cb8481e778d7f6cdd350d95e8e90c627c739a0cb2c323543762b5"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-082822-da20e0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T08:28:22",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-083840-e5f90a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T08:38:40",
+    "lane": 17,
+    "reference_run": "20261023-082822-da20e0",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "title": 0.0
+    }
+   },
+   {
+    "run": "20261023-083840-e5f90a",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T08:40:09",
+    "lane": 17,
+    "reference_run": "20261023-082822-da20e0",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "title": 0.0
+    }
+   }
+  ]
+ }
+}

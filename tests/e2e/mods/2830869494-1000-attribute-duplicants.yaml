@@ -1,0 +1,24 @@
+# 1000点基本属性的小人 (2830869494), class P.
+#
+# What it does: every Duplicant's base trait gains +1000 to each attribute (construction,
+# digging, machinery, athletics, science, cooking, medicine, strength, creativity,
+# agriculture, husbandry, piloting and the rest), +100 germ resistance and more, and a
+# Duplicant given that trait masters every skill (a postfix on BaseMinionConfig.AddMinionTraits).
+# How a player reaches it: any Duplicant, in its attributes; any errand, done far faster.
+# What changes: Duplicants that dig, build and walk as fast as the game allows.
+#
+# The traits apply to the base's Duplicants as they load (the skills only to new ones): the
+# attributes of the three are checked, then four cells of sandstone at the east end of the
+# dug-out corridor west of the printing pod are dug.
+from: early-base
+mods: [2830869494]
+steps:
+  - expect_state:
+      "Components.LiveMinionIdentities.Items[1].GetComponent<Modifiers>.attributes.Get(\"Construction\").GetTotalValue()": ">= 990"
+      "Components.LiveMinionIdentities.Items[1].GetComponent<Modifiers>.attributes.Get(\"Digging\").GetTotalValue()": ">= 990"
+      "Components.LiveMinionIdentities.Items[2].GetComponent<Modifiers>.attributes.Get(\"Athletics\").GetTotalValue()": ">= 990"
+      "Components.LiveMinionIdentities.Items[2].GetComponent<Modifiers>.attributes.Get(\"Learning\").GetTotalValue()": ">= 990"
+      "Components.LiveMinionIdentities.Items[0].GetComponent<Modifiers>.attributes.Get(\"Construction\").GetTotalValue()": ">= 990"
+      "Components.LiveMinionIdentities.Items[1].GetComponent<Modifiers>.attributes.Get(\"Construction\").GetTotalValue()": "== original"
+  - dig: [119, 209, 120, 210]
+  - run: {seconds: 300, until: {pending_digs: 0}}

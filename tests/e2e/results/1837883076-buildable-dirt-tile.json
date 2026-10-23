@@ -1,0 +1,59 @@
+{
+ "spec": "mods/1837883076-buildable-dirt-tile.yaml",
+ "mods": [
+  "1837883076"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with Basic Farming granted, a Dirt Tile built in the pit turns into a 50 kg natural dirt cell and leaves no building; the cell's world shot as in the original",
+ "updated": "2026-10-23",
+ "commit": "f01acc2",
+ "mod_dlls": {
+  "1837883076": {
+   "BuildableDirtTile-merged.dll": "6afa9779ede583da1abcdaf4e559c7e990379857169e9ebd93e63afdf8562622"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-082822-da20e0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T08:33:22",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-083840-e5f90a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T08:47:58",
+    "lane": 17,
+    "reference_run": "20261023-082822-da20e0",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "tile": 0.019084
+    }
+   },
+   {
+    "run": "20261023-083840-e5f90a",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T08:49:12",
+    "lane": 17,
+    "reference_run": "20261023-082822-da20e0",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "tile": 0.025222
+    }
+   }
+  ]
+ }
+}

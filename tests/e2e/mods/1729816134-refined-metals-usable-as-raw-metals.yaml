@@ -1,0 +1,38 @@
+# Refined Metals Usable As Raw Metals (1729816134), class P.
+#
+# What it does: copper, gold, iron, lead, tungsten and steel (and niobium in Spaced Out) gain
+# the Metal tag, the raw metal ore's material category (a postfix on
+# ElementLoader.FinaliseElementsTable), so buildings that ask for metal ore take them too.
+# How a player reaches it: the build menu: a building of metal ore lists refined metals in its
+# material panel.
+# What changes: refined metal can be spent where metal ore is asked for.
+#
+# setup spawns 400 kg of refined copper beside the base's copper ore. The Manual Generator
+# (metal ore) is picked in the Power menu after a short run; its material panel offers the
+# copper, which is picked, and the generator is placed in the dug-out corridor west of the
+# printing pod. It is built of copper.
+from: early-base
+mods: [1729816134]
+setup:
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Copper\").substance", method: SpawnResource, args: [[114.5, 207.5, -12], 400, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "ElementLoader.FindElementByName(\"Copper\").oreTags": {contains: Metal}
+      "Assets.GetBuildingDef(\"ManualGenerator\").MaterialCategory": {contains: Metal}
+  - run: {seconds: 5}
+  - driver: {camera.set: {cell: [114, 208], ortho: 10}}
+  - click: {ui: "**/PlanScreen/Toggle:Power"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/ManualGenerator Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/ManualGenerator Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen/MaterialSelectionPanel", cond: stable}
+  - expect_ui:
+      "**/MaterialSelectionPanel/MaterialSelectorTemplate/Header/Label": {text: "~Metal Ore"}
+      "**/MaterialSelectionPanel/**/Toggles/MaterialSelection_<link=?COPPER?>*/HeldText": {text: "400"}
+  - click: {ui: "**/MaterialSelectionPanel/**/Toggles/MaterialSelection_<link=?COPPER?>*"}
+  - shot: {name: materials, crop: "**/ProductInfoScreen/MaterialSelectionPanel", threshold: 0.04}
+  - click_world: {cell: [113, 206]}
+  - key: {code: Escape}
+  - expect: {blueprints: {ManualGenerator: 1}}
+  - run: {seconds: 900, until: {buildings: {ManualGenerator: 2}, pending_construction: 0}}
+  - expect_state:
+      "count:all:ManualGenerator::[*] if .GetComponent<PrimaryElement>.ElementID == Copper": 1

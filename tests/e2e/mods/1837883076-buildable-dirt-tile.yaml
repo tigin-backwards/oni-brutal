@@ -1,0 +1,31 @@
+# Buildable Dirt Tile (1837883076), class B.
+#
+# What it does: adds the Dirt Tile to the Base menu (researched with the Ration Box's tech,
+# Basic Farming): built of 50 kg of dirt, it turns at once into a natural cell of dirt (the
+# completed building replaces its cell with dirt at the configured block mass, 50 kg,
+# pushes items out of the cell and deletes itself). Its config.json sets the build and block
+# masses and the build time.
+# How a player reaches it: the build menu (Base).
+# What changes: a dug-out cell becomes natural dirt again.
+#
+# setup grants Basic Farming and spawns 200 kg of dirt. The tile fills one cell of the pit in
+# the floor of the dug-out room west of the printing pod.
+from: early-base
+mods: [1837883076]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"FarmingTech\")", method: Purchased}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Dirt\").substance", method: SpawnResource, args: [[113.5, 207.5, -12], 200, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"FarmingTech\").unlockedItemIDs": {contains: DirtTile}
+      "Grid.Solid.get_Item(131124)": false
+  - build: {prefab: DirtTile, at: [108, 206], material: Dirt}
+  - expect: {blueprints: {DirtTile: 1}}
+  - run: {seconds: 900, until: {pending_construction: 0}}
+  # No building is left; the cell is natural dirt, 50 kg of it.
+  - expect: {buildings: {DirtTile: 0}}
+  - expect_state:
+      "Grid.Solid.get_Item(131124)": true
+      "Grid.Element[131124].id": Dirt
+      "Grid.Mass.get_Item(131124)": 50
+  - world_shot: {name: tile, ortho: 4, at: [108, 207], mask: [[0, 0, 1280, 400]]}

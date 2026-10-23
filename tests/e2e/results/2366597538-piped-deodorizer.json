@@ -1,0 +1,59 @@
+{
+ "spec": "mods/2366597538-piped-deodorizer.yaml",
+ "mods": [
+  "2366597538"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with HVAC granted and the wattage option at 120 W, a Piped Deodorizer is built and draws 120 W, with gas ports converting polluted oxygen; its title as in the original",
+ "updated": "2026-10-23",
+ "commit": "f01acc2",
+ "mod_dlls": {
+  "2366597538": {
+   "PipedDeodorizer.dll": "ba9dd64a857ddd5fba9a89e13dac03ac14cdc1f62166683313422f540440af44"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-082822-da20e0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T08:35:05",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-083840-e5f90a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T09:33:41",
+    "lane": 17,
+    "reference_run": "20261023-082822-da20e0",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "title": 0.0
+    }
+   },
+   {
+    "run": "20261023-083840-e5f90a",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T09:34:56",
+    "lane": 17,
+    "reference_run": "20261023-082822-da20e0",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "title": 0.0
+    }
+   }
+  ]
+ }
+}

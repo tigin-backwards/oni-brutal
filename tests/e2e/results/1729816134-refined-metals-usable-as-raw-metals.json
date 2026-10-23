@@ -1,0 +1,59 @@
+{
+ "spec": "mods/1729816134-refined-metals-usable-as-raw-metals.yaml",
+ "mods": [
+  "1729816134"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "refined copper carries the Metal tag: the Manual Generator's metal-ore panel in the Power menu offers it, it is picked and placed, and the generator is built of copper; the material panel as in the original",
+ "updated": "2026-10-23",
+ "commit": "f01acc2",
+ "mod_dlls": {
+  "1729816134": {
+   "RefinedMetalsUsableAsRawMetals.dll": "aae3662235948cda68a37483152b1ef9e7e670f034492d06d98490815c46ebc3"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-082822-da20e0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T08:28:23",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-083840-e5f90a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T08:41:30",
+    "lane": 17,
+    "reference_run": "20261023-082822-da20e0",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "materials": 0.009182
+    }
+   },
+   {
+    "run": "20261023-083840-e5f90a",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T08:42:47",
+    "lane": 17,
+    "reference_run": "20261023-082822-da20e0",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "materials": 0.009182
+    }
+   }
+  ]
+ }
+}

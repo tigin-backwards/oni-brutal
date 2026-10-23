@@ -1,0 +1,59 @@
+{
+ "spec": "mods/2610275728-threshold-walls.yaml",
+ "mods": [
+  "2610275728"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with Luxury granted, a Threshold Wall built of sandstone is counted as a room boundary cell; its title as in the original",
+ "updated": "2026-10-23",
+ "commit": "f01acc2",
+ "mod_dlls": {
+  "2610275728": {
+   "Thresholds.dll": "7fa42bca54d6c4bcb24904e518376f5b2b58100a86e217314bdec3252541bdf0"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-082822-da20e0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T08:34:52",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-083840-e5f90a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T09:31:07",
+    "lane": 17,
+    "reference_run": "20261023-082822-da20e0",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "title": 0.0
+    }
+   },
+   {
+    "run": "20261023-083840-e5f90a",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T09:32:26",
+    "lane": 17,
+    "reference_run": "20261023-082822-da20e0",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "title": 0.0
+    }
+   }
+  ]
+ }
+}

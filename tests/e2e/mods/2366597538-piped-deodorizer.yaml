@@ -1,0 +1,37 @@
+# Piped Deodorizer (2366597538), classes B, O.
+#
+# What it does: adds the Piped Deodorizer to the Oxygen menu (HVAC): a 2x2 powered building of
+# metal ore with a gas input and output; polluted oxygen pumped through it leaves as oxygen
+# (90 %), the rest as clay (or, as a "classic" deodorizer, it uses filter media and drops
+# clay), other gases pass through. PLib options set its wattage (60 W), heat, intake rate and
+# the classic mode.
+# How a player reaches it: the build menu (Oxygen); the options on the Mods screen.
+# What changes: deodorizing on a gas pipe.
+#
+# Options here: 120 W. setup grants HVAC. The deodorizer is built in the dug-out corridor west
+# of the printing pod and selected: it draws the configured wattage and has the mod's gas
+# ports.
+from: early-base
+mods: [2366597538]
+options:
+  "2366597538": {Wattage: 120}
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"HVAC\")", method: Purchased}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"HVAC\").unlockedItemIDs": {contains: PipedDeodorizer}
+      "Assets.GetBuildingDef(\"PipedDeodorizer\").EnergyConsumptionWhenActive": 120
+  - build: {prefab: PipedDeodorizer, at: [113, 206]}
+  - expect: {blueprints: {PipedDeodorizer: 1}}
+  - run: {seconds: 900, until: {buildings: {PipedDeodorizer: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [113, 207], ortho: 8}}
+  - click_world: {cell: [113, 207], select: PipedDeodorizer}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<EnergyConsumer>.WattsNeededWhenActive": 120
+      "selected:GetComponent<ConduitConsumer>.conduitType": Gas
+      "selected:GetComponent<ConduitDispenser>.conduitType": Gas
+      "selected:GetComponent<ElementConverter>.consumedElements[0].Tag.Name": ContaminatedOxygen
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Piped Deodorizer"}
+  - shot: {name: title, crop: "**/DetailsScreen/TitleBar", threshold: 0.04}

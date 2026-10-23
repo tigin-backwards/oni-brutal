@@ -105,6 +105,18 @@ namespace OniBrutal.Engine.Rendering
         /// block (may be null) and global shader state.
         public abstract void Draw(in DrawRequest draw);
 
+        /// Draws a queue's items in order, as Draw does each (pass -1 unless the item names one).
+        /// No game code runs between them, so nothing they read changes until the last is drawn:
+        /// a device may record them in parallel, with the same result.
+        public virtual void DrawQueue(List<DrawItem> items)
+        {
+            foreach (var d in items) Draw(new DrawRequest(d.Mesh, d.SubMesh, d.ObjectToWorld, d.Material, d.Pass, d.Properties, d.Keywords));
+        }
+
+        /// Diagnostics (ONI_RENDER_TIMING): how the device recorded its draw queues since the
+        /// last call; null when it has nothing to say.
+        public virtual string TakeQueueCounters(int frames) => null;
+
         /// Draws GL immediate-mode geometry with the pass activated by SetPass.
         public abstract void DrawImmediate(ImmediatePrimitive primitive, ReadOnlySpan<ImmediateVertex> vertices, Matrix4x4 modelView, Matrix4x4 projection);
 

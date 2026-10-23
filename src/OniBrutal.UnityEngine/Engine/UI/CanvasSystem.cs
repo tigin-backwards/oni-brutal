@@ -1004,8 +1004,8 @@ namespace OniBrutal.Engine.UI
                     device.SetCamera(new CameraConstants(Matrix4x4.identity, Matrix4x4.Ortho(0f, size.x, 0f, size.y, -1000f, 1000f), Vector3.zero, -1000f, 1000f, true, size));
                     bound = true;
                 }
-                foreach (var item in Batched(b, overlay: true))
-                    device.Draw(new DrawRequest(item.Mesh, item.SubMesh, item.ObjectToWorld, item.Material, -1, item.Properties, item.Keywords));
+                // Canvas items name no pass (-1).
+                FrameRenderer.DrawQueue(device, Batched(b, overlay: true));
             }
         }
 

@@ -122,6 +122,9 @@ namespace OniBrutal.Desktop.Gl
             return d;
         }
 
+        /// The mesh's device data is recorded as it is now: Prepare would record nothing.
+        public static bool IsCurrent(MeshNative m) => m.Gpu is DeviceMesh d && d.RecordedVersion == m.Version;
+
         // Its own method, so the closure is allocated only for a changed mesh (Prepare runs for
         // every draw).
         static void PostUpload(GlWorker worker, DeviceMesh d, MeshUpload upload) => worker.Post(() =>

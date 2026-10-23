@@ -74,7 +74,7 @@ namespace OniBrutal.Desktop.Gl
         public readonly int[] PropertyIds;
 
         /// The state of a pass that reads no properties, resolved once.
-        public ResolvedState? Constant;
+        public ResolvedFor Constant;
 
         static bool IsDefault(Fields op)
         {
@@ -82,6 +82,9 @@ namespace OniBrutal.Desktop.Gl
             return Constant(op.Struct("comp"), 8f) && Constant(op.Struct("pass"), 0f) && Constant(op.Struct("fail"), 0f) && Constant(op.Struct("zFail"), 0f);
         }
     }
+
+    /// A pass's state resolved for it (a cache entry).
+    internal sealed record ResolvedFor(PassState Pass, ResolvedState State);
 
     /// A pass's fixed-function state with its property references resolved.
     internal struct ResolvedState : IEquatable<ResolvedState>
@@ -101,23 +104,32 @@ namespace OniBrutal.Desktop.Gl
         /// Resolves a pass's state for a draw (main thread): once for a pass that reads no
         /// properties; from the material's values (resolved with them) unless the draw's block
         /// sets a property the state reads.
+        ///
+        /// Threads recording one queue at once may call it together: the cached states are whole
+        /// objects, replaced at once, and threads that resolve the same one store equal values.
         public static ResolvedState Of(PassState s, DrawInputs d, MaterialValues values)
         {
-            if (s.PropertyIds.Length == 0) return s.Constant ??= Resolve(s, d);
+            if (s.PropertyIds.Length == 0)
+            {
+                var constant = System.Threading.Volatile.Read(ref s.Constant);
+                if (constant == null) System.Threading.Volatile.Write(ref s.Constant, constant = new ResolvedFor(s, Resolve(s, d)));
+                return constant.State;
+            }
             if (values == null || BlockSetsAny(d.Block, s.PropertyIds)) return Resolve(s, d);
-            if (values.StateFor == s) return values.State;
+            var cached = System.Threading.Volatile.Read(ref values.Resolved);
+            if (cached?.Pass == s) return cached.State;
             var block = d.Block;
             d.Block = null;
             try
             {
-                values.State = Resolve(s, d);
+                cached = new ResolvedFor(s, Resolve(s, d));
             }
             finally
             {
                 d.Block = block;
             }
-            values.StateFor = s;
-            return values.State;
+            System.Threading.Volatile.Write(ref values.Resolved, cached);
+            return cached.State;
         }
 
         static bool BlockSetsAny(PropertySheet block, int[] ids)

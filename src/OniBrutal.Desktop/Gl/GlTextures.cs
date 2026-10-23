@@ -352,6 +352,23 @@ namespace OniBrutal.Desktop.Gl
             return g;
         }
 
+        /// The texture's device side is recorded as it is now (shape, content, sampler settings):
+        /// Prepare would record nothing. Reads only.
+        public static bool IsCurrent(TextureNative t)
+        {
+            if (t.Gpu is not DeviceTexture g) return false;
+            switch (t)
+            {
+                case RenderTextureNative rt:
+                    if (g.RecordedShape != RenderShape.Of(rt)) return false;
+                    break;
+                case TexelTextureNative tt:
+                    if (g.RecordedContent != tt.ContentVersion) return false;
+                    break;
+            }
+            return g.RecordedEmpty || g.RecordedSampler == t.SamplerVersion;
+        }
+
         // The GL-thread work Prepare posts, each in its own method so that its closure is
         // allocated only when there is work (Prepare runs for every texture of every draw).
         static void PostRenderTexture(GlWorker worker, DeviceTexture g, RenderShape shape, string name) => worker.Post(() =>

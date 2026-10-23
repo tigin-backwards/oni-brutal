@@ -53,6 +53,12 @@ namespace OniBrutal.Desktop.Gl
             thread.Start();
         }
 
+        /// A worker that only records (tests): no GL thread runs what is posted, and nothing is
+        /// handed over.
+        internal GlWorker()
+        {
+        }
+
         /// The frame being recorded (main thread).
         public Frame Recording => recording;
 
@@ -64,6 +70,7 @@ namespace OniBrutal.Desktop.Gl
         /// Hands the recorded frame to the GL thread once the previous one has been executed.
         public void Submit()
         {
+            if (thread == null) throw new InvalidOperationException("This worker only records.");
             Frame next;
             lock (gate)
             {
@@ -169,6 +176,7 @@ namespace OniBrutal.Desktop.Gl
         /// Executes what was submitted, then stops the thread.
         public void Dispose()
         {
+            if (thread == null) return;
             lock (gate)
             {
                 stopping = true;
@@ -183,18 +191,38 @@ namespace OniBrutal.Desktop.Gl
     /// the arrays they were given.
     internal sealed class FrameArena
     {
-        float[] floats = new float[1 << 16];
+        float[] floats;
         int floatCount;
-        byte[] bytes = new byte[1 << 18];
+        byte[] bytes;
         int byteCount;
+
+        public FrameArena() : this(1 << 16, 1 << 18) { }
+
+        FrameArena(int floatCapacity, int byteCapacity)
+        {
+            floats = new float[floatCapacity];
+            bytes = new byte[byteCapacity];
+        }
         readonly List<object> objects = new();
         int objectCount;
+        /// Arenas of their own for the frame's worker threads (Child), reset with this one.
+        readonly List<FrameArena> children = new();
 
         public void Reset()
         {
             floatCount = 0;
             byteCount = 0;
             objectCount = 0;
+            foreach (var c in children) c.Reset();
+        }
+
+        /// The frame's `index`th child arena, for one thread's recording while others record into
+        /// their own (made on the recording thread before they start).
+        public FrameArena Child(int index)
+        {
+            // A chunk of a queue needs a fraction of a frame's storage; it grows as the frame's does.
+            while (children.Count <= index) children.Add(new FrameArena(1 << 12, 1 << 14));
+            return children[index];
         }
 
         /// An object for this frame's commands, reused from the frame's last use when there is

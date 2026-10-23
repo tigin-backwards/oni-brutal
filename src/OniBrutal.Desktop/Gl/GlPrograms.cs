@@ -73,14 +73,16 @@ namespace OniBrutal.Desktop.Gl
     /// resolved at (main thread).
     internal sealed class MaterialValues
     {
+        /// Written last when the values are resolved again (with release semantics), so a
+        /// thread that reads them current (with acquire semantics) sees the values too.
         public int MaterialVersion = -1, GlobalsVersion = -1;
         public readonly float[] Loose;
         public readonly byte[] Blocks;
         public readonly TextureBinding[] Textures;
         public readonly bool[] Found;
-        /// The pass state resolved from the same values, for StateFor (ResolvedState.Of).
-        public ResolvedState State;
-        public PassState StateFor;
+        /// The pass state resolved from the same values, for one pass (ResolvedState.Of); one
+        /// object, so that threads recording a queue replace it whole.
+        public ResolvedFor Resolved;
 
         public MaterialValues(DeviceProgram p)
         {
@@ -381,7 +383,8 @@ namespace OniBrutal.Desktop.Gl
     /// buffers.
     internal static unsafe class GlUniforms
     {
-        static readonly float[] scratch = new float[4 * 1024];
+        /// Resolve's output (per thread: draw queues are recorded on worker threads).
+        [ThreadStatic] static float[] scratch;
         /// Array uniforms tightly packed for glUniform*fv.
         static readonly float[] packedScratch = new float[4 * 1024];
         /// Integer uniforms tightly packed for glUniform*iv / *uiv.
@@ -484,6 +487,7 @@ namespace OniBrutal.Desktop.Gl
                     v = new Vector4(0f, 0f, 0f, d.ObjectToWorld.determinant < 0f ? -1f : 1f);
                     break;
                 case UniformSource.TextureScaleOffset:
+                    // Found on first use; threads recording at once store the same id.
                     if (u.ScaleOffsetId == int.MinValue) u.ScaleOffsetId = ShaderPropertyIds.Get(ShaderPropertyIds.NameOf(u.PropertyId) + "_ST");
                     v = d.TryVector(u.ScaleOffsetId, out var st) ? st
                         : d.TryTextureScaleOffset(u.PropertyId, out var so) ? so : TextureBinding.IdentityScaleOffset;
@@ -581,12 +585,21 @@ namespace OniBrutal.Desktop.Gl
                 return null;
             }
             var cached = ValuesOf(p, d);
+            RecordFrom(cached, p, d, values, blocks);
+            return cached;
+        }
+
+        /// A draw's values from the material's (current) values: those copied, then its per-draw
+        /// values and its block's properties resolved over them. Reads only: any thread, while
+        /// nothing changes the inputs.
+        public static void RecordFrom(MaterialValues cached, DeviceProgram p, DrawInputs d, Span<float> values, Span<byte> blocks)
+        {
             cached.Loose.AsSpan().CopyTo(values);
             cached.Blocks.AsSpan().CopyTo(blocks);
             var block = d.Block is { IsEmpty: false } b ? b : null;
             RecordAll(p, d, values, blocks, perDraw: true, block);
-            return cached;
         }
+
 
         /// The material's and the globals' values for a program, resolved again when either has
         /// changed since.
@@ -597,6 +610,14 @@ namespace OniBrutal.Desktop.Gl
             int materialVersion = material.Properties.Version, globalsVersion = ShaderGlobals.Properties.Version;
             if (entries.TryGetValue(p, out var e) && e.MaterialVersion == materialVersion && e.GlobalsVersion == globalsVersion) return e;
             if (e == null) entries[p] = e = new MaterialValues(p);
+            Resolve(e, p, d, materialVersion, globalsVersion);
+            return e;
+        }
+
+        /// Resolves the material's and globals' values into an entry. What it resolves for
+        /// per-draw uniforms (from `d`'s matrices and camera) every draw resolves again over it.
+        static void Resolve(MaterialValues e, DeviceProgram p, DrawInputs d, int materialVersion, int globalsVersion)
+        {
             var block = d.Block;
             d.Block = null;
             try
@@ -610,11 +631,30 @@ namespace OniBrutal.Desktop.Gl
             {
                 d.Block = block;
             }
-            e.StateFor = null;
-            e.MaterialVersion = materialVersion;
-            e.GlobalsVersion = globalsVersion;
+            e.Resolved = null;
+            System.Threading.Volatile.Write(ref e.MaterialVersion, materialVersion);
+            System.Threading.Volatile.Write(ref e.GlobalsVersion, globalsVersion);
+        }
+
+        /// ValuesOf for threads recording one queue at once (while nothing changes the material
+        /// or the globals): an entry found out of date is resolved again by one of them, under
+        /// its lock, the others reading it once it is current. Null when the material has no
+        /// entry for the program yet (adding one changes the material's table: main thread).
+        public static MaterialValues SharedValuesOf(DeviceProgram p, DrawInputs d)
+        {
+            var material = d.Material;
+            if (material?.DeviceCache is not Dictionary<DeviceProgram, MaterialValues> entries || !entries.TryGetValue(p, out var e)) return null;
+            int materialVersion = material.Properties.Version, globalsVersion = ShaderGlobals.Properties.Version;
+            if (Current(e, materialVersion, globalsVersion)) return e;
+            lock (e)
+            {
+                if (!Current(e, materialVersion, globalsVersion)) Resolve(e, p, d, materialVersion, globalsVersion);
+            }
             return e;
         }
+
+        static bool Current(MaterialValues e, int materialVersion, int globalsVersion)
+            => System.Threading.Volatile.Read(ref e.GlobalsVersion) == globalsVersion && System.Threading.Volatile.Read(ref e.MaterialVersion) == materialVersion;
 
         static bool OwnValue(UniformBinding u, PropertySheet block) => u.Source != UniformSource.Property || (block != null && Sets(block, u));
 
@@ -631,7 +671,7 @@ namespace OniBrutal.Desktop.Gl
         /// itself (not read from properties, or set by its block).
         static void RecordAll(DeviceProgram p, DrawInputs d, Span<float> values, Span<byte> blocks, bool perDraw, PropertySheet block)
         {
-            Span<float> o = scratch;
+            Span<float> o = scratch ??= new float[4 * 1024];
             Span<int> blockStarts = stackalloc int[p.BlockSizes.Length];
             for (int b = 0, at = 0; b < blockStarts.Length; b++)
             {

@@ -116,7 +116,56 @@ namespace OniBrutal.Engine.Rendering
         /// The frame's own camera pass is running.
         static bool inFrameRender;
 
+        /// Diagnostics (ONI_RENDER_TIMING=1): the main thread's time in rendering and in draw
+        /// queues, logged every TimingFrames frames.
+        static readonly bool timing = Environment.GetEnvironmentVariable("ONI_RENDER_TIMING") == "1";
+        const int TimingFrames = 600;
+        static long renderTicks, queueTicks, queueDraws, windowStart;
+        static int timedFrames;
+
         static void RenderFrame()
+        {
+            long start = timing ? System.Diagnostics.Stopwatch.GetTimestamp() : 0;
+            try
+            {
+                RenderFrameCore();
+            }
+            finally
+            {
+                if (timing) EndTiming(start);
+            }
+        }
+
+        static void EndTiming(long start)
+        {
+            long now = System.Diagnostics.Stopwatch.GetTimestamp();
+            renderTicks += now - start;
+            if (windowStart == 0) windowStart = start;
+            if (++timedFrames < TimingFrames) return;
+            double ms(long ticks) => ticks * 1000.0 / System.Diagnostics.Stopwatch.Frequency / timedFrames;
+            double fps = timedFrames / ((now - windowStart) / (double)System.Diagnostics.Stopwatch.Frequency);
+            var device = GraphicsDevice.Current.TakeQueueCounters(timedFrames);
+            EngineLog.Engine($"render timing: frame {Time.frameCount}, {fps:F2} fps, rendering {ms(renderTicks):F3} ms a frame, draw queues {ms(queueTicks):F3} ms ({queueDraws / timedFrames} draws a frame){(device != null ? ", " + device : "")}");
+            renderTicks = queueTicks = queueDraws = 0;
+            timedFrames = 0;
+            windowStart = now;
+        }
+
+        /// Draws a sorted queue (a camera's pass, an overlay canvas's batches).
+        internal static void DrawQueue(RenderDevice device, List<DrawItem> items)
+        {
+            if (!timing)
+            {
+                device.DrawQueue(items);
+                return;
+            }
+            long start = System.Diagnostics.Stopwatch.GetTimestamp();
+            device.DrawQueue(items);
+            queueTicks += System.Diagnostics.Stopwatch.GetTimestamp() - start;
+            queueDraws += items.Count;
+        }
+
+        static void RenderFrameCore()
         {
             if (GraphicsDevice.Current.RendersFrames)
             {
@@ -223,6 +272,14 @@ namespace OniBrutal.Engine.Rendering
             }
         }
 
+        /// Draw queues are recorded serially, whatever the device would do (diagnostics).
+        public static bool SerialQueues;
+
+        /// Diagnostics (ONI_CAPTURE_TWICE=serial|parallel): each super-sized capture renders the
+        /// frame a second time, with draw queues recorded serially or as usual, into
+        /// PATH.again.png: the two must be identical.
+        static readonly string captureTwice = Environment.GetEnvironmentVariable("ONI_CAPTURE_TWICE");
+
         /// Screen drawing after the frame renderer's (IMGUI); captures repeat it.
         public static event Action RenderScreenLate;
 
@@ -316,7 +373,15 @@ namespace OniBrutal.Engine.Rendering
             }
             // Captures show the finished frame, OnGUI included.
             if (GraphicsDevice.Current.RendersFrames)
-                foreach (var (path, scale) in captures) Capture(path, scale);
+                foreach (var (path, scale) in captures)
+                {
+                    Capture(path, scale);
+                    if (captureTwice == null || scale == 1) continue;
+                    // Diagnostics: the same frame rendered again, into PATH.again.png.
+                    SerialQueues = captureTwice == "serial";
+                    try { Capture(path + ".again.png", scale); }
+                    finally { SerialQueues = false; }
+                }
             captures.Clear();
             frameQueued.Clear();
             // The frame's queued draws are done with the property blocks they share.
@@ -580,8 +645,7 @@ namespace OniBrutal.Engine.Rendering
             foreach (var d in all)
                 if (opaque ? d.Queue <= 2500 : d.Queue > 2500) list.Add(d);
             list.Sort(opaque ? OpaqueOrder : TransparentOrder);
-            foreach (var d in list)
-                device.Draw(new DrawRequest(d.Mesh, d.SubMesh, d.ObjectToWorld, d.Material, d.Pass, d.Properties, d.Keywords));
+            DrawQueue(device, list);
         }
 
         static readonly Comparison<DrawItem> OpaqueOrder = (a, b) =>

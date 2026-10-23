@@ -1,0 +1,33 @@
+# select last care package (1879935708), class S.
+#
+# What it does: the immigrant screen's Reject All button becomes REROLL: it deals new cards at
+# once, without the confirmation and without closing the screen. And the care package a player
+# prints is remembered (in the save, on an ImmigrantScreenContext): the next offer of care
+# packages starts with the same one (Immigration.RandomCarePackage).
+# How a player reaches it: the printing pod's immigrant screen.
+# What changes: the cards on offer; the remembered care package.
+#
+# The cards are random and differ between the players: the checks are relations (new cards,
+# a care package remembered once one is printed).
+from: early-base
+mods: [1879935708]
+setup:
+  - driver: {seed: 12345}
+  - driver: {setup.call: {target: "Immigration.Instance", method: "Sim200ms", args: [100000]}}   # Duplicants on offer now
+steps:
+  - expect_state:
+      "Immigration.Instance.ImmigrantsAvailable": true
+      "SaveGame.Instance.GetComponent<undancer.SelectLastCarePackage.ImmigrantScreenContext>.LastSelectedCarePackageInfo": missing
+  - call: {tool: building_control, args: {domain: side_surface, surface: facility, kind: telepad, action: open_immigrants, confirm: true}}
+  - ui_wait: {path: "**/ImmigrantScreen/Layout", cond: stable}
+  - expect_ui:
+      "**/ImmigrantScreen/Layout/BottomButtons/RejectButton/Label": {text: "REROLL"}
+      "**/ImmigrantScreen/Layout/Content/*Container": {count: 4}
+  - ui_dump: {name: buttons, root: "**/ImmigrantScreen/Layout/BottomButtons"}
+  - expect_state: {"ui:**/ImmigrantScreen/Layout/Content/*Container[0]::GetInstanceID()": {save_as: first}}
+  - click: {ui: "**/ImmigrantScreen/Layout/BottomButtons/RejectButton"}
+  - ui_wait: {path: "**/ImmigrantScreen/Layout/Content", cond: stable}
+  - expect_ui:
+      "**/ImmigrantScreen/ConfirmationBox": {exists: false}
+      "**/ImmigrantScreen/Layout/Content/*Container": {count: 4}
+  - expect_state: {"ui:**/ImmigrantScreen/Layout/Content/*Container[0]::GetInstanceID()": "!= first"}

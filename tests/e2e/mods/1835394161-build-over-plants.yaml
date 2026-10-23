@@ -1,0 +1,16 @@
+# [Obsolete] Build Over Plants (1835394161), class P.
+#
+# What it did: let buildings be placed over plants. The game does that itself now, and the
+# Workshop build (1.2.0, as its title says, obsolete) holds no patch at all: its assembly has
+# one class, ModInfo, with its name and version.
+# How a player reaches it: nothing to reach.
+# What changes: nothing; it only has to load and stay out of the way.
+#
+# A smaller spec, as the mod is obsolete: it is loaded and enabled, and the colony runs.
+from: early-base
+mods: [1835394161]
+steps:
+  - expect_state:
+      "count:Global.Instance.modManager.mods[*] if .staticID == buildoverplants and .IsEnabledForActiveDlc() == true": 1
+  - run: {seconds: 60}
+  - expect: {duplicants: 3, buildings: {Outhouse: 1, ResearchCenter: 1, ManualGenerator: 1, Bed: 1}}

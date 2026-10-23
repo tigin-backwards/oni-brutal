@@ -1,0 +1,55 @@
+{
+ "spec": "mods/1835394161-build-over-plants.yaml",
+ "mods": [
+  "1835394161"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "obsolete, its build holds no patch: a smaller spec, it loads enabled and the colony runs a minute",
+ "updated": "2026-10-22",
+ "commit": "7afbc2c",
+ "mod_dlls": {
+  "1835394161": {
+   "BuildOverPlants.dll": "b191c65f4d0acf09910bc1bd64a6e190fb068be440cfcfb5c920298697da3b77"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261022-221335-5ba139",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-22T22:13:35",
+    "lane": 10,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261022-221544-3eb1bf",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-22T22:15:44",
+    "lane": 10,
+    "reference_run": "20261022-221335-5ba139",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261022-221544-3eb1bf",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-22T22:17:14",
+    "lane": 10,
+    "reference_run": "20261022-221335-5ba139",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

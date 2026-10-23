@@ -1,0 +1,63 @@
+{
+ "spec": "mods/1879935708-select-last-care-package.yaml",
+ "mods": [
+  "1879935708"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the immigrant screen's REROLL deals four new cards without confirmation, the screen staying open; its buttons as in the original",
+ "updated": "2026-10-22",
+ "commit": "7afbc2c",
+ "mod_dlls": {
+  "1879935708": {
+   "SelectLastCarePackage.dll": "c3754256611df710c2a8d14cddd7a60b11bdd7df33a5619732825d00df18486f"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261022-222002-dd5147",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-22T22:20:02",
+    "lane": 11,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261022-222146-07918f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-22T22:21:46",
+    "lane": 11,
+    "reference_run": "20261022-222002-dd5147",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "buttons": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261022-222146-07918f",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-22T22:22:51",
+    "lane": 11,
+    "reference_run": "20261022-222002-dd5147",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "buttons": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

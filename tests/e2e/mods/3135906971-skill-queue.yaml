@@ -1,0 +1,34 @@
+# Skill Queue (3135906971), classes S, K, O.
+#
+# What it does: on the skills screen, Shift+click on a skill queues it for the Duplicant
+# shown, with the skills it needs first; Shift+click on a queued skill takes it and the skills
+# after it out. Queued skills carry their place in the queue ("[1]", tinted along a rainbow)
+# in their names and tooltips, and the morale and expectation bars show what the queue will
+# cost. Whenever the Duplicant earns a skill point, the next queued skill is learnt, with a
+# notification (SavedSkillQueue on every Duplicant; patches on SkillWidget and SkillsScreen).
+# PLib options switch the notifications and the rainbow.
+# How a player reaches it: the skills screen (L), Shift+click on a skill.
+# What changes: skills learnt in a planned order without the player's attention.
+#
+# The skills screen opens on the first Duplicant, the bionic one, which has no skill point.
+# Shift+click on Improved Gears II queues Improved Gears I and II, numbered 1 and 2;
+# Shift+click on Improved Gears I takes both out again.
+from: early-base
+mods: [3135906971]
+steps:
+  - open: {management: skills}
+  - ui_wait: {path: "**/SkillsScreen/Content/Skills", cond: stable}
+  - expect_state:
+      "ui:**/SkillsScreen::GetComponent<SkillsScreen>.CurrentlySelectedMinion.GetComponent<MinionResume>.AvailableSkillpoints": 0
+      "ui:**/SkillsScreen::GetComponent<SkillsScreen>.CurrentlySelectedMinion.GetComponent<SkillingQueue.SavedSkillQueue>.QueuedSkillCount": 0
+  - click: {text: "Improved Gears II", under: "**/SkillsScreen", mods: [Shift]}
+  - expect_state:
+      "ui:**/SkillsScreen::GetComponent<SkillsScreen>.CurrentlySelectedMinion.GetComponent<SkillingQueue.SavedSkillQueue>.SkillIds": {equals: [BionicsB1, BionicsB2]}
+  - expect_ui:
+      "**/PrefabSkillWidget/Header/Label": {any_text: "~Improved Gears II</link><color=#FFD98CFF> <b>[2]</b>"}
+  - expect_ui:
+      "**/PrefabSkillWidget/Header/Label": {any_text: "~Improved Gears I</link><color=#FF8C8CFF> <b>[1]</b>"}
+  - ui_dump: {name: queued, root: "**/SkillsScreen/Content/Skills/ScrollRect/ScrollContent/Table"}
+  - click: {text: "~Improved Gears I</link><color", under: "**/SkillsScreen", mods: [Shift]}
+  - expect_state:
+      "ui:**/SkillsScreen::GetComponent<SkillsScreen>.CurrentlySelectedMinion.GetComponent<SkillingQueue.SavedSkillQueue>.QueuedSkillCount": 0

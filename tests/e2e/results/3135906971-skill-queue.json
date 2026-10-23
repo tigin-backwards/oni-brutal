@@ -1,0 +1,63 @@
+{
+ "spec": "mods/3135906971-skill-queue.yaml",
+ "mods": [
+  "3135906971"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "on the skills screen, Shift+click on Improved Gears II queues it and Improved Gears I, numbered [1] and [2] (the skill table dumped as in the original); Shift+click on the first empties the queue",
+ "updated": "2026-10-23",
+ "commit": "49cc900",
+ "mod_dlls": {
+  "3135906971": {
+   "SkillingQueue.dll": "f8f14fcde1c865f947b24686c57195cfe8cc09e8301e1594651fc6241d526f2e"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-105624-28ed2a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T10:56:24",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-111345-92ec1d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T11:13:45",
+    "lane": 16,
+    "reference_run": "20261023-105624-28ed2a",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "queued": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261023-111345-92ec1d",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T11:13:46",
+    "lane": 17,
+    "reference_run": "20261023-105624-28ed2a",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "queued": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

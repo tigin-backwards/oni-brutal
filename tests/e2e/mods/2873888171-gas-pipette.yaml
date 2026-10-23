@@ -1,0 +1,33 @@
+# 移气管 Gas Pipette (2873888171), classes T, K, O.
+#
+# What it does: adds a Gas Pipette tool to the toolbar (PlayerController.OnPrefabInit and
+# ToolMenu.CreateBasicTools patches, an unbound PAction for a hotkey): pressing on a gas
+# cell takes up to its capacity of that gas (SimMessages.ConsumeMass), and releasing over an
+# open cell puts it there (SimMessages.ReplaceElement, the cell's own gas merged into a
+# neighbour of the same gas). Its PLib option sets the capacity, 0.00001 to 100 g.
+# How a player reaches it: the toolbar's Gas Pipette tool; a press and release.
+# What changes: a small amount of gas moves from one cell to another.
+#
+# setup lets 20 kg of chlorine into the pit west of the printing pod (x 106-115, y 206); the
+# spec sets the capacity to 100 g. The pipette is dragged from the chlorine to the base's
+# floor east of the pit (120, 207): its press and release show in the log (the mod's own
+# lines: a gas cell taken from, then the cell it drops into). Where the 0.1 kg of chlorine
+# drifts within a second differs from run to run, so the cells are not checked.
+from: early-base
+mods: [2873888171]
+options:
+  "2873888171": {Capacity: 100}
+require_log: ['气体滴管,是否气体:True', '格子id:']   # its press (a gas cell) and its release
+setup:
+  - driver: {setup.call: {type: SimMessages, method: AddRemoveSubstance, args: [131124, ChlorineGas, null, 20, 300, 255, 0]}}
+steps:
+  - run: {seconds: 2}
+  - expect_state:
+      "Grid.Element[131124].id": ChlorineGas
+      "Grid.Element[131772].id": "!= 'ChlorineGas'"
+      "type:GasPipette.Integration::Settings.Capacity": 100
+  - driver: {camera.set: {cell: [114, 208], ortho: 9}}
+  - tool: {toolbar: Gas Pipette}
+  - expect_state: {"PlayerController.Instance.ActiveTool.name": GasPipetteTool}
+  - drag: {from: [108, 206], to: [120, 207]}
+  - key: {code: Escape}

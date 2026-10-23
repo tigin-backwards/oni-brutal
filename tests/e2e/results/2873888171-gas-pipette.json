@@ -1,0 +1,56 @@
+{
+ "spec": "mods/2873888171-gas-pipette.yaml",
+ "mods": [
+  "2873888171"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with a 100 g capacity, the Gas Pipette tool from the toolbar is dragged from chlorine in the pit to the base floor; the mod logs the press on a gas cell and the release as in the original (where the gas then drifts is not deterministic, so not checked)",
+ "updated": "2026-10-23",
+ "commit": "49cc900",
+ "mod_dlls": {
+  "2873888171": {
+   "Gas Pipette.dll": "5cbf6705dc5d33a80f9f08e95a1367a30cad6d278f1e94b268f0717e881053de",
+   "PLib.dll": "c4bb22f1bc06ebcb0dbba75a7f1bc46f63eaa3dae12c22a08729f1a6d3362dda"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-103528-04bb40",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T10:45:12",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-111345-92ec1d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T11:14:50",
+    "lane": 16,
+    "reference_run": "20261023-103528-04bb40",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-111345-92ec1d",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T11:15:57",
+    "lane": 16,
+    "reference_run": "20261023-103528-04bb40",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

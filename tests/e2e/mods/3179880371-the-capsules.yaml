@@ -12,13 +12,17 @@
 # What changes: dig orders done, buildings built or removed, liquids poured, instantly.
 #
 # The Mining Capsule: three sandstone cells above the corridor west of the printing pod are
-# marked for digging, the capsule is placed from the build menu, and its Boom! button digs
-# them within a few seconds, before any Duplicant could.
+# marked for digging (the Duplicants' digging errand turned off in setup, so that they leave
+# them alone), the capsule is placed from the build menu, and its Boom! button digs them.
 from: early-base
 mods: [3179880371]
 setup:
   - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"HVAC\")"}, true]}}
   - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  # Digging is taken off the Duplicants' errands, so only the capsule digs.
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[0].GetComponent<ChoreConsumer>", method: SetPermittedByUser, args: [{"$": "Db.Get().ChoreGroups.Dig"}, false]}}
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[1].GetComponent<ChoreConsumer>", method: SetPermittedByUser, args: [{"$": "Db.Get().ChoreGroups.Dig"}, false]}}
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[2].GetComponent<ChoreConsumer>", method: SetPermittedByUser, args: [{"$": "Db.Get().ChoreGroups.Dig"}, false]}}
 steps:
   - dig: [118, 210, 120, 210]
   - expect: {pending_digs: 3}

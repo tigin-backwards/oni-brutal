@@ -315,7 +315,7 @@ installs get developer checks subscribers never see).
 | 294 | [Priority Zero](https://steamcommunity.com/sharedfiles/filedetails/?id=1972768699) | ❌ | ❌ | ⬜ | broken upstream: its 0 button and tool work, and a dig errand set to 0 carries the mod's precondition and priority class, yet a Duplicant digs it within 300 s, so priority 0 no longer holds errands back (spec tests/e2e/mods/1972768699-priority-zero.yaml) (same in the original) |
 | 295 | [Dupes Machinery](https://steamcommunity.com/sharedfiles/filedetails/?id=2888290233) | ✅ | ✅ | ⬜ |  |
 | 296 | [Mineral Processing - Metallurgy](https://steamcommunity.com/sharedfiles/filedetails/?id=1970894610) | ✅ | ✅ | ⬜ |  |
-| 297 | [Refresh Printing Pod](https://steamcommunity.com/sharedfiles/filedetails/?id=2642931981) | ✅ | ✅ | ⬜ |  |
+| 297 | [Refresh Printing Pod](https://steamcommunity.com/sharedfiles/filedetails/?id=2642931981) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2642931981-refresh-printing-pod.yaml: the Refresh button (renamed Reject All) deals four new cards without a confirmation box, twice, the screen staying open; its buttons as in the original |
 | 298 | [量杯](https://steamcommunity.com/sharedfiles/filedetails/?id=3336359859) | ✅ | ✅ | ⬜ |  |
 | 299 | [More Emotions](https://steamcommunity.com/sharedfiles/filedetails/?id=3204363352) | ✅ | ✅ | ⬜ |  |
 | 300 | [Dupes Refrigeration](https://steamcommunity.com/sharedfiles/filedetails/?id=2021324045) | ✅ | ✅ | ⬜ |  |

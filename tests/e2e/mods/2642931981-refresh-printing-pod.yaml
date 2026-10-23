@@ -1,0 +1,43 @@
+# Refresh Printing Pod (2642931981), class P (on a vanilla screen).
+#
+# What it does: renames the printing pod's Reject All button to "Refresh", and the button no
+# longer asks for confirmation and closes the screen: it destroys the offered cards and deals
+# new ones, the screen staying open (a prefix on ImmigrantScreen.OnRejectAll).
+# How a player reaches it: the printing pod's immigrant screen, its Refresh button.
+# What changes: the cards on offer; the pod stays ready to print.
+#
+# The cards are random, so only the screen's bottom buttons are compared by structure, and the
+# check is that every card is a new one.
+from: early-base
+mods: [2642931981]
+setup:
+  - driver: {seed: 12345}
+  - driver: {setup.call: {target: "Immigration.Instance", method: "Sim200ms", args: [100000]}}   # Duplicants on offer now
+steps:
+  - expect_state: {"Immigration.Instance.ImmigrantsAvailable": true}
+  - call: {tool: building_control, args: {domain: side_surface, surface: facility, kind: telepad, action: open_immigrants, confirm: true}}
+  - ui_wait: {path: "**/ImmigrantScreen/Layout", cond: stable}
+  - expect_ui:
+      "**/ImmigrantScreen/Layout/BottomButtons/RejectButton/Label": {text: "Refresh"}
+      "**/ImmigrantScreen/Layout/Content/*Container": {count: 4}
+  - expect_state:
+      "ui:**/ImmigrantScreen/Layout/Content/*Container[0]::GetInstanceID()": {save_as: first}
+      "ui:**/ImmigrantScreen/Layout/Content/*Container[3]::GetInstanceID()": {save_as: last}
+  - ui_dump: {name: buttons, root: "**/ImmigrantScreen/Layout/BottomButtons"}
+  - click: {ui: "**/ImmigrantScreen/Layout/BottomButtons/RejectButton"}
+  - ui_wait: {path: "**/ImmigrantScreen/Layout/Content", cond: stable}
+  # No confirmation box, the screen stays open, and four new cards are dealt.
+  - expect_ui:
+      "**/ImmigrantScreen/ConfirmationBox": {exists: false}
+      "**/ImmigrantScreen/Layout/BottomButtons/RejectButton": {interactable: true}
+      "**/ImmigrantScreen/Layout/Content/*Container": {count: 4}
+  - expect_state:
+      "Immigration.Instance.ImmigrantsAvailable": true
+      "ui:**/ImmigrantScreen/Layout/Content/*Container[0]::GetInstanceID()": "!= first"
+      "ui:**/ImmigrantScreen/Layout/Content/*Container[3]::GetInstanceID()": "!= last"
+  # And again: it can be pressed as often as the player likes.
+  - click: {ui: "**/ImmigrantScreen/Layout/BottomButtons/RejectButton"}
+  - ui_wait: {path: "**/ImmigrantScreen/Layout/Content", cond: stable}
+  - expect_ui:
+      "**/ImmigrantScreen/Layout/Content/*Container": {count: 4}
+      "**/ImmigrantScreen/ConfirmationBox": {exists: false}

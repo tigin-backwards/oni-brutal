@@ -1,0 +1,63 @@
+{
+ "spec": "mods/2642931981-refresh-printing-pod.yaml",
+ "mods": [
+  "2642931981"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Refresh button (renamed Reject All) deals four new cards without a confirmation box, twice, the screen staying open; its buttons as in the original",
+ "updated": "2026-10-23",
+ "commit": "b4c7537",
+ "mod_dlls": {
+  "2642931981": {
+   "ONI Mod1.dll": "21b003b1b84dde0fc2324135670b62faec34aa644d56f0562e823cdce7f06f40"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-140706-5dc4cb",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T14:07:06",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-140823-f4e84c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T14:08:23",
+    "lane": 14,
+    "reference_run": "20261023-140706-5dc4cb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "buttons": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261023-140823-f4e84c",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T14:08:24",
+    "lane": 15,
+    "reference_run": "20261023-140706-5dc4cb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "buttons": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

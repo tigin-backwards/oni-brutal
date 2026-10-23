@@ -1,0 +1,27 @@
+# skill experience 技能经验 (2429077517), class P.
+#
+# What it does: a prefix on MinionResume.AddExperience multiplies every experience gain by
+# Multiple from the mod's Config/TacitSkill.ini (10 as shipped), so Duplicants earn skill
+# points ten times as fast.
+# How a player reaches it: nothing to press; Duplicants gain experience as they live and work.
+# What changes: a Duplicant's total experience grows ten times as fast.
+#
+# The game itself counts the experience it hands out before the mod's prefix sees it
+# (MinionResume.DEBUG_PassiveExperienceGained and DEBUG_ActiveExperienceGained); the
+# Duplicant's total grows by ten times that while the colony runs.
+from: early-base
+mods: [2429077517]
+steps:
+  - expect_state:
+      "Components.LiveMinionIdentities.Items[1].GetComponent<MinionResume>.totalExperienceGained": {save_as: total}
+      "Components.LiveMinionIdentities.Items[1].GetComponent<MinionResume>.DEBUG_PassiveExperienceGained": {save_as: passive}
+      "Components.LiveMinionIdentities.Items[1].GetComponent<MinionResume>.DEBUG_ActiveExperienceGained": {save_as: active}
+  - run: {seconds: 120}
+  - expect_state:
+      "Components.LiveMinionIdentities.Items[1].GetComponent<MinionResume>.DEBUG_PassiveExperienceGained": {save_as: passive2}
+      "Components.LiveMinionIdentities.Items[1].GetComponent<MinionResume>.DEBUG_ActiveExperienceGained": {save_as: active2}
+  - expect_state:
+      "Components.LiveMinionIdentities.Items[1].GetComponent<MinionResume>.totalExperienceGained": ">= total + 9.9 * (passive2 - passive + active2 - active)"
+  - expect_state:
+      "Components.LiveMinionIdentities.Items[1].GetComponent<MinionResume>.totalExperienceGained": "<= total + 10.1 * (passive2 - passive + active2 - active)"
+  - expect_state: {"Components.LiveMinionIdentities.Items[1].GetComponent<MinionResume>.DEBUG_PassiveExperienceGained": "> passive + 1"}

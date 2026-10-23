@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2429077517-skill-experience.yaml",
+ "mods": [
+  "2429077517"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "over 120 s of colony time a Duplicant's total experience grows by ten times the experience the game hands out (the mod's shipped Multiple = 10)",
+ "updated": "2026-10-23",
+ "commit": "a7fc273",
+ "mod_dlls": {
+  "2429077517": {
+   "TacitSkill.dll": "4282926ddd79c265c33dfc21b3a734d07684a025262c823290ac64b082232e9c"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-142412-0589f6",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T14:27:22",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-143647-1604dd",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T14:44:48",
+    "lane": 14,
+    "reference_run": "20261023-142412-0589f6",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-143647-1604dd",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T14:44:48",
+    "lane": 15,
+    "reference_run": "20261023-142412-0589f6",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

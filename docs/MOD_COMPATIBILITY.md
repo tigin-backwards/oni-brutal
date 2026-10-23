@@ -320,7 +320,7 @@ installs get developer checks subscribers never see).
 | 299 | [More Emotions](https://steamcommunity.com/sharedfiles/filedetails/?id=3204363352) | ✅ | ✅ | ⬜ |  |
 | 300 | [Dupes Refrigeration](https://steamcommunity.com/sharedfiles/filedetails/?id=2021324045) | ✅ | ✅ | ⬜ |  |
 | 301 | [telescope auto research](https://steamcommunity.com/sharedfiles/filedetails/?id=1888643088) | ⬜ | ⬜ | ⬜ | flagged by onimaxxing (notLoading); not tested |
-| 302 | [skill experience 技能经验](https://steamcommunity.com/sharedfiles/filedetails/?id=2429077517) | ✅ | ✅ | ⬜ |  |
+| 302 | [skill experience 技能经验](https://steamcommunity.com/sharedfiles/filedetails/?id=2429077517) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2429077517-skill-experience.yaml: over 120 s of colony time a Duplicant's total experience grows by ten times the experience the game hands out (the mod's shipped Multiple = 10) |
 | 303 | [[DLC+Vanilla]Travel Tube Anywhere](https://steamcommunity.com/sharedfiles/filedetails/?id=2536616489) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2536616489-travel-tube-anywhere.yaml: a Transit Tube placed with OniMcp in a built Tile's cell is accepted and built there, the tile staying |
 | 304 | [Advanced Generators](https://steamcommunity.com/sharedfiles/filedetails/?id=1934934314) | ✅ | ✅ | ⬜ |  |
 | 305 | [Optimized official Chinese【SU】](https://steamcommunity.com/sharedfiles/filedetails/?id=1493391479) | ⬜ | ⬜ | ⬜ | translation: the game applies one only from a Steam subscription; not testable here |

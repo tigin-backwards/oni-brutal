@@ -420,6 +420,12 @@ phase: right after each step, then Update, a coroutine's `yield return null`, La
 - **Not measured:** `ForceLabelUpdate()` on a field whose label was never written (measured only
   after it had been written: no change); the caret's layer; a text component on an inactive
   GameObject at enable.
+- **Two text behaviours the same probe measured** (they apply to every `TextMeshProUGUI`, not only
+  input fields; probe output `uis-check.py diff … input`):
+  - An empty text in a rect lower than its font's line reports `isTextOverflowing` false. For
+    auto-size it still counts as not fitting.
+  - A text with no canvas above it is not laid out. It stays dirty and is laid out in the first
+    canvas rebuild after it is parented under a canvas (a field built in code, then parented).
 
 **`TMP_Dropdown`:** like uGUI's `Dropdown`, with TMP texts:
 - **Contents:** `options` (`OptionData`: text and image), `value` and `onValueChanged`.

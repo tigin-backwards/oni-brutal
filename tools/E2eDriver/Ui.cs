@@ -521,6 +521,9 @@ namespace E2eDriver
             return s == "-0" ? "0" : s;
         }
 
-        static string C(Color c) => $"{Math.Round(c.r * 255)},{Math.Round(c.g * 255)},{Math.Round(c.b * 255)},{Math.Round(c.a * 255)}";
+        // In double: Unity's Mono keeps float intermediates at double precision (-O=-float32), so a
+        // float product rounds differently there than on CoreCLR (0.9 x 255: 229 vs 230); the
+        // double product is the same in both players (tools/UnityProbe/FloatPrecision.cs).
+        static string C(Color c) => $"{Math.Round(c.r * 255d)},{Math.Round(c.g * 255d)},{Math.Round(c.b * 255d)},{Math.Round(c.a * 255d)}";
     }
 }

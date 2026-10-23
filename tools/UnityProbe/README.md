@@ -92,6 +92,12 @@ With `PROBE_SCENARIO=floatprec` only the float-precision probe runs (`FloatPreci
 float32 and double results differ, each line saying which one the player gave. Its header
 records what it measured: the original rounds float arithmetic to float32 only on stores.
 
+With `PROBE_SCENARIO=newobject` only the `new` probe runs (`NewObject.cs`, lines `NEW …`, at the
+main menu): what `new` gives for a ScriptableObject subclass, a bare ScriptableObject and a
+MonoBehaviour (whether it is alive, its instance id, name, hide flags and `ToString`, which of
+Awake and OnEnable run and when, what reaches the log), then Instantiate, DestroyImmediate and
+Destroy on it. `ScriptableObjectNewTests` encodes the results.
+
 ## UI semantics (`UiSemantics.cs`, `UIS` lines)
 
 Ten seconds into the front end, after the front-end dump, it builds small hierarchies on an

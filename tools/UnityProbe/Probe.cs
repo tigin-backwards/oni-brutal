@@ -49,6 +49,11 @@ namespace SemanticsProbe
                 FloatPrecision.Run();
                 return;
             }
+            if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "newobject")
+            {
+                go.AddComponent<NewObject>();
+                return;
+            }
             if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "startdestroy")
             {
                 go.AddComponent<SDScenario>();

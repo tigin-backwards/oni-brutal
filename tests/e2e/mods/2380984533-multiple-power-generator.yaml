@@ -1,0 +1,31 @@
+# Multiple Power Generator (2380984533), classes P, O.
+#
+# What it does: multiplies every generator's wattage (PowerRatio, 10 by default), every wire's
+# maximum wattage (WireRatio, 100) and the capacity of batteries and transformers
+# (BatteryRatio, 10). PLib options set the three factors.
+# How a player reaches it: building generators, wires and batteries; the Mods screen's
+# options.
+# What changes: how much power a generator makes, how much a wire carries, how much a battery
+# holds.
+#
+# Options here: PowerRatio 5, WireRatio 20, BatteryRatio 4. A battery is built beside the
+# manual generator east of the printing pod and wired to it: a Duplicant runs the generator
+# (2000 W instead of 400) to charge the battery past the 10 kJ a small battery holds in the
+# game alone (40 kJ here).
+from: early-base
+mods: [2380984533]
+options:
+  "2380984533": {PowerRatio: 5, WireRatio: 20, BatteryRatio: 4}
+steps:
+  - expect_state:
+      "all:ManualGenerator::[0].GetComponent<Generator>.WattageRating": 2000
+  - build: {prefab: Battery, at: [131, 207]}
+  - build: {prefab: Wire, cells: [[129, 207], [130, 207], [131, 207]]}
+  - expect: {blueprints: {Battery: 1, Wire: 3}}
+  - run: {seconds: 900, until: {buildings: {Battery: 1}, pending_construction: 0}}
+  - expect_state:
+      "all:Battery::[0].capacity": 40000
+      "Wire.GetMaxWattageAsFloat(\"Max1000\")": 20000
+  - run: {seconds: 600}
+  - expect_state:
+      "all:Battery::[0].JoulesAvailable": "> 10000"

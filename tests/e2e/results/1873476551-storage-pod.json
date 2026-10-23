@@ -1,0 +1,59 @@
+{
+ "spec": "mods/1873476551-storage-pod.yaml",
+ "mods": [
+  "1873476551"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with the capacity option at 3000 kg, a Storage Pod built in mid-air from spawned steel and selected (shot); its slider ends at 3000 kg, and 1200 typed into its field is taken",
+ "updated": "2026-10-23",
+ "commit": "0fa3b34",
+ "mod_dlls": {
+  "1873476551": {
+   "Storage Pod.dll": "5d858827b22f1df1aa8dcf2fab1ba4a5b801ac030566503268cd7449a2ff09d5"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-105344-995c07",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T11:04:17",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-115736-03ee0b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T11:57:36",
+    "lane": 15,
+    "reference_run": "20261023-105344-995c07",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "details": 0.0
+    }
+   },
+   {
+    "run": "20261023-115736-03ee0b",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T12:20:10",
+    "lane": 15,
+    "reference_run": "20261023-105344-995c07",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "details": 0.0
+    }
+   }
+  ]
+ }
+}

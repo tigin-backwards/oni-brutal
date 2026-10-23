@@ -1,0 +1,34 @@
+# Hideable Heavy-Watt (2558292946), class P (building definitions).
+#
+# What it does: Heavy-Watt Wire, Conductive Heavy-Watt Wire and their joint plates may be built
+# anywhere (BuildLocationRule Anywhere instead of NotInTiles), so they can run behind tiles and
+# be hidden.
+# How a player reaches it: building a Heavy-Watt Wire (Power, researched with Advanced Power
+# Regulation) over tiles.
+# What changes: a Heavy-Watt Wire can share a cell with a tile, which the game alone refuses.
+#
+# setup grants Advanced Power Regulation and spawns granite for tiles and copper ore for the
+# wire. Two tiles are built in the dug-out room west of the printing pod; a Heavy-Watt Wire is
+# then run through them and the open cell between.
+from: early-base
+mods: [2558292946]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"AdvancedPowerRegulation\")", method: Purchased}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Granite\").substance", method: SpawnResource, args: [[114.5, 207.5, -12], 400, 300, 255, 0]}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Cuprite\").substance", method: SpawnResource, args: [[114.5, 207.5, -12], 400, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"HighWattageWire\").BuildLocationRule": Anywhere
+      "Assets.GetBuildingDef(\"WireBridgeHighWattage\").BuildLocationRule": Anywhere
+      "Assets.GetBuildingDef(\"WireRefinedHighWattage\").BuildLocationRule": Anywhere
+      "Assets.GetBuildingDef(\"WireRefinedBridgeHighWattage\").BuildLocationRule": Anywhere
+  - build: {prefab: Tile, cells: [[110, 209], [112, 209]], material: Granite}
+  - expect: {blueprints: {Tile: 2}}
+  - run: {seconds: 900, until: {pending_construction: 0}}
+  - build: {prefab: HighWattageWire, cells: [[110, 209], [111, 209], [112, 209]], material: Cuprite}
+  - expect: {blueprints: {HighWattageWire: 3}}
+  - run: {seconds: 900, until: {pending_construction: 0}}
+  - expect: {buildings: {HighWattageWire: 3}}
+  # The middle segment joins both of its neighbours, which lie inside the tiles.
+  - expect_state:
+      "Game.Instance.electricalConduitSystem.GetConnections(133035, false)": "Left, Right"

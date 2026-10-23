@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2380984533-multiple-power-generator.yaml",
+ "mods": [
+  "2380984533"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with the options at 5, 20 and 4: the manual generator rates 2000 W, a wire 20000 W, a new battery 40 kJ; a Duplicant runs the generator and charges the battery past 10 kJ",
+ "updated": "2026-10-23",
+ "commit": "0fa3b34",
+ "mod_dlls": {
+  "2380984533": {
+   "Multiple_Power_Generator.dll": "593215bd9cc2c10483c17af0190189db83afe75d9d919157903803cd0e1ddbaf"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-105344-995c07",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T10:57:16",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-112327-c1a4b2",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T11:23:27",
+    "lane": 15,
+    "reference_run": "20261023-105344-995c07",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-112327-c1a4b2",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T11:28:13",
+    "lane": 15,
+    "reference_run": "20261023-105344-995c07",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

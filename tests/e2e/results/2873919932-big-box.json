@@ -1,0 +1,56 @@
+{
+ "spec": "mods/2873919932-big-box.yaml",
+ "mods": [
+  "2873919932"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Storage Bin built east of the pod: its capacity slider ends at the mod's 111111 kg, and 30000 typed into its field is taken",
+ "updated": "2026-10-23",
+ "commit": "0fa3b34",
+ "mod_dlls": {
+  "2873919932": {
+   "Big box┤≤╧Σ╫╙.dll": "7ef1fa5675263d71f849e2de35c680c7818225aeeac4055cc7dfc8890174907d",
+   "PLib.dll": "b862c5db2b3cd6df09a62d4a30782e91e2b24e8e1bfac08d991c9cc89a984ba9"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-105344-995c07",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T11:02:26",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-113255-0e5566",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T11:32:55",
+    "lane": 15,
+    "reference_run": "20261023-105344-995c07",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-113255-0e5566",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T11:54:52",
+    "lane": 15,
+    "reference_run": "20261023-105344-995c07",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

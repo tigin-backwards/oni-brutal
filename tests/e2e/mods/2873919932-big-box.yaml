@@ -1,0 +1,28 @@
+# Big box / 大箱子 (2873919932), classes P, O.
+#
+# What it does: raises the capacity of the Storage Bin, the Smart Storage Bin, the Liquid
+# Reservoir and the Gas Reservoir (111111 kg each by default; the game's are 20000, 20000,
+# 5000 and 1000). PLib options set each one.
+# How a player reaches it: building one of those; its side screen's capacity slider and field.
+# What changes: how much the building holds, and how far its slider goes.
+#
+# With the default options (the mod reads its own Controler.json, not the config.json the
+# runner writes), a Storage Bin is built in the dug-out room east of the printing pod and
+# selected: its capacity slider ends at 111111 kg, and 30000 typed into the side screen's
+# field (more than the game's bin can hold) is taken.
+from: early-base
+mods: [2873919932]
+steps:
+  - build: {prefab: StorageLocker, at: [134, 207]}
+  - expect: {blueprints: {StorageLocker: 1}}
+  - run: {seconds: 900, until: {buildings: {StorageLocker: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [134, 208], ortho: 8}}
+  - click_world: {cell: [134, 208], select: StorageLocker}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_wait: {path: "**/CapacityControlSideScreen", cond: stable}
+  - expect_state:
+      "selected:Storage.capacityKg": 111111
+      "ui:**/CapacityControlSideScreen/**/Slider::GetComponent<KSlider>.maxValue": 111111
+  - type: {ui: "**/CapacityControlSideScreen/**/InputField", text: "30000", enter: true, clear: true}
+  - expect_state:
+      "selected:StorageLocker.UserMaxCapacity": 30000

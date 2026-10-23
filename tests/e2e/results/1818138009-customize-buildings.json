@@ -1,0 +1,59 @@
+{
+ "spec": "mods/1818138009-customize-buildings.yaml",
+ "mods": [
+  "1818138009"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with the mod's preset, a Storage Bin built east of the pod and selected (shot): its capacity slider ends at 400000 kg, and 250000 typed into its field is taken",
+ "updated": "2026-10-23",
+ "commit": "0fa3b34",
+ "mod_dlls": {
+  "1818138009": {
+   "CustomizeBuildings.dll": "413ed018698a9a810cdf7d08604413673037c4763e8389def51465d2f978fbf6"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-105344-995c07",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T11:06:04",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-122129-dca2c6",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T12:21:29",
+    "lane": 15,
+    "reference_run": "20261023-105344-995c07",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "details": 0.0
+    }
+   },
+   {
+    "run": "20261023-122129-dca2c6",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T12:22:55",
+    "lane": 15,
+    "reference_run": "20261023-105344-995c07",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "details": 0.0
+    }
+   }
+  ]
+ }
+}

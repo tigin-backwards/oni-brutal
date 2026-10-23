@@ -1,0 +1,31 @@
+# Customize Buildings (more capacity, less dupes) (1818138009), classes S, O.
+#
+# What it does: a long list of building tweaks set in its own options dialog (Mods screen) and
+# kept in mods/CustomizeBuildings.json: storage capacities (a Storage Bin holds 400000 kg by
+# the mod's preset, 20000 in the game), batteries, pipes and pumps, doors, switches and valves
+# set without Duplicants, reservoirs in the air, an auto-sweeper's range and more, and side
+# screen sliders for some of them.
+# How a player reaches it: the Mods screen's options; then building and selecting the
+# buildings it changes.
+# What changes: what those buildings hold and how they act.
+#
+# With the mod's preset (no options file yet), a Storage Bin is built in the dug-out room east
+# of the printing pod and selected: its capacity slider ends at 400000 kg, and 250000 typed
+# into the side screen's field (more than the game's bin can hold) is taken.
+from: early-base
+mods: [1818138009]
+steps:
+  - build: {prefab: StorageLocker, at: [134, 207]}
+  - expect: {blueprints: {StorageLocker: 1}}
+  - run: {seconds: 900, until: {buildings: {StorageLocker: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [134, 208], ortho: 8}}
+  - click_world: {cell: [134, 208], select: StorageLocker}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_wait: {path: "**/CapacityControlSideScreen", cond: stable}
+  - expect_state:
+      "selected:Storage.capacityKg": 400000
+      "ui:**/CapacityControlSideScreen/**/Slider::GetComponent<KSlider>.maxValue": 400000
+  - shot: {name: details, crop: "**/DetailsScreen", threshold: 0.04}
+  - type: {ui: "**/CapacityControlSideScreen/**/InputField", text: "250000", enter: true, clear: true}
+  - expect_state:
+      "selected:StorageLocker.UserMaxCapacity": 250000

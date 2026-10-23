@@ -1,0 +1,39 @@
+# Storage Pod (1873476551), classes B, O.
+#
+# What it does: adds two 1x1 storages of refined metal that may be built anywhere, in the air
+# too: the Storage Pod (Base, Refined Objects; stores solids, 5000 kg by default) and the
+# Cool Pod (Food, Agriculture; a powered 60 W refrigerator for 50 kg of food). PLib options
+# set both capacities and whether the Storage Pod also takes food.
+# How a player reaches it: the build menu; the pod's side screens (what to store, how much).
+# What changes: a small storage that hangs anywhere.
+#
+# Options here: the Storage Pod holds 3000 kg. setup grants Refined Objects and spawns steel.
+# A Storage Pod is built in mid-air in the dug-out room west of the printing pod and selected:
+# its capacity slider ends at 3000 kg, and 1200 typed into its field is taken.
+from: early-base
+mods: [1873476551]
+options:
+  "1873476551": {podCapacity: 3000}
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"RefinedObjects\")", method: Purchased}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Steel\").substance", method: SpawnResource, args: [[114.5, 207.5, -12], 400, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"StoragePodConfig\").BuildLocationRule": Anywhere
+      "Db.Get().Techs.Get(\"RefinedObjects\").unlockedItemIDs": {contains: StoragePodConfig}
+  - build: {prefab: StoragePodConfig, at: [112, 209], material: Steel}
+  - expect: {blueprints: {StoragePodConfig: 1}}
+  - run: {seconds: 900, until: {buildings: {StoragePodConfig: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [112, 209], ortho: 8}}
+  - click_world: {cell: [112, 209], select: StoragePodConfig}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Storage Pod"}
+  - ui_wait: {path: "**/CapacityControlSideScreen", cond: stable}
+  - expect_state:
+      "selected:Storage.capacityKg": 3000
+      "ui:**/CapacityControlSideScreen/**/Slider::GetComponent<KSlider>.maxValue": 3000
+  - shot: {name: details, crop: "**/DetailsScreen", threshold: 0.04}
+  - type: {ui: "**/CapacityControlSideScreen/**/InputField", text: "1200", enter: true, clear: true}
+  - expect_state:
+      "selected:StorageLocker.UserMaxCapacity": 1200

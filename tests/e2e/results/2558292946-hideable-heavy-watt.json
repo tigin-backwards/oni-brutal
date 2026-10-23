@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2558292946-hideable-heavy-watt.yaml",
+ "mods": [
+  "2558292946"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "two granite tiles built, then a Heavy-Watt Wire run through them and the cell between (the game alone refuses wire in tiles); the middle segment joins both",
+ "updated": "2026-10-23",
+ "commit": "2eabd9e",
+ "mod_dlls": {
+  "2558292946": {
+   "HideableHeavyWatt.dll": "881074c33d3413681707b49b9662db21d8895ae849af022bbc5b168f9a1c547b"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-105344-995c07",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T10:53:44",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-111957-8019f9",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T11:19:57",
+    "lane": 15,
+    "reference_run": "20261023-105344-995c07",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-111957-8019f9",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T11:21:42",
+    "lane": 15,
+    "reference_run": "20261023-105344-995c07",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

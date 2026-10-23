@@ -13,7 +13,7 @@
 from: early-base
 mods: [3405454008]
 options:
-  "3405454008/StatsUnlimited.json": {DiggingMultiplier: 1000}
+  "3405454008": {$file: StatsUnlimited.json, DiggingMultiplier: 1000}
 steps:
   - expect_state:
       "type:StatsUnlimitedSO.Config::Cfg.DiggingMultiplier": 1000

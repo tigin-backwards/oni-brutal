@@ -1095,12 +1095,131 @@ Where this implementation deviates (`TMP_InputField.cs`, the layout element at t
 Also seen, outside the rule: `text` set from code on a field that is still inactive (as the probe
 builds them) keeps what `characterLimit` and `SingleLine` would refuse from typing. "1915"
 with a limit of 2 stays "1915", and "ab\ncd" in a `SingleLine` field keeps its line feed and is
-two lines (16.45 × 38.1). This implementation cuts them to "19" and "abcd". Neither case was
-measured on an active field, nor are these the layout values themselves. Measure them before
-relying on them.
+two lines (16.45 × 38.1). This implementation cuts them to "19" and "abcd". "Text set from
+code" below measures this in every state: the shipped package keeps the value whole on active
+and focused fields too.
 
 Not measured: a scaled or rotated viewport, a viewport that is not the field's child,
 `ForceLabelUpdate` between passes, the vertical scrollbar, and auto-size text.
+
+### Text set from code (measured 2026-10-23)
+
+Found in a mod play-test: with its layout fixed, Geyser Control's slider fields still showed
+cut values. `SliderSet.SetTarget` gives each field a `characterLimit`
+(⌊1 + log10(max + decimal places)⌋, 4 for mass per cycle), and then `KNumberInputField.SetDisplayValue`
+sets `field.text` to the value. The shipped package keeps "507.2", "63.6", "65208.3" and
+"61.3", in the field's `text` and in its label. This implementation cut them to "507.",
+"63", "65208." and "61".
+
+Measured with `PROBE_SCENARIO=inputtext` (tools/UnityProbe, `InputText.cs`, lines `IT …`): 438
+cases. Each field is a `KInputTextField` built as the slider row's `NumberInputField` is
+(an `Image`, "Text Area" with a `RectMask2D`, "Text" anchored to its top), with
+`onFocusSelectAll` off. Its line type, content type and limit are set first, as `SetTarget`
+sets them, or one of them after the text. Then the text is set, in one of three ways:
+`text =`, `SetTextWithoutNotify`, or the text component's own `text`. The field is in one of
+three states then: inactive, active but not focused, or focused (selected and activated two
+frames before).
+
+The cases vary:
+- Geyser Control's values with limit 4 and `DecimalNumber`;
+- the limits 0, 1 and 4;
+- each line type with a line feed, a tab and a CR;
+- each content type (Standard, Autocorrected, IntegerNumber, DecimalNumber, Alphanumeric,
+  Name, EmailAddress, Password, Pin) with "-12.5e3", "ab c!1" and "x\ny";
+- a limit with `MultiLineNewline`.
+
+Each field is then followed step by step: a frame on, being enabled (when inactive), activation
+(selected and `ActivateInputField`, two frames), an edit (End, then a typed "9", then
+Backspace, through `ProcessEvent`) and deselection. Every step logs the field's `text`, its
+label, `caretPosition` and the `onValueChanged`, `onEndEdit` and `onSubmit` reports.
+`tools/UnityProbe/it-check.py rule LOG` checks the rule below, and `it-check.py diff ORIG OURS`
+compares two players' logs. The rule holds for all 438 cases in the shipped package's log.
+- **`text =` and `SetTextWithoutNotify` keep the value whole.**
+  - `characterLimit` does not cut it: "507.2" with limit 4 stays "507.2", and "abcdefg" with
+    limit 1 stays "abcdefg".
+  - `SingleLine` keeps line feeds and tabs: "ab\ncd" stays two lines, "a\tb" keeps its tab.
+  - No content type validates or changes it: IntegerNumber keeps "ab c!1", Name keeps
+    "-12.5e3".
+  - This holds in every state: inactive, active, and focused while being edited.
+  - The label becomes the value followed by U+200B ("507.2​"). With `Password` and `Pin` the
+    label is one "*" per character, a line feed included ("x\ny" shows "***​").
+- **Nothing applies them later.** The text stays whole a frame on, when the field is enabled,
+  on activation and focus, and on deselection.
+  - Setting `characterLimit`, `contentType` or `lineType` after the text changes nothing either:
+    "507.2" then limit 4 stays "507.2", and no `onValueChanged` is sent.
+- **Only an edit is limited and validated, one typed character at a time.**
+  - A typed character is refused while the text is as long as the limit or longer: "507.2" with
+    limit 4 stays "507.2" when "9" is typed, with no `onValueChanged`. "12" becomes "129".
+  - Deleting is not limited: Backspace on "507.2" gives "507.", and the rest is not cut.
+  - The content type checks only the typed character against the text around it. IntegerNumber
+    takes "9" at the end of "-12.5e3", giving "-12.5e39"; Name refuses it.
+  - The rest of the text is never checked again: "x\ny" keeps its line feed in a `SingleLine`
+    field through every edit.
+- **`onValueChanged`:**
+  - `text =` reports the whole value once, at once, in every state, including inactive fields.
+  - `SetTextWithoutNotify` reports nothing.
+  - Edits report the edited text.
+  - Backspace on an empty field still reports `""` once (Name, after its refused "9"), though
+    nothing changed.
+  - Deselecting reports `onEndEdit` with the text as it is ("507." after the Backspace).
+- **The text component's own `text`:**
+  - On an enabled field (active or focused), it is put back at once: right after
+    `textComponent.text = "507.2"` it reads back as the field's text and U+200B ("​" for an
+    empty field). The field's `text` stays "". No event is sent.
+  - On an inactive field it keeps the value until the field is enabled, which writes the
+    field's text and U+200B, as "when the label and the caret are set up" above describes.
+  - Edits work on the field's `text`, not on the label: "9" typed afterwards gives "9".
+- **Activation** with `onFocusSelectAll` off leaves the caret where it was, at 0
+  (`caretPosition` 0, `selectionAnchorPosition` 0), not at the end. End then moves it to the
+  end of the caret's line as laid out, not of the text. In a `SingleLine` field "ab\ncd" takes
+  "9" after "ab". In a 64-wide multi-line field "a\tb" wraps (the tab reaches 364.58), and "9"
+  goes in after "a".
+
+Where this implementation deviates (`TMP_InputField.cs`: `SetText` and the `characterLimit`
+setter):
+- **`SetText` cuts.** `text =` and `SetTextWithoutNotify` remove line feeds and tabs in a
+  `SingleLine` field (so "x\ny" becomes "xy" under every single-line content type), and cut
+  the value to `characterLimit`. `onValueChanged` and the label carry
+  the cut value. That is Geyser Control's "507." and "65208." (the game's limits differ by row).
+  CR is kept, as in the shipped package.
+- **The `characterLimit` setter cuts** the text when the limit falls below its length, and
+  sends `onValueChanged` with the cut text.
+- **The text component's own text** stays as set on an enabled field until activation writes
+  the label, where the shipped package puts it back at once.
+- **Activation** puts the caret at the end of the text (7 in "abcdefg"), not at 0, in all 132
+  activations of a field with text.
+- **Backspace** on an empty field sends nothing.
+- **End** in the wrapped multi-line "a\tb" goes to the end of the text ("a\tb9").
+- It matches elsewhere: `SetTextWithoutNotify` sends nothing, a typed character is refused at
+  the limit, CR is kept, setting the text on a focused field leaves the caret at 0, the label
+  of an inactive field is kept until enable, and `onEndEdit` comes on deselection.
+- In the probe, 1,628 of 4,428 steps differ. 338 of 438 cases follow the rule, and the 100
+  that do not are the limit and line-feed cases above.
+
+| Field, text set from code | shipped: `text`; `onValueChanged` | this implementation before |
+|---|---|---|
+| limit 4, `DecimalNumber`, `text = "507.2"` (inactive, active or focused) | "507.2"; "507.2" | "507."; "507." |
+| the same, "65208.3" | "65208.3"; "65208.3" | "6520"; "6520" |
+| the same, "12", then "9" typed | "12", then "129" | the same |
+| the same, "507.2", then "9" typed | "507.2", "9" refused, no event | "507.", "9" refused |
+| the same, "507.2", then Backspace and deselect | "507."; `onEndEdit` "507." | "507"; `onEndEdit` "507" |
+| limit 4, `SetTextWithoutNotify("507.2")` | "507.2"; nothing | "507."; nothing |
+| `text = "507.2"`, then `characterLimit = 4` | "507.2"; nothing more | "507."; "507." |
+| limit 1, `text = "abcdefg"` | "abcdefg" | "a" |
+| limit 3, `MultiLineNewline`, "a\nbcd" | "a\nbcd" | "a\nb" |
+| `SingleLine`, "ab\ncd" | "ab\ncd" (two lines) | "abcd" |
+| `SingleLine`, "a\tb" | "a\tb" | "ab" |
+| `SingleLine`, "ab\rcd" | "ab\rcd" | "ab\rcd" |
+| `IntegerNumber`, "ab c!1" | "ab c!1" | "ab c!1" |
+| `Password`, "x\ny" | "x\ny", label "***​" | "xy", label "**​" |
+| `textComponent.text = "507.2"`, active field with text "" | label "​" at once, `text` "" | label "507.2" until activation |
+| the same, inactive field | label "507.2" until enable, then "​" | the same |
+| activation, "abcdefg", `onFocusSelectAll` off | caret 0 | caret 7 |
+| Backspace in an empty field | `onValueChanged` "" | nothing |
+
+Not measured: `onValidateInput` and `inputValidator` (the probe's fields have neither; some of
+the game's fields do), `characterValidation` set without a content type, pasting, `text =` with the value the field already holds, rich text, and
+`readOnly`. Measure them the same way before relying on them.
 
 ## Verification
 

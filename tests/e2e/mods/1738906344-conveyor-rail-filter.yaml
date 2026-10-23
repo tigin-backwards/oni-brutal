@@ -1,0 +1,32 @@
+# Conveyor Rail Filter (1738906344), class B.
+#
+# What it does: adds the Conveyor Filter (ConveyorFilter, 3x1, 200 kg of refined metal,
+# 120 W, in the Shipping menu, researched with Solid Transport): items arriving on its input
+# rail whose tags the filter side screen accepts leave on a second, filtered output rail
+# (a ConduitSecondaryOutput in its middle cell); the rest go on to the main output.
+# Building it takes the Conveyor Build skill, as the game's rails do.
+# How a player reaches it: the build menu (Shipping), after the research.
+# What changes: a rail splitter by material.
+#
+# Building one needs a skilled Duplicant, power and rails, so this is a smaller spec: setup
+# grants the research and sets 400 kg of copper down; a blueprint is placed in the dug-out
+# corridor west of the printing pod, and its construction site asks for the skill and has the
+# filtered port. The finished building's filter and ports are checked on the prefab.
+from: early-base
+mods: [1738906344]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"SolidTransport\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Copper\").substance", method: SpawnResource, args: [[110.5, 206.5, -12], 400, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"SolidTransport\").unlockedItemIDs": {contains: ConveyorFilter}
+      "Assets.GetBuildingDef(\"ConveyorFilter\").BuildingComplete.GetComponent<ConveyorRailUtilities.Filter.ConveyorFilter>": exists
+      "Assets.GetBuildingDef(\"ConveyorFilter\").BuildingComplete.GetComponent<TreeFilterable>": exists
+      "Assets.GetBuildingDef(\"ConveyorFilter\").EnergyConsumptionWhenActive": 120
+  - run: {seconds: 5}
+  - build: {prefab: ConveyorFilter, at: [113, 209], material: Copper}
+  - expect: {blueprints: {ConveyorFilter: 1}}
+  - expect_state:
+      "all:Constructable::[0].requiredSkillPerk": ConveyorBuild
+      "all:Constructable::[0].GetComponent<ConduitSecondaryOutput>": exists

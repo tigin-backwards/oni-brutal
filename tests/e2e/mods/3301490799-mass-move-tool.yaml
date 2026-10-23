@@ -1,0 +1,32 @@
+# Mass Move Tool (3301490799), classes T, S, K, O.
+#
+# What it does: adds a "Mass Move To" tool to the toolbar (PlayerController.OnPrefabInit and
+# ToolMenu.CreateBasicTools patches; a PAction hotkey): drag a box over debris, with a type
+# filter panel (from its asset bundle) beside the tool menu choosing which kinds, and the
+# items are marked for moving; the target tool that follows takes a cell (or a dragged row
+# of cells), and Duplicants carry everything there, several at once by its option (a
+# multi-delivery placer). The game's Relocate tool moves one item at a time.
+# How a player reaches it: the toolbar's Mass Move To tool, two drags.
+# What changes: many items relocate in one order.
+#
+# Debris lies in the dug-out corridor west of the printing pod (coal, among others). The
+# tool's filter panel is set to all types, its box dragged over the corridor, the target set on
+# the floor of the pit, and the move orders appear.
+from: early-base
+mods: [3301490799]
+steps:
+  - expect_state:
+      "count:all:Movable::[*] if .IsMarkedForMove == true": 0
+  - driver: {camera.set: {cell: [116, 208], ortho: 10}}
+  - tool: {toolbar: "Mass Move To"}
+  - expect_state: {"PlayerController.Instance.ActiveTool.name": FilteredMoveSelectTool}
+  - ui_wait: {path: "**/ToolMenu/TypeSelect", cond: stable}
+  - ui_dump: {name: types, root: "**/ToolMenu/TypeSelect"}
+  - click: {ui: "**/ToolMenu/TypeSelect/**/Categories/SelectAll/AlignmentWrapper/CheckBox"}
+  - expect_state: {"type:MassMoveTo.Tools.SweepByType.FilteredMoveSelectTool::Instance.TypeSelect.IsAllSelected": true}
+  - drag: {from: [112, 206], to: [121, 208]}
+  - expect_state: {"PlayerController.Instance.ActiveTool.name": TargetSelectTool}
+  - click_world: {cell: [111, 206]}
+  - expect_state:
+      "PlayerController.Instance.ActiveTool.name": SelectTool
+      "count:all:Movable::[*] if .IsMarkedForMove == true": ">= 1"

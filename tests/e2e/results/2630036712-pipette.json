@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2630036712-pipette.yaml",
+ "mods": [
+  "2630036712"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with a 0.1 kg capacity, the Pipette tool from the toolbar is dragged from a pool of water to the dry base floor, which then holds the water",
+ "updated": "2026-10-23",
+ "commit": "546578b",
+ "mod_dlls": {
+  "2630036712": {
+   "Pipette.dll": "6c18d09a67650a493be4e5a905cd7fe49ac797538bdb128dab1e71a5ddfd6690"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-053746-a442a9",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T07:04:01",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-071456-986b84",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T07:14:56",
+    "lane": 16,
+    "reference_run": "20261023-053746-a442a9",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-071456-986b84",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T07:15:49",
+    "lane": 16,
+    "reference_run": "20261023-053746-a442a9",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

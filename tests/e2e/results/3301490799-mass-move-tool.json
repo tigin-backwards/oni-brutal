@@ -1,0 +1,75 @@
+{
+ "spec": "mods/3301490799-mass-move-tool.yaml",
+ "mods": [
+  "3301490799"
+ ],
+ "verdict": "warning",
+ "why": "known findings: scroll-normalized-position",
+ "findings": [
+  "scroll-normalized-position"
+ ],
+ "note": "the Mass Move To tool from the toolbar, its type panel (dumped) set to all types, a box dragged over the corridor's debris and a target cell clicked: the items are marked for moving",
+ "updated": "2026-10-23",
+ "commit": "546578b",
+ "mod_dlls": {
+  "3301490799": {
+   "MassMoveTo.dll": "ca13eaae4c127e03e1149dab4d42e61fc0d2c3b3eb2b92d42f71989786def479"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-053746-a442a9",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T07:02:30",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-071316-d56e6c",
+    "index": 1,
+    "verdict": "warn",
+    "date": "2026-10-23T07:13:16",
+    "lane": 16,
+    "reference_run": "20261023-053746-a442a9",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "types": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261023-071316-d56e6c",
+    "index": 2,
+    "verdict": "warn",
+    "date": "2026-10-23T07:14:04",
+    "lane": 16,
+    "reference_run": "20261023-053746-a442a9",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "types": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

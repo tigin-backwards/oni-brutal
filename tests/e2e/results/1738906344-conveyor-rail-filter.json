@@ -1,0 +1,55 @@
+{
+ "spec": "mods/1738906344-conveyor-rail-filter.yaml",
+ "mods": [
+  "1738906344"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a smaller spec (building it needs a skilled Duplicant, power and rails): after Solid Transport its blueprint is placed from copper, asking for the conveyor skill and carrying the filtered output port",
+ "updated": "2026-10-23",
+ "commit": "546578b",
+ "mod_dlls": {
+  "1738906344": {
+   "ConveyorRailUtilities.dll": "b32d919409a0696b0372d386b2c25908fd12bf257294a3fb9dba49b25181317f"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-053746-a442a9",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T07:05:31",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-071645-e9f048",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T07:16:45",
+    "lane": 16,
+    "reference_run": "20261023-053746-a442a9",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-071645-e9f048",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T07:17:43",
+    "lane": 16,
+    "reference_run": "20261023-053746-a442a9",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

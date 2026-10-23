@@ -1,0 +1,33 @@
+# Pipette (2630036712), classes T, K, O.
+#
+# What it does: adds a Pipette tool to the toolbar (PlayerController.OnPrefabInit and
+# ToolMenu.CreateBasicTools patches, an unbound PAction for a hotkey): pressing on a liquid
+# cell takes up to its capacity of that liquid (SimMessages.ConsumeMass), and releasing over
+# an open cell drops it there (SimMessages.ReplaceElement), at the temperature it was taken
+# at. Its PLib option sets the capacity, 0.01 to 0.1 kg (the Workshop config.json: 0.03).
+# How a player reaches it: the toolbar's Pipette tool; a press and release.
+# What changes: a small amount of liquid moves from one cell to another.
+#
+# setup pours 50 kg of water into the pit west of the printing pod (x 106-115, y 206); the
+# spec sets the capacity to 0.1 kg. The pipette is dragged from the water to the base's floor
+# east of the pit (120, 207), which holds water after the sim steps.
+from: early-base
+mods: [2630036712]
+options:
+  PipetteMod: {Capacity: 0.1}
+setup:
+  - driver: {setup.call: {type: SimMessages, method: AddRemoveSubstance, args: [131124, Water, null, 50, 300, 255, 0]}}
+steps:
+  - run: {seconds: 2}
+  - expect_state:
+      "Grid.Element[131772].id": "!= 'Water'"
+      "type:Pipette.Integration::Settings.Capacity": 0.1
+  - driver: {camera.set: {cell: [114, 208], ortho: 9}}
+  - tool: {toolbar: Pipette}
+  - expect_state: {"PlayerController.Instance.ActiveTool.name": PipetteTool}
+  - drag: {from: [108, 206], to: [120, 207]}
+  - key: {code: Escape}
+  - run: {seconds: 1}
+  - expect_state:
+      "Grid.Element[131772].id": Water
+      "Grid.Mass.get_Item(131772)": "== original"

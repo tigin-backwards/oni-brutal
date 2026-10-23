@@ -1,0 +1,29 @@
+# [Vanilla + DLC] Combined Conduit Display (2634633299), class V.
+#
+# What it does: in the pipe, conveyor and automation overlays, the buildings that sit on a
+# network (vents, pumps, valves, filters, sensors, bridges and so on) are drawn behind the
+# pipes instead of in front of them (each gets the OverlayBehindConduits tag, OverlayBackLayer,
+# in place of the game's OverlayInFrontOfConduits, and the overlay moves them back in z), so
+# the network stays visible through them.
+# How a player reaches it: any of those overlays.
+# What changes: the drawing order in those overlays.
+#
+# setup grants Plumbing (LiquidPiping) and spawns copper for the vent. A liquid vent is built on
+# a short liquid pipe on the floor of the room west of the printing pod; the liquid overlay is then
+# opened over it.
+from: early-base
+mods: [2634633299]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"LiquidPiping\")", method: Purchased}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Copper\").substance", method: SpawnResource, args: [[113.5, 207.5, -12], 200, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"LiquidVent\").GetComponent<KPrefabID>.HasTag(\"OverlayBackLayer\")": true
+      "Assets.GetPrefab(\"LiquidVent\").GetComponent<KPrefabID>.HasTag(\"OverlayFrontLayer\")": false
+  - build: {prefab: LiquidConduit, cells: [[112, 207], [113, 207], [114, 207], [115, 207]]}
+  - build: {prefab: LiquidVent, at: [115, 207]}
+  - run: {seconds: 900, until: {buildings: {LiquidVent: 1, LiquidConduit: 4}, pending_construction: 0}}
+  - key: {code: F6}
+  - expect_state: {"OverlayScreen.Instance.mode.HashValue": "== original"}
+  - world_shot: {name: liquid-overlay, ortho: 4, at: [114, 208]}
+  - key: {code: Escape}

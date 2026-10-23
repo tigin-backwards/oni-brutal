@@ -1,0 +1,59 @@
+{
+ "spec": "mods/2634633299-combined-conduit-display.yaml",
+ "mods": [
+  "2634633299"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a liquid vent built on a pipe carries the behind-the-pipes tag in place of the game's in-front one; liquid overlay world shot",
+ "updated": "2026-10-23",
+ "commit": "24df5c4",
+ "mod_dlls": {
+  "2634633299": {
+   "CombinedConduitDisplay.dll": "22cbd819409c31082dcebf56c877e6ee7b66fd601ca23e85e356ff266f1211fe"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261022-232004-36dc49",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-22T23:27:41",
+    "lane": 12,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261022-233007-91775e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T00:17:18",
+    "lane": 13,
+    "reference_run": "20261022-232004-36dc49",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "liquid-overlay": 0.020143
+    }
+   },
+   {
+    "run": "20261022-233007-91775e",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T00:18:37",
+    "lane": 13,
+    "reference_run": "20261022-232004-36dc49",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "liquid-overlay": 0.018161
+    }
+   }
+  ]
+ }
+}

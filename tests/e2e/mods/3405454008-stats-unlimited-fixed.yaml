@@ -1,0 +1,25 @@
+# Stats Unlimited Fixed (3405454008), classes S, O.
+#
+# What it does: Duplicants' attributes level past the game's 20, up to a cap (50 by default),
+# with a global and a per-attribute experience multiplier (a prefix replacing
+# AttributeLevel.AddExperience); each gain of experience above a threshold pops up a coloured
+# "DIGGING: ++N%/M% (level)" text over the Duplicant. Other options: the starting stats and
+# hit points of new Duplicants, a regenerative trait, injury penalties, "curses".
+# How a player reaches it: automatic as Duplicants work; the options on the Mods screen.
+# What changes: how fast and how far attributes grow.
+#
+# Options here: digging experience times 1000. Four cells of sandstone are dug at the east end
+# of the corridor west of the printing pod; the Duplicants' digging levels rise.
+from: early-base
+mods: [3405454008]
+options:
+  "3405454008/StatsUnlimited.json": {DiggingMultiplier: 1000}
+steps:
+  - expect_state:
+      "type:StatsUnlimitedSO.Config::Cfg.DiggingMultiplier": 1000
+      "type:StatsUnlimitedSO.Config::Cfg.StatsCap": 50
+      "sum:Components.LiveMinionIdentities.Items[*].GetComponent<Klei.AI.AttributeLevels>.GetAttributeLevel(\"Digging\").level": {save_as: before}
+  - dig: [119, 209, 120, 210]
+  - run: {seconds: 900, until: {pending_digs: 0}}
+  - expect_state:
+      "sum:Components.LiveMinionIdentities.Items[*].GetComponent<Klei.AI.AttributeLevels>.GetAttributeLevel(\"Digging\").level": ">= before + 2"

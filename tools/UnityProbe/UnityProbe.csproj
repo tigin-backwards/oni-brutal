@@ -11,6 +11,10 @@
     <Reference Include="$(OniManaged)/UnityEngine.CoreModule.dll" Private="false" />
     <Reference Include="$(OniManaged)/UnityEngine.dll" Private="false" />
     <Reference Include="$(OniManaged)/UnityEngine.PhysicsModule.dll" Private="false" />
+    <Reference Include="$(OniManaged)/UnityEngine.Physics2DModule.dll" Private="false" />
+    <Reference Include="$(OniManaged)/UnityEngine.AnimationModule.dll" Private="false" />
+    <Reference Include="$(OniManaged)/UnityEngine.AudioModule.dll" Private="false" />
+    <Reference Include="$(OniManaged)/UnityEngine.ParticleSystemModule.dll" Private="false" />
     <Reference Include="$(OniManaged)/UnityEngine.JSONSerializeModule.dll" Private="false" />
     <Reference Include="$(OniManaged)/UnityEngine.UIModule.dll" Private="false" />
     <Reference Include="$(OniManaged)/UnityEngine.TextRenderingModule.dll" Private="false" />

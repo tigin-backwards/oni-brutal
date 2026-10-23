@@ -107,6 +107,131 @@ namespace SemanticsProbe
         void Update() { if (n++ < 3) Rec.Log("VAL destroy in " + Of.Phase + ": watcher Update childCount=" + Of.Target.transform.childCount + " component " + (Of.Target.GetComponent<BoxCollider>() == null ? "gone" : "there")); }
     }
 
+    // Classes for AddComponent's refusals: [DisallowMultipleComponent] on a base, on a middle
+    // class and on a leaf; Dm0 has none of its own.
+    [DisallowMultipleComponent] public class DmBase : MonoBehaviour { }
+    public class DmA : DmBase { }
+    public class DmB : DmBase { }
+    public class Dm0 : MonoBehaviour { }
+    [DisallowMultipleComponent] public class DmMid : Dm0 { }
+    public class DmLeaf : DmMid { }
+    [DisallowMultipleComponent] public class DmOwn : DmA { }
+    public class Plain : MonoBehaviour { }
+
+    /// What AddComponent does when it refuses a component (or does not): what it returns, the
+    /// components left, and what reaches the log callbacks (type, message, stack trace), between
+    /// two markers in Player.log ("VAL addcomp begin/end LABEL").
+    ///
+    /// Measured in U57's player (AddComponentRefusalTests holds it): every refusal returns C#
+    /// null and raises one LogType.Log, with an empty stack trace, on both logMessageReceived
+    /// and logMessageReceivedThreaded; Player.log gets the bare message. A refusal by
+    /// [DisallowMultipleComponent] reads "Can't add 'ADDED' to GO because a 'EXISTING' is
+    /// already added to the game object!", and a second line "A GameObject can only contain one
+    /// 'X' component." when EXISTING is not X itself, X being the most basic class declaring the
+    /// attribute. The same Transform, RectTransform or single engine component (Canvas, Camera,
+    /// CanvasGroup, CanvasRenderer, MeshFilter, MeshRenderer, SpriteRenderer, LineRenderer,
+    /// Light, Rigidbody(2D), Animator, Animation, AudioListener, ParticleSystem(Renderer)) again
+    /// reads "Can't add component 'T' to GO because such a component is already added to the
+    /// game object!". A Transform over a RectTransform replaces it, as the reverse does, even
+    /// beside an Image. Duplicates of other types are added silently (MonoBehaviours without the
+    /// attribute, BoxCollider(2D), AudioSource, ContentSizeFitter, LayoutElement,
+    /// GraphicRaycaster). A SpriteRenderer over a MeshRenderer, a Rigidbody2D over a Rigidbody and
+    /// a BoxCollider2D over a BoxCollider read "Can't add component 'T' to GO because it
+    /// conflicts with the existing 'E' derived component!".
+    public static class AddComponentRefusals
+    {
+        static string Esc(string s) => s == null ? "null" : s.Replace("\r", "\\r").Replace("\n", "\\n");
+
+        static void V(string what, object value) => Rec.Log("VAL " + what + " = " + Convert.ToString(value, CultureInfo.InvariantCulture));
+
+        static void Try(string label, Type[] existing, Type added, bool rect = false)
+        {
+            var go = rect ? new GameObject("AC_" + label, typeof(RectTransform)) : new GameObject("AC_" + label);
+            var before = new List<Component>();
+            before.Add(go.transform);
+            foreach (var t in existing) before.Add(go.AddComponent(t));
+            var main = new List<string>();
+            var threaded = new List<string>();
+            Application.LogCallback onMain = (c, st, ty) => main.Add(ty + " \"" + Esc(c) + "\" stack \"" + Esc(st) + "\"");
+            Application.LogCallback onThreaded = (c, st, ty) => threaded.Add(ty + " \"" + Esc(c) + "\" stack \"" + Esc(st) + "\"");
+            Rec.Log("VAL addcomp begin " + label);
+            Application.logMessageReceived += onMain;
+            Application.logMessageReceivedThreaded += onThreaded;
+            Component got;
+            try { got = go.AddComponent(added); }
+            finally
+            {
+                Application.logMessageReceived -= onMain;
+                Application.logMessageReceivedThreaded -= onThreaded;
+            }
+            Rec.Log("VAL addcomp end " + label);
+            string result = (object)got == null ? "C# null" : got == null ? "fake null" : before.Contains(got) ?"the existing " + got.GetType().Name : "new " + got.GetType().Name;
+            V("addcomp " + label + " returns", result);
+            V("addcomp " + label + " components", string.Join(",", Array.ConvertAll(go.GetComponents<Component>(), c => c.GetType().Name)));
+            V("addcomp " + label + " logMessageReceived", main.Count + (main.Count > 0 ? " " + string.Join(" | ", main) : ""));
+            V("addcomp " + label + " logMessageReceivedThreaded", threaded.Count + (threaded.Count > 0 ? " " + string.Join(" | ", threaded) : ""));
+            UnityEngine.Object.Destroy(go);
+        }
+
+        public static void Run()
+        {
+            Rec.Log("=== values: add component refusals");
+            foreach (LogType t in Enum.GetValues(typeof(LogType)))
+                V("stack trace type " + t, Application.GetStackTraceLogType(t));
+            var vlg = typeof(UnityEngine.UI.VerticalLayoutGroup);
+            var hlg = typeof(UnityEngine.UI.HorizontalLayoutGroup);
+            Try("vlg-over-vlg", new[] { vlg }, vlg);
+            Try("vlg-over-hlg", new[] { hlg }, vlg);
+            Try("grid-over-vlg", new[] { vlg }, typeof(UnityEngine.UI.GridLayoutGroup));
+            Try("A-over-A", new[] { typeof(DmA) }, typeof(DmA));
+            Try("B-over-A", new[] { typeof(DmA) }, typeof(DmB));
+            Try("Base-over-A", new[] { typeof(DmA) }, typeof(DmBase));
+            Try("A-over-Base", new[] { typeof(DmBase) }, typeof(DmA));
+            Try("Base-over-Base", new[] { typeof(DmBase) }, typeof(DmBase));
+            Try("Leaf-over-Mid", new[] { typeof(DmMid) }, typeof(DmLeaf));
+            Try("Mid-over-Leaf", new[] { typeof(DmLeaf) }, typeof(DmMid));
+            Try("Mid-over-Dm0", new[] { typeof(Dm0) }, typeof(DmMid));
+            Try("Dm0-over-Mid", new[] { typeof(DmMid) }, typeof(Dm0));
+            Try("Own-over-A", new[] { typeof(DmA) }, typeof(DmOwn));
+            Try("Own-over-Own", new[] { typeof(DmOwn) }, typeof(DmOwn));
+            Try("B-over-Own", new[] { typeof(DmOwn) }, typeof(DmB));
+            Try("Plain-over-Plain", new[] { typeof(Plain) }, typeof(Plain));
+            Try("BoxCollider-over-BoxCollider", new[] { typeof(BoxCollider) }, typeof(BoxCollider));
+            Try("Transform-over-Transform", new Type[0], typeof(Transform));
+            Try("Transform-over-RectTransform", new Type[0], typeof(Transform), rect: true);
+            Try("Transform-over-RectTransform+Image", new[] { typeof(UnityEngine.UI.Image) }, typeof(Transform), rect: true);
+            Try("Transform-over-RectTransform+Plain", new[] { typeof(Plain) }, typeof(Transform), rect: true);
+            var back = new GameObject("AC_back", typeof(RectTransform));
+            var backChild = new GameObject("AC_backChild"); backChild.transform.SetParent(back.transform, false);
+            back.transform.localPosition = new Vector3(1, 2, 3);
+            var plain = back.AddComponent<Plain>();
+            var oldRect = back.transform;
+            var turned = back.AddComponent<Transform>();
+            V("addcomp Transform-over-RectTransform keeps", "localPosition " + back.transform.localPosition + " children " + back.transform.childCount + " child's parent is it " + (backChild.transform.parent == back.transform) + " old RectTransform null " + (oldRect == null) + " returned is go.transform " + (turned == back.transform) + " Plain.transform is it " + (plain.transform == back.transform));
+            UnityEngine.Object.Destroy(back);
+            Try("RectTransform-over-RectTransform", new Type[0], typeof(RectTransform), rect: true);
+            Try("RectTransform-over-Transform", new Type[0], typeof(RectTransform));
+            Try("Canvas-over-Canvas", new[] { typeof(Canvas) }, typeof(Canvas), rect: true);
+            // Engine types, each over itself, then pairs that may conflict.
+            foreach (var t in new[] { typeof(Camera), typeof(CanvasGroup), typeof(CanvasRenderer), typeof(MeshFilter), typeof(MeshRenderer),
+                typeof(SpriteRenderer), typeof(LineRenderer), typeof(Light), typeof(Rigidbody), typeof(Rigidbody2D), typeof(BoxCollider2D),
+                typeof(Animator), typeof(Animation), typeof(AudioSource), typeof(AudioListener), typeof(ParticleSystem),
+                typeof(ParticleSystemRenderer), typeof(UnityEngine.UI.Image), typeof(TMPro.TextMeshProUGUI), typeof(UnityEngine.UI.ContentSizeFitter),
+                typeof(UnityEngine.UI.LayoutElement), typeof(UnityEngine.UI.Mask), typeof(UnityEngine.UI.RectMask2D), typeof(UnityEngine.UI.ScrollRect),
+                typeof(UnityEngine.UI.Button), typeof(UnityEngine.UI.GraphicRaycaster), typeof(UnityEngine.UI.CanvasScaler) })
+                Try(t.Name + "-over-" + t.Name, new[] { t }, t, rect: true);
+            Try("Text-over-Image", new[] { typeof(UnityEngine.UI.Image) }, typeof(UnityEngine.UI.Text), rect: true);
+            Try("SpriteRenderer-over-MeshRenderer", new[] { typeof(MeshRenderer) }, typeof(SpriteRenderer));
+            Try("Rigidbody2D-over-Rigidbody", new[] { typeof(Rigidbody) }, typeof(Rigidbody2D));
+            Try("BoxCollider2D-over-BoxCollider", new[] { typeof(BoxCollider) }, typeof(BoxCollider2D));
+            Rec.Log("VAL addcomp begin ctor-vlg-vlg");
+            var made = new GameObject("AC_ctor", vlg, vlg);
+            Rec.Log("VAL addcomp end ctor-vlg-vlg");
+            V("addcomp ctor-vlg-vlg components", string.Join(",", Array.ConvertAll(made.GetComponents<Component>(), c => c.GetType().Name)));
+            UnityEngine.Object.Destroy(made);
+        }
+    }
+
     public static class Values
     {
         static void V(string what, object value) => Rec.Log("VAL " + what + " = " + Convert.ToString(value, CultureInfo.InvariantCulture));
@@ -248,6 +373,8 @@ namespace SemanticsProbe
             m.gameObject.SendMessage("Ping", "a", SendMessageOptions.RequireReceiver);
             m.gameObject.SendMessage("Missing", SendMessageOptions.DontRequireReceiver);
             for (int i = 0; i < 10; i++) yield return null;
+
+            AddComponentRefusals.Run();
             Rec.Log("=== values: done");
         }
 

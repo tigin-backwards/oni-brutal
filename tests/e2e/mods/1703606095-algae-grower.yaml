@@ -1,0 +1,33 @@
+# Algae Grower (1703606095), class B.
+#
+# What it does: adds the Algae Grower to the Oxygen menu (researched with Agriculture): a 1x2
+# building of dirt that, in light, takes in fertilizer and water (delivered) and carbon
+# dioxide (drawn from the air around it) and grows algae, dropped in 5 kg lumps, while giving
+# off a little oxygen. Without light it waits.
+# How a player reaches it: the build menu (Oxygen).
+# What changes: a building that turns CO2, water and fertilizer into algae.
+#
+# setup grants Agriculture (Animal Control's prerequisite, "Agriculture" in the Db) and spawns
+# dirt. The grower stands on the floor of the corridor west of the printing pod, where no
+# light falls, so it waits for light with fertilizer and water ordered.
+from: early-base
+mods: [1703606095]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"Agriculture\")", method: Purchased}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Dirt\").substance", method: SpawnResource, args: [[114.5, 207.5, -12], 400, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"Agriculture\").unlockedItemIDs": {contains: AlgaeGrower}
+  - build: {prefab: AlgaeGrower, at: [113, 206]}
+  - expect: {blueprints: {AlgaeGrower: 1}}
+  - run: {seconds: 900, until: {buildings: {AlgaeGrower: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [113, 207], ortho: 8}}
+  - click_world: {cell: [113, 207]}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Algae Grower"}
+  - expect_state:
+      "selected:ElementConverter.consumedElements.Length": 3
+      "selected:ElementConverter.outputElements[1].elementHash": Algae
+      "selected:ManualDeliveryKG.RequestedItemTag.Name": Fertilizer
+      "selected:AlgaeGrower.smi.HasLight()": false

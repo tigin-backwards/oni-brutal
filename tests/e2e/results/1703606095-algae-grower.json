@@ -1,0 +1,30 @@
+{
+ "spec": "mods/1703606095-algae-grower.yaml",
+ "mods": [
+  "1703606095"
+ ],
+ "verdict": "pending",
+ "why": "0 run(s) of ours against original run 20261023-032801-e809f3; 2 needed",
+ "findings": [],
+ "note": "",
+ "updated": "2026-10-23",
+ "commit": "2dff650",
+ "mod_dlls": {
+  "1703606095": {
+   "AlgaeGrower.dll": "27a9523276cc1f7770454d784d1141bb36c5ad959cbb562d654658944d311a0d"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-032801-e809f3",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T03:29:22",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": []
+ }
+}

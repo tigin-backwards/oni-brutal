@@ -3,12 +3,12 @@
  "mods": [
   "1872111766"
  ],
- "verdict": "failed",
- "why": "a run of ours failed",
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
  "findings": [],
- "note": "pinning Coal from All Resources saves the favourite in both; then the mod's Populate postfix adds a second VerticalLayoutGroup: ours logs that through Debug.LogError, which the game's crash reporter catches and shows its crash screen; Unity logs it natively, unseen",
+ "note": "pinning Coal from All Resources saves the favourite in both; the mod's Populate postfix adds a second VerticalLayoutGroup, which both refuse with the same LogType.Log message, so the game carries on",
  "updated": "2026-10-23",
- "commit": "c2906cc",
+ "commit": "0db425f",
  "mod_dlls": {
   "1872111766": {
    "FavoriteResources.dll": "78cba65a3395cb13292431d8daee4023417b78dce7fb752f1eda7c99078b574c"
@@ -17,25 +17,30 @@
  "runs": {
   "original": [
    {
-    "run": "20261022-234547-e5cfc9",
+    "run": "20261023-015624-fc8930",
     "index": 1,
     "verdict": "pass",
-    "date": "2026-10-22T23:53:48",
-    "lane": 13,
+    "date": "2026-10-23T01:56:24",
+    "lane": 16,
+    "signatures": 0
+   },
+   {
+    "run": "20261023-015624-fc8930",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T02:24:40",
+    "lane": 16,
     "signatures": 0
    }
   ],
   "ours": [
    {
-    "run": "20261022-235524-14385d",
+    "run": "20261023-015624-fc8930",
     "index": 1,
-    "verdict": "fail",
-    "date": "2026-10-23T00:21:29",
-    "lane": 13,
-    "reasons": [
-     "shot pinned: 78.98% of pixels differ (> 4%)"
-    ],
-    "reference_run": "20261022-234547-e5cfc9",
+    "verdict": "pass",
+    "date": "2026-10-23T02:25:47",
+    "lane": 16,
+    "reference_run": "20261023-015624-fc8930",
     "new_signatures": 0,
     "findings": [],
     "ui_dump": {
@@ -44,19 +49,16 @@
      }
     },
     "shots": {
-     "pinned": 0.789803
+     "pinned": 0.024777
     }
    },
    {
-    "run": "20261022-235524-14385d",
+    "run": "20261023-015624-fc8930",
     "index": 2,
-    "verdict": "fail",
-    "date": "2026-10-23T00:22:20",
-    "lane": 13,
-    "reasons": [
-     "step 11: **/PinnedResourcesPanel/**: no element with text '~Coal' among 13 (it held in the original: the interaction has no effect in ours)"
-    ],
-    "reference_run": "20261022-234547-e5cfc9",
+    "verdict": "pass",
+    "date": "2026-10-23T02:26:30",
+    "lane": 16,
+    "reference_run": "20261023-015624-fc8930",
     "new_signatures": 0,
     "findings": [],
     "ui_dump": {
@@ -64,7 +66,9 @@
       "differences": 0
      }
     },
-    "shots": {}
+    "shots": {
+     "pinned": 0.024777
+    }
    }
   ]
  }

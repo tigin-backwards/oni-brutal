@@ -33,6 +33,9 @@ namespace TMPro
         float m_BlinkStart;
         bool m_CaretVisible;
         TMP_SelectionCaret m_Caret;
+        // The caret's RectTransform, from its creation. Interface: PLib's TextMeshProPatcher
+        // reads it by name (`___caretRectTrans`) in its prefix on AssignPositioningIfNeeded.
+        RectTransform caretRectTrans;
         readonly Event m_ProcessingEvent = new();
         bool m_PreventCallback;
         bool m_IsSelectAll;
@@ -122,21 +125,14 @@ namespace TMPro
         public TMP_Text textComponent
         {
             get => m_TextComponent;
-            set
-            {
-                m_TextComponent = value;
-                UpdateLabel();
-            }
+            // Leaves the text component's text alone (measured: an assigned "" stays "").
+            set => m_TextComponent = value;
         }
 
         public Graphic placeholder
         {
             get => m_Placeholder;
-            set
-            {
-                m_Placeholder = value;
-                UpdateLabel();
-            }
+            set => m_Placeholder = value;
         }
 
         public Scrollbar verticalScrollbar { get => m_VerticalScrollbar; set => m_VerticalScrollbar = value; }
@@ -433,11 +429,13 @@ namespace TMPro
                 SetTextComponentRichTextMode();
                 m_TextComponent.RegisterDirtyVerticesCallback(MarkGeometryChanged);
             }
-            EnsureCaret();
+            if (EnsureCaret()) AssignPositioningIfNeeded();
             // The caret draws with the default UI material and a white texture from the start
             // (measured: the shipped package's caret renderer has them before it draws).
             if (m_Caret != null) m_Caret.canvasRenderer.SetMaterial(Graphic.defaultGraphicMaterial, Texture2D.whiteTexture);
-            UpdateLabel();
+            // The label is written now but laid out in the canvas rebuild, like any changed
+            // text (measured: characterCount stays 0 through this frame's LateUpdate).
+            UpdateLabel(false);
         }
 
         protected override void OnDisable()
@@ -455,32 +453,49 @@ namespace TMPro
             base.OnDestroy();
         }
 
-        // The caret graphic: a child of the viewport (its first), filling it, drawn under the
-        // text. It is created only here, when the field is enabled with a text component: a
-        // field given its text component later has none until it is enabled again, and
-        // nothing else creates it (a graphic created in a canvas rebuild would be logged).
-        void EnsureCaret()
+        // The caret graphic: a child of the viewport (its first), drawn under the text. It is
+        // created only here, when the field is enabled with a text component: a field given its
+        // text component later has none until it is enabled again, and nothing else creates it
+        // (a graphic created in a canvas rebuild would be logged). It is made at the world
+        // origin with the RectTransform defaults and keeps that world position under the
+        // viewport; AssignPositioningIfNeeded then places it. True when one was made.
+        bool EnsureCaret()
         {
-            if (m_Caret != null || m_TextComponent == null) return;
+            if (m_Caret != null || m_TextComponent == null) return false;
             var parent = m_TextViewport != null ? m_TextViewport : m_TextComponent.rectTransform.parent as RectTransform;
-            if (parent == null) return;
+            if (parent == null) return false;
             var go = new GameObject("Caret", typeof(RectTransform));
             go.hideFlags = HideFlags.DontSave;
             go.layer = gameObject.layer;
             var rt = (RectTransform)go.transform;
-            rt.SetParent(parent, false);
+            rt.SetParent(parent, true);
             rt.SetAsFirstSibling();
-            var textRect = m_TextComponent.rectTransform;
-            rt.anchorMin = textRect.anchorMin;
-            rt.anchorMax = textRect.anchorMax;
-            rt.anchoredPosition = textRect.anchoredPosition;
-            rt.sizeDelta = textRect.sizeDelta;
-            rt.pivot = textRect.pivot;
+            caretRectTrans = rt;
             go.AddComponent<CanvasRenderer>();
             m_Caret = go.AddComponent<TMP_SelectionCaret>();
             m_Caret.Owner = this;
             var element = go.AddComponent<LayoutElement>();
             element.ignoreLayout = true;
+            return true;
+        }
+
+        // Places the caret's rect where the text component's is: its local transform and its
+        // rect values. Called once per caret made, from OnEnable. Interface: PLib's
+        // TextMeshProPatcher finds it by name and may skip it with a Harmony prefix (the caret
+        // then keeps the defaults it was made with).
+        void AssignPositioningIfNeeded()
+        {
+            if (m_TextComponent == null || caretRectTrans == null) return;
+            var text = m_TextComponent.rectTransform;
+            var caret = caretRectTrans;
+            caret.localPosition = text.localPosition;
+            caret.localRotation = text.localRotation;
+            caret.localScale = text.localScale;
+            caret.anchorMin = text.anchorMin;
+            caret.anchorMax = text.anchorMax;
+            caret.anchoredPosition = text.anchoredPosition;
+            caret.sizeDelta = text.sizeDelta;
+            caret.pivot = text.pivot;
         }
 
         // ----- Activation -----
@@ -1072,7 +1087,10 @@ namespace TMPro
 
         // Shows the text (as asterisks for passwords; tags shown literally unless rich-text
         // editing is allowed) with the end marker, and the placeholder when it is empty.
-        protected void UpdateLabel()
+        protected void UpdateLabel() => UpdateLabel(true);
+
+        // layout false leaves the laying out to the canvas rebuild.
+        void UpdateLabel(bool layout)
         {
             if (m_TextComponent == null || m_TextComponent.font == null || m_PreventCallback || m_DeferLabel) return;
             m_PreventCallback = true;
@@ -1086,7 +1104,7 @@ namespace TMPro
             // The text is laid out at once, so that the caret's character indices follow the
             // change (measured: the shipped package lays it out once per typed character, and
             // not again in the canvas rebuild).
-            m_TextComponent.ForceMeshUpdate();
+            if (layout) m_TextComponent.ForceMeshUpdate();
             m_PreventCallback = false;
             MarkGeometryChanged();
         }

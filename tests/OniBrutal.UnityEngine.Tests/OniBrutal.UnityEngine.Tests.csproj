@@ -4,11 +4,14 @@
     <IsPackable>false</IsPackable>
     <Nullable>disable</Nullable>
     <RootNamespace>OniBrutal.Tests</RootNamespace>
+    <!-- Harmony records its patches with BinaryFormatter (as in the host). -->
+    <EnableUnsafeBinaryFormatterSerialization>true</EnableUnsafeBinaryFormatterSerialization>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="xunit.v3" />
     <PackageReference Include="xunit.runner.visualstudio" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="System.Runtime.Serialization.Formatters" />
   </ItemGroup>
   <ItemGroup>
     <!-- The engine is process-global, like Unity's: tests run one at a time. -->
@@ -21,5 +24,11 @@
     <ProjectReference Include="../../src/UnityEngine.UI/UnityEngine.UI.csproj" />
     <ProjectReference Include="../../src/Unity.TextMeshPro/Unity.TextMeshPro.csproj" />
     <ProjectReference Include="../../src/Unity.Timeline/Unity.Timeline.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- The game's Harmony, as mods patch the engine with it (TmpInputSetupTests). -->
+    <Reference Include="0Harmony">
+      <HintPath>$(OniGameDir)/OxygenNotIncluded_Data/Managed/0Harmony.dll</HintPath>
+    </Reference>
   </ItemGroup>
 </Project>

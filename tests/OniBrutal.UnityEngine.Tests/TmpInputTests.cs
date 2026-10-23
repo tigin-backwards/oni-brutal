@@ -33,7 +33,9 @@ namespace OniBrutal.Tests
             }
         }
 
-        static TMP_InputField NewField(float width = 200f)
+        // A field built inactive and then enabled; with assignLater, its text component and
+        // placeholder are assigned only after it is enabled.
+        internal static TMP_InputField NewField(float width = 200f, bool assignLater = false)
         {
             TmpTestSupport.LoadGameData();
             if (EventSystem.current == null) new GameObject("EventSystem", typeof(EventSystem), typeof(SelectedUpdateModule));
@@ -65,6 +67,7 @@ namespace OniBrutal.Tests
             var placeholder = placeholderGo.AddComponent<TextMeshProUGUI>();
             placeholder.font = TmpTestSupport.Graystroke;
             field.textViewport = areaRect;
+            if (assignLater) fieldGo.SetActive(true);
             field.textComponent = text;
             field.placeholder = placeholder;
             fieldGo.SetActive(true);

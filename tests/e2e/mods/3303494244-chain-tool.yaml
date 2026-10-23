@@ -1,0 +1,43 @@
+# Chain Tool (3303494244), classes T, S, K, O, V; touches_ui.
+#
+# What it does: adds a Chain tool to the toolbar. Dragged over errands (dig, build,
+# deconstruct, mop, empty pipe, move-to orders), it groups them into a chain of numbered
+# links: a Duplicant takes an errand of link N only once every errand of the links before it
+# is done (a chore precondition). Its tool menu (a PLib panel) creates or deletes chains and
+# links, picks the chain and link number and filters the errand types; an overlay numbers
+# the chained errands; options in PLib.
+# How a player reaches it: the toolbar's Chain button (or its key), then dragging.
+# What changes: the order Duplicants work errands in.
+#
+# Two columns of dig orders are placed in the sandstone east of the dug-out room east of the
+# printing pod. The Chain tool is picked from the toolbar, and a drag over the first column
+# makes a new chain.
+from: early-base
+mods: [3303494244]
+steps:
+  - dig: [136, 207, 136, 209]
+  - dig: [137, 207, 137, 209]
+  - expect: {pending_digs: 6}
+  - driver: {camera.set: {cell: [134, 208], ortho: 8}}
+  - tool: {toolbar: Chain}
+  - ui_wait: {path: "**/ChainToolsMenu", cond: stable}
+  - expect_ui:
+      "**/ChainToolsMenu/Title/Text/Text": {text: "Chain Tools"}
+  - ui_dump: {name: menu, root: "**/ChainToolsMenu"}
+  - drag: {from: [136, 207], to: [136, 209]}
+  - expect_state:
+      "type:ChainErrand.ChainHierarchy.ChainsContainer::ChainsCount": 1
+      "type:ChainErrand.ChainHierarchy.ChainsContainer::GetChain(0).LastLinkNumber()": 0
+  - ui_wait: {path: "**/ChainToolsMenu", cond: stable}
+  - ui_dump: {name: menu-chain, root: "**/ChainToolsMenu"}
+  # Create/Expand Link, then the second column: a second link of the same chain.
+  - click: {ui: "**/ChainToolsMenu/ToolsPanel/CreatePanel/toggleEntry[1]/Toggle"}
+  - drag: {from: [137, 207], to: [137, 209]}
+  - key: {code: Escape}
+  - expect_state:
+      "type:ChainErrand.ChainHierarchy.ChainsContainer::ChainsCount": 1
+      "type:ChainErrand.ChainHierarchy.ChainsContainer::GetChain(0).LastLinkNumber()": 1
+  # The Duplicants dig the first link before the second; the chain goes once both are done.
+  - run: {seconds: 900, until: {pending_digs: 0}}
+  - expect_state:
+      "type:ChainErrand.ChainHierarchy.ChainsContainer::ChainsCount": 0

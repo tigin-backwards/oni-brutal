@@ -2279,6 +2279,10 @@ class Run:
         meta = {'name': name, 'crop': None, 'masks': [], 'threshold': value.get('threshold')}
         if value.get('crop'):
             meta['crop'] = list(self.need_driver().find_one({'ui': value['crop']}).rect)
+            # An empty crop compares nothing: in ours it fails as "off the image", too late to
+            # fix the spec without blessing the original again.
+            if meta['crop'][2] < 1 or meta['crop'][3] < 1:
+                raise SpecFailure(f'shot {name}: crop {value["crop"]} is empty ({meta["crop"]})')
         if value.get('mask'):
             meta['masks'] = self.rects(value['mask'])
         path = screenshot(self.mcp, self.out, name)

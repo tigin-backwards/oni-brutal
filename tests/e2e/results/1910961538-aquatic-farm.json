@@ -3,12 +3,12 @@
  "mods": [
   "1910961538"
  ],
- "verdict": "pending",
- "why": "0 run(s) of ours against original run 20261023-032003-c23858; 2 needed",
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
  "findings": [],
- "note": "",
+ "note": "an Aquatic Farm Tile is built in the pit west of the pod, turns its cell solid and is selected: four passive consumers, farm-tile tags, nothing planted",
  "updated": "2026-10-23",
- "commit": "495e42d",
+ "commit": "cc687ac",
  "mod_dlls": {
   "1910961538": {
    "AquaticFarm.dll": "c26f918057765b4dd6ac6daea65ee174aff90be57a79182fda508e7ac37d8fce"
@@ -25,6 +25,31 @@
     "signatures": 0
    }
   ],
-  "ours": []
+  "ours": [
+   {
+    "run": "20261023-042809-dd03d9",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T04:28:09",
+    "lane": 15,
+    "reference_run": "20261023-032003-c23858",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-042809-dd03d9",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T04:29:19",
+    "lane": 15,
+    "reference_run": "20261023-032003-c23858",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
  }
 }

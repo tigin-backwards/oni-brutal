@@ -140,7 +140,7 @@ installs get developer checks subscribers never see).
 | 119 | [Debug Buttons](https://steamcommunity.com/sharedfiles/filedetails/?id=3120193648) | ✅ | ✅ | ⬜ |  |
 | 120 | [Thermal Tooltips](https://steamcommunity.com/sharedfiles/filedetails/?id=1983504552) | ✅ | ✅ | ⬜ |  |
 | 121 | [Self-sealing Airlocks Revived](https://steamcommunity.com/sharedfiles/filedetails/?id=2542160819) | ❌ | ❌ | ⬜ | broken upstream: calls `SimMessages.SetCellProperties(int, byte)`, which is gone (same in the original) |
-| 122 | [Aquatic Farm](https://steamcommunity.com/sharedfiles/filedetails/?id=1910961538) | ✅ | ✅ | ⬜ |  |
+| 122 | [Aquatic Farm](https://steamcommunity.com/sharedfiles/filedetails/?id=1910961538) | ✅ | ✅ | ✅ | spec tests/e2e/mods/1910961538-aquatic-farm.yaml: an Aquatic Farm Tile is built in the pit west of the pod, turns its cell solid and is selected: four passive consumers, farm-tile tags, nothing planted |
 | 123 | [Drywall Hides Pipes](https://steamcommunity.com/sharedfiles/filedetails/?id=1872105871) | ✅ | ✅ | ⬜ |  |
 | 124 | [Research Manager // by @Ony 👾](https://steamcommunity.com/sharedfiles/filedetails/?id=1897096779) | ✅ | ✅ | ⬜ |  |
 | 125 | [Dupery Fixed](https://steamcommunity.com/sharedfiles/filedetails/?id=3172734005) | ✅ | ✅ | ⬜ |  |

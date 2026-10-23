@@ -1,0 +1,21 @@
+# Oil Well - Any Water (1717519620), class P.
+#
+# What it does: the Oil Well (OilWellCap) takes any water through its input pipe, polluted
+# water, salt water and brine too, not only clean water: a postfix on
+# OilWellCapConfig.ConfigureBuildingTemplate makes its ElementConverter consume the AnyWater
+# tag at 1 kg/s and its ConduitConsumer fill by that tag.
+# How a player reaches it: an Oil Well on an oil reservoir (Plastics research), piped with
+# polluted water.
+# What changes: which liquids the well accepts and turns into crude oil.
+#
+# An oil reservoir is not in reach on early-base, so this is a smaller spec: the converter and
+# the consumer are checked on the prefab.
+from: early-base
+mods: [1717519620]
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"OilWellCap\").BuildingComplete.GetComponent<ConduitConsumer>.capacityTag.Name": AnyWater
+      "Assets.GetBuildingDef(\"OilWellCap\").BuildingComplete.GetComponent<ElementConverter>.consumedElements.Length": 1
+      "Assets.GetBuildingDef(\"OilWellCap\").BuildingComplete.GetComponent<ElementConverter>.consumedElements[0].Tag.Name": AnyWater
+      "Assets.GetBuildingDef(\"OilWellCap\").BuildingComplete.GetComponent<ElementConverter>.consumedElements[0].MassConsumptionRate": 1
+      "Assets.GetBuildingDef(\"OilWellCap\").BuildingComplete.GetComponent<ElementConverter>.outputElements[0].elementHash": "== original"

@@ -1,0 +1,38 @@
+# No Mop Limits (2313125589), class T.
+#
+# What it does: the Mop tool marks any liquid cell: the game's limit of 150 kg a cell
+# (MopTool.maxMopAmt, set to infinity in OnLoad) is gone, and so is its rule that the cell
+# below must be solid (a transpiler on MopTool.OnDragTool replaces the Grid.Solid check of
+# the cell below with true).
+# How a player reaches it: the toolbar's Mop tool, dragged over a pool.
+# What changes: deep liquid and liquid in mid-air can be mopped; the game alone shows "Too
+# much liquid" or "Not on floor" and marks nothing.
+#
+# setup pours 300 kg of water into each of the five cells of the pit in the floor of the
+# dug-out room west of the printing pod (x 106-110, y 206, on solid ground). The game alone
+# marks none of them (more than 150 kg each); with the mod all five get a mop order, and
+# Duplicants mop water out of the pit.
+from: early-base
+mods: [2313125589]
+setup:
+  - driver: {setup.call: {type: SimMessages, method: AddRemoveSubstance, args: [131122, Water, null, 300, 300, 255, 0]}}
+  - driver: {setup.call: {type: SimMessages, method: AddRemoveSubstance, args: [131123, Water, null, 300, 300, 255, 0]}}
+  - driver: {setup.call: {type: SimMessages, method: AddRemoveSubstance, args: [131124, Water, null, 300, 300, 255, 0]}}
+  - driver: {setup.call: {type: SimMessages, method: AddRemoveSubstance, args: [131125, Water, null, 300, 300, 255, 0]}}
+  - driver: {setup.call: {type: SimMessages, method: AddRemoveSubstance, args: [131126, Water, null, 300, 300, 255, 0]}}
+steps:
+  - run: {seconds: 2}
+  - expect_state:
+      "cells:106,206..110,206::Grid.Mass.get_Item({cell})": "> 1200"
+      "Grid.Mass.get_Item(131124)": "> 150"
+      "all:Moppable::Length": 0
+      "MopTool.maxMopAmt": Infinity
+  - expect_state: {"cells:106,206..110,206::Grid.Mass.get_Item({cell})": {save_as: before}}
+  - driver: {camera.set: {cell: [108, 208], ortho: 8}}
+  - tool: {toolbar: Mop}
+  - drag: {from: [106, 206], to: [110, 206]}
+  - key: {code: Escape}
+  # Every cell of the pit is marked, each holding more than the game's limit.
+  - expect_state: {"all:Moppable::Length": 5}
+  - run: {seconds: 600}
+  - expect_state: {"cells:106,206..110,206::Grid.Mass.get_Item({cell})": "< before - 100"}

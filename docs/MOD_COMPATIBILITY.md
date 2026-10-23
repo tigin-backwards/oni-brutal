@@ -163,10 +163,10 @@ installs get developer checks subscribers never see).
 | 142 | [The Duplicant Reacharound](https://steamcommunity.com/sharedfiles/filedetails/?id=1854895085) | ✅ | ✅ | ✅ | spec tests/e2e/mods/1854895085-duplicant-reacharound.yaml: smaller spec: the extended reach tables are checked after the load and a dig order on the corridor ceiling uses the extended table with corners |
 | 143 | [Floatation](https://steamcommunity.com/sharedfiles/filedetails/?id=1751123054) | ⬜ | ⬜ | ⬜ | flagged by onimaxxing (mayCrashInPlay); not tested |
 | 144 | [Free Resource Buildings - Updated](https://steamcommunity.com/sharedfiles/filedetails/?id=2839006500) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2839006500-free-resource-buildings.yaml: with the default wattage option at 1500 W, a Power Box is built from spawned steel west of the pod and selected (shot); it runs at 1500 W, and 3000 typed into its side screen's slider field sets 3000 W |
-| 145 | [No Mop Limits](https://steamcommunity.com/sharedfiles/filedetails/?id=2313125589) | ✅ | ✅ | ⬜ |  |
-| 146 | [More Small Sculptures](https://steamcommunity.com/sharedfiles/filedetails/?id=2875363453) | ✅ | ✅ | ⬜ |  |
+| 145 | [No Mop Limits](https://steamcommunity.com/sharedfiles/filedetails/?id=2313125589) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2313125589-no-mop-limits.yaml: the Mop tool dragged over a pit of 300 kg water cells (over the game's 150 kg limit) marks all five, and Duplicants mop water out of it |
+| 146 | [More Small Sculptures](https://steamcommunity.com/sharedfiles/filedetails/?id=2875363453) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2875363453-more-small-sculptures.yaml: a smaller spec: the 20 new sculpting block looks, their kanims and qualities are in the game's database, and opening the supply closet's inventory lists them among the sculptures |
 | 147 | [Rotate Everything](https://steamcommunity.com/sharedfiles/filedetails/?id=1715709940) | ✅ | ✅ | ⬜ |  |
-| 148 | [Double Sweeper Range](https://steamcommunity.com/sharedfiles/filedetails/?id=1732534140) | ✅ | ✅ | ⬜ |  |
+| 148 | [Double Sweeper Range](https://steamcommunity.com/sharedfiles/filedetails/?id=1732534140) | ✅ | ✅ | ✅ | spec tests/e2e/mods/1732534140-double-sweeper-range.yaml: a smaller spec (an Auto-Sweeper needs research, refined metal, power and a skilled builder): its prefabs reach 8 cells and carry the 17x17 range visualizer; the game's own range display stays at 4 |
 | 149 | [Double Bed [ BROKEN ]](https://steamcommunity.com/sharedfiles/filedetails/?id=2584828134) | ✅ | ✅ | ⬜ |  |
 | 150 | [Spolszczenie / Polish Language Pack](https://steamcommunity.com/sharedfiles/filedetails/?id=931119869) | ⬜ | ⬜ | ⬜ | translation: the game applies one only from a Steam subscription; not testable here |
 | 151 | [BalanceGasPumpConsumption](https://steamcommunity.com/sharedfiles/filedetails/?id=1822071175) | ✅ | ✅ | ⬜ |  |
@@ -193,7 +193,7 @@ installs get developer checks subscribers never see).
 | 172 | [Achievement Enabler](https://steamcommunity.com/sharedfiles/filedetails/?id=1830166724) | ✅ | ✅ | ⬜ |  |
 | 173 | [Insulated Joint Plate](https://steamcommunity.com/sharedfiles/filedetails/?id=2059584551) | ⬜ | ⬜ | ⬜ | flagged by onimaxxing (crashesAtStartup); not tested |
 | 174 | [Map Overlay](https://steamcommunity.com/sharedfiles/filedetails/?id=2271373459) | ❌ | ❌ | ⬜ | broken upstream: `OverlayModes.Mode.CreateDefaultFilters` returns another type now (same in the original) |
-| 175 | [Oil Well - Any Water](https://steamcommunity.com/sharedfiles/filedetails/?id=1717519620) | ✅ | ✅ | ⬜ |  |
+| 175 | [Oil Well - Any Water](https://steamcommunity.com/sharedfiles/filedetails/?id=1717519620) | ✅ | ✅ | ✅ | spec tests/e2e/mods/1717519620-oil-well-any-water.yaml: a smaller spec (no oil reservoir in reach): the Oil Well's converter and pipe intake take the AnyWater tag |
 | 176 | [Conveyor Rail Filter](https://steamcommunity.com/sharedfiles/filedetails/?id=1738906344) | ✅ | ✅ | ⬜ |  |
 | 177 | [Tiếng Việt [Chuột Chanel]](https://steamcommunity.com/sharedfiles/filedetails/?id=1714866600) | ⬜ | ⬜ | ⬜ | translation: the game applies one only from a Steam subscription; not testable here |
 | 178 | [[TH4427E] Thai Not Included](https://steamcommunity.com/sharedfiles/filedetails/?id=1823722773) | ⬜ | ⬜ | ⬜ | translation: the game applies one only from a Steam subscription; not testable here |

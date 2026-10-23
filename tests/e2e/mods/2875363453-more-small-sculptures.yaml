@@ -1,0 +1,37 @@
+# More Small Sculptures (2875363453), class P.
+#
+# What it does: adds 20 looks for the Sculpting Block (SmallSculpture): 17 "great" ones (Baby
+# Pip, Two Baby Pips, Baby Beeta, Baby Pokeshell, Catcoon, Cat, The Sun, Totoro, Chu Totoro,
+# Chibi Totoro, Arkay, Happy, Not Penrose, Egg, Froggit, Rotwood Onion, Spigot Seal), a
+# mediocre one (Duck) and two poor ones (High Taste, Banana), each with its own mss_*_kanim,
+# to the artable stages (a postfix on ArtableStages' constructor), and lists them in the
+# supply closet's sculpture category (InventoryOrganization.GenerateSubcategories). Its
+# settings.json can move stages to another quality; the Workshop build moves none.
+# How a player reaches it: a Duplicant sculpting a Sculpting Block picks among the looks; the
+# supply closet (pause menu) lists them.
+# What changes: the looks a finished sculpting block can have, and their decor.
+#
+# A sculpture's look is random and needs Art research, so this is a smaller spec: the stages,
+# their kanims and qualities are checked in the game's database, and the supply closet is
+# opened.
+from: early-base
+mods: [2875363453]
+steps:
+  - expect_state:
+      "Db.GetArtableStages().Get(\"SmallSculpture_baby_pip\").prefabId": SmallSculpture
+      "Db.GetArtableStages().Get(\"SmallSculpture_baby_pip\").animFile": mss_baby_pip_kanim
+      "Db.GetArtableStages().Get(\"SmallSculpture_totoro\").statusItem.StatusType": "== original"
+      "Db.GetArtableStages().Get(\"SmallSculpture_duck\").statusItem.StatusType": "== original"
+      "Db.GetArtableStages().Get(\"SmallSculpture_banan\").statusItem.StatusType": "== original"
+      "Db.GetArtableStages().GetPrefabStages(\"SmallSculpture\").Count": "== original"
+      "Assets.GetAnim(\"mss_spigot_seal_kanim\").name": mss_spigot_seal_kanim
+  # The supply closet (pause menu) builds its categories when it first opens; the mod adds
+  # its looks to the sculptures'.
+  - key: {code: Escape}
+  - ui_wait: {path: "**/PauseScreen/**/Supply ClosetButton", cond: stable}
+  - click: {ui: "**/PauseScreen/**/Supply ClosetButton"}
+  - ui_wait: {path: "**/LockerMenuScreen/Panel/Content/Buttons/InventoryButton", cond: stable}
+  - click: {ui: "**/LockerMenuScreen/Panel/Content/Buttons/InventoryButton"}
+  - ui_wait: {path: "**/KleiInventoryScreen", cond: stable}
+  - expect_state:
+      "InventoryOrganization.subcategoryIdToPermitIdsMap[\"BUILDING_SCULPTURE\"]": {contains: SmallSculpture_froggit}

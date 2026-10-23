@@ -1,0 +1,24 @@
+# Double Sweeper Range (1732534140), class P.
+#
+# What it does: the Auto-Sweeper (SolidTransferArm) reaches 8 cells instead of 4 (a postfix on
+# SolidTransferArmConfig.DoPostConfigureComplete sets SolidTransferArm.pickupRange), and its
+# preview, construction site and building get a StationaryChoreRangeVisualizer of 17 x 17
+# cells (a postfix on SolidTransferArmConfig.AddVisualizer). The game now draws the range
+# with its own RangeVisualizer, which the mod leaves at 4, so the range shown stays the
+# game's.
+# How a player reaches it: building an Auto-Sweeper (Smart Storage research, refined metal,
+# a Duplicant with the Improved Carrying skill).
+# What changes: how far an Auto-Sweeper picks up and delivers.
+#
+# Building one needs research, refined metal, power and a skilled builder, so this is a
+# smaller spec: the reach and the visualizer are checked on the prefabs.
+from: early-base
+mods: [1732534140]
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"SolidTransferArm\").BuildingComplete.GetComponent<SolidTransferArm>.pickupRange": 8
+      "Assets.GetBuildingDef(\"SolidTransferArm\").BuildingComplete.GetComponent<StationaryChoreRangeVisualizer>.width": 17
+      "Assets.GetBuildingDef(\"SolidTransferArm\").BuildingComplete.GetComponent<StationaryChoreRangeVisualizer>.x": -8
+      "Assets.GetBuildingDef(\"SolidTransferArm\").BuildingPreview.GetComponent<StationaryChoreRangeVisualizer>.height": 17
+      "Assets.GetBuildingDef(\"SolidTransferArm\").BuildingUnderConstruction.GetComponent<StationaryChoreRangeVisualizer>.y": -8
+      "Assets.GetBuildingDef(\"SolidTransferArm\").BuildingComplete.GetComponent<RangeVisualizer>.RangeMin.x": "== original"

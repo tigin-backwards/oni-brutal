@@ -1,0 +1,55 @@
+{
+ "spec": "mods/1717519620-oil-well-any-water.yaml",
+ "mods": [
+  "1717519620"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a smaller spec (no oil reservoir in reach): the Oil Well's converter and pipe intake take the AnyWater tag",
+ "updated": "2026-10-23",
+ "commit": "d57566d",
+ "mod_dlls": {
+  "1717519620": {
+   "OilWellAnyWater.dll": "fbd5099d9660e694cb71c46cdecc37111df52a02044ef6c828f2afc051911604"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-032142-4c0ded",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T03:21:43",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-042722-aece6c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T04:27:22",
+    "lane": 16,
+    "reference_run": "20261023-032142-4c0ded",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-042722-aece6c",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T04:28:11",
+    "lane": 16,
+    "reference_run": "20261023-032142-4c0ded",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

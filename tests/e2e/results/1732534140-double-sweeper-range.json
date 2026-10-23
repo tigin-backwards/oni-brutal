@@ -1,0 +1,55 @@
+{
+ "spec": "mods/1732534140-double-sweeper-range.yaml",
+ "mods": [
+  "1732534140"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a smaller spec (an Auto-Sweeper needs research, refined metal, power and a skilled builder): its prefabs reach 8 cells and carry the 17x17 range visualizer; the game's own range display stays at 4",
+ "updated": "2026-10-23",
+ "commit": "d57566d",
+ "mod_dlls": {
+  "1732534140": {
+   "DoubleSweeperRange.dll": "0eaaa11a4415beafa8af28cfc91536abc54527426638044a5068acc4eae348fe"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-032142-4c0ded",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T03:21:42",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-042536-7df75f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T04:25:36",
+    "lane": 16,
+    "reference_run": "20261023-032142-4c0ded",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-042536-7df75f",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T04:26:30",
+    "lane": 16,
+    "reference_run": "20261023-032142-4c0ded",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

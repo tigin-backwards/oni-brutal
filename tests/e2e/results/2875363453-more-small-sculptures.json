@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2875363453-more-small-sculptures.yaml",
+ "mods": [
+  "2875363453"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a smaller spec: the 20 new sculpting block looks, their kanims and qualities are in the game's database, and opening the supply closet's inventory lists them among the sculptures",
+ "updated": "2026-10-23",
+ "commit": "d57566d",
+ "mod_dlls": {
+  "2875363453": {
+   "MoreSmallSculptures.dll": "ab39d74cf1f6bb6c3c09e91d3ed1e42435c9a311361a8a7eb9af3ea3ffaa2497"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-031325-d301d1",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T03:13:25",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-042334-6b68a1",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T04:23:34",
+    "lane": 16,
+    "reference_run": "20261023-031325-d301d1",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-042334-6b68a1",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T04:24:32",
+    "lane": 16,
+    "reference_run": "20261023-031325-d301d1",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

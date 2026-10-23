@@ -149,7 +149,9 @@ and declares `ICanvasElement`.
 - `raycastTarget` and `raycastPadding`.
 - `material`: the default is `defaultGraphicMaterial`, the engine's default UI material.
 - `canvas`: the nearest enabled `Canvas` up the hierarchy.
-- `depth`: `canvasRenderer.absoluteDepth`.
+- `depth`: `canvasRenderer.absoluteDepth`, unchanged. The numbering is the engine's canvas
+  batching (`Engine/UI/CanvasSystem.cs`), not this package's: with the shipped uGUI on our
+  engine the numbers are ours, not the original's.
 - `defaultMaterial`, `mainTexture`, `rectTransform`, `canvasRenderer`.
 
 **Methods:**
@@ -403,7 +405,8 @@ It updates when its rect or its parent's rect changes, and in the update after i
     TwoD, ThreeD, All) and `blockingMask`.
   - **Display:** only graphics of the raycaster's canvas, on the pointer's display.
   - **Candidates:** for each graphic of its canvas (`GraphicRegistry`) that is a raycast
-    target, has a non-zero depth (has been drawn) and is not culled, the pointer must be
+    target, has a depth other than −1 (it has been drawn; depths start at 0) and is not
+    culled, the pointer must be
     inside the graphic's rect, as `RectTransformUtility.RectangleContainsScreenPoint(rect,
     point, eventCamera, raycastPadding)` tests it (the padding as its offset). Use the
     canvas's event camera for non-overlay canvases. The graphic's `Raycast` must pass.
@@ -627,6 +630,69 @@ It updates when its rect or its parent's rect changes, and in the update after i
   KScrollRect overrides `LateUpdate`.
 - **Layout:** it is an `ILayoutElement` (all -1) and an `ILayoutGroup`, so it lays out its
   scrollbars and viewport.
+
+**ScrollRect: normalized position and scrollbars, measured** (2026-10-22, `tools/UnityProbe`,
+the `UIS scroll` lines, in the original player and in ours; a 200 × 100 viewport unless
+stated). This implementation already does all of this, on these measurements; keep it.
+- **Bounds.** Both are boxes in the viewport's local space (the viewport, or the scroll rect's
+  own rect when there is none), kept as a centre and extents, with min = centre − extents:
+  - the view: the viewport's rect;
+  - the content: the box around the content's four world corners
+    (`RectTransform.GetWorldCorners`), each taken into the viewport's space with its
+    `worldToLocalMatrix`. Scale and rotation count: content of 400 × 400 at scale 0.25 is
+    100 × 100.
+- **Content smaller than the view on an axis** is grown to the view's size about its pivot:
+  the centre moves by −(view size − content size) × (pivot − 0.5) and the size becomes the
+  view's. Content exactly the view's size is not changed.
+- **The normalized position on an axis** (0 at the left or bottom of the scrollable range, 1
+  at the right or top):
+  - when the (grown) content is no larger than the view, or its size equals the view's as
+    `Mathf.Approximately` compares them: 1 when the view's min is greater than the content's
+    min, else 0. That comparison of the mins is exact, with no tolerance. Without the
+    approximate test, content an ulp larger than the view gives fractions such as −0.5 or
+    0.25, which the original never reported;
+  - otherwise (view min − content min) / (content size − view size), not clamped. Measured
+    on 400 × 300 content, offset −250 … 250: −1.25 to 2.25, both axes.
+  - The getter computes the bounds afresh from the current transforms, so it is valid before
+    the first `LateUpdate`, and whichever of `horizontal`, `vertical` and `movementType`.
+  - This formula reproduces all 172 axis values the probe recorded in the original, from the
+    logged inputs, bit for bit (`tools/UnityProbe/uis-check.py fit`), the fractional ones
+    included.
+- **What the exactness means.** Where the content's size equals the viewport's (the content
+  stretched to it, or laid out to its width, as Sweep By Type's list is), 0 or 1 is decided
+  by the rounding of the transformed corners:
+  - Content as wide as the view and offset by −0.1, −0.01, −0.001 and −0.0001 reports 1; by
+    0, +0.00001 and +0.001 it reports 0; by −0.00001 either, by the layout.
+  - In 48 random exactly-fitting layouts (sizes 80–600, fractional positions, half of them
+    under a parent at scale 0.86) the original reported 1 on about 40 % of the axes.
+  - Both players apply this formula. Their difference on such axes comes from the engine's
+    corners and matrices, 1 to 3 ulps apart in 57 of 86 cases. That belongs to the engine's
+    transform arithmetic, not to this package; do not add a tolerance here to hide it.
+- **Scrollbars.** On an update that finds the view bounds, the content bounds or the content's
+  position changed since the previous one (always on the first):
+  - each assigned scrollbar's `size` becomes clamp01((view size − |overshoot|) / content
+    size), with the (grown) content size and the overshoot as found at the start of that
+    update, before the content is moved back. Example: Clamped, 100 × 50 content offset by 30: size 0.85 though the content
+    is clamped in the same update; it stays 0.85, since nothing changes afterwards;
+  - its `value` becomes the normalized position: 0 or 1 when the content fits, as above.
+  - Before that update the scrollbar keeps its own values (a new one: value 0, size 0.2).
+  - Setting `value` invokes the scrollbar's `onValueChanged`, to which the scroll rect listens,
+    so it sets the normalized position on that axis. When the content fits, setting 1 moves
+    the grown content's min onto the view's min. Measured: 100 × 50 content offset (−20,
+    −10), Unrestricted: the first update sets both scrollbars to 1 and the content snaps to
+    (0, 0). With offsets ≥ 0 the value is 0, which the new scrollbar already holds, so
+    nothing is invoked and the content stays where it is.
+- **Movement types** with content that fits (100 × 50 offset by (30, −20), pivots (0,1),
+  (0.5,0.5), (1,0)):
+  - Clamped puts it back at once, in the first update (anchoredPosition (0, 0));
+  - Elastic springs back over time (`SmoothDamp` with `elasticity` and unscaled time; after
+    0.21 s, 2.4 of the 30 remained);
+  - Unrestricted leaves it, except through the scrollbar feedback above.
+- **Content resized at run time** (400 × 300 scrolled to (0.5, 0.5), then shrunk to 100 × 50,
+  then grown back): the normalized position follows the new bounds in the next update. While
+  the content fits, setting `normalizedPosition`, or either axis, does not move it.
+- **Not measured:** dragging and the scroll wheel with content that fits; `AutoHide`
+  scrollbar visibility.
 
 ### InputField and Dropdown (legacy)
 

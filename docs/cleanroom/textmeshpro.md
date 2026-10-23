@@ -355,6 +355,72 @@ KInputTextField overrides `LateUpdate` and calls the base implementation, so the
 `LateUpdate` must do its share of the work above (starting a requested activation, caret
 blinking, scrolling the text).
 
+**`TMP_InputField`: when the label and the caret are set up, measured** (2026-10-22,
+`tools/UnityProbe`, the `UIS input` lines; fields built in code on an overlay canvas, phase by
+phase: right after each step, then Update, a coroutine's `yield return null`, LateUpdate,
+`Canvas.willRenderCanvases` and the end of the frame). "The label" is the text component's
+`text`.
+- **On enable, with a text component:**
+  - The label becomes the field's text followed by U+200B (zero-width space) at once, in
+    `OnEnable`: `""` gives `"​"`, a text set while inactive (`"hello"`) gives
+    `"hello​"`.
+  - It is not laid out then. `textInfo.characterCount` stays 0 and `isTextOverflowing` false
+    through that frame's LateUpdate. They become 1 and true for the empty field in the canvas
+    rebuild before rendering, as for any changed text. (This implementation lays it out at
+    once: `characterCount` 1 right after `SetActive(true)`. Not matched.)
+- **The caret is made in that same `OnEnable`,** when the field has no caret yet:
+  - It is a new GameObject `Caret` (hideFlags `DontSave`) with `RectTransform`,
+    `CanvasRenderer`, `TMP_SelectionCaret` and a `LayoutElement` that ignores layout, made the
+    first child of `textViewport`.
+  - It is made at the world origin and keeps that world position as the viewport's child, with
+    the RectTransform defaults: anchors (0.5, 0.5), size 100 × 100, pivot (0.5, 0.5). Under a
+    viewport centred at world (640, 459.5) its anchoredPosition is (−640, −459.5).
+  - Still within that `OnEnable`, the field calls the private instance method
+    `void AssignPositioningIfNeeded()` once. It copies the text component's RectTransform onto
+    the caret's: `localPosition`, `localRotation`, `localScale`, `anchorMin`, `anchorMax`,
+    `anchoredPosition`, `sizeDelta` and `pivot`. Measured with a Harmony hook: on entry the
+    caret's anchors are (0.5, 0.5)–(0.5, 0.5) with size 100 × 100; on return they are the text's,
+    (0, 0)–(1, 1) with size 0 × 0.
+  - The caret's RectTransform is held, from its creation, in the private instance field
+    `RectTransform caretRectTrans`. It is already set when `AssignPositioningIfNeeded` runs.
+  - `AssignPositioningIfNeeded` runs nowhere else. It does not run on a later enable (the caret
+    exists), on select, focus or `ActivateInputField`, on typing, on setting `text`, or on
+    deselect. It is called once per caret made: for the template and for a clone, which both
+    make one.
+  - **Why the names are interface:** PLib's `TextMeshProPatcher`, in 36 of the 74 decompiled
+    mods in `out/local-tools/moddecomp`, finds `TMP_InputField.AssignPositioningIfNeeded` by
+    name. It puts a Harmony prefix on it that takes `___caretRectTrans` and
+    `___m_TextComponent`, and a postfix on `OnEnable` that takes `___m_VerticalScrollbar` and
+    `___m_TextComponent`. When the
+    caret's eight values differ from the text's, the prefix skips the method. It starts a
+    coroutine on the field instead, which copies them at the end of the frame. Without the
+    method, the patch is not applied at all, and the caret is positioned at once. With the
+    method but without the field, Harmony fails to patch, and PLib logs "Unable to patch
+    TextMeshPro bug" (inferred from Harmony and PLib's code, not measured). So both names must
+    exist, with these types.
+  - **The result in the original with PLib:** measured by reproducing that prefix in the probe.
+    A field hidden again in the frame it was shown loses the coroutine. Its caret then keeps
+    the defaults (100 × 100, centred, at the world origin) for good, through being shown again,
+    focus and typing. Sweep By Type's filter field is in this state in the original
+    (`Caret` rect −50, −50, 100, 100); in ours it fills the text area.
+  - A field enabled without a text component makes no caret. It makes none when a text
+    component is assigned later, nor on activation, but makes one on its next enable.
+- **Assigning `textComponent`** (and `placeholder`) to an enabled field leaves the text
+  component alone: its `""` stays `""`. (This implementation writes `"​"` into it then.
+  Not matched; this is Duplicant Stat Selector's search field, whose component is assigned at
+  run time.)
+- **Setting `text`:**
+  - to the value it already holds changes nothing: that field's label stays `""`;
+  - to another value writes the label (`"ab​"`) and lays it out at once
+    (`characterCount` 3);
+  - back to `""` gives `"​"`.
+- **Activation** of a field whose label was never written (selecting it, with
+  `shouldActivateOnSelect`, or `ActivateInputField()`) writes `"​"` in the LateUpdate that
+  activates it. It is seen in that frame's `willRenderCanvases`, with `isFocused` true.
+- **Not measured:** `ForceLabelUpdate()` on a field whose label was never written (measured only
+  after it had been written: no change); the caret's layer; a text component on an inactive
+  GameObject at enable.
+
 **`TMP_Dropdown`:** like uGUI's `Dropdown`, with TMP texts:
 - **Contents:** `options` (`OptionData`: text and image), `value` and `onValueChanged`.
 - **Showing the list:** `Show()` builds the list from `template` under a new canvas with a

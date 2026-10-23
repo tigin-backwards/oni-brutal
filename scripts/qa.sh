@@ -81,6 +81,7 @@ stage_unit()
     grep -E 'Total: [0-9]+, Errors: [0-9]+, Failed: [0-9]+' "$log" | sed 's/\x1b\[[0-9;]*m//g' | while read -r line; do echo "     $line"; done
     if grep -qE 'Errors: [1-9]|Failed: [1-9]' "$log"; then fail "unit: test failures (see $log)"; else ok "unit: tests"; fi
     if grep -qE '^[1-9][0-9]* failures|unresolved scripts [1-9]|missing types: [1-9]|^FAIL' "$log"; then fail "unit: host checks (see $log)"; else ok "unit: host checks"; fi
+    if grep -qE '^scripts: OK' "$log"; then ok "unit: script tests"; else fail "unit: script tests: $(grep -E '^scripts:' "$log" | head -1)"; fi
     local missing; missing=$(grep -oE 'missing members: [0-9]+' "$root/out/apicheck-summary.txt" | head -1 | grep -oE '[0-9]+')
     if [ "${missing:-99}" -le 13 ]; then ok "unit: ApiCheck, $missing members missing (13 known, UI Toolkit internals)"; else fail "unit: ApiCheck, $missing members missing"; fi
 }

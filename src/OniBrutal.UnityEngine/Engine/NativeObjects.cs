@@ -103,7 +103,10 @@ namespace OniBrutal.Engine
         public override void CopyStateFrom(NativeObject source)
         {
             var b = (BehaviourNative)source;
-            Enabled = b.Enabled;
+            // Instantiate copies a behaviour awaiting destruction, and copies it disabled, as
+            // observed in Unity's player: the clone keeps the enabled = false its source reports
+            // and lives on after the source's destruction.
+            Enabled = b.Enabled && !b.DestroyPending;
             UseGUILayout = b.UseGUILayout;
         }
         /// Per-behaviour coroutines (MonoBehaviour only).

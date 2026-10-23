@@ -190,7 +190,7 @@ namespace OniBrutal.Tests
             var go = new GameObject("a");
             go.AddComponent<Recorder>();
             Object.Destroy(go);
-            Assert.True(go != null); // still alive until the end of the frame
+            Assert.True(go != null); // still alive until the next destruction point
             Frame();
             Assert.True(go == null);
             Assert.False(go);
@@ -199,7 +199,8 @@ namespace OniBrutal.Tests
         }
 
         // Destroy's timing as observed in Unity's player (a probe mod in the original game):
-        // behaviours are disabled at the call, destroyed at the end of the frame in request order.
+        // behaviours are disabled at the call, destroyed at the next destruction point in request
+        // order.
 
         [Fact]
         public void DestroyDisablesTheObjectAndItsChildrenAtOnceAndDeeperOnesAtDestruction()
@@ -589,6 +590,129 @@ namespace OniBrutal.Tests
         }
     }
 
+    /// Destroys a target's BoxCollider and first child in one phase of a frame and records,
+    /// phase by phase, whether they are gone (UnityProbe's DestroyPhase).
+    public class DestroyPhaseRecorder : MonoBehaviour
+    {
+        public static readonly List<string> Log = new();
+        public string phase;
+        public GameObject target;
+        bool fired;
+
+        void Note(string at)
+        {
+            if (fired) Log.Add(at + " " + (target.GetComponent<BoxCollider>() == null ? "gone" : "there") + " " + target.transform.childCount);
+            if (fired || at != phase) return;
+            fired = true;
+            Object.Destroy(target.GetComponent<BoxCollider>());
+            Object.Destroy(target.transform.GetChild(0).gameObject);
+            Log.Add(at + " destroyed");
+        }
+
+        void Start() => Note("Start");
+        void Update() => Note("Update");
+        void LateUpdate() => Note("LateUpdate");
+        void OnEnable()
+        {
+            StartCoroutine(Resumed());
+            StartCoroutine(EndOfFrame());
+        }
+        IEnumerator Resumed()
+        {
+            while (true) { yield return null; Note("co"); }
+        }
+        IEnumerator EndOfFrame()
+        {
+            while (true) { yield return new WaitForEndOfFrame(); Note("EndOfFrame"); }
+        }
+    }
+
+    public class DestroyTimingTests : EngineTest
+    {
+        public DestroyTimingTests() => DestroyPhaseRecorder.Log.Clear();
+
+        static List<string> Run(string phase)
+        {
+            var target = new GameObject("Target");
+            target.AddComponent<BoxCollider>();
+            new GameObject("Child").transform.SetParent(target.transform, false);
+            var d = new GameObject("Destroyer");
+            d.SetActive(false);
+            var r = d.AddComponent<DestroyPhaseRecorder>();
+            r.phase = phase; r.target = target;
+            d.SetActive(true);
+            // No fixed step, which would carry the requests out before Update.
+            float fixedStep = Time.fixedDeltaTime;
+            Time.fixedDeltaTime = 100f;
+            try
+            {
+                for (int i = 0; i < 3; i++) Frame();
+            }
+            finally
+            {
+                Time.fixedDeltaTime = fixedStep;
+            }
+            return DestroyPhaseRecorder.Log.GetRange(0, 5);
+        }
+
+        // Where the player carries out Destroy, as measured in the original player (UnityProbe,
+        // "values: destroy phases"): after the Update pass, after LateUpdate, and for calls made
+        // later in the frame, after the next frame's Update pass.
+
+        [Fact]
+        public void DestroyInStartIsCarriedOutAfterTheUpdatePass()
+            => Assert.Equal(["Start destroyed", "Update there 1", "co gone 0", "LateUpdate gone 0", "EndOfFrame gone 0"], Run("Start"));
+
+        [Fact]
+        public void DestroyInUpdateIsCarriedOutBeforeCoroutinesAndLateUpdate()
+            => Assert.Equal(["Update destroyed", "co gone 0", "LateUpdate gone 0", "EndOfFrame gone 0", "Update gone 0"], Run("Update"));
+
+        [Fact]
+        public void DestroyInACoroutineIsCarriedOutAfterLateUpdate()
+            => Assert.Equal(["co destroyed", "LateUpdate there 1", "EndOfFrame gone 0", "Update gone 0", "co gone 0"], Run("co"));
+
+        [Fact]
+        public void DestroyInLateUpdateIsCarriedOutBeforeTheEndOfTheFrame()
+            => Assert.Equal(["LateUpdate destroyed", "EndOfFrame gone 0", "Update gone 0", "co gone 0", "LateUpdate gone 0"], Run("LateUpdate"));
+
+        [Fact]
+        public void DestroyAtTheEndOfTheFrameWaitsForTheNextUpdatePass()
+            => Assert.Equal(["EndOfFrame destroyed", "Update there 1", "co gone 0", "LateUpdate gone 0", "EndOfFrame gone 0"], Run("EndOfFrame"));
+
+        /// Better Automation Overlay strips a label template in Update (the overlay toggle's click)
+        /// and the pool clones it in LateUpdate (the overlay's update): the clone lacks the parts.
+        public class StripInUpdateCloneInLateUpdate : MonoBehaviour
+        {
+            public GameObject template, clone;
+            void Update()
+            {
+                if (template != null) return;
+                template = new GameObject("Template");
+                template.AddComponent<BoxCollider>();
+                template.AddComponent<Recorder>();
+                new GameObject("Unit").transform.SetParent(template.transform, false);
+                Object.Destroy(template.GetComponent<BoxCollider>());
+                Object.Destroy(template.GetComponent<Recorder>());
+                Object.Destroy(template.transform.GetChild(0).gameObject);
+            }
+            void LateUpdate()
+            {
+                if (clone == null) clone = Object.Instantiate(template);
+            }
+        }
+
+        [Fact]
+        public void ATemplateStrippedInUpdateIsClonedInLateUpdateWithoutTheParts()
+        {
+            var s = new GameObject("S").AddComponent<StripInUpdateCloneInLateUpdate>();
+            Frame();
+            Assert.NotNull(s.clone);
+            Assert.Null(s.clone.GetComponent<BoxCollider>());
+            Assert.Null(s.clone.GetComponent<Recorder>());
+            Assert.Equal(0, s.clone.transform.childCount);
+        }
+    }
+
     public class CloneTests : EngineTest
     {
         [System.Serializable]
@@ -735,6 +859,81 @@ namespace OniBrutal.Tests
             Assert.Equal(5, watcher.Count);
             Object.Instantiate(prefab);
             Assert.Equal(5, watcher.Count);
+        }
+
+        // Instantiate of a source whose parts await Destroy, as measured in the original player
+        // (UnityProbe, "values: clone pending destroy").
+
+        static GameObject StrippedSource(bool active)
+        {
+            var go = new GameObject("Src");
+            go.SetActive(active);
+            go.AddComponent<Recorder>();
+            go.AddComponent<BoxCollider>();
+            go.AddComponent<LateRecorder>();
+            new GameObject("Keep").transform.SetParent(go.transform, false);
+            var gone = new GameObject("Gone");
+            gone.transform.SetParent(go.transform, false);
+            gone.AddComponent<Recorder>();
+            Object.Destroy(go.GetComponent<Recorder>());
+            Object.Destroy(go.GetComponent<BoxCollider>());
+            Object.Destroy(gone);
+            return go;
+        }
+
+        static string Parts(GameObject go)
+        {
+            var parts = new List<string>();
+            foreach (var c in go.GetComponents<Component>())
+                parts.Add(c.GetType().Name + (c is Behaviour b ? (b.enabled ? "+" : "-") : ""));
+            for (int i = 0; i < go.transform.childCount; i++) parts.Add("/" + go.transform.GetChild(i).name);
+            return string.Join(" ", parts);
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void AClonePendingDestroyPartsKeepsThemDisabled(bool active)
+        {
+            var src = StrippedSource(active);
+            // The source still shows its pending parts until they are destroyed.
+            Assert.Equal("Transform Recorder- BoxCollider LateRecorder+ /Keep /Gone", Parts(src));
+            Assert.NotNull(src.GetComponent<Recorder>());
+            Assert.Equal(2, src.transform.childCount);
+            // A clone made now copies them, the behaviours disabled; Instantiate(Component) and a
+            // clone of that clone alike.
+            var clone = Object.Instantiate(src);
+            var byComponent = Object.Instantiate(src.GetComponent<LateRecorder>()).gameObject;
+            var ofClone = Object.Instantiate(clone);
+            foreach (var go in new[] { clone, byComponent, ofClone })
+            {
+                Assert.Equal("Transform Recorder- BoxCollider LateRecorder+ /Keep /Gone", Parts(go));
+                Assert.Equal(active, go.activeSelf);
+            }
+            Assert.False(clone.transform.Find("Gone").GetComponent<Recorder>().enabled);
+            Frame();
+            // The source has lost them; the clones keep theirs, still disabled.
+            Assert.Equal("Transform LateRecorder+ /Keep", Parts(src));
+            Assert.Equal("Transform Recorder- BoxCollider LateRecorder+ /Keep /Gone", Parts(clone));
+            Assert.Equal("Transform Recorder- BoxCollider LateRecorder+ /Keep /Gone", Parts(ofClone));
+            // A clone made after the destruction has none of them.
+            Assert.Equal("Transform LateRecorder+ /Keep", Parts(Object.Instantiate(src)));
+            Assert.Equal("Transform Recorder- BoxCollider LateRecorder+ /Keep /Gone", Parts(Object.Instantiate(clone)));
+        }
+
+        [Fact]
+        public void ACloneOfAnObjectAwaitingDestroyLivesOnDisabled()
+        {
+            var whole = new GameObject("Whole");
+            whole.AddComponent<Recorder>();
+            whole.AddComponent<BoxCollider>();
+            Object.Destroy(whole);
+            var clone = Object.Instantiate(whole);
+            Assert.Equal("Transform Recorder- BoxCollider", Parts(clone));
+            Frame();
+            Assert.True(whole == null);
+            Assert.True(clone != null);
+            Assert.Equal("Transform Recorder- BoxCollider", Parts(clone));
         }
 }
 }

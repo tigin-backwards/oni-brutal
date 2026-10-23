@@ -138,6 +138,9 @@ namespace OniBrutal.Engine
                     BehaviourManager.RunStarts();
                     RunPhase(FixedAnimationUpdate);
                     Coroutines.RunFixedUpdatePhase();
+                    // Destroy called in FixedUpdate is carried out before Update (observed in
+                    // Unity's player).
+                    Lifecycle.ProcessDestroyQueue();
                 }
                 finally
                 {
@@ -147,6 +150,11 @@ namespace OniBrutal.Engine
 
             Mark(4);
             BehaviourManager.RunUpdate();
+            // Destroy called in Start or Update is carried out when the Update pass ends, before
+            // the coroutines resumed after it, as observed in Unity's player: LateUpdate already
+            // finds the parts gone (Better Automation Overlay strips a template in Update and
+            // clones it in LateUpdate).
+            Lifecycle.ProcessDestroyQueue();
             // Update.ScriptRunDelayedDynamicFrameRate: Start for behaviours enabled during
             // Update (so they start before LateUpdate), Invoke calls due, then coroutines resumed
             // after Update.
@@ -165,6 +173,8 @@ namespace OniBrutal.Engine
             // Invoke calls made since the pass after Update.
             DelayedCalls.Run();
 
+            // Destroy called after the Update pass (coroutines, animation events, LateUpdate) is
+            // carried out after LateUpdate.
             Lifecycle.ProcessDestroyQueue();
             Mark(6);
             RunPhase(PostLateUpdate);
@@ -175,8 +185,10 @@ namespace OniBrutal.Engine
             Mark(0);
             RunPhase(GUI);
             Mark(1);
+            // Destroy called after LateUpdate's destruction point waits for the next one: called
+            // in OnGUI or at WaitForEndOfFrame, it is carried out after the next frame's Update
+            // pass, and that Update still finds the parts (observed in Unity's player).
             Coroutines.RunEndOfFramePhase();
-            Lifecycle.ProcessDestroyQueue();
             EngineLog.FlushToMainThread();
             Mark(2);
             Present?.Invoke();

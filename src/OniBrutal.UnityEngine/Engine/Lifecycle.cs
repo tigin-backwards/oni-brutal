@@ -16,7 +16,8 @@ namespace OniBrutal.Engine
     /// - Activation sets the active flags of the whole subtree first, then runs Awake/OnEnable
     ///   per component in hierarchy pre-order; deactivation clears the flags, then runs OnDisable
     ///   in the same order.
-    /// - Destroy is deferred to the end of the frame; DestroyImmediate is synchronous.
+    /// - Destroy is deferred to the player loop's next destruction point (after the fixed steps,
+    ///   after the Update pass, after LateUpdate); DestroyImmediate is synchronous.
     ///   OnDestroy runs only for behaviours whose Awake ran.
     internal static class Lifecycle
     {
@@ -348,7 +349,7 @@ namespace OniBrutal.Engine
         }
 
         /// Destroy disables part of what it will destroy at once (OnDisable now, OnDestroy at the
-        /// end of the frame), as observed in Unity's player: the behaviours of the GameObject and
+        /// next destruction point), as observed in Unity's player: the behaviours of the GameObject and
         /// of its direct children, or the one component. Until destruction they report
         /// enabled = false and activation does not enable them again, while the GameObjects keep
         /// their active flags. Deeper descendants stay enabled until the destruction itself.
@@ -380,7 +381,8 @@ namespace OniBrutal.Engine
                 }
         }
 
-        /// End-of-frame processing of Destroy requests (player loop).
+        /// Carries out the Destroy requests made so far: the player loop calls it after the fixed
+        /// steps, after the Update pass and after LateUpdate (PlayerLoop.RunFrame).
         public static void ProcessDestroyQueue()
         {
             float now = Time.time;

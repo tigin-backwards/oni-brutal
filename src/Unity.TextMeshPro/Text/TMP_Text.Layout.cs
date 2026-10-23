@@ -288,14 +288,15 @@ namespace TMPro
                     pb.KernY += second.yPlacement * pb.Scale;
                 }
 
-            // Break opportunities: after whitespace, and around CJK characters as the line
-            // breaking rules allow.
+            // Break opportunities: after whitespace but the no-break space U+00A0 (U+2007 and
+            // U+202F allow one; measured on the shipped package), and around CJK characters as
+            // the line breaking rules allow.
             for (int i = 0; i < count; i++)
             {
                 ref var p = ref pl[i];
                 if (p.NoBreak) { p.BreakAfter = false; continue; }
                 uint c = parsed.Elements[p.Element].Unicode;
-                if ((p.Whitespace && c != 0xA0 && c != 0x202F && c != 0x2007) || c == 0x200B) { p.BreakAfter = true; continue; }
+                if ((p.Whitespace && c != 0xA0) || c == 0x200B) { p.BreakAfter = true; continue; }
                 // A line may break after a hyphen-minus or a soft hyphen (not after the hyphen
                 // U+2010 or the non-breaking hyphen U+2011; measured on the shipped package).
                 if (c == 0x2D || c == 0xAD) { p.BreakAfter = true; continue; }

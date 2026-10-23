@@ -183,7 +183,9 @@ namespace TMPro
                         continue;
                     }
                     ci.elementType = el.Kind == ElementKind.Sprite ? TMP_TextElementType.Sprite : TMP_TextElementType.Character;
-                    ci.character = (char)el.Unicode;
+                    // A soft hyphen drawn where its line breaks reports a hyphen-minus (measured on the
+                    // shipped package).
+                    ci.character = p.SoftHyphen > 0f && p.Visible ? '-' : (char)el.Unicode;
                     ci.index = el.SourceIndex;
                     ci.stringLength = el.SourceLength;
                     ci.textElement = el.Element;
@@ -574,10 +576,16 @@ namespace TMPro
             return ellipsis;
         }
 
-        // Letters, digits and hyphens make words; apostrophes join word characters.
-        static bool IsWordCharacter(char c) => char.IsLetterOrDigit(c) || c == '-';
+        // Letters (any L category) and decimal digits, and four hyphens: U+002D, the soft hyphen
+        // U+00AD, U+2010 and U+2011 (measured: "Words and their separators").
+        static bool IsWordCharacter(char c) => char.IsLetterOrDigit(c) || c == '-' || c == '\u00AD' || c == '\u2010' || c == '\u2011';
 
         static bool IsJoiner(char c) => c == '\'' || c == '\u2019';
+
+        // Punctuation is any P category, except that § and ¶ count as symbols.
+        static bool IsWordPunctuation(char c) => char.IsPunctuation(c) && c != '\u00A7' && c != '\u00B6';
+
+        static int[] s_WordEnds = new int[8];
 
         void RecordWords(int count)
         {
@@ -585,42 +593,52 @@ namespace TMPro
             var chars = info.characterInfo;
             int words = 0;
             int start = -1;
-            void Add(int first, int last)
+            // Each word is counted on the line of the character that ended it.
+            void Add(int first, int last, int endedBy)
             {
                 info.EnsureWords(words + 1);
+                if (s_WordEnds.Length < words + 1) Array.Resize(ref s_WordEnds, Mathf.NextPowerOfTwo(words + 1));
                 info.wordInfo[words] = new TMP_WordInfo { textComponent = this, firstCharacterIndex = first, lastCharacterIndex = last, characterCount = last - first + 1 };
+                s_WordEnds[words] = endedBy;
                 words++;
             }
-            for (int i = 0; i <= count; i++)
+            bool LetterOrDigit(int i) => chars[i].elementType != TMP_TextElementType.Sprite && char.IsLetterOrDigit(chars[i].character);
+            for (int i = 0; i < count; i++)
             {
-                bool word = i < count && chars[i].elementType != TMP_TextElementType.Sprite
-                    && (IsWordCharacter(chars[i].character) || (IsJoiner(chars[i].character) && start >= 0 && i + 1 < count && IsWordCharacter(chars[i + 1].character)));
-                if (word)
+                char c = chars[i].character;
+                bool sprite = chars[i].elementType == TMP_TextElementType.Sprite;
+                if (!sprite && IsWordCharacter(c))
                 {
                     if (start < 0) start = i;
+                    if (i == count - 1) Add(start, i, i);
                     continue;
                 }
+                // An apostrophe joins between letters or digits. At the end of the text it reads
+                // the character slot past it, which holds what an earlier layout left there; when
+                // that is a letter or digit the word never ends (measured on the shipped package).
+                if (!sprite && IsJoiner(c) && i > 0 && LetterOrDigit(i - 1) && i + 1 < chars.Length && LetterOrDigit(i + 1))
+                    continue;
                 if (start >= 0)
                 {
-                    Add(start, i - 1);
+                    Add(start, i - 1, i);
                     start = -1;
                 }
-                // A text that starts with a character that is neither a word character nor
-                // punctuation (white space, a symbol, a sprite) begins with an empty word
-                // (first 0, last -1); a text without words is one word of its first character
-                // (measured: the shipped package records them so).
-                else if (i == 0 && count > 0 && (chars[0].elementType == TMP_TextElementType.Sprite || !char.IsPunctuation(chars[0].character)))
-                    Add(0, -1);
+                // A text that starts with a separator that is not punctuation (white space, a
+                // symbol, a sprite), or is a single character that is not a word character,
+                // begins with an empty word (first 0, last -1).
+                else if (i == 0 && (sprite || !IsWordPunctuation(c) || count == 1))
+                    Add(0, -1, 0);
             }
-            if (words == 0 && count > 0) Add(0, 0);
-            info.wordCount = words;
-            var lines = s_Lines;
-            for (int k = 0; k < info.lineCount; k++)
+            // A text without words is one word, with no record: the first keeps the previous
+            // layout's.
+            info.wordCount = words == 0 && count > 0 ? 1 : words;
+            int lineCount = info.lineCount;
+            for (int k = 0; k < lineCount; k++) info.lineInfo[k].wordCount = 0;
+            for (int j = 0, k = 0; j < words; j++)
             {
-                int w = 0;
-                for (int j = 0; j < words; j++)
-                    if (info.wordInfo[j].firstCharacterIndex >= lines[k].First && info.wordInfo[j].firstCharacterIndex <= lines[k].Last) w++;
-                info.lineInfo[k].wordCount = w;
+                int at = s_WordEnds[j];
+                while (k < lineCount - 1 && info.lineInfo[k].lastCharacterIndex < at) k++;
+                if (k < lineCount) info.lineInfo[k].wordCount++;
             }
         }
 

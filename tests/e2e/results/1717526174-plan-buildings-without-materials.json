@@ -1,0 +1,79 @@
+{
+ "spec": "mods/1717526174-plan-buildings-without-materials.yaml",
+ "mods": [
+  "1717526174"
+ ],
+ "verdict": "warning",
+ "why": "known findings: scroll-normalized-position",
+ "findings": [
+  "scroll-normalized-position"
+ ],
+ "note": "with snow discovered but none in the colony, the Snow Tile's card takes a click on the snow anyway, the build tool comes up and the blueprint is placed; the card as in the original",
+ "updated": "2026-10-22",
+ "commit": "1c79be8",
+ "mod_dlls": {
+  "1717526174": {
+   "PlanBuildingsWithoutMaterials.dll": "6fc5d45d4bcd8a0ad811c1251b84fa5d99143e09aac9edcd623093ac8c466d78"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261022-230644-b574c0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-22T23:06:44",
+    "lane": 11,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261022-230854-56d8cb",
+    "index": 1,
+    "verdict": "warn",
+    "date": "2026-10-22T23:08:54",
+    "lane": 11,
+    "reference_run": "20261022-230644-b574c0",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "card": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "card": 0.007747
+    }
+   },
+   {
+    "run": "20261022-230854-56d8cb",
+    "index": 2,
+    "verdict": "warn",
+    "date": "2026-10-22T23:10:14",
+    "lane": 11,
+    "reference_run": "20261022-230644-b574c0",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "card": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "card": 0.007747
+    }
+   }
+  ]
+ }
+}

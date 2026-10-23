@@ -1,0 +1,35 @@
+# Plan Buildings Without Materials (1717526174), class S.
+#
+# What it does: buildings whose materials the colony lacks can still be chosen and placed as
+# blueprints, to be built once the materials turn up: the build menu reports them as buildable
+# (PlanScreen.GetBuildableStateForDef turns Materials into Complete) and the material selector
+# allows too little (MaterialSelector.AllowInsufficientMaterialBuild is always true).
+# How a player reaches it: the build menu.
+# What changes: the build tool comes up for such a building, and its blueprint can be placed.
+#
+# early-base has no snow, so the Snow Tile (Base) lacks its material. setup marks snow as
+# discovered (an undiscovered material is not offered at all), so the card lists it with 0 kg
+# of 30 and stays on the prebuild tool; with the mod a click on the snow chooses it anyway
+# and the build tool comes up. The tile is placed in the dug-out corridor west of the pod.
+from: early-base
+mods: [1717526174]
+setup:
+  - driver: {setup.call: {target: "DiscoveredResources.Instance", method: Discover, args: [Snow]}}
+steps:
+  - driver: {camera.set: {cell: [114, 208], ortho: 10}}
+  - open: {key: Alpha1}
+  - ui_wait: {path: "**/PlanBuildingSelectionPanel/BuildingGroups", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/SnowTile Group*"}
+  - ui_wait: {path: "**/PlanBuildingSelectionPanel/ProductInfoScreen", cond: stable}
+  - expect_ui:
+      "**/MaterialSelectorTemplate/**/Toggles/MaterialSelection_*/HeldText": {text: "0"}
+      "**/MaterialSelectorTemplate/**/Toggles/MaterialSelection_*/RequiredText": {text: "30"}
+  - click: {ui: "**/MaterialSelectorTemplate/**/Toggles/MaterialSelection_*"}
+  - expect_state:
+      "PlayerController.Instance.ActiveTool.name": BuildTool
+      "PlanScreen.Instance.ProductInfoScreen.materialSelectionPanel.CurrentSelectedElement.Name": Snow
+  - ui_dump: {name: card, root: "**/PlanBuildingSelectionPanel/ProductInfoScreen"}
+  - shot: {name: card, crop: "**/PlanBuildingSelectionPanel/ProductInfoScreen", threshold: 0.04}
+  - click_world: {cell: [113, 207]}
+  - key: {code: Escape}
+  - expect: {blueprints: {SnowTile: 1}}

@@ -170,7 +170,8 @@ nothing changes them, so no per-draw copy of the inputs is needed.
 
 ### What moved, and why it is exact
 
-1. **Workers** (`Parallel.For`, chunks of at least 24 draws, queues of at least 96) record each
+1. **Workers** (the main thread and up to three helper threads of the recorder's own,
+   `ForkJoin`; chunks of at least 24 draws, queues of at least 96) record each
    draw into the frame's arena, a child arena per chunk (`FrameArena.Child`, reset with the
    frame): everything but what would add a cache entry or compile. The material's values,
    found out of date (the game sets globals every frame, so almost every entry is), are
@@ -216,7 +217,9 @@ recorded serially. The overlays scenario's 14 captures (2048×1536): all identic
 Stopwatch counters (`ONI_RENDER_TIMING=1`: main-thread wall time of `FrameRenderer.RenderFrame`
 and of its draw queues, 600-frame windows), every tweak, Linux, 1280×720, under the exclusive
 machine lock. `ONI_PARALLEL_DRAWS=alternate` switches between serial and parallel recording
-every window, so both are measured in one run; the first window (the load) is left out.
+every window, so both are measured in one run; the first window (the load) is left out. (This
+first version ran the workers on `Parallel.For`; see below for why that changed, and for the
+whole-run numbers of the version kept.)
 
 | Main-thread ms a frame | Gluttony serial | Gluttony parallel | U57 serial | U57 parallel |
 |---|---|---|---|---|
@@ -229,6 +232,34 @@ every window, so both are measured in one run; the first window (the load) is le
 Gluttony (`presync-clean.sav`, 1,830 draws a frame): 1.8 ms less rendering a frame; U57
 (1,520 draws): 1.35 ms. More than the audit's estimate, because the values refresh moved too:
 it runs for nearly every draw every frame.
+
+### Not the thread pool: a busy machine
+
+QA's perf stage then found it slower over whole runs: U57, 4,800 frames, 37.6 fps off and 34.6
+on, windows falling from 37.6 to 25.1 as the run went on. Alternating windows hide what
+happens across a run, so it was reproduced with whole runs, with thread-pool, thread, GC and
+CPU counters added to the timing lines. On an idle machine those stayed flat and the
+recording kept its gain. With other work on 12 of the 16 cores (busy loops, standing in for
+the other players QA's machine runs between its locked stages) it lost: 14.3 fps on against
+17.5 off, though its draw queues were only about 0.5 ms slower. The loss was elsewhere in the
+frame: after each `Parallel.For` (several a frame) the pool's workers, up to one a core, spin
+looking for more work, and on a busy machine that spinning takes the cores of the GL thread
+and of the game's job threads. Pool threads, GC counts and the heap were the same either
+way, so neither pool growth nor the child arenas were the cause.
+
+The recording now runs on `ForkJoin`: the main thread and a quarter of the cores' worth of
+helper threads (at most three) of its own, which sleep in the kernel between queues and never
+spin. The main thread claims chunks too, so a helper that wakes late finds nothing left; the
+main thread waits only for chunks a helper has claimed (0.2 ms a frame, U57). Results:
+
+| U57, `scripts/qa.sh perf` (4,800 frames, every tweak) | Off | On |
+|---|---|---|
+| Idle machine, back to back (off, on, on, off) | 38.89, 38.40 fps | 41.85, 43.39 fps |
+| · steady windows, render timing | 37.0–40.6 fps, rendering 3.0–3.2 ms | 39.6–44.9 fps, rendering 1.9–2.0 ms |
+| 12 of 16 cores busy | 17.53 fps (draw queues 3.3–3.5 ms) | 19.21 fps (2.0–2.2 ms); with `Parallel.For` 14.32 |
+
+No window falls as the run goes on. `fast-anim-batches` still runs on `Parallel.For` and may
+show the same effect on a busy machine.
 
 ## Other candidates
 

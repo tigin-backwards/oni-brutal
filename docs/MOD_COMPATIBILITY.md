@@ -97,7 +97,7 @@ installs get developer checks subscribers never see).
 | 76 | [Ronivan's Legacy - Industrial Revolution](https://steamcommunity.com/sharedfiles/filedetails/?id=3557584850) | ✅ | ✅ | ✅ | spec tests/e2e/mods/3557584850-ronivans-legacy.yaml: broad smoke spec: building and element counts as in the original; a Metal Ladder built through the normal flow and selected, details screen compared |
 | 77 | [Scaffolds / 脚手架](https://steamcommunity.com/sharedfiles/filedetails/?id=3103376569) | ✅ | ✅ | ✅ | spec tests/e2e/mods/3103376569-scaffolds.yaml: a column of scaffolds dragged from the build menu stands at once; Make Permanent and Remove from its user menu; product card and user menu compared |
 | 78 | [Self-sealing Airlocks](https://steamcommunity.com/sharedfiles/filedetails/?id=1735550356) | ⬜ | ⬜ | ⬜ | flagged by onimaxxing (notLoading); not tested |
-| 79 | [Speed Control 202107](https://steamcommunity.com/sharedfiles/filedetails/?id=2552175137) | ✅ | ✅ | ⬜ |  |
+| 79 | [Speed Control 202107](https://steamcommunity.com/sharedfiles/filedetails/?id=2552175137) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2552175137-speed-control.yaml: the speed buttons, clicked while the game runs, set the time scale to the mod's defaults, 3, 10 and 1; the speed buttons' layout matches |
 | 80 | [AI Improvements](https://steamcommunity.com/sharedfiles/filedetails/?id=2128885110) | ✅ | ✅ | ⬜ |  |
 | 81 | [The Capsules 2.0](https://steamcommunity.com/sharedfiles/filedetails/?id=3179880371) | ✅ | ✅ | ⬜ |  |
 | 82 | [More Marble Sculptures](https://steamcommunity.com/sharedfiles/filedetails/?id=2789182100) | ✅ | ✅ | ⬜ |  |
@@ -123,7 +123,7 @@ installs get developer checks subscribers never see).
 | 102 | [Drains](https://steamcommunity.com/sharedfiles/filedetails/?id=1866754178) | ✅ | ✅ | ⬜ |  |
 | 103 | [schedule shift](https://steamcommunity.com/sharedfiles/filedetails/?id=1932765859) | ⬜ | ⬜ | ⬜ | flagged by onimaxxing (crashesAtStartup); not tested |
 | 104 | [Auto-Eject](https://steamcommunity.com/sharedfiles/filedetails/?id=2551341883) | ✅ | ✅ | ⬜ |  |
-| 105 | [Immigrants Reroll](https://steamcommunity.com/sharedfiles/filedetails/?id=2537508393) | ✅ | ✅ | ⬜ |  |
+| 105 | [Immigrants Reroll](https://steamcommunity.com/sharedfiles/filedetails/?id=2537508393) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2537508393-immigrants-reroll.yaml: the immigrant screen's bottom button, labelled Reroll, deals four new cards without a confirmation and the screen stays open; the bottom buttons' layout and pixels match |
 | 106 | [Convenient Scheduling](https://steamcommunity.com/sharedfiles/filedetails/?id=3369089274) | ✅ | ✅ | ⬜ |  |
 | 107 | [[Vanilla + DLC] Rooms Expanded](https://steamcommunity.com/sharedfiles/filedetails/?id=2348079481) | ✅ | ✅ | ⬜ |  |
 | 108 | [Backwalls](https://steamcommunity.com/sharedfiles/filedetails/?id=2921809973) | ✅ | ✅ | ⬜ |  |

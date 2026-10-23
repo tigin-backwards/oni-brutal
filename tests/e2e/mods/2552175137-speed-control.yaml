@@ -1,0 +1,39 @@
+# Speed Control 202107 (2552175137), class S.
+#
+# What it does: the three speed buttons run the game at the time scales of its config file,
+# Config/SpeedControlConfig.json beside its assembly (1, 3 and 10 by default; the game's own
+# are 1, 2 and 3): a prefix replaces SpeedControlScreen.OnChanged. The Workshop build ships no
+# config file, so it logs the missing file and uses the defaults.
+# How a player reaches it: the speed buttons beside the clock.
+# What changes: Time.timeScale while the game runs.
+#
+# The runner keeps the game paused through OniMcp (the pause button cannot lift that hold), so
+# the game is resumed and paused again through OniMcp; the speed buttons are clicked while it
+# runs, as in Customizable Speed's spec.
+from: early-base
+mods: [2552175137]
+steps:
+  - expect_state:
+      "SpeedControlScreen.Instance.IsPaused": true
+      "Time.timeScale": 0
+  - ui_dump: {name: speed, root: "**/SecondaryRow/SpeedControlScreen"}
+  # A resume straight after the load does not take: the game runs a few seconds first.
+  - run: {seconds: 5}
+  - call: {tool: game_control, args: {domain: speed, action: resume, confirm: true}}
+  - click: {ui: "**/SecondaryRow/SpeedControlScreen/GenericIconButton_Medium"}
+  - expect_state:
+      "SpeedControlScreen.Instance.IsPaused": false
+      "SpeedControlScreen.Instance.GetSpeed()": 1
+      "Time.timeScale": 3
+  - click: {ui: "**/SecondaryRow/SpeedControlScreen/GenericIconButton_Fast"}
+  - expect_state:
+      "SpeedControlScreen.Instance.GetSpeed()": 2
+      "Time.timeScale": 10
+  - click: {ui: "**/SecondaryRow/SpeedControlScreen/GenericIconButton_Slow"}
+  - expect_state:
+      "SpeedControlScreen.Instance.GetSpeed()": 0
+      "Time.timeScale": 1
+  - call: {tool: game_control, args: {domain: speed, action: pause, confirm: true}}
+  - expect_state:
+      "SpeedControlScreen.Instance.IsPaused": true
+      "Time.timeScale": 0

@@ -1,0 +1,63 @@
+{
+ "spec": "mods/2552175137-speed-control.yaml",
+ "mods": [
+  "2552175137"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the speed buttons, clicked while the game runs, set the time scale to the mod's defaults, 3, 10 and 1; the speed buttons' layout matches",
+ "updated": "2026-10-23",
+ "commit": "95300c8",
+ "mod_dlls": {
+  "2552175137": {
+   "SpeedControl.dll": "92b1a98a05f30f4dd4ced2c3500b9715e5bd5974e96bfcdc15185280678bd296"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-000220-4b27bb",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T00:02:20",
+    "lane": 10,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-000409-88a650",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T00:04:09",
+    "lane": 10,
+    "reference_run": "20261023-000220-4b27bb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "speed": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261023-000409-88a650",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T00:04:10",
+    "lane": 11,
+    "reference_run": "20261023-000220-4b27bb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "speed": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

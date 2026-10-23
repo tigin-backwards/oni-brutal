@@ -1,0 +1,67 @@
+{
+ "spec": "mods/2537508393-immigrants-reroll.yaml",
+ "mods": [
+  "2537508393"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the immigrant screen's bottom button, labelled Reroll, deals four new cards without a confirmation and the screen stays open; the bottom buttons' layout and pixels match",
+ "updated": "2026-10-23",
+ "commit": "95300c8",
+ "mod_dlls": {
+  "2537508393": {
+   "ImmigrantsReroll.dll": "039f06d62c1544931110ef1098a9564a689ce396f101367127280e3d79e40249"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-000220-4b27bb",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T00:02:21",
+    "lane": 11,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-000415-6ad42f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T00:05:01",
+    "lane": 10,
+    "reference_run": "20261023-000220-4b27bb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "buttons": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "buttons": 0.001592
+    }
+   },
+   {
+    "run": "20261023-000415-6ad42f",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T00:05:05",
+    "lane": 11,
+    "reference_run": "20261023-000220-4b27bb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "buttons": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "buttons": 0.001592
+    }
+   }
+  ]
+ }
+}

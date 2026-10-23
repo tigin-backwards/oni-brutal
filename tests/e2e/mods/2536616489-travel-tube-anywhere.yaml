@@ -1,0 +1,35 @@
+# [DLC+Vanilla]Travel Tube Anywhere (2536616489), class P.
+#
+# What it does: a postfix on TravelTubeConfig.CreateBuildingDef sets the Transit Tube's build
+# rule to Anywhere (the game's is NotInTiles) and moves it to the backwall object layer, so a
+# tube can run through constructed tiles and behind other buildings.
+# How a player reaches it: the build menu (Transit Tube, researched with Transit Tubes);
+# placing a tube over a tile.
+# What changes: a tube blueprint is accepted inside a tile, and is built there.
+#
+# setup grants Transit Tubes and spawns sandstone and plastic. A Tile is built in the dug-out
+# corridor west of the printing pod; then a Transit Tube is placed in the same cell, which the
+# game alone refuses, and built.
+from: early-base
+mods: [2536616489]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"TravelTubes\")", method: Purchased}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"SandStone\").substance", method: SpawnResource, args: [[109.5, 206.5, -12], 200, 300, 255, 0]}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Polypropylene\").substance", method: SpawnResource, args: [[110.5, 206.5, -12], 200, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"TravelTube\").BuildLocationRule": Anywhere
+      "Assets.GetBuildingDef(\"TravelTube\").ObjectLayer": Backwall
+  - expect_state:
+      "Grid.XYToCell(114, 208)": {save_as: cell}
+      "count:all:Building::[*] if .Def.PrefabID == Tile": {save_as: tiles}
+  - build: {prefab: Tile, at: [114, 208], material: SandStone}
+  - expect: {blueprints: {Tile: 1}}
+  - run: {seconds: 900, until: {pending_construction: 0}}
+  - expect_state: {"count:all:Building::[*] if .Def.PrefabID == Tile": "== tiles + 1"}
+  - build: {prefab: TravelTube, at: [114, 208]}
+  - expect: {blueprints: {TravelTube: 1}}
+  - run: {seconds: 900, until: {buildings: {TravelTube: 1}, pending_construction: 0}}
+  - expect_state:
+      "all:TravelTube::[0].GetComponent<Building>.GetCell()": "== cell"
+      "count:all:Building::[*] if .Def.PrefabID == Tile": "== tiles + 1"

@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2536616489-travel-tube-anywhere.yaml",
+ "mods": [
+  "2536616489"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Transit Tube placed with OniMcp in a built Tile's cell is accepted and built there, the tile staying",
+ "updated": "2026-10-23",
+ "commit": "874f9a3",
+ "mod_dlls": {
+  "2536616489": {
+   "TravelTubeAnywhere.dll": "d4d8480dcef4ec6336cabfddb9a07bc6893130b4a16d81e92dbba8e064afe5e4"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-141422-cbe96f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T14:14:47",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-142224-22b3e6",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T14:23:59",
+    "lane": 15,
+    "reference_run": "20261023-141422-cbe96f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-142224-22b3e6",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T14:25:39",
+    "lane": 15,
+    "reference_run": "20261023-141422-cbe96f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

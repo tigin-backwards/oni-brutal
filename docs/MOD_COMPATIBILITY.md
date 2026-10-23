@@ -316,12 +316,12 @@ installs get developer checks subscribers never see).
 | 295 | [Dupes Machinery](https://steamcommunity.com/sharedfiles/filedetails/?id=2888290233) | ✅ | ✅ | ⬜ |  |
 | 296 | [Mineral Processing - Metallurgy](https://steamcommunity.com/sharedfiles/filedetails/?id=1970894610) | ✅ | ✅ | ⬜ |  |
 | 297 | [Refresh Printing Pod](https://steamcommunity.com/sharedfiles/filedetails/?id=2642931981) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2642931981-refresh-printing-pod.yaml: the Refresh button (renamed Reject All) deals four new cards without a confirmation box, twice, the screen staying open; its buttons as in the original |
-| 298 | [量杯](https://steamcommunity.com/sharedfiles/filedetails/?id=3336359859) | ✅ | ✅ | ⬜ |  |
+| 298 | [量杯](https://steamcommunity.com/sharedfiles/filedetails/?id=3336359859) | ✅ | ✅ | ⬜ | spec fails in ours: tests/e2e/mods/3336359859-measuring-cup.yaml: a Bottle Emptier gets the capacity side screen (200 kg) and a value typed into its field becomes its capacity, as in the original; after the typed value is submitted, ours lays the field out to the new text (preferred width 45.84 vs 55.01, the Max row 9 px narrower) and leaves its caret at 0 (5 in the original) (a run of ours failed) |
 | 299 | [More Emotions](https://steamcommunity.com/sharedfiles/filedetails/?id=3204363352) | ✅ | ✅ | ⬜ |  |
 | 300 | [Dupes Refrigeration](https://steamcommunity.com/sharedfiles/filedetails/?id=2021324045) | ✅ | ✅ | ⬜ |  |
 | 301 | [telescope auto research](https://steamcommunity.com/sharedfiles/filedetails/?id=1888643088) | ⬜ | ⬜ | ⬜ | flagged by onimaxxing (notLoading); not tested |
 | 302 | [skill experience 技能经验](https://steamcommunity.com/sharedfiles/filedetails/?id=2429077517) | ✅ | ✅ | ⬜ |  |
-| 303 | [[DLC+Vanilla]Travel Tube Anywhere](https://steamcommunity.com/sharedfiles/filedetails/?id=2536616489) | ✅ | ✅ | ⬜ |  |
+| 303 | [[DLC+Vanilla]Travel Tube Anywhere](https://steamcommunity.com/sharedfiles/filedetails/?id=2536616489) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2536616489-travel-tube-anywhere.yaml: a Transit Tube placed with OniMcp in a built Tile's cell is accepted and built there, the tile staying |
 | 304 | [Advanced Generators](https://steamcommunity.com/sharedfiles/filedetails/?id=1934934314) | ✅ | ✅ | ⬜ |  |
 | 305 | [Optimized official Chinese【SU】](https://steamcommunity.com/sharedfiles/filedetails/?id=1493391479) | ⬜ | ⬜ | ⬜ | translation: the game applies one only from a Steam subscription; not testable here |
 | 306 | [Giga-watt Wire](https://steamcommunity.com/sharedfiles/filedetails/?id=3096204182) | ✅ | ✅ | ⬜ |  |

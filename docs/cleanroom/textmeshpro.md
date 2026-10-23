@@ -353,6 +353,8 @@ channel meanings must match exactly.
   - The caret and selection are drawn by a child graphic in the viewport.
   - The text is scrolled to keep the caret visible.
   - The placeholder shows when the text is empty.
+- **Layout element:** the field's preferred size is its text component's plus its viewport's
+  offsets. The rects do not enter it. See "The input field's layout values" below.
 
 KInputTextField overrides `LateUpdate` and calls the base implementation, so the base's
 `LateUpdate` must do its share of the work above (starting a requested activation, caret
@@ -961,6 +963,144 @@ Not measured: Page, Linked
 and ScrollRect, auto-size (whether a text of white space alone fits), margins, rich text,
 several fonts on one line, and whether "…" backs up past a visible character it cannot follow.
 Measure them the same way before relying on them.
+
+### The input field's layout values (measured 2026-10-23)
+
+Found in a mod play-test: Geyser Control opens a `MultiSliderSideScreen`. Each slider row's
+`TitleRow` (a `HorizontalLayoutGroup` controlling its children's width and height, not
+expanding them) holds a `NumberInputField`, a `KInputTextField` (a `TMP_InputField`). In the
+shipped package the row is 24 high and the field's rect is -32, -12, 64, 24. In this
+implementation the row's preferred height was 33,329.72 and the screen 166,846 px tall, drawn
+as a white column. The first value that differs is the field's own `preferredHeight`: 19.04
+in the shipped package, which equals its text component's, and 44.04 in this implementation
+at the field's first layout. That value then grows by 20.04 with every layout pass.
+
+The prefab, read in the original player through E2eDriver:
+- **The field:** a 64 × 24 rect (anchors top-left of the row), with a `LayoutElement` (min
+  64 × 24, preferred width 64, preferred height -1, flexible width 0, priority 1), a sliced
+  `Image` (priority 0), `KNumberInputField` and `KInputTextField`. Its settings: `SingleLine`,
+  `characterLimit` 4 (set by `SliderSet.SetTarget`), `DecimalNumber`, no placeholder.
+- **`textViewport`:** "Text Area", with a `RectMask2D` (padding 0), stretched over the field
+  with offsets 0.
+- **`textComponent`:** "Text", a `LocText` at 14 pt, no wrapping. It is anchored across the
+  viewport's top edge: anchors (0, 1)–(1, 1), size delta (-3, -1), position (1.5, -0.5). Its
+  rect is 61 wide and -1 high, whatever the field's height.
+- **The values:** the field's preferred size is 32.09 × 19.04, its text's 32.09 × 19.04.
+  `LayoutUtility` gives the field 64 × 24: the `LayoutElement`'s preferred width and minimum
+  height are the larger values. Forcing the
+  row's layout again (`LayoutRebuilder.ForceRebuildLayoutImmediate`) changes nothing.
+
+Measured with `PROBE_SCENARIO=inputlayout` (tools/UnityProbe, `InputLayout.cs`): fields built in
+code as Klei's prefabs are, a field with an `Image` and a `TMP_InputField`, its child
+"Text Area" (`RectMask2D`) as `textViewport`, and its grandchild "Text" (NotoSans-Regular
+14 pt, no wrapping) as `textComponent`. The cases vary:
+- the field's rect (64 × 24, 200 × 100, 10 × 5);
+- the text rect (stretched with offsets 0, inset by 10 and 6, moved, Geyser Control's
+  top-anchored one, a fixed 50 × 10 at the centre);
+- the viewport (stretched with offsets, fixed 40 × 10 at the centre, moved, anchored to part
+  of the field, larger than the field, with `RectMask2D` padding, not assigned);
+- the text's margins, and the text: "1915", "" and longer ones;
+- with and without a placeholder (20 pt, wider and taller than the text);
+- each line type, `characterLimit` 0 and 2, and no text component.
+
+Each value is read at once, after a forced rebuild and a frame later. The same fields are then
+laid out through four forced passes and three frames: in Geyser Control's row, under a
+`HorizontalLayoutGroup` with `childControlHeight` on, off, and on with
+`childForceExpandHeight`, with a `ContentSizeFitter` on the field, and in a row whose own
+`ContentSizeFitter` fits its height. `tools/UnityProbe/il-check.py rule LOG` checks the rule
+below against a log, and `il-check.py diff ORIG OURS` compares two. The rule reproduces all 888
+lines of the shipped package's log.
+- **The rule.** With a text component:
+  - `preferredWidth` is the text component's `preferredWidth` + (viewport `offsetMin.x` −
+    viewport `offsetMax.x`).
+  - `preferredHeight` is the text component's `preferredHeight` + (viewport `offsetMin.y` −
+    viewport `offsetMax.y`).
+  - The offsets are the viewport's own, as set relative to its anchors. With no viewport they
+    count as 0.
+  - `minWidth` and `minHeight` are 0, `flexibleWidth` and `flexibleHeight` -1, and
+    `layoutPriority` 1. `CalculateLayoutInputHorizontal` and `CalculateLayoutInputVertical`
+    change none of them.
+  - Without a text component, both preferred values are 0.
+- **Not the rects.** Neither the field's rect nor the text component's enters the value. The
+  same text gives the same value at 64 × 24, 200 × 100 and 10 × 5, and in every text rect,
+  including a negative one (Geyser Control's -1 high, or -10 × -7 in a 10 × 5 field). So
+  laying the field out cannot change its own preferred size, and repeated passes give the
+  same value: every pass in every layout above reports the same preferred size as the first.
+- **The viewport's offsets, not its rect.** A viewport fixed at 40 × 10 in the field's centre
+  has offsets (-20, -5) and (20, 5), so the field is 32.09 − 40 = -7.91 wide and
+  19.04 − 10 = 9.04 high. That holds in a 64 × 24 field and in a 200 × 100 one, and when the
+  viewport is moved by (6, 2), since its offsets differ by the same amounts. The value is not
+  clamped: -7.91 is reported, and `LayoutUtility.GetPreferredWidth` makes it 0 (as for any
+  value below the minimum). A viewport larger than the field (offsets (-5, -3) and (7, 4)) gives
+  32.09 − 12 = 20.09 by 19.04 − 7 = 12.04. A viewport anchored to the middle half of the field
+  with offsets 0 adds nothing. The `RectMask2D`'s padding adds nothing either.
+- **The text's own preferred size,** as "Text layout" and the sections above give it. Its
+  margins are in it (margins 4, 2, 6, 3 give 42.09 × 24.04). An empty field's text is the lone
+  U+200B: 0.01 × 19.04. The line type enters only through the text: a multi-line type turns
+  wrapping on, so "abc def ghi jkl mno" in a 64-wide text is 124.8 × 57.17 (three lines), as
+  its text component reports.
+- **The placeholder does not count,** shown or not: an empty field with a placeholder 293.81 ×
+  27.19 is 0.01 × 19.04, and so is the same field without it.
+- **`characterLimit` does not count** beyond what it does to the text.
+- **In layouts,** the field is laid out like any element of priority 1 with these values:
+  - Under a `HorizontalLayoutGroup` controlling height, the field "1915" becomes
+    32.09 × 19.04.
+  - With height control off, it is 32.09 wide and keeps its 24.
+  - With a `ContentSizeFitter` on the field, it is 32.09 × 19.04 from the next canvas update.
+  - Beside Geyser Control's `LayoutElement`, the larger value wins: 64 × 24, the row 24.
+
+Where this implementation deviates (`TMP_InputField.cs`, the layout element at the end):
+- It adds to the text's preferred size the difference between the field's rect and the text
+  component's rect, at least 0, not the viewport's offsets. That difference changes with the
+  field's own size wherever the text rect does not stretch with the field.
+- Geyser Control's text is anchored to the top and is -1 high in every field. So the field's
+  preferred height is 19.04 + (h + 1), where h is the field's current height: 44.04 at 24. A
+  parent that sizes the row to its preferred height makes the field 44.04 high, the next pass
+  reads 64.08, and so on. In the probe's fitted row, the passes give 44.04, 64.08, 84.12,
+  104.16, 124.2 and then 20.04 more each frame. In the game it keeps growing while the side
+  screen is open: the UI dump read the row at 33,329.72, and the field's `preferredHeight` was
+  82,485.54 when read later.
+- Where the text rect does stretch, the value is wrong without growing:
+  - a text inset by (-20, -12) gives 52.09 × 31.04 for 32.09 × 19.04;
+  - a viewport fixed at 40 × 10 gives 56.09 × 33.04 for -7.91 × 9.04;
+  - a viewport larger than the field is clamped to 32.09 × 19.04 for 20.09 × 12.04;
+  - a field without a viewport counts the text's offsets (44.09 × 26.04 for 32.09 × 19.04).
+- It matches where the viewport and the text both stretch over the field: offsets 0 (32.09 ×
+  19.04), or offsets on the viewport with the text at 0 (44.09 × 26.04). It also matches the
+  margins, the empty text, the placeholder, the line types and the missing text component.
+  In the probe 540 of the 888 lines differ, every one in `preferredWidth` or `preferredHeight`
+  first.
+
+| Field (text "1915", NotoSans 14 pt, 32.09 × 19.04) | shipped | this implementation before |
+|---|---|---|
+| Geyser Control: 64 × 24, text anchored to the top, size delta (-3, -1) | 32.09 × 19.04 | 35.09 × 44.04 |
+| the same, the field 200 × 100 | 32.09 × 19.04 | 35.09 × 120.04 |
+| the same in a row fitted to its height, passes 1 to 4 | 19.04 every pass | 64.08, 84.12, 104.16, 124.2 |
+| the same in Geyser Control's row (`LayoutElement` min 64 × 24) | row 24 | row 44.04; in the game 33,329.72 |
+| text and viewport stretched, offsets 0, any field size | 32.09 × 19.04 | 32.09 × 19.04 |
+| text inset (size delta (-20, -12)) | 32.09 × 19.04 | 52.09 × 31.04 |
+| viewport offsets (5, 3) and (-7, -4) | 44.09 × 26.04 | 44.09 × 26.04 |
+| viewport anchored (0.25, 0.5)–(0.75, 1), offsets (2, 1) and (-3, -4) | 37.09 × 24.04 | 69.09 × 36.04 |
+| viewport fixed 40 × 10 at the centre | -7.91 × 9.04 | 56.09 × 33.04 |
+| viewport offsets (-5, -3) and (7, 4), larger than the field | 20.09 × 12.04 | 32.09 × 19.04 |
+| no viewport, text inset by (5, 3) and (7, 4) | 32.09 × 19.04 | 44.09 × 26.04 |
+| `RectMask2D` padding (4, 3, 2, 1) | 32.09 × 19.04 | 32.09 × 19.04 |
+| text margins (4, 2, 6, 3) | 42.09 × 24.04 | 42.09 × 24.04 |
+| empty text, Geyser Control's text rect | 0.01 × 19.04 | 3.01 × 44.04 |
+| empty text, a placeholder 293.81 × 27.19 shown | 0.01 × 19.04 | 0.01 × 19.04 |
+| `MultiLineNewline`, "abc def ghi jkl mno" in 64 wide | 124.8 × 57.17 | 124.8 × 57.17 |
+| no text component | 0 × 0 | 0 × 0 |
+| min, flexible, priority (every case) | 0, -1, 1 | 0, -1, 1 |
+
+Also seen, outside the rule: `text` set from code on a field that is still inactive (as the probe
+builds them) keeps what `characterLimit` and `SingleLine` would refuse from typing. "1915"
+with a limit of 2 stays "1915", and "ab\ncd" in a `SingleLine` field keeps its line feed and is
+two lines (16.45 × 38.1). This implementation cuts them to "19" and "abcd". Neither case was
+measured on an active field, nor are these the layout values themselves. Measure them before
+relying on them.
+
+Not measured: a scaled or rotated viewport, a viewport that is not the field's child,
+`ForceLabelUpdate` between passes, the vertical scrollbar, and auto-size text.
 
 ## Verification
 

@@ -1,0 +1,34 @@
+# Custom Reservoirs (2407398520), classes B, O.
+#
+# What it does: adds eight smaller reservoirs of metal: Small Liquid and Gas Reservoirs and
+# their inverted versions (1x3; Liquid Piping, Gas Piping), Wall Liquid and Gas Tanks
+# (Improved Liquid and Gas Piping) and Medium Liquid and Gas Reservoirs (Improved Liquid
+# Piping, HVAC), in the Plumbing and Ventilation menus. Each is a smart reservoir with a logic
+# output and the game's threshold side screen, and is tinted by how full it is. A PLib options
+# dialog sets each one's volume (the Small Liquid Reservoir 2,500 kg) and which groups exist.
+# How a player reaches it: the build menu (Plumbing, Ventilation); the reservoir's side screen.
+# What changes: reservoirs that fit in small spaces.
+#
+# A smaller spec: no pipe fills it. setup grants Liquid Piping and spawns copper ore. A Small
+# Liquid Reservoir is built in the dug-out corridor west of the printing pod and selected: it
+# holds 90,000 kg, the volume in the settings file the mod ships (CustomReservoirsBaseConfig.json),
+# and its details screen is shot.
+from: early-base
+mods: [2407398520]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"LiquidPiping\")", method: Purchased}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Cuprite\").substance", method: SpawnResource, args: [[115.5, 207.5, -12], 400, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"LiquidPiping\").unlockedItemIDs": {contains: SmallLiquidReservoir}
+  - build: {prefab: SmallLiquidReservoir, at: [113, 206]}
+  - expect: {blueprints: {SmallLiquidReservoir: 1}}
+  - run: {seconds: 900, until: {buildings: {SmallLiquidReservoir: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: SmallLiquidReservoir}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<Storage>.capacityKg": 90000
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Small Liquid Reservoir"}
+  - shot: {name: details, crop: "**/DetailsScreen", threshold: 0.04}

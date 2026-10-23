@@ -1,0 +1,68 @@
+{
+ "spec": "mods/1873666181-imbastorages.yaml",
+ "mods": [
+  "1873666181"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the options set the Storage Bin to 50,000 kg; the four storages' prefabs carry the mod's capacities, and a Storage Bin built of sandstone shows its capacity side screen (dumped and shot); 1000 typed into it caps the bin at 1,000 kg",
+ "updated": "2026-10-23",
+ "commit": "7efbed1",
+ "mod_dlls": {
+  "1873666181": {
+   "ImbaStorage.dll": "701de47403ae92f86c6ce4cf91616f6e2089a9f634a032e6e1b252c800ae7bdb",
+   "PLib.dll": "5d6a8ef9d87143b90113548016180078efaf112d69afe0cdf1073a6125b33773"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-123333-3bbe4d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T12:37:08",
+    "lane": 13,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-125324-e4934d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T12:54:19",
+    "lane": 12,
+    "reference_run": "20261023-123333-3bbe4d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "side-screen": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "details": 0.0
+    }
+   },
+   {
+    "run": "20261023-125324-e4934d",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T12:55:27",
+    "lane": 12,
+    "reference_run": "20261023-123333-3bbe4d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "side-screen": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "details": 0.0
+    }
+   }
+  ]
+ }
+}

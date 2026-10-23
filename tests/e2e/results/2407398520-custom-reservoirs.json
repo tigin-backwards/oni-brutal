@@ -1,0 +1,60 @@
+{
+ "spec": "mods/2407398520-custom-reservoirs.yaml",
+ "mods": [
+  "2407398520"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "smaller spec (no pipes): a Small Liquid Reservoir is built of copper ore in the corridor and selected; it holds the 90,000 kg of the settings file the mod ships, and its details screen is shot",
+ "updated": "2026-10-23",
+ "commit": "7efbed1",
+ "mod_dlls": {
+  "2407398520": {
+   "Custom Reservoirs.dll": "d32491118a74b471aa12a6857dd9d4945f5901a0f8ce6d708610e2b3ee645de6",
+   "PLib.dll": "c4bb22f1bc06ebcb0dbba75a7f1bc46f63eaa3dae12c22a08729f1a6d3362dda"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-123333-3bbe4d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T12:46:54",
+    "lane": 13,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-125642-7372f5",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T12:56:42",
+    "lane": 12,
+    "reference_run": "20261023-123333-3bbe4d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "details": 4.1e-05
+    }
+   },
+   {
+    "run": "20261023-125642-7372f5",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T12:58:10",
+    "lane": 12,
+    "reference_run": "20261023-123333-3bbe4d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "details": 4.1e-05
+    }
+   }
+  ]
+ }
+}

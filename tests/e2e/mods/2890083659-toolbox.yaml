@@ -1,0 +1,31 @@
+# 游手的小工具箱 (MiniBox, 2890083659), classes T, O.
+#
+# What it does: a PLib options dialog of tweaks, each a patch on the game: the share of a dug
+# cell's mass dropped as debris (a transpiler on WorldDamage.OnDigComplete's 0.5), each wire
+# kind's maximum wattage (a postfix on Wire.GetMaxWattageAsFloat), storage, reservoir,
+# refrigerator and conveyor capacities, the Oxygen Diffuser's output, crop times and yields,
+# Duplicant needs (fatigue, hunger, bladder, stress), unlimited mopping (MopTool) and more.
+# How a player reaches it: the Mods screen's options; digging, wiring and building.
+# What changes: the numbers those options set.
+#
+# Options: a dig drops all of the cell's mass, a plain wire carries 3 kW, a Storage Bin holds
+# 30 t. Four cells of sandstone (5080 kg) at the east end of the dug-out corridor west of the
+# printing pod are dug, and the sandstone debris lying in the base is weighed before and after.
+from: early-base
+mods: [2890083659]
+options:
+  "2890083659": {$file: MiniBox.json, DiggingDropRate: 1.0, Wires: 3.0, StorageLockerCapacityKg: 30000.0}
+steps:
+  - expect_state:
+      "Wire.GetMaxWattageAsFloat(\"Max1000\")": 3000
+      "Wire.GetMaxWattageAsFloat(\"Max2000\")": 2000
+      "Assets.GetBuildingDef(\"StorageLocker\").BuildingComplete.GetComponent<Storage>.capacityKg": 30000
+  - expect_state:
+      "cells:119,209..120,210::Grid.Mass.get_Item({cell})": {save_as: block}
+      "sum:all:Clearable::[*].GetComponent<PrimaryElement>.Mass if .GetComponent<PrimaryElement>.ElementID == SandStone": {save_as: before}
+  - expect_state: {"cells:119,209..120,210::Grid.Element[{cell}].hardness": "> 0"}
+  - dig: [119, 209, 120, 210]
+  - run: {seconds: 900, until: {pending_digs: 0}}
+  # The game alone would leave before + 0.5 * block.
+  - expect_state:
+      "sum:all:Clearable::[*].GetComponent<PrimaryElement>.Mass if .GetComponent<PrimaryElement>.ElementID == SandStone": ">= before + 0.95 * block"

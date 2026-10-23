@@ -1,0 +1,59 @@
+{
+ "spec": "mods/2451195132-insulated-radbolt-joint-plate.yaml",
+ "mods": [
+  "2451195132"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "its option moves it to Materials Science Research; built across the corridor from plastic, its middle cell insulated, and selected",
+ "updated": "2026-10-23",
+ "commit": "fc688c9",
+ "mod_dlls": {
+  "2451195132": {
+   "HEPBridgeInsulationTile.dll": "3bb5d00df33c350d5e79abb8ed5364598b7a11f3ef3b45aeceac2332b1b3caff"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-150021-d9fd53",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T15:31:25",
+    "lane": 12,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-165024-0f430a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T16:50:24",
+    "lane": 12,
+    "reference_run": "20261023-150021-d9fd53",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "title": 0.0
+    }
+   },
+   {
+    "run": "20261023-165024-0f430a",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T16:56:23",
+    "lane": 12,
+    "reference_run": "20261023-150021-d9fd53",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "title": 0.0
+    }
+   }
+  ]
+ }
+}

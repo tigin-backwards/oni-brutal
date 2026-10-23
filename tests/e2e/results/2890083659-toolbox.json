@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2890083659-toolbox.yaml",
+ "mods": [
+  "2890083659"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "options in its MiniBox.json: a dig drops all the cell's mass, a wire carries 3 kW, a Storage Bin holds 30 t",
+ "updated": "2026-10-23",
+ "commit": "b1e12df",
+ "mod_dlls": {
+  "2890083659": {
+   "MiniBox.dll": "f58fea64f38de6a6229cf18b6724c74fab7665ffb0cb1ad7dbc3ca60f549a06b"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-150021-d9fd53",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T15:20:09",
+    "lane": 12,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-163639-fc72cf",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T16:36:39",
+    "lane": 12,
+    "reference_run": "20261023-150021-d9fd53",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-163639-fc72cf",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T16:41:07",
+    "lane": 12,
+    "reference_run": "20261023-150021-d9fd53",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

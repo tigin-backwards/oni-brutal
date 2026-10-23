@@ -1,0 +1,38 @@
+# Insulated Radbolt Joint Plate (2451195132), classes B, O.
+#
+# What it does: adds an insulated Radbolt Joint Plate (HighEnergyParticleWallBridgeRedirector,
+# a 3x1 tile of raw mineral and plastic or glass, in the Radiation menu): it carries radbolts
+# through a wall like the game's plate, and its tile conducts heat at 0.01 (an Insulator). A
+# PLib option picks its research (Radbolt Containment, NuclearStorage, by default), another the
+# old animation.
+# How a player reaches it: the build menu (Radiation), after the research.
+# What changes: a radbolt passage through an insulated wall.
+#
+# Option: it is researched with Materials Science Research (AdvancedNuclearResearch). setup
+# grants that and sets plastic down; the plate is built across the dug-out corridor west of
+# the printing pod (110..112, 208), and its middle cell is insulated.
+from: early-base
+mods: [2451195132]
+options:
+  Sanchozz.ONIMods.HEPBridgeInsulationTile: {research_mod: AdvancedNuclearResearch}
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"AdvancedNuclearResearch\")", method: Purchased}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Polypropylene\").substance", method: SpawnResource, args: [[113.5, 206.5, -12], 200, 300, 255, 0]}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"SandStone\").substance", method: SpawnResource, args: [[114.5, 206.5, -12], 600, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"AdvancedNuclearResearch\").unlockedItemIDs": {contains: HighEnergyParticleWallBridgeRedirector}
+      "Assets.GetBuildingDef(\"HighEnergyParticleWallBridgeRedirector\").ThermalConductivity": 0.01
+      "Assets.GetBuildingDef(\"HighEnergyParticleWallBridgeRedirector\").Deprecated": false
+      "cells:111,208..111,208::Grid.Insulation.get_Item({cell})": 255
+  - build: {prefab: HighEnergyParticleWallBridgeRedirector, at: [110, 208]}
+  - expect: {blueprints: {HighEnergyParticleWallBridgeRedirector: 1}}
+  - run: {seconds: 1200, until: {buildings: {HighEnergyParticleWallBridgeRedirector: 1}, pending_construction: 0}}
+  - expect_state: {"cells:111,208..111,208::Grid.Insulation.get_Item({cell})": "< 10"}
+  - expect_state: {"cells:111,208..111,208::Grid.Insulation.get_Item({cell})": "== original"}
+  - driver: {camera.set: {cell: [111, 208], ortho: 8}}
+  - click_world: {cell: [111, 208], select: HighEnergyParticleWallBridgeRedirector}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Insulated"}
+  - shot: {name: title, crop: "**/DetailsScreen/TitleBar", threshold: 0.04}

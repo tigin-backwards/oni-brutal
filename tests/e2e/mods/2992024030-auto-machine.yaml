@@ -1,0 +1,36 @@
+# auto machine机器自动工作 (2992024030), classes P, O.
+#
+# What it does: thirty of the game's fabricators and machines work without a Duplicant
+# (ComplexFabricator.duplicantOperated set false: the Electric Grill, Gas Range, Rock Crusher,
+# Metal Refinery, Glass Forge, Molecular Forge, Microbe Musher, Exosuit Forge, Textile Loom,
+# Crafting Station and more), and the Desalinator empties its own salt. A PLib options dialog
+# (Chinese names) turns each one off.
+# How a player reaches it: the Mods screen's Options dialog; building the machines.
+# What changes: no operator errands.
+#
+# A smaller spec: every one of these machines needs power, which early-base does not have to
+# spare. The options turn the Rock Crusher off, and the machines' prefabs follow them. setup
+# grants Jobs and spawns copper ore; a Crafting Station is built in the dug-out corridor west
+# of the printing pod and selected: it needs no operator.
+from: early-base
+mods: [2992024030]
+options:
+  "2992024030": {碎石机: false}
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"Jobs\")", method: Purchased}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Cuprite\").substance", method: SpawnResource, args: [[115.5, 207.5, -12], 400, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"CraftingTable\").BuildingComplete.GetComponent<ComplexFabricator>.duplicantOperated": false
+      "Assets.GetBuildingDef(\"MicrobeMusher\").BuildingComplete.GetComponent<ComplexFabricator>.duplicantOperated": false
+      "Assets.GetBuildingDef(\"RockCrusher\").BuildingComplete.GetComponent<ComplexFabricator>.duplicantOperated": true
+  - build: {prefab: CraftingTable, at: [107, 206]}
+  - expect: {blueprints: {CraftingTable: 1}}
+  - run: {seconds: 1200, until: {buildings: {CraftingTable: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [107, 207], ortho: 8}}
+  - click_world: {cell: [107, 207], select: CraftingTable}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<ComplexFabricator>.duplicantOperated": false
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Crafting Station"}

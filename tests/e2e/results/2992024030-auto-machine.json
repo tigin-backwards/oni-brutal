@@ -1,0 +1,56 @@
+{
+ "spec": "mods/2992024030-auto-machine.yaml",
+ "mods": [
+  "2992024030"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "smaller spec (every such machine needs power): the options turn the Rock Crusher off and the machines' prefabs follow them; a Crafting Station built of copper ore in the corridor needs no operator",
+ "updated": "2026-10-23",
+ "commit": "f96deb8",
+ "mod_dlls": {
+  "2992024030": {
+   "PLib.dll": "5d6a8ef9d87143b90113548016180078efaf112d69afe0cdf1073a6125b33773",
+   "╗·╞≈╫╘╢»╣ñ╫≈.dll": "b3f55c7b79d55a23a09613cd9e74fd55617359aedb7ff22e5cdc2b4bc29cd060"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-130426-e75773",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T13:11:23",
+    "lane": 12,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-131329-9798a7",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T13:19:14",
+    "lane": 12,
+    "reference_run": "20261023-130426-e75773",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-131329-9798a7",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T13:20:33",
+    "lane": 12,
+    "reference_run": "20261023-130426-e75773",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

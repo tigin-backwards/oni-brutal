@@ -1,0 +1,39 @@
+# Huge Battery (1868495239), class B.
+#
+# What it does: adds the Huge Battery (LargeBattery, 2x3, 200 kg of any metal, in the Power
+# menu, researched with Combustion): it stores 80 kJ and leaks 5 % of that a cycle, but stores
+# only half the energy it is charged with (a prefix on Battery.AddEnergy halves the joules for
+# it).
+# How a player reaches it: the build menu (Power), after the research.
+# What changes: a bigger battery.
+#
+# setup grants Combustion. The Power menu lists it after a short run; a Huge Battery is built
+# in the dug-out corridor west of the printing pod and selected: it holds 80 kJ.
+from: early-base
+mods: [1868495239]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"Combustion\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"Combustion\").unlockedItemIDs": {contains: LargeBattery}
+      "Assets.GetBuildingDef(\"LargeBattery\").BuildingComplete.GetComponent<Battery>.capacity": 80000
+  - run: {seconds: 5}
+  - driver: {camera.set: {cell: [114, 208], ortho: 10}}
+  - click: {ui: "**/PlanScreen/Toggle:Power"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/LargeBattery Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/LargeBattery Group*": {active: true}
+  - shot: {name: power-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
+  - key: {code: Escape}
+  - expect_ui: {"**/PauseScreen": {exists: false}}
+  - build: {prefab: LargeBattery, at: [113, 206]}
+  - expect: {blueprints: {LargeBattery: 1}}
+  - run: {seconds: 1200, until: {buildings: {LargeBattery: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [114, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: LargeBattery}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<Battery>.capacity": 80000
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Huge Battery"}

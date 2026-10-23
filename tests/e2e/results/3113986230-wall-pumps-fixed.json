@@ -1,0 +1,60 @@
+{
+ "spec": "mods/3113986230-wall-pumps-fixed.yaml",
+ "mods": [
+  "3113986230"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Gas Wall Vent built as a solid tile in the corridor and selected; its PLib option sets its maximum pressure to 3 kg",
+ "updated": "2026-10-23",
+ "commit": "8b8655c",
+ "mod_dlls": {
+  "3113986230": {
+   "PLib.dll": "28d17ee798b06211d08688402a2d710ae6f73b55f9734e599b305732dcab9d70",
+   "WallPumps.dll": "2d18e71005fe8c63a002786cba157e7ff2a444c66576343a314a6d6a329a1ccd"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-142249-8bc65a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T14:29:15",
+    "lane": 13,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-152842-3ae1db",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T15:28:42",
+    "lane": 13,
+    "reference_run": "20261023-142249-8bc65a",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "details": 0.002155
+    }
+   },
+   {
+    "run": "20261023-152842-3ae1db",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T15:30:13",
+    "lane": 13,
+    "reference_run": "20261023-142249-8bc65a",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "details": 0.002155
+    }
+   }
+  ]
+ }
+}

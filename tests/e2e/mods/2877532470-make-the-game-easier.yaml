@@ -1,0 +1,36 @@
+# Make the game easier-轻松游戏 (2877532470), classes P, O.
+#
+# What it does: about thirty PLib options (all on by default), each easing one building or
+# rule: bigger storage (the Storage Bin holds 2,000 t, the reservoirs more), buildings that do
+# not overheat, the Metal Refinery at 400 W and not operated by a Duplicant, insulated doors
+# that block gas and liquid, wires that carry more, no CO2 from the Polymer Press, and so on
+# (patches on the buildings' configs).
+# How a player reaches it: the Mods screen's options; building the buildings it changes.
+# What changes: those buildings' numbers.
+#
+# Its options are left at their defaults. A Storage Bin is built from sandstone in the dug-out
+# corridor west of the printing pod and selected: it holds 2,000 t, its capacity slider
+# reaches that, and a capacity typed into the side screen is kept.
+from: early-base
+mods: [2877532470]
+setup:
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"SandStone\").substance", method: SpawnResource, args: [[113.5, 207.5, -12], 600, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"StorageLocker\").BuildingComplete.GetComponent<Storage>.capacityKg": 2000000
+      "Assets.GetBuildingDef(\"MetalRefinery\").EnergyConsumptionWhenActive": 400
+      "Assets.GetBuildingDef(\"MetalRefinery\").BuildingComplete.GetComponent<LiquidCooledRefinery>.duplicantOperated": false
+  - build: {prefab: StorageLocker, at: [113, 206], material: SandStone}
+  - expect: {blueprints: {StorageLocker: 1}}
+  - run: {seconds: 900, until: {buildings: {StorageLocker: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: StorageLocker}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/CapacityControlSideScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<Storage>.capacityKg": 2000000
+      "ui:**/CapacityControlSideScreen/**/Slider::GetComponent<KSlider>.maxValue": 2000000
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Storage Bin"}
+  - shot: {name: details, crop: "**/DetailsScreen", threshold: 0.04}
+  - type: {ui: "**/CapacityControlSideScreen/**/InputField", text: "250000", enter: true, clear: true}
+  - expect_state: {"selected:GetComponent<StorageLocker>.UserMaxCapacity": 250000}

@@ -1,0 +1,59 @@
+{
+ "spec": "mods/1868495239-huge-battery.yaml",
+ "mods": [
+  "1868495239"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Power menu lists it after Combustion; built in the corridor and selected, it holds 80 kJ",
+ "updated": "2026-10-23",
+ "commit": "8b8655c",
+ "mod_dlls": {
+  "1868495239": {
+   "LargeBattery.dll": "93443c3f66a6d30355d43a14cb96f1624460f53daab9c26af34594137f28d045"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-142249-8bc65a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T14:31:05",
+    "lane": 13,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-153230-e048a4",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T15:32:30",
+    "lane": 13,
+    "reference_run": "20261023-142249-8bc65a",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "power-menu": 0.0
+    }
+   },
+   {
+    "run": "20261023-153230-e048a4",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T15:33:43",
+    "lane": 13,
+    "reference_run": "20261023-142249-8bc65a",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "power-menu": 0.0
+    }
+   }
+  ]
+ }
+}

@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3505882053-better-wires.yaml",
+ "mods": [
+  "3505882053"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a wire built and selected: its load status and its effects read 100 kW (100000 W)",
+ "updated": "2026-10-23",
+ "commit": "ff3143d",
+ "mod_dlls": {
+  "3505882053": {
+   "Wiremod.dll": "c8e7cd3f59ef77dd3868c6139ad8607a64bf6aa02f975666c390d1899bf7f613"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-142249-8bc65a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T14:22:49",
+    "lane": 13,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-150638-8f10d6",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T15:06:38",
+    "lane": 13,
+    "reference_run": "20261023-142249-8bc65a",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-150638-8f10d6",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T15:10:54",
+    "lane": 13,
+    "reference_run": "20261023-142249-8bc65a",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

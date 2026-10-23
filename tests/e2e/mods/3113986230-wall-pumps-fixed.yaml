@@ -1,0 +1,39 @@
+# Wall Pumps - Fixed (3113986230), classes B, O.
+#
+# What it does: adds pumps and vents that are wall tiles (1x1 foundation tiles, rotatable): the
+# Gas Wall Vent (Ventilation), the High Pressure Gas Wall Vent and the Gas Wall Pump (Improved
+# Ventilation), the Liquid Wall Vent (Plumbing) and the Liquid Wall Pump (Improved Plumbing).
+# A wall pump draws from the cell its face points at, a wall vent releases into it (patches on
+# ElementConsumer.GetSampleCell and Exhaust.UpdateEmission for the rotated cell). PLib options
+# set each one's power, rate, maximum pressure, conductivity, and whether it is enabled.
+# How a player reaches it: the build menu (Ventilation, Plumbing).
+# What changes: walls that pump and vent.
+#
+# Option: the Gas Wall Vent stops at 3 kg (the default is 2). setup grants Ventilation; a Gas
+# Wall Vent is built as a tile in the dug-out corridor west of the printing pod, its cell turns
+# solid, and it is selected.
+from: early-base
+mods: [3113986230]
+options:
+  WallPumps: {GasWallVentMaxPressure: 3.0}
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"GasPiping\")", method: Purchased}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"FairGasWallVent\").IsFoundation": true
+      "Db.Get().Techs.Get(\"GasPiping\").unlockedItemIDs": {contains: FairGasWallVent}
+      "Db.Get().Techs.Get(\"ImprovedGasPiping\").unlockedItemIDs": {contains: FairGasWallPump}
+      "Grid.Solid.get_Item(131130)": false
+  - build: {prefab: FairGasWallVent, at: [114, 206]}
+  - expect: {blueprints: {FairGasWallVent: 1}}
+  - run: {seconds: 900, until: {buildings: {FairGasWallVent: 1}, pending_construction: 0}}
+  - expect_state: {"Grid.Solid.get_Item(131130)": true}
+  - driver: {camera.set: {cell: [114, 208], ortho: 8}}
+  - click_world: {cell: [114, 206], select: FairGasWallVent}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Gas wall vent"}
+  - expect_state:
+      "selected:GetComponent<WallPumps.RotatableExhaust>": exists
+      "selected:Vent.overpressureMass": 3
+  - shot: {name: details, crop: "**/DetailsScreen", threshold: 0.04}

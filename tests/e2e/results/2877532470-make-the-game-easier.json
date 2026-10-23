@@ -1,0 +1,60 @@
+{
+ "spec": "mods/2877532470-make-the-game-easier.yaml",
+ "mods": [
+  "2877532470"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "default options: a Storage Bin built and selected holds 2,000 t, its capacity typed in the side screen; the Metal Refinery's 400 W, unattended, on its definition",
+ "updated": "2026-10-23",
+ "commit": "8b8655c",
+ "mod_dlls": {
+  "2877532470": {
+   "PLib.dll": "79350ee2d4eea7a879c6eebc12acca89bdd1d2a93ed7b396b875a7907a91d1e2",
+   "▓Γ╩╘1.dll": "a1cf84576cb81a979f25494b0f6313600745370ec370d341c097ca4a9e63f01f"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-142249-8bc65a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T14:25:59",
+    "lane": 13,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-151946-91ec24",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T15:19:46",
+    "lane": 13,
+    "reference_run": "20261023-142249-8bc65a",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "details": 0.0
+    }
+   },
+   {
+    "run": "20261023-151946-91ec24",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T15:27:21",
+    "lane": 13,
+    "reference_run": "20261023-142249-8bc65a",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "details": 0.0
+    }
+   }
+  ]
+ }
+}

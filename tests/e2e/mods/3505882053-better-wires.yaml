@@ -1,0 +1,27 @@
+# Better Wires (3505882053), class P.
+#
+# What it does: every wire, whatever its kind, carries 100,000 W (a prefix on
+# Wire.GetMaxWattageAsFloat that always answers 100000), so no circuit overloads.
+# How a player reaches it: building wires.
+# What changes: a wire's maximum wattage, shown in its status when selected.
+#
+# A plain Wire (the game's 1 kW) is built in the dug-out corridor west of the printing pod and
+# selected: its load status and its effects read the mod's maximum.
+from: early-base
+mods: [3505882053]
+steps:
+  - expect_state:
+      "Wire.GetMaxWattageAsFloat(\"Max1000\")": 100000
+      "Wire.GetMaxWattageAsFloat(\"Max20000\")": 100000
+  - build: {prefab: Wire, cells: [[109, 208], [110, 208], [111, 208]]}
+  - expect: {blueprints: {Wire: 3}}
+  - run: {seconds: 900, until: {pending_construction: 0}}
+  - driver: {camera.set: {cell: [110, 208], ortho: 8}}
+  - click_world: {cell: [110, 208], select: Wire}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:Wire.MaxWattageRating": Max1000
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Wire"}
+      "**/SimpleInfoScreen/**/StatusItemTemplate/TextLayout/Value": {any_text: "~/ 100000 W"}
+      "**/SimpleInfoScreen/**/Descriptors/DescLabel": {any_text: "~100 kW"}

@@ -78,7 +78,8 @@ in start-up and before the main menu.
   `/Canvas#0/ConfirmDialog#0/GameObject#1/Panel#3/OKButton#0`.
 - **Numbers** are written the same way in both runtimes:
   - floats as the shortest of G6 to G9 that reads back as the same value;
-  - doubles to 15 significant digits.
+  - doubles to 15 significant digits;
+  - NaN and the infinities as the strings `NaN`, `Infinity` and `-Infinity`.
 - **Type names** are full names, with generic arguments written as `List<System.String>`. They
   carry no assembly names, so they compare equal across runtimes.
 
@@ -364,7 +365,7 @@ A reflective call. **The runner allows it only in a spec's `setup:` block**, nev
   - numbers to any numeric type;
   - strings to enums, Tags or HashedStrings;
   - `[x, y(, z)]` to Vector2, Vector3 or Vector2I;
-  - arrays to arrays or `List<T>`;
+  - arrays to arrays, `List<T>` or a list interface (`IList<T>`, `IEnumerable<T>`, …);
   - a type name to `Type`;
   - `{"$": "EXPR"}` to the value of the `state.get` expression EXPR, when it is of the
     parameter's type, or to its component of that type: for arguments JSON cannot spell, such

@@ -19,7 +19,7 @@ namespace E2eDriver
         /// A float as the shortest of G6–G9 that reads back as the same float.
         public static JToken Num(float f)
         {
-            if (float.IsNaN(f) || float.IsInfinity(f)) return f.ToString(CultureInfo.InvariantCulture);
+            if (float.IsNaN(f) || float.IsInfinity(f)) return NonFinite(f);
             for (int p = 6; p < 9; p++)
             {
                 var s = f.ToString("G" + p, CultureInfo.InvariantCulture);
@@ -31,9 +31,13 @@ namespace E2eDriver
         /// A double to 15 significant digits.
         public static JToken Num(double d)
         {
-            if (double.IsNaN(d) || double.IsInfinity(d)) return d.ToString(CultureInfo.InvariantCulture);
+            if (double.IsNaN(d) || double.IsInfinity(d)) return NonFinite(d);
             return double.Parse(d.ToString("G15", CultureInfo.InvariantCulture), CultureInfo.InvariantCulture);
         }
+
+        /// NaN and the infinities as text, spelled the same in both runtimes (Mono writes
+        /// "Infinity", .NET Core "∞").
+        static JToken NonFinite(double d) => double.IsNaN(d) ? "NaN" : d > 0 ? "Infinity" : "-Infinity";
 
         /// Screen and layout numbers: rounded to 0.01.
         public static JToken Px(float f) => Num(Math.Round((double)f, 2));
@@ -205,6 +209,12 @@ namespace E2eDriver
             _ => 6,
         };
 
+        static readonly Type[] ListTypes =
+        {
+            typeof(List<>), typeof(IList<>), typeof(ICollection<>), typeof(IEnumerable<>),
+            typeof(IReadOnlyList<>), typeof(IReadOnlyCollection<>),
+        };
+
         /// A JSON argument as a parameter of the given type; false when it cannot be.
         public static bool Convert(JToken token, Type type, out object value)
         {
@@ -262,10 +272,12 @@ namespace E2eDriver
                     value = array;
                     return true;
                 }
-                if (under.IsGenericType && under.GetGenericTypeDefinition() == typeof(List<>) && token is JArray listItems)
+                // A list, or a list interface (IList<T>, IReadOnlyList<T>, ...): a List<T>.
+                if (under.IsGenericType && token is JArray listItems
+                    && Array.IndexOf(ListTypes, under.GetGenericTypeDefinition()) >= 0)
                 {
                     var element = under.GetGenericArguments()[0];
-                    var list = (IList)Activator.CreateInstance(under);
+                    var list = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(element));
                     foreach (var t in listItems)
                     {
                         if (!Convert(t, element, out var item)) return false;

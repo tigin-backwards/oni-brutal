@@ -60,7 +60,7 @@ installs get developer checks subscribers never see).
 | 39 | [Português foi Incluído! (PT-BR)](https://steamcommunity.com/sharedfiles/filedetails/?id=1198657258) | ⬜ | ⬜ | ⬜ | translation: the game applies one only from a Steam subscription; not testable here |
 | 40 | [Multiplayer Mod (Alpha)](https://steamcommunity.com/sharedfiles/filedetails/?id=2997749628) | ⬜ | ⬜ | ⬜ | flagged by onimaxxing (mayCrashInPlay); not tested |
 | 41 | [Speed Control - Outdated](https://steamcommunity.com/sharedfiles/filedetails/?id=1713359495) | ⬜ | ⬜ | ⬜ | flagged by onimaxxing (notLoading); not tested |
-| 42 | [Suppress Notifications](https://steamcommunity.com/sharedfiles/filedetails/?id=1832319118) | ✅ | ✅ | ⬜ |  |
+| 42 | [Suppress Notifications](https://steamcommunity.com/sharedfiles/filedetails/?id=1832319118) | ✅ | ✅ | ✅ | spec tests/e2e/mods/1832319118-suppress-notifications.yaml: the research station's user menu: Suppress Current hides every status item it showed, Clear Suppressed brings them back; details screen shot |
 | 43 | [Clean Floors](https://steamcommunity.com/sharedfiles/filedetails/?id=1937854017) | ✅ | ✅ | ⬜ |  |
 | 44 | [Better Air Filters](https://steamcommunity.com/sharedfiles/filedetails/?id=1718888149) | ✅ | ✅ | ✅ | spec tests/e2e/mods/1718888149-better-air-filters.yaml: a Deodorizer picked in the build menu, turned upside down with O and hung from a ceiling, then built |
 | 45 | [最后的补给包-Fix](https://steamcommunity.com/sharedfiles/filedetails/?id=3280056840) | ✅ | ✅ | ✅ | spec tests/e2e/mods/3280056840-last-care-package-fix.yaml: the immigrant screen's Reject All reads REROLL and deals new cards keeping the offer open; bottom buttons dumped |

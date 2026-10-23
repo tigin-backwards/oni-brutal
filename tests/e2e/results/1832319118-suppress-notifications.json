@@ -1,0 +1,59 @@
+{
+ "spec": "mods/1832319118-suppress-notifications.yaml",
+ "mods": [
+  "1832319118"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the research station's user menu: Suppress Current hides every status item it showed, Clear Suppressed brings them back; details screen shot",
+ "updated": "2026-10-23",
+ "commit": "a301215",
+ "mod_dlls": {
+  "1832319118": {
+   "SuppressNotifications.dll": "602a9d9c1d506845761f663a4022c4a2f09f79cc66b6ab6c6a26c55910c12b39"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261022-232004-36dc49",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-22T23:25:55",
+    "lane": 12,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261022-232751-b34e37",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-22T23:59:56",
+    "lane": 12,
+    "reference_run": "20261022-232004-36dc49",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "suppressed": 0.0
+    }
+   },
+   {
+    "run": "20261022-232751-b34e37",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T00:00:58",
+    "lane": 12,
+    "reference_run": "20261022-232004-36dc49",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "suppressed": 0.0
+    }
+   }
+  ]
+ }
+}

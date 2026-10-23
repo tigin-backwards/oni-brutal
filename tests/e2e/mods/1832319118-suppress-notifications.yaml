@@ -1,0 +1,35 @@
+# Suppress Notifications (1832319118), classes T, S, O.
+#
+# What it does: adds "Suppress Current" to the user menu of buildings, critters and
+# Duplicants: the status items (and notifications) the object shows now are hidden from then
+# on, for that object; "Clear Suppressed" brings them back. A building's damage bar can be
+# hidden the same way. A copy-settings tool copies the suppression to other objects; PLib
+# options choose what is suppressable.
+# How a player reaches it: select an object, its user menu button.
+# What changes: which status items an object shows.
+#
+# The research station of early-base is unpowered, so it shows status items to suppress.
+from: early-base
+mods: [1832319118]
+setup:
+  # Selected here: Duplicants idle in front of it, and a click would pick one of them.
+  - driver: {setup.call: {target: "SelectTool.Instance", method: Select, args: [{$expr: "all:ResearchCenter::[0]"}]}}
+steps:
+  - driver: {camera.set: {cell: [126, 208], ortho: 8}}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:KPrefabID.PrefabTag.Name": ResearchCenter
+      "selected:StatusItemsSuppressedComp.suppressedStatusItemTitles.Count": 0
+      "selected:StatusItemsSuppressedComp.GetSuppressableStatusItems().Count": {save_as: shown}
+  - expect_state: {"selected:StatusItemsSuppressedComp.GetSuppressableStatusItems().Count": ">= 1"}
+  - click: {text: "Suppress Current", under: "**/DetailsScreen"}
+  # Every status item it showed is suppressed, and none is shown any more.
+  - expect_state:
+      "selected:StatusItemsSuppressedComp.suppressedStatusItemTitles.Count": "== shown"
+      "selected:StatusItemsSuppressedComp.GetSuppressableStatusItems().Count": 0
+      "selected:StatusItemsSuppressedComp.GetSuppressedStatusItems().Count": "== shown"
+  - shot: {name: suppressed, crop: "**/DetailsScreen", threshold: 0.04}
+  - click: {text: "Clear Suppressed", under: "**/DetailsScreen"}
+  - expect_state:
+      "selected:StatusItemsSuppressedComp.suppressedStatusItemTitles.Count": 0
+      "selected:StatusItemsSuppressedComp.GetSuppressableStatusItems().Count": "== shown"

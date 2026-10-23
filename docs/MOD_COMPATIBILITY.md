@@ -45,7 +45,7 @@ installs get developer checks subscribers never see).
 | 24 | [Waste Not, Want Not](https://steamcommunity.com/sharedfiles/filedetails/?id=2567122431) | ✅ | ✅ | ⬜ |  |
 | 25 | [Geyser Calculated Average Output Tooltip](https://steamcommunity.com/sharedfiles/filedetails/?id=1706181611) | ✅ | ✅ | ⬜ |  |
 | 26 | [Mod Manager // by @Ony 👾](https://steamcommunity.com/sharedfiles/filedetails/?id=1843965353) | ✅ | ✅ | ⬜ |  |
-| 27 | [PrintingPodRefresh / 刷新选人](https://steamcommunity.com/sharedfiles/filedetails/?id=2841963310) | ✅ | ✅ | ⬜ |  |
+| 27 | [PrintingPodRefresh / 刷新选人](https://steamcommunity.com/sharedfiles/filedetails/?id=2841963310) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2841963310-printing-pod-refresh.yaml: Reject All deals four new cards without the confirmation box, twice, the screen staying open; its buttons as in the original |
 | 28 | [German Translation [inkl. DLCs]](https://steamcommunity.com/sharedfiles/filedetails/?id=929139073) | ⬜ | ⬜ | ⬜ | translation: the game applies one only from a Steam subscription; not testable here |
 | 29 | [WGSM - World Generation Settings Manager // by @Ony 👾](https://steamcommunity.com/sharedfiles/filedetails/?id=1833427385) | ✅ | ✅ | ⬜ |  |
 | 30 | [True Tiles (texture mod)](https://steamcommunity.com/sharedfiles/filedetails/?id=2815406414) | ✅ | ✅ | ✅ | tiles connect as in the original (needed D21) |

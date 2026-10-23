@@ -28,6 +28,11 @@ namespace SemanticsProbe
                 go.AddComponent<TextWidth>();
                 return;
             }
+            if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "startdestroy")
+            {
+                go.AddComponent<SDScenario>();
+                return;
+            }
             go.AddComponent<Probe>();
             go.AddComponent<QuitLog>().Tag = "ddol-at-load";
             go.AddComponent<FrameLog>();
@@ -192,6 +197,155 @@ namespace SemanticsProbe
             if (template == null) { template = new GameObject("ST"); template.SetActive(false); AddAll(template); Object.DontDestroyOnLoad(template); }
             for (int i = 0; i < 2; i++) { var go = new GameObject(prefix + "new" + i); go.SetActive(false); AddAll(go); Tag(go, prefix + "new" + i); go.SetActive(true); }
             for (int i = 0; i < 2; i++) { var go = Object.Instantiate(template); Tag(go, prefix + "clone" + i); go.SetActive(true); }
+        }
+    }
+
+    /// Scenario 20: Destroy of objects whose Start is still pending. The game's SaveLoader, in
+    /// a Start of the frame's first pass, makes Game (Start and Update) and then
+    /// MinionSelectScreen, whose Awake makes CharacterContainers (Start, no update messages);
+    /// Game's Start, run just before its first Update, destroys the screen.
+    public class SDPart : StartBase
+    {
+        public bool Started;
+        void Start() { Started = true; Rec.Log("SD " + Tag + " Start"); }
+        void OnDisable() => Rec.Log("SD " + Tag + " OnDisable started=" + Started);
+        void OnDestroy() => Rec.Log("SD " + Tag + " OnDestroy started=" + Started);
+    }
+    public class SDPartU : SDPart { bool once; void Update() { if (!once) Rec.Log("SD " + Tag + " first Update"); once = true; } }
+    public class SDPartL : SDPart { bool once; void LateUpdate() { if (!once) Rec.Log("SD " + Tag + " first LateUpdate"); once = true; } }
+
+    /// The screen: its Awake makes children with Start only, with Update and with LateUpdate,
+    /// and a grandchild with Start only.
+    public class SDScreen : SDPart
+    {
+        public static string Prefix;
+        void Awake()
+        {
+            Tag = Prefix + "screen";
+            Child<SDPart>("N", transform);
+            Child<SDPartU>("U", transform);
+            Child<SDPartL>("L", transform);
+            Child<SDPart>("deepN", Child<SDPart>("mid", transform).transform);
+        }
+        T Child<T>(string name, Transform parent) where T : SDPart
+        {
+            var go = new GameObject(Prefix + name);
+            go.transform.SetParent(parent, false);
+            var c = go.AddComponent<T>();
+            c.Tag = Prefix + name;
+            return c;
+        }
+        public static GameObject Make(string prefix)
+        {
+            Prefix = prefix;
+            return new GameObject(prefix + "screen", typeof(SDScreen));
+        }
+    }
+
+    /// Game's part: its Start destroys the screen.
+    public class SDGame : StartBase
+    {
+        public GameObject Target;
+        bool once;
+        void Start() { Rec.Log("SD " + Tag + "game Start, destroying the screen"); Destroy(Target); }
+        void Update() { if (!once) Rec.Log("SD " + Tag + "game first Update"); once = true; }
+    }
+
+    /// SaveLoader's part: a Start that makes the game and then the screen.
+    public class SDLoader : StartBase
+    {
+        void Start()
+        {
+            Rec.Log("SD " + Tag + "loader Start");
+            var game = new GameObject(Tag + "game").AddComponent<SDGame>();
+            game.Tag = Tag;
+            game.Target = SDScreen.Make(Tag);
+            Rec.Log("SD " + Tag + "loader Start done");
+        }
+    }
+
+    /// Makes the loader from a Start, so that the loader starts in the next frame's first pass.
+    public class SDChain : StartBase { void Start() => new GameObject("SDLoader").AddComponent<SDLoader>().Tag = Tag; }
+
+    /// Makes a screen and destroys it at once, from Update or LateUpdate (Mode, once).
+    public class SDNow : MonoBehaviour
+    {
+        public static string Mode;
+        void Update() { if (Mode == "upd-") { Mode = null; Destroy(SDScreen.Make("upd-")); Rec.Log("SD upd- made and destroyed in Update"); } }
+        void LateUpdate() { if (Mode == "late-") { Mode = null; Destroy(SDScreen.Make("late-")); Rec.Log("SD late- made and destroyed in LateUpdate"); } }
+    }
+
+    /// Made in Update before and after a Destroy there: whether its Start, in the pass after
+    /// Update, still finds what was destroyed.
+    public class SDWitness : StartBase
+    {
+        public SDPart Watched;
+        void Start() => Rec.Log("SD " + Tag + " Start, watched " + (Watched == null ? "gone" : "there"));
+    }
+
+    /// In Update (Armed, once): a witness, Destroy of a screen made frames earlier (all of it
+    /// started), a second witness.
+    public class SDOld : MonoBehaviour
+    {
+        public static bool Armed;
+        public static GameObject Old;
+        void Update()
+        {
+            if (!Armed) return;
+            Armed = false;
+            var deep = Old.transform.Find("old-mid/old-deepN").GetComponent<SDPart>();
+            var w1 = new GameObject("w1").AddComponent<SDWitness>(); w1.Tag = "old-witness1"; w1.Watched = deep;
+            Destroy(Old);
+            var w2 = new GameObject("w2").AddComponent<SDWitness>(); w2.Tag = "old-witness2"; w2.Watched = deep;
+            Rec.Log("SD old- destroyed in Update");
+        }
+    }
+
+    public class SDScenario : MonoBehaviour
+    {
+        IEnumerator Start()
+        {
+            yield return null;
+            yield return Run();
+            Rec.Log("=== done");
+        }
+
+        public static IEnumerator Run()
+        {
+            Rec.Log("=== scenario 20: Destroy of objects whose Start is pending");
+            new GameObject("marker20").AddComponent<PhaseMarker>();
+            new GameObject("SDNow").AddComponent<SDNow>();
+            yield return null;
+            PhaseMarker.Frames = 4;
+            Rec.Log("coroutine: making the loader's chain");
+            new GameObject("SDChain").AddComponent<SDChain>().Tag = "load-";
+            for (int i = 0; i < 4; i++) yield return null;
+            // The same with no fixed step in the loader's frame.
+            float fixedStep = Time.fixedDeltaTime;
+            Time.fixedDeltaTime = 5f;
+            yield return null;
+            PhaseMarker.Frames = 4;
+            new GameObject("SDChain").AddComponent<SDChain>().Tag = "loadnf-";
+            for (int i = 0; i < 4; i++) yield return null;
+            Time.fixedDeltaTime = fixedStep;
+            PhaseMarker.Frames = 2;
+            SDNow.Mode = "upd-";
+            for (int i = 0; i < 3; i++) yield return null;
+            PhaseMarker.Frames = 2;
+            SDNow.Mode = "late-";
+            for (int i = 0; i < 3; i++) yield return null;
+            PhaseMarker.Frames = 2;
+            yield return null;
+            Destroy(SDScreen.Make("co-"));
+            Rec.Log("SD co- made and destroyed in a coroutine");
+            for (int i = 0; i < 3; i++) yield return null;
+            SDOld.Old = SDScreen.Make("old-");
+            new GameObject("SDOld").AddComponent<SDOld>();
+            yield return null;
+            yield return null;
+            PhaseMarker.Frames = 2;
+            SDOld.Armed = true;
+            for (int i = 0; i < 3; i++) yield return null;
         }
     }
 
@@ -419,6 +573,7 @@ namespace SemanticsProbe
             Rec.Log("ADDED component order " + string.Join(",", System.Array.ConvertAll(order, c => c.Name)));
             yield return null;
             yield return null;
+            yield return SDScenario.Run();
             yield return Values.Run();
             Rec.Log("=== done");
         }

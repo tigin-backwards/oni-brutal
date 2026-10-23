@@ -18,7 +18,8 @@ player's own mods folder:
 4. Read the `PROBE` lines in `Player.log`.
 
 What it records (each line prefixed `PROBE f<frame>`): lifecycle scenarios (Destroy, activation,
-coroutines, start/late-update timing; Start order, scenarios 12 to 19), the Duplicants' spawn
+coroutines, start/late-update timing; Start order, scenarios 12 to 19; Destroy of objects whose
+Start is pending, scenario 20, alone with `PROBE_SCENARIO=startdestroy`), the Duplicants' spawn
 order after a save loads (`MINION`, `KSTART`: build against the original's own `Managed` with
 `-p:OniManaged=…`, start the colony after `=== values: screen`), engine values (`VAL …`: formatting, maths, JSON,
 hierarchy queries, Instantiate order, Instantiate of parts awaiting Destroy and the points in

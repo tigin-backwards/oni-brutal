@@ -67,6 +67,7 @@ namespace OniBrutal.Host
                     if (dumpFrame == frame) EngineLog.Engine($"mouse {Input.mousePosition} dt {Time.unscaledDeltaTime}\n" + HierarchyDump(path));
                 options.Input.Apply(frame);
                 PlayerLoop.RunFrame(dt);
+                if (options.LogPointerHits) PointerHitLog.Frame(frame);
                 frame++;
                 Throttle(clock, now, platform != null, frame <= options.MaxFrameRateFrames ? options.MaxFrameRate : 0);
             }
@@ -206,7 +207,7 @@ namespace OniBrutal.Host
                 "windowed" => FullScreenMode.Windowed,
                 _ => mode,
             };
-            return new OniBrutal.Desktop.WindowSettings(EngineConfig.ProductName, width, height, mode) { IgnoreUserInput = options.Input.Any, DebugContext = options.GlDebug, Monitor = options.Monitor };
+            return new OniBrutal.Desktop.WindowSettings(EngineConfig.ProductName, width, height, mode) { IgnoreUserInput = options.Input.Any || options.Background, DebugContext = options.GlDebug, Monitor = options.Monitor };
         }
 
         /// Frame pacing as in Unity's desktop player: with vSync the swap paces frames (the

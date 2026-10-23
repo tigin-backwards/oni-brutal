@@ -1,0 +1,25 @@
+# Show Building Ranges (1960996649), class V.
+#
+# What it does: a building that takes in gas or liquid around it (an ElementConsumer: algae
+# terrarium, scrubbers, pumps) shows the cells it draws from when it is selected or on the
+# build cursor: a coloured overlay, drawn after the frame by a renderer on the overlay camera
+# (GL quads in OnPostRender with the game's range shader), stopped at solid cells.
+# How a player reaches it: select such a building (built or a blueprint), or pick it to build.
+# What changes: the range drawn over the world.
+#
+# setup grants Agriculture (the Algae Terrarium's tech); a terrarium blueprint is placed in the
+# dug-out corridor west of the printing pod (blueprints carry the range too) and selected.
+from: early-base
+mods: [1960996649]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"FarmingTech\")", method: Purchased}}
+steps:
+  - build: {prefab: AlgaeHabitat, at: [110, 206]}
+  - expect: {blueprints: {AlgaeHabitat: 1}}
+  - driver: {camera.set: {cell: [110, 208], ortho: 8}}
+  - world_shot: {name: unselected, ortho: 8, at: [110, 208]}
+  - click_world: {cell: [110, 207]}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<PeterHan.ShowRange.SimVisualizerParams>.worstCaseRadius": "== original"
+  - world_shot: {name: range, ortho: 8, at: [110, 208]}

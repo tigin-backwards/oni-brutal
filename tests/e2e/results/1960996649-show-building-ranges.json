@@ -1,0 +1,61 @@
+{
+ "spec": "mods/1960996649-show-building-ranges.yaml",
+ "mods": [
+  "1960996649"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "an Algae Terrarium blueprint, selected, shows its intake range over the world; world shots with and without it compared with the original",
+ "updated": "2026-10-22",
+ "commit": "f1b41ea",
+ "mod_dlls": {
+  "1960996649": {
+   "ShowRange.dll": "b8f3853e38dc5e097bed872f2898e812b41ad64fdc07abf331b4ab85828faecd"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261022-225027-1e6526",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-22T22:50:27",
+    "lane": 11,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261022-225233-588197",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-22T22:52:33",
+    "lane": 11,
+    "reference_run": "20261022-225027-1e6526",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "unselected": 0.028206,
+     "range": 0.028461
+    }
+   },
+   {
+    "run": "20261022-225233-588197",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-22T22:54:03",
+    "lane": 11,
+    "reference_run": "20261022-225027-1e6526",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "unselected": 0.028161,
+     "range": 0.028065
+    }
+   }
+  ]
+ }
+}

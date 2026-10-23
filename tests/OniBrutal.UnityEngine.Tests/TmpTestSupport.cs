@@ -40,6 +40,8 @@ namespace OniBrutal.Tests
             ["RobotoCondensed-Regular"] = ("sharedassets0.assets", 20156),
             ["Economica-Bold-OTF SDF"] = ("sharedassets0.assets", 20028),
             ["GRAYSTROKE REGULAR SDF"] = ("sharedassets0.assets", 20032),
+            ["GRAYSTROKE OUTLINE SDF"] = ("sharedassets0.assets", 20031),
+            ["NotoSansCJKjp-Regular"] = ("sharedassets0.assets", 20153),
             ["oni_sprite_assets"] = ("resources.assets", 177),
             ["EmojiOne"] = ("resources.assets", 178),
         };

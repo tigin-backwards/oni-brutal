@@ -45,10 +45,6 @@ namespace TMPro
             public float Pen, BaselineRel, OffsetX, OffsetY;
             // The font's line height at the character's size.
             public float FontLineHeight;
-            // The advances the preferred width sums: the glyph's at the font's size times the
-            // reciprocal of its point size (measured: the shipped package's preferred widths
-            // round so, while its vertices use the size over the point size).
-            public float PreferredAdvance, PreferredGlyphAdvance;
         }
 
         private protected struct LineData
@@ -550,7 +546,7 @@ namespace TMPro
             float em = baseSize * 0.01f;
             if (p.LineBreak || c == 13 || c == 3) return;
 
-            float advance, spacing = 0f, preferredAdvance = float.NaN;
+            float advance, spacing = 0f;
             if (el.Kind == ElementKind.Sprite)
             {
                 var sprite = (TMP_SpriteCharacter)el.Element;
@@ -585,8 +581,6 @@ namespace TMPro
                 p.Top = gm.horizontalBearingY * s + shift;
                 p.Bottom = (gm.horizontalBearingY - gm.height) * s + shift;
                 advance = gm.horizontalAdvance * s * p.XScale;
-                float reciprocalScale = size * (1f / face.pointSize) * face.scale * (character?.scale ?? 1f) * (glyph?.scale ?? 1f);
-                preferredAdvance = gm.horizontalAdvance * reciprocalScale * p.XScale;
                 // Every character that is not white space draws its glyph's quad; the zero-width
                 // space only where white space is preserved (measured on the shipped package).
                 p.Visible = !p.Whitespace && glyph != null && (c != 0x200B || m_TextWrappingMode == TextWrappingModes.PreserveWhitespace || m_TextWrappingMode == TextWrappingModes.PreserveWhitespaceNoWrap);
@@ -596,7 +590,6 @@ namespace TMPro
                 if (c == 9)
                 {
                     advance = font.tabSize * gm.horizontalAdvance * s;
-                    preferredAdvance = advance;
                     spacing = 0f;
                 }
             }
@@ -606,18 +599,14 @@ namespace TMPro
                 float mono = state.Monospace.Resolve(size, 0f);
                 p.MonoOffset = (mono - advance) * 0.5f;
                 advance = mono;
-                preferredAdvance = mono;
             }
             p.GlyphAdvance = advance;
             p.Advance = advance + spacing;
-            if (float.IsNaN(preferredAdvance)) preferredAdvance = advance;
-            p.PreferredGlyphAdvance = preferredAdvance;
-            p.PreferredAdvance = preferredAdvance + spacing;
             if (c == 0xAD && el.Kind == ElementKind.Character && p.Visible)
             {
                 p.SoftHyphen = advance;
                 p.Visible = false;
-                p.GlyphAdvance = p.Advance = p.PreferredGlyphAdvance = p.PreferredAdvance = 0f;
+                p.GlyphAdvance = p.Advance = 0f;
             }
         }
     }

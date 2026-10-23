@@ -23,20 +23,30 @@ namespace UnityEngine
         /// base constructor binds the managed object to its native record (Unity creates the
         /// native object first and then runs the managed constructor).
         [ThreadStatic] static NativeObject s_PendingNative;
+        /// The type being constructed for s_PendingNative. A class's field initializers run before
+        /// its base constructor, so an object they create (a mod's component holding
+        /// `new ColorStyleSetting()`) reaches this constructor first and must not take the record.
+        [ThreadStatic] static Type s_PendingType;
 
         public Object()
         {
             var pending = s_PendingNative;
-            if (pending != null)
+            if (pending != null && GetType() == s_PendingType)
             {
                 s_PendingNative = null;
+                s_PendingType = null;
                 Bind(pending);
             }
         }
 
         internal static T ConstructBound<T>(Type type, NativeObject native) where T : Object
         {
+            // Field initializers may construct bound objects too (CreateInstance), before the
+            // outer object's base constructor runs: its record is put back afterwards.
+            var outerNative = s_PendingNative;
+            var outerType = s_PendingType;
             s_PendingNative = native;
+            s_PendingType = type;
             try
             {
                 var obj = (T)Activator.CreateInstance(type, nonPublic: true);
@@ -45,7 +55,8 @@ namespace UnityEngine
             }
             finally
             {
-                s_PendingNative = null;
+                s_PendingNative = outerNative;
+                s_PendingType = outerType;
             }
         }
 

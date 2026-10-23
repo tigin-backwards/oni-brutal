@@ -1,0 +1,56 @@
+{
+ "spec": "mods/2593265755-fan-tiles.yaml",
+ "mods": [
+  "2593265755"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "smaller spec (no live circuit on early-base): with 0.8 kg/s and 90 W set in its options, a Fan built on the corridor floor west of the pod is a solid tile with that flow, selected",
+ "updated": "2026-10-23",
+ "commit": "f1c3b20",
+ "mod_dlls": {
+  "2593265755": {
+   "FanTiles.dll": "507f2113e3541a631e4df876ba1ecb575d611bc643a7a92c670a01b9caecda52",
+   "RomenH.CommonLib.dll": "ba4c894c99a523a1cfdc80cda80e67c0438d5e3acc96106ecfae55bc81d96840"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-164831-048d31",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T16:48:31",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-165717-ce03d0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T16:57:17",
+    "lane": 17,
+    "reference_run": "20261023-164831-048d31",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-165717-ce03d0",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T17:14:36",
+    "lane": 17,
+    "reference_run": "20261023-164831-048d31",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

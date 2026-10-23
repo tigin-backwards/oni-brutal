@@ -1,0 +1,37 @@
+# Fan Tiles (2593265755), classes B, O.
+#
+# What it does: adds powered floor tiles that move gas or liquid through themselves, from the
+# cell on one side to the other (rotatable): the Fan (Ventilation, 60 W, 0.5 kg/s up to 2 kg),
+# High Pressure Fan, Compressor Fan, Turbine and Compressor Turbine, in the Ventilation and
+# Plumbing menus, each a solid, gas- and liquid-tight tile Duplicants walk on. PLib options set
+# each one's flow, pressure limit and power, the art and the wind effect.
+# How a player reaches it: the build menu (Ventilation, Plumbing); the options on the Mods
+# screen.
+# What changes: gas pushed across a tile.
+#
+# Options here: the Fan at 0.8 kg/s and 90 W. setup grants Ventilation. A Fan is built on the
+# corridor floor west of the printing pod; it is a solid tile with the configured flow. It is
+# not powered (early-base has no live circuit), so it is not run: a smaller spec.
+from: early-base
+mods: [2593265755]
+options:
+  "2593265755": {FanFlowRate: 0.8, FanWattage: 90}
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"GasPiping\")", method: Purchased}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"GasPiping\").unlockedItemIDs": {contains: FanBlock}
+      "Assets.GetBuildingDef(\"FanBlock\").EnergyConsumptionWhenActive": 90
+      "Assets.GetBuildingDef(\"FanBlock\").BuildLocationRule": Tile
+  - build: {prefab: FanBlock, at: [113, 206]}
+  - expect: {blueprints: {FanBlock: 1}}
+  - run: {seconds: 900, until: {buildings: {FanBlock: 1}, pending_construction: 0}}
+  - expect_state:
+      "Grid.Solid.get_Item(131129)": true
+      "all:RomenH.Fans.FanRotatablePassiveElementConsumer::[0].consumptionRate": 0.8
+      "all:RomenH.Fans.FanRotatablePassiveElementConsumer::[0].GetComponent<Storage>.capacityKg": 1.6
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 206]}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Fan"}

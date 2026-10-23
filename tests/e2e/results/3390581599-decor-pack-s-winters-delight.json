@@ -1,0 +1,67 @@
+{
+ "spec": "mods/3390581599-decor-pack-s-winters-delight.yaml",
+ "mods": [
+  "3390581599"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a ladder and then the Snow Machine on the corridor ceiling west of the pod are built and the machine selected: its side screen from the asset bundle matches the original (density row dumped, panel shot), and a click on its Density slider sets the machine's density; unpowered, so no snow",
+ "updated": "2026-10-23",
+ "commit": "f1c3b20",
+ "mod_dlls": {
+  "3390581599": {
+   "AkisSnowThings.dll": "efdb2ca733e4e3e53ba0160d850f8b466f4b63ae3c16c8e5055842993dfd5977"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-165557-93f33e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T16:55:57",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-165857-6c1912",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T16:58:57",
+    "lane": 16,
+    "reference_run": "20261023-165557-93f33e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "density": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "details": 4.1e-05
+    }
+   },
+   {
+    "run": "20261023-165857-6c1912",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T17:18:11",
+    "lane": 16,
+    "reference_run": "20261023-165557-93f33e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "density": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "details": 4.1e-05
+    }
+   }
+  ]
+ }
+}

@@ -1,0 +1,41 @@
+# Decor Pack S - Winters Delight (3390581599), classes B, S, O, V.
+#
+# What it does: winter decorations: a Snow Machine (Furniture, Interior Decor; a ceiling
+# light-sized machine of raw metal, 2 W, +35 decor in 16 cells while it runs) that snows
+# particles down to the floor, with its own side screen (from the mod's asset bundle) of four
+# sliders: density, speed, lifetime and turbulence; a Snow Sculpture (Furniture, Artistry; 2x3
+# of snow, carved by artists), a Glass Case to seal one in (Utilities), an Evergreen tree and
+# festive tree decorations, presents, a rock-crusher recipe of snow and new elements. PLib
+# options set decor and power.
+# How a player reaches it: the build menu (Furniture, Utilities); the Snow Machine's side
+# screen.
+# What changes: decor, and snow falling.
+#
+# setup grants Interior Decor. A ladder is built in the corridor west of the printing pod and
+# the Snow Machine on the ceiling beside its top; it is selected: its side screen shows the
+# machine's four sliders, and a click on Density sets the machine's density. The machine is
+# not powered (early-base has no live circuit), so no snow falls.
+from: early-base
+mods: [3390581599]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"InteriorDecor\")", method: Purchased}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"InteriorDecor\").unlockedItemIDs": {contains: SnowSculptures_SnowMachine}
+  - build: {prefab: Ladder, cells: [[113, 207], [113, 208], [113, 209]]}
+  - run: {seconds: 900, until: {buildings: {Ladder: ">=3"}, pending_construction: 0}}
+  - build: {prefab: SnowSculptures_SnowMachine, at: [114, 210]}
+  - expect: {blueprints: {SnowSculptures_SnowMachine: 1}}
+  - run: {seconds: 900, until: {buildings: {SnowSculptures_SnowMachine: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [114, 208], ortho: 8}}
+  - click_world: {cell: [114, 210], select: SnowSculptures_SnowMachine}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<AkisSnowThings.Content.Scripts.Buildings.SnowMachine>.density": 6
+  # Its side screen (from the asset bundle): four sliders; a click mid-way on Density sets it.
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/Contents/Density/Slider", cond: stable}
+  - ui_dump: {name: density, root: "**/DetailsScreen/SideScreen/**/Contents/Density"}
+  - shot: {name: details, crop: "**/DetailsScreen", threshold: 0.04}
+  - click: {ui: "**/DetailsScreen/SideScreen/**/Contents/Density/Slider"}
+  - expect_state:
+      "selected:GetComponent<AkisSnowThings.Content.Scripts.Buildings.SnowMachine>.density": "!= 6"

@@ -1,0 +1,54 @@
+# Sandbox Tools (1928837153), classes T, S.
+#
+# What it does: improves sandbox mode: the sandbox Destroy tool becomes Filtered Destroy, whose
+# Tool Filter menu picks what a drag deletes (elements, items, creatures, plants, buildings,
+# background buildings, pipes, wires, automation, conveyor rails); more search filters in the
+# spawner (Ruins Props, Artifacts, Geysers, Scout Rover); buildings placed in sandbox keep the
+# selected material's temperature.
+# How a player reaches it: sandbox mode (enabled in the game options, then the SANDBOX button
+# or Shift+S), the sandbox toolbar.
+# What changes: what a sandbox drag removes.
+#
+# Sandbox is enabled through the game options as a player would. The drag runs along the floor
+# east of the outhouse, west of the printing pod: three pieces of sandstone debris and a lump of
+# coal lie there, partly under the outhouse. With only Items ticked, the debris goes and the
+# outhouse stays.
+from: early-base
+mods: [1928837153]
+steps:
+  - expect_state:
+      "Game.Instance.SandboxModeActive": false
+      "count:all:Clearable::[*] if .GetComponent<PrimaryElement>.ElementID == SandStone": {save_as: debris}
+  - expect: {buildings: {Outhouse: 1}}
+  # Options, Game, Enable sandbox tools.
+  - key: {code: Escape}
+  - ui_wait: {path: "**/PauseScreen/LayoutContent", cond: stable}
+  - click: {ui: "**/PauseScreen/LayoutContent/ButtonContent/OptionsButton"}
+  - ui_wait: {path: "**/OptionsMenu/CenterContent/Content/Buttons/GameButton", cond: stable}
+  - click: {ui: "**/OptionsMenu/CenterContent/Content/Buttons/GameButton"}
+  - ui_wait: {path: "**/InGameContent/UnlockSandbox/Checkbox", cond: stable}
+  - click: {ui: "**/InGameContent/UnlockSandbox/Checkbox"}
+  - ui_wait: {path: "**/ConfirmDialog/GameObject/Panel/OKButton", cond: stable}
+  - click: {ui: "**/ConfirmDialog/GameObject/Panel/OKButton"}
+  - expect_state: {"SaveGame.Instance.sandboxEnabled": true}
+  - click: {ui: "**/OptionsMenu/CenterContent/Content/BottomButtons/DoneButton"}
+  - key: {code: Escape}
+  - ui_wait: {path: "**/PauseScreen", cond: gone}
+  - click: {ui: "**/TopLeftControlPanel(Clone)/SecondaryRow/SandboxToggle"}
+  - expect_state: {"Game.Instance.SandboxModeActive": true}
+  # The filtered destroy tool and its filter menu.
+  - click: {text: "Filtered Destroy", under: "**/ToolMenu/prefabToolRow/SandboxToolSet"}
+  - expect_state: {"PlayerController.Instance.ActiveTool.name": FilteredDestroyTool}
+  - ui_wait: {path: "**/ToolMenu/ToolParameters/Content", cond: stable}
+  - ui_dump: {name: filter-menu, root: "**/ToolMenu/ToolParameters/Content"}
+  - shot: {name: filter-menu, crop: "**/ToolMenu/ToolParameters/Content", threshold: 0.04}
+  - click: {text: "None", under: "**/ToolMenu/ToolParameters"}
+  - click: {ui: "**/ToolParameters/Content/List/toggleEntry[1]/Toggle"}
+  - expect_state:
+      "type:PeterHan.SandboxTools.DestroyParameterMenu::Instance.GetState(\"Items\")": "On"
+      "type:PeterHan.SandboxTools.DestroyParameterMenu::Instance.GetState(\"Buildings\")": "Off"
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - drag: {from: [114, 207], to: [120, 207], steps: 30}
+  # The three pieces of sandstone there are gone; the outhouse they lay under stands.
+  - expect_state: {"count:all:Clearable::[*] if .GetComponent<PrimaryElement>.ElementID == SandStone": "== debris - 3"}
+  - expect: {buildings: {Outhouse: 1}}

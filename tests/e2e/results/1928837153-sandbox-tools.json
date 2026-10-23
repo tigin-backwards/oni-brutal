@@ -1,0 +1,67 @@
+{
+ "spec": "mods/1928837153-sandbox-tools.yaml",
+ "mods": [
+  "1928837153"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "sandbox enabled through the game options; the Filtered Destroy tool's filter set to Items by clicks deletes the debris under a drag and leaves the outhouse; filter menu dump and shot",
+ "updated": "2026-10-23",
+ "commit": "0feba58",
+ "mod_dlls": {
+  "1928837153": {
+   "SandboxTools.dll": "68df9c881a2db5a4df440a2e2e6923aa03840d100868948dbbac474a365090d3"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261022-234547-e5cfc9",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T00:00:09",
+    "lane": 13,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-000204-1a43a6",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T00:07:09",
+    "lane": 12,
+    "reference_run": "20261022-234547-e5cfc9",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "filter-menu": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "filter-menu": 0.002952
+    }
+   },
+   {
+    "run": "20261023-000204-1a43a6",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T00:08:14",
+    "lane": 12,
+    "reference_run": "20261022-234547-e5cfc9",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "filter-menu": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "filter-menu": 0.002952
+    }
+   }
+  ]
+ }
+}

@@ -1,0 +1,29 @@
+# SuperSmartBattery[Vanilla+DLC] (2018048391), class P.
+#
+# What it does: a transpiler on BatterySmartConfig.DoPostConfigureComplete makes the Smart
+# Battery hold 600 kJ instead of 20 kJ and leak 0.006667 J/s instead of 0.667 J/s.
+# How a player reaches it: the build menu (Power, researched with Acoustics); building one.
+# What changes: a Smart Battery stores thirty times as much and hardly loses any of it.
+#
+# setup grants Acoustics and spawns steel (the battery takes 200 kg of refined metal). The
+# battery is built in the dug-out corridor west of the printing pod, unwired, and selected:
+# its capacity and leak are the mod's, and its details screen shows them.
+from: early-base
+mods: [2018048391]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"Acoustics\")", method: Purchased}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Steel\").substance", method: SpawnResource, args: [[111.5, 206.5, -12], 300, 300, 255, 0]}}
+steps:
+  - build: {prefab: BatterySmart, at: [113, 206], material: Steel}
+  - expect: {blueprints: {BatterySmart: 1}}
+  - run: {seconds: 900, until: {buildings: {BatterySmart: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [113, 207], ortho: 8}}
+  - click_world: {cell: [113, 206], select: BatterySmart}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Smart Battery"}
+  - expect_state:
+      "selected:GetComponent<BatterySmart>.capacity": 600000
+      "selected:GetComponent<BatterySmart>.joulesLostPerSecond": "< 0.007"
+  - expect_state: {"selected:GetComponent<BatterySmart>.joulesLostPerSecond": "> 0.006"}
+  - shot: {name: details, crop: "**/DetailsScreen", threshold: 0.04}

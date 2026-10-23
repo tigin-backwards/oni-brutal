@@ -1,0 +1,59 @@
+{
+ "spec": "mods/2018048391-super-smart-battery.yaml",
+ "mods": [
+  "2018048391"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Smart Battery built from the build menu's prefab holds 600 kJ and leaks 0.0067 J/s; its details screen within threshold",
+ "updated": "2026-10-23",
+ "commit": "29caa6d",
+ "mod_dlls": {
+  "2018048391": {
+   "SuperSmartBettery.dll": "dc83e0dab49f474e9fb8a2d90c96154df25ce79efffe0147fa3a455ba3e507a8"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-140946-c20fd3",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T14:09:46",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-141146-9b60c7",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T14:11:46",
+    "lane": 14,
+    "reference_run": "20261023-140946-c20fd3",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "details": 4.1e-05
+    }
+   },
+   {
+    "run": "20261023-141146-9b60c7",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T14:12:57",
+    "lane": 15,
+    "reference_run": "20261023-140946-c20fd3",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "details": 4.1e-05
+    }
+   }
+  ]
+ }
+}

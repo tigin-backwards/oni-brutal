@@ -1581,6 +1581,20 @@ class Player:
         return set(result.stdout.splitlines())
 
 
+_QA_TOOLS = None
+
+
+def qa_tools():
+    """scripts/qa-tools.py as a module (log signatures: canonical forms across Mono and .NET)."""
+    global _QA_TOOLS
+    if _QA_TOOLS is None:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location('qa_tools', os.path.join(ROOT, 'scripts', 'qa-tools.py'))
+        _QA_TOOLS = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(_QA_TOOLS)
+    return _QA_TOOLS
+
+
 def original_player(executable, lane, root=OUT):
     """The original player's executable in a folder of the lane's own: Unity's Linux player runs
     single-instance, locking unity.lock beside its executable ("Player is already running"), so
@@ -2730,7 +2744,7 @@ def differential(spec, result, reference, findings=None):
     reason; its id goes into checks['findings'], which makes the run a warning."""
     findings = load_findings() if findings is None else findings
     checks, reasons, cited = {}, [], set()
-    new = sorted(result['signatures'] - reference.signatures)
+    new = qa_tools().unknown(result['signatures'], reference.signatures)
     checks['signatures'] = {'new': new, 'reference': len(reference.signatures)}
     if new:
         reasons.append(f'{len(new)} log signature(s) the original lacks')

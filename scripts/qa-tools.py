@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Helpers of scripts/qa.sh.
   qa-tools.py signatures LOG              the log's exceptions and errors, one normalized line each
+  qa-tools.py new-signatures REF NEW      lines of NEW whose canonical form REF lacks (signature files)
   qa-tools.py image REFERENCE NEW DIFF [--crop X,Y,W,H] [--crop-new X,Y,W,H] [--mask X,Y,W,H]...
                                           fraction of (unmasked) pixels differing visibly; writes
                                           DIFF (a mask). --crop cuts both (--crop-new the new one
@@ -16,6 +17,39 @@ def normalize(text):
     text = re.sub(r'\d+(\.\d+)?', 'N', text)
     return text.strip()
 
+# Runtime internals: the first frame of a trace only says which runtime threw (Mono's
+# System.IO.FileStream, .NET's Interop.ThrowExceptionForIoErrno, Unity's or our logger, our
+# engine's dispatch), so a signature keeps the message alone when that frame is one of these.
+RUNTIME_FRAME = re.compile(r'^(System|Interop|Microsoft|Mono)\.|^UnityEngine\.(Debug|Logger|DebugLogHandler|StackTraceUtility)\.'
+                           r'|^OniBrutal\.')
+
+def canonical(signature):
+    """A signature as both runtimes write it: Mono and .NET word some exception messages
+    differently ('…'. against "…", a trailing period or none) and format stack frames
+    differently ("at A.B (x) [N] in <…>:N", "A:B (x)"). Idempotent, so it also applies to
+    signatures stored by an earlier version (references)."""
+    message, _, frame = signature.partition(' @ ')
+    message = re.sub(r'\.$', '', message.replace("'", '"').rstrip())
+    if frame:
+        frame = re.sub(r'^at ', '', frame.strip())
+        frame = re.sub(r' (\[N\] )?in <[^>]*>(:N)?$', '', frame)
+        frame = re.sub(r'\s*\(.*\)$', '', frame).replace(':', '.')
+        if RUNTIME_FRAME.search(frame):
+            frame = ''
+    return message + (' @ ' + frame if frame else '')
+
+def unknown(signatures, reference):
+    """The SIGNATURES not in REFERENCE once both are canonical. A reference entry with no frame
+    (written when its first frame was runtime internals) stands for its message with any frame."""
+    known = {canonical(s) for s in reference}
+    return sorted(s for s in signatures
+                  if canonical(s) not in known and canonical(s).partition(' @ ')[0] not in known)
+
+def new_signatures(reference, new):
+    read = lambda path: open(path, encoding='utf-8', errors='replace').read().splitlines()
+    for line in unknown(read(new), read(reference)):
+        print(line)
+
 def signatures(path):
     lines = open(path, encoding='utf-8', errors='replace').read().splitlines()
     found = set()
@@ -23,11 +57,13 @@ def signatures(path):
         body = re.sub(r'^\[[^\]]*\] \[\d+\] \[[A-Z]+\] ', '', line)
         if re.search(r'\b\w+(Exception|Error)\b:', body) or '[ERROR]' in line:
             frame = ''
-            for nxt in lines[i + 1:i + 4]:
+            for nxt in lines[i + 1:i + 9]:
                 if re.match(r'\s*(at |[\w.`]+[:.][\w<>`]+ ?\()', nxt):
                     frame = nxt.strip()
-                    break
-            found.add(normalize(body) + (' @ ' + normalize(frame) if frame else ''))
+                    if not RUNTIME_FRAME.search(re.sub(r'^at ', '', frame).replace(':', '.')):
+                        break  # the first frame past the runtime's own
+                    frame = ''
+            found.add(canonical(normalize(body) + (' @ ' + normalize(frame) if frame else '')))
     for s in sorted(found):
         print(s)
 
@@ -126,4 +162,4 @@ def perf(path):
 
 if __name__ == '__main__':
     cmd, *args = sys.argv[1:]
-    {'signatures': signatures, 'image': image, 'verify': verify, 'perf': perf}[cmd](*args)
+    {'signatures': signatures, 'new-signatures': new_signatures, 'image': image, 'verify': verify, 'perf': perf}[cmd](*args)

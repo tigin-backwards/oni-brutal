@@ -141,7 +141,7 @@ run_scenario() # NAME
         ok "dogfood $name: blessed ($(($(wc -l < "$out/signatures.txt") - 1)) signatures)"; return
     fi
     if [ ! -d "$rdir" ]; then fail "dogfood $name: no reference (run with --bless after checking $out)"; return; fi
-    local new; new=$(comm -13 <(sort "$rdir/signatures.txt") <(sort "$out/signatures.txt"))
+    local new; new=$(python3 "$tools" new-signatures "$rdir/signatures.txt" "$out/signatures.txt")
     if [ -n "$new" ]; then fail "dogfood $name: new log signatures:"; echo "$new" | sed 's/^/       /' | tee -a "$run/summary.txt"; fi
     local worst=0 bad=""
     local previous=""
@@ -253,7 +253,7 @@ u57_check()
         cp "$out/signatures.txt" "$ref/$stage-signatures.txt"; ok "$stage: $(wc -l < "$out/signatures.txt") log signatures blessed"; return
     fi
     if [ ! -f "$ref/$stage-signatures.txt" ]; then fail "$stage: no reference signatures (run with --bless after checking $out)"; return; fi
-    local new; new=$(comm -13 <(sort "$ref/$stage-signatures.txt") <(sort "$out/signatures.txt"))
+    local new; new=$(python3 "$tools" new-signatures "$ref/$stage-signatures.txt" "$out/signatures.txt")
     if [ -n "$new" ]; then fail "$stage: new log signatures:"; echo "$new" | sed 's/^/       /' | tee -a "$run/summary.txt"; else ok "$stage: no new exceptions or errors"; fi
 }
 

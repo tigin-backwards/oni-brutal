@@ -1,0 +1,59 @@
+{
+ "spec": "mods/2126548651-stirling-engine.yaml",
+ "mods": [
+  "2126548651"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Stirling Engine is built of copper ore in the corridor over rock made hot in setup, and selected: it runs at the original's efficiency; its details title is shot",
+ "updated": "2026-10-23",
+ "commit": "8451394",
+ "mod_dlls": {
+  "2126548651": {
+   "StirlingEngine.dll": "9c834791d1d705c07d05260bf25ecdc1890e7c74a44ee7d92cfc00cf9c010bca"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-123333-3bbe4d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T12:53:39",
+    "lane": 13,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-125712-1b542f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T13:12:32",
+    "lane": 13,
+    "reference_run": "20261023-123333-3bbe4d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "title": 0.0
+    }
+   },
+   {
+    "run": "20261023-125712-1b542f",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T13:14:22",
+    "lane": 13,
+    "reference_run": "20261023-123333-3bbe4d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "title": 0.0
+    }
+   }
+  ]
+ }
+}

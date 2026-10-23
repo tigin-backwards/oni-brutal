@@ -1,0 +1,37 @@
+# Stirling Engine (2126548651), classes B, O.
+#
+# What it does: adds the Stirling Engine to the Power menu (Temperature Modulation): a 1x3
+# generator of metal that draws heat from the cell two below its foot (under the floor tile it
+# stands on) and turns it into up to 100 W, at an efficiency of 1 - T(engine) / T(source),
+# while the source is at least 10 degrees hotter than the engine. Status items show the heat
+# drawn and the wattage, or why it idles. A PLib options dialog sets the wattage, the minimum
+# difference and the waste heat.
+# How a player reaches it: the build menu (Power).
+# What changes: power from hot rock or magma under a floor.
+#
+# setup grants Temperature Modulation, spawns copper ore, and makes the rock under the floor
+# of the dug-out corridor west of the printing pod hot (igneous rock at 400 K). The engine is
+# built there and selected: it runs, at the same efficiency as in the original.
+from: early-base
+mods: [2126548651]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"TemperatureModulation\")", method: Purchased}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Cuprite\").substance", method: SpawnResource, args: [[115.5, 207.5, -12], 600, 300, 255, 0]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(113, 204)"}, IgneousRock, null, 2000, 400]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"TemperatureModulation\").unlockedItemIDs": {contains: StirlingEngine}
+  - build: {prefab: StirlingEngine, at: [113, 206]}
+  - expect: {blueprints: {StirlingEngine: 1}}
+  - run: {seconds: 1200, until: {buildings: {StirlingEngine: 1}, pending_construction: 0}}
+  - run: {seconds: 10}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: StirlingEngine}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<RomenH.StirlingEngine.StirlingEngine>.currentEfficiency": "> 0.05"
+  - expect_state:
+      "selected:GetComponent<RomenH.StirlingEngine.StirlingEngine>.currentEfficiency": "== original"
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Stirling Engine"}
+  - shot: {name: title, crop: "**/DetailsScreen/TitleBar", threshold: 0.04}

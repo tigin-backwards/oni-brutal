@@ -289,7 +289,7 @@ installs get developer checks subscribers never see).
 | 268 | [Outdated - Buildable AETN](https://steamcommunity.com/sharedfiles/filedetails/?id=1714094338) | ⬜ | ⬜ | ⬜ | flagged by onimaxxing (notLoading); not tested |
 | 269 | [auto machine机器自动工作](https://steamcommunity.com/sharedfiles/filedetails/?id=2992024030) | ✅ | ✅ | ⬜ |  |
 | 270 | [Français](https://steamcommunity.com/sharedfiles/filedetails/?id=2701205009) | ⬜ | ⬜ | ⬜ | translation: the game applies one only from a Steam subscription; not testable here |
-| 271 | [Stirling Engine](https://steamcommunity.com/sharedfiles/filedetails/?id=2126548651) | ✅ | ✅ | ⬜ |  |
+| 271 | [Stirling Engine](https://steamcommunity.com/sharedfiles/filedetails/?id=2126548651) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2126548651-stirling-engine.yaml: the Stirling Engine is built of copper ore in the corridor over rock made hot in setup, and selected: it runs at the original's efficiency; its details title is shot |
 | 272 | [Wireless Power](https://steamcommunity.com/sharedfiles/filedetails/?id=2356326908) | ❌ | ❌ | ⬜ | broken upstream: its PLib side screens look for `DetailsScreen.sideScreenContentBody`, which the game no longer has, so loading a colony opens the crash screen (spec tests/e2e/mods/2356326908-wireless-power.yaml) (same in the original) |
 | 273 | [Hatch Morphs](https://steamcommunity.com/sharedfiles/filedetails/?id=1843550325) | ✅ | ✅ | ✅ | spec tests/e2e/mods/1843550325-hatch-morphs.yaml: a Wooden Hatch is spawned in the corridor (setup); the mod's fertility modifiers exist, the hatch is selected and named (title shot) and lives through a short run on the floor |
 | 274 | [Build Straight Up](https://steamcommunity.com/sharedfiles/filedetails/?id=2135682628) | ✅ | ✅ | ⬜ |  |

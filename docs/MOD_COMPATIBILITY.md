@@ -73,7 +73,7 @@ installs get developer checks subscribers never see).
 | 52 | [[Vanilla + DLC] Combined Conduit Display](https://steamcommunity.com/sharedfiles/filedetails/?id=2634633299) | ✅ | ✅ | ⬜ |  |
 | 53 | [Pliers](https://steamcommunity.com/sharedfiles/filedetails/?id=1848884654) | ⬜ | ⬜ | ⬜ | flagged by onimaxxing (notLoading); not tested |
 | 54 | [Sandbox Tools](https://steamcommunity.com/sharedfiles/filedetails/?id=1928837153) | ✅ | ✅ | ⬜ |  |
-| 55 | [Starmap Queue](https://steamcommunity.com/sharedfiles/filedetails/?id=1907780517) | ✅ | ✅ | ⬜ |  |
+| 55 | [Starmap Queue](https://steamcommunity.com/sharedfiles/filedetails/?id=1907780517) | ✅ | ✅ | ✅ | spec tests/e2e/mods/1907780517-starmap-queue.yaml: smaller spec (the base game's starmap is not in a Spaced Out colony): the mod loads, nothing is being analysed, the colony runs 30 s with it |
 | 56 | [【停止更新】刷新选人(Refresh selection)](https://steamcommunity.com/sharedfiles/filedetails/?id=1724518038) | ⬜ | ⬜ | ⬜ | flagged by onimaxxing (notLoading); not tested |
 | 57 | [Buildable Natural Tile](https://steamcommunity.com/sharedfiles/filedetails/?id=1840755803) | ✅ | ✅ | ⬜ |  |
 | 58 | [[DEPRECATED] Drag Tool Area](https://steamcommunity.com/sharedfiles/filedetails/?id=1835851890) | ⬜ | ⬜ | ⬜ | flagged by onimaxxing (notLoading); not tested |

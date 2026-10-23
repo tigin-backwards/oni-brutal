@@ -1,0 +1,21 @@
+# Starmap Queue (1907780517), class P.
+#
+# What it does: when a telescope finishes analysing the selected starmap destination, it
+# goes on with the nearest unanalysed one at the same or a greater distance instead of
+# stopping, and posts a message naming the destination just discovered (a transpiler on
+# SpacecraftManager.EarnDestinationAnalysisPoints).
+# How a player reaches it: the base game's starmap and telescope.
+# What changes: which destination is analysed next.
+#
+# Smaller spec: the base game's starmap does not exist in a Spaced Out colony (its telescopes
+# reveal the cluster map instead: no starmap destinations exist, none is being analysed), so the
+# feature cannot be reached from early-base. The spec checks that the mod loads, that nothing
+# is being analysed, and that the colony runs with it.
+from: early-base
+mods: [1907780517]
+steps:
+  - expect_state:
+      "type:PeterHan.StarmapQueue.StarmapQueuePatches::": PeterHan.StarmapQueue.StarmapQueuePatches
+      "SpacecraftManager.instance.GetStarmapAnalysisDestinationID()": -1
+  - run: {seconds: 30}
+  - expect: {duplicants: 3}

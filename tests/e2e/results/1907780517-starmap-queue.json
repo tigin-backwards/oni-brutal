@@ -1,0 +1,55 @@
+{
+ "spec": "mods/1907780517-starmap-queue.yaml",
+ "mods": [
+  "1907780517"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "smaller spec (the base game's starmap is not in a Spaced Out colony): the mod loads, nothing is being analysed, the colony runs 30 s with it",
+ "updated": "2026-10-22",
+ "commit": "fd67309",
+ "mod_dlls": {
+  "1907780517": {
+   "StarmapQueue.dll": "703ada1915883528f592a1faf093ea2f008a96554fb68b56dc2d99678739ba78"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261022-232004-36dc49",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-22T23:24:24",
+    "lane": 13,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261022-232630-614fbf",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-22T23:45:06",
+    "lane": 13,
+    "reference_run": "20261022-232004-36dc49",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261022-232630-614fbf",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-22T23:46:16",
+    "lane": 13,
+    "reference_run": "20261022-232004-36dc49",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

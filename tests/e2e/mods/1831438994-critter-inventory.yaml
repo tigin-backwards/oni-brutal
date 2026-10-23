@@ -1,0 +1,22 @@
+# Critter Inventory (1831438994), classes T, S.
+#
+# What it does: the resources panel in the top right and the All Resources screen get critter
+# categories, wild, tame and artificial (each shown once it has critters), with a row per
+# species and its count (pinnable, with a chart); clicking a row cycles the camera through
+# those critters.
+# How a player reaches it: the resources panel (top right), See All.
+# What changes: critter counts in the resource lists.
+#
+# early-base's asteroid has wild hatches, shine bugs and sweetles nearby; the All Resources
+# screen, opened from the resources panel's See All, lists them under Critter (Wild).
+from: early-base
+mods: [1831438994]
+steps:
+  - click: {ui: "**/PinnedResourcesPanel/Resources/EntryContainer/SeeAllButton"}
+  - ui_wait: {path: "**/TopRight/AllResourcesScreen", cond: stable}
+  - expect_ui:
+      "**/AllResourcesScreen/Scroll/RootList/CategoryRow[0]/Header/NameLabel": {text: "Critter (Wild)"}
+      "**/AllResourcesScreen/Scroll/RootList/CategoryRow[0]/Container/ResourceRow/NameLabel": {any_text: "Hatch (Wild)"}
+      "**/AllResourcesScreen/Scroll/RootList/CategoryRow[0]/Container/ResourceRow": {count: ">= 3"}
+  - ui_dump: {name: wild, root: "**/AllResourcesScreen/Scroll/RootList/CategoryRow[0]"}
+  - shot: {name: all-resources, crop: "**/TopRight/AllResourcesScreen", threshold: 0.04}

@@ -160,7 +160,7 @@ installs get developer checks subscribers never see).
 | 139 | [Turkish (Türkçe) [Innovation]](https://steamcommunity.com/sharedfiles/filedetails/?id=934649708) | ⬜ | ⬜ | ⬜ | translation: the game applies one only from a Steam subscription; not testable here |
 | 140 | [Visual Fixes N Tweaks](https://steamcommunity.com/sharedfiles/filedetails/?id=3455710156) | ✅ | ✅ | ⬜ |  |
 | 141 | [Smart Dig // by @Ony 👾](https://steamcommunity.com/sharedfiles/filedetails/?id=1844888487) | ✅ | ✅ | ⬜ |  |
-| 142 | [The Duplicant Reacharound](https://steamcommunity.com/sharedfiles/filedetails/?id=1854895085) | ✅ | ✅ | ⬜ |  |
+| 142 | [The Duplicant Reacharound](https://steamcommunity.com/sharedfiles/filedetails/?id=1854895085) | ✅ | ✅ | ✅ | spec tests/e2e/mods/1854895085-duplicant-reacharound.yaml: smaller spec: the extended reach tables are checked after the load and a dig order on the corridor ceiling uses the extended table with corners |
 | 143 | [Floatation](https://steamcommunity.com/sharedfiles/filedetails/?id=1751123054) | ⬜ | ⬜ | ⬜ | flagged by onimaxxing (mayCrashInPlay); not tested |
 | 144 | [Free Resource Buildings - Updated](https://steamcommunity.com/sharedfiles/filedetails/?id=2839006500) | ✅ | ✅ | ⬜ |  |
 | 145 | [No Mop Limits](https://steamcommunity.com/sharedfiles/filedetails/?id=2313125589) | ✅ | ✅ | ⬜ |  |

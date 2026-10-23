@@ -3,12 +3,12 @@
  "mods": [
   "1854895085"
  ],
- "verdict": "pending",
- "why": "0 run(s) of ours against original run 20261023-033546-e953d8; 2 needed",
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
  "findings": [],
- "note": "",
+ "note": "smaller spec: the extended reach tables are checked after the load and a dig order on the corridor ceiling uses the extended table with corners",
  "updated": "2026-10-23",
- "commit": "2dff650",
+ "commit": "309f5f8",
  "mod_dlls": {
   "1854895085": {
    "The Duplicant Reacharound 2.dll": "d02c5aaac3d14a341e8678a8d295e686f66eb261fc7f8a663af2ffba8281b5a1"
@@ -25,6 +25,31 @@
     "signatures": 0
    }
   ],
-  "ours": []
+  "ours": [
+   {
+    "run": "20261023-053424-dee5e7",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T05:34:24",
+    "lane": 14,
+    "reference_run": "20261023-033546-e953d8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-053424-dee5e7",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T05:35:12",
+    "lane": 14,
+    "reference_run": "20261023-033546-e953d8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
  }
 }

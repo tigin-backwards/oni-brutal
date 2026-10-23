@@ -1,0 +1,23 @@
+# Queue for Sinks (1881925531), class P.
+#
+# What it does: a Duplicant who would use a wash basin, sink or hand sanitizer on the way
+# (or an ore scrubber) waits in line when it is busy, unless the next one in the row is free,
+# instead of walking past unwashed. It adds a SinkCheckpoint (ScrubberCheckpoint) to each such
+# building's Work component; the checkpoint registers a reactable on the building that stops
+# Duplicants coming through in the building's direction.
+# How a player reaches it: build sinks on a path Duplicants walk.
+# What changes: Duplicants stop at a busy sink.
+#
+# A smaller spec: the queue only shows with several Duplicants reaching a busy sink at once,
+# which early-base's three do not do on cue. Two wash basins are built side by side in the
+# corridor west of the printing pod; each gets its checkpoint, and the colony runs with them.
+from: early-base
+mods: [1881925531]
+steps:
+  - build: {prefab: WashBasin, cells: [[106, 206], [108, 206]]}
+  - run: {seconds: 1200, until: {buildings: {WashBasin: 2}, pending_construction: 0}}
+  - expect_state:
+      "all:PeterHan.QueueForSinks.SinkCheckpoint::Length": 2
+      "count:all:PeterHan.QueueForSinks.SinkCheckpoint::[*] if .gameObject.name == WashBasinComplete": 2
+  - run: {seconds: 120}
+  - expect: {duplicants: 3, buildings: {WashBasin: 2}}

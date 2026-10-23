@@ -1,0 +1,55 @@
+{
+ "spec": "mods/1881925531-queue-for-sinks.yaml",
+ "mods": [
+  "1881925531"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a smaller spec: two wash basins built side by side each get its queue checkpoint and the colony runs with them (the queue itself needs several Duplicants at a busy sink)",
+ "updated": "2026-10-22",
+ "commit": "17eb26f",
+ "mod_dlls": {
+  "1881925531": {
+   "QueueForSink.dll": "2300e9eaa876daff8fbcdee820fa4acca46235acb7759cc4043fed5a9bc5e30e"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261022-222044-a2f028",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-22T22:20:44",
+    "lane": 10,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261022-222323-ac89e3",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-22T22:28:13",
+    "lane": 10,
+    "reference_run": "20261022-222044-a2f028",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261022-222323-ac89e3",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-22T22:30:39",
+    "lane": 10,
+    "reference_run": "20261022-222044-a2f028",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

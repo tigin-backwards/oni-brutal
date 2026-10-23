@@ -1,0 +1,63 @@
+{
+ "spec": "mods/2567122431-waste-not-want-not.yaml",
+ "mods": [
+  "2567122431"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the ration box's minimum freshness slider, set to 90 % through its number field; the slider side screen as in the original",
+ "updated": "2026-10-22",
+ "commit": "17eb26f",
+ "mod_dlls": {
+  "2567122431": {
+   "NoWasteWant.dll": "17fd12ca873a5316d1b090bb4c9dbf281991ca5a254a52c7d4f64aad31d801f8"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261022-222429-fbc40a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-22T22:24:29",
+    "lane": 11,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261022-222612-a425e4",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-22T22:26:12",
+    "lane": 11,
+    "reference_run": "20261022-222429-fbc40a",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "slider": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261022-222612-a425e4",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-22T22:27:32",
+    "lane": 11,
+    "reference_run": "20261022-222429-fbc40a",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "slider": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

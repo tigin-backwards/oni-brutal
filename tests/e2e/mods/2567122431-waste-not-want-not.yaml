@@ -1,0 +1,28 @@
+# Waste Not, Want Not (2567122431), class P.
+#
+# What it does: ration boxes and refrigerators get a minimum freshness slider (a
+# FreshnessControl with the game's single-slider side screen): food below it is dropped and
+# never fetched into them. Fetching also prefers the stalest food first, so it is eaten before
+# it spoils (patches on FetchManager), and the rot handler and sap trees follow suit.
+# How a player reaches it: select a ration box; the slider's number field.
+# What changes: the box's minimum freshness, and what it accepts.
+#
+# early-base's ration box (west of the printing pod) holds 20 kg of fresh rations. The minimum
+# is set to 90 % through the number field.
+from: early-base
+mods: [2567122431]
+steps:
+  - driver: {camera.set: {cell: [122, 208], ortho: 8}}
+  - click_world: {cell: [121, 207]}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<RationBox>": exists
+      "selected:GetComponent<PeterHan.NoWasteWant.FreshnessControl>.MinFreshness": 0
+  - expect_ui:
+      "**/SingleSliderSideScreen/Contents/MinLabel": {text: "0%"}
+      "**/SingleSliderSideScreen/Contents/MaxLabel": {text: "100%"}
+  - ui_dump: {name: slider, root: "**/Config Tab - body instance/SingleSliderSideScreen"}
+  - type: {ui: "**/SingleSliderSideScreen/Contents/NumberInputField", text: "90", clear: true, enter: true}
+  - expect_state:
+      "selected:GetComponent<PeterHan.NoWasteWant.FreshnessControl>.MinFreshness": 0.9
+      "selected:GetComponent<Storage>.MassStored()": "== original"

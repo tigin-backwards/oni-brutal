@@ -3,12 +3,12 @@
  "mods": [
   "2660131829"
  ],
- "verdict": "pending",
- "why": "0 run(s) of ours against original run 20261023-042128-2bb68b; 2 needed",
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
  "findings": [],
- "note": "",
+ "note": "a Mood Lamp is built from glass west of the pod and selected; its side screen lists the variants, Unicorn and Morb are picked by clicks, and the side screen is shot",
  "updated": "2026-10-23",
- "commit": "885cbe9",
+ "commit": "beb2db7",
  "mod_dlls": {
   "2660131829": {
    "DecorPackA.dll": "dfe91d61d1fbd73ceeaf62077e84577c1851cf5b0b5535897c9d6a886e8959f2"
@@ -25,6 +25,35 @@
     "signatures": 0
    }
   ],
-  "ours": []
+  "ours": [
+   {
+    "run": "20261023-071027-b8233d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T07:10:27",
+    "lane": 14,
+    "reference_run": "20261023-042128-2bb68b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "side-screen": 0.0
+    }
+   },
+   {
+    "run": "20261023-071027-b8233d",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T07:10:53",
+    "lane": 15,
+    "reference_run": "20261023-042128-2bb68b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "side-screen": 0.0
+    }
+   }
+  ]
  }
 }

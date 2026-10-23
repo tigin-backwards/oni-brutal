@@ -1,0 +1,30 @@
+# Favorite Resources // by @Ony (1872111766), class S.
+#
+# What it does: a resource pinned in the All Resources screen also becomes a favourite, saved
+# in the mod's settings (mods/config/FavoriteResources/config.json) and pinned again in every
+# later game; the pinned list keeps the favourites' order (Shift/Ctrl-click on a pinned row
+# moves it up or down or removes it), and the tooltips say so. Opening the screen clears the
+# "NEW" marks. Its settings (update rate, background) are in its own config screen.
+# How a player reaches it: the Resources panel's settings button, a row's pin button.
+# What changes: the pinned resources panel, and the mod's saved favourites.
+#
+# The first row of the screen in early-base is Coal.
+from: early-base
+mods: [1872111766]
+steps:
+  - expect_state: {"ClusterManager.Instance.activeWorld.worldInventory.pinnedResources.Count": 0}
+  # The mod hides the panel's "See All" and Clear buttons and puts a settings button in the
+  # header, which opens the All Resources screen.
+  - expect_ui: {"**/PinnedResourcesPanel/Resources/EntryContainer/SeeAllButton": {exists: false}}
+  - click: {ui: "**/PinnedResourcesPanel/Resources/HeaderLayout/SettingsButton"}
+  - ui_wait: {path: "**/TopRight/AllResourcesScreen", cond: stable}
+  - expect_ui: {"**/AllResourcesScreen/Scroll/RootList/CategoryRow/Container/ResourceRow/NameLabel": {text: "Coal"}}
+  - click: {ui: "**/AllResourcesScreen/Scroll/RootList/CategoryRow/Container/ResourceRow/Pin"}
+  - expect_state:
+      "ClusterManager.Instance.activeWorld.worldInventory.pinnedResources.Count": 1
+      "file:mods/config/FavoriteResources/config.json": {contains: "Carbon"}
+  - ui_dump: {name: coal-row, root: "**/AllResourcesScreen/Scroll/RootList/CategoryRow[0]/Container/ResourceRow[0]"}
+  - key: {code: Escape}
+  - expect_state: {"AllResourcesScreen.Instance.IsScreenActive()": false}
+  - expect_ui: {"**/PinnedResourcesPanel/**": {any_text: "~Coal"}}
+  - shot: {name: pinned, crop: "**/TopRight/PinnedResourcesPanel", threshold: 0.04}

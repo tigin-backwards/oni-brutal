@@ -1,0 +1,71 @@
+{
+ "spec": "mods/1872111766-favorite-resources.yaml",
+ "mods": [
+  "1872111766"
+ ],
+ "verdict": "failed",
+ "why": "a run of ours failed",
+ "findings": [],
+ "note": "pinning Coal from All Resources saves the favourite in both; then the mod's Populate postfix adds a second VerticalLayoutGroup: ours logs that through Debug.LogError, which the game's crash reporter catches and shows its crash screen; Unity logs it natively, unseen",
+ "updated": "2026-10-23",
+ "commit": "c2906cc",
+ "mod_dlls": {
+  "1872111766": {
+   "FavoriteResources.dll": "78cba65a3395cb13292431d8daee4023417b78dce7fb752f1eda7c99078b574c"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261022-234547-e5cfc9",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-22T23:53:48",
+    "lane": 13,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261022-235524-14385d",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-23T00:21:29",
+    "lane": 13,
+    "reasons": [
+     "shot pinned: 78.98% of pixels differ (> 4%)"
+    ],
+    "reference_run": "20261022-234547-e5cfc9",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "coal-row": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "pinned": 0.789803
+    }
+   },
+   {
+    "run": "20261022-235524-14385d",
+    "index": 2,
+    "verdict": "fail",
+    "date": "2026-10-23T00:22:20",
+    "lane": 13,
+    "reasons": [
+     "step 11: **/PinnedResourcesPanel/**: no element with text '~Coal' among 13 (it held in the original: the interaction has no effect in ours)"
+    ],
+    "reference_run": "20261022-234547-e5cfc9",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "coal-row": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

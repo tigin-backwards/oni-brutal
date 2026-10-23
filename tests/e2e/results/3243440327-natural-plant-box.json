@@ -1,0 +1,63 @@
+{
+ "spec": "mods/3243440327-natural-plant-box.yaml",
+ "mods": [
+  "3243440327"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Natural Plant Box built and given a Bluff Briar seed through the planter side screen; once planted the box is gone and a wild Bluff Briar stands on its cell",
+ "updated": "2026-10-23",
+ "commit": "61e619a",
+ "mod_dlls": {
+  "3243440327": {
+   "NaturalPlantBox.dll": "1ed58601d61415fb89b278186e0990e20bcb346fa41e53dad0c5691eedf81210"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-002727-f44293",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T00:27:27",
+    "lane": 13,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-002922-fc11bf",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T00:29:22",
+    "lane": 12,
+    "reference_run": "20261023-002727-f44293",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "planter-title": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261023-002922-fc11bf",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T00:30:48",
+    "lane": 12,
+    "reference_run": "20261023-002727-f44293",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "planter-title": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

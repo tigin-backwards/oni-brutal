@@ -1,0 +1,34 @@
+# 自然种植盒 (Natural Plant Box) (3243440327), class B.
+#
+# What it does: adds the Natural Plant Box (PiapiPlantHelper, Food menu, researched with
+# Agriculture): a 1x1 box of farmable material (dirt) on any foundation, turnable, taking crop,
+# decor and water seeds. When a Duplicant plants a seed in it, the seed becomes a wild plant on
+# that cell and the box removes itself: planting as a Pip would, without one. It also keeps the
+# "no farmable plots" check from counting the boxes.
+# How a player reaches it: the build menu (Food), then the box's seed side screen.
+# What changes: a wild plant where the box was.
+#
+# setup grants Agriculture and drops a Bluff Briar seed on the floor of the room west of the
+# printing pod (through Scenario.SpawnPrefab: early-base has none within reach). The box stands
+# at the room's west end, out of the Duplicants' way.
+from: early-base
+mods: [3243440327]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"Agriculture\")", method: Purchased}}
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131757, 0, 0, \"PrickleGrassSeed\", \"Ore\")", method: SetActive, args: [true]}}
+steps:
+  - expect_state: {"count:all:PlantableSeed::[*] if .PlantID.Name == PrickleGrass": ">= 1"}
+  - build: {prefab: PiapiPlantHelper, at: [106, 206]}
+  - run: {seconds: 900, until: {buildings: {PiapiPlantHelper: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [110, 208], ortho: 8}}
+  - click_world: {cell: [106, 206], select: PiapiPlantHelper}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui: {"**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Natural Plant Box"}}
+  - ui_wait: {path: "**/Config Tab - body instance/PlanterSideScreen", cond: stable}
+  - ui_dump: {name: planter-title, root: "**/DetailsScreen/SideScreen/Body/Config Tab - body instance/Title"}
+  - click: {text: "Bluff Briar", under: "**/PlanterSideScreen"}
+  - click: {ui: "**/PlanterSideScreen/Contents/ButtonArea/PlaceButton"}
+  # A Duplicant brings the seed: it becomes a wild Bluff Briar on the cell, and the box is gone.
+  - run: {seconds: 900, until: {buildings: {PiapiPlantHelper: 0}}}
+  - expect_state:
+      "Grid.Objects.get_Item(131122, 1).GetComponent<KPrefabID>.PrefabTag.Name": PrickleGrass

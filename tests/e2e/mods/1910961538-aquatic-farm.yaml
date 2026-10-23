@@ -1,0 +1,36 @@
+# Aquatic Farm (1910961538), class B.
+#
+# What it does: adds the Aquatic Farm Tile to the Food menu (researched with Meal
+# Preparation, beside the Farm Tile): a farm tile of metal ore and dirt whose plant takes the
+# liquid it needs to be irrigated from the liquid touching the tile (four passive consumers,
+# above, below and beside it, switched on for the planted crop's irrigation elements at 1.5
+# times its rate), instead of having it delivered.
+# How a player reaches it: the build menu (Food), then planting a seed in it.
+# What changes: a farm tile that waters its plant from the surrounding liquid.
+#
+# setup grants Meal Preparation and spawns dirt. The tile fills one cell of the pit in the
+# floor of the dug-out room west of the printing pod; with nothing planted, its consumers
+# stay off.
+from: early-base
+mods: [1910961538]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"FineDining\")", method: Purchased}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Dirt\").substance", method: SpawnResource, args: [[110.5, 207.5, -12], 400, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"FineDining\").unlockedItemIDs": {contains: AquaticFarm}
+      "Grid.Solid.get_Item(131124)": false
+  - build: {prefab: AquaticFarm, at: [108, 206]}
+  - expect: {blueprints: {AquaticFarm: 1}}
+  - run: {seconds: 1200, until: {buildings: {AquaticFarm: 1}, pending_construction: 0}}
+  - expect_state: {"Grid.Solid.get_Item(131124)": true}
+  - driver: {camera.set: {cell: [108, 207], ortho: 8}}
+  - click_world: {cell: [108, 206]}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Aquatic Farm"}
+  - expect_state:
+      "selected:GetComponents<PassiveElementConsumer>.Length": 4
+      "selected:GetComponent<AquaticFarm.AquaticFarm>": exists
+      "selected:PlantablePlot.Occupant": null
+      "selected:KPrefabID.HasTag(\"FarmTiles\")": true

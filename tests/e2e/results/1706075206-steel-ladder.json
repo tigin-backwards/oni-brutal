@@ -1,0 +1,29 @@
+{
+ "spec": "mods/1706075206-steel-ladder.yaml",
+ "mods": [
+  "1706075206"
+ ],
+ "verdict": "pending",
+ "why": "0 run(s) of ours against original run 20261023-031612-70fa76; 2 needed",
+ "findings": [],
+ "note": "three steel ladder cells are built from spawned steel in the corridor west of the pod and selected; climbing speeds 1.5 up and down",
+ "updated": "2026-10-23",
+ "commit": "495e42d",
+ "mod_dlls": {
+  "1706075206": {
+   "SteelLadder.dll": "93fc04a01cf8ae35d2c587690a7edbd2c72b09a6d6d9f87b23dec7db4a8466df"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-031612-70fa76",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T03:16:12",
+    "lane": 14,
+    "signatures": 0
+   }
+  ]
+ }
+}

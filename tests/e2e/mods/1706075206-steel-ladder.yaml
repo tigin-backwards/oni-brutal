@@ -1,0 +1,32 @@
+# Steel Ladder (1706075206), class B.
+#
+# What it does: adds the Steel Ladder to the Base menu (researched with Luxury, beside the
+# Plastic Ladder): a 1x1 ladder of 50 kg of steel, drag-built, that Duplicants climb 1.5
+# times as fast as a normal ladder, up and down, and that never floods, overheats or entombs.
+# How a player reaches it: the build menu (Base).
+# What changes: a ladder that speeds up climbing.
+#
+# setup grants Luxury and spawns 400 kg of steel (early-base has none). Three ladder cells
+# stand in the dug-out corridor west of the printing pod.
+from: early-base
+mods: [1706075206]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"Luxury\")", method: Purchased}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Steel\").substance", method: SpawnResource, args: [[114.5, 207.5, -12], 400, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"Luxury\").unlockedItemIDs": {contains: SteelLadder}
+      "Assets.GetBuildingDef(\"SteelLadder\").Mass[0]": 50
+  - build: {prefab: SteelLadder, cells: [[113, 207], [113, 208], [113, 209]], material: Steel}
+  - expect: {blueprints: {SteelLadder: 3}}
+  - run: {seconds: 900, until: {buildings: {SteelLadder: 3}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 208]}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Steel Ladder"}
+  - expect_state:
+      "selected:Ladder.upwardsMovementSpeedMultiplier": 1.5
+      "selected:Ladder.downwardsMovementSpeedMultiplier": 1.5
+      "selected:PrimaryElement.ElementID": Steel
+      "Grid.HasLadder.get_Item(132401)": true

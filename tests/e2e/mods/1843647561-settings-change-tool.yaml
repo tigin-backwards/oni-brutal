@@ -1,0 +1,40 @@
+# Settings Change Tool (1843647561), classes T, K.
+#
+# What it does: adds a Change Settings tool to the toolbar (key Q by default): a menu beside
+# the toolbar picks one setting (enable or disable buildings, auto-disinfect, auto-repair,
+# compost, empty storage, tinkering), and a drag applies it to every building or item in the
+# dragged area, with a popup over each one changed. Enabling or disabling a building queues
+# the same errand its own button would.
+# How a player reaches it: the toolbar's Change Settings button (or its key).
+# What changes: the settings of every building in the dragged area.
+#
+# The menu's choice is moved to Disable Disinfect and back to Disable Building (its first entry
+# and default); the drag then covers the outhouse, the research station and the manual
+# generator around the printing pod, and each of them gets a queued disable errand.
+from: early-base
+mods: [1843647561]
+steps:
+  - expect_state:
+      "count:all:BuildingEnabledButton::[*] if .queuedToggle == true": 0
+  - tool: {toolbar: "Change Settings"}
+  - ui_wait: {path: "**/ToolMenu/ToolParameters/Content", cond: stable}
+  - expect_ui:
+      "**/ToolParameters/Content/List/toggleEntry": {count: 12}
+      "**/ToolParameters/Content/List/toggleEntry/Label": {text: "Disable Building"}
+  - ui_dump: {name: menu, root: "**/ToolMenu/ToolParameters/Content"}
+  - expect_state:
+      "type:PeterHan.BulkSettingsChange.BulkParameterMenu::Instance.SelectedKey": DISABLE_BUILDING
+  # Disable Disinfect (the third entry), then back to Disable Building (the first).
+  - click: {ui: "**/ToolParameters/Content/List/toggleEntry", index: 2}
+  - expect_state:
+      "type:PeterHan.BulkSettingsChange.BulkParameterMenu::Instance.SelectedKey": DISABLE_DISINFECT
+  - click: {ui: "**/ToolParameters/Content/List/toggleEntry", index: 0}
+  - expect_state:
+      "type:PeterHan.BulkSettingsChange.BulkParameterMenu::Instance.SelectedKey": DISABLE_BUILDING
+  - shot: {name: menu, crop: "**/ToolMenu/ToolParameters/Content", threshold: 0.04}
+  - driver: {camera.set: {cell: [122, 209], ortho: 12}}
+  - drag: {from: [114, 207], to: [130, 208]}
+  - expect_state:
+      "count:all:BuildingEnabledButton::[*] if .queuedToggle == true": ">= 3"
+  - expect_state:
+      "count:all:BuildingEnabledButton::[*] if .queuedToggle == true": "== original"

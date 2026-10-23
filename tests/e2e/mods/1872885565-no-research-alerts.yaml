@@ -1,0 +1,34 @@
+# No Research Alerts (1872885565), classes S, O.
+#
+# What it does: a completed research no longer puts the "new" alert badge on the build menu's
+# categories and buildings it unlocks (option Mode: No Alerts, the default), or, in Fast Clear
+# mode, the badges are cleared as soon as the category's panel is closed. Option Prevent
+# Notification also drops the "Research Complete" message in the top left.
+# How a player reaches it: completing any research; the options on the Mods screen.
+# What changes: the build menu's attention badges, and the research messages.
+#
+# setup completes Agriculture (FarmingTech) through the research queue, the way the research
+# station would, with Prevent Notification on. The build menu still records the Planter Box as
+# newly researched (the call the mod silences was made), but neither the Food category nor
+# the Planter Box shows the badge, and no research message joins early-base's two videos.
+from: early-base
+mods: [1872885565]
+options:
+  Aze.NoResearchAlerts: {SuppressMessage: true}
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"FarmingTech\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+steps:
+  - expect_state:
+      "Research.Instance.GetTechInstance(\"FarmingTech\").IsComplete()": true
+      "PlanScreen.Instance.toggleEntries[3].pendingResearchAttentions": {contains: PlanterBox}
+      "ui:**/PlanScreen/Toggle:Food::GetComponent<PlanCategoryNotifications>.AttentionImage.gameObject.activeSelf": false
+      "Messenger.Instance.Count": 2
+  - expect_ui:
+      "**/PlanScreen/Toggle:Food/AttentionIcon": {exists: false}
+  - ui_dump: {name: categories, root: "**/OldPlanScreen/ScollPanel/Viewport/PlanScreen"}
+  - click: {ui: "**/PlanScreen/Toggle:Food"}
+  - ui_wait: {path: "**/PlanBuildingSelectionPanel", cond: stable}
+  - expect_ui:
+      "**/PlanBuildingSelectionPanel/**/PlanterBox*/**/AttentionIcon": {exists: false}
+  - shot: {name: food, crop: "**/BottomPanelLeft/BottomLeftPanel", threshold: 0.04}

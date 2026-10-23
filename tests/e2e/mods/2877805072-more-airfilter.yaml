@@ -1,0 +1,33 @@
+# 更多的空气过滤器 More AirFilter (2877805072), classes B, O.
+#
+# What it does: adds five unpowered 1x1 filters of raw mineral to the Oxygen menu (all
+# researched with Directed Air Streams): each draws one gas within its working radius (4 by
+# default) and, with filter media, turns it into a solid and a cleaner gas: carbon dioxide to
+# carbon and oxygen (AirFilter2), and filters for chlorine, oxygen, natural gas and hydrogen.
+# It also changes the game's Deodorizer: no power, no floor needed, a logic input, and it
+# drops clay. PLib options set the rates, the radius, the drop mass and the rotations.
+# How a player reaches it: the build menu (Oxygen); the options on the Mods screen.
+# What changes: filters that clean gases without power.
+#
+# setup grants Directed Air Streams. The carbon dioxide filter stands in the corridor west of
+# the printing pod, in mid-air (no floor needed), and is selected.
+from: early-base
+mods: [2877805072]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"DirectedAirStreams\")", method: Purchased}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"DirectedAirStreams\").unlockedItemIDs": {contains: AirFilter2}
+      "Assets.GetBuildingDef(\"AirFilter\").RequiresPowerInput": false
+      "Assets.GetBuildingDef(\"AirFilter2\").RequiresPowerInput": false
+  - build: {prefab: AirFilter2, at: [113, 208]}
+  - expect: {blueprints: {AirFilter2: 1}}
+  - run: {seconds: 900, until: {buildings: {AirFilter2: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 208]}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:KPrefabID.PrefabTag.Name": AirFilter2
+      "selected:ElementConsumer.elementToConsume": CarbonDioxide
+      "selected:ElementConsumer.consumptionRadius": 4
+  - shot: {name: details, crop: "**/DetailsScreen", threshold: 0.04}

@@ -1,0 +1,34 @@
+{
+ "spec": "mods/2629866529-pliers-2021.yaml",
+ "mods": [
+  "2629866529"
+ ],
+ "verdict": "pending",
+ "why": "the spec fails in the original: a broken spec, or a mod broken upstream",
+ "findings": [],
+ "note": "",
+ "updated": "2026-10-23",
+ "commit": "fb8747e",
+ "mod_dlls": {
+  "2629866529": {
+   "PLib.dll": "3b174379c1bc41e51c6771c1d5b1d66494d96c4fe9e7cb0d54ef38887d87dedb",
+   "Pliers.dll": "c8f1e8dbfa7602d16afbcb05e88ca41d3b832390aa55b40c7d68e1cf20906ed9"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-080251-19fd1e",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-23T08:37:32",
+    "lane": 15,
+    "reasons": [
+     "step start: the player exited (-6) while loading"
+    ],
+    "signatures": 17
+   }
+  ],
+  "ours": []
+ }
+}

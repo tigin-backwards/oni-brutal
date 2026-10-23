@@ -156,6 +156,10 @@ broken.update({
 broken.update({
     '2869608898': 'broken upstream: its printing pod side screen calls `Dropdown.OptionData(string, Sprite)`, which the game\'s UI library no longer has, so the selected pod (with the mod\'s BioPrinter) shows no Bio-Ink screen and the crash report screen opens (spec tests/e2e/mods/2869608898-bio-inks.yaml)',
 })
+# Found by the e2e specs of batch 06: the spec fails the same way in the original.
+broken.update({
+    '2629866529': 'broken upstream: its PliersWorkable overrides `OnCompleteWork(Worker)`, and the game no longer has a `Worker` type: the type fails to load while the game creates its prefabs, and the player aborts loading a colony; spec tests/e2e/mods/2629866529-pliers-2021.yaml',
+})
 # Fails to load in the original only.
 original_only = {
     '1729794261': 'loads in ours but not in the original: Mono rejects its `PixelPack2` class (an interface method it lacks) at first use, where ours stubs the missing method (ARCHITECTURE D22); left out of the colony runs, which the original\'s error dialog stops',

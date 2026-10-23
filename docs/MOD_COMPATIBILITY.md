@@ -204,7 +204,7 @@ installs get developer checks subscribers never see).
 | 183 | [Mass Move Tool](https://steamcommunity.com/sharedfiles/filedetails/?id=3301490799) | ✅ | ✅ | ⚠️ | spec tests/e2e/mods/3301490799-mass-move-tool.yaml: the Mass Move To tool from the toolbar, its type panel (dumped) set to all types, a box dragged over the corridor's debris and a target cell clicked: the items are marked for moving; known findings: `scroll-normalized-position` |
 | 184 | [Free Resource Buildings Branch](https://steamcommunity.com/sharedfiles/filedetails/?id=3047547550) | ✅ | ✅ | ✅ | spec tests/e2e/mods/3047547550-free-resource-buildings-branch.yaml: the Power Box is built from copper after Power Regulation and selected; it generates its default 2000 W |
 | 185 | [U&F-Choose Neural Vacillator 神经振荡器自由选择](https://steamcommunity.com/sharedfiles/filedetails/?id=3381262702) | ✅ | ✅ | ✅ | issue #2's set |
-| 186 | [Colorful Shinebugs](https://steamcommunity.com/sharedfiles/filedetails/?id=1702980293) | ✅ | ✅ | ⬜ |  |
+| 186 | [Colorful Shinebugs](https://steamcommunity.com/sharedfiles/filedetails/?id=1702980293) | ✅ | ✅ | ✅ | spec tests/e2e/mods/1702980293-colorful-shinebugs.yaml: a blue and an orange Shinebug spawned in the colony: each one's light takes its morph's colour (blue 1, 1.6, 2.2; orange 2, 1.2, 0), and the other morphs' prefabs carry theirs |
 | 187 | [Player Controlled Switch](https://steamcommunity.com/sharedfiles/filedetails/?id=1742045344) | ⬜ | ⬜ | ⬜ | flagged by onimaxxing (notLoading); not tested |
 | 188 | [แปลไทย / Thai](https://steamcommunity.com/sharedfiles/filedetails/?id=2769557641) | ⬜ | ⬜ | ⬜ | translation: the game applies one only from a Steam subscription; not testable here |
 | 189 | [Türkçe Çeviri](https://steamcommunity.com/sharedfiles/filedetails/?id=2872159695) | ⬜ | ⬜ | ⬜ | translation: the game applies one only from a Steam subscription; not testable here |
@@ -215,15 +215,15 @@ installs get developer checks subscribers never see).
 | 194 | [[Vanilla + DLC] Better Air Filters updated](https://steamcommunity.com/sharedfiles/filedetails/?id=2556074790) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2556074790-better-air-filters-updated.yaml: a Deodorizer picked in the build menu, turned on its side with O and placed in mid-air above a floor, then built |
 | 195 | [技能自定义](https://steamcommunity.com/sharedfiles/filedetails/?id=2851636970) | ✅ | ✅ | ⬜ |  |
 | 196 | [Auto Drop Gas Bottler Filler and Liquid Filler](https://steamcommunity.com/sharedfiles/filedetails/?id=3477214095) | ✅ | ✅ | ⬜ |  |
-| 197 | [Pliers 2021](https://steamcommunity.com/sharedfiles/filedetails/?id=2629866529) | ✅ | ✅ | ⬜ |  |
+| 197 | [Pliers 2021](https://steamcommunity.com/sharedfiles/filedetails/?id=2629866529) | ❌ | ❌ | ⬜ | broken upstream: its PliersWorkable overrides `OnCompleteWork(Worker)`, and the game no longer has a `Worker` type: the type fails to load while the game creates its prefabs, and the player aborts loading a colony; spec tests/e2e/mods/2629866529-pliers-2021.yaml (same in the original) |
 | 198 | [Longer Bridges](https://steamcommunity.com/sharedfiles/filedetails/?id=1748601256) | ⬜ | ⬜ | ⬜ | flagged by onimaxxing (notLoading); not tested |
-| 199 | [Faster Jetpacks](https://steamcommunity.com/sharedfiles/filedetails/?id=1822175925) | ✅ | ✅ | ⬜ |  |
+| 199 | [Faster Jetpacks](https://steamcommunity.com/sharedfiles/filedetails/?id=1822175925) | ✅ | ✅ | ✅ | spec tests/e2e/mods/1822175925-faster-jetpacks.yaml: smaller spec (a Jet Suit is late game): after the Duplicants have walked about, each one's jet suit flying speed is 3 x its walking speed (9.975 instead of 7) |
 | 200 | [Multiple Power Generator](https://steamcommunity.com/sharedfiles/filedetails/?id=2380984533) | ✅ | ✅ | ⬜ |  |
 | 201 | [AllBiomesWorld - Fuleria](https://steamcommunity.com/sharedfiles/filedetails/?id=1794510050) | ✅ | ✅ | ⬜ |  |
 | 202 | [Duplicant Status Bar - All DLC Status HUD](https://steamcommunity.com/sharedfiles/filedetails/?id=3682732647) | ✅ | ✅ | ⬜ |  |
 | 203 | [Traditional Chinese by LaFa](https://steamcommunity.com/sharedfiles/filedetails/?id=1123693010) | ⬜ | ⬜ | ⬜ | translation: the game applies one only from a Steam subscription; not testable here |
 | 204 | [Big box大箱子](https://steamcommunity.com/sharedfiles/filedetails/?id=2873919932) | ✅ | ✅ | ⬜ |  |
-| 205 | [Wrangle & Carry](https://steamcommunity.com/sharedfiles/filedetails/?id=2950117755) | ✅ | ✅ | ⬜ |  |
+| 205 | [Wrangle & Carry](https://steamcommunity.com/sharedfiles/filedetails/?id=2950117755) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2950117755-wrangle-carry.yaml: carrying a wrangled critter ranks with the wrangling (RanchingFetch's priority equals CreatureFetch's); a spawned Hatch is wrangled through its menu button by a Duplicant taught Husbandry, and lies bagged |
 | 206 | [Smart Egg Incubator(DLC Compatible)](https://steamcommunity.com/sharedfiles/filedetails/?id=2206905516) | ✅ | ✅ | ⬜ |  |
 | 207 | [Customize Buildings (more capacity, less dupes)](https://steamcommunity.com/sharedfiles/filedetails/?id=1818138009) | ✅ | ✅ | ⬜ |  |
 | 208 | [Paint Walls](https://steamcommunity.com/sharedfiles/filedetails/?id=1732578172) | ✅ | ✅ | ⬜ |  |
@@ -235,7 +235,7 @@ installs get developer checks subscribers never see).
 | 214 | [Türkçe Çeviri](https://steamcommunity.com/sharedfiles/filedetails/?id=2467094947) | ⬜ | ⬜ | ⬜ | translation: the game applies one only from a Steam subscription; not testable here |
 | 215 | [Font Loader for Traditional Chinese](https://steamcommunity.com/sharedfiles/filedetails/?id=2119648603) | ❌ | ❌ | ⬜ | broken upstream: uses TextMeshPro's `FaceInfo`, which the game's TextMeshPro lacks (same in the original) |
 | 216 | [Translate Fix 翻译修正](https://steamcommunity.com/sharedfiles/filedetails/?id=3105273056) | ⬜ | ⬜ | ⬜ | flagged by onimaxxing (crashesAtStartup); not tested |
-| 217 | [Real Insulation Tile真正的隔热砖](https://steamcommunity.com/sharedfiles/filedetails/?id=2869487421) | ✅ | ✅ | ⬜ |  |
+| 217 | [Real Insulation Tile真正的隔热砖](https://steamcommunity.com/sharedfiles/filedetails/?id=2869487421) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2869487421-real-insulation-tile.yaml: an Insulated Tile built from spawned granite: its cell's insulation in the simulation is 0 (no heat passes), against 255 for an open cell |
 | 218 | [Instant Sandbox](https://steamcommunity.com/sharedfiles/filedetails/?id=2263043737) | ⬜ | ⬜ | ⬜ | flagged by onimaxxing (crashesAtStartup); not tested |
 | 219 | [automatic harvest](https://steamcommunity.com/sharedfiles/filedetails/?id=1971998416) | ❌ | ❌ | ⬜ | broken upstream: Harmony patch targets now have overloads (same in the original) |
 | 220 | [Portal Network](https://steamcommunity.com/sharedfiles/filedetails/?id=2968184715) | ❌ | ❌ | ⬜ | broken upstream: its animations fail to load (same in the original) |

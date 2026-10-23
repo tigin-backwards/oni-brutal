@@ -1,0 +1,59 @@
+{
+ "spec": "mods/1708823360-flow-splitters.yaml",
+ "mods": [
+  "1708823360"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "smaller spec (early-base has no pump to feed a pipe): Liquid Splitter A built with pipes on its input and both outputs, found operational with its second output joined; liquid overlay shot",
+ "updated": "2026-10-22",
+ "commit": "690bee0",
+ "mod_dlls": {
+  "1708823360": {
+   "FlowSplitters.dll": "5a8fe7bdab62dabe8ec08a9ae5fc1494de17b6372ac05d155eea8bc98650b757"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261022-220928-e8cb86",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-22T23:10:47",
+    "lane": 13,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261022-231952-c9db63",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-22T23:22:57",
+    "lane": 12,
+    "reference_run": "20261022-220928-e8cb86",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "liquid-overlay": 0.024069
+    }
+   },
+   {
+    "run": "20261022-231952-c9db63",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-22T23:24:28",
+    "lane": 12,
+    "reference_run": "20261022-220928-e8cb86",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "liquid-overlay": 0.023797
+    }
+   }
+  ]
+ }
+}

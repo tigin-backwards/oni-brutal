@@ -1,0 +1,32 @@
+# Flow Splitters (1708823360), class B.
+#
+# What it does: adds Liquid Splitter A and B (Plumbing, researched with Plumbing) and Gas
+# Splitter A and B (Ventilation, researched with Ventilation): 2x2 raw-mineral buildings with
+# one input and two outputs that split each packet in half between the outputs (the rest to
+# the other output when one cannot take its half; all of it to the only output connected).
+# A and B differ in where the second output sits.
+# How a player reaches it: the build menu (Plumbing or Ventilation).
+# What changes: one pipe feeds two.
+#
+# Smaller spec: early-base has no powered pump to put liquid into a pipe, so the split itself is
+# not measured. A Liquid Splitter A is built with a pipe on its input and on both outputs in the
+# dug-out room west of the printing pod (origin 108, 207: input 108, 207, output 109, 207,
+# second output 109, 208), and found operational, its second output joined to its pipe.
+from: early-base
+mods: [1708823360]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"LiquidPiping\")", method: Purchased}}
+steps:
+  - build: {prefab: LiquidSplitterA, at: [108, 207]}
+  - build: {prefab: LiquidConduit, cells: [[106, 207], [107, 207], [108, 207], [109, 207], [110, 207], [109, 208], [110, 208]]}
+  - run: {seconds: 1200, until: {buildings: {LiquidSplitterA: 1, LiquidConduit: 7}, pending_construction: 0}}
+  - expect_state:
+      "all:FlowSplitters.FlowSplitter::[0].IsOperational": true
+      "all:FlowSplitters.FlowSplitter::[0]._secondaryOutputCell": 132397
+      "Game.Instance.liquidConduitSystem.GetConnections(132397, false)": "== original"
+  - driver: {camera.set: {cell: [110, 208], ortho: 6}}
+  - click_world: {cell: [108, 208]}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui: {"**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Liquid Splitter A"}}
+  - key: {code: F6}
+  - world_shot: {name: liquid-overlay, ortho: 4, at: [108, 208]}

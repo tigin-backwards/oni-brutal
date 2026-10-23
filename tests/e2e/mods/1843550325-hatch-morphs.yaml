@@ -1,0 +1,34 @@
+# Hatch Morphs (1843550325), class P.
+#
+# What it does: adds three Hatch morphs with their eggs and babies: the Wooden Hatch (eats
+# wood, lumber and plant matter), the Floral Hatch (eats Bristle Berries and Blossom seeds)
+# and the Diamond Hatch (eats diamond and refined carbon, hard-rock diet). Stone and Sage
+# Hatches lay their eggs at a small chance (breeding weights added in
+# ExtendEntityToFertileCreature), raised by what they eat (dietary fertility modifiers); the
+# Molecular Forge can make the eggs. The Stone Hatch also eats diamond.
+# How a player reaches it: ranching Hatches; the critters' details screen.
+# What changes: new critters and eggs.
+#
+# setup spawns a Wooden Hatch in the dug-out corridor west of the printing pod (early-base has
+# none). It is selected: its details screen names it and is shot; it then lives
+# through a short run on the floor.
+from: early-base
+mods: [1843550325]
+setup:
+  - driver: {setup.call: {type: GameUtil, method: KInstantiate, args: [{"$": "Assets.GetPrefab(\"HatchWooden\")"}, [110.5, 206.01, -24.5], Creatures]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+steps:
+  - expect_state:
+      "Db.Get().FertilityModifiers.Get(\"HatchWooden\").TargetTag.Name": HatchWoodenEgg
+      "count:all:CreatureBrain::[*] if .GetComponent<KPrefabID>.PrefabTag.Name == HatchWooden": 1
+  - driver: {camera.set: {cell: [110, 207], ortho: 6}}
+  - click_world: {cell: [110, 206], select: HatchWooden}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Wooden Hatch"}
+  - shot: {name: title, crop: "**/DetailsScreen/TitleBar", threshold: 0.04}
+  - run: {seconds: 30}
+  - expect_state:
+      "selected:GetComponent<KPrefabID>.PrefabTag.Name": HatchWooden
+      "selected:GetComponent<Health>.IsDefeated()": false
+      "selected:GetComponent<Navigator>.CurrentNavType": Floor

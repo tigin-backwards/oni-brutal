@@ -1,0 +1,59 @@
+{
+ "spec": "mods/1843550325-hatch-morphs.yaml",
+ "mods": [
+  "1843550325"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Wooden Hatch is spawned in the corridor (setup); the mod's fertility modifiers exist, the hatch is selected and named (title shot) and lives through a short run on the floor",
+ "updated": "2026-10-23",
+ "commit": "4908b38",
+ "mod_dlls": {
+  "1843550325": {
+   "HatchMorphs.dll": "ebc1de756e316fb8123d7a7cee54ce2b67eefeeb475ea1ca1a10ecb2cb0f1b32"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-123333-3bbe4d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T13:01:03",
+    "lane": 13,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-130426-f5a429",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T13:06:06",
+    "lane": 13,
+    "reference_run": "20261023-123333-3bbe4d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "title": 0.0
+    }
+   },
+   {
+    "run": "20261023-130426-f5a429",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T13:07:08",
+    "lane": 13,
+    "reference_run": "20261023-123333-3bbe4d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "title": 0.0
+    }
+   }
+  ]
+ }
+}

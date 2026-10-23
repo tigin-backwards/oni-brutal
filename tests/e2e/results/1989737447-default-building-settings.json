@@ -1,0 +1,63 @@
+{
+ "spec": "mods/1989737447-default-building-settings.yaml",
+ "mods": [
+  "1989737447"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Storage Bin built of sandstone in the corridor west of the pod is selected: its filter's Sweep Only box is checked from the start (dumped)",
+ "updated": "2026-10-23",
+ "commit": "162322d",
+ "mod_dlls": {
+  "1989737447": {
+   "DefaultBuildingSettings.dll": "6633df5bb2ec33cc8f126ec25e6586a1a60eee6b15dbcc5245872be371c6615c"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-153635-1bf8b1",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T16:25:11",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-163729-353d46",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T16:37:29",
+    "lane": 17,
+    "reference_run": "20261023-153635-1bf8b1",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "sweep-only": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261023-163729-353d46",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T16:38:50",
+    "lane": 17,
+    "reference_run": "20261023-153635-1bf8b1",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "sweep-only": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

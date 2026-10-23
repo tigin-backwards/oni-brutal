@@ -372,7 +372,7 @@ installs get developer checks subscribers never see).
 | 351 | [Passive Gas Vent Input](https://steamcommunity.com/sharedfiles/filedetails/?id=2462402015) | ✅ | ✅ | ⬜ |  |
 | 352 | [Grip Now Included](https://steamcommunity.com/sharedfiles/filedetails/?id=3664750796) | ✅ | ✅ | ⬜ |  |
 | 353 | [Chemical Processing: Industrial Overhaul Edition](https://steamcommunity.com/sharedfiles/filedetails/?id=2661907148) | ❌ | ❌ | ⬜ | broken upstream: adds a space POI the game already has ("Granite"), and the save fails to load (same in the original) |
-| 354 | [Default Building Settings](https://steamcommunity.com/sharedfiles/filedetails/?id=1989737447) | ✅ | ✅ | ⬜ |  |
+| 354 | [Default Building Settings](https://steamcommunity.com/sharedfiles/filedetails/?id=1989737447) | ✅ | ✅ | ✅ | spec tests/e2e/mods/1989737447-default-building-settings.yaml: a Storage Bin built of sandstone in the corridor west of the pod is selected: its filter's Sweep Only box is checked from the start (dumped) |
 | 355 | [Instant Switch Toggle](https://steamcommunity.com/sharedfiles/filedetails/?id=3384457117) | ✅ | ✅ | ✅ | spec tests/e2e/mods/3384457117-instant-switch-toggle.yaml: a Power Switch built in the corridor west of the pod is turned off and on again at once by Shift + clicks in the paused game, without being selected |
 | 356 | [Popup Control](https://steamcommunity.com/sharedfiles/filedetails/?id=2032187035) | ✅ | ✅ | ⬜ |  |
 | 357 | [Water Gate](https://steamcommunity.com/sharedfiles/filedetails/?id=3586927171) | ✅ | ✅ | ✅ | spec tests/e2e/mods/3586927171-water-gate.yaml: with a 0.05 kg bottom layer set in its options, the 1x2 gate built of sandstone in the corridor west of the pod leaves crude oil (under 0.08 kg) under petroleum, and removes itself |

@@ -1,0 +1,30 @@
+# Default Building Settings (1989737447), classes S, O.
+#
+# What it does: new buildings start with the settings a player usually picks: storage
+# receptacles sweep only (TreeFilterable.OnPrefabInit), checkpoints Vacancy Only, airflow
+# doors open once built, switches off, smart batteries and reservoirs at 5-95 %, delivery and
+# manual generators at 25 %, and optionally auto-repair off. PLib options switch each and set
+# the values.
+# How a player reaches it: building any of those; the options on the Mods screen.
+# What changes: the building's side screen starts on those settings.
+#
+# A Storage Bin is built of sandstone in the corridor west of the printing pod and selected:
+# its filter's Sweep Only box is checked from the start.
+from: early-base
+mods: [1989737447]
+steps:
+  - build: {prefab: StorageLocker, at: [113, 206], material: SandStone}
+  - expect: {blueprints: {StorageLocker: 1}}
+  - run: {seconds: 900, until: {buildings: {StorageLocker: ">=1"}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 206], select: StorageLocker}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Storage Bin"}
+  - expect_state:
+      "selected:GetComponent<Storage>.GetOnlyFetchMarkedItems()": true
+  - ui_wait: {path: "**/TreeFilterableSideScreen", cond: stable}
+  - expect_ui:
+      "**/ConfigurationRows/OnlyAllowTransportItems/Label": {text: "Sweep Only"}
+      "**/ConfigurationRows/OnlyAllowTransportItems/CheckBox/CheckMark": {active: true}
+  - ui_dump: {name: sweep-only, root: "**/TreeFilterableSideScreen/ContentMask/Content/ConfigurationRows/OnlyAllowTransportItems"}

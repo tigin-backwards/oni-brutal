@@ -2216,6 +2216,8 @@ class Run:
             path = os.path.join(self.player.profile, expr[5:])
             if not os.path.exists(path):
                 return None
+            if os.path.isdir(path):
+                return len(os.listdir(path))  # a folder's value: how many entries it holds
             with open(path, encoding='utf-8', errors='replace') as f:
                 return f.read()
         each = re.fullmatch(r'(count|sum):(.+?)\[\*\](\S*)(?:\s+if\s+(.+))?', expr)

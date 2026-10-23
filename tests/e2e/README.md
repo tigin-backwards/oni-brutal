@@ -184,6 +184,7 @@ e2e.py). `type` types any printable ASCII, on a US keymap.
     "type:BlueprintsV2.BlueprintState.rotation": 1
     "selected:MinionIdentity.GetComponent<Traits>": {contains: QuickLearner}
     "file:blueprints/e2e.blueprint": exists         # file:PATH, in the run's profile (no driver)
+    "file:mods/config/Mod/presets": ">= 1"           # a folder reads as its count of entries
     "mass:debris": {save_as: before}                # remember a value...
 - expect_state: {"mass:debris": ">= 0.95 * before"} # ...and compare with it later
 - expect_state: {"Research.Instance.queuedTech.Count": "== original"}   # the original's value here

@@ -64,6 +64,11 @@ namespace SemanticsProbe
                 go.AddComponent<SubMesh>();
                 return;
             }
+            if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "wordcount")
+            {
+                go.AddComponent<WordCount>();
+                return;
+            }
             if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "newobject")
             {
                 go.AddComponent<NewObject>();

@@ -29,9 +29,11 @@ class SharedLocks(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.locks = os.path.join(self.temp.name, 'locks')
-        self.saved = {k: os.environ.get(k) for k in ('E2E_LOCK_DIR', 'E2E_RESERVED', 'E2E_MEMORY_GB', 'E2E_MAX_PLAYERS')}
+        self.saved = {k: os.environ.get(k) for k in ('E2E_LOCK_DIR', 'E2E_RESERVED', 'E2E_MEMORY_GB', 'E2E_MAX_PLAYERS',
+                                                       'E2E_QA_GB')}
         os.environ['E2E_LOCK_DIR'] = self.locks
         os.environ.pop('E2E_RESERVED', None)
+        os.environ['E2E_QA_GB'] = '0'  # a qa.sh running on the machine must not change these budgets
         self.children = []
 
     def tearDown(self):

@@ -73,7 +73,7 @@ FRAME_FALLBACK = 0.1   # seconds a "frame" lasts without E2eDriver to count real
 # and it says so through perf.wanted and an exclusive hold of perf.lock (machine_lock); its other
 # stages run beside specs, counted in the players' budget as one QA_GB player (Budget).
 QA_JOBS = [r'(^|/)scripts/qa\.sh\b']
-QA_GB = 15          # QA's verify stage runs U57
+QA_GB = 15          # E2E_QA_GB: QA's verify stage runs U57 (0: not counted)
 PERF_JOBS = [r'(^|/)scripts/m9-compare\.sh\b', r'(^|/)scripts/flamegraph\.py\b',
              r'out/local-tools/(sweep|measure|ft-bench|compare-queued|minnow-prof|glut-prof|queue|orig-queue|tw-run)',
              r'^perf (record|stat)\b']
@@ -629,7 +629,9 @@ class Budget:
         of QA_GB."""
         with self._locked():
             entries = self._read()
-            counted = entries + [dict(label='qa.sh', gb=QA_GB, pid=pid) for pid, _, _ in qa_processes()]
+            qa_gb = float(os.environ.get('E2E_QA_GB', QA_GB))
+            counted = entries + ([dict(label='qa.sh', gb=qa_gb, pid=pid) for pid, _, _ in qa_processes()]
+                                 if qa_gb > 0 else [])
             used = sum(e['gb'] for e in counted)
             if counted and (len(counted) >= self.players or used + gb > self.gb):
                 return None, (f'{used:g} of {self.gb:g} GB and {len(counted)} of {self.players} players in use: '

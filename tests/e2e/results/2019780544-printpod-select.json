@@ -1,0 +1,67 @@
+{
+ "spec": "mods/2019780544-printpod-select.yaml",
+ "mods": [
+  "2019780544"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with Reroll All on, the immigrant screen's button deals new cards and keeps the offer open; the PLS Options toolbar button opens its PLib options dialog (title dump, shot)",
+ "updated": "2026-10-22",
+ "commit": "fd67309",
+ "mod_dlls": {
+  "2019780544": {
+   "PrintListSelect.dll": "1c06ec20cd23388e35aea7df838741bb1b9e63a771ee103ca061d8ec21315b0e"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261022-232004-36dc49",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-22T23:29:52",
+    "lane": 12,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261022-233155-07befb",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-22T23:48:55",
+    "lane": 12,
+    "reference_run": "20261022-232004-36dc49",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "options-title": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "options": 0.0
+    }
+   },
+   {
+    "run": "20261022-233155-07befb",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-22T23:49:58",
+    "lane": 12,
+    "reference_run": "20261022-232004-36dc49",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "options-title": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "options": 0.0
+    }
+   }
+  ]
+ }
+}

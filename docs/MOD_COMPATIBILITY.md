@@ -77,7 +77,7 @@ installs get developer checks subscribers never see).
 | 56 | [【停止更新】刷新选人(Refresh selection)](https://steamcommunity.com/sharedfiles/filedetails/?id=1724518038) | ⬜ | ⬜ | ⬜ | flagged by onimaxxing (notLoading); not tested |
 | 57 | [Buildable Natural Tile](https://steamcommunity.com/sharedfiles/filedetails/?id=1840755803) | ✅ | ✅ | ⬜ |  |
 | 58 | [[DEPRECATED] Drag Tool Area](https://steamcommunity.com/sharedfiles/filedetails/?id=1835851890) | ⬜ | ⬜ | ⬜ | flagged by onimaxxing (notLoading); not tested |
-| 59 | [打印舱物品刷新(PrintPod Select)](https://steamcommunity.com/sharedfiles/filedetails/?id=2019780544) | ✅ | ✅ | ⬜ |  |
+| 59 | [打印舱物品刷新(PrintPod Select)](https://steamcommunity.com/sharedfiles/filedetails/?id=2019780544) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2019780544-printpod-select.yaml: with Reroll All on, the immigrant screen's button deals new cards and keeps the offer open; the PLS Options toolbar button opens its PLib options dialog (title dump, shot) |
 | 60 | [Half Door](https://steamcommunity.com/sharedfiles/filedetails/?id=1766168866) | ⬜ | ⬜ | ⬜ | flagged by onimaxxing (notLoading); not tested |
 | 61 | [Traducción al Español 100% (2026) + TODOS LOS DLC](https://steamcommunity.com/sharedfiles/filedetails/?id=1902735059) | ⬜ | ⬜ | ⬜ | translation: the game applies one only from a Steam subscription; not testable here |
 | 62 | [Favorite Resources // by @Ony 👾](https://steamcommunity.com/sharedfiles/filedetails/?id=1872111766) | ✅ | ✅ | ⬜ |  |

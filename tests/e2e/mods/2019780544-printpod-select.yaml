@@ -1,0 +1,43 @@
+# 打印舱物品刷新 (PrintPod Select) (2019780544), classes T, S, K, O.
+#
+# What it does: chooses which care packages the printing pod may offer (a PLib options dialog
+# with a check box per item, opened from its "PLS Options" toolbar button or the Mods screen),
+# can multiply their amounts, ignore their requirements, change the time between prints, and
+# turn the immigrant screen's "Reject All" into "Reroll All", which deals new cards and keeps
+# the screen open.
+# How a player reaches it: the toolbar button (or its key) and the printing pod's screen.
+# What changes: the cards the printing pod offers.
+#
+# The Reroll All option is set before launch; setup lets the pod offer Duplicants now, as in
+# the Duplicant Stat Selector spec. Cards are random: only the button and the screen's state
+# are checked.
+from: early-base
+mods: [2019780544]
+options:
+  PrintListSelect: {IsREROLLALL: true}
+setup:
+  - driver: {setup.call: {target: "Immigration.Instance", method: "Sim200ms", args: [100000]}}
+steps:
+  - expect_state: {"Immigration.Instance.ImmigrantsAvailable": true}
+  - call: {tool: building_control, args: {domain: side_surface, surface: facility, kind: telepad, action: open_immigrants, confirm: true}}
+  - ui_wait: {path: "**/ImmigrantScreen/Layout", cond: stable}
+  - expect_state: {"ui:**/ImmigrantScreen::GetComponent<ImmigrantScreen>.containers.Count": {save_as: cards}}
+  - click: {text: "Reroll All", under: "**/ImmigrantScreen"}
+  - ui_wait: {path: "**/ImmigrantScreen/Layout", cond: stable}
+  # New cards, and the screen and the offer are still there; the game alone closes it.
+  - expect_ui: {"**/ImmigrantScreen/Layout": {active: true}}
+  - expect_state:
+      "Immigration.Instance.ImmigrantsAvailable": true
+      "ui:**/ImmigrantScreen::GetComponent<ImmigrantScreen>.containers.Count": "== cards"
+  - key: {code: Escape}
+  - ui_wait: {path: "**/ImmigrantScreen/Layout", cond: gone}
+  # The toolbar button opens the options dialog.
+  - tool: {toolbar: PLS Options}
+  - ui_wait: {path: "**/ScreenSpaceOverlayCanvas/ModOptions", cond: stable}
+  - expect_ui:
+      "**/ModOptions/Title/Text": {text: "~Options for PrintPod Select"}
+      "**/ModOptions/Body/**/Entries/Label/Text": {any_text: "Reroll All"}
+  - ui_dump: {name: options-title, root: "**/ScreenSpaceOverlayCanvas/ModOptions/Title"}
+  - shot: {name: options, crop: "**/ScreenSpaceOverlayCanvas/ModOptions", threshold: 0.04}
+  - click: {text: "CANCEL", under: "**/ScreenSpaceOverlayCanvas/ModOptions"}
+  - ui_wait: {path: "**/ScreenSpaceOverlayCanvas/ModOptions", cond: gone}

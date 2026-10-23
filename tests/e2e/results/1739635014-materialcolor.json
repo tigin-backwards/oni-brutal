@@ -3,12 +3,12 @@
  "mods": [
   "1739635014"
  ],
- "verdict": "pending",
- "why": "0 run(s) of ours against original run 20261023-042128-2bb68b; 2 needed",
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
  "findings": [],
- "note": "",
+ "note": "the copper ore manual generator is tinted copper; the overlay bar's MaterialColor button (dumped) switches the tint off and on again",
  "updated": "2026-10-23",
- "commit": "885cbe9",
+ "commit": "22baa68",
  "mod_dlls": {
   "1739635014": {
    "Common.dll": "87a6b9950dc4f7703d1d165fab10c6aeddad6810531639062a4a40bbe6fefb3a",
@@ -26,6 +26,39 @@
     "signatures": 0
    }
   ],
-  "ours": []
+  "ours": [
+   {
+    "run": "20261023-070849-e6fc58",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T07:08:49",
+    "lane": 14,
+    "reference_run": "20261023-042128-2bb68b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "overlays": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261023-070849-e6fc58",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T07:09:38",
+    "lane": 14,
+    "reference_run": "20261023-042128-2bb68b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "overlays": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
  }
 }

@@ -196,6 +196,8 @@ def check_step(where, kind, value, in_setup):
             problems += [f'{where}: {p}' for p in key_problems(value['key'])]
     elif kind == 'key':
         need(isinstance(value, dict) and value.get('code'), 'key takes {code: "Shift+B"}')
+        need(not isinstance(value, dict) or 'at' not in value or _cell(value['at']),
+             'key takes `at: [x, y]`, the world cell to hold the pointer over')
         if isinstance(value, dict) and value.get('code'):
             problems += [f'{where}: {p}' for p in key_problems(value['code'])]
     elif kind == 'click':
@@ -215,6 +217,7 @@ def check_step(where, kind, value, in_setup):
     elif kind == 'drag':
         need(isinstance(value, dict) and _cell(value.get('from')) and _cell(value.get('to')),
              'drag takes {from: [x, y], to: [x, y]} (world cells)')
+        need(not isinstance(value, dict) or isinstance(value.get('hold', 0), int), 'drag `hold` is a number of frames')
     elif kind == 'click_world':
         need(isinstance(value, dict) and _cell(value.get('cell')), 'click_world takes {cell: [x, y]}')
     elif kind == 'scroll':
@@ -1223,8 +1226,9 @@ class Input:
                 self._flush()
                 self.frames(1)
 
-    def drag(self, start, end, button='left', mods=(), steps=8):
-        """Press at START, move to END in STEPS motion events a frame apart, release."""
+    def drag(self, start, end, button='left', mods=(), steps=8, hold=0):
+        """Press at START, move to END in STEPS motion events a frame apart, wait HOLD frames
+        there (the button still down), release."""
         with self.modifiers(mods):
             self.move(*start)
             self.frames(2)
@@ -1233,7 +1237,7 @@ class Input:
             for i in range(1, steps + 1):
                 self.move(start[0] + (end[0] - start[0]) * i / steps, start[1] + (end[1] - start[1]) * i / steps)
                 self.frames(1)
-            self.frames(1)
+            self.frames(1 + hold)
             self.button(button, False)
             self.frames(2)
 
@@ -2008,6 +2012,10 @@ class Run:
         elif kind == 'open':
             self.open(value)
         elif kind == 'key':
+            if 'at' in value:
+                # A tool hears keys only while the pointer is over the world, not the UI.
+                self.need_input().move(*self.need_driver().to_screen(value['at']))
+                self.frames(2)
             self.need_input().key(value['code'])
         elif kind == 'click':
             self.click_element(value, value.get('mods', ()), value.get('button', 'left'))
@@ -2039,7 +2047,7 @@ class Run:
             driver = self.need_driver()
             start, end = driver.to_screen(value['from']), driver.to_screen(value['to'])
             self.need_input().drag(start, end, button=value.get('button', 'left'), mods=value.get('mods', ()),
-                                   steps=value.get('steps', 8))
+                                   steps=value.get('steps', 8), hold=value.get('hold', 0))
         elif kind == 'scroll':
             at = value.get('at', 'center')
             if at == 'center':

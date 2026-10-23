@@ -152,7 +152,9 @@ and nothing is clicked. A click is: move, 2 frames of hover, press, 2 frames, re
 - type: {ui: "**/FileNameDialog/**/Input", text: "e2e", enter: true, clear: true}
 - key: {code: "Shift+B"}                                       # KKeyCode names; Shift, Ctrl, Alt
 - key: {code: Escape}
-- drag: {from: [108, 212], to: [136, 205]}                     # world cells; `mods`, `button`, `steps`
+- key: {code: O, at: [110, 209]}                               # the pointer over a cell first
+- drag: {from: [108, 212], to: [136, 205]}                     # world cells; `mods`, `button`, `steps`,
+                                                               # `hold` (frames at `to` before release)
 - click_world: {cell: [150, 212]}
 - scroll: {at: center, notches: -40}                           # or at: [x, y] (a cell), or a UI path
 - tool: {toolbar: Sweep}                  # a ToolMenu collection by its text or icon name

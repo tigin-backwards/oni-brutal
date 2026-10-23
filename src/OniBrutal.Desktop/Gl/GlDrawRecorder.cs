@@ -104,8 +104,12 @@ namespace OniBrutal.Desktop.Gl
         /// Draws per work item, at least.
         const int MinChunk = 24;
 
-        /// Work items per queue, at most.
-        static readonly int MaxChunks = Math.Max(2, Environment.ProcessorCount * 2);
+        /// The threads recording a queue besides the main thread (shared by recorders).
+        static readonly int helpers = ForkJoin.DefaultHelpers;
+        static ForkJoin forkJoin;
+
+        /// Work items per queue, at most: a few per thread, for balance.
+        static readonly int MaxChunks = (helpers + 1) * 4;
 
         /// `defaultTexture`: a shader property's default texture by name and sampler target.
         /// `runDraw`: executes a recorded mesh draw (GL thread).
@@ -362,7 +366,9 @@ namespace OniBrutal.Desktop.Gl
         public static string TakeCounters(int frames)
         {
             double ms(long ticks) => ticks * 1000.0 / System.Diagnostics.Stopwatch.Frequency / Math.Max(1, frames);
-            var text = $"{(queueDraws > 0 ? 100.0 * aheadDraws / queueDraws : 0):F1}% recorded ahead, parallel part {ms(parallelTicks):F3} ms, walk {ms(walkTicks):F3} ms";
+            long waited = forkJoin?.WaitTicks ?? 0;
+            if (forkJoin != null) forkJoin.WaitTicks = 0;
+            var text = $"{(queueDraws > 0 ? 100.0 * aheadDraws / queueDraws : 0):F1}% recorded ahead, parallel part {ms(parallelTicks):F3} ms (waiting for helpers {ms(waited):F3}), walk {ms(walkTicks):F3} ms";
             if (alternate)
             {
                 text += serialWindow ? " (serial window)" : " (parallel window)";
@@ -392,7 +398,7 @@ namespace OniBrutal.Desktop.Gl
         {
             int n = items.Count;
             queueDraws += n;
-            if (!ParallelQueues || n < MinParallelDraws || serialWindow || FrameRenderer.SerialQueues)
+            if (!ParallelQueues || helpers == 0 || n < MinParallelDraws || serialWindow || FrameRenderer.SerialQueues)
             {
                 foreach (var d in items) Draw(RequestOf(d));
                 return;
@@ -419,7 +425,7 @@ namespace OniBrutal.Desktop.Gl
             long start = System.Diagnostics.Stopwatch.GetTimestamp();
             try
             {
-                System.Threading.Tasks.Parallel.For(0, chunkCount, recordChunk ??= RecordChunk);
+                (forkJoin ??= new ForkJoin(helpers)).For(chunkCount, recordChunk ??= RecordChunk);
             }
             finally
             {

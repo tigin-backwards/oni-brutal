@@ -121,6 +121,7 @@ namespace OniBrutal.Engine.Rendering
         static readonly bool timing = Environment.GetEnvironmentVariable("ONI_RENDER_TIMING") == "1";
         const int TimingFrames = 600;
         static long renderTicks, queueTicks, queueDraws, windowStart;
+        static TimeSpan lastCpu;
         static int timedFrames;
 
         static void RenderFrame()
@@ -145,7 +146,11 @@ namespace OniBrutal.Engine.Rendering
             double ms(long ticks) => ticks * 1000.0 / System.Diagnostics.Stopwatch.Frequency / timedFrames;
             double fps = timedFrames / ((now - windowStart) / (double)System.Diagnostics.Stopwatch.Frequency);
             var device = GraphicsDevice.Current.TakeQueueCounters(timedFrames);
-            EngineLog.Engine($"render timing: frame {Time.frameCount}, {fps:F2} fps, rendering {ms(renderTicks):F3} ms a frame, draw queues {ms(queueTicks):F3} ms ({queueDraws / timedFrames} draws a frame){(device != null ? ", " + device : "")}");
+            var cpu = System.Diagnostics.Process.GetCurrentProcess().TotalProcessorTime;
+            double cores = (cpu - lastCpu).TotalSeconds / ((now - windowStart) / (double)System.Diagnostics.Stopwatch.Frequency);
+            lastCpu = cpu;
+            EngineLog.Engine($"render timing: frame {Time.frameCount}, {fps:F2} fps, rendering {ms(renderTicks):F3} ms a frame, draw queues {ms(queueTicks):F3} ms ({queueDraws / timedFrames} draws a frame){(device != null ? ", " + device : "")}"
+                + $"; pool threads {System.Threading.ThreadPool.ThreadCount}, pending {System.Threading.ThreadPool.PendingWorkItemCount}, process threads {System.Diagnostics.Process.GetCurrentProcess().Threads.Count}, cpu {cores:F1} cores, gc {GC.CollectionCount(0)}/{GC.CollectionCount(1)}/{GC.CollectionCount(2)}, heap {GC.GetTotalMemory(false) >> 20} MB");
             renderTicks = queueTicks = queueDraws = 0;
             timedFrames = 0;
             windowStart = now;

@@ -432,7 +432,8 @@ It updates when its rect or its parent's rect changes, and in the update after i
   `pointerDownHandler`, `pointerUpHandler`, `pointerClickHandler`,
   `initializePotentialDrag`, `beginDragHandler`, `dragHandler`, `endDragHandler`,
   `dropHandler`, `scrollHandler`, `updateSelectedHandler`, `selectHandler`,
-  `deselectHandler`, `moveHandler`, `submitHandler` and `cancelHandler`.
+  `deselectHandler`, `moveHandler`, `submitHandler` and `cancelHandler`, and
+  `pointerMoveHandler` (see "Pointer move events").
 - **`Execute<T>(go, data, functor)`:** calls the functor on every component of `go` that
   implements `T` and is an active, enabled Behaviour, or a non-Behaviour. They are called in
   component order. An exception in one is logged, and the rest still run. It returns whether
@@ -463,7 +464,8 @@ It updates when its rect or its parent's rect changes, and in the update after i
   - `eventSystem`;
   - `FindFirstRaycast` (the first result with a GameObject), `DetermineMoveDirection`,
     `FindCommonRoot` and `GetBaseEventData`/`GetAxisEventData`.
-- **`HandlePointerExitAndEnter(eventData, newEnter)`:**
+- **`HandlePointerExitAndEnter(eventData, newEnter)`** (with pointer moves, see "Pointer move
+  events (measured 2026-10-23)", which corrects step 1):
   1. When the new target is null or the pointer data's enter is unchanged, exit is sent to the
      whole hovered list. When the new target is null, the list is then cleared.
   2. Otherwise exit is sent to old hovered objects up to the common root with the new target,
@@ -849,6 +851,84 @@ right after its `RectTransform`, with `cullTransparentMesh` true.
 
 Every rect not stated otherwise has pivot (0.5,0.5) and position (0,0). Where a size is stated,
 anchors not given are the centre (0.5,0.5).
+
+### Pointer move events (measured 2026-10-23)
+
+Found in a mod play-test (issue #2): Resource Dashboard (Workshop 3671379574) does not load.
+Its graph view implements `IPointerMoveHandler`, which this package lacks, so loading the mod's
+types fails with a `TypeLoadException`. The game's `Assets.OnPrefabInit` then fails on the same
+types, and the player exits while loading. No game assembly names the interface. Add it to
+`src/UnityEngine.UI/package-required-types.tsv` and regenerate (`scripts/regen-packages.sh`):
+
+```
+UnityEngine.UI	UnityEngine.EventSystems.IPointerMoveHandler	# mods (Resource Dashboard's graph view): OnPointerMove
+```
+
+**Interface, from the package's metadata:**
+- `IPointerMoveHandler : IEventSystemHandler`, with `void OnPointerMove(PointerEventData
+  eventData)`;
+- `ExecuteEvents.pointerMoveHandler`, a static `EventFunction<IPointerMoveHandler>` property
+  beside `moveHandler`. It is not null.
+
+**When it is sent.** Measured with `PROBE_SCENARIO=pointermove` (tools/UnityProbe,
+`PointerMove.cs`, lines `PM …`). It drives the game's own current module, a
+`StandaloneInputModule` (Klei's `VirtualInputModule` is there but disabled), through
+`inputOverride`, a frame at a time. The test hierarchy is on an overlay canvas: P (400 × 300,
+with enter, exit and move handlers) holds A (enter, exit and move handlers, and a second move
+handler on another component), A's child A1 (no handler), B (move handler only), C (no
+handler), D (move handler, not a raycast target) and E (a disabled move handler).
+
+Move events are sent from `HandlePointerExitAndEnter(eventData, newEnterTarget)`, together with
+enter and exit, with `ExecuteEvents.Execute` on each object (not `ExecuteHierarchy`). The
+mouse's left-button data passes through it each frame, as before. Three cases:
+
+1. **The new target is null, or the data's `pointerEnter` is null.** Every object in `hovered`,
+   in list order, gets move and then exit. Move is sent here even when the pointer has not
+   moved. The list is cleared. When the new target is null, `pointerEnter` becomes null and
+   nothing more happens. Otherwise go on with case 3's enter part.
+   - Measured: from A (hovered [P, canvas, A]) to a point off the screen, P gets move then exit,
+     then A gets move and its second handler's move, then exit. Each sees `hovered` still
+     [P, canvas, A].
+   - Measured: with no target and nothing hovered, nothing is sent, moving or not.
+2. **The new target is the current `pointerEnter`.** When the pointer is moving
+   (`IsPointerMoving()`: a non-zero `delta`), each object in `hovered`, in list order, gets
+   move. Nothing else is sent. When it is still, nothing is sent.
+   - Measured: on A, moving: A (both handlers), then P. On A1 (hovered [A, P, canvas, A1]):
+     A, then P. A1 has no handler, and the event does not bubble from it.
+   - Measured: after entering B from P, `hovered` is [P, canvas, B], and a move goes to P
+     before B. Entered objects are appended to the list.
+3. **The target changed.** Find the common root, as before.
+   - **Exit:** walk from the old `pointerEnter` up to the common root, not including it. Each
+     object gets move, then exit, and is then removed from `hovered`. Move is sent even with
+     a zero delta: measured when A moved away from under a still pointer (A gets move, then
+     exit, with `delta` (0,0) and `IsPointerMoving()` false).
+   - **Enter:** set `pointerEnter` to the new target. Walk from the new target up to the
+     common root, not including it. Each object gets enter, then move, and is then appended
+     to `hovered`. Move is sent even with a zero delta: measured for a press without
+     movement, and for A moving back under a still pointer.
+   - **Objects at or above the common root get no move in that frame,** although the pointer
+     moved. Measured from A1 to P's bare area: A1 and A get move then exit; P gets nothing.
+     From A to its child A1: nothing is sent to A or P.
+   - Measured: from B to A (common root P), B gets move then exit, then A gets enter, then
+     move.
+   - Measured: from A to another canvas's object (no common root), A gets move then exit, then
+     P gets move then exit. Each is removed as it goes: P sees `hovered` [P, canvas].
+
+The event data in each call: `position` and `delta` of this frame's pointer data;
+`pointerEnter` is still the old target during the exit walk, and the new one during the enter
+walk; `pointerCurrentRaycast` is this frame's hit. `used` is false. A disabled handler
+component, or one on an inactive object, gets nothing, and the other components still run
+(`Execute`'s rule). An object with `raycastTarget` false is never the target, so it gets
+nothing (D).
+
+**Pressed buttons change nothing:** with the left button held, the same events are sent as
+without it (measured from A across P to B while held). Releasing the button without moving
+sends nothing more. Not measured: a press on an object with a drag handler. The probe's objects
+have none, so `dragging` stays false and `pointerDrag` null.
+
+This replaces the description of `HandlePointerExitAndEnter` under Input modules. That said
+that exit goes to the whole `hovered` list when the enter is unchanged. Instead, an unchanged
+enter sends only moves, and only while the pointer moves.
 
 ### Measured on the shipped package
 

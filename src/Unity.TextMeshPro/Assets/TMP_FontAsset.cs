@@ -151,6 +151,94 @@ namespace TMPro
             return asset;
         }
 
+        // From an installed OS font, by family and style name (matched without regard to case).
+        // A family or style that is not installed returns null and logs one line; a point size
+        // of 0 or below samples the face at its units per EM.
+        public static TMP_FontAsset CreateFontAsset(string familyName, string styleName, int pointSize = 90)
+        {
+            if (!FontEngine.TryGetSystemFontReference(familyName, styleName, out var fontRef))
+            {
+                Debug.Log($"Unable to find a font file with the specified Family Name [{familyName}] and Style [{styleName}].");
+                return null;
+            }
+            if (!LoadFaceFromPath(fontRef.filePath, fontRef.faceIndex, pointSize)) return null;
+            return NewFileAsset(fontRef.filePath, 9, GlyphRenderMode.SDFAA, 1024, 1024, AtlasPopulationMode.DynamicOS);
+        }
+
+        // From the face at faceIndex of a font file. A file that cannot be loaded as a font (or
+        // has no such face) returns null and logs one line.
+        public static TMP_FontAsset CreateFontAsset(string fontFilePath, int faceIndex, int samplingPointSize, int atlasPadding, GlyphRenderMode renderMode, int atlasWidth, int atlasHeight)
+        {
+            if (!LoadFaceFromPath(fontFilePath, faceIndex, samplingPointSize))
+            {
+                Debug.Log($"Unable to load font face from [{fontFilePath}].");
+                return null;
+            }
+            return NewFileAsset(fontFilePath, atlasPadding, renderMode, atlasWidth, atlasHeight, AtlasPopulationMode.Dynamic);
+        }
+
+        // Makes the face current at pointSize; at its units per EM when pointSize is 0 or below.
+        static bool LoadFaceFromPath(string path, int faceIndex, int pointSize)
+        {
+            if (string.IsNullOrEmpty(path)) return false;
+            if (pointSize > 0) return FontEngine.LoadFontFace(path, pointSize, faceIndex) == FontEngineError.Success;
+            if (FontEngine.LoadFontFace(path, DefaultSamplingPointSize, faceIndex) != FontEngineError.Success) return false;
+            int unitsPerEm = FontEngine.GetFaceInfo().unitsPerEM;
+            return unitsPerEm > 0 && FontEngine.LoadFontFace(path, unitsPerEm, faceIndex) == FontEngineError.Success;
+        }
+
+        const int DefaultSamplingPointSize = 90;
+
+        // A dynamic asset of the current face, read from a file: unnamed, no source Font, default
+        // creation settings, no fallback list, and a 1 x 1 atlas texture that takes the atlas size
+        // when its first glyph is added.
+        static TMP_FontAsset NewFileAsset(string path, int atlasPadding, GlyphRenderMode renderMode, int atlasWidth, int atlasHeight, AtlasPopulationMode populationMode)
+        {
+            bool sdf = IsSdf(renderMode);
+            var shader = Shader.Find(sdf ? "TextMeshPro/Mobile/Distance Field" : "TextMeshPro/Bitmap");
+            // The game ships no bitmap shader: no asset for a bitmap render mode.
+            if (shader == null) throw new System.ArgumentNullException();
+
+            var asset = ScriptableObject.CreateInstance<TMP_FontAsset>();
+            asset.m_Version = CurrentVersion;
+            asset.name = "";
+            asset.m_FaceInfo = FontEngine.GetFaceInfo();
+            asset.m_SourceFontFilePath = path;
+            asset.m_AtlasPopulationMode = populationMode;
+            asset.m_AtlasWidth = atlasWidth;
+            asset.m_AtlasHeight = atlasHeight;
+            asset.m_AtlasPadding = atlasPadding;
+            asset.m_AtlasRenderMode = renderMode;
+            asset.m_IsMultiAtlasTexturesEnabled = true;
+            asset.m_GlyphTable = new List<Glyph>();
+            asset.m_CharacterTable = new List<TMP_Character>();
+            asset.m_FontFeatureTable = new TMP_FontFeatureTable();
+            asset.m_FallbackFontAssetTable = null;
+            asset.m_FontWeightTable = new TMP_FontWeightPair[10];
+            asset.m_UsedGlyphRects = new List<GlyphRect>();
+            asset.m_FreeGlyphRects = new List<GlyphRect> { new GlyphRect(0, 0, atlasWidth - 1, atlasHeight - 1) };
+            asset.m_AtlasTextureIndex = 0;
+
+            var format = IsColor(renderMode) ? TextureFormat.RGBA32 : TextureFormat.Alpha8;
+            var texture = new Texture2D(1, 1, format, false) { name = "" };
+            FontEngine.ResetAtlasTexture(texture);
+            asset.m_AtlasTextures = new[] { texture };
+
+            var material = new Material(shader) { name = shader.name };
+            material.SetTexture(ShaderUtilities.ID_MainTex, texture);
+            material.SetFloat(ShaderUtilities.ID_TextureWidth, atlasWidth);
+            material.SetFloat(ShaderUtilities.ID_TextureHeight, atlasHeight);
+            if (sdf)
+            {
+                material.SetFloat(ShaderUtilities.ID_GradientScale, atlasPadding + 1);
+                material.SetFloat(ShaderUtilities.ID_WeightNormal, asset.normalStyle);
+                material.SetFloat(ShaderUtilities.ID_WeightBold, asset.boldStyle);
+            }
+            asset.m_Material = material;
+            asset.ReadFontAssetDefinition();
+            return asset;
+        }
+
         // GlyphRasterModes bits of the render mode: SDF (0x20) and SDFAA (0x40) fields, colour (0x10000).
         internal static bool IsSdf(GlyphRenderMode mode) => ((int)mode & 0x60) != 0;
 
@@ -320,7 +408,7 @@ namespace TMPro
         internal bool TryAddCharacter(uint unicode, out TMP_Character character)
         {
             character = null;
-            if (m_SourceFontFile == null || m_FaceLoadFailed) return false;
+            if ((m_SourceFontFile == null && string.IsNullOrEmpty(m_SourceFontFilePath)) || m_FaceLoadFailed) return false;
             if (m_MissingUnicodes != null && m_MissingUnicodes.Contains(unicode)) return false;
             if (!LoadFace())
             {
@@ -343,6 +431,12 @@ namespace TMPro
             m_UsedGlyphRects ??= new List<GlyphRect>();
             m_FreeGlyphRects ??= new List<GlyphRect> { new GlyphRect(0, 0, m_AtlasWidth - 1, m_AtlasHeight - 1) };
             var texture = m_AtlasTextures[m_AtlasTextureIndex];
+            // An asset made from a font file starts with a 1 x 1 texture.
+            if (texture != null && texture.width == 1 && texture.height == 1 && (m_AtlasWidth > 1 || m_AtlasHeight > 1))
+            {
+                texture.Reinitialize(m_AtlasWidth, m_AtlasHeight);
+                FontEngine.ResetAtlasTexture(texture);
+            }
             if (!FontEngine.TryAddGlyphToTexture(glyphIndex, m_AtlasPadding, GlyphPackingMode.BestShortSideFit, m_FreeGlyphRects, m_UsedGlyphRects, m_AtlasRenderMode, texture, out var glyph))
             {
                 if (!m_IsMultiAtlasTexturesEnabled) return false;
@@ -390,6 +484,8 @@ namespace TMPro
         bool LoadFace()
         {
             int pointSize = m_CreationSettings.pointSize > 0 ? m_CreationSettings.pointSize : (int)m_FaceInfo.pointSize;
+            if (m_SourceFontFile == null)
+                return FontEngine.LoadFontFace(m_SourceFontFilePath, pointSize, m_FaceInfo.faceIndex) == FontEngineError.Success;
             return FontEngine.LoadFontFace(m_SourceFontFile, pointSize, m_FaceInfo.faceIndex) == FontEngineError.Success;
         }
 

@@ -43,6 +43,13 @@ namespace TMPro
             m_CurrentLink = -1;
 
             var primary = text.font;
+            // A dynamic font asset gets "…" and "_" before the text's own characters, whatever
+            // the overflow mode.
+            if (primary != null && primary.atlasPopulationMode != AtlasPopulationMode.Static)
+            {
+                primary.TryGetLocalCharacter(0x2026, out _);
+                primary.TryGetLocalCharacter('_', out _);
+            }
             output.Materials.Add(new MaterialSlot { Material = text.fontSharedMaterial, Asset = primary });
 
             var s = new TextState

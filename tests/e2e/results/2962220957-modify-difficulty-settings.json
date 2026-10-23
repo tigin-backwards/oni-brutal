@@ -1,0 +1,83 @@
+{
+ "spec": "mods/2962220957-modify-difficulty-settings.yaml",
+ "mods": [
+  "2962220957"
+ ],
+ "verdict": "failed",
+ "why": "a run of ours failed",
+ "findings": [],
+ "note": "fails in ours on one ui_dump field: the pause menu's Change Difficulty Settings button opens the mod's asset-bundle window (shot identical, 0 % of pixels differ), its Hunger arrow steps the colony's calorie setting and Escape closes it, as in the original; but the Care Packages toggle's label at the scroll view's bottom edge (world y 78-109 against the RectMask2D's 94) is marked culled in the original's CanvasRenderer and not in ours",
+ "updated": "2026-10-23",
+ "commit": "360de75",
+ "mod_dlls": {
+  "2962220957": {
+   "CustomGameSettingsModifier.dll": "55aee313ca1a8077340a848502784c62bef26d4d6d7c423be47882f0bd0a0356"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-175909-968677",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T17:59:09",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-180050-a3ec16",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-23T18:00:50",
+    "lane": 17,
+    "reasons": [
+     "ui_dump settings: 1 difference(s)"
+    ],
+    "reference_run": "20261023-175909-968677",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "settings": {
+      "differences": 1,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "settings": 0.0
+    }
+   },
+   {
+    "run": "20261023-180050-a3ec16",
+    "index": 2,
+    "verdict": "fail",
+    "date": "2026-10-23T18:01:46",
+    "lane": 17,
+    "reasons": [
+     "ui_dump settings: 1 difference(s)"
+    ],
+    "reference_run": "20261023-175909-968677",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "settings": {
+      "differences": 1,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "settings": 0.0
+    }
+   }
+  ]
+ }
+}

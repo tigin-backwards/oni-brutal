@@ -1,0 +1,36 @@
+# Modify Difficulty Settings (2962220957), classes S, K.
+#
+# What it does: the pause menu gets a "Change Difficulty Settings" button that opens a window
+# (from the mod's asset bundle) listing the colony's custom game settings (stress, morale,
+# calories, immunity, meteor showers, durability, radiation, ...): a check box for each on/off
+# setting and left/right arrows for each list setting. A change is made at once
+# (CustomGameSettings.SetQualitySetting); most take effect after a reload. While the window is
+# open, Escape closes it rather than the pause menu.
+# How a player reaches it: the pause menu (Escape), its button.
+# What changes: the colony's difficulty settings.
+#
+# The window is opened from the pause menu; a list setting is stepped once with its right
+# arrow, and the colony's setting follows.
+from: early-base
+mods: [2962220957]
+steps:
+  - key: {code: Escape}
+  - ui_wait: {path: "**/PauseScreen/**/Change Difficulty SettingsButton", cond: stable}
+  - click: {ui: "**/PauseScreen/**/Change Difficulty SettingsButton"}
+  - ui_wait: {path: "**/CustomGameSettingsChanger*", cond: stable}
+  - ui_dump: {name: settings, root: "**/CustomGameSettingsChanger*"}
+  - shot: {name: settings, crop: "**/CustomGameSettingsChanger*", threshold: 0.04}
+  # The second list setting is Hunger (calorie burn); its right arrow steps it once.
+  - expect_ui:
+      "**/ScrollRectContainer/SwitchPrefab/Label": {any_text: "Hunger"}
+  - expect_state:
+      "CustomGameSettings.Instance.GetCurrentQualitySetting(\"CalorieBurn\").id": Default
+  - click: {ui: "**/ScrollRectContainer/SwitchPrefab/Right", index: 1}
+  - expect_state:
+      "CustomGameSettings.Instance.GetCurrentQualitySetting(\"CalorieBurn\").id": "!= 'Default'"
+  # Escape closes the window, not the pause menu behind it.
+  - key: {code: Escape}
+  - expect_state:
+      "type:CustomGameSettingsModifier.CustomSettingsController::Instance.CurrentlyActive": false
+  - expect_ui:
+      "**/PauseScreen/**/Change Difficulty SettingsButton": {active: true}

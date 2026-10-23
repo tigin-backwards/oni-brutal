@@ -1,0 +1,33 @@
+{
+ "spec": "mods/1820638089-liquid-bottler.yaml",
+ "mods": [
+  "1820638089"
+ ],
+ "verdict": "pending",
+ "why": "the spec fails in the original: a broken spec, or a mod broken upstream",
+ "findings": [],
+ "note": "",
+ "updated": "2026-10-23",
+ "commit": "867650f",
+ "mod_dlls": {
+  "1820638089": {
+   "LiquidBottler.dll": "a6e7ddd400505827d53219c99e6947d4ef122d5edee317e54f5c86d1478617da"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-042102-a633d0",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-23T05:19:27",
+    "lane": 17,
+    "reasons": [
+     "step start: Canvas/ConfirmDialog/GameObject/Panel/OKButton is occluded by ErrorCanvas/CrashReportScreen(Clone)/InfoBox/ModsInfo/ModsList/Files/Viewport/Content/Entry/BG (hits there: ErrorCanvas/CrashReportScreen(Clone)/InfoBox/ModsInfo/ModsList/Files/Viewport/Content/Entry/BG, ErrorCanvas/CrashRepor"
+    ],
+    "signatures": 3
+   }
+  ],
+  "ours": []
+ }
+}

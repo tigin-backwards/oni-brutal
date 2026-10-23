@@ -197,7 +197,7 @@ installs get developer checks subscribers never see).
 | 176 | [Conveyor Rail Filter](https://steamcommunity.com/sharedfiles/filedetails/?id=1738906344) | ✅ | ✅ | ⬜ |  |
 | 177 | [Tiếng Việt [Chuột Chanel]](https://steamcommunity.com/sharedfiles/filedetails/?id=1714866600) | ⬜ | ⬜ | ⬜ | translation: the game applies one only from a Steam subscription; not testable here |
 | 178 | [[TH4427E] Thai Not Included](https://steamcommunity.com/sharedfiles/filedetails/?id=1823722773) | ⬜ | ⬜ | ⬜ | translation: the game applies one only from a Steam subscription; not testable here |
-| 179 | [Liquid Bottler](https://steamcommunity.com/sharedfiles/filedetails/?id=1820638089) | ✅ | ✅ | ⬜ |  |
+| 179 | [Liquid Bottler](https://steamcommunity.com/sharedfiles/filedetails/?id=1820638089) | ❌ | ❌ | ⬜ | broken upstream: its LIQUIDBOTTLER building's codex entry collides with the game's own Bottle Filler (LiquidBottler), and loading a colony stops at the crash screen (same in the original) |
 | 180 | [Português (BR)](https://steamcommunity.com/sharedfiles/filedetails/?id=3229139332) | ⬜ | ⬜ | ⬜ | translation: the game applies one only from a Steam subscription; not testable here |
 | 181 | [Piped Everything](https://steamcommunity.com/sharedfiles/filedetails/?id=3033409170) | ✅ | ✅ | ⬜ |  |
 | 182 | [Rational Priority](https://steamcommunity.com/sharedfiles/filedetails/?id=2632758219) | ✅ | ✅ | ⬜ |  |

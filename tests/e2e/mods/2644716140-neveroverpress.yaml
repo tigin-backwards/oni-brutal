@@ -1,0 +1,27 @@
+# Neveroverpress(永不超压) (2644716140), class B.
+#
+# What it does: adds the Gas Vent High (GasVentHigh, Ventilation menu) and the Liquid Vent
+# High (Plumbing menu): vents like the game's, of any metal, whose overpressure mass is
+# infinite, so they never stop for pressure. They need no research.
+# How a player reaches it: the build menu (Ventilation, Plumbing).
+# What changes: vents that never overpressure.
+#
+# A Gas Vent High is built from the base's ore in the dug-out corridor west of the printing
+# pod and selected.
+from: early-base
+mods: [2644716140]
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"GasVentHigh\").BuildingComplete.GetComponent<Vent>.overpressureMass": Infinity
+      "Assets.GetBuildingDef(\"LiquidVentHigh\").BuildingComplete.GetComponent<Vent>.overpressureMass": Infinity
+  - build: {prefab: GasVentHigh, at: [113, 206]}
+  - expect: {blueprints: {GasVentHigh: 1}}
+  - run: {seconds: 900, until: {buildings: {GasVentHigh: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 206], select: GasVentHigh}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Gas Vent High"}
+  - expect_state:
+      "selected:Vent.overpressureMass": Infinity
+  - shot: {name: details, crop: "**/DetailsScreen", threshold: 0.04}

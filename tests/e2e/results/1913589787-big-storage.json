@@ -1,0 +1,60 @@
+{
+ "spec": "mods/1913589787-big-storage.yaml",
+ "mods": [
+  "1913589787"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "its config sets 120 t: a Big Solid Storage built after Refined Objects and selected holds 120 t, its slider reaching that",
+ "updated": "2026-10-23",
+ "commit": "f4073ec",
+ "mod_dlls": {
+  "1913589787": {
+   "BigStorage.dll": "2e28192fb843e0afa84b7b906ad37875ab9416d9d7769a8bc805fab04921a0cb",
+   "PLib.dll": "3b174379c1bc41e51c6771c1d5b1d66494d96c4fe9e7cb0d54ef38887d87dedb"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-142249-8bc65a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T14:36:34",
+    "lane": 13,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-153931-7e443b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T15:39:31",
+    "lane": 13,
+    "reference_run": "20261023-142249-8bc65a",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "details": 0.0
+    }
+   },
+   {
+    "run": "20261023-153931-7e443b",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T15:40:50",
+    "lane": 13,
+    "reference_run": "20261023-142249-8bc65a",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "details": 0.0
+    }
+   }
+  ]
+ }
+}

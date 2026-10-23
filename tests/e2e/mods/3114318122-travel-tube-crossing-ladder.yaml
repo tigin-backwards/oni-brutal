@@ -1,0 +1,29 @@
+# Travel Tube Crossing Ladder (3114318122), class P.
+#
+# What it does: transit tubes may cross ladders and other buildings: a postfix on
+# TravelTubeConfig.CreateBuildingDef moves the tube from the Building object layer to another
+# (Canvases) and stops it checking its foundation, so a tube and a ladder can share a cell.
+# Tube entrances no longer flood, and take 1 kJ a launch from a 40 kJ store.
+# How a player reaches it: building a transit tube through a ladder.
+# What changes: where tubes can be placed.
+#
+# setup grants Transit Tubes and sets plastic down. A ladder is built in the dug-out corridor
+# west of the printing pod (110, 207..209), then a tube across it (109..111, 208): its
+# blueprint takes the ladder's cell, and both are built.
+from: early-base
+mods: [3114318122]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"TravelTubes\")", method: Purchased}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Polypropylene\").substance", method: SpawnResource, args: [[113.5, 206.5, -12], 300, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"TravelTube\").ObjectLayer": Canvases
+      "Assets.GetBuildingDef(\"TravelTubeEntrance\").Floodable": false
+      "Assets.GetBuildingDef(\"TravelTubeEntrance\").BuildingComplete.GetComponent<TravelTubeEntrance>.jouleCapacity": 40000
+  - build: {prefab: Ladder, cells: [[110, 207], [110, 208], [110, 209]], material: SandStone}
+  - expect: {blueprints: {Ladder: 3}}
+  - run: {seconds: 900, until: {buildings: {Ladder: ">= 3"}, pending_construction: 0}}
+  - build: {prefab: TravelTube, cells: [[109, 208], [110, 208], [111, 208]]}
+  - expect: {blueprints: {TravelTube: 3}}
+  - run: {seconds: 1200, until: {buildings: {TravelTube: 3}, pending_construction: 0}}
+  - world_shot: {name: crossing, ortho: 3, at: [110, 208], mask: [[0, 0, 1280, 170], [0, 420, 1280, 300]]}

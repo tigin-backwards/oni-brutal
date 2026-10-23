@@ -1,0 +1,59 @@
+{
+ "spec": "mods/2644716140-neveroverpress.yaml",
+ "mods": [
+  "2644716140"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Gas Vent High built without research and selected: its overpressure limit is infinite",
+ "updated": "2026-10-23",
+ "commit": "f4073ec",
+ "mod_dlls": {
+  "2644716140": {
+   "Neveroverpress.dll": "308431aa4c9542da7c9495fcb3cd1e5441d0acfc1de4a3f7c47e44ad42bb0697"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-142249-8bc65a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T14:40:11",
+    "lane": 13,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-154453-c0873e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T15:44:53",
+    "lane": 13,
+    "reference_run": "20261023-142249-8bc65a",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "details": 0.002155
+    }
+   },
+   {
+    "run": "20261023-154453-c0873e",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T16:03:42",
+    "lane": 13,
+    "reference_run": "20261023-142249-8bc65a",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "details": 0.002155
+    }
+   }
+  ]
+ }
+}

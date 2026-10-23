@@ -1,0 +1,56 @@
+{
+ "spec": "mods/2713769536-temperature-controller.yaml",
+ "mods": [
+  "2713769536"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Heating Element built after Temperature Modulation runs unpowered and heats its cell by more than 50 K in 5 s",
+ "updated": "2026-10-23",
+ "commit": "f4073ec",
+ "mod_dlls": {
+  "2713769536": {
+   "PLib.dll": "c4bb22f1bc06ebcb0dbba75a7f1bc46f63eaa3dae12c22a08729f1a6d3362dda",
+   "TempretureControler.dll": "0984d313d6e8f740dca6f8335cd27885bbd21bf02824436bbc48cb54fc00229d"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-142249-8bc65a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T14:38:11",
+    "lane": 13,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-154210-a359df",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T15:42:10",
+    "lane": 13,
+    "reference_run": "20261023-142249-8bc65a",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-154210-a359df",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T15:43:36",
+    "lane": 13,
+    "reference_run": "20261023-142249-8bc65a",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

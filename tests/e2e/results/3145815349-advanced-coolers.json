@@ -1,0 +1,60 @@
+{
+ "spec": "mods/3145815349-advanced-coolers.yaml",
+ "mods": [
+  "3145815349"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "options drop fullerene and set 100 W: a Space Cooler built from copper after Temperature Modulation, selected, draws 100 W",
+ "updated": "2026-10-23",
+ "commit": "f4073ec",
+ "mod_dlls": {
+  "3145815349": {
+   "Advanced Coolers.dll": "95de409dfa4c759446dc5d2955bf89cf0d8aa1f97445456698b884561bfe7dce",
+   "PLib.dll": "d87814a7d5d74fa0e94bc5435cd770d3746438f494208b6f356a2ab999169c52"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-142249-8bc65a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T14:33:03",
+    "lane": 13,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-153651-c4987d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T15:36:51",
+    "lane": 13,
+    "reference_run": "20261023-142249-8bc65a",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "details": 0.002155
+    }
+   },
+   {
+    "run": "20261023-153651-c4987d",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T15:38:09",
+    "lane": 13,
+    "reference_run": "20261023-142249-8bc65a",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "details": 0.002155
+    }
+   }
+  ]
+ }
+}

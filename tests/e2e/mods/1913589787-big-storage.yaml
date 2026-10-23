@@ -1,0 +1,37 @@
+# Big Storage (1913589787), classes B, O.
+#
+# What it does: adds bigger storage buildings to the Base menu: the Big Solid Storage
+# (BigSolidStorage, 1x2, raw metal, Refined Objects research; 100 t), the Big Beautiful
+# Storage (Smelting), the Big Liquid Storage (Liquid Tuning) and the Big Gas Reservoir
+# (Catalytics). Their capacities and tint colours come from the config.json beside the mod;
+# a postfix on FilteredStorage.OnFilterChanged tints the solid ones.
+# How a player reaches it: the build menu (Base), after the research.
+# What changes: storage that holds more than the game's.
+#
+# Config: the Big Solid Storage holds 120 t. setup grants Refined Objects. A Big Solid Storage
+# is built from the base's ore in the dug-out corridor west of the printing pod and selected:
+# it holds 120 t, and its capacity slider reaches that.
+from: early-base
+mods: [1913589787]
+options:
+  "1913589787": {BigStorageLockerCapacity: 120000}
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"RefinedObjects\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"RefinedObjects\").unlockedItemIDs": {contains: BigSolidStorage}
+      "Db.Get().Techs.Get(\"Catalytics\").unlockedItemIDs": {contains: BigGasReservoir}
+      "Assets.GetBuildingDef(\"BigSolidStorage\").BuildingComplete.GetComponent<Storage>.capacityKg": 120000
+  - build: {prefab: BigSolidStorage, at: [113, 206]}
+  - expect: {blueprints: {BigSolidStorage: 1}}
+  - run: {seconds: 1200, until: {buildings: {BigSolidStorage: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: BigSolidStorage}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/CapacityControlSideScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<Storage>.capacityKg": 120000
+      "ui:**/CapacityControlSideScreen/**/Slider::GetComponent<KSlider>.maxValue": 120000
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Big Solid Storage"}
+  - shot: {name: details, crop: "**/DetailsScreen", threshold: 0.04}

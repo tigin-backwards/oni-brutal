@@ -1,0 +1,35 @@
+# Temperature Controller (2713769536), classes B, O.
+#
+# What it does: adds two 1x1 buildings (Temperature Modulation research, Utilities menu): the
+# Cooling Element (any buildable material), which removes heat, and the Heating Element (raw
+# mineral and refined metal), which adds it; a state machine plays their animation while they
+# are operational. Their heat, power draw and whether they need power come from the mod's
+# TempretureControler.json (PLib options): as shipped, the heater adds 10,000 kDTU/s and needs
+# no power, the cooler removes 800 kDTU/s and needs 400 W.
+# How a player reaches it: the build menu (Utilities), after the research.
+# What changes: buildings that heat or cool their cell without limit.
+#
+# setup grants Temperature Modulation and sets sandstone and copper down. A Heating Element is
+# built in the dug-out corridor west of the printing pod, unpowered; it runs, and in a few
+# seconds its cell is far hotter than before.
+from: early-base
+mods: [2713769536]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"TemperatureModulation\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Copper\").substance", method: SpawnResource, args: [[110.5, 206.5, -12], 400, 300, 255, 0]}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"SandStone\").substance", method: SpawnResource, args: [[109.5, 206.5, -12], 600, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"TemperatureModulation\").unlockedItemIDs": {contains: HeatingElement}
+      "Assets.GetBuildingDef(\"HeatingElement\").ExhaustKilowattsWhenActive": 10000
+      "Assets.GetBuildingDef(\"HeatingElement\").RequiresPowerInput": false
+      "Assets.GetBuildingDef(\"CoolingElement\").ExhaustKilowattsWhenActive": -800
+  - build: {prefab: HeatingElement, at: [113, 209]}
+  - expect: {blueprints: {HeatingElement: 1}}
+  - run: {seconds: 1200, until: {buildings: {HeatingElement: 1}, pending_construction: 0}}
+  - expect_state: {"Grid.Temperature.get_Item(133037)": {save_as: before}}
+  - run: {seconds: 5}
+  - expect_state:
+      "count:all:Operational::[*] if .name == HeatingElementComplete and .IsActive == true": 1
+      "Grid.Temperature.get_Item(133037)": "> before + 50"

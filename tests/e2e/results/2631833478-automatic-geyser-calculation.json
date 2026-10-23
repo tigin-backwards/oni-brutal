@@ -3,12 +3,14 @@
  "mods": [
   "2631833478"
  ],
- "verdict": "failed",
- "why": "a run of ours failed",
- "findings": [],
+ "verdict": "warning",
+ "why": "known findings: float-tostring-shortest",
+ "findings": [
+  "float-tostring-shortest"
+ ],
  "note": "a steam vent placed in the base and selected shows the Flow Information section (average active flow, eruption buffer, totals \"(Requires Analysis)\") as in the original, but its heat lines differ: the game formats them with StringBuilder.Append(float), \"Erupting: 498.1159 kDTU/s\" in the original and \"498.11588 kDTU/s\" in ours (ARCHITECTURE D2, shortest round-trip on .NET), so two labels are 7 px wider",
  "updated": "2026-10-23",
- "commit": "1df32ad",
+ "commit": "6cdd6f6",
  "mod_dlls": {
   "2631833478": {
    "AutomaticGeyserCalculation.dll": "d51551e3039776414ed4c8ce1ac3d8027c19ed799d0e76837d00da3c38794b8d"
@@ -17,49 +19,61 @@
  "runs": {
   "original": [
    {
-    "run": "20261023-081630-cc966a",
+    "run": "20261023-112153-41ccdf",
     "index": 1,
     "verdict": "pass",
-    "date": "2026-10-23T08:16:30",
+    "date": "2026-10-23T11:21:53",
     "lane": 16,
+    "signatures": 0
+   },
+   {
+    "run": "20261023-112153-41ccdf",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T11:21:54",
+    "lane": 17,
     "signatures": 0
    }
   ],
   "ours": [
    {
-    "run": "20261023-081804-58d9b7",
-    "index": 1,
-    "verdict": "fail",
-    "date": "2026-10-23T08:18:04",
+    "run": "20261023-112153-41ccdf",
+    "index": 2,
+    "verdict": "warn",
+    "date": "2026-10-23T11:25:16",
     "lane": 16,
-    "reasons": [
-     "ui_dump descriptors: 4 difference(s)"
-    ],
-    "reference_run": "20261023-081630-cc966a",
+    "reference_run": "20261023-112153-41ccdf",
     "new_signatures": 0,
-    "findings": [],
+    "findings": [
+     "float-tostring-shortest"
+    ],
     "ui_dump": {
      "descriptors": {
-      "differences": 4
+      "differences": 0,
+      "known": {
+       "float-tostring-shortest": 4
+      }
      }
     },
     "shots": {}
    },
    {
-    "run": "20261023-081804-58d9b7",
-    "index": 2,
-    "verdict": "fail",
-    "date": "2026-10-23T08:18:05",
+    "run": "20261023-112153-41ccdf",
+    "index": 1,
+    "verdict": "warn",
+    "date": "2026-10-23T11:25:16",
     "lane": 17,
-    "reasons": [
-     "ui_dump descriptors: 4 difference(s)"
-    ],
-    "reference_run": "20261023-081630-cc966a",
+    "reference_run": "20261023-112153-41ccdf",
     "new_signatures": 0,
-    "findings": [],
+    "findings": [
+     "float-tostring-shortest"
+    ],
     "ui_dump": {
      "descriptors": {
-      "differences": 4
+      "differences": 0,
+      "known": {
+       "float-tostring-shortest": 4
+      }
      }
     },
     "shots": {}

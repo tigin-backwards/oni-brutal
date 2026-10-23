@@ -65,3 +65,14 @@
   component: KSlider
   fields: [value]
   path: '**/MultiSliderSideScreen/**'
+
+- id: float-tostring-shortest
+  description: >-
+    A float printed without a format (StringBuilder.Append(float), float.ToString()) shows the
+    shortest round-trip digits in ours, up to 9, where Mono shows 7 (ARCHITECTURE D2): a geyser's
+    heat lines read "498.11588 kDTU/s" in ours and "498.1159 kDTU/s" in the original, and their
+    labels are a few pixels wider.
+  link: tests/e2e/mods/2631833478-automatic-geyser-calculation.yaml
+  component: [rect, LocText]
+  fields: [rect, world, screen, text, textInfo]
+  path: '**/SimpleInfoScreen/**/Descriptors/DescLabel'

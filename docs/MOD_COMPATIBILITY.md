@@ -248,7 +248,7 @@ installs get developer checks subscribers never see).
 | 227 | [Better Dupe Assignment](https://steamcommunity.com/sharedfiles/filedetails/?id=3657612749) | ✅ | ✅ | ⬜ |  |
 | 228 | [True Tiles Material Pack](https://steamcommunity.com/sharedfiles/filedetails/?id=3599672848) | ✅ | ✅ | ⬜ |  |
 | 229 | [Refined Metals Usable As Raw Metals](https://steamcommunity.com/sharedfiles/filedetails/?id=1729816134) | ✅ | ✅ | ⬜ |  |
-| 230 | [Automatic Geyser Calculation](https://steamcommunity.com/sharedfiles/filedetails/?id=2631833478) | ✅ | ✅ | ⬜ |  |
+| 230 | [Automatic Geyser Calculation](https://steamcommunity.com/sharedfiles/filedetails/?id=2631833478) | ✅ | ✅ | ⬜ | spec fails in ours: tests/e2e/mods/2631833478-automatic-geyser-calculation.yaml: a steam vent placed in the base and selected shows the Flow Information section (average active flow, eruption buffer, totals "(Requires Analysis)") as in the original, but its heat lines differ: the game formats them with StringBuilder.Append(float), "Erupting: 498.1159 kDTU/s" in the original and "498.11588 kDTU/s" in ours (ARCHITECTURE D2, shortest round-trip on .NET), so two labels are 7 px wider (a run of ours failed) |
 | 231 | [[MG]Super Wire(超级电线)](https://steamcommunity.com/sharedfiles/filedetails/?id=2558054404) | ✅ | ✅ | ⬜ |  |
 | 232 | [ภาษาไทย / Thai Language](https://steamcommunity.com/sharedfiles/filedetails/?id=2889982891) | ⬜ | ⬜ | ⬜ | translation: the game applies one only from a Steam subscription; not testable here |
 | 233 | [Critical Notification Pauser](https://steamcommunity.com/sharedfiles/filedetails/?id=1708809748) | ✅ | ✅ | ⬜ |  |

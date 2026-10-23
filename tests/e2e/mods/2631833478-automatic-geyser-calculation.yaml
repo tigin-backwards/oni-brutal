@@ -1,0 +1,30 @@
+# Automatic Geyser Calculation (2631833478), class P.
+#
+# What it does: a geyser's descriptors (its info panel and tooltips) gain a "Flow Information"
+# section computed from its configuration: the average active flow and the buffer an
+# eruption needs, then, once the geyser has been analysed, the total average flow and the
+# dormancy buffer ("(Requires Analysis)" until then), and heating or cooling figures against
+# a steam turbine's or a room's temperature (a postfix on Geyser.GetDescriptors).
+# How a player reaches it: select a geyser.
+# What changes: more lines in the geyser's status panel.
+#
+# early-base has no geyser in sight (its one is buried in rock): setup places a cool steam
+# vent in the dug-out corridor west of the printing pod. Analysing it needs a Duplicant with
+# the Field Research skill, which early-base lacks, so the unanalysed lines are checked. The
+# flow figures follow the vent's random configuration: they are masked in the dump.
+from: early-base
+mods: [2631833478]
+setup:
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(0, 112, 206, \"GeyserGeneric_steam\", \"BuildingBack\")", method: SetActive, args: [true]}}
+steps:
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 207]}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state: {"selected:GetComponent<Geyser>": exists}
+  - expect_ui:
+      "**/SimpleInfoScreen/**/Descriptors/DescLabel": {any_text: "~Flow Information:"}
+  - expect_ui:
+      "**/SimpleInfoScreen/**/Descriptors/DescLabel": {any_text: "~Average Active Flow: "}
+  - expect_ui:
+      "**/SimpleInfoScreen/**/Descriptors/DescLabel": {any_text: "~Total Average Flow: (Requires Analysis)"}
+  - ui_dump: {name: descriptors, root: "**/SimpleInfoScreen/**/ContentStatus/Descriptors", mask_text: ['[\d.,]+']}

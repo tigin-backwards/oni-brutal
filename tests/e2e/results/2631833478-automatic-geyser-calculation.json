@@ -1,0 +1,69 @@
+{
+ "spec": "mods/2631833478-automatic-geyser-calculation.yaml",
+ "mods": [
+  "2631833478"
+ ],
+ "verdict": "failed",
+ "why": "a run of ours failed",
+ "findings": [],
+ "note": "a steam vent placed in the base and selected shows the Flow Information section (average active flow, eruption buffer, totals \"(Requires Analysis)\") as in the original, but its heat lines differ: the game formats them with StringBuilder.Append(float), \"Erupting: 498.1159 kDTU/s\" in the original and \"498.11588 kDTU/s\" in ours (ARCHITECTURE D2, shortest round-trip on .NET), so two labels are 7 px wider",
+ "updated": "2026-10-23",
+ "commit": "1df32ad",
+ "mod_dlls": {
+  "2631833478": {
+   "AutomaticGeyserCalculation.dll": "d51551e3039776414ed4c8ce1ac3d8027c19ed799d0e76837d00da3c38794b8d"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-081630-cc966a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T08:16:30",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-081804-58d9b7",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-23T08:18:04",
+    "lane": 16,
+    "reasons": [
+     "ui_dump descriptors: 4 difference(s)"
+    ],
+    "reference_run": "20261023-081630-cc966a",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "descriptors": {
+      "differences": 4
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261023-081804-58d9b7",
+    "index": 2,
+    "verdict": "fail",
+    "date": "2026-10-23T08:18:05",
+    "lane": 17,
+    "reasons": [
+     "ui_dump descriptors: 4 difference(s)"
+    ],
+    "reference_run": "20261023-081630-cc966a",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "descriptors": {
+      "differences": 4
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

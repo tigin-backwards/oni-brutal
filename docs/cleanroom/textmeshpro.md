@@ -199,7 +199,9 @@ transform.
   - the font's normal or bold spacing offset;
   - the kerning pair adjustment from `fontFeatureTable` when kerning is on.
 - **Monospacing:** `<mspace>` centres each glyph in the fixed width instead.
-- **Tabs:** they advance to the next multiple of `tabSize` × the space width.
+- **Tabs:** they advance to the next multiple of `tabSize` × the face's `tabWidth`, scaled
+  to the size, from the line's start (measured: "Further characters" under "Overflow at
+  white space" below).
 - **Lines:**
   - Lines break at `\n` and when a word overflows the width with wrapping on.
   - Words are separated by whitespace and the break opportunities of CJK characters. The
@@ -766,9 +768,10 @@ off, centred (and top-left for Overflow without wrapping): 37,692 cases, each wi
 and every character's code, `isVisible` and `lineNumber`. `tools/UnityProbe/ov-check.py rule
 LOG` predicts each case from the rule below and reproduces all 37,692; this implementation
 (with the preferred sizes above) reproduces 25,947 of its 38,124.
-- **Checked characters.** Every character except white space (space, no-break space, line
-  feed) is checked against the rect's height. The tab is checked too, though it is not visible
-  (`isVisible` false, character 9).
+- **Checked characters.** Every character except white space is checked against the rect's
+  height. The white space here is space, no-break space and line feed; "Further characters"
+  below lists the rest. The tab is checked too, though it is not visible (`isVisible` false,
+  character 9).
 - **Vertical overflow.** The text overflows at the first checked character whose line's
   bottom is below the rect: the distance from the first line's ascender down to that line's
   descender is greater than the rect's height. Exactly at the height fits: NotoSans 14 pt's
@@ -863,7 +866,73 @@ Where this implementation deviates (`TMP_Text.Layout.cs` and `TMP_Text.Place.cs`
 | preferred size, "A\n " | 8.94 × 19.04 | 8.94 × 38.1 |
 | preferred size, "\t" | 0.01 × 19.04 | 14.01 × 20.74 |
 
-Not measured: other white space (U+2000–U+200A, U+3000, the zero-width space), Page, Linked
+**Further characters** (measured 2026-10-23, the same probe with `PROBE_OV_PART=chars`, `CH`
+lines). Each character x below was measured alone, doubled, and in "xA", "Ax", "A\nx", "A\nxx"
+and "x\nA", in NotoSans-Regular 14 pt and GRAYSTROKE REGULAR SDF 12 pt. The rects were 0 × 0,
+0.01 × 0.01, 400 × 0, 400 × one line (and 0.01 under it) and 400 × 100, in Overflow and
+Truncate. Both fonts agree on everything except advances and heights.
+- **Not checked** (never overflow; a text of only them reports false and -1 in 0 × 0 and
+  0.01 × 0.01 and keeps its characters under Truncate; "xA" in 400 × 0 overflows at 1; "A\nx" in a
+  rect one line high does not overflow; "A\nx" is as high as "A"): space, U+00A0, line feed,
+  CR (U+000D), vertical tab (U+000B), U+2000–U+200A, the zero-width space U+200B, U+2028,
+  U+2029 and U+3000. None of them is visible.
+  - Line feed, vertical tab, U+2028 and U+2029 break the line ("x\nA" has three lines). CR
+    does not: it is an ordinary character on its line, 7.146 wide in NotoSans 14 pt and 0 in
+    GRAYSTROKE 12 pt ("x\nA" has two lines).
+  - Not checked does not mean no height. A white-space character that comes from a fallback
+    font with a deeper descender still deepens its line. In NotoSans 14 pt, U+3000 (descender
+    5.79 below the baseline against 4.08) makes "x\nA" 39.81 high, not 38.1. The same goes
+    for U+00A0 and U+2000–U+200A in GRAYSTROKE 12 pt: "x\nA" is 33.01, not 25.18. On the last
+    line it still raises the preferred height, though by an amount not explained here: "A\nx"
+    is 20.33 (U+3000, NotoSans) and 14.03 (U+00A0 and U+2000–U+200A, GRAYSTROKE, also U+3000
+    15.13), where one line is 19.04 and 12.6. Its overflow index is not affected.
+- **Checked** (as a visible character: a text of only it overflows at 0 in 0 × 0 and
+  0.01 × 0.01, Truncate there leaves nothing, "xA" in 400 × 0 overflows at 0, and "A\nx" in a rect
+  one line high overflows at 2):
+  - the tab (not visible, see below);
+  - form feed (U+000C) and U+180E: neither font has them, so each is drawn as the missing
+    glyph U+25A1, visible: 14.01 × 20.74 (NotoSans 14 pt), 12.01 × 17.78 (GRAYSTROKE 12 pt);
+  - U+FEFF: visible (`isVisible` true), 0 wide, from a fallback: 0.01 × 23.82 (NotoSans),
+    0.01 × 20.42 (GRAYSTROKE).
+- **U+0003 ends the text.** Nothing after it is laid out: "x" and "xA" have no characters and
+  no lines and are 0.01 × 0.01; "x\nA" has none either. "Ax" has two characters, the second
+  U+0003 (not visible, of no height), and is 8.94 × 19.04. "A\nx" has three characters on two
+  lines, but is 8.94 × 4.09 (NotoSans) and 7.29 × 1.21 (GRAYSTROKE), less than the "A" alone:
+  an anomaly measured, not explained. None of them overflows.
+- **The tab's advance.** A tab moves the pen to the next tab stop. Stops are multiples of
+  T = `tabSize` × `faceInfo.tabWidth` × (font size / `faceInfo.pointSize`) × `faceInfo.scale`,
+  counted from the line's start. A pen already on a stop moves to the next one.
+  - NotoSans-Regular has `tabSize` 10 and `tabWidth` 62.5 at point size 24: T is 364.58333 at
+    14 pt and 729.16667 at 28 pt. GRAYSTROKE REGULAR SDF has 10 and 310 at 124: T is 300 at
+    12 pt, 600 at 24 pt.
+  - "\t" ends at T, "\t\t" at 2T, "A\t" and " \t" at T, "\tA" has its "A" at T.
+  - The stops do not depend on the rect: the same in rects 50, 400 and 1000 wide. Centred
+    text lays the line out the same and then centres it ("\t" from -T/2 to T/2).
+  - The space width plays no part: 10 × the space is 36.458 and 22.778, which this
+    implementation uses. It agrees with T only where `tabWidth` is 10 spaces (NotoSans: 62.5
+    is 10 × 6.25), and even there it leaves out the `tabSize` factor.
+  - The preferred width counts a tab at its start, not its end. "\t" is 0.01 and "\t\t"
+    364.59 (the second tab starts at T), "A\t" 8.94, " \t" 3.65, and "\tA" 373.52, which is
+    T + the "A". It is the next hundredth above the larger of the last visible character's
+    end and the last tab's start.
+
+| Character (NotoSans-Regular 14 pt) | checked | alone in 0 × 0 | "xA", 400 × 0 | "A\nx", 400 × 19.03125 | preferred size of x; of "A\nx" |
+|---|---|---|---|---|---|
+| U+000D (CR) | no | false, -1 | true, 1 | false, -1 | 0.01 × 0.01; 8.94 × 19.04 |
+| U+000B (VT), U+2028, U+2029 | no, break the line | false, -1 | true, 1 | false, -1 | 0.01 × 0.01; 8.94 × 19.04 |
+| U+2000–U+200A, U+200B | no | false, -1 | true, 1 | false, -1 | 0.01 × 0.01; 8.94 × 19.04 |
+| U+3000 (from a fallback) | no | false, -1 | true, 1 | false, -1 | 0.01 × 0.01; 8.94 × 20.33 |
+| U+0009 (tab) | yes, not visible | true, 0 | true, 0 | true, 2 | 0.01 × 19.04; 8.94 × 38.1 |
+| U+000C (FF), U+180E | yes, drawn as U+25A1 | true, 0 | true, 0 | true, 2 | 14.01 × 20.74; 14.01 × 39.81 |
+| U+FEFF | yes, visible, 0 wide | true, 0 | true, 0 | true, 2 | 0.01 × 23.82; 8.94 × 42.89 |
+| U+0003 | ends the text | false, -1, no characters | false, -1, none | false, -1 | 0.01 × 0.01; 8.94 × 4.09 |
+
+| Tab, rect 400 wide, left-aligned | shipped: tab ends at (from the line's start) | this implementation |
+|---|---|---|
+| NotoSans-Regular 14 pt "\t" | 364.58333 | 36.458 |
+| GRAYSTROKE REGULAR SDF 12 pt "\t" | 300 | 22.778 |
+
+Not measured: Page, Linked
 and ScrollRect, auto-size (whether a text of white space alone fits), margins, rich text,
 several fonts on one line, and whether "…" backs up past a visible character it cannot follow.
 Measure them the same way before relying on them.

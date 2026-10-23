@@ -1331,6 +1331,171 @@ into the main menu), on this machine's fonts (DejaVu, FreeFont, TLWG, Unifont, I
 Not measured: Windows and macOS lookups (the families Geyser Tab tries exist there), and
 another call's effect on an existing asset of the same face.
 
+### Sub-meshes and raycasts (measured 2026-10-23)
+
+Found in a user's video: the tool cursor's icon and hover card vanished over empty world while
+a Demolior impactor reveal ran, because the event system reported the pointer over UI. In this
+implementation the topmost raycast hit at the screen's centre was
+`LargeImpactorSequenceReticle/CalculatingImpactSection/label/TMP SubMeshUI [GRAYSTROKE REGULAR
+SDF Material + NotoSansCJKsc-Regular Atlas]`. That is a sub-mesh saved in the reticle prefab:
+its label shows no fallback glyph, and the sub-mesh's empty rect covers the label. A mod
+play-test found the same independently (Duplicant Status Bar): the "New Game Object" sub-meshes
+of its header labels had `raycastTarget` true here and false in the shipped package. Their
+parent texts have it false.
+
+Measured with `PROBE_SCENARIO=submesh` (tools/UnityProbe, `SubMesh.cs`, lines `SM …`), at the
+main menu, on an overlay canvas of its own with a `GraphicRaycaster`. "Hit" below means that
+`EventSystem.RaycastAll` at the graphic's rect centre returns it. The cases:
+- **Texts:** GRAYSTROKE REGULAR SDF 12 pt and NotoSans-Regular 14 pt, 400 × 100, with
+  "AB中文", "中文" and "AB▼". The CJK glyphs come from NotoSansCJKsc-Regular and the "▼" from
+  another fallback, through the global fallback list. Each text makes one sub-mesh.
+- **Steps (`reg` lines):** 21 steps, each on a fresh text whose `raycastTarget` is on or off.
+  They cycle the enabled state and the activity of the sub-mesh and of the text, in the same
+  frame and a frame apart. They cycle the sub-mesh's own `raycastTarget` (false, then true), and
+  combine that cycle with the other ones. They relayout with the sub-mesh's or the text's
+  `raycastTarget` set off first. They take the fallback glyphs away and bring them back, change
+  to another fallback and reparent the text.
+- **Controls (`img` lines):** an `Image` made the same ways.
+- **By hand (`hand` lines):** a `TMP_SubMeshUI` added by hand, before and after parenting.
+- **Saved sub-meshes:** the ten loaded prefab sub-meshes, copies of three prefab labels, and
+  a copy of the whole `LargeImpactorSequenceReticle`.
+
+The shipped package:
+- **A sub-mesh is not a raycast target until its `raycastTarget` changes to true.**
+  - Enabling does not list it with the canvas's raycast targets, unlike every other
+    `Graphic`. Take a sub-mesh made by a layout with `raycastTarget` true, drawn (depth 1),
+    covering the text's rect: it is never hit, through every later frame. The same holds for
+    the enabled and activity cycles of the sub-mesh or the text, a reparent, a relayout, and
+    fallback glyphs taken away and brought back.
+  - A `TMP_SubMeshUI` added by hand (`raycastTarget` true, its own default) is not hit
+    either, whether it was added before or after parenting.
+  - The `Image` controls are hit from the next frame in every one of those cases, so the rule
+    belongs to the sub-mesh, not to the raycaster.
+  - Setting `raycastTarget` false and then true lists it: from then on it is hit, with or
+    without glyphs (an empty sub-mesh is hit over its whole rect).
+  - Setting it to the value it already has does nothing: true on a fresh sub-mesh leaves it
+    unlisted.
+- **After it is listed:**
+  - Cycling the sub-mesh's own enabled state, or the text's object's activity, drops it from
+    the list, and it is not hit again until the next change to true.
+  - Cycling the text component's enabled state keeps it listed.
+  - Setting `raycastTarget` false drops it.
+  - A listed sub-mesh destroyed with its text stays in the canvas's list: every later raycast
+    on that canvas throws a `NullReferenceException` from `CanvasRenderer.cull`, and the input
+    module's do too. Do not reproduce this. Drop a destroyed sub-mesh from the list.
+- **The text copies its `raycastTarget` into the sub-meshes it fills,** through the property,
+  so a change lists or drops the sub-mesh as above:
+  - **At creation:** a text with `raycastTarget` false makes its sub-mesh with false; one with
+    true makes it with true (unlisted, as above). This is Duplicant Status Bar's false.
+  - **At every mesh generation** (`ForceMeshUpdate`, or the canvas rebuild after a change of
+    text, of the rect or of enabling) that puts glyphs in that sub-mesh:
+    - A sub-mesh set false by hand becomes true again when its text is true. Then it is
+      listed and hit.
+    - When the text is set false after the sub-mesh exists, the sub-mesh becomes false at
+      the next generation, not before.
+  - Setting the text's `raycastTarget` alone changes no sub-mesh until that generation.
+  - Sub-meshes a generation leaves unused keep their value.
+- **Saved sub-meshes** keep the value saved with them until a generation fills them, and they
+  are not listed. All ten loaded at the main menu are saved with `raycastTarget` true,
+  including the reticle's two labels, whose texts are false. Copies of these labels, and of
+  the whole reticle, are never hit. They only become hit after a false-and-true cycle of the
+  sub-mesh's own property.
+- **Rect:**
+  - A sub-mesh made by a layout is stretched over its text: anchors (0, 0)–(1, 1), size delta
+    0, position 0. Its rect is the text's.
+  - Its pivot is the text's, and it follows changes to the text's pivot at once, so its
+    local origin stays the text's. With the text's pivot set to (0, 1), the sub-mesh's pivot
+    reads (0, 1) right after.
+  - Resizing the text, changing its anchors or margins resizes the sub-mesh with it.
+  - Saved sub-meshes carry the same anchors and their text's pivot.
+- **Without fallback glyphs:** when the text changes to "AB" or "", the sub-mesh stays active
+  and enabled, with its rect, material and depth. Its `mesh` keeps its vertex count and bounds
+  from the last fill. When fallback glyphs return, the same sub-mesh (same instance) is
+  filled again.
+- **Other Graphic values:**
+  - `maskable` is copied from the text at creation: false when the text was unmaskable
+    before the layout. Setting the text's `maskable` later did not change the sub-mesh within
+    the next frame.
+  - The colour is white.
+  - The layer is 0 (the text's) for those made at run time.
+- **Components:** a sub-mesh made at run time has, in order, `RectTransform`, `LayoutElement`
+  (`ignoreLayout` true), `CanvasRenderer` and `TMP_SubMeshUI`. It is named "New Game Object",
+  with hide flags `DontSave`. Saved ones have no `LayoutElement`. `TMP_SubMeshUI` is not an
+  `ILayoutElement`, and `LayoutUtility` gives it preferred sizes 0.
+- **The text disabled:** its sub-meshes are disabled with it (`enabled` false), and enabled
+  again with it. Deactivating the text's object leaves the sub-mesh's `enabled` false until the
+  object is active again.
+- **A clone:** `Instantiate` of a text with a sub-mesh gives a copy whose cloned sub-mesh stays
+  empty (vertex count 0). The copy's first layout makes a second sub-mesh for the glyphs.
+
+Where this implementation deviates (`TMP_SubMeshUI.cs`, `TextMeshProUGUI.UploadGeometry`, and
+`Graphic.OnEnable` in this project's uGUI):
+- **Every enabled sub-mesh is a raycast target.** `TMP_SubMeshUI` lists itself on enable, as
+  `Graphic` does. Fresh sub-meshes, hand-added ones and saved ones are all hit from their
+  first drawn frame: the reticle's two sub-meshes, and the sub-mesh of every text with a
+  fallback glyph. The sub-mesh is the topmost hit over its text, ahead of the text itself.
+  This is the bug. The `Image` controls match the shipped package.
+- **The text's `raycastTarget` is never copied.** A sub-mesh made under a text with false is
+  true (Duplicant Status Bar's dump). One set false by hand stays false through relayouts, and
+  the text set false leaves its sub-meshes true.
+- **The pivot is set only at creation:** after the text's pivot changes, the sub-mesh keeps
+  (0.5, 0.5), and its local position moves (150, -30 for a 300 × 60 text pivoted to (0, 1)),
+  so its local origin is no longer the text's.
+- **`maskable`** is not copied: true under an unmaskable text.
+- **Hide flags** are `None` (`TMP_Settings.hideSubTextObjects` is false), not `DontSave`.
+- **The text disabled** leaves its sub-meshes enabled (only their renderers are cleared).
+- **Without fallback glyphs** the sub-mesh's mesh is cleared (vertex count 0). Nothing the
+  probe measures depends on this. Whether the shipped package still draws the stale
+  vertices was not measured; it should draw nothing.
+- **A clone** adopts the cloned sub-mesh and fills it, so it has one sub-mesh, not two.
+- It matched elsewhere: the anchors and the rect, the components and their order, the
+  `LayoutElement` with `ignoreLayout`, the name, reuse of the same sub-mesh when glyphs
+  return, and the saved sub-meshes' serialized values.
+
+| Case (GRAYSTROKE 12 pt, "AB中") | shipped: sub-mesh `raycastTarget`, hit | this implementation |
+|---|---|---|
+| text true, sub-mesh made by the layout | true, not hit | true, hit |
+| text false, sub-mesh made by the layout | false, not hit | true, hit |
+| text true; the sub-mesh's or the text's enabled or active cycle | true, not hit | true, hit |
+| text true; sub-mesh set false, then true | true, hit | true, hit |
+| the same, then the sub-mesh's enabled cycled | true, not hit | true, hit |
+| the same, then the text's object's activity cycled | true, not hit | true, hit |
+| the same, then the text component's enabled cycled | true, hit | true, hit |
+| text true; sub-mesh set false, then a relayout | true, hit | false, not hit |
+| text set false after the layout, then a relayout | false, not hit | true, hit |
+| text set false after the layout, no relayout | true, not hit | true, hit |
+| text true; fallback glyphs removed and returned | true, not hit | true, hit |
+| text true; sub-mesh false, glyphs removed and returned | true, hit | false, not hit |
+| `TMP_SubMeshUI` added by hand | true, not hit | true, hit |
+| `Image` made the same ways (control) | true, hit | true, hit |
+| reticle prefab: CalculatingImpactSection label (text false, saved true, empty) | true, not hit | true, hit |
+| language menu "Uninstall" label (text true, saved true, empty) | true, not hit | true, hit |
+| either saved one after its own false-and-true cycle | true, hit | true, hit |
+| text pivot changed to (0, 1) | pivot (0, 1), position 0 | pivot (0.5, 0.5), position moved |
+| text unmaskable before the layout | `maskable` false | true |
+| text component disabled | sub-mesh disabled | sub-mesh enabled |
+
+- **To implement:**
+  - `TMP_SubMeshUI` does not list itself as a raycast target when enabled. The
+    `raycastTarget` property lists it when it changes to true while active and enabled, and
+    drops it when it changes to false.
+  - Drop it on disable and on destroy as well. This differs from the shipped package only in
+    its failure cases: the stale entry, and the text component's enabled cycle keeping it.
+  - A text sets each sub-mesh it creates or fills to its own `raycastTarget` through that
+    property, and sets `maskable` from its own at creation.
+  - The sub-mesh's pivot follows its text's.
+  - The rest of the table follows from these rules.
+  - The expected effect in the game: a sub-mesh is hit only after code sets its
+    `raycastTarget` from false to true, directly or through its text's copy. With these rules
+    the reticle's sub-meshes are not hit, and Duplicant Status Bar's are false, as in the
+    shipped package. Whether any game or mod code does that was not surveyed.
+
+Not measured:
+- world-space `TMP_SubMeshUI` (`TextMeshPro`, not UGUI);
+- sprite sub-meshes from a layout (only the saved "TextMeshPro/Sprite" one is listed);
+- the text's `maskable` changed after the sub-mesh exists and followed by a relayout;
+- whether the stale vertices of an unused sub-mesh are drawn.
+
 ## Verification
 
 1. **Build:**

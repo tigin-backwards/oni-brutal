@@ -175,9 +175,10 @@ run_scenario() # NAME
     done
 }
 
-# The stages that need a quiet machine (dogfood's captures follow real time, perf measures frame
-# rates) hold it: perf.wanted keeps new e2e specs from starting, and the exclusive hold of
-# perf.lock waits for the running ones. Unit and verify run beside specs.
+# The perf stage measures frame rates, so it holds the machine: perf.wanted keeps new e2e specs
+# from starting, and the exclusive hold of perf.lock waits for the running ones. The other stages
+# run beside specs (a scenario that waits on real time, as newgame's worldgen, leaves it ample
+# frames).
 quiet_lockdir="${E2E_LOCK_DIR:-$HOME/.cache/oni-brutal-e2e}"
 quiet_fd=""
 quiet_begin() # STAGE
@@ -199,9 +200,7 @@ stage_dogfood()
 {
     build_release || return
     local s
-    quiet_begin dogfood
     for s in "${SCENARIOS[@]}"; do run_scenario "$s"; done
-    quiet_end
 }
 
 # ---- U57 (verify, perf) ----

@@ -59,6 +59,11 @@ namespace SemanticsProbe
                 FloatPrecision.Run();
                 return;
             }
+            if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "submesh")
+            {
+                go.AddComponent<SubMesh>();
+                return;
+            }
             if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "newobject")
             {
                 go.AddComponent<NewObject>();

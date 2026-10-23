@@ -108,6 +108,19 @@ To run one of them in a player without the e2e runner's lanes, give it a scratch
 the `mods.json` entry described above. Run the original player through `scripts/e2e.py`'s
 `original_player` copy (Unity's player locks its folder), under `xvfb-run -a`, with
 `PROBE_SCENARIO` set.
+With `PROBE_SCENARIO=submesh` only the sub-mesh probe runs (`SubMesh.cs`, lines `SM …`, 10 s
+into the main menu, about a minute). It covers the `TMP_SubMeshUI` children that texts in GRAYSTROKE
+REGULAR SDF 12 pt and NotoSans-Regular 14 pt make for CJK characters and "▼" taken from
+fallback fonts. Each step logs every sub-mesh's `raycastTarget`, `maskable`, activity, components, rect, mesh and depth.
+It also logs whether `EventSystem.RaycastAll` reaches it. The steps cover the parent's
+`raycastTarget` set before and after the sub-mesh exists, the sub-mesh's own `raycastTarget`
+set, texts without fallback glyphs, enable and activation cycles of either object, relayouts,
+pivot, anchors, `maskable` and a clone. `reg` lines follow one step each on a fresh sub-mesh,
+`img` lines run the same steps on an `Image` as a control, and `hand` lines cover a
+`TMP_SubMeshUI` added by hand. Then every loaded
+`TMP_SubMeshUI` (the prefabs' saved ones) is listed, and copies of three prefab labels and of
+the whole `LargeImpactorSequenceReticle` are checked. `textmeshpro.md` ("Sub-meshes and
+raycasts") records what it measured.
 
 With `PROBE_SCENARIO=floatprec` only the float-precision probe runs (`FloatPrecision.cs`, lines
 `VAL fp …`, at mod load; the full run includes it in its values): float expressions whose

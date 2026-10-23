@@ -148,6 +148,10 @@ broken.update({
     '2584828134': 'broken upstream (its title says so): its sleeping spots still name the game\'s former `Worker` class, so a Duplicant who lies down in one gets a TypeLoadException and none of the bed\'s effects',
     '1820638089': 'broken upstream: its LIQUIDBOTTLER building\'s codex entry collides with the game\'s own Bottle Filler (LiquidBottler), and loading a colony stops at the crash screen',
 })
+# Found by the e2e specs of batch 07: the spec fails the same way in the original.
+broken.update({
+    '2869608898': 'broken upstream: its printing pod side screen calls `Dropdown.OptionData(string, Sprite)`, which the game\'s UI library no longer has, so the selected pod (with the mod\'s BioPrinter) shows no Bio-Ink screen and the crash report screen opens (spec tests/e2e/mods/2869608898-bio-inks.yaml)',
+})
 # Fails to load in the original only.
 original_only = {
     '1729794261': 'loads in ours but not in the original: Mono rejects its `PixelPack2` class (an interface method it lacks) at first use, where ours stubs the missing method (ARCHITECTURE D22); left out of the colony runs, which the original\'s error dialog stops',

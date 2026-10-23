@@ -1,0 +1,23 @@
+# Bio-Inks: Rechargeable Printing Pod (2869608898), classes S, V, M.
+#
+# What it does: the printing pod takes bio-inks (made at the crafting table, or refunded when
+# all of its offers are rejected): a side screen on the pod picks an ink from a dropdown and
+# orders it delivered (Deliver), then prints at once a bonus set of offers shaped by the ink
+# (Activate): germy, metallic, vacuum, shaker (random Duplicants) and others. It adds items
+# (books, dice, a cat drawing, a leek), random Duplicant presets, Twitch integration, and a
+# settings dialog on the Mods screen.
+# How a player reaches it: select the printing pod; its "Telepad Recharge" side screen.
+# What changes: printing on demand.
+#
+# The printing pod is selected; it carries the mod's BioPrinter, so the mod's side screen is
+# valid for it and should show its ink dropdown.
+from: early-base
+mods: [2869608898]
+steps:
+  - driver: {camera.set: {cell: [124, 208], ortho: 8}}
+  - click_world: {cell: [124, 208], select: Headquarters}
+  - expect_state:
+      "selected:GetComponent<PrintingPodRecharge.Content.Cmps.BioPrinter>": exists
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/Telepad Recharge Sidescreen/Contents/BeakerSelector/Dropdown": {active: true}

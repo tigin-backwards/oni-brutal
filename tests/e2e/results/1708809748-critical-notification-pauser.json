@@ -1,0 +1,55 @@
+{
+ "spec": "mods/1708809748-critical-notification-pauser.yaml",
+ "mods": [
+  "1708809748"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with two Duplicants nearly starving and the Manual Generator overheated, the game's Bad notifications make the mod pause the running game, as in the original, and its settings.json is written",
+ "updated": "2026-10-23",
+ "commit": "900daca",
+ "mod_dlls": {
+  "1708809748": {
+   "NotificationsPause.dll": "8f422ce34dab41cc19855e246367db0df08c10fc92d20c86c2e3eecd1ec6bd85"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-084432-178ad9",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T08:46:18",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-093645-2b013b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T09:40:03",
+    "lane": 17,
+    "reference_run": "20261023-084432-178ad9",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-093645-2b013b",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T09:41:24",
+    "lane": 17,
+    "reference_run": "20261023-084432-178ad9",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

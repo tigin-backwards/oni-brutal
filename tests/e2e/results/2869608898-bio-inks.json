@@ -1,0 +1,33 @@
+{
+ "spec": "mods/2869608898-bio-inks.yaml",
+ "mods": [
+  "2869608898"
+ ],
+ "verdict": "pending",
+ "why": "the spec fails in the original: a broken spec, or a mod broken upstream",
+ "findings": [],
+ "note": "selecting the printing pod (which carries the mod's BioPrinter) shows no Bio-Ink side screen in the original: its OnPrefabInit throws MissingMethodException for Dropdown.OptionData(string, Sprite), then SetTarget a NullReferenceException",
+ "updated": "2026-10-23",
+ "commit": "900daca",
+ "mod_dlls": {
+  "2869608898": {
+   "PrintingPodRecharge.dll": "5744ff48ab1a71db326a0beab15c5eeb939b4d13837246391f15bae0833bf318"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-084432-178ad9",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-23T10:31:09",
+    "lane": 16,
+    "reasons": [
+     "step 5: **/Telepad Recharge Sidescreen/Contents/BeakerSelector/Dropdown: no such element"
+    ],
+    "signatures": 1
+   }
+  ],
+  "ours": []
+ }
+}

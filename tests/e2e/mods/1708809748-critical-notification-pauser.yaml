@@ -1,0 +1,27 @@
+# Critical Notification Pauser (1708809748), class P.
+#
+# What it does: when a notification becomes ready while the game runs, the game pauses if it is
+# a Bad or Duplicant-threatening one (Combat, Red and Yellow Alert, Missing Research Station
+# and No Researchers assigned excepted), at most once a second; titles listed in the mod's
+# settings.json (written beside it on first use) pause or not as set there (a postfix on
+# Notification.IsReady).
+# How a player reaches it: playing; the settings file in the mod's folder.
+# What changes: the game stops when something goes badly wrong.
+#
+# setup leaves two Duplicants all but starving (100 kcal) and heats the base's Manual Generator
+# past its overheat temperature. While the game runs, Bad notifications follow (Starving,
+# Overheated), and the mod pauses the game: its last pause time is set, and its settings file
+# has been written.
+from: early-base
+mods: [1708809748]
+setup:
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[1].GetComponent<Modifiers>.amounts.Get(\"Calories\")", method: SetValue, args: [100000]}}
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[2].GetComponent<Modifiers>.amounts.Get(\"Calories\")", method: SetValue, args: [100000]}}
+  - driver: {setup.call: {target: "all:ManualGenerator::[0].GetComponent<PrimaryElement>", method: set_Temperature, args: [1000]}}
+steps:
+  - expect_state:
+      "type:NotificationsPause.NotificationsPause::lastPause": 0
+  - run: {seconds: 60}
+  - expect_state:
+      "type:NotificationsPause.NotificationsPause::lastPause": "> 0"
+      "file:mods/Local/1708809748/settings.json": exists

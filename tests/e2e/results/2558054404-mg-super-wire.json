@@ -1,0 +1,59 @@
+{
+ "spec": "mods/2558054404-mg-super-wire.yaml",
+ "mods": [
+  "2558054404"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "every wire carries 5 MW, the Power menu lists the Dev Generator (shot as in the original), and a Battery built from a build order holds 200 kJ, 20 times the game's",
+ "updated": "2026-10-23",
+ "commit": "900daca",
+ "mod_dlls": {
+  "2558054404": {
+   "MG_SuperWire.dll": "761ebb3a36b095fbf1aa71e446a89add3f2d8b6d549ba921f64e722743855228"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-084432-178ad9",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T08:44:32",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-093645-2b013b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T09:36:45",
+    "lane": 17,
+    "reference_run": "20261023-084432-178ad9",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "power-menu": 0.0
+    }
+   },
+   {
+    "run": "20261023-093645-2b013b",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T09:38:41",
+    "lane": 17,
+    "reference_run": "20261023-084432-178ad9",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "power-menu": 0.0
+    }
+   }
+  ]
+ }
+}

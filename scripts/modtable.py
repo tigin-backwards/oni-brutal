@@ -38,8 +38,12 @@ def read_results(folder):
             record = json.load(f)
         if record.get('verdict') not in ('played', 'warning', 'failed'):
             continue
-        for mid in record.get('mods', []):
-            by_mod[str(mid)] = record
+        # A spec is the record of the mod it is named for (mods/ID-slug.yaml); the other mods it
+        # installs (a base mod an addon needs) are not played by it.
+        named = os.path.basename(record.get('spec', '')).split('-')[0]
+        mods = [str(m) for m in record.get('mods', [])]
+        for mid in ([named] if named in mods else mods):
+            by_mod[mid] = record
     return by_mod
 
 

@@ -84,6 +84,25 @@ steps:
                      "unknown E2eDriver command 'teleport'", 'steps 9: a step is one'):
             self.assertIn(text, joined)
 
+    def test_key_held_down_across_steps(self):
+        s = spec('''
+from: early-base
+steps:
+  - key: {code: Q, down: true, at: [110, 207]}
+  - run: {seconds: 2}
+  - key: {code: Q, up: true}
+''')
+        self.assertEqual(e2e.check_spec(s), [])
+        s = spec('''
+from: early-base
+steps:
+  - key: {code: Q, down: true, up: true}
+  - key: {code: "Shift+Q", down: true}
+''')
+        joined = '\n'.join(e2e.check_spec(s))
+        self.assertIn('steps 1: key takes `down: true` or `up: true`, not both', joined)
+        self.assertIn('steps 2: a key held down (`down`/`up`) is one key, without modifiers', joined)
+
     def test_file_only_expect_state_needs_no_driver(self):
         s = spec('from: x\nsteps:\n  - expect_state: {"file:blueprints/e2e.blueprint": exists}\n')
         self.assertEqual(e2e.check_spec(s), [])

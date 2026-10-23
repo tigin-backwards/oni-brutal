@@ -204,6 +204,11 @@ def check_step(where, kind, value, in_setup):
         need(isinstance(value, dict) and value.get('code'), 'key takes {code: "Shift+B"}')
         need(not isinstance(value, dict) or 'at' not in value or _cell(value['at']),
              'key takes `at: [x, y]`, the world cell to hold the pointer over')
+        need(not isinstance(value, dict) or not (value.get('down') and value.get('up')),
+             'key takes `down: true` or `up: true`, not both')
+        need(not isinstance(value, dict) or not (value.get('down') or value.get('up'))
+             or '+' not in str(value.get('code', '')).strip('+'),
+             'a key held down (`down`/`up`) is one key, without modifiers')
         if isinstance(value, dict) and value.get('code'):
             problems += [f'{where}: {p}' for p in key_problems(value['code'])]
     elif kind == 'click':
@@ -2081,7 +2086,12 @@ class Run:
                 # A tool hears keys only while the pointer is over the world, not the UI.
                 self.need_input().move(*self.need_driver().to_screen(value['at']))
                 self.frames(2)
-            self.need_input().key(value['code'])
+            if value.get('down') or value.get('up'):
+                # Held across the steps between (a `run` included), released by `up` or at the end.
+                self.need_input().key_event(parse_key(value['code'])[1], bool(value.get('down')))
+                self.frames(2)
+            else:
+                self.need_input().key(value['code'])
         elif kind == 'click':
             self.click_element(value, value.get('mods', ()), value.get('button', 'left'))
         elif kind == 'click_world':

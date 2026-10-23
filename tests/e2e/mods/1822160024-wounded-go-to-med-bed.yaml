@@ -9,18 +9,19 @@
 #
 # setup hurts a standard Duplicant (the second; the first is a bionic one, which has no
 # WoundMonitor) to half health: Injured, the wounded.medium state, where the game assigns no
-# bed. A Sick Bay is then built in the dug-out corridor west of the printing pod.
-#
-# Broken upstream: this spec fails in the original. The Sick Bay is built and free, the
-# Duplicant stays Injured, and no bed is assigned 20 s on (Assignables.AutoAssignSlot, called
-# by hand on the same Duplicant, does assign it). Kept to re-check when the mod is updated.
+# bed. It takes two hits: Health.OnHealthChanged raises HealthChanged before it updates
+# Health.State, so after the first the WoundMonitor still finds the Duplicant Perfect and stays
+# healthy; the second takes it to wounded.medium. A Sick Bay is then built in the dug-out
+# corridor west of the printing pod.
 from: early-base
 mods: [1822160024]
 setup:
-  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[1].GetComponent<Health>", method: Damage, args: [50]}}
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[1].GetComponent<Health>", method: Damage, args: [49]}}
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[1].GetComponent<Health>", method: Damage, args: [1]}}
 steps:
   - expect_state:
       "Components.LiveMinionIdentities.Items[1].GetComponent<Health>.State": Injured
+      "Components.LiveMinionIdentities.Items[1].GetComponent<StateMachineController>.GetSMI(\"WoundMonitor+Instance\").GetCurrentState().name": root.wounded.medium
   - build: {prefab: MedicalCot, at: [108, 206]}
   - run: {seconds: 900, until: {buildings: {MedicalCot: 1}, pending_construction: 0}}
   - run: {seconds: 20}

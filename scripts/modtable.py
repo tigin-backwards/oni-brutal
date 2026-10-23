@@ -137,10 +137,6 @@ broken = {
     '1992978572': 'broken upstream: its filter patch reads the game\'s changed filter type and crashes the game',
     '1823182964': 'broken upstream: CaiLib calls `EntityTemplates.ExtendEntityToBasicPlant` with arguments the game no longer takes, and the save fails to load',
 }
-# Found broken in the original by their specs (tests/e2e/mods).
-broken.update({
-    '1822160024': 'broken upstream: a standard Duplicant at half health (Injured, the wounded.medium state) gets no free Sick Bay assigned, the mod\'s whole purpose (the game\'s own AutoAssignSlot assigns it); spec tests/e2e/mods/1822160024-wounded-go-to-med-bed.yaml',
-})
 # Ranks 501-750 that fail as they do in the original (out of the sweep's colony runs).
 broken.update({
     '2778263368': 'broken upstream: a Harmony transpiler whose target method is gone, and the error dialog quits the game',

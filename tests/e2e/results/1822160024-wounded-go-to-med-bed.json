@@ -1,0 +1,63 @@
+{
+ "spec": "mods/1822160024-wounded-go-to-med-bed.yaml",
+ "mods": [
+  "1822160024"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "an Injured Duplicant (wounded.medium) is assigned the free Sick Bay",
+ "updated": "2026-10-23",
+ "commit": "2efcce4",
+ "mod_dlls": {
+  "1822160024": {
+   "WoundedGoToMedBed.dll": "ea7ed32eef01cbd3818574b99fc961842b2e895e1b0d52f506ea76d28390e626"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-003826-9f982c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T00:38:26",
+    "lane": 14,
+    "signatures": 0
+   },
+   {
+    "run": "20261023-003826-9f982c",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T00:40:08",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-003826-9f982c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T00:41:52",
+    "lane": 14,
+    "reference_run": "20261023-003826-9f982c",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-003826-9f982c",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T00:43:10",
+    "lane": 14,
+    "reference_run": "20261023-003826-9f982c",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

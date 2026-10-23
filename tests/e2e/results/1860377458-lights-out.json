@@ -1,0 +1,59 @@
+{
+ "spec": "mods/1860377458-lights-out.yaml",
+ "mods": [
+  "1860377458"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "its main feature works despite the title: the base west of the pod, shot with the UI hidden before time passes, is drawn dark but for the pod's light, as in the original (world shot compared)",
+ "updated": "2026-10-23",
+ "commit": "f31e70c",
+ "mod_dlls": {
+  "1860377458": {
+   "LightsOut.dll": "40a5b7b619405335b1ca325f971f404a8876321b8bfee544e0d573c9ac13a67f"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-161133-19571f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T16:11:33",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-161301-c75414",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T16:13:01",
+    "lane": 17,
+    "reference_run": "20261023-161133-19571f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "dark": 0.000153
+    }
+   },
+   {
+    "run": "20261023-161301-c75414",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T16:18:39",
+    "lane": 17,
+    "reference_run": "20261023-161133-19571f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "dark": 0.000243
+    }
+   }
+  ]
+ }
+}

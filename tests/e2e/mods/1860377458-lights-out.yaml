@@ -1,0 +1,21 @@
+# [CURRENTLY OUT OF DATE] Lights Out (Darkness Revived) (1860377458), class V.
+#
+# What it does: the world is drawn dark where it is unlit (a prefix replacing
+# PropertyTextures.UpdateFogOfWar maps each visible cell's light, or its neighbours' average,
+# to a brightness between LowestFog 30 and HighestFog 255 at 1800 lux); lit-decor, lit
+# workspace and sleep-disturbing light need more lux; Duplicants in the dark get Dark and
+# Pitch Black effects (a LightsOutMonitor on RationalAi), may carry a light, and the pause menu
+# gets a "Toggle Lights Out" button. Its title says it is out of date: the pause-menu button
+# and the light monitor are written for an older game.
+# How a player reaches it: always on in a colony; Config.json beside the mod.
+# What changes: unlit areas look dark.
+#
+# The base west of the printing pod is shot with the UI hidden, before time passes: the
+# rooms are drawn dark, with the pod's light.
+from: early-base
+mods: [1860377458]
+steps:
+  - expect_state:
+      "type:LightsOut.LightsOutPatches::_lightsOut": true
+      "type:LightsOut.LightsOutMod::ConfigManager.Config.LowestFog": 30
+  - world_shot: {name: dark, ortho: 12, at: [116, 208], hide_ui: true}

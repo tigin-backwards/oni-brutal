@@ -285,7 +285,7 @@ installs get developer checks subscribers never see).
 | 264 | [Supply to Closest](https://steamcommunity.com/sharedfiles/filedetails/?id=3392404591) | ✅ | ✅ | ⬜ |  |
 | 265 | [Worn Suit doesn't drop Canister & Suit Docks Tune-Up](https://steamcommunity.com/sharedfiles/filedetails/?id=2679005270) | ✅ | ✅ | ⬜ |  |
 | 266 | [Spanish Translation ES-es 2026 71% (All DLCs)](https://steamcommunity.com/sharedfiles/filedetails/?id=1831722850) | ⬜ | ⬜ | ⬜ | translation: the game applies one only from a Steam subscription; not testable here |
-| 267 | [Conveyor Tile](https://steamcommunity.com/sharedfiles/filedetails/?id=3196698830) | ✅ | ✅ | ⬜ |  |
+| 267 | [Conveyor Tile](https://steamcommunity.com/sharedfiles/filedetails/?id=3196698830) | ✅ | ✅ | ✅ | spec tests/e2e/mods/3196698830-conveyor-tile.yaml: smaller spec (no power on early-base): a Conveyor Tile is built of steel in the pit by Duplicants taught the conveyor skill, and selected; its details title is shot |
 | 268 | [Outdated - Buildable AETN](https://steamcommunity.com/sharedfiles/filedetails/?id=1714094338) | ⬜ | ⬜ | ⬜ | flagged by onimaxxing (notLoading); not tested |
 | 269 | [auto machine机器自动工作](https://steamcommunity.com/sharedfiles/filedetails/?id=2992024030) | ✅ | ✅ | ⬜ |  |
 | 270 | [Français](https://steamcommunity.com/sharedfiles/filedetails/?id=2701205009) | ⬜ | ⬜ | ⬜ | translation: the game applies one only from a Steam subscription; not testable here |

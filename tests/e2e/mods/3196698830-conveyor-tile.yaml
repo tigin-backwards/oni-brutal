@@ -1,0 +1,37 @@
+# Conveyor Tile (3196698830), classes B, O.
+#
+# What it does: adds the Conveyor Tile to the Shipping menu behind the Conveyor Loader
+# (Solid Transport): a floor tile of refined metal, built by a Duplicant with the conveyor
+# skill, that draws power (4 W by default) and moves what lies or walks on it along its
+# direction (rotatable, with a ribbon logic input to stop it). Neighbouring tiles join into
+# one belt when they run the same way. A PLib options dialog sets speed, wattage and whether
+# Duplicants and critters are carried.
+# How a player reaches it: the build menu (Shipping).
+# What changes: belts that carry debris and Duplicants.
+#
+# A smaller spec: early-base has no circuit to power it. setup grants Solid Transport, teaches
+# the Duplicants Mechatronics Engineering (the conveyor skill) and spawns steel. A Conveyor
+# Tile is built in the pit of the dug-out corridor west of the printing pod and selected.
+from: early-base
+mods: [3196698830]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"SolidTransport\")", method: Purchased}}
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[0].GetComponent<MinionResume>", method: MasterSkill, args: [Engineering1]}}
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[1].GetComponent<MinionResume>", method: MasterSkill, args: [Engineering1]}}
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[2].GetComponent<MinionResume>", method: MasterSkill, args: [Engineering1]}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Steel\").substance", method: SpawnResource, args: [[113.5, 207.5, -12], 300, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"SolidTransport\").unlockedItemIDs": {contains: CT_ConveyorTile}
+      "Assets.GetBuildingDef(\"CT_ConveyorTile\").EnergyConsumptionWhenActive": 16
+  - build: {prefab: CT_ConveyorTile, at: [110, 206], material: Steel}
+  - expect: {blueprints: {CT_ConveyorTile: 1}}
+  - run: {seconds: 900, until: {buildings: {CT_ConveyorTile: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [110, 207], ortho: 8}}
+  - click_world: {cell: [110, 206], select: CT_ConveyorTile}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<ConveyorTiles.ConveyorTileSM>": exists
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Conveyor"}
+  - shot: {name: title, crop: "**/DetailsScreen/TitleBar", threshold: 0.04}

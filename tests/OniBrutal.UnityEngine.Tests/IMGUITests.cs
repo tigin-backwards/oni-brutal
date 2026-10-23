@@ -47,10 +47,13 @@ namespace OniBrutal.Tests
         public readonly List<(Material Material, Matrix4x4 View, Matrix4x4 Projection)> MeshDraws = new();
         /// The property sheet each mesh draw was given.
         public readonly List<OniBrutal.Engine.Rendering.PropertySheet> MeshDrawProperties = new();
+        /// Each mesh draw's request.
+        public readonly List<OniBrutal.Engine.Rendering.DrawRequest> MeshDrawRequests = new();
         public override void Draw(in OniBrutal.Engine.Rendering.DrawRequest draw)
         {
             MeshDraws.Add((draw.Material, Camera.View, Camera.Projection));
             MeshDrawProperties.Add(draw.Properties);
+            MeshDrawRequests.Add(draw);
         }
         public override void DrawImmediate(OniBrutal.Engine.Rendering.ImmediatePrimitive primitive, ReadOnlySpan<OniBrutal.Engine.Rendering.ImmediateVertex> vertices, Matrix4x4 modelView, Matrix4x4 projection)
             => Draws.Add((pass, vertices.ToArray(), projection));

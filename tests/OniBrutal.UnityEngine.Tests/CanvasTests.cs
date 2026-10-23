@@ -305,6 +305,93 @@ namespace OniBrutal.Tests
             }
         }
 
+        /// Elements of a nested canvas are drawn from one mesh in the nested canvas's space, a
+        /// submesh each, through the canvas's transform: moving or scaling the canvas (the
+        /// research screen's zoom, observed in Unity's player at the frame time of a still
+        /// screen) leaves that mesh as it is. Elements of the root canvas keep their own meshes.
+        [Fact]
+        public void ANestedCanvasMovedOrScaledKeepsItsElementsGeometry()
+        {
+            var game = Environment.GetEnvironmentVariable("ONI_GAME_DIR")
+                       ?? System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "projects", "oni-linux");
+            AssetSystem.Initialize(System.IO.Path.Combine(game, "OxygenNotIncluded_Data"));
+            ProjectSettings.Load();
+            FrameRenderer.Install();
+            OniBrutal.Engine.UI.CanvasSystem.Install();
+            var device = new RecordingDevice();
+            var previous = GraphicsDevice.Current;
+            GraphicsDevice.Install(device);
+            var root = new GameObject("Overlay", typeof(RectTransform));
+            try
+            {
+                root.AddComponent<Canvas>().renderMode = RenderMode.ScreenSpaceOverlay;
+                var tree = new GameObject("Tree", typeof(RectTransform));
+                tree.transform.SetParent(root.transform, false);
+                tree.AddComponent<Canvas>();
+                var row = new GameObject("Row", typeof(RectTransform));
+                row.transform.SetParent(tree.transform, false);
+                row.transform.localPosition = new Vector3(10f, 20f, 0f);
+                // Two materials, so the elements are two draws rather than one merged run.
+                var a = Triangle(row.transform, "A", new Vector3(0f, 0f, 0f));
+                var b = Triangle(row.transform, "B", new Vector3(200f, 0f, 0f));
+                var outside = Triangle(root.transform, "Outside", new Vector3(5f, 5f, 0f));
+
+                Frame();
+                var first = device.MeshDrawRequests.ToArray();
+                Assert.Equal(3, first.Length);
+                var (drawA, drawB) = (Find(first, a), Find(first, b));
+                Assert.Same(drawA.Mesh, drawB.Mesh);
+                Assert.NotEqual(drawA.SubMesh, drawB.SubMesh);
+                Assert.Equal(tree.transform.localToWorldMatrix, drawA.ObjectToWorld);
+                Assert.NotSame(drawA.Mesh, Find(first, outside).Mesh);
+                var shared = drawA.Mesh;
+                int version = shared.Version;
+
+                device.MeshDrawRequests.Clear();
+                tree.transform.localScale = new Vector3(0.6f, 0.6f, 1f);
+                tree.transform.localPosition = new Vector3(-347f, 278f, 0f);
+                Frame();
+                var moved = device.MeshDrawRequests.ToArray();
+                drawA = Find(moved, a);
+                drawB = Find(moved, b);
+                Assert.Same(shared, drawA.Mesh);
+                Assert.Equal(version, shared.Version);
+                Assert.Equal(tree.transform.localToWorldMatrix, drawA.ObjectToWorld);
+                // Drawn where the element is: its vertices through the draw's transform.
+                foreach (var (draw, element) in new[] { (drawA, a), (drawB, b) })
+                {
+                    var indices = draw.Mesh.SubMeshes[draw.SubMesh].Indices;
+                    var world = draw.ObjectToWorld.MultiplyPoint3x4(draw.Mesh.Positions[indices[1]]);
+                    var expected = element.transform.localToWorldMatrix.MultiplyPoint3x4(new Vector3(0f, 100f, 0f));
+                    Assert.True((world - expected).magnitude < 1e-3f, $"{element.name}: {world} != {expected}");
+                }
+            }
+            finally
+            {
+                Object.DestroyImmediate(root);
+                GraphicsDevice.Install(previous);
+            }
+
+            static DrawRequest Find(DrawRequest[] draws, CanvasRenderer element)
+            {
+                foreach (var d in draws)
+                    if (ReferenceEquals(d.Material, element.GetMaterial(0))) return d;
+                throw new InvalidOperationException(element.name + " was not drawn");
+            }
+        }
+
+        static CanvasRenderer Triangle(Transform parent, string name, Vector3 position)
+        {
+            var go = new GameObject(name, typeof(RectTransform));
+            go.transform.SetParent(parent, false);
+            go.transform.localPosition = position;
+            var renderer = go.AddComponent<CanvasRenderer>();
+            renderer.SetMesh(new Mesh { vertices = [Vector3.zero, new Vector3(0f, 100f), new Vector3(100f, 0f)], triangles = [0, 1, 2] });
+            renderer.materialCount = 1;
+            renderer.SetMaterial(new Material(Shader.Find("UI/Default")), 0);
+            return renderer;
+        }
+
         // ----- Disabled canvases (measured in the original with UnityProbe's CanvasProbe) -----
 
         /// The probe's layout: an overlay root (scale factor 1.5, order 32000) holding a nested

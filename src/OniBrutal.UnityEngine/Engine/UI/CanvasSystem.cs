@@ -356,7 +356,8 @@ namespace OniBrutal.Engine.UI
             public Matrix4x4 SpaceToWorld, WorldToSpace;
         }
 
-        internal readonly struct CanvasDraw(CanvasRendererNative renderer, CanvasNative space, Material material, bool pop, float groupAlpha)
+        internal readonly struct CanvasDraw(CanvasRendererNative renderer, CanvasNative space, Material material, bool pop, float groupAlpha,
+            CanvasNative nearest = null, Matrix4x4 toNearest = default)
         {
             public readonly CanvasRendererNative Renderer = renderer;
             public readonly CanvasNative Space = space;
@@ -364,7 +365,30 @@ namespace OniBrutal.Engine.UI
             public readonly bool Pop = pop;
             /// Alpha inherited from CanvasGroups.
             public readonly float GroupAlpha = groupAlpha;
+            /// The nested canvas the element is in, when it is not the root canvas, and the
+            /// element's transform in that canvas's space.
+            public readonly CanvasNative Nearest = nearest;
+            public readonly Matrix4x4 ToNearest = toNearest;
         }
+
+        /// The space an element's geometry is baked in: the element to that space, and that space
+        /// to the world. An element in a nested canvas is baked in the nested canvas's space and
+        /// drawn through the canvas's transform, so moving or scaling that canvas leaves its
+        /// elements' geometry as it is. Unity's player batches a nested canvas the same way:
+        /// observed in it, the research screen's tree (a nested canvas of about 5,000 elements)
+        /// zooms at the frame time of a still screen, where rebaking and uploading every element
+        /// each frame took 30 to 130 ms more, and the screen's zoom, which steps by the frame
+        /// time, overshot its target. A rect-clipped element (RectMask2D) stays in the root
+        /// canvas's space, where uGUI gives its clip rect.
+        static (Matrix4x4 ToSpace, Matrix4x4 SpaceToWorld) SpaceOf(CanvasBatch b, in CanvasDraw d)
+        {
+            if (NestedSpace(d) is { } nested) return (d.ToNearest, nested.GameObject.Transform.LocalToWorld);
+            return (b.WorldToSpace * d.Renderer.GameObject.Transform.LocalToWorld, b.SpaceToWorld);
+        }
+
+        /// The nested canvas a draw's geometry is baked in, or null for the root canvas's space.
+        static CanvasNative NestedSpace(in CanvasDraw d)
+            => d.Nearest != null && d.Renderer.ClipRect == null && !d.Nearest.Destroyed ? d.Nearest : null;
 
         static void Build()
         {
@@ -409,7 +433,7 @@ namespace OniBrutal.Engine.UI
                     c.DepthEpoch++;
                     if (stats) statsRenumbered++;
                 }
-                Collect(b, c.GameObject, b.Root, isBatchRoot: true, depth, c, c.GameObject.Transform.LocalToWorld.inverse, alpha, blocks);
+                Collect(b, c.GameObject, b.Root, isBatchRoot: true, depth, c, c.GameObject.Transform.LocalToWorld.inverse, Matrix4x4.identity, alpha, blocks);
             }
             // A canvas no longer a sort root (one moved under a canvas that draws it, or under a
             // disabled one) takes its numbers back, so uGUI does not raycast into it.
@@ -469,7 +493,7 @@ namespace OniBrutal.Engine.UI
         /// runs (ONI_VERIFY_CANVAS_SKIPS=1) check each skipped subtree as the walk would have seen
         /// it and log differences.
         static void Collect(CanvasBatch batch, GameObjectNative go, CanvasNative space, bool isBatchRoot, Counter depth,
-            CanvasNative nearest, Matrix4x4 worldToNearest, float groupAlpha, bool blocksRaycasts)
+            CanvasNative nearest, Matrix4x4 worldToNearest, Matrix4x4 parentToNearest, float groupAlpha, bool blocksRaycasts)
         {
             if (!go.ActiveInHierarchy) return;
             if (stats) statsVisits++;
@@ -507,6 +531,12 @@ namespace OniBrutal.Engine.UI
                 worldToNearest = go.Transform.LocalToWorld.inverse;
                 depth.RelativeBase = depth.Value;
             }
+            // Below a canvas other than the root, the object's placement in that canvas's space:
+            // the product of the local transforms from the canvas down, so it stays exactly the
+            // same while the canvas itself moves or scales (SpaceOf).
+            var own = nearest != space ? nearest : null;
+            var toNearest = own == null || go == own.GameObject ? Matrix4x4.identity
+                : parentToNearest * Matrix4x4.TRS(go.Transform.LocalPosition, go.Transform.LocalRotation, go.Transform.LocalScale);
             List<CanvasRendererNative> pops = null;
             bool numbersPop = false;
             foreach (var r in parts.Renderers)
@@ -524,14 +554,14 @@ namespace OniBrutal.Engine.UI
                 if (hidden && !blocksRaycasts) continue;
                 r.BuiltToCanvas = worldToNearest * r.GameObject.Transform.LocalToWorld;
                 if (r.Cull || hidden || r.Geometry == null || r.Geometry.Indices.Length == 0) continue;
-                foreach (var m in r.Materials) batch.Draws.Add(new CanvasDraw(r, space, m, pop: false, groupAlpha));
+                foreach (var m in r.Materials) batch.Draws.Add(new CanvasDraw(r, space, m, pop: false, groupAlpha, own, toNearest));
                 if (r.HasPopInstruction) (pops ??= new()).Add(r);
             }
             foreach (var child in go.Transform.Children)
-                Collect(batch, child.GameObject, space, isBatchRoot: false, depth, nearest, worldToNearest, groupAlpha, blocksRaycasts);
+                Collect(batch, child.GameObject, space, isBatchRoot: false, depth, nearest, worldToNearest, toNearest, groupAlpha, blocksRaycasts);
             if (pops != null)
                 foreach (var r in pops)
-                    foreach (var m in r.PopMaterials) batch.Draws.Add(new CanvasDraw(r, space, m, pop: true, groupAlpha));
+                    foreach (var m in r.PopMaterials) batch.Draws.Add(new CanvasDraw(r, space, m, pop: true, groupAlpha, own, toNearest));
             if (numbersPop)
                 foreach (var r in parts.Renderers)
                     if (!r.Destroyed && r.HasPopInstruction) depth.Value++;
@@ -570,9 +600,9 @@ namespace OniBrutal.Engine.UI
             foreach (var b in batches)
             {
                 if (!IsOverlay(b.Root)) continue;
-                var p = b.WorldToSpace.MultiplyPoint3x4(new Vector3(screen.x, screen.y, 0f));
                 foreach (var d in b.Draws)
                 {
+                    var p = SpaceOf(b, d).SpaceToWorld.inverse.MultiplyPoint3x4(new Vector3(screen.x, screen.y, 0f));
                     var mesh = d.Renderer.Baked;
                     if (mesh == null || mesh.VertexCount == 0) continue;
                     var bounds = mesh.Bounds;
@@ -628,8 +658,8 @@ namespace OniBrutal.Engine.UI
             // An element whose inherited alpha (renderer alpha × CanvasGroups) is zero is not
             // drawn, as in Unity (screens hidden through a CanvasGroup stay active).
             if (d.Material == null || alpha <= 0f) return null;
-            var spaceToWorld = b.SpaceToWorld;
-            var mesh = BuildMesh(r, b.WorldToSpace * r.GameObject.Transform.LocalToWorld, new Color(r.Color.r, r.Color.g, r.Color.b, alpha));
+            var (toSpace, spaceToWorld) = SpaceOf(b, d);
+            var mesh = BuildMesh(r, toSpace, new Color(r.Color.r, r.Color.g, r.Color.b, alpha));
             var texture = r.Texture ?? d.Material.mainTexture;
             var state = new UiDrawState(
                 d.Pop ? null : r.Texture,
@@ -718,22 +748,85 @@ namespace OniBrutal.Engine.UI
             var items = FrameRenderer.NewDrawList();
             var run = new List<(DrawItem Item, CanvasRendererNative Renderer)>();
             UiDrawState runState = default;
+            CanvasNative runSpace = null;
+            nestedDraws.Clear();
             void Flush()
             {
-                if (run.Count == 1) items.Add(run[0].Item);
-                else if (run.Count > 1) items.Add(Merge(run));
+                if (run.Count == 0) return;
+                var item = run.Count == 1 ? run[0].Item : Merge(run);
+                items.Add(item);
+                if (runSpace != null) nestedDraws.Add((runSpace, item));
                 run.Clear();
             }
             foreach (var d in b.Draws)
             {
                 if (Item(b, d, overlay) is not { } item) continue;
                 var state = StateOf(d.Renderer, item);
-                if (run.Count > 0 && !SameState(run[0].Item, runState, item, state)) Flush();
-                if (run.Count == 0) runState = state;
+                var space = NestedSpace(d);
+                // Elements baked in different spaces (a nested canvas's, the root's) draw apart.
+                if (run.Count > 0 && (!SameState(run[0].Item, runState, item, state) || runSpace != space)) Flush();
+                if (run.Count == 0)
+                {
+                    runState = state;
+                    runSpace = space;
+                }
                 run.Add((item, d.Renderer));
             }
             Flush();
+            if (nestedDraws.Count > 0) ShareNestedMeshes();
             return items;
+        }
+
+        static readonly List<(CanvasNative Space, DrawItem Item)> nestedDraws = new();
+
+        sealed class NestedMesh
+        {
+            public MeshNative[] Parts = Array.Empty<MeshNative>();
+            public int[] Versions = Array.Empty<int>();
+            public readonly MeshNative Mesh = new() { Dynamic = true };
+        }
+
+        static readonly System.Runtime.CompilerServices.ConditionalWeakTable<CanvasNative, NestedMesh> nestedMeshes = new();
+
+        /// A nested canvas's draws take their geometry from one mesh, a submesh each, as Unity
+        /// keeps a canvas's batch in one buffer: the device then makes and fills a few buffers
+        /// for the canvas rather than a few for each of its elements. The research screen's tree
+        /// (about 3,800 draws) took 25,000 buffers when first shown, 370 to 470 ms on the GL
+        /// thread where the original shows it within a frame of 84 ms. The mesh is rebuilt when
+        /// one of its parts changed; a nested canvas that moves or scales does not change them.
+        static void ShareNestedMeshes()
+        {
+            var group = new List<DrawItem>();
+            while (nestedDraws.Count > 0)
+            {
+                // Each nested canvas's draws, in drawing order (they need not be consecutive:
+                // a canvas nested in another one draws between its parent's elements).
+                var space = nestedDraws[0].Space;
+                group.Clear();
+                foreach (var (s, item) in nestedDraws)
+                    if (s == space) group.Add(item);
+                nestedDraws.RemoveAll(e => e.Space == space);
+                var shared = nestedMeshes.GetValue(space, _ => new NestedMesh());
+                bool same = shared.Parts.Length == group.Count;
+                for (int i = 0; same && i < group.Count; i++)
+                    same = ReferenceEquals(shared.Parts[i], group[i].Mesh) && shared.Versions[i] == group[i].Mesh.Version;
+                if (!same)
+                {
+                    shared.Parts = new MeshNative[group.Count];
+                    shared.Versions = new int[group.Count];
+                    for (int i = 0; i < group.Count; i++)
+                    {
+                        shared.Parts[i] = group[i].Mesh;
+                        shared.Versions[i] = group[i].Mesh.Version;
+                    }
+                    Concatenate(shared.Parts, shared.Mesh, subMeshEach: true);
+                }
+                for (int i = 0; i < group.Count; i++)
+                {
+                    group[i].Mesh = shared.Mesh;
+                    group[i].SubMesh = i;
+                }
+            }
         }
 
         static UiDrawState StateOf(CanvasRendererNative r, DrawItem item)
@@ -797,7 +890,8 @@ namespace OniBrutal.Engine.UI
             return item;
         }
 
-        static void Concatenate(MeshNative[] parts, MeshNative mesh)
+        /// The parts' geometry in one mesh: one submesh, or one submesh for each part.
+        static void Concatenate(MeshNative[] parts, MeshNative mesh, bool subMeshEach = false)
         {
             int vertices = 0, indices = 0;
             bool normals = false, tangents = false;
@@ -816,10 +910,19 @@ namespace OniBrutal.Engine.UI
             var tangentData = tangents ? new Vector4[vertices] : null;
             var uvData = new Vector4[4][];
             for (int u = 0; u < 4; u++) uvData[u] = uvs[u] ? new Vector4[vertices] : null;
-            var indexData = new int[indices];
+            var indexData = subMeshEach ? null : new int[indices];
+            var subMeshes = new List<SubMeshData>(subMeshEach ? parts.Length : 1);
             int v = 0, k = 0;
             foreach (var p in parts)
             {
+                if (subMeshEach)
+                {
+                    var part = new int[p.SubMeshes[0].Indices.Length];
+                    for (int i = 0; i < part.Length; i++) part[i] = p.SubMeshes[0].Indices[i] + v;
+                    subMeshes.Add(new SubMeshData { Indices = part });
+                }
+                else
+                    foreach (int index in p.SubMeshes[0].Indices) indexData[k++] = index + v;
                 int n = p.VertexCount;
                 Array.Copy(p.Positions, 0, positions, v, n);
                 Array.Copy(p.Colors, 0, colors, v, n);
@@ -829,7 +932,6 @@ namespace OniBrutal.Engine.UI
                     for (int i = 0; i < n; i++) tangentData[v + i] = p.Tangents != null ? p.Tangents[i] : new Vector4(1f, 0f, 0f, -1f);
                 for (int u = 0; u < 4; u++)
                     if (uvData[u] != null && p.Uvs[u] != null) Array.Copy(p.Uvs[u], 0, uvData[u], v, n);
-                foreach (int index in p.SubMeshes[0].Indices) indexData[k++] = index + v;
                 v += n;
             }
             mesh.Clear();
@@ -843,7 +945,8 @@ namespace OniBrutal.Engine.UI
                 mesh.Uvs[u] = uvData[u];
                 mesh.UvDimensions[u] = uvData[u] != null ? 4 : 0;
             }
-            mesh.SubMeshes = new List<SubMeshData> { new SubMeshData { Indices = indexData } };
+            if (!subMeshEach) subMeshes.Add(new SubMeshData { Indices = indexData });
+            mesh.SubMeshes = subMeshes;
             mesh.RecalculateBounds();
             mesh.Changed();
         }
@@ -902,7 +1005,7 @@ namespace OniBrutal.Engine.UI
                     bound = true;
                 }
                 foreach (var item in Batched(b, overlay: true))
-                    device.Draw(new DrawRequest(item.Mesh, 0, item.ObjectToWorld, item.Material, -1, item.Properties, item.Keywords));
+                    device.Draw(new DrawRequest(item.Mesh, item.SubMesh, item.ObjectToWorld, item.Material, -1, item.Properties, item.Keywords));
             }
         }
 

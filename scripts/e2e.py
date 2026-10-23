@@ -2305,7 +2305,10 @@ class Run:
                 records.flush()
             failed_kind = None
             label = 'end'
-            screenshot(self.mcp, self.out, 'end')
+            # A look for a person, not a check: OniMcp cannot take it at the main menu (a spec
+            # of a menu mod ends there).
+            with contextlib.suppress(SpecFailure):
+                screenshot(self.mcp, self.out, 'end')
             if not self.player.alive():
                 raise SpecFailure('the player is not alive at the end')
             errors = driver_errors(self.player.log) if uses_driver else []

@@ -30,6 +30,11 @@ namespace E2eDriver
                 current = selected.gameObject;
                 rest = expr.Substring("selected:".Length);
             }
+            else if (expr.StartsWith("last:", StringComparison.Ordinal))
+            {
+                current = last ?? throw new DriverError("no setup.call has returned a value");
+                rest = expr.Substring("last:".Length);
+            }
             else if (Prefixed(expr, "ui:", out var pattern, out rest))
             {
                 var found = Ui.Find(new JObject { ["path"] = pattern });
@@ -308,8 +313,14 @@ namespace E2eDriver
                 var typeName = (string)args["type"] ?? throw new DriverError("setup.call needs a type or a target");
                 on = new Static(Values.FindType(typeName) ?? throw new DriverError("no type " + typeName));
             }
-            return CallMethod(on, method, list);
+            var value = CallMethod(on, method, list);
+            if (value != null) last = value;
+            return value;
         }
+
+        /// The latest non-null value a setup.call returned: "last:rest" reads from it, so a
+        /// setup can act on what an earlier call made (an instantiated object, say).
+        static object last;
 
         public static JObject Result(object value, JObject args)
         {

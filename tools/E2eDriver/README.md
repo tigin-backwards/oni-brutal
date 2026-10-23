@@ -288,6 +288,8 @@ A small read-only path language. The result is `{value, type}`.
 - `selected:rest`: the GameObject the player has selected (`SelectTool.Instance.selected`).
 - `ui:PATTERN::rest`: the GameObject of the first active element matching PATTERN.
 - `all:TYPE::rest`: every loaded object of a Unity type (`FindObjectsByType`), as an array.
+- `last:rest`: the latest non-null value a `setup.call` returned, such as an object it
+  instantiated: `{target: "last:", method: SetActive, args: [true]}`.
 
 **Segments**, separated by `.`:
 - `name`: a field or property, public or not, instance or static, base types included.

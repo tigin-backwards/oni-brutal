@@ -118,7 +118,9 @@ differences = {
     '2856555858': 'spec tests/e2e/mods/2856555858-duplicant-stat-selector.yaml: stat editing ([#5](https://github.com/tigin-backwards/oni-brutal/issues/5) fixed), removing an interest and a trait, adding one through its searchable list, and printing the Duplicant with it; screens within 0.3 % of the original\'s pixels; the list\'s empty search field holds a zero-width space (empty in the original), which does not show',
 }
 # Loads and Colony as swept, Played withdrawn until a spec drives the mod's UI (mod-play-testing.md).
-unplayed = {}
+unplayed = {
+    '2077848080': 'not played: it supports the base game only (`supportedContent: VANILLA_ID`), and every spec fixture is a Spaced Out colony',
+}
 broken = {
     '1715248368': 'broken upstream: patches `Deconstructable.TriggerDestroy`, which now has two overloads',
     '2363561445': 'broken upstream: `STRINGS.UI.TOOLS.FILTERLAYERS.ALL` is no longer a field',

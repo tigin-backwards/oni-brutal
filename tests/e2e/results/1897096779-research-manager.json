@@ -3,12 +3,12 @@
  "mods": [
   "1897096779"
  ],
- "verdict": "failed",
- "why": "a run of ours failed",
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
  "findings": [],
- "note": "the research screen opens by R with the pointer in the screen's middle; the original settles the tree at anchoredPosition (143, -143) (150, -150 in an earlier run), and its clicks on Meal Preparation and Basic Farming, the queue panel's count and Clear Queue pass; in ours the tree settles elsewhere each run ((-347, 278), (-132, 87), (-223, 171)), so Meal Preparation is off screen and the click fails. The mod lets the tree zoom about the pointer (zoomCenterLock off) from 1 to 0.6 while the screen opens",
+ "note": "the research screen opens by R with the pointer in the screen's middle; the mod lets the tree zoom about the pointer (zoomCenterLock off) from 1 to 0.6 while the screen opens, and the screen glides it to its clamped place by steps of the frame time. Both players settle the tree at anchoredPosition (150, -150), and the clicks on Meal Preparation and Basic Farming, the queue panel's count and Clear Queue pass. Ours had settled it elsewhere each run ((-347, 278), (-132, 87), (-223, 171)): a frame of 230 to 560 ms while the tree's nested canvas zoomed made the glide overshoot, fixed by drawing a nested canvas from one mesh in its own space",
  "updated": "2026-10-23",
- "commit": "dcc965c",
+ "commit": "1df32ad",
  "mod_dlls": {
   "1897096779": {
    "ResearchManager.dll": "e55ea78c768384a0ff15e14d551015045c0114c33f9e30e659c92fec4b32b3f4"
@@ -17,44 +17,58 @@
  "runs": {
   "original": [
    {
-    "run": "20261023-071524-17db21",
+    "run": "20261023-084250-281ba4",
     "index": 1,
     "verdict": "pass",
-    "date": "2026-10-23T07:15:24",
-    "lane": 14,
+    "date": "2026-10-23T08:42:50",
+    "lane": 19,
+    "signatures": 0
+   },
+   {
+    "run": "20261023-084250-281ba4",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T08:44:06",
+    "lane": 19,
     "signatures": 0
    }
   ],
   "ours": [
    {
-    "run": "20261023-071648-cb012f",
+    "run": "20261023-084250-281ba4",
     "index": 1,
-    "verdict": "fail",
-    "date": "2026-10-23T07:16:48",
-    "lane": 14,
-    "reasons": [
-     "step 9: GameScreenManager/FullScreenUICanvases/ResearchScreen/Content/ScrollRectRoot/ScrollContent/<link=\"FINEDINING\">Meal Preparation</link> Panel is off screen (rect (346.47, -254.41, 156.86, 75.34))"
-    ],
-    "reference_run": "20261023-071524-17db21",
+    "verdict": "pass",
+    "date": "2026-10-23T08:45:29",
+    "lane": 19,
+    "reference_run": "20261023-084250-281ba4",
     "new_signatures": 0,
     "findings": [],
-    "ui_dump": {},
-    "shots": {}
+    "ui_dump": {
+     "queue": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "queue": 0.000108
+    }
    },
    {
-    "run": "20261023-071648-cb012f",
+    "run": "20261023-084250-281ba4",
     "index": 2,
-    "verdict": "fail",
-    "date": "2026-10-23T07:17:44",
-    "lane": 14,
-    "reasons": [
-     "step 9: GameScreenManager/FullScreenUICanvases/ResearchScreen/Content/ScrollRectRoot/ScrollContent/<link=\"FINEDINING\">Meal Preparation</link> Panel is off screen (rect (531.52, -90.68, 156.86, 75.34))"
-    ],
-    "reference_run": "20261023-071524-17db21",
+    "verdict": "pass",
+    "date": "2026-10-23T08:46:24",
+    "lane": 19,
+    "reference_run": "20261023-084250-281ba4",
     "new_signatures": 0,
     "findings": [],
-    "ui_dump": {},
-    "shots": {}
+    "ui_dump": {
+     "queue": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "queue": 0.000108
+    }
    }
   ]
  }

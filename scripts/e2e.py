@@ -141,7 +141,7 @@ TOP_KEYS = {'name', 'from', 'mods', 'options', 'setup', 'steps', 'require_log', 
             'thresholds', 'ignore_fields', 'memory_gb'}
 # Steps that talk to E2eDriver (a spec with any of them needs it installed).
 DRIVER_STEPS = {'click', 'toggle', 'dropdown', 'type', 'drag', 'tool', 'expect_ui', 'expect_state', 'ui_dump',
-                'ui_wait', 'world_shot', 'driver', 'click_world', 'scroll'}
+                'ui_wait', 'world_shot', 'driver', 'click_world', 'scroll', 'expect_hit'}
 STEP_KINDS = {'dig', 'build', 'run', 'expect', 'call', 'save', 'shot', 'open', 'key'} | DRIVER_STEPS
 DRIVER_COMMANDS = {'ping', 'ui.find', 'ui.at', 'ui.dump', 'ui.wait', 'world.to_screen', 'screen.to_cell', 'state.get', 'camera.get',
                    'camera.set', 'canvas.hide', 'canvas.show', 'setup.call', 'seed'}
@@ -238,6 +238,9 @@ def check_step(where, kind, value, in_setup):
     elif kind == 'tool':
         need(isinstance(value, dict) and (value.get('toolbar') or value.get('ui') or value.get('key')),
              'tool takes {toolbar: NAME}, {ui: PATH} or {key: CODE}')
+    elif kind == 'expect_hit':
+        need(isinstance(value, dict) and ('top' in value or 'not' in value),
+             'expect_hit takes {at, top: PATTERN} or {at, not: PATTERN}')
     elif kind == 'expect_ui':
         need(isinstance(value, dict) and value and all(isinstance(v, dict) for v in value.values()),
              'expect_ui takes {PATH: {text, active, interactable, isOn, exists}}')
@@ -2138,16 +2141,12 @@ class Run:
             self.need_input().drag(start, end, button=value.get('button', 'left'), mods=value.get('mods', ()),
                                    steps=value.get('steps', 8), hold=value.get('hold', 0))
         elif kind == 'scroll':
-            at = value.get('at', 'center')
-            if at == 'center':
-                x, y = WIDTH // 2, HEIGHT // 2
-            elif _cell(at):
-                x, y = self.need_driver().to_screen(at)
-            else:
-                x, y = self.element({'ui': at}).center
+            x, y = self.screen_point(value.get('at', 'center'))
             self.need_input().scroll(x, y, value['notches'])
         elif kind == 'tool':
             self.tool(value)
+        elif kind == 'expect_hit':
+            self.expect_hit(value)
         elif kind == 'expect_ui':
             self.expect_ui(value)
         elif kind == 'expect_state':
@@ -2227,6 +2226,30 @@ class Run:
         after = self.driver.find(path=element.path)
         if after and after[0].text is not None and str(value['option']) not in str(after[0].text):
             raise SpecFailure(f'{element.path} shows {after[0].text!r} after choosing {value["option"]!r}')
+
+    def screen_point(self, at):
+        """A step's `at`: `center` (the screen's), a cell [x, y] or a UI path, as screen pixels."""
+        if at == 'center':
+            return WIDTH // 2, HEIGHT // 2
+        if _cell(at):
+            return self.need_driver().to_screen(at)
+        return self.element({'ui': at}).center
+
+    def expect_hit(self, value):
+        """The top raycast hit at a point (E2eDriver's ui.at): its path matches `top`, or does not
+        match `not` (text_matches patterns; no hit is the empty path), within `frames` (30)."""
+        x, y = self.screen_point(value.get('at', 'center'))
+        for attempt in range(max(1, value.get('frames', 30) // 3)):
+            top = self.need_driver().at(x, y).get('path') or ''
+            misses = []
+            if 'top' in value and not text_matches(top, value['top']):
+                misses.append(f'top hit at {x},{y} is {top!r}, wanted {value["top"]!r}')
+            if 'not' in value and text_matches(top, value['not']):
+                misses.append(f'top hit at {x},{y} is {top!r}, wanted none matching {value["not"]!r}')
+            if not misses:
+                return
+            self.frames(3)
+        raise SpecFailure('; '.join(misses))
 
     def expect_ui(self, value, tries=10):
         for attempt in range(tries):

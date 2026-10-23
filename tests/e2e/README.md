@@ -190,7 +190,13 @@ e2e.py). `type` types any printable ASCII, on a US keymap.
     "mass:debris": {save_as: before}                # remember a value...
 - expect_state: {"mass:debris": ">= 0.95 * before"} # ...and compare with it later
 - expect_state: {"Research.Instance.queuedTech.Count": "== original"}   # the original's value here
+- expect_hit: {at: center, not: "~TMP SubMeshUI"}  # the top raycast hit there (ui.at); or top: PATTERN
 ```
+
+`expect_hit` takes `at` as `scroll` does (`center`, a cell or a UI path) and checks the path of
+the topmost raycast hit there, the empty path when nothing is hit: `top` must match it, `not`
+must not (exact, `~sub` or `/regex/`). It checks every 3 frames until that holds or `frames`
+(default 30) have passed. It does not move the pointer.
 
 `expect_ui` checks the first active match; `count` checks how many match (a value, `"OP EXPR"` or
 `{save_as: NAME}`) and `any_text` passes when any match has that text. It retries for a few
@@ -332,6 +338,7 @@ Fixtures are blessed saves (`--bless` copies a spec's `save:` into `fixtures/`, 
 - `landing`: a new Spaced Out colony at its printing pod;
 - `early-base` (`early-base.yaml`): dug out on both sides of the pod, with an outhouse, a manual
   generator, an unpowered research station and a cot. Debris lies on the floors.
+- `prehistoric1`: a Prehistoric colony at cycle 1 (copied from a played save, not blessed).
 
 What a spec needs beyond them (a researched tech, materials, Duplicants on offer) it sets up in
 `setup:` through E2eDriver, as the pilot specs do, rather than from a later fixture.

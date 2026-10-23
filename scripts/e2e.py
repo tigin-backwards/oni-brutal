@@ -43,7 +43,7 @@ tests/e2e/known-findings.yaml explains make a run of ours a warning, not a failu
 
 --hold keeps each player running after its steps (--hold-on-fail: after a failing step) until
 the hold file in its run folder is removed, for a look through OniMcp and E2eDriver while
-writing a spec.
+writing a spec; a QA perf stage waiting to start ends it 10 minutes later.
 """
 import contextlib, ctypes, fcntl, importlib.util, json, os, re, shutil, signal, socket, subprocess, sys
 import threading, time, urllib.error, urllib.request
@@ -2446,10 +2446,13 @@ class Run:
 
 
     HOLD_SECONDS = 3600
+    HOLD_YIELD_SECONDS = 600
 
     def held(self):
         """Keeps the player running (--hold) until its hold file is removed, the player exits or
-        an hour passes, so its OniMcp and E2eDriver can be queried by hand."""
+        an hour passes, so its OniMcp and E2eDriver can be queried by hand. A perf job waiting to
+        start (perf.wanted) ends the hold HOLD_YIELD_SECONDS later: a held spec keeps perf.lock
+        shared, and QA's perf stage waits for it."""
         flag = os.path.join(self.out, 'hold')
         open(flag, 'w').close()
         self.log(f'  holding: OniMcp :{self.lane.mcp_port}, E2eDriver :{self.lane.driver_port}, display '
@@ -2457,7 +2460,17 @@ class Run:
         if self.driver:
             self.driver.close()  # others may connect meanwhile; reconnected below
         end = time.time() + self.HOLD_SECONDS
+        wanted_since = None
         while os.path.exists(flag) and self.player.alive() and time.time() < end:
+            if perf_wanted(shared_dir()):
+                if wanted_since is None:
+                    wanted_since = time.time()
+                    self.log(f'  a perf job waits: the hold ends in {self.HOLD_YIELD_SECONDS // 60} min')
+                elif time.time() - wanted_since > self.HOLD_YIELD_SECONDS:
+                    self.log('  hold ended for the waiting perf job')
+                    break
+            else:
+                wanted_since = None
             time.sleep(2)
         with contextlib.suppress(OSError):
             os.remove(flag)

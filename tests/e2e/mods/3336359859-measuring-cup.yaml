@@ -1,0 +1,36 @@
+# 量杯 (measuring cup) (3336359859), class P.
+#
+# What it does: replaces the Bottle Emptier's component with a subclass that implements
+# IUserControlledCapacity (a prefix on BottleEmptierConfig.ConfigureBuildingTemplate; its
+# storage holds 200 kg), so the building gets the capacity side screen, and the emptier's
+# fetch chore asks only for the capacity the player set (a prefix on
+# BottleEmptier.StatesInstance.CreateChore).
+# How a player reaches it: the Bottle Emptier's side screen, its capacity slider and field.
+# What changes: a player limits how much liquid Duplicants bring to the emptier.
+#
+# setup spawns sandstone. A Bottle Emptier is built in the dug-out corridor west of the
+# printing pod and selected; its capacity side screen shows, and a value typed into its field
+# becomes the building's capacity.
+from: early-base
+mods: [3336359859]
+setup:
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"SandStone\").substance", method: SpawnResource, args: [[109.5, 206.5, -12], 500, 300, 255, 0]}}
+steps:
+  - build: {prefab: BottleEmptier, at: [114, 206]}
+  - expect: {blueprints: {BottleEmptier: 1}}
+  - run: {seconds: 1200, until: {buildings: {BottleEmptier: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [114, 207], ortho: 8}}
+  - click_world: {cell: [114, 207], select: BottleEmptier}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<Storage>.capacityKg": 200
+      "selected:GetComponent<IUserControlledCapacity>.UserMaxCapacity": 200000
+  - ui_wait: {path: "**/CapacityControlSideScreen", cond: stable}
+  - expect_ui:
+      "**/CapacityControlSideScreen/TitleBox/Label": {text: "Storage Capacity Control"}
+  - ui_dump: {name: capacity, root: "**/CapacityControlSideScreen"}
+  # The field reads in grams (the mod's capacity is its storage's kilograms times 1000).
+  - type: {ui: "**/CapacityControlSideScreen/**/InputField", text: "50000", enter: true, clear: true}
+  - expect_state:
+      "selected:GetComponent<IUserControlledCapacity>.UserMaxCapacity": 50000
+  - ui_dump: {name: capacity-set, root: "**/CapacityControlSideScreen"}

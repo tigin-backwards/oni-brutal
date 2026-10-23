@@ -1,0 +1,63 @@
+{
+ "spec": "mods/2765256496-ai-controlled-rockets.yaml",
+ "mods": [
+  "2765256496"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a smaller spec (rocket modules need a rocket platform): the research screen opened from the management menu shows the mod's Artificial Learning Capabilities node, its panel dumped; the early-game AI module is among High Velocity Destruction's unlocks",
+ "updated": "2026-10-23",
+ "commit": "a730d6b",
+ "mod_dlls": {
+  "2765256496": {
+   "RoboRockets.dll": "d35144ce1082ce0607b51b8b181340504f3c427582fdc5d21662405770d26f05"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-183623-a5f7b7",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T18:36:23",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-191849-68ed52",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T19:18:49",
+    "lane": 14,
+    "reference_run": "20261023-183623-a5f7b7",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "tech": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261023-191849-68ed52",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T19:18:50",
+    "lane": 15,
+    "reference_run": "20261023-183623-a5f7b7",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "tech": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

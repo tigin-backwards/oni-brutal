@@ -1,0 +1,27 @@
+# AI Controlled Rockets (DLC) (2765256496), classes B, S, O, V.
+#
+# What it does: adds rocket modules that fly without a pilot: an early-game AI control module
+# and an AI nosecone (High Velocity Destruction), and learning AI modules fed with "brains"
+# that a new tech, RR_BrainModuleTech (the AI Brains node of the research tree), unlocks along
+# with the brain recipe; brains also drop from gravitas jars and the gene shuffler. Side
+# screens of the rocket, its crew and its habitat module know about the AI modules.
+# How a player reaches it: the research screen; the rocket platform's module list.
+# What changes: rockets without Duplicants aboard.
+#
+# A smaller spec: rocket modules need a rocket platform, far beyond early-base. The research
+# screen shows the mod's tech node, its prerequisites and unlocks; the early-game module is
+# among High Velocity Destruction's unlocks.
+from: early-base
+mods: [2765256496]
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"HighVelocityDestruction\").unlockedItemIDs": {contains: RR_EarlyGameAIControlModule}
+      "Db.Get().Techs.Get(\"RR_BrainModuleTech\").unlockedItemIDs": {contains: RR_AILearningControlModuleV2}
+      "Assets.GetBuildingDef(\"RR_EarlyGameAIControlModule\").PrefabID": RR_EarlyGameAIControlModule
+  - open: {management: research}
+  # The tree glides to its clamped place after the screen opens: the dump waits for it.
+  - ui_wait: {path: "**/ResearchScreen/Content/ScrollRectRoot/ScrollContent", cond: stable, frames: 600}
+  - ui_wait: {path: "**/ResearchScreen/**/*RRBRAINMODULETECH* Panel", cond: stable}
+  - expect_ui:
+      "**/ResearchScreen/**/*RRBRAINMODULETECH* Panel": {active: true}
+  - ui_dump: {name: tech, root: "**/ResearchScreen/**/*RRBRAINMODULETECH* Panel"}

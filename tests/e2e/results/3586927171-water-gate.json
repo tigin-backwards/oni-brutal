@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3586927171-water-gate.yaml",
+ "mods": [
+  "3586927171"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with a 0.05 kg bottom layer set in its options, the 1x2 gate built of sandstone in the corridor west of the pod leaves crude oil (under 0.08 kg) under petroleum, and removes itself",
+ "updated": "2026-10-23",
+ "commit": "aad0ae8",
+ "mod_dlls": {
+  "3586927171": {
+   "WaterGate.dll": "6696d24ed5a8492760e62c0a4cb1a56f60bc77c6154c889e5db022ca6872d591"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-150723-74e0ce",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T15:07:23",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-150929-d7efd8",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T15:09:29",
+    "lane": 17,
+    "reference_run": "20261023-150723-74e0ce",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-150929-d7efd8",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T15:12:21",
+    "lane": 17,
+    "reference_run": "20261023-150723-74e0ce",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

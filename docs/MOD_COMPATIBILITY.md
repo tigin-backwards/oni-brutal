@@ -359,7 +359,7 @@ installs get developer checks subscribers never see).
 | 338 | [Voidria](https://steamcommunity.com/sharedfiles/filedetails/?id=3430682737) | ✅ | ✅ | ⬜ |  |
 | 339 | [DraggableUI](https://steamcommunity.com/sharedfiles/filedetails/?id=1870540864) | ✅ | ✅ | ⬜ |  |
 | 340 | [Mod Translation](https://steamcommunity.com/sharedfiles/filedetails/?id=2692663069) | ⬜ | ⬜ | ⬜ | flagged by onimaxxing (crashesAtStartup); not tested |
-| 341 | [2格水门](https://steamcommunity.com/sharedfiles/filedetails/?id=3239657659) | ✅ | ✅ | ⬜ |  |
+| 341 | [2格水门](https://steamcommunity.com/sharedfiles/filedetails/?id=3239657659) | ✅ | ✅ | ✅ | spec tests/e2e/mods/3239657659-water-gate-2.yaml: built of sandstone in the corridor west of the pod, the gate leaves crude oil in its cell and petroleum above it, and removes itself |
 | 342 | [Suit Docks Store 75kg Oxygen](https://steamcommunity.com/sharedfiles/filedetails/?id=1706161210) | ✅ | ✅ | ⬜ |  |
 | 343 | [Czech language](https://steamcommunity.com/sharedfiles/filedetails/?id=1135041189) | ⬜ | ⬜ | ⬜ | translation: the game applies one only from a Steam subscription; not testable here |
 | 344 | [Move This Here汉化版](https://steamcommunity.com/sharedfiles/filedetails/?id=3614371572) | ✅ | ✅ | ⬜ |  |
@@ -375,7 +375,7 @@ installs get developer checks subscribers never see).
 | 354 | [Default Building Settings](https://steamcommunity.com/sharedfiles/filedetails/?id=1989737447) | ✅ | ✅ | ⬜ |  |
 | 355 | [Instant Switch Toggle](https://steamcommunity.com/sharedfiles/filedetails/?id=3384457117) | ✅ | ✅ | ⬜ |  |
 | 356 | [Popup Control](https://steamcommunity.com/sharedfiles/filedetails/?id=2032187035) | ✅ | ✅ | ⬜ |  |
-| 357 | [Water Gate](https://steamcommunity.com/sharedfiles/filedetails/?id=3586927171) | ✅ | ✅ | ⬜ |  |
+| 357 | [Water Gate](https://steamcommunity.com/sharedfiles/filedetails/?id=3586927171) | ✅ | ✅ | ✅ | spec tests/e2e/mods/3586927171-water-gate.yaml: with a 0.05 kg bottom layer set in its options, the 1x2 gate built of sandstone in the corridor west of the pod leaves crude oil (under 0.08 kg) under petroleum, and removes itself |
 | 358 | [Українізатор «Oxygen Not Included» [UA] [uk] (UnlocTeam)](https://steamcommunity.com/sharedfiles/filedetails/?id=1561634664) | ⬜ | ⬜ | ⬜ | translation: the game applies one only from a Steam subscription; not testable here |
 | 359 | [Fan Tiles](https://steamcommunity.com/sharedfiles/filedetails/?id=2593265755) | ✅ | ✅ | ⬜ |  |
 | 360 | [Clean HUD](https://steamcommunity.com/sharedfiles/filedetails/?id=1909037839) | ✅ | ✅ | ⬜ |  |

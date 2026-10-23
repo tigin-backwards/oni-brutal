@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3239657659-water-gate-2.yaml",
+ "mods": [
+  "3239657659"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "built of sandstone in the corridor west of the pod, the gate leaves crude oil in its cell and petroleum above it, and removes itself",
+ "updated": "2026-10-23",
+ "commit": "aad0ae8",
+ "mod_dlls": {
+  "3239657659": {
+   "WaterGate1x2.dll": "fc5bb346f39cb04f481faf80809766ff26c2df018f0fb1a93ebd0a7fefe297c4"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-144420-9336c8",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T14:44:20",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-150115-6c38ca",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T15:01:15",
+    "lane": 17,
+    "reference_run": "20261023-144420-9336c8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-150115-6c38ca",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T15:05:56",
+    "lane": 17,
+    "reference_run": "20261023-144420-9336c8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

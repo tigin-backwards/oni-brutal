@@ -1,0 +1,30 @@
+# 2格水门, "two-cell water gate" (3239657659), class B.
+#
+# What it does: adds a 1x1 building to the Utilities menu (2 kg of raw mineral, researched with
+# Plumbing): once built it turns its cell into a 0.111 kg drop of liquid and the cell above
+# into another, then removes itself, leaving a two-cell liquid airlock that Duplicants walk
+# through and gases do not cross. The material picks the liquids: igneous rock gives salt water
+# under water, granite ethanol under brine, any other crude oil under petroleum.
+# How a player reaches it: the build menu (Utilities).
+# What changes: two drops of liquid where it was built.
+#
+# setup grants Plumbing. The gate is built of sandstone in the corridor west of the printing
+# pod; crude oil and petroleum are left in its cell and the one above, and the building is
+# gone.
+from: early-base
+mods: [3239657659]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"LiquidPiping\")", method: Purchased}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"LiquidPiping\").unlockedItemIDs": {contains: PiapiWaterGate1x2}
+      "Grid.Element[131129].IsLiquid": false
+  - build: {prefab: PiapiWaterGate1x2, at: [113, 206], material: SandStone}
+  - expect: {blueprints: {PiapiWaterGate1x2: 1}}
+  - run: {seconds: 900, until: {pending_construction: 0}}
+  - run: {seconds: 2}
+  - expect: {buildings: {PiapiWaterGate1x2: 0}}
+  - expect_state:
+      "Grid.Element[131129].id": CrudeOil
+      "Grid.Element[131765].id": Petroleum
+      "Grid.Mass.get_Item(131129)": "> 0.1"

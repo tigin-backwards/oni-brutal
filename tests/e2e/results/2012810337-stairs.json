@@ -3,12 +3,12 @@
  "mods": [
   "2012810337"
  ],
- "verdict": "pending",
- "why": "0 run(s) of ours against original run 20261023-033546-e953d8; 2 needed",
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
  "findings": [],
- "note": "",
+ "note": "two stairs are built west of the pod; the mod's grid marks them as stairs, the user menu is dumped, and Change Direction flips the lower one",
  "updated": "2026-10-23",
- "commit": "2dff650",
+ "commit": "ea12685",
  "mod_dlls": {
   "2012810337": {
    "Stairs.dll": "5f8f6ddf86e16ef260f3b00037223116e3f0890b53284500d8eeb1099a7bf0c7"
@@ -25,6 +25,39 @@
     "signatures": 0
    }
   ],
-  "ours": []
+  "ours": [
+   {
+    "run": "20261023-053150-6eb572",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T05:31:50",
+    "lane": 14,
+    "reference_run": "20261023-033546-e953d8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "user-menu": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261023-053150-6eb572",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T05:33:07",
+    "lane": 14,
+    "reference_run": "20261023-033546-e953d8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "user-menu": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
  }
 }

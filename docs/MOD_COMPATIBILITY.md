@@ -130,7 +130,7 @@ installs get developer checks subscribers never see).
 | 109 | [Super Miner - Outdated](https://steamcommunity.com/sharedfiles/filedetails/?id=1728728517) | ⬜ | ⬜ | ⬜ | flagged by onimaxxing (notLoading); not tested |
 | 110 | [Refresh Immigrants / 刷新选人](https://steamcommunity.com/sharedfiles/filedetails/?id=2363561445) | ❌ | ❌ | ⬜ | broken upstream: `STRINGS.UI.TOOLS.FILTERLAYERS.ALL` is no longer a field (same in the original) |
 | 111 | [No Research Alerts](https://steamcommunity.com/sharedfiles/filedetails/?id=1872885565) | ✅ | ✅ | ⬜ |  |
-| 112 | [Settings Change Tool](https://steamcommunity.com/sharedfiles/filedetails/?id=1843647561) | ✅ | ✅ | ⬜ |  |
+| 112 | [Settings Change Tool](https://steamcommunity.com/sharedfiles/filedetails/?id=1843647561) | ✅ | ✅ | ✅ | spec tests/e2e/mods/1843647561-settings-change-tool.yaml: the toolbar's Change Settings tool opens its 12-entry menu (dumped and shot); the choice moves to Disable Disinfect and back to Disable Building by clicks, and a drag over the outhouse, research station and generator queues their disable errands |
 | 113 | [Steel Ladder](https://steamcommunity.com/sharedfiles/filedetails/?id=1706075206) | ✅ | ✅ | ✅ | spec tests/e2e/mods/1706075206-steel-ladder.yaml: three steel ladder cells are built from spawned steel in the corridor west of the pod and selected; climbing speeds 1.5 up and down |
 | 114 | [Buildable POI Props](https://steamcommunity.com/sharedfiles/filedetails/?id=1704376369) | ⬜ | ⬜ | ⬜ | flagged by onimaxxing (crashesAtStartup); not tested |
 | 115 | [Replace Floors](https://steamcommunity.com/sharedfiles/filedetails/?id=2722663035) | ✅ | ✅ | ⬜ |  |
@@ -149,14 +149,14 @@ installs get developer checks subscribers never see).
 | 128 | [Algae Grower](https://steamcommunity.com/sharedfiles/filedetails/?id=1703606095) | ✅ | ✅ | ✅ | spec tests/e2e/mods/1703606095-algae-grower.yaml: an Algae Grower is built from dirt on the corridor floor west of the pod and selected: three consumed elements, algae output, fertilizer delivery, no light there |
 | 129 | [Reveal Map](https://steamcommunity.com/sharedfiles/filedetails/?id=3130257075) | ✅ | ✅ | ⬜ |  |
 | 130 | [MaterialColor](https://steamcommunity.com/sharedfiles/filedetails/?id=1739635014) | ✅ | ✅ | ⬜ |  |
-| 131 | [Planning Tool](https://steamcommunity.com/sharedfiles/filedetails/?id=2982316671) | ✅ | ✅ | ⬜ |  |
+| 131 | [Planning Tool](https://steamcommunity.com/sharedfiles/filedetails/?id=2982316671) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2982316671-planning-tool.yaml: five plan marks are dragged with the toolbar's Planning tool along the corridor ceiling west of the pod; the plans are counted and shot |
 | 132 | [Traditional Chinese Language Pack](https://steamcommunity.com/sharedfiles/filedetails/?id=929305589) | ⬜ | ⬜ | ⬜ | translation: the game applies one only from a Steam subscription; not testable here |
-| 133 | [Stairs](https://steamcommunity.com/sharedfiles/filedetails/?id=2012810337) | ✅ | ✅ | ⬜ |  |
+| 133 | [Stairs](https://steamcommunity.com/sharedfiles/filedetails/?id=2012810337) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2012810337-stairs.yaml: two stairs are built west of the pod; the mod's grid marks them as stairs, the user menu is dumped, and Change Direction flips the lower one |
 | 134 | [Germicidal UV Lamps](https://steamcommunity.com/sharedfiles/filedetails/?id=2229356245) | ✅ | ✅ | ⬜ |  |
 | 135 | [Fast Insulated Self Sealing AirLock](https://steamcommunity.com/sharedfiles/filedetails/?id=3231839363) | ❌ | ❌ | ⬜ | broken upstream: calls `SimMessages.SetCellProperties(int, byte)`, which is gone (same in the original) |
 | 136 | [Critter Inventory](https://steamcommunity.com/sharedfiles/filedetails/?id=1831438994) | ✅ | ✅ | ⬜ |  |
 | 137 | [Decor Pack I - Classy Glass](https://steamcommunity.com/sharedfiles/filedetails/?id=2660131829) | ✅ | ✅ | ⬜ |  |
-| 138 | [更多的空气过滤器 More AirFilter](https://steamcommunity.com/sharedfiles/filedetails/?id=2877805072) | ✅ | ✅ | ⬜ |  |
+| 138 | [更多的空气过滤器 More AirFilter](https://steamcommunity.com/sharedfiles/filedetails/?id=2877805072) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2877805072-more-airfilter.yaml: the carbon dioxide filter is built unpowered in mid-air west of the pod and selected (radius 4, CO2); the Deodorizer needs no power; the title bar with the English name is shot |
 | 139 | [Turkish (Türkçe) [Innovation]](https://steamcommunity.com/sharedfiles/filedetails/?id=934649708) | ⬜ | ⬜ | ⬜ | translation: the game applies one only from a Steam subscription; not testable here |
 | 140 | [Visual Fixes N Tweaks](https://steamcommunity.com/sharedfiles/filedetails/?id=3455710156) | ✅ | ✅ | ⬜ |  |
 | 141 | [Smart Dig // by @Ony 👾](https://steamcommunity.com/sharedfiles/filedetails/?id=1844888487) | ✅ | ✅ | ⬜ |  |

@@ -4,11 +4,11 @@
   "1872885565"
  ],
  "verdict": "pending",
- "why": "0 run(s) of ours against original run 20261023-031726-fc5748; 2 needed",
+ "why": "0 run(s) of ours against original run 20261023-042830-916aae; 2 needed",
  "findings": [],
  "note": "Agriculture is completed through the research queue with Prevent Notification on: the build menu records the Planter Box as new, but the Food category and the Planter Box show no badge and no research message appears; the category bar dump and the Food panel shot are compared",
  "updated": "2026-10-23",
- "commit": "495e42d",
+ "commit": "ea12685",
  "mod_dlls": {
   "1872885565": {
    "NoResearchAlerts.dll": "ce28722bc662b2d139ed103e058a35648e5601aadd36006d4a6db5a854a97af9"
@@ -17,13 +17,14 @@
  "runs": {
   "original": [
    {
-    "run": "20261023-031726-fc5748",
+    "run": "20261023-042830-916aae",
     "index": 1,
     "verdict": "pass",
-    "date": "2026-10-23T03:17:26",
+    "date": "2026-10-23T05:33:01",
     "lane": 15,
     "signatures": 0
    }
-  ]
+  ],
+  "ours": []
  }
 }

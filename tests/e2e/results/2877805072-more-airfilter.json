@@ -3,12 +3,12 @@
  "mods": [
   "2877805072"
  ],
- "verdict": "pending",
- "why": "0 run(s) of ours against original run 20261023-051240-7fa1f4; 2 needed",
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
  "findings": [],
- "note": "",
+ "note": "the carbon dioxide filter is built unpowered in mid-air west of the pod and selected (radius 4, CO2); the Deodorizer needs no power; the title bar with the English name is shot",
  "updated": "2026-10-23",
- "commit": "885cbe9",
+ "commit": "ea12685",
  "mod_dlls": {
   "2877805072": {
    "PLib.dll": "79350ee2d4eea7a879c6eebc12acca89bdd1d2a93ed7b396b875a7907a91d1e2",
@@ -26,6 +26,35 @@
     "signatures": 0
    }
   ],
-  "ours": []
+  "ours": [
+   {
+    "run": "20261023-052706-332f46",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T05:28:42",
+    "lane": 15,
+    "reference_run": "20261023-051240-7fa1f4",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "title": 0.0
+    }
+   },
+   {
+    "run": "20261023-052706-332f46",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T05:29:55",
+    "lane": 15,
+    "reference_run": "20261023-051240-7fa1f4",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "title": 0.0
+    }
+   }
+  ]
  }
 }

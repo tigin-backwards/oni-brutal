@@ -3,12 +3,12 @@
  "mods": [
   "2982316671"
  ],
- "verdict": "pending",
- "why": "0 run(s) of ours against original run 20261023-033546-e953d8; 2 needed",
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
  "findings": [],
- "note": "",
+ "note": "five plan marks are dragged with the toolbar's Planning tool along the corridor ceiling west of the pod; the plans are counted and shot",
  "updated": "2026-10-23",
- "commit": "2dff650",
+ "commit": "ea12685",
  "mod_dlls": {
   "2982316671": {
    "PlanningTool.dll": "801987cbd20cb624fa19aa6b51299205a11b128e8dd24012ec94f6312640f2da"
@@ -25,6 +25,35 @@
     "signatures": 0
    }
   ],
-  "ours": []
+  "ours": [
+   {
+    "run": "20261023-053007-d8c12a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T05:30:07",
+    "lane": 14,
+    "reference_run": "20261023-033546-e953d8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "plans": 0.022379
+    }
+   },
+   {
+    "run": "20261023-053007-d8c12a",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T05:30:56",
+    "lane": 14,
+    "reference_run": "20261023-033546-e953d8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "plans": 0.023252
+    }
+   }
+  ]
  }
 }

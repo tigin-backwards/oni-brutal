@@ -3,12 +3,12 @@
  "mods": [
   "1843647561"
  ],
- "verdict": "pending",
- "why": "0 run(s) of ours against original run 20261023-042128-2bb68b; 2 needed",
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
  "findings": [],
- "note": "",
+ "note": "the toolbar's Change Settings tool opens its 12-entry menu (dumped and shot); the choice moves to Disable Disinfect and back to Disable Building by clicks, and a drag over the outhouse, research station and generator queues their disable errands",
  "updated": "2026-10-23",
- "commit": "885cbe9",
+ "commit": "ea12685",
  "mod_dlls": {
   "1843647561": {
    "BulkSettingsChange.dll": "330f72fcffe9cb3d7a23c16590de941e03afcae18cbcb3f7427fa8aaa4ca9095"
@@ -25,6 +25,43 @@
     "signatures": 0
    }
   ],
-  "ours": []
+  "ours": [
+   {
+    "run": "20261023-053107-5c4360",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T05:31:07",
+    "lane": 15,
+    "reference_run": "20261023-042128-2bb68b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "menu": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "menu": 0.0
+    }
+   },
+   {
+    "run": "20261023-053107-5c4360",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T05:32:02",
+    "lane": 15,
+    "reference_run": "20261023-042128-2bb68b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "menu": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "menu": 0.0
+    }
+   }
+  ]
  }
 }

@@ -31,4 +31,4 @@ steps:
   - ui_wait: {path: "**/PlanBuildingSelectionPanel", cond: stable}
   - expect_ui:
       "**/PlanBuildingSelectionPanel/**/PlanterBox*/**/AttentionIcon": {exists: false}
-  - shot: {name: food, crop: "**/BottomPanelLeft/BottomLeftPanel", threshold: 0.04}
+  - shot: {name: food, crop: "**/BottomLeftPanel/PlanBuildingSelectionPanel", threshold: 0.04}

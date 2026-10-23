@@ -1,0 +1,67 @@
+{
+ "spec": "mods/2047308624-no-manual-delivery.yaml",
+ "mods": [
+  "2047308624"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the ration box's Allow Manual Use check box (the mod's side screen) unticked and ticked again by clicks; nothing stored while unticked; side screen dump and shot",
+ "updated": "2026-10-23",
+ "commit": "f72dfcb",
+ "mod_dlls": {
+  "2047308624": {
+   "NoManualDelivery.dll": "5564a877753a2036c7912def278f6ef59c0db5841bb3ed71da48bc1a4114a301"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261022-234547-e5cfc9",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-22T23:50:23",
+    "lane": 13,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261022-235357-9e1c80",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T00:02:02",
+    "lane": 12,
+    "reference_run": "20261022-234547-e5cfc9",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "side-screen": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "side-screen": 0.0
+    }
+   },
+   {
+    "run": "20261022-235357-9e1c80",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T00:04:38",
+    "lane": 12,
+    "reference_run": "20261022-234547-e5cfc9",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "side-screen": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "side-screen": 0.0
+    }
+   }
+  ]
+ }
+}

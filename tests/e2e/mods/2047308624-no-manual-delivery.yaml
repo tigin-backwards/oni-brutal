@@ -1,0 +1,36 @@
+# No Manual Delivery (2047308624), classes S, O.
+#
+# What it does: gives storage, ration boxes, fridges, fabricators, converters, generators,
+# farms and the research station an "Allow Manual Use" check box (its own side screen,
+# Automatable2SideScreen, in place of the game's Automatable one): unticked, Duplicants no
+# longer deliver to the building or take from it, only Auto-Sweepers do. Ticked, by default
+# Duplicants still wait a few seconds for an Auto-Sweeper first. PLib options.
+# How a player reaches it: select a building, its side screen.
+# What changes: which errands Duplicants take for that building.
+#
+# early-base has a Ration Box, and Muckroots lying on the floor of the room west of the printing
+# pod. With manual use unticked, nothing is stored in it for 300 s; then it is ticked again.
+# (Whether a Duplicant would have stored one within that time otherwise depends on their
+# errands and meals: it is not asserted.)
+from: early-base
+mods: [2047308624]
+setup:
+  # Selected here: a click on it could pick a Duplicant walking past instead.
+  - driver: {setup.call: {target: "SelectTool.Instance", method: Select, args: [{$expr: "all:RationBox::[0]"}]}}
+steps:
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:KPrefabID.PrefabTag.Name": RationBox
+      "selected:Automatable2.GetAutomationOnly()": false
+      "selected:Storage.MassStored()": {save_as: stored}
+  - ui_wait: {path: "**/Automatable2SideScreen", cond: stable}
+  - ui_dump: {name: side-screen, root: "**/Config Tab - body instance/Automatable2SideScreen"}
+  - shot: {name: side-screen, crop: "**/Config Tab - body instance/Automatable2SideScreen", threshold: 0.04}
+  - click: {ui: "**/Automatable2SideScreen/MainPanel/Automatable/AlignmentWrapper/CheckBox"}
+  - expect_state: {"selected:Automatable2.GetAutomationOnly()": true}
+  # Manual use off: nothing more is stored.
+  - run: {seconds: 300}
+  - expect_state: {"selected:Storage.MassStored()": "<= stored"}
+  # Ticked again: manual use is back.
+  - click: {ui: "**/Automatable2SideScreen/MainPanel/Automatable/AlignmentWrapper/CheckBox"}
+  - expect_state: {"selected:Automatable2.GetAutomationOnly()": false}

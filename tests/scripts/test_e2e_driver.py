@@ -178,7 +178,7 @@ class FakeInput:
     def type_text(self, text):
         self.events.append(('type', text))
 
-    def drag(self, start, end, button='left', mods=(), steps=8):
+    def drag(self, start, end, button='left', mods=(), steps=8, hold=0):
         self.events.append(('drag', tuple(start), tuple(end)))
 
     def move(self, x, y):

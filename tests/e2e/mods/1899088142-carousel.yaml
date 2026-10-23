@@ -1,0 +1,37 @@
+# Carousel (1899088142), classes B, O.
+#
+# What it does: adds the Carousel (CarouselCentrifuge, 5x5 on a floor, refined metal, 480 W,
+# in the Furniture menu's recreation group, researched with Space Program in Spaced Out): a
+# recreation building for a Recreation Room. A Duplicant who rides it gets the "Ride on
+# Carousel" morale effect (+4 for 4 cycles), and sometimes gets dizzy; PLib options set the
+# bonus, its duration, the chance of dizziness, and training.
+# How a player reaches it: the build menu (Furniture), after the research.
+# What changes: a new morale building.
+#
+# The 5x5 Carousel does not fit the dug-out rooms of early-base, so this is a smaller spec.
+# Option: a ride gives +6 morale. setup grants Space Program; after a short run the Furniture
+# menu lists the Carousel, and choosing it shows its materials. The effect a ride gives is
+# registered with the option's bonus.
+from: early-base
+mods: [1899088142]
+options:
+  Sanchozz.ONIMods.CarouselCentrifuge: {MoraleBonus: 6}
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"SpaceProgram\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"SpaceProgram\").unlockedItemIDs": {contains: CarouselCentrifuge}
+      "Db.Get().effects.Get(\"RideonCarousel\").SelfModifiers[0].Value": 6
+      "Assets.GetBuildingDef(\"CarouselCentrifuge\").EnergyConsumptionWhenActive": 480
+  - run: {seconds: 5}
+  - driver: {camera.set: {cell: [114, 208], ortho: 10}}
+  - click: {ui: "**/PlanScreen/Toggle:Furniture"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/CarouselCentrifuge Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/CarouselCentrifuge Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
+  - expect_state:
+      "PlanScreen.Instance.ProductInfoScreen.currentDef.PrefabID": CarouselCentrifuge
+  - shot: {name: materials, crop: "**/ProductInfoScreen", threshold: 0.04}
+  - key: {code: Escape}
+  - expect_ui: {"**/PauseScreen": {exists: false}}

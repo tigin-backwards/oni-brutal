@@ -1,0 +1,59 @@
+{
+ "spec": "mods/1899088142-carousel.yaml",
+ "mods": [
+  "1899088142"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "smaller spec, the 5x5 Carousel fits no early-base room: the Furniture menu lists it after Space Program, its materials card, and the ride effect with the option's +6 morale",
+ "updated": "2026-10-23",
+ "commit": "5c7d13b",
+ "mod_dlls": {
+  "1899088142": {
+   "CarouselCentrifuge.dll": "4e3e97908bc81ce291fe5ea094de692a4f1759c04025159f964e30e3d6bf113c"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-153836-7c45a6",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T16:09:44",
+    "lane": 12,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-170140-f73ad3",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T17:21:41",
+    "lane": 13,
+    "reference_run": "20261023-153836-7c45a6",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "materials": 0.0
+    }
+   },
+   {
+    "run": "20261023-170140-f73ad3",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T17:43:10",
+    "lane": 13,
+    "reference_run": "20261023-153836-7c45a6",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "materials": 0.0
+    }
+   }
+  ]
+ }
+}

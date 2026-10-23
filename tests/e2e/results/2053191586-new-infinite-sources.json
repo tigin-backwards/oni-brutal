@@ -1,0 +1,33 @@
+{
+ "spec": "mods/2053191586-new-infinite-sources.yaml",
+ "mods": [
+  "2053191586"
+ ],
+ "verdict": "pending",
+ "why": "the spec fails in the original: a broken spec, or a mod broken upstream",
+ "findings": [],
+ "note": "",
+ "updated": "2026-10-23",
+ "commit": "8b8655c",
+ "mod_dlls": {
+  "2053191586": {
+   "New Infinite Sources.dll": "9316efebb9b3e78e549ee18027e6b64c565aa6386ddd75cadef69efb768b8bad"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-150021-d9fd53",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-23T15:34:34",
+    "lane": 12,
+    "reasons": [
+     "step start: the player exited (1) while loading"
+    ],
+    "signatures": 12
+   }
+  ],
+  "ours": []
+ }
+}

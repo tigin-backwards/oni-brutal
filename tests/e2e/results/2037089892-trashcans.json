@@ -1,0 +1,33 @@
+{
+ "spec": "mods/2037089892-trashcans.yaml",
+ "mods": [
+  "2037089892"
+ ],
+ "verdict": "pending",
+ "why": "the spec fails in the original: a broken spec, or a mod broken upstream",
+ "findings": [],
+ "note": "",
+ "updated": "2026-10-23",
+ "commit": "8b8655c",
+ "mod_dlls": {
+  "2037089892": {
+   "Trashcans.dll": "5d18eab4ba28f4f614437dce632d0b414b6721cde5e9087b86252b875ec43e5c"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-150021-d9fd53",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-23T15:33:03",
+    "lane": 12,
+    "reasons": [
+     "step start: the player exited (-6) while loading"
+    ],
+    "signatures": 17
+   }
+  ],
+  "ours": []
+ }
+}

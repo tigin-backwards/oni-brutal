@@ -1,0 +1,23 @@
+# New Infinite Sources[Stop updating] (2053191586), classes B, S.
+#
+# What it does: adds sandbox-style buildings that need no research: the Infinite Gas and
+# Liquid Sources (1x2, any metal; they make the element chosen in their filter side screen at
+# a set flow and temperature), the Infinite Gas and Liquid Sinks (void what their pipe
+# brings), an infinite storage, fridge, swallow storage, lights and art. A prefix on
+# FilterSideScreen.IsValidForTarget shows the element filter for the sources.
+# How a player reaches it: the build menu (Ventilation, Plumbing, Base, Furniture).
+# What changes: free gas, liquid and storage.
+#
+# A Gas Source is built in the dug-out corridor west of the printing pod and selected; its
+# element filter is shown.
+from: early-base
+mods: [2053191586]
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"GasSource\").BuildingComplete.GetComponent<Filterable>": exists
+  - build: {prefab: GasSource, at: [113, 206]}
+  - expect: {blueprints: {GasSource: 1}}
+  - run: {seconds: 900, until: {buildings: {GasSource: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 206], select: GasSource}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/FilterSideScreen", cond: stable}

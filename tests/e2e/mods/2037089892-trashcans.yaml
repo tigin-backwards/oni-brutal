@@ -1,0 +1,28 @@
+# Trashcans (2037089892), classes B, S.
+#
+# What it does: adds the Solid, Liquid and Gas Trashcans (Base menu, Smart Storage research):
+# storage that deletes what it holds. Each has an "Empty Trash" side-screen button
+# (ISidescreenButtonControl), an Auto-Trash checkbox and interval slider, and a "Drop
+# Contents" user-menu button; the Config.json beside the mod sets power, capacities and the
+# auto-trash limit.
+# How a player reaches it: the build menu (Base), after the research; its side screen.
+# What changes: a way to delete items, liquids and gases.
+#
+# setup grants Smart Storage and sets copper down; a Solid Trashcan is built in the dug-out
+# corridor west of the printing pod and selected, and its button is shown.
+from: early-base
+mods: [2037089892]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"SmartStorage\")", method: Purchased}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Copper\").substance", method: SpawnResource, args: [[110.5, 206.5, -12], 400, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"SmartStorage\").unlockedItemIDs": {contains: SolidTrashcan}
+  - build: {prefab: SolidTrashcan, at: [113, 206]}
+  - expect: {blueprints: {SolidTrashcan: 1}}
+  - run: {seconds: 900, until: {buildings: {SolidTrashcan: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: SolidTrashcan}
+  - ui_wait: {path: "**/ButtonMenuSideScreen/Buttons/Button", cond: stable}
+  - expect_ui:
+      "**/ButtonMenuSideScreen/Buttons/Button/Label": {any_text: "Empty Trash"}

@@ -1181,26 +1181,26 @@ compares two players' logs. The rule holds for all 438 cases in the shipped pack
   "9" after "ab". In a 64-wide multi-line field "a\tb" wraps (the tab reaches 364.58), and "9"
   goes in after "a".
 
-Where this implementation deviates (`TMP_InputField.cs`: `SetText` and the `characterLimit`
-setter):
-- **`SetText` cuts.** `text =` and `SetTextWithoutNotify` remove line feeds and tabs in a
-  `SingleLine` field (so "x\ny" becomes "xy" under every single-line content type), and cut
-  the value to `characterLimit`. `onValueChanged` and the label carry
+Where this implementation deviated before (`TMP_InputField.cs`: `SetText` and the
+`characterLimit` setter):
+- **`SetText` cut.** `text =` and `SetTextWithoutNotify` removed line feeds and tabs in a
+  `SingleLine` field (so "x\ny" became "xy" under every single-line content type), and cut
+  the value to `characterLimit`. `onValueChanged` and the label carried
   the cut value. That is Geyser Control's "507." and "65208." (the game's limits differ by row).
-  CR is kept, as in the shipped package.
-- **The `characterLimit` setter cuts** the text when the limit falls below its length, and
-  sends `onValueChanged` with the cut text.
-- **The text component's own text** stays as set on an enabled field until activation writes
+  CR was kept, as in the shipped package.
+- **The `characterLimit` setter cut** the text when the limit fell below its length, and
+  sent `onValueChanged` with the cut text.
+- **The text component's own text** stayed as set on an enabled field until activation wrote
   the label, where the shipped package puts it back at once.
-- **Activation** puts the caret at the end of the text (7 in "abcdefg"), not at 0, in all 132
+- **Activation** put the caret at the end of the text (7 in "abcdefg"), not at 0, in all 132
   activations of a field with text.
-- **Backspace** on an empty field sends nothing.
-- **End** in the wrapped multi-line "a\tb" goes to the end of the text ("a\tb9").
-- It matches elsewhere: `SetTextWithoutNotify` sends nothing, a typed character is refused at
-  the limit, CR is kept, setting the text on a focused field leaves the caret at 0, the label
-  of an inactive field is kept until enable, and `onEndEdit` comes on deselection.
-- In the probe, 1,628 of 4,428 steps differ. 338 of 438 cases follow the rule, and the 100
-  that do not are the limit and line-feed cases above.
+- **Backspace** on an empty field sent nothing.
+- **End** in the wrapped multi-line "a\tb" went to the end of the text ("a\tb9").
+- It matched elsewhere: `SetTextWithoutNotify` sent nothing, a typed character was refused at
+  the limit, CR was kept, setting the text on a focused field left the caret at 0, the label
+  of an inactive field was kept until enable, and `onEndEdit` came on deselection.
+- In the probe, 1,628 of 4,428 steps differed. 338 of 438 cases followed the rule, and the 100
+  that did not were the limit and line-feed cases above.
 
 | Field, text set from code | shipped: `text`; `onValueChanged` | this implementation before |
 |---|---|---|
@@ -1222,6 +1222,24 @@ setter):
 | the same, inactive field | label "507.2" until enable, then "​" | the same |
 | activation, "abcdefg", `onFocusSelectAll` off | caret 0 | caret 7 |
 | Backspace in an empty field | `onValueChanged` "" | nothing |
+
+- **Implemented.** `text =` and `SetTextWithoutNotify` keep the value whole (only `\0` is
+  removed, as before). The `characterLimit`, `contentType` and `lineType` setters leave the
+  text alone and send nothing. Typed characters are limited and validated as before.
+  - A text written into an enabled field's text component is put back at once, from the text
+    component's dirty-vertices callback.
+  - Activation with `onFocusSelectAll` off leaves the caret where it was.
+  - The End key goes to the end of the caret's laid-out line, before its last character (the
+    line feed, or the white space a wrapped line ends in). On the last line it goes to the
+    last laid-out character, as before. `MoveTextEnd` itself is unchanged.
+  - Backspace in an empty field reports `""`.
+  - In the probe, `it-check.py rule` holds for all 438 cases of our log. `it-check.py diff`
+    against the shipped package's log finds none of the 4,428 steps different. Tests are in
+    `TmpInputTextTests`.
+- **Also measured by that diff:** setting `characterLimit` writes the label again, also on an
+  inactive field. Take an inactive field whose text component has its own "507.2": setting
+  `characterLimit = 4` makes the label "​" (the field's text "" and U+200B) at once, before
+  the field is enabled. This implementation does the same.
 
 Not measured: `onValidateInput` and `inputValidator` (the probe's fields have neither; some of
 the game's fields do), `characterValidation` set without a content type, pasting, `text =` with the value the field already holds, rich text, and

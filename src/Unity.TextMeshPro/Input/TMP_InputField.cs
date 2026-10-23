@@ -83,13 +83,14 @@ namespace TMPro
 
         public void SetTextWithoutNotify(string input) => SetText(input, false);
 
+        // Text set from code is kept whole: neither the character limit, nor the single-line
+        // rule, nor the content type applies to it, in any state, then or later (measured:
+        // "507.2" at limit 4 stays "507.2"). Only typed characters are limited and validated.
         void SetText(string value, bool sendCallback)
         {
             if (value == null) value = "";
             value = value.Replace("\0", "");
             if (m_Text == value) return;
-            if (m_LineType == LineType.SingleLine) value = value.Replace("\n", "").Replace("\t", "");
-            if (m_CharacterLimit > 0 && value.Length > m_CharacterLimit) value = value.Substring(0, m_CharacterLimit);
             m_Text = value;
             if (m_StringPosition > m_Text.Length) m_StringPosition = m_StringSelectPosition = m_Text.Length;
             else if (m_StringSelectPosition > m_Text.Length) m_StringSelectPosition = m_Text.Length;
@@ -176,9 +177,11 @@ namespace TMPro
             get => m_CharacterLimit;
             set
             {
+                // A text longer than the new limit is kept, without an event (measured): the
+                // limit applies to typed characters only. The label is written again, also on
+                // an inactive field (measured: a text component's own "507.2" becomes U+200B).
                 if (m_CharacterLimit == value) return;
                 m_CharacterLimit = Math.Max(0, value);
-                if (m_CharacterLimit > 0 && m_Text.Length > m_CharacterLimit) text = m_Text.Substring(0, m_CharacterLimit);
                 UpdateLabel();
             }
         }
@@ -427,7 +430,7 @@ namespace TMPro
             {
                 SetTextComponentWrapMode();
                 SetTextComponentRichTextMode();
-                m_TextComponent.RegisterDirtyVerticesCallback(MarkGeometryChanged);
+                m_TextComponent.RegisterDirtyVerticesCallback(OnTextComponentDirty);
             }
             if (EnsureCaret()) AssignPositioningIfNeeded();
             // The caret draws with the default UI material and a white texture from the start
@@ -442,7 +445,7 @@ namespace TMPro
         {
             m_ShouldActivateNextUpdate = false;
             DeactivateInputField();
-            if (m_TextComponent != null) m_TextComponent.UnregisterDirtyVerticesCallback(MarkGeometryChanged);
+            if (m_TextComponent != null) m_TextComponent.UnregisterDirtyVerticesCallback(OnTextComponentDirty);
             CanvasUpdateRegistry.UnRegisterCanvasElementForRebuild(this);
             base.OnDisable();
         }
@@ -518,15 +521,13 @@ namespace TMPro
             m_OriginalText = m_Text;
             m_WasCanceled = false;
             m_TextChangedSinceActivation = false;
+            // Without onFocusSelectAll the caret stays where it was (measured: at 0 for a field
+            // whose text was set from code, not at the end).
             if (m_OnFocusSelectAll)
             {
                 m_StringPosition = 0;
                 m_StringSelectPosition = m_Text.Length;
                 m_IsSelectAll = true;
-            }
-            else
-            {
-                m_StringPosition = m_StringSelectPosition = m_Text.Length;
             }
             m_BlinkStart = Time.unscaledTime;
             m_CaretVisible = true;
@@ -693,7 +694,7 @@ namespace TMPro
                 case KeyCode.Backspace: Backspace(ctrl); return EditState.Continue;
                 case KeyCode.Delete: ForwardDelete(ctrl); return EditState.Continue;
                 case KeyCode.Home: MoveTextStart(shift); return EditState.Continue;
-                case KeyCode.End: MoveTextEnd(shift); return EditState.Continue;
+                case KeyCode.End: MoveToEndOfLaidOutLine(shift); return EditState.Continue;
                 case KeyCode.A when ctrlOnly: SelectAll(); return EditState.Continue;
                 case KeyCode.C when ctrlOnly:
                     if (m_InputType != InputType.Password && HasSelection) GUIUtility.systemCopyBuffer = SelectedText();
@@ -757,6 +758,9 @@ namespace TMPro
 
         // The text the label last showed.
         string m_LabelText;
+
+        // What the label last wrote into the text component (with the end marker).
+        string m_LabelShown;
 
         // Inserts a typed character at the caret (replacing the selection) once it passes the
         // validation: the content type's, a custom validator's (which inserts it itself) or the
@@ -876,7 +880,12 @@ namespace TMPro
                 DeleteSelection();
                 return;
             }
-            if (m_StringSelectPosition <= 0) return;
+            if (m_StringSelectPosition <= 0)
+            {
+                // An empty field still reports its text, though nothing changed (measured).
+                if (m_Text.Length == 0) SendOnValueChanged();
+                return;
+            }
             int start = word ? PreviousWordStart(m_StringSelectPosition) : m_StringSelectPosition - 1;
             if (!word && start > 0 && char.IsLowSurrogate(m_Text[start]) && char.IsHighSurrogate(m_Text[start - 1])) start--;
             m_Text = m_Text.Remove(start, m_StringSelectPosition - start);
@@ -942,6 +951,32 @@ namespace TMPro
             m_StringSelectPosition = info != null && info.characterCount > 0
                 ? Mathf.Clamp(info.characterInfo[info.characterCount - 1].index, 0, m_Text.Length)
                 : m_Text.Length;
+            if (!shift) m_StringPosition = m_StringSelectPosition;
+            MarkGeometryChanged();
+        }
+
+        // The End key: to the end of the caret's line as laid out, before its last character
+        // (the line feed, or the white space a wrapped line ends in). Measured: in "ab\ncd" End
+        // from 0 stops after "ab", also in a single-line field; in a 64-wide multi-line field
+        // "a\tb" wraps after the tab, and End from 0 stops after "a". On the last line it is
+        // MoveTextEnd.
+        void MoveToEndOfLaidOutLine(bool shift)
+        {
+            var info = CurrentTextInfo();
+            if (info == null || info.characterCount == 0 || info.lineInfo == null)
+            {
+                MoveTextEnd(shift);
+                return;
+            }
+            int ci = Mathf.Clamp(CharacterIndexOf(m_StringSelectPosition), 0, info.characterCount - 1);
+            int line = info.characterInfo[ci].lineNumber;
+            if (line < 0 || line >= info.lineCount - 1 || line >= info.lineInfo.Length)
+            {
+                MoveTextEnd(shift);
+                return;
+            }
+            int last = Mathf.Clamp(info.lineInfo[line].lastCharacterIndex, ci, info.characterCount - 1);
+            m_StringSelectPosition = Mathf.Clamp(info.characterInfo[last].index, 0, m_Text.Length);
             if (!shift) m_StringPosition = m_StringSelectPosition;
             MarkGeometryChanged();
         }
@@ -1072,6 +1107,16 @@ namespace TMPro
 
         // ----- Events -----
 
+        // The text component's vertices are dirty. A text written into it from outside, on an
+        // enabled field, is put back at once to the field's label, without an event (measured:
+        // textComponent.text = "507.2" reads back as the field's text and U+200B).
+        void OnTextComponentDirty()
+        {
+            MarkGeometryChanged();
+            if (m_PreventCallback || m_DeferLabel || m_LabelShown == null || m_TextComponent == null) return;
+            if (!string.Equals(m_TextComponent.text, m_LabelShown, StringComparison.Ordinal)) UpdateLabel(false);
+        }
+
         void SendOnValueChanged()
         {
             m_TextChangedSinceActivation = true;
@@ -1100,7 +1145,8 @@ namespace TMPro
             else shown = m_Text;
             bool empty = string.IsNullOrEmpty(m_Text);
             if (m_Placeholder != null) m_Placeholder.enabled = empty;
-            m_TextComponent.text = shown + EndMarker;
+            m_LabelShown = shown + EndMarker;
+            m_TextComponent.text = m_LabelShown;
             // The text is laid out at once, so that the caret's character indices follow the
             // change (measured: the shipped package lays it out once per typed character, and
             // not again in the canvas rebuild).

@@ -1582,6 +1582,10 @@ def write_options(profile, mods, options):
             dlls = [f for f in files if f.lower().endswith('.dll')]
             if dlls:
                 targets.add(os.path.join(directory, 'config.json'))
+                # PLib's [ConfigFile] may spell it otherwise ("Config.json"): a mod that ships
+                # its file reads that one, on a case-sensitive file system too.
+                targets.update(os.path.join(directory, f) for f in files
+                               if f.lower() == 'config.json' and f != 'config.json')
                 for dll in dlls:
                     targets.add(os.path.join(mods_dir, 'config', os.path.splitext(dll)[0], 'config.json'))
         for target in sorted(targets):

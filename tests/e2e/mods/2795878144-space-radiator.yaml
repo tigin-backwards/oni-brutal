@@ -1,0 +1,35 @@
+# Space Radiator (2795878144), classes B, O.
+#
+# What it does: adds the Space Radiator to the Utilities menu behind the Space Heater (Liquid
+# Temperature), and in Spaced Out a Rocket Wall Radiator: a 2x6 panel of metal with a liquid
+# input and output that radiates the heat of the liquid in its pipe into space while it
+# stands in a vacuum under open sky (status items show the power radiated, or that it is not
+# in space). A PLib options dialog tunes it.
+# How a player reaches it: the build menu (Utilities).
+# What changes: cooling in space without an Aquatuner.
+#
+# A smaller spec: early-base has no room under open sky, and the corridor west of the
+# printing pod is too low for the panel. setup grants Liquid Temperature; after a short run
+# the Utilities menu lists both radiators, and the menu is shot.
+from: early-base
+mods: [2795878144]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"LiquidTemperature\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"LiquidTemperature\").unlockedItemIDs": {contains: RadiatorBase}
+      "Assets.GetBuildingDef(\"RadiatorBase\").HeightInCells": 6
+  - run: {seconds: 5}
+  - driver: {camera.set: {cell: [114, 208], ortho: 10}}
+  - click: {ui: "**/PlanScreen/Toggle:Utilities"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/RadiatorBase*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/RadiatorBase*": {active: true}
+      "**/BuildingGroups/**/Grid/RM_RadiatorRocketWallBuildable*": {active: true}
+  - shot: {name: utilities-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
+  - click: {ui: "**/BuildingGroups/**/Grid/RadiatorBase*"}
+  - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
+  - expect_ui:
+      "**/ProductInfoScreen": {active: true}
+  - shot: {name: product-info, crop: "**/ProductInfoScreen", threshold: 0.04}

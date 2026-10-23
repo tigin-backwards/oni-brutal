@@ -1,0 +1,61 @@
+{
+ "spec": "mods/2795878144-space-radiator.yaml",
+ "mods": [
+  "2795878144"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "smaller spec (no room under open sky, and the corridor is too low for the 2x6 panel): the Utilities menu lists the Space Radiator and the Rocket Wall Radiator, and the menu and the radiator's product card are shot",
+ "updated": "2026-10-23",
+ "commit": "52e6e6b",
+ "mod_dlls": {
+  "2795878144": {
+   "Radiator_Mod.dll": "cc09af0f40b30634515e8dd34489d9315e105a1df79f74dfa65f90b81d208cd8"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-123333-3bbe4d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T12:55:32",
+    "lane": 13,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-131622-5ed7f7",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T13:16:22",
+    "lane": 13,
+    "reference_run": "20261023-123333-3bbe4d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "utilities-menu": 0.0,
+     "product-info": 0.0
+    }
+   },
+   {
+    "run": "20261023-131622-5ed7f7",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T13:17:33",
+    "lane": 13,
+    "reference_run": "20261023-123333-3bbe4d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "utilities-menu": 0.0,
+     "product-info": 0.0
+    }
+   }
+  ]
+ }
+}

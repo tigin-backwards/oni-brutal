@@ -1,0 +1,19 @@
+# Less Waste From Jetpacks (1717499632), class P.
+#
+# What it did: a jet suit in flight burned less fuel: a transpiler on JetSuitMonitor.Emit
+# replaces its first float constant 3 with 1. Today's Emit holds no constant 3 (it burns
+# 0.2 kg/s and exhausts a quarter of that as CO2), so the transpiler finds nothing to replace
+# and the method runs as the game's.
+# How a player reaches it: a Duplicant flying in a Jet Suit.
+# What changes: nothing in today's game.
+#
+# A smaller spec, as the mod has nothing left to change and a Jet Suit is far beyond
+# early-base: it is loaded and enabled (its CaiLib start-up line goes to the console, not the
+# log), and the colony runs.
+from: early-base
+mods: [1717499632]
+steps:
+  - expect_state:
+      "count:Global.Instance.modManager.mods[*] if .staticID == Cairath.LessWasteFromJetpacks and .IsEnabledForActiveDlc() == true": 1
+  - run: {seconds: 60}
+  - expect: {duplicants: 3, buildings: {Outhouse: 1, ResearchCenter: 1, ManualGenerator: 1, Bed: 1}}

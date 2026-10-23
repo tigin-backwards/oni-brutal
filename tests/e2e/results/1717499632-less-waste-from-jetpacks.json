@@ -1,0 +1,55 @@
+{
+ "spec": "mods/1717499632-less-waste-from-jetpacks.yaml",
+ "mods": [
+  "1717499632"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "obsolete, today's JetSuitMonitor.Emit has no constant 3 for its transpiler: a smaller spec, it loads enabled and the colony runs",
+ "updated": "2026-10-23",
+ "commit": "b1e12df",
+ "mod_dlls": {
+  "1717499632": {
+   "LessWasteFromJetpacks.dll": "31ad9f4c82fbb5ad01376c90993b40afab05c31d20fbae3e2d3d9fc0d09de4bc"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-141440-0a337e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T14:19:58",
+    "lane": 12,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-163658-d22a0d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T16:36:58",
+    "lane": 13,
+    "reference_run": "20261023-141440-0a337e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-163658-d22a0d",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T16:38:16",
+    "lane": 13,
+    "reference_run": "20261023-141440-0a337e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

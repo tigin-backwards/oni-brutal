@@ -1,0 +1,59 @@
+{
+ "spec": "mods/2359640901-rename-asteroids.yaml",
+ "mods": [
+  "2359640901"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a double click on the asteroid's row in the world selector opens its name field; the name typed renames the asteroid and its row",
+ "updated": "2026-10-23",
+ "commit": "b1e12df",
+ "mod_dlls": {
+  "2359640901": {
+   "RenameAsteroids.dll": "665c07af79ecb97dad92adfbd8fff45eeedab24508354867babde5031252a871"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-145643-67371d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T14:56:43",
+    "lane": 12,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-164323-768842",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T16:43:23",
+    "lane": 13,
+    "reference_run": "20261023-145643-67371d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "selector": 0.000873
+    }
+   },
+   {
+    "run": "20261023-164323-768842",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T16:51:15",
+    "lane": 13,
+    "reference_run": "20261023-145643-67371d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "selector": 0.00163
+    }
+   }
+  ]
+ }
+}

@@ -1,0 +1,26 @@
+# Rename Asteroids (2359640901), class S.
+#
+# What it does: a double click on an asteroid (or rocket) in the top-right world selector
+# opens a text field over its name (a copy of the alarm side screen's name field); Enter
+# renames the asteroid (its ClusterGridEntity's name and its selectable's) and refreshes the
+# selector (postfixes on WorldSelector.SpawnToggles and AddWorld set the rows' onDoubleClick;
+# one on DetailsScreen.OnPrefabInit takes the field).
+# How a player reaches it: double-clicking a row of the world selector.
+# What changes: the asteroid's name, everywhere it is shown.
+#
+# The starting asteroid's row is double-clicked, "Rocky" typed over its name, and Enter
+# pressed: the asteroid and its row are called Rocky.
+from: early-base
+mods: [2359640901]
+steps:
+  - expect_state:
+      "type:RenameAsteroids.RenameAsteroids::InputPrefab": exists
+  - ui_wait: {path: "**/WorldSelector/Cluster/Worlds/Row", cond: stable}
+  - click: {ui: "**/WorldSelector/Cluster/Worlds/Row", double: true}
+  - ui_wait: {path: "**/WorldSelector/Cluster/Worlds/Row/**/Label/*", cond: stable}
+  - type: {ui: "**/WorldSelector/Cluster/Worlds/Row/**/Label/**/*Input*", text: "Rocky", enter: true, clear: true}
+  - expect_state:
+      "ClusterManager.Instance.GetWorld(0).GetComponent<ClusterGridEntity>.Name": Rocky
+  - expect_ui:
+      "**/WorldSelector/Cluster/Worlds/Row/Content/ManualLayout/Label": {text: Rocky}
+  - shot: {name: selector, crop: "**/TopRight/WorldSelector", threshold: 0.04}

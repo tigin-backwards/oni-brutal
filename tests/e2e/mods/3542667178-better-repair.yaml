@@ -1,0 +1,27 @@
+# Better Repair (3542667178), classes P, O.
+#
+# What it does: a damaged building is repaired without first having its building material
+# delivered (the Repairable's allowed state starts at "repairable", not "needs mass"); a repair
+# errand is offered only once the building's condition is below a threshold (40 %) or some time
+# (0.25 cycles) has passed since the damage; repairs belong to the Building and Machine
+# Operating errand groups (not Tidying) and go faster with the repairer's Construction,
+# Machinery and Strength. PLib options set the thresholds, the speed factors and the groups.
+# How a player reaches it: a building that took damage; the Mods screen's options.
+# What changes: when and by whom a building is repaired, and how fast.
+#
+# setup damages the manual generator east of the printing pod to 5 of its 30 hit points. Its
+# repair skips the delivery of material and a Duplicant restores it to 30.
+from: early-base
+mods: [3542667178]
+setup:
+  - driver: {setup.call: {target: "all:ManualGenerator::[0].GetComponent<BuildingHP>", method: DoDamage, args: [25]}}
+steps:
+  - expect_state:
+      "all:ManualGenerator::[0].GetComponent<BuildingHP>.HitPoints": 5
+      "Db.Get().ChoreTypes.Repair.groups[0].Id": Build
+  - run: {seconds: 2}
+  - expect_state:
+      "all:ManualGenerator::[0].GetComponent<Repairable>.smi.GetCurrentState().name": root.allowed.repairable
+  - run: {seconds: 600}
+  - expect_state:
+      "all:ManualGenerator::[0].GetComponent<BuildingHP>.HitPoints": 30

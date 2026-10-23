@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3542667178-better-repair.yaml",
+ "mods": [
+  "3542667178"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the manual generator damaged to 5 of 30 hit points goes straight to the repairable state, no material delivered, and a Duplicant repairs it to 30; repairs belong to the Building errands",
+ "updated": "2026-10-23",
+ "commit": "f115470",
+ "mod_dlls": {
+  "3542667178": {
+   "BetterRepair.dll": "8b86b595c1bb33189bcc8dbc927e7c86e3f780ba6a73daabe1e898cfaba43412"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-080251-19fd1e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T08:32:47",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-094218-e08733",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T09:42:18",
+    "lane": 14,
+    "reference_run": "20261023-080251-19fd1e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-094218-e08733",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T09:46:30",
+    "lane": 14,
+    "reference_run": "20261023-080251-19fd1e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

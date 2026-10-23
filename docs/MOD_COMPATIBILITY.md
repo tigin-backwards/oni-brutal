@@ -230,7 +230,7 @@ installs get developer checks subscribers never see).
 | 209 | [Suit Recharger](https://steamcommunity.com/sharedfiles/filedetails/?id=2688074001) | ✅ | ✅ | ⬜ |  |
 | 210 | [Storage Pod](https://steamcommunity.com/sharedfiles/filedetails/?id=1873476551) | ✅ | ✅ | ⬜ |  |
 | 211 | [Rebuildable AETN](https://steamcommunity.com/sharedfiles/filedetails/?id=2539984678) | ✅ | ✅ | ⬜ |  |
-| 212 | [Better Repair](https://steamcommunity.com/sharedfiles/filedetails/?id=3542667178) | ✅ | ✅ | ⬜ |  |
+| 212 | [Better Repair](https://steamcommunity.com/sharedfiles/filedetails/?id=3542667178) | ✅ | ✅ | ✅ | spec tests/e2e/mods/3542667178-better-repair.yaml: the manual generator damaged to 5 of 30 hit points goes straight to the repairable state, no material delivered, and a Duplicant repairs it to 30; repairs belong to the Building errands |
 | 213 | [BRET-简体中文](https://steamcommunity.com/sharedfiles/filedetails/?id=1142641133) | ⬜ | ⬜ | ⬜ | translation: the game applies one only from a Steam subscription; not testable here |
 | 214 | [Türkçe Çeviri](https://steamcommunity.com/sharedfiles/filedetails/?id=2467094947) | ⬜ | ⬜ | ⬜ | translation: the game applies one only from a Steam subscription; not testable here |
 | 215 | [Font Loader for Traditional Chinese](https://steamcommunity.com/sharedfiles/filedetails/?id=2119648603) | ❌ | ❌ | ⬜ | broken upstream: uses TextMeshPro's `FaceInfo`, which the game's TextMeshPro lacks (same in the original) |

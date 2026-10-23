@@ -12,11 +12,16 @@
 # A broad smoke spec: the mod's buildings and elements are registered as in the original, and
 # one of its buildings, the Metal Ladder (Base, researched with Smelting, refined metal), is
 # built through the normal flow and selected. setup grants Smelting and spawns copper.
+#
+# Then a Tile is ordered through the build menu, so the mod's prefix on the build tool's hover
+# card runs (issue #7: it reads a TextStyleSetting it made with `new`, which has to be alive).
+# setup spawns sandstone for it.
 from: early-base
 mods: [3557584850]
 setup:
   - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"Smelting\")", method: Purchased}}
   - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Copper\").substance", method: SpawnResource, args: [[114.5, 207.5, -12], 300, 300, 255, 0]}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"SandStone\").substance", method: SpawnResource, args: [[110.5, 207.5, -12], 400, 300, 255, 0]}}
 steps:
   - expect_state:
       "Assets.BuildingDefs.Count": "== original"
@@ -31,3 +36,14 @@ steps:
   - expect_ui: {"**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Metal Ladder"}}
   - expect_state: {"selected:Ladder.upwardsMovementSpeedMultiplier": "== original"}
   - shot: {name: details, crop: "**/DetailsScreen", threshold: 0.04}
+  - key: {code: Escape}
+  - driver: {camera.set: {cell: [101, 208], ortho: 8}}
+  - click: {ui: "**/PlanScreen/Toggle:Base"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/Tile Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/Tile Group*"}
+  - expect_state: {"PlayerController.Instance.ActiveTool.name": BuildTool}
+  - click_world: {cell: [108, 206]}
+  - key: {code: Escape}
+  - expect: {blueprints: {Tile: 1}}
+  - expect_state:
+      "type:UtilLibs.BuildingPortUtils.ConduitDisplayPortPatching+PortInfoDrawing::textStyle": exists

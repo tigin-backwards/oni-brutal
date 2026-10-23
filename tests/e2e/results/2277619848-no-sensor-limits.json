@@ -1,0 +1,59 @@
+{
+ "spec": "mods/2277619848-no-sensor-limits.yaml",
+ "mods": [
+  "2277619848"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Gas Pressure Sensor (slider to 20 kg) built and selected: 50 typed into its side screen is kept",
+ "updated": "2026-10-23",
+ "commit": "5c7d13b",
+ "mod_dlls": {
+  "2277619848": {
+   "NoSensorLimits.dll": "6d9ba4b3837e0139cffa1f38c8c8d2994ab6190391e4ed60c2d4b0fb97ef78ed"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-153836-7c45a6",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T16:05:35",
+    "lane": 12,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-174645-2743f1",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T17:46:45",
+    "lane": 12,
+    "reference_run": "20261023-153836-7c45a6",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "side-screen": 0.003529
+    }
+   },
+   {
+    "run": "20261023-174645-2743f1",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T17:56:23",
+    "lane": 12,
+    "reference_run": "20261023-153836-7c45a6",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "side-screen": 0.004173
+    }
+   }
+  ]
+ }
+}

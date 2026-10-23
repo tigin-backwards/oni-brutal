@@ -58,6 +58,11 @@ Ellipsis and Masking, wrapping on and off. Each text's layout in the 400 × 100 
 too (`metrics`: origins, advances, line ascenders and descenders). Compare the players with
 `tools/UnityProbe/ov-check.py diff ORIG OURS`, and check the rule against a log with
 `ov-check.py rule LOG`; `textmeshpro.md` ("Overflow at white space") records what it measured.
+Before them it logs `CH` lines: further white space and control characters (CR, vertical tab,
+form feed, U+0003, U+2000–U+200B, U+2028, U+2029, U+3000, U+FEFF, U+180E) alone and around
+"A" in low rects. It also logs `TAB` lines: the fonts' tab settings and tabs after other
+characters at two sizes, in rects 50, 400 and 1000 wide. `PROBE_OV_PART=chars` runs only
+these.
 
 ## UI semantics (`UiSemantics.cs`, `UIS` lines)
 

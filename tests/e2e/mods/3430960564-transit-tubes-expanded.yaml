@@ -1,0 +1,37 @@
+# Transit Tubes Expanded (3430960564), classes B, S, O.
+#
+# What it does: adds seven transit tube crossings to the Base menu beside the Transit Tube
+# Crossing (Transit Tubes): through an insulated or bunker wall, a ladder, a fire pole or
+# ribbed fire pole, a cross bridge and a tube door, each a tile Duplicants use as such while
+# tubes pass through it. Tubes may also leave an access straight up, long jumps are
+# allowed in the nav grid, and the door's access side screen hides the robots' section. A
+# PLib option sets the access's energy per launch (10 kJ).
+# How a player reaches it: the build menu (Base); the tube door's access side screen.
+# What changes: tubes through walls and ladders.
+#
+# Options here: 20 kJ per launch. setup grants Transit Tubes and spawns plastic. A ladder
+# crossing is built in the dug-out corridor west of the printing pod and selected: a ladder
+# 1.2 times as fast as the game's, carrying a tube bridge.
+from: early-base
+mods: [3430960564]
+options:
+  "3430960564": {kjoules_per_launch: 20}
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"TravelTubes\")", method: Purchased}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Polypropylene\").substance", method: SpawnResource, args: [[114.5, 207.5, -12], 300, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"TravelTubes\").unlockedItemIDs": {contains: TravelTubeLadderBridge}
+      "Assets.GetPrefab(\"TravelTubeEntrance\").GetComponent<TravelTubeEntrance>.joulesPerLaunch": 20000
+  - build: {prefab: TravelTubeLadderBridge, at: [113, 207], material: Polypropylene}
+  - expect: {blueprints: {TravelTubeLadderBridge: 1}}
+  - run: {seconds: 900, until: {buildings: {TravelTubeLadderBridge: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: TravelTubeLadderBridge}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<Ladder>.upwardsMovementSpeedMultiplier": 1.2
+      "selected:GetComponent<TravelTubeBridge>": exists
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Transit Tube Ladder Crossing"}
+  - shot: {name: title, crop: "**/DetailsScreen/TitleBar", threshold: 0.04}

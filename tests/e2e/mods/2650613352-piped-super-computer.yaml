@@ -1,0 +1,41 @@
+# Piped Super Computer (Advanced Research Station) (2650613352), classes P, O.
+#
+# What it does: the Super Computer (AdvancedResearchCenter) gains a liquid input port: water
+# piped in fills its storage (1000 kg, a ConduitConsumer), so no Duplicant has to deliver it.
+# Its PLib options set where the port sits (Middle by default) and whether Duplicants may
+# still deliver water by hand (an Automatable whose "automation only" follows the option).
+# How a player reaches it: building a Super Computer (Stations, Advanced Research); the
+# liquid overlay shows the port; its "Allow manual use" checkbox.
+# What changes: a research station fed by a pipe.
+#
+# Options here: the port at the top left, and no manual delivery by default. setup grants
+# Advanced Research and spawns copper. The Super Computer is built in the dug-out corridor
+# west of the printing pod (x 108-110) and
+# selected: it has the liquid port and automation only.
+from: early-base
+mods: [2650613352]
+options:
+  "2650613352": {Position: 0, DefaultManual: false}
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"AdvancedResearch\")", method: Purchased}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Copper\").substance", method: SpawnResource, args: [[116.5, 207.5, -12], 500, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"AdvancedResearchCenter\").InputConduitType": Liquid
+      "Assets.GetBuildingDef(\"AdvancedResearchCenter\").UtilityInputOffset.x": -1
+      "Assets.GetBuildingDef(\"AdvancedResearchCenter\").UtilityInputOffset.y": 2
+  - build: {prefab: AdvancedResearchCenter, at: [108, 206]}
+  - expect: {blueprints: {AdvancedResearchCenter: 1}}
+  - run: {seconds: 1200, until: {buildings: {AdvancedResearchCenter: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [109, 207], ortho: 8}}
+  - click_world: {cell: [109, 207], select: AdvancedResearchCenter}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<ConduitConsumer>.conduitType": Liquid
+      "selected:GetComponent<PipedSuperComputer.AutomateOverritten>.GetAutomationOnly()": true
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Super Computer"}
+  - key: {code: Escape}
+  - open: {key: F6}
+  - ui_wait: {path: "**/TopRight/OverlayLegend", cond: stable}
+  - world_shot: {name: liquid-overlay, ortho: 6, at: [109, 207]}

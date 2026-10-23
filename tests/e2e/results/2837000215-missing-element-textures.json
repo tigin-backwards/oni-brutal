@@ -1,0 +1,59 @@
+{
+ "spec": "mods/2837000215-missing-element-textures.yaml",
+ "mods": [
+  "2837000215"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "refined carbon tiles and debris placed in the pit carry the mod's 1024 px texture, shine mask and anim; their world shot as in the original",
+ "updated": "2026-10-23",
+ "commit": "819f26e",
+ "mod_dlls": {
+  "2837000215": {
+   "CompleteElementTextures.dll": "91b40305445a7291b87bbbb1862ca6df177dd430810a726c19a711f90d4ddd9e"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-084432-178ad9",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T09:32:42",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-102330-5f352e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T10:32:02",
+    "lane": 17,
+    "reference_run": "20261023-084432-178ad9",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "tiles": 0.008287
+    }
+   },
+   {
+    "run": "20261023-102330-5f352e",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T10:33:09",
+    "lane": 17,
+    "reference_run": "20261023-084432-178ad9",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "tiles": 0.009477
+    }
+   }
+  ]
+ }
+}

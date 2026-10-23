@@ -1,0 +1,34 @@
+# MAGNET!!! (3637202410), classes S, K, O, V, M.
+#
+# What it does: holding a key (Q by default) with the pointer over the world pulls the debris
+# and items within a radius (8 cells) to the pointer, where they hang against gravity, tinted;
+# with Ctrl held it pushes them away, with Shift only items of the kind nearest the pointer.
+# Released, they fall or coast. A field effect is drawn around the pointer and the hover card
+# hides meanwhile. Its options (CloverLib, from the Mods screen) set the key, radius, speed,
+# flight style, physics, chaos, field effect, highlight and hover card.
+# How a player reaches it: the key, held over the world while the game runs.
+# What changes: items move to where the player points.
+#
+# setup drops 1 kg of diamond in the pit west of the printing pod (x 106-115, y 206). Q is held
+# with the pointer two cells above the pit while the game runs two seconds: the diamond is
+# held and has risen toward the pointer; released, the magnet lets go.
+from: early-base
+mods: [3637202410]
+setup:
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Diamond\").substance", method: SpawnResource, args: [[109.5, 206.5, -12], 1, 300, 255, 0]}}
+steps:
+  - run: {seconds: 2}
+  - expect_state:
+      "sum:all:Pickupable::[*].transform.position.y if .GetComponent<PrimaryElement>.ElementID == Diamond": "< 207"
+      "Game.Instance.GetComponent<Magnet.MagnetController>": exists
+  - driver: {camera.set: {cell: [110, 208], ortho: 8}}
+  - key: {code: Q, down: true, at: [111, 209]}
+  - run: {seconds: 2}
+  - expect_state:
+      "type:Magnet.MagnetController::Active": true
+      "Game.Instance.GetComponent<Magnet.MagnetController>.FieldOn": true
+      "Game.Instance.GetComponent<Magnet.MagnetController>.held.Count": ">= 1"
+      "sum:all:Pickupable::[*].transform.position.y if .GetComponent<PrimaryElement>.ElementID == Diamond": "> 207.5"
+  - key: {code: Q, up: true}
+  - expect_state:
+      "Game.Instance.GetComponent<Magnet.MagnetController>.held.Count": 0

@@ -1,0 +1,31 @@
+# Rest for the Weary (2373109589), class P with UI.
+#
+# What it does: adds a "Finish-Up" schedule block (FinishTask): in it Duplicants finish the
+# errand they hold but start no new work (a precondition on chores scheduled for work time
+# and on fetches), then mingle at the printing pod or a recreation room. The schedule screen
+# gains a paint button for it beside Bathtime's (a postfix on ScheduleScreenEntry.Setup), and
+# each Duplicant carries a FinishChoreDetector.
+# How a player reaches it: the schedule screen (period key), its Finish-Up paint button, a
+# click on the timetable.
+# What changes: a shift that winds work down.
+#
+# The Finish-Up button of the standard schedule is clicked, then its fourth block, a work
+# block: the block becomes Finish-Up.
+from: early-base
+mods: [2373109589]
+steps:
+  - expect_state:
+      "Db.Get().ScheduleGroups.Get(\"FinishTask\").Id": FinishTask
+      "Components.LiveMinionIdentities.Items[1].GetComponent<PeterHan.FinishTasks.FinishChoreDetector>": exists
+      "ScheduleManager.Instance.GetSchedules()[0].GetBlock(3).GroupId": Worktime
+  - open: {key: Period}
+  - ui_wait: {path: "**/Schedule_Default Standard Schedule/Content/Timetable/PaintButtons/FinishTask", cond: stable}
+  - ui_dump: {name: paint-buttons, root: "**/Schedule_Default Standard Schedule/Content/Timetable/PaintButtons"}
+  - click: {ui: "**/Schedule_Default Standard Schedule/Content/Timetable/PaintButtons/FinishTask"}
+  - expect_state:
+      "ui:**/Schedule_Default Standard Schedule/Content/Timetable/PaintButtons/FinishTask::GetComponent<MultiToggle>.CurrentState": 1
+  - click: {ui: "**/Schedule_Default Standard Schedule/**/Blocks/ScheduleBlock_3"}
+  - expect_state:
+      "ScheduleManager.Instance.GetSchedules()[0].GetBlock(3).GroupId": FinishTask
+      "ScheduleManager.Instance.GetSchedules()[0].GetBlock(4).GroupId": Worktime
+  - shot: {name: timetable, crop: "**/ScheduleScreen/**/Schedule_Default Standard Schedule/Content/Timetable"}

@@ -1,0 +1,67 @@
+{
+ "spec": "mods/2373109589-rest-for-the-weary.yaml",
+ "mods": [
+  "2373109589"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the schedule screen's Finish-Up paint button, then a click on a work block, makes it a Finish-Up block; the paint buttons and timetable as in the original",
+ "updated": "2026-10-23",
+ "commit": "819f26e",
+ "mod_dlls": {
+  "2373109589": {
+   "FinishTasks.dll": "4a74aa853adbb00552aebcd8c759e39c6ca8f5c782e79b84f3f4fabe7ef6728f"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-084432-178ad9",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T09:43:38",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-102330-5f352e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T10:42:36",
+    "lane": 17,
+    "reference_run": "20261023-084432-178ad9",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "paint-buttons": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "timetable": 0.0
+    }
+   },
+   {
+    "run": "20261023-102330-5f352e",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T10:43:47",
+    "lane": 17,
+    "reference_run": "20261023-084432-178ad9",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "paint-buttons": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "timetable": 0.0
+    }
+   }
+  ]
+ }
+}

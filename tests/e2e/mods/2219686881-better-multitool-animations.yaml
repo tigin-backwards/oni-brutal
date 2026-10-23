@@ -1,0 +1,21 @@
+# Better Multitool Animations (2219686881), class P.
+#
+# What it does: the start and end animations of a Duplicant's multitool (digging, building,
+# research and other work) play at a speed that follows the Duplicant's Athletics: level / 6.67,
+# at least 0.75 (a transpiler on MultitoolController.Instance.PlayPre and PlayPost scales the
+# speed passed to KAnimControllerBase.Play; it logs an error if it finds no such call).
+# How a player reaches it: any dig or build order.
+# What changes: how fast those animations play.
+#
+# A smaller spec: the animation speed itself is not read. Four cells of sandstone at the east
+# end of the dug-out corridor west of the printing pod are dug, which plays the patched
+# animations, and the dig completes; a failed patch would show in the log.
+from: early-base
+mods: [2219686881]
+steps:
+  - expect_state:
+      "cells:119,209..120,210::Grid.Element[{cell}].hardness": "> 0"
+  - dig: [119, 209, 120, 210]
+  - run: {seconds: 900, until: {pending_digs: 0}}
+  - expect_state:
+      "cells:119,209..120,210::Grid.Element[{cell}].hardness": "< 1"

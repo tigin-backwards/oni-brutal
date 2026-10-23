@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2219686881-better-multitool-animations.yaml",
+ "mods": [
+  "2219686881"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a smaller spec: four sandstone cells are dug, playing the patched multitool animations, with no new log signature; the animation speed itself is not read",
+ "updated": "2026-10-23",
+ "commit": "819f26e",
+ "mod_dlls": {
+  "2219686881": {
+   "BetterAnimations.dll": "9f4a16396f9abd8f4ffd33519a562798df5d7ee06464ff11d42dd3acf9618223"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-084432-178ad9",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T09:34:06",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-102330-5f352e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T10:34:18",
+    "lane": 17,
+    "reference_run": "20261023-084432-178ad9",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-102330-5f352e",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T10:35:49",
+    "lane": 17,
+    "reference_run": "20261023-084432-178ad9",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

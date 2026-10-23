@@ -1,0 +1,30 @@
+# Missing Element Textures (2837000215), class P (textures).
+#
+# What it does: gives elements the game draws with a placeholder their own tile textures and
+# debris animations: aerogel, refined carbon (shiny), "creature" (the critter element), carbon
+# fibre, bitumen, solid naphtha and solid petroleum (shiny), frozen phyto oil, and a shine for
+# cobalt (a postfix on ElementLoader.Load sets each substance's material texture from the
+# mod's textures/ and its anim from the mod's kanims).
+# How a player reaches it: any cell or debris of those elements.
+# What changes: how those elements look.
+#
+# setup turns three cells of the pit west of the printing pod (x 106-115, y 206) into refined
+# carbon and spawns refined carbon debris beside it; the substance carries the mod's
+# 1024x1024 texture and shine mask, and the tiles and debris are shot.
+from: early-base
+mods: [2837000215]
+setup:
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [131124, RefinedCarbon, null, 500, 300, 255, 0, -1]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [131125, RefinedCarbon, null, 500, 300, 255, 0, -1]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [131126, RefinedCarbon, null, 500, 300, 255, 0, -1]}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"RefinedCarbon\").substance", method: SpawnResource, args: [[112.5, 207.5, -12], 50, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "ElementLoader.FindElementByName(\"RefinedCarbon\").substance.material.mainTexture.width": 1024
+      "ElementLoader.FindElementByName(\"RefinedCarbon\").substance.material.GetTexture(\"_ShineMask\").width": 1024
+      "ElementLoader.FindElementByName(\"RefinedCarbon\").substance.anim.name": refinedcarbon_kanim
+      "ElementLoader.FindElementByName(\"SolidPetroleum\").substance.material.mainTexture.width": 1024
+  - run: {seconds: 1}
+  - expect_state:
+      "Grid.Element[131125].id": RefinedCarbon
+  - world_shot: {name: tiles, ortho: 4, at: [110, 207], mask: [[0, 0, 1280, 330]]}

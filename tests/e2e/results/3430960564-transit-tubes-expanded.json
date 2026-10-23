@@ -1,0 +1,59 @@
+{
+ "spec": "mods/3430960564-transit-tubes-expanded.yaml",
+ "mods": [
+  "3430960564"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with the launch energy option at 20 kJ and Transit Tubes granted, a Transit Tube Ladder Crossing is built of plastic: a 1.2x ladder with a tube bridge; its title as in the original",
+ "updated": "2026-10-23",
+ "commit": "819f26e",
+ "mod_dlls": {
+  "3430960564": {
+   "TravelTubesExpanded.dll": "4172f7101e71a90c29ec4b09b6d3684e5e66cfdb30b733b83e63fc2ce2f4f1d6"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-084432-178ad9",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T09:40:18",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-102330-5f352e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T10:37:17",
+    "lane": 17,
+    "reference_run": "20261023-084432-178ad9",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "title": 0.0
+    }
+   },
+   {
+    "run": "20261023-102330-5f352e",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T10:38:43",
+    "lane": 17,
+    "reference_run": "20261023-084432-178ad9",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "title": 0.0
+    }
+   }
+  ]
+ }
+}

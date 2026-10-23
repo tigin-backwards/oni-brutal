@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3637202410-magnet.yaml",
+ "mods": [
+  "3637202410"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "Q held with the pointer over the world while the game runs pulls a diamond out of the pit to the pointer and holds it there; released, the magnet lets go, as in the original",
+ "updated": "2026-10-23",
+ "commit": "819f26e",
+ "mod_dlls": {
+  "3637202410": {
+   "Magnet.dll": "93bbcdb4e2e3a5a284674d6441430b1dae9b5deb26ff67ec75289de13f0c9a47"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-084432-178ad9",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T09:42:10",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-102330-5f352e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T10:40:12",
+    "lane": 17,
+    "reference_run": "20261023-084432-178ad9",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-102330-5f352e",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T10:41:22",
+    "lane": 17,
+    "reference_run": "20261023-084432-178ad9",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

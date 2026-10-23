@@ -1,0 +1,59 @@
+{
+ "spec": "mods/2650613352-piped-super-computer.yaml",
+ "mods": [
+  "2650613352"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with the port option at the top left and manual delivery off, a Super Computer built from a build order has the liquid input and is automation-only; the liquid overlay world shot as in the original",
+ "updated": "2026-10-23",
+ "commit": "819f26e",
+ "mod_dlls": {
+  "2650613352": {
+   "PipedSuperComputer.dll": "15ae03077d2bb42e5677af5f88edcf2e161513707587a50b2394bd8d827fe8f8"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-084432-178ad9",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T08:49:20",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-102330-5f352e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T10:29:33",
+    "lane": 17,
+    "reference_run": "20261023-084432-178ad9",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "liquid-overlay": 0.003445
+    }
+   },
+   {
+    "run": "20261023-102330-5f352e",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T10:30:48",
+    "lane": 17,
+    "reference_run": "20261023-084432-178ad9",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "liquid-overlay": 0.005582
+    }
+   }
+  ]
+ }
+}

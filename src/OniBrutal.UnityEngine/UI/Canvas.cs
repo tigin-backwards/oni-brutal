@@ -105,6 +105,7 @@ namespace UnityEngine
                 if (Data.OverrideSorting == value) return;
                 Data.OverrideSorting = value;
                 Hierarchy.Touch(Data.GameObject?.Transform);
+                CanvasSystem.SortingChanged(Data);
             }
         }
 
@@ -172,9 +173,14 @@ namespace UnityEngine
 
         CanvasRendererNative Data => (CanvasRendererNative)NativeOrThrow;
 
+        /// Becoming active, or being added to an active object, renumbers its canvas.
+        internal override void EngineOnEnable() => CanvasSystem.Restructured(Data.GameObject.Transform);
+
         internal override void EngineOnDestroy()
         {
-            if (Data.Baked is { } baked) baked.ReleaseResources();
+            var d = Data;
+            if (d.HasDepth) d.DepthBatch.DepthDirty = true;
+            if (d.Baked is { } baked) baked.ReleaseResources();
         }
 
         /// Takes a copy of the mesh's geometry (Unity copies it into the canvas batch).
@@ -277,7 +283,15 @@ namespace UnityEngine
         public bool hasPopInstruction
         {
             get => Data.HasPopInstruction;
-            set { var d = Data; d.HasPopInstruction = value; d.Changed(); }
+            set
+            {
+                var d = Data;
+                if (d.HasPopInstruction == value) return;
+                d.HasPopInstruction = value;
+                d.Changed();
+                // A pop instruction (a Mask's) takes a depth number of its own.
+                if (d.GameObject.ActiveInHierarchy) CanvasSystem.Restructured(d.GameObject.Transform);
+            }
         }
 
         public void SetTexture(Texture texture) { var d = Data; d.Texture = texture; d.Changed(); }
@@ -339,10 +353,13 @@ namespace UnityEngine
         /// Whether the element moved relative to its canvas since the canvas was last built.
         public bool hasMoved => Data.HasMoved;
 
-        /// Draw order within the root canvas; -1 when the element was not in the last build.
-        public int absoluteDepth => Data.DepthBuild == CanvasSystem.BuildNumber ? Data.AbsoluteDepth : -1;
+        /// Draw order within its sort root (the root canvas, or a canvas that overrides sorting);
+        /// -1 until its canvas numbers it, and once its canvas renumbers without it
+        /// (CanvasSystem.Collect).
+        public int absoluteDepth => Data.HasDepth ? Data.AbsoluteDepth : -1;
 
-        public int relativeDepth => Data.DepthBuild == CanvasSystem.BuildNumber ? Data.RelativeDepth : -1;
+        /// Draw order within its nearest canvas.
+        public int relativeDepth => Data.HasDepth ? Data.RelativeDepth : -1;
 
         public bool hasRectClipping => Data.ClipRect != null;
 
@@ -603,6 +620,12 @@ namespace OniBrutal.Engine.UI
         public AdditionalCanvasShaderChannels AdditionalShaderChannels;
         public int RenderOrder;
         public int EnableSequence;
+        /// As a sort root: renumber its elements at the next build (CanvasSystem.Restructured).
+        public bool DepthDirty = true;
+        /// As a sort root: counts its numberings; an element's depth stands while it matches.
+        public int DepthEpoch;
+        /// The last canvas build that drew it as a sort root.
+        public int SortRootBuild = -1;
 
         public override void RemapReferences(Func<Object, Object> map) => WorldCamera = (Camera)map(WorldCamera);
 
@@ -706,8 +729,12 @@ namespace OniBrutal.Engine.UI
         public bool CullTransparentMesh;
         public int AbsoluteDepth = -1;
         public int RelativeDepth = -1;
-        /// The build (CanvasSystem.BuildNumber) that last set the depths.
-        public int DepthBuild = -1;
+        /// The sort root that numbered it last, and its DepthEpoch then.
+        public CanvasNative DepthBatch;
+        public int DepthEpoch;
+
+        /// Its depths stand: its sort root has not renumbered since, or been reset.
+        public bool HasDepth => DepthBatch != null && DepthBatch.DepthEpoch == DepthEpoch;
         public int Version;
 
         /// The element's transform relative to its root canvas at the last build.

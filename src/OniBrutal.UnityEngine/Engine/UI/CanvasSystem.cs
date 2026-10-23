@@ -52,13 +52,61 @@ namespace OniBrutal.Engine.UI
             // canvas is not, so a Dropdown's template canvas (world space, as AddComponent leaves
             // it) cloned at the root and nested again keeps its own anchoring.
             if (c.RenderMode != RenderMode.WorldSpace) UpdateRootTransform(c);
+            Rehomed(c);
             HierarchyChanged(c);
         }
 
         public static void Disable(Canvas canvas)
         {
             enabled.Remove(canvas.Data);
+            Rehomed(canvas.Data);
             HierarchyChanged(canvas.Data);
+        }
+
+        /// overrideSorting changed: the canvas's elements move to another sort root.
+        public static void SortingChanged(CanvasNative c) => Rehomed(c);
+
+        // ----- Depth numbering -----
+        //
+        // As measured in the original (UnityProbe UiSemantics, `UIS depth`): a sort root numbers
+        // the CanvasRenderers of the active objects it draws from 0, depth first in hierarchy
+        // order, when it renders (after Canvas.willRenderCanvases), and only when its structure
+        // changed since it last did: a renderer became active, was added or destroyed, a sibling
+        // order changed, a nested canvas or a Mask was enabled or disabled, or the canvas itself
+        // was. Nothing else renumbers it: an object deactivated keeps its number (and its gap)
+        // until the next renumbering, which leaves it -1. A canvas enabled or disabled, or its
+        // overrideSorting changed, leaves the elements at and below it -1 at once.
+
+        /// A structural change at or below a transform: its sort root renumbers at the next build.
+        /// The nearest canvas that overrides sorting (or is disabled: a root of its own) holds the
+        /// change; a nested canvas that sorts with its parent passes it up.
+        public static void Restructured(TransformNative t)
+        {
+            for (; t != null; t = t.Parent)
+            {
+                if (PartsOf(t.GameObject).Canvas is not { Destroyed: false } c) continue;
+                c.DepthDirty = true;
+                if (c.OverrideSorting || !IsLive(c)) return;
+            }
+        }
+
+        /// A canvas enabled or disabled (or one that stopped or started sorting on its own): the
+        /// elements at and below it read -1 until numbered again, and the sort roots among them
+        /// and the one above renumber. Measured: disabling a nested canvas leaves its elements -1
+        /// at once; disabling and enabling the root leaves every element -1 until it renders.
+        static void Rehomed(CanvasNative c)
+        {
+            if (c.GameObject?.Transform is not { } t) return;
+            Reset(t);
+            Restructured(t.Parent);
+        }
+
+        static void Reset(TransformNative t)
+        {
+            var parts = PartsOf(t.GameObject);
+            if (parts.Canvas is { Destroyed: false } c) c.DepthDirty = true;
+            foreach (var r in parts.Renderers) r.DepthBatch = null;
+            foreach (var child in t.Children) Reset(child);
         }
 
         /// Unity tells the scripts on the canvas's object and below (uGUI's graphics, masks and
@@ -290,8 +338,8 @@ namespace OniBrutal.Engine.UI
                 statsTicks += System.Diagnostics.Stopwatch.GetTimestamp() - start;
                 if (++statsFrames == 600)
                 {
-                    EngineLog.Engine($"canvas build: {statsTicks * 1000.0 / System.Diagnostics.Stopwatch.Frequency / statsFrames:F3} ms a frame, {statsVisits / statsFrames} objects walked a frame, {statsRenotified / (double)statsFrames:F1} rects told of changes after the update");
-                    statsFrames = 0; statsTicks = 0; statsVisits = 0; statsRenotified = 0;
+                    EngineLog.Engine($"canvas build: {statsTicks * 1000.0 / System.Diagnostics.Stopwatch.Frequency / statsFrames:F3} ms a frame, {statsVisits / statsFrames} objects walked a frame, {statsRenotified / (double)statsFrames:F1} rects told of changes after the update, {statsRenumbered / (double)statsFrames:F2} sort roots renumbered");
+                    statsFrames = 0; statsTicks = 0; statsVisits = 0; statsRenotified = 0; statsRenumbered = 0;
                 }
             }
             else Build();
@@ -318,13 +366,11 @@ namespace OniBrutal.Engine.UI
             public readonly float GroupAlpha = groupAlpha;
         }
 
-        /// Counts builds: an element's depth is its last build's only if that build reached it
-        /// (CanvasRendererNative.DepthBuild), so elements under a canvas that stopped drawing read -1.
-        public static int BuildNumber { get; private set; }
-
         static void Build()
         {
-            BuildNumber++;
+            buildNumber++;
+            lastSortRoots.Clear();
+            foreach (var b in batches) lastSortRoots.Add(b.Canvas);
             batches.Clear();
             int reused = 0;
             foreach (var c in enabled)
@@ -348,8 +394,31 @@ namespace OniBrutal.Engine.UI
                 b.WorldToSpace = b.SpaceToWorld.inverse;
                 var above = b.Canvas.GameObject.Transform.Parent;
                 var (alpha, blocks) = above == null ? (1f, true) : InheritedGroups(above.GameObject);
-                Collect(b, b.Canvas.GameObject, b.Root, isBatchRoot: true, new Counter(), b.Canvas, b.Canvas.GameObject.Transform.LocalToWorld.inverse, alpha, blocks);
+                var c = b.Canvas;
+                var depth = counter;
+                depth.Value = 0;
+                depth.RelativeBase = 0;
+                depth.IgnoringGroups = 0;
+                // A canvas that was not a sort root at the last build (one moved to the top level)
+                // numbers its elements, whatever numbered them before.
+                depth.Renumber = c.DepthDirty || c.SortRootBuild != buildNumber - 1;
+                c.SortRootBuild = buildNumber;
+                if (depth.Renumber)
+                {
+                    c.DepthDirty = false;
+                    c.DepthEpoch++;
+                    if (stats) statsRenumbered++;
+                }
+                Collect(b, c.GameObject, b.Root, isBatchRoot: true, depth, c, c.GameObject.Transform.LocalToWorld.inverse, alpha, blocks);
             }
+            // A canvas no longer a sort root (one moved under a canvas that draws it, or under a
+            // disabled one) takes its numbers back, so uGUI does not raycast into it.
+            foreach (var c in lastSortRoots)
+                if (c.SortRootBuild != buildNumber)
+                {
+                    c.DepthEpoch++;
+                    c.DepthDirty = true;
+                }
             // Render order: by sorting layer, sorting order, then enable order.
             batches.Sort((a, b) =>
             {
@@ -362,31 +431,43 @@ namespace OniBrutal.Engine.UI
         }
 
         static readonly List<CanvasBatch> batchPool = new();
+        static readonly List<CanvasNative> lastSortRoots = new();
+        static int buildNumber;
 
         static CanvasNative SortingOf(CanvasBatch b) => b.Canvas.OverrideSorting || b.Canvas == b.Root ? b.Canvas : b.Root;
 
         sealed class Counter
         {
+            /// Renumbering the batch (its canvas's DepthDirty), and the next number.
+            public bool Renumber;
             public int Value;
+            /// Value where the nearest canvas began: relativeDepth counts from there.
+            public int RelativeBase;
             /// Live CanvasGroups that ignore their parents' groups, met so far in the walk.
             public int IgnoringGroups;
         }
 
+        static readonly Counter counter = new();
+
         /// Depth-first in hierarchy order; nested sort roots are skipped (they are batches of
-        /// their own); an element's pop materials draw after its children. Every live, unculled
-        /// element is given a depth, as in Unity (measured: an element without geometry, the
-        /// game's NonDrawingGraphic, and one under a CanvasGroup at alpha 0 are both numbered and
-        /// hit by raycasts), so raycasts find them; only elements with geometry that are not
-        /// fully transparent through their CanvasGroups are drawn. A group below that ignores its
-        /// parents' groups can make part of a transparent subtree visible again.
+        /// their own); an element's pop materials draw after its children. When renumbering
+        /// (depth.Renumber), every element on an active object is numbered, as in Unity
+        /// (measured: one without a Graphic or geometry, a disabled Graphic, alpha 0 by colour or
+        /// through a CanvasGroup whether it blocks raycasts or not, culled by a RectMask2D,
+        /// off-screen, zero-size, empty text); an element whose renderer has a pop instruction (a
+        /// Mask's) takes one more number after its subtree. A nested canvas that sorts with its
+        /// parent continues the parent's numbering, and its relativeDepth starts at 0. Only
+        /// unculled elements with geometry that are not fully transparent through their
+        /// CanvasGroups are drawn; a group below that ignores its parents' groups can make part of
+        /// a transparent subtree visible again.
         ///
-        /// A hidden subtree whose groups also stop raycasts can never be drawn or hit, so its walk
-        /// only sets its elements' depths to -1 (a raycast-blocking one is numbered). Its top object records
-        /// when it was walked so (CanvasHiddenAt) if no group in it ignores its parents; while
-        /// nothing at or below it changes (SubtreeVersion), its elements still hold -1 and the walk
-        /// is skipped. Most of a large colony's UI is screens hidden this way (about 8,900 of
-        /// 11,500 objects visited a frame in U57). Test runs (ONI_VERIFY_CANVAS_SKIPS=1) check each
-        /// skipped subtree as the walk would have seen it and log differences.
+        /// A hidden subtree whose groups also stop raycasts can never be drawn or hit, so unless
+        /// the batch renumbers there is nothing to do in it. Its top object records when it was
+        /// walked so (CanvasHiddenAt) if no group in it ignores its parents; while nothing at or
+        /// below it changes (SubtreeVersion), the walk skips it. Most of a large colony's UI is
+        /// screens hidden this way (about 8,900 of 11,500 objects visited a frame in U57). Test
+        /// runs (ONI_VERIFY_CANVAS_SKIPS=1) check each skipped subtree as the walk would have seen
+        /// it and log differences.
         static void Collect(CanvasBatch batch, GameObjectNative go, CanvasNative space, bool isBatchRoot, Counter depth,
             CanvasNative nearest, Matrix4x4 worldToNearest, float groupAlpha, bool blocksRaycasts)
         {
@@ -411,33 +492,38 @@ namespace OniBrutal.Engine.UI
             // found it all hidden (only a group ignoring its parents could let raycasts in again,
             // and a subtree with one is never skipped).
             bool hiddenTop = hidden && !blocksRaycasts && !skippedAbove;
-            if (hiddenTop && go.CanvasHiddenAt == go.SubtreeVersion)
+            if (hiddenTop && !depth.Renumber && go.CanvasHiddenAt == go.SubtreeVersion)
             {
-                if (verifySkips) VerifySkipped(go, isTop: true);
+                if (verifySkips) VerifySkipped(batch.Canvas, go, isTop: true);
                 return;
             }
             go.CanvasHiddenAt = -1;
             long version = go.SubtreeVersion;
             int ignoringBefore = depth.IgnoringGroups;
+            int relativeBefore = depth.RelativeBase;
             if (canvasHere != null && canvasHere != nearest)
             {
                 nearest = canvasHere;
                 worldToNearest = go.Transform.LocalToWorld.inverse;
+                depth.RelativeBase = depth.Value;
             }
             List<CanvasRendererNative> pops = null;
+            bool numbersPop = false;
             foreach (var r in parts.Renderers)
             {
                 if (r.Destroyed) continue;
-                r.AbsoluteDepth = -1;
-                r.RelativeDepth = -1;
-                r.DepthBuild = BuildNumber;
+                if (depth.Renumber)
+                {
+                    r.DepthBatch = batch.Canvas;
+                    r.DepthEpoch = batch.Canvas.DepthEpoch;
+                    r.AbsoluteDepth = depth.Value;
+                    r.RelativeDepth = depth.Value - depth.RelativeBase;
+                    depth.Value++;
+                    numbersPop |= r.HasPopInstruction;
+                }
                 if (hidden && !blocksRaycasts) continue;
                 r.BuiltToCanvas = worldToNearest * r.GameObject.Transform.LocalToWorld;
-                if (r.Cull) continue;
-                r.AbsoluteDepth = depth.Value;
-                r.RelativeDepth = depth.Value;
-                depth.Value++;
-                if (hidden || r.Geometry == null || r.Geometry.Indices.Length == 0) continue;
+                if (r.Cull || hidden || r.Geometry == null || r.Geometry.Indices.Length == 0) continue;
                 foreach (var m in r.Materials) batch.Draws.Add(new CanvasDraw(r, space, m, pop: false, groupAlpha));
                 if (r.HasPopInstruction) (pops ??= new()).Add(r);
             }
@@ -446,6 +532,10 @@ namespace OniBrutal.Engine.UI
             if (pops != null)
                 foreach (var r in pops)
                     foreach (var m in r.PopMaterials) batch.Draws.Add(new CanvasDraw(r, space, m, pop: true, groupAlpha));
+            if (numbersPop)
+                foreach (var r in parts.Renderers)
+                    if (!r.Destroyed && r.HasPopInstruction) depth.Value++;
+            depth.RelativeBase = relativeBefore;
             if (hiddenTop && depth.IgnoringGroups == ignoringBefore) go.CanvasHiddenAt = version;
         }
 
@@ -453,12 +543,12 @@ namespace OniBrutal.Engine.UI
         /// ONI_CANVAS_STATS=1: the build's time and the objects it walks, a frame, every 600 frames.
         static readonly bool stats = Environment.GetEnvironmentVariable("ONI_CANVAS_STATS") == "1";
         static int statsFrames;
-        static long statsTicks, statsVisits, statsRenotified;
+        static long statsTicks, statsVisits, statsRenotified, statsRenumbered;
         static long skipsVerified, skipsWrong;
 
-        /// A skipped hidden subtree, as the walk would visit it: every element at depth -1 and no
-        /// live group that ignores its parents.
-        static void VerifySkipped(GameObjectNative go, bool isTop)
+        /// A skipped hidden subtree, as the walk would visit it: every element numbered by the
+        /// batch's last renumbering and no live group that ignores its parents.
+        static void VerifySkipped(CanvasNative batch, GameObjectNative go, bool isTop)
         {
             if (isTop && ++skipsVerified % 10000 == 0) EngineLog.Engine($"canvas skips: {skipsVerified} verified, {skipsWrong} wrong");
             if (!go.ActiveInHierarchy) return;
@@ -467,9 +557,9 @@ namespace OniBrutal.Engine.UI
             if (!isTop && parts.Canvas is { } c && !c.Destroyed && (c.OverrideSorting || !IsLive(c))) return;
             bool wrong = false;
             foreach (var g in parts.Groups) wrong |= g.IsActiveAndEnabledState && g.IgnoreParentGroups;
-            foreach (var r in parts.Renderers) wrong |= !r.Destroyed && (r.AbsoluteDepth != -1 || r.RelativeDepth != -1);
+            foreach (var r in parts.Renderers) wrong |= !r.Destroyed && (r.DepthBatch != batch || !r.HasDepth);
             if (wrong) EngineLog.Engine($"canvas skip wrong ({++skipsWrong}) at {go.Name}");
-            foreach (var child in go.Transform.Children) VerifySkipped(child.GameObject, isTop: false);
+            foreach (var child in go.Transform.Children) VerifySkipped(batch, child.GameObject, isTop: false);
         }
 
         /// Diagnostics (`--probe-ui`): the elements of the last build drawn at a screen point

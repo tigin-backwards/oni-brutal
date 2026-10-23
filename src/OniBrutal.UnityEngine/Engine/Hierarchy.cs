@@ -28,6 +28,14 @@ namespace OniBrutal.Engine
             parent.Children = shrunk;
             child.Parent = null;
             Touch(parent);
+            ChildrenRestructured(parent, child);
+        }
+
+        /// An active UI object leaving or joining a parent (or moving among its siblings)
+        /// renumbers the canvas's depths.
+        static void ChildrenRestructured(TransformNative parent, TransformNative child)
+        {
+            if (child is RectTransformNative && child.GameObject.ActiveInHierarchy) UI.CanvasSystem.Restructured(parent);
         }
 
         static void InsertChild(TransformNative parent, TransformNative child, int index)
@@ -41,6 +49,7 @@ namespace OniBrutal.Engine
             parent.Children = grown;
             child.Parent = parent;
             Touch(parent);
+            ChildrenRestructured(parent, child);
         }
 
         public static bool IsAncestorOrSelf(TransformNative ancestor, TransformNative t)

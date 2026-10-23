@@ -441,6 +441,26 @@ namespace OniBrutal.Tests
             Assert.NotEqual(-1, n.RootElement.absoluteDepth);
         }
 
+        /// A root canvas moved under a disabled canvas stops drawing, and its elements read -1
+        /// as when it is disabled; moved back to the top level, it numbers them again.
+        [Fact]
+        public void ARootCanvasMovedUnderADisabledCanvasLosesItsDepths()
+        {
+            var n = BuildNest();
+            var other = new GameObject("Other", typeof(RectTransform)).AddComponent<Canvas>();
+            other.renderMode = RenderMode.ScreenSpaceOverlay;
+            var element = Element(other.transform, "OtherElement");
+            Frame();
+            Assert.Equal(0, element.absoluteDepth);
+            n.Root.enabled = false;
+            other.transform.SetParent(n.Root.transform, false);
+            Frame();
+            Assert.Equal(-1, element.absoluteDepth);
+            other.transform.SetParent(null, false);
+            Frame();
+            Assert.Equal(0, element.absoluteDepth);
+        }
+
         /// For contrast: with the root's GameObject inactive, every nested canvas reports itself
         /// as its own root with its own settings, and nothing draws.
         [Fact]

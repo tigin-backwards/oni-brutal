@@ -150,8 +150,8 @@ and declares `ICanvasElement`.
 - `material`: the default is `defaultGraphicMaterial`, the engine's default UI material.
 - `canvas`: the nearest enabled `Canvas` up the hierarchy.
 - `depth`: `canvasRenderer.absoluteDepth`, unchanged. The numbering is the engine's canvas
-  batching (`Engine/UI/CanvasSystem.cs`), not this package's: with the shipped uGUI on our
-  engine the numbers are ours, not the original's.
+  batching (`Engine/UI/CanvasSystem.cs`), not this package's; it follows the original's as
+  UnityProbe measured it (`UIS depth`), with either package.
 - `defaultMaterial`, `mainTexture`, `rectTransform`, `canvasRenderer`.
 
 **Methods:**

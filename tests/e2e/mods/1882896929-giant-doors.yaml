@@ -1,0 +1,31 @@
+# Giant Doors (1882896929), class B.
+#
+# What it does: adds two doors four cells tall to the Base menu: the King Door (Jobs), a
+# manual door of 400 kg of metal, and the powered King Power Door (Refined Objects). They are
+# ordinary doors otherwise, with the door's access side screen; a Config.json sets their
+# animation speeds.
+# How a player reaches it: the build menu (Base); the door's side screen.
+# What changes: doors for tall rooms.
+#
+# setup grants Jobs and spawns copper ore. A King Door is built in the dug-out corridor west
+# of the printing pod, floor to ceiling, and selected.
+from: early-base
+mods: [1882896929]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"Jobs\")", method: Purchased}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Cuprite\").substance", method: SpawnResource, args: [[115.5, 207.5, -12], 600, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"Jobs\").unlockedItemIDs": {contains: KingDoor}
+  - build: {prefab: KingDoor, at: [109, 206]}
+  - expect: {blueprints: {KingDoor: 1}}
+  - run: {seconds: 1200, until: {buildings: {KingDoor: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [109, 208], ortho: 8}}
+  - click_world: {cell: [109, 208], select: KingDoor}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<Door>.doorType": Internal
+      "selected:GetComponent<Building>.Def.HeightInCells": 4
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~King Door"}
+  - shot: {name: details, crop: "**/DetailsScreen", threshold: 0.04}

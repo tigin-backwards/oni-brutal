@@ -1,0 +1,59 @@
+{
+ "spec": "mods/1882896929-giant-doors.yaml",
+ "mods": [
+  "1882896929"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a King Door, four cells tall, is built of copper ore in the corridor and selected; its details screen is shot",
+ "updated": "2026-10-23",
+ "commit": "03f4421",
+ "mod_dlls": {
+  "1882896929": {
+   "GiantDoors.dll": "8de8f559f389ad9aeb85499d60a6c7c8ac87dd0f532c088d3e461129bd748f8a"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-123333-3bbe4d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T12:51:47",
+    "lane": 13,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-125432-6c7dc1",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T13:03:37",
+    "lane": 12,
+    "reference_run": "20261023-123333-3bbe4d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "details": 0.0
+    }
+   },
+   {
+    "run": "20261023-125432-6c7dc1",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T13:05:06",
+    "lane": 12,
+    "reference_run": "20261023-123333-3bbe4d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "details": 0.0
+    }
+   }
+  ]
+ }
+}

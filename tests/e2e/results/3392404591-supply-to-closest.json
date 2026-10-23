@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3392404591-supply-to-closest.yaml",
+ "mods": [
+  "3392404591"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "smaller spec (the switch depends on timing and paths): two Storage Bins in the corridor are supplied with sandstone through the mod's fetch states, both are built, and the fetch states carry the mod's parameters",
+ "updated": "2026-10-23",
+ "commit": "c36792c",
+ "mod_dlls": {
+  "3392404591": {
+   "SupplyToClosest.dll": "3256bce0b250a698908f7c38568a87257ad58057c0029020a817878789f39326"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-123333-3bbe4d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T13:00:45",
+    "lane": 12,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-130230-aa7599",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T13:03:40",
+    "lane": 13,
+    "reference_run": "20261023-123333-3bbe4d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-130230-aa7599",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T13:04:50",
+    "lane": 13,
+    "reference_run": "20261023-123333-3bbe4d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

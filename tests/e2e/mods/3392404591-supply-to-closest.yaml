@@ -1,0 +1,27 @@
+# Supply to Closest (3392404591), class P.
+#
+# What it does: when a Duplicant has picked up a load for a delivery whose destination is
+# still out of reach, it looks again for a fetch errand of the same kind whose destination is
+# closer (a postfix on FetchAreaChore's states adds an event handler on the pick-up, and
+# preconditions on every FetchChore let the search override the current errand), and switches
+# to it. So supplies go to the nearest site first.
+# How a player reaches it: nothing to press; deliveries and construction supply.
+# What changes: shorter delivery trips.
+#
+# A smaller spec: the switch depends on timing and paths that differ between runs. Two
+# blueprints in the dug-out corridor west of the printing pod are supplied with sandstone
+# lying between them, through the mod's fetch state machine, and both are built.
+from: early-base
+mods: [3392404591]
+setup:
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"SandStone\").substance", method: SpawnResource, args: [[111.5, 207.5, -12], 1000, 300, 255, 0]}}
+steps:
+  - build: {prefab: StorageLocker, at: [108, 206], material: SandStone}
+  - build: {prefab: StorageLocker, at: [114, 206], material: SandStone}
+  - expect: {blueprints: {StorageLocker: 2}}
+  - run: {seconds: 1200, until: {buildings: {StorageLocker: 2}, pending_construction: 0}}
+  - expect: {buildings: {StorageLocker: 2}}
+  # The fetch states were built (lazily, at the first delivery) with the mod's parameters.
+  - expect_state:
+      "type:SupplyToClosest.Patches::do_search_better": exists
+      "type:SupplyToClosest.Patches::cashed_path_cost": exists

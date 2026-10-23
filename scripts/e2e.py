@@ -772,6 +772,20 @@ def plan_jobs(specs, kinds, repeat):
 
 # ---------------------------------------------------------------- OniMcp
 
+def why_failed(value):
+    """The error, reason and message texts nested anywhere in an OniMcp result: the failure's
+    summary is cut short, and a build's own reason sits several levels down."""
+    if isinstance(value, dict):
+        for key, item in value.items():
+            if key in ('error', 'reason', 'message', 'detail', 'why') and isinstance(item, str):
+                yield item
+            else:
+                yield from why_failed(item)
+    elif isinstance(value, list):
+        for item in value:
+            yield from why_failed(item)
+
+
 class Mcp:
     """A minimal client for OniMcp's streamable HTTP endpoint (JSON text results)."""
 
@@ -816,7 +830,8 @@ class Mcp:
         value, error = self.parse(self.post({'jsonrpc': '2.0', 'id': 2, 'method': 'tools/call',
                                              'params': {'name': tool, 'arguments': args}}))
         if error:
-            raise SpecFailure(f'{tool} failed: {str(value)[:600]}')
+            why = '; '.join(dict.fromkeys(why_failed(value)))[:600]
+            raise SpecFailure(f'{tool} failed: {str(value)[:600]}' + (f' ... why: {why}' if why else ''))
         return value
 
     def read(self, uri):

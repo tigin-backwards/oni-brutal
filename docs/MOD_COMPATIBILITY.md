@@ -112,7 +112,7 @@ installs get developer checks subscribers never see).
 | 91 | [Pipe Flow Overlay](https://steamcommunity.com/sharedfiles/filedetails/?id=2968583663) | ✅ | ✅ | ⬜ |  |
 | 92 | [Enable achievements](https://steamcommunity.com/sharedfiles/filedetails/?id=2415088657) | ✅ | ✅ | ⬜ |  |
 | 93 | [Demolish Neutronium](https://steamcommunity.com/sharedfiles/filedetails/?id=2721654252) | ✅ | ✅ | ⬜ |  |
-| 94 | [Simpler Pip Plant Rule (Vanilla/DLC)](https://steamcommunity.com/sharedfiles/filedetails/?id=1859560108) | ✅ | ✅ | ⬜ |  |
+| 94 | [Simpler Pip Plant Rule (Vanilla/DLC)](https://steamcommunity.com/sharedfiles/filedetails/?id=1859560108) | ✅ | ✅ | ✅ | spec tests/e2e/mods/1859560108-simpler-pip-plant-rule.yaml: a smaller spec (no Pips on early-base): its options reach the Pip's seed-planting monitor and the plant query, and the query counts the plants in a centred square beside two wild Mealwood |
 | 95 | [Smart Pumps](https://steamcommunity.com/sharedfiles/filedetails/?id=1887986467) | ✅ | ✅ | ⬜ |  |
 | 96 | [Tiny Door](https://steamcommunity.com/sharedfiles/filedetails/?id=2051059692) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2051059692-tiny-door.yaml: a Tiny Pneumatic Door, placed as a blueprint in the corridor west of the pod, is built from cuprite as a 1x1 door with access control; the airlock variants are in their techs |
 | 97 | [FreeCamera](https://steamcommunity.com/sharedfiles/filedetails/?id=1737603705) | ✅ | ✅ | ✅ | spec tests/e2e/mods/1737603705-freecamera.yaml: the camera's maximum zoom is 350; the mouse wheel zooms out past the world's size, the camera stays where it is set outside the world, and a far world shot matches |

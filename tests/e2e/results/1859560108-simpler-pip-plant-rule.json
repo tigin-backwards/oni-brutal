@@ -1,0 +1,57 @@
+{
+ "spec": "mods/1859560108-simpler-pip-plant-rule.yaml",
+ "mods": [
+  "1859560108"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a smaller spec (no Pips on early-base): its options reach the Pip's seed-planting monitor and the plant query, and the query counts the plants in a centred square beside two wild Mealwood",
+ "updated": "2026-10-23",
+ "commit": "346361a",
+ "mod_dlls": {
+  "1859560108": {
+   "Commons_DLC.dll": "48d3fa8f0c4d9f1489f5c39ca7a6eb3ac3b14c11edbb1a5f40762f0c1cc3aa0c",
+   "PLib.dll": "93073fdf44dbe9fd7c0afe19e56341be862cc2d732090dee30999cf60e2e160d",
+   "SimplerPipPlantRule.dll": "b664cd1b22b49c8ff2a5ae915c530399e76389e28964b97afd3ceec99e6d8b4d"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-002005-c235bd",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T00:20:05",
+    "lane": 10,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-002557-9ad912",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T00:33:37",
+    "lane": 11,
+    "reference_run": "20261023-002005-c235bd",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-002557-9ad912",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T00:34:26",
+    "lane": 11,
+    "reference_run": "20261023-002005-c235bd",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -1,0 +1,33 @@
+# Simpler Pip Plant Rule (1859560108), classes B, O.
+#
+# What it does: Pips plant seeds under a simpler rule. Where the game allows a seed when at
+# most 2 plants stand in the 12x12 square around the cell, the mod counts the plants in a
+# square of side 2 * radius + 1 centred on it (radius 1 by default) and allows none. Its PLib
+# options set the radius, the plants allowed and the Pips' search interval (60 to 300 s by
+# default). Patches: the PlantableCellQuery and SeedPlantingMonitor.Def constructors, and
+# PlantableCellQuery.CountNearbyPlants.
+# How a player reaches it: the Mods screen's options; then Pips carrying seeds.
+# What changes: where, and how often, Pips plant.
+#
+# early-base has no Pips, so the rule is checked on the game's own objects, a smaller spec:
+# the options (here written into its config.json) reach the Pip's seed-planting monitor and
+# the plant query, and the count is taken beside the two wild Mealwood west of the pod, at
+# (111, 206) and (112, 206), on the floor cells below them (row 205; cell = 636 y + x).
+from: early-base
+mods: [1859560108]
+options:
+  "1859560108": {PlantDetectionRadius: 2, MaxPlantsInRadius: 1, SearchMinInterval: 30, SearchMaxInterval: 90}
+steps:
+  - expect_state:
+      "Grid.Objects.get_Item(131127, 1).name": BasicForagePlantPlanted
+      "Grid.Objects.get_Item(131128, 1).name": BasicForagePlantPlanted
+      "PathFinderQueries.plantableCellQuery.plantDetectionRadius": 2
+      "PathFinderQueries.plantableCellQuery.maxPlantsInRadius": 1
+      "Assets.GetPrefab(\"Squirrel\").GetComponent<StateMachineController>.cmpdef.defs[6].searchMinInterval": 30
+      "Assets.GetPrefab(\"Squirrel\").GetComponent<StateMachineController>.cmpdef.defs[6].searchMaxInterval": 90
+      # The square is centred: at (110, 205) radius 1 reaches the plant at 111 (the game's
+      # square, from x - 1 two cells wide, would not); at (114, 205) it reaches neither.
+      "PlantableCellQuery.CountNearbyPlants(130490, 1)": 1
+      "PlantableCellQuery.CountNearbyPlants(130491, 1)": 2
+      "PlantableCellQuery.CountNearbyPlants(130494, 1)": 0
+      "PlantableCellQuery.CountNearbyPlants(130494, 2)": 1

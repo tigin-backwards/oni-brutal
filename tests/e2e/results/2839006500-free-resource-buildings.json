@@ -3,12 +3,12 @@
  "mods": [
   "2839006500"
  ],
- "verdict": "pending",
- "why": "0 run(s) of ours against original run 20261023-052840-d190ff; 2 needed",
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
  "findings": [],
- "note": "",
+ "note": "with the default wattage option at 1500 W, a Power Box is built from spawned steel west of the pod and selected (shot); it runs at 1500 W, and 3000 typed into its side screen's slider field sets 3000 W",
  "updated": "2026-10-23",
- "commit": "6cf8cd3",
+ "commit": "111dd44",
  "mod_dlls": {
   "2839006500": {
    "FreeResourceBuildings.dll": "557f7bd8170cdb7835040c23287a2aeadd5dba27a94e1375c7f029529b381e22"
@@ -25,6 +25,35 @@
     "signatures": 0
    }
   ],
-  "ours": []
+  "ours": [
+   {
+    "run": "20261023-071639-513a32",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T07:16:39",
+    "lane": 15,
+    "reference_run": "20261023-052840-d190ff",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "details": 0.0
+    }
+   },
+   {
+    "run": "20261023-071639-513a32",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T07:18:16",
+    "lane": 15,
+    "reference_run": "20261023-052840-d190ff",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "details": 0.0
+    }
+   }
+  ]
  }
 }

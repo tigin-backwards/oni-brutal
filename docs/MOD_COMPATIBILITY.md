@@ -162,7 +162,7 @@ installs get developer checks subscribers never see).
 | 141 | [Smart Dig // by @Ony 👾](https://steamcommunity.com/sharedfiles/filedetails/?id=1844888487) | ✅ | ✅ | ✅ | spec tests/e2e/mods/1844888487-smart-dig.yaml: with the Dig tool a plain click marks one cuprite cell of the corridor ceiling west of the pod; a Shift-click on another spreads the order through the connected cuprite (8 orders) |
 | 142 | [The Duplicant Reacharound](https://steamcommunity.com/sharedfiles/filedetails/?id=1854895085) | ✅ | ✅ | ✅ | spec tests/e2e/mods/1854895085-duplicant-reacharound.yaml: smaller spec: the extended reach tables are checked after the load and a dig order on the corridor ceiling uses the extended table with corners |
 | 143 | [Floatation](https://steamcommunity.com/sharedfiles/filedetails/?id=1751123054) | ⬜ | ⬜ | ⬜ | flagged by onimaxxing (mayCrashInPlay); not tested |
-| 144 | [Free Resource Buildings - Updated](https://steamcommunity.com/sharedfiles/filedetails/?id=2839006500) | ✅ | ✅ | ⬜ |  |
+| 144 | [Free Resource Buildings - Updated](https://steamcommunity.com/sharedfiles/filedetails/?id=2839006500) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2839006500-free-resource-buildings.yaml: with the default wattage option at 1500 W, a Power Box is built from spawned steel west of the pod and selected (shot); it runs at 1500 W, and 3000 typed into its side screen's slider field sets 3000 W |
 | 145 | [No Mop Limits](https://steamcommunity.com/sharedfiles/filedetails/?id=2313125589) | ✅ | ✅ | ⬜ |  |
 | 146 | [More Small Sculptures](https://steamcommunity.com/sharedfiles/filedetails/?id=2875363453) | ✅ | ✅ | ⬜ |  |
 | 147 | [Rotate Everything](https://steamcommunity.com/sharedfiles/filedetails/?id=1715709940) | ✅ | ✅ | ⬜ |  |

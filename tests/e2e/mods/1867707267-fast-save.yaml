@@ -1,0 +1,64 @@
+# Fast Save (1867707267), classes S, O, V.
+#
+# What it does: makes saving and loading faster: compiled delegates instead of reflection for
+# the save serializer (Use Delegates), autosaves written in the background, and, by Save
+# Optimization, keeping only the last 20 (Moderate) or 4 (Aggressive) daily reports; the report
+# screen's Prev button is then disabled where the kept reports end. PLib options.
+# How a player reaches it: the Mods screen's Options; then every save and every new cycle.
+# What changes: the reports kept, and the time a save takes.
+#
+# The options are set before launch: Aggressive, with delegates. setup moves the clock through
+# six nights (GameClock.AddTime; early-base starts 290 s into its first cycle, and a night falls
+# at 525 s), so six cycles end with a report each; autosaves are switched off for it. The game
+# is then saved from the pause menu.
+from: early-base
+mods: [1867707267]
+options:
+  PeterHan.FastSave: {Mode: 2, DelegateSave: true, BackgroundSave: true}
+setup:
+  - driver: {setup.call: {target: "SaveGame.Instance", method: set_AutoSaveCycleInterval, args: [0]}}
+  - driver: {setup.call: {target: "GameClock.Instance", method: AddTime, args: [250]}}
+  - driver: {setup.call: {target: "GameClock.Instance", method: AddTime, args: [100]}}
+  - driver: {setup.call: {target: "GameClock.Instance", method: AddTime, args: [500]}}
+  - driver: {setup.call: {target: "GameClock.Instance", method: AddTime, args: [100]}}
+  - driver: {setup.call: {target: "GameClock.Instance", method: AddTime, args: [500]}}
+  - driver: {setup.call: {target: "GameClock.Instance", method: AddTime, args: [100]}}
+  - driver: {setup.call: {target: "GameClock.Instance", method: AddTime, args: [500]}}
+  - driver: {setup.call: {target: "GameClock.Instance", method: AddTime, args: [100]}}
+  - driver: {setup.call: {target: "GameClock.Instance", method: AddTime, args: [500]}}
+  - driver: {setup.call: {target: "GameClock.Instance", method: AddTime, args: [100]}}
+  - driver: {setup.call: {target: "GameClock.Instance", method: AddTime, args: [500]}}
+steps:
+  # Six reports were made; only the last four are kept.
+  - expect_state:
+      "ReportManager.Instance.reports.Count": 4
+      "ReportManager.Instance.reports[0].day": 3
+      "ReportManager.Instance.reports[-1].day": 6
+  # The six "report ready" notifications expire first, as they would in play: opening the
+  # reports would otherwise go to the oldest one's cycle, which is no longer kept (and the mod's
+  # Refresh postfix throws on the missing report, in the original too).
+  - run: {seconds: 60}
+  - click: {ui: "**/TopRightInfoPanelButtons/Toggle:REPORTS"}
+  - ui_wait: {path: "**/TopRightInfoPanels/ReportScreen", cond: stable}
+  - ui_dump: {name: report-title, root: "**/ReportScreen/Subtitle"}
+  - expect_ui: {"**/ReportScreen/Subtitle/Title": {text: "~Today"}}
+  # Back through the kept reports: cycles 6, 5, 4, 3; there the button stops.
+  - click: {ui: "**/ReportScreen/Subtitle/Prev"}
+  - click: {ui: "**/ReportScreen/Subtitle/Prev"}
+  - click: {ui: "**/ReportScreen/Subtitle/Prev"}
+  - expect_ui: {"**/ReportScreen/Subtitle/Prev": {interactable: true}}
+  - click: {ui: "**/ReportScreen/Subtitle/Prev"}
+  - expect_ui:
+      "**/ReportScreen/Subtitle/Title": {text: "Cycle 3"}
+      "**/ReportScreen/Subtitle/Prev": {interactable: false}
+  - click: {ui: "**/ReportScreen/TopButtons/CloseButton"}
+  # A save from the pause menu, through the mod's serializer.
+  - key: {code: Escape}
+  - ui_wait: {path: "**/PauseScreen/LayoutContent", cond: stable}
+  - click: {ui: "**/PauseScreen/LayoutContent/ButtonContent/SaveButton"}
+  - ui_wait: {path: "**/ConfirmDialog/GameObject/Panel/OKButton", cond: stable}
+  - click: {ui: "**/ConfirmDialog/GameObject/Panel/OKButton"}
+  # Saved: the game renames the save button after its new label, "Already Saved".
+  - ui_wait: {path: "**/PauseScreen/LayoutContent/ButtonContent/SaveButton", cond: gone, frames: 1200}
+  - expect_ui: {"**/PauseScreen/LayoutContent/ButtonContent/**": {any_text: "~Already Saved"}}
+  - key: {code: Escape}

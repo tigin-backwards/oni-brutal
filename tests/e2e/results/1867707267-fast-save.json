@@ -1,0 +1,63 @@
+{
+ "spec": "mods/1867707267-fast-save.yaml",
+ "mods": [
+  "1867707267"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "Aggressive mode: of six cycle reports the last four are kept, and the report screen's Prev button stops at the oldest kept one; a save from the pause menu completes",
+ "updated": "2026-10-23",
+ "commit": "c2906cc",
+ "mod_dlls": {
+  "1867707267": {
+   "FastSave.dll": "26e34935f2cfd9962be1599434a5adb3fde614d9eccf453a4fffdf4ed4b0cb5e"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-000729-9d4594",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T00:19:59",
+    "lane": 13,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-002139-4e620e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T00:23:14",
+    "lane": 13,
+    "reference_run": "20261023-000729-9d4594",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "report-title": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261023-002139-4e620e",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T00:24:36",
+    "lane": 13,
+    "reference_run": "20261023-000729-9d4594",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "report-title": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

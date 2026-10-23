@@ -162,6 +162,11 @@ broken.update({
     '2629866529': 'broken upstream: its PliersWorkable overrides `OnCompleteWork(Worker)`, and the game no longer has a `Worker` type: the type fails to load while the game creates its prefabs, and the player aborts loading a colony; spec tests/e2e/mods/2629866529-pliers-2021.yaml',
     '2539984678': 'broken upstream: its Constructable.OnSpawn transpiler multiplies the AETN\'s 2 cores by a core\'s 25 kg, but the game counts cores by the unit, so a blueprint asks for 50 Neutronium Cores and is never built; spec tests/e2e/mods/2539984678-rebuildable-aetn.yaml',
 })
+# Found by the e2e specs of batch 08: the spec fails the same way in the original.
+broken.update({
+    '2356326908': 'broken upstream: its PLib side screens look for `DetailsScreen.sideScreenContentBody`, which the game no longer has, so loading a colony opens the crash screen (spec tests/e2e/mods/2356326908-wireless-power.yaml)',
+    '2524767809': 'broken upstream: its emptier\'s state machine calls `StateMachine.Instance.Subscribe(int, Action<object>)`, which the game no longer has, so the finished building throws a MissingMethodException in `BottleUserEmptier.OnSpawn` and the crash screen opens (spec tests/e2e/mods/2524767809-bottle-emptier-variable-size.yaml)',
+})
 # Fails to load in the original only.
 original_only = {
     '1729794261': 'loads in ours but not in the original: Mono rejects its `PixelPack2` class (an interface method it lacks) at first use, where ours stubs the missing method (ARCHITECTURE D22); left out of the colony runs, which the original\'s error dialog stops',

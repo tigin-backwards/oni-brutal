@@ -1,0 +1,33 @@
+{
+ "spec": "mods/2356326908-wireless-power.yaml",
+ "mods": [
+  "2356326908"
+ ],
+ "verdict": "pending",
+ "why": "the spec fails in the original: a broken spec, or a mod broken upstream",
+ "findings": [],
+ "note": "",
+ "updated": "2026-10-23",
+ "commit": "e6ee4a1",
+ "mod_dlls": {
+  "2356326908": {
+   "WirelessPower.dll": "bacdeaa02e794311390613900b26c440b3a71c4865a1b07da9ffc182fccb648d"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-113951-d72f9a",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-23T12:26:53",
+    "lane": 12,
+    "reasons": [
+     "step start: Canvas/ConfirmDialog/GameObject/Panel/OKButton is occluded by ErrorCanvas/CrashReportScreen(Clone)/InfoBox/ModsInfo/ModsList/Files/Viewport/Content/Entry/BG (hits there: ErrorCanvas/CrashReportScreen(Clone)/InfoBox/ModsInfo/ModsList/Files/Viewport/Content/Entry/BG, ErrorCanvas/CrashRepor"
+    ],
+    "signatures": 2
+   }
+  ],
+  "ours": []
+ }
+}

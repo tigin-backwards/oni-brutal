@@ -1,0 +1,33 @@
+{
+ "spec": "mods/2524767809-bottle-emptier-variable-size.yaml",
+ "mods": [
+  "2524767809"
+ ],
+ "verdict": "pending",
+ "why": "the spec fails in the original: a broken spec, or a mod broken upstream",
+ "findings": [],
+ "note": "",
+ "updated": "2026-10-23",
+ "commit": "e6ee4a1",
+ "mod_dlls": {
+  "2524767809": {
+   "BottleEmptierVar.dll": "c46c7586665b6235b832adbe10341d2d4a9a4b5d08a2b7d1e29bb98882ebb53c"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-113951-d72f9a",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-23T11:58:58",
+    "lane": 13,
+    "reasons": [
+     "step 5: no BottleEmptierVar selected at [113, 207] after 5 clicks (last: None)"
+    ],
+    "signatures": 2
+   }
+  ],
+  "ours": []
+ }
+}

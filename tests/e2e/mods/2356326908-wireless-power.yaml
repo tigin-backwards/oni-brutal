@@ -1,0 +1,32 @@
+# Wireless Power (2356326908), classes B, S.
+#
+# What it does: adds the Wireless Power Sender, Receiver and Battery to the Power menu beside
+# the Smart Battery (Low-Resistance Conductors), of steel by default: a sender takes power
+# from its circuit and puts it on one of ten wireless channels, a receiver on that channel
+# feeds its own circuit, and the battery stores a channel's surplus. Each has a PLib side
+# screen (channel and transfer rate), added to the DetailsScreen at its prefab init. A
+# Config.json tunes channels, rates and costs.
+# How a player reaches it: the build menu (Power); the building's side screen.
+# What changes: power across the map without wires.
+#
+# A smaller spec: early-base has no powered circuit to send from. setup grants Low-Resistance
+# Conductors and spawns steel. A Wireless Power Sender is built in the dug-out corridor west of
+# the printing pod and selected; its details screen is shot.
+from: early-base
+mods: [2356326908]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"PrettyGoodConductors\")", method: Purchased}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Steel\").substance", method: SpawnResource, args: [[115.5, 207.5, -12], 400, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"PrettyGoodConductors\").unlockedItemIDs": {contains: WirelessPowerSender}
+      "Assets.GetBuildingDef(\"WirelessPowerSender\")": exists
+  - build: {prefab: WirelessPowerSender, at: [113, 206], material: Steel}
+  - expect: {blueprints: {WirelessPowerSender: 1}}
+  - run: {seconds: 900, until: {buildings: {WirelessPowerSender: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [113, 207], ortho: 8}}
+  - click_world: {cell: [113, 207], select: WirelessPowerSender}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Wireless Power Sender"}
+  - shot: {name: details, crop: "**/DetailsScreen", threshold: 0.04}

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading;
 using OniBrutal.Assets.TypeTrees;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -123,7 +124,12 @@ namespace OniBrutal.Engine
         public Vector3 LocalScale = Vector3.one;
         public bool HasChanged = true;
 
-        // World data, computed when first read after a change (MarkDirty).
+        // World data, computed when first read after a change (MarkDirty). Reads may come from
+        // several threads at once while nothing changes the hierarchy (game tweaks that read
+        // animation controllers on worker threads, fast-anim-batches): each computes the same
+        // value, and the flag is cleared with release semantics after the value is stored and
+        // tested with acquire semantics before it is read, so a reader that finds it clear sees
+        // the stored value. Plain moves on x64.
         Matrix4x4 localToWorld;
         Quaternion worldRotation;
         Vector3 lossyScale;
@@ -141,11 +147,11 @@ namespace OniBrutal.Engine
         {
             get
             {
-                if (worldDirty)
+                if (Volatile.Read(ref worldDirty))
                 {
                     var local = Matrix4x4.TRS(LocalPosition, LocalRotation, LocalScale);
                     localToWorld = Parent != null ? Parent.LocalToWorld * local : local;
-                    worldDirty = false;
+                    Volatile.Write(ref worldDirty, false);
                 }
                 return localToWorld;
             }
@@ -172,10 +178,10 @@ namespace OniBrutal.Engine
         {
             get
             {
-                if (rotationDirty)
+                if (Volatile.Read(ref rotationDirty))
                 {
                     worldRotation = Parent != null ? Parent.WorldRotation * LocalRotation : LocalRotation;
-                    rotationDirty = false;
+                    Volatile.Write(ref rotationDirty, false);
                 }
                 return worldRotation;
             }
@@ -187,11 +193,11 @@ namespace OniBrutal.Engine
         {
             get
             {
-                if (scaleDirty)
+                if (Volatile.Read(ref scaleDirty))
                 {
                     var rs = Matrix4x4.Rotate(Quaternion.Inverse(WorldRotation)) * LocalToWorld;
                     lossyScale = new Vector3(rs.m00, rs.m11, rs.m22);
-                    scaleDirty = false;
+                    Volatile.Write(ref scaleDirty, false);
                 }
                 return lossyScale;
             }

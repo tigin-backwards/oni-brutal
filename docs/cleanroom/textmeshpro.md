@@ -683,46 +683,53 @@ three pivots, under a `HorizontalLayoutGroup` beside a 24-wide icon, and copied 
   hundredth goes up by 0.01 (67.25 gives 67.26, 139 gives 139.01), and any other goes to
   the next hundredth (85.09375 gives 85.1). The rule reproduces all 648 regular-style
   texts at pivot 0, including white space, against the shipped package; ceiling to the
-  hundredth, as this implementation does, misses 21 of the 576 that are not white space,
-  and the 72 that are.
+  hundredth, as this implementation did before, misses 21 of the 576 that are not white
+  space, and the 72 that are.
+- **Implemented.** This implementation follows the rule: in the same probe it reproduces it
+  on all 648 regular-style texts, at every pivot and under the layout group. Against the
+  shipped package 9 texts (27 at the three pivots, regular and bold) still differ by 0.01,
+  all where a character's pen is one float step off at a scale that is not a power of two
+  (see "Also seen" below).
 - **Not tied to the rect.** The value does not depend on where the rect is: the same text at
   pivot 0.5, 0 and 0.37, and as a child of the layout group, has the same bits in all 1,368
-  cases. This implementation sums the pens in the rect's coordinates, so its value moves
-  with the rect: 68 texts change between the pivots and 61 under the layout group (GRAYSTROKE REGULAR 16 pt
-  "Hydrogen" is 67.51 alone and 67.5 in the row), and "i" in NotoSansCJKjp 12 pt is 3.31
-  where the shipped package's pen is the float 3.3 (3.2999999523) and gives 3.3.
+  cases. This implementation used to sum the pens in the rect's coordinates, so its value
+  moved with the rect: 68 texts changed between the pivots and 61 under the layout group
+  (GRAYSTROKE REGULAR 16 pt "Hydrogen" was 67.51 alone and 67.5 in the row), and "i" in
+  NotoSansCJKjp 12 pt was 3.31 where the shipped package's pen is the float 3.3
+  (3.2999999523) and gives 3.3. It now measures from the line's own pen start and gives the
+  same bits at every pivot and in the row.
 - **White space.** A text of only white space (" ", "  ") has no visible character, so x is
   0: its preferred width is 0.01, and its preferred height is 0.01 too (the height is that of
-  the visible characters, none here, by the same rule). This implementation gives 0 and one
-  line's height (12.6 for GRAYSTROKE 12 pt, 19.04 for NotoSans 14 pt). An empty text ("")
-  is 0 × 0 in both.
+  the visible characters, none here, by the same rule). This implementation gave 0 and one
+  line's height (12.6 for GRAYSTROKE 12 pt, 19.04 for NotoSans 14 pt); it now gives
+  0.01 × 0.01. An empty text ("") is 0 × 0 in both.
 - **Heights** follow the same rule (first line's ascender to the last line's descender):
   NotoSans-Regular at 16 pt is 21.75 high and gives 21.76; at 12 pt 16.3125 gives 16.32.
   No other height measured falls on a hundredth, so ceiling and the rule agree on the rest.
 - **Bold:** x ends at the last character's regular glyph advance, as above; the bold spacing
   after it is not counted. NotoSans-Regular 12 pt bold "Ethanol Gas" ends its last advance at
   71.21, its "s" begins at 65.1 and is 5.75 wide: x is 70.849998 and the width 70.85 (this
-  implementation gives 70.86 for the centred rect). The rule reproduces 574 of 576 bold texts
+  implementation gave 70.86 for the centred rect, and now gives 70.85). The rule reproduces 574 of 576 bold texts
   from the logged values; the two misses are within one float step of a hundredth, where
   this reconstruction from logged values is not exact.
 - **Layout groups and layout elements** take the value as it is: a `HorizontalLayoutGroup`
   with 4 + 4 of padding, 12 of spacing and a 24-wide child reports 44 + the text's width in
   float (148.26001 for 104.26; 44.01 for " "), and a `LayoutElement` given it keeps the bits.
 
-| Font, size, text (regular) | x | shipped | this implementation now |
-|---|---|---|---|
-| NotoSans-Regular 12, "Ethanol Gas" | 67.25 | 67.26 | 67.25 |
-| NotoSans-Regular 12, "Super Coolant Gas" | 104.25 | 104.26 | 104.25 |
-| NotoSans-Regular 12, "Nuclear Fallout" | 85.09375 | 85.1 | 85.1 |
-| NotoSans-Regular 12, "Room" | 33.1875 | 33.19 | 33.19 |
-| NotoSans-Regular 16, "Super Coolant Gas" | 139 | 139.01 | 139 |
-| NotoSans-Regular 16, "Room" | 44.25 | 44.26 | 44.25 |
-| GRAYSTROKE REGULAR SDF 16, "Hydrogen" | 67.5 | 67.51 | 67.5 at pivot 0 |
-| GRAYSTROKE OUTLINE SDF 14, "A" | 8.5 | 8.51 | 8.5 |
-| NotoSansCJKjp-Regular 12, "Oxygen" | 41.850002 | 41.86 | 41.86 |
-| NotoSansCJKjp-Regular 12, "i" | 3.2999999523 | 3.3 | 3.31 |
-| NotoSans-Regular 14, " " | 0 | 0.01 × 0.01 | 0 × 19.04 |
-| any, "" | — | 0 × 0 | 0 × 0 |
+| Font, size, text (regular) | x | shipped | this implementation before | now |
+|---|---|---|---|---|
+| NotoSans-Regular 12, "Ethanol Gas" | 67.25 | 67.26 | 67.25 | 67.26 |
+| NotoSans-Regular 12, "Super Coolant Gas" | 104.25 | 104.26 | 104.25 | 104.26 |
+| NotoSans-Regular 12, "Nuclear Fallout" | 85.09375 | 85.1 | 85.1 | 85.1 |
+| NotoSans-Regular 12, "Room" | 33.1875 | 33.19 | 33.19 | 33.19 |
+| NotoSans-Regular 16, "Super Coolant Gas" | 139 | 139.01 | 139 | 139.01 |
+| NotoSans-Regular 16, "Room" | 44.25 | 44.26 | 44.25 | 44.26 |
+| GRAYSTROKE REGULAR SDF 16, "Hydrogen" | 67.5 | 67.51 | 67.5 at pivot 0 | 67.51 |
+| GRAYSTROKE OUTLINE SDF 14, "A" | 8.5 | 8.51 | 8.5 | 8.51 |
+| NotoSansCJKjp-Regular 12, "Oxygen" | 41.850002 | 41.86 | 41.86 | 41.86 |
+| NotoSansCJKjp-Regular 12, "i" | 3.2999999523 | 3.3 | 3.31 | 3.3 |
+| NotoSans-Regular 14, " " | 0 | 0.01 × 0.01 | 0 × 19.04 | 0.01 × 0.01 |
+| any, "" | — | 0 × 0 | 0 × 0 | 0 × 0 |
 
 Not measured: margins (they are expected to be added to x before the rounding, as the
 section above says they are included), several lines, wrapping, auto-size and rich-text
@@ -738,6 +745,128 @@ this implementation at 34.08853912. The rule above turns this into a 0.01 differ
 where a pen falls within a float step of a hundredth (NotoSans 16 pt "Oxygen", 57.875 shipped
 and 57.875004 here, gives 57.88 in both). Matching it needs a measurement of how a kerning
 pair's adjustment enters the pen (the font assets' pair records and texts with kerning off).
+
+### Overflow at white space (measured 2026-10-23)
+
+Found in a mod play-test: Butcher & Fishing Stations has a label of one space (" ", 14 pt,
+centred) in a rect its `LayoutElement` sizes to the text's preferred size, 0.01 × 0.01 (see
+"Preferred sizes to the hundredth" above). The shipped package reports `isTextOverflowing`
+false and `firstOverflowCharacterIndex` -1; this implementation reports true and 0. The
+`textInfo` counts are the same in both.
+
+Measured with `PROBE_SCENARIO=textoverflow` (tools/UnityProbe, `TextOverflow.cs`): 22 texts
+(" ", "  ", "\t", " \n ", "\n", "", U+00A0, "A", " A", "A ", " A ", "  A  ", "A\n", "\nA",
+"A\n ", " \nA", "A B", "AB", "A\nB", " \n\nA", "A \n ", "…") in NotoSans-Regular 14 pt and
+GRAYSTROKE REGULAR SDF 12 pt, set up as `SetTextStyleSetting` does. Rect widths 0, 0.005, 0.01,
+the preferred width and 0.01 and 0.001 under and over it, and 400; heights 0, 0.005, 0.01, the
+preferred height and the same steps around it, one line of the font (ascender to descender)
+and 0.01 under and over it, and 100. Overflow, Truncate, Ellipsis and Masking, wrapping on and
+off, centred (and top-left for Overflow without wrapping): 37,692 cases, each with
+`isTextOverflowing`, `firstOverflowCharacterIndex`, `isTextTruncated`, the `textInfo` counts
+and every character's code, `isVisible` and `lineNumber`. `tools/UnityProbe/ov-check.py rule
+LOG` predicts each case from the rule below and reproduces all 37,692; this implementation
+(with the preferred sizes above) reproduces 25,947 of its 38,124.
+- **Checked characters.** Every character except white space (space, no-break space, line
+  feed) is checked against the rect's height. The tab is checked too, though it is not visible
+  (`isVisible` false, character 9).
+- **Vertical overflow.** The text overflows at the first checked character whose line's
+  bottom is below the rect: the distance from the first line's ascender down to that line's
+  descender is greater than the rect's height. Exactly at the height fits: NotoSans 14 pt's
+  first line ends at 19.03125, so 19.03125 fits and 19.03 overflows; its second line ends at
+  38.098953. `firstOverflowCharacterIndex` is that character's index, and
+  `isTextOverflowing` is true when there is one.
+  - So a text of white space alone never overflows, in any rect (0 × 0 too), in any mode,
+    with or without wrapping: " ", "  ", " \n ", "\n" and U+00A0 report false and -1, and
+    keep their characters.
+  - White space before the first checked character, after the last one, and lines of white
+    space alone never overflow either: " A" in a rect of height 0 overflows at 1, "\nA" at 1,
+    " \n\nA" at 3; "A\n " in a 400 × 19.03125 rect does not overflow.
+  - Lines of white space still take their height: in " \nA" the "A" overflows below 38.098953,
+    in " \n\nA" below 57.16666.
+  - Alignment makes no difference, and Masking reports the same as Overflow.
+- **Cut at the width** (Truncate and Ellipsis, wrapping on or off). The first visible character
+  (not white space, not a tab) whose pen after it passes the rect's width cuts the text there.
+  The pen is measured from the line's start, as laid out. With wrapping on, such a character
+  is one that is still too wide on the line it wraps to. "A" (8.93 wide) in a rect 0 wide, wrapped,
+  Truncate, shows nothing and reports `isTextTruncated` true; in Overflow it shows "A". This
+  cut is not an overflow: `firstOverflowCharacterIndex` stays -1, as in "Horizontal overflow
+  with wrapping off" above. A tab is never cut.
+- **Which cut.** The text is cut at the earlier of the two. When the cut at the width comes
+  first, the index is -1. When both fall on the same character, it is the overflow's.
+- **Truncate** at the cut c:
+  - At c = 0, nothing is shown: `characterCount` 0, `lineCount` 0.
+  - Otherwise the characters before c stay as laid out and c becomes the blank record
+    (U+0003, not visible): `characterCount` is c + 1. White space before the cut is kept:
+    " A" in a rect of height 0 keeps " " and the record on one line.
+  - The record is on c's line. When that line began by wrapping (not after a line feed), the
+    record stays at the end of the line before, and the text has one line fewer: "A B" wrapped
+    at 21.69 × 19.04 gives "A", " " and the record on line 0; "\nA" at height 0 gives "\n" and
+    the record on line 1.
+- **Ellipsis** at the cut c: "…" takes the place of the last character before c whose line
+  fits the rect's height and at whose pen "…" fits the width (its pen plus the ellipsis's
+  advance, 11.083328 for NotoSans 14 pt, 7.078125 for GRAYSTROKE 12 pt from its fallback). The
+  blank record follows it on the same line, and the text ends there (`lineCount` is that line
+  + 1). When no character qualifies, nothing is shown (`characterCount` 0, `lineCount` 0).
+  - " A" at 12.57 × 100 gives "…" and the record; "  A  " at 16.22 gives " …".
+  - " A" 0 wide gives nothing: "…" does not fit at the space's pen 0.
+  - " A" at height 0 gives nothing: line 0 does not fit.
+  - " \n\nA" at 400 × 19.03125 gives " …" on line 0, in place of the first line feed: the
+    second line does not fit.
+  - GRAYSTROKE 12 pt " \nA" at 7.28 × 12.59 gives "…" in place of the space: at the line
+    feed's pen (2.28) it does not fit.
+  - This refines "Ellipsis shows nothing at all" in "Horizontal overflow with wrapping off"
+    above: that holds where "…" is wider than the room before the cut.
+- **Preferred height** is measured down to the last line with a checked character. "A\n " and
+  "A \n " are 8.94 × 19.04 (this implementation: 38.1 high), " \nA" 38.1 and " \n\nA" 57.17
+  high. "\t" is 0.01 × 19.04 (its width is that of no visible character, its height that of a
+  checked one).
+
+Where this implementation deviates (`TMP_Text.Layout.cs` and `TMP_Text.Place.cs`):
+- It checks each line, at the line's first character, whatever that is. So white space
+  overflows (" " at 0.01 × 0.01 reports 0), and the index is the line's start (" A" and "\nA"
+  at height 0 report 0, "A\n " at 400 × 19.03125 reports 2).
+- Truncate and Ellipsis then remove the whole overflowing line: " A" at height 0 shows
+  nothing where the shipped package keeps " " and the record. A text of white space alone in
+  a low rect is cut to nothing where the shipped package keeps it.
+- Ellipsis places "…" at the character before the cut without checking that it fits: " A" 0
+  wide shows "…", and GRAYSTROKE 12 pt " \nA" at 7.28 × 12.59 shows " …".
+- With wrapping on, Truncate and Ellipsis keep a character too wide for any line ("A" 0 wide
+  stays "A"; " A" 0 wide gives " " and "A" on two lines).
+- A tab is drawn as a visible U+25A1 and is 14.01 × 20.74 (NotoSans 14 pt), and lines of
+  white space after the last checked character count towards the preferred height.
+
+| Text (NotoSans-Regular 14 pt, centred), rect, mode | shipped: overflowing, index; characters | this implementation now |
+|---|---|---|
+| " ", 0.01 × 0.01, Overflow (Butcher & Fishing Stations) | false, -1; " " | true, 0; " " |
+| " ", 0 × 0, Truncate | false, -1; " " | true, 0; nothing |
+| U+00A0, 0 × 0, Ellipsis | false, -1; U+00A0 | true, 0; nothing |
+| " \n ", 0 × 0, Overflow, wrapped | false, -1; 3 characters, 2 lines | true, 0 |
+| "A", 400 × 19.03, Overflow | true, 0 | true, 0 |
+| "A", 400 × 19.03125, Overflow | false, -1 | false, -1 |
+| "\t", 400 × 19.03125, Overflow | false, -1; "\t" not visible | true, 0; U+25A1 visible |
+| " A", 400 × 0, Overflow | true, 1 | true, 0 |
+| " A", 400 × 0, Truncate | true, 1; " ", record | true, 0; nothing |
+| " A", 400 × 0, Ellipsis | true, 1; nothing | true, 0; nothing |
+| " A", 0 × 100, Ellipsis | false, -1, truncated; nothing | false, -1; "…", record |
+| " A", 12.57 × 100, Ellipsis | false, -1; "…", record | the same |
+| "\nA", 400 × 0, Overflow | true, 1 | true, 0 |
+| "\nA", 400 × 0, Truncate | true, 1; "\n", record on line 1 | true, 0; nothing |
+| "\nA", 400 × 38.09, Ellipsis | true, 1; "…", record on line 0 | the same |
+| "A\n ", 400 × 19.03125, Overflow | false, -1 | true, 2 |
+| " \n\nA", 400 × 19.03125, Ellipsis | true, 3; " ", "…", record | true, 2; the same characters |
+| "A B", 21.69 × 19.04, Truncate, wrapped | true, 2; "A", " ", record, 1 line | the same |
+| "A B", 21.69 × 19.04, Ellipsis, wrapped | true, 2; "A", "…", record | the same |
+| "A", 0 × 100, Truncate, wrapped | false, -1, truncated; nothing | false, -1; "A" |
+| " A", 0 × 100, Truncate, wrapped | false, -1; " ", record, 1 line | " ", "A", 2 lines |
+| GRAYSTROKE 12 pt " \nA", 7.28 × 12.59, Ellipsis | true, 2; "…", record | true, 2; " ", "…", record |
+| GRAYSTROKE 12 pt U+00A0 (fallback, 20.41 high), 400 × 12.59, Overflow | false, -1 | true, 0 |
+| preferred size, "A\n " | 8.94 × 19.04 | 8.94 × 38.1 |
+| preferred size, "\t" | 0.01 × 19.04 | 14.01 × 20.74 |
+
+Not measured: other white space (U+2000–U+200A, U+3000, the zero-width space), Page, Linked
+and ScrollRect, auto-size (whether a text of white space alone fits), margins, rich text,
+several fonts on one line, and whether "…" backs up past a visible character it cannot follow.
+Measure them the same way before relying on them.
 
 ## Verification
 

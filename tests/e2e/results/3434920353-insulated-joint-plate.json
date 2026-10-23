@@ -1,0 +1,59 @@
+{
+ "spec": "mods/3434920353-insulated-joint-plate.yaml",
+ "mods": [
+  "3434920353"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the short insulated Heavi-Watt joint plate is built of sandstone and copper ore in the corridor, its cell's insulation drops as in the original, and its details title is shot",
+ "updated": "2026-10-23",
+ "commit": "be506d9",
+ "mod_dlls": {
+  "3434920353": {
+   "InsulatedJointPlate.dll": "833106ab3e33d94f47309c42fd1a305510588d5cdf12f095aff2210464900adb"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-113951-d72f9a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T12:22:16",
+    "lane": 13,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-123343-561091",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T12:36:13",
+    "lane": 12,
+    "reference_run": "20261023-113951-d72f9a",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "title": 0.0
+    }
+   },
+   {
+    "run": "20261023-123343-561091",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T12:37:33",
+    "lane": 12,
+    "reference_run": "20261023-113951-d72f9a",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "title": 0.0
+    }
+   }
+  ]
+ }
+}

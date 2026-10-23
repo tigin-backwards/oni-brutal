@@ -1,0 +1,35 @@
+# Insulated Joint Plate [FIXED] (3434920353), class B.
+#
+# What it does: adds four insulated Heavi-Watt joint plates to the Power menu: of raw
+# mineral and metal (Advanced Power Regulation) and of raw mineral and refined metal (Low-Resistance
+# Conductors), each in a short (1 cell, linking the cells beside it) and a long version. Their
+# tile conducts heat at 0.01: an Insulator, and for the long ones a patch on
+# BuildingComplete.OnSpawn that insulates every cell they cover.
+# How a player reaches it: the build menu (Power).
+# What changes: a Heavi-Watt wire through an insulated wall.
+#
+# setup grants Advanced Power Regulation and spawns sandstone and copper ore. The short plate
+# is built in the dug-out corridor west of the printing pod; once built its cell's insulation
+# drops far below an open cell's.
+from: early-base
+mods: [3434920353]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"AdvancedPowerRegulation\")", method: Purchased}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"SandStone\").substance", method: SpawnResource, args: [[113.5, 207.5, -12], 600, 300, 255, 0]}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Cuprite\").substance", method: SpawnResource, args: [[115.5, 207.5, -12], 400, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"AdvancedPowerRegulation\").unlockedItemIDs": {contains: InsulatedWireBridgeHighWattage}
+      "Assets.GetBuildingDef(\"InsulatedWireBridgeHighWattage\").ThermalConductivity": 0.01
+      "cells:111,207..111,207::Grid.Insulation.get_Item({cell})": 255
+  - build: {prefab: InsulatedWireBridgeHighWattage, at: [111, 207]}
+  - expect: {blueprints: {InsulatedWireBridgeHighWattage: 1}}
+  - run: {seconds: 900, until: {buildings: {InsulatedWireBridgeHighWattage: 1}, pending_construction: 0}}
+  - expect_state: {"cells:111,207..111,207::Grid.Insulation.get_Item({cell})": "< 10"}
+  - expect_state: {"cells:111,207..111,207::Grid.Insulation.get_Item({cell})": "== original"}
+  - driver: {camera.set: {cell: [111, 208], ortho: 8}}
+  - click_world: {cell: [111, 207], select: InsulatedWireBridgeHighWattage}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Insulated"}
+  - shot: {name: title, crop: "**/DetailsScreen/TitleBar", threshold: 0.04}

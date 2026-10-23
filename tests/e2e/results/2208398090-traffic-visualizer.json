@@ -3,12 +3,12 @@
  "mods": [
   "2208398090"
  ],
- "verdict": "pending",
- "why": "0 run(s) of ours against original run 20261023-042128-2bb68b; 2 needed",
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
  "findings": [],
- "note": "",
+ "note": "after half a minute of play the Duplicants' steps are counted; the overlay bar's Traffic button (dumped) switches the overlay on and off",
  "updated": "2026-10-23",
- "commit": "885cbe9",
+ "commit": "312be48",
  "mod_dlls": {
   "2208398090": {
    "TrafficVisualizer.dll": "b65d932fa2ddea68355c79971f26169175cb109dd26dd5c828c21e2b293eaaad"
@@ -25,6 +25,39 @@
     "signatures": 0
    }
   ],
-  "ours": []
+  "ours": [
+   {
+    "run": "20261023-071232-9deea2",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T07:12:32",
+    "lane": 15,
+    "reference_run": "20261023-042128-2bb68b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "overlays": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261023-071232-9deea2",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T07:13:28",
+    "lane": 15,
+    "reference_run": "20261023-042128-2bb68b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "overlays": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
  }
 }

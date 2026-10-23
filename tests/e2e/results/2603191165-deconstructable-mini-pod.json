@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2603191165-deconstructable-mini-pod.yaml",
+ "mods": [
+  "2603191165"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Mini-Pod built from the build menu's prefab allows deconstruction; the Deconstruct tool marks it and the Duplicants take it down",
+ "updated": "2026-10-23",
+ "commit": "5064bfe",
+ "mod_dlls": {
+  "2603191165": {
+   "DeconstructableMiniPod.dll": "b5baaad44f2b34d66c7a6499b2a22ee2873b2dbaf422d647727dd9a2fc8ee1c5"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-141057-2a0687",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T14:10:57",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-141305-0904a5",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T14:13:05",
+    "lane": 14,
+    "reference_run": "20261023-141057-2a0687",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-141305-0904a5",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T14:14:36",
+    "lane": 15,
+    "reference_run": "20261023-141057-2a0687",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

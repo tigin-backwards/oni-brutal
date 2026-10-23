@@ -1,0 +1,32 @@
+# Deconstructable Mini-Pod (2603191165), class P.
+#
+# What it does: a postfix on BuildingComplete.OnSpawn allows deconstruction of the Mini-Pod
+# (ExobaseHeadquarters), which its Telepad component otherwise forbids, so a player can take
+# down a Mini-Pod built in the wrong place.
+# How a player reaches it: the Deconstruct tool (or the user menu) over a built Mini-Pod.
+# What changes: the Mini-Pod accepts the deconstruct order and is taken down.
+#
+# setup grants Advanced Research (the Mini-Pod's tech) and spawns sandstone. The Mini-Pod is
+# built in the dug-out corridor west of the printing pod, marked with the Deconstruct tool,
+# and taken down by the Duplicants.
+from: early-base
+mods: [2603191165]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"AdvancedResearch\")", method: Purchased}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"SandStone\").substance", method: SpawnResource, args: [[111.5, 206.5, -12], 400, 300, 255, 0]}}
+steps:
+  - build: {prefab: ExobaseHeadquarters, at: [113, 206]}
+  - expect: {blueprints: {ExobaseHeadquarters: 1}}
+  - run: {seconds: 1200, until: {buildings: {ExobaseHeadquarters: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [114, 208], ortho: 8}}
+  - click_world: {cell: [114, 207], select: ExobaseHeadquarters}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<Deconstructable>.allowDeconstruction": true
+  - key: {code: Escape}
+  - tool: {toolbar: Deconstruct}
+  - drag: {from: [113, 206], to: [115, 208]}
+  - key: {code: Escape}
+  - expect_state: {"count:all:Deconstructable::[*] if .IsMarkedForDeconstruction() == true": 1}
+  - run: {seconds: 900, until: {buildings: {ExobaseHeadquarters: 0}}}
+  - expect: {buildings: {ExobaseHeadquarters: 0}}

@@ -343,7 +343,7 @@ installs get developer checks subscribers never see).
 | 322 | [Airtight/Airlock Door With Half Door](https://steamcommunity.com/sharedfiles/filedetails/?id=2093302246) | ✅ | ✅ | ⬜ |  |
 | 323 | [Show Industrial Machinery Tag](https://steamcommunity.com/sharedfiles/filedetails/?id=1706080287) | ⬜ | ⬜ | ⬜ | flagged by onimaxxing (crashesAtStartup); not tested |
 | 324 | [S 增强冰箱 Enhanced Refrigerator 2.0](https://steamcommunity.com/sharedfiles/filedetails/?id=2874973256) | ✅ | ✅ | ⬜ |  |
-| 325 | [Deconstructable Mini-Pod](https://steamcommunity.com/sharedfiles/filedetails/?id=2603191165) | ✅ | ✅ | ⬜ |  |
+| 325 | [Deconstructable Mini-Pod](https://steamcommunity.com/sharedfiles/filedetails/?id=2603191165) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2603191165-deconstructable-mini-pod.yaml: a Mini-Pod built from the build menu's prefab allows deconstruction; the Deconstruct tool marks it and the Duplicants take it down |
 | 326 | [Auto Connect: Power](https://steamcommunity.com/sharedfiles/filedetails/?id=3636360749) | ⬜ | ⬜ | ⬜ | flagged by onimaxxing (crashesAtStartup); not tested |
 | 327 | [SuperSmartBattery[Vanilla+DLC]](https://steamcommunity.com/sharedfiles/filedetails/?id=2018048391) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2018048391-super-smart-battery.yaml: a Smart Battery built from the build menu's prefab holds 600 kJ and leaks 0.0067 J/s; its details screen within threshold |
 | 328 | [Advanced Space Cooler](https://steamcommunity.com/sharedfiles/filedetails/?id=2119934242) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2119934242-advanced-space-cooler.yaml: the cooler is picked in the build menu (Utilities) and placed in the corridor west of the pod, run unpowered through its config.json: once built, the air of its cells is over 200 K colder within a minute |

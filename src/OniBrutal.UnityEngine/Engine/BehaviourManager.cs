@@ -78,6 +78,7 @@ namespace OniBrutal.Engine
             public readonly Dictionary<ScriptInfo, long> Times = new();
             readonly SortedDictionary<int, List<BehaviourNative>> byOrder = new();
             readonly List<BehaviourNative> pendingAdd = new();
+            readonly HashSet<BehaviourNative> pendingAddSet = new();
             readonly HashSet<BehaviourNative> members = new();
             readonly HashSet<BehaviourNative> pendingRemove = new();
             readonly List<List<BehaviourNative>> touched = new();
@@ -86,13 +87,17 @@ namespace OniBrutal.Engine
             {
                 if (selector(b.Script) == null) return;
                 pendingRemove.Remove(b);
-                if (members.Contains(b) || pendingAdd.Contains(b)) return;
+                if (members.Contains(b) || !pendingAddSet.Add(b)) return;
                 pendingAdd.Add(b);
             }
 
             public void Remove(BehaviourNative b)
             {
-                if (pendingAdd.Remove(b)) return;
+                if (pendingAddSet.Remove(b))
+                {
+                    pendingAdd.Remove(b);
+                    return;
+                }
                 if (members.Contains(b)) pendingRemove.Add(b);
             }
 
@@ -119,6 +124,7 @@ namespace OniBrutal.Engine
                     members.Add(b);
                 }
                 pendingAdd.Clear();
+                pendingAddSet.Clear();
             }
 
             int depth;
@@ -136,10 +142,18 @@ namespace OniBrutal.Engine
                         for (int i = 0; i < list.Count; i++)
                         {
                             var b = list[i];
-                            // Disabled or destroyed earlier in this phase: skip. A behaviour whose
-                            // Start has not run yet (enabled after this frame's Start pass) gets its
-                            // update callbacks only after Start, as in Unity.
-                            if (!b.IsActiveAndEnabledState || (pendingRemove.Count != 0 && pendingRemove.Contains(b)) || !b.StartCalled) continue;
+                            // Disabled or destroyed earlier in this phase: skip.
+                            if (!b.IsActiveAndEnabledState || (pendingRemove.Count != 0 && pendingRemove.Contains(b))) continue;
+                            if (!b.StartCalled)
+                            {
+                                // A member whose Start is still pending starts here, just before
+                                // its first callback of this phase, ahead of the pending Starts of
+                                // behaviours without this callback (measured in the original,
+                                // UnityProbe scenarios 13, 17, 18).
+                                if (!b.StartPending) continue;
+                                RunStart(b);
+                                if (!b.IsActiveAndEnabledState || b.Destroyed) continue;
+                            }
                             if (!PlayerLoop.FrameStats)
                             {
                                 Lifecycle.Invoke(selector(b.Script), (MonoBehaviour)b.Managed);
@@ -199,32 +213,47 @@ namespace OniBrutal.Engine
         /// enabled first). Execution order still shapes Start order indirectly, through the Awake/OnEnable
         /// order of a batch activated together. A behaviour that is not active-and-enabled at
         /// that point keeps its Start for when it is enabled.
+        ///
+        /// Starts scheduled while the pass runs (objects a Start creates) wait for a later pass,
+        /// or for the first update callback of their own (PhaseList.Run), as measured in the
+        /// original (UnityProbe scenarios 14 and 17): the game's SaveLoader loads a save from a
+        /// Start, and the Duplicants' behaviours with Update start before the others, all
+        /// Duplicants' together; their MinionIdentity spawns before their KPrefabID, so a
+        /// dead Duplicant enters Components.LiveMinionIdentities and leaves it again, which
+        /// reorders the list.
         public static void RunStarts()
         {
-            while (startQueue.Count > 0)
+            if (startQueue.Count == 0) return;
+            var batch = startQueue.ToArray();
+            startQueue.Clear();
+            foreach (var b in batch)
             {
-                var batch = startQueue.ToArray();
-                startQueue.Clear();
-                foreach (var b in batch)
+                // Started since it was queued (by its first update callback): nothing to do.
+                if (b.StartCalled || b.Destroyed) continue;
+                b.StartPending = false;
+                if (!b.IsActiveAndEnabledState) continue; // rescheduled on the next OnEnable
+                RunStart(b);
+            }
+        }
+
+        /// Start for one behaviour, active and enabled, whose Start has not run. A queue entry it
+        /// leaves behind is skipped by the pass that reaches it.
+        static void RunStart(BehaviourNative b)
+        {
+            b.StartPending = false;
+            b.StartCalled = true;
+            var mb = (MonoBehaviour)b.Managed;
+            if (b.Script.Start != null) Lifecycle.Invoke(b.Script.Start, mb);
+            else if (b.Script.StartCoroutine != null)
+            {
+                try
                 {
-                    b.StartPending = false;
-                    if (b.StartCalled || b.Destroyed) continue;
-                    if (!b.IsActiveAndEnabledState) continue; // rescheduled on the next OnEnable
-                    b.StartCalled = true;
-                    var mb = (MonoBehaviour)b.Managed;
-                    if (b.Script.Start != null) Lifecycle.Invoke(b.Script.Start, mb);
-                    else if (b.Script.StartCoroutine != null)
-                    {
-                        try
-                        {
-                            var routine = b.Script.StartCoroutine(mb);
-                            if (routine != null) Coroutines.Start(mb, routine);
-                        }
-                        catch (Exception e)
-                        {
-                            Debug.LogException(e, mb);
-                        }
-                    }
+                    var routine = b.Script.StartCoroutine(mb);
+                    if (routine != null) Coroutines.Start(mb, routine);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogException(e, mb);
                 }
             }
         }

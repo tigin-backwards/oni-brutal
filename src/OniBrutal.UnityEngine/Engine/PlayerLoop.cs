@@ -125,12 +125,17 @@ namespace OniBrutal.Engine
             EngineLog.FlushToMainThread();
             RunPhase(EarlyUpdate);
 
+            // Passes of pending Starts (measured in the original, UnityProbe scenarios 13 to 18):
+            // at the start of the frame, after each FixedUpdate pass, after Update and after
+            // LateUpdate. Each runs the Starts queued before it began; the update passes start
+            // their own members just before their first callback.
             BehaviourManager.RunStarts();
             while (Time.BeginFixedStep())
             {
                 try
                 {
                     BehaviourManager.RunFixedUpdate();
+                    BehaviourManager.RunStarts();
                     RunPhase(FixedAnimationUpdate);
                     Coroutines.RunFixedUpdatePhase();
                 }
@@ -141,7 +146,6 @@ namespace OniBrutal.Engine
             }
 
             Mark(4);
-            BehaviourManager.RunStarts();
             BehaviourManager.RunUpdate();
             // Update.ScriptRunDelayedDynamicFrameRate: Start for behaviours enabled during
             // Update (so they start before LateUpdate), Invoke calls due, then coroutines resumed
@@ -153,10 +157,11 @@ namespace OniBrutal.Engine
 
             Mark(5);
             RunPhase(AnimationUpdate);
-            // Behaviours enabled after the Update pass (by coroutines, animation events) start
-            // before LateUpdate and get it this frame (observed in Unity's player).
-            BehaviourManager.RunStarts();
+            // Behaviours enabled after the Update pass (by coroutines, animation events) get
+            // LateUpdate this frame, those with it starting just before it; the others start
+            // after it (observed in Unity's player).
             BehaviourManager.RunLateUpdate();
+            BehaviourManager.RunStarts();
             // Invoke calls made since the pass after Update.
             DelayedCalls.Run();
 

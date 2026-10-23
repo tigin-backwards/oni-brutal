@@ -12,6 +12,9 @@ namespace SemanticsProbe
         public override void OnLoad(HarmonyLib.Harmony harmony)
         {
             harmony.Patch(HarmonyLib.AccessTools.Method(typeof(Game), "OnApplicationQuit"), prefix: new HarmonyLib.HarmonyMethod(typeof(Mod), nameof(GameQuitPrefix)), postfix: new HarmonyLib.HarmonyMethod(typeof(Mod), nameof(GameQuitPostfix)));
+            harmony.Patch(HarmonyLib.AccessTools.Method(typeof(MinionIdentity), "OnSpawn"), prefix: new HarmonyLib.HarmonyMethod(typeof(Mod), nameof(MinionSpawnPrefix)));
+            harmony.Patch(HarmonyLib.AccessTools.Method(typeof(KMonoBehaviour), "Start"), prefix: new HarmonyLib.HarmonyMethod(typeof(Mod), nameof(KStartPrefix)));
+            harmony.Patch(HarmonyLib.AccessTools.Method(typeof(MinionIdentity), "OnDied"), prefix: new HarmonyLib.HarmonyMethod(typeof(Mod), nameof(MinionRemovedPrefix)));
             harmony.Patch(HarmonyLib.AccessTools.Method(typeof(DetailsScreen), "OnCmpDisable"), prefix: new HarmonyLib.HarmonyMethod(typeof(Mod), nameof(DetailsDisablePrefix)));
             var go = new GameObject("SemanticsProbe");
             Object.DontDestroyOnLoad(go);
@@ -39,6 +42,17 @@ namespace SemanticsProbe
             var mgrGo = mgr is Component c ? c.gameObject : mgr as GameObject;
             Rec.Log("Game.OnApplicationQuit postfix: screenMgr=" + (mgrGo == null ? "null" : mgrGo.name) + " details under it=" + (d != null && mgrGo != null && d.transform.IsChildOf(mgrGo.transform)) + " details isActiveAndEnabled=" + (d != null && d.isActiveAndEnabled) + " details path=" + (d == null ? "" : Path(d.transform)) + " mgr comp enabled=" + (mgr is Behaviour b && b.isActiveAndEnabled));
         }
+
+        /// The order Duplicants spawn in after a load (Components.LiveMinionIdentities follows it).
+        public static void MinionSpawnPrefix(MinionIdentity __instance) => Rec.Log("MINION OnSpawn " + __instance.name + " kpid=" + __instance.GetComponent<KPrefabID>().InstanceID + " dead=" + __instance.gameObject.HasTag(GameTags.Dead) + " live=" + string.Join(",", Components.LiveMinionIdentities.Items.ConvertAll(m => m.name)));
+
+        public static void KStartPrefix(KMonoBehaviour __instance)
+        {
+            var id = __instance.GetComponent<MinionIdentity>();
+            if (id != null) Rec.Log("KSTART " + __instance.GetType().Name + " on " + id.name + " kpid=" + __instance.GetComponent<KPrefabID>().InstanceID + " spawned=" + __instance.isSpawned);
+        }
+
+        public static void MinionRemovedPrefix(MinionIdentity __instance) => Rec.Log("MINION removed " + __instance.name + " live=" + string.Join(",", Components.LiveMinionIdentities.Items.ConvertAll(m => m.name)));
 
         static string Path(Transform t) => t.parent == null ? t.name : Path(t.parent) + "/" + t.name;
 
@@ -69,6 +83,106 @@ namespace SemanticsProbe
     {
         public string Tag;
         void Start() => Rec.Log("START " + Tag);
+    }
+
+    /// Start-order probes: components with Start and none, one or another of the update
+    /// messages, on objects made in one batch (StartSets), from a coroutine or from a Start.
+    public class StartBase : MonoBehaviour { public string Tag; }
+    public class SN : StartBase { void Start() => Rec.Log("START " + Tag + "/N"); }
+    public class SU : StartBase { bool once; void Start() => Rec.Log("START " + Tag + "/U"); void Update() { if (!once) Rec.Log("FIRST Update " + Tag); once = true; } }
+    public class SL : StartBase { bool once; void Start() => Rec.Log("START " + Tag + "/L"); void LateUpdate() { if (!once) Rec.Log("FIRST LateUpdate " + Tag); once = true; } }
+    public class SF : StartBase { bool once; void Start() => Rec.Log("START " + Tag + "/F"); void FixedUpdate() { if (!once) Rec.Log("FIRST FixedUpdate " + Tag); once = true; } }
+    public class Spawner : StartBase { void Start() { Rec.Log("START " + Tag + " spawner"); StartSets.Make(Tag); } }
+    public class SpawnerU : StartBase { void Start() { Rec.Log("START " + Tag + " spawnerU"); StartSets.Make(Tag); } void Update() { } }
+
+    /// A Start that makes a set and a further Spawner (whose own Start then runs a frame later,
+    /// in the frame's first pass of pending Starts, as the game's SaveLoader does).
+    public class ChainSpawner : StartBase
+    {
+        void Start()
+        {
+            Rec.Log("START " + Tag + " chain");
+            if (Tag.EndsWith("2-")) { StartSets.Make(Tag); return; }
+            new GameObject("chain2").AddComponent<ChainSpawner>().Tag = Tag + "2-";
+        }
+    }
+
+    /// Marks the frame's phases while armed (Frames > 0), and makes a set from inside its own
+    /// Update, LateUpdate or FixedUpdate when asked.
+    public class PhaseMarker : MonoBehaviour
+    {
+        public static int Frames;
+        public static string InUpdate, InLate, InFixed;
+        void FixedUpdate()
+        {
+            if (Frames <= 0) return;
+            Rec.Log("MARK FixedUpdate");
+            if (InFixed != null) { var t = InFixed; InFixed = null; StartSets.Make(t); }
+        }
+        void Update()
+        {
+            if (Frames <= 0) return;
+            Rec.Log("MARK Update");
+            if (InUpdate != null) { var t = InUpdate; InUpdate = null; StartSets.Make(t); }
+        }
+        void LateUpdate()
+        {
+            if (Frames <= 0) return;
+            Rec.Log("MARK LateUpdate");
+            if (InLate != null) { var t = InLate; InLate = null; StartSets.Make(t); }
+            Frames--;
+        }
+        void OnEnable() => StartCoroutine(EndOfFrames());
+        IEnumerator EndOfFrames()
+        {
+            var eof = new WaitForEndOfFrame();
+            while (true)
+            {
+                yield return eof;
+                if (Frames > 0) Rec.Log("MARK EndOfFrame");
+            }
+        }
+    }
+
+    /// Lifecycle of a component added by another one's Awake while its object activates (as
+    /// the game's MyCmpAdd does): A adds C in its Awake, B follows A.
+    public class AwakeLog : MonoBehaviour
+    {
+        public virtual string Name => "?";
+        protected virtual void Awake() => Rec.Log("ADDED " + Name + " Awake");
+        void OnEnable() => Rec.Log("ADDED " + Name + " OnEnable");
+        void Start() => Rec.Log("ADDED " + Name + " Start");
+        bool once;
+        void Update() { if (!once) Rec.Log("ADDED " + Name + " Update"); once = true; }
+    }
+    public class AwakeAdderA : AwakeLog
+    {
+        public override string Name => "A";
+        protected override void Awake() { base.Awake(); if (GetComponent<AwakeAddedC>() == null) gameObject.AddComponent<AwakeAddedC>(); Rec.Log("ADDED A Awake done, components=" + GetComponents<AwakeLog>().Length); }
+    }
+    public class AwakeB : AwakeLog { public override string Name => "B"; }
+    public class AwakeAddedC : AwakeLog { public override string Name => "C"; }
+
+    public static class StartSets
+    {
+        static GameObject template;
+        static void AddAll(GameObject go)
+        {
+            go.AddComponent<SN>(); go.AddComponent<SU>(); go.AddComponent<SN>(); go.AddComponent<SL>(); go.AddComponent<SF>(); go.AddComponent<SN>();
+        }
+        static void Tag(GameObject go, string tag)
+        {
+            var all = go.GetComponents<StartBase>();
+            for (int i = 0; i < all.Length; i++) all[i].Tag = tag + "#" + i;
+        }
+        /// Two new objects, then two clones of an inactive template activated one by one (as
+        /// the game's save loader does).
+        public static void Make(string prefix)
+        {
+            if (template == null) { template = new GameObject("ST"); template.SetActive(false); AddAll(template); Object.DontDestroyOnLoad(template); }
+            for (int i = 0; i < 2; i++) { var go = new GameObject(prefix + "new" + i); go.SetActive(false); AddAll(go); Tag(go, prefix + "new" + i); go.SetActive(true); }
+            for (int i = 0; i < 2; i++) { var go = Object.Instantiate(template); Tag(go, prefix + "clone" + i); go.SetActive(true); }
+        }
     }
 
     public class Upd : MonoBehaviour
@@ -233,6 +347,66 @@ namespace SemanticsProbe
             var inactive = new GameObject[4];
             for (int i = 0; i < 4; i++) { inactive[i] = Instantiate(template); inactive[i].GetComponent<StartLog>().Tag = "activated" + i; }
             for (int i = 0; i < 4; i++) inactive[i].SetActive(true);
+            yield return null;
+            yield return null;
+            Rec.Log("=== scenario 13: Start order of objects with and without update messages, made in a coroutine");
+            StartSets.Make("co-");
+            yield return null;
+            yield return null;
+            Rec.Log("=== scenario 14: the same, made inside a Start without Update");
+            new GameObject("SP").AddComponent<Spawner>().Tag = "inStart-";
+            yield return null;
+            yield return null;
+            Rec.Log("=== scenario 15: the same, made inside a Start with Update");
+            new GameObject("SPU").AddComponent<SpawnerU>().Tag = "inStartU-";
+            yield return null;
+            yield return null;
+            Rec.Log("=== scenario 16: the same, made inside a Start with Update, after objects of their own");
+            new GameObject("pre").AddComponent<SN>().Tag = "pre";
+            new GameObject("preU").AddComponent<SU>().Tag = "preU";
+            new GameObject("SPU2").AddComponent<SpawnerU>().Tag = "inStartU2-";
+            new GameObject("post").AddComponent<SN>().Tag = "post";
+            new GameObject("postU").AddComponent<SU>().Tag = "postU";
+            yield return null;
+            yield return null;
+            Rec.Log("=== scenario 17: phases; a Start made a frame earlier makes a set; sets made in Update, LateUpdate, FixedUpdate");
+            new GameObject("marker").AddComponent<PhaseMarker>();
+            yield return null;
+            PhaseMarker.Frames = 3;
+            Rec.Log("coroutine: making chain");
+            new GameObject("chain").AddComponent<ChainSpawner>().Tag = "chain-";
+            yield return null;
+            yield return null;
+            yield return null;
+            PhaseMarker.Frames = 2;
+            PhaseMarker.InUpdate = "inUpdate-";
+            yield return null;
+            yield return null;
+            yield return null;
+            PhaseMarker.Frames = 2;
+            PhaseMarker.InLate = "inLate-";
+            yield return null;
+            yield return null;
+            yield return null;
+            PhaseMarker.Frames = 3;
+            PhaseMarker.InFixed = "inFixed-";
+            for (int i = 0; i < 8; i++) yield return null;
+            Rec.Log("=== scenario 18: a Start made a frame earlier makes a set, with fixed steps in every frame");
+            float fixedStep = Time.fixedDeltaTime;
+            Time.fixedDeltaTime = 0.0005f;
+            yield return null;
+            PhaseMarker.Frames = 3;
+            new GameObject("chainF").AddComponent<ChainSpawner>().Tag = "chainF-";
+            for (int i = 0; i < 3; i++) { yield return null; Rec.Log("coroutine after Update"); }
+            Time.fixedDeltaTime = fixedStep;
+            Rec.Log("=== scenario 19: a component added by an Awake while its object activates");
+            var adder = new GameObject("adder");
+            adder.SetActive(false);
+            adder.AddComponent<AwakeAdderA>();
+            adder.AddComponent<AwakeB>();
+            adder.SetActive(true);
+            var order = adder.GetComponents<AwakeLog>();
+            Rec.Log("ADDED component order " + string.Join(",", System.Array.ConvertAll(order, c => c.Name)));
             yield return null;
             yield return null;
             yield return Values.Run();

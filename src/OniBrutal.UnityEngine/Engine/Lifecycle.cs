@@ -242,10 +242,25 @@ namespace OniBrutal.Engine
                     // player): objects an Awake creates start after their creator, although they
                     // are enabled first. A behaviour that Awake leaves disabled is skipped when the
                     // queue runs and queued again when enabled.
-                    if (bn.Script != null && bn.Enabled && !bn.StartCalled && !bn.StartPending) BehaviourManager.ScheduleStart(bn);
+                    // Its place among the update callbacks is taken then too: a component that an
+                    // Awake adds (the game's MyCmpAdd) is enabled before the component adding it,
+                    // and updates after it (UnityProbe scenario 19).
+                    bool reserved = bn.Script != null && bn.Enabled;
+                    if (reserved)
+                    {
+                        if (!bn.StartCalled && !bn.StartPending) BehaviourManager.ScheduleStart(bn);
+                        BehaviourManager.Register(bn);
+                    }
                     c.EngineAwake();
                     if (bn.Script?.Awake != null) Invoke(bn.Script.Awake, (MonoBehaviour)c);
-                    if (c.Native == null || !native.GameObject.ActiveInHierarchy) return;
+                    if (c.Native == null || !native.GameObject.ActiveInHierarchy)
+                    {
+                        if (reserved && !bn.IsActiveAndEnabledState) BehaviourManager.Unregister(bn);
+                        return;
+                    }
+                    if (bn.Enabled) Enable(c, bn);
+                    if (reserved && !bn.IsActiveAndEnabledState) BehaviourManager.Unregister(bn); // disabled by Awake
+                    return;
                 }
                 if (bn.Enabled) Enable(c, bn);
             }

@@ -386,7 +386,8 @@ citing why.
     open delegates. A base implementation runs only if the derived one calls it.
   - `Awake` runs when a component's GameObject first becomes active in hierarchy (or at
     load/instantiate time if already active), then `OnEnable`; `Start` runs before that
-    component's first `Update`, deferred to the next Start phase. Activation and deactivation
+    component's first update callback, at the next Start pass or that callback, whichever
+    comes first (§3.3). Activation and deactivation
     recurse in Unity's order (Awake/OnEnable for the whole subtree, parent first; OnDisable
     children-first when deactivating).
   - `Destroy` is deferred to the end of the frame; `DestroyImmediate` is synchronous,
@@ -394,8 +395,8 @@ citing why.
   - Exceptions in a message are logged through `Debug.LogException` and do not stop the frame,
     as in Unity.
 - **Script execution order** comes from `MonoScript.m_ExecutionOrder` in
-  `globalgamemanagers.assets`; within one order, update order is the order components became
-  enabled, matching Unity's behaviour list. Pending `Start` calls are not sorted by it: they run in
+  `globalgamemanagers.assets`; within one order, update order is the order components' activation
+  began (or they were enabled later), matching Unity's behaviour list. Pending `Start` calls are not sorted by it: they run in
   the order the behaviours were scheduled (became active and enabled), as Unity's delayed-call
   queue does.
 - `ScriptableObject` and `MonoBehaviour` instances are created with
@@ -430,11 +431,12 @@ One thread, Unity's order (*usage §1.3, §3.5*), driven by `OniBrutal.Host`:
 ```
 Initialization  time update (Time.*), pending scene-load completion
 EarlyUpdate     platform events → Input state; Screen size changes
-FixedUpdate     0..n steps (accumulator, maximumDeltaTime clamp), coroutines WaitForFixedUpdate
-Update          Start for pending components; Update; Start for components enabled during Update
-                (ScriptRunDelayedDynamicFrameRate); coroutines (null, WaitForSeconds, custom yields).
-                Update/LateUpdate/FixedUpdate reach a behaviour only after its Start.
-PreLateUpdate   Animators (DirectorUpdateAnimationBegin/End); LateUpdate
+                Start pass
+FixedUpdate     0..n steps (accumulator, maximumDeltaTime clamp), each followed by a Start pass;
+                coroutines WaitForFixedUpdate
+Update          Update; Start pass (ScriptRunDelayedDynamicFrameRate); coroutines (null,
+                WaitForSeconds, custom yields).
+PreLateUpdate   Animators (DirectorUpdateAnimationBegin/End); LateUpdate; Start pass
 PostLateUpdate  Canvas.willRenderCanvases (uGUI layout/graphic rebuild) → render all cameras
                 → screen-space-overlay canvases → WaitForEndOfFrame coroutines → present
                 → deferred Destroy processing
@@ -453,6 +455,17 @@ not by script execution order. Both were measured in the original player: a larg
 although it is enabled first. (Loading a save, Game's Awake creates the screens, among them the
 new-colony screen; Game starts first and destroys that screen, whose Start would otherwise name
 the colony anew and move its saves to a new folder.)
+
+A Start pass runs the Starts queued before it began; those queued meanwhile (objects a Start
+creates) wait. FixedUpdate, Update and LateUpdate start a member whose Start is still pending
+just before its first call, so it starts ahead of pending behaviours without that message. A
+behaviour also takes its place among the update callbacks when its activation begins: a
+component that an Awake adds (the game's `MyCmpAdd`) is enabled before its adder but updates
+after it. All of this was measured in the original (UnityProbe scenarios 13 to 19). The game
+depends on it: SaveLoader loads a save from a Start, so the Duplicants' StandardWorker starts
+before their other components and spawns their MinionIdentity before their KPrefabID. A dead
+Duplicant thus enters `Components.LiveMinionIdentities` and is removed again once its KPrefabID
+restores the Dead tag, and that removal reorders the list.
 
 Coroutines are Unity's state machine: an `IEnumerator` is advanced immediately by
 `StartCoroutine`; nested `IEnumerator`/`Coroutine` yields wait for the child;

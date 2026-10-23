@@ -10,6 +10,10 @@
 # setup hurts a standard Duplicant (the second; the first is a bionic one, which has no
 # WoundMonitor) to half health: Injured, the wounded.medium state, where the game assigns no
 # bed. A Sick Bay is then built in the dug-out corridor west of the printing pod.
+#
+# Broken upstream: this spec fails in the original. The Sick Bay is built and free, the
+# Duplicant stays Injured, and no bed is assigned 20 s on (Assignables.AutoAssignSlot, called
+# by hand on the same Duplicant, does assign it). Kept to re-check when the mod is updated.
 from: early-base
 mods: [1822160024]
 setup:

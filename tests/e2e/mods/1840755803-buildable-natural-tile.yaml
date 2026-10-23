@@ -1,0 +1,30 @@
+# Buildable Natural Tile (1840755803), class B.
+#
+# What it does: adds the Natural Tile to the Base menu (researched with Basic Farming, the tech
+# of the Ration Box): built of any solid, it turns at once into a natural cell of that element
+# (the building removes itself, the cell gets the element at the configured block mass, and
+# items in the cell are pushed out).
+# How a player reaches it: the build menu (Base).
+# What changes: an open cell becomes natural rock, diggable again.
+#
+# setup grants Basic Farming. The tile fills one cell of the pit in the floor of the dug-out
+# room west of the printing pod.
+from: early-base
+mods: [1840755803]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"FarmingTech\")", method: Purchased}}
+steps:
+  - expect_state:
+      "Grid.Solid.get_Item(131124)": false
+  - build: {prefab: NaturalTile, at: [108, 206], material: SandStone}
+  - expect: {blueprints: {NaturalTile: 1}}
+  - run: {seconds: 900, until: {pending_construction: 0}}
+  # No building is left; the cell is natural sandstone.
+  - expect: {buildings: {NaturalTile: 0}}
+  - expect_state:
+      "Grid.Solid.get_Item(131124)": true
+      "Grid.Element[131124].id": SandStone
+      "Grid.Mass.get_Item(131124)": "== original"
+  # Above the tile, where Duplicants walk wherever the run left them, is masked, and so is the
+  # management bar.
+  - world_shot: {name: tile, ortho: 4, at: [108, 207], mask: [[0, 0, 1280, 400]]}

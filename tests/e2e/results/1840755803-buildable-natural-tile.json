@@ -1,0 +1,59 @@
+{
+ "spec": "mods/1840755803-buildable-natural-tile.yaml",
+ "mods": [
+  "1840755803"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Natural Tile of sandstone built from its prefab becomes a natural sandstone cell of the same mass as in the original; world shot of it, the walkway above masked",
+ "updated": "2026-10-23",
+ "commit": "0feba58",
+ "mod_dlls": {
+  "1840755803": {
+   "BuildableNaturalTile-merged.dll": "0899a8b45dc41b21875659423bce0f31870bed493530660eecb05b134f4aacc0"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261022-235451-fe01eb",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-22T23:56:06",
+    "lane": 12,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-000434-dd3ae3",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T00:07:34",
+    "lane": 13,
+    "reference_run": "20261022-235451-fe01eb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "tile": 0.01428
+    }
+   },
+   {
+    "run": "20261023-000434-dd3ae3",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T00:08:54",
+    "lane": 13,
+    "reference_run": "20261022-235451-fe01eb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "tile": 0.015332
+    }
+   }
+  ]
+ }
+}

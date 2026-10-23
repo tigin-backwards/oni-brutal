@@ -64,6 +64,18 @@ form feed, U+0003, U+2000–U+200B, U+2028, U+2029, U+3000, U+FEFF, U+180E) alon
 characters at two sizes, in rects 50, 400 and 1000 wide. `PROBE_OV_PART=chars` runs only
 these.
 
+With `PROBE_SCENARIO=inputlayout` only the input-field layout probe runs (`InputLayout.cs`, lines
+`IL …`, 10 s into the main menu). It logs `TMP_InputField`'s layout element values (min,
+preferred, flexible, priority) beside its text component's and placeholder's preferred sizes,
+and `LayoutUtility`'s values and the rects. The fields are built in code as Klei's prefabs are,
+and the cases vary the field's rect, the text rect, the viewport's anchors, offsets and mask
+padding, the text's margins and text, the placeholder, the line type and the character limit.
+Then Geyser Control's slider row and other layouts (a `HorizontalLayoutGroup` with height
+control on and off, `ContentSizeFitter`s) are logged through four forced layout passes and three
+frames. Check the rule with `tools/UnityProbe/il-check.py rule LOG`, and compare the players
+with `il-check.py diff ORIG OURS`. `textmeshpro.md` ("The input field's layout values")
+records what it measured.
+
 With `PROBE_SCENARIO=floatprec` only the float-precision probe runs (`FloatPrecision.cs`, lines
 `VAL fp …`, at mod load; the full run includes it in its values): float expressions whose
 float32 and double results differ, each line saying which one the player gave. Its header

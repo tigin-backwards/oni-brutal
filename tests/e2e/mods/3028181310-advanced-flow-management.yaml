@@ -1,0 +1,41 @@
+# Advanced Flow Management (3028181310), classes T, S, V.
+#
+# What it does: a pipe cell where three or four pipe segments meet (a crossing) gets a flow
+# configuration: which branches flow in and out and with what priority, set in a side screen
+# on the crossing (FlowConfigurationSideScreen) and drawn as arrows and icons over the pipe
+# overlays; buffers at crossings; the settings follow a pipe's copy-settings tool. Patches on
+# ConduitFlow route the flow by those priorities.
+# How a player reaches it: build pipes that cross; select the crossing; its side screen.
+# What changes: how liquids and gases split at junctions.
+#
+# setup researches Plumbing. Liquid pipes are dragged from the build menu in the dug-out corridor
+# west of the printing pod: along y 208 from x 106 to 110, and up from (108, 208) to
+# (108, 209), a T (a cell higher is out of reach). Once built, the junction (108, 208) is a
+# crossing, and selecting it shows the mod's side screen.
+from: early-base
+mods: [3028181310]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"LiquidPiping\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+steps:
+  - run: {seconds: 5}
+  - driver: {camera.set: {cell: [108, 209], ortho: 8}}
+  - click: {ui: "**/PlanScreen/Toggle:Plumbing"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/LiquidConduit Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/LiquidConduit Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
+  - drag: {from: [106, 208], to: [110, 208]}
+  - drag: {from: [108, 208], to: [108, 209]}
+  - key: {code: Escape}
+  - expect: {blueprints: {LiquidConduit: ">= 6"}}
+  - run: {seconds: 1200, until: {pending_construction: 0}}
+  - expect: {buildings: {LiquidConduit: ">= 6"}}
+  - run: {seconds: 2}
+  - expect_state:
+      "type:AdvancedFlowManagement.Utils::ConduitTypeToCrossingsSet(\"Liquid\").Contains(132396)": true
+  - key: {code: F6}
+  - click_world: {cell: [108, 208], select: LiquidConduit}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/FlowConfigurationSideScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<AdvancedFlowManagement.CrossingCmp>": exists
+  - shot: {name: side-screen, crop: "**/FlowConfigurationSideScreen", threshold: 0.04}

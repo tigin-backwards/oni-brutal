@@ -1,0 +1,63 @@
+{
+ "spec": "mods/3487819075-true-tiles-skin-selector.yaml",
+ "mods": [
+  "3487819075",
+  "2815406414"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with True Tiles installed, a sandstone tile's skin side screen lists the skins; clicking the second sets the tile's override; the side screen shot as in the original",
+ "updated": "2026-10-23",
+ "commit": "047fcf4",
+ "mod_dlls": {
+  "3487819075": {
+   "AkiTrueTiles_SkinSelectorAddon.dll": "4218f77d80f8ce699254b32783a03554cf94be36aaa57c000c5e1ddac094c698"
+  },
+  "2815406414": {
+   "TrueTiles.dll": "ccd24cf608fa27ada9eef6f7dbcc25498329d553db6dbdf7985c137a7c0034ac"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-084432-178ad9",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T10:29:49",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-105328-d91fd4",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T10:57:31",
+    "lane": 16,
+    "reference_run": "20261023-084432-178ad9",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "skins": 0.0
+    }
+   },
+   {
+    "run": "20261023-105328-d91fd4",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T10:58:29",
+    "lane": 16,
+    "reference_run": "20261023-084432-178ad9",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "skins": 0.0
+    }
+   }
+  ]
+ }
+}

@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2154537340-dont-idle-in-doors.yaml",
+ "mods": [
+  "2154537340"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with Idle Traverse Doors off, every door def carries the flag and a Pneumatic Door built from a build order marks its cells against idle traversal, as in the original",
+ "updated": "2026-10-23",
+ "commit": "047fcf4",
+ "mod_dlls": {
+  "2154537340": {
+   "NoDoorIdle.dll": "2aa7bea4132c1e766f6eb87016853759f9212738d127c54e10db587161a808ff"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-103528-04bb40",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T10:46:44",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-105328-d91fd4",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T11:01:22",
+    "lane": 16,
+    "reference_run": "20261023-103528-04bb40",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-105328-d91fd4",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T11:02:38",
+    "lane": 16,
+    "reference_run": "20261023-103528-04bb40",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

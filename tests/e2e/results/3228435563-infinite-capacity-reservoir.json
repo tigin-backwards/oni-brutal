@@ -1,0 +1,59 @@
+{
+ "spec": "mods/3228435563-infinite-capacity-reservoir.yaml",
+ "mods": [
+  "3228435563"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a smaller spec (no pipe fills it): the infinite liquid reservoir is built from a build order and selected; its threshold side screen typed to 3 sets 999 kg; the details screen shot as in the original",
+ "updated": "2026-10-23",
+ "commit": "047fcf4",
+ "mod_dlls": {
+  "3228435563": {
+   "FullCapacityReservoir.dll": "75ed6ebe83d1d8e8802456e417e7ae842c887ed533a6f8d2e3eb0e0403c198b5"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-103528-04bb40",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T10:48:40",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-105328-d91fd4",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T11:03:52",
+    "lane": 16,
+    "reference_run": "20261023-103528-04bb40",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "details": 0.002155
+    }
+   },
+   {
+    "run": "20261023-105328-d91fd4",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T11:05:55",
+    "lane": 16,
+    "reference_run": "20261023-103528-04bb40",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "details": 0.002155
+    }
+   }
+  ]
+ }
+}

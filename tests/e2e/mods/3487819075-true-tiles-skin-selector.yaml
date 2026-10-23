@@ -1,0 +1,31 @@
+# True Tiles Skin Selector (3487819075), classes S, V; an addon to True Tiles (2815406414).
+#
+# What it does: a tile that True Tiles textures by its material gets a side screen (cloned
+# from the artable selection screen) with a button per skin True Tiles has for that kind of
+# tile, the vanilla look and each material's texture; picking one draws the tile with that
+# skin whatever it is built of (TrueTiles_OverrideStorage on the tile, saved and copied with
+# its settings; patches on True Tiles' block tile renderer). Reset clears the choice.
+# How a player reaches it: select a tile; its skin side screen.
+# What changes: how a single tile looks.
+#
+# With True Tiles installed, the sandstone tile west under the printing pod (121, 206) is
+# selected: the side screen lists the skins, and the second one is clicked; the tile then
+# carries that override.
+from: early-base
+mods: [3487819075, 2815406414]
+steps:
+  - expect_state:
+      "type:AkiTrueTiles_SkinSelectorAddon.Mod::TrueTilesEnabled": true
+  - driver: {camera.set: {cell: [121, 207], ortho: 8}}
+  - click_world: {cell: [121, 206], select: Tile}
+  - ui_wait: {path: "**/TrueTilesSkinSelectorSideScreen/Content/Scroll/Grid", cond: stable}
+  - expect_state:
+      "selected:GetComponent<AkiTrueTiles_SkinSelectorAddon.TrueTiles_OverrideStorage>.OverrideElement": Void
+      "selected:GetComponent<PrimaryElement>.ElementID": SandStone
+  - expect_ui:
+      "**/TrueTilesSkinSelectorSideScreen/Content/Scroll/Grid/ButtonPrefab": {count: ">= 2"}
+  - shot: {name: skins, crop: "**/TrueTilesSkinSelectorSideScreen", threshold: 0.04}
+  - click: {ui: "**/TrueTilesSkinSelectorSideScreen/Content/Scroll/Grid/ButtonPrefab", index: 1}
+  - expect_state:
+      "selected:GetComponent<AkiTrueTiles_SkinSelectorAddon.TrueTiles_OverrideStorage>.OverrideElement": "!= 'Void'"
+      "ui:**/TrueTilesSkinSelectorSideScreen/Content/Scroll/Grid/ButtonPrefab[1]::GetComponent<MultiToggle>.CurrentState": 1

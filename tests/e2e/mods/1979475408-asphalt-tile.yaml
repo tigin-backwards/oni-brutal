@@ -1,0 +1,42 @@
+# Asphalt Tile (1979475408), classes B, S, M.
+#
+# What it does: adds the Asphalt Tile to the Base menu beside the Metal Tile (Improved
+# Combustion): a floor tile of bitumen that Duplicants run on at twice their speed (its
+# SimCellOccupier's movementSpeedMultiplier, from the mod's settings). Bitumen becomes a
+# usable manufactured material, and the Oil Refinery drops it as a by-product. A Settings
+# button on the mod's row in the Mods screen opens a dialog (from the mod's asset bundle) with
+# a speed slider, 1 to 20 times.
+# How a player reaches it: the build menu (Base); the Mods screen's Settings button.
+# What changes: fast floors.
+#
+# setup grants Improved Combustion and spawns bitumen. The tile fills one cell of the pit in
+# the floor of the dug-out room west of the printing pod: it carries the speed in the mod's
+# shipped settings.json, 3.5 (2 without one).
+from: early-base
+mods: [1979475408]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"ImprovedCombustion\")", method: Purchased}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Bitumen\").substance", method: SpawnResource, args: [[113.5, 207.5, -12], 400, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"ImprovedCombustion\").unlockedItemIDs": {contains: AsphaltTile}
+      "ElementLoader.FindElementByName(\"Bitumen\").oreTags": {contains: BuildableAny}
+  - build: {prefab: AsphaltTile, at: [108, 206], material: Bitumen}
+  - expect: {blueprints: {AsphaltTile: 1}}
+  - run: {seconds: 900, until: {buildings: {AsphaltTile: 1}, pending_construction: 0}}
+  - expect_state:
+      "count:all:SimCellOccupier::[*] if .GetComponent<KPrefabID>.PrefabTag.Name == AsphaltTile": 1
+      "sum:all:SimCellOccupier::[*].movementSpeedMultiplier if .GetComponent<KPrefabID>.PrefabTag.Name == AsphaltTile": 3.5
+  - world_shot: {name: tile, ortho: 4, at: [108, 207], mask: [[0, 0, 1280, 400]]}
+  # The settings dialog: from the Mods screen of the main menu, which cannot be shot.
+  - key: {code: Escape}
+  - ui_wait: {path: "**/PauseScreen/**/Main MenuButton", cond: stable}
+  - click: {ui: "**/PauseScreen/**/Main MenuButton"}
+  - ui_wait: {path: "**/ConfirmDialog/GameObject/Panel/ConfigurableButton", cond: stable}
+  - click: {ui: "**/ConfirmDialog/GameObject/Panel/ConfigurableButton"}   # Quit Without Saving
+  - ui_wait: {path: "**/MainMenu_SpacedOut/MainMenuMenubar/MainMenuButtons", cond: stable, frames: 3000}
+  - click: {text: "MODS", under: "**/MainMenuButtons"}
+  - ui_wait: {path: "**/ModsScreen/Panel", cond: stable}
+  - click: {text: "Settings", under: "**/ModsScreen/Panel/ListView/Files/Viewport/Content/Asphalt Tile"}
+  - ui_wait: {path: "**/SettingsDialog(Clone)", cond: stable}
+  - ui_dump: {name: settings, root: "**/SettingsDialog(Clone)"}

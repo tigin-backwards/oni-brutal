@@ -1,0 +1,67 @@
+{
+ "spec": "mods/1979475408-asphalt-tile.yaml",
+ "mods": [
+  "1979475408"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with Improved Combustion granted, an Asphalt Tile is built of bitumen at the shipped speed 3.5 (world shot as in the original); the Mods screen's Settings button opens its dialog, dumped as in the original",
+ "updated": "2026-10-23",
+ "commit": "047fcf4",
+ "mod_dlls": {
+  "1979475408": {
+   "Asphalt.dll": "b75ef6fda244c878a1b7b32811843dcf29e3160d56c06365321dd52f45e1636c"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-103528-04bb40",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T10:51:20",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-105328-d91fd4",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T11:07:53",
+    "lane": 16,
+    "reference_run": "20261023-103528-04bb40",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "settings": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "tile": 0.037942
+    }
+   },
+   {
+    "run": "20261023-105328-d91fd4",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T11:09:10",
+    "lane": 16,
+    "reference_run": "20261023-103528-04bb40",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "settings": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "tile": 0.029597
+    }
+   }
+  ]
+ }
+}

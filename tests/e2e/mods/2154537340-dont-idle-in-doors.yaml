@@ -1,0 +1,29 @@
+# Don't Idle in Doors (2154537340), classes P, O.
+#
+# What it does: idle Duplicants no longer pick a cell in or under a door to stand in, and move
+# on if they find themselves in one (patches on IdleCellQuery.IsMatch and IdleChore's
+# states); with "Idle Traverse Doors" off, every door's def gets PreventIdleTraversalPastBuilding,
+# so idle Duplicants do not wander through doors; a transpiler on
+# MinionPathFinderAbilities.TraversePath fixes idle Duplicants stuck at checkpoints. PLib
+# options switch each part.
+# How a player reaches it: building doors; idle Duplicants.
+# What changes: where idle Duplicants stand and walk.
+#
+# Options here: Idle Traverse Doors off. A Pneumatic Door is built in the dug-out
+# corridor west of the printing pod: the game's doors carry the flag, and the door's cells are
+# marked against idle traversal, which the game alone leaves open.
+from: early-base
+mods: [2154537340]
+options:
+  "2154537340": {CanIdleTraverseDoors: false}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"Door\").PreventIdleTraversalPastBuilding": true
+      "Assets.GetBuildingDef(\"PressureDoor\").PreventIdleTraversalPastBuilding": true
+      "Grid.PreventIdleTraversal.get_Item(131764)": false
+  - build: {prefab: Door, at: [112, 207]}
+  - expect: {blueprints: {Door: 1}}
+  - run: {seconds: 900, until: {buildings: {Door: 2}}}   # early-base has a door already
+  - expect_state:
+      "Grid.PreventIdleTraversal.get_Item(131764)": true
+      "Grid.PreventIdleTraversal.get_Item(132400)": true

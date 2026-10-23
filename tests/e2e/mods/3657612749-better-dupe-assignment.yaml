@@ -1,0 +1,30 @@
+# Better Dupe Assignment (3657612749), classes S, O, V.
+#
+# What it does: groups the colony's errands into work clusters by kind (dig/build,
+# farm/ranch, operate, supply/haul, sweep/mop, cook, doctor, ...) and place, and keeps each
+# Duplicant on the cluster it was given for a while, so Duplicants stop criss-crossing the
+# base (a postfix on GlobalChoreProvider.CollectChores reorders the chores they may pick; a
+# "Focused" status line on each Duplicant). A "Work Clusters" overlay, with its own toggle at
+# the end of the overlay bar and a legend of the cluster kinds, draws the clusters. PLib
+# options set the debug level, the status line, hatted specialists and reachability checks.
+# How a player reaches it: playing; the Work Clusters overlay button.
+# What changes: which errand a Duplicant takes next.
+#
+# A rectangle of sandstone at the east end of the dug-out corridor west of the printing pod
+# is marked for digging and the game runs a little: the mod has formed a cluster. The Work
+# Clusters toggle opens the overlay and its legend.
+from: early-base
+mods: [3657612749]
+steps:
+  - dig: [117, 209, 120, 210]
+  - run: {seconds: 10}
+  - expect_state:
+      "type:BetterDupeAssignment.ClusterManager::Instance.GetAllClusters().Count": ">= 1"
+  - click: {ui: "**/OverlaysBar/Toggle:Work Clusters"}
+  - expect_state: {"type:BetterDupeAssignment.ClusterOverlayMode::ID.HashValue": {save_as: clusters}}
+  - expect_state: {"OverlayScreen.Instance.mode.HashValue": "== clusters"}
+  - ui_wait: {path: "**/OverlayLegend/Scrollrect", cond: stable}
+  - expect_ui:
+      "**/OverlayLegend/TitleBar/Label": {text: "WORK CLUSTERS"}
+  - ui_dump: {name: legend, root: "**/OverlayLegend/Scrollrect/Content/ActiveUnits"}
+  - shot: {name: legend, crop: "**/OverlayLegend"}

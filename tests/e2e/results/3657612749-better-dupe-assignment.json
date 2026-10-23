@@ -1,0 +1,67 @@
+{
+ "spec": "mods/3657612749-better-dupe-assignment.yaml",
+ "mods": [
+  "3657612749"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a dig order forms a work cluster; the Work Clusters toggle at the end of the overlay bar opens the mod's overlay, its legend dumped and shot as in the original",
+ "updated": "2026-10-23",
+ "commit": "047fcf4",
+ "mod_dlls": {
+  "3657612749": {
+   "BetterDupeAssignment.dll": "f7239c723072b4d9a2afa7f675e7abce6ea044ac4b5cb5745ab8801a4b45cffc"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-084432-178ad9",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T10:28:09",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-105328-d91fd4",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T10:55:29",
+    "lane": 16,
+    "reference_run": "20261023-084432-178ad9",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "legend": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "legend": 4.1e-05
+    }
+   },
+   {
+    "run": "20261023-105328-d91fd4",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T10:56:25",
+    "lane": 16,
+    "reference_run": "20261023-084432-178ad9",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "legend": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "legend": 4.1e-05
+    }
+   }
+  ]
+ }
+}

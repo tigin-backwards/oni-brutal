@@ -1,0 +1,59 @@
+{
+ "spec": "mods/3028181310-advanced-flow-management.yaml",
+ "mods": [
+  "3028181310"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "liquid pipes dragged from the Plumbing menu into a T: the junction becomes a crossing, and selecting it in the plumbing overlay shows the mod's flow side screen, shot as in the original",
+ "updated": "2026-10-23",
+ "commit": "047fcf4",
+ "mod_dlls": {
+  "3028181310": {
+   "AdvancedFlowManagement.dll": "d04320c66678bb68c4d2997ad077f90c83483b591cc664c2a0909e74210ebc06"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-105340-8a7346",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T10:53:40",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-105328-d91fd4",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T11:10:31",
+    "lane": 16,
+    "reference_run": "20261023-105340-8a7346",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "side-screen": 0.006882
+    }
+   },
+   {
+    "run": "20261023-105328-d91fd4",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T11:12:00",
+    "lane": 16,
+    "reference_run": "20261023-105340-8a7346",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "side-screen": 0.006882
+    }
+   }
+  ]
+ }
+}

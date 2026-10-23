@@ -1,0 +1,39 @@
+# Remove Sandbox Lock Mode (2549472747), class S.
+#
+# What it does: sandbox mode can be switched off again. The game's "Enable sandbox tools"
+# check box in the game options asks for confirmation, then turns sandbox on for good and
+# greys itself out; with the mod (a prefix on GameOptionsScreen.OnUnlockSandboxMode, a
+# postfix on SetSandboxModeActive) each click toggles sandbox at once and the check box stays
+# usable. Saving also drops the "debug was used" mark from the save (Game.Save).
+# How a player reaches it: the pause menu, Options, Game, the sandbox check box.
+# What changes: the save's sandbox mode, and the sandbox button beside the speed controls.
+from: early-base
+mods: [2549472747]
+steps:
+  - expect_state: {"SaveGame.Instance.sandboxEnabled": false}
+  - key: {code: Escape}
+  - ui_wait: {path: "**/PauseScreen/**/OptionsButton", cond: stable}
+  - click: {ui: "**/PauseScreen/**/OptionsButton"}
+  - ui_wait: {path: "**/OptionsMenu/CenterContent/Content/Buttons/GameButton", cond: stable}
+  - click: {ui: "**/OptionsMenu/CenterContent/Content/Buttons/GameButton"}
+  - ui_wait: {path: "**/GameOptionsScreen/Content/SaveOptions/InGameContent/UnlockSandbox", cond: stable}
+  - expect_ui:
+      "**/UnlockSandbox/Label": {text: "Enable sandbox tools"}
+      "**/UnlockSandbox/Checkbox/CheckMark": {active: false}
+  - ui_dump: {name: options, root: "**/GameOptionsScreen/Content/SaveOptions"}
+  # On, with no confirmation, and the check box stays usable.
+  - click: {ui: "**/UnlockSandbox/Checkbox"}
+  - expect_ui:
+      "**/ConfirmDialog": {exists: false}
+      "**/UnlockSandbox/Checkbox": {interactable: true}
+      "**/UnlockSandbox/Checkbox/CheckMark": {active: true}
+  - expect_state:
+      "SaveGame.Instance.sandboxEnabled": true
+      "Game.Instance.SandboxModeActive": false
+  - ui_dump: {name: options-on, root: "**/GameOptionsScreen/Content/SaveOptions"}
+  - shot: {name: options-on, crop: "**/GameOptionsScreen"}
+  # And off again.
+  - click: {ui: "**/UnlockSandbox/Checkbox"}
+  - expect_ui:
+      "**/UnlockSandbox/Checkbox/CheckMark": {active: false}
+  - expect_state: {"SaveGame.Instance.sandboxEnabled": false}

@@ -1,0 +1,43 @@
+# Smart Pumps (1887986467), classes B, S, O.
+#
+# What it does: adds pumps that take in only one element: the Filtered Gas Pump and the
+# Filtered Liquid Pump (2x2, refined metal and a gasket, researched with Valve
+# Miniaturization), and the Vacuum Pump, which draws gas only below a pressure. The element is
+# chosen on the game's element filter side screen, which the mod allows on its pumps
+# (FilterSideScreen.IsValidForTarget); the pump then consumes only that element. PLib options
+# set their powers and rates.
+# How a player reaches it: the build menu (Ventilation, Plumbing), then the pump's filter
+# side screen.
+# What changes: what a pump takes in.
+#
+# setup grants the research and lays down copper and a plastic gasket; a Filtered Gas Pump is
+# built from them, unpowered, in the dug-out corridor west of the printing pod. Oxygen is
+# chosen on its side screen, and the pump's consumer follows.
+from: early-base
+mods: [1887986467]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"ValveMiniaturization\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Copper\").substance", method: SpawnResource, args: [[109.5, 206.5, -12], 200, 300, 255, 0]}}
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131125, 0, 0, \"PlasticGasket\", \"Ore\")", method: SetActive, args: [true]}}
+steps:
+  - build: {prefab: PeterHan_FilteredGasPump, at: [108, 206]}
+  - expect: {blueprints: {PeterHan_FilteredGasPump: 1}}
+  - run: {seconds: 900, until: {buildings: {PeterHan_FilteredGasPump: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [109, 208], ortho: 8}}
+  - click_world: {cell: [108, 206], select: PeterHan_FilteredGasPump}
+  - ui_wait: {path: "**/LogicFilterSideScreen/Scroll View/Viewport/Content", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Filtered Gas Pump"}
+      "**/LogicFilterSideScreen/SelectedElement/Label": {text: "None"}
+  - expect_state: {"selected:Filterable.SelectedTag": Void}
+  - ui_dump: {name: filter, root: "**/LogicFilterSideScreen"}
+  - click: {text: "Breathable Gas", under: "**/LogicFilterSideScreen/Scroll View/Viewport/Content"}
+  - ui_wait: {path: "**/LogicFilterSideScreen/**/Entries/Item-Oxygen", cond: stable}
+  - click: {ui: "**/LogicFilterSideScreen/**/Entries/Item-Oxygen"}
+  - expect_state: {"selected:Filterable.SelectedTag": Oxygen}
+  - expect_ui:
+      "**/LogicFilterSideScreen/SelectedElement/Label": {text: "~Oxygen"}
+  - shot: {name: filter, crop: "**/LogicFilterSideScreen"}
+  - run: {seconds: 10}
+  - expect_state: {"selected:ElementConsumer.elementToConsume": Oxygen}

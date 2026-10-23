@@ -1,0 +1,37 @@
+# More Marble Sculptures (2789182100), class P.
+#
+# What it does: adds 13 looks for the Marble Sculpture (12 "great" ones: Dragon, Talos,
+# Pacucorn, Smug Pip, Red Panda Spirit, Dashmaster, Azura, Poseidon, Lung, Toadstool, Pig King,
+# Mystical Flox; and a poor one, ":)"), each with its own kanim, to the artable stages
+# (a postfix on ArtableStages' constructor), lists them in the supply closet's sculpture
+# category (InventoryOrganization.GenerateSubcategories), and moves two of the game's looks to
+# another quality as its settings.json says (Average to Great, Bad to Okay).
+# How a player reaches it: a Duplicant sculpting a Marble Sculpture picks among the looks; the
+# supply closet (pause menu) lists them.
+# What changes: the looks a finished sculpture can have, and their decor.
+#
+# A sculpture's look is random and needs Fine Art and marble, so this is a smaller spec: the
+# stages, their kanims and the moved qualities are checked in the game's database, and the
+# supply closet is opened.
+from: early-base
+mods: [2789182100]
+steps:
+  - expect_state:
+      "Db.GetArtableStages().Get(\"MarbleSculpture_dragon\").prefabId": MarbleSculpture
+      "Db.GetArtableStages().Get(\"MarbleSculpture_dragon\").animFile": marblesculptures_dragon_kanim
+      "Db.GetArtableStages().Get(\"MarbleSculpture_flox\").statusItem.StatusType": "== original"
+      "Db.GetArtableStages().Get(\"MarbleSculpture_smile\").statusItem.StatusType": "== original"
+      "Db.GetArtableStages().Get(\"MarbleSculpture_Average\").statusItem.StatusType": "== original"
+      "Db.GetArtableStages().Get(\"MarbleSculpture_Bad\").statusItem.StatusType": "== original"
+      "Db.GetArtableStages().GetPrefabStages(\"MarbleSculpture\").Count": "== original"
+      "Assets.GetAnim(\"marblesculptures_pigking_kanim\").name": marblesculptures_pigking_kanim
+  # The supply closet (pause menu) builds its categories when it first opens; the mod adds
+  # its looks to the sculptures'.
+  - key: {code: Escape}
+  - ui_wait: {path: "**/PauseScreen/**/Supply ClosetButton", cond: stable}
+  - click: {ui: "**/PauseScreen/**/Supply ClosetButton"}
+  - ui_wait: {path: "**/LockerMenuScreen/Panel/Content/Buttons/InventoryButton", cond: stable}
+  - click: {ui: "**/LockerMenuScreen/Panel/Content/Buttons/InventoryButton"}
+  - ui_wait: {path: "**/KleiInventoryScreen", cond: stable}
+  - expect_state:
+      "InventoryOrganization.subcategoryIdToPermitIdsMap[\"BUILDING_SCULPTURE\"]": {contains: MarbleSculpture_poseidon}

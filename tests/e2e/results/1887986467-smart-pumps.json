@@ -1,0 +1,79 @@
+{
+ "spec": "mods/1887986467-smart-pumps.yaml",
+ "mods": [
+  "1887986467"
+ ],
+ "verdict": "warning",
+ "why": "known findings: unused-input-caret-layout",
+ "findings": [
+  "unused-input-caret-layout"
+ ],
+ "note": "a Filtered Gas Pump built from copper and a plastic gasket gets the element filter side screen; Oxygen chosen there becomes what the pump takes in; the side screen's layout and pixels match",
+ "updated": "2026-10-23",
+ "commit": "a58b89c",
+ "mod_dlls": {
+  "1887986467": {
+   "SmartPumps.dll": "0f1d6b03432d16385366acbcf5483f17177d5ac2474853e9820cfb698cc3c1e9"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-005647-453b7d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T00:57:57",
+    "lane": 10,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-012232-2edf85",
+    "index": 1,
+    "verdict": "warn",
+    "date": "2026-10-23T01:22:32",
+    "lane": 11,
+    "reference_run": "20261023-005647-453b7d",
+    "new_signatures": 0,
+    "findings": [
+     "unused-input-caret-layout"
+    ],
+    "ui_dump": {
+     "filter": {
+      "differences": 0,
+      "known": {
+       "unused-input-caret-layout": 1
+      }
+     }
+    },
+    "shots": {
+     "filter": 0.0
+    }
+   },
+   {
+    "run": "20261023-012232-2edf85",
+    "index": 2,
+    "verdict": "warn",
+    "date": "2026-10-23T01:23:46",
+    "lane": 11,
+    "reference_run": "20261023-005647-453b7d",
+    "new_signatures": 0,
+    "findings": [
+     "unused-input-caret-layout"
+    ],
+    "ui_dump": {
+     "filter": {
+      "differences": 0,
+      "known": {
+       "unused-input-caret-layout": 1
+      }
+     }
+    },
+    "shots": {
+     "filter": 0.0
+    }
+   }
+  ]
+ }
+}

@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2789182100-more-marble-sculptures.yaml",
+ "mods": [
+  "2789182100"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a smaller spec: the 13 new sculpture looks, their kanims and the two moved qualities are in the game's database, and opening the supply closet's inventory lists them among the sculptures",
+ "updated": "2026-10-23",
+ "commit": "a58b89c",
+ "mod_dlls": {
+  "2789182100": {
+   "MoreMarbleSculptures.dll": "63d1afbf119ecbcbcc8f3b8c6c5e02f3c271cc90b2adda9a659c1a67b8589714"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-005647-453b7d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T00:56:47",
+    "lane": 10,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-010644-9724bc",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T01:14:59",
+    "lane": 11,
+    "reference_run": "20261023-005647-453b7d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-010644-9724bc",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T01:15:48",
+    "lane": 11,
+    "reference_run": "20261023-005647-453b7d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

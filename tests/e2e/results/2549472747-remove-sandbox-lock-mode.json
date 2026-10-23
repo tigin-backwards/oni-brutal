@@ -1,0 +1,73 @@
+{
+ "spec": "mods/2549472747-remove-sandbox-lock-mode.yaml",
+ "mods": [
+  "2549472747"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the game options' sandbox check box turns sandbox on with no confirmation, stays usable, and turns it off again; the options' layout and pixels match",
+ "updated": "2026-10-23",
+ "commit": "a58b89c",
+ "mod_dlls": {
+  "2549472747": {
+   "RemoveSandboxLockMode.dll": "2960e5b06993add488d90f6a1ce7c484857c5fd3a56329b4ae2cc7711218d2df"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-005647-453b7d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T00:58:28",
+    "lane": 11,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-011630-6ab2af",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T01:16:30",
+    "lane": 11,
+    "reference_run": "20261023-005647-453b7d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "options": {
+      "differences": 0
+     },
+     "options-on": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "options-on": 0.0
+    }
+   },
+   {
+    "run": "20261023-011630-6ab2af",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T01:17:20",
+    "lane": 11,
+    "reference_run": "20261023-005647-453b7d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "options": {
+      "differences": 0
+     },
+     "options-on": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "options-on": 0.0
+    }
+   }
+  ]
+ }
+}

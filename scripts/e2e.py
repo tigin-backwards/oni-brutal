@@ -230,6 +230,8 @@ def check_step(where, kind, value, in_setup):
         need(isinstance(value, dict) and _cell(value.get('from')) and _cell(value.get('to')),
              'drag takes {from: [x, y], to: [x, y]} (world cells)')
         need(not isinstance(value, dict) or isinstance(value.get('hold', 0), int), 'drag `hold` is a number of frames')
+        need(not isinstance(value, dict) or (isinstance(value.get('via', []), list) and all(_cell(c) for c in value.get('via', []))),
+             'drag `via` is a list of world cells [x, y] passed through in order')
     elif kind == 'click_world':
         need(isinstance(value, dict) and _cell(value.get('cell')), 'click_world takes {cell: [x, y]}')
         need(not isinstance(value, dict) or isinstance(value.get('select', ''), str),
@@ -1302,17 +1304,20 @@ class Input:
                 self._flush()
                 self.frames(1)
 
-    def drag(self, start, end, button='left', mods=(), steps=8, hold=0):
-        """Press at START, move to END in STEPS motion events a frame apart, wait HOLD frames
-        there (the button still down), release."""
+    def drag(self, start, end, button='left', mods=(), steps=8, hold=0, via=()):
+        """Press at START, move through each point of VIA to END, STEPS motion events a frame
+        apart on each leg, wait HOLD frames there (the button still down), release."""
         with self.modifiers(mods):
             self.move(*start)
             self.frames(2)
             self.button(button, True)
             self.frames(2)
-            for i in range(1, steps + 1):
-                self.move(start[0] + (end[0] - start[0]) * i / steps, start[1] + (end[1] - start[1]) * i / steps)
-                self.frames(1)
+            prev = start
+            for point in [*via, end]:
+                for i in range(1, steps + 1):
+                    self.move(prev[0] + (point[0] - prev[0]) * i / steps, prev[1] + (point[1] - prev[1]) * i / steps)
+                    self.frames(1)
+                prev = point
             self.frames(1 + hold)
             self.button(button, False)
             self.frames(2)
@@ -2148,8 +2153,9 @@ class Run:
         elif kind == 'drag':
             driver = self.need_driver()
             start, end = driver.to_screen(value['from']), driver.to_screen(value['to'])
+            more = {'via': [driver.to_screen(c) for c in value['via']]} if value.get('via') else {}
             self.need_input().drag(start, end, button=value.get('button', 'left'), mods=value.get('mods', ()),
-                                   steps=value.get('steps', 8), hold=value.get('hold', 0))
+                                   steps=value.get('steps', 8), hold=value.get('hold', 0), **more)
         elif kind == 'scroll':
             x, y = self.screen_point(value.get('at', 'center'))
             self.need_input().scroll(x, y, value['notches'])

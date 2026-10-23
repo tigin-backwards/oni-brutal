@@ -178,8 +178,8 @@ class FakeInput:
     def type_text(self, text):
         self.events.append(('type', text))
 
-    def drag(self, start, end, button='left', mods=(), steps=8, hold=0):
-        self.events.append(('drag', tuple(start), tuple(end)))
+    def drag(self, start, end, button='left', mods=(), steps=8, hold=0, via=()):
+        self.events.append(('drag', tuple(start), *(tuple(v) for v in via), tuple(end)))
 
     def move(self, x, y):
         self.events.append(('move', x, y))
@@ -380,6 +380,7 @@ class DriverTests(unittest.TestCase):
         run.step('type', {'ui': 'Dialog/Input', 'text': 'e2e', 'enter': True}, 1)
         run.step('key', {'code': 'Shift+B'}, 2)
         run.step('drag', {'from': [110, 207], 'to': [118, 209]}, 3)
+        run.step('drag', {'from': [110, 207], 'via': [[110, 208]], 'to': [118, 209]}, 4)
         run.step('click_world', {'cell': [100, 212]}, 4)
         with self.assertRaises(e2e.SpecFailure) as caught:
             run.step('click_world', {'cell': [150, 212]}, 5)  # x 1500: off the 1280-pixel screen
@@ -387,6 +388,7 @@ class DriverTests(unittest.TestCase):
         run.step('scroll', {'at': [100, 200], 'notches': -3}, 5)
         self.assertEqual(run.input.events, [('click', 60, 20, 'left', ()), ('type', 'e2e'), ('key', 'Return'),
                                             ('key', 'Shift+B'), ('drag', (1100, 99), (1180, 93)),
+                                            ('drag', (1100, 99), (1100, 96), (1180, 93)),
                                             ('click', 1000, 84, 'left', ()), ('scroll', 1000, 120, -3)])
 
     def test_tool_by_toolbar_name(self):

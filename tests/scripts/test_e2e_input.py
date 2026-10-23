@@ -44,6 +44,8 @@ class Xtest(unittest.TestCase):
         self.assertFalse(self.pointer()[2] & (1 << 8))
         self.input.drag((10, 10), (90, 50), steps=4)
         self.assertEqual(self.pointer()[:2], (90, 50))
+        self.input.drag((10, 10), (90, 50), steps=2, via=[(10, 50)])
+        self.assertEqual(self.pointer()[:2], (90, 50))
         self.input.click(200, 100, mods=['Shift'])
         self.assertEqual(self.pointer(), (200, 100, 0))
 

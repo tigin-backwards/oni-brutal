@@ -55,3 +55,13 @@
   path: '**/Text Area/Text'
   original: '^text="" '
   ours: '^text="​" '
+
+- id: float-intermediate-precision
+  description: >-
+    A value computed from a float expression differs in its last digit, as ARCHITECTURE D25
+    describes (Unity's Mono evaluates float arithmetic in double): Geyser Control's slider reads
+    1914.98 in the original and 1914.99 in ours.
+  link: tests/e2e/mods/3369395347-geyser-control.yaml
+  component: KSlider
+  fields: [value]
+  path: '**/MultiSliderSideScreen/**'

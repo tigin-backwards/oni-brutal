@@ -1,0 +1,28 @@
+# Dupery Fixed (3172734005), classes S, V.
+#
+# What it does: Duplicant personalities come from JSON files: the game's own (which can be
+# overridden in OVERRIDE_PERSONALITIES.json), custom ones in PERSONALITIES.json, and ones other
+# mods ship with their accessories (hair, faces and so on); the files are created in
+# mods/config/DuperyConfigs on first start. Printed Duplicants are drawn from that pool, and a
+# Duplicant's bio and the Duplicant browser say where a personality comes from.
+# How a player reaches it: the config files; printing pod and new-colony Duplicants; the
+# Duplicant's Personality tab.
+# What changes: which personalities Duplicants can have.
+#
+# Smaller spec: no custom personality is added. The first start writes both files, the stock
+# personalities fill the pool, and Nikola's bio (selected in setup) comes from the pool's
+# description.
+from: early-base
+mods: [3172734005]
+setup:
+  - driver: {setup.call: {target: "SelectTool.Instance", method: Select, args: [{"$": "Components.LiveMinionIdentities.Items[1]"}]}}
+steps:
+  - expect_state:
+      "file:mods/config/DuperyConfigs/OVERRIDE_PERSONALITIES.json": {contains: "\"NIKOLA\""}
+      "file:mods/config/DuperyConfigs/PERSONALITIES.json": exists
+      "Db.Get().Personalities.Count": "== original"
+      "selected:MinionIdentity.nameStringKey": NIKOLA
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - click: {ui: "**/DetailsScreen/Tabs/TabHeader/tab: PERSONALITY"}
+  - ui_wait: {path: "**/DetailsScreen/Body/TabBody/ScrollRect/Content/MinionPersonalityPanel", cond: stable}
+  - shot: {name: personality, crop: "**/DetailsScreen", threshold: 0.04}

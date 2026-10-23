@@ -1,0 +1,30 @@
+{
+ "spec": "mods/3172734005-dupery-fixed.yaml",
+ "mods": [
+  "3172734005"
+ ],
+ "verdict": "pending",
+ "why": "0 run(s) of ours against original run 20261023-042731-3568a0; 2 needed",
+ "findings": [],
+ "note": "",
+ "updated": "2026-10-23",
+ "commit": "8c58bc9",
+ "mod_dlls": {
+  "3172734005": {
+   "DuperyFixed.dll": "9ef4a93958b6b80fbf086cab57821955dd344324d2192086db7ea7845e71f7f2"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-042731-3568a0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T05:35:37",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": []
+ }
+}

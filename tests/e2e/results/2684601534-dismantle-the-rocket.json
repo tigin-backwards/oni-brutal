@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2684601534-dismantle-the-rocket.yaml",
+ "mods": [
+  "2684601534"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a rocket wall tile placed in the corridor takes a deconstruct order from the tool",
+ "updated": "2026-10-23",
+ "commit": "9885384",
+ "mod_dlls": {
+  "2684601534": {
+   "olstic_wall.dll": "7ed8a399ab36d2f522b3771da452e6f2ac3a13c01948b2658f7c0816e9fa7083"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-153836-7c45a6",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T15:38:36",
+    "lane": 12,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-170258-6812ab",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T17:02:58",
+    "lane": 12,
+    "reference_run": "20261023-153836-7c45a6",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-170258-6812ab",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T17:19:17",
+    "lane": 12,
+    "reference_run": "20261023-153836-7c45a6",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -1,0 +1,26 @@
+# Dismantle the rocket (拆火箭, 2684601534), class P.
+#
+# What it does: a rocket's walls and windows can be deconstructed: postfixes on
+# RocketWallTileConfig and RocketEnvelopeWindowTileConfig.DoPostConfigureComplete set their
+# Deconstructable's allowDeconstruction (false in the game).
+# How a player reaches it: the deconstruct tool over a rocket interior's walls.
+# What changes: those walls take deconstruct orders.
+#
+# A rocket interior is far beyond early-base, so setup places a finished rocket wall tile in
+# the dug-out corridor west of the printing pod (110, 208); the deconstruct tool is dragged
+# over it, and it takes the order.
+from: early-base
+mods: [2684601534]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"RocketWallTile\")", method: Build, args: [132398, Neutral, null, [Steel], 293.15]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"RocketWallTile\").BuildingComplete.GetComponent<Deconstructable>.allowDeconstruction": true
+      "Assets.GetBuildingDef(\"RocketEnvelopeWindowTile\").BuildingComplete.GetComponent<Deconstructable>.allowDeconstruction": true
+      "count:all:Deconstructable::[*] if .name == RocketWallTileComplete": 1
+  - driver: {camera.set: {cell: [110, 208], ortho: 8}}
+  - tool: {key: X}
+  - drag: {from: [110, 208], to: [110, 208]}
+  - key: {code: Escape}
+  - expect_state:
+      "count:all:Deconstructable::[*] if .IsMarkedForDeconstruction() == true": 1

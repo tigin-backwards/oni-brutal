@@ -1,0 +1,39 @@
+# Blueprints fixed (2435244304), classes T, S, K, O, V.
+#
+# What it does: adds New Blueprint, Use Blueprint and Take Snapshot to the toolbar. New
+# Blueprint: a drag over buildings (with a filter menu of what to take), then a name dialog
+# (the game's FileNameDialog); the blueprint is written to blueprints/NAME.blueprint. Use
+# Blueprint puts the current blueprint on the cursor, its cells coloured by whether they can
+# be built (BlockTileRenderer.GetCellColour); a click places its buildings as blueprints. Keys
+# cycle blueprints and folders, rename and delete them; PLib options set the colours.
+# How a player reaches it: the toolbar (or its keys).
+# What changes: a blueprint file, then construction sites where it is placed.
+#
+# The blueprint is made of the cot east of the printing pod (sandstone, of which early-base
+# has plenty) and placed on the floor of the dug-out corridor west of the pod, where it
+# becomes a cot blueprint.
+from: early-base
+mods: [2435244304]
+steps:
+  - run: {seconds: 5}
+  - driver: {camera.set: {cell: [124, 208], ortho: 10}}
+  - tool: {toolbar: New Blueprint}
+  - drag: {from: [132, 207], to: [133, 208]}
+  - ui_wait: {path: "**/BlueprintsMod_TextDialog_*/Panel", cond: stable}
+  - expect_ui: {"**/BlueprintsMod_TextDialog_*/Panel/Title_BG/Title": {text: "NAME BLUEPRINT"}}
+  - ui_dump: {name: name-dialog, root: "**/BlueprintsMod_TextDialog_*/Panel"}
+  - shot: {name: name-dialog, crop: "**/BlueprintsMod_TextDialog_*/Panel", threshold: 0.04}
+  - type: {ui: "**/BlueprintsMod_TextDialog_*/Panel/Body/LocTextInputField", text: "e2e"}
+  - click: {ui: "**/BlueprintsMod_TextDialog_*/Panel/Body/ConfirmButton"}
+  - ui_wait: {path: "**/BlueprintsMod_TextDialog_*", cond: gone}
+  - expect_state: {"file:blueprints/e2e.blueprint": exists}
+  - key: {code: Escape}
+  # Use: the blueprint on the cursor, placed on the floor of the dug-out corridor west of the
+  # printing pod.
+  - driver: {camera.set: {cell: [110, 208], ortho: 8}}
+  - tool: {toolbar: Use Blueprint}
+  - expect_state: {"PlayerController.Instance.ActiveTool.name": UseBlueprintTool}
+  - click_world: {cell: [108, 206]}
+  - expect_state:
+      "all:Constructable::Length": ">= 1"
+      "count:all:Constructable::[*] if .name == BedUnderConstruction": 1

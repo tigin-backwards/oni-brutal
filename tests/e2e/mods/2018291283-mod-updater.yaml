@@ -1,0 +1,30 @@
+# Mod Updater (2018291283), classes K, O, M.
+#
+# What it does: the Mods screen gets an update button on every mod's row: for a Workshop mod
+# its state against the Workshop (up to date, outdated, update pending; outdated ones can be
+# updated from there, and an Update All button appears), for a local mod a disabled check
+# mark whose tooltip gives the files' last change. It also backs up mods' configs over updates
+# and warns on the main menu when mods are outdated.
+# How a player reaches it: the main menu's Mods screen (from a colony: the pause menu's Main
+# Menu, then Quit Without Saving).
+# What changes: the Mods screen's rows.
+#
+# Every mod of a run is a local one (Workshop builds installed as local mods), so each of the
+# four rows (the mod, OniMcp, E2eDriver) gets the disabled check mark, and no Update All
+# button appears.
+from: early-base
+mods: [2018291283]
+steps:
+  - key: {code: Escape}
+  - ui_wait: {path: "**/PauseScreen/**/Main MenuButton", cond: stable}
+  - click: {ui: "**/PauseScreen/**/Main MenuButton"}
+  - ui_wait: {path: "**/ConfirmDialog/GameObject/Panel/ConfigurableButton", cond: stable}
+  - click: {ui: "**/ConfirmDialog/GameObject/Panel/ConfigurableButton"}   # Quit Without Saving
+  - ui_wait: {path: "**/MainMenu_SpacedOut/MainMenuMenubar/MainMenuButtons", cond: stable, frames: 3000}
+  - click: {text: "MODS", under: "**/MainMenuButtons"}
+  - ui_wait: {path: "**/ModsScreen/Panel", cond: stable}
+  - expect_ui:
+      "**/ModsScreen/Panel/ListView/Files/Viewport/Content/*/UpdateMod": {count: 3, interactable: false}
+      "**/ModsScreen/Panel/ListView/Files/Viewport/Content/Mod Updater/UpdateMod": {interactable: false}
+      "**/ModsScreen/**/UpdateAll": {exists: false}
+  - ui_dump: {name: row, root: "**/ModsScreen/Panel/ListView/Files/Viewport/Content/Mod Updater"}

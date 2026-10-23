@@ -1,0 +1,63 @@
+{
+ "spec": "mods/2018291283-mod-updater.yaml",
+ "mods": [
+  "2018291283"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "from a colony to the main menu's Mods screen: every (local) mod's row gets its disabled check-mark update button, and no Update All; a row's layout as in the original",
+ "updated": "2026-10-22",
+ "commit": "85c30c5",
+ "mod_dlls": {
+  "2018291283": {
+   "ModUpdateDate.dll": "afbebdd8abfce0a72e40998575ee32a7a614f33d366a9917e075d652da33f616"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261022-233111-98729d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-22T23:31:11",
+    "lane": 11,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261022-233259-3eb540",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-22T23:32:59",
+    "lane": 11,
+    "reference_run": "20261022-233111-98729d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "row": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261022-233259-3eb540",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-22T23:34:08",
+    "lane": 11,
+    "reference_run": "20261022-233111-98729d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "row": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

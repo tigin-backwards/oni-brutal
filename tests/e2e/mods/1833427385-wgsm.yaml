@@ -1,0 +1,35 @@
+# WGSM - World Generation Settings Manager // by @Ony (1833427385), class M.
+#
+# What it does: the new game's destination screen gets a "Remove All Traits" button beside
+# Back, and a settings (gear) button on every asteroid's row that opens an editor of its world
+# traits; the chosen traits are kept through rerolls, customisation and the story traits tab,
+# and used when the world is generated (SettingsCache.GetRandomTraits).
+# How a player reaches it: the main menu's New Game, a mode and an asteroid style, then the
+# destination screen (from a colony: the pause menu's Main Menu, then Quit Without Saving).
+# What changes: the asteroids' world traits.
+#
+# The destination's coordinates are random, so are its traits: the check is relational
+# (traits listed, then none after Remove All Traits).
+from: early-base
+mods: [1833427385]
+steps:
+  - key: {code: Escape}
+  - ui_wait: {path: "**/PauseScreen/**/Main MenuButton", cond: stable}
+  - click: {ui: "**/PauseScreen/**/Main MenuButton"}
+  - ui_wait: {path: "**/ConfirmDialog/GameObject/Panel/ConfigurableButton", cond: stable}
+  - click: {ui: "**/ConfirmDialog/GameObject/Panel/ConfigurableButton"}   # Quit Without Saving
+  - ui_wait: {path: "**/MainMenu_SpacedOut/MainMenuMenubar/MainMenuButtons", cond: stable, frames: 3000}
+  - click: {text: "NEW GAME", under: "**/MainMenuButtons"}
+  - ui_wait: {path: "**/ModeSelectScreen/Panel/Content/RootToggles/StandardGame", cond: stable}
+  - click: {ui: "**/ModeSelectScreen/Panel/Content/RootToggles/StandardGame"}
+  - ui_wait: {path: "**/ClusterCategorySelectionScreen/Panel/Content/RootToggles/SpacedOutGame", cond: stable}
+  - click: {ui: "**/ClusterCategorySelectionScreen/Panel/Content/RootToggles/SpacedOutGame"}
+  - ui_wait: {path: "**/ColonyDestinationScreen2/Layout/Buttons/remove-all-button", cond: stable, frames: 1200}
+  - expect_ui:
+      "**/ColonyDestinationScreen2/Layout/Buttons/remove-all-button": {interactable: true}
+      "**/Section - SelectedAsteroidDetails/**/TraitLine/Labels/Name": {count: {save_as: traits}}
+  - ui_dump: {name: buttons, root: "**/ColonyDestinationScreen2/Layout/Buttons"}
+  - click: {ui: "**/ColonyDestinationScreen2/Layout/Buttons/remove-all-button"}
+  - ui_wait: {path: "**/ColonyDestinationScreen2/Layout/Buttons", cond: stable}
+  - expect_ui:
+      "**/Section - SelectedAsteroidDetails/**/TraitLine/Labels/Name": {count: "< traits"}   # the story traits stay

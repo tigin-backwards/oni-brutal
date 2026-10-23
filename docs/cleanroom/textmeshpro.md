@@ -1245,6 +1245,92 @@ Not measured: `onValidateInput` and `inputValidator` (the probe's fields have ne
 the game's fields do), `characterValidation` set without a content type, pasting, `text =` with the value the field already holds, rich text, and
 `readOnly`. Measure them the same way before relying on them.
 
+### Font assets from OS fonts (measured 2026-10-23)
+
+Found in a mod play-test (issue #2): Geyser Tab (Workshop 3746027329) opens no window. Building
+the window, it gives its Refresh button's "↻" label an OS font. It calls
+`TMP_FontAsset.CreateFontAsset("Segoe UI Symbol", "Regular", 60)`, then "Arial", "Malgun
+Gothic" and "Tahoma", inside a try/catch. This implementation lacks that overload. So the
+method that calls it fails to compile (`MissingMethodException`), the catch never runs, and
+the whole window's build is abandoned. In the original on this Linux machine, none of the four
+is installed. Each call returns null, and the label keeps the game's font.
+
+**Interface, from the package's metadata:** two public overloads that this implementation
+lacks:
+- `static TMP_FontAsset CreateFontAsset(string familyName, string styleName, int pointSize =
+  90)`;
+- `static TMP_FontAsset CreateFontAsset(string fontFilePath, int faceIndex, int
+  samplingPointSize, int atlasPadding, GlyphRenderMode renderMode, int atlasWidth, int
+  atlasHeight)`.
+
+Measured with `PROBE_SCENARIO=fontasset` (tools/UnityProbe, `FontAsset.cs`, lines `FA …`, 10 s
+into the main menu), on this machine's fonts (DejaVu, FreeFont, TLWG, Unifont, IPA Gothic, …).
+`Application.logMessageReceived` caught what was logged.
+
+**By family and style name:**
+- **Lookup:** the face comes from the engine's `FontEngine.TryGetSystemFontReference(familyName,
+  styleName, out FontReference)`, which is internal in Unity's engine too. Called by
+  reflection, it gave the same faces. The engine provides it here; it is in this project's
+  engine code.
+  - Family and style match without regard to case ("dejavu sans", "BOOK"). Names must be
+    whole: "DejaVuSans" finds nothing. A localized family name finds nothing ("IPAゴシック"
+    for IPAGothic).
+  - A style the family lacks finds nothing: "DejaVu Sans" has no "Regular" (its faces are Book
+    and Bold).
+  - An empty or null style finds the family's "Regular" face when it has one (FreeSans, Loma,
+    IPAGothic, Unifont). Otherwise it finds some face of the family: Book for DejaVu Sans,
+    Bold for DejaVu Sans Mono. The engine gives the family's first face then.
+- **Not found** (also with an empty or null family): it returns null and logs one line through
+  `Debug.Log` (a Log, not a warning): `Unable to find a font file with the specified Family
+  Name [Arial] and Style [Regular].` A null family prints as `[]`, and so does an empty style.
+  Nothing is thrown.
+- **Found:** a new asset on each call. Two calls for the same face give two assets with two
+  atlas textures.
+  - `name` "", `hideFlags` None, `version` "1.1.0", `sourceFontFile` null.
+  - `faceInfo` is the face's at `pointSize`, with its own family and style names (for "dejavu
+    sans"/"book": "DejaVu Sans"/"Book") and scale 1. These are the engine's
+    `FontEngine.GetFaceInfo()` values. DejaVu Sans Book at 60: line height 69.84375, ascent
+    55.6933556, descent −14.15039, cap line 44, mean line 33, tab width 19.
+  - A `pointSize` of 0 or below loads the face at its units per em: DejaVu Sans gives
+    `pointSize` 2048, line height 2384, ascent 1901.
+  - Atlas: 1024 × 1024, padding 9, `atlasRenderMode` SDFAA, `atlasPopulationMode` DynamicOS,
+    `isMultiAtlasTexturesEnabled` true. `atlasTextures` holds one texture: 1 × 1, Alpha8, named
+    "", which is also `atlasTexture`. It is resized to the atlas size when the first glyph is
+    added.
+  - `material`: a new material on "TextMeshPro/Mobile/Distance Field", named as its shader.
+    `_MainTex` is the atlas texture. `_TextureWidth` and `_TextureHeight` are 1024,
+    `_GradientScale` is the padding + 1 (10), `_WeightNormal` 0 and `_WeightBold` 0.75.
+  - `creationSettings` is the default (null GUID, zeros, `includeFontFeatures` false).
+  - `characterTable` and `glyphTable` are empty, and `fallbackFontAssetTable` is null.
+  - `normalStyle` 0, `normalSpacingOffset` 0, `boldStyle` 0.75, `boldSpacing` 7,
+    `italicStyle` 35, `tabSize` 10. `fontWeightTable` has 10 entries.
+
+**By file path:**
+- The face at `faceIndex` of the file, at `samplingPointSize`, with the given padding, render
+  mode and atlas size. `atlasPopulationMode` is Dynamic here, not DynamicOS. `_GradientScale`
+  is the padding + 1 (7 for 6), and `_TextureWidth`/`_TextureHeight` are the atlas size. The
+  rest is as above (DejaVuSans.ttf, 0, 60, 6, SDFAA, 512 × 512; and 0, 90, 9, SDFAA, 1024 ×
+  1024).
+- A missing file, a file that is not a font (/etc/hostname), an empty path or a `faceIndex`
+  past the file's faces: it returns null and logs `Unable to load font face from [PATH].`
+  (`Debug.Log`).
+- `RASTER_HINTED` throws `ArgumentNullException` ("Value cannot be null.") and returns no
+  asset. The game ships no bitmap TMP shader.
+
+**In use** (a `TextMeshProUGUI` at 16 pt, no wrapping, on DejaVu Sans Book at 60):
+- The first text adds U+2026 (…) and U+005F (_) to the asset, then the text's characters.
+  After "↻", `characterTable` is [U+2026, U+005F, U+21BB], and the atlas is 1024 × 1024. A
+  following "A" adds U+0041.
+- "↻" is drawn from the asset: preferred width 13.41, height 18.63, advance 13.4083328. "A" is
+  10.95 wide.
+- A character the face lacks (U+AC00) is not added. It comes from the global fallbacks
+  (NotoSansCJKkr-Regular), and the table stays as it was.
+- `HasCharacter('↻')` is then true, `TryAddCharacters("↻Z")` returns true, and
+  `TryAddCharacters("가")` returns false with `missing` "가".
+
+Not measured: Windows and macOS lookups (the families Geyser Tab tries exist there), and
+another call's effect on an existing asset of the same face.
+
 ## Verification
 
 1. **Build:**

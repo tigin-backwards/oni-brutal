@@ -7,7 +7,21 @@ namespace UnityEngine
 {
     public partial class ScriptableObject
     {
-        public ScriptableObject() { }
+        /// CreateInstance, asset loading and Instantiate bind the native object before this runs.
+        /// Plain `new` on a ScriptableObject still makes a live object (observed in Unity's
+        /// player): one warning, then Awake and OnEnable, all before the subclass constructor's
+        /// body; the object has an instance id, an empty name and no hide flags, and Destroy
+        /// ends it as usual. Mods build TextStyleSettings this way and test them against null
+        /// (Ronivan's Legacy, issue #7). `new` on a MonoBehaviour stays a dead object, with no
+        /// log, as in the player.
+        public ScriptableObject()
+        {
+            if (Native != null) return;
+            var type = GetType();
+            Debug.LogWarning($"{type.FullName} must be instantiated using the ScriptableObject.CreateInstance method instead of new {type.Name}.");
+            Bind(new NativeObject { Name = "" });
+            ScriptableObjectLifecycle.Created(this);
+        }
 
         public static T CreateInstance<T>() where T : ScriptableObject => (T)CreateInstance(typeof(T));
 

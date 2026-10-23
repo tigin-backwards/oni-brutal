@@ -1,0 +1,79 @@
+{
+ "spec": "mods/2883096049-signs-tags-and-ribbons.yaml",
+ "mods": [
+  "2883096049"
+ ],
+ "verdict": "warning",
+ "why": "known findings: scroll-normalized-position",
+ "findings": [
+  "scroll-normalized-position"
+ ],
+ "note": "an Alert Tag built with OniMcp is selected; its sign side screen lists nine pictures, and clicking the third switches the sign to it; side screen dump and shot compared",
+ "updated": "2026-10-23",
+ "commit": "63cd491",
+ "mod_dlls": {
+  "2883096049": {
+   "SignsTagsAndRibbons.dll": "1914231bc317eea913def1233d0ebe8eb0c0e7d97f346e7e13119664c0dc8f8a"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-161145-33b28b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T16:12:15",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-162136-175e25",
+    "index": 1,
+    "verdict": "warn",
+    "date": "2026-10-23T16:38:58",
+    "lane": 15,
+    "reference_run": "20261023-161145-33b28b",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "sign": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "sign": 0.0
+    }
+   },
+   {
+    "run": "20261023-162136-175e25",
+    "index": 2,
+    "verdict": "warn",
+    "date": "2026-10-23T16:48:47",
+    "lane": 15,
+    "reference_run": "20261023-161145-33b28b",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "sign": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "sign": 0.0
+    }
+   }
+  ]
+ }
+}

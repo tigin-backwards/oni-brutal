@@ -1,0 +1,34 @@
+# [Vanilla + DLC] Signs, Tags and Ribbons (2883096049), classes B, S.
+#
+# What it does: adds decorative signs to a "Signs, Tags and Ribbons" subcategory of the
+# Utilities menu (no research): danger ribbons, a meter scale, and tags (alert, info, system,
+# utility, solid, liquid, gas, numbers, letters, geyser, location, small element), each 10 kg
+# of raw mineral, buildable anywhere. A sign's side screen (a clone of the monument's) shows a
+# button per picture; pressing one switches the sign to it.
+# How a player reaches it: the build menu (Utilities); the sign's side screen.
+# What changes: the sign's picture (SelectableSign.selectedIndex and its animation).
+#
+# setup spawns sandstone. An Alert Tag is built in the dug-out corridor west of the printing
+# pod and selected; its side screen lists its nine pictures, and the third one is picked.
+from: early-base
+mods: [2883096049]
+setup:
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"SandStone\").substance", method: SpawnResource, args: [[109.5, 206.5, -12], 100, 300, 255, 0]}}
+steps:
+  - build: {prefab: AlertTag, at: [113, 208]}
+  - expect: {blueprints: {AlertTag: 1}}
+  - run: {seconds: 900, until: {buildings: {AlertTag: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 6}}
+  - click_world: {cell: [113, 208], select: AlertTag}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_wait: {path: "**/Sign Side Screen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<SelectableSign>.GetCurrentVariant()": art_a
+  - expect_ui:
+      "**/Sign Side Screen/Content/Scroll/Grid/ButtonPrefab": {count: 9}
+  - ui_dump: {name: sign, root: "**/Sign Side Screen"}
+  - shot: {name: sign, crop: "**/Sign Side Screen", threshold: 0.04}
+  - click: {ui: "**/Sign Side Screen/Content/Scroll/Grid/ButtonPrefab", index: 2}
+  - expect_state:
+      "selected:GetComponent<SelectableSign>.GetCurrentVariant()": art_c
+      "selected:GetComponent<SelectableSign>.selectedIndex": 2

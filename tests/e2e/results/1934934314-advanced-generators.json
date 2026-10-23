@@ -1,0 +1,60 @@
+{
+ "spec": "mods/1934934314-advanced-generators.yaml",
+ "mods": [
+  "1934934314"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Refined Carbon Generator picked in the build menu's Power category is placed with the build tool, built and selected: rated 1200 W; product screen within threshold (its burning is not checked)",
+ "updated": "2026-10-23",
+ "commit": "63cd491",
+ "mod_dlls": {
+  "1934934314": {
+   "Advanced Generators.dll": "a7b524812630194f042918386424ee8467e26fac4e61f41bd79543bc7019e93b",
+   "MissileLib.dll": "e2ab19f741fdcbb1d9bb0ea3903a1b3458c345439dfc14f30ffc13491cf2a7e1"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-153631-565187",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T15:56:30",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-161903-a6f3d6",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T16:40:00",
+    "lane": 14,
+    "reference_run": "20261023-153631-565187",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.004678
+    }
+   },
+   {
+    "run": "20261023-161903-a6f3d6",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T16:49:12",
+    "lane": 14,
+    "reference_run": "20261023-153631-565187",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.004678
+    }
+   }
+  ]
+ }
+}

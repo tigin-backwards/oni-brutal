@@ -1,0 +1,61 @@
+{
+ "spec": "mods/3096204182-giga-watt-wire.yaml",
+ "mods": [
+  "3096204182"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "four Mega-watt Wires picked in the build menu's Power category are dragged with the build tool and built by power technicians, from the copper the mod tags Conductor; selected, rated 1 MW; product and details screens within threshold",
+ "updated": "2026-10-23",
+ "commit": "63cd491",
+ "mod_dlls": {
+  "3096204182": {
+   "GigawattWire.dll": "0a22b832eadf6bed6b80f5e05212dc56656dfe1743a7bc7ee9bee3c73426a67f"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-153631-565187",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T16:05:54",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-163858-3f5668",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T16:56:28",
+    "lane": 15,
+    "reference_run": "20261023-153631-565187",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.004678,
+     "details": 0.002155
+    }
+   },
+   {
+    "run": "20261023-163858-3f5668",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T17:00:26",
+    "lane": 15,
+    "reference_run": "20261023-153631-565187",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.004678,
+     "details": 0.002155
+    }
+   }
+  ]
+ }
+}

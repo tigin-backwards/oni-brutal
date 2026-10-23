@@ -66,7 +66,7 @@ installs get developer checks subscribers never see).
 | 45 | [最后的补给包-Fix](https://steamcommunity.com/sharedfiles/filedetails/?id=3280056840) | ✅ | ✅ | ⬜ |  |
 | 46 | [Efficient Supply](https://steamcommunity.com/sharedfiles/filedetails/?id=1874600082) | ✅ | ✅ | ⬜ |  |
 | 47 | [Japanese Language Pack](https://steamcommunity.com/sharedfiles/filedetails/?id=928606476) | ⬜ | ⬜ | ⬜ | translation: the game applies one only from a Steam subscription; not testable here |
-| 48 | [Pip Plant Overlay](https://steamcommunity.com/sharedfiles/filedetails/?id=2493100777) | ✅ | ✅ | ⬜ |  |
+| 48 | [Pip Plant Overlay](https://steamcommunity.com/sharedfiles/filedetails/?id=2493100777) | ✅ | ✅ | ⬜ | spec fails in ours: tests/e2e/mods/2493100777-pip-plant-overlay.yaml: the Pip Planting overlay from its overlay-bar button: mode, legend and world view match (shots within 1 %); fails on the legend's scrollbar, value 1 in ours, 0 in the original (content fits; the Scrollbar side of scroll-normalized-position) (a run of ours failed) |
 | 49 | [Traduction Française](https://steamcommunity.com/sharedfiles/filedetails/?id=928348692) | ⬜ | ⬜ | ⬜ | translation: the game applies one only from a Steam subscription; not testable here |
 | 50 | [Smart Drag Tool](https://steamcommunity.com/sharedfiles/filedetails/?id=2590260868) | ✅ | ✅ | ⬜ |  |
 | 51 | [No Manual Delivery](https://steamcommunity.com/sharedfiles/filedetails/?id=2047308624) | ✅ | ✅ | ⬜ |  |

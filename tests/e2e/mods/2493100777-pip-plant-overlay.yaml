@@ -1,0 +1,21 @@
+# Pip Plant Overlay (2493100777), classes S, K, V.
+#
+# What it does: adds a Pip Planting overlay (mode PIPPLANT) to the overlay menu: each cell is
+# coloured by whether a Pip could plant a seed there (a natural or farm tile below or above,
+# not too hard, few enough plants around, enough pressure, a fit temperature), with a legend
+# entry explaining the rules. An "Open Pip Planting Overlay" key can be bound (PLib action,
+# unbound by default).
+# How a player reaches it: the overlay buttons at the top right (its own icon).
+# What changes: the world view, coloured cell by cell, and the legend.
+from: early-base
+mods: [2493100777]
+steps:
+  - expect_state: {"OverlayScreen.Instance.mode.HashValue": 0}
+  - click: {ui: "**/OverlaysBar/Toggle:Pip Planting Overlay"}
+  - expect_state: {"OverlayScreen.Instance.mode.HashValue": "!= 0"}
+  - expect_state: {"OverlayScreen.Instance.mode.HashValue": "== original"}
+  - ui_wait: {path: "**/TopRight/OverlayLegend", cond: stable}
+  - expect_ui: {"**/TopRight/OverlayLegend/**": {any_text: "~PIP PLANTING"}}
+  - ui_dump: {name: legend, root: "**/TopRight/OverlayLegend"}
+  - shot: {name: legend, crop: "**/TopRight/OverlayLegend", threshold: 0.04}
+  - world_shot: {name: overlay, ortho: 12, at: [122, 208]}

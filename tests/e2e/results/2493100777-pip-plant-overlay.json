@@ -1,0 +1,85 @@
+{
+ "spec": "mods/2493100777-pip-plant-overlay.yaml",
+ "mods": [
+  "2493100777"
+ ],
+ "verdict": "failed",
+ "why": "a run of ours failed",
+ "findings": [],
+ "note": "the Pip Planting overlay from its overlay-bar button: mode, legend and world view match (shots within 1 %); fails on the legend's scrollbar, value 1 in ours, 0 in the original (content fits; the Scrollbar side of scroll-normalized-position)",
+ "updated": "2026-10-22",
+ "commit": "f15c949",
+ "mod_dlls": {
+  "2493100777": {
+   "PipPlantOverlay.dll": "d3aa76ead63e8f04e2383ee4ae7d41e7d9452a2caaa6b4a32878f3e3cda7bc65"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261022-220928-e8cb86",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-22T22:16:42",
+    "lane": 12,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261022-222519-2e25cd",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-22T23:19:26",
+    "lane": 13,
+    "reasons": [
+     "ui_dump legend: 1 difference(s)"
+    ],
+    "reference_run": "20261022-220928-e8cb86",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "legend": {
+      "differences": 1,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "legend": 2.2e-05,
+     "overlay": 0.009123
+    }
+   },
+   {
+    "run": "20261022-222519-2e25cd",
+    "index": 2,
+    "verdict": "fail",
+    "date": "2026-10-22T23:20:48",
+    "lane": 13,
+    "reasons": [
+     "ui_dump legend: 1 difference(s)"
+    ],
+    "reference_run": "20261022-220928-e8cb86",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "legend": {
+      "differences": 1,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "legend": 2.2e-05,
+     "overlay": 0.00912
+    }
+   }
+  ]
+ }
+}

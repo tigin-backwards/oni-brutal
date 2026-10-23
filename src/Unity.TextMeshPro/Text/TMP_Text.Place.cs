@@ -120,7 +120,8 @@ namespace TMPro
                 // Lines align in their width plus 0.0001 (the tolerance that lets a line fill its
                 // width exactly).
                 float available = line.Width + 0.0001f;
-                float used = line.StartX + line.Length;
+                // A tab counts to its end (measured: a centred "\t" spans -T/2 to T/2).
+                float used = line.StartX + Mathf.Max(line.LastVisible >= 0 ? line.Length : 0f, line.TabEnd);
                 var align = line.Align;
                 bool lastOfParagraph = line.EndsWithLineFeed || k == lineCount - 1;
                 float extra = available - used;

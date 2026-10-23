@@ -200,9 +200,22 @@ namespace TMPro
             e.CaseScale = caseScale;
 
             // Line feeds and other controls need no glyph.
-            if (shown == 10 || shown == 13 || shown == 11 || shown == 0x2028 || shown == 0x2029 || shown == 3)
+            if (shown == 10 || shown == 11 || shown == 0x2028 || shown == 0x2029 || shown == 3)
             {
                 e.MaterialIndex = 0;
+                return;
+            }
+            // CR is an ordinary character of its line, not visible, as wide as the text font's
+            // glyph for it, or of no width when that font has none; no fallback is looked in
+            // (measured on the shipped package: 7.146 in NotoSans 14 pt, 0 in GRAYSTROKE 12 pt).
+            if (shown == 13)
+            {
+                if ((state.Font ?? m_Text.font) is { } crFont)
+                {
+                    e.Element = crFont.TryGetLocalCharacter(13, out var cr) ? cr : EmptyCharacter(crFont);
+                    e.Asset = crFont;
+                    e.MaterialIndex = MaterialFor(crFont, state, false, AtlasOf(e.Element));
+                }
                 return;
             }
             // A zero-width space the text's font does not have is an empty glyph of that font,

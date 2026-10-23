@@ -131,15 +131,18 @@ namespace TMPro
             if (m_fontAsset == null) return 0f;
             float rectWidth = float.IsInfinity(width) ? float.PositiveInfinity : width;
             LayoutUnadjusted(rectWidth);
-            if (m_LayoutCharacterCount == 0) return RoundUp(m_margin.x + m_margin.z);
+            if (m_LayoutCharacterCount == 0)
+                return m_LayoutEndedAtStart ? NextHundredth(m_margin.x + m_margin.z) : RoundUp(m_margin.x + m_margin.z);
             double max = 0.0;
             for (int k = 0; k < s_LineCount; k++)
             {
                 ref var line = ref s_Lines[k];
-                if (line.LastVisible < 0) continue;
+                if (line.LastVisible < 0 && line.TabStart < 0f) continue;
                 // Length is the float pen from the line's start; indents and the line's margin
-                // are added to it.
-                max = Math.Max(max, (double)line.Length + line.MarginLeft + line.StartX);
+                // are added to it. A tab counts at its start (measured on the shipped package:
+                // "\t" is 0.01 wide, "\t\t" one tab stop and 0.01).
+                double length = Math.Max(line.LastVisible >= 0 ? line.Length : 0f, line.TabStart);
+                max = Math.Max(max, length + line.MarginLeft + line.StartX);
             }
             return NextHundredth(max + m_margin.x + m_margin.z);
         }
@@ -179,7 +182,8 @@ namespace TMPro
                 m_CharWidthAdjustment = widthAdjust;
             }
             else LayoutUnadjusted(width);
-            if (s_LineCount == 0) return RoundUp(m_margin.y + m_margin.w);
+            if (s_LineCount == 0)
+                return m_LayoutEndedAtStart ? NextHundredth(m_margin.y + m_margin.w) : RoundUp(m_margin.y + m_margin.w);
             // The height goes down to the last line with a checked character (not white space;
             // a tab is checked): a text of only white space has no height, 0 (measured on the
             // shipped package: " " is 0.01 high, "A\n " one line, "\t" one line).

@@ -36,6 +36,8 @@ namespace TMPro
             // A soft hyphen's advance: it takes no room, and is drawn only where a line breaks
             // after it (0: not a soft hyphen).
             public float SoftHyphen;
+            // A tab's stop interval (0: not a tab).
+            public float TabStop;
             // An empty record where truncation stopped (textInfo holds a blank character there).
             public bool Blank;
             public float LineHeightOverride;  // NaN: none
@@ -63,6 +65,8 @@ namespace TMPro
             // must fit in the rect (the hyphen is drawn after the line was found to fit).
             public float FitDescender;
             public float Length;         // pen advance to the end of the last visible character
+            // The last tab's start and end, from the line's start (-1: no tab).
+            public float TabStart, TabEnd;
             public float Width;          // the width available to the line
             public float MarginLeft, MarginRight, StartX;
             public float Baseline;
@@ -226,6 +230,7 @@ namespace TMPro
 
             // 1. Characters.
             int count = 0;
+            bool endedAtStart = false;
             float space = 0f, pos = float.NaN;
             bool page = false;
             var rules = TMP_Settings.linebreakingRules;
@@ -244,6 +249,10 @@ namespace TMPro
                         page = true;
                         continue;
                 }
+                // U+0003 ends the text: nothing after it is laid out, and as the first character
+                // it leaves no characters at all (measured on the shipped package).
+                bool end3 = el.Kind == ElementKind.Character && el.Unicode == 3;
+                if (end3 && count == 0) { endedAtStart = true; break; }
                 ref var p = ref pl[count++];
                 Measure(ref el, ref p, baseSize, width);
                 p.Element = e;
@@ -253,6 +262,7 @@ namespace TMPro
                 space = 0f;
                 pos = float.NaN;
                 page = false;
+                if (end3) break;
             }
             // Kerning: the font's pair adjustments between consecutive glyphs of the same font
             // move the first glyph's advance and placement and the second glyph's placement.
@@ -345,12 +355,23 @@ namespace TMPro
                         lineFeed = true;
                         break;
                     }
-                    if (parsed.Elements[p.Element].Unicode == 9)
+                    if (parsed.Elements[p.Element].Unicode == 13 && parsed.Elements[p.Element].Kind == ElementKind.Character)
                     {
-                        // Tabs advance to the next multiple of the tab width.
-                        float stop = p.Advance;
+                        // CR keeps the pen where it is; its record still spans its glyph's
+                        // advance (measured on the shipped package: "\rA" has its "A" at 0).
                         p.X = x;
-                        x = stop > 0f ? (Mathf.Floor((x - line.StartX) / stop + 0.0001f) + 1f) * stop + line.StartX : x;
+                        if (p.BreakAfter) lastBreak = i;
+                        continue;
+                    }
+                    if (p.TabStop > 0f)
+                    {
+                        // Tabs advance to the next stop, a multiple of the tab interval from the
+                        // line's start (from a stop, to the next one); the tab's advance is the
+                        // distance to it.
+                        float stop = p.TabStop;
+                        p.X = x;
+                        x = (Mathf.Floor((x - line.StartX) / stop + 0.0001f) + 1f) * stop + line.StartX;
+                        p.Advance = p.GlyphAdvance = x - p.X;
                         if (p.BreakAfter) lastBreak = i;
                         continue;
                     }
@@ -450,11 +471,14 @@ namespace TMPro
             m_LayoutOverflowIndex = overflowIndex;
             m_LayoutHorizontalCut = horizontalCut;
             m_LayoutCharacterCount = count;
+            m_LayoutEndedAtStart = endedAtStart;
             m_LayoutBaseSize = baseSize;
             return fits;
         }
 
         int m_LayoutOverflowIndex = -1, m_LayoutHorizontalCut = -1, m_LayoutCharacterCount;
+        // The text began with U+0003: it has no characters, but is not empty.
+        bool m_LayoutEndedAtStart;
         float m_LayoutBaseSize;
 
         static bool IsCjk(uint c) =>
@@ -467,6 +491,7 @@ namespace TMPro
             line.FirstVisible = -1;
             line.LastVisible = -1;
             line.LastChecked = -1;
+            line.TabStart = line.TabEnd = -1f;
             line.FontLineHeight = 0f;
             line.Visible = line.Spaces = 0;
             // A soft hyphen that is not drawn takes no part in the line's metrics (measured on
@@ -484,6 +509,11 @@ namespace TMPro
                 gap = Mathf.Max(gap, p.Gap);
                 maxAscent = Mathf.Max(maxAscent, p.Ascender);
                 if (p.Checked) line.LastChecked = i;
+                if (p.TabStop > 0f)
+                {
+                    line.TabStart = p.X - line.StartX;
+                    line.TabEnd = p.X + p.Advance - line.StartX;
+                }
                 line.FontLineHeight = Mathf.Max(line.FontLineHeight, p.FontLineHeight);
                 if (p.Visible)
                 {
@@ -559,11 +589,12 @@ namespace TMPro
             uint c = el.Unicode;
             p.LineBreak = el.Kind == ElementKind.Character && IsLineBreak(c);
             p.Whitespace = el.Kind == ElementKind.Character && (IsWhitespace(c) || p.LineBreak || c == 13 || c == 3);
-            p.Checked = !p.Whitespace || (el.Kind == ElementKind.Character && c == 9);
+            // White space is not checked, nor the zero-width space; a tab is.
+            p.Checked = (!p.Whitespace && !(el.Kind == ElementKind.Character && c == 0x200B)) || (el.Kind == ElementKind.Character && c == 9);
             // The spacing properties are in hundredths of the text's font size, whatever size
             // tags say (measured on the shipped package).
             float em = baseSize * 0.01f;
-            if (p.LineBreak || c == 13 || c == 3) return;
+            if (p.LineBreak || c == 3) return;
 
             float advance, spacing = 0f;
             if (el.Kind == ElementKind.Sprite)
@@ -606,9 +637,13 @@ namespace TMPro
                 float styleSpacing = p.Bold ? font.boldSpacing : font.normalSpacingOffset;
                 spacing = (m_characterSpacing + styleSpacing) * em;
                 if (c == 32 || c == 0xA0) spacing += m_wordSpacing * em;
-                if (c == 9)
+                if (c == 9 && el.Kind == ElementKind.Character)
                 {
-                    advance = font.tabSize * gm.horizontalAdvance * s;
+                    // T = tabSize x the face's tabWidth, at the size (measured on the shipped
+                    // package: 364.58333 for NotoSans 14 pt, 300 for GRAYSTROKE 12 pt).
+                    var tabFace = font.faceInfo;
+                    advance = font.tabSize * tabFace.tabWidth * (size / tabFace.pointSize * tabFace.scale);
+                    p.TabStop = advance;
                     spacing = 0f;
                 }
             }

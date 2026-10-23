@@ -203,5 +203,168 @@ namespace OniBrutal.Tests
             Assert.Equal(width, t.preferredWidth);
             Assert.Equal(height, t.preferredHeight);
         }
+
+        // "Further characters": the first verification table (NotoSans-Regular 14 pt, centred).
+        // Each row: the character; whether a text of it alone overflows in 0 x 0 (index); "xA" in
+        // 400 x 0; "A\nx" in 400 x 19.03125; the preferred size of x and of "A\nx" (NaN: the
+        // table's value is a fallback height the section leaves unexplained, not checked here).
+        [Theory]
+        [InlineData(0x0D, false, -1, 1, -1, 0.01f, 0.01f, 8.94f, 19.04f)]
+        [InlineData(0x0B, false, -1, 1, -1, 0.01f, 0.01f, 8.94f, 19.04f)]
+        [InlineData(0x2028, false, -1, 1, -1, 0.01f, 0.01f, 8.94f, 19.04f)]
+        [InlineData(0x2029, false, -1, 1, -1, 0.01f, 0.01f, 8.94f, 19.04f)]
+        [InlineData(0x2000, false, -1, 1, -1, 0.01f, 0.01f, 8.94f, 19.04f)]
+        [InlineData(0x2005, false, -1, 1, -1, 0.01f, 0.01f, 8.94f, 19.04f)]
+        [InlineData(0x200A, false, -1, 1, -1, 0.01f, 0.01f, 8.94f, 19.04f)]
+        [InlineData(0x200B, false, -1, 1, -1, 0.01f, 0.01f, 8.94f, 19.04f)]
+        [InlineData(0x3000, false, -1, 1, -1, 0.01f, 0.01f, 8.94f, float.NaN)]
+        [InlineData(0x09, true, 0, 0, 2, 0.01f, 19.04f, 8.94f, 38.1f)]
+        [InlineData(0x0C, true, 0, 0, 2, 14.01f, 20.74f, 14.01f, 39.81f)]
+        [InlineData(0x180E, true, 0, 0, 2, 14.01f, 20.74f, 14.01f, 39.81f)]
+        [InlineData(0xFEFF, true, 0, 0, 2, 0.01f, 23.82f, 8.94f, 42.89f)]
+        public void FurtherCharactersAreCheckedOrNotAsMeasured(int code, bool alone, int aloneIndex, int beforeA, int afterLine,
+            float width, float height, float lineWidth, float lineHeight)
+        {
+            string x = ((char)code).ToString();
+            var t = Label(x, 0f, 0f, TextOverflowModes.Overflow);
+            Assert.Equal(alone, t.isTextOverflowing);
+            Assert.Equal(aloneIndex, t.firstOverflowCharacterIndex);
+            // Truncate keeps an unchecked character and leaves nothing of a checked one.
+            t = Label(x, 0f, 0f, TextOverflowModes.Truncate);
+            Assert.Equal(alone ? 0 : 1, t.textInfo.characterCount);
+            Assert.Equal(beforeA, Label(x + "A", 400f, 0f, TextOverflowModes.Overflow).firstOverflowCharacterIndex);
+            Assert.Equal(afterLine, Label("A\n" + x, 400f, 19.03125f, TextOverflowModes.Overflow).firstOverflowCharacterIndex);
+            t = Label(x, 400f, 100f, TextOverflowModes.Overflow);
+            Assert.Equal(width, t.preferredWidth);
+            Assert.Equal(height, t.preferredHeight);
+            t = Label("A\n" + x, 400f, 100f, TextOverflowModes.Overflow);
+            Assert.Equal(lineWidth, t.preferredWidth);
+            if (!float.IsNaN(lineHeight)) Assert.Equal(lineHeight, t.preferredHeight);
+        }
+
+        [Theory]
+        [InlineData(0x0D, 2)]
+        [InlineData(0x0B, 3)]
+        [InlineData(0x2028, 3)]
+        [InlineData(0x2029, 3)]
+        [InlineData(0x0A, 3)]
+        [InlineData(0x2003, 2)]
+        public void LineFeedVerticalTabAndTheSeparatorsBreakTheLineButCrDoesNot(int code, int lines)
+        {
+            var t = Label((char)code + "\nA", 400f, 100f, TextOverflowModes.Overflow);
+            Assert.Equal(lines, t.textInfo.lineCount);
+        }
+
+        [Fact]
+        public void CrIsAnInvisibleCharacterAsWideAsItsGlyph()
+        {
+            var t = Label("\rA", 400f, 100f, TextOverflowModes.Overflow);
+            var cr = t.textInfo.characterInfo[0];
+            Assert.Equal('\r', cr.character);
+            Assert.False(cr.isVisible);
+            Assert.Equal(7.146f, cr.xAdvance - cr.origin, 3);
+            // GRAYSTROKE has no CR: it is 0 wide.
+            t = Label("\r", 400f, 100f, TextOverflowModes.Overflow, font: Graystroke, size: 12f);
+            Assert.Equal(0f, t.textInfo.characterInfo[0].xAdvance - t.textInfo.characterInfo[0].origin);
+        }
+
+        [Fact]
+        public void FormFeedAndU180EAreTheMissingGlyphAndUFEFFIsVisible()
+        {
+            foreach (int code in new[] { 0x0C, 0x180E })
+            {
+                var c = Label(((char)code).ToString(), 400f, 100f, TextOverflowModes.Overflow).textInfo.characterInfo[0];
+                Assert.Equal('□', c.character);
+                Assert.True(c.isVisible);
+            }
+            var feff = Label("﻿", 400f, 100f, TextOverflowModes.Overflow).textInfo.characterInfo[0];
+            Assert.Equal('﻿', feff.character);
+            Assert.True(feff.isVisible);
+            Assert.Equal(0f, feff.xAdvance - feff.origin);
+        }
+
+        [Theory]
+        [InlineData("\u0003", 0)]
+        [InlineData("\u0003\u0003", 0)]
+        [InlineData("\u0003A", 0)]
+        [InlineData("\u0003\nA", 0)]
+        [InlineData("A\u0003", 2)]
+        [InlineData("A\n\u0003", 3)]
+        public void U0003EndsTheText(string text, int characters)
+        {
+            foreach (var mode in new[] { TextOverflowModes.Overflow, TextOverflowModes.Truncate })
+            {
+                var info = Label(text, 400f, 100f, mode).textInfo;
+                Assert.Equal(characters, info.characterCount);
+                if (characters > 0)
+                {
+                    Assert.Equal('\u0003', info.characterInfo[characters - 1].character);
+                    Assert.False(info.characterInfo[characters - 1].isVisible);
+                }
+                else Assert.Equal(0, info.lineCount);
+            }
+            // None of them overflows.
+            Assert.False(Label(text, 400f, 19.03125f, TextOverflowModes.Overflow).isTextOverflowing);
+            if (characters == 0) Assert.False(Label(text, 0f, 0f, TextOverflowModes.Overflow).isTextOverflowing);
+            var p = Label(text, 400f, 100f, TextOverflowModes.Overflow);
+            if (characters == 0)
+            {
+                Assert.Equal(0.01f, p.preferredWidth);
+                Assert.Equal(0.01f, p.preferredHeight);
+            }
+            else
+            {
+                Assert.Equal(8.94f, p.preferredWidth);
+                // "A\n\u0003" is 4.09 high, an anomaly the section does not explain.
+                if (characters == 2) Assert.Equal(19.04f, p.preferredHeight);
+            }
+        }
+
+        static TextMeshProUGUI Tabbed(string text, string font, float size, TextAlignmentOptions align = TextAlignmentOptions.TopLeft, float width = 400f)
+        {
+            var t = Label(text, width, 100f, TextOverflowModes.Overflow, font: font, size: size);
+            t.alignment = align;
+            t.ForceMeshUpdate(true);
+            return t;
+        }
+
+        // The second verification table, and the tab's stops: multiples of tabSize x tabWidth at
+        // the size, from the line's start, whatever the rect.
+        [Theory]
+        [InlineData(Noto, 14f, 364.58333f)]
+        [InlineData(Noto, 28f, 729.16667f)]
+        [InlineData(Graystroke, 12f, 300f)]
+        [InlineData(Graystroke, 24f, 600f)]
+        public void ATabEndsAtTheNextStop(string font, float size, float stop)
+        {
+            foreach (float width in new[] { 50f, 400f, 1000f })
+            {
+                var c = Tabbed("\t", font, size, width: width).textInfo.characterInfo;
+                Assert.Equal(stop, c[0].xAdvance - c[0].origin, 3);
+                c = Tabbed("\t\t", font, size, width: width).textInfo.characterInfo;
+                Assert.Equal(2 * stop, c[1].xAdvance - c[0].origin, 3);
+                c = Tabbed("A\t", font, size, width: width).textInfo.characterInfo;
+                Assert.Equal(stop, c[1].xAdvance - c[0].origin, 3);
+                c = Tabbed(" \t", font, size, width: width).textInfo.characterInfo;
+                Assert.Equal(stop, c[1].xAdvance - c[0].origin, 3);
+                c = Tabbed("\tA", font, size, width: width).textInfo.characterInfo;
+                Assert.Equal(stop, c[1].origin - c[0].origin, 3);
+            }
+            // Centred, the line is laid out the same and then centred: "\t" from -T/2 to T/2.
+            var centred = Tabbed("\t", font, size, TextAlignmentOptions.Top).textInfo.characterInfo[0];
+            Assert.Equal(-stop / 2f, centred.origin, 3);
+            Assert.Equal(stop / 2f, centred.xAdvance, 3);
+        }
+
+        [Theory]
+        [InlineData("\t", 0.01f)]
+        [InlineData("\t\t", 364.59f)]
+        [InlineData("A\t", 8.94f)]
+        [InlineData(" \t", 3.65f)]
+        [InlineData("\tA", 373.52f)]
+        public void ThePreferredWidthCountsATabAtItsStart(string text, float width)
+        {
+            Assert.Equal(width, Tabbed(text, Noto, 14f).preferredWidth);
+        }
     }
 }

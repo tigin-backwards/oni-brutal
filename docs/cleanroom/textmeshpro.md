@@ -828,8 +828,8 @@ LOG` predicts each case from the rule below and reproduces all 37,692; this impl
   reproduces all 37,692 cases from its log, and `ov-check.py diff` finds none that differ from
   the shipped package, preferred sizes included. "…" fits where its glyph's advance at its own
   font's scale fits (7.078125 for GRAYSTROKE 12 pt, from its fallback); it is still drawn at
-  the text font's scale, as "Horizontal overflow with wrapping off" above measured. Other white
-  space (not measured) is not checked either, and auto-size still counts a line of white space
+  the text font's scale, as "Horizontal overflow with wrapping off" above measured. The further
+  characters below are implemented as listed there, and auto-size still counts a line of white space
   below the rect as not fitting.
 
 Where this implementation deviated before (`TMP_Text.Layout.cs` and `TMP_Text.Place.cs`):
@@ -935,10 +935,22 @@ Truncate. Both fonts agree on everything except advances and heights.
 | U+FEFF | yes, visible, 0 wide | true, 0 | true, 0 | true, 2 | 0.01 × 23.82; 8.94 × 42.89 |
 | U+0003 | ends the text | false, -1, no characters | false, -1, none | false, -1 | 0.01 × 0.01; 8.94 × 4.09 |
 
-| Tab, rect 400 wide, left-aligned | shipped: tab ends at (from the line's start) | this implementation |
+| Tab, rect 400 wide, left-aligned | shipped: tab ends at (from the line's start) | this implementation before |
 |---|---|---|
 | NotoSans-Regular 14 pt "\t" | 364.58333 | 36.458 |
 | GRAYSTROKE REGULAR SDF 12 pt "\t" | 300 | 22.778 |
+
+- **Implemented.** This implementation follows the block. In the probe's `CH` and `TAB`
+  lines it matches the shipped package's overflow, index, truncation, counts and characters,
+  and the tab's stops and preferred widths, except where the block leaves the heights of
+  white space from a fallback and "A\n\u0003" unexplained: there "x\nA" is 39.74 where the
+  shipped package gives 39.81 (NotoSans, U+3000, U+000C, U+180E), "A\nx" stays one line high,
+  and "Ax" in a rect one line high overflows at the "A" (U+3000, and U+00A0 and U+2000–U+200A
+  in GRAYSTROKE, which the shipped package lays out at the text font's height after a
+  visible character). It also gives index 0, not 1, for "Ax" one line high where x is a
+  taller checked character (U+000C, U+180E, U+FEFF), which the block does not cover. CR's
+  record spans its glyph's advance but leaves the pen where it is ("\rA" has its "A" at the
+  line's start, as the probe logs it).
 
 Not measured: Page, Linked
 and ScrollRect, auto-size (whether a text of white space alone fits), margins, rich text,

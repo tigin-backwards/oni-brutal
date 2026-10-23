@@ -123,8 +123,14 @@ namespace UnityEngine.TextCore.LowLevel
             }
         }
 
+        // Observed in Unity's player (tools/UnityProbe, PROBE_SCENARIO=fontasset): an empty or null
+        // style finds a face of the family even when none is called "Regular" ("DejaVu Sans" gives
+        // its Book face); a family's Regular face when it has one. Which face it takes otherwise
+        // differs by family there (DejaVu Sans Mono gives Bold); this takes the first.
         internal static bool TryGetSystemFontReference(string familyName, string styleName, out FontReference fontRef)
-            => SystemFonts.TryFind(familyName, styleName, out fontRef);
+            => string.IsNullOrEmpty(styleName)
+                ? SystemFonts.TryFindFamily(familyName, out fontRef)
+                : SystemFonts.TryFind(familyName, styleName, out fontRef);
 
         // ----- Face information -----
 

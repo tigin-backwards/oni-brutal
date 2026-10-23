@@ -214,6 +214,14 @@ namespace OniBrutal.Tests
             if (dejavu == null) Assert.Skip("DejaVu Sans is not installed.");
             Assert.True(FontEngine.TryGetSystemFontReference("dejavu sans", "BOOK", out var reference));
             Assert.Equal(dejavu, reference.filePath);
+            // As in Unity's player: no "Regular" face, and none is found by that name; an empty or
+            // null style still finds one of the family's faces.
+            Assert.False(FontEngine.TryGetSystemFontReference("DejaVu Sans", "Regular", out _));
+            Assert.True(FontEngine.TryGetSystemFontReference("DejaVu Sans", "", out var any));
+            Assert.Equal("DejaVu Sans", any.familyName);
+            Assert.True(FontEngine.TryGetSystemFontReference("DejaVu Sans", null, out any));
+            Assert.Equal("DejaVu Sans", any.familyName);
+            Assert.False(FontEngine.TryGetSystemFontReference("Segoe UI Symbol (not installed)", "", out _));
             Assert.Equal(FontEngineError.Success, FontEngine.LoadFontFace("DejaVu Sans", "Book", 32f));
             Assert.Equal(FontEngineError.Invalid_File_Path, FontEngine.LoadFontFace("/nonexistent/font.ttf"));
             Assert.Equal(FontEngineError.Success, FontEngine.LoadFontFace(dejavu, 32f, 0));

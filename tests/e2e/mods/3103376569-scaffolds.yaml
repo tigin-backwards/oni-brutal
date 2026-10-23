@@ -1,0 +1,37 @@
+# Scaffolds / 脚手架 (3103376569), classes B, T, S, O.
+#
+# What it does: adds the Scaffold to the Base menu beside the Ladder: a ladder that costs
+# nothing and is built the moment its blueprint is placed (the material panel is hidden and the
+# cursor reads "Free insta-build!"), slows climbing by 25 %, has -10 decor, and removes itself
+# after 10 cycles unless made permanent. Its user menu has Make Permanent / Enable Self
+# Destruct and Remove (instant). PLib options set the defaults.
+# How a player reaches it: the build menu (Base, Scaffold), a drag; the scaffold's user menu.
+# What changes: instant ladders that go away again.
+#
+# A column of four scaffolds is dragged in the dug-out room west of the printing pod.
+from: early-base
+mods: [3103376569]
+steps:
+  - run: {seconds: 5}
+  - driver: {camera.set: {cell: [116, 208], ortho: 10}}
+  - click: {ui: "**/PlanScreen/Toggle:Base"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/Scaffold Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/Scaffold Group*"}
+  - expect_state: {"PlayerController.Instance.ActiveTool.name": BuildTool}
+  - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
+  - expect_ui: {"**/ProductInfoScreen/**/MaterialSelectionPanel": {exists: false}}
+  - shot: {name: product-info, crop: "**/ProductInfoScreen", threshold: 0.04}
+  - drag: {from: [113, 207], to: [113, 210]}
+  # Built at once, with no Duplicant and no material.
+  - expect: {buildings: {Scaffold: 4}, pending_construction: 0}
+  - key: {code: Escape}
+  - click_world: {cell: [113, 209]}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui: {"**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Scaffold"}}
+  - expect_state: {"selected:Scaffold.willSelfDestruct": true}
+  - ui_dump: {name: user-menu, root: "**/DetailsScreen/UserMenuButtons/UserMenuScreen/Buttons"}
+  - click: {ui: "**/UserMenuScreen/Buttons/Make PermanentButton"}
+  - expect_state: {"selected:Scaffold.willSelfDestruct": false}
+  - expect_ui: {"**/UserMenuScreen/Buttons/Enable Self DestructButton": {active: true}}
+  - click: {ui: "**/UserMenuScreen/Buttons/RemoveButton"}
+  - expect: {buildings: {Scaffold: 3}}

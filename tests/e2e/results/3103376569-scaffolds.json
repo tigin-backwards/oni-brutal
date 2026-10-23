@@ -1,0 +1,67 @@
+{
+ "spec": "mods/3103376569-scaffolds.yaml",
+ "mods": [
+  "3103376569"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a column of scaffolds dragged from the build menu stands at once; Make Permanent and Remove from its user menu; product card and user menu compared",
+ "updated": "2026-10-22",
+ "commit": "d0cf992",
+ "mod_dlls": {
+  "3103376569": {
+   "Scaffolds.dll": "6bf33ab71b4f020bea8df29abadb1905a1b221b14def9269a8e06faf5da87edb"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261022-220928-e8cb86",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-22T22:13:08",
+    "lane": 13,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261022-221500-31ba91",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-22T23:16:07",
+    "lane": 13,
+    "reference_run": "20261022-220928-e8cb86",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "user-menu": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "product-info": 0.0
+    }
+   },
+   {
+    "run": "20261022-221500-31ba91",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-22T23:17:55",
+    "lane": 13,
+    "reference_run": "20261022-220928-e8cb86",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "user-menu": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "product-info": 0.0
+    }
+   }
+  ]
+ }
+}

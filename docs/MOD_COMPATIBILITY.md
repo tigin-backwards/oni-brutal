@@ -95,7 +95,7 @@ installs get developer checks subscribers never see).
 | 74 | [Flow Splitters](https://steamcommunity.com/sharedfiles/filedetails/?id=1708823360) | ✅ | ✅ | ⬜ |  |
 | 75 | [484114 한글 언어팩](https://steamcommunity.com/sharedfiles/filedetails/?id=1454392573) | ⬜ | ⬜ | ⬜ | translation: the game applies one only from a Steam subscription; not testable here |
 | 76 | [Ronivan's Legacy - Industrial Revolution](https://steamcommunity.com/sharedfiles/filedetails/?id=3557584850) | ✅ | ✅ | ⬜ |  |
-| 77 | [Scaffolds / 脚手架](https://steamcommunity.com/sharedfiles/filedetails/?id=3103376569) | ✅ | ✅ | ⬜ |  |
+| 77 | [Scaffolds / 脚手架](https://steamcommunity.com/sharedfiles/filedetails/?id=3103376569) | ✅ | ✅ | ✅ | spec tests/e2e/mods/3103376569-scaffolds.yaml: a column of scaffolds dragged from the build menu stands at once; Make Permanent and Remove from its user menu; product card and user menu compared |
 | 78 | [Self-sealing Airlocks](https://steamcommunity.com/sharedfiles/filedetails/?id=1735550356) | ⬜ | ⬜ | ⬜ | flagged by onimaxxing (notLoading); not tested |
 | 79 | [Speed Control 202107](https://steamcommunity.com/sharedfiles/filedetails/?id=2552175137) | ✅ | ✅ | ⬜ |  |
 | 80 | [AI Improvements](https://steamcommunity.com/sharedfiles/filedetails/?id=2128885110) | ✅ | ✅ | ⬜ |  |

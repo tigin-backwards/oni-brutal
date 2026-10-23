@@ -79,6 +79,7 @@ from: early-base                 # fixture: tests/e2e/fixtures/early-base.sav
 mods: [1863428350]               # Workshop IDs, installed as Local mods (out/ws, ws-mods.py)
 options:                         # PLib options, merged into the mod's config.json before launch
   SweepByType: {DisableIcons: true}       # by static ID (or Workshop ID)
+  "2890083659": {$file: MiniBox.json, Wires: 3.0}   # a [ConfigFile] name other than config.json
 require_log: ['\[SweepByType\] options saved']   # regexes: in the original's log -> must be in ours
 mask_text: ['\d+:\d+', 'Cycle \d+']      # masked in every ui_dump's text before the diff
 ignore_fields: [depth]           # NAME=VALUE members left out of every ui_dump's diff
@@ -147,6 +148,7 @@ and nothing is clicked. A click is: move, 2 frames of hover, press, 2 frames, re
 - click: {ui: "**/Tech_FineDining/Button", mods: [Shift]}      # modifier-click
 - click: {text: "Quick Learner", under: "**/UnityDuplicitySelectionScreen"}
 - click: {ui: "**/List/Item", index: 2, button: right}         # the third match; right button
+- click: {ui: "**/WorldSelector/**/Row", double: true}         # a double click
 - toggle: {ui: "**/TypeSelectScreen/**/Sandstone", to: true}   # clicks only if needed, then checks isOn
 - dropdown: {ui: "**/MaterialDropdown", option: "Sandstone"}   # opens it, clicks the option by text
 - type: {ui: "**/FileNameDialog/**/Input", text: "e2e", enter: true, clear: true}

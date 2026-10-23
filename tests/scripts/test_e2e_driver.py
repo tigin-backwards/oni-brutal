@@ -168,8 +168,8 @@ class FakeInput:
     def __init__(self, on_click=None):
         self.events, self.on_click = [], on_click or (lambda x, y, mods: None)
 
-    def click(self, x, y, button='left', mods=()):
-        self.events.append(('click', x, y, button, tuple(mods)))
+    def click(self, x, y, button='left', mods=(), double=False):
+        self.events.append(('double-click' if double else 'click', x, y, button, tuple(mods)))
         self.on_click(x, y, mods)
 
     def key(self, code):
@@ -332,6 +332,13 @@ class DriverTests(unittest.TestCase):
         with self.assertRaises(e2e.SpecFailure) as caught:
             run.step('click', {'text': 'Nope', 'under': 'Screen'}, 3)
         self.assertIn('no active element', str(caught.exception))
+
+    def test_double_click(self):
+        self.game.add('Screen/Row', [0, 0, 10, 10])
+        run = self.run_for()
+        run.step('click', {'ui': 'Screen/Row', 'double': True}, 1)
+        self.assertEqual(run.input.events, [('double-click', 5, 5, 'left', ())])
+        self.assertTrue(e2e.check_step('s', 'click', {'ui': 'x', 'double': 1}, False))
 
     def test_click_by_text_under(self):
         self.game.add('Screen/List/Item0', [0, 0, 10, 10], text='Sandstone')

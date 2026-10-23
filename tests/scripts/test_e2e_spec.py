@@ -252,6 +252,20 @@ class Options(unittest.TestCase):
             with self.assertRaises(e2e.SpecFailure):
                 e2e.write_options(profile, {'1863428350': 'SweepByType'}, {'Other': {'X': 1}})
 
+    def test_config_file_named_by_the_spec(self):
+        with tempfile.TemporaryDirectory() as profile:
+            mod = os.path.join(profile, 'mods', 'Local', '2890083659')
+            os.makedirs(mod)
+            open(os.path.join(mod, 'MiniBox.dll'), 'w').close()
+            written = e2e.write_options(profile, {'2890083659': '2890083659'},
+                                        {'2890083659': {'$file': 'MiniBox.json', 'WireLoadKw': 3.0}})
+            self.assertEqual(sorted(os.path.relpath(w, profile) for w in written), [
+                'mods/Local/2890083659/MiniBox.json',
+                'mods/config/MiniBox/MiniBox.json'])
+            self.assertEqual(json.load(open(os.path.join(mod, 'MiniBox.json'))), {'WireLoadKw': 3.0})
+        problems = e2e.check_spec({'steps': [], 'options': {'X': {'$file': '../x.json'}}})
+        self.assertTrue(any('$file' in p for p in problems), problems)
+
 
 class Install(unittest.TestCase):
     def test_onimcp_and_driver_beside_the_mods(self):

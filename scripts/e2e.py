@@ -216,6 +216,7 @@ def check_step(where, kind, value, in_setup):
         if isinstance(value, dict):
             for m in value.get('mods', []):
                 problems += [f'{where}: {p}' for p in key_problems(m)]
+            need(isinstance(value.get('double', False), bool), 'click `double` is true or false')
     elif kind == 'toggle':
         _ui_query(where, value, problems)
         need(isinstance(value, dict) and isinstance(value.get('to'), bool), 'toggle needs `to: true|false`')
@@ -273,6 +274,8 @@ def check_spec(spec):
     options = spec.get('options', {})
     if not isinstance(options, dict) or not all(isinstance(v, dict) for v in options.values()):
         problems.append('`options` maps a static ID to {Field: value}')
+    elif not all(re.fullmatch(r'[^/\\]+\.json', str(v.get('$file', 'x.json'))) for v in options.values()):
+        problems.append('an `options` `$file` is a file name ending in .json')
     for key in ('require_log', 'mask_text'):
         if not isinstance(spec.get(key, []), list):
             problems.append(f'`{key}` is a list of regular expressions')
@@ -1262,14 +1265,18 @@ class Input:
             if names:
                 self.frames(2)
 
-    def click(self, x, y, button='left', mods=()):
-        """Move, hover two frames, press, two frames, release (§4.3)."""
+    def click(self, x, y, button='left', mods=(), double=False):
+        """Move, hover two frames, press, two frames, release (§4.3). A double click presses
+        twice, a frame apart, so the event system counts them as one double click."""
         with self.modifiers(mods):
             self.move(x, y)
             self.frames(2)
-            self.button(button, True)
-            self.frames(2)
-            self.button(button, False)
+            for press in range(2 if double else 1):
+                if press:
+                    self.frames(1)
+                self.button(button, True)
+                self.frames(1 if double else 2)
+                self.button(button, False)
             self.frames(2)
 
     def key(self, code):
@@ -1606,25 +1613,28 @@ def write_options(profile, mods, options):
     """A mod's PLib options before launch: OPTIONS maps a static ID (or Workshop ID) to fields,
     merged into config.json where POptions reads it, beside the mod's assembly (every folder of
     the mod holding a DLL, as KMod may load an archived version) and in the shared location
-    mods/config/ASSEMBLY/. Returns the files written."""
+    mods/config/ASSEMBLY/. A `$file` field names the file instead, for a mod whose
+    [ConfigFile] gives it another name ("MiniBox.json"). Returns the files written."""
     written = []
     mods_dir = os.path.join(profile, 'mods')
     for key, fields in options.items():
         folder = next((f for f, static in mods.items() if key in (f, static)), None)
         if folder is None:
             raise SpecFailure(f'options for {key!r}, which is not among the spec\'s mods')
+        fields = dict(fields)
+        name = fields.pop('$file', 'config.json')
         root = os.path.join(mods_dir, 'Local', folder)
         targets = set()
         for directory, _, files in os.walk(root):
             dlls = [f for f in files if f.lower().endswith('.dll')]
             if dlls:
-                targets.add(os.path.join(directory, 'config.json'))
+                targets.add(os.path.join(directory, name))
                 # PLib's [ConfigFile] may spell it otherwise ("Config.json"): a mod that ships
                 # its file reads that one, on a case-sensitive file system too.
                 targets.update(os.path.join(directory, f) for f in files
-                               if f.lower() == 'config.json' and f != 'config.json')
+                               if f.lower() == name.lower() and f != name)
                 for dll in dlls:
-                    targets.add(os.path.join(mods_dir, 'config', os.path.splitext(dll)[0], 'config.json'))
+                    targets.add(os.path.join(mods_dir, 'config', os.path.splitext(dll)[0], name))
         for target in sorted(targets):
             data = {}
             if os.path.exists(target):
@@ -2015,9 +2025,9 @@ class Run:
             raise SpecFailure(f'{element.path} is occluded by {what} (hits there: {stack})')
         return element
 
-    def click_element(self, query, mods=(), button='left'):
+    def click_element(self, query, mods=(), button='left', double=False):
         element = self.element(query)
-        self.need_input().click(*element.center, button=button, mods=mods)
+        self.need_input().click(*element.center, button=button, mods=mods, double=double)
         return element
 
     def pointer_away(self):
@@ -2096,7 +2106,7 @@ class Run:
             else:
                 self.need_input().key(value['code'])
         elif kind == 'click':
-            self.click_element(value, value.get('mods', ()), value.get('button', 'left'))
+            self.click_element(value, value.get('mods', ()), value.get('button', 'left'), bool(value.get('double')))
         elif kind == 'click_world':
             x, y = self.need_driver().to_screen(value['cell'])
             self.need_input().click(x, y, button=value.get('button', 'left'), mods=value.get('mods', ()))

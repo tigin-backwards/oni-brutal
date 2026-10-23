@@ -38,6 +38,11 @@ namespace SemanticsProbe
                 go.AddComponent<InputLayout>();
                 return;
             }
+            if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "inputtext")
+            {
+                go.AddComponent<InputText>();
+                return;
+            }
             if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "floatprec")
             {
                 Rec.Log("=== values: float precision");

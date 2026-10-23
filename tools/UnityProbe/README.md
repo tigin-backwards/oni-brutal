@@ -76,6 +76,17 @@ frames. Check the rule with `tools/UnityProbe/il-check.py rule LOG`, and compare
 with `il-check.py diff ORIG OURS`. `textmeshpro.md` ("The input field's layout values")
 records what it measured.
 
+With `PROBE_SCENARIO=inputtext` only the input-text probe runs (`InputText.cs`, lines `IT …`, 10 s
+into the main menu, about a minute). It covers `KInputTextField`s built as the slider row's
+`NumberInputField`, with text set by `text =`, `SetTextWithoutNotify` or the text component's
+`text`, on inactive, active and focused fields, across `characterLimit`, `lineType` and
+`contentType`, with one of them set after the text in some cases. Each field is followed
+through a frame, enabling, activation, an edit (End, a typed "9", Backspace, through
+`ProcessEvent`) and deselection. Each step logs the text, the label, the caret and the
+`onValueChanged` / `onEndEdit` / `onSubmit` reports. Check the rule with
+`tools/UnityProbe/it-check.py rule LOG`, and compare the players with `it-check.py diff ORIG
+OURS`. `textmeshpro.md` ("Text set from code") records what it measured.
+
 With `PROBE_SCENARIO=floatprec` only the float-precision probe runs (`FloatPrecision.cs`, lines
 `VAL fp …`, at mod load; the full run includes it in its values): float expressions whose
 float32 and double results differ, each line saying which one the player gave. Its header

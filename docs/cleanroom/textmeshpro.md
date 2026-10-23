@@ -950,7 +950,12 @@ Truncate. Both fonts agree on everything except advances and heights.
   visible character). It also gives index 0, not 1, for "Ax" one line high where x is a
   taller checked character (U+000C, U+180E, U+FEFF), which the block does not cover. CR's
   record spans its glyph's advance but leaves the pen where it is ("\rA" has its "A" at the
-  line's start, as the probe logs it).
+  line's start, as the probe logs it). The zero-width space is unchecked only where it is not
+  drawn: where white space is preserved it is visible (see "Text layout"), and this
+  implementation checks it there like any visible character. An empty `TMP_InputField`'s text
+  is a lone U+200B with white space preserved, and in the shipped package the field is one
+  line high (Butcher & Fishing Stations: 21.04 with its padding); without this it was 0.01
+  high (2.01 with padding).
 
 Not measured: Page, Linked
 and ScrollRect, auto-size (whether a text of white space alone fits), margins, rich text,

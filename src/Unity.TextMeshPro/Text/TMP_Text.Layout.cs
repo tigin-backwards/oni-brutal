@@ -589,8 +589,9 @@ namespace TMPro
             uint c = el.Unicode;
             p.LineBreak = el.Kind == ElementKind.Character && IsLineBreak(c);
             p.Whitespace = el.Kind == ElementKind.Character && (IsWhitespace(c) || p.LineBreak || c == 13 || c == 3);
-            // White space is not checked, nor the zero-width space; a tab is.
-            p.Checked = (!p.Whitespace && !(el.Kind == ElementKind.Character && c == 0x200B)) || (el.Kind == ElementKind.Character && c == 9);
+            // White space is not checked; a tab is. The zero-width space is checked only where
+            // it is drawn (below).
+            p.Checked = !p.Whitespace || (el.Kind == ElementKind.Character && c == 9);
             // The spacing properties are in hundredths of the text's font size, whatever size
             // tags say (measured on the shipped package).
             float em = baseSize * 0.01f;
@@ -656,6 +657,11 @@ namespace TMPro
             }
             p.GlyphAdvance = advance;
             p.Advance = advance + spacing;
+            // The zero-width space is not checked against the height where it is not drawn
+            // (measured on the shipped package); where white space is preserved it is drawn, and
+            // checked as a visible character (an empty input field's text, U+200B alone, is one
+            // line high).
+            if (c == 0x200B && el.Kind == ElementKind.Character) p.Checked = p.Visible;
             if (c == 0xAD && el.Kind == ElementKind.Character && p.Visible)
             {
                 p.SoftHyphen = advance;

@@ -274,11 +274,11 @@ namespace OniBrutal.Tests
             foreach (int code in new[] { 0x0C, 0x180E })
             {
                 var c = Label(((char)code).ToString(), 400f, 100f, TextOverflowModes.Overflow).textInfo.characterInfo[0];
-                Assert.Equal('□', c.character);
+                Assert.Equal('\u25A1', c.character);
                 Assert.True(c.isVisible);
             }
-            var feff = Label("﻿", 400f, 100f, TextOverflowModes.Overflow).textInfo.characterInfo[0];
-            Assert.Equal('﻿', feff.character);
+            var feff = Label("\uFEFF", 400f, 100f, TextOverflowModes.Overflow).textInfo.characterInfo[0];
+            Assert.Equal('\uFEFF', feff.character);
             Assert.True(feff.isVisible);
             Assert.Equal(0f, feff.xAdvance - feff.origin);
         }
@@ -365,6 +365,67 @@ namespace OniBrutal.Tests
         public void ThePreferredWidthCountsATabAtItsStart(string text, float width)
         {
             Assert.Equal(width, Tabbed(text, Noto, 14f).preferredWidth);
+        }
+
+        // An unchecked character after a visible one leaves the line its height: "Ax" is as high
+        // as "A" (the input field's "85" and its zero-width space among them).
+        [Theory]
+        [InlineData("85\u200B", 16.05f)]
+        [InlineData("A\u200B", 8.94f)]
+        [InlineData("A ", 8.94f)]
+        [InlineData("A\u00A0", 8.94f)]
+        [InlineData("A\r", 8.94f)]
+        [InlineData("A\u000B", 8.94f)]
+        [InlineData("A\u2000", 8.94f)]
+        [InlineData("A\u2005", 8.94f)]
+        [InlineData("A\u200A", 8.94f)]
+        [InlineData("A\u2028", 8.94f)]
+        [InlineData("A\u2029", 8.94f)]
+        [InlineData("A\n", 8.94f)]
+        public void AnUncheckedCharacterAfterAVisibleOneKeepsTheLinesHeight(string text, float width)
+        {
+            foreach (var wrap in new[] { TextWrappingModes.NoWrap, TextWrappingModes.Normal, TextWrappingModes.PreserveWhitespaceNoWrap })
+            {
+                var t = Label(text, 400f, 100f, TextOverflowModes.Overflow);
+                t.textWrappingMode = wrap;
+                Assert.Equal(width, t.preferredWidth);
+                Assert.Equal(19.04f, t.preferredHeight);
+                Assert.False(Label(text, 400f, 19.03125f, TextOverflowModes.Overflow).isTextOverflowing);
+            }
+        }
+
+        [Fact]
+        public void AZeroWidthSpaceIsCheckedWhereWhiteSpaceIsPreserved()
+        {
+            // Not drawn, it is not checked: alone it is 0.01 x 0.01 and does not overflow.
+            var t = Label("\u200B", 0f, 0f, TextOverflowModes.Overflow);
+            Assert.False(t.isTextOverflowing);
+            Assert.Equal(0.01f, Label("\u200B", 400f, 100f, TextOverflowModes.Overflow).preferredHeight);
+            // Drawn where white space is preserved (an empty input field's text), it is checked:
+            // one line high.
+            foreach (var wrap in new[] { TextWrappingModes.PreserveWhitespace, TextWrappingModes.PreserveWhitespaceNoWrap })
+            {
+                t = Label("\u200B", 400f, 100f, TextOverflowModes.Overflow);
+                t.textWrappingMode = wrap;
+                t.ForceMeshUpdate(true);
+                Assert.True(t.textInfo.characterInfo[0].isVisible);
+                Assert.Equal(19.04f, t.preferredHeight);
+            }
+        }
+
+        [Fact]
+        public void AnEmptyInputFieldIsOneLineHigh()
+        {
+            // Its text component holds a zero-width space and preserves white space.
+            var field = TmpInputTests.NewField(42f);
+            var text = (TextMeshProUGUI)field.textComponent;
+            text.font = TmpTestSupport.FindAsset<TMP_FontAsset>(Noto);
+            text.fontSize = 14f;
+            Assert.Equal("\u200B", text.text);
+            Assert.Equal(19.04f, text.preferredHeight);
+            field.text = "85";
+            Assert.Equal("85\u200B", text.text);
+            Assert.Equal(19.04f, text.preferredHeight);
         }
     }
 }

@@ -262,7 +262,17 @@ stage_perf()
     u57_ready || { note "perf: skipped (no out/local-tools/qa.env)"; return; }
     build_release || return
     local out="$run/perf"
+    # Only this stage needs a quiet machine: e2e specs run beside the others. perf.wanted keeps
+    # new specs from starting, and the exclusive hold of perf.lock waits for the running ones.
+    local lockdir="${E2E_LOCK_DIR:-$HOME/.cache/oni-brutal-e2e}" lockfd
+    mkdir -p "$lockdir"
+    echo $$ > "$lockdir/perf.wanted"
+    exec {lockfd}>>"$lockdir/perf.lock"
+    note "perf: waiting for running e2e specs to finish"
+    flock -x "$lockfd"
     u57_run "$out" 4800
+    flock -u "$lockfd"; exec {lockfd}>&-
+    rm -f "$lockdir/perf.wanted"
     u57_check perf "$out"
     local peak; peak=$(cat "$out/peak-rss")
     if [ "$peak" -lt $((16 * 1024 * 1024)) ]; then ok "perf: peak memory $((peak / 1024)) MB"; else fail "perf: peak memory $((peak / 1024)) MB (16 GB limit)"; fi

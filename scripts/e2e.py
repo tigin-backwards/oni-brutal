@@ -68,9 +68,13 @@ UI_TOLERANCE = 2       # pixels, for ui-diff.py --tolerance
 # is numbered differently in our player, whatever is drawn (tests/e2e/README.md, Verdicts).
 IGNORE_FIELDS = ('depth',)
 FRAME_FALLBACK = 0.1   # seconds a "frame" lasts without E2eDriver to count real ones
-# Perf jobs a spec never starts beside (matched against `ps -eo args`): the QA stages, the sweep
-# and measurement scripts, profilers.
-PERF_JOBS = [r'(^|/)scripts/qa\.sh\b', r'(^|/)scripts/m9-compare\.sh\b', r'(^|/)scripts/flamegraph\.py\b',
+# Perf jobs a spec never starts beside (matched against `ps -eo args`): the sweep and measurement
+# scripts, profilers. QA (scripts/qa.sh) is not one: only its perf stage needs a quiet machine,
+# and it says so through perf.wanted and an exclusive hold of perf.lock (machine_lock); its other
+# stages run beside specs, counted in the players' budget as one QA_GB player (Budget).
+QA_JOBS = [r'(^|/)scripts/qa\.sh\b']
+QA_GB = 15          # QA's verify stage runs U57
+PERF_JOBS = [r'(^|/)scripts/m9-compare\.sh\b', r'(^|/)scripts/flamegraph\.py\b',
              r'out/local-tools/(sweep|measure|ft-bench|compare-queued|minnow-prof|glut-prof|queue|orig-queue|tw-run)',
              r'^perf (record|stat)\b']
 
@@ -621,13 +625,15 @@ class Budget:
         return ', '.join(f'{e["label"]} ({e["gb"]:g} GB, pid {e["pid"]})' for e in entries) or 'none'
 
     def try_acquire(self, gb, label):
-        """A token for one player of GB, or (None, why not)."""
+        """A token for one player of GB, or (None, why not). A running qa.sh counts as one player
+        of QA_GB."""
         with self._locked():
             entries = self._read()
-            used = sum(e['gb'] for e in entries)
-            if entries and (len(entries) >= self.players or used + gb > self.gb):
-                return None, (f'{used:g} of {self.gb:g} GB and {len(entries)} of {self.players} players in use: '
-                              + self.describe(entries))
+            counted = entries + [dict(label='qa.sh', gb=QA_GB, pid=pid) for pid, _, _ in qa_processes()]
+            used = sum(e['gb'] for e in counted)
+            if counted and (len(counted) >= self.players or used + gb > self.gb):
+                return None, (f'{used:g} of {self.gb:g} GB and {len(counted)} of {self.players} players in use: '
+                              + self.describe(counted))
             token = f'{os.getpid()}-{threading.get_ident()}-{time.time_ns()}'
             entries.append(dict(owner_record(), token=token, gb=gb, label=label))
             self._write(entries)
@@ -667,17 +673,35 @@ def perf_jobs(lines=None):
     return found
 
 
-def perf_processes(lines=None):
+def perf_processes(lines=None, patterns=None):
     """Running perf jobs as (pid, seconds running, args), from `ps -eo pid=,etimes=,args=`."""
+    patterns = PERF_JOBS if patterns is None else patterns
     if lines is None:
         lines = subprocess.run(['ps', '-eo', 'pid=,etimes=,args='], capture_output=True, text=True).stdout.splitlines()
     found = []
     for line in lines:
         parts = line.strip().split(None, 2)
+        args = re.sub(r'^(/usr/bin/env )?(ba)?sh ', '', parts[2].strip()) if len(parts) == 3 else ''
         if len(parts) == 3 and parts[0].isdigit() and parts[1].isdigit() and int(parts[0]) != os.getpid() \
-                and perf_jobs([parts[2]]):
+                and any(re.search(p, args) for p in patterns):
             found.append((int(parts[0]), int(parts[1]), parts[2]))
     return found
+
+
+def qa_processes(lines=None):
+    """Running qa.sh processes as (pid, seconds running, args)."""
+    return perf_processes(lines, QA_JOBS)
+
+
+def perf_wanted(lock_dir):
+    """The pid in perf.wanted while that process runs: a perf job (qa.sh's perf stage) waiting
+    for the specs already running to end, so that no new one starts (flock alone would let new
+    shared holders in ahead of it)."""
+    try:
+        pid = int(open(os.path.join(lock_dir, 'perf.wanted')).read().split()[0])
+    except (OSError, ValueError, IndexError):
+        return None
+    return pid if os.path.exists(f'/proc/{pid}') else None
 
 
 @contextlib.contextmanager
@@ -693,7 +717,10 @@ def machine_lock(lock_dir=None, perf_wait=True, log=say, max_wait=None):
     try:
         while True:
             jobs = perf_processes() if perf_wait else []
-            if not jobs:
+            wanted = perf_wanted(lock_dir) if perf_wait else None
+            if wanted:
+                reason, key = f'pid {wanted} waits to run a perf job ({path.replace("perf.lock", "perf.wanted")})', 'wanted'
+            elif not jobs:
                 try:
                     fcntl.flock(f, fcntl.LOCK_SH | fcntl.LOCK_NB)
                     break

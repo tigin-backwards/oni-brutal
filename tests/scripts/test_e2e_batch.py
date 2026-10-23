@@ -192,8 +192,41 @@ class PerfWaitVisible(unittest.TestCase):
         self.assertIn('--max-wait', caught.exception.args[0])
 
     def test_perf_processes_parse_ps(self):
-        lines = ['  311   4000 bash scripts/qa.sh', f'{os.getpid()} 5 python3 scripts/qa.sh', '  12 9 vim notes']
-        self.assertEqual(e2e.perf_processes(lines), [(311, 4000, 'bash scripts/qa.sh')])
+        lines = ['  311   4000 bash out/local-tools/measure.sh', f'{os.getpid()} 5 bash out/local-tools/measure.sh',
+                 '  12 9 vim notes', '  40 70 bash scripts/qa.sh']
+        self.assertEqual(e2e.perf_processes(lines), [(311, 4000, 'bash out/local-tools/measure.sh')])
+        self.assertEqual(e2e.qa_processes(lines), [(40, 70, 'bash scripts/qa.sh')])
+
+    def test_perf_wanted_holds_specs_back(self):
+        sleep = e2e.time.sleep
+        e2e.time.sleep = lambda s: sleep(0.01)
+        messages = []
+        try:
+            with tempfile.TemporaryDirectory() as locks:
+                with open(os.path.join(locks, 'perf.wanted'), 'w') as f:
+                    f.write(f'{os.getpid()}\n')
+                with self.assertRaises(e2e.WaitTimeout):
+                    with e2e.machine_lock(locks, log=messages.append, max_wait=0.05):
+                        self.fail('started while a perf job waited')
+                with open(os.path.join(locks, 'perf.wanted'), 'w') as f:
+                    f.write('999999999\n')  # a pid that has gone
+                with e2e.machine_lock(locks, log=messages.append, max_wait=1):
+                    pass
+        finally:
+            e2e.time.sleep = sleep
+        self.assertIn('waits to run a perf job', messages[0])
+
+    def test_qa_counts_in_the_budget(self):
+        processes = e2e.qa_processes
+        e2e.qa_processes = lambda: [(4242, 60, 'bash scripts/qa.sh')]
+        try:
+            with tempfile.TemporaryDirectory() as d:
+                budget = e2e.Budget(d, gb=40, players=6)
+                tokens = [budget.try_acquire(6, f'p{i}')[0] for i in range(5)]
+                self.assertEqual(sum(t is not None for t in tokens), 4)  # 15 + 4 x 6 = 39 of 40 GB
+                self.assertIn('qa.sh (15 GB, pid 4242)', budget.try_acquire(6, 'p5')[1])
+        finally:
+            e2e.qa_processes = processes
 
     def test_max_wait_option(self):
         self.assertEqual(e2e.parse_args(['--max-wait', '90', 'x'])['max_wait'], 5400)

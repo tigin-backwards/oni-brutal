@@ -87,9 +87,9 @@ class PerfWait(unittest.TestCase):
                  '/home/x/out/bin/OniBrutal.Host/release/OniBrutal --game g', 'perf record -g -p 12',
                  'bash /home/x/projects/oni-brutal/scripts/qa.sh u57', 'vim scripts/qa.sh.orig',
                  'bash out/local-tools/measure.sh 3']
-        self.assertEqual(e2e.perf_jobs(lines), ['bash scripts/qa.sh', '/bin/bash out/local-tools/sweep11c.sh',
-                                                'perf record -g -p 12', 'bash /home/x/projects/oni-brutal/scripts/qa.sh u57',
-                                                'bash out/local-tools/measure.sh 3'])
+        # qa.sh is not a perf job: only its perf stage is, through perf.wanted and perf.lock.
+        self.assertEqual(e2e.perf_jobs(lines), ['/bin/bash out/local-tools/sweep11c.sh',
+                                                'perf record -g -p 12', 'bash out/local-tools/measure.sh 3'])
 
     def test_exclusive_lock_holds_specs_back(self):
         import fcntl, os

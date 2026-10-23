@@ -41,10 +41,12 @@ namespace TMPro
             m_fontColor32 = m_fontColor;
             ConvertAlignment();
             // Sub-meshes saved with the object are adopted, in the order of their material slots.
+            // Those made at run time (DontSave) are not: a clone of a text leaves its copy of the
+            // original's sub-mesh empty and makes its own (measured on the shipped package).
             var existing = GetComponentsInChildren<TMP_SubMeshUI>(true);
             var own = new List<TMP_SubMeshUI>();
             foreach (var s in existing)
-                if (s.transform.parent == transform) own.Add(s);
+                if (s.transform.parent == transform && (s.gameObject.hideFlags & HideFlags.DontSaveInBuild) == 0) own.Add(s);
             own.Sort((a, b) => a.MaterialReferenceIndex.CompareTo(b.MaterialReferenceIndex));
             m_SubMeshes = own.ToArray();
             m_ParseRequired = true;
@@ -58,8 +60,13 @@ namespace TMPro
             m_CanvasCache = null;
             m_havePropertiesChanged = true;
             m_ParseRequired = true;
+            // The sub-meshes disabled with the text are enabled with it (measured).
             foreach (var s in m_SubMeshes)
-                if (s != null && s.isActiveAndEnabled == false && s.HasGeometry) s.enabled = true;
+            {
+                if (s == null || !s.DisabledWithText) continue;
+                s.DisabledWithText = false;
+                s.enabled = true;
+            }
             SetAllDirty();
             Canvas.willRenderCanvases -= RescaleIfScaleChanged;
             Canvas.willRenderCanvases += RescaleIfScaleChanged;
@@ -69,8 +76,13 @@ namespace TMPro
         {
             base.OnDisable();
             Canvas.willRenderCanvases -= RescaleIfScaleChanged;
+            // Its sub-meshes are disabled with it, also when its object is deactivated (measured).
             foreach (var s in m_SubMeshes)
-                if (s != null) s.canvasRenderer.Clear();
+            {
+                if (s == null || !s.enabled) continue;
+                s.enabled = false;
+                s.DisabledWithText = true;
+            }
         }
 
         protected override void OnDestroy()
@@ -83,6 +95,7 @@ namespace TMPro
 
         protected override void OnRectTransformDimensionsChange()
         {
+            FollowPivot();
             if (!gameObject.activeInHierarchy) return;
             var size = rectTransform.rect.size;
             if (size != m_LastRectSize)
@@ -92,6 +105,15 @@ namespace TMPro
                 m_havePropertiesChanged = true;
             }
             base.OnRectTransformDimensionsChange();
+        }
+
+        // The sub-meshes' pivot is the text's, so that their local origin stays the text's
+        // (measured: it follows a change of the text's pivot at once).
+        void FollowPivot()
+        {
+            var pivot = rectTransform.pivot;
+            foreach (var s in m_SubMeshes)
+                if (s != null && s.rectTransform.pivot != pivot) s.rectTransform.pivot = pivot;
         }
 
         protected override void OnTransformParentChanged()
@@ -365,6 +387,11 @@ namespace TMPro
                 sub.Configure(slot.Material, slot.Asset, i);
                 if (!sub.gameObject.activeSelf) sub.gameObject.SetActive(true);
                 if (!sub.enabled) sub.enabled = true;
+                sub.DisabledWithText = false;
+                // Every generation that fills the sub-mesh gives it the text's raycastTarget,
+                // through the property: a change to true lists it as a raycast target (measured).
+                sub.raycastTarget = raycastTarget;
+                if (sub.rectTransform.pivot != rectTransform.pivot) sub.rectTransform.pivot = rectTransform.pivot;
                 ref var mi = ref info.meshInfo[i];
                 UploadMesh(ref mi, sub.mesh, TMP_VertexDataUpdateFlags.All);
                 sub.canvasRenderer.SetMesh(sub.mesh);

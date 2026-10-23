@@ -11,6 +11,19 @@ namespace TMPro
         Mesh m_Mesh;
         bool m_MaterialDirtyFlag;
 
+        // Whether the sub-mesh is listed with its canvas's raycast targets. Unlike other
+        // graphics, enabling does not list it: only its raycastTarget changing to true while it
+        // is active and enabled does (measured on the shipped package). Disabling and destroying
+        // drop it.
+        bool m_RaycastListed;
+
+        // Disabled by its text's OnDisable, to be enabled again by its OnEnable.
+        internal bool DisabledWithText;
+
+        // What the canvas renderer gets while no glyph uses the sub-mesh: the sub-mesh's own mesh
+        // keeps its last fill.
+        static Mesh s_EmptyMesh;
+
         public TMP_FontAsset fontAsset { get => m_fontAsset; set => m_fontAsset = value; }
 
         public TMP_SpriteAsset spriteAsset { get => m_spriteAsset; set => m_spriteAsset = value; }
@@ -44,6 +57,25 @@ namespace TMPro
 
         public Material fallbackSourceMaterial { get; set; }
 
+        public override bool raycastTarget
+        {
+            get => base.raycastTarget;
+            set
+            {
+                if (base.raycastTarget == value) return;
+                base.raycastTarget = value;
+                m_RaycastListed = value && isActiveAndEnabled;
+                if (!m_RaycastListed) GraphicRegistry.UnregisterRaycastGraphicForCanvas(canvas, this);
+            }
+        }
+
+        // Graphic lists every raycast target it registers; the sub-mesh stays listed only when
+        // its own property listed it.
+        void KeepRaycastListing()
+        {
+            if (!m_RaycastListed) GraphicRegistry.UnregisterRaycastGraphicForCanvas(canvas, this);
+        }
+
         public bool isDefaultMaterial { get => m_isDefaultMaterial; set => m_isDefaultMaterial = value; }
 
         public float padding { get => m_padding; set => m_padding = value; }
@@ -69,14 +101,12 @@ namespace TMPro
 
         internal int MaterialReferenceIndex => m_materialReferenceIndex;
 
-        internal bool HasGeometry => m_Mesh != null && m_Mesh.vertexCount > 0;
-
         // A new sub-mesh object under the text, filling its rect, hidden in the hierarchy. As
         // in the shipped player, the object keeps the default name ("New Game Object").
         internal static TMP_SubMeshUI AddSubTextObject(TextMeshProUGUI text, int materialIndex)
         {
             var go = new GameObject("New Game Object", typeof(RectTransform));
-            if (TMP_Settings.hideSubTextObjects) go.hideFlags = HideFlags.HideAndDontSave;
+            go.hideFlags = TMP_Settings.hideSubTextObjects ? HideFlags.HideAndDontSave : HideFlags.DontSave;
             go.layer = text.gameObject.layer;
             var rt = (RectTransform)go.transform;
             rt.SetParent(text.transform, false);
@@ -92,6 +122,8 @@ namespace TMPro
             var sub = go.AddComponent<TMP_SubMeshUI>();
             sub.m_TextComponent = text;
             sub.m_materialReferenceIndex = materialIndex;
+            sub.maskable = text.maskable;
+            sub.raycastTarget = text.raycastTarget;
             return sub;
         }
 
@@ -109,21 +141,48 @@ namespace TMPro
             }
         }
 
+        // Draws nothing; the mesh keeps its vertices and bounds from the last fill (measured on
+        // the shipped package).
         internal void ClearGeometry()
         {
             if (m_Mesh == null) return;
-            m_Mesh.Clear();
-            canvasRenderer.SetMesh(m_Mesh);
+            if (s_EmptyMesh == null) s_EmptyMesh = new Mesh { name = "TMP SubMeshUI Empty Mesh", hideFlags = HideFlags.HideAndDontSave };
+            canvasRenderer.SetMesh(s_EmptyMesh);
         }
 
         protected override void OnEnable()
         {
             base.OnEnable();
+            m_RaycastListed = false;
+            KeepRaycastListing();
             if (m_TextComponent == null) m_TextComponent = GetComponentInParent<TextMeshProUGUI>();
         }
 
+        protected override void OnDisable()
+        {
+            base.OnDisable();
+            m_RaycastListed = false;
+            GraphicRegistry.UnregisterRaycastGraphicForCanvas(canvas, this);
+        }
+
+        protected override void OnTransformParentChanged()
+        {
+            base.OnTransformParentChanged();
+            KeepRaycastListing();
+        }
+
+        protected override void OnCanvasHierarchyChanged()
+        {
+            base.OnCanvasHierarchyChanged();
+            KeepRaycastListing();
+        }
+
+        // Dropped from the raycast targets, unlike the shipped package's, whose destroyed
+        // sub-mesh stays listed and makes its canvas's raycasts throw.
         protected override void OnDestroy()
         {
+            m_RaycastListed = false;
+            GraphicRegistry.UnregisterRaycastGraphicForCanvas(canvas, this);
             base.OnDestroy();
             if (m_Mesh != null) Destroy(m_Mesh);
         }

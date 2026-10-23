@@ -1,0 +1,27 @@
+# GasOverlay (1737859934), classes S, V.
+#
+# What it does: the Oxygen overlay becomes the "Gas Overlay": every gas cell is drawn in its
+# gas's own colour, paler the thinner it is (a prefix on SimDebugView.GetOxygenMapColour,
+# easing towards the new colour a little each frame), cells over 5 kg get an ear-pop tint, and
+# the legend lists every gas (OverlayLegend.OnSpawn) under the title GAS OVERLAY; the overlay
+# button's tooltip is renamed too.
+# How a player reaches it: the overlay bar's first button, or F1.
+# What changes: the overlay's colours and its legend.
+#
+# The base's air is oxygen with a little carbon dioxide. The world shot is taken after the
+# colours have had time to settle (the overlay eases each frame, paused or not).
+from: early-base
+mods: [1737859934]
+steps:
+  - driver: {camera.set: {cell: [122, 209], ortho: 12}}
+  - open: {key: F1}
+  - ui_wait: {path: "**/TopRight/OverlayLegend", cond: stable}
+  - expect_state: {"OverlayScreen.Instance.mode.HashValue": "== original"}
+  - expect_ui:
+      "**/OverlayLegend/TitleBar/Label": {text: "GAS OVERLAY"}
+      "**/OverlayLegend/**/ActiveUnits/UnitPrefab/Description": {any_text: "Carbon Dioxide"}
+      "**/OverlayLegend/**/ActiveUnits/UnitPrefab": {count: ">= 12"}
+  - ui_dump: {name: legend, root: "**/TopRight/OverlayLegend"}
+  - shot: {name: legend, crop: "**/TopRight/OverlayLegend", threshold: 0.04}
+  - ui_wait: {path: "**/TopRight/OverlayLegend", cond: stable, stable: 240, frames: 600}   # 240 frames for the colours to settle
+  - world_shot: {name: base, ortho: 12, at: [122, 209]}

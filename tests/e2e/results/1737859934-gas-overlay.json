@@ -1,0 +1,86 @@
+{
+ "spec": "mods/1737859934-gas-overlay.yaml",
+ "mods": [
+  "1737859934"
+ ],
+ "verdict": "failed",
+ "why": "a run of ours failed",
+ "findings": [],
+ "note": "F1 opens the renamed GAS OVERLAY with every gas in the legend; legend within 0.02 % and the overlay's colours over the base within 0.6 % of the original's pixels; its layout dump differs: two legend rows' HorizontalLayoutGroup preferredWidth 0.01 smaller (111.25 for 111.26, 148.25 for 148.26) and the legend's scrollbar value 1 (0 in the original) where its content fits",
+ "updated": "2026-10-22",
+ "commit": "7afbc2c",
+ "mod_dlls": {
+  "1737859934": {
+   "Common.dll": "87a6b9950dc4f7703d1d165fab10c6aeddad6810531639062a4a40bbe6fefb3a",
+   "GasOverlay.dll": "9201b18ce34728b78d056b0b9adac965fe61974db75cd12d81e343c7b2a7c09f"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261022-220847-28722c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-22T22:08:47",
+    "lane": 11,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261022-221113-898f44",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-22T22:11:13",
+    "lane": 11,
+    "reasons": [
+     "ui_dump legend: 3 difference(s)"
+    ],
+    "reference_run": "20261022-220847-28722c",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "legend": {
+      "differences": 3,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "legend": 0.000196,
+     "base": 0.0054
+    }
+   },
+   {
+    "run": "20261022-221113-898f44",
+    "index": 2,
+    "verdict": "fail",
+    "date": "2026-10-22T22:12:45",
+    "lane": 11,
+    "reasons": [
+     "ui_dump legend: 3 difference(s)"
+    ],
+    "reference_run": "20261022-220847-28722c",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "legend": {
+      "differences": 3,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "legend": 0.000196,
+     "base": 0.005379
+    }
+   }
+  ]
+ }
+}

@@ -365,7 +365,9 @@ A reflective call. **The runner allows it only in a spec's `setup:` block**, nev
   - arrays to arrays or `List<T>`;
   - a type name to `Type`;
   - `{"$": "EXPR"}` to the value of the `state.get` expression EXPR, when it is of the
-    parameter's type: for arguments JSON cannot spell, such as a `Tech` or a `GameObject`.
+    parameter's type, or to its component of that type: for arguments JSON cannot spell, such
+    as a `Tech` or a `GameObject`. `SelectTool.Instance.Select` with
+    `[{"$": "all:ResearchCenter::[0]"}]` selects the research station.
 
   Missing trailing arguments take their defaults. Among the overloads, exact kinds win: a
   JSON integer picks `int` over `float`.

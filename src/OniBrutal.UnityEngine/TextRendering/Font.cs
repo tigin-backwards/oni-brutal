@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using OniBrutal.Engine.Text;
 
 namespace UnityEngine
@@ -68,5 +69,15 @@ namespace UnityEngine
 
         /// Paths of the font files installed on the system.
         public static string[] GetPathsToOSFonts() => (string[])SystemFonts.Paths.Clone();
+
+        /// Family names of the fonts installed on the system, each once.
+        public static string[] GetOSInstalledFontNames()
+        {
+            var names = new List<string>();
+            var seen = new HashSet<string>(StringComparer.Ordinal);
+            foreach (var face in SystemFonts.Faces)
+                if (seen.Add(face.familyName)) names.Add(face.familyName);
+            return names.ToArray();
+        }
     }
 }

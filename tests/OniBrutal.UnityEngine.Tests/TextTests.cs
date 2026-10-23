@@ -84,7 +84,18 @@ namespace OniBrutal.Tests
             // Liberation Sans: ascender 1854, descender -434 (hhea), cap height 1409.
             Assert.Equal(1854f * 90f / 2048f, info.ascentLine, 3);
             Assert.Equal(-434f * 90f / 2048f, info.descentLine, 3);
-            Assert.Equal(1409f * 90f / 2048f, info.capLine, 3);
+            // Cap and mean lines are the hinted 'H' and 'x' tops, the tab width the hinted space's
+            // advance: whole pixels, as in Unity's player.
+            Assert.Equal(62f, info.capLine, 3);
+            Assert.Equal(48f, info.meanLine, 3);
+            Assert.Equal(25f, info.tabWidth, 3);
+            // The game's LiberationSans SDF, made by Unity at 86: cap 59, mean 45, tab 24.
+            Assert.Equal(FontEngineError.Success, FontEngine.LoadFontFace(font, 86f, 0));
+            var at86 = FontEngine.GetFaceInfo();
+            Assert.Equal(59f, at86.capLine, 3);
+            Assert.Equal(45f, at86.meanLine, 3);
+            Assert.Equal(24f, at86.tabWidth, 3);
+            Assert.Equal(FontEngineError.Success, FontEngine.LoadFontFace(font, 90f, 0));
             Assert.True(info.lineHeight > info.ascentLine - info.descentLine - 0.01f);
 
             uint a = FontEngine.GetGlyphIndex('A');

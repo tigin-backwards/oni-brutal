@@ -155,9 +155,12 @@ namespace UnityEngine.TextCore.LowLevel
                 info.descentLine = face.Descender * s;
                 info.baseline = 0f;
                 bool hasOs2 = face.Tables.TryGetOs2(out var os2);
-                // Cap and x heights from OS/2 (version 2+), else from the extents of 'H' and 'x'.
-                info.capLine = hasOs2 && os2.HasHeights && os2.CapHeight > 0 ? os2.CapHeight * s : GlyphTop(face, 'H');
-                info.meanLine = hasOs2 && os2.HasHeights && os2.XHeight > 0 ? os2.XHeight * s : GlyphTop(face, 'x');
+                // Cap and x heights are the tops of the hinted 'H' and 'x' (whole pixels), as Unity's
+                // player gives them (tools/UnityProbe's fontasset scenario: DejaVu Sans Book at 60
+                // has 44 and 33; the game's LiberationSans SDF at 86 has 59 and 45). Without the
+                // glyph, OS/2's heights (version 2+).
+                info.capLine = GlyphTop(face, 'H') ?? (hasOs2 && os2.HasHeights ? os2.CapHeight * s : 0f);
+                info.meanLine = GlyphTop(face, 'x') ?? (hasOs2 && os2.HasHeights ? os2.XHeight * s : 0f);
                 if (hasOs2)
                 {
                     info.superscriptOffset = os2.SuperscriptYOffset * s;
@@ -169,22 +172,24 @@ namespace UnityEngine.TextCore.LowLevel
                 }
                 info.underlineOffset = face.UnderlinePosition * s;
                 info.underlineThickness = face.UnderlineThickness * s;
+                // The hinted space's advance (19 for DejaVu Sans Book at 60, 24 for LiberationSans
+                // at 86).
                 info.tabWidth = GlyphAdvance(face, ' ');
                 return info;
             }
         }
 
-        static unsafe float GlyphTop(FontFace face, char c)
+        static unsafe float? GlyphTop(FontFace face, char c)
         {
             uint index = face.GlyphIndex(c);
-            if (index == 0 || !face.Load(index, FT.LOAD_NO_HINTING | FT.LOAD_NO_BITMAP)) return 0f;
+            if (index == 0 || !face.Load(index, FT.LOAD_DEFAULT | FT.LOAD_NO_BITMAP)) return null;
             return face.Slot->metrics.horiBearingY.Value / 64f;
         }
 
         static unsafe float GlyphAdvance(FontFace face, char c)
         {
             uint index = face.GlyphIndex(c);
-            if (index == 0 || !face.Load(index, FT.LOAD_NO_HINTING | FT.LOAD_NO_BITMAP)) return 0f;
+            if (index == 0 || !face.Load(index, FT.LOAD_DEFAULT | FT.LOAD_NO_BITMAP)) return 0f;
             return face.Slot->metrics.horiAdvance.Value / 64f;
         }
 

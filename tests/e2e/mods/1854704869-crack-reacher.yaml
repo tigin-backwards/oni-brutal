@@ -1,0 +1,21 @@
+# Crack Reacher (1854704869), class P.
+#
+# What it does: Duplicants reach one cell further straight up: it adds the offset four cells
+# below a work cell (with the three between) to the game's reach tables
+# (OffsetGroups.InvertedStandardTable and ...WithCorners, at Game.OnPrefabInit). The game alone
+# reaches three cells above a Duplicant's feet.
+# How a player reaches it: any dig (or other errand) four cells above a floor.
+# What changes: such errands become reachable and get done.
+#
+# The cell dug is in the ceiling of the corridor east of the printing pod, four cells above its
+# floor, with nothing to stand on nearer to it.
+from: early-base
+mods: [1854704869]
+steps:
+  - expect_state:
+      "OffsetGroups.InvertedStandardTable.Length": "== original"
+      "cells:124,211..124,211::Grid.Mass.get_Item({cell})": "> 100"   # solid sandstone
+      "cells:124,207..124,210::Grid.Mass.get_Item({cell})": "< 10"    # air below it, down to the floor
+  - dig: [124, 211, 124, 211]
+  - run: {seconds: 900, until: {pending_digs: 0}}
+  - expect_state: {"cells:124,211..124,211::Grid.Mass.get_Item({cell})": "< 10"}

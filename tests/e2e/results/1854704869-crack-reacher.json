@@ -1,0 +1,55 @@
+{
+ "spec": "mods/1854704869-crack-reacher.yaml",
+ "mods": [
+  "1854704869"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a dig order four cells above the floor, out of the game's reach, is reached and dug",
+ "updated": "2026-10-22",
+ "commit": "c162b5b",
+ "mod_dlls": {
+  "1854704869": {
+   "CrackReacher2.dll": "2dda08ab9fceaca7cd4eb6fed88b654ee00813cd98e641c286c05c54a963b834"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261022-215953-8f019c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-22T21:59:53",
+    "lane": 10,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261022-220147-1694a1",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-22T22:01:47",
+    "lane": 10,
+    "reference_run": "20261022-215953-8f019c",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261022-220147-1694a1",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-22T22:03:02",
+    "lane": 10,
+    "reference_run": "20261022-215953-8f019c",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

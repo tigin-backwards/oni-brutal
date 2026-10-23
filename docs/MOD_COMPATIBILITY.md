@@ -50,7 +50,7 @@ installs get developer checks subscribers never see).
 | 29 | [WGSM - World Generation Settings Manager // by @Ony 👾](https://steamcommunity.com/sharedfiles/filedetails/?id=1833427385) | ✅ | ✅ | ⬜ |  |
 | 30 | [True Tiles (texture mod)](https://steamcommunity.com/sharedfiles/filedetails/?id=2815406414) | ✅ | ✅ | ✅ | tiles connect as in the original (needed D21) |
 | 31 | [Wounded Go To Med Bed](https://steamcommunity.com/sharedfiles/filedetails/?id=1822160024) | ✅ | ✅ | ⬜ |  |
-| 32 | [Crack Reacher](https://steamcommunity.com/sharedfiles/filedetails/?id=1854704869) | ✅ | ✅ | ⬜ |  |
+| 32 | [Crack Reacher](https://steamcommunity.com/sharedfiles/filedetails/?id=1854704869) | ✅ | ✅ | ✅ | spec tests/e2e/mods/1854704869-crack-reacher.yaml: a dig order four cells above the floor, out of the game's reach, is reached and dug |
 | 33 | [[Vanilla + DLC] Deconstructable POI Props](https://steamcommunity.com/sharedfiles/filedetails/?id=1715248368) | ❌ | ❌ | ⬜ | broken upstream: patches `Deconstructable.TriggerDestroy`, which now has two overloads (same in the original) |
 | 34 | [Element Captured Capsule](https://steamcommunity.com/sharedfiles/filedetails/?id=2781902332) | ✅ | ✅ | ⬜ |  |
 | 35 | [Pliers fixed [Obsolete]](https://steamcommunity.com/sharedfiles/filedetails/?id=2479475997) | ✅ | ✅ | ⬜ |  |

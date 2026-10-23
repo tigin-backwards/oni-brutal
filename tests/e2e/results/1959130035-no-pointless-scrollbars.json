@@ -1,0 +1,85 @@
+{
+ "spec": "mods/1959130035-no-pointless-scrollbars.yaml",
+ "mods": [
+  "1959130035"
+ ],
+ "verdict": "warning",
+ "why": "known findings: scroll-normalized-position",
+ "findings": [
+  "scroll-normalized-position"
+ ],
+ "note": "the Base build menu and a Storage Bin's material list are opened: the material list does not scroll, and the panels' layout and the materials shot match the original but for the known scrollbar value",
+ "updated": "2026-10-23",
+ "commit": "3558e6d",
+ "mod_dlls": {
+  "1959130035": {
+   "NoPointlessScrollbars.dll": "56462c6ec3ec2aa2d0df369de7eef3449a46cb1b4531c1cf0bf9c39f65827de0"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-155043-865563",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T15:50:43",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-155635-81cf58",
+    "index": 1,
+    "verdict": "warn",
+    "date": "2026-10-23T16:00:15",
+    "lane": 16,
+    "reference_run": "20261023-155043-865563",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "buildings": {
+      "differences": 0
+     },
+     "materials": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "materials": 0.009182
+    }
+   },
+   {
+    "run": "20261023-155635-81cf58",
+    "index": 2,
+    "verdict": "warn",
+    "date": "2026-10-23T16:01:19",
+    "lane": 16,
+    "reference_run": "20261023-155043-865563",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "buildings": {
+      "differences": 0
+     },
+     "materials": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "materials": 0.009182
+    }
+   }
+  ]
+ }
+}

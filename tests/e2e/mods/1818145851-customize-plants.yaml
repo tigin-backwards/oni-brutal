@@ -1,0 +1,25 @@
+# Customize Plants (1818145851), classes K, O.
+#
+# What it does: rewrites plants from a settings file (CustomizePlants.json, PLib options with
+# presets): each plant's crop, grow time and yield, irrigation and fertilizer, light,
+# atmosphere, temperature and pressure ranges, decor, submersion, disease, gas or liquid
+# intake and output, auto-harvest age; also flower-pot rules, Wheezewort cooling and Oxyfern
+# output. Its defaults change several plants: the Mealwood takes 5 kg of dirt a cycle (the
+# game 10) and grows between 5 and 35 C (the game 10 to 30), the Dusk Cap grows in 6 cycles
+# (the game 7.5) and breathes in CO2, Bristle Blossoms want water, and so on.
+# How a player reaches it: the plants themselves; the options on the Mods screen.
+# What changes: what plants need and give.
+#
+# A smaller spec: early-base has no farm, so the default settings are read off the plants'
+# prefabs once the colony has loaded.
+from: early-base
+mods: [1818145851]
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"BasicSingleHarvestPlant\").GetComponent<StateMachineController>.cmpdef.defs[2].consumedElements[0].tag": Dirt
+      "Assets.GetPrefab(\"BasicSingleHarvestPlant\").GetComponent<StateMachineController>.cmpdef.defs[2].consumedElements[0].massConsumptionRate": "< 0.009"
+      "Assets.GetPrefab(\"BasicSingleHarvestPlant\").GetComponent<TemperatureVulnerable>.TemperatureWarningLow": 278.15
+      "Assets.GetPrefab(\"BasicSingleHarvestPlant\").GetComponent<TemperatureVulnerable>.TemperatureWarningHigh": 308.15
+      "Assets.GetPrefab(\"MushroomPlant\").GetComponent<Crop>.cropVal.cropDuration": 3600
+      "Assets.GetPrefab(\"MushroomPlant\").GetComponent<ElementConsumer>.elementToConsume": CarbonDioxide
+  - run: {seconds: 5}

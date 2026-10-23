@@ -1,0 +1,55 @@
+{
+ "spec": "mods/1818145851-customize-plants.yaml",
+ "mods": [
+  "1818145851"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "smaller spec (early-base has no farm): the default settings are on the plants once loaded: the Mealwood takes 5 kg of dirt a cycle and grows between 5 and 35 C, the Dusk Cap grows in 3600 s and breathes CO2",
+ "updated": "2026-10-23",
+ "commit": "3558e6d",
+ "mod_dlls": {
+  "1818145851": {
+   "CustomizePlants.dll": "bdb69a28d30f65a08a923366df3e13f558adbe65e8bd8c03e09036ddb2420162"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-153937-f76937",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T15:39:37",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-154105-f59a22",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T16:00:26",
+    "lane": 17,
+    "reference_run": "20261023-153937-f76937",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-154105-f59a22",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T16:01:27",
+    "lane": 17,
+    "reference_run": "20261023-153937-f76937",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

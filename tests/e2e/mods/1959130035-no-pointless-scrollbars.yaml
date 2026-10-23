@@ -1,0 +1,31 @@
+# No Pointless Scrollbars (1959130035), classes S, O.
+#
+# What it does: the build menu's building panel and the material selector show no scrollbar
+# and do not scroll when their content fits (a transpiler on PlanScreen.ConfigurePanelSize and
+# a postfix that turns ScrollRect.vertical off and widens the panel by the scrollbar's width;
+# a transpiler on MaterialSelector.UpdateScrollBar that ties ScrollRect.vertical to the
+# scrollbar).
+# How a player reaches it: the build menu.
+# What changes: no idle scrollbar, and a panel that does not scroll.
+#
+# A short run comes first: the build menu offers a material only once the colony's inventory
+# has been counted. The Base menu is opened and a Storage Bin chosen; its few materials fit,
+# so the material list does not scroll.
+from: early-base
+mods: [1959130035]
+steps:
+  - run: {seconds: 5}
+  - driver: {camera.set: {cell: [114, 208], ortho: 10}}
+  - open: {key: Alpha1}
+  - ui_wait: {path: "**/PlanBuildingSelectionPanel/BuildingGroups", cond: stable}
+  - expect_state:
+      "PlanScreen.Instance.BuildingGroupContentsRect.GetComponent<UnityEngine.UI.ScrollRect>.vertical": "== original"
+      "PlanScreen.Instance.BuildingGroupContentsRect.GetComponent<UnityEngine.UI.ScrollRect>.verticalScrollbar.gameObject.activeSelf": "== original"
+  - ui_dump: {name: buildings, root: "**/PlanBuildingSelectionPanel/BuildingGroups"}
+  - click: {ui: "**/BuildingGroups/**/Grid/StorageLocker Group*"}
+  - ui_wait: {path: "**/PlanBuildingSelectionPanel/ProductInfoScreen", cond: stable}
+  - expect_state:
+      "ui:**/ProductInfoScreen/MaterialSelectionPanel/MaterialSelectorTemplate::GetComponent<MaterialSelector>.ScrollRect.vertical": false
+  - ui_dump: {name: materials, root: "**/ProductInfoScreen/MaterialSelectionPanel"}
+  - shot: {name: materials, crop: "**/ProductInfoScreen/MaterialSelectionPanel", threshold: 0.04}
+  - key: {code: Escape}

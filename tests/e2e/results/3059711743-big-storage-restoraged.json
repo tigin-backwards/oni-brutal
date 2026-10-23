@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3059711743-big-storage-restoraged.yaml",
+ "mods": [
+  "3059711743"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Big Storage Bin is built from copper after Refined Objects and selected; it holds its option's capacity, past the Storage Bin's",
+ "updated": "2026-10-23",
+ "commit": "82ed96b",
+ "mod_dlls": {
+  "3059711743": {
+   "BigStorage.dll": "cff53fe175db6656f035c63ded2b58ec58d3777b2cf6de6ac837f6d2efe8c3e4"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-042102-a633d0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T05:23:42",
+    "lane": 17,
+    "signatures": 1
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-053651-1b79e4",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T05:36:51",
+    "lane": 16,
+    "reference_run": "20261023-042102-a633d0",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-053651-1b79e4",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T06:18:24",
+    "lane": 16,
+    "reference_run": "20261023-042102-a633d0",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

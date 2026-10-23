@@ -1,0 +1,34 @@
+# Piped Everything (3033409170), class V.
+#
+# What it does: gives many of the game's buildings extra pipe and rail ports, from its
+# PipedEverything.json (defaults in PipedEverythingState): an Oxygen Diffuser gets an oxygen
+# output port and an algae input, a Research Station a dirt input, generators, electrolyzers,
+# deoxidizers and fabricators ports for what they make and use. A PortDisplayController on
+# each building draws the ports in the matching overlay, and patches on ElementConverter,
+# EnergyGenerator, the storage droppers and ComplexFabricator send output into a connected
+# port instead of the world.
+# How a player reaches it: building one of those buildings; the overlays show the ports.
+# What changes: buildings that can be piped.
+#
+# An Oxygen Diffuser is built in the dug-out corridor west of the printing pod from the
+# base's metal ore; once built, it and the base's Research Station carry the mod's ports,
+# and the gas overlay draws the diffuser's oxygen port.
+from: early-base
+mods: [3033409170]
+steps:
+  - expect_state:
+      "all:ResearchCenter::[0].GetComponent<PipedEverything.PortDisplayController>": exists
+      "all:ResearchCenter::[0].GetComponent<PipedEverything.PortDisplayController>.solidOverlay.Count": ">= 1"
+  - build: {prefab: MineralDeoxidizer, at: [114, 206], material: Cuprite}
+  - expect: {blueprints: {MineralDeoxidizer: 1}}
+  - run: {seconds: 900, until: {buildings: {MineralDeoxidizer: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [114, 207], ortho: 6}}
+  - click_world: {cell: [114, 206], select: MineralDeoxidizer}
+  - expect_state:
+      "selected:GetComponent<PipedEverything.PortDisplayController>.outputPorts.Count": ">= 1"
+      "selected:GetComponent<PipedEverything.PortDisplayController>.gasOverlay.Count": ">= 1"
+      "selected:GetComponent<PipedEverything.PortDisplayController>.solidOverlay.Count": "== original"
+  - key: {code: Escape}
+  - open: {key: F7}
+  - ui_wait: {path: "**/TopRight/OverlayLegend", cond: stable}
+  - world_shot: {name: gas-overlay, ortho: 6, at: [114, 207]}

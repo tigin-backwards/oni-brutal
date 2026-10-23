@@ -1,0 +1,36 @@
+# Big Storage: Restoraged (3059711743), classes B, O.
+#
+# What it does: adds bigger storage buildings, each beside the game's own in the Base menu:
+# the Big Storage Bin (BigStorageLocker, 1x2, 200 kg of refined metal, Refined Objects
+# research), the Big Beautiful Storage Bin, the Big Smart Storage Bin, Big
+# Liquid and Gas Reservoirs, the Big Storage Tile and (by an option) a Big Refrigerator. PLib
+# options set each one's capacity; a reservoir capacity above PrimaryElement.MAX_MASS raises
+# it.
+# How a player reaches it: the build menu (Base), after the research.
+# What changes: storage buildings that hold more than the game's.
+#
+# setup grants Refined Objects and sets 400 kg of copper down in the dug-out corridor west of
+# the printing pod. A Big Storage Bin is built there; once built it is selected, and it
+# holds the capacity its options give (more than the Storage Bin's 20 t).
+from: early-base
+mods: [3059711743]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"RefinedObjects\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Copper\").substance", method: SpawnResource, args: [[110.5, 206.5, -12], 400, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"RefinedObjects\").unlockedItemIDs": {contains: BigStorageLocker}
+      "Assets.GetBuildingDef(\"BigStorageLocker\").HeightInCells": 2
+      "Assets.GetBuildingDef(\"BigStorageLocker\").BuildingComplete.GetComponent<Storage>.capacityKg": "> 20000"
+  - build: {prefab: BigStorageLocker, at: [113, 206], material: Copper}
+  - expect: {blueprints: {BigStorageLocker: 1}}
+  - run: {seconds: 900, until: {buildings: {BigStorageLocker: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [114, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: BigStorageLocker}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Big Storage"}
+  - expect_state:
+      "selected:Storage.capacityKg": "== original"
+      "selected:PrimaryElement.ElementID": Copper

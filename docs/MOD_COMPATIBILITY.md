@@ -180,7 +180,7 @@ installs get developer checks subscribers never see).
 | 159 | [Advanced Electrolyzers](https://steamcommunity.com/sharedfiles/filedetails/?id=1801004057) | ✅ | ✅ | ✅ | spec tests/e2e/mods/1801004057-advanced-electrolyzers.yaml: the Industrial Electrolyzer is built from copper after Improved Oxygen and selected: 400 W, any-water intake, 6 kg storage |
 | 160 | [Deselect New Materials](https://steamcommunity.com/sharedfiles/filedetails/?id=1863598374) | ✅ | ✅ | ⬜ |  |
 | 161 | [Piped output](https://steamcommunity.com/sharedfiles/filedetails/?id=1820866530) | ⬜ | ⬜ | ⬜ | flagged by onimaxxing (notLoading); not tested |
-| 162 | [Big Storage: Restoraged](https://steamcommunity.com/sharedfiles/filedetails/?id=3059711743) | ✅ | ✅ | ⬜ |  |
+| 162 | [Big Storage: Restoraged](https://steamcommunity.com/sharedfiles/filedetails/?id=3059711743) | ✅ | ✅ | ✅ | spec tests/e2e/mods/3059711743-big-storage-restoraged.yaml: the Big Storage Bin is built from copper after Refined Objects and selected; it holds its option's capacity, past the Storage Bin's |
 | 163 | [自动收获 Fixed](https://steamcommunity.com/sharedfiles/filedetails/?id=2705951522) | ❌ | ❌ | ⬜ | broken upstream: Harmony patch targets now have overloads (same in the original) |
 | 164 | [Schedule Master // by @Ony 👾](https://steamcommunity.com/sharedfiles/filedetails/?id=1865119054) | ✅ | ✅ | ⬜ |  |
 | 165 | [繁體中文語言包](https://steamcommunity.com/sharedfiles/filedetails/?id=1562134514) | ⬜ | ⬜ | ⬜ | translation: the game applies one only from a Steam subscription; not testable here |
@@ -199,7 +199,7 @@ installs get developer checks subscribers never see).
 | 178 | [[TH4427E] Thai Not Included](https://steamcommunity.com/sharedfiles/filedetails/?id=1823722773) | ⬜ | ⬜ | ⬜ | translation: the game applies one only from a Steam subscription; not testable here |
 | 179 | [Liquid Bottler](https://steamcommunity.com/sharedfiles/filedetails/?id=1820638089) | ❌ | ❌ | ⬜ | broken upstream: its LIQUIDBOTTLER building's codex entry collides with the game's own Bottle Filler (LiquidBottler), and loading a colony stops at the crash screen (same in the original) |
 | 180 | [Português (BR)](https://steamcommunity.com/sharedfiles/filedetails/?id=3229139332) | ⬜ | ⬜ | ⬜ | translation: the game applies one only from a Steam subscription; not testable here |
-| 181 | [Piped Everything](https://steamcommunity.com/sharedfiles/filedetails/?id=3033409170) | ✅ | ✅ | ⬜ |  |
+| 181 | [Piped Everything](https://steamcommunity.com/sharedfiles/filedetails/?id=3033409170) | ✅ | ✅ | ✅ | spec tests/e2e/mods/3033409170-piped-everything.yaml: the base's Research Station and a newly built Oxygen Diffuser carry the mod's ports; the gas overlay with the diffuser's port is shot |
 | 182 | [Rational Priority](https://steamcommunity.com/sharedfiles/filedetails/?id=2632758219) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2632758219-rational-priority.yaml: a smaller spec (which errand wins depends on positions): an idle Duplicant's Errands tab entry reads in the mod's words ("Idle priority"), the game's priority breakdown gone |
 | 183 | [Mass Move Tool](https://steamcommunity.com/sharedfiles/filedetails/?id=3301490799) | ✅ | ✅ | ⬜ |  |
 | 184 | [Free Resource Buildings Branch](https://steamcommunity.com/sharedfiles/filedetails/?id=3047547550) | ✅ | ✅ | ⬜ |  |

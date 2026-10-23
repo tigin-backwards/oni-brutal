@@ -1,0 +1,59 @@
+{
+ "spec": "mods/3033409170-piped-everything.yaml",
+ "mods": [
+  "3033409170"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the base's Research Station and a newly built Oxygen Diffuser carry the mod's ports; the gas overlay with the diffuser's port is shot",
+ "updated": "2026-10-23",
+ "commit": "82ed96b",
+ "mod_dlls": {
+  "3033409170": {
+   "PipedEverything.dll": "cb0c823162b32b4860e739f69ac71c380df9d694a7078146540be12f42e7d506"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-042102-a633d0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T05:25:16",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-061937-96c131",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T06:19:37",
+    "lane": 16,
+    "reference_run": "20261023-042102-a633d0",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "gas-overlay": 0.004031
+    }
+   },
+   {
+    "run": "20261023-061937-96c131",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T06:20:55",
+    "lane": 16,
+    "reference_run": "20261023-042102-a633d0",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "gas-overlay": 0.004034
+    }
+   }
+  ]
+ }
+}

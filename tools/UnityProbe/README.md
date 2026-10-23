@@ -25,4 +25,39 @@ frames. Compare the two players' outputs with frame numbers taken relative to ea
 header.
 
 Both players write the same version stamp for the mod (ARCHITECTURE D3), so one `mods.json`
-serves both.
+serves both. In U59 that stamp is `692750779`, with `enabledForDlc: ["", "EXPANSION1_ID"]`;
+with another stamp the game reinstalls the mod and disables it.
+
+## UI semantics (`UiSemantics.cs`, `UIS` lines)
+
+Ten seconds into the front end, after the front-end dump, it builds small hierarchies on an
+overlay canvas of its own (scale 1) and logs frame by frame. Each line is `PROBE f<frame> UIS
+<section> <label> <phase> <values>`. A phase is `now` (right after the step), then per frame
+`U` (an Update), `co` (a coroutine's `yield return null`), `L` (a LateUpdate), `R`
+(`Canvas.willRenderCanvases`, after the canvas rebuild) and `E` (the end of the frame).
+
+- `scroll`: ScrollRect's `normalizedPosition` and its scrollbars' `value`/`size`. Content
+  smaller than, equal to and larger than the viewport, by pivot and offset; the movement
+  types; one axis only; scaled content; the content resized at run time; hairline offsets
+  and random exactly-fitting layouts. `scroll raw` lines give the inputs at full precision
+  (the view's rect, the content's world corners and those corners in the view's space).
+  `zoom anchoring` reproduces Blueprints Expanded's pointer-anchored preview zoom.
+- `input`: when `TMP_InputField` fills its text component and makes and positions its caret.
+  Fields are built inactive, active, with the text component assigned later, outside any
+  canvas, cloned, and with PLib's replacement of `AssignPositioningIfNeeded` emulated.
+  `UiSemantics.Install` hooks that private method with Harmony when it exists (`UIS hooks`
+  says whether it does) and logs each call (`APIN`).
+- `depth`: `CanvasRenderer.absoluteDepth`/`relativeDepth` and `Graphic.depth` for renderers
+  of every kind on one canvas. Then one change at a time, to see which changes renumber it.
+
+Run it in both players with the same DLL; in ours, `--shipped-ui-packages` separates the
+packages from the engine. Then compare:
+
+```
+tools/UnityProbe/uis-check.py diff ORIG/Player.log OURS/stdout.txt [scroll|input|depth]
+tools/UnityProbe/uis-check.py fit LOG          # the ScrollRect rule against the raw lines
+tools/UnityProbe/uis-check.py inputs ORIG/Player.log OURS/stdout.txt
+```
+
+`docs/cleanroom/ugui.md` (ScrollRect) and `textmeshpro.md` (TMP_InputField) record what it
+measured. Elastic lines differ by frame timing, and so do the `time` lines.

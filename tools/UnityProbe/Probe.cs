@@ -21,6 +21,8 @@ namespace SemanticsProbe
             go.AddComponent<UiDump>();
             go.AddComponent<EventQueueLog>();
             go.AddComponent<Triggers>();
+            go.AddComponent<UiSemantics>();
+            UiSemantics.Install(harmony);
             Rec.Log("OnLoad renderedFrameCount=" + Time.renderedFrameCount + " scene=" + UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
         }
 

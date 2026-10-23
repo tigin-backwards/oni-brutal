@@ -1,0 +1,35 @@
+# Mod Manager // by @Ony (1843965353), class M.
+#
+# What it does: rebuilds the Mods screen: a "Filter mods by name/author" field over the list,
+# a bottom panel of check boxes (show enabled, disabled, local, Steam, incompatible, outdated
+# mods; auto updater) and buttons (open the log folder, reset crash counts, enable or disable
+# all, update all), mods' authors and versions on their rows, drag ordering, and Steam
+# profile and update lookups.
+# How a player reaches it: the main menu's Mods screen (from a colony: the pause menu's Main
+# Menu, then Quit Without Saving).
+# What changes: which mods the list shows.
+#
+# The main menu cannot be screenshot through OniMcp, so the screen is compared by its layout
+# dump only. The filter is typed into: only E2eDriver stays listed.
+from: early-base
+mods: [1843965353]
+steps:
+  - key: {code: Escape}
+  - ui_wait: {path: "**/PauseScreen/**/Main MenuButton", cond: stable}
+  - click: {ui: "**/PauseScreen/**/Main MenuButton"}
+  - ui_wait: {path: "**/ConfirmDialog/GameObject/Panel/ConfigurableButton", cond: stable}
+  - click: {ui: "**/ConfirmDialog/GameObject/Panel/ConfigurableButton"}   # Quit Without Saving
+  - ui_wait: {path: "**/MainMenu_SpacedOut/MainMenuMenubar/MainMenuButtons", cond: stable, frames: 3000}
+  - click: {text: "MODS", under: "**/MainMenuButtons"}
+  - ui_wait: {path: "**/ModsScreen/Panel", cond: stable}
+  # The list: the mod, OniMcp and E2eDriver; the filter over it.
+  - expect_ui:
+      "**/ModsScreen/Panel/FilterModsPanel/FilterLabelHolder": {text: "~Filter mods by name/author"}
+      "**/ModsScreen/Panel/ListView/Files/Viewport/Content/*": {count: 3}
+  - ui_dump: {name: filter, root: "**/ModsScreen/Panel/FilterModsPanel"}
+  # Typing in the filter leaves only the mods whose name matches.
+  - type: {ui: "**/ModsScreen/Panel/FilterModsPanel/TextField", text: "driver"}
+  - ui_wait: {path: "**/ModsScreen/Panel/ListView/Files/Viewport/Content", cond: stable}
+  - expect_ui:
+      "**/ModsScreen/Panel/ListView/Files/Viewport/Content/*": {count: 1}
+      "**/ModsScreen/Panel/ListView/Files/Viewport/Content/E2eDriver": {active: true}

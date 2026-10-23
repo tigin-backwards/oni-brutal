@@ -7,19 +7,38 @@
 # How a player reaches it: the build menu (Base), then its side screen and user menu.
 # What changes: a hauling point that collects the checked items.
 #
-# Broken upstream: this spec fails in the original. Choosing the Hauling Point leaves the
-# prebuild tool active ("BACK" on the cursor) with no material chosen
-# (materialSelectionPanel.CurrentSelectedElement is empty): the card's material selector, which
-# the mod hides, never picks one, and a click on the floor places nothing. Kept to re-check
-# when the mod is updated.
+# The build menu offers a material only once the colony's inventory has been counted, which
+# takes the game running a moment after the load (straight after it every building's card
+# reads "Missing resources"): a short run comes first.
 from: early-base
 mods: [2667816955]
 steps:
-  - driver: {camera.set: {cell: [124, 208], ortho: 10}}
+  - run: {seconds: 5}
+  - driver: {camera.set: {cell: [110, 208], ortho: 10}}
   - open: {key: Alpha1}
   - ui_wait: {path: "**/PlanBuildingSelectionPanel/BuildingGroups", cond: stable}
   - click: {ui: "**/BuildingGroups/**/Grid/HaulingPoint Group*"}
   - ui_wait: {path: "**/PlanBuildingSelectionPanel/ProductInfoScreen", cond: stable}
-  - expect_state: {"PlayerController.Instance.ActiveTool.name": BuildTool}   # PrebuildTool in the original
-  - click_world: {cell: [125, 207]}
+  - expect_state: {"PlayerController.Instance.ActiveTool.name": BuildTool}
+  - click_world: {cell: [108, 206]}
   - expect: {buildings: {HaulingPoint: 1}}
+  - key: {code: Escape}
+  # Its side screen: the element filter; sandstone, found through its search field.
+  - click_world: {cell: [108, 206]}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen", cond: stable}
+  - expect_state: {"selected:GetComponent<MoveThisHere.HaulingPoint>": exists}
+  - expect_ui:
+      "**/UserMenuScreen/Buttons/RemoveButton": {interactable: true}
+      "**/UserMenuScreen/Buttons/Enable Auto-DropButton": {interactable: true}
+  - ui_dump: {name: user-menu, root: "**/DetailsScreen/UserMenuButtons/UserMenuScreen"}
+  - type: {ui: "**/TreeFilterableSideScreen/SearchRow/FilterInputField", text: "sandstone"}
+  - ui_wait: {path: "**/TreeFilterableRow/Elements/Element/CheckBox", cond: stable}
+  - click: {ui: "**/TreeFilterableRow/Elements/Element/CheckBox"}
+  - expect_state: {"selected:GetComponent<TreeFilterable>.AcceptedTags": {contains: SandStone}}
+  # Duplicants bring sandstone to it; Remove drops it there and takes the point away.
+  - run: {seconds: 240}
+  - expect_state: {"all:MoveThisHere.HaulingPoint::[0].GetComponent<Storage>.MassStored()": "> 0"}
+  # Still selected (a click on its cell now may pick a Duplicant hauling to it).
+  - expect_state: {"selected:GetComponent<MoveThisHere.HaulingPoint>": exists}
+  - click: {ui: "**/UserMenuScreen/Buttons/RemoveButton"}
+  - expect: {buildings: {HaulingPoint: 0}}

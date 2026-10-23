@@ -1,0 +1,64 @@
+{
+ "spec": "mods/1843965353-mod-manager.yaml",
+ "mods": [
+  "1843965353"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "from a colony to the main menu's Mods screen: its filter field over the list, typed into, leaves only the matching mod; the filter panel's layout as in the original",
+ "updated": "2026-10-22",
+ "commit": "abe5313",
+ "mod_dlls": {
+  "1843965353": {
+   "Mod Manager.dll": "7153826ec1d8f42a4344c8296a63ffdf6578085a597bfc1f1d34af139cc3af91",
+   "NickBuhro.Translit.dll": "74bd7d4cbd38e5fd8b1d504792637c8085825efd8451c054e702636cac5f4a67"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261022-234335-676140",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-22T23:43:35",
+    "lane": 10,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261022-234517-5cbb93",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-22T23:45:17",
+    "lane": 10,
+    "reference_run": "20261022-234335-676140",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "filter": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261022-234517-5cbb93",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-22T23:46:19",
+    "lane": 10,
+    "reference_run": "20261022-234335-676140",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "filter": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

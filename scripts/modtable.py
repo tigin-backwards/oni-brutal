@@ -139,7 +139,7 @@ broken = {
 }
 # Found broken in the original by their specs (tests/e2e/mods).
 broken.update({
-    '2667816955': 'broken upstream: choosing its Hauling Point in the build menu picks no material (the mod hides the material selector), so nothing can be placed; spec tests/e2e/mods/2667816955-move-this-here.yaml',
+    '1822160024': 'broken upstream: a standard Duplicant at half health (Injured, the wounded.medium state) gets no free Sick Bay assigned, the mod\'s whole purpose (the game\'s own AutoAssignSlot assigns it); spec tests/e2e/mods/1822160024-wounded-go-to-med-bed.yaml',
 })
 # Ranks 501-750 that fail as they do in the original (out of the sweep's colony runs).
 broken.update({

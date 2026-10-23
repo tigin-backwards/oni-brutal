@@ -1,0 +1,26 @@
+# Wounded Go To Med Bed (1822160024), class P.
+#
+# What it does: a Duplicant who is lightly or moderately wounded gets a free medical bed (Sick
+# Bay / triage cot) assigned to them at once, and loses it when healed (a postfix on
+# WoundMonitor.InitializeStates adding an update to its light and medium states). The game
+# alone looks for a bed only for the critically wounded.
+# How a player reaches it: build a Sick Bay; a Duplicant gets hurt.
+# What changes: the bed's assignee.
+#
+# setup hurts a standard Duplicant (the second; the first is a bionic one, which has no
+# WoundMonitor) to half health: Injured, the wounded.medium state, where the game assigns no
+# bed. A Sick Bay is then built in the dug-out corridor west of the printing pod.
+from: early-base
+mods: [1822160024]
+setup:
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[1].GetComponent<Health>", method: Damage, args: [50]}}
+steps:
+  - expect_state:
+      "Components.LiveMinionIdentities.Items[1].GetComponent<Health>.State": Injured
+  - build: {prefab: MedicalCot, at: [108, 206]}
+  - run: {seconds: 900, until: {buildings: {MedicalCot: 1}, pending_construction: 0}}
+  - run: {seconds: 20}
+  - expect_state:
+      "all:Clinic::Length": 1
+      "all:Clinic::[0].GetComponent<Ownable>.assignee": exists
+      "count:Components.LiveMinionIdentities.Items[*] if .GetComponent<Health>.State == Injured": 1

@@ -1,0 +1,63 @@
+{
+ "spec": "mods/2667816955-move-this-here.yaml",
+ "mods": [
+  "2667816955"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Hauling Point placed from the build menu at once, its element filter set to sandstone through its search field; Duplicants bring sandstone to it and its Remove button takes it away; its user menu as in the original",
+ "updated": "2026-10-22",
+ "commit": "abe5313",
+ "mod_dlls": {
+  "2667816955": {
+   "MoveThisHere.dll": "e0173afbac1caefecf6981b8a06e8dd2b834999e2c1ce9d15e5b307514daceff"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261022-233919-4072a6",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-22T23:39:19",
+    "lane": 11,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261022-234230-682bd0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-22T23:42:30",
+    "lane": 11,
+    "reference_run": "20261022-233919-4072a6",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "user-menu": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261022-234230-682bd0",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-22T23:45:06",
+    "lane": 11,
+    "reference_run": "20261022-233919-4072a6",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "user-menu": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

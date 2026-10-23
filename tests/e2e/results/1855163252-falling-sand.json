@@ -1,0 +1,55 @@
+{
+ "spec": "mods/1855163252-falling-sand.yaml",
+ "mods": [
+  "1855163252"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "digging out the dirt under a cell of sand: the sand that falls gets its own dig order where it lands and is dug",
+ "updated": "2026-10-22",
+ "commit": "4e5bd41",
+ "mod_dlls": {
+  "1855163252": {
+   "FallingSand.dll": "351a48f4dacd37cc82a6aee619668d761e672d4aa57f585f6a2f2cef74a16190"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261022-220559-dd74b5",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-22T22:05:59",
+    "lane": 10,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261022-220813-3c9f0c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-22T22:08:13",
+    "lane": 10,
+    "reference_run": "20261022-220559-dd74b5",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261022-220813-3c9f0c",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-22T22:09:51",
+    "lane": 10,
+    "reference_run": "20261022-220559-dd74b5",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

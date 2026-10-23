@@ -1,0 +1,24 @@
+# Falling Sand (1855163252), class P.
+#
+# What it does: sand (or any unstable element) that falls because a dig removed what held it
+# up gets a dig order of its own where it lands, at the dig's priority, so a column of sand is
+# dug out with one order (patches on Diggable and UnstableGroundManager).
+# How a player reaches it: a dig order under sand.
+# What changes: the fallen sand is dug too, instead of lying as a new solid cell.
+#
+# East of the printing pod the corridor ends at a wall of dirt (136, 208..209) under a cell of
+# sand (136, 210). Both dirt cells are dug; the sand falls into the hole and is dug after.
+from: early-base
+mods: [1855163252]
+steps:
+  - expect_state:
+      "Grid.Element[133696].id": Sand     # 136, 210 (the grid is 636 cells wide)
+      "Grid.Element[133060].id": Dirt     # 136, 209
+      "Grid.Element[132424].id": Dirt     # 136, 208
+      "Grid.Element[131788].id": SandStone   # 136, 207, the floor it lands on
+  - dig: [136, 208, 136, 209]
+  - run: {seconds: 900, until: {pending_digs: 0}}
+  # The sand fell and was dug where it landed: the three cells are open, sand debris lies there.
+  - expect_state:
+      "cells:136,208..136,210::Grid.Mass.get_Item({cell})": "< 30"
+      "count:all:Clearable::[*] if .GetComponent<PrimaryElement>.ElementID == Sand": ">= 1"

@@ -213,6 +213,16 @@ namespace E2eDriver
             {
                 if (token == null || token.Type == JTokenType.Null)
                     return !type.IsValueType || Nullable.GetUnderlyingType(type) != null;
+                // {"$": "EXPR"}: the value of a state.get expression, for an argument JSON cannot
+                // spell (a Tech, a GameObject). It must be of the parameter's type.
+                if (token is JObject expr && expr.Count == 1 && expr["$"] is JValue text && text.Type == JTokenType.String)
+                {
+                    var found = State.Eval((string)text);
+                    if (found == null) return !type.IsValueType;
+                    if (!type.IsInstanceOfType(found)) return false;
+                    value = found;
+                    return true;
+                }
                 var under = Nullable.GetUnderlyingType(type) ?? type;
                 if (under == typeof(string)) { if (token.Type != JTokenType.String) return false; value = (string)token; return true; }
                 if (under.IsEnum)

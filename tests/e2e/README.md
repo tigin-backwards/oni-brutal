@@ -238,7 +238,9 @@ setup:
 ```
 
 `setup.call` (reflection) is allowed only in `setup:`. It may prepare a test, never perform the
-thing under test: issue #6 was "Played" through reflection while its screens were broken.
+thing under test: issue #6 was "Played" through reflection while its screens were broken. An
+argument JSON cannot spell is given as a state expression, `{"$": "Db.Get().Techs.Get(\"HVAC\")"}`
+(E2eDriver's README, setup.call).
 
 ## Verdicts
 

@@ -363,7 +363,9 @@ A reflective call. **The runner allows it only in a spec's `setup:` block**, nev
   - strings to enums or Tags;
   - `[x, y(, z)]` to Vector2, Vector3 or Vector2I;
   - arrays to arrays or `List<T>`;
-  - a type name to `Type`.
+  - a type name to `Type`;
+  - `{"$": "EXPR"}` to the value of the `state.get` expression EXPR, when it is of the
+    parameter's type: for arguments JSON cannot spell, such as a `Tech` or a `GameObject`.
 
   Missing trailing arguments take their defaults. Among the overloads, exact kinds win: a
   JSON integer picks `int` over `float`.

@@ -1,0 +1,32 @@
+# Pliers fixed [Obsolete] (2479475997), classes T, K.
+#
+# What it does: adds a Pliers tool to the toolbar (with a key, and a filter menu: wires, liquid
+# and gas pipes, conveyor rails, automation): a drag cuts the links between the utility
+# segments inside the dragged area, without deconstructing anything. Marked obsolete by its
+# author: the game now has its own Disconnect tool.
+# How a player reaches it: the toolbar's Pliers button.
+# What changes: which wire or pipe segments are joined.
+#
+# A run of four wires (early-base has two elsewhere) is built in the dug-out room west of the printing pod; the pliers are then
+# dragged over its two middle segments.
+from: early-base
+mods: [2479475997]
+steps:
+  - build: {prefab: Wire, cells: [[108, 209], [109, 209], [110, 209], [111, 209]]}
+  - expect: {blueprints: {Wire: 4}}
+  - run: {seconds: 900, until: {pending_construction: 0}}
+  - expect_state:
+      "Game.Instance.electricalConduitSystem.GetConnections(133033, false)": "Left, Right"
+      "Game.Instance.electricalConduitSystem.GetConnections(133034, false)": "Left, Right"
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - tool: {toolbar: Pliers}
+  - drag: {from: [109, 209], to: [110, 209]}
+  # The link between the two segments dragged over is cut; their outer links stay.
+  - expect_state:
+      "Game.Instance.electricalConduitSystem.GetConnections(133033, false)": Left
+      "Game.Instance.electricalConduitSystem.GetConnections(133034, false)": Right
+  - expect: {buildings: {Wire: 6}}
+  - key: {code: Escape}
+  # The floor below, where Duplicants and debris lie wherever the run left them, is masked, and
+  # so is the management bar.
+  - world_shot: {name: wires, ortho: 4, at: [110, 209], mask: [[0, 420, 1280, 300], [860, 0, 420, 50]]}

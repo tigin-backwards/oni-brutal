@@ -1,0 +1,59 @@
+{
+ "spec": "mods/2479475997-pliers.yaml",
+ "mods": [
+  "2479475997"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Pliers toolbar tool dragged over two wire segments cuts the link between them and keeps their outer links; world shot of the wires, the floor masked",
+ "updated": "2026-10-23",
+ "commit": "0feba58",
+ "mod_dlls": {
+  "2479475997": {
+   "Pliers.dll": "0810ffc156e1f24ef1226d9f800a31a8b56499a2169d46b55c42b5e7edaed272"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261022-235451-fe01eb",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-22T23:58:03",
+    "lane": 12,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-000434-5b038c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T00:12:54",
+    "lane": 13,
+    "reference_run": "20261022-235451-fe01eb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "wires": 0.007948
+    }
+   },
+   {
+    "run": "20261023-000434-5b038c",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T00:14:09",
+    "lane": 13,
+    "reference_run": "20261022-235451-fe01eb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "wires": 0.0074
+    }
+   }
+  ]
+ }
+}

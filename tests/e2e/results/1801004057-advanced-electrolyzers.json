@@ -1,0 +1,55 @@
+{
+ "spec": "mods/1801004057-advanced-electrolyzers.yaml",
+ "mods": [
+  "1801004057"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Industrial Electrolyzer is built from copper after Improved Oxygen and selected: 400 W, any-water intake, 6 kg storage",
+ "updated": "2026-10-23",
+ "commit": "46251f3",
+ "mod_dlls": {
+  "1801004057": {
+   "AdvancedElectrolyzers.dll": "766e1b2ce4ec9039df780656d30d556876293e09a742bcc9448829d6079af36c"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-042102-a633d0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T05:21:51",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-053343-034535",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T05:33:43",
+    "lane": 16,
+    "reference_run": "20261023-042102-a633d0",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-053343-034535",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T05:35:22",
+    "lane": 16,
+    "reference_run": "20261023-042102-a633d0",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

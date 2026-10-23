@@ -1,0 +1,83 @@
+# Build Straight Up (2135682628), class P.
+#
+# What it does: a building that sits on another's attachment point (the Great Monument's
+# middle and top, the base game's rocket modules) may be planned on top of one that is still
+# under construction: a transpiler on BuildingDef.IsAreaClear and IsValidBuildLocation also
+# accepts an attachment point of a blueprint's finished building. The game accepts only
+# finished buildings (Components.BuildingAttachPoints).
+# How a player reaches it: the build menu; planning a stack in one go.
+# What changes: a whole monument or rocket planned at once.
+#
+# setup grants Monuments, spawns the monument's materials, and clears a 5x10 space from
+# the floor of the dug-out corridor west of the printing pod through its ceiling (setup only;
+# the Duplicants cannot reach that high). The Monument Base is planned on the floor, then the
+# Monument Midsection on top of its blueprint, which the game refuses.
+from: early-base
+mods: [2135682628]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"Monuments\")", method: Purchased}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Steel\").substance", method: SpawnResource, args: [[116.5, 207.5, -12], 13000, 300, 255, 0]}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Obsidian\").substance", method: SpawnResource, args: [[116.5, 207.5, -12], 2600, 300, 255, 0]}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Ceramic\").substance", method: SpawnResource, args: [[116.5, 207.5, -12], 2600, 300, 255, 0]}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Polypropylene\").substance", method: SpawnResource, args: [[116.5, 207.5, -12], 2600, 300, 255, 0]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(106, 206)"}, Oxygen, null, 1, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(107, 206)"}, Oxygen, null, 1, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(108, 206)"}, Oxygen, null, 1, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(109, 206)"}, Oxygen, null, 1, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(110, 206)"}, Oxygen, null, 1, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(106, 207)"}, Oxygen, null, 1, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(107, 207)"}, Oxygen, null, 1, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(108, 207)"}, Oxygen, null, 1, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(109, 207)"}, Oxygen, null, 1, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(110, 207)"}, Oxygen, null, 1, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(106, 208)"}, Oxygen, null, 1, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(107, 208)"}, Oxygen, null, 1, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(108, 208)"}, Oxygen, null, 1, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(109, 208)"}, Oxygen, null, 1, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(110, 208)"}, Oxygen, null, 1, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(106, 209)"}, Oxygen, null, 1, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(107, 209)"}, Oxygen, null, 1, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(108, 209)"}, Oxygen, null, 1, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(109, 209)"}, Oxygen, null, 1, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(110, 209)"}, Oxygen, null, 1, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(106, 210)"}, Oxygen, null, 1, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(107, 210)"}, Oxygen, null, 1, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(108, 210)"}, Oxygen, null, 1, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(109, 210)"}, Oxygen, null, 1, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(110, 210)"}, Oxygen, null, 1, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(106, 211)"}, Oxygen, null, 1, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(107, 211)"}, Oxygen, null, 1, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(108, 211)"}, Oxygen, null, 1, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(109, 211)"}, Oxygen, null, 1, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(110, 211)"}, Oxygen, null, 1, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(106, 212)"}, Oxygen, null, 1, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(107, 212)"}, Oxygen, null, 1, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(108, 212)"}, Oxygen, null, 1, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(109, 212)"}, Oxygen, null, 1, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(110, 212)"}, Oxygen, null, 1, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(106, 213)"}, Oxygen, null, 1, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(107, 213)"}, Oxygen, null, 1, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(108, 213)"}, Oxygen, null, 1, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(109, 213)"}, Oxygen, null, 1, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(110, 213)"}, Oxygen, null, 1, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(106, 214)"}, Oxygen, null, 1, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(107, 214)"}, Oxygen, null, 1, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(108, 214)"}, Oxygen, null, 1, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(109, 214)"}, Oxygen, null, 1, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(110, 214)"}, Oxygen, null, 1, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(106, 215)"}, Oxygen, null, 1, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(107, 215)"}, Oxygen, null, 1, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(108, 215)"}, Oxygen, null, 1, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(109, 215)"}, Oxygen, null, 1, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(110, 215)"}, Oxygen, null, 1, 300]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"MonumentMiddle\").BuildLocationRule": BuildingAttachPoint
+      "Components.BuildingAttachPoints.Count": 0
+  - run: {seconds: 2}
+  - expect_state: {"cells:106,206..110,215::Grid.Mass.get_Item({cell})": "<= 80"}
+  - build: {prefab: MonumentBottom, at: [106, 206]}
+  - expect: {blueprints: {MonumentBottom: 1}}
+  - build: {prefab: MonumentMiddle, at: [106, 211]}
+  - expect: {blueprints: {MonumentBottom: 1, MonumentMiddle: 1}}
+  - expect_state: {"Components.BuildingAttachPoints.Count": 0}

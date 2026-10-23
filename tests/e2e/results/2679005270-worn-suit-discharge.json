@@ -1,0 +1,63 @@
+{
+ "spec": "mods/2679005270-worn-suit-discharge.yaml",
+ "mods": [
+  "2679005270"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "smaller spec (no suits to wear out): equipping is a critical-fetch errand, and an Oxygen Mask Dock built of copper ore gets the mod's paused oxygen delivery, which its Enable Delivery user-menu button turns on (the menu dumped)",
+ "updated": "2026-10-23",
+ "commit": "25b9d93",
+ "mod_dlls": {
+  "2679005270": {
+   "WornSuitDischarge.dll": "04a3c99dc08826596d6ac03db6e51df8c35203c3ac54b58cfc31de08313a146d"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-123333-3bbe4d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T12:59:35",
+    "lane": 13,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-130113-ed5c57",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T13:20:43",
+    "lane": 13,
+    "reference_run": "20261023-123333-3bbe4d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "user-menu": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261023-130113-ed5c57",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T13:32:32",
+    "lane": 13,
+    "reference_run": "20261023-123333-3bbe4d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "user-menu": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

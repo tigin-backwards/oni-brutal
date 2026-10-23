@@ -1,0 +1,39 @@
+# Worn Suit doesn't drop Canister & Suit Docks Tune-Up (2679005270), class P.
+#
+# What it does: a worn-out suit's oxygen (and a jet suit's fuel) goes into the dock or the
+# checkpoint's emptiest dock instead of dropping as a canister (transpilers on the docks'
+# return and the checkpoint's unequip). The docks (Atmo, Jet, Lead and Oxygen Mask Lockers)
+# get a manual delivery of oxygen (and of fuel for the Jet Suit Dock), paused by default and
+# turned on from their user menu, and copy each other's settings. Putting on equipment
+# becomes a Life Support errand at the priority of critical fetches.
+# How a player reaches it: the dock's user menu; suits wearing out.
+# What changes: no canisters lying about, docks filled by hand.
+#
+# A smaller spec: early-base has no suits to wear out. setup grants Portable Gases and spawns
+# copper ore. An Oxygen Mask Dock is built in the dug-out corridor west of the printing pod
+# and selected: it has the mod's oxygen delivery, paused, and its user-menu button turns it on.
+from: early-base
+mods: [2679005270]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"PortableGasses\")", method: Purchased}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Cuprite\").substance", method: SpawnResource, args: [[115.5, 207.5, -12], 300, 300, 255, 0]}}
+steps:
+  - expect_state: {"Db.Get().ChoreTypes.FetchCritical.priority": {save_as: critical}}
+  - expect_state: {"Db.Get().ChoreTypes.EquipmentFetch.priority": "== critical"}
+  - build: {prefab: OxygenMaskLocker, at: [113, 206]}
+  - expect: {blueprints: {OxygenMaskLocker: 1}}
+  - run: {seconds: 900, until: {buildings: {OxygenMaskLocker: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [113, 207], ortho: 8}}
+  - click_world: {cell: [113, 207], select: OxygenMaskLocker}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponents<ManualDeliveryKG>.Length": 1
+      "selected:GetComponent<ManualDeliveryKG>.RequestedItemTag.Name": Oxygen
+      "selected:GetComponent<ManualDeliveryKG>.capacity": 30
+      "selected:GetComponent<ManualDeliveryKG>.userPaused": true
+  - ui_dump: {name: user-menu, root: "**/DetailsScreen/UserMenuButtons/UserMenuScreen/Buttons"}
+  - click: {ui: "**/UserMenuScreen/Buttons/Enable DeliveryButton"}
+  - expect_state:
+      "selected:GetComponent<ManualDeliveryKG>.userPaused": false
+  - expect_ui:
+      "**/UserMenuScreen/Buttons/Disable DeliveryButton": {active: true}

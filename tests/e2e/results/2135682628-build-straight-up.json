@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2135682628-build-straight-up.yaml",
+ "mods": [
+  "2135682628"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "setup clears a 5x10 space over the corridor floor; the Monument Base is planned there and the Monument Midsection on top of its blueprint, which the game refuses without the mod",
+ "updated": "2026-10-23",
+ "commit": "f96deb8",
+ "mod_dlls": {
+  "2135682628": {
+   "BuildStraightUp.dll": "fdbb2854705c6a58c8d82e13fb319cf8d115172d728ce8155c17c5714eed3b62"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-130426-e75773",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T13:13:12",
+    "lane": 12,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-131519-5802b2",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T13:18:39",
+    "lane": 13,
+    "reference_run": "20261023-130426-e75773",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-131519-5802b2",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T13:19:46",
+    "lane": 13,
+    "reference_run": "20261023-130426-e75773",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -193,6 +193,9 @@ class Expectations(unittest.TestCase):
         self.assertEqual(self.check(4, '== original'), (True, True))
         self.assertEqual(self.check(4, '== original', original=4), (True, False))
         self.assertEqual(self.check(3, '== original', original=4), (False, False))
+        # A boolean is compared as itself, not as a number.
+        self.assertEqual(self.check(False, '== original', original=False), (True, False))
+        self.assertEqual(self.check(True, '== original', original=False), (False, False))
 
     def test_ui(self):
         element = e2e.Element({'path': 'a/b', 'rect': {'x': 0, 'y': 0, 'w': 10, 'h': 10}, 'active': True, 'isOn': False,

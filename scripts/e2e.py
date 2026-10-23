@@ -1945,7 +1945,7 @@ def state_check(have, wanted, saved, original=None):
             if re.search(r'\boriginal\b', expression):
                 if original is None:
                     return True, True
-                if not re.fullmatch(r'\s*original\s*', expression) or isinstance(original, (int, float)):
+                if not re.fullmatch(r'\s*original\s*', expression) or (isinstance(original, (int, float)) and not isinstance(original, bool)):
                     return apply_op(op, have, arithmetic(expression, dict(saved, original=original))), False
                 return apply_op(op, have, original), False
             return apply_op(op, have, arithmetic(expression, saved)), False

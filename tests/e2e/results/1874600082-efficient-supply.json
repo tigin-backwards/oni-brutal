@@ -1,0 +1,55 @@
+{
+ "spec": "mods/1874600082-efficient-supply.yaml",
+ "mods": [
+  "1874600082"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a 5 kg granite pile beside a tile blueprint is passed over; the 200 kg tile comes from a 400 kg pile across the base, as in the original",
+ "updated": "2026-10-23",
+ "commit": "c2906cc",
+ "mod_dlls": {
+  "1874600082": {
+   "EfficientFetch.dll": "5404b8388c7f875a8eb21301ed89a9f3a2b2cd5383640361a45e41744db40789"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261022-235802-500a0f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T00:15:32",
+    "lane": 13,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-001726-9c1429",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T00:21:21",
+    "lane": 12,
+    "reference_run": "20261022-235802-500a0f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-001726-9c1429",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T00:22:29",
+    "lane": 12,
+    "reference_run": "20261022-235802-500a0f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

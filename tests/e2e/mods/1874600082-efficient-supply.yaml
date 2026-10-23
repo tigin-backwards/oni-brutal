@@ -1,0 +1,32 @@
+# Efficient Supply (1874600082), classes P, O.
+#
+# What it does: Duplicants fetching for an errand skip piles smaller than a share of what the
+# errand needs (Minimum Amount, 25 % by default, a PLib option) while a bigger pile is
+# available, instead of taking the nearest pile however small (patches
+# FetchChore.FindFetchTarget and FetchablesByPrefabId.UpdatePickups).
+# How a player reaches it: nothing to press; every delivery.
+# What changes: which pile a delivery is taken from.
+#
+# setup lays a 5 kg pile of granite beside a tile blueprint's cell, on the floor of the room
+# west of the printing pod, and a 400 kg pile east of the printing pod (there is more granite
+# in the colony, far away). The tile needs 200 kg of raw mineral: the game alone takes the 5 kg
+# pile first, being nearest; with the mod it is passed over (5 kg is under 25 % of 200), and the
+# whole tile comes from the big one.
+from: early-base
+mods: [1874600082]
+setup:
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Granite\").substance", method: SpawnResource, args: [[108.5, 206.5, -12], 5, 300, 255, 0]}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Granite\").substance", method: SpawnResource, args: [[130.5, 207.5, -12], 400, 300, 255, 0]}}
+steps:
+  - run: {seconds: 2}
+  - expect_state:
+      "cells:130,207..130,207::Grid.Objects.get_Item({cell}, 3).GetComponent<PrimaryElement>.Mass": 400
+      "cells:108,206..108,206::Grid.Objects.get_Item({cell}, 3).GetComponent<PrimaryElement>.Mass": 5
+  - build: {prefab: Tile, at: [107, 206], material: Granite}
+  - expect: {blueprints: {Tile: 1}}
+  - run: {seconds: 900, until: {pending_construction: 0}}
+  # The small pile beside the tile is untouched; the granite tile's 200 kg came from the big pile.
+  - expect_state:
+      "cells:108,206..108,206::Grid.Objects.get_Item({cell}, 3).GetComponent<PrimaryElement>.Mass": 5
+      "cells:130,207..130,207::Grid.Objects.get_Item({cell}, 3).GetComponent<PrimaryElement>.Mass": 200
+      "Grid.Objects.get_Item(131123, 1).GetComponent<PrimaryElement>.ElementID": Granite

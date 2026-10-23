@@ -162,6 +162,8 @@ def check_step(where, kind, value, in_setup):
     need = lambda ok, text: ok or problems.append(f'{where}: {text}')
     if kind not in STEP_KINDS:
         return [f'{where}: unknown step {kind!r}']
+    if kind in ('shot', 'world_shot', 'ui_dump') and isinstance(value, dict) and 'name' in value:
+        need(isinstance(value['name'], str), f"{kind} name {value['name']!r} is not text (YAML reads on, off, yes and no as booleans: quote it)")
     if kind == 'dig':
         need(_rect(value), 'dig takes [x1, y1, x2, y2]')
     elif kind == 'build':

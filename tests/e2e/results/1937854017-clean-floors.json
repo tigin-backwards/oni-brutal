@@ -1,0 +1,59 @@
+{
+ "spec": "mods/1937854017-clean-floors.yaml",
+ "mods": [
+  "1937854017"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the tile decor tops and outside corners are cut off by the default options; five sandstone tiles built and their top edge shot",
+ "updated": "2026-10-23",
+ "commit": "0feba58",
+ "mod_dlls": {
+  "1937854017": {
+   "CleanFloors.dll": "7425a3e56fc8a7b45c658780555bfb23cc87942cb85ab1133ec41bf59a6043c3"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261022-232004-36dc49",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-22T23:36:21",
+    "lane": 12,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261022-233841-f7a1a3",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T00:10:12",
+    "lane": 13,
+    "reference_run": "20261022-232004-36dc49",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "tiles": 0.036343
+    }
+   },
+   {
+    "run": "20261022-233841-f7a1a3",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T00:11:31",
+    "lane": 13,
+    "reference_run": "20261022-232004-36dc49",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "tiles": 0.035344
+    }
+   }
+  ]
+ }
+}

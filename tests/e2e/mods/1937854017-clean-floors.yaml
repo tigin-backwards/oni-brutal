@@ -1,0 +1,22 @@
+# Clean Floors (1937854017), classes P, O.
+#
+# What it does: hides the decorative bits drawn on built tiles: the "tops" on their upper
+# edge always, the outside corners by default, the inside corners optionally (PLib options,
+# restart required), by raising those decor entries' probability cutoff out of reach.
+# How a player reaches it: any built tile (Tile, Mesh Tile, Insulated Tile, ...).
+# What changes: how built floors look.
+#
+# Five sandstone tiles fill the pit in the floor of the dug-out room west of the printing pod;
+# their top edge is then shot, paused, with the camera set.
+from: early-base
+mods: [1937854017]
+steps:
+  - expect_state:
+      "sum:Assets.GetBuildingDef(\"Tile\").DecorBlockTileInfo.decor[*].probabilityCutoff if .name == tops": "> 1000000000"
+      "sum:Assets.GetBuildingDef(\"Tile\").DecorBlockTileInfo.decor[*].probabilityCutoff if .name == outside_tl_corner": "> 1000000000"
+      "sum:Assets.GetBuildingDef(\"Tile\").DecorBlockTileInfo.decor[*].probabilityCutoff if .name == inside_bl_corner": "< 1000000000"
+  - build: {prefab: Tile, cells: [[106, 206], [107, 206], [108, 206], [109, 206], [110, 206]], material: SandStone}
+  - expect: {blueprints: {Tile: 5}}
+  - run: {seconds: 900, until: {pending_construction: 0}}
+  # Above the tiles, where Duplicants walk wherever the run left them, is masked.
+  - world_shot: {name: tiles, ortho: 3, at: [108, 207], mask: [[0, 0, 1280, 400]]}

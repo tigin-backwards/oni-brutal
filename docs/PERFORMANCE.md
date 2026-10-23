@@ -177,6 +177,7 @@ after times were measured on Linux under WSL2, where the game's code ran about h
 | `fast-anim-cleanup`: the sweep for destroyed animations skips chunks that can't hold any | 0.48 → 0.12 ms | exact |
 | `fast-partitioner-cleanup`: the spatial index's cleanup looks only at entries that were removed | Gluttony: 0.38 → 0.16 ms | exact |
 | `fast-symbol-overrides`: unchanged symbol-override blocks aren't uploaded again | 1.47 → 1.20 ms | exact |
+| `fast-anim-batches`: animation batches write their controllers' instance and symbol data on worker threads, the rest in the game's order | Gluttony: 1.9–2.0 → 1.5–1.65 ms | exact |
 | Save tweaks: `fast-serialization`, `fast-save-type-checks`, `fast-save-compression`, `no-save-gc`, `background-save` | autosave freeze 11.7 → 4.8 s | exact, and saves still load in the original |
 | `slow-reachability`: reachability re-checked every 4 game seconds instead of every second | 1.88 → 0.53 ms | changes timing |
 | `off-screen-conveyors`: items on rails off screen are placed when they stop or come into view | skips most of about 950 moves a frame | changes positions while off screen |
@@ -194,7 +195,11 @@ Measured ideas that didn't pay off, so nobody needs to try them again:
 - Skipping uploads of identical animation frames: not exact (some objects change their data
   without marking it dirty), and no faster anyway.
 - Recording draws on worker threads: the game changes materials between draws, so each draw's
-  inputs would need copying, which costs about as much as it saves.
+  inputs would need copying, which costs about as much as it saves. (That holds for command
+  buffers and immediate draws; the queued draws are recorded with no game code in between, so
+  they remain a candidate: see [research/parallel-main-thread.md](research/parallel-main-thread.md).)
+- Building navigation links on worker threads: exact, but each update is too small (about
+  40 µs) for a fork and join to pay.
 - Early-outs inside per-item systems like sublimation and sensors: the cost is reaching each
   object at all, not the work after that.
 - Equivalents of Fast Track (Peter Han's mod), reviewed option by option: the ones that would

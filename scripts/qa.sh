@@ -268,7 +268,7 @@ stage_verify()
     echo "$report" | sed 's/^/     /' | tee -a "$run/summary.txt"
     [ $status -eq 0 ] || fail "verify: a verify mode reported mismatches"
     local tweak
-    for tweak in fast-anim-events fast-sublimation fast-jobs fast-particle-collision fast-offset-tables fast-anim-cleanup fast-partitioner-cleanup "canvas skips" "component layouts" "texel copies" "partial uploads"; do
+    for tweak in fast-anim-events fast-anim-batches fast-sublimation fast-jobs fast-particle-collision fast-offset-tables fast-anim-cleanup fast-partitioner-cleanup "canvas skips" "component layouts" "texel copies" "partial uploads"; do
         echo "$report" | grep -q "$tweak:" || fail "verify: no report from $tweak"
     done
     # The radbolt tweak checks two things, each with its own report.

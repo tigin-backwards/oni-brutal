@@ -431,6 +431,20 @@ unchanged.
   are skipped (exact by construction; the setters are the block's only writers). U57: override
   texture writes 0.42 → 0.01 ms a frame; batch uploads 1.47 → 1.20 ms including the checks.
 
+- `fast-anim-batches`: KAnimBatchManager.UpdateDirty writes, per dirty controller in order,
+  its instance data and symbol instance block, applies its symbol overrides (game code with
+  side effects) and writes its override block. The tweak writes the first two for every dirty
+  batch on worker threads beforehand (one batch per worker, the main thread waiting), runs the
+  game's loop with those calls skipped for controllers already written, and makes the
+  override block copies the loop asked for after it, on workers again. A batch's writes touch
+  only its own textures and slots; what they read is not changed by another controller's
+  override application. UI batches, batches being set up, other controller types and other
+  position delegates stay in the loop; another Harmony owner on the write path turns it off.
+  Gluttony, Linux, stopwatch: 1.92–2.01 → 1.49–1.65 ms a frame; 3.2 million writes and 55,000
+  deferred override blocks verified with ONI_TWEAK_VERIFY (each redone at its original place
+  and compared byte for byte), none different. The engine's transform caches were made safe
+  for concurrent readers for it.
+
 - `fast-jobs`: the game's JobManager wakes every worker for each Run (a kernel semaphore, 15
   workers here) and waits until all have checked in, however few the items; the main thread
   runs it about 14 times a frame in U57. The tweak runs the same items on its own workers (same

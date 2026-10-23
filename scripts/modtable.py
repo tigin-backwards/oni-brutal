@@ -36,11 +36,22 @@ played = {
     '2977728791': "issue #2's set",
     '3381262702': "issue #2's set",
     '2854869130': "issue #2's set",
+    # Played by their specs (tests/e2e/mods, scripts/e2e.py): passed once in the original and
+    # twice in ours, with no new log signature and screens matching the original's.
+    '1717463209': 'spec tests/e2e/mods/1717463209-bigger-camera-zoom-out.yaml: the mouse wheel zooms out past the game\'s 20, to 200; world shots at three zoom levels within 3.1 % of the original',
+    '2527442674': 'spec tests/e2e/mods/2527442674-full-miner-yield.yaml: a dig leaves debris weighing as much as the dug cells',
+    '2094698134': 'spec tests/e2e/mods/2094698134-airlock-door.yaml: built from copper through a build order, its side screen and status as in the original, shut and uncharged without power',
+    '1893887916': 'spec tests/e2e/mods/1893887916-research-queue.yaml: Shift+click queues a tech with its prerequisites and numbers the queue; a click takes one out or replaces the queue; the research screen as in the original',
+}
+# Played by their specs, with a small difference in what the UI reports (not in what it shows):
+# ⚠️ until it is fixed. The differences are the engine's, found by the specs' layout dumps.
+differences = {
+    '1863428350': 'spec tests/e2e/mods/1863428350-sweep-by-type.yaml: the filtered sweep marks only the checked material, and its list looks as in the original (no pixel differs); its layout dump does not match: a nested canvas reports scaleFactor 1 (0.86 in the original), its scroll view normalizedPosition x 1 (0), and an unused input field has laid out its caret',
+    '3468585385': 'spec tests/e2e/mods/3468585385-blueprints-expanded.yaml: a blueprint created, chosen, rotated and placed through its windows ([#6](https://github.com/tigin-backwards/oni-brutal/issues/6) fixed), screens within 0.6 % of the original\'s pixels; the preview\'s scroll view reports normalizedPosition x 1 (0 in the original) and its content sits 3.4 px aside',
+    '2856555858': 'spec tests/e2e/mods/2856555858-duplicant-stat-selector.yaml: stat editing ([#5](https://github.com/tigin-backwards/oni-brutal/issues/5) fixed), removing an interest and a trait, adding one through its searchable list, and printing the Duplicant with it; screens within 0.3 % of the original\'s pixels; the list\'s empty search field holds a zero-width space (empty in the original), which does not show',
 }
 # Loads and Colony as swept, Played withdrawn until a spec drives the mod's UI (mod-play-testing.md).
-unplayed = {
-    '3468585385': 'its windows were laid out wrongly ([#6](https://github.com/tigin-backwards/oni-brutal/issues/6), fixed in 2026.10.22.3); played again once its spec runs through the UI. Earlier, a blueprint created, written, read back and placed by its code: the same 345 construction sites as in the original',
-}
+unplayed = {}
 broken = {
     '1715248368': 'broken upstream: patches `Deconstructable.TriggerDestroy`, which now has two overloads',
     '2363561445': 'broken upstream: `STRINGS.UI.TOOLS.FILTERLAYERS.ALL` is no longer a field',
@@ -87,7 +98,7 @@ for extra in glob.glob(os.path.join(SWEEPS, 'modtable-*.tsv')):
         i, loads, colony, note = (line.rstrip('\n').split('\t') + [''] * 4)[:4]
         third_results[i] = (loads, colony, note)
 
-Y, N, X = '✅', '⬜', '❌'
+Y, N, X, W = '✅', '⬜', '❌', '⚠️'
 
 def row(rank, mid, title, loads, colony, play, note):
     link = f'[{title.replace("|", "/")}](https://steamcommunity.com/sharedfiles/filedetails/?id={mid})' if mid else title
@@ -101,6 +112,8 @@ for r in cat:
     listed.add(mid)
     if mid in played:
         rows.append(row(rank, mid, title, Y, Y, Y, played[mid]))
+    elif mid in differences:
+        rows.append(row(rank, mid, title, Y, Y, W, differences[mid]))
     elif mid in unplayed:
         rows.append(row(rank, mid, title, Y, Y, N, unplayed[mid]))
     elif mid in broken:

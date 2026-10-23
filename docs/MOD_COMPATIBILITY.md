@@ -19,23 +19,23 @@ installs get developer checks subscribers never see).
 | Rank | Mod | Loads | Colony | Played | Notes |
 |---|---|---|---|---|---|
 | – | Fast Track (GitHub) | ✅ | ✅ | ✅ | about 30 fps on U57, where the original runs 5–6 |
-| 1 | [Bigger Camera Zoom Out](https://steamcommunity.com/sharedfiles/filedetails/?id=1717463209) | ✅ | ✅ | ⬜ |  |
+| 1 | [Bigger Camera Zoom Out](https://steamcommunity.com/sharedfiles/filedetails/?id=1717463209) | ✅ | ✅ | ✅ | spec tests/e2e/mods/1717463209-bigger-camera-zoom-out.yaml: the mouse wheel zooms out past the game's 20, to 200; world shots at three zoom levels within 3.1 % of the original |
 | 2 | [Mod Updater](https://steamcommunity.com/sharedfiles/filedetails/?id=2018291283) | ✅ | ✅ | ⬜ |  |
 | 3 | [[Obsolete] Build Over Plants](https://steamcommunity.com/sharedfiles/filedetails/?id=1835394161) | ✅ | ✅ | ⬜ |  |
 | 4 | [Show Building Ranges](https://steamcommunity.com/sharedfiles/filedetails/?id=1960996649) | ✅ | ✅ | ⬜ |  |
 | 5 | [DGSM  - Duplicants Generation Settings Manager // by @Ony 👾](https://steamcommunity.com/sharedfiles/filedetails/?id=1838445101) | ✅ | ✅ | ⬜ |  |
-| 6 | [Research Queue](https://steamcommunity.com/sharedfiles/filedetails/?id=1893887916) | ✅ | ✅ | ⬜ |  |
+| 6 | [Research Queue](https://steamcommunity.com/sharedfiles/filedetails/?id=1893887916) | ✅ | ✅ | ✅ | spec tests/e2e/mods/1893887916-research-queue.yaml: Shift+click queues a tech with its prerequisites and numbers the queue; a click takes one out or replaces the queue; the research screen as in the original |
 | 7 | [Better Info Cards](https://steamcommunity.com/sharedfiles/filedetails/?id=1960947963) | ✅ | ✅ | ✅ | hover cards draw as in the original (needed ARCHITECTURE D17, D18) |
 | 8 | [Falling Sand](https://steamcommunity.com/sharedfiles/filedetails/?id=1855163252) | ✅ | ✅ | ⬜ |  |
 | 9 | [Better Automation Overlay](https://steamcommunity.com/sharedfiles/filedetails/?id=1878896484) | ✅ | ✅ | ⬜ |  |
 | 10 | [No Drop // by @Ony 👾](https://steamcommunity.com/sharedfiles/filedetails/?id=1868454866) | ✅ | ✅ | ⬜ |  |
-| 11 | [Duplicant Stat Selector](https://steamcommunity.com/sharedfiles/filedetails/?id=2856555858) | ✅ | ✅ | ⬜ |  |
+| 11 | [Duplicant Stat Selector](https://steamcommunity.com/sharedfiles/filedetails/?id=2856555858) | ✅ | ✅ | ⚠️ | spec tests/e2e/mods/2856555858-duplicant-stat-selector.yaml: stat editing ([#5](https://github.com/tigin-backwards/oni-brutal/issues/5) fixed), removing an interest and a trait, adding one through its searchable list, and printing the Duplicant with it; screens within 0.3 % of the original's pixels; the list's empty search field holds a zero-width space (empty in the original), which does not show |
 | 12 | [Queue for Sinks](https://steamcommunity.com/sharedfiles/filedetails/?id=1881925531) | ✅ | ✅ | ⬜ |  |
-| 13 | [Sweep By Type](https://steamcommunity.com/sharedfiles/filedetails/?id=1863428350) | ✅ | ✅ | ⬜ |  |
+| 13 | [Sweep By Type](https://steamcommunity.com/sharedfiles/filedetails/?id=1863428350) | ✅ | ✅ | ⚠️ | spec tests/e2e/mods/1863428350-sweep-by-type.yaml: the filtered sweep marks only the checked material, and its list looks as in the original (no pixel differs); its layout dump does not match: a nested canvas reports scaleFactor 1 (0.86 in the original), its scroll view normalizedPosition x 1 (0), and an unused input field has laid out its caret |
 | 14 | [select last care package](https://steamcommunity.com/sharedfiles/filedetails/?id=1879935708) | ✅ | ✅ | ⬜ |  |
 | 15 | [Customizable Speed](https://steamcommunity.com/sharedfiles/filedetails/?id=2002421412) | ✅ | ✅ | ⬜ |  |
 | 16 | [Move This Here](https://steamcommunity.com/sharedfiles/filedetails/?id=2667816955) | ✅ | ✅ | ⬜ |  |
-| 17 | [Airlock Door](https://steamcommunity.com/sharedfiles/filedetails/?id=2094698134) | ✅ | ✅ | ⬜ |  |
+| 17 | [Airlock Door](https://steamcommunity.com/sharedfiles/filedetails/?id=2094698134) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2094698134-airlock-door.yaml: built from copper through a build order, its side screen and status as in the original, shut and uncharged without power |
 | 18 | [GasOverlay](https://steamcommunity.com/sharedfiles/filedetails/?id=1737859934) | ✅ | ✅ | ⬜ |  |
 | 19 | [Bigger Building Menu](https://steamcommunity.com/sharedfiles/filedetails/?id=1703611962) | ✅ | ✅ | ⬜ |  |
 | 20 | [Plan Buildings Without Materials](https://steamcommunity.com/sharedfiles/filedetails/?id=1717526174) | ✅ | ✅ | ⬜ |  |
@@ -83,13 +83,13 @@ installs get developer checks subscribers never see).
 | 62 | [Favorite Resources // by @Ony 👾](https://steamcommunity.com/sharedfiles/filedetails/?id=1872111766) | ✅ | ✅ | ⬜ |  |
 | 63 | [bottle emptier extend](https://steamcommunity.com/sharedfiles/filedetails/?id=1885337332) | ❌ | ❌ | ⬜ | broken upstream: calls `TreeFilterable.GetTags()`, which the game no longer has (same in the original) |
 | 64 | [No 'Long Commutes'](https://steamcommunity.com/sharedfiles/filedetails/?id=1725950119) | ✅ | ✅ | ⬜ |  |
-| 65 | [Blueprints Expanded](https://steamcommunity.com/sharedfiles/filedetails/?id=3468585385) | ✅ | ✅ | ⬜ | its windows were laid out wrongly ([#6](https://github.com/tigin-backwards/oni-brutal/issues/6), fixed in 2026.10.22.3); played again once its spec runs through the UI. Earlier, a blueprint created, written, read back and placed by its code: the same 345 construction sites as in the original |
+| 65 | [Blueprints Expanded](https://steamcommunity.com/sharedfiles/filedetails/?id=3468585385) | ✅ | ✅ | ⚠️ | spec tests/e2e/mods/3468585385-blueprints-expanded.yaml: a blueprint created, chosen, rotated and placed through its windows ([#6](https://github.com/tigin-backwards/oni-brutal/issues/6) fixed), screens within 0.6 % of the original's pixels; the preview's scroll view reports normalizedPosition x 1 (0 in the original) and its content sits 3.4 px aside |
 | 66 | [U&F-Translate Fix 翻译修正](https://steamcommunity.com/sharedfiles/filedetails/?id=3374671941) | ⬜ | ⬜ | ⬜ | flagged by onimaxxing (crashesAtStartup); not tested |
 | 67 | [自然种植盒（Natural Plant Box）](https://steamcommunity.com/sharedfiles/filedetails/?id=3243440327) | ✅ | ✅ | ⬜ |  |
 | 68 | [Русификатор (Wiki)](https://steamcommunity.com/sharedfiles/filedetails/?id=1269554374) | ⬜ | ⬜ | ⬜ | translation: the game applies one only from a Steam subscription; not testable here |
 | 69 | [Insulated Door](https://steamcommunity.com/sharedfiles/filedetails/?id=2054432034) | ✅ | ✅ | ⬜ |  |
 | 70 | [Smart Mop // by @Ony 👾](https://steamcommunity.com/sharedfiles/filedetails/?id=1863275516) | ✅ | ✅ | ⬜ |  |
-| 71 | [Full Miner Yield](https://steamcommunity.com/sharedfiles/filedetails/?id=2527442674) | ✅ | ✅ | ⬜ |  |
+| 71 | [Full Miner Yield](https://steamcommunity.com/sharedfiles/filedetails/?id=2527442674) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2527442674-full-miner-yield.yaml: a dig leaves debris weighing as much as the dug cells |
 | 72 | [Dup Stats Configurator](https://steamcommunity.com/sharedfiles/filedetails/?id=1717999057) | ✅ | ✅ | ⬜ |  |
 | 73 | [Wallpaper](https://steamcommunity.com/sharedfiles/filedetails/?id=1717534457) | ✅ | ✅ | ⬜ |  |
 | 74 | [Flow Splitters](https://steamcommunity.com/sharedfiles/filedetails/?id=1708823360) | ✅ | ✅ | ⬜ |  |

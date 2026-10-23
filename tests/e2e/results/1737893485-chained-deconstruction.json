@@ -1,0 +1,56 @@
+{
+ "spec": "mods/1737893485-chained-deconstruction.yaml",
+ "mods": [
+  "1737893485"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a column of four ladders marked with the Deconstruct tool comes down at once when the first is deconstructed",
+ "updated": "2026-10-22",
+ "commit": "3ca172b",
+ "mod_dlls": {
+  "1737893485": {
+   "ChainedDeconstruction.dll": "9ee9c63cb81184b3de77de72171edc477f81f4f6c75db4985dd1e4373109212c",
+   "Common.dll": "87a6b9950dc4f7703d1d165fab10c6aeddad6810531639062a4a40bbe6fefb3a"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261022-224110-e266f8",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-22T22:41:10",
+    "lane": 10,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261022-224350-ab1aaa",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-22T22:43:50",
+    "lane": 10,
+    "reference_run": "20261022-224110-e266f8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261022-224350-ab1aaa",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-22T22:45:55",
+    "lane": 10,
+    "reference_run": "20261022-224110-e266f8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

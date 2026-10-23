@@ -1,0 +1,63 @@
+{
+ "spec": "mods/1706181611-geyser-calculated-average-output-tooltip.yaml",
+ "mods": [
+  "1706181611"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a steam vent placed in the base and selected shows \"Calculated Average Output: (Requires Analysis)\" among its descriptors, as in the original",
+ "updated": "2026-10-22",
+ "commit": "3ca172b",
+ "mod_dlls": {
+  "1706181611": {
+   "GeyserCalculatedAvgOutputTooltip.dll": "9c38d8db47dc9280db2c4f18756a7515abb5f57ed4269da2449c0720c55fd4ab"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261022-224111-084385",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-22T22:41:11",
+    "lane": 11,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261022-224259-983575",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-22T22:42:59",
+    "lane": 11,
+    "reference_run": "20261022-224111-084385",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "descriptors": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261022-224259-983575",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-22T22:44:21",
+    "lane": 11,
+    "reference_run": "20261022-224111-084385",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "descriptors": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

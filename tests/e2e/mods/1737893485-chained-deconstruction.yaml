@@ -1,0 +1,25 @@
+# ChainedDeconstruction (1737893485), class P.
+#
+# What it does: when a Duplicant finishes deconstructing a building, the buildings of the same
+# kind next to it that are also marked for deconstruction go with it at once, and theirs, and
+# so on (a postfix on Deconstructable.TriggerDestroy). Its Chainables.json lists the kinds; the
+# Workshop build ships "*", every kind.
+# How a player reaches it: the Deconstruct tool over a run of buildings, a ladder for example.
+# What changes: a marked column of ladders comes down with the first one.
+#
+# A column of four ladders is built in the dug-out corridor west of the printing pod, then
+# marked with the Deconstruct tool. The game alone takes them down one at a time; with the mod
+# the count goes from four to none in one step.
+from: early-base
+mods: [1737893485]
+steps:
+  - build: {prefab: Ladder, cells: [[114, 206], [114, 207], [114, 208], [114, 209]]}
+  - expect: {blueprints: {Ladder: 4}}
+  - run: {seconds: 1200, until: {buildings: {Ladder: 4}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [114, 208], ortho: 8}}
+  - tool: {toolbar: Deconstruct}
+  - drag: {from: [114, 206], to: [114, 209]}
+  - key: {code: Escape}
+  - expect_state: {"count:all:Deconstructable::[*] if .IsMarkedForDeconstruction() == true": 4}
+  - run: {seconds: 900, until: {buildings: {Ladder: "<4"}}}
+  - expect: {buildings: {Ladder: 0}}

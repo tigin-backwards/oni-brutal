@@ -1,0 +1,33 @@
+# Movable Features 位移信标 (3007505281), classes T, S, M; asset_bundle_ui.
+#
+# What it does: world features that cannot be moved in the game (geysers and vents, Gravitas
+# buildings, the sap tree and others) get a "Relocate To" button in their user menu. It starts
+# a tool (MoveInterfaceTool) that carries a ghost of the feature on the cursor, white where it
+# may go and red where not (solid cells); a click moves the feature there. A settings screen
+# on the Mods screen chooses which kinds are movable and how they move.
+# How a player reaches it: select a geyser, its Relocate To button, then a click in the world.
+# What changes: where the feature stands.
+#
+# early-base's only geyser is buried in rock: setup places a cool steam vent in the dug-out
+# corridor west of the printing pod, and the vent is moved 4 cells further west.
+from: early-base
+mods: [3007505281]
+setup:
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(0, 112, 206, \"GeyserGeneric_steam\", \"BuildingBack\")", method: SetActive, args: [true]}}
+steps:
+  - driver: {camera.set: {cell: [111, 208], ortho: 8}}
+  - click_world: {cell: [112, 207]}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<Geyser>": exists
+      "selected:GetComponent<MovableFeatures.BaseMovable>.flag": IsGeyser
+      "selected:transform.position.x": 112.5
+  - expect_ui: {"**/UserMenuScreen/Buttons/Relocate ToButton": {interactable: true}}
+  - ui_dump: {name: user-menu, root: "**/DetailsScreen/UserMenuButtons/UserMenuScreen"}
+  - click: {ui: "**/UserMenuScreen/Buttons/Relocate ToButton"}
+  - expect_state: {"PlayerController.Instance.ActiveTool.name": MoveInterfaceTool}
+  - click_world: {cell: [108, 206]}
+  - expect_state:
+      "PlayerController.Instance.ActiveTool.name": SelectTool
+      "count:all:Geyser::[*] if .transform.position.x == 108.5": 1
+      "count:all:Geyser::[*] if .transform.position.x == 112.5": 0

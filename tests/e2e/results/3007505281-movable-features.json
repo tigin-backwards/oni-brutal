@@ -1,0 +1,63 @@
+{
+ "spec": "mods/3007505281-movable-features.yaml",
+ "mods": [
+  "3007505281"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a steam vent placed in the base is moved 4 cells through its Relocate To button and a click in the world; its user menu as in the original",
+ "updated": "2026-10-22",
+ "commit": "3ca172b",
+ "mod_dlls": {
+  "3007505281": {
+   "MovableFeatures.dll": "de15c77ddbeac5b22cde84605bb36d91aab0123fe5ba5488013e3a67fe2839cc"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261022-224543-dc46f3",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-22T22:45:43",
+    "lane": 11,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261022-224742-ba3ff4",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-22T22:47:42",
+    "lane": 11,
+    "reference_run": "20261022-224543-dc46f3",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "user-menu": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261022-224742-ba3ff4",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-22T22:49:01",
+    "lane": 11,
+    "reference_run": "20261022-224543-dc46f3",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "user-menu": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

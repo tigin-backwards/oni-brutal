@@ -48,6 +48,17 @@ formatting itself. Compare the players with `tools/UnityProbe/tw-check.py diff O
 check the rounding rule with `tw-check.py rule LOG`; `docs/cleanroom/textmeshpro.md`
 ("Preferred sizes to the hundredth") records what it measured.
 
+With `PROBE_SCENARIO=textoverflow` only the overflow probe runs (`TextOverflow.cs`, lines `OV …`,
+10 s into the main menu): `isTextOverflowing`, `firstOverflowCharacterIndex`, `isTextTruncated`,
+the `textInfo` counts and each character's code, visibility and line, for texts of white space
+alone and with white space around a visible character, in NotoSans-Regular 14 pt and GRAYSTROKE
+REGULAR SDF 12 pt. The rects run from 0 × 0 through the text's preferred size (a hundredth and a
+thousandth under and over it) and one line of the font to 400 × 100, with Overflow, Truncate,
+Ellipsis and Masking, wrapping on and off. Each text's layout in the 400 × 100 rect is logged
+too (`metrics`: origins, advances, line ascenders and descenders). Compare the players with
+`tools/UnityProbe/ov-check.py diff ORIG OURS`, and check the rule against a log with
+`ov-check.py rule LOG`; `textmeshpro.md` ("Overflow at white space") records what it measured.
+
 ## UI semantics (`UiSemantics.cs`, `UIS` lines)
 
 Ten seconds into the front end, after the front-end dump, it builds small hierarchies on an

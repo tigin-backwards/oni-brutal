@@ -28,6 +28,11 @@ namespace SemanticsProbe
                 go.AddComponent<TextWidth>();
                 return;
             }
+            if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "textoverflow")
+            {
+                go.AddComponent<TextOverflow>();
+                return;
+            }
             if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "startdestroy")
             {
                 go.AddComponent<SDScenario>();

@@ -1,0 +1,54 @@
+# Geyser Control (3369395347), classes P, O.
+#
+# What it does: a studied geyser's side screen gets sliders for its output: mass per cycle,
+# eruption period and its active share, dormancy period and its active share (and, by an
+# option, temperature), kept within the geyser type's range (or past it, by an option). It
+# adds a "Show Slider Controls" button that shows them, and "Reset to Original Values" and
+# "Randomize Values" buttons (each asks for a second click to confirm). Options add dormancy
+# and eruption buttons, a pressure cap checkbox, and instant analysis (a prefix on
+# Studyable.OnSidescreenButtonPressed marks the geyser studied at once, and drops databanks
+# in Spaced Out).
+# How a player reaches it: selecting a geyser; its side screen buttons and sliders.
+# What changes: the geyser's emission rate and timings, its configuration.
+#
+# The Liquid Sulfur Geyser west of the base is still buried in early-base; setup makes it
+# selectable (as uncovering it does), and the spec turns on instant analysis. The geyser is
+# selected, analysed with its button, its sliders shown with the mod's button, and a slider
+# set by a click on its track.
+from: early-base
+mods: [3369395347]
+options:
+  GeyserControlMod: {allowInstantAnalysis: true}
+setup:
+  - driver: {setup.call: {target: "all:Geyser::[0].GetComponent<KSelectable>", method: set_IsSelectable, args: [true]}}
+steps:
+  - expect_state:
+      "all:Geyser::[0].GetComponent<Studyable>.Studied": false
+      "all:Geyser::[0].GetComponent<GeyserSliders>": exists
+  - driver: {camera.set: {cell: [92, 205], ortho: 8}}
+  - click_world: {cell: [89, 203], select: GeyserGeneric_liquid_sulfur}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_wait: {path: "**/ButtonMenuSideScreen/Buttons/Button", cond: stable}
+  - click: {text: "ANALYZE", under: "**/ButtonMenuSideScreen"}
+  - expect_state:
+      "selected:Studyable.Studied": true
+  - ui_wait: {path: "**/ButtonMenuSideScreen/Buttons/Button/Label", cond: text, value: "ANALYSIS COMPLETE"}
+  - click: {text: "Show Slider Controls", under: "**/ButtonMenuSideScreen"}
+  - ui_wait: {path: "**/MultiSliderSideScreen/Sliders/SliderContents[4]", cond: stable}
+  - expect_ui:
+      "**/MultiSliderSideScreen/Sliders/SliderContents/TitleRow/TargetLabel": {text: "Mass Per Cycle"}
+      "**/ButtonMenuSideScreen/Buttons/Button/Label": {any_text: "Hide Slider Controls"}
+  - ui_dump: {name: sliders, root: "**/MultiSliderSideScreen"}
+  - shot: {name: sliders, crop: "**/MultiSliderSideScreen"}
+  # Mass per cycle, typed into its slider's field: the geyser's rate follows.
+  - type: {ui: "**/MultiSliderSideScreen/Sliders/SliderContents[0]/TitleRow/NumberInputField", text: "1500", clear: true, enter: true}
+  - expect_state:
+      "selected:Geyser.configuration.scaledRate": 1500
+  # Reset asks for a second click, then puts the geyser's own values back.
+  - click: {text: "Reset to Original Values", under: "**/ButtonMenuSideScreen"}
+  - ui_wait: {path: "**/ButtonMenuSideScreen/Buttons/Button", cond: stable}
+  - expect_state:
+      "selected:Geyser.configuration.scaledRate": 1500
+  - click: {ui: "**/ButtonMenuSideScreen/Buttons/Button[1]"}
+  - expect_state:
+      "selected:Geyser.configuration.scaledRate": "> 1900"

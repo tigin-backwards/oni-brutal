@@ -1,0 +1,61 @@
+{
+ "spec": "mods/3369395347-geyser-control.yaml",
+ "mods": [
+  "3369395347"
+ ],
+ "verdict": "failed",
+ "why": "a run of ours failed",
+ "findings": [],
+ "note": "the geyser is analysed with its button (instant analysis option) and its sliders shown with the mod's button; in ours the slider side screen lays out 166846 px tall (each slider's number field, a TMP_InputField, reports a preferred height of 82485, 24 in the original) and renders as an empty white column, so its last slider never settles",
+ "updated": "2026-10-23",
+ "commit": "e271778",
+ "mod_dlls": {
+  "3369395347": {
+   "Geyser_Control.dll": "2e3d2d368d3f009e25d455153454625dfc826c909723bbc009b64196677faa42"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-033513-02b35f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T03:35:13",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-051902-fb2c9c",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-23T05:19:02",
+    "lane": 16,
+    "reasons": [
+     "step 10: E2eDriver ui.wait {\"path\": \"**/MultiSliderSideScreen/Sliders/SliderContents[4]\", \"cond\": \"stable\", \"frames\": 300}: timeout: stable not met within 300 frames"
+    ],
+    "reference_run": "20261023-033513-02b35f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-051902-fb2c9c",
+    "index": 2,
+    "verdict": "fail",
+    "date": "2026-10-23T05:19:56",
+    "lane": 16,
+    "reasons": [
+     "step 10: E2eDriver ui.wait {\"path\": \"**/MultiSliderSideScreen/Sliders/SliderContents[4]\", \"cond\": \"stable\", \"frames\": 300}: timeout: stable not met within 300 frames"
+    ],
+    "reference_run": "20261023-033513-02b35f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

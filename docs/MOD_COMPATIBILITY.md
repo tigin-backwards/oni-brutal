@@ -293,10 +293,10 @@ installs get developer checks subscribers never see).
 | 272 | [Wireless Power](https://steamcommunity.com/sharedfiles/filedetails/?id=2356326908) | ✅ | ✅ | ⬜ | its side screen fails to attach, as in the original (an older game's `DetailsScreen`); needed ARCHITECTURE D22 |
 | 273 | [Hatch Morphs](https://steamcommunity.com/sharedfiles/filedetails/?id=1843550325) | ✅ | ✅ | ⬜ |  |
 | 274 | [Build Straight Up](https://steamcommunity.com/sharedfiles/filedetails/?id=2135682628) | ✅ | ✅ | ⬜ |  |
-| 275 | [Insulated Farm Tiles](https://steamcommunity.com/sharedfiles/filedetails/?id=1850356486) | ✅ | ✅ | ⬜ |  |
+| 275 | [Insulated Farm Tiles](https://steamcommunity.com/sharedfiles/filedetails/?id=1850356486) | ✅ | ✅ | ✅ | spec tests/e2e/mods/1850356486-insulated-farm-tiles.yaml: the Insulated Farm Tile is planned from sandstone in the pit, built, and lowers its cell's insulation as in the original; its details title is shot |
 | 276 | [ImbaStorages](https://steamcommunity.com/sharedfiles/filedetails/?id=1873666181) | ✅ | ✅ | ⬜ |  |
 | 277 | [Bottle Emptier Variable Size](https://steamcommunity.com/sharedfiles/filedetails/?id=2524767809) | ✅ | ✅ | ⬜ |  |
-| 278 | [Rocket Calculator](https://steamcommunity.com/sharedfiles/filedetails/?id=2077848080) | ✅ | ✅ | ⬜ |  |
+| 278 | [Rocket Calculator](https://steamcommunity.com/sharedfiles/filedetails/?id=2077848080) | ✅ | ✅ | ⬜ | not played: it supports the base game only (`supportedContent: VANILLA_ID`), and every spec fixture is a Spaced Out colony |
 | 279 | [Custom Reservoirs](https://steamcommunity.com/sharedfiles/filedetails/?id=2407398520) | ✅ | ✅ | ⬜ |  |
 | 280 | [I Love Slicksters - Morphs !](https://steamcommunity.com/sharedfiles/filedetails/?id=1847165596) | ✅ | ✅ | ⬜ |  |
 | 281 | [Marble Tile](https://steamcommunity.com/sharedfiles/filedetails/?id=1706061612) | ⬜ | ⬜ | ⬜ | flagged by onimaxxing (crashesAtStartup); not tested |

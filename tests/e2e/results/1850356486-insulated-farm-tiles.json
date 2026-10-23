@@ -1,0 +1,59 @@
+{
+ "spec": "mods/1850356486-insulated-farm-tiles.yaml",
+ "mods": [
+  "1850356486"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Insulated Farm Tile is planned from sandstone in the pit, built, and lowers its cell's insulation as in the original; its details title is shot",
+ "updated": "2026-10-23",
+ "commit": "6cdd6f6",
+ "mod_dlls": {
+  "1850356486": {
+   "InsulatedFarmTiles.dll": "3af91eda473dc85b211b90ae0348514a3efe6eaa9a69362ad1df315c61371b93"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-112639-fff087",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T11:26:39",
+    "lane": 12,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-113008-59dc91",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T11:30:08",
+    "lane": 12,
+    "reference_run": "20261023-112639-fff087",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "title": 0.0
+    }
+   },
+   {
+    "run": "20261023-113008-59dc91",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T11:32:55",
+    "lane": 12,
+    "reference_run": "20261023-112639-fff087",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "title": 0.0
+    }
+   }
+  ]
+ }
+}

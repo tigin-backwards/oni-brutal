@@ -1,0 +1,32 @@
+# Insulated Farm Tiles (1850356486), class B.
+#
+# What it does: adds the Insulated Farm Tile and the Insulated Hydroponic Farm Tile to the
+# Food menu (Finer Dining): farm tiles of raw mineral whose cell conducts heat at 1/32 (an
+# Insulator), so a plant can be fed from outside a sealed room.
+# How a player reaches it: the build menu (Food), then the tile's plant side screen.
+# What changes: a farm tile that keeps heat apart.
+#
+# setup grants Finer Dining and spawns sandstone. The tile fills one cell of the pit in the
+# floor of the dug-out room west of the printing pod; once built its cell's insulation drops
+# to the tile's conductivity, and its details screen is shot.
+from: early-base
+mods: [1850356486]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"FinerDining\")", method: Purchased}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"SandStone\").substance", method: SpawnResource, args: [[113.5, 207.5, -12], 400, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"FinerDining\").unlockedItemIDs": {contains: InsulatedFarmTile}
+      "Assets.GetBuildingDef(\"InsulatedFarmTile\").ThermalConductivity": 0.03125
+      "cells:108,206..108,206::Grid.Insulation.get_Item({cell})": 255
+  - build: {prefab: InsulatedFarmTile, at: [108, 206], material: SandStone}
+  - expect: {blueprints: {InsulatedFarmTile: 1}}
+  - run: {seconds: 900, until: {buildings: {InsulatedFarmTile: 1}, pending_construction: 0}}
+  - expect_state: {"cells:108,206..108,206::Grid.Insulation.get_Item({cell})": "< 255"}
+  - expect_state: {"cells:108,206..108,206::Grid.Insulation.get_Item({cell})": "== original"}
+  - driver: {camera.set: {cell: [108, 207], ortho: 8}}
+  - click_world: {cell: [108, 206], select: InsulatedFarmTile}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Insulated Farm Tile"}
+  - shot: {name: title, crop: "**/DetailsScreen/TitleBar", threshold: 0.04}

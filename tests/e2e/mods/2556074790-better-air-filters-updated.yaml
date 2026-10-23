@@ -1,0 +1,40 @@
+# [Vanilla + DLC] Better Air Filters updated (2556074790), class P (building definitions).
+#
+# What it does: the Deodorizer (AirFilter) may be placed anywhere, floating in the air too
+# (BuildLocationRule Anywhere instead of OnFloor), and turned all the way round (R360). The
+# Rail Gun (Spaced Out, late research) may be placed anywhere and flipped (FlipH).
+# How a player reaches it: the build menu (Oxygen, Deodorizer), O to turn it before placing.
+# What changes: a Deodorizer can stand turned on its side in mid-air, which the game alone
+# refuses.
+#
+# setup grants Decontamination (DirectedAirStreams), which unlocks the Deodorizer, and tells the
+# build menu, which caches what is researched. The Deodorizer is turned once (R90) and placed
+# in the open, two cells above the floor of the passage west of the printing pod.
+from: early-base
+mods: [2556074790]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"DirectedAirStreams\")", method: Purchased}}
+  - driver: {setup.call: {target: "Game.Instance", method: Trigger, args: [-107300940]}}
+  - driver: {setup.call: {target: "PlanScreen.Instance._researchedDefs", method: Clear}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"AirFilter\").BuildLocationRule": Anywhere
+      "Assets.GetBuildingDef(\"AirFilter\").PermittedRotations": R360
+      "Assets.GetBuildingDef(\"RailGun\").BuildLocationRule": Anywhere
+      "Assets.GetBuildingDef(\"RailGun\").PermittedRotations": FlipH
+  # The build menu counts the colony's materials only once the game has run.
+  - run: {seconds: 5}
+  - driver: {camera.set: {cell: [112, 208], ortho: 10}}
+  - click: {ui: "**/PlanScreen/Toggle:Oxygen"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/AirFilter Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/AirFilter Group*"}
+  - expect_state: {"PlayerController.Instance.ActiveTool.name": BuildTool}
+  # The building menu's info card covers the screen's left half: the target is kept right of it.
+  - key: {code: O, at: [119, 208]}
+  - expect_state: {"BuildTool.Instance.buildingOrientation": R90}
+  - click_world: {cell: [119, 208]}
+  - expect: {blueprints: {AirFilter: 1}}
+  - expect_state: {"all:Constructable::[0].GetComponent<Rotatable>.GetOrientation()": R90}
+  - key: {code: Escape}
+  - run: {seconds: 900, until: {buildings: {AirFilter: 1}, pending_construction: 0}}
+  - expect_state: {"all:AirFilter::[0].GetComponent<Rotatable>.GetOrientation()": R90}

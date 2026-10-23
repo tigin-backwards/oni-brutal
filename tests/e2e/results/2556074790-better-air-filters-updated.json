@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2556074790-better-air-filters-updated.yaml",
+ "mods": [
+  "2556074790"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Deodorizer picked in the build menu, turned on its side with O and placed in mid-air above a floor, then built",
+ "updated": "2026-10-23",
+ "commit": "82f7c41",
+ "mod_dlls": {
+  "2556074790": {
+   "BetterFilterTweaksV2.dll": "3f8c41fb74d09509d6ec54dcb8dd7198c64f519cf4b76901af70d137f2e40a5e"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-072848-922450",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T07:28:48",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-080054-0101a6",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T08:00:54",
+    "lane": 14,
+    "reference_run": "20261023-072848-922450",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-080054-0101a6",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T08:02:24",
+    "lane": 14,
+    "reference_run": "20261023-072848-922450",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -212,7 +212,7 @@ installs get developer checks subscribers never see).
 | 191 | [Extra Large Map](https://steamcommunity.com/sharedfiles/filedetails/?id=1285243247) | ⬜ | ⬜ | ⬜ | flagged by onimaxxing (notLoading); not tested |
 | 192 | [Athletic Manual Generator](https://steamcommunity.com/sharedfiles/filedetails/?id=2949194697) | ✅ | ✅ | ⬜ |  |
 | 193 | [技能自定义-fix](https://steamcommunity.com/sharedfiles/filedetails/?id=3458128254) | ✅ | ✅ | ⬜ |  |
-| 194 | [[Vanilla + DLC] Better Air Filters updated](https://steamcommunity.com/sharedfiles/filedetails/?id=2556074790) | ✅ | ✅ | ⬜ |  |
+| 194 | [[Vanilla + DLC] Better Air Filters updated](https://steamcommunity.com/sharedfiles/filedetails/?id=2556074790) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2556074790-better-air-filters-updated.yaml: a Deodorizer picked in the build menu, turned on its side with O and placed in mid-air above a floor, then built |
 | 195 | [技能自定义](https://steamcommunity.com/sharedfiles/filedetails/?id=2851636970) | ✅ | ✅ | ⬜ |  |
 | 196 | [Auto Drop Gas Bottler Filler and Liquid Filler](https://steamcommunity.com/sharedfiles/filedetails/?id=3477214095) | ✅ | ✅ | ⬜ |  |
 | 197 | [Pliers 2021](https://steamcommunity.com/sharedfiles/filedetails/?id=2629866529) | ✅ | ✅ | ⬜ |  |

@@ -1,0 +1,55 @@
+{
+ "spec": "mods/1861473661-autosave-drag-fix.yaml",
+ "mods": [
+  "1861473661"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "options in its own Config.json: with the Dig tool picked from the toolbar the game runs through the cycle's end; the autosave is written, the warning dialog shows, and the Dig tool is deactivated (its priority screen gone)",
+ "updated": "2026-10-23",
+ "commit": "76618d8",
+ "mod_dlls": {
+  "1861473661": {
+   "AutosaveDragFix.dll": "f8dfd2eb442df6302cd664a2a94063306e1f8d0fe655f70529fa5a024abe5dfa"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-153631-565187",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T16:02:03",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-161145-31a95d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T16:19:21",
+    "lane": 15,
+    "reference_run": "20261023-153631-565187",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-161145-31a95d",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T16:27:33",
+    "lane": 15,
+    "reference_run": "20261023-153631-565187",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -1,0 +1,37 @@
+# Autosave Drag Fix (1861473661), class K.
+#
+# What it does: just before an autosave (a prefix on Game.DelayedSave with isAutoSave), the
+# active tool is deactivated and activated again, so a drag in progress ends instead of
+# carrying on through the save; with ResetToolOnAutosave it is only deactivated (the player
+# controller still names it, but its cursor and priority screen are gone). With SendAutosaveWarning, a dialog "Announcer" warns
+# WarningSecondsBeforeAutosave seconds before the cycle ends. Its options are the mod's
+# Config.json.
+# How a player reaches it: any tool held when a cycle ends (the autosave runs then).
+# What changes: the tool after an autosave; a warning dialog before it.
+#
+# Options here: ResetToolOnAutosave and SendAutosaveWarning on, the warning 5 s ahead. The
+# Dig tool is picked from the toolbar, and the game runs through the end of the cycle: the
+# warning shows, the autosave runs, and the Dig tool is deactivated.
+from: early-base
+mods: [1861473661]
+options:
+  "1861473661:Config.json": {IgnoreIfOnlyDragging: false, ResetToolOnAutosave: true, SendAutosaveWarning: true, WarningSecondsBeforeAutosave: 5}
+steps:
+  - expect_state:
+      "GameClock.Instance.GetCycle()": {save_as: cycle}
+      "SaveGame.Instance.AutoSaveCycleInterval": 1
+  - tool: {toolbar: Dig}
+  - expect_state:
+      "PlayerController.Instance.ActiveTool.name": DigTool
+      "ToolMenu.Instance.PriorityScreen.gameObject.activeSelf": true
+  - run: {seconds: 400}
+  # The autosave ran (cycle 2's file), the warning dialog is up, and the Dig tool was
+  # deactivated: the mod calls DeactivateTool without activating another, so the player's
+  # active tool is still the Dig tool, with its priority screen gone.
+  - expect_state:
+      "GameClock.Instance.GetCycle()": "== cycle + 1"
+      "file:save_files/e2e/auto_save/early-base Cycle 2.sav": exists
+      "PlayerController.Instance.ActiveTool.name": DigTool
+      "ToolMenu.Instance.PriorityScreen.gameObject.activeSelf": false
+  - expect_ui:
+      "**/ConfirmDialog/**": {any_text: "~The game will autosave in 5 seconds."}

@@ -3,12 +3,12 @@
  "mods": [
   "3671379574"
  ],
- "verdict": "failed",
- "why": "a run of ours failed",
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
  "findings": [],
  "note": "after 150 s of play, the resources panel's Dashboard button opens the window; a row selects the graph and the search filters the rows in the original; in ours the mod fails to load and the player exits while loading (uGUI lacks IPointerMoveHandler: docs/cleanroom/ugui.md, Pointer move events)",
  "updated": "2026-10-23",
- "commit": "195246a",
+ "commit": "9bd4413",
  "mod_dlls": {
   "3671379574": {
    "ResourceDashboard.dll": "f8aaa8ea958717c0e089784b2181cdea74e3c9fe4470bd1b0f2ebee830f7acbf"
@@ -17,45 +17,53 @@
  "runs": {
   "original": [
    {
-    "run": "20261023-131335-87ba21",
+    "run": "20261023-174012-fe7a53",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T17:40:13",
+    "lane": 19,
+    "signatures": 0
+   },
+   {
+    "run": "20261023-174012-fe7a53",
     "index": 1,
     "verdict": "pass",
-    "date": "2026-10-23T13:13:35",
+    "date": "2026-10-23T17:40:12",
     "lane": 18,
     "signatures": 0
    }
   ],
   "ours": [
    {
-    "run": "20261023-131610-ca1744",
+    "run": "20261023-174012-fe7a53",
     "index": 1,
-    "verdict": "fail",
-    "date": "2026-10-23T13:16:10",
+    "verdict": "pass",
+    "date": "2026-10-23T17:59:45",
     "lane": 18,
-    "reasons": [
-     "step start: the player exited (1) while loading",
-     "12 log signature(s) the original lacks"
-    ],
-    "reference_run": "20261023-131335-87ba21",
-    "new_signatures": 12,
+    "reference_run": "20261023-174012-fe7a53",
+    "new_signatures": 0,
     "findings": [],
-    "ui_dump": {},
+    "ui_dump": {
+     "controls": {
+      "differences": 0
+     }
+    },
     "shots": {}
    },
    {
-    "run": "20261023-131610-ca1744",
+    "run": "20261023-174012-fe7a53",
     "index": 2,
-    "verdict": "fail",
-    "date": "2026-10-23T13:16:59",
-    "lane": 18,
-    "reasons": [
-     "step start: the player exited (1) while loading",
-     "12 log signature(s) the original lacks"
-    ],
-    "reference_run": "20261023-131335-87ba21",
-    "new_signatures": 12,
+    "verdict": "pass",
+    "date": "2026-10-23T18:00:48",
+    "lane": 19,
+    "reference_run": "20261023-174012-fe7a53",
+    "new_signatures": 0,
     "findings": [],
-    "ui_dump": {},
+    "ui_dump": {
+     "controls": {
+      "differences": 0
+     }
+    },
     "shots": {}
    }
   ]

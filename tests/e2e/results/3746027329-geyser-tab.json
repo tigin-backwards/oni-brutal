@@ -8,7 +8,7 @@
  "findings": [],
  "note": "the management menu's Geysers toggle: in the original the window lists the colony's geyser by world and closes from its button; in ours no window opens (TMP lacks CreateFontAsset(family, style, size): docs/cleanroom/textmeshpro.md, Font assets from OS fonts)",
  "updated": "2026-10-23",
- "commit": "195246a",
+ "commit": "9bd4413",
  "mod_dlls": {
   "3746027329": {
    "GeyserList.dll": "3061007f702f7657ecf0a16e2b776c42d7b121a05ee7b080d4e1676e5d7861f4"
@@ -17,45 +17,59 @@
  "runs": {
   "original": [
    {
-    "run": "20261023-130952-b63f53",
+    "run": "20261023-174012-fe7a53",
     "index": 1,
     "verdict": "pass",
-    "date": "2026-10-23T13:09:52",
-    "lane": 18,
+    "date": "2026-10-23T17:51:52",
+    "lane": 19,
+    "signatures": 0
+   },
+   {
+    "run": "20261023-174012-fe7a53",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T17:58:06",
+    "lane": 19,
     "signatures": 0
    }
   ],
   "ours": [
    {
-    "run": "20261023-131124-ce9cfe",
+    "run": "20261023-174012-fe7a53",
     "index": 1,
     "verdict": "fail",
-    "date": "2026-10-23T13:11:24",
-    "lane": 18,
+    "date": "2026-10-23T17:59:44",
+    "lane": 19,
     "reasons": [
-     "step 3: E2eDriver ui.wait {\"path\": \"**/TopRightInfoPanels/GeyserWindow\", \"cond\": \"stable\", \"frames\": 300}: timeout: stable not met within 300 frames",
-     "1 log signature(s) the original lacks"
+     "ui_dump window: 1 difference(s)"
     ],
-    "reference_run": "20261023-130952-b63f53",
-    "new_signatures": 1,
+    "reference_run": "20261023-174012-fe7a53",
+    "new_signatures": 0,
     "findings": [],
-    "ui_dump": {},
+    "ui_dump": {
+     "window": {
+      "differences": 1
+     }
+    },
     "shots": {}
    },
    {
-    "run": "20261023-131124-ce9cfe",
+    "run": "20261023-174012-fe7a53",
     "index": 2,
     "verdict": "fail",
-    "date": "2026-10-23T13:12:26",
+    "date": "2026-10-23T18:01:42",
     "lane": 18,
     "reasons": [
-     "step 3: E2eDriver ui.wait {\"path\": \"**/TopRightInfoPanels/GeyserWindow\", \"cond\": \"stable\", \"frames\": 300}: timeout: stable not met within 300 frames",
-     "1 log signature(s) the original lacks"
+     "ui_dump window: 1 difference(s)"
     ],
-    "reference_run": "20261023-130952-b63f53",
-    "new_signatures": 1,
+    "reference_run": "20261023-174012-fe7a53",
+    "new_signatures": 0,
     "findings": [],
-    "ui_dump": {},
+    "ui_dump": {
+     "window": {
+      "differences": 1
+     }
+    },
     "shots": {}
    }
   ]

@@ -54,7 +54,7 @@ SHOT_THRESHOLD = 0.02  # fraction of pixels differing (§5.3), set per step afte
 WORLD_THRESHOLD = 0.05
 UI_TOLERANCE = 2       # pixels, for ui-diff.py --tolerance
 # ui_dump members every diff leaves out: a Graphic's depth (the order of graphics on its canvas)
-# is numbered differently in our player, whatever is drawn (out/e2e pilot, 2026-10-22).
+# is numbered differently in our player, whatever is drawn (tests/e2e/README.md, Verdicts).
 IGNORE_FIELDS = ('depth',)
 FRAME_FALLBACK = 0.1   # seconds a "frame" lasts without E2eDriver to count real ones
 # Perf jobs a spec never starts beside (matched against `ps -eo args`): the QA stages, the sweep

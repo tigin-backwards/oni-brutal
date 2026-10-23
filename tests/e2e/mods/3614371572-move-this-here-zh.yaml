@@ -1,0 +1,51 @@
+# Move This Here汉化版, a Chinese edition of Move This Here (3614371572), classes B, S.
+#
+# What it does: adds the Hauling Point (板纸箱, Base > storage, after the Storage Bin): a 1x1
+# marker that costs nothing and is placed at once (BuildingDef.Instantiate is patched to build
+# it outright), with a storage filter like a storage bin's and a maximum-capacity slider.
+# Duplicants bring the chosen items to it; its user menu's 释放 ("release") drops them there
+# and removes it, and other buttons make it release itself once full, spill liquids, or take
+# from pumping stations. Its build card hides the material selector.
+# How a player reaches it: the build menu (Base), then its side screen and user menu.
+# What changes: a hauling point that collects the checked items, up to its capacity.
+#
+# A short run comes first: the build menu offers a material only once the colony's inventory
+# has been counted. The point is placed in the corridor west of the printing pod, filtered to
+# sandstone and capped at 50 kg through the slider's number field.
+from: early-base
+mods: [3614371572]
+steps:
+  - run: {seconds: 5}
+  - driver: {camera.set: {cell: [110, 208], ortho: 10}}
+  - open: {key: Alpha1}
+  - ui_wait: {path: "**/PlanBuildingSelectionPanel/BuildingGroups", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/HaulingPoint Group*"}
+  - ui_wait: {path: "**/PlanBuildingSelectionPanel/ProductInfoScreen", cond: stable}
+  - expect_ui:
+      "**/ProductInfoScreen/Panel/TitleBar/Label": {text: "~板纸箱"}
+  - expect_state: {"PlayerController.Instance.ActiveTool.name": BuildTool}
+  - click_world: {cell: [108, 206]}
+  - expect: {buildings: {HaulingPoint: 1}}
+  - key: {code: Escape}
+  # Its side screens: the element filter (sandstone, through its search field) and the slider.
+  - click_world: {cell: [108, 206]}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen", cond: stable}
+  - expect_state: {"selected:GetComponent<MoveThisHere.HaulingPoint>": exists}
+  - expect_ui:
+      "**/UserMenuScreen/Buttons/释放Button": {interactable: true}
+  - ui_dump: {name: user-menu, root: "**/DetailsScreen/UserMenuButtons/UserMenuScreen"}
+  - type: {ui: "**/TreeFilterableSideScreen/SearchRow/FilterInputField", text: "sandstone"}
+  - ui_wait: {path: "**/TreeFilterableRow/Elements/Element/CheckBox", cond: stable}
+  - click: {ui: "**/TreeFilterableRow/Elements/Element/CheckBox"}
+  - expect_state: {"selected:GetComponent<TreeFilterable>.AcceptedTags": {contains: SandStone}}
+  - type: {ui: "**/SingleSliderSideScreen/Contents/NumberInputField", text: "50", clear: true, enter: true}
+  - expect_state: {"selected:GetComponent<Storage>.capacityKg": 50}
+  # Duplicants bring sandstone to it, no more than 50 kg; 释放 drops it and takes the point away.
+  - run: {seconds: 240}
+  - expect_state:
+      "all:MoveThisHere.HaulingPoint::[0].GetComponent<Storage>.MassStored()": "> 0"
+  - expect_state:
+      "all:MoveThisHere.HaulingPoint::[0].GetComponent<Storage>.MassStored()": "<= 50.1"
+  - expect_state: {"selected:GetComponent<MoveThisHere.HaulingPoint>": exists}
+  - click: {ui: "**/UserMenuScreen/Buttons/释放Button"}
+  - expect: {buildings: {HaulingPoint: 0}}

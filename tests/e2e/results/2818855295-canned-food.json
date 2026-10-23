@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2818855295-canned-food.yaml",
+ "mods": [
+  "2818855295"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with steel cans set in its options and two Duplicants left starving, a Canned BBQ spawned in the corridor west of the pod is eaten and leaves an empty steel can of half a kilogram",
+ "updated": "2026-10-23",
+ "commit": "0177ce3",
+ "mod_dlls": {
+  "2818855295": {
+   "CannedFoods.dll": "475c87f97adeeb2f48d50ba6c65ad546ecf197fb86266f2a23091ef094d5bdfb"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-151957-73ed0d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T15:19:57",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-153038-2dcf4a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T15:30:38",
+    "lane": 17,
+    "reference_run": "20261023-151957-73ed0d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-153038-2dcf4a",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T15:40:20",
+    "lane": 17,
+    "reference_run": "20261023-151957-73ed0d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

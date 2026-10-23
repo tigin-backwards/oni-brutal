@@ -1,0 +1,63 @@
+{
+ "spec": "mods/3614371572-move-this-here-zh.yaml",
+ "mods": [
+  "3614371572"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the hauling point (板纸箱) is placed at once from the build menu, filtered to sandstone through its side screen and capped at 50 kg with its slider; Duplicants bring at most that, and 释放 drops it and removes the point; user menu dumped",
+ "updated": "2026-10-23",
+ "commit": "0177ce3",
+ "mod_dlls": {
+  "3614371572": {
+   "MoveThisHere.dll": "7736523d6fef01e83acdd9b843abcd698cd18a5e323ad2d04e1d1c22bf26bd93"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-154258-2fd889",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T15:42:58",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-154548-0425f4",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T15:45:48",
+    "lane": 17,
+    "reference_run": "20261023-154258-2fd889",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "user-menu": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261023-154548-0425f4",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T15:48:16",
+    "lane": 17,
+    "reference_run": "20261023-154258-2fd889",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "user-menu": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

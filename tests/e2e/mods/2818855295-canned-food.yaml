@@ -1,0 +1,35 @@
+# Canned Food (2818855295), classes P, O.
+#
+# What it does: adds canned foods (Canned BBQ, Canned Tuna, Canned Bread at the Crafting
+# Station from half a kilogram of metal and the cooked food; Canned Beans and Milk), which
+# keep for long (spoil time 19200 s). A Duplicant who eats a canned BBQ or tuna drops an empty
+# can (half a kilogram per unit eaten); empty cans and can scrap go back to metal at the rock
+# crusher and the metal refinery. A PLib option picks the cans' metal (steel, aluminum or
+# copper; the mod's own config.json says aluminum).
+# How a player reaches it: the Crafting Station's recipes; eating; the options on the Mods
+# screen.
+# What changes: what Duplicants eat, and the empty cans they leave.
+#
+# Options here: steel cans. setup leaves both of the base's eating Duplicants starving (900
+# kcal; the bionic one does not eat) and spawns a Canned BBQ in the corridor west of the
+# printing pod. One eats it, and a steel can lies there afterwards.
+from: early-base
+mods: [2818855295]
+options:
+  "2818855295": {UsesAluminumForCans: 0}
+setup:
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[1].GetComponent<Klei.AI.Modifiers>.amounts.Get(\"Calories\")", method: SetValue, args: [900000]}}
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[2].GetComponent<Klei.AI.Modifiers>.amounts.Get(\"Calories\")", method: SetValue, args: [900000]}}
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131766, 0, 0, \"CF_CannedBBQ\", \"Ore\")", method: SetActive, args: [true]}}
+steps:
+  - expect_state:
+      "type:CannedFoods.Foods.CannedTunaConfig::recipe.ingredients[0].material": Steel
+      "type:CannedFoods.Foods.CannedTunaConfig::recipe.fabricators": {contains: CraftingTable}
+      "Assets.GetPrefab(\"CF_EmptyCan\").GetComponent<PrimaryElement>.ElementID": Steel
+      "count:all:Edible::[*] if .FoodInfo.Id == CF_CannedBBQ": 1
+      "count:all:Pickupable::[*] if .GetComponent<KPrefabID>.PrefabTag == CF_EmptyCan": 0
+  - run: {seconds: 300}
+  - expect_state:
+      "count:all:Edible::[*] if .FoodInfo.Id == CF_CannedBBQ": 0
+      "count:all:Pickupable::[*] if .GetComponent<KPrefabID>.PrefabTag == CF_EmptyCan": ">= 1"
+      "sum:all:Pickupable::[*].GetComponent<PrimaryElement>.Mass if .GetComponent<KPrefabID>.PrefabTag == CF_EmptyCan": ">= 0.49"

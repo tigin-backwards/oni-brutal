@@ -1,0 +1,63 @@
+{
+ "spec": "mods/3280056840-last-care-package-fix.yaml",
+ "mods": [
+  "3280056840"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the immigrant screen's Reject All reads REROLL and deals new cards keeping the offer open; bottom buttons dumped",
+ "updated": "2026-10-22",
+ "commit": "fd67309",
+ "mod_dlls": {
+  "3280056840": {
+   "SelectLastCarePackage.dll": "885cb56a1bd6ac5dc6a041e917658656fd0f8e848470ea0880f4a2c8880435ba"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261022-232004-36dc49",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-22T23:34:38",
+    "lane": 12,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261022-233630-fa2e96",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-22T23:51:10",
+    "lane": 12,
+    "reference_run": "20261022-232004-36dc49",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "bottom-buttons": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261022-233630-fa2e96",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-22T23:52:15",
+    "lane": 12,
+    "reference_run": "20261022-232004-36dc49",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "bottom-buttons": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

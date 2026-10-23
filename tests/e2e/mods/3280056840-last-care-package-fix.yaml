@@ -1,0 +1,31 @@
+# 最后的补给包-Fix (3280056840), class S.
+#
+# What it does: the printing pod remembers the care package printed last and offers it again;
+# the immigrant screen's "Reject All" becomes REROLL, which deals new cards and keeps the screen
+# open instead of closing it; every Duplicant card can be rerolled; each care package card gets
+# a "ManualSelect" button opening a searchable list (CarePackagePanel) to pick its contents.
+# How a player reaches it: the printing pod's immigrant screen.
+# What changes: the cards offered, and which care package comes back.
+#
+# setup lets the pod offer Duplicants now, as in the Duplicant Stat Selector spec. Cards are
+# random: only the screen's state is checked, not the cards.
+from: early-base
+mods: [3280056840]
+setup:
+  - driver: {setup.call: {target: "Immigration.Instance", method: "Sim200ms", args: [100000]}}
+steps:
+  - expect_state: {"Immigration.Instance.ImmigrantsAvailable": true}
+  - call: {tool: building_control, args: {domain: side_surface, surface: facility, kind: telepad, action: open_immigrants, confirm: true}}
+  - ui_wait: {path: "**/ImmigrantScreen/Layout", cond: stable}
+  - expect_ui: {"**/ImmigrantScreen/Layout/TopButtonmodify": {active: true}}
+  - expect_state: {"ui:**/ImmigrantScreen::GetComponent<ImmigrantScreen>.containers.Count": {save_as: cards}}
+  # The game's Reject All button now reads REROLL.
+  - expect_ui: {"**/ImmigrantScreen/Layout/BottomButtons/RejectButton/Label": {text: "REROLL"}}
+  - ui_dump: {name: bottom-buttons, root: "**/ImmigrantScreen/Layout/BottomButtons"}
+  - click: {ui: "**/ImmigrantScreen/Layout/BottomButtons/RejectButton"}
+  - ui_wait: {path: "**/ImmigrantScreen/Layout", cond: stable}
+  # New cards; the screen and the offer stay. The game alone closes the screen and ends the offer.
+  - expect_ui: {"**/ImmigrantScreen/Layout": {active: true}}
+  - expect_state:
+      "Immigration.Instance.ImmigrantsAvailable": true
+      "ui:**/ImmigrantScreen::GetComponent<ImmigrantScreen>.containers.Count": "== cards"

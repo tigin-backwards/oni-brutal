@@ -205,7 +205,9 @@ transform.
 - **Lines:**
   - Lines break at `\n` and when a word overflows the width with wrapping on.
   - Words are separated by whitespace and the break opportunities of CJK characters. The
-    line-breaking rules decide which characters cannot start or end a line.
+    line-breaking rules decide which characters cannot start or end a line. U+00A0 gives no
+    break; U+2007 and U+202F do (measured: "Words and their separators" below, which also
+    gives `textInfo`'s words).
   - A word wider than the line is broken at characters.
   - `<nobr>` prevents breaks.
 - **Line height:** the line height is the font's line height, scaled to the size, plus
@@ -650,9 +652,9 @@ from what is described here, the measurement wins and this section is corrected.
   (the line is 23.8 high) but is not counted when the line is checked against the rect's
   height. When Truncate or Ellipsis continue that line (38.79 wide, 20 high), the soft
   hyphen is hidden again: "aaaa", "b", then the blank record (Ellipsis: "aaaa…"). Test
-  `AHiddenSoftHyphenTakesNoPartInItsLinesHeight`. Not matched: the shipped package
-  sometimes reports a drawn soft hyphen's `character` as "-" (U+002D) and its line 0.035
-  lower.
+  `AHiddenSoftHyphenTakesNoPartInItsLinesHeight`. Not matched: the shipped package reports
+  a drawn soft hyphen's `character` as "-" (U+002D), every time it is drawn (measured: "Words
+  and their separators" below), and puts its line 0.035 lower.
 - **Password fields** show one asterisk per UTF-16 unit, and the shipped package's caret
   steps per unit, between the halves of a surrogate pair (a, 😀, b: Left from 4 gives 3, 2,
   1); a character typed there goes between them, and Backspace removes one unit, leaving a
@@ -1503,6 +1505,144 @@ Not measured:
 - sprite sub-meshes from a layout (only the saved "TextMeshPro/Sprite" one is listed);
 - the text's `maskable` changed after the sub-mesh exists and followed by a relayout;
 - whether the stale vertices of an unused sub-mesh are drawn.
+
+### Words and their separators (measured 2026-10-23)
+
+Found by a mod's play-test (Geyser Tab, `tests/e2e/mods/3746027329-geyser-tab.yaml`): its geyser
+list shows a `TextMeshProUGUI` (NotoSans-Regular 14 pt) with "Liquid Sulfur Geyser NJ24‑7",
+the character before the 7 being U+2011, the non-breaking hyphen. `textInfo.wordCount` is 4 in
+the shipped package and 5 here: this implementation ended a word at the U+2011.
+
+Measured with `PROBE_SCENARIO=wordcount` (tools/UnityProbe, `WordCount.cs`, lines `WC …`), at
+the main menu. It used one `TextMeshProUGUI` per font, set up as `SetTextStyleSetting` does,
+in NotoSans-Regular 14 pt and GRAYSTROKE REGULAR SDF 12 pt. Each case logs `wordCount`, each
+word's first and last character index and character count, each line's `wordCount`, and the
+characters' codes and visibility. The cases:
+- **Texts** (unwrapped, 400 × 100): the hyphens and dashes U+002D, U+00AD, U+2010–U+2015 and
+  U+2212; the spaces U+00A0, U+202F and U+2007; apostrophes and quotes; "NJ24", "24-7", digits
+  mixed with letters, decimals, underscores, CJK and Hangul, rich-text tags, sprites, emoji,
+  combining marks; texts without words; texts ending in an apostrophe.
+- **A sweep** of every character in U+0021–U+007E, U+00A0–U+017F, U+2000–U+206F and
+  U+3000–U+303F, and some others (U+0301, U+02BC, U+2E3A, U+30FB, U+FE63, U+FF07, U+FF0D,
+  U+FF3F, …). Each X was laid out as "abXcd", "Xab", "abX", "12X34" and X alone, plus a few
+  texts with rich text off.
+- **Wrapped texts:** "aaaa", X, "bbbb" for the separators above, "aa-bb-cc-dd", the same with
+  U+2011, "NJ24‑7 NJ24-7", and the geyser's name with either hyphen. Each was laid out in rects
+  from 1 to 2 past its preferred width, in steps of 0.25, logging each distinct set of breaks.
+
+Two runs of the original logged the same lines. `tools/UnityProbe/wc-check.py rule LOG`
+replays a log against the rule below: it reproduces all 6093 word lists and all 6035 checked
+line word counts of the second run, and all 5985 and 5929 of the first. `wc-check.py diff ORIG
+OURS` compares two players.
+
+**The rule.** The laid-out characters are taken one by one: tags are not characters, a sprite
+is one, and a character the fonts lack is its replacement, U+25A1 (an emoji too). The rule
+uses each character's category in the Unicode tables:
+- **Word characters:**
+  - Letters (any L category, so ideographs, kana and Hangul too) and decimal digits (Nd).
+  - Four hyphens: U+002D, the soft hyphen U+00AD, U+2010 and U+2011. They count anywhere in a
+    word, as letters do: "a-b", "a‑b", "-a", "‑a", "a‑" and "--" are one word each, from the
+    first to the last character, and "-" alone is the word (0, 0).
+  - Nothing else: not the other dashes (U+2012–U+2015, U+2212, U+FE63, U+FF0D), "_", the
+    non-breaking spaces, superscripts and fractions (No), letter numbers (Nl: U+3007, the
+    Hangzhou numerals), or combining marks ("e", U+0301, "a" is two words).
+  - So "NJ24‑7" and "24-7" are one word, "ab中cd" is one word, "中。文" is two, and
+    "1,000" is "1" and "000".
+- **Apostrophes** (U+0027 and U+2019, not U+2018, `"`, "`" or U+FF07) join when the character
+  before and the character after are both letters or digits. Hyphens don't count here:
+  - "don't", "a'1" and "1'a" are one word;
+  - "a''b" is two words, "ab'-" is "ab" and "-", and "ab-'" is "ab-";
+  - an apostrophe at the start doesn't join: "'tis" is 1–3.
+- **An apostrophe at the end** after a letter or digit:
+  - The character after it is read from the character slot past the text. That slot holds
+    whatever an earlier layout of the same component left there.
+  - If it holds a letter or digit, the apostrophe joins and the word never ends: it is not
+    counted, not recorded and not counted on its line. "ab cd'" has one word, "ab".
+  - Otherwise the apostrophe ends the word as any separator does: "a'" is (0, 0) when the
+    slot held "'".
+  - In the probe, "ab'", laid out after a text with "a" at index 3, has word count 1 and line
+    word count 0, and its record is the previous text's (rule for texts without words below).
+- **A word ends** at the first separator after it, or at the text's last character. Its record
+  is (first, last, last − first + 1). It is counted on the line of the character that ended
+  it: the separator, or the last character. A word broken across lines is one word, counted on
+  the line where it ends:
+  - "aaaa-bbbb" broken "aaaa-|bbbb" counts 0, 1;
+  - "aaaa/bbbb" broken "aa|aa|/b|bb|b" (GRAYSTROKE, 13 wide) counts 0, 0, 1, 0, 1;
+  - "aaaa", U+00A0, "bbbb" broken after the U+00A0 counts 1, 1.
+- **The empty word** (0, −1, count 0), counted on line 0, comes first in two cases:
+  - When the first character is a separator that is not punctuation: white space, a symbol, a
+    sprite, a combining mark, U+25A1. So " ab" and "+ a" have two words, and "(a)", "%a", "#1"
+    and "'tis" have one.
+  - When the text is a single character that is not a word character, punctuation included:
+    "(", "." and U+00A0 alone are (0, −1).
+- **Punctuation** is any P category, except § (U+00A7) and ¶ (U+00B6), which count as symbols:
+  "§a" is (0, −1) and (1, 1).
+- **A text without words** (two or more characters, starting with punctuation, none of them a
+  word character, or a text whose only word never ended) has word count 1. It writes no
+  record: `wordInfo[0]` keeps the previous layout's, and no line counts a word. ".." laid out
+  after "#1" reports (1, 1); "()" after "(" reports (0, −1). An empty text has word count 0.
+
+**Line breaking**, measured with the same probe:
+- **U+2010 and U+2011** give no break opportunity; a line that must break there fills by
+  characters. "aa‑bb‑cc‑dd" in 28.5 (NotoSans) is "aa‑|bb‑c|c‑dd", where "aa-bb-cc-dd" in
+  35.25 is "aa-|bb-|cc-dd". This implementation matches.
+- **U+2007 and U+202F** allow a break after them, as a space does; U+00A0 does not. "aaaa",
+  X, "bbbb" in 19.5 (GRAYSTROKE) is "aaa|aX|bbb|b" for U+2007 and U+202F, and "aaa|aXb|bbb"
+  for U+00A0.
+- **A drawn soft hyphen** reports `character` U+002D wherever it is drawn at a break, and a
+  hidden one U+00AD. (This settles the "sometimes" under "Soft hyphens and the line's height"
+  above: it is drawn exactly when its glyph fits the line.)
+
+**Where this implementation deviates** (`RecordWords` in `TMP_Text.Place.cs` and the break
+opportunities in `TMP_Text.Layout.cs`, 2026-10-23):
+- U+00AD, U+2010 and U+2011 are separators, not word characters.
+- An apostrophe joins whatever word character follows it, a hyphen too, with no check of the
+  one before it, and an apostrophe at the end always ends its word.
+- A line's word count counts the words that begin on it, not those that end on it.
+- A single punctuation character, and a text without words, record (0, 0) and count it on
+  line 0.
+- § and ¶ are punctuation (.NET's `char.IsPunctuation`).
+- U+2007 and U+202F give no break opportunity.
+- A drawn soft hyphen keeps `character` U+00AD.
+- It matched elsewhere: the letters and digits (.NET's `char.IsLetterOrDigit` agrees on every
+  character swept), the other dashes, the non-breaking spaces' word counts, the empty first
+  word, tags, sprites, CJK, and the breaks around U+2010 and U+2011.
+
+| Case | shipped | this implementation (2026-10-23) |
+|---|---|---|
+| "Liquid Sulfur Geyser NJ24‑7" (U+2011), NotoSans 14 pt | 4 words; the last 21–26 | 5 words; 21–24, 26–26 |
+| "a‑b", "a‐b" (U+2010), "a", U+00AD, "b" | 1 word, 0–2 | 2 words, 0–0 and 2–2 |
+| "‑a" | 0–1 | 1–1 |
+| "a ‑ b" | 3 words, 0, 2, 4 | 2 words, 0 and 4 |
+| "a–b" (U+2013), "a−b" (U+2212), "a_b", "a", U+00A0, "b" | 2 words | 2 words |
+| "ab'-" | "ab" 0–1, "-" 3–3 | 0–3 |
+| "a'1", "don't" | 1 word | 1 word |
+| "ab cd'", slot after the text held "c" | 1 word, 0–1; line count 1 | 2 words; line count 2 |
+| "ab'", slot held "a" | 1 word, previous record (0–0); line count 0 | 0–1; line count 1 |
+| "(" | (0, −1) | (0, 0) |
+| "..", laid out after "#1" | 1 word, record 1–1 kept; line count 0 | (0, 0); line count 1 |
+| "+", " ab" | (0, −1) first | (0, −1) first |
+| "§a" | (0, −1), (1, 1) | (1, 1) |
+| "ab中cd"; "中。文"; "ab<b>cd</b>"; "e", U+0301, "a" | 1; 2; 1; 2 words | 1; 2; 1; 2 words |
+| geyser's name (U+2011), NotoSans, 40 wide: "Liqui\|d \|Sulfur \|Geyse\|r \|NJ24‑\|7" | line counts 0,1,1,0,1,0,1 | 1,0,1,1,0,1,1 (and 5 words) |
+| "aa-bb-cc-dd", 21.75 wide: "aa-\|bb-\|cc-\|dd" | line counts 0,0,0,1 | 1,0,0,0 |
+| "aaaa", U+2007 or U+202F, "bbbb", GRAYSTROKE, 19.5 wide | "aaa\|aX\|bbb\|b" | "aaa\|aXb\|bbb" |
+| "aaaa", U+00A0, "bbbb", GRAYSTROKE, 19.5 wide | "aaa\|aXb\|bbb" | "aaa\|aXb\|bbb" |
+| "aaaa", U+00AD, "bbbb", NotoSans, 36 wide: "aaaa-\|bbbb" | the soft hyphen drawn, `character` U+002D | drawn, U+00AD |
+| "aa‑bb‑cc‑dd", NotoSans, 28.5 wide | "aa‑\|bb‑c\|c‑dd" | the same |
+
+Whole runs: `wc-check.py rule` on this implementation's log matches 5581 of 6109 word lists
+and 5464 of 6051 line word counts; `wc-check.py diff` finds 811 of 6093 common lines
+differing (82 texts, 236 sweep lines, 493 wrapped layouts).
+
+Not measured:
+- the slot past the text, and `wordInfo[0]`, in a component that has laid out no longer text
+  (presumably empty: the slot no letter, the record zeros);
+- `maxVisibleWords`, `TMP_TextUtilities.FindIntersectingWord` and the input field's
+  word-wise caret moves, which use words;
+- characters outside the swept ranges whose Unicode category differs between the original's
+  tables and .NET's (only § and ¶ were found in them);
+- world-space `TextMeshPro`.
 
 ## Verification
 

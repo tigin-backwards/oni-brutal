@@ -1,0 +1,44 @@
+# Free Resource Buildings - Updated (2839006500), classes B, S, O.
+#
+# What it does: adds buildings that make resources out of nothing or destroy them: the Power
+# Box (a free generator), gas and liquid sources and sinks, magic storage, refrigerator,
+# feeders, wardrobe, first aid box, a radbolt source, a heater, a trash can and more, each
+# with a side screen to pick what or how much (wattage, flow, temperature, item). PLib options
+# switch each building on and set their cost: free and at once, or behind early, mid or late
+# research (early by default), and their defaults.
+# How a player reaches it: the build menu (Power, Base, Food, Ventilation, Plumbing, ...);
+# each building's side screen.
+# What changes: free power, gases, liquids and items.
+#
+# Options here: the Power Box's default wattage 1500 W (the game's default 2000). setup grants
+# Power Regulation (the Power Box's early tech) and spawns steel. A Power Box is built in the
+# corridor west of the printing pod and selected: it runs at the configured wattage, and
+# its side screen sets another.
+from: early-base
+mods: [2839006500]
+options:
+  "2839006500": {defaultEnergyWattage: 1500}
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"PowerRegulation\")", method: Purchased}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Steel\").substance", method: SpawnResource, args: [[114.5, 207.5, -12], 400, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"PowerRegulation\").unlockedItemIDs": {contains: FreeEnergyGenerator}
+  - build: {prefab: FreeEnergyGenerator, at: [113, 208], material: Steel}
+  - expect: {blueprints: {FreeEnergyGenerator: 1}}
+  - run: {seconds: 900, until: {buildings: {FreeEnergyGenerator: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 208]}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Power Box"}
+  - expect_state:
+      "selected:GetComponent<FreeResourceBuildings.FreeEnergyGenerator>.currentCapacity": 1500
+  # Its side screen's slider sets the wattage (0 to 40000 W): 3000 typed into its field.
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/SingleSliderSideScreen", cond: stable}
+  - expect_ui:
+      "**/SingleSliderSideScreen/Contents/MaxLabel": {text: "40000 W"}
+  - shot: {name: details, crop: "**/DetailsScreen", threshold: 0.04}
+  - type: {ui: "**/SingleSliderSideScreen/Contents/NumberInputField", text: "3000", enter: true, clear: true}
+  - expect_state:
+      "selected:GetComponent<FreeResourceBuildings.FreeEnergyGenerator>.currentCapacity": 3000

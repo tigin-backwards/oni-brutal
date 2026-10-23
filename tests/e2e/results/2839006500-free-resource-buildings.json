@@ -1,0 +1,30 @@
+{
+ "spec": "mods/2839006500-free-resource-buildings.yaml",
+ "mods": [
+  "2839006500"
+ ],
+ "verdict": "pending",
+ "why": "0 run(s) of ours against original run 20261023-052840-d190ff; 2 needed",
+ "findings": [],
+ "note": "",
+ "updated": "2026-10-23",
+ "commit": "6cf8cd3",
+ "mod_dlls": {
+  "2839006500": {
+   "FreeResourceBuildings.dll": "557f7bd8170cdb7835040c23287a2aeadd5dba27a94e1375c7f029529b381e22"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-052840-d190ff",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T07:14:26",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": []
+ }
+}

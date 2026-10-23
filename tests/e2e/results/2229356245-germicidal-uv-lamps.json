@@ -3,12 +3,12 @@
  "mods": [
   "2229356245"
  ],
- "verdict": "pending",
- "why": "0 run(s) of ours against original run 20261023-042128-2bb68b; 2 needed",
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
  "findings": [],
- "note": "",
+ "note": "with the big lamp's range option at 5, a Germicidal UV Lamp is built unwired west of the pod and selected: its UV area and range preview are 11x13 cells",
  "updated": "2026-10-23",
- "commit": "885cbe9",
+ "commit": "e94daf1",
  "mod_dlls": {
   "2229356245": {
    "GermicidalLamps.dll": "f619b1d9e7dd862ebaef2ce70f95244fd2977587b4dce17642928b7186a1a877"
@@ -25,6 +25,31 @@
     "signatures": 0
    }
   ],
-  "ours": []
+  "ours": [
+   {
+    "run": "20261023-070628-841dda",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T07:06:28",
+    "lane": 14,
+    "reference_run": "20261023-042128-2bb68b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-070628-841dda",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T07:07:38",
+    "lane": 14,
+    "reference_run": "20261023-042128-2bb68b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
  }
 }

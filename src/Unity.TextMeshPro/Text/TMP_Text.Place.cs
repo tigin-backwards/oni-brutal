@@ -36,27 +36,15 @@ namespace TMPro
             int pages = lineCount == 0 ? 1 : lines[lineCount - 1].Page + 1;
             int shownPage = m_overflowMode == TextOverflowModes.Page ? Mathf.Clamp(m_pageToDisplay - 1, 0, pages - 1) : -1;
             m_FirstHiddenLine = lineCount;
-            // A line cut at the rect's width (without wrapping) ends the text there, unless the
-            // text overflows the height before it.
-            int cutLine = -1;
-            if (m_LayoutHorizontalCut >= 0)
-                for (int k = 0; k < lineCount; k++)
-                    if (lines[k].First <= m_LayoutHorizontalCut && m_LayoutHorizontalCut <= lines[k].Last) { cutLine = k; break; }
-            if (cutLine >= 0 && (overflowLine < 0 || cutLine < overflowLine))
+            // Truncate and Ellipsis cut the text at the earlier of the overflow and the cut at the
+            // width (the overflow's when they fall on the same character).
+            int vertical = m_LayoutOverflowIndex, horizontal = m_LayoutHorizontalCut;
+            if ((m_overflowMode == TextOverflowModes.Truncate || m_overflowMode == TextOverflowModes.Ellipsis) && (vertical >= 0 || horizontal >= 0))
             {
-                CutAtWidth(cutLine, m_LayoutHorizontalCut, ref count, ref lineCount);
-                info.EnsureCharacters(count + 1);
-                info.EnsureLines(lineCount + 1);
-                info.characterCount = count;
-                info.lineCount = lineCount;
-                m_FirstHiddenLine = lineCount;
-                m_IsTextTruncated = true;
-                // What follows the cut is never laid out: it does not overflow.
-                m_firstOverflowCharacterIndex = -1;
-            }
-            else if ((m_overflowMode == TextOverflowModes.Truncate || m_overflowMode == TextOverflowModes.Ellipsis) && overflowLine >= 0)
-            {
-                Truncate(overflowLine, ref count, ref lineCount);
+                bool atWidth = vertical < 0 || (horizontal >= 0 && horizontal < vertical);
+                // What follows a cut at the width is never laid out: it does not overflow.
+                if (atWidth) m_firstOverflowCharacterIndex = -1;
+                Cut(atWidth ? horizontal : vertical, ref count, ref lineCount);
                 info.EnsureCharacters(count + 1);
                 info.EnsureLines(lineCount + 1);
                 info.characterCount = count;
@@ -456,78 +444,101 @@ namespace TMPro
             return cap;
         }
 
-        // Text that does not fit ends in "…" (U+2026) on its last shown line: the ellipsis
-        // follows the last character after which it fits, and the text ends there.
-        // Truncate and Ellipsis stop the text where the first line that does not fit begins (as
-        // the shipped package does, which lays out character by character): the characters of
-        // a word that wrapped onto it stay at the end of the line before, as far as they fit,
-        // and the record where it stopped is blank. Ellipsis replaces the last character after
-        // which the ellipsis fits on that line, followed by the blank record. When the first
-        // line does not fit, nothing is shown.
-        void Truncate(int overflowLine, ref int count, ref int lineCount)
+        static int LineOf(int index, int lineCount)
         {
-            var pl = s_Placements;
-            if (overflowLine == 0)
+            var lines = s_Lines;
+            for (int k = 0; k < lineCount; k++)
+                if (lines[k].First <= index && index <= lines[k].Last) return k;
+            return lineCount - 1;
+        }
+
+        // Truncate and Ellipsis at the cut c (the overflowing character, or the one cut at the
+        // width). At the first character nothing is shown. Otherwise the characters before c stay
+        // as laid out and c becomes the blank record, on c's line; when that line began by
+        // wrapping (not after a line feed), the record stays at the end of the line before (the
+        // characters of a word that wrapped onto it stay there too, as far as they fit, as the
+        // shipped package lays out character by character), and the text has one line fewer.
+        // Ellipsis puts "…" in place of the last character before the cut whose line fits the
+        // rect's height and at whose pen "…" fits the width, followed by the blank record; when
+        // no character qualifies, nothing is shown.
+        void Cut(int c, ref int count, ref int lineCount)
+        {
+            if (c <= 0)
             {
                 count = 0;
                 lineCount = 0;
                 return;
             }
-            ref var prev = ref s_Lines[overflowLine - 1];
-            ref var next = ref s_Lines[overflowLine];
-            int stop = next.First;
-            if (!prev.EndsWithLineFeed)
+            var lines = s_Lines;
+            int k = LineOf(c, lineCount);
+            int recordLine = k, stop = c;
+            float recordX;
+            if (k > 0 && c == lines[k].First && !lines[k - 1].EndsWithLineFeed)
             {
+                ref var prev = ref lines[k - 1];
+                ref var next = ref lines[k];
+                var pl0 = s_Placements;
                 // The line goes on: a soft hyphen drawn where it broke is hidden again
                 // (measured on the shipped package).
-                ref var end = ref pl[prev.Last];
+                ref var end = ref pl0[prev.Last];
                 if (end.SoftHyphen > 0f && end.Visible)
                 {
                     end.Visible = false;
                     end.GlyphAdvance = end.Advance = 0f;
                 }
-                float x = pl[prev.Last].X + pl[prev.Last].Advance;
+                float x = pl0[prev.Last].X + pl0[prev.Last].Advance;
                 for (; stop < count && stop <= next.Last; stop++)
                 {
-                    ref var p = ref pl[stop];
+                    ref var p = ref pl0[stop];
                     if (p.LineBreak || (p.Visible && x + p.GlyphAdvance > prev.Width + 0.0001f)) break;
                     p.X = x;
                     x += p.Advance;
                 }
-            }
-            if (s_Placements.Length <= stop + 1) Array.Resize(ref s_Placements, stop + 2);
-            pl = s_Placements;
-            if (m_overflowMode == TextOverflowModes.Ellipsis && m_Parsed.Ellipsis.Element != null)
-            {
-                var ellipsis = MeasureEllipsis(prev.Width);
-                int at = stop - 1;
-                while (at > prev.First && pl[at].X + ellipsis.GlyphAdvance > prev.Width + 0.0001f) at--;
-                ellipsis.X = pl[at].X;
-                ReplaceWithEllipsis(ref pl[at], ellipsis);
-                pl[at + 1] = new Placement { Blank = true, Element = pl[at + 1].Element, X = pl[at].X + pl[at].Advance };
-                prev.Last = at + 1;
-                prev.EndsWithLineFeed = false;
-                FinishLine(ref prev, pl, m_LayoutBaseSize);
-                count = at + 2;
-                lineCount = overflowLine;
-                return;
-            }
-            float blankX = prev.EndsWithLineFeed ? next.StartX : pl[stop - 1].X + pl[stop - 1].Advance;
-            pl[stop] = new Placement { Blank = true, Element = pl[stop].Element, X = blankX };
-            count = stop + 1;
-            if (prev.EndsWithLineFeed)
-            {
-                // The blank record starts a line of its own.
-                next.Last = stop;
-                FinishLine(ref next, pl, m_LayoutBaseSize);
-                lineCount = overflowLine + 1;
+                recordLine = k - 1;
+                recordX = x;
+                prev.Last = stop - 1;
             }
             else
             {
-                prev.Last = stop;
-                FinishLine(ref prev, pl, m_LayoutBaseSize);
-                lineCount = overflowLine;
+                var pl0 = s_Placements;
+                recordX = c > lines[k].First ? pl0[c - 1].X + pl0[c - 1].Advance : lines[k].StartX;
             }
+            if (s_Placements.Length <= stop + 1) Array.Resize(ref s_Placements, stop + 2);
+            var pl = s_Placements;
+            if (m_overflowMode == TextOverflowModes.Ellipsis && m_Parsed.Ellipsis.Element != null)
+            {
+                var ellipsis = MeasureEllipsis(lines[recordLine].Width, out float fit);
+                int at = stop - 1, atLine = recordLine;
+                for (; at >= 0; at--)
+                {
+                    while (atLine > 0 && at < lines[atLine].First) atLine--;
+                    ref var line = ref lines[atLine];
+                    if (!line.Below && pl[at].X + fit <= line.Width + 0.0001f) break;
+                }
+                if (at < 0)
+                {
+                    count = 0;
+                    lineCount = 0;
+                    return;
+                }
+                ellipsis.X = pl[at].X;
+                ReplaceWithEllipsis(ref pl[at], ellipsis);
+                pl[at + 1] = new Placement { Blank = true, Element = pl[at + 1].Element, X = pl[at].X + pl[at].Advance };
+                ref var shown = ref lines[atLine];
+                shown.Last = at + 1;
+                shown.EndsWithLineFeed = false;
+                FinishLine(ref shown, pl, m_LayoutBaseSize);
+                count = at + 2;
+                lineCount = atLine + 1;
+                return;
+            }
+            pl[stop] = new Placement { Blank = true, Element = pl[stop].Element, X = recordX };
+            ref var last = ref lines[recordLine];
+            last.Last = stop;
+            last.EndsWithLineFeed = false;
+            FinishLine(ref last, pl, m_LayoutBaseSize);
+            count = stop + 1;
+            lineCount = recordLine + 1;
         }
 
         // The ellipsis, as an element after the parsed ones. Its glyph (from whichever font has
@@ -544,53 +555,22 @@ namespace TMPro
             replaced = ellipsis;
         }
 
-        Placement MeasureEllipsis(float width)
+        // fit: the advance "…" needs to fit where it goes, that of its glyph at its own font's
+        // scale (measured on the shipped package: GRAYSTROKE 12 pt's "…", from a fallback, needs
+        // 7.078125, as a typed "…" is wide).
+        Placement MeasureEllipsis(float width, out float fit)
         {
             var parsed = m_Parsed;
             int index = parsed.Count;
             if (parsed.Elements.Length <= index) Array.Resize(ref parsed.Elements, index + 1);
             parsed.Elements[index] = parsed.Ellipsis;
             var ellipsis = default(Placement);
+            Measure(ref parsed.Elements[index], ref ellipsis, m_LayoutBaseSize, width);
+            fit = ellipsis.GlyphAdvance;
+            ellipsis = default;
             Measure(ref parsed.Elements[index], ref ellipsis, m_LayoutBaseSize, width, parsed.Ellipsis.State.Font ?? m_fontAsset);
             ellipsis.Element = index;
             return ellipsis;
-        }
-
-        // Without wrapping, Truncate and Ellipsis cut a line wider than the rect at the first
-        // visible character that passes the width (measured on the shipped package): the
-        // characters before it stay, followed by the blank record, and the lines after it are
-        // not shown. Ellipsis replaces the last character that stayed with "…" (or an earlier
-        // one, where the ellipsis would not fit). When the cut falls on a line's first
-        // character, Truncate leaves the blank record alone on that line (nothing at all on the
-        // first line), and Ellipsis shows nothing.
-        void CutAtWidth(int lineIndex, int cut, ref int count, ref int lineCount)
-        {
-            ref var line = ref s_Lines[lineIndex];
-            if (cut == line.First && (lineIndex == 0 || m_overflowMode == TextOverflowModes.Ellipsis))
-            {
-                count = 0;
-                lineCount = 0;
-                return;
-            }
-            if (s_Placements.Length <= cut + 1) Array.Resize(ref s_Placements, cut + 2);
-            var pl = s_Placements;
-            int stop = cut;
-            if (m_overflowMode == TextOverflowModes.Ellipsis && m_Parsed.Ellipsis.Element != null)
-            {
-                var ellipsis = MeasureEllipsis(line.Width);
-                int at = cut - 1;
-                while (at > line.First && pl[at].X + ellipsis.GlyphAdvance > line.Width + 0.0001f) at--;
-                ellipsis.X = pl[at].X;
-                ReplaceWithEllipsis(ref pl[at], ellipsis);
-                stop = at + 1;
-            }
-            float blankX = stop > line.First ? pl[stop - 1].X + pl[stop - 1].Advance : line.StartX;
-            pl[stop] = new Placement { Blank = true, Element = pl[stop].Element, X = blankX };
-            line.Last = stop;
-            line.EndsWithLineFeed = false;
-            FinishLine(ref line, pl, m_LayoutBaseSize);
-            count = stop + 1;
-            lineCount = lineIndex + 1;
         }
 
         // Letters, digits and hyphens make words; apostrophes join word characters.

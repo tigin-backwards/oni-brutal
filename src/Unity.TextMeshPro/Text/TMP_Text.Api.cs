@@ -180,12 +180,13 @@ namespace TMPro
             }
             else LayoutUnadjusted(width);
             if (s_LineCount == 0) return RoundUp(m_margin.y + m_margin.w);
-            // A text of only white space has no visible character, and no height: 0 (measured
-            // on the shipped package: " " is 0.01 high).
-            bool visible = false;
-            for (int k = 0; k < s_LineCount && !visible; k++) visible = s_Lines[k].LastVisible >= 0;
-            if (!visible) return NextHundredth(m_margin.y + m_margin.w);
-            ref var last = ref s_Lines[s_LineCount - 1];
+            // The height goes down to the last line with a checked character (not white space;
+            // a tab is checked): a text of only white space has no height, 0 (measured on the
+            // shipped package: " " is 0.01 high, "A\n " one line, "\t" one line).
+            int lastLine = s_LineCount - 1;
+            while (lastLine >= 0 && s_Lines[lastLine].LastChecked < 0) lastLine--;
+            if (lastLine < 0) return NextHundredth(m_margin.y + m_margin.w);
+            ref var last = ref s_Lines[lastLine];
             double height = (double)s_Lines[0].Ascender - ((double)last.Baseline + last.Descender);
             return NextHundredth(height + m_margin.y + m_margin.w);
         }

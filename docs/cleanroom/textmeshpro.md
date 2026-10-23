@@ -824,7 +824,15 @@ LOG` predicts each case from the rule below and reproduces all 37,692; this impl
   high. "\t" is 0.01 × 19.04 (its width is that of no visible character, its height that of a
   checked one).
 
-Where this implementation deviates (`TMP_Text.Layout.cs` and `TMP_Text.Place.cs`):
+- **Implemented.** This implementation follows the rule: in the same probe `ov-check.py rule`
+  reproduces all 37,692 cases from its log, and `ov-check.py diff` finds none that differ from
+  the shipped package, preferred sizes included. "…" fits where its glyph's advance at its own
+  font's scale fits (7.078125 for GRAYSTROKE 12 pt, from its fallback); it is still drawn at
+  the text font's scale, as "Horizontal overflow with wrapping off" above measured. Other white
+  space (not measured) is not checked either, and auto-size still counts a line of white space
+  below the rect as not fitting.
+
+Where this implementation deviated before (`TMP_Text.Layout.cs` and `TMP_Text.Place.cs`):
 - It checks each line, at the line's first character, whatever that is. So white space
   overflows (" " at 0.01 × 0.01 reports 0), and the index is the line's start (" A" and "\nA"
   at height 0 report 0, "A\n " at 400 × 19.03125 reports 2).
@@ -838,7 +846,7 @@ Where this implementation deviates (`TMP_Text.Layout.cs` and `TMP_Text.Place.cs`
 - A tab is drawn as a visible U+25A1 and is 14.01 × 20.74 (NotoSans 14 pt), and lines of
   white space after the last checked character count towards the preferred height.
 
-| Text (NotoSans-Regular 14 pt, centred), rect, mode | shipped: overflowing, index; characters | this implementation now |
+| Text (NotoSans-Regular 14 pt, centred), rect, mode | shipped: overflowing, index; characters | this implementation before |
 |---|---|---|
 | " ", 0.01 × 0.01, Overflow (Butcher & Fishing Stations) | false, -1; " " | true, 0; " " |
 | " ", 0 × 0, Truncate | false, -1; " " | true, 0; nothing |

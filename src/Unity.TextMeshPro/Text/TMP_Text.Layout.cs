@@ -30,6 +30,9 @@ namespace TMPro
             public float KernY;          // glyph placement from kerning pairs (y)
             public float PointSize;
             public bool Visible, Whitespace, LineBreak, Bold, Italic, NoBreak, BreakAfter;
+            // Checked against the rect's height: every character but white space (a tab is
+            // checked, though it is not visible).
+            public bool Checked;
             // A soft hyphen's advance: it takes no room, and is drawn only where a line breaks
             // after it (0: not a soft hyphen).
             public float SoftHyphen;
@@ -51,6 +54,10 @@ namespace TMPro
         {
             public int First, Last;
             public int FirstVisible, LastVisible;
+            public int LastChecked;      // the last checked character (-1: none)
+            // Whether the line's descender is below the rect (its characters do not fit the
+            // height).
+            public bool Below;
             public float Ascender, Descender, Gap, MaxAscent, FontLineHeight;
             // The descender without a soft hyphen drawn where the line breaks: what the line
             // must fit in the rect (the hyphen is drawn after the line was found to fit).
@@ -300,9 +307,10 @@ namespace TMPro
             int lineCount = 0;
             bool fits = true;
             int overflowIndex = -1;
-            // Without wrapping, Truncate and Ellipsis cut the text at the first visible character
-            // that passes its line's width.
-            bool cutWide = !wrap && (m_overflowMode == TextOverflowModes.Truncate || m_overflowMode == TextOverflowModes.Ellipsis);
+            // Truncate and Ellipsis cut the text at the first visible character whose pen after
+            // it passes its line's width: without wrapping, or with wrapping one that is still too
+            // wide on the line it wraps to.
+            bool cutWide = m_overflowMode == TextOverflowModes.Truncate || m_overflowMode == TextOverflowModes.Ellipsis;
             int horizontalCut = -1;
             int start = 0;
             while (start < count || (lineCount == 0 && count == 0))
@@ -414,9 +422,18 @@ namespace TMPro
                 }
                 line.Baseline = y;
                 line.LineHeight = line.Ascender - line.Descender;
-                // Vertical overflow: the line's descender below the rect.
-                if (overflowIndex < 0 && (double)textTop - ((double)y + line.FitDescender) > height + 0.0001 && m_overflowMode != TextOverflowModes.Page)
-                    overflowIndex = line.First;
+                // Vertical overflow: at the first checked character whose line's descender is
+                // below the rect. White space does not overflow (a line of it alone, or before
+                // and after the checked characters), though its lines take their height. A line
+                // below the rect still does not fit, for auto-size.
+                line.Below = (double)textTop - ((double)y + line.FitDescender) > height + 0.0001;
+                if (line.Below && m_overflowMode != TextOverflowModes.Page)
+                {
+                    fits = false;
+                    if (overflowIndex < 0)
+                        for (int i = line.First; i <= line.Last; i++)
+                            if (pl[i].Checked) { overflowIndex = i; break; }
+                }
                 if (m_overflowMode == TextOverflowModes.Page && k > 0 && (double)pageTop - ((double)y + line.Descender) > height + 0.0001 && !pl[line.First].PageBreak)
                 {
                     pageIndex++;
@@ -429,7 +446,6 @@ namespace TMPro
             if (!wrap)
                 for (int k = 0; k < lineCount; k++)
                     if (lines[k].Length > lines[k].Width + 0.0001f) fits = false;
-            if (overflowIndex >= 0) fits = false;
             s_LineCount = lineCount;
             m_LayoutOverflowIndex = overflowIndex;
             m_LayoutHorizontalCut = horizontalCut;
@@ -450,6 +466,7 @@ namespace TMPro
             float fitDesc = float.PositiveInfinity;
             line.FirstVisible = -1;
             line.LastVisible = -1;
+            line.LastChecked = -1;
             line.FontLineHeight = 0f;
             line.Visible = line.Spaces = 0;
             // A soft hyphen that is not drawn takes no part in the line's metrics (measured on
@@ -466,6 +483,7 @@ namespace TMPro
                 desc = Mathf.Min(desc, p.Descender);
                 gap = Mathf.Max(gap, p.Gap);
                 maxAscent = Mathf.Max(maxAscent, p.Ascender);
+                if (p.Checked) line.LastChecked = i;
                 line.FontLineHeight = Mathf.Max(line.FontLineHeight, p.FontLineHeight);
                 if (p.Visible)
                 {
@@ -541,6 +559,7 @@ namespace TMPro
             uint c = el.Unicode;
             p.LineBreak = el.Kind == ElementKind.Character && IsLineBreak(c);
             p.Whitespace = el.Kind == ElementKind.Character && (IsWhitespace(c) || p.LineBreak || c == 13 || c == 3);
+            p.Checked = !p.Whitespace || (el.Kind == ElementKind.Character && c == 9);
             // The spacing properties are in hundredths of the text's font size, whatever size
             // tags say (measured on the shipped package).
             float em = baseSize * 0.01f;

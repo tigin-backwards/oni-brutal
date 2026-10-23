@@ -216,6 +216,17 @@ namespace TMPro
             }
             if (!ResolveGlyph(shown, state, out var character, out var asset, out bool alternate))
             {
+                // A tab the fonts do not have is not replaced: it stays a tab, not visible, of
+                // the text's font (measured on the shipped package: "\t" in NotoSans is
+                // character 9, not visible, and one line of the font high). Its width comes from
+                // the font's space.
+                if (shown == 9 && (state.Font ?? m_Text.font) is { } tabFont)
+                {
+                    e.Element = tabFont.TryGetLocalCharacter(32, out var space) ? space : EmptyCharacter(tabFont);
+                    e.Asset = tabFont;
+                    e.MaterialIndex = MaterialFor(tabFont, state, false);
+                    return;
+                }
                 // Emoji and other characters may come from the sprite assets.
                 if (ResolveSpriteByUnicode(shown, ref e)) return;
                 uint missing = (uint)TMP_Settings.missingGlyphCharacter;

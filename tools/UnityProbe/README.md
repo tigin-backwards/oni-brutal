@@ -37,6 +37,16 @@ Both players write the same version stamp for the mod (ARCHITECTURE D3), so one 
 serves both. In U59 that stamp is `692750779`, with `enabledForDlc: ["", "EXPANSION1_ID"]`;
 with another stamp the game reinstalls the mod and disables it.
 
+With `PROBE_SCENARIO=textwidth` only the text-width probe runs (`TextWidth.cs`, lines `TW …`,
+10 s into the main menu, about two seconds of work): TMP's preferred width and height of short
+labels in every NotoSans and GRAYSTROKE font asset at 12, 14 and 16 pt, regular and bold, set up
+as `SetTextStyleSetting` does, with each character's origin and advance; in rects at three
+pivots, under a `HorizontalLayoutGroup` and in a `LayoutElement`. Values are logged in "R"
+format with their float bits and E2eDriver's two-decimal dump form, after a check of that
+formatting itself. Compare the players with `tools/UnityProbe/tw-check.py diff ORIG OURS`, and
+check the rounding rule with `tw-check.py rule LOG`; `docs/cleanroom/textmeshpro.md`
+("Preferred sizes to the hundredth") records what it measured.
+
 ## UI semantics (`UiSemantics.cs`, `UIS` lines)
 
 Ten seconds into the front end, after the front-end dump, it builds small hierarchies on an

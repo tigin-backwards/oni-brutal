@@ -23,6 +23,11 @@ namespace SemanticsProbe
                 go.AddComponent<CanvasProbe>();
                 return;
             }
+            if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "textwidth")
+            {
+                go.AddComponent<TextWidth>();
+                return;
+            }
             go.AddComponent<Probe>();
             go.AddComponent<QuitLog>().Tag = "ddol-at-load";
             go.AddComponent<FrameLog>();

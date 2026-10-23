@@ -18,6 +18,7 @@
     <Reference Include="$(OniManaged)/UnityEngine.JSONSerializeModule.dll" Private="false" />
     <Reference Include="$(OniManaged)/UnityEngine.UIModule.dll" Private="false" />
     <Reference Include="$(OniManaged)/UnityEngine.TextRenderingModule.dll" Private="false" />
+    <Reference Include="$(OniManaged)/UnityEngine.TextCoreFontEngineModule.dll" Private="false" />
     <Reference Include="$(OniManaged)/Unity.TextMeshPro.dll" Private="false" />
     <Reference Include="$(OniManaged)/UnityEngine.UI.dll" Private="false" />
     <Reference Include="$(OniManaged)/UnityEngine.IMGUIModule.dll" Private="false" />

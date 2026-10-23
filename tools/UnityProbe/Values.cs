@@ -375,6 +375,8 @@ namespace SemanticsProbe
             for (int i = 0; i < 10; i++) yield return null;
 
             AddComponentRefusals.Run();
+            Rec.Log("=== values: float precision");
+            FloatPrecision.Run();
             Rec.Log("=== values: done");
         }
 

@@ -33,6 +33,12 @@ namespace SemanticsProbe
                 go.AddComponent<TextOverflow>();
                 return;
             }
+            if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "floatprec")
+            {
+                Rec.Log("=== values: float precision");
+                FloatPrecision.Run();
+                return;
+            }
             if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "startdestroy")
             {
                 go.AddComponent<SDScenario>();

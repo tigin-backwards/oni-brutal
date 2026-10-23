@@ -64,6 +64,11 @@ form feed, U+0003, U+2000–U+200B, U+2028, U+2029, U+3000, U+FEFF, U+180E) alon
 characters at two sizes, in rects 50, 400 and 1000 wide. `PROBE_OV_PART=chars` runs only
 these.
 
+With `PROBE_SCENARIO=floatprec` only the float-precision probe runs (`FloatPrecision.cs`, lines
+`VAL fp …`, at mod load; the full run includes it in its values): float expressions whose
+float32 and double results differ, each line saying which one the player gave. Its header
+records what it measured: the original rounds float arithmetic to float32 only on stores.
+
 ## UI semantics (`UiSemantics.cs`, `UIS` lines)
 
 Ten seconds into the front end, after the front-end dump, it builds small hierarchies on an

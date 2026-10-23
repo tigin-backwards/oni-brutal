@@ -1429,12 +1429,13 @@ namespace TMPro
 
         public virtual int layoutPriority => 1;
 
-        // The space the viewport and text rect leave around the text inside the field.
+        // The viewport's own offsets from its anchors (offsetMin - offsetMax); 0 without a
+        // viewport. Neither the field's rect nor the text's enters the layout values, so laying
+        // the field out cannot change its own preferred size.
         Vector2 Padding()
         {
-            var field = (RectTransform)transform;
-            var textRect = m_TextComponent.rectTransform;
-            return new Vector2(Mathf.Max(0f, field.rect.width - textRect.rect.width), Mathf.Max(0f, field.rect.height - textRect.rect.height));
+            if (m_TextViewport == null) return Vector2.zero;
+            return m_TextViewport.offsetMin - m_TextViewport.offsetMax;
         }
     }
 }

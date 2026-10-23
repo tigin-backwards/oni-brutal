@@ -1049,24 +1049,24 @@ lines of the shipped package's log.
   - With a `ContentSizeFitter` on the field, it is 32.09 × 19.04 from the next canvas update.
   - Beside Geyser Control's `LayoutElement`, the larger value wins: 64 × 24, the row 24.
 
-Where this implementation deviates (`TMP_InputField.cs`, the layout element at the end):
-- It adds to the text's preferred size the difference between the field's rect and the text
+Where this implementation deviated before (`TMP_InputField.cs`, the layout element at the end):
+- It added to the text's preferred size the difference between the field's rect and the text
   component's rect, at least 0, not the viewport's offsets. That difference changes with the
   field's own size wherever the text rect does not stretch with the field.
 - Geyser Control's text is anchored to the top and is -1 high in every field. So the field's
-  preferred height is 19.04 + (h + 1), where h is the field's current height: 44.04 at 24. A
+  preferred height was 19.04 + (h + 1), where h is the field's current height: 44.04 at 24. A
   parent that sizes the row to its preferred height makes the field 44.04 high, the next pass
   reads 64.08, and so on. In the probe's fitted row, the passes give 44.04, 64.08, 84.12,
-  104.16, 124.2 and then 20.04 more each frame. In the game it keeps growing while the side
+  104.16, 124.2 and then 20.04 more each frame. In the game it kept growing while the side
   screen is open: the UI dump read the row at 33,329.72, and the field's `preferredHeight` was
   82,485.54 when read later.
-- Where the text rect does stretch, the value is wrong without growing:
+- Where the text rect does stretch, the value was wrong without growing:
   - a text inset by (-20, -12) gives 52.09 × 31.04 for 32.09 × 19.04;
   - a viewport fixed at 40 × 10 gives 56.09 × 33.04 for -7.91 × 9.04;
   - a viewport larger than the field is clamped to 32.09 × 19.04 for 20.09 × 12.04;
   - a field without a viewport counts the text's offsets (44.09 × 26.04 for 32.09 × 19.04).
-- It matches where the viewport and the text both stretch over the field: offsets 0 (32.09 ×
-  19.04), or offsets on the viewport with the text at 0 (44.09 × 26.04). It also matches the
+- It matched where the viewport and the text both stretch over the field: offsets 0 (32.09 ×
+  19.04), or offsets on the viewport with the text at 0 (44.09 × 26.04). It also matched the
   margins, the empty text, the placeholder, the line types and the missing text component.
   In the probe 540 of the 888 lines differ, every one in `preferredWidth` or `preferredHeight`
   first.
@@ -1091,6 +1091,12 @@ Where this implementation deviates (`TMP_InputField.cs`, the layout element at t
 | `MultiLineNewline`, "abc def ghi jkl mno" in 64 wide | 124.8 × 57.17 | 124.8 × 57.17 |
 | no text component | 0 × 0 | 0 × 0 |
 | min, flexible, priority (every case) | 0, -1, 1 | 0, -1, 1 |
+
+- **Implemented.** This implementation follows the rule: the text's preferred size plus the
+  viewport's `offsetMin` − `offsetMax`, 0 without a viewport, no rect read and no clamp. In the
+  probe `il-check.py rule` holds for all 888 lines of its log. Against the shipped package's
+  log the only values that differ are the inactive fields' `characterLimit` and `SingleLine`
+  cases below (60 lines), which are outside the rule.
 
 Also seen, outside the rule: `text` set from code on a field that is still inactive (as the probe
 builds them) keeps what `characterLimit` and `SingleLine` would refuse from typing. "1915"

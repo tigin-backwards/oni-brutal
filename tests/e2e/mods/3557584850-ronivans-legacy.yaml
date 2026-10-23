@@ -1,0 +1,33 @@
+# Ronivan's Legacy - Industrial Revolution (3557584850), classes B, T, S, O, V, M;
+# asset_bundle_ui.
+#
+# What it does: brings Ronivan's old mods together: Chemical Processing (new elements, refineries,
+# reactors), Mineral Processing and Metallurgy, High Pressure Applications (high-pressure pipes and
+# rails), Dupes Engineering (tiles, walls, doors, a metal ladder), Logistics (mini rails),
+# Refrigeration, Machinery and more: 136 buildings, each in a build menu category and tech,
+# with its own overlay tweaks, side screens and an options screen at the main menu.
+# How a player reaches it: the build menu, after research.
+# What changes: the whole tech tree.
+#
+# A broad smoke spec: the mod's buildings and elements are registered as in the original, and
+# one of its buildings, the Metal Ladder (Base, researched with Smelting, refined metal), is
+# built through the normal flow and selected. setup grants Smelting and spawns copper.
+from: early-base
+mods: [3557584850]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"Smelting\")", method: Purchased}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Copper\").substance", method: SpawnResource, args: [[114.5, 207.5, -12], 300, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Assets.BuildingDefs.Count": "== original"
+      "ElementLoader.elements.Count": "== original"
+      "Assets.GetBuildingDef(\"AIO_MetalLadder\").PrefabID": AIO_MetalLadder
+  - build: {prefab: AIO_MetalLadder, cells: [[113, 207], [113, 208], [113, 209]], material: Copper}
+  - expect: {blueprints: {AIO_MetalLadder: 3}}
+  - run: {seconds: 900, until: {buildings: {AIO_MetalLadder: 3}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [116, 208], ortho: 8}}
+  - click_world: {cell: [113, 208]}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui: {"**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Metal Ladder"}}
+  - expect_state: {"selected:Ladder.upwardsMovementSpeedMultiplier": "== original"}
+  - shot: {name: details, crop: "**/DetailsScreen", threshold: 0.04}

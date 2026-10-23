@@ -1,0 +1,59 @@
+{
+ "spec": "mods/3557584850-ronivans-legacy.yaml",
+ "mods": [
+  "3557584850"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "broad smoke spec: building and element counts as in the original; a Metal Ladder built through the normal flow and selected, details screen compared",
+ "updated": "2026-10-22",
+ "commit": "82ad375",
+ "mod_dlls": {
+  "3557584850": {
+   "RonivansLegacy_ChemicalProcessing.dll": "a8f2ed8ca2162478ff021d96cf5a13e98fbdf047da64db96d8ea02c7e50bd64f"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261022-220928-e8cb86",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-22T23:13:18",
+    "lane": 13,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261022-231953-ceb4b9",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-22T23:53:14",
+    "lane": 12,
+    "reference_run": "20261022-220928-e8cb86",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "details": 0.002155
+    }
+   },
+   {
+    "run": "20261022-231953-ceb4b9",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-22T23:54:39",
+    "lane": 12,
+    "reference_run": "20261022-220928-e8cb86",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "details": 0.002155
+    }
+   }
+  ]
+ }
+}

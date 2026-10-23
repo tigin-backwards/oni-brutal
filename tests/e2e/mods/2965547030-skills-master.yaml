@@ -1,0 +1,31 @@
+# Skills Master // by @Ony (2965547030), class S.
+#
+# What it does: the Skills screen gets a "Skills" panel under the selected Duplicant's row in
+# its list, one label per attribute the Duplicant has above zero, sorted by value, the top one
+# or two in green and the larger values in a larger font (14 to 18 by default), each with the
+# attribute's tooltip. The first Duplicant is selected when the screen opens, and clicking
+# another row moves the panel there. Empty planetoids' dividers are hidden in the Skills and
+# Priorities screens.
+# How a player reaches it: the Skills screen, and a click on a Duplicant's row.
+# What changes: a Duplicant's attributes at a glance while choosing skills.
+#
+# The Skills screen opens with the panel under the first row (Husbandry 5, Athletics 2); a
+# click on the second row moves it there. The labels follow the save's attributes, the same
+# in both players.
+from: early-base
+mods: [2965547030]
+steps:
+  - open: {management: skills}
+  - ui_wait: {path: "**/SkillsScreen/Minions/**/Content/Skills", cond: stable}
+  - expect_ui:
+      "**/SkillsScreen/Minions/**/Content/Skills/skillRanching/label": {text: "Husbandry: 5"}
+      "**/SkillsScreen/Minions/**/Content/Skills/skillAthletics/label": {text: "Athletics: 2"}
+  - ui_dump: {name: panel, root: "**/SkillsScreen/Minions/**/Content"}
+  - expect_state:
+      "ui:**/SkillsScreen/Minions/**/Content/Skills::transform.GetSiblingIndex()": 2
+  - shot: {name: screen, crop: "**/SkillsScreen", threshold: 0.04}
+  - click: {ui: "**/SkillsScreen/Minions/**/Content/MinionPrefab2[1]"}
+  - ui_wait: {path: "**/SkillsScreen/Minions/**/Content/Skills", cond: stable}
+  - expect_state:
+      "ui:**/SkillsScreen/Minions/**/Content/Skills::transform.GetSiblingIndex()": ">= 3"
+  - ui_dump: {name: panel-second, root: "**/SkillsScreen/Minions/**/Content"}

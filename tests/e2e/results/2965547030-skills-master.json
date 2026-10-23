@@ -1,0 +1,73 @@
+{
+ "spec": "mods/2965547030-skills-master.yaml",
+ "mods": [
+  "2965547030"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Skills screen opens with the mod's attribute panel under the first Duplicant (dumped, and the screen shot); a click on the second Duplicant's row moves the panel there (dumped)",
+ "updated": "2026-10-23",
+ "commit": "0baf271",
+ "mod_dlls": {
+  "2965547030": {
+   "SkillsMaster.dll": "003ff0001db10d615c8c88ee70f9ef5e31ccb14026f4962b0750fc8e15d93169"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-130426-e75773",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T13:06:41",
+    "lane": 12,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-130814-59fdc4",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T13:10:34",
+    "lane": 13,
+    "reference_run": "20261023-130426-e75773",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "panel": {
+      "differences": 0
+     },
+     "panel-second": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "screen": 0.00012
+    }
+   },
+   {
+    "run": "20261023-130814-59fdc4",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T13:11:35",
+    "lane": 13,
+    "reference_run": "20261023-130426-e75773",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "panel": {
+      "differences": 0
+     },
+     "panel-second": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "screen": 0.00012
+    }
+   }
+  ]
+ }
+}

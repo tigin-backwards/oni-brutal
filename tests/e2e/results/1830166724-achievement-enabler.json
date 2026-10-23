@@ -1,0 +1,63 @@
+{
+ "spec": "mods/1830166724-achievement-enabler.yaml",
+ "mods": [
+  "1830166724"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "in a colony marked as debugged, the colony summary opened from the pause menu shows achievements enabled; the mod's own pause menu button is gone in the original too (the game rebuilds its button list on each opening)",
+ "updated": "2026-10-23",
+ "commit": "8c7f95e",
+ "mod_dlls": {
+  "1830166724": {
+   "ONI-AchievementEnabler.dll": "83f6901ccced684bff36d338002336c9e44758d96ae5659bf2897b613226eef1"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-053746-a442a9",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T06:20:49",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-070629-502a3e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T07:06:29",
+    "lane": 16,
+    "reference_run": "20261023-053746-a442a9",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "header": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261023-070629-502a3e",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T07:07:18",
+    "lane": 16,
+    "reference_run": "20261023-053746-a442a9",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "header": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

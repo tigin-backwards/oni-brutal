@@ -1,0 +1,36 @@
+# Achievement Enabler (1830166724), class S.
+#
+# What it does: achievements unlock even in a colony where debug or sandbox tools were used:
+# a prefix and postfix on ColonyAchievementTracker.UnlockPlatformAchievement clear and restore
+# the instant-build, sandbox and debug-used marks around it, and the colony summary
+# (a postfix on RetiredColonyInfoScreen.OnShow) shows achievements as enabled. Its on/off
+# switch is kept in mods/Config/ID.json; a pause menu button "Achievement Enabler" was to
+# open a menu for it, but the mod appends it to PauseScreen's buttons once, in OnPrefabInit,
+# and the game now rebuilds that list each time the menu opens (ConfigureButtonInfos): the
+# pause menu shows no such button, in the original too.
+# How a player reaches it: the colony summary (pause menu, Colony Summary).
+# What changes: the summary's achievements header says they are enabled in a debugged
+# colony; achievements unlock there.
+#
+# setup marks the colony as debugged (Game.debugWasUsed, by reflection). The colony summary
+# is opened from the pause menu: its header shows the "enabled" mark, where the game alone
+# would show "disabled".
+from: early-base
+mods: [1830166724]
+require_log: ['Achievement Enabler loaded']
+setup:
+  - driver: {setup.call: {target: "Game.Instance.GetType().GetField(\"debugWasUsed\")", method: SetValue, args: [{"$": "Game.Instance"}, true]}}
+steps:
+  - expect_state:
+      "Game.Instance.debugWasUsed": true
+      "type:AchievementEnablerLib.Model.Configure::IsDisable": false
+  - key: {code: Escape}
+  - ui_wait: {path: "**/PauseScreen/**/Colony SummaryButton", cond: stable}
+  - expect_ui:
+      "**/PauseScreen/**/Achievement EnablerButton": {exists: false}
+  - click: {ui: "**/PauseScreen/**/Colony SummaryButton"}
+  - ui_wait: {path: "**/RetiredColonyInfoScreen/**/Achievements/Header/Platform", cond: stable}
+  - expect_ui:
+      "**/RetiredColonyInfoScreen/**/Achievements/Header/Platform/enabled": {active: true}
+      "**/RetiredColonyInfoScreen/**/Achievements/Header/Platform/disabled": {exists: false}
+  - ui_dump: {name: header, root: "**/RetiredColonyInfoScreen/**/Achievements/Header"}

@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2129768894-pause-on-ready-to-print.yaml",
+ "mods": [
+  "2129768894"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the next printing brought to 3 s away, the game is unpaused with the pause button; the pod opens and the game pauses itself, the pause button on again",
+ "updated": "2026-10-23",
+ "commit": "8c7f95e",
+ "mod_dlls": {
+  "2129768894": {
+   "PauseOnReadyToPrint.dll": "3ddb9f0537252f917df89fd94d1ff25740d932e6381e852c9f76030c2618cbae"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-053746-a442a9",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T05:37:46",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-070431-a1021a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T07:04:31",
+    "lane": 16,
+    "reference_run": "20261023-053746-a442a9",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-070431-a1021a",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T07:05:36",
+    "lane": 16,
+    "reference_run": "20261023-053746-a442a9",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -1,0 +1,32 @@
+# PAUSE on ready to print (2129768894), class P.
+#
+# What it does: the game pauses when the Printing Pod opens with new Duplicants or care
+# packages to choose (a postfix on Telepad.States.InitializeStates adds an Enter action to
+# its open state that calls SpeedControlScreen.Pause). It logs the arity of Pause it found.
+# How a player reaches it: playing until the pod is ready to print.
+# What changes: the game stops by itself at each printing.
+#
+# setup brings the next printing to 3 seconds away (one Immigration.Sim200ms of 1257 s; the
+# colony of early-base would wait 1260 s). The player unpauses with the pause button; the pod
+# opens and the game pauses itself, the pause button showing it.
+from: early-base
+mods: [2129768894]
+require_log: ['PauseOnReadyToPrint: arity = ']
+setup:
+  - driver: {setup.call: {target: "Immigration.Instance", method: Sim200ms, args: [1257]}}
+steps:
+  # A short run first: just after the load the game holds more than one pause, and the pause
+  # button would only take one of them away.
+  - run: {seconds: 1}
+  - expect_state:
+      "Immigration.Instance.ImmigrantsAvailable": false
+      "SpeedControlScreen.Instance.IsPaused": true
+      "SpeedControlScreen.Instance.pauseCount": 1
+  - click: {ui: "**/SpeedControlScreen/PauseButton"}
+  - ui_wait: {path: "**/SpeedControlScreen/PauseButton", cond: "off", frames: 120}
+  # The pod opens a few seconds later, and the mod pauses the game.
+  - ui_wait: {path: "**/SpeedControlScreen/PauseButton", cond: "on", frames: 3000}
+  - expect_state:
+      "SpeedControlScreen.Instance.IsPaused": true
+      "Immigration.Instance.ImmigrantsAvailable": true
+      "all:Telepad::[0].smi.GetCurrentState().name": root.open

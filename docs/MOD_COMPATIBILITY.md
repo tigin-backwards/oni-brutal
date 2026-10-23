@@ -175,7 +175,7 @@ installs get developer checks subscribers never see).
 | 154 | [Expanded Lights](https://steamcommunity.com/sharedfiles/filedetails/?id=1871382174) | ❌ | ❌ | ⬜ | broken upstream: Harmony patch targets now have overloads (same in the original) |
 | 155 | [EmptyWorlds (SkyBlock)](https://steamcommunity.com/sharedfiles/filedetails/?id=1825146346) | ✅ | ✅ | ⬜ |  |
 | 156 | [Mod Profile Manager [MPM]](https://steamcommunity.com/sharedfiles/filedetails/?id=2854869130) | ✅ | ✅ | ✅ | issue #2's set |
-| 157 | [PAUSE on ready to print](https://steamcommunity.com/sharedfiles/filedetails/?id=2129768894) | ✅ | ✅ | ⬜ |  |
+| 157 | [PAUSE on ready to print](https://steamcommunity.com/sharedfiles/filedetails/?id=2129768894) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2129768894-pause-on-ready-to-print.yaml: the next printing brought to 3 s away, the game is unpaused with the pause button; the pod opens and the game pauses itself, the pause button on again |
 | 158 | [Stats Unlimited](https://steamcommunity.com/sharedfiles/filedetails/?id=1758223146) | ❌ | ❌ | ⬜ | broken upstream: a Harmony patch whose target is gone (same in the original) |
 | 159 | [Advanced Electrolyzers](https://steamcommunity.com/sharedfiles/filedetails/?id=1801004057) | ✅ | ✅ | ✅ | spec tests/e2e/mods/1801004057-advanced-electrolyzers.yaml: the Industrial Electrolyzer is built from copper after Improved Oxygen and selected: 400 W, any-water intake, 6 kg storage |
 | 160 | [Deselect New Materials](https://steamcommunity.com/sharedfiles/filedetails/?id=1863598374) | ✅ | ✅ | ⬜ |  |
@@ -190,7 +190,7 @@ installs get developer checks subscribers never see).
 | 169 | [Pipette](https://steamcommunity.com/sharedfiles/filedetails/?id=2630036712) | ✅ | ✅ | ⬜ |  |
 | 170 | [正體中文 by DolphinWing](https://steamcommunity.com/sharedfiles/filedetails/?id=2906930548) | ⬜ | ⬜ | ⬜ | translation: the game applies one only from a Steam subscription; not testable here |
 | 171 | [Italian Language Pack](https://steamcommunity.com/sharedfiles/filedetails/?id=929224194) | ⬜ | ⬜ | ⬜ | translation: the game applies one only from a Steam subscription; not testable here |
-| 172 | [Achievement Enabler](https://steamcommunity.com/sharedfiles/filedetails/?id=1830166724) | ✅ | ✅ | ⬜ |  |
+| 172 | [Achievement Enabler](https://steamcommunity.com/sharedfiles/filedetails/?id=1830166724) | ✅ | ✅ | ✅ | spec tests/e2e/mods/1830166724-achievement-enabler.yaml: in a colony marked as debugged, the colony summary opened from the pause menu shows achievements enabled; the mod's own pause menu button is gone in the original too (the game rebuilds its button list on each opening) |
 | 173 | [Insulated Joint Plate](https://steamcommunity.com/sharedfiles/filedetails/?id=2059584551) | ⬜ | ⬜ | ⬜ | flagged by onimaxxing (crashesAtStartup); not tested |
 | 174 | [Map Overlay](https://steamcommunity.com/sharedfiles/filedetails/?id=2271373459) | ❌ | ❌ | ⬜ | broken upstream: `OverlayModes.Mode.CreateDefaultFilters` returns another type now (same in the original) |
 | 175 | [Oil Well - Any Water](https://steamcommunity.com/sharedfiles/filedetails/?id=1717519620) | ✅ | ✅ | ✅ | spec tests/e2e/mods/1717519620-oil-well-any-water.yaml: a smaller spec (no oil reservoir in reach): the Oil Well's converter and pipe intake take the AnyWater tag |
@@ -202,7 +202,7 @@ installs get developer checks subscribers never see).
 | 181 | [Piped Everything](https://steamcommunity.com/sharedfiles/filedetails/?id=3033409170) | ✅ | ✅ | ✅ | spec tests/e2e/mods/3033409170-piped-everything.yaml: the base's Research Station and a newly built Oxygen Diffuser carry the mod's ports; the gas overlay with the diffuser's port is shot |
 | 182 | [Rational Priority](https://steamcommunity.com/sharedfiles/filedetails/?id=2632758219) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2632758219-rational-priority.yaml: a smaller spec (which errand wins depends on positions): an idle Duplicant's Errands tab entry reads in the mod's words ("Idle priority"), the game's priority breakdown gone |
 | 183 | [Mass Move Tool](https://steamcommunity.com/sharedfiles/filedetails/?id=3301490799) | ✅ | ✅ | ⬜ |  |
-| 184 | [Free Resource Buildings Branch](https://steamcommunity.com/sharedfiles/filedetails/?id=3047547550) | ✅ | ✅ | ⬜ |  |
+| 184 | [Free Resource Buildings Branch](https://steamcommunity.com/sharedfiles/filedetails/?id=3047547550) | ✅ | ✅ | ✅ | spec tests/e2e/mods/3047547550-free-resource-buildings-branch.yaml: the Power Box is built from copper after Power Regulation and selected; it generates its default 2000 W |
 | 185 | [U&F-Choose Neural Vacillator 神经振荡器自由选择](https://steamcommunity.com/sharedfiles/filedetails/?id=3381262702) | ✅ | ✅ | ✅ | issue #2's set |
 | 186 | [Colorful Shinebugs](https://steamcommunity.com/sharedfiles/filedetails/?id=1702980293) | ✅ | ✅ | ⬜ |  |
 | 187 | [Player Controlled Switch](https://steamcommunity.com/sharedfiles/filedetails/?id=1742045344) | ⬜ | ⬜ | ⬜ | flagged by onimaxxing (notLoading); not tested |

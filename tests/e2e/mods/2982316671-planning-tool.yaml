@@ -1,0 +1,26 @@
+# Planning Tool (2982316671), classes T, S, K, O, V.
+#
+# What it does: adds a Planning tool at the front of the toolbar: a drag paints coloured plan
+# marks (the shape and colour picked in its brush menu, or in a radial menu on a key) over
+# cells, saved with the colony; other modes remove, sample, copy, cut and paste plans; a plan
+# can go away once a building is built over it (an option).
+# How a player reaches it: the toolbar's Planning button (or its key).
+# What changes: plan marks drawn over the world, nothing else.
+#
+# Five plan marks are dragged along the corridor west of the printing pod, at the height of
+# its ceiling, out of the Duplicants' way.
+from: early-base
+mods: [2982316671]
+steps:
+  - expect_state:
+      "type:PlanningTool.PlanGrid::PlansDict.Count": 0
+  - driver: {camera.set: {cell: [112, 209], ortho: 8}}
+  - tool: {toolbar: Planning}
+  - expect_state:
+      "PlayerController.Instance.ActiveTool.name": PlanningToolInterface
+  - drag: {from: [108, 210], to: [112, 210]}
+  - expect_state:
+      "type:PlanningTool.PlanGrid::PlansDict.Count": 5
+  - key: {code: Escape}
+  # Below the plans, where Duplicants walk wherever the run left them, is masked.
+  - world_shot: {name: plans, ortho: 4, at: [110, 210], mask: [[0, 400, 1280, 320]]}

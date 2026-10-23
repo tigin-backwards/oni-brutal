@@ -1,0 +1,37 @@
+# Stairs (2012810337), classes B, T.
+#
+# What it does: adds Stairs to the Base menu (no research needed; more styles and scaffolding
+# with Luxury, Interior Decor, Refined Objects and Smelting): 1x1 steps of raw mineral or wood
+# and a little metal that Duplicants and rovers walk up and down diagonally, at 90 % speed,
+# instead of climbing. A grid of its own (MyGrid) marks each stair cell, its direction and
+# the cells walkable above it; pathfinding, floor checks and falling are patched to use it.
+# A stair's user menu flips its direction; deconstructing one is patched to be instant when a
+# Duplicant stands on it.
+# How a player reaches it: the build menu (Base, beside the Fire Pole); the stair's user menu.
+# What changes: a diagonal walkway between floors.
+#
+# Two steps rise from the corridor floor west of the printing pod; the lower one is then
+# selected and flipped through its user menu.
+from: early-base
+mods: [2012810337]
+steps:
+  - expect_state:
+      "type:Stairs.MyGrid::IsStair(131766)": false
+  - build: {prefab: Stairs, cells: [[114, 207], [115, 208]]}
+  - expect: {blueprints: {Stairs: 2}}
+  - run: {seconds: 900, until: {buildings: {Stairs: 2}, pending_construction: 0}}
+  - expect_state:
+      "type:Stairs.MyGrid::IsStair(131766)": true
+      "type:Stairs.MyGrid::IsStair(132403)": true
+      "type:Stairs.MyGrid::IsRightSet(131766)": false
+  - driver: {camera.set: {cell: [115, 208], ortho: 8}}
+  - click_world: {cell: [114, 207]}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Stair"}
+  - ui_dump: {name: user-menu, root: "**/DetailsScreen/UserMenuButtons/UserMenuScreen/Buttons"}
+  # Change Direction flips the step: its cell is marked as rising to the right.
+  - click: {ui: "**/UserMenuScreen/Buttons/Change DirectionButton"}
+  - expect_state:
+      "type:Stairs.MyGrid::IsRightSet(131766)": true
+      "type:Stairs.MyGrid::IsStair(131766)": true

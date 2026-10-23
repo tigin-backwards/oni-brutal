@@ -1,0 +1,27 @@
+# The Duplicant Reacharound (1854895085), class P.
+#
+# What it does: Duplicants reach farther: the game's inverted reach tables (where a Duplicant
+# may stand to work on a cell: digging, building, mopping) get eighteen more offsets, up to
+# four cells above or below and three to the side, mirrored.
+# How a player reaches it: any dig or build order out of the usual reach.
+# What changes: which orders Duplicants can reach.
+#
+# Smaller spec: the reach tables are checked after the load (they are extended in
+# Game.OnPrefabInit), and a dig order on the corridor's ceiling west of the printing pod is
+# checked to use the extended table. Showing a Duplicant work an order out of the usual reach
+# needs a deeper set-up than early-base has.
+from: early-base
+mods: [1854895085]
+steps:
+  - expect_state:
+      "type:Duplicant_Reacharound_Expanded.Patches::OffsetsExpanded": true
+      "OffsetGroups.InvertedStandardTable.Length": {save_as: reach}
+      "OffsetGroups.InvertedStandardTableWithCorners.Length": {save_as: corners}
+  - expect_state:
+      "OffsetGroups.InvertedStandardTable.Length": "== original"
+      "OffsetGroups.InvertedStandardTableWithCorners.Length": "== original"
+  - dig: [113, 211, 113, 211]
+  - expect: {pending_digs: 1}
+  # The order's reach is the extended table with corners.
+  - expect_state:
+      "all:Diggable::[0].offsetTracker.table.Length": "== corners"

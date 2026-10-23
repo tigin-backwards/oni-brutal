@@ -3,12 +3,12 @@
  "mods": [
   "1706075206"
  ],
- "verdict": "pending",
- "why": "0 run(s) of ours against original run 20261023-031612-70fa76; 2 needed",
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
  "findings": [],
  "note": "three steel ladder cells are built from spawned steel in the corridor west of the pod and selected; climbing speeds 1.5 up and down",
  "updated": "2026-10-23",
- "commit": "495e42d",
+ "commit": "2dff650",
  "mod_dlls": {
   "1706075206": {
    "SteelLadder.dll": "93fc04a01cf8ae35d2c587690a7edbd2c72b09a6d6d9f87b23dec7db4a8466df"
@@ -23,6 +23,32 @@
     "date": "2026-10-23T03:16:12",
     "lane": 14,
     "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-041512-9ddde2",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T04:23:38",
+    "lane": 14,
+    "reference_run": "20261023-031612-70fa76",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-041512-9ddde2",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T04:24:59",
+    "lane": 14,
+    "reference_run": "20261023-031612-70fa76",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
    }
   ]
  }

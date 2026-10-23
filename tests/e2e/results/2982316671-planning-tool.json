@@ -1,0 +1,30 @@
+{
+ "spec": "mods/2982316671-planning-tool.yaml",
+ "mods": [
+  "2982316671"
+ ],
+ "verdict": "pending",
+ "why": "0 run(s) of ours against original run 20261023-033546-e953d8; 2 needed",
+ "findings": [],
+ "note": "",
+ "updated": "2026-10-23",
+ "commit": "2dff650",
+ "mod_dlls": {
+  "2982316671": {
+   "PlanningTool.dll": "801987cbd20cb624fa19aa6b51299205a11b128e8dd24012ec94f6312640f2da"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-033546-e953d8",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T04:20:37",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": []
+ }
+}

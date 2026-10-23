@@ -1,0 +1,27 @@
+# Drywall Hides Pipes (1872105871), class P.
+#
+# What it does: the Drywall and the Tempshift Plate are drawn in front of pipes, wires and
+# automation (their scene layer moves from Backwall to LogicGatesFront), so a wall hides the
+# utilities behind it. Overlays still show them.
+# How a player reaches it: building drywall or a tempshift plate over utilities.
+# What changes: the draw order of those two buildings.
+#
+# setup grants Textile Production (Clothing, the Drywall's tech). A run of three wires is built
+# in the dug-out room west of the printing pod, then drywall over it and the cells around.
+from: early-base
+mods: [1872105871]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"Clothing\")", method: Purchased}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"ExteriorWall\").SceneLayer": LogicGatesFront
+      "Assets.GetBuildingDef(\"ThermalBlock\").SceneLayer": LogicGatesFront
+  - build: {prefab: Wire, cells: [[109, 208], [110, 208], [111, 208]]}
+  - expect: {blueprints: {Wire: 3}}
+  - run: {seconds: 900, until: {pending_construction: 0}}
+  - build: {prefab: ExteriorWall, cells: [[108, 208], [109, 208], [110, 208], [111, 208], [112, 208], [109, 209], [110, 209], [111, 209]], material: SandStone}
+  - expect: {blueprints: {ExteriorWall: 8}}
+  - run: {seconds: 1200, until: {buildings: {ExteriorWall: 8}, pending_construction: 0}}
+  # Below the wall, where Duplicants walk wherever the run left them, is masked, and so is the
+  # ceiling with the management bar.
+  - world_shot: {name: wall, ortho: 3, at: [110, 208], mask: [[0, 0, 1280, 170], [0, 420, 1280, 300]]}

@@ -1,0 +1,30 @@
+{
+ "spec": "mods/1854895085-duplicant-reacharound.yaml",
+ "mods": [
+  "1854895085"
+ ],
+ "verdict": "pending",
+ "why": "0 run(s) of ours against original run 20261023-033546-e953d8; 2 needed",
+ "findings": [],
+ "note": "",
+ "updated": "2026-10-23",
+ "commit": "2dff650",
+ "mod_dlls": {
+  "1854895085": {
+   "The Duplicant Reacharound 2.dll": "d02c5aaac3d14a341e8678a8d295e686f66eb261fc7f8a663af2ffba8281b5a1"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-033546-e953d8",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T04:22:00",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": []
+ }
+}

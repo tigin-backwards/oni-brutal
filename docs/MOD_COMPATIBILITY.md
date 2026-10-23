@@ -131,7 +131,7 @@ installs get developer checks subscribers never see).
 | 110 | [Refresh Immigrants / 刷新选人](https://steamcommunity.com/sharedfiles/filedetails/?id=2363561445) | ❌ | ❌ | ⬜ | broken upstream: `STRINGS.UI.TOOLS.FILTERLAYERS.ALL` is no longer a field (same in the original) |
 | 111 | [No Research Alerts](https://steamcommunity.com/sharedfiles/filedetails/?id=1872885565) | ✅ | ✅ | ⬜ |  |
 | 112 | [Settings Change Tool](https://steamcommunity.com/sharedfiles/filedetails/?id=1843647561) | ✅ | ✅ | ⬜ |  |
-| 113 | [Steel Ladder](https://steamcommunity.com/sharedfiles/filedetails/?id=1706075206) | ✅ | ✅ | ⬜ |  |
+| 113 | [Steel Ladder](https://steamcommunity.com/sharedfiles/filedetails/?id=1706075206) | ✅ | ✅ | ✅ | spec tests/e2e/mods/1706075206-steel-ladder.yaml: three steel ladder cells are built from spawned steel in the corridor west of the pod and selected; climbing speeds 1.5 up and down |
 | 114 | [Buildable POI Props](https://steamcommunity.com/sharedfiles/filedetails/?id=1704376369) | ⬜ | ⬜ | ⬜ | flagged by onimaxxing (crashesAtStartup); not tested |
 | 115 | [Replace Floors](https://steamcommunity.com/sharedfiles/filedetails/?id=2722663035) | ✅ | ✅ | ⬜ |  |
 | 116 | [Korean language](https://steamcommunity.com/sharedfiles/filedetails/?id=928441385) | ⬜ | ⬜ | ⬜ | translation: the game applies one only from a Steam subscription; not testable here |

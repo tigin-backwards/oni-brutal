@@ -1,0 +1,28 @@
+# Smart Dig // by @Ony (1844888487), classes T, K.
+#
+# What it does: with Shift held, a dig order on a natural cell spreads to every connected cell
+# of the same element within a radius (10 cells by default; Shift+X only vertically, Shift+Z
+# only horizontally; diagonals as an option); the dig tool's hover card lists those keys, and
+# a drag's size label also shows the cell count.
+# How a player reaches it: the toolbar's Dig tool, Shift held while clicking.
+# What changes: how many cells one dig order marks.
+#
+# One cell of the corridor's cuprite ceiling west of the printing pod is Shift-clicked with
+# the Dig tool; the order spreads through the cuprite around it. A plain click on
+# another cell marks that cell only.
+from: early-base
+mods: [1844888487]
+steps:
+  - expect: {pending_digs: 0}
+  - expect_state:
+      "Grid.Element[134306].id": Cuprite
+      "Grid.Element[134310].id": Cuprite
+  - driver: {camera.set: {cell: [112, 211], ortho: 12}}
+  - tool: {toolbar: Dig}
+  - drag: {from: [114, 211], to: [114, 211]}
+  - expect: {pending_digs: 1}
+  - drag: {from: [110, 211], to: [110, 211], mods: [Shift]}
+  - expect: {pending_digs: ">= 5"}
+  - expect_state:
+      "all:Diggable::Length": "== original"
+  - key: {code: Escape}

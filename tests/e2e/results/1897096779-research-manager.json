@@ -1,0 +1,30 @@
+{
+ "spec": "mods/1897096779-research-manager.yaml",
+ "mods": [
+  "1897096779"
+ ],
+ "verdict": "pending",
+ "why": "0 run(s) of ours against original run 20261023-052059-87d8f0; 2 needed",
+ "findings": [],
+ "note": "",
+ "updated": "2026-10-23",
+ "commit": "2c85c73",
+ "mod_dlls": {
+  "1897096779": {
+   "ResearchManager.dll": "e55ea78c768384a0ff15e14d551015045c0114c33f9e30e659c92fec4b32b3f4"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-052059-87d8f0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T05:37:00",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": []
+ }
+}

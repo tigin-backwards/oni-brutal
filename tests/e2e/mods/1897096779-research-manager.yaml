@@ -1,0 +1,40 @@
+# Research Manager // by @Ony (1897096779), classes S, K.
+#
+# What it does: the research screen gets a queue panel on its right ("Projects Queued: N"):
+# the queued techs in order, each clickable (a click takes it out, Shift+click moves it to the
+# front), and buttons Clear Queue, Save as Preset and Load Preset (a preset is loaded on new
+# games if the option says so). A click on a tech in the tree adds it and its missing
+# prerequisites to the end of the queue instead of replacing the queue.
+# How a player reaches it: the research screen (R), which needs a research station.
+# What changes: Research.Instance's queue, and the panel.
+from: early-base
+mods: [1897096779]
+steps:
+  - open: {management: research}
+  - ui_wait: {path: "**/FullScreenUICanvases/ResearchScreen", cond: stable}
+  - ui_wait: {path: "**/ResearchScreen/**/research-queue-root", cond: stable, frames: 600}
+  - expect_state:
+      "Research.Instance.GetResearchQueue().Count": 0
+  - expect_ui:
+      "**/research-queue-root/research-queue-title/projects-queued/label": {text: "Projects Queued: 0"}
+  # The panel covers the tree's right side: the techs clicked lie left of it. Meal Preparation
+  # comes with its prerequisite, Basic Farming.
+  - click: {ui: "**/ScrollContent/*\"FINEDINING\"* Panel"}
+  - expect_state:
+      "Research.Instance.GetResearchQueue().Count": 2
+      "Research.Instance.GetResearchQueue()[-1].tech.Id": FineDining
+  - expect_ui:
+      "**/research-queue-root/research-queue-title/projects-queued/label": {text: "Projects Queued: 2"}
+      "**/research-queue-content/ScrollPanel/Viewport/Content/*": {count: 2}
+  - ui_dump: {name: queue, root: "**/research-queue-root"}
+  - shot: {name: queue, crop: "**/ResearchScreen/research-queue-root", threshold: 0.04}
+  # Clicking a queued tech takes it out, with the queued techs that need it.
+  - click: {ui: "**/ScrollContent/*\"FARMINGTECH\"* Panel"}
+  - expect_state: {"Research.Instance.GetResearchQueue().Count": 0}
+  # Clear Queue empties it.
+  - click: {ui: "**/ScrollContent/*\"FINEDINING\"* Panel"}
+  - expect_state: {"Research.Instance.GetResearchQueue().Count": 2}
+  - click: {ui: "**/research-queue-root/research-queue-title/Button"}
+  - expect_state: {"Research.Instance.GetResearchQueue().Count": 0}
+  - expect_ui:
+      "**/research-queue-root/research-queue-title/projects-queued/label": {text: "Projects Queued: 0"}

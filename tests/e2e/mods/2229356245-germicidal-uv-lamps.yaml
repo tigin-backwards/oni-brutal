@@ -1,0 +1,38 @@
+# Germicidal UV Lamps (2229356245), classes B, O.
+#
+# What it does: adds two powered lamps to the Medicine menu: the Germicidal UV Lamp (1x3, on
+# the floor, Medical Equipment IV) and the Germicidal Ceiling Light (2x1, Medical Equipment
+# III). While lit they kill germs in the cells of their range (half-lives per germ, weaker in
+# liquid) and may sunburn Duplicants; the range shows on placement. PLib options set each
+# lamp's range, power, heat and strength; orange and violet shine bugs also kill germs.
+# How a player reaches it: the build menu (Medicine); the options on the Mods screen.
+# What changes: lamps that clear germs around them.
+#
+# Options here: the big lamp's range 5 (default 2), so its area is 11x13 cells. setup grants
+# the tech and spawns copper and ceramic (early-base has neither refined metal nor ceramic).
+# The lamp stands on the corridor floor west of the printing pod, unwired, and is selected.
+from: early-base
+mods: [2229356245]
+options:
+  "2229356245": {BigLampRange: 5}
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"MedicineIV\")", method: Purchased}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Copper\").substance", method: SpawnResource, args: [[114.5, 207.5, -12], 400, 300, 255, 0]}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Ceramic\").substance", method: SpawnResource, args: [[115.5, 207.5, -12], 400, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"MedicineIV\").unlockedItemIDs": {contains: GermicideLamp}
+      "Db.Get().Techs.Get(\"MedicineIII\").unlockedItemIDs": {contains: SmallGermicideLamp}
+  - build: {prefab: GermicideLamp, at: [114, 206]}
+  - expect: {blueprints: {GermicideLamp: 1}}
+  - run: {seconds: 900, until: {buildings: {GermicideLamp: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [114, 207], ortho: 8}}
+  - click_world: {cell: [114, 207]}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Germicidal UV Lamp"}
+  - expect_state:
+      "selected:GetComponent<RomenH.GermicideLamp.GermicideLamp>.aoeWidth": 11
+      "selected:GetComponent<RomenH.GermicideLamp.GermicideLamp>.aoeHeight": 13
+      "selected:StationaryChoreRangeVisualizer.width": 11
+      "selected:Operational.IsOperational": false

@@ -1,0 +1,30 @@
+{
+ "spec": "mods/3130257075-reveal-map.yaml",
+ "mods": [
+  "3130257075"
+ ],
+ "verdict": "pending",
+ "why": "0 run(s) of ours against original run 20261023-042128-2bb68b; 2 needed",
+ "findings": [],
+ "note": "",
+ "updated": "2026-10-23",
+ "commit": "885cbe9",
+ "mod_dlls": {
+  "3130257075": {
+   "ONIRevealMap.dll": "035f4c490e032fa0e6032bf5fe2d7f193cbb9e4a93bd4e340d506c601948a04e"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-042128-2bb68b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T05:14:55",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": []
+ }
+}

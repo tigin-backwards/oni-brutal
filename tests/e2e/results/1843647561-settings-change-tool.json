@@ -4,11 +4,11 @@
   "1843647561"
  ],
  "verdict": "pending",
- "why": "the spec fails in the original: a broken spec, or a mod broken upstream",
+ "why": "0 run(s) of ours against original run 20261023-042128-2bb68b; 2 needed",
  "findings": [],
  "note": "",
  "updated": "2026-10-23",
- "commit": "495e42d",
+ "commit": "885cbe9",
  "mod_dlls": {
   "1843647561": {
    "BulkSettingsChange.dll": "330f72fcffe9cb3d7a23c16590de941e03afcae18cbcb3f7427fa8aaa4ca9095"
@@ -17,14 +17,11 @@
  "runs": {
   "original": [
    {
-    "run": "20261023-032042-33344f",
+    "run": "20261023-042128-2bb68b",
     "index": 1,
-    "verdict": "fail",
-    "date": "2026-10-23T03:24:12",
+    "verdict": "pass",
+    "date": "2026-10-23T04:27:18",
     "lane": 14,
-    "reasons": [
-     "step 3: E2eDriver ui.wait {\"path\": \"**/ToolMenu/**/Disable Building\", \"cond\": \"stable\", \"frames\": 300}: timeout: stable not met within 300 frames"
-    ],
     "signatures": 0
    }
   ],

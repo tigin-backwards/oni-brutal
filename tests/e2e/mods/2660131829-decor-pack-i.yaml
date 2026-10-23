@@ -1,0 +1,42 @@
+# Decor Pack I - Classy Glass (2660131829), classes B, T, S, V, M.
+#
+# What it does: adds a Mood Lamp (Interior Decor, glass, 1x2 on the floor, powered: its side
+# screen picks one of many lamp variants, some tintable, rotatable or with particles), a Glass
+# Sculpture (Glass Furnishings) and Stained Glass Tiles in every dye (Glass Furnishings, the
+# tile's second material tints and insulates it), plus facades for vanilla buildings and a
+# settings screen on the Mods screen.
+# How a player reaches it: the build menu (Furniture, Base); the lamp's side screen.
+# What changes: decorative buildings and their looks.
+#
+# setup grants Interior Decor and spawns glass. A Mood Lamp stands on the corridor floor west
+# of the printing pod, unwired, and is selected; its side screen lists the variants.
+from: early-base
+mods: [2660131829]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"InteriorDecor\")", method: Purchased}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Glass\").substance", method: SpawnResource, args: [[114.5, 207.5, -12], 400, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"InteriorDecor\").unlockedItemIDs": {contains: DecorPackA_MoodLamp}
+  - build: {prefab: DecorPackA_MoodLamp, at: [113, 206]}
+  - expect: {blueprints: {DecorPackA_MoodLamp: 1}}
+  - run: {seconds: 900, until: {buildings: {DecorPackA_MoodLamp: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [113, 207], ortho: 8}}
+  - click_world: {cell: [113, 207]}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:KPrefabID.PrefabTag.Name": DecorPackA_MoodLamp
+  # The lamp starts as a random variant. The side screen's first button picks a random one
+  # again; the second is the Unicorn.
+  - ui_wait: {path: "**/DecorPackA Mood Lamp Side Screen", cond: stable}
+  - expect_ui:
+      "**/DecorPackA Mood Lamp Side Screen/Content/Scroll/Grid/ButtonPrefab": {count: ">= 40"}
+  - expect_state:
+      "ui:**/DecorPackA Mood Lamp Side Screen/Content/Scroll/Grid/ButtonPrefab[1]::GetComponent<ToolTip>.multiStringToolTips[0]": Unicorn
+  - click: {ui: "**/DecorPackA Mood Lamp Side Screen/Content/Scroll/Grid/ButtonPrefab", index: 1}
+  - expect_state:
+      "selected:GetComponent<DecorPackA.Buildings.MoodLamp.MoodLamp>.currentVariantID": unicorn
+  - click: {ui: "**/DecorPackA Mood Lamp Side Screen/Content/Scroll/Grid/ButtonPrefab", index: 2}
+  - expect_state:
+      "selected:GetComponent<DecorPackA.Buildings.MoodLamp.MoodLamp>.currentVariantID": morb
+  - shot: {name: side-screen, crop: "**/DetailsScreen/SideScreen", threshold: 0.04}

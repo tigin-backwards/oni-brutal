@@ -1,0 +1,30 @@
+{
+ "spec": "mods/2208398090-traffic-visualizer.yaml",
+ "mods": [
+  "2208398090"
+ ],
+ "verdict": "pending",
+ "why": "0 run(s) of ours against original run 20261023-042128-2bb68b; 2 needed",
+ "findings": [],
+ "note": "",
+ "updated": "2026-10-23",
+ "commit": "885cbe9",
+ "mod_dlls": {
+  "2208398090": {
+   "TrafficVisualizer.dll": "b65d932fa2ddea68355c79971f26169175cb109dd26dd5c828c21e2b293eaaad"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-042128-2bb68b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T05:23:57",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": []
+ }
+}

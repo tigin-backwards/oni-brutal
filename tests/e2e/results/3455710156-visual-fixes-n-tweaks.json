@@ -1,0 +1,30 @@
+{
+ "spec": "mods/3455710156-visual-fixes-n-tweaks.yaml",
+ "mods": [
+  "3455710156"
+ ],
+ "verdict": "pending",
+ "why": "0 run(s) of ours against original run 20261023-042128-2bb68b; 2 needed",
+ "findings": [],
+ "note": "",
+ "updated": "2026-10-23",
+ "commit": "885cbe9",
+ "mod_dlls": {
+  "3455710156": {
+   "VisualFixesNTweaks.dll": "67d4f09ff276280f42ebd5937f6b9b805fa957795a9c9146fc4423f9d44cbdc0"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-042128-2bb68b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T05:17:32",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": []
+ }
+}

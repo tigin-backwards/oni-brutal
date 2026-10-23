@@ -1,0 +1,29 @@
+# Traffic Visualizer (2208398090), classes S, V.
+#
+# What it does: adds a Traffic overlay to the overlay menu: every cell is coloured by how often
+# Duplicants have passed through it in the last three cycles (counted at each finished
+# navigation step), from cold to hot.
+# How a player reaches it: the overlay buttons in the top right.
+# What changes: a new overlay; nothing in the colony.
+#
+# The game runs half a minute so the Duplicants walk and their steps are counted; the overlay
+# is then switched on from its button. The colours follow where the Duplicants happened to
+# walk, so no world shot is compared.
+from: early-base
+mods: [2208398090]
+steps:
+  - expect_state:
+      "type:TrafficVisualizer.HotspotOverlayMode::Id.HashValue": {save_as: traffic}
+  - run: {seconds: 30}
+  - expect_state:
+      "type:TrafficVisualizer.NavigatorRecordManager::CurrentCounts.Count": "> 0"
+      "type:TrafficVisualizer.NavigatorRecordManager::max": "> 0"
+  - expect_ui:
+      "**/OverlaysBarHolder/OverlaysBar/Toggle:Traffic Overlay": {exists: true}
+  - click: {ui: "**/OverlaysBarHolder/OverlaysBar/Toggle:Traffic Overlay"}
+  - expect_state:
+      "OverlayScreen.Instance.mode.HashValue": "== traffic"
+  - ui_dump: {name: overlays, root: "**/OverlaysBarHolder/OverlaysBar"}
+  - click: {ui: "**/OverlaysBarHolder/OverlaysBar/Toggle:Traffic Overlay"}
+  - expect_state:
+      "OverlayScreen.Instance.mode.HashValue": "!= traffic"

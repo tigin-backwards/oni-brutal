@@ -1,0 +1,30 @@
+# Visual Fixes N Tweaks (3455710156), classes T, O.
+#
+# What it does: many small visual changes: ladders and fire poles draw end caps that join
+# (LadderAnimTileable), dig orders hit with a rock, metal, ice or rubble effect by the cell's
+# material, buildings tint by their contents or exterior (vents, heaters, refinery), a wall
+# preview while placing, magma bubbles, luma flies and more; PLib options switch several of
+# them (tile bits, magma, tool effects, rocket platform).
+# How a player reaches it: building ladders, giving dig orders; the options on the Mods
+# screen.
+# What changes: how those things look.
+#
+# A column of three ladders is built in the corridor west of the printing pod, and a cell of
+# its ceiling is marked for digging.
+from: early-base
+mods: [3455710156]
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"Ladder\").GetComponent<_3GuBsVisualFixesNTweaks.Scripts.LadderAnimTileable>()": exists
+      "Assets.GetPrefab(\"FirePole\").GetComponent<_3GuBsVisualFixesNTweaks.Scripts.LadderAnimTileable>()": exists
+  - build: {prefab: Ladder, cells: [[113, 207], [113, 208], [113, 209]]}
+  - expect: {blueprints: {Ladder: 3}}
+  - run: {seconds: 900, until: {buildings: {Ladder: 3}, pending_construction: 0}}
+  - dig: [113, 211, 113, 211]
+  - expect: {pending_digs: 1}
+  # Cuprite, a metal ore: the metal effect (the game's default is its generic dig effect).
+  - expect_state:
+      "Grid.Element[134309].id": Cuprite
+      "all:Diggable::[0].multitoolHitEffectTag.Name": DigMetalFx
+  - expect_state:
+      "Grid.Objects.get_Item(132401, 1).GetComponent<_3GuBsVisualFixesNTweaks.Scripts.LadderAnimTileable>()": exists

@@ -30,4 +30,8 @@ steps:
       "selected:KPrefabID.PrefabTag.Name": AirFilter2
       "selected:ElementConsumer.elementToConsume": CarbonDioxide
       "selected:ElementConsumer.consumptionRadius": 4
-  - shot: {name: details, crop: "**/DetailsScreen", threshold: 0.04}
+  # Its status follows how much filter medium has been delivered by then: only the title, the
+  # mod's English name for it, is shot.
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Carbon Dioxide Purifier"}
+  - shot: {name: title, crop: "**/DetailsScreen/TitleBar", threshold: 0.04}

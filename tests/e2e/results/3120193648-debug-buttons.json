@@ -1,0 +1,30 @@
+{
+ "spec": "mods/3120193648-debug-buttons.yaml",
+ "mods": [
+  "3120193648"
+ ],
+ "verdict": "pending",
+ "why": "0 run(s) of ours against original run 20261023-042128-2bb68b; 2 needed",
+ "findings": [],
+ "note": "",
+ "updated": "2026-10-23",
+ "commit": "885cbe9",
+ "mod_dlls": {
+  "3120193648": {
+   "DebugButton.dll": "fb863433e6205a690606844dc4d087f89327ce140be9f3519cc122541d5eba50"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-042128-2bb68b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T04:31:04",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": []
+ }
+}

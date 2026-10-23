@@ -1,0 +1,30 @@
+{
+ "spec": "mods/2600818338-material-selection-properties.yaml",
+ "mods": [
+  "2600818338"
+ ],
+ "verdict": "pending",
+ "why": "0 run(s) of ours against original run 20261023-042128-2bb68b; 2 needed",
+ "findings": [],
+ "note": "",
+ "updated": "2026-10-23",
+ "commit": "885cbe9",
+ "mod_dlls": {
+  "2600818338": {
+   "MaterialSelectionProperties.dll": "e2d317a3ed241c3ba2f3323cf42aa9778b6909c13160a2a753d851633b710ff7"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-042128-2bb68b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T05:16:14",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": []
+ }
+}

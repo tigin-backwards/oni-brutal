@@ -1,0 +1,23 @@
+# Material Selection Properties (2600818338), class S.
+#
+# What it does: the build menu's material panel lists, under each material's effects, its
+# thermal conductivity, specific heat capacity and (for solids) melting point; for tiles,
+# doors and other buildings that become part of the grid, also its radiation absorption
+# (Spaced Out).
+# How a player reaches it: the build menu, any building, its materials.
+# What changes: the material panel's descriptors.
+#
+# The Tile is picked in the Base menu after a short run (the menu counts materials only then);
+# its material panel shows the properties of the first material, sandstone.
+from: early-base
+mods: [2600818338]
+steps:
+  - run: {seconds: 5}
+  - driver: {camera.set: {cell: [126, 208], ortho: 10}}
+  - click: {ui: "**/PlanScreen/Toggle:Base"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/Tile Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/Tile Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
+  - expect_ui:
+      "**/ProductInfoScreen/**/MaterialEffects/DescLabel": {any_text: "~Specific Heat Capacity"}
+  - shot: {name: materials, crop: "**/ProductInfoScreen", threshold: 0.04}

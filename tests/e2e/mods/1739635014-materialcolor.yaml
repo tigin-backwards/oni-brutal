@@ -1,0 +1,33 @@
+# MaterialColor (1739635014), classes S, K, V.
+#
+# What it does: buildings and built tiles are tinted with the colour of the material they are
+# made of (from a JSON of element colours; filters and factors in its config); an overlay
+# button ("Toggle MaterialColor", also on a key) switches the tinting off and on.
+# How a player reaches it: the overlay buttons in the top right.
+# What changes: the colours buildings are drawn with.
+#
+# early-base's manual generator, of copper ore, is tinted copper; the overlay button switches
+# the tinting off, and the generator's tint goes back.
+from: early-base
+mods: [1739635014]
+steps:
+  - expect_state:
+      "type:MaterialColor.State::Config.Enabled": true
+      "all:ManualGenerator::[0].GetComponent<PrimaryElement>().ElementID": Cuprite
+      "all:ManualGenerator::[0].GetComponent<KBatchedAnimController>().TintColour.r": 51
+      "all:ManualGenerator::[0].GetComponent<KBatchedAnimController>().TintColour.g": 13
+  - expect_ui:
+      "**/OverlaysBarHolder/OverlaysBar/Toggle:Toggle MaterialColor": {exists: true}
+  - ui_dump: {name: overlays, root: "**/OverlaysBarHolder/OverlaysBar"}
+  - click: {ui: "**/OverlaysBarHolder/OverlaysBar/Toggle:Toggle MaterialColor"}
+  - expect_state:
+      "type:MaterialColor.State::Config.Enabled": false
+      "all:ManualGenerator::[0].GetComponent<KBatchedAnimController>().TintColour.r": "> 51"
+  - expect_state:
+      "all:ManualGenerator::[0].GetComponent<KBatchedAnimController>().TintColour.r": "== original"
+      "all:ManualGenerator::[0].GetComponent<KBatchedAnimController>().TintColour.g": "== original"
+  # Switched on again.
+  - click: {ui: "**/OverlaysBarHolder/OverlaysBar/Toggle:Toggle MaterialColor"}
+  - expect_state:
+      "type:MaterialColor.State::Config.Enabled": true
+      "all:ManualGenerator::[0].GetComponent<KBatchedAnimController>().TintColour.r": 51

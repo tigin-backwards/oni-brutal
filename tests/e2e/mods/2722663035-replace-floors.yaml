@@ -1,0 +1,42 @@
+# Replace Floors (2722663035), class P.
+#
+# What it does: Farm Tiles, Hydroponic Farms, Heavi-Watt Joint Plates, Weight Plates, Radbolt
+# Joint Plates and the printed POI tiles get the FloorTiles tag, which ordinary tiles may
+# replace; so a Tile, Metal Tile, Insulated Tile, ... can be built straight over one of them
+# (a replacement order) instead of deconstructing it first. The POI tile is made replaceable
+# itself.
+# How a player reaches it: the build menu, placing a tile over such a building.
+# What changes: which buildings a tile replaces.
+#
+# setup grants Meal Preparation (the Farm Tile's tech) and spawns dirt. A Farm Tile fills one
+# cell of the pit in the floor of the dug-out room west of the printing pod; a Tile is then
+# ordered over it through the build menu, and replaces it.
+from: early-base
+mods: [2722663035]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"FineDining\")", method: Purchased}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Dirt\").substance", method: SpawnResource, args: [[110.5, 207.5, -12], 400, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"FarmTile\").GetComponent<KPrefabID>().HasTag(\"FloorTiles\")": true
+      "Assets.GetPrefab(\"HydroponicFarm\").GetComponent<KPrefabID>().HasTag(\"FloorTiles\")": true
+      "Assets.GetBuildingDef(\"TilePOI\").Replaceable": true
+  - build: {prefab: FarmTile, at: [108, 206]}
+  - expect: {blueprints: {FarmTile: 1}}
+  - run: {seconds: 900, until: {buildings: {FarmTile: 1}, pending_construction: 0}}
+  # OniMcp places no blueprint over a building: the Tile is placed through the build menu.
+  # The building menu's info card covers the screen's left half: the target is kept right of it.
+  - driver: {camera.set: {cell: [101, 208], ortho: 8}}
+  - click: {ui: "**/PlanScreen/Toggle:Base"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/Tile Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/Tile Group*"}
+  - expect_state: {"PlayerController.Instance.ActiveTool.name": BuildTool}
+  - click_world: {cell: [108, 206]}
+  - key: {code: Escape}
+  - expect: {blueprints: {Tile: 1}}
+  - run: {seconds: 900, until: {buildings: {FarmTile: 0}, pending_construction: 0}}
+  - expect:
+      buildings: {FarmTile: 0}
+  - expect_state:
+      "Grid.Objects.get_Item(131124, 9).GetComponent<KPrefabID>().PrefabTag.Name": Tile
+      "Grid.Solid.get_Item(131124)": true

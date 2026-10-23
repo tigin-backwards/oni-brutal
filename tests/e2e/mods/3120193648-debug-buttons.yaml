@@ -1,0 +1,32 @@
+# Debug Buttons (3120193648), classes S, K, O.
+#
+# What it does: adds four buttons beside the Sandbox toggle in the top left: Debug Mode (turns
+# the game's debug mode on and off), Insta Build, Superspeed (time scale 30) and Dev Tools
+# (the ImGui developer tools); the last three only work while debug mode is on. A PLib option
+# shows them only in sandbox saves.
+# How a player reaches it: the buttons in the top left, beside the clock.
+# What changes: the game's debug mode and its instant build.
+#
+# Debug mode is switched on, insta build with it, and both are switched off again.
+from: early-base
+mods: [3120193648]
+steps:
+  - expect_state:
+      "DebugHandler.enabled": false
+      "DebugHandler.InstantBuildMode": false
+  # The buttons are copies of the (hidden) Sandbox toggle: Debug Mode, Insta Build, Superspeed
+  # and Dev Tools, in that order.
+  - expect_ui:
+      "**/TopLeftControlPanel(Clone)/SecondaryRow/SandboxToggle/Label": {count: 4}
+      "**/TopLeftControlPanel(Clone)/SecondaryRow/SandboxToggle[0]/Label": {text: "DEBUG MODE"}
+      "**/TopLeftControlPanel(Clone)/SecondaryRow/SandboxToggle[1]/Label": {text: "INSTA BUILD"}
+  - ui_dump: {name: buttons, root: "**/TopLeftControlPanel(Clone)/SecondaryRow"}
+  - click: {ui: "**/TopLeftControlPanel(Clone)/SecondaryRow/SandboxToggle", index: 0}
+  - expect_state: {"DebugHandler.enabled": true}
+  - click: {ui: "**/TopLeftControlPanel(Clone)/SecondaryRow/SandboxToggle", index: 1}
+  - expect_state: {"DebugHandler.InstantBuildMode": true}
+  - shot: {name: enabled, crop: "**/TopLeftControlPanel(Clone)/SecondaryRow", threshold: 0.04}
+  - click: {ui: "**/TopLeftControlPanel(Clone)/SecondaryRow/SandboxToggle", index: 0}
+  - expect_state:
+      "DebugHandler.enabled": false
+      "DebugHandler.InstantBuildMode": false

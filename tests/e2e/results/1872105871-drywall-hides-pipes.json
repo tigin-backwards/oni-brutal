@@ -3,12 +3,12 @@
  "mods": [
   "1872105871"
  ],
- "verdict": "pending",
- "why": "0 run(s) of ours against original run 20261023-033546-e953d8; 2 needed",
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
  "findings": [],
- "note": "",
+ "note": "three wires are built west of the pod and drywall over and around them; the drywall's scene layer is in front of the wires, and the wall is shot with the wires hidden",
  "updated": "2026-10-23",
- "commit": "2dff650",
+ "commit": "885cbe9",
  "mod_dlls": {
   "1872105871": {
    "DrywallHidesPipes.dll": "6361645c106aa84001c907b52bf30d476f673d9b93f5780ab19f5048afcc4fc6"
@@ -25,6 +25,35 @@
     "signatures": 0
    }
   ],
-  "ours": []
+  "ours": [
+   {
+    "run": "20261023-051800-25dc24",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T05:26:55",
+    "lane": 14,
+    "reference_run": "20261023-033546-e953d8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "wall": 0.003938
+    }
+   },
+   {
+    "run": "20261023-051800-25dc24",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T05:28:30",
+    "lane": 14,
+    "reference_run": "20261023-033546-e953d8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "wall": 0.011719
+    }
+   }
+  ]
  }
 }

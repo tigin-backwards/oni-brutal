@@ -1,0 +1,20 @@
+# Reveal Map (3130257075), class S.
+#
+# What it does: copying the world seed from the pause menu (its clipboard button beside the
+# seed) also reveals the whole active world: every cell's fog of war is lifted.
+# How a player reaches it: Escape, then the copy button beside the world seed.
+# What changes: the map's visibility.
+#
+# Before the click a cell near the asteroid's bottom left corner, (20, 20), is still hidden;
+# after it, it is revealed.
+from: early-base
+mods: [3130257075]
+steps:
+  - expect_state:
+      "Grid.Visible[12740]": 0
+  - key: {code: Escape}
+  - ui_wait: {path: "**/PauseScreen", cond: stable}
+  - click: {ui: "**/PauseScreen/**/SeedContainer/CopyButton"}
+  - expect_state:
+      "Grid.Visible[12740]": 255
+  - key: {code: Escape}

@@ -1,0 +1,31 @@
+{
+ "spec": "mods/1739635014-materialcolor.yaml",
+ "mods": [
+  "1739635014"
+ ],
+ "verdict": "pending",
+ "why": "0 run(s) of ours against original run 20261023-042128-2bb68b; 2 needed",
+ "findings": [],
+ "note": "",
+ "updated": "2026-10-23",
+ "commit": "885cbe9",
+ "mod_dlls": {
+  "1739635014": {
+   "Common.dll": "87a6b9950dc4f7703d1d165fab10c6aeddad6810531639062a4a40bbe6fefb3a",
+   "MaterialColor.dll": "42ba05fac37b60a317f450ebf9e2c6b19cac482d76265556fe562c77d4615afc"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-042128-2bb68b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T05:20:57",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": []
+ }
+}

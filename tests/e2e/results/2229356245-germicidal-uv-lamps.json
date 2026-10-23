@@ -1,0 +1,30 @@
+{
+ "spec": "mods/2229356245-germicidal-uv-lamps.yaml",
+ "mods": [
+  "2229356245"
+ ],
+ "verdict": "pending",
+ "why": "0 run(s) of ours against original run 20261023-042128-2bb68b; 2 needed",
+ "findings": [],
+ "note": "",
+ "updated": "2026-10-23",
+ "commit": "885cbe9",
+ "mod_dlls": {
+  "2229356245": {
+   "GermicidalLamps.dll": "f619b1d9e7dd862ebaef2ce70f95244fd2977587b4dce17642928b7186a1a877"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-042128-2bb68b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T05:19:04",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": []
+ }
+}

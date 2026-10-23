@@ -29,11 +29,12 @@
 
 - id: scroll-normalized-position
   description: >-
-    A ScrollRect whose content fits in its viewport reports normalizedPosition x 1 in ours, 0 in
-    the original.
+    A ScrollRect whose content exactly fits its viewport reports a normalizedPosition axis (and
+    its Scrollbar's value) of 1 in ours, 0 in the original: which one is decided by the
+    sub-ulp rounding of the transformed corners (docs/cleanroom/ugui.md, ScrollRect measured).
   link: tests/e2e/mods/3468585385-blueprints-expanded.yaml
-  component: [ScrollRect, KScrollRect]
-  fields: [normalizedPosition]
+  component: [ScrollRect, KScrollRect, Scrollbar]
+  fields: [normalizedPosition, value]
 
 - id: unused-input-caret-layout
   description: >-

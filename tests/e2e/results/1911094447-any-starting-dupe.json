@@ -1,0 +1,55 @@
+{
+ "spec": "mods/1911094447-any-starting-dupe.yaml",
+ "mods": [
+  "1911094447"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "today's build only logs the personalities: a smaller spec, its two log lines in both players, it loads enabled and the colony runs",
+ "updated": "2026-10-23",
+ "commit": "38691b4",
+ "mod_dlls": {
+  "1911094447": {
+   "AnyStartingDupe.dll": "883eb484f369981b11b899bf0c1038e70cf21e4774b2c52a346b7da02ef23f1c"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-141440-0a337e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T14:18:27",
+    "lane": 13,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-162701-695adb",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T16:27:01",
+    "lane": 13,
+    "reference_run": "20261023-141440-0a337e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-162701-695adb",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T16:31:53",
+    "lane": 13,
+    "reference_run": "20261023-141440-0a337e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

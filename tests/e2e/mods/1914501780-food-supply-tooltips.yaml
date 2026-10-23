@@ -1,0 +1,27 @@
+# Food Supply Tooltips (1914501780), class S.
+#
+# What it does: adds food information to the game's screens: a selected crop plant lists, for
+# each food its harvest can be made into, the calories a cycle it would provide ("Liceloaf:
+# ... kcal/cycle", or "Not growing"); a selected critter does the same for its meat and eggs;
+# the top-left rations meter's tooltip gains this cycle's, last cycle's and the 5-cycle average
+# of calories made and eaten (postfixes on Crop.InformationDescriptors,
+# CreatureCalorieMonitor.Def.GetDescriptors and MeterScreen_Rations.OnTooltip).
+# How a player reaches it: selecting a plant or critter; hovering the rations meter.
+# What changes: extra lines in those screens.
+#
+# setup sets a wild Mealwood down in the dug-out corridor west of the printing pod (114, 206).
+# After a short run it is selected: its descriptors list the foods its Meal Lice make.
+from: early-base
+mods: [1914501780]
+setup:
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131130, 0, 0, \"BasicSingleHarvestPlant\", \"BuildingBack\")", method: SetActive, args: [true]}}
+steps:
+  - run: {seconds: 5}
+  - driver: {camera.set: {cell: [114, 208], ortho: 8}}
+  - click_world: {cell: [114, 206], select: BasicSingleHarvestPlant}
+  - ui_wait: {path: "**/SimpleInfoScreen/**/Descriptors/DescLabel", cond: stable}
+  - expect_ui:
+      "**/SimpleInfoScreen/**/Descriptors/DescLabel": {any_text: "~Liceloaf"}
+  - expect_ui:
+      "**/SimpleInfoScreen/**/Descriptors/DescLabel": {any_text: "~Pickled Meal"}
+  - ui_dump: {name: descriptors, root: "**/SimpleInfoScreen/**/ContentStatus/Descriptors", mask_text: ['[\d.,]+']}

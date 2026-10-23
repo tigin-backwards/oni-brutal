@@ -1,0 +1,21 @@
+# Any Starting Dupe (1911094447), class P.
+#
+# What it did: let every Duplicant personality appear among the starting Duplicants. The
+# Workshop build for today's game (2.1.0) only lists the personalities at start-up: a postfix
+# on Db.Initialize writes "Valid starting personalities:" and "All personalities:" to the log
+# (the names themselves go to the console), and changes nothing.
+# How a player reaches it: nothing to reach; the log, at start-up.
+# What changes: nothing in the game; two log lines.
+#
+# A smaller spec, as the build changes nothing: its log lines are written in both players, it
+# is loaded and enabled, the starting personalities are as many as in the original, and the
+# colony runs.
+from: early-base
+mods: [1911094447]
+require_log: ['Valid starting personalities:', 'All personalities:']
+steps:
+  - expect_state:
+      "count:Global.Instance.modManager.mods[*] if .staticID == asquared31415.AnyStartingDupe and .IsEnabledForActiveDlc() == true": 1
+      "Db.Get().Personalities.GetStartingPersonalities().Count": "== original"
+  - run: {seconds: 60}
+  - expect: {duplicants: 3, buildings: {Outhouse: 1, ResearchCenter: 1, ManualGenerator: 1, Bed: 1}}

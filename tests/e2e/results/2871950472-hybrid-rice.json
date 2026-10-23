@@ -1,0 +1,56 @@
+{
+ "spec": "mods/2871950472-hybrid-rice.yaml",
+ "mods": [
+  "2871950472"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a wild Mealwood shows a 0.7-cycle life and is ready to harvest after 450 s",
+ "updated": "2026-10-23",
+ "commit": "38691b4",
+ "mod_dlls": {
+  "2871950472": {
+   "PLib.dll": "b862c5db2b3cd6df09a62d4a30782e91e2b24e8e1bfac08d991c9cc89a984ba9",
+   "S_╘╙╜╗╦«╡╛.dll": "c4df8d4c8b737e098adc8958a3f08248b046557c302ca47b7d2c4ea1babf21b0"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-150021-d9fd53",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T15:08:03",
+    "lane": 12,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-160931-00e69e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T16:11:17",
+    "lane": 12,
+    "reference_run": "20261023-150021-d9fd53",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-160931-00e69e",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T16:18:44",
+    "lane": 12,
+    "reference_run": "20261023-150021-d9fd53",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

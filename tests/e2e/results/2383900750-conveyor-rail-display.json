@@ -1,0 +1,59 @@
+{
+ "spec": "mods/2383900750-conveyor-rail-display.yaml",
+ "mods": [
+  "2383900750"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Conveyor Filter built; it is drawn behind rails (OverlayBackLayer), and the conveyor overlay turns the mod's layer on",
+ "updated": "2026-10-23",
+ "commit": "38691b4",
+ "mod_dlls": {
+  "2383900750": {
+   "ConveyorRailDisplay.dll": "32763d23181418ff76dce422d76aabd48708c8e82ee556d166bb1d7fe31650f5"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-142249-8bc65a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T14:56:39",
+    "lane": 13,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-161214-a2e478",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T16:12:14",
+    "lane": 13,
+    "reference_run": "20261023-142249-8bc65a",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "conveyor-overlay": 0.000785
+    }
+   },
+   {
+    "run": "20261023-161214-a2e478",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T16:13:33",
+    "lane": 13,
+    "reference_run": "20261023-142249-8bc65a",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "conveyor-overlay": 0.000318
+    }
+   }
+  ]
+ }
+}

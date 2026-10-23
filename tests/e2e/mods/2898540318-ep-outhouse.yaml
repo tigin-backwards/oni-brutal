@@ -1,0 +1,27 @@
+# 环保户外厕所 EP Outhouse (2898540318), class P.
+#
+# What it does: the Outhouse becomes eco-friendly: a postfix on
+# OuthouseConfig.ConfigureBuildingTemplate sets its Toilet to 100 uses before it must be
+# emptied (the game's 15), each use leaving 6.7 kg of Fertilizer where the game leaves
+# polluted dirt, and its dirt delivery to hold 1,300 kg.
+# How a player reaches it: building or using an Outhouse.
+# What changes: how often an outhouse needs emptying, and what it leaves.
+#
+# early-base already has an Outhouse: it is selected, and its toilet and delivery read the
+# mod's numbers.
+from: early-base
+mods: [2898540318]
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"Outhouse\").BuildingComplete.GetComponent<Toilet>.maxFlushes": 100
+      "Assets.GetBuildingDef(\"Outhouse\").BuildingComplete.GetComponent<Toilet>.solidWastePerUse.elementID": Fertilizer
+      "Assets.GetBuildingDef(\"Outhouse\").BuildingComplete.GetComponent<ManualDeliveryKG>.capacity": 1300
+  - driver: {camera.set: {cell: [116, 208], ortho: 8}}
+  - click_world: {cell: [116, 208], select: Outhouse}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Outhouse"}
+  - expect_state:
+      "selected:Toilet.maxFlushes": 100
+      "selected:ManualDeliveryKG.capacity": 1300
+  - shot: {name: details, crop: "**/DetailsScreen", threshold: 0.04}

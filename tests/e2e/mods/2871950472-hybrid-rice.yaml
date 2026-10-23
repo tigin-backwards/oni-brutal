@@ -1,0 +1,34 @@
+# S 杂交水稻 Hybrid Rice 1.7 (2871950472), classes P, O.
+#
+# What it does: the Mealwood becomes "hybrid rice": a prefix on Db.Initialize makes its crop
+# take 100 s (the game's 1,800) and give 10 Meal Lice (the game's 1), Meal Lice, Liceloaf and
+# Pickled Meal no longer rot and are of quality 6; a postfix on
+# BasicSingleHarvestPlantConfig.CreatePrefab makes a farmed Mealwood need 0.01 kg/s of Dirt
+# and widens its temperature range. PLib options (its own J001GG1.json) set the dirt, the time
+# and the yield.
+# How a player reaches it: planting or finding a Mealwood.
+# What changes: a Mealwood grows 18 times as fast and yields 10 times as much.
+#
+# setup sets a wild Mealwood down in the dug-out corridor west of the printing pod (114, 206).
+# Selected, it shows a life cycle of 0.7 cycles (the game's wild one takes 12); after 450 s it
+# is ready to harvest.
+from: early-base
+mods: [2871950472]
+setup:
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131130, 0, 0, \"BasicSingleHarvestPlant\", \"BuildingBack\")", method: SetActive, args: [true]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"BasicSingleHarvestPlant\").GetComponent<Crop>.cropVal.cropDuration": 100
+      "Assets.GetPrefab(\"BasicSingleHarvestPlant\").GetComponent<Crop>.cropVal.numProduced": 10
+      "TUNING.FOOD.FOOD_TYPES.BASICPLANTFOOD.CanRot": false
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [114, 208], ortho: 8}}
+  - click_world: {cell: [114, 206], select: BasicSingleHarvestPlant}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/SimpleInfoScreen/**/ContentStatus/ConditionContainerNormal/Label": {any_text: "~[Life Cycle: 0.7 cycles]"}
+  - expect_state:
+      "selected:GetComponent<Growing>.ReachedNextHarvest()": false
+  - run: {seconds: 450}
+  - expect_state:
+      "selected:GetComponent<Growing>.ReachedNextHarvest()": true

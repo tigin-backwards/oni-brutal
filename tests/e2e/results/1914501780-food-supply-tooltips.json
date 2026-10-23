@@ -1,0 +1,63 @@
+{
+ "spec": "mods/1914501780-food-supply-tooltips.yaml",
+ "mods": [
+  "1914501780"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Mealwood selected lists the foods its harvest makes (Liceloaf, Pickled Meal) in its descriptors",
+ "updated": "2026-10-23",
+ "commit": "38691b4",
+ "mod_dlls": {
+  "1914501780": {
+   "FoodTooltip.dll": "3bbbdbaacbf2cb8106e329858dd0cc66e6688231e82d87fea013906ef3cc5c8b"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-150021-d9fd53",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T15:12:24",
+    "lane": 12,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-162720-80eadb",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T16:27:20",
+    "lane": 12,
+    "reference_run": "20261023-150021-d9fd53",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "descriptors": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261023-162720-80eadb",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T16:31:31",
+    "lane": 12,
+    "reference_run": "20261023-150021-d9fd53",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "descriptors": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

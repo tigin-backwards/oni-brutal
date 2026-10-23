@@ -1,0 +1,30 @@
+# Stock Bug Fix (1967921388), classes O, M.
+#
+# What it does: about thirty fixes to the game, several behind PLib options: missing or
+# nonsensical overheat temperatures (the Kiln and the Algae Distiller overheat at 125 °C, a
+# Park Sign never does), food and equipment storing moved from the Supply to the Store errand
+# group, conflicting traits and interests kept apart, the Long Commutes check, decor that
+# refreshes, sweeping that finishes, timelapse framing, and, on the main menu, the Mods button
+# held back until a race in the game's Steam mod update has passed.
+# How a player reaches it: none to reach for most; the Mods screen's options; the priorities
+# screen's errand groups.
+# What changes: those buildings' overheating, which errand group stores food, and the rest.
+#
+# Options at their defaults. The overheat fixes are on the buildings' definitions, food
+# storing is a Store errand, and the colony runs.
+from: early-base
+mods: [1967921388]
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"Kiln\").Overheatable": true
+      "Assets.GetBuildingDef(\"Kiln\").OverheatTemperature": 398.15
+      "Assets.GetBuildingDef(\"AlgaeDistillery\").Overheatable": true
+      "Assets.GetBuildingDef(\"ParkSign\").Overheatable": false
+      "Db.Get().ChoreTypes.FoodFetch.groups[0].Id": Storage
+      "Db.Get().ChoreTypes.EquipmentFetch.groups[0].Id": Storage
+  - open: {management: priorities}
+  - ui_wait: {path: "**/JobsTableScreen", cond: stable}
+  - shot: {name: priorities, crop: "**/JobsTableScreen", threshold: 0.04, mask: ["**/JobsTableScreen/**/Portrait*"]}
+  - key: {code: Escape}
+  - run: {seconds: 60}
+  - expect: {duplicants: 3, buildings: {Outhouse: 1, ResearchCenter: 1, ManualGenerator: 1, Bed: 1}}

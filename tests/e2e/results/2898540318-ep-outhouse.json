@@ -1,0 +1,59 @@
+{
+ "spec": "mods/2898540318-ep-outhouse.yaml",
+ "mods": [
+  "2898540318"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the base's outhouse, selected, takes 100 uses and 1,300 kg of dirt, and leaves fertilizer",
+ "updated": "2026-10-23",
+ "commit": "38691b4",
+ "mod_dlls": {
+  "2898540318": {
+   "╗╖▒ú╗º═Γ▓▐╦∙ EP Outhouse.dll": "7259c99b26e6e681cab6df2096a56b0517ffc4ec81ed9b39d68534634daaf09c"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-142249-8bc65a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T14:55:15",
+    "lane": 13,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-160836-8c6abb",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T16:08:36",
+    "lane": 13,
+    "reference_run": "20261023-142249-8bc65a",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "details": 0.0
+    }
+   },
+   {
+    "run": "20261023-160836-8c6abb",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T16:09:35",
+    "lane": 13,
+    "reference_run": "20261023-142249-8bc65a",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "details": 0.0
+    }
+   }
+  ]
+ }
+}

@@ -147,7 +147,7 @@ installs get developer checks subscribers never see).
 | 126 | [[ภาษาไทย] Thai Localisation Pack](https://steamcommunity.com/sharedfiles/filedetails/?id=1416077105) | ⬜ | ⬜ | ⬜ | translation: the game applies one only from a Steam subscription; not testable here |
 | 127 | [Material Selection Properties](https://steamcommunity.com/sharedfiles/filedetails/?id=2600818338) | ✅ | ✅ | ⬜ |  |
 | 128 | [Algae Grower](https://steamcommunity.com/sharedfiles/filedetails/?id=1703606095) | ✅ | ✅ | ✅ | spec tests/e2e/mods/1703606095-algae-grower.yaml: an Algae Grower is built from dirt on the corridor floor west of the pod and selected: three consumed elements, algae output, fertilizer delivery, no light there |
-| 129 | [Reveal Map](https://steamcommunity.com/sharedfiles/filedetails/?id=3130257075) | ✅ | ✅ | ⬜ |  |
+| 129 | [Reveal Map](https://steamcommunity.com/sharedfiles/filedetails/?id=3130257075) | ✅ | ✅ | ✅ | spec tests/e2e/mods/3130257075-reveal-map.yaml: the pause menu's copy button beside the world seed reveals a hidden cell at the asteroid's bottom left |
 | 130 | [MaterialColor](https://steamcommunity.com/sharedfiles/filedetails/?id=1739635014) | ✅ | ✅ | ⬜ |  |
 | 131 | [Planning Tool](https://steamcommunity.com/sharedfiles/filedetails/?id=2982316671) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2982316671-planning-tool.yaml: five plan marks are dragged with the toolbar's Planning tool along the corridor ceiling west of the pod; the plans are counted and shot |
 | 132 | [Traditional Chinese Language Pack](https://steamcommunity.com/sharedfiles/filedetails/?id=929305589) | ⬜ | ⬜ | ⬜ | translation: the game applies one only from a Steam subscription; not testable here |

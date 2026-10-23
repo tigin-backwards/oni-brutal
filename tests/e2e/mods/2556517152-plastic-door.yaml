@@ -1,0 +1,39 @@
+# Plastic Door (2556517152), classes B, S.
+#
+# What it does: adds the Plastic Door to the Base menu (Luxury): a 1x2 curtain of plastic (any
+# of four plastics, tagged AC_FlexibleMaterial) that keeps gas out while closed, lets light and
+# decor through, and flutters open while a Duplicant passes. Its side screen (a PLib panel,
+# "Plastic Door Permissions") has Lock, Auto and Open buttons; a Duplicant then walks to the
+# door to apply the change (a 3 s errand).
+# How a player reaches it: the build menu (Base); the door's side screen.
+# What changes: a see-through airlock.
+#
+# setup grants Luxury and spawns plastic. The door is built in the dug-out corridor west of
+# the printing pod and selected; its side screen is dumped and shot, and its Lock button
+# queues a change that a Duplicant carries out.
+from: early-base
+mods: [2556517152]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"Luxury\")", method: Purchased}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Polypropylene\").substance", method: SpawnResource, args: [[114.5, 207.5, -12], 600, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"Luxury\").unlockedItemIDs": {contains: AC_PlasticCurtain}
+  - build: {prefab: AC_PlasticCurtain, at: [112, 207]}
+  - expect: {blueprints: {AC_PlasticCurtain: 1}}
+  - run: {seconds: 900, until: {buildings: {AC_PlasticCurtain: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 208], select: AC_PlasticCurtain}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/SimpleCurtainSidescreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<RomenH.PlasticDoor.Curtain>.CurrentState": Auto
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Plastic Door"}
+  - ui_dump: {name: side-screen, root: "**/SimpleCurtainSidescreen"}
+  - shot: {name: details, crop: "**/DetailsScreen", threshold: 0.04}
+  - click: {ui: "**/SimpleCurtainSidescreen/**/LockButton"}
+  - expect_state:
+      "selected:GetComponent<RomenH.PlasticDoor.Curtain>.RequestedState": Locked
+  - run: {seconds: 120}
+  - expect_state:
+      "selected:GetComponent<RomenH.PlasticDoor.Curtain>.CurrentState": Locked

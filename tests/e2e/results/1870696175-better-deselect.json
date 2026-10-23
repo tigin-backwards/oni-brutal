@@ -1,0 +1,55 @@
+{
+ "spec": "mods/1870696175-better-deselect.yaml",
+ "mods": [
+  "1870696175"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a right click after choosing a Ladder drops the build tool but keeps the build menu, a second closes it; Escape closes both at once",
+ "updated": "2026-10-23",
+ "commit": "e271778",
+ "mod_dlls": {
+  "1870696175": {
+   "BetterDeselect.dll": "728786615a93d8f5b4b3bbc9866c9fb7a362719ee5c11d3dffc27a74ab126925"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-033708-7bb20f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T03:37:09",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-052054-bf6aa9",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T05:20:54",
+    "lane": 16,
+    "reference_run": "20261023-033708-7bb20f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-052054-bf6aa9",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T05:21:41",
+    "lane": 16,
+    "reference_run": "20261023-033708-7bb20f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2844843044-drag-area-more-visible.yaml",
+ "mods": [
+  "2844843044"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Dig tool's box and label take the mod's colours and 40-point font, a dig drag places its orders, and leaving the tool puts the font back to 18",
+ "updated": "2026-10-23",
+ "commit": "e271778",
+ "mod_dlls": {
+  "2844843044": {
+   "DragAreaMoreVisible.dll": "d7677f0a8a70922ee550c06729319f1bc55f1fde5080242a70aa2f1d35229425"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-032932-0b9d62",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T03:29:32",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-051732-562df3",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T05:17:32",
+    "lane": 16,
+    "reference_run": "20261023-032932-0b9d62",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-051732-562df3",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T05:18:17",
+    "lane": 16,
+    "reference_run": "20261023-032932-0b9d62",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

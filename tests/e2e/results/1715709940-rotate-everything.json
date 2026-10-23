@@ -1,0 +1,55 @@
+{
+ "spec": "mods/1715709940-rotate-everything.yaml",
+ "mods": [
+  "1715709940"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Storage Bin, unrotatable in the game, is chosen from the build menu, flipped with O and placed; its blueprint keeps the flip",
+ "updated": "2026-10-23",
+ "commit": "e271778",
+ "mod_dlls": {
+  "1715709940": {
+   "rotate_everything.dll": "4626485b52e6c909ec5b267591d81064b0cf4b1f36a25c494ed53747cdad51f0"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-032754-afbff0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T03:27:54",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-051546-5d623d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T05:15:46",
+    "lane": 16,
+    "reference_run": "20261023-032754-afbff0",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-051546-5d623d",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T05:16:41",
+    "lane": 16,
+    "reference_run": "20261023-032754-afbff0",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

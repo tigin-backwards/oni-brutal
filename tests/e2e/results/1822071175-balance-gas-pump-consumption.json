@@ -1,0 +1,55 @@
+{
+ "spec": "mods/1822071175-balance-gas-pump-consumption.yaml",
+ "mods": [
+  "1822071175"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the three defs draw half power; a Gas Pump built from the base's metal ore asks for 120 W when selected",
+ "updated": "2026-10-23",
+ "commit": "e271778",
+ "mod_dlls": {
+  "1822071175": {
+   "BalanceGasPumpComsumption.dll": "fe88e44fbd87f74ed2c6ebfef2965f929ce221412c14192d3f4a8a52df4d593a"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-032142-4c0ded",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T03:22:45",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-042859-f00cf4",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T04:28:59",
+    "lane": 16,
+    "reference_run": "20261023-032142-4c0ded",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-042859-f00cf4",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T04:30:16",
+    "lane": 16,
+    "reference_run": "20261023-032142-4c0ded",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

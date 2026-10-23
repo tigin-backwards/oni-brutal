@@ -1,0 +1,31 @@
+# Drag Area More Visible (2844843044), class T.
+#
+# What it does: the box a drag tool draws (dig, mop, sweep, cancel ...) is opaque white, and
+# its size label ("3 x 2") black and in a 40-point font, from its config.json (Size 40,
+# Background 255,255,255, Foreground 0,0,0). A postfix on DragTool.OnActivateTool sets the
+# tool's areaColour and its area visualizer's material colour, and the label prefab's text
+# style's font size; a postfix on DragTool.OnDeactivateTool puts the font size back to 18.
+# How a player reaches it: any drag tool from the toolbar.
+# What changes: how the drag box and its label look; the game's box is translucent white.
+#
+# The Dig tool is chosen from the toolbar: its box and label take the mod's colours and size
+# (read from the tool, as the box is drawn only while the button is held), a box is dragged
+# over the corridor west of the printing pod and its dig orders placed, and leaving the tool
+# puts the font size back.
+from: early-base
+mods: [2844843044]
+steps:
+  - driver: {camera.set: {cell: [116, 209], ortho: 10}}
+  - tool: {toolbar: Dig}
+  - expect_state:
+      "PlayerController.Instance.ActiveTool.name": DigTool
+      "DigTool.Instance.areaColour.r": 0
+      "DigTool.Instance.areaColour.a": 255
+      "DigTool.Instance.areaVisualizer.GetComponent<Renderer>.material.color.a": 1
+      "DigTool.Instance.areaVisualizer.GetComponent<Renderer>.material.color.g": 1
+      "DigTool.Instance.areaVisualizerTextPrefab.GetComponentInChildren<LocText>.textStyleSetting.fontSize": 40
+  - drag: {from: [119, 209], to: [120, 210], hold: 10}
+  - expect: {pending_digs: 4}
+  - key: {code: Escape}
+  - expect_state:
+      "DigTool.Instance.areaVisualizerTextPrefab.GetComponentInChildren<LocText>.textStyleSetting.fontSize": 18

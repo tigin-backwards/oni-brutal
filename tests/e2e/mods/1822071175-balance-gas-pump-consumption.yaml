@@ -1,0 +1,31 @@
+# BalanceGasPumpConsumption (1822071175), class P.
+#
+# What it does: halves the power of the gas pumps and filter: the Gas Pump draws 120 W (the
+# game's 240 W), the Mini Gas Pump 30 W (60 W) and the Gas Filter 60 W (120 W), by postfixes
+# on their configs' CreateBuildingDef.
+# How a player reaches it: building one of them.
+# What changes: the power they draw while working.
+#
+# setup grants Ventilation (GasPiping). A Gas Pump is built in the dug-out corridor west of
+# the printing pod from the base's metal ore; once built, selecting it shows the pump and
+# its energy consumer asks for 120 W.
+from: early-base
+mods: [1822071175]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"GasPiping\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"GasPump\").EnergyConsumptionWhenActive": 120
+      "Assets.GetBuildingDef(\"GasMiniPump\").EnergyConsumptionWhenActive": 30
+      "Assets.GetBuildingDef(\"GasFilter\").EnergyConsumptionWhenActive": 60
+  - build: {prefab: GasPump, at: [113, 206], material: Cuprite}
+  - expect: {blueprints: {GasPump: 1}}
+  - run: {seconds: 900, until: {buildings: {GasPump: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [114, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: GasPump}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Gas Pump"}
+  - expect_state:
+      "selected:EnergyConsumer.WattsNeededWhenActive": 120

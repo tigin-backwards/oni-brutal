@@ -1,0 +1,51 @@
+# Better Deselect (1870696175), classes T, S, O.
+#
+# What it does: a right click closes the open UI in steps rather than all at once. Its options
+# number the selected tool or object, the overlay and the build menu 1 to 3 (defaults: tool 1,
+# overlay 2, build menu 2); each right click closes the lowest-numbered of those still open (a
+# prefix on ToolMenu.OnKeyUp), and the game's own closing of the build menu and overlay when a
+# tool is dropped is held back for those numbered later (transpilers on
+# PlanScreen.OnActiveToolChanged and InterfaceTool.DeactivateTool). Escape closes them all at
+# once (a prefix on ToolMenu.OnKeyDown). Its Selection Mode option (Hold) keeps a building
+# chosen when its category is clicked again.
+# How a player reaches it: right clicks and Escape while building.
+# What changes: the first right click after choosing a building drops the build tool but
+# leaves the build menu open; the game closes both at once.
+#
+# A Ladder is chosen from the Base menu; a right click over the world drops the build tool and
+# leaves the menu open, a second closes the menu. Then the Ladder is chosen again and Escape
+# closes everything at once.
+from: early-base
+mods: [1870696175]
+steps:
+  # The build menu offers materials only once the game has run a little.
+  - run: {seconds: 5}
+  - driver: {camera.set: {cell: [114, 208], ortho: 10}}
+  - open: {key: Alpha1}
+  - ui_wait: {path: "**/PlanBuildingSelectionPanel/BuildingGroups", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/Ladder Group*"}
+  - ui_wait: {path: "**/PlanBuildingSelectionPanel/ProductInfoScreen", cond: stable}
+  - click: {ui: "**/MaterialSelectorTemplate/**/Toggles/MaterialSelection_*"}
+  - expect_state:
+      "PlayerController.Instance.ActiveTool.name": BuildTool
+      "PlanScreen.Instance.ActiveCategoryToggleInfo": exists
+  - click_world: {cell: [116, 208], button: right}
+  - expect_state:
+      "PlayerController.Instance.ActiveTool.name": SelectTool
+      "PlanScreen.Instance.ActiveCategoryToggleInfo": exists
+  - expect_ui:
+      "**/PlanBuildingSelectionPanel/BuildingGroups": {active: true}
+  - click_world: {cell: [116, 208], button: right}
+  - expect_state:
+      "PlanScreen.Instance.ActiveCategoryToggleInfo": missing
+  # Escape closes the tool and the menu at once.
+  - open: {key: Alpha1}
+  - ui_wait: {path: "**/PlanBuildingSelectionPanel/BuildingGroups", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/Ladder Group*"}
+  - ui_wait: {path: "**/PlanBuildingSelectionPanel/ProductInfoScreen", cond: stable}
+  - click: {ui: "**/MaterialSelectorTemplate/**/Toggles/MaterialSelection_*"}
+  - expect_state: {"PlayerController.Instance.ActiveTool.name": BuildTool}
+  - key: {code: Escape, at: [116, 208]}
+  - expect_state:
+      "PlayerController.Instance.ActiveTool.name": SelectTool
+      "PlanScreen.Instance.ActiveCategoryToggleInfo": missing

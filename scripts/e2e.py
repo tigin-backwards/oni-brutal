@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 """End-to-end specs: a colony checkpoint, played through OniMcp and E2eDriver, checked by its outcome.
   scripts/e2e.py [--player ours|original|both] [--repeat N] [--bless] [--lanes N] [--first-lane L]
-                 [--last-lane L] [--displays :88,:89] [--no-perf-wait] [--results PATH]
-                 [--hold | --hold-on-fail] SPEC...
-  scripts/e2e.py --check SPEC...             parse and validate specs only
+                 [--last-lane L] [--displays :88,:89 | --xvfb-run] [--no-perf-wait] [--max-wait MIN]
+                 [--results PATH] [--run-id ID] [--record [--note TEXT]] [--hold | --hold-on-fail]
+                 SPEC...
+  scripts/e2e.py --check SPEC...             parse and validate specs (and known-findings.yaml)
+  scripts/e2e.py --status                    the machine's lanes, players and perf jobs
 A spec (tests/e2e/NAME.yaml; tests/e2e/README.md describes every step) starts from a fixture save
 (tests/e2e/fixtures), installs Workshop mods, gives orders through OniMcp's tools (an in-game MCP
 server), drives the UI with real X11 input (XTEST) located through E2eDriver (our test mod, a
@@ -16,24 +18,32 @@ signatures, required log lines, UI dumps (ui-diff.py), cropped and masked screen
 run's saves into tests/e2e/fixtures and its evidence into out/e2e-refs/SPEC, which a run of ours
 alone compares against.
 
-Lanes: --lanes N runs specs from a queue on N lanes at once. Lane L's OniMcp listens on
-8800 + 10 L and its E2eDriver on 8801 + 10 L (E2E_DRIVER_PORT); lanes are taken from
---first-lane (1) to --last-lane (6 lanes on). Each lane has its own display: xvfb-run -a, or one
-of --displays. A lane holds out/e2e/.lane-L.lock, and out/e2e/.lock shared, so a perf job
-taking that lock exclusively (`flock out/e2e/.lock CMD`) keeps specs from starting; specs also
-wait while ps shows a perf job.
+Runners in every worktree meet in one lock directory (E2E_LOCK_DIR, default
+~/.cache/oni-brutal-e2e). Lanes are machine-wide: --lanes N runs specs from a queue on N lanes at
+once, taken from --first-lane (1) to --last-lane (19). Lane L's OniMcp listens on 8800 + 10 L,
+its E2eDriver on 8801 + 10 L (E2E_DRIVER_PORT), and its display is an Xvfb on :(300 + L)
+(--xvfb-run: xvfb-run -a; --displays: those). A lane holds lane-L.lock there, and is skipped
+while its ports or display are in use or reserved (the directory's `reserved` file and
+E2E_RESERVED). Each player is counted for its memory in the machine's players' budget
+(E2E_MEMORY_GB, default 40; E2E_MAX_PLAYERS, default 6). A run holds perf.lock shared, so a perf
+job taking it exclusively (`flock -x ~/.cache/oni-brutal-e2e/perf.lock CMD`) keeps specs from
+starting; specs also wait while ps shows a perf job. Each wait says what it waits for, and
+--max-wait (or E2E_MAX_WAIT) fails the run after that many minutes.
 
 Needs, in the environment or out/local-tools/qa.env: QA_U57_GAME and QA_U57_STEAM (the DLC
 content and a Steam double owning it, as for qa.sh's U57 stages), E2E_ONIMCP (a build of
 OniMcp's mod folder; its licence does not allow vendoring it), E2E_DRIVER (E2eDriver's mod
 folder; default out/bin/E2eDriver/release) for specs that use it and, for --player original or
 both, E2E_ORIGINAL (the original player's executable, with a DLC-owning Steam double in its
-Plugins). Each run's log, results and evidence are in out/e2e/SPEC/PLAYER-N; out/e2e/results.json
-holds one record per spec run.
+Plugins). Each invocation has a run id; each run's log, results and evidence are in
+out/e2e/SPEC/RUN_ID/PLAYER-N, and out/e2e/runs/RUN_ID.json holds one record per spec run.
+--record writes tests/e2e/results/SPEC.json, the committed record of the spec's verdict (played,
+warning, failed or pending), which scripts/modtable.py reads. ui_dump differences that
+tests/e2e/known-findings.yaml explains make a run of ours a warning, not a failure.
 
 --hold keeps each player running after its steps (--hold-on-fail: after a failing step) until
-out/e2e/SPEC/PLAYER-N/hold is removed, for a look through OniMcp and E2eDriver while writing a
-spec.
+the hold file in its run folder is removed, for a look through OniMcp and E2eDriver while
+writing a spec.
 """
 import contextlib, ctypes, fcntl, importlib.util, json, os, re, shutil, signal, socket, subprocess, sys
 import threading, time, urllib.error, urllib.request
@@ -41,8 +51,9 @@ import threading, time, urllib.error, urllib.request
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SPECS = os.path.join(ROOT, 'tests', 'e2e')
 FIXTURES = os.path.join(SPECS, 'fixtures')
-OUT = os.path.join(ROOT, 'out', 'e2e')
-REFS = os.path.join(ROOT, 'out', 'e2e-refs')
+# A worktree's runs and references (E2E_OUT moves both: references go beside it, in E2E_OUT-refs).
+OUT = os.environ.get('E2E_OUT') or os.path.join(ROOT, 'out', 'e2e')
+REFS = OUT.rstrip('/') + '-refs'
 DRIVER_SOURCE = os.path.join(ROOT, 'tools', 'E2eDriver')  # its mod.yaml and mod_info.yaml
 WIDTH, HEIGHT = 1280, 720
 PROFILE = ('config', 'unity3d', 'Klei', 'Oxygen Not Included')
@@ -123,7 +134,7 @@ def ws_mods():
 # ---------------------------------------------------------------- specs
 
 TOP_KEYS = {'name', 'from', 'mods', 'options', 'setup', 'steps', 'require_log', 'mask_text', 'tolerance',
-            'thresholds', 'ignore_fields'}
+            'thresholds', 'ignore_fields', 'memory_gb'}
 # Steps that talk to E2eDriver (a spec with any of them needs it installed).
 DRIVER_STEPS = {'click', 'toggle', 'dropdown', 'type', 'drag', 'tool', 'expect_ui', 'expect_state', 'ui_dump',
                 'ui_wait', 'world_shot', 'driver', 'click_world', 'scroll'}
@@ -272,6 +283,7 @@ def load_spec(name):
     if problems:
         raise SpecError(f'{path}:\n  ' + '\n  '.join(problems))
     spec.setdefault('name', os.path.splitext(os.path.basename(path))[0])
+    spec['path'] = os.path.relpath(os.path.abspath(path), SPECS)
     spec.setdefault('setup', [])
     spec['mods'] = [str(m) for m in spec.get('mods', [])]
     return spec
@@ -287,17 +299,107 @@ def needs_driver(spec):
     return False
 
 
-# ---------------------------------------------------------------- lanes and the machine lock
+# ---------------------------------------------------------------- lanes, the players' budget and the perf lock
+#
+# Every runner on the machine, in whichever worktree, meets in one directory (shared_dir):
+#   lane-L.lock       held (flock) by the runner using lane L; it holds that runner's pid and root
+#   players.json      the players running now and the memory each one is counted for
+#   players.lock      guards players.json
+#   perf.lock         held shared by every spec run; a perf job takes it exclusively
+#   xvfb.lock         serialises xvfb-run -a starts (--xvfb-run)
+#   reserved          ports and displays that others use, which no lane takes
+
+def shared_dir():
+    """The machine-wide lock directory: E2E_LOCK_DIR, default ~/.cache/oni-brutal-e2e."""
+    return os.environ.get('E2E_LOCK_DIR') or os.path.join(os.path.expanduser('~'), '.cache', 'oni-brutal-e2e')
+
+
+class WaitTimeout(SpecFailure):
+    """A wait (for a perf job, a lane or memory for a player) longer than --max-wait."""
+
+
+class Waiter:
+    """A wait that says what it waits for: when it starts, when what it waits for changes, and
+    again every REPEAT seconds; it gives up after MAX_WAIT seconds (None: never)."""
+    REPEAT = 600
+
+    def __init__(self, what, log, max_wait=None, clock=time.time):
+        self.what, self.log, self.max_wait, self.clock = what, log, max_wait, clock
+        self.start = self.said = self.key = None
+
+    @property
+    def waited(self):
+        return 0 if self.start is None else self.clock() - self.start
+
+    def tick(self, reason, key=None):
+        now = self.clock()
+        if self.start is None:
+            self.start = now
+        waited = now - self.start
+        key = reason if key is None else key
+        if key != self.key or now - self.said >= self.REPEAT:
+            so_far = f' ({waited / 60:.0f} min so far)' if waited >= 60 else ''
+            self.log(f'waiting for {self.what}{so_far}: {reason}')
+            self.said, self.key = now, key
+        if self.max_wait is not None and waited >= self.max_wait:
+            raise WaitTimeout(f'gave up after {waited / 60:.1f} min (--max-wait) waiting for {self.what}: {reason}')
+
+
+def owner_record():
+    """Who holds a lock: written into lane locks and the players' ledger."""
+    return {'pid': os.getpid(), 'start': process_start(os.getpid()), 'root': ROOT, 'out': OUT,
+            'since': time.strftime('%Y-%m-%dT%H:%M:%S')}
+
+
+def process_start(pid):
+    """A process's start time in clock ticks (/proc/PID/stat field 22), which tells it apart
+    from a later process given the same pid; None when it has gone."""
+    try:
+        with open(f'/proc/{pid}/stat') as f:
+            return int(f.read().rsplit(')', 1)[1].split()[19])
+    except (OSError, IndexError, ValueError):
+        return None
+
+
+def alive_owner(entry):
+    return entry.get('pid') is not None and process_start(entry['pid']) == entry.get('start')
+
+
+# Lanes. Lane L's OniMcp listens on 8800 + 10 L, its E2eDriver on 8801 + 10 L, and its display is
+# :(DISPLAY_BASE + L), an Xvfb the runner starts (§4.4). Lane numbers are machine-wide.
+FIRST_LANE, LAST_LANE = 1, 19
+DISPLAY_BASE = 300  # E2E_DISPLAY_BASE; far above xvfb-run -a's :99 and up
+
 
 def lane_ports(lane):
     """OniMcp's and E2eDriver's ports of a lane (§4.4)."""
     return 8800 + 10 * lane, 8801 + 10 * lane
 
 
+def lane_display(lane):
+    return f':{int(os.environ.get("E2E_DISPLAY_BASE") or DISPLAY_BASE) + lane}'
+
+
 def port_open(port):
     with socket.socket() as s:
         s.settimeout(1)
         return s.connect_ex(('127.0.0.1', port)) == 0
+
+
+def display_in_use(number):
+    """Whether X display NUMBER is taken: a server accepts connections there, or a live process
+    holds its lock file (Xvfb itself replaces a stale one)."""
+    number = str(number).lstrip(':')
+    if display_ready(number):
+        return True
+    try:
+        with open(f'/tmp/.X{number}-lock') as f:
+            pid = int(f.read().strip())
+    except FileNotFoundError:
+        return False
+    except (OSError, ValueError):
+        return True
+    return os.path.exists(f'/proc/{pid}')
 
 
 def parse_displays(text):
@@ -311,6 +413,42 @@ def parse_displays(text):
     if len(set(displays)) != len(displays):
         raise ValueError('a display is named twice')
     return displays
+
+
+def parse_ranges(text):
+    """'8788, 8820-8831 :80-:85' as a set of numbers."""
+    numbers = set()
+    for part in re.split(r'[\s,]+', text.strip()):
+        if not part:
+            continue
+        match = re.fullmatch(r':?(\d+)(?:-:?(\d+))?', part)
+        if not match:
+            raise ValueError(f'bad number or range {part!r}')
+        low, high = int(match.group(1)), int(match.group(2) or match.group(1))
+        numbers.update(range(low, high + 1))
+    return numbers
+
+
+def reservations(directory=None, text=None):
+    """Ports and displays others use (another tool, a session on the old per-worktree locks),
+    which no lane takes: lines 'ports 8788 8820-8831' and 'displays :80-:85 :91' in DIRECTORY's
+    reserved file and in E2E_RESERVED (';' between lines). Returns (ports, displays)."""
+    lines = []
+    path = os.path.join(directory or shared_dir(), 'reserved')
+    if os.path.exists(path):
+        with open(path) as f:
+            lines += f.read().splitlines()
+    lines += (os.environ.get('E2E_RESERVED', '') if text is None else text).split(';')
+    ports, displays = set(), set()
+    for line in lines:
+        line = line.split('#', 1)[0].strip()
+        if not line:
+            continue
+        kind, _, rest = line.partition(' ')
+        if kind not in ('ports', 'displays'):
+            raise ValueError(f'reserved: {line!r} is neither "ports ..." nor "displays ..."')
+        (ports if kind == 'ports' else displays).update(parse_ranges(rest))
+    return ports, displays
 
 
 class Lane:
@@ -327,43 +465,192 @@ class Lane:
             self.lock_file = None
 
 
-def try_lane(number, lock_dir, busy=port_open):
-    """Lane NUMBER if no other runner holds it and its ports are free, else None."""
+def lane_problem(number, busy=port_open, display_busy=display_in_use, reserved=(set(), set()), display=True):
+    """Why lane NUMBER cannot be used now (a reserved or open port, a reserved or running
+    display), or None."""
+    ports = lane_ports(number)
+    taken = [p for p in ports if p in reserved[0]]
+    if taken:
+        return f'port {taken[0]} is reserved'
+    if display and int(lane_display(number)[1:]) in reserved[1]:
+        return f'display {lane_display(number)} is reserved'
+    taken = [p for p in ports if busy(p)]
+    if taken:
+        return f'port {taken[0]} is open'
+    if display and display_busy(lane_display(number)[1:]):
+        return f'display {lane_display(number)} is in use'
+    return None
+
+
+def try_lane(number, lock_dir=None, busy=port_open, display_busy=display_in_use, reserved=(set(), set()), display=True):
+    """Lane NUMBER if no runner on the machine holds it and its ports and display are free and
+    not reserved, else None."""
+    if lane_problem(number, lambda p: False, lambda d: False, reserved, display):
+        return None
+    lock_dir = lock_dir or shared_dir()
     os.makedirs(lock_dir, exist_ok=True)
-    f = open(os.path.join(lock_dir, f'.lane-{number}.lock'), 'w')
+    f = open(os.path.join(lock_dir, f'lane-{number}.lock'), 'a+')  # 'w' would wipe the holder's record
     try:
         fcntl.flock(f, fcntl.LOCK_EX | fcntl.LOCK_NB)
     except OSError:
         f.close()
         return None
-    if any(busy(p) for p in lane_ports(number)):
+    if lane_problem(number, busy, display_busy, reserved, display):
         fcntl.flock(f, fcntl.LOCK_UN)
         f.close()
         return None
-    return Lane(number, f)
+    f.seek(0)
+    f.truncate()
+    json.dump(dict(owner_record(), lane=number), f)
+    f.flush()
+    return Lane(number, f, lane_display(number) if display else None)
 
 
-def allocate_lane(first, lock_dir=OUT, busy=port_open, wait=True, log=say, last=None):
-    """The first free lane from FIRST to LAST (default MAX_LANES lanes), waiting for one if WAIT."""
-    announced = False
-    last = first + MAX_LANES - 1 if last is None else last
+def allocate_lane(first, lock_dir=None, busy=port_open, wait=True, log=say, last=None, display=True,
+                  display_busy=display_in_use, reserved=None, max_wait=None):
+    """The first free lane from FIRST to LAST (default LAST_LANE), waiting for one if WAIT."""
+    lock_dir = lock_dir or shared_dir()
+    last = LAST_LANE if last is None else last
+    reserved = reservations(lock_dir) if reserved is None else reserved
+    waiter = Waiter(f'a free lane ({first}..{last})', log, max_wait)
     while True:
         for number in range(first, last + 1):
-            lane = try_lane(number, lock_dir, busy)
+            lane = try_lane(number, lock_dir, busy, display_busy, reserved, display)
             if lane:
                 return lane
         if not wait:
             return None
-        if not announced:
-            log(f'waiting for a free lane ({first}..{last})')
-            announced = True
+        holders = [f'{s["lane"]}: pid {s["pid"]} in {s["root"]}' for s in lane_status(lock_dir) if first <= s['lane'] <= last]
+        waiter.tick('held: ' + (', '.join(holders) or 'none; the others are busy or reserved'))
         time.sleep(5)
 
 
+def lane_status(lock_dir=None):
+    """The lanes runners hold now: [{lane, pid, root, since}]."""
+    lock_dir = lock_dir or shared_dir()
+    held = []
+    for name in sorted(os.listdir(lock_dir)) if os.path.isdir(lock_dir) else []:
+        match = re.fullmatch(r'lane-(\d+)\.lock', name)
+        if not match:
+            continue
+        with open(os.path.join(lock_dir, name), 'a+') as f:
+            try:
+                fcntl.flock(f, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                fcntl.flock(f, fcntl.LOCK_UN)
+                continue  # nobody holds it
+            except OSError:
+                pass
+            f.seek(0)
+            try:
+                record = json.loads(f.read() or '{}')
+            except ValueError:
+                record = {}
+        held.append({'pid': None, 'root': '?', 'since': '?', **record, 'lane': int(match.group(1))})
+    return sorted(held, key=lambda s: s['lane'])
+
+
+# The players' memory budget (§6.2): the machine has 62 GB. A player on a small save takes 4-6 GB,
+# on 2minnow about 11 GB and on U57 about 15 GB.
+MEMORY_GB = 40      # E2E_MEMORY_GB: what all players on the machine may use at once
+MAX_PLAYERS = 6     # E2E_MAX_PLAYERS: how many may run at once
+FIXTURE_GB = {'U57': 15, '2minnow': 11}
+SMALL_GB, MID_GB, LATE_GB = 6, 11, 15
+
+
+def player_gb(spec, fixture=None):
+    """The memory a player of SPEC is counted for: the spec's memory_gb, else by its fixture."""
+    if spec.get('memory_gb'):
+        return float(spec['memory_gb'])
+    if spec.get('from') in FIXTURE_GB:
+        return float(FIXTURE_GB[spec['from']])
+    size = os.path.getsize(fixture) if fixture and os.path.exists(fixture) else 0
+    return float(SMALL_GB if size < 8 << 20 else MID_GB if size < 40 << 20 else LATE_GB)
+
+
+class Budget:
+    """The players running on the machine, from every runner: a ledger (players.json, guarded
+    by players.lock) of who runs one and for how many GB. A player starts only while the total
+    stays within E2E_MEMORY_GB and the count within E2E_MAX_PLAYERS (a player bigger than the
+    whole budget starts alone). An entry whose process has gone is dropped."""
+
+    def __init__(self, directory=None, gb=None, players=None):
+        self.dir = directory or shared_dir()
+        self.gb = float(gb or os.environ.get('E2E_MEMORY_GB') or MEMORY_GB)
+        self.players = int(players or os.environ.get('E2E_MAX_PLAYERS') or MAX_PLAYERS)
+        self.ledger = os.path.join(self.dir, 'players.json')
+        self.guard = threading.Lock()
+
+    @contextlib.contextmanager
+    def _locked(self):
+        os.makedirs(self.dir, exist_ok=True)
+        with self.guard, open(os.path.join(self.dir, 'players.lock'), 'a+') as f:
+            fcntl.flock(f, fcntl.LOCK_EX)
+            try:
+                yield
+            finally:
+                fcntl.flock(f, fcntl.LOCK_UN)
+
+    def _read(self):
+        try:
+            with open(self.ledger) as f:
+                entries = json.load(f)
+        except (OSError, ValueError):
+            entries = []
+        return [e for e in entries if alive_owner(e)]
+
+    def _write(self, entries):
+        temp = f'{self.ledger}.{os.getpid()}.{threading.get_ident()}'
+        with open(temp, 'w') as f:
+            json.dump(entries, f, indent=1)
+        os.replace(temp, self.ledger)
+
+    def entries(self):
+        with self._locked():
+            return self._read()
+
+    @staticmethod
+    def describe(entries):
+        return ', '.join(f'{e["label"]} ({e["gb"]:g} GB, pid {e["pid"]})' for e in entries) or 'none'
+
+    def try_acquire(self, gb, label):
+        """A token for one player of GB, or (None, why not)."""
+        with self._locked():
+            entries = self._read()
+            used = sum(e['gb'] for e in entries)
+            if entries and (len(entries) >= self.players or used + gb > self.gb):
+                return None, (f'{used:g} of {self.gb:g} GB and {len(entries)} of {self.players} players in use: '
+                              + self.describe(entries))
+            token = f'{os.getpid()}-{threading.get_ident()}-{time.time_ns()}'
+            entries.append(dict(owner_record(), token=token, gb=gb, label=label))
+            self._write(entries)
+            return token, None
+
+    def release(self, token):
+        with self._locked():
+            self._write([e for e in self._read() if e['token'] != token])
+
+    @contextlib.contextmanager
+    def hold(self, gb, label, log=say, max_wait=None):
+        waiter = Waiter(f'memory for a player ({gb:g} GB)', log, max_wait)
+        while True:
+            token, why = self.try_acquire(gb, label)
+            if token:
+                break
+            waiter.tick(why, key=why.split(':')[0])
+            time.sleep(5)
+        try:
+            yield token
+        finally:
+            self.release(token)
+
+
+# Perf jobs: a spec never starts beside one (§10 decision 7). It waits while one holds
+# perf.lock exclusively (`flock -x ~/.cache/oni-brutal-e2e/perf.lock CMD`) or while ps shows one.
+
 def perf_jobs(lines=None):
-    """The ps lines of running perf jobs."""
+    """The ps lines (args) of running perf jobs."""
     if lines is None:
-        lines = subprocess.run(['ps', '-eo', 'args'], capture_output=True, text=True).stdout.splitlines()[1:]
+        return [args for _, _, args in perf_processes()]
     found = []
     for line in lines:
         args = re.sub(r'^(/usr/bin/env )?(ba)?sh ', '', line.strip())
@@ -372,29 +659,69 @@ def perf_jobs(lines=None):
     return found
 
 
+def perf_processes(lines=None):
+    """Running perf jobs as (pid, seconds running, args), from `ps -eo pid=,etimes=,args=`."""
+    if lines is None:
+        lines = subprocess.run(['ps', '-eo', 'pid=,etimes=,args='], capture_output=True, text=True).stdout.splitlines()
+    found = []
+    for line in lines:
+        parts = line.strip().split(None, 2)
+        if len(parts) == 3 and parts[0].isdigit() and parts[1].isdigit() and int(parts[0]) != os.getpid() \
+                and perf_jobs([parts[2]]):
+            found.append((int(parts[0]), int(parts[1]), parts[2]))
+    return found
+
+
 @contextlib.contextmanager
-def machine_lock(lock_dir=OUT, perf_wait=True, log=say):
-    """Shared hold of out/e2e/.lock for a spec run, after any perf job has finished: a perf job
-    that takes the lock exclusively, or one ps shows, keeps a spec from starting."""
+def machine_lock(lock_dir=None, perf_wait=True, log=say, max_wait=None):
+    """Shared hold of perf.lock for a spec run, after any perf job has finished: a perf job that
+    takes the lock exclusively, or one ps shows, keeps a spec from starting. The wait says what
+    it waits for, and gives up after MAX_WAIT seconds."""
+    lock_dir = lock_dir or shared_dir()
     os.makedirs(lock_dir, exist_ok=True)
-    f = open(os.path.join(lock_dir, '.lock'), 'w')
-    announced = False
+    path = os.path.join(lock_dir, 'perf.lock')
+    f = open(path, 'a+')
+    waiter = Waiter('a perf job to finish', log, max_wait)
     try:
         while True:
-            jobs = perf_jobs() if perf_wait else []
+            jobs = perf_processes() if perf_wait else []
             if not jobs:
                 try:
                     fcntl.flock(f, fcntl.LOCK_SH | fcntl.LOCK_NB)
                     break
                 except OSError:
-                    jobs = ['a perf job holds out/e2e/.lock']
-            if not announced:
-                log('waiting for a perf job: ' + jobs[0][:160])
-                announced = True
+                    reason, key = f'a perf job holds {path} exclusively', 'flock'
+            else:
+                pid, seconds, args = jobs[0]
+                more = f' (and {len(jobs) - 1} more)' if len(jobs) > 1 else ''
+                reason, key = f'pid {pid}, running {seconds // 60} min: {args[:160]}{more}', pid
+            waiter.tick(reason, key)
             time.sleep(20)
+        if waiter.start is not None:
+            log(f'perf wait over after {waiter.waited / 60:.1f} min')
         yield
     finally:
         f.close()
+
+
+def status(lock_dir=None):
+    """What the machine's runners hold now, as lines (--status)."""
+    lock_dir = lock_dir or shared_dir()
+    lines = [f'lock directory {lock_dir}']
+    ports, displays = reservations(lock_dir)
+    lines.append(f'reserved: {len(ports)} port(s), {len(displays)} display(s)')
+    for s in lane_status(lock_dir):
+        mcp, driver = lane_ports(s['lane'])
+        lines.append(f'lane {s["lane"]} (:{mcp}, :{driver}, {lane_display(s["lane"])}): pid {s["pid"]} in {s["root"]}'
+                     + (f' (out {s["out"]})' if s.get('out') and s['out'] != os.path.join(s['root'], 'out', 'e2e') else '')
+                     + f' since {s["since"]}')
+    budget = Budget(lock_dir)
+    entries = budget.entries()
+    lines.append(f'players: {sum(e["gb"] for e in entries):g} of {budget.gb:g} GB, {len(entries)} of {budget.players}')
+    lines += [f'  {e["label"]}: {e["gb"]:g} GB, pid {e["pid"]} in {e["root"]} since {e["since"]}' for e in entries]
+    for pid, seconds, args in perf_processes():
+        lines.append(f'perf job: pid {pid}, running {seconds // 60} min: {args[:160]}')
+    return lines
 
 
 class JobQueue:
@@ -964,8 +1291,8 @@ def display_ready(number):
     return False
 
 
-# xvfb-run -a picks the first free display, and two lanes starting at once may pick the same:
-# starts are serialised, here and (through a lock file) across runners.
+# xvfb-run -a (--xvfb-run) picks the first free display, and two lanes starting at once may pick
+# the same: starts are serialised, here and (through xvfb.lock in shared_dir) across runners.
 _xvfb_start = threading.Lock()
 
 
@@ -1072,8 +1399,8 @@ class Player:
                                             start_new_session=True)
         else:
             command = ['xvfb-run', '-a', '-s', f'-screen 0 {WIDTH}x{HEIGHT}x24', *command]
-            os.makedirs(OUT, exist_ok=True)
-            with _xvfb_start, open(os.path.join(OUT, '.xvfb.lock'), 'w') as lock:
+            os.makedirs(shared_dir(), exist_ok=True)
+            with _xvfb_start, open(os.path.join(shared_dir(), 'xvfb.lock'), 'a+') as lock:
                 fcntl.flock(lock, fcntl.LOCK_EX)
                 self.process = subprocess.Popen(command, env=env, stdout=open(stdout, 'w'), stderr=subprocess.STDOUT,
                                                 start_new_session=True)
@@ -1094,7 +1421,7 @@ class Player:
 
     def start_xvfb(self, display):
         number = display.lstrip(':')
-        if os.path.exists(f'/tmp/.X{number}-lock') or os.path.exists(f'/tmp/.X11-unix/X{number}'):
+        if display_in_use(number):
             raise SpecFailure(f'display {display} is in use')
         self.xvfb = subprocess.Popen(['Xvfb', display, '-screen', '0', f'{WIDTH}x{HEIGHT}x24', '-nolisten', 'tcp'],
                                      stdout=subprocess.DEVNULL, stderr=open(os.path.join(self.out, 'xvfb.txt'), 'w'),
@@ -1542,12 +1869,34 @@ def state_check(have, wanted, saved, original=None):
 
 # ---------------------------------------------------------------- one spec run
 
+def new_run_id():
+    """An invocation's id, unique among a worktree's runs: its start time and a random part.
+    Its runs are in out/e2e/SPEC/RUN_ID/PLAYER-N, and out/e2e/SPEC/latest points at the newest."""
+    return time.strftime('%Y%m%d-%H%M%S') + '-' + os.urandom(3).hex()
+
+
+def run_folder(name, run_id, kind, index, out=None):
+    return os.path.join(out or OUT, name, run_id, f'{kind}-{index}')
+
+
+def point_latest(folder, target):
+    """FOLDER/latest as a symlink to TARGET (a name in FOLDER), replaced atomically."""
+    os.makedirs(folder, exist_ok=True)
+    link = os.path.join(folder, 'latest')
+    temp = f'{link}.{os.getpid()}.{threading.get_ident()}'
+    with contextlib.suppress(OSError):
+        os.remove(temp)
+    os.symlink(target, temp)
+    os.replace(temp, link)
+
+
 class Run:
     """One spec in one player: the step interpreter."""
 
-    def __init__(self, spec, kind, index, env, lane, log, perf_wait=True, original_values=None, hold=None):
+    def __init__(self, spec, kind, index, env, lane, log, perf_wait=True, original_values=None, hold=None, run_id=None):
         self.spec, self.kind, self.index, self.env, self.lane, self.log = spec, kind, index, env, lane, log
-        self.out = os.path.join(OUT, spec['name'], f'{kind}-{index}')
+        self.run_id = run_id or new_run_id()
+        self.out = run_folder(spec['name'], self.run_id, kind, index)
         self.perf_wait = perf_wait
         self.hold = hold  # 'fail' or 'end': keep the player up for a look (--hold)
         self.mcp = Mcp(lane.mcp_port)
@@ -1981,7 +2330,7 @@ class Run:
         if os.path.isdir(self.out):
             with open(os.path.join(self.out, 'values.json'), 'w') as f:
                 json.dump(self.values, f, indent=1, default=str)
-        return {'outcome': outcome, 'failed_step_kind': failed_kind,
+        return {'outcome': outcome, 'failed_step_kind': failed_kind, 'run': self.run_id,
                 'signatures': self.player.signatures() if self.player else set(),
                 'saves': self.saves, 'out': self.out, 'values': self.values, 'evidence': self.evidence,
                 'lane': self.player.lane_record() if self.player else {'lane': self.lane.number},
@@ -2015,6 +2364,148 @@ def driver_errors(log):
         return [l.strip() for l in f if 'E2eDriver' in l and ('[ERROR]' in l or re.search(r'\b\w+Exception\b', l))]
 
 
+# ---------------------------------------------------------------- known findings
+
+KNOWN_FINDINGS = os.path.join(SPECS, 'known-findings.yaml')
+FINDING_KEYS = {'id', 'description', 'link', 'component', 'fields', 'path', 'specs', 'original', 'ours', 'presence'}
+
+
+def as_list(value):
+    return [] if value is None else list(value) if isinstance(value, (list, tuple)) else [value]
+
+
+def check_findings(findings):
+    """The problems of a known-findings list, as readable lines."""
+    if not isinstance(findings, list):
+        return ['known findings are a list']
+    problems, ids = [], set()
+    for number, f in enumerate(findings, 1):
+        where = f'finding {number}' + (f' ({f.get("id")})' if isinstance(f, dict) and f.get('id') else '')
+        if not isinstance(f, dict):
+            problems.append(f'{where}: a mapping')
+            continue
+        problems += [f'{where}: unknown key {k!r}' for k in f if k not in FINDING_KEYS]
+        if not re.fullmatch(r'[a-z0-9]+(-[a-z0-9]+)*', str(f.get('id', ''))):
+            problems.append(f'{where}: `id` is lowercase words joined by dashes')
+        elif f['id'] in ids:
+            problems.append(f'{where}: `id` is used twice')
+        ids.add(f.get('id'))
+        for key in ('description', 'link'):
+            if not isinstance(f.get(key), str) or not f[key].strip():
+                problems.append(f'{where}: needs `{key}`')
+        if f.get('presence'):
+            if not f.get('path'):
+                problems.append(f'{where}: a presence finding needs `path`')
+        elif not f.get('component') or not f.get('fields'):
+            problems.append(f'{where}: needs `component` and `fields` (or `presence: true` and `path`)')
+        for key in ('original', 'ours'):
+            if key in f:
+                try:
+                    re.compile(f[key])
+                except (re.error, TypeError) as e:
+                    problems.append(f'{where}: `{key}` {e}')
+    return problems
+
+
+def load_findings(path=None):
+    """tests/e2e/known-findings.yaml: reviewed engine differences a ui_dump diff may cite."""
+    path = path or KNOWN_FINDINGS
+    if not os.path.exists(path):
+        return []
+    import yaml
+    with open(path) as f:
+        findings = yaml.safe_load(f) or []
+    problems = check_findings(findings)
+    if problems:
+        raise SpecError(f'{path}:\n  ' + '\n  '.join(problems))
+    return findings
+
+
+def glob_regex(pattern):
+    """An E2eDriver path glob (* within a name, ** any number of levels) as a regex."""
+    out = ''
+    for part in re.split(r'(\*\*/?|\*)', pattern.strip('/')):
+        if part.startswith('**'):
+            out += '(?:.*/)?' if part.endswith('/') else '.*'
+        elif part == '*':
+            out += '[^/]*'
+        else:
+            out += re.escape(part)
+    return re.compile(out + r'\Z')
+
+
+def path_matches(key, patterns):
+    """Whether a dump key (/A#0/B#2/C#0) matches a glob, with or without its sibling numbers."""
+    key = key.strip('/')
+    plain = re.sub(r'#\d+(?=/|$)', '', key)
+    return any(glob_regex(p).match(key) or glob_regex(p).match(plain) for p in as_list(patterns))
+
+
+MEMBER = re.compile(r'(\w+)(?:=|\s+)("(?:[^"\\]|\\.)*"|[^\s"]+)')
+
+
+def members(text):
+    """A dump component's NAME=VALUE (or, for the rect, NAME VALUE) members, or None."""
+    found, rest = {}, MEMBER.sub('', text or '')
+    if rest.strip():
+        return None
+    for name, value in MEMBER.findall(text or ''):
+        found[name] = value
+    return found
+
+
+def parse_difference(line):
+    """A ui-diff.py line as (kind, key, component, original, ours): kind 'only-original',
+    'only-ours' or 'changed'."""
+    match = re.match(r'only in (first|second): (.+)$', line)
+    if match:
+        return ('only-original' if match.group(1) == 'first' else 'only-ours'), match.group(2), None, None, None
+    head, _, rest = line.partition('\n')
+    match = re.fullmatch(r'(.+) \[(.+)\]', head)
+    values = rest.split('\n')
+    if not match or len(values) != 2:
+        return 'changed', head, None, None, None
+    return 'changed', match.group(1), match.group(2), values[0].removeprefix('  - '), values[1].removeprefix('  + ')
+
+
+def finding_for(line, findings, spec_name=None):
+    """The id of the first known finding that explains one ui-diff difference, or None. A
+    finding explains a changed component when the component and the element path match and
+    every member that differs is one of its fields (and the values match its `original` and
+    `ours` regexes); a presence finding explains an element only one player has."""
+    kind, key, component, a, b = parse_difference(line)
+    for f in findings:
+        if f.get('specs') and spec_name not in as_list(f['specs']):
+            continue
+        if f.get('path') and not path_matches(key, f['path']):
+            continue
+        if kind != 'changed':
+            if f.get('presence') in (True, kind):
+                return f['id']
+            continue
+        if f.get('presence') or component is None:
+            continue
+        if not any(fnmatch_name(component, c) for c in as_list(f['component'])):
+            continue
+        ma, mb = members(a), members(b)
+        if ma is None or mb is None:
+            continue
+        differing = {n for n in ma.keys() | mb.keys() if ma.get(n) != mb.get(n)}
+        if not differing or not differing <= set(as_list(f['fields'])):
+            continue
+        if f.get('original') and not re.search(f['original'], a):
+            continue
+        if f.get('ours') and not re.search(f['ours'], b):
+            continue
+        return f['id']
+    return None
+
+
+def fnmatch_name(name, pattern):
+    import fnmatch
+    return fnmatch.fnmatchcase(name, pattern)
+
+
 # ---------------------------------------------------------------- differential checks (§5.3)
 
 def log_matches(log, patterns):
@@ -2028,8 +2519,9 @@ class Reference:
     """The original's evidence for a spec: from this invocation's original runs, or blessed into
     out/e2e-refs/SPEC."""
 
-    def __init__(self, folder, signatures, log_found, values, source):
+    def __init__(self, folder, signatures, log_found, values, source, run=None):
         self.folder, self.signatures, self.log_found, self.values, self.source = folder, signatures, log_found, values, source
+        self.run = run  # the original run's id, which a results record cites
 
     @staticmethod
     def from_runs(spec, results):
@@ -2039,7 +2531,7 @@ class Reference:
         first = passed[0]
         signatures = set().union(*(r['signatures'] for r in results))
         return Reference(first['out'], signatures, log_matches(first['log'], spec.get('require_log', [])),
-                         values_by_step(first['values']), 'original run')
+                         values_by_step(first['values']), 'original run', first.get('run'))
 
     @staticmethod
     def blessed(spec):
@@ -2048,7 +2540,7 @@ class Reference:
             return None
         read = lambda name, default: json.load(open(os.path.join(folder, name))) if os.path.exists(os.path.join(folder, name)) else default
         return Reference(folder, set(read('signatures.json', [])), read('log.json', {}),
-                         values_by_step(read('values.json', [])), folder)
+                         values_by_step(read('values.json', [])), folder, read('source.json', {}).get('run'))
 
 
 def values_by_step(values):
@@ -2056,22 +2548,35 @@ def values_by_step(values):
 
 
 def bless(spec, result):
-    """An original run's evidence into out/e2e-refs/SPEC."""
+    """An original run's evidence into out/e2e-refs/SPEC (one folder per spec, whichever run
+    blessed it; source.json names that run). It is written beside and then swapped in, so a run
+    of ours never reads half of it."""
     folder = os.path.join(REFS, spec['name'])
-    shutil.rmtree(folder, ignore_errors=True)
-    os.makedirs(folder)
+    temp = f'{folder}.new-{os.getpid()}'
+    shutil.rmtree(temp, ignore_errors=True)
+    os.makedirs(temp)
     for name in os.listdir(result['out']):
         if name.endswith(('.ui.txt', '.shot.json', '.png', '.jpg')):
-            shutil.copy(os.path.join(result['out'], name), folder)
-    json.dump(sorted(result['signatures']), open(os.path.join(folder, 'signatures.json'), 'w'), indent=1)
-    json.dump(log_matches(result['log'], spec.get('require_log', [])), open(os.path.join(folder, 'log.json'), 'w'), indent=1)
-    json.dump(result['values'], open(os.path.join(folder, 'values.json'), 'w'), indent=1, default=str)
+            shutil.copy(os.path.join(result['out'], name), temp)
+    json.dump(sorted(result['signatures']), open(os.path.join(temp, 'signatures.json'), 'w'), indent=1)
+    json.dump(log_matches(result['log'], spec.get('require_log', [])), open(os.path.join(temp, 'log.json'), 'w'), indent=1)
+    json.dump(result['values'], open(os.path.join(temp, 'values.json'), 'w'), indent=1, default=str)
+    json.dump({'run': result.get('run'), 'out': result['out'], 'date': time.strftime('%Y-%m-%dT%H:%M:%S')},
+              open(os.path.join(temp, 'source.json'), 'w'), indent=1)
+    old = f'{folder}.old-{os.getpid()}'
+    if os.path.isdir(folder):
+        os.rename(folder, old)
+    os.rename(temp, folder)
+    shutil.rmtree(old, ignore_errors=True)
     return folder
 
 
-def differential(spec, result, reference):
-    """Ours against the original's evidence: {check: details}, and the reasons it fails."""
-    checks, reasons = {}, []
+def differential(spec, result, reference, findings=None):
+    """Ours against the original's evidence: {check: details}, and the reasons it fails. A
+    ui_dump difference a known finding explains (FINDINGS, default known-findings.yaml) is no
+    reason; its id goes into checks['findings'], which makes the run a warning."""
+    findings = load_findings() if findings is None else findings
+    checks, reasons, cited = {}, [], set()
     new = sorted(result['signatures'] - reference.signatures)
     checks['signatures'] = {'new': new, 'reference': len(reference.signatures)}
     if new:
@@ -2092,9 +2597,19 @@ def differential(spec, result, reference):
             continue
         masks = list(spec.get('mask_text', [])) + list(dump.get('mask_text', []))
         fields = list(IGNORE_FIELDS) + list(spec.get('ignore_fields', [])) + list(dump.get('ignore_fields', []))
-        differences = ui_diff.diff(without_fields(ui_diff.parse(a), fields), without_fields(ui_diff.parse(b), fields),
-                                   tolerance=tolerance, mask_text=masks)
-        checks['ui_dump'][name] = {'ok': not differences, 'differences': len(differences), 'first': differences[:20]}
+        lines = ui_diff.diff(without_fields(ui_diff.parse(a), fields), without_fields(ui_diff.parse(b), fields),
+                             tolerance=tolerance, mask_text=masks)
+        differences, known = [], {}
+        for line in lines:
+            ident = finding_for(line, findings, spec.get('name'))
+            if ident:
+                known.setdefault(ident, []).append(line)
+            else:
+                differences.append(line)
+        cited |= set(known)
+        checks['ui_dump'][name] = {'ok': not differences, 'differences': len(differences), 'first': differences[:20],
+                                   'known': {i: len(v) for i, v in sorted(known.items())},
+                                   'known_first': {i: v[:3] for i, v in sorted(known.items())}}
         if differences:
             reasons.append(f'ui_dump {name}: {len(differences)} difference(s)')
     qa_tools = load_script('qa-tools.py')
@@ -2132,6 +2647,7 @@ def differential(spec, result, reference):
         if not ok:
             reasons.append(f'step {v["step"]}: {v["expr"]} is {v["value"]}, wanted {v["wanted"]} ({original} in the original)')
     checks['expect_original'] = deferred
+    checks['findings'] = sorted(cited)
     return checks, reasons
 
 
@@ -2150,6 +2666,110 @@ def relative_masks(masks, crop):
     return [[m[0] - crop[0], m[1] - crop[1], m[2], m[3]] for m in masks]
 
 
+# ---------------------------------------------------------------- the results record (§7)
+
+RESULTS = os.path.join(SPECS, 'results')
+OURS_RUNS_NEEDED = 2  # Played: once in the original, twice in ours (§2)
+VERDICTS = ('played', 'warning', 'failed', 'pending')
+
+
+def run_summary(record):
+    """What a results record keeps of one run: its verdict and the numbers behind it."""
+    checks = record.get('checks') or {}
+    summary = {'run': record.get('run'), 'index': record['index'], 'verdict': record['verdict'],
+               'date': record.get('started'), 'lane': record.get('lane')}
+    if record.get('reasons'):
+        summary['reasons'] = [r[:300] for r in record['reasons'][:5]]
+    if record['player'] == 'original':
+        summary['signatures'] = record.get('signature_count', 0)
+        return summary
+    summary['reference_run'] = record.get('reference_run')
+    summary['new_signatures'] = len(checks.get('signatures', {}).get('new', []))
+    summary['findings'] = checks.get('findings', [])
+    summary['ui_dump'] = {n: {'differences': c.get('differences'), **({'known': c['known']} if c.get('known') else {})}
+                          for n, c in checks.get('ui_dump', {}).items()}
+    summary['shots'] = {n: c.get('fraction') for kind in ('shot', 'world_shot') for n, c in checks.get(kind, {}).items()}
+    return summary
+
+
+def record_verdict(runs):
+    """A spec's verdict from its runs: played, warning (passed, with differences known
+    findings explain), failed (in ours), or pending (no passing original run, or fewer than
+    OURS_RUNS_NEEDED runs of ours against the newest one), and why."""
+    originals = runs.get('original', [])
+    passed = [r for r in originals if r['verdict'] == 'pass']
+    if not originals:
+        return 'pending', 'no run in the original'
+    if not passed:
+        return 'pending', 'the spec fails in the original: a broken spec, or a mod broken upstream'
+    current = {r['run'] for r in passed}
+    ours = [r for r in runs.get('ours', []) if r.get('reference_run') in current]
+    if len(ours) < OURS_RUNS_NEEDED:
+        return 'pending', (f'{len(ours)} run(s) of ours against original run {", ".join(sorted(current))}; '
+                           f'{OURS_RUNS_NEEDED} needed')
+    if any(r['verdict'] == 'fail' for r in ours):
+        return 'failed', 'a run of ours failed'
+    if any(r['verdict'] == 'warn' for r in ours):
+        return 'warning', 'known findings: ' + ', '.join(sorted({f for r in ours for f in r.get('findings', [])}))
+    return 'played', 'passed once in the original and twice in ours'
+
+
+def mod_hashes(ids):
+    """The SHA-256 of each mod's DLLs (out/ws/ID, top level), so a record says which build it played."""
+    import hashlib
+    ws = os.environ.get('ONI_WS') or os.path.join(ROOT, 'out', 'ws')
+    found = {}
+    for i in ids:
+        folder = os.path.join(ws, i)
+        dlls = sorted(n for n in os.listdir(folder) if n.lower().endswith('.dll')) if os.path.isdir(folder) else []
+        found[i] = {n: hashlib.sha256(open(os.path.join(folder, n), 'rb').read()).hexdigest() for n in dlls}
+    return found
+
+
+def head_commit():
+    result = subprocess.run(['git', '-C', ROOT, 'rev-parse', '--short', 'HEAD'], capture_output=True, text=True)
+    return result.stdout.strip() or None
+
+
+def update_record(spec, records, note=None, folder=None, commit=None, date=None, hashes=None):
+    """tests/e2e/results/SPEC.json, the committed record of a spec (§7): this invocation's runs
+    replace the record's runs of the same player, the others are kept, and the verdict follows
+    from them. NOTE replaces the note (else it is kept). Returns the record."""
+    folder = folder or RESULTS
+    path = os.path.join(folder, spec['name'] + '.json')
+    old = {}
+    if os.path.exists(path):
+        with open(path) as f:
+            old = json.load(f)
+    runs = {k: list(v) for k, v in old.get('runs', {}).items()}
+    for kind in ('original', 'ours'):
+        mine = [run_summary(r) for r in records if r['spec'] == spec['name'] and r['player'] == kind
+                and r['verdict'] != 'skipped']
+        if mine:
+            runs[kind] = mine
+    runs = {'original': runs.get('original', []), 'ours': runs.get('ours', [])}
+    verdict, why = record_verdict(runs)
+    record = {
+        'spec': spec.get('path') or spec['name'] + '.yaml',
+        'mods': spec['mods'],
+        'verdict': verdict,
+        'why': why,
+        'findings': sorted({f for r in runs['ours'] for f in r.get('findings', [])}) if verdict == 'warning' else [],
+        'note': old.get('note', '') if note is None else note,
+        'updated': date or time.strftime('%Y-%m-%d'),
+        'commit': commit if commit is not None else head_commit(),
+        'mod_dlls': hashes if hashes is not None else mod_hashes(spec['mods']),
+        'runs': runs,
+    }
+    os.makedirs(folder, exist_ok=True)
+    temp = f'{path}.{os.getpid()}'
+    with open(temp, 'w') as f:
+        json.dump(record, f, indent=1, ensure_ascii=False)
+        f.write('\n')
+    os.replace(temp, path)
+    return record
+
+
 # ---------------------------------------------------------------- main
 
 def usage():
@@ -2157,12 +2777,13 @@ def usage():
 
 
 def parse_args(argv):
-    opts = {'players': 'ours', 'repeat': 1, 'bless': False, 'hold': None, 'lanes': 1, 'first_lane': 1, 'last_lane': None, 'displays': None,
-            'perf_wait': True, 'results': os.path.join(OUT, 'results.json'), 'check': False, 'names': []}
+    opts = {'players': 'ours', 'repeat': 1, 'bless': False, 'hold': None, 'lanes': 1, 'first_lane': FIRST_LANE,
+            'last_lane': None, 'displays': None, 'xvfb_run': False, 'perf_wait': True, 'results': None, 'check': False,
+            'status': False, 'record': False, 'note': None, 'max_wait': None, 'run_id': None, 'names': []}
     i = 0
     takes = {'--player': 'players', '--repeat': 'repeat', '--lanes': 'lanes', '--first-lane': 'first_lane',
-             '--last-lane': 'last_lane',
-             '--displays': 'displays', '--results': 'results'}
+             '--last-lane': 'last_lane', '--displays': 'displays', '--results': 'results', '--note': 'note',
+             '--max-wait': 'max_wait', '--run-id': 'run_id'}
     while i < len(argv):
         a = argv[i]
         if a in takes:
@@ -2176,8 +2797,14 @@ def parse_args(argv):
             opts['hold'] = 'end' if a == '--hold' else 'fail'
         elif a == '--no-perf-wait':
             opts['perf_wait'] = False
+        elif a == '--xvfb-run':
+            opts['xvfb_run'] = True
+        elif a == '--record':
+            opts['record'] = True
         elif a == '--check':
             opts['check'] = True
+        elif a == '--status':
+            opts['status'] = True
         elif a.startswith('-'):
             raise SpecError(f'unknown option {a}')
         else:
@@ -2192,10 +2819,20 @@ def parse_args(argv):
             opts[key] = int(opts[key])
         except ValueError:
             raise SpecError(f'--{key.replace("_", "-")} takes a number')
+    if opts['max_wait'] is None and os.environ.get('E2E_MAX_WAIT'):
+        opts['max_wait'] = os.environ['E2E_MAX_WAIT']
+    if opts['max_wait'] is not None:
+        try:
+            opts['max_wait'] = float(opts['max_wait']) * 60
+        except ValueError:
+            raise SpecError('--max-wait takes minutes')
+    if opts['run_id'] is not None and not re.fullmatch(r'[\w.-]+', opts['run_id']):
+        raise SpecError('--run-id is letters, digits, dots and dashes')
     if not 1 <= opts['lanes'] <= MAX_LANES:
         raise SpecError(f'--lanes is 1..{MAX_LANES}')
-    if opts['last_lane'] is not None and not opts['first_lane'] + opts['lanes'] - 1 <= opts['last_lane']:
-        raise SpecError('--last-lane leaves fewer lanes than --lanes')
+    last = LAST_LANE if opts['last_lane'] is None else opts['last_lane']
+    if not opts['first_lane'] + opts['lanes'] - 1 <= last:
+        raise SpecError('--first-lane .. --last-lane leaves fewer lanes than --lanes')
     if opts['first_lane'] < 0 or opts['repeat'] < 1:
         raise SpecError('--first-lane is 0 or more, --repeat 1 or more')
     if opts['displays'] is not None:
@@ -2205,7 +2842,9 @@ def parse_args(argv):
             raise SpecError(str(e))
         if len(opts['displays']) < opts['lanes']:
             raise SpecError('--displays names fewer displays than --lanes')
-    if not opts['names']:
+    if opts['record'] and (opts['hold'] == 'end'):
+        raise SpecError('--record takes no --hold (a held run is exploration, not a verdict)')
+    if not opts['names'] and not opts['status']:
         raise SpecError('no spec named')
     return opts
 
@@ -2215,6 +2854,8 @@ def report(record):
     head = f'{record["spec"]} in {record["player"]} ({record["index"]})'
     if record['verdict'] == 'pass':
         lines.append(f'ok   {head} ({record["out"]})')
+    elif record['verdict'] == 'warn':
+        lines.append(f'warn {head}: known findings ' + ', '.join(record.get('findings', [])) + f' ({record["out"]})')
     elif record['verdict'] == 'skipped':
         lines.append(f'skip {head}: {record["reasons"][0]}')
     else:
@@ -2230,13 +2871,20 @@ def main(argv):
     try:
         opts = parse_args(argv)
         specs = [load_spec(n) for n in opts['names']]
-    except SpecError as e:
+        findings = load_findings()
+    except (SpecError, ValueError) as e:
         print(f'e2e: {e}', file=sys.stderr)
         usage()
+    if opts['status']:
+        for line in status():
+            print(line)
+        if not specs:
+            return 0
     if opts['check']:
         for spec in specs:
             print(f'ok   {spec["name"]}: {len(spec["setup"])} setup and {len(spec["steps"])} steps'
                   + (', needs E2eDriver' if needs_driver(spec) else ''))
+        print(f'ok   {len(findings)} known finding(s)')
         return 0
     env = environment()
     kinds = ['original', 'ours'] if opts['players'] == 'both' else [opts['players']]
@@ -2245,12 +2893,16 @@ def main(argv):
     if missing:
         print('e2e: skipped, needs ' + ', '.join(missing) + ' (out/local-tools/qa.env)')
         return 0
+    run_id = opts['run_id'] or new_run_id()
+    results_path = opts['results'] or os.path.join(OUT, 'runs', run_id + '.json')
+    say(f'== run {run_id}: lock directory {shared_dir()}')
     queue = JobQueue(plan_jobs(specs, kinds, opts['repeat']))
     results, records, state = {}, [], threading.Lock()
+    budget = Budget()
 
     def process(job, lane, log):
         spec, kind, index = job['spec'], job['kind'], job['index']
-        record = {'spec': spec['name'], 'player': kind, 'index': index, 'mods': spec['mods'],
+        record = {'spec': spec['name'], 'player': kind, 'index': index, 'mods': spec['mods'], 'run': run_id,
                   'started': time.strftime('%Y-%m-%dT%H:%M:%S')}
         with state:
             originals = [results[d] for d in job['after'] if d in results]
@@ -2260,23 +2912,34 @@ def main(argv):
             if job['after'] and reference is None:
                 return dict(record, verdict='skipped', reasons=['the spec fails in the original'], out=None)
         log(f'== {spec["name"]} in {kind} ({index}/{opts["repeat"]})')
-        with machine_lock(perf_wait=opts['perf_wait'], log=log):
-            result = Run(spec, kind, index, env, lane, log, opts['perf_wait'],
-                         reference.values if reference else None, opts['hold']).execute()
+        fixture = os.path.join(FIXTURES, spec['from'] + '.sav')
+        gb = player_gb(spec, fixture)
+        try:
+            with machine_lock(perf_wait=opts['perf_wait'], log=log, max_wait=opts['max_wait']), \
+                    budget.hold(gb, f'{spec["name"]}/{kind}-{index} lane {lane.number}', log, opts['max_wait']):
+                point_latest(os.path.join(OUT, spec['name']), run_id)
+                result = Run(spec, kind, index, env, lane, log, opts['perf_wait'],
+                             reference.values if reference else None, opts['hold'], run_id).execute()
+        except WaitTimeout as e:
+            return dict(record, lane=lane.number, verdict='fail', reasons=[str(e)], out=None)
         with state:
             results[job['id']] = result
         record.update(result['lane'], out=result['out'], outcome=result['outcome'], saves=result['saves'],
-                      options_written=result['options_written'], signature_count=len(result['signatures']))
+                      options_written=result['options_written'], signature_count=len(result['signatures']),
+                      memory_gb=gb)
         reasons = [result['outcome']] if result['outcome'] else []
         if reasons and reference and result['failed_step_kind'] in ('expect_ui', 'expect_state'):
             reasons[0] += ' (it held in the original: the interaction has no effect in ours)'
+        checks = {}
         if kind == 'ours':
             record['reference'] = reference.source if reference else None
+            record['reference_run'] = reference.run if reference else None
             if reference:
-                checks, more = differential(spec, result, reference)
+                checks, more = differential(spec, result, reference, findings)
                 record['checks'] = checks
                 reasons += more
-        record.update(verdict='fail' if reasons else 'pass', reasons=reasons)
+        record['findings'] = checks.get('findings', [])
+        record.update(verdict='fail' if reasons else 'warn' if record['findings'] else 'pass', reasons=reasons)
         if opts['bless'] and kind == 'original' and not result['outcome'] and index == 1:
             for save in result['saves']:
                 shutil.copy(os.path.join(result['out'], save + '.sav'), os.path.join(FIXTURES, save + '.sav'))
@@ -2288,10 +2951,20 @@ def main(argv):
         return record
 
     def worker(slot):
-        lane = allocate_lane(opts['first_lane'], last=opts['last_lane'])
+        log = lambda s: say(f'[slot {slot}] {s}')
+        try:
+            lane = allocate_lane(opts['first_lane'], last=opts['last_lane'], log=log, max_wait=opts['max_wait'],
+                                 display=not opts['xvfb_run'] and not opts['displays'])
+        except WaitTimeout as e:
+            say(f'FAIL slot {slot}: {e}')
+            with state:
+                records.append({'spec': '-', 'player': '-', 'index': 0, 'verdict': 'fail', 'reasons': [str(e)], 'out': None})
+            return
         if opts['displays']:
             lane.display = opts['displays'][slot]
         log = lambda s: say(f'[lane {lane.number}] {s}')
+        log(f'lane {lane.number}: OniMcp :{lane.mcp_port}, E2eDriver :{lane.driver_port}, display '
+            f'{lane.display or "from xvfb-run -a"}')
         try:
             while True:
                 job = queue.next()
@@ -2302,7 +2975,7 @@ def main(argv):
                 except Exception as e:  # a runner bug fails this run, not the queue
                     import traceback
                     traceback.print_exc()
-                    record = {'spec': job['spec']['name'], 'player': job['kind'], 'index': job['index'],
+                    record = {'spec': job['spec']['name'], 'player': job['kind'], 'index': job['index'], 'run': run_id,
                               'verdict': 'fail', 'reasons': [f'runner error: {e!r}'], 'out': None}
                 with state:
                     records.append(record)
@@ -2317,11 +2990,18 @@ def main(argv):
         time.sleep(1)  # lanes are allocated in order
     for t in threads:
         t.join()
-    os.makedirs(os.path.dirname(os.path.abspath(opts['results'])), exist_ok=True)
-    with open(opts['results'], 'w') as f:
+    os.makedirs(os.path.dirname(os.path.abspath(results_path)), exist_ok=True)
+    with open(results_path, 'w') as f:
         json.dump(records, f, indent=1, default=sorted)
+    if not opts['results']:
+        point_latest(os.path.join(OUT, 'runs'), run_id + '.json')
+    if opts['record']:
+        for spec in specs:
+            saved = update_record(spec, records, opts['note'])
+            say(f'== {spec["name"]}: {saved["verdict"]} ({saved["why"]}), in '
+                f'{os.path.relpath(os.path.join(RESULTS, spec["name"] + ".json"), ROOT)}')
     failures = sum(1 for r in records if r['verdict'] == 'fail')
-    say(f'== {failures} failure(s); results in {opts["results"]}')
+    say(f'== {failures} failure(s); results in {results_path}')
     return 1 if failures else 0
 
 

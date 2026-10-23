@@ -1,16 +1,81 @@
 #!/usr/bin/env python3
-"""scripts/modtable.py CATALOG.tsv > docs/MOD_COMPATIBILITY.md
+"""scripts/modtable.py [CATALOG.tsv] > docs/MOD_COMPATIBILITY.md
 The compatibility table from onimaxxing's catalog ranks (a TSV of rank, id, subscriptions, flags,
-title) and what our sweeps recorded: the sweep-*.txt ID lists and modtable-*.tsv results in out/
-(or ONI_SWEEP_DIR), and the status sets below."""
-import glob, os, sys
+title; default scripts/mod-catalog.tsv) and what our runs recorded:
+- the sweeps' sweep-*.txt ID lists and modtable-*.tsv results in out/ (or ONI_SWEEP_DIR; in a
+  worktree whose out/ has none, the main checkout's out/);
+- the spec results in tests/e2e/results/*.json (or ONI_RESULTS_DIR), written by
+  `scripts/e2e.py --record`: a record's verdict and note decide the Played column, ahead of the
+  hand-written status sets below, which stay for mods no spec has played yet."""
+import glob, json, os, subprocess, sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SWEEPS = os.environ.get('ONI_SWEEP_DIR') or os.path.join(ROOT, 'out')
-if len(sys.argv) != 2: sys.exit(__doc__)
-cat = [l.rstrip('\n').split('\t') for l in open(sys.argv[1], encoding='utf-8')]
+
+
+def main_checkout_out():
+    """The main checkout's out/ when this is a worktree (git's common dir is the main .git)."""
+    common = subprocess.run(['git', '-C', ROOT, 'rev-parse', '--path-format=absolute', '--git-common-dir'],
+                            capture_output=True, text=True).stdout.strip()
+    return os.path.join(os.path.dirname(common), 'out') if common else None
+
+
+def sweep_dir():
+    if os.environ.get('ONI_SWEEP_DIR'):
+        return os.environ['ONI_SWEEP_DIR']
+    own = os.path.join(ROOT, 'out')
+    if glob.glob(os.path.join(own, 'sweep-*.txt')):
+        return own
+    main = main_checkout_out()
+    return main if main and glob.glob(os.path.join(main, 'sweep-*.txt')) else own
+
+
+def read_results(folder):
+    """The spec records (tests/e2e/results/SPEC.json) as {mod id: record}; pending ones (not yet
+    played to a verdict) are left out."""
+    by_mod = {}
+    for path in sorted(glob.glob(os.path.join(folder, '*.json'))):
+        with open(path, encoding='utf-8') as f:
+            record = json.load(f)
+        if record.get('verdict') not in ('played', 'warning', 'failed'):
+            continue
+        for mid in record.get('mods', []):
+            by_mod[str(mid)] = record
+    return by_mod
+
+
+def read_findings(path):
+    if not os.path.exists(path):
+        return {}
+    import yaml
+    with open(path, encoding='utf-8') as f:
+        return {x['id']: x for x in yaml.safe_load(f) or []}
+
+
+def finding_text(ident, findings):
+    link = findings.get(ident, {}).get('link', '')
+    return f'[{ident}]({link})' if link.startswith('http') else f'`{ident}`'
+
+
+def record_status(record, findings):
+    """(Played mark, note) of a spec record."""
+    note = f'spec tests/e2e/{record["spec"]}' + (f': {record["note"]}' if record.get('note') else '')
+    if record['verdict'] == 'played':
+        return '✅', note
+    if record['verdict'] == 'warning':
+        cited = ', '.join(finding_text(i, findings) for i in record.get('findings', []))
+        return '⚠️', note + (f'; known findings: {cited}' if cited else '')
+    return '⬜', f'spec fails in ours: {note[5:]}' + (f' ({record["why"]})' if record.get('why') else '')
+
+
+SWEEPS = sweep_dir()
+RESULTS = os.environ.get('ONI_RESULTS_DIR') or os.path.join(ROOT, 'tests', 'e2e', 'results')
+FINDINGS = read_findings(os.path.join(ROOT, 'tests', 'e2e', 'known-findings.yaml'))
+if len(sys.argv) > 2: sys.exit(__doc__)
+catalog = sys.argv[1] if len(sys.argv) == 2 else os.path.join(ROOT, 'scripts', 'mod-catalog.tsv')
+cat = [l.rstrip('\n').split('\t') for l in open(catalog, encoding='utf-8')]
 by_id = {r[1]: r for r in cat}
 LAST_RANK = 750
+results = read_results(RESULTS)
 
 def ids(pattern):
     s = set()
@@ -39,7 +104,6 @@ played = {
     # Played by their specs (tests/e2e/mods, scripts/e2e.py): passed once in the original and
     # twice in ours, with no new log signature and screens matching the original's.
     '1717463209': 'spec tests/e2e/mods/1717463209-bigger-camera-zoom-out.yaml: the mouse wheel zooms out past the game\'s 20, to 200; world shots at three zoom levels within 3.1 % of the original',
-    '2527442674': 'spec tests/e2e/mods/2527442674-full-miner-yield.yaml: a dig leaves debris weighing as much as the dug cells',
     '2094698134': 'spec tests/e2e/mods/2094698134-airlock-door.yaml: built from copper through a build order, its side screen and status as in the original, shut and uncharged without power',
     '1893887916': 'spec tests/e2e/mods/1893887916-research-queue.yaml: Shift+click queues a tech with its prerequisites and numbers the queue; a click takes one out or replaces the queue; the research screen as in the original',
 }
@@ -104,47 +168,57 @@ def row(rank, mid, title, loads, colony, play, note):
     link = f'[{title.replace("|", "/")}](https://steamcommunity.com/sharedfiles/filedetails/?id={mid})' if mid else title
     return f'| {rank} | {link} | {loads} | {colony} | {play} | {note} |'
 
+def status(mid, flags):
+    """(Loads, Colony, Played, note) of a mod from the sweeps and the hand-written sets."""
+    if mid in played:
+        return Y, Y, Y, played[mid]
+    if mid in differences:
+        return Y, Y, W, differences[mid]
+    if mid in unplayed:
+        return Y, Y, N, unplayed[mid]
+    if mid in broken:
+        return X, X, N, broken[mid] + ' (same in the original)'
+    if flags:
+        return N, N, N, f'flagged by onimaxxing ({flags}); not tested'
+    if mid in worldgen:
+        return N, N, N, 'worldgen mod: out of scope'
+    if mid in translations:
+        return N, N, N, 'translation: the game applies one only from a Steam subscription; not testable here'
+    if mid in original_only:
+        return Y, N, N, original_only[mid]
+    if mid in fifth_failing:
+        return X, X, N, 'fails to load in the original as well, in its sweep batch'
+    if mid in third_results:
+        loads, colony, note = third_results[mid]
+        return loads, colony, N, note
+    if mid in fifth or mid in swept:
+        return Y, Y, N, ''
+    return N, N, N, ''
+
+
+def with_record(mid, flags):
+    """A mod's status, its Played column and note from its spec record when it has one: a played
+    or ⚠️ spec ran it in a colony, so Loads and Colony are ✅."""
+    loads, colony, play, note = status(mid, flags)
+    if mid not in results:
+        return loads, colony, play, note
+    play, note = record_status(results[mid], FINDINGS)
+    return (Y, Y, play, note) if play != N else (loads, colony, play, note)
+
+
 rows = [row('–', None, 'Fast Track (GitHub)', Y, Y, Y, 'about 30 fps on U57, where the original runs 5–6')]
 listed = set()
 for r in cat:
     rank, mid, _, flags, title = int(r[0]), r[1], r[2], r[3], r[4]
-    if rank > LAST_RANK and mid not in played: continue
+    if rank > LAST_RANK and mid not in played and mid not in results: continue
     listed.add(mid)
-    if mid in played:
-        rows.append(row(rank, mid, title, Y, Y, Y, played[mid]))
-    elif mid in differences:
-        rows.append(row(rank, mid, title, Y, Y, W, differences[mid]))
-    elif mid in unplayed:
-        rows.append(row(rank, mid, title, Y, Y, N, unplayed[mid]))
-    elif mid in broken:
-        rows.append(row(rank, mid, title, X, X, N, broken[mid] + ' (same in the original)'))
-    elif flags:
-        rows.append(row(rank, mid, title, N, N, N, f'flagged by onimaxxing ({flags}); not tested'))
-    elif mid in worldgen:
-        rows.append(row(rank, mid, title, N, N, N, 'worldgen mod: out of scope'))
-    elif mid in translations:
-        rows.append(row(rank, mid, title, N, N, N, 'translation: the game applies one only from a Steam subscription; not testable here'))
-    elif mid in original_only:
-        rows.append(row(rank, mid, title, Y, N, N, original_only[mid]))
-    elif mid in fifth_failing:
-        rows.append(row(rank, mid, title, X, X, N, 'fails to load in the original as well, in its sweep batch'))
-    elif mid in third_results:
-        loads, colony, note = third_results[mid]
-        rows.append(row(rank, mid, title, loads, colony, N, note))
-    elif mid in fifth:
-        rows.append(row(rank, mid, title, Y, Y, N, ''))
-    elif mid in swept:
-        rows.append(row(rank, mid, title, Y, Y, N, ''))
-    elif mid in third:
-        rows.append(row(rank, mid, title, N, N, N, ''))
-    else:
-        rows.append(row(rank, mid, title, N, N, N, ''))
-for mid in played:
+    rows.append(row(rank, mid, title, *with_record(mid, flags)))
+for mid in list(played) + [m for m in results if m not in played]:
     if mid not in listed and mid in by_id:
         r = by_id[mid]
-        rows.append(row(r[0], mid, r[4], Y, Y, Y, played[mid]))
+        rows.append(row(r[0], mid, r[4], *with_record(mid, r[3])))
     elif mid not in listed:
-        rows.append(row('–', mid, unranked[mid], Y, Y, Y, played[mid]))
+        rows.append(row('–', mid, unranked.get(mid, mid), *with_record(mid, '')))
 
 print(f'''# Mod compatibility
 

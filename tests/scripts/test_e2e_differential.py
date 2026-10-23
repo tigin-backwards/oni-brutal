@@ -55,12 +55,16 @@ class Differential(unittest.TestCase):
         e2e.REFS = os.path.join(self.temp.name, 'refs')
         try:
             folder = e2e.bless(spec, {'out': self.orig, 'signatures': {'shared'}, 'log': os.path.join(self.orig, 'player.log'),
-                                      'values': [{'step': 4, 'expr': 'n', 'value': 3}]})
+                                      'values': [{'step': 4, 'expr': 'n', 'value': 3}], 'run': '20261022-120000-abcdef'})
             self.assertEqual(sorted(os.listdir(folder)), ['log.json', 'panel.png', 'panel.shot.json', 'panel.ui.txt',
-                                                          'signatures.json', 'values.json'])
+                                                          'signatures.json', 'source.json', 'values.json'])
             reference = e2e.Reference.blessed(spec)
-            self.assertEqual((reference.signatures, reference.log_found, reference.values),
-                             ({'shared'}, {'PLib options saved': True}, {'4:n': 3}))
+            self.assertEqual((reference.signatures, reference.log_found, reference.values, reference.run),
+                             ({'shared'}, {'PLib options saved': True}, {'4:n': 3}, '20261022-120000-abcdef'))
+            # A second blessing replaces the first whole, and leaves nothing beside it.
+            e2e.bless(spec, {'out': self.orig, 'signatures': set(), 'log': None, 'values': [], 'run': 'second'})
+            self.assertEqual(e2e.Reference.blessed(spec).run, 'second')
+            self.assertEqual(os.listdir(e2e.REFS), ['unit-bless'])
             checks, reasons = e2e.differential(spec, self.result(), reference)
             self.assertEqual(checks['expect_original'][0]['ok'], True)
         finally:

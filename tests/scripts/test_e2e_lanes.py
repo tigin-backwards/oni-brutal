@@ -14,23 +14,25 @@ class Lanes(unittest.TestCase):
     def test_allocation_skips_held_and_busy_lanes(self):
         with tempfile.TemporaryDirectory() as locks:
             free = lambda port: False
-            a = e2e.allocate_lane(2, locks, busy=free)
-            b = e2e.allocate_lane(2, locks, busy=free)
+            quiet = dict(display_busy=lambda d: False, reserved=(set(), set()))
+            a = e2e.allocate_lane(2, locks, busy=free, **quiet)
+            b = e2e.allocate_lane(2, locks, busy=free, **quiet)
             self.assertEqual((a.number, b.number), (2, 3))
-            self.assertEqual((b.mcp_port, b.driver_port), (8830, 8831))
+            self.assertEqual((b.mcp_port, b.driver_port, b.display), (8830, 8831, ':303'))
             # A lane whose port another program holds is skipped.
-            c = e2e.allocate_lane(2, locks, busy=lambda port: port == 8840)
+            c = e2e.allocate_lane(2, locks, busy=lambda port: port == 8840, **quiet)
             self.assertEqual(c.number, 5)
             a.release()
-            d = e2e.allocate_lane(2, locks, busy=free)
+            d = e2e.allocate_lane(2, locks, busy=free, **quiet)
             self.assertEqual(d.number, 2)
             for lane in (b, c, d):
                 lane.release()
 
     def test_all_lanes_held(self):
         with tempfile.TemporaryDirectory() as locks:
-            held = [e2e.allocate_lane(1, locks, busy=lambda p: False) for _ in range(e2e.MAX_LANES)]
-            self.assertIsNone(e2e.allocate_lane(1, locks, busy=lambda p: False, wait=False))
+            quiet = dict(busy=lambda p: False, display_busy=lambda d: False, reserved=(set(), set()), last=6)
+            held = [e2e.allocate_lane(1, locks, **quiet) for _ in range(6)]
+            self.assertIsNone(e2e.allocate_lane(1, locks, wait=False, **quiet))
             for lane in held:
                 lane.release()
 
@@ -87,7 +89,7 @@ class PerfWait(unittest.TestCase):
     def test_exclusive_lock_holds_specs_back(self):
         import fcntl, os
         with tempfile.TemporaryDirectory() as locks:
-            perf = open(os.path.join(locks, '.lock'), 'w')
+            perf = open(os.path.join(locks, 'perf.lock'), 'w')
             fcntl.flock(perf, fcntl.LOCK_EX)
             entered, messages = [], []
             original_sleep = e2e.time.sleep
@@ -103,7 +105,8 @@ class PerfWait(unittest.TestCase):
                 fcntl.flock(perf, fcntl.LOCK_UN)
                 t.join(5)
                 self.assertEqual(entered, [True])
-                self.assertEqual(messages, ['waiting for a perf job: a perf job holds out/e2e/.lock'])
+                self.assertEqual(messages, [f'waiting for a perf job to finish: a perf job holds {locks}/perf.lock exclusively',
+                                            'perf wait over after 0.0 min'])
             finally:
                 e2e.time.sleep = original_sleep
                 perf.close()

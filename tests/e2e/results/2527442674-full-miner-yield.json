@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2527442674-full-miner-yield.yaml",
+ "mods": [
+  "2527442674"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a dig leaves debris weighing as much as the dug cells",
+ "updated": "2026-10-22",
+ "commit": "14e677a",
+ "mod_dlls": {
+  "2527442674": {
+   "FullMinerYield.dll": "87ac14cf4722f44ee70a3824b1088bbcf9d7bd43fdcabe2fdae984b9d7b5ca5d"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261022-212441-8fa2e4",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-22T21:24:41",
+    "lane": 7,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261022-213048-ed3f83",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-22T21:30:48",
+    "lane": 7,
+    "reference_run": "20261022-212441-8fa2e4",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261022-213048-ed3f83",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-22T21:32:15",
+    "lane": 7,
+    "reference_run": "20261022-212441-8fa2e4",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -1,0 +1,56 @@
+# Known findings: engine differences that a spec's ui_dump diff found, reviewed and recorded
+# here while they are being fixed. scripts/e2e.py applies them to every ui_dump comparison: a
+# difference one of them explains does not fail a run of ours, but makes it a warning, and the
+# finding's id goes into the run's result and into tests/e2e/results/SPEC.json, so the mod reads
+# ⚠️ in docs/MOD_COMPATIBILITY.md with the ids cited.
+#
+# Each finding is reviewed before it is added (a finding hides a difference in every spec it
+# matches), and removed once the engine is fixed. Keys:
+#   id           lowercase words joined by dashes; cited in results and the table
+#   description  what differs, and in which player
+#   link         the issue, or the doc or spec where it is described
+#   component    the [COMPONENT] of a ui-diff line (fnmatch patterns): Canvas, ScrollRect, rect ...
+#   fields       the members that may differ; a difference in any other member is not explained
+#   path         optional E2eDriver path globs the element must match (* within a name, ** any
+#                levels; sibling numbers #N may be left out)
+#   original, ours   optional regexes the original's or our value of the component must match
+#   specs        optional spec names it is limited to
+#   presence     true (or only-original / only-ours) for an element only one player has; needs path
+# Depth (a Graphic's draw order on its canvas) is left out of every diff already (e2e.py
+# IGNORE_FIELDS), not listed here.
+
+- id: nested-canvas-scale-factor
+  description: >-
+    A canvas nested in a scaled screen-space canvas reports scaleFactor 1 in ours; the original
+    reports its root canvas's factor (0.86 at 1280x720). Layout and pixels are not affected.
+  link: tests/e2e/mods/1863428350-sweep-by-type.yaml
+  component: Canvas
+  fields: [scaleFactor]
+
+- id: scroll-normalized-position
+  description: >-
+    A ScrollRect whose content fits in its viewport reports normalizedPosition x 1 in ours, 0 in
+    the original.
+  link: tests/e2e/mods/3468585385-blueprints-expanded.yaml
+  component: [ScrollRect, KScrollRect]
+  fields: [normalizedPosition]
+
+- id: unused-input-caret-layout
+  description: >-
+    The caret of a TMP input field never focused has been laid out to the text area's size in
+    ours; the original leaves it at the prefab's 100x100.
+  link: tests/e2e/mods/1863428350-sweep-by-type.yaml
+  component: rect
+  fields: [rect, world, screen]
+  path: '**/Text Area/Caret'
+
+- id: empty-input-zero-width-space
+  description: >-
+    An empty TMP input field's text component holds a zero-width space in ours (empty in the
+    original), so it reports one character and overflow. Nothing shows.
+  link: tests/e2e/mods/2856555858-duplicant-stat-selector.yaml
+  component: [LocText, TextMeshProUGUI]
+  fields: [text, isTextOverflowing, firstOverflowCharacterIndex, textInfo]
+  path: '**/Text Area/Text'
+  original: '^text="" '
+  ours: '^text="​" '

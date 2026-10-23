@@ -481,8 +481,15 @@ and P, then T and K, then S and M. Mods with open GitHub issues come first, what
   `fails`, `upstream`), new signatures, worst pixel fraction per shot, ui-diff difference count,
   and a one-line note.
 
+*Implemented* (tests/e2e/README.md, "The results record"): one file per spec,
+`tests/e2e/results/SPEC.json`, rather than one `results.json`, so batches in parallel worktrees
+never conflict. A record holds the mod IDs, the verdict (`played`, `warning`, `failed`, or
+`pending` while runs are missing), the known findings a ⚠️ cites (`tests/e2e/known-findings.yaml`),
+a note, the commit, the mods' DLL hashes and each run's summary. `upstream` stays in
+`modtable.py`'s `broken` set.
+
 **Kept locally** (not committed):
-- `out/e2e/SPEC/PLAYER-N/`: logs, screenshots, dumps, diff masks.
+- `out/e2e/SPEC/RUN_ID/PLAYER-N/`: logs, screenshots, dumps, diff masks.
 - `out/e2e-refs/ID/BUILD/`: the original's blessed references (dumps, cropped shots, signatures,
   expect values). These are what re-runs of ours compare against. They are reproducible from the
   committed spec plus the original player.

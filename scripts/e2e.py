@@ -2190,10 +2190,11 @@ class Run:
             n = driver.state(head + separator + 'Count')
         tests = []
         for condition in re.split(r'\s+and\s+', conditions or '') if conditions else []:
-            match = re.fullmatch(r'(\.\S+)\s*(==|!=)\s*(\S+)', condition.strip())
+            match = re.fullmatch(r"(\.\S+)\s*(==|!=)\s*('[^']*'|\S+)", condition.strip())
             if not match:
                 raise SpecFailure(f'{condition!r}: a condition is .MEMBER == VALUE or .MEMBER != VALUE')
-            tests.append(match.groups())
+            member, op, want = match.groups()
+            tests.append((member, op, want[1:-1] if want.startswith("'") else want))  # 'TEXT' may hold spaces
         as_text = lambda v: str(v).lower() if isinstance(v, bool) else str(v)
         total = 0
         for i in range(n):

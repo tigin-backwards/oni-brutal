@@ -205,7 +205,8 @@ Besides `file:PATH`, the runner reads these, each item through its own `state.ge
 - `sum:HEAD[*].MEMBER if ...`: the sum of a member over the items that match, as in
   `sum:all:Clearable::[*].GetComponent<PrimaryElement>.Mass if .GetComponent<PrimaryElement>.ElementID == SandStone`.
 
-A condition compares the member's value as text (`true`/`false` for booleans). These read one
+A condition compares the member's value as text (`true`/`false` for booleans; `'TEXT'` in quotes
+may hold spaces). These read one
 item a frame: a few hundred items take some seconds.
 
 `== original` is checked after our run, against the value the original player recorded at the same

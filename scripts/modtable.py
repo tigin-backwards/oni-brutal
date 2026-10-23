@@ -137,6 +137,10 @@ broken = {
     '1992978572': 'broken upstream: its filter patch reads the game\'s changed filter type and crashes the game',
     '1823182964': 'broken upstream: CaiLib calls `EntityTemplates.ExtendEntityToBasicPlant` with arguments the game no longer takes, and the save fails to load',
 }
+# Found broken in the original by their specs (tests/e2e/mods).
+broken.update({
+    '2667816955': 'broken upstream: choosing its Hauling Point in the build menu picks no material (the mod hides the material selector), so nothing can be placed; spec tests/e2e/mods/2667816955-move-this-here.yaml',
+})
 # Ranks 501-750 that fail as they do in the original (out of the sweep's colony runs).
 broken.update({
     '2778263368': 'broken upstream: a Harmony transpiler whose target method is gone, and the error dialog quits the game',

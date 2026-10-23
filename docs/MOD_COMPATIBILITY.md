@@ -34,7 +34,7 @@ installs get developer checks subscribers never see).
 | 13 | [Sweep By Type](https://steamcommunity.com/sharedfiles/filedetails/?id=1863428350) | ✅ | ✅ | ⚠️ | spec tests/e2e/mods/1863428350-sweep-by-type.yaml: the filtered sweep marks only the checked material, and its list looks as in the original (no pixel differs); its layout dump does not match: a nested canvas reports scaleFactor 1 (0.86 in the original), its scroll view normalizedPosition x 1 (0), and an unused input field has laid out its caret |
 | 14 | [select last care package](https://steamcommunity.com/sharedfiles/filedetails/?id=1879935708) | ✅ | ✅ | ⬜ |  |
 | 15 | [Customizable Speed](https://steamcommunity.com/sharedfiles/filedetails/?id=2002421412) | ✅ | ✅ | ⬜ |  |
-| 16 | [Move This Here](https://steamcommunity.com/sharedfiles/filedetails/?id=2667816955) | ✅ | ✅ | ⬜ |  |
+| 16 | [Move This Here](https://steamcommunity.com/sharedfiles/filedetails/?id=2667816955) | ❌ | ❌ | ⬜ | broken upstream: choosing its Hauling Point in the build menu picks no material (the mod hides the material selector), so nothing can be placed; spec tests/e2e/mods/2667816955-move-this-here.yaml (same in the original) |
 | 17 | [Airlock Door](https://steamcommunity.com/sharedfiles/filedetails/?id=2094698134) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2094698134-airlock-door.yaml: built from copper through a build order, its side screen and status as in the original, shut and uncharged without power |
 | 18 | [GasOverlay](https://steamcommunity.com/sharedfiles/filedetails/?id=1737859934) | ✅ | ✅ | ⬜ |  |
 | 19 | [Bigger Building Menu](https://steamcommunity.com/sharedfiles/filedetails/?id=1703611962) | ✅ | ✅ | ⬜ |  |

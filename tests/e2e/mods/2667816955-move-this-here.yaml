@@ -1,0 +1,25 @@
+# Move This Here (2667816955), classes B, S.
+#
+# What it does: adds the Hauling Point (Base > storage): a 1x1 marker that costs nothing and is
+# placed at once (BuildingDef.Instantiate is patched to build it outright), with a storage
+# filter like a storage bin's. Duplicants bring the chosen items to it; its user menu's Remove
+# drops them there. Its build card hides the material selector.
+# How a player reaches it: the build menu (Base), then its side screen and user menu.
+# What changes: a hauling point that collects the checked items.
+#
+# Broken upstream: this spec fails in the original. Choosing the Hauling Point leaves the
+# prebuild tool active ("BACK" on the cursor) with no material chosen
+# (materialSelectionPanel.CurrentSelectedElement is empty): the card's material selector, which
+# the mod hides, never picks one, and a click on the floor places nothing. Kept to re-check
+# when the mod is updated.
+from: early-base
+mods: [2667816955]
+steps:
+  - driver: {camera.set: {cell: [124, 208], ortho: 10}}
+  - open: {key: Alpha1}
+  - ui_wait: {path: "**/PlanBuildingSelectionPanel/BuildingGroups", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/HaulingPoint Group*"}
+  - ui_wait: {path: "**/PlanBuildingSelectionPanel/ProductInfoScreen", cond: stable}
+  - expect_state: {"PlayerController.Instance.ActiveTool.name": BuildTool}   # PrebuildTool in the original
+  - click_world: {cell: [125, 207]}
+  - expect: {buildings: {HaulingPoint: 1}}

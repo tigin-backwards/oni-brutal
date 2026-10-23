@@ -3,12 +3,12 @@
  "mods": [
   "1703606095"
  ],
- "verdict": "pending",
- "why": "0 run(s) of ours against original run 20261023-032801-e809f3; 2 needed",
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
  "findings": [],
- "note": "",
+ "note": "an Algae Grower is built from dirt on the corridor floor west of the pod and selected: three consumed elements, algae output, fertilizer delivery, no light there",
  "updated": "2026-10-23",
- "commit": "2dff650",
+ "commit": "96363b5",
  "mod_dlls": {
   "1703606095": {
    "AlgaeGrower.dll": "27a9523276cc1f7770454d784d1141bb36c5ad959cbb562d654658944d311a0d"
@@ -25,6 +25,31 @@
     "signatures": 0
    }
   ],
-  "ours": []
+  "ours": [
+   {
+    "run": "20261023-051539-e9adac",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T05:15:39",
+    "lane": 15,
+    "reference_run": "20261023-032801-e809f3",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-051539-e9adac",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T05:16:52",
+    "lane": 15,
+    "reference_run": "20261023-032801-e809f3",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
  }
 }

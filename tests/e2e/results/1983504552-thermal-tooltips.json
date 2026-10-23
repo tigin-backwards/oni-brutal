@@ -3,12 +3,12 @@
  "mods": [
   "1983504552"
  ],
- "verdict": "pending",
- "why": "0 run(s) of ours against original run 20261023-032801-e809f3; 2 needed",
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
  "findings": [],
- "note": "",
+ "note": "the Tile is picked in the Base menu after a short run; the material panel lists the completed tile's thermal conductivity, thermal mass and melting point for sandstone, and is shot",
  "updated": "2026-10-23",
- "commit": "2dff650",
+ "commit": "96363b5",
  "mod_dlls": {
   "1983504552": {
    "ThermalTooltips.dll": "56912eb148c4989534150fa1927e2ffe95a5a13e8ec6d12b12740646cf708087"
@@ -25,6 +25,35 @@
     "signatures": 0
    }
   ],
-  "ours": []
+  "ours": [
+   {
+    "run": "20261023-042727-5b7752",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T05:13:28",
+    "lane": 15,
+    "reference_run": "20261023-032801-e809f3",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "materials": 0.007747
+    }
+   },
+   {
+    "run": "20261023-042727-5b7752",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T05:14:32",
+    "lane": 15,
+    "reference_run": "20261023-032801-e809f3",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "materials": 0.007747
+    }
+   }
+  ]
  }
 }

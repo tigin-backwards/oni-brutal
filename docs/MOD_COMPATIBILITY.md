@@ -138,7 +138,7 @@ installs get developer checks subscribers never see).
 | 117 | [Traffic Visualizer](https://steamcommunity.com/sharedfiles/filedetails/?id=2208398090) | ✅ | ✅ | ⬜ |  |
 | 118 | [Travel tube crossing wall and ladder](https://steamcommunity.com/sharedfiles/filedetails/?id=1830443217) | ⬜ | ⬜ | ⬜ | flagged by onimaxxing (notLoading); not tested |
 | 119 | [Debug Buttons](https://steamcommunity.com/sharedfiles/filedetails/?id=3120193648) | ✅ | ✅ | ⬜ |  |
-| 120 | [Thermal Tooltips](https://steamcommunity.com/sharedfiles/filedetails/?id=1983504552) | ✅ | ✅ | ⬜ |  |
+| 120 | [Thermal Tooltips](https://steamcommunity.com/sharedfiles/filedetails/?id=1983504552) | ✅ | ✅ | ✅ | spec tests/e2e/mods/1983504552-thermal-tooltips.yaml: the Tile is picked in the Base menu after a short run; the material panel lists the completed tile's thermal conductivity, thermal mass and melting point for sandstone, and is shot |
 | 121 | [Self-sealing Airlocks Revived](https://steamcommunity.com/sharedfiles/filedetails/?id=2542160819) | ❌ | ❌ | ⬜ | broken upstream: calls `SimMessages.SetCellProperties(int, byte)`, which is gone (same in the original) |
 | 122 | [Aquatic Farm](https://steamcommunity.com/sharedfiles/filedetails/?id=1910961538) | ✅ | ✅ | ✅ | spec tests/e2e/mods/1910961538-aquatic-farm.yaml: an Aquatic Farm Tile is built in the pit west of the pod, turns its cell solid and is selected: four passive consumers, farm-tile tags, nothing planted |
 | 123 | [Drywall Hides Pipes](https://steamcommunity.com/sharedfiles/filedetails/?id=1872105871) | ✅ | ✅ | ⬜ |  |
@@ -146,7 +146,7 @@ installs get developer checks subscribers never see).
 | 125 | [Dupery Fixed](https://steamcommunity.com/sharedfiles/filedetails/?id=3172734005) | ✅ | ✅ | ⬜ |  |
 | 126 | [[ภาษาไทย] Thai Localisation Pack](https://steamcommunity.com/sharedfiles/filedetails/?id=1416077105) | ⬜ | ⬜ | ⬜ | translation: the game applies one only from a Steam subscription; not testable here |
 | 127 | [Material Selection Properties](https://steamcommunity.com/sharedfiles/filedetails/?id=2600818338) | ✅ | ✅ | ⬜ |  |
-| 128 | [Algae Grower](https://steamcommunity.com/sharedfiles/filedetails/?id=1703606095) | ✅ | ✅ | ⬜ |  |
+| 128 | [Algae Grower](https://steamcommunity.com/sharedfiles/filedetails/?id=1703606095) | ✅ | ✅ | ✅ | spec tests/e2e/mods/1703606095-algae-grower.yaml: an Algae Grower is built from dirt on the corridor floor west of the pod and selected: three consumed elements, algae output, fertilizer delivery, no light there |
 | 129 | [Reveal Map](https://steamcommunity.com/sharedfiles/filedetails/?id=3130257075) | ✅ | ✅ | ⬜ |  |
 | 130 | [MaterialColor](https://steamcommunity.com/sharedfiles/filedetails/?id=1739635014) | ✅ | ✅ | ⬜ |  |
 | 131 | [Planning Tool](https://steamcommunity.com/sharedfiles/filedetails/?id=2982316671) | ✅ | ✅ | ⬜ |  |

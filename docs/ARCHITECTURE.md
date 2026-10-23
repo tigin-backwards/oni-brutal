@@ -433,13 +433,13 @@ Initialization  time update (Time.*), pending scene-load completion
 EarlyUpdate     platform events → Input state; Screen size changes
                 Start pass
 FixedUpdate     0..n steps (accumulator, maximumDeltaTime clamp), each followed by a Start pass;
-                coroutines WaitForFixedUpdate
-Update          Update; Start pass (ScriptRunDelayedDynamicFrameRate); coroutines (null,
-                WaitForSeconds, custom yields).
-PreLateUpdate   Animators (DirectorUpdateAnimationBegin/End); LateUpdate; Start pass
+                coroutines WaitForFixedUpdate; Destroy carried out
+Update          Update; Start pass (ScriptRunDelayedDynamicFrameRate); Destroy carried out;
+                coroutines (null, WaitForSeconds, custom yields).
+PreLateUpdate   Animators (DirectorUpdateAnimationBegin/End); LateUpdate; Start pass; Destroy
+                carried out
 PostLateUpdate  Canvas.willRenderCanvases (uGUI layout/graphic rebuild) → render all cameras
                 → screen-space-overlay canvases → WaitForEndOfFrame coroutines → present
-                → deferred Destroy processing
 ```
 
 Quit (`Application.Quit`, or `--frames N` in test runs): `OnApplicationQuit` to every active
@@ -466,6 +466,14 @@ depends on it: SaveLoader loads a save from a Start, so the Duplicants' Standard
 before their other components and spawns their MinionIdentity before their KPrefabID. A dead
 Duplicant thus enters `Components.LiveMinionIdentities` and is removed again once its KPrefabID
 restores the Dead tag, and that removal reorders the list.
+
+Destroy is carried out at three points, measured in the original (UnityProbe's destroy phases
+and scenario 20): after the fixed steps, after the Start pass that follows Update, and after
+LateUpdate's; a call made later in the frame waits for the next frame's Update. The Start pass
+comes first, so its Starts still find what Update destroyed, and a pending Start runs on a
+descendant that Destroy left enabled before its OnDestroy. Loading a save, Game's Start (just
+before its first Update) destroys the new-colony screen, whose CharacterContainers register in
+their Start and unregister in OnDestroy.
 
 Coroutines are Unity's state machine: an `IEnumerator` is advanced immediately by
 `StartCoroutine`; nested `IEnumerator`/`Coroutine` yields wait for the child;

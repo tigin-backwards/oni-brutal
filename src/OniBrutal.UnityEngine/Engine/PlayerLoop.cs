@@ -150,15 +150,23 @@ namespace OniBrutal.Engine
 
             Mark(4);
             BehaviourManager.RunUpdate();
+            // Update.ScriptRunDelayedDynamicFrameRate: Start for behaviours enabled before or
+            // during Update (so they start before LateUpdate), then the destruction point, Invoke
+            // calls due and the coroutines resumed after Update.
+            //
+            // These Starts run before the destruction, as observed in Unity's player (UnityProbe
+            // scenario 20): they still find what Start or Update destroyed, and a pending Start
+            // runs on a descendant that Destroy left enabled (below the object's direct
+            // children) before its OnDisable and OnDestroy. The game's SaveLoader makes Game
+            // and MinionSelectScreen in a Start; Game's Start, just before its first Update,
+            // destroys the screen, whose CharacterContainers start (and register) before their
+            // OnDestroy unregisters them.
+            BehaviourManager.RunStarts();
             // Destroy called in Start or Update is carried out when the Update pass ends, before
             // the coroutines resumed after it, as observed in Unity's player: LateUpdate already
             // finds the parts gone (Better Automation Overlay strips a template in Update and
             // clones it in LateUpdate).
             Lifecycle.ProcessDestroyQueue();
-            // Update.ScriptRunDelayedDynamicFrameRate: Start for behaviours enabled during
-            // Update (so they start before LateUpdate), Invoke calls due, then coroutines resumed
-            // after Update.
-            BehaviourManager.RunStarts();
             DelayedCalls.Run();
             Coroutines.RunUpdatePhase();
             RunPhase(DirectorUpdate);

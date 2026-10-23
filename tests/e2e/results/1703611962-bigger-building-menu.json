@@ -3,12 +3,14 @@
  "mods": [
   "1703611962"
  ],
- "verdict": "failed",
- "why": "a run of ours failed",
- "findings": [],
+ "verdict": "warning",
+ "why": "known findings: scroll-normalized-position",
+ "findings": [
+  "scroll-normalized-position"
+ ],
  "note": "a smaller spec (at 1280x720 the game keeps the build menu below the mod's raised row limit): the Base panel opens in grid and list view at the original's height; it fails on two differences: the search bar's preferred width 100 (100.01 in the original), and in the list view, straight after the load, ours shows the buildable rows as affordable (blue, colour icons) where the original greys them (106,105,102) until the colony's inventory has been counted (23 % of the panel's pixels)",
- "updated": "2026-10-22",
- "commit": "1c79be8",
+ "updated": "2026-10-23",
+ "commit": "8f094b0",
  "mod_dlls": {
   "1703611962": {
    "BiggerBuildingMenu.dll": "1f3a8f6b07be7f010e55dd17c0d103253d03f421c770af65922674f99386da41"
@@ -17,40 +19,43 @@
  "runs": {
   "original": [
    {
-    "run": "20261022-230045-b2a540",
+    "run": "20261023-041617-ace04f",
     "index": 1,
     "verdict": "pass",
-    "date": "2026-10-22T23:00:45",
-    "lane": 11,
+    "date": "2026-10-23T04:23:26",
+    "lane": 10,
+    "signatures": 0
+   },
+   {
+    "run": "20261023-041617-ace04f",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T04:25:10",
+    "lane": 10,
     "signatures": 0
    }
   ],
   "ours": [
    {
-    "run": "20261022-230323-99dcc1",
+    "run": "20261023-041617-ace04f",
     "index": 1,
-    "verdict": "fail",
-    "date": "2026-10-22T23:03:23",
-    "lane": 11,
-    "reasons": [
-     "ui_dump grid: 1 difference(s)",
-     "ui_dump list: 5 difference(s)",
-     "shot list: 23.38% of pixels differ (> 4%)"
-    ],
-    "reference_run": "20261022-230045-b2a540",
+    "verdict": "warn",
+    "date": "2026-10-23T04:26:43",
+    "lane": 10,
+    "reference_run": "20261023-041617-ace04f",
     "new_signatures": 0,
     "findings": [
      "scroll-normalized-position"
     ],
     "ui_dump": {
      "grid": {
-      "differences": 1,
+      "differences": 0,
       "known": {
        "scroll-normalized-position": 1
       }
      },
      "list": {
-      "differences": 5,
+      "differences": 0,
       "known": {
        "scroll-normalized-position": 1
       }
@@ -58,34 +63,29 @@
     },
     "shots": {
      "grid": 0.0,
-     "list": 0.233821
+     "list": 0.0
     }
    },
    {
-    "run": "20261022-230323-99dcc1",
+    "run": "20261023-041617-ace04f",
     "index": 2,
-    "verdict": "fail",
-    "date": "2026-10-22T23:05:07",
-    "lane": 11,
-    "reasons": [
-     "ui_dump grid: 1 difference(s)",
-     "ui_dump list: 5 difference(s)",
-     "shot list: 23.38% of pixels differ (> 4%)"
-    ],
-    "reference_run": "20261022-230045-b2a540",
+    "verdict": "warn",
+    "date": "2026-10-23T04:26:43",
+    "lane": 12,
+    "reference_run": "20261023-041617-ace04f",
     "new_signatures": 0,
     "findings": [
      "scroll-normalized-position"
     ],
     "ui_dump": {
      "grid": {
-      "differences": 1,
+      "differences": 0,
       "known": {
        "scroll-normalized-position": 1
       }
      },
      "list": {
-      "differences": 5,
+      "differences": 0,
       "known": {
        "scroll-normalized-position": 1
       }
@@ -93,7 +93,7 @@
     },
     "shots": {
      "grid": 0.0,
-     "list": 0.233821
+     "list": 0.0
     }
    }
   ]

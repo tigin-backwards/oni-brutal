@@ -3,12 +3,14 @@
  "mods": [
   "1737859934"
  ],
- "verdict": "failed",
- "why": "a run of ours failed",
- "findings": [],
+ "verdict": "warning",
+ "why": "known findings: scroll-normalized-position",
+ "findings": [
+  "scroll-normalized-position"
+ ],
  "note": "F1 opens the renamed GAS OVERLAY with every gas in the legend; legend within 0.02 % and the overlay's colours over the base within 0.6 % of the original's pixels; its layout dump differs: two legend rows' HorizontalLayoutGroup preferredWidth 0.01 smaller (111.25 for 111.26, 148.25 for 148.26) and the legend's scrollbar value 1 (0 in the original) where its content fits",
- "updated": "2026-10-22",
- "commit": "7afbc2c",
+ "updated": "2026-10-23",
+ "commit": "319206f",
  "mod_dlls": {
   "1737859934": {
    "Common.dll": "87a6b9950dc4f7703d1d165fab10c6aeddad6810531639062a4a40bbe6fefb3a",
@@ -18,67 +20,69 @@
  "runs": {
   "original": [
    {
-    "run": "20261022-220847-28722c",
+    "run": "20261023-042917-d97c64",
     "index": 1,
     "verdict": "pass",
-    "date": "2026-10-22T22:08:47",
+    "date": "2026-10-23T04:29:17",
+    "lane": 10,
+    "signatures": 0
+   },
+   {
+    "run": "20261023-042917-d97c64",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T04:29:18",
     "lane": 11,
     "signatures": 0
    }
   ],
   "ours": [
    {
-    "run": "20261022-221113-898f44",
+    "run": "20261023-042917-d97c64",
     "index": 1,
-    "verdict": "fail",
-    "date": "2026-10-22T22:11:13",
+    "verdict": "warn",
+    "date": "2026-10-23T04:31:00",
     "lane": 11,
-    "reasons": [
-     "ui_dump legend: 3 difference(s)"
-    ],
-    "reference_run": "20261022-220847-28722c",
+    "reference_run": "20261023-042917-d97c64",
     "new_signatures": 0,
     "findings": [
      "scroll-normalized-position"
     ],
     "ui_dump": {
      "legend": {
-      "differences": 3,
+      "differences": 0,
       "known": {
-       "scroll-normalized-position": 1
+       "scroll-normalized-position": 2
       }
      }
     },
     "shots": {
      "legend": 0.000196,
-     "base": 0.0054
+     "base": 0.000248
     }
    },
    {
-    "run": "20261022-221113-898f44",
+    "run": "20261023-042917-d97c64",
     "index": 2,
-    "verdict": "fail",
-    "date": "2026-10-22T22:12:45",
-    "lane": 11,
-    "reasons": [
-     "ui_dump legend: 3 difference(s)"
-    ],
-    "reference_run": "20261022-220847-28722c",
+    "verdict": "warn",
+    "date": "2026-10-23T04:31:56",
+    "lane": 12,
+    "reference_run": "20261023-042917-d97c64",
     "new_signatures": 0,
     "findings": [
      "scroll-normalized-position"
     ],
     "ui_dump": {
      "legend": {
-      "differences": 3,
+      "differences": 0,
       "known": {
-       "scroll-normalized-position": 1
+       "scroll-normalized-position": 2
       }
      }
     },
     "shots": {
      "legend": 0.000196,
-     "base": 0.005379
+     "base": 0.000247
     }
    }
   ]

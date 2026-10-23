@@ -1,0 +1,59 @@
+{
+ "spec": "mods/1847165596-i-love-slicksters.yaml",
+ "mods": [
+  "1847165596"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Leafy Slickster is spawned in the corridor (setup), selected and named (title shot), and lives through a short run",
+ "updated": "2026-10-23",
+ "commit": "15adabf",
+ "mod_dlls": {
+  "1847165596": {
+   "ILoveSlicksters.dll": "97d6642ba68e953f7ec69a9b41b7955f5b878af83cadd59cfc097842a406f669"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-123333-3bbe4d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T13:02:17",
+    "lane": 12,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-130808-6365b8",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T13:08:08",
+    "lane": 13,
+    "reference_run": "20261023-123333-3bbe4d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "title": 0.0
+    }
+   },
+   {
+    "run": "20261023-130808-6365b8",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T13:09:18",
+    "lane": 13,
+    "reference_run": "20261023-123333-3bbe4d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "title": 0.0
+    }
+   }
+  ]
+ }
+}

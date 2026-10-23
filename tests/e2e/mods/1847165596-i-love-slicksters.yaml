@@ -1,0 +1,32 @@
+# I Love Slicksters - Morphs ! (1847165596), classes P, O.
+#
+# What it does: adds six Slickster morphs with eggs and larvae, each eating a gas and
+# excreting a liquid: Ethanol (CO2 to ethanol), OwO, Leafy (CO2 to oxygen-rich polluted
+# water), Robot (makes zombie spores), Frozen (cools its surroundings) and Aqua Slicksters.
+# Vanilla Slicksters lay them at small chances, care packages and Molecular Forge recipes
+# offer the eggs, and some morphs drown in liquid or need grooming. A PLib options dialog
+# tunes consumption, the recipes, care packages and the morphs' effects.
+# How a player reaches it: ranching Slicksters; the critters' details screen.
+# What changes: new critters and eggs.
+#
+# setup spawns a Leafy Slickster in the dug-out corridor west of the printing pod (early-base
+# has none). It is selected: its details screen names it and is shot; it then lives
+# through a short run.
+from: early-base
+mods: [1847165596]
+setup:
+  - driver: {setup.call: {type: GameUtil, method: KInstantiate, args: [{"$": "Assets.GetPrefab(\"LeafyOilfloater\")"}, [110.5, 206.01, -24.5], Creatures]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+steps:
+  - expect_state:
+      "count:all:CreatureBrain::[*] if .GetComponent<KPrefabID>.PrefabTag.Name == LeafyOilfloater": 1
+  - driver: {camera.set: {cell: [110, 207], ortho: 6}}
+  - click_world: {cell: [110, 206], select: LeafyOilfloater}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Leafy Slickster"}
+  - shot: {name: title, crop: "**/DetailsScreen/TitleBar", threshold: 0.04}
+  - run: {seconds: 30}
+  - expect_state:
+      "selected:GetComponent<KPrefabID>.PrefabTag.Name": LeafyOilfloater
+      "selected:GetComponent<Health>.IsDefeated()": false

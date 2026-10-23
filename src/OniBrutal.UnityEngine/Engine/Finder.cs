@@ -36,8 +36,11 @@ namespace OniBrutal.Engine
             return result;
         }
 
-        /// Objects of `type` that live in scenes: GameObjects and their components. Inactive ones
-        /// are included only when asked; a disabled Behaviour counts as inactive, as in Unity.
+        /// Objects of `type` that live in scenes: GameObjects and their components. Those on
+        /// inactive GameObjects are included only when asked. A disabled Behaviour on an active
+        /// GameObject is always included, as measured in the original (UnityProbe CanvasProbe:
+        /// FindObjectsByType and FindObjectsOfType with Exclude or without the flag, and
+        /// FindFirstObjectByType, return a disabled Canvas and a disabled MonoBehaviour).
         public static IEnumerable<UnityEngine.Object> SceneObjects(Type type, bool includeInactive, FindObjectsSortMode sortMode)
         {
             var results = new List<UnityEngine.Object>();
@@ -56,7 +59,6 @@ namespace OniBrutal.Engine
                     var ct = c.GetType();
                     if (!matches.TryGetValue(ct, out bool match)) matches[ct] = match = type.IsAssignableFrom(ct);
                     if (!match) continue;
-                    if (!includeInactive && c is Behaviour b && !b.enabled) continue;
                     results.Add(c);
                 }
             }

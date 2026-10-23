@@ -340,9 +340,9 @@ namespace UnityEngine
         public bool hasMoved => Data.HasMoved;
 
         /// Draw order within the root canvas; -1 when the element was not in the last build.
-        public int absoluteDepth => Data.AbsoluteDepth;
+        public int absoluteDepth => Data.DepthBuild == CanvasSystem.BuildNumber ? Data.AbsoluteDepth : -1;
 
-        public int relativeDepth => Data.RelativeDepth;
+        public int relativeDepth => Data.DepthBuild == CanvasSystem.BuildNumber ? Data.RelativeDepth : -1;
 
         public bool hasRectClipping => Data.ClipRect != null;
 
@@ -706,6 +706,8 @@ namespace OniBrutal.Engine.UI
         public bool CullTransparentMesh;
         public int AbsoluteDepth = -1;
         public int RelativeDepth = -1;
+        /// The build (CanvasSystem.BuildNumber) that last set the depths.
+        public int DepthBuild = -1;
         public int Version;
 
         /// The element's transform relative to its root canvas at the last build.

@@ -26,6 +26,12 @@ front end 8 s after it loads and of the in-game overlay canvases once the clock 
 frames. Compare the two players' outputs with frame numbers taken relative to each scenario
 header.
 
+With `PROBE_SCENARIO=canvas` only the canvas probe runs (`CanvasProbe.cs`, lines `CANVAS …`, at the
+main menu): which disabled Behaviours the FindObjects family returns, and whether nested canvases
+under a disabled root canvas (or an inactive one) draw, take raycasts and keep their root. Set
+`PROBE_CAPTURE_DIR` for its screenshots, read back by pixel; `CanvasTests` and `SceneRootsTests`
+encode the results.
+
 Both players write the same version stamp for the mod (ARCHITECTURE D3), so one `mods.json`
 serves both. In U59 that stamp is `692750779`, with `enabledForDlc: ["", "EXPANSION1_ID"]`;
 with another stamp the game reinstalls the mod and disables it.

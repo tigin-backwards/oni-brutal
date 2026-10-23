@@ -69,6 +69,9 @@ namespace OniBrutal.Engine.UI
 
         static CanvasNative CanvasOn(GameObjectNative go) => PartsOf(go).Canvas is { } c && IsLive(c) ? c : null;
 
+        /// A GameObject's canvas, enabled or not.
+        static CanvasNative AnyCanvasOn(GameObjectNative go) => PartsOf(go).Canvas is { } c && !c.Destroyed ? c : null;
+
         /// A GameObject's canvas components, found once per component list: GameObject.Components
         /// is copy-on-write, so the list is the same array until a component is added or removed.
         /// The canvas walks run every frame over the whole UI; their state (enabled, destroyed,
@@ -100,26 +103,36 @@ namespace OniBrutal.Engine.UI
             return parts;
         }
 
-        /// The topmost live canvas at or above this canvas.
+        /// A canvas's root: the topmost canvas above it, up to and including the first disabled
+        /// one. As measured in the original (UnityProbe CanvasProbe): a disabled canvas, like one
+        /// on an inactive object, is a root of its own (isRootCanvas, its own render mode and
+        /// scale factor), but it is still the root of the live canvases below it, which keep its
+        /// render mode, scale factor and sorting. Its override-sorting descendants draw and take
+        /// raycasts in its space; nothing else under it draws.
         public static CanvasNative RootOf(CanvasNative canvas)
         {
             var root = canvas;
+            if (!IsLive(canvas)) return root;
             for (var t = canvas.GameObject.Transform.Parent; t != null; t = t.Parent)
-                if (CanvasOn(t.GameObject) is { } c) root = c;
+                if (AnyCanvasOn(t.GameObject) is { } c)
+                {
+                    root = c;
+                    if (!IsLive(c)) break;
+                }
             return root;
         }
 
-        /// The canvas whose sorting layer and order a canvas uses: the nearest live canvas at or
-        /// above it that overrides sorting, or its root.
+        /// The canvas whose sorting layer and order a canvas uses: the nearest canvas at or above
+        /// it that overrides sorting, or its root (RootOf).
         public static CanvasNative SortingCanvasOf(CanvasNative canvas)
         {
-            if (canvas.OverrideSorting) return canvas;
+            if (canvas.OverrideSorting || !IsLive(canvas)) return canvas;
             var result = canvas;
             for (var t = canvas.GameObject.Transform.Parent; t != null; t = t.Parent)
-                if (CanvasOn(t.GameObject) is { } c)
+                if (AnyCanvasOn(t.GameObject) is { } c)
                 {
                     result = c;
-                    if (c.OverrideSorting) return c;
+                    if (c.OverrideSorting || !IsLive(c)) return c;
                 }
             return result;
         }
@@ -305,8 +318,13 @@ namespace OniBrutal.Engine.UI
             public readonly float GroupAlpha = groupAlpha;
         }
 
+        /// Counts builds: an element's depth is its last build's only if that build reached it
+        /// (CanvasRendererNative.DepthBuild), so elements under a canvas that stopped drawing read -1.
+        public static int BuildNumber { get; private set; }
+
         static void Build()
         {
+            BuildNumber++;
             batches.Clear();
             int reused = 0;
             foreach (var c in enabled)
@@ -375,8 +393,10 @@ namespace OniBrutal.Engine.UI
             if (!go.ActiveInHierarchy) return;
             if (stats) statsVisits++;
             var parts = PartsOf(go);
-            var canvasHere = parts.Canvas is { } here && IsLive(here) ? here : null;
-            if (!isBatchRoot && canvasHere != null && canvasHere.OverrideSorting) return;
+            var canvasHere = parts.Canvas is { } here && !here.Destroyed ? here : null;
+            // A nested sort root is a batch of its own; a disabled canvas draws nothing (its
+            // override-sorting descendants are batches rooted at it).
+            if (!isBatchRoot && canvasHere != null && (canvasHere.OverrideSorting || !IsLive(canvasHere))) return;
             // CanvasGroups multiply down the hierarchy; one that ignores its parents restarts it.
             bool skippedAbove = groupAlpha <= 0f && !blocksRaycasts;
             foreach (var g in parts.Groups)
@@ -410,6 +430,7 @@ namespace OniBrutal.Engine.UI
                 if (r.Destroyed) continue;
                 r.AbsoluteDepth = -1;
                 r.RelativeDepth = -1;
+                r.DepthBuild = BuildNumber;
                 if (hidden && !blocksRaycasts) continue;
                 r.BuiltToCanvas = worldToNearest * r.GameObject.Transform.LocalToWorld;
                 if (r.Cull) continue;
@@ -443,7 +464,7 @@ namespace OniBrutal.Engine.UI
             if (!go.ActiveInHierarchy) return;
             if (stats) statsVisits++;
             var parts = PartsOf(go);
-            if (!isTop && parts.Canvas is { } c && IsLive(c) && c.OverrideSorting) return;
+            if (!isTop && parts.Canvas is { } c && !c.Destroyed && (c.OverrideSorting || !IsLive(c))) return;
             bool wrong = false;
             foreach (var g in parts.Groups) wrong |= g.IsActiveAndEnabledState && g.IgnoreParentGroups;
             foreach (var r in parts.Renderers) wrong |= !r.Destroyed && (r.AbsoluteDepth != -1 || r.RelativeDepth != -1);

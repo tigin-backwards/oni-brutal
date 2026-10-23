@@ -304,5 +304,162 @@ namespace OniBrutal.Tests
                 GraphicsDevice.Install(previous);
             }
         }
+
+        // ----- Disabled canvases (measured in the original with UnityProbe's CanvasProbe) -----
+
+        /// The probe's layout: an overlay root (scale factor 1.5, order 32000) holding a nested
+        /// override-sorting canvas, a plain nested canvas with an override-sorting canvas inside
+        /// it, and an element directly under the root. Each canvas holds one element.
+        sealed class Nest
+        {
+            public Canvas Root, Override, Plain, Inner;
+            public CanvasRenderer RootElement, OverrideElement, PlainElement, InnerElement;
+            public CanvasRenderer[] Elements => [RootElement, OverrideElement, PlainElement, InnerElement];
+        }
+
+        static CanvasRenderer Element(Transform parent, string name)
+        {
+            var go = new GameObject(name, typeof(RectTransform));
+            go.transform.SetParent(parent, false);
+            return go.AddComponent<CanvasRenderer>();
+        }
+
+        static Canvas NestedCanvas(Transform parent, string name, Vector2 position, bool overrideSorting)
+        {
+            var go = new GameObject(name, typeof(RectTransform));
+            var rt = (RectTransform)go.transform;
+            rt.SetParent(parent, false);
+            rt.anchorMin = rt.anchorMax = rt.pivot = Vector2.zero;
+            rt.anchoredPosition = position;
+            rt.sizeDelta = new Vector2(60f, 60f);
+            var canvas = go.AddComponent<Canvas>();
+            if (overrideSorting)
+            {
+                canvas.overrideSorting = true;
+                canvas.sortingOrder = 32001;
+            }
+            return canvas;
+        }
+
+        static Nest BuildNest()
+        {
+            OniBrutal.Engine.UI.CanvasSystem.Install();
+            var n = new Nest();
+            n.Root = new GameObject("Root", typeof(RectTransform)).AddComponent<Canvas>();
+            n.Root.renderMode = RenderMode.ScreenSpaceOverlay;
+            n.Root.sortingOrder = 32000;
+            n.Root.scaleFactor = 1.5f;
+            n.Override = NestedCanvas(n.Root.transform, "Override", new Vector2(20f, 20f), overrideSorting: true);
+            n.Plain = NestedCanvas(n.Root.transform, "Plain", new Vector2(120f, 20f), overrideSorting: false);
+            n.Inner = NestedCanvas(n.Plain.transform, "Inner", new Vector2(0f, 70f), overrideSorting: true);
+            n.RootElement = Element(n.Root.transform, "RootElement");
+            n.OverrideElement = Element(n.Override.transform, "OverrideElement");
+            n.PlainElement = Element(n.Plain.transform, "PlainElement");
+            n.InnerElement = Element(n.Inner.transform, "InnerElement");
+            return n;
+        }
+
+        static Vector3 Corner(Canvas canvas)
+        {
+            var corners = new Vector3[4];
+            ((RectTransform)canvas.transform).GetWorldCorners(corners);
+            return corners[0];
+        }
+
+        /// A nested canvas under a root whose Canvas component is disabled still has that root:
+        /// isRootCanvas false, rootCanvas the disabled root, and the root's render mode, scale
+        /// factor and (without its own override) sorting order; it keeps its place on screen.
+        [Fact]
+        public void ADisabledRootCanvasIsStillTheRootOfTheCanvasesBelowIt()
+        {
+            var n = BuildNest();
+            Frame();
+            var placed = Corner(n.Override);
+            Assert.Equal(new Vector3(30f, 30f, 0f), placed);
+            n.Root.enabled = false;
+            Frame();
+            foreach (var nested in new[] { n.Override, n.Plain, n.Inner })
+            {
+                Assert.False(nested.isRootCanvas);
+                Assert.Same(n.Root, nested.rootCanvas);
+                Assert.Equal(1.5f, nested.scaleFactor);
+                Assert.Equal(RenderMode.ScreenSpaceOverlay, nested.renderMode);
+            }
+            Assert.Equal(32001, n.Override.sortingOrder);
+            Assert.Equal(32000, n.Plain.sortingOrder);
+            Assert.Equal(placed, Corner(n.Override));
+            Assert.True(n.Root.isRootCanvas);
+        }
+
+        /// Under a disabled root canvas only the nested override-sorting canvases draw (their
+        /// elements are numbered, so uGUI raycasts hit them); the root's own elements and those
+        /// of nested canvases that sort with it read depth -1. Enabling the root brings them back.
+        [Fact]
+        public void UnderADisabledRootCanvasOnlyOverrideSortingCanvasesDraw()
+        {
+            var n = BuildNest();
+            Frame();
+            Assert.All(n.Elements, r => Assert.NotEqual(-1, r.absoluteDepth));
+
+            n.Root.enabled = false;
+            Frame();
+            Assert.NotEqual(-1, n.OverrideElement.absoluteDepth);
+            Assert.NotEqual(-1, n.InnerElement.absoluteDepth);
+            Assert.Equal(-1, n.RootElement.absoluteDepth);
+            Assert.Equal(-1, n.PlainElement.absoluteDepth);
+
+            n.Root.enabled = true;
+            Frame();
+            Assert.All(n.Elements, r => Assert.NotEqual(-1, r.absoluteDepth));
+        }
+
+        /// A disabled canvas reports itself as a root with its own settings (here a nested
+        /// canvas's defaults: World Space, scale factor 1, order 0), as one on an inactive object
+        /// does; the canvases below it take it as their root. It draws nothing, override-sorting
+        /// or not, while the rest of its root's canvas still draws.
+        [Fact]
+        public void ADisabledNestedCanvasIsARootOfItsOwnAndDrawsNothing()
+        {
+            var n = BuildNest();
+            n.Override.enabled = false;
+            n.Plain.enabled = false;
+            Frame();
+            foreach (var disabled in new[] { n.Override, n.Plain })
+            {
+                Assert.True(disabled.isRootCanvas);
+                Assert.Same(disabled, disabled.rootCanvas);
+                Assert.Equal(1f, disabled.scaleFactor);
+                Assert.Equal(RenderMode.WorldSpace, disabled.renderMode);
+            }
+            Assert.Equal(0, n.Plain.sortingOrder);
+            Assert.False(n.Inner.isRootCanvas);
+            Assert.Same(n.Plain, n.Inner.rootCanvas);
+            Assert.Equal(1f, n.Inner.scaleFactor);
+            Assert.Equal(RenderMode.WorldSpace, n.Inner.renderMode);
+            Assert.Equal(-1, n.OverrideElement.absoluteDepth);
+            Assert.Equal(-1, n.PlainElement.absoluteDepth);
+            Assert.NotEqual(-1, n.RootElement.absoluteDepth);
+        }
+
+        /// For contrast: with the root's GameObject inactive, every nested canvas reports itself
+        /// as its own root with its own settings, and nothing draws.
+        [Fact]
+        public void UnderAnInactiveRootEveryCanvasIsItsOwnRoot()
+        {
+            var n = BuildNest();
+            Frame();
+            n.Root.gameObject.SetActive(false);
+            Frame();
+            foreach (var nested in new[] { n.Override, n.Plain, n.Inner })
+            {
+                Assert.True(nested.isRootCanvas);
+                Assert.Same(nested, nested.rootCanvas);
+                Assert.Equal(1f, nested.scaleFactor);
+                Assert.Equal(RenderMode.WorldSpace, nested.renderMode);
+            }
+            Assert.Equal(0, n.Plain.sortingOrder);
+            Assert.Equal(32001, n.Override.sortingOrder);
+            Assert.All(n.Elements, r => Assert.Equal(-1, r.absoluteDepth));
+        }
     }
 }

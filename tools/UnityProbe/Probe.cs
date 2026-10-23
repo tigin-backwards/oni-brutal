@@ -18,6 +18,11 @@ namespace SemanticsProbe
             harmony.Patch(HarmonyLib.AccessTools.Method(typeof(DetailsScreen), "OnCmpDisable"), prefix: new HarmonyLib.HarmonyMethod(typeof(Mod), nameof(DetailsDisablePrefix)));
             var go = new GameObject("SemanticsProbe");
             Object.DontDestroyOnLoad(go);
+            if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "canvas")
+            {
+                go.AddComponent<CanvasProbe>();
+                return;
+            }
             go.AddComponent<Probe>();
             go.AddComponent<QuitLog>().Tag = "ddol-at-load";
             go.AddComponent<FrameLog>();

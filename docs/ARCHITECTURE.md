@@ -140,7 +140,10 @@ past the boot checkpoint needs a Steam client logged in with an account that own
 - **D2 Number formatting.** `double`/`float.ToString()` without a format prints the shortest
   round-trippable string on .NET (Mono printed 15 significant digits), and a negative value
   that rounds to zero keeps its sign ("-0.0" where Mono printed "0.0") — cosmetic, in game
-  code's own formatting. The engine's own `ToString` methods (vectors, colours, matrices, rects)
+  code's own formatting. Fixed-decimal formats round differently at a half: Mono rounds a
+  float's 7-significant-digit form, .NET its exact value, so `67.255f.ToString("F2")` is "67.26"
+  on Mono and "67.25" here (`0.005f`: "0.01" and "0.00"). Kept: .NET's is the exact rounding of
+  the value the game holds. The engine's own `ToString` methods (vectors, colours, matrices, rects)
   format as Unity's Mono player does.
 - **D3 `string.GetHashCode`** is randomized per process (Mono's is stable). Its only persisted
   use is the version stamp of local and dev (unpackaged) mods in `mods.json`
@@ -331,6 +334,19 @@ past the boot checkpoint needs a Steam client logged in with an account that own
   `Directory.CreateDirectory("")` throws. **Resolved in** `MonoFolderPaths`: the default option
   is answered without the existence check, as Mono answers it; Windows is unchanged.
   `--check-types` asks for the Desktop of a home that has none.
+- **D25 Float intermediate precision.** Unity starts Mono with `-O=-float32`
+  (`UnityPlayer.so`; Mono's own default is float32 on): float arithmetic is evaluated in double
+  and rounded to float32 only where the value is stored (a local, field, array element,
+  parameter or return value) or cast. CoreCLR rounds every float operation to float32. So a
+  float expression used without being stored first can differ in the last bit:
+  `(int)(0.7f * 10f)` is 6 on Mono and 7 here, `Math.Round(0.9f * 255)` 229 and 230. In the game
+  this shows as rare off-by-one results where a product lands on an integer, such as the germs
+  a ladder passes on (`(int)(count * 0.005f)`, one fewer on Mono at multiples of 200), and in
+  some UI roundings at a half. Kept: .NET's results are those the code as written asks for, and
+  emulating Mono (widening every float load and call result in all game and mod IL) would
+  break mods' transpilers that match IL patterns. Measured by `tools/UnityProbe`
+  (FloatPrecision.cs, `PROBE_SCENARIO=floatprec`); test tools that compare players compute in
+  double, where both runtimes agree.
 
 ## 3. The engine API (`OniBrutal.UnityEngine`)
 
@@ -704,7 +720,8 @@ HTTP and FMOD threads call into the engine. Our rules:
 `Vector2/3/4`, `Quaternion`, `Matrix4x4`, `Color`, `Mathf`, … are implemented with Unity's
 formulas (including `Mathf.Approximately`, `RoundToInt` banker's rounding, `Random.Range`
 inclusive/exclusive rules, `Quaternion.Euler` order ZXY). Bit-exact float results are out of
-scope; algorithmic equivalence is not.
+scope; algorithmic equivalence is not. The runtime's float rounding differs from Unity's Mono
+(D25) and so does its number formatting (D2).
 
 ## 6. Configuration and paths
 

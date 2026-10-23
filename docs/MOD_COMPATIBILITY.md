@@ -91,7 +91,7 @@ installs get developer checks subscribers never see).
 | 70 | [Smart Mop // by @Ony 👾](https://steamcommunity.com/sharedfiles/filedetails/?id=1863275516) | ✅ | ✅ | ⬜ |  |
 | 71 | [Full Miner Yield](https://steamcommunity.com/sharedfiles/filedetails/?id=2527442674) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2527442674-full-miner-yield.yaml: a dig leaves debris weighing as much as the dug cells |
 | 72 | [Dup Stats Configurator](https://steamcommunity.com/sharedfiles/filedetails/?id=1717999057) | ✅ | ✅ | ⬜ |  |
-| 73 | [Wallpaper](https://steamcommunity.com/sharedfiles/filedetails/?id=1717534457) | ✅ | ✅ | ⬜ |  |
+| 73 | [Wallpaper](https://steamcommunity.com/sharedfiles/filedetails/?id=1717534457) | ✅ | ✅ | ✅ | spec tests/e2e/mods/1717534457-wallpaper.yaml: four sandstone wallpapers built and tinted sandstone's colour; world shot of them, the floor masked |
 | 74 | [Flow Splitters](https://steamcommunity.com/sharedfiles/filedetails/?id=1708823360) | ✅ | ✅ | ✅ | spec tests/e2e/mods/1708823360-flow-splitters.yaml: smaller spec (early-base has no pump to feed a pipe): Liquid Splitter A built with pipes on its input and both outputs, found operational with its second output joined; liquid overlay shot |
 | 75 | [484114 한글 언어팩](https://steamcommunity.com/sharedfiles/filedetails/?id=1454392573) | ⬜ | ⬜ | ⬜ | translation: the game applies one only from a Steam subscription; not testable here |
 | 76 | [Ronivan's Legacy - Industrial Revolution](https://steamcommunity.com/sharedfiles/filedetails/?id=3557584850) | ✅ | ✅ | ⬜ |  |

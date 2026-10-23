@@ -1,0 +1,59 @@
+{
+ "spec": "mods/1717534457-wallpaper.yaml",
+ "mods": [
+  "1717534457"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "four sandstone wallpapers built and tinted sandstone's colour; world shot of them, the floor masked",
+ "updated": "2026-10-22",
+ "commit": "fd67309",
+ "mod_dlls": {
+  "1717534457": {
+   "Wallpaper.dll": "6c2a8ee5d7dc42217452a64750b3020b490e81a1ac23018df44b340ebb3548f0"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261022-232004-36dc49",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-22T23:37:50",
+    "lane": 13,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261022-234018-d42ec0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-22T23:45:53",
+    "lane": 12,
+    "reference_run": "20261022-232004-36dc49",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "wallpaper": 0.007418
+    }
+   },
+   {
+    "run": "20261022-234018-d42ec0",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-22T23:47:28",
+    "lane": 12,
+    "reference_run": "20261022-232004-36dc49",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "wallpaper": 0.00935
+    }
+   }
+  ]
+ }
+}

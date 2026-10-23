@@ -1,0 +1,36 @@
+# Wallpaper (1717534457), classes B, V.
+#
+# What it does: adds Wallpaper (Furniture, researched with Art (Artistry)): a 1x1 background
+# wall of any solid, 1 kg, +5 decor, tinted with the colour of its material (the element's UI
+# colour, or one from the mod's Config.json). It is tinted again when the overlay goes back to
+# none. (A Painted Drywall config is in the code but not in the build menu.)
+# How a player reaches it: the build menu (Furniture).
+# What changes: coloured background tiles, and decor.
+#
+# setup grants Art. Four wallpapers of sandstone are hung on the back wall of the dug-out room
+# west of the printing pod.
+from: early-base
+mods: [1717534457]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"Artistry\")", method: Purchased}}
+steps:
+  - build: {prefab: Wallpaper, cells: [[108, 209], [109, 209], [110, 209], [111, 209]], material: SandStone}
+  - expect: {blueprints: {Wallpaper: 4}}
+  - run: {seconds: 900, until: {buildings: {Wallpaper: 4}, pending_construction: 0}}
+  - expect_state:
+      "ElementLoader.FindElementByName(\"SandStone\").substance.uiColour.r": {save_as: r}
+      "ElementLoader.FindElementByName(\"SandStone\").substance.uiColour.g": {save_as: g}
+      "ElementLoader.FindElementByName(\"SandStone\").substance.uiColour.b": {save_as: b}
+  # Each wallpaper is tinted with sandstone's colour.
+  - click_world: {cell: [109, 209]}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui: {"**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Wallpaper"}}
+  - expect_state:
+      "selected:KPrefabID.PrefabTag.Name": Wallpaper
+      "selected:KBatchedAnimController.TintColour.r": "== r"
+      "selected:KBatchedAnimController.TintColour.g": "== g"
+      "selected:KBatchedAnimController.TintColour.b": "== b"
+  - key: {code: Escape}
+  # The floor below, where Duplicants and debris lie wherever the run left them, is masked, and
+  # so is the management bar the shot keeps.
+  - world_shot: {name: wallpaper, ortho: 4, at: [110, 209], mask: [[0, 420, 1280, 300], [860, 0, 420, 50]]}

@@ -1,0 +1,33 @@
+{
+ "spec": "mods/1718226085-wireless-automation.yaml",
+ "mods": [
+  "1718226085"
+ ],
+ "verdict": "pending",
+ "why": "the spec fails in the original: a broken spec, or a mod broken upstream",
+ "findings": [],
+ "note": "",
+ "updated": "2026-10-23",
+ "commit": "7efbed1",
+ "mod_dlls": {
+  "1718226085": {
+   "WirelessAutomation.dll": "51e2074ae8033c753a85d1de0c4b1636d29fa843dcc7b06093c8b333eddca55b"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-123333-3bbe4d",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-23T12:56:56",
+    "lane": 13,
+    "reasons": [
+     "step start: the player exited (-6) while loading"
+    ],
+    "signatures": 21
+   }
+  ],
+  "ours": []
+ }
+}

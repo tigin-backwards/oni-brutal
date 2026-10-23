@@ -1,0 +1,30 @@
+# Wireless Automation (1718226085), class B.
+#
+# What it does: adds the Wireless Signal Emitter and Receiver to the Automation menu (Duplicant
+# Traffic Control): 1x1 buildings of refined metal, powered at 50 W, that carry an automation
+# signal without wires. An emitter broadcasts the signal on its logic input on a channel
+# (0-100, a slider in its side screen, IIntSliderControl); every receiver on that channel
+# sends it out.
+# How a player reaches it: the build menu (Automation); the channel slider.
+# What changes: automation across the map without wires.
+#
+# setup grants Duplicant Traffic Control and spawns steel. The mod's tech entries are checked
+# first (its Db patch ran), then that its buildings exist; an emitter is built in the dug-out
+# corridor west of the printing pod and selected, and its channel slider is shot.
+from: early-base
+mods: [1718226085]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"DupeTrafficControl\")", method: Purchased}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Steel\").substance", method: SpawnResource, args: [[115.5, 207.5, -12], 200, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"DupeTrafficControl\").unlockedItemIDs": {contains: WirelessSignalEmitter}
+  - expect_state:
+      "Assets.GetBuildingDef(\"WirelessSignalEmitter\")": exists
+  - build: {prefab: WirelessSignalEmitter, at: [113, 206], material: Steel}
+  - expect: {blueprints: {WirelessSignalEmitter: 1}}
+  - run: {seconds: 900, until: {buildings: {WirelessSignalEmitter: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [113, 207], ortho: 8}}
+  - click_world: {cell: [113, 206], select: WirelessSignalEmitter}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/IntSliderSideScreen", cond: stable}
+  - shot: {name: details, crop: "**/DetailsScreen", threshold: 0.04}

@@ -1,0 +1,63 @@
+{
+ "spec": "mods/3671379574-resource-dashboard.yaml",
+ "mods": [
+  "3671379574"
+ ],
+ "verdict": "failed",
+ "why": "a run of ours failed",
+ "findings": [],
+ "note": "after 150 s of play, the resources panel's Dashboard button opens the window; a row selects the graph and the search filters the rows in the original; in ours the mod fails to load and the player exits while loading (uGUI lacks IPointerMoveHandler: docs/cleanroom/ugui.md, Pointer move events)",
+ "updated": "2026-10-23",
+ "commit": "195246a",
+ "mod_dlls": {
+  "3671379574": {
+   "ResourceDashboard.dll": "f8aaa8ea958717c0e089784b2181cdea74e3c9fe4470bd1b0f2ebee830f7acbf"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-131335-87ba21",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T13:13:35",
+    "lane": 18,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-131610-ca1744",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-23T13:16:10",
+    "lane": 18,
+    "reasons": [
+     "step start: the player exited (1) while loading",
+     "12 log signature(s) the original lacks"
+    ],
+    "reference_run": "20261023-131335-87ba21",
+    "new_signatures": 12,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-131610-ca1744",
+    "index": 2,
+    "verdict": "fail",
+    "date": "2026-10-23T13:16:59",
+    "lane": 18,
+    "reasons": [
+     "step start: the player exited (1) while loading",
+     "12 log signature(s) the original lacks"
+    ],
+    "reference_run": "20261023-131335-87ba21",
+    "new_signatures": 12,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

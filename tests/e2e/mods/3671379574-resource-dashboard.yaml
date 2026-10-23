@@ -1,0 +1,33 @@
+# Resource Dashboard (3671379574), not in the triage (issue #2: zivvel's one mod that did not work).
+#
+# What it does: logs the colony's resources once a minute of game time (a ResourceLogger on the
+# SaveGame, kept in the save) and adds a "Dashboard" button to the pinned resources panel's
+# header. The button opens a window (ResourceDashboard, on the overlay canvas): a searchable
+# list of resources by category with amount and change, sort and hide-zero buttons, a delta
+# window menu, and a graph of the selected resource over time.
+# How a player reaches it: the Dashboard button at the top of the resources panel.
+# What changes: the window; a row's click selects its resource for the graph; the search bar
+# filters the rows.
+#
+# The colony runs 150 s first, so that the logger has samples. Amounts follow the Duplicants'
+# work, so the dumps leave the rows out.
+from: early-base
+mods: [3671379574]
+steps:
+  - run: {seconds: 150}
+  - ui_wait: {path: "**/RD_DashboardBtn", cond: stable}
+  - click: {ui: "**/RD_DashboardBtn"}
+  - ui_wait: {path: "**/ScreenSpaceOverlayCanvas/ResourceDashboard", cond: stable}
+  - expect_ui:
+      "**/ScreenSpaceOverlayCanvas/ResourceDashboard": {active: true}
+      "**/ResourceDashboard/GraphPanel/GraphTitle": {text: "No selection"}
+      "**/ResourceDashboard/ScrollView/Viewport/Content/Row_SandStone": {active: true}
+      "**/ResourceDashboard/ScrollView/Viewport/Content/Row_Dirt": {active: true}
+  - ui_dump: {name: controls, root: "**/ResourceDashboard/ControlsBar"}
+  - click: {ui: "**/ResourceDashboard/ScrollView/Viewport/Content/Row_SandStone"}
+  - expect_ui:
+      "**/ResourceDashboard/GraphPanel/GraphTitle": {text: "~Sandstone"}
+  - type: {ui: "**/ResourceDashboard/SearchBar", text: "dirt"}
+  - expect_ui:
+      "**/ResourceDashboard/ScrollView/Viewport/Content/Row_Dirt": {active: true}
+      "**/ResourceDashboard/ScrollView/Viewport/Content/Row_SandStone": {active: false}

@@ -1,0 +1,31 @@
+# Geyser Tab (3746027329), not in the triage (issue #2: "clicking to open the menu results in
+# nothing appearing").
+#
+# What it does: a "Geysers" toggle in the management menu (the top-right bar, before Vitals; also
+# Alt+R) opens a window listing every geyser, vent and volcano of each world, discovered or not,
+# with its average and active output, eruption period, temperature and status, a divider per
+# world, Refresh and Close buttons.
+# How a player reaches it: the management menu's Geysers toggle.
+# What changes: the window (a GeyserWindow under the top-right info panels) is built on each
+# open and destroyed on close.
+#
+# The window's build stops at its Refresh button's label: the mod gives it a font asset from
+# an OS font, TMP_FontAsset.CreateFontAsset(familyName, styleName, pointSize), trying "Segoe UI
+# Symbol", "Arial", "Malgun Gothic" and "Tahoma". The original returns null for a family that
+# is not installed, and the label keeps the game's font.
+from: early-base
+mods: [3746027329]
+steps:
+  - ui_wait: {path: "**/Toggle:GeyserList", cond: stable}
+  - click: {ui: "**/Toggle:GeyserList"}
+  - ui_wait: {path: "**/TopRightInfoPanels/GeyserWindow", cond: stable}
+  - expect_ui:
+      "**/TopRightInfoPanels/GeyserWindow": {active: true}
+      "**/GeyserWindow/Title/Label": {text: "GEYSER TAB"}
+      "**/GeyserWindow/Title/Refresh/Label": {text: "↻"}
+      "**/GeyserWindow/Viewport/Content/divider_*": {count: ">= 1"}
+      "**/GeyserWindow/Viewport/Content/row_*": {count: ">= 1"}
+  - ui_dump: {name: window, root: "**/TopRightInfoPanels/GeyserWindow"}
+  - click: {ui: "**/GeyserWindow/Title/Close"}
+  - expect_ui:
+      "**/TopRightInfoPanels/GeyserWindow": {exists: false}

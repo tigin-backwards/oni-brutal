@@ -1,0 +1,33 @@
+{
+ "spec": "mods/1972768699-priority-zero.yaml",
+ "mods": [
+  "1972768699"
+ ],
+ "verdict": "pending",
+ "why": "the spec fails in the original: a broken spec, or a mod broken upstream",
+ "findings": [],
+ "note": "",
+ "updated": "2026-10-23",
+ "commit": "1e5f39b",
+ "mod_dlls": {
+  "1972768699": {
+   "PriorityZero.dll": "e29e1087865f0696c774654667d4962d023be3be2ec3a2ad266d5dc434ca92db"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-134233-7af8d7",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-23T13:42:33",
+    "lane": 12,
+    "reasons": [
+     "step 13: pending_digs is 0, wanted 1"
+    ],
+    "signatures": 0
+   }
+  ],
+  "ours": []
+ }
+}

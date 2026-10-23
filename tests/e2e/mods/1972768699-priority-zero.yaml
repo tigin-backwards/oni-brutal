@@ -1,0 +1,34 @@
+# Priority Zero (1972768699), classes T, S, V.
+#
+# What it does: adds priority 0 below 1: a "0" button first in every priority screen (the tool
+# menu's and the details screen's), its own cursor for the Prioritize tool and its own icon
+# over prioritized errands (an atlas texture the mod swaps in). An errand at priority 0 is
+# never done: a precondition on every chore fails while its class is the mod's -2. The
+# Duplicant's to-do list shows such errands as "0".
+# How a player reaches it: any priority screen, the Prioritize tool (P).
+# What changes: errands that wait, without cancelling them.
+#
+# A dig order is placed on a floor cell (algae) of the dug-out corridor west of the printing
+# pod. The Prioritize tool's priority screen shows the 0 button; with it, a drag over the cell
+# sets the dig's priority to 0, and the Duplicants leave it alone.
+from: early-base
+mods: [1972768699]
+steps:
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - dig: [107, 205, 107, 205]
+  - expect: {pending_digs: 1}
+  - tool: {toolbar: Priority}
+  - ui_wait: {path: "**/ToolMenu/**/PriorityScreen", cond: stable}
+  - ui_dump: {name: priority-screen, root: "**/ToolMenu/**/PriorityScreen"}
+  - click: {text: "0", under: "**/ToolMenu/**/PriorityScreen"}
+  - drag: {from: [107, 205], to: [107, 205]}
+  - expect_state:
+      "count:all:Diggable::[*] if .GetComponent<Prioritizable>.GetMasterPriority().priority_class == -2": 1
+  # The dig's errand has the mod's precondition, and its priority is the mod's class.
+  - expect_state:
+      "all:Diggable::Length": 1
+      "count:all:Diggable::[0].chore.GetPreconditions()[*] if .condition.id == ZeroPrecondition": 1
+      "all:Diggable::[0].chore.masterPriority.priority_class": "== original"
+  - key: {code: Escape}
+  - run: {seconds: 300}
+  - expect: {pending_digs: 1}

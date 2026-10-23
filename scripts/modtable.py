@@ -165,6 +165,7 @@ broken.update({
 # Found by the e2e specs of batch 08: the spec fails the same way in the original.
 broken.update({
     '1718226085': 'broken upstream: Mono cannot set up its emitter and receiver types (`ISliderControl` changed: "VTable setup of type WirelessAutomation.WirelessSignalEmitter failed"), which stops the game\'s prefab creation in `Assets.OnPrefabInit`, so loading a colony leaves prefabs missing and the game crashes (SIGSEGV) twice in two runs (spec tests/e2e/mods/1718226085-wireless-automation.yaml)',
+    '1972768699': 'broken upstream: its 0 button and tool work, and a dig errand set to 0 carries the mod\'s precondition and priority class, yet a Duplicant digs it within 300 s, so priority 0 no longer holds errands back (spec tests/e2e/mods/1972768699-priority-zero.yaml)',
     '2356326908': 'broken upstream: its PLib side screens look for `DetailsScreen.sideScreenContentBody`, which the game no longer has, so loading a colony opens the crash screen (spec tests/e2e/mods/2356326908-wireless-power.yaml)',
     '2524767809': 'broken upstream: its emptier\'s state machine calls `StateMachine.Instance.Subscribe(int, Action<object>)`, which the game no longer has, so the finished building throws a MissingMethodException in `BottleUserEmptier.OnSpawn` and the crash screen opens (spec tests/e2e/mods/2524767809-bottle-emptier-variable-size.yaml)',
 })

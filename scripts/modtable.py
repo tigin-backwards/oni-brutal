@@ -145,6 +145,7 @@ broken.update({
 })
 # Found by the e2e specs of batch 05: the spec fails the same way in the original.
 broken.update({
+    '2584828134': 'broken upstream (its title says so): its sleeping spots still name the game\'s former `Worker` class, so a Duplicant who lies down in one gets a TypeLoadException and none of the bed\'s effects',
     '1820638089': 'broken upstream: its LIQUIDBOTTLER building\'s codex entry collides with the game\'s own Bottle Filler (LiquidBottler), and loading a colony stops at the crash screen',
 })
 # Fails to load in the original only.

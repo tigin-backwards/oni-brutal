@@ -1,0 +1,44 @@
+# Deselect New Materials (1863598374), classes K, O.
+#
+# What it does: a storage building no longer starts accepting a material when it is first
+# discovered (a postfix on TreeFilterable.OnDiscover takes it out of the filter again). The
+# game adds a newly discovered material to every storage that accepts all of its category.
+# Each storage gets a NewMaterialsSettings component and a user menu button ("Rejects New
+# Types" / "Accepts New Types") to choose per building; its PLib option makes ration
+# boxes and refrigerators accept by default.
+# How a player reaches it: a storage bin whose filter accepts a whole category, then a new
+# material turning up; the bin's user menu.
+# What changes: the new material stays unchecked in the bin's filter.
+#
+# A Storage Bin is built in the dug-out corridor west of the printing pod and set to accept
+# everything with its filter side screen's "All Standard" check box. Algae, not yet
+# discovered in early-base, is dug from the floor of the pit west of the pod; once its debris
+# is discovered, the bin still accepts what it did, and not algae.
+from: early-base
+mods: [1863598374]
+steps:
+  - expect_state:
+      "DiscoveredResources.Instance.IsDiscovered(\"Algae\")": false
+      "Grid.Element[130488].id": Algae
+  - build: {prefab: StorageLocker, at: [113, 206], material: SandStone}
+  - expect: {blueprints: {StorageLocker: 1}}
+  - run: {seconds: 900, until: {buildings: {StorageLocker: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: StorageLocker}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<PeterHan.DeselectNewMaterials.NewMaterialsSettings>.AcceptsNewMaterials": false
+      "selected:TreeFilterable.AcceptedTags.Count": 0
+  - ui_wait: {path: "**/TreeFilterableSideScreen/**/AllStandardItemsRowHeader/HorizontalContent/CheckBox", cond: stable}
+  - click: {ui: "**/TreeFilterableSideScreen/**/AllStandardItemsRowHeader/HorizontalContent/CheckBox"}
+  - expect_state:
+      "selected:TreeFilterable.AcceptedTags": {contains: SandStone}
+      "selected:TreeFilterable.AcceptedTags.Count": {save_as: accepted}
+  # A cell of the algae under the pit, dug.
+  - dig: [108, 205, 108, 205]
+  - run: {seconds: 900, until: {pending_digs: 0}}
+  - run: {seconds: 5}
+  - expect_state:
+      "DiscoveredResources.Instance.IsDiscovered(\"Algae\")": true
+      "all:StorageLocker::[0].GetComponent<TreeFilterable>.AcceptedTags.Count": "== accepted"
+      "all:StorageLocker::[0].GetComponent<TreeFilterable>.AcceptedTags": {contains: SandStone}

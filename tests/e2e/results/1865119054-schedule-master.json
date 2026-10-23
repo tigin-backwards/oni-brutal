@@ -1,0 +1,73 @@
+{
+ "spec": "mods/1865119054-schedule-master.yaml",
+ "mods": [
+  "1865119054"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the schedule screen's header has the Import and Save Preset buttons (dumped, shot); saving shows the mod's dialog (dumped), closed with its button, and writes the two schedules to its preset folder; importing is not exercised (no dialog or change in the original)",
+ "updated": "2026-10-23",
+ "commit": "d8c7b91",
+ "mod_dlls": {
+  "1865119054": {
+   "ScheduleMaster.dll": "3f0c1267eeebe5259b843cb1e1eb49edb3edc0321e1919257e53837c27c652e9"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-072228-789585",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T07:22:28",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-080508-9f931a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T08:05:08",
+    "lane": 16,
+    "reference_run": "20261023-072228-789585",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     },
+     "saved": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "title": 0.0
+    }
+   },
+   {
+    "run": "20261023-080508-9f931a",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T08:06:05",
+    "lane": 16,
+    "reference_run": "20261023-072228-789585",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     },
+     "saved": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "title": 0.0
+    }
+   }
+  ]
+ }
+}

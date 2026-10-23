@@ -1,0 +1,43 @@
+# Double Bed [ BROKEN ] (2584828134), class B.
+#
+# What it does: adds the Double Bed (DoubleBed, 2x3, 400 kg of raw minerals, Furniture menu
+# after the Cot, researched with Interior Decor): two sleeping spots stacked in one building,
+# each an invisible Sleepable with its own Ownable (DoubleBedDummy), so two Duplicants own
+# and sleep in it. When one starts sleeping, DoubleBed.OnWorkableEvent gives the bed's
+# stamina and health effects and lifts the sleeper's animation by its spot's offset; when he
+# wakes it takes them back, logs "Double Bed Unassign", and a SleepChore postfix unassigns
+# the spot.
+# How a player reaches it: the build menu (Furniture), after the research; bedtime.
+# What changes: a bed for two.
+#
+# setup grants Interior Decor. A Double Bed is built in the dug-out corridor west of the
+# printing pod from the base's sandstone; the colony then runs into the night, when the
+# Duplicants without a cot claim its spots and go to sleep there.
+#
+# Broken upstream: the game's Worker class is now WorkerBase, which DoubleBed.OnWorkableEvent
+# still names. When a Duplicant starts sleeping in a spot, the original logs "Exception in:
+# Worker.StartWork(Sleepable) System.TypeLoadException: ... expected class 'Worker'" from the
+# bed's workable callback, and the sleeper (Travaldo) lies in the spot, sleeping, without the
+# bed's effects. The spec checks that a spot is claimed and worked (the path is reached), then
+# that its sleeper has the bed's stamina effect, which fails.
+from: early-base
+mods: [2584828134]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"InteriorDecor\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"InteriorDecor\").unlockedItemIDs": {contains: DoubleBed}
+  - build: {prefab: DoubleBed, at: [113, 206], material: SandStone}
+  - expect: {blueprints: {DoubleBed: 1}}
+  - run: {seconds: 900, until: {buildings: {DoubleBed: 1}, pending_construction: 0}}
+  - expect_state:
+      "all:DoubleBed.DoubleBedDummy::Length": 2
+  - run: {seconds: 700}
+  # Night: a spot is claimed and a Duplicant sleeps in it.
+  - expect_state:
+      "count:all:DoubleBed.DoubleBedDummy::[*] if .GetComponent<Ownable>.IsAssigned() == true": ">= 1"
+      "count:Components.LiveMinionIdentities.Items[*] if .GetComponent<ChoreDriver>.GetCurrentChore().choreType.Id == Sleep": ">= 1"
+  # The bed's effects on its sleeper, which OnWorkableEvent gives.
+  - expect_state:
+      "count:Components.LiveMinionIdentities.Items[*] if .GetComponent<Effects>.HasEffect(\"BedStamina\") == true": ">= 1"

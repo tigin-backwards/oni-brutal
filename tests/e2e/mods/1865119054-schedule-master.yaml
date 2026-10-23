@@ -1,0 +1,37 @@
+# Schedule Master // by @Ony (1865119054), class S.
+#
+# What it does: the schedule screen's header gets "Import Preset" and "Save as Preset"
+# buttons beside "Add New Schedule" (a postfix on ScheduleScreen.OnSpawn, which also lays the
+# header out in a row): saving writes every schedule to the mod's preset store, importing
+# replaces the colony's schedules with the saved ones, each with an OK dialog. New
+# Duplicants join the emptiest schedule, and a new schedule is made once each has enough
+# members (a prefix on ScheduleManager.OnAddDupe, by its settings); timetable rows get
+# shift buttons.
+# How a player reaches it: the schedule screen (period key), its header buttons.
+# What changes: schedules can be kept as a preset and brought into this or another colony.
+#
+# early-base has the game's two schedules. The header's new buttons are dumped and shot;
+# saving writes the preset store (mods/config/ScheduleMaster/schedule) and shows the mod's
+# dialog, closed with its button. Importing is left out: in the original its click brought
+# up no dialog and no change within the spec's wait.
+from: early-base
+mods: [1865119054]
+steps:
+  - open: {key: Period}
+  - ui_wait: {path: "**/ScheduleScreen/**/SavePresets", cond: stable}
+  - expect_ui:
+      "**/ScheduleScreen/**/LoadPresets/**": {any_text: "Import Preset"}
+      "**/ScheduleScreen/**/SavePresets/**": {any_text: "Save as Preset"}
+  - expect_state:
+      "ScheduleManager.Instance.GetSchedules().Count": 2
+  - ui_dump: {name: title, root: "**/ScheduleScreen/Title"}
+  - shot: {name: title, crop: "**/ScheduleScreen/Title"}
+  - click: {ui: "**/ScheduleScreen/**/SavePresets"}
+  - ui_wait: {path: "**/dialog/dialog_root", cond: stable}
+  - expect_ui:
+      "**/dialog/dialog_root/**": {any_text: "Schedule preset was successfully saved"}
+  - ui_dump: {name: saved, root: "**/dialog/dialog_root"}
+  - click: {ui: "**/dialog/dialog_root/bottom/buttons/Button"}
+  - ui_wait: {path: "**/dialog/dialog_root", cond: gone}
+  - expect_state:
+      "file:mods/config/ScheduleMaster/schedule": 2

@@ -1,0 +1,33 @@
+{
+ "spec": "mods/2584828134-double-bed.yaml",
+ "mods": [
+  "2584828134"
+ ],
+ "verdict": "pending",
+ "why": "the spec fails in the original: a broken spec, or a mod broken upstream",
+ "findings": [],
+ "note": "",
+ "updated": "2026-10-23",
+ "commit": "d8c7b91",
+ "mod_dlls": {
+  "2584828134": {
+   "DoubleBed.dll": "921fc6a003c44ce35ab5806adebec596f71a01ebf942c4b892599d0127bd8e42"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-080509-ce79fa",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-23T08:05:09",
+    "lane": 17,
+    "reasons": [
+     "step 8: count:Components.LiveMinionIdentities.Items[*] if .GetComponent<Effects>.HasEffect(\"BedStamina\") == true is 0, wanted >= 1"
+    ],
+    "signatures": 5
+   }
+  ],
+  "ours": []
+ }
+}

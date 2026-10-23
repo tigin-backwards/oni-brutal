@@ -1,0 +1,55 @@
+{
+ "spec": "mods/1868454866-no-drop.yaml",
+ "mods": [
+  "1868454866"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "40 kg of sandstone put into a Duplicant's own storage are taken over by the mod at its next errand (its CarriedItemsComponent) and put down, not dropped by the game",
+ "updated": "2026-10-22",
+ "commit": "4b8a06b",
+ "mod_dlls": {
+  "1868454866": {
+   "NoDrop.dll": "668be85bbdd6d3344041f501e058e5c7e71b2f7c0162b26f32bb79b9250d349f"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261022-230237-3909c9",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-22T23:14:38",
+    "lane": 10,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261022-231703-596dbd",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-22T23:17:03",
+    "lane": 10,
+    "reference_run": "20261022-230237-3909c9",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261022-231703-596dbd",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-22T23:18:53",
+    "lane": 10,
+    "reference_run": "20261022-230237-3909c9",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -1,0 +1,25 @@
+# No Drop // by @Ony (1868454866), class P.
+#
+# What it does: a Duplicant carrying something does not drop it the moment a new errand
+# begins, wherever it stands (the game's MinionModifiers.OnBeginChore calls Storage.DropAll;
+# the mod's prefix replaces it). The items are kept in a CarriedItemsComponent and put down
+# on a cell with floor under it as the Duplicant moves on (DropManager: here if there is
+# floor, else in the next cell left or right), or used for a delivery of the same thing
+# (FetchChore.FindFetchTarget, FetchAreaChore.SetupDeliverables).
+# How a player reaches it: any errand that interrupts a delivery, on a ladder for example.
+# What changes: nothing is dropped mid-air; carried items land on a floor.
+#
+# setup puts 40 kg of sandstone into the first Duplicant's own storage, as if it had been
+# picked up. At its next errand the mod takes the items over (the component appears on the
+# Duplicant) and puts the sandstone down; the Duplicant carries nothing after.
+from: early-base
+mods: [1868454866]
+setup:
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[0].GetComponent<Storage>", method: AddOre, args: [SandStone, 40, 293, 255, 0]}}
+steps:
+  - expect_state:
+      "Components.LiveMinionIdentities.Items[0].GetComponent<Storage>.MassStored()": ">= 40"
+  - run: {seconds: 60}
+  - expect_state:
+      "Components.LiveMinionIdentities.Items[0].GetComponent<Ony.OxygenNotIncluded.NoDrop.CarriedItemsComponent>": exists
+      "Components.LiveMinionIdentities.Items[0].GetComponent<Storage>.MassStored()": "< 1"

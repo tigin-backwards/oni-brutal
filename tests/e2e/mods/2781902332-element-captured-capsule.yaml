@@ -1,0 +1,42 @@
+# Element Captured Capsule (2781902332), classes B, T, S, K, V.
+#
+# What it does: adds four capsules to the Ventilation menu (HVAC tech): gas, liquid, solid and
+# pickup capsules, built at once and for nothing (BuildingDef.Instantiate is patched). Each
+# shows its range when placed, has sliders for its range (128 cells) and mass limit, and a user
+# menu: "Boom!" captures the elements of its kind in the cells around it (a flood fill), and
+# "Teleport To" chooses, with a tool and an overlay of its own, where the capture is released.
+# How a player reaches it: the build menu, then the capsule's user menu.
+# What changes: the gas around the capsule is taken out of the world.
+#
+# setup researches HVAC (with its prerequisites); the capsule is found through the build menu's
+# search. After a short run (the build menu offers
+# a material only once the colony's inventory has been counted) a Gas Capsule is placed in the
+# dug-out corridor west of the printing pod, and its Boom! button pressed.
+from: early-base
+mods: [2781902332]
+setup:
+  # HVAC researched the game's way (its completion event refreshes the build menu): queued,
+  # then the queue completed.
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"HVAC\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+steps:
+  - expect_state: {"cells:106,206..115,209::Grid.Mass.get_Item({cell})": {save_as: gas}}
+  - run: {seconds: 5}
+  - driver: {camera.set: {cell: [110, 208], ortho: 8}}
+  - open: {key: Alpha1}
+  - ui_wait: {path: "**/PlanBuildingSelectionPanel/BuildingGroups", cond: stable}
+  - type: {ui: "**/BuildingGroups/Searchbar/FilterInputField", text: "capsule"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/GasCapsule Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/GasCapsule Group*"}
+  - ui_wait: {path: "**/PlanBuildingSelectionPanel/ProductInfoScreen", cond: stable}
+  - expect_state: {"PlayerController.Instance.ActiveTool.name": BuildTool}
+  - click_world: {cell: [110, 207]}
+  - key: {code: Escape}
+  - expect: {buildings: {GasCapsule: 1}}
+  - click_world: {cell: [110, 207]}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state: {"selected:GetComponent<Vacuumbomb.Boomable>": exists}
+  - ui_dump: {name: user-menu, root: "**/DetailsScreen/UserMenuButtons/UserMenuScreen"}
+  - click: {text: "Boom!", under: "**/UserMenuScreen"}
+  - run: {seconds: 20}
+  - expect_state: {"cells:106,206..115,209::Grid.Mass.get_Item({cell})": "< 0.2 * gas"}

@@ -1,0 +1,64 @@
+{
+ "spec": "mods/2781902332-element-captured-capsule.yaml",
+ "mods": [
+  "2781902332"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Gas Capsule found through the build menu's search and placed, its Boom! button takes the gas out of the corridor around it; its user menu as in the original",
+ "updated": "2026-10-22",
+ "commit": "4b8a06b",
+ "mod_dlls": {
+  "2781902332": {
+   "PLib.dll": "432e28fbecb2d422a46eafe489a446f946ec828acfb2b721f7fe6df19d84cd7c",
+   "VacuumBomb.dll": "1fba0c91bbb5acf8c93e7ddc60069b826902da1954d8d9fb8a08420f53453eb3"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261022-232124-c48a6a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-22T23:21:24",
+    "lane": 11,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261022-232337-7f1af5",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-22T23:23:37",
+    "lane": 11,
+    "reference_run": "20261022-232124-c48a6a",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "user-menu": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261022-232337-7f1af5",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-22T23:25:01",
+    "lane": 11,
+    "reference_run": "20261022-232124-c48a6a",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "user-menu": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

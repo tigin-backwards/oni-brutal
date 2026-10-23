@@ -1584,7 +1584,7 @@ class Player:
 _QA_TOOLS = None
 
 
-def qa_tools():
+def qa_tools_module():
     """scripts/qa-tools.py as a module (log signatures: canonical forms across Mono and .NET)."""
     global _QA_TOOLS
     if _QA_TOOLS is None:
@@ -2744,7 +2744,7 @@ def differential(spec, result, reference, findings=None):
     reason; its id goes into checks['findings'], which makes the run a warning."""
     findings = load_findings() if findings is None else findings
     checks, reasons, cited = {}, [], set()
-    new = qa_tools().unknown(result['signatures'], reference.signatures)
+    new = qa_tools_module().unknown(result['signatures'], reference.signatures)
     checks['signatures'] = {'new': new, 'reference': len(reference.signatures)}
     if new:
         reasons.append(f'{len(new)} log signature(s) the original lacks')

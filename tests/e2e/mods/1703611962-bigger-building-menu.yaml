@@ -1,0 +1,33 @@
+# Bigger Building Menu (1703611962), class S.
+#
+# What it does: raises the most rows the build menu's grid shows before it scrolls, from the
+# game's 6 to its Config.json's Height (8 by default; a transpiler on
+# PlanScreen.ConfigurePanelSize).
+# How a player reaches it: any build menu category.
+# What changes: the height of the category panel.
+#
+# At 1280x720 the game also keeps the panel to Screen.height / row height - 3 rows, which is
+# below 6, so the mod's raised limit changes nothing at this size. A smaller spec: the panel
+# opens and lays out as in the original, in the grid and the list view.
+from: early-base
+mods: [1703611962]
+steps:
+  - open: {key: Alpha1}
+  - ui_wait: {path: "**/PlanBuildingSelectionPanel/BuildingGroups", cond: stable}
+  - expect_ui:
+      "**/PlanBuildingSelectionPanel/BuildingGroups/TitleBar/CategoryLabel": {text: "BASE"}
+      "**/BuildingGroups/**/Grid/* Group*": {count: 5}
+  - expect_state:
+      "ui:**/PlanBuildingSelectionPanel/BuildingGroups::GetComponent<RectTransform>.sizeDelta.y": "== original"
+  - ui_dump: {name: grid, root: "**/PlanBuildingSelectionPanel/BuildingGroups"}
+  - shot: {name: grid, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
+  # The list view: a row per building.
+  - click: {ui: "**/BuildingGroups/Searchbar/ListViewButton"}
+  # The menu refreshes a few of its buttons a frame, round the whole list: 120 frames for
+  # the new rows to take their state.
+  - ui_wait: {path: "**/PlanBuildingSelectionPanel/BuildingGroups", cond: stable, stable: 120, frames: 600}
+  - expect_state:
+      "ui:**/PlanBuildingSelectionPanel/BuildingGroups::GetComponent<RectTransform>.sizeDelta.y": "== original"
+  - ui_dump: {name: list, root: "**/PlanBuildingSelectionPanel/BuildingGroups"}
+  - shot: {name: list, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
+  - click: {ui: "**/BuildingGroups/Searchbar/GridViewButton"}

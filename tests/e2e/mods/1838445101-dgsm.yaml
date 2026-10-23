@@ -1,0 +1,47 @@
+# DGSM - Duplicants Generation Settings Manager // by @Ony (1838445101), classes S, M;
+# asset_bundle_ui.
+#
+# What it does: adds a settings button (a gear, left of the rename button) to the title bar of
+# every Duplicant card, at the printing pod and at the new game's selection. It turns the card
+# into a "Duplicant configuration" panel: each interest, the positive trait, the negative
+# traits, the stress and overjoyed reactions, each with a CHANGE button that opens a "Choose
+# one" list, and Apply Settings, which shows the card again with the choices. Its settings (in
+# its own config file) also set the printing pod's interval, the starting Duplicants and how
+# many traits a Duplicant gets.
+# How a player reaches it: the printing pod's immigrant screen (here opened through OniMcp
+# once the pod has Duplicants to offer), the gear in a Duplicant card's title bar.
+# What changes: the card's interests and traits; the printed Duplicant gets them.
+#
+# The cards are random, and the seed does not make them the same in both players: the first
+# card is a standard Duplicant in one run and a bionic one (whose lists are boosters) in
+# another, so no particular trait can be chosen in both. The spec opens the panel, checks its
+# CHANGE buttons are there, applies it and prints the card; only the panel's header is
+# compared by structure.
+from: early-base
+mods: [1838445101]
+setup:
+  - driver: {seed: 12345}
+  - driver: {setup.call: {target: "Immigration.Instance", method: "Sim200ms", args: [100000]}}   # Duplicants on offer now
+steps:
+  - expect_state: {"Immigration.Instance.ImmigrantsAvailable": true}
+  - call: {tool: building_control, args: {domain: side_surface, surface: facility, kind: telepad, action: open_immigrants, confirm: true}}
+  - ui_wait: {path: "**/ImmigrantScreen/Layout", cond: stable}
+  - expect_ui:
+      "**/CharacterContainer[0]/TitleBar/dupSettings": {interactable: true}
+  - ui_dump: {name: title-bar, root: "**/ImmigrantScreen/**/CharacterContainer[0]/TitleBar/dupSettings"}
+  - click: {ui: "**/CharacterContainer[0]/TitleBar/dupSettings"}
+  - ui_wait: {path: "**/CharacterContainer[0]/duplicant_panel", cond: stable}
+  - expect_ui:
+      "**/CharacterContainer[0]/duplicant_panel/header/loc-text/label": {text: "Duplicant configuration"}
+      "**/CharacterContainer[0]/duplicant_panel/Button/loc-text/label": {text: "Apply Settings"}
+  - ui_dump: {name: header, root: "**/CharacterContainer[0]/duplicant_panel/header"}
+  - expect_ui: {"**/duplicant_panel/edit_holder/**/Content/*/Button": {count: ">= 2"}}
+  - click: {ui: "**/CharacterContainer[0]/duplicant_panel/Button"}
+  - ui_wait: {path: "**/CharacterContainer[0]/duplicant_panel", cond: gone}
+  - expect_ui: {"**/CharacterContainer[0]/TitleBar/dupSettings": {interactable: true}}
+  # Print that card.
+  - click: {ui: "**/ImmigrantScreen/**/CharacterContainer[0]/TitleBar/LabelGroup/Label"}   # selects the card
+  - expect_ui: {"**/ImmigrantScreen/Layout/BottomButtons/ProceedButton": {interactable: true}}
+  - click: {ui: "**/ImmigrantScreen/Layout/BottomButtons/ProceedButton"}
+  - ui_wait: {path: "**/ImmigrantScreen", cond: gone}
+  - run: {seconds: 30, until: {duplicants: 4}}

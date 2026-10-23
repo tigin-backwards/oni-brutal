@@ -1,0 +1,71 @@
+{
+ "spec": "mods/1838445101-dgsm.yaml",
+ "mods": [
+  "1838445101"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "its gear on a Duplicant card opens the Duplicant configuration panel with its CHANGE buttons; Apply Settings shows the card again and the card is printed; the panel's header as in the original",
+ "updated": "2026-10-22",
+ "commit": "33e45c1",
+ "mod_dlls": {
+  "1838445101": {
+   "DGSM.dll": "a0ad93e8f326baa9d502f6d1554b0fe5254f0ea39ecf5ec74dfd52167d4d0db0",
+   "DGSM_Scripts.dll": "8f3302c2f0aef24c4cee66e2e14c816e1794031d58c6ae023943969153aaed67",
+   "Ony.OxygenNotIncluded.Scripts.dll": "a59122bb7d22e019ca0f482786874245f5f31bf425b36d0208a6286492efce03"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261022-235055-6292c7",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-22T23:50:55",
+    "lane": 10,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261022-235234-61738e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-22T23:52:34",
+    "lane": 10,
+    "reference_run": "20261022-235055-6292c7",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title-bar": {
+      "differences": 0
+     },
+     "header": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261022-235234-61738e",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-22T23:53:28",
+    "lane": 10,
+    "reference_run": "20261022-235055-6292c7",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title-bar": {
+      "differences": 0
+     },
+     "header": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

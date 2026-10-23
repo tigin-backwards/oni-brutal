@@ -14,6 +14,10 @@ namespace OniBrutal.Tests
     // 32.09 x 19.04.
     public class TmpInputLayoutTests : EngineTest
     {
+        // The canvas update (layout rebuilds) runs from the canvas system, which the host installs
+        // at start; a test run of this class alone would otherwise have none.
+        public TmpInputLayoutTests() => OniBrutal.Engine.UI.CanvasSystem.Install();
+
         sealed class Cfg
         {
             public Vector2 Size = new Vector2(64, 24);

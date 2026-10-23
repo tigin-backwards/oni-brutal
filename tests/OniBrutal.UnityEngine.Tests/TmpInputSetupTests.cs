@@ -12,6 +12,10 @@ namespace OniBrutal.Tests
     // (docs/cleanroom/textmeshpro.md, "when the label and the caret are set up, measured").
     public class TmpInputSetupTests : EngineTest
     {
+        // The canvas update (layout rebuilds) runs from the canvas system, which the host installs
+        // at start; a test run of this class alone would otherwise have none.
+        public TmpInputSetupTests() => OniBrutal.Engine.UI.CanvasSystem.Install();
+
         const string Zwsp = "​";
 
         // Records the label's layout as the field's own LateUpdate leaves it.

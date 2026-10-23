@@ -76,6 +76,7 @@ The rest is the engine itself, profiled on U57 and fixed where the game leans on
 | Change | Saved per frame |
 |---|---|
 | Texture snapshots copied on worker threads (the game re-applies about 20 MB of animation textures every frame) | 2.2 ms |
+| Draw queues recorded on worker threads, uploads and posting kept in order (`ONI_PARALLEL_DRAWS=0` turns it off) | 1.35 ms (Gluttony 1.8) |
 | Component lookups: instances of one prefab share a cached layout, so `GetComponent` goes straight to what it returns instead of testing about 30 components | 1.7 ms |
 | The UI walk skips screens hidden by their groups (the game keeps its closed screens active) | 1.3 ms |
 | World rotation and scale cached (TextMeshPro reads them for every text, every frame) | 1.1 ms |
@@ -194,10 +195,10 @@ Measured ideas that didn't pay off, so nobody needs to try them again:
 - Caching the whole UI build: it never hit, because the HUD changes every frame.
 - Skipping uploads of identical animation frames: not exact (some objects change their data
   without marking it dirty), and no faster anyway.
-- Recording draws on worker threads: the game changes materials between draws, so each draw's
-  inputs would need copying, which costs about as much as it saves. (That holds for command
-  buffers and immediate draws; the queued draws are recorded with no game code in between, so
-  they remain a candidate: see [research/parallel-main-thread.md](research/parallel-main-thread.md).)
+- Recording immediate draws and command buffers on worker threads: the game changes materials
+  between those draws, so each draw's inputs would need copying, which costs about as much as
+  it saves. Queued draws have no game code between them and are now recorded on workers (see
+  [research/parallel-main-thread.md](research/parallel-main-thread.md)).
 - Building navigation links on worker threads: exact, but each update is too small (about
   40 µs) for a fork and join to pay.
 - Early-outs inside per-item systems like sublimation and sensors: the cost is reaching each

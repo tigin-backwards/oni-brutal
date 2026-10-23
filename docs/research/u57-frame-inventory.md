@@ -187,7 +187,9 @@ Columns: ms per frame (main thread), count of the objects involved where known, 
   its material and the shader globals, which command buffers change in the middle of a frame;
   recording draws on worker threads would need a flush at every global change, a per-draw copy of
   the inputs, and thread-safe material and texture caches. Only value resolution (about 60% of
-  the 3.5 ms) could move, for about 1.5 ms: not worth that risk.
+  the 3.5 ms) could move, for about 1.5 ms: not worth that risk. (Later done for the queues,
+  where no game code runs between draws, so the inputs need no copy: 1.35 ms on U57, see
+  [parallel-main-thread.md](parallel-main-thread.md).)
 
 The same applies to the other per-item systems (reachability, critter temperature, requirement
 checks): caching what a call looks up cannot remove the cost of visiting each object. Gains need
@@ -363,7 +365,7 @@ What is left above 0.3 ms a frame, and why it is not done:
 | Candidate | ms | Why not done |
 |---|---|---|
 | Brain sensors and fetch searches (ClosestPickupableSensor, FetchManager) | 0.06 measured | Ruled out. Timed directly (a stopwatch around the sensors' FindClosestPickupable), the scans cost 0.064 ms a frame in U57 (Bionic power-bank sensors, about 0.2 scans a frame over 700 items); the 0.68 ms the perf profile attributed to the sensor came from stale perf-map entries (the JIT reuses code memory, so a later method's samples can resolve to an earlier symbol). The fetch helpers are 0.1–0.15 ms each. |
-| Draw recording on a worker thread (engine) | ~1.5 | Ruled out. The GL calls already run on the device's worker; what stays on the main thread is resolving each draw's uniform values. The game reuses and changes property blocks and materials between draws of one frame, so moving the resolution needs each draw's inputs copied at call time, which costs about what resolving them does. |
+| Draw recording on a worker thread (engine) | ~1.5 | Ruled out here; later done for draw queues ([parallel-main-thread.md](parallel-main-thread.md)), which change no inputs between draws. The GL calls already run on the device's worker; what stays on the main thread is resolving each draw's uniform values. The game reuses and changes property blocks and materials between draws of one frame, so moving the resolution needs each draw's inputs copied at call time, which costs about what resolving them does. |
 | Canvas build and HUD draw lists (engine) | 0.5–0.7 each | What remains is visible UI (about 2,600 objects, 670 draws a frame). An unchanged visible subtree still needs its renderers' depths rewritten whenever anything before it changes, and a cached draw list still needs each renderer checked for changes; either reads the same renderers the current walk reads. Expected saving under 0.3 ms each. |
 | Animation updates, events, uploads | 2.1–2.3 each | Per-object work. Skipping identical-frame uploads is not exact and gained nothing; event-free looping animations held paused would freeze synchronized children. |
 | Critter temperature, building input checks | 0.9, 1.1 | Each tick recomputes from live state (cell temperatures, power and pipe connections): no no-op to skip, and lowering their rates is not acceptable. |

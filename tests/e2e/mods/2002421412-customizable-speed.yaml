@@ -1,0 +1,48 @@
+# Customizable Speed (2002421412), classes S, O.
+#
+# What it does: the three speed buttons run the game at the time scales its PLib options set
+# (slow, normal, super; 1, 2 and 3 by default, as in the game), and their tooltips show the
+# scale, "(x3)".
+# How a player reaches it: the Mods screen's options (here written into its config.json), then
+# the speed buttons beside the clock.
+# What changes: Time.timeScale while the game runs, and the buttons' tooltips.
+#
+# Options here: 1.5, 4 and 7. The runner keeps the game paused through OniMcp (the pause
+# button cannot lift that hold), so the game is resumed and paused again through OniMcp; the
+# speed buttons are clicked while it runs.
+from: early-base
+mods: [2002421412]
+options:
+  CustomizableSpeed: {slowSpeed: 1.5, normalSpeed: 4, superSpeed: 7}
+steps:
+  - expect_state:
+      "SpeedControlScreen.Instance.IsPaused": true
+      "Time.timeScale": 0
+      "SpeedControlScreen.Instance.speedButtonWidget_slow.GetComponent<ToolTip>.multiStringToolTips[0]": {contains: "(x1.5)"}
+      "SpeedControlScreen.Instance.speedButtonWidget_medium.GetComponent<ToolTip>.multiStringToolTips[0]": {contains: "(x4)"}
+      "SpeedControlScreen.Instance.speedButtonWidget_fast.GetComponent<ToolTip>.multiStringToolTips[0]": {contains: "(x7)"}
+  - ui_dump: {name: speed, root: "**/SecondaryRow/SpeedControlScreen"}
+  # A resume straight after the load does not take: the game runs a few seconds first.
+  - run: {seconds: 5}
+  # Running, at normal speed: 4.
+  - call: {tool: game_control, args: {domain: speed, action: resume, confirm: true}}
+  - click: {ui: "**/SecondaryRow/SpeedControlScreen/GenericIconButton_Medium"}
+  - expect_state:
+      "SpeedControlScreen.Instance.IsPaused": false
+      "SpeedControlScreen.Instance.GetSpeed()": 1
+      "Time.timeScale": 4
+  # Super speed while running: 7.
+  - click: {ui: "**/SecondaryRow/SpeedControlScreen/GenericIconButton_Fast"}
+  - expect_state:
+      "SpeedControlScreen.Instance.GetSpeed()": 2
+      "Time.timeScale": 7
+  # Slow: 1.5.
+  - click: {ui: "**/SecondaryRow/SpeedControlScreen/GenericIconButton_Slow"}
+  - expect_state:
+      "SpeedControlScreen.Instance.GetSpeed()": 0
+      "Time.timeScale": 1.5
+  # Paused again: 0.
+  - call: {tool: game_control, args: {domain: speed, action: pause, confirm: true}}
+  - expect_state:
+      "SpeedControlScreen.Instance.IsPaused": true
+      "Time.timeScale": 0

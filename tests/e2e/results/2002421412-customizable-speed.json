@@ -1,0 +1,63 @@
+{
+ "spec": "mods/2002421412-customizable-speed.yaml",
+ "mods": [
+  "2002421412"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the speed buttons run the game at the time scales of its options (4, 7, 1.5 here) and their tooltips show them; the buttons as in the original",
+ "updated": "2026-10-22",
+ "commit": "f2b3777",
+ "mod_dlls": {
+  "2002421412": {
+   "CustomizableSpeed.dll": "bd188972253b357c82354ac9ee79c1edabeaf9df670645e5da61ac575292ba09"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261022-215953-9b9fd9",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-22T21:59:53",
+    "lane": 11,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261022-220129-87da91",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-22T22:01:29",
+    "lane": 11,
+    "reference_run": "20261022-215953-9b9fd9",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "speed": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261022-220129-87da91",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-22T22:02:26",
+    "lane": 11,
+    "reference_run": "20261022-215953-9b9fd9",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "speed": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

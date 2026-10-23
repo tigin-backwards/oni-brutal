@@ -1,0 +1,55 @@
+{
+ "spec": "mods/1725950119-no-long-commutes.yaml",
+ "mods": [
+  "1725950119"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "three cycle reports of 83 % travel time raise no Long Commutes warning",
+ "updated": "2026-10-22",
+ "commit": "5851fa2",
+ "mod_dlls": {
+  "1725950119": {
+   "NoLongCommutes.dll": "f53fa26514b8e21c3f6fd75e3402c04b9aa2677580ddd6c0cc5f11e22257e853"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261022-214650-3ffe51",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-22T21:46:50",
+    "lane": 12,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261022-214831-71fb66",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-22T21:48:31",
+    "lane": 12,
+    "reference_run": "20261022-214650-3ffe51",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261022-214831-71fb66",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-22T21:49:50",
+    "lane": 12,
+    "reference_run": "20261022-214650-3ffe51",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

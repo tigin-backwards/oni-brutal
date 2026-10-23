@@ -1,0 +1,29 @@
+# No 'Long Commutes' (1725950119), class P.
+#
+# What it does: Tutorial.LongTravelTimes always answers true (a Harmony prefix), so the "Long
+# Commutes" warning, raised when Duplicants spent more than 40 % of the last three cycles
+# travelling, never shows.
+# How a player reaches it: nothing to press; it acts once three cycle reports exist.
+# What changes: no "Long Commutes" notification, whatever the travel times.
+#
+# setup gives the colony three cycle reports in which travel took 5/6 of each Duplicant's day
+# (500 s of 600), well over the 40 % the game warns at. The game alone would then post the
+# warning within a second of game time.
+from: early-base
+mods: [1725950119]
+setup:
+  - driver: {setup.call: {target: "ReportManager.Instance", method: ReportValue, args: [TravelTime, 500, "e2e", "e2e"]}}
+  - driver: {setup.call: {target: "ReportManager.Instance", method: OnNightTime, args: [null]}}
+  - driver: {setup.call: {target: "ReportManager.Instance", method: ReportValue, args: [TravelTime, 500, "e2e", "e2e"]}}
+  - driver: {setup.call: {target: "ReportManager.Instance", method: OnNightTime, args: [null]}}
+  - driver: {setup.call: {target: "ReportManager.Instance", method: ReportValue, args: [TravelTime, 500, "e2e", "e2e"]}}
+  - driver: {setup.call: {target: "ReportManager.Instance", method: OnNightTime, args: [null]}}
+steps:
+  - expect_state:
+      "ReportManager.Instance.reports.Count": ">= 3"
+      "ReportManager.Instance.reports[-1].GetEntry(\"TravelTime\").Net": 500
+      "Tutorial.Instance.LongTravelTimes()": true
+  - run: {seconds: 20}
+  - expect_state:
+      "Tutorial.Instance.LongTravelTimes()": true
+      "count:NotificationScreen.Instance.notifications[*] if .titleText == 'Long Commutes'": 0

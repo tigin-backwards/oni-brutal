@@ -3,12 +3,12 @@
  "mods": [
   "3455710156"
  ],
- "verdict": "pending",
- "why": "0 run(s) of ours against original run 20261023-042128-2bb68b; 2 needed",
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
  "findings": [],
- "note": "",
+ "note": "ladders and fire poles carry the joining end caps; three ladders are built and a dig order on the cuprite ceiling gets the metal hit effect",
  "updated": "2026-10-23",
- "commit": "885cbe9",
+ "commit": "88f0fa5",
  "mod_dlls": {
   "3455710156": {
    "VisualFixesNTweaks.dll": "67d4f09ff276280f42ebd5937f6b9b805fa957795a9c9146fc4423f9d44cbdc0"
@@ -25,6 +25,31 @@
     "signatures": 0
    }
   ],
-  "ours": []
+  "ours": [
+   {
+    "run": "20261023-070344-d997b4",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T07:03:44",
+    "lane": 14,
+    "reference_run": "20261023-042128-2bb68b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-070344-d997b4",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T07:05:08",
+    "lane": 14,
+    "reference_run": "20261023-042128-2bb68b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
  }
 }

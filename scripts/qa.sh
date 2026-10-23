@@ -98,7 +98,10 @@ run_scenario() # NAME
     # set whose textures are still referenced), REQUIRE (log lines the run must print).
     # MOVING: captures that must each differ from the one before (a playing video; its content at
     # a given frame follows its audio clock, so it is not compared with a reference).
+    # DUMP_MATCH / DUMP_ABSENT: "FRAME:REGEX" pairs; the UI dump of that frame must have / must
+    # not have a line matching the extended regex (game state a capture comparison may miss).
     SAVE=""; FRAMES=0; DUMPS=""; ARGS=(); TOLERANCE=0.03; DLC=0; KEPT_MAX=1; REQUIRE=(); MOVING=""
+    DUMP_MATCH=(); DUMP_ABSENT=()
     source "$file"
     # DLC=1: the scenario needs the DLC content and a DLC-owning Steam double (qa.env).
     local gamedir="$game" runner=("$root/scripts/run-offline.sh")
@@ -162,6 +165,13 @@ run_scenario() # NAME
     [ "${kept:-0}" -le "$KEPT_MAX" ] || fail "dogfood $name: $kept multi-target framebuffers kept at the end (at most $KEPT_MAX)"
     local line
     for line in "${REQUIRE[@]}"; do grep -aqF "$line" "$out/stdout.txt" || fail "dogfood $name: the log lacks \"$line\""; done
+    local check
+    for check in "${DUMP_MATCH[@]}"; do
+        grep -aqE "${check#*:}" "$out/f${check%%:*}.txt" 2>/dev/null || fail "dogfood $name: the f${check%%:*} UI dump has no line matching ${check#*:}"
+    done
+    for check in "${DUMP_ABSENT[@]}"; do
+        ! grep -aqE "${check#*:}" "$out/f${check%%:*}.txt" 2>/dev/null || fail "dogfood $name: the f${check%%:*} UI dump has a line matching ${check#*:}"
+    done
 }
 
 stage_dogfood()

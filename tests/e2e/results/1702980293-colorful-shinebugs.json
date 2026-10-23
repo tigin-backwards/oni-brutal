@@ -1,0 +1,55 @@
+{
+ "spec": "mods/1702980293-colorful-shinebugs.yaml",
+ "mods": [
+  "1702980293"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a blue and an orange Shinebug spawned in the colony: each one's light takes its morph's colour (blue 1, 1.6, 2.2; orange 2, 1.2, 0), and the other morphs' prefabs carry theirs",
+ "updated": "2026-10-23",
+ "commit": "e1b30a5",
+ "mod_dlls": {
+  "1702980293": {
+   "ColorfulShinebugs.dll": "da8a9ad541b43f706a78640b839e86a9abf822ad1b227708468d2c1d22f331d3"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-080251-19fd1e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T08:02:51",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-084941-e65095",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T08:49:41",
+    "lane": 14,
+    "reference_run": "20261023-080251-19fd1e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-084941-e65095",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T09:30:28",
+    "lane": 14,
+    "reference_run": "20261023-080251-19fd1e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

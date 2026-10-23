@@ -1,0 +1,37 @@
+# Wrangle & Carry (2950117755), class P.
+#
+# What it does: carrying a wrangled critter to its drop-off is done at the wrangling's priority
+# (the CreatureFetch chore type keeps its implicit priority for the next type, so it no longer
+# ranks below ordinary ranching fetches); a critter's brain is updated when a Duplicant starts
+# or stops wrangling it, so it reacts at once; a Duplicant whose wrangled critter cannot be
+# reached throws a tantrum (an emote); a Duplicant carrying a critter shows a sack on its chest.
+# How a player reaches it: the Wrangle button of a critter's menu, a Critter Drop-Off.
+# What changes: who carries a wrangled critter and when, and how it looks.
+#
+# setup teaches the Duplicants Husbandry (Ranching1, through Farming1) and spawns a Hatch in
+# the dug-out room west of the printing pod. The Hatch is selected and its Wrangle button
+# pressed; a Duplicant wrangles it, and it lies bagged on the floor.
+from: early-base
+mods: [2950117755]
+setup:
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[1].GetComponent<MinionResume>", method: MasterSkill, args: [Farming1]}}
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[1].GetComponent<MinionResume>", method: MasterSkill, args: [Ranching1]}}
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[2].GetComponent<MinionResume>", method: MasterSkill, args: [Farming1]}}
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[2].GetComponent<MinionResume>", method: MasterSkill, args: [Ranching1]}}
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131124, 0, 0, \"Hatch\", \"Creatures\")", method: SetActive, args: [true]}}
+steps:
+  # Carrying a wrangled critter ranks with the wrangling, not below the ranching fetches.
+  - expect_state:
+      "Db.Get().ChoreTypes.CreatureFetch.priority": {save_as: carry}
+  - expect_state:
+      "Db.Get().ChoreTypes.RanchingFetch.priority": "== carry"
+  - driver: {camera.set: {cell: [110, 207], ortho: 8}}
+  - click_world: {cell: [108, 206], select: Hatch}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - click: {text: "Wrangle", under: "**/UserMenuScreen"}
+  - expect_state:
+      "selected:Capturable.IsMarkedForCapture": true
+  - key: {code: Escape}
+  - run: {seconds: 300}
+  - expect_state:
+      "count:all:Capturable::[*] if .IsMarkedForCapture == false and .GetComponent<KPrefabID>.HasTag(\"Bagged\") == true": 1

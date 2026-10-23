@@ -1,0 +1,26 @@
+# Real Insulation Tile / 真正的隔热砖 (2869487421), class P (a building definition).
+#
+# What it does: the Insulated Tile's thermal conductivity factor becomes 0 (the game's is
+# 0.01), so a built Insulated Tile passes no heat at all.
+# How a player reaches it: building an Insulated Tile (Base, researched with Temperature
+# Modulation).
+# What changes: the insulation the tile's cell gets in the simulation.
+#
+# setup grants Temperature Modulation and spawns granite. An Insulated Tile is built in the
+# dug-out room west of the printing pod; the cell's insulation is read back from the
+# simulation (Grid.Insulation), and compared with a cell beside it that has no tile.
+from: early-base
+mods: [2869487421]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"TemperatureModulation\")", method: Purchased}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Granite\").substance", method: SpawnResource, args: [[114.5, 207.5, -12], 800, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"InsulationTile\").ThermalConductivity": 0
+  - build: {prefab: InsulationTile, cells: [[112, 208]], material: Granite}
+  - expect: {blueprints: {InsulationTile: 1}}
+  - run: {seconds: 900, until: {buildings: {InsulationTile: 1}, pending_construction: 0}}
+  - run: {seconds: 2}
+  - expect_state:
+      "cells:112,208..112,208::Grid.Insulation.get_Item({cell})": 0
+      "cells:113,208..113,208::Grid.Insulation.get_Item({cell})": 255

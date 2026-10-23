@@ -1,0 +1,56 @@
+{
+ "spec": "mods/2869487421-real-insulation-tile.yaml",
+ "mods": [
+  "2869487421"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "an Insulated Tile built from spawned granite: its cell's insulation in the simulation is 0 (no heat passes), against 255 for an open cell",
+ "updated": "2026-10-23",
+ "commit": "e1b30a5",
+ "mod_dlls": {
+  "2869487421": {
+   "PLib.dll": "b862c5db2b3cd6df09a62d4a30782e91e2b24e8e1bfac08d991c9cc89a984ba9",
+   "Real Insulation Tile╒µ╒²╡─╕⌠╚╚╫⌐.dll": "b76325d8dae7ac90d6081f63e82242972ed2c7826c65ce6a40354d9fe8e1a087"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-080251-19fd1e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T08:05:43",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-093339-ab6df4",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T09:33:39",
+    "lane": 14,
+    "reference_run": "20261023-080251-19fd1e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-093339-ab6df4",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T09:34:52",
+    "lane": 14,
+    "reference_run": "20261023-080251-19fd1e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

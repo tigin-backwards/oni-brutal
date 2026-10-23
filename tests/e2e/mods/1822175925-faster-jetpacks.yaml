@@ -1,0 +1,19 @@
+# Faster Jetpacks (1822175925), class P.
+#
+# What it does: whenever a Duplicant begins a move, its jet suit flying speed is set to its
+# floor walking speed times SpeedMultiplier (3 by default, from the mod's config.json), instead
+# of the game's fixed 7 (a prefix on BipedTransitionLayer.BeginTransition).
+# How a player reaches it: a Duplicant in a Jet Suit flying.
+# What changes: how fast a jet suit flies: 9.975 cells a second (3 x 3.325) instead of 7.
+#
+# A Jet Suit needs late research, a suit dock and petroleum, beyond early-base: this smaller
+# spec reads the flying speed the prefix sets on each Duplicant's movement layer once the
+# Duplicants have walked about, without a suit.
+from: early-base
+mods: [1822175925]
+steps:
+  - run: {seconds: 30}
+  - expect_state:
+      "Components.LiveMinionIdentities.Items[1].GetComponent<Navigator>.transitionDriver.overrideLayers[0].floorSpeed": 3.325
+      "Components.LiveMinionIdentities.Items[1].GetComponent<Navigator>.transitionDriver.overrideLayers[0].jetPackSpeed": 9.975
+      "Components.LiveMinionIdentities.Items[2].GetComponent<Navigator>.transitionDriver.overrideLayers[0].jetPackSpeed": 9.975

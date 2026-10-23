@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2950117755-wrangle-carry.yaml",
+ "mods": [
+  "2950117755"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "carrying a wrangled critter ranks with the wrangling (RanchingFetch's priority equals CreatureFetch's); a spawned Hatch is wrangled through its menu button by a Duplicant taught Husbandry, and lies bagged",
+ "updated": "2026-10-23",
+ "commit": "e1b30a5",
+ "mod_dlls": {
+  "2950117755": {
+   "WrangleCarry.dll": "28abaebfc26abd4bd2440746173f818c07ade1e33e6c66286a280cd05327f63f"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-080251-19fd1e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T08:20:06",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-093616-a73c0f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T09:36:16",
+    "lane": 14,
+    "reference_run": "20261023-080251-19fd1e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-093616-a73c0f",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T09:39:46",
+    "lane": 14,
+    "reference_run": "20261023-080251-19fd1e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

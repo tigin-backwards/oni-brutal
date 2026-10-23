@@ -1,0 +1,55 @@
+{
+ "spec": "mods/1822175925-faster-jetpacks.yaml",
+ "mods": [
+  "1822175925"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "smaller spec (a Jet Suit is late game): after the Duplicants have walked about, each one's jet suit flying speed is 3 x its walking speed (9.975 instead of 7)",
+ "updated": "2026-10-23",
+ "commit": "e1b30a5",
+ "mod_dlls": {
+  "1822175925": {
+   "FasterJetpacks.dll": "af4dd94557d05ab606227d5b55c2c917289737e4a03c15ee7b5064c4d344c452"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-080251-19fd1e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T08:04:14",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-093128-916750",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T09:31:28",
+    "lane": 14,
+    "reference_run": "20261023-080251-19fd1e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-093128-916750",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T09:32:34",
+    "lane": 14,
+    "reference_run": "20261023-080251-19fd1e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3204363352-more-emotions.yaml",
+ "mods": [
+  "3204363352"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Duplicant put 6 cells above the floor of an open cave falls and lands with the Contusion effect and its dizzy stars (the mod's ContusionFX); the effect is registered with its 30 s",
+ "updated": "2026-10-23",
+ "commit": "db4ede9",
+ "mod_dlls": {
+  "3204363352": {
+   "MoreEmotions.dll": "d9a6465ebeb44fdfeb9de4109d865ac385674ea1783f4775ff8a06cf547c9e76"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-153631-565187",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T16:09:54",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-175815-a00108",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T17:58:15",
+    "lane": 15,
+    "reference_run": "20261023-153631-565187",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-175815-a00108",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T17:59:29",
+    "lane": 15,
+    "reference_run": "20261023-153631-565187",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

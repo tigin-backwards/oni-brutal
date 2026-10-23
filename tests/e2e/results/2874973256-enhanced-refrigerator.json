@@ -1,0 +1,62 @@
+{
+ "spec": "mods/2874973256-enhanced-refrigerator.yaml",
+ "mods": [
+  "2874973256"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Refrigerator picked in the build menu's Food category is placed with the build tool, built and selected: it holds 800 t; product and details screens within threshold (its -18 °C is not checked)",
+ "updated": "2026-10-23",
+ "commit": "db4ede9",
+ "mod_dlls": {
+  "2874973256": {
+   "PLib.dll": "b862c5db2b3cd6df09a62d4a30782e91e2b24e8e1bfac08d991c9cc89a984ba9",
+   "S_╘÷╟┐▒∙╧Σ.dll": "cf5dc4b106ae756394bc8ab38cfde67aca97558c08690dc721d040e4d96054ea"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-153631-565187",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T16:07:56",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-171309-b19f52",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T17:13:09",
+    "lane": 15,
+    "reference_run": "20261023-153631-565187",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.004983,
+     "details": 0.0
+    }
+   },
+   {
+    "run": "20261023-171309-b19f52",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T17:56:39",
+    "lane": 15,
+    "reference_run": "20261023-153631-565187",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.004983,
+     "details": 0.0
+    }
+   }
+  ]
+ }
+}

@@ -1,0 +1,27 @@
+# More Emotions (3204363352), classes P, O; touches_ui.
+#
+# What it does: new Duplicant emotes and reactions, each a PLib option: kicking a lazy sleeper
+# awake, cheering a stressed friend, double and moonwalk greetings, a full-bladder dance and
+# laughing passers-by, a starving "eat hand", other sleep and narcolepsy animations, a putting-
+# off look at corpses and respect at graves, an odour emote after the shower, and a
+# contusion: a Duplicant that falls 6 cells or more lands hard ("fall_hard_pst") and gets the
+# Contusion effect (30 s, plus 5 s per extra cell), with a dizzy animation and stars over its
+# head (the ContusionFX state machine the mod adds to each Duplicant) while it lasts.
+# How a player reaches it: nothing to press; Duplicants react as they live.
+# What changes: animations, and effects such as Contusion.
+#
+# setup puts a Duplicant in the open cave north of the base (x 120), at y 239, 6 cells
+# above its floor; it falls as the game runs, and lands contused.
+from: early-base
+mods: [3204363352]
+setup:
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[1].transform", method: set_position, args: [[120.5, 239.1, -25.5]]}}
+steps:
+  - expect_state:
+      "Db.Get().effects.TryGet(\"Contusion\").duration": 30
+      "Components.LiveMinionIdentities.Items[1].GetComponent<Effects>.HasEffect(\"Contusion\")": false
+  - run: {seconds: 8}
+  - expect_state:
+      "Components.LiveMinionIdentities.Items[1].transform.position.y": "< 234"
+      "Components.LiveMinionIdentities.Items[1].GetComponent<Effects>.HasEffect(\"Contusion\")": true
+      "Components.LiveMinionIdentities.Items[1].transform.Find(\"contused_crew_fx_kanim\")": exists

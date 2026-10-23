@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2632758219-rational-priority.yaml",
+ "mods": [
+  "2632758219"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a smaller spec (which errand wins depends on positions): an idle Duplicant's Errands tab entry reads in the mod's words (\"Idle priority\"), the game's priority breakdown gone",
+ "updated": "2026-10-23",
+ "commit": "46251f3",
+ "mod_dlls": {
+  "2632758219": {
+   "RationalPriority.dll": "552bcb0be6f9a73e8f9503574c7bc604416a4440c74f6ed2d409972d2b890972"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-042102-a633d0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T05:14:30",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-053011-70906b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T05:30:11",
+    "lane": 16,
+    "reference_run": "20261023-042102-a633d0",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-053011-70906b",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T05:31:00",
+    "lane": 16,
+    "reference_run": "20261023-042102-a633d0",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

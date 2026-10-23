@@ -170,14 +170,14 @@ installs get developer checks subscribers never see).
 | 149 | [Double Bed [ BROKEN ]](https://steamcommunity.com/sharedfiles/filedetails/?id=2584828134) | ✅ | ✅ | ⬜ |  |
 | 150 | [Spolszczenie / Polish Language Pack](https://steamcommunity.com/sharedfiles/filedetails/?id=931119869) | ⬜ | ⬜ | ⬜ | translation: the game applies one only from a Steam subscription; not testable here |
 | 151 | [BalanceGasPumpConsumption](https://steamcommunity.com/sharedfiles/filedetails/?id=1822071175) | ✅ | ✅ | ✅ | spec tests/e2e/mods/1822071175-balance-gas-pump-consumption.yaml: the three defs draw half power; a Gas Pump built from the base's metal ore asks for 120 W when selected |
-| 152 | [Better Refresh复制人基础属性提高](https://steamcommunity.com/sharedfiles/filedetails/?id=2878830936) | ✅ | ✅ | ⬜ |  |
+| 152 | [Better Refresh复制人基础属性提高](https://steamcommunity.com/sharedfiles/filedetails/?id=2878830936) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2878830936-better-refresh.yaml: with its options set (Config.json), the printing pod's screen opened from its side screen has the Reshuffle All button; every Duplicant card has three interests before and after a click on it |
 | 153 | [Geyser Control](https://steamcommunity.com/sharedfiles/filedetails/?id=3369395347) | ✅ | ✅ | ⬜ | spec fails in ours: tests/e2e/mods/3369395347-geyser-control.yaml: the geyser is analysed with its button (instant analysis option) and its sliders shown with the mod's button; in ours the slider side screen lays out 166846 px tall (each slider's number field, a TMP_InputField, reports a preferred height of 82485, 24 in the original) and renders as an empty white column, so its last slider never settles (a run of ours failed) |
 | 154 | [Expanded Lights](https://steamcommunity.com/sharedfiles/filedetails/?id=1871382174) | ❌ | ❌ | ⬜ | broken upstream: Harmony patch targets now have overloads (same in the original) |
 | 155 | [EmptyWorlds (SkyBlock)](https://steamcommunity.com/sharedfiles/filedetails/?id=1825146346) | ✅ | ✅ | ⬜ |  |
 | 156 | [Mod Profile Manager [MPM]](https://steamcommunity.com/sharedfiles/filedetails/?id=2854869130) | ✅ | ✅ | ✅ | issue #2's set |
 | 157 | [PAUSE on ready to print](https://steamcommunity.com/sharedfiles/filedetails/?id=2129768894) | ✅ | ✅ | ⬜ |  |
 | 158 | [Stats Unlimited](https://steamcommunity.com/sharedfiles/filedetails/?id=1758223146) | ❌ | ❌ | ⬜ | broken upstream: a Harmony patch whose target is gone (same in the original) |
-| 159 | [Advanced Electrolyzers](https://steamcommunity.com/sharedfiles/filedetails/?id=1801004057) | ✅ | ✅ | ⬜ |  |
+| 159 | [Advanced Electrolyzers](https://steamcommunity.com/sharedfiles/filedetails/?id=1801004057) | ✅ | ✅ | ✅ | spec tests/e2e/mods/1801004057-advanced-electrolyzers.yaml: the Industrial Electrolyzer is built from copper after Improved Oxygen and selected: 400 W, any-water intake, 6 kg storage |
 | 160 | [Deselect New Materials](https://steamcommunity.com/sharedfiles/filedetails/?id=1863598374) | ✅ | ✅ | ⬜ |  |
 | 161 | [Piped output](https://steamcommunity.com/sharedfiles/filedetails/?id=1820866530) | ⬜ | ⬜ | ⬜ | flagged by onimaxxing (notLoading); not tested |
 | 162 | [Big Storage: Restoraged](https://steamcommunity.com/sharedfiles/filedetails/?id=3059711743) | ✅ | ✅ | ⬜ |  |
@@ -200,7 +200,7 @@ installs get developer checks subscribers never see).
 | 179 | [Liquid Bottler](https://steamcommunity.com/sharedfiles/filedetails/?id=1820638089) | ❌ | ❌ | ⬜ | broken upstream: its LIQUIDBOTTLER building's codex entry collides with the game's own Bottle Filler (LiquidBottler), and loading a colony stops at the crash screen (same in the original) |
 | 180 | [Português (BR)](https://steamcommunity.com/sharedfiles/filedetails/?id=3229139332) | ⬜ | ⬜ | ⬜ | translation: the game applies one only from a Steam subscription; not testable here |
 | 181 | [Piped Everything](https://steamcommunity.com/sharedfiles/filedetails/?id=3033409170) | ✅ | ✅ | ⬜ |  |
-| 182 | [Rational Priority](https://steamcommunity.com/sharedfiles/filedetails/?id=2632758219) | ✅ | ✅ | ⬜ |  |
+| 182 | [Rational Priority](https://steamcommunity.com/sharedfiles/filedetails/?id=2632758219) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2632758219-rational-priority.yaml: a smaller spec (which errand wins depends on positions): an idle Duplicant's Errands tab entry reads in the mod's words ("Idle priority"), the game's priority breakdown gone |
 | 183 | [Mass Move Tool](https://steamcommunity.com/sharedfiles/filedetails/?id=3301490799) | ✅ | ✅ | ⬜ |  |
 | 184 | [Free Resource Buildings Branch](https://steamcommunity.com/sharedfiles/filedetails/?id=3047547550) | ✅ | ✅ | ⬜ |  |
 | 185 | [U&F-Choose Neural Vacillator 神经振荡器自由选择](https://steamcommunity.com/sharedfiles/filedetails/?id=3381262702) | ✅ | ✅ | ✅ | issue #2's set |

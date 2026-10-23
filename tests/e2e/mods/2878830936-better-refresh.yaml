@@ -1,0 +1,43 @@
+# Better Refresh 复制人基础属性提高 (2878830936), classes S, O.
+#
+# What it does: tunes printed Duplicants by its PLib options (Config.json): a bonus to the
+# attribute points of their interests (DUPLICANTSTATS.APTITUDE_ATTRIBUTE_BONUSES, set1),
+# no good or no bad traits (set2, set3), always three interests (set4, a postfix on
+# MinionStartingStats.GenerateAptitudes), attribute levelling limits (set6..8), and (set5) a
+# "Reshuffle All" button on the printing pod's screen that rerolls every card, its reject
+# button rerolling instead of closing (ImmigrantScreen patches).
+# How a player reaches it: the printing pod's side screen, "View" for the new Duplicants;
+# the buttons at the bottom of that screen.
+# What changes: the Duplicants and care packages on offer, and a button to reroll them.
+#
+# The Workshop Config.json holds values of the wrong types, so PLib keeps its defaults (all
+# off); the spec sets all of them, with a bonus of 5, three interests and the reshuffle
+# button. setup makes the next printing ready now. The pod is selected and its screen
+# opened: the Reshuffle All button is there, every Duplicant card has three interests, and a
+# click on it rerolls the cards (their content is random, so only its structure is
+# compared).
+from: early-base
+mods: [2878830936]
+options:
+  fuzhirenshuxingxiugai: {set1: 5, set2: false, set3: false, set4: true, set5: true, set6: 20, set7: 1.7, set8: 400}
+setup:
+  - driver: {seed: 12345}
+  - driver: {setup.call: {target: "Immigration.Instance", method: Sim200ms, args: [100000]}}
+steps:
+  - expect_state:
+      "TUNING.DUPLICANTSTATS.APTITUDE_ATTRIBUTE_BONUSES[0]": 12
+      "type:复制人基础属性提高.Class1::Settings.set5": true
+  - driver: {camera.set: {cell: [124, 209], ortho: 8}}
+  - click_world: {cell: [124, 208], select: Headquarters}
+  - ui_wait: {path: "**/TelepadSideScreen/Contents/Immigration/ViewButton", cond: stable}
+  - click: {ui: "**/TelepadSideScreen/Contents/Immigration/ViewButton"}
+  - ui_wait: {path: "**/ImmigrantScreen/Layout/BottomButtons", cond: stable}
+  - expect_ui:
+      "**/ImmigrantScreen/Layout/BottomButtons/**": {any_text: "Reshuffle All"}
+  - expect_state:
+      "count:all:CharacterContainer::[*] if .stats.personality.model == Minion and .stats.skillAptitudes.Count != 3": 0
+  - click: {text: "Reshuffle All", under: "**/ImmigrantScreen/Layout/BottomButtons"}
+  - ui_wait: {path: "**/ImmigrantScreen/Layout/Content", cond: stable}
+  - expect_state:
+      "count:all:CharacterContainer::[*] if .stats.personality.model == Minion and .stats.skillAptitudes.Count != 3": 0
+      "ImmigrantScreen.instance.containers.Count": "== original"

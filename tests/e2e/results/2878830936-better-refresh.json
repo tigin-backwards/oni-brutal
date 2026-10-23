@@ -1,0 +1,56 @@
+{
+ "spec": "mods/2878830936-better-refresh.yaml",
+ "mods": [
+  "2878830936"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with its options set (Config.json), the printing pod's screen opened from its side screen has the Reshuffle All button; every Duplicant card has three interests before and after a click on it",
+ "updated": "2026-10-23",
+ "commit": "46251f3",
+ "mod_dlls": {
+  "2878830936": {
+   "PLib.dll": "79350ee2d4eea7a879c6eebc12acca89bdd1d2a93ed7b396b875a7907a91d1e2",
+   "╕┤╓╞╚╦╗∙┤í╩⌠╨╘╠ß╕▀.dll": "c97bc3805e5d14e5bfb6d998b3e617680af4e20db61b5dface84157d1769090e"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-042102-a633d0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T05:17:02",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-053152-e45246",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T05:31:52",
+    "lane": 16,
+    "reference_run": "20261023-042102-a633d0",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-053152-e45246",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T05:32:45",
+    "lane": 16,
+    "reference_run": "20261023-042102-a633d0",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

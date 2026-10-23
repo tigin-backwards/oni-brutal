@@ -1,0 +1,23 @@
+# Rational Priority (2632758219), class P.
+#
+# What it does: Duplicants weigh an errand's priority against its distance instead of taking
+# priority first (prefixes on Chore.Precondition.Context.CompareTo, Fetch.IsBetterThan and
+# the global chore provider's comparers: a cost of personal priority x building priority x
+# travel), skilled Duplicants favour errands of their skill, and the Errands tab's tooltips
+# explain the new order (a prefix on MinionTodoChoreEntry.TooltipForChore: "Task
+# Importance", "Errand Proximity"; an idle errand shows "Idle priority").
+# How a player reaches it: playing; a Duplicant's Errands tab.
+# What changes: which errand a Duplicant picks, and how its tooltip reads.
+#
+# A smaller spec (which errand wins depends on the Duplicants' positions): setup selects
+# Nikola, idle in early-base; his Errands tab's current entry reads in the mod's words, the
+# game's "Total Priority" breakdown gone.
+from: early-base
+mods: [2632758219]
+setup:
+  - driver: {setup.call: {target: "SelectTool.Instance", method: Select, args: [{"$": "Components.LiveMinionIdentities.Items[1]"}]}}
+steps:
+  - ui_wait: {path: "**/MinionTodoSideScreen/CurrentTaskContainer/CurrentEntry", cond: stable}
+  - expect_state:
+      "selected:MinionIdentity.name": Nikola
+      "ui:**/MinionTodoSideScreen/CurrentTaskContainer/CurrentEntry::GetComponent<ToolTip>.multiStringToolTips[0]": {contains: "Idle priority: "}

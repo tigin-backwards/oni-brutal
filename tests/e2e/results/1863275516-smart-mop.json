@@ -1,0 +1,55 @@
+{
+ "spec": "mods/1863275516-smart-mop.yaml",
+ "mods": [
+  "1863275516"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "one mop click on a five-cell puddle marks the whole puddle, as in the original; Duplicants mop it up",
+ "updated": "2026-10-23",
+ "commit": "24df5c4",
+ "mod_dlls": {
+  "1863275516": {
+   "SmartMop.dll": "73d9dd2a6e81ca27d3bb9ca75b37f4214c4fe6b5db2e91b365ecc0092c16645d"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261022-215714-6407a5",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-22T22:03:52",
+    "lane": 13,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261022-220909-3ad9da",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T00:11:02",
+    "lane": 12,
+    "reference_run": "20261022-215714-6407a5",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261022-220909-3ad9da",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T00:15:29",
+    "lane": 12,
+    "reference_run": "20261022-215714-6407a5",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

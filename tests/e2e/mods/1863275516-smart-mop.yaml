@@ -1,0 +1,36 @@
+# Smart Mop // by @Ony (1863275516), class T.
+#
+# What it does: a mop order on one cell of a puddle spreads to the whole puddle: every cell of
+# the same liquid lying on a floor next to it, along the floor, gets a mop order (cells of more
+# than the mop's limit are passed over but still connect). Shift keeps the game's one-cell
+# order. Its settings (max mop kg) are in the mod's own config screen, not exercised here.
+# How a player reaches it: the toolbar's Mop tool, one click on a puddle.
+# What changes: how many cells one click marks for mopping.
+#
+# setup pours 15 kg of water into each of the five cells of the pit in the floor of the
+# dug-out room west of the printing pod (x 106-110, y 206, on solid ground).
+from: early-base
+mods: [1863275516]
+setup:
+  - driver: {setup.call: {type: SimMessages, method: AddRemoveSubstance, args: [131122, Water, null, 15, 300, 255, 0]}}
+  - driver: {setup.call: {type: SimMessages, method: AddRemoveSubstance, args: [131123, Water, null, 15, 300, 255, 0]}}
+  - driver: {setup.call: {type: SimMessages, method: AddRemoveSubstance, args: [131124, Water, null, 15, 300, 255, 0]}}
+  - driver: {setup.call: {type: SimMessages, method: AddRemoveSubstance, args: [131125, Water, null, 15, 300, 255, 0]}}
+  - driver: {setup.call: {type: SimMessages, method: AddRemoveSubstance, args: [131126, Water, null, 15, 300, 255, 0]}}
+steps:
+  - run: {seconds: 2}
+  - expect_state:
+      "cells:106,206..110,206::Grid.Mass.get_Item({cell})": "> 50"
+      "all:Moppable::Length": 0
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - tool: {toolbar: Mop}
+  - click_world: {cell: [108, 206]}
+  # One click marked the whole puddle; the game alone marks the cell clicked.
+  - expect_state: {"all:Moppable::Length": ">= 3"}
+  - expect_state: {"all:Moppable::Length": "== original"}
+  - key: {code: Escape}
+  # Duplicants mop it all up.
+  - run: {seconds: 600}
+  - expect_state:
+      "all:Moppable::Length": 0
+      "cells:106,206..110,206::Grid.Mass.get_Item({cell})": "< 30"

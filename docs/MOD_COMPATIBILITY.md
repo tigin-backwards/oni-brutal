@@ -88,7 +88,7 @@ installs get developer checks subscribers never see).
 | 67 | [自然种植盒（Natural Plant Box）](https://steamcommunity.com/sharedfiles/filedetails/?id=3243440327) | ✅ | ✅ | ⬜ |  |
 | 68 | [Русификатор (Wiki)](https://steamcommunity.com/sharedfiles/filedetails/?id=1269554374) | ⬜ | ⬜ | ⬜ | translation: the game applies one only from a Steam subscription; not testable here |
 | 69 | [Insulated Door](https://steamcommunity.com/sharedfiles/filedetails/?id=2054432034) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2054432034-insulated-door.yaml: insulated manual airlock built from the build menu's prefab; its cells' insulation drops as in the original; details screen within threshold |
-| 70 | [Smart Mop // by @Ony 👾](https://steamcommunity.com/sharedfiles/filedetails/?id=1863275516) | ✅ | ✅ | ⬜ |  |
+| 70 | [Smart Mop // by @Ony 👾](https://steamcommunity.com/sharedfiles/filedetails/?id=1863275516) | ✅ | ✅ | ✅ | spec tests/e2e/mods/1863275516-smart-mop.yaml: one mop click on a five-cell puddle marks the whole puddle, as in the original; Duplicants mop it up |
 | 71 | [Full Miner Yield](https://steamcommunity.com/sharedfiles/filedetails/?id=2527442674) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2527442674-full-miner-yield.yaml: a dig leaves debris weighing as much as the dug cells |
 | 72 | [Dup Stats Configurator](https://steamcommunity.com/sharedfiles/filedetails/?id=1717999057) | ✅ | ✅ | ⬜ |  |
 | 73 | [Wallpaper](https://steamcommunity.com/sharedfiles/filedetails/?id=1717534457) | ✅ | ✅ | ✅ | spec tests/e2e/mods/1717534457-wallpaper.yaml: four sandstone wallpapers built and tinted sandstone's colour; world shot of them, the floor masked |

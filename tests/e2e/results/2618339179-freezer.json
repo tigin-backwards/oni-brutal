@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2618339179-freezer.yaml",
+ "mods": [
+  "2618339179"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Freezer is built from copper and plastic in the corridor west of the pod and selected; its storage holds 200 kg and it is tagged as a refrigerator",
+ "updated": "2026-10-23",
+ "commit": "d8636f5",
+ "mod_dlls": {
+  "2618339179": {
+   "Freezer.dll": "f3b879cea3494489cc4a018a4953db6a1cea38cc93f2f010b737b9cd755280d1"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-003409-1d7989",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T00:39:12",
+    "lane": 11,
+    "signatures": 1
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-022550-00ca20",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T02:25:50",
+    "lane": 11,
+    "reference_run": "20261023-003409-1d7989",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-022550-00ca20",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T02:26:55",
+    "lane": 11,
+    "reference_run": "20261023-003409-1d7989",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -1,0 +1,40 @@
+# Squirrel Wheel (2086704949), classes B, O.
+#
+# What it does: adds the Squirrel Wheel (SquirrelGenerator, 2x2, 200 kg of metal ore and a
+# seed, researched with Ranching, beside the Manual Generator in the Power menu): a happy, fed
+# Pip runs in it and makes 250 W (a WheelRunningMonitor and WheelRunningStates added to the
+# Pip's brain, BaseSquirrelConfig.BaseSquirrel); the runner gets a happiness and metabolism
+# bonus. PLib options set the wattage, heat, bonuses and the Pips' search radius and interval.
+# How a player reaches it: the build menu (Power); then Pips nearby.
+# What changes: a generator that Pips run.
+#
+# A smaller spec: a running Pip has to be tame, happy and fed, which early-base cannot give
+# without a ranch. setup grants the research and lays down a Mealwood seed; the wheel is built
+# with a wire on its power port (a generator without a circuit is not operational), and a Pip
+# placed beside it gets the mod's wheel monitor.
+from: early-base
+mods: [2086704949]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"Ranching\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131123, 0, 0, \"BasicSingleHarvestPlantSeed\", \"Ore\")", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131125, 0, 0, \"Squirrel\", \"Creatures\")", method: SetActive, args: [true]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"Ranching\").unlockedItemIDs": {contains: SquirrelGenerator}
+  - build: {prefab: SquirrelGenerator, at: [106, 206]}
+  - expect: {blueprints: {SquirrelGenerator: 1}}
+  - run: {seconds: 900, until: {buildings: {SquirrelGenerator: 1}, pending_construction: 0}}
+  - expect_state: {"Grid.Objects.get_Item(131122, 1).GetComponent<Operational>.IsOperational": false}
+  - build: {prefab: Wire, at: [106, 206], material: Cuprite}
+  - run: {seconds: 600, until: {pending_construction: 0}}
+  - expect_state:
+      "Grid.Objects.get_Item(131122, 1).GetComponent<Operational>.IsOperational": true
+      "Assets.GetBuildingDef(\"SquirrelGenerator\").GeneratorWattageRating": 250
+      "Components.Brains.Items[-1].name": Squirrel
+      "Components.Brains.Items[-1].GetComponent<SquirrelGenerator.WheelRunningMonitor>": exists
+  - driver: {camera.set: {cell: [107, 208], ortho: 8}}
+  - click_world: {cell: [106, 207], select: SquirrelGenerator}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Squirrel Wheel"}

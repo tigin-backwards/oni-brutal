@@ -1,0 +1,63 @@
+{
+ "spec": "mods/2947429297-cluster-generation-manager.yaml",
+ "mods": [
+  "2947429297"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "from the main menu's New Game, Survival, Spaced Out!, the gear beside the coordinate's shuffle button opens the mod's cluster editor, and a category click changes its item list; compared by layout dump only (main menu)",
+ "updated": "2026-10-23",
+ "commit": "d8636f5",
+ "mod_dlls": {
+  "2947429297": {
+   "ClusterTraitGenerationManager.dll": "a5a06587d437357ba4b8fb1e5cc842f8de51eefbf5dde1472442750cf74b6485"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-011501-e9e5e6",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T01:21:16",
+    "lane": 11,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-013205-ceaec1",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T01:32:05",
+    "lane": 11,
+    "reference_run": "20261023-011501-e9e5e6",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "categories": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261023-013205-ceaec1",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T01:33:04",
+    "lane": 11,
+    "reference_run": "20261023-011501-e9e5e6",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "categories": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

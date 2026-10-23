@@ -1,0 +1,31 @@
+# Auto-Eject (2551341883), class P.
+#
+# What it does: finishes two errands that otherwise wait for the player. A Duplicant in a
+# Neural Vacillator whose shuffle is done is let out at once (a state entry on
+# GeneShufflerSM.working.complete sets the work time to 0) instead of staying inside until
+# the player releases it; and a Teleporter whose occupant is waiting starts the warp itself
+# (WarpPortalSM.occupied.waiting).
+# How a player reaches it: assigning a Duplicant to a Neural Vacillator, or a Teleporter.
+# What changes: the Duplicant comes out with its new trait, and the Vacillator is spent.
+#
+# setup places a charged Neural Vacillator in the dug-out corridor west of the printing pod
+# and assigns it to a standard Duplicant (the first of early-base's three is bionic). The
+# Duplicant goes in, gets a trait and comes out on its own; the Vacillator is spent and
+# unassigned.
+from: early-base
+mods: [2551341883]
+setup:
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131124, 0, 0, \"GeneShuffler\", \"Building\")", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "all:GeneShuffler::[0].GetComponent<Ownable>", method: Assign, args: [{"$": "Components.LiveMinionIdentities.Items[1].assignableProxy.Get()"}]}}
+steps:
+  - expect_state:
+      "all:GeneShuffler::Length": 1
+      "all:GeneShuffler::[0].IsConsumed": false
+      "all:GeneShuffler::[0].GetComponent<Ownable>.assignee": exists
+      "Components.LiveMinionIdentities.Items[1].GetComponent<Klei.AI.Traits>.TraitList.Count": {save_as: traits}
+  - run: {seconds: 300}
+  - expect_state:
+      "all:GeneShuffler::[0].IsConsumed": true
+      "all:GeneShuffler::[0].WorkComplete": false
+      "all:GeneShuffler::[0].GetComponent<Ownable>.assignee": missing
+      "Components.LiveMinionIdentities.Items[1].GetComponent<Klei.AI.Traits>.TraitList.Count": "== traits + 1"

@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2086704949-squirrel-wheel.yaml",
+ "mods": [
+  "2086704949"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a smaller spec: a Squirrel Wheel built from metal ore and a seed is operational once wired, and a Pip placed beside it gets the mod's wheel monitor (a running Pip must be tame, happy and fed)",
+ "updated": "2026-10-23",
+ "commit": "d8636f5",
+ "mod_dlls": {
+  "2086704949": {
+   "SquirrelGenerator.dll": "67426657d8432de4972463f17639e4cd78868195b4022f67fb962d510e13cafa"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-012617-63ec21",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T01:28:58",
+    "lane": 11,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-014050-17de52",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T01:40:50",
+    "lane": 10,
+    "reference_run": "20261023-012617-63ec21",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-014050-17de52",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T01:42:21",
+    "lane": 10,
+    "reference_run": "20261023-012617-63ec21",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

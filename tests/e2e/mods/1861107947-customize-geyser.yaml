@@ -1,0 +1,30 @@
+# Customize Geyser (1861107947), classes S, O.
+#
+# What it does: geysers, vents and volcanoes are set from a JSON file (mods/Customize
+# Geyser.json, written with its defaults on first start): the game's own get new values (the
+# steam geyser erupts at 105 C instead of 110), and new kinds are added (Ethanol Geyser and
+# Super Coolant Geyser; Aluminum, Tungsten, Glass and Steel volcanoes), which may replace a
+# geyser still in the fog of war. Its randomiser sets how often each kind appears, and the
+# Geotuner's side screen offers the new kinds too.
+# How a player reaches it: the config file; then a geyser, by selecting it.
+# What changes: what geysers erupt, and how.
+#
+# early-base has no geyser in sight, so setup places one of the new kinds, an Ethanol Geyser,
+# in the dug-out corridor west of the printing pod; the spec selects it.
+from: early-base
+mods: [1861107947]
+setup:
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131124, 0, 0, \"GeyserGeneric_liquid_ethanol\", \"BuildingBack\")", method: SetActive, args: [true]}}
+steps:
+  - expect_state:
+      "GeyserConfigurator.FindType(\"steam\").temperature": 378.15
+      "GeyserConfigurator.FindType(\"liquid_ethanol\").element": Ethanol
+      "GeyserConfigurator.FindType(\"molten_tungsten\").element": MoltenTungsten
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [109, 207]}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Ethanol Geyser"}
+  - expect_state:
+      "selected:KPrefabID.PrefabTag": GeyserGeneric_liquid_ethanol
+      "selected:Geyser.configuration.GetElement()": Ethanol

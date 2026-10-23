@@ -1,0 +1,32 @@
+# Demolish Neutronium (2721654252), classes P, O.
+#
+# What it does: Neutronium can be dug. Diggable.Undiggable no longer refuses it; a dig order on
+# it gets the dig time of Obsidian times a factor (5 by default, a PLib option), so a Duplicant
+# with Obsidian digging can remove it, and it drops nothing (or Neutronium Dust, if another
+# mod adds that element). Buildings may also be placed over it (BuildingDef.IsAreaClear and
+# IsAreaValid treat it like other solids).
+# How a player reaches it: the dig tool, dragged over Neutronium.
+# What changes: dig orders on the world's Neutronium border, and their time.
+#
+# The asteroid's floor (rows 0 to 3) is Neutronium, hidden in the fog of war, where the dig
+# tool places nothing: setup reveals three cells of row 2, (118..120, 2). The dig tool is
+# dragged over them; each gets a dig order with 180 s of work (Obsidian's 36 s, times 5).
+from: early-base
+mods: [2721654252]
+setup:
+  - driver: {setup.call: {type: Grid, method: Reveal, args: [1390, 255, true]}}
+  - driver: {setup.call: {type: Grid, method: Reveal, args: [1391, 255, true]}}
+  - driver: {setup.call: {type: Grid, method: Reveal, args: [1392, 255, true]}}
+steps:
+  - expect_state:
+      "Grid.Element[1391].id": Unobtanium
+      "Diggable.Undiggable({\"$\": \"Grid.Element[1391]\"})": false
+  - expect: {pending_digs: 0}
+  - driver: {camera.set: {cell: [120, 6], ortho: 8}}
+  - tool: {key: G}
+  - drag: {from: [118, 2], to: [120, 2]}
+  - key: {code: Escape}
+  - expect: {pending_digs: 3}
+  - expect_state:
+      "count:all:Diggable::[*] if .workTime == 180.0": 3
+  - world_shot: {name: orders, ortho: 8, at: [120, 6]}

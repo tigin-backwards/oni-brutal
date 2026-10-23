@@ -1,0 +1,55 @@
+{
+ "spec": "mods/1861107947-customize-geyser.yaml",
+ "mods": [
+  "1861107947"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the config's values reach the geysers (steam at 105 C, new kinds such as the Tungsten Volcano); an Ethanol Geyser placed in setup is selected and its details name it",
+ "updated": "2026-10-23",
+ "commit": "d8636f5",
+ "mod_dlls": {
+  "1861107947": {
+   "CustomizeGeyser.dll": "9f4e0dce1504bb0dcd1095ad8d49735a1fd979a8527d927152de3b60f1f26177"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-003409-1d7989",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T00:36:41",
+    "lane": 11,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-014206-9b33fd",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T01:42:06",
+    "lane": 11,
+    "reference_run": "20261023-003409-1d7989",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-014206-9b33fd",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T01:42:53",
+    "lane": 11,
+    "reference_run": "20261023-003409-1d7989",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

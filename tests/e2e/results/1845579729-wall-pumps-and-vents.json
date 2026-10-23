@@ -1,0 +1,55 @@
+{
+ "spec": "mods/1845579729-wall-pumps-and-vents.yaml",
+ "mods": [
+  "1845579729"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Gas Wall Vent is built from cuprite as a tile in the corridor west of the pod, its cell turns solid, and it is selected",
+ "updated": "2026-10-23",
+ "commit": "d8636f5",
+ "mod_dlls": {
+  "1845579729": {
+   "WallPumps.dll": "de994fe6d4713793260463944f77f98f5f17410dcf56a39795b9f739ed9ed634"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-003409-1d7989",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T00:42:30",
+    "lane": 11,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-022801-b080a2",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T02:28:01",
+    "lane": 11,
+    "reference_run": "20261023-003409-1d7989",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-022801-b080a2",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T02:28:27",
+    "lane": 10,
+    "reference_run": "20261023-003409-1d7989",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

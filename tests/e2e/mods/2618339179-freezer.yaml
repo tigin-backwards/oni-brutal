@@ -1,0 +1,34 @@
+# Freezer (2618339179), classes B, O.
+#
+# What it does: adds the Freezer (2x2, 400 kg of refined metal and 25 kg of plastic, 480 W,
+# researched with Gourmet Cooking, after the Refrigerator in the Food menu): a refrigerator
+# that keeps its food at -19 C (254.15 K) instead of 4 C, so it stops spoiling outright, with
+# a capacity of 200 kg, a power saver of 40 W, and a Full/Not Full automation port. PLib
+# options set the capacity and the two powers.
+# How a player reaches it: the build menu (Food), then its side screen (the food filter).
+# What changes: food storage colder than the Refrigerator's.
+#
+# setup grants the research, copper and plastic; the Freezer is built unpowered in the
+# dug-out corridor west of the printing pod and selected.
+from: early-base
+mods: [2618339179]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"FinerDining\")", method: Purchased}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Copper\").substance", method: SpawnResource, args: [[109.5, 206.5, -12], 800, 300, 255, 0]}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Polypropylene\").substance", method: SpawnResource, args: [[109.5, 206.5, -12], 100, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"Freezer\").EnergyConsumptionWhenActive": 480
+      "Db.Get().Techs.Get(\"FinerDining\").unlockedItemIDs": {contains: Freezer}
+  - build: {prefab: Freezer, at: [113, 206]}
+  - expect: {blueprints: {Freezer: 1}}
+  - run: {seconds: 900, until: {buildings: {Freezer: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [114, 208], ortho: 8}}
+  - click_world: {cell: [113, 207]}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Freezer"}
+  - expect_state:
+      "selected:Storage.capacityKg": 200
+      "selected:GetComponent<Psyko.Freezer.Freezer>.MaxCapacity": 200
+      "selected:KPrefabID.HasTag(\"Refrigerator\")": true

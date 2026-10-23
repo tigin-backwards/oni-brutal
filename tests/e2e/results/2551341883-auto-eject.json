@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2551341883-auto-eject.yaml",
+ "mods": [
+  "2551341883"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Neural Vacillator placed and assigned in setup lets its Duplicant out on its own with a new trait, spent and unassigned (the Teleporter half is not reached on early-base)",
+ "updated": "2026-10-23",
+ "commit": "d8636f5",
+ "mod_dlls": {
+  "2551341883": {
+   "AutoEject.dll": "8feb6f6f6bbaf418fc7b7c459b2cc9c39aaf1365bd884bdb83f49ea1333820e3"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-005647-453b7d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T01:01:19",
+    "lane": 10,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-013650-7ffe78",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T01:36:50",
+    "lane": 11,
+    "reference_run": "20261023-005647-453b7d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-013650-7ffe78",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T01:39:33",
+    "lane": 11,
+    "reference_run": "20261023-005647-453b7d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

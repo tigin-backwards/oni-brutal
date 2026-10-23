@@ -1,0 +1,59 @@
+{
+ "spec": "mods/2721654252-demolish-neutronium.yaml",
+ "mods": [
+  "2721654252"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the dig tool dragged over three revealed Neutronium cells of the world's floor places dig orders, each of 180 s",
+ "updated": "2026-10-23",
+ "commit": "d8636f5",
+ "mod_dlls": {
+  "2721654252": {
+   "DemolishNeutronium.dll": "2468b177490065e465486a9f6b7d855d481a4962aca281602f5450414ee33070"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-003409-1d7989",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T00:37:58",
+    "lane": 11,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-022407-e1e9fe",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T02:24:53",
+    "lane": 10,
+    "reference_run": "20261023-003409-1d7989",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "orders": 0.009482
+    }
+   },
+   {
+    "run": "20261023-022407-e1e9fe",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T02:25:07",
+    "lane": 11,
+    "reference_run": "20261023-003409-1d7989",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "orders": 0.009322
+    }
+   }
+  ]
+ }
+}

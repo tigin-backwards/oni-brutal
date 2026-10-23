@@ -1,0 +1,35 @@
+# Wall Pumps and Vents (1845579729), class B.
+#
+# What it does: adds pumps and vents that are wall tiles (1x1 foundation tiles, insulating,
+# rotatable): the Gas Wall Vent (Ventilation, metal ore), the High Pressure Gas Wall Vent and
+# the Gas Wall Pump (Improved Ventilation), the Liquid Wall Vent (Plumbing) and the Liquid
+# Wall Pump (Improved Plumbing). A wall pump draws from the cell its face points at, a wall
+# vent releases into it (patches on ElementConsumer.GetSampleCell and Exhaust.UpdateEmission
+# for the rotated cell). A config file in mods/settings sets their rates and powers.
+# How a player reaches it: the build menu (Ventilation, Plumbing).
+# What changes: walls that pump and vent.
+#
+# setup grants Ventilation; a Gas Wall Vent is built from cuprite as a tile in the dug-out
+# corridor west of the printing pod, and selected.
+from: early-base
+mods: [1845579729]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"GasPiping\")", method: Purchased}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"FairGasWallVent\").IsFoundation": true
+      "Db.Get().Techs.Get(\"GasPiping\").unlockedItemIDs": {contains: FairGasWallVent}
+      "Db.Get().Techs.Get(\"ImprovedGasPiping\").unlockedItemIDs": {contains: FairGasWallPump}
+      "Grid.Solid.get_Item(131130)": false
+  - build: {prefab: FairGasWallVent, at: [114, 206], material: Cuprite}
+  - expect: {blueprints: {FairGasWallVent: 1}}
+  - run: {seconds: 900, until: {buildings: {FairGasWallVent: 1}, pending_construction: 0}}
+  - expect_state: {"Grid.Solid.get_Item(131130)": true}
+  - driver: {camera.set: {cell: [114, 208], ortho: 8}}
+  - click_world: {cell: [114, 206]}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Gas Wall Vent"}
+  - expect_state:
+      "selected:GetComponent<WallPumps.RotatableExhaust>": exists
+      "selected:Vent.overpressureMass": "== original"

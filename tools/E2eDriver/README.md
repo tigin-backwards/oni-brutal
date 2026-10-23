@@ -360,7 +360,7 @@ A reflective call. **The runner allows it only in a spec's `setup:` block**, nev
 - `target`: a `state.get` expression for the instance, or for the type, to call `method` on.
 - `args`: JSON values, converted to the parameter types. Accepted conversions:
   - numbers to any numeric type;
-  - strings to enums or Tags;
+  - strings to enums, Tags or HashedStrings;
   - `[x, y(, z)]` to Vector2, Vector3 or Vector2I;
   - arrays to arrays or `List<T>`;
   - a type name to `Type`;

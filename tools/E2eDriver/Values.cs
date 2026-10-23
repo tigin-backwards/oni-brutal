@@ -242,6 +242,7 @@ namespace E2eDriver
                 }
                 if (under == typeof(Type)) { value = FindType((string)token); return value != null; }
                 if (under == typeof(Tag)) { value = new Tag((string)token); return true; }
+                if (under == typeof(HashedString)) { if (token.Type != JTokenType.String) return false; value = new HashedString((string)token); return true; }
                 if ((under == typeof(Vector2) || under == typeof(Vector3)) && token is JArray xyz && xyz.Count >= 2)
                 {
                     float x = (float)xyz[0], y = (float)xyz[1], z = xyz.Count > 2 ? (float)xyz[2] : 0f;

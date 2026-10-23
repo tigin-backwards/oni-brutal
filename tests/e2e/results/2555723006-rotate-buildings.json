@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2555723006-rotate-buildings.yaml",
+ "mods": [
+  "2555723006"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Storage Bin picked in the build menu, flipped with O and placed in the corridor west of the pod: its blueprint keeps the flip; generators and doors take FlipH and R360",
+ "updated": "2026-10-23",
+ "commit": "b4c7537",
+ "mod_dlls": {
+  "2555723006": {
+   "RotateBuildings.dll": "fa6c2c80bfe751cf9be506dc26f724db98d68d0e9a28d92c40b0d4206e247ae3"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-141546-ad2d9b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T14:15:46",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-142008-57c53f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T14:20:08",
+    "lane": 16,
+    "reference_run": "20261023-141546-ad2d9b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-142008-57c53f",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T14:21:17",
+    "lane": 16,
+    "reference_run": "20261023-141546-ad2d9b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

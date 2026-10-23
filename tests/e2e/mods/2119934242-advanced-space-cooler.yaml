@@ -1,0 +1,45 @@
+# Advanced Space Cooler (2119934242), class B.
+#
+# What it does: adds the Advanced Space Cooler to the Utilities menu: a 2x1 space heater
+# (spaceheater_kanim) of 400 kg of metal whose exhaust is -8000 kW, so it deletes heat from
+# the cells around it, down to its minimum operating temperature of 50 K, while powered
+# (800 W). Its tech entry names "AdvancedSpaceHeater", so it is in no tech: it is buildable
+# from the start. A config.json beside the DLL sets its size, power, exhaust and the rest.
+# How a player reaches it: the build menu (Utilities).
+# What changes: the air around it cools fast.
+#
+# Options here: requiresPowerInput false (the mod's config.json), so it runs unwired on
+# early-base. The cooler is placed through the build menu in the corridor west of the
+# printing pod; once built, the air of its cells is far colder after a minute.
+from: early-base
+mods: [2119934242]
+options:
+  "2119934242": {requiresPowerInput: false}
+setup:
+  # The Utilities menu shows only once one of its own buildings is researched.
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"TemperatureModulation\")", method: Purchased}}
+  - driver: {setup.call: {target: "Game.Instance", method: Trigger, args: [-107300940]}}
+  - driver: {setup.call: {target: "PlanScreen.Instance._researchedDefs", method: Clear}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"AdvancedSpaceCooler\").ExhaustKilowattsWhenActive": -8000
+      "Assets.GetBuildingDef(\"AdvancedSpaceCooler\").RequiresPowerInput": false
+      "Assets.GetBuildingDef(\"AdvancedSpaceCooler\").WidthInCells": 2
+  - run: {seconds: 5}
+  - driver: {camera.set: {cell: [113, 208], ortho: 10}}
+  - click: {ui: "**/PlanScreen/Toggle:Utilities"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/AdvancedSpaceCooler Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/AdvancedSpaceCooler Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
+  - expect_ui:
+      "**/ProductInfoScreen/Panel/TitleBar/Label": {text: "~Advanced Space Cooler"}
+  - shot: {name: info, crop: "**/ProductInfoScreen", threshold: 0.04}
+  - click_world: {cell: [113, 206]}
+  - key: {code: Escape}
+  - expect: {blueprints: {AdvancedSpaceCooler: 1}}
+  - expect_state:
+      "cells:113,206..114,207::Grid.Temperature.get_Item({cell})": {save_as: warm}
+  - run: {seconds: 900, until: {buildings: {AdvancedSpaceCooler: 1}, pending_construction: 0}}
+  - run: {seconds: 60}
+  - expect_state:
+      "cells:113,206..114,207::Grid.Temperature.get_Item({cell})": "< warm - 200"

@@ -346,11 +346,11 @@ installs get developer checks subscribers never see).
 | 325 | [Deconstructable Mini-Pod](https://steamcommunity.com/sharedfiles/filedetails/?id=2603191165) | ✅ | ✅ | ⬜ |  |
 | 326 | [Auto Connect: Power](https://steamcommunity.com/sharedfiles/filedetails/?id=3636360749) | ⬜ | ⬜ | ⬜ | flagged by onimaxxing (crashesAtStartup); not tested |
 | 327 | [SuperSmartBattery[Vanilla+DLC]](https://steamcommunity.com/sharedfiles/filedetails/?id=2018048391) | ✅ | ✅ | ⬜ |  |
-| 328 | [Advanced Space Cooler](https://steamcommunity.com/sharedfiles/filedetails/?id=2119934242) | ✅ | ✅ | ⬜ |  |
+| 328 | [Advanced Space Cooler](https://steamcommunity.com/sharedfiles/filedetails/?id=2119934242) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2119934242-advanced-space-cooler.yaml: the cooler is picked in the build menu (Utilities) and placed in the corridor west of the pod, run unpowered through its config.json: once built, the air of its cells is over 200 K colder within a minute |
 | 329 | [Grouped Resources](https://steamcommunity.com/sharedfiles/filedetails/?id=2880433226) | ✅ | ✅ | ⬜ |  |
 | 330 | [Modify Difficulty Settings](https://steamcommunity.com/sharedfiles/filedetails/?id=2962220957) | ✅ | ✅ | ⬜ |  |
 | 331 | [Pipe Pressure Valve](https://steamcommunity.com/sharedfiles/filedetails/?id=1730126196) | ⬜ | ⬜ | ⬜ | flagged by onimaxxing (notLoading); not tested |
-| 332 | [Rotate Buildings](https://steamcommunity.com/sharedfiles/filedetails/?id=2555723006) | ✅ | ✅ | ⬜ |  |
+| 332 | [Rotate Buildings](https://steamcommunity.com/sharedfiles/filedetails/?id=2555723006) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2555723006-rotate-buildings.yaml: a Storage Bin picked in the build menu, flipped with O and placed in the corridor west of the pod: its blueprint keeps the flip; generators and doors take FlipH and R360 |
 | 333 | [Canned Food](https://steamcommunity.com/sharedfiles/filedetails/?id=2818855295) | ✅ | ✅ | ⬜ |  |
 | 334 | [[Deprecated] Clean Drop](https://steamcommunity.com/sharedfiles/filedetails/?id=2047364442) | ⬜ | ⬜ | ⬜ | flagged by onimaxxing (crashesAtStartup); not tested |
 | 335 | [Русский (Sci-Tech)](https://steamcommunity.com/sharedfiles/filedetails/?id=2000481647) | ⬜ | ⬜ | ⬜ | translation: the game applies one only from a Steam subscription; not testable here |

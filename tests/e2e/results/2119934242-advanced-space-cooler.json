@@ -1,0 +1,59 @@
+{
+ "spec": "mods/2119934242-advanced-space-cooler.yaml",
+ "mods": [
+  "2119934242"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the cooler is picked in the build menu (Utilities) and placed in the corridor west of the pod, run unpowered through its config.json: once built, the air of its cells is over 200 K colder within a minute",
+ "updated": "2026-10-23",
+ "commit": "b4c7537",
+ "mod_dlls": {
+  "2119934242": {
+   "AdvancedSpaceCooler.dll": "9d847f88ac4ebf7015d858e4430c9d2188a5395198b6af72c08864325e528597"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-141030-ce5b6f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T14:10:30",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-141229-a4ae17",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T14:12:29",
+    "lane": 16,
+    "reference_run": "20261023-141030-ce5b6f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "info": 0.007747
+    }
+   },
+   {
+    "run": "20261023-141229-a4ae17",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T14:14:05",
+    "lane": 16,
+    "reference_run": "20261023-141030-ce5b6f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "info": 0.007747
+    }
+   }
+  ]
+ }
+}

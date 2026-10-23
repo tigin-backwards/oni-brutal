@@ -1,0 +1,40 @@
+# Rotate Buildings (2555723006), class P.
+#
+# What it does: about 120 buildings the game places one way only (storage bins, generators,
+# deoxidizers, batteries, fridges, critter buildings, refineries and more) can be flipped
+# left to right while placed (postfixes on BuildingTemplates.CreateBuildingDef and a few
+# building configs set PermittedRotations to FlipH; doors get R360). Patches on
+# EnergyGenerator, DirectionControl and the ranch station move outputs and directions with
+# the flip.
+# How a player reaches it: the build menu, then the rotate key (O) while placing.
+# What changes: those buildings can be placed mirrored.
+#
+# The Storage Bin (Base) is chosen from the build menu, flipped with O and placed in the
+# dug-out corridor west of the printing pod; its blueprint keeps the flip. The game alone
+# would not flip it.
+from: early-base
+mods: [2555723006]
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"StorageLocker\").PermittedRotations": FlipH
+      "Assets.GetBuildingDef(\"ManualGenerator\").PermittedRotations": FlipH
+      "Assets.GetBuildingDef(\"Door\").PermittedRotations": R360
+      "Assets.GetBuildingDef(\"Tile\").PermittedRotations": "== original"
+  # The build menu offers materials only once the game has run a little.
+  - run: {seconds: 5}
+  - driver: {camera.set: {cell: [114, 208], ortho: 10}}
+  - open: {key: Alpha1}
+  - ui_wait: {path: "**/PlanBuildingSelectionPanel/BuildingGroups", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/StorageLocker Group*"}
+  - ui_wait: {path: "**/PlanBuildingSelectionPanel/ProductInfoScreen", cond: stable}
+  - click: {ui: "**/MaterialSelectorTemplate/**/Toggles/MaterialSelection_*"}
+  - expect_state:
+      "PlayerController.Instance.ActiveTool.name": BuildTool
+  - key: {code: O, at: [113, 206]}
+  - expect_state:
+      "BuildTool.Instance.GetBuildingOrientation": FlipH
+  - click_world: {cell: [113, 206]}
+  - key: {code: Escape}
+  - expect: {blueprints: {StorageLocker: 1}}
+  - expect_state:
+      "count:all:Constructable::[*] if .GetComponent<Rotatable>.GetOrientation() == FlipH": 1

@@ -1,0 +1,30 @@
+# Paint Walls (1732578172), class V.
+#
+# What it does: a built Drywall or Tempshift Plate is tinted with the colour of the material it
+# was built from (its element's UI colour), and tinted again whenever the Decor overlay, which
+# resets tints, is left.
+# How a player reaches it: building Drywall (Base, Textile Production) or a Tempshift Plate
+# from different materials; the Decor overlay.
+# What changes: the colour walls are drawn in.
+#
+# setup grants Textile Production and spawns granite. A strip of sandstone drywall and one of
+# granite drywall are built in the dug-out room west of the printing pod: each takes its
+# material's colour. The Decor overlay is opened and closed again, and the colours stay. The
+# walls are shot, with the floor and the ceiling masked.
+from: early-base
+mods: [1732578172]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"Clothing\")", method: Purchased}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Granite\").substance", method: SpawnResource, args: [[114.5, 207.5, -12], 800, 300, 255, 0]}}
+steps:
+  - build: {prefab: ExteriorWall, cells: [[108, 208], [109, 208], [110, 208], [108, 209], [109, 209], [110, 209]], material: SandStone}
+  - build: {prefab: ExteriorWall, cells: [[111, 208], [112, 208], [113, 208], [111, 209], [112, 209], [113, 209]], material: Granite}
+  - expect: {blueprints: {ExteriorWall: 12}}
+  - run: {seconds: 1500, until: {buildings: {ExteriorWall: 12}, pending_construction: 0}}
+  - expect_state:
+      "count:all:BuildingComplete::[*] if .name == 'ExteriorWallComplete' and .GetComponent<PrimaryElement>.ElementID == SandStone and .GetComponent<KBatchedAnimController>.TintColour.r == 152": 6
+      "count:all:BuildingComplete::[*] if .name == 'ExteriorWallComplete' and .GetComponent<PrimaryElement>.ElementID == Granite and .GetComponent<KBatchedAnimController>.TintColour.r == 67": 6
+  - world_shot: {name: walls, ortho: 3, at: [110, 208], mask: [[0, 0, 1280, 170], [0, 470, 1280, 250]]}
+  - key: {code: F8}
+  - key: {code: F8}
+  - world_shot: {name: walls-after-decor, ortho: 3, at: [110, 208], mask: [[0, 0, 1280, 170], [0, 470, 1280, 250]]}

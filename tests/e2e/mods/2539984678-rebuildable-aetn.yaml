@@ -1,0 +1,57 @@
+# Rebuildable AETN (2539984678), classes P, O.
+#
+# What it does: the Anti-Entropy Thermo-Nullifier can be built (Utilities, researched with
+# Catalytics) from 800 kg of refined metal and a Neutronium Core, a new item found in Gravitas
+# ruins, lockers and satellites, in space, or (after cycle 100) as a care package. Building
+# and deconstructing one needs the Demolition skill (CanDemolish), and a deconstructed AETN
+# gives its core back. An option adds an automation input.
+# How a player reaches it: the build menu (Utilities); the core where it is found.
+# What changes: a player can have more AETNs, or move one.
+#
+# setup grants Catalytics (and Temperature Modulation, which shows the Utilities menu), teaches
+# two Duplicants the builder skills up to Demolition (Building3), and spawns steel and two
+# Neutronium Cores (an AETN takes two) in the dug-out room west of the printing pod. The AETN
+# is picked in the build menu and placed there; it is built, with the cores.
+from: early-base
+mods: [2539984678]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"Catalytics\")", method: Purchased}}
+  # The Utilities menu shows only once one of its own buildings is researched.
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"TemperatureModulation\")", method: Purchased}}
+  - driver: {setup.call: {target: "Game.Instance", method: Trigger, args: [-107300940]}}
+  - driver: {setup.call: {target: "PlanScreen.Instance._researchedDefs", method: Clear}}
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[1].GetComponent<MinionResume>", method: MasterSkill, args: [Building1]}}
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[1].GetComponent<MinionResume>", method: MasterSkill, args: [Building2]}}
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[1].GetComponent<MinionResume>", method: MasterSkill, args: [Building3]}}
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[2].GetComponent<MinionResume>", method: MasterSkill, args: [Building1]}}
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[2].GetComponent<MinionResume>", method: MasterSkill, args: [Building2]}}
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[2].GetComponent<MinionResume>", method: MasterSkill, args: [Building3]}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Steel\").substance", method: SpawnResource, args: [[113.5, 206.5, -12], 900, 300, 255, 0]}}
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131124, 0, 0, \"MassiveHeatSinkCore\", \"Ore\")", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131125, 0, 0, \"MassiveHeatSinkCore\", \"Ore\")", method: SetActive, args: [true]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"MassiveHeatSink\").MaterialCategory": {contains: BuildingNeutroniumCore}
+      "Assets.GetBuildingDef(\"MassiveHeatSink\").BuildingUnderConstruction.GetComponent<Constructable>.requiredSkillPerk": CanDemonlish
+  # The build menu counts the colony's materials only once the game has run.
+  - run: {seconds: 5}
+  - driver: {camera.set: {cell: [110, 208], ortho: 10}}
+  - click: {ui: "**/PlanScreen/Toggle:Utilities"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/MassiveHeatSink Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/MassiveHeatSink Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
+  - shot: {name: materials, crop: "**/ProductInfoScreen", threshold: 0.04}
+  - click_world: {cell: [107, 206]}
+  - expect: {blueprints: {MassiveHeatSink: 1}}
+  - key: {code: Escape}
+  # The mod's transpiler on Constructable.OnSpawn multiplies the core's amount (2) by a core's
+  # mass (25 kg), but the game counts cores by the unit: the blueprint asks for 50 cores.
+  - expect_state:
+      "all:Constructable::[0].fetchList.MinimumAmount[\"MassiveHeatSinkCore\"]": 50
+  - run: {seconds: 1500}
+  # The two cores the colony has are delivered; 48 are still wanted, and nothing is built.
+  - expect_state:
+      "all:Constructable::[0].fetchList.GetRemaining()[\"MassiveHeatSinkCore\"]": ">= 48"
+  - expect: {buildings: {MassiveHeatSink: 1}, pending_construction: 0}
+  - expect_state:
+      "all:MassiveHeatSink::[0].GetComponent<ReBuildableAETN.MassiveHeatSinkRebuildable>": exists

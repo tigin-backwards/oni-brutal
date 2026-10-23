@@ -1,0 +1,33 @@
+{
+ "spec": "mods/2539984678-rebuildable-aetn.yaml",
+ "mods": [
+  "2539984678"
+ ],
+ "verdict": "pending",
+ "why": "the spec fails in the original: a broken spec, or a mod broken upstream",
+ "findings": [],
+ "note": "",
+ "updated": "2026-10-23",
+ "commit": "c96947c",
+ "mod_dlls": {
+  "2539984678": {
+   "ReBuildableAETN.dll": "15fb645b589fb951bff81370e8c0cca6bcb13b4ed9e84a05b175074986633a78"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-110954-666830",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-23T11:09:54",
+    "lane": 15,
+    "reasons": [
+     "step 15: buildings.MassiveHeatSink is 0, wanted 1; pending_construction is 1, wanted 0"
+    ],
+    "signatures": 0
+   }
+  ],
+  "ours": []
+ }
+}

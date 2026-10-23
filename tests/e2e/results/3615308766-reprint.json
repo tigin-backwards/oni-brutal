@@ -1,0 +1,63 @@
+{
+ "spec": "mods/3615308766-reprint.yaml",
+ "mods": [
+  "3615308766"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the printing pod's screen gains Reshuffle All (bottom buttons compared by structure); pressed, both Duplicant cards are dealt anew; Reject All then rejects without a confirmation box",
+ "updated": "2026-10-23",
+ "commit": "c96947c",
+ "mod_dlls": {
+  "3615308766": {
+   "RePrint.dll": "29ea47d953b7de0105dee6de167902e2d795d14427a49298c964f3e427320f21"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-103125-95e74f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T10:34:46",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-105854-27ed88",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T10:58:54",
+    "lane": 14,
+    "reference_run": "20261023-103125-95e74f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "buttons": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261023-105854-27ed88",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T10:59:46",
+    "lane": 14,
+    "reference_run": "20261023-103125-95e74f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "buttons": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -1,0 +1,61 @@
+{
+ "spec": "mods/1732578172-paint-walls.yaml",
+ "mods": [
+  "1732578172"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "sandstone and granite drywall built west of the pod each take their material's colour (world shot); the Decor overlay opened and closed with F8, the colours stay (world shot)",
+ "updated": "2026-10-23",
+ "commit": "c96947c",
+ "mod_dlls": {
+  "1732578172": {
+   "PaintWalls.dll": "85e10a081e76fb4dc26ae2768feb883855578cd76da9555f939719523c22c375"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-093209-e4d2ff",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T09:44:39",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-111145-a4ce80",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T11:11:45",
+    "lane": 14,
+    "reference_run": "20261023-093209-e4d2ff",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "walls": 0.02918,
+     "walls-after-decor": 0.02918
+    }
+   },
+   {
+    "run": "20261023-111145-a4ce80",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T11:13:13",
+    "lane": 14,
+    "reference_run": "20261023-093209-e4d2ff",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "walls": 0.028839,
+     "walls-after-decor": 0.028839
+    }
+   }
+  ]
+ }
+}

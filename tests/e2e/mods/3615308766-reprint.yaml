@@ -1,0 +1,41 @@
+# 刷新打印舱 / RePrint (3615308766), class S.
+#
+# What it does: the printing pod's screen gets a Reshuffle All button beside its bottom buttons,
+# which deals every card anew (Duplicants and care packages); each card's own reshuffle button
+# is shown and deals that card anew; Reject All rejects at once, without the confirmation box.
+# How a player reaches it: the printing pod's immigrant screen.
+# What changes: the cards on offer, as often as the player likes; rejecting takes one click.
+#
+# The cards are random: the checks are that every Duplicant card's Duplicant is a new one
+# after Reshuffle All, and after its own reshuffle button. The bottom buttons are compared by
+# structure.
+from: early-base
+mods: [3615308766]
+setup:
+  - driver: {seed: 12345}
+  - driver: {setup.call: {target: "Immigration.Instance", method: "Sim200ms", args: [100000]}}   # Duplicants on offer now
+steps:
+  - expect_state: {"Immigration.Instance.ImmigrantsAvailable": true}
+  - call: {tool: building_control, args: {domain: side_surface, surface: facility, kind: telepad, action: open_immigrants, confirm: true}}
+  - ui_wait: {path: "**/ImmigrantScreen/Layout", cond: stable}
+  - expect_ui:
+      "**/ImmigrantScreen/Layout/BottomButtons/RejectButton[0]/Label": {text: "Reshuffle All"}
+      "**/ImmigrantScreen/Layout/BottomButtons/RejectButton[1]/Label": {text: "Reject All"}
+      "**/ImmigrantScreen/Layout/Content/*Container": {count: 4}
+  - ui_dump: {name: buttons, root: "**/ImmigrantScreen/Layout/BottomButtons"}
+  - expect_state:
+      "ui:**/ImmigrantScreen/Layout/Content/CharacterContainer[0]::GetComponent<CharacterContainer>.stats.GetHashCode()": {save_as: first}
+      "ui:**/ImmigrantScreen/Layout/Content/CharacterContainer[1]::GetComponent<CharacterContainer>.stats.GetHashCode()": {save_as: second}
+  - click: {ui: "**/ImmigrantScreen/Layout/BottomButtons/RejectButton[0]"}
+  - ui_wait: {path: "**/ImmigrantScreen/Layout/Content", cond: stable}
+  - expect_ui:
+      "**/ImmigrantScreen/ConfirmationBox": {exists: false}
+      "**/ImmigrantScreen/Layout/Content/*Container": {count: 4}
+  - expect_state:
+      "ui:**/ImmigrantScreen/Layout/Content/CharacterContainer[0]::GetComponent<CharacterContainer>.stats.GetHashCode()": "!= first"
+      "ui:**/ImmigrantScreen/Layout/Content/CharacterContainer[1]::GetComponent<CharacterContainer>.stats.GetHashCode()": "!= second"
+  # Reject All rejects at once: no confirmation box, the screen closes, nobody is on offer.
+  - click: {ui: "**/ImmigrantScreen/Layout/BottomButtons/RejectButton[1]"}
+  - expect_ui:
+      "**/ImmigrantScreen/ConfirmationBox": {exists: false}
+  - expect_state: {"Immigration.Instance.ImmigrantsAvailable": false}

@@ -159,6 +159,7 @@ broken.update({
 # Found by the e2e specs of batch 06: the spec fails the same way in the original.
 broken.update({
     '2629866529': 'broken upstream: its PliersWorkable overrides `OnCompleteWork(Worker)`, and the game no longer has a `Worker` type: the type fails to load while the game creates its prefabs, and the player aborts loading a colony; spec tests/e2e/mods/2629866529-pliers-2021.yaml',
+    '2539984678': 'broken upstream: its Constructable.OnSpawn transpiler multiplies the AETN\'s 2 cores by a core\'s 25 kg, but the game counts cores by the unit, so a blueprint asks for 50 Neutronium Cores and is never built; spec tests/e2e/mods/2539984678-rebuildable-aetn.yaml',
 })
 # Fails to load in the original only.
 original_only = {

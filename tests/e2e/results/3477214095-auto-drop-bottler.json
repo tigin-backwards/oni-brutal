@@ -1,0 +1,63 @@
+{
+ "spec": "mods/3477214095-auto-drop-bottler.yaml",
+ "mods": [
+  "3477214095"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Canister Filler built from spawned steel drops by itself (the mod's component); its menu button (compared by structure) makes it automation only, and, reselected, turns the drop back on",
+ "updated": "2026-10-23",
+ "commit": "c96947c",
+ "mod_dlls": {
+  "3477214095": {
+   "Auto Drop Gas Bottler and Liquid.dll": "5070c0657125eda0ab52faa866bfe0ff8e07ba48249461ad8ab04f84f2e2f100"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-103125-95e74f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T10:49:49",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-110745-ec8a70",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T11:07:45",
+    "lane": 14,
+    "reference_run": "20261023-103125-95e74f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "user-menu": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261023-110745-ec8a70",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T11:09:42",
+    "lane": 14,
+    "reference_run": "20261023-103125-95e74f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "user-menu": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

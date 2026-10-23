@@ -4,3 +4,4 @@
 UnityEngine.UI	UnityEngine.UI.DefaultControls	# mods (Ony's shared library: DGSM, WGSM, NoDrop, SmartMop, FavoriteResources, Mod Manager): CreateDropdown, CreateScrollView
 UnityEngine.UI	UnityEngine.UI.DefaultControls+Resources	# DefaultControls' argument
 UnityEngine.UI	UnityEngine.UI.DefaultControls+IFactoryControls	# DefaultControls.factory
+UnityEngine.UI	UnityEngine.EventSystems.IPointerMoveHandler	# mods (Resource Dashboard's graph view): OnPointerMove

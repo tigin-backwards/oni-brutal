@@ -99,15 +99,22 @@ namespace UnityEngine.EventSystems
         }
 
         /// Sends exit to the objects the pointer left and enter to those it entered, below their
-        /// common ancestor, keeping the pointer's hovered list and pointerEnter up to date.
+        /// common ancestor, keeping the pointer's hovered list and pointerEnter up to date. Pointer
+        /// move goes to each object before its exit and after its enter (whether or not the
+        /// pointer moved), and to the hovered objects while the pointer moves over the same
+        /// target. Each event goes to the object itself (Execute, not ExecuteHierarchy).
         protected void HandlePointerExitAndEnter(PointerEventData currentPointerData, GameObject newEnterTarget)
         {
+            var hovered = currentPointerData.hovered;
             if (newEnterTarget == null || currentPointerData.pointerEnter == null)
             {
-                var left = currentPointerData.hovered;
-                for (int i = 0; i < left.Count; i++)
-                    ExecuteEvents.Execute(left[i], currentPointerData, ExecuteEvents.pointerExitHandler);
-                left.Clear();
+                // Everything hovered is left; the list is cleared once all have been told.
+                for (int i = 0; i < hovered.Count; i++)
+                {
+                    ExecuteEvents.Execute(hovered[i], currentPointerData, ExecuteEvents.pointerMoveHandler);
+                    ExecuteEvents.Execute(hovered[i], currentPointerData, ExecuteEvents.pointerExitHandler);
+                }
+                hovered.Clear();
                 if (newEnterTarget == null)
                 {
                     currentPointerData.pointerEnter = null;
@@ -115,23 +122,33 @@ namespace UnityEngine.EventSystems
                 }
             }
 
-            if (currentPointerData.pointerEnter == newEnterTarget) return;
+            if (currentPointerData.pointerEnter == newEnterTarget)
+            {
+                // The same target: moves only, and only while the pointer moves.
+                if (currentPointerData.IsPointerMoving())
+                    for (int i = 0; i < hovered.Count; i++)
+                        ExecuteEvents.Execute(hovered[i], currentPointerData, ExecuteEvents.pointerMoveHandler);
+                return;
+            }
 
             var common = FindCommonRoot(currentPointerData.pointerEnter, newEnterTarget);
             var commonTransform = common == null ? null : common.transform;
 
+            // Objects at or above the common root get nothing in this frame.
             if (currentPointerData.pointerEnter != null)
                 for (var t = currentPointerData.pointerEnter.transform; t != null && t != commonTransform; t = t.parent)
                 {
+                    ExecuteEvents.Execute(t.gameObject, currentPointerData, ExecuteEvents.pointerMoveHandler);
                     ExecuteEvents.Execute(t.gameObject, currentPointerData, ExecuteEvents.pointerExitHandler);
-                    currentPointerData.hovered.Remove(t.gameObject);
+                    hovered.Remove(t.gameObject);
                 }
 
             currentPointerData.pointerEnter = newEnterTarget;
             for (var t = newEnterTarget.transform; t != null && t != commonTransform; t = t.parent)
             {
                 ExecuteEvents.Execute(t.gameObject, currentPointerData, ExecuteEvents.pointerEnterHandler);
-                currentPointerData.hovered.Add(t.gameObject);
+                ExecuteEvents.Execute(t.gameObject, currentPointerData, ExecuteEvents.pointerMoveHandler);
+                hovered.Add(t.gameObject);
             }
         }
 

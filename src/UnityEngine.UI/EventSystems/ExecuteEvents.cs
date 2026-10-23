@@ -15,6 +15,7 @@ namespace UnityEngine.EventSystems
 
         static readonly EventFunction<IPointerEnterHandler> pointerEnter = (h, d) => h.OnPointerEnter(ValidateEventData<PointerEventData>(d));
         static readonly EventFunction<IPointerExitHandler> pointerExit = (h, d) => h.OnPointerExit(ValidateEventData<PointerEventData>(d));
+        static readonly EventFunction<IPointerMoveHandler> pointerMove = (h, d) => h.OnPointerMove(ValidateEventData<PointerEventData>(d));
         static readonly EventFunction<IPointerDownHandler> pointerDown = (h, d) => h.OnPointerDown(ValidateEventData<PointerEventData>(d));
         static readonly EventFunction<IPointerUpHandler> pointerUp = (h, d) => h.OnPointerUp(ValidateEventData<PointerEventData>(d));
         static readonly EventFunction<IPointerClickHandler> pointerClick = (h, d) => h.OnPointerClick(ValidateEventData<PointerEventData>(d));
@@ -46,6 +47,7 @@ namespace UnityEngine.EventSystems
         public static EventFunction<ISelectHandler> selectHandler => select;
         public static EventFunction<IDeselectHandler> deselectHandler => deselect;
         public static EventFunction<IMoveHandler> moveHandler => move;
+        public static EventFunction<IPointerMoveHandler> pointerMoveHandler => pointerMove;
         public static EventFunction<ISubmitHandler> submitHandler => submit;
         public static EventFunction<ICancelHandler> cancelHandler => cancel;
 

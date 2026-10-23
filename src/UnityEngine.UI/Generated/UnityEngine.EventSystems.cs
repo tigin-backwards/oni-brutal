@@ -138,6 +138,10 @@ namespace UnityEngine.EventSystems
     {
         void OnPointerExit(global::UnityEngine.EventSystems.PointerEventData eventData);
     }
+    public interface IPointerMoveHandler : global::UnityEngine.EventSystems.IEventSystemHandler
+    {
+        void OnPointerMove(global::UnityEngine.EventSystems.PointerEventData eventData);
+    }
     public interface IPointerUpHandler : global::UnityEngine.EventSystems.IEventSystemHandler
     {
         void OnPointerUp(global::UnityEngine.EventSystems.PointerEventData eventData);

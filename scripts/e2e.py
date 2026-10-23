@@ -220,6 +220,8 @@ def check_step(where, kind, value, in_setup):
         need(not isinstance(value, dict) or isinstance(value.get('hold', 0), int), 'drag `hold` is a number of frames')
     elif kind == 'click_world':
         need(isinstance(value, dict) and _cell(value.get('cell')), 'click_world takes {cell: [x, y]}')
+        need(not isinstance(value, dict) or isinstance(value.get('select', ''), str),
+             'click_world `select` is the prefab ID to click until it is selected')
     elif kind == 'scroll':
         need(isinstance(value, dict) and isinstance(value.get('notches'), int), 'scroll takes {at, notches: N}')
     elif kind == 'tool':
@@ -2022,6 +2024,20 @@ class Run:
         elif kind == 'click_world':
             x, y = self.need_driver().to_screen(value['cell'])
             self.need_input().click(x, y, button=value.get('button', 'left'), mods=value.get('mods', ()))
+            if value.get('select'):
+                # Clicking the same cell again picks the next object under it, as a player does
+                # when a Duplicant stands in front of the building wanted.
+                for clicks in range(1, 6):
+                    self.frames(3)
+                    selected = None
+                    with contextlib.suppress(DriverError):
+                        selected = self.driver.state('selected:KPrefabID.PrefabTag.Name')
+                    if selected == value['select']:
+                        break
+                    if clicks == 5:
+                        raise SpecFailure(f'no {value["select"]} selected at {value["cell"]} after 5 clicks '
+                                          f'(last: {selected})')
+                    self.input.click(x, y)
         elif kind == 'toggle':
             element = self.element(value)
             if element.is_on is None:

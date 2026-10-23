@@ -156,6 +156,7 @@ and nothing is clicked. A click is: move, 2 frames of hover, press, 2 frames, re
 - drag: {from: [108, 212], to: [136, 205]}                     # world cells; `mods`, `button`, `steps`,
                                                                # `hold` (frames at `to` before release)
 - click_world: {cell: [150, 212]}
+- click_world: {cell: [106, 206], select: PiapiPlantHelper}  # clicks again until that is selected
 - scroll: {at: center, notches: -40}                           # or at: [x, y] (a cell), or a UI path
 - tool: {toolbar: Sweep}                  # a ToolMenu collection by its text or icon name
 - tool: {ui: "**/ToolMenu/**/SomeButton"}

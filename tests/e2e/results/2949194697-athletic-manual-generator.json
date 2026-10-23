@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2949194697-athletic-manual-generator.yaml",
+ "mods": [
+  "2949194697"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with 30 W per Athletics level: the converter is registered, the manual generator gets the meter animation and the mod's component; wired to a new battery, a Duplicant runs it and charges the battery",
+ "updated": "2026-10-23",
+ "commit": "c96947c",
+ "mod_dlls": {
+  "2949194697": {
+   "AthleticsGenerator.dll": "989443e8dee965507849782d8cd1a0f021a6eafaf4b9108b673a15a335203ecb"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-080251-19fd1e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T08:45:10",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-111443-134db8",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T11:14:43",
+    "lane": 14,
+    "reference_run": "20261023-080251-19fd1e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-111443-134db8",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T11:17:49",
+    "lane": 14,
+    "reference_run": "20261023-080251-19fd1e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

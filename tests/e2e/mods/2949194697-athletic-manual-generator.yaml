@@ -1,0 +1,29 @@
+# Athletic Manual Generator (2949194697), classes P, O.
+#
+# What it does: a Duplicant running on the Manual Generator makes more power the higher its
+# Athletics: +10 W per Athletics level by default (a new attribute converter, "Manual
+# Generator Power", whose value raises the generator's output while that Duplicant works it).
+# The generator's animation gains a wattage meter, with a light. PLib options set the watts
+# per level and turn the meter and its light off.
+# How a player reaches it: a Manual Generator wired to something that needs power; the Mods
+# screen's options.
+# What changes: the generator's wattage, and its look.
+#
+# Options here: 30 W per level. A battery is built beside the manual generator east of the
+# printing pod and wired to it, so that a Duplicant runs the generator; the battery charges.
+from: early-base
+mods: [2949194697]
+options:
+  "2949194697": {watts_per_level: 30}
+steps:
+  - expect_state:
+      "Db.Get().AttributeConverters.Get(\"ManualGeneratorPower\").multiplier": 30
+      "Assets.GetBuildingDef(\"ManualGenerator\").AnimFiles[0].name": generatormanual_meter_light_kanim
+      "all:ManualGenerator::[0].GetComponent<AthleticsGenerator.AthleticsGenerator>": exists
+  - build: {prefab: Battery, at: [131, 207]}
+  - build: {prefab: Wire, cells: [[129, 207], [130, 207], [131, 207]]}
+  - expect: {blueprints: {Battery: 1, Wire: 3}}
+  - run: {seconds: 900, until: {buildings: {Battery: 1}, pending_construction: 0}}
+  - run: {seconds: 300}
+  - expect_state:
+      "all:Battery::[0].JoulesAvailable": "> 1000"

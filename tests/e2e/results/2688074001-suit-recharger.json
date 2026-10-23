@@ -1,0 +1,59 @@
+{
+ "spec": "mods/2688074001-suit-recharger.yaml",
+ "mods": [
+  "2688074001"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with 300 kg of oxygen: a Suit Recharger built from spawned steel west of the pod and selected (shot); it takes 300 kg of oxygen",
+ "updated": "2026-10-23",
+ "commit": "2eabd9e",
+ "mod_dlls": {
+  "2688074001": {
+   "SuitRecharger.dll": "de320dff6fd00ed3c9474f83f33d19a1554806e8747f6a4452d54fafaf8d8c5c"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-080251-19fd1e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T08:48:31",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-112057-9e5214",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T11:20:57",
+    "lane": 14,
+    "reference_run": "20261023-080251-19fd1e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "details": 0.0
+    }
+   },
+   {
+    "run": "20261023-112057-9e5214",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T11:22:25",
+    "lane": 14,
+    "reference_run": "20261023-080251-19fd1e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "details": 0.0
+    }
+   }
+  ]
+ }
+}

@@ -1,0 +1,64 @@
+{
+ "spec": "mods/1870540864-draggableui.yaml",
+ "mods": [
+  "1870540864"
+ ],
+ "verdict": "failed",
+ "why": "a run of ours failed",
+ "findings": [],
+ "note": "fails in ours: an Alt + drag over the selected research station's details panel starts the mod's drag and saves the moved position (State.json the same as the original's, DetailsScreen x -58), but the panel's anchoredPosition is back at 302 at once: the VerticalLayoutGroup of its parent RootMenuRight re-lays it out in ours, where the original keeps the moved position; ours also logs the mod's harmless missing-State.json FileNotFoundException in .NET's wording (single quotes, Interop frames), a new log signature",
+ "updated": "2026-10-23",
+ "commit": "0177ce3",
+ "mod_dlls": {
+  "1870540864": {
+   "Common.dll": "87a6b9950dc4f7703d1d165fab10c6aeddad6810531639062a4a40bbe6fefb3a",
+   "DraggableUI.dll": "4ff6c434eee41fe8e4609488d44fe5738a308726bbabd55f5af30f694c0187ea"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-145953-91745b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T15:36:24",
+    "lane": 16,
+    "signatures": 1
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-153744-949b66",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-23T15:37:44",
+    "lane": 16,
+    "reasons": [
+     "step 6: ui:**/DetailsScreen::GetComponent<RectTransform>.anchoredPosition.x is 302.0, wanted < x0 - 200 (it held in the original: the interaction has no effect in ours)",
+     "1 log signature(s) the original lacks"
+    ],
+    "reference_run": "20261023-145953-91745b",
+    "new_signatures": 1,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-153744-949b66",
+    "index": 2,
+    "verdict": "fail",
+    "date": "2026-10-23T15:38:39",
+    "lane": 16,
+    "reasons": [
+     "step 6: ui:**/DetailsScreen::GetComponent<RectTransform>.anchoredPosition.x is 302.0, wanted < x0 - 200 (it held in the original: the interaction has no effect in ours)",
+     "1 log signature(s) the original lacks"
+    ],
+    "reference_run": "20261023-145953-91745b",
+    "new_signatures": 1,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

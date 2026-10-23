@@ -1,0 +1,22 @@
+# Real Time Clock (3462174357), classes S, O.
+#
+# What it does: the cycle clock in the top left also shows the computer's time of day under
+# the cycle number (a postfix on GameClock.Render1000ms rewrites the DateTime widget's texts;
+# one on DateTime.OnSpawn makes the widget taller and moves and enlarges its labels). PLib
+# options: on or off, 24 or 12 hours (AM/PM), the digits' colour, the font size.
+# How a player reaches it: always on screen in a colony; the options on the Mods screen.
+# What changes: the clock widget shows "hh:mm".
+#
+# Options here: 12 hours, red digits, standard size. The clock's text follows the wall clock,
+# so it is checked by its form and its digits are masked in the dump.
+from: early-base
+mods: [3462174357]
+options:
+  "3462174357": {TimeFormat: Hour12, Color: "#ff0000", Font: Standard}
+mask_text: ['\d\d']
+steps:
+  - run: {seconds: 2}
+  - expect_ui:
+      "**/AsteroidClockPanel(Clone)/Text/Number": {text: "/^<color=#ff0000>\\d\\d</color><color=#ffffff>:</color><color=#ff0000>\\d\\d</color><sup><color=#ffffff>[AP]M</color></sup>$/"}
+      "**/AsteroidClockPanel(Clone)/Text/Day": {text: "/^<line-height=125%>Cycle\\n\\d+$/"}
+  - ui_dump: {name: clock, root: "**/AsteroidClockPanel(Clone)/Text"}

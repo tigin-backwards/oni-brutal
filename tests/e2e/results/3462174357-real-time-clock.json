@@ -1,0 +1,63 @@
+{
+ "spec": "mods/3462174357-real-time-clock.yaml",
+ "mods": [
+  "3462174357"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with 12 hours and red digits set in its options, the cycle clock shows the wall-clock time as red hh:mm with AM/PM under the cycle number; the clock's labels match the original's layout",
+ "updated": "2026-10-23",
+ "commit": "423c1b9",
+ "mod_dlls": {
+  "3462174357": {
+   "RealTimeClock.dll": "c0511039e0c10b76ae2dea78d8655b51bed7b5dd7683220f1c9b66113861110a"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-160227-0a4361",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T16:02:27",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-160358-5dafa6",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T16:03:58",
+    "lane": 17,
+    "reference_run": "20261023-160227-0a4361",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "clock": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261023-160358-5dafa6",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T16:10:35",
+    "lane": 17,
+    "reference_run": "20261023-160227-0a4361",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "clock": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

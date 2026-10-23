@@ -1,0 +1,24 @@
+# DraggableUI (1870540864), class K.
+#
+# What it does: every KScreen (but the info panel's SimpleInfoScreen) gets a DraggablePanel:
+# Alt + left drag over a screen moves it, and the position is saved per screen name in the
+# mod's State.json and restored when the screen spawns again; Alt + right click puts it back.
+# How a player reaches it: hold Alt and drag any window (the details panel, management
+# screens, the build menu ...).
+# What changes: where the window sits.
+#
+# The research station east of the printing pod is selected, and its details panel is dragged
+# 10 cells to the left with Alt held; it moves by as much, and State.json records it.
+from: early-base
+mods: [1870540864]
+steps:
+  - driver: {camera.set: {cell: [127, 208], ortho: 10}}
+  - click_world: {cell: [127, 207], select: ResearchCenter}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "ui:**/DetailsScreen::GetComponent<DraggablePanelMod.DraggablePanel>": exists
+      "ui:**/DetailsScreen::GetComponent<RectTransform>.anchoredPosition.x": {save_as: x0}
+  - drag: {from: [140, 206], to: [130, 206], mods: [Alt], hold: 5}
+  - expect_state:
+      "ui:**/DetailsScreen::GetComponent<RectTransform>.anchoredPosition.x": "< x0 - 200"
+      "file:mods/Local/1870540864/State.json": exists

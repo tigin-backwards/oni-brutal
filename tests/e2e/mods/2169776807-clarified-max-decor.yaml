@@ -1,0 +1,25 @@
+# Clarified Max Decor (2169776807), classes P, O.
+#
+# What it does: the decor overlay's hover card shows a cell's real decor, past the 120 a
+# Duplicant can feel (a transpiler on SelectToolHoverTextCard.UpdateHoverElements calls
+# GetFormattedDecor without enforce_max, where the game prints "+120 (Maximum Decor)"); the
+# Duplicant's decor tooltip in Vitals says instead whether yesterday's average hit the cap.
+# How a player reaches it: the decor overlay (F8), hovering a cell; Vitals.
+# What changes: the hover card's "Total Decor" number.
+#
+# setup spawns a crystal Shine Bug (+200 decor in 8 cells) in the corridor west of the
+# printing pod. With the decor overlay on, the hover card over its cell reads more than 125,
+# and not the game's "+120 (Maximum Decor)".
+from: early-base
+mods: [2169776807]
+setup:
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131766, 0, 0, \"LightBugCrystal\", \"Creatures\")", method: SetActive, args: [true]}}
+steps:
+  - run: {seconds: 1}
+  - expect_state:
+      "Grid.Decor[131766]": "> 125"
+  - driver: {camera.set: {cell: [114, 208], ortho: 10}}
+  - key: {code: F8}
+  - key: {code: LeftShift, at: [114, 207]}
+  - expect_ui:
+      "**/HoverTextScreen/**": {any_text: "/^Total Decor: \\+(12[6-9]|1[3-9]\\d|[2-9]\\d\\d)$/"}

@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2169776807-clarified-max-decor.yaml",
+ "mods": [
+  "2169776807"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a crystal Shine Bug spawned west of the pod lifts a cell's decor past 125; with the decor overlay on (F8), the hover card over it reads the real total, not the game's +120 (Maximum Decor)",
+ "updated": "2026-10-23",
+ "commit": "96322b4",
+ "mod_dlls": {
+  "2169776807": {
+   "ClarifiedMaxDecor.dll": "cf4a978bb9e1f26484c5bdfbeeaef091eff1f83e92441f470393c77f54c241dc"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-155635-ee6316",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T15:58:55",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-160026-2300b5",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T16:42:16",
+    "lane": 16,
+    "reference_run": "20261023-155635-ee6316",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-160026-2300b5",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T16:48:22",
+    "lane": 16,
+    "reference_run": "20261023-155635-ee6316",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

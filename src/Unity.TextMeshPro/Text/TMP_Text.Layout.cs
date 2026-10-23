@@ -385,10 +385,12 @@ namespace TMPro
             if (count == 0)
             {
                 lineCount = 0;
-                // An empty text still takes a line of its font: it overflows a rect lower than that.
+                // An empty text still takes a line of its font: it does not fit a rect lower than
+                // that, but it does not overflow (measured: an empty label in a 17-unit rect at
+                // size 14 reports isTextOverflowing false).
                 var face = m_fontAsset.faceInfo;
                 float scale = baseSize / face.pointSize * face.scale;
-                if ((face.ascentLine - face.descentLine) * scale > height + 0.0001f) overflowIndex = 0;
+                if ((face.ascentLine - face.descentLine) * scale > height + 0.0001f) fits = false;
             }
 
             // 3. Vertical placement: baselines relative to the first line's (0).

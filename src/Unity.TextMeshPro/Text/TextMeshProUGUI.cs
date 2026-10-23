@@ -144,6 +144,10 @@ namespace TMPro
         public override void Rebuild(CanvasUpdate update)
         {
             if (this == null) return;
+            // A text outside any canvas waits, still dirty, until it is parented to one
+            // (measured: an input field's label built outside a canvas is laid out in the first
+            // rebuild after its parenting).
+            if (canvas == null) return;
             if (update == CanvasUpdate.PreRender)
             {
                 if (m_havePropertiesChanged || m_VerticesDirty)

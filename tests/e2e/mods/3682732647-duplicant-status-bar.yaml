@@ -1,0 +1,36 @@
+# Duplicant Status Bar - All DLC Status HUD (3682732647), classes S, O, V.
+#
+# What it does: a bar at the top of the screen with a card per Duplicant of the active world:
+# its portrait (drawn from its animation, with expressions), its name, a border coloured by
+# stress, and alert effects (suffocating, low health, scalding, starving, stuck, idle, ...).
+# Hovering a card shows a tooltip of its status; clicking it selects that Duplicant and moves
+# the camera to it. The header has a sort and filter popup, a grip to drag the bar, and a
+# button to collapse it. PLib options set sizes, rows, opacity, stress thresholds and which
+# alerts show.
+# How a player reaches it: it is always there in a colony.
+# What changes: the Duplicants can be seen and picked at a glance.
+#
+# The bar of early-base's three Duplicants is compared by structure and in a shot, the
+# portraits masked. A click on the second card selects that Duplicant; the collapse button
+# hides the cards and shows "+", and a second click shows them again.
+from: early-base
+mods: [3682732647]
+steps:
+  - ui_wait: {path: "**/DSB_Canvas/BarPanel", cond: stable}
+  - expect_ui:
+      "**/DSB_Canvas/BarPanel/ScrollView/Viewport/Content/DupeCard": {count: 3}
+      "**/DSB_Canvas/BarPanel/Header/Grip": {text: "Dupes"}
+  - ui_dump: {name: bar, root: "**/DSB_Canvas/BarPanel"}
+  - shot: {name: bar, crop: "**/DSB_Canvas/BarPanel", mask: ["**/DupeCard/Card/Portrait"]}
+  - expect_ui:
+      "**/DSB_Canvas/BarPanel/ScrollView/Viewport/Content/DupeCard[1]/Name": {text: Nikola}
+  - click: {ui: "**/DSB_Canvas/BarPanel/ScrollView/Viewport/Content/DupeCard[1]"}
+  - expect_state:
+      "selected:MinionIdentity.name": Nikola
+  - click: {ui: "**/DSB_Canvas/BarPanel/Header/CollapseBtn"}
+  - expect_ui:
+      "**/DSB_Canvas/BarPanel/ScrollView": {exists: false}
+      "**/DSB_Canvas/BarPanel/Header/CollapseBtn/Label": {text: "+"}
+  - click: {ui: "**/DSB_Canvas/BarPanel/Header/CollapseBtn"}
+  - expect_ui:
+      "**/DSB_Canvas/BarPanel/ScrollView/Viewport/Content/DupeCard": {count: 3}

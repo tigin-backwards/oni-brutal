@@ -1,0 +1,31 @@
+# 技能自定义-fix / Skill customisation, fixed (3458128254), classes P, O.
+#
+# What it does: PLib options decide how the printing pod's Duplicants are made: how many
+# interests (aptitudes) each has (3 by default) and the attribute points per interest count,
+# how many good and bad traits (1 and 1), whether stress and joy reactions are left out, the
+# skill points a printed Duplicant starts with, and the passive experience rate.
+# How a player reaches it: the Mods screen's options; then the printing pod's offers.
+# What changes: the Duplicants on offer.
+#
+# Options here (over the config.json the mod ships, which picks interests at random): 4
+# interests, 2 good and 2 bad traits. Duplicants are put on offer and the
+# printing pod's screen opened: each Duplicant card's Duplicant has 4 interests, and its traits
+# are the base trait and 4 more.
+from: early-base
+mods: [3458128254]
+options:
+  "3458128254": {RandomNumberOfInterests: false, NumberOfInterests: 4, NumberOfGoodTraits: 2, NumberOfBadTraits: 2}
+setup:
+  - driver: {seed: 12345}
+  - driver: {setup.call: {target: "Immigration.Instance", method: "Sim200ms", args: [100000]}}   # Duplicants on offer now
+steps:
+  - expect_state: {"Immigration.Instance.ImmigrantsAvailable": true}
+  - call: {tool: building_control, args: {domain: side_surface, surface: facility, kind: telepad, action: open_immigrants, confirm: true}}
+  - ui_wait: {path: "**/ImmigrantScreen/Layout", cond: stable}
+  - expect_ui:
+      "**/ImmigrantScreen/Layout/Content/*Container": {count: 4}
+  - expect_state:
+      "ui:**/ImmigrantScreen/Layout/Content/CharacterContainer[0]::GetComponent<CharacterContainer>.stats.skillAptitudes.Count": 4
+      "ui:**/ImmigrantScreen/Layout/Content/CharacterContainer[1]::GetComponent<CharacterContainer>.stats.skillAptitudes.Count": 4
+      "ui:**/ImmigrantScreen/Layout/Content/CharacterContainer[0]::GetComponent<CharacterContainer>.stats.Traits.Count": ">= 5"
+      "ui:**/ImmigrantScreen/Layout/Content/CharacterContainer[1]::GetComponent<CharacterContainer>.stats.Traits.Count": ">= 5"

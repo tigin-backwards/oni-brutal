@@ -1,0 +1,73 @@
+{
+ "spec": "mods/3682732647-duplicant-status-bar.yaml",
+ "mods": [
+  "3682732647"
+ ],
+ "verdict": "failed",
+ "why": "a run of ours failed",
+ "findings": [],
+ "note": "the bar's cards, click-to-select and collapse work as in the original and its shot matches, but the ui_dump differs: the TMP_SubMeshUI children of the header labels (FilterBtn, Grip, CollapseBtn) have raycastTarget True in ours, False in the original (their texts set it False)",
+ "updated": "2026-10-23",
+ "commit": "c96947c",
+ "mod_dlls": {
+  "3682732647": {
+   "DuplicantStatusBar.dll": "5075752039e7552177c786fca6bc9876a4531acb7f659a4ecafc7981141a0297"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-103125-95e74f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T10:32:59",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-105659-b56829",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-23T10:56:59",
+    "lane": 14,
+    "reasons": [
+     "ui_dump bar: 3 difference(s)"
+    ],
+    "reference_run": "20261023-103125-95e74f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "bar": {
+      "differences": 3
+     }
+    },
+    "shots": {
+     "bar": 0.011172
+    }
+   },
+   {
+    "run": "20261023-105659-b56829",
+    "index": 2,
+    "verdict": "fail",
+    "date": "2026-10-23T10:57:56",
+    "lane": 14,
+    "reasons": [
+     "ui_dump bar: 3 difference(s)"
+    ],
+    "reference_run": "20261023-103125-95e74f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "bar": {
+      "differences": 3
+     }
+    },
+    "shots": {
+     "bar": 0.011172
+    }
+   }
+  ]
+ }
+}

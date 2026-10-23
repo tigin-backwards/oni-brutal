@@ -1,0 +1,62 @@
+{
+ "spec": "mods/3458128254-skill-custom-fix.yaml",
+ "mods": [
+  "3458128254"
+ ],
+ "verdict": "failed",
+ "why": "a run of ours failed",
+ "findings": [],
+ "note": "4 interests and at least 5 traits on both cards, as in the original, but ours logs 2 signatures the original lacks: the mod's random interests make CharacterContainer.SetInfoText log 'Could not find ChoreGroup' and throw a NullReferenceException in both players, and ours' log of them differs (a stack trace after Debug.LogError, the exception's message and frame format)",
+ "updated": "2026-10-23",
+ "commit": "c96947c",
+ "mod_dlls": {
+  "3458128254": {
+   "Interest_correction_fix.dll": "765876390d8144a8c8ed711f09258bdf17f19ef93b5e984a75709c0fe6eb2321",
+   "PLib.dll": "d87814a7d5d74fa0e94bc5435cd770d3746438f494208b6f356a2ab999169c52"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-103125-95e74f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T10:36:27",
+    "lane": 15,
+    "signatures": 3
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-110040-87a895",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-23T11:00:40",
+    "lane": 14,
+    "reasons": [
+     "2 log signature(s) the original lacks"
+    ],
+    "reference_run": "20261023-103125-95e74f",
+    "new_signatures": 2,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-110040-87a895",
+    "index": 2,
+    "verdict": "fail",
+    "date": "2026-10-23T11:01:35",
+    "lane": 14,
+    "reasons": [
+     "2 log signature(s) the original lacks"
+    ],
+    "reference_run": "20261023-103125-95e74f",
+    "new_signatures": 2,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

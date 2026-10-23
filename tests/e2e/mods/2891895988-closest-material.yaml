@@ -1,0 +1,37 @@
+# Closest Material (2891895988), classes T, S, K.
+#
+# What it does: the build menu's material panel gets a "Closest" button: while it is on, each
+# blueprint placed takes, for each of its material slots, the valid material lying closest to
+# where it is placed (of which the world holds enough), instead of the one picked in the
+# panel. It also adds a Plan tool to the toolbar.
+# How a player reaches it: the build menu, a building, the material panel's button.
+# What changes: which material each placed blueprint asks for.
+#
+# setup spawns granite in the dug-out room west of the printing pod; the sandstone the colony
+# dug lies east of it, and the panel picks sandstone first. With Closest on, a Tile placed in
+# the west room asks for granite.
+from: early-base
+mods: [2891895988]
+setup:
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Granite\").substance", method: SpawnResource, args: [[108.5, 206.5, -12], 400, 300, 255, 0]}}
+steps:
+  - run: {seconds: 5}
+  - driver: {camera.set: {cell: [112, 208], ortho: 10}}
+  - click: {ui: "**/PlanScreen/Toggle:Base"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/Tile Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/Tile Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
+  - expect_state:
+      "ui:**/ProductInfoScreen/MaterialSelectionPanel/MaterialSelectorTemplate::GetComponent<MaterialSelector>.CurrentSelectedElement": SandStone
+      "type:MJCloserMaterial.Info.InfoData::ACTIVE": false
+  - expect_ui:
+      "**/MaterialSelectionPanel/MainPanelClosestElement/ButtonClosestElement/Text": {text: "Closest Material"}
+  - ui_dump: {name: closest, root: "**/ProductInfoScreen/MaterialSelectionPanel/MainPanelClosestElement"}
+  - click: {ui: "**/MaterialSelectionPanel/MainPanelClosestElement/ButtonClosestElement"}
+  - expect_state: {"type:MJCloserMaterial.Info.InfoData::ACTIVE": true}
+  - ui_dump: {name: closest-on, root: "**/ProductInfoScreen/MaterialSelectionPanel/MainPanelClosestElement"}
+  - click_world: {cell: [110, 207]}
+  - expect: {blueprints: {Tile: 1}}
+  - expect_state:
+      "all:Constructable::[0].SelectedElementsTags": {contains: Granite}
+  - key: {code: Escape}

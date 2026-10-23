@@ -1,0 +1,63 @@
+{
+ "spec": "mods/2891895988-closest-material.yaml",
+ "mods": [
+  "2891895988"
+ ],
+ "verdict": "failed",
+ "why": "a run of ours failed",
+ "findings": [],
+ "note": "fails in ours: the mod's material-panel widget never comes up; ours throws 'ClosestMenuWidget did not chain to UnityEngine.Object's constructor' (Object.ConstructBound), because the widget's field initialisers create ColorStyleSetting ScriptableObjects before its base constructor runs, so the panel has no selected material and no Closest button",
+ "updated": "2026-10-23",
+ "commit": "c96947c",
+ "mod_dlls": {
+  "2891895988": {
+   "MJCloserMaterial.dll": "15455a45974cf146229525a92cc87c1b29022d235da96031c99719c9c41ae8ec"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-103125-95e74f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T10:31:25",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-105502-8bd168",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-23T10:55:02",
+    "lane": 14,
+    "reasons": [
+     "step 7: ui:**/ProductInfoScreen/MaterialSelectionPanel/MaterialSelectorTemplate::GetComponent<MaterialSelector>.CurrentSelectedElement is \"\", wanted SandStone (it held in the original: the interaction has no effect in ours)",
+     "3 log signature(s) the original lacks"
+    ],
+    "reference_run": "20261023-103125-95e74f",
+    "new_signatures": 3,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-105502-8bd168",
+    "index": 2,
+    "verdict": "fail",
+    "date": "2026-10-23T10:55:58",
+    "lane": 14,
+    "reasons": [
+     "step 7: ui:**/ProductInfoScreen/MaterialSelectionPanel/MaterialSelectorTemplate::GetComponent<MaterialSelector>.CurrentSelectedElement is \"\", wanted SandStone (it held in the original: the interaction has no effect in ours)",
+     "3 log signature(s) the original lacks"
+    ],
+    "reference_run": "20261023-103125-95e74f",
+    "new_signatures": 3,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

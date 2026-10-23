@@ -229,7 +229,8 @@ transform.
 - **Preferred sizes:**
   - `preferredWidth` and `preferredHeight` (and `GetPreferredValues(…)`) are the size of the
     laid-out text: without wrapping for the width, wrapped at the given width for the height.
-    Margins are included.
+    Margins are included. Both are taken to the next hundredth above, measured from the
+    line's start rather than the rect (see "Preferred sizes to the hundredth" below).
   - They are the `ILayoutElement` values: minimum 0, flexible -1.
   - `renderedWidth` and `renderedHeight` are those of the visible characters.
   - `bounds` and `textBounds` are the mesh's bounds and the text's.
@@ -658,6 +659,85 @@ from what is described here, the measurement wins and this section is corrected.
   decoration (underline, strikethrough, highlight) takes when its run starts in atlas k; and
   the per-atlas material copies are made once per source material and texture, not
   refreshed when the source material changes later.
+
+### Preferred sizes to the hundredth (measured 2026-10-23)
+
+Found in mod play-tests: overlay legend rows (Gas Overlay, Rooms Expanded, Pipe Flow Overlay),
+Bigger Building Menu's search bar and a Butcher Station label were 0.01 narrower in this
+implementation (67.25 for 67.26, 100 for 100.01, 13.75 for 13.76), and a label of one space
+was 0 × 19.04 where the shipped package's is 0.01 × 0.01. The UI dump's formatting is not
+the cause: `Math.Round(v, 2)` and `"0.##"` give the same strings in both players for every
+float tested, and the layout groups add the same child values to the same sums. The first
+value that differs is the text's own `preferredWidth`.
+
+Measured with `PROBE_SCENARIO=textwidth` (tools/UnityProbe, `TextWidth.cs`): 19 labels in
+every NotoSans and GRAYSTROKE font asset, at 12, 14 and 16 pt, regular and bold, set up as
+`SetTextStyleSetting` does (kerning, extra padding, no wrapping), in a 400 × 40 rect at
+three pivots, under a `HorizontalLayoutGroup` beside a 24-wide icon, and copied into a
+`LayoutElement`. `tools/UnityProbe/tw-check.py` compares two logs and checks the rule below.
+- **The rule.** Let x be the widest line's width, as a float: the pen at the end of its last
+  visible character (that character's origin plus its glyph's advance, without the
+  character or style spacing after it), measured from where the line's pen starts.
+  `preferredWidth` is (⌊x × 100⌋ + 1) / 100, with x × 100 taken exactly (in double, not
+  rounded to a float first), stored as the nearest float. So a width already on a
+  hundredth goes up by 0.01 (67.25 gives 67.26, 139 gives 139.01), and any other goes to
+  the next hundredth (85.09375 gives 85.1). The rule reproduces all 648 regular-style
+  texts at pivot 0, including white space, against the shipped package; ceiling to the
+  hundredth, as this implementation does, misses 21 of the 576 that are not white space,
+  and the 72 that are.
+- **Not tied to the rect.** The value does not depend on where the rect is: the same text at
+  pivot 0.5, 0 and 0.37, and as a child of the layout group, has the same bits in all 1,368
+  cases. This implementation sums the pens in the rect's coordinates, so its value moves
+  with the rect: 68 texts change between the pivots and 61 under the layout group (GRAYSTROKE REGULAR 16 pt
+  "Hydrogen" is 67.51 alone and 67.5 in the row), and "i" in NotoSansCJKjp 12 pt is 3.31
+  where the shipped package's pen is the float 3.3 (3.2999999523) and gives 3.3.
+- **White space.** A text of only white space (" ", "  ") has no visible character, so x is
+  0: its preferred width is 0.01, and its preferred height is 0.01 too (the height is that of
+  the visible characters, none here, by the same rule). This implementation gives 0 and one
+  line's height (12.6 for GRAYSTROKE 12 pt, 19.04 for NotoSans 14 pt). An empty text ("")
+  is 0 × 0 in both.
+- **Heights** follow the same rule (first line's ascender to the last line's descender):
+  NotoSans-Regular at 16 pt is 21.75 high and gives 21.76; at 12 pt 16.3125 gives 16.32.
+  No other height measured falls on a hundredth, so ceiling and the rule agree on the rest.
+- **Bold:** x ends at the last character's regular glyph advance, as above; the bold spacing
+  after it is not counted. NotoSans-Regular 12 pt bold "Ethanol Gas" ends its last advance at
+  71.21, its "s" begins at 65.1 and is 5.75 wide: x is 70.849998 and the width 70.85 (this
+  implementation gives 70.86 for the centred rect). The rule reproduces 574 of 576 bold texts
+  from the logged values; the two misses are within one float step of a hundredth, where
+  this reconstruction from logged values is not exact.
+- **Layout groups and layout elements** take the value as it is: a `HorizontalLayoutGroup`
+  with 4 + 4 of padding, 12 of spacing and a 24-wide child reports 44 + the text's width in
+  float (148.26001 for 104.26; 44.01 for " "), and a `LayoutElement` given it keeps the bits.
+
+| Font, size, text (regular) | x | shipped | this implementation now |
+|---|---|---|---|
+| NotoSans-Regular 12, "Ethanol Gas" | 67.25 | 67.26 | 67.25 |
+| NotoSans-Regular 12, "Super Coolant Gas" | 104.25 | 104.26 | 104.25 |
+| NotoSans-Regular 12, "Nuclear Fallout" | 85.09375 | 85.1 | 85.1 |
+| NotoSans-Regular 12, "Room" | 33.1875 | 33.19 | 33.19 |
+| NotoSans-Regular 16, "Super Coolant Gas" | 139 | 139.01 | 139 |
+| NotoSans-Regular 16, "Room" | 44.25 | 44.26 | 44.25 |
+| GRAYSTROKE REGULAR SDF 16, "Hydrogen" | 67.5 | 67.51 | 67.5 at pivot 0 |
+| GRAYSTROKE OUTLINE SDF 14, "A" | 8.5 | 8.51 | 8.5 |
+| NotoSansCJKjp-Regular 12, "Oxygen" | 41.850002 | 41.86 | 41.86 |
+| NotoSansCJKjp-Regular 12, "i" | 3.2999999523 | 3.3 | 3.31 |
+| NotoSans-Regular 14, " " | 0 | 0.01 × 0.01 | 0 × 19.04 |
+| any, "" | — | 0 × 0 | 0 × 0 |
+
+Not measured: margins (they are expected to be added to x before the rounding, as the
+section above says they are included), several lines, wrapping, auto-size and rich-text
+spacing tags. Measure them the same way before relying on them.
+
+Also seen, not part of the rule: the character pens themselves (`xAdvance` at pivot 0) differ
+by one float step in 318 of 1,152 non-white-space texts. NotoSans at 12 pt (scale 0.5) matches
+in every case, as do one-character texts; the misses are at scales that are not powers of two
+(14/24, 16/24, 12/124 and so on), at characters whose neighbour forms a kerning pair ("Hy",
+"yg", "oo", "Me"). There the shipped package's pen is the float above or below origin +
+advance × (size / point size): NotoSans 14 pt "Oxygen" has its "g" end at 34.08854294,
+this implementation at 34.08853912. The rule above turns this into a 0.01 difference only
+where a pen falls within a float step of a hundredth (NotoSans 16 pt "Oxygen", 57.875 shipped
+and 57.875004 here, gives 57.88 in both). Matching it needs a measurement of how a kerning
+pair's adjustment enters the pen (the font assets' pair records and texts with kerning off).
 
 ## Verification
 

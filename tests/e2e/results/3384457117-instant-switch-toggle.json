@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3384457117-instant-switch-toggle.yaml",
+ "mods": [
+  "3384457117"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Power Switch built in the corridor west of the pod is turned off and on again at once by Shift + clicks in the paused game, without being selected",
+ "updated": "2026-10-23",
+ "commit": "ed9466b",
+ "mod_dlls": {
+  "3384457117": {
+   "Instant_Switch.dll": "286cc0f5a6bd9cee6232fa77637bb67e14b52290182ebdb4b1876d9618ae1cdc"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-155425-470ae0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T15:54:25",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-155618-563c6a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T15:56:18",
+    "lane": 17,
+    "reference_run": "20261023-155425-470ae0",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-155618-563c6a",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T15:57:33",
+    "lane": 17,
+    "reference_run": "20261023-155425-470ae0",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

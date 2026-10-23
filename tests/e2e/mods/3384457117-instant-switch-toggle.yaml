@@ -1,0 +1,31 @@
+# Instant Switch Toggle (3384457117), classes T, K.
+#
+# What it does: a Shift + left click on a switch (anything with IPlayerControlledToggle: the
+# Power Switch, the Signal Switch) toggles it at once, without an errand, and without
+# selecting it; while the game is paused the switch's on/off animation is played too (a
+# prefix on SelectTool.OnLeftClickDown).
+# How a player reaches it: Shift + click on a switch in the world.
+# What changes: the switch's state, straight away.
+#
+# setup grants Power Regulation. A Power Switch is built in the corridor west of the printing
+# pod (it starts on); a Shift + click on it, with the game paused, turns it off at once, and a
+# second turns it on again.
+from: early-base
+mods: [3384457117]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"PowerRegulation\")", method: Purchased}}
+steps:
+  - build: {prefab: Switch, at: [113, 206]}
+  - expect: {blueprints: {Switch: 1}}
+  - run: {seconds: 900, until: {buildings: {Switch: 1}, pending_construction: 0}}
+  - expect_state:
+      "all:CircuitSwitch::[0].IsSwitchedOn": true
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 206], mods: [Shift]}
+  - expect_state:
+      "all:CircuitSwitch::[0].IsSwitchedOn": false
+      "SpeedControlScreen.Instance.IsPaused": true
+      "SelectTool.Instance.selected": missing
+  - click_world: {cell: [113, 206], mods: [Shift]}
+  - expect_state:
+      "all:CircuitSwitch::[0].IsSwitchedOn": true

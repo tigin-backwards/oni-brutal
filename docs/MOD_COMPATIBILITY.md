@@ -363,7 +363,7 @@ installs get developer checks subscribers never see).
 | 342 | [Suit Docks Store 75kg Oxygen](https://steamcommunity.com/sharedfiles/filedetails/?id=1706161210) | ✅ | ✅ | ⬜ |  |
 | 343 | [Czech language](https://steamcommunity.com/sharedfiles/filedetails/?id=1135041189) | ⬜ | ⬜ | ⬜ | translation: the game applies one only from a Steam subscription; not testable here |
 | 344 | [Move This Here汉化版](https://steamcommunity.com/sharedfiles/filedetails/?id=3614371572) | ✅ | ✅ | ✅ | spec tests/e2e/mods/3614371572-move-this-here-zh.yaml: the hauling point (板纸箱) is placed at once from the build menu, filtered to sandstone through its side screen and capped at 50 kg with its slider; Duplicants bring at most that, and 释放 drops it and removes the point; user menu dumped |
-| 345 | [No Pointless Scrollbars](https://steamcommunity.com/sharedfiles/filedetails/?id=1959130035) | ✅ | ✅ | ⬜ |  |
+| 345 | [No Pointless Scrollbars](https://steamcommunity.com/sharedfiles/filedetails/?id=1959130035) | ✅ | ✅ | ⬜ | spec fails in ours: tests/e2e/mods/1959130035-no-pointless-scrollbars.yaml (a run of ours failed) |
 | 346 | [[CURRENTLY OUT OF DATE] Lights Out (Darkness Revived)](https://steamcommunity.com/sharedfiles/filedetails/?id=1860377458) | ✅ | ✅ | ⬜ | its light monitor fails as in the original (its title says it is out of date) |
 | 347 | [Авторский перевод на русский от DarkDeny](https://steamcommunity.com/sharedfiles/filedetails/?id=1817639915) | ⬜ | ⬜ | ⬜ | translation: the game applies one only from a Steam subscription; not testable here |
 | 348 | [Real Time Clock](https://steamcommunity.com/sharedfiles/filedetails/?id=3462174357) | ✅ | ✅ | ⬜ |  |
@@ -373,7 +373,7 @@ installs get developer checks subscribers never see).
 | 352 | [Grip Now Included](https://steamcommunity.com/sharedfiles/filedetails/?id=3664750796) | ✅ | ✅ | ⬜ |  |
 | 353 | [Chemical Processing: Industrial Overhaul Edition](https://steamcommunity.com/sharedfiles/filedetails/?id=2661907148) | ❌ | ❌ | ⬜ | broken upstream: adds a space POI the game already has ("Granite"), and the save fails to load (same in the original) |
 | 354 | [Default Building Settings](https://steamcommunity.com/sharedfiles/filedetails/?id=1989737447) | ✅ | ✅ | ⬜ |  |
-| 355 | [Instant Switch Toggle](https://steamcommunity.com/sharedfiles/filedetails/?id=3384457117) | ✅ | ✅ | ⬜ |  |
+| 355 | [Instant Switch Toggle](https://steamcommunity.com/sharedfiles/filedetails/?id=3384457117) | ✅ | ✅ | ✅ | spec tests/e2e/mods/3384457117-instant-switch-toggle.yaml: a Power Switch built in the corridor west of the pod is turned off and on again at once by Shift + clicks in the paused game, without being selected |
 | 356 | [Popup Control](https://steamcommunity.com/sharedfiles/filedetails/?id=2032187035) | ✅ | ✅ | ⬜ |  |
 | 357 | [Water Gate](https://steamcommunity.com/sharedfiles/filedetails/?id=3586927171) | ✅ | ✅ | ✅ | spec tests/e2e/mods/3586927171-water-gate.yaml: with a 0.05 kg bottom layer set in its options, the 1x2 gate built of sandstone in the corridor west of the pod leaves crude oil (under 0.08 kg) under petroleum, and removes itself |
 | 358 | [Українізатор «Oxygen Not Included» [UA] [uk] (UnlocTeam)](https://steamcommunity.com/sharedfiles/filedetails/?id=1561634664) | ⬜ | ⬜ | ⬜ | translation: the game applies one only from a Steam subscription; not testable here |

@@ -1,0 +1,73 @@
+{
+ "spec": "mods/3664750796-grip-now-included.yaml",
+ "mods": [
+  "3664750796"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "Duplicants carry the mod's DroppablesHolder; the pause menu's Adjust GripNowIncluded Settings button opens its PLib options in the colony (dumped and shot), and unchecking Liquids under sweep dropped items with OK changes the live setting",
+ "updated": "2026-10-23",
+ "commit": "a82df75",
+ "mod_dlls": {
+  "3664750796": {
+   "ItemDropPrevention.dll": "1a38ea93d35b1846d7ef7df0ae0250ec710a5601b352dfe8b4dcef4363b9f97d"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-180243-9a3d40",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T18:02:43",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-180800-931418",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T18:08:00",
+    "lane": 17,
+    "reference_run": "20261023-180243-9a3d40",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "pause": {
+      "differences": 0
+     },
+     "options": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "options": 8.3e-05
+    }
+   },
+   {
+    "run": "20261023-180800-931418",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T18:16:13",
+    "lane": 17,
+    "reference_run": "20261023-180243-9a3d40",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "pause": {
+      "differences": 0
+     },
+     "options": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "options": 2.4e-05
+    }
+   }
+  ]
+ }
+}

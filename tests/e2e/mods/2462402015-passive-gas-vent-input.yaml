@@ -1,0 +1,39 @@
+# Passive Gas Vent Input (2462402015), classes B, O.
+#
+# What it does: adds the Passive Gas Vent Input to the Ventilation menu (researched with
+# Ventilation): an unpowered 1x1 intake of 25 kg of raw metal that draws the gas of its cell
+# into a gas pipe, faster the higher the pressure (0 to 3 kg/s between 2 and 602 kg), with an
+# automation port. PLib options set the pressures and flows.
+# How a player reaches it: the build menu (Ventilation); the options on the Mods screen.
+# What changes: gas taken in without power.
+#
+# Options here: it starts at 0.1 kg (early-base's air is lighter than the default 2 kg).
+# setup grants Ventilation. The intake is built in the corridor west of the printing pod, with
+# a gas pipe from its cell to a Gas Vent two cells east (without a flowing output it stays
+# idle): it draws the corridor's gas into the pipe.
+from: early-base
+mods: [2462402015]
+options:
+  "2462402015": {MinimumPressure: 0.1}
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"GasPiping\")", method: Purchased}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"GasPiping\").unlockedItemIDs": {contains: PassiveGasVentInput}
+      "Grid.Mass.get_Item(131129)": "> 0.1"
+  - build: {prefab: PassiveGasVentInput, at: [113, 206]}
+  - expect: {blueprints: {PassiveGasVentInput: 1}}
+  - run: {seconds: 900, until: {buildings: {PassiveGasVentInput: 1}, pending_construction: 0}}
+  # It works only while its output pipe (from its own cell) flows: a Gas Vent ends the pipe.
+  - build: {prefab: GasConduit, cells: [[113, 206], [114, 206], [115, 206]], material: SandStone}
+  - build: {prefab: GasVent, at: [115, 206]}
+  - run: {seconds: 900, until: {buildings: {GasConduit: ">=3", GasVent: ">=1"}, pending_construction: 0}}
+  - run: {seconds: 30}
+  - expect_state:
+      "all:PassiveGasVentInput.PassiveGasVentInput::[0].GetComponent<ElementConsumer>.consumptionRate": "> 0"
+      "cells:113,206..115,206::Game.Instance.gasConduitFlow.GetContents({cell}).mass": "> 0"
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 206], select: PassiveGasVentInput}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Gas Vent Input"}

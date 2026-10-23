@@ -1,0 +1,33 @@
+# Grip Now Included (3664750796), classes S, O.
+#
+# What it does: Duplicants and rovers no longer drop what they carry when a chore is
+# interrupted (a DroppablesHolder on BaseMinion and BaseRover keeps the items and drops them
+# once the Duplicant falls asleep, passes out or must recover its breath, or at a valid
+# spot); dropped items can be scheduled for sweeping (gas, liquid, solid) and dropped critters
+# for wrangling. The pause menu gets an "Adjust GripNowIncluded Settings" button that opens
+# the PLib options dialog in the colony.
+# How a player reaches it: automatic; the pause menu's button.
+# What changes: carried items stay held; the options.
+#
+# The pause menu's button opens the options; the liquid sweep option is turned off and saved
+# with OK.
+from: early-base
+mods: [3664750796]
+steps:
+  - expect_state:
+      "Components.LiveMinionIdentities.Items[1].GetComponent<ItemDropPrevention.Content.Scripts.DroppablesHolder>()": exists
+      "type:ItemDropPrevention.Config::Instance.SweepDroppedItems_Liquid": true
+  - key: {code: Escape}
+  - ui_wait: {path: "**/PauseScreen/**/Adjust GripNowIncluded SettingsButton", cond: stable}
+  - ui_dump: {name: pause, root: "**/PauseScreen/LayoutContent/ButtonContent"}
+  - click: {ui: "**/PauseScreen/**/Adjust GripNowIncluded SettingsButton"}
+  - ui_wait: {path: "**/ScreenSpaceOverlayCanvas/ModOptions", cond: stable}
+  - ui_dump: {name: options, root: "**/ScreenSpaceOverlayCanvas/ModOptions"}
+  - shot: {name: options, crop: "**/ScreenSpaceOverlayCanvas/ModOptions", threshold: 0.04}
+  # Sweep dropped items: Gases, Liquids, Solids; the second box is Liquids.
+  - click: {ui: "**/ModOptions/**/Category_STRINGS.IDP_MOD_CONFIG.SWEEP_DROPPED_ITEMS/Entries/CheckBox", index: 1}
+  - click: {text: "OK", under: "**/ScreenSpaceOverlayCanvas/ModOptions"}
+  - ui_wait: {path: "**/ScreenSpaceOverlayCanvas/ModOptions", cond: gone}
+  - expect_state:
+      "type:ItemDropPrevention.Config::Instance.SweepDroppedItems_Liquid": false
+      "type:ItemDropPrevention.Config::Instance.SweepDroppedItems_Gas": true

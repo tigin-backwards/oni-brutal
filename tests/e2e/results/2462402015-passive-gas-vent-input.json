@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2462402015-passive-gas-vent-input.yaml",
+ "mods": [
+  "2462402015"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with a 0.1 kg minimum pressure set in its options, the intake built in the corridor west of the pod, piped to a Gas Vent, draws the corridor's gas into the pipe unpowered; selected",
+ "updated": "2026-10-23",
+ "commit": "a82df75",
+ "mod_dlls": {
+  "2462402015": {
+   "PassiveGasVentInput.dll": "6090f5771e83ebbf4dcc1772455e5533d6a8240a4127d1ee4b8f5bd29a9f9137"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-175159-469d04",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T18:00:39",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-180352-78d233",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T18:03:52",
+    "lane": 16,
+    "reference_run": "20261023-175159-469d04",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-180352-78d233",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T18:18:08",
+    "lane": 16,
+    "reference_run": "20261023-175159-469d04",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

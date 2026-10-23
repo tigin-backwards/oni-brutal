@@ -1,0 +1,63 @@
+{
+ "spec": "mods/2032187035-popup-control.yaml",
+ "mods": [
+  "2032187035"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with harvest-toggle popups off in its options, a wild Grubfruit plant's Enable Autoharvest user-menu button, pressed in the paused game, sets the plant to harvest and no popup shows; user menu dumped",
+ "updated": "2026-10-23",
+ "commit": "360de75",
+ "mod_dlls": {
+  "2032187035": {
+   "ToastControl.dll": "546d27d657e36cf6062474b0f053e932132e38a2c6eca178dc73337795b8aef2"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-175641-0dcfc6",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T17:56:46",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-175828-4139d1",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T17:58:28",
+    "lane": 16,
+    "reference_run": "20261023-175641-0dcfc6",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "user-menu": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261023-175828-4139d1",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T17:59:37",
+    "lane": 16,
+    "reference_run": "20261023-175641-0dcfc6",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "user-menu": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

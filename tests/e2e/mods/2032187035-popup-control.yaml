@@ -1,0 +1,33 @@
+# Popup Control (2032187035), classes T, K, O.
+#
+# What it does: each kind of floating popup text (resources dug, picked up, delivered or
+# dropped, building complete, damage, germs, effects, skill points, research, insufficient
+# materials, harvest toggles, ...) can be switched off, separately for Duplicants and
+# machines; an option keeps popups from drifting up. Transpilers on the game's
+# PopFXManager.SpawnFX callers ask the options first. The PLib options open from the Mods
+# screen, or in a colony with an action (unbound by default).
+# How a player reaches it: the options on the Mods screen.
+# What changes: which popups appear.
+#
+# Options here: no harvest-toggle popups. A wild Grubfruit plant in the base is selected and
+# its user menu's harvest button pressed, with the game paused: the plant's setting changes,
+# and the game's popup for it (HarvestDesignatable's user-menu handler) does not show.
+from: early-base
+mods: [2032187035]
+options:
+  "2032187035": {HarvestToggle: false}
+steps:
+  - expect_state:
+      "type:PeterHan.ToastControl.ToastControlPopups::Options.HarvestToggle": false
+      "type:PeterHan.ToastControl.ToastControlPopups::Options.BuildingComplete": true
+  - driver: {camera.set: {cell: [141, 230], ortho: 8}}
+  - click_world: {cell: [141, 229], select: WormPlant}
+  - ui_wait: {path: "**/DetailsScreen/UserMenuButtons/UserMenuScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<HarvestDesignatable>.HarvestWhenReady": false
+      "count:all:PopFX::[*] if .enabled == true": 0
+  - ui_dump: {name: user-menu, root: "**/DetailsScreen/UserMenuButtons/UserMenuScreen"}
+  - click: {ui: "**/UserMenuScreen/Buttons/Enable AutoharvestButton"}
+  - expect_state:
+      "selected:GetComponent<HarvestDesignatable>.HarvestWhenReady": true
+      "count:all:PopFX::[*] if .enabled == true": 0

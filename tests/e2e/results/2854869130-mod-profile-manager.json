@@ -1,0 +1,79 @@
+{
+ "spec": "mods/2854869130-mod-profile-manager.yaml",
+ "mods": [
+  "2018291283",
+  "2854869130"
+ ],
+ "verdict": "warning",
+ "why": "known findings: scroll-normalized-position",
+ "findings": [
+  "scroll-normalized-position"
+ ],
+ "note": "with Mod Updater: from a colony to the main menu's Mods screen, the Mod Profiles button opens its window with the save's profile, which opens its mod list; the window's layout as in the original",
+ "updated": "2026-10-23",
+ "commit": "357a45f",
+ "mod_dlls": {
+  "2018291283": {
+   "ModUpdateDate.dll": "afbebdd8abfce0a72e40998575ee32a7a614f33d366a9917e075d652da33f616"
+  },
+  "2854869130": {
+   "SaveGameModLoader.dll": "a711ed99e522cb644d6e9c002490b41dc0bd4d48f52b9506d79801942a83ea48"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-130628-8f622a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T13:06:28",
+    "lane": 18,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-130742-df6466",
+    "index": 1,
+    "verdict": "warn",
+    "date": "2026-10-23T13:07:42",
+    "lane": 18,
+    "reference_run": "20261023-130628-8f622a",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "profiles": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261023-130742-df6466",
+    "index": 2,
+    "verdict": "warn",
+    "date": "2026-10-23T13:08:32",
+    "lane": 18,
+    "reference_run": "20261023-130628-8f622a",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "profiles": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

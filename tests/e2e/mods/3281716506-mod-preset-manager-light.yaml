@@ -1,0 +1,36 @@
+# Mod Preset Manager Light [MPML] (3281716506), not in the triage (issue #2: "clicking the
+# 'preset' button causes a crash and enters a loop"). Not Preset Manager (2977728791), a different
+# mod with presets for consumables, priorities and schedules.
+#
+# What it does: a pink "Presets" button beside the main menu's Mods button opens a window from
+# the mod's asset bundle (PresetOverview, under the FrontEndManager): mod presets on the left
+# (search, import a preset string, create a preset), the current preset's mods on the right
+# (checkbox, reorder, label, type), with filters, Apply and Enable-all buttons.
+# How a player reaches it: the main menu's Presets button (from a colony: the pause menu's Main
+# Menu, then Quit Without Saving).
+# What changes: the window; presets are files under the mod's folder.
+#
+# The window opens with a temporary preset of the enabled mods: this mod, OniMcp and E2eDriver.
+# Escape closes it.
+from: early-base
+mods: [3281716506]
+steps:
+  - key: {code: Escape}
+  - ui_wait: {path: "**/PauseScreen/**/Main MenuButton", cond: stable}
+  - click: {ui: "**/PauseScreen/**/Main MenuButton"}
+  - ui_wait: {path: "**/ConfirmDialog/GameObject/Panel/ConfigurableButton", cond: stable}
+  - click: {ui: "**/ConfirmDialog/GameObject/Panel/ConfigurableButton"}   # Quit Without Saving
+  - ui_wait: {path: "**/MainMenu_SpacedOut/MainMenuMenubar/MainMenuButtons", cond: stable, frames: 3000}
+  - click: {ui: "**/PresetButton"}
+  - ui_wait: {path: "**/FrontEndManager/PresetOverview/ModEntryView/ScrollArea/Content", cond: stable}
+  - expect_ui:
+      "**/FrontEndManager/PresetOverview": {active: true}
+      "**/PresetOverview/TopBar/Label": {text: "Mod Preset Manager"}
+      "**/PresetOverview/ModEntryView/ScrollArea/Content/*/Label": {count: 3}
+      "**/PresetOverview/ModEntryView/ScrollArea/Content/Mod Preset Manager Light [MPML]/ModType/Label": {text: "Local"}
+      "**/PresetOverview/FileHierarchy/Buttons/SaveButton/Text": {text: "Create new Preset"}
+  - ui_dump: {name: entries, root: "**/PresetOverview/ModEntryView/ScrollArea/Content"}
+  - ui_dump: {name: presets, root: "**/PresetOverview/FileHierarchy"}
+  - key: {code: Escape}
+  - expect_ui:
+      "**/FrontEndManager/PresetOverview": {active: false}

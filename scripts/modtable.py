@@ -104,7 +104,6 @@ played = {
     '2958243747': "issue #2's set",
     '2977728791': "issue #2's set",
     '3381262702': "issue #2's set",
-    '2854869130': "issue #2's set",
     # Played by their specs (tests/e2e/mods, scripts/e2e.py): passed once in the original and
     # twice in ours, with no new log signature and screens matching the original's.
     '1717463209': 'spec tests/e2e/mods/1717463209-bigger-camera-zoom-out.yaml: the mouse wheel zooms out past the game\'s 20, to 200; world shots at three zoom levels within 3.1 % of the original',
@@ -165,7 +164,8 @@ broken.update({
 original_only = {
     '1729794261': 'loads in ours but not in the original: Mono rejects its `PixelPack2` class (an interface method it lacks) at first use, where ours stubs the missing method (ARCHITECTURE D22); left out of the colony runs, which the original\'s error dialog stops',
 }
-unranked = {'3427974009': 'Synchronized Building Groups', '2977728791': 'Preset Manager', '3775625682': 'LocalCanvas-本地画框', '3781314647': 'Morphs Not Included'}
+unranked = {'3427974009': 'Synchronized Building Groups', '2977728791': 'Preset Manager', '3775625682': 'LocalCanvas-本地画框', '3781314647': 'Morphs Not Included',
+            '3281716506': 'Mod Preset Manager (Light) [MPML]', '3746027329': 'Geyser Tab', '3671379574': 'Resource Dashboard'}
 translations = {'929139073', '927642162', '1198657258', '928606476', '928348692', '1902735059', '1269554374',
                 '1454392573', '929036307', '928441385', '1416077105', '929305589', '934649708', '931119869',
                 '1562134514', '2906930548', '929224194', '1714866600', '1823722773', '3229139332', '2769557641',

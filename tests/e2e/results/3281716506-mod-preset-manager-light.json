@@ -1,0 +1,81 @@
+{
+ "spec": "mods/3281716506-mod-preset-manager-light.yaml",
+ "mods": [
+  "3281716506"
+ ],
+ "verdict": "warning",
+ "why": "known findings: scroll-normalized-position",
+ "findings": [
+  "scroll-normalized-position"
+ ],
+ "note": "from a colony to the main menu, the Presets button opens the preset window from the mod's asset bundle: the temporary preset's three mods, the preset list, Escape closes it; both lists' layout as in the original",
+ "updated": "2026-10-23",
+ "commit": "6ab9827",
+ "mod_dlls": {
+  "3281716506": {
+   "ModProfileManager_Addon.dll": "4cb2a5451d21b4b3f8d1d8899edd98218f6f4e9b510846d99b9c3943c110506d"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-125727-75c50f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T12:57:27",
+    "lane": 18,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-125838-c3db2b",
+    "index": 1,
+    "verdict": "warn",
+    "date": "2026-10-23T12:58:38",
+    "lane": 18,
+    "reference_run": "20261023-125727-75c50f",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "entries": {
+      "differences": 0
+     },
+     "presets": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 2
+      }
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261023-125838-c3db2b",
+    "index": 2,
+    "verdict": "warn",
+    "date": "2026-10-23T12:59:27",
+    "lane": 18,
+    "reference_run": "20261023-125727-75c50f",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "entries": {
+      "differences": 0
+     },
+     "presets": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 2
+      }
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

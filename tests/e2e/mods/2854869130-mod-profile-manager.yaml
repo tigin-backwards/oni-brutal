@@ -1,0 +1,37 @@
+# Mod Profile Manager [MPM] (2854869130), with Mod Updater (2018291283), which it requires on
+# the Workshop and which the report (issue #2) had with it: "clicking the 'mod profiles' button
+# causes a crash". Classes S, O, M.
+#
+# What it does: keeps mod profiles, lists of enabled mods: one per save (written as a colony
+# is saved), and ones the player creates or imports. The Mods screen gets a "Mod Profiles"
+# button, a copy-mod-list button, a pin and a folder button on each row; the load screen gets a
+# sync button per save, and the main menu a "Sync and Continue" button.
+# How a player reaches it: the main menu's Mods screen, its Mod Profiles button.
+# What changes: the Mod Profiles window (a copy of the language options screen, ModListView,
+# under the Mods screen). It lists created and imported profiles, and profiles from save games
+# with their count of stored versions and of mods; a profile opens its mod list (SingleList).
+#
+# The fixture's save (e2e) left its profile when early-base was blessed: one stored version
+# with 2 mods.
+from: early-base
+mods: [2018291283, 2854869130]
+steps:
+  - key: {code: Escape}
+  - ui_wait: {path: "**/PauseScreen/**/Main MenuButton", cond: stable}
+  - click: {ui: "**/PauseScreen/**/Main MenuButton"}
+  - ui_wait: {path: "**/ConfirmDialog/GameObject/Panel/ConfigurableButton", cond: stable}
+  - click: {ui: "**/ConfirmDialog/GameObject/Panel/ConfigurableButton"}   # Quit Without Saving
+  - ui_wait: {path: "**/MainMenu_SpacedOut/MainMenuMenubar/MainMenuButtons", cond: stable, frames: 3000}
+  - click: {text: "MODS", under: "**/MainMenuButtons"}
+  - ui_wait: {path: "**/ModsScreen/Panel", cond: stable}
+  - click: {ui: "**/ModsScreen/Panel/DetailsView/ModListsButton"}
+  - ui_wait: {path: "**/ModsScreen/ModListView/Content/ScrollWindow/Viewport/Content", cond: stable}
+  - expect_ui:
+      "**/ModsScreen/ModListView": {active: true}
+      "**/ModListView/Content/BG/TitleBar/Title": {text: "Mod Profiles"}
+      "**/ModListView/**/PreinstalledContent/WorkshopButton/Label": {text: "~e2e"}
+  - ui_dump: {name: profiles, root: "**/ModsScreen/ModListView/Content"}
+  - click: {ui: "**/ModListView/**/PreinstalledContent/WorkshopButton"}
+  - ui_wait: {path: "**/ModListView/SingleList", cond: stable}
+  - expect_ui:
+      "**/ModListView/SingleList": {active: true}

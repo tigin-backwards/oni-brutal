@@ -145,7 +145,7 @@ installs get developer checks subscribers never see).
 | 124 | [Research Manager // by @Ony 👾](https://steamcommunity.com/sharedfiles/filedetails/?id=1897096779) | ✅ | ✅ | ⬜ |  |
 | 125 | [Dupery Fixed](https://steamcommunity.com/sharedfiles/filedetails/?id=3172734005) | ✅ | ✅ | ⬜ |  |
 | 126 | [[ภาษาไทย] Thai Localisation Pack](https://steamcommunity.com/sharedfiles/filedetails/?id=1416077105) | ⬜ | ⬜ | ⬜ | translation: the game applies one only from a Steam subscription; not testable here |
-| 127 | [Material Selection Properties](https://steamcommunity.com/sharedfiles/filedetails/?id=2600818338) | ✅ | ✅ | ⬜ |  |
+| 127 | [Material Selection Properties](https://steamcommunity.com/sharedfiles/filedetails/?id=2600818338) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2600818338-material-selection-properties.yaml: the Tile is picked in the Base menu after a short run; the material panel lists sandstone's specific heat capacity and other properties, and is shot |
 | 128 | [Algae Grower](https://steamcommunity.com/sharedfiles/filedetails/?id=1703606095) | ✅ | ✅ | ✅ | spec tests/e2e/mods/1703606095-algae-grower.yaml: an Algae Grower is built from dirt on the corridor floor west of the pod and selected: three consumed elements, algae output, fertilizer delivery, no light there |
 | 129 | [Reveal Map](https://steamcommunity.com/sharedfiles/filedetails/?id=3130257075) | ✅ | ✅ | ✅ | spec tests/e2e/mods/3130257075-reveal-map.yaml: the pause menu's copy button beside the world seed reveals a hidden cell at the asteroid's bottom left |
 | 130 | [MaterialColor](https://steamcommunity.com/sharedfiles/filedetails/?id=1739635014) | ✅ | ✅ | ⬜ |  |
@@ -159,7 +159,7 @@ installs get developer checks subscribers never see).
 | 138 | [更多的空气过滤器 More AirFilter](https://steamcommunity.com/sharedfiles/filedetails/?id=2877805072) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2877805072-more-airfilter.yaml: the carbon dioxide filter is built unpowered in mid-air west of the pod and selected (radius 4, CO2); the Deodorizer needs no power; the title bar with the English name is shot |
 | 139 | [Turkish (Türkçe) [Innovation]](https://steamcommunity.com/sharedfiles/filedetails/?id=934649708) | ⬜ | ⬜ | ⬜ | translation: the game applies one only from a Steam subscription; not testable here |
 | 140 | [Visual Fixes N Tweaks](https://steamcommunity.com/sharedfiles/filedetails/?id=3455710156) | ✅ | ✅ | ⬜ |  |
-| 141 | [Smart Dig // by @Ony 👾](https://steamcommunity.com/sharedfiles/filedetails/?id=1844888487) | ✅ | ✅ | ⬜ |  |
+| 141 | [Smart Dig // by @Ony 👾](https://steamcommunity.com/sharedfiles/filedetails/?id=1844888487) | ✅ | ✅ | ✅ | spec tests/e2e/mods/1844888487-smart-dig.yaml: with the Dig tool a plain click marks one cuprite cell of the corridor ceiling west of the pod; a Shift-click on another spreads the order through the connected cuprite (8 orders) |
 | 142 | [The Duplicant Reacharound](https://steamcommunity.com/sharedfiles/filedetails/?id=1854895085) | ✅ | ✅ | ✅ | spec tests/e2e/mods/1854895085-duplicant-reacharound.yaml: smaller spec: the extended reach tables are checked after the load and a dig order on the corridor ceiling uses the extended table with corners |
 | 143 | [Floatation](https://steamcommunity.com/sharedfiles/filedetails/?id=1751123054) | ⬜ | ⬜ | ⬜ | flagged by onimaxxing (mayCrashInPlay); not tested |
 | 144 | [Free Resource Buildings - Updated](https://steamcommunity.com/sharedfiles/filedetails/?id=2839006500) | ✅ | ✅ | ⬜ |  |

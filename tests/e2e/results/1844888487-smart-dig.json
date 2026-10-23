@@ -3,12 +3,12 @@
  "mods": [
   "1844888487"
  ],
- "verdict": "pending",
- "why": "0 run(s) of ours against original run 20261023-052059-87d8f0; 2 needed",
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
  "findings": [],
- "note": "",
+ "note": "with the Dig tool a plain click marks one cuprite cell of the corridor ceiling west of the pod; a Shift-click on another spreads the order through the connected cuprite (8 orders)",
  "updated": "2026-10-23",
- "commit": "2c85c73",
+ "commit": "6105830",
  "mod_dlls": {
   "1844888487": {
    "Smart Dig .dll": "cc926682318579559240c495949996b6c03d813e2d8617715745fcf511c51038"
@@ -25,6 +25,31 @@
     "signatures": 0
    }
   ],
-  "ours": []
+  "ours": [
+   {
+    "run": "20261023-070226-e2375c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T07:02:26",
+    "lane": 15,
+    "reference_run": "20261023-052059-87d8f0",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-070226-e2375c",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T07:03:19",
+    "lane": 15,
+    "reference_run": "20261023-052059-87d8f0",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
  }
 }

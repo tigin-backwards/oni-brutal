@@ -3,12 +3,12 @@
  "mods": [
   "2600818338"
  ],
- "verdict": "pending",
- "why": "0 run(s) of ours against original run 20261023-042128-2bb68b; 2 needed",
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
  "findings": [],
- "note": "",
+ "note": "the Tile is picked in the Base menu after a short run; the material panel lists sandstone's specific heat capacity and other properties, and is shot",
  "updated": "2026-10-23",
- "commit": "885cbe9",
+ "commit": "6105830",
  "mod_dlls": {
   "2600818338": {
    "MaterialSelectionProperties.dll": "e2d317a3ed241c3ba2f3323cf42aa9778b6909c13160a2a753d851633b710ff7"
@@ -25,6 +25,35 @@
     "signatures": 0
    }
   ],
-  "ours": []
+  "ours": [
+   {
+    "run": "20261023-070142-7336b2",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T07:01:42",
+    "lane": 14,
+    "reference_run": "20261023-042128-2bb68b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "materials": 0.007747
+    }
+   },
+   {
+    "run": "20261023-070142-7336b2",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T07:02:45",
+    "lane": 14,
+    "reference_run": "20261023-042128-2bb68b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "materials": 0.007747
+    }
+   }
+  ]
  }
 }

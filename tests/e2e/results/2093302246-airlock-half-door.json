@@ -1,0 +1,59 @@
+{
+ "spec": "mods/2093302246-airlock-half-door.yaml",
+ "mods": [
+  "2093302246"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "an Airlock Door built with OniMcp in the corridor fills its cells with its own mass while unpowered, has access control, and its details screen is within threshold",
+ "updated": "2026-10-23",
+ "commit": "19b040f",
+ "mod_dlls": {
+  "2093302246": {
+   "AirlockMechanizedDoor.dll": "fffe9801203b55d107fdf0ea0e0f3d022559d2bfc8569eff246f848b55eebc82"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-143629-d74d25",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T15:05:48",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-153533-8bf920",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T15:35:33",
+    "lane": 14,
+    "reference_run": "20261023-143629-d74d25",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "details": 0.0
+    }
+   },
+   {
+    "run": "20261023-153533-8bf920",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T15:36:19",
+    "lane": 15,
+    "reference_run": "20261023-143629-d74d25",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "details": 0.0
+    }
+   }
+  ]
+ }
+}

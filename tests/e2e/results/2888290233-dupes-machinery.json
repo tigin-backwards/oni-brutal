@@ -1,0 +1,62 @@
+{
+ "spec": "mods/2888290233-dupes-machinery.yaml",
+ "mods": [
+  "2888290233"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the CO2 pump picked in the build menu's Oxygen category is placed with the build tool, built and selected: it consumes carbon dioxide into a gas pipe; product and details screens within threshold",
+ "updated": "2026-10-23",
+ "commit": "19b040f",
+ "mod_dlls": {
+  "2888290233": {
+   "Dupes Machinery.dll": "13fa703e54e5ca8b3e7fcf461f4c5ea2fa44f50e4a5242d9bc7fa258191aa8e8",
+   "PLib.dll": "93073fdf44dbe9fd7c0afe19e56341be862cc2d732090dee30999cf60e2e160d"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-144524-54470a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T15:01:16",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-154019-4b4ab7",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T15:40:19",
+    "lane": 15,
+    "reference_run": "20261023-144524-54470a",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.007747,
+     "details": 0.002155
+    }
+   },
+   {
+    "run": "20261023-154019-4b4ab7",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T15:42:00",
+    "lane": 15,
+    "reference_run": "20261023-144524-54470a",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.007747,
+     "details": 0.002155
+    }
+   }
+  ]
+ }
+}

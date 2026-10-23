@@ -1,0 +1,62 @@
+{
+ "spec": "mods/2021324045-dupes-refrigeration.yaml",
+ "mods": [
+  "2021324045"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "options 150 kg / 90 W: the Simple Fridge picked in the build menu's Food category is placed with the build tool, built and selected with the optioned capacity and power; product and details screens within threshold",
+ "updated": "2026-10-23",
+ "commit": "19b040f",
+ "mod_dlls": {
+  "2021324045": {
+   "DupesRefrigeration.dll": "ab129f075946a7af83542d3f48cc9f52b51c8016dbd187776646813fd6e2aaa4",
+   "PLib.dll": "93073fdf44dbe9fd7c0afe19e56341be862cc2d732090dee30999cf60e2e160d"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-144524-54470a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T15:10:12",
+    "lane": 15,
+    "signatures": 1
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-154345-de0b05",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T15:43:45",
+    "lane": 15,
+    "reference_run": "20261023-144524-54470a",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.007747,
+     "details": 0.0
+    }
+   },
+   {
+    "run": "20261023-154345-de0b05",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T15:45:11",
+    "lane": 15,
+    "reference_run": "20261023-144524-54470a",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.007747,
+     "details": 0.0
+    }
+   }
+  ]
+ }
+}

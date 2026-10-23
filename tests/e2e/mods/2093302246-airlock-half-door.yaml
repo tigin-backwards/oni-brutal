@@ -1,0 +1,35 @@
+# Airtight/Airlock Door With Half Door (2093302246), class B.
+#
+# What it does: adds the Airlock Door (AirlockMechanizedDoor, 1x2) and the Airlock Half Door
+# (1x1) to the Base menu's doors (HVAC; metal, 120 W and 60 W): powered doors that are always
+# solid to gas and liquid. Prefixes on Door.SetSimState and Door.OnCleanUp keep the door's
+# cells filled with its own material whether it is open or shut, so Duplicants pass while
+# nothing else does; the door has access control and no enable button.
+# How a player reaches it: the build menu (Base), after research; the door's side screen.
+# What changes: a door that never lets fluids through.
+#
+# setup grants HVAC and spawns copper ore. The Airlock Door is built, unwired, in the dug-out
+# corridor west of the printing pod and selected: its cells hold the door's mass, and its
+# access-control side screen shows.
+from: early-base
+mods: [2093302246]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"HVAC\")", method: Purchased}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Cuprite\").substance", method: SpawnResource, args: [[109.5, 206.5, -12], 500, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "cells:112,207..112,208::Grid.Mass.get_Item({cell})": "< 10"
+  - build: {prefab: AirlockMechanizedDoor, at: [112, 207]}
+  - expect: {blueprints: {AirlockMechanizedDoor: 1}}
+  - run: {seconds: 1200, until: {buildings: {AirlockMechanizedDoor: 1}, pending_construction: 0}}
+  - run: {seconds: 10}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 208], select: AirlockMechanizedDoor}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Airlock Door"}
+  - expect_state:
+      "selected:GetComponent<AccessControl>.controlEnabled": true
+      "cells:112,207..112,208::Grid.Mass.get_Item({cell})": "> 100"
+  - expect_state: {"cells:112,207..112,208::Grid.Mass.get_Item({cell})": "== original"}
+  - shot: {name: details, crop: "**/DetailsScreen", threshold: 0.04}

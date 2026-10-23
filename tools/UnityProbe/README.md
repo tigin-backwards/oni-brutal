@@ -87,6 +87,28 @@ through a frame, enabling, activation, an edit (End, a typed "9", Backspace, thr
 `tools/UnityProbe/it-check.py rule LOG`, and compare the players with `it-check.py diff ORIG
 OURS`. `textmeshpro.md` ("Text set from code") records what it measured.
 
+With `PROBE_SCENARIO=fontasset` only the font-asset probe runs (`FontAsset.cs`, lines `FA …`, 10 s
+into the main menu, a few seconds). It calls `TMP_FontAsset.CreateFontAsset` by family and style
+name and by file path, with installed and missing families, other cases, empty and null names,
+point sizes of 0 and below, and files that are not fonts. It logs what each call returns or
+throws, and what it logs. For each asset it logs the face, atlas, material, creation settings
+and tables. Then it uses an asset in a `TextMeshProUGUI` (a character to add, one the face
+lacks) and logs the asset's character table. It also calls the engine's internal
+`FontEngine.TryGetSystemFontReference` by reflection. `textmeshpro.md` ("Font assets from OS
+fonts") records what it measured.
+
+With `PROBE_SCENARIO=pointermove` only the pointer-move probe runs (`PointerMove.cs`, lines `PM
+…`, 10 s into the main menu). It sets a `BaseInput` of its own as the current input module's
+`inputOverride`, which moves the pointer and presses the left button frame by frame over a small
+hierarchy of handlers. It logs every `OnPointerMove`, `OnPointerEnter` and `OnPointerExit` with
+its event data. `ugui.md` ("Pointer move events") records what it measured.
+
+To run one of them in a player without the e2e runner's lanes, give it a scratch profile
+(`XDG_CONFIG_HOME`) whose `mods/Local/SemanticsProbe/` holds the DLL and the two yaml files, with
+the `mods.json` entry described above. Run the original player through `scripts/e2e.py`'s
+`original_player` copy (Unity's player locks its folder), under `xvfb-run -a`, with
+`PROBE_SCENARIO` set.
+
 With `PROBE_SCENARIO=floatprec` only the float-precision probe runs (`FloatPrecision.cs`, lines
 `VAL fp …`, at mod load; the full run includes it in its values): float expressions whose
 float32 and double results differ, each line saying which one the player gave. Its header

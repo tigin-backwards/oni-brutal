@@ -67,17 +67,26 @@ namespace OniBrutal.Engine
                 Debug.LogError($"Cannot add component of type '{type.Name}' because it is abstract.");
                 return null;
             }
+            // The refusals below are the player's own messages: LogType.Log, no stack trace
+            // (measured: UnityProbe's "add component refusals").
             if (typeof(Transform).IsAssignableFrom(type))
             {
-                // A RectTransform replaces the plain Transform in place; any other Transform request fails.
-                if (type == typeof(RectTransform) && go.Components[0].GetType() == typeof(Transform))
-                    return ConvertToRectTransform(go);
-                Debug.LogError($"Can't add component '{type.Name}' to {go.Name} because such a component is already added to the game object!");
+                // A RectTransform replaces a plain Transform in place and a Transform replaces a
+                // RectTransform, even under components that require one; the same type again fails.
+                if (go.Components[0].GetType() != type) return ConvertTransform(go, type);
+                RefuseSameType(go, type);
                 return null;
             }
-            if (IsDisallowedDuplicate(go, type))
+            if (SingleInstance.Contains(type) && Components.First(go, type) != null)
             {
-                Debug.LogError($"Can't add component '{type.Name}' to {go.Name} because such a component is already added to the game object!");
+                RefuseSameType(go, type);
+                return null;
+            }
+            if (DisallowedBy(go, type) is var (declaring, existing))
+            {
+                var message = $"Can't add '{type.Name}' to {go.Name} because a '{existing.GetType().Name}' is already added to the game object!";
+                if (existing.GetType() != declaring) message += $"\nA GameObject can only contain one '{declaring.Name}' component.";
+                EngineLog.Message(LogType.Log, message, "");
                 return null;
             }
 
@@ -96,16 +105,32 @@ namespace OniBrutal.Engine
             return component;
         }
 
-        static bool IsDisallowedDuplicate(GameObjectNative go, Type type)
+        /// Engine components a GameObject holds at most one of, measured one by one (an
+        /// AudioSource or a collider may repeat). The player also refuses components that conflict
+        /// with others (a SpriteRenderer beside a MeshRenderer, 2D physics beside 3D); not here.
+        static readonly HashSet<Type> SingleInstance =
+        [
+            typeof(Camera), typeof(Canvas), typeof(CanvasGroup), typeof(CanvasRenderer), typeof(MeshFilter),
+            typeof(MeshRenderer), typeof(SpriteRenderer), typeof(LineRenderer), typeof(Light), typeof(Rigidbody),
+            typeof(Rigidbody2D), typeof(Animator), typeof(Animation), typeof(ParticleSystem),
+            typeof(ParticleSystemRenderer),
+        ];
+
+        static void RefuseSameType(GameObjectNative go, Type type) =>
+            EngineLog.Message(LogType.Log, $"Can't add component '{type.Name}' to {go.Name} because such a component is already added to the game object!", "");
+
+        /// The class whose [DisallowMultipleComponent] refuses TYPE here, and the component in the
+        /// way. The attribute covers the class declaring it and its subclasses, so the most basic
+        /// declaring class decides; the second line of the message names it.
+        static (Type declaring, Component existing)? DisallowedBy(GameObjectNative go, Type type)
         {
-            // The attribute applies to the class that declares it and its subclasses.
+            Type declaring = null;
             for (var t = type; t != null && t != typeof(Component); t = t.BaseType)
-            {
-                if (!t.IsDefined(typeof(DisallowMultipleComponent), false)) continue;
-                foreach (var c in go.Components)
-                    if (t.IsInstanceOfType(c)) return true;
-            }
-            return false;
+                if (t.IsDefined(typeof(DisallowMultipleComponent), false)) declaring = t;
+            if (declaring == null) return null;
+            foreach (var c in go.Components)
+                if (declaring.IsInstanceOfType(c)) return (declaring, c);
+            return null;
         }
 
         /// Constructs a component and appends it to the GameObject (no lifecycle calls).
@@ -128,11 +153,13 @@ namespace OniBrutal.Engine
             return component;
         }
 
-        static Component ConvertToRectTransform(GameObjectNative go)
+        /// Replaces the GameObject's Transform with one of TYPE (Transform or RectTransform), keeping
+        /// its local placement and its place in the hierarchy.
+        static Component ConvertTransform(GameObjectNative go, Type type)
         {
             var old = (Transform)go.Components[0];
             var oldNative = (TransformNative)old.NativeOrThrow;
-            var native = (TransformNative)ComponentNatives.Create(typeof(RectTransform));
+            var native = (TransformNative)ComponentNatives.Create(type);
             native.GameObject = go;
             native.LocalPosition = oldNative.LocalPosition;
             native.LocalRotation = oldNative.LocalRotation;
@@ -146,16 +173,16 @@ namespace OniBrutal.Engine
                 siblings[Array.IndexOf(siblings, oldNative)] = native;
                 native.Parent.Children = siblings;
             }
-            var rect = Object.ConstructBound<RectTransform>(typeof(RectTransform), native);
+            var transform = Object.ConstructBound<Transform>(type, native);
             var comps = (Component[])go.Components.Clone();
-            comps[0] = rect;
+            comps[0] = transform;
             go.Transform = native;
             go.Components = comps;
             Hierarchy.Touch(native);
             foreach (var c in comps) c.ForgetTransform();
             old.Unbind();
             native.MarkDirty();
-            return rect;
+            return transform;
         }
 
         // ---- Activation ----

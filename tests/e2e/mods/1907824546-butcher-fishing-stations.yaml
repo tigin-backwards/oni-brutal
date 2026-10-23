@@ -1,0 +1,39 @@
+# Butcher & Fishing Stations (1907824546), classes B, S, O.
+#
+# What it does: adds two ranching buildings to the Stations menu, researched with Critter
+# Ranching: the Butcher Station (ButcherStation, 3x3, 400 kg of metal ore, powered), which a
+# rancher uses to butcher the critters of its pen that its filter and settings pick; and the
+# Fishing Station, which catches fish from the water below it. The Butcher Station's side
+# screen (PLib) has check boxes for which critters go (unwanted kinds, old ones, the surplus
+# over a limit), number fields and sliders for the age and the limit, and the critter filter.
+# How a player reaches it: the build menu (Stations), then the station's side screen.
+# What changes: which critters a rancher butchers, and the meat they give.
+#
+# early-base has no critters, so the spec stops at the side screen: setup grants the research;
+# the station is built unpowered from cuprite in the dug-out corridor west of the printing
+# pod, and its "old aged" check box and its critter limit are set.
+from: early-base
+mods: [1907824546]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"AnimalControl\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+steps:
+  - build: {prefab: ButcherStation, at: [113, 206], material: Cuprite}
+  - expect: {blueprints: {ButcherStation: 1}}
+  - run: {seconds: 900, until: {buildings: {ButcherStation: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [114, 208], ortho: 8}}
+  - click_world: {cell: [114, 207]}
+  - ui_wait: {path: "**/ButcherStationSideScreen/MainPanel", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Butcher Station"}
+      "**/ButcherStationSideScreen/MainPanel/wrangle_old_aged/AlignmentWrapper/Text": {text: "Auto-Wrangle Old Aged"}
+  - expect_state:
+      "selected:GetComponent<ButcherStation.ButcherStation>.wrangleOldAged": true
+      "selected:GetComponent<ButcherStation.ButcherStation>.creatureLimit": 40
+  - ui_dump: {name: side, root: "**/ButcherStationSideScreen/MainPanel", mask_text: ['​']}
+  - shot: {name: side, crop: "**/ButcherStationSideScreen/MainPanel"}
+  - click: {ui: "**/ButcherStationSideScreen/MainPanel/wrangle_old_aged/AlignmentWrapper/CheckBox"}
+  - type: {ui: "**/ButcherStationSideScreen/MainPanel/slider_top_creature_limit/text_creature_limit", text: "12", clear: true, enter: true}
+  - expect_state:
+      "selected:GetComponent<ButcherStation.ButcherStation>.wrangleOldAged": false
+      "selected:GetComponent<ButcherStation.ButcherStation>.creatureLimit": 12

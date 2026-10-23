@@ -1,0 +1,42 @@
+# Pipe Flow Overlay (2968583663), classes O, V.
+#
+# What it does: in the Plumbing, Ventilation and Conveyor overlays, every pipe or rail shows an
+# icon of its flow: arrows for the directions its contents move, a cross where nothing flows.
+# The icons are images on the world-space canvas, one per conduit (PipeFlowOverlayIconController),
+# drawn from textures the mod builds at load; a "Show Flow Overlay" check box in the overlay's
+# legend turns them off and on (a PLib setting, saved).
+# How a player reaches it: the overlays (F6 to F8), and the legend's check box.
+# What changes: icons over the pipes.
+#
+# setup grants Ventilation; three gas pipes are built in the dug-out corridor west of the
+# printing pod. With no gas in them, each shows the cross. The legend's check box hides them.
+from: early-base
+mods: [2968583663]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"GasPiping\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+steps:
+  - build: {prefab: GasConduit, cells: [[108, 209], [109, 209], [110, 209]], material: SandStone}
+  - expect: {blueprints: {GasConduit: 3}}
+  - run: {seconds: 900, until: {buildings: {GasConduit: 3}, pending_construction: 0}}
+  - expect_state:
+      "all:PipeFlowOverlay.PipeFlowOverlayIconController::Length": 3
+  - driver: {camera.set: {cell: [109, 209], ortho: 6}}
+  - open: {key: F7}
+  - ui_wait: {path: "**/TopRight/OverlayLegend/**/PipeFlowOverlayCheckBox", cond: stable}
+  - expect_ui:
+      "**/PipeFlowOverlayCheckBox/AlignmentWrapper/Text": {text: "Show Flow Overlay"}
+  - expect_state:
+      "type:PipeFlowOverlay.PipeFlowOverlayPatches::OverlayMode": Gas
+      "type:PipeFlowOverlay.PipeFlowOverlaySettings::Instance.ShowOverlay": true
+      "count:all:PipeFlowOverlay.PipeFlowOverlayIconController::[*] if ._flow == none": 3
+      "all:PipeFlowOverlay.PipeFlowOverlayIconController::[0].GetComponent<UnityEngine.UI.Image>.color.a": 1
+  - ui_dump: {name: legend, root: "**/TopRight/OverlayLegend"}
+  - world_shot: {name: icons, ortho: 6, at: [109, 209]}
+  - click: {ui: "**/PipeFlowOverlayCheckBox/AlignmentWrapper/CheckBox"}
+  - expect_state:
+      "type:PipeFlowOverlay.PipeFlowOverlaySettings::Instance.ShowOverlay": false
+  - ui_wait: {path: "**/PipeFlowOverlayCheckBox", cond: stable}
+  - expect_state:
+      "all:PipeFlowOverlay.PipeFlowOverlayIconController::[0].GetComponent<UnityEngine.UI.Image>.color.a": 0
+  - world_shot: {name: hidden, ortho: 6, at: [109, 209]}

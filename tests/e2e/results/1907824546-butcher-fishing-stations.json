@@ -1,0 +1,83 @@
+{
+ "spec": "mods/1907824546-butcher-fishing-stations.yaml",
+ "mods": [
+  "1907824546"
+ ],
+ "verdict": "failed",
+ "why": "a run of ours failed",
+ "findings": [],
+ "note": "a Butcher Station built from cuprite shows its PLib side screen, and its old-aged check box and critter limit field set the station; the pixels match, but the layout dump does not: the age slider's empty PLib label (text \" \") lays out 0.01x0.01 in the original and 0x19.04 in ours, and the limit's max label is 0.01 narrower in ours",
+ "updated": "2026-10-23",
+ "commit": "c7f9d6e",
+ "mod_dlls": {
+  "1907824546": {
+   "ButcherStation.dll": "9682ffd06b0c3e2c717502c94cdef43febf78ba30e0d4b75d4c418419cbb4c42"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-005647-453b7d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T00:59:42",
+    "lane": 11,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-012613-a9a94b",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-23T01:26:13",
+    "lane": 10,
+    "reasons": [
+     "ui_dump side: 4 difference(s)"
+    ],
+    "reference_run": "20261023-005647-453b7d",
+    "new_signatures": 0,
+    "findings": [
+     "unused-input-caret-layout"
+    ],
+    "ui_dump": {
+     "side": {
+      "differences": 4,
+      "known": {
+       "unused-input-caret-layout": 2
+      }
+     }
+    },
+    "shots": {
+     "side": 0.003965
+    }
+   },
+   {
+    "run": "20261023-012613-a9a94b",
+    "index": 2,
+    "verdict": "fail",
+    "date": "2026-10-23T01:27:20",
+    "lane": 10,
+    "reasons": [
+     "ui_dump side: 4 difference(s)"
+    ],
+    "reference_run": "20261023-005647-453b7d",
+    "new_signatures": 0,
+    "findings": [
+     "unused-input-caret-layout"
+    ],
+    "ui_dump": {
+     "side": {
+      "differences": 4,
+      "known": {
+       "unused-input-caret-layout": 2
+      }
+     }
+    },
+    "shots": {
+     "side": 0.003965
+    }
+   }
+  ]
+ }
+}

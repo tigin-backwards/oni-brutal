@@ -1,0 +1,31 @@
+# [Vanilla + DLC] Rooms Expanded (2348079481), classes O, V.
+#
+# What it does: adds room types (Shower Room, Kitchenette, Gym Room, Nursery and Genetic
+# Nursery, Aquarium, Botanical Garden, Graveyard, Power Plant, Art, Space and History Museums,
+# Agricultural Room, Pilot Help Center, Bionic Pit Stop, Data Mining Shaft), each with its
+# bonus, colour and size limits, to the game's RoomTypes (a patch on its constructor); widens
+# the largest room size; and lists each room's effect in the Rooms overlay's legend. A JSON
+# config sets which rooms are included and their sizes and bonuses.
+# How a player reaches it: building the rooms; the Rooms overlay (F11) and its legend.
+# What changes: the rooms the game recognises, their effects, and the overlay's legend.
+#
+# The Rooms overlay is opened over the base; its legend lists the new room types.
+from: early-base
+mods: [2348079481]
+steps:
+  - expect_state:
+      "Db.Get().RoomTypes.TryGet(\"BathroomRoom\").Name": Shower Room
+      "Db.Get().RoomTypes.TryGet(\"KitchenetteRoom\").Name": Kitchenette
+      "Db.Get().RoomTypes.TryGet(\"GymRoom\").Name": Gym Room
+      "Db.Get().RoomTypes.Count": "== original"
+  - driver: {camera.set: {cell: [122, 208], ortho: 12}}
+  - open: {key: F11}
+  - ui_wait: {path: "**/TopRight/OverlayLegend", cond: stable}
+  - expect_ui:
+      "**/OverlayLegend/**/UnitPrefab/Description": {any_text: "Shower Room"}
+      "**/OverlayLegend/**/UnitPrefab": {count: ">= 28"}
+  - expect_ui:
+      "**/OverlayLegend/**/UnitPrefab/Description": {any_text: "Data Mining Shaft"}
+  - ui_dump: {name: legend, root: "**/TopRight/OverlayLegend"}
+  - shot: {name: legend, crop: "**/TopRight/OverlayLegend", threshold: 0.04}
+  - world_shot: {name: rooms, ortho: 12, at: [122, 208]}

@@ -1,0 +1,47 @@
+# The Capsules 2.0 (3179880371), classes B, T, S, V.
+#
+# What it does: adds five capsules to the Ventilation menu, researched with Air Systems
+# (HVAC), each 1x1 and placed complete at once with no materials (patches on
+# BuildingDef.Instantiate and the product card): the Mining Capsule (its Boom! button sends
+# lasers that dig every marked dig order at once, then it vanishes), the Water Lock Capsule
+# (a side screen from the mod's asset bundle: a 3x3 grid of liquids to pour around it), the
+# Black Hole, Dismantle and Constructor capsules (deconstruct, or finish constructions, in an
+# area picked with its own select tool). Effects are particle systems from the bundle.
+# How a player reaches it: the build menu (Ventilation), then the capsule's user menu button
+# or side screen.
+# What changes: dig orders done, buildings built or removed, liquids poured, instantly.
+#
+# The Mining Capsule: three sandstone cells above the corridor west of the printing pod are
+# marked for digging, the capsule is placed from the build menu, and its Boom! button digs
+# them within a few seconds, before any Duplicant could.
+from: early-base
+mods: [3179880371]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"HVAC\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+steps:
+  - dig: [118, 210, 120, 210]
+  - expect: {pending_digs: 3}
+  - expect_state:
+      "Grid.Solid.get_Item(133678)": true
+      "Grid.Solid.get_Item(133680)": true
+  # The build menu offers its buildings once the game has run a little after the load.
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [114, 208], ortho: 8}}
+  - click: {ui: "**/PlanScreen/Toggle:Ventilation"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/MiningCapsule Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/MiningCapsule Group*"}
+  - expect_state: {"PlayerController.Instance.ActiveTool.name": BuildTool}
+  - click_world: {cell: [113, 208]}
+  - key: {code: Escape}
+  - expect: {buildings: {MiningCapsule: 1}, pending_digs: 3}
+  - click_world: {cell: [113, 208], select: MiningCapsule}
+  - ui_wait: {path: "**/UserMenuScreen/Buttons/Boom!Button", cond: stable}
+  - ui_dump: {name: menu, root: "**/UserMenuScreen/Buttons/Boom!Button"}
+  - click: {ui: "**/UserMenuScreen/Buttons/Boom!Button"}
+  - run: {seconds: 8}
+  - expect: {pending_digs: 0, buildings: {MiningCapsule: 0}}
+  - expect_state:
+      "Grid.Solid.get_Item(133678)": false
+      "Grid.Solid.get_Item(133679)": false
+      "Grid.Solid.get_Item(133680)": false

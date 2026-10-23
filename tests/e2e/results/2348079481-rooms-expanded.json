@@ -1,0 +1,75 @@
+{
+ "spec": "mods/2348079481-rooms-expanded.yaml",
+ "mods": [
+  "2348079481"
+ ],
+ "verdict": "failed",
+ "why": "a run of ours failed",
+ "findings": [],
+ "note": "the Rooms overlay legend lists the new room types, and its pixels and the overlay world shot match; its layout dump does not: five legend rows report a HorizontalLayoutGroup preferredWidth 0.01 smaller in ours (the reported difference)",
+ "updated": "2026-10-23",
+ "commit": "c7f9d6e",
+ "mod_dlls": {
+  "2348079481": {
+   "RoomsExpandedMerged.dll": "6ee20da7319886dbb94154b236b1fbd9810797cb9eb2bedfbd3290503cd8e6b5"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-002531-5ca489",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T00:27:58",
+    "lane": 10,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-012522-3522ec",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-23T01:25:22",
+    "lane": 11,
+    "reasons": [
+     "ui_dump legend: 5 difference(s)"
+    ],
+    "reference_run": "20261023-002531-5ca489",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "legend": {
+      "differences": 5
+     }
+    },
+    "shots": {
+     "legend": 0.000188,
+     "rooms": 0.009138
+    }
+   },
+   {
+    "run": "20261023-012522-3522ec",
+    "index": 2,
+    "verdict": "fail",
+    "date": "2026-10-23T01:26:10",
+    "lane": 11,
+    "reasons": [
+     "ui_dump legend: 5 difference(s)"
+    ],
+    "reference_run": "20261023-002531-5ca489",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "legend": {
+      "differences": 5
+     }
+    },
+    "shots": {
+     "legend": 0.000188,
+     "rooms": 0.009155
+    }
+   }
+  ]
+ }
+}

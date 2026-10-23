@@ -1,0 +1,85 @@
+{
+ "spec": "mods/2968583663-pipe-flow-overlay.yaml",
+ "mods": [
+  "2968583663"
+ ],
+ "verdict": "failed",
+ "why": "a run of ours failed",
+ "findings": [],
+ "note": "three gas pipes show the mod's no-flow icons in the Ventilation overlay and the legend's Show Flow Overlay check box hides them; both world shots match, but the legend's layout dump shows the two reported differences (a row's HorizontalLayoutGroup preferredWidth 0.01 smaller, the Scrollbar value 1 vs 0 when the content fits)",
+ "updated": "2026-10-23",
+ "commit": "c7f9d6e",
+ "mod_dlls": {
+  "2968583663": {
+   "PipeFlowOverlay.dll": "949cf889d3a19114dde95f0153e7e21b77c107d8b9e990f3ef47d29f720a92dd"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-005647-453b7d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T00:59:51",
+    "lane": 10,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-013404-99d174",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-23T01:34:04",
+    "lane": 11,
+    "reasons": [
+     "ui_dump legend: 2 difference(s)"
+    ],
+    "reference_run": "20261023-005647-453b7d",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "legend": {
+      "differences": 2,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "icons": 0.014119,
+     "hidden": 0.014119
+    }
+   },
+   {
+    "run": "20261023-013404-99d174",
+    "index": 2,
+    "verdict": "fail",
+    "date": "2026-10-23T01:35:25",
+    "lane": 11,
+    "reasons": [
+     "ui_dump legend: 2 difference(s)"
+    ],
+    "reference_run": "20261023-005647-453b7d",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "legend": {
+      "differences": 2,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "icons": 0.014931,
+     "hidden": 0.014931
+    }
+   }
+  ]
+ }
+}

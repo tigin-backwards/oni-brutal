@@ -224,7 +224,7 @@ installs get developer checks subscribers never see).
 | 203 | [Traditional Chinese by LaFa](https://steamcommunity.com/sharedfiles/filedetails/?id=1123693010) | ⬜ | ⬜ | ⬜ | translation: the game applies one only from a Steam subscription; not testable here |
 | 204 | [Big box大箱子](https://steamcommunity.com/sharedfiles/filedetails/?id=2873919932) | ✅ | ✅ | ⬜ |  |
 | 205 | [Wrangle & Carry](https://steamcommunity.com/sharedfiles/filedetails/?id=2950117755) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2950117755-wrangle-carry.yaml: carrying a wrangled critter ranks with the wrangling (RanchingFetch's priority equals CreatureFetch's); a spawned Hatch is wrangled through its menu button by a Duplicant taught Husbandry, and lies bagged |
-| 206 | [Smart Egg Incubator(DLC Compatible)](https://steamcommunity.com/sharedfiles/filedetails/?id=2206905516) | ✅ | ✅ | ⬜ |  |
+| 206 | [Smart Egg Incubator(DLC Compatible)](https://steamcommunity.com/sharedfiles/filedetails/?id=2206905516) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2206905516-smart-egg-incubator.yaml: an Incubator built from spawned steel has the mod's automation output and input; empty, its output is off; a Hatch egg requested through its side screen is delivered, and the output turns on |
 | 207 | [Customize Buildings (more capacity, less dupes)](https://steamcommunity.com/sharedfiles/filedetails/?id=1818138009) | ✅ | ✅ | ⬜ |  |
 | 208 | [Paint Walls](https://steamcommunity.com/sharedfiles/filedetails/?id=1732578172) | ✅ | ✅ | ⬜ |  |
 | 209 | [Suit Recharger](https://steamcommunity.com/sharedfiles/filedetails/?id=2688074001) | ✅ | ✅ | ⬜ |  |

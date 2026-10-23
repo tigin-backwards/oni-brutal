@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2206905516-smart-egg-incubator.yaml",
+ "mods": [
+  "2206905516"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "an Incubator built from spawned steel has the mod's automation output and input; empty, its output is off; a Hatch egg requested through its side screen is delivered, and the output turns on",
+ "updated": "2026-10-23",
+ "commit": "c79be4a",
+ "mod_dlls": {
+  "2206905516": {
+   "SmartEggIncubator.dll": "c81e8144c330c968b5aabf759804008875b41f22fb22dda332fd813f61166bc5"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-081305-8cb353",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T08:13:05",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-103125-daf784",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T10:31:25",
+    "lane": 14,
+    "reference_run": "20261023-081305-8cb353",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-103125-daf784",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T10:36:45",
+    "lane": 14,
+    "reference_run": "20261023-081305-8cb353",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

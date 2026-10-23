@@ -1,0 +1,42 @@
+# Smart Egg Incubator (DLC Compatible) (2206905516), class P.
+#
+# What it does: the Incubator gets an automation output, "EggNeedAttention", which is green
+# while it holds an egg that has no lullaby (song) buff, so a Duplicant can be called to sing
+# to it, and an automation input that switches it on and off.
+# How a player reaches it: building an Incubator (Stations, Critter Ranching ... Animal
+# Control); its automation ports.
+# What changes: incubators can be automated.
+#
+# setup grants Animal Control and spawns steel and a Hatch egg. An Incubator is built in the
+# dug-out room west of the printing pod; it has the two ports, and its output is off while it
+# is empty. The egg is requested through its side screen, a Duplicant delivers it, and the
+# output turns on.
+from: early-base
+mods: [2206905516]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"AnimalControl\")", method: Purchased}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Steel\").substance", method: SpawnResource, args: [[109.5, 206.5, -12], 500, 300, 255, 0]}}
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131124, 0, 0, \"HatchEgg\", \"Ore\")", method: SetActive, args: [true]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"EggIncubator\").LogicOutputPorts.Count": 1
+      "Assets.GetBuildingDef(\"EggIncubator\").LogicInputPorts.Count": 1
+  - build: {prefab: EggIncubator, at: [113, 206], material: Steel}
+  - expect: {blueprints: {EggIncubator: 1}}
+  - run: {seconds: 900, until: {buildings: {EggIncubator: 1}, pending_construction: 0}}
+  - run: {seconds: 3}
+  - expect_state:
+      "all:EggIncubator::[0].GetComponent<LogicPorts>.GetOutputValue(\"EggNeedAttention\")": 0
+  - driver: {camera.set: {cell: [113, 207], ortho: 8}}
+  - click_world: {cell: [113, 207], select: EggIncubator}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_wait: {path: "**/IncubatorSideScreen", cond: stable}
+  - expect_ui:
+      "**/IncubatorSideScreen/**/GridLayout/Toggle[1]/RequestToggle/Label": {text: "~Hatch Egg"}
+  - click: {ui: "**/IncubatorSideScreen/**/GridLayout/Toggle[1]/RequestToggle"}
+  - click: {ui: "**/IncubatorSideScreen/Contents/ButtonArea/PlaceButton"}
+  - key: {code: Escape}
+  - run: {seconds: 600}
+  - expect_state:
+      "all:EggIncubator::[0].Occupant": exists
+      "all:EggIncubator::[0].GetComponent<LogicPorts>.GetOutputValue(\"EggNeedAttention\")": 1

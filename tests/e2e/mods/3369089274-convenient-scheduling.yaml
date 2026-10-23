@@ -1,0 +1,39 @@
+# ConvenientScheduling (3369089274), class P with UI.
+#
+# What it does: each schedule on the schedule screen gets two toggles beside its alarm button,
+# "Dupli" and "Bionic" (copies of the alarm toggle, dupliButton and bionicButton). They mark
+# which kind of Duplicant joins that schedule when it arrives; the mark is kept as a prefix of
+# the schedule's name ("ㅤ2_" for Dupli, "ㅤ1_" for Bionic, "ㅤ3_" for both) and hidden from
+# the title. A new Duplicant joins the marked schedule with the fewest members (a prefix on
+# ScheduleManager.OnAddDupe), and a new colony starts with a set of schedules.
+# How a player reaches it: the schedule screen (period key), its toggles; then printing
+# Duplicants.
+# What changes: the schedules' names (their marks), and which schedule new Duplicants join.
+#
+# early-base has the game's two default schedules, standard and bionic. The standard one's
+# Dupli toggle is clicked, then its Bionic toggle; its title stays the same.
+from: early-base
+mods: [3369089274]
+steps:
+  - open: {key: Period}
+  - ui_wait: {path: "**/ScheduleScreen/**/Schedule_Default Standard Schedule/Header/ScheduleName/bionicButton", cond: stable}
+  - expect_ui:
+      "**/ScheduleScreen/**/ScheduleName/dupliButton": {count: 2}
+      "**/ScheduleScreen/**/ScheduleName/bionicButton": {count: 2}
+  - expect_state:
+      "ScheduleManager.Instance.GetSchedules()[0].name": Default Standard Schedule
+      "ui:**/Schedule_Default Standard Schedule/Header/ScheduleName/dupliButton::GetComponent<MultiToggle>.CurrentState": 0
+  - ui_dump: {name: header, root: "**/ScheduleScreen/**/Schedule_Default Standard Schedule/Header/ScheduleName"}
+  - click: {ui: "**/Schedule_Default Standard Schedule/Header/ScheduleName/dupliButton"}
+  - expect_state:
+      "ScheduleManager.Instance.GetSchedules()[0].name": "ㅤ2_Default Standard Schedule"
+      "ui:**/Schedule_Default Standard Schedule/Header/ScheduleName/dupliButton::GetComponent<MultiToggle>.CurrentState": 1
+      "ui:**/Schedule_Default Standard Schedule/Header/ScheduleName/bionicButton::GetComponent<MultiToggle>.CurrentState": 0
+  - click: {ui: "**/Schedule_Default Standard Schedule/Header/ScheduleName/bionicButton"}
+  - expect_state:
+      "ScheduleManager.Instance.GetSchedules()[0].name": "ㅤ3_Default Standard Schedule"
+      "ui:**/Schedule_Default Standard Schedule/Header/ScheduleName/bionicButton::GetComponent<MultiToggle>.CurrentState": 1
+  - expect_ui:
+      "**/Schedule_Default Standard Schedule/Header/ScheduleName/LabelGroup/Label": {text: "Default Standard Schedule"}
+  - ui_dump: {name: header-on, root: "**/ScheduleScreen/**/Schedule_Default Standard Schedule/Header/ScheduleName"}
+  - shot: {name: header, crop: "**/ScheduleScreen/**/Schedule_Default Standard Schedule/Header"}

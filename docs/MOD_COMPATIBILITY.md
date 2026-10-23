@@ -100,7 +100,7 @@ installs get developer checks subscribers never see).
 | 79 | [Speed Control 202107](https://steamcommunity.com/sharedfiles/filedetails/?id=2552175137) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2552175137-speed-control.yaml: the speed buttons, clicked while the game runs, set the time scale to the mod's defaults, 3, 10 and 1; the speed buttons' layout matches |
 | 80 | [AI Improvements](https://steamcommunity.com/sharedfiles/filedetails/?id=2128885110) | ✅ | ✅ | ⬜ |  |
 | 81 | [The Capsules 2.0](https://steamcommunity.com/sharedfiles/filedetails/?id=3179880371) | ✅ | ✅ | ⬜ |  |
-| 82 | [More Marble Sculptures](https://steamcommunity.com/sharedfiles/filedetails/?id=2789182100) | ✅ | ✅ | ⬜ |  |
+| 82 | [More Marble Sculptures](https://steamcommunity.com/sharedfiles/filedetails/?id=2789182100) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2789182100-more-marble-sculptures.yaml: a smaller spec: the 13 new sculpture looks, their kanims and the two moved qualities are in the game's database, and opening the supply closet's inventory lists them among the sculptures |
 | 83 | [Chinese language pack (by deloquac)](https://steamcommunity.com/sharedfiles/filedetails/?id=929036307) | ⬜ | ⬜ | ⬜ | translation: the game applies one only from a Steam subscription; not testable here |
 | 84 | [Cluster Generation Manager [Vanilla/DLC]](https://steamcommunity.com/sharedfiles/filedetails/?id=2947429297) | ✅ | ✅ | ⬜ |  |
 | 85 | [[Deprecated] Resculpt](https://steamcommunity.com/sharedfiles/filedetails/?id=1918000273) | ⬜ | ⬜ | ⬜ | flagged by onimaxxing (mayCrashInPlay); not tested |
@@ -110,13 +110,13 @@ installs get developer checks subscribers never see).
 | 89 | [Squirrel Wheel](https://steamcommunity.com/sharedfiles/filedetails/?id=2086704949) | ✅ | ✅ | ⬜ |  |
 | 90 | [Wall Pumps and Vents](https://steamcommunity.com/sharedfiles/filedetails/?id=1845579729) | ✅ | ✅ | ⬜ |  |
 | 91 | [Pipe Flow Overlay](https://steamcommunity.com/sharedfiles/filedetails/?id=2968583663) | ✅ | ✅ | ⬜ |  |
-| 92 | [Enable achievements](https://steamcommunity.com/sharedfiles/filedetails/?id=2415088657) | ✅ | ✅ | ⬜ |  |
+| 92 | [Enable achievements](https://steamcommunity.com/sharedfiles/filedetails/?id=2415088657) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2415088657-enable-achievements.yaml: a colony marked as debugged is saved and loaded again through the pause menu's Save and Load Game screens; the save carries the mark and it is clear after the load |
 | 93 | [Demolish Neutronium](https://steamcommunity.com/sharedfiles/filedetails/?id=2721654252) | ✅ | ✅ | ⬜ |  |
 | 94 | [Simpler Pip Plant Rule (Vanilla/DLC)](https://steamcommunity.com/sharedfiles/filedetails/?id=1859560108) | ✅ | ✅ | ✅ | spec tests/e2e/mods/1859560108-simpler-pip-plant-rule.yaml: a smaller spec (no Pips on early-base): its options reach the Pip's seed-planting monitor and the plant query, and the query counts the plants in a centred square beside two wild Mealwood |
-| 95 | [Smart Pumps](https://steamcommunity.com/sharedfiles/filedetails/?id=1887986467) | ✅ | ✅ | ⬜ |  |
+| 95 | [Smart Pumps](https://steamcommunity.com/sharedfiles/filedetails/?id=1887986467) | ✅ | ✅ | ⚠️ | spec tests/e2e/mods/1887986467-smart-pumps.yaml: a Filtered Gas Pump built from copper and a plastic gasket gets the element filter side screen; Oxygen chosen there becomes what the pump takes in; the side screen's layout and pixels match; known findings: `unused-input-caret-layout` |
 | 96 | [Tiny Door](https://steamcommunity.com/sharedfiles/filedetails/?id=2051059692) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2051059692-tiny-door.yaml: a Tiny Pneumatic Door, placed as a blueprint in the corridor west of the pod, is built from cuprite as a 1x1 door with access control; the airlock variants are in their techs |
 | 97 | [FreeCamera](https://steamcommunity.com/sharedfiles/filedetails/?id=1737603705) | ✅ | ✅ | ✅ | spec tests/e2e/mods/1737603705-freecamera.yaml: the camera's maximum zoom is 350; the mouse wheel zooms out past the world's size, the camera stays where it is set outside the world, and a far world shot matches |
-| 98 | [Remove Sandbox Lock Mode](https://steamcommunity.com/sharedfiles/filedetails/?id=2549472747) | ✅ | ✅ | ⬜ |  |
+| 98 | [Remove Sandbox Lock Mode](https://steamcommunity.com/sharedfiles/filedetails/?id=2549472747) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2549472747-remove-sandbox-lock-mode.yaml: the game options' sandbox check box turns sandbox on with no confirmation, stays usable, and turns it off again; the options' layout and pixels match |
 | 99 | [Freezer](https://steamcommunity.com/sharedfiles/filedetails/?id=2618339179) | ✅ | ✅ | ⬜ |  |
 | 100 | [Sealed Pump](https://steamcommunity.com/sharedfiles/filedetails/?id=2732419691) | ✅ | ✅ | ⬜ |  |
 | 101 | [Decor Lights](https://steamcommunity.com/sharedfiles/filedetails/?id=1732501619) | ⬜ | ⬜ | ⬜ | flagged by onimaxxing (crashesAtStartup); not tested |
@@ -124,7 +124,7 @@ installs get developer checks subscribers never see).
 | 103 | [schedule shift](https://steamcommunity.com/sharedfiles/filedetails/?id=1932765859) | ⬜ | ⬜ | ⬜ | flagged by onimaxxing (crashesAtStartup); not tested |
 | 104 | [Auto-Eject](https://steamcommunity.com/sharedfiles/filedetails/?id=2551341883) | ✅ | ✅ | ⬜ |  |
 | 105 | [Immigrants Reroll](https://steamcommunity.com/sharedfiles/filedetails/?id=2537508393) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2537508393-immigrants-reroll.yaml: the immigrant screen's bottom button, labelled Reroll, deals four new cards without a confirmation and the screen stays open; the bottom buttons' layout and pixels match |
-| 106 | [Convenient Scheduling](https://steamcommunity.com/sharedfiles/filedetails/?id=3369089274) | ✅ | ✅ | ⬜ |  |
+| 106 | [Convenient Scheduling](https://steamcommunity.com/sharedfiles/filedetails/?id=3369089274) | ✅ | ✅ | ✅ | spec tests/e2e/mods/3369089274-convenient-scheduling.yaml: the schedule screen's Dupli and Bionic toggles mark the standard schedule (its name's prefix) and keep its title; the header's layout and pixels match |
 | 107 | [[Vanilla + DLC] Rooms Expanded](https://steamcommunity.com/sharedfiles/filedetails/?id=2348079481) | ✅ | ✅ | ⬜ |  |
 | 108 | [Backwalls](https://steamcommunity.com/sharedfiles/filedetails/?id=2921809973) | ✅ | ✅ | ⬜ |  |
 | 109 | [Super Miner - Outdated](https://steamcommunity.com/sharedfiles/filedetails/?id=1728728517) | ⬜ | ⬜ | ⬜ | flagged by onimaxxing (notLoading); not tested |

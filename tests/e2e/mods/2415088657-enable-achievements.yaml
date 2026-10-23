@@ -1,0 +1,39 @@
+# Enable achievements (2415088657), class P.
+#
+# What it does: clears Game.debugWasUsed after every load (a postfix on Game.Load), so a colony
+# where debug or sandbox tools were used can still earn achievements.
+# How a player reaches it: loading a save.
+# What changes: the save's "debug was used" mark, which the achievement checks read.
+#
+# setup marks the colony as debugged (the field, by reflection); the spec saves it through the
+# pause menu and loads it again from the Load Game screen, and the mark is clear after the
+# load. The game logs the mark it read from the save ("Debug was used: True") before the mod's
+# postfix runs.
+from: early-base
+mods: [2415088657]
+require_log: ['Debug was used: True']
+setup:
+  - driver: {setup.call: {target: "Game.Instance.GetType().GetField(\"debugWasUsed\")", method: SetValue, args: [{"$": "Game.Instance"}, true]}}
+steps:
+  - expect_state: {"Game.Instance.debugWasUsed": true}
+  - key: {code: Escape}
+  - ui_wait: {path: "**/PauseScreen/**/SaveButton", cond: stable}
+  - click: {ui: "**/PauseScreen/**/SaveButton"}
+  - ui_wait: {path: "**/ConfirmDialog/GameObject/Panel/OKButton", cond: stable}
+  - expect_ui: {"**/ConfirmDialog/GameObject/Text": {text: "~overwrite early-base"}}
+  - click: {ui: "**/ConfirmDialog/GameObject/Panel/OKButton"}
+  - ui_wait: {path: "**/ConfirmDialog", cond: gone}
+  - ui_wait: {path: "**/PauseScreen/**/LoadButton", cond: stable}
+  - click: {ui: "**/PauseScreen/**/LoadButton"}
+  - ui_wait: {path: "**/LoadScreen/**/Prefab_ColonyButton/Header", cond: stable}
+  - click: {ui: "**/LoadScreen/**/Prefab_ColonyButton/Header"}
+  - ui_wait: {path: "**/LoadScreen/**/SaveTemplate(Clone)/LoadButton", cond: stable}
+  - expect_ui: {"**/LoadScreen/**/SavePreview/FileInfo/Filename": {text: "~early-base.sav"}}
+  - click: {ui: "**/LoadScreen/**/SaveTemplate(Clone)/LoadButton"}
+  # The pause menu stays open under the Load Game screen until the old colony goes with the
+  # load; then the new colony's HUD comes up.
+  - ui_wait: {path: "**/PauseScreen", cond: gone, frames: 6000}
+  - ui_wait: {path: "**/SecondaryRow/SpeedControlScreen", cond: stable, frames: 6000}
+  - expect_state:
+      "Game.Instance.debugWasUsed": false
+      "KCrashReporter.debugWasUsed": true

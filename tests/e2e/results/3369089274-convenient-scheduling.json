@@ -1,0 +1,73 @@
+{
+ "spec": "mods/3369089274-convenient-scheduling.yaml",
+ "mods": [
+  "3369089274"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the schedule screen's Dupli and Bionic toggles mark the standard schedule (its name's prefix) and keep its title; the header's layout and pixels match",
+ "updated": "2026-10-23",
+ "commit": "a58b89c",
+ "mod_dlls": {
+  "3369089274": {
+   "ConvenientScheduling.dll": "683655f90b3eb2581cf9e6ab1c1eadde7dc7b9bfb1d950ee538c0f7d5de8d3f4"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-002531-5ca489",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T00:26:52",
+    "lane": 10,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-010611-684c68",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T01:06:11",
+    "lane": 10,
+    "reference_run": "20261023-002531-5ca489",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "header": {
+      "differences": 0
+     },
+     "header-on": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "header": 0.0
+    }
+   },
+   {
+    "run": "20261023-010611-684c68",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T01:06:52",
+    "lane": 10,
+    "reference_run": "20261023-002531-5ca489",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "header": {
+      "differences": 0
+     },
+     "header-on": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "header": 0.0
+    }
+   }
+  ]
+ }
+}

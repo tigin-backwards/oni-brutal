@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2415088657-enable-achievements.yaml",
+ "mods": [
+  "2415088657"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a colony marked as debugged is saved and loaded again through the pause menu's Save and Load Game screens; the save carries the mark and it is clear after the load",
+ "updated": "2026-10-23",
+ "commit": "a58b89c",
+ "mod_dlls": {
+  "2415088657": {
+   "EnableAchievements.dll": "6acae52af99edebc315e549abac89a2765013416c34c8229fde2c6d7c47bd835"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-002531-5ca489",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T00:25:31",
+    "lane": 10,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-005715-476063",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T01:04:25",
+    "lane": 10,
+    "reference_run": "20261023-002531-5ca489",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-005715-476063",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T01:05:19",
+    "lane": 10,
+    "reference_run": "20261023-002531-5ca489",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

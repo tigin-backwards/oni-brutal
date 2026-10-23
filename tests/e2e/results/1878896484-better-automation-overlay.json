@@ -1,0 +1,73 @@
+{
+ "spec": "mods/1878896484-better-automation-overlay.yaml",
+ "mods": [
+  "1878896484"
+ ],
+ "verdict": "failed",
+ "why": "a run of ours failed",
+ "findings": [],
+ "note": "a Cycle Sensor built from copper shows its setting, \"0% : 100%\", as a label in the automation overlay (the overlay within 1.4 % of the original's pixels); the label differs in its layout dump: the mod's label template destroys the copied power label's ContentSizeFitter, ToolTip and child \"Unit\" (Object.Destroy), which ours still has, so the label is 52.8 wide instead of 50",
+ "updated": "2026-10-22",
+ "commit": "bafbbf6",
+ "mod_dlls": {
+  "1878896484": {
+   "BetterLogicOverlay.dll": "9d17871d13c3b69e82f49fa5cdb849b2aae283e52ffc0214f4e48a976bef4c53"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261022-234732-fd6947",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-22T23:47:32",
+    "lane": 11,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261022-234931-46eb4d",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-22T23:49:31",
+    "lane": 11,
+    "reasons": [
+     "ui_dump label: 5 difference(s)"
+    ],
+    "reference_run": "20261022-234732-fd6947",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "label": {
+      "differences": 5
+     }
+    },
+    "shots": {
+     "overlay": 0.013631
+    }
+   },
+   {
+    "run": "20261022-234931-46eb4d",
+    "index": 2,
+    "verdict": "fail",
+    "date": "2026-10-22T23:51:00",
+    "lane": 11,
+    "reasons": [
+     "ui_dump label: 5 difference(s)"
+    ],
+    "reference_run": "20261022-234732-fd6947",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "label": {
+      "differences": 5
+     }
+    },
+    "shots": {
+     "overlay": 0.014019
+    }
+   }
+  ]
+ }
+}

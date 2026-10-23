@@ -1,0 +1,31 @@
+# Better Automation Overlay (1878896484), classes O, V.
+#
+# What it does: in the automation overlay, each sensor, gate and other logic building shows
+# its setting as a small label over it (LogicSettingLabel on the world-space canvas: a timer's
+# times, a sensor's threshold, a filter's element as an abbreviation such as O<sub>2</sub>),
+# and a red output port is no longer drawn green by a green wire (Logic.UpdateUI). PLib
+# options set the label font and turn either part off.
+# How a player reaches it: the overlay bar's automation button.
+# What changes: labels over logic buildings in that overlay.
+#
+# setup researches Generic Sensors (the Cycle Sensor's tech) and 800 kg of copper for it (refined
+# metal, which early-base lacks). A Cycle Sensor is built in the dug-out corridor west of the
+# printing pod, then the overlay opened over it.
+from: early-base
+mods: [1878896484]
+setup:
+  # Researched the game's way, so the overlay bar gains its automation button: queued (with
+  # its prerequisites), then the queue completed.
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"GenericSensors\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Copper\").substance", method: SpawnResource, args: [[114.5, 206.5, -12], 800, 300, 255, 0]}}
+steps:
+  - build: {prefab: LogicTimeOfDaySensor, at: [110, 207], material: Copper}
+  - expect: {blueprints: {LogicTimeOfDaySensor: 1}}
+  - run: {seconds: 900, until: {buildings: {LogicTimeOfDaySensor: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [110, 208], ortho: 6}}
+  - click: {ui: "**/OverlaysBar/Toggle:Automation Overlay"}
+  - ui_wait: {path: "**/LogicSettingLabel", cond: stable}
+  - expect_ui: {"**/LogicSettingLabel": {count: 1, text: "0% : 100%"}}   # the sensor's on and off times
+  - ui_dump: {name: label, root: "**/LogicSettingLabel"}
+  - world_shot: {name: overlay, ortho: 6, at: [110, 208]}   # the labels sit on the world-space canvas, which stays

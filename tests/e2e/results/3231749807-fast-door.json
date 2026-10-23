@@ -1,0 +1,60 @@
+{
+ "spec": "mods/3231749807-fast-door.yaml",
+ "mods": [
+  "3231749807"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "options 4/3/2: a Manual Airlock built with OniMcp opens at 4 times the game's speed, and the Mechanized Airlock's prefab carries 3 x 5 and 2 x 0.65; details screen within threshold",
+ "updated": "2026-10-23",
+ "commit": "993d394",
+ "mod_dlls": {
+  "3231749807": {
+   "FastDoor.dll": "f3ce1c05fcd64535d720936e8f94b7fa456068e6c36176cf01e43dc406e25db5",
+   "PLib.dll": "93073fdf44dbe9fd7c0afe19e56341be862cc2d732090dee30999cf60e2e160d"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-142412-0589f6",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T14:29:33",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-144524-5743ff",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T15:11:59",
+    "lane": 14,
+    "reference_run": "20261023-142412-0589f6",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "details": 0.0
+    }
+   },
+   {
+    "run": "20261023-144524-5743ff",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T15:19:53",
+    "lane": 14,
+    "reference_run": "20261023-142412-0589f6",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "details": 0.0
+    }
+   }
+  ]
+ }
+}

@@ -1,0 +1,59 @@
+{
+ "spec": "mods/2787598894-golden-throne.yaml",
+ "mods": [
+  "2787598894"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Lavatory of gold amalgam built with OniMcp plays the mod's golden animation; a close-up world shot of it compared with the original's",
+ "updated": "2026-10-23",
+ "commit": "993d394",
+ "mod_dlls": {
+  "2787598894": {
+   "GoldenThrone.dll": "f90078cb4a46f740549997f306f738f59081ca386861fd695d776098ec793f4c"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-143629-d74d25",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T14:55:06",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-153309-2d408f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T15:33:09",
+    "lane": 14,
+    "reference_run": "20261023-143629-d74d25",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "throne": 0.021748
+    }
+   },
+   {
+    "run": "20261023-153309-2d408f",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T15:34:20",
+    "lane": 14,
+    "reference_run": "20261023-143629-d74d25",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "throne": 0.020854
+    }
+   }
+  ]
+ }
+}

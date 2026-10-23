@@ -1,0 +1,30 @@
+# [MG]Only Good Traits(仅好特性) (2557269577), class P.
+#
+# What it does: a postfix on Game.OnPrefabInit fills DUPLICANTSTATS.BADTRAITS with the good
+# traits, so a Duplicant generated afterwards (at the printing pod) draws good traits where the
+# game would give it bad ones.
+# How a player reaches it: the printing pod's immigrant screen; nothing to press.
+# What changes: the Duplicants on offer have no negative traits.
+#
+# The cards are random, so nothing on them is compared: the check is that the trait list the
+# game draws "bad" traits from holds only good ones, and that no Duplicant on offer has a
+# negative trait.
+from: early-base
+mods: [2557269577]
+setup:
+  - driver: {seed: 12345}
+  - driver: {setup.call: {target: "Immigration.Instance", method: "Sim200ms", args: [100000]}}   # Duplicants on offer now
+steps:
+  - expect_state:
+      "TUNING.DUPLICANTSTATS.GOODTRAITS.Count": {save_as: good}
+  - expect_state:
+      "TUNING.DUPLICANTSTATS.BADTRAITS.Count": "== good"
+  - call: {tool: building_control, args: {domain: side_surface, surface: facility, kind: telepad, action: open_immigrants, confirm: true}}
+  - ui_wait: {path: "**/ImmigrantScreen/Layout", cond: stable}
+  - expect_ui:
+      "**/ImmigrantScreen/Layout/Content/*Container": {count: 4}
+  - expect_state:
+      "all:CharacterContainer::Length": ">= 1"
+      "count:all:CharacterContainer::[0].stats.Traits[*] if .PositiveTrait == false": 0
+  - expect_state:
+      "count:all:CharacterContainer::[-1].stats.Traits[*] if .PositiveTrait == false": 0

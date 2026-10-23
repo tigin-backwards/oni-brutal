@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2557269577-only-good-traits.yaml",
+ "mods": [
+  "2557269577"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the list the game draws bad traits from holds only good ones, and the Duplicants on the printing pod's immigrant screen have no negative trait",
+ "updated": "2026-10-23",
+ "commit": "993d394",
+ "mod_dlls": {
+  "2557269577": {
+   "MG_GoodTraits.dll": "90029a0d680eae7ae7b1751a745ca67655779076bf2f941d30b2e071c8b233cc"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-143629-d74d25",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T14:46:24",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-151545-c8a76d",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T15:31:31",
+    "lane": 15,
+    "reference_run": "20261023-143629-d74d25",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-151545-c8a76d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T15:31:20",
+    "lane": 14,
+    "reference_run": "20261023-143629-d74d25",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -1,0 +1,33 @@
+# Fast Door (3231749807), classes P, O.
+#
+# What it does: multiplies the animation speed of the Manual Airlock
+# (ManualPressureDoorMultiplier) and of the Mechanized Airlock, powered (…InWire) and
+# unpowered (…NoWire), by PLib options from 1 to 20 (5 by default; the Workshop copy ships a
+# config.json of 1s). A door's open and close time follows its animation speed.
+# How a player reaches it: the Mods screen's options; building the doors.
+# What changes: airlocks open and close faster, so Duplicants wait less at them.
+#
+# Options here: 4 (manual), 3 (powered), 2 (unpowered). A Manual Airlock is built from the
+# base's metal ore in the dug-out corridor west of the printing pod and selected: its speed is
+# 4 times the game's 1. The Mechanized Airlock's prefab carries 3 x 5 and 2 x 0.65.
+from: early-base
+mods: [3231749807]
+options:
+  "3231749807": {ManualPressureDoorMultiplier: 4, PressureDoorMultiplierInWire: 3, PressureDoorMultiplierNoWire: 2}
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"PressureManagement\")", method: Purchased}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"PressureDoor\").GetComponent<Door>.poweredAnimSpeed": 15
+      "Assets.GetPrefab(\"PressureDoor\").GetComponent<Door>.unpoweredAnimSpeed": 1.3
+  - build: {prefab: ManualPressureDoor, at: [112, 207]}
+  - expect: {blueprints: {ManualPressureDoor: 1}}
+  - run: {seconds: 1200, until: {buildings: {ManualPressureDoor: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 208], select: ManualPressureDoor}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Manual Airlock"}
+  - expect_state:
+      "selected:GetComponent<Door>.unpoweredAnimSpeed": 4
+  - shot: {name: details, crop: "**/DetailsScreen", threshold: 0.04}

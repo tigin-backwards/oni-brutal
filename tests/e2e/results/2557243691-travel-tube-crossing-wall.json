@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2557243691-travel-tube-crossing-wall.yaml",
+ "mods": [
+  "2557243691"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Transit Tube placed with OniMcp in a built Tile's cell is accepted and built there, the tile staying; the Transit Tube Access spends 1 kJ per launch of 40 kJ and is not floodable",
+ "updated": "2026-10-23",
+ "commit": "993d394",
+ "mod_dlls": {
+  "2557243691": {
+   "MG_TravelTubeCrossingWall.dll": "ae8b915689909094f017aee82405e7f59ad34ea9cd01d000991a8a05926cc9fa"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-142412-0589f6",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T14:42:30",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-152749-d33097",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T15:27:49",
+    "lane": 14,
+    "reference_run": "20261023-142412-0589f6",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-152749-d33097",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T15:29:28",
+    "lane": 14,
+    "reference_run": "20261023-142412-0589f6",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

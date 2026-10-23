@@ -1,0 +1,22 @@
+# Debug Console // by @Ony (2041219184), class P.
+#
+# What it does: on Windows, opens a console window beside the game that mirrors the game's
+# log (and writes console.log beside the mod). On every platform, a prefix on JobManager.Run
+# patches the game's worker threads (JobManager.WorkerThread.Run) the first time jobs run,
+# replacing their loop with one that prints an exception to the console before passing it on.
+# How a player reaches it: nothing to press; the console opens at start-up.
+# What changes: a log window, and worker exceptions on it.
+#
+# A smaller spec: the console window is Windows only (its CreateConsole returns on other
+# platforms). The game runs a while, so its jobs run through the mod's replacement worker
+# loop, and time and the simulation keep going.
+from: early-base
+mods: [2041219184]
+steps:
+  - expect_state:
+      "GameClock.Instance.GetTime()": {save_as: start}
+  - run: {seconds: 60}
+  - expect_state:
+      "type:Ony.OxygenNotIncluded.DebugConsole.JobManager_Run::_patched": true
+      "GameClock.Instance.GetTime()": ">= start + 59"
+  - expect: {duplicants: ">= 3"}

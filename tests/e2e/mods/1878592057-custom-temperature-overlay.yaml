@@ -1,0 +1,28 @@
+# CustomTemperatureOverlay (1878592057), class V.
+#
+# What it does: the Temperature overlay's colours come from the mod's Config.json, up to
+# eight steps of a colour at a temperature (from white at absolute zero through blues, greens
+# and reds), interpolated in between: a prefix on SimDebugView.NormalizedTemperature replaces
+# the game's ramp in the overlay's absolute mode, and a postfix on the overlay's legend
+# writes the steps' colours and temperatures into its eight entries. The file is watched and
+# reloaded while the game runs.
+# How a player reaches it: the Temperature overlay (F3).
+# What changes: the overlay's colours and legend.
+#
+# The overlay is opened over the base west of the printing pod: its legend lists the mod's
+# temperatures (absolute zero first), and the legend and the world under it are shot.
+from: early-base
+mods: [1878592057]
+steps:
+  - driver: {camera.set: {cell: [112, 208], ortho: 12}}
+  - open: {key: F3}
+  - ui_wait: {path: "**/TopRight/OverlayLegend", cond: stable}
+  - expect_state:
+      "type:CustomTemperatureOverlay.State::Steps.Length": "== original"
+      "Game.Instance.temperatureOverlayMode": AbsoluteTemperature
+  - expect_ui:
+      "**/OverlayLegend/TitleBar/Label": {text: "TEMPERATURE OVERLAY"}
+  - ui_dump: {name: legend, root: "**/TopRight/OverlayLegend"}
+  - shot: {name: legend, crop: "**/TopRight/OverlayLegend", threshold: 0.04}
+  - ui_wait: {path: "**/TopRight/OverlayLegend", cond: stable, stable: 240, frames: 600}
+  - world_shot: {name: base, ortho: 12, at: [112, 208]}

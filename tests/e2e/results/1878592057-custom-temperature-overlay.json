@@ -1,0 +1,82 @@
+{
+ "spec": "mods/1878592057-custom-temperature-overlay.yaml",
+ "mods": [
+  "1878592057"
+ ],
+ "verdict": "warning",
+ "why": "known findings: scroll-normalized-position",
+ "findings": [
+  "scroll-normalized-position"
+ ],
+ "note": "the Temperature overlay shows the mod's colours: its legend dumped and shot, and the base shot under it, as in the original",
+ "updated": "2026-10-23",
+ "commit": "e6ee4a1",
+ "mod_dlls": {
+  "1878592057": {
+   "Common.dll": "87a6b9950dc4f7703d1d165fab10c6aeddad6810531639062a4a40bbe6fefb3a",
+   "CustomTemperatureOverlay.dll": "e51bf0fa85156fc8221718d02dd4131b5ab70c29f4b68d8c01491f0238fda3f9"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-113951-d72f9a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T11:56:16",
+    "lane": 12,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-120421-aae910",
+    "index": 1,
+    "verdict": "warn",
+    "date": "2026-10-23T12:35:00",
+    "lane": 12,
+    "reference_run": "20261023-113951-d72f9a",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "legend": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 2
+      }
+     }
+    },
+    "shots": {
+     "legend": 0.000204,
+     "base": 8.1e-05
+    }
+   },
+   {
+    "run": "20261023-120421-aae910",
+    "index": 2,
+    "verdict": "warn",
+    "date": "2026-10-23T12:35:57",
+    "lane": 13,
+    "reference_run": "20261023-113951-d72f9a",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "legend": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 2
+      }
+     }
+    },
+    "shots": {
+     "legend": 0.000204,
+     "base": 8.4e-05
+    }
+   }
+  ]
+ }
+}

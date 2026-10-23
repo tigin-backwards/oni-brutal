@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2041219184-debug-console.yaml",
+ "mods": [
+  "2041219184"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "smaller spec: the console window is Windows only; the game runs a minute through the mod's replacement worker-thread loop, and time and the colony go on",
+ "updated": "2026-10-23",
+ "commit": "e6ee4a1",
+ "mod_dlls": {
+  "2041219184": {
+   "DebugConsole.dll": "ac702c58040d459fec6fe5e13e0fffde425358de45850683a05a60a509bb3cb3"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-113951-d72f9a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T11:55:24",
+    "lane": 13,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-120421-aae910",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T12:33:38",
+    "lane": 12,
+    "reference_run": "20261023-113951-d72f9a",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-120421-aae910",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T12:34:36",
+    "lane": 13,
+    "reference_run": "20261023-113951-d72f9a",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

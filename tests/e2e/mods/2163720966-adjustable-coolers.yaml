@@ -1,0 +1,37 @@
+# Adjustable Coolers (2163720966), class P.
+#
+# What it does: the Thermo Regulator and the Thermo Aquatuner get a "Cooling Temperature"
+# slider in their side screen (AirConditionerAdjustable, an IUserControlledCapacity) from
+# -20 to +20 degrees: the building changes what passes through by that much, and draws power
+# in proportion (the Regulator 340 W and the Aquatuner 1,700 W at 20 degrees).
+# How a player reaches it: selecting a Thermo Regulator or Aquatuner.
+# What changes: coolers that cool less, or heat, for less power.
+#
+# setup grants HVAC and spawns copper ore. A Thermo Regulator is built in the dug-out corridor
+# west of the printing pod and selected: it starts at the game's -14 degrees; 10 typed into
+# the slider's field makes it heat by 10 degrees, and its wattage is scaled as in the original
+# (the mod scales the already scaled wattage again, so it is not the 170 W it means).
+from: early-base
+mods: [2163720966]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"HVAC\")", method: Purchased}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Cuprite\").substance", method: SpawnResource, args: [[115.5, 207.5, -12], 600, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"AirConditioner\").EnergyConsumptionWhenActive": 340
+  - build: {prefab: AirConditioner, at: [113, 206]}
+  - expect: {blueprints: {AirConditioner: 1}}
+  - run: {seconds: 1200, until: {buildings: {AirConditioner: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: AirConditioner}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/CapacityControlSideScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<AirConditioner>.temperatureDelta": -14
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Thermo Regulator"}
+  - shot: {name: details, crop: "**/DetailsScreen", threshold: 0.04}
+  - ui_dump: {name: side-screen, root: "**/CapacityControlSideScreen"}
+  - type: {ui: "**/CapacityControlSideScreen/**/*Input*", text: "10", enter: true, clear: true}
+  - expect_state:
+      "selected:GetComponent<AirConditioner>.temperatureDelta": 10
+      "selected:GetComponent<EnergyConsumer>.BaseWattageRating": "== original"

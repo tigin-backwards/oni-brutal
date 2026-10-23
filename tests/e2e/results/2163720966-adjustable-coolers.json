@@ -1,0 +1,67 @@
+{
+ "spec": "mods/2163720966-adjustable-coolers.yaml",
+ "mods": [
+  "2163720966"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Thermo Regulator is built of copper ore in the corridor and selected; the mod's Cooling Temperature slider (dumped, details shot) starts at -14, and 10 typed into it makes it heat by 10 degrees, its wattage rescaled as in the original",
+ "updated": "2026-10-23",
+ "commit": "cb70efc",
+ "mod_dlls": {
+  "2163720966": {
+   "AdjustableCoolers.dll": "099cfdb9b5eb6d21515738bc2015c0bf93ec26d263bff79e010347a2c09b4ec7"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-130426-e75773",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T13:07:52",
+    "lane": 12,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-131020-a1c4ff",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T13:14:55",
+    "lane": 12,
+    "reference_run": "20261023-130426-e75773",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "side-screen": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "details": 4.1e-05
+    }
+   },
+   {
+    "run": "20261023-131020-a1c4ff",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T13:17:14",
+    "lane": 12,
+    "reference_run": "20261023-130426-e75773",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "side-screen": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "details": 4.1e-05
+    }
+   }
+  ]
+ }
+}

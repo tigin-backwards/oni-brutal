@@ -1,0 +1,32 @@
+# Tiny Door (2051059692), class B.
+#
+# What it does: adds three 1x1 doors to the Base build menu, beside the game's: the Tiny
+# Pneumatic Door (TinyDoor, 30 kg of metal, no research), the Tiny Mechanized Airlock
+# (TinyPressureDoor, powered, Directed Air Streams) and the Tiny Manual Airlock
+# (TinyManualPressureDoor, Pressure Management).
+# How a player reaches it: the build menu (Base), then the door's side screen (access).
+# What changes: a one-cell door, with the game's door controls.
+#
+# The Tiny Pneumatic Door needs no research: it is placed in the dug-out corridor west of the
+# printing pod, from early-base's cuprite, and built.
+from: early-base
+mods: [2051059692]
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"TinyDoor\").WidthInCells": 1
+      "Assets.GetBuildingDef(\"TinyDoor\").HeightInCells": 1
+      "Assets.GetBuildingDef(\"TinyPressureDoor\").RequiresPowerInput": true
+      "Db.Get().Techs.Get(\"DirectedAirStreams\").unlockedItemIDs": {contains: TinyPressureDoor}
+      "Db.Get().Techs.Get(\"PressureManagement\").unlockedItemIDs": {contains: TinyManualPressureDoor}
+  - build: {prefab: TinyDoor, at: [114, 207], material: Cuprite}
+  - expect: {blueprints: {TinyDoor: 1}}
+  - run: {seconds: 900, until: {buildings: {TinyDoor: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [114, 208], ortho: 8}}
+  - click_world: {cell: [114, 207]}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Tiny Pneumatic Door"}
+  - expect_state:
+      "selected:Door.doorType": Internal
+      "selected:Door.CurrentState": "== original"
+      "selected:AccessControl.controlEnabled": true

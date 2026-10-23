@@ -1,0 +1,22 @@
+# FreeCamera (1737603705), classes S, V.
+#
+# What it does: raises the camera's maximum orthographic size to 350 (when the camera
+# controller is made, when a new base's camera is set and after Wattson's welcome) and stops
+# the camera from being kept inside the world (CameraController.ConstrainToWorld does nothing).
+# How a player reaches it: the mouse wheel and the camera's panning, over the world.
+# What changes: how far the camera zooms out, and that it can leave the world's bounds.
+from: early-base
+mods: [1737603705]
+steps:
+  - expect_state:
+      "CameraController.Instance.maxOrthographicSize": 350
+      "Camera.main.orthographicSize": "<= 20"
+  - scroll: {at: center, notches: -40}
+  - expect_state: {"CameraController.Instance.targetOrthographicSize": "> 20"}
+  - expect_state: {"CameraController.Instance.targetOrthographicSize": "== original"}
+  # Out of the world: far left of x 0 and below it, the camera stays where it is set.
+  - driver: {camera.set: {pos: [-150, -100], ortho: 30}}
+  - expect_state:
+      "Camera.main.transform.position.x": "< -100"
+      "Camera.main.transform.position.y": "< -50"
+  - world_shot: {name: far, ortho: 150, at: [122, 208]}

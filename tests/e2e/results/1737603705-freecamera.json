@@ -1,0 +1,59 @@
+{
+ "spec": "mods/1737603705-freecamera.yaml",
+ "mods": [
+  "1737603705"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the camera's maximum zoom is 350; the mouse wheel zooms out past the world's size, the camera stays where it is set outside the world, and a far world shot matches",
+ "updated": "2026-10-23",
+ "commit": "6d768f4",
+ "mod_dlls": {
+  "1737603705": {
+   "FreeCamera.dll": "3518b79798e8c7a5e260daef03f7c41252cac9453efdb6c9e5be31d9caa3e7a2"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-000627-45d9e7",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T00:08:17",
+    "lane": 11,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-001102-3b70ea",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T00:11:57",
+    "lane": 11,
+    "reference_run": "20261023-000627-45d9e7",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "far": 0.009239
+    }
+   },
+   {
+    "run": "20261023-001102-3b70ea",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T00:12:03",
+    "lane": 10,
+    "reference_run": "20261023-000627-45d9e7",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "far": 0.009239
+    }
+   }
+  ]
+ }
+}

@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2051059692-tiny-door.yaml",
+ "mods": [
+  "2051059692"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Tiny Pneumatic Door, placed as a blueprint in the corridor west of the pod, is built from cuprite as a 1x1 door with access control; the airlock variants are in their techs",
+ "updated": "2026-10-23",
+ "commit": "6d768f4",
+ "mod_dlls": {
+  "2051059692": {
+   "TinyDoor.dll": "b035c08fc82bea1803bca016b4c42b42c615d1be3c161ac2d87f815ba12066f5"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-000627-45d9e7",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T00:06:27",
+    "lane": 11,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-001035-615195",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T00:10:35",
+    "lane": 11,
+    "reference_run": "20261023-000627-45d9e7",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-001035-615195",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T00:10:41",
+    "lane": 10,
+    "reference_run": "20261023-000627-45d9e7",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

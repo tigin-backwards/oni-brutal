@@ -10,9 +10,16 @@
 from: early-base
 mods: [1897096779]
 steps:
-  - open: {management: research}
+  # The mod unlocks the tree's zoom from the screen centre: it zooms about the pointer while the
+  # screen opens, so the pointer is put in the screen's middle before R opens it.
+  - driver: {camera.set: {cell: [122, 208], ortho: 10}}
+  - key: {code: R, at: [122, 208]}
   - ui_wait: {path: "**/FullScreenUICanvases/ResearchScreen", cond: stable}
   - ui_wait: {path: "**/ResearchScreen/**/research-queue-root", cond: stable, frames: 600}
+  # The tree glides to its clamped place after the screen opens: the clicks wait for it.
+  - ui_wait: {path: "**/ResearchScreen/Content/ScrollRectRoot/ScrollContent", cond: stable, frames: 600}
+  - expect_state:
+      "ui:**/ScrollRectRoot/ScrollContent::GetComponent<RectTransform>.anchoredPosition": {save_as: view}
   - expect_state:
       "Research.Instance.GetResearchQueue().Count": 0
   - expect_ui:

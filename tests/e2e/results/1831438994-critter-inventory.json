@@ -3,12 +3,12 @@
  "mods": [
   "1831438994"
  ],
- "verdict": "pending",
- "why": "0 run(s) of ours against original run 20261023-052710-56b7c0; 2 needed",
+ "verdict": "failed",
+ "why": "a run of ours failed",
  "findings": [],
- "note": "",
+ "note": "the All Resources screen opened from See All lists Critter (Wild) with hatch, shine bug and sweetle rows, and its shot matches; the ui_dump differs: the second row's background (the screen's alternate row colour) is 230,230,230 in ours, 229,229,229 in the original, in both runs",
  "updated": "2026-10-23",
- "commit": "309f5f8",
+ "commit": "115ad8e",
  "mod_dlls": {
   "1831438994": {
    "CritterInventory.dll": "909fbb871a6d3a27808b7fb12e38ad076d9115f48a2878ae66a2cee9a6dde94a"
@@ -25,6 +25,49 @@
     "signatures": 0
    }
   ],
-  "ours": []
+  "ours": [
+   {
+    "run": "20261023-053610-e811cd",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-23T06:20:06",
+    "lane": 15,
+    "reasons": [
+     "ui_dump wild: 1 difference(s)"
+    ],
+    "reference_run": "20261023-052710-56b7c0",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "wild": {
+      "differences": 1
+     }
+    },
+    "shots": {
+     "all-resources": 0.000441
+    }
+   },
+   {
+    "run": "20261023-053610-e811cd",
+    "index": 2,
+    "verdict": "fail",
+    "date": "2026-10-23T06:21:06",
+    "lane": 15,
+    "reasons": [
+     "ui_dump wild: 1 difference(s)"
+    ],
+    "reference_run": "20261023-052710-56b7c0",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "wild": {
+      "differences": 1
+     }
+    },
+    "shots": {
+     "all-resources": 0.000441
+    }
+   }
+  ]
  }
 }

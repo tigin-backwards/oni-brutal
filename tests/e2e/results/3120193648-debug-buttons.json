@@ -3,12 +3,12 @@
  "mods": [
   "3120193648"
  ],
- "verdict": "pending",
- "why": "0 run(s) of ours against original run 20261023-042128-2bb68b; 2 needed",
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
  "findings": [],
- "note": "",
+ "note": "the four buttons beside the hidden Sandbox toggle are dumped; Debug Mode and Insta Build are switched on by clicks (shot) and off again",
  "updated": "2026-10-23",
- "commit": "885cbe9",
+ "commit": "115ad8e",
  "mod_dlls": {
   "3120193648": {
    "DebugButton.dll": "fb863433e6205a690606844dc4d087f89327ce140be9f3519cc122541d5eba50"
@@ -25,6 +25,43 @@
     "signatures": 0
    }
   ],
-  "ours": []
+  "ours": [
+   {
+    "run": "20261023-061848-6b4b27",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T06:18:48",
+    "lane": 14,
+    "reference_run": "20261023-042128-2bb68b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "buttons": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "enabled": 0.0
+    }
+   },
+   {
+    "run": "20261023-061848-6b4b27",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T06:19:41",
+    "lane": 14,
+    "reference_run": "20261023-042128-2bb68b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "buttons": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "enabled": 0.0
+    }
+   }
+  ]
  }
 }

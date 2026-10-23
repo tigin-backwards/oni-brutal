@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2128885110-ai-improvements.yaml",
+ "mods": [
+  "2128885110"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a standard Duplicant's navigator gets the mod's location history, empty after the load and filled after it has walked",
+ "updated": "2026-10-23",
+ "commit": "c7f9d6e",
+ "mod_dlls": {
+  "2128885110": {
+   "AIImprovements.dll": "807ea13f47b6e6309214ddd34a75dfe7810dec789bc97771002ca294bf46f2e3"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-002531-5ca489",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T00:31:50",
+    "lane": 11,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-013409-ed7115",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T01:34:09",
+    "lane": 10,
+    "reference_run": "20261023-002531-5ca489",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-013409-ed7115",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T01:35:41",
+    "lane": 10,
+    "reference_run": "20261023-002531-5ca489",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

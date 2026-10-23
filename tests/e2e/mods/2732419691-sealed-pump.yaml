@@ -1,0 +1,36 @@
+# Sealed Pump (2732419691), class B.
+#
+# What it does: adds the Sealed Pitcher Pump (SolidWaterPump, 2x4, 800 kg of raw minerals by
+# its settings.json, no research) to the Plumbing menu after the Pitcher Pump. It works as a
+# Pitcher Pump, but its bottom row is solid (MakeBaseSolid on the foundation layer), so it can
+# stand in a pool and seal it: Duplicants stand on it and fill bottles from the liquid below.
+# How a player reaches it: the build menu (Plumbing).
+# What changes: a pitcher pump whose base is a floor.
+#
+# Placed in the dug-out corridor west of the printing pod, from 1000 kg of sandstone set down
+# beside it in setup; once built, its two base cells are solid.
+from: early-base
+mods: [2732419691]
+setup:
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"SandStone\").substance", method: SpawnResource, args: [[109.5, 206.5, -12], 1000, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"SolidWaterPump\").WidthInCells": 2
+      "Assets.GetBuildingDef(\"SolidWaterPump\").HeightInCells": 4
+      "Grid.Solid.get_Item(131129)": false
+      "Grid.Solid.get_Item(131130)": false
+  - build: {prefab: SolidWaterPump, at: [113, 206], material: SandStone}
+  - expect: {blueprints: {SolidWaterPump: 1}}
+  - run: {seconds: 900, until: {buildings: {SolidWaterPump: 1}, pending_construction: 0}}
+  - expect_state:
+      "Grid.Solid.get_Item(131129)": true
+      "Grid.Solid.get_Item(131130)": true
+      "Grid.Solid.get_Item(131765)": false
+  - driver: {camera.set: {cell: [114, 208], ortho: 8}}
+  - click_world: {cell: [113, 208]}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Sealed Pitcher Pump"}
+  - expect_state:
+      "selected:LiquidPumpingStation": exists
+      "selected:PrimaryElement.ElementID": SandStone

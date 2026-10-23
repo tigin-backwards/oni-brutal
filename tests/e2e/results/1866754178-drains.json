@@ -1,0 +1,55 @@
+{
+ "spec": "mods/1866754178-drains.yaml",
+ "mods": [
+  "1866754178"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Drain built from cuprite in the corridor floor west of the pod, with a liquid pipe through its cell, draws poured water into the pipe",
+ "updated": "2026-10-23",
+ "commit": "c7f9d6e",
+ "mod_dlls": {
+  "1866754178": {
+   "Drains.dll": "25a51c7325c8ae885b9cdf6506eaf7d0b2d25636ee91262377096ec588a90326"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-012617-63ec21",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T01:26:57",
+    "lane": 11,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-013704-2af6dd",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T01:37:19",
+    "lane": 10,
+    "reference_run": "20261023-012617-63ec21",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-013704-2af6dd",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T01:39:10",
+    "lane": 10,
+    "reference_run": "20261023-012617-63ec21",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

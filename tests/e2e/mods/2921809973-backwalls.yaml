@@ -1,0 +1,41 @@
+# Backwalls (2921809973), classes B, T, S, K, V, M.
+#
+# What it does: adds two backwall buildings to the Base menu, after the Drywall: the
+# Decorative Backwall (Artistry) and the Sealed Backwall (Clothing). They sit on the backwall
+# layer behind everything, drawn by the mod's own renderer in any tile's pattern (every tile
+# with a block atlas, plus a plain one) and any colour. Their side screen (from the mod's
+# asset bundle: colour swatches, HSV sliders, the pattern gallery, favourites, copy toggles)
+# sets them; the build tool's hover card and a smart build tool follow the selected pattern,
+# and the Mods screen gets a settings dialog.
+# How a player reaches it: the build menu (Base), then the wall's side screen.
+# What changes: the backwall's colour and pattern.
+#
+# setup grants Artistry; a Decorative Backwall is built in the dug-out corridor west of the
+# printing pod and selected, and a swatch and a pattern are picked on its side screen.
+from: early-base
+mods: [2921809973]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"Artistry\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+steps:
+  - build: {prefab: Backwall_DecorativeBackwall, at: [108, 208]}
+  - expect: {blueprints: {Backwall_DecorativeBackwall: 1}}
+  - run: {seconds: 900, until: {buildings: {Backwall_DecorativeBackwall: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [108, 208], ortho: 6}}
+  - click_world: {cell: [108, 208], select: Backwall_DecorativeBackwall}
+  - ui_wait: {path: "**/WallSidescreen/Contents/FacadeSelector", cond: stable}
+  - expect_state:
+      "selected:GetComponent<Backwalls.Cmps.Backwall>.settings.pattern": Tile
+      "selected:GetComponent<Backwalls.Cmps.Backwall>.settings.swatchIdx": -1
+  - ui_dump: {name: side, root: "**/WallSidescreen/Contents/ColorGrid"}
+  - shot: {name: side, crop: "**/WallSidescreen"}
+  - click: {ui: "**/WallSidescreen/Contents/ColorGrid/SwatchPrefab(Clone)", index: 5}
+  - expect_state:
+      "selected:GetComponent<Backwalls.Cmps.Backwall>.settings.swatchIdx": 5
+      "selected:GetComponent<Backwalls.Cmps.Backwall>.settings.colorHex": A80020FF
+  - click: {ui: "**/WallSidescreen/Contents/FacadeSelector/Scroll View/Viewport/Content/TogglePrefab(Clone)", index: 1}
+  - expect_state:
+      "selected:GetComponent<Backwalls.Cmps.Backwall>.settings.pattern": "== original"
+  - expect_state:
+      "selected:GetComponent<Backwalls.Cmps.Backwall>.settings.pattern": "!= 'Tile'"
+  - world_shot: {name: wall, ortho: 4, at: [108, 208]}

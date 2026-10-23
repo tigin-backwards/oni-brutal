@@ -1,0 +1,42 @@
+# Drains (1866754178), classes B, O.
+#
+# What it does: adds the Drain (1x1 floor tile, 100 kg of metal ore, researched with
+# Sanitation Sciences, in the Plumbing menu): liquid standing on it is drawn into a liquid
+# pipe below it at 0.1 kg/s, without power. PLib options set the rate, and whether drains are
+# solid tiles that draw from the cell above.
+# How a player reaches it: the build menu (Plumbing).
+# What changes: a floor tile that drains the liquid on it.
+#
+# setup grants the research and pours 300 kg of water into the dug-out corridor west of the
+# printing pod. A Drain is built in the corridor's floor row there, with a liquid pipe through
+# its cell, and draws the water into the pipe.
+from: early-base
+mods: [1866754178]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"SanitationSciences\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {type: SimMessages, method: AddRemoveSubstance, args: [131130, Water, null, 300, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"Drain\").IsFoundation": true
+      "Db.Get().Techs.Get(\"SanitationSciences\").unlockedItemIDs": {contains: Drain}
+  - build: {prefab: Drain, at: [114, 206], material: Cuprite}
+  - expect: {blueprints: {Drain: 1}}
+  - run: {seconds: 900, until: {buildings: {Drain: 1}, pending_construction: 0}}
+  # A liquid pipe through its cell: without its output connected the drain is not operational.
+  - build: {prefab: LiquidConduit, at: [114, 206], material: SandStone}
+  - run: {seconds: 600, until: {pending_construction: 0}}
+  - expect_state: {"Grid.Element[131130].id": Water}
+  - run: {seconds: 30}
+  - driver: {camera.set: {cell: [114, 208], ortho: 8}}
+  - click_world: {cell: [114, 206], select: Drain}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Drain"}
+  - expect_state:
+      "selected:GetComponent<Drains.Drain>": exists
+      "selected:ElementConsumer.consumptionRate": 0.1
+      "selected:Storage.capacityKg": 1
+      # The water went through the drain into the pipe in its cell.
+      "Game.Instance.liquidConduitFlow.GetContents(131130).element": Water
+      "Game.Instance.liquidConduitFlow.GetContents(131130).mass": "> 0"

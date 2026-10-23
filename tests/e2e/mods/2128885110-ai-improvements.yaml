@@ -1,0 +1,25 @@
+# AI Improvements (2128885110), classes P, O.
+#
+# What it does: Duplicants get a little smarter at common errands. Each Duplicant's navigator
+# keeps its last 5 cells (a LocationHistoryTransitionLayer added at spawn), and a colony-wide
+# count of recently occupied cells (AllMinionsLocationHistory): a Duplicant who falls or is
+# entombed steps back to a recent free cell instead (FallMonitor.Recover); building a tile on
+# a cell someone just stood in, or digging out the floor under one, is put off; ladders and
+# fire poles are built first and deconstructed last (PLib options list the buildings put
+# first or last).
+# How a player reaches it: nothing to click; the colony's errands, and the Mods screen's options.
+# What changes: the order of build and deconstruct errands, and how trapped Duplicants escape.
+#
+# The location history is checked on a standard Duplicant (the first of early-base's three is
+# bionic and gets no layer): empty after the load, filled once it has walked about.
+from: early-base
+mods: [2128885110]
+steps:
+  - expect_state:
+      "Components.LiveMinionIdentities.Items[1].GetComponent<Navigator>.transitionDriver.overrideLayers[-1].GetType().Name": LocationHistoryTransitionLayer
+      "Components.LiveMinionIdentities.Items[1].GetComponent<Navigator>.transitionDriver.overrideLayers[-1].VisitedCells[0]": -1
+      "type:PeterHan.AIImprovements.AllMinionsLocationHistory::Instance": exists
+  - run: {seconds: 120}
+  - expect_state:
+      "Components.LiveMinionIdentities.Items[1].GetComponent<Navigator>.transitionDriver.overrideLayers[-1].VisitedCells[0]": "> 0"
+      "Components.LiveMinionIdentities.Items[1].GetComponent<Navigator>.transitionDriver.overrideLayers[-1].VisitedCells[4]": "> 0"

@@ -1,0 +1,55 @@
+{
+ "spec": "mods/1717999057-dup-stats-configurator.yaml",
+ "mods": [
+  "1717999057"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with 5 interests and no bionic Duplicants set, every Duplicant card of the printing pod has 5 interests (the game alone gives 1 to 3)",
+ "updated": "2026-10-23",
+ "commit": "24df5c4",
+ "mod_dlls": {
+  "1717999057": {
+   "Always3Interests.dll": "a008862c8eed3e414751bd9b8665914c26191b609fc4ae8af63517ea0280edd9"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261022-232004-36dc49",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-22T23:33:32",
+    "lane": 13,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261022-233524-42329c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T00:19:49",
+    "lane": 12,
+    "reference_run": "20261022-232004-36dc49",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261022-233524-42329c",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T00:20:35",
+    "lane": 12,
+    "reference_run": "20261022-232004-36dc49",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

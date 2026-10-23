@@ -1,0 +1,29 @@
+# Dup Stats Configurator (1717999057), classes S, O.
+#
+# What it does: PLib options set how Duplicants are generated, at the printing pod and at a new
+# game: the number of interests (unless "Random number of interests"), the attribute points per
+# interest count, the number of good and bad traits, no joy or stress trait, the starting level
+# of printed Duplicants, and whether the pod offers standard or bionic Duplicants.
+# How a player reaches it: the Mods screen's Options; then every new Duplicant card.
+# What changes: the cards' interests and traits.
+#
+# The options are set before launch: exactly 5 interests (the game alone gives 1 to 3), and no
+# bionic Duplicants (the options leave their interests alone). setup lets the pod offer
+# Duplicants now, as in the Duplicant Stat Selector spec. Which cards are Duplicants and which
+# care packages is random: every Duplicant card is checked, whatever their number.
+from: early-base
+mods: [1717999057]
+options:
+  Always3Interests: {RandomNumberOfInterests: false, NumberOfInterests: 5, DisableBionicDuplicants: true}
+setup:
+  - driver: {setup.call: {target: "Immigration.Instance", method: "Sim200ms", args: [100000]}}
+steps:
+  - expect_state: {"Immigration.Instance.ImmigrantsAvailable": true}
+  - call: {tool: building_control, args: {domain: side_surface, surface: facility, kind: telepad, action: open_immigrants, confirm: true}}
+  - ui_wait: {path: "**/ImmigrantScreen/Layout", cond: stable}
+  - expect_state: {"all:CharacterContainer::Length": {save_as: dupes}}
+  - expect_state:
+      "all:CharacterContainer::Length": ">= 1"
+      "count:all:CharacterContainer::[*] if .stats.skillAptitudes.Count == 5": "== dupes"
+      "count:all:CharacterContainer::[*] if .stats.personality.model.Name == Minion": "== dupes"
+  - expect_ui: {"**/ImmigrantScreen/Layout/Content/CharacterContainer/Details/**": {any_text: "INTERESTS"}}

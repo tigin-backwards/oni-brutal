@@ -514,8 +514,9 @@ def try_lane(number, lock_dir=None, busy=port_open, display_busy=display_in_use,
 
 
 def allocate_lane(first, lock_dir=None, busy=port_open, wait=True, log=say, last=None, display=True,
-                  display_busy=display_in_use, reserved=None, max_wait=None):
-    """The first free lane from FIRST to LAST (default LAST_LANE), waiting for one if WAIT."""
+                  display_busy=display_in_use, reserved=None, max_wait=None, give_up=None):
+    """The first free lane from FIRST to LAST (default LAST_LANE), waiting for one if WAIT; None
+    once GIVE_UP() holds while it waits."""
     lock_dir = lock_dir or shared_dir()
     last = LAST_LANE if last is None else last
     reserved = reservations(lock_dir) if reserved is None else reserved
@@ -525,7 +526,7 @@ def allocate_lane(first, lock_dir=None, busy=port_open, wait=True, log=say, last
             lane = try_lane(number, lock_dir, busy, display_busy, reserved, display)
             if lane:
                 return lane
-        if not wait:
+        if not wait or (give_up and give_up()):
             return None
         holders = [f'{s["lane"]}: pid {s["pid"]} in {s["root"]}' for s in lane_status(lock_dir) if first <= s['lane'] <= last]
         waiter.tick('held: ' + (', '.join(holders) or 'none; the others are busy or reserved'))
@@ -751,6 +752,11 @@ class JobQueue:
                         self.taken.add(job['id'])
                         return job
                 self.condition.wait()
+
+    def untaken(self):
+        """Whether a job is left that no slot has taken."""
+        with self.condition:
+            return any(j['id'] not in self.taken for j in self.jobs)
 
     def done(self, job):
         with self.condition:
@@ -3005,12 +3011,17 @@ def main(argv):
     def worker(slot):
         log = lambda s: say(f'[slot {slot}] {s}')
         try:
+            # A slot still waiting for a lane once the other slots have taken every job gives up,
+            # or the invocation would wait for that lane before writing its records.
             lane = allocate_lane(opts['first_lane'], last=opts['last_lane'], log=log, max_wait=opts['max_wait'],
-                                 display=not opts['xvfb_run'] and not opts['displays'])
+                                 display=not opts['xvfb_run'] and not opts['displays'],
+                                 give_up=lambda: not queue.untaken())
         except WaitTimeout as e:
             say(f'FAIL slot {slot}: {e}')
             with state:
                 records.append({'spec': '-', 'player': '-', 'index': 0, 'verdict': 'fail', 'reasons': [str(e)], 'out': None})
+            return
+        if lane is None:
             return
         if opts['displays']:
             lane.display = opts['displays'][slot]

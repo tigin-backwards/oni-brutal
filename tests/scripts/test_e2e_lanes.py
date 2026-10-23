@@ -33,6 +33,11 @@ class Lanes(unittest.TestCase):
             quiet = dict(busy=lambda p: False, display_busy=lambda d: False, reserved=(set(), set()), last=6)
             held = [e2e.allocate_lane(1, locks, **quiet) for _ in range(6)]
             self.assertIsNone(e2e.allocate_lane(1, locks, wait=False, **quiet))
+            # A waiting slot gives up once its queue has nothing left for it.
+            calls = []
+            give_up = lambda: calls.append(1) or True
+            self.assertIsNone(e2e.allocate_lane(1, locks, give_up=give_up, log=lambda s: None, **quiet))
+            self.assertEqual(calls, [1])
             for lane in held:
                 lane.release()
 

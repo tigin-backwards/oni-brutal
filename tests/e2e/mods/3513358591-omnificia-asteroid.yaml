@@ -1,0 +1,21 @@
+# Omnificia Asteroid (3513358591), class P (a worldgen mod).
+#
+# What it does: adds the Omnificia cluster, a single 352x448 asteroid with every biome (its
+# worldgen files: a cluster, a world, subworlds, traits and templates), and code for it: a
+# meteor shower season with every cluster shower (OmnificiaMeteorShowers), the Temporal Tear
+# and The Great Escape counting it as five colonies, its world traits kept apart from other
+# worlds', its strings and the Frozen Core trait's icon.
+# How a player reaches it: a new game on the Omnificia cluster.
+# What changes: the world itself.
+#
+# A smaller spec: worldgen is out of scope here, and a new game on the cluster is far from
+# early-base. In a running colony of another cluster, the mod's season, strings and sprite are
+# registered: the season with its ten showers, the cluster and world names, the trait icon.
+from: early-base
+mods: [3513358591]
+steps:
+  - expect_state:
+      "Db.Get().GameplaySeasons.TryGet(\"OmnificiaMeteorShowers\").events.Count": 10
+      "Strings.Get(\"STRINGS.CLUSTER_NAMES.OMNIFICIA_CLUSTER.NAME\").String": Omnificia Cluster
+      "Strings.Get(\"STRINGS.WORLDS.OMNIFICIA.NAME\").String": Omnificia Asteroid
+      "Assets.GetSprite(\"OmnificiaFrozenCore\").name": OmnificiaFrozenCore

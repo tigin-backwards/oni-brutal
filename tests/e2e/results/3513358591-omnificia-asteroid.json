@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3513358591-omnificia-asteroid.yaml",
+ "mods": [
+  "3513358591"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a smaller spec (worldgen out of scope): the mod's meteor season with its ten showers, cluster and world names and trait icon are registered in a running colony",
+ "updated": "2026-10-23",
+ "commit": "8cef88a",
+ "mod_dlls": {
+  "3513358591": {
+   "Omnificia.dll": "0c1052842b4890299c9bab2a384bf25172d59b13bccb304a095aefe9d2cdaeb8"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-153631-565187",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T16:00:34",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-170449-f1913d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T17:04:49",
+    "lane": 14,
+    "reference_run": "20261023-153631-565187",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-170449-f1913d",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T17:15:37",
+    "lane": 14,
+    "reference_run": "20261023-153631-565187",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

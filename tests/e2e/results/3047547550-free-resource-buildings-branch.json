@@ -1,0 +1,56 @@
+{
+ "spec": "mods/3047547550-free-resource-buildings-branch.yaml",
+ "mods": [
+  "3047547550"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Power Box is built from copper after Power Regulation and selected; it generates its default 2000 W",
+ "updated": "2026-10-23",
+ "commit": "8c7f95e",
+ "mod_dlls": {
+  "3047547550": {
+   "FreeResourceBuildingsBranch.dll": "05b9fc0493ed92274312ea06d7fcdff39150e3cde9410e9d1bd204de334ca8d1",
+   "PLib.dll": "893dc1ea3eddd02c85d433231aae356be27be07ddfc1a98fb2c51d84748208e8"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-042102-a633d0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T05:26:52",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-062214-4ee12f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T06:22:14",
+    "lane": 16,
+    "reference_run": "20261023-042102-a633d0",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-062214-4ee12f",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T07:02:45",
+    "lane": 16,
+    "reference_run": "20261023-042102-a633d0",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

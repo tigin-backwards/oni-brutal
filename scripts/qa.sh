@@ -175,11 +175,33 @@ run_scenario() # NAME
     done
 }
 
+# The stages that need a quiet machine (dogfood's captures follow real time, perf measures frame
+# rates) hold it: perf.wanted keeps new e2e specs from starting, and the exclusive hold of
+# perf.lock waits for the running ones. Unit and verify run beside specs.
+quiet_lockdir="${E2E_LOCK_DIR:-$HOME/.cache/oni-brutal-e2e}"
+quiet_fd=""
+quiet_begin() # STAGE
+{
+    mkdir -p "$quiet_lockdir"
+    echo $$ > "$quiet_lockdir/perf.wanted"
+    exec {quiet_fd}>>"$quiet_lockdir/perf.lock"
+    note "$1: waiting for running e2e specs to finish"
+    flock -x "$quiet_fd"
+}
+quiet_end()
+{
+    flock -u "$quiet_fd"; exec {quiet_fd}>&-
+    rm -f "$quiet_lockdir/perf.wanted"
+}
+trap '[ -z "$quiet_fd" ] || rm -f "$quiet_lockdir/perf.wanted"' EXIT
+
 stage_dogfood()
 {
     build_release || return
     local s
+    quiet_begin dogfood
     for s in "${SCENARIOS[@]}"; do run_scenario "$s"; done
+    quiet_end
 }
 
 # ---- U57 (verify, perf) ----
@@ -262,17 +284,9 @@ stage_perf()
     u57_ready || { note "perf: skipped (no out/local-tools/qa.env)"; return; }
     build_release || return
     local out="$run/perf"
-    # Only this stage needs a quiet machine: e2e specs run beside the others. perf.wanted keeps
-    # new specs from starting, and the exclusive hold of perf.lock waits for the running ones.
-    local lockdir="${E2E_LOCK_DIR:-$HOME/.cache/oni-brutal-e2e}" lockfd
-    mkdir -p "$lockdir"
-    echo $$ > "$lockdir/perf.wanted"
-    exec {lockfd}>>"$lockdir/perf.lock"
-    note "perf: waiting for running e2e specs to finish"
-    flock -x "$lockfd"
+    quiet_begin perf
     u57_run "$out" 4800
-    flock -u "$lockfd"; exec {lockfd}>&-
-    rm -f "$lockdir/perf.wanted"
+    quiet_end
     u57_check perf "$out"
     local peak; peak=$(cat "$out/peak-rss")
     if [ "$peak" -lt $((16 * 1024 * 1024)) ]; then ok "perf: peak memory $((peak / 1024)) MB"; else fail "perf: peak memory $((peak / 1024)) MB (16 GB limit)"; fi

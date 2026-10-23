@@ -69,9 +69,10 @@ UI_TOLERANCE = 2       # pixels, for ui-diff.py --tolerance
 IGNORE_FIELDS = ('depth',)
 FRAME_FALLBACK = 0.1   # seconds a "frame" lasts without E2eDriver to count real ones
 # Perf jobs a spec never starts beside (matched against `ps -eo args`): the sweep and measurement
-# scripts, profilers. QA (scripts/qa.sh) is not one: only its perf stage needs a quiet machine,
-# and it says so through perf.wanted and an exclusive hold of perf.lock (machine_lock); its other
-# stages run beside specs, counted in the players' budget as one QA_GB player (Budget).
+# scripts, profilers. QA (scripts/qa.sh) is not one: only its dogfood and perf stages need a quiet
+# machine, and they say so through perf.wanted and an exclusive hold of perf.lock (machine_lock);
+# its unit and verify stages run beside specs, counted in the players' budget as one QA_GB player
+# (Budget).
 QA_JOBS = [r'(^|/)scripts/qa\.sh\b']
 QA_GB = 15          # E2E_QA_GB: QA's verify stage runs U57 (0: not counted)
 PERF_JOBS = [r'(^|/)scripts/m9-compare\.sh\b', r'(^|/)scripts/flamegraph\.py\b',

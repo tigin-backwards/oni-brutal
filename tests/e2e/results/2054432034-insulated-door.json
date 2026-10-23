@@ -1,0 +1,59 @@
+{
+ "spec": "mods/2054432034-insulated-door.yaml",
+ "mods": [
+  "2054432034"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "insulated manual airlock built from the build menu's prefab; its cells' insulation drops as in the original; details screen within threshold",
+ "updated": "2026-10-22",
+ "commit": "9162884",
+ "mod_dlls": {
+  "2054432034": {
+   "InsulatedDoor.dll": "8f7c97d3099292f0a51979d7dae2263176d296ad7d6aea968958930b810736de"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261022-215714-6407a5",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-22T21:57:15",
+    "lane": 13,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261022-215939-f1a624",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-22T22:08:54",
+    "lane": 13,
+    "reference_run": "20261022-215714-6407a5",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "details": 0.0
+    }
+   },
+   {
+    "run": "20261022-215939-f1a624",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-22T22:11:04",
+    "lane": 13,
+    "reference_run": "20261022-215714-6407a5",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "details": 0.0
+    }
+   }
+  ]
+ }
+}

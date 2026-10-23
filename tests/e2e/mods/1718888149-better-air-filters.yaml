@@ -1,0 +1,38 @@
+# Better Air Filters (1718888149), class P (a building's definition).
+#
+# What it does: the Deodorizer (AirFilter) may be placed on any foundation, a ceiling or a wall
+# as well as a floor (BuildLocationRule OnFoundationRotatable instead of OnFloor), and turned
+# (PermittedRotations R360).
+# How a player reaches it: the build menu (Oxygen, Deodorizer), O to turn it before placing.
+# What changes: a Deodorizer can hang upside down from a ceiling, which the game alone refuses.
+#
+# setup grants Decontamination (DirectedAirStreams), which unlocks the Deodorizer, and tells the
+# build menu, which caches what is researched. The Deodorizer is hung from the ceiling of the
+# passage west of the printing pod, at x 119 (floor at y 206, ceiling at y 209: within reach).
+from: early-base
+mods: [1718888149]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"DirectedAirStreams\")", method: Purchased}}
+  - driver: {setup.call: {target: "Game.Instance", method: Trigger, args: [-107300940]}}
+  - driver: {setup.call: {target: "PlanScreen.Instance._researchedDefs", method: Clear}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"AirFilter\").BuildLocationRule": OnFoundationRotatable
+      "Assets.GetBuildingDef(\"AirFilter\").PermittedRotations": R360
+  # The build menu counts the colony's materials only once the game has run.
+  - run: {seconds: 5}
+  - driver: {camera.set: {cell: [112, 208], ortho: 10}}
+  - click: {ui: "**/PlanScreen/Toggle:Oxygen"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/AirFilter Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/AirFilter Group*"}
+  - expect_state: {"PlayerController.Instance.ActiveTool.name": BuildTool}
+  # The building menu's info card covers the screen's left half: the target is kept right of it.
+  - key: {code: O, at: [119, 208]}
+  - key: {code: O, at: [119, 208]}
+  - expect_state: {"BuildTool.Instance.buildingOrientation": R180}
+  - click_world: {cell: [119, 208]}
+  - expect: {blueprints: {AirFilter: 1}}
+  - expect_state: {"all:Constructable::[0].GetComponent<Rotatable>.GetOrientation()": R180}
+  - key: {code: Escape}
+  - run: {seconds: 900, until: {buildings: {AirFilter: 1}, pending_construction: 0}}
+  - expect_state: {"all:AirFilter::[0].GetComponent<Rotatable>.GetOrientation()": R180}

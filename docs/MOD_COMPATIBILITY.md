@@ -62,7 +62,7 @@ installs get developer checks subscribers never see).
 | 41 | [Speed Control - Outdated](https://steamcommunity.com/sharedfiles/filedetails/?id=1713359495) | ⬜ | ⬜ | ⬜ | flagged by onimaxxing (notLoading); not tested |
 | 42 | [Suppress Notifications](https://steamcommunity.com/sharedfiles/filedetails/?id=1832319118) | ✅ | ✅ | ⬜ |  |
 | 43 | [Clean Floors](https://steamcommunity.com/sharedfiles/filedetails/?id=1937854017) | ✅ | ✅ | ⬜ |  |
-| 44 | [Better Air Filters](https://steamcommunity.com/sharedfiles/filedetails/?id=1718888149) | ✅ | ✅ | ⬜ |  |
+| 44 | [Better Air Filters](https://steamcommunity.com/sharedfiles/filedetails/?id=1718888149) | ✅ | ✅ | ✅ | spec tests/e2e/mods/1718888149-better-air-filters.yaml: a Deodorizer picked in the build menu, turned upside down with O and hung from a ceiling, then built |
 | 45 | [最后的补给包-Fix](https://steamcommunity.com/sharedfiles/filedetails/?id=3280056840) | ✅ | ✅ | ⬜ |  |
 | 46 | [Efficient Supply](https://steamcommunity.com/sharedfiles/filedetails/?id=1874600082) | ✅ | ✅ | ⬜ |  |
 | 47 | [Japanese Language Pack](https://steamcommunity.com/sharedfiles/filedetails/?id=928606476) | ⬜ | ⬜ | ⬜ | translation: the game applies one only from a Steam subscription; not testable here |

@@ -34,6 +34,79 @@ namespace SemanticsProbe
         void Start() => Order += name + ".Start ";
     }
 
+    /// Destroys a target's component and child in one phase of a frame (Update, a coroutine's
+    /// `yield return null`, LateUpdate or the end of the frame) and logs, at every phase after
+    /// it for two frames, whether they are gone: where the player carries out the destruction
+    /// Destroy asked for.
+    public class DestroyPhase : MonoBehaviour
+    {
+        public string Phase;
+        public GameObject Target;
+        public bool Armed;
+        int frames;
+        BoxCollider box;
+        Transform child;
+
+        public void Arm()
+        {
+            box = Target.GetComponent<BoxCollider>();
+            child = Target.transform.GetChild(0);
+            Armed = true;
+            StartCoroutine(Co());
+            StartCoroutine(Eof());
+        }
+
+        void Check(string at)
+        {
+            if (frames == 0 || frames > 2) return;
+            Rec.Log("VAL destroy in " + Phase + ": at " + at + " component " + (box == null ? "gone" : "there") + " child " + (child == null ? "gone" : "there") + " childCount=" + Target.transform.childCount);
+        }
+
+        void Fire(string at)
+        {
+            if (!Armed || Phase != at) return;
+            Armed = false;
+            frames = 1;
+            Destroy(box);
+            Destroy(child.gameObject);
+            Rec.Log("VAL destroy in " + Phase + ": destroyed");
+        }
+
+        void FixedUpdate() { Check("FixedUpdate"); Fire("FixedUpdate"); }
+        void Update() { Check("Update"); Fire("Update"); }
+        void OnGUI() { if (Event.current.type != EventType.Repaint) return; Check("OnGUI"); Fire("OnGUI"); }
+        public void FromStart() { Check("Start"); Fire("Start"); }
+        void LateUpdate() { Check("LateUpdate"); Fire("LateUpdate"); }
+        IEnumerator Co()
+        {
+            for (int i = 0; i < 4; i++) { yield return null; Check("co"); Fire("co"); }
+        }
+        IEnumerator Eof()
+        {
+            for (int i = 0; i < 4; i++)
+            {
+                yield return new WaitForEndOfFrame();
+                Check("EndOfFrame"); Fire("EndOfFrame");
+                // Added at the end of the frame, it starts in the next frame's first Start pass.
+                if (Armed && Phase == "Start" && i == 0) gameObject.AddComponent<DestroyFromStart>();
+                if (frames > 0) frames++;
+            }
+        }
+    }
+
+    public class DestroyFromStart : MonoBehaviour
+    {
+        void Start() => GetComponent<DestroyPhase>().FromStart();
+    }
+
+    /// Logs whether DestroyPhase's target lost its parts, from another behaviour's Update.
+    public class DestroyWatch : MonoBehaviour
+    {
+        public DestroyPhase Of;
+        int n;
+        void Update() { if (n++ < 3) Rec.Log("VAL destroy in " + Of.Phase + ": watcher Update childCount=" + Of.Target.transform.childCount + " component " + (Of.Target.GetComponent<BoxCollider>() == null ? "gone" : "there")); }
+    }
+
     public static class Values
     {
         static void V(string what, object value) => Rec.Log("VAL " + what + " = " + Convert.ToString(value, CultureInfo.InvariantCulture));
@@ -167,6 +240,8 @@ namespace SemanticsProbe
             yield return null;
             V("next frame", OrderRec.Order);
 
+            yield return ClonePendingDestroy();
+
             Rec.Log("=== values: messages");
             var m = new GameObject("M").AddComponent<Msg>();
             new GameObject("Mc").AddComponent<Msg>().transform.SetParent(m.transform);
@@ -174,6 +249,122 @@ namespace SemanticsProbe
             m.gameObject.SendMessage("Missing", SendMessageOptions.DontRequireReceiver);
             for (int i = 0; i < 10; i++) yield return null;
             Rec.Log("=== values: done");
+        }
+
+        /// What a source's parts tell, and what Instantiate copies of them, while they await the
+        /// end-of-frame destruction Destroy asked for (Better Automation Overlay strips a label
+        /// this way and clones it).
+        static string Parts(GameObject go)
+        {
+            if (go == null) return "null";
+            var parts = new List<string>();
+            foreach (var c in go.GetComponents<Component>())
+                parts.Add(c == null ? "null" : c.GetType().Name + (c is Behaviour b ? (b.enabled ? "+" : "-") : ""));
+            string children = "";
+            for (int i = 0; i < go.transform.childCount; i++)
+                children += (i == 0 ? "" : ",") + go.transform.GetChild(i).name;
+            return go.name + " active=" + go.activeSelf + " [" + string.Join(" ", parts) + "] children=" + go.transform.childCount + "(" + children + ")"
+                + " Get<Beh>=" + (go.GetComponent<OrderRec>() != null) + " Get<BoxCollider>=" + (go.GetComponent<BoxCollider>() != null)
+                + " Get<ContentSizeFitter>=" + (go.GetComponent<UnityEngine.UI.ContentSizeFitter>() != null)
+                + " InChildren<Beh>=" + go.GetComponentsInChildren<OrderRec>(true).Length;
+        }
+
+        static GameObject MakeStripped(string name, bool active)
+        {
+            var go = new GameObject(name, typeof(RectTransform));
+            go.SetActive(active);
+            go.AddComponent<OrderRec>();
+            go.AddComponent<BoxCollider>();
+            go.AddComponent<UnityEngine.UI.ContentSizeFitter>();
+            go.AddComponent<UnityEngine.UI.LayoutElement>();
+            var keep = new GameObject("Keep", typeof(RectTransform)); keep.transform.SetParent(go.transform, false);
+            var gone = new GameObject("Gone", typeof(RectTransform)); gone.transform.SetParent(go.transform, false);
+            gone.AddComponent<OrderRec>();
+            new GameObject("GoneChild").transform.SetParent(gone.transform, false);
+            return go;
+        }
+
+        static void Strip(GameObject go)
+        {
+            UnityEngine.Object.Destroy(go.GetComponent<OrderRec>());
+            UnityEngine.Object.Destroy(go.GetComponent<BoxCollider>());
+            UnityEngine.Object.Destroy(go.GetComponent<UnityEngine.UI.ContentSizeFitter>());
+            UnityEngine.Object.Destroy(go.transform.Find("Gone").gameObject);
+        }
+
+        // Measured in the original player (U59):
+        // - Until the destruction, the source's GetComponent(s), childCount, GetChild and Find
+        //   still return the parts Destroy was called on; a Behaviour among them reports
+        //   enabled = false, other components are unchanged.
+        // - Instantiate(GameObject), Instantiate(Component), Instantiate under a parent and a
+        //   clone of that clone, made before the destruction, copy those parts, active or
+        //   inactive source alike; the copied behaviours are disabled (enabled = false), and
+        //   they stay in the clone, still disabled, after the source loses them. A clone made
+        //   after the destruction has none of them. Destroy(go) then Instantiate(go): the clone
+        //   copies every behaviour disabled and lives on.
+        // - Destruction points ("destroy phases"): Destroy called in Start or Update is carried
+        //   out when the Update pass ends (another behaviour's Update later in the pass still
+        //   finds the parts; a `yield return null` coroutine, LateUpdate and the end of the
+        //   frame do not); called in FixedUpdate, before Update; in a coroutine resumed after
+        //   Update or in LateUpdate, after LateUpdate (LateUpdate still finds a coroutine's
+        //   parts, the end of the frame does not); in OnGUI or at WaitForEndOfFrame, after the
+        //   next frame's Update pass (that Update still finds them).
+        static IEnumerator ClonePendingDestroy()
+        {
+            Rec.Log("=== values: clone pending destroy");
+            foreach (var active in new[] { true, false })
+            {
+                string a = active ? "active " : "inactive ";
+                var src = MakeStripped("Src", active);
+                Strip(src);
+                V(a + "source after Destroy", Parts(src));
+                var clone = UnityEngine.Object.Instantiate(src);
+                V(a + "clone same frame", Parts(clone));
+                var byComponent = UnityEngine.Object.Instantiate(src.GetComponent<UnityEngine.UI.LayoutElement>());
+                V(a + "clone by component same frame", Parts(byComponent.gameObject));
+                var parent = new GameObject("Parent", typeof(RectTransform));
+                var underParent = UnityEngine.Object.Instantiate(src, parent.transform, false);
+                V(a + "clone under a parent same frame", Parts(underParent));
+                var ofClone = UnityEngine.Object.Instantiate(clone);
+                V(a + "clone of clone same frame", Parts(ofClone));
+                // A child destroyed on its own, then the source cloned: the child's own parts.
+                var gone = src.transform.Find("Gone");
+                V(a + "Find(Gone) on source", gone == null ? "null" : gone.name + " children=" + gone.childCount);
+                yield return null;
+                V(a + "source next frame", Parts(src));
+                V(a + "clone next frame", Parts(clone));
+                V(a + "clone of clone next frame", Parts(ofClone));
+                V(a + "clone made next frame", Parts(UnityEngine.Object.Instantiate(src)));
+                V(a + "clone of clone made next frame", Parts(UnityEngine.Object.Instantiate(clone)));
+            }
+            // DestroyImmediate for comparison.
+            var imm = MakeStripped("Imm", true);
+            UnityEngine.Object.DestroyImmediate(imm.GetComponent<OrderRec>());
+            UnityEngine.Object.DestroyImmediate(imm.transform.Find("Gone").gameObject);
+            V("DestroyImmediate clone", Parts(UnityEngine.Object.Instantiate(imm)));
+            // A destroyed source's clone: Destroy(go) and then Instantiate(go) the same frame.
+            var whole = MakeStripped("Whole", true);
+            UnityEngine.Object.Destroy(whole);
+            V("Destroy(go) source", Parts(whole));
+            GameObject wholeClone = null;
+            try { wholeClone = UnityEngine.Object.Instantiate(whole); V("Destroy(go) clone", Parts(wholeClone)); }
+            catch (Exception e) { V("Destroy(go) clone", "EXCEPTION " + e.GetType().Name + ": " + e.Message); }
+            yield return null;
+            V("Destroy(go) clone next frame", Parts(wholeClone));
+
+            Rec.Log("=== values: destroy phases");
+            foreach (var phase in new[] { "Update", "co", "LateUpdate", "EndOfFrame", "OnGUI", "Start", "FixedUpdate" })
+            {
+                var target = new GameObject("Target");
+                target.AddComponent<BoxCollider>();
+                new GameObject("Child").transform.SetParent(target.transform, false);
+                var d = new GameObject("Destroyer").AddComponent<DestroyPhase>();
+                d.Phase = phase; d.Target = target;
+                yield return null;
+                d.Arm();
+                new GameObject("Watcher").AddComponent<DestroyWatch>().Of = d;
+                for (int i = 0; i < 4; i++) yield return null;
+            }
         }
 
         static string SmoothDamp()

@@ -21,7 +21,8 @@ What it records (each line prefixed `PROBE f<frame>`): lifecycle scenarios (Dest
 coroutines, start/late-update timing; Start order, scenarios 12 to 19), the Duplicants' spawn
 order after a save loads (`MINION`, `KSTART`: build against the original's own `Managed` with
 `-p:OniManaged=…`, start the colony after `=== values: screen`), engine values (`VAL …`: formatting, maths, JSON,
-hierarchy queries, Instantiate order, SendMessage, screen), and UI layout dumps (`UI …`) of the
+hierarchy queries, Instantiate order, Instantiate of parts awaiting Destroy and the points in
+the frame where Destroy is carried out, SendMessage, screen), and UI layout dumps (`UI …`) of the
 front end 8 s after it loads and of the in-game overlay canvases once the clock has run for 120
 frames. Compare the two players' outputs with frame numbers taken relative to each scenario
 header.

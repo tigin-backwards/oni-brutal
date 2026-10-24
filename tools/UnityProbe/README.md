@@ -258,6 +258,20 @@ the engine's colour table from the original's log with `sv-check.py cs LOG`. Mea
 2026-10-23: 157 named colours, none on `Color32`; `isIncremental` False; alignment Left by
 default and any value read back as set. `ModApiTests` encodes them.
 
+With `PROBE_SCENARIO=logthreads` only the log-threads probe runs (`LogThreads.cs`, lines `LT …`,
+10 s into the main menu): a managed `Thread`, a thread-pool item, a `Task` and the main thread
+log each type through `UnityEngine.Debug`, `Debug.unityLogger` and Klei's `Debug`, and handlers
+on `Application.logMessageReceived` and `logMessageReceivedThreaded` record the thread and
+frame they run on; then handlers on one event only, the main thread blocked in `Join` while a
+thread logs, an exception left uncaught on a thread, throwing handlers, handlers that log, and
+whether KCrashReporter opened its dialog. Measured 2026-10-24 (U57): another thread's messages
+reach `logMessageReceivedThreaded` alone, on that thread, at once, and never
+`logMessageReceived` (nor KCrashReporter's dialog); the main thread's reach `logMessageReceived`
+and then the threaded event at once. The callbacks run before the text is written. A handler's
+exception is written as an exception's text before the message, reaches no callback and ends
+the call; a message logged in a handler is written and reaches none. `LogCallbackTests`
+encodes it.
+
 With `PROBE_SCENARIO=logging` only the logging probe runs (`Logging.cs`, lines `LOG …`, 10 s into
 the main menu): each log type through `UnityEngine.Debug`, `Debug.unityLogger` and Klei's `Debug`,
 between `LOG case NAME begin` and `end` lines so that the text the player writes for it lies in

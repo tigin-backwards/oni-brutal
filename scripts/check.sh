@@ -20,6 +20,15 @@ tests ModTriage.Tests
 scripts_log=$(python3 -m unittest discover -s "$root/tests/scripts" 2>&1) || failed+=(scripts)
 echo "scripts: $(tail -1 <<< "$scripts_log")"
 grep -A12 -E '^(FAIL|ERROR): ' <<< "$scripts_log" | sed 's/^/  /' || true
+# The host cross-published for macOS (x86_64, run under Rosetta on Apple Silicon): it must build,
+# and its apphost must be an x86_64 Mach-O executable (magic feedfacf, CPU type 0x01000007).
+osx="$root/out/publish/osx-x64"
+if dotnet publish "$root/src/OniBrutal.Host" -c Release -r osx-x64 --self-contained -o "$osx" -v q -nologo > "$root/out/publish-osx-x64.log" 2>&1 \
+    && [ "$(od -An -tx4 -N8 "$osx/OniBrutal" | tr -s ' ')" = " feedfacf 01000007" ]; then
+    echo "osx-x64 publish: $(ls "$osx" | wc -l) files, x86_64 Mach-O apphost"
+else
+    failed+=(osx-x64-publish); echo "osx-x64 publish failed: out/publish-osx-x64.log"
+fi
 # The macOS build's shaders (docs/research/macos-feasibility.md §6.1), when its data is here: Metal
 # reflection against the MSL, and every Metal program's parameters against GLCore's.
 mac_data="${ONI_MAC_APP:-/mnt/c/Program Files (x86)/Steam/steamapps/content/app_457140/depot_457142/OxygenNotIncluded.app}/Contents/Resources/Data"

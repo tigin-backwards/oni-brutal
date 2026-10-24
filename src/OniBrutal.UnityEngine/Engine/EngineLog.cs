@@ -79,6 +79,8 @@ namespace OniBrutal.Engine
 
             public override void WriteLine(string value)
             {
+                // The game's own log lines (Klei's Debug writes them here) mark its start-up.
+                if (!StartupProgress.Done && Threads.IsMainThread) StartupProgress.LogLine(value);
                 Platform.MainThreadPump.Maybe();
                 lock (fileLock)
                 {

@@ -93,7 +93,7 @@ namespace OniBrutal.Desktop.Gl
             }
             var a = art.Result;
             const string vs = "#version 330 core\nlayout(location = 0) in vec2 pos;\nlayout(location = 1) in vec3 uva;\nuniform vec2 size;\nout vec3 v;\nvoid main() { v = uva; gl_Position = vec4(pos.x / size.x * 2.0 - 1.0, 1.0 - pos.y / size.y * 2.0, 0.0, 1.0); }\n";
-            const string fs = "#version 330 core\nin vec3 v;\nuniform sampler2D atlas;\nout vec4 color;\nvoid main() { vec4 c = texture(atlas, v.xy); color = vec4(c.rgb, c.a * v.z); }\n";
+            const string fs = "#version 330 core\nin vec3 v;\nuniform sampler2D atlas;\nout vec4 color;\nvoid main() { vec4 c = texture(atlas, v.xy); color = c * v.z; }\n";
             uint v = GlApi.CompileShader(VertexShader, vs, out var vlog), f = GlApi.CompileShader(FragmentShader, fs, out var flog);
             program = v != 0 && f != 0 ? GlApi.LinkProgram(v, f, 0, out _) : 0;
             if (v != 0) N.glDeleteShader(new GlShader(v));
@@ -107,7 +107,17 @@ namespace OniBrutal.Desktop.Gl
             sizeLocation = GlApi.UniformLocation(program, "size");
             texture = GlApi.GenTexture();
             N.glBindTexture(TexTarget2D, texture);
-            fixed (byte* p = a.Rgba) N.glTexImage2D(TexTarget2D, 0, (int)Rgba8, a.Width, a.Height, 0, Rgba, UnsignedByte, p);
+            // Premultiplied: the atlas's transparent texels are white, which filtering and the
+            // smaller mips would otherwise bleed into the sprites' soft edges as a pale fringe.
+            var texels = (byte[])a.Rgba.Clone();
+            for (int i = 0; i < texels.Length; i += 4)
+            {
+                int alpha = texels[i + 3];
+                texels[i] = (byte)((texels[i] * alpha + 127) / 255);
+                texels[i + 1] = (byte)((texels[i + 1] * alpha + 127) / 255);
+                texels[i + 2] = (byte)((texels[i + 2] * alpha + 127) / 255);
+            }
+            fixed (byte* p = texels) N.glTexImage2D(TexTarget2D, 0, (int)Rgba8, a.Width, a.Height, 0, Rgba, UnsignedByte, p);
             N.glGenerateMipmap(TexTarget2D);
             N.glTexParameteri(TexTarget2D, TextureMinFilter, (int)LinearMipmapLinear);
             N.glTexParameteri(TexTarget2D, TextureMagFilter, (int)Linear);
@@ -131,6 +141,31 @@ namespace OniBrutal.Desktop.Gl
         }
 
         readonly List<float> vertices = new();
+
+        // The bar's colours, from the game's menus: its dark purple panels and pink highlights.
+        static readonly (float R, float G, float B) Track = (0.20f, 0.18f, 0.27f), Fill = (0.83f, 0.35f, 0.55f);
+
+        /// Start-up done so far (StartupProgress), as a thin bar low in the window, over a dark
+        /// track; gone once the rain fades.
+        static void DrawBar(int width, int height, float fade)
+        {
+            if (fade < 1f) return;
+            float progress = StartupProgress.Value;
+            int barWidth = Math.Max(120, width * 2 / 5), barHeight = Math.Max(4, height / 160);
+            int x = (width - barWidth) / 2, y = Math.Max(barHeight * 2, height / 14);
+            GlApi.Enable(ScissorTest, true);
+            N.glScissor(x - 2, y - 2, barWidth + 4, barHeight + 4);
+            N.glClearColor(Track.R, Track.G, Track.B, 1f);
+            N.glClear(ColorBufferBit);
+            int filled = (int)(barWidth * progress);
+            if (filled > 0)
+            {
+                N.glScissor(x, y, filled, barHeight);
+                N.glClearColor(Fill.R, Fill.G, Fill.B, 1f);
+                N.glClear(ColorBufferBit);
+            }
+            GlApi.Enable(ScissorTest, false);
+        }
 
         /// Draws the comets into the window's framebuffer (bound), `width`×`height` pixels.
         public void Draw(int width, int height)
@@ -169,14 +204,15 @@ namespace OniBrutal.Desktop.Gl
                     V(q.P0, q.Uv0); V(q.P2, q.Uv2); V(q.P3, q.Uv3);
                 }
             }
-            if (vertices.Count == 0) return;
             N.glViewport(0, 0, width, height);
+            DrawBar(width, height, fade);
+            if (vertices.Count == 0) return;
             GlApi.Enable(Blend, true);
             GlApi.Enable(DepthTest, false);
             GlApi.Enable(CullFace, false);
             GlApi.Enable(ScissorTest, false);
             GlApi.Enable(StencilTest, false);
-            N.glBlendFuncSeparate(SrcAlpha, OneMinusSrcAlpha, One, OneMinusSrcAlpha);
+            N.glBlendFuncSeparate(One, OneMinusSrcAlpha, One, OneMinusSrcAlpha);
             N.glUseProgram(new GlProgram(program));
             N.glUniform2f(sizeLocation, width, height);
             N.glActiveTexture(Texture0);

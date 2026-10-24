@@ -57,16 +57,22 @@ namespace OniBrutal.Engine
             Scenes.SetActive(scene);
             StartupStats.Mark($"scene {index} load starts");
             // Content bundles the game has not loaded by now it does not load at start-up.
-            if (firstSceneLoaded) Assets.BundlePrefetch.Drop();
+            if (firstSceneLoaded)
+            {
+                Assets.BundlePrefetch.Drop();
+                StartupProgress.Checkpoint("scene1");
+            }
             firstSceneLoaded = true;
             var file = AssetSystem.Get("level" + index);
             ObjectLoader.BeginSceneFile(file, scene);
             var gameObjects = new List<GameObjectNative>();
             try
             {
+                int done = 0;
                 foreach (var info in file.Objects)
                 {
                     Platform.MainThreadPump.Maybe();
+                    if (index == 0) StartupProgress.PhaseFraction((double)done++ / file.Objects.Count);
                     var obj = ObjectLoader.Load(file, info.PathId);
                     if (obj is GameObject go) gameObjects.Add((GameObjectNative)go.Native);
                 }

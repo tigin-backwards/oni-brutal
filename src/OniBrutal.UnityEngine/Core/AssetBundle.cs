@@ -30,6 +30,7 @@ namespace UnityEngine
                 Debug.LogError("Unable to open archive file: " + path);
                 return null;
             }
+            StartupProgress.Checkpoint("bundle");
             return AssetBundles.Mount(path, nodes);
         }
 

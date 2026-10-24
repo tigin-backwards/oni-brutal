@@ -33,6 +33,7 @@ namespace OniBrutal.Engine
             ObjectLoader.Prune();
             GraphicsDevice.ReleaseOrphans();
             FontNative.ReleaseOrphanFaces();
+            StartupProgress.Checkpoint("unload");
             EngineLog.Engine($"UnloadUnusedAssets: {unloaded} of {probed.Count} candidates unloaded in {watch.Elapsed.TotalMilliseconds:F0} ms (probe {weaken:F0}, collection {collect - weaken:F0})");
             return unloaded;
         }

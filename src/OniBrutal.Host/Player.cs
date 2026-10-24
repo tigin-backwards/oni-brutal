@@ -39,6 +39,7 @@ namespace OniBrutal.Host
                 OniBrutal.Engine.Rendering.GraphicsDevice.Install(device);
             }
             StartupStats.Mark("window and device ready");
+            StartupProgress.Checkpoint("window");
             OniBrutal.Engine.Rendering.FrameRenderer.Install();
             OniBrutal.Engine.UI.CanvasSystem.Install();
             OniBrutal.Engine.IMGUI.GUIManager.Install();
@@ -51,6 +52,7 @@ namespace OniBrutal.Host
             hooks.Run(RuntimeInitializeLoadType.BeforeSplashScreen);
             hooks.Run(RuntimeInitializeLoadType.BeforeSceneLoad);
             SceneLoader.LoadNow(0);
+            StartupProgress.Checkpoint("scene0");
             hooks.Run(RuntimeInitializeLoadType.AfterSceneLoad);
             BrutalCredit.Install();
 
@@ -76,6 +78,7 @@ namespace OniBrutal.Host
                 options.Input.Apply(frame);
                 PlayerLoop.RunFrame(dt);
                 StartupStats.FrameEnd(frame);
+                StartupProgress.FrameEnded(frame);
                 if (options.LogPointerHits) PointerHitLog.Frame(frame);
                 frame++;
                 Throttle(clock, now, platform != null, frame <= options.MaxFrameRateFrames ? options.MaxFrameRate : 0);

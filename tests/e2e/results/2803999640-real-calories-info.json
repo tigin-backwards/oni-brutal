@@ -1,0 +1,63 @@
+{
+ "spec": "mods/2803999640-real-calories-info.yaml",
+ "mods": [
+  "2803999640"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the rations meter reads 16,800 kcal; the Consumables screen's column headers forbid the first three foods to everyone, and the meter then reads 0 kcal (the forbidden Field Ration and Muckroot no longer count); the meter's layout dump is compared",
+ "updated": "2026-10-24",
+ "commit": "17bb508",
+ "mod_dlls": {
+  "2803999640": {
+   "RealCaloriesInfo.dll": "40f93e429f0a35de9961bb9c77917384579c5ef4348f24c1c0b202bade7703da"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-120353-0f8286",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T12:03:53",
+    "lane": 12,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-121823-97585f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T12:18:23",
+    "lane": 12,
+    "reference_run": "20261024-120353-0f8286",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "rations": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261024-121823-97585f",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T12:18:24",
+    "lane": 13,
+    "reference_run": "20261024-120353-0f8286",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "rations": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

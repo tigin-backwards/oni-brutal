@@ -1,0 +1,33 @@
+# [Vanilla + DLC] Real Calories Info (2803999640), class P.
+#
+# What it does: the top-left rations meter (MeterScreen_Rations, its text and tooltip) and the
+# power bank meter count only the food (and power banks) at least one Duplicant of the world
+# is allowed to consume in the Consumables screen. Transpilers swap the trackers' CountAmount
+# calls for the mod's own count, which skips forbidden food.
+# How a player reaches it: the rations meter, after forbidding food in Consumables (F).
+# What changes: forbidden food no longer counts toward the colony's calories.
+#
+# The meter reads early-base's 16,800 kcal (a Field Ration and a Muckroot). In the Consumables
+# screen, the header of each of the first three food columns is clicked, forbidding that food to
+# everyone: no Duplicant may eat either food (the bionic one eats none), and the meter reads 0 kcal.
+from: early-base
+mods: [2803999640]
+steps:
+  - run: {seconds: 1}
+  - expect_ui:
+      "**/TopLeftControlPanel(Clone)/StatusDisplay/Rations/CurrentRations": {text: "16,800 kcal"}
+  - key: {code: F}
+  - ui_wait: {path: "**/ConsumablesTableScreen/HeaderContent/prefab_row_header/SuperCheckBox_Horizontal", cond: stable, frames: 30}
+  - click: {ui: "**/ConsumablesTableScreen/HeaderContent/prefab_row_header/Scroller/Content/TogglePortrait", index: 0}
+  - click: {ui: "**/ConsumablesTableScreen/HeaderContent/prefab_row_header/Scroller/Content/TogglePortrait", index: 1}
+  - click: {ui: "**/ConsumablesTableScreen/HeaderContent/prefab_row_header/Scroller/Content/TogglePortrait", index: 2}
+  - expect_state:
+      "Components.MinionIdentities.Items[1].GetComponent<ConsumableConsumer>.IsPermitted(\"FieldRation\")": false
+      "Components.MinionIdentities.Items[1].GetComponent<ConsumableConsumer>.IsPermitted(\"BasicForagePlant\")": false
+      "Components.MinionIdentities.Items[2].GetComponent<ConsumableConsumer>.IsPermitted(\"FieldRation\")": false
+      "Components.MinionIdentities.Items[2].GetComponent<ConsumableConsumer>.IsPermitted(\"BasicForagePlant\")": false
+  - key: {code: F}
+  - run: {seconds: 2}
+  - expect_ui:
+      "**/TopLeftControlPanel(Clone)/StatusDisplay/Rations/CurrentRations": {text: "0 kcal"}
+  - ui_dump: {name: rations, root: "**/TopLeftControlPanel(Clone)/StatusDisplay/Rations"}

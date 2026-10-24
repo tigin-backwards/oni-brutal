@@ -3,12 +3,12 @@
  "mods": [
   "2879300160"
  ],
- "verdict": "failed",
- "why": "a run of ours failed",
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
  "findings": [],
- "note": "a colony geyser erupts all the time at 10 kg maximum pressure in both players, but its emit rate is 50.16 kg/s in ours against 31.92 in the original: GetIterationPercent() and GetOnDuration() read the patched 1 when called directly, yet GetEmitRate() computes with the unpatched 0.636, as if the patched method were inlined into it",
+ "note": "a colony geyser erupts all the time (iteration and year shares 1) at 10 kg maximum pressure, and emits its mass per cycle over 60 s, the patched share, as in the original",
  "updated": "2026-10-24",
- "commit": "676516a",
+ "commit": "e6572ed",
  "mod_dlls": {
   "2879300160": {
    "PLib.dll": "b862c5db2b3cd6df09a62d4a30782e91e2b24e8e1bfac08d991c9cc89a984ba9",
@@ -28,14 +28,11 @@
   ],
   "ours": [
    {
-    "run": "20261024-061244-d25615",
-    "index": 1,
-    "verdict": "fail",
-    "date": "2026-10-24T06:12:44",
-    "lane": 12,
-    "reasons": [
-     "step 3: all:Geyser::[0].configuration.GetEmitRate() is 50.163364, wanted <= 1.001 * mass / 60 (it held in the original: the interaction has no effect in ours)"
-    ],
+    "run": "20261024-073716-f6aca5",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T07:37:17",
+    "lane": 19,
     "reference_run": "20261024-050648-9c109f",
     "new_signatures": 0,
     "findings": [],
@@ -43,14 +40,11 @@
     "shots": {}
    },
    {
-    "run": "20261024-061244-d25615",
-    "index": 2,
-    "verdict": "fail",
-    "date": "2026-10-24T06:12:45",
-    "lane": 13,
-    "reasons": [
-     "step 3: all:Geyser::[0].configuration.GetEmitRate() is 50.163364, wanted <= 1.001 * mass / 60 (it held in the original: the interaction has no effect in ours)"
-    ],
+    "run": "20261024-073716-f6aca5",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T07:37:16",
+    "lane": 18,
     "reference_run": "20261024-050648-9c109f",
     "new_signatures": 0,
     "findings": [],

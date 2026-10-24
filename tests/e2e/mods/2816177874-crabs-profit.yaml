@@ -1,0 +1,29 @@
+# Crabs Profit (2816177874), class P (PLib options).
+#
+# What it does: the Sanishell (CrabFreshWater) gets a molt of its own, the Sanishell Molt
+# (CrabFreshWaterShell): a baby drops one when it grows up (BabyMonitor's onGrowDropID, mass
+# adult / divider, 75 / 4 = 18.75 kg by default) and an adult or baby drops one on death. The
+# Rock Granulator crushes the molt into a "Random Ore" that turns into a metal ore chosen by
+# the options' weights, plus Pearl (or Coquina) as a secondary output.
+# How a player reaches it: raising Sanishells; the Rock Granulator's recipe list.
+# What changes: what Sanishells leave behind, and a new crusher recipe.
+#
+# setup spawns a Sanishell baby in the dug-out corridor west of the printing pod and sets its
+# age just short of adulthood (5 cycles). The game runs; the baby grows up and drops its molt.
+from: early-base
+mods: [2816177874]
+setup:
+  - driver: {setup.call: {type: Scenario, method: SpawnPrefab, args: [131126, 0, 0, "CrabFreshWaterBaby", "Creatures"]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "Db.Get().Amounts.Age", method: Lookup, args: [{"$": "last:"}]}}
+  - driver: {setup.call: {target: "last:", method: SetValue, args: [4.98]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"CrabFreshWaterShell\")": exists
+      "ComplexRecipeManager.Get().GetRecipe(\"RockCrusher_I_CrabFreshWaterShell_O_CrabsProfitRandomOre\")": exists
+      "all:EntitySizeVisualizer::Length": 0
+  - run: {seconds: 120}
+  - expect_state:
+      "all:EntitySizeVisualizer::Length": 1
+      "all:EntitySizeVisualizer::[0].GetComponent<KPrefabID>.PrefabTag.Name": CrabFreshWaterShell
+      "all:EntitySizeVisualizer::[0].GetComponent<PrimaryElement>.Mass": 18.75

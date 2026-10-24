@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2816177874-crabs-profit.yaml",
+ "mods": [
+  "2816177874"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Sanishell baby set just short of adulthood grows up and drops the mod's 18.75 kg Sanishell Molt; the molt prefab and its Rock Granulator recipe exist (state only)",
+ "updated": "2026-10-24",
+ "commit": "87cf6ac",
+ "mod_dlls": {
+  "2816177874": {
+   "CrabsProfit.dll": "f53c779c0928459bcaedee1b7b75e4f0439eee9ae5e1bebf2884d78b9d0ada76"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-114122-24c769",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T11:41:22",
+    "lane": 12,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-114336-0dafae",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T11:43:36",
+    "lane": 12,
+    "reference_run": "20261024-114122-24c769",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-114336-0dafae",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T11:43:37",
+    "lane": 13,
+    "reference_run": "20261024-114122-24c769",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

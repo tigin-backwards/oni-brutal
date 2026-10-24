@@ -758,7 +758,7 @@ installs get developer checks subscribers never see).
 | 737 | [Reapy/Harvester (Automatic Farming) - fixed](https://steamcommunity.com/sharedfiles/filedetails/?id=2878236934) | ✅ | ✅ | ⬜ |  |
 | 738 | [Planet Balancer](https://steamcommunity.com/sharedfiles/filedetails/?id=1995546475) | ⬜ | ⬜ | ⬜ | flagged by onimaxxing (notLoading); not tested |
 | 739 | [Pipe Germ Info Fixed](https://steamcommunity.com/sharedfiles/filedetails/?id=2645785510) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2645785510-pipe-germ-info-fixed.yaml: a liquid pipe holding polluted water with Food Poisoning germs is selected outside any overlay: its Contents status lists the germs, and the status section's layout dump is compared |
-| 740 | [Crabs Profit](https://steamcommunity.com/sharedfiles/filedetails/?id=2816177874) | ✅ | ✅ | ⬜ |  |
+| 740 | [Crabs Profit](https://steamcommunity.com/sharedfiles/filedetails/?id=2816177874) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2816177874-crabs-profit.yaml: a Sanishell baby set just short of adulthood grows up and drops the mod's 18.75 kg Sanishell Molt; the molt prefab and its Rock Granulator recipe exist (state only) |
 | 741 | [Balloon Dispenser](https://steamcommunity.com/sharedfiles/filedetails/?id=2938304376) | ✅ | ✅ | ⬜ |  |
 | 742 | [Roller Snakes](https://steamcommunity.com/sharedfiles/filedetails/?id=1963899596) | ⬜ | ⬜ | ⬜ | flagged by onimaxxing (notLoading); not tested |
 | 743 | [[Vanilla + DLC] Real Calories Info](https://steamcommunity.com/sharedfiles/filedetails/?id=2803999640) | ✅ | ✅ | ⬜ |  |

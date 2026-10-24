@@ -1,0 +1,32 @@
+# Exp Multiplier (2546907682), class P.
+#
+# What it does: multiplies the experience Duplicants earn. A prefix on MinionResume.AddExperience
+# doubles skill experience (skillExpMultiplier 2); a prefix on AttributeLevel.AddExperience adds
+# ten times the attribute experience (attributeExpMultiplier 10) and levels up, up to level 50;
+# it returns true, so the game's method then adds the plain amount as well (11 times in all).
+# Its config.json beside the DLL is written at load.
+# How a player reaches it: Duplicants working.
+# What changes: skill points and attribute levels come faster.
+#
+# setup hands Nikola experience through the game's own calls for work done: 100 skill
+# experience (MinionResume.AddExperience), which counts 200 (his total is 226.5 in early-base),
+# and 10 s of Digging (AttributeLevels.AddExperience), which counts 110 (his Digging is level
+# 3 with 154.9 of the 6017.9 the next level needs). The colony then runs on.
+from: early-base
+mods: [2546907682]
+setup:
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[1].GetComponent<MinionResume>", method: AddExperience, args: [100]}}
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[1].GetComponent<AttributeLevels>", method: AddExperience, args: [Digging, 10, 1]}}
+steps:
+  - expect_state:
+      "type:ONI_MOD.ExpMultiplier::config.skillExpMultiplier": 2
+      "type:ONI_MOD.ExpMultiplier::config.attributeExpMultiplier": 10
+      "Components.LiveMinionIdentities.Items[1].GetComponent<MinionResume>.TotalExperienceGained": ">= 426"
+      "Components.LiveMinionIdentities.Items[1].GetComponent<AttributeLevels>.GetAttributeLevel(\"Digging\").experience": ">= 264.8"
+      "Components.LiveMinionIdentities.Items[1].GetComponent<AttributeLevels>.GetAttributeLevel(\"Digging\").level": 3
+      "file:mods/Local/2546907682/config.json": exists
+  - expect_state:
+      "Components.LiveMinionIdentities.Items[1].GetComponent<MinionResume>.TotalExperienceGained": "<= 427"
+      "Components.LiveMinionIdentities.Items[1].GetComponent<AttributeLevels>.GetAttributeLevel(\"Digging\").experience": "<= 265"
+  - run: {seconds: 60}
+  - expect: {duplicants: 3}

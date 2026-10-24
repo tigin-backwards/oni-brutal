@@ -1,0 +1,24 @@
+# Adaptive Building Menu (3724635599), class S.
+#
+# What it does: lays out the build menu's building grid in up to 8 columns (PLib option, 3..12)
+# instead of 3, so it grows wider rather than taller, with up to 8 rows before it scrolls;
+# moves the building card beside the wider menu; and lays the material selector out in 5
+# columns and 2 rows (options too). Postfixes on PlanScreen.ConfigurePanelSize and
+# RefreshScale and on MaterialSelector / MaterialSelectionPanel apply the layout.
+# How a player reaches it: opening any build menu category.
+# What changes: the build menu's shape and the material selector's.
+#
+# The Base category is opened and dumped, then a Tile is picked: the building card and its
+# material selector beside the menu are dumped and shot.
+from: early-base
+mods: [3724635599]
+steps:
+  - run: {seconds: 5}
+  - click: {ui: "**/PlanScreen/Toggle:Base"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/Tile Group*", cond: stable}
+  - ui_dump: {name: base, root: "**/BuildingGroups"}
+  - shot: {name: base, crop: "**/BuildingGroups", threshold: 0.04}
+  - click: {ui: "**/BuildingGroups/**/Grid/Tile Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
+  - ui_dump: {name: product, root: "**/ProductInfoScreen"}
+  - shot: {name: product, crop: "**/ProductInfoScreen", threshold: 0.04}

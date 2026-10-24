@@ -1,0 +1,32 @@
+# [Vanilla + DLC] Biobot Upgrades (3089113205), class P.
+#
+# What it does: upgrades the Biobot (MorbRover). It may also farm and do life-support errands
+# (removed from its trait's disabled chore groups), it digs anything (the skill-perk chore
+# precondition passes for a Biobot on the three hard-digging perks), it gets the Botanist and
+# Strength attributes, and it recharges its biofuel battery from the Zombie Spores around it
+# (a ZombieFuelMakerStates machine started in MorbRoverConfig.OnSpawn, shown as a status line
+# and a recharge effect stepped by the germ count; PLib option for the germs needed).
+# How a player reaches it: a Biobot in the colony (from a zombie-spore Duplicant's remains).
+# What changes: what a Biobot does and how long it runs.
+#
+# setup spawns a Biobot in the corridor west of the printing pod. It is selected: its status
+# reads "Zombie Recharge inactive" (no spores around), it carries the 0 % recharge effect, and
+# its trait no longer disables farming.
+from: early-base
+mods: [3089113205]
+setup:
+  - driver: {setup.call: {type: Scenario, method: SpawnPrefab, args: [131758, 0, 0, MorbRover, Creatures]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+steps:
+  - expect_state:
+      "count:Db.Get().traits.Get(\"MorbRoverBaseTrait\").disabledChoreGroups[*] if .Id == Farming": 0
+      "count:Db.Get().traits.Get(\"MorbRoverBaseTrait\").disabledChoreGroups[*] if .Id == LifeSupport": 0
+  - run: {seconds: 5}
+  - expect_state:
+      "count:Components.Brains.Items[*] if .name == MorbRover": 1
+  - driver: {camera.set: {cell: [107, 208], ortho: 8}}
+  - click_world: {pos: [105.5, 207.4], select: MorbRover}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui: {"**/SimpleInfoScreen/**": {any_text: "~Zombie Recharge inactive"}}
+  - expect_state:
+      "selected:GetComponent<Effects>.HasEffect(\"MorbRoverRechargeEffect_0\")": true

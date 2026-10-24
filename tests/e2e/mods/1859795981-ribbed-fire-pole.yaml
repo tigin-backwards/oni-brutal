@@ -1,0 +1,40 @@
+# Ribbed Fire Pole (1859795981), class B.
+#
+# What it does: adds the Ribbed Fire Pole to the Base menu, next to the Fire Pole, researched
+# with High Temp Forging: a 1x1 drag-built pole of 25 kg of steel and 25 kg of plastic that
+# Duplicants climb 1.2 times and slide down 4.5 times as fast as a ladder (its own config.json
+# sets both), and that never floods, overheats or entombs.
+# How a player reaches it: the build menu (Base), after research.
+# What changes: a pole that is quick both ways.
+#
+# setup grants High Temp Forging and spawns steel and plastic. Three cells of the pole are
+# dragged in the corridor west of the printing pod from the build menu and built.
+from: early-base
+mods: [1859795981]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"HighTempForging\")", method: Purchased}}
+  - driver: {setup.call: {target: "Game.Instance", method: Trigger, args: [-107300940]}}
+  - driver: {setup.call: {target: "PlanScreen.Instance._researchedDefs", method: Clear}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Steel\").substance", method: SpawnResource, args: [[114.5, 206.5, -12], 200, 300, 255, 0]}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Polypropylene\").substance", method: SpawnResource, args: [[115.5, 206.5, -12], 200, 300, 255, 0]}}
+steps:
+  - run: {seconds: 5}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click: {ui: "**/PlanScreen/Toggle:Base"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/RibbedFirePole Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/RibbedFirePole Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
+  - shot: {name: product, crop: "**/ProductInfoScreen", threshold: 0.04}
+  - drag: {from: [113, 207], to: [113, 209]}
+  - key: {code: Escape}
+  - expect: {blueprints: {RibbedFirePole: 3}}
+  - run: {seconds: 1500, until: {buildings: {RibbedFirePole: 3}, pending_construction: 0}}
+  - click_world: {cell: [113, 208], select: RibbedFirePole}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Ribbed Fire Pole"}
+  - expect_state:
+      "selected:Ladder.isPole": true
+      "selected:Ladder.upwardsMovementSpeedMultiplier": 1.2
+      "selected:Ladder.downwardsMovementSpeedMultiplier": 4.5
+      "Grid.HasPole.get_Item(132401)": true

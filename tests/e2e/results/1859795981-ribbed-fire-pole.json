@@ -1,0 +1,59 @@
+{
+ "spec": "mods/1859795981-ribbed-fire-pole.yaml",
+ "mods": [
+  "1859795981"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Ribbed Fire Pole is picked in the build menu (card shot), three cells are dragged and built, and the pole climbs 1.2x and slides 4.5x",
+ "updated": "2026-10-24",
+ "commit": "ca8e37e",
+ "mod_dlls": {
+  "1859795981": {
+   "RibbedFirePole.dll": "0814f679916b7789745b20afae0b8c8c911eb37ce41d343d23018c1273a40b1f"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-092853-3a19a1",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T09:33:27",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-105143-331154",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T10:51:43",
+    "lane": 16,
+    "reference_run": "20261024-092853-3a19a1",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.004678
+    }
+   },
+   {
+    "run": "20261024-105143-331154",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T10:51:44",
+    "lane": 17,
+    "reference_run": "20261024-092853-3a19a1",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.004678
+    }
+   }
+  ]
+ }
+}

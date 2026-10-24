@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3089113205-biobot-upgrades.yaml",
+ "mods": [
+  "3089113205"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a spawned Biobot shows \"Zombie Recharge inactive\" and its 0 % recharge effect; its trait no longer disables farming or life support",
+ "updated": "2026-10-24",
+ "commit": "ca8e37e",
+ "mod_dlls": {
+  "3089113205": {
+   "BiobotUpgradesMerged.dll": "e194cac988c210413adf5905006709c84ce9dade808b2cf1565a4ce98224b900"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-093955-c660f6",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T09:43:52",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-105557-977608",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T10:55:58",
+    "lane": 17,
+    "reference_run": "20261024-093955-c660f6",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-105557-977608",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T10:55:57",
+    "lane": 16,
+    "reference_run": "20261024-093955-c660f6",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

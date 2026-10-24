@@ -1,0 +1,48 @@
+# Nuclear Processing [Currently Broken] (2614715953), class B.
+#
+# What it does: adds four radiation buildings to the Radiation menu: the Rad Projector (2x1, of
+# refined metal and plastic, Nuclear Refinement), which takes uranium ore delivered to it and,
+# while it holds enough, emits 900 rads around it and turns the ore into liquid nuclear waste
+# for a pipe; the HEP Centrifuge, the HEP Calcinator (yellowcake from ore or waste) and a
+# Light Reactor, with radium and yellowcake elements and radbolt automation ports.
+# How a player reaches it: the build menu (Radiation), after nuclear research.
+# What changes: more ways to make and use radiation.
+#
+# Its title says it is broken; the Rad Projector works in today's game. setup grants Nuclear
+# Refinement and spawns steel, plastic and uranium ore. A Rad Projector is picked in the build
+# menu and built in the corridor west of the printing pod, then selected: it asks for uranium
+# ore and, with no pipe on its output, reports "No Liquid Output" (a smaller spec: its waste
+# pipe is not laid, so it is not filled and does not emit).
+from: early-base
+mods: [2614715953]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"NuclearRefinement\")", method: Purchased}}
+  - driver: {setup.call: {target: "Game.Instance", method: Trigger, args: [-107300940]}}
+  - driver: {setup.call: {target: "PlanScreen.Instance._researchedDefs", method: Clear}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Steel\").substance", method: SpawnResource, args: [[113.5, 206.5, -12], 300, 300, 255, 0]}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Polypropylene\").substance", method: SpawnResource, args: [[114.5, 206.5, -12], 200, 300, 255, 0]}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"UraniumOre\").substance", method: SpawnResource, args: [[115.5, 206.5, -12], 300, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"NuclearRefinement\").unlockedItemIDs": {contains: HepProjector}
+      "Assets.GetBuildingDef(\"LightReactor\").HeightInCells": 6
+  - run: {seconds: 5}
+  - driver: {camera.set: {cell: [110, 208], ortho: 8}}
+  - click: {ui: "**/PlanScreen/Toggle:Radiation"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/HepProjector Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/HepProjector Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
+  - shot: {name: product, crop: "**/ProductInfoScreen", threshold: 0.04}
+  - click_world: {cell: [109, 206]}
+  - key: {code: Escape}
+  - expect: {blueprints: {HepProjector: 1}}
+  - run: {seconds: 1500, until: {buildings: {HepProjector: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [110, 208], ortho: 8}}
+  - click_world: {cell: [109, 206], select: HepProjector}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Rad Projector"}
+  - expect_state:
+      "selected:GetComponent<ManualDeliveryKG>.RequestedItemTag": UraniumOre
+      "selected:GetComponent<RadiationEmitter>": exists
+  - expect_ui: {"**/SimpleInfoScreen/**": {any_text: "~No Liquid Output"}}

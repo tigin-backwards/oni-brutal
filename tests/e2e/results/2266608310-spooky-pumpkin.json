@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2266608310-spooky-pumpkin.yaml",
+ "mods": [
+  "2266608310"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the printing pod's \"Answer mysterious call\" button throws out a Ghost Pip",
+ "updated": "2026-10-24",
+ "commit": "ca8e37e",
+ "mod_dlls": {
+  "2266608310": {
+   "SpookyPumpkinSO.dll": "48658c6db13f1347664ebe05161fbb42c6a15b42b7c1e4c8fb0c8b5e0cfab640"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-093955-c660f6",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T09:43:48",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-105508-05706b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T10:55:08",
+    "lane": 16,
+    "reference_run": "20261024-093955-c660f6",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-105508-05706b",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T10:55:09",
+    "lane": 17,
+    "reference_run": "20261024-093955-c660f6",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

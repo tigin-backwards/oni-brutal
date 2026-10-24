@@ -1,0 +1,45 @@
+# Buildable Cryopod (DLC) (2847621082), class B.
+#
+# What it does: adds two buildable cryopods to the Medical menu, the Cryopod (4x3, 800 kg of
+# refined metal, 200 kg of glass and 200 kg of plastic, 960 W, 240 W in power-saver mode) and
+# a liquid-cooled one with pipe ports. A Duplicant assigned to one is frozen into it by an
+# errand and kept at 37 C, and can be thawed later. Both are unlocked by a hidden tech,
+# Frosted Dupe Research, which no research station studies: it completes when the player
+# demolishes a Gravitas cryo tank or (by chance) scans a space artifact. Frozen Duplicants
+# are also carried out when their world is destroyed.
+# How a player reaches it: the build menu (Medical), once the tech is unlocked.
+# What changes: Duplicants can be stored frozen.
+#
+# setup completes Frosted Dupe Research (the player would demolish a Gravitas cryo tank) and
+# spawns steel, glass and plastic. The Cryopod is picked in the build menu, placed in the
+# corridor west of the printing pod, built and selected.
+from: early-base
+mods: [2847621082]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"FrostedDupeResearch\")", method: Purchased}}
+  - driver: {setup.call: {target: "Game.Instance", method: Trigger, args: [-107300940]}}
+  - driver: {setup.call: {target: "PlanScreen.Instance._researchedDefs", method: Clear}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Steel\").substance", method: SpawnResource, args: [[113.5, 206.5, -12], 900, 300, 255, 0]}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Glass\").substance", method: SpawnResource, args: [[114.5, 206.5, -12], 300, 300, 255, 0]}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Polypropylene\").substance", method: SpawnResource, args: [[115.5, 206.5, -12], 300, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"FrostedDupeResearch\").unlockedItemIDs": {contains: CRY_BuildableCryoTank}
+  - run: {seconds: 5}
+  - driver: {camera.set: {cell: [110, 208], ortho: 10}}
+  - click: {ui: "**/PlanScreen/Toggle:Medicine"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/CRY_BuildableCryoTank Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/CRY_BuildableCryoTank Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
+  - shot: {name: product, crop: "**/ProductInfoScreen", threshold: 0.04}
+  - click_world: {cell: [107, 206]}
+  - key: {code: Escape}
+  - expect: {blueprints: {CRY_BuildableCryoTank: 1}}
+  - run: {seconds: 1500, until: {buildings: {CRY_BuildableCryoTank: 1}, pending_construction: 0}}
+  - click_world: {cell: [107, 207], select: CRY_BuildableCryoTank}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Cryotank 4000"}
+  - expect_state:
+      "selected:GetComponent<Cryopod.Buildings.CryopodReusable>": exists
+      "selected:GetComponent<MinionStorage>": exists

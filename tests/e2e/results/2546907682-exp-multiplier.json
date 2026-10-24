@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2546907682-exp-multiplier.yaml",
+ "mods": [
+  "2546907682"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the game's own experience calls count 2x for skills and 11x for attributes; the colony runs on",
+ "updated": "2026-10-24",
+ "commit": "ca8e37e",
+ "mod_dlls": {
+  "2546907682": {
+   "ExpMultiplier.dll": "3d74048806408ac3fbae3e14678f14a5d6f02aa6ca55356e7f980e0f7824f0cc"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-100001-ddcbba",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T10:00:01",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-105758-c8cf4f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T10:57:58",
+    "lane": 16,
+    "reference_run": "20261024-100001-ddcbba",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-105758-c8cf4f",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T10:57:59",
+    "lane": 17,
+    "reference_run": "20261024-100001-ddcbba",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

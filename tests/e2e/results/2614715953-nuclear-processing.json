@@ -1,0 +1,59 @@
+{
+ "spec": "mods/2614715953-nuclear-processing.yaml",
+ "mods": [
+  "2614715953"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Rad Projector is picked in the Radiation menu (card shot), built and selected: it asks for uranium ore and reports No Liquid Output (no pipe laid)",
+ "updated": "2026-10-24",
+ "commit": "ca8e37e",
+ "mod_dlls": {
+  "2614715953": {
+   "Nuclear Processing.dll": "e1fdfd3d51d147f955859999c69ded97e98ef8f992502dd197ab3883a5456d5c"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-100001-ddcbba",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T10:00:02",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-105906-649357",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T10:59:07",
+    "lane": 17,
+    "reference_run": "20261024-100001-ddcbba",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.004678
+    }
+   },
+   {
+    "run": "20261024-105906-649357",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T10:59:06",
+    "lane": 16,
+    "reference_run": "20261024-100001-ddcbba",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.004678
+    }
+   }
+  ]
+ }
+}

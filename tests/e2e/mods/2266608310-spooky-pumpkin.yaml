@@ -1,0 +1,27 @@
+# Spooky Pumpkin (2266608310), classes B, P, S.
+#
+# What it does: a Halloween pack. It adds a Pumpkin plant and foods (pumpkin, pie, toasted
+# seeds), two pumpkin lamps for the Furniture menu (built from a pumpkin), costumes, a sugar
+# sickness, and a Ghost Pip: the printing pod gets an "Answer mysterious call" button in its
+# side screen that opens the portal once and throws out a ghostly Pip (SP_GhostSquirrel),
+# which trades seeds through its own side screen.
+# How a player reaches it: the printing pod's side screen; the build menu (Furniture).
+# What changes: a ghost Pip joins the colony, and with it the pumpkin content.
+#
+# The printing pod is selected and its "Answer mysterious call" button clicked: a Ghost Pip
+# is spawned (thrown in a random direction) and the button is gone.
+from: early-base
+mods: [2266608310]
+steps:
+  - run: {seconds: 1}
+  - expect_state:
+      "all:Telepad::[0].GetComponent<SpookyPumpkinSO.Content.GhostPip.Spawning.GhostPipSpawner>.spawnComplete": false
+      "all:SpookyPumpkinSO.Content.GhostPip.GhostSquirrel::Length": 0
+  - driver: {camera.set: {cell: [124, 209], ortho: 8}}
+  - click_world: {cell: [124, 208], select: Headquarters}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - click: {text: "Answer mysterious call", under: "**/DetailsScreen"}
+  - run: {seconds: 5}
+  - expect_state:
+      "all:Telepad::[0].GetComponent<SpookyPumpkinSO.Content.GhostPip.Spawning.GhostPipSpawner>.spawnComplete": true
+      "all:SpookyPumpkinSO.Content.GhostPip.GhostSquirrel::Length": 1

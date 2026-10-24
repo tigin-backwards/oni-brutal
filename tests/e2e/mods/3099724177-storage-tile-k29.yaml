@@ -1,0 +1,38 @@
+# 大存储砖 Storage Tile -K29 (3099724177), class P.
+#
+# What it does: postfixes on StorageTileConfig raise the Storage Tile's capacity from 1000 kg
+# to 10000 kg (its Storage and its def's MaxCapacity) and give it +10 decor in a radius of 2.
+# How a player reaches it: a Storage Tile (Solid Management), its capacity side screen.
+# What changes: a storage tile holds ten times as much and is decorative.
+#
+# setup grants Solid Management and spawns steel and glass. A Storage Tile is picked in the
+# build menu, built in the corridor west of the printing pod and selected: its capacity slider
+# goes up to 10000 kg.
+from: early-base
+mods: [3099724177]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"SolidManagement\")", method: Purchased}}
+  - driver: {setup.call: {target: "Game.Instance", method: Trigger, args: [-107300940]}}
+  - driver: {setup.call: {target: "PlanScreen.Instance._researchedDefs", method: Clear}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Steel\").substance", method: SpawnResource, args: [[114.5, 206.5, -12], 300, 300, 255, 0]}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Glass\").substance", method: SpawnResource, args: [[115.5, 206.5, -12], 300, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"StorageTile\").BaseDecor": 10
+      "Assets.GetBuildingDef(\"StorageTile\").BaseDecorRadius": 2
+  - run: {seconds: 5}
+  - driver: {camera.set: {cell: [110, 208], ortho: 8}}
+  - click: {ui: "**/PlanScreen/Toggle:Base"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/StorageTile Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/StorageTile Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
+  - click_world: {cell: [110, 207]}
+  - key: {code: Escape}
+  - expect: {blueprints: {StorageTile: 1}}
+  - run: {seconds: 1500, until: {buildings: {StorageTile: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [110, 208], ortho: 8}}
+  - click_world: {cell: [110, 207], select: StorageTile}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/CapacityControlSideScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<Storage>.capacityKg": 10000
+  - ui_dump: {name: capacity, root: "**/CapacityControlSideScreen"}

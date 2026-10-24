@@ -1,0 +1,63 @@
+{
+ "spec": "mods/3099724177-storage-tile-k29.yaml",
+ "mods": [
+  "3099724177"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Storage Tile picked in the build menu is built and selected: capacity 10000 kg, decor 10, its capacity side screen dumped",
+ "updated": "2026-10-24",
+ "commit": "ca8e37e",
+ "mod_dlls": {
+  "3099724177": {
+   "K-29-┤≤┤µ┤ó╫⌐.dll": "373a3df6e85299a0076d15f890b6d52525d6d3f9ee46dfe271d6311ef2352599"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-093955-c660f6",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T09:39:56",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-105354-651080",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T10:53:54",
+    "lane": 16,
+    "reference_run": "20261024-093955-c660f6",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "capacity": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261024-105354-651080",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T10:53:55",
+    "lane": 17,
+    "reference_run": "20261024-093955-c660f6",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "capacity": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

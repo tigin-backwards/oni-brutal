@@ -1,0 +1,94 @@
+{
+ "spec": "mods/3724635599-adaptive-building-menu.yaml",
+ "mods": [
+  "3724635599"
+ ],
+ "verdict": "warning",
+ "why": "known findings: scroll-normalized-position",
+ "findings": [
+  "scroll-normalized-position"
+ ],
+ "note": "the Base category's wider grid and the Tile's card and material selector are dumped and shot",
+ "updated": "2026-10-24",
+ "commit": "ca8e37e",
+ "mod_dlls": {
+  "3724635599": {
+   "AdaptiveBuildingMenu.dll": "28d413252fe9b9ddcbc54907b2ab98f86f7cbc92b8a8c573013311b82844b17f",
+   "PLib.dll": "3dc9bc06c6b54660b833d314192e6b34c578754facc6aff3c7e803b5cdc6616e"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-092853-3a19a1",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T09:35:13",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-105300-d593fd",
+    "index": 1,
+    "verdict": "warn",
+    "date": "2026-10-24T10:53:00",
+    "lane": 16,
+    "reference_run": "20261024-092853-3a19a1",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "base": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     },
+     "product": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 2
+      }
+     }
+    },
+    "shots": {
+     "base": 0.0,
+     "product": 0.0
+    }
+   },
+   {
+    "run": "20261024-105300-d593fd",
+    "index": 2,
+    "verdict": "warn",
+    "date": "2026-10-24T10:53:01",
+    "lane": 17,
+    "reference_run": "20261024-092853-3a19a1",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "base": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     },
+     "product": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 2
+      }
+     }
+    },
+    "shots": {
+     "base": 0.0,
+     "product": 0.0
+    }
+   }
+  ]
+ }
+}

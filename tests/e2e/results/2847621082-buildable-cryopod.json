@@ -1,0 +1,59 @@
+{
+ "spec": "mods/2847621082-buildable-cryopod.yaml",
+ "mods": [
+  "2847621082"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Cryotank 4000 is picked in the Medicine menu (card shot), built and selected",
+ "updated": "2026-10-24",
+ "commit": "ca8e37e",
+ "mod_dlls": {
+  "2847621082": {
+   "Cryopod.dll": "dedadfd9cf2ae8cbe418f77642679a5d68d42c74e0ea2dcf0b6c97d9413eb327"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-093955-c660f6",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T09:45:05",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-105646-2a644d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T10:56:46",
+    "lane": 16,
+    "reference_run": "20261024-093955-c660f6",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.003339
+    }
+   },
+   {
+    "run": "20261024-105646-2a644d",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T10:56:47",
+    "lane": 17,
+    "reference_run": "20261024-093955-c660f6",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.003339
+    }
+   }
+  ]
+ }
+}

@@ -1,0 +1,59 @@
+{
+ "spec": "mods/1891350955-puft-morphs.yaml",
+ "mods": [
+  "1891350955"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Cloudy Puft is spawned in the corridor (setup); the morphs' eggs and babies exist, the puft is selected and named (title shot as in the original) and hovers through a short run",
+ "updated": "2026-10-23",
+ "commit": "397acff",
+ "mod_dlls": {
+  "1891350955": {
+   "PuftMorphs.dll": "13b801c054ce684618b462cd0c56b00c165045c1f82e7712e27b90282428e31a"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-183417-5e8543",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T18:46:24",
+    "lane": 12,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-214320-a91093",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T21:53:51",
+    "lane": 12,
+    "reference_run": "20261023-183417-5e8543",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "title": 0.0
+    }
+   },
+   {
+    "run": "20261023-214320-a91093",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T21:55:09",
+    "lane": 12,
+    "reference_run": "20261023-183417-5e8543",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "title": 0.0
+    }
+   }
+  ]
+ }
+}

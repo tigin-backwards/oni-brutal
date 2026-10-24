@@ -1,0 +1,34 @@
+# Puft Morphs (1891350955), class P.
+#
+# What it does: adds three Puft morphs with their eggs and babies: the Cloudy Puft
+# (PuftHydrogen: breathes hydrogen, loves the cold), the Smoggy Puft (PuftCO2: carbon dioxide)
+# and the Devil Puft (PuftDevil), with their own kanims (KAnimGroupFile.Load) and Molecular
+# Forge recipes for the eggs. A prefix on Stomach.Poop makes the Cloudy and Smoggy Pufts'
+# droppings 10 K colder or 40 K hotter than the Puft.
+# How a player reaches it: ranching Pufts; the critters' details screen.
+# What changes: new critters and eggs.
+#
+# setup spawns a Cloudy Puft in the dug-out corridor west of the printing pod (early-base has
+# none). It is selected: its details screen names it and is shot; it then lives through a
+# short run, hovering.
+from: early-base
+mods: [1891350955]
+setup:
+  - driver: {setup.call: {type: GameUtil, method: KInstantiate, args: [{"$": "Assets.GetPrefab(\"PuftHydrogen\")"}, [110.5, 208.01, -24.5], Creatures]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"PuftHydrogenEgg\").GetComponent<KPrefabID>.PrefabTag.Name": PuftHydrogenEgg
+      "Assets.GetPrefab(\"PuftCO2Baby\").GetComponent<KPrefabID>.PrefabTag.Name": PuftCO2Baby
+      "count:all:CreatureBrain::[*] if .GetComponent<KPrefabID>.PrefabTag.Name == PuftHydrogen": 1
+  - driver: {camera.set: {cell: [110, 208], ortho: 6}}
+  - click_world: {cell: [110, 208], select: PuftHydrogen}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Cloudy Puft"}
+  - shot: {name: title, crop: "**/DetailsScreen/TitleBar", threshold: 0.04}
+  - run: {seconds: 30}
+  - expect_state:
+      "selected:GetComponent<KPrefabID>.PrefabTag.Name": PuftHydrogen
+      "selected:GetComponent<Health>.IsDefeated()": false
+      "selected:GetComponent<Navigator>.CurrentNavType": Hover

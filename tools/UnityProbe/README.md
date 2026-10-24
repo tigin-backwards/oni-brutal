@@ -103,6 +103,13 @@ With `PROBE_SCENARIO=pointermove` only the pointer-move probe runs (`PointerMove
 hierarchy of handlers. It logs every `OnPointerMove`, `OnPointerEnter` and `OnPointerExit` with
 its event data. `ugui.md` ("Pointer move events") records what it measured.
 
+With `PROBE_SCENARIO=scrollbar` only the scrollbar probe runs (`ScrollbarPress.cs`, lines `SB
+…`, 10 s into the main menu, a few seconds). It builds a fresh `Scrollbar` per case (each
+direction, several sizes, values and step counts) and presses its track or handle through the
+current module's `inputOverride`, held for 1 to 60 frames, some moving while held. Each frame
+logs the value and the handle's anchors, and each `onValueChanged` its argument. `ugui.md`
+("Scrollbar presses on the track") records what it measured.
+
 With `PROBE_SCENARIO=layoutcull` only the layout-and-cull probe runs (`LayoutCull.cs`, lines `LC
 …`, 10 s into the main menu, about a minute). `LC lay` lines follow a `VerticalLayoutGroup`
 (a subclass counting its layout calls) with three children through one change at a time:

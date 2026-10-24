@@ -132,7 +132,10 @@ namespace OniBrutal.Desktop.Gl
                 GraphicsDevice.Adopt(shader, set);
             }
             if (set.Programs.TryGetValue(blobIndex, out var p)) return p;
+            long buildStart = System.Diagnostics.Stopwatch.GetTimestamp();
             p = Build(shader, shader.Programs.Variant(blobIndex));
+            System.Threading.Interlocked.Add(ref OniBrutal.Engine.StartupStats.ProgramTicks, System.Diagnostics.Stopwatch.GetTimestamp() - buildStart);
+            System.Threading.Interlocked.Increment(ref OniBrutal.Engine.StartupStats.Programs);
             set.Programs[blobIndex] = p;
             return p;
         }

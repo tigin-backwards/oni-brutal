@@ -130,7 +130,24 @@ namespace OniBrutal.Engine.Rendering
             return new TexelSource(texture.Get<byte[]>("image data"), null, 0, 0);
         }
 
-        public byte[] Read() => StreamPath != null ? AssetSystem.ReadStream(StreamPath, Offset, Size) : Inline;
+        public byte[] Read()
+        {
+            long start = System.Diagnostics.Stopwatch.GetTimestamp();
+            var bytes = StreamPath != null ? AssetSystem.ReadStream(StreamPath, Offset, Size) : Inline;
+            System.Threading.Interlocked.Add(ref StartupStats.ReadTicks, System.Diagnostics.Stopwatch.GetTimestamp() - start);
+            return bytes;
+        }
+
+        /// The texels in new memory, read straight into it.
+        public PixelMemory ReadMemory()
+        {
+            if (StreamPath == null) return new PixelMemory(Inline);
+            long start = System.Diagnostics.Stopwatch.GetTimestamp();
+            var memory = new PixelMemory(Size);
+            AssetSystem.ReadStreamInto(StreamPath, Offset, memory.Span);
+            System.Threading.Interlocked.Add(ref StartupStats.ReadTicks, System.Diagnostics.Stopwatch.GetTimestamp() - start);
+            return memory;
+        }
     }
 
     /// Texture2D, Texture2DArray and Texture3D: texels kept on the CPU side in one block of
@@ -168,15 +185,17 @@ namespace OniBrutal.Engine.Rendering
                 AwaitCopy();
                 if (memory == null && source is { } s)
                 {
-                    var bytes = s.Read();
+                    memory = GraphicsDevice.Pipelined ? s.ReadMemory() : new PixelMemory(s.Read());
                     source = null;
-                    memory = new PixelMemory(bytes);
                 }
                 return memory;
             }
         }
 
         public bool HasTexels => memory != null || source != null;
+
+        /// Texels still to be read from an asset file.
+        public bool TexelsUnread => memory == null && source != null;
 
         /// Texels from an asset file. As in Unity, a loaded texture is uploaded to the graphics
         /// device as part of loading (on the main thread before the next frame renders), not on

@@ -127,6 +127,10 @@ namespace OniBrutal.Engine.Rendering
         /// Shows the frame (swap buffers).
         public abstract void Present();
 
+        /// Hands the work recorded so far to the device's thread without ending the frame
+        /// (a device that records nothing does nothing).
+        public virtual void FlushRecorded() { }
+
         /// Diagnostics: the average GPU time per presented frame since the last call, in
         /// milliseconds; -1 when unknown. The first call starts the measurement.
         public virtual double TakeGpuFrameMilliseconds() => -1;
@@ -230,11 +234,48 @@ namespace OniBrutal.Engine.Rendering
             if (Current.RendersFrames) pendingUploads.Enqueue(new WeakReference<TextureNative>(texture));
         }
 
+        const int ParallelReadThreshold = 32;
+        internal static readonly bool Pipelined = Environment.GetEnvironmentVariable("ONI_UPLOAD_PIPELINE") != "0";
+        const long FlushBytes = 64L << 20;
+
         /// Uploads the textures loaded since the last call (main thread).
         public static void UploadPending()
         {
+            long start = System.Diagnostics.Stopwatch.GetTimestamp();
+            if (pendingUploads.IsEmpty) return;
+            var textures = new List<TextureNative>();
             while (pendingUploads.TryDequeue(out var weak))
-                if (weak.TryGetTarget(out var texture) && !texture.Destroyed) Current.Upload(texture);
+                if (weak.TryGetTarget(out var texture) && !texture.Destroyed) textures.Add(texture);
+            // Many textures at once (a scene or bundle load): their texels are read from the
+            // asset files on worker threads first. Each texture's own reads, nothing else.
+            if (Pipelined && textures.Count >= ParallelReadThreshold)
+            {
+                var unread = new List<TexelTextureNative>();
+                foreach (var t in textures)
+                    if (t is TexelTextureNative tt && tt.TexelsUnread) unread.Add(tt);
+                System.Threading.Tasks.Parallel.ForEach(unread, new System.Threading.Tasks.ParallelOptions { MaxDegreeOfParallelism = Math.Max(1, Environment.ProcessorCount / 2) },
+                    t => _ = t.Memory);
+            }
+            long sinceFlush = 0;
+            foreach (var texture in textures)
+            {
+                long bytes = texture is TexelTextureNative t ? t.SliceSize * t.Depth : 0;
+                if (StartupStats.Enabled)
+                {
+                    StartupStats.Uploads++;
+                    StartupStats.UploadBytes += bytes;
+                }
+                Current.Upload(texture);
+                // Large batches go to the device as they are recorded, so it uploads while the
+                // rest are recorded.
+                sinceFlush += bytes;
+                if (Pipelined && sinceFlush >= FlushBytes)
+                {
+                    Current.FlushRecorded();
+                    sinceFlush = 0;
+                }
+            }
+            StartupStats.UploadTicks += System.Diagnostics.Stopwatch.GetTimestamp() - start;
         }
 
         static int collectionsAtLastScan = -1;

@@ -39,6 +39,7 @@ namespace OniBrutal.Host
             Paths.Configure(layout, options);
             EngineLog.Open(options.LogPath ?? EngineConfig.ConsoleLogPath);
             EngineLog.Engine($"OniBrutal host starting: game={options.GameDir} .NET={Environment.Version}");
+            StartupStats.Mark("host starts (runtime up)");
             UnhandledExceptions.Install();
 
             AssemblyPolicy.Install(layout, AppContext.BaseDirectory, options.UiPackages, options.ShippedUiPackages);
@@ -46,6 +47,7 @@ namespace OniBrutal.Host
             var assemblies = AssemblyPolicy.PreloadScriptingAssemblies(dataDir);
             EngineConfig.BuildAssemblies = AssemblyPolicy.BuildAssemblyNames(dataDir);
             EngineLog.Engine($"Preloaded {assemblies.Count} scripting assemblies");
+            StartupStats.Mark("assemblies preloaded");
 
             if (options.CheckTypes) return CheckTypes(assemblies);
             if (options.CheckAssets) return AssetCheck.Run(dataDir, options.ListDataScripts);
@@ -72,6 +74,7 @@ namespace OniBrutal.Host
             MonoFolderPaths.Install();
             GameTweaks.GameTweaks.Install(options.GameTweaks);
             StateMachineSaveNames.Install(dataDir, AppContext.BaseDirectory);
+            StartupStats.Mark("host patches installed");
             return Player.Run(options, dataDir);
         }
 

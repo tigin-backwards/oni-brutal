@@ -16,8 +16,10 @@ namespace OniBrutal.Host
     {
         public static int Run(Options options, string dataDir)
         {
+            StartupStats.Mark("player starts");
             AssetSystem.Initialize(dataDir);
             ProjectSettings.Load();
+            BundlePrefetch.Start(EngineConfig.StreamingAssetsPath);
             PlayerLoop.Initialize();
             OniBrutal.Desktop.GlfwPlatform? platform = null;
             if (options.Headless || options.BatchMode) OniBrutal.Engine.Platform.PlatformLoop.Install(null);
@@ -32,6 +34,7 @@ namespace OniBrutal.Host
                 var device = new OniBrutal.Desktop.Gl.GlDevice(platform);
                 OniBrutal.Engine.Rendering.GraphicsDevice.Install(device);
             }
+            StartupStats.Mark("window and device ready");
             OniBrutal.Engine.Rendering.FrameRenderer.Install();
             OniBrutal.Engine.UI.CanvasSystem.Install();
             OniBrutal.Engine.IMGUI.GUIManager.Install();
@@ -67,6 +70,7 @@ namespace OniBrutal.Host
                     if (dumpFrame == frame) EngineLog.Engine($"mouse {Input.mousePosition} dt {Time.unscaledDeltaTime}\n" + HierarchyDump(path));
                 options.Input.Apply(frame);
                 PlayerLoop.RunFrame(dt);
+                StartupStats.FrameEnd(frame);
                 if (options.LogPointerHits) PointerHitLog.Frame(frame);
                 frame++;
                 Throttle(clock, now, platform != null, frame <= options.MaxFrameRateFrames ? options.MaxFrameRate : 0);

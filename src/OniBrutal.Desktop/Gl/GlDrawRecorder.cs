@@ -194,7 +194,10 @@ namespace OniBrutal.Desktop.Gl
         public DeviceProgram Program(ShaderNative shader, int blob)
         {
             if (shader.Gpu is DeviceProgramSet set && set.Programs.TryGetValue(blob, out var p)) return p;
-            return worker.Call(() => GlPrograms.Get(shader, blob));
+            long waitStart = System.Diagnostics.Stopwatch.GetTimestamp();
+            var built = worker.Call(() => GlPrograms.Get(shader, blob));
+            System.Threading.Interlocked.Add(ref OniBrutal.Engine.StartupStats.ProgramWaitTicks, System.Diagnostics.Stopwatch.GetTimestamp() - waitStart);
+            return built;
         }
 
         ProgramInputs NewInputs()

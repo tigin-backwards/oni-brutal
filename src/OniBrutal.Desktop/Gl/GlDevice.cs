@@ -770,6 +770,8 @@ namespace OniBrutal.Desktop.Gl
             });
         }
 
+        public override void FlushRecorded() => worker.Submit();
+
         /// Hands the frame to the GL thread, which presents it through the presenter with
         /// QualitySettings.vSyncCount as the swap interval.
         public override void Present()

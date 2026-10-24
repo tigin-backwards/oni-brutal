@@ -150,6 +150,7 @@ namespace OniBrutal.Desktop.Gl
                         catch (Exception e) { commandFailed(e); }
                     }
                     GlTimings.Busy += GlTimings.Now - start;
+                    System.Threading.Interlocked.Add(ref OniBrutal.Engine.StartupStats.GlBusyTicks, GlTimings.Now - start);
                     frame.Reset();
                     lock (gate)
                     {

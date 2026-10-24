@@ -385,6 +385,7 @@ namespace OniBrutal.Desktop.Gl
             upload.Execute(g);
             if (GlGpuProfile.Enabled) GlGpuProfile.End($"texture upload {upload.Width}x{upload.Height} {upload.Format}", q);
             GlTimings.TextureUploads += GlTimings.Now - t;
+            System.Threading.Interlocked.Add(ref OniBrutal.Engine.StartupStats.GlUploadTicks, GlTimings.Now - t);
         });
 
         static void PostSampler(GlWorker worker, DeviceTexture g, SamplerSettings sampler) => worker.Post(() => ApplySampler(sampler, g));

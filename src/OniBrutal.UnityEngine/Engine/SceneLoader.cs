@@ -13,6 +13,7 @@ namespace OniBrutal.Engine
     internal static class SceneLoader
     {
         static int pendingBuildIndex = -1;
+        static bool firstSceneLoaded;
 
         static SceneLoader() => PlayerLoop.FrameStart += CompletePendingLoad;
 
@@ -54,6 +55,10 @@ namespace OniBrutal.Engine
             var path = ProjectSettings.BuildScenes[index];
             var scene = Scenes.Create(Path.GetFileNameWithoutExtension(path), path, index);
             Scenes.SetActive(scene);
+            StartupStats.Mark($"scene {index} load starts");
+            // Content bundles the game has not loaded by now it does not load at start-up.
+            if (firstSceneLoaded) Assets.BundlePrefetch.Drop();
+            firstSceneLoaded = true;
             var file = AssetSystem.Get("level" + index);
             ObjectLoader.BeginSceneFile(file, scene);
             var gameObjects = new List<GameObjectNative>();
@@ -75,8 +80,10 @@ namespace OniBrutal.Engine
                 go.Scene = scene;
                 if (go.Transform.Parent == null) scene.Roots.Add(go);
             }
+            StartupStats.Mark($"scene {index} objects loaded");
             Time.LevelLoaded();
             Activate(scene);
+            StartupStats.Mark($"scene {index} awake and enabled");
             EngineLog.Engine($"Loaded scene {scene.Name} ({gameObjects.Count} GameObjects)");
             UnityEngine.SceneManagement.SceneManager.RaiseActiveSceneChanged(previous, scene);
             UnityEngine.SceneManagement.SceneManager.RaiseSceneLoaded(scene);

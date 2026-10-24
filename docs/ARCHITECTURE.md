@@ -763,6 +763,9 @@ Textures loaded from asset files are uploaded as part of loading, as in Unity (t
 them; the main thread records their upload before the next frame renders), not on first draw: first
 draws of screens with many textures (the research tree) would otherwise hitch for a second and
 throw off the game's time-based UI animation. Non-readable textures drop their CPU copy then.
+When many are pending at once (a scene's or a bundle's), their texels are read from the asset
+files on worker threads first, and the recorded uploads go to the GL thread in batches as they
+are recorded, so it uploads while the rest are read; the order of all GL work is unchanged.
 
 Per-draw uniform blocks are streamed through a ring buffer that stays persistently mapped for the
 device's lifetime (`GlStreamBuffer`, ARB_buffer_storage): data is copied into the mapping, blocks

@@ -131,14 +131,22 @@ namespace OniBrutal.Engine.Assets
         /// Reads `size` bytes at `offset` of a streamed resource file (.resS / .resource).
         public static byte[] ReadStream(string path, long offset, long size)
         {
-            var key = Canonical(path);
             var result = new byte[size];
+            ReadStreamInto(path, offset, result);
+            return result;
+        }
+
+        /// Reads `destination.Length` bytes at `offset` of a streamed resource file into
+        /// `destination`. Thread-safe.
+        public static unsafe void ReadStreamInto(string path, long offset, Span<byte> destination)
+        {
+            var key = Canonical(path);
             lock (gate)
             {
                 if (bundleNodes.TryGetValue(key, out var node))
                 {
-                    Array.Copy(node, offset, result, 0, size);
-                    return result;
+                    new ReadOnlySpan<byte>(node, checked((int)offset), destination.Length).CopyTo(destination);
+                    return;
                 }
             }
             var view = streams.GetOrAdd(key, k => new Lazy<MemoryMappedViewAccessor>(() =>
@@ -167,8 +175,17 @@ namespace OniBrutal.Engine.Assets
                 streams.TryRemove(new KeyValuePair<string, Lazy<MemoryMappedViewAccessor>>(key, view));
                 throw;
             }
-            mapped.ReadArray(offset, result, 0, (int)size);
-            return result;
+            // Straight from the mapping (no intermediate copy).
+            byte* start = null;
+            mapped.SafeMemoryMappedViewHandle.AcquirePointer(ref start);
+            try
+            {
+                new ReadOnlySpan<byte>(start + mapped.PointerOffset + offset, destination.Length).CopyTo(destination);
+            }
+            finally
+            {
+                mapped.SafeMemoryMappedViewHandle.ReleasePointer();
+            }
         }
     }
 }

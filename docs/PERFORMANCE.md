@@ -228,3 +228,37 @@ Loading U57 takes 35–36 s on Windows, against 2 min 22 s in the original. Prof
 about two thirds of it is the game's own work (reading the save and setting up each object), and about a quarter is the engine
 creating those objects. Unloading unused assets during the load takes another 1.2 s. The JIT
 isn't the bottleneck: compiling ahead of time (ReadyToRun) saved nothing measurable.
+
+## Start-up
+
+From process start to the main menu on Linux under WSL2 (Mesa's d3d12 driver), 1280×720, three
+rounds back to back (each round: the original, ours, ours with the start-up changes), the time
+the menu first shows on screen. A game was running on the Windows side, so the rounds spread by up
+to a third; the medians:
+
+| | Original | Before | Now |
+|---|---|---|---|
+| Every DLC | 35&nbsp;s | 40.5&nbsp;s | 25.5&nbsp;s |
+| Base game | 12.5&nbsp;s | 19&nbsp;s | 16.5&nbsp;s |
+
+Most of it is three long frames, each with nothing on screen changing:
+- Frame 0 loads the first scene, whose Global prefab references every animation texture: about
+  2,550 textures, 2 GiB. They are uploaded before the frame renders, as in Unity, so the window
+  stays black until they are (Klei's logo is that frame). The texels are now read on worker
+  threads, straight from the mapped file into the upload buffer, and handed to the GL thread in
+  64 MiB batches while the rest are read, so reading and uploading overlap
+  (`ONI_UPLOAD_PIPELINE=0` turns it off). The frame went from 9.5–11.6 s to 7.7–10.6 s; what's
+  left is the GL thread's upload, about 400 MB/s through Mesa's d3d12 driver.
+- Frame 1 is the game's own start-up (`LaunchInitializer`: Steam, FMOD's banks, the Global
+  prefab with `Assets`, `Db` and the localization). With the DLCs it also loads each DLC's
+  content bundle, a single LZMA stream each, about 1 GiB decompressed in all, one after another
+  on the main thread: 9–11 s. The bundles in StreamingAssets (installed only with their DLC) are
+  now decompressed on worker threads from the player's start, and `AssetBundle.LoadFromFile`
+  takes the result: 0.4–0.6 s (`ONI_BUNDLE_PREFETCH=0` turns it off). Bundles the game hasn't
+  loaded when its second scene loads are dropped.
+- Frame 2, the menu's first, waits for the GL thread: with the DLCs, the bundles' 880 MiB of
+  textures were queued at the end of frame 1. 5.2–5.6 s before, 1.4–2.4 s now. Compiling the
+  menu's programs takes under 0.1 s of it.
+
+`ONI_STARTUP_STATS=1` logs the start-up phases with the time since the process started, and for
+each slow frame its texel reads, uploads, program builds and GL-thread time.

@@ -23,7 +23,7 @@ namespace UnityEngine
             List<(string Key, byte[] Data)> nodes;
             try
             {
-                nodes = AssetSystem.ReadNodes(UnityFsArchive.Open(path));
+                nodes = BundlePrefetch.Take(path) ?? AssetSystem.ReadNodes(UnityFsArchive.Open(path));
             }
             catch (Exception e) when (e is IOException or UnauthorizedAccessException or InvalidDataException)
             {

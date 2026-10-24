@@ -550,7 +550,7 @@ installs get developer checks subscribers never see).
 | 529 | [Forever Eruption Geyser Revived(可以永远喷发的喷泉）](https://steamcommunity.com/sharedfiles/filedetails/?id=2816649817) | ✅ | ✅ | ⬜ |  |
 | 530 | [Attribute-based Workshop Restrictions](https://steamcommunity.com/sharedfiles/filedetails/?id=2829258387) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2829258387-attribute-workshop-restrictions.yaml: the research station's restriction side screen: its check box clicked, Above pressed and 8 typed; the station requires Science 8 and above; the side screen dumped and shot before and after |
 | 531 | [[Vanilla + DLC] Multiplayer Storage](https://steamcommunity.com/sharedfiles/filedetails/?id=2612332708) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2612332708-multiplayer-storage.yaml: smaller spec (30 t of materials): Smart Storage holds the Shared Storage, its definition; its card opened in the Base menu and shot |
-| 532 | [Sweep Bot Pro](https://steamcommunity.com/sharedfiles/filedetails/?id=3567851431) | ✅ | ✅ | ⬜ |  |
+| 532 | [Sweep Bot Pro](https://steamcommunity.com/sharedfiles/filedetails/?id=3567851431) | ✅ | ✅ | ✅ | spec tests/e2e/mods/3567851431-sweep-bot-pro.yaml: smaller spec (a Sweepy needs research, refined metal and power): the Sweepy's dustbin holds 2,000 kg and its dock 20,000 kg on their prefabs; the dock's card opened in the Utilities menu and shot |
 | 533 | [Better Rebuilding](https://steamcommunity.com/sharedfiles/filedetails/?id=3204497859) | ✅ | ✅ | ⬜ |  |
 | 534 | [Advanced Storage](https://steamcommunity.com/sharedfiles/filedetails/?id=1808602247) | ⬜ | ⬜ | ⬜ | flagged by onimaxxing (notLoading); not tested |
 | 535 | [Auto Drop Wrong Liquid](https://steamcommunity.com/sharedfiles/filedetails/?id=3305874874) | ✅ | ✅ | ⬜ |  |

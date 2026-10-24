@@ -1,0 +1,35 @@
+# Sweep Bot Pro (3567851431), class P.
+#
+# What it does: makes the Sweepy carry more. Transpilers on SweepStates.TryStore and TryMop
+# raise the 10 kg a Sweepy picks up (or mops per second) at once to 100 kg; its dustbin holds
+# 2,000 kg instead of 500; and the Sweepy Dock's ConfigureBuildingTemplate is replaced, so its
+# unloading storage holds 20,000 kg instead of 1,000 (its 25 kg battery storage stays). Its
+# attempt to change SweepBotConfig.MAX_SWEEP_AMOUNT, a constant, only logs a warning.
+# How a player reaches it: building a Sweepy Dock (Artificial Friends research).
+# What changes: how much a Sweepy sweeps up and its dock holds.
+#
+# Smaller spec: a Sweepy needs the Artificial Friends research, refined metal and a powered
+# dock, and what it sweeps at a time depends on where it wanders. The Sweepy's and the dock's
+# storages are checked on their prefabs, and the dock's card is opened in the Utilities menu.
+from: early-base
+mods: [3567851431]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"ArtificialFriends\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Game.Instance", method: Trigger, args: [-107300940]}}
+  - driver: {setup.call: {target: "PlanScreen.Instance._researchedDefs", method: Clear}}
+require_log: ['SweepBot Mod loaded!']
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"SweepBot\").GetComponents<Storage>()[1].capacityKg": 2000
+      "Assets.GetBuildingDef(\"SweepBotStation\").BuildingComplete.GetComponents<Storage>()[0].capacityKg": 25
+      "Assets.GetBuildingDef(\"SweepBotStation\").BuildingComplete.GetComponents<Storage>()[1].capacityKg": 20000
+      "Assets.GetBuildingDef(\"SweepBotStation\").BuildingComplete.GetComponent<SweepBotStation>": exists
+  - run: {seconds: 5}
+  - driver: {camera.set: {cell: [113, 208], ortho: 10}}
+  - click: {ui: "**/PlanScreen/Toggle:Utilities"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/SweepBotStation Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/SweepBotStation Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
+  - shot: {name: product, crop: "**/ProductInfoScreen", threshold: 0.04}
+  - key: {code: Escape}

@@ -1,0 +1,59 @@
+{
+ "spec": "mods/3567851431-sweep-bot-pro.yaml",
+ "mods": [
+  "3567851431"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "smaller spec (a Sweepy needs research, refined metal and power): the Sweepy's dustbin holds 2,000 kg and its dock 20,000 kg on their prefabs; the dock's card opened in the Utilities menu and shot",
+ "updated": "2026-10-24",
+ "commit": "c6be1d0",
+ "mod_dlls": {
+  "3567851431": {
+   "SweepBotProMOD.dll": "0c7798f30d49ca69ff48439ee6e0aaba6dd6dfcd59c62a3a63b895466511a159"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-043029-527c2d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T04:47:35",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-051146-b5c375",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T05:11:46",
+    "lane": 17,
+    "reference_run": "20261024-043029-527c2d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.0
+    }
+   },
+   {
+    "run": "20261024-051146-b5c375",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T05:12:46",
+    "lane": 17,
+    "reference_run": "20261024-043029-527c2d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.0
+    }
+   }
+  ]
+ }
+}

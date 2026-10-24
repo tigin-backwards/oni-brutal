@@ -1,0 +1,64 @@
+{
+ "spec": "mods/1737903327-displayalltemps.yaml",
+ "mods": [
+  "1737903327"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the research station is selected and its Details tab opened by click; its temperature and melting point read in °C, °F and K (the mod's own odd conversion), the melting point line as in the original",
+ "updated": "2026-10-23",
+ "commit": "fb22e84",
+ "mod_dlls": {
+  "1737903327": {
+   "Common.dll": "808835db1a2fd6534cd8c84818bc9d591a29e4ba6b7cef2179a8d39b1a3391ce",
+   "DisplayAllTemps.dll": "3b4fef2fb905e93f8288298168e85971dd02e844b01d033f05489b62fe7d4a3e"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-184827-e292cb",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T20:58:54",
+    "lane": 13,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-212230-4db70d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T21:39:14",
+    "lane": 13,
+    "reference_run": "20261023-184827-e292cb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "melting-point": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261023-212230-4db70d",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T21:40:25",
+    "lane": 13,
+    "reference_run": "20261023-184827-e292cb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "melting-point": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

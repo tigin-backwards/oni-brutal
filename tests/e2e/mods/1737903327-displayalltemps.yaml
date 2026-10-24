@@ -1,0 +1,24 @@
+# DisplayAllTemps (1737903327), class S.
+#
+# What it does: every absolute temperature the game prints with its unit
+# (GameUtil.GetFormattedTemperature) gets the other units appended, "21.7 ºC, ... ºF, ... K";
+# the options menu's unit screen (UnitConfigurationScreen) turns into checkboxes that pick which
+# units show, saved in the mod's Unit.json (all three by default).
+# How a player reaches it: any temperature in the details screen or hover card; Options, Units.
+# What changes: temperatures read in several units.
+#
+# The research station is selected and its Details tab opened: its temperature and melting
+# point lines carry Fahrenheit and Kelvin after Celsius. (The mod converts the game's Kelvin as
+# if it were the display unit, so its extra values are off; they are what it prints.)
+from: early-base
+mods: [1737903327]
+steps:
+  - driver: {camera.set: {cell: [128, 208], ortho: 8}}
+  - click_world: {cell: [127, 207], select: ResearchCenter}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - click: {ui: "**/DetailsScreen/Tabs/TabHeader/tab: DETAILS"}
+  - ui_wait: {path: "**/AdditionalDetailsPanel/**/ContentStatus/melting_point", cond: stable}
+  - expect_ui:
+      "**/AdditionalDetailsPanel/**/ContentStatus/temperature": {text: "/^Temperature: [\\d.]+ ºC, [\\d.]+ ºF, [\\d.]+ K$/"}
+      "**/AdditionalDetailsPanel/**/ContentStatus/melting_point": {text: "/^Melting Point: [\\d.]+ ºC, [\\d.]+ ºF, [\\d.]+ K$/"}
+  - ui_dump: {name: melting-point, root: "**/AdditionalDetailsPanel/**/ContentStatus/melting_point"}

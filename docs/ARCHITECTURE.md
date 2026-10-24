@@ -100,7 +100,7 @@ and .NET 10 ships out-of-band. The host restores them the way .NET documents for
 time where they persist runtime-specific values (D1 state-machine parameter names, D3 a local
 mod's version stamp); so are mods' loading (D11) and the bubble manager's one use of a struct's
 hash as an identity (D26), and the game's conversions of floats to integers are rewritten as
-they load (D29). No other game IL is touched.
+they load (D29), in the same pass as its directory listings (D30). No other game IL is touched.
 
 | Mono provided | Host provides | Needed by |
 |---|---|---|
@@ -485,6 +485,41 @@ past the boot checkpoint needs a Steam client logged in with an account that own
   ours converts as the x86-64 one there too). `--check-types` loads a mod with conversions of
   floats, products, a generic result and a join of a float32 and a float64, and an integer's
   conversion, and compares them with the measured values.
+- **D30 Order of directory listings.** On Linux and macOS, Unity's Mono hands out a folder's
+  entries sorted by the bytes of their UTF-8 names (strcmp: Unicode code point order, so "B"
+  before "_" before "a", "ﬀ" U+FB00 before "😀" U+1F600); CoreCLR hands them out in readdir order.
+  Both class libraries enumerate with corefx's `FileSystemEnumerator` (Mono's
+  `mcs/class/corlib/unix_build_corlib.dll.sources`), but Unity's `libmono-native` is built from
+  its own `external/corefx-bugfix/src/Native/Unix/System.Native/pal_io.c`, whose
+  `SystemNative_ReadDirR` reads the whole folder on the first call and `qsort`s it with strcmp
+  (`CompareByName`); upstream corefx and .NET's `pal_io.c` do not sort, and the Linux and macOS
+  `libmono-native` of the game import `qsort` and `strcmp`. A recursive listing walks breadth
+  first in both (a queue of subfolders, each queued as its entry is read), so Mono's visits the
+  subfolders in sorted order too. Measured in the original player (`tools/UnityProbe`,
+  `PROBE_SCENARIO=dirorder`): every `Directory` and `DirectoryInfo` `Get*`/`Enumerate*` call,
+  with and without patterns, recursive and with `EnumerationOptions`, sorted a folder created in
+  another readdir order; an enumeration reads its folder on its first step (a file added after
+  the call and before that step is listed, one added after it is not). On Windows both use
+  `FindFirstFileEx` and the same corefx enumerator, so nothing differs there. True Tiles finds
+  texture packs with `Directory.GetDirectories` and keeps packs of one Order in the order found:
+  its settings list and the texture that won differed (True Tiles Material Pack's Aquatic,
+  Prehistoric, Misc Tiles in the original; Misc Tiles first here). **Resolved in**
+  `MonoDirectoryListing`, in `MonoConversions`' pass (D29) over the game's assemblies from
+  `Managed/` (cached with it) and each mod's: every call of those methods (call, callvirt, and
+  ldftn of `Directory`'s; a `DirectoryInfo` method's instance becomes the first parameter) calls
+  the host's instead, which lists with .NET's own method (the same entries, paths and exceptions,
+  thrown as eagerly) and reorders (`OniBrutal.Engine.MonoDirectoryOrder`): a folder's results
+  are read in full and sorted when first enumerated; a recursive one lists each folder alone (its
+  `FileSystemEnumerable` reports the subfolders it would enter and does not), sorts its results,
+  and queues its subfolders sorted, skipping one gone before its turn as .NET's walk does. A
+  listing with CoreLib's own `MaxRecursionDepth` stays .NET's. Not covered: reflection calls,
+  `FileSystemEnumerable` used directly, our own code, and a transpiler that looks for a listing
+  call in game IL (no catalog mod names a listing method in a string). The game has 32 such
+  calls (Assembly-CSharp 26, firstpass 2, Ionic.Zip 4). Cost: the sort, and on a recursive
+  listing one list per folder: a folder of 200 files lists in 109 µs instead of 81 (GetFiles;
+  EnumerateFiles 127 instead of 83), a tree of 21 folders and 600 files in 383 instead of 312.
+  `--check-types` lists a mod's folders made in another
+  order, recursively and through a delegate.
 
 ## 3. The engine API (`OniBrutal.UnityEngine`)
 

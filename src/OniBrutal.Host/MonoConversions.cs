@@ -15,7 +15,8 @@ namespace OniBrutal.Host
     /// of a float in the game's assemblies and in mods (conv.i1 … conv.u8, conv.i, conv.u whose
     /// operand is a float32 or float64, found by following the IL's stack types) call these
     /// instead, which convert as Mono does (OniBrutal.Engine.MonoConvert). An assembly that cannot
-    /// be rewritten loads unchanged.
+    /// be rewritten loads unchanged. The same pass sends the assembly's directory listings to
+    /// MonoDirectoryListing (D30), and the game's rewritten images are cached with both.
     public static class MonoConversions
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)] public static sbyte ToSByte(double x) => MonoConvert.ToSByte(x);
@@ -42,7 +43,7 @@ namespace OniBrutal.Host
         /// `symbols` (portable PDB bytes or null) are rewritten to match.
         internal static byte[]? Adjust(byte[] image, ref byte[]? symbols, string path)
         {
-            if (!MayConvertFloats(image)) return null;
+            if (!MayConvertFloats(image) && !MonoDirectoryListing.MayList(image)) return null;
             try
             {
                 return Rewrite(image, ref symbols, path);
@@ -75,7 +76,7 @@ namespace OniBrutal.Host
         /// the player's cache folder, under the image's hash and this host build's.
         internal static byte[]? AdjustGame(byte[] image, string path)
         {
-            if (!MayConvertFloats(image)) return null;
+            if (!MayConvertFloats(image) && !MonoDirectoryListing.MayList(image)) return null;
             string? cached = null;
             try
             {
@@ -140,12 +141,17 @@ namespace OniBrutal.Host
             }
             using var owned = module;
             int converted = RewriteModule(module, out int methods, out int unsure);
-            if (converted == 0) return null;
+            // The same pass sends its directory listings to MonoDirectoryListing (D30).
+            int listings = MonoDirectoryListing.RewriteModule(module);
+            if (converted == 0 && listings == 0) return null;
             using var output = new MemoryStream();
             using var symbolOutput = new MemoryStream();
             module.Write(output, new Cecil.WriterParameters { WriteSymbols = withSymbols, SymbolStream = withSymbols ? symbolOutput : null, SymbolWriterProvider = withSymbols ? new Cil.PortablePdbWriterProvider() : null });
             symbols = withSymbols ? symbolOutput.ToArray() : null;
-            EngineLog.Engine($"{what}: {Path.GetFileName(path)}: {converted} conversion(s) of floats in {methods} method(s) convert as on Mono" + (unsure > 0 ? $"; {unsure} left as they were (stack types not followed)" : ""));
+            if (converted > 0)
+                EngineLog.Engine($"{what}: {Path.GetFileName(path)}: {converted} conversion(s) of floats in {methods} method(s) convert as on Mono" + (unsure > 0 ? $"; {unsure} left as they were (stack types not followed)" : ""));
+            if (listings > 0)
+                EngineLog.Engine($"{what.Replace("conversions", "listings")}: {Path.GetFileName(path)}: {listings} directory listing(s) in Mono's order");
             return output.ToArray();
         }
 

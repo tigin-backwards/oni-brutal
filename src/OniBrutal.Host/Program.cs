@@ -804,6 +804,70 @@ namespace OniBrutal.Host
                     try { Directory.Delete(dir, true); } catch (IOException) { } catch (UnauthorizedAccessException) { }
                 }
             });
+            Check("A mod's directory listings (MonoDirectoryListing)", () =>
+            {
+                ModAccess.Install();
+                var dir = Directory.CreateTempSubdirectory("oni-brutal-check-").FullName;
+                try
+                {
+                    // A mod listing folders as True Tiles does, a DirectoryInfo's recursive listing,
+                    // and a delegate of Directory.GetFiles.
+                    var mod = new System.Reflection.Emit.PersistedAssemblyBuilder(new AssemblyName("OniBrutalCheckListings"), typeof(object).Assembly);
+                    var type = mod.DefineDynamicModule("OniBrutalCheckListings").DefineType("Listings", TypeAttributes.Public | TypeAttributes.Abstract | TypeAttributes.Sealed);
+                    var folders = type.DefineMethod("Folders", MethodAttributes.Public | MethodAttributes.Static, typeof(string[]), [typeof(string)]).GetILGenerator();
+                    folders.Emit(System.Reflection.Emit.OpCodes.Ldarg_0);
+                    folders.Emit(System.Reflection.Emit.OpCodes.Call, typeof(Directory).GetMethod(nameof(Directory.GetDirectories), [typeof(string)])!);
+                    folders.Emit(System.Reflection.Emit.OpCodes.Ret);
+                    var files = type.DefineMethod("Files", MethodAttributes.Public | MethodAttributes.Static, typeof(IEnumerable<FileInfo>), [typeof(DirectoryInfo)]).GetILGenerator();
+                    files.Emit(System.Reflection.Emit.OpCodes.Ldarg_0);
+                    files.Emit(System.Reflection.Emit.OpCodes.Ldstr, "*");
+                    files.Emit(System.Reflection.Emit.OpCodes.Ldc_I4_1);
+                    files.Emit(System.Reflection.Emit.OpCodes.Callvirt, typeof(DirectoryInfo).GetMethod(nameof(DirectoryInfo.EnumerateFiles), [typeof(string), typeof(SearchOption)])!);
+                    files.Emit(System.Reflection.Emit.OpCodes.Ret);
+                    var lister = type.DefineMethod("Lister", MethodAttributes.Public | MethodAttributes.Static, typeof(Func<string, string[]>), Type.EmptyTypes).GetILGenerator();
+                    lister.Emit(System.Reflection.Emit.OpCodes.Ldnull);
+                    lister.Emit(System.Reflection.Emit.OpCodes.Ldftn, typeof(Directory).GetMethod(nameof(Directory.GetFiles), [typeof(string)])!);
+                    lister.Emit(System.Reflection.Emit.OpCodes.Newobj, typeof(Func<string, string[]>).GetConstructors()[0]);
+                    lister.Emit(System.Reflection.Emit.OpCodes.Ret);
+                    type.CreateType();
+                    var modPath = Path.Combine(dir, "OniBrutalCheckListings.dll");
+                    mod.Save(modPath);
+                    using (var module = Mono.Cecil.ModuleDefinition.ReadModule(modPath))
+                    {
+                        int found = MonoDirectoryListing.RewriteModule(module);
+                        int expected = OperatingSystem.IsWindows() ? 0 : 3;
+                        if (found != expected) throw new InvalidOperationException($"{found} listings found, not {expected}");
+                    }
+                    // True Tiles' packs, made in an order that is not sorted; a folder of each.
+                    var packs = Path.Combine(dir, "true_tiles_addon");
+                    foreach (var pack in new[] { "Specialty", "Aquatic", "Prehistoric", "aquatic", "_Shared" })
+                    {
+                        Directory.CreateDirectory(Path.Combine(packs, pack, "textures"));
+                        File.WriteAllText(Path.Combine(packs, pack, "tiles.json"), "{}");
+                    }
+                    var listings = ModAccess.LoadFrom(modPath).GetType("Listings")!;
+                    string Names(IEnumerable<string> paths) => string.Join(" ", paths.Select(p => Path.GetRelativePath(packs, p)));
+                    string Expect(string order) => OperatingSystem.IsWindows() ? null! : order;
+                    var listed = Names((string[])listings.GetMethod("Folders")!.Invoke(null, [packs])!);
+                    // Mono's order: each folder's entries by their UTF-8 bytes, breadth first.
+                    if (Expect("Aquatic Prehistoric Specialty _Shared aquatic") is { } folderOrder && listed != folderOrder)
+                        throw new InvalidOperationException($"GetDirectories gave {listed}; Mono gives {folderOrder}");
+                    var recursive = Names(((IEnumerable<FileInfo>)listings.GetMethod("Files")!.Invoke(null, [new DirectoryInfo(packs)])!).Select(f => f.FullName));
+                    if (Expect("Aquatic/tiles.json Prehistoric/tiles.json Specialty/tiles.json _Shared/tiles.json aquatic/tiles.json") is { } fileOrder && recursive != fileOrder)
+                        throw new InvalidOperationException($"EnumerateFiles(*, AllDirectories) gave {recursive}; Mono gives {fileOrder}");
+                    File.WriteAllText(Path.Combine(packs, "b"), "");
+                    File.WriteAllText(Path.Combine(packs, "B"), "");
+                    File.WriteAllText(Path.Combine(packs, "a"), "");
+                    var delegated = Names(((Func<string, string[]>)listings.GetMethod("Lister")!.Invoke(null, null)!)(packs));
+                    if (Expect("B a b") is { } delegateOrder && delegated != delegateOrder)
+                        throw new InvalidOperationException($"a delegate of GetFiles gave {delegated}; Mono gives {delegateOrder}");
+                    return OperatingSystem.IsWindows() ? "left as they are on Windows" : $"folders {listed}; files {recursive}; through a delegate {delegated}";
+                }
+                finally
+                {
+                    try { Directory.Delete(dir, true); } catch (IOException) { } catch (UnauthorizedAccessException) { }
+                }
+            });
             Check("Bubble archetype ids of two elements (MonoValueTypeHashes)", () =>
             {
                 MonoValueTypeHashes.Install();

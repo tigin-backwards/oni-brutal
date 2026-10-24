@@ -89,7 +89,8 @@ namespace OniBrutal.Host
             var path = Path.Combine(managedDir, simple + ".dll");
             if (!File.Exists(path)) return null;
             var image = MonoFieldSemantics.Adjust(path);
-            // Its conversions of floats to integers give Mono's values out of range (MonoConversions).
+            // Its conversions of floats to integers give Mono's values out of range (MonoConversions)
+            // and its directory listings come in Mono's order (MonoDirectoryListing).
             if (MonoConversions.AdjustGame(image ?? File.ReadAllBytes(path), path) is { } converted) image = converted;
             return image == null ? context.LoadFromAssemblyPath(path) : context.LoadFromStream(new MemoryStream(image));
         }

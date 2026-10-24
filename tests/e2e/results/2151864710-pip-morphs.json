@@ -1,0 +1,59 @@
+{
+ "spec": "mods/2151864710-pip-morphs.yaml",
+ "mods": [
+  "2151864710"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Winter Pip is spawned in the corridor (setup); the morphs' eggs and babies exist, Sleet Wheat is grazable, the pip is selected and named (title shot as in the original) and lives through a short run on the floor",
+ "updated": "2026-10-23",
+ "commit": "765a9c0",
+ "mod_dlls": {
+  "2151864710": {
+   "PipMorphs.dll": "ab47e31d66ffab19b47d4e1190192e83a002856f21a1e064fc1238afa18661c4"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-183417-5e8543",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T19:18:57",
+    "lane": 12,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-192041-f7eddd",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T21:01:31",
+    "lane": 12,
+    "reference_run": "20261023-183417-5e8543",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "title": 0.0
+    }
+   },
+   {
+    "run": "20261023-192041-f7eddd",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T21:09:51",
+    "lane": 12,
+    "reference_run": "20261023-183417-5e8543",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "title": 0.0
+    }
+   }
+  ]
+ }
+}

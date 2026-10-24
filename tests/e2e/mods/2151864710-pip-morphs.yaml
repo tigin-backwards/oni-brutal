@@ -1,0 +1,35 @@
+# Pip Morphs (2151864710), class P.
+#
+# What it does: adds three Pip morphs with their eggs and babies: the Winter Pip
+# (SquirrelWinter: eats Sleet Wheat and Nosh Sprouts, prefers the cold), the Autumn Pip
+# (SquirrelAutumn) and the Spring Pip (SquirrelSpring), with their own kanims and Molecular
+# Forge recipes for the eggs; Sleet Wheat, Nosh Sprout and Dusk Cap become plants critters can
+# graze (DirectlyEdiblePlant_Growth added to their prefabs).
+# How a player reaches it: ranching Pips; the critters' details screen.
+# What changes: new critters and eggs; grazable crops.
+#
+# setup spawns a Winter Pip on the floor of the dug-out corridor west of the printing pod
+# (early-base has none). It is selected: its details screen names it and is shot; it then lives
+# through a short run on the floor.
+from: early-base
+mods: [2151864710]
+setup:
+  - driver: {setup.call: {type: GameUtil, method: KInstantiate, args: [{"$": "Assets.GetPrefab(\"SquirrelWinter\")"}, [110.5, 206.01, -24.5], Creatures]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"SquirrelWinterEgg\").GetComponent<KPrefabID>.PrefabTag.Name": SquirrelWinterEgg
+      "Assets.GetPrefab(\"SquirrelSpringBaby\").GetComponent<KPrefabID>.PrefabTag.Name": SquirrelSpringBaby
+      "Assets.GetPrefab(\"ColdWheat\").GetComponent<DirectlyEdiblePlant_Growth>": exists
+      "count:all:CreatureBrain::[*] if .GetComponent<KPrefabID>.PrefabTag.Name == SquirrelWinter": 1
+  - driver: {camera.set: {cell: [110, 207], ortho: 6}}
+  - click_world: {cell: [110, 206], select: SquirrelWinter}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Winter Pip"}
+  - shot: {name: title, crop: "**/DetailsScreen/TitleBar", threshold: 0.04}
+  - run: {seconds: 30}
+  - expect_state:
+      "selected:GetComponent<KPrefabID>.PrefabTag.Name": SquirrelWinter
+      "selected:GetComponent<Health>.IsDefeated()": false
+      "selected:GetComponent<Navigator>.CurrentNavType": Floor

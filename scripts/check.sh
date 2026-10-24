@@ -20,6 +20,18 @@ tests ModTriage.Tests
 scripts_log=$(python3 -m unittest discover -s "$root/tests/scripts" 2>&1) || failed+=(scripts)
 echo "scripts: $(tail -1 <<< "$scripts_log")"
 grep -A12 -E '^(FAIL|ERROR): ' <<< "$scripts_log" | sed 's/^/  /' || true
+# The macOS build's shaders (docs/research/macos-feasibility.md §6.1), when its data is here: Metal
+# reflection against the MSL, and every Metal program's parameters against GLCore's.
+mac_data="${ONI_MAC_APP:-/mnt/c/Program Files (x86)/Steam/steamapps/content/app_457140/depot_457142/OxygenNotIncluded.app}/Contents/Resources/Data"
+if [ -d "$mac_data" ]; then
+    survey=("$root/out/bin/ShaderSurvey/debug/ShaderSurvey")
+    "${survey[@]}" check-metal "$mac_data" | tail -1 || failed+=(check-metal)
+    compare=$("${survey[@]}" compare-metal "$mac_data") || failed+=(compare-metal)
+    echo "compare-metal: $(head -1 <<< "$compare"); $(tail -1 <<< "$compare")"
+    grep -A20 UNEXPLAINED <<< "$compare" | head -40 || true
+else
+    echo "macOS data not found: Metal shader checks skipped (set ONI_MAC_APP)"
+fi
 "$root/scripts/build-engine.sh" >/dev/null
 "$root/scripts/apicheck.sh" > "$root/out/apicheck-summary.txt" || true; head -2 "$root/out/apicheck-summary.txt"
 "$root/out/bin/OniBrutal.Host/debug/OniBrutal" --game "$game" --check-types --log "$root/out/check-types.log" | grep -vE '^(ok   [A-Za-z0-9.-]+ +[0-9]+ types|from )'

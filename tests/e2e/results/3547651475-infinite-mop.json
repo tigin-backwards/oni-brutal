@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3547651475-infinite-mop.yaml",
+ "mods": [
+  "3547651475"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "water poured into the pit, 300 kg a cell; the toolbar's Mop tool dragged over it marks all five cells (the game refuses over 150 kg) and Duplicants mop it out",
+ "updated": "2026-10-23",
+ "commit": "fb22e84",
+ "mod_dlls": {
+  "3547651475": {
+   "tuoba.dll": "e2380bd0f86b5ba2aaef5d122a5a7a4b457034cbef7425489947ee6435cc8473"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-183417-5e8543",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T18:36:36",
+    "lane": 13,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-212230-4db70d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T21:30:12",
+    "lane": 13,
+    "reference_run": "20261023-183417-5e8543",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-212230-4db70d",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T21:34:50",
+    "lane": 13,
+    "reference_run": "20261023-183417-5e8543",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -946,6 +946,8 @@ namespace OniBrutal.Host
         /// --background: the window takes no focus and the desktop's mouse and keyboard reach
         /// nothing (test runs on a desktop someone is using: PerfProbe-driven runs).
         public bool Background;
+        /// --splash moo: the player's own loading splash (Gassy Moos falling while it loads).
+        public string? Splash;
         /// Diagnostics (--log-pointer-hits): the UI element under the mouse, logged when it changes.
         public bool LogPointerHits;
         /// Diagnostics (--vsync-count N): the swap interval regardless of the quality settings.
@@ -1036,6 +1038,7 @@ namespace OniBrutal.Host
                     case "--trace-exceptions": o.TraceExceptions = true; break;
                     case "--gl-debug": o.GlDebug = true; break;
                     case "--background": o.Background = true; break;
+                    case "--splash": o.Splash = args[++i]; break;
                     case "--log-pointer-hits": o.LogPointerHits = true; break;
                     case "--vsync-count": o.VSyncCount = int.Parse(args[++i]); break;
                     case "--gpu-profile": o.GpuProfile = true; break;
@@ -1118,7 +1121,7 @@ namespace OniBrutal.Host
                     }
                     default:
                         Console.Error.WriteLine($"Unknown option {args[i]}");
-                        Console.Error.WriteLine("usage: OniBrutal [--game DIR] [--log FILE] [--run-home DIR] [--audio-wav DIR] [--headless] [--batchmode] [--frames N] [--native-override NAME=PATH] [--trace-exceptions] [--gl-debug] [--background] [--log-pointer-hits] [--vsync-count N] [--gpu-profile] [--no-bindless] [--input FRAME:ACTION[:ARGS]] [--input-file PATH] [--frame-stats] [--max-frame-rate N[:FRAMES]] [--dump-render-textures FRAME:DIR] [-screen-width W] [-screen-height H] [-screen-fullscreen 0|1] [-window-mode exclusive|borderless|windowed] [-monitor N] [--check-types] [--ui-packages DIR | --shipped-ui-packages] [--game-tweak NAME|all|exact] [--check-assets [--list-data-scripts FILE]] [--check-bind] [--check-shaders] [--check-natives [--native-arch x86_64|arm64] [--native-dir DIR]] [--dump-shader NAME:DIR] [--capture FRAME:PATH[:SCALE]] [--probe-ui FRAME:X,Y] [--dump-ui FRAME:PATH] [--dump-ui-vertices PATH-SUBSTRING] [--dump-hierarchy FRAME:PATH] [--report-builtin-assets FILE] [--dump-component FRAME:PATH|TYPE] [-- STEAM-COMMAND]");
+                        Console.Error.WriteLine("usage: OniBrutal [--game DIR] [--log FILE] [--run-home DIR] [--audio-wav DIR] [--headless] [--batchmode] [--frames N] [--native-override NAME=PATH] [--trace-exceptions] [--gl-debug] [--background] [--splash moo] [--log-pointer-hits] [--vsync-count N] [--gpu-profile] [--no-bindless] [--input FRAME:ACTION[:ARGS]] [--input-file PATH] [--frame-stats] [--max-frame-rate N[:FRAMES]] [--dump-render-textures FRAME:DIR] [-screen-width W] [-screen-height H] [-screen-fullscreen 0|1] [-window-mode exclusive|borderless|windowed] [-monitor N] [--check-types] [--ui-packages DIR | --shipped-ui-packages] [--game-tweak NAME|all|exact] [--check-assets [--list-data-scripts FILE]] [--check-bind] [--check-shaders] [--check-natives [--native-arch x86_64|arm64] [--native-dir DIR]] [--dump-shader NAME:DIR] [--capture FRAME:PATH[:SCALE]] [--probe-ui FRAME:X,Y] [--dump-ui FRAME:PATH] [--dump-ui-vertices PATH-SUBSTRING] [--dump-hierarchy FRAME:PATH] [--report-builtin-assets FILE] [--dump-component FRAME:PATH|TYPE] [-- STEAM-COMMAND]");
                         return null;
                 }
             }

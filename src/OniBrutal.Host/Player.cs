@@ -20,6 +20,8 @@ namespace OniBrutal.Host
             AssetSystem.Initialize(dataDir);
             ProjectSettings.Load();
             BundlePrefetch.Start(EngineConfig.StreamingAssetsPath);
+            if (options.Splash == "moo" && !options.Headless && !options.BatchMode)
+                OniBrutal.Desktop.Gl.GlDevice.Splash = System.Threading.Tasks.Task.Run(OniBrutal.Engine.Rendering.SplashArt.Load);
             PlayerLoop.Initialize();
             OniBrutal.Desktop.GlfwPlatform? platform = null;
             if (options.Headless || options.BatchMode) OniBrutal.Engine.Platform.PlatformLoop.Install(null);

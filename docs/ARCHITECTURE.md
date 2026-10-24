@@ -759,6 +759,14 @@ player: with vSync the swap paces frames; otherwise `Application.targetFrameRate
 otherwise none. Without a display (`--headless`, `--batchmode`) frames are paced at
 `targetFrameRate` or 60 Hz.
 
+**Loading splash (`--splash moo`, off by default).** The player's own presentation, not the
+game's: the presenter thread draws Gassy Moo comets (the game's `meteor_gassymoo` kanim, its
+`fall_loop`, read from `sharedassets0.assets` on a worker thread at start-up) over whatever the
+window last showed, redrawing about 60 times a second while no game frame comes, so the window
+keeps moving while the main and GL threads load. Game frames are not changed: the comets are
+drawn into the window after a frame is copied there. Once 30 frames in a row arrive within
+100 ms of each other (the main menu), the rain fades out for good.
+
 Textures loaded from asset files are uploaded as part of loading, as in Unity (the load queues
 them; the main thread records their upload before the next frame renders), not on first draw: first
 draws of screens with many textures (the research tree) would otherwise hitch for a second and

@@ -152,7 +152,7 @@ namespace OniBrutal.Desktop.Gl
             GlBindings.Invalidate();
             CreateDefaults();
             GlStateCache.Invalidate();
-            presenter = new GlPresenter(platform.Window);
+            presenter = new GlPresenter(platform.Window, Splash != null ? new GlSplash(Splash) : null, platform.FramebufferWidth, platform.FramebufferHeight);
             // From here on the context belongs to the GL thread.
             worker = new GlWorker(platform.RenderWindow, CommandFailed);
             recorder = new GlDrawRecorder(worker, DefaultTexture, RunDraw);
@@ -172,6 +172,9 @@ namespace OniBrutal.Desktop.Gl
         }
 
         readonly GlPresenter presenter;
+
+        /// The art of the player's loading splash (--splash moo), loading; null: no splash.
+        public static System.Threading.Tasks.Task<OniBrutal.Engine.Rendering.SplashArt> Splash;
 
         /// A recorded command threw (GL thread): the error is logged and the GL thread's caches
         /// of context state are dropped, since the command may have stopped part way.

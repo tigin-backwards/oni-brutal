@@ -55,9 +55,19 @@ namespace OniBrutal.Desktop.Gl
         Exception failure;
         int swapInterval = -1;
 
-        public GlPresenter(GlfwWindow window)
+        /// The player's loading splash, drawn over the window by this thread (null: none).
+        readonly GlSplash splash;
+        // The window's size for splash frames drawn before any game frame (any thread writes).
+        volatile int splashWidth, splashHeight;
+        // The buffer last copied to the window (presenter thread).
+        Buffer shown;
+
+        public GlPresenter(GlfwWindow window, GlSplash splash = null, int width = 0, int height = 0)
         {
             this.window = window;
+            this.splash = splash;
+            splashWidth = width;
+            splashHeight = height;
             thread = new Thread(Run) { Name = "Presenter", IsBackground = true };
             thread.Start();
         }
@@ -75,6 +85,8 @@ namespace OniBrutal.Desktop.Gl
             }
             width = Math.Max(1, width);
             height = Math.Max(1, height);
+            splashWidth = width;
+            splashHeight = height;
             if (b.Framebuffer == 0 || b.Width != width || b.Height != height) Allocate(b, width, height);
             return b.Framebuffer;
         }
@@ -140,11 +152,27 @@ namespace OniBrutal.Desktop.Gl
                 while (true)
                 {
                     (Buffer Buffer, GlSync Fence, int Interval) frame;
+                    bool redraw = false;
                     lock (gate)
                     {
-                        while (queue.Count == 0 && !stopping) Monitor.Wait(gate);
-                        if (queue.Count == 0) break;
-                        frame = queue.Dequeue();
+                        while (queue.Count == 0 && !stopping)
+                        {
+                            // While the splash runs, the window is redrawn about 60 times a
+                            // second when no game frame comes.
+                            if (splash != null && splash.Active)
+                            {
+                                if (!Monitor.Wait(gate, 16)) { redraw = true; break; }
+                            }
+                            else Monitor.Wait(gate);
+                        }
+                        if (redraw && queue.Count > 0) redraw = false;
+                        if (!redraw && queue.Count == 0) break;
+                        frame = redraw ? default : queue.Dequeue();
+                    }
+                    if (redraw)
+                    {
+                        RedrawSplash();
+                        continue;
                     }
                     PresentBuffer(frame.Buffer, frame.Fence, frame.Interval);
                     lock (gate)
@@ -195,6 +223,12 @@ namespace OniBrutal.Desktop.Gl
             // The GL thread draws into the buffer again only after the copy has read it.
             b.CopyDone = N.glFenceSync(SyncGpuCommandsComplete, default);
             b.HasCopyDone = true;
+            shown = b;
+            if (splash != null && splash.Active)
+            {
+                splash.GameFrame();
+                splash.Draw(b.Width, b.Height);
+            }
             N.glFlush();
             window.SwapBuffers();
             if (interval > 0)
@@ -205,6 +239,28 @@ namespace OniBrutal.Desktop.Gl
                 while (N.glClientWaitSync(swapped, default, WaitSliceNanoseconds) == TimeoutExpired) { }
                 N.glDeleteSync(swapped);
             }
+        }
+
+        /// A splash frame between game frames: the frame last shown (black before the first),
+        /// with the comets over it. The GL thread draws into that buffer again only after two
+        /// newer frames have been presented, so it holds the frame last shown meanwhile.
+        void RedrawSplash()
+        {
+            GlApi.BindFramebuffer(DrawFramebuffer, 0);
+            int width = shown?.Width ?? splashWidth, height = shown?.Height ?? splashHeight;
+            if (shown != null)
+            {
+                GlApi.BindFramebuffer(ReadFramebuffer, shown.PresentFramebuffer);
+                N.glBlitFramebuffer(0, 0, shown.Width, shown.Height, 0, 0, shown.Width, shown.Height, ColorBufferBit, Nearest);
+            }
+            else
+            {
+                N.glClearColor(0f, 0f, 0f, 1f);
+                N.glClear(ColorBufferBit);
+            }
+            splash.Draw(width, height);
+            N.glFlush();
+            window.SwapBuffers();
         }
 
         /// Presents what was handed over, then stops the thread and releases the window's

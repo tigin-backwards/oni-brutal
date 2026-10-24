@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2968008945-warning-notification-manager.yaml",
+ "mods": [
+  "2968008945"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with the starvation threshold at 500 kcal and the base's food out of reach, a Duplicant at 800 kcal in the starving state shows Hungry, one at 300 kcal Starving",
+ "updated": "2026-10-24",
+ "commit": "d823bdc",
+ "mod_dlls": {
+  "2968008945": {
+   "SGTIM_NotificationManager.dll": "ce52418e05fb8d670737bc110b5c8890b0991d4bbb3335f625d0addd38f196e4"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-080629-e32fb8",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T08:06:29",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-080741-fbcc8d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T08:07:41",
+    "lane": 14,
+    "reference_run": "20261024-080629-e32fb8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-080741-fbcc8d",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T08:07:42",
+    "lane": 15,
+    "reference_run": "20261024-080629-e32fb8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

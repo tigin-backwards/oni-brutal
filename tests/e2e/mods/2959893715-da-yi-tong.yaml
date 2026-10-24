@@ -1,0 +1,30 @@
+# 大一统:大一统 (2959893715), classes P, O.
+#
+# What it does: a collection of some seventy tweaks, each switched on in its PLib options
+# (大一统控制台.json, all off by default): new buildings (one-way tiles, a natural block, a
+# void block, an auto-digging wall, a critter killer, a ghost door, a neutron annihilator),
+# building tweaks (automatic recipes, a colder and bigger Refrigerator, cooler ceiling lights,
+# bigger lockers and cargo bays, ...), world and critter tweaks, and Duplicant tweaks
+# (precise mining, chain digging, longer reach, faster work, ...). Its own AnyHarmony patches
+# each tweak only when its option is set.
+# How a player reaches it: the Mods screen's options; then playing.
+# What changes: whatever is switched on.
+#
+# Options here: 精准采集 (precise mining: a dig drops all of its mass, the game half). Four
+# cells of sandstone at the east end of the dug-out corridor west of the printing pod are
+# dug, and the debris weighed.
+from: early-base
+mods: [2959893715]
+options:
+  "2959893715": {$file: 大一统控制台.json, 精准采集: true}
+steps:
+  - expect_state:
+      "type:大一统.大一统控制台UI::Instance.精准采集": true
+      "cells:119,209..120,210::Grid.Mass.get_Item({cell})": {save_as: block}
+      "sum:all:Clearable::[*].GetComponent<PrimaryElement>.Mass if .GetComponent<PrimaryElement>.ElementID == SandStone": {save_as: before}
+  - expect_state: {"cells:119,209..120,210::Grid.Element[{cell}].hardness": "> 0"}   # solid, all of it
+  - dig: [119, 209, 120, 210]
+  - run: {seconds: 900, until: {pending_digs: 0}}
+  # The game alone would leave before + 0.5 * block.
+  - expect_state:
+      "sum:all:Clearable::[*].GetComponent<PrimaryElement>.Mass if .GetComponent<PrimaryElement>.ElementID == SandStone": ">= before + 0.95 * block"

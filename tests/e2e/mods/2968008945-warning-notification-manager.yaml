@@ -1,0 +1,41 @@
+# Warning Notification Manager (2968008945), classes P, O.
+#
+# What it does: per kind of warning notification (starvation, suffocation, attack, fleeing,
+# stress, scalding, entombed, plant death, food rot, broken machine, a Duplicant's death,
+# allergies, ...) PLib options mute its ping, pause the game and pan the camera to it when it
+# appears (postfixes on NotificationScreen.PlayDingSound and its Entry.Add); they can mute
+# the red and yellow alert sounds, and set the thresholds at which a Duplicant shows
+# Starving (kcal; a CalorieMonitor postfix replaces the starving state's status with its
+# own, shown below the threshold and Hungry above it) and Suffocating (breath).
+# How a player reaches it: the Mods screen's options; then playing.
+# What changes: which warnings show, ping, pause or pan.
+#
+# Options here: starvation threshold 500 kcal. setup leaves one Duplicant at 800 kcal
+# (starving for the game alone, below a quarter of 4000 kcal) and another at 300 kcal, and
+# moves the base's food out of their reach. After a short run both are in the calorie
+# monitor's starving state, but only the second shows Starving; the first shows Hungry.
+from: early-base
+mods: [2968008945]
+options:
+  "2968008945": {STARVATION_THRESHOLD: 500}
+setup:
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[1].GetComponent<Modifiers>.amounts.Get(\"Calories\")", method: SetValue, args: [800000]}}
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[2].GetComponent<Modifiers>.amounts.Get(\"Calories\")", method: SetValue, args: [300000]}}
+  # early-base's two foods go out of reach (to the map's bottom row), or a starving
+  # Duplicant would start eating at once.
+  - driver: {setup.call: {target: "all:Edible::[0].transform", method: set_position, args: [[20.5, 1.5, -12]]}}
+  - driver: {setup.call: {target: "all:Edible::[1].transform", method: set_position, args: [[21.5, 1.5, -12]]}}
+  # early-base saved them at a meal; their calorie monitors start from hungry instead.
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[1].GetComponent<StateMachineController>.GetSMI(\"CalorieMonitor+Instance\")", method: GoTo, args: [{"$": "Components.LiveMinionIdentities.Items[1].GetComponent<StateMachineController>.GetSMI(\"CalorieMonitor+Instance\").sm.hungry.normal"}]}}
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[2].GetComponent<StateMachineController>.GetSMI(\"CalorieMonitor+Instance\")", method: GoTo, args: [{"$": "Components.LiveMinionIdentities.Items[2].GetComponent<StateMachineController>.GetSMI(\"CalorieMonitor+Instance\").sm.hungry.normal"}]}}
+steps:
+  - expect_state:
+      "type:SGTIM_NotificationManager.Config::Instance.STARVATION_THRESHOLD": 500
+  - run: {seconds: 3}
+  - expect_state:
+      "Components.LiveMinionIdentities.Items[1].GetComponent<StateMachineController>.GetSMI(\"CalorieMonitor+Instance\").GetCurrentState().name": root.hungry.starving
+      "Components.LiveMinionIdentities.Items[2].GetComponent<StateMachineController>.GetSMI(\"CalorieMonitor+Instance\").GetCurrentState().name": root.hungry.starving
+  - expect_state:
+      "count:Components.LiveMinionIdentities.Items[1].GetComponent<KSelectable>.GetStatusItemGroup().items[*] if .item.Id == Starving": 0
+      "count:Components.LiveMinionIdentities.Items[1].GetComponent<KSelectable>.GetStatusItemGroup().items[*] if .item.Id == Hungry": 1
+      "count:Components.LiveMinionIdentities.Items[2].GetComponent<KSelectable>.GetStatusItemGroup().items[*] if .item.Id == Starving": 1

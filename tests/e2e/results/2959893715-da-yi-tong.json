@@ -1,0 +1,56 @@
+{
+ "spec": "mods/2959893715-da-yi-tong.yaml",
+ "mods": [
+  "2959893715"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with its precise-mining option on, four dug sandstone cells leave all of their mass as debris (the game half)",
+ "updated": "2026-10-24",
+ "commit": "d823bdc",
+ "mod_dlls": {
+  "2959893715": {
+   "PLib.dll": "22507507f11ca049b59efed4874560a3ab22730b5f9c87776c3baa9731c12ca9",
+   "┤≤╥╗═│.dll": "8f93f5e55fc41b200c8c081d5b5663bbde03c35659b559a531ad1cf941d6e0f3"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-074715-360fa9",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T07:55:10",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-075838-c66b39",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T07:58:38",
+    "lane": 14,
+    "reference_run": "20261024-074715-360fa9",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-075838-c66b39",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T07:58:39",
+    "lane": 15,
+    "reference_run": "20261024-074715-360fa9",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

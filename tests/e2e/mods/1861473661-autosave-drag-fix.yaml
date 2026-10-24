@@ -15,7 +15,7 @@
 from: early-base
 mods: [1861473661]
 options:
-  "1861473661:Config.json": {IgnoreIfOnlyDragging: false, ResetToolOnAutosave: true, SendAutosaveWarning: true, WarningSecondsBeforeAutosave: 5}
+  "1861473661": {$file: Config.json, IgnoreIfOnlyDragging: false, ResetToolOnAutosave: true, SendAutosaveWarning: true, WarningSecondsBeforeAutosave: 5}
 steps:
   - expect_state:
       "GameClock.Instance.GetCycle()": {save_as: cycle}

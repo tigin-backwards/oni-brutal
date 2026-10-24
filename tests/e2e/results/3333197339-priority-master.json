@@ -1,0 +1,63 @@
+{
+ "spec": "mods/3333197339-priority-master.yaml",
+ "mods": [
+  "3333197339"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "Dig set to priority 8 by click; the Sweep tool then opens at 5, the Dig tool again at 8 (dumped as in the original), and a dig order dragged on the floor has priority 8",
+ "updated": "2026-10-23",
+ "commit": "397acff",
+ "mod_dlls": {
+  "3333197339": {
+   "PriorityMaster.dll": "a923735e43b8a67486e38bef07204307f25f360bdc82a8fe2bbb2f3abd441c59"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-183417-5e8543",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T20:55:06",
+    "lane": 12,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-213047-94e53a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T21:59:46",
+    "lane": 12,
+    "reference_run": "20261023-183417-5e8543",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "priority-screen": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261023-213047-94e53a",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T22:00:03",
+    "lane": 13,
+    "reference_run": "20261023-183417-5e8543",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "priority-screen": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

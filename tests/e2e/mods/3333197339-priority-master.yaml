@@ -1,0 +1,38 @@
+# Priority Master // by @Ony (3333197339), classes T, S.
+#
+# What it does: each tool remembers its own priority: the tool menu's priority screen (and the
+# build card's) is set, when a tool opens, to the last priority picked with that tool (dig,
+# sweep, mop, harvest, deconstruct, build), or to its default from the mod's settings (5); the
+# game alone keeps one priority for all of them. It also shows the priority next to the cursor
+# (PriorityVisualizer), sorts errands by the mod's chore-group order, and lets needs go first.
+# How a player reaches it: the toolbar's tools and their priority screen.
+# What changes: the priority each tool starts with; the priority of new orders.
+#
+# The Dig tool gets priority 8 and is closed; the Sweep tool opens at 5, the Dig tool again at
+# 8, and a dig order dragged on the corridor floor west of the printing pod has priority 8.
+from: early-base
+mods: [3333197339]
+steps:
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - tool: {toolbar: Dig}
+  - ui_wait: {path: "**/ToolMenu/**/PriorityScreen", cond: stable}
+  - click: {text: "8", under: "**/ToolMenu/**/PriorityScreen"}
+  - expect_state: {"ToolMenu.Instance.PriorityScreen.GetLastSelectedPriority().priority_value": 8}
+  - key: {code: Escape}
+  - tool: {toolbar: Sweep}
+  - ui_wait: {path: "**/ToolMenu/**/PriorityScreen", cond: stable}
+  - expect_state:
+      "PlayerController.Instance.ActiveTool.name": ClearTool
+      "ToolMenu.Instance.PriorityScreen.GetLastSelectedPriority().priority_value": 5
+  - key: {code: Escape}
+  - tool: {toolbar: Dig}
+  - ui_wait: {path: "**/ToolMenu/**/PriorityScreen", cond: stable}
+  - expect_state:
+      "PlayerController.Instance.ActiveTool.name": DigTool
+      "ToolMenu.Instance.PriorityScreen.GetLastSelectedPriority().priority_value": 8
+  - ui_dump: {name: priority-screen, root: "**/ToolMenu/**/PriorityScreen"}
+  - drag: {from: [107, 205], to: [107, 205]}
+  - key: {code: Escape}
+  - expect: {pending_digs: 1}
+  - expect_state:
+      "count:all:Diggable::[*] if .GetComponent<Prioritizable>.GetMasterPriority().priority_value == 8": 1

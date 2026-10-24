@@ -1,0 +1,30 @@
+# Stop Sublimation While In Storage (updated for Big Merge) (2686344355), class P.
+#
+# What it does: an item that sublimates (oxylite, polluted dirt, bleach stone, ...) stops
+# giving off gas while it is stored: a prefix on Sublimates.Sim200ms skips the update for an
+# item tagged Stored, unless its storage is an Oxysconce. In the game alone, items in a
+# storage bin keep sublimating.
+# How a player reaches it: storing such an item in any storage.
+# What changes: stored oxylite and the like keep their mass, and no gas comes off them.
+#
+# setup builds a Storage Bin in the dug-out corridor west of the printing pod and stores 100 kg
+# of oxylite in it, with another 100 kg of oxylite lying loose beside it as the control. After
+# a run the stored oxylite has kept its mass, the loose one has lost some.
+from: early-base
+mods: [2686344355]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"StorageLocker\")", method: Build, args: [{"$": "Grid.XYToCell(114, 206)"}, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"OxyRock\").substance", method: SpawnResource, args: [[114.5, 206.5, -12], 100, 293.15, 255, 0]}}
+  - driver: {setup.call: {target: "all:StorageLocker::[0].GetComponent<Storage>", method: Store, args: [{"$": "last:"}, true, false, true, false]}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"OxyRock\").substance", method: SpawnResource, args: [[109.5, 206.5, -12], 100, 293.15, 255, 0]}}
+steps:
+  - expect_state:
+      "all:StorageLocker::[0].GetComponent<Storage>.items.Count": 1
+      "all:StorageLocker::[0].GetComponent<Storage>.items[0].GetComponent<KPrefabID>.PrefabTag": OxyRock
+      "all:StorageLocker::[0].GetComponent<Storage>.items[0].GetComponent<KPrefabID>.HasTag(\"Stored\")": true
+      "sum:all:Sublimates::[*].GetComponent<PrimaryElement>.Mass if .GetComponent<KPrefabID>.HasTag(\"Stored\") == false and .GetComponent<PrimaryElement>.ElementID == OxyRock": {save_as: loose}
+  - run: {seconds: 120}
+  # The stored oxylite kept every gram; the loose oxylite gave some off.
+  - expect_state:
+      "all:StorageLocker::[0].GetComponent<Storage>.items[0].GetComponent<PrimaryElement>.Mass": 100
+      "sum:all:Sublimates::[*].GetComponent<PrimaryElement>.Mass if .GetComponent<KPrefabID>.HasTag(\"Stored\") == false and .GetComponent<PrimaryElement>.ElementID == OxyRock": "< loose"

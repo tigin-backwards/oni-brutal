@@ -519,7 +519,7 @@ installs get developer checks subscribers never see).
 | 498 | [Utility Glass](https://steamcommunity.com/sharedfiles/filedetails/?id=3121297403) | ✅ | ✅ | ⬜ |  |
 | 499 | [Filterable Auto-Compost](https://steamcommunity.com/sharedfiles/filedetails/?id=3612606893) | ✅ | ✅ | ⬜ |  |
 | 500 | [Clothing Locker](https://steamcommunity.com/sharedfiles/filedetails/?id=2046407638) | ✅ | ✅ | ⬜ |  |
-| 501 | [Stop Sublimation While In Storage (updated for Big Merge)](https://steamcommunity.com/sharedfiles/filedetails/?id=2686344355) | ✅ | ✅ | ⬜ |  |
+| 501 | [Stop Sublimation While In Storage (updated for Big Merge)](https://steamcommunity.com/sharedfiles/filedetails/?id=2686344355) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2686344355-stop-sublimation-in-storage.yaml: 100 kg of oxylite stored in a storage bin keeps its mass over 120 s while a loose pile beside it sublimates |
 | 502 | [Forcefield Projectors](https://steamcommunity.com/sharedfiles/filedetails/?id=3568684741) | ✅ | ✅ | ⬜ |  |
 | 503 | [Heat Terminator热量终结者](https://steamcommunity.com/sharedfiles/filedetails/?id=2842352931) | ✅ | ✅ | ⬜ |  |
 | 504 | [Mod Filter](https://steamcommunity.com/sharedfiles/filedetails/?id=2196347807) | ✅ | ✅ | ⬜ |  |

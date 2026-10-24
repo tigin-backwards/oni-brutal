@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2686344355-stop-sublimation-in-storage.yaml",
+ "mods": [
+  "2686344355"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "100 kg of oxylite stored in a storage bin keeps its mass over 120 s while a loose pile beside it sublimates",
+ "updated": "2026-10-24",
+ "commit": "79f5b1e",
+ "mod_dlls": {
+  "2686344355": {
+   "NoSublimationWhenItemsAreInStorage.dll": "7305addefd0ec2d2fb3262b08e1f00a5f68a3dc998a9594d996a196a65678588"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-041001-686fdf",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T04:10:01",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-042157-f8f547",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T04:21:57",
+    "lane": 16,
+    "reference_run": "20261024-041001-686fdf",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-042157-f8f547",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T04:23:33",
+    "lane": 16,
+    "reference_run": "20261024-041001-686fdf",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

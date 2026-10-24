@@ -4,12 +4,12 @@
   "2815406414",
   "3599672848"
  ],
- "verdict": "failed",
- "why": "a run of ours failed",
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
  "findings": [],
- "note": "spec fails in ours: with True Tiles, the pack's texture packs load and its Specialty textures are used in both players, but True Tiles finds packs with Directory.GetDirectories, which returns folder names sorted in the original and in directory (readdir) order in ours, so its settings list (Mods screen, Texture Packs) orders the pack's three equal-order packs Aquatic, Prehistoric, Misc Tiles in the original and Misc Tiles, Aquatic, Prehistoric in ours, and loads their textures in a different order",
+ "note": "with True Tiles, the pack's three texture packs join True Tiles' pack list (Aquatic listed but off), the Diamond window and Palm Wood tiles take its Specialty textures, and the Mods screen's Texture Packs button lists the packs as in the original (Aquatic, Prehistoric, Misc Tiles: True Tiles finds them with Directory.GetDirectories, sorted as on Mono since ARCHITECTURE D30)",
  "updated": "2026-10-24",
- "commit": "4d33697",
+ "commit": "97dbdb3",
  "mod_dlls": {
   "2815406414": {
    "TrueTiles.dll": "ccd24cf608fa27ada9eef6f7dbcc25498329d553db6dbdf7985c137a7c0034ac"
@@ -29,39 +29,33 @@
   ],
   "ours": [
    {
-    "run": "20261024-162751-cd4ac8",
+    "run": "20261024-193239-5ed0b061",
     "index": 1,
-    "verdict": "fail",
-    "date": "2026-10-24T16:27:51",
-    "lane": 17,
-    "reasons": [
-     "ui_dump packs: 7 difference(s)"
-    ],
+    "verdict": "pass",
+    "date": "2026-10-24T19:32:39",
+    "lane": 7,
     "reference_run": "20261024-162544-109dda",
     "new_signatures": 0,
     "findings": [],
     "ui_dump": {
      "packs": {
-      "differences": 7
+      "differences": 0
      }
     },
     "shots": {}
    },
    {
-    "run": "20261024-162751-cd4ac8",
+    "run": "20261024-193239-5ed0b061",
     "index": 2,
-    "verdict": "fail",
-    "date": "2026-10-24T16:53:29",
-    "lane": 17,
-    "reasons": [
-     "ui_dump packs: 7 difference(s)"
-    ],
+    "verdict": "pass",
+    "date": "2026-10-24T19:33:26",
+    "lane": 7,
     "reference_run": "20261024-162544-109dda",
     "new_signatures": 0,
     "findings": [],
     "ui_dump": {
      "packs": {
-      "differences": 7
+      "differences": 0
      }
     },
     "shots": {}

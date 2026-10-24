@@ -1,0 +1,33 @@
+# Diseases Restored (1911357229), class B.
+#
+# What it does: reworks germs and sickness: a Duplicant's germ exposure is integrated over time
+# (GermIntegrator, added to every Duplicant) against per-germ contraction thresholds instead of
+# the game's per-exposure chance, shown in the details screen's contraction section; hand
+# washing has a cooldown, sinks and showers spread their germs, food germs grow on food and
+# slime germs in polluted water, Duplicants can vomit up food poisoning, scalding and sunburn
+# make them sick, and the Basic Cure treats the mod's sicknesses. It also adds the UV Cleaner
+# (Medical menu, researched with Medicine III).
+# How a player reaches it: the Duplicants' details screen (Details tab); the build menu
+# (Medical).
+# What changes: how Duplicants catch and lose diseases.
+#
+# A Duplicant is selected (setup) and its Details tab opened: the contraction section lists
+# the germs with the mod's thresholds; the Duplicants carry the mod's integrator and the Basic
+# Cure cures its sicknesses.
+from: early-base
+mods: [1911357229]
+setup:
+  - driver: {setup.call: {target: "SelectTool.Instance", method: Select, args: [{"$": "Components.LiveMinionIdentities.Items[1]"}]}}
+steps:
+  - expect_state:
+      "Components.LiveMinionIdentities.Items[1].GetComponent<DiseasesReimagined.GermIntegrator>": exists
+      "Assets.GetPrefab(\"BasicCure\").GetComponent<MedicinalPill>.info.curedSicknesses": {contains: FoodPoisonVomiting}
+      "Assets.GetBuildingDef(\"UVCleaner\").PrefabID": UVCleaner
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - click: {ui: "**/DetailsScreen/Tabs/TabHeader/tab: DETAILS"}
+  - ui_wait: {path: "**/AdditionalDetailsPanel/**/ContentStatus/disease_FoodPoisoning", cond: stable}
+  - expect_ui:
+      "**/AdditionalDetailsPanel/**/ContentStatus/disease_FoodPoisoning": {text: "~Food Poisoning"}
+      "**/AdditionalDetailsPanel/**/ContentStatus/disease_SlimeLung": {text: "~Slimelung"}
+  - ui_dump: {name: food-poisoning, root: "**/AdditionalDetailsPanel/**/ContentStatus/disease_FoodPoisoning"}
+  - ui_dump: {name: slimelung, root: "**/AdditionalDetailsPanel/**/ContentStatus/disease_SlimeLung"}

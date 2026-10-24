@@ -1,0 +1,69 @@
+{
+ "spec": "mods/1911357229-diseases-restored.yaml",
+ "mods": [
+  "1911357229"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Duplicant is selected (setup) and its Details tab opened by click: the contraction section lists Food Poisoning and Slimelung with the mod's thresholds, as in the original; Duplicants carry the mod's GermIntegrator and the Basic Cure cures its sicknesses",
+ "updated": "2026-10-23",
+ "commit": "fb22e84",
+ "mod_dlls": {
+  "1911357229": {
+   "DiseasesReimagined.dll": "2b6bba46d6dbde3fe75bcff22af56b20a7c51d7964a76ae4f3c1956c83d26c4b"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-184827-e292cb",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T21:00:40",
+    "lane": 13,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-212230-4db70d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T21:41:21",
+    "lane": 13,
+    "reference_run": "20261023-184827-e292cb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "food-poisoning": {
+      "differences": 0
+     },
+     "slimelung": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261023-212230-4db70d",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T21:42:14",
+    "lane": 13,
+    "reference_run": "20261023-184827-e292cb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "food-poisoning": {
+      "differences": 0
+     },
+     "slimelung": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

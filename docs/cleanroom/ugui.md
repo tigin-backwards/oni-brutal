@@ -773,15 +773,21 @@ RectTransforms, every level logged. Each operation below rounds to float; no fus
     v + w t + q×t in any of 120 term orders per lane (≤ 49% per lane), nor q v q* with this
     product or any lane orders, nor the forms with q(q·v). With q = (−½, −½, −½, ½) exactly it
     turns (0, 68.15, −0.0709) into (68.15, −9291 / 2^17, 0): one lane cancels at the vector's
-    magnitude, another exactly, so the lanes are grouped differently.
+    magnitude, another exactly, so the lanes are grouped differently. Searched again with
+    Inverse3DAffine's and Rotate's findings in hand: the managed `Quaternion * Vector3` matrix
+    form in float gives 18% of vectors (66% of x lanes), in double 12%, the basis formula in
+    double 10%.
   - `worldToLocalMatrix`, `InverseTransform*`: the per-axis inverse scale f(s) is a function of
     s alone (the same in every context, sign-symmetric, exponent-independent, 0 for 1e-20 and
     1e38), within 1.25 ulp of 1/s and correctly rounded in 69% of 2,585 values; not 1/s, nor
     rcpps (this CPU's table) with one or two Newton steps in eight evaluation orders, nor a
     constant estimate refined, nor rsqrt forms, nor any expression of up to three operations
     on s, 1/s, s², rcp and rsqrt. Rows of the inverse are f(s) times the transposed rotation;
-    the translation is −p·f(s) in 98% of cases.
-  - RectTransform's rect from its anchors: (w·aMax − w·aMin) + sizeDelta matches 98% of sizes.
+    the translation is −p·f(s) in 98% of cases. Nor is it the cofactor form Inverse3DAffine
+    takes, s²·(1/s³) or s/s² (52 to 57% of 1,009 values; 1/s 64%).
+  - RectTransform's rect from its anchors: (w·aMax − w·aMin) + sizeDelta matches 98% of sizes;
+    w·(aMax − aMin) + sizeDelta 94%, the sums in double 91%, the size as the difference of the
+    corners in the parent (anchor points plus offsets) at most 71%.
 - **`Matrix4x4.inverse`** and `Matrix4x4.Inverse` (managed API, native) are Mesa's
   Gauss–Jordan inversion with partial pivoting in float (`invert_matrix_general`, MIT), and the
   engine ports it (`MesaInverse`, from Mesa 20.3.5; `docs/LICENSING.md`). Every operation
@@ -830,29 +836,70 @@ Python check; the unit tests compare the bits.
   w = cosf(half), the identity unless |axis| > 1e-6 (so also for a NaN axis; boundary 1e-6
   along x, 1e-6/√14 along (1, 2, 3)). The engine follows it; its angle · Deg2Rad · 0.5 matched
   235.
-- **`Matrix4x4.Inverse3DAffine`** is not Mesa's `invert_matrix_3d_general`: its 3 × 3 is
-  Mesa's float cofactors times one scalar in 607 of 608 cases, but that scalar is not 1 / det
-  for Mesa's positive/negative sum, any order of the six terms (best 531), the row and column
-  expansions or the exact determinant; its fourth row is (−0, −0, −0, 1), and the success flag
-  agrees in 614 of 620. 362 of 608 match whole (496 for the top three rows); not adopted, and
-  the engine still has no `Inverse3DAffine`. On the 207 diagonal (scale and translation) cases
-  the general cofactor form matches all, Mesa's `invert_matrix_3d_no_rot` (1 / s per axis) none:
-  the original does not take Mesa's per-type shortcuts (nor `_2d_no_rot`).
-- **`Matrix4x4.Rotate`** is not the engine's quaternion matrix (176 of 400; the diagonal differs,
-  none of 1 − 2(yy + zz)'s eight float forms matches), although `TRS` is (400 of 400).
-- **Camera.** `projectionMatrix` is `Perspective(fieldOfView, aspect, near, far)` or
-  `Ortho(−size·aspect, size·aspect, −size, size, near, far)`: 240 of 240.
-  `cameraToWorldMatrix` is Mesa's inverse of `worldToCameraMatrix`: 240 of 240.
-  `worldToCameraMatrix` is not the transform's `worldToLocalMatrix` with the third row negated
-  where the transform has a rotation or scale (105 of 240), like `worldToLocalMatrix` itself.
-  `pixelRect`'s width is (xMax − x) · W, its height is not (149 of 240; the rect's stored
-  bounds are not observable). `WorldToViewportPoint` is (`WorldToScreenPoint` − pixel x) /
-  pixel width, 1,440 of 1,440, but `WorldToScreenPoint` is not `gluProject`: in double 47 of
-  1,440, and no float pipeline tried (P·V or P·(V·w), sums in order, paired or in double,
-  divide or reciprocal, four viewport forms) reproduces more than 48 of 240 points (96 in x)
-  even for unrotated orthographic cameras, where the original is off the exact value by up to
-  four ulps.
-  `ScreenToWorldPoint` is not `gluUnProject` either (at most 9 of 240). None adopted.
+- **`Matrix4x4.Inverse3DAffine`**, 629 of 629 (608 random affine matrices, 21 singular and
+  degenerate ones, 9 at the threshold): not Mesa's `invert_matrix_3d_general`, which matches 365.
+  The determinant is summed over column 0's lanes of col0 · (col1 × col2), each lane
+  (e_i·a_i+1)·b_i+2 − (e_i·a_i+2)·b_i+1 with e, a, b columns 0, 1, 2, the lanes left to right
+  (the SIMD shape; Mesa's positive/negative sum, every order of the six terms, the row and
+  column expansions and the exact determinant all miss some). The 3 × 3 is Mesa's float
+  cofactors (a·b − c·d) times k = 1 / det, the translation −((t.x r0 + t.y r1) + t.z r2) per row,
+  the bottom row (0·k, 0·k, 0·k, 1), so (−0, −0, −0, 1) for a negative determinant and NaNs for a
+  NaN one; the input's bottom row is ignored. It fails, giving false and the zero matrix (m33
+  0 too), when det·det < 1e-25 in float: bisected on Scale(x, 1, 1), (x, x, x) and (−x, 1, 1),
+  |det| = 3.1622776e-13 fails and the next float passes; NaN and infinite determinants pass.
+  The engine follows it, with both overloads (by value and `in`); of a NaN input the NaNs'
+  signs can differ (CoreCLR orders a product's operands its own way).
+- **`Matrix4x4.Rotate`**, 400 of 400 (and 400 of `AngleAxis`'s): the usual quaternion matrix with
+  each product (x·2x, w·2z, …) stored to float and the diagonal's 1 − (yy + zz) evaluated in
+  double and rounded once: managed code under Unity's Mono (ARCHITECTURE D25). Every float form
+  matched 176. `TRS` stays all float (400 of 400), so the engine's TRS no longer calls Rotate.
+- **Camera rects** (240 random cameras and 80 rule cases at 1024 × 768, `PK` lines). `rect` keeps
+  what was set, out of range, negative and NaN included. `pixelRect` clips it to the target
+  (the target texture's size, else the screen's): per axis the start is 0 + x·W and the end
+  start + w·W, each clamped to [0, W] with comparisons that pass a NaN through (std::min and
+  max), and the size end − start, at least 0; the 0 + turns a −0 start positive. The
+  `pixelRect` setter stores the rect times 1 / W (21.5 / 768 is an ulp under 21.5 · (1/768)).
+  `pixelWidth`/`Height` are a whole-pixel viewport's size: the start rounded half up
+  (floor(v + 0.5)), the end (start + size) rounded and clamped to [0, W], the difference in
+  32 bits (a NaN start gives int.MinValue, a NaN size 0). `aspect` is pixelRect's width over its
+  height, 1 for a zero height; a set aspect (any value, 0, negative, NaN, infinity) stays through
+  rect, pixel rect, projection and field-of-view changes until `ResetAspect`. The engine
+  clamped the rect when it was set, which changed the projection of 50 of 240 cameras.
+- **`worldToCameraMatrix`**, 240 of 240 and the 8 poses (the origin, −0, 180° turns, a child of a
+  rotated, mirrored, scaled parent): the world rotation's matrix as the hierarchy builds it
+  (above, "Local matrix"), unscaled and transposed into rows; each row's translation
+  0 − (r0·p.x + (r1·p.y + r2·p.z)) with p the world position; then the third row subtracted from
+  0, so zeros stay positive. The scale is ignored. `projectionMatrix` is `Perspective(fieldOfView,
+  aspect, near, far)` or `Ortho(−size·aspect, size·aspect, −size, size, near, far)` and
+  `cameraToWorldMatrix` Mesa's inverse of `worldToCameraMatrix`, 240 of 240 each.
+- **Conversions**, 1,440 points of the 240 cameras, all bit for bit but the rays' perspective
+  direction. Every operation rounds to float; C is cameraToWorldMatrix, its translation the
+  camera position, −column 2 the forward axis; the screen side uses the whole-pixel viewport
+  (x0, y0, w, h) above, not pixelRect.
+  - `WorldToScreenPoint`: c = (P·V)·(p, 1) with P·V's elements summed left to right in float;
+    x = ((c.x · (1 / c.w) + 1) · 0.5) · w + x0, y likewise; z = −((p − position) · C's column 2).
+    `gluProject` in double matched 47.
+  - `WorldToViewportPoint` = (screen − pixelRect.x) / pixelRect.width, z kept;
+    `ScreenToViewportPoint` the same of the screen point, `ViewportToScreenPoint`
+    v · pixelRect.width + pixelRect.x.
+  - `ScreenToWorldPoint`: ndc = (s − x0) · 2 / w − 1 per axis, the point q = inverse(P·V)·(ndc,
+    0.95, 1) times 1 / its w (0.95 found by searching the depth in steps of 0.05; Mesa's inverse);
+    d = q − position, dist = d · forward. Perspective: position + d · (z / dist); orthographic:
+    q − forward · (dist − z). It gives (0, 0, 0) unless |dist| ≥ 1e-6 (bisected on the clip
+    planes for both projections; a NaN dist, as from an empty viewport or a zero aspect, fails).
+    `ViewportToWorldPoint` is `ScreenToWorldPoint` of `ViewportToScreenPoint`. `gluUnProject`
+    matched at most 9 of 240.
+  - `ScreenPointToRay`: the origin is `ScreenToWorldPoint` at the near plane (1,440 of 1,440); an
+    orthographic camera's direction is the forward axis normalized (its √(x² + y² + z²) in float,
+    each component divided), 720 of 720. A perspective camera's is within an ulp or two of the
+    normalized offset from the camera to the screen point at distance 1000 (175 of 720; the
+    point at the far plane, at other distances, the depth-0.95 point, differences of two depths,
+    camera-space directions, double, reciprocal and rsqrt normalizations all matched fewer):
+    not reproduced; the engine uses that form. Where the unprojection fails the ray starts at the
+    camera position along (0, 0, 1). `ViewportPointToRay` is `ScreenPointToRay` of
+    `ViewportToScreenPoint`.
+- **Not measured on Windows.** `Perspective` and `AngleAxis` depend on the C library's sinf and
+  cosf, and were measured on Linux only (glibc, which .NET's MathF also calls there).
 
 ### InputField and Dropdown (legacy)
 

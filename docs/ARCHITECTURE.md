@@ -377,9 +377,12 @@ past the boot checkpoint needs a Steam client logged in with an account that own
   Mesa's (`MesaFrustum`, MIT), `LookAt` is `gluLookAt`'s basis arithmetic in Unity's layout
   (`GluLookAt`, SGI Free Software License B), and `Perspective` and `Quaternion.AngleAxis`
   are float code with the C library's sinf and cosf, which MathF calls too; the engine follows
-  all five bit for bit. `Inverse3DAffine`, `Rotate` and the camera's screen conversions are
-  neither Mesa's nor GLU's and stay apart (`docs/cleanroom/ugui.md`, "Camera and projection
-  math").
+  all five bit for bit. Neither Mesa's nor GLU's, but measured and followed bit for bit too:
+  `Inverse3DAffine` (native float cofactors over a SIMD-shaped determinant), `Rotate` (managed:
+  its diagonal is evaluated in double under the Mono, as above, where `TRS` is native float), and
+  the camera's rects, `worldToCameraMatrix` and screen conversions (float P·V, a whole-pixel
+  viewport, an unprojection at depth 0.95), all but the perspective rays' direction
+  (`docs/cleanroom/ugui.md`, "Camera and projection math").
   The transform hierarchy's world matrix, rotation and lossy scale are native float code in the
   original, composed from the leaf up; the engine follows it bit for bit (`HierarchyMath`,
   `docs/cleanroom/ugui.md` "Transform hierarchy to the bit").

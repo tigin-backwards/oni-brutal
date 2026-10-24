@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using OniBrutal.Assets.TypeTrees;
 using OniBrutal.Engine;
 using OniBrutal.Engine.Platform;
@@ -85,11 +87,12 @@ namespace UnityEngine
 
         // ----- Viewport -----
 
-        /// Normalized viewport rectangle, clamped to [0, 1].
+        /// Normalized viewport rectangle, kept as set (out of range and NaN too); pixelRect clips
+        /// it to the target.
         public Rect rect
         {
             get => Data.Rect;
-            set => Data.Rect = CameraNative.ClampRect(value);
+            set => Data.Rect = value;
         }
 
         public Rect pixelRect
@@ -97,8 +100,10 @@ namespace UnityEngine
             get => Data.PixelRect;
             set
             {
+                // times the reciprocal, as the original (21.5 / 768 an ulp over the quotient)
                 var size = Data.TargetSize;
-                rect = new Rect(value.x / size.x, value.y / size.y, value.width / size.x, value.height / size.y);
+                float kx = 1f / size.x, ky = 1f / size.y;
+                rect = new Rect(value.x * kx, value.y * ky, value.width * kx, value.height * ky);
             }
         }
 
@@ -137,6 +142,10 @@ namespace UnityEngine
         public void ResetProjectionMatrix() => Data.ProjectionOverride = null;
 
         // ----- Coordinate conversions -----
+        // The original's, bit for bit (tools/UnityProbe PROBE_SCENARIO=projection, pj-check.py
+        // camera: 1,440 points of 240 cameras), but for the rays' perspective direction
+        // (CameraNative.ScreenRay). The screen side maps through the pixel rect rounded to whole
+        // pixels (CameraNative.PixelViewport), the viewport side through the pixel rect itself.
 
         /// Screen pixels to viewport (0..1 across the camera's pixel rect); z unchanged.
         public Vector3 ScreenToViewportPoint(Vector3 position)
@@ -148,43 +157,29 @@ namespace UnityEngine
         public Vector3 ViewportToScreenPoint(Vector3 position)
         {
             var r = Data.PixelRect;
-            return new Vector3(r.x + position.x * r.width, r.y + position.y * r.height, position.z);
+            return new Vector3(position.x * r.width + r.x, position.y * r.height + r.y, position.z);
         }
 
         /// Viewport xy, z = distance in front of the camera along its view axis.
         public Vector3 WorldToViewportPoint(Vector3 position)
         {
             var d = Data;
-            var view = d.WorldToCamera.MultiplyPoint3x4(position);
-            var clip = d.Projection * new Vector4(view.x, view.y, view.z, 1f);
-            float w = clip.w == 0f ? 1f : clip.w;
-            return new Vector3((clip.x / w + 1f) * 0.5f, (clip.y / w + 1f) * 0.5f, -view.z);
+            var s = d.WorldToScreen(position);
+            var r = d.PixelRect;
+            return new Vector3((s.x - r.x) / r.width, (s.y - r.y) / r.height, s.z);
         }
 
-        public Vector3 WorldToScreenPoint(Vector3 position) => ViewportToScreenPoint(WorldToViewportPoint(position));
+        public Vector3 WorldToScreenPoint(Vector3 position) => Data.WorldToScreen(position);
 
         /// The world point at viewport xy whose distance in front of the camera is z.
-        public Vector3 ViewportToWorldPoint(Vector3 position)
-        {
-            var (near, far) = Data.ViewportSegment(position.x, position.y);
-            var d = Data;
-            float dn = DistanceInFront(d, near), df = DistanceInFront(d, far);
-            float t = df == dn ? 0f : (position.z - dn) / (df - dn);
-            return near + (far - near) * t;
-        }
+        public Vector3 ViewportToWorldPoint(Vector3 position) => Data.ScreenToWorld(ViewportToScreenPoint(position));
 
-        static float DistanceInFront(CameraNative d, Vector3 world) => -d.WorldToCamera.MultiplyPoint3x4(world).z;
-
-        public Vector3 ScreenToWorldPoint(Vector3 position) => ViewportToWorldPoint(ScreenToViewportPoint(position));
+        public Vector3 ScreenToWorldPoint(Vector3 position) => Data.ScreenToWorld(position);
 
         /// From the near-plane point under the viewport position, away from the camera.
-        public Ray ViewportPointToRay(Vector3 pos)
-        {
-            var (near, far) = Data.ViewportSegment(pos.x, pos.y);
-            return new Ray(near, (far - near).normalized);
-        }
+        public Ray ViewportPointToRay(Vector3 pos) => Data.ScreenRay(ViewportToScreenPoint(pos));
 
-        public Ray ScreenPointToRay(Vector3 pos) => ViewportPointToRay(ScreenToViewportPoint(pos));
+        public Ray ScreenPointToRay(Vector3 pos) => Data.ScreenRay(pos);
 
         // ----- Cameras -----
 
@@ -294,12 +289,6 @@ namespace OniBrutal.Engine.Rendering
         public RenderBuffer TargetDepthBuffer;
         public readonly Dictionary<UnityEngine.Rendering.CameraEvent, List<UnityEngine.Rendering.CommandBuffer>> CommandBuffers = new();
 
-        public static Rect ClampRect(Rect r)
-        {
-            float xMin = Mathf.Clamp01(r.xMin), yMin = Mathf.Clamp01(r.yMin), xMax = Mathf.Clamp01(r.xMax), yMax = Mathf.Clamp01(r.yMax);
-            return Rect.MinMaxRect(xMin, yMin, Math.Max(xMin, xMax), Math.Max(yMin, yMax));
-        }
-
         /// Size of what the camera renders into: its target texture, the first of its target
         /// buffers (SetTargetBuffers), else the screen.
         public Vector2 TargetSize
@@ -315,18 +304,58 @@ namespace OniBrutal.Engine.Rendering
             }
         }
 
+        /// The normalized rect scaled to the target and clipped to it, as the original (240
+        /// random rects, and 80 rule cases out of range, NaN, at half pixels and on a target
+        /// texture; PROBE_SCENARIO=projection): per axis the start is 0 + x·W and the end start + w·W,
+        /// each clamped to [0, W] by comparisons that pass NaN through, and the size end − start,
+        /// at least 0.
         public Rect PixelRect
         {
             get
             {
                 var s = TargetSize;
-                return new Rect(Rect.x * s.x, Rect.y * s.y, Rect.width * s.x, Rect.height * s.y);
+                Clip(Rect.x, Rect.width, s.x, out float x, out float w);
+                Clip(Rect.y, Rect.height, s.y, out float y, out float h);
+                return new Rect(x, y, w, h);
             }
         }
 
-        public int PixelWidth => Mathf.RoundToInt(PixelRect.width);
-        public int PixelHeight => Mathf.RoundToInt(PixelRect.height);
+        static void Clip(float start, float size, float target, out float pixelStart, out float pixelSize)
+        {
+            float a = 0f + start * target, b = a + size * target;
+            a = Min(Max(a, 0f), target);
+            b = Min(Max(b, 0f), target);
+            pixelStart = a;
+            pixelSize = Max(b - a, 0f);
+        }
 
+        // std::min and std::max: a NaN first argument passes through.
+        static float Min(float a, float b) => b < a ? b : a;
+        static float Max(float a, float b) => a < b ? b : a;
+
+        /// The pixel rect in whole pixels: the start rounded half up, the end (start + size)
+        /// rounded and clamped to the target, the size their difference (so a NaN start gives
+        /// int.MinValue, a NaN size 0). pixelWidth and pixelHeight are its size, and the screen
+        /// conversions map through it.
+        public (int X, int Y, int Width, int Height) PixelViewport
+        {
+            get
+            {
+                var r = PixelRect;
+                var s = TargetSize;
+                int x0 = Round(r.x), y0 = Round(r.y);
+                int x1 = Math.Clamp(Round(r.x + r.width), 0, (int)s.x), y1 = Math.Clamp(Round(r.y + r.height), 0, (int)s.y);
+                return (x0, y0, unchecked(x1 - x0), unchecked(y1 - y0));
+            }
+        }
+
+        static int Round(float v) => float.IsNaN(v) ? int.MinValue : (int)MathF.Floor(v + 0.5f);
+
+        public int PixelWidth => PixelViewport.Width;
+        public int PixelHeight => PixelViewport.Height;
+
+        /// The set aspect until ResetAspect (any value, kept through rect and projection
+        /// changes), else the pixel rect's width over height, 1 for a zero height.
         public float Aspect
         {
             get
@@ -337,15 +366,28 @@ namespace OniBrutal.Engine.Rendering
             }
         }
 
-        /// The transform without scale, Z flipped (view space looks down -Z).
+        /// The original's, bit for bit (240 random cameras, 7 poses and a child of a rotated,
+        /// mirrored parent): the world rotation's matrix as the hierarchy builds it
+        /// (HierarchyMath), unscaled and transposed; each row's translation
+        /// 0 − (r0·p.x + (r1·p.y + r2·p.z)) with p the world position; the third row then
+        /// subtracted from 0 (view space looks down −Z), which keeps zeros positive.
         public Matrix4x4 WorldToCamera
         {
             get
             {
                 if (WorldToCameraOverride is { } m) return m;
                 var t = GameObject.Transform;
-                var noScale = Matrix4x4.TRS(Hierarchy.Position(t), t.WorldRotation, Vector3.one).inverse;
-                return Matrix4x4.Scale(new Vector3(1f, 1f, -1f)) * noScale;
+                var p = Hierarchy.Position(t);
+                var r = HierarchyMath.Trs(Vector3.zero, t.WorldRotation, Vector3.one);
+                Matrix4x4 v;
+                v.m00 = r.M00; v.m01 = r.M10; v.m02 = r.M20;
+                v.m03 = 0f - (r.M00 * p.x + (r.M10 * p.y + r.M20 * p.z));
+                v.m10 = r.M01; v.m11 = r.M11; v.m12 = r.M21;
+                v.m13 = 0f - (r.M01 * p.x + (r.M11 * p.y + r.M21 * p.z));
+                v.m20 = 0f - r.M02; v.m21 = 0f - r.M12; v.m22 = 0f - r.M22;
+                v.m23 = 0f - (0f - (r.M02 * p.x + (r.M12 * p.y + r.M22 * p.z)));
+                v.m30 = 0f; v.m31 = 0f; v.m32 = 0f; v.m33 = 1f;
+                return v;
             }
         }
 
@@ -359,6 +401,143 @@ namespace OniBrutal.Engine.Rendering
                     ? Matrix4x4.Ortho(-OrthographicSize * aspect, OrthographicSize * aspect, -OrthographicSize, OrthographicSize, Near, Far)
                     : Matrix4x4.Perspective(FieldOfView, aspect, Near, Far);
             }
+        }
+
+        // ----- Screen conversions (measured; every operation rounds to float) -----
+
+        /// a · b, each element summed left to right in float (not Matrix4x4's product, which sums
+        /// in double as the managed one does).
+        static Matrix4x4 MulFloat(in Matrix4x4 a, in Matrix4x4 b)
+        {
+            Matrix4x4 r;
+            r.m00 = a.m00 * b.m00 + a.m01 * b.m10 + a.m02 * b.m20 + a.m03 * b.m30;
+            r.m01 = a.m00 * b.m01 + a.m01 * b.m11 + a.m02 * b.m21 + a.m03 * b.m31;
+            r.m02 = a.m00 * b.m02 + a.m01 * b.m12 + a.m02 * b.m22 + a.m03 * b.m32;
+            r.m03 = a.m00 * b.m03 + a.m01 * b.m13 + a.m02 * b.m23 + a.m03 * b.m33;
+            r.m10 = a.m10 * b.m00 + a.m11 * b.m10 + a.m12 * b.m20 + a.m13 * b.m30;
+            r.m11 = a.m10 * b.m01 + a.m11 * b.m11 + a.m12 * b.m21 + a.m13 * b.m31;
+            r.m12 = a.m10 * b.m02 + a.m11 * b.m12 + a.m12 * b.m22 + a.m13 * b.m32;
+            r.m13 = a.m10 * b.m03 + a.m11 * b.m13 + a.m12 * b.m23 + a.m13 * b.m33;
+            r.m20 = a.m20 * b.m00 + a.m21 * b.m10 + a.m22 * b.m20 + a.m23 * b.m30;
+            r.m21 = a.m20 * b.m01 + a.m21 * b.m11 + a.m22 * b.m21 + a.m23 * b.m31;
+            r.m22 = a.m20 * b.m02 + a.m21 * b.m12 + a.m22 * b.m22 + a.m23 * b.m32;
+            r.m23 = a.m20 * b.m03 + a.m21 * b.m13 + a.m22 * b.m23 + a.m23 * b.m33;
+            r.m30 = a.m30 * b.m00 + a.m31 * b.m10 + a.m32 * b.m20 + a.m33 * b.m30;
+            r.m31 = a.m30 * b.m01 + a.m31 * b.m11 + a.m32 * b.m21 + a.m33 * b.m31;
+            r.m32 = a.m30 * b.m02 + a.m31 * b.m12 + a.m32 * b.m22 + a.m33 * b.m32;
+            r.m33 = a.m30 * b.m03 + a.m31 * b.m13 + a.m32 * b.m23 + a.m33 * b.m33;
+            return r;
+        }
+
+        static float Dot(Vector3 a, Vector3 b) => a.x * b.x + a.y * b.y + a.z * b.z;
+
+        // The conversions' matrices, kept while the view and projection stay the same to the bit
+        // (each call would otherwise multiply them and invert twice).
+        Matrix4x4 cachedView, cachedProjection, cachedViewProjection, cachedInverseViewProjection, cachedCameraToWorld;
+        bool cached;
+
+        static bool SameBits(in Matrix4x4 a, in Matrix4x4 b)
+            => MemoryMarshal.AsBytes(MemoryMarshal.CreateReadOnlySpan(ref Unsafe.AsRef(in a), 1))
+                .SequenceEqual(MemoryMarshal.AsBytes(MemoryMarshal.CreateReadOnlySpan(ref Unsafe.AsRef(in b), 1)));
+
+        void Matrices()
+        {
+            var view = WorldToCamera;
+            var projection = Projection;
+            if (cached && SameBits(view, cachedView) && SameBits(projection, cachedProjection)) return;
+            cachedView = view;
+            cachedProjection = projection;
+            cachedViewProjection = MulFloat(projection, view);
+            if (!MesaInverse.Invert(cachedViewProjection, out cachedInverseViewProjection)) cachedInverseViewProjection = Matrix4x4.zero;
+            if (!MesaInverse.Invert(view, out cachedCameraToWorld)) cachedCameraToWorld = Matrix4x4.zero;
+            cached = true;
+        }
+
+        /// The camera's position and forward axis as its cameraToWorldMatrix (the inverse of
+        /// WorldToCamera) has them: the translation, and column 2 negated.
+        static void CameraAxes(in Matrix4x4 c2w, out Vector3 position, out Vector3 forward)
+        {
+            position = new Vector3(c2w.m03, c2w.m13, c2w.m23);
+            forward = new Vector3(-c2w.m02, -c2w.m12, -c2w.m22);
+        }
+
+        /// (P · V) · (p, 1) times 1 / w, from [−1, 1] onto the whole-pixel viewport; z is the
+        /// distance along the camera's forward axis from its position.
+        public Vector3 WorldToScreen(Vector3 p)
+        {
+            Matrices();
+            ref readonly var vp = ref cachedViewProjection;
+            float cx = vp.m00 * p.x + vp.m01 * p.y + vp.m02 * p.z + vp.m03;
+            float cy = vp.m10 * p.x + vp.m11 * p.y + vp.m12 * p.z + vp.m13;
+            float cw = vp.m30 * p.x + vp.m31 * p.y + vp.m32 * p.z + vp.m33;
+            float k = 1f / cw;
+            var px = PixelViewport;
+            float sx = (cx * k + 1f) * 0.5f * px.Width + px.X;
+            float sy = (cy * k + 1f) * 0.5f * px.Height + px.Y;
+            CameraAxes(cachedCameraToWorld, out var pos, out var fwd);
+            float z = -Dot(new Vector3(p.x - pos.x, p.y - pos.y, p.z - pos.z), -fwd);
+            return new Vector3(sx, sy, z);
+        }
+
+        /// The screen point's clip-space xy at depth 0.95 (found by searching the depth) through
+        /// the inverse of P · V: that point, its offset d from the camera and d's length along
+        /// the forward axis. False, as the original gives up, when that length is under 1e-6 or
+        /// NaN (the boundary found by bisection on the clip planes).
+        bool Unproject(Vector3 s, out Vector3 point, out Vector3 pos, out Vector3 fwd, out Vector3 d, out float dist)
+        {
+            Matrices();
+            ref readonly var inv = ref cachedInverseViewProjection;
+            var px = PixelViewport;
+            float nx = (s.x - px.X) * 2f / px.Width - 1f;
+            float ny = (s.y - px.Y) * 2f / px.Height - 1f;
+            const float nz = 0.95f;
+            float k = 1f / (inv.m30 * nx + inv.m31 * ny + inv.m32 * nz + inv.m33);
+            point = new Vector3(
+                (inv.m00 * nx + inv.m01 * ny + inv.m02 * nz + inv.m03) * k,
+                (inv.m10 * nx + inv.m11 * ny + inv.m12 * nz + inv.m13) * k,
+                (inv.m20 * nx + inv.m21 * ny + inv.m22 * nz + inv.m23) * k);
+            CameraAxes(cachedCameraToWorld, out pos, out fwd);
+            d = new Vector3(point.x - pos.x, point.y - pos.y, point.z - pos.z);
+            dist = Dot(d, fwd);
+            return MathF.Abs(dist) >= 1e-6f;
+        }
+
+        /// The unprojected point moved to distance z along the forward axis: for perspective
+        /// along the line from the camera, for orthographic straight.
+        Vector3 AtDistance(in Vector3 point, in Vector3 pos, in Vector3 fwd, in Vector3 d, float dist, float z)
+        {
+            if (Orthographic)
+            {
+                float back = dist - z;
+                return new Vector3(point.x - fwd.x * back, point.y - fwd.y * back, point.z - fwd.z * back);
+            }
+            float f = z / dist;
+            return new Vector3(pos.x + d.x * f, pos.y + d.y * f, pos.z + d.z * f);
+        }
+
+        /// Zero where the unprojection gives up.
+        public Vector3 ScreenToWorld(Vector3 s)
+            => Unproject(s, out var point, out var pos, out var fwd, out var d, out float dist)
+                ? AtDistance(point, pos, fwd, d, dist, s.z) : Vector3.zero;
+
+        /// From the screen point on the near plane. Orthographic: along the forward axis,
+        /// normalized (the original's, bit for bit). Perspective: toward the screen point at
+        /// distance 1000, normalized; the original's direction is within an ulp or two of that
+        /// but not reproduced (175 of 720 rays; the other forms tried matched fewer). Where the
+        /// unprojection gives up, the camera's position and (0, 0, 1), as the original.
+        public Ray ScreenRay(Vector3 s)
+        {
+            if (!Unproject(s, out var point, out var pos, out var fwd, out var d, out float dist))
+                return Ray.Raw(pos, new Vector3(0f, 0f, 1f));
+            var origin = AtDistance(point, pos, fwd, d, dist, Near);
+            Vector3 dir = fwd;
+            if (!Orthographic)
+            {
+                var far = AtDistance(point, pos, fwd, d, dist, 1000f);
+                dir = new Vector3(far.x - pos.x, far.y - pos.y, far.z - pos.z);
+            }
+            float m = MathF.Sqrt(Dot(dir, dir));
+            return Ray.Raw(origin, new Vector3(dir.x / m, dir.y / m, dir.z / m));
         }
 
         /// World points on the near and far planes under a viewport position.
@@ -418,7 +597,7 @@ namespace OniBrutal.Engine.Rendering
             var c = f.Struct("m_BackGroundColor");
             BackgroundColor = new Color(c.Float("r"), c.Float("g"), c.Float("b"), c.Float("a"));
             var r = f.Struct("m_NormalizedViewPortRect");
-            Rect = ClampRect(new Rect(r.Float("x"), r.Float("y"), r.Float("width"), r.Float("height")));
+            Rect = new Rect(r.Float("x"), r.Float("y"), r.Float("width"), r.Float("height"));
             Near = f.Float("near clip plane");
             Far = f.Float("far clip plane");
             FieldOfView = f.Float("field of view");

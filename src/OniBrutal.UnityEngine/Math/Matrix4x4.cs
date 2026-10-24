@@ -168,7 +168,28 @@ namespace UnityEngine
             return m;
         }
 
+        /// The original's, bit for bit (400 of 400 quaternions, unit and not, and 400 from
+        /// AngleAxis; tools/UnityProbe PROBE_SCENARIO=projection, pj-check.py): the usual
+        /// quaternion matrix with each product stored to float, as Unity's managed code runs under
+        /// its Mono (ARCHITECTURE D25), so the diagonal's 1 − (yy + zz) is evaluated in double and
+        /// rounded once. The float form differed in the diagonal in 224 cases.
         public static Matrix4x4 Rotate(Quaternion q)
+        {
+            float x = q.x * 2f, y = q.y * 2f, z = q.z * 2f;
+            float xx = q.x * x, yy = q.y * y, zz = q.z * z;
+            float xy = q.x * y, xz = q.x * z, yz = q.y * z;
+            float wx = q.w * x, wy = q.w * y, wz = q.w * z;
+            Matrix4x4 m;
+            m.m00 = (float)(1.0 - ((double)yy + zz)); m.m10 = xy + wz; m.m20 = xz - wy; m.m30 = 0f;
+            m.m01 = xy - wz; m.m11 = (float)(1.0 - ((double)xx + zz)); m.m21 = yz + wx; m.m31 = 0f;
+            m.m02 = xz + wy; m.m12 = yz - wx; m.m22 = (float)(1.0 - ((double)xx + yy)); m.m32 = 0f;
+            m.m03 = 0f; m.m13 = 0f; m.m23 = 0f; m.m33 = 1f;
+            return m;
+        }
+
+        /// The original's, bit for bit (400 of 400): the quaternion matrix in float throughout,
+        /// unlike Rotate, each column times its scale.
+        public static Matrix4x4 TRS(Vector3 pos, Quaternion q, Vector3 s)
         {
             float x = q.x * 2f, y = q.y * 2f, z = q.z * 2f;
             float xx = q.x * x, yy = q.y * y, zz = q.z * z;
@@ -178,13 +199,7 @@ namespace UnityEngine
             m.m00 = 1f - (yy + zz); m.m10 = xy + wz; m.m20 = xz - wy; m.m30 = 0f;
             m.m01 = xy - wz; m.m11 = 1f - (xx + zz); m.m21 = yz + wx; m.m31 = 0f;
             m.m02 = xz + wy; m.m12 = yz - wx; m.m22 = 1f - (xx + yy); m.m32 = 0f;
-            m.m03 = 0f; m.m13 = 0f; m.m23 = 0f; m.m33 = 1f;
-            return m;
-        }
-
-        public static Matrix4x4 TRS(Vector3 pos, Quaternion q, Vector3 s)
-        {
-            var m = Rotate(q);
+            m.m33 = 1f;
             m.m00 *= s.x; m.m10 *= s.x; m.m20 *= s.x;
             m.m01 *= s.y; m.m11 *= s.y; m.m21 *= s.y;
             m.m02 *= s.z; m.m12 *= s.z; m.m22 *= s.z;
@@ -244,6 +259,54 @@ namespace UnityEngine
         /// Mesa's Gauss–Jordan inversion, bit for bit as the original (MesaInverse); a matrix it
         /// finds singular gives Matrix4x4.zero, as in the original.
         public static Matrix4x4 Inverse(Matrix4x4 m) => MesaInverse.Invert(m, out var r) ? r : zero;
+
+        public static Matrix4x4 Inverse(in Matrix4x4 m) => MesaInverse.Invert(m, out var r) ? r : zero;
+
+        public static bool Inverse3DAffine(Matrix4x4 input, ref Matrix4x4 result) => Inverse3DAffine(in input, ref result);
+
+        /// The inverse of the upper 3 × 4, as the original's, bit for bit (tools/UnityProbe
+        /// PROBE_SCENARIO=projection, pj-check.py: 629 of 629 cases, the singular, near-singular,
+        /// NaN and overflowing ones included; of a NaN input the NaNs' signs can differ, the
+        /// original's operand order there not being CoreCLR's). Every operation rounds to float. The determinant sums
+        /// column 0's lanes of col0 · (col1 × col2), each lane a difference of two triple
+        /// products; the 3 × 3 is the cofactors (each a·b − c·d) times 1 / det; the translation is
+        /// −((t.x r0 + t.y r1) + t.z r2) per row; the bottom row is 0 · (1 / det), so −0 for a
+        /// negative determinant, then 1. The input's bottom row is ignored. A determinant whose
+        /// float square is under 1e-25 (|det| ≤ 3.1622776e-13, found by bisection; NaN and
+        /// infinity pass) gives false and the zero matrix.
+        public static bool Inverse3DAffine(in Matrix4x4 input, ref Matrix4x4 result)
+        {
+            float m00 = input.m00, m01 = input.m01, m02 = input.m02, m03 = input.m03;
+            float m10 = input.m10, m11 = input.m11, m12 = input.m12, m13 = input.m13;
+            float m20 = input.m20, m21 = input.m21, m22 = input.m22, m23 = input.m23;
+            float l0 = m00 * m11 * m22 - m00 * m21 * m12;
+            float l1 = m10 * m21 * m02 - m10 * m01 * m22;
+            float l2 = m20 * m01 * m12 - m20 * m11 * m02;
+            float det = l0 + l1 + l2;
+            if (det * det < 1e-25f)
+            {
+                result = zero;
+                return false;
+            }
+            float k = 1f / det;
+            Matrix4x4 r;
+            r.m00 = (m11 * m22 - m21 * m12) * k;
+            r.m01 = -(m01 * m22 - m21 * m02) * k;
+            r.m02 = (m01 * m12 - m11 * m02) * k;
+            r.m10 = -(m10 * m22 - m20 * m12) * k;
+            r.m11 = (m00 * m22 - m20 * m02) * k;
+            r.m12 = -(m00 * m12 - m10 * m02) * k;
+            r.m20 = (m10 * m21 - m20 * m11) * k;
+            r.m21 = -(m00 * m21 - m20 * m01) * k;
+            r.m22 = (m00 * m11 - m10 * m01) * k;
+            r.m03 = -(m03 * r.m00 + m13 * r.m01 + m23 * r.m02);
+            r.m13 = -(m03 * r.m10 + m13 * r.m11 + m23 * r.m12);
+            r.m23 = -(m03 * r.m20 + m13 * r.m21 + m23 * r.m22);
+            float z = 0f * k;
+            r.m30 = z; r.m31 = z; r.m32 = z; r.m33 = 1f;
+            result = r;
+            return true;
+        }
 
         public float determinant
         {

@@ -112,6 +112,15 @@ namespace UnityEngine
             m_Direction = direction.normalized;
         }
 
+        /// A ray as native code returns one: the direction as given, not normalized again.
+        internal static Ray Raw(Vector3 origin, Vector3 direction)
+        {
+            Ray r;
+            r.m_Origin = origin;
+            r.m_Direction = direction;
+            return r;
+        }
+
         public Vector3 origin { get => m_Origin; set => m_Origin = value; }
         public Vector3 direction { get => m_Direction; set => m_Direction = value.normalized; }
         public Vector3 GetPoint(float distance) => m_Origin + m_Direction * distance;

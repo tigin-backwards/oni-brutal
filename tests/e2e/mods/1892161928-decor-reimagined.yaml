@@ -1,0 +1,34 @@
+# Decor Reimagined (1892161928), classes P, V, O.
+#
+# What it does: reworks decor. Each cell counts only the best decor of each kind of object
+# around it (a per-cell manager replaces DecorProvider.GetDecorForCell and Refresh), many
+# buildings' decor values are retuned, debris gives -10 decor in a radius of 2, broken
+# buildings -60, art and suits get new values, decor effects last a cycle, a Duplicant's decor
+# moves toward the cell's decor gradually (half while asleep), and new decor-based room
+# constraints are added. PLib options: hard mode, critters at zero decor, keep tiles' decor;
+# the JSON file sets the numbers.
+# How a player reaches it: building and decorating; the Decor overlay.
+# What changes: decor values and how they add up.
+#
+# Options here: debris gives -25 decor in a radius of 3. A pile of sandstone is dropped in the
+# corridor east of the printing pod; its decor provider is the mod's, with the new values, and
+# the Decor overlay is opened from its button and shot.
+from: early-base
+mods: [1892161928]
+options:
+  PeterHan.DecorReimagined: {DebrisDecor: -25.0, DebrisRadius: 3}
+setup:
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"SandStone\").substance", method: SpawnResource, args: [[121.5, 206.5, -12], 100, 293.15, 255, 0]}}
+steps:
+  - run: {seconds: 2}
+  - expect_state:
+      "ReimaginationTeam.DecorRework.DecorCellManager.Instance": exists
+      "last:GetComponent<DecorProvider>.baseDecor": -25
+      "last:GetComponent<DecorProvider>.baseRadius": 3
+      "last:GetComponent<ReimaginationTeam.DecorRework.DecorSplatNew>": exists
+      "Grid.Decor[131137]": "== original"
+      "Grid.Decor[131779]": "== original"
+  - driver: {camera.set: {cell: [121, 208], ortho: 10}}
+  - click: {ui: "**/OverlaysBarHolder/OverlaysBar/Toggle:Decor Overlay"}
+  - ui_wait: {path: "**/OverlaysBarHolder/OverlaysBar/Toggle:Decor Overlay", cond: "on"}
+  - world_shot: {name: decor-overlay, ortho: 10, at: [121, 208]}

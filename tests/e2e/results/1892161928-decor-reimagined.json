@@ -1,0 +1,59 @@
+{
+ "spec": "mods/1892161928-decor-reimagined.yaml",
+ "mods": [
+  "1892161928"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "options -25 decor in a radius of 3 for debris: a dropped sandstone pile's decor provider is the mod's with those values, cell decor as in the original; the Decor overlay opened from its button and shot",
+ "updated": "2026-10-24",
+ "commit": "79a65d0",
+ "mod_dlls": {
+  "1892161928": {
+   "DecorReimagined.dll": "6f2bdab25025c6d556c021f5c153ba9cf7ef467d029cd75d15990da92dc1190f"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-043029-527c2d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T04:43:46",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-050512-6c3161",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T05:05:12",
+    "lane": 17,
+    "reference_run": "20261024-043029-527c2d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "decor-overlay": 2.8e-05
+    }
+   },
+   {
+    "run": "20261024-050512-6c3161",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T05:06:07",
+    "lane": 17,
+    "reference_run": "20261024-043029-527c2d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "decor-overlay": 6.3e-05
+    }
+   }
+  ]
+ }
+}

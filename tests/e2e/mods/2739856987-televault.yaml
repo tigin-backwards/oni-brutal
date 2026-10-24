@@ -1,0 +1,35 @@
+# TeleVault (2739856987), class B.
+#
+# What it does: adds the TeleVault (PLib building) to the Utilities build menu: a 4x5 vault
+# of 5 kg of ceramic and 4 kg of plastic that draws 2 kW and gives off 16 kDTU/s; while
+# operational (powered, and enabled by its automation port) it scans its whole world, ten
+# cells a tick, and pulls every piece of garbage-tagged debris it finds into its storage,
+# merging chunks of the same element. The mod also raises the game's limit on one item's
+# mass to 1,000 t. It names the "CargoIII" research, which the game no longer has, so the
+# vault is not behind any research.
+# How a player reaches it: the build menu (Utilities).
+# What changes: debris collects itself, at a cost in power.
+#
+# Smaller spec: running the vault needs 2 kW, and its scan of the world takes far longer than
+# a spec runs. The building's definition is checked, and its card is opened in the Utilities
+# menu.
+from: early-base
+mods: [2739856987]
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"TeleVault\").WidthInCells": 4
+      "Assets.GetBuildingDef(\"TeleVault\").HeightInCells": 5
+      "Assets.GetBuildingDef(\"TeleVault\").EnergyConsumptionWhenActive": 2000
+      "Assets.GetBuildingDef(\"TeleVault\").BuildingComplete.GetComponent<TeleVault.TeleVault>": exists
+      "Db.Get().TechItems.GetTechFromItemID(\"TeleVault\")": missing
+      "PrimaryElement.MAX_MASS": 1000000
+  - run: {seconds: 5}
+  - driver: {camera.set: {cell: [113, 208], ortho: 10}}
+  - click: {ui: "**/PlanScreen/Toggle:Utilities"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/TeleVault Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/TeleVault Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
+  - expect_ui:
+      "**/ProductInfoScreen/**": {any_text: "~TeleVault"}
+  - shot: {name: product, crop: "**/ProductInfoScreen", threshold: 0.04}
+  - key: {code: Escape}

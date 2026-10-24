@@ -1,0 +1,59 @@
+{
+ "spec": "mods/1906475585-customize-your-paints.yaml",
+ "mods": [
+  "1906475585"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the sample picture moved to the config folder becomes a Landscape Canvas stage and kanim; a canvas set to it (in setup) is shot in the world",
+ "updated": "2026-10-24",
+ "commit": "79a65d0",
+ "mod_dlls": {
+  "1906475585": {
+   "CustomizeYourPaints.dll": "f29521d60af0fd5e2e428fa0f2bd9921423ec2d1dec63b64c3ceadbdbf5813e9"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-043029-527c2d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T04:42:20",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-050312-08477f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T05:03:12",
+    "lane": 17,
+    "reference_run": "20261024-043029-527c2d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "canvas": 0.012658
+    }
+   },
+   {
+    "run": "20261024-050312-08477f",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T05:04:10",
+    "lane": 17,
+    "reference_run": "20261024-043029-527c2d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "canvas": 0.011721
+    }
+   }
+  ]
+ }
+}

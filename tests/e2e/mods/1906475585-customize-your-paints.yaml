@@ -1,0 +1,28 @@
+# Customize your paints (1906475585), classes P, V.
+#
+# What it does: lets a player add their own pictures as paintings. On first start the mod
+# moves its sample "wide_ put your picture here.png" into mods/config/CustomizeYourPaints;
+# every PNG there (named normal_*, tall_* or wide_*) is scaled into a copy of the game's
+# painting texture and registered as a kanim and an artable stage of the Blank, Portrait or
+# Landscape Canvas, so Duplicants may paint it (and it shows in the supply closet's canvas
+# categories). The chosen custom stage is kept across saves.
+# How a player reaches it: put pictures in the config folder; a canvas, painted by a
+# Duplicant with art skill.
+# What changes: the paintings Duplicants can make.
+#
+# The sample picture becomes a Landscape Canvas stage. setup builds a Landscape Canvas in the
+# corridor east of the printing pod and sets that stage on it, as a Duplicant's painting
+# would; its look is shot.
+from: early-base
+mods: [1906475585]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"CanvasWide\")", method: Build, args: [131134, Neutral, null, [Cuprite, BasicFabric], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "last:GetComponent<Artable>", method: SetStage, args: ["CustomizeYourPaints_01_ put your picture here_kanim", true]}}
+steps:
+  - expect_state:
+      "file:mods/config/CustomizeYourPaints/wide_ put your picture here.png": exists
+      "Db.GetArtableStages().Get(\"CustomizeYourPaints_01_ put your picture here_kanim\").prefabId": CanvasWide
+      "Assets.GetAnim(\"CustomizeYourPaints_01_ put your picture here_kanim\")": exists
+      "all:Artable::[0].CurrentStage": "CustomizeYourPaints_01_ put your picture here_kanim"
+  - run: {seconds: 1}
+  - world_shot: {name: canvas, ortho: 4, at: [119, 207]}

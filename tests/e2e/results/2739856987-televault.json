@@ -1,0 +1,59 @@
+{
+ "spec": "mods/2739856987-televault.yaml",
+ "mods": [
+  "2739856987"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "smaller spec (2 kW and a whole-world scan): the vault's definition, no research, the 1,000 t item mass limit; its card opened in the Utilities menu and shot",
+ "updated": "2026-10-24",
+ "commit": "79a65d0",
+ "mod_dlls": {
+  "2739856987": {
+   "TeleVault.dll": "f93e82395aa48d8da34c3e7fa2e12cc6da94f8cc9a40d77c085998dae28aeb0e"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-043029-527c2d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T04:45:08",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-050705-6c8fee",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T05:07:05",
+    "lane": 17,
+    "reference_run": "20261024-043029-527c2d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.0
+    }
+   },
+   {
+    "run": "20261024-050705-6c8fee",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T05:08:12",
+    "lane": 17,
+    "reference_run": "20261024-043029-527c2d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.0
+    }
+   }
+  ]
+ }
+}

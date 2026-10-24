@@ -1,0 +1,59 @@
+{
+ "spec": "mods/2612332708-multiplayer-storage.yaml",
+ "mods": [
+  "2612332708"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "smaller spec (30 t of materials): Smart Storage holds the Shared Storage, its definition; its card opened in the Base menu and shot",
+ "updated": "2026-10-24",
+ "commit": "79a65d0",
+ "mod_dlls": {
+  "2612332708": {
+   "MultiplayerStorage.dll": "bad2190b00955fd87c1d05b14cd7e88c5c12311ba6f977d7ad54b4dcb9c304e3"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-043029-527c2d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T04:46:23",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-050918-6743fa",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T05:09:18",
+    "lane": 17,
+    "reference_run": "20261024-043029-527c2d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.0
+    }
+   },
+   {
+    "run": "20261024-050918-6743fa",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T05:10:28",
+    "lane": 17,
+    "reference_run": "20261024-043029-527c2d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.0
+    }
+   }
+  ]
+ }
+}

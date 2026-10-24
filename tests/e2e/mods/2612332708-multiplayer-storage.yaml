@@ -1,0 +1,35 @@
+# [Vanilla + DLC] Multiplayer Storage (2612332708), classes B, S.
+#
+# What it does: adds the Shared Storage (SharedStorageConfig) to the Base build menu,
+# researched with Smart Storage: a 6x5 storage with the look of the multiverse gate, of
+# 10 t each of three materials, one per world. Its contents are written to a file beside the
+# mod's DLL whenever the game is saved and read back when another colony builds one, so items
+# move between colonies (or players sharing the file); an ownership file keeps two colonies
+# from using it at once. Not a network mod: no second Steam account is needed.
+# How a player reaches it: the build menu (Base), after research; the storage's side screens.
+# What changes: a storage shared between saves.
+#
+# Smaller spec: the building takes 30 t of materials. setup grants Smart Storage; the
+# research holds it and its card is opened in the Base menu.
+from: early-base
+mods: [2612332708]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"SolidManagement\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Game.Instance", method: Trigger, args: [-107300940]}}
+  - driver: {setup.call: {target: "PlanScreen.Instance._researchedDefs", method: Clear}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"SolidManagement\").unlockedItemIDs": {contains: SharedStorageConfig}
+      "Assets.GetBuildingDef(\"SharedStorageConfig\").WidthInCells": 6
+      "Assets.GetBuildingDef(\"SharedStorageConfig\").OnePerWorld": true
+      "Assets.GetBuildingDef(\"SharedStorageConfig\").MaterialCategory": "== original"
+      "Assets.GetBuildingDef(\"SharedStorageConfig\").BuildingComplete.GetComponent<MultiplayerStorage.SharedStorage>": exists
+  - run: {seconds: 5}
+  - driver: {camera.set: {cell: [113, 208], ortho: 10}}
+  - click: {ui: "**/PlanScreen/Toggle:Base"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/SharedStorageConfig Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/SharedStorageConfig Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
+  - shot: {name: product, crop: "**/ProductInfoScreen", threshold: 0.04}
+  - key: {code: Escape}

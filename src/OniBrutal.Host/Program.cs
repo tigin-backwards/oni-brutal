@@ -22,22 +22,25 @@ namespace OniBrutal.Host
             Environment.SetEnvironmentVariable("ONI_BRUTAL_RESTART_ARGV", System.Text.Json.JsonSerializer.Serialize(args));
             Environment.SetEnvironmentVariable("ONI_BRUTAL_RESTART_PID", Environment.ProcessId.ToString(System.Globalization.CultureInfo.InvariantCulture));
 
-            var dataDir = Path.Combine(options.GameDir, "OxygenNotIncluded_Data");
-            if (!Directory.Exists(dataDir))
+            // The install's layout: OxygenNotIncluded_Data beside the game (Linux, Windows) or the
+            // macOS bundle OxygenNotIncluded.app, told from the files (GameLayout).
+            var layout = OniBrutal.Engine.Platform.GameLayout.Find(options.GameDir);
+            if (layout == null)
             {
-                Console.Error.WriteLine($"Game data not found: {dataDir}");
+                Console.Error.WriteLine($"Game data not found: {Path.Combine(options.GameDir, OniBrutal.Engine.Platform.GameLayout.DataFolderName)} (or an OxygenNotIncluded.app there)");
                 return 2;
             }
+            var dataDir = layout.DataDir;
 
             // Code pages (IBM437 etc.), which Mono provided through I18N.
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
-            Paths.Configure(dataDir, options);
+            Paths.Configure(layout, options);
             EngineLog.Open(options.LogPath ?? EngineConfig.ConsoleLogPath);
             EngineLog.Engine($"OniBrutal host starting: game={options.GameDir} .NET={Environment.Version}");
             UnhandledExceptions.Install();
 
-            AssemblyPolicy.Install(dataDir, AppContext.BaseDirectory, options.UiPackages, options.ShippedUiPackages);
+            AssemblyPolicy.Install(layout, AppContext.BaseDirectory, options.UiPackages, options.ShippedUiPackages);
             var assemblies = AssemblyPolicy.PreloadScriptingAssemblies(dataDir);
             EngineConfig.BuildAssemblies = AssemblyPolicy.BuildAssemblyNames(dataDir);
             EngineLog.Engine($"Preloaded {assemblies.Count} scripting assemblies");
@@ -647,6 +650,8 @@ namespace OniBrutal.Host
     {
         public string GameDir = OperatingSystem.IsWindows()
             ? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "OxygenNotIncluded")
+            : OperatingSystem.IsMacOS()
+            ? OniBrutal.Engine.Platform.GameLayout.DefaultMacSteamInstall(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile))
             : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "projects", "oni-linux");
         /// Test runs (`--run-home DIR`): the player's per-user data (Unity's persistent and cache
         /// paths, and on Windows the Documents and local application data folders the game reads)
@@ -733,13 +738,13 @@ namespace OniBrutal.Host
                         // the game's executable and its arguments. The game directory is the
                         // executable's; the arguments after it are read as the player's (Unity's
                         // -screen-width and the like).
-                        int exe = Array.FindIndex(args, i + 1, a => Path.GetFileName(a) is "OxygenNotIncluded" or "OxygenNotIncluded.exe");
+                        int exe = Array.FindIndex(args, i + 1, a => OniBrutal.Engine.Platform.GameLayout.GameDirOfExecutable(a) != null);
                         if (exe < 0)
                         {
                             Console.Error.WriteLine("OniBrutal: no OxygenNotIncluded executable after --; the Steam launch options should end with -- %command%");
                             return null;
                         }
-                        o.GameDir = Path.GetDirectoryName(Path.GetFullPath(args[exe]))!;
+                        o.GameDir = OniBrutal.Engine.Platform.GameLayout.GameDirOfExecutable(args[exe])!;
                         i = exe;
                         break;
                     }
@@ -866,17 +871,41 @@ namespace OniBrutal.Host
     /// player's (LocalLow, the temporary folder; with forward slashes, as Unity reports them).
     internal static class Paths
     {
-        public static void Configure(string dataDir, Options options)
+        public static void Configure(OniBrutal.Engine.Platform.GameLayout layout, Options options)
         {
+            var dataDir = layout.DataDir;
             // app.info: company name, then product name.
             var info = File.ReadAllLines(Path.Combine(dataDir, "app.info"));
             EngineConfig.CompanyName = info.Length > 0 ? info[0] : "";
             EngineConfig.ProductName = info.Length > 1 ? info[1] : "";
             if (OperatingSystem.IsWindows()) ConfigureWindows(dataDir, options.RunHome);
+            else if (OperatingSystem.IsMacOS() && layout.IsMacBundle) ConfigureMac(layout, options.RunHome);
             else ConfigureLinux(dataDir, options.RunHome);
-            EngineConfig.ConsoleLogPath = EngineConfig.PersistentDataPath + "/Player.log";
+            if (!OperatingSystem.IsMacOS() || !layout.IsMacBundle) EngineConfig.ConsoleLogPath = EngineConfig.PersistentDataPath + "/Player.log";
+            // A bundle's Application.dataPath is its Contents (a Mac bundle read on Linux too, by
+            // the check modes); the data it reads stays in Contents/Resources/Data.
+            if (layout.IsMacBundle && !OperatingSystem.IsMacOS())
+            {
+                EngineConfig.DataPath = layout.DataPath;
+                EngineConfig.StreamingAssetsPath = layout.StreamingAssetsPath;
+            }
             EngineConfig.IsBatchMode = options.BatchMode;
             EngineConfig.Headless = options.Headless;
+        }
+
+        /// Unity's macOS player (OniBrutal.Engine.Platform.MacUserFolders): dataPath the bundle's
+        /// Contents, persistent data and caches under ~/Library by the bundle identifier, the log
+        /// in ~/Library/Logs.
+        static void ConfigureMac(OniBrutal.Engine.Platform.GameLayout layout, string? runHome)
+        {
+            EngineConfig.DataPath = layout.DataPath;
+            EngineConfig.StreamingAssetsPath = layout.StreamingAssetsPath;
+            var home = runHome ?? Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            var folders = OniBrutal.Engine.Platform.MacUserFolders.For(home, layout.BundleIdentifier ?? $"unity.{EngineConfig.CompanyName}.{EngineConfig.ProductName}",
+                EngineConfig.CompanyName, EngineConfig.ProductName);
+            EngineConfig.PersistentDataPath = folders.PersistentDataPath;
+            EngineConfig.TemporaryCachePath = folders.TemporaryCachePath;
+            EngineConfig.ConsoleLogPath = folders.ConsoleLogPath;
         }
 
         static void ConfigureLinux(string dataDir, string? runHome)

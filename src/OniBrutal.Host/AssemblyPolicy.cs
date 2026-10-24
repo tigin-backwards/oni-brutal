@@ -46,7 +46,7 @@ namespace OniBrutal.Host
 
         /// Where the game's assemblies and our engine facades are (ModAccess resolves mods' references there).
         public static string[] ReferenceDirectories => [managedDir, engineDir];
-        static string pluginsDir = "";
+        static OniBrutal.Engine.Platform.GameLayout? layout;
         static string engineDir = "";
 
         /// The Unity packages this project replaces (PLAN M9).
@@ -57,13 +57,11 @@ namespace OniBrutal.Host
 
         /// `uiPackagesDir` null: the replacements the host ships in packages/; `shippedUiPackages`:
         /// none.
-        public static void Install(string gameDataDir, string hostDir, string? uiPackagesDir = null, bool shippedUiPackages = false)
+        public static void Install(OniBrutal.Engine.Platform.GameLayout game, string hostDir, string? uiPackagesDir = null, bool shippedUiPackages = false)
         {
             packagesDir = shippedUiPackages ? null : uiPackagesDir ?? Path.Combine(hostDir, "packages");
-            managedDir = Path.Combine(gameDataDir, "Managed");
-            // Unity's Windows player keeps 64-bit plugins in Plugins/x86_64; the Linux build in Plugins.
-            var x64 = Path.Combine(gameDataDir, "Plugins", "x86_64");
-            pluginsDir = Directory.Exists(x64) ? x64 : Path.Combine(gameDataDir, "Plugins");
+            layout = game;
+            managedDir = Path.Combine(game.DataDir, "Managed");
             engineDir = Path.Combine(hostDir, "engine");
             AssemblyLoadContext.Default.Resolving += Resolve;
             AssemblyLoadContext.Default.ResolvingUnmanagedDll += ResolveNative;
@@ -97,17 +95,13 @@ namespace OniBrutal.Host
         /// (tools/SteamStub).
         public static readonly Dictionary<string, string> NativeOverrides = new(StringComparer.Ordinal);
 
-        /// The game's native plugins live in Plugins/ (the Unity player searches there).
+        /// The game's native plugins live in Plugins/ (the Unity player searches there), on macOS
+        /// in the bundle's PlugIns/<name>.bundle (GameLayout.PluginCandidates).
         static IntPtr ResolveNative(Assembly requester, string name)
         {
             if (NativeOverrides.TryGetValue(name, out var overridePath)) return NativeLibrary.Load(overridePath);
-            var candidates = OperatingSystem.IsWindows() ? new[] { $"{name}.dll", name } : new[] { $"lib{name}.so", $"{name}.so", name };
-            foreach (var candidate in candidates)
-            {
-                var path = Path.Combine(pluginsDir, candidate);
-                if (File.Exists(path)) return NativeLibrary.Load(path);
-            }
-            return IntPtr.Zero;
+            var path = layout?.Plugin(name, OperatingSystem.IsWindows());
+            return path != null ? NativeLibrary.Load(path) : IntPtr.Zero;
         }
 
         /// The simple names of the assemblies the game was built with (ScriptingAssemblies.json):

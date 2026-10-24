@@ -403,8 +403,12 @@ what it logs:
 - `projection` (`ProjectionMath.cs`, `PJ`, at mod load): `Matrix4x4.Perspective`, `Ortho`,
   `Frustum`, `LookAt`, `Inverse3DAffine`, `Rotate`, `TRS` and `Quaternion.AngleAxis` to the bit,
   degenerate inputs and the look-at and axis fallbacks' boundaries included, and cameras'
-  matrices and conversions (`WorldToScreenPoint` and the rest); `pj-check.py rule LOG` tests
-  Mesa's, GLU's and the measured formulas, `pj-check.py diff ORIG OURS` compares players.
+  matrices and conversions (`WorldToScreenPoint` and the rest); then the camera rect rules
+  (`PK`: rects and pixel rects out of range, NaN and at half pixels, a target texture, a set
+  aspect kept or reset, worldToCameraMatrix's signs of zero) and where `Inverse3DAffine` and
+  `ScreenToWorldPoint` give up, by bisection (`PJ PT affine`, `PJ PQ bound`), with simple
+  cameras' rays (`PJ PQ ray`); `pj-check.py rule LOG` tests Mesa's, GLU's and the measured
+  formulas, `pj-check.py diff ORIG OURS` compares players.
 - `transform` (`TransformMath.cs`, `TM`, `TN`, `TR` and others, at mod load): transform
   matrices, rotations, scales, points and RectTransform corners of logged hierarchies to the bit;
   `tm-check.py rule LOG` and `tm-check.py diff ORIG OURS` read the `TM` lines; the file's header

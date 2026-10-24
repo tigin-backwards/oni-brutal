@@ -13,6 +13,8 @@
 //      transform matrices; then PCP lines, one per point: WorldToScreenPoint,
 //      WorldToViewportPoint, ScreenToWorldPoint, ViewportToWorldPoint, ScreenToViewportPoint,
 //      ViewportToScreenPoint, ScreenPointToRay and ViewportPointToRay.
+//   PK camera rect rules: rects and pixel rects out of range and at half pixels, a target
+//      texture, the aspect kept or recomputed, worldToCameraMatrix's parts (CameraRules)
 // Random cases come from a seeded System.Random, then degenerate ones (equal planes, zero and
 // negative sizes, 0 and 180 degree fields of view, NaN, infinity). Each kind runs in its own
 // method so that a player lacking one of these APIs logs "PJ <kind> missing" and goes on. Run
@@ -374,8 +376,170 @@ namespace SemanticsProbe
             Axis(90, new Vector3(float.PositiveInfinity, 0, 1));
         }
 
+        // Where Inverse3DAffine gives up (lines "PJ PT affine"): the smallest scale it inverts,
+        // found by bisection for (x, 1, 1), (x, x, x) and (-x, 1, 1), and the cases on either side.
+        static void AffineThresholds()
+        {
+            var r = Matrix4x4.identity;
+            bool Fails(Matrix4x4 m) => !Matrix4x4.Inverse3DAffine(m, ref r);
+            int i = 0;
+            void Log(string what, Matrix4x4 m)
+            {
+                var o = Rows(7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7);
+                bool ok = Matrix4x4.Inverse3DAffine(m, ref o);
+                Rec.Log("PJ PA t" + i++ + " m=" + H(m) + " ok=" + (ok ? 1 : 0) + " r=" + H(o) + " what=" + what);
+            }
+            System.Func<float, Matrix4x4>[] shapes =
+            {
+                x => Matrix4x4.Scale(new Vector3(x, 1, 1)),
+                x => Matrix4x4.Scale(new Vector3(x, x, x)),
+                x => Matrix4x4.Scale(new Vector3(-x, 1, 1)),
+            };
+            string[] names = { "x11", "xxx", "-x11" };
+            for (int k = 0; k < shapes.Length; k++)
+            {
+                var shape = shapes[k];
+                float s = Boundary(x => Fails(shape(x)), 1e-38f, 1f);
+                Rec.Log("PJ PT affine " + names[k] + " boundary=" + H(s));
+                Log(names[k], shape(s));
+                Log(names[k], shape(BitConverter.ToSingle(BitConverter.GetBytes(BitConverter.ToInt32(BitConverter.GetBytes(s), 0) - 1), 0)));
+            }
+            Log("rows", Rows(1e-5f, 0, 0, 0, 0, 1e5f, 0, 0, 0, 0, 1e-5f, 0, 0, 0, 0, 1));
+            Log("rows", Rows(0, 1e-3f, 0, 0, 1e-3f, 0, 0, 0, 0, 0, 1e-3f, 0, 0, 0, 0, 1));
+            Log("rows", Rows(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+        }
+
+        // Camera rect rules (lines "PJ PK <case> <step>"): rects and pixel rects set out of range,
+        // at halves of a pixel and on a target texture, the aspect set and then the rect changed,
+        // and worldToCameraMatrix of cameras at the origin, rotated, and under a rotated and
+        // scaled parent. Each step logs rect, pixelRect, pixelWidth/Height, aspect,
+        // projectionMatrix's m00 and m11, worldToCameraMatrix and WorldToScreenPoint of a point
+        // 10 in front of the camera (which shows the viewport the conversions use).
+        static void CameraRules()
+        {
+            var go = new GameObject("CameraRulesProbe");
+            var cam = go.AddComponent<Camera>();
+            cam.enabled = false;
+            var t = go.transform;
+            int i = 0, step = 0;
+            void Log(string what)
+            {
+                var c = t.position + t.forward * 10;
+                Rec.Log("PJ PK " + i + " " + step++ + " what=" + what + " rect=" + H(cam.rect) + " prect=" + H(cam.pixelRect)
+                    + " pw=" + cam.pixelWidth + " ph=" + cam.pixelHeight + " aspect=" + H(cam.aspect)
+                    + " p00=" + H(cam.projectionMatrix.m00) + " p11=" + H(cam.projectionMatrix.m11)
+                    + " pos=" + H(t.position) + " rot=" + H(t.rotation)
+                    + " w2c=" + H(cam.worldToCameraMatrix) + " c2w=" + H(cam.cameraToWorldMatrix)
+                    + " w2s=" + H(cam.WorldToScreenPoint(c)) + " s2w=" + H(cam.ScreenToWorldPoint(new Vector3(100.5f, 200.5f, 7)))
+                    + " sray=" + H(cam.ScreenPointToRay(new Vector3(100.5f, 200.5f, 7))) + " vray=" + H(cam.ViewportPointToRay(new Vector3(0.3f, 0.6f, 7))));
+            }
+            void Next() { i++; step = 0; }
+            var rects = new[]
+            {
+                new Rect(0, 0, 1, 1), new Rect(-0.5f, 0, 1, 1), new Rect(0.5f, 0, 1, 1), new Rect(1.5f, 0, 0.5f, 1),
+                new Rect(0.2f, 0.2f, -0.1f, 0.5f), new Rect(0.2f, 0.2f, 0, 0.5f), new Rect(0, 0, 2, 2), new Rect(-1, -1, 3, 3),
+                new Rect(0.3f, 0.3f, 0.5f, 0), new Rect(0.9f, 0.9f, 0.5f, 0.5f), new Rect(-0.2f, -0.2f, 0.5f, 0.5f),
+                new Rect(0.5f, 0.5f, -1, -1), new Rect(0.5f, -2, 0.25f, 1), new Rect(-0f, -0f, 1, 1), new Rect(0.25f, 0.25f, 1e-7f, 1e-7f),
+                new Rect(Nan, 0, 1, 1), new Rect(0, 0, Inf, 1), new Rect(0, 0, 1, Nan),
+            };
+            foreach (bool ortho in new[] { false, true })
+            {
+                cam.orthographic = ortho;
+                foreach (var r in rects) { cam.rect = r; Log("rect " + H(r)); Next(); }
+            }
+            cam.orthographic = false;
+            var prects = new[]
+            {
+                new Rect(10.5f, 20.5f, 100.5f, 50.5f), new Rect(11.5f, 21.5f, 100, 50), new Rect(0.5f, 0.5f, 1, 1), new Rect(1.5f, 2.5f, 3, 4),
+                new Rect(2.5f, 3.5f, 4.5f, 5.5f), new Rect(-10, -10, 100, 100), new Rect(1000, 700, 100, 100), new Rect(0, 0, 2048, 1536),
+                new Rect(100.25f, 100.75f, 300.5f, 200.5f), new Rect(0.4999f, 0.5001f, 10.4999f, 10.5001f), new Rect(0, 0, 0, 0),
+                new Rect(1023.5f, 767.5f, 1, 1),
+            };
+            foreach (var r in prects) { cam.pixelRect = r; Log("prect " + H(r)); Next(); }
+            // the aspect set, then the rect, pixel rect, projection kind and screen-independent settings changed
+            cam.rect = new Rect(0, 0, 1, 1); cam.ResetAspect();
+            Log("reset"); cam.aspect = 2; Log("aspect 2"); cam.rect = new Rect(0.1f, 0.1f, 0.5f, 0.5f); Log("rect after aspect");
+            cam.pixelRect = new Rect(10, 10, 300, 100); Log("prect after aspect"); cam.orthographic = true; Log("ortho after aspect");
+            cam.orthographic = false; cam.fieldOfView = 50; Log("fov after aspect"); cam.ResetAspect(); Log("reset");
+            cam.aspect = 0; Log("aspect 0"); cam.aspect = -1.5f; Log("aspect -1.5"); cam.aspect = Nan; Log("aspect NaN");
+            cam.aspect = Inf; Log("aspect inf"); cam.ResetAspect(); Log("reset"); cam.fieldOfView = 60; Next();
+            cam.rect = new Rect(0.3f, 0.3f, 0.5f, 0); Log("zero height"); cam.rect = new Rect(0.3f, 0.3f, 0, 0.5f); Log("zero width");
+            cam.rect = new Rect(0, 0, 1, 1); Next();
+            // a target texture
+            var rt = new RenderTexture(300, 200, 0);
+            cam.targetTexture = rt; Log("texture 300x200"); cam.rect = new Rect(0.25f, 0.25f, 0.5f, 0.5f); Log("texture rect");
+            cam.pixelRect = new Rect(10.5f, 20.5f, 100.5f, 50.5f); Log("texture prect"); cam.targetTexture = null; Log("texture removed");
+            rt.Release(); UnityEngine.Object.Destroy(rt);
+            cam.rect = new Rect(0, 0, 1, 1); Next();
+            // worldToCameraMatrix's signs of zero and its parts
+            var posePositions = new[]
+            {
+                Vector3.zero, new Vector3(1, 2, 0), new Vector3(-0f, 0, -0f), new Vector3(3, -4, 5), new Vector3(3, -4, 5), Vector3.zero, Vector3.one,
+            };
+            var poseRotations = new[]
+            {
+                Quaternion.identity, Quaternion.identity, Quaternion.identity, Quaternion.Euler(0, 180, 0), Quaternion.Euler(90, 0, 0),
+                new Quaternion(0, 0, 0, -1), Quaternion.Euler(30, 45, 60),
+            };
+            for (int k = 0; k < posePositions.Length; k++) { t.position = posePositions[k]; t.rotation = poseRotations[k]; Log("pose"); Next(); }
+            var parent = new GameObject("CameraRulesParent").transform;
+            parent.position = new Vector3(5, -3, 2); parent.rotation = Quaternion.Euler(10, 20, 30); parent.localScale = new Vector3(2, 0.5f, -3);
+            t.SetParent(parent, false);
+            t.localPosition = new Vector3(1, 2, 3); t.localRotation = Quaternion.Euler(-40, 15, 70); t.localScale = new Vector3(1.5f, 1, 1);
+            Log("child"); Next();
+            t.SetParent(null, false);
+            UnityEngine.Object.Destroy(parent.gameObject);
+            t.localScale = Vector3.one;
+
+            // Where ScreenToWorldPoint gives up (it returns zero): the clip planes at which the
+            // depth-0.95 point comes too close to the camera, by bisection ("PJ PQ bound").
+            var center = new Vector3(512, 384, 5);
+            t.position = Vector3.zero; t.rotation = Quaternion.identity;
+            cam.rect = new Rect(0, 0, 1, 1); cam.ResetAspect();
+            bool Zero(Vector3 v) => v.x == 0 && v.y == 0 && v.z == 0;
+            cam.orthographic = false; cam.fieldOfView = 60;
+            float pb = Boundary(n => { cam.nearClipPlane = n; cam.farClipPlane = 3 * n; return Zero(cam.ScreenToWorldPoint(center)); }, 1e-30f, 1f);
+            Rec.Log("PJ PQ bound perspective near=" + H(pb));
+            foreach (float n in new[] { pb, BitConverter.ToSingle(BitConverter.GetBytes(BitConverter.ToInt32(BitConverter.GetBytes(pb), 0) - 1), 0) })
+            {
+                cam.nearClipPlane = n; cam.farClipPlane = 3 * n;
+                Log("bound perspective"); Next();
+            }
+            cam.orthographic = true; cam.orthographicSize = 5;
+            float ob = Boundary(n => { cam.nearClipPlane = -n; cam.farClipPlane = n; return Zero(cam.ScreenToWorldPoint(center)); }, 1e-30f, 1f);
+            Rec.Log("PJ PQ bound ortho n=" + H(ob));
+            foreach (float n in new[] { ob, BitConverter.ToSingle(BitConverter.GetBytes(BitConverter.ToInt32(BitConverter.GetBytes(ob), 0) - 1), 0) })
+            {
+                cam.nearClipPlane = -n; cam.farClipPlane = n;
+                Log("bound ortho"); Next();
+            }
+            // rays of simple cameras, with the screen points at several distances ("PJ PQ ray")
+            cam.orthographic = false; cam.nearClipPlane = 0.3f; cam.farClipPlane = 1000;
+            var poses2 = new[] { Vector3.zero, new Vector3(10, 20, 30), new Vector3(10, 20, 30) };
+            var rots2 = new[] { Quaternion.identity, Quaternion.identity, Quaternion.Euler(0, 30, 0) };
+            var sps = new[] { new Vector3(0, 0, 0), new Vector3(512, 384, 0), new Vector3(100.5f, 200.5f, 0), new Vector3(1000, 700, 0), new Vector3(300, 600, 0), new Vector3(513, 384, 0) };
+            for (int k = 0; k < poses2.Length; k++)
+            {
+                t.position = poses2[k]; t.rotation = rots2[k];
+                foreach (var sp in sps)
+                {
+                    var sb = new StringBuilder("PJ PQ ray " + k + " sp=" + H(sp) + " sray=" + H(cam.ScreenPointToRay(sp)) + " c2w=" + H(cam.cameraToWorldMatrix));
+                    foreach (float z in new[] { 0.3f, 1f, 10f, 1000f, 1e6f })
+                        sb.Append(" s2w").Append(z).Append('=').Append(H(cam.ScreenToWorldPoint(new Vector3(sp.x, sp.y, z))));
+                    Rec.Log(sb.ToString());
+                }
+            }
+            // a ray of a rotated camera whose viewport is empty
+            t.position = new Vector3(1, 2, 3); t.rotation = Quaternion.Euler(0, 90, 0);
+            cam.rect = new Rect(0.3f, 0.3f, 0, 0.5f); Log("empty rotated"); Next();
+            cam.orthographic = true; Log("empty rotated ortho"); Next();
+            UnityEngine.Object.Destroy(go);
+        }
+
         public static void Run()
         {
+            Guard("PK", CameraRules);
+            Guard("PAT", AffineThresholds);
             Guard("PT", Thresholds);
             Guard("PP", () => Perspective(new System.Random(1)));
             Guard("PO", () => Ortho(new System.Random(2)));

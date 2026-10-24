@@ -5,9 +5,12 @@
   pj-check.py rule LOG          how many logged cases each model reproduces bit for bit:
                                 PO Mesa's _math_float_ortho, PF Mesa's _math_matrix_frustum,
                                 PP the measured Perspective (cosf / sinf of (fov / 360) pi),
-                                PL gluLookAt's basis in Unity's order, PR AngleAxis, PA Mesa's
-                                invert_matrix_3d_general, PC the camera's projectionMatrix and
-                                cameraToWorldMatrix, PCP gluProject / gluUnProject (double)
+                                PL gluLookAt's basis in Unity's order, PR AngleAxis and the
+                                measured Rotate, PA Mesa's invert_matrix_3d_general and the
+                                measured Inverse3DAffine, PC/PK the camera's pixel rect, pixel
+                                size, aspect, projectionMatrix, worldToCameraMatrix and
+                                cameraToWorldMatrix, PCP gluProject (double) and the measured
+                                screen conversions and rays
   pj-check.py diff ORIG OURS    the lines and fields whose bits differ between the two players
 
 LOG is the original's Player.log or our player's stdout. NaNs compare equal whatever their sign
@@ -201,6 +204,167 @@ def mesa_inverse_3d_general(m):
     return o
 
 
+def cofactors(m):
+    """Mesa's float cofactors (as invert_matrix_3d_general), the 3 x 3 of the adjugate."""
+    g = lambda r, c: m[r * 4 + c]
+    c2 = lambda a, b, c, d: S(M(g(*a), g(*b)), M(g(*c), g(*d)))
+    return {0: c2((1, 1), (2, 2), (2, 1), (1, 2)), 1: -c2((0, 1), (2, 2), (2, 1), (0, 2)),
+            2: c2((0, 1), (1, 2), (1, 1), (0, 2)), 4: -c2((1, 0), (2, 2), (2, 0), (1, 2)),
+            5: c2((0, 0), (2, 2), (2, 0), (0, 2)), 6: -c2((0, 0), (1, 2), (1, 0), (0, 2)),
+            8: c2((1, 0), (2, 1), (2, 0), (1, 1)), 9: -c2((0, 0), (2, 1), (2, 0), (0, 1)),
+            10: c2((0, 0), (1, 1), (1, 0), (0, 1))}
+
+
+def inverse3daffine(m):
+    """Measured: the determinant summed over column 0's lanes of col0 . (col1 x col2), each lane
+    (e_i a_i+1) b_i+2 - (e_i a_i+2) b_i+1; failing (zero matrix) when det * det < 1e-25 in
+    float; the cofactors times 1 / det, Mesa's translation, a bottom row of 0 * (1 / det)."""
+    g = lambda r, c: m[r * 4 + c]
+    e, a, b = [g(i, 0) for i in range(3)], [g(i, 1) for i in range(3)], [g(i, 2) for i in range(3)]
+    lanes = [S(M(M(e[i], a[(i + 1) % 3]), b[(i + 2) % 3]), M(M(e[i], a[(i + 2) % 3]), b[(i + 1) % 3])) for i in range(3)]
+    det = A(A(lanes[0], lanes[1]), lanes[2])
+    if M(det, det) < f32(1e-25):
+        return False, [0.0] * 16
+    k = D(1.0, det)
+    o = [0.0] * 16
+    for i, c in cofactors(m).items():
+        o[i] = M(c, k)
+    for r in range(3):
+        o[r * 4 + 3] = -A(A(M(g(0, 3), o[r * 4]), M(g(1, 3), o[r * 4 + 1])), M(g(2, 3), o[r * 4 + 2]))
+    o[12] = o[13] = o[14] = M(0.0, k)
+    o[15] = 1.0
+    return True, o
+
+
+def rotate(q):
+    """Measured Matrix4x4.Rotate: the products stored to float, the diagonal's 1 - (yy + zz) in
+    double (Unity's managed code under its Mono, ARCHITECTURE D25)."""
+    x, y, z, w = q
+    X, Y, Z = M(x, 2.0), M(y, 2.0), M(z, 2.0)
+    xx, yy, zz, xy, xz, yz = M(x, X), M(y, Y), M(z, Z), M(x, Y), M(x, Z), M(y, Z)
+    wx, wy, wz = M(w, X), M(w, Y), M(w, Z)
+    d = lambda a, b: f32(1.0 - (a + b))
+    return [d(yy, zz), S(xy, wz), A(xz, wy), 0.0, A(xy, wz), d(xx, zz), S(yz, wx), 0.0,
+            S(xz, wy), A(yz, wx), d(xx, yy), 0.0, 0.0, 0.0, 0.0, 1.0]
+
+
+def basis_columns(q):
+    """The hierarchy's local rotation columns (docs/cleanroom/ugui.md, "Transform hierarchy to
+    the bit"): t = 2 (q x e), component i ((-q_b t_a + q_a t_b) + w t_i) + e_i."""
+    x, y, z, w = q
+    qv = [x, y, z]
+    cols = []
+    for i in range(3):
+        e = [0.0, 0.0, 0.0]
+        e[i] = 1.0
+        t = [M(2.0, S(M(qv[(k + 1) % 3], e[(k + 2) % 3]), M(qv[(k + 2) % 3], e[(k + 1) % 3]))) for k in range(3)]
+        cols.append([A(A(A(M(-qv[(k + 2) % 3], t[(k + 1) % 3]), M(qv[(k + 1) % 3], t[(k + 2) % 3])), M(w, t[k])), e[k]) for k in range(3)])
+    return cols
+
+
+def world_to_camera(pos, q):
+    """Measured: rows are the rotation's columns, translation 0 - (r0 p.x + (r1 p.y + r2 p.z)),
+    the third row subtracted from 0."""
+    m = [0.0] * 16
+    for r, col in enumerate(basis_columns(q)):
+        row = col + [S(0.0, A(M(col[0], pos[0]), A(M(col[1], pos[1]), M(col[2], pos[2]))))]
+        if r == 2:
+            row = [S(0.0, v) for v in row]
+        m[r * 4:r * 4 + 4] = row
+    m[15] = 1.0
+    return m
+
+
+def _fmin(a, b): return b if b < a else a
+def _fmax(a, b): return b if a < b else a
+
+
+def pixel_rect(rect, W, H):
+    """Measured: per axis start 0 + x W, end start + w W, each clamped to [0, W] (NaN passes),
+    size max(end - start, 0)."""
+    out = []
+    for p, s, T in ((rect[0], rect[2], W), (rect[1], rect[3], H)):
+        a = A(0.0, M(p, T))
+        b = A(a, M(s, T))
+        a, b = _fmin(_fmax(a, 0.0), T), _fmin(_fmax(b, 0.0), T)
+        out.append((a, _fmax(S(b, a), 0.0)))
+    return [out[0][0], out[1][0], out[0][1], out[1][1]]
+
+
+def _round(v):
+    return -2 ** 31 if v != v else int(math.floor(f32(v + 0.5)))
+
+
+def pixel_viewport(pr, W, H):
+    """Measured: start rounded half up, end rounded and clamped to [0, W], size end - start
+    (32-bit wrap); pixelWidth/Height and the screen conversions use it."""
+    x0, y0 = _round(pr[0]), _round(pr[1])
+    x1 = min(max(_round(A(pr[0], pr[2])), 0), int(W))
+    y1 = min(max(_round(A(pr[1], pr[3])), 0), int(H))
+    wrap = lambda v: (v + 2 ** 31) % 2 ** 32 - 2 ** 31
+    return [x0, y0, wrap(x1 - x0), wrap(y1 - y0)]
+
+
+def _dot4(row, v): return A(A(A(M(row[0], v[0]), M(row[1], v[1])), M(row[2], v[2])), M(row[3], v[3]))
+def _dot3(a, b): return A(A(M(a[0], b[0]), M(a[1], b[1])), M(a[2], b[2]))
+
+
+def _mulf(a, b):
+    return [_dot4(a[r * 4:r * 4 + 4], [b[k * 4 + c] for k in range(4)]) for r in range(4) for c in range(4)]
+
+
+def world_to_screen(cam, w):
+    """Measured: (P V in float) (w, 1) times 1 / w onto the whole-pixel viewport; z the distance
+    along cameraToWorldMatrix's -column 2 from its translation."""
+    P, V, C = cam['proj'], cam['w2c'], cam['c2w']
+    vx, vy, vw, vh = [float(v) for v in pixel_viewport(cam['prect'], *cam['screen'])]
+    vp = _mulf(P, V)
+    c = [_dot4(vp[r * 4:r * 4 + 4], w + [1.0]) for r in range(4)]
+    k = D(1.0, c[3])
+    z = -_dot3([S(w[i], C[i * 4 + 3]) for i in range(3)], [C[2], C[6], C[10]])
+    return [A(M(M(A(M(c[0], k), 1.0), 0.5), vw), vx), A(M(M(A(M(c[1], k), 1.0), 0.5), vh), vy), z]
+
+
+def screen_to_world(cam, sp):
+    """Measured: clip-space xy at depth 0.95 through the inverse of P V (Mesa's), then moved to
+    distance sp.z along the forward axis (perspective: from the camera position)."""
+    P, V, C = cam['proj'], cam['w2c'], cam['c2w']
+    vx, vy, vw, vh = [float(v) for v in pixel_viewport(cam['prect'], *cam['screen'])]
+    inv = mesa_inverse(_mulf(P, V))
+    n = [S(D(M(S(sp[0], vx), 2.0), vw), 1.0), S(D(M(S(sp[1], vy), 2.0), vh), 1.0), f32(0.95), 1.0]
+    r = [_dot4(inv[i * 4:i * 4 + 4], n) for i in range(4)]
+    k = D(1.0, r[3])
+    pt = [M(r[i], k) for i in range(3)]
+    cp, fwd = [C[3], C[7], C[11]], [-C[2], -C[6], -C[10]]
+    d = [S(pt[i], cp[i]) for i in range(3)]
+    dist = _dot3(d, fwd)
+    if not abs(dist) >= f32(1e-6):
+        return None  # the original gives up (bisected): zero, and rays from the camera along +z
+    if cam['ortho'] == '1':
+        return [S(pt[i], M(fwd[i], S(dist, sp[2]))) for i in range(3)]
+    f = D(sp[2], dist)
+    return [A(cp[i], M(d[i], f)) for i in range(3)]
+
+
+def _normalize(v):
+    m = f32(math.sqrt(_dot3(v, v)))
+    return [D(x, m) for x in v]
+
+
+def screen_ray(cam, sp):
+    """Origin: the screen point at the near plane (measured). Direction: orthographic, the
+    forward axis normalized (measured); perspective, toward the point at distance 1000 (the
+    closest form found, not the original's)."""
+    C = cam['c2w']
+    origin = screen_to_world(cam, [sp[0], sp[1], cam['near'][0]])
+    if origin is None:
+        return [C[3], C[7], C[11], 0.0, 0.0, 1.0]
+    if cam['ortho'] == '1':
+        return origin + _normalize([-C[2], -C[6], -C[10]])
+    far = screen_to_world(cam, [sp[0], sp[1], 1000.0])
+    return origin + _normalize([S(far[i], C[i * 4 + 3]) for i in range(3)])
+
+
 def mesa_inverse(mm):
     """invert_matrix_general in float, a zero pivot giving zero (as mm-check.py)."""
     r0, r1, r2, r3 = [list(mm[r * 4:r * 4 + 4]) + [1.0 if k == r else 0.0 for k in range(4)] for r in range(4)]
@@ -283,11 +447,17 @@ def rule(path):
     pa = by.get('PA', [])
     ok_agree = sum(1 for _, c in pa if (mesa_inverse_3d_general(c['m']) is not None) == (c['ok'] == '1'))
     full = sum(1 for _, c in pa if c['ok'] == '1' and (lambda g: g is not None and same(g, c['r']))(mesa_inverse_3d_general(c['m'])))
-    upper = sum(1 for _, c in pa if c['ok'] == '1' and (lambda g: g is not None and same(
-        [g[r * 4 + k] for r in range(3) for k in range(4)], [c['r'][r * 4 + k] for r in range(3) for k in range(4)]))(mesa_inverse_3d_general(c['m'])))
     print(f'{"PA Inverse3DAffine = Mesa 3d_general":44} {full}/{sum(c["ok"] == "1" for _, c in pa)} invertible'
-          f' (top three rows {upper}); success flag agrees {ok_agree}/{len(pa)}')
+          f'; success flag agrees {ok_agree}/{len(pa)}')
+    ok = sum(1 for _, c in pa if (lambda g: g[0] == (c['ok'] == '1') and same(g[1], c['r']))(inverse3daffine(c['m'])))
+    show('PA Inverse3DAffine = measured', (ok, len(pa)))
+    pr = [c for _, c in by.get('PR', []) if 'rot' in c]
+    show('PR Rotate = measured (diagonal in double)', (sum(same(rotate(c['q']), c['rot']) for c in pr), len(pr)))
+    show('PR Rotate(AngleAxis) = measured', (sum(same(rotate(c['aa']), c['rotaa']) for c in pr), len(pr)))
+    screen = next((tuple(float(v) for v in idx[0].split('x')) for idx, _ in by.get('screen', [])), (1024.0, 768.0))
     cams = {idx[0]: c for idx, c in by.get('PC', [])}
+    for c in cams.values():
+        c['screen'] = screen
 
     def cam_proj(c):
         if c['ortho'] == '1':
@@ -296,12 +466,37 @@ def rule(path):
         return perspective(c['fov'][0], c['aspect'][0], c['near'][0], c['far'][0])
     show('PC projectionMatrix = Perspective / Ortho', count('PC', cam_proj, 'proj'))
     show('PC cameraToWorldMatrix = inverse(w2c)', count('PC', lambda c: mesa_inverse(c['w2c']), 'c2w'))
+    show('PC worldToCameraMatrix = measured', count('PC', lambda c: world_to_camera(c['pos'], c['rot']), 'w2c'))
+    show('PC pixelRect = measured', count('PC', lambda c: pixel_rect(c['rect'], *screen), 'prect'))
+    pv = [(c, pixel_viewport(c['prect'], *screen)) for _, c in by.get('PC', [])]
+    show('PC pixelWidth/Height = whole-pixel viewport', (sum(int(c['pw']) == v[2] and int(c['ph']) == v[3] for c, v in pv), len(pv)))
+    auto = [c for idx, c in by.get('PC', []) if int(idx[0]) % 7 != 3]
+    show('PC aspect (reset) = pixel w / h', (sum(same([1.0 if c['prect'][3] == 0 else D(c['prect'][2], c['prect'][3])], c['aspect']) for c in auto), len(auto)))
+    pk = by.get('PK', [])
+    ok = sum(1 for _, c in pk if 'texture' in c.get('what', '') or same(pixel_rect(c['rect'], *screen), c['prect'])
+             and [int(c['pw']), int(c['ph'])] == pixel_viewport(c['prect'], *screen)[2:])
+    show('PK pixelRect, pixelWidth/Height (rules)', (ok, len(pk)))
+    show('PK worldToCameraMatrix = measured', (sum(same(world_to_camera(c['pos'], c['rot']), c['w2c']) for _, c in pk), len(pk)))
     pcp = by.get('PCP', [])
     ok = sum(1 for idx, c in pcp if (lambda g: g is not None and same(g, c['w2s']))(glu_project(cams[idx[0]], c['w'])))
     show('PCP WorldToScreenPoint = gluProject (double)', (ok, len(pcp)))
+    show('PCP WorldToScreenPoint = measured', (sum(same(world_to_screen(cams[i[0]], c['w']), c['w2s']) for i, c in pcp), len(pcp)))
     ok = sum(1 for idx, c in pcp if same([D(S(c['w2s'][0], cams[idx[0]]['prect'][0]), cams[idx[0]]['prect'][2]),
                                           D(S(c['w2s'][1], cams[idx[0]]['prect'][1]), cams[idx[0]]['prect'][3])], c['w2v'][:2]))
     show('PCP WorldToViewportPoint = (screen - x) / w', (ok, len(pcp)))
+    s2w = lambda cam, sp: screen_to_world(cam, sp) or [0.0, 0.0, 0.0]
+    show('PCP ScreenToWorldPoint = measured', (sum(same(s2w(cams[i[0]], c['sp']), c['s2w']) for i, c in pcp), len(pcp)))
+
+    def v2s(cam, vp):
+        pr = cam['prect']
+        return [A(M(vp[0], pr[2]), pr[0]), A(M(vp[1], pr[3]), pr[1]), vp[2]]
+    show('PCP ViewportToWorldPoint = s2w(v2s)', (sum(same(s2w(cams[i[0]], v2s(cams[i[0]], c['vp'])), c['v2w']) for i, c in pcp), len(pcp)))
+    rays = [(screen_ray(cams[i[0]], c['sp']), c['sray']) for i, c in pcp]
+    show('PCP ScreenPointToRay origin = s2w(near)', (sum(same(g[:3], o[:3]) for g, o in rays), len(rays)))
+    for kind, name in (('1', 'orthographic'), ('0', 'perspective')):
+        sel = [(screen_ray(cams[i[0]], c['sp']), c['sray']) for i, c in pcp if cams[i[0]]['ortho'] == kind]
+        show(f'PCP ScreenPointToRay direction, {name}', (sum(same(g[3:], o[3:]) for g, o in sel), len(sel)))
+    show('PCP ViewportPointToRay = sray(v2s)', (sum(same(screen_ray(cams[i[0]], v2s(cams[i[0]], c['vp'])), c['vray']) for i, c in pcp), len(pcp)))
 
 
 def diff(orig, ours):

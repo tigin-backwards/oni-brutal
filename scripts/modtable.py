@@ -126,7 +126,6 @@ unplayed = {
     '3635632392': 'not played: a multiplayer mod (its own LiteNetLib client and server); a session needs two players on two Steam accounts',
     # Batch 18: base-game-only mods (every spec fixture is a Spaced Out colony).
     '1891479671': 'not played: it supports the base game only (`supportedContent: VANILLA_ID`; it patches the base game\'s Biological Cargo Bay, which Spaced Out lacks), and every spec fixture is a Spaced Out colony',
-    '1828719932': 'not played: it supports the base game only (`supportedContent: VANILLA_ID`; it patches the base game\'s starmap destinations), and every spec fixture is a Spaced Out colony',
     '1886699455': 'not played: it supports the base game only (`supportedContent: VANILLA_ID`), and every spec fixture is a Spaced Out colony',
     # Batch 21.
 }

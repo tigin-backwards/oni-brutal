@@ -1,0 +1,67 @@
+{
+ "spec": "mods/1828719932-infinite-planet-resources.yaml",
+ "mods": [
+  "1828719932"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "played on vanilla-base (base game): a fresh destination holds maximum - minimum and one second later its maximum (current mass minimum + maximum); with a telescope stood on the surface, the starmap's details for the analysed asteroid show the current mass above the maximum; a mission is not flown",
+ "updated": "2026-10-24",
+ "commit": "8fd3812",
+ "mod_dlls": {
+  "1828719932": {
+   "InfinitePlanetResources.dll": "488a654d94b05043e7852dc30bf35edb8a8a6c148d0d535c3515230a70473c20"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-170702-1ed4e4",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T17:07:02",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-170930-cfcc64",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T17:09:30",
+    "lane": 16,
+    "reference_run": "20261024-170702-1ed4e4",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "mass": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "mass": 0.0
+    }
+   },
+   {
+    "run": "20261024-170930-cfcc64",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T17:10:47",
+    "lane": 16,
+    "reference_run": "20261024-170702-1ed4e4",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "mass": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "mass": 0.0
+    }
+   }
+  ]
+ }
+}

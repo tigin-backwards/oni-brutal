@@ -1,0 +1,43 @@
+# Infinite Planet Resources (1828719932), class P; base game only (VANILLA_ID).
+#
+# What it does: a postfix on SpaceDestination.Replenish, which the base game's SpacecraftManager
+# calls for every starmap destination each Sim1000ms, sets the destination's available mass to
+# its type's maximum mass. The base game refills a destination slowly
+# (replishmentPerSim1000ms) and caps its current mass (minimum + available) at the maximum; with
+# the mod every destination is full again within a second of a mission, and its current mass
+# reads minimum + maximum.
+# How a player reaches it: rocket missions; the starmap's destination details (Current Mass).
+# What changes: how much a destination holds after missions.
+#
+# Setup stands a telescope on the surface (BuildingDef.Build: the base game's starmap opens
+# once one exists) and completes the analysis of the nearest destination, a carbonaceous
+# asteroid. A fresh destination holds maximum - minimum; one second of play later it holds the
+# maximum. The starmap, opened from its button, shows the asteroid's current mass above its
+# maximum.
+from: vanilla-base
+mods: [1828719932]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Telescope\")", method: Build, args: [88776, "Neutral", null, ["Cuprite"], 293.15]}}
+  - driver: {setup.call: {target: "SpacecraftManager.instance", method: EarnDestinationAnalysisPoints, args: [0, 1000000]}}
+steps:
+  - expect_state:
+      "DlcManager.IsExpansion1Active()": false
+      "SpacecraftManager.instance.destinations[0].type": CarbonaceousAsteroid
+      "SpacecraftManager.instance.destinations[0].AvailableMass": {save_as: before}
+      "SpacecraftManager.instance.destinations[0].GetDestinationType().maxiumMass": {save_as: max}
+      "SpacecraftManager.instance.destinations[0].GetDestinationType().minimumMass": {save_as: min}
+  - expect_state:
+      "SpacecraftManager.instance.destinations[0].AvailableMass": "== max - min"
+  - run: {seconds: 2}
+  - expect_state:
+      "SpacecraftManager.instance.destinations[0].AvailableMass": "== max"
+      "SpacecraftManager.instance.destinations[0].CurrentMass": "== max + min"
+  - click: {ui: "**/TopRightInfoPanelButtons/Toggle:STARMAP"}
+  - ui_wait: {path: "**/FullScreenUICanvases/Starmap/Map/Content", cond: stable}
+  # The nearest row's first planet is destination 0.
+  - click: {ui: "**/Starmap/Map/Content/RowPrefab/PlanetPrefab", index: 21}
+  - ui_wait: {path: "**/Starmap/**/destinationDetailsMass", cond: stable}
+  - expect_ui:
+      "**/Starmap/**/destinationDetailsMass/BreakdownListRow(Clone)/Value": {any_text: "255988 t"}
+  - ui_dump: {name: mass, root: "**/Starmap/**/destinationDetailsMass"}
+  - shot: {name: mass, crop: "**/Starmap/**/destinationDetailsMass", threshold: 0.04}

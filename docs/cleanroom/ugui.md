@@ -606,8 +606,9 @@ It updates when its rect or its parent's rect changes, and in the update after i
   `numberOfSteps`.
 - **Events:** `onValueChanged`.
 - **Visuals:** the handle's anchors span `size` at `value`.
-- **Input:** dragging the handle moves the value. Pressing the track outside the handle moves
-  towards the press by one `size` per step, repeating while held, through a coroutine.
+- **Input:** dragging the handle moves the value. A press on the track outside the handle
+  centres the handle on the press point at once, and the handle then follows the pointer while
+  the button is held ("Scrollbar presses on the track", measured, below).
 
 **`ScrollRect`:**
 - **Settings:**
@@ -1150,6 +1151,72 @@ of 20. The kinds:
 | text whose box is out, rect in, nothing changes | culled | not culled |
 | text whose box is out after an alignment change | culled one frame later | not culled |
 | Modify Difficulty Settings, "Care Packages" label | culled; shown when scrolled 100 up, culled again back | not culled |
+
+### Scrollbar presses on the track (measured 2026-10-23)
+
+Found through the vanilla Consumables screen (`tests/e2e/consumables-scroll.yaml`). Its header
+row has a horizontal `Scrollbar` (`…/prefab_row_header/Border/HorizontalScrollbar`, 760 wide,
+`size` 0.4496, `value` 0) driving the header's `KScrollRect`. A click on the track right of the
+handle, at the track's centre, moved the value to 0.49994 in the original: the handle centred
+on the click. Ours moved it by one `size`, to 0.4496, and kept stepping while the button was
+held. (The rows of that table did not follow the header in ours either; that is the layout
+re-send described under "Moved children of layout groups", not this.)
+
+**Measured** with `PROBE_SCENARIO=scrollbar` (tools/UnityProbe, `ScrollbarPress.cs`, lines `SB
+…`). Each case builds a fresh `Scrollbar` on an overlay canvas of scale 1: the track an `Image`
+of 400 × 20 (20 × 400 vertical) at the screen centre, a "Sliding Area" child stretched over it,
+and a "Handle" child `Image` in that as `handleRect`. The case sets `direction`, `size`,
+`value` and `numberOfSteps`, waits two frames, then drives the game's `StandaloneInputModule`
+through `inputOverride`: a press at a fraction p of the track's length (0 at the left or bottom
+end), held for 1 to 60 frames (at about 250 frames a second, so up to about 0.25 s), sometimes
+moving while held, then a release. Every frame logs `value` and the handle's anchors; every
+`onValueChanged` logs its argument.
+
+Write the track position of the press along the scrollbar's direction as q: q = p for
+LeftToRight and BottomToTop, q = 1 − p for RightToLeft and TopToBottom.
+
+1. **A press on the handle** changes nothing. Pressing it and moving drags it, keeping the
+   offset at which it was grabbed: `size` 0.45, `value` 0, pressed at p = 0.1 and moved to
+   p = 0.5 gives 0.72727 (the handle's start moved by 0.4 of the track; 0.4 / 0.55).
+2. **A press on the track outside the handle** sets, in the frame of the press, the value that
+   puts the handle's centre on the press point: `value` = clamp01((q − `size` / 2) / (1 −
+   `size`)), then `numberOfSteps` rounding as for any value set. `onValueChanged` is invoked
+   once, with that value (not when the value is unchanged).
+3. **While the button is held,** the handle follows the pointer as a drag from its centre: the
+   value is again (q − `size` / 2) / (1 − `size`) for the pointer's current q, clamped, each
+   frame the pointer moves. This holds below the event system's drag threshold (20 px):
+   a move of 10 px gave the followed value. A pointer that stays still changes nothing: there
+   is no repeat, however long the press is held. The release changes nothing.
+
+| Case | original | ours before |
+|---|---|---|
+| size 0.4496, value 0, p 0.5, held 2 frames | 0.5 at the press | 0.4496 |
+| size 0.45, value 0, p 0.5, held 1 or 30 frames | 0.5 | 0.45 |
+| size 0.45, value 0, p 0.6 | 0.68182 | 0.45 |
+| size 0.45, value 0, p 0.75 | 0.95455 | 0.45, then 0.9 on the 2nd held frame |
+| size 0.45, value 0, p 0.9 or 0.99, held 2 or 60 | 1 | 0.45, 0.9, then 1 |
+| size 0.45, value 0, p 0.46 (just right of the handle) | 0.42727 | 0.45 |
+| size 0.45, value 0, p 0.2 (on the handle) | 0, nothing invoked | the same |
+| size 0.2, value 0, p 0.3 | 0.25 | 0.2 |
+| size 0.2, value 0, p 0.9, held 60 | 1 | 0.2, 0.4, 0.6, 0.8, 1 a frame apart |
+| size 0.2, value 0.5, p 0.1 | 0 | 0.3, then 0.1 |
+| size 0.2, value 0.5, p 0.9 | 1 | 0.7, then 0.9 |
+| size 0.2, value 1, p 0.1, held 60 | 0 | 0.8 down to 0 |
+| size 0.1, value 0, p 0.55, held 60 | 0.55556 | 0.1 up to 0.5 |
+| size 0.45, value 0, steps 5, p 0.75 | 1 (0.95455 rounded) | 0.5, then 1 |
+| size 0.2, value 0, steps 3, p 0.9, held 60 | 1 | 0, nothing invoked |
+| RightToLeft, size 0.45, value 0, p 0.25 (q 0.75) | 0.95455 | 0.45, then 0.9 |
+| BottomToTop, size 0.3, value 0, p 0.8 | 0.92857 | 0.3, 0.6, then 0.9 |
+| TopToBottom, size 0.3, value 0, p 0.8 (q 0.2, on the handle) | 0, nothing invoked | the same |
+| size 0.2, value 0, p 0.9, then moved to p 0.3 while held | 1, then 0.25 | 0.2, then 0.25 |
+| size 0.2, value 0, p 0.9, then moved to p 2 (off the track) while held | 1, stays 1 | 0.2, then 1 |
+| size 0.2, value 0, p 0.5, then moved 10 px (p 0.525) | 0.5, then 0.53125 | 0.2, then 0.53125 |
+| size 0.2, value 0, p 0.5, then moved 30 px (p 0.575) | 0.5, then 0.59375 | 0.2, then 0.59375 |
+
+What follows a value change (the handle's anchors, `onValueChanged`, a linked `ScrollRect`
+setting its normalized position) is as described above; only the value a press on the track
+produces, and the repeat, differ. Not measured: touch input, a press with a button other than
+the left, and presses on a scrollbar whose `interactable` is false.
 
 ### Measured on the shipped package
 

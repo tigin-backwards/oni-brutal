@@ -350,7 +350,12 @@ namespace OniBrutal.Engine.UI
         /// zooms at the frame time of a still screen, where rebaking and uploading every element
         /// each frame took 30 to 130 ms more, and the screen's zoom, which steps by the frame
         /// time, overshot its target. A rect-clipped element (RectMask2D) stays in the root
-        /// canvas's space, where uGUI gives its clip rect.
+        /// canvas's space, where uGUI gives its clip rect. So does an element whose shader reads
+        /// no vertex position: such a program places its geometry from unity_ObjectToWorld
+        /// alone, which a UI draw sets to the root canvas's transform in the original. Klei's
+        /// BatchedAnimationUI is one; its game code computes the Duplicant portraits' positions
+        /// around the root canvas's centre, and in the Consumables table (a nested canvas
+        /// whose pivot is its top right corner) they were drawn off the screen's corner.
         static (Matrix4x4 ToSpace, Matrix4x4 SpaceToWorld) SpaceOf(CanvasBatch b, in CanvasDraw d)
         {
             if (NestedSpace(d) is { } nested) return (d.ToNearest, nested.GameObject.Transform.LocalToWorld);
@@ -359,7 +364,13 @@ namespace OniBrutal.Engine.UI
 
         /// The nested canvas a draw's geometry is baked in, or null for the root canvas's space.
         static CanvasNative NestedSpace(in CanvasDraw d)
-            => d.Nearest != null && d.Renderer.ClipRect == null && !d.Nearest.Destroyed ? d.Nearest : null;
+            => d.Nearest != null && d.Renderer.ClipRect == null && !d.Nearest.Destroyed && ReadsVertexPosition(d.Material) ? d.Nearest : null;
+
+        static bool ReadsVertexPosition(Material material)
+        {
+            var shader = material == null ? null : material.shader;
+            return shader == null || shader.Native is not ShaderNative native || native.ReadsVertexPosition;
+        }
 
         static void Build()
         {

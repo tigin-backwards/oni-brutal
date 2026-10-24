@@ -418,6 +418,62 @@ namespace OniBrutal.Tests
             }
         }
 
+        /// A shader whose vertex program reads no position places its geometry from
+        /// unity_ObjectToWorld alone, so an element drawn with one is given the root canvas's
+        /// transform, also inside a nested canvas: the Consumables table's Duplicant portraits
+        /// (Klei/BatchedAnimationUI, in a nested canvas pivoted at its top right) were drawn off
+        /// that corner while the original draws them in their rows. Elements whose shader reads
+        /// positions keep the nested canvas's space.
+        [Fact]
+        public void AnElementWhoseShaderReadsNoPositionIsDrawnInTheRootCanvassSpace()
+        {
+            var game = Environment.GetEnvironmentVariable("ONI_GAME_DIR")
+                       ?? System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "projects", "oni-linux");
+            AssetSystem.Initialize(System.IO.Path.Combine(game, "OxygenNotIncluded_Data"));
+            ProjectSettings.Load();
+            FrameRenderer.Install();
+            OniBrutal.Engine.UI.CanvasSystem.Install();
+            var device = new RecordingDevice();
+            var previous = GraphicsDevice.Current;
+            GraphicsDevice.Install(device);
+            var root = new GameObject("Overlay", typeof(RectTransform));
+            try
+            {
+                var anim = Shader.Find("Klei/BatchedAnimationUI");
+                Assert.NotNull(anim);
+                Assert.False(((ShaderNative)anim.Native).ReadsVertexPosition);
+                Assert.True(((ShaderNative)Shader.Find("UI/Default").Native).ReadsVertexPosition);
+
+                root.AddComponent<Canvas>().renderMode = RenderMode.ScreenSpaceOverlay;
+                root.transform.localPosition = new Vector3(640f, 360f, 0f);
+                root.transform.localScale = new Vector3(0.86f, 0.86f, 1f);
+                var screen = new GameObject("Screen", typeof(RectTransform));
+                screen.transform.SetParent(root.transform, false);
+                screen.transform.localPosition = new Vector3(744f, 418f, 0f);
+                screen.AddComponent<Canvas>();
+                var portrait = Triangle(screen.transform, "Portrait", new Vector3(-1000f, -300f, 0f));
+                portrait.SetMaterial(new Material(anim), 0);
+                var label = Triangle(screen.transform, "Label", new Vector3(-900f, -300f, 0f));
+
+                Frame();
+                var draws = device.MeshDrawRequests.ToArray();
+                Assert.Equal(root.transform.localToWorldMatrix, Find(draws, portrait).ObjectToWorld);
+                Assert.Equal(screen.transform.localToWorldMatrix, Find(draws, label).ObjectToWorld);
+            }
+            finally
+            {
+                Object.DestroyImmediate(root);
+                GraphicsDevice.Install(previous);
+            }
+
+            static DrawRequest Find(DrawRequest[] draws, CanvasRenderer element)
+            {
+                foreach (var d in draws)
+                    if (ReferenceEquals(d.Material, element.GetMaterial(0))) return d;
+                throw new InvalidOperationException(element.name + " was not drawn");
+            }
+        }
+
         static CanvasRenderer Triangle(Transform parent, string name, Vector3 position)
         {
             var go = new GameObject(name, typeof(RectTransform));

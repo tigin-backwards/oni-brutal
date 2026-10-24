@@ -110,11 +110,36 @@ namespace OniBrutal.Engine.Rendering
             }
         }
 
+        bool? readsVertexPosition;
+
+        /// Whether any of its OpenGLCore vertex programs reads the vertex position (its channel
+        /// mask's position bit); true when that is not known (no OpenGLCore programs). A program
+        /// that reads none (Klei's BatchedAnimationUI places its quads from instance data and
+        /// unity_ObjectToWorld alone) draws the same whatever space the mesh is baked in, but not
+        /// whatever object-to-world transform it is given.
+        public bool ReadsVertexPosition => readsVertexPosition ??= FindReadsVertexPosition();
+
+        bool FindReadsVertexPosition()
+        {
+            var programs = Programs;
+            if (programs == null) return true;
+            bool any = false;
+            foreach (var sub in SubShaders)
+                foreach (var pass in sub.Passes)
+                    foreach (var variant in pass.Variants)
+                    {
+                        any = true;
+                        if ((programs.Variant(variant.BlobIndex).ChannelMask & 1u) != 0) return true;
+                    }
+            return !any;
+        }
+
         /// Shader (class 48).
         public override void Bind(Fields f, IReferenceResolver resolver)
         {
             Serialized = null;
             Data = f;
+            readsVertexPosition = null;
             var parsed = f.Struct("m_ParsedForm");
             ShaderName = parsed.String("m_Name");
             if (Name.Length == 0) Name = ShaderName;

@@ -1,0 +1,50 @@
+# Smarter Conditioner (3446454257), classes S, P.
+#
+# What it does: the Thermo Regulator and the Thermo Aquatuner cool what passes through to a
+# target temperature instead of by a fixed 14 degrees: a SmarterConditioner component (an
+# IUserControlledCapacity) gives them a capacity side screen retitled "Target Temperature"
+# (default 20 C, from -273.15 to 300 C), and an AirConditioner.UpdateState prefix cools each
+# packet by at most 20 degrees down to that target, drawing power in proportion to the
+# cooling done (340 W and 1700 W at the full 20 degrees, which are also their circuit loads).
+# Its config.yaml beside the DLL sets the range, the step and the wattages; copy settings copy
+# the target.
+# How a player reaches it: select a Thermo Regulator or Aquatuner, its side screen.
+# What changes: coolers that hold a temperature, and draw only what that takes.
+#
+# setup grants HVAC and spawns copper ore. A Thermo Regulator is built in the dug-out corridor
+# west of the printing pod and selected: its side screen reads Target Temperature, 20 C;
+# 5 typed into its field becomes the regulator's target.
+from: early-base
+mods: [3446454257]
+require_log: ['\[SmarterConditioner\] Config loaded: target -273\.15C\.\.300C, max delta 20C, gas 340W, liquid 1700W\.']
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"HVAC\")", method: Purchased}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Cuprite\").substance", method: SpawnResource, args: [[115.5, 207.5, -12], 600, 300, 255, 0]}}
+steps:
+  - build: {prefab: AirConditioner, at: [113, 206]}
+  - expect: {blueprints: {AirConditioner: 1}}
+  - run: {seconds: 1200, until: {buildings: {AirConditioner: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: AirConditioner}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/CapacityControlSideScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Thermo Regulator"}
+  - expect_ui:
+      "**/CapacityControlSideScreen/**": {any_text: "Target Temperature:"}
+  - expect_state:
+      "selected:GetComponent<SmarterConditioner.SmarterConditioner>.UserMaxCapacity": ">= 19.99"
+      "selected:GetComponent<EnergyConsumer>.WattsNeededWhenActive": 340
+  - expect_state:
+      "selected:GetComponent<SmarterConditioner.SmarterConditioner>.UserMaxCapacity": "<= 20.01"
+  - shot: {name: details, crop: "**/DetailsScreen", threshold: 0.04}
+  - ui_dump: {name: side-screen, root: "**/CapacityControlSideScreen"}
+  - type: {ui: "**/CapacityControlSideScreen/**/*Input*", text: "5", enter: true, clear: true}
+  - expect_state:
+      "selected:GetComponent<SmarterConditioner.SmarterConditioner>.UserMaxCapacity": ">= 4.99"
+  - expect_state:
+      "selected:GetComponent<SmarterConditioner.SmarterConditioner>.UserMaxCapacity": "<= 5.01"
+  - run: {seconds: 1}
+  - expect_state:
+      "selected:GetComponent<AirConditioner>.TargetTemperature": ">= 278.1"
+  - expect_state:
+      "selected:GetComponent<AirConditioner>.TargetTemperature": "<= 278.2"

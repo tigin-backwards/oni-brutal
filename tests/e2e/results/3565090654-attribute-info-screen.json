@@ -1,0 +1,91 @@
+{
+ "spec": "mods/3565090654-attribute-info-screen.yaml",
+ "mods": [
+  "3565090654"
+ ],
+ "verdict": "failed",
+ "why": "a run of ours failed",
+ "findings": [],
+ "note": "spec fails in ours: the Attributes button opens the screen, its sort and close work and it looks as in the original (0.3 % of pixels), but every attribute row of the bionic Duplicant reads \"Xp:0/0\" where the original reads \"Xp:0/-2147483648\": Mathf.RoundToInt of a NaN experience target, which Mono turns into int.MinValue and .NET saturates to 0 (PLAN A4)",
+ "updated": "2026-10-24",
+ "commit": "e235451",
+ "mod_dlls": {
+  "3565090654": {
+   "SkillsInfoScreen.dll": "bf96191279fc5aad98a80538cef72a3101f4b718b3d22a19c2cd0436bc1d5a87"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-114728-37561f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T11:49:20",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-123819-18c5fa",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-24T13:01:08",
+    "lane": 15,
+    "reasons": [
+     "ui_dump screen: 12 difference(s)",
+     "ui_dump sorted: 12 difference(s)"
+    ],
+    "reference_run": "20261024-114728-37561f",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "screen": {
+      "differences": 12,
+      "known": {
+       "scroll-normalized-position": 2
+      }
+     },
+     "sorted": {
+      "differences": 12
+     }
+    },
+    "shots": {
+     "screen": 0.003157
+    }
+   },
+   {
+    "run": "20261024-123819-18c5fa",
+    "index": 2,
+    "verdict": "fail",
+    "date": "2026-10-24T13:01:10",
+    "lane": 14,
+    "reasons": [
+     "ui_dump screen: 12 difference(s)",
+     "ui_dump sorted: 12 difference(s)"
+    ],
+    "reference_run": "20261024-114728-37561f",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "screen": {
+      "differences": 12,
+      "known": {
+       "scroll-normalized-position": 2
+      }
+     },
+     "sorted": {
+      "differences": 12
+     }
+    },
+    "shots": {
+     "screen": 0.003157
+    }
+   }
+  ]
+ }
+}

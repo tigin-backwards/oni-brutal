@@ -1,0 +1,30 @@
+# Petroleum Doesn't Break Pipes (2602057752), class P.
+#
+# What it does: a prefix on ConduitFlow.MeltConduitContents, which the game calls when a
+# pipe's contents pass their boiling point: crude oil in a pipe turns into petroleum in place
+# (the packet's element changed, mass and temperature kept), where the game damages the pipe
+# ("contents boiled") and empties it. Other liquids still boil as before.
+# How a player reaches it: crude oil hotter than 400 C in a liquid pipe, such as an oil
+# well's output heated on its way.
+# What changes: hot crude oil refines itself in the pipes instead of breaking them.
+#
+# setup builds a liquid pipe (BuildingDef.Build) in the dug-out corridor west of the printing
+# pod, at (110, 207), rebuilds the pipe networks at once (UtilityNetworkManager.Update, so
+# the pipe takes contents before the game runs) and puts 5 kg of crude oil at 430 C in it.
+# When the game runs, the packet is petroleum, still 5 kg, and the pipe is undamaged.
+from: early-base
+mods: [2602057752]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LiquidConduit\")", method: Build, args: [131762, Neutral, null, [SandStone], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Game.Instance.liquidConduitSystem", method: ForceRebuildNetworks}}
+  - driver: {setup.call: {target: "Game.Instance.liquidConduitSystem", method: Update}}
+  - driver: {setup.call: {target: "Game.Instance.liquidConduitFlow", method: AddElement, args: [131762, CrudeOil, 5.0, 703.15, 255, 0]}}
+steps:
+  - expect_state:
+      "Game.Instance.liquidConduitFlow.GetContents(131762).element": "== 'CrudeOil'"
+      "Grid.Objects.get_Item(131762, 16).GetComponent<BuildingHP>.HitPoints": {save_as: hp}
+  - run: {seconds: 5}
+  - expect_state:
+      "Game.Instance.liquidConduitFlow.GetContents(131762).element": "== 'Petroleum'"
+      "Game.Instance.liquidConduitFlow.GetContents(131762).mass": ">= 4.9"
+      "Grid.Objects.get_Item(131762, 16).GetComponent<BuildingHP>.HitPoints": "== hp"

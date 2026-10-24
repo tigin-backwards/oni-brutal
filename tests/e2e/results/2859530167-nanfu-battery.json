@@ -1,0 +1,60 @@
+{
+ "spec": "mods/2859530167-nanfu-battery.yaml",
+ "mods": [
+  "2859530167"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with its options at 50000 J and 0.5 J/s, a Battery built from a build order holds and leaks that and plays the mod's Nanfu animation; its details screen as in the original",
+ "updated": "2026-10-24",
+ "commit": "e235451",
+ "mod_dlls": {
+  "2859530167": {
+   "Nanfu battery─╧µ┌╡τ│╪.dll": "ead4413c1228ecc2959896f48de3c9c693d180d26453ae64ee8ef56e3febf425",
+   "PLib.dll": "b862c5db2b3cd6df09a62d4a30782e91e2b24e8e1bfac08d991c9cc89a984ba9"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-112336-f68baf",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T11:38:06",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-123819-18c5fa",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T12:47:43",
+    "lane": 15,
+    "reference_run": "20261024-112336-f68baf",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "details": 0.002155
+    }
+   },
+   {
+    "run": "20261024-123819-18c5fa",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T12:48:59",
+    "lane": 15,
+    "reference_run": "20261024-112336-f68baf",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "details": 0.002155
+    }
+   }
+  ]
+ }
+}

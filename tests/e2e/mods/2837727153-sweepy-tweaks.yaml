@@ -1,0 +1,42 @@
+# Sweepy Tweaks (2837727153), classes P, S.
+#
+# What it does: a Sweepy gets user menu buttons for its behaviour (a SweepyExtraModes
+# component): "Mode: Standard / Sweeper / Mop" (sweep and mop, only sweep, only mop), with
+# "Patrol: Roaming / Cleaning" while it sweeps, "Allow / Forbid Open Doors" and "Allow /
+# Forbid Navigate Platforms". Its own nav grid and a door transition layer let it pass doors
+# and walk on fake floors (platforms) when allowed, and its sweep and dock-return states
+# follow the chosen modes.
+# How a player reaches it: select a Sweepy, its user menu buttons.
+# What changes: where a Sweepy goes and what it cleans.
+#
+# setup spawns a Sweepy in the dug-out corridor west of the printing pod. Selected, it shows
+# the mod's buttons; Allow Open Doors turns into Forbid Open Doors, and Mode: Standard into
+# Mode: Sweeper, with the patrol button beside it.
+from: early-base
+mods: [2837727153]
+setup:
+  - driver: {setup.call: {type: Scenario, method: SpawnPrefab, args: [131124, 0, 0, SweepBot, Creatures]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+steps:
+  - run: {seconds: 1}
+  - driver: {camera.set: {cell: [110, 207], ortho: 8}}
+  - click_world: {cell: [108, 206], select: SweepBot}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<SweepyTweaks.SweepyExtraModes>.SweepySweepFlags": "== 'Standard'"
+      "selected:GetComponent<Navigator>.NavGridName": SweepyTweaksNavGrid
+  - ui_dump: {name: menu, root: "**/UserMenuScreen"}
+  - click: {text: "Allow Open Doors", under: "**/UserMenuScreen"}
+  - expect_state:
+      "selected:GetComponent<SweepyTweaks.SweepyExtraModes>.SweepySweepFlags": "== 'Standard, OpenDoors'"
+  - click: {text: "Mode: Standard", under: "**/UserMenuScreen"}
+  - expect_state:
+      "selected:GetComponent<SweepyTweaks.SweepyExtraModes>.SweepySweepFlags": "== 'Sweep, OpenDoors'"
+  - ui_wait: {path: "**/UserMenuScreen", cond: stable}
+  - expect_ui:
+      "**/UserMenuScreen/**": {any_text: "~Forbid Open Doors"}
+  - expect_ui:
+      "**/UserMenuScreen/**": {any_text: "~Mode: Sweeper"}
+  - expect_ui:
+      "**/UserMenuScreen/**": {any_text: "~Patrol: Roaming"}
+  - ui_dump: {name: menu-set, root: "**/UserMenuScreen"}

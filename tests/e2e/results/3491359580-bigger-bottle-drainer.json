@@ -1,0 +1,59 @@
+{
+ "spec": "mods/3491359580-bigger-bottle-drainer.yaml",
+ "mods": [
+  "3491359580"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Bottle Drainer built from steel holds 1600 kg; its details screen as in the original",
+ "updated": "2026-10-24",
+ "commit": "e235451",
+ "mod_dlls": {
+  "3491359580": {
+   "BiggerBottleEmptierConduitLiquid.dll": "f8ec1a5f3e028b47cce0050c717cc6531df8d25d7e3d59389a9ea8a1eea2973b"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-114728-37561f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T12:03:26",
+    "lane": 14,
+    "signatures": 1
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-123819-18c5fa",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T13:11:40",
+    "lane": 14,
+    "reference_run": "20261024-114728-37561f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "details": 0.0
+    }
+   },
+   {
+    "run": "20261024-123819-18c5fa",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T13:11:59",
+    "lane": 15,
+    "reference_run": "20261024-114728-37561f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "details": 0.0
+    }
+   }
+  ]
+ }
+}

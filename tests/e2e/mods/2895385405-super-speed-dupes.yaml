@@ -1,0 +1,30 @@
+# Super Speed Dupes (2895385405), class P.
+#
+# What it does: a prefix on BipedTransitionLayer.BeginTransition replaces the game's speed
+# rules for Duplicants' moves: every transition but an idle stroll runs at speed 100 (cells
+# per second), its animation sped up a hundredfold, so Duplicants cross the map almost at
+# once; idle strolling keeps the base speed, without the athletics bonus.
+# How a player reaches it: Duplicants moving anywhere.
+# What changes: Duplicants arrive at once.
+#
+# setup selects the third Duplicant, standing by the printing pod. Its Move To button is
+# pressed and the far west end of the dug-out corridor (109, 206), some 18 cells away, is
+# clicked. In 1.5 game seconds it has arrived (its move-to monitor is back to satisfied),
+# where at the game's speed of a few cells a second it would still be on its way.
+from: early-base
+mods: [2895385405]
+setup:
+  - driver: {setup.call: {target: "SelectTool.Instance", method: Select, args: [{"$": "Components.LiveMinionIdentities.Items[2]"}]}}
+steps:
+  - driver: {camera.set: {cell: [116, 208], ortho: 12}}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "Components.LiveMinionIdentities.Items[2].transform.position.x": "> 125"
+  - click: {text: "Move To", under: "**/UserMenuScreen"}
+  - click_world: {cell: [109, 206]}
+  - expect_state:
+      "Components.LiveMinionIdentities.Items[2].GetComponent<StateMachineController>.GetSMI(\"MoveToLocationMonitor+Instance\").GetCurrentState().name": root.moving
+      "Components.LiveMinionIdentities.Items[2].GetComponent<StateMachineController>.GetSMI(\"MoveToLocationMonitor+Instance\").targetCell": 131125
+  - run: {seconds: 1.5}
+  - expect_state:
+      "Components.LiveMinionIdentities.Items[2].GetComponent<StateMachineController>.GetSMI(\"MoveToLocationMonitor+Instance\").GetCurrentState().name": root.satisfied

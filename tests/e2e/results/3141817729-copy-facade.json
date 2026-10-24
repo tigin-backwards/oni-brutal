@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3141817729-copy-facade.yaml",
+ "mods": [
+  "3141817729"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "copy settings from a Flower Pot with the Retro Bold blueprint, clicked onto a plain one, give it that blueprint",
+ "updated": "2026-10-24",
+ "commit": "e235451",
+ "mod_dlls": {
+  "3141817729": {
+   "copyfacade.dll": "fe4f420208cccb6edf2f6f4232d591bd5d0e3edfbb6ae479210dfe64eb0ecaca"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-112336-f68baf",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T11:26:49",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-123819-18c5fa",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T12:45:52",
+    "lane": 15,
+    "reference_run": "20261024-112336-f68baf",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-123819-18c5fa",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T12:46:47",
+    "lane": 15,
+    "reference_run": "20261024-112336-f68baf",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

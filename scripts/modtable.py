@@ -131,6 +131,8 @@ unplayed = {
     '1828719932': 'not played: it supports the base game only (`supportedContent: VANILLA_ID`; it patches the base game\'s starmap destinations), and every spec fixture is a Spaced Out colony',
     '1886699455': 'not played: it supports the base game only (`supportedContent: VANILLA_ID`), and every spec fixture is a Spaced Out colony',
     '2995333290': 'not played: hairstyles and Duplicant personalities for Dupery, no code of its own; it does nothing without that mod',
+    # Batch 21.
+    '3385429972': 'not played: bionic Duplicant personalities for Dupery Fixed, no code of its own; it does nothing without that mod',
 }
 broken = {
     '1715248368': 'broken upstream: patches `Deconstructable.TriggerDestroy`, which now has two overloads',
@@ -200,6 +202,10 @@ broken.update({
     '3036286512': 'broken upstream: its DLL references PLib 4.8.1 but ships without it, so its `OnLoad` (`PUtil.InitLibrary`) throws a FileNotFoundException, its building fails to register (NullReferenceException, its anim missing), and the error dialog quits the game before the colony loads (spec tests/e2e/mods/3036286512-gas-liquefaction-machine.yaml)',
     '3425252325': 'broken upstream: its DLL references PLib 4.16 but ships without it, so its types fail to load (FileNotFoundException), `Assets.OnPrefabInit` stops on a ReflectionTypeLoadException and the game quits before OniMcp starts; it loads only beside another mod that ships PLib (spec tests/e2e/mods/3425252325-auto-drop-gas-bottler.yaml)',
     '1869090131': 'broken upstream: Mono cannot set up its `DestructibleWorkable` type ("VTable setup of type DestructibleFeatures.DestructibleWorkable failed": `ISidescreenButtonControl` gained members, and it overrides `OnCompleteWork(Worker)`), so a spawned geyser gets no workable and no DESTROY button (spec tests/e2e/mods/1869090131-destructible-features.yaml)',
+})
+# Found by the e2e specs of batch 21: the spec fails the same way in the original.
+broken.update({
+    '2215696830': 'broken upstream: its tile\'s `ItemPermeableTile.OnSpawn` calls `SimMessages.ClearCellProperties(int, byte)`, which the game no longer has, so every finished Item Permeable Tile throws a MissingMethodException and opens the crash report screen (spec tests/e2e/mods/2215696830-item-permeable-tiles.yaml)',
 })
 # Fails to load in the original only.
 original_only = {

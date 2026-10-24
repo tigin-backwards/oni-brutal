@@ -1,0 +1,40 @@
+# Double Ranges[Vanilla+DLC] (2018085913), class P.
+#
+# What it does: postfixes on the Robo-Miner's and the Auto-Sweeper's configs widen their
+# reach and cut their power: the Robo-Miner digs a 30x20 area (x -14, y 0; the game's is
+# 16x9) and the Auto-Sweeper picks up within 15 cells (the game's 4), each with its range
+# preview widened to match; both draw 1 W and overheat only at 1000 C.
+# How a player reaches it: building or selecting either machine.
+# What changes: one machine covers a much larger area.
+#
+# The prefabs carry the mod's ranges and wattage. setup grants Smart Storage, teaches two
+# Duplicants Mechatronics Engineering (an Auto-Sweeper needs it) and spawns steel; an
+# Auto-Sweeper is built in the dug-out corridor west of the printing pod and selected: its
+# 31x31 range preview is drawn around it.
+from: early-base
+mods: [2018085913]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"SmartStorage\")", method: Purchased}}
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[1].GetComponent<MinionResume>", method: GrantSkill, args: [Engineering1]}}
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[2].GetComponent<MinionResume>", method: GrantSkill, args: [Engineering1]}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Steel\").substance", method: SpawnResource, args: [[109.5, 206.5, -12], 300, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"SolidTransferArm\").GetComponent<SolidTransferArm>.pickupRange": 15
+      "Assets.GetPrefab(\"SolidTransferArm\").GetComponent<StationaryChoreRangeVisualizer>.width": 31
+      "Assets.GetPrefab(\"AutoMiner\").GetComponent<AutoMiner>.width": 30
+      "Assets.GetPrefab(\"AutoMiner\").GetComponent<AutoMiner>.height": 20
+      "Assets.GetPrefab(\"AutoMiner\").GetComponent<AutoMiner>.x": -14
+      "Assets.GetBuildingDef(\"SolidTransferArm\").EnergyConsumptionWhenActive": 1
+      "Assets.GetBuildingDef(\"AutoMiner\").EnergyConsumptionWhenActive": 1
+  - build: {prefab: SolidTransferArm, at: [113, 207], material: Steel}
+  - expect: {blueprints: {SolidTransferArm: 1}}
+  - run: {seconds: 1500, until: {buildings: {SolidTransferArm: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: SolidTransferArm}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Auto-Sweeper"}
+  - expect_state:
+      "selected:GetComponent<SolidTransferArm>.pickupRange": 15
+  - world_shot: {name: range, ortho: 20, at: [113, 207]}

@@ -1,0 +1,34 @@
+# Nanfu battery南孚电池 (2859530167), classes P, O.
+#
+# What it does: the Battery (Power menu) draws with the mod's own art (Nanfubattery_kanim, a
+# Nanfu dry cell) and holds the PLib option "Battery Capacity" (default 33333 J, where the
+# game's holds 10000 J) and leaks "Battery Loss" (default 0 J/s, the game's 1.67 J/s); its
+# options file is Controler.json beside the DLL (restart required).
+# How a player reaches it: the build menu (Power); the options on the Mods screen.
+# What changes: a bigger battery that keeps its charge, and how it looks.
+#
+# The options set a capacity of 50000 J and a loss of 0.5 J/s. setup spawns copper ore; a
+# Battery is built in the dug-out corridor west of the printing pod, unwired, and selected:
+# its capacity and leak are the options', and it plays the mod's animation.
+from: early-base
+mods: [2859530167]
+options:
+  "2859530167": {$file: Controler.json, c1: 50000.0, c2: 0.5}
+setup:
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Cuprite\").substance", method: SpawnResource, args: [[109.5, 206.5, -12], 300, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"Battery\").AnimFiles[0].name": Nanfubattery_kanim
+  - build: {prefab: Battery, at: [113, 206]}
+  - expect: {blueprints: {Battery: 1}}
+  - run: {seconds: 900, until: {buildings: {Battery: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [113, 207], ortho: 8}}
+  - click_world: {cell: [113, 206], select: Battery}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Battery"}
+  - expect_state:
+      "selected:GetComponent<Battery>.capacity": 50000
+      "selected:GetComponent<Battery>.joulesLostPerSecond": 0.5
+      "selected:GetComponent<KBatchedAnimController>.AnimFiles[0].name": Nanfubattery_kanim
+  - shot: {name: details, crop: "**/DetailsScreen", threshold: 0.04}

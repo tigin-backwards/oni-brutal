@@ -1,0 +1,36 @@
+# Storage Locker Pro (3569693244), classes S, P.
+#
+# What it does: every Storage Bin gets a StorageThresholdController with an activation-range
+# side screen, "Storage Refill Thresholds": "Stop Refilling" (default 100 %) and "Resume
+# Refilling" (default 0 %), in percent of the bin's user-set capacity. When the bin fills to
+# the stop level its delivery errands are cancelled (a prefix on FilteredStorage.
+# OnFilterChanged), and they come back only once it has emptied to the resume level. The
+# thresholds are copied with copy settings; Chinese strings ship beside it.
+# How a player reaches it: select a Storage Bin, its side screen.
+# What changes: bins refill in batches instead of topping up all the time.
+#
+# A Storage Bin is built in the dug-out corridor west of the printing pod and selected: its
+# threshold side screen shows the defaults, and 60 and 20 typed into its fields set them.
+from: early-base
+mods: [3569693244]
+steps:
+  - build: {prefab: StorageLocker, at: [113, 206]}
+  - expect: {blueprints: {StorageLocker: 1}}
+  - run: {seconds: 900, until: {buildings: {StorageLocker: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [113, 207], ortho: 8}}
+  - click_world: {cell: [113, 206], select: StorageLocker}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/ActivationRangeSideScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Storage Bin"}
+  - expect_state:
+      "selected:GetComponent<StorageThresholdLocker.StorageThresholdController>.ActivateValue": 100
+      "selected:GetComponent<StorageThresholdLocker.StorageThresholdController>.DeactivateValue": 0
+      "selected:GetComponent<StorageThresholdLocker.StorageThresholdController>.FetchingEnabled": true
+  - ui_dump: {name: range, root: "**/ActivationRangeSideScreen"}
+  - shot: {name: details, crop: "**/DetailsScreen", threshold: 0.04}
+  - type: {ui: "**/ActivationRangeSideScreen/**/ActivateInput", text: "60", enter: true, clear: true}
+  - type: {ui: "**/ActivationRangeSideScreen/**/DeactivateInput", text: "20", enter: true, clear: true}
+  - expect_state:
+      "selected:GetComponent<StorageThresholdLocker.StorageThresholdController>.ActivateValue": 60
+      "selected:GetComponent<StorageThresholdLocker.StorageThresholdController>.DeactivateValue": 20
+  - ui_dump: {name: range-set, root: "**/ActivationRangeSideScreen"}

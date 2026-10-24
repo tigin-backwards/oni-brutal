@@ -1,0 +1,39 @@
+# Piped Sweepy's Dock (2215668681), class B.
+#
+# What it does: adds the Piped Sweepy's Dock (Shipping menu, researched with Solid
+# Transport; 2x2 of refined metal, powered, 300 W, built by a Duplicant with the Mechatronics
+# Engineering skill): a Sweepy's Dock (SweepBotStation) that builds and charges its own
+# Sweepy, with a conveyor rail output (SolidConduitDispenser, always dispensing) that sends on
+# whatever the Sweepy brings back, where the game's dock keeps it for Duplicants to fetch.
+# How a player reaches it: the build menu (Shipping), after research.
+# What changes: a Sweepy whose sweepings go straight onto a rail.
+#
+# setup grants Solid Transport, teaches two Duplicants Mechatronics Engineering and spawns
+# steel. The dock is built in the dug-out corridor west of the printing pod and selected: it
+# has its rail output, and once a Duplicant has brought it a Sweepy's worth of steel it has
+# made its Sweepy.
+from: early-base
+mods: [2215668681]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"SolidTransport\")", method: Purchased}}
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[1].GetComponent<MinionResume>", method: GrantSkill, args: [Engineering1]}}
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[2].GetComponent<MinionResume>", method: GrantSkill, args: [Engineering1]}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Steel\").substance", method: SpawnResource, args: [[109.5, 206.5, -12], 300, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"PipedSweepyDock\").OutputConduitType": "== 'Solid'"
+  - build: {prefab: PipedSweepyDock, at: [113, 206], material: Steel}
+  - expect: {blueprints: {PipedSweepyDock: 1}}
+  - run: {seconds: 1500, until: {buildings: {PipedSweepyDock: 1}, pending_construction: 0}}
+  - run: {seconds: 300}
+  - driver: {camera.set: {cell: [113, 207], ortho: 8}}
+  - click_world: {cell: [113, 207], select: PipedSweepyDock}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  # The dock names itself after its Sweepy, as the game's does ("Sweepy's Dock").
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Dock"}
+  - expect_state:
+      "selected:GetComponent<KPrefabID>.PrefabTag.Name": PipedSweepyDock
+      "selected:GetComponent<SolidConduitDispenser>.alwaysDispense": true
+      "selected:GetComponent<SweepBotStation>": exists
+      "selected:GetComponent<SweepBotStation>.sweepBot.Get().GetComponent<KPrefabID>.PrefabTag.Name": SweepBot

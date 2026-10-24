@@ -1,0 +1,28 @@
+# Attribute Info Screen (3565090654), classes S, O.
+#
+# What it does: adds an "Attributes" button to the top-right management menu (before Skills)
+# that opens its own screen from an asset bundle (UnityAttributeInfoScreen, a KScreen): one
+# row per Duplicant, grouped by asteroid, with every attribute's value tinted from worst to
+# best, sortable by name, experience or any attribute (click a column header), a filter menu
+# (temporary effects, grouping), and a window that is dragged and resized, its position and
+# size kept in its own config file.
+# How a player reaches it: the Attributes button at the top right.
+# What changes: all Duplicants' attributes side by side.
+#
+# The button opens the screen on the three Duplicants of early-base; the Experience column's
+# header sorts them, and the close button shuts it.
+from: early-base
+mods: [3565090654]
+steps:
+  - click: {ui: "**/TopRightInfoPanelButtons/Toggle:ATTRIBUTES"}
+  - ui_wait: {path: "**/AttributeInfoScreen/ScrollArea/Content", cond: stable}
+  - expect_state:
+      "type:SkillsInfoScreen.UI.UnityAttributeInfoScreen::Instance.gameObject.activeInHierarchy": true
+  - ui_dump: {name: screen, root: "**/AttributeInfoScreen"}
+  - shot: {name: screen, crop: "**/AttributeInfoScreen", threshold: 0.04}
+  - click: {ui: "**/AttributeInfoScreen/Info/Filter_XP"}
+  - ui_wait: {path: "**/AttributeInfoScreen/ScrollArea/Content", cond: stable}
+  - ui_dump: {name: sorted, root: "**/AttributeInfoScreen/ScrollArea/Content"}
+  - click: {ui: "**/AttributeInfoScreen/TopBar/CloseButton"}
+  - expect_state:
+      "type:SkillsInfoScreen.UI.UnityAttributeInfoScreen::Instance.gameObject.activeInHierarchy": false

@@ -1,0 +1,73 @@
+{
+ "spec": "mods/2876432453-bottle-emptier-capacity.yaml",
+ "mods": [
+  "2876432453"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a built Bottle Emptier shows the capacity side screen at 200 kg (dumped, details shot), and 50000 typed into it sets 50 kg",
+ "updated": "2026-10-24",
+ "commit": "e235451",
+ "mod_dlls": {
+  "2876432453": {
+   "BottleEmptierExt.dll": "a2b412587982e8a404dd31cf62862680b15369f5d7b707531de9484815b4ac70"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-114728-37561f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T11:57:05",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-123819-18c5fa",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T13:08:52",
+    "lane": 15,
+    "reference_run": "20261024-114728-37561f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "capacity": {
+      "differences": 0
+     },
+     "capacity-set": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "details": 0.0
+    }
+   },
+   {
+    "run": "20261024-123819-18c5fa",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T13:08:53",
+    "lane": 14,
+    "reference_run": "20261024-114728-37561f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "capacity": {
+      "differences": 0
+     },
+     "capacity-set": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "details": 0.0
+    }
+   }
+  ]
+ }
+}

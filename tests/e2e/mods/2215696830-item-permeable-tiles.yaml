@@ -1,0 +1,46 @@
+# Item Permeable Tiles (2215696830), class B.
+#
+# What it does: adds the Item Permeable Tile (Base menu, researched with Sanitation Sciences;
+# a 1x1 mesh-like foundation tile of 200 kg of refined metal, drag-built) that Duplicants walk
+# on and buildings stand on, but that lets gas, liquid, light and decor through, and loose
+# items fall through it: a transpiler on GravityComponents.FixedUpdate and FallerComponents.
+# OnSolidChanged makes falling items treat its cells as open.
+# How a player reaches it: the build menu (Base), after research.
+# What changes: floors that debris drops through, to a sweeper or conveyor below.
+#
+# setup grants Sanitation Sciences and spawns steel. The tile is chosen in the build menu
+# (its product card is shot), then setup's own tile, built (BuildingDef.Build) at (110, 208)
+# in the dug-out corridor west of the printing pod, has 10 kg of diamond spawned on top of it
+# at (110, 209): when the game runs, the diamond falls through it to the corridor floor at
+# (110, 206).
+#
+# Broken upstream: the tile's ItemPermeableTile.OnSpawn calls SimMessages.ClearCellProperties
+# (int, byte), which the game no longer has, so every finished tile throws a
+# MissingMethodException and opens the crash report screen (the falling diamond shows the
+# transpiler itself still works).
+from: early-base
+mods: [2215696830]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"SanitationSciences\")", method: Purchased}}
+  - driver: {setup.call: {target: "Game.Instance", method: Trigger, args: [-107300940]}}
+  - driver: {setup.call: {target: "PlanScreen.Instance._researchedDefs", method: Clear}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"asquared31415_ItemPermeableTileConfig\")", method: Build, args: [132398, Neutral, null, [Steel], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Diamond\").substance", method: SpawnResource, args: [[110.5, 209.5, -12], 10, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Grid.Objects.get_Item(132398, 1).GetComponent<ItemPermeableTiles.ItemPermeableTile>": exists
+  # Its ItemPermeableTile.OnSpawn calls SimMessages.ClearCellProperties(int, byte), which the
+  # game no longer has: a finished tile opens the crash report screen.
+  - expect_ui:
+      "ErrorCanvas/CrashReportScreen*": {exists: false}
+  - run: {seconds: 5}
+  - expect_state:
+      "Grid.Solid.get_Item(132398)": true
+      "count:all:Pickupable::[*] if .GetComponent<PrimaryElement>.ElementID == Diamond and .cachedCell == 131126": 1
+  - driver: {camera.set: {cell: [110, 208], ortho: 8}}
+  - click: {ui: "**/PlanScreen/Toggle:Base"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/asquared31415_ItemPermeableTileConfig Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/asquared31415_ItemPermeableTileConfig Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
+  - shot: {name: product, crop: "**/ProductInfoScreen", threshold: 0.04}
+  - key: {code: Escape}

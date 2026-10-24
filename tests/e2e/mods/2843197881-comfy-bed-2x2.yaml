@@ -1,0 +1,40 @@
+# 2*2 comfy bed (2843197881), class P.
+#
+# What it does: a postfix on LuxuryBedConfig.CreateBuildingDef makes the Comfy Bed two cells
+# wide instead of four (2x2), takes half the material (Tier 2, 100 kg of plastic, where the
+# game's takes 200 kg) and draws it with the mod's own narrower art (cyans_luxurybed_kanim).
+# How a player reaches it: the build menu (Furniture), after Home Luxuries research.
+# What changes: a smaller, cheaper Comfy Bed.
+#
+# setup grants Home Luxuries (Luxury) and spawns plastic. A Comfy Bed is placed from the build
+# menu in the dug-out corridor west of the printing pod, at (113, 206), built and selected.
+from: early-base
+mods: [2843197881]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"Luxury\")", method: Purchased}}
+  - driver: {setup.call: {target: "Game.Instance", method: Trigger, args: [-107300940]}}
+  - driver: {setup.call: {target: "PlanScreen.Instance._researchedDefs", method: Clear}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Polypropylene\").substance", method: SpawnResource, args: [[109.5, 206.5, -12], 200, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"LuxuryBed\").WidthInCells": 2
+      "Assets.GetBuildingDef(\"LuxuryBed\").Mass[0]": 100
+      "Assets.GetBuildingDef(\"LuxuryBed\").AnimFiles[0].name": cyans_luxurybed_kanim
+  - run: {seconds: 5}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click: {ui: "**/PlanScreen/Toggle:Furniture"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/LuxuryBed Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/LuxuryBed Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
+  - shot: {name: product, crop: "**/ProductInfoScreen", threshold: 0.04}
+  - click_world: {cell: [113, 206]}
+  - key: {code: Escape}
+  - expect: {blueprints: {LuxuryBed: 1}}
+  - run: {seconds: 1500, until: {buildings: {LuxuryBed: 1}, pending_construction: 0}}
+  - click_world: {cell: [114, 207], select: LuxuryBed}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Comfy Bed"}
+  - expect_state:
+      "selected:GetComponent<Building>.Def.WidthInCells": 2
+      "selected:GetComponent<OccupyArea>.OccupiedCellsOffsets.Length": 4

@@ -1,0 +1,34 @@
+# [DLC SUPPORT] capture any animal (2221288330), class P.
+#
+# What it does: a prefix on EntityTemplates.CreateAndRegisterBaggedCreature sets
+# allow_mark_for_capture for every critter, so the ones the game never lets a player wrangle
+# (the Morb, "Glom", and the Beeta) get a Wrangle button and can be caught and carried like
+# any other.
+# How a player reaches it: select such a critter, its Wrangle button.
+# What changes: Morbs and Beetas can be wrangled.
+#
+# setup teaches two Duplicants Husbandry (Ranching1, through Farming1) and spawns a Morb in
+# the dug-out corridor west of the printing pod. The Morb is selected and its Wrangle button
+# pressed; a Duplicant wrangles it, and it lies bagged on the floor.
+from: early-base
+mods: [2221288330]
+setup:
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[1].GetComponent<MinionResume>", method: MasterSkill, args: [Farming1]}}
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[1].GetComponent<MinionResume>", method: MasterSkill, args: [Ranching1]}}
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[2].GetComponent<MinionResume>", method: MasterSkill, args: [Farming1]}}
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[2].GetComponent<MinionResume>", method: MasterSkill, args: [Ranching1]}}
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131124, 0, 0, \"Glom\", \"Creatures\")", method: SetActive, args: [true]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"Glom\").GetComponent<Capturable>.allowCapture": true
+      "Assets.GetPrefab(\"Bee\").GetComponent<Capturable>.allowCapture": true
+  - driver: {camera.set: {cell: [110, 207], ortho: 8}}
+  - click_world: {cell: [108, 206], select: Glom}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - click: {text: "Wrangle", under: "**/UserMenuScreen"}
+  - expect_state:
+      "selected:Capturable.IsMarkedForCapture": true
+  - key: {code: Escape}
+  - run: {seconds: 300}
+  - expect_state:
+      "count:all:Capturable::[*] if .IsMarkedForCapture == false and .GetComponent<KPrefabID>.HasTag(\"Bagged\") == true": 1

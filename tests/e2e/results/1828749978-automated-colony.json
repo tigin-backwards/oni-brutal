@@ -1,0 +1,60 @@
+{
+ "spec": "mods/1828749978-automated-colony.yaml",
+ "mods": [
+  "1828749978"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the retuned game buildings carry the mod's values; three cells of Background Ladder picked from the build menu (card shot), dragged and built are a ladder in the backwall layer",
+ "updated": "2026-10-24",
+ "commit": "e235451",
+ "mod_dlls": {
+  "1828749978": {
+   "BuildingExtension.dll": "4741320cdef7d4d4c7e21d37d1f86ecd02955e58440c9685209bc6b8d9b434cd",
+   "RainbowCommons.dll": "284e5ba2da33b556a8d8d5b02dc522eef1ae28f062fb6a100665c0a93151bca7"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-121236-bbba7d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T12:17:13",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-123819-18c5fa",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T13:13:02",
+    "lane": 14,
+    "reference_run": "20261024-121236-bbba7d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.007747
+    }
+   },
+   {
+    "run": "20261024-123819-18c5fa",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T13:13:25",
+    "lane": 15,
+    "reference_run": "20261024-121236-bbba7d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.007747
+    }
+   }
+  ]
+ }
+}

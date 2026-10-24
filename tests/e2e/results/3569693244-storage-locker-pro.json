@@ -1,0 +1,73 @@
+{
+ "spec": "mods/3569693244-storage-locker-pro.yaml",
+ "mods": [
+  "3569693244"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a built Storage Bin shows the refill-threshold side screen (dumped, details shot), and 60 and 20 typed into its fields set the thresholds",
+ "updated": "2026-10-24",
+ "commit": "e235451",
+ "mod_dlls": {
+  "3569693244": {
+   "StorageLocerProV5.dll": "76464fe3fe9047cd81000dcd276970acc4e1cc2e87f5bf24d83720e4d7804e7b"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-112336-f68baf",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T11:39:51",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-123819-18c5fa",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T12:52:51",
+    "lane": 15,
+    "reference_run": "20261024-112336-f68baf",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "range": {
+      "differences": 0
+     },
+     "range-set": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "details": 0.0
+    }
+   },
+   {
+    "run": "20261024-123819-18c5fa",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T12:54:05",
+    "lane": 15,
+    "reference_run": "20261024-112336-f68baf",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "range": {
+      "differences": 0
+     },
+     "range-set": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "details": 0.0
+    }
+   }
+  ]
+ }
+}

@@ -1,0 +1,23 @@
+# No Useless Notifications (2637907611), class P.
+#
+# What it does: a prefix on Notifier.Add drops every notification whose title contains
+# "report ready" (the end-of-cycle "Cycle N report ready") or "Attribute increase" (a
+# Duplicant's attribute level-up), so neither shows in the notification list.
+# How a player reaches it: Duplicants working (attribute level-ups), a cycle ending.
+# What changes: fewer messages in the top left.
+#
+# setup hands Nikola 7000 s of Digging through the game's own call for work done
+# (AttributeLevels.AddExperience): his Digging rises from level 3 to 4, the game's level-up
+# posts its "Attribute increase" notification, and the mod drops it. The cycle report needs a
+# whole cycle and is left out.
+from: early-base
+mods: [2637907611]
+setup:
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[1].GetComponent<AttributeLevels>", method: AddExperience, args: [Digging, 7000, 1]}}
+steps:
+  - expect_state:
+      "Components.LiveMinionIdentities.Items[1].GetComponent<AttributeLevels>.GetAttributeLevel(\"Digging\").level": 4
+  - run: {seconds: 2}
+  - expect_state:
+      "count:NotificationManager.Instance.notifications[*] if .titleText == 'Attribute increase'": 0
+      "count:NotificationManager.Instance.pendingNotifications[*] if .titleText == 'Attribute increase'": 0

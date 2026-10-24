@@ -1,0 +1,44 @@
+# Automated Colony (1828749978), classes B, P.
+#
+# What it does: a pack of buildings (its RainbowCommons library adds them to the build menu
+# and to research): automatic refineries, rock crusher, kiln, composter and moppers that need
+# no Duplicant, laser and super miners, wide-area and super transfer arms, steel travel tubes,
+# super wires, a slime grower, a small pressure door, high-capacity storage and the
+# Background Ladder (Base menu, Home Luxuries: a plastic ladder in the backwall layer, so it
+# can stand behind other buildings, climbed 1.2 times as fast). It also retunes game
+# buildings: the large Power Transformer passes 2000 W, filters draw 10 W, the Smart Storage
+# Bin 1 W, and suit docks, checkpoints and the Tepid Reservoir no longer flood.
+# How a player reaches it: the build menu, after research.
+# What changes: automation without Duplicants, and the tuned buildings.
+#
+# The retuned game buildings are checked on their defs. setup grants Home Luxuries and spawns
+# plastic; three cells of Background Ladder are dragged from the build menu in the dug-out
+# corridor west of the printing pod and built: they are a ladder Duplicants can climb.
+from: early-base
+mods: [1828749978]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"Luxury\")", method: Purchased}}
+  - driver: {setup.call: {target: "Game.Instance", method: Trigger, args: [-107300940]}}
+  - driver: {setup.call: {target: "PlanScreen.Instance._researchedDefs", method: Clear}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Polypropylene\").substance", method: SpawnResource, args: [[114.5, 206.5, -12], 200, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"PowerTransformer\").GeneratorWattageRating": 2000
+      "Assets.GetBuildingDef(\"StorageLockerSmart\").EnergyConsumptionWhenActive": 1
+      "Assets.GetBuildingDef(\"GasFilter\").EnergyConsumptionWhenActive": 10
+      "Assets.GetBuildingDef(\"SuitLocker\").Floodable": false
+      "Assets.GetBuildingDef(\"BackgroundLadder\").ObjectLayer": "== 'Backwall'"
+  - run: {seconds: 5}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click: {ui: "**/PlanScreen/Toggle:Base"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/BackgroundLadder Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/BackgroundLadder Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
+  - shot: {name: product, crop: "**/ProductInfoScreen", threshold: 0.04}
+  - drag: {from: [113, 207], to: [113, 209]}
+  - key: {code: Escape}
+  - expect: {blueprints: {BackgroundLadder: 3}}
+  - run: {seconds: 1500, until: {buildings: {BackgroundLadder: 3}, pending_construction: 0}}
+  - expect_state:
+      "Grid.HasLadder.get_Item(132401)": true
+      "Grid.Objects.get_Item(132401, 2).GetComponent<Ladder>.upwardsMovementSpeedMultiplier": 1.2

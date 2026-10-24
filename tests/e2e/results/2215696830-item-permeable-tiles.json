@@ -1,0 +1,33 @@
+{
+ "spec": "mods/2215696830-item-permeable-tiles.yaml",
+ "mods": [
+  "2215696830"
+ ],
+ "verdict": "pending",
+ "why": "the spec fails in the original: a broken spec, or a mod broken upstream",
+ "findings": [],
+ "note": "",
+ "updated": "2026-10-24",
+ "commit": "e235451",
+ "mod_dlls": {
+  "2215696830": {
+   "ItemPermeableTiles.dll": "70c52c373e9d78e8b49736d0ca48b7b50f64ace92f910587f20889900a70854d"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-121236-bbba7d",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-24T12:20:58",
+    "lane": 14,
+    "reasons": [
+     "step 2: ErrorCanvas/CrashReportScreen*: exists is True, wanted False"
+    ],
+    "signatures": 2
+   }
+  ],
+  "ours": []
+ }
+}

@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2895385405-super-speed-dupes.yaml",
+ "mods": [
+  "2895385405"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Duplicant sent with Move To some 18 cells away has arrived within 1.5 game seconds",
+ "updated": "2026-10-24",
+ "commit": "e235451",
+ "mod_dlls": {
+  "2895385405": {
+   "SuperSpeedDupes.dll": "190a5525e43e431f7910df46e65ad291def86fae61da3753b18ace4d8314ccf8"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-114728-37561f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T11:50:34",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-123819-18c5fa",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T13:03:31",
+    "lane": 15,
+    "reference_run": "20261024-114728-37561f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-123819-18c5fa",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T13:03:33",
+    "lane": 14,
+    "reference_run": "20261024-114728-37561f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

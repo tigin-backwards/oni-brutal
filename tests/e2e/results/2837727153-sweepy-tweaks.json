@@ -1,0 +1,69 @@
+{
+ "spec": "mods/2837727153-sweepy-tweaks.yaml",
+ "mods": [
+  "2837727153"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Sweepy's user menu shows the mod's buttons (dumped); Allow Open Doors and Mode: Standard switch its flags and the menu to Forbid Open Doors, Mode: Sweeper and Patrol: Roaming",
+ "updated": "2026-10-24",
+ "commit": "e235451",
+ "mod_dlls": {
+  "2837727153": {
+   "SweepyTweaks.dll": "37f73789e50463d03344b6de866451713e0d3b1322ccf2f24c8e8b0a4f19954e"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-114728-37561f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T11:50:35",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-123819-18c5fa",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T13:04:32",
+    "lane": 15,
+    "reference_run": "20261024-114728-37561f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "menu": {
+      "differences": 0
+     },
+     "menu-set": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261024-123819-18c5fa",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T13:04:35",
+    "lane": 14,
+    "reference_run": "20261024-114728-37561f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "menu": {
+      "differences": 0
+     },
+     "menu-set": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

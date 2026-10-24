@@ -1,0 +1,59 @@
+{
+ "spec": "mods/2018085913-double-ranges.yaml",
+ "mods": [
+  "2018085913"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Robo-Miner and Auto-Sweeper prefabs carry the doubled ranges and 1 W; a built Auto-Sweeper reaches 15 cells and its range preview is drawn (world shot)",
+ "updated": "2026-10-24",
+ "commit": "e235451",
+ "mod_dlls": {
+  "2018085913": {
+   "DoubelArmRange.dll": "832ad356489c7021e1e16fb0d867515ca3507f281248b6dcc1551ced7b4cbb2a"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-122931-5425c3",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T12:35:59",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-123819-18c5fa",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T13:18:50",
+    "lane": 14,
+    "reference_run": "20261024-122931-5425c3",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "range": 0.005882
+    }
+   },
+   {
+    "run": "20261024-123819-18c5fa",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T13:19:31",
+    "lane": 15,
+    "reference_run": "20261024-122931-5425c3",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "range": 0.00585
+    }
+   }
+  ]
+ }
+}

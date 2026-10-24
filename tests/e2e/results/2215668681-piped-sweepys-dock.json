@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2215668681-piped-sweepys-dock.yaml",
+ "mods": [
+  "2215668681"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Piped Sweepy's Dock built by Mechatronics Engineers has its rail output and makes its Sweepy from delivered steel",
+ "updated": "2026-10-24",
+ "commit": "e235451",
+ "mod_dlls": {
+  "2215668681": {
+   "PipedSweepyDock.dll": "53155ef1e3fa9bd83db1cfff9834cac1725921a8b0870825cd418c4f383f5694"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-121236-bbba7d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T12:17:14",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-123819-18c5fa",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T13:14:28",
+    "lane": 14,
+    "reference_run": "20261024-121236-bbba7d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-123819-18c5fa",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T13:14:57",
+    "lane": 15,
+    "reference_run": "20261024-121236-bbba7d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

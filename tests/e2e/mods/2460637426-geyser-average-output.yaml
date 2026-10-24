@@ -1,0 +1,33 @@
+# Geyser Average Output Tooltip [Base + Spaced Out] (2460637426), class P.
+#
+# What it does: a postfix on Geyser.GetDescriptors adds two lines to a geyser's descriptors
+# (its info panel): "Eruption Average", its emission rate averaged over an eruption cycle,
+# and "Total Average", averaged over its dormancy cycle as well, in g/s, or in kg/s with two
+# decimals above 1000 g/s. Until the geyser has been analysed both read "(Requires
+# Analysis)".
+# How a player reaches it: select a geyser.
+# What changes: a geyser's long-run output at a glance.
+#
+# early-base has no geyser in sight: setup places a cool steam vent in the dug-out corridor
+# west of the printing pod and marks it analysed (Studyable.OnCompleteWork, as a finished
+# analysis does). Selected, it shows both averages. The figures follow the vent's random
+# configuration: they are checked by form and masked in the dump.
+from: early-base
+mods: [2460637426]
+setup:
+  - driver: {setup.call: {type: Scenario, method: SpawnPrefab, args: [0, 112, 206, GeyserGeneric_steam, BuildingBack]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "last:GetComponent<Studyable>", method: OnCompleteWork, args: [null]}}
+  - driver: {setup.call: {target: "last:GetComponent<Studyable>", method: Refresh}}
+steps:
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 207]}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<Geyser>": exists
+      "selected:GetComponent<Studyable>.Studied": true
+  - expect_ui:
+      "**/SimpleInfoScreen/**/Descriptors/DescLabel": {any_text: "/Eruption Average: \\d+(\\.\\d\\d)? K?g\\/s/"}
+  - expect_ui:
+      "**/SimpleInfoScreen/**/Descriptors/DescLabel": {any_text: "/Total Average: \\d+(\\.\\d\\d)? K?g\\/s/"}
+  - ui_dump: {name: descriptors, root: "**/SimpleInfoScreen/**/ContentStatus/Descriptors", mask_text: ['[\d.,]+']}

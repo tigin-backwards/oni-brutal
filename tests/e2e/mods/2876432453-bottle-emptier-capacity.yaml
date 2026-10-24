@@ -1,0 +1,33 @@
+# 取水大爷的量杯-改 (2876432453), classes S, P.
+#
+# What it does: the Bottle Emptier becomes a BottleEmptier2, an IUserControlledCapacity: it
+# gets the capacity side screen (a slider and field, up to its 200 kg storage, in the game's
+# small mass unit), and its delivery errand (a prefix on BottleEmptier.StatesInstance.
+# CreateChore) fetches only up to the set amount of the liquids its filter allows; copy
+# settings copy the amount.
+# How a player reaches it: select a Bottle Emptier, its side screen.
+# What changes: a player chooses how much liquid an emptier gathers at a time.
+#
+# A Bottle Emptier is built in the dug-out corridor west of the printing pod and selected:
+# its capacity side screen shows, at its full 200 kg; 50000 typed into its field sets it to
+# 50 kg.
+from: early-base
+mods: [2876432453]
+steps:
+  - build: {prefab: BottleEmptier, at: [113, 206]}
+  - expect: {blueprints: {BottleEmptier: 1}}
+  - run: {seconds: 900, until: {buildings: {BottleEmptier: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [113, 207], ortho: 8}}
+  - click_world: {cell: [113, 206], select: BottleEmptier}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/CapacityControlSideScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Bottle Emptier"}
+  - expect_state:
+      "selected:GetComponent<ClassLibBottleEmptierExtrary1.BottleEmptier2>.UserMaxCapacity": 200000
+      "selected:GetComponent<ClassLibBottleEmptierExtrary1.BottleEmptier2>.MaxCapacity": 200000
+  - ui_dump: {name: capacity, root: "**/CapacityControlSideScreen"}
+  - shot: {name: details, crop: "**/DetailsScreen", threshold: 0.04}
+  - type: {ui: "**/CapacityControlSideScreen/**/*Input*", text: "50000", enter: true, clear: true}
+  - expect_state:
+      "selected:GetComponent<ClassLibBottleEmptierExtrary1.BottleEmptier2>.UserMaxCapacity": 50000
+  - ui_dump: {name: capacity-set, root: "**/CapacityControlSideScreen"}

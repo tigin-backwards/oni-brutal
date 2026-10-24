@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2915844170-critter-shedding.yaml",
+ "mods": [
+  "2915844170"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "in a stable walled off in the corridor, a rancher grooms a Sage Hatch at a Grooming Station and a Fur Ball (Reed Fiber with the hatch's colour) drops",
+ "updated": "2026-10-24",
+ "commit": "e235451",
+ "mod_dlls": {
+  "2915844170": {
+   "CrittersShedFurOnBrush.dll": "42a41bb5c1adb54abd65d22ceff7e2511bc92400f1a0c80b01046ba98c7baa11"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-114728-37561f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T11:53:33",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-123819-18c5fa",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T13:05:28",
+    "lane": 15,
+    "reference_run": "20261024-114728-37561f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-123819-18c5fa",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T13:05:31",
+    "lane": 14,
+    "reference_run": "20261024-114728-37561f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

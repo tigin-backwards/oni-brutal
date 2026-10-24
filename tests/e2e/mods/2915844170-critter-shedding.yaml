@@ -1,0 +1,41 @@
+# Critter Shedding (2915844170), class P (with PLib options).
+#
+# What it does: the Grooming Station's ranch-complete callback is replaced: besides the
+# game's "Groomed" effect (lengthened by the rancher's skill), a fluffy critter drops a "Fur
+# Ball", a Reed Fiber item tinted in the critter's colour (a FloofColourHolder on the item),
+# its amount by the critter's shed rate (a Sage Hatch 0.1 a groom, a Drecko 1/7, Pufts,
+# Cuddle Pips, Plug Slugs, Floxes, Bammoths and Husky Moos too) and the rancher's skill. PLib
+# options turn each critter off.
+# How a player reaches it: a Grooming Station in a Stable, a rancher and a fluffy critter.
+# What changes: grooming yields reed fiber.
+#
+# setup makes the west half of the dug-out corridor a Stable (BuildingDef.Build): two
+# sandstone tiles at (116, 209..210) and a Door at (116, 207) wall it off from the printing
+# pod's side, and a Grooming Station stands at (112, 206). Two Duplicants learn Husbandry
+# (Ranching1, through Farming1) and a Sage Hatch is spawned at (108, 206). When the game runs
+# a Duplicant grooms the hatch, and a Fur Ball of its colour lies in the stable.
+from: early-base
+mods: [2915844170]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Tile\")", method: Build, args: [133040, Neutral, null, [SandStone], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Tile\")", method: Build, args: [133676, Neutral, null, [SandStone], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Door\")", method: Build, args: [131768, Neutral, null, [Cuprite], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"RanchStation\")", method: Build, args: [131128, Neutral, null, [Cuprite], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[1].GetComponent<MinionResume>", method: MasterSkill, args: [Farming1]}}
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[1].GetComponent<MinionResume>", method: MasterSkill, args: [Ranching1]}}
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[2].GetComponent<MinionResume>", method: MasterSkill, args: [Farming1]}}
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[2].GetComponent<MinionResume>", method: MasterSkill, args: [Ranching1]}}
+  - driver: {setup.call: {type: Scenario, method: SpawnPrefab, args: [131124, 0, 0, HatchVeggie, Creatures]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+steps:
+  - expect_state:
+      "all:CrittersShedFurOnBrush.FloofColourHolder::Length": 0
+  - run: {seconds: 10}
+  - expect_state:
+      "Game.Instance.roomProber.GetCavityForCell(131126).room.roomType.Id": CreaturePen
+  - run: {seconds: 400}
+  - expect_state:
+      "all:CrittersShedFurOnBrush.FloofColourHolder::Length": ">= 1"
+      "all:CrittersShedFurOnBrush.FloofColourHolder::[0].CritterId": HatchVeggie
+      "all:CrittersShedFurOnBrush.FloofColourHolder::[0].GetComponent<KPrefabID>.PrefabTag.Name": BasicFabric
+      "all:CrittersShedFurOnBrush.FloofColourHolder::[0].GetComponent<KSelectable>.GetName()": Fur Ball

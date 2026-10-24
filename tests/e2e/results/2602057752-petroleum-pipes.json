@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2602057752-petroleum-pipes.yaml",
+ "mods": [
+  "2602057752"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "5 kg of crude oil at 430 C in a liquid pipe turns into 5 kg of petroleum, and the pipe takes no damage",
+ "updated": "2026-10-24",
+ "commit": "e235451",
+ "mod_dlls": {
+  "2602057752": {
+   "PetroleumDoesntBreakPipes.dll": "66894f047fd32cb9d6c8cce52082f42f775a4f1a7d62f1ad5ca90736676a0b3e"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-122931-5425c3",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T12:29:31",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-123819-18c5fa",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T13:17:33",
+    "lane": 14,
+    "reference_run": "20261024-122931-5425c3",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-123819-18c5fa",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T13:18:20",
+    "lane": 15,
+    "reference_run": "20261024-122931-5425c3",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

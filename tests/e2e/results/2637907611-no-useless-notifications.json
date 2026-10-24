@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2637907611-no-useless-notifications.yaml",
+ "mods": [
+  "2637907611"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Duplicant's Digging level-up (through AttributeLevels.AddExperience) posts no \"Attribute increase\" notification; the cycle report is not reached",
+ "updated": "2026-10-24",
+ "commit": "e235451",
+ "mod_dlls": {
+  "2637907611": {
+   "noUselessNotifications.dll": "28e61bc9c26faf225a0b6908b953ddf7c4f6ef71154b5f56ed138acb96d7db3b"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-112336-f68baf",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T11:23:36",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-123819-18c5fa",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T12:38:19",
+    "lane": 14,
+    "reference_run": "20261024-112336-f68baf",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-123819-18c5fa",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T12:38:20",
+    "lane": 15,
+    "reference_run": "20261024-112336-f68baf",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

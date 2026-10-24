@@ -1,0 +1,33 @@
+# Copy Facade immediately (3141817729), class P.
+#
+# What it does: a postfix on BuildingFacade.OnSpawn gives every building that has facades
+# (blueprints) a Copy Settings button if it had none, and makes copied settings apply the
+# source building's facade to the target at once, so a player can paint a row of buildings
+# with one blueprint through the copy settings tool.
+# How a player reaches it: select a building with a blueprint, its Copy Settings button, then
+# click or drag over buildings of the same kind.
+# What changes: the targets take the source's look.
+#
+# setup builds two Flower Pots (BuildingDef.Build) in the dug-out corridor west of the
+# printing pod: one at (113, 206) with the Retro Bold blueprint, one at (115, 206) with the
+# default look. The first is selected, its Copy Settings button pressed, and the second
+# clicked: it takes the Retro Bold blueprint.
+from: early-base
+mods: [3141817729]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"FlowerVase\")", method: Build, args: [131129, Neutral, null, [SandStone], 300.0, FlowerVase_retro_red]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"FlowerVase\")", method: Build, args: [131131, Neutral, null, [SandStone], 300.0, DEFAULT_FACADE]}}
+steps:
+  - run: {seconds: 1}
+  - expect_state:
+      "Grid.Objects.get_Item(131129, 1).GetComponent<BuildingFacade>.CurrentFacade": FlowerVase_retro_red
+      "Grid.Objects.get_Item(131131, 1).GetComponent<BuildingFacade>.CurrentFacade": "!= 'FlowerVase_retro_red'"
+      "Grid.Objects.get_Item(131131, 1).GetComponent<CopyBuildingSettings>": exists
+  - driver: {camera.set: {cell: [114, 207], ortho: 6}}
+  - click_world: {cell: [113, 206], select: FlowerVase}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - click: {text: "Copy Settings", under: "**/UserMenuScreen"}
+  - click_world: {cell: [115, 206]}
+  - key: {code: Escape}
+  - expect_state:
+      "Grid.Objects.get_Item(131131, 1).GetComponent<BuildingFacade>.CurrentFacade": FlowerVase_retro_red

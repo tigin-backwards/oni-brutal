@@ -1,0 +1,59 @@
+{
+ "spec": "mods/2843197881-comfy-bed-2x2.yaml",
+ "mods": [
+  "2843197881"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Comfy Bed is 2 cells wide and 100 kg in the build menu (card shot), and one is placed from it and built in 2x2",
+ "updated": "2026-10-24",
+ "commit": "e235451",
+ "mod_dlls": {
+  "2843197881": {
+   "SmallerLuxuryBed.dll": "962a4a1c4f2ff37195747304cf5f88d37d59bff9475b580c7e7fca43ffe5e7ff"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-112336-f68baf",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T11:39:24",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-123819-18c5fa",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T12:50:16",
+    "lane": 15,
+    "reference_run": "20261024-112336-f68baf",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.004983
+    }
+   },
+   {
+    "run": "20261024-123819-18c5fa",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T12:51:34",
+    "lane": 15,
+    "reference_run": "20261024-112336-f68baf",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.004983
+    }
+   }
+  ]
+ }
+}

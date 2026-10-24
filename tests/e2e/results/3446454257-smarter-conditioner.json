@@ -1,0 +1,67 @@
+{
+ "spec": "mods/3446454257-smarter-conditioner.yaml",
+ "mods": [
+  "3446454257"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a built Thermo Regulator's side screen reads Target Temperature, 20 C (dumped, details shot); 5 typed into it becomes the regulator's 278.15 K target",
+ "updated": "2026-10-24",
+ "commit": "e235451",
+ "mod_dlls": {
+  "3446454257": {
+   "SmarterConditioner.dll": "05e741b57bb75d36b4b8522fcafb425c1131ffe0e8c6fc16fa817942c9580197"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-114728-37561f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T11:59:15",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-123819-18c5fa",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T13:10:06",
+    "lane": 14,
+    "reference_run": "20261024-114728-37561f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "side-screen": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "details": 4.1e-05
+    }
+   },
+   {
+    "run": "20261024-123819-18c5fa",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T13:10:05",
+    "lane": 15,
+    "reference_run": "20261024-114728-37561f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "side-screen": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "details": 4.1e-05
+    }
+   }
+  ]
+ }
+}

@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine.EventSystems;
 
 namespace UnityEngine.UI
@@ -303,6 +304,10 @@ namespace UnityEngine.UI
         [NonSerialized] RectTransform container;
         [NonSerialized] Vector2 grab;
         [NonSerialized] bool pressedOnTrack;
+        /// A left press is down on the scrollbar and has not become a drag.
+        [NonSerialized] bool pressHeld;
+        [NonSerialized] bool everPressed;
+        [NonSerialized] Coroutine pressRepeat;
         DrivenRectTransformTracker tracker;
 
         protected Scrollbar()
@@ -380,6 +385,7 @@ namespace UnityEngine.UI
         protected override void OnDisable()
         {
             tracker.Clear();
+            pressHeld = false;
             base.OnDisable();
         }
 
@@ -419,7 +425,10 @@ namespace UnityEngine.UI
             var min = Vector2.zero;
             var max = Vector2.one;
             int a = (int)axis;
-            float start = Mathf.Clamp01(value) * (1f - size);
+            // value - value * size, in floats, as measured (value * (1 - size) can differ in the
+            // last bit).
+            float clamped = Mathf.Clamp01(value);
+            float start = clamped - clamped * size;
             if (reverseValue)
             {
                 min[a] = 1f - start - size;
@@ -467,6 +476,7 @@ namespace UnityEngine.UI
         /// press on the track it drags the handle by its centre.
         public virtual void OnBeginDrag(PointerEventData eventData)
         {
+            if (eventData.button == PointerEventData.InputButton.Left) pressHeld = false;
             if (!MayDrag(eventData) || container == null) return;
             grab = Vector2.zero;
             if (pressedOnTrack) return;
@@ -482,26 +492,50 @@ namespace UnityEngine.UI
             if (container != null) UpdateDrag(eventData);
         }
 
-        /// A press on the track outside the handle centres the handle on the press point in that
-        /// frame. Holding the button changes nothing more until the pointer moves, when the drag
-        /// follows it; there is no repeat. A press on the handle changes nothing.
+        /// A press holds its point until the release or a drag: at once, and again at the end of
+        /// every frame, a press point outside the handle centres the handle on it. A press on the
+        /// track therefore centres the handle in that frame; one on the handle changes nothing
+        /// until something else moves the handle off the point.
         public override void OnPointerDown(PointerEventData eventData)
         {
             if (!MayDrag(eventData)) return;
             base.OnPointerDown(eventData);
-            pressedOnTrack = false;
-            if (container == null) return;
             var at = eventData.pointerPressRaycast.screenPosition;
-            if (RectTransformUtility.RectangleContainsScreenPoint(m_HandleRect, at, eventData.enterEventCamera)) return;
-            pressedOnTrack = true;
+            pressedOnTrack = container != null && !RectTransformUtility.RectangleContainsScreenPoint(m_HandleRect, at, eventData.enterEventCamera);
             grab = Vector2.zero;
-            if (ValueAt(at, eventData.pressEventCamera, Vector2.zero, out var v)) Set(v);
+            pressHeld = true;
+            everPressed = true;
+            if (pressRepeat != null) StopCoroutine(pressRepeat);
+            pressRepeat = StartCoroutine(ClickRepeat(at, eventData.enterEventCamera));
         }
+
+        /// ClickRepeat(screenPosition, camera) with the point the event was pressed at
+        /// (`pointerPressRaycast.screenPosition`) and its enter camera.
+        protected IEnumerator ClickRepeat(PointerEventData eventData) => ClickRepeat(eventData.pointerPressRaycast.screenPosition, eventData.enterEventCamera);
+
+        /// While a press holds (from a press until its release or a drag), each step puts the
+        /// handle's centre on the point when the handle does not cover it, then waits for the end
+        /// of the frame. Once no press holds it ends; on a scrollbar never pressed, the first step
+        /// throws NullReferenceException instead.
+        protected IEnumerator ClickRepeat(Vector2 screenPosition, Camera camera)
+        {
+            while (pressHeld)
+            {
+                if (container != null && !RectTransformUtility.RectangleContainsScreenPoint(m_HandleRect, screenPosition, camera)
+                    && ValueAt(screenPosition, camera, Vector2.zero, out var v))
+                    Set(v);
+                yield return new WaitForEndOfFrame();
+            }
+            if (!everPressed) throw new NullReferenceException("routine is null");
+        }
+
+        /// Measured to have no effect of its own: a subclass may override it without calling it.
+        protected virtual void Update() { }
 
         public override void OnPointerUp(PointerEventData eventData)
         {
             base.OnPointerUp(eventData);
-            pressedOnTrack = false;
+            if (eventData.button == PointerEventData.InputButton.Left) pressHeld = false;
         }
 
         public override void OnMove(AxisEventData eventData)

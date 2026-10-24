@@ -178,4 +178,264 @@ namespace OniBrutal.Tests.UGui
             Assert.Single(run.Changed);
         }
     }
+
+    /// A subclass reaching the protected members a mod's subclass can.
+    public class ProbeScrollbar : Scrollbar
+    {
+        public bool SkipBaseUpdate;
+        public int Updates;
+        public System.Collections.IEnumerator FromEvent(PointerEventData eventData) => ClickRepeat(eventData);
+        public System.Collections.IEnumerator FromPoint(Vector2 screenPosition, Camera camera) => ClickRepeat(screenPosition, camera);
+        protected override void Update()
+        {
+            Updates++;
+            if (!SkipBaseUpdate) base.Update();
+        }
+    }
+
+    // The press while held, ClickRepeat and Update (docs/cleanroom/ugui.md, "Scrollbar presses on
+    // the track", rules 4 to 7), on the cases of the probe's clickrepeat parts: size 0.2, a 400 x 20
+    // track at the screen centre.
+    public class ScrollbarHeldPressTests : UGuiTest
+    {
+        static readonly Vector2 Centre = new(512f, 384f);
+        static Vector2 At(float f) => Centre + new Vector2((f - 0.5f) * 400f, 0f);
+        TestInput input;
+        ProbeScrollbar bar;
+        RectTransform track;
+        readonly List<float> changed = new();
+
+        void Setup(float value)
+        {
+            var esGo = new GameObject("EventSystem");
+            esGo.AddComponent<EventSystem>();
+            input = esGo.AddComponent<TestInput>();
+            esGo.AddComponent<StandaloneInputModule>().inputOverride = input;
+            var canvas = NewCanvas();
+            canvas.gameObject.AddComponent<GraphicRaycaster>();
+            track = NewRect("Track", canvas.transform, 400f, 20f, typeof(Image));
+            var area = NewRect("Sliding Area", track, 0f, 0f);
+            area.anchorMin = Vector2.zero;
+            area.anchorMax = Vector2.one;
+            area.sizeDelta = Vector2.zero;
+            var handle = NewRect("Handle", area, 0f, 0f, typeof(Image));
+            bar = track.gameObject.AddComponent<ProbeScrollbar>();
+            bar.handleRect = handle;
+            bar.size = 0.2f;
+            bar.value = value;
+            bar.onValueChanged.AddListener(v => changed.Add(v));
+            input.Mouse = new Vector2(-50f, -50f);
+            Frame();
+            Frame();
+        }
+
+        void Press(float at)
+        {
+            input.Mouse = At(at);
+            input.Down = input.Held = true;
+            Frame();
+            input.Down = false;
+        }
+
+        void Release()
+        {
+            input.Held = false;
+            input.Up = true;
+            Frame();
+            input.Up = false;
+        }
+
+        static void Near(float expected, float actual) => Assert.True(Mathf.Abs(expected - actual) < 1e-5f, $"{actual} is not {expected}");
+
+        static void Sequence(float[] expected, List<float> actual)
+        {
+            Assert.Equal(expected.Length, actual.Count);
+            for (int i = 0; i < expected.Length; i++) Near(expected[i], actual[i]);
+        }
+
+        [Fact]
+        public void AValueSetWhileHeldOnTheTrackIsPutBackAtTheEndOfTheFrame()
+        {
+            Setup(0f);
+            Press(0.75f);
+            Near(0.8125f, bar.value);
+            Frame();
+            bar.value = 0.2f;
+            Near(0.2f, bar.value);
+            Frame();
+            Near(0.8125f, bar.value);
+            Sequence(new[] { 0.8125f, 0.2f, 0.8125f }, changed);
+            Release();
+            bar.value = 0.2f;
+            Frame();
+            Near(0.2f, bar.value);
+        }
+
+        [Fact]
+        public void AValueSetWhileHeldOnTheHandleStaysWhileTheHandleCoversThePress()
+        {
+            Setup(0.5f);
+            Press(0.5f);
+            Frame();
+            bar.value = 0.45f;
+            Frame();
+            Frame();
+            Near(0.45f, bar.value);
+            bar.value = 0f;
+            Frame();
+            Near(0.5f, bar.value);
+            Sequence(new[] { 0.45f, 0f, 0.5f }, changed);
+        }
+
+        [Fact]
+        public void ClickRepeatOnANeverPressedScrollbarThrows()
+        {
+            Setup(0f);
+            foreach (var it in new[] { bar.FromPoint(At(0.9f), null), bar.FromPoint(At(0.1f), null),
+                         bar.FromEvent(new PointerEventData(null) { pointerPressRaycast = new RaycastResult { screenPosition = At(0.9f) } }) })
+            {
+                var e = Assert.Throws<System.NullReferenceException>(() => it.MoveNext());
+                Assert.Equal("routine is null", e.Message);
+            }
+            Assert.Equal(0f, bar.value);
+            Assert.Empty(changed);
+        }
+
+        [Fact]
+        public void ClickRepeatAppliesItsPointWhileAPressHoldsAndThePressPutsItsOwnBack()
+        {
+            Setup(0.5f);
+            Press(0.5f); // on the handle
+            var it = bar.FromPoint(At(0.9f), null);
+            for (int k = 0; k < 4; k++)
+            {
+                Assert.True(it.MoveNext());
+                Assert.IsType<WaitForEndOfFrame>(it.Current);
+                Near(1f, bar.value);
+                Frame();
+                Near(0.5f, bar.value);
+            }
+            Sequence(new[] { 1f, 0.5f, 1f, 0.5f, 1f, 0.5f, 1f, 0.5f }, changed);
+            Release();
+            Assert.False(it.MoveNext());
+            Near(0.5f, bar.value);
+        }
+
+        [Fact]
+        public void ClickRepeatAsACoroutineRunsAfterThePressAtTheEndOfTheFrame()
+        {
+            Setup(0.5f);
+            Press(0.5f);
+            bar.StartCoroutine(bar.FromPoint(At(0.9f), null));
+            Near(1f, bar.value);
+            for (int f = 0; f < 3; f++)
+            {
+                Frame();
+                Near(1f, bar.value);
+            }
+            // The first step in StartCoroutine, then at each end of frame the press's 0.5 and the
+            // subclass's 1.
+            Sequence(new[] { 1f, 0.5f, 1f, 0.5f, 1f, 0.5f, 1f }, changed);
+            changed.Clear();
+            Release();
+            Frame();
+            Near(1f, bar.value);
+            Assert.Empty(changed);
+        }
+
+        [Fact]
+        public void ClickRepeatOnTheHandleChangesNothing()
+        {
+            Setup(0f);
+            Press(0.75f);
+            var it = bar.FromPoint(At(0.75f), null);
+            for (int k = 0; k < 3; k++)
+            {
+                Assert.True(it.MoveNext());
+                Frame();
+            }
+            Near(0.8125f, bar.value);
+            Assert.Single(changed);
+        }
+
+        [Fact]
+        public void ClickRepeatEndsAfterADrag()
+        {
+            Setup(0f);
+            Press(0.75f);
+            Frame();
+            input.Mouse = At(0.3f);
+            Frame();
+            Near(0.25f, bar.value);
+            Assert.False(bar.FromPoint(At(0.9f), null).MoveNext());
+            Frame();
+            Near(0.25f, bar.value);
+            Sequence(new[] { 0.8125f, 0.25f }, changed);
+        }
+
+        [Fact]
+        public void ClickRepeatEndsAfterARelease()
+        {
+            Setup(0f);
+            Press(0.75f);
+            Release();
+            Assert.False(bar.FromPoint(At(0.9f), null).MoveNext());
+            Near(0.8125f, bar.value);
+        }
+
+        [Fact]
+        public void TheEventOverloadReadsThePressRaycastsScreenPosition()
+        {
+            Setup(0f);
+            Press(0.5f);
+            Near(0.5f, bar.value);
+            // Only position, or only pressPosition: the press point is the screen's corner.
+            Assert.True(bar.FromEvent(new PointerEventData(null) { position = At(0.9f) }).MoveNext());
+            Near(0f, bar.value);
+            Frame();
+            Assert.True(bar.FromEvent(new PointerEventData(null) { pressPosition = At(0.9f) }).MoveNext());
+            Near(0f, bar.value);
+            Frame();
+            Assert.True(bar.FromEvent(new PointerEventData(null) { pointerPressRaycast = new RaycastResult { screenPosition = At(0.9f) } }).MoveNext());
+            Near(1f, bar.value);
+        }
+
+        /// The handle starts at v - v * size in floats: 0.65 to 0.849999964 for 0.8125 at size
+        /// 0.2 (v * (1 - size) would give 0.65000004 to 0.85).
+        [Fact]
+        public void TheHandlesAnchorsAreWorkedOutAsMeasured()
+        {
+            Setup(0.8125f);
+            Assert.Equal(0.65f, bar.handleRect.anchorMin.x);
+            Assert.Equal(0.849999964f, bar.handleRect.anchorMax.x);
+            bar.value = 0.2f;
+            Assert.Equal(0.16f, bar.handleRect.anchorMin.x);
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void AnUpdateOverrideWithoutBaseChangesNothing(bool skip)
+        {
+            {
+                Setup(0f);
+                bar.SkipBaseUpdate = skip;
+                bar.value = 0.5f;
+                Frame();
+                bar.size = 0.4f;
+                Frame();
+                Near(0.3f, bar.handleRect.anchorMin.x);
+                Near(0.7f, bar.handleRect.anchorMax.x);
+                bar.size = 0.2f;
+                bar.value = 0f;
+                Frame();
+                Press(0.9f);
+                Frame();
+                Release();
+                Near(1f, bar.value);
+                Assert.True(bar.Updates > 0);
+                Sequence(new[] { 0.5f, 0f, 1f }, changed);
+            }
+        }
+    }
 }

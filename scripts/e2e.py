@@ -212,7 +212,12 @@ def check_step(where, kind, value, in_setup):
         if isinstance(value, dict) and value.get('code'):
             problems += [f'{where}: {p}' for p in key_problems(value['code'])]
     elif kind == 'click':
-        _ui_query(where, value, problems)
+        if isinstance(value, dict) and 'at' in value:
+            # A screen point (top-left pixels), for IMGUI controls: they have no element to find.
+            need(_cell(value['at']) and not (value.get('ui') or value.get('text')),
+                 'click `at` is a screen point [x, y], instead of `ui` or `text`')
+        else:
+            _ui_query(where, value, problems)
         if isinstance(value, dict):
             for m in value.get('mods', []):
                 problems += [f'{where}: {p}' for p in key_problems(m)]
@@ -2112,6 +2117,9 @@ class Run:
                 self.frames(2)
             else:
                 self.need_input().key(value['code'])
+        elif kind == 'click' and 'at' in value:
+            self.need_input().click(*value['at'], button=value.get('button', 'left'), mods=value.get('mods', ()),
+                                    double=bool(value.get('double')))
         elif kind == 'click':
             self.click_element(value, value.get('mods', ()), value.get('button', 'left'), bool(value.get('double')))
         elif kind == 'click_world':

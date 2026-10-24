@@ -84,6 +84,24 @@ steps:
                      "unknown E2eDriver command 'teleport'", 'steps 9: a step is one'):
             self.assertIn(text, joined)
 
+    def test_click_at_a_screen_point(self):
+        s = spec('''
+from: early-base
+steps:
+  - click: {at: [640, 112.5]}
+  - click: {at: [10, 20], double: true}
+''')
+        self.assertEqual(e2e.check_spec(s), [])
+        s = spec('''
+from: early-base
+steps:
+  - click: {at: [640]}
+  - click: {at: [1, 2], ui: "**/X"}
+''')
+        joined = '\n'.join(e2e.check_spec(s))
+        self.assertIn('steps 1: click `at` is a screen point', joined)
+        self.assertIn('steps 2: click `at` is a screen point', joined)
+
     def test_key_held_down_across_steps(self):
         s = spec('''
 from: early-base

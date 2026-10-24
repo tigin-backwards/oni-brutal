@@ -149,6 +149,8 @@ and nothing is clicked. A click is: move, 2 frames of hover, press, 2 frames, re
 - click: {text: "Quick Learner", under: "**/UnityDuplicitySelectionScreen"}
 - click: {ui: "**/List/Item", index: 2, button: right}         # the third match; right button
 - click: {ui: "**/WorldSelector/**/Row", double: true}         # a double click
+- click: {at: [640, 112.5]}                                    # a screen point (top-left pixels), unchecked:
+                                                               # for IMGUI (OnGUI) controls, which no path finds
 - toggle: {ui: "**/TypeSelectScreen/**/Sandstone", to: true}   # clicks only if needed, then checks isOn
 - dropdown: {ui: "**/MaterialDropdown", option: "Sandstone"}   # opens it, clicks the option by text
 - type: {ui: "**/FileNameDialog/**/Input", text: "e2e", enter: true, clear: true}

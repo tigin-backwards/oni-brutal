@@ -79,7 +79,8 @@ namespace OniBrutal.Host
         /// A mod's assembly, rewritten when it reaches into the game's non-public members, with its
         /// static readonly fields writable as Mono's are, with any class that misses a method of an
         /// interface it lists still loadable, with a patched method's stack frame reporting its
-        /// owner type, and with its string-keyed concurrent dictionaries in Mono's order, as on Mono.
+        /// owner type, with its string-keyed concurrent dictionaries in Mono's order, and with a stack
+        /// overflow in a method that can recurse thrown as an exception, as on Mono.
         internal static Assembly LoadFrom(string path)
         {
             path = Path.GetFullPath(path);
@@ -110,6 +111,8 @@ namespace OniBrutal.Host
             if (MonoStackFrames.Adjust(image ?? File.ReadAllBytes(path), ref symbols, path) is { } rewritten) image = rewritten;
             // Its string-keyed concurrent dictionaries enumerate in Mono's order (MonoConcurrentDictionaries).
             if (MonoConcurrentDictionaries.Adjust(image ?? File.ReadAllBytes(path), ref symbols, path) is { } ordered) image = ordered;
+            // A stack overflow in a method that can recurse throws, as on Mono (MonoStackOverflow).
+            if (MonoStackOverflow.Adjust(image ?? File.ReadAllBytes(path), ref symbols, path) is { } probed) image = probed;
             if (image == null) return Assembly.LoadFrom(path);
             Assembly assembly;
             try

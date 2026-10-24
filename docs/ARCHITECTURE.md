@@ -417,6 +417,21 @@ past the boot checkpoint needs a Steam client logged in with an account that own
   lock per processor and grows their table as soon as a lock holds more than 31 / processors keys,
   so their order in the original depends on the machine. `--check-types` enumerates such a
   dictionary of a mod against Mono's order and adds a key during the enumeration as PLib does.
+- **D28 Stack overflows.** Mono turns a stack overflow into a `StackOverflowException` that the
+  code below it can catch. Measured in the original player: a test mod whose patch of
+  `Telepad.OnSpawn` recursed without end had the game log "Error in
+  HeadquartersComplete.Telepad.OnSpawn … System.StackOverflowException: The requested operation
+  caused a stack overflow." (`KMonoBehaviour.Spawn` catches every exception), show its error
+  dialog and play on. CoreCLR ends the process instead (exit code 134 on Linux, 0xC00000FD on
+  Windows) and writes "Stack overflow." and the frames to stderr only, so the player's log just
+  stops where the recursion began, as in issue #13's log. **Resolved in** `MonoStackOverflow`: a
+  mod's methods on a call cycle among its own methods (from its IL: calls, generic
+  instantiations, methods of its generic types, a virtual call reaching every virtual method of
+  that name) start with a probe that throws `StackOverflowException`, with Mono's message, once
+  `RuntimeHelpers.TryEnsureSufficientExecutionStack` fails; the probe is hidden from stack
+  traces. A recursion through game methods or another assembly is not covered, nor one in the
+  game's own code. A mod that cannot be rewritten loads unchanged. `--check-types` runs a mod's
+  self and mutual recursions without end.
 
 ## 3. The engine API (`OniBrutal.UnityEngine`)
 

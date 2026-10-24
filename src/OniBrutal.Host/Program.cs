@@ -551,6 +551,65 @@ namespace OniBrutal.Host
                     try { Directory.Delete(dir, true); } catch (IOException) { } catch (UnauthorizedAccessException) { }
                 }
             });
+            Check("A mod's recursion without end (MonoStackOverflow)", () =>
+            {
+                ModAccess.Install();
+                var dir = Directory.CreateTempSubdirectory("oni-brutal-check-").FullName;
+                try
+                {
+                    // Recurse calls itself, Ping and Pong call each other, Plain calls neither; each
+                    // adds one after its call, so no call is a tail call.
+                    var mod = new System.Reflection.Emit.PersistedAssemblyBuilder(new AssemblyName("OniBrutalCheckOverflowMod"), typeof(object).Assembly);
+                    var type = mod.DefineDynamicModule("OniBrutalCheckOverflowMod").DefineType("Deep", TypeAttributes.Public);
+                    System.Reflection.Emit.MethodBuilder Define(string name) => type.DefineMethod(name, MethodAttributes.Public | MethodAttributes.Static, typeof(int), [typeof(int)]);
+                    var recurse = Define("Recurse");
+                    var ping = Define("Ping");
+                    var pong = Define("Pong");
+                    var plain = Define("Plain");
+                    foreach (var (method, callee) in new[] { (recurse, recurse), (ping, pong), (pong, ping) })
+                    {
+                        var il = method.GetILGenerator();
+                        il.Emit(System.Reflection.Emit.OpCodes.Ldarg_0);
+                        il.Emit(System.Reflection.Emit.OpCodes.Ldc_I4_1);
+                        il.Emit(System.Reflection.Emit.OpCodes.Add);
+                        il.Emit(System.Reflection.Emit.OpCodes.Call, callee);
+                        il.Emit(System.Reflection.Emit.OpCodes.Ldc_I4_1);
+                        il.Emit(System.Reflection.Emit.OpCodes.Add);
+                        il.Emit(System.Reflection.Emit.OpCodes.Ret);
+                    }
+                    var plainIl = plain.GetILGenerator();
+                    plainIl.Emit(System.Reflection.Emit.OpCodes.Ldarg_0);
+                    plainIl.Emit(System.Reflection.Emit.OpCodes.Ret);
+                    type.CreateType();
+                    var modPath = Path.Combine(dir, "OniBrutalCheckOverflowMod.dll");
+                    mod.Save(modPath);
+                    int probed = MonoStackOverflow.RecursiveMethods(File.ReadAllBytes(modPath)).Count;
+                    if (probed != 3) throw new InvalidOperationException($"{probed} methods found that can recurse, not 3");
+                    var deep = ModAccess.LoadFrom(modPath).GetType("Deep")!;
+                    if ((int)deep.GetMethod("Plain")!.Invoke(null, [7])! != 7) throw new InvalidOperationException("Plain changed");
+                    string Overflow(string name)
+                    {
+                        try
+                        {
+                            deep.GetMethod(name)!.Invoke(null, [0]);
+                        }
+                        catch (TargetInvocationException e) when (e.InnerException is StackOverflowException s)
+                        {
+                            return s.Message;
+                        }
+                        throw new InvalidOperationException($"{name} returned");
+                    }
+                    // Measured in the original player: Mono's message.
+                    const string mono = "The requested operation caused a stack overflow.";
+                    foreach (var name in new[] { "Recurse", "Ping" })
+                        if (Overflow(name) is var message && message != mono) throw new InvalidOperationException($"{name}: {message}");
+                    return "both recursions throw StackOverflowException with Mono's message; the process goes on";
+                }
+                finally
+                {
+                    try { Directory.Delete(dir, true); } catch (IOException) { } catch (UnauthorizedAccessException) { }
+                }
+            });
             Check("A special folder that does not exist (MonoFolderPaths)", () =>
             {
                 MonoFolderPaths.Install();

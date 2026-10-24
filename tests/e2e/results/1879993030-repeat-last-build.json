@@ -1,0 +1,55 @@
+{
+ "spec": "mods/1879993030-repeat-last-build.yaml",
+ "mods": [
+  "1879993030"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Tile picked from the build menu and closed with Escape; holding Q brings its build tool and card back, and a click places a tile blueprint",
+ "updated": "2026-10-23",
+ "commit": "0368bca",
+ "mod_dlls": {
+  "1879993030": {
+   "Repeat Last Build.dll": "4bc52d2e95b26fb77c72a325806e479df5d715bdf87e9a7266cb1c27b43f8645"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-212155-fbe646",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T21:40:41",
+    "lane": 12,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-220850-ea5d78",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T22:08:50",
+    "lane": 12,
+    "reference_run": "20261023-212155-fbe646",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-220850-ea5d78",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T22:09:52",
+    "lane": 12,
+    "reference_run": "20261023-212155-fbe646",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

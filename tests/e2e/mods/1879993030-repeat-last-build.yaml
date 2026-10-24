@@ -1,0 +1,33 @@
+# Repeat Last Build // by @Ony (1879993030), class T.
+#
+# What it does: remembers the last building whose build tool was opened (prefixes on
+# BuildTool.Activate and BaseUtilityBuildTool.Activate for pipes, wires and tubes), and a
+# hotkey, Q by default (rebindable in the mod's own settings), reopens that building's build
+# menu card and tool from anywhere, without going through the build menu again.
+# How a player reaches it: pressing Q in a colony after having built something.
+# What changes: the build tool comes back with the last building.
+#
+# The Tile is picked from the build menu, then everything is closed with Escape; holding Q
+# brings the Tile's build tool and card back, and a click places a tile blueprint in the
+# dug-out corridor west of the printing pod.
+from: early-base
+mods: [1879993030]
+steps:
+  - run: {seconds: 5}
+  - driver: {camera.set: {cell: [104, 208], ortho: 8}}
+  - click: {ui: "**/PlanScreen/Toggle:Base"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/Tile Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/Tile Group*"}
+  - expect_state: {"PlayerController.Instance.ActiveTool.name": BuildTool}
+  - key: {code: Escape}
+  - expect_state: {"PlayerController.Instance.ActiveTool.name": SelectTool}
+  - key: {code: Q, down: true, at: [106, 209]}
+  - key: {code: Q, up: true}
+  - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
+  - expect_state:
+      "PlayerController.Instance.ActiveTool.name": BuildTool
+      "BuildTool.Instance.def.PrefabID": Tile
+  - expect_ui: {"**/ProductInfoScreen/**/TitleBar/**/Label": {text: "~Tile"}}
+  - click_world: {cell: [110, 209]}
+  - key: {code: Escape}
+  - expect: {blueprints: {Tile: 1}}

@@ -1,0 +1,81 @@
+{
+ "spec": "mods/3291074493-any-ice-liquefier.yaml",
+ "mods": [
+  "3291074493"
+ ],
+ "verdict": "warning",
+ "why": "known findings: scroll-normalized-position",
+ "findings": [
+  "scroll-normalized-position"
+ ],
+ "note": "an Ice Liquefier's side screen lists Ice and the discovered Snow and a Fuel filter of four fuels (dumped and shot); Snow chosen and Coal ticked by clicks",
+ "updated": "2026-10-24",
+ "commit": "1913f83",
+ "mod_dlls": {
+  "3291074493": {
+   "AnyIceKettle.dll": "24a7d5478c07ad27ffbe38f5f9e366696928eec6bc5f379f113e58ab89ef9949"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-064836-d1751a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T07:00:10",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-073421-dafdb5",
+    "index": 1,
+    "verdict": "warn",
+    "date": "2026-10-24T07:34:21",
+    "lane": 15,
+    "reference_run": "20261024-064836-d1751a",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "sidescreen": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 2
+      }
+     }
+    },
+    "shots": {
+     "sidescreen": 2.6e-05,
+     "chosen": 2.6e-05
+    }
+   },
+   {
+    "run": "20261024-073421-dafdb5",
+    "index": 2,
+    "verdict": "warn",
+    "date": "2026-10-24T07:35:34",
+    "lane": 15,
+    "reference_run": "20261024-064836-d1751a",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "sidescreen": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 2
+      }
+     }
+    },
+    "shots": {
+     "sidescreen": 2.6e-05,
+     "chosen": 2.6e-05
+    }
+   }
+  ]
+ }
+}

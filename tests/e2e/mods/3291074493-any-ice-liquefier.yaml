@@ -1,0 +1,37 @@
+# Any Ice Liquefier (3291074493), classes S, P, O.
+#
+# What it does: the Ice Liquefier (IceKettle) melts any ice the colony has discovered, not
+# only Ice: its side screen gains an options list of the ices (snow, brine ice, polluted ice,
+# ...; with PLib options also resin, gunk and frozen phyto oil), and the liquid it makes
+# follows the chosen ice. It also burns more fuels than wood: a "Fuel" filter (wood, plywood,
+# gum wood and coal, weighted by the Kiln's coal recipe) on its side screen.
+# How a player reaches it: the Ice Liquefier's side screen (Temperature Modulation).
+# What changes: which ice the liquefier melts and what it burns.
+#
+# setup grants Temperature Modulation, discovers Snow, and builds an Ice Liquefier in the
+# dug-out corridor west of the printing pod. Selected, its side screen lists Ice and Snow and
+# the four fuels; Snow is chosen and Coal ticked.
+from: early-base
+mods: [3291074493]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"TemperatureModulation\")", method: Purchased}}
+  - driver: {setup.call: {target: "DiscoveredResources.Instance", method: Discover, args: [Snow, IceOre]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"IceKettle\")", method: Build, args: [{"$": "Grid.XYToCell(113, 206)"}, Neutral, null, [Cuprite], 293.15, DEFAULT_FACADE]}}
+steps:
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: IceKettle}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/FewOptionSelectionSideScreen", cond: stable}
+  - expect_state:
+      "all:AnyIceKettle.AnyIceKettle::[0].GetSelectedOption()": Ice
+  - expect_ui:
+      "**/FewOptionSelectionSideScreen/**/Rows/RowPrefab/AssignmentText": {any_text: "~Snow"}
+      "**/FlatTagFilterSideScreen/TitleBox/Label": {text: Fuel}
+  - ui_dump: {name: sidescreen, root: "**/DetailsScreen/SideScreen/Body"}
+  - shot: {name: sidescreen, crop: "**/DetailsScreen/SideScreen", threshold: 0.04}
+  - click: {text: "~Snow", under: "**/FewOptionSelectionSideScreen"}
+  - expect_state:
+      "all:AnyIceKettle.AnyIceKettle::[0].GetSelectedOption()": Snow
+  - click: {ui: "**/FlatTagFilterSideScreen/**/ListContainer/*Coal*/Toggle"}
+  - expect_state:
+      "all:FlatTagFilterable::[0].selectedTags": {contains: Carbon}
+  - shot: {name: chosen, crop: "**/DetailsScreen/SideScreen", threshold: 0.04}

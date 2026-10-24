@@ -1,0 +1,39 @@
+# Daily Routine (2863383492), class S.
+#
+# What it does: every fabricator (a ComplexFabricator) gets a "Daily Routine" side screen
+# (cloned from the timer sensor's): Enable Daily Routine stores the fabricator's current
+# recipe queue, and at the start of each cycle (or at a custom time of day) the queue is set
+# back to the stored counts, or added to them with Recipe Queueing on. Update Daily Tasks
+# stores the queue again; hovering it lists the stored recipes.
+# How a player reaches it: a fabricator's side screen.
+# What changes: fabricators refill their queue every day by themselves.
+#
+# setup builds a Rock Granulator in the dug-out corridor west of the printing pod and queues
+# 3 of its first recipe. Selected, its Daily Routine screen shows; Enable Daily Routine and
+# Update Daily Tasks store the queue (3 items of one recipe).
+from: early-base
+mods: [2863383492]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"RockCrusher\")", method: Build, args: [{"$": "Grid.XYToCell(108, 206)"}, Neutral, null, [Cuprite], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "last:GetComponent<ComplexFabricator>", method: SetRecipeQueueCount, args: [{"$": "last:GetComponent<ComplexFabricator>.GetRecipes()[0]"}, 3]}}
+steps:
+  - driver: {camera.set: {cell: [109, 208], ortho: 8}}
+  - click_world: {cell: [109, 207], select: RockCrusher}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/DailyResetSidescreen", cond: stable}
+  - expect_ui:
+      "**/DailyResetSidescreen/Contents/Buttons/ResetButton/Label": {text: "Enable Daily Routine"}
+      "**/DailyResetSidescreen/Contents/Container2/ResetButton/Label": {text: "~Update Daily Tasks"}
+  - expect_state:
+      "all:DailyRoutine.DR_ResetComponent::[0].IsActive": false
+  - ui_dump: {name: sidescreen, root: "**/DetailsScreen/SideScreen/Body/**/DailyResetSidescreen"}
+  - shot: {name: sidescreen, crop: "**/DetailsScreen/SideScreen", threshold: 0.04}
+  - click: {ui: "**/DailyResetSidescreen/Contents/Buttons/ResetButton"}
+  - expect_state:
+      "all:DailyRoutine.DR_ResetComponent::[0].IsActive": true
+  - expect_ui:
+      "**/DailyResetSidescreen/Contents/Buttons/ResetButton/Label": {text: "Disable Daily Routine"}
+  - click: {ui: "**/DailyResetSidescreen/Contents/Container2/ResetButton"}
+  - expect_state:
+      "all:DailyRoutine.DR_ResetComponent::[0].StoredRecipes.Count": 1
+      "all:DailyRoutine.DR_ResetComponent::[0].GetFormattedCount(false)": "3 items set as daily task."
+  - shot: {name: enabled, crop: "**/DetailsScreen/SideScreen", threshold: 0.04}

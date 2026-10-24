@@ -1,0 +1,69 @@
+{
+ "spec": "mods/2863383492-daily-routine.yaml",
+ "mods": [
+  "2863383492"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Rock Granulator with 3 queued: its Daily Routine side screen (dumped and shot); Enable Daily Routine and Update Daily Tasks store the queue (3 items of one recipe)",
+ "updated": "2026-10-24",
+ "commit": "1913f83",
+ "mod_dlls": {
+  "2863383492": {
+   "DailyRoutine.dll": "d808bb167210e49e5784c8f7d07b3e42737b182a6d9872edbf18ef486b483ba5"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-064836-d1751a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T06:58:43",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-070329-82b8ba",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T07:32:30",
+    "lane": 15,
+    "reference_run": "20261024-064836-d1751a",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "sidescreen": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "sidescreen": 0.0,
+     "enabled": 0.0
+    }
+   },
+   {
+    "run": "20261024-070329-82b8ba",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T07:33:25",
+    "lane": 15,
+    "reference_run": "20261024-064836-d1751a",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "sidescreen": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "sidescreen": 0.0,
+     "enabled": 0.0
+    }
+   }
+  ]
+ }
+}

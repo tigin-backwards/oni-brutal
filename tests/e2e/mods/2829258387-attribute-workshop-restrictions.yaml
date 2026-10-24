@@ -1,0 +1,40 @@
+# Attribute-based Workshop Restrictions (2829258387), classes S, O.
+#
+# What it does: Duplicant-operated workshops (fabricators, research stations, ranching
+# stations, the manual generator, the ice-cooled fan, the oil refinery, ...) get a side
+# screen (PLib): "Allow to operate this Building when the <attribute> is" Above or Below a
+# level from 0 to 20 (a slider and a number field). While it is checked, the building's work
+# errands carry a precondition: only Duplicants whose attribute (the work's own, Science for a
+# research station) is at or above (or at or below) the level may take them. A PLib option
+# picks Machinery or Athletics for the manual generator.
+# How a player reaches it: select such a building; its side screen.
+# What changes: who may operate the building.
+#
+# The research station east of the printing pod is selected: the side screen's check box is
+# checked, Above pressed and 8 typed into its number field; the building's restriction is
+# enabled at Science 8 and above. (Its research errand needs power, which early-base lacks, so
+# who takes it is not watched.)
+from: early-base
+mods: [2829258387]
+steps:
+  - driver: {camera.set: {cell: [128, 208], ortho: 8}}
+  - click_world: {cell: [127, 208], select: ResearchCenter}
+  - ui_wait: {path: "**/DetailsScreen/**/AttributeRestrictionSideScreen", cond: stable}
+  - expect_ui:
+      "**/AttributeRestrictionSideScreen/MainPanel/is_enable/AlignmentWrapper/Text": {text: "~Science"}
+  - expect_state:
+      "selected:AttributeRestriction.isEnabled": false
+      "selected:AttributeRestriction.requiredAttribute.Id": Learning
+  - ui_dump: {name: before, root: "**/AttributeRestrictionSideScreen"}
+  - click: {ui: "**/AttributeRestrictionSideScreen/MainPanel/is_enable/AlignmentWrapper/CheckBox"}
+  - expect_ui: {"**/AttributeRestrictionSideScreen/MainPanel/slider_top_required_level/Button[1]/Text": {text: "Above"}}
+  - click: {ui: "**/AttributeRestrictionSideScreen/MainPanel/slider_top_required_level/Button[1]"}
+  - ui_wait: {path: "**/AttributeRestrictionSideScreen/MainPanel/slider_top_required_level/text_required_level", cond: stable}
+  - type: {ui: "**/AttributeRestrictionSideScreen/MainPanel/slider_top_required_level/text_required_level", text: "8", enter: true, clear: true}
+  - ui_wait: {path: "**/AttributeRestrictionSideScreen/MainPanel/slider_bottom_required_level/slider_required_level/Handle", cond: stable}
+  - expect_state:
+      "selected:AttributeRestriction.isEnabled": true
+      "selected:AttributeRestriction.isBelow": false
+      "selected:AttributeRestriction.requiredAttributeLevel": 8
+  - ui_dump: {name: after, root: "**/AttributeRestrictionSideScreen"}
+  - shot: {name: after, crop: "**/AttributeRestrictionSideScreen", threshold: 0.04}

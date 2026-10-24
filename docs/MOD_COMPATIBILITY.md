@@ -521,7 +521,7 @@ installs get developer checks subscribers never see).
 | 500 | [Clothing Locker](https://steamcommunity.com/sharedfiles/filedetails/?id=2046407638) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2046407638-clothing-locker.yaml: the Clothing Locker built from cuprite in the corridor, selected: a storage locker that takes clothes only; its title as in the original |
 | 501 | [Stop Sublimation While In Storage (updated for Big Merge)](https://steamcommunity.com/sharedfiles/filedetails/?id=2686344355) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2686344355-stop-sublimation-in-storage.yaml: 100 kg of oxylite stored in a storage bin keeps its mass over 120 s while a loose pile beside it sublimates |
 | 502 | [Forcefield Projectors](https://steamcommunity.com/sharedfiles/filedetails/?id=3568684741) | ✅ | ✅ | ⬜ |  |
-| 503 | [Heat Terminator热量终结者](https://steamcommunity.com/sharedfiles/filedetails/?id=2842352931) | ✅ | ✅ | ⬜ |  |
+| 503 | [Heat Terminator热量终结者](https://steamcommunity.com/sharedfiles/filedetails/?id=2842352931) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2842352931-heat-terminator.yaml: options 200 W and 300 W; the gas cooler (Chinese name) built and selected, drawing 200 W and making no heat; its title as in the original |
 | 504 | [Mod Filter](https://steamcommunity.com/sharedfiles/filedetails/?id=2196347807) | ✅ | ✅ | ⬜ |  |
 | 505 | [Thermoelectric Coolers](https://steamcommunity.com/sharedfiles/filedetails/?id=2593479763) | ✅ | ✅ | ⬜ |  |
 | 506 | [So Many Dupes](https://steamcommunity.com/sharedfiles/filedetails/?id=2823469509) | ✅ | ✅ | ⬜ |  |
@@ -533,7 +533,7 @@ installs get developer checks subscribers never see).
 | 512 | [Customize your paints](https://steamcommunity.com/sharedfiles/filedetails/?id=1906475585) | ✅ | ✅ | ⬜ |  |
 | 513 | [ภาษาไทย (Thai Language) by Mary](https://steamcommunity.com/sharedfiles/filedetails/?id=3669382915) | ⬜ | ⬜ | ⬜ |  |
 | 514 | [Lead Volcano](https://steamcommunity.com/sharedfiles/filedetails/?id=3508865977) | ⬜ | ⬜ | ⬜ |  |
-| 515 | [香草梯子Vanilla ladder](https://steamcommunity.com/sharedfiles/filedetails/?id=2882418505) | ✅ | ✅ | ⬜ |  |
+| 515 | [香草梯子Vanilla ladder](https://steamcommunity.com/sharedfiles/filedetails/?id=2882418505) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2882418505-vanilla-ladder.yaml: options 5 up and 6 down; a column of three ladder cells built and one selected, with those speeds; its title and look as in the original |
 | 516 | [Demolior Story Trait](https://steamcommunity.com/sharedfiles/filedetails/?id=3503014942) | ⬜ | ⬜ | ⬜ |  |
 | 517 | [Liquid Mercury Geyser](https://steamcommunity.com/sharedfiles/filedetails/?id=3508870243) | ⬜ | ⬜ | ⬜ |  |
 | 518 | [No Critter Overcrowding](https://steamcommunity.com/sharedfiles/filedetails/?id=3010968005) | ✅ | ✅ | ✅ | spec tests/e2e/mods/3010968005-no-critter-overcrowding.yaml: 12 Dreckos fill a 124-cell cavity with 144 cells of space, and none is Crowded or Confined (the game alone crowds them) |
@@ -547,8 +547,8 @@ installs get developer checks subscribers never see).
 | 526 | [Not 0K, But Pretty Cool Place](https://steamcommunity.com/sharedfiles/filedetails/?id=3413401611) | ⬜ | ⬜ | ⬜ |  |
 | 527 | [No Boulders // by @Ony 👾](https://steamcommunity.com/sharedfiles/filedetails/?id=1831179100) | ⬜ | ⬜ | ⬜ |  |
 | 528 | [TeleVault](https://steamcommunity.com/sharedfiles/filedetails/?id=2739856987) | ✅ | ✅ | ⬜ |  |
-| 529 | [Forever Eruption Geyser Revived(可以永远喷发的喷泉）](https://steamcommunity.com/sharedfiles/filedetails/?id=2816649817) | ✅ | ✅ | ⬜ |  |
-| 530 | [Attribute-based Workshop Restrictions](https://steamcommunity.com/sharedfiles/filedetails/?id=2829258387) | ✅ | ✅ | ⬜ |  |
+| 529 | [Forever Eruption Geyser Revived(可以永远喷发的喷泉）](https://steamcommunity.com/sharedfiles/filedetails/?id=2816649817) | ✅ | ✅ | ⬜ | spec fails in ours: tests/e2e/mods/2816649817-forever-eruption-geyser.yaml: a Cool Steam Vent placed and selected: it erupts all its iteration and all its year, at 5 times its cycle average; its title as in the original (a run of ours failed) |
+| 530 | [Attribute-based Workshop Restrictions](https://steamcommunity.com/sharedfiles/filedetails/?id=2829258387) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2829258387-attribute-workshop-restrictions.yaml: the research station's restriction side screen: its check box clicked, Above pressed and 8 typed; the station requires Science 8 and above; the side screen dumped and shot before and after |
 | 531 | [[Vanilla + DLC] Multiplayer Storage](https://steamcommunity.com/sharedfiles/filedetails/?id=2612332708) | ✅ | ✅ | ⬜ |  |
 | 532 | [Sweep Bot Pro](https://steamcommunity.com/sharedfiles/filedetails/?id=3567851431) | ✅ | ✅ | ⬜ |  |
 | 533 | [Better Rebuilding](https://steamcommunity.com/sharedfiles/filedetails/?id=3204497859) | ✅ | ✅ | ⬜ |  |

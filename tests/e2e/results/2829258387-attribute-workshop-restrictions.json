@@ -1,0 +1,73 @@
+{
+ "spec": "mods/2829258387-attribute-workshop-restrictions.yaml",
+ "mods": [
+  "2829258387"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the research station's restriction side screen: its check box clicked, Above pressed and 8 typed; the station requires Science 8 and above; the side screen dumped and shot before and after",
+ "updated": "2026-10-24",
+ "commit": "0a8d2b1",
+ "mod_dlls": {
+  "2829258387": {
+   "AttributeRestrictions.dll": "13c74355f09ede329734b9f65dc3bfa54c05f958824cad7cdb97217dab5f7f06"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-041749-149a12",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T04:19:21",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-043911-918e55",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T04:39:11",
+    "lane": 16,
+    "reference_run": "20261024-041749-149a12",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "before": {
+      "differences": 0
+     },
+     "after": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "after": 0.0
+    }
+   },
+   {
+    "run": "20261024-043911-918e55",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T04:40:15",
+    "lane": 16,
+    "reference_run": "20261024-041749-149a12",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "before": {
+      "differences": 0
+     },
+     "after": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "after": 0.0
+    }
+   }
+  ]
+ }
+}

@@ -360,8 +360,20 @@ past the boot checkpoint needs a Steam client logged in with an account that own
   (after an Oxy Coral's oxygen bubble, a Thermal Gas Fissure gave oxygen instead of natural
   gas). **Resolved by a patch** (`MonoValueTypeHashes`): that call computes Mono's hash
   (`OniBrutal.Engine.MonoValueTypeHash`, starting from 0, so ids equal Mono's up to its
-  per-process start). Scanned in Assembly-CSharp, it is the game's only such call on a struct
-  without an override. This is the host's fourth change to game code (with D1, D3 and D11).
+  per-process start). This is the host's fourth change to game code (with D1, D3 and D11).
+  **Scanned** (2026-10-23, Mono.Cecil over IL: `constrained.` or `box` before
+  `object::GetHashCode`, `EqualityComparer<T>.GetHashCode` and `HashCode` over such a struct;
+  a struct as a dictionary key only hashes to a bucket and is left out): every game assembly
+  in `Managed/` that is not Unity's or the BCL (Assembly-CSharp, Assembly-CSharp-firstpass,
+  ImGui, ImGui.NET, FMODUnity*, Harmony, Newtonsoft.Json, VYaml, Ionic.Zip, LibNoiseDotNet,
+  ArabicSupport, Steamworks.NET), and of mods only the Workshop builds in the catalog's
+  `out/ws` (archived versions included), 1229 assemblies in all. Mods outside that set are
+  not covered. Hits besides `GetId`, neither a collision under CoreCLR: Klei's ImGui object
+  drawer (`MemberDrawerCollection.DrawFor`) puts the hash of `MemberDrawContext` (two bools)
+  into an ImGui ID, an identity, but CoreCLR hashes a struct of plain values by all its bytes,
+  so it tells the four values apart (Mono's XOR does not: (true, false) and (false, true)
+  collide there); Antigravity Multiplayer (3635632392) sends the hash of `Random.state` (four
+  ints, hashed by all bytes as well) to clients as a random seed, a value, not an identity.
   `--check-types` compares two elements' archetype ids. `tests/e2e/thermal-gas-fissure.yaml`
   checks the fissure's gas.
 

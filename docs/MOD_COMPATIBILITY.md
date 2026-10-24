@@ -761,7 +761,7 @@ installs get developer checks subscribers never see).
 | 740 | [Crabs Profit](https://steamcommunity.com/sharedfiles/filedetails/?id=2816177874) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2816177874-crabs-profit.yaml: a Sanishell baby set just short of adulthood grows up and drops the mod's 18.75 kg Sanishell Molt; the molt prefab and its Rock Granulator recipe exist (state only) |
 | 741 | [Balloon Dispenser](https://steamcommunity.com/sharedfiles/filedetails/?id=2938304376) | ✅ | ✅ | ⬜ |  |
 | 742 | [Roller Snakes](https://steamcommunity.com/sharedfiles/filedetails/?id=1963899596) | ⬜ | ⬜ | ⬜ | flagged by onimaxxing (notLoading); not tested |
-| 743 | [[Vanilla + DLC] Real Calories Info](https://steamcommunity.com/sharedfiles/filedetails/?id=2803999640) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2803999640-real-calories-info.yaml: the rations meter reads 16,800 kcal; the Consumables screen's column headers forbid the first three foods to everyone, and the meter then reads 0 kcal (the forbidden Field Ration and Muckroot no longer count); the meter's layout dump is compared |
+| 743 | [[Vanilla + DLC] Real Calories Info](https://steamcommunity.com/sharedfiles/filedetails/?id=2803999640) | ✅ | ✅ | ⬜ |  |
 | 744 | [Default Save Settings](https://steamcommunity.com/sharedfiles/filedetails/?id=2033314981) | ✅ | ✅ | ⬜ |  |
 | 745 | [Advanced Space Heater](https://steamcommunity.com/sharedfiles/filedetails/?id=2119931768) | ✅ | ✅ | ⬜ |  |
 | 746 | [Pipe Germ Info](https://steamcommunity.com/sharedfiles/filedetails/?id=2276953041) | ⬜ | ⬜ | ⬜ | flagged by onimaxxing (notLoading); not tested |

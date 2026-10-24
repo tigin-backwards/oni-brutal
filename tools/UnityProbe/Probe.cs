@@ -68,6 +68,11 @@ namespace SemanticsProbe
                 go.AddComponent<ChildActivation>();
                 return;
             }
+            if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "childdims")
+            {
+                go.AddComponent<ChildDimensions>();
+                return;
+            }
             if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "floatprec")
             {
                 Rec.Log("=== values: float precision");

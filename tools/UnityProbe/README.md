@@ -186,6 +186,19 @@ child before its parent, before `OnEnable`/`OnDisable`, with no
 `OnRectTransformDimensionsChange`; the group is queued at once and re-lays out in that frame.
 `ActivatedLayoutChildTests` encodes it.
 
+With `PROBE_SCENARIO=childdims` only the child-dimensions probe runs (`ChildDimensions.cs`,
+lines `CD …`, 10 s into the main menu, about a minute). A rect with a child, a grandchild and a
+stretched child, each with a spy, is moved, resized, scaled, rotated or re-pivoted: in a
+coroutine, in `Canvas.willRenderCanvases` or during the layout rebuild; with and without
+graphics on it; on canvases at scale 1 and 0.86, pixel perfect or not; then as a child of a
+`HorizontalLayoutGroup`, and a copy of the main menu's news row. Each message is logged with the
+phase it came after. `PROBE_CD_PART=extra` runs the pixel-perfect details instead: which objects
+are told (a `CanvasRenderer` alone, disabled, transparent or culled graphics, a layout element),
+several moves in a frame, a drag, values set to themselves, new, cloned, activated and
+reparented objects, a move at the end of the frame, and nested canvases that override
+`pixelPerfect`. `ugui.md` ("Moves on pixel-perfect canvases") records what it measured, and
+`PixelPerfectMoveTests` encodes it.
+
 With `PROBE_SCENARIO=floatprec` only the float-precision probe runs (`FloatPrecision.cs`, lines
 `VAL fp …`, at mod load; the full run includes it in its values): float expressions whose
 float32 and double results differ, each line saying which one the player gave. Its header

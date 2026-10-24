@@ -998,7 +998,9 @@ height changes (a re-layout from elsewhere), and one more frame is watched.
    or a group setting to the value it has, setting a text to the text it has, and
    `Canvas.ForceUpdateCanvases()` with nothing marked.
 4. **`OnRectTransformDimensionsChange` is sent once, from the change, and only for the rect's
-   size.** This includes changes made during the canvas update:
+   size**, on a canvas that is not pixel perfect (the probe's canvas; on a pixel-perfect one
+   a move is told after the canvas update, see "Moves on pixel-perfect canvases" below). This
+   includes changes made during the canvas update:
    - A rect resized or re-pivoted from a `Canvas.willRenderCanvases` handler gets the message
      once, from the setter. It gets nothing after the update.
    - A rect moved there (`anchoredPosition`, `localPosition`, `localScale`) gets none.
@@ -1055,6 +1057,66 @@ CanvasSystem.cs`) sends `OnRectTransformDimensionsChange` again, after the updat
 | solo rect, `anchoredPosition` set in `willRenderCanvases` | no message | 1 message after the update |
 | solo rect, `sizeDelta` or `pivot` set in `willRenderCanvases` | 1 message | 2 messages |
 | DraggableUI, `DetailsScreen.anchoredPosition.x` after the drag | −58 (from 302) | 302 |
+
+### Moves on pixel-perfect canvases (measured 2026-10-24)
+
+Found in QA's dogfood `intro`: after the Spaced Out intro video, the main menu's news tiles
+(`MOTD`, a `HorizontalLayoutGroup` of three `MotdBox` tiles) sat stacked at the row's right
+edge. Each tile's `ImageButton` has a `MotdBox_ImageButtonLayoutElement`, whose preferred width
+is its height × a ratio, set on `OnRectTransformDimensionsChange`. The row first lays out with
+the buttons' heights still unset, so with widths of 0. PerfProbe's `layout.txt` trace in the
+original shows the buttons hearing `OnRectTransformDimensionsChange` again after each frame's
+canvas update, from the engine (the managed stack holds only the handler), with
+`IsRebuildingLayout()` false; each marks the layout, and the row lays out again in the next
+frame, three frames in all, until nothing moves. The probe above saw no such message: its
+canvas is not pixel perfect. The front end's canvas (`FrontEndManager`) is.
+
+**Measured** with `PROBE_SCENARIO=childdims` (tools/UnityProbe, `ChildDimensions.cs`, lines
+`CD …`; `PROBE_CD_PART=extra` for the second set). A rect P (200 × 100) holds C (50 × 50,
+centre anchors), which holds GC; P also holds S (stretched). Each has a spy. One change to P
+per case, made in a coroutine, in `Canvas.willRenderCanvases` or during the layout rebuild (an
+`ICanvasElement` registered for it); on canvases at scale 1 and 0.86, pixel perfect or not;
+with P an `Image`, C a `RawImage` and GC a `TextMeshProUGUI`, or with no graphics. Then P as a
+child of a `HorizontalLayoutGroup`, resized or moved by it; then a copy of the news row.
+
+- **Not pixel perfect:** no message beyond the size messages of rule 4, in any case.
+- **Pixel perfect:** every active GameObject that has a `CanvasRenderer` and whose transform
+  moved gets `OnRectTransformDimensionsChange` once, after the canvas update (after the
+  `willRenderCanvases` handlers, before the end of the frame), whenever in the frame the move
+  was made: before the update, in it, during the layout rebuild or in a `willRenderCanvases`
+  handler. A move made after rendering (end of frame) is told in the next frame's.
+  - A move is any change of the transform's place: `anchoredPosition`, `localPosition`,
+    `position`, `localScale`, `localRotation`, a parent set (with or without keeping the world
+    position), a sub-pixel move (0.3), and a move undone in the same frame. Two moves in a
+    frame are told once. A drag is told every frame.
+  - It reaches the moved rect and every descendant whose place moves with it: C and GC when
+    P moves. A pivot change moves the children's rects but not P's transform: C and GC are
+    told after the update, P only by the setter (rule 4).
+  - A size change alone is not a move: P resized in place hears it from the setter only; C
+    (centre anchors) does not move and is told nothing. P resized and moved by its group
+    hears both: the setter's message during the rebuild and one after the update.
+  - Only GameObjects with a `CanvasRenderer`: an `Image`, a `RawImage`, a text, a
+    `CanvasRenderer` alone, a disabled `Image`, one with alpha 0 and a culled one all count. A
+    rect without one (S, a `LayoutElement` alone) is told nothing. Inactive objects are told
+    nothing.
+  - Not a move: setting `anchoredPosition` to its value, `SetAsLastSibling`, activating an
+    object, turning `pixelPerfect` on. An object made or cloned in the frame (a new object, an
+    `Instantiate` into a parent) is not told of its placement.
+  - The canvas that decides is the nearest one, as `Canvas.pixelPerfect` reads: a nested
+    canvas that overrides `pixelPerfect` off is not told under a pixel-perfect root; one that
+    overrides it on is told under a root that is not. A nested canvas that inherits follows its
+    root.
+  - Changing the root canvas's `scaleFactor` moves everything under it: P is told.
+- **The news row:** a copy (row > tiles with a `VerticalLayoutGroup` > a header and a button
+  whose preferred width follows its height) stays at the row's first layout (preferred width
+  56) on a canvas that is not pixel perfect, at scale 1 and 0.86, with a `Mask` and a
+  `RawImage` child with an `AspectRatioFitter` too. On a pixel-perfect canvas the buttons are
+  told after the update, and the row reaches 908.5 in the next frames, as in the game.
+
+**Where ours deviated.** Nothing was sent for a move on any canvas, so the news row kept its
+first layout whenever nothing else re-laid it out (the intro path; the `menu` scenario happened
+to get another layout). The re-send withdrawn on 2026-10-23 had covered it, but for every rect
+on every canvas, sizes included.
 
 ### RectMask2D culling (measured 2026-10-23)
 

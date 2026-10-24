@@ -39,6 +39,7 @@ namespace OniBrutal.Engine.UI
             PlayerLoop.PostLateUpdate += Update;
             FrameRenderer.RenderOverlays += RenderOverlays;
             FrameRenderer.CollectDraws += CollectCameraDraws;
+            Hierarchy.ParentChanged += ParentChanged;
         }
 
         public static void Enable(Canvas canvas)
@@ -54,6 +55,60 @@ namespace OniBrutal.Engine.UI
             if (c.RenderMode != RenderMode.WorldSpace) UpdateRootTransform(c);
             Rehomed(c);
             HierarchyChanged(c);
+        }
+
+        // ----- Order among canvases of the same sorting layer and order -----
+        //
+        // As measured in the original player (UnityProbe canvasorder, `CO` lines): canvases that
+        // tie on sorting layer and order draw in list order. A canvas enabled (its component, or
+        // its object activated) goes on top of its ties. Some changes put the whole list back in
+        // creation order, the canvas component's instance ID ascending (the one made last at the
+        // bottom): setting sortingOrder, whatever the value, on a canvas with no canvas component
+        // above it (enabled, active or not), or on a nested canvas that overrides sorting and was
+        // added by AddComponent to an active object (one added to an inactive object and
+        // activated later does not re-sort; canvases instantiated from prefabs were not measured
+        // and are treated as the latter); and an object moving to another parent with a live
+        // canvas at or below it, nested or not.
+        // Nothing else does: a canvas created and left at its order, destroyed, disabled,
+        // instantiated, sibling order, overrideSorting, renderMode or Canvas.ForceUpdateCanvases.
+
+        /// Puts the live canvases back in creation order (see above).
+        public static void Resort()
+        {
+            if (enabled.Count == 0) return;
+            var list = enabled.ToArray();
+            Array.Sort(list, (a, b) => a.InstanceId.CompareTo(b.InstanceId));
+            foreach (var c in list) c.EnableSequence = ++sequence;
+        }
+
+        /// Canvas.sortingOrder was set.
+        public static void SortingOrderSet(CanvasNative c)
+        {
+            if (c.Destroyed) return;
+            if (!UnderACanvas(c) || c.OverrideSorting && c.AddedToActiveObject) Resort();
+        }
+
+        /// Whether a canvas component, enabled or not, is on an object above this one, active or
+        /// not: a canvas made on an inactive object under a canvas does not count as a root here.
+        static bool UnderACanvas(CanvasNative c)
+        {
+            for (var t = c.GameObject?.Transform?.Parent; t != null; t = t.Parent)
+                if (AnyCanvasOn(t.GameObject) != null) return true;
+            return false;
+        }
+
+        static void ParentChanged(TransformNative t)
+        {
+            if (HasLiveCanvas(t)) Resort();
+        }
+
+        static bool HasLiveCanvas(TransformNative t)
+        {
+            if (!t.GameObject.ActiveInHierarchy) return false;
+            if (PartsOf(t.GameObject).Canvas is { } c && IsLive(c)) return true;
+            foreach (var child in t.Children)
+                if (HasLiveCanvas(child)) return true;
+            return false;
         }
 
         public static void Disable(Canvas canvas)
@@ -477,7 +532,7 @@ namespace OniBrutal.Engine.UI
                     c.DepthEpoch++;
                     c.DepthDirty = true;
                 }
-            // Render order: by sorting layer, sorting order, then enable order.
+            // Render order: by sorting layer, sorting order, then list order (Resort).
             batches.Sort((a, b) =>
             {
                 int c = SortingLayers.ValueOf(SortingOf(a).SortingLayerId).CompareTo(SortingLayers.ValueOf(SortingOf(b).SortingLayerId));

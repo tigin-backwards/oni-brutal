@@ -644,6 +644,109 @@ namespace OniBrutal.Tests
             Assert.Equal(0, element.absoluteDepth);
         }
 
+        static Canvas TiedRoot(string name)
+        {
+            var c = new GameObject(name, typeof(RectTransform)).AddComponent<Canvas>();
+            c.renderMode = RenderMode.ScreenSpaceOverlay;
+            c.sortingOrder = 31000;
+            Element(c.transform, name + "Element");
+            return c;
+        }
+
+        static string BottomToTop(params Canvas[] canvases)
+        {
+            Frame();
+            var sorted = (Canvas[])canvases.Clone();
+            Array.Sort(sorted, (a, b) => a.renderOrder.CompareTo(b.renderOrder));
+            return string.Join(",", Array.ConvertAll(sorted, c => c.name));
+        }
+
+        /// Root canvases that tie on sorting order draw in list order, as measured in the original
+        /// (UnityProbe canvasorder): an enabled canvas goes on top, and setting a sortingOrder or
+        /// moving a live canvas to another parent puts them all back in creation order, the last
+        /// made at the bottom. The Skills screen and the HUD tie at 0: the first tooltip moves its
+        /// canvas under the tooltip anchor, and the HUD, made first, ends up over the screen.
+        [Fact]
+        public void CanvasesTiedOnSortingOrderDrawInListOrder()
+        {
+            OniBrutal.Engine.UI.CanvasSystem.Install();
+            var a = TiedRoot("A");
+            var b = TiedRoot("B");
+            var c = TiedRoot("C");
+            Assert.Equal("C,B,A", BottomToTop(a, b, c));
+            // Enabled again: on top of its ties.
+            b.gameObject.SetActive(false);
+            b.gameObject.SetActive(true);
+            Assert.Equal("C,A,B", BottomToTop(a, b, c));
+            c.enabled = false;
+            c.enabled = true;
+            Assert.Equal("A,B,C", BottomToTop(a, b, c));
+            Assert.Equal("A,B,C", BottomToTop(a, b, c));
+            // Setting a root's order, even to the same value, sorts by creation again.
+            a.sortingOrder = 31000;
+            Assert.Equal("C,B,A", BottomToTop(a, b, c));
+
+            // A canvas at another order, created and left at its default order: no re-sort; its
+            // nested canvas made, given an order while inactive and enabled, overrideSorting
+            // changed, sibling order: none either.
+            c.gameObject.SetActive(false);
+            c.gameObject.SetActive(true);
+            var other = new GameObject("Other", typeof(RectTransform)).AddComponent<Canvas>();
+            other.renderMode = RenderMode.ScreenSpaceOverlay;
+            Element(other.transform, "OtherElement");
+            var anchor = new GameObject("Anchor", typeof(RectTransform));
+            anchor.transform.SetParent(other.transform, false);
+            var tip = new GameObject("Tip", typeof(RectTransform));
+            tip.SetActive(false);
+            tip.transform.SetParent(other.transform, false);
+            tip.AddComponent<Canvas>();
+            Element(tip.transform, "TipElement");
+            // Its order set while its object is inactive: not a root (a canvas is above it).
+            tip.GetComponent<Canvas>().sortingOrder = 4;
+            tip.SetActive(true);
+            tip.GetComponent<Canvas>().overrideSorting = true;
+            a.transform.SetAsLastSibling();
+            Assert.Equal("B,A,C", BottomToTop(a, b, c));
+            // The nested canvas moved under another parent: a re-sort. Moved to the parent it
+            // already has: none.
+            tip.transform.SetParent(anchor.transform);
+            Assert.Equal("C,B,A", BottomToTop(a, b, c));
+            c.gameObject.SetActive(false);
+            c.gameObject.SetActive(true);
+            tip.transform.SetParent(anchor.transform);
+            Assert.Equal("B,A,C", BottomToTop(a, b, c));
+            // A disabled canvas moved: none.
+            tip.SetActive(false);
+            tip.transform.SetParent(other.transform);
+            Assert.Equal("B,A,C", BottomToTop(a, b, c));
+            // An object moved with a live canvas below it: a re-sort.
+            tip.SetActive(true);
+            anchor.transform.SetParent(null);
+            anchor.transform.SetParent(other.transform);
+            Assert.Equal("B,A,C", BottomToTop(a, b, c));
+            tip.transform.SetParent(anchor.transform);
+            c.gameObject.SetActive(false);
+            c.gameObject.SetActive(true);
+            Assert.Equal("B,A,C", BottomToTop(a, b, c));
+            anchor.transform.SetParent(null);
+            Assert.Equal("C,B,A", BottomToTop(a, b, c));
+            anchor.transform.SetParent(other.transform);
+
+            // The order set on a nested canvas that overrides sorting: a re-sort when the canvas
+            // was added to an active object, none when it was added to an inactive one (tip).
+            c.gameObject.SetActive(false);
+            c.gameObject.SetActive(true);
+            tip.GetComponent<Canvas>().sortingOrder = 5;
+            Assert.Equal("B,A,C", BottomToTop(a, b, c));
+            var live = new GameObject("Live", typeof(RectTransform));
+            live.transform.SetParent(other.transform, false);
+            var liveCanvas = live.AddComponent<Canvas>();
+            liveCanvas.overrideSorting = true;
+            Assert.Equal("B,A,C", BottomToTop(a, b, c));
+            liveCanvas.sortingOrder = 6;
+            Assert.Equal("C,B,A", BottomToTop(a, b, c));
+        }
+
         /// For contrast: with the root's GameObject inactive, every nested canvas reports itself
         /// as its own root with its own settings, and nothing draws.
         [Fact]

@@ -19,6 +19,7 @@ namespace UnityEngine
 
         internal override void EngineOnEnable() => CanvasSystem.Enable(this);
         internal override void EngineOnDisable() => CanvasSystem.Disable(this);
+        internal override void EngineReset() => Data.AddedToActiveObject = gameObject.activeInHierarchy;
 
         /// Nested canvases report their root canvas's mode.
         public RenderMode renderMode
@@ -114,7 +115,11 @@ namespace UnityEngine
         public int sortingOrder
         {
             get => SortingSource.SortingOrder;
-            set => Data.SortingOrder = (short)Math.Clamp(value, short.MinValue, short.MaxValue);
+            set
+            {
+                Data.SortingOrder = (short)Math.Clamp(value, short.MinValue, short.MaxValue);
+                CanvasSystem.SortingOrderSet(Data);
+            }
         }
 
         public int sortingLayerID
@@ -619,7 +624,10 @@ namespace OniBrutal.Engine.UI
         public float ReferencePixelsPerUnit = 100f;
         public AdditionalCanvasShaderChannels AdditionalShaderChannels;
         public int RenderOrder;
+        /// Place among the canvases it ties with on sorting (CanvasSystem.Resort).
         public int EnableSequence;
+        /// Added by AddComponent to an active object (CanvasSystem.SortingOrderSet).
+        public bool AddedToActiveObject;
         /// As a sort root: renumber its elements at the next build (CanvasSystem.Restructured).
         public bool DepthDirty = true;
         /// As a sort root: counts its numberings; an element's depth stands while it matches.

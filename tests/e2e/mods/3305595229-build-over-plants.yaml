@@ -1,0 +1,40 @@
+# Build Over Plants (3305595229), class P.
+#
+# What it does: a building may be placed over plants. BuildingDef.IsAreaClear (prefix) moves a
+# plant it finds in the building's object layer aside, so the area counts as clear; once the
+# blueprint is placed (Constructable.PlaceDiggables, postfix), each plant under it is marked
+# for uprooting at the blueprint's priority, and Duplicants uproot it before they build. The
+# room prober (RoomProber.RefreshModule.AddRoomContentsToCavities) still counts the plant.
+# How a player reaches it: placing any building over a plant.
+# What changes: plants no longer block buildings.
+#
+# A Cot (2x2) is placed from the build menu over the two wild Mealwood west of the printing pod, at (111, 206) and
+# (112, 206) (cell = 636 y + x), which the game would refuse. The plants are marked for
+# uprooting; Duplicants uproot them and build the cot.
+from: early-base
+mods: [3305595229]
+steps:
+  - expect_state:
+      "Grid.Objects.get_Item(131127, 1).name": BasicForagePlantPlanted
+      "Grid.Objects.get_Item(131128, 1).name": BasicForagePlantPlanted
+      "count:all:Uprootable::[*] if .IsMarkedForUproot == true": 0
+  # OniMcp's build refuses a footprint with a plant, so the real build menu is used.
+  - run: {seconds: 5}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click: {ui: "**/PlanScreen/Toggle:Furniture"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/Bed Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/Bed Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen/MaterialSelectionPanel", cond: stable}
+  - click_world: {cell: [111, 206]}
+  - key: {code: Escape}
+  - expect: {blueprints: {Bed: 1}}
+  - expect_state:
+      "count:all:Uprootable::[*] if .IsMarkedForUproot == true": ">= 2"
+  - run: {seconds: 1200, until: {buildings: {Bed: 2}, pending_construction: 0}}
+  - expect: {buildings: {Bed: 2}}
+  # The cot stands where the plants were (the plant layer of its two floor cells is empty).
+  - expect_state:
+      "Grid.Objects.get_Item(131127, 1).name": BedComplete
+      "Grid.Objects.get_Item(131128, 1).name": BedComplete
+      "Grid.Objects.get_Item(131127, 5)": missing
+      "Grid.Objects.get_Item(131128, 5)": missing

@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3305595229-build-over-plants.yaml",
+ "mods": [
+  "3305595229"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Cot placed from the build menu over the two wild Mealwood marks them for uprooting; Duplicants uproot them and build it where they stood",
+ "updated": "2026-10-23",
+ "commit": "a0a11a5",
+ "mod_dlls": {
+  "3305595229": {
+   "BuildOverPlants.dll": "9225c8c76ffd68ab5ff17a3938334b26d85eef994d45709a627932cbf612edfb"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-225259-2b2499",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T22:52:59",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-225430-6cd76f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T22:54:30",
+    "lane": 16,
+    "reference_run": "20261023-225259-2b2499",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-225430-6cd76f",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T22:54:31",
+    "lane": 17,
+    "reference_run": "20261023-225259-2b2499",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

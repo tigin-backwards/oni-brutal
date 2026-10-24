@@ -199,6 +199,12 @@ broken.update({
     '2872099618': 'broken upstream: its SpaceBomb\'s BuildingComplete.OnSpawn postfix calls `SimMessages.Dig(int, int, bool)`, which the game no longer has, so a finished bomb deletes itself and marks its background as space but digs nothing (spec tests/e2e/mods/2872099618-bomb-space.yaml)',
     '2367992483': 'broken upstream: its prefix names the 19-parameter `EntityTemplates.ExtendEntityToBasicPlant` of 2021 (the game\'s has 20); Harmony lists the method as patched and the game builds its plants through it, yet the prefix never runs, so no plant data or drop times are written or read (spec tests/e2e/mods/2367992483-automatic-harvesting.yaml)',
 })
+# Found by the e2e specs of batch 20: the spec fails the same way in the original.
+broken.update({
+    '3036286512': 'broken upstream: its DLL references PLib 4.8.1 but ships without it, so its `OnLoad` (`PUtil.InitLibrary`) throws a FileNotFoundException, its building fails to register (NullReferenceException, its anim missing), and the error dialog quits the game before the colony loads (spec tests/e2e/mods/3036286512-gas-liquefaction-machine.yaml)',
+    '3425252325': 'broken upstream: its DLL references PLib 4.16 but ships without it, so its types fail to load (FileNotFoundException), `Assets.OnPrefabInit` stops on a ReflectionTypeLoadException and the game quits before OniMcp starts; it loads only beside another mod that ships PLib (spec tests/e2e/mods/3425252325-auto-drop-gas-bottler.yaml)',
+    '1869090131': 'broken upstream: Mono cannot set up its `DestructibleWorkable` type ("VTable setup of type DestructibleFeatures.DestructibleWorkable failed": `ISidescreenButtonControl` gained members, and it overrides `OnCompleteWork(Worker)`), so a spawned geyser gets no workable and no DESTROY button (spec tests/e2e/mods/1869090131-destructible-features.yaml)',
+})
 # Fails to load in the original only.
 original_only = {
     '1729794261': 'loads in ours but not in the original: Mono rejects its `PixelPack2` class (an interface method it lacks) at first use, where ours stubs the missing method (ARCHITECTURE D22); left out of the colony runs, which the original\'s error dialog stops',

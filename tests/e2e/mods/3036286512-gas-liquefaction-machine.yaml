@@ -1,0 +1,18 @@
+# M 气体液化机 Gas Liquefaction Machine 1.1 (3036286512), class B.
+#
+# What it does: adds the Gas Liquefaction Machine (M006GG1) to the Refinement menu, researched
+# with Pressure Management: a 3x3 building of refined metal drawing 480 W that takes gas from
+# a gas pipe and sends it out of a liquid pipe as the matching liquid (oxygen, hydrogen,
+# carbon dioxide, methane, chlorine, steam and one more), cooled to its condensation point.
+# How a player reaches it: the build menu (Refinement), after research; gas and liquid pipes.
+# What changes: gases turn into liquids without cooling loops.
+#
+# Broken upstream: the DLL references PLib 4.8.1 but ships without it. Its OnLoad throws, its
+# building fails to register, and the original's error dialog quits the game before the
+# colony loads. The spec only loads the colony and looks for the building.
+from: early-base
+mods: [3036286512]
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"PressureManagement\").unlockedItemIDs": {contains: M006GG1}
+      "Assets.GetBuildingDef(\"M006GG1\").EnergyConsumptionWhenActive": 480

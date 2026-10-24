@@ -1,0 +1,33 @@
+{
+ "spec": "mods/3425252325-auto-drop-gas-bottler.yaml",
+ "mods": [
+  "3425252325"
+ ],
+ "verdict": "pending",
+ "why": "the spec fails in the original: a broken spec, or a mod broken upstream",
+ "findings": [],
+ "note": "",
+ "updated": "2026-10-24",
+ "commit": "bbebfbe",
+ "mod_dlls": {
+  "3425252325": {
+   "AutoGasBottlerDropMod.dll": "0f31967e9fa0df066f8bf2983526f0b6372e3140ca679303f47fc027b523b18b"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-085631-6ae9bb",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-24T09:10:34",
+    "lane": 16,
+    "reasons": [
+     "step start: the player exited (1) before OniMcp started"
+    ],
+    "signatures": 11
+   }
+  ],
+  "ours": []
+ }
+}

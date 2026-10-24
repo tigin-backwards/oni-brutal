@@ -667,7 +667,7 @@ installs get developer checks subscribers never see).
 | 646 | [Spooky Pumpkin](https://steamcommunity.com/sharedfiles/filedetails/?id=2266608310) | ✅ | ✅ | ⬜ |  |
 | 647 | [Composter Outputs Fertilizer](https://steamcommunity.com/sharedfiles/filedetails/?id=1878176354) | ❌ | ❌ | ⬜ | fails to load in the original as well, in its sweep batch |
 | 648 | [Better Food Effects / 更好的食物效果](https://steamcommunity.com/sharedfiles/filedetails/?id=3796760626) | ✅ | ✅ | ⬜ |  |
-| 649 | [M 气体液化机 Gas Liquefaction Machine 1.1](https://steamcommunity.com/sharedfiles/filedetails/?id=3036286512) | ✅ | ✅ | ⬜ |  |
+| 649 | [M 气体液化机 Gas Liquefaction Machine 1.1](https://steamcommunity.com/sharedfiles/filedetails/?id=3036286512) | ❌ | ❌ | ⬜ | broken upstream: its DLL references PLib 4.8.1 but ships without it, so its `OnLoad` (`PUtil.InitLibrary`) throws a FileNotFoundException, its building fails to register (NullReferenceException, its anim missing), and the error dialog quits the game before the colony loads (spec tests/e2e/mods/3036286512-gas-liquefaction-machine.yaml) (same in the original) |
 | 650 | [[OBSOLETE] Nubrion (Map)](https://steamcommunity.com/sharedfiles/filedetails/?id=1413765966) | ⬜ | ⬜ | ⬜ | flagged by onimaxxing (notLoading); not tested |
 | 651 | [Refrigerator Balanced](https://steamcommunity.com/sharedfiles/filedetails/?id=1864152914) | ⬜ | ⬜ | ⬜ | flagged by onimaxxing (notLoading); not tested |
 | 652 | [Extra Marble Sculptures](https://steamcommunity.com/sharedfiles/filedetails/?id=1940755077) | ⬜ | ⬜ | ⬜ | flagged by onimaxxing (notLoading); not tested |
@@ -684,13 +684,13 @@ installs get developer checks subscribers never see).
 | 663 | [Nuclear Processing [Currently Broken]](https://steamcommunity.com/sharedfiles/filedetails/?id=2614715953) | ✅ | ✅ | ⬜ |  |
 | 664 | [大存储砖Storage Tile -K29](https://steamcommunity.com/sharedfiles/filedetails/?id=3099724177) | ✅ | ✅ | ⬜ |  |
 | 665 | [AutomaticOilRefinery](https://steamcommunity.com/sharedfiles/filedetails/?id=2836775275) | ❌ | ❌ | ⬜ | fails to load in the original as well, in its sweep batch |
-| 666 | [Destructible Features (Geysers & Volcanoes)](https://steamcommunity.com/sharedfiles/filedetails/?id=1869090131) | ✅ | ✅ | ⬜ |  |
+| 666 | [Destructible Features (Geysers & Volcanoes)](https://steamcommunity.com/sharedfiles/filedetails/?id=1869090131) | ❌ | ❌ | ⬜ | broken upstream: Mono cannot set up its `DestructibleWorkable` type ("VTable setup of type DestructibleFeatures.DestructibleWorkable failed": `ISidescreenButtonControl` gained members, and it overrides `OnCompleteWork(Worker)`), so a spawned geyser gets no workable and no DESTROY button (spec tests/e2e/mods/1869090131-destructible-features.yaml) (same in the original) |
 | 667 | [[Vanilla + DLC] Advanced Generators+ OV3.0](https://steamcommunity.com/sharedfiles/filedetails/?id=1892977499) | ✅ | ✅ | ⬜ |  |
 | 668 | [Exp Multiplier](https://steamcommunity.com/sharedfiles/filedetails/?id=2546907682) | ✅ | ✅ | ⬜ |  |
 | 669 | [Mass Based Digging](https://steamcommunity.com/sharedfiles/filedetails/?id=1835785649) | ✅ | ✅ | ⬜ |  |
 | 670 | [Buildable Cryopod (DLC)](https://steamcommunity.com/sharedfiles/filedetails/?id=2847621082) | ✅ | ✅ | ⬜ |  |
 | 671 | [Ladder Replace](https://steamcommunity.com/sharedfiles/filedetails/?id=2946564795) | ✅ | ✅ | ⬜ |  |
-| 672 | [Auto Drop Gas Bottler](https://steamcommunity.com/sharedfiles/filedetails/?id=3425252325) | ✅ | ✅ | ⬜ |  |
+| 672 | [Auto Drop Gas Bottler](https://steamcommunity.com/sharedfiles/filedetails/?id=3425252325) | ❌ | ❌ | ⬜ | broken upstream: its DLL references PLib 4.16 but ships without it, so its types fail to load (FileNotFoundException), `Assets.OnPrefabInit` stops on a ReflectionTypeLoadException and the game quits before OniMcp starts; it loads only beside another mod that ships PLib (spec tests/e2e/mods/3425252325-auto-drop-gas-bottler.yaml) (same in the original) |
 | 673 | [Adaptive Building Menu](https://steamcommunity.com/sharedfiles/filedetails/?id=3724635599) | ✅ | ✅ | ⬜ |  |
 | 674 | [Todo List](https://steamcommunity.com/sharedfiles/filedetails/?id=3503958913) | ✅ | ✅ | ⬜ |  |
 | 675 | [Auto Harvest](https://steamcommunity.com/sharedfiles/filedetails/?id=3743308292) | ✅ | ✅ | ⬜ |  |

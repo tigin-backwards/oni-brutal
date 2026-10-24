@@ -1,0 +1,33 @@
+{
+ "spec": "mods/1869090131-destructible-features.yaml",
+ "mods": [
+  "1869090131"
+ ],
+ "verdict": "pending",
+ "why": "the spec fails in the original: a broken spec, or a mod broken upstream",
+ "findings": [],
+ "note": "",
+ "updated": "2026-10-24",
+ "commit": "bbebfbe",
+ "mod_dlls": {
+  "1869090131": {
+   "DestructibleFeatures.dll": "2be9b7222228431010bd45f2395cfabda771388f7e16da5f7cf59dca0b3a7aa5"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-092853-3a19a1",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-24T09:35:16",
+    "lane": 16,
+    "reasons": [
+     "step 3: E2eDriver state.get {\"expr\": \"all:Geyser::[0].GetComponent<DestructibleFeatures.DestructibleWorkable>.markedForDestruction\"}: markedForDestruction: the value before it is null"
+    ],
+    "signatures": 0
+   }
+  ],
+  "ours": []
+ }
+}

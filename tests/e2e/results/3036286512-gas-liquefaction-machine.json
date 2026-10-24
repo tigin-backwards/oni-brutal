@@ -1,0 +1,33 @@
+{
+ "spec": "mods/3036286512-gas-liquefaction-machine.yaml",
+ "mods": [
+  "3036286512"
+ ],
+ "verdict": "pending",
+ "why": "the spec fails in the original: a broken spec, or a mod broken upstream",
+ "findings": [],
+ "note": "",
+ "updated": "2026-10-24",
+ "commit": "bbebfbe",
+ "mod_dlls": {
+  "3036286512": {
+   "M_╞°╠σ╥║╗»╗·.dll": "4bcd6be8683fbb05298159edfaae3531894c5d9ffc008ed96f89d22d97e5e22e"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-085631-6ae9bb",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-24T09:15:29",
+    "lane": 16,
+    "reasons": [
+     "step start: the player exited (1) while loading"
+    ],
+    "signatures": 5
+   }
+  ],
+  "ours": []
+ }
+}

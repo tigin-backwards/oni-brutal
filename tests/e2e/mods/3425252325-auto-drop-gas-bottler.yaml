@@ -1,0 +1,34 @@
+# Auto Drop Gas Bottler / 气体瓶满自动掉落 (3425252325), classes P, S.
+#
+# What it does: the Canister Filler (GasBottler) drops its canister by itself once it holds
+# the filler's set capacity (DropAllWorkable.CompleteWork on a storage change), instead of
+# waiting for a Duplicant to empty it; it also drops what it holds when it spawns. A user-menu
+# button, "禁止瓶满掉落" / "允许瓶满掉落" (forbid / allow dropping when full), turns it off and
+# on per building, copied with its settings; a PLib option turns it off everywhere.
+# How a player reaches it: a Canister Filler (Portable Gasses), its user-menu button.
+# What changes: full canisters land on the floor without an errand.
+#
+# A smaller spec: no gas pipe feeds it. setup grants Portable Gasses and spawns metal ore. A
+# Canister Filler is built in the corridor west of the printing pod and selected, and its
+# user-menu button is clicked: auto-drop is off, and the button now offers to allow it.
+#
+# Broken upstream: the DLL references PLib 4.16 but ships without it. Alone, its types fail
+# to load and the original quits in Assets.OnPrefabInit before the colony loads.
+from: early-base
+mods: [3425252325]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"PortableGasses\")", method: Purchased}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Cuprite\").substance", method: SpawnResource, args: [[114.5, 206.5, -12], 600, 300, 255, 0]}}
+steps:
+  - build: {prefab: GasBottler, at: [109, 206]}
+  - expect: {blueprints: {GasBottler: 1}}
+  - run: {seconds: 1500, until: {buildings: {GasBottler: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [110, 208], ortho: 8}}
+  - click_world: {cell: [109, 207], select: GasBottler}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<AutoGasBottlerDropMod.GasBottlerToggleComponent>.IsAutoDropAllowed()": true
+  - click: {text: "禁止瓶满掉落"}
+  - expect_state:
+      "selected:GetComponent<AutoGasBottlerDropMod.GasBottlerToggleComponent>.IsAutoDropAllowed()": false
+  - expect_ui: {"**/DetailsScreen/**": {any_text: "允许瓶满掉落"}}

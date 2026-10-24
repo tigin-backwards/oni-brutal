@@ -1,0 +1,38 @@
+# Destructible Features (Geysers & Volcanoes) (1869090131), classes P, S.
+#
+# What it does: every geyser and volcano gets a "Destroy Natural Feature" side screen with a
+# DESTROY button (a DestructibleWorkable, added in a postfix on Geyser.OnSpawn). Pressed, it
+# queues a dig-type errand of 1800 s that needs the Super-Duperhard digging skill; when it is
+# done the feature is removed and the neutronium under it turns into obsidian (config.json).
+# The button becomes CANCEL DESTRUCTION while queued. It also sets geyser analysis time
+# (3600 s by default) from its config.
+# How a player reaches it: selecting a geyser, its side screen.
+# What changes: geysers can be removed.
+#
+# setup reveals the liquid sulfur geyser west of the base (89, 203). It is selected and
+# DESTROY pressed: the feature is marked for destruction, its errand exists, and the button
+# reads CANCEL DESTRUCTION. (No Duplicant has the skill, so it is not destroyed.)
+#
+# Broken upstream: Mono cannot set up DestructibleWorkable ("VTable setup ... failed"), so the
+# spawned geyser has no workable and the spec stops at its first look for one.
+from: early-base
+mods: [1869090131]
+setup:
+  - driver: {setup.call: {type: GridVisibility, method: Reveal, args: [89, 204, 8, 8]}}
+steps:
+  - run: {seconds: 1}
+  # The geyser has spawned (Geyser.OnSpawn, the method the mod's postfix adds its workable in).
+  - expect_state:
+      "all:Geyser::Length": 1
+      "all:Geyser::[0].isSpawned": true
+      "all:Geyser::[0].GetType().FullName": Geyser
+  - expect_state:
+      "all:Geyser::[0].GetComponent<DestructibleFeatures.DestructibleWorkable>.markedForDestruction": false
+  - driver: {camera.set: {cell: [89, 204], ortho: 8}}
+  - click_world: {cell: [89, 204], select: Geyser}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - click: {text: "DESTROY", under: "**/DetailsScreen"}
+  - expect_ui: {"**/ButtonMenuSideScreen/**": {any_text: "CANCEL DESTRUCTION"}}
+  - expect_state:
+      "all:Geyser::[0].GetComponent<DestructibleFeatures.DestructibleWorkable>.markedForDestruction": true
+      "all:Geyser::[0].GetComponent<DestructibleFeatures.DestructibleWorkable>.chore": exists

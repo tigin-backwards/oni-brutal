@@ -1,0 +1,59 @@
+{
+ "spec": "mods/2860925029-polluted-water-evaporator.yaml",
+ "mods": [
+  "2860925029"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "smaller spec: the Polluted Water Evaporator's build-menu card is shot, and one built in the corridor with power and a pipe takes 10 kg of polluted water into its storage; the corridor's 2 kg air is above the 1.8 kg it emits into, so it waits overpressured (as in the original) and the conversion is not reached",
+ "updated": "2026-10-24",
+ "commit": "b9c5e0d",
+ "mod_dlls": {
+  "2860925029": {
+   "LiquidSublimator.dll": "7d354d6d65b68feb57dda4bff8462bbeddb6410831c1b7ef21b666f6a2fe05de"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-132352-bdd7a0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T13:23:52",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-132835-05cd20",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T13:28:35",
+    "lane": 14,
+    "reference_run": "20261024-132352-bdd7a0",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.007747
+    }
+   },
+   {
+    "run": "20261024-132835-05cd20",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T13:28:36",
+    "lane": 15,
+    "reference_run": "20261024-132352-bdd7a0",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.007747
+    }
+   }
+  ]
+ }
+}

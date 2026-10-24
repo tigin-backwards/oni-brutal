@@ -1,0 +1,35 @@
+# Skilled Enough (3540078795), classes S, P.
+#
+# What it does: the Skills screen gets a button (a PLib PButton, "SuppressButton") on the
+# selected Duplicant's level box: it tags the Duplicant SkilledEnough, which greys out the
+# level and the green skill point count on its row, keeps its new skill points from raising
+# the "Skill Points Available" notification (a prefix on MinionResume.
+# ShowNewSkillPointNotification), and from lighting the skill-point marks on the Skills
+# Scanner and the Printing Pod screen. A second click undoes it; the choice is saved with
+# the colony.
+# How a player reaches it: the Skills screen, the button by the selected Duplicant's level.
+# What changes: no nagging about Duplicants a player is done training.
+#
+# The Skills screen opens on the first Duplicant; the button on its level box tags it, the
+# level turns grey, and the tooltip offers to show the notification again. A second click
+# clears the tag.
+from: early-base
+mods: [3540078795]
+steps:
+  - open: {management: skills}
+  - ui_wait: {path: "**/SkillsScreen/Minions/SelectedDuplicant/Top/BoxButtons/CurrentLevel", cond: stable}
+  - expect_ui:
+      "**/SkillsScreen/Minions/SelectedDuplicant/Top/BoxButtons/CurrentLevel/SuppressButton": {active: true}
+  - expect_state:
+      "type:SkilledEnough.SkilledEnoughTools::CurrentlySelectedMinionResume.GetComponent<KPrefabID>.HasTag(\"SkilledEnough\")": false
+  - ui_dump: {name: level, root: "**/SkillsScreen/Minions/SelectedDuplicant/Top/BoxButtons"}
+  - click: {ui: "**/SkillsScreen/Minions/SelectedDuplicant/Top/BoxButtons/CurrentLevel/SuppressButton"}
+  - expect_state:
+      "type:SkilledEnough.SkilledEnoughTools::CurrentlySelectedMinionResume.GetComponent<KPrefabID>.HasTag(\"SkilledEnough\")": true
+      "type:SkilledEnough.SkilledEnoughTools::headerText.color.r": "< 0.6"
+  - ui_dump: {name: level-suppressed, root: "**/SkillsScreen/Minions/SelectedDuplicant/Top/BoxButtons"}
+  - shot: {name: screen, crop: "**/SkillsScreen", threshold: 0.04}
+  - click: {ui: "**/SkillsScreen/Minions/SelectedDuplicant/Top/BoxButtons/CurrentLevel/SuppressButton"}
+  - expect_state:
+      "type:SkilledEnough.SkilledEnoughTools::CurrentlySelectedMinionResume.GetComponent<KPrefabID>.HasTag(\"SkilledEnough\")": false
+      "type:SkilledEnough.SkilledEnoughTools::headerText.color.r": 1

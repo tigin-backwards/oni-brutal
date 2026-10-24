@@ -1,0 +1,65 @@
+# Polluted Water Evaporator (2860925029), class B.
+#
+# What it does: adds the Polluted Water Evaporator (Oxygen menu, researched with Directed Air
+# Streams; 2x2 of any metal, 60 W, a liquid input and a logic input): it takes polluted water
+# from its pipe (1 kg/s, storing up to 600 kg) and turns it into polluted oxygen at 30 C,
+# 1 kg/s, released beside it until the gas there passes 1.8 kg (an Electrolyzer).
+# How a player reaches it: the build menu (Oxygen), after research.
+# What changes: polluted water becomes breathable-ish gas, for power.
+#
+# setup grants Directed Air Streams. Its product card in the build menu is shot. A working
+# evaporator then needs a floor, power and polluted water, which setup builds (BuildingDef.
+# Build) in the dug-out corridor west of the printing pod, at (109..112, 207..209): four
+# sandstone tiles under it, a charged Battery at (114, 208) wired to it, and a liquid pipe on
+# its input port at (110, 209) holding 10 kg of polluted water. When the game runs the water
+# flows into its storage. The corridor's air (about 2 kg a cell) is above the 1.8 kg the
+# evaporator emits into, so it waits as overpressured and converts nothing: the conversion
+# itself is not reached on early-base.
+from: early-base
+mods: [2860925029]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"DirectedAirStreams\")", method: Purchased}}
+  - driver: {setup.call: {target: "Game.Instance", method: Trigger, args: [-107300940]}}
+  - driver: {setup.call: {target: "PlanScreen.Instance._researchedDefs", method: Clear}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Tile\")", method: Build, args: [131761, Neutral, null, [SandStone], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Tile\")", method: Build, args: [131762, Neutral, null, [SandStone], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Tile\")", method: Build, args: [131763, Neutral, null, [SandStone], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Tile\")", method: Build, args: [131764, Neutral, null, [SandStone], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"PollutedWaterEvaporator\")", method: Build, args: [132398, Neutral, null, [Cuprite], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Battery\")", method: Build, args: [132402, Neutral, null, [Cuprite], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "last:GetComponent<Battery>", method: AddEnergy, args: [10000.0]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Wire\")", method: Build, args: [132398, Neutral, null, [Cuprite], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Wire\")", method: Build, args: [132399, Neutral, null, [Cuprite], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Wire\")", method: Build, args: [132400, Neutral, null, [Cuprite], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Wire\")", method: Build, args: [132401, Neutral, null, [Cuprite], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Wire\")", method: Build, args: [132402, Neutral, null, [Cuprite], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Game.Instance.electricalConduitSystem", method: SetConnections, args: ["Right", 132398, true]}}
+  - driver: {setup.call: {target: "Game.Instance.electricalConduitSystem", method: SetConnections, args: ["Left, Right", 132399, true]}}
+  - driver: {setup.call: {target: "Game.Instance.electricalConduitSystem", method: SetConnections, args: ["Left, Right", 132400, true]}}
+  - driver: {setup.call: {target: "Game.Instance.electricalConduitSystem", method: SetConnections, args: ["Left, Right", 132401, true]}}
+  - driver: {setup.call: {target: "Game.Instance.electricalConduitSystem", method: SetConnections, args: ["Left", 132402, true]}}
+  - driver: {setup.call: {target: "Game.Instance.electricalConduitSystem", method: ForceRebuildNetworks}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LiquidConduit\")", method: Build, args: [133033, Neutral, null, [SandStone], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LiquidConduit\")", method: Build, args: [133034, Neutral, null, [SandStone], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Game.Instance.liquidConduitSystem", method: ForceRebuildNetworks}}
+  - driver: {setup.call: {target: "Game.Instance.liquidConduitSystem", method: Update}}
+  - driver: {setup.call: {target: "Game.Instance.liquidConduitFlow", method: AddElement, args: [133034, DirtyWater, 10.0, 300.0, 255, 0]}}
+steps:
+  - expect_state:
+      "Grid.Objects.get_Item(132398, 1).GetComponent<Storage>.GetMassAvailable(\"DirtyWater\")": 0
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [111, 209], ortho: 8}}
+  - click: {ui: "**/PlanScreen/Toggle:Oxygen"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/PollutedWaterEvaporator Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/PollutedWaterEvaporator Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
+  - shot: {name: product, crop: "**/ProductInfoScreen", threshold: 0.04}
+  - key: {code: Escape}
+  - run: {seconds: 20}
+  # The corridor's air is about 2 kg a cell, above the 1.8 kg the mod lets it emit into: it
+  # stops as overpressured, as in the original.
+  - expect_state:
+      "Grid.Objects.get_Item(132398, 1).GetComponent<Storage>.GetMassAvailable(\"DirtyWater\")": ">= 9.9"
+      "Game.Instance.liquidConduitFlow.GetContents(133034).mass": "< 0.1"
+      "Grid.Objects.get_Item(132398, 1).GetComponent<EnergyConsumer>.IsPowered": true
+      "Grid.Objects.get_Item(132398, 1).GetComponent<Electrolyzer>.RoomForPressure": false

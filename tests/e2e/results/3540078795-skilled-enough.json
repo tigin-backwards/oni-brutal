@@ -1,0 +1,79 @@
+{
+ "spec": "mods/3540078795-skilled-enough.yaml",
+ "mods": [
+  "3540078795"
+ ],
+ "verdict": "failed",
+ "why": "a run of ours failed",
+ "findings": [],
+ "note": "spec fails in ours: the mod's button on the Skills screen tags the Duplicant and greys its level, and a second click undoes it (dumps as in the original); after the click the original draws the HUD (top-left panel, notifications, build and tool menus, planetoid list) over the Skills screen and ours does not (9.2 % of the screen's pixels differ, twice in the original)",
+ "updated": "2026-10-24",
+ "commit": "e235451",
+ "mod_dlls": {
+  "3540078795": {
+   "SkilledEnough.dll": "92fc49158413f27dc2a8842dd4065a4a66e5f2ce2a93108d3910ab31ddf87382"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-114728-37561f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T11:49:21",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-123819-18c5fa",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-24T13:02:33",
+    "lane": 15,
+    "reasons": [
+     "shot screen: 9.22% of pixels differ (> 4%)"
+    ],
+    "reference_run": "20261024-114728-37561f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "level": {
+      "differences": 0
+     },
+     "level-suppressed": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "screen": 0.092172
+    }
+   },
+   {
+    "run": "20261024-123819-18c5fa",
+    "index": 2,
+    "verdict": "fail",
+    "date": "2026-10-24T13:02:35",
+    "lane": 14,
+    "reasons": [
+     "shot screen: 9.35% of pixels differ (> 4%)"
+    ],
+    "reference_run": "20261024-114728-37561f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "level": {
+      "differences": 0
+     },
+     "level-suppressed": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "screen": 0.093482
+    }
+   }
+  ]
+ }
+}

@@ -792,7 +792,13 @@ written directly) stands in for the Steam client. `scripts/run-windows.sh` uses 
 `Debug.Log*` and the logger/handler surface behave as Unity's (the game replaces the handler).
 Our engine logs through `Brutal.Logging` into the same Player.log-style file
 (`~/.config/unity3d/Klei/Oxygen Not Included/Player.log`), with engine messages tagged
-`[engine]`. GL debug output is enabled in debug builds.
+`[engine]`. GL debug output is enabled in debug builds. As the original release player does
+(UnityProbe's logging scenario), a message of any type (Log, Warning, Error) is written with no
+stack trace, and its callbacks get an empty one, although `Application.GetStackTraceLogType`
+reports ScriptOnly for each type. An exception gets its own frames, innermost exception first, in
+Mono's format (`  at A.B (System.String s) [0x0001f] in <mvid>:0`), then the managed frames of the
+`LogException` call in Unity's (`A:B(String)`), the engine's frames left out where the original's
+are native (`Engine/LogTraces.cs`).
 
 Development diagnostics (host options, never needed by players): `--trace-exceptions` logs every
 first-chance exception with per-frame IL offsets (the game ships without symbols; the offset

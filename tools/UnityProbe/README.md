@@ -244,6 +244,21 @@ the engine's colour table from the original's log with `sv-check.py cs LOG`. Mea
 2026-10-23: 157 named colours, none on `Color32`; `isIncremental` False; alignment Left by
 default and any value read back as set. `ModApiTests` encodes them.
 
+With `PROBE_SCENARIO=logging` only the logging probe runs (`Logging.cs`, lines `LOG …`, 10 s into
+the main menu): each log type through `UnityEngine.Debug`, `Debug.unityLogger` and Klei's `Debug`,
+between `LOG case NAME begin` and `end` lines so that the text the player writes for it lies in
+between, with what `Application.logMessageReceived` got (condition and stack trace); then
+`Application.GetStackTraceLogType` per type, the same calls with every type set to None and to
+Full, and exceptions left uncaught in an Update and a coroutine. Measured 2026-10-24 (U57): every
+type reports ScriptOnly, yet messages (Log, Warning, Error, an Exception-typed message) get no
+stack trace, in the log or the callbacks. An exception's text is its innermost "Type: message",
+the frames of each exception in Mono's format (`  at A.B () [0x00000] in <mvid>:0 `, then
+"Rethrow as Outer: message" and the outer one's), the managed frames of the logging call in
+Unity's (`UnityEngine.Debug:LogException(Exception)`, `A:B(String, Action)`, a nested type named
+`Namespace.<>c`), and an empty line; the callbacks get the frames as `A.B () (at <mvid>:0)` and the
+call from `UnityEngine.Debug`'s frame on. An exception from Update has its own frames alone. None
+gives no trace for exceptions either; Full gives native frames. `LogTracesTests` encodes it.
+
 ## UI semantics (`UiSemantics.cs`, `UIS` lines)
 
 Ten seconds into the front end, after the front-end dump, it builds small hierarchies on an

@@ -25,9 +25,10 @@ RUNTIME_FRAME = re.compile(r'^(System|Interop|Microsoft|Mono)\.|^UnityEngine\.(D
 
 def canonical(signature):
     """A signature as both runtimes write it: Mono and .NET word some exception messages
-    differently ('…'. against "…", a trailing period or none) and format stack frames
-    differently ("at A.B (x) [N] in <…>:N", "A:B (x)"). Idempotent, so it also applies to
-    signatures stored by an earlier version (references)."""
+    differently ('…'. against "…", a trailing period or none), and stack frames come as
+    "at A.B (x) [N] in <…>:N" (an exception's own, in both players; with symbols, in a file),
+    "A:B(x)" (Unity's) and "A:B (x)" (ours before 2026-10-24). Idempotent, so it also applies
+    to signatures stored by an earlier version (references)."""
     message, _, frame = signature.partition(' @ ')
     message = re.sub(r'\.$', '', message.replace("'", '"').rstrip())
     # A path into the run's own folder (out/e2e/SPEC/RUN_ID/PLAYER-N/home/...) names the run
@@ -35,7 +36,9 @@ def canonical(signature):
     message = re.sub(r'/[^"\s]*/(?:original|ours)-N/home/', 'RUN/home/', message)
     if frame:
         frame = re.sub(r'^at ', '', frame.strip())
-        frame = re.sub(r' (\[N\] )?in <[^>]*>(:N)?$', '', frame)
+        # Mono's location: "[0x…] in <mvid>:0", or the source file with symbols (ours has the
+        # engine's).
+        frame = re.sub(r' (\[N\] in .*|in <[^>]*>(:N)?)$', '', frame)
         frame = re.sub(r'\s*\(.*\)$', '', frame).replace(':', '.')
         if RUNTIME_FRAME.search(frame):
             frame = ''

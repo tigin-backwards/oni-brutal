@@ -104,11 +104,15 @@ namespace OniBrutal.Engine
             }
         }
 
-        public static void Message(LogType type, string message, string stackTrace)
+        public static void Message(LogType type, string message, string stackTrace) => Message(type, message, stackTrace, stackTrace);
+
+        /// A message whose log text has another stack trace than its callbacks get (an exception's:
+        /// LogTraces.Exception). A trace ends with a line break, so the text then ends with an empty
+        /// line; a message without one is a line of its own.
+        public static void Message(LogType type, string message, string logTrace, string callbackTrace)
         {
-            var text = stackTrace.Length > 0 ? message + "\n" + stackTrace : message;
-            WriteRaw(text);
-            Dispatch(message, stackTrace, type);
+            WriteRaw(logTrace.Length > 0 ? message + "\n" + logTrace : message);
+            Dispatch(message, callbackTrace, type);
         }
 
         static void Dispatch(string condition, string stackTrace, LogType type)
@@ -124,54 +128,9 @@ namespace OniBrutal.Engine
             while (pendingMainThread.TryDequeue(out var m)) Application.RaiseLogMessage(m.condition, m.stackTrace, m.type);
         }
 
-        /// A managed stack trace in Unity's format ("Type:Method (ArgTypes)" per line), starting at
-        /// the first frame outside the logging machinery.
-        public static string CaptureStackTrace()
-        {
-            var trace = new StackTrace(1, true);
-            var sb = new StringBuilder();
-            foreach (var frame in trace.GetFrames())
-            {
-                var m = frame.GetMethod();
-                if (m == null) continue;
-                var t = m.DeclaringType;
-                if (t == typeof(EngineLog) || t?.Namespace == "OniBrutal.Engine.Logging") continue;
-                AppendFrame(sb, m, frame);
-            }
-            return sb.ToString();
-        }
-
-        public static string FormatException(Exception e)
-        {
-            var sb = new StringBuilder();
-            for (var ex = e; ex != null; ex = ex.InnerException)
-            {
-                var trace = new StackTrace(ex, true);
-                foreach (var frame in trace.GetFrames())
-                {
-                    var m = frame.GetMethod();
-                    if (m != null) AppendFrame(sb, m, frame);
-                }
-                if (ex.InnerException != null) sb.Append("Rethrow as ").Append(ex.GetType().Name).Append(": ").Append(ex.Message).Append('\n');
-            }
-            return sb.ToString();
-        }
-
-        static void AppendFrame(StringBuilder sb, MethodBase m, StackFrame frame)
-        {
-            var t = m.DeclaringType;
-            sb.Append(t != null ? t.FullName : "<unknown>").Append(':').Append(m.Name).Append(" (");
-            var ps = m.GetParameters();
-            for (int i = 0; i < ps.Length; i++)
-            {
-                if (i > 0) sb.Append(',');
-                sb.Append(ps[i].ParameterType.Name);
-            }
-            sb.Append(')');
-            var file = frame.GetFileName();
-            if (file != null) sb.Append(" (at ").Append(file).Append(':').Append(frame.GetFileLineNumber()).Append(')');
-            sb.Append('\n');
-        }
+        /// The managed stack of the caller in Unity's format ("Type:Method(ArgTypes)" per line), the
+        /// engine's frames included, with their source lines. For engine diagnostics.
+        public static string CaptureStackTrace() => LogTraces.Calls(new StackTrace(1, true), engineFrames: true);
     }
 }
 
@@ -258,14 +217,18 @@ namespace OniBrutal.Engine.Logging
     {
         public void LogFormat(LogType logType, UnityEngine.Object context, string format, params object[] args)
         {
+            // A release player writes no stack trace for a message of any type, although
+            // Application.GetStackTraceLogType says ScriptOnly for each, and its callbacks get an
+            // empty one (measured: UnityProbe's logging scenario).
             string message = args == null || args.Length == 0 ? format : string.Format(format, args);
-            EngineLog.Message(logType, message, EngineLog.CaptureStackTrace());
+            EngineLog.Message(logType, message, "");
         }
 
         public void LogException(Exception exception, UnityEngine.Object context)
         {
             if (exception == null) throw new ArgumentNullException(nameof(exception));
-            EngineLog.Message(LogType.Exception, exception.GetType().Name + ": " + exception.Message, EngineLog.FormatException(exception));
+            var report = LogTraces.Exception(exception, new StackTrace(1, true));
+            EngineLog.Message(LogType.Exception, report.Condition, report.LogTrace, report.CallbackTrace);
         }
     }
 }

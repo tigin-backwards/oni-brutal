@@ -28,13 +28,50 @@ class LogSignatures(unittest.TestCase):
                           '  at DraggableUI.State.Load () [0x00000] in <bb>:0\n')
         self.assertEqual(ours, mono)
 
-    def test_logged_error_frames(self):
-        ours = signatures('[12:00:01.000] [1] [ERROR] Could not find ChoreGroup:\n'
-                          'UnityEngine.Debug:LogError (object)\n'
-                          'CharacterContainer:SetInfoText ()\n')
-        mono = signatures('[12:00:01.000] [1] [ERROR] Could not find ChoreGroup:\n'
-                          '  at CharacterContainer.SetInfoText () [0x00012] in <abc123>:0\n')
+    def test_logged_error_then_exception(self):
+        # Neither player writes a stack trace for an error (UnityProbe's logging scenario); an
+        # exception's own frames are in Mono's format in both, then the logging call's frames.
+        ours = signatures('[08:02:46.562] [1] [ERROR] Could not find ChoreGroup: \n'
+                          'Could not find ChoreGroup: \n'
+                          'NullReferenceException: Object reference not set to an instance of an object.\n'
+                          '  at CharacterContainer.SetInfoText () [0x007d7] in <b4ac>:0 \n'
+                          '  at CharacterContainer+<DelayedGeneration>d__67.MoveNext () [0x00045] in <b4ac>:0 \n'
+                          'LogCatcher:UnityEngine.ILogHandler.LogException(Exception, Object)\n'
+                          '\n')
+        mono = signatures('[07:57:30.972] [1] [ERROR] Could not find ChoreGroup: \n'
+                          'Could not find ChoreGroup: \n'
+                          'NullReferenceException: Object reference not set to an instance of an object\n'
+                          '  at CharacterContainer.SetInfoText () [0x007d7] in <b4ac>:0 \n'
+                          '  at UnityEngine.SetupCoroutine.InvokeMoveNext (System.Collections.IEnumerator enumerator, '
+                          'System.IntPtr returnValueAddress) [0x00026] in <49b3>:0 \n'
+                          'UnityEngine.DebugLogHandler:Internal_LogException_Injected(Exception, IntPtr)\n'
+                          'LogCatcher:UnityEngine.ILogHandler.LogException(Exception, Object)\n'
+                          'UnityEngine.Logger:LogException(Exception, Object)\n'
+                          'UnityEngine.Debug:CallOverridenDebugHandler(Exception, Object)\n'
+                          '\n')
         self.assertEqual(ours, mono)
+        self.assertIn('Could not find ChoreGroup: @ CharacterContainer.SetInfoText', mono)
+
+    def test_unity_frames_with_and_without_the_space(self):
+        # Unity writes "A:B(x)"; ours wrote "A:B (x) (at file)" until 2026-10-24, which signatures
+        # stored then (references) still hold.
+        old = signatures('[12:00:01.000] [1] [ERROR] Could not find ChoreGroup:\n'
+                         'UnityEngine.Debug:LogError (Object) (at /src/Core/Debug.cs:28)\n'
+                         'CharacterContainer:SetInfoText ()\n')
+        new = signatures('[12:00:01.000] [1] [ERROR] Could not find ChoreGroup:\n'
+                         'UnityEngine.Debug:LogError(Object)\n'
+                         'CharacterContainer:SetInfoText()\n')
+        self.assertEqual(old, new)
+
+    def test_a_frame_with_its_source_file(self):
+        # The engine has symbols: Mono's format then names the file where the original names <mvid>.
+        ours = signatures('NullReferenceException: x\n'
+                          '  at UnityEngine.Transform.set_parent (UnityEngine.Transform value) [0x00012] in '
+                          '/w/src/OniBrutal.UnityEngine/Core/Transform.cs:40 \n')
+        mono = signatures('NullReferenceException: x\n'
+                          '  at UnityEngine.Transform.set_parent (UnityEngine.Transform value) [0x00012] in <abc>:0 \n')
+        self.assertEqual(ours, mono)
+        self.assertEqual(mono, ['NullReferenceException: x @ UnityEngine.Transform.set_parent'])
 
     def test_run_folder_is_masked(self):
         # The original and ours run in separate invocations, each in a folder of its run id.

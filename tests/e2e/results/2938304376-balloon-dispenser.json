@@ -1,0 +1,91 @@
+{
+ "spec": "mods/2938304376-balloon-dispenser.yaml",
+ "mods": [
+  "2938304376"
+ ],
+ "verdict": "warning",
+ "why": "known findings: scroll-normalized-position",
+ "findings": [
+  "scroll-normalized-position"
+ ],
+ "note": "the Balloon Dispenser's card opens in the Furniture menu after Home Luxuries; it is built of steel and selected (unpowered, without gas): the mod's side screen shows its balloon skins, and its Enable Manual Delivery and Activate All buttons switch hand delivery and every skin on; card and side screen compared",
+ "updated": "2026-10-24",
+ "commit": "33010ee",
+ "mod_dlls": {
+  "2938304376": {
+   "BawoonFwiend.dll": "0fb6e3474be529c2cf6eaba8799ed9cde5fb2a33db77d76d31f8372f8e1ea19c"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-124512-aa774e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T12:45:12",
+    "lane": 12,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-124701-48132b",
+    "index": 2,
+    "verdict": "warn",
+    "date": "2026-10-24T12:47:02",
+    "lane": 13,
+    "reference_run": "20261024-124512-aa774e",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "side-screen": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     },
+     "side-screen-on": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "product": 0.007747
+    }
+   },
+   {
+    "run": "20261024-124701-48132b",
+    "index": 1,
+    "verdict": "warn",
+    "date": "2026-10-24T12:47:01",
+    "lane": 12,
+    "reference_run": "20261024-124512-aa774e",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "side-screen": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     },
+     "side-screen-on": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "product": 0.007747
+    }
+   }
+  ]
+ }
+}

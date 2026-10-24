@@ -1,0 +1,47 @@
+# Balloon Dispenser (2938304376), classes B, S (PLib options).
+#
+# What it does: adds the Balloon Dispenser (BF_BalloonStation) to Furniture after the Espresso
+# Machine, researched with Luxury (Home Luxuries): a 1x2 recreation building of refined metal
+# (250 kg) that takes 480 W and hydrogen or oxygen through a gas input (or delivered by hand)
+# and gives a passing Duplicant on its break a balloon, as a Balloon Artist would, with a
+# weaker morale bonus ("Just a Machine"). Its side screen picks which balloon skins it hands
+# out (all, random, or chosen ones) and switches hand delivery of the gas on or off.
+# How a player reaches it: the build menu (Furniture), after research; selecting it.
+# What changes: balloons without a Balloon Artist.
+#
+# setup grants Home Luxuries and spawns steel. The dispenser is picked in the Furniture menu,
+# placed in the dug-out corridor west of the printing pod, built and selected (unpowered,
+# without gas): the mod's side screen shows; its delivery button switches hand delivery on and
+# Activate All enables every balloon skin.
+from: early-base
+mods: [2938304376]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"Luxury\")", method: Purchased}}
+  - driver: {setup.call: {target: "Game.Instance", method: Trigger, args: [-107300940]}}
+  - driver: {setup.call: {target: "PlanScreen.Instance._researchedDefs", method: Clear}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Steel\").substance", method: SpawnResource, args: [[109.5, 206.5, -12], 400, 300, 255, 0]}}
+steps:
+  - run: {seconds: 5}
+  - driver: {camera.set: {cell: [113, 208], ortho: 10}}
+  - click: {ui: "**/PlanScreen/Toggle:Furniture"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/BF_BalloonStation Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/BF_BalloonStation Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
+  - shot: {name: product, crop: "**/ProductInfoScreen", threshold: 0.04}
+  - click_world: {cell: [113, 206]}
+  - key: {code: Escape}
+  - expect: {blueprints: {BF_BalloonStation: 1}}
+  - run: {seconds: 1200, until: {buildings: {BF_BalloonStation: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [113, 207], ortho: 8}}
+  - click_world: {cell: [113, 207], select: BF_BalloonStation}
+  - ui_wait: {path: "**/BalloonStationSkinSelectorSidescreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<BawoonFwiend.Bawoongiver>.UseManualDelivery": false
+      "selected:GetComponent<BawoonFwiend.Bawoongiver>.ToggleAllBtnOn": false
+  - ui_dump: {name: side-screen, root: "**/BalloonStationSkinSelectorSidescreen"}
+  - click: {text: "Enable Manual Delivery", under: "**/BalloonStationSkinSelectorSidescreen"}
+  - click: {text: "Activate All", under: "**/BalloonStationSkinSelectorSidescreen"}
+  - expect_state:
+      "selected:GetComponent<BawoonFwiend.Bawoongiver>.UseManualDelivery": true
+      "selected:GetComponent<BawoonFwiend.Bawoongiver>.ToggleAllBtnOn": true
+  - ui_dump: {name: side-screen-on, root: "**/BalloonStationSkinSelectorSidescreen"}

@@ -28,8 +28,9 @@ inferred from the shipped data, the dylibs' symbol tables were read as data.
 | Program loading per platform: `ShaderPrograms.Load(shader, 14 or 15)`, Metal variants per stage (`ShaderPass.MetalVertexVariants`, `MetalFragmentVariants`), `ShaderPrograms.SelectStages`, `ShaderNative.ProgramsFor`, `RenderDevice.ShaderPlatform` | `src/OniBrutal.UnityEngine/Engine/Rendering/ShaderPrograms.cs`, `ShaderNative.cs`, `RenderDevice.cs` | `tests/OniBrutal.UnityEngine.Tests/MetalShaderProgramTests.cs`; the GLCore path is unchanged: every GLCore variant of the Linux and Mac data (583 and 596) decodes to the same keywords, stage sources and channel masks before and after (a scratch comparison, not kept) |
 | Metal parameters against GLCore's | `tools/ShaderSurvey` `compare-metal` (`MetalCompare.cs`), `check-metal` | §2; `scripts/check.sh` runs both when the Mac data is present |
 | Constant-buffer packer | `src/OniBrutal.Desktop/Metal/MetalConstantBuffers.cs` | `tests/OniBrutal.UnityEngine.Tests/MetalConstantBufferTests.cs`: §2.3 |
-| osx-x64 cross-publish | `scripts/check.sh` | self-contained publish, x86_64 Mach-O apphost, every gate run |
-| Native interface | `src/OniBrutal.Host/NativeCheck.cs` (`--check-natives`), `src/OniBrutal.UnityEngine/Engine/Platform/NativeExports.cs` | §2.4; `NativeExportsTests` on hand-built Mach-O and ELF files |
+| osx-arm64 cross-publish (the primary build) and osx-x64 (the fallback) | `scripts/check.sh` | self-contained publishes, arm64 and x86_64 Mach-O apphosts, every gate run; the arm64 one carries BRUTAL's dylibs and, when at hand, onimaxxing-sim in `plugins/` |
+| Native interface, both architectures | `src/OniBrutal.Host/NativeCheck.cs` (`--check-natives`, `--native-arch`, `--native-dir`), `src/OniBrutal.UnityEngine/Engine/Platform/NativeExports.cs` (slices, ELF machine, Mach-O dependencies) | §2.4; `NativeExportsTests` on hand-built Mach-O and ELF files |
+| SimDLL replacement for arm64 | `GameLayout.Native`, `AssemblyPolicy.ResolveNative`: a plugin without the process's architecture gives way to `plugins/lib<name>.dylib` | `GameLayoutTests`; the port bound on Linux with `--native-override` (study §3.4) |
 | Mac host paths | `src/OniBrutal.UnityEngine/Engine/Platform/GameLayout.cs` (`GameLayout`, `MacUserFolders`), `Program.cs` (`Paths.ConfigureMac`), `AssemblyPolicy.ResolveNative` | `GameLayoutTests` on fake `.app` trees; `--check-assets` and `--check-natives` read the depot's bundle on Linux |
 
 ---
@@ -126,16 +127,20 @@ that already have them (§6).
 `OniBrutal --game <dir or .app> --check-natives` reads every P/Invoke of the assemblies the host
 runs with (its own, the UI packages, and those of `Managed/` the policy would load), resolves each
 library as the host does for the install's layout, and reads the exports of the plugin file
-without loading it. On the Mac depot:
+without loading it. It reads the slice of `--native-arch` (x86_64 or arm64) and lists the
+dependencies each Mach-O slice links, which must be found. On the Mac depot:
 
-| Library | Result |
-|---|---|
-| SimDLL (`SimDLL.bundle/Contents/MacOS/SimDLL`, thin x86_64) | 32 of 32 entry points exported |
-| fmodstudio (universal x86_64 + arm64) | 571 of 571 |
-| steam_api (`libsteam_api.dylib`, universal) | 924 of 930; the 6 missing (`SteamGameServerClient`, `SteamGameServer_ReleaseCurrentThreadMemory`, four `ISteamNetworkingConnectionSignaling`/`SignalingRecvContext` functions) are missing from Linux's `libsteam_api.so` too: Steamworks.NET 20.1.0 binds a newer SDK than the game's; never called, and a P/Invoke binds at its first call |
-| cimgui, libEOSSDK-Mac-Shipping, rail_api64, sdkencryptedappticket | not shipped in the bundle: Klei's dev tools are compiled out on Mac; no EOS platform is created; Rail is WeGame's; no game assembly names the encrypted-ticket API |
-| glfw, freetype, stb, glad | BRUTAL's: resolved from its packages, which ship no osx-x64 natives (study §3.2): **the gap to close in Phase 1** |
-| libc, dl, libSystem, kernel32… | system libraries (0Harmony and MonoMod probe all platforms') |
+| Library | x86_64 (fallback) | arm64 (primary, `--native-dir out/publish/osx-arm64`) |
+|---|---|---|
+| SimDLL | Klei's `SimDLL.bundle/Contents/MacOS/SimDLL` (thin x86_64): 32 of 32 | Klei's has no arm64 code; onimaxxing-sim from `plugins/libSimDLL.dylib`: 16 of 32, the other 16 the `kprofiler_*` functions no game code calls (study §3.4) |
+| fmodstudio (universal) | 571 of 571 | 571 of 571 |
+| steam_api (`libsteam_api.dylib`, universal) | 924 of 930; the 6 missing (`SteamGameServerClient`, `SteamGameServer_ReleaseCurrentThreadMemory`, four `ISteamNetworkingConnectionSignaling`/`SignalingRecvContext` functions) are missing from Linux's `libsteam_api.so` too: Steamworks.NET 20.1.0 binds a newer SDK than the game's; never called, and a P/Invoke binds at its first call | the same |
+| cimgui, libEOSSDK-Mac-Shipping, rail_api64, sdkencryptedappticket | not shipped in the bundle: Klei's dev tools are compiled out on Mac; no EOS platform is created; Rail is WeGame's; no game assembly names the encrypted-ticket API | the same |
+| glfw, freetype, stb, glad | BRUTAL's: its packages ship no osx-x64 natives (study §3.2), the gap to close for the fallback | BRUTAL's osx-arm64 dylibs in the publish: glfw 138 of 154 (the 16 absent are GLX, WGL, Wayland, Win32 and X11 accessors), freetype 15 of 15 with `libpng18.18` and `libzlib.1` found beside it, stb 17 of 17, glad 2 of 2 |
+| libc, dl, libSystem, kernel32… | system libraries (0Harmony and MonoMod probe all platforms') | the same |
+
+Each of the port's four dylibs (arm64 and x86_64, sim-thread and default) gives the same 16 of
+32, with `libSystem.B.dylib` its only dependency.
 
 On the Linux install the same check finds SimDLL, fmodstudio and steam_api complete but for the
 same six, and Linux's `cimgui.so` lacking `SetKAssertCB` (ARCHITECTURE D20), which validates the
@@ -215,7 +220,9 @@ on the large colony (`docs/research/u57-frame-inventory.md` method) to keep the 
   `MTLLibrary`… as `readonly struct` handles) for about 150 selectors, plus `MTLCreateSystemDefaultDevice`
   from `Metal.framework`. Structs by value as Apple declares them: `MTLRegion` (48 bytes),
   `MTLViewport` (6 doubles), `MTLScissorRect`, `MTLClearColor`, `MTLSize`, `MTLOrigin`.
-- **x86_64 under Rosetta:** a struct return larger than 16 bytes goes through
+- **arm64** (the primary build) has no `objc_msgSend_stret`: every call goes through
+  `objc_msgSend`, struct returns included.
+- **x86_64 under Rosetta (the fallback):** a struct return larger than 16 bytes goes through
   `objc_msgSend_stret` (arm64 has none). The device needs few (`MTLSize`-returning getters such as
   `maxThreadsPerThreadgroup`, avoidable). Struct *arguments* by value follow the SysV ABI through a
   typed function pointer. Double returns (`GPUStartTime`) use plain `objc_msgSend` on x86_64.
@@ -366,13 +373,13 @@ or buffer the GPU is still reading races with it. The design keeps GL's semantic
   again after a draw of the same frame has read it gets a new version (a fresh `MTLTexture` from a
   per-size pool) for the later draws, the renaming GL drivers do; the old version returns to the
   pool when its frame completes. `GlTextures.UploadChanged`'s row diffing carries over.
-- **Shared, managed, private under Rosetta.** The process is x86_64, the GPU is the Mac's: on Apple
-  Silicon all storage is unified memory; `Shared` buffers are CPU-visible without copies and
+- **Shared, managed, private.** The primary build is native arm64 on Apple Silicon; the fallback
+  is an x86_64 process under Rosetta. On Apple Silicon all storage is unified memory; `Shared` buffers are CPU-visible without copies and
   `Managed` behaves as `Shared` (its `didModifyRange` costs nothing). On Intel Macs with discrete
   GPUs, `Shared` textures are not allowed and `Managed` costs a transfer. So: `Shared` for the ring
   and readback buffers on both; `Private` + blit for textures on both (no per-architecture paths).
-  Rosetta translates the x86_64 slices of Apple's frameworks too, so each Metal call costs more
-  than natively: the design minimises calls per draw (offset rebinding, state caching, one encoder
+  Under Rosetta (the fallback), the x86_64 slices of Apple's frameworks are translated too, so each
+  Metal call costs more than natively: the design minimises calls per draw (offset rebinding, state caching, one encoder
   per pass), and the frame counters (`TakeFrameCounters`) count them.
 
 ---
@@ -417,13 +424,15 @@ about 1000 moved out of `Gl/`.
 
 ## 11. Test plan for when a Mac exists
 
-An Apple Silicon Mac (Rosetta is where the risk is), with the game installed by Steam; an Intel
-Mac as a second check.
+An Apple Silicon Mac (the primary arm64 build runs there natively, and the fallback under
+Rosetta), with the game installed by Steam; an Intel Mac as a second check of the fallback.
 
-1. **Platform port** (no Metal): `scripts/check.sh` on the Mac (unit tests under Rosetta,
-   `--check-natives` loading nothing, `--check-assets`), then `NativeLibrary.Load` of SimDLL,
-   fmodstudio and libsteam_api from the bundle (a host `--check-natives --load` variant), then the
-   headless player (`--headless --frames N`) loading a save with the real SimDLL. Shakes out the
+1. **Platform port** (no Metal), arm64 first: `scripts/check.sh` on the Mac (unit tests natively,
+   `--check-natives` loading nothing, `--check-assets`). Then `NativeLibrary.Load` of the port from
+   `plugins/` and of fmodstudio and libsteam_api from the bundle (a host `--check-natives --load`
+   variant), and a Harmony patch applied and called (study R11). Then the headless player
+   (`--headless --frames N`) loading a save with onimaxxing-sim, its log naming the port's
+   SYSINFO banner. Then the x86_64 build with Klei's SimDLL under Rosetta, which shakes out the
    CoreCLR-under-Rosetta hangs (study §3.1): 200 launches.
 2. **Interop smoke** (`MetalSmokeTests`, skipped off macOS): device, queue, a trivial MSL library,
    an offscreen triangle read back; struct sizes against the real framework.
@@ -458,8 +467,10 @@ Mac as a second check.
 | Q7 | Unity's Mac `persistentDataPath` form for this game (bundle identifier vs company/product) and the log path | Where Klei's Mac player writes `save_files` and `Player.log` on a Mac with saves. |
 | Q8 | What Steam's `%command%` passes on macOS (the `.app` or its executable) | A launch option running a script that logs its arguments. |
 | Q9 | Whether FMOD finds `resonanceaudio`/`fmod_haptics` from FMODUnity's Mac plugin path with `dataPath = Contents` | Run with FMOD's logging on; FMODUnity's `Platform` code (game code we may read) names the folder. |
-| Q10 | Klei-signed dylibs loaded by an unsigned or ad-hoc-signed x86_64 process (library validation off without the hardened runtime) | The headless run of §11.1. |
+| Q10 | Klei-signed dylibs loaded by an ad-hoc-signed arm64 process (and an unsigned or ad-hoc-signed x86_64 one), and the zig-linked port once ad-hoc signed (library validation off without the hardened runtime) | The headless runs of §11.1. |
 | Q11 | `CAMetalLayer` on a GLFW `NO_API` window: does GLFW's Cocoa view keep our layer across full-screen toggles and monitor changes? | Toggle full screen and move between Retina and non-Retina monitors with the layer's scale logged. |
 | Q12 | `MTLBinaryArchive` under Rosetta: are archives keyed so x86_64 processes reuse them? | Second-run load times with and without the archive. |
 | Q13 | Mod shaders in pre-2021.2 bundles carrying Metal programs (legacy keyword lists) | Survey the Workshop catalog's bundles (`out/ws`) for platform 14 programs; the legacy reader handles GLCore only today. |
-| Q14 | BRUTAL's osx-x64 natives (glfw, freetype/png/zlib, stb): built by us or upstream | Study §3.2 options; `--check-natives` will list them as found once a package carries them. |
+| Q14 | BRUTAL's osx-x64 natives (glfw, freetype/png/zlib, stb) for the fallback: built by us or upstream (the arm64 build has them) | Study §3.2 options; `--check-natives --native-arch x86_64 --native-dir` will list them as found once a package carries them. |
+| Q15 | Harmony 2.4.2 on osx-arm64 CoreCLR (arm64 detours, W^X): the host's patches, the game tweaks, mods | §11.1's Harmony step, then the headless player with `--game-tweak all`. |
+| Q16 | onimaxxing-sim on macOS: does it run a colony as on Linux, where does its `oni-ffi.log` go (it reads `$TEMP`/`$TMP`, not `$TMPDIR`), and how fast is it on Apple Silicon against Klei's under Rosetta | The headless run of §11.1; §11.7's frame times. |

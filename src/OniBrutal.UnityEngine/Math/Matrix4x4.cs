@@ -86,30 +86,47 @@ namespace UnityEngine
         public static Matrix4x4 operator *(Matrix4x4 lhs, Matrix4x4 rhs)
         {
             Matrix4x4 r;
-            r.m00 = lhs.m00 * rhs.m00 + lhs.m01 * rhs.m10 + lhs.m02 * rhs.m20 + lhs.m03 * rhs.m30;
-            r.m01 = lhs.m00 * rhs.m01 + lhs.m01 * rhs.m11 + lhs.m02 * rhs.m21 + lhs.m03 * rhs.m31;
-            r.m02 = lhs.m00 * rhs.m02 + lhs.m01 * rhs.m12 + lhs.m02 * rhs.m22 + lhs.m03 * rhs.m32;
-            r.m03 = lhs.m00 * rhs.m03 + lhs.m01 * rhs.m13 + lhs.m02 * rhs.m23 + lhs.m03 * rhs.m33;
-            r.m10 = lhs.m10 * rhs.m00 + lhs.m11 * rhs.m10 + lhs.m12 * rhs.m20 + lhs.m13 * rhs.m30;
-            r.m11 = lhs.m10 * rhs.m01 + lhs.m11 * rhs.m11 + lhs.m12 * rhs.m21 + lhs.m13 * rhs.m31;
-            r.m12 = lhs.m10 * rhs.m02 + lhs.m11 * rhs.m12 + lhs.m12 * rhs.m22 + lhs.m13 * rhs.m32;
-            r.m13 = lhs.m10 * rhs.m03 + lhs.m11 * rhs.m13 + lhs.m12 * rhs.m23 + lhs.m13 * rhs.m33;
-            r.m20 = lhs.m20 * rhs.m00 + lhs.m21 * rhs.m10 + lhs.m22 * rhs.m20 + lhs.m23 * rhs.m30;
-            r.m21 = lhs.m20 * rhs.m01 + lhs.m21 * rhs.m11 + lhs.m22 * rhs.m21 + lhs.m23 * rhs.m31;
-            r.m22 = lhs.m20 * rhs.m02 + lhs.m21 * rhs.m12 + lhs.m22 * rhs.m22 + lhs.m23 * rhs.m32;
-            r.m23 = lhs.m20 * rhs.m03 + lhs.m21 * rhs.m13 + lhs.m22 * rhs.m23 + lhs.m23 * rhs.m33;
-            r.m30 = lhs.m30 * rhs.m00 + lhs.m31 * rhs.m10 + lhs.m32 * rhs.m20 + lhs.m33 * rhs.m30;
-            r.m31 = lhs.m30 * rhs.m01 + lhs.m31 * rhs.m11 + lhs.m32 * rhs.m21 + lhs.m33 * rhs.m31;
-            r.m32 = lhs.m30 * rhs.m02 + lhs.m31 * rhs.m12 + lhs.m32 * rhs.m22 + lhs.m33 * rhs.m32;
-            r.m33 = lhs.m30 * rhs.m03 + lhs.m31 * rhs.m13 + lhs.m32 * rhs.m23 + lhs.m33 * rhs.m33;
+            r.m00 = Dot(lhs.m00, rhs.m00, lhs.m01, rhs.m10, lhs.m02, rhs.m20, lhs.m03, rhs.m30);
+            r.m01 = Dot(lhs.m00, rhs.m01, lhs.m01, rhs.m11, lhs.m02, rhs.m21, lhs.m03, rhs.m31);
+            r.m02 = Dot(lhs.m00, rhs.m02, lhs.m01, rhs.m12, lhs.m02, rhs.m22, lhs.m03, rhs.m32);
+            r.m03 = Dot(lhs.m00, rhs.m03, lhs.m01, rhs.m13, lhs.m02, rhs.m23, lhs.m03, rhs.m33);
+            r.m10 = Dot(lhs.m10, rhs.m00, lhs.m11, rhs.m10, lhs.m12, rhs.m20, lhs.m13, rhs.m30);
+            r.m11 = Dot(lhs.m10, rhs.m01, lhs.m11, rhs.m11, lhs.m12, rhs.m21, lhs.m13, rhs.m31);
+            r.m12 = Dot(lhs.m10, rhs.m02, lhs.m11, rhs.m12, lhs.m12, rhs.m22, lhs.m13, rhs.m32);
+            r.m13 = Dot(lhs.m10, rhs.m03, lhs.m11, rhs.m13, lhs.m12, rhs.m23, lhs.m13, rhs.m33);
+            r.m20 = Dot(lhs.m20, rhs.m00, lhs.m21, rhs.m10, lhs.m22, rhs.m20, lhs.m23, rhs.m30);
+            r.m21 = Dot(lhs.m20, rhs.m01, lhs.m21, rhs.m11, lhs.m22, rhs.m21, lhs.m23, rhs.m31);
+            r.m22 = Dot(lhs.m20, rhs.m02, lhs.m21, rhs.m12, lhs.m22, rhs.m22, lhs.m23, rhs.m32);
+            r.m23 = Dot(lhs.m20, rhs.m03, lhs.m21, rhs.m13, lhs.m22, rhs.m23, lhs.m23, rhs.m33);
+            r.m30 = Dot(lhs.m30, rhs.m00, lhs.m31, rhs.m10, lhs.m32, rhs.m20, lhs.m33, rhs.m30);
+            r.m31 = Dot(lhs.m30, rhs.m01, lhs.m31, rhs.m11, lhs.m32, rhs.m21, lhs.m33, rhs.m31);
+            r.m32 = Dot(lhs.m30, rhs.m02, lhs.m31, rhs.m12, lhs.m32, rhs.m22, lhs.m33, rhs.m32);
+            r.m33 = Dot(lhs.m30, rhs.m03, lhs.m31, rhs.m13, lhs.m32, rhs.m23, lhs.m33, rhs.m33);
             return r;
         }
 
         public static Vector4 operator *(Matrix4x4 lhs, Vector4 v) => new Vector4(
-            lhs.m00 * v.x + lhs.m01 * v.y + lhs.m02 * v.z + lhs.m03 * v.w,
-            lhs.m10 * v.x + lhs.m11 * v.y + lhs.m12 * v.z + lhs.m13 * v.w,
-            lhs.m20 * v.x + lhs.m21 * v.y + lhs.m22 * v.z + lhs.m23 * v.w,
-            lhs.m30 * v.x + lhs.m31 * v.y + lhs.m32 * v.z + lhs.m33 * v.w);
+            Dot(lhs.m00, v.x, lhs.m01, v.y, lhs.m02, v.z, lhs.m03, v.w),
+            Dot(lhs.m10, v.x, lhs.m11, v.y, lhs.m12, v.z, lhs.m13, v.w),
+            Dot(lhs.m20, v.x, lhs.m21, v.y, lhs.m22, v.z, lhs.m23, v.w),
+            Dot(lhs.m30, v.x, lhs.m31, v.y, lhs.m32, v.z, lhs.m33, v.w));
+
+        // The products are evaluated as Unity's own Matrix4x4 is under its Mono (ARCHITECTURE
+        // D25: float32 off): each element's sum of products in double, left to right, rounded to
+        // float once. Measured bit for bit in the original on 400 random cases of each product
+        // (tools/UnityProbe MatrixMath.cs, mm-check.py); rounding every multiply and add, as
+        // CoreCLR does with the float expression, matched 0 to 130 of them. ScrollRect's bounds
+        // depend on it: whether a content's bounds in its viewport change by an ulp when the
+        // content grows decides whether the scrollbar is updated again (docs/cleanroom/ugui.md,
+        // "ScrollRect: bounds to the bit").
+        static float Dot(float a0, float b0, float a1, float b1, float a2, float b2, float a3, float b3)
+            => (float)((double)a0 * b0 + (double)a1 * b1 + (double)a2 * b2 + (double)a3 * b3);
+
+        static float Dot(float a0, float b0, float a1, float b1, float a2, float b2)
+            => (float)((double)a0 * b0 + (double)a1 * b1 + (double)a2 * b2);
+
+        static float Affine(float a0, float b0, float a1, float b1, float a2, float b2, float a3)
+            => (float)((double)a0 * b0 + (double)a1 * b1 + (double)a2 * b2 + a3);
 
         public static bool operator ==(Matrix4x4 lhs, Matrix4x4 rhs)
             => lhs.GetColumn(0) == rhs.GetColumn(0) && lhs.GetColumn(1) == rhs.GetColumn(1)
@@ -120,22 +137,22 @@ namespace UnityEngine
         /// Full projective transform with the perspective divide.
         public Vector3 MultiplyPoint(Vector3 point)
         {
-            float x = m00 * point.x + m01 * point.y + m02 * point.z + m03;
-            float y = m10 * point.x + m11 * point.y + m12 * point.z + m13;
-            float z = m20 * point.x + m21 * point.y + m22 * point.z + m23;
-            float w = 1f / (m30 * point.x + m31 * point.y + m32 * point.z + m33);
+            float x = Affine(m00, point.x, m01, point.y, m02, point.z, m03);
+            float y = Affine(m10, point.x, m11, point.y, m12, point.z, m13);
+            float z = Affine(m20, point.x, m21, point.y, m22, point.z, m23);
+            float w = 1f / Affine(m30, point.x, m31, point.y, m32, point.z, m33);
             return new Vector3(x * w, y * w, z * w);
         }
 
         public Vector3 MultiplyPoint3x4(Vector3 point) => new Vector3(
-            m00 * point.x + m01 * point.y + m02 * point.z + m03,
-            m10 * point.x + m11 * point.y + m12 * point.z + m13,
-            m20 * point.x + m21 * point.y + m22 * point.z + m23);
+            Affine(m00, point.x, m01, point.y, m02, point.z, m03),
+            Affine(m10, point.x, m11, point.y, m12, point.z, m13),
+            Affine(m20, point.x, m21, point.y, m22, point.z, m23));
 
         public Vector3 MultiplyVector(Vector3 vector) => new Vector3(
-            m00 * vector.x + m01 * vector.y + m02 * vector.z,
-            m10 * vector.x + m11 * vector.y + m12 * vector.z,
-            m20 * vector.x + m21 * vector.y + m22 * vector.z);
+            Dot(m00, vector.x, m01, vector.y, m02, vector.z),
+            Dot(m10, vector.x, m11, vector.y, m12, vector.z),
+            Dot(m20, vector.x, m21, vector.y, m22, vector.z));
 
         public static Matrix4x4 Scale(Vector3 vector)
         {

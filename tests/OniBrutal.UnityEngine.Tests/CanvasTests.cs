@@ -556,7 +556,9 @@ namespace OniBrutal.Tests
             var n = BuildNest();
             Frame();
             var placed = Corner(n.Override);
-            Assert.Equal(new Vector3(30f, 30f, 0f), placed);
+            // 20 from the root's corner at scale 1.5, to within a float's rounding: the root's
+            // rect is 1024 / 1.5 wide, so the corner is not exact.
+            Assert.True((placed - new Vector3(30f, 30f, 0f)).sqrMagnitude < 1e-8f, placed.ToString("R"));
             n.Root.enabled = false;
             Frame();
             foreach (var nested in new[] { n.Override, n.Plain, n.Inner })

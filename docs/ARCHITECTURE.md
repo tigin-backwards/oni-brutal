@@ -365,7 +365,11 @@ past the boot checkpoint needs a Steam client logged in with an account that own
   emulating Mono (widening every float load and call result in all game and mod IL) would
   break mods' transpilers that match IL patterns. Measured by `tools/UnityProbe`
   (FloatPrecision.cs, `PROBE_SCENARIO=floatprec`); test tools that compare players compute in
-  double, where both runtimes agree.
+  double, where both runtimes agree. The engine's own versions of Unity's managed math follow
+  Mono where it was measured: `Matrix4x4`'s products (`MultiplyPoint3x4`, `MultiplyPoint`,
+  `MultiplyVector`, matrix × vector and matrix × matrix) sum each element in double and round
+  once, as in the original bit for bit (`PROBE_SCENARIO=matmul`, `mm-check.py`; ScrollRect's
+  change detection depends on it, `docs/cleanroom/ugui.md` "ScrollRect: bounds to the bit").
 - **D26 Hashes of structs without a GetHashCode.** A struct that does not override GetHashCode
   is hashed by `ValueType.GetHashCode`. Mono XORs every field into the hash
   (`ves_icall_System_ValueType_InternalGetHashCode`: an `int` field's value, a string field's

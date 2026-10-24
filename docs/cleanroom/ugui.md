@@ -703,6 +703,41 @@ stated). This implementation already does all of this, on these measurements; ke
 - **Not measured:** dragging and the scroll wheel with content that fits; `AutoHide`
   scrollbar visibility.
 
+**ScrollRect: bounds to the bit** (measured 2026-10-24, `tools/UnityProbe`: `PROBE_SCENARIO=
+zeroscale`, `vitalsopen`, `matmul`). Found with Resize Dup UI (Workshop 2549295369), whose Vitals
+screen opened with a scrollbar of size 0.94 to 0.98 in about half of our runs, 1 in the original's.
+- **The screen's first frames, in both players.** `TableScreen.OnActivate` sets the screen's
+  scale to 0; the next frame's `ScreenUpdate` sets it back to 1. The scroll rect's first
+  `LateUpdate` runs in between. Every corner of its content maps to one point; that point,
+  taken into the viewport's space, lies 43 above the view's top, so the content (16 px, grown to
+  the view) overshoots by 43 and springs down by an amount that depends on that frame's
+  `unscaledDeltaTime` (0.7 to 1.6 px at 20 to 30 ms; 28 px at 250 ms). In the next update the
+  scale is 1, the overshoot is the distance moved, and the scrollbar is set to that size and
+  to value 1, which snaps the content back. The probe's copy of this hierarchy gave the same
+  numbers in both players (`zeroscale`, all six cases), and so did the game (`vitalsopen`).
+- **What clears it.** The next frame the rows lay the content out to 208 px. Both heights fit
+  the view, so both are grown to its height, and the update runs again only if the grown
+  bounds differ. In the original they usually do, by a few ulps: -249.499969 with 16 px,
+  -249.499954 with 208 px. That update sets the scrollbar to size 1 and value 0 (9 of 12
+  original runs). Ours computed both as the same value in every run logged, so the size of the
+  overshoot stayed; after a slow frame that was 0.94, outside the dump's tolerance.
+- **The arithmetic.** The original's bounds are reproduced from its logged corners and
+  `worldToLocalMatrix` when `MultiplyPoint3x4` rounds each component once (the sum of products
+  in double), and not when every multiply and add rounds. The bounds' own centre and extents
+  arithmetic does not change the result either way. Unity's `Matrix4x4` products all round that
+  way (400 random cases of each, `mm-check.py`); that is the engine's `Matrix4x4`
+  (ARCHITECTURE D25), which now follows it. This package needs nothing beyond mapping the
+  corners with the engine's `MultiplyPoint3x4`.
+- **Still apart.** The original's transform matrices themselves (`localToWorldMatrix`,
+  `worldToLocalMatrix`, `TransformPoint`) are computed natively; none of the formulas tried
+  reproduces them bit for bit (`tools/UnityProbe` `PROBE_SCENARIO=transform`, `tm-check.py`:
+  composing the levels' matrices from the root down matches 106 of 177 world matrices without
+  rotation; composing the inverse level by level, 45). Ours invert the world matrix, which gave
+  -367.64432 where the original has -(316.1741 × (1 / 0.86)) = -367.6443. So whether the
+  grown bounds move by an ulp still differs between the players for a given layout, and both
+  remain timing-dependent: the stale size shows in the original too (3 runs of 12, sizes 0.995
+  to 0.9985), and in either player after a slow frame.
+
 ### InputField and Dropdown (legacy)
 
 **`InputField`:**

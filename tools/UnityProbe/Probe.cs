@@ -136,6 +136,33 @@ namespace SemanticsProbe
                 go.AddComponent<Tooltip>();
                 return;
             }
+            if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "transform")
+            {
+                TransformMath.Run();
+                return;
+            }
+            if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "matmul")
+            {
+                MatrixMath.Run();
+                return;
+            }
+            if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "vitalsopen")
+            {
+                VitalsOpen.Install(harmony);
+                go.AddComponent<VitalsOpen>();
+                return;
+            }
+            if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "zeroscale")
+            {
+                go.AddComponent<ZeroScale>();
+                return;
+            }
+            if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "updorder")
+            {
+                UpdateOrder.Install(harmony);
+                go.AddComponent<UpdateOrder>();
+                return;
+            }
             if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "guilayout")
             {
                 go.AddComponent<GuiLayout>();

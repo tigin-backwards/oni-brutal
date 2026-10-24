@@ -221,8 +221,68 @@ namespace OniBrutal.Tests.UGui
         }
     }
 
+    /// Exposes the content's bounds in the view's space.
+    public class BoundsScrollRect : ScrollRect
+    {
+        public Bounds ContentBounds => m_ContentBounds;
+    }
+
     public class ScrollRectTests : UGuiTest
     {
+        /// A 1114 x 499 view at scale 0.86 whose world origin is at originY, holding a 16 px
+        /// content along its top (anchoredPosition.y ap) that then grows to 208 px, as Resize Dup
+        /// UI's Vitals screen does in its first frames: the content's bounds in the view with 16
+        /// and 208 px (both grown to the view's height), and how often onValueChanged fired for
+        /// the growth.
+        static (float Min16, float Min208, int Updates) Grow(float originX, float originY, float ap)
+        {
+            var root = (RectTransform)new GameObject("Screen", typeof(RectTransform)).transform;
+            root.localScale = new Vector3(0.86f, 0.86f, 0.86f);
+            root.localPosition = new Vector3(originX, originY, 0f);
+            var view = NewRect("Scroll View", root, 1114, 499);
+            view.gameObject.SetActive(false);
+            var scroll = view.gameObject.AddComponent<BoundsScrollRect>();
+            var content = NewRect("Content", view, 0, 16);
+            content.anchorMin = new Vector2(0f, 1f);
+            content.anchorMax = Vector2.one;
+            content.pivot = new Vector2(0.5f, 1f);
+            content.sizeDelta = new Vector2(-8f, 16f);
+            content.anchoredPosition = new Vector2(0f, ap);
+            scroll.content = content;
+            scroll.horizontal = false;
+            scroll.movementType = ScrollRect.MovementType.Unrestricted;
+            scroll.inertia = false;
+            int changes = 0;
+            scroll.onValueChanged.AddListener(_ => changes++);
+            view.gameObject.SetActive(true);
+            Frame();
+            Frame();
+            float min16 = scroll.ContentBounds.min.y;
+            int before = changes;
+            content.sizeDelta = new Vector2(-8f, 208f);
+            Frame();
+            float min208 = scroll.ContentBounds.min.y;
+            Object.DestroyImmediate(root.gameObject);
+            return (min16, min208, changes - before);
+        }
+
+        /// Measured in the original (tools/UnityProbe VitalsOpen.cs, "geo" lines; Resize Dup UI,
+        /// Workshop 2549295369): the Vitals screen's scroll rect sprang its content back after an
+        /// overshoot and kept the overshoot's scrollbar size until the content grew from 16 to
+        /// 208 px, both inside the view. The bounds of the two came out a few ulps apart
+        /// (-249.499969 and -249.499954, from the view's matrix as Matrix4x4.MultiplyPoint3x4
+        /// maps the corners, each component rounded once), so the original updated the scrollbar
+        /// again, to size 1. With every multiply and add rounded, as before, the two bounds were
+        /// equal at every position tried here, and the scrollbar kept its stale size.
+        [Fact]
+        public void ContentGrowingInsideTheViewMovesItsBoundsByTheOriginalsUlps()
+        {
+            var (min16, min208, updates) = Grow(782.92f, 316.17407f, 4.5776367E-05f);
+            Assert.Equal(-249.499969f, min16);
+            Assert.Equal(-249.499954f, min208);
+            Assert.Equal(1, updates);
+        }
+
         (ScrollRect Scroll, RectTransform Content) Setup(ScrollRect.MovementType movement)
         {
             var canvas = NewCanvas();

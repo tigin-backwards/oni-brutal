@@ -342,3 +342,23 @@ tools/UnityProbe/uis-check.py inputs ORIG/Player.log OURS/stdout.txt
 
 `docs/cleanroom/ugui.md` (ScrollRect) and `textmeshpro.md` (TMP_InputField) record what it
 measured. Elastic lines differ by frame timing, and so do the `time` lines.
+
+Five scenarios found with Resize Dup UI (Workshop 2549295369), whose Vitals scrollbar kept a stale
+size in ours (`docs/cleanroom/ugui.md`, "ScrollRect: bounds to the bit"); each file's header says
+what it logs:
+
+- `zeroscale` (`ZeroScale.cs`, `ZS`, 10 s into the main menu): a scroll rect's first frames under
+  an ancestor at scale 0, as `TableScreen.OnActivate` leaves the screen, with a fast and a 250 ms
+  frame before it, activated from a coroutine and from an `Update`.
+- `vitalsopen` (`VitalsOpen.cs`, `VO`): in a colony, what runs around a table screen's
+  activation, and the inputs of its scroll rect's bounds to the bit (`geo`). It needs a colony
+  and a table screen opened: install the probe as a Local mod in an e2e run of the Resize Dup UI
+  spec (a scratch `ONI_WS` holding it as an item, the spec's `mods` naming that item, and
+  `PROBE_SCENARIO` in the runner's environment).
+- `updorder` (`UpdateOrder.cs`, `UO`): the order Update and LateUpdate reach behaviours of one
+  execution order made at different times, KScreenManager and an object made in OnLoad among
+  them.
+- `matmul` (`MatrixMath.cs`, `MM`, at mod load): Matrix4x4's products to the bit;
+  `mm-check.py rule LOG` tests candidate formulas, `mm-check.py diff ORIG OURS` compares players.
+- `transform` (`TransformMath.cs`, `TM`, at mod load): transform matrices and points to the bit;
+  `tm-check.py rule LOG` and `tm-check.py diff ORIG OURS` likewise.

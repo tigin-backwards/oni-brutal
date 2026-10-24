@@ -449,8 +449,8 @@ installs get developer checks subscribers never see).
 | 428 | [无限擦拭](https://steamcommunity.com/sharedfiles/filedetails/?id=3547651475) | ✅ | ✅ | ✅ | spec tests/e2e/mods/3547651475-infinite-mop.yaml: water poured into the pit, 300 kg a cell; the toolbar's Mop tool dragged over it marks all five cells (the game refuses over 150 kg) and Duplicants mop it out |
 | 429 | [Rover's Recharger](https://steamcommunity.com/sharedfiles/filedetails/?id=2761462871) | ✅ | ✅ | ⬜ |  |
 | 430 | [System Clock](https://steamcommunity.com/sharedfiles/filedetails/?id=2013164217) | ✅ | ✅ | ⬜ |  |
-| 431 | [Debug Does Not Discover Map](https://steamcommunity.com/sharedfiles/filedetails/?id=1703400426) | ✅ | ✅ | ⬜ |  |
-| 432 | [Sharing Is Caring](https://steamcommunity.com/sharedfiles/filedetails/?id=2557346794) | ✅ | ✅ | ⬜ |  |
+| 431 | [Debug Does Not Discover Map](https://steamcommunity.com/sharedfiles/filedetails/?id=1703400426) | ❌ | ❌ | ⬜ | broken upstream: its DebugHandler.OnKeyDown prefix consumes Action 173, which the game's Action enum now gives to SreenShot32x (the debug toggle is 174), so with debug mode on Backspace still runs the game's debug toggle (its paint screen opens) and reveals the map (spec tests/e2e/mods/1703400426-debug-does-not-discover-map.yaml) (same in the original) |
+| 432 | [Sharing Is Caring](https://steamcommunity.com/sharedfiles/filedetails/?id=2557346794) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2557346794-sharing-is-caring.yaml: a click on a Duplicant's row in the cot's assignment side screen leaves the cot unowned at mid-day |
 | 433 | [AutomaticDesalinator](https://steamcommunity.com/sharedfiles/filedetails/?id=2836853288) | ✅ | ✅ | ⬜ |  |
 | 434 | [Room Size - Outdated](https://steamcommunity.com/sharedfiles/filedetails/?id=1715802131) | ⬜ | ⬜ | ⬜ | flagged by onimaxxing (notLoading); not tested |
 | 435 | [Deprecated! Uninstall! [Professional Attire]](https://steamcommunity.com/sharedfiles/filedetails/?id=1810563583) | ⬜ | ⬜ | ⬜ | flagged by onimaxxing (notLoading); not tested |
@@ -460,12 +460,12 @@ installs get developer checks subscribers never see).
 | 439 | [Drecko Morphs](https://steamcommunity.com/sharedfiles/filedetails/?id=2263396355) | ✅ | ✅ | ⬜ |  |
 | 440 | [Buildable Natural Tile – Fix](https://steamcommunity.com/sharedfiles/filedetails/?id=3582340906) | ✅ | ✅ | ⬜ |  |
 | 441 | [Build Menu Search Quick Select Hotkeys](https://steamcommunity.com/sharedfiles/filedetails/?id=3164212090) | ✅ | ✅ | ⬜ |  |
-| 442 | [IceBox](https://steamcommunity.com/sharedfiles/filedetails/?id=2627472154) | ✅ | ✅ | ⬜ |  |
+| 442 | [IceBox](https://steamcommunity.com/sharedfiles/filedetails/?id=2627472154) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2627472154-icebox.yaml: the Food menu lists the IceBox (shot); one built of sandstone with 600 kg set in its options holds 600 kg; the Refrigerator is retuned |
 | 443 | [Search Overlay (Previously known as Material Search Overlay)](https://steamcommunity.com/sharedfiles/filedetails/?id=3734826909) | ✅ | ✅ | ⬜ |  |
 | 444 | [简易研究simple research](https://steamcommunity.com/sharedfiles/filedetails/?id=3321776010) | ✅ | ✅ | ⬜ |  |
 | 445 | [Hyper Reservoirs (Vanilla/DLC)](https://steamcommunity.com/sharedfiles/filedetails/?id=1834180425) | ✅ | ✅ | ⬜ |  |
-| 446 | [Food Poisoning Dies In Pure Water](https://steamcommunity.com/sharedfiles/filedetails/?id=2893508694) | ✅ | ✅ | ⬜ |  |
-| 447 | [Bubbles Bathtub](https://steamcommunity.com/sharedfiles/filedetails/?id=3286559448) | ✅ | ✅ | ⬜ |  |
+| 446 | [Food Poisoning Dies In Pure Water](https://steamcommunity.com/sharedfiles/filedetails/?id=2893508694) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2893508694-food-poisoning-dies-in-pure-water.yaml: 100 000 Food Poisoning germs in 200 kg of clean water fall below 10 000 within 60 s |
+| 447 | [Bubbles Bathtub](https://steamcommunity.com/sharedfiles/filedetails/?id=3286559448) | ✅ | ✅ | ✅ | spec tests/e2e/mods/3286559448-bubbles-bathtub.yaml: the Plumbing menu lists the Bathtub (shot); one built of granite and copper ore and selected is an advanced wash station for a Plumbed Bathroom |
 | 448 | [Omnificia II](https://steamcommunity.com/sharedfiles/filedetails/?id=3743010929) | ⬜ | ⬜ | ⬜ | worldgen mod: out of scope |
 | 449 | [Extended Building Width](https://steamcommunity.com/sharedfiles/filedetails/?id=3024728464) | ✅ | ✅ | ⬜ |  |
 | 450 | [Build Over Plants](https://steamcommunity.com/sharedfiles/filedetails/?id=3305595229) | ✅ | ✅ | ⬜ |  |

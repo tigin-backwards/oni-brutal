@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2557346794-sharing-is-caring-off.yaml",
+ "mods": [
+  "2557346794"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with Share Beds off, the same click on the cot's side screen assigns it, as in the game",
+ "updated": "2026-10-23",
+ "commit": "d2f5fa1",
+ "mod_dlls": {
+  "2557346794": {
+   "SharingIsCaring.dll": "2f1336c31c3c5caea59b49788212b79962320f896df3ea26e253889964f05f48"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-192206-4b9a39",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T20:57:14",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-213000-91dfaa",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T21:30:00",
+    "lane": 16,
+    "reference_run": "20261023-192206-4b9a39",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-213000-91dfaa",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T21:30:01",
+    "lane": 17,
+    "reference_run": "20261023-192206-4b9a39",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

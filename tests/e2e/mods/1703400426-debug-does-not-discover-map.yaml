@@ -1,0 +1,32 @@
+# Debug Does Not Discover Map (1703400426), class P (a key handler).
+#
+# What it does: with debug mode on, the debug toggle opens the debug paint screen and frees
+# the camera without revealing the map: a prefix on DebugHandler.OnKeyDown consumes the action
+# it was built against (Action 173) and does only those two things, where the game's handler
+# also spawns every world-gen object and reveals the fog of war.
+# How a player reaches it: debug mode (debug_enable.txt), then the debug toggle (Backspace).
+# What changes: the debug toggle no longer discovers the map.
+#
+# setup turns debug mode on (DebugHandler.SetDebugEnabled), as debug_enable.txt would.
+# Backspace reaches the game's debug toggle: its paint screen opens, so the toggle ran, but the
+# fog is revealed all the same. The game's Action enum has since gained a member: 173 is now
+# SreenShot32x (Alt+4) and the debug toggle 174, so the mod's prefix no longer sees the toggle.
+# This spec fails in the original on RevealFogOfWar, the mod broken upstream.
+from: early-base
+mods: [1703400426]
+setup:
+  - driver: {setup.call: {type: DebugHandler, method: SetDebugEnabled, args: [true]}}
+steps:
+  - expect_state:
+      "DebugHandler.enabled": true
+      "DebugHandler.RevealFogOfWar": false
+      "DebugPaintElementScreen.Instance.gameObject.activeSelf": false
+  - driver: {camera.set: {cell: [112, 208], ortho: 10}}
+  - key: {code: Backspace}
+  - run: {seconds: 1}
+  # The game's debug toggle ran: its paint screen is open.
+  - expect_state:
+      "DebugPaintElementScreen.Instance.gameObject.activeSelf": true
+  # What the mod promises: the map stays undiscovered.
+  - expect_state:
+      "DebugHandler.RevealFogOfWar": false

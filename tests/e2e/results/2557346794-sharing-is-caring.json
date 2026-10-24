@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2557346794-sharing-is-caring.yaml",
+ "mods": [
+  "2557346794"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a click on a Duplicant's row in the cot's assignment side screen leaves the cot unowned at mid-day",
+ "updated": "2026-10-23",
+ "commit": "d2f5fa1",
+ "mod_dlls": {
+  "2557346794": {
+   "SharingIsCaring.dll": "2f1336c31c3c5caea59b49788212b79962320f896df3ea26e253889964f05f48"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-192206-4b9a39",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T20:57:22",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-212405-14e32c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T21:24:05",
+    "lane": 16,
+    "reference_run": "20261023-192206-4b9a39",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-212405-14e32c",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T21:24:06",
+    "lane": 17,
+    "reference_run": "20261023-192206-4b9a39",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

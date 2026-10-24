@@ -1,0 +1,19 @@
+# Sharing Is Caring (2557346794), its Share Beds option off.
+#
+# The mod card is in 2557346794-sharing-is-caring.yaml. Here Share Beds is off in its PLib
+# options: the same click on a Duplicant's row in the cot's side screen assigns the cot, and
+# the Duplicant keeps it, as in the game.
+from: early-base
+mods: [2557346794]
+options:
+  "2557346794": {ShareBeds: false}
+steps:
+  - expect_state:
+      "all:Bed::[0].GetComponent<Ownable>.assignee": missing
+  - driver: {camera.set: {cell: [132, 208], ortho: 8}}
+  - click_world: {cell: [132, 207], select: Bed}
+  - ui_wait: {path: "**/AssignableSideScreen/ValidContent/Contents/ContentScrollRect/RowContainer/Rows", cond: stable}
+  - click: {ui: "**/AssignableSideScreen/ValidContent/Contents/ContentScrollRect/RowContainer/Rows/AssignableSideScreenRow", index: 1}
+  - run: {seconds: 1}
+  - expect_state:
+      "all:Bed::[0].GetComponent<Ownable>.assignee": exists

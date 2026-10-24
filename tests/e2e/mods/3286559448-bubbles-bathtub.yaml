@@ -1,0 +1,44 @@
+# Bubbles Bathtub (3286559448), class B.
+#
+# What it does: adds the Bathtub (3x2, 500 kg of precious rock and 200 kg of metal, after the
+# Shower in the Plumbing menu, researched with Sanitation Sciences): a wash station for a
+# Plumbed Bathroom that a Duplicant soaks in for 36 s, taking 112 kg of clean water from its
+# pipe and giving back polluted water. It has two skins (a Handy Retro Tub), a Rubber Duckie
+# that floats on liquids, and its own status items.
+# How a player reaches it: the build menu (Plumbing); the tub's details screen.
+# What changes: a new wash station.
+#
+# setup grants Sanitation Sciences and spawns granite (a precious rock) and copper ore. The
+# Plumbing menu lists the Bathtub; one is built in the dug-out corridor west of the printing
+# pod and selected.
+from: early-base
+mods: [3286559448]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"SanitationSciences\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Granite\").substance", method: SpawnResource, args: [[114.5, 207.5, -12], 600, 300, 255, 0]}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Cuprite\").substance", method: SpawnResource, args: [[114.5, 207.5, -12], 300, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"SanitationSciences\").unlockedItemIDs": {contains: SgtImalas_BathTub}
+      "Assets.GetBuildingDef(\"SgtImalas_BathTub\").BuildingComplete.GetComponent<ConduitConsumer>.capacityKG": 100
+  - run: {seconds: 5}
+  - driver: {camera.set: {cell: [114, 208], ortho: 10}}
+  - click: {ui: "**/PlanScreen/Toggle:Plumbing"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/SgtImalas_BathTub Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/SgtImalas_BathTub Group*": {active: true}
+  - shot: {name: plumbing-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
+  - key: {code: Escape}
+  - expect_ui: {"**/PauseScreen": {exists: false}}
+  - build: {prefab: SgtImalas_BathTub, at: [113, 206]}
+  - expect: {blueprints: {SgtImalas_BathTub: 1}}
+  - run: {seconds: 1200, until: {buildings: {SgtImalas_BathTub: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [114, 208], ortho: 8}}
+  - click_world: {cell: [114, 206], select: SgtImalas_BathTub}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Bathtub"}
+  - expect_state:
+      "selected:KPrefabID.HasTag(\"AdvancedWashStation\")": true
+      "selected:GetComponent<RoomTracker>.requiredRoomType": PlumbedBathroom

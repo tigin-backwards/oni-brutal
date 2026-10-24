@@ -1,0 +1,48 @@
+# IceBox (2627472154), classes B, O.
+#
+# What it does: adds the IceBox (3x3, 800 kg of raw mineral, 240 W, researched with Gourmet
+# Cooking, after the Refrigerator in the Food menu): a refrigerator for 520 kg of food that
+# keeps it at -40 C. It also retunes the game's Refrigerator (120 W, 100 kg, no heat of its
+# own) and makes every atmosphere count as normal for food spoilage (Rottable.AtmosphereQuality
+# always answers Normal). PLib options set the IceBox's capacity and power and the
+# Refrigerator's.
+# How a player reaches it: the build menu (Food), then the IceBox's side screens (the food
+# filter, capacity).
+# What changes: a bigger refrigerator.
+#
+# Options here: the IceBox holds 600 kg. setup grants Gourmet Cooking; the IceBox is built of
+# sandstone (the base's debris) in the dug-out corridor west of the printing pod and selected.
+from: early-base
+mods: [2627472154]
+options:
+  "2627472154": {Defultstorage: 600.0}
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"FinerDining\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"SandStone\").substance", method: SpawnResource, args: [[114.5, 207.5, -12], 900, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"FinerDining\").unlockedItemIDs": {contains: IceBox}
+      "Assets.GetBuildingDef(\"IceBox\").EnergyConsumptionWhenActive": 240
+      "Assets.GetBuildingDef(\"Refrigerator\").EnergyConsumptionWhenActive": 120
+      "Assets.GetBuildingDef(\"Refrigerator\").BuildingComplete.GetComponent<Storage>.capacityKg": 100
+  - run: {seconds: 5}
+  - driver: {camera.set: {cell: [114, 208], ortho: 10}}
+  - click: {ui: "**/PlanScreen/Toggle:Food"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/IceBox Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/IceBox Group*": {active: true}
+  - shot: {name: food-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
+  - key: {code: Escape}
+  - expect_ui: {"**/PauseScreen": {exists: false}}
+  - build: {prefab: IceBox, at: [113, 206], material: SandStone}
+  - expect: {blueprints: {IceBox: 1}}
+  - run: {seconds: 1200, until: {buildings: {IceBox: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [114, 208], ortho: 8}}
+  - click_world: {cell: [114, 207], select: IceBox}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~IceBox"}
+  - expect_state:
+      "selected:Storage.capacityKg": 600
+      "selected:GetComponent<Refrigerator>": exists

@@ -175,6 +175,10 @@ broken.update({
 broken.update({
     '2897886291': 'broken upstream: its overlay overrides `OverlayModes.Mode.CreateDefaultFilters`, which returns another type now, so its `OverlayScreen.RegisterModes` postfix throws a MissingMethodException while the colony loads, the overlay screen has no modes and the crash screen opens (spec tests/e2e/mods/2897886291-sweep-zones.yaml)',
 })
+# Found by the e2e specs of batch 13: the spec fails the same way in the original.
+broken.update({
+    '1703400426': 'broken upstream: its DebugHandler.OnKeyDown prefix consumes Action 173, which the game\'s Action enum now gives to SreenShot32x (the debug toggle is 174), so with debug mode on Backspace still runs the game\'s debug toggle (its paint screen opens) and reveals the map (spec tests/e2e/mods/1703400426-debug-does-not-discover-map.yaml)',
+})
 # Fails to load in the original only.
 original_only = {
     '1729794261': 'loads in ours but not in the original: Mono rejects its `PixelPack2` class (an interface method it lacks) at first use, where ours stubs the missing method (ARCHITECTURE D22); left out of the colony runs, which the original\'s error dialog stops',

@@ -1,0 +1,25 @@
+# Food Poisoning Dies In Pure Water (2893508694), class P.
+#
+# What it does: Food Poisoning germs die in clean water with a half-life of 10 s (an element
+# growth rule for Water added in FoodGerms.PopulateElemGrowthInfo); the game lets them live
+# there for a long time.
+# How a player reaches it: any germy food or water (an outhouse's polluted water, a sink).
+# What changes: how long Food Poisoning lasts in a pool of water.
+#
+# setup puts 200 kg of clean water with 100 000 Food Poisoning germs in a cell of the pit
+# in the floor of the dug-out room west of the printing pod. After 60 s of game time almost
+# none are left in the pit (the water spreads along it): with the game's rule alone (a
+# half-life of 12000 s in liquids) nearly all would be.
+from: early-base
+mods: [2893508694]
+setup:
+  - driver: {setup.call: {type: SimMessages, method: ReplaceAndDisplaceElement, args: [131124, Water, null, 200.0, 300.0, 0, 100000]}}
+steps:
+  - run: {seconds: 2}
+  - expect_state:
+      "Grid.Element[131124].id": Water
+      "Grid.DiseaseIdx.get_Item(131124)": 0
+      "cells:106,206..115,206::Grid.DiseaseCount.get_Item({cell})": "> 50000"
+  - run: {seconds: 60}
+  - expect_state:
+      "cells:106,206..115,206::Grid.DiseaseCount.get_Item({cell})": "< 10000"

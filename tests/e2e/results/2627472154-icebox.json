@@ -1,0 +1,60 @@
+{
+ "spec": "mods/2627472154-icebox.yaml",
+ "mods": [
+  "2627472154"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Food menu lists the IceBox (shot); one built of sandstone with 600 kg set in its options holds 600 kg; the Refrigerator is retuned",
+ "updated": "2026-10-23",
+ "commit": "d2f5fa1",
+ "mod_dlls": {
+  "2627472154": {
+   "ONIMod.dll": "fb5a9d2fa031e44bef58d97e263308bed5d91b1ddc1866241d0fb8346353441e",
+   "PLib.dll": "d87814a7d5d74fa0e94bc5435cd770d3746438f494208b6f356a2ab999169c52"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-192206-4b9a39",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T20:59:00",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-213121-f4c77e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T21:31:21",
+    "lane": 17,
+    "reference_run": "20261023-192206-4b9a39",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "food-menu": 0.0
+    }
+   },
+   {
+    "run": "20261023-213121-f4c77e",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T21:32:55",
+    "lane": 17,
+    "reference_run": "20261023-192206-4b9a39",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "food-menu": 0.0
+    }
+   }
+  ]
+ }
+}

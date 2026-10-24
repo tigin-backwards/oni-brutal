@@ -1,0 +1,33 @@
+{
+ "spec": "mods/1703400426-debug-does-not-discover-map.yaml",
+ "mods": [
+  "1703400426"
+ ],
+ "verdict": "pending",
+ "why": "the spec fails in the original: a broken spec, or a mod broken upstream",
+ "findings": [],
+ "note": "",
+ "updated": "2026-10-23",
+ "commit": "d2f5fa1",
+ "mod_dlls": {
+  "1703400426": {
+   "DebugDoesNotDiscoverMap.dll": "a770102fd91b2ace540e827e32113d65105c55ee0e9f55d2afbb91b6eb155958"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-192206-4b9a39",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-23T19:22:06",
+    "lane": 16,
+    "reasons": [
+     "step 6: DebugHandler.RevealFogOfWar is true, wanted False"
+    ],
+    "signatures": 0
+   }
+  ],
+  "ours": []
+ }
+}

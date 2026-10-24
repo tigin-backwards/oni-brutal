@@ -1,0 +1,30 @@
+# Sharing Is Caring (2557346794), classes P, O.
+#
+# What it does: Duplicants share beds and mess tables. A Duplicant holds a bed only while
+# sleepy (a prefix on SleepChoreMonitor.Instance.UpdateBed, which the game runs whenever
+# assignments change and when the sleep urge comes: without the urge it unassigns the bed),
+# and gives it up when it wakes (SleepChore's success state); a mess table is given up after
+# each meal (EatChore). PLib options turn either off.
+# How a player reaches it: the bed's assignment side screen; nothing else to do.
+# What changes: beds and tables are no longer owned.
+#
+# The colony's cot (east of the printing pod, at (132, 207)) is unassigned. It is selected and
+# a Duplicant's row is clicked in its side screen: it is mid-day, nobody is sleepy, and the
+# bed at once has no owner again. The spec 2557346794-sharing-is-caring-off shows the same
+# click assigning it with the option off.
+from: early-base
+mods: [2557346794]
+steps:
+  - expect_state:
+      "all:Bed::[0].GetComponent<Ownable>.assignee": missing
+  - driver: {camera.set: {cell: [132, 208], ortho: 8}}
+  - click_world: {cell: [132, 207], select: Bed}
+  - ui_wait: {path: "**/AssignableSideScreen/ValidContent/Contents/ContentScrollRect/RowContainer/Rows", cond: stable}
+  - expect_ui:
+      "**/AssignableSideScreen/ValidContent/Contents/ContentScrollRect/RowContainer/Rows/AssignableSideScreenRow": {active: true}
+  - click: {ui: "**/AssignableSideScreen/ValidContent/Contents/ContentScrollRect/RowContainer/Rows/AssignableSideScreenRow", index: 1}
+  - run: {seconds: 1}
+  - expect_state:
+      "all:Bed::[0].GetComponent<Ownable>.assignee": missing
+  - expect_ui:
+      "**/AssignableSideScreen/ValidContent/AssignedToText": {text: "-"}

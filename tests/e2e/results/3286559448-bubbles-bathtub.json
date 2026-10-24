@@ -1,0 +1,59 @@
+{
+ "spec": "mods/3286559448-bubbles-bathtub.yaml",
+ "mods": [
+  "3286559448"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Plumbing menu lists the Bathtub (shot); one built of granite and copper ore and selected is an advanced wash station for a Plumbed Bathroom",
+ "updated": "2026-10-23",
+ "commit": "d2f5fa1",
+ "mod_dlls": {
+  "3286559448": {
+   "BathTub.dll": "42a08a7062811e3b6fd29ce441ac300cd78d29bf8d664c5fb8377dd4a54bd712"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-192206-4b9a39",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T21:02:12",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-213708-729972",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T21:37:08",
+    "lane": 17,
+    "reference_run": "20261023-192206-4b9a39",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "plumbing-menu": 0.0
+    }
+   },
+   {
+    "run": "20261023-213708-729972",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T21:38:43",
+    "lane": 17,
+    "reference_run": "20261023-192206-4b9a39",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "plumbing-menu": 0.0
+    }
+   }
+  ]
+ }
+}

@@ -36,6 +36,15 @@ class LogSignatures(unittest.TestCase):
                           '  at CharacterContainer.SetInfoText () [0x00012] in <abc123>:0\n')
         self.assertEqual(ours, mono)
 
+    def test_run_folder_is_masked(self):
+        # The original and ours run in separate invocations, each in a folder of its run id.
+        ours = signatures("FileNotFoundException: Could not find file '/w/out/e2e/s/20261024-040121-cfd644/"
+                          "ours-1/home/config/mods/Local/1/State.json'.\n")
+        mono = signatures('FileNotFoundException: Could not find file "/w/out/e2e/s/20261024-035631-81d98e/'
+                          'original-1/home/config/mods/Local/1/State.json"\n')
+        self.assertEqual(ours, mono)
+        self.assertEqual(qa_tools.unknown(ours, mono), [])
+
     def test_trailing_period(self):
         self.assertEqual(qa_tools.canonical('NullReferenceException: Object reference not set to an instance of an object.'),
                          qa_tools.canonical('NullReferenceException: Object reference not set to an instance of an object'))

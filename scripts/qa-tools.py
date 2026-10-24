@@ -30,6 +30,9 @@ def canonical(signature):
     signatures stored by an earlier version (references)."""
     message, _, frame = signature.partition(' @ ')
     message = re.sub(r'\.$', '', message.replace("'", '"').rstrip())
+    # A path into the run's own folder (out/e2e/SPEC/RUN_ID/PLAYER-N/home/...) names the run
+    # id, which differs between the invocations that ran the original and ours.
+    message = re.sub(r'/[^"\s]*/(?:original|ours)-N/home/', 'RUN/home/', message)
     if frame:
         frame = re.sub(r'^at ', '', frame.strip())
         frame = re.sub(r' (\[N\] )?in <[^>]*>(:N)?$', '', frame)

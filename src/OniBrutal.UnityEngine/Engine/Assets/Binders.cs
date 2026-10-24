@@ -78,7 +78,7 @@ namespace OniBrutal.Engine.Assets
             foreach (PPtr child in children)
                 if (request.Resolver.Resolve(child) is Transform t) list.Add((TransformNative)t.NativeOrThrow);
             native.Children = list.ToArray();
-            native.MarkDirty();
+            native.MarkDirty(false);
         }
 
         internal static Vector3 ToVector3(Fields f) => new(f.Float("x"), f.Float("y"), f.Float("z"));

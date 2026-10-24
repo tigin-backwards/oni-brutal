@@ -204,16 +204,22 @@ namespace OniBrutal.Engine
         }
 
         /// Invalidates cached world data for this transform and its descendants, and marks
-        /// them changed (Transform.hasChanged).
-        public void MarkDirty()
+        /// them changed (Transform.hasChanged), for a change of their place in the world: a
+        /// position, rotation, scale or parent set.
+        public void MarkDirty() => MarkDirty(true);
+
+        /// moved false: only cached data changed (an object made, cloned or loaded, a rect
+        /// resized in place), not the transform's place.
+        public void MarkDirty(bool moved)
         {
             worldDirty = rotationDirty = scaleDirty = true;
             HasChanged = true;
-            foreach (var c in Children) c.MarkDirty();
-            OnTransformChanged();
+            if (moved) OnMoved();
+            foreach (var c in Children) c.MarkDirty(moved);
         }
 
-        protected virtual void OnTransformChanged() { }
+        /// The transform's place in the world changed, through its own change or an ancestor's.
+        protected virtual void OnMoved() { }
 
         /// Called after the parent changed (RectTransforms re-resolve their anchoring).
         public virtual void ParentChangedInternal(bool worldPositionStays) { }

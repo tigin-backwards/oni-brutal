@@ -30,8 +30,10 @@ namespace UnityEngine
             set
             {
                 var t = TransformNative;
-                t.LocalRotation = Quaternion.Normalize(value);
-                t.MarkDirty();
+                var rotation = Quaternion.Normalize(value);
+                bool moved = rotation != t.LocalRotation;
+                t.LocalRotation = rotation;
+                t.MarkDirty(moved);
             }
         }
 
@@ -41,8 +43,9 @@ namespace UnityEngine
             set
             {
                 var t = TransformNative;
+                bool moved = value != t.LocalScale;
                 t.LocalScale = value;
-                t.MarkDirty();
+                t.MarkDirty(moved);
             }
         }
 
@@ -62,8 +65,10 @@ namespace UnityEngine
             set
             {
                 var t = TransformNative;
-                t.LocalRotation = Quaternion.Normalize(t.Parent == null ? value : Quaternion.Inverse(t.Parent.WorldRotation) * value);
-                t.MarkDirty();
+                var rotation = Quaternion.Normalize(t.Parent == null ? value : Quaternion.Inverse(t.Parent.WorldRotation) * value);
+                bool moved = rotation != t.LocalRotation;
+                t.LocalRotation = rotation;
+                t.MarkDirty(moved);
             }
         }
 
@@ -312,8 +317,9 @@ namespace OniBrutal.Engine
         /// Sets the local position (RectTransforms also update their anchored position).
         public virtual void SetLocalPositionInternal(UnityEngine.Vector3 value)
         {
+            bool moved = value != LocalPosition;
             LocalPosition = value;
-            MarkDirty();
+            MarkDirty(moved);
         }
     }
 }

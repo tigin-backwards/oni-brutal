@@ -291,17 +291,69 @@ namespace OniBrutal.Engine.UI
         /// rebuilds). Nothing is sent to the rects changed while they run once they are over: a
         /// RectTransform hears of a change of its size from the change itself, and of a move not
         /// at all (measured in the original player, docs/cleanroom/ugui.md "Moved children of
-        /// layout groups").
+        /// layout groups"), except on pixel-perfect canvases (SendMovesOnPixelPerfectCanvases,
+        /// after it in the frame).
         public static void RunCanvasUpdate()
         {
             Canvas.SendPreWillRenderCanvases();
             Canvas.SendWillRenderCanvases();
         }
 
+        static readonly List<RectTransformNative> movedRects = new();
+        static readonly HashSet<RectTransformNative> movedSet = new();
+
+        /// Counts SendMovesOnPixelPerfectCanvases's passes (CanvasRendererNative.BornBeforePass).
+        public static int MovePass { get; private set; }
+
+        /// A RectTransform's place in the world changed (a position, rotation, scale or parent
+        /// set, its own or an ancestor's). Kept when it has a CanvasRenderer, for the next pass.
+        public static void NoteMoved(RectTransformNative rect)
+        {
+            var go = rect.GameObject;
+            if (go == null || go.Components.Length < 2 || PartsOf(go).Renderers.Length == 0) return;
+            if (movedSet.Add(rect)) movedRects.Add(rect);
+        }
+
+        /// After the canvas update: every active GameObject with a CanvasRenderer that moved since
+        /// the last pass gets OnRectTransformDimensionsChange once, when its canvas is pixel
+        /// perfect. As measured in the original (docs/cleanroom/ugui.md, "Moves on pixel-perfect
+        /// canvases"): any position, rotation, scale or parent change counts, even one undone in
+        /// the same frame, and so does an ancestor's; a size change alone, a sibling index, an
+        /// activation and an object made or cloned since the last pass do not. On other canvases
+        /// a move sends nothing.
+        static void SendMovesOnPixelPerfectCanvases()
+        {
+            int pass = MovePass++;
+            if (movedRects.Count == 0) return;
+            var moved = movedRects.ToArray();
+            movedRects.Clear();
+            movedSet.Clear();
+            foreach (var rect in moved)
+            {
+                var go = rect.GameObject;
+                if (rect.Destroyed || go == null || go.Destroyed || !go.ActiveInHierarchy) continue;
+                bool established = false;
+                foreach (var r in PartsOf(go).Renderers)
+                    if (!r.Destroyed && r.BornBeforePass != pass) established = true;
+                if (!established || NearestCanvas(go) is not { } canvas || !IsPixelPerfect(canvas)) continue;
+                Messages.SendToComponents(go, s => s.OnRectTransformDimensionsChange);
+            }
+        }
+
+        /// Canvas.pixelPerfect: the canvas's own setting when it overrides it or is a root,
+        /// else its root's; never in world space.
+        static bool IsPixelPerfect(CanvasNative canvas)
+        {
+            var root = RootOf(canvas);
+            if (root.RenderMode == RenderMode.WorldSpace) return false;
+            return canvas.OverridePixelPerfect || root == canvas ? canvas.PixelPerfect : root.PixelPerfect;
+        }
+
         static void Update()
         {
             foreach (var c in enabled.ToArray()) UpdateRootTransform(c);
             RunCanvasUpdate();
+            SendMovesOnPixelPerfectCanvases();
             if (stats)
             {
                 long start = System.Diagnostics.Stopwatch.GetTimestamp();

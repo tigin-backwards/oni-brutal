@@ -181,7 +181,7 @@ namespace OniBrutal.Engine
             Hierarchy.Touch(native);
             foreach (var c in comps) c.ForgetTransform();
             old.Unbind();
-            native.MarkDirty();
+            native.MarkDirty(false);
             return transform;
         }
 

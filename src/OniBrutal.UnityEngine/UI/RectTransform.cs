@@ -227,12 +227,16 @@ namespace OniBrutal.Engine
             bool rectChanged = !hasLastRect || !r.Equals(lastRect);
             lastRect = r;
             hasLastRect = true;
-            if (moved || rectChanged) MarkDirty();
+            if (moved || rectChanged) MarkDirty(moved);
             if (!rectChanged) return;
             foreach (var child in Children)
                 if (child is RectTransformNative rc) rc.Resolve();
             SendDimensionsChange();
         }
+
+        /// A move of a rect with a CanvasRenderer is told to it after the canvas update when its
+        /// canvas is pixel perfect (CanvasSystem.NoteMoved).
+        protected override void OnMoved() => UI.CanvasSystem.NoteMoved(this);
 
         /// OnRectTransformDimensionsChange to the object, and OnChildRectTransformDimensionsChange
         /// to its parent RectTransform's components when sendChildDimensionsChange is set (layout
@@ -248,8 +252,9 @@ namespace OniBrutal.Engine
         {
             var reference = AnchorReference();
             AnchoredPosition = new UnityEngine.Vector2(value.x - reference.x, value.y - reference.y);
+            bool moved = value != LocalPosition;
             LocalPosition = value;
-            MarkDirty();
+            MarkDirty(moved);
         }
 
         public override void ParentChangedInternal(bool worldPositionStays)

@@ -743,6 +743,10 @@ namespace OniBrutal.Engine.UI
 
         public bool HasMoved => BuiltToCanvas is not { } built || !built.Equals(CanvasSystem.ToCanvas(this));
 
+        /// The pass of CanvasSystem.SendMovesOnPixelPerfectCanvases it was made before: an
+        /// element made since the last pass is not told of its moves in the next one.
+        public readonly int BornBeforePass = CanvasSystem.MovePass;
+
         public void Changed() => Version++;
 
         public override void CopyStateFrom(NativeObject source)

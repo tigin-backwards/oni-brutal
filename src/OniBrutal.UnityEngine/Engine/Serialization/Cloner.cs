@@ -100,7 +100,7 @@ namespace OniBrutal.Engine.Serialization
                     Scenes.SetSceneRecursive(rootClone, scene);
                 }
             }
-            t.MarkDirty();
+            t.MarkDirty(false);
             if (t is RectTransformNative rt) rt.ParentChangedInternal(position.HasValue || (parent != null && worldPositionStays));
 
             // 4. Lifecycle.

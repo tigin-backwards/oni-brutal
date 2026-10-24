@@ -1,0 +1,30 @@
+# Custom Generators (2562813586), class B.
+#
+# What it does: adds five generators to the Power menu, each beside the game's and with a piped
+# exhaust output: the Custom Coal Generator (CustomSolidGenerator, Combustion: refined carbon,
+# 750 W, half the game's carbon dioxide, piped), a gas, a petroleum, a diesel and a steam
+# generator. Propane is made burnable (ElementLoader.FinaliseElementsTable).
+# How a player reaches it: the build menu (Power).
+# What changes: new generators.
+#
+# setup grants Combustion. The Custom Coal Generator (2x4) is built at the west end of the
+# dug-out room west of the printing pod and selected.
+from: early-base
+mods: [2562813586]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"Combustion\")", method: Purchased}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"Combustion\").unlockedItemIDs": {contains: CustomSolidGenerator}
+      "Assets.GetBuildingDef(\"CustomSolidGenerator\").GeneratorWattageRating": 750
+  - build: {prefab: CustomSolidGenerator, at: [107, 206]}
+  - expect: {blueprints: {CustomSolidGenerator: 1}}
+  - run: {seconds: 1200, until: {buildings: {CustomSolidGenerator: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [108, 208], ortho: 8}}
+  - click_world: {cell: [107, 207], select: CustomSolidGenerator}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui: {"**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Custom Coal Generator"}}
+  - expect_state:
+      "selected:EnergyGenerator.formula.inputs[0].tag.Name": RefinedCarbon
+      "selected:ManualDeliveryKG.RequestedItemTag.Name": RefinedCarbon
+  - shot: {name: title, crop: "**/DetailsScreen/TitleBar", threshold: 0.04}

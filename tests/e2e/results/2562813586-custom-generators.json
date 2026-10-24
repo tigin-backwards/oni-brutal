@@ -1,0 +1,59 @@
+{
+ "spec": "mods/2562813586-custom-generators.yaml",
+ "mods": [
+  "2562813586"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Custom Coal Generator (Combustion) built at the west end of the room and selected burns refined carbon (title shot as in the original)",
+ "updated": "2026-10-23",
+ "commit": "397acff",
+ "mod_dlls": {
+  "2562813586": {
+   "Custom Generators.dll": "fe95916d0e66aa1733d418555192707341c35691c0e8a71879ce3f451a7ca203"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-183417-5e8543",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T20:48:26",
+    "lane": 13,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-213047-94e53a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T21:46:19",
+    "lane": 13,
+    "reference_run": "20261023-183417-5e8543",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "title": 0.0
+    }
+   },
+   {
+    "run": "20261023-213047-94e53a",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T21:48:04",
+    "lane": 13,
+    "reference_run": "20261023-183417-5e8543",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "title": 0.0
+    }
+   }
+  ]
+ }
+}

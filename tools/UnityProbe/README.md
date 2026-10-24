@@ -358,7 +358,8 @@ what it logs:
 - `updorder` (`UpdateOrder.cs`, `UO`): the order Update and LateUpdate reach behaviours of one
   execution order made at different times, KScreenManager and an object made in OnLoad among
   them.
-- `matmul` (`MatrixMath.cs`, `MM`, at mod load): Matrix4x4's products to the bit;
+- `matmul` (`MatrixMath.cs`, `MM` and `MMS`, at mod load): Matrix4x4's products and inverse to
+  the bit, and the inverse of singular and near-singular matrices;
   `mm-check.py rule LOG` tests candidate formulas, `mm-check.py diff ORIG OURS` compares players.
 - `transform` (`TransformMath.cs`, `TM`, `TN`, `TR` and others, at mod load): transform
   matrices, rotations, scales, points and RectTransform corners of logged hierarchies to the bit;

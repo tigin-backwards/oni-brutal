@@ -3,12 +3,12 @@
  "mods": [
   "3565090654"
  ],
- "verdict": "failed",
- "why": "a run of ours failed",
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
  "findings": [],
- "note": "spec fails in ours: the Attributes button opens the screen, its sort and close work and it looks as in the original (0.3 % of pixels), but every attribute row of the bionic Duplicant reads \"Xp:0/0\" where the original reads \"Xp:0/-2147483648\": Mathf.RoundToInt of a NaN experience target, which Mono turns into int.MinValue and .NET saturates to 0 (PLAN A4)",
+ "note": "the Attributes button opens the screen, its sort and close work and it looks as in the original; the bionic Duplicant's rows read \"Xp:0/-2147483648\" as in the original (Mathf.RoundToInt of a NaN experience target, which Mono and ours since ARCHITECTURE D29 turn into int.MinValue)",
  "updated": "2026-10-24",
- "commit": "e235451",
+ "commit": "36d7c24",
  "mod_dlls": {
   "3565090654": {
    "SkillsInfoScreen.dll": "bf96191279fc5aad98a80538cef72a3101f4b718b3d22a19c2cd0436bc1d5a87"
@@ -27,63 +27,45 @@
   ],
   "ours": [
    {
-    "run": "20261024-123819-18c5fa",
+    "run": "20261024-152833-93d8f2",
     "index": 1,
-    "verdict": "fail",
-    "date": "2026-10-24T13:01:08",
-    "lane": 15,
-    "reasons": [
-     "ui_dump screen: 12 difference(s)",
-     "ui_dump sorted: 12 difference(s)"
-    ],
+    "verdict": "pass",
+    "date": "2026-10-24T15:28:33",
+    "lane": 12,
     "reference_run": "20261024-114728-37561f",
     "new_signatures": 0,
-    "findings": [
-     "scroll-normalized-position"
-    ],
+    "findings": [],
     "ui_dump": {
      "screen": {
-      "differences": 12,
-      "known": {
-       "scroll-normalized-position": 2
-      }
+      "differences": 0
      },
      "sorted": {
-      "differences": 12
+      "differences": 0
      }
     },
     "shots": {
-     "screen": 0.003157
+     "screen": 0.0
     }
    },
    {
-    "run": "20261024-123819-18c5fa",
+    "run": "20261024-152833-93d8f2",
     "index": 2,
-    "verdict": "fail",
-    "date": "2026-10-24T13:01:10",
-    "lane": 14,
-    "reasons": [
-     "ui_dump screen: 12 difference(s)",
-     "ui_dump sorted: 12 difference(s)"
-    ],
+    "verdict": "pass",
+    "date": "2026-10-24T15:28:34",
+    "lane": 13,
     "reference_run": "20261024-114728-37561f",
     "new_signatures": 0,
-    "findings": [
-     "scroll-normalized-position"
-    ],
+    "findings": [],
     "ui_dump": {
      "screen": {
-      "differences": 12,
-      "known": {
-       "scroll-normalized-position": 2
-      }
+      "differences": 0
      },
      "sorted": {
-      "differences": 12
+      "differences": 0
      }
     },
     "shots": {
-     "screen": 0.003157
+     "screen": 0.0
     }
    }
   ]

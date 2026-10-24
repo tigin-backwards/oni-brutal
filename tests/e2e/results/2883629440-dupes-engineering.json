@@ -1,0 +1,60 @@
+{
+ "spec": "mods/2883629440-dupes-engineering.yaml",
+ "mods": [
+  "2883629440"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with its default options the original stops loading at a crash report (its Wooden Door has the ID of the game's WoodenDoor); with the doors off, three Sandstone Tiles built in the pit speed walking and show the mod's texture (world shot of the tiles as in the original)",
+ "updated": "2026-10-23",
+ "commit": "1c016e8",
+ "mod_dlls": {
+  "2883629440": {
+   "Dupes Engineering.dll": "c3ef1475529c03136ed4162af454aab362e085ab9efe6e5dcca63d7a50771ac3",
+   "PLib.dll": "93073fdf44dbe9fd7c0afe19e56341be862cc2d732090dee30999cf60e2e160d"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-223323-d7b906",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T22:33:23",
+    "lane": 13,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-223517-5ff5cb",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T22:35:17",
+    "lane": 13,
+    "reference_run": "20261023-223323-d7b906",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "tiles": 0.013803
+    }
+   },
+   {
+    "run": "20261023-223517-5ff5cb",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T22:36:37",
+    "lane": 13,
+    "reference_run": "20261023-223323-d7b906",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "tiles": 0.015312
+    }
+   }
+  ]
+ }
+}

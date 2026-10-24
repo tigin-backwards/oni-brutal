@@ -1,0 +1,39 @@
+# Dupes Engineering (2883629440), classes B, O.
+#
+# What it does: adds some sixty buildings, each group behind a PLib option: tiles of one
+# material each (Sandstone, Granite, Igneous, Obsidian, Wooden, Concrete, Insulating ...) with
+# their own textures and a walking-speed bonus; wooden, glass and facility doors; spacer and
+# wooden drywalls and windows; Gravitas props as decorations (desks, lab jars, a clock ...);
+# alert lights, a wooden ladder, and a Cement Mixer for the mod's concrete.
+# How a player reaches it: the build menu (Base, Furniture, ...), each researched with a tech.
+# What changes: new buildings.
+#
+# With its default options the game does not start: the mod's Wooden Door has the ID of the
+# game's own WoodenDoor, and PlanScreen.OnSpawn and the codex throw on the duplicate key (a crash
+# report at load, in the original too). Options here: the doors group off.
+# setup grants Interior Decor. Three Sandstone Tiles are built in the pit in the floor of the
+# dug-out room west of the printing pod: they are tiles Duplicants walk faster on, shown with
+# the mod's texture.
+from: early-base
+mods: [2883629440]
+options:
+  "2883629440": {Enable_CustomDoors: false}
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"InteriorDecor\")", method: Purchased}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"InteriorDecor\").unlockedItemIDs": {contains: CustomSandstoneTile}
+      "Assets.GetBuildingDef(\"CustomSandstoneTile\").BuildingComplete.GetComponent<SimCellOccupier>.movementSpeedMultiplier": "> 1"
+  - build: {prefab: CustomSandstoneTile, cells: [[106, 206], [107, 206], [108, 206]], material: SandStone}
+  - expect: {blueprints: {CustomSandstoneTile: 3}}
+  - run: {seconds: 900, until: {buildings: {CustomSandstoneTile: 3}, pending_construction: 0}}
+  - expect_state:
+      "Grid.Foundation.get_Item(131123)": true
+      "Grid.Objects.get_Item(131123, 9).GetComponent<PrimaryElement>.ElementID": SandStone
+  - driver: {camera.set: {cell: [107, 208], ortho: 8}}
+  - click_world: {cell: [107, 206], select: CustomSandstoneTile}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui: {"**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Sandstone Tile"}}
+  - key: {code: Escape}
+  # Only the tiles are compared: Duplicants stand where the run left them.
+  - world_shot: {name: tiles, ortho: 3, at: [107, 207], mask: [[0, 0, 1280, 440], [0, 440, 450, 280], [835, 440, 445, 280], [0, 545, 1280, 175]]}

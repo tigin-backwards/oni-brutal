@@ -1,0 +1,44 @@
+# Micro Transformer (1991239137), class B.
+#
+# What it does: adds the Micro Transformer to the Power menu (researched with Advanced Power
+# Regulation): a 2x1 transformer of any metal, a battery of 750 J feeding a 750 W generator,
+# so a branch of wire behind it never draws more than 750 W (the game's smallest is the
+# 1 kW Power Transformer). It gives off 0.75 kDTU/s.
+# How a player reaches it: the build menu (Power).
+# What changes: a transformer that limits a circuit to 750 W.
+#
+# setup grants Advanced Power Regulation. The transformer is picked in the Power menu and
+# placed in the dug-out corridor west of the printing pod, built, and selected.
+from: early-base
+mods: [1991239137]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"AdvancedPowerRegulation\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"AdvancedPowerRegulation\").unlockedItemIDs": {contains: asquared31415.MicroTransformer}
+      "Assets.GetBuildingDef(\"asquared31415.MicroTransformer\").GeneratorWattageRating": 750
+  - run: {seconds: 5}
+  - driver: {camera.set: {cell: [104, 208], ortho: 8}}
+  - click: {ui: "**/PlanScreen/Toggle:Power"}
+  - ui_wait: {path: "**/PlanBuildingSelectionPanel/BuildingGroups", cond: stable}
+  - scroll: {at: "**/PlanBuildingSelectionPanel/BuildingGroups", notches: -10}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/asquared31415.MicroTransformer Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/asquared31415.MicroTransformer Group*"}
+  - expect_state: {"PlayerController.Instance.ActiveTool.name": BuildTool}
+  - click_world: {cell: [109, 208]}
+  - key: {code: Escape}
+  # OniMcp's building counts leave this prefab out (its ID has a dot): state is read instead.
+  - expect_state: {"all:Constructable::Length": 1}
+  - run: {seconds: 600}
+  - expect_state: {"all:Constructable::Length": 0, "all:PowerTransformer::Length": 1}
+  - driver: {camera.set: {cell: [109, 208], ortho: 8}}
+  - click_world: {cell: [109, 208], select: asquared31415.MicroTransformer}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Micro Transformer"}
+  - expect_state:
+      "selected:Battery.capacity": 750
+      "selected:Battery.chargeWattage": 750
+      "selected:PowerTransformer": exists
+  - shot: {name: title, crop: "**/DetailsScreen/TitleBar", threshold: 0.04}

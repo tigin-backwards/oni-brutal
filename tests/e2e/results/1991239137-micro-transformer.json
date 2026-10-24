@@ -1,0 +1,59 @@
+{
+ "spec": "mods/1991239137-micro-transformer.yaml",
+ "mods": [
+  "1991239137"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Micro Transformer picked in the Power menu (scrolled to), placed in the corridor, built and selected: a 750 J battery feeding 750 W (title shot as in the original)",
+ "updated": "2026-10-23",
+ "commit": "4fb4380",
+ "mod_dlls": {
+  "1991239137": {
+   "MicroTransformer.dll": "5ac23536f01f948c88c44a35052a7720cbafe309897045f703a80cb924883f53"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-220612-1cc9f0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T22:17:52",
+    "lane": 13,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-223940-231368",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T22:39:40",
+    "lane": 13,
+    "reference_run": "20261023-220612-1cc9f0",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "title": 0.0
+    }
+   },
+   {
+    "run": "20261023-223940-231368",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T22:43:56",
+    "lane": 13,
+    "reference_run": "20261023-220612-1cc9f0",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "title": 0.0
+    }
+   }
+  ]
+ }
+}

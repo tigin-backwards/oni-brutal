@@ -33,9 +33,11 @@ namespace UnityEngine
         public static float Floor(float f) => (float)Math.Floor(f);
         /// Rounds half to even, like System.Math.Round.
         public static float Round(float f) => (float)Math.Round(f);
-        public static int CeilToInt(float f) => (int)Math.Ceiling(f);
-        public static int FloorToInt(float f) => (int)Math.Floor(f);
-        public static int RoundToInt(float f) => (int)Math.Round(f);
+        // Unity's *ToInt convert as Mono does: NaN and values out of range give int.MinValue
+        // (ARCHITECTURE D29).
+        public static int CeilToInt(float f) => OniBrutal.Engine.MonoConvert.ToInt32(Math.Ceiling(f));
+        public static int FloorToInt(float f) => OniBrutal.Engine.MonoConvert.ToInt32(Math.Floor(f));
+        public static int RoundToInt(float f) => OniBrutal.Engine.MonoConvert.ToInt32(Math.Round(f));
         public static float Sign(float f) => f >= 0f ? 1f : -1f;
 
         public static float Min(float a, float b) => a < b ? a : b;

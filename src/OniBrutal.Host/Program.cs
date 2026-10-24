@@ -695,6 +695,87 @@ namespace OniBrutal.Host
                     try { Directory.Delete(dir, true); } catch (IOException) { } catch (UnauthorizedAccessException) { }
                 }
             });
+            Check("A mod's conversions of NaN and out-of-range floats to integers (MonoConversions)", () =>
+            {
+                ModAccess.Install();
+                var dir = Directory.CreateTempSubdirectory("oni-brutal-check-").FullName;
+                try
+                {
+                    var mod = new System.Reflection.Emit.PersistedAssemblyBuilder(new AssemblyName("OniBrutalCheckConversions"), typeof(object).Assembly);
+                    var type = mod.DefineDynamicModule("OniBrutalCheckConversions").DefineType("Convert", TypeAttributes.Public | TypeAttributes.Abstract | TypeAttributes.Sealed);
+                    void Define(string name, Type result, Type[] parameters, System.Reflection.Emit.OpCode conversion)
+                    {
+                        var il = type.DefineMethod(name, MethodAttributes.Public | MethodAttributes.Static, result, parameters).GetILGenerator();
+                        il.Emit(System.Reflection.Emit.OpCodes.Ldarg_0);
+                        il.Emit(conversion);
+                        il.Emit(System.Reflection.Emit.OpCodes.Ret);
+                    }
+                    Define("I4F", typeof(int), [typeof(float)], System.Reflection.Emit.OpCodes.Conv_I4);
+                    Define("I4D", typeof(int), [typeof(double)], System.Reflection.Emit.OpCodes.Conv_I4);
+                    Define("U1F", typeof(int), [typeof(float)], System.Reflection.Emit.OpCodes.Conv_U1);
+                    Define("U4D", typeof(uint), [typeof(double)], System.Reflection.Emit.OpCodes.Conv_U4);
+                    Define("U8D", typeof(ulong), [typeof(double)], System.Reflection.Emit.OpCodes.Conv_U8);
+                    Define("I8F", typeof(long), [typeof(float)], System.Reflection.Emit.OpCodes.Conv_I8);
+                    Define("IF", typeof(nint), [typeof(float)], System.Reflection.Emit.OpCodes.Conv_I);
+                    // An integer's conversion stays as it is.
+                    Define("Long", typeof(int), [typeof(long)], System.Reflection.Emit.OpCodes.Conv_I4);
+                    // A product, a generic type's float result, and floats of two types meeting at
+                    // a join.
+                    var product = type.DefineMethod("Product", MethodAttributes.Public | MethodAttributes.Static, typeof(int), [typeof(float), typeof(float)]).GetILGenerator();
+                    product.Emit(System.Reflection.Emit.OpCodes.Ldarg_0);
+                    product.Emit(System.Reflection.Emit.OpCodes.Ldarg_1);
+                    product.Emit(System.Reflection.Emit.OpCodes.Mul);
+                    product.Emit(System.Reflection.Emit.OpCodes.Conv_I4);
+                    product.Emit(System.Reflection.Emit.OpCodes.Ret);
+                    var listed = type.DefineMethod("Listed", MethodAttributes.Public | MethodAttributes.Static, typeof(int), [typeof(List<float>)]).GetILGenerator();
+                    listed.Emit(System.Reflection.Emit.OpCodes.Ldarg_0);
+                    listed.Emit(System.Reflection.Emit.OpCodes.Ldc_I4_0);
+                    listed.Emit(System.Reflection.Emit.OpCodes.Callvirt, typeof(List<float>).GetMethod("get_Item")!);
+                    listed.Emit(System.Reflection.Emit.OpCodes.Conv_I4);
+                    listed.Emit(System.Reflection.Emit.OpCodes.Ret);
+                    var joined = type.DefineMethod("Joined", MethodAttributes.Public | MethodAttributes.Static, typeof(int), [typeof(bool), typeof(float), typeof(double)]).GetILGenerator();
+                    var second = joined.DefineLabel();
+                    var join = joined.DefineLabel();
+                    joined.Emit(System.Reflection.Emit.OpCodes.Ldarg_0);
+                    joined.Emit(System.Reflection.Emit.OpCodes.Brtrue_S, second);
+                    joined.Emit(System.Reflection.Emit.OpCodes.Ldarg_1);
+                    joined.Emit(System.Reflection.Emit.OpCodes.Br_S, join);
+                    joined.MarkLabel(second);
+                    joined.Emit(System.Reflection.Emit.OpCodes.Ldarg_2);
+                    joined.MarkLabel(join);
+                    joined.Emit(System.Reflection.Emit.OpCodes.Conv_I4);
+                    joined.Emit(System.Reflection.Emit.OpCodes.Ret);
+                    type.CreateType();
+                    var modPath = Path.Combine(dir, "OniBrutalCheckConversions.dll");
+                    mod.Save(modPath);
+                    using (var module = Mono.Cecil.ModuleDefinition.ReadModule(modPath))
+                    {
+                        int found = MonoConversions.RewriteModule(module, out _, out int unsure);
+                        if (found != 10 || unsure != 0) throw new InvalidOperationException($"{found} conversions of floats found ({unsure} not followed), not 10");
+                    }
+                    var convert = ModAccess.LoadFrom(modPath).GetType("Convert")!;
+                    object Call(string name, object[] args) => convert.GetMethod(name)!.Invoke(null, args)!;
+                    // The original player's values (UnityProbe convert scenario).
+                    var cases = new (string Name, object[] Args, object Mono)[]
+                    {
+                        ("I4F", [float.NaN], int.MinValue), ("I4F", [float.PositiveInfinity], int.MinValue), ("I4F", [-1.5f], -1), ("I4F", [3e9f], int.MinValue),
+                        ("I4D", [double.NegativeInfinity], int.MinValue), ("I4D", [2147483647.9], int.MaxValue), ("I4D", [-2147483648.9], int.MinValue),
+                        ("U1F", [300f], 44), ("U1F", [float.NaN], 0), ("U4D", [-1.0], 4294967295u), ("U4D", [5e9], 705032704u),
+                        ("U8D", [double.NegativeInfinity], 9223372036854775808ul), ("U8D", [double.NaN], 0ul), ("U8D", [1e19], 10000000000000000000ul),
+                        ("I8F", [float.NaN], long.MinValue), ("IF", [-1f], unchecked((nint)4294967295L)), ("IF", [float.NaN], unchecked((nint)2147483648L)),
+                        ("Long", [0x100000005L], 5), ("Product", [1e30f, 1e10f], int.MinValue), ("Product", [1.5f, 3f], 4),
+                        ("Listed", [new List<float> { float.NaN }], int.MinValue), ("Joined", [false, 3e9f, 0.0], int.MinValue),
+                        ("Joined", [true, 0f, double.NaN], int.MinValue), ("Joined", [true, 0f, -7.5], -7),
+                    };
+                    foreach (var (name, args, mono) in cases)
+                        if (Call(name, args) is var got && !Equals(got, mono)) throw new InvalidOperationException($"{name}({string.Join(", ", args)}) gave {got}; Mono gives {mono}");
+                    return $"{cases.Length} conversions give the original's values; an integer's conversion is untouched";
+                }
+                finally
+                {
+                    try { Directory.Delete(dir, true); } catch (IOException) { } catch (UnauthorizedAccessException) { }
+                }
+            });
             Check("Bubble archetype ids of two elements (MonoValueTypeHashes)", () =>
             {
                 MonoValueTypeHashes.Install();

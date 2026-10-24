@@ -50,7 +50,7 @@ OniBrutal.Host (exe)                      entry point; ALC setup; main loop; CLI
  │     ├─ OniBrutal.Platform.dll          GLFW window, GL context, input events, clipboard, cursors,
  │     │                                  display modes, timing.
  │     └─ BRUTAL packages                 Ahwoo.BRUTAL.{Core,Glfw,OpenGl,Numerics,Stb,…}
- └─ game assemblies from Managed/ (unmodified)
+ └─ game assemblies from Managed/ (unmodified on disk)
 ```
 
 **Why facades.** Game IL binds to `[UnityEngine.CoreModule]UnityEngine.GameObject`,
@@ -99,7 +99,8 @@ and .NET 10 ships out-of-band. The host restores them the way .NET documents for
 .NET Framework-era code where it can. Two serialization paths of the game are patched at run
 time where they persist runtime-specific values (D1 state-machine parameter names, D3 a local
 mod's version stamp); so are mods' loading (D11) and the bubble manager's one use of a struct's
-hash as an identity (D26). No other game IL is touched.
+hash as an identity (D26), and the game's conversions of floats to integers are rewritten as
+they load (D29). No other game IL is touched.
 
 | Mono provided | Host provides | Needed by |
 |---|---|---|
@@ -444,6 +445,43 @@ past the boot checkpoint needs a Steam client logged in with an account that own
   traces. A recursion through game methods or another assembly is not covered, nor one in the
   game's own code. A mod that cannot be rewritten loads unchanged. `--check-types` runs a mod's
   self and mutual recursions without end.
+- **D29 Float-to-integer conversions out of range.** Mono converts a float to an integer with
+  the processor's truncating instruction (cvttsd2si), which gives the target's minimum for NaN,
+  the infinities and values whose truncation is out of range; CoreCLR saturates since .NET 9
+  (NaN gives 0, +∞ the maximum). Attribute Info Screen shows the bionic Duplicant's experience as
+  `Mathf.RoundToInt(GetExperienceForNextLevel())`, which is NaN: "Xp:0/-2147483648" in the
+  original, "Xp:0/0" here; `Grid.PosToCell` of a NaN position gave cell 0. Measured in the
+  original player (`tools/UnityProbe`, `PROBE_SCENARIO=convert`, `cv-check.py rule`: 1596 of
+  1596 lines follow these rules), every unchecked IL conversion of a float32 or float64, the
+  float32 widened exactly: conv.i4 is the 32-bit conversion, conv.i1/i2/u1/u2 its low bits (300
+  as a byte is 44, NaN 0); conv.i8 is the 64-bit conversion, conv.u4 its low 32 bits (-1 gives
+  4294967295); conv.u8 and conv.u convert below 2^63 and otherwise convert the value less 2^63
+  and flip the top bit (NaN, +∞ give 0, -∞ gives 2^63); conv.i is the 32-bit conversion
+  zero-extended (Mono's amd64 back end; -1 gives 4294967295). Unity's `Mathf.RoundToInt`,
+  `FloorToInt`, `CeilToInt` and `Vector2Int`/`Vector3Int`'s follow conv.i4. The checked
+  conversions (conv.ovf.*), `Convert.ToXxx` and `Color32` from a `Color` agree in both players.
+  **Resolved in** the engine's `Mathf` (`OniBrutal.Engine.MonoConvert`: the processor's
+  truncating instructions through `Sse2`, an equivalent comparison elsewhere) and in
+  `MonoConversions`: as a game assembly from `Managed/` or a mod's assembly loads, each
+  unchecked conversion whose operand is a float (found by following the IL's stack types along
+  every path, generic instantiations included) calls a helper that converts as Mono does; a
+  conversion reached with a float on one path and an integer on another, or a method whose IL
+  is not followed, stays as it is. The game has 672 such conversions (Assembly-CSharp 501 in 272
+  methods, firstpass 95, LibNoiseDotNet 69, Ionic.Zip 4, FMODUnity 1, 0Harmony 2 and 13 not
+  followed), the catalog's 1137 mod assemblies 3502; checked against a local rule (a conversion
+  right after a float load) with no disagreement. Costs measured: a conversion in a tight loop
+  takes 0.75 ns instead of 0.52 (the float32 is widened first); four U57 runs of `qa.sh perf`
+  alternating without and with the rewrite gave 32.9 and 43.8 fps without, 37.5 and 39.7 with
+  (another session loaded the machine between runs; the spread between runs of one build is
+  wider than any difference); rewriting the game's assemblies at load takes 2.4 s, so the
+  images are kept in the player's cache folder (`OniBrutal/conversions`, by the image's hash
+  and the host build) and later starts read them. A Harmony transpiler sees the call where the
+  IL had the conversion: no mod assembly in the catalog names an unchecked `OpCodes.Conv_*`
+  field (`Conv_I4` and the rest), and none of our transpilers does. Not covered: our own UI packages and the
+  engine's other code (compiled for .NET; `Mathf` aside), and an arm64 original (not measured;
+  ours converts as the x86-64 one there too). `--check-types` loads a mod with conversions of
+  floats, products, a generic result and a join of a float32 and a float64, and an integer's
+  conversion, and compares them with the measured values.
 
 ## 3. The engine API (`OniBrutal.UnityEngine`)
 

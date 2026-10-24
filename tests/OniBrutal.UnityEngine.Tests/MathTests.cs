@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using Xunit;
 
@@ -58,6 +59,70 @@ namespace OniBrutal.Tests
         {
             Assert.Equal(2, Mathf.RoundToInt(2.5f));
             Assert.Equal(4, Mathf.RoundToInt(3.5f));
+        }
+
+        [Fact]
+        public void ToIntConversionsGiveMonosValueOutOfRange()
+        {
+            // Measured in the original player (UnityProbe convert scenario, ARCHITECTURE D29).
+            foreach (var f in new[] { float.NaN, float.PositiveInfinity, float.NegativeInfinity, 2147483648f, -2147483904f, 3e9f, -1e30f })
+            {
+                Assert.Equal(int.MinValue, Mathf.RoundToInt(f));
+                Assert.Equal(int.MinValue, Mathf.FloorToInt(f));
+                Assert.Equal(int.MinValue, Mathf.CeilToInt(f));
+            }
+            Assert.Equal(2147483520, Mathf.RoundToInt(2147483520f));
+            Assert.Equal(int.MinValue, Mathf.RoundToInt(-2147483648f));
+            Assert.Equal(new Vector2Int(int.MinValue, 2), Vector2Int.RoundToInt(new Vector2(float.NaN, 1.5f)));
+            Assert.Equal(new Vector3Int(int.MinValue, 1, -2), Vector3Int.FloorToInt(new Vector3(float.PositiveInfinity, 1.5f, -1.5f)));
+        }
+
+        [Theory]
+        // input, conv.i4, conv.i8, conv.u4, conv.u8, conv.i1, conv.u1, conv.i2, conv.u2, conv.i (the original's values)
+        [InlineData(double.NaN, int.MinValue, long.MinValue, 0u, 0ul, 0, 0, 0, 0, 2147483648L)]
+        [InlineData(double.PositiveInfinity, int.MinValue, long.MinValue, 0u, 0ul, 0, 0, 0, 0, 2147483648L)]
+        [InlineData(double.NegativeInfinity, int.MinValue, long.MinValue, 0u, 9223372036854775808ul, 0, 0, 0, 0, 2147483648L)]
+        [InlineData(-1.5, -1, -1L, 4294967295u, 18446744073709551615ul, -1, 255, -1, 65535, 4294967295L)]
+        [InlineData(300.0, 300, 300L, 300u, 300ul, 44, 44, 300, 300, 300L)]
+        [InlineData(-300.0, -300, -300L, 4294966996u, 18446744073709551316ul, -44, 212, -300, 65236, 4294966996L)]
+        [InlineData(70000.0, 70000, 70000L, 70000u, 70000ul, 112, 112, 4464, 4464, 70000L)]
+        [InlineData(-2147483648.9, int.MinValue, -2147483648L, 2147483648u, 18446744071562067968ul, 0, 0, 0, 0, 2147483648L)]
+        [InlineData(5e9, int.MinValue, 5000000000L, 705032704u, 5000000000ul, 0, 0, 0, 0, 2147483648L)]
+        [InlineData(-5e9, int.MinValue, -5000000000L, 3589934592u, 18446744068709551616ul, 0, 0, 0, 0, 2147483648L)]
+        [InlineData(1e19, int.MinValue, long.MinValue, 0u, 10000000000000000000ul, 0, 0, 0, 0, 2147483648L)]
+        [InlineData(-9.2e18, int.MinValue, -9200000000000000000L, 1650982912u, 9246744073709551616ul, 0, 0, 0, 0, 2147483648L)]
+        [InlineData(2e19, int.MinValue, long.MinValue, 0u, 0ul, 0, 0, 0, 0, 2147483648L)]
+        [InlineData(-2e19, int.MinValue, long.MinValue, 0u, 9223372036854775808ul, 0, 0, 0, 0, 2147483648L)]
+        public void MonoConvertFollowsTheOriginal(double x, int i4, long i8, uint u4, ulong u8, int i1, int u1, int i2, int u2, long i)
+        {
+            Assert.Equal(i4, OniBrutal.Engine.MonoConvert.ToInt32(x));
+            Assert.Equal(i8, OniBrutal.Engine.MonoConvert.ToInt64(x));
+            Assert.Equal(u4, OniBrutal.Engine.MonoConvert.ToUInt32(x));
+            Assert.Equal(u8, OniBrutal.Engine.MonoConvert.ToUInt64(x));
+            Assert.Equal(u8, (ulong)OniBrutal.Engine.MonoConvert.ToUIntPtr(x));
+            Assert.Equal(i1, OniBrutal.Engine.MonoConvert.ToSByte(x));
+            Assert.Equal(u1, OniBrutal.Engine.MonoConvert.ToByte(x));
+            Assert.Equal(i2, OniBrutal.Engine.MonoConvert.ToInt16(x));
+            Assert.Equal(u2, OniBrutal.Engine.MonoConvert.ToUInt16(x));
+            Assert.Equal(i, (long)OniBrutal.Engine.MonoConvert.ToIntPtr(x));
+        }
+
+        [Fact]
+        public void MonoConvertsPortablePathAgreesWithTheProcessors()
+        {
+            var values = new List<double> { double.NaN, double.PositiveInfinity, double.NegativeInfinity, double.MaxValue, double.MinValue, -0.0, double.Epsilon };
+            foreach (double edge in new[] { 2147483648.0, 9223372036854775808.0 })
+                foreach (double sign in new[] { 1.0, -1.0 })
+                {
+                    double e = sign * edge;
+                    values.AddRange(new[] { e, System.Math.BitDecrement(e), System.Math.BitIncrement(e), e - 1, e + 1, e - 0.5, e + 0.5, e - 1.5, e + 1.5 });
+                }
+            for (int k = -70; k <= 70; k++) values.Add(System.Math.ScaleB(1.2345, k) * (k % 2 == 0 ? 1 : -1));
+            foreach (double x in values)
+            {
+                Assert.Equal(OniBrutal.Engine.MonoConvert.ToInt32(x), OniBrutal.Engine.MonoConvert.ToInt32Portable(x));
+                Assert.Equal(OniBrutal.Engine.MonoConvert.ToInt64(x), OniBrutal.Engine.MonoConvert.ToInt64Portable(x));
+            }
         }
 
         [Fact]

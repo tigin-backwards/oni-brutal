@@ -1,0 +1,58 @@
+# Better Rebuilding (3204497859), classes S, P.
+#
+# What it does: a building rebuilt in another material (the side screen's Material tab: change
+# material, then order the rebuild) keeps its settings: when the rebuild starts, the mod copies
+# every component that answers OnCopySettings (and the pipe or wire connections) onto a
+# hidden cache object for that cell, and applies them to the new building once it is built.
+# Every breakable building also gets an "Automatic Rebuild Screen" side screen: "Rebuild when
+# broken" orders a full rebuild of the building when it breaks.
+# How a player reaches it: select a building; its Material tab; its side screen's check box.
+# What changes: rebuilt buildings keep their settings; broken ones can rebuild themselves.
+#
+# setup builds a Storage Bin of sandstone in the dug-out corridor west of the printing pod and
+# lays granite beside it. The bin is selected, its capacity set to 500 kg and "Rebuild when
+# broken" checked; then it is ordered rebuilt in granite. The Duplicants rebuild it, and the new
+# granite bin still holds at most 500 kg and still rebuilds when broken.
+from: early-base
+mods: [3204497859]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"StorageLocker\")", method: Build, args: [131130, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Granite\").substance", method: SpawnResource, args: [[112.5, 206.5, -12], 1000, 293.15, 255, 0]}}
+steps:
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [114, 208], ortho: 8}}
+  - click_world: {cell: [114, 207], select: StorageLocker}
+  - ui_wait: {path: "**/AutomatedBrokenRebuildSideScreen/Contents/AllowManualCheckbox/CheckBox", cond: stable}
+  - expect_ui:
+      "**/AutomatedBrokenRebuildSideScreen/Contents/AllowManualCheckbox/Label": {text: "Rebuild when broken"}
+  - ui_dump: {name: rebuild-screen, root: "**/AutomatedBrokenRebuildSideScreen"}
+  - click: {ui: "**/AutomatedBrokenRebuildSideScreen/Contents/AllowManualCheckbox/CheckBox"}
+  - expect_state:
+      "selected:GetComponent<RebuildPreserve.AutomatedBrokenRebuild>.RebuildOnBreaking": true
+  - ui_wait: {path: "**/CapacityControlSideScreen/**/InputField", cond: stable}
+  - type: {ui: "**/CapacityControlSideScreen/**/InputField", text: "500", enter: true, clear: true}
+  - expect_state:
+      "selected:StorageLocker.UserMaxCapacity": 500
+  - click: {ui: "**/SidescreenTabHeader/TabRow/Material Tab Instance"}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/Body/BodyMaterial", cond: stable}
+  - click: {ui: "**/DetailsScreenMaterialPanel/OpenChangeMaterialPanelButton"}
+  - ui_wait: {path: "**/DetailsScreenMaterialPanel/MaterialSelectionPanel/ButtonRow/OrderChangeButton", cond: stable}
+  - click: {ui: "**/DetailsScreenMaterialPanel/MaterialSelectionPanel/**/Toggles/MaterialSelection_*GRANITE*"}
+  - expect_state:
+      "ui:**/DetailsScreenMaterialPanel::GetComponent<DetailsScreenMaterialPanel>.materialSelectionPanel.CurrentSelectedElement.Name": Granite
+  - expect_ui:
+      "**/DetailsScreenMaterialPanel/MaterialSelectionPanel/ButtonRow/OrderChangeButton/Label": {text: "Order Rebuild"}
+  - ui_dump: {name: material-panel, root: "**/DetailsScreenMaterialPanel", mask_text: ['^\d+$']}
+  # The order button sits behind the tool bar until the material tab is scrolled down.
+  - scroll: {at: "**/DetailsScreen/SideScreen/Body/BodyMaterial/ScrollRect", notches: -10}
+  - ui_wait: {path: "**/DetailsScreenMaterialPanel/MaterialSelectionPanel/ButtonRow/OrderChangeButton", cond: stable}
+  - click: {ui: "**/DetailsScreenMaterialPanel/MaterialSelectionPanel/ButtonRow/OrderChangeButton"}
+  - expect_state:
+      "selected:Reconstructable.ReconstructRequested": true
+  # The Duplicants take the sandstone bin down and build one of granite in its place.
+  - run: {seconds: 900}
+  - expect_state:
+      "all:StorageLocker::Length": 1
+      "all:StorageLocker::[0].GetComponent<PrimaryElement>.ElementID": Granite
+      "all:StorageLocker::[0].UserMaxCapacity": 500
+      "all:StorageLocker::[0].GetComponent<RebuildPreserve.AutomatedBrokenRebuild>.RebuildOnBreaking": true

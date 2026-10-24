@@ -1,0 +1,69 @@
+{
+ "spec": "mods/3204497859-better-rebuilding.yaml",
+ "mods": [
+  "3204497859"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a storage bin's capacity set to 500 kg and its new Rebuild when broken box checked, then a rebuild in granite ordered from its Material tab: the granite bin built in its place keeps both settings; the rebuild screen and material panel dumped",
+ "updated": "2026-10-24",
+ "commit": "439a1de",
+ "mod_dlls": {
+  "3204497859": {
+   "RebuildPreserve.dll": "be97a86b975977e337417be1e6599144c985e08712da1eb0e93db10f07ce1e5a"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-051158-c8e0f4",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T05:11:58",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-054427-9bcd17",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T05:44:27",
+    "lane": 17,
+    "reference_run": "20261024-051158-c8e0f4",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "rebuild-screen": {
+      "differences": 0
+     },
+     "material-panel": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261024-054427-9bcd17",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T05:50:24",
+    "lane": 17,
+    "reference_run": "20261024-051158-c8e0f4",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "rebuild-screen": {
+      "differences": 0
+     },
+     "material-panel": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -1,0 +1,59 @@
+{
+ "spec": "mods/2612676878-more-building-info.yaml",
+ "mods": [
+  "2612676878"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a smaller spec for an obsolete, emptied mod (it patches nothing): it is loaded and active, and the outhouse's details screen is within threshold",
+ "updated": "2026-10-23",
+ "commit": "3126b12",
+ "mod_dlls": {
+  "2612676878": {
+   "MoreBuildingInfo.dll": "29ff3e869f926d304ba89eb0ee9fe4bf7d610a2c3b037bfe799c27bb5f35829c"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-192148-0b0135",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T19:21:48",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-201419-152be1",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T20:14:20",
+    "lane": 15,
+    "reference_run": "20261023-192148-0b0135",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "details": 0.0
+    }
+   },
+   {
+    "run": "20261023-201419-152be1",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T20:14:19",
+    "lane": 14,
+    "reference_run": "20261023-192148-0b0135",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "details": 0.0
+    }
+   }
+  ]
+ }
+}

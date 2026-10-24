@@ -1,0 +1,21 @@
+# More Building Info [DEPRECATED] (2612676878), class P.
+#
+# What it does: nothing any more. Its author emptied it when the game took over its features
+# (input requirements and room traits in building descriptions): its UserMod2 only calls the
+# base OnLoad, which applies no patches (the assembly has none).
+# How a player reaches it: nothing to reach.
+# What changes: nothing.
+#
+# A smaller spec for an obsolete mod: it is loaded and active in a running colony, and a
+# building's details screen (the outhouse east of the printing pod) is as in the original.
+from: early-base
+mods: [2612676878]
+steps:
+  - expect_state:
+      "count:Global.Instance.modManager.mods[*] if .staticID == MoreBuildingInfo and .IsActive() == true": 1
+  - driver: {camera.set: {cell: [117, 208], ortho: 8}}
+  - click_world: {cell: [116, 207], select: Outhouse}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Outhouse"}
+  - shot: {name: details, crop: "**/DetailsScreen", threshold: 0.04}

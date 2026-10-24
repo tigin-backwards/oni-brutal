@@ -608,7 +608,9 @@ It updates when its rect or its parent's rect changes, and in the update after i
 - **Visuals:** the handle's anchors span `size` at `value`.
 - **Input:** dragging the handle moves the value. A press on the track outside the handle
   centres the handle on the press point at once, and the handle then follows the pointer while
-  the button is held ("Scrollbar presses on the track", measured, below).
+  the button is held; until it moves, the press point is re-applied at the end of each frame.
+  The protected `ClickRepeat` overloads and `Update` are part of the surface ("Scrollbar
+  presses on the track", measured, below).
 
 **`ScrollRect`:**
 - **Settings:**
@@ -1186,7 +1188,8 @@ LeftToRight and BottomToTop, q = 1 − p for RightToLeft and TopToBottom.
    value is again (q − `size` / 2) / (1 − `size`) for the pointer's current q, clamped, each
    frame the pointer moves. This holds below the event system's drag threshold (20 px):
    a move of 10 px gave the followed value. A pointer that stays still changes nothing: there
-   is no repeat, however long the press is held. The release changes nothing.
+   is no stepping repeat, however long the press is held (the press point is re-applied,
+   rule 4, which leaves the value as it is). The release changes nothing.
 
 | Case | original | ours before |
 |---|---|---|
@@ -1217,6 +1220,43 @@ What follows a value change (the handle's anchors, `onValueChanged`, a linked `S
 setting its normalized position) is as described above; only the value a press on the track
 produces, and the repeat, differ. Not measured: touch input, a press with a button other than
 the left, and presses on a scrollbar whose `interactable` is false.
+
+**The press while held, and the protected `ClickRepeat` and `Update` (measured 2026-10-23,**
+`PROBE_SB_PART=clickrepeat` and `clickrepeat2`, a `Scrollbar` subclass of size 0.2 calling
+both `ClickRepeat` overloads by hand, one `MoveNext` a frame, and through `StartCoroutine`).
+The press of rule 2 is not applied once only:
+
+4. **A press holds its point.** From a press (on the handle or not) until the release or the
+   start of a drag, the press point is re-applied immediately and then at the end of every
+   frame: when it lies outside the handle, the value becomes the one rule 2 gives for it. With
+   nothing else moving the value this changes nothing (rule 3's still pointer). A value set
+   while the button is held is put back at the end of that frame when the handle no longer
+   covers the press point: pressed on the track at 0.75 (0.8125), then set to 0.2 from code,
+   the value is 0.8125 again by the next frame, with `onValueChanged` for 0.2 and then
+   0.8125. Pressed on the handle (value 0.5, at 0.5), a value of 0.45 stays (the handle still
+   covers 0.5); a value of 0 is put back to 0.5.
+5. **`ClickRepeat(Vector2 screenPosition, Camera camera)`** returns an enumerator. While a
+   press of rule 4 holds, each `MoveNext` applies `screenPosition` as rule 4 applies the press
+   point (outside the handle: the value of rule 2 for it, `onValueChanged` when it changes;
+   on the handle: nothing), and returns true with `Current` a `WaitForEndOfFrame`. Once the
+   press has ended (released, or a drag begun), `MoveNext` returns false and changes nothing.
+   On a scrollbar that has never been pressed, the first `MoveNext` throws a
+   `NullReferenceException` ("routine is null") and changes nothing, wherever the point is.
+   Both repeats run at the end of each frame, the press's first: while the button was held
+   still on the handle (value 0.5) a subclass's `ClickRepeat` at 0.9 gave `onValueChanged` 1,
+   then 0.5 at the end of the frame, then 1 again from the subclass's next step; its value
+   was 1 when read in the next frame's `Update`. Under `StartCoroutine` the first step runs
+   inside the call.
+6. **`ClickRepeat(PointerEventData eventData)`** is the same with the point
+   `eventData.pointerPressRaycast.screenPosition`; `position` and `pressPosition` are not
+   read. (The camera was not measured; every measurement used an overlay canvas.)
+   The handle's anchors along the axis start at v − v × `size` (v the clamped value; float
+   arithmetic) and end `size` further: in all 945 left-to-right states these probes logged,
+   v × (1 − `size`) differed in the last bit 79 times (v 0.8125, size 0.2: 0.65 to
+   0.849999964, not 0.65000004 to 0.85).
+7. **`Update`** (protected, virtual) has no measured effect: a subclass whose override does not
+   call `base.Update()` gave the same values, anchors and `onValueChanged` for a value and a
+   size set from code and for a press on the track held and released.
 
 ### Measured on the shipped package
 

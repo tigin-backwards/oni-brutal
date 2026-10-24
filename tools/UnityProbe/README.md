@@ -107,7 +107,11 @@ With `PROBE_SCENARIO=scrollbar` only the scrollbar probe runs (`ScrollbarPress.c
 …`, 10 s into the main menu, a few seconds). It builds a fresh `Scrollbar` per case (each
 direction, several sizes, values and step counts) and presses its track or handle through the
 current module's `inputOverride`, held for 1 to 60 frames, some moving while held. Each frame
-logs the value and the handle's anchors, and each `onValueChanged` its argument. `ugui.md`
+logs the value and the handle's anchors, and each `onValueChanged` its argument. Then a
+`Scrollbar` subclass runs both protected `ClickRepeat` overloads by hand and as coroutines,
+idle and with a press held, and overrides `Update`; `PROBE_SB_PART=press` runs only the press
+cases, `clickrepeat` only the subclass cases, and `clickrepeat2` only the held-press cases (a
+value set while held, the event's position fields, a drag, a released press). `ugui.md`
 ("Scrollbar presses on the track") records what it measured.
 
 With `PROBE_SCENARIO=layoutcull` only the layout-and-cull probe runs (`LayoutCull.cs`, lines `LC

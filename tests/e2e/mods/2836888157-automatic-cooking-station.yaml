@@ -1,0 +1,43 @@
+# AutomaticCookingStation (2836888157), class P.
+#
+# What it does: the Electric Grill (CookingStation) and the Gas Range (GourmetCookingStation)
+# no longer need a Duplicant at the station: postfixes on their DoPostConfigureComplete set
+# the ComplexFabricator's duplicantOperated to false, so a queued recipe cooks by itself
+# once its ingredients are delivered and the station is powered.
+# How a player reaches it: building either station (Food, Fine Dining / Finer Dining) and
+# queueing a recipe on its side screen.
+# What changes: no cooking errands; the station works unattended.
+#
+# setup grants Fine Dining. The Electric Grill is picked in the Food menu and placed in the
+# dug-out corridor west of the printing pod, built (from the base's metal ore) and selected;
+# its recipe side screen opens.
+from: early-base
+mods: [2836888157]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"FineDining\")", method: Purchased}}
+  # The build menu shows a category once one of its buildings is researched, as it learns.
+  - driver: {setup.call: {target: "Game.Instance", method: Trigger, args: [-107300940]}}
+  - driver: {setup.call: {target: "PlanScreen.Instance._researchedDefs", method: Clear}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Cuprite\").substance", method: SpawnResource, args: [[109.5, 206.5, -12], 500, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"CookingStation\").BuildingComplete.GetComponent<CookingStation>.duplicantOperated": false
+      "Assets.GetBuildingDef(\"GourmetCookingStation\").BuildingComplete.GetComponent<GourmetCookingStation>.duplicantOperated": false
+  - run: {seconds: 5}
+  - driver: {camera.set: {cell: [113, 208], ortho: 10}}
+  - click: {ui: "**/PlanScreen/Toggle:Food"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/CookingStation Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/CookingStation Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
+  - click_world: {cell: [114, 206]}
+  - key: {code: Escape}
+  - expect: {blueprints: {CookingStation: 1}}
+  - run: {seconds: 1500, until: {buildings: {CookingStation: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [114, 207], ortho: 8}}
+  - click_world: {cell: [114, 206], select: CookingStation}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Electric Grill"}
+  - expect_state:
+      "selected:CookingStation.duplicantOperated": false
+  - shot: {name: details, crop: "**/DetailsScreen", threshold: 0.04}

@@ -595,7 +595,7 @@ installs get developer checks subscribers never see).
 | 574 | [Shiny Hats (Vanilla + Spaced Out)](https://steamcommunity.com/sharedfiles/filedetails/?id=1949320130) | ❌ | ❌ | ⬜ | fails to load in the original as well, in its sweep batch |
 | 575 | [[reupload] Wooden Set - Furniture by Ronivan](https://steamcommunity.com/sharedfiles/filedetails/?id=2880373139) | ✅ | ✅ | ⚠️ | spec tests/e2e/mods/2880373139-wooden-set-furniture.yaml: a Wooden Table built from a build order shows its nine looks in the mod's side screen, and a click switches the look, as in the original; known findings: `scroll-normalized-position` |
 | 576 | [Nickel Volcano](https://steamcommunity.com/sharedfiles/filedetails/?id=3508859197) | ⬜ | ⬜ | ⬜ |  |
-| 577 | [4kwWire 4kw的导线 dlc适用](https://steamcommunity.com/sharedfiles/filedetails/?id=2006947666) | ✅ | ✅ | ⬜ |  |
+| 577 | [4kwWire 4kw的导线 dlc适用](https://steamcommunity.com/sharedfiles/filedetails/?id=2006947666) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2006947666-4kw-wire.yaml: Conductive Wire carries 4 kW (the other ratings as the game's); picked in the Power menu (card shot as in the original), dragged, built from steel and selected (details shot as in the original) |
 | 578 | [Material Colored Tiles and more](https://steamcommunity.com/sharedfiles/filedetails/?id=2694008506) | ✅ | ✅ | ⬜ |  |
 | 579 | [【2024-09-FIXED】[VANILLA + DLC SUPPORT] 4KW/900KW WIRE // 4千瓦导线 900KW 高负荷导线](https://steamcommunity.com/sharedfiles/filedetails/?id=2543819221) | ✅ | ✅ | ⬜ |  |
 | 580 | [More Vents](https://steamcommunity.com/sharedfiles/filedetails/?id=3144715617) | ⬜ | ⬜ | ⬜ |  |
@@ -606,7 +606,7 @@ installs get developer checks subscribers never see).
 | 585 | [Smoother Light (Vanilla/DLC)](https://steamcommunity.com/sharedfiles/filedetails/?id=1839645620) | ✅ | ✅ | ⬜ |  |
 | 586 | [Pick up Flopping Aquatic Critters](https://steamcommunity.com/sharedfiles/filedetails/?id=2996740374) | ✅ | ✅ | ⬜ |  |
 | 587 | [Thermal Isolation Door](https://steamcommunity.com/sharedfiles/filedetails/?id=1732806087) | ⬜ | ⬜ | ⬜ | flagged by onimaxxing (notLoading); not tested |
-| 588 | [AutomaticCookingStation](https://steamcommunity.com/sharedfiles/filedetails/?id=2836888157) | ✅ | ✅ | ⬜ |  |
+| 588 | [AutomaticCookingStation](https://steamcommunity.com/sharedfiles/filedetails/?id=2836888157) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2836888157-automatic-cooking-station.yaml: the Electric Grill and Gas Range need no Duplicant (duplicantOperated false); the grill picked in the Food menu, built from copper ore and selected, its details shot |
 | 589 | [Adjustable Mining Yield](https://steamcommunity.com/sharedfiles/filedetails/?id=2985540238) | ✅ | ✅ | ⬜ |  |
 | 590 | [电冰箱增强](https://steamcommunity.com/sharedfiles/filedetails/?id=3276456257) | ✅ | ✅ | ⬜ |  |
 | 591 | [自定义修改房间大小（Modify the room size）](https://steamcommunity.com/sharedfiles/filedetails/?id=3309623145) | ✅ | ✅ | ⬜ |  |
@@ -618,12 +618,12 @@ installs get developer checks subscribers never see).
 | 597 | [squirrel behavior correction](https://steamcommunity.com/sharedfiles/filedetails/?id=1973325790) | ✅ | ✅ | ⬜ |  |
 | 598 | [大一统:大一统](https://steamcommunity.com/sharedfiles/filedetails/?id=2959893715) | ✅ | ✅ | ⬜ |  |
 | 599 | [More Plants](https://steamcommunity.com/sharedfiles/filedetails/?id=2819853217) | ❌ | ❌ | ⬜ | fails to load in the original as well, in its sweep batch |
-| 600 | [Tweaked Biological Cargo Bay](https://steamcommunity.com/sharedfiles/filedetails/?id=1891479671) | ✅ | ✅ | ⬜ |  |
+| 600 | [Tweaked Biological Cargo Bay](https://steamcommunity.com/sharedfiles/filedetails/?id=1891479671) | ✅ | ✅ | ⬜ | not played: it supports the base game only (`supportedContent: VANILLA_ID`; it patches the base game's Biological Cargo Bay, which Spaced Out lacks), and every spec fixture is a Spaced Out colony |
 | 601 | [[MG]Air Filter(过滤器)](https://steamcommunity.com/sharedfiles/filedetails/?id=2646067420) | ❌ | ❌ | ⬜ | broken upstream: calls `ConsumedElement(Tag, float)`, which the game no longer has, and the error dialog quits the game (same in the original) |
 | 602 | [Quicker On The Ladder 更快的梯子](https://steamcommunity.com/sharedfiles/filedetails/?id=3302173423) | ✅ | ✅ | ⬜ |  |
-| 603 | [Bleachstone and Slime Refinery](https://steamcommunity.com/sharedfiles/filedetails/?id=1886699455) | ✅ | ✅ | ⬜ |  |
+| 603 | [Bleachstone and Slime Refinery](https://steamcommunity.com/sharedfiles/filedetails/?id=1886699455) | ✅ | ✅ | ⬜ | not played: it supports the base game only (`supportedContent: VANILLA_ID`), and every spec fixture is a Spaced Out colony |
 | 604 | [Daily Routine](https://steamcommunity.com/sharedfiles/filedetails/?id=2863383492) | ✅ | ✅ | ⬜ |  |
-| 605 | [Infinite Planet Resources](https://steamcommunity.com/sharedfiles/filedetails/?id=1828719932) | ✅ | ✅ | ⬜ |  |
+| 605 | [Infinite Planet Resources](https://steamcommunity.com/sharedfiles/filedetails/?id=1828719932) | ✅ | ✅ | ⬜ | not played: it supports the base game only (`supportedContent: VANILLA_ID`; it patches the base game's starmap destinations), and every spec fixture is a Spaced Out colony |
 | 606 | [SmartSweepy](https://steamcommunity.com/sharedfiles/filedetails/?id=2016657763) | ⬜ | ⬜ | ⬜ | flagged by onimaxxing (notLoading); not tested |
 | 607 | [Warning Notification Manager](https://steamcommunity.com/sharedfiles/filedetails/?id=2968008945) | ✅ | ✅ | ⬜ |  |
 | 608 | [Bigger Gas Reservoir (x10)](https://steamcommunity.com/sharedfiles/filedetails/?id=3509481763) | ✅ | ✅ | ⬜ |  |

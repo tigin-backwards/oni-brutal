@@ -1,0 +1,59 @@
+{
+ "spec": "mods/2836888157-automatic-cooking-station.yaml",
+ "mods": [
+  "2836888157"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Electric Grill and Gas Range need no Duplicant (duplicantOperated false); the grill picked in the Food menu, built from copper ore and selected, its details shot",
+ "updated": "2026-10-24",
+ "commit": "29e4f14",
+ "mod_dlls": {
+  "2836888157": {
+   "AutomaticCookingStation.dll": "f05ee10745b0f098af7e0053ffc94ad75eeed355e32c1054e053da10e78499d3"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-061840-ff3541",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T06:21:02",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-063046-b7a160",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T06:32:51",
+    "lane": 14,
+    "reference_run": "20261024-061840-ff3541",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "details": 0.0
+    }
+   },
+   {
+    "run": "20261024-063046-b7a160",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T06:34:20",
+    "lane": 14,
+    "reference_run": "20261024-061840-ff3541",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "details": 0.0
+    }
+   }
+  ]
+ }
+}

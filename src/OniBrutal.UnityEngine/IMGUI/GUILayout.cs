@@ -88,7 +88,7 @@ namespace UnityEngine
                 var all = new GUILayoutOption[(options?.Length ?? 0) + 1];
                 all[0] = ExpandWidth(true);
                 options?.CopyTo(all, 1);
-                var item = LayoutItem.Leaf(style, width, width, height, height, all);
+                var item = LayoutEntry.Leaf(style, width, width, height, height, all);
                 // Measured: the row sits flush with its area (no leading or side margins), and
                 // the style's bottom margin separates it from what follows.
                 item.MarginLeft = item.MarginRight = item.MarginTop = 0;
@@ -145,35 +145,19 @@ namespace UnityEngine
 
         // ----- Space -----
 
-        /// A fixed gap along the current group's axis.
+        /// A fixed gap along the current group's axis. It takes no margin: it starts where the
+        /// entry before it ends, and the entry after it keeps its leading margin.
         public static void Space(float pixels)
         {
             var pass = GUILayoutUtility.Pass;
-            if (!pass.Recording)
-            {
-                pass.Leaf(null);
-                return;
-            }
-            bool vertical = pass.InVertical;
-            var item = vertical ? LayoutItem.Leaf(GUIStyle.none, 0f, 0f, pixels, pixels, null) : LayoutItem.Leaf(GUIStyle.none, pixels, pixels, 0f, 0f, null);
-            item.StretchWidth = item.StretchHeight = false;
-            pass.Leaf(item);
+            pass.Leaf(pass.Recording ? LayoutEntry.Spacer(pass.InVertical, pixels, false) : null);
         }
 
         /// An empty entry that takes the space left along the current group's axis.
         public static void FlexibleSpace()
         {
             var pass = GUILayoutUtility.Pass;
-            if (!pass.Recording)
-            {
-                pass.Leaf(null);
-                return;
-            }
-            bool vertical = pass.InVertical;
-            var item = LayoutItem.Leaf(GUIStyle.none, 0f, 0f, 0f, 0f, null);
-            item.StretchWidth = !vertical;
-            item.StretchHeight = vertical;
-            pass.Leaf(item);
+            pass.Leaf(pass.Recording ? LayoutEntry.Spacer(pass.InVertical, 0f, true) : null);
         }
 
         // ----- Groups -----
@@ -201,7 +185,7 @@ namespace UnityEngine
         static void BeginGroup(bool vertical, GUIContent content, GUIStyle style, GUILayoutOption[] options)
         {
             var box = GUILayoutUtility.Pass.BeginGroup(vertical, style ?? GUIStyle.none, options);
-            if (Event.current.type == EventType.Repaint && style != null && style != GUIStyle.none)
+            if (box != null && Event.current.type == EventType.Repaint && style != null && style != GUIStyle.none)
                 style.Draw(box.Rect, content ?? GUIContent.none, false, false, false, false);
         }
 
@@ -222,9 +206,11 @@ namespace UnityEngine
             GUI.BeginGroup(screenRect, content, style);
         }
 
+        /// Closes the area's layout group first: with no group left under it this throws
+        /// (InvalidOperationException) before the clip is closed.
         public static void EndArea()
         {
-            GUILayoutUtility.Pass.EndGroup();
+            GUILayoutUtility.Pass.EndArea();
             GUI.EndGroup();
         }
 
@@ -252,9 +238,18 @@ namespace UnityEngine
         public static Vector2 BeginScrollView(Vector2 scrollPosition, bool alwaysShowHorizontal, bool alwaysShowVertical, GUIStyle horizontalScrollbar, GUIStyle verticalScrollbar, GUIStyle background, params GUILayoutOption[] options)
         {
             var pass = GUILayoutUtility.Pass;
-            var box = pass.BeginScroll(alwaysShowHorizontal, alwaysShowVertical, horizontalScrollbar, verticalScrollbar, background ?? GUIStyle.none, options);
-            if (pass.Recording) return ScrollViews.BeginMeasuring(scrollPosition);
-            return ScrollViews.Begin(box.Rect, scrollPosition, box.ViewRect, box.NeedsHorizontal, box.NeedsVertical, horizontalScrollbar, verticalScrollbar, background);
+            if (pass.Recording)
+            {
+                pass.BeginScroll(alwaysShowHorizontal, alwaysShowVertical, horizontalScrollbar, verticalScrollbar, background ?? GUIStyle.none, options);
+                return ScrollViews.BeginMeasuring(scrollPosition);
+            }
+            // The recorded group in its place (ExitGUIException when a leaf is there); none in a
+            // Used event.
+            var g = pass.TakeScroll();
+            if (g == null) return ScrollViews.BeginMeasuring(scrollPosition);
+            var s = g as ScrollGroup;
+            var view = s != null ? s.ViewRect : new Rect(0f, 0f, g.Rect.width, g.Rect.height);
+            return ScrollViews.Begin(g.Rect, scrollPosition, view, s?.NeedsHorizontal ?? false, s?.NeedsVertical ?? false, horizontalScrollbar, verticalScrollbar, background);
         }
 
         public static void EndScrollView() => EndScrollView(true);

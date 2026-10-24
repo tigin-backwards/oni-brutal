@@ -4,7 +4,7 @@
   gl-check.py diff ORIG OURS    every measurement, window size, order step and mismatch case that differs
   gl-check.py show LOG [PART]   the log by part: size, ws, ord, mm
 Exit code 0 when the rules hold (rule) or nothing differs (diff)."""
-import math, re, sys
+import math, re, struct, sys
 
 LINE = re.compile(r'PROBE f(\d+) GL (.*)$')
 DUMMY = '0,0,1,1'
@@ -22,6 +22,20 @@ def parse(path):
 
 def rect(text):
     return tuple(float(v) for v in text.split(','))
+
+
+def f32(v):
+    return struct.unpack('f', struct.pack('f', v))[0]
+
+
+def norm(text):
+    """A value as the float32 numbers it holds: Mono's "R" prints a float in 9 digits where 7
+    do not read back ("72.0200043"), .NET the shortest string that does ("72.020004"); the same
+    value either way. Other text is left as it is."""
+    try:
+        return ','.join(repr(f32(float(v))) for v in text.split(','))
+    except ValueError:
+        return text
 
 
 def kv(text):
@@ -264,11 +278,14 @@ def rule_ws(c, ws):
             continue
         o = WS_OPTS.get(wid, {})
         c.check(gout[:2] == gin[:2], f'ws {case} {wid}: moved {v}')
-        # Content height: padding 20 + 10, entries at their unrounded heights, 4 between.
-        width = rect(f['first'])[2]
-        lines = 1 if (n <= 5 or (width >= 180 and n <= 10)) else None  # longer labels wrap
-        if lines:
-            content = 30 + n * 19.01 + (n - 1) * 4
+        # Content height: padding 20 + 10, entries at their unrounded heights (one line 19.01,
+        # each further 14.3), 4 between. Where the labels wrap depends on the font's widths: the
+        # first one's rounded height gives the lines of labels 0 to 9, the last one's those of
+        # labels 10 and up (a digit longer).
+        heights = {19: 1, 33: 2, 48: 3, 62: 4}
+        first_lines, last_lines = heights.get(int(rect(f['first'])[3])), heights.get(int(rect(f['last'])[3]))
+        if first_lines and last_lines:
+            content = 30 + sum(19.01 + ((first_lines if i < 10 else last_lines) - 1) * 14.3 for i in range(n)) + (n - 1) * 4
             h = gin[3]
             if 'h' in o:
                 h = o['h']
@@ -485,8 +502,8 @@ def diff(orig, ours):
         va, vb = sa[k], sb.get(k)
         if vb is None:
             n += 1; print('SIZE', k, 'missing in ours'); continue
-        da = {x: y for x, y in va.items() if x not in ('calc', 'ch', 'mm')}
-        db = {x: y for x, y in vb.items() if x not in ('calc', 'ch', 'mm')}
+        da = {x: norm(y) for x, y in va.items() if x not in ('calc', 'ch', 'mm')}
+        db = {x: norm(y) for x, y in vb.items() if x not in ('calc', 'ch', 'mm')}
         if da != db:
             n += 1
             print('SIZE', k)
@@ -494,8 +511,10 @@ def diff(orig, ours):
                 if da[x] != db.get(x):
                     print(f'   {x}: orig {da[x]}  ours {db.get(x)}')
     wa, wb = ws_lines(a), ws_lines(b)
+    def nv(v):
+        return {x: norm(y) for x, y in v.items()} if v is not None else None
     for k in wa:
-        if k[0] != 'f' and wa[k] != wb.get(k):
+        if k[0] != 'f' and nv(wa[k]) != nv(wb.get(k)):
             n += 1; print('WS', k, 'orig', wa[k].get('out'), 'ours', (wb.get(k) or {}).get('out'))
     oa, ob = order_steps(a), order_steps(b)
     for k in oa:
@@ -509,7 +528,7 @@ def diff(orig, ours):
             out = []
             for r in rows:
                 if r[0] == 'call':
-                    out.append(f'{r[2]} {r[3]}: ' + ' '.join(f'{x}={y}' for x, y in r[5]) + f' [{r[6]}]')
+                    out.append(f'{r[2]} {r[3]}: ' + ' '.join(f'{x}={norm(y)}' for x, y in r[5]) + f' [{r[6]}]')
                 else:
                     out.append(f'LOG {r[2]} {r[3][:120]}')
             # frames differ between players; compare the distinct lines in order of first appearance

@@ -6,7 +6,8 @@ using UnityEngine;
 namespace OniBrutal.Engine.IMGUI
 {
     /// A behaviour that takes part in IMGUI (its script declares OnGUI), with the state kept for
-    /// it across events: its control IDs, its GUILayout entries, its windows and its depth.
+    /// it across events: its control IDs, its GUILayout entries and its depth. Its windows are
+    /// in the one stack of every behaviour's windows (Windows).
     internal sealed class GUIParticipant(BehaviourNative behaviour, long order)
     {
         public readonly BehaviourNative Behaviour = behaviour;
@@ -16,74 +17,36 @@ namespace OniBrutal.Engine.IMGUI
         public int Depth;
         public readonly ControlScope Scope = new();
         public readonly LayoutPass Layout = new();
-        /// Its windows, the front one first.
-        public readonly List<WindowRecord> Windows = new();
-        public WindowRecord FocusedWindow;
 
         public bool UsesLayout => Behaviour.UseGUILayout;
 
         public bool Alive => !Behaviour.Destroyed && Behaviour.IsActiveAndEnabledState && Behaviour.Managed is MonoBehaviour;
 
-        public WindowRecord FindWindow(int id)
-        {
-            foreach (var w in Windows)
-                if (w.Id == id) return w;
-            return null;
-        }
-
-        public void BringToFront(WindowRecord w)
-        {
-            if (Windows.Remove(w)) Windows.Insert(0, w);
-        }
-
-        public void SendToBack(WindowRecord w)
-        {
-            if (Windows.Remove(w)) Windows.Add(w);
-        }
-
-        /// Windows its OnGUI did not call since the last prune are gone.
-        public void PruneWindows()
-        {
-            for (int i = Windows.Count - 1; i >= 0; i--)
-            {
-                var w = Windows[i];
-                if (w.Touched) continue;
-                Windows.RemoveAt(i);
-                w.Scope.Release();
-                if (IMGUI.Windows.ActiveModal == w) IMGUI.Windows.ActiveModal = null;
-                if (FocusedWindow == w) FocusedWindow = null;
-            }
-        }
-
-        public void UntouchWindows()
-        {
-            foreach (var w in Windows) w.Touched = false;
-        }
-
         public void Release()
         {
             Scope.Release();
-            foreach (var w in Windows)
-            {
-                w.Scope.Release();
-                if (IMGUI.Windows.ActiveModal == w) IMGUI.Windows.ActiveModal = null;
-            }
-            Windows.Clear();
-            FocusedWindow = null;
+            Windows.Release(this);
         }
     }
 
     /// Runs IMGUI each frame, after the cameras and canvases have rendered: every input event
-    /// of the frame, in order, then a Repaint, each sent to the participating behaviours.
+    /// of the frame, in order, then a Repaint ("GUILayout, measured", part 4).
     ///
-    /// Each behaviour gets a Layout event before every event (unless it turned useGUILayout
-    /// off), and its windows run after its own OnGUI. Repaint and Layout go back to front;
-    /// input goes front to back and stops at the first behaviour that uses it.
+    /// Every event is preceded by its own Layout: each behaviour's OnGUI front to back, then
+    /// the windows of all the behaviours, front to back. Repaint goes to the behaviours back
+    /// to front, then to the windows back to front. A mouse event goes first to the front
+    /// window under the mouse (or the one whose control holds it), then to the behaviours
+    /// front to back, until one of them has used it. GUI.depth orders the behaviours (lower in
+    /// front); equal depths keep the order in which they were enabled, the first in front.
+    /// The player sends no MouseMove events.
     internal static class GUIManager
     {
+        public const string UnbalancedClips = "GUI Error: You are pushing more GUIClips than you are popping. Make sure they are balanced.";
+
         static bool installed;
         static readonly List<GUIParticipant> participants = new();
         static readonly Dictionary<BehaviourNative, GUIParticipant> byBehaviour = new();
+        /// The behaviours front to back.
         static readonly List<GUIParticipant> ordered = new();
         static long nextOrder;
         /// The '\t' character event that follows a Tab press which moved focus is used too.
@@ -123,7 +86,7 @@ namespace OniBrutal.Engine.IMGUI
             participants.Clear();
             byBehaviour.Clear();
             InputEvents.Reset();
-            Windows.ActiveModal = null;
+            Windows.Reset();
             GUIStateData.StaleHotControl = 0;
             swallowTabCharacter = false;
             lastMouse = Vector2.zero;
@@ -169,6 +132,8 @@ namespace OniBrutal.Engine.IMGUI
         {
             var type = e.rawType;
             if (e.isMouse || type == EventType.ScrollWheel) lastMouse = e.ScreenPosition;
+            // The player sends no MouseMove events: a move only places the mouse.
+            if (type == EventType.MouseMove) return;
             if (swallowTabCharacter)
             {
                 swallowTabCharacter = false;
@@ -182,61 +147,78 @@ namespace OniBrutal.Engine.IMGUI
                 GUIStateData.StaleHotControl = 0;
             }
             Order();
-            if (type is EventType.Repaint or EventType.Layout)
+            if (type == EventType.Layout)
             {
-                foreach (var p in ordered)
-                    if (p.Alive) Send(p, e);
-                // The modal window is drawn last, in front of every other window.
-                if (type == EventType.Repaint && Modal() is { } shown) Windows.Call(shown, e);
+                LayoutPass(e);
+                return;
+            }
+            LayoutPass(Pass(EventType.Layout, e));
+            if (type == EventType.Repaint)
+            {
+                RepaintPass(e);
                 return;
             }
             if (Modal() is { } modal)
             {
                 // While a modal window is shown, input goes to it alone.
                 SendModal(modal, e);
-                if (type == EventType.MouseDown && e.rawType != EventType.Used) GUIStateData.KeyboardControl = 0;
-                return;
             }
-            for (int i = ordered.Count - 1; i >= 0; i--)
+            else
             {
-                var p = ordered[i];
-                if (!p.Alive) continue;
-                Send(p, e);
-                if (e.rawType == EventType.Used) return;
+                SendInput(e);
             }
             // A click no control took ends keyboard focus (a click outside a text field).
-            if (type == EventType.MouseDown) GUIStateData.KeyboardControl = 0;
+            if (type == EventType.MouseDown && e.rawType != EventType.Used) GUIStateData.KeyboardControl = 0;
         }
 
-        /// Back to front: higher depth first, equal depths in the order they were enabled.
+        /// Front to back: lower depth first, equal depths in the order they were enabled.
         static void Order()
         {
             ordered.Clear();
             ordered.AddRange(participants);
-            ordered.Sort(static (a, b) => a.Depth != b.Depth ? b.Depth.CompareTo(a.Depth) : a.Order.CompareTo(b.Order));
+            ordered.Sort(static (a, b) => a.Depth != b.Depth ? a.Depth.CompareTo(b.Depth) : a.Order.CompareTo(b.Order));
         }
 
-        /// One event to one behaviour: its Layout pass first, then the event, its windows
-        /// after its OnGUI for Layout and Repaint, before it for input.
-        static void Send(GUIParticipant p, Event e)
+        /// A Layout event: every behaviour's OnGUI front to back (their window declarations),
+        /// then every window front to back.
+        static void LayoutPass(Event layout)
         {
-            if (p.UsesLayout)
+            Windows.BeginDeclarations();
+            foreach (var p in ordered)
+                if (p.Alive && p.UsesLayout) Call(p, layout);
+            Windows.EndDeclarations();
+            foreach (var w in Windows.Snapshot())
             {
-                var layout = Pass(EventType.Layout, e);
-                p.UntouchWindows();
-                Call(p, layout);
-                p.PruneWindows();
-                RunWindows(p, layout);
+                if (!w.Owner.Alive || !w.Owner.UsesLayout || !Windows.Shown(w)) continue;
+                // A modal window that is not the one shown is skipped.
+                if (w.Modal && w != Windows.ActiveModal) continue;
+                Windows.Call(w, layout);
             }
-            if (e.rawType == EventType.Repaint)
+        }
+
+        /// Repaint: the behaviours back to front, then the windows back to front; the modal
+        /// window shown is drawn last, in front of every other window.
+        static void RepaintPass(Event e)
+        {
+            Windows.BeginRepaintDeclarations();
+            for (int i = ordered.Count - 1; i >= 0; i--)
+                if (ordered[i].Alive) Call(ordered[i], e);
+            Windows.EndRepaintDeclarations();
+            var windows = Windows.Snapshot();
+            for (int i = windows.Count - 1; i >= 0; i--)
             {
-                if (!p.UsesLayout) p.UntouchWindows();
-                Call(p, e);
-                if (!p.UsesLayout) p.PruneWindows();
-                RunWindows(p, e);
-                return;
+                var w = windows[i];
+                if (w.Modal || !w.Owner.Alive || !Windows.Shown(w)) continue;
+                Windows.Call(w, e);
             }
-            var (target, underMouse) = Target(p, e);
+            if (Modal() is { } shown) Windows.Call(shown, e);
+        }
+
+        /// An input event: the window it is for, then the behaviours front to back; a behaviour
+        /// that leaves it used ends it (the first one gets it even when the window used it).
+        static void SendInput(Event e)
+        {
+            var (target, underMouse) = Windows.Target(e);
             if (target != null)
             {
                 bool down = e.rawType == EventType.MouseDown && underMouse;
@@ -256,19 +238,23 @@ namespace OniBrutal.Engine.IMGUI
                 TabFocus(target.Scope, e);
                 if (down)
                 {
-                    // A press in a window focuses it and brings it to the front.
-                    p.FocusedWindow = target;
-                    p.BringToFront(target);
-                    if (e.rawType != EventType.Used) e.Use();
+                    // A press on a window focuses it and brings it to the front at once; a press
+                    // on its empty area reaches the behaviours unused.
+                    Windows.Focused = target;
+                    Windows.BringToFrontNow(target);
                 }
-                if (e.rawType == EventType.Used) return;
             }
             else if (e.rawType == EventType.MouseDown)
             {
-                p.FocusedWindow = null;
+                Windows.Focused = null;
             }
-            Call(p, e);
-            TabFocus(p.Scope, e);
+            foreach (var p in ordered)
+            {
+                if (!p.Alive) continue;
+                Call(p, e);
+                TabFocus(p.Scope, e);
+                if (e.rawType == EventType.Used) break;
+            }
         }
 
         /// The modal window shown, if any: the last one declared, while its behaviour is alive
@@ -277,83 +263,25 @@ namespace OniBrutal.Engine.IMGUI
         {
             var w = Windows.ActiveModal;
             if (w == null) return null;
-            if (w.Owner.Alive && byBehaviour.TryGetValue(w.Owner.Behaviour, out var p) && p == w.Owner && p.Windows.Contains(w)) return w;
+            if (w.Owner.Alive && byBehaviour.TryGetValue(w.Owner.Behaviour, out var p) && p == w.Owner && Windows.Shown(w)) return w;
             return null;
         }
 
         /// GUIUtility.hasModalWindow.
         public static bool HasModalWindow => Modal() != null;
 
-        /// An input event while a modal window is shown: its behaviour's Layout pass, then the
-        /// modal window alone gets the event.
+        /// An input event while a modal window is shown: the modal window alone gets it.
         static void SendModal(WindowRecord modal, Event e)
         {
-            var p = modal.Owner;
-            if (p.UsesLayout)
-            {
-                var layout = Pass(EventType.Layout, e);
-                p.UntouchWindows();
-                Call(p, layout);
-                p.PruneWindows();
-                RunWindows(p, layout);
-                // Its behaviour stopped showing it.
-                if (Modal() != modal) return;
-            }
             bool down = e.rawType == EventType.MouseDown && modal.Contains(e.ScreenPosition);
             Windows.Call(modal, e);
             TabFocus(modal.Scope, e);
             if (down)
             {
-                p.FocusedWindow = modal;
-                p.BringToFront(modal);
+                Windows.Focused = modal;
+                Windows.BringToFrontNow(modal);
                 if (e.rawType != EventType.Used) e.Use();
             }
-        }
-
-        /// A behaviour's windows for one event, back to front. A modal window that is not the
-        /// one shown is skipped; the shown one is drawn after every behaviour (Dispatch).
-        static void RunWindows(GUIParticipant p, Event e)
-        {
-            bool repaint = e.rawType == EventType.Repaint;
-            for (int i = p.Windows.Count - 1; i >= 0; i--)
-            {
-                if (i >= p.Windows.Count) continue;
-                var w = p.Windows[i];
-                if (w.Modal && (repaint || w != Windows.ActiveModal)) continue;
-                Windows.Call(w, e);
-            }
-        }
-
-        /// The window an input event goes to: for mouse events the window whose control holds
-        /// the mouse, else the front window under it; for key events the window with the
-        /// keyboard control, else (when no control has it) the focused window.
-        static (WindowRecord Window, bool UnderMouse) Target(GUIParticipant p, Event e)
-        {
-            if (p.Windows.Count == 0) return (null, false);
-            var type = e.rawType;
-            if (Event.IsPointer(type))
-            {
-                int hot = GUIStateData.HotControl;
-                if (hot != 0)
-                {
-                    var holder = ControlScope.OwnerOf(hot)?.Window;
-                    return holder != null && holder.Owner == p ? (holder, false) : (null, false);
-                }
-                foreach (var w in p.Windows)
-                    if (!w.Modal && w.Contains(e.ScreenPosition)) return (w, true);
-                return (null, false);
-            }
-            if (type is EventType.KeyDown or EventType.KeyUp)
-            {
-                int keyboard = GUIStateData.KeyboardControl;
-                if (keyboard != 0)
-                {
-                    var holder = ControlScope.OwnerOf(keyboard)?.Window;
-                    return holder != null && holder.Owner == p ? (holder, false) : (null, false);
-                }
-                return (p.FocusedWindow, false);
-            }
-            return (null, false);
         }
 
         /// A Tab press nothing used moves keyboard focus to the container's next focusable
@@ -388,7 +316,7 @@ namespace OniBrutal.Engine.IMGUI
             bool layoutEvent = e.rawType == EventType.Layout;
             if (p.UsesLayout)
             {
-                if (layoutEvent) p.Layout.BeginRecord(new Rect(0f, 0f, Screen.width, Screen.height), GUIStyle.none);
+                if (layoutEvent) p.Layout.BeginRecord(GUIStyle.none);
                 else p.Layout.BeginReplay();
                 GUIStateData.Layout = p.Layout;
             }
@@ -399,8 +327,7 @@ namespace OniBrutal.Engine.IMGUI
             bool completed = Invoke(p, null);
             try
             {
-                if (completed && ClipStack.Count > 0)
-                    Debug.LogError("GUI Error: You are pushing more GUIClips than you are popping. Make sure they are balanced.");
+                if (completed && ClipStack.Count > 0) Debug.LogError(UnbalancedClips);
                 if (p.UsesLayout && layoutEvent) p.Layout.Compute();
             }
             finally

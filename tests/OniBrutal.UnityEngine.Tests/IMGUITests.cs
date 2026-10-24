@@ -751,7 +751,8 @@ namespace OniBrutal.Tests
             Frame();
             Frame();
             Assert.Equal(new Rect(10f, 10f, 110f, 65f), small);
-            Assert.Equal(new Rect(300f, 10f, 110f, 65f), large);
+            // The size passed in is the least it gets ("GUILayout, measured", part 3).
+            Assert.Equal(new Rect(300f, 10f, 500f, 500f), large);
             Assert.Equal(new Rect(10f, 300f, 300f, 65f), wide);
             Assert.Equal(new Rect(5f, 20f, 100f, 40f), inner);
         }
@@ -851,14 +852,14 @@ namespace OniBrutal.Tests
             Frame();
             // Measured in the original player with the game's skin: (0, 0, 400 x 19), the next
             // control at y = 23. The height is the button style's one-line height (padding 3 + 3
-            // plus the font's line, 13 there); the legacy text generator here gives the built-in
-            // font a taller line (about 14.9), so the height is checked against the style's own
-            // CalcSize, and the gap against its margin (4).
-            Assert.Equal(new Rect(0f, 0f, 400f, buttonHeight), bar);
+            // plus the line, 13.01), rounded by the area along its axis; the gap is the style's
+            // margin (4).
+            Assert.Equal(19.01f, buttonHeight, 3);
+            Assert.Equal(new Rect(0f, 0f, 400f, 19f), bar);
             Assert.Equal(4, buttonMargin);
-            Assert.Equal(buttonHeight + buttonMargin, next.y);
+            Assert.Equal(23f, next.y);
             Assert.Equal(300f, narrow.width);
-            Assert.Equal(buttonHeight, narrow.height);
+            Assert.Equal(19f, narrow.height);
         }
 
         [Fact]
@@ -1014,8 +1015,9 @@ namespace OniBrutal.Tests
             reads.Clear();
             MoveMouse(new Vector2(21f, 21f));
             Frame();
-            // The move and its Layout change nothing; A sets it as it draws in Repaint.
-            Assert.Equal(new[] { "Layout   ", Name(EventType.MouseMove) + "   ", "Layout   ", "Repaint  tA tA" }, reads);
+            // The move only places the mouse (the player sends no MouseMove events); A sets the
+            // tooltip as it draws in Repaint.
+            Assert.Equal(new[] { "Layout   ", "Repaint  tA tA" }, reads);
             Assert.Equal("tA", GUI.tooltip);
             reads.Clear();
             // Over B (no tooltip), then over nothing: the last tooltip stays.

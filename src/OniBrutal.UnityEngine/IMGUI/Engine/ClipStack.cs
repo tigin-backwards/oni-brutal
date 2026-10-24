@@ -63,6 +63,16 @@ namespace OniBrutal.Engine.IMGUI
             return true;
         }
 
+        /// What the player logs for a pop with no clip left: an EndGroup, EndClip or
+        /// EndScrollView too many, or a window function that closed its window's own clip.
+        public const string InvalidPop = "Invalid GUIClip stack popping";
+
+        /// Pops the topmost clip; with none left, logs InvalidPop.
+        public static void PopOrReport()
+        {
+            if (!Pop()) Debug.LogError(InvalidPop);
+        }
+
         static Rect Intersect(Rect a, Rect b)
         {
             float x0 = Mathf.Max(a.xMin, b.xMin), y0 = Mathf.Max(a.yMin, b.yMin);

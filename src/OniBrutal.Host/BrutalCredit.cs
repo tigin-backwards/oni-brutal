@@ -31,6 +31,8 @@ namespace OniBrutal.Host
 
         void Awake()
         {
+            // It lays nothing out: no Layout events.
+            useGUILayout = false;
             using var stream = typeof(BrutalCredit).Assembly.GetManifestResourceStream("LOGO_BRUTAL_WHT.png")!;
             var data = new byte[stream.Length];
             stream.ReadExactly(data);
@@ -89,6 +91,10 @@ namespace OniBrutal.Host
 
         void OnGUI()
         {
+            // Not a behaviour of the game's: it draws only, behind every other behaviour, so
+            // that input reaches the game's and mods' OnGUI as in the original player (the
+            // front behaviour is the one that gets an event a window used).
+            GUI.depth = int.MaxValue;
             if (Event.current.type != EventType.Repaint || mainMenu() is not MonoBehaviour menu || menu == null || !menu.isActiveAndEnabled) return;
             if (videoScreen() is MonoBehaviour video && video != null && video.isActiveAndEnabled) return;
             if (modalOpen()) return;

@@ -240,7 +240,7 @@ namespace OniBrutal.Engine.IMGUI
                 color = Color.white,
                 fontSize = font != null && font.dynamic ? fontSize : 0,
                 fontStyle = font != null && font.dynamic ? fontStyle : FontStyle.Normal,
-                lineSpacing = 1f,
+                lineSpacing = LineSpacing(font, fontSize),
                 richText = richText,
                 scaleFactor = 1f,
                 textAnchor = alignment,
@@ -254,18 +254,37 @@ namespace OniBrutal.Engine.IMGUI
             };
         }
 
-        /// Height of one line of the font at the style's size.
+        /// The built-in font, whose IMGUI text heights were measured in the original player.
+        static bool IsLegacyRuntime(Font font) => font.name == "LegacyRuntime";
+
+        static int PixelSize(Text.FontNative native, int fontSize) => fontSize != 0 && native.Dynamic ? fontSize : (int)native.FontSize;
+
+        /// The generator's line spacing: the built-in font's lines are drawn 1.1 × size apart,
+        /// as its text is measured (Size); other fonts keep their own.
+        static float LineSpacing(Font font, int fontSize)
+        {
+            if (font == null || !IsLegacyRuntime(font)) return 1f;
+            var native = (Text.FontNative)font.NativeOrThrow;
+            int size = PixelSize(native, fontSize);
+            native.LineMetrics(size, out _, out _, out float lineHeight);
+            return lineHeight > 0f ? 1.1f * size / lineHeight : 1f;
+        }
+
+        /// Height of one line of the font at the style's size (GUIStyle.lineHeight). For the
+        /// built-in font it is a whole number: Font.lineHeight (14) at the font's own size.
         public static float LineHeight(Font font, int fontSize)
         {
             if (font == null) return 0f;
             var native = (Text.FontNative)font.NativeOrThrow;
-            int size = fontSize != 0 && native.Dynamic ? fontSize : (int)native.FontSize;
+            int size = PixelSize(native, fontSize);
             native.LineMetrics(size, out _, out _, out float lineHeight);
-            return lineHeight;
+            return IsLegacyRuntime(font) ? Mathf.Floor(lineHeight) : lineHeight;
         }
 
         /// Size of the text, unwrapped (width ≤ 0) or wrapped at `width`. Empty text measures
-        /// one empty line.
+        /// one empty line. With the built-in font at size s ("GUILayout, measured", part 2),
+        /// one line of text is s + 0.01 high and each further line adds 1.1 × s, bold and rich
+        /// text alike.
         public static Vector2 Size(string text, Font font, int fontSize, FontStyle fontStyle, bool richText, float width)
         {
             if (font == null) return Vector2.zero;
@@ -275,6 +294,13 @@ namespace OniBrutal.Engine.IMGUI
             var settings = Settings(font, fontSize, fontStyle, TextAnchor.UpperLeft, wrap, richText, new Vector2(wrap ? width : 0f, 0f));
             measure.Populate(text, settings);
             var extents = measure.rectExtents;
+            if (IsLegacyRuntime(font))
+            {
+                float s = PixelSize((Text.FontNative)font.NativeOrThrow, fontSize);
+                float height = s + 0.01f;
+                for (int i = 1; i < measure.lineCount; i++) height += 1.1f * s;
+                return new Vector2(extents.width, height);
+            }
             return new Vector2(extents.width, Mathf.Max(extents.height, line));
         }
 

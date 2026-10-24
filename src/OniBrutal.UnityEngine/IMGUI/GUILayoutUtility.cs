@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.CompilerServices;
 using OniBrutal.Engine.IMGUI;
 
 namespace UnityEngine
@@ -17,6 +18,13 @@ namespace UnityEngine
                 return GUIStateData.Layout ?? throw new ArgumentException("GUILayout functions cannot be used while the behaviour's useGUILayout is false.");
             }
         }
+
+        /// A call past the last entry of its group during Repaint. It is thrown here, in the
+        /// UnityEngine namespace, because the player's logged trace starts with the frame that
+        /// throws.
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        internal static void ThrowPastTheEnd(int index, int count)
+            => throw new ArgumentException($"Getting control {index}'s position in a group with only {count} controls when doing {Event.current.type}\nAborting");
 
         public static Rect GetRect(float width, float height) => GetRect(width, height, GUIStyle.none, null);
 
@@ -41,30 +49,30 @@ namespace UnityEngine
         public static Rect GetRect(float minWidth, float maxWidth, float minHeight, float maxHeight, GUIStyle style, params GUILayoutOption[] options)
         {
             var pass = Pass;
-            return pass.Leaf(pass.Recording ? LayoutItem.Leaf(style, minWidth, Mathf.Max(minWidth, maxWidth), minHeight, Mathf.Max(minHeight, maxHeight), options) : null);
+            return pass.Leaf(pass.Recording ? LayoutEntry.Leaf(style, minWidth, Mathf.Max(minWidth, maxWidth), minHeight, Mathf.Max(minHeight, maxHeight), options) : null);
         }
 
         public static Rect GetRect(GUIContent content, GUIStyle style) => GetRect(content, style, null);
 
-        /// A rect for showing `content` with `style`: its CalcSize, or for a word-wrapping
-        /// style a width within CalcMinMaxWidth and the height CalcHeight gives at that width.
+        /// A rect for showing `content` with `style`: its CalcSize rounded up to whole pixels,
+        /// or for a word-wrapping style a width within CalcMinMaxWidth (rounded up) and the
+        /// height CalcHeight gives at that width.
         public static Rect GetRect(GUIContent content, GUIStyle style, params GUILayoutOption[] options)
         {
             var pass = Pass;
             if (!pass.Recording) return pass.Leaf(null);
             content ??= GUIContent.none;
             style ??= GUIStyle.none;
-            if (style.isHeightDependantOnWidth) return pass.Leaf(new WrappedItem(content, style, options));
+            if (style.isHeightDependantOnWidth) return pass.Leaf(new WrappedEntry(content, style, options));
             var size = style.CalcSize(content);
-            return pass.Leaf(LayoutItem.Leaf(style, size.x, size.x, size.y, size.y, options));
+            float w = Mathf.Ceil(size.x), h = Mathf.Ceil(size.y);
+            return pass.Leaf(LayoutEntry.Leaf(style, w, w, h, h, options));
         }
 
-        /// The last rect a GUILayout call reserved (a dummy during Layout).
-        public static Rect GetLastRect()
-        {
-            var pass = Pass;
-            return pass.LastRect;
-        }
+        /// The rect of the entry the last GUILayout call of the current group took; the dummy
+        /// rect during Layout and Used events, and (with an error during Repaint) straight
+        /// after a Begin call.
+        public static Rect GetLastRect() => Pass.LastRect;
 
         public static Rect GetAspectRect(float aspect) => GetAspectRect(aspect, GUIStyle.none, null);
 
@@ -76,7 +84,7 @@ namespace UnityEngine
         public static Rect GetAspectRect(float aspect, GUIStyle style, params GUILayoutOption[] options)
         {
             var pass = Pass;
-            return pass.Leaf(pass.Recording ? new AspectItem(aspect, style, options) : null);
+            return pass.Leaf(pass.Recording ? new AspectEntry(aspect, style, options) : null);
         }
     }
 }

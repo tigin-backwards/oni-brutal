@@ -33,14 +33,14 @@ namespace OniBrutal.Engine.IMGUI
 
         public static void Reset() => open.Clear();
 
-        /// The room a scrollbar takes across: its style's fixed size, else its measured size,
-        /// plus its margins.
+        /// The room a scrollbar takes across: its style's fixed size (else its padding) plus its
+        /// leading margin (measured: the vertical bar's 15 + 1 of the default skin).
         public static float BarThickness(GUIStyle style, bool vertical)
         {
             if (style == null) return 0f;
             float fixedSize = vertical ? style.fixedWidth : style.fixedHeight;
             float size = fixedSize != 0f ? fixedSize : vertical ? style.padding.horizontal : style.padding.vertical;
-            return size + (vertical ? style.margin.horizontal : style.margin.vertical);
+            return size + (vertical ? style.margin.left : style.margin.top);
         }
 
         public static Vector2 Begin(Rect position, Vector2 scrollPosition, Rect viewRect, bool alwaysShowHorizontal, bool alwaysShowVertical,
@@ -67,12 +67,12 @@ namespace OniBrutal.Engine.IMGUI
                 background.Draw(position, false, false, false, false);
             if (needH && horizontalScrollbar != null)
             {
-                var bar = new Rect(position.x, position.yMax - barH + horizontalScrollbar.margin.top, clip.x, barH - horizontalScrollbar.margin.vertical);
+                var bar = new Rect(position.x, position.yMax - barH + horizontalScrollbar.margin.top, clip.x, barH - horizontalScrollbar.margin.top);
                 scrollPosition.x = Controls.Scrollbar(bar, scrollPosition.x, Mathf.Min(clip.x, viewRect.width), 0f, Mathf.Max(viewRect.width, clip.x), horizontalScrollbar, true);
             }
             if (needV && verticalScrollbar != null)
             {
-                var bar = new Rect(position.xMax - barV + verticalScrollbar.margin.left, position.y, barV - verticalScrollbar.margin.horizontal, clip.y);
+                var bar = new Rect(position.xMax - barV + verticalScrollbar.margin.left, position.y, barV - verticalScrollbar.margin.left, clip.y);
                 scrollPosition.y = Controls.Scrollbar(bar, scrollPosition.y, Mathf.Min(clip.y, viewRect.height), 0f, Mathf.Max(viewRect.height, clip.y), verticalScrollbar, false);
             }
             scrollPosition = Clamp(scrollPosition, viewRect.size, clip);
@@ -111,19 +111,15 @@ namespace OniBrutal.Engine.IMGUI
         static Vector2 Clamp(Vector2 scroll, Vector2 content, Vector2 clip)
             => new(Mathf.Clamp(scroll.x, 0f, Mathf.Max(0f, content.x - clip.x)), Mathf.Clamp(scroll.y, 0f, Mathf.Max(0f, content.y - clip.y)));
 
-        /// Ends the innermost scroll view. A scroll wheel event over it that its content did not
-        /// use scrolls it.
+        /// Ends the innermost scroll view (with none open, nothing happens). A scroll wheel event
+        /// over it that its content did not use scrolls it.
         public static void End(bool handleScrollWheel)
         {
             GUIStateData.RequireGUI();
-            if (open.Count == 0)
-            {
-                Debug.LogError("EndScrollView called without a matching BeginScrollView.");
-                return;
-            }
+            if (open.Count == 0) return;
             var s = open[^1];
             open.RemoveAt(open.Count - 1);
-            ClipStack.Pop();
+            ClipStack.PopOrReport();
             var e = Event.current;
             if (!handleScrollWheel || e.type != EventType.ScrollWheel || !s.Position.Contains(e.mousePosition)) return;
             var target = Clamp(s.Scroll + e.delta * WheelLine, s.ViewRect.size, s.ClipSize);

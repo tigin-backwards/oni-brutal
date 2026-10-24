@@ -5,181 +5,223 @@ using UnityEngine;
 namespace OniBrutal.Engine.IMGUI
 {
     /// The GUILayout entries of one container (a behaviour's OnGUI or a window's function).
-    /// During a Layout event the GUILayout calls record entries; once the call has returned
-    /// they are laid out; during the following events the same calls, in the same order, take
-    /// the computed rects back.
+    ///
+    /// During a Layout event the GUILayout calls record entries: a leaf per control, Space,
+    /// FlexibleSpace and GetRect, a group per Begin call, and areas in a list of their own.
+    /// Once the call has returned they are laid out. In every later event each call takes the
+    /// next recorded entry of the current group, by position only, whatever it was recorded
+    /// for; a Begin call needs a group there ("GUILayout, measured", part 1). During an event
+    /// whose type is Used nothing is checked: every call gets the dummy rect and no entry is
+    /// taken.
     internal sealed class LayoutPass
     {
-        LayoutBox root;
-        readonly List<LayoutBox> areas = new();
-        // The open groups, innermost last, with the entry each stands for in its parent (a
-        // scroll view's content stands for the scroll view).
-        readonly List<(LayoutBox Box, LayoutItem Entry)> open = new();
+        LayoutGroup root;
+        LayoutGroup areas = new(true, GUIStyle.none, null);
+        /// The group the calls go to (Unity's "topLevel"), and the open groups.
+        LayoutGroup current;
+        readonly Stack<LayoutGroup> stack = new();
         bool recording;
-        bool measured;
-        Rect lastRect;
 
         /// The rect GUILayout calls return during Layout, when nothing is computed yet.
-        public static readonly Rect Dummy = new(0f, 0f, 1f, 1f);
+        public static Rect Dummy => LayoutEntry.Dummy;
 
         public bool Recording => recording;
 
-        public LayoutBox Root => root;
+        public LayoutGroup Root => root;
 
-        LayoutBox Current => open[^1].Box;
+        /// Nothing is checked or taken (an event of type Used).
+        public static bool Unchecked => Event.current != null && Event.current.type == EventType.Used;
 
-        /// Starts recording: the root is an empty vertical group with `style` at `rect`.
-        public void BeginRecord(Rect rect, GUIStyle style, GUILayoutOption[] options = null)
+        /// Recording or unchecked: calls get the dummy rect.
+        public bool Dummies => recording || Unchecked;
+
+        /// Starts recording: the root is an empty vertical group with `style`.
+        public void BeginRecord(GUIStyle style)
         {
-            root = new LayoutBox(true, style, options) { Rect = rect };
-            areas.Clear();
-            open.Clear();
-            open.Add((root, root));
+            root = new LayoutGroup(true, style, null);
+            areas = new LayoutGroup(true, GUIStyle.none, null);
+            Reset(root);
             recording = true;
-            lastRect = Dummy;
         }
 
         /// Starts replaying the last recording.
         public void BeginReplay()
         {
-            open.Clear();
+            root ??= new LayoutGroup(true, GUIStyle.none, null);
+            Reset(root);
+            areas.Cursor = 0;
             recording = false;
-            lastRect = Dummy;
-            if (root == null) return;
-            root.Cursor = 0;
-            open.Add((root, root));
         }
 
-        /// Lays out what was recorded: the root at its rect, each area at its own.
+        void Reset(LayoutGroup top)
+        {
+            stack.Clear();
+            stack.Push(top);
+            current = top;
+            top.Cursor = 0;
+        }
+
+        /// An OnGUI call's layout: the root from (0, 0) at its entries' largest sizes, within
+        /// the screen (labels: as wide as the widest; a scroll view between MinHeight 50 and
+        /// MaxHeight 70 gets 70), each area at its rect's size.
         public void Compute()
         {
             if (root == null) return;
-            root.LayOut(root.Rect);
+            root.CalcWidth();
+            root.SetHorizontal(0f, Within(root.MaxWidth, Screen.width));
+            root.CalcHeight();
+            root.SetVertical(0f, Within(root.MaxHeight, Screen.height));
             LayOutAreas();
         }
 
-        /// GUILayout.Window: the root takes the requested size within the range its content
-        /// and options allow (any size not below its minimum, when it stretches); returns the
-        /// size it got.
-        public Vector2 ComputeFitted(Vector2 requested)
+        static float Within(float size, int screen) => screen > 0 ? Mathf.Min(size, screen) : size;
+
+        /// A GUI.Window's layout: the content at the window's size.
+        public void Compute(Vector2 size)
+        {
+            if (root == null) return;
+            root.LayOut(new Rect(0f, 0f, size.x, size.y));
+            LayOutAreas();
+        }
+
+        /// GUILayout.Window's size: per axis the larger of the content's minimum and the size
+        /// passed in after the options (Width/Height stand for it, Min and Max clamp it);
+        /// the content is laid out at that size.
+        public Vector2 ComputeFitted(Vector2 requested, GUILayoutOption[] options)
         {
             if (root == null) return requested;
-            root.MeasureWidth();
-            float width = Fit(requested.x, root.MinWidth, root.MaxWidth, root.StretchWidth);
-            root.PlaceX(0f, width);
-            root.MeasureHeight();
-            float height = Fit(requested.y, root.MinHeight, root.MaxHeight, root.StretchHeight);
-            root.PlaceY(0f, height);
+            root.CalcWidth();
+            float width = Mathf.Max(root.MinWidth, Given(requested.x, options, true));
+            root.SetHorizontal(0f, width);
+            root.CalcHeight();
+            float height = Mathf.Max(root.MinHeight, Given(requested.y, options, false));
+            root.SetVertical(0f, height);
             LayOutAreas();
-            measured = true;
             return new Vector2(width, height);
         }
 
-        /// The size ComputeFitted gave for `requested` at the last layout, from the ranges it
-        /// measured then; `requested` itself before any layout.
-        public Vector2 Fit(Vector2 requested)
+        static float Given(float size, GUILayoutOption[] options, bool horizontal)
         {
-            if (root == null || !measured) return requested;
-            return new Vector2(Fit(requested.x, root.MinWidth, root.MaxWidth, root.StretchWidth), Fit(requested.y, root.MinHeight, root.MaxHeight, root.StretchHeight));
+            if (options == null) return size;
+            float min = float.NegativeInfinity, max = float.PositiveInfinity;
+            foreach (var o in options)
+            {
+                if (o == null || o.Horizontal != horizontal) continue;
+                switch (o.Rule)
+                {
+                    case LayoutRule.Fixed: size = o.Value; break;
+                    case LayoutRule.Min: min = o.Value; break;
+                    case LayoutRule.Max: max = o.Value; break;
+                }
+            }
+            if (size > max) size = max;
+            if (size < min) size = min;
+            return size;
         }
-
-        static float Fit(float requested, float min, float max, bool stretch)
-            => stretch ? Mathf.Max(requested, min) : Mathf.Clamp(requested, min, Mathf.Max(min, max));
 
         void LayOutAreas()
         {
-            foreach (var area in areas) area.LayOut(new Rect(0f, 0f, area.Rect.width, area.Rect.height));
+            foreach (var e in areas.Entries)
+                if (e is LayoutGroup area) area.LayOut(new Rect(0f, 0f, area.AreaSize.x, area.AreaSize.y));
         }
 
-        public Rect LastRect => recording ? Dummy : lastRect;
+        /// GUILayoutUtility.GetLastRect: the entry the last call of the current group took.
+        public Rect LastRect => Dummies ? Dummy : current.GetLast();
 
         // ----- Entries -----
 
-        public Rect Leaf(LayoutItem item)
+        /// A leaf call: records `entry` during Layout, else takes the next entry's rect.
+        public Rect Leaf(LayoutEntry entry)
         {
             if (recording)
             {
-                Current.Children.Add(item);
+                current.Entries.Add(entry);
                 return Dummy;
             }
-            var next = Next();
-            if (next is LayoutBox or ScrollBox) throw Mismatch();
-            lastRect = next.Rect;
-            return next.Rect;
+            if (Unchecked) return Dummy;
+            return current.GetNext().Rect;
         }
 
         /// The orientation of the group that entries currently go to.
-        public bool InVertical => open.Count == 0 || Current.Vertical;
+        public bool InVertical => current == null || current.Vertical;
 
-        public LayoutBox BeginGroup(bool vertical, GUIStyle style, GUILayoutOption[] options)
+        /// BeginHorizontal / BeginVertical: a new group during Layout; later, the recorded
+        /// group in its place, of whatever kind (null when unchecked).
+        public LayoutGroup BeginGroup(bool vertical, GUIStyle style, GUILayoutOption[] options)
+        {
+            if (recording) return Open(new LayoutGroup(vertical, style, options));
+            if (Unchecked) return null;
+            return Open(TakeGroup(current));
+        }
+
+        public ScrollGroup BeginScroll(bool alwaysShowHorizontal, bool alwaysShowVertical, GUIStyle horizontalScrollbar, GUIStyle verticalScrollbar, GUIStyle background, GUILayoutOption[] options)
         {
             if (recording)
             {
-                var box = new LayoutBox(vertical, style, options);
-                Current.Children.Add(box);
-                open.Add((box, box));
-                return box;
+                var g = new ScrollGroup(alwaysShowHorizontal, alwaysShowVertical, horizontalScrollbar, verticalScrollbar, background, options);
+                Open(g);
+                return g;
             }
-            if (Next() is not LayoutBox { IsArea: false } group || group.Vertical != vertical) throw Mismatch();
-            group.Cursor = 0;
-            open.Add((group, group));
-            return group;
+            return null;
         }
 
-        public LayoutBox EndGroup()
+        /// BeginScrollView after Layout: the recorded group in its place (null when unchecked).
+        public LayoutGroup TakeScroll() => Unchecked ? null : Open(TakeGroup(current));
+
+        LayoutGroup Open(LayoutGroup g)
         {
-            if (open.Count <= 1) throw new ArgumentException("GUILayout: an End call has no matching Begin call.");
-            var (box, entry) = open[^1];
-            open.RemoveAt(open.Count - 1);
-            lastRect = entry.Rect;
-            return box;
+            if (recording) current.Entries.Add(g);
+            g.Cursor = 0;
+            stack.Push(g);
+            current = g;
+            return g;
         }
 
-        public LayoutBox BeginArea(Rect rect, GUIStyle style)
+        /// The next entry of `group`, which must be a group: a leaf there ends the call with
+        /// ExitGUIException (not logged), and the group is not opened.
+        static LayoutGroup TakeGroup(LayoutGroup group)
+        {
+            var e = group.GetNext();
+            if (e is LayoutGroup g) return g;
+            throw new ExitGUIException("GUILayout: Mismatched LayoutGroup." + Event.current.type);
+        }
+
+        /// EndHorizontal / EndVertical / EndScrollView: closes the current group. Closing the
+        /// last one leaves an empty group current.
+        public void EndGroup()
+        {
+            if (Unchecked) return;
+            stack.Pop();
+            current = stack.Count > 0 ? stack.Peek() : new LayoutGroup(true, GUIStyle.none, null);
+        }
+
+        /// BeginArea's layout part: an area of its own during Layout; later the next recorded
+        /// area. Areas are not entries of the group they are begun in.
+        public void BeginArea(Rect rect, GUIStyle style)
         {
             if (recording)
             {
-                var box = new LayoutBox(true, style, null, isArea: true) { Rect = rect };
-                Current.Children.Add(box);
-                areas.Add(box);
-                open.Add((box, box));
-                return box;
+                var g = new LayoutGroup(true, style, null) { IsArea = true, AreaSize = rect.size };
+                areas.Entries.Add(g);
+                g.Cursor = 0;
+                stack.Push(g);
+                current = g;
+                return;
             }
-            if (Next() is not LayoutBox { IsArea: true } area) throw Mismatch();
+            if (Unchecked) return;
+            var area = TakeGroup(areas);
             area.Cursor = 0;
-            open.Add((area, area));
-            return area;
+            stack.Push(area);
+            current = area;
         }
 
-        public ScrollBox BeginScroll(bool alwaysShowHorizontal, bool alwaysShowVertical, GUIStyle horizontalScrollbar, GUIStyle verticalScrollbar, GUIStyle background, GUILayoutOption[] options)
+        /// EndArea's layout part: closes the current group; with none left the group under it
+        /// cannot be read (InvalidOperationException "Stack empty.").
+        public void EndArea()
         {
-            if (recording)
-            {
-                var box = new ScrollBox(alwaysShowHorizontal, alwaysShowVertical, horizontalScrollbar, verticalScrollbar, background, options);
-                Current.Children.Add(box);
-                open.Add((box.Content, box));
-                return box;
-            }
-            if (Next() is not ScrollBox scroll) throw Mismatch();
-            scroll.Content.Cursor = 0;
-            open.Add((scroll.Content, scroll));
-            return scroll;
-        }
-
-        LayoutItem Next()
-        {
-            if (open.Count == 0) throw Mismatch();
-            var group = Current;
-            if (group.Cursor >= group.Children.Count) throw Mismatch();
-            return group.Children[group.Cursor++];
-        }
-
-        Exception Mismatch()
-        {
-            var group = open.Count > 0 ? Current : null;
-            int index = group?.Cursor ?? 0, count = group?.Children.Count ?? 0;
-            var type = Event.current != null ? EventTypeNames.Of(Event.current.rawType) : "no event";
-            return new ArgumentException($"GUILayout mismatch: entry {index} was asked for in a group of {count} entries during {type}. The GUILayout calls of an event must be those of the Layout event before it.");
+            if (Unchecked) return;
+            stack.Pop();
+            current = stack.Peek();
         }
     }
 }

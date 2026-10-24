@@ -40,6 +40,14 @@ namespace UnityEngine
         /// The size the font was imported at (its metrics and bitmap glyphs are at this size).
         public int fontSize => (int)Data.FontSize;
 
+        /// The font's line spacing at its own size, in whole pixels (truncated: the built-in
+        /// LegacyRuntime font's 14.95 reads 14 in the original player).
+        public int lineHeight => (int)Data.LineSpacing;
+
+        /// The font's ascent at its own size, in whole pixels (truncated: LegacyRuntime's 11.77
+        /// reads 11).
+        public int ascent => (int)Data.Ascent;
+
         public bool HasCharacter(char c) => Data.HasCharacter(c);
 
         /// Puts the characters, at `size` pixels (0: the font's size) and `style`, into the

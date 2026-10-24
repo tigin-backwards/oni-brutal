@@ -45,7 +45,7 @@ namespace UnityEngine
         public static void EndClip()
         {
             GUIStateData.RequireGUI();
-            if (!ClipStack.Pop()) Debug.LogError("GUI Error: EndGroup or EndClip was called without a matching BeginGroup or BeginClip.");
+            ClipStack.PopOrReport();
         }
 
         // ----- Scroll views -----
@@ -114,34 +114,18 @@ namespace UnityEngine
         /// the window.
         public static void DragWindow(Rect position) => Windows.Drag(position);
 
-        public static void BringWindowToFront(int windowID)
-        {
-            var p = GUIStateData.Participant;
-            var w = p?.FindWindow(windowID);
-            if (w != null) p.BringToFront(w);
-        }
+        /// Puts the window in front of all the others: called during Layout, from that Layout's
+        /// window pass; called in another event, from the next frame's. Outside OnGUI it does
+        /// nothing.
+        public static void BringWindowToFront(int windowID) => Windows.Request(windowID, true);
 
-        public static void BringWindowToBack(int windowID)
-        {
-            var p = GUIStateData.Participant;
-            var w = p?.FindWindow(windowID);
-            if (w != null) p.SendToBack(w);
-        }
+        /// Puts the window behind all the others, at the time BringWindowToFront would.
+        public static void BringWindowToBack(int windowID) => Windows.Request(windowID, false);
 
-        /// Makes a window the focused one (key events go to it) and brings it to the front.
-        public static void FocusWindow(int windowID)
-        {
-            var p = GUIStateData.Participant;
-            var w = p?.FindWindow(windowID);
-            if (w == null) return;
-            p.FocusedWindow = w;
-            p.BringToFront(w);
-        }
+        /// Makes a window the focused one (key events go to it); the order does not change.
+        public static void FocusWindow(int windowID) => Windows.Focus(windowID);
 
-        /// No window is focused afterwards.
-        public static void UnfocusWindow()
-        {
-            if (GUIStateData.Participant != null) GUIStateData.Participant.FocusedWindow = null;
-        }
+        /// No window is focused afterwards; the order does not change.
+        public static void UnfocusWindow() => Windows.Focused = null;
     }
 }

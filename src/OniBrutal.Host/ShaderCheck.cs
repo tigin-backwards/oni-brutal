@@ -25,9 +25,10 @@ namespace OniBrutal.Host
             var device = new OniBrutal.Desktop.Gl.GlDevice(platform);
             GraphicsDevice.Install(device);
             int errors = 0;
-            Application.logMessageReceived += (condition, stack, type) =>
+            // The GL thread logs compile and link errors: only the threaded callback sees them.
+            Application.logMessageReceivedThreaded += (condition, stack, type) =>
             {
-                if (type == LogType.Error) errors++;
+                if (type == LogType.Error) System.Threading.Interlocked.Increment(ref errors);
             };
             int shaders = 0;
             foreach (var name in files)
@@ -37,7 +38,6 @@ namespace OniBrutal.Host
                     if (file.TypeOf(info).ClassId == 48 && ObjectLoader.Load(file, info.PathId) is Shader) shaders++;
             }
             Shader.WarmupAllShaders();
-            EngineLog.FlushToMainThread();
             Console.WriteLine($"{shaders} shaders warmed up, {errors} compile/link errors");
             platform.Dispose();
             return errors == 0 ? 0 : 1;

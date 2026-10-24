@@ -64,32 +64,23 @@ namespace UnityEngine
         public static event LogCallback logMessageReceived;
         public static event LogCallback logMessageReceivedThreaded;
 
-        internal static void RaiseLogMessage(string condition, string stackTrace, LogType type)
+        /// The log callbacks for one message, as the original player calls them (UnityProbe's
+        /// logthreads scenario): logged on the main thread, logMessageReceived and then
+        /// logMessageReceivedThreaded; logged on any other thread, logMessageReceivedThreaded
+        /// alone, on that thread (logMessageReceived never sees the message, later or queued). A
+        /// handler's exception ends the call: the handlers after it, and the threaded event after
+        /// a logMessageReceived handler's, do not run. It is returned for the log to write.
+        internal static Exception CallLogCallback(string condition, string stackTrace, LogType type, bool onMainThread)
         {
-            var handler = logMessageReceived;
-            if (handler == null) return;
             try
             {
-                handler(condition, stackTrace, type);
+                if (onMainThread) logMessageReceived?.Invoke(condition, stackTrace, type);
+                logMessageReceivedThreaded?.Invoke(condition, stackTrace, type);
+                return null;
             }
             catch (Exception e)
             {
-                // A throwing log callback must not recurse into logging through itself.
-                Console.Error.WriteLine("Exception in Application.logMessageReceived handler: " + e);
-            }
-        }
-
-        internal static void RaiseLogMessageThreaded(string condition, string stackTrace, LogType type)
-        {
-            var handler = logMessageReceivedThreaded;
-            if (handler == null) return;
-            try
-            {
-                handler(condition, stackTrace, type);
-            }
-            catch (Exception e)
-            {
-                Console.Error.WriteLine("Exception in Application.logMessageReceivedThreaded handler: " + e);
+                return e;
             }
         }
     }

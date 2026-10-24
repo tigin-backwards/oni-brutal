@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
@@ -9,13 +8,12 @@ using UnityEngine;
 namespace OniBrutal.Engine
 {
     /// The player's log: what Unity's default log handler does natively. Writes Player.log and
-    /// stdout, and raises Application.logMessageReceivedThreaded on the calling thread and
-    /// Application.logMessageReceived on the main thread (queued when logging from elsewhere).
+    /// stdout, and calls the log callbacks on the logging thread: logMessageReceived only for a
+    /// message logged on the main thread, logMessageReceivedThreaded for every message.
     internal static class EngineLog
     {
         static readonly object fileLock = new();
         static StreamWriter file;
-        static readonly ConcurrentQueue<(string condition, string stackTrace, LogType type)> pendingMainThread = new();
 
         static TextWriter console;
 
@@ -109,24 +107,31 @@ namespace OniBrutal.Engine
         /// A message whose log text has another stack trace than its callbacks get (an exception's:
         /// LogTraces.Exception). A trace ends with a line break, so the text then ends with an empty
         /// line; a message without one is a line of its own.
+        ///
+        /// As in the original (UnityProbe's logthreads scenario), the callbacks run first, on the
+        /// logging thread (Application.CallLogCallback), and the text is written after them. A
+        /// message logged from inside a callback is written but reaches no callback, and a
+        /// callback's exception is written as a logged exception's text, before the message's,
+        /// and reaches no callback either.
         public static void Message(LogType type, string message, string logTrace, string callbackTrace)
         {
+            if (!inCallback)
+            {
+                Exception thrown;
+                inCallback = true;
+                try { thrown = Application.CallLogCallback(message, callbackTrace, type, Threads.IsMainThread); }
+                finally { inCallback = false; }
+                if (thrown != null)
+                {
+                    var report = LogTraces.Exception(thrown, new StackTrace(1, true));
+                    WriteRaw(report.Condition + "\n" + report.LogTrace);
+                }
+            }
             WriteRaw(logTrace.Length > 0 ? message + "\n" + logTrace : message);
-            Dispatch(message, callbackTrace, type);
         }
 
-        static void Dispatch(string condition, string stackTrace, LogType type)
-        {
-            Application.RaiseLogMessageThreaded(condition, stackTrace, type);
-            if (Threads.IsMainThread) Application.RaiseLogMessage(condition, stackTrace, type);
-            else pendingMainThread.Enqueue((condition, stackTrace, type));
-        }
-
-        /// Delivers messages logged from other threads to main-thread subscribers (player loop).
-        public static void FlushToMainThread()
-        {
-            while (pendingMainThread.TryDequeue(out var m)) Application.RaiseLogMessage(m.condition, m.stackTrace, m.type);
-        }
+        /// This thread is inside the log callbacks.
+        [ThreadStatic] static bool inCallback;
 
         /// The managed stack of the caller in Unity's format ("Type:Method(ArgTypes)" per line), the
         /// engine's frames included, with their source lines. For engine diagnostics.

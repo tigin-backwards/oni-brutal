@@ -122,7 +122,6 @@ namespace OniBrutal.Engine
             Time.BeginFrame(realDelta);
             RunPhase(FrameStart);
 
-            EngineLog.FlushToMainThread();
             RunPhase(EarlyUpdate);
 
             // Passes of pending Starts (measured in the original, UnityProbe scenarios 13 to 18):
@@ -197,7 +196,6 @@ namespace OniBrutal.Engine
             // in OnGUI or at WaitForEndOfFrame, it is carried out after the next frame's Update
             // pass, and that Update still finds the parts (observed in Unity's player).
             Coroutines.RunEndOfFramePhase();
-            EngineLog.FlushToMainThread();
             Mark(2);
             Present?.Invoke();
             Event.DiscardUnconsumed();

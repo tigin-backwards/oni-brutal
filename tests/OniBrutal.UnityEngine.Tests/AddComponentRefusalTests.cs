@@ -41,7 +41,7 @@ namespace OniBrutal.Tests
             Component got = null;
             var logged = Logged(() => got = go.AddComponent(added));
             Assert.True(ReferenceEquals(got, null));
-            Assert.Equal([(message, "", LogType.Log, true), (message, "", LogType.Log, false)], logged);
+            Assert.Equal([(message, "", LogType.Log, false), (message, "", LogType.Log, true)], logged);
             Assert.Equal(left, Array.ConvertAll(go.GetComponents<Component>(), c => c.GetType()));
         }
 

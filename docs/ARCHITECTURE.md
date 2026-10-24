@@ -808,8 +808,16 @@ HTTP and FMOD threads call into the engine. Our rules:
    `gameObject`; `GetComponent(s)`; `Transform.position` and other transform **reads**;
    `TextAsset.text`/`bytes`; `Resources.Load` (loading is serialized by a lock and completes
    on the calling thread, as the game's lazy `Db.Get` needs); `Debug.Log*`.
-2. **`Debug.Log*` from other threads** invokes `logMessageReceivedThreaded` on the caller and
-   queues `logMessageReceived` to the main thread, as Unity does (KCrashReporter listens there).
+2. **`Debug.Log*` from other threads** invokes `logMessageReceivedThreaded` alone, on the
+   caller, and never `logMessageReceived`, later or queued (measured with UnityProbe's
+   `logthreads` scenario in the original, for a `Thread`, a thread-pool item and a `Task`; so
+   too for an exception nothing catches on a thread, which D16 logs there). A message logged on
+   the main thread invokes `logMessageReceived` and then `logMessageReceivedThreaded`, at once.
+   The callbacks run before the text is written; a handler's exception ends the call (the
+   handlers after it, and after a `logMessageReceived` handler's the threaded event too) and is
+   written as a logged exception's text, ahead of the message's, reaching no callback; a message
+   logged inside a handler is written and reaches no callback. KCrashReporter listens on
+   `logMessageReceived`, so worldgen's errors on its threads open no error dialog.
 3. **Main thread only** (asserted in all builds, the failure is an exception with a clear
    message, as Unity's "can only be called from the main thread"): structural mutation
    (`Instantiate`, `AddComponent`, `Destroy`, `SetParent`, transform setters, activation),

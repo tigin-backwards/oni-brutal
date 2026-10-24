@@ -659,7 +659,7 @@ These results come from `Analyze reach`, an IL call-graph walk with class-hierar
 1. Value types and math are free-threaded.
 2. **These must be callable from any thread:**
    - `Application.*` path and platform getters: cache them at startup as immutable values.
-   - `Debug.Log*`: thread-safe, and must fire `logMessageReceivedThreaded` on the calling thread. `logMessageReceived` is main-thread only in Unity; KCrashReporter subscribes to `logMessageReceived`, so we must queue messages from other threads to the main thread, as Unity does.
+   - `Debug.Log*`: thread-safe, and must fire `logMessageReceivedThreaded` on the calling thread. `logMessageReceived` gets only messages logged on the main thread: Unity neither calls it for another thread's messages nor queues them to the main thread (measured, UnityProbe `logthreads`; ARCHITECTURE §4), so KCrashReporter, which subscribes there, never sees them.
    - `Object.==`/`!=`/`bool`, `name` and `GetInstanceID`: lock-free reads of a native-alive flag.
    - `Component.transform`/`gameObject`, `GetComponent`/`GetComponents` and `Transform.position` *reads*: the game relies on release-player leniency here.
    - `TextAsset.text`/`bytes` and `Resources.Load` of already-loaded assets.

@@ -1,0 +1,48 @@
+# Buildable Natural Tile – Fix (3582340906), classes B, S, O.
+#
+# What it does: adds the Natural Tile (BUILDABLENATURALTILEFIX_NATURALTILE) to the Base menu,
+# after the Mesh Tile, researched with Basic Farming: built of 50 kg of any solid, it turns at
+# once into a natural cell of that element (BuildingComplete.OnSpawn postfix: the cell gets
+# the element at the configured block mass, 10 kg by default, and the building removes itself).
+# Its material selector offers every solid element (MaterialSelector.GetValidMaterials
+# postfix for BuildableAny). PLib options set the build mass, the block mass and the build
+# speed.
+# How a player reaches it: the build menu (Base), its material selector.
+# What changes: an open cell becomes natural rock, diggable again.
+#
+# Options here: a block mass of 100 kg. setup grants Basic Farming. The tile is chosen in the
+# Base menu, sandstone in its material selector, and placed in the pit in the floor of the
+# dug-out room west of the printing pod (cell 131124): after construction the cell is natural
+# sandstone of 100 kg.
+from: early-base
+mods: [3582340906]
+options:
+  "3582340906": {BlockMass: 100.0}
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"FarmingTech\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+steps:
+  - expect_state:
+      "Grid.Solid.get_Item(131124)": false
+      "Db.Get().Techs.Get(\"FarmingTech\").unlockedItemIDs": {contains: BUILDABLENATURALTILEFIX_NATURALTILE}
+  - run: {seconds: 5}
+  - driver: {camera.set: {cell: [110, 208], ortho: 10}}
+  - click: {ui: "**/PlanScreen/Toggle:Base"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/BUILDABLENATURALTILEFIX_NATURALTILE Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/BUILDABLENATURALTILEFIX_NATURALTILE Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen/MaterialSelectionPanel", cond: stable}
+  - expect_ui:
+      "**/MaterialSelectionPanel/**/Toggles/MaterialSelection_<link=?SANDSTONE?>*": {active: true}
+  - click: {ui: "**/MaterialSelectionPanel/**/Toggles/MaterialSelection_<link=?SANDSTONE?>*"}
+  - expect_state:
+      "PlanScreen.Instance.ProductInfoScreen.materialSelectionPanel.CurrentSelectedElement.Name": SandStone
+  - shot: {name: materials, crop: "**/ProductInfoScreen/MaterialSelectionPanel", threshold: 0.04}
+  - click_world: {cell: [108, 206]}
+  - key: {code: Escape}
+  - expect: {blueprints: {BUILDABLENATURALTILEFIX_NATURALTILE: 1}}
+  - run: {seconds: 900, until: {pending_construction: 0}}
+  - expect: {buildings: {BUILDABLENATURALTILEFIX_NATURALTILE: 0}}
+  - expect_state:
+      "Grid.Solid.get_Item(131124)": true
+      "Grid.Element[131124].id": SandStone
+      "Grid.Mass.get_Item(131124)": 100

@@ -1,0 +1,48 @@
+# Thermal Interface Plate (1938747693), class B.
+#
+# What it does: adds the Thermal Interface Plate (1x1, 200 kg of refined metal, a backwall
+# building after the Drywall in the Utilities menu, researched with Suits). Every second it
+# moves heat between itself and the buildings in its cell, so buildings it sits behind share
+# their temperature with it (and, through neighbouring plates, with each other). It has a few
+# colour skins.
+# How a player reaches it: the build menu (Utilities); the plate's details screen.
+# What changes: heat moves between buildings without touching gas or liquid.
+#
+# setup grants Suits and spawns copper. The plate is chosen in the Utilities menu, copper in
+# its material selector, and it is built behind nothing in the dug-out corridor west of the
+# printing pod, selected, and lives through a short run.
+from: early-base
+mods: [1938747693]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"Suits\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Copper\").substance", method: SpawnResource, args: [[114.5, 207.5, -12], 300, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"Suits\").unlockedItemIDs": {contains: ThermalInterfacePlate}
+  # OniMcp's blueprint waited for a refined metal the base lacks, so the build menu is used.
+  - run: {seconds: 5}
+  - driver: {camera.set: {cell: [112, 208], ortho: 10}}
+  - click: {ui: "**/PlanScreen/Toggle:Utilities"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/ThermalInterfacePlate Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/ThermalInterfacePlate Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen/MaterialSelectionPanel", cond: stable}
+  - click: {ui: "**/MaterialSelectionPanel/**/Toggles/MaterialSelection_<link=?COPPER?>*"}
+  - expect_state:
+      "PlanScreen.Instance.ProductInfoScreen.materialSelectionPanel.CurrentSelectedElement.Name": Copper
+  - shot: {name: materials, crop: "**/ProductInfoScreen", threshold: 0.04}
+  - click_world: {cell: [112, 208]}
+  - key: {code: Escape}
+  - expect: {blueprints: {ThermalInterfacePlate: 1}}
+  - run: {seconds: 900, until: {buildings: {ThermalInterfacePlate: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 208], select: ThermalInterfacePlate}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Thermal Interface Plate"}
+  - expect_state:
+      "selected:GetComponent<ThermalInterfacePlate>": exists
+      "selected:GetComponent<PrimaryElement>.ElementID": Copper
+  - run: {seconds: 10}
+  - expect_state:
+      "selected:GetComponent<KPrefabID>.PrefabTag.Name": ThermalInterfacePlate

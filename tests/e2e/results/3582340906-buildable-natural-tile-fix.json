@@ -1,0 +1,59 @@
+{
+ "spec": "mods/3582340906-buildable-natural-tile-fix.yaml",
+ "mods": [
+  "3582340906"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Natural Tile chosen in the Base menu with sandstone (selector shot) becomes a natural sandstone cell of the 100 kg set in its options",
+ "updated": "2026-10-23",
+ "commit": "d562f91",
+ "mod_dlls": {
+  "3582340906": {
+   "BuildableNaturalTileFix.dll": "27da2d0175848e242d25ca22e81fec35552ce72e60c5f3163c40bd19e0bad578"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-221602-dfd54e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T22:37:56",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-224810-7af5f0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T22:48:10",
+    "lane": 16,
+    "reference_run": "20261023-221602-dfd54e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "materials": 0.009182
+    }
+   },
+   {
+    "run": "20261023-224810-7af5f0",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T22:48:11",
+    "lane": 17,
+    "reference_run": "20261023-221602-dfd54e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "materials": 0.009182
+    }
+   }
+  ]
+ }
+}

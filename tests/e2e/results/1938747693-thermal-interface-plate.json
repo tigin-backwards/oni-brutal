@@ -1,0 +1,59 @@
+{
+ "spec": "mods/1938747693-thermal-interface-plate.yaml",
+ "mods": [
+  "1938747693"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the plate chosen in the Utilities menu with copper (card shot) is built behind nothing in the corridor, selected and kept through a run",
+ "updated": "2026-10-23",
+ "commit": "d562f91",
+ "mod_dlls": {
+  "1938747693": {
+   "ThermalPlate.dll": "3b9e4b08775e1b283e638b6ee5e03614ce85b2205ab0fda252e691d187f02503"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-223804-867822",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T22:39:41",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-224450-2f3745",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T22:44:50",
+    "lane": 16,
+    "reference_run": "20261023-223804-867822",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "materials": 0.003328
+    }
+   },
+   {
+    "run": "20261023-224450-2f3745",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T22:44:51",
+    "lane": 17,
+    "reference_run": "20261023-223804-867822",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "materials": 0.003328
+    }
+   }
+  ]
+ }
+}

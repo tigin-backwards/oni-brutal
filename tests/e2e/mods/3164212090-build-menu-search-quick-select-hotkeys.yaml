@@ -1,0 +1,31 @@
+# Build Menu Search Quick Select Hotkeys (3164212090), classes S, K, O.
+#
+# What it does: in the build menu's search field, a digit picks that search result (1 the
+# first, 2 the second, ...) instead of being typed, and Enter picks the first: a postfix on
+# BuildingGroupScreen.OnSpawn adds a validator and an end-edit listener to the field, which
+# click the result's toggle once the key is released.
+# How a player reaches it: the build menu's search field ("Search all buildings...").
+# What changes: a building is chosen from the keyboard.
+#
+# A category is opened, "pump" is typed into the search field and then "2": the field keeps
+# "pump", and the second result is chosen (its card opens).
+from: early-base
+mods: [3164212090]
+steps:
+  - run: {seconds: 5}
+  - click: {ui: "**/PlanScreen/Toggle:Base"}
+  - expect_ui:
+      "**/BuildingGroups/Searchbar/FilterInputField": {active: true}
+  - click: {ui: "**/BuildingGroups/Searchbar/FilterInputField"}
+  - type: {ui: "**/BuildingGroups/Searchbar/FilterInputField", text: "pump"}
+  - ui_wait: {path: "**/BuildingGroups/Viewport/Contents", cond: stable}
+  - ui_dump: {name: results, root: "**/PlanBuildingSelectionPanel/BuildingGroups/Viewport"}
+  - type: {ui: "**/BuildingGroups/Searchbar/FilterInputField", text: "2"}
+  - ui_wait: {path: "**/PlanBuildingSelectionPanel/ProductInfoScreen", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/Searchbar/FilterInputField/Text Area/Text": {text: "~pump"}
+  - expect_state:
+      "PlanScreen.Instance.ProductInfoScreen.currentDef.PrefabID": "== original"
+      "PlanScreen.Instance.ProductInfoScreen.gameObject.activeSelf": true
+  - expect_ui:
+      "**/ProductInfoScreen/Panel/TitleBar/Label": {text: "~Pump"}

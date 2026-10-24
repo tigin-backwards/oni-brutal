@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2852279246-rebuild-tiles.yaml",
+ "mods": [
+  "2852279246"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a floor tile destroyed as by liquid pressure (setup) is replaced by a priority 7 blueprint at once, the Tile Rebuilding message is listed, and Duplicants rebuild it",
+ "updated": "2026-10-23",
+ "commit": "d562f91",
+ "mod_dlls": {
+  "2852279246": {
+   "RebuildTiles.dll": "b3e15a23d46eab4482452a9d819a1c78ea54e3ceecade8891398e93c2697d3d5"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-221602-dfd54e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T22:36:07",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-223842-5d33b4",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T22:41:33",
+    "lane": 17,
+    "reference_run": "20261023-221602-dfd54e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-223842-5d33b4",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T22:42:12",
+    "lane": 16,
+    "reference_run": "20261023-221602-dfd54e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

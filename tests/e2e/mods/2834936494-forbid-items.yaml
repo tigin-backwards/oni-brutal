@@ -1,0 +1,45 @@
+# Forbid Items (2834936494), class K (a user-menu button).
+#
+# What it does: every loose item (debris, ore) gets a Forbid Item button in its user menu.
+# A forbidden item carries the Forbidden tag and an "Item Forbidden" status, its sweep order is
+# cancelled, and no Duplicant or Auto-Sweeper picks it up (patches on ChoreConsumer.CanReach,
+# FetchableMonitor.IsFetchable and Pickupable.CouldBePickedUp*) until Reclaim Item takes the
+# tag off again. Auto-Sweepers get an "Allow Forbidden Items" toggle.
+# How a player reaches it: select the item; its user menu, Forbid Item / Reclaim Item.
+# What changes: which items Duplicants may fetch.
+#
+# setup spawns 200 kg of obsidian (the base has none loose) in the dug-out corridor west of the
+# printing pod. It is selected and forbidden through its button; an obsidian Tile blueprint then
+# waits for it: after two minutes it is still a blueprint and the obsidian lies where it was.
+# Reclaim Item gives the tile its obsidian.
+from: early-base
+mods: [2834936494]
+setup:
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Obsidian\").substance", method: SpawnResource, args: [[109.5, 206.5, -12], 200, 300, 255, 0]}}
+steps:
+  - run: {seconds: 5}   # the spawned obsidian settles on the floor, where a click finds it
+  - driver: {camera.set: {cell: [110, 208], ortho: 8}}
+  - click_world: {pos: [109.5, 206.25], select: Obsidian}   # debris lies low in its cell
+  - ui_wait: {path: "**/DetailsScreen/UserMenuButtons/UserMenuScreen/Buttons", cond: stable}
+  - expect_ui:
+      "**/UserMenuScreen/Buttons/Forbid ItemButton": {active: true, interactable: true}
+  - ui_dump: {name: user-menu, root: "**/DetailsScreen/UserMenuButtons/UserMenuScreen/Buttons"}
+  - click: {ui: "**/UserMenuScreen/Buttons/Forbid ItemButton"}
+  - expect_ui:
+      "**/UserMenuScreen/Buttons/Reclaim ItemButton": {active: true}
+  - expect_state:
+      "selected:KPrefabID.HasTag(\"Forbidden\")": true
+      "sum:all:Pickupable::[*].GetComponent<PrimaryElement>.Mass if .GetComponent<PrimaryElement>.ElementID == Obsidian": 200
+  - shot: {name: details, crop: "**/DetailsScreen", threshold: 0.04}
+  - build: {prefab: Tile, cells: [[112, 208]], material: Obsidian}
+  - expect: {blueprints: {Tile: 1}}
+  - run: {seconds: 120}
+  - expect: {blueprints: {Tile: 1}}
+  - expect_state:
+      "selected:KPrefabID.HasTag(\"Forbidden\")": true
+      "sum:all:Pickupable::[*].GetComponent<PrimaryElement>.Mass if .GetComponent<PrimaryElement>.ElementID == Obsidian": 200
+  - click: {ui: "**/UserMenuScreen/Buttons/Reclaim ItemButton"}
+  - expect_state:
+      "selected:KPrefabID.HasTag(\"Forbidden\")": false
+  - run: {seconds: 600, until: {pending_construction: 0}}
+  - expect: {blueprints: {Tile: 0}}

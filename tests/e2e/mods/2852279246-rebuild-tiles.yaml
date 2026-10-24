@@ -1,0 +1,29 @@
+# Rebuild Tiles (2852279246), class S (a message).
+#
+# What it does: a tile destroyed by liquid pressure or by a Duplicant's tantrum is replaced
+# at once by a blueprint of the same tile and materials, at priority 7 (a prefix on
+# BuildingHP.DestroyOnDamaged), and a "Tile Rebuilding" message says so. Its settings file
+# sets the priority and can also post a message whenever a tile is damaged.
+# How a player reaches it: nothing to do; the message in the notification list opens a
+# dialog.
+# What changes: broken tiles come back.
+#
+# setup destroys the floor tile at (126, 206) under the printing pod's room (cell 131142) as
+# neighbouring liquid pressure would (WorldDamage.ApplyDamage with the game's pop text). A
+# tile blueprint stands there at priority 7, the message is listed, and Duplicants rebuild the
+# tile. (The message is not opened: the list's order follows the fixture's other messages,
+# and the label's text sits beside the collider that takes the click.)
+from: early-base
+mods: [2852279246]
+setup:
+  - driver: {setup.call: {target: "WorldDamage.Instance", method: ApplyDamage, args: [131142, 1.0, -1, "Absolute", "neighboring liquid pressure", "Pressure Damage"]}}
+steps:
+  - expect_state:
+      "Grid.Objects.get_Item(131142, 9).name": TileUnderConstruction
+      "Grid.Objects.get_Item(131142, 9).GetComponent<Prioritizable>.GetMasterPriority().priority_value": 7
+  - expect_ui:
+      "**/NotificationScreen/Messages/MessageLabel/Label/Text": {any_text: "Tile Rebuilding"}
+  - run: {seconds: 900, until: {pending_construction: 0}}
+  - expect_state:
+      "Grid.Objects.get_Item(131142, 9).name": TileComplete
+      "Grid.Solid.get_Item(131142)": true

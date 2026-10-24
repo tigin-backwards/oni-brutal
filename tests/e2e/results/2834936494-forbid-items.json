@@ -1,0 +1,67 @@
+{
+ "spec": "mods/2834936494-forbid-items.yaml",
+ "mods": [
+  "2834936494"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "obsidian debris forbidden through its user-menu button (menu dumped, details shot) is left alone by an obsidian tile blueprint for two minutes; Reclaim Item lets the tile be built",
+ "updated": "2026-10-23",
+ "commit": "d562f91",
+ "mod_dlls": {
+  "2834936494": {
+   "ForbidItems.dll": "6ec3da674223b2c348fa03cc3b015fd38a4e7adf675327b208f2a21b94c2abd3"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-223804-867822",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T22:39:35",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-224611-bfe0f6",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T22:46:11",
+    "lane": 16,
+    "reference_run": "20261023-223804-867822",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "user-menu": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "details": 0.002155
+    }
+   },
+   {
+    "run": "20261023-224611-bfe0f6",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T22:46:12",
+    "lane": 17,
+    "reference_run": "20261023-223804-867822",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "user-menu": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "details": 0.002155
+    }
+   }
+  ]
+ }
+}

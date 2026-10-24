@@ -19,10 +19,21 @@ namespace OniBrutal.Engine
 
         /// Opens the log file (overwriting it, as Unity does). Called once by the host. Like the
         /// original player's log, it also takes the process's console output: the game's own
-        /// logger writes its [INFO] lines with Console.WriteLine.
-        public static void Open(string path)
+        /// logger writes its [INFO] lines with Console.WriteLine. With `keepPrevious` (the
+        /// player's default log, not one named on the command line), the last session's log is
+        /// kept beside it as NAME-prev.EXT (Player-prev.log), replacing the one before, as
+        /// Unity's player does.
+        public static void Open(string path, bool keepPrevious = false)
         {
             Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+            if (keepPrevious && File.Exists(path))
+            {
+                var previous = Path.Combine(Path.GetDirectoryName(path)!, Path.GetFileNameWithoutExtension(path) + "-prev" + Path.GetExtension(path));
+                // Another running player may hold it open; the session's log is then written
+                // over it, as before.
+                try { File.Move(path, previous, overwrite: true); }
+                catch (Exception e) when (e is IOException or UnauthorizedAccessException) { }
+            }
             lock (fileLock)
             {
                 file = new StreamWriter(new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.ReadWrite), new UTF8Encoding(false)) { AutoFlush = true };

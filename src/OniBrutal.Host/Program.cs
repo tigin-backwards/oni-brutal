@@ -37,8 +37,12 @@ namespace OniBrutal.Host
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
             Paths.Configure(layout, options);
-            EngineLog.Open(options.LogPath ?? EngineConfig.ConsoleLogPath);
-            EngineLog.Engine($"OniBrutal host starting: game={options.GameDir} .NET={Environment.Version}");
+            EngineLog.Open(options.LogPath ?? EngineConfig.ConsoleLogPath, keepPrevious: options.LogPath == null);
+            // Which build this is (the commit the SDK stamps into the informational version) and
+            // where it runs from, so a log tells which release, or which stray copy, wrote it.
+            var built = typeof(Program).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
+            string commit = built?.IndexOf('+') is int plus and >= 0 ? built[(plus + 1)..] : "unknown";
+            EngineLog.Engine($"OniBrutal host starting: commit={commit} exe={Environment.ProcessPath} game={options.GameDir} .NET={Environment.Version}");
             StartupStats.Mark("host starts (runtime up)");
             UnhandledExceptions.Install();
 

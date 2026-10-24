@@ -1,0 +1,25 @@
+# No Meteors (1962090267), class P.
+#
+# What it does: a meteor shower spawns no meteors (a prefix returning false on
+# MeteorShowerEvent.StatesInstance.SpawnBombard). The shower itself still runs its states.
+# How a player reaches it: any meteor shower on a planetoid.
+# What changes: nothing falls from the sky.
+#
+# setup starts a Fullerene shower on the start planetoid (30 s long, bombarding at once, one
+# meteor every half second, no star-map travel). It is bombarding a few seconds later, and no
+# comet exists then or after it ends.
+from: early-base
+mods: [1962090267]
+setup:
+  - driver: {setup.call: {target: "GameplayEventManager.Instance", method: StartNewEvent, args: [{"$": "Db.Get().GameplayEvents.MeteorShowerFullereneEvent"}, 0, null]}}
+steps:
+  - run: {seconds: 5}
+  - expect_state:
+      "last:smi.GetCurrentState().name": root.running.bombarding
+      "all:Comet::Length": 0
+  - run: {seconds: 20}
+  - expect_state:
+      "all:Comet::Length": 0
+  - run: {seconds: 20}
+  - expect_state:
+      "all:Comet::Length": 0

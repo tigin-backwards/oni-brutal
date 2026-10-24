@@ -1,0 +1,27 @@
+# [Vanilla + DLC] No Dormant Geyser (2021164231), class P.
+#
+# What it does: geysers never go dormant. Postfixes on GeyserInstanceConfiguration make
+# GetYearPercent 1 (active the whole year) and scale GetMassPerCycle by the geyser's own year
+# percentage, so its average output stays what it was. (It steps aside for one map-sharing
+# mod's geyser postfix.)
+# How a player reaches it: any geyser.
+# What changes: geysers erupt all year round, with less mass per eruption cycle.
+#
+# setup spawns a Cool Steam Vent in the corridor west of the printing pod; early-base has one
+# geyser of its own. Both have all of their year active, no dormant time in it, and neither
+# goes dormant.
+from: early-base
+mods: [2021164231]
+setup:
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(0, 112, 206, \"GeyserGeneric_steam\", \"BuildingBack\")", method: SetActive, args: [true]}}
+steps:
+  - run: {seconds: 5}
+  - expect_state:
+      "all:Geyser::Length": 2
+      "sum:all:Geyser::[*].configuration.GetYearPercent()": 2
+      "sum:all:Geyser::[*].configuration.GetYearOffDuration()": 0
+      "sum:all:Geyser::[*].configuration.scaledYearPercent": "< 1.9"
+      "count:all:Geyser::[*] if .ShouldGoDormant() == false": 2
+  - run: {seconds: 120}
+  - expect_state:
+      "count:all:Geyser::[*] if .ShouldGoDormant() == false": 2

@@ -1,0 +1,56 @@
+{
+ "spec": "mods/2870433404-true-insulated-piping.yaml",
+ "mods": [
+  "2870433404"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "smaller spec: built insulated gas and liquid pipes carry zero thermal conductivity, the plain gas pipe keeps 1",
+ "updated": "2026-10-24",
+ "commit": "e235451",
+ "mod_dlls": {
+  "2870433404": {
+   "PLib.dll": "b862c5db2b3cd6df09a62d4a30782e91e2b24e8e1bfac08d991c9cc89a984ba9",
+   "True insulated piping╒µ╒²╡─╕⌠╚╚╣▄╡└.dll": "4c345874eced807bcddf25f88e02e12ef89ed98319c5084f3a142e3b5b35f471"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-113834-7a4218",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T11:43:05",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-115505-24a7f0",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T12:02:00",
+    "lane": 17,
+    "reference_run": "20261024-113834-7a4218",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-115505-24a7f0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T12:01:59",
+    "lane": 16,
+    "reference_run": "20261024-113834-7a4218",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

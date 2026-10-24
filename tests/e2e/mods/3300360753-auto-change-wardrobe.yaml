@@ -1,0 +1,41 @@
+# Auto Change Wardrobe (3300360753), class B.
+#
+# What it does: adds the Auto Change Wardrobe (Furniture menu, after Interior Decor research;
+# 1x2, raw mineral), a locker for clothing with a direction arrow. A Duplicant walking past in
+# the arrow's direction takes off clothes of the chosen kinds and leaves them inside; walking the
+# other way, it puts on one of them (a Reactable). Its storage takes clothes only, chosen in its
+# filter side screen. A postfix also stores Pajamas back on unequip.
+# How a player reaches it: the build menu; the wardrobe's side screens.
+# What changes: Duplicants change clothes on their way.
+#
+# setup grants Interior Decor. The wardrobe is picked in the Furniture menu, placed in the
+# corridor west of the printing pod, built and selected: its storage holds clothing only, and
+# its side screens are there.
+from: early-base
+mods: [3300360753]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"InteriorDecor\")", method: Purchased}}
+  - driver: {setup.call: {target: "Game.Instance", method: Trigger, args: [-107300940]}}
+  - driver: {setup.call: {target: "PlanScreen.Instance._researchedDefs", method: Clear}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"SandStone\").substance", method: SpawnResource, args: [[110.5, 206.5, -12], 300, 300, 255, 0]}}
+steps:
+  - run: {seconds: 5}
+  - driver: {camera.set: {cell: [111, 208], ortho: 8}}
+  - click: {ui: "**/PlanScreen/Toggle:Furniture"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/ChangingLocker Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/ChangingLocker Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
+  - expect_ui:
+      "**/ProductInfoScreen/**": {any_text: "~Auto Change Wardrobe"}
+  - shot: {name: product, crop: "**/ProductInfoScreen", threshold: 0.04}
+  - click_world: {cell: [113, 206]}
+  - key: {code: Escape}
+  - expect: {blueprints: {ChangingLocker: 1}}
+  - run: {seconds: 1500, until: {buildings: {ChangingLocker: 1}, pending_construction: 0}}
+  - click_world: {cell: [113, 207], select: ChangingLocker}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<Storage>.storageFilters.Count": 1
+      "selected:GetComponent<Storage>.storageFilters[0]": Clothes
+      "selected:GetComponent<DirectionControl>": exists
+      "selected:GetComponent<ChangingLocker.ChangingLocker>": exists

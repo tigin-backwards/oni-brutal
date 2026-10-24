@@ -1,0 +1,55 @@
+{
+ "spec": "mods/1872051674-wrangle-fliers.yaml",
+ "mods": [
+  "1872051674"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "obsolete (the game wrangles fliers itself): a spawned Puft is selected and its Wrangle button marks it for capture",
+ "updated": "2026-10-24",
+ "commit": "e235451",
+ "mod_dlls": {
+  "1872051674": {
+   "WrangleFlyers.dll": "50483be4007b6ecf36b0b3691413747efd992a6a4c1261772fdbe3293709c17a"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-113834-7a4218",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T11:43:41",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-115505-24a7f0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T12:03:12",
+    "lane": 17,
+    "reference_run": "20261024-113834-7a4218",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-115505-24a7f0",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T12:03:13",
+    "lane": 16,
+    "reference_run": "20261024-113834-7a4218",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

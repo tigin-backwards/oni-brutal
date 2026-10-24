@@ -1,0 +1,27 @@
+# True insulated piping 真正的隔热管道 (2870433404), class P.
+#
+# What it does: Insulated Gas and Insulated Liquid Pipes conduct no heat at all (postfixes on
+# their CreateBuildingDef set ThermalConductivity 0; the game's is 1/32 of the material's).
+# How a player reaches it: building insulated pipes.
+# What changes: what flows in insulated pipes keeps its temperature.
+#
+# A smaller spec: setup builds an Insulated Gas Pipe and an Insulated Liquid Pipe of sandstone
+# in the corridor west of the printing pod. Both defs, and both built pipes, carry the zero
+# conductivity (the plain Gas Pipe keeps 1). Gas in a pipe cannot be set up before the game has
+# run, so no temperature is measured.
+from: early-base
+mods: [2870433404]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"InsulatedGasConduit\")", method: Build, args: [{"$": "Grid.XYToCell(109, 209)"}, Neutral, null, [SandStone], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"InsulatedLiquidConduit\")", method: Build, args: [{"$": "Grid.XYToCell(110, 209)"}, Neutral, null, [SandStone], 300.0, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"InsulatedGasConduit\").ThermalConductivity": 0
+      "Assets.GetBuildingDef(\"InsulatedLiquidConduit\").ThermalConductivity": 0
+      "Assets.GetBuildingDef(\"GasConduit\").ThermalConductivity": 1
+      "all:Conduit::Length": ">= 2"
+      "count:all:Building::[*] if .Def.PrefabID == InsulatedGasConduit": 1
+      "count:all:Building::[*] if .Def.PrefabID == InsulatedLiquidConduit": 1
+  - expect_state:
+      "sum:all:Building::[*].Def.ThermalConductivity if .Def.PrefabID == InsulatedGasConduit": 0
+      "sum:all:Building::[*].Def.ThermalConductivity if .Def.PrefabID == InsulatedLiquidConduit": 0

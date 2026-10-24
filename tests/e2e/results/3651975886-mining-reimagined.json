@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3651975886-mining-reimagined.yaml",
+ "mods": [
+  "3651975886"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a dig of four sandstone cells with the flat multiplier set to 1.5 leaves 1.5 times their mass as debris; the mode line is logged",
+ "updated": "2026-10-24",
+ "commit": "e235451",
+ "mod_dlls": {
+  "3651975886": {
+   "MiningReimagined.dll": "ed79f285cdca8031500a5913240a5f05fef3a0c833c7ed21aa5bfce0f723cf1f"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-113834-7a4218",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T11:38:35",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-115505-24a7f0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T11:56:24",
+    "lane": 16,
+    "reference_run": "20261024-113834-7a4218",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-115505-24a7f0",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T11:56:24",
+    "lane": 17,
+    "reference_run": "20261024-113834-7a4218",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

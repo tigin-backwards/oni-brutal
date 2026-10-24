@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2293939893-varicoloured-balloons.yaml",
+ "mods": [
+  "2293939893"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "smaller spec: the two modded balloon facades are made (the Varicoloured one reading its anim's symbols) and pooled, and the balloon prefab carries the mod's component",
+ "updated": "2026-10-24",
+ "commit": "e235451",
+ "mod_dlls": {
+  "2293939893": {
+   "VaricolouredBalloons.dll": "69182d72e6146fdc4391acd920bfb734f2ef0ba77d072b24ed603c500fefed38"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-113834-7a4218",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T11:41:45",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-115505-24a7f0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T11:59:45",
+    "lane": 16,
+    "reference_run": "20261024-113834-7a4218",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-115505-24a7f0",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T11:59:47",
+    "lane": 17,
+    "reference_run": "20261024-113834-7a4218",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -1,0 +1,38 @@
+# [Vanilla + DLC] Support Package+ OV3.0 (2784329372), class B.
+#
+# What it does: adds buildings and gear through the author's SuperComicLib: an Easy Electrolyzer,
+# an Organic Deoxidizer and a CO2 Decomposer (Oxygen), a Two-In-One Grill (Food), a Wastewater
+# Sterilizer (Refinement), an H2O Synthesizer (Utilities) and a Magic Tile (Base); super suits
+# and three backpacks; an all-in-one refrigerator controller. The library puts them in the build
+# menu without a tech, so they can be built without research.
+# How a player reaches it: the build menu.
+# What changes: cheap, strong life-support and food buildings.
+#
+# setup spawns metal ore. The Two-In-One Grill (raw metal, 800 kg) is picked in the Food menu,
+# placed in the corridor west of the printing pod, built and selected.
+from: early-base
+mods: [2784329372]
+setup:
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Cuprite\").substance", method: SpawnResource, args: [[109.5, 206.5, -12], 900, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"TwoInOneGrill\")": exists
+      "Assets.GetBuildingDef(\"EasyElectrolyzer\").EnergyConsumptionWhenActive": 90
+  - run: {seconds: 5}
+  - driver: {camera.set: {cell: [113, 208], ortho: 10}}
+  - click: {ui: "**/PlanScreen/Toggle:Food"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/TwoInOneGrill Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/TwoInOneGrill Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
+  - shot: {name: product, crop: "**/ProductInfoScreen", threshold: 0.04}
+  - click_world: {cell: [114, 206]}
+  - key: {code: Escape}
+  - expect: {blueprints: {TwoInOneGrill: 1}}
+  - run: {seconds: 1500, until: {buildings: {TwoInOneGrill: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [114, 208], ortho: 8}}
+  - click_world: {cell: [114, 207], select: TwoInOneGrill}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "/.+/"}
+  - expect_state:
+      "selected:GetComponent<Building>.Def.PrefabID": TwoInOneGrill

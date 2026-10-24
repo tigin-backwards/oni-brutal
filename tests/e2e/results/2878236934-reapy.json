@@ -1,0 +1,60 @@
+{
+ "spec": "mods/2878236934-reapy.yaml",
+ "mods": [
+  "2878236934"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "after Robotic Tools the Reapy Station is in the Utilities menu (product card shot); a station built in the corridor gets copper delivered and makes its ReapBot",
+ "updated": "2026-10-24",
+ "commit": "e235451",
+ "mod_dlls": {
+  "2878236934": {
+   "PLib.dll": "9bf74a5ec6b897e2f82354c90de45c0ec89181087679c39e76b7cbc77de20fc6",
+   "Reapy.dll": "ccf271e3a32a83172fc5d92b13dcdabd02959ee1ce0b0a3a62dd9cb7ab6cb71c"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-113834-7a4218",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T11:49:35",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-115505-24a7f0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T12:08:34",
+    "lane": 17,
+    "reference_run": "20261024-113834-7a4218",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.010558
+    }
+   },
+   {
+    "run": "20261024-115505-24a7f0",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T12:08:37",
+    "lane": 16,
+    "reference_run": "20261024-113834-7a4218",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.010558
+    }
+   }
+  ]
+ }
+}

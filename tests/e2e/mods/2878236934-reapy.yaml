@@ -1,0 +1,32 @@
+# Reapy/Harvester (Automatic Farming) - fixed (2878236934), class B.
+#
+# What it does: adds the Reapy Station (Utilities menu after the Sweepy station, researched with
+# Robotic Tools; 2x2, refined metal, 240 W). Like Sweepy's dock it builds its robot from the
+# metal it is given: a ReapBot that roams near its station, harvests ripe plants within its
+# harvest range and brings the produce to the station's storage, then recharges. PLib options:
+# ranges, speed, doors, rail output, seeds and salt, raw metal.
+# How a player reaches it: the build menu; the station's side screen.
+# What changes: farms harvest themselves.
+#
+# setup grants Robotic Tools, builds a Reapy Station of copper in the corridor west of the
+# printing pod and drops copper beside it. The station is in the Utilities menu; a Duplicant
+# brings the copper and the station makes its ReapBot.
+from: early-base
+mods: [2878236934]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"RoboticTools\")", method: Purchased}}
+  - driver: {setup.call: {target: "Game.Instance", method: Trigger, args: [-107300940]}}
+  - driver: {setup.call: {target: "PlanScreen.Instance._researchedDefs", method: Clear}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"ReapBotStation\")", method: Build, args: [{"$": "Grid.XYToCell(109, 206)"}, Neutral, null, [Copper], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Copper\").substance", method: SpawnResource, args: [[113.5, 206.5, -12], 200, 300, 255, 0]}}
+steps:
+  - run: {seconds: 5}
+  - click: {ui: "**/PlanScreen/Toggle:Utilities"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/ReapBotStation Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/ReapBotStation Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
+  - shot: {name: product, crop: "**/ProductInfoScreen", threshold: 0.04}
+  - key: {code: Escape}
+  - run: {seconds: 600}
+  - expect_state:
+      "all:Reapy.ReapBotStation::[0].ReapBot.Get()": exists

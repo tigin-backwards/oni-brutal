@@ -1,0 +1,55 @@
+{
+ "spec": "mods/1962090267-no-meteors.yaml",
+ "mods": [
+  "1962090267"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Fullerene meteor shower started on the start planetoid bombards for its 30 s and spawns no comet",
+ "updated": "2026-10-24",
+ "commit": "e235451",
+ "mod_dlls": {
+  "1962090267": {
+   "NoMeteors.dll": "245854d64763574dc3bdb5dff10cae2307174630b59343f70352701995c54243"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-113834-7a4218",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T11:38:34",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-115505-24a7f0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T11:55:05",
+    "lane": 16,
+    "reference_run": "20261024-113834-7a4218",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-115505-24a7f0",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T11:55:06",
+    "lane": 17,
+    "reference_run": "20261024-113834-7a4218",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

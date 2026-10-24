@@ -1,0 +1,59 @@
+{
+ "spec": "mods/3300360753-auto-change-wardrobe.yaml",
+ "mods": [
+  "3300360753"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "after Interior Decor the Auto Change Wardrobe is picked in the Furniture menu, built and selected: a clothing-only locker with a direction control (product card shot)",
+ "updated": "2026-10-24",
+ "commit": "e235451",
+ "mod_dlls": {
+  "3300360753": {
+   "ChangingLocker.dll": "facdfe38d9867ae12addc779073495bae7658e3969e18b51e969ec52f180344f"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-113834-7a4218",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T11:47:52",
+    "lane": 17,
+    "signatures": 1
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-115505-24a7f0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T12:07:00",
+    "lane": 17,
+    "reference_run": "20261024-113834-7a4218",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.007747
+    }
+   },
+   {
+    "run": "20261024-115505-24a7f0",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T12:07:03",
+    "lane": 16,
+    "reference_run": "20261024-113834-7a4218",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.007747
+    }
+   }
+  ]
+ }
+}

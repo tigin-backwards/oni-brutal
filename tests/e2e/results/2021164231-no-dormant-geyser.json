@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2021164231-no-dormant-geyser.yaml",
+ "mods": [
+  "2021164231"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a spawned Cool Steam Vent and early-base's own geyser have their whole year active and never go dormant",
+ "updated": "2026-10-24",
+ "commit": "e235451",
+ "mod_dlls": {
+  "2021164231": {
+   "No_Dormant_Geyser.dll": "c0bfe01e243d31ec35a8d2eac662774c290b295e9b765456ee1b4a57b867865d"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-113834-7a4218",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T11:40:19",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-115505-24a7f0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T11:57:56",
+    "lane": 16,
+    "reference_run": "20261024-113834-7a4218",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-115505-24a7f0",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T11:57:59",
+    "lane": 17,
+    "reference_run": "20261024-113834-7a4218",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

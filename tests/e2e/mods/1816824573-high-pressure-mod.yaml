@@ -1,0 +1,34 @@
+# High Pressure Mod (1816824573), class B.
+#
+# What it does: pipes carry forty times as much (a prefix on the ConduitFlow constructor
+# multiplies its max conduit mass: 40 kg of gas, 400 kg of liquid per pipe cell), and logic
+# valves let as much through. It adds five buildings, all researched with Improved Ventilation
+# (PrecisionPlumbing) and made of "Supermetal" (a tag it puts on steel and another refined
+# metal) or plastic: a Pressure Gas Pump and an Extreme Pressure Gas Vent (Ventilation), a
+# Pressure Liquid Pump (Plumbing), and Pressure Gas and Liquid Reservoirs of 95 t (Base).
+# How a player reaches it: the build menu after the research; any pipe network.
+# What changes: pipe throughput, and big pumps and reservoirs.
+#
+# setup grants Improved Ventilation. The pipe flows hold the new limits; the Pressure Gas
+# Reservoir is picked in the Base menu and its product card shot.
+from: early-base
+mods: [1816824573]
+require_log: ['\[= INIT =\] Load High Pressure Mod']
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"PrecisionPlumbing\")", method: Purchased}}
+  - driver: {setup.call: {target: "Game.Instance", method: Trigger, args: [-107300940]}}
+  - driver: {setup.call: {target: "PlanScreen.Instance._researchedDefs", method: Clear}}
+steps:
+  - expect_state:
+      "Game.Instance.gasConduitFlow.MaxMass": 40
+      "Game.Instance.liquidConduitFlow.MaxMass": 400
+      "Assets.GetBuildingDef(\"PressureGasReservoir\").BuildingComplete.GetComponent<Storage>.capacityKg": 95000
+      "Db.Get().Techs.Get(\"PrecisionPlumbing\").unlockedItemIDs.Contains(\"PressureGasPump\")": true
+  - run: {seconds: 5}
+  - click: {ui: "**/PlanScreen/Toggle:Base"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/PressureGasReservoir Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/PressureGasReservoir Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
+  - expect_ui:
+      "**/ProductInfoScreen/**": {any_text: "~Pressure Gas Reservoir"}
+  - shot: {name: product, crop: "**/ProductInfoScreen", threshold: 0.04}

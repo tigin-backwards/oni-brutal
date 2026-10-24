@@ -1,0 +1,27 @@
+# Varicoloured Balloons (2293939893), class P.
+#
+# What it does: Balloon Artists hand out balloons of random colours. After the Db is ready it
+# makes two balloon facades from its own anims (an orange one with sparkles and a "Varicoloured"
+# one with every body symbol of a baby Puft mutant anim) and pools every unlocked facade's
+# symbols; a postfix on BalloonOverrideSymbolIter.Next picks one of the pool when a balloon
+# has no facade. EquippableBalloon gets a component that saves the modded symbol.
+# How a player reaches it: a Balloon Artist Duplicant, overjoyed, handing out balloons.
+# What changes: the colours of the balloons.
+#
+# A smaller spec: an overjoyed Balloon Artist is far from early-base. Its two facades are made,
+# the Varicoloured one reading many symbols from its anim (the patched
+# GetBalloonOverrideSymbolIDs), the pool holds them, and the balloon prefab carries the
+# component.
+from: early-base
+mods: [2293939893]
+steps:
+  - expect_state:
+      "type:VaricolouredBalloons.VaricolouredBalloonsPatches::MyBalloons.Count": 2
+      "type:VaricolouredBalloons.VaricolouredBalloonsPatches::MyBalloons[0].Id": VBalloonOrangeLongSparkles
+      "type:VaricolouredBalloons.VaricolouredBalloonsPatches::MyBalloons[1].balloonOverrideSymbolIDs.Length": "> 1"
+      "type:VaricolouredBalloons.VaricolouredBalloonsPatches::MyBalloons[1].balloonOverrideSymbolIDs.Length": "== original"
+      "type:VaricolouredBalloons.VaricolouredBalloonsPatches::BalloonOverrides.Count": "> 2"
+      "type:VaricolouredBalloons.VaricolouredBalloonsPatches::BalloonOverrides.Count": "== original"
+      "Assets.GetPrefab(\"EquippableBalloon\").GetComponent<VaricolouredBalloons.ModdedEquippableBalloon>": exists
+  - run: {seconds: 5}
+  - expect: {duplicants: 3}

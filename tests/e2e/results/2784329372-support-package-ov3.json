@@ -1,0 +1,62 @@
+{
+ "spec": "mods/2784329372-support-package-ov3.yaml",
+ "mods": [
+  "2784329372"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Two-In-One Grill is picked in the Food menu without research, built by the Duplicants and selected (product card shot)",
+ "updated": "2026-10-24",
+ "commit": "e235451",
+ "mod_dlls": {
+  "2784329372": {
+   "0SuperComicLib.ModONI.dll": "ab1b3ec34fc2bbf90810844205824364128cf59acfcf291bebf5ffa1917c23d7",
+   "SupportPackage_OV3.dll": "42ad09848bc9b7199712880c1b568b5b54e1cc2a2407fd2e7fd91580b61431b7",
+   "VYaml.Annotations.dll": "3d41df55af5e3f3cbb0db9028a7bc952317470fa427be3e9f6e51565ca8b23ba",
+   "VYaml.dll": "dc85a16a973d7395628269ea36597104d4399e9e00c498e3728dfcdec2f0ed85"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-113834-7a4218",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T11:46:04",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-115505-24a7f0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T12:05:30",
+    "lane": 17,
+    "reference_run": "20261024-113834-7a4218",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.007747
+    }
+   },
+   {
+    "run": "20261024-115505-24a7f0",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T12:05:32",
+    "lane": 16,
+    "reference_run": "20261024-113834-7a4218",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.007747
+    }
+   }
+  ]
+ }
+}

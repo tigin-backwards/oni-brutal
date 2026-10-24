@@ -1,0 +1,28 @@
+# [Deprecated - Implemented in base game!] Wrangle Fliers (1872051674), class P.
+#
+# What it does: lets Duplicants wrangle Shine Bugs, Gassy Moos, Slicksters and Pufts (postfixes
+# on their base configs set Capturable.allowCapture). The game has since made every critter
+# capturable, so the mod changes nothing any more.
+# How a player reaches it: a flying critter's Wrangle button.
+# What changes: nothing now; once, flying critters could be wrangled.
+#
+# setup spawns a Puft in the corridor west of the printing pod and selects it. Its user menu
+# offers Wrangle; clicking it marks the Puft for capture, and the button turns to Cancel Wrangle.
+from: early-base
+mods: [1872051674]
+setup:
+  - driver: {setup.call: {type: Scenario, method: SpawnPrefab, args: [{"$": "Grid.XYToCell(110, 208)"}, 0, 0, Puft, Creatures]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "SelectTool.Instance", method: Select, args: [{"$": "last:GetComponent<KSelectable>"}, false]}}
+steps:
+  - run: {seconds: 1}
+  - expect_state:
+      "Assets.GetPrefab(\"Puft\").GetComponent<Capturable>.allowCapture": true
+      "Assets.GetPrefab(\"LightBug\").GetComponent<Capturable>.allowCapture": true
+      "selected:GetComponent<Capturable>.IsMarkedForCapture": false
+  - ui_wait: {path: "**/DetailsScreen/UserMenuButtons/UserMenuScreen/Buttons", cond: stable}
+  - click: {ui: "**/UserMenuScreen/Buttons/WrangleButton"}
+  - expect_state:
+      "selected:GetComponent<Capturable>.IsMarkedForCapture": true
+  - expect_ui:
+      "**/UserMenuScreen/Buttons/Cancel WrangleButton": {active: true}

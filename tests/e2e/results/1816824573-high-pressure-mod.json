@@ -1,0 +1,60 @@
+{
+ "spec": "mods/1816824573-high-pressure-mod.yaml",
+ "mods": [
+  "1816824573"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "pipe flows hold 40 kg of gas and 400 kg of liquid; after Improved Ventilation the Pressure Gas Reservoir is picked in the Base menu (product card shot)",
+ "updated": "2026-10-24",
+ "commit": "e235451",
+ "mod_dlls": {
+  "1816824573": {
+   "HighPressureMod.dll": "8ccfc6994ea0f7767d526e40436268b78e5ebdd6d103421cacfd613d8d267bd7",
+   "RainbowCommons.dll": "284e5ba2da33b556a8d8d5b02dc522eef1ae28f062fb6a100665c0a93151bca7"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-113834-7a4218",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T11:45:16",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-115505-24a7f0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T12:04:20",
+    "lane": 17,
+    "reference_run": "20261024-113834-7a4218",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.0
+    }
+   },
+   {
+    "run": "20261024-115505-24a7f0",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T12:04:21",
+    "lane": 16,
+    "reference_run": "20261024-113834-7a4218",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.0
+    }
+   }
+  ]
+ }
+}

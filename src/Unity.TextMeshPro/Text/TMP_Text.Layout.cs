@@ -40,6 +40,8 @@ namespace TMPro
             public float TabStop;
             // An empty record where truncation stopped (textInfo holds a blank character there).
             public bool Blank;
+            // Whether the line, as it stands with this character placed, ends below the rect.
+            public bool Below;
             public float LineHeightOverride;  // NaN: none
             public float MarginLeft, MarginRight, Indent, LineIndent;
             public float WidthLimit;     // NaN: none
@@ -430,12 +432,7 @@ namespace TMPro
                 if (k == 0) y = 0f;
                 else
                 {
-                    ref var prev = ref lines[k - 1];
-                    float interval = prev.Gap + line.MaxAscent;
-                    if (!float.IsNaN(pl[line.First].LineHeightOverride)) interval = pl[line.First].LineHeightOverride;
-                    interval += (m_lineSpacing - m_LineSpacingAdjustment) * 0.01f * baseSize;
-                    if (prev.EndsWithLineFeed) interval += m_paragraphSpacing * 0.01f * baseSize;
-                    y -= interval;
+                    y -= LineInterval(k, line.MaxAscent, baseSize);
                     if (m_overflowMode == TextOverflowModes.Page && pl[line.First].PageBreak)
                     {
                         pageIndex++;
@@ -444,18 +441,14 @@ namespace TMPro
                 }
                 line.Baseline = y;
                 line.LineHeight = line.Ascender - line.Descender;
-                // Vertical overflow: at the first checked character whose line's descender is
-                // below the rect. White space does not overflow (a line of it alone, or before
-                // and after the checked characters), though its lines take their height. A line
-                // below the rect still does not fit, for auto-size.
+                // A line below the rect does not fit, for auto-size (a line of white space too).
                 line.Below = (double)textTop - ((double)y + line.FitDescender) > height + 0.0001;
-                if (line.Below && m_overflowMode != TextOverflowModes.Page)
-                {
-                    fits = false;
-                    if (overflowIndex < 0)
-                        for (int i = line.First; i <= line.Last; i++)
-                            if (pl[i].Checked) { overflowIndex = i; break; }
-                }
+                if (line.Below && m_overflowMode != TextOverflowModes.Page) fits = false;
+                // Vertical overflow: at the first checked character whose line, as it stands when
+                // the character is placed, ends below the rect. White space does not overflow,
+                // though its lines take their height.
+                if (m_overflowMode != TextOverflowModes.Page)
+                    CheckSoFar(k, textTop, height, baseSize, ref overflowIndex);
                 if (m_overflowMode == TextOverflowModes.Page && k > 0 && (double)pageTop - ((double)y + line.Descender) > height + 0.0001 && !pl[line.First].PageBreak)
                 {
                     pageIndex++;
@@ -474,13 +467,59 @@ namespace TMPro
             m_LayoutCharacterCount = count;
             m_LayoutEndedAtStart = endedAtStart;
             m_LayoutBaseSize = baseSize;
+            m_LayoutHeight = height;
             return fits;
         }
 
         int m_LayoutOverflowIndex = -1, m_LayoutHorizontalCut = -1, m_LayoutCharacterCount;
         // The text began with U+0003: it has no characters, but is not empty.
         bool m_LayoutEndedAtStart;
-        float m_LayoutBaseSize;
+        float m_LayoutBaseSize, m_LayoutHeight;
+
+        // The distance from line k-1's baseline down to line k's, for line k's ascender.
+        private protected float LineInterval(int k, float ascender, float baseSize)
+        {
+            var pl = s_Placements;
+            ref var prev = ref s_Lines[k - 1];
+            ref var line = ref s_Lines[k];
+            float interval = prev.Gap + ascender;
+            if (!float.IsNaN(pl[line.First].LineHeightOverride)) interval = pl[line.First].LineHeightOverride;
+            interval += (m_lineSpacing - m_LineSpacingAdjustment) * 0.01f * baseSize;
+            if (prev.EndsWithLineFeed) interval += m_paragraphSpacing * 0.01f * baseSize;
+            return interval;
+        }
+
+        // Each character of line k against the rect's height, as its line stands when it is
+        // placed: the line's ascender and descender are those of its characters so far. On the
+        // first line its top is the highest ascender so far; a later line sits below the line
+        // before by the interval from its ascender so far, under the first line's whole top
+        // (measured on the shipped package: a taller character later in a line overflows at
+        // itself, not at the line's start). Records in Below whether the line so far ends below
+        // the rect, and the first checked character that does in overflowIndex.
+        void CheckSoFar(int k, float textTop, float height, float baseSize, ref int overflowIndex)
+        {
+            var pl = s_Placements;
+            ref var line = ref s_Lines[k];
+            bool onlySoftHyphens = true;
+            for (int i = line.First; i <= line.Last; i++)
+                if (pl[i].SoftHyphen <= 0f) { onlySoftHyphens = false; break; }
+            float asc = float.NegativeInfinity, desc = float.PositiveInfinity;
+            for (int i = line.First; i <= line.Last; i++)
+            {
+                ref var p = ref pl[i];
+                if (!(p.SoftHyphen > 0f && !p.Visible && !onlySoftHyphens))
+                {
+                    asc = Mathf.Max(asc, p.Ascender);
+                    if (p.SoftHyphen <= 0f || onlySoftHyphens) desc = Mathf.Min(desc, p.Descender);
+                }
+                p.Below = false;
+                if (float.IsInfinity(asc) || float.IsInfinity(desc)) continue;
+                float top = k == 0 ? asc : textTop;
+                float baseline = k == 0 ? 0f : s_Lines[k - 1].Baseline - LineInterval(k, asc, baseSize);
+                p.Below = (double)top - ((double)baseline + desc) > height + 0.0001;
+                if (p.Below && p.Checked && overflowIndex < 0) overflowIndex = i;
+            }
+        }
 
         static bool IsCjk(uint c) =>
             (c >= 0x2E80 && c <= 0x9FFF) || (c >= 0xAC00 && c <= 0xD7AF) || (c >= 0xF900 && c <= 0xFAFF) || (c >= 0xFF00 && c <= 0xFFEF) || (c >= 0x20000 && c <= 0x2FA1F) || (c >= 0x3000 && c <= 0x303F);
@@ -569,6 +608,17 @@ namespace TMPro
             if (!state.VerticalOffset.IsZero) shift += state.VerticalOffset.Resolve(size, 0f);
             float fontScale = size / face.pointSize * face.scale;
             float metricScale = el.CaseScale != 1f ? fullSize / face.pointSize * face.scale : fontScale;
+            // White space in a <size> takes no part in its line's height: its ascender and
+            // descender are those of the text's own size (measured on the shipped package; a
+            // tab is not such white space here, it is checked).
+            uint code = el.Unicode;
+            bool sizedWhitespace = el.Kind == ElementKind.Character && code != 9 && (IsWhitespace(code) || IsLineBreak(code))
+                && (state.SizeScale != 1f || state.SizeOffset != 0f);
+            if (sizedWhitespace)
+            {
+                float tagged = PointSizeOf(state, baseSize);
+                if (tagged > 0f) metricScale *= baseSize / tagged;
+            }
             p.PointSize = fullSize;
             p.FontScale = fontScale;
             p.BaselineShift = shift;

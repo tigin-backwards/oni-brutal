@@ -1736,13 +1736,20 @@ overflowing character.
     ("Further characters" above). Not measured: white space in `<voffset>`, and in a
     `<size>` smaller than the text.
 
-Where this implementation deviates (`TMP_Text.Layout.cs`): it lays out each line whole, and
+- **Implemented.** This implementation follows the block: in the same probe `tl-check.py rule`
+  passes all 79,257 sweep results from its log, and `tl-check.py diff` finds none of the 348
+  cases differing from the shipped package. Where Truncate goes on with a line begun by
+  wrapping, the characters that move onto the line before are checked on that line as it
+  stands. The white space a `<size>` leaves out of the line's height is space-like white space
+  and line breaks, not the tab, which is checked.
+
+Where this implementation deviated before (`TMP_Text.Layout.cs`): it lays out each line whole, and
 then checks the line's whole height at its first checked character. So a line that grows
 part-way overflows at its start. Truncate and Ellipsis then cut the whole line. On the first
 line nothing is shown, and that is the geyser title: index 0, 0 records. In
 "AA\nAAAA<size=150%>B</size>AA" it reports 3 where the shipped package reports 7.
 
-| Case (GRAYSTROKE REGULAR SDF 14 pt) | shipped: index; records | this implementation |
+| Case (GRAYSTROKE REGULAR SDF 14 pt) | shipped: index; records | this implementation before |
 |---|---|---|
 | the title, 175.13 × 22, Truncate | 25; "Liquid Sulfur Geyser NJ24", record | 0; nothing |
 | the title, 175.13 × 22, Ellipsis | 25; "Liquid Sulfur Geyser NJ2…", record | 0; nothing |

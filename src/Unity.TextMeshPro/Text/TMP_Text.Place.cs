@@ -500,6 +500,9 @@ namespace TMPro
                 recordLine = k - 1;
                 recordX = x;
                 prev.Last = stop - 1;
+                // The characters it goes on with are checked on that line as it stands.
+                int none = -1;
+                CheckSoFar(k - 1, lines[0].Ascender, m_LayoutHeight, m_LayoutBaseSize, ref none);
             }
             else
             {
@@ -516,7 +519,7 @@ namespace TMPro
                 {
                     while (atLine > 0 && at < lines[atLine].First) atLine--;
                     ref var line = ref lines[atLine];
-                    if (!line.Below && pl[at].X + fit <= line.Width + 0.0001f) break;
+                    if (!pl[at].Below && pl[at].X + fit <= line.Width + 0.0001f) break;
                 }
                 if (at < 0)
                 {
@@ -531,6 +534,7 @@ namespace TMPro
                 shown.Last = at + 1;
                 shown.EndsWithLineFeed = false;
                 FinishLine(ref shown, pl, m_LayoutBaseSize);
+                Rebaseline(atLine);
                 count = at + 2;
                 lineCount = atLine + 1;
                 return;
@@ -540,8 +544,19 @@ namespace TMPro
             last.Last = stop;
             last.EndsWithLineFeed = false;
             FinishLine(ref last, pl, m_LayoutBaseSize);
+            Rebaseline(recordLine);
             count = stop + 1;
             lineCount = recordLine + 1;
+        }
+
+        // The line the cut ends is laid out with its characters before the cut only: its
+        // baseline follows from its ascender as it stood there (measured on the shipped package:
+        // a taller character after the cut does not lower it).
+        void Rebaseline(int k)
+        {
+            ref var line = ref s_Lines[k];
+            if (k > 0) line.Baseline = s_Lines[k - 1].Baseline - LineInterval(k, line.MaxAscent, m_LayoutBaseSize);
+            line.LineHeight = line.Ascender - line.Descender;
         }
 
         // The ellipsis, as an element after the parsed ones. Its glyph (from whichever font has

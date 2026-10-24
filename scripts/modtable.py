@@ -122,7 +122,6 @@ unplayed = {
     '2077848080': 'not played: it supports the base game only (`supportedContent: VANILLA_ID`), and every spec fixture is a Spaced Out colony',
     # Batch 14: content packs without code.
     # Batch 17.
-    '1873884303': 'not played: it supports the base game only (`supportedContent: VANILLA_ID`, and its OnLoad stops on Spaced Out), and every spec fixture is a Spaced Out colony',
     '3635632392': 'not played: a multiplayer mod (its own LiteNetLib client and server); a session needs two players on two Steam accounts',
     # Batch 18: base-game-only mods (every spec fixture is a Spaced Out colony).
     '1891479671': 'not played: it supports the base game only (`supportedContent: VANILLA_ID`; it patches the base game\'s Biological Cargo Bay, which Spaced Out lacks), and every spec fixture is a Spaced Out colony',
@@ -200,6 +199,7 @@ broken.update({
 })
 # Found by the e2e specs of batch 21: the spec fails the same way in the original.
 broken.update({
+    '1873884303': 'broken upstream: on the base-game fixture its `OnLoad` stops on a HarmonyException (its `DetailsScreen.OnPrefabInit` patch takes `___sideScreenContentBody`, a field the game no longer has), its scanner then fails to register ("First anim file needs to be non-null", a NullReferenceException in RegisterBuilding), and the game disables it ("Failed to load mod ...disabling") and closes before the save loads',
     '2215696830': 'broken upstream: its tile\'s `ItemPermeableTile.OnSpawn` calls `SimMessages.ClearCellProperties(int, byte)`, which the game no longer has, so every finished Item Permeable Tile throws a MissingMethodException and opens the crash report screen (spec tests/e2e/mods/2215696830-item-permeable-tiles.yaml)',
 })
 # Fails to load in the original only.

@@ -1,6 +1,6 @@
 # Public API that Workshop mods use and the engine lacks: what to specify
 
-Status: open. Nothing here is implemented. Each section is the input for a functional
+Status: open. Nothing here is implemented; section 1 is specified. Each section is the input for a functional
 specification, written by the specification side (README.md, "Roles") from Unity's public
 documentation and from measurement in the original player, and then implemented from that
 specification alone.
@@ -26,22 +26,10 @@ left needs behaviour that a few values cannot pin down.
 
 **Used by:** Customize and edit Duplicant traits (3687060621, rank 508), its IMGUI window.
 
-**Interface:** `public static string GUI.tooltip { get; set; }` in `UnityEngine.IMGUIModule`.
-Next to it, `protected static Rect GUI.tooltipRect { get; set; }` (protected, in a type whose
-constructor is public).
-
-**The specification must say** (extending `imgui.md`):
-- what `tooltip` reads during each event of an `OnGUI` pass: the `GUIContent.tooltip` of the
-  control under the mouse, of the control that has keyboard focus, or of the last control drawn;
-- when it is set and when it is cleared: per control, per event, per window, per frame;
-- what a set from user code does: does it last until the next control, or until the end of the
-  event;
-- how windows (`GUI.Window`, `GUILayout.Window`) and groups change it;
-- its value outside `OnGUI`.
-
-**To measure:** a probe window with two buttons that carry tooltips. Log `GUI.tooltip` after each
-control and at the end of `OnGUI`, for each event type, with the mouse over each button, over
-neither, and with a text field focused.
+**Specified:** measured in the original player (`PROBE_SCENARIO=tooltip`) and written up in
+`imgui.md`, "GUI.tooltip". That section has the interface (`GUI.tooltip` and the protected
+`GUI.tooltipRect`), the rules, and a table of the original against this implementation. Not
+implemented yet.
 
 ## 2. `UnityWebRequest` upload and download handlers
 

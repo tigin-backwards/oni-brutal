@@ -126,6 +126,11 @@ namespace SemanticsProbe
                 go.AddComponent<Logging>();
                 return;
             }
+            if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "tooltip")
+            {
+                go.AddComponent<Tooltip>();
+                return;
+            }
             if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "startdestroy")
             {
                 go.AddComponent<SDScenario>();

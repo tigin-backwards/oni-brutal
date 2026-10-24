@@ -546,6 +546,193 @@ forms:
   | Ctrl+V | "xbcd" |
   | A click outside | `keyboardControl` is 0 |
 
+### GUI.tooltip (measured 2026-10-24)
+
+Found by a mod spec: Customize Duplicant traits (Workshop 3687060621,
+`tests/e2e/mods/3687060621-customize-duplicant-traits.yaml`). Its editor is a `GUI.Window`
+whose function lays out labels whose `GUIContent` carries a tooltip, many of them inside a
+`GUILayout.BeginScrollView`. At the end of the function it reads `GUI.tooltip` and shows it in
+a `GUILayout.Label` in a second scroll view, or a placeholder ("Hover over an item to see its
+description...") when the value is empty. This implementation has no `GUI.tooltip`. The window
+function throws `MissingMethodException: Method not found: 'System.String
+UnityEngine.GUI.get_tooltip()'` on every event, so the window draws nothing and the crash
+screen opens. No game assembly uses the member, so `tools/ApiCheck` does not report it.
+
+**Interface** (`UnityEngine.IMGUIModule`):
+- `public static string GUI.tooltip { get; set; }`;
+- `protected static Rect GUI.tooltipRect { get; set; }`. It is protected in a class with a
+  public constructor, so a subclass of `GUI` can read it. No mod uses it.
+
+**Measured** with `PROBE_SCENARIO=tooltip` (tools/UnityProbe, `Tooltip.cs`, lines `TT …`, 10 s
+into the main menu, about a minute and a half). One behaviour draws controls whose
+`GUIContent` has a tooltip ("tA" for control A) or none:
+- `GUI.Button` A and B (B without a tooltip), `GUI.Label` L, `GUI.Box` X, `GUI.Toggle` T;
+- two buttons O1 and O2 that overlap by 60 pixels, and a button H drawn with `GUI.enabled`
+  false;
+- `GUILayout.Button` C and `GUILayout.Label` D in a `GUILayout.BeginArea`, with a 20-pixel
+  `Space` between them;
+- a button E in a `GUI.BeginGroup`, and buttons F and G in a `GUI.BeginScrollView` 80 high,
+  G at y 100 (scrolled out of view);
+- a button Z under window 101.
+
+It opens three windows:
+- **101 (`GUI.Window`):** buttons W1a, W1c and W1d, a label W1b without a tooltip, a button W1g
+  in a group, a title `GUIContent` with a tooltip, and a `GUI.Window` 103 called from inside
+  its function;
+- **102 (`GUILayout.Window`):** laid out like the mod's window. It has a button W2a, a label
+  W2b without a tooltip, a `GUILayout.BeginScrollView` 100 high of six labels W2s0 to W2s5 with
+  tooltips (W2s5 out of view), and a label showing `GUI.tooltip` as read after them;
+- **104 (`GUI.Window`):** over part of 101, with a button W4a that overlaps W1d.
+
+A second behaviour, enabled after the first, only reads. The probe moves the real mouse with
+XTest over the centre of each control (its screen rect measured during Repaint), and between
+them. Two frames are recorded at each point. Every OnGUI call and window function logs one
+line per event: `GUI.tooltip` at its start, after each control and at its end, with
+`tooltipRect`, `hotControl` and `keyboardControl`. Update, LateUpdate and the end of the frame
+read the value as well. The points are then visited again in mode "reset": every call first
+sets `GUI.tooltip = "-"`, so its line shows exactly which of its own controls set the value.
+Then come modes that set the value from code:
+- at the start of OnGUI;
+- at the end of its Repaint;
+- inside window 101;
+- at the end of window 102's Repaint;
+- to null.
+
+Further modes give button A or toggle T keyboard focus, and the mouse button is pressed over
+A, L, W2a, W1a and W4a: clicked, then held, dragged off and released off.
+`tools/UnityProbe/tt-check.py rule LOG` checks the rules below. They hold for all 3,643 calls
+of the original's log (278 points where a control was expected to set the value).
+`tt-check.py diff ORIG OURS` compares two players' logs per step, and `tt-check.py show LOG`
+prints them.
+
+1. **`GUI.tooltip` is one global string that only controls and user code write.**
+   - **Initial value:** it reads "" before any control has set it, including in the probe's
+     `Awake` at mod load.
+   - **Never null:** a set to null reads back "".
+   - **Outside OnGUI:** it reads the same value in Update, LateUpdate and at the end of the
+     frame, without an error.
+   - **Persistence:** the value carries over unchanged between events, between OnGUI calls,
+     between behaviours, into and out of window functions, and from frame to frame.
+   - **Nothing clears it.** The engine never resets it at the start of a frame, an event, an
+     OnGUI call or a window function. Moving the mouse off every control leaves the last
+     tooltip in place, whether onto a control without a tooltip (B, W1b, W2b), onto empty
+     window space, or off every window. So the mod's description box keeps showing the last
+     description hovered.
+2. **A control sets it while it draws during a Repaint, when the control is hovered and its
+   content's tooltip is not empty.** The value becomes that tooltip at the point the control
+   is drawn. Controls drawn later in the same call read the new value.
+   - **Hovered** means two things. The mouse (`Event.current.mousePosition`, in the control's
+     own coordinates) is inside the control's rect, as `Rect.Contains` decides: (21, 21) in A's
+     (20, 20, 100 × 30) sets it, (19, 19) does not. And the mouse is inside the visible area of
+     the clip the control is drawn in.
+     - The clip may be a group, an area, a scroll view or the window: a button or label
+       scrolled out of a scroll view does not set the value with the mouse over its unclipped
+       rect. That held for G in a `GUI` scroll view and for W2s5 in a `GUILayout` one.
+     - Windows do not hide what lies under them. Button Z under window 101 sets the value. So
+       do W1d and W4a, overlapping in windows 101 and 104: each sets it as it is drawn.
+   - **The control holding the mouse** (its ID is `GUIUtility.hotControl`) also sets the value
+     on each Repaint while the mouse is elsewhere. A pressed on A and dragged off the screen
+     sets "tA" each frame until the release.
+   - **Which controls:** `GUI.Button`, `GUI.Toggle`, `GUI.Label`, `GUI.Box`, a disabled
+     `GUI.Button` (`GUI.enabled` false), and `GUILayout.Button` and `GUILayout.Label`, at the
+     rect the layout gave them. GUI and GUILayout controls behave the same.
+   - **Empty tooltips write nothing.** A control whose content has an empty tooltip, under the
+     mouse, leaves the value as it was.
+   - **A window's title** `GUIContent` with a tooltip, under the mouse on the title bar, does
+     not set it.
+   - **Keyboard focus does not count.** With `keyboardControl` set to A's or T's ID, and the
+     mouse elsewhere, neither sets it.
+   - **No other event sets it.** Layout, MouseDown, MouseUp, MouseDrag, Used and Ignore
+     events change nothing, even with the mouse over a control. (The player sent no MouseMove
+     events.)
+3. **Several hovered controls: the last one drawn wins.** Over the overlap of O1 and O2, O1
+   sets "tO1" and then O2 sets "tO2". Over W1d and W4a, W4a's window is drawn first and W1d's
+   last, so the value ends as "tW1d". The window drawn last is the front window (rule 6).
+4. **A read in a window function after its controls** (the mod's pattern) gives the tooltip of
+   the control hovered in that window. During Repaint it reads the value set by the window's
+   own hovered label. During Layout it reads the value the previous frame's Repaint left. So
+   both passes read the same string, and the window lays out the same controls in both.
+5. **A set from code sticks until the next control sets the value, or the next set.**
+   - Set to "S" at the start of every OnGUI call, with the mouse on empty space, it reads "S"
+     everywhere: in the same call, in the second behaviour, in every window and outside
+     OnGUI.
+   - With the mouse over A, A replaces it in Repaint ("tA"), and "tA" is what the windows,
+     the end of the frame and the next frame's Layout read, until the next set.
+   - Set at the end of the Repaint call ("E"), it is what the windows drawn after it read
+     (unless one of their controls is hovered), and what every call of the next frame reads
+     until a hovered control sets it again.
+   - Set inside window 101's function ("W"), it is what the windows drawn after it and the
+     next frame read.
+   - Leaving the mode leaves the last set value in place.
+6. **The order of calls in a frame**, as measured with two behaviours (enabled in the order
+   gui, gui2) and three windows of the first one. It decides which value a call reads at its
+   start and which control wins:
+   - Layout: gui, gui2, then the windows from front to back. At first that is 101, 102, 104
+     (101 in front); after a click on 102 it is 102, 101, 104.
+   - Repaint: gui2, gui (the reverse), then the windows from back to front: 104, 102, 101 at
+     first, and 104, 101, 102 after the click on 102.
+   - An input event over a window goes to that window first. Clicking W2a sent MouseDown to
+     102, and then gui, its behaviour, got it as `Used`.
+
+   This is not the order "Dispatch of OnGUI" and "Windows" describe (each behaviour's Layout
+   and event, with its windows right after it). Keep that order unless a mod needs this one;
+   the rules above hold within any order of calls.
+7. **`tooltipRect`** starts as (0, 0, 0 × 0). Only a label sets it: `GUI.Label` or
+   `GUILayout.Label` with a non-empty tooltip, hovered, during Repaint. It becomes a rect of
+   size 0 at the mouse position in the label's own coordinates:
+   - (70, 116) for L;
+   - (100, 55) for D in the area at (20, 180), with the mouse at (120, 235);
+   - (132, 14) for W2s0 inside window 102's scroll view.
+
+   Buttons, boxes and toggles leave it alone. It persists like the tooltip.
+
+**Seen in passing** (not tooltip rules; for the implementer's information):
+- **Nested windows:** a `GUI.Window` called inside another window's function (103 inside
+  101) never shows in the original. Its function is never called, and the call returns
+  (0, 0, 0 × 0).
+- **Release outside a window:** the original delivers a mouse release outside the window
+  whose control holds the mouse to that window's function as `Ignore` (`rawType` MouseUp).
+  `hotControl` stays set until the next press. While it stays, that control keeps setting
+  the tooltip (rule 2): after W1a was pressed and released off the window, "tW1a" was set on
+  every Repaint.
+- **`GUILayout.Window`** kept its given height (300) in the original, although its content is
+  about 190 high.
+
+**Where this implementation deviates**, from the same probe (`tt-check.py diff` finds all 157
+steps different, as `GUI.tooltip` is missing):
+
+| Case | original | this implementation |
+|---|---|---|
+| `GUI.tooltip` read anywhere (Awake, Update, OnGUI, a window function) | "" until a control sets it | `MissingMethodException` |
+| mouse over button A (tooltip "tA"), Repaint | "tA" from A's draw on | missing |
+| then over button B (no tooltip), or over nothing | stays "tA" | missing |
+| Layout, MouseDown, MouseUp, MouseDrag over A | unchanged | missing |
+| label L, box X, toggle T, disabled button H | each sets its tooltip | missing |
+| `GUILayout.Button` C / `GUILayout.Label` D in an area; the space between them | set; not set | missing |
+| button F in a scroll view; G scrolled out of view | set; not set | missing |
+| O1 and O2 both under the mouse | "tO1", then "tO2" (last drawn) | missing |
+| button Z under window 101 | sets "tZ" | missing |
+| W1d (window 101, front) over W4a (window 104) | "tW4a", then "tW1d" | missing |
+| window 101's title, tooltip "tWin1" | not set | missing |
+| keyboard focus on A, mouse elsewhere | not set | missing |
+| A pressed and dragged off | "tA" on each Repaint while held | missing |
+| set "S" at OnGUI start, mouse over A | "S" until A's draw in Repaint, then "tA" | missing |
+| set null | reads "" | missing |
+| window 102 reads it after its hovered label W2s0 | "tW2s0" in Layout and Repaint | missing; the window throws as well (below) |
+| `tooltipRect` after hovering label L | (70, 116, 0 × 0) | missing |
+| order of calls (two behaviours, windows) | rule 6 | gui Layout, its windows' Layout, gui Repaint, its windows' Repaint, then gui2 |
+| `GUI.Window` 103 inside window 101's function | no window; returns (0, 0, 0 × 0) | shown at (450, 620, 200 × 80), relative to 101; its function runs |
+| `GUILayout.Window` 102 | called for Layout and Repaint from the first frame | its function gets no Layout event until window 101 is clicked; each Repaint throws "GUILayout mismatch: entry 0 was asked for in a group of 0 entries during Repaint" (1,016 times in the run) |
+| mouse release outside window 101 while W1a holds the mouse | `Ignore`; `hotControl` stays | `MouseUp`; `hotControl` released |
+| `GUILayout` area and labels | C at (20, 180, 200 × 20), labels 19–20 high | C at (24, 184, 192 × 20.95), labels 20.95 high |
+
+The three rows after the `tooltipRect` row are not about the tooltip. The 102 failure
+probably follows from window 103, which this implementation shows; that was not tried
+separately. Not measured: `GUI.tooltip` with `GUI.ModalWindow`, tooltips on `TextField` or
+slider content (those controls take no `GUIContent`), `GUI.Toolbar` and `SelectionGrid`
+buttons, `GUIStyle.Draw` called directly with a content, and a matrix other than the
+identity.
+
 ## Tests
 
 `tests/OniBrutal.UnityEngine.Tests/IMGUITests.cs` already pins the rules marked "Test" above.
@@ -559,4 +746,5 @@ match your design. Add tests for these rules:
 - scroll views;
 - `GUILayout.Window` sizing;
 - `GetStyle` fallbacks;
-- `Event.KeyboardEvent`.
+- `Event.KeyboardEvent`;
+- `GUI.tooltip`, rules 1 to 5 of its section, with the mouse placed through the event queue.

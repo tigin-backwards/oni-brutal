@@ -266,6 +266,19 @@ wake (copied under an inactive parent, as Chain Tool's menu does), each step log
 alignment, its halves and the stored value. `textmeshpro.md` ("Alignment set before a text
 first wakes") records what it measured.
 
+With `PROBE_SCENARIO=tooltip` only the tooltip probe runs (`Tooltip.cs`, lines `TT …`, 10 s
+into the main menu, about a minute and a half). One behaviour draws IMGUI controls with and
+without `GUIContent` tooltips (GUI and GUILayout controls, a group, an area, scroll views) and
+opens three windows (`GUI.Window`, a `GUILayout.Window` laid out as Customize Duplicant traits'
+editor, one over another); a second behaviour only reads. The real mouse is moved over each
+control through XTest, and every OnGUI call and window function logs `GUI.tooltip` at its
+start, after each control and at its end, per event, with `tooltipRect`; Update, LateUpdate
+and the end of the frame read it too. Then the same with every call resetting the value first,
+values set from code, keyboard focus, and presses held and dragged off. The XTest window must be
+the player's (it focuses the largest mapped window). Check the rules with
+`tools/UnityProbe/tt-check.py rule LOG`, and compare the players with `tt-check.py diff ORIG
+OURS`. `docs/cleanroom/imgui.md` ("GUI.tooltip") records what it measured.
+
 ## UI semantics (`UiSemantics.cs`, `UIS` lines)
 
 Ten seconds into the front end, after the front-end dump, it builds small hierarchies on an

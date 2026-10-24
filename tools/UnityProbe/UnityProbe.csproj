@@ -22,6 +22,7 @@
     <Reference Include="$(OniManaged)/Unity.TextMeshPro.dll" Private="false" />
     <Reference Include="$(OniManaged)/UnityEngine.UI.dll" Private="false" />
     <Reference Include="$(OniManaged)/UnityEngine.IMGUIModule.dll" Private="false" />
+    <Reference Include="$(OniManaged)/UnityEngine.InputLegacyModule.dll" Private="false" />
     <Reference Include="$(OniManaged)/UnityEngine.ScreenCaptureModule.dll" Private="false" />
     <Reference Include="$(OniManaged)/Assembly-CSharp.dll" Private="false" />
     <Reference Include="$(OniManaged)/Assembly-CSharp-firstpass.dll" Private="false" />

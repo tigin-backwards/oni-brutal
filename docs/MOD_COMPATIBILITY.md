@@ -763,9 +763,9 @@ installs get developer checks subscribers never see).
 | 742 | [Roller Snakes](https://steamcommunity.com/sharedfiles/filedetails/?id=1963899596) | ⬜ | ⬜ | ⬜ | flagged by onimaxxing (notLoading); not tested |
 | 743 | [[Vanilla + DLC] Real Calories Info](https://steamcommunity.com/sharedfiles/filedetails/?id=2803999640) | ✅ | ✅ | ⬜ |  |
 | 744 | [Default Save Settings](https://steamcommunity.com/sharedfiles/filedetails/?id=2033314981) | ✅ | ✅ | ⬜ |  |
-| 745 | [Advanced Space Heater](https://steamcommunity.com/sharedfiles/filedetails/?id=2119931768) | ✅ | ✅ | ⬜ |  |
+| 745 | [Advanced Space Heater](https://steamcommunity.com/sharedfiles/filedetails/?id=2119931768) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2119931768-advanced-space-heater.yaml: the Advanced Space Heater's card opens in the Utilities menu after Temperature Modulation; it is placed, built (unpowered) and selected: it heats to 1000 degrees with 80 kW of exhaust; card and details match |
 | 746 | [Pipe Germ Info](https://steamcommunity.com/sharedfiles/filedetails/?id=2276953041) | ⬜ | ⬜ | ⬜ | flagged by onimaxxing (notLoading); not tested |
-| 747 | [Where's My Loot ?](https://steamcommunity.com/sharedfiles/filedetails/?id=2670041100) | ✅ | ✅ | ⬜ |  |
+| 747 | [Where's My Loot ?](https://steamcommunity.com/sharedfiles/filedetails/?id=2670041100) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2670041100-wheres-my-loot.yaml: an unused Neural Vacillator is selected and its Demolish button clicked; a Duplicant given the demolition skill demolishes it and a Vacillator Recharge drops where it stood (state only) |
 | 748 | [Español - Oxygen Not Included](https://steamcommunity.com/sharedfiles/filedetails/?id=935885438) | ⬜ | ⬜ | ⬜ |  |
 | 749 | [Türkçe Çeviri - 2026](https://steamcommunity.com/sharedfiles/filedetails/?id=3535190546) | ⬜ | ⬜ | ⬜ |  |
 | 750 | [Claim Notification](https://steamcommunity.com/sharedfiles/filedetails/?id=2955304767) | ✅ | ✅ | ⬜ |  |

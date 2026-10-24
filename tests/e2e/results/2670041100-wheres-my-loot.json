@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2670041100-wheres-my-loot.yaml",
+ "mods": [
+  "2670041100"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "an unused Neural Vacillator is selected and its Demolish button clicked; a Duplicant given the demolition skill demolishes it and a Vacillator Recharge drops where it stood (state only)",
+ "updated": "2026-10-24",
+ "commit": "9434a90",
+ "mod_dlls": {
+  "2670041100": {
+   "WhereMyLoot.dll": "b90a934afb249fedfba8c3e18fc005ab8fcb930335461c51aa42cd21f38d7444"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-122531-dcbca6",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T12:25:31",
+    "lane": 12,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-123756-52739a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T12:39:21",
+    "lane": 12,
+    "reference_run": "20261024-122531-dcbca6",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-123756-52739a",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T12:39:32",
+    "lane": 13,
+    "reference_run": "20261024-122531-dcbca6",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

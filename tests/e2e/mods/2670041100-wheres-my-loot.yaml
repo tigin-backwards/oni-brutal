@@ -1,0 +1,41 @@
+# Where's My Loot ? (2670041100), class P.
+#
+# What it does: demolishing a point-of-interest building no longer throws its contents away
+# (a prefix on Demolishable.TriggerDestroy). A storage locker (SetLocker) not yet looted drops
+# its loot; a lore object (LoreBearer) not yet read unlocks its entry; a Neural Vacillator
+# (GeneShuffler) not yet used drops a Vacillator Recharge one cell above it. A lore dialog
+# opened by a demolition is closed at once.
+# How a player reaches it: the Demolish button of such a building, then a Duplicant with the
+# demolition skill (Senior Builder) demolishes it.
+# What changes: the loot comes out instead of being lost.
+#
+# setup places an unused Neural Vacillator in the dug-out corridor west of the printing pod
+# and gives the two standard Duplicants the builder skills up to demolition. The Vacillator is
+# selected and its Demolish button clicked; once a Duplicant has demolished it, a Vacillator
+# Recharge lies where it stood.
+from: early-base
+mods: [2670041100]
+setup:
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131124, 0, 0, \"GeneShuffler\", \"Building\")", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[1].GetComponent<MinionResume>", method: GrantSkill, args: [Building1]}}
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[1].GetComponent<MinionResume>", method: GrantSkill, args: [Building2]}}
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[1].GetComponent<MinionResume>", method: GrantSkill, args: [Building3]}}
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[2].GetComponent<MinionResume>", method: GrantSkill, args: [Building1]}}
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[2].GetComponent<MinionResume>", method: GrantSkill, args: [Building2]}}
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[2].GetComponent<MinionResume>", method: GrantSkill, args: [Building3]}}
+steps:
+  - expect_state:
+      "all:GeneShuffler::Length": 1
+      "all:GeneShuffler::[0].IsConsumed": false
+      "ClusterManager.Instance.activeWorld.worldInventory.GetPickupables(\"GeneShufflerRecharge\")": missing
+  - run: {seconds: 1}
+  - driver: {camera.set: {cell: [109, 208], ortho: 8}}
+  - click_world: {cell: [109, 207], select: GeneShuffler}
+  - ui_wait: {path: "**/UserMenuScreen/Buttons/DemolishButton", cond: stable}
+  - click: {ui: "**/UserMenuScreen/Buttons/DemolishButton"}
+  - expect_state:
+      "all:GeneShuffler::[0].GetComponent<Demolishable>.chore": exists
+  - run: {seconds: 300}
+  - expect_state:
+      "all:GeneShuffler::Length": 0
+      "ClusterManager.Instance.activeWorld.worldInventory.GetPickupables(\"GeneShufflerRecharge\").Count": 1

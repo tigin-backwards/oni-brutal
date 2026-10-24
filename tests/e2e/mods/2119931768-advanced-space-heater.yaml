@@ -1,0 +1,44 @@
+# Advanced Space Heater (2119931768), class B.
+#
+# What it does: adds the Advanced Space Heater to Utilities, researched with Temperature
+# Modulation: a 2x1 Space Heater of any metal (400 kg) that heats the air up to 1000 degrees
+# (target 1273.15 K, overheating at 1100) with 80 kW of exhaust and 30 kW of self-heat for
+# 800 W, with a logic input. Its numbers come from the mod's config.json, written with these
+# defaults on first load.
+# How a player reaches it: the build menu (Utilities), after research.
+# What changes: a much stronger heater.
+#
+# setup grants Temperature Modulation and spawns copper ore. The heater is picked in the
+# Utilities menu, placed in the dug-out corridor west of the printing pod, built and selected,
+# unpowered (early-base has no circuit for it): its card and details show.
+from: early-base
+mods: [2119931768]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"TemperatureModulation\")", method: Purchased}}
+  - driver: {setup.call: {target: "Game.Instance", method: Trigger, args: [-107300940]}}
+  - driver: {setup.call: {target: "PlanScreen.Instance._researchedDefs", method: Clear}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Cuprite\").substance", method: SpawnResource, args: [[109.5, 206.5, -12], 600, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"AdvancedSpaceHeater\").ExhaustKilowattsWhenActive": 80
+      "Assets.GetBuildingDef(\"AdvancedSpaceHeater\").EnergyConsumptionWhenActive": 800
+      "Assets.GetBuildingDef(\"AdvancedSpaceHeater\").WidthInCells": 2
+  - run: {seconds: 5}
+  - driver: {camera.set: {cell: [113, 208], ortho: 10}}
+  - click: {ui: "**/PlanScreen/Toggle:Utilities"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/AdvancedSpaceHeater Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/AdvancedSpaceHeater Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
+  - shot: {name: product, crop: "**/ProductInfoScreen", threshold: 0.04}
+  - click_world: {cell: [113, 206]}
+  - key: {code: Escape}
+  - expect: {blueprints: {AdvancedSpaceHeater: 1}}
+  - run: {seconds: 1200, until: {buildings: {AdvancedSpaceHeater: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [113, 207], ortho: 8}}
+  - click_world: {cell: [113, 206], select: AdvancedSpaceHeater}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<SpaceHeater>.targetTemperature": 1273.15
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Advanced Space Heater"}
+  - shot: {name: details, crop: "**/DetailsScreen", threshold: 0.04}

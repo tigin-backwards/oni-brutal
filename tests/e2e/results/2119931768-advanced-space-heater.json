@@ -1,0 +1,61 @@
+{
+ "spec": "mods/2119931768-advanced-space-heater.yaml",
+ "mods": [
+  "2119931768"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Advanced Space Heater's card opens in the Utilities menu after Temperature Modulation; it is placed, built (unpowered) and selected: it heats to 1000 degrees with 80 kW of exhaust; card and details match",
+ "updated": "2026-10-24",
+ "commit": "9434a90",
+ "mod_dlls": {
+  "2119931768": {
+   "AdvancedSpaceHeater.dll": "6fd0fdaccc816e3cb8fba2bf995d55acff2db1bc9d7762d440ca72e357cab54d"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-122018-74e565",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T12:20:18",
+    "lane": 12,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-123756-52739a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T12:37:56",
+    "lane": 12,
+    "reference_run": "20261024-122018-74e565",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.007747,
+     "details": 0.002155
+    }
+   },
+   {
+    "run": "20261024-123756-52739a",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T12:37:57",
+    "lane": 13,
+    "reference_run": "20261024-122018-74e565",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.007747,
+     "details": 0.002155
+    }
+   }
+  ]
+ }
+}

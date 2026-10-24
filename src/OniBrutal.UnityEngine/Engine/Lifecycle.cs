@@ -213,6 +213,7 @@ namespace OniBrutal.Engine
             if (now == go.ActiveInHierarchy) return;
             var changed = new List<GameObjectNative>();
             SetFlags(go, now, changed);
+            ReapplyDrivenOnActivation(go.Transform, changed);
             if (now) AwakeAndEnableAll(changed);
             else
             {
@@ -223,9 +224,29 @@ namespace OniBrutal.Engine
                     StopCoroutinesOn(g);
                 }
             }
-            // A RectTransform appearing or disappearing changes its dimensions as far as layout is
-            // concerned: Unity notifies it and its parent (layout groups re-lay out their children).
-            if (go.Transform is RectTransformNative rt && !go.Destroyed) rt.SendDimensionsChange();
+        }
+
+        /// RectTransform.reapplyDrivenProperties for every RectTransform whose activeInHierarchy
+        /// just changed, children before their parent, before any OnEnable or OnDisable (measured
+        /// in the original, UnityProbe PROBE_SCENARIO=childactive). No dimension message is sent.
+        /// uGUI's LayoutRebuilder listens and marks the layout around each one, which is how a
+        /// layout group re-lays out when a child without a Graphic or layout element appears or
+        /// disappears (the build menu's search results).
+        static void ReapplyDrivenOnActivation(TransformNative t, List<GameObjectNative> changed)
+        {
+            if (changed.Count == 0) return;
+            var set = changed.Count == 1 ? null : new HashSet<GameObjectNative>(changed);
+            void PostOrder(TransformNative n)
+            {
+                foreach (var child in n.Children)
+                    if (set != null && set.Contains(child.GameObject)) PostOrder(child);
+                if (n is RectTransformNative && n.Managed is UnityEngine.RectTransform rt && !n.GameObject.Destroyed)
+                {
+                    try { UnityEngine.RectTransform.SendReapplyDrivenProperties(rt); }
+                    catch (Exception e) { Debug.LogException(e); }
+                }
+            }
+            PostOrder(t);
         }
 
         /// Awake/OnEnable for objects that just became active (scene load, Instantiate,

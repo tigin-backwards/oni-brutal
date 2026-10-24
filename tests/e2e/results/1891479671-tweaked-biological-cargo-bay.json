@@ -1,0 +1,55 @@
+{
+ "spec": "mods/1891479671-tweaked-biological-cargo-bay.yaml",
+ "mods": [
+  "1891479671"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "played on vanilla-base (base game), smaller spec: the Biological Cargo Bay's storage allows item removal, so a hatch egg stored in a bay stood on the surface is Stored but not StoredPrivate (open to fetch errands); no mission is flown",
+ "updated": "2026-10-24",
+ "commit": "603d926",
+ "mod_dlls": {
+  "1891479671": {
+   "TweakedBiologicalCargoBay.dll": "d95eef0ecbfce83b6b90889bbf2663668a596de6a9eca9192ef97f4c0e7961d6"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-171825-f84267",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T17:18:25",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-171936-b68d35",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T17:19:36",
+    "lane": 17,
+    "reference_run": "20261024-171825-f84267",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-171936-b68d35",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T17:20:29",
+    "lane": 17,
+    "reference_run": "20261024-171825-f84267",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

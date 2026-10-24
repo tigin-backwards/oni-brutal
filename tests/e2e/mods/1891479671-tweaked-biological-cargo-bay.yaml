@@ -1,0 +1,31 @@
+# Tweaked Biological Cargo Bay (1891479671), class P; base game only (VANILLA_ID).
+#
+# What it does: one postfix on SpecialCargoBayConfig.DoPostConfigureComplete sets the base
+# game's Biological Cargo Bay's Storage.allowItemRemoval. The bay brings critters back from
+# missions; in the base game what it holds is private (GameTags.StoredPrivate), so Duplicants
+# never take it out. With the mod the bay's contents are only Stored, open to fetch errands
+# (critter drop-offs, storage), like a storage bin's.
+# How a player reaches it: a rocket with a Biological Cargo Bay returning from a mission.
+# What changes: whether Duplicants may empty the bay.
+#
+# Smaller spec: flying a mission is out of the fixture's reach. Setup stands a bay on the
+# surface (BuildingDef.Build) and stores a hatch egg in it, as a landing stores its catch; the
+# egg is then Stored but not StoredPrivate.
+from: vanilla-base
+mods: [1891479671]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"SpecialCargoBay\")", method: Build, args: [88781, "Neutral", null, ["Steel"], 293.15]}}
+  - driver: {setup.call: {type: Scenario, method: SpawnPrefab, args: [88781, 0, 0, "HatchEgg"]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "all:CargoBay::[0].storage", method: Store, args: [{"$": "last:"}]}}
+steps:
+  - run: {seconds: 1}
+  - expect_state:
+      "DlcManager.IsExpansion1Active()": false
+      "Assets.GetPrefab(\"SpecialCargoBay\").GetComponent<Storage>.allowItemRemoval": true
+      "all:CargoBay::[0].storage.allowItemRemoval": true
+      "all:CargoBay::[0].storage.items.Count": 1
+  - expect_state:
+      "all:CargoBay::[0].storage.items[0].GetComponent<KPrefabID>.PrefabTag.Name": HatchEgg
+      "all:CargoBay::[0].storage.items[0].GetComponent<KPrefabID>.HasTag(\"Stored\")": true
+      "all:CargoBay::[0].storage.items[0].GetComponent<KPrefabID>.HasTag(\"StoredPrivate\")": false

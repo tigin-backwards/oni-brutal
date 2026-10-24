@@ -93,12 +93,20 @@ namespace UnityEngine
             return list.ToArray();
         }
 
-        /// Every live object of the type: loaded assets, scene objects and inactive ones.
+        /// Every live object of the type: loaded assets, scene objects and inactive ones, in
+        /// ascending instance-id order, as measured in the original player (UnityProbe
+        /// FindOrder): the newest object made at run time first (ids count down from -1), then
+        /// older ones, then the objects loaded from files. Objects destroyed in between, and
+        /// whether they were components or ScriptableObjects, do not change the order. Mods take
+        /// the first match (Duplicant Status Bar clones the first usable LocText), so the order
+        /// of the table's slots, which are reused and filled from the loading thread, must not
+        /// show through.
         public static Object[] FindObjectsOfTypeAll(Type type)
         {
             var result = new List<Object>();
             foreach (var native in ObjectTable.Snapshot())
                 if (native.Managed != null && type.IsInstanceOfType(native.Managed)) result.Add(native.Managed);
+            result.Sort((a, b) => a.GetInstanceID().CompareTo(b.GetInstanceID()));
             var typed = (Object[])Array.CreateInstance(type, result.Count);
             for (int i = 0; i < result.Count; i++) typed.SetValue(result[i], i);
             return typed;

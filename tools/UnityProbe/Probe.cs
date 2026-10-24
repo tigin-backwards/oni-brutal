@@ -85,6 +85,11 @@ namespace SemanticsProbe
                 go.AddComponent<NewObject>();
                 return;
             }
+            if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "findorder")
+            {
+                go.AddComponent<FindOrder>();
+                return;
+            }
             if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "startdestroy")
             {
                 go.AddComponent<SDScenario>();

@@ -154,6 +154,13 @@ With `PROBE_SCENARIO=floatprec` only the float-precision probe runs (`FloatPreci
 float32 and double results differ, each line saying which one the player gave. Its header
 records what it measured: the original rounds float arithmetic to float32 only on stores.
 
+With `PROBE_SCENARIO=findorder` only the find-order probe runs (`FindOrder.cs`, lines `FO …`, 10 s
+into the main menu): the order of `Resources.FindObjectsOfTypeAll`. It logs every `LocText` the
+call returns (instance id, scene, activity, pivot, path) and whether the ids ascend, then
+components and ScriptableObjects made in a known order, some destroyed and others made after.
+The original returns ascending instance ids: the newest run-time object first, the objects
+loaded from files last. `FindObjectsOrderTests` encodes the result.
+
 With `PROBE_SCENARIO=newobject` only the `new` probe runs (`NewObject.cs`, lines `NEW …`, at the
 main menu): what `new` gives for a ScriptableObject subclass, a bare ScriptableObject and a
 MonoBehaviour (whether it is alive, its instance id, name, hide flags and `ToString`, which of

@@ -303,6 +303,10 @@ stage_verify()
 stage_perf()
 {
     u57_ready || { note "perf: skipped (no out/local-tools/qa.env)"; return; }
+    # The user playing on Windows: perf is skipped rather than measured beside them (WSL can't see
+    # that load) or held up; regressions have been rare enough that a later run will do.
+    local win; win=$(windows_game)
+    [ -z "$win" ] || { note "perf: skipped (a game is running on Windows: $win)"; return; }
     build_release || return
     local out="$run/perf"
     quiet_begin perf

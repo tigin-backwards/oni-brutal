@@ -6,9 +6,9 @@
  "verdict": "failed",
  "why": "a run of ours failed",
  "findings": [],
- "note": "a selected geyser shows the converter panel; the type list opens, a type is picked, and Start conversion asks for an analysis, as in the original",
+ "note": "loading the colony opens the crash report screen in ours: the mod's converter panel builds its uGUI Text labels with Resources.GetBuiltinResource<Font>(\"Arial.ttf\"), which ours does not provide (\"The resource Arial.ttf could not be loaded\"); the original shows the panel",
  "updated": "2026-10-24",
- "commit": "676516a",
+ "commit": "1f5d9e4",
  "mod_dlls": {
   "3670972563": {
    "GeyserSwapper.dll": "1ce045ef92e133cb4c7aa2e37c0de3e71c5f47dc9408410c7b4d530de7d3062a"
@@ -27,13 +27,13 @@
   ],
   "ours": [
    {
-    "run": "20261024-063933-a753b1",
+    "run": "20261024-065710-8fe885",
     "index": 1,
     "verdict": "fail",
-    "date": "2026-10-24T06:39:33",
+    "date": "2026-10-24T06:57:10",
     "lane": 12,
     "reasons": [
-     "step start: Remote end closed connection without response"
+     "step start: Canvas/ConfirmDialog/GameObject/Panel/OKButton is occluded by ErrorCanvas/CrashReportScreen(Clone)/InfoBox/ModsInfo/ModsList/Files/Viewport/Content/Entry/BG (hits there: ErrorCanvas/CrashReportScreen(Clone)/InfoBox/ModsInfo/ModsList/Files/Viewport/Content/Entry/BG, ErrorCanvas/CrashRepor"
     ],
     "reference_run": "20261024-060548-2e3b53",
     "new_signatures": 0,
@@ -42,13 +42,13 @@
     "shots": {}
    },
    {
-    "run": "20261024-063933-a753b1",
+    "run": "20261024-065710-8fe885",
     "index": 2,
     "verdict": "fail",
-    "date": "2026-10-24T06:39:34",
+    "date": "2026-10-24T06:57:11",
     "lane": 13,
     "reasons": [
-     "step start: Remote end closed connection without response"
+     "step start: Canvas/ConfirmDialog/GameObject/Panel/OKButton is occluded by ErrorCanvas/CrashReportScreen(Clone)/InfoBox/ModsInfo/ModsList/Files/Viewport/Content/Entry/BG (hits there: ErrorCanvas/CrashReportScreen(Clone)/InfoBox/ModsInfo/ModsList/Files/Viewport/Content/Entry/BG, ErrorCanvas/CrashRepor"
     ],
     "reference_run": "20261024-060548-2e3b53",
     "new_signatures": 0,

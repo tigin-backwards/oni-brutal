@@ -3,12 +3,14 @@
  "mods": [
   "3347169088"
  ],
- "verdict": "failed",
- "why": "a run of ours failed",
- "findings": [],
+ "verdict": "warning",
+ "why": "known findings: scroll-normalized-position",
+ "findings": [
+  "scroll-normalized-position"
+ ],
  "note": "a Liquid Receiver renamed in its title bar moves to a new channel, and the Liquid Sender joins it from the Channels side screen, as in the original",
  "updated": "2026-10-24",
- "commit": "676516a",
+ "commit": "1f5d9e4",
  "mod_dlls": {
   "3347169088": {
    "PLib.dll": "bdd637dbef718cdd52e61c0a7177bd297864a50bac1583d2837a36ff3edf07db",
@@ -28,33 +30,45 @@
   ],
   "ours": [
    {
-    "run": "20261024-064033-a67ab7",
+    "run": "20261024-070452-f7fcad",
     "index": 1,
-    "verdict": "fail",
-    "date": "2026-10-24T06:40:33",
+    "verdict": "warn",
+    "date": "2026-10-24T07:04:52",
     "lane": 12,
-    "reasons": [
-     "step start: Remote end closed connection without response"
-    ],
     "reference_run": "20261024-060548-2e3b53",
     "new_signatures": 0,
-    "findings": [],
-    "ui_dump": {},
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "channels": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 2
+      }
+     }
+    },
     "shots": {}
    },
    {
-    "run": "20261024-064033-a67ab7",
+    "run": "20261024-070452-f7fcad",
     "index": 2,
-    "verdict": "fail",
-    "date": "2026-10-24T06:40:34",
+    "verdict": "warn",
+    "date": "2026-10-24T07:04:53",
     "lane": 13,
-    "reasons": [
-     "step start: Remote end closed connection without response"
-    ],
     "reference_run": "20261024-060548-2e3b53",
     "new_signatures": 0,
-    "findings": [],
-    "ui_dump": {},
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "channels": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 2
+      }
+     }
+    },
     "shots": {}
    }
   ]

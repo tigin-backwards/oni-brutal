@@ -3,12 +3,12 @@
  "mods": [
   "3595057668"
  ],
- "verdict": "failed",
- "why": "a run of ours failed",
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
  "findings": [],
  "note": "a Cot's blueprint picked in its Blueprint tab is batch-applied by the mod's button and drag to the colony's other Cot, as in the original",
  "updated": "2026-10-24",
- "commit": "676516a",
+ "commit": "1f5d9e4",
  "mod_dlls": {
   "3595057668": {
    "BatchModifyStyles.dll": "26fb1dc6a59401a79150f68a91a7a7a39323e0d070631bbb798606bef9d51cb6"
@@ -27,14 +27,11 @@
   ],
   "ours": [
    {
-    "run": "20261024-063851-e8901b",
+    "run": "20261024-065542-98b411",
     "index": 1,
-    "verdict": "fail",
-    "date": "2026-10-24T06:38:51",
+    "verdict": "pass",
+    "date": "2026-10-24T06:55:42",
     "lane": 12,
-    "reasons": [
-     "step start: Remote end closed connection without response"
-    ],
     "reference_run": "20261024-053220-d64e2f",
     "new_signatures": 0,
     "findings": [],
@@ -42,14 +39,11 @@
     "shots": {}
    },
    {
-    "run": "20261024-063851-e8901b",
+    "run": "20261024-065542-98b411",
     "index": 2,
-    "verdict": "fail",
-    "date": "2026-10-24T06:38:52",
+    "verdict": "pass",
+    "date": "2026-10-24T06:55:43",
     "lane": 13,
-    "reasons": [
-     "step start: Remote end closed connection without response"
-    ],
     "reference_run": "20261024-053220-d64e2f",
     "new_signatures": 0,
     "findings": [],

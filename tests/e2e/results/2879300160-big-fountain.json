@@ -6,7 +6,7 @@
  "verdict": "failed",
  "why": "a run of ours failed",
  "findings": [],
- "note": "a colony geyser erupts all the time (eruption and active shares 1), at 10 kg maximum pressure and ten times its average rate, as in the original",
+ "note": "a colony geyser erupts all the time at 10 kg maximum pressure in both players, but its emit rate is 50.16 kg/s in ours against 31.92 in the original: GetIterationPercent() and GetOnDuration() read the patched 1 when called directly, yet GetEmitRate() computes with the unpatched 0.636, as if the patched method were inlined into it",
  "updated": "2026-10-24",
  "commit": "676516a",
  "mod_dlls": {

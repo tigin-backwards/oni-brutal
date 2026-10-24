@@ -71,6 +71,8 @@ namespace TMPro
             m_LineLimit = 0;
             m_ShouldActivateOnSelect = true;
             m_RestoreOriginalTextOnEscape = true;
+            // On in a new field (measured), as in the game's prefabs.
+            m_ResetOnDeActivation = true;
         }
 
         // ----- Settings -----
@@ -329,7 +331,7 @@ namespace TMPro
         // (measured on the shipped package).
         public int caretPosition
         {
-            get => CharacterIndexOf(m_StringSelectPosition);
+            get => SelectAllPending ? m_LagFocus : CharacterIndexOf(m_StringSelectPosition);
             set
             {
                 selectionAnchorPosition = value;
@@ -339,13 +341,13 @@ namespace TMPro
 
         public int selectionAnchorPosition
         {
-            get => CharacterIndexOf(m_StringPosition);
+            get => SelectAllPending ? m_LagAnchor : CharacterIndexOf(m_StringPosition);
             set => selectionStringAnchorPosition = StringIndexOf(value);
         }
 
         public int selectionFocusPosition
         {
-            get => CharacterIndexOf(m_StringSelectPosition);
+            get => SelectAllPending ? m_LagFocus : CharacterIndexOf(m_StringSelectPosition);
             set => selectionStringFocusPosition = StringIndexOf(value);
         }
 
@@ -380,15 +382,29 @@ namespace TMPro
         }
 
         // The laid-out character a string position is at: the first whose source index is not
-        // before it (the end marker's at the end). Without a layout, the string position.
+        // before it (the end marker's at the end). Without a layout, the string position. While
+        // an edit's events run, before its text is laid out, a position past the old layout's
+        // end lies that far past its last character: a typed character's onValueChanged reads
+        // the caret after it (measured: typing "500" reports 1, 2 and 3).
         int CharacterIndexOf(int position)
         {
             var info = m_TextComponent != null ? m_TextComponent.textInfo : null;
             if (info == null || info.characterCount == 0) return position;
             for (int k = 0; k < info.characterCount; k++)
                 if (info.characterInfo[k].index >= position) return k;
-            return info.characterCount - 1;
+            int last = info.characterCount - 1;
+            if (m_LabelText != null && !string.Equals(m_LabelText, m_Text, StringComparison.Ordinal))
+                return last + Math.Max(0, position - info.characterInfo[last].index);
+            return last;
         }
+
+        // Ctrl+A moves the string positions at once and the character positions a frame later
+        // (measured: right after it, selectionStringAnchorPosition is 4 in "1000" while
+        // selectionAnchorPosition still reads 0). Until the frame ends, or the positions move
+        // again, the character positions read as Ctrl+A found them.
+        int m_LagFrame = -1, m_LagAnchor, m_LagFocus, m_LagStringAnchor, m_LagStringFocus;
+
+        bool SelectAllPending => m_LagFrame == Time.frameCount && m_LagStringAnchor == m_StringPosition && m_LagStringFocus == m_StringSelectPosition;
 
         // The string position of a laid-out character: where its source begins.
         int StringIndexOf(int character)
@@ -523,10 +539,12 @@ namespace TMPro
             m_TextChangedSinceActivation = false;
             // Without onFocusSelectAll the caret stays where it was (measured: at 0 for a field
             // whose text was set from code, not at the end).
+            // With it, the caret goes to the start and the anchor to the end, as Ctrl+A puts them
+            // (measured: caretPosition 0, selectionAnchorPosition 3 in "500").
             if (m_OnFocusSelectAll)
             {
-                m_StringPosition = 0;
-                m_StringSelectPosition = m_Text.Length;
+                m_StringPosition = m_Text.Length;
+                m_StringSelectPosition = 0;
                 m_IsSelectAll = true;
             }
             m_BlinkStart = Time.unscaledTime;
@@ -537,15 +555,22 @@ namespace TMPro
 
         public void DeactivateInputField() => DeactivateInputField(false);
 
-        public void DeactivateInputField(bool clearSelection)
+        public void DeactivateInputField(bool clearSelection) => EndEdit(clearSelection, false);
+
+        // Ends the edit. The caret and the selection stay where they were, whatever
+        // resetOnDeActivation and clearSelection say; only a text shorter than them (Escape's
+        // restore, then a listener's) cuts them, as any text set does (measured). onEndEdit is
+        // sent, unfocused and with the caret as it was, on Enter and Escape (`keyed`), and
+        // otherwise only with resetOnDeActivation or clearSelection: without them,
+        // DeactivateInputField() and deselection send onDeselect alone, and disabling nothing.
+        void EndEdit(bool clearSelection, bool keyed)
         {
             m_ShouldActivateNextUpdate = false;
             if (!m_AllowInput) return;
             m_AllowInput = false;
             if (m_WasCanceled && m_RestoreOriginalTextOnEscape) text = m_OriginalText;
-            if (m_ResetOnDeActivation || clearSelection) m_StringPosition = m_StringSelectPosition = 0;
             m_IsSelectAll = false;
-            SendOnEndEdit();
+            if (keyed || m_ResetOnDeActivation || clearSelection) SendOnEndEdit();
             UpdateLabel();
             MarkGeometryChanged();
             // A focused field ends selected no more, whatever clearSelection says, so selecting it
@@ -614,10 +639,18 @@ namespace TMPro
             if (HasSelection) m_OnEndTextSelection?.Invoke(m_Text, SelectionStart, SelectionEnd);
         }
 
+        // On a focused field: onSubmit, then the edit ends as DeactivateInputField() ends it and
+        // the field is deselected (measured). One that is not focused is activated.
         public virtual void OnSubmit(BaseEventData eventData)
         {
             if (!IsActive() || !IsInteractable()) return;
-            if (!isFocused) m_ShouldActivateNextUpdate = true;
+            if (!isFocused)
+            {
+                m_ShouldActivateNextUpdate = true;
+                return;
+            }
+            SendOnSubmit();
+            DeactivateInputField();
         }
 
         public virtual void OnCancel(BaseEventData eventData)
@@ -651,8 +684,10 @@ namespace TMPro
                 if (m_Text != before) changed = true;
                 if (state == EditState.Finish)
                 {
+                    // Enter: onSubmit, onEndEdit, onDeselect. Escape: the restored text's
+                    // onValueChanged, onEndEdit, onDeselect (measured).
                     if (!m_WasCanceled) SendOnSubmit();
-                    DeactivateInputField();
+                    EndEdit(false, true);
                     break;
                 }
             }
@@ -930,9 +965,14 @@ namespace TMPro
         // shipped package).
         protected void SelectAll()
         {
+            m_LagAnchor = selectionAnchorPosition;
+            m_LagFocus = caretPosition;
             m_IsSelectAll = true;
             m_StringPosition = m_Text.Length;
             m_StringSelectPosition = 0;
+            m_LagFrame = Time.frameCount;
+            m_LagStringAnchor = m_StringPosition;
+            m_LagStringFocus = m_StringSelectPosition;
             MarkGeometryChanged();
         }
 

@@ -181,6 +181,10 @@ namespace OniBrutal.Tests
             Frame();
             // Select all: the anchor at the end, the caret at the start.
             Type(Key(KeyCode.A, 'a', EventModifiers.Control));
+            Assert.Equal(3, field.selectionStringAnchorPosition);
+            Assert.Equal(0, field.stringPosition);
+            // The character positions follow a frame later.
+            Frame();
             Assert.Equal(3, field.selectionAnchorPosition);
             Assert.Equal(0, field.caretPosition);
             Type(Char('x'));

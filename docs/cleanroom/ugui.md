@@ -1221,7 +1221,10 @@ graphic a `TMP_InputField` draws its caret and selection with, is registered wit
 and clipped like any `MaskableGraphic`, but its `Cull` ignores its rect and mesh: it is culled
 only when the clip rect is invalid. `textmeshpro.md` ("The caret graphic and RectMask2D")
 records the measurement. The same probe found that the original re-culls an `Image` a frame
-after a direct `Cull` call un-culled it, with nothing moved.
+after a direct `Cull` call un-culled it, with nothing moved, and the caret graphic under an
+invalid clip likewise. This implementation's `RectMask2D` keeps the cull its pass left on each
+graphic and culls one again in its next pass when its cull changed since (a direct call),
+which reproduces both (`ic-check.py diff … cull`: no step differs).
 
 ### Scrollbar presses on the track (measured 2026-10-23)
 

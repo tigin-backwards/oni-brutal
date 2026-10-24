@@ -80,6 +80,10 @@ namespace UnityEngine.UI
             UpdateCull(cull);
         }
 
+        /// The cull its RectMask2D's last pass left: a cull changed since then (a direct Cull
+        /// call) makes the next pass cull it again.
+        [NonSerialized] internal bool PassCull;
+
         void UpdateCull(bool cull)
         {
             if (canvasRenderer.cull == cull) return;

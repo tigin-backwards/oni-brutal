@@ -1847,7 +1847,15 @@ players' logs.
    `selectionAnchorPosition` still reads 0. With real keys, two frames later, both read 4.
    Nothing in the game reads them in between.
 
-**Where this implementation deviates** (`TMP_InputField.cs`):
+- **Implemented.** This implementation follows the rules above: in the same probe `ic-check.py
+  rule` holds for all 326 cases of its log (end, x and cull), and `ic-check.py diff` finds none
+  of the 2,055 `ProcessEvent` steps, the 324 steps with real keys or the 540 cull steps
+  different from the shipped package. The character positions read as Ctrl+A found them until
+  the frame ends or the string positions move again. While an edit's events run before its
+  text is laid out, a string position past the old layout's end reads that far past its last
+  character.
+
+**Where this implementation deviated before** (`TMP_InputField.cs`):
 - `DeactivateInputField(bool)` puts both string positions to 0 when `resetOnDeActivation` or
   `clearSelection` is set. The game's fields have `resetOnDeActivation` on, so every ended edit
   leaves the caret at 0. That is the specs' `caretPosition=0`, and the field typed into again
@@ -1873,7 +1881,7 @@ players' logs.
   diff` finds 910 of the 2,055 `ProcessEvent` steps different, and 149 of the 324 steps with
   real keys.
 
-| Case | shipped: caret/anchor after; events | this implementation |
+| Case | shipped: caret/anchor after; events | this implementation before |
 |---|---|---|
 | Ctrl+A, Backspace, "500", Return (real keys), `resetOnDeActivation` on: the specs | 3/3; submit, endEdit, deselect | 0/0; the same events |
 | the same with Klei's `onEndEdit` (text set again, deactivate at end of frame) | 3/3 | 0/0 |
@@ -1946,8 +1954,13 @@ and the far rect with `false`. 36 cases. `ic-check.py rule` checks the rule and 
   culls, the original culled it again a frame later with nothing moved. Ours keeps the value
   of the call until something moves. Only code that calls `Cull` itself would see it.
 
-**Where this implementation deviates.** `TMP_SelectionCaret` (`src/Unity.TextMeshPro/Input/TMP_SelectionCaret.cs`)
-has no `Cull` of its own, so it culls with its rect as `MaskableGraphic` does:
+- **Implemented.** `TMP_SelectionCaret.Cull` sets the cull to `!validRect` and raises the
+  change as the base does. A `RectMask2D` culls again, in its next pass, a graphic whose cull
+  changed since its last pass set it (the re-cull above); `ugui.md` records it. `ic-check.py
+  diff … cull` finds none of the 540 steps different.
+
+**Where this implementation deviated before.** `TMP_SelectionCaret` (`src/Unity.TextMeshPro/Input/TMP_SelectionCaret.cs`)
+had no `Cull` of its own, so it culls with its rect as `MaskableGraphic` does:
 - The caret at its defaults outside the clip is culled in every step with a valid clip (12
   cases). That is the presets organizer's `Caret#0`.
 - A caret placed over the text is culled after it moves, because the text's rect has a height

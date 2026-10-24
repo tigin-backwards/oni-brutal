@@ -246,18 +246,22 @@ namespace UnityEngine.UI
                     m.SetClipRect(clip, valid);
                     m.CulledSize = m.rectTransform.rect.size;
                     m.Cull(clip, valid);
+                    m.PassCull = m.canvasRenderer.cull;
                 }
             }
             else
                 foreach (var m in maskableTargets)
                 {
-                    // A graphic is culled again when it moved (its transform or a parent's) or
-                    // its rect changed size (measured: an Image grown into the clip is shown in
-                    // that frame).
+                    // A graphic is culled again when it moved (its transform or a parent's), its
+                    // rect changed size (measured: an Image grown into the clip is shown in that
+                    // frame), or its cull changed since this pass last set it (measured: a
+                    // direct Cull call that un-culled an Image the mask culls is undone a frame
+                    // later, with nothing moved).
                     var size = m.rectTransform.rect.size;
-                    if (!m.canvasRenderer.hasMoved && size == m.CulledSize) continue;
+                    if (!m.canvasRenderer.hasMoved && size == m.CulledSize && m.canvasRenderer.cull == m.PassCull) continue;
                     m.CulledSize = size;
                     m.Cull(clip, valid);
+                    m.PassCull = m.canvasRenderer.cull;
                 }
 
             lastClip = clip;

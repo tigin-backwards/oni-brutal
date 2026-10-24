@@ -1,0 +1,31 @@
+# Pipe Germ Info Fixed (2645785510), class P.
+#
+# What it does: the "Contents" status of a liquid or gas pipe (BuildingStatusItems.Pipe) lists
+# the germs in the pipe's contents at all times. The game adds that line only while the
+# Germ overlay is open; the mod's postfix on CreateStatusItems replaces the status's string
+# callback with one that always adds it.
+# How a player reaches it: selecting a pipe (or hovering it) whose contents carry germs.
+# What changes: the pipe's status line gains "Food Poisoning: N" under the contents.
+#
+# setup lays one liquid pipe at (110, 208) in the dug-out corridor west of the printing pod, lets
+# the game run so the flow knows it, and puts 5 kg of polluted water with 50,000 Food
+# Poisoning germs in it. The pipe is selected outside any overlay; its status lists the germs.
+from: early-base
+mods: [2645785510]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LiquidConduit\")", method: Build, args: [132398, Neutral, null, [SandStone], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Game.Instance.liquidConduitSystem", method: ForceRebuildNetworks}}
+  - run: {seconds: 2}   # the new pipe joins the flow only once the game has run
+  - driver: {setup.call: {target: "Game.Instance.liquidConduitFlow", method: AddElement, args: [132398, DirtyWater, 5.0, 300.0, {"$": "Db.Get().Diseases.GetIndex(\"FoodPoisoning\")"}, 50000]}}
+steps:
+  - run: {seconds: 2}
+  - expect_state:
+      "Game.Instance.liquidConduitFlow.GetContents(132398).mass": "> 4.9"
+      "Game.Instance.liquidConduitFlow.GetContents(132398).diseaseCount": "> 0"
+      "OverlayScreen.Instance.mode.HashValue": "== original"
+  - driver: {camera.set: {cell: [110, 208], ortho: 8}}
+  - click_world: {cell: [110, 208], select: LiquidConduit}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/SimpleInfoScreen/**/StatusItemTemplate/TextLayout/Value": {any_text: "~Food Poisoning"}
+  - ui_dump: {name: status, root: "**/SimpleInfoScreen/**/ContentStatus", mask_text: ['\d[\d,.]*']}

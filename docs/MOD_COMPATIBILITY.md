@@ -757,7 +757,7 @@ installs get developer checks subscribers never see).
 | 736 | [Plastic Mesh & Airflow Tiles](https://steamcommunity.com/sharedfiles/filedetails/?id=2728791684) | ✅ | ✅ | ⬜ |  |
 | 737 | [Reapy/Harvester (Automatic Farming) - fixed](https://steamcommunity.com/sharedfiles/filedetails/?id=2878236934) | ✅ | ✅ | ⬜ |  |
 | 738 | [Planet Balancer](https://steamcommunity.com/sharedfiles/filedetails/?id=1995546475) | ⬜ | ⬜ | ⬜ | flagged by onimaxxing (notLoading); not tested |
-| 739 | [Pipe Germ Info Fixed](https://steamcommunity.com/sharedfiles/filedetails/?id=2645785510) | ✅ | ✅ | ⬜ |  |
+| 739 | [Pipe Germ Info Fixed](https://steamcommunity.com/sharedfiles/filedetails/?id=2645785510) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2645785510-pipe-germ-info-fixed.yaml: a liquid pipe holding polluted water with Food Poisoning germs is selected outside any overlay: its Contents status lists the germs, and the status section's layout dump is compared |
 | 740 | [Crabs Profit](https://steamcommunity.com/sharedfiles/filedetails/?id=2816177874) | ✅ | ✅ | ⬜ |  |
 | 741 | [Balloon Dispenser](https://steamcommunity.com/sharedfiles/filedetails/?id=2938304376) | ✅ | ✅ | ⬜ |  |
 | 742 | [Roller Snakes](https://steamcommunity.com/sharedfiles/filedetails/?id=1963899596) | ⬜ | ⬜ | ⬜ | flagged by onimaxxing (notLoading); not tested |

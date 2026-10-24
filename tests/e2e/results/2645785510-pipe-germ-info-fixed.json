@@ -1,0 +1,63 @@
+{
+ "spec": "mods/2645785510-pipe-germ-info-fixed.yaml",
+ "mods": [
+  "2645785510"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a liquid pipe holding polluted water with Food Poisoning germs is selected outside any overlay: its Contents status lists the germs, and the status section's layout dump is compared",
+ "updated": "2026-10-24",
+ "commit": "3f7b0fe",
+ "mod_dlls": {
+  "2645785510": {
+   "ONI_PipeGermInfo.dll": "7387af36167bc5bdbfba4163fbf8ea7377d8d1fb6010c7985ba553ce14004970"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-112726-441fdd",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T11:27:26",
+    "lane": 12,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-113836-e4e3dc",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T11:38:36",
+    "lane": 12,
+    "reference_run": "20261024-112726-441fdd",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "status": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261024-113836-e4e3dc",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T11:38:37",
+    "lane": 13,
+    "reference_run": "20261024-112726-441fdd",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "status": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

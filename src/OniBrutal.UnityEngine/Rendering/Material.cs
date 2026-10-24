@@ -17,8 +17,9 @@ namespace UnityEngine
         /// Looks the shader up by its ShaderLab name; null when there is none.
         public static Shader Find(string name) => ShaderRegistry.Find(name);
 
-        /// Whether the shader has programs for this build's graphics API (OpenGLCore).
-        public bool isSupported => Data.HasOpenGLCorePrograms;
+        /// Whether the shader has programs for the device's graphics API (OpenGLCore, or Metal
+        /// for a device that runs Metal programs).
+        public bool isSupported => Data.HasProgramsFor(GraphicsDevice.Current.ShaderPlatform);
 
         public int renderQueue => Data.RenderQueue;
 

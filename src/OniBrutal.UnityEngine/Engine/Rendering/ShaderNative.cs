@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using OniBrutal.Assets.Shaders;
 using OniBrutal.Assets.TypeTrees;
 using OniBrutal.Engine.Assets;
 using OniBrutal.Engine.Serialization;
@@ -58,9 +59,15 @@ namespace OniBrutal.Engine.Rendering
         public Fields Data;
         /// Its OpenGLCore program variants: blob index and keywords (ShaderPrograms.SelectVariant).
         public ProgramVariant[] Variants = Array.Empty<ProgramVariant>();
+        /// Its Metal programs, one list per stage, each keyed by that stage's own keywords
+        /// (ShaderPrograms.SelectStages); empty for shaders without Metal programs.
+        public ProgramVariant[] MetalVertexVariants = Array.Empty<ProgramVariant>();
+        public ProgramVariant[] MetalFragmentVariants = Array.Empty<ProgramVariant>();
     }
 
-    internal readonly record struct ProgramVariant(int BlobIndex, string[] Keywords);
+    /// A program variant: its entry in the platform's blob table, its keywords and (Metal) its
+    /// parameter blob (-1: none recorded).
+    internal readonly record struct ProgramVariant(int BlobIndex, string[] Keywords, int ParameterBlobIndex = -1);
 
     internal sealed class SubShader
     {
@@ -78,7 +85,9 @@ namespace OniBrutal.Engine.Rendering
     internal sealed class ShaderNative : NativeObject
     {
         /// GLCore in ShaderCompilerPlatform.
-        public const uint OpenGLCorePlatform = 15;
+        public const uint OpenGLCorePlatform = ShaderCompilerPlatform.OpenGLCore;
+        /// Metal in ShaderCompilerPlatform.
+        public const uint MetalPlatform = ShaderCompilerPlatform.Metal;
 
         public string ShaderName = "";
         /// The device's compiled programs (see MeshNative.Gpu).
@@ -93,8 +102,13 @@ namespace OniBrutal.Engine.Rendering
         /// The whole serialized shader, for the device (program blobs and their tables).
         public Fields Data;
 
+        /// The ShaderCompilerPlatforms the shader carries programs for.
+        public uint[] Platforms = Array.Empty<uint>();
+
         ShaderPrograms programs;
         bool programsLoaded;
+        ShaderPrograms metalPrograms;
+        bool metalProgramsLoaded;
 
         /// The OpenGLCore programs (null when the shader has none).
         public ShaderPrograms Programs
@@ -107,6 +121,26 @@ namespace OniBrutal.Engine.Rendering
                     programsLoaded = true;
                 }
                 return programs;
+            }
+        }
+
+        /// Whether the shader carries programs for a ShaderCompilerPlatform.
+        public bool HasProgramsFor(uint platform) => platform == OpenGLCorePlatform ? HasOpenGLCorePrograms : Array.IndexOf(Platforms, platform) >= 0;
+
+        /// The programs for a ShaderCompilerPlatform (OpenGLCore or Metal; null when the shader
+        /// has none for it).
+        public ShaderPrograms ProgramsFor(uint platform)
+        {
+            if (platform == OpenGLCorePlatform) return Programs;
+            if (platform != MetalPlatform) throw new ArgumentOutOfRangeException(nameof(platform), platform, "Programs are read for OpenGLCore (15) and Metal (14).");
+            lock (this)
+            {
+                if (!metalProgramsLoaded)
+                {
+                    metalPrograms = Data == null ? null : ShaderPrograms.Load(Data, MetalPlatform);
+                    metalProgramsLoaded = true;
+                }
+                return metalPrograms;
             }
         }
 
@@ -179,10 +213,18 @@ namespace OniBrutal.Engine.Rendering
                     Tags = TagMap(p.Struct("m_Tags")),
                     Data = p,
                     Variants = legacy ? ShaderPrograms.LegacyVariants(p) : ShaderPrograms.Variants(p, KeywordNames),
+                    MetalVertexVariants = legacy ? Array.Empty<ProgramVariant>() : ShaderPrograms.StageVariants(p, "progVertex", KeywordNames, MetalPlatform),
+                    MetalFragmentVariants = legacy ? Array.Empty<ProgramVariant>() : ShaderPrograms.StageVariants(p, "progFragment", KeywordNames, MetalPlatform),
                 }).ToArray(),
             }).ToArray();
 
-            HasOpenGLCorePrograms = f.Get<uint[]>("platforms").Contains(OpenGLCorePlatform);
+            Platforms = f.Get<uint[]>("platforms");
+            lock (this)
+            {
+                metalPrograms = null;
+                metalProgramsLoaded = false;
+            }
+            HasOpenGLCorePrograms = Platforms.Contains(OpenGLCorePlatform);
             ShaderRegistry.Register(this);
         }
 

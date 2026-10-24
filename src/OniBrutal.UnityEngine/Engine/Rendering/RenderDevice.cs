@@ -56,6 +56,10 @@ namespace OniBrutal.Engine.Rendering
     {
         public abstract GraphicsCaps Caps { get; }
 
+        /// The ShaderCompilerPlatform whose programs the device runs (ShaderNative.ProgramsFor):
+        /// OpenGLCore unless a device says otherwise.
+        public virtual uint ShaderPlatform => ShaderNative.OpenGLCorePlatform;
+
         /// False for the null device: the player renders no frames (cameras and overlay canvases
         /// are not drawn), as Unity's -nographics player.
         public abstract bool RendersFrames { get; }

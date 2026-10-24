@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using OniBrutal.Assets.Compression;
+using OniBrutal.Assets.Shaders;
 using OniBrutal.Assets.TypeTrees;
 
 namespace OniBrutal.Engine.Rendering
@@ -22,50 +22,52 @@ namespace OniBrutal.Engine.Rendering
         public uint ChannelMask;
     }
 
-    /// The OpenGLCore programs of a shader (platform 15): LZ4-compressed segments holding a
-    /// table of (offset, length, segment) entries. Program entries are: version, GPU program
-    /// type, four stats, the variant's keywords, the GLSL source of all stages (sections
-    /// `#ifdef VERTEX` … `#ifdef FRAGMENT` …), then the vertex channel mask. Shaders built before
-    /// Unity 2021.2 (mods' bundles; Unity 6 loads them) list global then local keywords, and keep
-    /// the channel mask in the parsed form's subprograms instead.
+    /// The programs selected for a draw, per stage: program and parameter blob indices (-1: none).
+    /// On OpenGLCore both stages name the one program.
+    internal readonly record struct StagePrograms(int Vertex, int VertexParameters, int Fragment, int FragmentParameters);
+
+    /// A shader's programs for one graphics API (ShaderCompilerPlatform: 15 OpenGLCore, 14 Metal),
+    /// from its blob table (ShaderProgramTable).
+    ///
+    /// OpenGLCore entries are: version, GPU program type, four stats, the variant's keywords, the
+    /// GLSL source of all stages (sections `#ifdef VERTEX` … `#ifdef FRAGMENT` …), then the vertex
+    /// channel mask. Shaders built before Unity 2021.2 (mods' bundles; Unity 6 loads them) list
+    /// global then local keywords, and keep the channel mask in the parsed form's subprograms
+    /// instead. One GLCore program holds every stage, keyed by the union of their keywords.
+    ///
+    /// Metal entries hold one stage each, as MSL source (MetalProgram), keyed by the keywords that
+    /// stage uses (docs/research/macos-feasibility.md §1.3); their parameter blobs
+    /// (ShaderParameters) give the constant-buffer layouts and the texture, sampler and buffer
+    /// slots. Legacy shaders' Metal programs are not read.
     internal sealed class ShaderPrograms
     {
-        const int GlCorePlatformIndexNotFound = -1;
-
-        readonly byte[][] segments;
-        readonly (int Offset, int Length, int Segment)[] entries;
+        readonly ShaderProgramTable table;
         readonly Dictionary<int, ShaderVariant> variants = new();
+        readonly Dictionary<int, MetalProgram> metalPrograms = new();
+        readonly Dictionary<(Fields Pass, string Stage, int Blob), ShaderParameters> parameters = new();
         /// Legacy shaders: each blob's channel mask, from the parsed form (null otherwise).
         readonly Dictionary<int, uint> legacyChannels;
 
-        ShaderPrograms(byte[][] segments, Dictionary<int, uint> legacyChannels)
+        /// The ShaderCompilerPlatform the programs are for.
+        public readonly uint Platform;
+
+        ShaderPrograms(ShaderProgramTable table, uint platform, Dictionary<int, uint> legacyChannels)
         {
-            this.segments = segments;
+            this.table = table;
+            Platform = platform;
             this.legacyChannels = legacyChannels;
-            var table = segments[0];
-            int count = BitConverter.ToInt32(table, 0);
-            entries = new (int, int, int)[count];
-            for (int i = 0; i < count; i++)
-                entries[i] = (BitConverter.ToInt32(table, 4 + 12 * i), BitConverter.ToInt32(table, 8 + 12 * i), BitConverter.ToInt32(table, 12 + 12 * i));
         }
 
-        public static ShaderPrograms Load(Fields shader)
+        /// The OpenGLCore programs (null when the shader has none).
+        public static ShaderPrograms Load(Fields shader) => Load(shader, ShaderNative.OpenGLCorePlatform);
+
+        /// The programs of one platform (null when the shader has none for it).
+        public static ShaderPrograms Load(Fields shader, uint platform)
         {
-            var platforms = shader.Get<uint[]>("platforms");
-            int p = Array.IndexOf(platforms, ShaderNative.OpenGLCorePlatform);
-            if (p == GlCorePlatformIndexNotFound) return null;
-            var blob = shader.Get<byte[]>("compressedBlob");
-            var offsets = (uint[])shader.Array("offsets")[p];
-            var compressed = (uint[])shader.Array("compressedLengths")[p];
-            var decompressed = (uint[])shader.Array("decompressedLengths")[p];
-            var segs = new byte[offsets.Length][];
-            for (int s = 0; s < segs.Length; s++)
-            {
-                segs[s] = new byte[decompressed[s]];
-                Lz4.Decode(blob.AsSpan((int)offsets[s], (int)compressed[s]), segs[s]);
-            }
+            var table = ShaderProgramTable.Load(shader, platform);
+            if (table == null) return null;
             Dictionary<int, uint> legacyChannels = null;
-            if (IsLegacy(shader))
+            if (platform == ShaderNative.OpenGLCorePlatform && IsLegacy(shader))
             {
                 legacyChannels = new Dictionary<int, uint>();
                 foreach (Fields sub in shader.Struct("m_ParsedForm").Array("m_SubShaders"))
@@ -74,14 +76,16 @@ namespace OniBrutal.Engine.Rendering
                             if (IsGlCore(Convert.ToInt32(program["m_GpuProgramType"])))
                                 legacyChannels[(int)Convert.ToUInt32(program["m_BlobIndex"])] = Convert.ToUInt32(program.Struct("m_Channels")["m_SourceMap"]);
             }
-            return new ShaderPrograms(segs, legacyChannels);
+            return new ShaderPrograms(table, platform, legacyChannels);
         }
 
         /// A shader serialized before Unity 2021.2: no shader-wide keyword list.
         public static bool IsLegacy(Fields shader) => !shader.Struct("m_ParsedForm").Contains("m_KeywordNames");
 
+        /// An OpenGLCore program variant, decoded on first use.
         public ShaderVariant Variant(int blobIndex)
         {
+            if (Platform != ShaderNative.OpenGLCorePlatform) throw new InvalidOperationException($"Shader platform {Platform} has no GLSL variants.");
             lock (variants)
             {
                 if (variants.TryGetValue(blobIndex, out var v)) return v;
@@ -93,8 +97,7 @@ namespace OniBrutal.Engine.Rendering
 
         ShaderVariant Decode(int blobIndex)
         {
-            var (offset, length, segment) = entries[blobIndex];
-            var data = segments[segment].AsSpan(offset, length);
+            var data = table.Get(blobIndex);
             int pos = 24;
             var keywords = new List<string>();
             // Legacy entries list global keywords, then local ones.
@@ -123,6 +126,33 @@ namespace OniBrutal.Engine.Rendering
                 GeometrySource = stages.GetValueOrDefault("GEOMETRY"),
                 ChannelMask = channels,
             };
+        }
+
+        /// A Metal stage program, decoded on first use.
+        public MetalProgram Metal(int blobIndex)
+        {
+            if (Platform != ShaderNative.MetalPlatform) throw new InvalidOperationException($"Shader platform {Platform} has no Metal programs.");
+            lock (metalPrograms)
+            {
+                if (metalPrograms.TryGetValue(blobIndex, out var m)) return m;
+                m = MetalProgram.Read(table.Get(blobIndex));
+                metalPrograms[blobIndex] = m;
+                return m;
+            }
+        }
+
+        /// What a stage variant of a pass reads: the stage's common parameters merged with the
+        /// variant's parameter blob (the common ones alone without a blob). Read on first use.
+        public ShaderParameters Parameters(Fields pass, string stage, int parameterBlobIndex)
+        {
+            lock (parameters)
+            {
+                if (parameters.TryGetValue((pass, stage, parameterBlobIndex), out var p)) return p;
+                var common = PlayerSubprograms.Common(pass, stage, PlayerSubprograms.Names(pass));
+                p = parameterBlobIndex < 0 ? common : ShaderParameters.Merge(common, ShaderParameters.Read(table.Get(parameterBlobIndex)));
+                parameters[(pass, stage, parameterBlobIndex)] = p;
+                return p;
+            }
         }
 
         static readonly string[] stageNames = ["VERTEX", "FRAGMENT", "GEOMETRY", "HULL", "DOMAIN"];
@@ -169,6 +199,16 @@ namespace OniBrutal.Engine.Rendering
             return result.ToArray();
         }
 
+        /// A pass stage's player programs for a platform whose programs hold one stage each
+        /// (Metal: `progVertex`, `progFragment`), with their parameter blobs.
+        public static ProgramVariant[] StageVariants(Fields pass, string stage, string[] shaderKeywords, uint platform)
+        {
+            var result = new List<ProgramVariant>();
+            foreach (var sub in PlayerSubprograms.Of(pass, stage, shaderKeywords))
+                if (sub.Platform == platform) result.Add(new ProgramVariant(sub.BlobIndex, sub.Keywords, sub.ParameterBlobIndex));
+            return result.ToArray();
+        }
+
         /// A legacy pass's OpenGLCore programs: their global and local keyword indices name
         /// keywords through the pass's name table.
         public static ProgramVariant[] LegacyVariants(Fields pass)
@@ -194,21 +234,46 @@ namespace OniBrutal.Engine.Rendering
         /// earliest.
         public static int SelectVariant(ShaderPass pass, Func<string, bool> isEnabled)
         {
+            int best = SelectIndex(pass.Variants, isEnabled);
+            return best < 0 ? -1 : pass.Variants[best].BlobIndex;
+        }
+
+        /// The position in `variants` of the variant that rule selects (-1 when there is none).
+        public static int SelectIndex(ProgramVariant[] variants, Func<string, bool> isEnabled)
+        {
             int best = -1, bestMatches = -1, bestExtras = int.MaxValue;
-            foreach (var variant in pass.Variants)
+            for (int i = 0; i < variants.Length; i++)
             {
                 int matches = 0, extras = 0;
-                foreach (var k in variant.Keywords)
+                foreach (var k in variants[i].Keywords)
                     if (isEnabled(k)) matches++;
                     else extras++;
                 if (matches > bestMatches || (matches == bestMatches && extras < bestExtras))
                 {
-                    best = variant.BlobIndex;
+                    best = i;
                     bestMatches = matches;
                     bestExtras = extras;
                 }
             }
             return best;
+        }
+
+        /// The programs a draw uses on a platform: on OpenGLCore one program for both stages; on
+        /// Metal each stage selected from its own list by the same rule, since Metal keys each
+        /// stage by the keywords it uses (a vertex-only keyword does not split the fragment
+        /// programs).
+        public static StagePrograms SelectStages(ShaderPass pass, uint platform, Func<string, bool> isEnabled)
+        {
+            if (platform != ShaderNative.MetalPlatform)
+            {
+                int blob = SelectVariant(pass, isEnabled);
+                return new StagePrograms(blob, -1, blob, -1);
+            }
+            var vertex = pass.MetalVertexVariants;
+            var fragment = pass.MetalFragmentVariants;
+            int v = SelectIndex(vertex, isEnabled), f = SelectIndex(fragment, isEnabled);
+            return new StagePrograms(v < 0 ? -1 : vertex[v].BlobIndex, v < 0 ? -1 : vertex[v].ParameterBlobIndex,
+                f < 0 ? -1 : fragment[f].BlobIndex, f < 0 ? -1 : fragment[f].ParameterBlobIndex);
         }
     }
 }

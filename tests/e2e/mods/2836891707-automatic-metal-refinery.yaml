@@ -1,0 +1,29 @@
+# AutomaticMetalRefinery (2836891707), class P.
+#
+# What it does: the Rock Crusher and the Metal Refinery work without a Duplicant: postfixes
+# on their ConfigureBuildingTemplate set the fabricator's duplicantOperated to false, so with
+# power and ingredients they run their recipes on their own, as the Kiln does.
+# How a player reaches it: building either, queueing a recipe.
+# What changes: no operator errand; the machines run unattended.
+#
+# A smaller spec: running either needs power, which early-base has none of without a wired
+# generator. setup grants Basic Refinement; a Rock Crusher is built in the dug-out corridor
+# west of the printing pod and selected: its fabricator needs no operator.
+from: early-base
+mods: [2836891707]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"BasicRefinement\")", method: Purchased}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"RockCrusher\").GetComponent<ComplexFabricator>.duplicantOperated": false
+      "Assets.GetPrefab(\"MetalRefinery\").GetComponent<ComplexFabricator>.duplicantOperated": false
+  - build: {prefab: RockCrusher, at: [106, 206]}
+  - expect: {blueprints: {RockCrusher: 1}}
+  - run: {seconds: 900, until: {buildings: {RockCrusher: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [108, 208], ortho: 8}}
+  - click_world: {cell: [107, 207], select: RockCrusher}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui: {"**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Rock Crusher"}}
+  - expect_state:
+      "selected:ComplexFabricator.duplicantOperated": false
+      "selected:ComplexFabricatorWorkable": exists

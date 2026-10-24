@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2836891707-automatic-metal-refinery.yaml",
+ "mods": [
+  "2836891707"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "smaller spec (running needs power, which early-base lacks): the Rock Crusher and Metal Refinery need no operator; a Rock Crusher built in the room and selected has duplicantOperated off",
+ "updated": "2026-10-23",
+ "commit": "bdcb3f5",
+ "mod_dlls": {
+  "2836891707": {
+   "AutomaticMetalRefinery.dll": "fdac959c8eae5219dd0aa1771eb6776eb87794176fe298365708c0998f667b3a"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-214629-3ca18b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T22:05:37",
+    "lane": 13,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-221547-c0b8cb",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T22:20:27",
+    "lane": 12,
+    "reference_run": "20261023-214629-3ca18b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-221547-c0b8cb",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T22:22:30",
+    "lane": 12,
+    "reference_run": "20261023-214629-3ca18b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

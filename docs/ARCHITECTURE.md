@@ -357,7 +357,9 @@ kinds, signatures, `virtual`/`sealed`-ness, and base types, verified by `tools/A
 (conformance gate, §9). We do not add public API Unity doesn't have. Internals are free-form.
 Mods may call Unity API the game never does; types they are known to need are listed in
 `engine-required-types.tsv`, and running `tools/ApiCheck` over a profile's mod assemblies finds
-the members they reference that the engine lacks.
+the members they reference that the engine lacks. `scripts/apisurface.sh` (`ApiCheck --surface`)
+lists every public type and member of the shipped Unity assemblies that the engine and our
+packages lack, and which of them the Workshop builds in `out/ws` reference.
 
 The consumer set is: `Assembly-CSharp`, `Assembly-CSharp-firstpass`, `UnityEngine.UI`,
 `Unity.TextMeshPro`, `Unity.Timeline`, `FMODUnity*`, `ImGui.NET`, Steamworks.NET.

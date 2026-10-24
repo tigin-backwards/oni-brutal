@@ -5,6 +5,7 @@
 //
 // usage: ApiCheck <gameManagedDir> <ourAssemblyDir> <providerPrefix,...> <consumer.dll> [consumer.dll...]
 //        [--json out.json]
+//        ApiCheck --surface ...   (see Surface.cs: Unity's whole public surface, and what mods use of it)
 // Exit code: 0 when everything resolves (stubs allowed), 1 when anything is missing.
 using System.Collections.Immutable;
 using System.Reflection;
@@ -13,6 +14,7 @@ using System.Reflection.Metadata.Ecma335;
 using System.Reflection.PortableExecutable;
 using System.Text.Json;
 
+if (args.Length > 0 && args[0] == "--surface") return Surface.Run(args[1..]);
 var positional = new List<string>();
 string? jsonOut = null;
 for (int i = 0; i < args.Length; i++)
@@ -193,7 +195,9 @@ sealed class RefNames(MetadataReader md)
 }
 
 readonly record struct FoundType(LoadedAssembly Assembly, TypeDefinitionHandle Handle);
-readonly record struct FoundMember(bool IsStub);
+/// Where a member resolved: its declaring type and its access (the MemberAccessMask bits, the same
+/// values for fields and methods).
+readonly record struct FoundMember(bool IsStub, LoadedAssembly Assembly, TypeDefinitionHandle Declaring, int Access);
 
 sealed class LoadedAssembly : IDisposable
 {
@@ -262,7 +266,8 @@ sealed class OurAssemblies
                 {
                     var f = md.GetFieldDefinition(fh);
                     if (md.GetString(f.Name) != name) continue;
-                    if (Signatures.Decode(md, f.Signature).Return == sig.Return) return new FoundMember(false);
+                    if (Signatures.Decode(md, f.Signature).Return == sig.Return)
+                        return new FoundMember(false, currentAsm, th, (int)(f.Attributes & FieldAttributes.FieldAccessMask));
                 }
             }
             else
@@ -274,7 +279,7 @@ sealed class OurAssemblies
                     var ms = Signatures.Decode(md, m.Signature);
                     if (ms.IsInstance != sig.IsInstance || ms.GenericArity != sig.GenericArity || ms.Return != sig.Return
                         || !ms.Params.SequenceEqual(sig.Params)) continue;
-                    return new FoundMember(IsStub(currentAsm, m));
+                    return new FoundMember(IsStub(currentAsm, m), currentAsm, th, (int)(m.Attributes & MethodAttributes.MemberAccessMask));
                 }
             }
             // Constructors and static members never bind through base types.
@@ -287,6 +292,8 @@ sealed class OurAssemblies
     (TypeDefinitionHandle?, LoadedAssembly) BaseOf(LoadedAssembly la, TypeDefinition td)
     {
         var md = la.MD;
+        // System.Object's (and an interface's) base is nil, which reads as TypeDefinition row 0.
+        if (td.BaseType.IsNil) return (null, la);
         switch (td.BaseType.Kind)
         {
             case HandleKind.TypeDefinition:

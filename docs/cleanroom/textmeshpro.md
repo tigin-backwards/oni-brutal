@@ -652,9 +652,10 @@ from what is described here, the measurement wins and this section is corrected.
   (the line is 23.8 high) but is not counted when the line is checked against the rect's
   height. When Truncate or Ellipsis continue that line (38.79 wide, 20 high), the soft
   hyphen is hidden again: "aaaa", "b", then the blank record (Ellipsis: "aaaa…"). Test
-  `AHiddenSoftHyphenTakesNoPartInItsLinesHeight`. Not matched: the shipped package reports
-  a drawn soft hyphen's `character` as "-" (U+002D), every time it is drawn (measured: "Words
-  and their separators" below), and puts its line 0.035 lower.
+  `AHiddenSoftHyphenTakesNoPartInItsLinesHeight`. A drawn soft hyphen's `character` is "-"
+  (U+002D), every time it is drawn, as in the shipped package (measured: "Words and their
+  separators" below; test `ADrawnSoftHyphenReportsAHyphenMinus`). Not matched: the shipped
+  package puts its line 0.035 lower.
 - **Password fields** show one asterisk per UTF-16 unit, and the shipped package's caret
   steps per unit, between the halves of a surrogate pair (a, 😀, b: Left from 4 gives 3, 2,
   1); a character typed there goes between them, and Backspace removes one unit, leaving a
@@ -1593,22 +1594,27 @@ uses each character's category in the Unicode tables:
   hidden one U+00AD. (This settles the "sometimes" under "Soft hyphens and the line's height"
   above: it is drawn exactly when its glyph fits the line.)
 
-**Where this implementation deviates** (`RecordWords` in `TMP_Text.Place.cs` and the break
-opportunities in `TMP_Text.Layout.cs`, 2026-10-23):
-- U+00AD, U+2010 and U+2011 are separators, not word characters.
-- An apostrophe joins whatever word character follows it, a hyphen too, with no check of the
-  one before it, and an apostrophe at the end always ends its word.
-- A line's word count counts the words that begin on it, not those that end on it.
-- A single punctuation character, and a text without words, record (0, 0) and count it on
-  line 0.
-- § and ¶ are punctuation (.NET's `char.IsPunctuation`).
-- U+2007 and U+202F give no break opportunity.
-- A drawn soft hyphen keeps `character` U+00AD.
-- It matched elsewhere: the letters and digits (.NET's `char.IsLetterOrDigit` agrees on every
-  character swept), the other dashes, the non-breaking spaces' word counts, the empty first
-  word, tags, sprites, CJK, and the breaks around U+2010 and U+2011.
+**Implemented** (`RecordWords` in `TMP_Text.Place.cs`, the break opportunities in
+`TMP_Text.Layout.cs` and a drawn soft hyphen's `character` in `TMP_Text.Place.cs`; tests in
+`TmpWordTests`). This implementation follows the rule: in the same probe `wc-check.py rule`
+reproduces all 6093 word lists and all 6035 checked line word counts from its log, and
+`wc-check.py diff` against the shipped package's second run finds none of the 6093 common
+lines different, and no line in one log only. Letters and digits are .NET's
+`char.IsLetterOrDigit`, which agrees on every character swept; punctuation is
+`char.IsPunctuation` without § and ¶. The slot past the text is the `characterInfo` entry
+after the last character, which keeps what an earlier layout wrote there (entries beyond the
+count are not cleared), or none (no letter) past the array's end.
 
-| Case | shipped | this implementation (2026-10-23) |
+Before (2026-10-23) this implementation deviated: U+00AD, U+2010 and U+2011 were separators;
+an apostrophe joined any word character after it, with no check of the one before it, and one
+at the end always ended its word; a line counted the words that began on it; a single
+punctuation character and a text without words recorded (0, 0) and counted it on line 0; §
+and ¶ were punctuation; U+2007 and U+202F gave no break opportunity; a drawn soft hyphen kept
+`character` U+00AD. It matched elsewhere: the letters and digits, the other dashes, the
+non-breaking spaces' word counts, the empty first word, tags, sprites, CJK, and the breaks
+around U+2010 and U+2011.
+
+| Case | shipped (and this implementation now) | this implementation before (2026-10-23) |
 |---|---|---|
 | "Liquid Sulfur Geyser NJ24‑7" (U+2011), NotoSans 14 pt | 4 words; the last 21–26 | 5 words; 21–24, 26–26 |
 | "a‑b", "a‐b" (U+2010), "a", U+00AD, "b" | 1 word, 0–2 | 2 words, 0–0 and 2–2 |
@@ -1631,8 +1637,8 @@ opportunities in `TMP_Text.Layout.cs`, 2026-10-23):
 | "aaaa", U+00AD, "bbbb", NotoSans, 36 wide: "aaaa-\|bbbb" | the soft hyphen drawn, `character` U+002D | drawn, U+00AD |
 | "aa‑bb‑cc‑dd", NotoSans, 28.5 wide | "aa‑\|bb‑c\|c‑dd" | the same |
 
-Whole runs: `wc-check.py rule` on this implementation's log matches 5581 of 6109 word lists
-and 5464 of 6051 line word counts; `wc-check.py diff` finds 811 of 6093 common lines
+Whole runs before: `wc-check.py rule` on this implementation's log matched 5581 of 6109 word
+lists and 5464 of 6051 line word counts; `wc-check.py diff` found 811 of 6093 common lines
 differing (82 texts, 236 sweep lines, 493 wrapped layouts).
 
 Not measured:

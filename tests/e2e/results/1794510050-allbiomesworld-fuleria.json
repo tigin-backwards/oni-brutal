@@ -1,0 +1,63 @@
+{
+ "spec": "mods/1794510050-allbiomesworld-fuleria.yaml",
+ "mods": [
+  "1794510050"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "from a colony to New Game, Survival, the event category: the carousel lists Fuleria; the cluster chosen by typing its coordinate (its asteroid list dumped), launched and embarked: five worlds, the 260 x 380 start world with sixteen biome kinds (wasteland, aquatic, radioactive among them), world traits, geysers among the spawners, the Temporal Tear and starmap POIs, as in the original",
+ "updated": "2026-10-24",
+ "commit": "f1447d1",
+ "mod_dlls": {
+  "1794510050": {
+   "AllBiomesWorld.dll": "ecd6bcb47f3073015f09b8e7aaff21564b5b687c1d11fe3194fed6e8b20a3448"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-121957-33f99b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T12:19:58",
+    "lane": 19,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-123514-8ff7a9",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T12:44:15",
+    "lane": 19,
+    "reference_run": "20261024-121957-33f99b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "asteroids": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261024-123514-8ff7a9",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T12:45:33",
+    "lane": 19,
+    "reference_run": "20261024-121957-33f99b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "asteroids": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -5,13 +5,19 @@
 # meteor showers on its worlds, and changes elements for every game: radium is a metal with
 # 14 rads per 1000 kg, bitumen a manufactured material, and some disabled elements are
 # enabled (a postfix on ElementLoader.FinaliseElementsTable).
-# How a player reaches it: the new-game screens (its clusters); the elements in any colony.
+# How a player reaches it: the new-game screens (its clusters: Baator, coordinate prefix
+# BTOR-L, in Classic; Baator Moonlet, BTOR-S, in Spaced Out!); the elements in any colony.
 # What changes: new worlds; radium and bitumen in other build categories.
 #
-# Worldgen is out of scope here: only the element changes are checked, on early-base (a
-# smaller spec). The biome icons are loaded too.
+# First the element changes on early-base, then a new game: Main Menu, Quit Without Saving, New
+# Game, Survival, Classic; the Baator cluster chosen by typing its coordinate (fixed seed),
+# launched and embarked. Worldgen expectations are functional (mod-play-testing.md, "Worldgen
+# mods"): its eleven worlds, the start world Baator with its own subworlds (its HellHot and
+# CaniaCold temperature ranges parsed through the mod's Enum.Parse prefix) and seasons, its
+# geyser templates among the spawners, starmap POIs.
 from: early-base
 mods: [2582905897]
+memory_gb: 8
 steps:
   - expect_state:
       "ElementLoader.FindElementByName(\"Radium\").materialCategory.Name": Metal
@@ -19,3 +25,45 @@ steps:
       "ElementLoader.FindElementByName(\"Bitumen\").materialCategory.Name": ManufacturedMaterial
       "Assets.GetSprite(\"biomeIconBaator\")": exists
       "Assets.GetSprite(\"biomeIconBaator\").rect.width": "== original"
+  - key: {code: Escape}
+  - ui_wait: {path: "**/PauseScreen/**/Main MenuButton", cond: stable}
+  - click: {ui: "**/PauseScreen/**/Main MenuButton"}
+  - ui_wait: {path: "**/ConfirmDialog/GameObject/Panel/ConfigurableButton", cond: stable}
+  - click: {ui: "**/ConfirmDialog/GameObject/Panel/ConfigurableButton"}   # Quit Without Saving
+  - ui_wait: {path: "**/MainMenu_SpacedOut/MainMenuMenubar/MainMenuButtons", cond: stable, frames: 3000}
+  - click: {text: "NEW GAME", under: "**/MainMenuButtons"}
+  - ui_wait: {path: "**/ModeSelectScreen/Panel/Content/RootToggles/StandardGame", cond: stable}
+  - click: {ui: "**/ModeSelectScreen/Panel/Content/RootToggles/StandardGame"}
+  - ui_wait: {path: "**/ClusterCategorySelectionScreen/Panel/Content/RootToggles/ClassicStyleGame", cond: stable}
+  - click: {ui: "**/ClusterCategorySelectionScreen/Panel/Content/RootToggles/ClassicStyleGame"}
+  - ui_wait: {path: "**/ColonyDestinationScreen2/Layout/Buttons/LaunchButton", cond: stable, frames: 3000}
+  - expect_state:
+      "all:DestinationSelectPanel::[0].clusterKeys": {contains: "expansion1::clusters/BaatorStartCluster"}
+  - click: {ui: "**/CoordinateContainer/SeedInput"}
+  - ui_wait: {path: "**/CoordinateContainer/SeedInput", cond: stable}
+  - type: {ui: "**/CoordinateContainer/SeedInput", text: "BTOR-L-12345-0-0-0", clear: true, enter: true}
+  - ui_wait: {path: "**/Section - Destination/DestinationDetailsHeader/ClusterName", cond: text, value: "~Baator"}
+  - expect_ui:
+      "**/CoordinateContainer/SeedInput/Text Area/Text": {text: "~BTOR-L-12345-0-0-0"}
+      "**/StartingAsteroidCategory/Content/Prefab_AsteroidLine/Label": {text: "Baator"}
+  - expect_state:
+      "CustomGameSettings.Instance.GetCurrentQualitySetting(\"ClusterLayout\").id": "expansion1::clusters/BaatorStartCluster"
+  - ui_dump: {name: asteroids, root: "**/Section - Destination/World Scoll (Rect Size Set By Screen Code!)/Content/Details"}
+  - click: {ui: "**/ColonyDestinationScreen2/Layout/Buttons/LaunchButton"}
+  # Worldgen runs on its own thread; the Duplicant selection follows once the world is loaded.
+  - ui_wait: {path: "**/MinionSelectScreen/Content/BottomContent/Buttons/ProceedButton", cond: stable, frames: 60000}
+  - click: {ui: "**/MinionSelectScreen/Content/BottomContent/Buttons/ProceedButton"}
+  - ui_wait: {path: "**/MinionSelectScreen", cond: gone, frames: 6000}
+  - expect_state:
+      "ClusterManager.Instance.WorldContainers.Count": 11
+      "ClusterManager.Instance.GetStartWorld().worldName": "expansion1::worlds/Baator"
+      "ClusterManager.Instance.GetStartWorld().worldSize.x": 256
+      "ClusterManager.Instance.GetStartWorld().worldSize.y": 416
+      "count:ClusterManager.Instance.WorldContainers[*] if .worldName == expansion1::worlds/Baator_oilyswampy": 1
+      "Components.LiveMinionIdentities.Count": 3
+      "ClusterManager.Instance.GetStartWorld().Biomes": {contains: baator}
+      "ClusterManager.Instance.GetStartWorld().m_generatedSubworlds": {contains: subworlds/baator/Baator_AvernusStart}
+      "ClusterManager.Instance.GetStartWorld().m_seasonIds": {contains: MiniRadioactiveOceanMeteorShowers}
+      "count:SaveGame.Instance.worldGenSpawner.spawnables[*] if .spawnInfo.id.StartsWith(\"GeyserGeneric\") == true": ">= 5"
+      "all:TemporalTear::Length": 1
+      "all:HarvestablePOIClusterGridEntity::Length": ">= 10"

@@ -1,0 +1,63 @@
+{
+ "spec": "mods/3430682737-voidria.yaml",
+ "mods": [
+  "3430682737"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "from a colony to New Game, Survival, Classic: the carousel lists Voidria; the Classic-style cluster chosen by typing its coordinate (its asteroid list dumped), launched and embarked: three worlds, the 240 x 380 start world with the mod's forest start and plain space (not the background subworld its option removes), most templates spawned at once (Save Critters), the Temporal Tear still shut, as in the original",
+ "updated": "2026-10-24",
+ "commit": "f1447d1",
+ "mod_dlls": {
+  "3430682737": {
+   "VoidriaR.dll": "4df62fe19f5dd51dbfdef7e0d8844a5071b0b15790f5dc4caa3a48b8ac76c8eb"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-121957-33f99b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T12:29:48",
+    "lane": 18,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-123514-8ff7a9",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T12:48:13",
+    "lane": 19,
+    "reference_run": "20261024-121957-33f99b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "asteroids": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261024-123514-8ff7a9",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T12:49:10",
+    "lane": 18,
+    "reference_run": "20261024-121957-33f99b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "asteroids": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

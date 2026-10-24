@@ -1,0 +1,70 @@
+{
+ "spec": "mods/1930918856-solar-system-worlds.yaml",
+ "mods": [
+  "1930918856"
+ ],
+ "verdict": "failed",
+ "why": "a run of ours failed",
+ "findings": [],
+ "note": "from a colony to New Game, Survival, Classic: the carousel lists the Solar System; the cluster chosen by typing its coordinate (its asteroid list dumped), launched and embarked: nine worlds with Earth (224 x 320, the mod's earth subworlds), the Moon, Ganymede and Titan named by the mod after their planet icons, geysers and starmap POIs (in the original); fails in ours: errors the game's worldgen logs from a worldgen thread ('Missing mob description for internal mob [PacuEgg]') open the game's error dialog in ours (Application.logMessageReceived raised for another thread's Debug.LogError; the original logs the same lines with no dialog), and when the generated colony loads its ReportErrorDialog.OnDestroy quits the player (App.QuitCode(1), terminateOnError)",
+ "updated": "2026-10-24",
+ "commit": "f1447d1",
+ "mod_dlls": {
+  "1930918856": {
+   "PLib.dll": "13c356607dd2878fd3de000ad38a39cd35b1e0f23035f9d74d1fec41da841511",
+   "SolarSystemWorlds.dll": "a964fb141ecad93926de8348c6dd1bd71083022a5f8e22a9060f78f9a542d845"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-121957-33f99b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T12:27:34",
+    "lane": 18,
+    "signatures": 1
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-123514-8ff7a9",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-24T12:52:58",
+    "lane": 19,
+    "reasons": [
+     "step 22: E2eDriver closed the connection during ui.wait"
+    ],
+    "reference_run": "20261024-121957-33f99b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "asteroids": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261024-123514-8ff7a9",
+    "index": 2,
+    "verdict": "fail",
+    "date": "2026-10-24T12:54:10",
+    "lane": 19,
+    "reasons": [
+     "step 22: E2eDriver closed the connection during ui.wait"
+    ],
+    "reference_run": "20261024-121957-33f99b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "asteroids": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

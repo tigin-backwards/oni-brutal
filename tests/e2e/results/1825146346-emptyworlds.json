@@ -1,0 +1,64 @@
+{
+ "spec": "mods/1825146346-emptyworlds.yaml",
+ "mods": [
+  "1825146346"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "from a colony to New Game, Survival, the event category: the carousel lists Islands and Emptera; Islands chosen by typing its coordinate (its asteroid list dumped), launched and embarked: nine worlds, the 230 x 290 start world with the mod's forest start subworld and space zones, Emptera among the worlds, the SkyBlock bunker's doors and the mob lab's gene shuffler among the spawners, geysers, the Temporal Tear and starmap POIs, the SpaceHole sprite, as in the original",
+ "updated": "2026-10-24",
+ "commit": "f1447d1",
+ "mod_dlls": {
+  "1825146346": {
+   "EmptyWorlds.dll": "36ae02656550be30cbcda6c7c17ad020879f4daedcc3ed9c240be1971c4f73f4",
+   "PLib.dll": "893dc1ea3eddd02c85d433231aae356be27be07ddfc1a98fb2c51d84748208e8"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-121957-33f99b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T12:19:57",
+    "lane": 18,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-123514-8ff7a9",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T12:35:15",
+    "lane": 19,
+    "reference_run": "20261024-121957-33f99b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "asteroids": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261024-123514-8ff7a9",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T12:35:14",
+    "lane": 18,
+    "reference_run": "20261024-121957-33f99b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "asteroids": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -120,11 +120,7 @@ differences = {
 # Loads and Colony as swept, Played withdrawn until a spec drives the mod's UI (mod-play-testing.md).
 unplayed = {
     '2077848080': 'not played: it supports the base game only (`supportedContent: VANILLA_ID`), and every spec fixture is a Spaced Out colony',
-    # Batch 14: worldgen mods (specs pending, functional expectations) and content packs without code.
-    '1825146346': 'not played: a worldgen mod (empty SkyBlock worlds); spec pending (worldgen: functional expectations)',
-    '1794510050': 'not played: a worldgen mod (a world with every biome); spec pending (worldgen: functional expectations)',
-    '1930918856': 'not played: a worldgen mod (Solar System worlds and their asteroids); spec pending (worldgen: functional expectations)',
-    '3430682737': 'not played: a worldgen mod (the Voidria cluster); spec pending (worldgen: functional expectations)',
+    # Batch 14: content packs without code.
     '3599672848': 'not played: textures for True Tiles, no code of its own; it does nothing without that mod',
     '3746576803': 'not played: Duplicant personalities for Dupery Fixed, no code of its own; it does nothing without that mod',
     # Batch 17.
@@ -217,7 +213,11 @@ translations = {'929139073', '927642162', '1198657258', '928606476', '928348692'
                 '2872159695', '1123693010', '1142641133', '2467094947', '2377723746',
                 '2889982891', '2819586273', '1821957996', '3327324912', '1758933220', '930830432', '1831722850', '2701205009', '1493391479', '2566414917', '1419578320', '2000481647',
                 '1135041189', '1817639915', '1561634664', '929154970', '933302292', '2679329370'}
-worldgen = {'3743010929', '3382061617', '2919833683'}
+# Worldgen mods no sweep ran, as their specs' runs of ours found them (id -> (loads, colony)): a
+# spec that gets to its new game loaded a colony first; Single Asteroid Clusters' worlds log
+# errors while the game loads them, which open the error dialog at the main menu in ours, and
+# loading a colony then quits.
+worldgen = {'3743010929': ('✅', '✅'), '3382061617': ('✅', '✅'), '2919833683': ('❌', '❌')}
 # Third hundred: filled in from that sweep's results (id -> (loads, colony, note)).
 third_results = {}
 for extra in glob.glob(os.path.join(SWEEPS, 'modtable-*.tsv')):
@@ -244,7 +244,7 @@ def status(mid, flags):
     if flags:
         return N, N, N, f'flagged by onimaxxing ({flags}); not tested'
     if mid in worldgen:
-        return N, N, N, 'worldgen mod: not swept yet; spec pending (functional expectations)'
+        return (*worldgen[mid], N, 'worldgen mod: spec pending (functional expectations)')
     if mid in translations:
         return N, N, N, 'translation: the game applies one only from a Steam subscription; not testable here'
     if mid in original_only:

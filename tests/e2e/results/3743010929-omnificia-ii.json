@@ -1,0 +1,63 @@
+{
+ "spec": "mods/3743010929-omnificia-ii.yaml",
+ "mods": [
+  "3743010929"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "from a colony to New Game, Survival, Classic: the carousel lists its six clusters; the Sandstone one chosen by typing its coordinate (its asteroid list dumped), launched and embarked: one 352 x 448 asteroid with 29 biome kinds (the DLCs' sugar woods and wetlands among them), the mod's meteor season with ten showers, geysers among the spawners, starmap POIs, as in the original",
+ "updated": "2026-10-24",
+ "commit": "f1447d1",
+ "mod_dlls": {
+  "3743010929": {
+   "Omnificia.dll": "b1586ed45afec7cbef56f4454efb7570fc8ed3b6c8099cc6485fece2051b8879"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-121957-33f99b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T12:32:53",
+    "lane": 18,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-123514-8ff7a9",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T12:50:34",
+    "lane": 19,
+    "reference_run": "20261024-121957-33f99b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "asteroids": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261024-123514-8ff7a9",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T12:51:48",
+    "lane": 19,
+    "reference_run": "20261024-121957-33f99b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "asteroids": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

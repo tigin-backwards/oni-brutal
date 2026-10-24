@@ -1,0 +1,69 @@
+# MiniBase Forever Edition (3382061617), classes P, O (a worldgen mod).
+#
+# What it does: the MiniBase cluster, a Spaced Out-style cluster whose start asteroid is drawn
+# by the mod's own code (WorldGen.RenderOffline replaced by MiniBaseWorldGen.CreateWorld): a
+# small liveable box (70 x 40 by default, inside a 112 x 57 world) walled in neutronium, with
+# its biome, geysers, core and space access set by PLib options (config.json), and optional
+# baby moonlets (oily, marshy, niobium, ...). It adds meteor seasons, Resin and Niobium
+# harvestable POIs on the starmap, sets the care package timer (CarePackageFrequency cycles),
+# reveals the whole map when the Duplicants embark, and opens the Temporal Tear when no opener
+# was placed.
+# How a player reaches it: the main menu, New Game, Survival, Spaced Out!; the carousel lists
+# MiniBase (coordinate prefix MINI-B); its options are in the Mods screen.
+# What changes: the cluster a new game generates; the care package timer.
+#
+# With the oily moonlet on and a 3-cycle care package timer: from a colony, Main Menu, Quit
+# Without Saving, New Game, Survival, Spaced Out!; the cluster chosen by typing its coordinate,
+# launched and embarked. Functional expectations (mod-play-testing.md, "Worldgen mods"): the two
+# worlds, the start world's size from the options, the map revealed, the immigration interval,
+# the mod's POIs on the starmap.
+from: early-base
+mods: [3382061617]
+options:
+  "3382061617": {OilMoonlet: true, CarePackageFrequency: 3}
+memory_gb: 8
+steps:
+  - key: {code: Escape}
+  - ui_wait: {path: "**/PauseScreen/**/Main MenuButton", cond: stable}
+  - click: {ui: "**/PauseScreen/**/Main MenuButton"}
+  - ui_wait: {path: "**/ConfirmDialog/GameObject/Panel/ConfigurableButton", cond: stable}
+  - click: {ui: "**/ConfirmDialog/GameObject/Panel/ConfigurableButton"}   # Quit Without Saving
+  - ui_wait: {path: "**/MainMenu_SpacedOut/MainMenuMenubar/MainMenuButtons", cond: stable, frames: 3000}
+  - click: {text: "NEW GAME", under: "**/MainMenuButtons"}
+  - ui_wait: {path: "**/ModeSelectScreen/Panel/Content/RootToggles/StandardGame", cond: stable}
+  - click: {ui: "**/ModeSelectScreen/Panel/Content/RootToggles/StandardGame"}
+  - ui_wait: {path: "**/ClusterCategorySelectionScreen/Panel/Content/RootToggles/SpacedOutGame", cond: stable}
+  - click: {ui: "**/ClusterCategorySelectionScreen/Panel/Content/RootToggles/SpacedOutGame"}
+  - ui_wait: {path: "**/ColonyDestinationScreen2/Layout/Buttons/LaunchButton", cond: stable, frames: 3000}
+  - expect_state:
+      "all:DestinationSelectPanel::[0].clusterKeys": {contains: "expansion1::clusters/MiniBase"}
+  - click: {ui: "**/CoordinateContainer/SeedInput"}
+  - ui_wait: {path: "**/CoordinateContainer/SeedInput", cond: stable}
+  - type: {ui: "**/CoordinateContainer/SeedInput", text: "MINI-B-12345-0-0-0", clear: true, enter: true}
+  - ui_wait: {path: "**/Section - Destination/DestinationDetailsHeader/ClusterName", cond: text, value: "~MiniBase"}
+  - expect_ui:
+      "**/CoordinateContainer/SeedInput/Text Area/Text": {text: "~MINI-B-12345-0-0-0"}
+      "**/StartingAsteroidCategory/Content/Prefab_AsteroidLine/Label": {text: "MiniBase"}
+  - expect_state:
+      "CustomGameSettings.Instance.GetCurrentQualitySetting(\"ClusterLayout\").id": "expansion1::clusters/MiniBase"
+  - ui_dump: {name: asteroids, root: "**/Section - Destination/World Scoll (Rect Size Set By Screen Code!)/Content/Details"}
+  - click: {ui: "**/ColonyDestinationScreen2/Layout/Buttons/LaunchButton"}
+  # Worldgen runs on its own thread; the Duplicant selection follows once the world is loaded.
+  - ui_wait: {path: "**/MinionSelectScreen/Content/BottomContent/Buttons/ProceedButton", cond: stable, frames: 60000}
+  - click: {ui: "**/MinionSelectScreen/Content/BottomContent/Buttons/ProceedButton"}
+  - ui_wait: {path: "**/MinionSelectScreen", cond: gone, frames: 6000}
+  - expect_state:
+      "ClusterManager.Instance.WorldContainers.Count": 2
+      "ClusterManager.Instance.GetStartWorld().worldName": "expansion1::worlds/MiniBase"
+      "ClusterManager.Instance.GetStartWorld().worldSize.x": 112
+      "ClusterManager.Instance.GetStartWorld().worldSize.y": 57
+      "count:ClusterManager.Instance.WorldContainers[*] if .worldName == expansion1::worlds/BabyOilyMoonlet": 1
+      "Components.LiveMinionIdentities.Count": 3
+      # The care package timer: 3 cycles of 600 s.
+      "Immigration.Instance.spawnInterval[0]": 1800
+      # The whole map is revealed when the Duplicants embark.
+      "Grid.Visible[0]": "> 0"
+      "all:TemporalTear::Length": 1
+      "count:all:HarvestablePOIClusterGridEntity::[*] if .GetComponent<KPrefabID>.PrefabTag.Name == HarvestableSpacePOI_ResinAsteroidField": 1
+      "count:all:HarvestablePOIClusterGridEntity::[*] if .GetComponent<KPrefabID>.PrefabTag.Name == HarvestableSpacePOI_NiobiumAsteroidField": 1
+      "Db.Get().GameplaySeasons.TryGet(\"MixedMinibaseShower\").events.Count": 1

@@ -1,0 +1,59 @@
+{
+ "spec": "mods/2919833683-single-asteroid-clusters.yaml",
+ "mods": [
+  "2919833683"
+ ],
+ "verdict": "failed",
+ "why": "a run of ours failed",
+ "findings": [],
+ "note": "from a colony to New Game, Survival, Classic: the carousel lists the mod's ten clusters; its Terra cluster chosen by typing its coordinate (its asteroid list dumped), launched and embarked: one 320 x 384 asteroid with the classic biomes and the Spaced Out ones the mod adds, geysers and starmap POIs (in the original); fails in ours: errors the mod's worlds logs from a worldgen thread ('defines a subworldMixingRule ... but it's not referenced', while the game loads its worldgen settings) open the game's error dialog in ours (Application.logMessageReceived raised for another thread's Debug.LogError; the original logs the same lines with no dialog), and when the fixture loads its ReportErrorDialog.OnDestroy quits the player (App.QuitCode(1), terminateOnError)",
+ "updated": "2026-10-24",
+ "commit": "f1447d1",
+ "mod_dlls": {
+  "2919833683": {}
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-121957-33f99b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T12:32:52",
+    "lane": 19,
+    "signatures": 3
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-123514-8ff7a9",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-24T13:02:52",
+    "lane": 19,
+    "reasons": [
+     "step start: the player exited (1) while loading"
+    ],
+    "reference_run": "20261024-121957-33f99b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-123514-8ff7a9",
+    "index": 2,
+    "verdict": "fail",
+    "date": "2026-10-24T13:03:42",
+    "lane": 18,
+    "reasons": [
+     "step start: the player exited (1) while loading"
+    ],
+    "reference_run": "20261024-121957-33f99b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

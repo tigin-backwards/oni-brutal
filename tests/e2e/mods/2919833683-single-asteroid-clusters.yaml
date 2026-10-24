@@ -1,0 +1,72 @@
+# Single Asteroid Clusters (2919833683), class P (a worldgen mod, no code).
+#
+# What it does: ten Classic-style clusters for Spaced Out, each a single asteroid (the classic
+# start worlds, Terra to Oasis, with no moonlets): to have every resource on one asteroid, its
+# worlds add Spaced Out biomes (wasteland, radioactive, the Moo caverns, aquatic graphite caves,
+# a niobium core) to the classic subworlds. Each cluster keeps a starmap of POIs and the
+# Temporal Tear.
+# How a player reaches it: the main menu, New Game, Survival, Classic; the destination screen's
+# asteroid carousel lists the mod's clusters (coordinate prefixes M-...-S).
+# What changes: the cluster a new game generates.
+#
+# From a colony: the pause menu's Main Menu, Quit Without Saving, New Game, Survival, Classic.
+# The mod's Terra cluster is chosen by typing its coordinate (fixed seed), launched, and the new
+# colony embarked. Worldgen expectations are functional (mod-play-testing.md, "Worldgen mods"):
+# one asteroid, the mod's world and its added biomes, POIs on the starmap, geysers among the
+# world's spawners. The destination's list of asteroids is dumped (the main menu cannot be shot).
+from: early-base
+mods: [2919833683]
+memory_gb: 8
+steps:
+  - key: {code: Escape}
+  - ui_wait: {path: "**/PauseScreen/**/Main MenuButton", cond: stable}
+  - click: {ui: "**/PauseScreen/**/Main MenuButton"}
+  - ui_wait: {path: "**/ConfirmDialog/GameObject/Panel/ConfigurableButton", cond: stable}
+  - click: {ui: "**/ConfirmDialog/GameObject/Panel/ConfigurableButton"}   # Quit Without Saving
+  - ui_wait: {path: "**/MainMenu_SpacedOut/MainMenuMenubar/MainMenuButtons", cond: stable, frames: 3000}
+  - click: {text: "NEW GAME", under: "**/MainMenuButtons"}
+  - ui_wait: {path: "**/ModeSelectScreen/Panel/Content/RootToggles/StandardGame", cond: stable}
+  - click: {ui: "**/ModeSelectScreen/Panel/Content/RootToggles/StandardGame"}
+  - ui_wait: {path: "**/ClusterCategorySelectionScreen/Panel/Content/RootToggles/ClassicStyleGame", cond: stable}
+  - click: {ui: "**/ClusterCategorySelectionScreen/Panel/Content/RootToggles/ClassicStyleGame"}
+  - ui_wait: {path: "**/ColonyDestinationScreen2/Layout/Buttons/LaunchButton", cond: stable, frames: 3000}
+  # The carousel offers the mod's ten clusters, ahead of the game's (their menu order is lower).
+  - expect_state:
+      "all:DestinationSelectPanel::[0].clusterKeys": {contains: clusters/VanillierSandstoneCluster}
+      "count:all:DestinationSelectPanel::[0].clusterKeys[*] if .StartsWith(\"clusters/Vanillier\") == true": 10
+  - click: {ui: "**/CoordinateContainer/SeedInput"}
+  - ui_wait: {path: "**/CoordinateContainer/SeedInput", cond: stable}
+  - type: {ui: "**/CoordinateContainer/SeedInput", text: "M-SNDST-S-12345-0-0-0", clear: true, enter: true}
+  - ui_wait: {path: "**/Section - Destination/DestinationDetailsHeader/ClusterName", cond: text, value: "~Terra Cluster"}
+  - expect_ui:
+      "**/CoordinateContainer/SeedInput/Text Area/Text": {text: "~M-SNDST-S-12345-0-0-0"}
+      "**/StartingAsteroidCategory/Content/Prefab_AsteroidLine/Label": {text: "Terra Asteroid"}
+  - expect_state:
+      "CustomGameSettings.Instance.GetCurrentQualitySetting(\"ClusterLayout\").id": clusters/VanillierSandstoneCluster
+  - ui_dump: {name: asteroids, root: "**/Section - Destination/World Scoll (Rect Size Set By Screen Code!)/Content/Details"}
+  - click: {ui: "**/ColonyDestinationScreen2/Layout/Buttons/LaunchButton"}
+  # Worldgen runs on its own thread; the Duplicant selection follows once the world is loaded.
+  - ui_wait: {path: "**/MinionSelectScreen/Content/BottomContent/Buttons/ProceedButton", cond: stable, frames: 60000}
+  - click: {ui: "**/MinionSelectScreen/Content/BottomContent/Buttons/ProceedButton"}
+  - ui_wait: {path: "**/MinionSelectScreen", cond: gone, frames: 6000}
+  - expect_state:
+      "ClusterManager.Instance.WorldContainers.Count": 1
+      "ClusterManager.Instance.GetStartWorld().worldName": worlds/VanillierSandstoneDefault
+      "ClusterManager.Instance.GetStartWorld().worldSize.x": 320
+      "ClusterManager.Instance.GetStartWorld().worldSize.y": 384
+      "Components.LiveMinionIdentities.Count": 3
+      # The classic biomes and the Spaced Out ones the mod adds.
+      "ClusterManager.Instance.GetStartWorld().Biomes": {contains: sandstone}
+      "ClusterManager.Instance.GetStartWorld().Biomes.Count": ">= 11"
+      "ClusterManager.Instance.GetStartWorld().m_generatedSubworlds": {contains: "expansion1::subworlds/moo/MooCaverns"}
+      "ClusterManager.Instance.GetStartWorld().WorldTraitIds.Count": ">= 1"
+      # The starmap: the Temporal Tear and the harvestable and artifact POIs.
+      "all:TemporalTear::Length": 1
+      "all:HarvestablePOIClusterGridEntity::Length": ">= 20"
+      "all:ArtifactPOIClusterGridEntity::Length": ">= 5"
+      # Geysers wait among the world's spawners until they are uncovered.
+      "count:SaveGame.Instance.worldGenSpawner.spawnables[*] if .spawnInfo.id.StartsWith(\"GeyserGeneric\") == true": ">= 4"
+  - expect_state:
+      "ClusterManager.Instance.GetStartWorld().m_generatedSubworlds": {contains: "expansion1::subworlds/aquatic/GraphiteCaves"}
+  - expect_state:
+      "ClusterManager.Instance.GetStartWorld().m_generatedSubworlds": {contains: "expansion1::subworlds/radioactive/Radioactive"}

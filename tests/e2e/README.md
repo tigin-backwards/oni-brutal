@@ -365,7 +365,10 @@ would (`mods/2919833683-single-asteroid-clusters.yaml` is the pattern):
    `**/CoordinateContainer/SeedInput` (`PREFIX-12345-0-0-0`, `clear: true, enter: true`): the
    screen selects that cluster and seed, whatever its category. Wait for
    `**/Section - Destination/DestinationDetailsHeader/ClusterName` to read the cluster's name
-   (`cond: text, value: "~NAME"`); `ui_dump` the details header (the main menu cannot be shot).
+   (`cond: text, value: "~NAME"`); `ui_dump` the list of asteroids,
+   `**/Section - Destination/World Scoll (Rect Size Set By Screen Code!)/Content/Details` (the
+   main menu cannot be shot). Leave the coordinate row out: its input field's width after
+   typing varies from run to run in either player.
 4. Click `**/ColonyDestinationScreen2/Layout/Buttons/LaunchButton`. Worldgen runs on its own
    thread and the world loads behind the Duplicant selection: wait for
    `**/MinionSelectScreen/Content/BottomContent/Buttons/ProceedButton` to be stable with a

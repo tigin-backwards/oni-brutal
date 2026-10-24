@@ -6,9 +6,9 @@
  "verdict": "played",
  "why": "passed once in the original and twice in ours",
  "findings": [],
- "note": "a smaller spec (worldgen out of scope): the mod's meteor season with its ten showers, cluster and world names and trait icon are registered in a running colony",
- "updated": "2026-10-23",
- "commit": "8cef88a",
+ "note": "the mod's meteor season with its ten showers, cluster and world names and trait icon are registered in a running colony; then from a colony to New Game, Survival, Classic: the carousel lists the Omnificia cluster; it chosen by typing its coordinate (its asteroid list dumped), launched and embarked: one 352 x 448 asteroid with every biome (Frosty and Prehistoric ones included), the mod's season, geysers among the spawners, starmap POIs, as in the original",
+ "updated": "2026-10-24",
+ "commit": "f1447d1",
  "mod_dlls": {
   "3513358591": {
    "Omnificia.dll": "0c1052842b4890299c9bab2a384bf25172d59b13bccb304a095aefe9d2cdaeb8"
@@ -17,37 +17,45 @@
  "runs": {
   "original": [
    {
-    "run": "20261023-153631-565187",
+    "run": "20261024-121957-33f99b",
     "index": 1,
     "verdict": "pass",
-    "date": "2026-10-23T16:00:34",
-    "lane": 15,
+    "date": "2026-10-24T12:31:07",
+    "lane": 19,
     "signatures": 0
    }
   ],
   "ours": [
    {
-    "run": "20261023-170449-f1913d",
+    "run": "20261024-123514-8ff7a9",
     "index": 1,
     "verdict": "pass",
-    "date": "2026-10-23T17:04:49",
-    "lane": 14,
-    "reference_run": "20261023-153631-565187",
+    "date": "2026-10-24T12:49:25",
+    "lane": 19,
+    "reference_run": "20261024-121957-33f99b",
     "new_signatures": 0,
     "findings": [],
-    "ui_dump": {},
+    "ui_dump": {
+     "asteroids": {
+      "differences": 0
+     }
+    },
     "shots": {}
    },
    {
-    "run": "20261023-170449-f1913d",
+    "run": "20261024-123514-8ff7a9",
     "index": 2,
     "verdict": "pass",
-    "date": "2026-10-23T17:15:37",
-    "lane": 14,
-    "reference_run": "20261023-153631-565187",
+    "date": "2026-10-24T12:50:18",
+    "lane": 18,
+    "reference_run": "20261024-121957-33f99b",
     "new_signatures": 0,
     "findings": [],
-    "ui_dump": {},
+    "ui_dump": {
+     "asteroids": {
+      "differences": 0
+     }
+    },
     "shots": {}
    }
   ]

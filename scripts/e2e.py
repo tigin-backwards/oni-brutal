@@ -26,7 +26,7 @@ its E2eDriver on 8801 + 10 L (E2E_DRIVER_PORT), and its display is an Xvfb on :(
 while its ports or display are in use or reserved (the directory's `reserved` file and
 E2E_RESERVED). Each player is counted for its memory in the machine's players' budget
 (E2E_MEMORY_GB, default 40; E2E_MAX_PLAYERS, default 6). A run holds perf.lock shared, so a perf
-job taking it exclusively (`flock -x ~/.cache/oni-brutal-e2e/perf.lock CMD`) keeps specs from
+job taking it exclusively (`flock -x -o ~/.cache/oni-brutal-e2e/perf.lock CMD`) keeps specs from
 starting; specs also wait while ps shows a perf job. Each wait says what it waits for, and
 --max-wait (or E2E_MAX_WAIT) fails the run after that many minutes.
 
@@ -672,7 +672,7 @@ class Budget:
 
 
 # Perf jobs: a spec never starts beside one (§10 decision 7). It waits while one holds
-# perf.lock exclusively (`flock -x ~/.cache/oni-brutal-e2e/perf.lock CMD`) or while ps shows one.
+# perf.lock exclusively (`flock -x -o ~/.cache/oni-brutal-e2e/perf.lock CMD`) or while ps shows one.
 
 def perf_jobs(lines=None):
     """The ps lines (args) of running perf jobs."""

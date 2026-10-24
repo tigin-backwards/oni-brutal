@@ -3,12 +3,12 @@
  "mods": [
   "2971184827"
  ],
- "verdict": "failed",
- "why": "a run of ours failed",
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
  "findings": [],
- "note": "an Auto-Sweeper is built and selected: 10 typed into its range slider field gives it a 10-cell range, and Cross Wall is ticked; fails in ours: the slider screen's empty UnitsLabel (16 pt in a 15 px tall rect) reports isTextOverflowing=True, firstOverflowCharacterIndex=0 in the original and False, -1 in ours",
+ "note": "an Auto-Sweeper is built and selected: 10 typed into its range slider field gives it a 10-cell range, and Cross Wall is ticked; the slider screen's empty UnitsLabel keeps its earlier overflow (true, 0), as in the original",
  "updated": "2026-10-24",
- "commit": "0bbf8a4",
+ "commit": "0c5db57",
  "mod_dlls": {
   "2971184827": {
    "AdjustableSolidTransferArm.dll": "72f19c6321cd8480a950e05d5c9d3a414b09cf5c95ac9ab365fb2dc3dfd1ca82"
@@ -27,20 +27,17 @@
   ],
   "ours": [
    {
-    "run": "20261024-080304-bb8a38",
+    "run": "20261024-085431-581565",
     "index": 1,
-    "verdict": "fail",
-    "date": "2026-10-24T08:03:04",
-    "lane": 16,
-    "reasons": [
-     "ui_dump slider: 1 difference(s)"
-    ],
+    "verdict": "pass",
+    "date": "2026-10-24T08:54:31",
+    "lane": 12,
     "reference_run": "20261024-075822-057dc1",
     "new_signatures": 0,
     "findings": [],
     "ui_dump": {
      "slider": {
-      "differences": 1
+      "differences": 0
      }
     },
     "shots": {
@@ -48,20 +45,17 @@
     }
    },
    {
-    "run": "20261024-080304-bb8a38",
+    "run": "20261024-085431-581565",
     "index": 2,
-    "verdict": "fail",
-    "date": "2026-10-24T08:04:13",
-    "lane": 16,
-    "reasons": [
-     "ui_dump slider: 1 difference(s)"
-    ],
+    "verdict": "pass",
+    "date": "2026-10-24T08:54:32",
+    "lane": 13,
     "reference_run": "20261024-075822-057dc1",
     "new_signatures": 0,
     "findings": [],
     "ui_dump": {
      "slider": {
-      "differences": 1
+      "differences": 0
      }
     },
     "shots": {

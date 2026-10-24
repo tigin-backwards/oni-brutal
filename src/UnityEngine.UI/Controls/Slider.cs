@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using UnityEngine.EventSystems;
 
 namespace UnityEngine.UI
@@ -304,7 +303,6 @@ namespace UnityEngine.UI
         [NonSerialized] RectTransform container;
         [NonSerialized] Vector2 grab;
         [NonSerialized] bool pressedOnTrack;
-        [NonSerialized] Coroutine repeat;
         DrivenRectTransformTracker tracker;
 
         protected Scrollbar()
@@ -436,33 +434,42 @@ namespace UnityEngine.UI
             m_HandleRect.anchorMax = max;
         }
 
-        /// The value that puts the handle's grabbed point under the pointer.
+        /// The value that puts the handle's centre at the screen point less `offset` (in the
+        /// track's local units): with q the point's position along the track in the direction of
+        /// the value, clamp01((q - size / 2) / (1 - size)). False when the point does not map
+        /// onto the track or the handle fills it.
+        bool ValueAt(Vector2 screen, Camera camera, Vector2 offset, out float result)
+        {
+            result = 0f;
+            if (container == null || size >= 1f) return false;
+            if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(container, screen, camera, out var local)) return false;
+            var rect = container.rect;
+            int a = (int)axis;
+            float length = rect.size[a];
+            if (length <= 0f) return false;
+            // In the track's units: (q * length - handle / 2) / (length - handle).
+            float along = local[a] - offset[a] - rect.min[a];
+            if (reverseValue) along = length - along;
+            float handle = length * size;
+            result = Mathf.Clamp01((along - handle / 2f) / (length - handle));
+            return true;
+        }
+
         void UpdateDrag(PointerEventData eventData)
         {
-            if (eventData.button != PointerEventData.InputButton.Left || container == null) return;
-            if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(container, eventData.position, eventData.pressEventCamera, out var local)) return;
-            var centre = local - grab - container.rect.position;
-            var corner = centre - (m_HandleRect.rect.size - m_HandleRect.sizeDelta) * 0.5f;
-            float track = axis == Axis.Horizontal ? container.rect.width : container.rect.height;
-            float free = track * (1f - size);
-            if (free <= 0f) return;
-            switch (m_Direction)
-            {
-                case Direction.LeftToRight: Set(Mathf.Clamp01(corner.x / free)); break;
-                case Direction.RightToLeft: Set(Mathf.Clamp01(1f - corner.x / free)); break;
-                case Direction.BottomToTop: Set(Mathf.Clamp01(corner.y / free)); break;
-                case Direction.TopToBottom: Set(Mathf.Clamp01(1f - corner.y / free)); break;
-            }
+            if (eventData.button != PointerEventData.InputButton.Left) return;
+            if (ValueAt(eventData.position, eventData.pressEventCamera, grab, out var v)) Set(v);
         }
 
         bool MayDrag(PointerEventData eventData) => IsActive() && IsInteractable() && eventData.button == PointerEventData.InputButton.Left;
 
-        /// A drag grabs the handle where it was pressed (its centre when pressed on the track).
+        /// A drag keeps the point at which the handle was grabbed under the pointer; after a
+        /// press on the track it drags the handle by its centre.
         public virtual void OnBeginDrag(PointerEventData eventData)
         {
-            pressedOnTrack = false;
             if (!MayDrag(eventData) || container == null) return;
             grab = Vector2.zero;
+            if (pressedOnTrack) return;
             var at = eventData.pointerPressRaycast.screenPosition;
             if (RectTransformUtility.RectangleContainsScreenPoint(m_HandleRect, at, eventData.enterEventCamera)
                 && RectTransformUtility.ScreenPointToLocalPointInRectangle(m_HandleRect, at, eventData.pressEventCamera, out var local))
@@ -475,33 +482,20 @@ namespace UnityEngine.UI
             if (container != null) UpdateDrag(eventData);
         }
 
+        /// A press on the track outside the handle centres the handle on the press point in that
+        /// frame. Holding the button changes nothing more until the pointer moves, when the drag
+        /// follows it; there is no repeat. A press on the handle changes nothing.
         public override void OnPointerDown(PointerEventData eventData)
         {
             if (!MayDrag(eventData)) return;
             base.OnPointerDown(eventData);
+            pressedOnTrack = false;
+            if (container == null) return;
+            var at = eventData.pointerPressRaycast.screenPosition;
+            if (RectTransformUtility.RectangleContainsScreenPoint(m_HandleRect, at, eventData.enterEventCamera)) return;
             pressedOnTrack = true;
-            repeat = StartCoroutine(ClickRepeat(eventData.pointerPressRaycast.screenPosition, eventData.enterEventCamera));
-        }
-
-        protected IEnumerator ClickRepeat(PointerEventData eventData) => ClickRepeat(eventData.pointerPressRaycast.screenPosition, eventData.enterEventCamera);
-
-        /// While the press on the track lasts, the handle moves a page (its size) towards the
-        /// press each frame until it covers it.
-        protected IEnumerator ClickRepeat(Vector2 screenPosition, Camera camera)
-        {
-            while (pressedOnTrack)
-            {
-                if (!RectTransformUtility.RectangleContainsScreenPoint(m_HandleRect, screenPosition, camera)
-                    && RectTransformUtility.ScreenPointToLocalPointInRectangle(m_HandleRect, screenPosition, camera, out var local))
-                {
-                    float along = axis == Axis.Horizontal ? local.x : local.y;
-                    float page = along < 0f ? size : -size;
-                    float v = Mathf.Clamp01(value + (reverseValue ? page : -page));
-                    value = Mathf.Round(v * 10000f) / 10000f;
-                }
-                yield return null;
-            }
-            repeat = null;
+            grab = Vector2.zero;
+            if (ValueAt(at, eventData.pressEventCamera, Vector2.zero, out var v)) Set(v);
         }
 
         public override void OnPointerUp(PointerEventData eventData)

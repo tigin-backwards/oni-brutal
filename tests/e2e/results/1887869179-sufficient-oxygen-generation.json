@@ -1,0 +1,55 @@
+{
+ "spec": "mods/1887869179-sufficient-oxygen-generation.yaml",
+ "mods": [
+  "1887869179"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "option Constant at 50 kg; the clock moved past two nightfalls with no oxygen made: today's deficit is under 50 kg, so the mod's check passes where the game alone would warn",
+ "updated": "2026-10-24",
+ "commit": "147b0d6",
+ "mod_dlls": {
+  "1887869179": {
+   "SufficientOxygenGeneration.dll": "d8cf2b166391707c67bb7983584558f6c1170e1e37e4551130d7956cb7ad02bf"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-054427-485496",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T05:47:28",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-060015-b7307d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T06:00:15",
+    "lane": 16,
+    "reference_run": "20261024-054427-485496",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-060015-b7307d",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T06:01:24",
+    "lane": 16,
+    "reference_run": "20261024-054427-485496",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

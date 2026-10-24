@@ -1,0 +1,50 @@
+# Customize and edit Duplicant traits (3687060621), classes S, M.
+#
+# What it does: every Duplicant card (the printing pod's and a new colony's CharacterContainer)
+# gets an IMGUI button above it, "::: EDIT NAME :::". It opens a window, "--- NAME CONTROL
+# PANEL ---", over the card: interests and their attribute levels (- and +, X to remove, < >
+# and ADD), good and bad traits (X, < > and ADD, at most 4 each), stress and joy reactions
+# (< >), presets saved to and loaded from DupePresets in the game's data folder (SAVE, LOAD,
+# DEL), and [ CLOSE EDITOR ]. Each change rebuilds the card from the edited starting stats.
+# How a player reaches it: the printing pod's immigrant screen (or a new colony's Duplicant
+# selection), the EDIT button over a card.
+# What changes: the printed Duplicant's interests, traits and reactions.
+#
+# setup makes Duplicants available and seeds the cards. The immigrant screen is opened through
+# OniMcp. Its controls are IMGUI, which E2eDriver cannot find, so they are clicked by screen
+# point: the EDIT button over the first card opens the editor; SAVE writes the card as a
+# preset file, DEL deletes it, and [ CLOSE EDITOR ] closes the window. The cards are random,
+# so the window is not shot; only the parts below its fixed-height list of interests and
+# traits are clicked, which do not move with the card's content.
+from: early-base
+mods: [3687060621]
+setup:
+  - driver: {seed: 12345}
+  - driver: {setup.call: {target: "Immigration.Instance", method: "Sim200ms", args: [100000]}}
+steps:
+  - call: {tool: building_control, args: {domain: side_surface, surface: facility, kind: telepad, action: open_immigrants, confirm: true}}
+  - ui_wait: {path: "**/ImmigrantScreen/Layout", cond: stable}
+  - ui_wait: {path: "**/ImmigrantScreen/Layout/Content/*Container[0]", cond: stable}
+  - expect_ui:
+      "**/ImmigrantScreen/Layout/Content/CharacterContainer[0]": {active: true}
+  - expect_state:
+      "ui:**/ImmigrantScreen/Layout/Content/CharacterContainer::GetComponent<CustomDuplicantBuilder.KankaCanliArayuz>.panelAcik": false
+  # The first card spans x 113.68..371.68 from y 66.74: its EDIT button is 250 x 25 pixels,
+  # centred over it and 80 pixels above its top edge, so its lower half shows at the top of the
+  # screen.
+  - click: {at: [242, 5]}
+  - expect_state:
+      "ui:**/ImmigrantScreen/Layout/Content/CharacterContainer::GetComponent<CustomDuplicantBuilder.KankaCanliArayuz>.panelAcik": true
+      "file:DupePresets/MyPreset.dupe": missing
+  # The window (350 x 650 from x 67.68, y -73.26) ends with the preset row (the name field and
+  # SAVE), the preset list and [ CLOSE EDITOR ].
+  - click: {at: [347, 327]}                 # SAVE: DupePresets/MyPreset.dupe
+  - expect_state:
+      "file:DupePresets/MyPreset.dupe": exists
+      "file:DupePresets": 1
+  - click: {at: [339, 355]}                 # DEL on the new MyPreset row
+  - expect_state:
+      "file:DupePresets/MyPreset.dupe": missing
+  - click: {at: [242, 493]}                 # [ CLOSE EDITOR ], once the list is empty again
+  - expect_state:
+      "ui:**/ImmigrantScreen/Layout/Content/CharacterContainer::GetComponent<CustomDuplicantBuilder.KankaCanliArayuz>.panelAcik": false

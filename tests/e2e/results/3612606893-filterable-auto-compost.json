@@ -1,0 +1,77 @@
+{
+ "spec": "mods/3612606893-filterable-auto-compost.yaml",
+ "mods": [
+  "3612606893"
+ ],
+ "verdict": "failed",
+ "why": "a run of ours failed",
+ "findings": [],
+ "note": "after Farming Technology, a Compost selected: its filter side screen lists the Edible compost category; checked, a Duplicant brings the Meal Lice and the Compost holds it as compostable, in both players. Fails in ours on the side screen's layout dumps: the focused search field's caret (a TMP_SelectionCaret at its prefab rect, outside the field's RectMask2D) is culled in ours, not in the original",
+ "updated": "2026-10-24",
+ "commit": "147b0d6",
+ "mod_dlls": {
+  "3612606893": {
+   "AutoComposter.dll": "743f6bb785b1d68fccb651e3138d6a796675340e7a663f9f50764b6630905fcd"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-054427-485496",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T05:44:27",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-055448-19b0d8",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-24T05:54:48",
+    "lane": 16,
+    "reasons": [
+     "ui_dump filter: 1 difference(s)",
+     "ui_dump filter-checked: 1 difference(s)"
+    ],
+    "reference_run": "20261024-054427-485496",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "filter": {
+      "differences": 1
+     },
+     "filter-checked": {
+      "differences": 1
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261024-055448-19b0d8",
+    "index": 2,
+    "verdict": "fail",
+    "date": "2026-10-24T05:57:34",
+    "lane": 16,
+    "reasons": [
+     "ui_dump filter: 1 difference(s)",
+     "ui_dump filter-checked: 1 difference(s)"
+    ],
+    "reference_run": "20261024-054427-485496",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "filter": {
+      "differences": 1
+     },
+     "filter-checked": {
+      "differences": 1
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

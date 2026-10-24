@@ -1,0 +1,39 @@
+# Filterable Auto-Compost (3612606893), classes P, O.
+#
+# What it does: the Compost gets a filter side screen of compostable categories ("Compost:"
+# food, seeds, ...): Duplicants bring it the checked items, fresh or not, and the Compost marks
+# them compostable itself once they are stored (rot piles from its contents stay in it). No
+# need to mark food for compost by hand. PLib options: make the Compostable category special in
+# filter menus, or hide it from them, or from the resources screen.
+# How a player reaches it: select a Compost; its filter side screen.
+# What changes: what the Compost takes, without marking items first.
+#
+# setup grants Farming Technology, builds a Compost in the dug-out corridor west of the
+# printing pod and lays 4 Mealwood (Meal Lice) beside it. The Compost is selected and its food
+# category checked in its filter: a Duplicant delivers the Meal Lice, which the Compost holds
+# as compostable.
+from: early-base
+mods: [3612606893]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"FarmingTech\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Compost\")", method: Build, args: [131130, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131126, 0, 0, \"BasicPlantFood\", \"Ore\")", method: SetActive, args: [true]}}
+steps:
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [114, 208], ortho: 8}}
+  - click_world: {cell: [114, 207], select: Compost}
+  - ui_wait: {path: "**/TreeFilterableSideScreen", cond: stable}
+  - expect_ui:
+      "**/TreeFilterableSideScreen/**/TreeFilterableRow/HorizontalContent/ElementName": {text: "Edible"}
+  - expect_state:
+      "selected:Storage.storageFilters": {contains: CompostEdible}
+      "selected:GetComponent<AutoComposter.AutoComposter>": exists
+  - ui_dump: {name: filter, root: "**/TreeFilterableSideScreen"}
+  - click: {ui: "**/TreeFilterableSideScreen/**/TreeFilterableRow/HorizontalContent/CheckBox"}
+  - ui_wait: {path: "**/TreeFilterableSideScreen/**/TreeFilterableRow", cond: stable}
+  - ui_dump: {name: filter-checked, root: "**/TreeFilterableSideScreen"}
+  # A Duplicant brings the Meal Lice, which the Compost keeps as compostable.
+  - run: {seconds: 300}
+  - expect_state:
+      "count:all:Compost::[0].GetComponent<Storage>.items[*] if .GetComponent<KPrefabID>.HasTag(\"Compostable\") == true": ">= 1"

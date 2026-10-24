@@ -1,0 +1,36 @@
+# Sufficient Oxygen Generation (1887869179), classes P, O.
+#
+# What it does: changes when the game warns "Insufficient Oxygen Generation". The game warns
+# from the second cycle whenever no oxygen was made, net, today or yesterday. With the mod
+# (a prefix on Tutorial.SufficientOxygenLastCycleAndThisCycle) the warning follows a PLib
+# option: Constant (warn when today's net oxygen is below minus ConstantThreshold kg and
+# yesterday's was not positive), Ratio (when produced over consumed is below RatioThreshold,
+# 30 s into a cycle), or Off.
+# How a player reaches it: the Mods screen's options; then the warning in the notifications.
+# What changes: when the oxygen warning shows.
+#
+# Options here: Constant, 50 kg. setup moves the clock into the third cycle, so yesterday has a
+# report: early-base makes no oxygen, and its Duplicants breathe, so the game alone would
+# warn. Today's deficit is far less than 50 kg, so the check passes.
+from: early-base
+mods: [1887869179]
+options:
+  Aze.SufficientOxygenGeneration: {Mode: 0, ConstantThreshold: 50.0}
+setup:
+  - driver: {setup.call: {target: "SaveGame.Instance", method: set_AutoSaveCycleInterval, args: [0]}}
+  # early-base starts 290 s into its first cycle. Past two nightfalls (a report is filed at
+  # each; "yesterday" is the last one once there are two), into cycle 3.
+  - driver: {setup.call: {target: "GameClock.Instance", method: AddTime, args: [250]}}
+  - driver: {setup.call: {target: "GameClock.Instance", method: AddTime, args: [100]}}
+  - driver: {setup.call: {target: "GameClock.Instance", method: AddTime, args: [500]}}
+  - driver: {setup.call: {target: "GameClock.Instance", method: AddTime, args: [100]}}
+steps:
+  - run: {seconds: 30}
+  - expect_state:
+      "GameClock.Instance.GetCycle()": ">= 1"
+      "ReportManager.Instance.YesterdaysReport": exists
+      "ReportManager.Instance.YesterdaysReport.GetEntry(\"OxygenCreated\").Net": "<= 0.0001"
+      "ReportManager.Instance.TodaysReport.GetEntry(\"OxygenCreated\").Net": "<= 0.0001"
+  - expect_state:
+      "ReportManager.Instance.TodaysReport.GetEntry(\"OxygenCreated\").Net": "> -50"
+      "Tutorial.Instance.SufficientOxygenLastCycleAndThisCycle()": true

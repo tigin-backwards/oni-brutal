@@ -1,0 +1,33 @@
+# Auto Drop Wrong Liquid (3305874874), class P.
+#
+# What it does: a planted crop whose irrigation storage holds the wrong liquid (polluted water
+# piped into a Hydroponic Farm growing a Bristle Blossom, say) and is starved because of it
+# gets an Empty Storage errand ("awaiting empty"): a Duplicant comes and dumps the wrong
+# liquid, and the crop can be irrigated again. In the game alone it is dumped only when a seed
+# is planted, so a starved crop stays stuck.
+# How a player reaches it: farming with irrigated crops; nothing to press.
+# What changes: wrong liquids leave farm plots without the player's help.
+#
+# setup builds a Planter Box in the dug-out corridor west of the printing pod and plants a
+# Bristle Blossom in it; once the crop has settled in (the game dumps wrong liquids when a seed
+# is planted), 10 kg of polluted water is put in the box's storage. The crop starves on the
+# wrong liquid, the mod's errand appears, and the polluted water is emptied out.
+from: early-base
+mods: [3305874874]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"PlanterBox\")", method: Build, args: [131125, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {type: Scenario, method: SpawnPrefab, args: [131125, 0, 1, "PrickleFlowerSeed", "Ore"]}}
+  - driver: {setup.call: {target: "all:PlanterBox::[0].GetComponent<PlantablePlot>", method: ForceDeposit, args: [{"$": "last:"}]}}
+  - driver: {ui.wait: {path: "**/E2eNothing", cond: gone, frames: 5}}
+  - driver: {ui.wait: {path: "**/E2eNothing", cond: gone, frames: 5}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"DirtyWater\").substance", method: SpawnResource, args: [[109.5, 207.5, -12], 10, 293.15, 255, 0]}}
+  - driver: {setup.call: {target: "all:PlanterBox::[0].GetComponent<Storage>", method: Store, args: [{"$": "last:"}, true, false, true, false]}}
+steps:
+  - expect_state:
+      "all:PlanterBox::[0].GetComponent<PlantablePlot>.Occupant.GetComponent<KPrefabID>.PrefabTag": PrickleFlower
+      "count:all:PlanterBox::[0].GetComponent<Storage>.items[*] if .GetComponent<PrimaryElement>.ElementID == DirtyWater": 1
+  - run: {seconds: 120}
+  # The starved crop's errand (the mod's workable on the box) emptied the polluted water out.
+  - expect_state:
+      "all:PlanterBox::[0].GetComponent<DumpIncorrectFertilizers.DumpIncorrectFertilizersWorkable>": exists
+      "count:all:PlanterBox::[0].GetComponent<Storage>.items[*] if .GetComponent<PrimaryElement>.ElementID == DirtyWater": 0

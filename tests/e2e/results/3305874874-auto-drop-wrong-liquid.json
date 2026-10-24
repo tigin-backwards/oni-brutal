@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3305874874-auto-drop-wrong-liquid.yaml",
+ "mods": [
+  "3305874874"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Bristle Blossom planted in a planter box, then 10 kg of polluted water put in its storage: the starved crop gets the mod's Empty Storage errand and the polluted water is emptied out within 120 s",
+ "updated": "2026-10-24",
+ "commit": "147b0d6",
+ "mod_dlls": {
+  "3305874874": {
+   "DumpIncorrectFertilizers.dll": "837935fd22a26d86b2a6c8473a1f090df1d9561e7c6eef111023060cee7f13b5"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-055229-4b4b02",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T05:52:29",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-060230-c3d789",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T06:02:30",
+    "lane": 16,
+    "reference_run": "20261024-055229-4b4b02",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-060230-c3d789",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T06:04:07",
+    "lane": 16,
+    "reference_run": "20261024-055229-4b4b02",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

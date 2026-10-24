@@ -1,0 +1,59 @@
+{
+ "spec": "mods/2381541381-egg-cryopreservation.yaml",
+ "mods": [
+  "2381541381"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Egg Cryopreservation unit (Animal Control) built of steel and selected stores eggs, up to 50 (title shot as in the original); running it needs power, which early-base lacks",
+ "updated": "2026-10-23",
+ "commit": "397acff",
+ "mod_dlls": {
+  "2381541381": {
+   "EggCryopreservation.dll": "edf0c67f432087b2ee1a9d3c693476ee944e0e5ddff3024f97297614db9cee2b"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-183417-5e8543",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T20:51:38",
+    "lane": 13,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-213047-94e53a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T21:56:34",
+    "lane": 12,
+    "reference_run": "20261023-183417-5e8543",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "title": 0.0
+    }
+   },
+   {
+    "run": "20261023-213047-94e53a",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T21:58:09",
+    "lane": 12,
+    "reference_run": "20261023-183417-5e8543",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "title": 0.0
+    }
+   }
+  ]
+ }
+}

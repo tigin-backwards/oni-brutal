@@ -1,0 +1,31 @@
+# Egg Cryopreservation (2381541381), classes B, S.
+#
+# What it does: adds the Egg Cryopreservation unit to the Food menu (researched with Animal
+# Control): a 2x3 powered (150 W) storage of refined metal for eggs. Once its cryo efficiency
+# is high enough, eggs in it stop incubating (a "frozen" state added to IncubationMonitor) and
+# take no room in the ranch's overcrowding count; it has logic outputs for working, full and
+# efficiency, a capacity slider, and the details screen's storage list sorted and stacked.
+# How a player reaches it: the build menu (Food); its filter and capacity side screens.
+# What changes: eggs that keep.
+#
+# setup grants Animal Control and spawns steel. The unit is built in the dug-out corridor west
+# of the printing pod and selected: its side screens offer eggs to store.
+from: early-base
+mods: [2381541381]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"AnimalControl\")", method: Purchased}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Steel\").substance", method: SpawnResource, args: [[112.5, 207.5, -12], 400, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"AnimalControl\").unlockedItemIDs": {contains: EggCryopreservation}
+  - build: {prefab: EggCryopreservation, at: [108, 206], material: Steel}
+  - expect: {blueprints: {EggCryopreservation: 1}}
+  - run: {seconds: 1200, until: {buildings: {EggCryopreservation: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [109, 208], ortho: 8}}
+  - click_world: {cell: [108, 207], select: EggCryopreservation}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui: {"**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Egg"}}
+  - expect_state:
+      "selected:EggCryopreservation.MaxCapacity": 50
+      "selected:Storage.storageFilters": {contains: Egg}
+  - shot: {name: title, crop: "**/DetailsScreen/TitleBar", threshold: 0.04}

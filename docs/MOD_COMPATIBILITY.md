@@ -524,10 +524,10 @@ installs get developer checks subscribers never see).
 | 503 | [Heat Terminator热量终结者](https://steamcommunity.com/sharedfiles/filedetails/?id=2842352931) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2842352931-heat-terminator.yaml: options 200 W and 300 W; the gas cooler (Chinese name) built and selected, drawing 200 W and making no heat; its title as in the original |
 | 504 | [Mod Filter](https://steamcommunity.com/sharedfiles/filedetails/?id=2196347807) | ✅ | ✅ | ⬜ |  |
 | 505 | [Thermoelectric Coolers](https://steamcommunity.com/sharedfiles/filedetails/?id=2593479763) | ✅ | ✅ | ⬜ |  |
-| 506 | [So Many Dupes](https://steamcommunity.com/sharedfiles/filedetails/?id=2823469509) | ✅ | ✅ | ⬜ |  |
+| 506 | [So Many Dupes](https://steamcommunity.com/sharedfiles/filedetails/?id=2823469509) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2823469509-so-many-dupes.yaml: with Dupery Fixed: the mod's personalities (Daikon, Paul) are in the game's pool with their traits and hair; content only |
 | 507 | [Skill and Stats progress](https://steamcommunity.com/sharedfiles/filedetails/?id=1710666223) | ❌ | ❌ | ⬜ | fails to load in the original as well, in its sweep batch |
 | 508 | [Customize and edit Duplicant traits](https://steamcommunity.com/sharedfiles/filedetails/?id=3687060621) | ✅ | ✅ | ⬜ |  |
-| 509 | [[MG]Rocket speed 10 times(火箭速度10倍)](https://steamcommunity.com/sharedfiles/filedetails/?id=2557280880) | ✅ | ✅ | ⬜ |  |
+| 509 | [[MG]Rocket speed 10 times(火箭速度10倍)](https://steamcommunity.com/sharedfiles/filedetails/?id=2557280880) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2557280880-mg-rocket-speed-10x.yaml: smaller spec, no rocket on early-base: the engine power tunings are ten times the game's and the big engines carry 12 modules, on their prefabs |
 | 510 | [Geo Apocalypse {Updated}](https://steamcommunity.com/sharedfiles/filedetails/?id=1810480011) | ⬜ | ⬜ | ⬜ |  |
 | 511 | [No Damage - Outdated](https://steamcommunity.com/sharedfiles/filedetails/?id=1728703506) | ⬜ | ⬜ | ⬜ | flagged by onimaxxing (notLoading); not tested |
 | 512 | [Customize your paints](https://steamcommunity.com/sharedfiles/filedetails/?id=1906475585) | ✅ | ✅ | ⬜ |  |
@@ -559,8 +559,8 @@ installs get developer checks subscribers never see).
 | 538 | [Advanced Start](https://steamcommunity.com/sharedfiles/filedetails/?id=1906667480) | ❌ | ❌ | ⬜ | fails to load in the original as well, in its sweep batch |
 | 539 | [100K Challenge](https://steamcommunity.com/sharedfiles/filedetails/?id=2228381429) | ⬜ | ⬜ | ⬜ |  |
 | 540 | [Custom World Size - Outdated](https://steamcommunity.com/sharedfiles/filedetails/?id=1713687582) | ⬜ | ⬜ | ⬜ | flagged by onimaxxing (notLoading); not tested |
-| 541 | [Liquid Conditioner Config 液温调整器耗电调整](https://steamcommunity.com/sharedfiles/filedetails/?id=1931516176) | ✅ | ✅ | ⬜ |  |
-| 542 | [Hysteresis Storage](https://steamcommunity.com/sharedfiles/filedetails/?id=2875347670) | ✅ | ✅ | ⬜ |  |
+| 541 | [Liquid Conditioner Config 液温调整器耗电调整](https://steamcommunity.com/sharedfiles/filedetails/?id=1931516176) | ✅ | ✅ | ✅ | spec tests/e2e/mods/1931516176-liquid-conditioner-config.yaml: option 500 W; the Thermo Aquatuner picked in the Utilities menu after Liquid Tuning: its card shows 500 W (the game's is 1200) |
+| 542 | [Hysteresis Storage](https://steamcommunity.com/sharedfiles/filedetails/?id=2875347670) | ✅ | ✅ | ⬜ | spec fails in ours: tests/e2e/mods/2875347670-hysteresis-storage.yaml: a storage bin's Enable Hysteresis user-menu button clicked and 500 typed as its minimum: hysteresis on at 500 kg in both players, the side screen's shot within 0.9 % of the original's; fails in ours on its layout dump: after the typed value is applied, the minimum's input field reports caretPosition 0 in ours, 3 in the original (a run of ours failed) |
 | 543 | [Transit Tube Overlay](https://steamcommunity.com/sharedfiles/filedetails/?id=3510927460) | ✅ | ✅ | ⬜ |  |
 | 544 | [Geyser Swapper](https://steamcommunity.com/sharedfiles/filedetails/?id=3670972563) | ✅ | ✅ | ⬜ |  |
 | 545 | [Geothermal Story Trait](https://steamcommunity.com/sharedfiles/filedetails/?id=3485474178) | ⬜ | ⬜ | ⬜ |  |

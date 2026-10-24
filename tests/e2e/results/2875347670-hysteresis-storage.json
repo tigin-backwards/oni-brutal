@@ -1,0 +1,73 @@
+{
+ "spec": "mods/2875347670-hysteresis-storage.yaml",
+ "mods": [
+  "2875347670"
+ ],
+ "verdict": "failed",
+ "why": "a run of ours failed",
+ "findings": [],
+ "note": "a storage bin's Enable Hysteresis user-menu button clicked and 500 typed as its minimum: hysteresis on at 500 kg in both players, the side screen's shot within 0.9 % of the original's; fails in ours on its layout dump: after the typed value is applied, the minimum's input field reports caretPosition 0 in ours, 3 in the original",
+ "updated": "2026-10-24",
+ "commit": "65688ea",
+ "mod_dlls": {
+  "2875347670": {
+   "HysteresisStorage.dll": "1bdf20f12d52dc6f83f1a1f4c944893d4d4ba0b1a91a4833af4a49ed8f5a21ba"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-041749-149a12",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T04:20:44",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-044120-ebdf7e",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-24T04:41:20",
+    "lane": 16,
+    "reasons": [
+     "ui_dump sidescreen: 1 difference(s)"
+    ],
+    "reference_run": "20261024-041749-149a12",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "sidescreen": {
+      "differences": 1
+     }
+    },
+    "shots": {
+     "sidescreen": 0.009129
+    }
+   },
+   {
+    "run": "20261024-044120-ebdf7e",
+    "index": 2,
+    "verdict": "fail",
+    "date": "2026-10-24T04:42:24",
+    "lane": 16,
+    "reasons": [
+     "ui_dump sidescreen: 1 difference(s)"
+    ],
+    "reference_run": "20261024-041749-149a12",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "sidescreen": {
+      "differences": 1
+     }
+    },
+    "shots": {
+     "sidescreen": 0.009129
+    }
+   }
+  ]
+ }
+}

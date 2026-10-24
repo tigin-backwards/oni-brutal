@@ -1,0 +1,59 @@
+{
+ "spec": "mods/1931516176-liquid-conditioner-config.yaml",
+ "mods": [
+  "1931516176"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "option 500 W; the Thermo Aquatuner picked in the Utilities menu after Liquid Tuning: its card shows 500 W (the game's is 1200)",
+ "updated": "2026-10-24",
+ "commit": "65688ea",
+ "mod_dlls": {
+  "1931516176": {
+   "ThermoAqua2Merged.dll": "a8b974552f2d5687baaefe425d28d18c8cddebac9cb9bc522c50940914c565b6"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-041749-149a12",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T04:23:35",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-044320-8407a6",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T04:43:20",
+    "lane": 16,
+    "reference_run": "20261024-041749-149a12",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.004983
+    }
+   },
+   {
+    "run": "20261024-044320-8407a6",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T04:44:22",
+    "lane": 16,
+    "reference_run": "20261024-041749-149a12",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.004983
+    }
+   }
+  ]
+ }
+}

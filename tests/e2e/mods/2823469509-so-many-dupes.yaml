@@ -1,0 +1,23 @@
+# So Many Dupes (2823469509), with Dupery Fixed (3172734005), which it requires. Class P
+# (content only: no DLL).
+#
+# What it does: ships a PERSONALITIES.json of about 40 new Duplicant personalities (Daikon,
+# Ferris, Paul, Annie, ...) with their own hair (anim/) and dream icons (dreamicons/). Dupery
+# finds the file in the mod's folder at Db.Initialize, loads the accessories and icons, and
+# adds the personalities to the game's pool, so the printing pod and new colonies can offer
+# them.
+# How a player reaches it: printing pod and new-colony Duplicants.
+# What changes: which personalities Duplicants can have.
+#
+# The pool is checked: Daikon and Paul are personalities, with their names, traits and hair;
+# Daikon's hair is an accessory and his dream icon a sprite.
+from: early-base
+mods: [3172734005, 2823469509]
+steps:
+  - expect_state:
+      "Db.Get().Personalities.Get(\"DAIKON\").Name": Daikon
+      "Db.Get().Personalities.Get(\"DAIKON\").stresstrait": Aggressive
+      "Db.Get().Personalities.Get(\"PAUL\").Name": Paul
+      "Db.Get().Personalities.Get(\"PAUL\").joyTrait": HappySinger
+      "Db.Get().Personalities.Count": "== original"
+      "Db.Get().Accessories.TryGet(\"hair_daikon\")": exists

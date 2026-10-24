@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2557280880-mg-rocket-speed-10x.yaml",
+ "mods": [
+  "2557280880"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "smaller spec, no rocket on early-base: the engine power tunings are ten times the game's and the big engines carry 12 modules, on their prefabs",
+ "updated": "2026-10-24",
+ "commit": "65688ea",
+ "mod_dlls": {
+  "2557280880": {
+   "MG_RocketrySpeed.dll": "0efe3b8fb40792f18ea9a4e746383928b3978bee0557be0f8e814c15bb561e7b"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-041749-149a12",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T04:28:15",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-044648-9e8a2c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T04:46:48",
+    "lane": 16,
+    "reference_run": "20261024-041749-149a12",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-044648-9e8a2c",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T04:47:32",
+    "lane": 16,
+    "reference_run": "20261024-041749-149a12",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

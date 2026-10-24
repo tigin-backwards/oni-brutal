@@ -1,0 +1,26 @@
+# [MG]Rocket speed 10 times(火箭速度10倍) (2557280880), class P.
+#
+# What it does: rockets go far faster (Spaced Out): a prefix on Db.Initialize multiplies the
+# engine power tunings (ROCKETRY.ENGINE_POWER EARLY_WEAK .. LATE_VERY_STRONG, all but MID_WEAK)
+# by 10, so every engine module's EnginePower is ten times the game's; RocketStats reports a
+# rocket's total thrust 5 times and its total mass a tenth of what it is, and the Hydrogen and
+# Petroleum engines carry 12 modules instead of 7.
+# How a player reaches it: building a rocket; its speed and range show on the rocket's side
+# screens and the starmap.
+# What changes: how fast rockets fly, and how tall the big engines' rockets may be.
+#
+# Smaller spec: early-base has no rocket, and building one needs most of the tech tree. The
+# engine tunings and the modules' performance on their prefabs are checked.
+from: early-base
+mods: [2557280880]
+steps:
+  - expect_state:
+      "TUNING.ROCKETRY.ENGINE_POWER.EARLY_WEAK": 160
+      "TUNING.ROCKETRY.ENGINE_POWER.MID_VERY_STRONG": 480
+      "TUNING.ROCKETRY.ENGINE_POWER.LATE_VERY_STRONG": 550
+      "TUNING.ROCKETRY.ENGINE_POWER.MID_WEAK": 27
+      "Assets.GetBuildingDef(\"HydrogenEngineCluster\").BuildingComplete.GetComponent<RocketModuleCluster>.performanceStats.EnginePower": 550
+      "Assets.GetBuildingDef(\"KeroseneEngineCluster\").BuildingComplete.GetComponent<RocketModuleCluster>.performanceStats.EnginePower": 480
+      "Assets.GetBuildingDef(\"SteamEngineCluster\").BuildingComplete.GetComponent<RocketModuleCluster>.performanceStats.EnginePower": "== original"
+      "Assets.GetBuildingDef(\"HydrogenEngineCluster\").BuildingComplete.GetComponent<RocketEngineCluster>.maxModules": 12
+      "Assets.GetBuildingDef(\"KeroseneEngineCluster\").BuildingComplete.GetComponent<RocketEngineCluster>.maxModules": 12

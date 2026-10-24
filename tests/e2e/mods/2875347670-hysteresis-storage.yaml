@@ -1,0 +1,36 @@
+# Hysteresis Storage (2875347670), classes S, P.
+#
+# What it does: storage bins, ration boxes, refrigerators, smart storage, critter feeders and
+# conveyor loaders get an "Enable Hysteresis" button in their user menu. Enabled, a second
+# capacity side screen (a clone of the game's, labelled Min) appears: once the storage has been
+# filled, it asks for no more deliveries until its contents fall to that minimum (a prefix on
+# FilteredStorage.OnFilterChanged decides when the fetch errand is made).
+# How a player reaches it: select a storage building; its user menu button; the Min field or
+# slider in its side screen.
+# What changes: storages refill in batches instead of topping up after every withdrawal.
+#
+# setup builds a Storage Bin in the dug-out corridor west of the printing pod. It is selected,
+# hysteresis enabled from its user menu and 500 typed as the minimum.
+from: early-base
+mods: [2875347670]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"StorageLocker\")", method: Build, args: [131130, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+steps:
+  - driver: {camera.set: {cell: [114, 208], ortho: 8}}
+  - click_world: {cell: [114, 207], select: StorageLocker}
+  - ui_wait: {path: "**/DetailsScreen/UserMenuButtons/UserMenuScreen/Buttons", cond: stable}
+  - expect_state:
+      "selected:GetComponent<HysteresisStorage.ToggleButton>.IsEnabled": false
+  - click: {ui: "**/UserMenuScreen/Buttons/Enable HysteresisButton"}
+  - ui_wait: {path: "**/HysteresisStorageSideScreen/ValidContent", cond: stable}
+  - expect_state:
+      "selected:GetComponent<HysteresisStorage.ToggleButton>.IsEnabled": true
+  - expect_ui:
+      "**/UserMenuScreen/Buttons/Disable HysteresisButton": {active: true}
+  - ui_wait: {path: "**/HysteresisStorageSideScreen/ValidContent/Max/VerticalLayout/InputField", cond: stable}
+  - type: {ui: "**/HysteresisStorageSideScreen/ValidContent/Max/VerticalLayout/InputField", text: "500", enter: true, clear: true}
+  - ui_wait: {path: "**/HysteresisStorageSideScreen/ValidContent/SliderContainer/Slider/Handle Slide Area/Handle", cond: stable}
+  - expect_state:
+      "selected:GetComponent<HysteresisStorage.HysteresisStorageLogic>.MinUserStorage": 500
+  - ui_dump: {name: sidescreen, root: "**/HysteresisStorageSideScreen"}
+  - shot: {name: sidescreen, crop: "**/HysteresisStorageSideScreen", threshold: 0.04}

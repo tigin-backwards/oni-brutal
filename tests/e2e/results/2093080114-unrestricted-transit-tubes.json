@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2093080114-unrestricted-transit-tubes.yaml",
+ "mods": [
+  "2093080114"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a transit tube dragged through the build menu up, across and down again (a one-cell U the game refuses) joins at every turn, is built, and keeps its joints; no shot (Duplicants idle in front of the tube)",
+ "updated": "2026-10-23",
+ "commit": "c6eae87",
+ "mod_dlls": {
+  "2093080114": {
+   "UnrestrictedTransitTubes.dll": "bec5f2b706f173cac2e206c7e31f78a488189ef33a03699bf10911d71bbed24a"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-223905-d73c2d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T22:39:50",
+    "lane": 12,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-224139-516476",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T22:41:39",
+    "lane": 12,
+    "reference_run": "20261023-223905-d73c2d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-224139-516476",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T22:42:59",
+    "lane": 12,
+    "reference_run": "20261023-223905-d73c2d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

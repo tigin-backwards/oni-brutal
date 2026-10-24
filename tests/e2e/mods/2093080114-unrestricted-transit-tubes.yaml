@@ -1,0 +1,38 @@
+# Unrestricted Transit Tubes (2093080114), class P.
+#
+# What it does: transit tubes may be laid in any shape: a postfix on
+# UtilityNetworkTubesManager.CanAddConnection always allows the connection, where the game
+# refuses tight U-turns ("No U-turns") and a tube beside a crossing bridge ("Bridges must be
+# straight").
+# How a player reaches it: the build menu (Base, Transit Tube), dragging a tube path.
+# What changes: which tube segments join; the game alone leaves the U-turn's last segment
+# unconnected and shows the reason.
+#
+# setup grants Transit Tubes and spawns plastic. In the dug-out corridor west of the printing
+# pod a tube is dragged up, across and down again (a U one cell wide): every segment joins, the
+# blueprints are built, and the built tube keeps its joints.
+from: early-base
+mods: [2093080114]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"TravelTubes\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Polypropylene\").substance", method: SpawnResource, args: [[113.5, 206.5, -12], 300, 300, 255, 0]}}
+steps:
+  - run: {seconds: 5}
+  - driver: {camera.set: {cell: [106, 208], ortho: 8}}
+  - click: {ui: "**/PlanScreen/Toggle:Base"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/TravelTube Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/TravelTube Group*"}
+  - expect_state: {"PlayerController.Instance.ActiveTool.name": UtilityBuildTool}
+  - drag: {from: [109, 207], via: [[109, 209], [110, 209]], to: [110, 207]}
+  - key: {code: Escape}
+  - expect: {blueprints: {TravelTube: 6}}
+  # The U's turns and its last leg down are joined.
+  - expect_state:
+      "Game.Instance.travelTubeSystem.GetConnections(133034, false)": "== 'Left, Down'"
+      "Game.Instance.travelTubeSystem.GetConnections(132398, false)": "== 'Up, Down'"
+      "Game.Instance.travelTubeSystem.GetConnections(131762, false)": "== 'Up'"
+  - run: {seconds: 1200, until: {buildings: {TravelTube: 6}, pending_construction: 0}}
+  - expect_state:
+      "Game.Instance.travelTubeSystem.GetConnections(131762, true)": "== 'Up'"
+      "Game.Instance.travelTubeSystem.GetConnections(133034, true)": "== 'Left, Down'"

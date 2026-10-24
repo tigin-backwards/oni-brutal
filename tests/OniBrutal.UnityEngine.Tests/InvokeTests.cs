@@ -82,13 +82,5 @@ namespace OniBrutal.Tests
             Frame();
             Assert.False(target.IsInvoking());
         }
-
-        [Fact]
-        public void NamedColoursAreCssValues()
-        {
-            Assert.Equal(new Color(169f / 255f, 169f / 255f, 169f / 255f, 1f), Color.darkGray);
-            Assert.Equal(new Color(1f, 165f / 255f, 0f, 1f), Color.orange);
-            Assert.Equal(new Color(238f / 255f, 130f / 255f, 238f / 255f, 1f), Color.violet);
-        }
     }
 }

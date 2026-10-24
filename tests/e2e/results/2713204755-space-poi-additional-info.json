@@ -1,0 +1,67 @@
+{
+ "spec": "mods/2713204755-space-poi-additional-info.yaml",
+ "mods": [
+  "2713204755"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the starmap revealed around the colony; the Sandy Ore Field clicked on it shows Maximum Mass, Time Until Full and Refill Rate rows in its panel (dumped and shot)",
+ "updated": "2026-10-24",
+ "commit": "1913f83",
+ "mod_dlls": {
+  "2713204755": {
+   "SpacePOIExtraInfo.dll": "9c3a2a15a8f37739098dc9caf75ef14540f2b8821d17369ec668094f37e48971"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-064836-d1751a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T06:57:28",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-073125-14016a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T07:31:25",
+    "lane": 14,
+    "reference_run": "20261024-064836-d1751a",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "panel": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "panel": 0.0
+    }
+   },
+   {
+    "run": "20261024-073125-14016a",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T07:32:27",
+    "lane": 14,
+    "reference_run": "20261024-064836-d1751a",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "panel": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "panel": 0.0
+    }
+   }
+  ]
+ }
+}

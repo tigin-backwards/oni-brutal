@@ -1,0 +1,33 @@
+# Bigger Gas Reservoir (x10) (3509481763), class P.
+#
+# What it does: the Gas Reservoir holds 10 t of gas instead of 150 kg (a postfix on
+# GasReservoirConfig.ConfigureBuildingTemplate sets its Storage's capacityKg and its
+# ConduitConsumer's capacityKG to 10000).
+# How a player reaches it: building a Gas Reservoir (Base, researched with HVAC); its
+# Full/Not Full side screen.
+# What changes: a reservoir that holds far more gas.
+#
+# setup grants HVAC and spawns copper ore. A Gas Reservoir is built in the dug-out corridor
+# west of the printing pod and selected.
+from: early-base
+mods: [3509481763]
+require_log: ['GasReservoirCapacityMod: Capacidad del Gas Reservoir aumentada']
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"HVAC\")", method: Purchased}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Cuprite\").substance", method: SpawnResource, args: [[109.5, 206.5, -12], 600, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"GasReservoir\").BuildingComplete.GetComponent<Storage>.capacityKg": 10000
+      "Assets.GetBuildingDef(\"GasReservoir\").BuildingComplete.GetComponent<ConduitConsumer>.capacityKG": 10000
+  - build: {prefab: GasReservoir, at: [106, 206]}
+  - expect: {blueprints: {GasReservoir: 1}}
+  - run: {seconds: 1500, until: {buildings: {GasReservoir: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [108, 208], ortho: 8}}
+  - click_world: {cell: [108, 207], select: GasReservoir}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Gas Reservoir"}
+  - expect_state:
+      "selected:Storage.capacityKg": 10000
+      "selected:GetComponent<ConduitConsumer>.capacityKG": 10000
+  - shot: {name: details, crop: "**/DetailsScreen", threshold: 0.04}

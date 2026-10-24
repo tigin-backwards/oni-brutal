@@ -1,0 +1,31 @@
+# Quicker On The Ladder 更快的梯子 (3302173423), classes P, O.
+#
+# What it does: multiplies how fast Duplicants climb the Ladder (1x by default), the Plastic
+# Ladder (the game's 1.2x) and the Ladder Bed (0.75x), up and down, by PLib options
+# (Controler.json: ladder, plasticLadder, ladderBed, each 1 to 10; postfixes on the
+# configs' ConfigureBuildingTemplate / DoPostConfigureComplete).
+# How a player reaches it: the Mods screen's options; building ladders.
+# What changes: faster climbing.
+#
+# Options here: ladder 3, plastic ladder 2. A column of three Ladder cells is built in the
+# dug-out corridor west of the printing pod, from the base's sandstone, and one is selected.
+from: early-base
+mods: [3302173423]
+options:
+  "3302173423": {$file: Controler.json, ladder: 3.0, plasticLadder: 2.0, ladderBed: 1.0}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"Ladder\").BuildingComplete.GetComponent<Ladder>.upwardsMovementSpeedMultiplier": 3
+      "Assets.GetBuildingDef(\"Ladder\").BuildingComplete.GetComponent<Ladder>.downwardsMovementSpeedMultiplier": 3
+      "Assets.GetBuildingDef(\"LadderFast\").BuildingComplete.GetComponent<Ladder>.upwardsMovementSpeedMultiplier": ">= 2.39"
+  - build: {prefab: Ladder, cells: [[114, 206], [114, 207], [114, 208]], material: SandStone}
+  - expect: {blueprints: {Ladder: 3}}
+  - run: {seconds: 900, until: {buildings: {Ladder: ">=3"}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [114, 208], ortho: 8}}
+  - click_world: {cell: [114, 207], select: Ladder}
+  - ui_wait: {path: "**/DetailsScreen/TitleBar", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Ladder"}
+  - expect_state:
+      "selected:Ladder.upwardsMovementSpeedMultiplier": 3
+      "selected:Ladder.downwardsMovementSpeedMultiplier": 3

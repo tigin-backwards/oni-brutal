@@ -1,0 +1,59 @@
+{
+ "spec": "mods/3509481763-bigger-gas-reservoir.yaml",
+ "mods": [
+  "3509481763"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Gas Reservoir built through a build order and selected holds 10 t of gas, its pipe intake too; its log line and details shot",
+ "updated": "2026-10-24",
+ "commit": "1913f83",
+ "mod_dlls": {
+  "3509481763": {
+   "ONI_IncreasedGasReservoir.dll": "107090603b29cea60471b55e810b59416dff4bfaa801706cdb2fd9b3e4e381a9"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-061840-ff3541",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T06:25:31",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-070711-6ce539",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T07:07:11",
+    "lane": 15,
+    "reference_run": "20261024-061840-ff3541",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "details": 4.1e-05
+    }
+   },
+   {
+    "run": "20261024-070711-6ce539",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T07:09:15",
+    "lane": 15,
+    "reference_run": "20261024-061840-ff3541",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "details": 4.1e-05
+    }
+   }
+  ]
+ }
+}

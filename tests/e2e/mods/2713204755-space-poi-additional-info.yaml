@@ -1,0 +1,34 @@
+# Space POI Additional Info (2713204755), class S.
+#
+# What it does: a harvestable space POI's Status panel (SpacePOISimpleInfoPanel) gains three
+# rows, Maximum Mass, Time Until Full and Refill Rate (a postfix on RefreshMassHeader adds
+# them, cloned from the panel's icon-label row); each element row gets a tooltip with its
+# mass remaining, maximum and refill rate (RefreshElements); an artifact POI shows its
+# recharge time (RefreshArtifacts).
+# How a player reaches it: the starmap; selecting a revealed space POI.
+# What changes: what the POI's panel tells about its mass.
+#
+# setup reveals the starmap within 3 hexes of the colony's asteroid (the fog of war's
+# RevealLocation). The starmap is opened and the Sandy Ore Field, the first POI drawn, is
+# clicked: its panel lists the three new rows.
+from: early-base
+mods: [2713204755]
+setup:
+  - driver: {setup.call: {target: "SaveGame.Instance.GetComponent<StateMachineController>.GetSMI(\"ClusterFogOfWarManager+Instance\")", method: RevealLocation, args: [{"$": "AxialI.ZERO"}, 3, 0]}}
+steps:
+  - open: {management: starmap}
+  - ui_wait: {path: "**/ClusterMap/MapView/VisContainer/POIVis/StaticSelectablePrefab(Clone)", cond: stable, frames: 300}
+  - expect_state:
+      "ui:**/ClusterMap/MapView/VisContainer/POIVis/StaticSelectablePrefab(Clone)::GetComponent<ClusterMapVisualizer>.entity.name": HarvestableSpacePOI_SandyOreField
+  # The hex's border takes the click over the POI's picture; a player clicks the hex.
+  - click: {at: [343, 650]}
+  - ui_wait: {path: "**/DetailsScreen/**/SimpleInfoScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "Sandy Ore Field"}
+      "**/SimpleInfoScreen/**/ContentStatus/ImageLabelRow/Label": {any_text: "<b>Maximum Mass</b>"}
+  - expect_ui:
+      "**/SimpleInfoScreen/**/ContentStatus/ImageLabelRow/Label": {any_text: "<b>Refill Rate</b>"}
+  - expect_ui:
+      "**/SimpleInfoScreen/**/ContentStatus/ImageLabelRow/Label": {any_text: "<b>Time Until Full</b>"}
+  - ui_dump: {name: panel, root: "**/DetailsScreen/Body/TabBody/ScrollRect/Content/SimpleInfoScreen"}
+  - shot: {name: panel, crop: "**/DetailsScreen", threshold: 0.04}

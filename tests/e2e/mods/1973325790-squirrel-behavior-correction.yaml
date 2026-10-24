@@ -1,0 +1,27 @@
+# squirrel behavior correction (1973325790), class P.
+#
+# What it does: a Pip rummaging a Storage Bin (TreeClimbStates, the "rummaging" behaviour the
+# game gives Pips for trees and lockers) throws out only seeds: a prefix on
+# TreeClimbStates.Instance.Toss skips any other item, which stays stored. The game alone
+# tosses whatever it picks from the bin, a kilogram at a time.
+# How a player reaches it: a Pip living near a Storage Bin.
+# What changes: Pips no longer empty storage bins onto the floor.
+#
+# setup builds a Storage Bin in the dug-out corridor west of the printing pod, stores 200 kg
+# of copper ore in it, and drops a Pip beside it (Pips look for something to rummage every
+# 60 to 120 s). After 600 s the bin still holds all of it and no copper ore lies loose.
+from: early-base
+mods: [1973325790]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"StorageLocker\")", method: Build, args: [{"$": "Grid.XYToCell(113, 206)"}, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "last:GetComponent<Storage>", method: AddOre, args: [Cuprite, 200, 293, 255, 0]}}
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(0, 111, 206, \"Squirrel\", \"Creatures\")", method: SetActive, args: [true]}}
+steps:
+  - expect_state:
+      "sum:all:StorageLocker::[*].GetComponent<Storage>.MassStored() if .GetComponent<Storage>.Has(\"Cuprite\") == true": 200
+      "count:all:Clearable::[*] if .GetComponent<PrimaryElement>.ElementID == Cuprite and .GetComponent<Pickupable>.storage == null": {save_as: loose}
+      "count:all:CreatureBrain::[*] if .GetComponent<KPrefabID>.PrefabTag.Name == Squirrel": ">= 1"
+  - run: {seconds: 600}
+  - expect_state:
+      "sum:all:StorageLocker::[*].GetComponent<Storage>.MassStored() if .GetComponent<Storage>.Has(\"Cuprite\") == true": ">= 199.9"
+      "count:all:Clearable::[*] if .GetComponent<PrimaryElement>.ElementID == Cuprite and .GetComponent<Pickupable>.storage == null": "<= loose"

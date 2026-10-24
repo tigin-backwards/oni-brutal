@@ -1,0 +1,56 @@
+{
+ "spec": "mods/3302173423-quicker-on-the-ladder.yaml",
+ "mods": [
+  "3302173423"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "Controler.json's ladder 3 and plastic ladder 2: three Ladder cells built and one selected climb 3 times as fast",
+ "updated": "2026-10-24",
+ "commit": "1913f83",
+ "mod_dlls": {
+  "3302173423": {
+   "PLib.dll": "b862c5db2b3cd6df09a62d4a30782e91e2b24e8e1bfac08d991c9cc89a984ba9",
+   "QuickerOnTheLadder.dll": "90935f8dcc54761b9c28b9436f96b6c334e046f7db80e29360a9aac3dd6daa96"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-061840-ff3541",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T06:26:50",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-072735-232bd0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T07:27:35",
+    "lane": 15,
+    "reference_run": "20261024-061840-ff3541",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-072735-232bd0",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T07:29:00",
+    "lane": 15,
+    "reference_run": "20261024-061840-ff3541",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

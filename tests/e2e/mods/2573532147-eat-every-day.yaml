@@ -1,0 +1,28 @@
+# Eat every day [Updated] (2573532147), class P.
+#
+# What it does: a Duplicant counts as hungry (and so takes an Eat errand at mealtime) once
+# their calories are below the maximum less three quarters of a cycle's burn, whatever the
+# game's own threshold (a postfix on CalorieMonitor.Instance.IsHungry: while not satisfied
+# and burning, hungry = calories < max + 0.75 * 600 s * delta). With the standard 4000 kcal
+# and 1000 kcal a cycle, that is below 3250 kcal, where the game alone says below 3300 kcal.
+# How a player reaches it: playing; the Hungry status on a Duplicant.
+# What changes: when Duplicants count as hungry, so they eat about once a day.
+#
+# setup leaves one Duplicant at 3280 kcal (hungry for the game alone, not with the mod) and
+# another at 3150 kcal (hungry either way), both in the calorie monitor's satisfied state.
+# After a short run, only the second carries the Hungry status item.
+from: early-base
+mods: [2573532147]
+setup:
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[1].GetComponent<Modifiers>.amounts.Get(\"Calories\")", method: SetValue, args: [3280000]}}
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[2].GetComponent<Modifiers>.amounts.Get(\"Calories\")", method: SetValue, args: [3150000]}}
+  # Both start from the satisfied state, as after a meal (a hungry Duplicant stays hungry
+  # until above 95 %).
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[1].GetComponent<StateMachineController>.GetSMI(\"CalorieMonitor+Instance\")", method: GoTo, args: [{"$": "Components.LiveMinionIdentities.Items[1].GetComponent<StateMachineController>.GetSMI(\"CalorieMonitor+Instance\").sm.satisfied"}]}}
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[2].GetComponent<StateMachineController>.GetSMI(\"CalorieMonitor+Instance\")", method: GoTo, args: [{"$": "Components.LiveMinionIdentities.Items[2].GetComponent<StateMachineController>.GetSMI(\"CalorieMonitor+Instance\").sm.satisfied"}]}}
+steps:
+  - run: {seconds: 3}
+  - expect_state:
+      "Components.LiveMinionIdentities.Items[1].GetComponent<Modifiers>.amounts.Get(\"Calories\").value": "> 3260000"
+      "count:Components.LiveMinionIdentities.Items[1].GetComponent<KSelectable>.GetStatusItemGroup().items[*] if .item.Id == Hungry": 0
+      "count:Components.LiveMinionIdentities.Items[2].GetComponent<KSelectable>.GetStatusItemGroup().items[*] if .item.Id == Hungry": 1

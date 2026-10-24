@@ -1,0 +1,55 @@
+{
+ "spec": "mods/1973325790-squirrel-behavior-correction.yaml",
+ "mods": [
+  "1973325790"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Pip beside a Storage Bin holding 200 kg of copper ore for 600 s: the bin keeps it all and no ore lies loose (rummaging not observed directly)",
+ "updated": "2026-10-24",
+ "commit": "1913f83",
+ "mod_dlls": {
+  "1973325790": {
+   "SquirrelBehaviorCorrection.dll": "31a067b4425d5702c7b354965903ff252ada9b81ff5f716a206a84ce70faeaab"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-064836-d1751a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T06:52:26",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-071446-caf5fc",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T07:14:46",
+    "lane": 14,
+    "reference_run": "20261024-064836-d1751a",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-071446-caf5fc",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T07:26:59",
+    "lane": 14,
+    "reference_run": "20261024-064836-d1751a",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

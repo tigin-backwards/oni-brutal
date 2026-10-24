@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2573532147-eat-every-day.yaml",
+ "mods": [
+  "2573532147"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Duplicant at 3280 kcal, hungry for the game alone, is not hungry with the mod; one at 3150 kcal is (the Hungry status item)",
+ "updated": "2026-10-24",
+ "commit": "1913f83",
+ "mod_dlls": {
+  "2573532147": {
+   "EatEveryDay.dll": "e725b7915ad36771a020347e320329e74f32b030c49a109a2871f691a34b9678"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-064717-fe1ea4",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T06:47:17",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-073024-8fb8ef",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T07:30:24",
+    "lane": 15,
+    "reference_run": "20261024-064717-fe1ea4",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-073024-8fb8ef",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T07:31:28",
+    "lane": 15,
+    "reference_run": "20261024-064717-fe1ea4",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

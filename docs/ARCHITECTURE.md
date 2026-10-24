@@ -394,6 +394,25 @@ past the boot checkpoint needs a Steam client logged in with an account that own
   ints, hashed by all bytes as well) to clients as a random seed, a value, not an identity.
   `--check-types` compares two elements' archetype ids. `tests/e2e/thermal-gas-fissure.yaml`
   checks the fissure's gas.
+- **D27 Order of string-keyed concurrent dictionaries.** A `ConcurrentDictionary` enumerates its
+  buckets in order, a bucket's newest entry first, in Mono's class library (`Managed/mscorlib.dll`)
+  as in .NET's, so the order follows the keys' hashes and the table's size, and both differ for
+  string keys: Mono's table has as many buckets as the capacity asked for (at least the
+  concurrency level) and hashes with Mono's string hash; .NET rounds the capacity up to a prime
+  (32 gives 37) and hashes with its own. PLib's component registry (`PRegistryComponent`, a
+  `ConcurrentDictionary<string, …>(2, 32)`) initializes each component while it enumerates the
+  registry, and PLib 4.16's `PBuildingManager` registers `PPatchManager` from its `Initialize`:
+  Mono's order reaches that key afterwards, ours had passed it, so PLib's stages from
+  `Db.Initialize` on never ran (Thermo Sensor Tile's techs were never registered; the original
+  logs "Register techs"). **Resolved in** `MonoConcurrentDictionaries`: a mod's
+  `new ConcurrentDictionary<string, T>(concurrencyLevel, capacity)` (found in its metadata) calls
+  the host's instead, which gives the dictionary a comparer whose hash is the key's bucket in
+  Mono's table of that size modulo .NET's table size (the rest of Mono's hash above it), so it
+  enumerates in Mono's order until Mono's table would grow (a lock holding more than capacity /
+  concurrency level keys). The constructors without a size are left alone: Mono gives them one
+  lock per processor and grows their table as soon as a lock holds more than 31 / processors keys,
+  so their order in the original depends on the machine. `--check-types` enumerates such a
+  dictionary of a mod against Mono's order and adds a key during the enumeration as PLib does.
 
 ## 3. The engine API (`OniBrutal.UnityEngine`)
 

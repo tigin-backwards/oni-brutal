@@ -3,12 +3,12 @@
  "mods": [
   "1974008313"
  ],
- "verdict": "failed",
- "why": "a run of ours failed",
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
  "findings": [],
- "note": "the Thermo Sensor Tile is missing from HVAC in ours: PLib's PBuildingManager never runs its AfterDbInit tech registration ('[PLibBuildings] Register techs' is in the original's log only), so the tile cannot be built from the research it names",
+ "note": "the Thermo Sensor Tile is in HVAC's unlocks and buildable: PLib 4.16's tech registration runs after Db.Initialize ('[PLibBuildings] Register techs' in both logs) since mods' string-keyed concurrent dictionaries enumerate in Mono's order (D27)",
  "updated": "2026-10-24",
- "commit": "1f5d9e4",
+ "commit": "ba6c8c0",
  "mod_dlls": {
   "1974008313": {
    "TileTempSensor.dll": "db3bc6c68c88ab05ecf8e530b58fe2b30edcd64d574761eedd5763cdc9ca8afd"
@@ -27,14 +27,11 @@
   ],
   "ours": [
    {
-    "run": "20261024-065230-adce1d",
+    "run": "20261024-075533-a5c2c3",
     "index": 1,
-    "verdict": "fail",
-    "date": "2026-10-24T06:52:30",
-    "lane": 12,
-    "reasons": [
-     "step 1: Db.Get().Techs.Get(\"HVAC\").unlockedItemIDs is [\"AirConditioner\", \"LogicTemperatureSensor\", \"GasConduitTemperatureSensor\", \"GasConduitElementSensor\", \"GasConduitRadiant\", \"GasReservoir\", \"GasLimitValve\"], wanted {'contains': 'TileTempSensor'} (it held in the original: the interaction has no e"
-    ],
+    "verdict": "pass",
+    "date": "2026-10-24T07:55:33",
+    "lane": 18,
     "reference_run": "20261024-054739-94feff",
     "new_signatures": 0,
     "findings": [],
@@ -42,14 +39,11 @@
     "shots": {}
    },
    {
-    "run": "20261024-065230-adce1d",
+    "run": "20261024-075533-a5c2c3",
     "index": 2,
-    "verdict": "fail",
-    "date": "2026-10-24T06:52:31",
-    "lane": 13,
-    "reasons": [
-     "step 1: Db.Get().Techs.Get(\"HVAC\").unlockedItemIDs is [\"AirConditioner\", \"LogicTemperatureSensor\", \"GasConduitTemperatureSensor\", \"GasConduitElementSensor\", \"GasConduitRadiant\", \"GasReservoir\", \"GasLimitValve\"], wanted {'contains': 'TileTempSensor'} (it held in the original: the interaction has no e"
-    ],
+    "verdict": "pass",
+    "date": "2026-10-24T07:56:50",
+    "lane": 18,
     "reference_run": "20261024-054739-94feff",
     "new_signatures": 0,
     "findings": [],

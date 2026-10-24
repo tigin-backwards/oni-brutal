@@ -78,8 +78,8 @@ namespace OniBrutal.Host
 
         /// A mod's assembly, rewritten when it reaches into the game's non-public members, with its
         /// static readonly fields writable as Mono's are, with any class that misses a method of an
-        /// interface it lists still loadable, and with a patched method's stack frame reporting its
-        /// owner type, as on Mono.
+        /// interface it lists still loadable, with a patched method's stack frame reporting its
+        /// owner type, and with its string-keyed concurrent dictionaries in Mono's order, as on Mono.
         internal static Assembly LoadFrom(string path)
         {
             path = Path.GetFullPath(path);
@@ -108,6 +108,8 @@ namespace OniBrutal.Host
             if (MissingInterfaceMethods.Adjust(image ?? File.ReadAllBytes(path), ref symbols, path) is { } completed) image = completed;
             // A frame of a patched method reports its owner type, as on Mono (MonoStackFrames).
             if (MonoStackFrames.Adjust(image ?? File.ReadAllBytes(path), ref symbols, path) is { } rewritten) image = rewritten;
+            // Its string-keyed concurrent dictionaries enumerate in Mono's order (MonoConcurrentDictionaries).
+            if (MonoConcurrentDictionaries.Adjust(image ?? File.ReadAllBytes(path), ref symbols, path) is { } ordered) image = ordered;
             if (image == null) return Assembly.LoadFrom(path);
             Assembly assembly;
             try

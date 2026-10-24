@@ -575,6 +575,67 @@ namespace OniBrutal.Host
                     try { Directory.Delete(home, true); } catch (IOException) { } catch (UnauthorizedAccessException) { }
                 }
             });
+            Check("A mod's string-keyed ConcurrentDictionary enumerated while it grows (MonoConcurrentDictionaries)", () =>
+            {
+                ModAccess.Install();
+                var dir = Directory.CreateTempSubdirectory("oni-brutal-check-").FullName;
+                try
+                {
+                    // A mod making a dictionary as PLib's registry does: (concurrencyLevel, capacity).
+                    var cd = typeof(System.Collections.Concurrent.ConcurrentDictionary<string, object>);
+                    var mod = new System.Reflection.Emit.PersistedAssemblyBuilder(new AssemblyName("OniBrutalCheckDictionaries"), typeof(object).Assembly);
+                    var type = mod.DefineDynamicModule("OniBrutalCheckDictionaries").DefineType("Registry", TypeAttributes.Public | TypeAttributes.Abstract | TypeAttributes.Sealed);
+                    var sized = type.DefineMethod("Sized", MethodAttributes.Public | MethodAttributes.Static, cd, [typeof(int), typeof(int)]).GetILGenerator();
+                    sized.Emit(System.Reflection.Emit.OpCodes.Ldarg_0);
+                    sized.Emit(System.Reflection.Emit.OpCodes.Ldarg_1);
+                    sized.Emit(System.Reflection.Emit.OpCodes.Newobj, cd.GetConstructor([typeof(int), typeof(int)])!);
+                    sized.Emit(System.Reflection.Emit.OpCodes.Ret);
+                    type.CreateType();
+                    var modPath = Path.Combine(dir, "OniBrutalCheckDictionaries.dll");
+                    mod.Save(modPath);
+                    var registry = ModAccess.LoadFrom(modPath).GetType("Registry")!;
+                    System.Collections.Concurrent.ConcurrentDictionary<string, object> Make(int concurrencyLevel, int capacity) =>
+                        (System.Collections.Concurrent.ConcurrentDictionary<string, object>)registry.GetMethod("Sized")!.Invoke(null, [concurrencyLevel, capacity])!;
+                    // Mono's order, from its ConcurrentDictionary (Managed/mscorlib.dll): buckets
+                    // ascending, a bucket's newest entry first; bucket = (hash & 0x7fffffff) % size.
+                    static string MonoOrder(IEnumerable<string> added, int size) => string.Join(" ", added
+                        .Select((key, i) => (key, i, bucket: (MonoStringHash.Compute(key) & 0x7fffffff) % size))
+                        .OrderBy(e => e.bucket).ThenByDescending(e => e.i).Select(e => e.key));
+                    var keys = new[] { "PeterHan.PLib.Core.PLibCorePatches", "PeterHan.PLib.Database.PLocalization", "PeterHan.PLib.Buildings.PBuildingManager",
+                        "PeterHan.PLib.AVC.PVersionCheck", "PeterHan.PLib.Options.POptions", "PeterHan.PLib.Lighting.PLightManager", "PeterHan.PLib.Actions.PActionManager",
+                        "PeterHan.PLib.Detours.PDetours", "PeterHan.PLib.UI.PUIElements", "PeterHan.PLib.Codex.PCodexManager", "Alpha", "Beta", "Gamma" };
+                    // PLib's sizes; 13 keys stay within Mono's lock budget (capacity / concurrencyLevel).
+                    foreach (var (concurrencyLevel, capacity) in new[] { (2, 32), (2, 64), (1, 17) })
+                    {
+                        var dictionary = Make(concurrencyLevel, capacity);
+                        foreach (var key in keys) dictionary.TryAdd(key, key);
+                        var order = string.Join(" ", dictionary.Select(e => e.Key));
+                        var mono = MonoOrder(keys, Math.Max(capacity, concurrencyLevel));
+                        if (order != mono) throw new InvalidOperationException($"({concurrencyLevel}, {capacity}): order {order}; Mono's is {mono}");
+                        if (order != string.Join(" ", dictionary.Keys)) throw new InvalidOperationException("Keys differ from the enumeration");
+                    }
+                    // PLib 4.16's registry: PBuildingManager's Initialize registers PPatchManager
+                    // while the registry is enumerated; Mono's order reaches it afterwards.
+                    var plib = Make(2, 32);
+                    foreach (var key in keys.Take(5)) plib.TryAdd(key, key);
+                    var visited = new List<string>();
+                    foreach (var entry in plib)
+                    {
+                        visited.Add(entry.Key);
+                        if (entry.Key.EndsWith(".PBuildingManager", StringComparison.Ordinal)) plib.TryAdd("PeterHan.PLib.PatchManager.PPatchManager", "");
+                    }
+                    if (!visited.Contains("PeterHan.PLib.PatchManager.PPatchManager")) throw new InvalidOperationException("PPatchManager, added during the enumeration, was not reached: " + string.Join(" ", visited));
+                    // Many keys: the table grows and every key stays reachable.
+                    var big = Make(2, 32);
+                    for (int i = 0; i < 5000; i++) big[$"key{i}"] = i;
+                    for (int i = 0; i < 5000; i++) if (!big.TryGetValue($"key{i}", out var v) || (int)v != i) throw new InvalidOperationException($"key{i} lost");
+                    return "enumerated in Mono's bucket order; PPatchManager, added during PLib's registry walk, is reached";
+                }
+                finally
+                {
+                    try { Directory.Delete(dir, true); } catch (IOException) { } catch (UnauthorizedAccessException) { }
+                }
+            });
             Check("Bubble archetype ids of two elements (MonoValueTypeHashes)", () =>
             {
                 MonoValueTypeHashes.Install();

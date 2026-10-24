@@ -557,5 +557,27 @@ namespace OniBrutal.Tests
             Assert.Throws<InvalidOperationException>(() => request.GetData<byte>());
             Object.DestroyImmediate(texture);
         }
+
+        // Color's named colours as the original player gives them (tools/UnityProbe,
+        // PROBE_SCENARIO=statics): 157 of them, with float bits that are not always n / 255f.
+        // A reported SkillsInfoScreen build calls Color.darkGreen (its Workshop build does not).
+        [Fact]
+        public void NamedColoursHaveTheMeasuredBits()
+        {
+            var names = typeof(Color).GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+            Assert.Equal(157, names.Count(p => p.PropertyType == typeof(Color)));
+            static uint[] Bits(Color c) => [Bits1(c.r), Bits1(c.g), Bits1(c.b), Bits1(c.a)];
+            static uint Bits1(float f) => BitConverter.SingleToUInt32Bits(f);
+            Assert.Equal(new uint[] { 0, 0x3EC8C8CA, 0, 0x3F800000 }, Bits(Color.darkGreen));
+            Assert.Equal(new uint[] { 0, 0, 0x3F008081, 0x3F800000 }, Bits(Color.navyBlue));
+            Assert.Equal(new uint[] { 0x3ECCCCCD, 0x3E4CCCCD, 0x3F19999A, 0x3F800000 }, Bits(Color.rebeccaPurple));
+            Assert.Equal(new uint[] { 0x3F5CDCDF, 0x3E44C4C7, 0x3E48C8C7, 0x3F800000 }, Bits(Color.softRed));
+            Assert.Equal(Bits(Color.yellow), Bits(Color.yellowNice));
+            Assert.Equal(new uint[] { 0, 0, 0, 0 }, Bits(Color.clear));
+        }
+
+        // Measured: False in the original player.
+        [Fact]
+        public void GarbageCollectorIsNotIncremental() => Assert.False(UnityEngine.Scripting.GarbageCollector.isIncremental);
     }
 }

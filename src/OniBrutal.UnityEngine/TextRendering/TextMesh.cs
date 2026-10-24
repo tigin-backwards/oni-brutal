@@ -50,6 +50,13 @@ namespace UnityEngine
             set => Data.Anchor = value;
         }
 
+        /// The serialized m_Alignment: how lines sit within the block (Geometry).
+        public TextAlignment alignment
+        {
+            get => (TextAlignment)Data.Alignment;
+            set => Data.Alignment = (int)value;
+        }
+
         public float characterSize
         {
             get => Data.CharacterSize;

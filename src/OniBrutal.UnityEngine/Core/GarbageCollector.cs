@@ -21,6 +21,10 @@ namespace UnityEngine.Scripting
                 GCModeChanged?.Invoke(value);
             }
         }
+
+        /// False: the original player's build does not use the incremental collector (measured,
+        /// tools/UnityProbe PROBE_SCENARIO=statics), and the engine offers none.
+        public static bool isIncremental => false;
     }
 }
 

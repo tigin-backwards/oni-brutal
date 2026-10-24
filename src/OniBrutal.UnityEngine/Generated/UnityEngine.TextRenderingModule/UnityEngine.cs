@@ -17,6 +17,12 @@ namespace UnityEngine
         Wrap = 0,
         Overflow = 1,
     }
+    public enum TextAlignment
+    {
+        Left = 0,
+        Center = 1,
+        Right = 2,
+    }
     public enum TextAnchor
     {
         UpperLeft = 0,

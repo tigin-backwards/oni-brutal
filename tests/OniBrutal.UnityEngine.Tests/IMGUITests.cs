@@ -973,5 +973,340 @@ namespace OniBrutal.Tests
             // The plain window was declared later (so it would be in front), but the modal one draws last.
             Assert.Equal(new[] { "window:Repaint", "modal:Repaint" }, order.FindAll(o => o.EndsWith("Repaint")));
         }
+
+        // ----- GUI.tooltip -----
+
+        static void MoveMouse(Vector2 position) => Queue(EventType.MouseMove, position);
+
+        /// GUI.tooltipRect is protected; a subclass reads it.
+        sealed class TooltipRectReader : GUI
+        {
+            public static Rect Value => tooltipRect;
+        }
+
+        [Fact]
+        public void TooltipStartsEmptyNeverNullAndReadsOutsideOnGUI()
+        {
+            Assert.Equal("", GUI.tooltip);
+            GUI.tooltip = "x";
+            Assert.Equal("x", GUI.tooltip);
+            GUI.tooltip = null;
+            Assert.Equal("", GUI.tooltip);
+            Assert.Equal(new Rect(0f, 0f, 0f, 0f), TooltipRectReader.Value);
+        }
+
+        [Fact]
+        public void HoveredControlSetsTooltipDuringRepaintAndNothingClearsIt()
+        {
+            var probe = MakeProbe();
+            var reads = new List<string>();
+            GUIProbe.Body = _ =>
+            {
+                string start = GUI.tooltip;
+                GUI.Button(new Rect(20f, 20f, 100f, 30f), new GUIContent("A", "tA"));
+                string afterA = GUI.tooltip;
+                GUI.Button(new Rect(20f, 60f, 100f, 30f), new GUIContent("B"));
+                reads.Add(Name(Event.current.rawType) + " " + start + " " + afterA + " " + GUI.tooltip);
+            };
+            MoveMouse(new Vector2(19f, 19f));
+            Frame();
+            Assert.Equal("", GUI.tooltip);
+            reads.Clear();
+            MoveMouse(new Vector2(21f, 21f));
+            Frame();
+            // The move and its Layout change nothing; A sets it as it draws in Repaint.
+            Assert.Equal(new[] { "Layout   ", Name(EventType.MouseMove) + "   ", "Layout   ", "Repaint  tA tA" }, reads);
+            Assert.Equal("tA", GUI.tooltip);
+            reads.Clear();
+            // Over B (no tooltip), then over nothing: the last tooltip stays.
+            MoveMouse(new Vector2(30f, 70f));
+            Frame();
+            MoveMouse(new Vector2(500f, 500f));
+            Frame();
+            Assert.Equal("tA", GUI.tooltip);
+            Assert.All(reads, r => Assert.EndsWith("tA tA tA", r));
+        }
+
+        [Fact]
+        public void InputEventsOverAControlDoNotSetTheTooltip()
+        {
+            var probe = MakeProbe();
+            var seen = new List<string>();
+            GUIProbe.Body = _ =>
+            {
+                GUI.tooltip = "-";
+                GUI.Button(new Rect(20f, 20f, 100f, 30f), new GUIContent("A", "tA"));
+                GUI.Label(new Rect(20f, 60f, 100f, 30f), new GUIContent("L", "tL"));
+                if (Event.current.rawType != EventType.Repaint) seen.Add(GUI.tooltip);
+            };
+            Queue(EventType.MouseDown, new Vector2(30f, 30f));
+            Event.Enqueue(new Event { type = EventType.MouseDrag, mousePosition = new Vector2(30f, 70f), delta = new Vector2(0f, 40f) });
+            Queue(EventType.MouseUp, new Vector2(30f, 70f));
+            Frame();
+            Assert.NotEmpty(seen);
+            Assert.All(seen, v => Assert.Equal("-", v));
+            // Repaint, over L.
+            Assert.Equal("tL", GUI.tooltip);
+        }
+
+        [Fact]
+        public void ButtonsTogglesLabelsBoxesAndLayoutControlsSetItWhenHoveredInTheirClip()
+        {
+            var probe = MakeProbe();
+            var tips = new Dictionary<string, string>();
+            bool toggle = false;
+            GUIProbe.Body = _ =>
+            {
+                void After(string name)
+                {
+                    if (Event.current.type == EventType.Repaint) tips[name] = GUI.tooltip;
+                    GUI.tooltip = "-";
+                }
+                GUI.tooltip = "-";
+                GUI.Label(new Rect(20f, 100f, 100f, 30f), new GUIContent("L", "tL")); After("L");
+                GUI.Box(new Rect(20f, 140f, 100f, 30f), new GUIContent("X", "tX")); After("X");
+                toggle = GUI.Toggle(new Rect(140f, 20f, 100f, 30f), toggle, new GUIContent("T", "tT")); After("T");
+                GUI.enabled = false;
+                GUI.Button(new Rect(140f, 140f, 100f, 30f), new GUIContent("H", "tH")); After("H");
+                GUI.enabled = true;
+                GUI.Button(new Rect(140f, 60f, 100f, 30f), new GUIContent("Empty", "")); After("Empty");
+                GUILayout.BeginArea(new Rect(20f, 180f, 200f, 100f));
+                GUILayout.Button(new GUIContent("C", "tC")); After("C");
+                GUILayout.Label(new GUIContent("D", "tD")); After("D");
+                GUILayout.EndArea();
+                GUI.BeginGroup(new Rect(300f, 300f, 200f, 100f));
+                GUI.Button(new Rect(10f, 10f, 100f, 30f), new GUIContent("E", "tE")); After("E");
+                GUI.EndGroup();
+                GUI.BeginScrollView(new Rect(300f, 420f, 200f, 80f), Vector2.zero, new Rect(0f, 0f, 180f, 300f));
+                GUI.Button(new Rect(0f, 0f, 100f, 30f), new GUIContent("F", "tF")); After("F");
+                GUI.Button(new Rect(0f, 100f, 100f, 30f), new GUIContent("G", "tG")); After("G");
+                GUI.EndScrollView();
+            };
+            string At(Vector2 p, string name)
+            {
+                MoveMouse(p);
+                Frame();
+                return tips[name];
+            }
+            Assert.Equal("tL", At(new Vector2(30f, 110f), "L"));
+            Assert.Equal("tX", At(new Vector2(30f, 150f), "X"));
+            Assert.Equal("tT", At(new Vector2(150f, 30f), "T"));
+            Assert.Equal("tH", At(new Vector2(150f, 150f), "H"));
+            Assert.Equal("-", At(new Vector2(150f, 70f), "Empty"));
+            Assert.Equal("tC", At(new Vector2(30f, 185f), "C"));
+            Assert.Equal("-", At(new Vector2(30f, 185f), "D"));
+            Assert.Equal("tE", At(new Vector2(320f, 320f), "E"));
+            Assert.Equal("-", At(new Vector2(320f, 320f), "L"));
+            Assert.Equal("tF", At(new Vector2(310f, 430f), "F"));
+            // G is at y 100 in the scroll view, below its visible 80 pixels.
+            Assert.Equal("-", At(new Vector2(310f, 530f), "G"));
+        }
+
+        [Fact]
+        public void TheLastHoveredControlDrawnWinsAndWindowsHideNothing()
+        {
+            var probe = MakeProbe();
+            string afterO1 = null, afterO2 = null;
+            GUIProbe.Body = _ =>
+            {
+                GUI.Button(new Rect(140f, 100f, 100f, 30f), new GUIContent("O1", "tO1"));
+                if (Event.current.type == EventType.Repaint) afterO1 = GUI.tooltip;
+                GUI.Button(new Rect(180f, 100f, 100f, 30f), new GUIContent("O2", "tO2"));
+                if (Event.current.type == EventType.Repaint) afterO2 = GUI.tooltip;
+                // Z lies under window 1.
+                GUI.Button(new Rect(420f, 200f, 100f, 30f), new GUIContent("Z", "tZ"));
+                GUI.Window(1, new Rect(400f, 20f, 300f, 250f), id =>
+                    GUI.Button(new Rect(10f, 25f, 100f, 30f), new GUIContent("W1a", "tW1a")), new GUIContent("Win1", "tWin1"));
+            };
+            MoveMouse(new Vector2(200f, 110f));
+            Frame();
+            Assert.Equal("tO1", afterO1);
+            Assert.Equal("tO2", afterO2);
+            Assert.Equal("tO2", GUI.tooltip);
+            MoveMouse(new Vector2(430f, 210f));
+            Frame();
+            Assert.Equal("tZ", GUI.tooltip);
+            MoveMouse(new Vector2(420f, 50f));
+            Frame();
+            Assert.Equal("tW1a", GUI.tooltip);
+            // The window's title does not set it.
+            MoveMouse(new Vector2(550f, 28f));
+            Frame();
+            Assert.Equal("tW1a", GUI.tooltip);
+        }
+
+        [Fact]
+        public void KeyboardFocusDoesNotSetTheTooltipButHoldingTheMouseDoes()
+        {
+            var probe = MakeProbe();
+            int idA = 0;
+            bool focus = false;
+            GUIProbe.Body = _ =>
+            {
+                GUI.tooltip = "-";
+                if (focus) GUIUtility.keyboardControl = idA;
+                GUI.Button(new Rect(20f, 20f, 100f, 30f), new GUIContent("A", "tA"));
+                if (idA == 0 && GUIUtility.hotControl != 0) idA = GUIUtility.hotControl;
+            };
+            // A press over A, then dragged off: A holds the mouse and sets "tA" each Repaint.
+            Queue(EventType.MouseDown, new Vector2(30f, 30f));
+            Frame();
+            Assert.NotEqual(0, idA);
+            Event.Enqueue(new Event { type = EventType.MouseDrag, mousePosition = new Vector2(500f, 500f), delta = new Vector2(470f, 470f) });
+            Frame();
+            Assert.Equal(idA, GUIUtility.hotControl);
+            Assert.Equal("tA", GUI.tooltip);
+            Frame();
+            Assert.Equal("tA", GUI.tooltip);
+            Queue(EventType.MouseUp, new Vector2(500f, 500f));
+            Frame();
+            Assert.Equal(0, GUIUtility.hotControl);
+            Assert.Equal("-", GUI.tooltip);
+            focus = true;
+            Frame();
+            Assert.Equal(idA, GUIUtility.keyboardControl);
+            Assert.Equal("-", GUI.tooltip);
+        }
+
+        [Fact]
+        public void ATooltipSetFromCodeSticksUntilAControlSetsIt()
+        {
+            var probe = MakeProbe();
+            bool set = true;
+            var windowReads = new List<string>();
+            GUIProbe.Body = _ =>
+            {
+                if (set) GUI.tooltip = "S";
+                GUI.Button(new Rect(20f, 20f, 100f, 30f), new GUIContent("A", "tA"));
+                GUI.Window(1, new Rect(400f, 20f, 300f, 250f), id => windowReads.Add(GUI.tooltip), "w");
+            };
+            MoveMouse(new Vector2(500f, 500f));
+            Frame();
+            Assert.Equal("S", GUI.tooltip);
+            Assert.All(windowReads, v => Assert.Equal("S", v));
+            windowReads.Clear();
+            MoveMouse(new Vector2(30f, 30f));
+            Frame();
+            // Layout reads the set; Repaint reads A's tooltip.
+            Assert.Equal("tA", GUI.tooltip);
+            Assert.Equal("tA", windowReads[^1]);
+            set = false;
+            MoveMouse(new Vector2(500f, 500f));
+            Frame();
+            Assert.Equal("tA", GUI.tooltip);
+        }
+
+        [Fact]
+        public void ALayoutWindowReadsTheSameTooltipInLayoutAndRepaint()
+        {
+            var probe = MakeProbe();
+            var reads = new List<string>();
+            var rect = new Rect(750f, 20f, 300f, 300f);
+            Vector2 scroll = Vector2.zero;
+            Rect button = default;
+            GUIProbe.Body = _ =>
+            {
+                rect = GUILayout.Window(2, rect, id =>
+                {
+                    GUILayout.Button(new GUIContent("W2a", "tW2a"));
+                    if (Event.current.type == EventType.Repaint) button = GUILayoutUtility.GetLastRect();
+                    scroll = GUILayout.BeginScrollView(scroll, GUILayout.Height(100f));
+                    for (int i = 0; i < 6; i++) GUILayout.Label(new GUIContent("W2s" + i, "tW2s" + i));
+                    GUILayout.EndScrollView();
+                    string read = GUI.tooltip;
+                    GUILayout.Label(string.IsNullOrEmpty(read) ? "(none)" : read);
+                    reads.Add(Name(Event.current.rawType) + " " + read);
+                }, "Win2");
+            };
+            Frame();
+            Frame();
+            MoveMouse(rect.position + button.center);
+            Frame();
+            reads.Clear();
+            Frame();
+            Assert.Equal(new[] { "Layout tW2a", "Repaint tW2a" }, reads);
+        }
+
+        [Fact]
+        public void OnlyAHoveredLabelSetsTooltipRect()
+        {
+            var probe = MakeProbe();
+            GUIProbe.Body = _ =>
+            {
+                GUI.Button(new Rect(20f, 20f, 100f, 30f), new GUIContent("A", "tA"));
+                GUI.Label(new Rect(20f, 100f, 100f, 30f), new GUIContent("L", "tL"));
+                GUI.BeginGroup(new Rect(20f, 180f, 200f, 100f));
+                GUI.Label(new Rect(0f, 30f, 150f, 30f), new GUIContent("D", "tD"));
+                GUI.EndGroup();
+            };
+            MoveMouse(new Vector2(30f, 30f));
+            Frame();
+            Assert.Equal("tA", GUI.tooltip);
+            Assert.Equal(new Rect(0f, 0f, 0f, 0f), TooltipRectReader.Value);
+            MoveMouse(new Vector2(70f, 116f));
+            Frame();
+            Assert.Equal(new Rect(70f, 116f, 0f, 0f), TooltipRectReader.Value);
+            MoveMouse(new Vector2(120f, 235f));
+            Frame();
+            Assert.Equal("tD", GUI.tooltip);
+            Assert.Equal(new Rect(100f, 55f, 0f, 0f), TooltipRectReader.Value);
+            // It persists like the tooltip.
+            MoveMouse(new Vector2(500f, 500f));
+            Frame();
+            Assert.Equal(new Rect(100f, 55f, 0f, 0f), TooltipRectReader.Value);
+        }
+
+        [Fact]
+        public void AWindowDeclaredInsideAWindowFunctionIsNotShown()
+        {
+            var probe = MakeProbe();
+            bool innerRan = false;
+            Rect inner = new(1f, 1f, 1f, 1f);
+            GUIProbe.Body = _ => GUI.Window(1, new Rect(400f, 20f, 300f, 250f), id =>
+            {
+                inner = GUI.Window(3, new Rect(50f, 600f, 200f, 80f), _ => innerRan = true, "Win3");
+            }, "Win1");
+            Frame();
+            Frame();
+            Assert.False(innerRan);
+            Assert.Equal(new Rect(0f, 0f, 0f, 0f), inner);
+        }
+
+        [Fact]
+        public void AReleaseOutsideTheHoldingWindowReachesItAsIgnore()
+        {
+            var probe = MakeProbe();
+            var seen = new List<string>();
+            int held = 0;
+            bool clicked = false;
+            GUIProbe.Body = _ =>
+            {
+                if (Event.current.rawType == EventType.MouseUp) seen.Add("ongui " + Name(Event.current.type));
+                GUI.Window(1, new Rect(400f, 20f, 300f, 250f), id =>
+                {
+                    var e = Event.current;
+                    if (e.rawType == EventType.MouseUp) seen.Add("window " + Name(e.type));
+                    GUI.tooltip = "-";
+                    if (GUI.Button(new Rect(10f, 25f, 100f, 30f), new GUIContent("W1a", "tW1a"))) clicked = true;
+                    if (held == 0) held = GUIUtility.hotControl;
+                }, "Win1");
+            };
+            Queue(EventType.MouseDown, new Vector2(420f, 50f));
+            Event.Enqueue(new Event { type = EventType.MouseDrag, mousePosition = new Vector2(800f, 680f), delta = new Vector2(380f, 630f) });
+            Queue(EventType.MouseUp, new Vector2(800f, 680f));
+            Frame();
+            Assert.NotEqual(0, held);
+            Assert.Equal(new[] { "window " + Name(EventType.Ignore), "ongui " + Name(EventType.MouseUp) }, seen);
+            Assert.False(clicked);
+            // The button keeps the mouse, and sets the tooltip, until the next press.
+            Assert.Equal(held, GUIUtility.hotControl);
+            Assert.Equal("tW1a", GUI.tooltip);
+            Frame();
+            Assert.Equal("tW1a", GUI.tooltip);
+            Queue(EventType.MouseDown, new Vector2(1000f, 600f));
+            Frame();
+            Assert.Equal(0, GUIUtility.hotControl);
+            Assert.Equal("-", GUI.tooltip);
+        }
     }
 }

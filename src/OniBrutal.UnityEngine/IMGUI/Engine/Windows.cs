@@ -58,6 +58,9 @@ namespace OniBrutal.Engine.IMGUI
             var p = GUIStateData.Participant;
             if (func == null) throw new System.ArgumentNullException(nameof(func));
             if (p == null) return rect;
+            // GUI.Window called inside a window function makes no window: its function never
+            // runs, and the call returns an empty rect.
+            if (GUIStateData.InWindow && !fitted && !modal) return default;
             var w = p.FindWindow(id);
             if (w == null)
             {

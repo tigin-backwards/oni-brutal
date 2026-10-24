@@ -124,6 +124,7 @@ namespace OniBrutal.Engine.IMGUI
             byBehaviour.Clear();
             InputEvents.Reset();
             Windows.ActiveModal = null;
+            GUIStateData.StaleHotControl = 0;
             swallowTabCharacter = false;
             lastMouse = Vector2.zero;
         }
@@ -172,6 +173,13 @@ namespace OniBrutal.Engine.IMGUI
             {
                 swallowTabCharacter = false;
                 if (type == EventType.KeyDown && e.keyCode == KeyCode.None && e.character == '\t') return;
+            }
+            // A control left holding the mouse by a release outside its window lets go at the
+            // next press.
+            if (type == EventType.MouseDown && GUIStateData.StaleHotControl != 0)
+            {
+                if (GUIStateData.HotControl == GUIStateData.StaleHotControl) GUIStateData.HotControl = 0;
+                GUIStateData.StaleHotControl = 0;
             }
             Order();
             if (type is EventType.Repaint or EventType.Layout)
@@ -232,7 +240,19 @@ namespace OniBrutal.Engine.IMGUI
             if (target != null)
             {
                 bool down = e.rawType == EventType.MouseDown && underMouse;
-                Windows.Call(target, e);
+                if (e.rawType == EventType.MouseUp && !underMouse && GUIStateData.HotControl != 0 && !target.Contains(e.ScreenPosition))
+                {
+                    // A release outside the window whose control holds the mouse reaches it as
+                    // Ignore, and the control keeps hotControl until the next press.
+                    GUIStateData.StaleHotControl = GUIStateData.HotControl;
+                    e.Masked = true;
+                    try { Windows.Call(target, e); }
+                    finally { e.Masked = false; }
+                }
+                else
+                {
+                    Windows.Call(target, e);
+                }
                 TabFocus(target.Scope, e);
                 if (down)
                 {

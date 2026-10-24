@@ -28,10 +28,28 @@ namespace OniBrutal.Engine.IMGUI
 
         static bool Over(Rect r) => r.Contains(Current.mousePosition);
 
-        public static void Label(Rect position, GUIContent content, GUIStyle style)
+        /// GUI.Label (`label`) and GUI.Box: draw on Repaint, where a hovered one sets the tooltip.
+        public static void Label(Rect position, GUIContent content, GUIStyle style, bool label)
         {
             GUIStateData.RequireGUI();
-            if (Current.type == EventType.Repaint) (style ?? GUIStyle.none).Draw(position, content, false, false, false, false);
+            if (Current.type != EventType.Repaint) return;
+            (style ?? GUIStyle.none).Draw(position, content, false, false, false, false);
+            Tooltip(position, content, 0, label);
+        }
+
+        /// On Repaint, a control whose content has a tooltip makes it GUI.tooltip when the mouse
+        /// is inside its rect and inside the visible area of the clip it is drawn in, or when it
+        /// holds the mouse (`id` is hotControl). A label also moves GUI.tooltipRect to the mouse.
+        /// Windows do not hide the controls under them, so the last one drawn wins.
+        static void Tooltip(Rect position, GUIContent content, int id, bool label)
+        {
+            string tip = content?.tooltip;
+            if (string.IsNullOrEmpty(tip)) return;
+            var mouse = Current.mousePosition;
+            bool hovered = position.Contains(mouse) && ClipStack.AbsoluteVisible.Contains(ClipStack.Unclip(mouse));
+            if (!hovered && (id == 0 || GUIStateData.HotControl != id)) return;
+            GUIStateData.Tooltip = tip;
+            if (label && hovered) GUIStateData.TooltipRect = new Rect(mouse, Vector2.zero);
         }
 
         /// True on the release of a press that started inside, when the release is inside too;
@@ -40,10 +58,11 @@ namespace OniBrutal.Engine.IMGUI
         {
             GUIStateData.RequireGUI();
             int id = GUIUtility.GetControlID(ControlHints.Button, FocusType.Passive, position);
-            return Pressable(position, id, content, style ?? GUIStyle.none, false);
+            return Pressable(position, id, content, style ?? GUIStyle.none, false, true);
         }
 
-        static bool Pressable(Rect position, int id, GUIContent content, GUIStyle style, bool on)
+        /// A button's input and drawing; with `tooltip` it sets GUI.tooltip as it draws.
+        static bool Pressable(Rect position, int id, GUIContent content, GUIStyle style, bool on, bool tooltip = false)
         {
             var e = Current;
             switch (e.GetTypeForControl(id))
@@ -75,6 +94,7 @@ namespace OniBrutal.Engine.IMGUI
                     return false;
                 case EventType.Repaint:
                     style.Draw(position, content, id, on);
+                    if (tooltip) Tooltip(position, content, id, false);
                     return false;
             }
             return false;
@@ -113,7 +133,7 @@ namespace OniBrutal.Engine.IMGUI
         {
             GUIStateData.RequireGUI();
             int id = GUIUtility.GetControlID(ControlHints.Toggle, FocusType.Passive, position);
-            return Pressable(position, id, content, style ?? GUIStyle.none, value) ? !value : value;
+            return Pressable(position, id, content, style ?? GUIStyle.none, value, true) ? !value : value;
         }
 
         /// A row of buttons splitting `position`'s width equally, the one at `selected` drawn

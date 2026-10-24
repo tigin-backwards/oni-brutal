@@ -83,6 +83,24 @@ namespace UnityEngine
             }
         }
 
+        /// The tooltip of the control under the mouse, as last drawn: a control whose content
+        /// has a tooltip sets it during Repaint while it is hovered (inside its rect and its
+        /// clip's visible area) or holds the mouse. Nothing clears it; it reads "" until set,
+        /// and outside OnGUI too. A set to null reads back "".
+        public static string tooltip
+        {
+            get => GUIStateData.Tooltip;
+            set => GUIStateData.Tooltip = value ?? "";
+        }
+
+        /// Where the last hovered label with a tooltip had the mouse: a rect of size 0 at the
+        /// mouse in the label's coordinates. Only labels set it.
+        protected static Rect tooltipRect
+        {
+            get => GUIStateData.TooltipRect;
+            set => GUIStateData.TooltipRect = value;
+        }
+
         // ----- Control names and focus -----
 
         /// Names the next control (the next GetControlID call).
@@ -109,14 +127,14 @@ namespace UnityEngine
         public static void Label(Rect position, GUIContent content) => Label(position, content, skin.label);
         public static void Label(Rect position, string text, GUIStyle style) => Label(position, GUIContent.Scratch(text), style);
         public static void Label(Rect position, Texture image, GUIStyle style) => Label(position, GUIContent.Scratch(image), style);
-        public static void Label(Rect position, GUIContent content, GUIStyle style) => Controls.Label(position, content, style);
+        public static void Label(Rect position, GUIContent content, GUIStyle style) => Controls.Label(position, content, style, true);
 
         public static void Box(Rect position, string text) => Box(position, GUIContent.Scratch(text), skin.box);
         public static void Box(Rect position, Texture image) => Box(position, GUIContent.Scratch(image), skin.box);
         public static void Box(Rect position, GUIContent content) => Box(position, content, skin.box);
         public static void Box(Rect position, string text, GUIStyle style) => Box(position, GUIContent.Scratch(text), style);
         public static void Box(Rect position, Texture image, GUIStyle style) => Box(position, GUIContent.Scratch(image), style);
-        public static void Box(Rect position, GUIContent content, GUIStyle style) => Controls.Label(position, content, style);
+        public static void Box(Rect position, GUIContent content, GUIStyle style) => Controls.Label(position, content, style, false);
 
         public static void DrawTexture(Rect position, Texture image) => DrawTexture(position, image, ScaleMode.StretchToFill, true, 0f);
         public static void DrawTexture(Rect position, Texture image, ScaleMode scaleMode) => DrawTexture(position, image, scaleMode, true, 0f);

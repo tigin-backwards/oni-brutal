@@ -25,6 +25,15 @@ namespace OniBrutal.Engine.IMGUI
 
         public static int HotControl;
         public static int KeyboardControl;
+        /// The control that held the mouse when its release came outside its window (and was
+        /// delivered there as Ignore): it keeps hotControl until the next press.
+        public static int StaleHotControl;
+
+        /// GUI.tooltip: one global value that only controls (on Repaint) and user code write;
+        /// nothing resets it between events, calls or frames.
+        public static string Tooltip = "";
+        /// GUI.tooltipRect: set by a hovered label with a tooltip, persisting like the tooltip.
+        public static Rect TooltipRect;
         /// GUIUtility.ExitGUI was called and the call it leaves has not ended yet.
         public static bool Exiting;
 
@@ -94,6 +103,9 @@ namespace OniBrutal.Engine.IMGUI
             BeginCall();
             HotControl = 0;
             KeyboardControl = 0;
+            StaleHotControl = 0;
+            Tooltip = "";
+            TooltipRect = default;
             Exiting = false;
             Participant = null;
             Window = null;

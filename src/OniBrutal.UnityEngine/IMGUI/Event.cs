@@ -49,9 +49,13 @@ namespace UnityEngine
         /// While GUI.enabled is false inside OnGUI, input events read as Ignore.
         public EventType type
         {
-            get => kind != EventType.Ignore && currentEvent == this && GUIStateData.InGUI && !GUIStateData.Enabled && IsInput(kind) ? EventType.Ignore : kind;
+            get => kind != EventType.Ignore && (Masked && kind != EventType.Used || currentEvent == this && GUIStateData.InGUI && !GUIStateData.Enabled && IsInput(kind)) ? EventType.Ignore : kind;
             set => kind = value;
         }
+
+        /// The event reads as Ignore while rawType keeps its type: how a mouse release outside
+        /// the window whose control holds the mouse reaches that window's function.
+        internal bool Masked;
 
         /// The type regardless of GUI.enabled.
         public EventType rawType => kind;
@@ -170,6 +174,7 @@ namespace UnityEngine
             flags = other.flags;
             commandText = other.commandText;
             display = other.display;
+            Masked = other.Masked;
         }
 
         /// Makes this a fresh event of `type` (the dispatcher's Layout and Repaint events).

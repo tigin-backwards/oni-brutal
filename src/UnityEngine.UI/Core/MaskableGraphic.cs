@@ -12,6 +12,8 @@ namespace UnityEngine.UI
 
         RectMask2D clipper;
         bool masking;
+        /// The size of its rect when its RectMask2D last culled it: a new size culls it again.
+        [NonSerialized] internal Vector2 CulledSize;
         readonly Vector3[] corners = new Vector3[4];
 
         protected MaskableGraphic()

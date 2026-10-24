@@ -215,8 +215,8 @@ namespace UnityEngine.UI
         }
 
         /// The clip of every enclosing RectMask2D, intersected, goes to the clippables; a mask
-        /// wholly off its screen-space canvas clips everything. Clippables that moved are culled
-        /// again even when the clip is unchanged.
+        /// wholly off its screen-space canvas clips everything. Clippables that moved or changed
+        /// size are culled again even when the clip is unchanged.
         public virtual void PerformClipping()
         {
             if (ReferenceEquals(RootCanvas, null)) return;
@@ -244,12 +244,21 @@ namespace UnityEngine.UI
                 foreach (var m in maskableTargets)
                 {
                     m.SetClipRect(clip, valid);
+                    m.CulledSize = m.rectTransform.rect.size;
                     m.Cull(clip, valid);
                 }
             }
             else
                 foreach (var m in maskableTargets)
-                    if (m.canvasRenderer.hasMoved) m.Cull(clip, valid);
+                {
+                    // A graphic is culled again when it moved (its transform or a parent's) or
+                    // its rect changed size (measured: an Image grown into the clip is shown in
+                    // that frame).
+                    var size = m.rectTransform.rect.size;
+                    if (!m.canvasRenderer.hasMoved && size == m.CulledSize) continue;
+                    m.CulledSize = size;
+                    m.Cull(clip, valid);
+                }
 
             lastClip = clip;
             hasLastClip = true;

@@ -153,6 +153,7 @@ namespace TMPro
         {
             if (this == null || !IsActive()) return;
             InvalidateLayoutCache();
+            m_CullWithNextMesh = true;
             base.SetLayoutDirty();
         }
 
@@ -175,7 +176,11 @@ namespace TMPro
                 if (m_havePropertiesChanged || m_VerticesDirty)
                 {
                     m_VerticesDirty = false;
+                    bool cullNow = m_CullWithNextMesh;
+                    m_CullWithNextMesh = false;
+                    var before = MeshBounds;
                     GenerateTextMesh();
+                    CullAfterMesh(before, cullNow);
                 }
                 if (m_MaterialDirty)
                 {
@@ -272,8 +277,99 @@ namespace TMPro
             // again (measured: the shipped package's doesn't, after ForceMeshUpdate).
             m_VerticesDirty = false;
             m_IgnoreActiveStateNow = true;
+            var before = MeshBounds;
             try { GenerateTextMesh(); }
             finally { m_IgnoreActiveStateNow = false; }
+            CullAfterMesh(before, false);
+        }
+
+        // ----- Culling under a RectMask2D -----
+        //
+        // A text culls with the bounds of the mesh its canvas renderer has (every vertex, the
+        // unused ones at the local origin included), not with its rect. The RectMask2D culls it
+        // when the clip changes, or when the text moves or changes size; the text culls itself
+        // again when its mesh changes: in the same canvas update when the mesh followed a change
+        // of its layout (text, font size, a new text), otherwise in the next one. A mesh made
+        // for an empty text keeps the cull it had. (docs/cleanroom/ugui.md, "RectMask2D culling".)
+
+        // The clip its RectMask2D last culled it with, while it is under one.
+        Rect m_CullClip;
+        bool m_CullClipValid, m_HasCullClip;
+        // Its layout changed since its last mesh.
+        bool m_CullWithNextMesh;
+        bool m_CullPending;
+        static readonly List<TextMeshProUGUI> s_CullPending = new();
+        static bool s_CullHooked;
+
+        Bounds MeshBounds => MeshCache != null ? MeshCache.bounds : default;
+
+        public override void SetClipRect(Rect clipRect, bool validRect)
+        {
+            base.SetClipRect(clipRect, validRect);
+            // An invalid rect: the mask let go of the text, or (culling it next) has no area.
+            if (!validRect) m_HasCullClip = false;
+        }
+
+        public override void Cull(Rect clipRect, bool validRect)
+        {
+            m_CullClip = clipRect;
+            m_CullClipValid = validRect;
+            m_HasCullClip = true;
+            bool cull = !validRect || !clipRect.Overlaps(MeshRectInRootCanvas(), true);
+            if (canvasRenderer.cull == cull) return;
+            canvasRenderer.cull = cull;
+            onCullStateChanged.Invoke(cull);
+            // Within the graphic rebuild the text has just made its mesh: nothing is left to queue.
+            if (!CanvasUpdateRegistry.IsRebuildingGraphics()) OnCullingChanged();
+        }
+
+        // The mesh's bounds in the root canvas's space: the box of its corners mapped there.
+        Rect MeshRectInRootCanvas()
+        {
+            var b = MeshBounds;
+            var m = transform.localToWorldMatrix;
+            var c = canvas;
+            if (c != null) m = c.rootCanvas.transform.worldToLocalMatrix * m;
+            var p0 = m.MultiplyPoint(new Vector3(b.min.x, b.min.y, b.center.z));
+            var p1 = m.MultiplyPoint(new Vector3(b.min.x, b.max.y, b.center.z));
+            var p2 = m.MultiplyPoint(new Vector3(b.max.x, b.max.y, b.center.z));
+            var p3 = m.MultiplyPoint(new Vector3(b.max.x, b.min.y, b.center.z));
+            float xMin = Mathf.Min(Mathf.Min(p0.x, p1.x), Mathf.Min(p2.x, p3.x));
+            float xMax = Mathf.Max(Mathf.Max(p0.x, p1.x), Mathf.Max(p2.x, p3.x));
+            float yMin = Mathf.Min(Mathf.Min(p0.y, p1.y), Mathf.Min(p2.y, p3.y));
+            float yMax = Mathf.Max(Mathf.Max(p0.y, p1.y), Mathf.Max(p2.y, p3.y));
+            return new Rect(xMin, yMin, xMax - xMin, yMax - yMin);
+        }
+
+        void CullAfterMesh(Bounds before, bool now)
+        {
+            if (!m_HasCullClip || m_textInfo == null || m_textInfo.characterCount == 0) return;
+            if (MeshBounds == before) return;
+            if (now)
+            {
+                Cull(m_CullClip, m_CullClipValid);
+                return;
+            }
+            if (m_CullPending) return;
+            m_CullPending = true;
+            s_CullPending.Add(this);
+            if (s_CullHooked) return;
+            s_CullHooked = true;
+            Canvas.preWillRenderCanvases += CullPendingTexts;
+        }
+
+        // Before the next canvas update's layout and clipping, as the mask would in its clipping.
+        static void CullPendingTexts()
+        {
+            if (s_CullPending.Count == 0) return;
+            var pending = s_CullPending.ToArray();
+            s_CullPending.Clear();
+            foreach (var t in pending)
+            {
+                if (t == null) continue;
+                t.m_CullPending = false;
+                if (t.isActiveAndEnabled && t.m_HasCullClip) t.Cull(t.m_CullClip, t.m_CullClipValid);
+            }
         }
 
         // ----- Materials -----

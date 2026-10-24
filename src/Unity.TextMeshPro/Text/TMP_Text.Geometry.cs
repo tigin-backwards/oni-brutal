@@ -90,22 +90,11 @@ namespace TMPro
             }
             WriteDecorations(sdfFactor);
 
-            var bounds = Extents.uninitialized;
             for (int m = 0; m < materialCount; m++)
             {
                 ref var mi = ref info.meshInfo[m];
                 mi.ClearUnusedVertices(Math.Max(mi.vertexCount, written[m]));
-                for (int k = 0; k < mi.vertexCount; k++)
-                {
-                    var pos = mi.vertices[k];
-                    bounds.min.x = Mathf.Min(bounds.min.x, pos.x);
-                    bounds.min.y = Mathf.Min(bounds.min.y, pos.y);
-                    bounds.max.x = Mathf.Max(bounds.max.x, pos.x);
-                    bounds.max.y = Mathf.Max(bounds.max.y, pos.y);
-                }
             }
-            if (bounds.max.x < bounds.min.x) m_MeshBounds = default;
-            else m_MeshBounds = new Bounds(new Vector3((bounds.min.x + bounds.max.x) * 0.5f, (bounds.min.y + bounds.max.y) * 0.5f, 0f), new Vector3(bounds.max.x - bounds.min.x, bounds.max.y - bounds.min.y, 0f));
             if (m_geometrySortingOrder == VertexSortingOrder.Reverse)
                 for (int m = 0; m < materialCount; m++) info.meshInfo[m].SortGeometry(VertexSortingOrder.Reverse);
         }

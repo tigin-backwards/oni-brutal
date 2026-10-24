@@ -25,7 +25,6 @@ namespace TMPro
         float m_LineSpacingAdjustment;
         float m_CharWidthAdjustment;
         float m_AutoSizedFontSize = -1f;
-        Bounds m_MeshBounds;
         Extents m_TextExtents;
         float m_Padding;
         bool m_IsUsingBold;
@@ -1161,15 +1160,9 @@ namespace TMPro
         [Obsolete("This does nothing. It was added to prevent PLib from breaking after upgrading to Unity 6.3")]
         public bool ignoreRectMaskCulling { get; set; }
 
-        // The bounds of the mesh (padding included).
-        public Bounds bounds
-        {
-            get
-            {
-                if (m_MeshCache == null) return default;
-                return m_MeshBounds;
-            }
-        }
+        // The bounds of the mesh: every vertex, the unused ones at the local origin included
+        // (measured: the shipped package's equal its mesh's bounds, pivot included).
+        public Bounds bounds => m_MeshCache != null ? m_MeshCache.bounds : default;
 
         // The bounds of the text's characters.
         public Bounds textBounds

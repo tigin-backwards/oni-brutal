@@ -640,15 +640,15 @@ installs get developer checks subscribers never see).
 | 619 | [Enclosed Telescope Tune-Up](https://steamcommunity.com/sharedfiles/filedetails/?id=2630438094) | ✅ | ✅ | ⬜ |  |
 | 620 | [Half Door Modern (Spaced out!+)](https://steamcommunity.com/sharedfiles/filedetails/?id=2737084838) | ✅ | ✅ | ⬜ |  |
 | 621 | [Dupes Logistics](https://steamcommunity.com/sharedfiles/filedetails/?id=2809687723) | ✅ | ✅ | ⬜ |  |
-| 622 | [Hatches Don't Eat Meat](https://steamcommunity.com/sharedfiles/filedetails/?id=2654161103) | ✅ | ✅ | ⬜ |  |
+| 622 | [Hatches Don't Eat Meat](https://steamcommunity.com/sharedfiles/filedetails/?id=2654161103) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2654161103-hatches-dont-eat-meat.yaml: the Hatch's and the Sage Hatch's diets (calorie and solid-consumer monitors) have no raw Meat but keep Barbeque and their minerals |
 | 623 | [Blow Dryer](https://steamcommunity.com/sharedfiles/filedetails/?id=1855385913) | ⬜ | ⬜ | ⬜ | flagged by onimaxxing (notLoading); not tested |
-| 624 | [Infinite Carry EXTREME](https://steamcommunity.com/sharedfiles/filedetails/?id=3462797653) | ✅ | ✅ | ⬜ |  |
+| 624 | [Infinite Carry EXTREME](https://steamcommunity.com/sharedfiles/filedetails/?id=3462797653) | ✅ | ✅ | ✅ | spec tests/e2e/mods/3462797653-infinite-carry-extreme.yaml: at 100x and build level 2 the carry converter is 4,000 kg a point and both standard Duplicants carry over 20,000 kg, the same as the original |
 | 625 | [item pedestal preview decor info](https://steamcommunity.com/sharedfiles/filedetails/?id=1934095066) | ⬜ | ⬜ | ⬜ | flagged by onimaxxing (notLoading); not tested |
 | 626 | [Batteries Charge Sensor](https://steamcommunity.com/sharedfiles/filedetails/?id=2449847174) | ✅ | ✅ | ⬜ |  |
 | 627 | [Quick Priority](https://steamcommunity.com/sharedfiles/filedetails/?id=2726552567) | ✅ | ✅ | ⬜ |  |
 | 628 | [I_实用系统_Practical System 1.6](https://steamcommunity.com/sharedfiles/filedetails/?id=3300147615) | ✅ | ✅ | ⬜ |  |
 | 629 | [Block Decor Effects Behind Walls](https://steamcommunity.com/sharedfiles/filedetails/?id=2693850829) | ✅ | ✅ | ⬜ |  |
-| 630 | [No Building Damage](https://steamcommunity.com/sharedfiles/filedetails/?id=2564329464) | ✅ | ✅ | ⬜ |  |
+| 630 | [No Building Damage](https://steamcommunity.com/sharedfiles/filedetails/?id=2564329464) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2564329464-no-building-damage.yaml: a Battery heated past its overheat temperature by hot petroleum stays overheated for two minutes and keeps its full hit points |
 | 631 | [Preemptive beta Traditional Chinese by LaFa](https://steamcommunity.com/sharedfiles/filedetails/?id=1142343584) | ⬜ | ⬜ | ⬜ |  |
 | 632 | [Preset Manager](https://steamcommunity.com/sharedfiles/filedetails/?id=2977728791) | ✅ | ✅ | ✅ | issue #2's set |
 | 633 | [Survival Not Required](https://steamcommunity.com/sharedfiles/filedetails/?id=2840201171) | ⬜ | ⬜ | ⬜ |  |
@@ -663,7 +663,7 @@ installs get developer checks subscribers never see).
 | 642 | [Adjustable Auto Sweeper (Deprecated)](https://steamcommunity.com/sharedfiles/filedetails/?id=2971184827) | ✅ | ✅ | ⬜ |  |
 | 643 | [Vietnamese_Base&DLC_100%-Update 2026/6/15.](https://steamcommunity.com/sharedfiles/filedetails/?id=3004126724) | ⬜ | ⬜ | ⬜ |  |
 | 644 | [automatic OilRefinery](https://steamcommunity.com/sharedfiles/filedetails/?id=2879250656) | ✅ | ✅ | ⬜ |  |
-| 645 | [NeodymiumStyle Hairstyle MOD for Dupery ALL-IN](https://steamcommunity.com/sharedfiles/filedetails/?id=2995333290) | ✅ | ✅ | ⬜ |  |
+| 645 | [NeodymiumStyle Hairstyle MOD for Dupery ALL-IN](https://steamcommunity.com/sharedfiles/filedetails/?id=2995333290) | ✅ | ✅ | ⬜ | not played: hairstyles and Duplicant personalities for Dupery, no code of its own; it does nothing without that mod |
 | 646 | [Spooky Pumpkin](https://steamcommunity.com/sharedfiles/filedetails/?id=2266608310) | ✅ | ✅ | ⬜ |  |
 | 647 | [Composter Outputs Fertilizer](https://steamcommunity.com/sharedfiles/filedetails/?id=1878176354) | ❌ | ❌ | ⬜ | fails to load in the original as well, in its sweep batch |
 | 648 | [Better Food Effects / 更好的食物效果](https://steamcommunity.com/sharedfiles/filedetails/?id=3796760626) | ✅ | ✅ | ⬜ |  |

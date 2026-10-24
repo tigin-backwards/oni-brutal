@@ -1,0 +1,23 @@
+# Hatches Don't Eat Meat (2654161103), class P.
+#
+# What it does: a postfix on BaseHatchConfig.FoodDiet, the list of foods the Hatch and the Sage
+# Hatch eat beside their minerals (the game adds every loaded food with calories), removes the
+# entry for raw Meat, so these hatches leave it lying.
+# How a player reaches it: any hatch near meat.
+# What changes: the hatches' diet, on their CreatureCalorieMonitor and SolidConsumerMonitor.
+#
+# The diet on the Hatch prefab's CreatureCalorieMonitor and SolidConsumerMonitor defs (the
+# 18th and 19th of its state machine defs) has no Meat but keeps cooked meat (Barbeque) and its
+# minerals; the Sage Hatch's too.
+from: early-base
+mods: [2654161103]
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"Hatch\").GetComponent<StateMachineController>.cmpdef.defs[17].diet.GetDietInfo(\"Meat\")": missing
+      "Assets.GetPrefab(\"Hatch\").GetComponent<StateMachineController>.cmpdef.defs[17].diet.GetDietInfo(\"CookedMeat\")": exists
+      "Assets.GetPrefab(\"Hatch\").GetComponent<StateMachineController>.cmpdef.defs[17].diet.GetDietInfo(\"SandStone\")": exists
+      "Assets.GetPrefab(\"Hatch\").GetComponent<StateMachineController>.cmpdef.defs[18].diet.GetDietInfo(\"Meat\")": missing
+      "Assets.GetPrefab(\"Hatch\").GetComponent<StateMachineController>.cmpdef.defs[18].diet.GetDietInfo(\"CookedMeat\")": exists
+      "Assets.GetPrefab(\"HatchVeggie\").GetComponent<StateMachineController>.cmpdef.defs[17].diet.GetDietInfo(\"Meat\")": missing
+      "Assets.GetPrefab(\"HatchVeggie\").GetComponent<StateMachineController>.cmpdef.defs[17].diet.GetDietInfo(\"CookedMeat\")": exists
+  - expect_state: {"Assets.GetPrefab(\"Hatch\").GetComponent<StateMachineController>.cmpdef.defs[17].diet.infos.Length": "== original"}

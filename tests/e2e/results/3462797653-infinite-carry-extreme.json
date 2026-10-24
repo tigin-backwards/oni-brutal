@@ -1,0 +1,58 @@
+{
+ "spec": "mods/3462797653-infinite-carry-extreme.yaml",
+ "mods": [
+  "3462797653"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "at 100x and build level 2 the carry converter is 4,000 kg a point and both standard Duplicants carry over 20,000 kg, the same as the original",
+ "updated": "2026-10-24",
+ "commit": "29e4f14",
+ "mod_dlls": {
+  "3462797653": {
+   "InfiniteCarry.dll": "223eff9254ce5434c5d20fe953fc66997f759906d561801a50e518f5a0b310dc",
+   "PLibCore.dll": "f2127c9fa9fd24e9631035d0157be71e3eebfdd2425f58cd2d0f1dc5f7e4f177",
+   "PLibOptions.dll": "024f5c0d18dc15bd93e9112434456ac930f35ab97b1769b160ba4097f49964e1",
+   "PLibUI.dll": "c9665407dcad35ef695b91396d2fc5edd62716f2aa11aa6934b22363ef537390"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-062118-139e05",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T06:25:32",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-063512-660e3f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T06:35:12",
+    "lane": 16,
+    "reference_run": "20261024-062118-139e05",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-063512-660e3f",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T06:36:11",
+    "lane": 16,
+    "reference_run": "20261024-062118-139e05",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

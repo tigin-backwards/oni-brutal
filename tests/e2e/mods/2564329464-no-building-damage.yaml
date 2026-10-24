@@ -1,0 +1,36 @@
+# No Building Damage (2564329464), class P.
+#
+# What it does: a prefix that skips BuildingHP.OnDoBuildingDamage, the handler of the
+# DoBuildingDamage event (-794517298) that building damage goes through: overheating, frozen
+# or boiling pipe contents, overloaded wires, meteors and critters. Its Workshop title names
+# conduits, but the patch covers every building.
+# How a player reaches it: any building that would take damage.
+# What changes: buildings never lose hit points.
+#
+# setup builds a Battery at (113, 206) in the dug-out corridor west of the printing pod and
+# pours 1000 kg of petroleum at 550 K into its cells (SimMessages.ReplaceElement), which heats
+# it far past its overheat temperature. The battery is selected; the game runs, the battery
+# stays overheated (the state whose update sends the damage event every 7.5 s) and its hit
+# points stay full.
+from: early-base
+mods: [2564329464]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Battery\")", method: Build, args: [131129, Neutral, null, [Cuprite], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [131129, Petroleum, {"$": "CellEventLogger.Instance.SandBoxTool"}, 1000.0, 550.0]}}
+steps:
+  - driver: {camera.set: {cell: [113, 207], ortho: 8}}
+  - click_world: {cell: [113, 207], select: Battery}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<BuildingHP>.MaxHitPoints": {save_as: max}
+      "selected:GetComponent<BuildingHP>.HitPoints": "== max"
+      "selected:GetComponent<Overheatable>.OverheatTemperature": {save_as: overheat}
+  - run: {seconds: 60}
+  - expect_state:
+      "selected:GetComponent<PrimaryElement>.Temperature": "> overheat"
+      "selected:GetComponent<BuildingHP>.HitPoints": "== max"
+  - expect_ui: {"**/SimpleInfoScreen/**/StatusItemTemplate/TextLayout/Value": {any_text: "~Overheat"}}
+  - run: {seconds: 60}
+  - expect_state:
+      "selected:GetComponent<PrimaryElement>.Temperature": "> overheat"
+      "selected:GetComponent<BuildingHP>.HitPoints": "== max"

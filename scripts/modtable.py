@@ -134,6 +134,7 @@ unplayed = {
     '1891479671': 'not played: it supports the base game only (`supportedContent: VANILLA_ID`; it patches the base game\'s Biological Cargo Bay, which Spaced Out lacks), and every spec fixture is a Spaced Out colony',
     '1828719932': 'not played: it supports the base game only (`supportedContent: VANILLA_ID`; it patches the base game\'s starmap destinations), and every spec fixture is a Spaced Out colony',
     '1886699455': 'not played: it supports the base game only (`supportedContent: VANILLA_ID`), and every spec fixture is a Spaced Out colony',
+    '2995333290': 'not played: hairstyles and Duplicant personalities for Dupery, no code of its own; it does nothing without that mod',
 }
 broken = {
     '1715248368': 'broken upstream: patches `Deconstructable.TriggerDestroy`, which now has two overloads',

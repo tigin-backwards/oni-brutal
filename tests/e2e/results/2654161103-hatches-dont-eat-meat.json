@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2654161103-hatches-dont-eat-meat.yaml",
+ "mods": [
+  "2654161103"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Hatch's and the Sage Hatch's diets (calorie and solid-consumer monitors) have no raw Meat but keep Barbeque and their minerals",
+ "updated": "2026-10-24",
+ "commit": "29e4f14",
+ "mod_dlls": {
+  "2654161103": {
+   "HatchesDon'tEatMeat.dll": "a43c1a4d07473d7f713cbc089a071915e5d59b3cedfae68acae311eda6df3734"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-062118-139e05",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T06:23:49",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-063303-f66ec5",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T06:33:03",
+    "lane": 16,
+    "reference_run": "20261024-062118-139e05",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-063303-f66ec5",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T06:34:07",
+    "lane": 16,
+    "reference_run": "20261024-062118-139e05",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -13,6 +13,7 @@ namespace OniBrutal.Host
     {
         static int Main(string[] args)
         {
+            WindowsConsole.AttachToParent();
             var options = Options.Parse(args);
             if (options == null) return 2;
             // For the Restarter next to the host (App.Restart): the arguments to start again with

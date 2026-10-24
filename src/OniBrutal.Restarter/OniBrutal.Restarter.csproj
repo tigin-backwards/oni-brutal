@@ -2,8 +2,12 @@
   <!-- Restarter.exe for the Windows player: the helper the game's App.Restart starts from the
        player's directory (the Linux player uses the shell script src/OniBrutal.Host/Restarter). -->
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
+    <!-- GUI subsystem: App.Restart starts it through the shell (UseShellExecute, where its
+         CreateNoWindow does nothing), so as a console program it would open a console window,
+         with a taskbar entry, while it waits for the player to exit. -->
+    <OutputType>WinExe</OutputType>
     <AssemblyName>Restarter</AssemblyName>
     <RootNamespace>OniBrutal.Restarter</RootNamespace>
+    <ApplicationIcon>../OniBrutal.Host/Steela.ico</ApplicationIcon>
   </PropertyGroup>
 </Project>

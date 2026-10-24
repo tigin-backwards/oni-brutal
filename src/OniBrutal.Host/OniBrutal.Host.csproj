@@ -1,6 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
+    <!-- On Windows a GUI-subsystem executable: started by Steam or Explorer it opens no console
+         window (with a taskbar entry of its own beside the game's); started from a terminal it
+         writes to that terminal's console (WindowsConsole). -->
+    <OutputType Condition="$(RuntimeIdentifier.StartsWith('win')) Or ('$(RuntimeIdentifier)' == '' And $([MSBuild]::IsOSPlatform('Windows')))">WinExe</OutputType>
     <AssemblyName>OniBrutal</AssemblyName>
     <RootNamespace>OniBrutal.Host</RootNamespace>
     <!-- BinaryFormatter: the game clones worldgen settings with it (ARCHITECTURE §2.1). -->

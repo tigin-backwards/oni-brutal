@@ -290,16 +290,34 @@ past the boot checkpoint needs a Steam client logged in with an account that own
   `PInvokePatches`: a missing export or library does not fail the preparation of a P/Invoke; the
   detour goes on the method's own entry, other P/Invokes bind as before, and calling the original
   still fails as on Mono. `--check-types` patches a P/Invoke to a missing export.
-- **D21 Patches of methods an earlier replacement calls.** Harmony compiles a patched method's
-  replacement fully optimized, and CoreCLR's JIT inlines small methods it calls; a method patched
-  later is marked not to be inlined from then on, but a replacement compiled before keeps its old
-  body inlined and the later patch never runs there (True Tiles patches
-  `BlockTileRenderer.GetConnectionBits`, then `MatchesDef`, which it calls: no tile connected to its
-  neighbours). On Mono the later patch takes effect (the mod works in the original player).
-  **Resolved in** `PatchDependents`: the methods each replacement calls are recorded from the
-  instructions Harmony builds it from (`CodeTranspiler.GetResult`), and the first time a method is
-  patched, the replacements already made that call it are rebuilt, as Harmony rebuilds one when a
-  patch is added. `--check-types` patches a caller, then a method it calls, and calls the caller.
+- **D21 Patches of methods an earlier replacement calls or inlines.** Harmony compiles a patched
+  method's replacement fully optimized, and CoreCLR's JIT inlines methods it calls, and, through
+  them, the methods those call; a method patched later is marked not to be inlined from then on,
+  but a replacement compiled before keeps its old body inlined and the later patch never runs
+  there (True Tiles patches `BlockTileRenderer.GetConnectionBits`, then `MatchesDef`, which it
+  calls: no tile connected to its neighbours; Forever Eruption Geyser patches
+  `Geyser.GetEmitRate`, then `GetIterationPercent`, which it reaches through `GetOnDuration`: the
+  emit rate kept the unpatched share). On Mono the later patch takes effect (both mods work in the
+  original player). **Resolved in** `PatchDependents`: the host records the methods each
+  replacement's instructions call (from `CodeTranspiler.GetResult`) and reads, once each, the IL of
+  every candidate for inlining reachable from them through candidates: a call graph. A candidate
+  has IL (not abstract, a P/Invoke or an internal call), is not marked NoInlining or synchronized,
+  is not patched yet, and has at most 1024 bytes of IL or is marked AggressiveInlining; a virtual
+  one counts, as the JIT inlines one it devirtualizes. 1024 is the JIT's bound
+  (`JitExtDefaultPolicyMaxILProf`, its bound with profile data, not the 128 without, and
+  measured: a replacement inlines 1024 bytes of straight-line IL two calls down, never 1026). The
+  first time a candidate (or a P/Invoke, whose call is inlined too) is patched, the host walks the
+  graph back from it through unpatched candidates, 20 calls deep (the JIT's inlining depth), and
+  rebuilds the replacements already made that call any method on the way, as Harmony rebuilds one
+  when a patch is added. The rule over-approximates (it ignores the JIT's budget and call-site
+  heuristics), which costs only time at mod load; replacements run as compiled. Eight
+  Harmony-heavy mods together (Fast Save, Ronivans Legacy, Research Manager, Popup Control,
+  Duplicant Stat Selector, Sweep By Type, Better Automation Overlay, Favorite Resources) read
+  43,600 bodies in 0.6–0.75 s and rebuild 230 times (126 replacements) in 1.2 s; Forever Eruption
+  Geyser alone rebuilds 18 times. Not covered: an override the JIT reaches by devirtualizing a
+  call to a base method (the call names the base method, whose body is followed instead).
+  `--check-types` patches a caller, then a method it calls, and calls the caller; and patches A,
+  then C, which A reaches through B, with C of 4, 1024 and 1026 bytes of IL, and calls A.
 - **D22 Classes missing a method of an interface they list.** A mod built against an older game
   can have a class that no longer implements every method of a game interface (Wireless Power's
   side screen lacks the new `ISliderControl.GetSliderTooltip(int)`). Mono loads the class and fails

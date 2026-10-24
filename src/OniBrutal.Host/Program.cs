@@ -302,6 +302,49 @@ namespace OniBrutal.Host
                 for (int i = 0; i < 100; i++) run.Invoke(null, [i]);
                 return prefixedB - before == 100 ? "the later prefix runs from the earlier replacement" : throw new InvalidOperationException($"B's prefix ran {prefixedB - before} of 100 calls");
             });
+            Check("A Harmony prefix on a method an earlier replacement reaches through an inlined one (PatchDependents)", () =>
+            {
+                PatchDependents.Install();
+                // A calls B, which calls C: static, and B small, so A's replacement inlines B and,
+                // through it, C. A is patched first, then C gets a prefix, as Forever Eruption Geyser
+                // patches Geyser.GetEmitRate and then GetIterationPercent, which GetOnDuration calls.
+                // C has 4 bytes of IL, then the most the JIT inlines (1024), then 2 more, which the
+                // JIT must call (no replacement is rebuilt for it): the bound PatchDependents assumes.
+                var ran = new List<string>();
+                foreach (var size in new[] { 4, 1024, 1026 })
+                {
+                    var module = System.Reflection.Emit.AssemblyBuilder.DefineDynamicAssembly(new AssemblyName($"OniBrutal.Host.NestedCheck{size}"),
+                        System.Reflection.Emit.AssemblyBuilderAccess.Run).DefineDynamicModule("NestedCheck");
+                    var type = module.DefineType("Nested", TypeAttributes.Public | TypeAttributes.Abstract | TypeAttributes.Sealed);
+                    var c = type.DefineMethod("C", MethodAttributes.Public | MethodAttributes.Static, typeof(int), [typeof(int)]);
+                    var il = c.GetILGenerator();
+                    il.Emit(System.Reflection.Emit.OpCodes.Ldarg_0);
+                    for (int i = 0; i < (size - 2) / 2; i++)
+                    {
+                        il.Emit(System.Reflection.Emit.OpCodes.Ldc_I4_3);
+                        il.Emit(i % 2 == 0 ? System.Reflection.Emit.OpCodes.Mul : System.Reflection.Emit.OpCodes.Xor);
+                    }
+                    il.Emit(System.Reflection.Emit.OpCodes.Ret);
+                    var b = type.DefineMethod("B", MethodAttributes.Public | MethodAttributes.Static, typeof(int), [typeof(int)]);
+                    il = b.GetILGenerator();
+                    il.Emit(System.Reflection.Emit.OpCodes.Ldarg_0); il.Emit(System.Reflection.Emit.OpCodes.Call, c); il.Emit(System.Reflection.Emit.OpCodes.Ldc_I4_2); il.Emit(System.Reflection.Emit.OpCodes.Add); il.Emit(System.Reflection.Emit.OpCodes.Ret);
+                    var a = type.DefineMethod("A", MethodAttributes.Public | MethodAttributes.Static, typeof(int), [typeof(int)]);
+                    il = a.GetILGenerator();
+                    il.Emit(System.Reflection.Emit.OpCodes.Ldarg_0); il.Emit(System.Reflection.Emit.OpCodes.Call, b); il.Emit(System.Reflection.Emit.OpCodes.Ldc_I4_1); il.Emit(System.Reflection.Emit.OpCodes.Add); il.Emit(System.Reflection.Emit.OpCodes.Ret);
+                    var nested = type.CreateType();
+                    int length = nested.GetMethod("C")!.GetMethodBody()!.GetILAsByteArray()!.Length;
+                    if (length != size) throw new InvalidOperationException($"C has {length} bytes of IL, not {size}");
+                    var harmony = new HarmonyLib.Harmony("OniBrutal.Host.Check");
+                    harmony.Patch(nested.GetMethod("A"), postfix: new HarmonyLib.HarmonyMethod(typeof(Program), nameof(CountA)));
+                    harmony.Patch(nested.GetMethod("C"), prefix: new HarmonyLib.HarmonyMethod(typeof(Program), nameof(CountC)));
+                    var run = nested.GetMethod("A")!;
+                    int before = prefixedC;
+                    for (int i = 0; i < 100; i++) run.Invoke(null, [i]);
+                    if (prefixedC - before != 100) throw new InvalidOperationException($"with {size} bytes of IL in C, its prefix ran {prefixedC - before} of 100 calls");
+                    ran.Add(size.ToString());
+                }
+                return $"the later prefix runs from the earlier replacement (C of {string.Join(", ", ran)} bytes of IL)";
+            });
             Check("Exceptions nothing catches on other threads (UnhandledExceptions)", () =>
             {
                 UnhandledExceptions.Install();
@@ -604,9 +647,10 @@ namespace OniBrutal.Host
             public T Draw(T item) { last = item; return item; }
         }
 
-        static int prefixedB, countedA;
+        static int prefixedB, prefixedC, countedA;
         static void CountA() => countedA++;
         static void CountB() => prefixedB++;
+        static void CountC() => prefixedC++;
 
         static int drawn;
         static void CountDraw() => drawn++;

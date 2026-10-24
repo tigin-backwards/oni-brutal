@@ -188,6 +188,22 @@ quiet_begin() # STAGE
     exec {quiet_fd}>>"$quiet_lockdir/perf.lock"
     note "$1: waiting for running e2e specs to finish"
     flock -x "$quiet_fd"
+    # The lock keeps players out, not other work (another project's build or verifier on many
+    # cores skewed a perf run by 13%): wait, at most QA_QUIET_MAX_MIN minutes, until under
+    # QA_QUIET_CORES cores' worth of CPU is busy.
+    local busy waited=0 max=$(( ${QA_QUIET_MAX_MIN:-30} * 60 ))
+    while busy=$(cores_busy); awk -v b="$busy" -v m="${QA_QUIET_CORES:-2}" 'BEGIN { exit !(b > m) }'; do
+        [ $waited -eq 0 ] && note "$1: waiting for the machine to go quiet ($busy cores busy; most: $(ps -eo pcpu=,comm= --sort=-pcpu | head -1 | xargs))"
+        if [ $waited -ge $max ]; then note "$1: still $busy cores busy after ${QA_QUIET_MAX_MIN:-30} min; measuring anyway"; break; fi
+        sleep 15; waited=$((waited + 20))
+    done
+}
+cores_busy() # cores' worth of CPU busy over 5 s, from /proc/stat
+{
+    local a b
+    a=$(awk '/^cpu /{print $2+$3+$4+$7+$8+$9, $5+$6}' /proc/stat); sleep 5
+    b=$(awk '/^cpu /{print $2+$3+$4+$7+$8+$9, $5+$6}' /proc/stat)
+    awk -v a="$a" -v b="$b" -v n="$(nproc)" 'BEGIN { split(a, x, " "); split(b, y, " "); busy = y[1] - x[1]; idle = y[2] - x[2]; printf "%.1f", (busy + idle > 0 ? n * busy / (busy + idle) : 0) }'
 }
 quiet_end()
 {

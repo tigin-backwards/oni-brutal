@@ -3,12 +3,12 @@
  "mods": [
   "3382061617"
  ],
- "verdict": "failed",
- "why": "a run of ours failed",
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
  "findings": [],
- "note": "with the oily moonlet on and a 3-cycle care package timer (config.json): from a colony to New Game, Survival, Spaced Out!: the carousel lists MiniBase; the cluster chosen by typing its coordinate (its asteroid list dumped), launched and embarked: two worlds, the 112 x 57 start world drawn by the mod, the map revealed, an 1800 s immigration interval, its Resin and Niobium POIs (in the original); fails in ours: errors the mod's worldgen logs from a worldgen thread ('Assert failed: Couldn't find a start node on a world that expects it!!') open the game's error dialog in ours (Application.logMessageReceived raised for another thread's Debug.LogError; the original logs the same lines with no dialog), and when the generated colony loads its ReportErrorDialog.OnDestroy quits the player (App.QuitCode(1), terminateOnError)",
+ "note": "with the oily moonlet on and a 3-cycle care package timer (config.json): from a colony to New Game, Survival, Spaced Out!: the carousel lists MiniBase; the cluster chosen by typing its coordinate (its asteroid list dumped), launched and embarked: two worlds, the 112 x 57 start world drawn by the mod, the map revealed, an 1800 s immigration interval, its Resin and Niobium POIs; the worldgen thread's errors are logged with no error dialog, in both players",
  "updated": "2026-10-24",
- "commit": "f1447d1",
+ "commit": "cf3a8bc",
  "mod_dlls": {
   "3382061617": {
    "MiniBase-merged.dll": "158417884ad0a0cc0b11636d14b836a2201f17b2eb194ef931bdb55f575113fa"
@@ -27,14 +27,11 @@
   ],
   "ours": [
    {
-    "run": "20261024-123514-8ff7a9",
-    "index": 1,
-    "verdict": "fail",
-    "date": "2026-10-24T12:56:38",
+    "run": "20261024-132352-b87901",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T13:27:17",
     "lane": 18,
-    "reasons": [
-     "step 22: E2eDriver closed the connection during ui.wait"
-    ],
     "reference_run": "20261024-121957-33f99b",
     "new_signatures": 0,
     "findings": [],
@@ -46,14 +43,11 @@
     "shots": {}
    },
    {
-    "run": "20261024-123514-8ff7a9",
-    "index": 2,
-    "verdict": "fail",
-    "date": "2026-10-24T13:01:11",
-    "lane": 18,
-    "reasons": [
-     "step 22: E2eDriver closed the connection during ui.wait"
-    ],
+    "run": "20261024-132352-b87901",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T13:27:17",
+    "lane": 19,
     "reference_run": "20261024-121957-33f99b",
     "new_signatures": 0,
     "findings": [],

@@ -3,12 +3,12 @@
  "mods": [
   "1930918856"
  ],
- "verdict": "failed",
- "why": "a run of ours failed",
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
  "findings": [],
- "note": "from a colony to New Game, Survival, Classic: the carousel lists the Solar System; the cluster chosen by typing its coordinate (its asteroid list dumped), launched and embarked: nine worlds with Earth (224 x 320, the mod's earth subworlds), the Moon, Ganymede and Titan named by the mod after their planet icons, geysers and starmap POIs (in the original); fails in ours: errors the game's worldgen logs from a worldgen thread ('Missing mob description for internal mob [PacuEgg]') open the game's error dialog in ours (Application.logMessageReceived raised for another thread's Debug.LogError; the original logs the same lines with no dialog), and when the generated colony loads its ReportErrorDialog.OnDestroy quits the player (App.QuitCode(1), terminateOnError)",
+ "note": "from a colony to New Game, Survival, Classic: the carousel lists the Solar System; the cluster chosen by typing its coordinate (its asteroid list dumped), launched and embarked: nine worlds with Earth (224 x 320, the mod's earth subworlds), the Moon, Ganymede and Titan named by the mod after their planet icons, geysers and starmap POIs; the worldgen thread's errors are logged with no error dialog, in both players",
  "updated": "2026-10-24",
- "commit": "f1447d1",
+ "commit": "cf3a8bc",
  "mod_dlls": {
   "1930918856": {
    "PLib.dll": "13c356607dd2878fd3de000ad38a39cd35b1e0f23035f9d74d1fec41da841511",
@@ -28,14 +28,11 @@
   ],
   "ours": [
    {
-    "run": "20261024-123514-8ff7a9",
-    "index": 1,
-    "verdict": "fail",
-    "date": "2026-10-24T12:52:58",
+    "run": "20261024-132352-b87901",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T13:25:25",
     "lane": 19,
-    "reasons": [
-     "step 22: E2eDriver closed the connection during ui.wait"
-    ],
     "reference_run": "20261024-121957-33f99b",
     "new_signatures": 0,
     "findings": [],
@@ -47,14 +44,11 @@
     "shots": {}
    },
    {
-    "run": "20261024-123514-8ff7a9",
-    "index": 2,
-    "verdict": "fail",
-    "date": "2026-10-24T12:54:10",
-    "lane": 19,
-    "reasons": [
-     "step 22: E2eDriver closed the connection during ui.wait"
-    ],
+    "run": "20261024-132352-b87901",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T13:25:25",
+    "lane": 18,
     "reference_run": "20261024-121957-33f99b",
     "new_signatures": 0,
     "findings": [],

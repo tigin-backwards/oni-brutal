@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2836853288-automatic-desalinator.yaml",
+ "mods": [
+  "2836853288"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a desalinator set up with floor, battery, wires and pipes (setup) starts on its piped salt water and drops the 150 kg of salt it held",
+ "updated": "2026-10-23",
+ "commit": "e924eba",
+ "mod_dlls": {
+  "2836853288": {
+   "AutomaticDesalinator.dll": "a28b1d628bd88a421d8f53c173d4f37b830470c8f5f7e26f94e97b852bb57b23"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-220418-70b026",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T22:08:22",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-223314-1a5761",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T22:33:14",
+    "lane": 17,
+    "reference_run": "20261023-220418-70b026",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-223314-1a5761",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T22:34:21",
+    "lane": 17,
+    "reference_run": "20261023-220418-70b026",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

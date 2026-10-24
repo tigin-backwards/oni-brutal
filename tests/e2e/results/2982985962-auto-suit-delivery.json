@@ -1,0 +1,59 @@
+{
+ "spec": "mods/2982985962-auto-suit-delivery.yaml",
+ "mods": [
+  "2982985962"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "an Atmo Suit Dock built and selected: Request Suit arms the mod's redelivery (side screen shot) and Cancel Request disarms it",
+ "updated": "2026-10-23",
+ "commit": "e924eba",
+ "mod_dlls": {
+  "2982985962": {
+   "AutoSuitDelivery.dll": "6e180d0556085f25fbb495ce4b8f306525c1539f618d39dff4fb5e3f598c1d96"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-220418-70b026",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T22:07:09",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-222635-c9ec25",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T22:27:51",
+    "lane": 16,
+    "reference_run": "20261023-220418-70b026",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "side-screen": 0.0
+    }
+   },
+   {
+    "run": "20261023-222635-c9ec25",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T22:26:35",
+    "lane": 17,
+    "reference_run": "20261023-220418-70b026",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "side-screen": 0.0
+    }
+   }
+  ]
+ }
+}

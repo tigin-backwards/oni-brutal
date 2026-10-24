@@ -1,0 +1,43 @@
+# Auto Suit Delivery (2982985962), classes P, O.
+#
+# What it does: a suit dock (Atmo, Jet, Lead suit docks and the oxygen mask dock) that was
+# set to request a suit asks for one again by itself once it has stood empty for 600 s (a
+# Sim4000ms component added to each dock config, armed by SuitLocker.ConfigRequestSuit and
+# disarmed by ConfigNoSuit and DropSuit), so a Duplicant who takes a suit no longer leaves the
+# dock idle; it also avoids the "No Docks available" notification for such docks. PLib
+# options set the delay and the notification.
+# How a player reaches it: the dock's side screen, Request Suit / Cancel Request.
+# What changes: docks refill themselves.
+#
+# setup grants Suits and spawns steel; an Atmo Suit Dock is built in the dug-out corridor west
+# of the printing pod and selected. Request Suit arms the mod's component (the dock awaits a
+# suit), Cancel Request disarms it.
+from: early-base
+mods: [2982985962]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"Suits\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Steel\").substance", method: SpawnResource, args: [[114.5, 207.5, -12], 200, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"SuitLocker\").BuildingComplete.GetComponent<AutoSuitDelivery.SuitLockerAutoDelivery>": exists
+      "Assets.GetBuildingDef(\"JetSuitLocker\").BuildingComplete.GetComponent<AutoSuitDelivery.SuitLockerAutoDelivery>": exists
+  - build: {prefab: SuitLocker, at: [113, 206], material: Steel}
+  - expect: {blueprints: {SuitLocker: 1}}
+  - run: {seconds: 900, until: {buildings: {SuitLocker: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: SuitLocker}
+  - ui_wait: {path: "**/SuitLockerSideScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<AutoSuitDelivery.SuitLockerAutoDelivery>.deliveryEnabled": false
+  - click: {ui: "**/SuitLockerSideScreen/InitialConfig/Buttons/RequestSuitButton"}
+  - ui_wait: {path: "**/SuitLockerSideScreen/RegularConfig", cond: stable}
+  - expect_ui:
+      "**/SuitLockerSideScreen/RegularConfig/Status": {text: "~Awaiting Delivery"}
+      "**/SuitLockerSideScreen/RegularConfig/Butttons/RequestSuitButton/Label": {text: "Cancel Request"}
+  - expect_state:
+      "selected:GetComponent<AutoSuitDelivery.SuitLockerAutoDelivery>.deliveryEnabled": true
+  - shot: {name: side-screen, crop: "**/SuitLockerSideScreen", threshold: 0.04}
+  - click: {ui: "**/SuitLockerSideScreen/RegularConfig/Butttons/RequestSuitButton"}
+  - expect_state:
+      "selected:GetComponent<AutoSuitDelivery.SuitLockerAutoDelivery>.deliveryEnabled": false

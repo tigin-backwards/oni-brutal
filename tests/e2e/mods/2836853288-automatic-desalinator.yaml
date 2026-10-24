@@ -1,0 +1,55 @@
+# AutomaticDesalinator (2836853288), class P.
+#
+# What it does: a working Desalinator drops its salt on the floor by itself once more than
+# 100 kg has gathered (a postfix on Desalinator.StatesInstance.UpdateStorageLeft, which the
+# game runs on every storage change while it works: the salt is dropped and the emptying
+# errand forgotten), where the game keeps up to 1000 kg until a Duplicant empties it.
+# How a player reaches it: any working Desalinator.
+# What changes: no emptying errands; salt debris beside the desalinator.
+#
+# A working Desalinator needs a floor, power and pipes, which setup builds (BuildingDef.Build)
+# in the dug-out corridor west of the printing pod, at (109..112, 208..210): four sandstone
+# tiles under it, a charged Battery at (114, 208) wired to it (the wire's connections set and
+# the network rebuilt), and a liquid pipe on its input and its output ports, the input one
+# holding 10 kg of salt water. Its storage holds 150 kg of salt already, as from earlier
+# work. When the game runs, the salt water flows in, the desalinator works, and its salt
+# lands on the floor.
+from: early-base
+mods: [2836853288]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Tile\")", method: Build, args: [131761, Neutral, null, [SandStone], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Tile\")", method: Build, args: [131762, Neutral, null, [SandStone], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Tile\")", method: Build, args: [131763, Neutral, null, [SandStone], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Tile\")", method: Build, args: [131764, Neutral, null, [SandStone], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Desalinator\")", method: Build, args: [132398, Neutral, null, [Cuprite], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "last:GetComponent<Storage>", method: AddOre, args: [Salt, 150.0, 300.0, 255, 0]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Battery\")", method: Build, args: [132402, Neutral, null, [Cuprite], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "last:GetComponent<Battery>", method: AddEnergy, args: [10000.0]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Wire\")", method: Build, args: [132398, Neutral, null, [Cuprite], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Wire\")", method: Build, args: [132399, Neutral, null, [Cuprite], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Wire\")", method: Build, args: [132400, Neutral, null, [Cuprite], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Wire\")", method: Build, args: [132401, Neutral, null, [Cuprite], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Wire\")", method: Build, args: [132402, Neutral, null, [Cuprite], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Game.Instance.electricalConduitSystem", method: SetConnections, args: ["Right", 132398, true]}}
+  - driver: {setup.call: {target: "Game.Instance.electricalConduitSystem", method: SetConnections, args: ["Left, Right", 132399, true]}}
+  - driver: {setup.call: {target: "Game.Instance.electricalConduitSystem", method: SetConnections, args: ["Left, Right", 132400, true]}}
+  - driver: {setup.call: {target: "Game.Instance.electricalConduitSystem", method: SetConnections, args: ["Left, Right", 132401, true]}}
+  - driver: {setup.call: {target: "Game.Instance.electricalConduitSystem", method: SetConnections, args: ["Left", 132402, true]}}
+  - driver: {setup.call: {target: "Game.Instance.electricalConduitSystem", method: ForceRebuildNetworks}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LiquidConduit\")", method: Build, args: [132397, Neutral, null, [SandStone], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LiquidConduit\")", method: Build, args: [132398, Neutral, null, [SandStone], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Game.Instance.liquidConduitSystem", method: ForceRebuildNetworks}}
+  - driver: {setup.call: {target: "Game.Instance.liquidConduitFlow", method: AddElement, args: [132397, SaltWater, 10.0, 300.0, 255, 0]}}
+steps:
+  - expect_state:
+      "all:Desalinator::[0].GetComponent<Storage>.GetMassAvailable(\"Salt\")": 150
+      "sum:all:Pickupable::[*].GetComponent<PrimaryElement>.Mass if .GetComponent<PrimaryElement>.ElementID == Salt and .GetComponent<KPrefabID>.HasTag(\"Stored\") == false": 0
+  - run: {seconds: 20}
+  - expect_state:
+      "all:Desalinator::[0].GetComponent<Storage>.GetMassAvailable(\"Salt\")": "< 100"
+      "sum:all:Pickupable::[*].GetComponent<PrimaryElement>.Mass if .GetComponent<PrimaryElement>.ElementID == Salt and .GetComponent<KPrefabID>.HasTag(\"Stored\") == false": ">= 150"
+  - driver: {camera.set: {cell: [111, 209], ortho: 8}}
+  - click_world: {cell: [110, 209], select: Desalinator}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Desalinator"}

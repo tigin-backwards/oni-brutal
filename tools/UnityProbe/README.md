@@ -87,6 +87,24 @@ through a frame, enabling, activation, an edit (End, a typed "9", Backspace, thr
 `tools/UnityProbe/it-check.py rule LOG`, and compare the players with `it-check.py diff ORIG
 OURS`. `textmeshpro.md` ("Text set from code") records what it measured.
 
+With `PROBE_SCENARIO=inputcaret` only the input-caret probe runs (`InputCaret.cs`, lines `IC …`,
+10 s into the main menu, about a minute). `IC settings` lines list the loaded game fields'
+`onFocusSelectAll`, `resetOnDeActivation` and line type. `IC end` lines follow
+`KInputTextField`s through an edit and its end. The text is typed, typed after Ctrl+A and
+Backspace, typed and then selected with Shift+Home, or set from code. The end is Return
+through `ProcessEvent`, `OnSubmit`, `DeactivateInputField()` or `(true)`, deselection or
+disabling, with `resetOnDeActivation` and `onFocusSelectAll` on and off, and with listeners that
+do what Klei's `KInputField` does on `onEndEdit`. They log the caret, the selection and every
+event with the caret it was sent with. `IC end x` lines do the same with real key presses, sent
+to the player's window through XTest (libX11 and libXtst, as `scripts/e2e.py` types), ended by
+Return, Escape or deselection. `IC cull` lines log the caret graphic's
+`CanvasRenderer.cull` beside an `Image` with its rect. The caret is at its defaults
+(`AssignPositioningIfNeeded` skipped by a Harmony prefix) or placed, under the field's own
+`RectMask2D`, inside an outer one or outside it, never focused or focused. `PROBE_IC_PART=end`,
+`x` or `cull` runs one part. Check the rules with `tools/UnityProbe/ic-check.py rule LOG`, and
+compare the players with `ic-check.py diff ORIG OURS [end|x|cull]`. `textmeshpro.md` ("The
+caret after an edit ends", "The caret graphic and RectMask2D") records what it measured.
+
 With `PROBE_SCENARIO=fontasset` only the font-asset probe runs (`FontAsset.cs`, lines `FA …`, 10 s
 into the main menu, a few seconds). It calls `TMP_FontAsset.CreateFontAsset` by family and style
 name and by file path, with installed and missing families, other cases, empty and null names,

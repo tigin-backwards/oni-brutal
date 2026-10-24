@@ -43,6 +43,12 @@ namespace SemanticsProbe
                 go.AddComponent<InputText>();
                 return;
             }
+            if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "inputcaret")
+            {
+                InputCaret.Install(harmony);
+                go.AddComponent<InputCaret>();
+                return;
+            }
             if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "fontasset")
             {
                 go.AddComponent<FontAsset>();

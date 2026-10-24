@@ -120,6 +120,13 @@ differences = {
 # Loads and Colony as swept, Played withdrawn until a spec drives the mod's UI (mod-play-testing.md).
 unplayed = {
     '2077848080': 'not played: it supports the base game only (`supportedContent: VANILLA_ID`), and every spec fixture is a Spaced Out colony',
+    # Batch 14: worldgen mods (out of scope) and content packs without code.
+    '1825146346': 'not played: a worldgen mod (empty SkyBlock worlds); worldgen is out of scope',
+    '1794510050': 'not played: a worldgen mod (a world with every biome); worldgen is out of scope',
+    '1930918856': 'not played: a worldgen mod (Solar System worlds and their asteroids); worldgen is out of scope',
+    '3430682737': 'not played: a worldgen mod (the Voidria cluster); worldgen is out of scope',
+    '3599672848': 'not played: textures for True Tiles, no code of its own; it does nothing without that mod',
+    '3746576803': 'not played: Duplicant personalities for Dupery Fixed, no code of its own; it does nothing without that mod',
 }
 broken = {
     '1715248368': 'broken upstream: patches `Deconstructable.TriggerDestroy`, which now has two overloads',

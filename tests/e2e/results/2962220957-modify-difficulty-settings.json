@@ -3,12 +3,14 @@
  "mods": [
   "2962220957"
  ],
- "verdict": "failed",
- "why": "a run of ours failed",
- "findings": [],
- "note": "fails in ours on one ui_dump field: the pause menu's Change Difficulty Settings button opens the mod's asset-bundle window (shot identical, 0 % of pixels differ), its Hunger arrow steps the colony's calorie setting and Escape closes it, as in the original; but the Care Packages toggle's label at the scroll view's bottom edge (world y 78-109 against the RectMask2D's 94) is marked culled in the original's CanvasRenderer and not in ours",
- "updated": "2026-10-23",
- "commit": "360de75",
+ "verdict": "warning",
+ "why": "known findings: scroll-normalized-position",
+ "findings": [
+  "scroll-normalized-position"
+ ],
+ "note": "the pause menu's Change Difficulty Settings button opens the mod's asset-bundle window (shot identical, 0 % of pixels differ), its Hunger arrow steps the colony's calorie setting and Escape closes it, as in the original; the window's scroll view reports normalizedPosition 1 (0 in the original; scroll-normalized-position), and the culled label at its bottom edge now matches (master 79f5b1e)",
+ "updated": "2026-10-24",
+ "commit": "2ceb488",
  "mod_dlls": {
   "2962220957": {
    "CustomGameSettingsModifier.dll": "55aee313ca1a8077340a848502784c62bef26d4d6d7c423be47882f0bd0a0356"
@@ -17,32 +19,29 @@
  "runs": {
   "original": [
    {
-    "run": "20261023-175909-968677",
+    "run": "20261024-035631-81d98e",
     "index": 1,
     "verdict": "pass",
-    "date": "2026-10-23T17:59:09",
-    "lane": 17,
+    "date": "2026-10-24T03:57:34",
+    "lane": 13,
     "signatures": 0
    }
   ],
   "ours": [
    {
-    "run": "20261023-180050-a3ec16",
+    "run": "20261024-040121-cfd644",
     "index": 1,
-    "verdict": "fail",
-    "date": "2026-10-23T18:00:50",
-    "lane": 17,
-    "reasons": [
-     "ui_dump settings: 1 difference(s)"
-    ],
-    "reference_run": "20261023-175909-968677",
+    "verdict": "warn",
+    "date": "2026-10-24T04:02:48",
+    "lane": 12,
+    "reference_run": "20261024-035631-81d98e",
     "new_signatures": 0,
     "findings": [
      "scroll-normalized-position"
     ],
     "ui_dump": {
      "settings": {
-      "differences": 1,
+      "differences": 0,
       "known": {
        "scroll-normalized-position": 1
       }
@@ -53,22 +52,19 @@
     }
    },
    {
-    "run": "20261023-180050-a3ec16",
+    "run": "20261024-040121-cfd644",
     "index": 2,
-    "verdict": "fail",
-    "date": "2026-10-23T18:01:46",
-    "lane": 17,
-    "reasons": [
-     "ui_dump settings: 1 difference(s)"
-    ],
-    "reference_run": "20261023-175909-968677",
+    "verdict": "warn",
+    "date": "2026-10-24T04:02:49",
+    "lane": 13,
+    "reference_run": "20261024-035631-81d98e",
     "new_signatures": 0,
     "findings": [
      "scroll-normalized-position"
     ],
     "ui_dump": {
      "settings": {
-      "differences": 1,
+      "differences": 0,
       "known": {
        "scroll-normalized-position": 1
       }

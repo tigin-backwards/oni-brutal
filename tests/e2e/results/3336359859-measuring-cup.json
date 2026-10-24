@@ -6,9 +6,9 @@
  "verdict": "failed",
  "why": "a run of ours failed",
  "findings": [],
- "note": "a Bottle Emptier gets the capacity side screen (200 kg) and a value typed into its field becomes its capacity, as in the original; after the typed value is submitted, ours lays the field out to the new text (preferred width 45.84 vs 55.01, the Max row 9 px narrower) and leaves its caret at 0 (5 in the original)",
- "updated": "2026-10-23",
- "commit": "874f9a3",
+ "note": "a Bottle Emptier gets the capacity side screen (200 kg) and a value typed into its field becomes its capacity, as in the original; rerun on master 79f5b1e, the field's layout now matches, but after the typed value is submitted ours leaves its caret at 0 (5 in the original, at the end of the text)",
+ "updated": "2026-10-24",
+ "commit": "2ceb488",
  "mod_dlls": {
   "3336359859": {
    "BOTTLEEMPTIER_patch.dll": "73f78702eb62c114c8bd59115b0b5b69ba0d1e7301a8eb9a2c4d1826dec646fd"
@@ -17,65 +17,55 @@
  "runs": {
   "original": [
    {
-    "run": "20261023-142010-dd177c",
+    "run": "20261024-035631-81d98e",
     "index": 1,
     "verdict": "pass",
-    "date": "2026-10-23T14:20:10",
-    "lane": 15,
+    "date": "2026-10-24T03:59:33",
+    "lane": 13,
     "signatures": 0
    }
   ],
   "ours": [
    {
-    "run": "20261023-142423-91f803",
+    "run": "20261024-040121-cfd644",
     "index": 1,
     "verdict": "fail",
-    "date": "2026-10-23T14:25:29",
-    "lane": 14,
+    "date": "2026-10-24T04:06:48",
+    "lane": 12,
     "reasons": [
-     "ui_dump capacity-set: 12 difference(s)"
+     "ui_dump capacity-set: 1 difference(s)"
     ],
-    "reference_run": "20261023-142010-dd177c",
+    "reference_run": "20261024-035631-81d98e",
     "new_signatures": 0,
-    "findings": [
-     "unused-input-caret-layout"
-    ],
+    "findings": [],
     "ui_dump": {
      "capacity": {
       "differences": 0
      },
      "capacity-set": {
-      "differences": 12,
-      "known": {
-       "unused-input-caret-layout": 1
-      }
+      "differences": 1
      }
     },
     "shots": {}
    },
    {
-    "run": "20261023-142423-91f803",
+    "run": "20261024-040121-cfd644",
     "index": 2,
     "verdict": "fail",
-    "date": "2026-10-23T14:26:50",
-    "lane": 14,
+    "date": "2026-10-24T04:06:50",
+    "lane": 13,
     "reasons": [
-     "ui_dump capacity-set: 12 difference(s)"
+     "ui_dump capacity-set: 1 difference(s)"
     ],
-    "reference_run": "20261023-142010-dd177c",
+    "reference_run": "20261024-035631-81d98e",
     "new_signatures": 0,
-    "findings": [
-     "unused-input-caret-layout"
-    ],
+    "findings": [],
     "ui_dump": {
      "capacity": {
       "differences": 0
      },
      "capacity-set": {
-      "differences": 12,
-      "known": {
-       "unused-input-caret-layout": 1
-      }
+      "differences": 1
      }
     },
     "shots": {}

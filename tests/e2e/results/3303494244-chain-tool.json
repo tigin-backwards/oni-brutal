@@ -6,9 +6,9 @@
  "verdict": "failed",
  "why": "a run of ours failed",
  "findings": [],
- "note": "the Chain tool's menu opens, a drag makes a chain, Create/Expand Link and a second drag add a link, and the chain goes once both links are dug, as in the original; but the menu's two mode-toggle labels report alignment MidlineLeft in ours, TopLeft in the original (the mod sets MidlineLeft on each label it clones from the game's toggle prefab under its still-hidden menu; the original reports the prefab's TopLeft)",
- "updated": "2026-10-23",
- "commit": "c630ab9",
+ "note": "the Chain tool's menu opens, a drag makes a chain, Create/Expand Link and a second drag add a link, and the chain goes once both links are dug, as in the original; rerun on master 79f5b1e, the menu's two mode-toggle labels still report alignment MidlineLeft in ours, TopLeft in the original (the mod sets MidlineLeft on each label it clones from the game's toggle prefab under its still-hidden menu; the original reports the prefab's TopLeft)",
+ "updated": "2026-10-24",
+ "commit": "2ceb488",
  "mod_dlls": {
   "3303494244": {
    "ChainErrand.dll": "0429c8f25344f3c9ef3f34543ca86ddf95cc36c773f1f2381b67ab6b54d2d8ff"
@@ -17,26 +17,26 @@
  "runs": {
   "original": [
    {
-    "run": "20261023-162136-fd65b6",
+    "run": "20261024-035631-81d98e",
     "index": 1,
     "verdict": "pass",
-    "date": "2026-10-23T17:46:47",
-    "lane": 14,
+    "date": "2026-10-24T03:58:36",
+    "lane": 12,
     "signatures": 0
    }
   ],
   "ours": [
    {
-    "run": "20261023-180047-e9c449",
+    "run": "20261024-040121-cfd644",
     "index": 1,
     "verdict": "fail",
-    "date": "2026-10-23T18:00:47",
-    "lane": 15,
+    "date": "2026-10-24T04:05:24",
+    "lane": 12,
     "reasons": [
      "ui_dump menu: 2 difference(s)",
      "ui_dump menu-chain: 2 difference(s)"
     ],
-    "reference_run": "20261023-162136-fd65b6",
+    "reference_run": "20261024-035631-81d98e",
     "new_signatures": 0,
     "findings": [],
     "ui_dump": {
@@ -50,16 +50,16 @@
     "shots": {}
    },
    {
-    "run": "20261023-180047-e9c449",
+    "run": "20261024-040121-cfd644",
     "index": 2,
     "verdict": "fail",
-    "date": "2026-10-23T18:04:30",
-    "lane": 15,
+    "date": "2026-10-24T04:05:25",
+    "lane": 13,
     "reasons": [
      "ui_dump menu: 2 difference(s)",
      "ui_dump menu-chain: 2 difference(s)"
     ],
-    "reference_run": "20261023-162136-fd65b6",
+    "reference_run": "20261024-035631-81d98e",
     "new_signatures": 0,
     "findings": [],
     "ui_dump": {

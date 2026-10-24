@@ -6,9 +6,9 @@
  "verdict": "failed",
  "why": "a run of ours failed",
  "findings": [],
- "note": "spec fails in ours on one difference: the presets column's unused input caret (a TMP_SelectionCaret at its prefab's 100x100, left of the field) has its CanvasRenderer culled in ours, not in the original; the '*' button on Mods (reached from the colony via the main menu) opens the organizer as in the original otherwise (scroll-normalized-position known)",
- "updated": "2026-10-23",
- "commit": "c6eae87",
+ "note": "the '*' button on Mods (reached from the colony via the main menu) opens the organizer as in the original (scroll-normalized-position known), but rerun on master 79f5b1e it still fails on one difference: the presets column's unused input caret (a TMP_SelectionCaret at its prefab's 100x100, left of the field) has its CanvasRenderer culled in ours, not in the original",
+ "updated": "2026-10-24",
+ "commit": "2ceb488",
  "mod_dlls": {
   "3284635963": {
    "ModsPresetsOrganizer.dll": "72477c4c1bcfb057052916392e5fb2b90c24caa5ba96bfa8fd045628a29d7b30"
@@ -17,25 +17,25 @@
  "runs": {
   "original": [
    {
-    "run": "20261023-215444-03edfa",
+    "run": "20261024-035631-81d98e",
     "index": 1,
     "verdict": "pass",
-    "date": "2026-10-23T22:13:24",
+    "date": "2026-10-24T03:58:32",
     "lane": 13,
     "signatures": 0
    }
   ],
   "ours": [
    {
-    "run": "20261023-223809-e05930",
+    "run": "20261024-040121-cfd644",
     "index": 1,
     "verdict": "fail",
-    "date": "2026-10-23T22:38:09",
+    "date": "2026-10-24T04:04:25",
     "lane": 12,
     "reasons": [
      "ui_dump presets: 1 difference(s)"
     ],
-    "reference_run": "20261023-215444-03edfa",
+    "reference_run": "20261024-035631-81d98e",
     "new_signatures": 0,
     "findings": [
      "scroll-normalized-position"
@@ -54,15 +54,15 @@
     "shots": {}
    },
    {
-    "run": "20261023-223809-e05930",
+    "run": "20261024-040121-cfd644",
     "index": 2,
     "verdict": "fail",
-    "date": "2026-10-23T22:38:58",
-    "lane": 12,
+    "date": "2026-10-24T04:04:26",
+    "lane": 13,
     "reasons": [
      "ui_dump presets: 1 difference(s)"
     ],
-    "reference_run": "20261023-215444-03edfa",
+    "reference_run": "20261024-035631-81d98e",
     "new_signatures": 0,
     "findings": [
      "scroll-normalized-position"

@@ -6,9 +6,9 @@
  "verdict": "failed",
  "why": "a run of ours failed",
  "findings": [],
- "note": "4 interests and at least 5 traits on both cards, as in the original, but ours logs 2 signatures the original lacks: the mod's random interests make CharacterContainer.SetInfoText log 'Could not find ChoreGroup' and throw a NullReferenceException in both players, and ours' log of them differs (a stack trace after Debug.LogError, the exception's message and frame format)",
- "updated": "2026-10-23",
- "commit": "c96947c",
+ "note": "4 interests and at least 5 traits on both cards, as in the original; rerun on master 79f5b1e, ours logs 1 signature the original lacks: the mod's random interests make CharacterContainer.SetInfoText log 'Could not find ChoreGroup' in both players, and ours writes a stack trace after that Debug.LogError (Klei's Debug.LogError, ResourceSet.Get, SetInfoText), where the original writes none, so its signature takes another frame",
+ "updated": "2026-10-24",
+ "commit": "2ceb488",
  "mod_dlls": {
   "2851636970": {
    "Interest_correction.dll": "df7f6f9a4c24cc54d5c63e41191dfc42f4d3d945053ba373875ee72f5d64b5b4",
@@ -18,41 +18,41 @@
  "runs": {
   "original": [
    {
-    "run": "20261023-103125-95e74f",
+    "run": "20261024-035631-81d98e",
     "index": 1,
     "verdict": "pass",
-    "date": "2026-10-23T10:37:59",
-    "lane": 15,
+    "date": "2026-10-24T03:56:32",
+    "lane": 13,
     "signatures": 3
    }
   ],
   "ours": [
    {
-    "run": "20261023-110554-7faba8",
+    "run": "20261024-040121-cfd644",
     "index": 1,
     "verdict": "fail",
-    "date": "2026-10-23T11:05:54",
-    "lane": 14,
+    "date": "2026-10-24T04:02:05",
+    "lane": 12,
     "reasons": [
-     "2 log signature(s) the original lacks"
+     "1 log signature(s) the original lacks"
     ],
-    "reference_run": "20261023-103125-95e74f",
-    "new_signatures": 2,
+    "reference_run": "20261024-035631-81d98e",
+    "new_signatures": 1,
     "findings": [],
     "ui_dump": {},
     "shots": {}
    },
    {
-    "run": "20261023-110554-7faba8",
+    "run": "20261024-040121-cfd644",
     "index": 2,
     "verdict": "fail",
-    "date": "2026-10-23T11:06:47",
-    "lane": 14,
+    "date": "2026-10-24T04:02:06",
+    "lane": 13,
     "reasons": [
-     "2 log signature(s) the original lacks"
+     "1 log signature(s) the original lacks"
     ],
-    "reference_run": "20261023-103125-95e74f",
-    "new_signatures": 2,
+    "reference_run": "20261024-035631-81d98e",
+    "new_signatures": 1,
     "findings": [],
     "ui_dump": {},
     "shots": {}

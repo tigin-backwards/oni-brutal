@@ -1,0 +1,27 @@
+# True Spices (texture mod) (3303976854), class P.
+#
+# What it does: new icons for the four spices: a postfix on the Spices constructor points
+# Brawny, Rocketeer, Freshener and Machinist spice at the mod's sprites (truespices_*), which a
+# prefix on Assets.OnPrefabInit loads from its assets/sprites folder.
+# How a player reaches it: wherever spices show, first the Spice Grinder's side screen.
+# What changes: the spice icons.
+#
+# setup grants Food Repurposing. A Spice Grinder is built in the dug-out corridor west of the
+# printing pod and selected: its configure side screen lists the spices with the mod's icons (shot).
+from: early-base
+mods: [3303976854]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"FoodRepurposing\")", method: Purchased}}
+steps:
+  - expect_state:
+      "Db.Get().Spices.StrengthSpice.Image": truespices_brawny
+      "Db.Get().Spices.MachinerySpice.Image": truespices_machinist
+      "Assets.GetSprite(\"truespices_freshener\").name": truespices_freshener
+  - build: {prefab: SpiceGrinder, at: [108, 206]}
+  - expect: {blueprints: {SpiceGrinder: 1}}
+  - run: {seconds: 900, until: {buildings: {SpiceGrinder: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [109, 208], ortho: 8}}
+  - click_world: {cell: [108, 206], select: SpiceGrinder}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_wait: {path: "**/Config Tab - body instance/ConfigureConsumerSideScreen", cond: stable}
+  - shot: {name: spices, crop: "**/Config Tab - body instance/ConfigureConsumerSideScreen", threshold: 0.04}

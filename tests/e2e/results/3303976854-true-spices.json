@@ -1,0 +1,59 @@
+{
+ "spec": "mods/3303976854-true-spices.yaml",
+ "mods": [
+  "3303976854"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the spices point at the mod's sprites; a Spice Grinder built in the corridor and selected shows them in its configure side screen (shot as in the original)",
+ "updated": "2026-10-23",
+ "commit": "0368bca",
+ "mod_dlls": {
+  "3303976854": {
+   "TrueSpices.dll": "826c2bc4aa45d654f0b1066716da3530583370d68c11cf05643e7575d765eff8"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-212155-fbe646",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T21:33:55",
+    "lane": 12,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-220331-be389c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T22:03:31",
+    "lane": 12,
+    "reference_run": "20261023-212155-fbe646",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "spices": 0.008345
+    }
+   },
+   {
+    "run": "20261023-220331-be389c",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T22:04:52",
+    "lane": 12,
+    "reference_run": "20261023-212155-fbe646",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "spices": 0.008345
+    }
+   }
+  ]
+ }
+}

@@ -1,0 +1,31 @@
+# Raincheck (Printing Pod Time Refund) (1872801058), classes P, O.
+#
+# What it does: rejecting every card the printing pod offers refunds part of its recharge: a
+# postfix on Telepad.RejectAll sets the time to the next print to (1 - refund) times the full
+# wait, where the game restarts the whole wait. The refund fraction is a PLib option (0.66).
+# How a player reaches it: the printing pod's immigrant screen, Reject All and its
+# confirmation.
+# What changes: how soon the pod is ready again.
+#
+# Options here: a refund of 0.5. setup makes the pod ready; the cards are rejected through the
+# screen's Reject All and the confirmation, and the time left is half the full wait.
+from: early-base
+mods: [1872801058]
+options:
+  "1872801058": {refundFraction: 0.5}
+setup:
+  - driver: {seed: 12345}
+  - driver: {setup.call: {target: "Immigration.Instance", method: "Sim200ms", args: [100000]}}   # Duplicants on offer now
+steps:
+  - expect_state: {"Immigration.Instance.ImmigrantsAvailable": true}
+  - call: {tool: building_control, args: {domain: side_surface, surface: facility, kind: telepad, action: open_immigrants, confirm: true}}
+  - ui_wait: {path: "**/ImmigrantScreen/Layout", cond: stable}
+  - click: {ui: "**/ImmigrantScreen/Layout/BottomButtons/RejectButton"}
+  - ui_wait: {path: "**/ImmigrantScreen/ConfirmationBox", cond: stable}
+  - ui_dump: {name: confirm, root: "**/ImmigrantScreen/ConfirmationBox"}
+  - click: {ui: "**/ImmigrantScreen/ConfirmationBox/ConfirmationBoxBG/RejectButton"}
+  - expect_state:
+      "Immigration.Instance.ImmigrantsAvailable": false
+      "Immigration.Instance.GetTotalWaitTime()": {save_as: full}
+  - expect_state: {"Immigration.Instance.GetTimeRemaining()": "<= 0.51 * full"}
+  - expect_state: {"Immigration.Instance.GetTimeRemaining()": ">= 0.49 * full"}

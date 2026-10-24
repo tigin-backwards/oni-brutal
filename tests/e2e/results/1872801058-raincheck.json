@@ -1,0 +1,63 @@
+{
+ "spec": "mods/1872801058-raincheck.yaml",
+ "mods": [
+  "1872801058"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with a refund of 0.5 (option), the printing pod's cards are rejected through Reject All and its confirmation box (dumped as in the original); the time to the next print is half the full wait",
+ "updated": "2026-10-23",
+ "commit": "bdcb3f5",
+ "mod_dlls": {
+  "1872801058": {
+   "PrintingPodRefund.dll": "119f3db64a367ba5ab045ecf0b8f79afc13840c70ac2cf333c2f50ff2841487e"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-214629-3ca18b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T22:01:09",
+    "lane": 13,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-220620-639069",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T22:17:31",
+    "lane": 12,
+    "reference_run": "20261023-214629-3ca18b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "confirm": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261023-220620-639069",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T22:18:56",
+    "lane": 12,
+    "reference_run": "20261023-214629-3ca18b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "confirm": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

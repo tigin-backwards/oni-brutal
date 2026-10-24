@@ -1,0 +1,59 @@
+{
+ "spec": "mods/3358334623-mineral-processing-mining.yaml",
+ "mods": [
+  "3358334623"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a finished CNC Machine (placed by setup: building one needs a skill early-base lacks) is selected and offers its drill-bit recipes",
+ "updated": "2026-10-24",
+ "commit": "79f5b1e",
+ "mod_dlls": {
+  "3358334623": {
+   "Mineral Processing Mining.dll": "38bfd948d8f3c0301beb35929c8427fda030026f16182bca98721e22e49715d5"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-053819-5df934",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T05:44:36",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-060153-17550e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T06:01:53",
+    "lane": 14,
+    "reference_run": "20261024-053819-5df934",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "title": 0.0
+    }
+   },
+   {
+    "run": "20261024-060153-17550e",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T06:02:50",
+    "lane": 14,
+    "reference_run": "20261024-053819-5df934",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "title": 0.0
+    }
+   }
+  ]
+ }
+}

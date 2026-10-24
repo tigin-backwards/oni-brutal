@@ -1,0 +1,32 @@
+# Splitters MK II (3544371748), class B.
+#
+# What it does: adds three filters that split their input by the elements chosen in a filter
+# side screen (TreeFilterable): the Liquid Splitter MK II (Plumbing, Advanced Filtration), the
+# Gas Splitter MK II (Ventilation, Advanced Filtration) and the Conveyor Splitter MK II
+# (Shipping, Smart Storage); each 3x1, of refined metal, sending the chosen elements out of its
+# side port and the rest straight on.
+# How a player reaches it: the build menu (Plumbing, Ventilation, Shipping); the filter side screen.
+# What changes: filters that take several elements at once.
+#
+# setup grants Advanced Filtration and spawns steel. The Liquid Splitter MK II is built in the
+# dug-out corridor west of the printing pod and selected: its filter side screen lists liquids.
+from: early-base
+mods: [3544371748]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"AdvancedFiltration\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Steel\").substance", method: SpawnResource, args: [[114.5, 207.5, -12], 300, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"AdvancedFiltration\").unlockedItemIDs": {contains: MJSplitterMKIILiquid}
+  - build: {prefab: MJSplitterMKIILiquid, at: [113, 207], material: Steel}
+  - expect: {blueprints: {MJSplitterMKIILiquid: 1}}
+  - run: {seconds: 900, until: {buildings: {MJSplitterMKIILiquid: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [114, 208], ortho: 8}}
+  - click_world: {cell: [114, 207], select: MJSplitterMKIILiquid}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<KPrefabID>.PrefabTag.Name": MJSplitterMKIILiquid
+      "selected:GetComponent<MJSplittersMKII.Filters.MJFilter>": exists
+      "selected:GetComponent<TreeFilterable>": exists
+  - shot: {name: title, crop: "**/DetailsScreen/TitleBar", threshold: 0.04}

@@ -1,0 +1,42 @@
+# J Optimize Oxygen Generator (2845101493), classes B, O.
+#
+# What it does: adds J001GGG1, a cheap 2x2 electrolyzer (any metal, 120 W, no research, in the
+# Oxygen menu after the game's own) that splits water from a liquid pipe into oxygen, released
+# into the room, and hydrogen, sent out through a gas pipe. Its PLib options (J001GG1.json)
+# set how many kg/s of oxygen and hydrogen it makes (0.88 and 0.11 by default).
+# How a player reaches it: the build menu (Oxygen); the Mods screen, Options.
+# What changes: a second electrolyzer, with output rates the player picks.
+#
+# Options here: 0.5 kg/s of oxygen and 0.2 kg/s of hydrogen. setup spawns copper ore. The
+# building is chosen in the Oxygen menu, placed in the dug-out corridor west of the printing
+# pod, built by the Duplicants and selected: its converter makes what the options say.
+from: early-base
+mods: [2845101493]
+options:
+  "2845101493": {$file: J001GG1.json, J001GGG1X1: 0.5, J001GGG1X2: 0.2}
+setup:
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Cuprite\").substance", method: SpawnResource, args: [[114.5, 207.5, -12], 400, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"J001GGG1\").RequiresPowerInput": true
+      "Assets.GetBuildingDef(\"J001GGG1\").BuildingComplete.GetComponent<ElementConverter>.outputElements[0].massGenerationRate": 0.5
+      "Assets.GetBuildingDef(\"J001GGG1\").BuildingComplete.GetComponent<ElementConverter>.outputElements[1].massGenerationRate": 0.2
+  # The build menu offers no material straight after a load.
+  - run: {seconds: 5}
+  - driver: {camera.set: {cell: [112, 208], ortho: 10}}
+  - click: {ui: "**/PlanScreen/Toggle:Oxygen"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/J001GGG1 Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/J001GGG1 Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen/MaterialSelectionPanel", cond: stable}
+  - click_world: {cell: [113, 206]}
+  - key: {code: Escape}
+  - expect: {blueprints: {J001GGG1: 1}}
+  - run: {seconds: 900, until: {buildings: {J001GGG1: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [112, 207], ortho: 8}}
+  - click_world: {cell: [113, 207], select: J001GGG1}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<KPrefabID>.PrefabTag.Name": J001GGG1
+      "selected:GetComponent<ElementConverter>.outputElements[0].massGenerationRate": 0.5
+      "selected:GetComponent<Electrolyzer>": exists
+  - shot: {name: title, crop: "**/DetailsScreen/TitleBar", threshold: 0.04}

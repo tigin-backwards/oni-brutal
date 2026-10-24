@@ -1,0 +1,59 @@
+{
+ "spec": "mods/3755915137-fast-insulated-self-sealing-airlock.yaml",
+ "mods": [
+  "3755915137"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the airlock, researched with Temperature Modulation, is built and selected: insulating, and 10 times as fast (the Multiplier option)",
+ "updated": "2026-10-24",
+ "commit": "79f5b1e",
+ "mod_dlls": {
+  "3755915137": {
+   "FastInsulatedSelfSealingAirLock.dll": "85ffb78ed47660604d3f19bb29fba3c83e31adbfddfaadcb8ac5b1963b685d44"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-041146-b43901",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T04:43:51",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-060347-a03714",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T06:03:47",
+    "lane": 14,
+    "reference_run": "20261024-041146-b43901",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "title": 0.0
+    }
+   },
+   {
+    "run": "20261024-060347-a03714",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T06:05:23",
+    "lane": 14,
+    "reference_run": "20261024-041146-b43901",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "title": 0.0
+    }
+   }
+  ]
+ }
+}

@@ -1,0 +1,59 @@
+{
+ "spec": "mods/1861918351-buildable-poi-doors.yaml",
+ "mods": [
+  "1861918351"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Internal Door, researched with Refined Renovations, is built of steel and selected",
+ "updated": "2026-10-24",
+ "commit": "79f5b1e",
+ "mod_dlls": {
+  "1861918351": {
+   "BuildablePoiDoors.dll": "38e1a3c7052bf5295f04d115e4a74e7c64ec372ad550b933c8ca2bc1756f0061"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-044626-bb9c43",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T04:46:27",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-054520-0dbddd",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T05:45:20",
+    "lane": 14,
+    "reference_run": "20261024-044626-bb9c43",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "title": 0.0
+    }
+   },
+   {
+    "run": "20261024-054520-0dbddd",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T05:46:01",
+    "lane": 15,
+    "reference_run": "20261024-044626-bb9c43",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "title": 0.0
+    }
+   }
+  ]
+ }
+}

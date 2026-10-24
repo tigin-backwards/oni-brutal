@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2616068109-no-suit-wear.yaml",
+ "mods": [
+  "2616068109"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "an Atmo Suit worn for cycles is taken off at a dock by the Duplicant and comes back at full durability",
+ "updated": "2026-10-24",
+ "commit": "79f5b1e",
+ "mod_dlls": {
+  "2616068109": {
+   "NoSuitWear.dll": "7969c414c8152957d27b5fb343c4f8b31d44be5dd14ab234a455a026e65d25fc"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-053819-5df934",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T05:39:32",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-055310-3af70e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T05:53:10",
+    "lane": 14,
+    "reference_run": "20261024-053819-5df934",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-055310-3af70e",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T05:57:33",
+    "lane": 14,
+    "reference_run": "20261024-053819-5df934",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

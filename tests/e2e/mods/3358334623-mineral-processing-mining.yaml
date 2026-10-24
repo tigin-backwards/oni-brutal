@@ -1,0 +1,32 @@
+# Mineral Processing - Mining (3358334623), class B.
+#
+# What it does: adds the CNC Machine (Mining_CNCMachine, 3x4, any metal, in the Equipment
+# menu) that machines drill bits (basic, steel, tungsten, guidance device), and the Auger Drill
+# (Mining_AugerDrill, 13x10, in the Utilities menu) that consumes drill bits to bring up random
+# ores; both are researched with Smart Storage (SolidManagement).
+# How a player reaches it: the build menu (Equipment, Utilities); the machines' recipe screens.
+# What changes: drill bits and an ore-producing drill.
+#
+# Building the CNC Machine needs a Duplicant with the Conveyor building skill (ConveyorBuild),
+# which early-base lacks, so setup grants Smart Storage and places a finished machine
+# (BuildingDef.Build) in the dug-out corridor west of the printing pod. It is selected: it
+# offers its drill-bit recipes.
+from: early-base
+mods: [3358334623]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"SolidManagement\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Mining_CNCMachine\")", method: Build, args: [131130, Neutral, null, [Cuprite], 300.0, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"SolidManagement\").unlockedItemIDs": {contains: Mining_CNCMachine}
+      "Assets.GetPrefab(\"Mining_Drillbits_Basic_Item\")": exists
+      "Assets.GetBuildingDef(\"Mining_CNCMachine\").BuildingUnderConstruction.GetComponent<Constructable>.requiredSkillPerk": ConveyorBuild
+  - run: {seconds: 1}
+  - driver: {camera.set: {cell: [114, 208], ortho: 8}}
+  - click_world: {cell: [114, 207], select: Mining_CNCMachine}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<KPrefabID>.PrefabTag.Name": Mining_CNCMachine
+      "selected:GetComponent<ComplexFabricator>.GetRecipes().Length": ">= 3"
+  - shot: {name: title, crop: "**/DetailsScreen/TitleBar", threshold: 0.04}

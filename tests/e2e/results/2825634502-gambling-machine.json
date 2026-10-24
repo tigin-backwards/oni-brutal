@@ -1,0 +1,60 @@
+{
+ "spec": "mods/2825634502-gambling-machine.yaml",
+ "mods": [
+  "2825634502"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Gambling Machine, researched with Refined Renovations, is built of steel and selected",
+ "updated": "2026-10-24",
+ "commit": "79f5b1e",
+ "mod_dlls": {
+  "2825634502": {
+   "Gambling Machine.dll": "8f901ec8af7cf7ebb14ee5f08db0365283b29905af86691ec79759ffffb407c5",
+   "PLib.dll": "c4bb22f1bc06ebcb0dbba75a7f1bc46f63eaa3dae12c22a08729f1a6d3362dda"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-044626-bb9c43",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T04:51:24",
+    "lane": 15,
+    "signatures": 1
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-055029-93983c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T05:50:29",
+    "lane": 15,
+    "reference_run": "20261024-044626-bb9c43",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "title": 0.0
+    }
+   },
+   {
+    "run": "20261024-055029-93983c",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T05:51:55",
+    "lane": 15,
+    "reference_run": "20261024-044626-bb9c43",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "title": 0.0
+    }
+   }
+  ]
+ }
+}

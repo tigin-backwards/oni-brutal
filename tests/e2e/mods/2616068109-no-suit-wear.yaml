@@ -1,0 +1,32 @@
+# No Suit Wear (2616068109), class P.
+#
+# What it does: a prefix on Durability.DeltaDurability (applied when a suit is taken off, for
+# the time it was worn) that sets the suit's durability back to full instead, so Atmo, Jet,
+# Oxygen and Lead Suits never wear out.
+# How a player reaches it: Duplicants wearing suits and returning them to their docks.
+# What changes: suits come back from use at 100 % durability.
+#
+# setup spawns an Atmo Suit, puts it on a (non-bionic) Duplicant as if worn since three cycles
+# ago (Durability.TimeEquipped), and builds an empty Atmo Suit Dock with an Atmo Suit
+# Checkpoint beside it in the dug-out corridor west of the printing pod. While the suit is
+# worn, its durability reading counts the time worn (the game's GetDurability adds it, a quirk
+# of its sign); the Duplicant then takes the suit off at the dock (the idle return-suit
+# errand), and it comes back at full durability, where the game would take 0.1 per cycle worn.
+from: early-base
+mods: [2616068109]
+setup:
+  - driver: {setup.call: {type: GameUtil, method: KInstantiate, args: [{"$": "Assets.GetPrefab(\"Atmo_Suit\")"}, [110.5, 206.5, -12], Ore]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "all:SuitTank::[0].GetComponent<Equippable>", method: Assign, args: [{"$": "Components.LiveMinionIdentities.Items[1]"}]}}
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[1].GetEquipment()", method: Equip, args: [{"$": "all:SuitTank::[0].GetComponent<Equippable>"}]}}
+  - driver: {setup.call: {target: "all:SuitTank::[0].GetComponent<Durability>", method: set_TimeEquipped, args: [-3.0]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"SuitLocker\")", method: Build, args: [131129, Neutral, null, [Steel], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"SuitMarker\")", method: Build, args: [131130, Neutral, null, [Steel], 300.0, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "all:SuitTank::[0].GetComponent<Equippable>.isEquipped": true
+      "all:SuitTank::[0].GetComponent<Durability>.GetDurability()": "> 1.1"
+  - run: {seconds: 600}
+  - expect_state:
+      "all:SuitTank::[0].GetComponent<Equippable>.isEquipped": false
+      "all:SuitTank::[0].GetComponent<Durability>.GetDurability()": 1

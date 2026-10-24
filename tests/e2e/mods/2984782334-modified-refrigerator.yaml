@@ -1,0 +1,33 @@
+# 魔改电冰箱 "Modified Refrigerator" (2984782334), class B.
+#
+# What it does: adds Refrigerator11 (1x2, 400 kg of raw mineral, in the Food menu, researched
+# with Basic Farming): a refrigerator that holds 100 tonnes of food, draws 1.2 W, gives off no
+# heat and keeps food at -100 °C.
+# How a player reaches it: the build menu (Food); its storage filter side screen.
+# What changes: one fridge for all the colony's food.
+#
+# setup grants Basic Farming. The fridge is built from the corridor's sandstone in the dug-out
+# corridor west of the printing pod and selected: it holds 100,000 kg and filters food.
+from: early-base
+mods: [2984782334]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"Agriculture\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"SandStone\").substance", method: SpawnResource, args: [[114.5, 207.5, -12], 500, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"Agriculture\").unlockedItemIDs": {contains: Refrigerator11}
+      "Assets.GetBuildingDef(\"Refrigerator11\").EnergyConsumptionWhenActive": 1.2
+  - build: {prefab: Refrigerator11, at: [113, 206]}
+  - expect: {blueprints: {Refrigerator11: 1}}
+  - run: {seconds: 900, until: {buildings: {Refrigerator11: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [113, 207], ortho: 8}}
+  - click_world: {cell: [113, 207], select: Refrigerator11}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<KPrefabID>.PrefabTag.Name": Refrigerator11
+      "selected:GetComponent<Storage>.capacityKg": 100000
+      "selected:GetComponent<Refrigerator>": exists
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~电冰箱魔改版"}
+  - shot: {name: title, crop: "**/DetailsScreen/TitleBar", threshold: 0.04}

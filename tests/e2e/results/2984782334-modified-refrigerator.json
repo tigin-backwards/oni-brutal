@@ -1,0 +1,60 @@
+{
+ "spec": "mods/2984782334-modified-refrigerator.yaml",
+ "mods": [
+  "2984782334"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the fridge, researched with Basic Farming, is built and selected: it holds 100 tonnes of food",
+ "updated": "2026-10-24",
+ "commit": "79f5b1e",
+ "mod_dlls": {
+  "2984782334": {
+   "PLib.dll": "b862c5db2b3cd6df09a62d4a30782e91e2b24e8e1bfac08d991c9cc89a984ba9",
+   "─º╕─╡τ▒∙╧Σ.dll": "6ec35352d1a49235ee564c2cd52403d5aa00c3df14604d4060aa9f467ae3b33c"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-041146-b43901",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T04:30:20",
+    "lane": 14,
+    "signatures": 1
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-051746-0c1fb0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T05:17:46",
+    "lane": 14,
+    "reference_run": "20261024-041146-b43901",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "title": 0.0
+    }
+   },
+   {
+    "run": "20261024-051746-0c1fb0",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T05:19:19",
+    "lane": 14,
+    "reference_run": "20261024-041146-b43901",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "title": 0.0
+    }
+   }
+  ]
+ }
+}

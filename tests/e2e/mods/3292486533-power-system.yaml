@@ -1,0 +1,45 @@
+# N Power System 1.8 (3292486533), classes B, O.
+#
+# What it does: a collection of power changes, each behind a PLib option (Controler.json, all
+# on by default): wires carry more (Wire 5 kW, Conductive and Heavi-Watt 10 kW, the conductive
+# Heavi-Watt 100 kW and above, through Wire.GetMaxWattageAsFloat), the plain Battery holds
+# without limit and loses nothing, the debug generator and battery become buildable, and ten
+# buildings join the Power menu: longer wire bridges (N006GG1..N009GG1), batteries
+# (N011GG1, N012GG1, N015GG1, N017GG1), a thin wire (N014GG1) and a generator (N021GG1).
+# Transformers, steam turbines, discharger and electrobank tweaks ride along.
+# How a player reaches it: the build menu (Power); the Mods screen, Options.
+# What changes: wire limits, battery sizes and new power buildings.
+#
+# setup spawns copper ore. The wire limits and the plain Battery are checked, the Power menu
+# lists the 1x1 battery N015GG1, which is built in the dug-out corridor west of the printing
+# pod and selected: it holds 5 kJ (its option's default).
+from: early-base
+mods: [3292486533]
+setup:
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Cuprite\").substance", method: SpawnResource, args: [[114.5, 207.5, -12], 400, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Wire.GetMaxWattageAsFloat(\"Max1000\")": 5000
+      "Wire.GetMaxWattageAsFloat(\"Max2000\")": 10000
+      "Wire.GetMaxWattageAsFloat(\"Max20000\")": 100000
+      "Assets.GetBuildingDef(\"Battery\").BuildingComplete.GetComponent<Battery>.capacity": "== 'Infinity'"
+      "Assets.GetBuildingDef(\"N015GG1\").BuildingComplete.GetComponent<Battery>.capacity": 5000
+  - run: {seconds: 5}
+  - driver: {camera.set: {cell: [112, 208], ortho: 10}}
+  - click: {ui: "**/PlanScreen/Toggle:Power"}
+  - ui_wait: {path: "**/PlanBuildingSelectionPanel/BuildingGroups", cond: stable}
+  - scroll: {at: "**/PlanBuildingSelectionPanel/BuildingGroups", notches: -10}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/N015GG1 Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/N015GG1 Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen/MaterialSelectionPanel", cond: stable}
+  - click_world: {cell: [113, 206]}
+  - key: {code: Escape}
+  - expect: {blueprints: {N015GG1: 1}}
+  - run: {seconds: 900, until: {buildings: {N015GG1: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [113, 207], ortho: 8}}
+  - click_world: {cell: [113, 206], select: N015GG1}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<KPrefabID>.PrefabTag.Name": N015GG1
+      "selected:GetComponent<Battery>.capacity": 5000
+  - shot: {name: title, crop: "**/DetailsScreen/TitleBar", threshold: 0.04}

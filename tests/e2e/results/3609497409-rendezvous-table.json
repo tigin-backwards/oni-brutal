@@ -1,0 +1,59 @@
+{
+ "spec": "mods/3609497409-rendezvous-table.yaml",
+ "mods": [
+  "3609497409"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Rendezvous Table, researched with Luxury, is built of plastic and selected: two seats",
+ "updated": "2026-10-24",
+ "commit": "79f5b1e",
+ "mod_dlls": {
+  "3609497409": {
+   "DualDiningTable.dll": "fbb1f704c2b2716ee21aa48ab55bd5d74794dc6cb80ee678c1b8a7e58d8d1270"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-045917-355eb5",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T05:13:06",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-060043-d55a58",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T06:00:43",
+    "lane": 15,
+    "reference_run": "20261024-045917-355eb5",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "title": 0.0
+    }
+   },
+   {
+    "run": "20261024-060043-d55a58",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T06:02:03",
+    "lane": 15,
+    "reference_run": "20261024-045917-355eb5",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "title": 0.0
+    }
+   }
+  ]
+ }
+}

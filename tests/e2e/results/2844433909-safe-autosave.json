@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2844433909-safe-autosave.yaml",
+ "mods": [
+  "2844433909"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Dig drag held through the end-of-cycle autosave is cancelled and orders nothing; the same drag held without an autosave orders its digs",
+ "updated": "2026-10-24",
+ "commit": "79f5b1e",
+ "mod_dlls": {
+  "2844433909": {
+   "SafeAutosave.dll": "48c8e3785efd658f7f98cf956230b6a604f28ad57b3f5523b2a4ab21b6040f87"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-044626-bb9c43",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T04:56:47",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-054246-f9955b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T05:42:46",
+    "lane": 14,
+    "reference_run": "20261024-044626-bb9c43",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-054246-f9955b",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T05:44:13",
+    "lane": 14,
+    "reference_run": "20261024-044626-bb9c43",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

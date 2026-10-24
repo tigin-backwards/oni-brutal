@@ -1,0 +1,33 @@
+# Pacu Morphs (2020793956), class P.
+#
+# What it does: adds three Pacu morphs with eggs and babies: the Beta Pacu, the Kelp Pacu
+# (PacuAlgae) and the Plated Pacu (PacuPlate), each with its codex entry. Pacus, Tropical and
+# Gulp Fish lay their eggs at a 2 % weight, raised by warm water (temperature fertility
+# modifiers added in ModifierSet.Initialize).
+# How a player reaches it: ranching Pacus; the critters' details screen; the codex.
+# What changes: new critters and eggs.
+#
+# setup spawns a Beta Pacu on the floor of the dug-out corridor west of the printing pod
+# (early-base has no water). It is selected: its details screen names it and is shot; it then
+# lives through a short run.
+from: early-base
+mods: [2020793956]
+setup:
+  - driver: {setup.call: {type: GameUtil, method: KInstantiate, args: [{"$": "Assets.GetPrefab(\"PacuBeta\")"}, [110.5, 206.01, -24.5], Creatures]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+steps:
+  - expect_state:
+      "Db.Get().FertilityModifiers.Get(\"PacuBeta\").TargetTag.Name": PacuBetaEgg
+      "Assets.GetPrefab(\"PacuAlgaeEgg\")": exists
+      "Assets.GetPrefab(\"PacuPlateBaby\")": exists
+      "count:all:CreatureBrain::[*] if .GetComponent<KPrefabID>.PrefabTag.Name == PacuBeta": 1
+  - driver: {camera.set: {cell: [110, 207], ortho: 6}}
+  - click_world: {cell: [110, 206], select: PacuBeta}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Beta Pacu"}
+  - shot: {name: title, crop: "**/DetailsScreen/TitleBar", threshold: 0.04}
+  - run: {seconds: 30}
+  - expect_state:
+      "selected:GetComponent<KPrefabID>.PrefabTag.Name": PacuBeta
+      "selected:GetComponent<Health>.IsDefeated()": false

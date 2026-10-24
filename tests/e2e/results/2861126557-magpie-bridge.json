@@ -1,0 +1,60 @@
+{
+ "spec": "mods/2861126557-magpie-bridge.yaml",
+ "mods": [
+  "2861126557"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the two-cell liquid bridge is chosen in the Plumbing menu and built between two pipes; water crosses it to the far pipe",
+ "updated": "2026-10-24",
+ "commit": "79f5b1e",
+ "mod_dlls": {
+  "2861126557": {
+   "Magpie Bridge╚╡╟┼.dll": "4e20650747f357cc0d4182ffea43308eda0a173de522cc709cd2c32d3a2e4722",
+   "PLib.dll": "b862c5db2b3cd6df09a62d4a30782e91e2b24e8e1bfac08d991c9cc89a984ba9"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-041146-b43901",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T04:28:23",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-051206-67e0b8",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T05:12:06",
+    "lane": 14,
+    "reference_run": "20261024-041146-b43901",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "title": 0.0
+    }
+   },
+   {
+    "run": "20261024-051206-67e0b8",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T05:13:33",
+    "lane": 14,
+    "reference_run": "20261024-041146-b43901",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "title": 0.0
+    }
+   }
+  ]
+ }
+}

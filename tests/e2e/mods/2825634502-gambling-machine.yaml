@@ -1,0 +1,32 @@
+# Gambling Machine (2825634502), class B.
+#
+# What it does: adds the Gambling Machine (3x3, 400 kg of refined metal, a recreation building
+# in the Furniture menu, researched with Refined Renovations): Duplicants feed it farmables,
+# seeds, metals or filters from its storage and win random prizes, a recreation room's lights
+# and noise included.
+# How a player reaches it: the build menu (Furniture); its storage filter.
+# What changes: a slot machine for the rec room.
+#
+# setup grants Refined Renovations and spawns steel. The machine is built in the dug-out
+# corridor west of the printing pod and selected.
+from: early-base
+mods: [2825634502]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"RefinedObjects\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Steel\").substance", method: SpawnResource, args: [[111.5, 207.5, -12], 500, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"RefinedObjects\").unlockedItemIDs": {contains: GamblingMachine}
+  - build: {prefab: GamblingMachine, at: [113, 206], material: Steel}
+  - expect: {blueprints: {GamblingMachine: 1}}
+  - run: {seconds: 900, until: {buildings: {GamblingMachine: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [114, 208], ortho: 8}}
+  - click_world: {cell: [114, 207], select: GamblingMachine}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<KPrefabID>.PrefabTag.Name": GamblingMachine
+      "selected:GetComponent<Gambling_Machine.Gambling>": exists
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Gambling Machine"}
+  - shot: {name: title, crop: "**/DetailsScreen/TitleBar", threshold: 0.04}

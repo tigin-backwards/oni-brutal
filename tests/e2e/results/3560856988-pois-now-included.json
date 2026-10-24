@@ -1,0 +1,59 @@
+{
+ "spec": "mods/3560856988-pois-now-included.yaml",
+ "mods": [
+  "3560856988"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Gravitas build category lists the POI props; a Gravitas wall is chosen there, built and selected",
+ "updated": "2026-10-24",
+ "commit": "79f5b1e",
+ "mod_dlls": {
+  "3560856988": {
+   "PoisNotIncluded.dll": "19ceda320867eaf92f5d70ffa74ed999040de2ca0d29d86cc26f55384c9d5e04"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-041146-b43901",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T04:41:56",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-053501-c925db",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T05:36:06",
+    "lane": 15,
+    "reference_run": "20261024-041146-b43901",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "title": 0.0
+    }
+   },
+   {
+    "run": "20261024-053501-c925db",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T05:36:27",
+    "lane": 14,
+    "reference_run": "20261024-041146-b43901",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "title": 0.0
+    }
+   }
+  ]
+ }
+}

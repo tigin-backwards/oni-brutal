@@ -1,0 +1,34 @@
+# Laser Turret (Vanilla/DLC) (1820831167), classes B, O.
+#
+# What it does: adds the Laser Turret (1x1, 50 kg of refined metal, 120 W, in the Food menu,
+# researched with Animal Control; building it needs a rancher with the Critter Ranching II
+# skill): powered, it kills the critters chosen in its filter within Radius tiles (PLib option,
+# 7 by default) on each side and up, and stores what they drop.
+# How a player reaches it: the build menu (Food); its critter filter side screen.
+# What changes: automatic critter culling.
+#
+# Options here: Radius 4. early-base has no rancher, so setup places a finished turret
+# (BuildingDef.Build) in the dug-out corridor west of the printing pod. It is selected: its
+# range is 9 tiles wide and 5 high, and its filter side screen lists critters.
+from: early-base
+mods: [1820831167]
+options:
+  "1820831167": {Radius: 4}
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LaserTurret\")", method: Build, args: [131130, Neutral, null, [Copper], 300.0, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"AnimalControl\").unlockedItemIDs": {contains: LaserTurret}
+      "Assets.GetBuildingDef(\"LaserTurret\").EnergyConsumptionWhenActive": 120
+  - run: {seconds: 1}
+  - driver: {camera.set: {cell: [114, 207], ortho: 8}}
+  - click_world: {cell: [114, 206], select: LaserTurret}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<KPrefabID>.PrefabTag.Name": LaserTurret
+      "selected:GetComponent<AsLimc.LaserTurret.LaserTurret>.rangeWidth": 9
+      "selected:GetComponent<AsLimc.LaserTurret.LaserTurret>.rangeHeight": 5
+      "selected:GetComponent<TreeFilterable>": exists
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Laser Turret"}
+  - shot: {name: title, crop: "**/DetailsScreen/TitleBar", threshold: 0.04}

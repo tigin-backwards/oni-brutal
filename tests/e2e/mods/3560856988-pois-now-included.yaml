@@ -1,0 +1,39 @@
+# POIs Now Included (3560856988), classes P, O.
+#
+# What it does: makes Gravitas point-of-interest props buildable from a new "Gravitas" build
+# category: the Gravitas walls, windows and doors, furniture, posters, displays and lamps
+# (built from the material the original prop is made of), story-trait buildings and entity
+# spawners (PLib options ConstructableStoryTraits and EntitySpawners); the beach chair joins
+# Environmental Appreciation.
+# How a player reaches it: the build menu's Gravitas category.
+# What changes: decorative POI buildings for a base.
+#
+# The Gravitas category is opened: its grid lists the props, and the Gravitas wall
+# (PropGravitasWall, a raw-mineral backwall) is chosen and placed in the dug-out corridor west
+# of the printing pod; the Duplicants build it and it is selected.
+from: early-base
+mods: [3560856988]
+setup:
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"SandStone\").substance", method: SpawnResource, args: [[114.5, 207.5, -12], 500, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"PropGravitasWall\").ShowInBuildMenu": true
+      "Assets.GetBuildingDef(\"PNI_PropTable\")": exists
+  - run: {seconds: 5}
+  - driver: {camera.set: {cell: [112, 208], ortho: 10}}
+  - click: {ui: "**/PlanScreen/Toggle:Gravitas"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/PropGravitasWall Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/PNI_PropTable Group*": {active: true}
+  - click: {ui: "**/BuildingGroups/**/Grid/PropGravitasWall Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen/MaterialSelectionPanel", cond: stable}
+  - click_world: {cell: [113, 208]}
+  - key: {code: Escape}
+  - expect: {blueprints: {PropGravitasWall: 1}}
+  - run: {seconds: 900, until: {buildings: {PropGravitasWall: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 208], select: PropGravitasWall}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<KPrefabID>.PrefabTag.Name": PropGravitasWall
+  - shot: {name: title, crop: "**/DetailsScreen/TitleBar", threshold: 0.04}

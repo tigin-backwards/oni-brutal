@@ -1,0 +1,60 @@
+{
+ "spec": "mods/3292486533-power-system.yaml",
+ "mods": [
+  "3292486533"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the wire limits and the endless Battery hold; the 1x1 battery N015GG1 is chosen in the Power menu, built and selected (5 kJ)",
+ "updated": "2026-10-24",
+ "commit": "79f5b1e",
+ "mod_dlls": {
+  "3292486533": {
+   "N_╡τ┴ª╧╡═│_1.0.dll": "76dd72e29f150e5f3c1ad2465030fa79ea623f1a1b1c12f4c5ef74999d86500e",
+   "PLib.dll": "b862c5db2b3cd6df09a62d4a30782e91e2b24e8e1bfac08d991c9cc89a984ba9"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-045917-355eb5",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T05:10:56",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-060329-f599c1",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T06:03:29",
+    "lane": 15,
+    "reference_run": "20261024-045917-355eb5",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "title": 0.0
+    }
+   },
+   {
+    "run": "20261024-060329-f599c1",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T06:04:46",
+    "lane": 15,
+    "reference_run": "20261024-045917-355eb5",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "title": 0.0
+    }
+   }
+  ]
+ }
+}

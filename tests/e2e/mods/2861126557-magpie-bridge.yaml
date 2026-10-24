@@ -1,0 +1,42 @@
+# Magpie Bridge 鹊桥 (2861126557), class B.
+#
+# What it does: adds longer bridges, no research needed: liquid and gas bridges that span two
+# or three cells (shuiguanqiao2/3 in Plumbing, qiguanqiao2/3 in Ventilation, 4 and 5 cells
+# long, of raw mineral) and wire bridges over two or three cells (daoxianqiao2/3,
+# dianxianqiao2/3 in Power).
+# How a player reaches it: the build menu (Plumbing, Ventilation, Power).
+# What changes: pipes and wires can jump wider gaps.
+#
+# setup lays two liquid pipes at (109, 208) and (112, 208) in the dug-out corridor west of the
+# printing pod, 10 kg of water in the first. The two-cell liquid bridge is chosen in the
+# Plumbing menu and placed between them; the Duplicants build it, and the water crosses it to
+# the far pipe.
+from: early-base
+mods: [2861126557]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LiquidConduit\")", method: Build, args: [132397, Neutral, null, [SandStone], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LiquidConduit\")", method: Build, args: [132400, Neutral, null, [SandStone], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Game.Instance.liquidConduitSystem", method: ForceRebuildNetworks}}
+  - driver: {setup.call: {target: "Game.Instance.liquidConduitFlow", method: AddElement, args: [132397, Water, 10.0, 300.0, 255, 0]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"shuiguanqiao2\").WidthInCells": 4
+      "Game.Instance.liquidConduitFlow.GetContents(132400).mass": 0
+  - run: {seconds: 5}
+  - driver: {camera.set: {cell: [110, 208], ortho: 8}}
+  - click: {ui: "**/PlanScreen/Toggle:Plumbing"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/shuiguanqiao2 Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/shuiguanqiao2 Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen/MaterialSelectionPanel", cond: stable}
+  - click_world: {cell: [110, 208]}
+  - key: {code: Escape}
+  - expect: {blueprints: {shuiguanqiao2: 1}}
+  - run: {seconds: 900, until: {buildings: {shuiguanqiao2: 1}, pending_construction: 0}}
+  - run: {seconds: 20}
+  - expect_state:
+      "Game.Instance.liquidConduitFlow.GetContents(132400).mass": "> 0"
+  - click_world: {cell: [111, 208], select: shuiguanqiao2}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<ConduitBridge>": exists
+  - shot: {name: title, crop: "**/DetailsScreen/TitleBar", threshold: 0.04}

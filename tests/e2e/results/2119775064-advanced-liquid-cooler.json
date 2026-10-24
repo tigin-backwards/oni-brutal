@@ -1,0 +1,59 @@
+{
+ "spec": "mods/2119775064-advanced-liquid-cooler.yaml",
+ "mods": [
+  "2119775064"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Advanced Liquid Cooler, researched with Liquid Tuning, is built by the Duplicants and selected: 800 W, a liquid chiller of -8000 kDTU/s",
+ "updated": "2026-10-24",
+ "commit": "79f5b1e",
+ "mod_dlls": {
+  "2119775064": {
+   "AdvancedLiquidCooler.dll": "bb3572c5b4e0e6de20dfbbaf8ab27c6ecdf41925a5c547c6c62d7a6e7fc84fca"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-041146-b43901",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T04:19:54",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-050216-181a12",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T05:02:16",
+    "lane": 14,
+    "reference_run": "20261024-041146-b43901",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "title": 0.0
+    }
+   },
+   {
+    "run": "20261024-050216-181a12",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T05:03:39",
+    "lane": 14,
+    "reference_run": "20261024-041146-b43901",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "title": 0.0
+    }
+   }
+  ]
+ }
+}

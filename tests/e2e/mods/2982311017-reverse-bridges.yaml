@@ -1,0 +1,34 @@
+# Reverse Bridges (2982311017), class P (a user-menu button).
+#
+# What it does: gas, liquid and conveyor bridges get a "Reverse" user-menu button: the bridge
+# is rebuilt in place turned 180 degrees, so its input and output swap, and the new bridge is
+# selected.
+# How a player reaches it: select a bridge; its user menu.
+# What changes: a bridge's direction flips without deconstructing it.
+#
+# setup builds two liquid pipes at (110, 208) and (112, 208) in the dug-out corridor west of
+# the printing pod, and a Liquid Bridge over them centred at (111, 208). The bridge is
+# selected and reversed: one bridge remains, turned R180.
+from: early-base
+mods: [2982311017]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LiquidConduit\")", method: Build, args: [132398, Neutral, null, [SandStone], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LiquidConduit\")", method: Build, args: [132400, Neutral, null, [SandStone], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LiquidConduitBridge\")", method: Build, args: [132399, Neutral, null, [SandStone], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Game.Instance.liquidConduitSystem", method: ForceRebuildNetworks}}
+steps:
+  - run: {seconds: 1}
+  - driver: {camera.set: {cell: [111, 208], ortho: 6}}
+  - click_world: {cell: [111, 208], select: LiquidConduitBridge}
+  - ui_wait: {path: "**/DetailsScreen/UserMenuButtons/UserMenuScreen/Buttons", cond: stable}
+  - expect_state:
+      "selected:GetComponent<Rotatable>.GetOrientation()": "== 'Neutral'"
+  - expect_ui:
+      "**/UserMenuScreen/Buttons/ReverseButton": {active: true, interactable: true}
+  - ui_dump: {name: user-menu, root: "**/DetailsScreen/UserMenuButtons/UserMenuScreen/Buttons"}
+  - click: {ui: "**/UserMenuScreen/Buttons/ReverseButton"}
+  - run: {seconds: 1}
+  - expect_state:
+      "selected:GetComponent<KPrefabID>.PrefabTag.Name": LiquidConduitBridge
+      "selected:GetComponent<Rotatable>.GetOrientation()": "== 'R180'"
+      "count:all:ConduitBridge::[*] if .type == Liquid": 1

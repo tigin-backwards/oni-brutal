@@ -1,0 +1,59 @@
+{
+ "spec": "mods/2020793956-pacu-morphs.yaml",
+ "mods": [
+  "2020793956"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Beta Pacu is spawned, selected (its title shot) and lives through a run; the morphs' eggs, babies and fertility modifiers exist",
+ "updated": "2026-10-24",
+ "commit": "79f5b1e",
+ "mod_dlls": {
+  "2020793956": {
+   "PacuMorphsMerged.dll": "095bbe456d155131b3e516100c30f4fedc85baac7961738fdb1feafcdf2679c0"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-041146-b43901",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T04:18:17",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-045945-8cb7f4",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T04:59:45",
+    "lane": 14,
+    "reference_run": "20261024-041146-b43901",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "title": 0.0
+    }
+   },
+   {
+    "run": "20261024-045945-8cb7f4",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T05:00:58",
+    "lane": 14,
+    "reference_run": "20261024-041146-b43901",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "title": 0.0
+    }
+   }
+  ]
+ }
+}

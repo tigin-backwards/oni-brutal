@@ -1,0 +1,61 @@
+{
+ "spec": "mods/1820831167-laser-turret.yaml",
+ "mods": [
+  "1820831167"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a finished Laser Turret (placed by setup: building one needs a rancher early-base lacks) is selected; its range follows the Radius option and it has its critter filter",
+ "updated": "2026-10-24",
+ "commit": "79f5b1e",
+ "mod_dlls": {
+  "1820831167": {
+   "Commons_DLC.dll": "48d3fa8f0c4d9f1489f5c39ca7a6eb3ac3b14c11edbb1a5f40762f0c1cc3aa0c",
+   "LaserTurret.dll": "f50f2b34d21c037930c3b3bd04302c8c8537dc818cc45ec007bb3a436091d4d9",
+   "PLib.dll": "93073fdf44dbe9fd7c0afe19e56341be862cc2d732090dee30999cf60e2e160d"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-041146-b43901",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T04:11:46",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-044651-7f62f6",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T04:57:31",
+    "lane": 14,
+    "reference_run": "20261024-041146-b43901",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "title": 0.0
+    }
+   },
+   {
+    "run": "20261024-044651-7f62f6",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T04:58:35",
+    "lane": 14,
+    "reference_run": "20261024-041146-b43901",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "title": 0.0
+    }
+   }
+  ]
+ }
+}

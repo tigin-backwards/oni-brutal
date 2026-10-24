@@ -1,0 +1,39 @@
+# Paint your Pipes & Wires (3160195957), classes T, S, K, O, V.
+#
+# What it does: pipes, wires, rails, logic wires and their bridges get a ColorableConduit: a
+# selected one shows a row of colour swatches (the Pixel Pack's) under its side screen, and a
+# click on a swatch tints it (a double click sets a second colour); the copy-building tool
+# carries the colour. A "PAINT OVERLAYS" toggle beside the top-left controls (or its hotkey)
+# shows the tints in the utility overlays as well. Its PLib option OverlayOnly limits tints to
+# the overlays.
+# How a player reaches it: select a pipe or wire; the top-left PAINT OVERLAYS toggle.
+# What changes: utilities take the colours a player picks.
+#
+# setup builds a Wire at (110, 208) in the dug-out corridor west of the printing pod. It is
+# selected: the swatch row shows, and a click on the fourth swatch tints the wire. Then the
+# PAINT OVERLAYS toggle is pressed and turns the overlay tint on.
+from: early-base
+mods: [3160195957]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Wire\")", method: Build, args: [132398, Neutral, null, [Cuprite], 300.0, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "type:PaintYourPipes.ColorableConduit::ShowOverlayTint": false
+  - expect_ui:
+      "**/TopLeftControlPanel*/SecondaryRow/SandboxToggle/Label": {any_text: "PAINT OVERLAYS"}
+  - run: {seconds: 1}
+  - driver: {camera.set: {cell: [110, 208], ortho: 6}}
+  - click_world: {cell: [110, 208], select: Wire}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/ColorSwatch", cond: stable}
+  - expect_state:
+      "selected:GetComponent<PaintYourPipes.ColorableConduit>.IsTinted": false
+  - ui_dump: {name: swatches, root: "**/DetailsScreen/SideScreen/ColorSwatch"}
+  - click: {ui: "**/DetailsScreen/SideScreen/ColorSwatch/SwatchEntry", index: 3}
+  - expect_state:
+      "selected:GetComponent<PaintYourPipes.ColorableConduit>.IsTinted": true
+      "selected:GetComponent<PaintYourPipes.ColorableConduit>.ColorHex": "== original"
+  - shot: {name: swatches, crop: "**/DetailsScreen/SideScreen/ColorSwatch", threshold: 0.04}
+  - key: {code: Escape}
+  - click: {text: "PAINT OVERLAYS", under: "**/TopLeftControlPanel*"}
+  - expect_state:
+      "type:PaintYourPipes.ColorableConduit::ShowOverlayTint": true

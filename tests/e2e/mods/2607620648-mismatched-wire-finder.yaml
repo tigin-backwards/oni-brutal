@@ -1,0 +1,38 @@
+# Mismatched Wire Finder (2607620648), class K.
+#
+# What it does: adds a "Find Mismatched" button to the user menu of a wire whose circuit has a
+# lower-rated wire somewhere (its rating differs from the circuit's maximum safe wattage), and
+# of a pipe joined to pipes of another material. The button selects and centres on the first
+# such wire or pipe.
+# How a player reaches it: select a wire or pipe; its user menu (the details screen's buttons).
+# What changes: one click finds the weak link of a circuit.
+#
+# setup lays a circuit in the dug-out corridor west of the printing pod: two Wires at
+# (108, 208) and (109, 208) joined to two Heavi-Watt Wires at (110, 208) and (111, 208), the
+# connections set and the network rebuilt. The Heavi-Watt Wire at (111, 208) is selected, its
+# user menu offers Find Mismatched, and the click selects a plain Wire.
+from: early-base
+mods: [2607620648]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Wire\")", method: Build, args: [132396, Neutral, null, [Cuprite], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Wire\")", method: Build, args: [132397, Neutral, null, [Cuprite], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"HighWattageWire\")", method: Build, args: [132398, Neutral, null, [Cuprite], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"HighWattageWire\")", method: Build, args: [132399, Neutral, null, [Cuprite], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Game.Instance.electricalConduitSystem", method: SetConnections, args: ["Right", 132396, true]}}
+  - driver: {setup.call: {target: "Game.Instance.electricalConduitSystem", method: SetConnections, args: ["Left, Right", 132397, true]}}
+  - driver: {setup.call: {target: "Game.Instance.electricalConduitSystem", method: SetConnections, args: ["Left, Right", 132398, true]}}
+  - driver: {setup.call: {target: "Game.Instance.electricalConduitSystem", method: SetConnections, args: ["Left", 132399, true]}}
+  - driver: {setup.call: {target: "Game.Instance.electricalConduitSystem", method: ForceRebuildNetworks}}
+steps:
+  - run: {seconds: 1}
+  - driver: {camera.set: {cell: [110, 208], ortho: 6}}
+  - click_world: {cell: [111, 208], select: HighWattageWire}
+  - ui_wait: {path: "**/DetailsScreen/UserMenuButtons/UserMenuScreen/Buttons", cond: stable}
+  - expect_ui:
+      "**/UserMenuScreen/Buttons/Find MismatchedButton": {active: true, interactable: true}
+  - ui_dump: {name: user-menu, root: "**/DetailsScreen/UserMenuButtons/UserMenuScreen/Buttons"}
+  - click: {ui: "**/UserMenuScreen/Buttons/Find MismatchedButton"}
+  - expect_state:
+      "selected:GetComponent<KPrefabID>.PrefabTag.Name": Wire
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Wire"}

@@ -1,0 +1,33 @@
+# Rendezvous Table (3609497409), class B.
+#
+# What it does: adds the Rendezvous Table (DualMinionDiningTable, 3x1, 200 kg of plastic, after
+# the Communal Table in the Furniture menu, researched with Luxury, or unlocked from a Gravitas
+# table's lore): a dining table with two seats, left and right, which counts as a mess table
+# for the Great Hall and Mess Hall rooms (a postfix on the room constraint), its seats spawned
+# by the communal table's code with the mod's seat count.
+# How a player reaches it: the build menu (Furniture); Duplicants eat at it.
+# What changes: a two-seat dining table.
+#
+# setup grants Luxury and spawns plastic. The table is built in the dug-out corridor west of
+# the printing pod and selected: it has its two seats.
+from: early-base
+mods: [3609497409]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"Luxury\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Polypropylene\").substance", method: SpawnResource, args: [[114.5, 207.5, -12], 300, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"Luxury\").unlockedItemIDs": {contains: DualMinionDiningTable}
+  - build: {prefab: DualMinionDiningTable, at: [113, 206]}
+  - expect: {blueprints: {DualMinionDiningTable: 1}}
+  - run: {seconds: 900, until: {buildings: {DualMinionDiningTable: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [114, 207], ortho: 8}}
+  - click_world: {cell: [114, 206], select: DualMinionDiningTable}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<KPrefabID>.PrefabTag.Name": DualMinionDiningTable
+      "all:MultiMinionDiningTable+Seat::Length": 2
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Rendezvous Table"}
+  - shot: {name: title, crop: "**/DetailsScreen/TitleBar", threshold: 0.04}

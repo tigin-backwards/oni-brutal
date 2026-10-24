@@ -1,0 +1,67 @@
+{
+ "spec": "mods/3160195957-paint-your-pipes.yaml",
+ "mods": [
+  "3160195957"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a selected wire shows the colour swatches and a swatch click tints it; the PAINT OVERLAYS toggle turns the overlay tint on",
+ "updated": "2026-10-24",
+ "commit": "79f5b1e",
+ "mod_dlls": {
+  "3160195957": {
+   "PaintYourPipes.dll": "8e72a03e513699c38c21e6d64d21c553619adc468ae861e7f438ff9b34bf0b6e"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-044626-bb9c43",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T04:53:17",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-055324-8a31bf",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T05:53:24",
+    "lane": 15,
+    "reference_run": "20261024-044626-bb9c43",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "swatches": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "swatches": 0.0
+    }
+   },
+   {
+    "run": "20261024-055324-8a31bf",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T05:54:31",
+    "lane": 15,
+    "reference_run": "20261024-044626-bb9c43",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "swatches": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "swatches": 0.0
+    }
+   }
+  ]
+ }
+}

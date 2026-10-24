@@ -1,0 +1,32 @@
+# Moveable Printing Pods (2859877461), class P.
+#
+# What it does: the Printing Pod (Headquarters) becomes buildable, one per world, from the Base
+# build menu (postfixes on HeadquartersConfig.CreateBuildingDef and
+# BuildingConfigManager.RegisterBuilding), and a built pod, the Mini-Pod included, can be
+# deconstructed (a postfix on BuildingComplete.OnSpawn), so a player can move it.
+# How a player reaches it: the Base build menu; the pod's user menu (Deconstruct).
+# What changes: the pod can be taken down and built elsewhere.
+#
+# The Base menu lists the Printing Pod. Then the colony's pod, at (123..126, 207..210), is
+# selected and marked for deconstruction from its user menu.
+from: early-base
+mods: [2859877461]
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"Headquarters\").ShowInBuildMenu": true
+      "Assets.GetBuildingDef(\"Headquarters\").OnePerWorld": true
+      "all:Telepad::[0].GetComponent<Deconstructable>.allowDeconstruction": true
+  - run: {seconds: 5}
+  - click: {ui: "**/PlanScreen/Toggle:Base"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/Headquarters Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/Headquarters Group*": {active: true}
+  - key: {code: Escape}
+  - driver: {camera.set: {cell: [124, 209], ortho: 8}}
+  - click_world: {cell: [124, 208], select: Headquarters}
+  - ui_wait: {path: "**/DetailsScreen/UserMenuButtons/UserMenuScreen/Buttons", cond: stable}
+  - expect_ui:
+      "**/UserMenuScreen/Buttons/DeconstructButton": {active: true}
+  - click: {ui: "**/UserMenuScreen/Buttons/DeconstructButton"}
+  - expect_state:
+      "selected:GetComponent<Deconstructable>.IsMarkedForDeconstruction()": true

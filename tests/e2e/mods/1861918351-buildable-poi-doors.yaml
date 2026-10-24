@@ -1,0 +1,32 @@
+# Buildable POI Doors (1861918351), class B.
+#
+# What it does: adds buildable copies of three Gravitas doors to the Base menu, researched with
+# Refined Renovations: the Facility Door (2x3, refined metal and plastic), the Security Door
+# and the Internal Door (BuildablePOIFacilityDoor, BuildablePOISecurityDoor,
+# BuildablePOIInternalDoor), with access control and door states like the game's doors.
+# How a player reaches it: the build menu (Base); the door's side screens.
+# What changes: Gravitas-style doors for a base.
+#
+# setup grants Refined Renovations and spawns steel. The Internal Door is built in the dug-out
+# corridor west of the printing pod and selected.
+from: early-base
+mods: [1861918351]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"RefinedObjects\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Steel\").substance", method: SpawnResource, args: [[114.5, 207.5, -12], 300, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"RefinedObjects\").unlockedItemIDs": {contains: BuildablePOIInternalDoor}
+      "Assets.GetBuildingDef(\"BuildablePOIFacilityDoor\")": exists
+      "Assets.GetBuildingDef(\"BuildablePOISecurityDoor\")": exists
+  - build: {prefab: BuildablePOIInternalDoor, at: [113, 206], material: Steel}
+  - expect: {blueprints: {BuildablePOIInternalDoor: 1}}
+  - run: {seconds: 900, until: {buildings: {BuildablePOIInternalDoor: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [113, 207], ortho: 8}}
+  - click_world: {cell: [113, 207], select: BuildablePOIInternalDoor}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<KPrefabID>.PrefabTag.Name": BuildablePOIInternalDoor
+      "selected:GetComponent<Door>": exists
+  - shot: {name: title, crop: "**/DetailsScreen/TitleBar", threshold: 0.04}

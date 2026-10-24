@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2197860553-buildings-cant-be-damaged.yaml",
+ "mods": [
+  "2197860553"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Battery heated by hot petroleum past its overheat temperature stays overheated through two minutes and keeps its full hit points",
+ "updated": "2026-10-24",
+ "commit": "79f5b1e",
+ "mod_dlls": {
+  "2197860553": {
+   "buildingsNoDamege.dll": "809d36c838b9ad2731dea2e341d0069625e2c91672392369be15733c74469052"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-054628-3a8bc8",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T05:47:03",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-054946-7a522c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T05:49:46",
+    "lane": 14,
+    "reference_run": "20261024-054628-3a8bc8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-054946-7a522c",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T05:51:24",
+    "lane": 14,
+    "reference_run": "20261024-054628-3a8bc8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

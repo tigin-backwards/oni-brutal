@@ -1,0 +1,63 @@
+{
+ "spec": "mods/2982311017-reverse-bridges.yaml",
+ "mods": [
+  "2982311017"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Liquid Bridge's Reverse button rebuilds it turned R180, one bridge left",
+ "updated": "2026-10-24",
+ "commit": "79f5b1e",
+ "mod_dlls": {
+  "2982311017": {
+   "reverse bridge.dll": "9460114f55d004686390ac88f25b880583a9cbeeaa925e0aaad7eb8bcfdfc41c"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-041146-b43901",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T04:29:16",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-051519-ba52fc",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T05:15:19",
+    "lane": 14,
+    "reference_run": "20261024-041146-b43901",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "user-menu": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261024-051519-ba52fc",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T05:16:36",
+    "lane": 14,
+    "reference_run": "20261024-041146-b43901",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "user-menu": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

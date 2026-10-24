@@ -1,0 +1,73 @@
+{
+ "spec": "mods/2014558219-automation-expanded.yaml",
+ "mods": [
+  "2014558219"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a 4-bit dense gate is built and selected; its Select Logic Function side screen matches the original, and its XOR button makes it an XOR gate",
+ "updated": "2026-10-24",
+ "commit": "79f5b1e",
+ "mod_dlls": {
+  "2014558219": {
+   "ONI-DenseLogicMerged.dll": "8c654026931698d58a8e404faff3ef56deadfd7086143b9ebe5082e91226656c"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-044626-bb9c43",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T04:47:57",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-054746-8a572b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T05:47:46",
+    "lane": 15,
+    "reference_run": "20261024-044626-bb9c43",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "gate-select": {
+      "differences": 0
+     },
+     "gate-xor": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "gate-select": 0.0
+    }
+   },
+   {
+    "run": "20261024-054746-8a572b",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T05:49:08",
+    "lane": 15,
+    "reference_run": "20261024-044626-bb9c43",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "gate-select": {
+      "differences": 0
+     },
+     "gate-xor": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "gate-select": 0.0
+    }
+   }
+  ]
+ }
+}

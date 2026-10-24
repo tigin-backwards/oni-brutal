@@ -1,0 +1,38 @@
+# Automation Expanded (2014558219), classes B, S.
+#
+# What it does: adds logic buildings: NOR, NAND and XNOR gates (Logic Circuits, Duplicant
+# Traffic Control), a 4-bit dense gate, multiplexer and demultiplexer, a 4-bit input, a signal
+# remapper, an inline gate, a seven-segment display and a data memory (Multiplexing, Parallel
+# Automation). The configurable ones have PLib side screens: the dense and inline gates a
+# "Select Logic Function" grid of six buttons (AND, OR, XOR, NAND, NOR, XNOR), the input a
+# four-bit selector, the remapper a mapping.
+# How a player reaches it: the build menu (Automation); the side screens.
+# What changes: denser logic; the gate's function is picked on its side screen.
+#
+# setup grants Parallel Automation (and its prerequisites) and spawns steel. A 4-bit dense
+# gate is built in the dug-out corridor west of the printing pod and selected: its side screen
+# shows the six functions, AND chosen; a click on XOR makes it an XOR gate.
+from: early-base
+mods: [2014558219]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"ParallelAutomation\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Steel\").substance", method: SpawnResource, args: [[111.5, 207.5, -12], 200, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"ParallelAutomation\").unlockedItemIDs": {contains: DenseLogicTeam_DenseGate}
+      "Db.Get().Techs.Get(\"LogicCircuits\").unlockedItemIDs": {contains: DenseLogicTeam_LogicNor}
+  - build: {prefab: DenseLogicTeam_DenseGate, at: [113, 207], material: Steel}
+  - expect: {blueprints: {DenseLogicTeam_DenseGate: 1}}
+  - run: {seconds: 900, until: {buildings: {DenseLogicTeam_DenseGate: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [114, 208], ortho: 8}}
+  - click_world: {cell: [113, 208], select: DenseLogicTeam_DenseGate}
+  - ui_wait: {path: "**/LogicGateSelectSideScreen/GateLogicSelect", cond: stable}
+  - expect_state:
+      "selected:GetComponent<ONI_DenseLogic.DenseLogicGate>.GateType": "== 'And'"
+  - ui_dump: {name: gate-select, root: "**/LogicGateSelectSideScreen"}
+  - shot: {name: gate-select, crop: "**/LogicGateSelectSideScreen", threshold: 0.04}
+  - click: {ui: "**/LogicGateSelectSideScreen/GateLogicSelect/XOR"}
+  - expect_state:
+      "selected:GetComponent<ONI_DenseLogic.DenseLogicGate>.GateType": "== 'Xor'"
+  - ui_dump: {name: gate-xor, root: "**/LogicGateSelectSideScreen"}

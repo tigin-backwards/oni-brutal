@@ -1,0 +1,28 @@
+# 1000TLargeStorageLocker (3486175417), class P (a building definition).
+#
+# What it does: the Storage Bin holds 999,999 kg instead of 20 tonnes (a postfix on
+# StorageLockerConfig.ConfigureBuildingTemplate sets its Storage's capacityKg), and logs it.
+# How a player reaches it: building a Storage Bin (Base menu); its capacity side screen.
+# What changes: one bin takes a thousand tonnes.
+#
+# A Storage Bin is built in the dug-out corridor west of the printing pod and selected: it
+# holds 999,999 kg, and its capacity side screen accepts 500,000 kg typed into its field.
+from: early-base
+mods: [3486175417]
+require_log: ['\[CombinedMod\] StorageLocker capacity successfully changed to 999999 kg']
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"StorageLocker\").BuildingComplete.GetComponent<Storage>.capacityKg": 999999
+  - build: {prefab: StorageLocker, at: [113, 206]}
+  - expect: {blueprints: {StorageLocker: 1}}
+  - run: {seconds: 900, until: {buildings: {StorageLocker: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [113, 207], ortho: 8}}
+  - click_world: {cell: [113, 207], select: StorageLocker}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/CapacityControlSideScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<Storage>.capacityKg": 999999
+      "ui:**/CapacityControlSideScreen/**/Slider::GetComponent<KSlider>.maxValue": 999999
+  - type: {ui: "**/CapacityControlSideScreen/**/*Input*", text: "500000", enter: true, clear: true}
+  - expect_state:
+      "selected:GetComponent<StorageLocker>.UserMaxCapacity": 500000
+  - ui_dump: {name: capacity, root: "**/CapacityControlSideScreen"}

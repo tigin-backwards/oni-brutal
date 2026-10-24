@@ -1,0 +1,59 @@
+{
+ "spec": "mods/3121297403-utility-glass.yaml",
+ "mods": [
+  "3121297403"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Window Wall, researched with Glass Blowing, is built of glass and selected",
+ "updated": "2026-10-24",
+ "commit": "79f5b1e",
+ "mod_dlls": {
+  "3121297403": {
+   "UtilityGlass.dll": "6b2a5a8e4b1a663fef230c41168b185b72ebe121308c7e318c9d536344d6b3b6"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-041146-b43901",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T04:30:39",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-052057-d4a3e2",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T05:20:57",
+    "lane": 14,
+    "reference_run": "20261024-041146-b43901",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "title": 0.0
+    }
+   },
+   {
+    "run": "20261024-052057-d4a3e2",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T05:22:33",
+    "lane": 14,
+    "reference_run": "20261024-041146-b43901",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "title": 0.0
+    }
+   }
+  ]
+ }
+}

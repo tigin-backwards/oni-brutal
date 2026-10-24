@@ -1,0 +1,63 @@
+{
+ "spec": "mods/2607620648-mismatched-wire-finder.yaml",
+ "mods": [
+  "2607620648"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Heavi-Watt Wire joined to plain Wires shows Find Mismatched in its user menu, and the click selects a plain Wire",
+ "updated": "2026-10-24",
+ "commit": "79f5b1e",
+ "mod_dlls": {
+  "2607620648": {
+   "MismatchedFinder.dll": "54f5c4b4f7abc01acd5007825ae631486003806685aef50990591a805c659dca"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-041146-b43901",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T04:21:33",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-050459-57c581",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T05:04:59",
+    "lane": 14,
+    "reference_run": "20261024-041146-b43901",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "user-menu": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261024-050459-57c581",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T05:05:52",
+    "lane": 14,
+    "reference_run": "20261024-041146-b43901",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "user-menu": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2859877461-moveable-printing-pods.yaml",
+ "mods": [
+  "2859877461"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Base menu lists the Printing Pod, and the colony's pod is marked for deconstruction from its user menu",
+ "updated": "2026-10-24",
+ "commit": "79f5b1e",
+ "mod_dlls": {
+  "2859877461": {
+   "DeletePrintingPods.dll": "a0ee4756b0be62b65744e98e9c786153e43d3f39c8d532355f9d92d0c2fb3bb8"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-041146-b43901",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T04:26:49",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-050941-fdf0cc",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T05:09:41",
+    "lane": 14,
+    "reference_run": "20261024-041146-b43901",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-050941-fdf0cc",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T05:10:50",
+    "lane": 14,
+    "reference_run": "20261024-041146-b43901",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

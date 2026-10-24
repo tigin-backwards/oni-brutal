@@ -1,0 +1,39 @@
+# Safe Autosave (2844433909), class S (patches only).
+#
+# What it does: prefixes on Game.DelayedSave (the autosave and any save) and KScreen.OnShow
+# (any screen opening) cancel a drag in progress, the player controller's and the build
+# tool's, so a drag held through an autosave or a popup is dropped instead of finishing on
+# stale cells.
+# How a player reaches it: any drag tool held when the cycle ends.
+# What changes: a drag held through the autosave places nothing.
+#
+# setup sets the clock 2 s before the end of the cycle. The game is unpaused with Space, and a
+# Dig drag over the cuprite ceiling of the corridor west of the printing pod is held across the
+# cycle's end: the autosave runs and the drag is cancelled, so its release orders no digging.
+# The same drag held again, with no autosave in it, orders its digs.
+from: early-base
+mods: [2844433909]
+setup:
+  - driver: {setup.call: {target: "GameClock.Instance", method: SetTime, args: [1198.0]}}
+steps:
+  - expect_state:
+      "GameClock.Instance.GetCycle()": 1
+      "SaveGame.Instance.AutoSaveCycleInterval": 1
+  - run: {seconds: 1}
+  - driver: {camera.set: {cell: [110, 209], ortho: 8}}
+  - tool: {toolbar: Dig}
+  - key: {code: Space}
+  - drag: {from: [108, 211], to: [112, 211], hold: 900}
+  - key: {code: Space}
+  - key: {code: Escape}
+  - expect_state:
+      "GameClock.Instance.GetCycle()": 2
+      "file:save_files/e2e/auto_save/early-base Cycle 3.sav": exists
+  - expect: {pending_digs: 0}
+  # The same drag, held as long with no autosave in it, orders its digs.
+  - tool: {toolbar: Dig}
+  - key: {code: Space}
+  - drag: {from: [108, 211], to: [112, 211], hold: 900}
+  - key: {code: Space}
+  - key: {code: Escape}
+  - expect: {pending_digs: ">= 3"}

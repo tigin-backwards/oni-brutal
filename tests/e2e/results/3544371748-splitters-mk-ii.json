@@ -1,0 +1,59 @@
+{
+ "spec": "mods/3544371748-splitters-mk-ii.yaml",
+ "mods": [
+  "3544371748"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Liquid Splitter MK II, researched with Advanced Filtration, is built of steel and selected, with its filter",
+ "updated": "2026-10-24",
+ "commit": "79f5b1e",
+ "mod_dlls": {
+  "3544371748": {
+   "MJSplittersMKII.dll": "cdc35b9e9263bf3e9ae5f606b9a1f1fe5d008655bba64e63fe1b6db5e8470bf8"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-044626-bb9c43",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T04:54:57",
+    "lane": 15,
+    "signatures": 1
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-055538-a657ed",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T05:55:38",
+    "lane": 15,
+    "reference_run": "20261024-044626-bb9c43",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "title": 0.0
+    }
+   },
+   {
+    "run": "20261024-055538-a657ed",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T05:57:08",
+    "lane": 15,
+    "reference_run": "20261024-044626-bb9c43",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "title": 0.0
+    }
+   }
+  ]
+ }
+}

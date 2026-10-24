@@ -1,0 +1,60 @@
+{
+ "spec": "mods/2845101493-optimize-oxygen-generator.yaml",
+ "mods": [
+  "2845101493"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the electrolyzer is chosen in the Oxygen menu, built and selected; its outputs follow the options (0.5 and 0.2 kg/s)",
+ "updated": "2026-10-24",
+ "commit": "79f5b1e",
+ "mod_dlls": {
+  "2845101493": {
+   "J_╓╞╤⌡╗·.dll": "e1da4b8da0759f68a6cb8c44496f69a4baabd921c88e99c0339e07fdeec2c445",
+   "PLib.dll": "b862c5db2b3cd6df09a62d4a30782e91e2b24e8e1bfac08d991c9cc89a984ba9"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-041146-b43901",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T04:24:48",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-050649-f1cb36",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T05:06:49",
+    "lane": 14,
+    "reference_run": "20261024-041146-b43901",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "title": 0.0
+    }
+   },
+   {
+    "run": "20261024-050649-f1cb36",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T05:08:13",
+    "lane": 14,
+    "reference_run": "20261024-041146-b43901",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "title": 0.0
+    }
+   }
+  ]
+ }
+}

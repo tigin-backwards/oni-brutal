@@ -1,0 +1,34 @@
+# Advanced Liquid Cooler (2119775064), class B.
+#
+# What it does: adds the Advanced Liquid Cooler (2x1, 400 kg of any metal, 800 W, in the
+# Utilities menu, researched with Liquid Tuning): a liquid "space heater" that takes 8000 kDTU/s
+# out of the liquid it stands in, down to absolute zero. Its size, power and heat come from the
+# mod's own config.json.
+# How a player reaches it: the build menu (Utilities); the building's details screen.
+# What changes: a very strong liquid chiller.
+#
+# setup grants Liquid Tuning and spawns copper ore. The cooler is built in the dug-out
+# corridor west of the printing pod and selected.
+from: early-base
+mods: [2119775064]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"LiquidTemperature\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Cuprite\").substance", method: SpawnResource, args: [[114.5, 207.5, -12], 500, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"LiquidTemperature\").unlockedItemIDs": {contains: AdvancedLiquidCooler}
+      "Assets.GetBuildingDef(\"AdvancedLiquidCooler\").ExhaustKilowattsWhenActive": -8000
+      "Assets.GetBuildingDef(\"AdvancedLiquidCooler\").EnergyConsumptionWhenActive": 800
+  - build: {prefab: AdvancedLiquidCooler, at: [113, 206]}
+  - expect: {blueprints: {AdvancedLiquidCooler: 1}}
+  - run: {seconds: 900, until: {buildings: {AdvancedLiquidCooler: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [114, 207], ortho: 8}}
+  - click_world: {cell: [113, 206], select: AdvancedLiquidCooler}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Advanced Liquid Cooler"}
+  - expect_state:
+      "selected:GetComponent<SpaceHeater>": exists
+      "selected:GetComponent<EnergyConsumer>.WattsNeededWhenActive": 800
+  - shot: {name: title, crop: "**/DetailsScreen/TitleBar", threshold: 0.04}

@@ -1,0 +1,35 @@
+# [DLC support] BUILDINGS CAN'T BE DAMAGED (2197860553), class P.
+#
+# What it does: a prefix on BuildingHP.DoDamage that skips it, so nothing lowers a building's
+# hit points: not overheating, frozen or boiling pipe contents, overloaded wires, meteors or
+# critters.
+# How a player reaches it: any building that would take damage.
+# What changes: buildings never break.
+#
+# setup builds a Battery at (113, 206) in the dug-out corridor west of the printing pod and
+# pours 1000 kg of petroleum at 550 K into its cells (SimMessages.ReplaceElement), which heats
+# it far past its overheat temperature. The battery is selected; the game runs, the battery
+# stays overheated (the state whose update sends the damage event every 7.5 s) and its hit
+# points stay full.
+from: early-base
+mods: [2197860553]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Battery\")", method: Build, args: [131129, Neutral, null, [Cuprite], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [131129, Petroleum, {"$": "CellEventLogger.Instance.SandBoxTool"}, 1000.0, 550.0]}}
+steps:
+  - driver: {camera.set: {cell: [113, 207], ortho: 8}}
+  - click_world: {cell: [113, 207], select: Battery}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<BuildingHP>.MaxHitPoints": {save_as: max}
+      "selected:GetComponent<BuildingHP>.HitPoints": "== max"
+      "selected:GetComponent<Overheatable>.OverheatTemperature": {save_as: overheat}
+  - run: {seconds: 60}
+  - expect_state:
+      "selected:GetComponent<PrimaryElement>.Temperature": "> overheat"
+      "selected:GetComponent<BuildingHP>.HitPoints": "== max"
+  - expect_ui: {"**/SimpleInfoScreen/**/StatusItemTemplate/TextLayout/Value": {any_text: "~Overheat"}}
+  - run: {seconds: 60}
+  - expect_state:
+      "selected:GetComponent<PrimaryElement>.Temperature": "> overheat"
+      "selected:GetComponent<BuildingHP>.HitPoints": "== max"

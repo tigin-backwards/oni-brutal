@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3010968005-no-critter-overcrowding.yaml",
+ "mods": [
+  "3010968005"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "12 Dreckos fill a 124-cell cavity with 144 cells of space, and none is Crowded or Confined (the game alone crowds them)",
+ "updated": "2026-10-24",
+ "commit": "fc737ea",
+ "mod_dlls": {
+  "3010968005": {
+   "NoCritterCram.dll": "92767d25ea6eccb0ee3c70ede739aa1ca60e1c8ca166c950157a1c200d7efe10"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-041001-686fdf",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T04:11:52",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-042506-ae9a4a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T04:25:06",
+    "lane": 16,
+    "reference_run": "20261024-041001-686fdf",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-042506-ae9a4a",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T04:26:27",
+    "lane": 16,
+    "reference_run": "20261024-041001-686fdf",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

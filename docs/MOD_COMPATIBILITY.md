@@ -518,7 +518,7 @@ installs get developer checks subscribers never see).
 | 497 | [Magpie Bridge鹊桥](https://steamcommunity.com/sharedfiles/filedetails/?id=2861126557) | ✅ | ✅ | ⬜ |  |
 | 498 | [Utility Glass](https://steamcommunity.com/sharedfiles/filedetails/?id=3121297403) | ✅ | ✅ | ⬜ |  |
 | 499 | [Filterable Auto-Compost](https://steamcommunity.com/sharedfiles/filedetails/?id=3612606893) | ✅ | ✅ | ⬜ |  |
-| 500 | [Clothing Locker](https://steamcommunity.com/sharedfiles/filedetails/?id=2046407638) | ✅ | ✅ | ⬜ |  |
+| 500 | [Clothing Locker](https://steamcommunity.com/sharedfiles/filedetails/?id=2046407638) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2046407638-clothing-locker.yaml: the Clothing Locker built from cuprite in the corridor, selected: a storage locker that takes clothes only; its title as in the original |
 | 501 | [Stop Sublimation While In Storage (updated for Big Merge)](https://steamcommunity.com/sharedfiles/filedetails/?id=2686344355) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2686344355-stop-sublimation-in-storage.yaml: 100 kg of oxylite stored in a storage bin keeps its mass over 120 s while a loose pile beside it sublimates |
 | 502 | [Forcefield Projectors](https://steamcommunity.com/sharedfiles/filedetails/?id=3568684741) | ✅ | ✅ | ⬜ |  |
 | 503 | [Heat Terminator热量终结者](https://steamcommunity.com/sharedfiles/filedetails/?id=2842352931) | ✅ | ✅ | ⬜ |  |
@@ -536,7 +536,7 @@ installs get developer checks subscribers never see).
 | 515 | [香草梯子Vanilla ladder](https://steamcommunity.com/sharedfiles/filedetails/?id=2882418505) | ✅ | ✅ | ⬜ |  |
 | 516 | [Demolior Story Trait](https://steamcommunity.com/sharedfiles/filedetails/?id=3503014942) | ⬜ | ⬜ | ⬜ |  |
 | 517 | [Liquid Mercury Geyser](https://steamcommunity.com/sharedfiles/filedetails/?id=3508870243) | ⬜ | ⬜ | ⬜ |  |
-| 518 | [No Critter Overcrowding](https://steamcommunity.com/sharedfiles/filedetails/?id=3010968005) | ✅ | ✅ | ⬜ |  |
+| 518 | [No Critter Overcrowding](https://steamcommunity.com/sharedfiles/filedetails/?id=3010968005) | ✅ | ✅ | ✅ | spec tests/e2e/mods/3010968005-no-critter-overcrowding.yaml: 12 Dreckos fill a 124-cell cavity with 144 cells of space, and none is Crowded or Confined (the game alone crowds them) |
 | 519 | [[FIXED]传送端口 (Transfer Port)](https://steamcommunity.com/sharedfiles/filedetails/?id=3519386331) | ❌ | ❌ | ⬜ | fails to load in the original as well, in its sweep batch |
 | 520 | [更强的小人](https://steamcommunity.com/sharedfiles/filedetails/?id=2778263368) | ❌ | ❌ | ⬜ | broken upstream: a Harmony transpiler whose target method is gone, and the error dialog quits the game (same in the original) |
 | 521 | [Assignable Showers](https://steamcommunity.com/sharedfiles/filedetails/?id=1842684413) | ⬜ | ⬜ | ⬜ | flagged by onimaxxing (notLoading); not tested |

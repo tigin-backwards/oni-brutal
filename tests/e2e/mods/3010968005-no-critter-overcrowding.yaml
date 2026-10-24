@@ -1,0 +1,39 @@
+# No Critter Overcrowding (3010968005), class P.
+#
+# What it does: critters are never Crowded, Cramped or Confined: postfixes make the
+# OvercrowdingMonitor's region analysis answer false to IsOvercrowded, IsFutureOvercrowded and
+# IsConfined, so the happiness and fertility penalties never apply. A prefix on
+# FetchEggPersonalSpace also guards eggs that hatch into nothing.
+# How a player reaches it: keeping more critters in a room than its size allows.
+# What changes: no overcrowding effects on critters.
+#
+# setup lets 12 Dreckos loose in the corridor east of the printing pod (x 118..129, y 207), a
+# cavity of 124 cells: they take 12 cells of space each, so the game alone makes them Crowded
+# (the Overcrowded tag and effect; seen in the original without the mod). After a run, the
+# cavity counts them as filling 144 cells, and none of them is crowded.
+from: early-base
+mods: [3010968005]
+setup:
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131770, 0, 0, \"Drecko\", \"Creatures\")", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131771, 0, 0, \"Drecko\", \"Creatures\")", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131772, 0, 0, \"Drecko\", \"Creatures\")", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131773, 0, 0, \"Drecko\", \"Creatures\")", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131774, 0, 0, \"Drecko\", \"Creatures\")", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131775, 0, 0, \"Drecko\", \"Creatures\")", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131776, 0, 0, \"Drecko\", \"Creatures\")", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131777, 0, 0, \"Drecko\", \"Creatures\")", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131778, 0, 0, \"Drecko\", \"Creatures\")", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131779, 0, 0, \"Drecko\", \"Creatures\")", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131780, 0, 0, \"Drecko\", \"Creatures\")", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131781, 0, 0, \"Drecko\", \"Creatures\")", method: SetActive, args: [true]}}
+steps:
+  - run: {seconds: 60}
+  # The cavity holds the 12 Dreckos, which need more space than it has.
+  - expect_state:
+      "Game.Instance.roomProber.GetCavityForCell(131775).occupancy.CritterCounts[\"Drecko\"]": 12
+      "Game.Instance.roomProber.GetCavityForCell(131775).NumCells": {save_as: cells}
+  - expect_state:
+      "Game.Instance.roomProber.GetCavityForCell(131775).occupancy.OccupiedCellCount": "> cells"
+      "count:Components.Brains.Items[*] if .GetComponent<KPrefabID>.HasTag(\"Overcrowded\") == true": 0
+      "count:Components.Brains.Items[*] if .GetComponent<KPrefabID>.HasTag(\"Confined\") == true": 0
+      "count:Components.Brains.Items[*] if .GetComponent<Effects>.HasEffect(\"Overcrowded\") == true": 0

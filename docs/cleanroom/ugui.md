@@ -730,8 +730,10 @@ screen opened with a scrollbar of size 0.94 to 0.98 in about half of our runs, 1
   corners with the engine's `MultiplyPoint3x4`.
 - **Still apart.** `localToWorldMatrix` (and with it `GetWorldCorners`), `rotation` and
   `lossyScale` now follow the original bit for bit ("Transform hierarchy to the bit" below),
-  but `worldToLocalMatrix` does not: the original's inverse scale is not 1/s rounded (it was
-  -(316.1741 × (1 / 0.86)) = -367.6443 where ours inverts the world matrix, -367.64432). So
+  but `worldToLocalMatrix` does not in general: the original's inverse scale is not always 1/s
+  rounded (f(s) below). Here it agrees: the translation was -(316.1741 × (1 / 0.86)) =
+  -367.6443, which inverting the world matrix with Mesa's inversion (`Matrix4x4.inverse`
+  below) also gives; the cofactor inverse used before gave -367.64432. So
   whether the grown bounds move by an ulp still differs between the players for a given
   layout, and both remain timing-dependent: the stale size shows in the original too (3 runs
   of 12, sizes 0.995 to 0.9985), and in either player after a slow frame.
@@ -780,9 +782,18 @@ RectTransforms, every level logged. Each operation below rounds to float; no fus
     on s, 1/s, s², rcp and rsqrt. Rows of the inverse are f(s) times the transposed rotation;
     the translation is −p·f(s) in 98% of cases.
   - RectTransform's rect from its anchors: (w·aMax − w·aMin) + sizeDelta matches 98% of sizes.
-  - `Matrix4x4.inverse` (managed API, native) is MESA's Gauss–Jordan inversion with partial
-    pivoting in float (`invert_matrix_general`, MIT): 400 of 400 (`MM` lines, `mm-check.py`
-    data); not taken up here.
+- **`Matrix4x4.inverse`** and `Matrix4x4.Inverse` (managed API, native) are Mesa's
+  Gauss–Jordan inversion with partial pivoting in float (`invert_matrix_general`, MIT), and the
+  engine ports it (`MesaInverse`, from Mesa 20.3.5; `docs/LICENSING.md`). Every operation
+  rounds; a zero pivot at any of the four steps gives `Matrix4x4.zero` (Mesa's caller would
+  load the identity). `matmul` scenario, `mm-check.py rule`: 400 of 400 random matrices (`MM`)
+  and 35 of 35 singular and near-singular ones (`MMS`): rank-deficient at each step, a zero TRS
+  scale, a 1e-20 scale whose float determinant is 0 (inverted all the same), subnormal scales
+  (inf and NaN), rows dependent but for an ulp, negative zeros, NaN, infinity, projections.
+  Our player matches both sets bit for bit (`mm-check.py diff`). worldToLocalMatrix inverts
+  the world matrix with it when its determinant is not 0, so that and `InverseTransform*`
+  match the original more often (TN `w2l` 668 of 4,200 against 396 with the cofactor inverse,
+  TR 227 of 1,046 against 134), but not throughout: the original builds them from f(s) above.
 
 ### InputField and Dropdown (legacy)
 

@@ -225,37 +225,9 @@ namespace UnityEngine
 
         public Matrix4x4 inverse => Inverse(this);
 
-        /// General inverse by cofactors; a singular matrix yields Matrix4x4.zero, as in Unity.
-        public static Matrix4x4 Inverse(Matrix4x4 m)
-        {
-            float a0 = m.m00 * m.m11 - m.m01 * m.m10, a1 = m.m00 * m.m12 - m.m02 * m.m10;
-            float a2 = m.m00 * m.m13 - m.m03 * m.m10, a3 = m.m01 * m.m12 - m.m02 * m.m11;
-            float a4 = m.m01 * m.m13 - m.m03 * m.m11, a5 = m.m02 * m.m13 - m.m03 * m.m12;
-            float b0 = m.m20 * m.m31 - m.m21 * m.m30, b1 = m.m20 * m.m32 - m.m22 * m.m30;
-            float b2 = m.m20 * m.m33 - m.m23 * m.m30, b3 = m.m21 * m.m32 - m.m22 * m.m31;
-            float b4 = m.m21 * m.m33 - m.m23 * m.m31, b5 = m.m22 * m.m33 - m.m23 * m.m32;
-            float det = a0 * b5 - a1 * b4 + a2 * b3 + a3 * b2 - a4 * b1 + a5 * b0;
-            if (det == 0f) return zero;
-            float inv = 1f / det;
-            Matrix4x4 r;
-            r.m00 = (+m.m11 * b5 - m.m12 * b4 + m.m13 * b3) * inv;
-            r.m01 = (-m.m01 * b5 + m.m02 * b4 - m.m03 * b3) * inv;
-            r.m02 = (+m.m31 * a5 - m.m32 * a4 + m.m33 * a3) * inv;
-            r.m03 = (-m.m21 * a5 + m.m22 * a4 - m.m23 * a3) * inv;
-            r.m10 = (-m.m10 * b5 + m.m12 * b2 - m.m13 * b1) * inv;
-            r.m11 = (+m.m00 * b5 - m.m02 * b2 + m.m03 * b1) * inv;
-            r.m12 = (-m.m30 * a5 + m.m32 * a2 - m.m33 * a1) * inv;
-            r.m13 = (+m.m20 * a5 - m.m22 * a2 + m.m23 * a1) * inv;
-            r.m20 = (+m.m10 * b4 - m.m11 * b2 + m.m13 * b0) * inv;
-            r.m21 = (-m.m00 * b4 + m.m01 * b2 - m.m03 * b0) * inv;
-            r.m22 = (+m.m30 * a4 - m.m31 * a2 + m.m33 * a0) * inv;
-            r.m23 = (-m.m20 * a4 + m.m21 * a2 - m.m23 * a0) * inv;
-            r.m30 = (-m.m10 * b3 + m.m11 * b1 - m.m12 * b0) * inv;
-            r.m31 = (+m.m00 * b3 - m.m01 * b1 + m.m02 * b0) * inv;
-            r.m32 = (-m.m30 * a3 + m.m31 * a1 - m.m32 * a0) * inv;
-            r.m33 = (+m.m20 * a3 - m.m21 * a1 + m.m22 * a0) * inv;
-            return r;
-        }
+        /// Mesa's Gauss–Jordan inversion, bit for bit as the original (MesaInverse); a matrix it
+        /// finds singular gives Matrix4x4.zero, as in the original.
+        public static Matrix4x4 Inverse(Matrix4x4 m) => MesaInverse.Invert(m, out var r) ? r : zero;
 
         public float determinant
         {

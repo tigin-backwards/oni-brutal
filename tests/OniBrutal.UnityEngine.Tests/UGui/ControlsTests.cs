@@ -273,11 +273,15 @@ namespace OniBrutal.Tests.UGui
         /// (-249.499969 and -249.499954, from the view's matrix as Matrix4x4.MultiplyPoint3x4
         /// maps the corners, each component rounded once), so the original updated the scrollbar
         /// again, to size 1. With every multiply and add rounded, as before, the two bounds were
-        /// equal at every position tried here, and the scrollbar kept its stale size.
+        /// equal at every position tried here, and the scrollbar kept its stale size. The view's
+        /// world origin was logged to seven digits (316.1741, from 316.17407 to 316.17413 in
+        /// float); with the view's inverse as the original's (Mesa's, MesaInverse: translation
+        /// -(316.1741 × (1 / 0.86))), 316.1741f is the one of them that gives its bounds. (The
+        /// cofactor inverse used before needed 316.17407.)
         [Fact]
         public void ContentGrowingInsideTheViewMovesItsBoundsByTheOriginalsUlps()
         {
-            var (min16, min208, updates) = Grow(782.92f, 316.17407f, 4.5776367E-05f);
+            var (min16, min208, updates) = Grow(782.92f, 316.1741f, 4.5776367E-05f);
             Assert.Equal(-249.499969f, min16);
             Assert.Equal(-249.499954f, min208);
             Assert.Equal(1, updates);

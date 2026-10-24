@@ -78,6 +78,12 @@ Steamworks (`libsteam_api.so`, Steamworks.NET under MIT); `cimgui.so` (Dear ImGu
   published in RFC 6386, Section 20, © 2010–2011 Google Inc., BSD-style licence with an
   additional patent grant (`src/ThirdParty/rfc6386/LICENSE`, `PATENTS`).
 - `src/ThirdParty/Steamworks.NET`: Steamworks.NET 20.1.0, MIT.
+- `src/OniBrutal.UnityEngine/Math/MesaInverse.cs` (`Matrix4x4.inverse`): a port of
+  `invert_matrix_general` from Mesa's `src/mesa/math/m_matrix.c` (Mesa 20.3.5, from the
+  release tarball at archive.mesa3d.org; Mesa 21 replaced it with `util_invert_mat4x4`),
+  © 1999–2005 Brian Paul, MIT. The notice is in the file's header and in `NOTICE.txt`, which
+  ships beside the player. The original player's inverse was measured to equal it bit for bit
+  (`docs/cleanroom/ugui.md`, "Transform hierarchy to the bit").
 - Native libraries from BRUTAL's packages (GLFW, glad, stb, FreeType with libpng and zlib), under
   their own licences as shipped in those packages.
 
@@ -148,7 +154,8 @@ The BRUTAL License asks every distributed copy for BRUTAL's copyright notice in 
 equivalent (§2.1: the README), its logo before gameplay (§2.2: drawn on the game's main menu by
 `BrutalCredit`, unaltered, as large as the menu's news tiles), and `NOTICE.txt` alongside (§2.3:
 copied next to the player by the build, so every setup and release carries it). The logo and
-notice are Ahwoo's, from ahwootech/brutal-branding.
+notice are Ahwoo's, from ahwootech/brutal-branding. `NOTICE.txt` also carries Mesa's MIT notice
+after BRUTAL's (above).
 
 ## This project's license
 All Rights Reserved.

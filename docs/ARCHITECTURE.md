@@ -370,6 +370,8 @@ past the boot checkpoint needs a Steam client logged in with an account that own
   `MultiplyVector`, matrix × vector and matrix × matrix) sum each element in double and round
   once, as in the original bit for bit (`PROBE_SCENARIO=matmul`, `mm-check.py`; ScrollRect's
   change detection depends on it, `docs/cleanroom/ugui.md` "ScrollRect: bounds to the bit").
+  `Matrix4x4.inverse` is native float code in the original, Mesa's Gauss–Jordan inversion; the
+  engine ports it (`MesaInverse`, MIT), bit for bit with the original.
   The transform hierarchy's world matrix, rotation and lossy scale are native float code in the
   original, composed from the leaf up; the engine follows it bit for bit (`HierarchyMath`,
   `docs/cleanroom/ugui.md` "Transform hierarchy to the bit").

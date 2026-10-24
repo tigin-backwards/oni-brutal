@@ -259,6 +259,13 @@ Unity's (`UnityEngine.Debug:LogException(Exception)`, `A:B(String, Action)`, a n
 call from `UnityEngine.Debug`'s frame on. An exception from Update has its own frames alone. None
 gives no trace for exceptions either; Full gives native frames. `LogTracesTests` encodes it.
 
+With `PROBE_SCENARIO=alignment` only the alignment probe runs (`Alignment.cs`, lines `AL …`, 10 s
+into the main menu): copies of loaded `LocText`s, one per value of their stored
+`m_textAlignment`, and new `TextMeshProUGUI`s, given an alignment before and after they first
+wake (copied under an inactive parent, as Chain Tool's menu does), each step logging the
+alignment, its halves and the stored value. `textmeshpro.md` ("Alignment set before a text
+first wakes") records what it measured.
+
 ## UI semantics (`UiSemantics.cs`, `UIS` lines)
 
 Ten seconds into the front end, after the front-end dump, it builds small hierarchies on an

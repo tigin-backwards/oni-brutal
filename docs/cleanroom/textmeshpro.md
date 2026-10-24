@@ -1970,6 +1970,51 @@ Give it a `Cull(Rect clipRect, bool validRect)` that sets `canvasRenderer.cull =
 | `Cull(far, false)` called directly | yes | yes |
 | the control `Image`, defaults' rect, `own` | yes | yes |
 
+### Alignment set before a text first wakes (measured 2026-10-24)
+
+Found by Chain Tool (3303494244): its tool menu clones toggle rows under a hidden menu and sets
+each label's `alignment` to MidlineLeft (4097) before the labels have ever been active. The
+shipped package then shows them TopLeft, the prefab's alignment; this implementation keeps
+MidlineLeft (ui_dump `menu`, `…/CreatePanel/toggleEntry#{0,1}/Label`). The engine's lifecycle is
+not the cause: in both players the copies wake (Awake, OnEnable) when the menu is first shown,
+after the mod's code.
+
+Measured with `PROBE_SCENARIO=alignment` (tools/UnityProbe, `Alignment.cs`, lines `AL …`), 10 s
+into the main menu, in both players. Among the loaded `LocText`s, the serialized
+`m_textAlignment` holds the values 0, 1, 4, 5, 7, 9 (the oldest table), 257, 258, 260, 513, 514,
+516, 1025, 1026, 1028 and 8200, and 65535 (already converted) in 10 of them. For one text of each
+value, copies were made with `Instantiate` under an inactive parent, set active themselves (as
+`Util.KInstantiateUI(…, force_active: true)` does), given an alignment and then shown by
+activating the parent; others were copied under an active parent, or set after waking. Each step
+logged `alignment`, `horizontalAlignment`, `verticalAlignment` and the stored value (read by
+reflection).
+
+- **A setter changes the two halves only.** `alignment`, `horizontalAlignment` and
+  `verticalAlignment` change what the getters return at once, before the text has woken too
+  (MidlineLeft reads back as h Left, v Geometry, 4097), and leave the stored `m_textAlignment`
+  as it was.
+- **The stored value is applied when the text first wakes.** If it is not 65535, it replaces
+  both halves then (by the rules of "Stored alignment" above: 0–15 by the oldest table, other
+  values split into their bytes) and becomes 65535. So whatever was set before the first wake
+  is lost when the data stored an alignment: a copy of a text with 257 set to MidlineLeft while
+  hidden shows TopLeft once shown; with 5 or 514, Center; with 513, Left; with 516, Right. A
+  half set alone (h Right, or v Bottom) is lost the same way.
+- **Before that, the getters report the serialized halves, not the stored value.** The game's
+  texts that store an old value hold the default halves (Left, Top), so a text not yet woken
+  reads TopLeft whatever it will show (the stored 5 reads TopLeft until it wakes, then Center).
+- **Once applied, it is not applied again.** A value set after the first wake stays through
+  deactivation and reactivation and later frames. A text whose stored value is 65535 keeps a
+  value set before it wakes (MidlineLeft on such a copy is still MidlineLeft when shown).
+- **New components** (`AddComponent<TextMeshProUGUI>()`) store 65535 and default to TopLeft; a
+  value set before or after they wake stays.
+- **Copies carry the stored value.** A copy of a not-yet-woken text that was given MidlineLeft
+  stores the source's value and shows the source's alignment when it wakes (a copy made of a
+  stored-257 text shows TopLeft). So does a not-yet-woken copy moved under an active parent: it
+  wakes there and loses what was set.
+- This implementation stores the set value (the setters write the stored field), so the first
+  wake applies what was set; every "hidden" case above keeps MidlineLeft in it, and the stored
+  value reads 4097 after a set.
+
 ## Verification
 
 1. **Build:**

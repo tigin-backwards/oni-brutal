@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2794010196-dumping-sign.yaml",
+ "mods": [
+  "2794010196"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Dumping Sign built in the pit and set to copper ore through its filter side screen (search, checkbox); the swept floor's copper ore is carried to the sign and left on its cell",
+ "updated": "2026-10-23",
+ "commit": "1c016e8",
+ "mod_dlls": {
+  "2794010196": {
+   "DumpingSign.dll": "c61192910a3e89253efe801ac4bc09d58e7ba96f369dc76d5e266c8f032ac666"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-215444-03edfa",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T22:09:29",
+    "lane": 13,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-222701-8741bd",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T22:27:01",
+    "lane": 12,
+    "reference_run": "20261023-215444-03edfa",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-222701-8741bd",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T22:35:07",
+    "lane": 12,
+    "reference_run": "20261023-215444-03edfa",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

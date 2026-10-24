@@ -1,0 +1,37 @@
+# Dumping Sign (2794010196), classes B, O.
+#
+# What it does: adds the Dumping Sign to the Base menu (storage): a 1x1 sign of raw minerals
+# with an element filter. Duplicants bring it only items marked for sweeping that match the
+# filter, and it drops whatever it receives on its own cell at once, so swept debris piles up
+# where the player wants it. The sign shows an icon of what it takes. PLib options: cancel
+# sweep errands that would loop, debug logging.
+# How a player reaches it: the build menu (Base); its filter side screen; the Sweep tool.
+# What changes: swept debris is dumped at the sign.
+#
+# The sign is built in the pit of the dug-out room west of the printing pod and set to take
+# copper ore (its search field, then the checkbox). The room's floor is swept: Duplicants carry
+# the copper ore debris to the sign, which leaves it on its cell.
+from: early-base
+mods: [2794010196]
+steps:
+  - run: {seconds: 5}
+  - build: {prefab: RomenH_DumpingSign, at: [108, 206], material: SandStone}
+  - run: {seconds: 900, until: {buildings: {RomenH_DumpingSign: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [110, 208], ortho: 10}}
+  - click_world: {cell: [108, 206], select: RomenH_DumpingSign}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen", cond: stable}
+  - expect_ui: {"**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Dumping Sign"}}
+  - type: {ui: "**/TreeFilterableSideScreen/SearchRow/FilterInputField", text: "copper ore"}
+  - ui_wait: {path: "**/TreeFilterableRow/Elements/Element/CheckBox", cond: stable}
+  - click: {ui: "**/TreeFilterableRow/Elements/Element/CheckBox"}
+  - expect_state: {"selected:GetComponent<TreeFilterable>.AcceptedTags": {contains: Cuprite}}
+  - key: {code: Escape}
+  - expect_state:
+      "sum:all:Pickupable::[*].GetComponent<PrimaryElement>.Mass if .cachedCell == 131124 and .GetComponent<PrimaryElement>.ElementID == Cuprite": {save_as: before}
+  - tool: {toolbar: Sweep}
+  - drag: {from: [109, 206], to: [115, 209]}
+  - key: {code: Escape}
+  - run: {seconds: 300}
+  - expect_state:
+      "all:RomenH.DumpingSign.DumpingSign::[0].GetComponent<Storage>.MassStored()": 0
+      "sum:all:Pickupable::[*].GetComponent<PrimaryElement>.Mass if .cachedCell == 131124 and .GetComponent<PrimaryElement>.ElementID == Cuprite": "> before"

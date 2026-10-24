@@ -6,9 +6,9 @@
  "verdict": "played",
  "why": "passed once in the original and twice in ours",
  "findings": [],
- "note": "a Shower built in the corridor uses the mod's coolshower anim; its world shot matches the original (backdrop and debris masked)",
+ "note": "a Shower built in the corridor uses the mod's coolshower anim; its world shot matches the original (the animated backdrop masked; the debris on the floor now draws in the original's order)",
  "updated": "2026-10-24",
- "commit": "488bc55",
+ "commit": "4f336c3",
  "mod_dlls": {
   "1927205197": {
    "no wall shower.dll": "c6f7fbf783f8168292cfdc66c689fde2f4d53317d6c1cc6a9eb8905618e8b335"
@@ -27,25 +27,25 @@
   ],
   "ours": [
    {
-    "run": "20261024-131155-d195fa",
-    "index": 2,
+    "run": "20261024-151831-822a66",
+    "index": 1,
     "verdict": "pass",
-    "date": "2026-10-24T13:19:14",
-    "lane": 16,
+    "date": "2026-10-24T15:18:31",
+    "lane": 14,
     "reference_run": "20261024-122721-fe700e",
     "new_signatures": 0,
     "findings": [],
     "ui_dump": {},
     "shots": {
-     "shower": 0.013006
+     "shower": 0.012886
     }
    },
    {
-    "run": "20261024-131155-d195fa",
-    "index": 1,
+    "run": "20261024-151831-822a66",
+    "index": 2,
     "verdict": "pass",
-    "date": "2026-10-24T13:19:14",
-    "lane": 17,
+    "date": "2026-10-24T15:18:32",
+    "lane": 15,
     "reference_run": "20261024-122721-fe700e",
     "new_signatures": 0,
     "findings": [],

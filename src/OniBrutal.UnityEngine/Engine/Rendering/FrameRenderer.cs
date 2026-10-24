@@ -23,6 +23,9 @@ namespace OniBrutal.Engine.Rendering
         public float Distance;
         public Bounds WorldBounds;
         public int Sequence;
+        /// A Graphics.DrawMesh draw: in the transparent queue, ties on distance between two of
+        /// them go by material (FrameRenderer.TransparentOrder).
+        public bool Queued;
 
         public void Clear()
         {
@@ -40,6 +43,7 @@ namespace OniBrutal.Engine.Rendering
             Distance = 0f;
             WorldBounds = default;
             Sequence = 0;
+            Queued = false;
         }
     }
 
@@ -610,6 +614,7 @@ namespace OniBrutal.Engine.Rendering
                 item.Queue = q.Material.renderQueue;
                 item.WorldBounds = bounds;
                 item.Sequence = sequence++;
+                item.Queued = true;
                 draws.Add(item);
             }
             int collected = draws.Count;
@@ -643,7 +648,11 @@ namespace OniBrutal.Engine.Rendering
         }
 
         /// Opaque (queue ≤ 2500): queue, then sorting layer/order, then front to back.
-        /// Transparent: sorting layer/order, queue, then back to front. Ties keep submission order.
+        /// Transparent: sorting layer/order, queue, then back to front. Ties keep submission order,
+        /// except between two Graphics.DrawMesh draws, which go by their materials' instance IDs,
+        /// ascending (the material made last first, under the others), whatever order they were
+        /// submitted in (measured: UnityProbe draworder, as KAnimBatchManager draws batches whose
+        /// z offsets fall within a float step of each other at the camera's distance).
         static void DrawQueue(RenderDevice device, List<DrawItem> all, bool opaque)
         {
             var list = NewDrawList();
@@ -670,6 +679,7 @@ namespace OniBrutal.Engine.Rendering
             if ((c = a.SortingOrder.CompareTo(b.SortingOrder)) != 0) return c;
             if ((c = a.Queue.CompareTo(b.Queue)) != 0) return c;
             if ((c = b.Distance.CompareTo(a.Distance)) != 0) return c;
+            if (a.Queued && b.Queued && (c = a.Material.GetInstanceID().CompareTo(b.Material.GetInstanceID())) != 0) return c;
             return a.Sequence.CompareTo(b.Sequence);
         };
     }

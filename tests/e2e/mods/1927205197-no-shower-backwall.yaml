@@ -18,7 +18,8 @@ steps:
       "Assets.GetBuildingDef(\"Shower\").AnimFiles[0].name": coolshower_kanim
       "all:Shower::Length": 1
       "all:Shower::[0].GetComponent<KBatchedAnimController>.AnimFiles[0].name": coolshower_kanim
-  # Only the shower is compared: the animated space backdrop and the debris on the floor are masked.
+  # Only the shower is compared: the animated space backdrop is masked (it also covers the debris
+  # on the floor, which now draws in the same order as in the original).
   - world_shot: {name: shower, ortho: 4, at: [109, 208], mask: [[0, 0, 480, 720], [715, 0, 565, 720], [480, 0, 235, 230], [480, 585, 235, 135]]}
   - run: {seconds: 5}
   - expect: {buildings: {Shower: 1}}

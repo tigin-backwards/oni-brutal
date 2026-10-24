@@ -1,0 +1,17 @@
+# Vanilla build menu search: typing into the search field shows every matching building in
+# one grid, laid out three per row.
+#
+# A category is opened, then "pump" is typed into the search field. The results go into one
+# SubCategory's Grid (a GridLayoutGroup); the original lays out nine of them in three rows.
+from: early-base
+steps:
+  - click: {ui: "**/PlanScreen/Toggle:Base"}
+  - expect_ui:
+      "**/BuildingGroups/Searchbar/FilterInputField": {active: true}
+  - click: {ui: "**/BuildingGroups/Searchbar/FilterInputField"}
+  - type: {ui: "**/BuildingGroups/Searchbar/FilterInputField", text: "pump"}
+  # The field refreshes the search 0.2 s after the last edit (KInputTextField).
+  - ui_wait: {path: "**/BuildingGroups/Viewport/Contents/*/Grid/GasPump Group*", cond: active}
+  - ui_wait: {path: "**/BuildingGroups/Viewport/Contents", cond: stable}
+  - ui_dump: {name: results, root: "**/PlanBuildingSelectionPanel/BuildingGroups/Viewport"}
+  - shot: {name: results}

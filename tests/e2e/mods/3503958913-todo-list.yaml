@@ -1,0 +1,42 @@
+# Todo List (3503958913), class T.
+#
+# What it does: adds a task list above the notifications on the left of the screen, saved
+# with the colony (a CameraList on the SaveGame object). "Add Task" makes a task that
+# remembers the camera's position and zoom and opens its "Task Detail" dialog (PLib): a title
+# field, a "Re-Save Location" button and a remarks area; Escape closes it. A task's row
+# shows its title (in brackets while selected), with an edit and a delete button; clicking
+# the title moves the camera back to the saved place.
+# How a player reaches it: the "Add Task" button on the left of the screen.
+# What changes: the player keeps a list of places to come back to.
+#
+# A task is added with the camera over the corridor west of the printing pod, renamed in its
+# dialog, and the dialog closed. The camera is moved away; a click on the task's row brings
+# it back.
+from: early-base
+mods: [3503958913]
+steps:
+  - driver: {camera.set: {cell: [110, 208], ortho: 8}}
+  - ui_wait: {path: "**/NotificationScreen/CameraList/CameraListAdd", cond: stable}
+  - ui_dump: {name: list0, root: "**/NotificationScreen/CameraList"}
+  - click: {ui: "**/NotificationScreen/CameraList/CameraListAdd"}
+  - ui_wait: {path: "**/CameraItemPanel", cond: stable}
+  - expect_state:
+      "type:CameraListMod.CameraList::Instance.Items.Count": 1
+      "type:CameraListMod.CameraList::Instance.Items[0].Title": New Task
+  - ui_dump: {name: dialog, root: "**/CameraItemPanel"}
+  - shot: {name: dialog, crop: "**/CameraItemPanel", threshold: 0.04}
+  - click: {ui: "**/CameraItemPanel/**/CameraItemName"}
+  - ui_wait: {path: "**/CameraItemPanel/**/CameraItemName", cond: stable}
+  - type: {ui: "**/CameraItemPanel/**/CameraItemName", text: "Dig here", enter: true, clear: true}
+  - expect_state:
+      "type:CameraListMod.CameraList::Instance.Items[0].Title": Dig here
+  - key: {code: Escape}
+  - ui_wait: {path: "**/CameraItemPanel", cond: gone}
+  - expect_ui:
+      "**/CameraList/CameraList/CameraListRow/TaskName/**": {any_text: "~Dig here"}
+  - ui_dump: {name: list1, root: "**/NotificationScreen/CameraList"}
+  - driver: {camera.set: {cell: [140, 208], ortho: 12}}
+  - click: {ui: "**/CameraList/CameraList/CameraListRow/TaskName"}
+  - run: {seconds: 2}
+  - expect_state:
+      "CameraController.Instance.targetPos.x": ">= 109.5"

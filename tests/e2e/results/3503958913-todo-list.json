@@ -1,0 +1,79 @@
+{
+ "spec": "mods/3503958913-todo-list.yaml",
+ "mods": [
+  "3503958913"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "Add Task opens the task dialog (dumped and shot), a typed title renames the task's row, and clicking the row brings the camera back",
+ "updated": "2026-10-24",
+ "commit": "b1abf0a",
+ "mod_dlls": {
+  "3503958913": {
+   "CameraListModMerged.dll": "f8d010d95ba7b4b3b885505dddb12cfaebb7dab2275ec5f882c57d21abcf9540"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-092853-3a19a1",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T09:30:41",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-105045-4ce3dd",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T10:50:45",
+    "lane": 16,
+    "reference_run": "20261024-092853-3a19a1",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "list0": {
+      "differences": 0
+     },
+     "dialog": {
+      "differences": 0
+     },
+     "list1": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "dialog": 0.0
+    }
+   },
+   {
+    "run": "20261024-105045-4ce3dd",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T10:50:46",
+    "lane": 17,
+    "reference_run": "20261024-092853-3a19a1",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "list0": {
+      "differences": 0
+     },
+     "dialog": {
+      "differences": 0
+     },
+     "list1": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "dialog": 0.0
+    }
+   }
+  ]
+ }
+}

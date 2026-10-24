@@ -1,0 +1,25 @@
+# Auto Harvest (3743308292), class P.
+#
+# What it does: a prefix on EntityTemplates.ExtendEntityToBasicPlant sets every plant's
+# max_age (how long a ripe plant waits before it harvests itself) to 5 s, and further patches
+# do the same for tree branches and clams; PLib options turn it off per plant (all on by
+# default). A ripe plant then drops its produce at once, without a Duplicant's harvest errand.
+# How a player reaches it: any growing plant.
+# What changes: ripe plants harvest themselves.
+#
+# setup spawns a wild Mealwood in the corridor west of the printing pod and ripens it (its
+# Growing maturity set to full). Within a minute it has dropped Meal Lice by itself.
+from: early-base
+mods: [3743308292]
+require_log: ['\[AutoHarvest\] Loaded configurable auto-harvest patches\.']
+setup:
+  - driver: {setup.call: {type: Scenario, method: SpawnPrefab, args: [131130, 0, 0, BasicSingleHarvestPlant, BuildingBack]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "last:GetComponent<Growing>", method: OverrideMaturityLevel, args: [1]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"BasicSingleHarvestPlant\").GetComponent<Growing>.maxAge": 5
+      "count:all:Edible::[*] if .name == BasicPlantFood": 0
+  - run: {seconds: 60}
+  - expect_state:
+      "count:all:Edible::[*] if .name == BasicPlantFood": ">= 1"

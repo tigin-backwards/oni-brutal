@@ -1,0 +1,44 @@
+# More Bunker Doors (1919745265), class B.
+#
+# What it does: adds six narrower Bunker Doors to the Base menu (doors group, after the
+# Bunker Door), 2, 3, 5, 6, 7, 10 and 11 tiles wide, each of 250 kg of steel per tile and
+# researched with High Temp Forging. Every bunker door (the game's too) gets a "Door Speed"
+# slider (1x to 4x in steps of 0.5) in its side screen, with a description line the mod adds
+# under it; a faster door draws as much more power while it moves.
+# How a player reaches it: the build menu (Base); the door's side screen.
+# What changes: smaller bunker doors, and faster ones.
+#
+# setup grants High Temp Forging and spawns steel. The 2-wide Bunker Door is picked in the
+# build menu and placed in the corridor west of the printing pod; once built it is selected,
+# and 2 typed into the speed field doubles its powered speed and wattage.
+from: early-base
+mods: [1919745265]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"HighTempForging\")", method: Purchased}}
+  - driver: {setup.call: {target: "Game.Instance", method: Trigger, args: [-107300940]}}
+  - driver: {setup.call: {target: "PlanScreen.Instance._researchedDefs", method: Clear}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Steel\").substance", method: SpawnResource, args: [[114.5, 206.5, -12], 800, 300, 255, 0]}}
+steps:
+  - run: {seconds: 5}
+  - driver: {camera.set: {cell: [111, 208], ortho: 8}}
+  - click: {ui: "**/PlanScreen/Toggle:Base"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/BunkerDoor2Wide Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/BunkerDoor2Wide Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
+  - shot: {name: product, crop: "**/ProductInfoScreen", threshold: 0.04}
+  - click_world: {cell: [110, 209]}
+  - key: {code: Escape}
+  - expect: {blueprints: {BunkerDoor2Wide: 1}}
+  - run: {seconds: 1500, until: {buildings: {BunkerDoor2Wide: 1}, pending_construction: 0}}
+  - click_world: {cell: [110, 209], select: BunkerDoor2Wide}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/SingleSliderSideScreen", cond: stable}
+  - expect_ui:
+      "**/SingleSliderSideScreen/**/MoreBunkerDoors_SpeedDescription": {text: "~Increases how fast the door opens"}
+  - ui_dump: {name: slider, root: "**/SingleSliderSideScreen"}
+  - expect_state:
+      "selected:GetComponent<Door>.poweredAnimSpeed": 0.05
+      "selected:GetComponent<EnergyConsumer>.BaseWattageRating": 60
+  - type: {ui: "**/SingleSliderSideScreen/Contents/NumberInputField", text: "2", enter: true, clear: true}
+  - expect_state:
+      "selected:GetComponent<Door>.poweredAnimSpeed": 0.1
+      "selected:GetComponent<EnergyConsumer>.BaseWattageRating": 120

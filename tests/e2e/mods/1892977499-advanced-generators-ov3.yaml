@@ -1,0 +1,40 @@
+# [Vanilla + DLC] Advanced Generators+ OV3.0 (1892977499), class B.
+#
+# What it does: adds six generators to the Power menu through the author's SuperComicLib: the
+# Refined Carbon Generator (3x3, metal and raw mineral, burns 1 kg/s of refined carbon for
+# 1440 W), the Thermoelectric Generator, the Naphtha Generator, the Eco-Friendly Methane
+# Generator, a Fusion Power Plant and a Thermoconvert Generator with a slider. The library
+# also asks to put them into techs, but they arrive with no tech item, so they can be built
+# without research.
+# How a player reaches it: the build menu (Power).
+# What changes: new power sources.
+#
+# setup spawns metal ore and sandstone. The Refined Carbon Generator is picked in the build
+# menu, placed in the corridor west of the printing pod, built and selected: it is rated
+# 1440 W. (Its fuel and wiring are not set up.)
+from: early-base
+mods: [1892977499]
+setup:
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Cuprite\").substance", method: SpawnResource, args: [[109.5, 206.5, -12], 900, 300, 255, 0]}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"SandStone\").substance", method: SpawnResource, args: [[110.5, 206.5, -12], 500, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"RefinedCarbonGenerator\").GeneratorWattageRating": 1440
+  - run: {seconds: 5}
+  - driver: {camera.set: {cell: [113, 208], ortho: 10}}
+  - click: {ui: "**/PlanScreen/Toggle:Power"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/RefinedCarbonGenerator Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/RefinedCarbonGenerator Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
+  - shot: {name: product, crop: "**/ProductInfoScreen", threshold: 0.04}
+  - click_world: {cell: [114, 206]}
+  - key: {code: Escape}
+  - expect: {blueprints: {RefinedCarbonGenerator: 1}}
+  - run: {seconds: 1500, until: {buildings: {RefinedCarbonGenerator: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [114, 208], ortho: 8}}
+  - click_world: {cell: [114, 207], select: RefinedCarbonGenerator}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Refined Carbon Generator"}
+  - expect_state:
+      "selected:GetComponent<Generator>.WattageRating": 1440

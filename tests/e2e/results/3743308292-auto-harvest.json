@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3743308292-auto-harvest.yaml",
+ "mods": [
+  "3743308292"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a ripened wild Mealwood drops its Meal Lice by itself within a minute",
+ "updated": "2026-10-24",
+ "commit": "b1abf0a",
+ "mod_dlls": {
+  "3743308292": {
+   "AutoHarvest.dll": "67a2d3617e9686538f13064ec8dd420cdb6f06444638c3e1aa9f9fc90fea4235"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-085631-6ae9bb",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T08:56:31",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-102339-0b9193",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T10:23:39",
+    "lane": 16,
+    "reference_run": "20261024-085631-6ae9bb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-102339-0b9193",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T10:23:40",
+    "lane": 17,
+    "reference_run": "20261024-085631-6ae9bb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

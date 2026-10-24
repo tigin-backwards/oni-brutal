@@ -1,0 +1,24 @@
+# Better Food Effects / 更好的食物效果 (3796760626), class P.
+#
+# What it does: gives every food a nutrition profile (vegetable, protein, fruit, carb, oil,
+# seafood, spicy) worked out from its recipe's ingredients, and adds one timed effect per
+# category to the food's FoodInfo (FoodNutritionBuff_CATEGORY_N, stacking with N), each with
+# its own attribute bonuses; spices and the spice grinder's options are reworked too, with
+# PLib options and a per-ingredient cost file.
+# How a player reaches it: Duplicants eating.
+# What changes: a meal leaves its eater with the nutrition effects of its ingredients.
+#
+# early-base's Duplicants are hungry and eat at once: a Field Ration (carb) and a Muckroot
+# (fruit) lie in the colony. After a short run an eater carries the food's effect.
+from: early-base
+mods: [3796760626]
+require_log: ['\[FoodNutritionBuff\] Runtime cache/effect bootstrap complete\.']
+steps:
+  - expect_state:
+      "EdiblesManager.GetFoodInfo(\"FieldRation\").Effects": {contains: FoodNutritionBuff_Carb_1}
+      "EdiblesManager.GetFoodInfo(\"BasicForagePlant\").Effects": {contains: FoodNutritionBuff_Fruit_1}
+  - run: {seconds: 300}
+  - expect_state:
+      "count:Components.LiveMinionIdentities.Items[*] if .GetComponent<Effects>.HasEffect(\"FoodNutritionBuff_Carb_1\") == true": {save_as: carb}
+  - expect_state:
+      "count:Components.LiveMinionIdentities.Items[*] if .GetComponent<Effects>.HasEffect(\"FoodNutritionBuff_Fruit_1\") == true": ">= 1 - carb"

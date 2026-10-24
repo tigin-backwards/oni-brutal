@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3052201693-universal-electrolyzer.yaml",
+ "mods": [
+  "3052201693"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "an Electrolyzer is built and selected: it carries the mod's converter and takes any water (no pipe feeds it)",
+ "updated": "2026-10-24",
+ "commit": "b1abf0a",
+ "mod_dlls": {
+  "3052201693": {
+   "UL_UniversalLyzer.dll": "caa51250ef803da19c9804c05bc79977c6e22cbfa40678497b9493e39dd70746"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-085631-6ae9bb",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T09:11:56",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-104931-397d4b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T10:49:31",
+    "lane": 16,
+    "reference_run": "20261024-085631-6ae9bb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-104931-397d4b",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T10:49:32",
+    "lane": 17,
+    "reference_run": "20261024-085631-6ae9bb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

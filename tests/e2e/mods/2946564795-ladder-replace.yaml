@@ -1,0 +1,30 @@
+# Ladder Replace (2946564795), class P.
+#
+# What it does: lets a Ladder, a Plastic Ladder or a Fire Pole be built over a tile, a ladder
+# or a backwall, replacing it (postfixes on their CreateBuildingDef set ReplacementCandidateLayers
+# and ReplacementTags), and tags heavy-wire bridges, farm tiles, hydroponic farms and Gravitas
+# tiles as floor tiles (and those tiles as replaceable) so ladders replace them too.
+# How a player reaches it: the build menu (Base), a ladder placed over a tile.
+# What changes: a tile becomes a ladder without deconstructing it first.
+#
+# A Tile is built in the corridor west of the printing pod; then a Ladder is picked from the
+# build menu and placed on it. The tile is replaced by the ladder.
+from: early-base
+mods: [2946564795]
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"Ladder\").ReplacementTags": {contains: FloorTiles}
+  - build: {prefab: Tile, cells: [[113, 207]]}
+  - run: {seconds: 900, until: {buildings: {Tile: 9}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click: {ui: "**/PlanScreen/Toggle:Base"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/Ladder Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/Ladder Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
+  - click_world: {cell: [113, 207]}
+  - key: {code: Escape}
+  - expect: {blueprints: {Ladder: 1}}
+  - run: {seconds: 900, until: {buildings: {Ladder: 1}, pending_construction: 0}}
+  - expect: {buildings: {Tile: 8, Ladder: 1}}
+  - expect_state:
+      "Grid.HasLadder.get_Item(131765)": true

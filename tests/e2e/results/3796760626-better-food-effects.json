@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3796760626-better-food-effects.yaml",
+ "mods": [
+  "3796760626"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "foods carry the nutrition effects, and a hungry Duplicant who eats gets the food's effect",
+ "updated": "2026-10-24",
+ "commit": "b1abf0a",
+ "mod_dlls": {
+  "3796760626": {
+   "BetterFoodEffect.dll": "2e23f6fabde0256d36b0c9f36625a8bc1e7134b3f63427de005206194fa034a2"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-085631-6ae9bb",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T09:05:48",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-104352-0c94ee",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T10:43:52",
+    "lane": 16,
+    "reference_run": "20261024-085631-6ae9bb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-104352-0c94ee",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T10:43:53",
+    "lane": 17,
+    "reference_run": "20261024-085631-6ae9bb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

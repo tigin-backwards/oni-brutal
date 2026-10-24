@@ -1,0 +1,62 @@
+{
+ "spec": "mods/1892977499-advanced-generators-ov3.yaml",
+ "mods": [
+  "1892977499"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Refined Carbon Generator is picked in the build menu (card shot), built and selected: rated 1440 W",
+ "updated": "2026-10-24",
+ "commit": "b1abf0a",
+ "mod_dlls": {
+  "1892977499": {
+   "0SuperComicLib.ModONI.dll": "ab1b3ec34fc2bbf90810844205824364128cf59acfcf291bebf5ffa1917c23d7",
+   "AdvancedGenerators_OV3.dll": "366d368a672b8e9494c6119f7984aec393efa57a7c553508d5cce9a1d4f7d5d7",
+   "VYaml.Annotations.dll": "3d41df55af5e3f3cbb0db9028a7bc952317470fa427be3e9f6e51565ca8b23ba",
+   "VYaml.dll": "dc85a16a973d7395628269ea36597104d4399e9e00c498e3728dfcdec2f0ed85"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-085631-6ae9bb",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T09:09:50",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-104801-becde7",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T10:48:01",
+    "lane": 16,
+    "reference_run": "20261024-085631-6ae9bb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.004678
+    }
+   },
+   {
+    "run": "20261024-104801-becde7",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T10:48:02",
+    "lane": 17,
+    "reference_run": "20261024-085631-6ae9bb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.004678
+    }
+   }
+  ]
+ }
+}

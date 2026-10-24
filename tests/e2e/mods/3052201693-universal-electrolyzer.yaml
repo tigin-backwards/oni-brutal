@@ -1,0 +1,31 @@
+# Universal Electrolyzer (3052201693), class P.
+#
+# What it does: the Electrolyzer accepts any water (its ConduitConsumer takes AnyWater) and
+# its Electrolyzer component is replaced with the mod's MultiConverterElectrolyzer: polluted
+# water also gives off polluted oxygen, salt water and brine chlorine and a little salt
+# debris, each with its own power use, output temperature and overpressure threshold (PLib
+# options; water uses 120 W as in the game). Its storage seals what it holds.
+# How a player reaches it: an Electrolyzer (Improved Oxygen) fed through a pipe.
+# What changes: what water an electrolyzer takes and what it gives off.
+#
+# A smaller spec: no pipe feeds it. setup grants Improved Oxygen and spawns metal ore. An
+# Electrolyzer is built in the corridor west of the printing pod and selected: it carries the
+# mod's converter instead of the game's, and takes any water.
+from: early-base
+mods: [3052201693]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"ImprovedOxygen\")", method: Purchased}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Cuprite\").substance", method: SpawnResource, args: [[114.5, 206.5, -12], 600, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"Electrolyzer\").EnergyConsumptionWhenActive": 120
+  - build: {prefab: Electrolyzer, at: [109, 206]}
+  - expect: {blueprints: {Electrolyzer: 1}}
+  - run: {seconds: 1500, until: {buildings: {Electrolyzer: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [110, 208], ortho: 8}}
+  - click_world: {cell: [109, 207], select: Electrolyzer}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<UL_UniversalLyzer.MultiConverterElectrolyzer>": exists
+      "selected:GetComponent<Electrolyzer>": missing
+      "selected:GetComponent<ConduitConsumer>.capacityTag": AnyWater

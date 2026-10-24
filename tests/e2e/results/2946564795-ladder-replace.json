@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2946564795-ladder-replace.yaml",
+ "mods": [
+  "2946564795"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Ladder picked in the build menu is placed over a built Tile and replaces it",
+ "updated": "2026-10-24",
+ "commit": "b1abf0a",
+ "mod_dlls": {
+  "2946564795": {
+   "LadderReplace.dll": "dee7c8dfdf2fe806c598906169089d80ffa8e9f4b9f5dcfbacaac429adbb58d0"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-085631-6ae9bb",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T08:58:11",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-102452-78a8d9",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T10:24:52",
+    "lane": 16,
+    "reference_run": "20261024-085631-6ae9bb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-102452-78a8d9",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T10:24:53",
+    "lane": 17,
+    "reference_run": "20261024-085631-6ae9bb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

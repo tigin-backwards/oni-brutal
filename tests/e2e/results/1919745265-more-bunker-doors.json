@@ -1,0 +1,67 @@
+{
+ "spec": "mods/1919745265-more-bunker-doors.yaml",
+ "mods": [
+  "1919745265"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the 2-wide Bunker Door is picked in the build menu, built and selected; its Door Speed slider and the mod's description are dumped, and 2 typed in doubles its speed and wattage",
+ "updated": "2026-10-24",
+ "commit": "b1abf0a",
+ "mod_dlls": {
+  "1919745265": {
+   "more_bunker_doors.dll": "57ab123f08c44704187a239eb32840584c2cdc2b278254b0d1a251f7a64cc963"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-085631-6ae9bb",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T09:07:42",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-104625-c16b0c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T10:46:25",
+    "lane": 16,
+    "reference_run": "20261024-085631-6ae9bb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "slider": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "product": 0.007747
+    }
+   },
+   {
+    "run": "20261024-104625-c16b0c",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T10:46:26",
+    "lane": 17,
+    "reference_run": "20261024-085631-6ae9bb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "slider": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "product": 0.007747
+    }
+   }
+  ]
+ }
+}

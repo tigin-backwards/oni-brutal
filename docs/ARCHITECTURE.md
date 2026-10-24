@@ -370,6 +370,9 @@ past the boot checkpoint needs a Steam client logged in with an account that own
   `MultiplyVector`, matrix × vector and matrix × matrix) sum each element in double and round
   once, as in the original bit for bit (`PROBE_SCENARIO=matmul`, `mm-check.py`; ScrollRect's
   change detection depends on it, `docs/cleanroom/ugui.md` "ScrollRect: bounds to the bit").
+  The transform hierarchy's world matrix, rotation and lossy scale are native float code in the
+  original, composed from the leaf up; the engine follows it bit for bit (`HierarchyMath`,
+  `docs/cleanroom/ugui.md` "Transform hierarchy to the bit").
 - **D26 Hashes of structs without a GetHashCode.** A struct that does not override GetHashCode
   is hashed by `ValueType.GetHashCode`. Mono XORs every field into the hash
   (`ves_icall_System_ValueType_InternalGetHashCode`: an `int` field's value, a string field's

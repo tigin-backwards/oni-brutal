@@ -728,15 +728,61 @@ screen opened with a scrollbar of size 0.94 to 0.98 in about half of our runs, 1
   way (400 random cases of each, `mm-check.py`); that is the engine's `Matrix4x4`
   (ARCHITECTURE D25), which now follows it. This package needs nothing beyond mapping the
   corners with the engine's `MultiplyPoint3x4`.
-- **Still apart.** The original's transform matrices themselves (`localToWorldMatrix`,
-  `worldToLocalMatrix`, `TransformPoint`) are computed natively; none of the formulas tried
-  reproduces them bit for bit (`tools/UnityProbe` `PROBE_SCENARIO=transform`, `tm-check.py`:
-  composing the levels' matrices from the root down matches 106 of 177 world matrices without
-  rotation; composing the inverse level by level, 45). Ours invert the world matrix, which gave
-  -367.64432 where the original has -(316.1741 × (1 / 0.86)) = -367.6443. So whether the
-  grown bounds move by an ulp still differs between the players for a given layout, and both
-  remain timing-dependent: the stale size shows in the original too (3 runs of 12, sizes 0.995
-  to 0.9985), and in either player after a slow frame.
+- **Still apart.** `localToWorldMatrix` (and with it `GetWorldCorners`), `rotation` and
+  `lossyScale` now follow the original bit for bit ("Transform hierarchy to the bit" below),
+  but `worldToLocalMatrix` does not: the original's inverse scale is not 1/s rounded (it was
+  -(316.1741 × (1 / 0.86)) = -367.6443 where ours inverts the world matrix, -367.64432). So
+  whether the grown bounds move by an ulp still differs between the players for a given
+  layout, and both remain timing-dependent: the stale size shows in the original too (3 runs
+  of 12, sizes 0.995 to 0.9985), and in either player after a slow frame.
+
+**Transform hierarchy to the bit** (measured 2026-10-24, `tools/UnityProbe`
+`PROBE_SCENARIO=transform`, lines `TN`, `TR`, `TQ`, `TQS`, `TD`, `TQN`; the U57 player on this
+machine). 1,200 chains of 1 to 6 transforms (translation only, uniform, non-uniform, negative and
+zero scales, rotations, z rotations with (s, s, 1) scales as UI uses, mixes) and 400 chains of
+RectTransforms, every level logged. Each operation below rounds to float; no fused multiply-add.
+- **Local matrix.** Each rotation column is the quaternion turning that basis vector:
+  t = 2 (q.xyz × e), then component i is ((−q_b t_a + q_a t_b) + w t_i) + e_i with
+  a = i+1, b = i+2 (mod 3); the column is then multiplied by that axis's scale, and the
+  translation is the local position. Its values equal the usual 1 − (yy + zz), xy − wz, …
+  matrix (x2 = x + x, xx = x·x2, …); the summation decides the sign of a zero element.
+- **World matrix: from the leaf up.** P0 (P1 (… (Pn L))), not (parent world) × local. In each
+  product an element is a0·b0 + (a1·b1 + a2·b2), and the translation's own column is added
+  last. 4,200 of 4,200 transform levels and 2,792 of 2,792 RectTransform levels (before and
+  after a root resize), signed zeros included; composing from the root down matches 103 of
+  800 two-level products. `GetWorldCorners` is that matrix's `MultiplyPoint` of the local
+  corners (2,792 of 2,792).
+- **World rotation: from the leaf up too.** r = q0 ⊗ m0(q1 ⊗ m1(… qn)), where m_k flips a
+  child rotation's components by that ancestor's scale signs (x by sy·sz, y by sx·sz, z by
+  sx·sy). The product's lanes are ordered x = −(((az·by − ay·bz) − aw·bx) − bw·ax),
+  y = −(((ax·bz − az·bx) − aw·by) − bw·ay), z = −(((ay·bx − aw·bz) − az·bw) − ax·by),
+  w = ((aw·bw − ax·bx) − az·bz) − ay·by: 4,200 of 4,200 with signs of zeros.
+- **lossyScale:** the diagonal of R(rotation⁻¹) · M, with R the usual quaternion matrix of the
+  conjugate and each diagonal element r0·m0 + (r1·m1 + r2·m2): 4,200 of 4,200.
+- **localRotation's setter** always normalizes, unit-length input included: x and z over
+  √((xx + yy) + (zz + ww)), y and w over √((xx + ww) + (yy + zz)) (5,480 sets of 5,480).
+- **position** is the world matrix's translation for rotation-free chains (all 1,149); with
+  rotations it is not (the native rotates each level's position by the quaternion with a
+  formula not found).
+- **Not reproduced** (searched, no formula matches every case):
+  - `TransformDirection`, `TransformVector`, `TransformPoint` and `position` under rotation.
+    The result for a basis vector is the local matrix's column, but for a general vector it is
+    neither a matrix–vector product in any order (44% of vectors), nor t = 2 q×v,
+    v + w t + q×t in any of 120 term orders per lane (≤ 49% per lane), nor q v q* with this
+    product or any lane orders, nor the forms with q(q·v). With q = (−½, −½, −½, ½) exactly it
+    turns (0, 68.15, −0.0709) into (68.15, −9291 / 2^17, 0): one lane cancels at the vector's
+    magnitude, another exactly, so the lanes are grouped differently.
+  - `worldToLocalMatrix`, `InverseTransform*`: the per-axis inverse scale f(s) is a function of
+    s alone (the same in every context, sign-symmetric, exponent-independent, 0 for 1e-20 and
+    1e38), within 1.25 ulp of 1/s and correctly rounded in 69% of 2,585 values; not 1/s, nor
+    rcpps (this CPU's table) with one or two Newton steps in eight evaluation orders, nor a
+    constant estimate refined, nor rsqrt forms, nor any expression of up to three operations
+    on s, 1/s, s², rcp and rsqrt. Rows of the inverse are f(s) times the transposed rotation;
+    the translation is −p·f(s) in 98% of cases.
+  - RectTransform's rect from its anchors: (w·aMax − w·aMin) + sizeDelta matches 98% of sizes.
+  - `Matrix4x4.inverse` (managed API, native) is MESA's Gauss–Jordan inversion with partial
+    pivoting in float (`invert_matrix_general`, MIT): 400 of 400 (`MM` lines, `mm-check.py`
+    data); not taken up here.
 
 ### InputField and Dropdown (legacy)
 

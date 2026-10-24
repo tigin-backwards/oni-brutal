@@ -30,7 +30,7 @@ namespace UnityEngine
             set
             {
                 var t = TransformNative;
-                var rotation = Quaternion.Normalize(value);
+                var rotation = HierarchyMath.Normalize(value);
                 bool moved = rotation != t.LocalRotation;
                 t.LocalRotation = rotation;
                 t.MarkDirty(moved);

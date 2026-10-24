@@ -131,9 +131,11 @@ namespace OniBrutal.Engine
         // tested with acquire semantics before it is read, so a reader that finds it clear sees
         // the stored value. Plain moves on x64.
         Matrix4x4 localToWorld;
+        HierarchyMath.Affine localToWorldAffine;
+        HierarchyMath.Affine localTrs;
         Quaternion worldRotation;
         Vector3 lossyScale;
-        bool worldDirty = true, rotationDirty = true, scaleDirty = true;
+        bool worldDirty = true, rotationDirty = true, scaleDirty = true, localTrsDirty = true;
 
         public override void CopyStateFrom(NativeObject source)
         {
@@ -147,14 +149,35 @@ namespace OniBrutal.Engine
         {
             get
             {
-                if (Volatile.Read(ref worldDirty))
-                {
-                    var local = Matrix4x4.TRS(LocalPosition, LocalRotation, LocalScale);
-                    localToWorld = Parent != null ? Parent.LocalToWorld * local : local;
-                    Volatile.Write(ref worldDirty, false);
-                }
+                if (Volatile.Read(ref worldDirty)) ComputeLocalToWorld();
                 return localToWorld;
             }
+        }
+
+        /// The original player composes the levels from the leaf up, (P0 (P1 (… L))), so a
+        /// transform's world matrix is not its parent's times its local matrix: each read after
+        /// a change walks to the root (HierarchyMath; the local matrices are cached).
+        void ComputeLocalToWorld()
+        {
+            var m = LocalTrs();
+            for (var p = Parent; p != null; p = p.Parent)
+            {
+                var pm = p.LocalTrs();
+                m = HierarchyMath.Mul(in pm, in m);
+            }
+            localToWorldAffine = m;
+            localToWorld = m.ToMatrix();
+            Volatile.Write(ref worldDirty, false);
+        }
+
+        HierarchyMath.Affine LocalTrs()
+        {
+            if (Volatile.Read(ref localTrsDirty))
+            {
+                localTrs = HierarchyMath.Trs(LocalPosition, LocalRotation, LocalScale);
+                Volatile.Write(ref localTrsDirty, false);
+            }
+            return localTrs;
         }
 
         /// World to local. A transform with a zero scale component (Rocketry Expanded scales a UI
@@ -180,7 +203,12 @@ namespace OniBrutal.Engine
             {
                 if (Volatile.Read(ref rotationDirty))
                 {
-                    worldRotation = Parent != null ? Parent.WorldRotation * LocalRotation : LocalRotation;
+                    // From the leaf up too: P0 · m0(P1 · m1(… L)), each level's product seen
+                    // through that ancestor's scale signs (HierarchyMath.Mirror).
+                    var r = LocalRotation;
+                    for (var p = Parent; p != null; p = p.Parent)
+                        r = HierarchyMath.Mul(p.LocalRotation, HierarchyMath.Mirror(r, p.LocalScale));
+                    worldRotation = r;
                     Volatile.Write(ref rotationDirty, false);
                 }
                 return worldRotation;
@@ -195,8 +223,9 @@ namespace OniBrutal.Engine
             {
                 if (Volatile.Read(ref scaleDirty))
                 {
-                    var rs = Matrix4x4.Rotate(Quaternion.Inverse(WorldRotation)) * LocalToWorld;
-                    lossyScale = new Vector3(rs.m00, rs.m11, rs.m22);
+                    var rotation = WorldRotation;
+                    if (Volatile.Read(ref worldDirty)) ComputeLocalToWorld();
+                    lossyScale = HierarchyMath.LossyScale(in localToWorldAffine, rotation);
                     Volatile.Write(ref scaleDirty, false);
                 }
                 return lossyScale;
@@ -212,7 +241,7 @@ namespace OniBrutal.Engine
         /// resized in place), not the transform's place.
         public void MarkDirty(bool moved)
         {
-            worldDirty = rotationDirty = scaleDirty = true;
+            worldDirty = rotationDirty = scaleDirty = localTrsDirty = true;
             HasChanged = true;
             if (moved) OnMoved();
             foreach (var c in Children) c.MarkDirty(moved);

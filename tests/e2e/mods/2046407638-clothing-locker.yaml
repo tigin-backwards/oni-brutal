@@ -1,0 +1,30 @@
+# Clothing Locker (2046407638), class B.
+#
+# What it does: adds the Clothing Locker (asquared31415_ClothingLockerConfig) to the Furniture
+# build menu, no research needed: a 1x2 locker of 30 kg of raw metal, with the look of a
+# storage locker set piece, that only stores clothing (its storage filter is the Clothes
+# category); a player picks which clothes in its filter side screen and can rename it.
+# How a player reaches it: the build menu (Furniture), then the locker's side screens.
+# What changes: a storage for clothes.
+#
+# The locker is placed in the dug-out corridor west of the printing pod, from early-base's
+# cuprite, built and selected: its storage takes clothing only.
+from: early-base
+mods: [2046407638]
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"asquared31415_ClothingLockerConfig\").HeightInCells": 2
+      "Assets.GetBuildingDef(\"asquared31415_ClothingLockerConfig\").BuildingComplete.GetComponent<Storage>.storageFilters.Count": 1
+      "Assets.GetBuildingDef(\"asquared31415_ClothingLockerConfig\").BuildingComplete.GetComponent<Storage>.storageFilters": {contains: Clothes}
+  - build: {prefab: asquared31415_ClothingLockerConfig, at: [114, 206], material: Cuprite}
+  - expect: {blueprints: {asquared31415_ClothingLockerConfig: 1}}
+  - run: {seconds: 900, until: {buildings: {asquared31415_ClothingLockerConfig: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [114, 208], ortho: 8}}
+  - click_world: {cell: [114, 207], select: asquared31415_ClothingLockerConfig}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Clothing Locker"}
+  - expect_state:
+      "selected:GetComponent<Storage>.storageFilters": {contains: Clothes}
+      "selected:StorageLocker": exists
+  - shot: {name: title, crop: "**/DetailsScreen/TitleBar", threshold: 0.04}

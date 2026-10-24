@@ -1,0 +1,59 @@
+{
+ "spec": "mods/2046407638-clothing-locker.yaml",
+ "mods": [
+  "2046407638"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Clothing Locker built from cuprite in the corridor, selected: a storage locker that takes clothes only; its title as in the original",
+ "updated": "2026-10-24",
+ "commit": "fc737ea",
+ "mod_dlls": {
+  "2046407638": {
+   "ClothingLocker.dll": "9815dbed47da2481e232b168e09c79c09562c441062d337740bd4935effbb738"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-041001-686fdf",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T04:13:45",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-042751-557981",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T04:27:51",
+    "lane": 16,
+    "reference_run": "20261024-041001-686fdf",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "title": 0.0
+    }
+   },
+   {
+    "run": "20261024-042751-557981",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T04:29:11",
+    "lane": 16,
+    "reference_run": "20261024-041001-686fdf",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "title": 0.0
+    }
+   }
+  ]
+ }
+}

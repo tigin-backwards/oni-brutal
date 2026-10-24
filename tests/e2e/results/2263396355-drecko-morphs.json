@@ -1,0 +1,59 @@
+{
+ "spec": "mods/2263396355-drecko-morphs.yaml",
+ "mods": [
+  "2263396355"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a spawned Glass Drecko is selected, named on its details screen (shot) and lives through 30 s; its egg, baby and the grazeable plants are registered",
+ "updated": "2026-10-23",
+ "commit": "e5eccc5",
+ "mod_dlls": {
+  "2263396355": {
+   "DreckoMorphs.dll": "660c98d306f4514c522ca705d3d88ba6162f7ac3b6aff1ea6bd6a6c05da7ddf5"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-192206-4b9a39",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T20:52:47",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-215128-2a20c0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T21:51:28",
+    "lane": 17,
+    "reference_run": "20261023-192206-4b9a39",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "title": 0.0
+    }
+   },
+   {
+    "run": "20261023-215128-2a20c0",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T21:52:14",
+    "lane": 16,
+    "reference_run": "20261023-192206-4b9a39",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "title": 0.0
+    }
+   }
+  ]
+ }
+}

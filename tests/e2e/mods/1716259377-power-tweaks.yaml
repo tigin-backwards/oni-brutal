@@ -1,0 +1,37 @@
+# Power Tweaks (1716259377), classes P, O.
+#
+# What it does: sets the power draw of five buildings from its PLib options (PowerTweaks.json):
+# the Gas Filter, the Gas Pump, the Mechanized Airlock, the Smart Storage Bin and the Jukebox
+# (postfixes on their CreateBuildingDef). Optionally it scales every powered building's draw by
+# a percentage instead.
+# How a player reaches it: the Mods screen, Options; then any of those buildings.
+# What changes: the watts those buildings need.
+#
+# Options here: the Gas Pump draws 90 W and the Smart Storage Bin 60 W (the Workshop build's
+# PowerTweaks.json already sets the Jukebox to 480 W). setup grants Gas
+# Piping and spawns copper ore; a Gas Pump is built in the dug-out corridor west of the
+# printing pod and selected: it needs 90 W.
+from: early-base
+mods: [1716259377]
+options:
+  "1716259377": {$file: PowerTweaks.json, GasPumpWatts: 90, SmartBinWatts: 60}
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"GasPiping\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Cuprite\").substance", method: SpawnResource, args: [[114.5, 207.5, -12], 200, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"GasPump\").EnergyConsumptionWhenActive": 90
+      "Assets.GetBuildingDef(\"StorageLockerSmart\").EnergyConsumptionWhenActive": 60
+      "Assets.GetBuildingDef(\"PressureDoor\").EnergyConsumptionWhenActive": 120
+      "Assets.GetBuildingDef(\"Phonobox\").EnergyConsumptionWhenActive": 480
+  - build: {prefab: GasPump, at: [113, 207]}
+  - expect: {blueprints: {GasPump: 1}}
+  - run: {seconds: 900, until: {buildings: {GasPump: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [114, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: GasPump}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Gas Pump"}
+  - expect_state:
+      "selected:GetComponent<EnergyConsumer>.WattsNeededWhenActive": 90

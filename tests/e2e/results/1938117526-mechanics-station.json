@@ -1,0 +1,55 @@
+{
+ "spec": "mods/1938117526-mechanics-station.yaml",
+ "mods": [
+  "1938117526"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "converters and fabricators take Machine Parts to tinker; a Mechanics Station built in the corridor and selected makes them from 5 kg of refined metal",
+ "updated": "2026-10-23",
+ "commit": "e5eccc5",
+ "mod_dlls": {
+  "1938117526": {
+   "MechanicsStation.dll": "54f21fb78b693b112a4aaa9a5a76e50b9c4e9ad0ad9660d6c712f7c08143f5ed"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-192206-4b9a39",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T20:14:31",
+    "lane": 16,
+    "signatures": 1
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-214827-82abfd",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T21:48:27",
+    "lane": 17,
+    "reference_run": "20261023-192206-4b9a39",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-214827-82abfd",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T21:50:02",
+    "lane": 17,
+    "reference_run": "20261023-192206-4b9a39",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

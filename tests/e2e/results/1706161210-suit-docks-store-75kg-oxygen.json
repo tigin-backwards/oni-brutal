@@ -1,0 +1,55 @@
+{
+ "spec": "mods/1706161210-suit-docks-store-75kg-oxygen.yaml",
+ "mods": [
+  "1706161210"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "both suit docks' intake holds 75 kg; an Atmo Suit Dock built in the corridor and selected holds 75 kg",
+ "updated": "2026-10-23",
+ "commit": "e5eccc5",
+ "mod_dlls": {
+  "1706161210": {
+   "SuitDockStores75Kg.dll": "450b75421fb7eba1f1d21dd9646538219432d492e62bbc64ae50df4a1df7fd3a"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-184944-545fda",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T18:49:44",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-214024-dc04d9",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T21:40:24",
+    "lane": 17,
+    "reference_run": "20261023-184944-545fda",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-214024-dc04d9",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T21:41:43",
+    "lane": 17,
+    "reference_run": "20261023-184944-545fda",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

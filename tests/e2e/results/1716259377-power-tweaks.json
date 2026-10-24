@@ -1,0 +1,56 @@
+{
+ "spec": "mods/1716259377-power-tweaks.yaml",
+ "mods": [
+  "1716259377"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "options from PowerTweaks.json reach the five buildings' power; a Gas Pump built in the corridor and selected needs the set 90 W",
+ "updated": "2026-10-23",
+ "commit": "e5eccc5",
+ "mod_dlls": {
+  "1716259377": {
+   "PLib.dll": "c4bb22f1bc06ebcb0dbba75a7f1bc46f63eaa3dae12c22a08729f1a6d3362dda",
+   "power_tweaks.dll": "2c470d5eb981abc60b72f80ac05af218c63f7bdda58514ea7c51722a634b239b"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-211325-bbfa10",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T21:13:25",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-215614-b2d92b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T21:56:14",
+    "lane": 16,
+    "reference_run": "20261023-211325-bbfa10",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-215614-b2d92b",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T21:57:49",
+    "lane": 16,
+    "reference_run": "20261023-211325-bbfa10",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

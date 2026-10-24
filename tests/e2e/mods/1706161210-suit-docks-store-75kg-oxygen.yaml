@@ -1,0 +1,32 @@
+# Suit Docks Store 75kg Oxygen (1706161210), class P (a building definition).
+#
+# What it does: the Atmo Suit Dock's and the Jet Suit Dock's oxygen intake holds 75 kg (their
+# ConduitConsumer's capacityKG, 200 kg in the game), so a dock stops drawing oxygen from its
+# pipe sooner.
+# How a player reaches it: building an Atmo Suit Dock (Oxygen menu, researched with Suits) or a
+# Jet Suit Dock (Jetpacks).
+# What changes: how much oxygen a dock takes in.
+#
+# setup grants Suits and spawns steel; an Atmo Suit Dock is built in the dug-out corridor west
+# of the printing pod and selected: its intake holds 75 kg.
+from: early-base
+mods: [1706161210]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"Suits\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Steel\").substance", method: SpawnResource, args: [[114.5, 207.5, -12], 200, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"Suits\").unlockedItemIDs": {contains: SuitLocker}
+      "Assets.GetBuildingDef(\"SuitLocker\").BuildingComplete.GetComponent<ConduitConsumer>.capacityKG": 75
+      "Assets.GetBuildingDef(\"JetSuitLocker\").BuildingComplete.GetComponent<ConduitConsumer>.capacityKG": 75
+  - build: {prefab: SuitLocker, at: [113, 206], material: Steel}
+  - expect: {blueprints: {SuitLocker: 1}}
+  - run: {seconds: 900, until: {buildings: {SuitLocker: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: SuitLocker}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Atmo Suit Dock"}
+  - expect_state:
+      "selected:GetComponent<ConduitConsumer>.capacityKG": 75

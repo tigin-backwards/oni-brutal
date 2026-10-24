@@ -1,0 +1,41 @@
+# Hyper Reservoirs (Vanilla/DLC) (1834180425), classes B, O.
+#
+# What it does: adds the Hyper Liquid Reservoir (2x3, the Liquid Reservoir's look) and the
+# Hyper Gas Reservoir (5x3), both of 800 kg of steel and 100 kg of plastic, in the Base menu,
+# researched with Valve Miniaturization. They hold 4 times the game's reservoirs (20 t of
+# liquid, 600 kg of gas), draw 40 W, take in from their pipe only while powered and enabled,
+# and dispense only while their automation input is green. PLib options set the masses, the
+# power and the capacity multipliers.
+# How a player reaches it: the build menu (Base); the reservoir's side screen (the
+# Full/Not Full thresholds).
+# What changes: bigger reservoirs that need power.
+#
+# Options here: the liquid capacity multiplier is 2 (10 t). setup grants Valve
+# Miniaturization and spawns steel and plastic; a Hyper Liquid Reservoir is built in the
+# dug-out corridor west of the printing pod and selected.
+from: early-base
+mods: [1834180425]
+options:
+  "1834180425": {LiquidReservoirCapacityMultiplier: 2.0}
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"ValveMiniaturization\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Steel\").substance", method: SpawnResource, args: [[114.5, 207.5, -12], 900, 300, 255, 0]}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Polypropylene\").substance", method: SpawnResource, args: [[114.5, 207.5, -12], 150, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"ValveMiniaturization\").unlockedItemIDs": {contains: HyperbaricLiquidReservoir}
+      "Assets.GetBuildingDef(\"HyperbaricLiquidReservoir\").EnergyConsumptionWhenActive": 40
+      "Assets.GetBuildingDef(\"HyperbaricGasReservoir\").BuildingComplete.GetComponent<Storage>.capacityKg": 600
+  - build: {prefab: HyperbaricLiquidReservoir, at: [113, 206]}
+  - expect: {blueprints: {HyperbaricLiquidReservoir: 1}}
+  - run: {seconds: 1500, until: {buildings: {HyperbaricLiquidReservoir: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [114, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: HyperbaricLiquidReservoir}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Hyper Liquid Reservoir"}
+  - expect_state:
+      "selected:Storage.capacityKg": 10000
+      "selected:GetComponent<ConduitConsumer>.capacityKG": 10000
+      "selected:GetComponent<PrimaryElement>.ElementID": Steel

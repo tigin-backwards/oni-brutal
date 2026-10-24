@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2013164217-system-clock.yaml",
+ "mods": [
+  "2013164217"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the rations meter shows the wall clock in the mod's colours after the calories, before and after a run (matched as a pattern; not dumped, as its width follows the clock)",
+ "updated": "2026-10-23",
+ "commit": "e5eccc5",
+ "mod_dlls": {
+  "2013164217": {
+   "ST.clock.dll": "a57d462e86e35b35d0e26fab5ba01cc41e57bf413a19db9bc2f7e63b8a0a6b19"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-211325-bbfa10",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T21:13:26",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-215923-bd165f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T21:59:23",
+    "lane": 16,
+    "reference_run": "20261023-211325-bbfa10",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-215923-bd165f",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T22:00:34",
+    "lane": 16,
+    "reference_run": "20261023-211325-bbfa10",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -1,0 +1,38 @@
+# Mechanics Station (1938117526), classes B, O.
+#
+# What it does: adds the Mechanics Station (2x2, 400 kg of any metal, in the Stations menu,
+# researched with Refined Objects): a Machine Shop station where a Duplicant with the
+# Mechatronics skill makes Machine Parts from 5 kg of refined metal. Machine Parts then tinker
+# powered converters and fabricators in any room (the game allows it only in a Machine Shop):
+# the mod makes them Tinkerable (Assets.AddBuildingDef prefix), with a user-menu button to
+# allow or forbid it, and a tinkered building works faster for a while. PLib options set the
+# speed bonuses and the effect's duration.
+# How a player reaches it: the build menu (Stations); then a converter's user menu.
+# What changes: machine tinkering outside the Machine Shop.
+#
+# setup grants Refined Objects and spawns copper ore; the station is built in the dug-out
+# corridor west of the printing pod and selected. The Electrolyzer and the Microbe Musher are
+# tinkerable now.
+from: early-base
+mods: [1938117526]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"RefinedObjects\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Cuprite\").substance", method: SpawnResource, args: [[114.5, 207.5, -12], 500, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"RefinedObjects\").unlockedItemIDs": {contains: MechanicsStation}
+      "Assets.GetBuildingDef(\"Electrolyzer\").BuildingComplete.GetComponent<Tinkerable>.tinkerMaterialTag.Name": MachineParts
+      "Assets.GetBuildingDef(\"MicrobeMusher\").BuildingComplete.GetComponent<Tinkerable>.tinkerMaterialTag.Name": MachineParts
+  - build: {prefab: MechanicsStation, at: [113, 206]}
+  - expect: {blueprints: {MechanicsStation: 1}}
+  - run: {seconds: 1200, until: {buildings: {MechanicsStation: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [114, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: MechanicsStation}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Mechanic"}
+  - expect_state:
+      "selected:GetComponent<TinkerStation>.outputPrefab.Name": MachineParts
+      "selected:GetComponent<TinkerStation>.massPerTinker": 5
+      "selected:GetComponent<RoomTracker>.requiredRoomType": MachineShop

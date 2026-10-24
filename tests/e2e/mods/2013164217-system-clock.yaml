@@ -1,0 +1,19 @@
+# System Clock (2013164217), class P (a HUD label).
+#
+# What it does: the rations meter at the top left shows the computer's clock after the
+# colony's calories, "16,800 kcal | 19:19", in bold, coloured by the time of day (morning
+# orange, day dark orange, evening blue, night green): a postfix on
+# MeterScreen_Rations.InternalRefresh appends DateTime.Now.ToShortTimeString().
+# How a player reaches it: nothing to do; it is always on the HUD.
+# What changes: the rations label.
+#
+# The label is read before and after a short run. The clock and its colour follow the wall
+# clock (and so does the label's width), so they are matched as patterns, not dumped.
+from: early-base
+mods: [2013164217]
+steps:
+  - expect_ui:
+      "**/TopLeftControlPanel(Clone)/StatusDisplay/Rations/CurrentRations": {text: "/^[\\d,]+ kcal \\| <b><color=#(eebb74|ef810e|09679a|0dbf19)>\\d{1,2}:\\d\\d( ?[AP]M)?</color></b>$/"}
+  - run: {seconds: 5}
+  - expect_ui:
+      "**/TopLeftControlPanel(Clone)/StatusDisplay/Rations/CurrentRations": {text: "/^16,800 kcal \\| <b><color=#(eebb74|ef810e|09679a|0dbf19)>\\d{1,2}:\\d\\d( ?[AP]M)?</color></b>$/"}

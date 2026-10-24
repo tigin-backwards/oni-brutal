@@ -1,0 +1,35 @@
+# Drecko Morphs (2263396355), class P.
+#
+# What it does: adds four Drecko morphs with their eggs and babies: the Glass Drecko (eats
+# Dasha Saltvine, grows glass), the Algae Drecko (Waterweed, algae), the Frosty Drecko (Sleet
+# Wheat) and the Metal Drecko (Dusk Caps). For their diets, Waterweed, Dasha Saltvine, Dusk
+# Cap and Sleet Wheat become edible where they grow (a DirectlyEdiblePlant_Growth added to
+# their prefabs).
+# How a player reaches it: ranching Dreckos; the critters' details screen.
+# What changes: new critters and eggs, and plants Dreckos can graze.
+#
+# setup spawns a Glass Drecko in the dug-out corridor west of the printing pod (early-base has
+# no Dreckos). It is selected: its details screen names it and is shot; it then lives through
+# a short run.
+from: early-base
+mods: [2263396355]
+setup:
+  - driver: {setup.call: {type: GameUtil, method: KInstantiate, args: [{"$": "Assets.GetPrefab(\"DreckoGlass\")"}, [110.5, 206.01, -24.5], Creatures]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"SaltPlant\").GetComponent<DirectlyEdiblePlant_Growth>": exists
+      "Assets.GetPrefab(\"SeaLettuce\").GetComponent<DirectlyEdiblePlant_Growth>": exists
+      "Assets.GetPrefab(\"DreckoGlassEgg\")": exists
+      "Assets.GetPrefab(\"GlassDrecklet\")": exists
+      "count:all:CreatureBrain::[*] if .GetComponent<KPrefabID>.PrefabTag.Name == DreckoGlass": 1
+  - driver: {camera.set: {cell: [110, 207], ortho: 6}}
+  - click_world: {cell: [110, 206], select: DreckoGlass}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Glass Drecko"}
+  - shot: {name: title, crop: "**/DetailsScreen/TitleBar", threshold: 0.04}
+  - run: {seconds: 30}
+  - expect_state:
+      "selected:GetComponent<KPrefabID>.PrefabTag.Name": DreckoGlass
+      "selected:GetComponent<Health>.IsDefeated()": false

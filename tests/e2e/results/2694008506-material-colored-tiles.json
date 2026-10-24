@@ -1,0 +1,59 @@
+{
+ "spec": "mods/2694008506-material-colored-tiles.yaml",
+ "mods": [
+  "2694008506"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with Tiles and Doors on, early-base's door is tinted its sandstone's colour, again after an overlay is opened and closed; a world shot of the base",
+ "updated": "2026-10-24",
+ "commit": "488e319",
+ "mod_dlls": {
+  "2694008506": {
+   "MaterialColoredTilesAndMore.dll": "dc894bee26bb4abc1211aa8742677586d98208eb09f951e325951e3e2f02257c"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-064836-d1751a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T06:53:00",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-071052-deda99",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T07:10:52",
+    "lane": 14,
+    "reference_run": "20261024-064836-d1751a",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "base": 0.026249
+    }
+   },
+   {
+    "run": "20261024-071052-deda99",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T07:11:46",
+    "lane": 14,
+    "reference_run": "20261024-064836-d1751a",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "base": 0.026038
+    }
+   }
+  ]
+ }
+}

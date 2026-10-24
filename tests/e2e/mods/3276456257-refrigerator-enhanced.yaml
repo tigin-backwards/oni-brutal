@@ -1,0 +1,47 @@
+# 电冰箱增强 (3276456257), class P.
+#
+# What it does: the Refrigerator gets +200 decor in a radius of 20, may be built anywhere
+# (BuildLocationRule Anywhere), never floods, entombs or overheats (postfix on
+# RefrigeratorConfig.CreateBuildingDef); it holds 100 t instead of 100 kg, keeps its food
+# hidden, preserved, insulated and sealed, and chills it as a cold store at -99 °C with a
+# conductivity of 10000 (postfix on DoPostConfigureComplete).
+# How a player reaches it: the build menu (Food, researched with Agriculture).
+# What changes: a fridge that holds far more, chills hard and brightens a room.
+#
+# setup grants Agriculture. The Refrigerator is picked in the build menu's Food category, its
+# card read, and placed in the dug-out corridor west of the printing pod (from the base's
+# sandstone), built and selected.
+from: early-base
+mods: [3276456257]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"Agriculture\")", method: Purchased}}
+  # The build menu shows a category once one of its buildings is researched, as it learns.
+  - driver: {setup.call: {target: "Game.Instance", method: Trigger, args: [-107300940]}}
+  - driver: {setup.call: {target: "PlanScreen.Instance._researchedDefs", method: Clear}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"SandStone\").substance", method: SpawnResource, args: [[109.5, 206.5, -12], 500, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"Refrigerator\").BaseDecor": 200
+      "Assets.GetBuildingDef(\"Refrigerator\").BaseDecorRadius": 20
+      "Assets.GetBuildingDef(\"Refrigerator\").BuildLocationRule": Anywhere
+      "Assets.GetBuildingDef(\"Refrigerator\").Floodable": false
+      "Assets.GetBuildingDef(\"Refrigerator\").Overheatable": false
+  - run: {seconds: 5}
+  - driver: {camera.set: {cell: [113, 208], ortho: 10}}
+  - click: {ui: "**/PlanScreen/Toggle:Food"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/Refrigerator Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/Refrigerator Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
+  - shot: {name: product, crop: "**/ProductInfoScreen", threshold: 0.04}
+  - click_world: {cell: [114, 206]}
+  - key: {code: Escape}
+  - expect: {blueprints: {Refrigerator: 1}}
+  - run: {seconds: 1200, until: {buildings: {Refrigerator: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [114, 207], ortho: 8}}
+  - click_world: {cell: [114, 206], select: Refrigerator}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<Storage>.capacityKg": 100000
+      "selected:GetComponent<Refrigerator>.MaxCapacity": 100000
+      "selected:GetComponent<DecorProvider>.baseDecor": 200
+  - shot: {name: details, crop: "**/DetailsScreen", threshold: 0.04}

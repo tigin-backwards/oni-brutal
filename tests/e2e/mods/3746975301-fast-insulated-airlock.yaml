@@ -1,0 +1,36 @@
+# 快速密封隔热气闸 Fix （不在进行维护） (3746975301), classes B, O.
+#
+# What it does: adds the FastInsulatedSelfSealingAirLock, a 1x2 manual door of any metal in
+# the Base menu after the Pressure Door (researched with Temperature Modulation): it never
+# conducts heat (insulated, conductivity 0), and while it is not set open it keeps gas and
+# liquid out of its cells even with a Duplicant passing (a prefix on Door.SetSimState sets
+# the cells' impermeable properties). It opens and closes faster by a PLib option's
+# Multiplier (1 to 20, default 5). Duplicants use it with a remote-use animation.
+# How a player reaches it: the build menu (Base); the door's side screen (access and
+# open/auto/locked).
+# What changes: a fast airlock that seals and insulates.
+#
+# Options here: Multiplier 8. setup grants Temperature Modulation and spawns copper ore. The
+# door is built in the dug-out corridor west of the printing pod and selected.
+from: early-base
+mods: [3746975301]
+options:
+  "3746975301": {Multiplier: 8}
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"TemperatureModulation\")", method: Purchased}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Cuprite\").substance", method: SpawnResource, args: [[110.5, 206.5, -12], 400, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"TemperatureModulation\").unlockedItemIDs": {contains: FastInsulatedSelfSealingAirLock}
+      "Assets.GetBuildingDef(\"FastInsulatedSelfSealingAirLock\").ThermalConductivity": 0
+  - build: {prefab: FastInsulatedSelfSealingAirLock, at: [112, 207]}
+  - expect: {blueprints: {FastInsulatedSelfSealingAirLock: 1}}
+  - run: {seconds: 1200, until: {buildings: {FastInsulatedSelfSealingAirLock: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 208], select: FastInsulatedSelfSealingAirLock}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:Door.poweredAnimSpeed": 8
+      "selected:Door.unpoweredAnimSpeed": 8
+      "selected:Door.doorType": ManualPressure
+  - shot: {name: details, crop: "**/DetailsScreen", threshold: 0.04}

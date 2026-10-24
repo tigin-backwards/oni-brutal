@@ -1,0 +1,44 @@
+# 喵喵ventilating fan喵喵排风扇 (2873348542), class B.
+#
+# What it does: adds six 1x1 gas pumps to the Ventilation (HVAC) menu, no research needed,
+# each pulling one gas only (0.5 kg/s within 2 cells) into its gas pipe output: "O2"
+# (O2GasPump), "污染氧泵" (polluted oxygen), "CO2", "H2", "CH4" and "Cl2". They are built from
+# 30 kg of any metal, anywhere (BuildLocationRule Conduit: over pipes and in mid-air), draw
+# 60 W and take an automation input.
+# How a player reaches it: the build menu (Ventilation).
+# What changes: small single-gas pumps.
+#
+# The O2 pump is picked in the Ventilation menu and placed in the dug-out corridor west of
+# the printing pod, built from copper ore and selected.
+from: early-base
+mods: [2873348542]
+setup:
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Cuprite\").substance", method: SpawnResource, args: [[111.5, 206.5, -12], 200, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"O2GasPump\").BuildingComplete.GetComponent<ElementConsumer>.elementToConsume": Oxygen
+      "Assets.GetBuildingDef(\"CO2GasPump\").BuildingComplete.GetComponent<ElementConsumer>.elementToConsume": CarbonDioxide
+      "Assets.GetBuildingDef(\"O2GasPump\").EnergyConsumptionWhenActive": 60
+  - run: {seconds: 5}
+  - driver: {camera.set: {cell: [111, 208], ortho: 10}}
+  - click: {ui: "**/PlanScreen/Toggle:Ventilation"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/O2GasPump Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/CO2GasPump Group*": {active: true}
+      "**/BuildingGroups/**/Grid/Cl2GasPump Group*": {active: true}
+  - shot: {name: menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
+  - click: {ui: "**/BuildingGroups/**/Grid/O2GasPump Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
+  - click_world: {cell: [113, 207]}
+  - key: {code: Escape}
+  - expect: {blueprints: {O2GasPump: 1}}
+  - run: {seconds: 900, until: {buildings: {O2GasPump: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: O2GasPump}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~O2"}
+  - expect_state:
+      "selected:ElementConsumer.elementToConsume": Oxygen
+      "selected:ElementConsumer.consumptionRate": 0.5
+  - shot: {name: details, crop: "**/DetailsScreen", threshold: 0.04}

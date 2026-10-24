@@ -1,0 +1,62 @@
+{
+ "spec": "mods/2873348542-ventilating-fan.yaml",
+ "mods": [
+  "2873348542"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "six single-gas pumps in the Ventilation menu (shot); the O2 pump placed from it, built from copper ore and selected pulls oxygen at 0.5 kg/s (details shot)",
+ "updated": "2026-10-24",
+ "commit": "488e319",
+ "mod_dlls": {
+  "2873348542": {
+   "PLib.dll": "b862c5db2b3cd6df09a62d4a30782e91e2b24e8e1bfac08d991c9cc89a984ba9",
+   "▀≈▀≈ventilating fan▀≈▀≈┼┼╖τ╔╚.dll": "2b3580d50e951952ebae3db6df772b6385897c4d9a87d52cabc9eb9ca1c944a4"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-064836-d1751a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T06:48:37",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-070432-35d93b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T07:04:32",
+    "lane": 14,
+    "reference_run": "20261024-064836-d1751a",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "menu": 0.0,
+     "details": 0.004223
+    }
+   },
+   {
+    "run": "20261024-070432-35d93b",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T07:05:59",
+    "lane": 14,
+    "reference_run": "20261024-064836-d1751a",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "menu": 0.0,
+     "details": 0.004223
+    }
+   }
+  ]
+ }
+}

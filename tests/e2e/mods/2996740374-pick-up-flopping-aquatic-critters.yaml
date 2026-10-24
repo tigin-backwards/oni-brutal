@@ -1,0 +1,23 @@
+# Pick up Flopping Aquatic Critters (2996740374), class P.
+#
+# What it does: a fish out of water (a Pacu flopping on dry land, in FlopStates) is tagged
+# Deliverable for as long as it flops (a postfix on FlopStates.InitializeStates toggles the
+# tag on the root state and re-prioritises the critter's brain on 856640610), so Duplicants
+# may pick it up for a Fish Release or a critter drop-off, which the game allows only for
+# wrangled critters.
+# How a player reaches it: a Pacu stranded out of water; a Fish Release asking for it.
+# What changes: a stranded Pacu can be carried back to water.
+#
+# setup drops a Pacu on the dry floor of the dug-out corridor west of the printing pod. After
+# a short run it flops, and carries the Deliverable tag while it does. No Fish Release is
+# built (it needs Ranching and a pool); the spec checks the tag the delivery errands look for.
+from: early-base
+mods: [2996740374]
+setup:
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(0, 113, 206, \"Pacu\", \"Creatures\")", method: SetActive, args: [true]}}
+steps:
+  - run: {seconds: 20}
+  - expect_state:
+      "count:all:CreatureBrain::[*] if .GetComponent<KPrefabID>.PrefabTag.Name == Pacu": 1
+      "count:all:CreatureBrain::[*] if .GetComponent<KPrefabID>.PrefabTag.Name == Pacu and .GetComponent<KPrefabID>.HasTag(\"Flopping\") == true": 1
+      "count:all:CreatureBrain::[*] if .GetComponent<KPrefabID>.PrefabTag.Name == Pacu and .GetComponent<KPrefabID>.HasTag(\"Deliverable\") == true": 1

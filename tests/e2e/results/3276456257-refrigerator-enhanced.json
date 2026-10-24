@@ -1,0 +1,61 @@
+{
+ "spec": "mods/3276456257-refrigerator-enhanced.yaml",
+ "mods": [
+  "3276456257"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Refrigerator's +200 decor, Anywhere rule and no flooding or overheating; picked in the Food menu (card shot), built and selected: it holds 100 t (details shot)",
+ "updated": "2026-10-24",
+ "commit": "488e319",
+ "mod_dlls": {
+  "3276456257": {
+   "╡τ▒∙╧Σ╘÷╟┐.dll": "086f4381d6a91441cc795f4681a45461f7a717f2fe7695bddeef7fee213b2eaa"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-061840-ff3541",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T06:23:15",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-070421-aff7b8",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T07:04:21",
+    "lane": 15,
+    "reference_run": "20261024-061840-ff3541",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.004983,
+     "details": 0.0
+    }
+   },
+   {
+    "run": "20261024-070421-aff7b8",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T07:05:45",
+    "lane": 15,
+    "reference_run": "20261024-061840-ff3541",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.004983,
+     "details": 0.0
+    }
+   }
+  ]
+ }
+}

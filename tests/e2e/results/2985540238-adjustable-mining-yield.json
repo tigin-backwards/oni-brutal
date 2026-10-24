@@ -1,0 +1,59 @@
+{
+ "spec": "mods/2985540238-adjustable-mining-yield.yaml",
+ "mods": [
+  "2985540238"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the option's 75 % yield: four dug sandstone cells leave three quarters of their mass as debris (between 72 and 78 %)",
+ "updated": "2026-10-24",
+ "commit": "488e319",
+ "mod_dlls": {
+  "2985540238": {
+   "AdjustableMiningYield.dll": "fdfe484ab33b740f974c52ebe8c9f34fec70c0a861e086bb4a906c9d58f60057",
+   "PLibCore.dll": "cbc01eb098f795bf494978f710fdd252310f17d6b878db1278adac68655a4491",
+   "PLibDatabase.dll": "b78daad279980553e63f9c83899cad1ef44dae7deaae46250921faaf0f3d9ad1",
+   "PLibOptions.dll": "9bfa2bb78fd54c4c2aecf2bf7e68bc1c468d6334fe4751fdfd105def860d9c95",
+   "PLibUI.dll": "bd4cbca7bdfd3472a86d463b18d8626521b67e7501e01405e0e92e0d470cb45a"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-061840-ff3541",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T06:18:41",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-064845-a09ec8",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T07:01:37",
+    "lane": 15,
+    "reference_run": "20261024-061840-ff3541",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-064845-a09ec8",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T07:03:02",
+    "lane": 15,
+    "reference_run": "20261024-061840-ff3541",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

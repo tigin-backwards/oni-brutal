@@ -1,0 +1,29 @@
+# Material Colored Tiles and more (2694008506), classes V, O.
+#
+# What it does: built tiles are drawn tinted with their material's colour (a postfix on
+# BlockTileRenderer.GetCellColour multiplies it by the element's substance colour times a
+# Brightness option); with its PLib options, also backwalls, doors, pipes, sculptures,
+# mouldings, automation wires and farm tiles (their anim's TintColour, set when the building
+# spawns and again whenever the overlay returns to None).
+# How a player reaches it: the Mods screen's options; the world view.
+# What changes: the colours tiles and buildings are drawn with.
+#
+# Options here: Tiles and Doors on, brightness 1. early-base's Door, of sandstone, is tinted
+# sandstone's colour; a world shot of the base's tiles and door. Opening and closing an
+# overlay tints them again.
+from: early-base
+mods: [2694008506]
+options:
+  "2694008506": {Tiles: true, Doors: true, Brightness: 1.0}
+steps:
+  - expect_state:
+      "all:Door::[0].GetComponent<PrimaryElement>().Element.substance.colour.r": {save_as: r}
+      "all:Door::[0].GetComponent<PrimaryElement>().Element.substance.colour.g": {save_as: g}
+  - expect_state:
+      "all:Door::[0].GetComponent<KBatchedAnimController>().TintColour.r": "== r"
+      "all:Door::[0].GetComponent<KBatchedAnimController>().TintColour.g": "== g"
+  - world_shot: {name: base, ortho: 12, at: [128, 210]}
+  - key: {code: F1}
+  - key: {code: F1}
+  - expect_state:
+      "all:Door::[0].GetComponent<KBatchedAnimController>().TintColour.r": "== r"

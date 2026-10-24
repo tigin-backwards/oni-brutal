@@ -1,0 +1,60 @@
+{
+ "spec": "mods/3746975301-fast-insulated-airlock.yaml",
+ "mods": [
+  "3746975301"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the airlock door built through a build order (Temperature Modulation) and selected: insulated, a ManualPressure door opening 8 times as fast by the option (details shot)",
+ "updated": "2026-10-24",
+ "commit": "488e319",
+ "mod_dlls": {
+  "3746975301": {
+   "FastInsulatedSelfSealingAirLock.dll": "4dddc81c00e3370bfa70514a16417cc621e757abeb49e955e389fe4f860803d3",
+   "PLib.dll": "93073fdf44dbe9fd7c0afe19e56341be862cc2d732090dee30999cf60e2e160d"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-064836-d1751a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T06:50:17",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-070727-6ddc89",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T07:07:27",
+    "lane": 14,
+    "reference_run": "20261024-064836-d1751a",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "details": 0.0
+    }
+   },
+   {
+    "run": "20261024-070727-6ddc89",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T07:09:11",
+    "lane": 14,
+    "reference_run": "20261024-064836-d1751a",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "details": 0.0
+    }
+   }
+  ]
+ }
+}

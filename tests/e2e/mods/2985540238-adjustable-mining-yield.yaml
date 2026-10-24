@@ -1,0 +1,27 @@
+# Adjustable Mining Yield (2985540238), classes P, O.
+#
+# What it does: a dug cell drops a set share of its mass as debris, where the game drops half
+# (a transpiler on WorldDamage.OnDigComplete replaces its 0.5). A PLib option ("Miner
+# Results") picks the share: 35, 50, 55, 60, 75, 100 (the default), 125 or 150 %.
+# How a player reaches it: any dig order; the Mods screen's options.
+# What changes: the mass of the debris a dig leaves.
+#
+# Options here: 75 %. Four cells of sandstone at the east end of the dug-out corridor west of
+# the printing pod are dug; all the sandstone debris lying in the base is weighed before and
+# after.
+from: early-base
+mods: [2985540238]
+options:
+  "2985540238": {YieldValue: V75}
+steps:
+  - expect_state:
+      "cells:119,209..120,210::Grid.Mass.get_Item({cell})": {save_as: block}
+      "sum:all:Clearable::[*].GetComponent<PrimaryElement>.Mass if .GetComponent<PrimaryElement>.ElementID == SandStone": {save_as: before}
+  - expect_state: {"cells:119,209..120,210::Grid.Element[{cell}].hardness": "> 0"}   # solid, all of it
+  - dig: [119, 209, 120, 210]
+  - run: {seconds: 900, until: {pending_digs: 0}}
+  # The game alone would leave before + 0.5 * block, the mod's default before + block.
+  - expect_state:
+      "sum:all:Clearable::[*].GetComponent<PrimaryElement>.Mass if .GetComponent<PrimaryElement>.ElementID == SandStone": ">= before + 0.72 * block"
+  - expect_state:
+      "sum:all:Clearable::[*].GetComponent<PrimaryElement>.Mass if .GetComponent<PrimaryElement>.ElementID == SandStone": "<= before + 0.78 * block"

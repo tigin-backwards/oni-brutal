@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2996740374-pick-up-flopping-aquatic-critters.yaml",
+ "mods": [
+  "2996740374"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Pacu dropped on a dry floor flops, and carries the Deliverable tag while it does (no Fish Release built: it needs Ranching and a pool)",
+ "updated": "2026-10-24",
+ "commit": "488e319",
+ "mod_dlls": {
+  "2996740374": {
+   "PickupFloppingPacu.dll": "ca1e73b5746703c1c6aa8e720b97016e460d69d759c6265f9d081e80eb5830a5"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-064836-d1751a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T06:48:36",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-070009-a274f1",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T07:02:20",
+    "lane": 14,
+    "reference_run": "20261024-064836-d1751a",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-070009-a274f1",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T07:03:28",
+    "lane": 14,
+    "reference_run": "20261024-064836-d1751a",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

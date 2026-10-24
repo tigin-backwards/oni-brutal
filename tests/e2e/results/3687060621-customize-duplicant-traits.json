@@ -3,12 +3,12 @@
  "mods": [
   "3687060621"
  ],
- "verdict": "failed",
- "why": "a run of ours failed",
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
  "findings": [],
- "note": "the immigrant screen opened through OniMcp; IMGUI controls clicked by screen point: in the original the EDIT button over the first card opens the editor, SAVE writes MyPreset.dupe, DEL deletes it and CLOSE EDITOR closes it. Fails in ours: the editor window's function calls GUI.tooltip, which our IMGUI lacks (MissingMethodException: UnityEngine.GUI.get_tooltip()), so the window draws nothing, SAVE does nothing and the crash screen opens",
+ "note": "the immigrant screen opened through OniMcp; IMGUI controls clicked by screen point: the EDIT button over the first card opens the mod's editor window, SAVE writes MyPreset.dupe, DEL deletes it and CLOSE EDITOR closes it, in both players alike (with GUILayout laid out as measured)",
  "updated": "2026-10-24",
- "commit": "147b0d6",
+ "commit": "e235451",
  "mod_dlls": {
   "3687060621": {
    "CustomDuplicantBuilder.dll": "dc80f3a6dbd21e423fcda8a3669fb715330da1a8005828ba667d821e43ff4bf3"
@@ -27,33 +27,25 @@
   ],
   "ours": [
    {
-    "run": "20261024-060413-114fb5",
+    "run": "20261024-111150-080101",
     "index": 1,
-    "verdict": "fail",
-    "date": "2026-10-24T06:04:13",
-    "lane": 17,
-    "reasons": [
-     "step 9: file:DupePresets/MyPreset.dupe is null, wanted exists; file:DupePresets is null, wanted 1 (it held in the original: the interaction has no effect in ours)",
-     "1 log signature(s) the original lacks"
-    ],
+    "verdict": "pass",
+    "date": "2026-10-24T11:11:50",
+    "lane": 12,
     "reference_run": "20261024-060245-4fc343",
-    "new_signatures": 1,
+    "new_signatures": 0,
     "findings": [],
     "ui_dump": {},
     "shots": {}
    },
    {
-    "run": "20261024-060413-114fb5",
+    "run": "20261024-111150-080101",
     "index": 2,
-    "verdict": "fail",
-    "date": "2026-10-24T06:05:11",
-    "lane": 17,
-    "reasons": [
-     "step 9: file:DupePresets/MyPreset.dupe is null, wanted exists; file:DupePresets is null, wanted 1 (it held in the original: the interaction has no effect in ours)",
-     "1 log signature(s) the original lacks"
-    ],
+    "verdict": "pass",
+    "date": "2026-10-24T11:11:51",
+    "lane": 13,
     "reference_run": "20261024-060245-4fc343",
-    "new_signatures": 1,
+    "new_signatures": 0,
     "findings": [],
     "ui_dump": {},
     "shots": {}

@@ -3,12 +3,14 @@
  "mods": [
   "2549295369"
  ],
- "verdict": "failed",
- "why": "a run of ours failed",
- "findings": [],
- "note": "the Vitals and Consumables screens open 200 px taller as in the original (the Priorities screen's postfix throws in both players), but in one of each two runs of ours the Vitals scroll view's scrollbar reports size 0.95-0.98 and a shorter handle, as if its content still overflowed the enlarged viewport (1 in the original)",
+ "verdict": "warning",
+ "why": "known findings: scroll-normalized-position",
+ "findings": [
+  "scroll-normalized-position"
+ ],
+ "note": "the Vitals and Consumables screens open 200 px taller as in the original (the Priorities screen's postfix throws in both players); the enlarged Vitals scroll view's scrollbar now matches the original's in both runs (size 1, full handle), its layout dump differing only by the known scroll-normalized-position",
  "updated": "2026-10-24",
- "commit": "1f5d9e4",
+ "commit": "e235451",
  "mod_dlls": {
   "2549295369": {
    "ResizeDupUi.dll": "17e66507a19504ae60a5f12e8d1595d6cd40f3d93ddfe2bbd9cb09e491fc19a8"
@@ -27,14 +29,11 @@
   ],
   "ours": [
    {
-    "run": "20261024-065030-b42d5f",
-    "index": 1,
-    "verdict": "fail",
-    "date": "2026-10-24T06:50:30",
-    "lane": 12,
-    "reasons": [
-     "ui_dump vitals: 2 difference(s)"
-    ],
+    "run": "20261024-111150-080101",
+    "index": 2,
+    "verdict": "warn",
+    "date": "2026-10-24T11:13:36",
+    "lane": 13,
     "reference_run": "20261024-054739-94feff",
     "new_signatures": 0,
     "findings": [
@@ -42,23 +41,23 @@
     ],
     "ui_dump": {
      "vitals": {
-      "differences": 2,
+      "differences": 0,
       "known": {
        "scroll-normalized-position": 1
       }
      }
     },
     "shots": {
-     "vitals": 0.000278,
+     "vitals": 1.6e-05,
      "consumables": 1.5e-05
     }
    },
    {
-    "run": "20261024-065030-b42d5f",
-    "index": 2,
+    "run": "20261024-111150-080101",
+    "index": 1,
     "verdict": "warn",
-    "date": "2026-10-24T06:50:31",
-    "lane": 13,
+    "date": "2026-10-24T11:13:36",
+    "lane": 12,
     "reference_run": "20261024-054739-94feff",
     "new_signatures": 0,
     "findings": [
@@ -73,7 +72,7 @@
      }
     },
     "shots": {
-     "vitals": 2.4e-05,
+     "vitals": 3.2e-05,
      "consumables": 1.5e-05
     }
    }

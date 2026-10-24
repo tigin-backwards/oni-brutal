@@ -263,6 +263,15 @@ Unity's Mathf.RoundToInt/FloorToInt/CeilToInt, Vector2Int/Vector3Int's and Color
 Check the rule with `tools/UnityProbe/cv-check.py rule LOG`, and compare the players with
 `cv-check.py diff ORIG OURS`. ARCHITECTURE D29 records what it measured.
 
+With `PROBE_SCENARIO=dirorder` only the directory-listing probe runs (`DirectoryOrder.cs`, lines
+`DL …`, at mod load): a tree of files and folders whose names tell UTF-8 byte order, UTF-16
+code unit order and case-insensitive orders apart, made in another order, listed through every
+`Directory` and `DirectoryInfo` `Get*`/`Enumerate*` overload (patterns, a pattern with a folder
+part, `AllDirectories`, `EnumerationOptions`), and an enumeration with files added before and
+after its first step. The tree stays in the temporary folder (its path is the first line), so
+`ls -U` shows the folder's own order. Compare the players' lines directly (`diff`).
+ARCHITECTURE D30 records what it measured, and `MonoDirectoryOrderTests` encodes it.
+
 With `PROBE_SCENARIO=findorder` only the find-order probe runs (`FindOrder.cs`, lines `FO …`, 10 s
 into the main menu): the order of `Resources.FindObjectsOfTypeAll`. It logs every `LocText` the
 call returns (instance id, scene, activity, pivot, path) and whether the ids ascend, then

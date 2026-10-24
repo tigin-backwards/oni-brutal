@@ -101,6 +101,12 @@ namespace SemanticsProbe
                 Conversions.Run();
                 return;
             }
+            if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "dirorder")
+            {
+                Rec.Log("=== values: directory order");
+                DirectoryOrder.Run();
+                return;
+            }
             if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "statics")
             {
                 Rec.Log("=== values: statics");

@@ -18,7 +18,8 @@ mods: [3670972563]
 setup:
   - driver: {setup.call: {type: Scenario, method: SpawnPrefab, args: [{"$": "Grid.XYToCell(113, 206)"}, 0, 0, "GeyserGeneric_steam", "BuildingBack"]}}
   - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
-mask_text: ['[A-Z]{2}\d{2}.\d']
+# The vent's name is random, its letters sometimes none ("24‑8", "HW24‑1" in the original).
+mask_text: ['(?:[A-Z]{2})?\d{2}.\d']
 steps:
   - run: {seconds: 1}
   - driver: {camera.set: {cell: [114, 208], ortho: 8}}

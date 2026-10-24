@@ -71,6 +71,37 @@ namespace OniBrutal.Tests
             Assert.Equal("Liberation Sans", FontEngine.GetFaceInfo().familyName);
         }
 
+        // Mods built for older Unity ask for the built-in font by its old name (Geyser Swapper,
+        // Antigravity, RomenH's buildings…); the original player gives them LegacyRuntime.
+        [Fact]
+        public void ArialIsTheLegacyRuntimeFont()
+        {
+            AssetSystem.Initialize(DataDir);
+            var font = Resources.GetBuiltinResource<Font>("Arial.ttf");
+            Assert.NotNull(font);
+            Assert.Same(Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf"), font);
+            Assert.Same(font, Resources.GetBuiltinResource(typeof(Font), "Arial.ttf"));
+        }
+
+        // Measured in the original: Geyser Swapper's 10-point status Text, on the game's canvas
+        // scaled 0.86, gives its layout group (16 units of padding) a preferred width of 322.98:
+        // the line at 8 pixels (264), not 9 (331), divided by the scale.
+        [Fact]
+        public void ScaledDynamicFontSizeIsTruncated()
+        {
+            AssetSystem.Initialize(DataDir);
+            var font = Resources.GetBuiltinResource<Font>("Arial.ttf");
+            const string status = "Stage: Analyze required\nStudy this geyser first - sealing and conversion will not start until it is analyzed.";
+            float Width(int size, float scale) => new TextGenerator().GetPreferredWidth(status, new TextGenerationSettings
+            {
+                font = font, fontSize = size, scaleFactor = scale, lineSpacing = 1, richText = true, color = Color.white,
+                pivot = new Vector2(0.5f, 0.5f), textAnchor = TextAnchor.MiddleLeft, horizontalOverflow = HorizontalWrapMode.Wrap,
+            });
+            Assert.Equal(264f, Width(8, 1f));
+            Assert.Equal(264f, Width(10, 0.86f));
+            Assert.Equal(322.98f, Width(10, 0.86f) / 0.86f + 16f, 2);
+        }
+
         [Fact]
         public void FaceInfoAndGlyphMetrics()
         {

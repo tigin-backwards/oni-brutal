@@ -738,6 +738,12 @@ TMP runs as shipped. The engine provides what it needs: `Font`, `TextCore` data 
   `LegacyRuntime`) use the built-in default face, Liberation Sans — the face Unity embeds for
   it (LegacyRuntime's serialized metrics are Liberation Sans's) — taken from the game's own
   Liberation Sans font asset; other data-less fonts first try the OS fonts in `m_FontNames`.
+  `Resources.GetBuiltinResource<Font>("Arial.ttf")`, the font's name before Unity renamed it
+  (LegacyRuntime's `m_FontNames` is still `["Arial"]`), gives LegacyRuntime: it is the only font
+  in `unity default resources`, and the original gives mods that ask for Arial (the only built-in
+  name the Workshop builds in `out/ws` ask for) a font without an error. A dynamic font is laid
+  out at the text's size times the canvas scale, truncated to whole pixels (measured in the
+  original: a 10-point Text on the game's 0.86 canvas is as wide as at 8 pixels).
 
 ### 3.8 Audio, video, other modules
 

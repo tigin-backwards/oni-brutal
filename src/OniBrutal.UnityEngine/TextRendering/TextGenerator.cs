@@ -255,7 +255,10 @@ namespace OniBrutal.Engine.Text
             maxHeight = settings.generationExtents.y * scale;
         }
 
-        int PixelSize(int size) => font.Dynamic ? Math.Max(1, (int)Math.Round(size * scale, MidpointRounding.AwayFromZero)) : (int)font.FontSize;
+        /// A dynamic font is laid out at the size times the scale factor, truncated: measured in the
+        /// original, a 10-point uGUI Text on a canvas scaled 0.86 is as wide as at 8 pixels (Geyser
+        /// Swapper's status line: a preferred width of 306.98 units, 264 pixels / 0.86), not 9.
+        int PixelSize(int size) => font.Dynamic ? Math.Max(1, (int)(size * scale)) : (int)font.FontSize;
 
         /// Lays the text out at a base font size (unscaled).
         public void Run(int baseSize)

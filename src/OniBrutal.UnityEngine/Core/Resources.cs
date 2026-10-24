@@ -62,10 +62,20 @@ namespace UnityEngine
         /// Built-in engine assets by name (meshes such as "Quad.fbx", the default font…).
         public static T GetBuiltinResource<T>(string path) where T : Object => (T)GetBuiltinResource(typeof(T), path);
 
+        /// "Arial.ttf" is the legacy built-in font's name before Unity renamed it LegacyRuntime.
+        /// The shipped "unity default resources" holds one font, LegacyRuntime, whose m_FontNames
+        /// is ["Arial"]; mods built for older Unity ask for Arial.ttf (every GetBuiltinResource
+        /// call in the Workshop builds of out/ws does), and the original player gives them a font
+        /// without an error (Geyser Swapper's labels draw in it), so the name resolves to that font.
+        static readonly Dictionary<string, string> BuiltinAliases = new(StringComparer.Ordinal)
+        {
+            ["Arial.ttf"] = "LegacyRuntime.ttf",
+        };
+
         public static Object GetBuiltinResource(Type type, string path)
         {
             var file = AssetSystem.Get("unity default resources");
-            var name = System.IO.Path.GetFileNameWithoutExtension(path);
+            var name = System.IO.Path.GetFileNameWithoutExtension(BuiltinAliases.GetValueOrDefault(path ?? "", path));
             foreach (var info in file.Objects)
             {
                 var obj = BuiltinCandidate(file, info, name);

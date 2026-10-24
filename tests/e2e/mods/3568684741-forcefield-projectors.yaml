@@ -1,0 +1,43 @@
+# Forcefield Projectors (3568684741), classes B, V, O.
+#
+# What it does: adds the Forcefield Projector (FFT_ForceFieldProjector) to the Utilities build
+# menu, researched with Jetpacks: a 1x1 tile of refined metal that draws 50 W (PLib option)
+# while it charges and a fifth of that once full. While powered it projects a shield over its
+# cell, drawn as a mesh joined with neighbouring projectors: the shield blocks liquids and
+# gases (pressure damages it), stops meteors (dropping part of their mass), lets Duplicants
+# through slowed, and overloads for a few seconds when its strength runs out.
+# How a player reaches it: the build menu (Utilities); the Mods screen's options.
+# What changes: a powered barrier that keeps fluids and meteors out.
+#
+# setup grants Jetpacks, spawns steel and lays a charged battery wired to the cell east of the
+# manual generator. A projector is built there from steel: powered, it charges its shield.
+from: early-base
+mods: [3568684741]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"Jetpacks\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Steel\").substance", method: SpawnResource, args: [[126.5, 207.5, -12], 200, 293.15, 255, 0]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Battery\")", method: Build, args: [131784, Neutral, null, [Cuprite], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "last:GetComponent<Battery>", method: AddEnergy, args: [10000.0]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Wire\")", method: Build, args: [131783, Neutral, null, [Cuprite], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Wire\")", method: Build, args: [131784, Neutral, null, [Cuprite], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Game.Instance.electricalConduitSystem", method: SetConnections, args: ["Right", 131783, true]}}
+  - driver: {setup.call: {target: "Game.Instance.electricalConduitSystem", method: SetConnections, args: ["Left", 131784, true]}}
+  - driver: {setup.call: {target: "Game.Instance.electricalConduitSystem", method: ForceRebuildNetworks}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"Jetpacks\").unlockedItemIDs": {contains: FFT_ForceFieldProjector}
+      "Assets.GetBuildingDef(\"FFT_ForceFieldProjector\").EnergyConsumptionWhenActive": 50
+  - build: {prefab: FFT_ForceFieldProjector, at: [131, 207], material: Steel}
+  - expect: {blueprints: {FFT_ForceFieldProjector: 1}}
+  - run: {seconds: 900, until: {buildings: {FFT_ForceFieldProjector: 1}, pending_construction: 0}}
+  - run: {seconds: 20}
+  - expect_state:
+      "all:ForceFieldWallTile.Content.Scripts.ForceFieldTile::[0].ShieldActive": true
+      "all:ForceFieldWallTile.Content.Scripts.ForceFieldTile::[0].ShieldStrength": "> 0"
+  - driver: {camera.set: {cell: [131, 208], ortho: 6}}
+  - click_world: {cell: [131, 207], select: FFT_ForceFieldProjector}
+  - ui_wait: {path: "**/DetailsScreen/TitleBar", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Forcefield"}
+  - shot: {name: title, crop: "**/DetailsScreen/TitleBar", threshold: 0.04}

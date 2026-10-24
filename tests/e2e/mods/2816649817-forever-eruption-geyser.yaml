@@ -1,0 +1,36 @@
+# Forever Eruption Geyser Revived (2816649817), class P.
+#
+# What it does: geysers, vents and volcanoes never go dormant and never pause. Postfixes on
+# GeyserInstanceConfiguration set the eruption share of an iteration (GetIterationPercent) and
+# of a year (GetYearPercent) from its config.json beside the DLL, and multiply an emit rate
+# under EmitRateMin kg/s by EmitRateMult. The Workshop copy ships with 1, 1, 10 and 5: always
+# erupting, never dormant, and a rate under 10 kg/s five times the cycle average.
+# How a player reaches it: any geyser, by selecting it.
+# What changes: how long and how hard a geyser erupts.
+#
+# early-base has no geyser in sight: setup places a Cool Steam Vent in the dug-out corridor
+# west of the printing pod, and the spec selects it.
+from: early-base
+mods: [2816649817]
+setup:
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131124, 0, 0, \"GeyserGeneric_steam\", \"BuildingBack\")", method: SetActive, args: [true]}}
+steps:
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [109, 207], select: GeyserGeneric_steam}
+  - ui_wait: {path: "**/DetailsScreen/TitleBar", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Cool Steam Vent"}
+  - expect_state:
+      "selected:Geyser.configuration.GetIterationPercent()": 1
+      "selected:Geyser.configuration.GetYearPercent()": 1
+      "selected:Geyser.configuration.GetMassPerCycle()": {save_as: perCycle}
+      # Recorded for comparison: the vent's own share of an iteration, which the mod overrides.
+      "selected:Geyser.configuration.scaledIterationPercent": {save_as: ownPercent}
+      "selected:Geyser.configuration.GetOnDuration()": {save_as: onDuration}
+      "selected:Geyser.configuration.GetIterationLength()": {save_as: iterationLength}
+  # The cycle's mass over 600 s, times 5: under 10 kg/s.
+  - expect_state:
+      "selected:Geyser.configuration.GetEmitRate()": ">= 0.00832 * perCycle"
+  - expect_state:
+      "selected:Geyser.configuration.GetEmitRate()": "<= 0.00834 * perCycle"
+  - shot: {name: title, crop: "**/DetailsScreen/TitleBar", threshold: 0.04}

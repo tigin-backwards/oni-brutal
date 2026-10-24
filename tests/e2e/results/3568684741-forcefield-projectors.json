@@ -1,0 +1,59 @@
+{
+ "spec": "mods/3568684741-forcefield-projectors.yaml",
+ "mods": [
+  "3568684741"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "after Jetpacks, a projector built from steel beside a charged battery: powered, its shield is up and charging; its title shot",
+ "updated": "2026-10-24",
+ "commit": "bab7d9a",
+ "mod_dlls": {
+  "3568684741": {
+   "ForceFieldWallTile.dll": "ba2d949a0e3a30cc7e15672469bff0f0d1377a93fd6c09c63fab8c2e15bd114a"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-050302-e4a1ee",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T05:09:27",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-053658-8badd9",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T05:36:58",
+    "lane": 17,
+    "reference_run": "20261024-050302-e4a1ee",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "title": 0.0
+    }
+   },
+   {
+    "run": "20261024-053658-8badd9",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T05:38:39",
+    "lane": 17,
+    "reference_run": "20261024-050302-e4a1ee",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "title": 0.0
+    }
+   }
+  ]
+ }
+}

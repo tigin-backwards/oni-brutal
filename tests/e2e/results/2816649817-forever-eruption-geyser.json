@@ -1,0 +1,61 @@
+{
+ "spec": "mods/2816649817-forever-eruption-geyser.yaml",
+ "mods": [
+  "2816649817"
+ ],
+ "verdict": "failed",
+ "why": "a run of ours failed",
+ "findings": [],
+ "note": "a Cool Steam Vent placed and selected: it erupts all its iteration and all its year in both players, but its emit rate reads 28.84 kg/s in ours against 12.47 (5 times the cycle average) in the original: the mod's GetIterationPercent postfix does not reach the copy of it inlined (through GetOnDuration) into its earlier-patched GetEmitRate, so ours divides by the vent's own 0.432 share (D21 rebuilds only direct callers)",
+ "updated": "2026-10-24",
+ "commit": "bab7d9a",
+ "mod_dlls": {
+  "2816649817": {
+   "SuperGeyserModNew.dll": "84f61888fb995cecedd6bcff437217c7363993f85a1a300b0b2a7f7354df26eb"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-050302-e4a1ee",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T05:07:47",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-054018-57c175",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-24T05:40:18",
+    "lane": 17,
+    "reasons": [
+     "step 7: selected:Geyser.configuration.GetEmitRate() is 28.839571, wanted <= 0.00834 * perCycle (it held in the original: the interaction has no effect in ours)"
+    ],
+    "reference_run": "20261024-050302-e4a1ee",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-054018-57c175",
+    "index": 2,
+    "verdict": "fail",
+    "date": "2026-10-24T05:41:25",
+    "lane": 17,
+    "reasons": [
+     "step 7: selected:Geyser.configuration.GetEmitRate() is 28.839571, wanted <= 0.00834 * perCycle (it held in the original: the interaction has no effect in ours)"
+    ],
+    "reference_run": "20261024-050302-e4a1ee",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

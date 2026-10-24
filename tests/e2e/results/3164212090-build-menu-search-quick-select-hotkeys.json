@@ -3,12 +3,14 @@
  "mods": [
   "3164212090"
  ],
- "verdict": "failed",
- "why": "a run of ours failed",
- "findings": [],
- "note": "\"pump\" typed in the build menu's search field, then \"2\": the field keeps \"pump\" and the second result's card opens in both; in ours the search results grid lays all nine results over its first cell (cells 80x95, where the original lays them out 78.4x98.4 in three rows), so the dump differs",
- "updated": "2026-10-23",
- "commit": "d562f91",
+ "verdict": "warning",
+ "why": "known findings: scroll-normalized-position",
+ "findings": [
+  "scroll-normalized-position"
+ ],
+ "note": "\"pump\" typed in the build menu's search field, then \"2\": the field keeps \"pump\" and the second result's card opens in both; the nine results lay out in three rows as in the original once the search has refreshed (the spec waits for it now); the results' scroll view reports normalizedPosition 1 (0 in the original)",
+ "updated": "2026-10-24",
+ "commit": "c3e9126",
  "mod_dlls": {
   "3164212090": {
    "BuildMenuSearchHotkey.dll": "ec0cf2e08db41dce30b49d4ee02856fbf7680b3a3f73d628f69b325d90e47755"
@@ -17,32 +19,29 @@
  "runs": {
   "original": [
    {
-    "run": "20261023-223804-867822",
+    "run": "20261024-040914-8397c4",
     "index": 1,
     "verdict": "pass",
-    "date": "2026-10-23T22:38:19",
-    "lane": 17,
+    "date": "2026-10-24T04:18:19",
+    "lane": 12,
     "signatures": 0
    }
   ],
   "ours": [
    {
-    "run": "20261023-224357-a96765",
+    "run": "20261024-041949-98b8be",
     "index": 1,
-    "verdict": "fail",
-    "date": "2026-10-23T22:43:57",
-    "lane": 16,
-    "reasons": [
-     "ui_dump results: 87 difference(s)"
-    ],
-    "reference_run": "20261023-223804-867822",
+    "verdict": "warn",
+    "date": "2026-10-24T04:19:49",
+    "lane": 12,
+    "reference_run": "20261024-040914-8397c4",
     "new_signatures": 0,
     "findings": [
      "scroll-normalized-position"
     ],
     "ui_dump": {
      "results": {
-      "differences": 87,
+      "differences": 0,
       "known": {
        "scroll-normalized-position": 1
       }
@@ -51,22 +50,19 @@
     "shots": {}
    },
    {
-    "run": "20261023-224357-a96765",
+    "run": "20261024-041949-98b8be",
     "index": 2,
-    "verdict": "fail",
-    "date": "2026-10-23T22:43:58",
-    "lane": 17,
-    "reasons": [
-     "ui_dump results: 93 difference(s)"
-    ],
-    "reference_run": "20261023-223804-867822",
+    "verdict": "warn",
+    "date": "2026-10-24T04:20:42",
+    "lane": 12,
+    "reference_run": "20261024-040914-8397c4",
     "new_signatures": 0,
     "findings": [
      "scroll-normalized-position"
     ],
     "ui_dump": {
      "results": {
-      "differences": 93,
+      "differences": 0,
       "known": {
        "scroll-normalized-position": 1
       }

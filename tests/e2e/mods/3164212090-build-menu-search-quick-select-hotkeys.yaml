@@ -18,6 +18,8 @@ steps:
       "**/BuildingGroups/Searchbar/FilterInputField": {active: true}
   - click: {ui: "**/BuildingGroups/Searchbar/FilterInputField"}
   - type: {ui: "**/BuildingGroups/Searchbar/FilterInputField", text: "pump"}
+  # The field refreshes the search 0.2 s after the last edit (KInputTextField).
+  - ui_wait: {path: "**/BuildingGroups/Viewport/Contents/*/Grid/GasPump Group*", cond: active}
   - ui_wait: {path: "**/BuildingGroups/Viewport/Contents", cond: stable}
   - ui_dump: {name: results, root: "**/PlanBuildingSelectionPanel/BuildingGroups/Viewport"}
   - type: {ui: "**/BuildingGroups/Searchbar/FilterInputField", text: "2"}

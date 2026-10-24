@@ -3,12 +3,12 @@
  "mods": [
   "1870540864"
  ],
- "verdict": "failed",
- "why": "a run of ours failed",
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
  "findings": [],
- "note": "fails in ours: an Alt + drag over the selected research station's details panel starts the mod's drag and saves the moved position (State.json the same as the original's, DetailsScreen x -58), but the panel's anchoredPosition is back at 302 at once: the VerticalLayoutGroup of its parent RootMenuRight re-lays it out in ours, where the original keeps the moved position; ours also logs the mod's harmless missing-State.json FileNotFoundException in .NET's wording (single quotes, Interop frames), a new log signature",
- "updated": "2026-10-23",
- "commit": "0177ce3",
+ "note": "an Alt + drag over the selected research station's details panel starts the mod's drag, moves the panel and saves the moved position (State.json the same as the original's), as in the original (rerun on master 79f5b1e, where the layout group keeps the moved child)",
+ "updated": "2026-10-24",
+ "commit": "c3e9126",
  "mod_dlls": {
   "1870540864": {
    "Common.dll": "87a6b9950dc4f7703d1d165fab10c6aeddad6810531639062a4a40bbe6fefb3a",
@@ -18,43 +18,35 @@
  "runs": {
   "original": [
    {
-    "run": "20261023-145953-91745b",
+    "run": "20261024-035631-81d98e",
     "index": 1,
     "verdict": "pass",
-    "date": "2026-10-23T15:36:24",
-    "lane": 16,
+    "date": "2026-10-24T03:56:31",
+    "lane": 12,
     "signatures": 1
    }
   ],
   "ours": [
    {
-    "run": "20261023-153744-949b66",
+    "run": "20261024-041949-98b8be",
     "index": 1,
-    "verdict": "fail",
-    "date": "2026-10-23T15:37:44",
-    "lane": 16,
-    "reasons": [
-     "step 6: ui:**/DetailsScreen::GetComponent<RectTransform>.anchoredPosition.x is 302.0, wanted < x0 - 200 (it held in the original: the interaction has no effect in ours)",
-     "1 log signature(s) the original lacks"
-    ],
-    "reference_run": "20261023-145953-91745b",
-    "new_signatures": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T04:21:42",
+    "lane": 12,
+    "reference_run": "20261024-035631-81d98e",
+    "new_signatures": 0,
     "findings": [],
     "ui_dump": {},
     "shots": {}
    },
    {
-    "run": "20261023-153744-949b66",
+    "run": "20261024-041949-98b8be",
     "index": 2,
-    "verdict": "fail",
-    "date": "2026-10-23T15:38:39",
-    "lane": 16,
-    "reasons": [
-     "step 6: ui:**/DetailsScreen::GetComponent<RectTransform>.anchoredPosition.x is 302.0, wanted < x0 - 200 (it held in the original: the interaction has no effect in ours)",
-     "1 log signature(s) the original lacks"
-    ],
-    "reference_run": "20261023-145953-91745b",
-    "new_signatures": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T04:22:31",
+    "lane": 12,
+    "reference_run": "20261024-035631-81d98e",
+    "new_signatures": 0,
     "findings": [],
     "ui_dump": {},
     "shots": {}

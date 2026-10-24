@@ -171,6 +171,10 @@ broken.update({
     '2053191586': 'broken upstream: Mono cannot set up its `InfiniteSource` type (`ISliderControl.GetSliderTooltip` now takes an index: "VTable setup of type InfiniteSourceSink.InfiniteSource failed"), its buildings fail to register, and loading a colony quits the game (spec tests/e2e/mods/2053191586-new-infinite-sources.yaml)',
     '2524767809': 'broken upstream: its emptier\'s state machine calls `StateMachine.Instance.Subscribe(int, Action<object>)`, which the game no longer has, so the finished building throws a MissingMethodException in `BottleUserEmptier.OnSpawn` and the crash screen opens (spec tests/e2e/mods/2524767809-bottle-emptier-variable-size.yaml)',
 })
+# Found by the e2e specs of batch 12: the spec fails the same way in the original.
+broken.update({
+    '2897886291': 'broken upstream: its overlay overrides `OverlayModes.Mode.CreateDefaultFilters`, which returns another type now, so its `OverlayScreen.RegisterModes` postfix throws a MissingMethodException while the colony loads, the overlay screen has no modes and the crash screen opens (spec tests/e2e/mods/2897886291-sweep-zones.yaml)',
+})
 # Fails to load in the original only.
 original_only = {
     '1729794261': 'loads in ours but not in the original: Mono rejects its `PixelPack2` class (an interface method it lacks) at first use, where ours stubs the missing method (ARCHITECTURE D22); left out of the colony runs, which the original\'s error dialog stops',

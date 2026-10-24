@@ -1,0 +1,26 @@
+# Sweep Zones (2897886291), classes T, S, K, V.
+#
+# What it does: adds the Set Sweep Zones tool to the toolbar (and a hotkey): dragging it marks
+# cells as a sweep zone (or a mop zone, or clears them, picked in its own tool menu) at the
+# chosen priority. Every 4 seconds (SweepZoneLogic.Sim4000ms) anything that lands in a sweep
+# zone is marked for sweeping at the zone's priority, and liquid in a mop zone gets a mop order.
+# A Sweep Zone overlay (with its legend) shows the zones, and opens with the tool.
+# How a player reaches it: the toolbar (Set Sweep Zones); its tool menu; the overlay.
+# What changes: debris in a zone is swept without new orders.
+#
+# The floor of the dug-out room west of the printing pod, where debris lies, is dragged as a
+# sweep zone; after a few seconds its debris is marked for sweeping.
+from: early-base
+mods: [2897886291]
+steps:
+  - expect_state:
+      "count:all:Clearable::[*] if .isMarkedForClear == true": {save_as: before}
+  - driver: {camera.set: {cell: [110, 208], ortho: 8}}
+  - tool: {toolbar: Set Sweep Zones}
+  - expect_state: {"PlayerController.Instance.ActiveTool.name": SweepZoneTool}
+  - ui_wait: {path: "**/ToolMenu/**/PriorityScreen", cond: stable}
+  - drag: {from: [106, 206], to: [115, 209]}
+  - key: {code: Escape}
+  - run: {seconds: 10}
+  - expect_state:
+      "count:all:Clearable::[*] if .isMarkedForClear == true": "> before"

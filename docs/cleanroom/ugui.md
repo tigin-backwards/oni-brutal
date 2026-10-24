@@ -795,6 +795,65 @@ RectTransforms, every level logged. Each operation below rounds to float; no fus
   match the original more often (TN `w2l` 668 of 4,200 against 396 with the cofactor inverse,
   TR 227 of 1,046 against 134), but not throughout: the original builds them from f(s) above.
 
+**Camera and projection math** (measured 2026-10-24, `tools/UnityProbe`
+`PROBE_SCENARIO=projection`, `pj-check.py rule`; the U57 player on this machine). Does more of
+Unity's native matrix and camera math follow Mesa (`m_matrix.c`, 20.3.5) or GLU (`project.c`,
+9.0.3), as the inverse does? Each function got 400 to 600 random cases and its degenerate ones
+(equal planes, zero and negative sizes, fields of view of 0, 180 and 360 degrees, NaN, infinity,
+and for the look-at and axis builders the size at which they give up, found by bisection). Every
+operation below rounds to float; no fused multiply-add. NaNs agree but for their sign in the
+Python check; the unit tests compare the bits.
+- **`Matrix4x4.Ortho`** is Mesa's `_math_float_ortho`: 417 of 417. It is what the engine
+  computed already.
+- **`Matrix4x4.Frustum`** is Mesa's `_math_matrix_frustum`: 417 of 417, near == far giving
+  −∞ in the depth row. The engine ports it (`MesaFrustum`, MIT); it had no `Frustum` before.
+- **`Matrix4x4.Perspective`** is neither: GLU 9.0.3's `gluPerspective` (double, cos / sin)
+  gives 56 of 440, the older GLUs' n·tan(fov·π/360) through Mesa's frustum 108. The original's,
+  440 of 440: r = (fov / 360) · π, cot = cosf(r) / sinf(r) (the C library's, glibc here:
+  correctly rounded sin and cos give 385, 1 / tanf 245), m00 = cot / aspect, m11 = cot,
+  m22 = (near + far) / (near − far), m23 = 2·near·far / (near − far) (so near == far gives +∞
+  where Mesa and GLU give −∞; 2·near·far overflows to −∞ at 1e20), m32 = −1. The engine's
+  computed 1 / tanf(fov·Deg2Rad·0.5) and Mesa's signs and differed by an ulp in m00 and m11 at
+  60 degrees; it now follows this (MathF's sinf and cosf are the same libm's).
+- **`Matrix4x4.LookAt`** builds its basis with `gluLookAt`'s float arithmetic: forward
+  normalized as GLU's `normalize` (√ of x² + y² + z² summed left to right, each component
+  divided by it), right = up × forward normalized, up = forward × right, as columns with
+  `from` as the translation, 473 of 473. GLU's own order (side = forward × up, negated for
+  Unity's left-handed matrix) gives the same values but other signs of zero (309). Where GLU
+  divides by a tiny length Unity gives the identity rotation: forward or right shorter than 1e-5
+  (|dir| boundary 1e-5 along x, 1e-5/√3 along (1, 1, 1); |up × dir| boundary 1e-5 for up of
+  sizes 1e-3 to 1e3), a forward overflowing float (2^64 along x), NaN passing through. The
+  engine ports it (`GluLookAt`, SGI Free Software License B); it had no `LookAt` before.
+- **`Quaternion.AngleAxis`**: not Mesa (`_math_matrix_rotate` builds a matrix from the angle
+  and axis; through a quaternion, `Rotate(AngleAxis(a, axis))` matches it in 10 of 400). The
+  original's, 420 of 420: half = (angle / 360) · π, the axis times sinf(half) / |axis|,
+  w = cosf(half), the identity unless |axis| > 1e-6 (so also for a NaN axis; boundary 1e-6
+  along x, 1e-6/√14 along (1, 2, 3)). The engine follows it; its angle · Deg2Rad · 0.5 matched
+  235.
+- **`Matrix4x4.Inverse3DAffine`** is not Mesa's `invert_matrix_3d_general`: its 3 × 3 is
+  Mesa's float cofactors times one scalar in 607 of 608 cases, but that scalar is not 1 / det
+  for Mesa's positive/negative sum, any order of the six terms (best 531), the row and column
+  expansions or the exact determinant; its fourth row is (−0, −0, −0, 1), and the success flag
+  agrees in 614 of 620. 362 of 608 match whole (496 for the top three rows); not adopted, and
+  the engine still has no `Inverse3DAffine`. On the 207 diagonal (scale and translation) cases
+  the general cofactor form matches all, Mesa's `invert_matrix_3d_no_rot` (1 / s per axis) none:
+  the original does not take Mesa's per-type shortcuts (nor `_2d_no_rot`).
+- **`Matrix4x4.Rotate`** is not the engine's quaternion matrix (176 of 400; the diagonal differs,
+  none of 1 − 2(yy + zz)'s eight float forms matches), although `TRS` is (400 of 400).
+- **Camera.** `projectionMatrix` is `Perspective(fieldOfView, aspect, near, far)` or
+  `Ortho(−size·aspect, size·aspect, −size, size, near, far)`: 240 of 240.
+  `cameraToWorldMatrix` is Mesa's inverse of `worldToCameraMatrix`: 240 of 240.
+  `worldToCameraMatrix` is not the transform's `worldToLocalMatrix` with the third row negated
+  where the transform has a rotation or scale (105 of 240), like `worldToLocalMatrix` itself.
+  `pixelRect`'s width is (xMax − x) · W, its height is not (149 of 240; the rect's stored
+  bounds are not observable). `WorldToViewportPoint` is (`WorldToScreenPoint` − pixel x) /
+  pixel width, 1,440 of 1,440, but `WorldToScreenPoint` is not `gluProject`: in double 47 of
+  1,440, and no float pipeline tried (P·V or P·(V·w), sums in order, paired or in double,
+  divide or reciprocal, four viewport forms) reproduces more than 48 of 240 points (96 in x)
+  even for unrotated orthographic cameras, where the original is off the exact value by up to
+  four ulps.
+  `ScreenToWorldPoint` is not `gluUnProject` either (at most 9 of 240). None adopted.
+
 ### InputField and Dropdown (legacy)
 
 **`InputField`:**

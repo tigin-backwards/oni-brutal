@@ -84,6 +84,14 @@ Steamworks (`libsteam_api.so`, Steamworks.NET under MIT); `cimgui.so` (Dear ImGu
   © 1999–2005 Brian Paul, MIT. The notice is in the file's header and in `NOTICE.txt`, which
   ships beside the player. The original player's inverse was measured to equal it bit for bit
   (`docs/cleanroom/ugui.md`, "Transform hierarchy to the bit").
+- `src/OniBrutal.UnityEngine/Math/MesaFrustum.cs` (`Matrix4x4.Frustum`): a port of
+  `_math_matrix_frustum` from the same Mesa 20.3.5 file, same copyright and MIT notice.
+- `src/OniBrutal.UnityEngine/Math/GluLookAt.cs` (`Matrix4x4.LookAt`): the basis arithmetic of
+  `gluLookAt` and its `normalize` and `cross` helpers from GLU's `src/libutil/project.c` (GLU
+  9.0.3, release tarball at archive.mesa3d.org), © 1991–2000 Silicon Graphics, Inc., SGI Free
+  Software License B 2.0 (X11-equivalent). The notice is in the file's header and in
+  `NOTICE.txt`. Both were measured to equal the original's bit for bit
+  (`docs/cleanroom/ugui.md`, "Camera and projection math").
 - Native libraries from BRUTAL's packages (GLFW, glad, stb, FreeType with libpng and zlib), under
   their own licences as shipped in those packages.
 
@@ -155,7 +163,7 @@ equivalent (§2.1: the README), its logo before gameplay (§2.2: drawn on the ga
 `BrutalCredit`, unaltered, as large as the menu's news tiles), and `NOTICE.txt` alongside (§2.3:
 copied next to the player by the build, so every setup and release carries it). The logo and
 notice are Ahwoo's, from ahwootech/brutal-branding. `NOTICE.txt` also carries Mesa's MIT notice
-after BRUTAL's (above).
+and GLU's SGI Free Software License B notice after BRUTAL's (above).
 
 ## This project's license
 All Rights Reserved.

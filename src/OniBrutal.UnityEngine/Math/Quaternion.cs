@@ -84,13 +84,17 @@ namespace UnityEngine
         public void Normalize() => this = Normalize(this);
         public Quaternion normalized => Normalize(this);
 
+        /// The original's, bit for bit (420 of 420 cases; tools/UnityProbe PROBE_SCENARIO=projection,
+        /// pj-check.py): the half angle as (angle / 360) · π, sinf and cosf of it, the axis times
+        /// sin / |axis| with |axis| summed left to right in float, and the identity unless |axis|
+        /// is over 1e-6 (a NaN axis included).
         public static Quaternion AngleAxis(float angle, Vector3 axis)
         {
-            float mag = axis.magnitude;
-            if (mag < Vector3.kEpsilon) return identity;
-            float half = angle * Mathf.Deg2Rad * 0.5f;
-            float s = Mathf.Sin(half) / mag;
-            return new Quaternion(axis.x * s, axis.y * s, axis.z * s, Mathf.Cos(half));
+            float mag = MathF.Sqrt(axis.x * axis.x + axis.y * axis.y + axis.z * axis.z);
+            if (!(mag > 1e-6f)) return identity;
+            float half = angle / 360f * MathF.PI;
+            float s = MathF.Sin(half) / mag;
+            return new Quaternion(axis.x * s, axis.y * s, axis.z * s, MathF.Cos(half));
         }
 
         public void ToAngleAxis(out float angle, out Vector3 axis)

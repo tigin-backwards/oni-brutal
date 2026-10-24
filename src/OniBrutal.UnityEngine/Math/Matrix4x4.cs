@@ -194,6 +194,9 @@ namespace UnityEngine
 
         public void SetTRS(Vector3 pos, Quaternion q, Vector3 s) => this = TRS(pos, q, s);
 
+        /// The same arithmetic as Mesa's _math_float_ortho, every operation rounded to float, and
+        /// so the original's bit for bit (417 of 417 boxes, degenerate ones included; tools/UnityProbe
+        /// PROBE_SCENARIO=projection, pj-check.py).
         public static Matrix4x4 Ortho(float left, float right, float bottom, float top, float zNear, float zFar)
         {
             var m = identity;
@@ -206,17 +209,30 @@ namespace UnityEngine
             return m;
         }
 
+        /// The original's, bit for bit (440 of 440 cases, degenerate ones included; tools/UnityProbe
+        /// PROBE_SCENARIO=projection, pj-check.py): float arithmetic, the cotangent as cosf / sinf
+        /// of (fov / 360) · π (the C library's sinf and cosf, which MathF calls), and the depth row
+        /// over (near − far), so that near == far gives +∞ where Mesa's frustum and GLU give −∞.
         public static Matrix4x4 Perspective(float fov, float aspect, float zNear, float zFar)
         {
-            float cotangent = 1f / Mathf.Tan(fov * Mathf.Deg2Rad * 0.5f);
+            float radians = fov / 360f * MathF.PI;
+            float cotangent = MathF.Cos(radians) / MathF.Sin(radians);
+            float depth = zNear - zFar;
             Matrix4x4 m = default;
             m.m00 = cotangent / aspect;
             m.m11 = cotangent;
-            m.m22 = -(zFar + zNear) / (zFar - zNear);
-            m.m23 = -2f * zFar * zNear / (zFar - zNear);
+            m.m22 = (zNear + zFar) / depth;
+            m.m23 = 2f * zNear * zFar / depth;
             m.m32 = -1f;
             return m;
         }
+
+        /// Mesa's frustum matrix, as the original (MesaFrustum).
+        public static Matrix4x4 Frustum(float left, float right, float bottom, float top, float zNear, float zFar)
+            => MesaFrustum.Frustum(left, right, bottom, top, zNear, zFar);
+
+        /// gluLookAt's basis arithmetic in Unity's layout, as the original (GluLookAt).
+        public static Matrix4x4 LookAt(Vector3 from, Vector3 to, Vector3 up) => GluLookAt.LookAt(from, to, up);
 
         public Matrix4x4 transpose => Transpose(this);
 

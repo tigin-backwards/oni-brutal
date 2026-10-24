@@ -371,7 +371,14 @@ past the boot checkpoint needs a Steam client logged in with an account that own
   once, as in the original bit for bit (`PROBE_SCENARIO=matmul`, `mm-check.py`; ScrollRect's
   change detection depends on it, `docs/cleanroom/ugui.md` "ScrollRect: bounds to the bit").
   `Matrix4x4.inverse` is native float code in the original, Mesa's Gauss–Jordan inversion; the
-  engine ports it (`MesaInverse`, MIT), bit for bit with the original.
+  engine ports it (`MesaInverse`, MIT), bit for bit with the original. So are the
+  projection builders (`PROBE_SCENARIO=projection`, `pj-check.py`): `Ortho` and `Frustum` are
+  Mesa's (`MesaFrustum`, MIT), `LookAt` is `gluLookAt`'s basis arithmetic in Unity's layout
+  (`GluLookAt`, SGI Free Software License B), and `Perspective` and `Quaternion.AngleAxis`
+  are float code with the C library's sinf and cosf, which MathF calls too; the engine follows
+  all five bit for bit. `Inverse3DAffine`, `Rotate` and the camera's screen conversions are
+  neither Mesa's nor GLU's and stay apart (`docs/cleanroom/ugui.md`, "Camera and projection
+  math").
   The transform hierarchy's world matrix, rotation and lossy scale are native float code in the
   original, composed from the leaf up; the engine follows it bit for bit (`HierarchyMath`,
   `docs/cleanroom/ugui.md` "Transform hierarchy to the bit").

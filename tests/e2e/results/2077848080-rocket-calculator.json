@@ -1,0 +1,60 @@
+{
+ "spec": "mods/2077848080-rocket-calculator.yaml",
+ "mods": [
+  "2077848080"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "played on vanilla-base (base game): with a petroleum rocket stood on the surface and sent to a distance-1 destination, the command module's descriptors show the reachable maximum distance (30,000 km), and the fuel and oxidizer tanks' Calculate buttons lower their fill limits from 900 and 2,700 kg to the trip's need (capacity side screen shot); the rocket is placed by BuildingDef.Build, not built by Duplicants",
+ "updated": "2026-10-24",
+ "commit": "68e15f7",
+ "mod_dlls": {
+  "2077848080": {
+   "PLib.dll": "c4bb22f1bc06ebcb0dbba75a7f1bc46f63eaa3dae12c22a08729f1a6d3362dda",
+   "RocketCalculator.dll": "dbc2c62c444c49d7ec3856fb136d3a69ffe4373d1888143cc2b6b07d7a76d506"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-171146-a01f76",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T17:11:46",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-171410-bf066c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T17:14:10",
+    "lane": 17,
+    "reference_run": "20261024-171146-a01f76",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "oxidizer": 0.009073
+    }
+   },
+   {
+    "run": "20261024-171410-bf066c",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T17:15:20",
+    "lane": 17,
+    "reference_run": "20261024-171146-a01f76",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "oxidizer": 0.009073
+    }
+   }
+  ]
+ }
+}

@@ -1,0 +1,56 @@
+# Rocket Calculator (2077848080), classes T, O; base game only (VANILLA_ID).
+#
+# What it does: for the base game's rockets. A fuel tank's user menu gets "Calculate Fuel" and
+# an oxidizer tank's "Calculate Oxidizer": the mod finds the rocket's command module and engine,
+# works out by bisection how much fuel (and so oxidizer) the rocket needs to reach its current
+# starmap destination, and sets the tanks' fill limits (UserMaxCapacity, through the capacity
+# side screen when it is open) to that amount, spread over the rocket's tanks. A second click
+# rounds up to a multiple of 10 (PLib option EnableSecondClickRoundTo10). The command module's
+# descriptors, and its "destination reachable" launch condition's tooltip, show the rocket's
+# reachable maximum distance.
+# How a player reaches it: select a fuel or oxidizer tank of a rocket that has a destination,
+# user menu; select the command module.
+# What changes: the tanks' fill limits; a descriptor line on the command module.
+#
+# Setup stands a petroleum rocket (engine, liquid fuel tank, oxidizer tank, command module) on
+# the surface above the colony with BuildingDef.Build, as if built, reveals the area and gives it
+# the destination at distance 1 (20,000 km). The spec selects the command module (its descriptors
+# list the reachable maximum distance), then each tank, and presses its Calculate button: the
+# tank's fill limit drops from the full 900 kg (2,700 kg for oxidizer) to what the trip needs.
+from: vanilla-base
+mods: [2077848080]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"KeroseneEngine\")", method: Build, args: [88781, "Neutral", null, ["Steel"], 293.15]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LiquidFuelTank\")", method: Build, args: [90061, "Neutral", null, ["Steel"], 293.15]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"OxidizerTank\")", method: Build, args: [91341, "Neutral", null, ["Steel"], 293.15]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"CommandModule\")", method: Build, args: [92621, "Neutral", null, ["Steel"], 293.15]}}
+  # The surface is still unexplored: reveal it, as a scout would, so the rocket can be selected.
+  - driver: {setup.call: {type: GridVisibility, method: Reveal, args: [205, 356, 14, 14.0]}}
+  - driver: {setup.call: {target: "SpacecraftManager.instance", method: SetSpacecraftDestination, args: [{"$": "all:LaunchConditionManager::[0]"}, {"$": "SpacecraftManager.instance.destinations[2]"}]}}
+steps:
+  - run: {seconds: 1}
+  - expect_state:
+      "DlcManager.IsExpansion1Active()": false
+      "SpacecraftManager.instance.GetSpacecraftDestination(0).OneBasedDistance": 2
+      "all:FuelTank::[0].UserMaxCapacity": 900.0
+      "all:OxidizerTank::[0].UserMaxCapacity": 2700.0
+  - driver: {camera.set: {cell: [205, 356], ortho: 14}}
+  - click_world: {cell: [205, 363], select: CommandModule}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/SimpleInfoScreen/**/Descriptors/DescLabel": {any_text: "~Reachable Maximum Distance: <color=\"blue\"><b>30,000</b></color> km"}
+  - click_world: {cell: [205, 353], select: LiquidFuelTank}
+  - ui_wait: {path: "**/UserMenuScreen/Buttons/Calculate FuelButton", cond: stable}
+  - click: {ui: "**/UserMenuScreen/Buttons/Calculate FuelButton"}
+  - expect_state:
+      "all:FuelTank::[0].UserMaxCapacity": "< 900"
+  - expect_state:
+      "all:FuelTank::[0].UserMaxCapacity": "== original"
+  - click_world: {cell: [205, 358], select: OxidizerTank}
+  - ui_wait: {path: "**/UserMenuScreen/Buttons/Calculate OxidizerButton", cond: stable}
+  - click: {ui: "**/UserMenuScreen/Buttons/Calculate OxidizerButton"}
+  - expect_state:
+      "all:OxidizerTank::[0].UserMaxCapacity": "< 2700"
+  - expect_state:
+      "all:OxidizerTank::[0].UserMaxCapacity": "== original"
+  - shot: {name: oxidizer, crop: "**/CapacityControlSideScreen", threshold: 0.04}

@@ -120,11 +120,11 @@ differences = {
 # Loads and Colony as swept, Played withdrawn until a spec drives the mod's UI (mod-play-testing.md).
 unplayed = {
     '2077848080': 'not played: it supports the base game only (`supportedContent: VANILLA_ID`), and every spec fixture is a Spaced Out colony',
-    # Batch 14: worldgen mods (out of scope) and content packs without code.
-    '1825146346': 'not played: a worldgen mod (empty SkyBlock worlds); worldgen is out of scope',
-    '1794510050': 'not played: a worldgen mod (a world with every biome); worldgen is out of scope',
-    '1930918856': 'not played: a worldgen mod (Solar System worlds and their asteroids); worldgen is out of scope',
-    '3430682737': 'not played: a worldgen mod (the Voidria cluster); worldgen is out of scope',
+    # Batch 14: worldgen mods (specs pending, functional expectations) and content packs without code.
+    '1825146346': 'not played: a worldgen mod (empty SkyBlock worlds); spec pending (worldgen: functional expectations)',
+    '1794510050': 'not played: a worldgen mod (a world with every biome); spec pending (worldgen: functional expectations)',
+    '1930918856': 'not played: a worldgen mod (Solar System worlds and their asteroids); spec pending (worldgen: functional expectations)',
+    '3430682737': 'not played: a worldgen mod (the Voidria cluster); spec pending (worldgen: functional expectations)',
     '3599672848': 'not played: textures for True Tiles, no code of its own; it does nothing without that mod',
     '3746576803': 'not played: Duplicant personalities for Dupery Fixed, no code of its own; it does nothing without that mod',
     # Batch 17.
@@ -244,7 +244,7 @@ def status(mid, flags):
     if flags:
         return N, N, N, f'flagged by onimaxxing ({flags}); not tested'
     if mid in worldgen:
-        return N, N, N, 'worldgen mod: out of scope'
+        return N, N, N, 'worldgen mod: not swept yet; spec pending (functional expectations)'
     if mid in translations:
         return N, N, N, 'translation: the game applies one only from a Steam subscription; not testable here'
     if mid in original_only:
@@ -287,7 +287,7 @@ print(f'''# Mod compatibility
 
 Which Workshop mods have been tried in this player, by popularity: the {LAST_RANK} most-subscribed
 in [onimaxxing's catalog](https://onimaxxing.com/mods), and mods players reported. Worldgen mods are
-out of scope.
+played with functional expectations (their worlds generate with their content), not identical layouts.
 
 **Columns:**
 - **Loads:** reaches the main menu with no error of ours.

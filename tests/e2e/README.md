@@ -384,7 +384,9 @@ For each mod of the batch:
 
 1. **Triage.** Read its row in [docs/research/mod-triage.md](../../docs/research/mod-triage.md):
    its classes (P, B, T, S, K, O, V, M, X) and flags (`touches_ui`, `asset_bundle_ui`, ...). An
-   X mod (a translation, multiplayer, worldgen) gets no spec.
+   X mod (a translation, multiplayer) gets no spec. A worldgen mod gets one, with functional
+   expectations: its worlds generate with its content, not a layout identical to the original's
+   (see mod-play-testing.md, "Worldgen mods").
 2. **Decompile** it: `ilspycmd -p -o out/local-tools/moddecomp/ID out/ws/ID/MOD.dll` (never
    committed), and confirm the classes from the code.
 3. **The mod card.** Write it as the header of `mods/ID-slug.yaml`: what the mod does, how a

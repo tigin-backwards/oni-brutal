@@ -122,7 +122,7 @@ spec costs to write.
 | **O** options | settings only (PLib `POptions`, `[Option]` attributes) or settings beside other features | Mods screen → Options dialog, `config.json` | low (one shared template) |
 | **V** visual | rendering, camera, overlays, shaders, textures (`CameraController`, `OverlayModes`, `SimDebugView`, materials and shaders, texture packs) | world view, overlay legend | medium (needs paused-frame shots) |
 | **M** menu / new game | acts before a colony exists: new-game flow, Mod Manager, world or duplicant generation screens | main menu, `MinionSelectScreen`, Mods screen | high |
-| **X** not testable here | translations (applied only from a Steam subscription), multiplayer sessions needing two Steam accounts, worldgen (out of scope) | none | none |
+| **X** not testable here | translations (applied only from a Steam subscription), multiplayer sessions needing two Steam accounts | none | none |
 
 **Flags** (independent of class):
 - `touches_ui`: the mod's own code references UGUI (`UnityEngine.UI.*`), `TMPro.*` or `LocText`,
@@ -184,7 +184,7 @@ These are estimates from a string scan plus the titles. ModTriage will replace t
 
 | Group | Count |
 |---|---|
-| X (translations, flagged by onimaxxing, worldgen) | about 45 |
+| X (translations, flagged by onimaxxing) | about 45 |
 | ❌ upstream | 9 |
 | Already Played | 7 |
 | P only (Full Miner Yield, No 'Long Commutes', Double Sweeper Range, …) | about 25–30 |
@@ -763,6 +763,11 @@ steps:
   VANILLA_ID`) need a base-game fixture. Should we add one, or record such mods as "Spaced Out
   not supported"?
 - **Not covered:** translations (Steam subscription only), multiplayer sessions (two Steam
-  accounts), worldgen mods (out of scope). These rows stay ⬜ with their current notes.
+  accounts). These rows stay ⬜ with their current notes.
+- **Worldgen mods** are classed by their code like any other and get specs, with functional
+  expectations: the mod's worlds or clusters are offered and generate, its biomes, traits,
+  templates and POIs appear, and generation ends without errors. The generated layout need not
+  match the original's cell for cell (our worldgen APIs, such as `Mathf.PerlinNoise`, are only
+  functionally similar), so world screenshots and element-by-cell comparisons are not expected.
 - **Machine contention** with perf measurements. The lock and the night-time schedule handle it,
   but a perf run blocks the mod queue.

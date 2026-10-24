@@ -138,7 +138,9 @@ def ws_mods():
 # ---------------------------------------------------------------- specs
 
 TOP_KEYS = {'name', 'from', 'mods', 'options', 'setup', 'steps', 'require_log', 'mask_text', 'tolerance',
-            'thresholds', 'ignore_fields', 'memory_gb'}
+            'thresholds', 'ignore_fields', 'memory_gb', 'spaced_out'}
+# `from: main-menu` loads no fixture: the steps start at the main menu (a new game's spec).
+MAIN_MENU = 'main-menu'
 # Steps that talk to E2eDriver (a spec with any of them needs it installed).
 DRIVER_STEPS = {'click', 'toggle', 'dropdown', 'type', 'drag', 'tool', 'expect_ui', 'expect_state', 'ui_dump',
                 'ui_wait', 'world_shot', 'driver', 'click_world', 'scroll', 'expect_hit'}
@@ -274,6 +276,8 @@ def check_spec(spec):
     problems = [f'unknown key {k!r}' for k in spec if k not in TOP_KEYS]
     if not spec.get('from'):
         problems.append('`from` names the fixture')
+    if not isinstance(spec.get('spaced_out', True), bool):
+        problems.append('`spaced_out` is true or false')
     if not isinstance(spec.get('steps'), list):
         problems.append('`steps` is a list')
     mods = spec.get('mods', [])
@@ -586,6 +590,30 @@ MEMORY_GB = 40      # E2E_MEMORY_GB: what all players on the machine may use at 
 MAX_PLAYERS = 6     # E2E_MAX_PLAYERS: how many may run at once
 FIXTURE_GB = {'U57': 15, '2minnow': 11}
 SMALL_GB, MID_GB, LATE_GB = 6, 11, 15
+
+
+def fixture_of(spec):
+    """The fixture save SPEC loads, or None for `from: main-menu`."""
+    return None if spec['from'] == MAIN_MENU else os.path.join(FIXTURES, spec['from'] + '.sav')
+
+
+def save_is_spaced_out(path):
+    """Whether a save is a Spaced Out one, from its header's dlcIds (scripts/windows-run-home.sh);
+    older saves list none, and their cluster names the expansion."""
+    with open(path, 'rb') as f:
+        head = f.read(65536).decode('latin1')
+    start = head.index('{')
+    info, _ = json.JSONDecoder().raw_decode(head, start)
+    return 'EXPANSION1_ID' in (info.get('dlcIds') or []) or str(info.get('clusterId', '')).startswith('expansion1::')
+
+
+def spaced_out(spec):
+    """Whether SPEC's players run with Spaced Out: its `spaced_out`, else its fixture's mode
+    (a base-game save loads in a base-game player), else on (the game's default)."""
+    if 'spaced_out' in spec:
+        return spec['spaced_out']
+    fixture = fixture_of(spec)
+    return save_is_spaced_out(fixture) if fixture and os.path.exists(fixture) else True
 
 
 def player_gb(spec, fixture=None):
@@ -1396,19 +1424,20 @@ class Player:
     """One player process on its own display, with a scratch profile holding OniMcp, E2eDriver,
     the spec's mods and options, and a fixture."""
 
-    def __init__(self, kind, out, env, fixture, lane, mods=(), options=None, driver=False):
+    def __init__(self, kind, out, env, fixture, lane, mods=(), options=None, driver=False, expansion1=True):
         self.kind, self.out, self.env, self.lane = kind, out, env, lane
         self.home = os.path.join(out, 'home')
         self.profile = os.path.join(self.home, *PROFILE)
         self.log = os.path.join(out, 'player.log' if kind == 'original' else 'stdout.txt')
         self.save_dir = os.path.join(self.profile, 'save_files', 'e2e')
-        self.fixture = os.path.join(self.save_dir, os.path.basename(fixture))
+        self.fixture = fixture and os.path.join(self.save_dir, os.path.basename(fixture))
         self.display = self.xauthority = None
         self.process = self.xvfb = None
         shutil.rmtree(out, ignore_errors=True)
         os.makedirs(os.path.join(self.profile, 'mods', 'Local'))
         os.makedirs(self.save_dir)
-        shutil.copy(fixture, self.fixture)
+        if fixture:
+            shutil.copy(fixture, self.fixture)
         self.mods = self.install_mods(list(mods), driver)
         self.option_files = write_options(self.profile, self.mods, options or {})
         # OniMcp's options: the lane's port, JSON tool text, and none of its own gameplay policies
@@ -1419,7 +1448,9 @@ class Player:
                        'ToolTextFormat': 'json'}, f)
         with open(os.path.join(self.profile, 'kplayerprefs.yaml'), 'w') as f:
             f.write(f'strings: {{}}\nints:\n  ResolutionWidth: {WIDTH}\n  ResolutionHeight: {HEIGHT}\n'
-                    '  RefreshRateNumerator: 60\n  RefreshRateDenominator: 1\n  FullScreen: 0\nfloats: {}\n')
+                    '  RefreshRateNumerator: 60\n  RefreshRateDenominator: 1\n  FullScreen: 0\n'
+                    # DlcManager reads Spaced Out as on unless this says 0.
+                    + ('' if expansion1 else '  EXPANSION1_ID.ENABLED: 0\n') + 'floats: {}\n')
 
     def install_mods(self, ids, driver):
         """The spec's Workshop mods as Local mods (ws-mods.py profile), then OniMcp and E2eDriver;
@@ -1553,6 +1584,8 @@ class Player:
 
     def load(self, mcp):
         mcp.connect()
+        if not self.fixture:
+            return  # `from: main-menu`: the steps start at the main menu
         mcp.call('game_control', domain='launch', action='start', path=self.fixture, confirm=True)
         deadline = time.time() + 900
         while True:
@@ -2482,7 +2515,7 @@ class Run:
     # -- the run
     def execute(self):
         spec = self.spec
-        fixture = os.path.join(FIXTURES, spec['from'] + '.sav')
+        fixture = fixture_of(spec)
         # E2eDriver goes into every run it is built for (the same in both players); a spec with
         # driver steps needs it.
         uses_driver = needs_driver(spec) or bool(self.env.get('E2E_DRIVER'))
@@ -2492,10 +2525,10 @@ class Run:
         try:
             if uses_driver and not self.env.get('E2E_DRIVER'):
                 raise SpecFailure('the spec needs E2eDriver, and E2E_DRIVER names no build of it')
-            if not os.path.exists(fixture):
+            if fixture and not os.path.exists(fixture):
                 raise SpecFailure(f'no fixture {fixture}')
             self.player = Player(self.kind, self.out, self.env, fixture, self.lane, spec['mods'], spec.get('options'),
-                                 driver=uses_driver)
+                                 driver=uses_driver, expansion1=spaced_out(spec))
             records = open(os.path.join(self.out, 'results.jsonl'), 'w')
             started = time.time()
             self.player.start()
@@ -3141,8 +3174,7 @@ def main(argv):
             if job['after'] and reference is None:
                 return dict(record, verdict='skipped', reasons=['the spec fails in the original'], out=None)
         log(f'== {spec["name"]} in {kind} ({index}/{opts["repeat"]})')
-        fixture = os.path.join(FIXTURES, spec['from'] + '.sav')
-        gb = player_gb(spec, fixture)
+        gb = player_gb(spec, fixture_of(spec))
         try:
             with machine_lock(perf_wait=opts['perf_wait'], log=log, max_wait=opts['max_wait']), \
                     budget.hold(gb, f'{spec["name"]}/{kind}-{index} lane {lane.number}', log, opts['max_wait']):

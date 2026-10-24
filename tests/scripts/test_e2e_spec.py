@@ -354,5 +354,34 @@ class Install(unittest.TestCase):
             self.assertEqual(lane.driver_port, 8831)
 
 
+class SpacedOut(unittest.TestCase):
+    """Which mode a spec's players run in: its `spaced_out`, else its fixture's header."""
+
+    def save(self, folder, name, info):
+        with open(os.path.join(folder, name + '.sav'), 'wb') as f:
+            f.write(b'\x00\x01KSAV' + json.dumps(info).encode() + b'\x00tail{not json')
+
+    def test_mode_follows_the_fixture_or_the_spec(self):
+        with tempfile.TemporaryDirectory() as folder:
+            self.save(folder, 'so', {'dlcIds': ['EXPANSION1_ID', 'DLC2_ID'], 'clusterId': 'expansion1::clusters/X'})
+            self.save(folder, 'base', {'dlcIds': ['', 'DLC2_ID'], 'clusterId': 'clusters/SandstoneDefault'})
+            self.save(folder, 'old', {'clusterId': 'expansion1::clusters/Y'})
+            old_fixtures, e2e.FIXTURES = e2e.FIXTURES, folder
+            try:
+                self.assertTrue(e2e.spaced_out({'from': 'so'}))
+                self.assertFalse(e2e.spaced_out({'from': 'base'}))
+                self.assertTrue(e2e.spaced_out({'from': 'old'}))
+                self.assertFalse(e2e.spaced_out({'from': 'so', 'spaced_out': False}))
+                self.assertTrue(e2e.spaced_out({'from': e2e.MAIN_MENU}))
+                self.assertIsNone(e2e.fixture_of({'from': e2e.MAIN_MENU}))
+            finally:
+                e2e.FIXTURES = old_fixtures
+
+    def test_spaced_out_is_a_boolean(self):
+        self.assertIn('`spaced_out` is true or false',
+                      e2e.check_spec({'from': 'main-menu', 'spaced_out': 'no', 'steps': []}))
+        self.assertEqual(e2e.check_spec({'from': 'main-menu', 'spaced_out': False, 'steps': []}), [])
+
+
 if __name__ == '__main__':
     unittest.main()

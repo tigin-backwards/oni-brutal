@@ -131,6 +131,11 @@ namespace OniBrutal.Engine.Rendering
         /// (a device that records nothing does nothing).
         public virtual void FlushRecorded() { }
 
+        /// Takes a texture loaded from an asset file to upload in the background, in load order,
+        /// instead of before the next frame renders; a draw that samples it first uploads it at
+        /// once (main thread). False when the device does not (then Upload does it now).
+        public virtual bool UploadInBackground(TextureNative texture) => false;
+
         /// Diagnostics: the average GPU time per presented frame since the last call, in
         /// milliseconds; -1 when unknown. The first call starts the measurement.
         public virtual double TakeGpuFrameMilliseconds() => -1;
@@ -231,7 +236,11 @@ namespace OniBrutal.Engine.Rendering
 
         public static void QueueUpload(TextureNative texture)
         {
-            if (Current.RendersFrames) pendingUploads.Enqueue(new WeakReference<TextureNative>(texture));
+            if (!Current.RendersFrames) return;
+            // Loaded on the main thread: handed to the device's background uploads at once, so
+            // they go up while loading goes on (a DLC bundle's, during the game's start-up).
+            if (Threads.IsMainThread && Current.UploadInBackground(texture)) return;
+            pendingUploads.Enqueue(new WeakReference<TextureNative>(texture));
         }
 
         const int ParallelReadThreshold = 32;
@@ -245,7 +254,7 @@ namespace OniBrutal.Engine.Rendering
             if (pendingUploads.IsEmpty) return;
             var textures = new List<TextureNative>();
             while (pendingUploads.TryDequeue(out var weak))
-                if (weak.TryGetTarget(out var texture) && !texture.Destroyed) textures.Add(texture);
+                if (weak.TryGetTarget(out var texture) && !texture.Destroyed && !Current.UploadInBackground(texture)) textures.Add(texture);
             // Many textures at once (a scene or bundle load): their texels are read from the
             // asset files on worker threads first. Each texture's own reads, nothing else.
             if (Pipelined && textures.Count >= ParallelReadThreshold)

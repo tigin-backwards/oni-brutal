@@ -39,7 +39,7 @@ namespace OniBrutal.Engine
             {
                 Interlocked.Exchange(ref ReadTicks, 0); Interlocked.Exchange(ref Uploads, 0); Interlocked.Exchange(ref UploadBytes, 0);
                 Interlocked.Exchange(ref UploadTicks, 0); Interlocked.Exchange(ref Programs, 0); Interlocked.Exchange(ref ProgramTicks, 0);
-                Interlocked.Exchange(ref ProgramWaitTicks, 0);
+                Interlocked.Exchange(ref ProgramWaitTicks, 0); Interlocked.Exchange(ref GlBusyTicks, 0); Interlocked.Exchange(ref GlUploadTicks, 0);
             }
         }
     }

@@ -156,6 +156,7 @@ namespace OniBrutal.Desktop.Gl
             // From here on the context belongs to the GL thread.
             worker = new GlWorker(platform.RenderWindow, CommandFailed);
             recorder = new GlDrawRecorder(worker, DefaultTexture, RunDraw);
+            GlBackgroundUploads.Start(worker);
             // A frame's GPU time is measured from its first commands, not from the previous
             // present: in between the GL thread waits for the main thread's next frame.
             worker.BatchStarting = () =>
@@ -749,7 +750,10 @@ namespace OniBrutal.Desktop.Gl
         {
             switch (gpu)
             {
-                case DeviceTexture t: worker.Post(t.Delete); break;
+                case DeviceTexture t:
+                    if (t.Background != null) GlBackgroundUploads.Claim(t, null);
+                    worker.Post(t.Delete);
+                    break;
                 case DeviceMesh m: worker.Post(m.Delete); break;
                 case DeviceProgramSet p: worker.Post(p.Delete); break;
             }
@@ -774,6 +778,8 @@ namespace OniBrutal.Desktop.Gl
         }
 
         public override void FlushRecorded() => worker.Submit();
+
+        public override bool UploadInBackground(TextureNative texture) => GlBackgroundUploads.Queue(texture);
 
         /// Hands the frame to the GL thread, which presents it through the presenter with
         /// QualitySettings.vSyncCount as the swap interval.

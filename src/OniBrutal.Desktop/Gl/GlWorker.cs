@@ -44,6 +44,19 @@ namespace OniBrutal.Desktop.Gl
         /// Runs on the GL thread before each handed-over batch of commands executes.
         public Action BatchStarting;
 
+        /// Work the GL thread does while no frame is handed over, one short piece at a time
+        /// (false: there was none), and whether there is any (GlBackgroundUploads).
+        public Func<bool> IdleWork;
+        public Func<bool> HasIdleWork;
+        // The last idle work could not go on although there is more (GL thread).
+        bool idleBlocked;
+
+        /// Wakes the GL thread for idle work.
+        public void Wake()
+        {
+            lock (gate) Monitor.PulseAll(gate);
+        }
+
         public GlWorker(GlfwWindow context, Action<Exception> commandFailed)
         {
             this.commandFailed = commandFailed;
@@ -138,9 +151,20 @@ namespace OniBrutal.Desktop.Gl
                     Frame frame;
                     lock (gate)
                     {
-                        while (submitted == null && !stopping) Monitor.Wait(gate);
-                        if (submitted == null) break;
+                        while (submitted == null && !stopping && (HasIdleWork?.Invoke() != true || idleBlocked))
+                        {
+                            // Idle work that could not go on (waiting for the GPU) is tried again soon.
+                            if (idleBlocked) { Monitor.Wait(gate, 2); idleBlocked = false; }
+                            else Monitor.Wait(gate);
+                        }
+                        if (submitted == null && stopping) break;
                         frame = submitted;
+                    }
+                    if (frame == null)
+                    {
+                        try { idleBlocked = IdleWork?.Invoke() == false && HasIdleWork?.Invoke() == true; }
+                        catch (Exception e) { commandFailed(e); }
+                        continue;
                     }
                     BatchStarting?.Invoke();
                     long start = GlTimings.Now;

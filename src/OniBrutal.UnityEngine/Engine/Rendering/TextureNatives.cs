@@ -194,6 +194,18 @@ namespace OniBrutal.Engine.Rendering
 
         public bool HasTexels => memory != null || source != null;
 
+        /// Hands over the texels as they are: their memory, or where to read them from (one of
+        /// the two, or neither when there are none); the texture keeps none (background uploads of
+        /// non-readable textures, which keep no CPU copy once uploaded).
+        public (PixelMemory Memory, TexelSource? Source) DetachTexels()
+        {
+            AwaitCopy();
+            var taken = (memory, source);
+            memory = null;
+            source = null;
+            return taken;
+        }
+
         /// Texels still to be read from an asset file.
         public bool TexelsUnread => memory == null && source != null;
 

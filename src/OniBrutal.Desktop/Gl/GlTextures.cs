@@ -21,6 +21,9 @@ namespace OniBrutal.Desktop.Gl
         public bool RecordedEmpty;
         public RenderShape? RecordedShape;
         public uint RecordedTarget = TexTarget2D;
+        /// Main thread: the background upload of its loaded texels, until the main thread takes
+        /// it back (GlBackgroundUploads.Claim).
+        public BackgroundUpload Background;
 
         public uint Id;
         public uint Target = TexTarget2D;
@@ -314,6 +317,8 @@ namespace OniBrutal.Desktop.Gl
                 t.Gpu = g;
                 GraphicsDevice.Adopt(t, g);
             }
+            // Still on its way in the background: uploaded in this frame, ahead of what follows.
+            if (g.Background != null) GlBackgroundUploads.Claim(g, worker);
             switch (t)
             {
                 case RenderTextureNative rt:
@@ -356,7 +361,7 @@ namespace OniBrutal.Desktop.Gl
         /// Prepare would record nothing. Reads only.
         public static bool IsCurrent(TextureNative t)
         {
-            if (t.Gpu is not DeviceTexture g) return false;
+            if (t.Gpu is not DeviceTexture g || g.Background != null) return false;
             switch (t)
             {
                 case RenderTextureNative rt:
@@ -378,7 +383,7 @@ namespace OniBrutal.Desktop.Gl
             GlTimings.Targets += GlTimings.Now - t;
         });
 
-        static void PostUpload(GlWorker worker, DeviceTexture g, TexelUpload upload) => worker.Post(() =>
+        internal static void PostUpload(GlWorker worker, DeviceTexture g, TexelUpload upload) => worker.Post(() =>
         {
             long t = GlTimings.Now;
             uint q = GlGpuProfile.Enabled ? GlGpuProfile.Begin() : 0;
@@ -388,7 +393,9 @@ namespace OniBrutal.Desktop.Gl
             System.Threading.Interlocked.Add(ref OniBrutal.Engine.StartupStats.GlUploadTicks, GlTimings.Now - t);
         });
 
-        static void PostSampler(GlWorker worker, DeviceTexture g, SamplerSettings sampler) => worker.Post(() => ApplySampler(sampler, g));
+        internal static void PostSampler(GlWorker worker, DeviceTexture g, SamplerSettings sampler) => worker.Post(() => ApplySampler(sampler, g));
+
+        internal static void ApplySamplerNow(SamplerSettings sampler, DeviceTexture g) => ApplySampler(sampler, g);
 
         /// Texture content uploads and their bytes since the last frame counters (--frame-stats),
         /// and re-uploads whose texels had not changed (none sent).

@@ -1,0 +1,57 @@
+# True Tiles Material Pack (3599672848), with True Tiles (2815406414), which it extends. Class P
+# (content only: no DLL).
+#
+# What it does: ships three True Tiles texture packs in true_tiles_addon/ (Aquatic, Prehistoric,
+# and Specialty, titled "Misc Tiles"), each a metadata.json, a tiles.json and PNG textures:
+# tile, carpet, insulation, mesh, airflow, metal, glass, wood and plastic tile looks for
+# materials True Tiles itself doesn't texture or textures differently (Diamond and Amber
+# window tiles, Palm Wood and Plywood wood tiles, Shale, Basalt, Nickel, Iridium, ...). True
+# Tiles scans every mod for that folder at start-up (Mod.ScanOtherMods), adds the packs to its
+# pack list in their order (4, after its own), and loads the enabled ones' textures over its
+# own; Aquatic ships with Enabled unset, so it is listed but off. In the Mods screen True Tiles
+# marks the pack as managed by it and adds a "Texture Packs" button to its row, which opens its
+# texture pack settings (enable, reorder).
+# How a player reaches it: tiles built of the pack's materials; the Mods screen's Texture
+# Packs button.
+# What changes: how tiles of those materials look.
+#
+# The packs are checked in True Tiles' pack list, and the textures the game uses for a Diamond
+# window tile and a Palm Wood tile come from the pack's Specialty folder. Then, from the main
+# menu, the Mods screen's Texture Packs button on the pack's row opens True Tiles' settings,
+# which list the three packs with their titles, authors and icons (dumped: OniMcp cannot shoot
+# the main menu).
+from: early-base
+mods: [2815406414, 3599672848]
+steps:
+  - expect_state:
+      "type:TrueTiles.Cmps.TexturePacksManager::Instance.packs.Count": "== original"
+      "count:type:TrueTiles.Cmps.TexturePacksManager::Instance.packs[*] if .Id == Specialty and .Enabled == true": 1
+      "count:type:TrueTiles.Cmps.TexturePacksManager::Instance.packs[*] if .Id == Prehistoric and .Enabled == true": 1
+      "count:type:TrueTiles.Cmps.TexturePacksManager::Instance.packs[*] if .Id == Aquatic and .Enabled == false": 1
+  - expect_state:
+      "type:TrueTiles.Cmps.TileAssetLoader::Instance.tiles[\"GlassTile\"][\"Diamond\"].Root": {contains: Specialty}
+      "type:TrueTiles.Cmps.TileAssetLoader::Instance.tiles[\"WoodTile\"][\"PalmWood\"].Root": {contains: Specialty}
+  - expect_state:
+      "type:TrueTiles.Cmps.TileAssets::Instance.Get(\"WoodTile\", \"PalmWood\")": exists
+  - expect_state:
+      "type:TrueTiles.Cmps.TileAssets::Instance.Get(\"GlassTile\", \"Diamond\").main.width": "> 0"
+  - key: {code: Escape}
+  - ui_wait: {path: "**/PauseScreen/**/Main MenuButton", cond: stable}
+  - click: {ui: "**/PauseScreen/**/Main MenuButton"}
+  - ui_wait: {path: "**/ConfirmDialog/GameObject/Panel/ConfigurableButton", cond: stable}
+  - click: {ui: "**/ConfirmDialog/GameObject/Panel/ConfigurableButton"}   # Quit Without Saving
+  - ui_wait: {path: "**/MainMenu_SpacedOut/MainMenuMenubar/MainMenuButtons", cond: stable, frames: 3000}
+  - click: {text: "MODS", under: "**/MainMenuButtons"}
+  - ui_wait: {path: "**/ModsScreen/Panel", cond: stable}
+  - expect_ui:
+      "**/ModsScreen/Panel/ListView/Files/Viewport/Content/True Tiles Material Pack/**/Title": {text: "~Mod managed by True Tiles"}
+  - click: {text: "Texture Packs", under: "**/ModsScreen/Panel/ListView/Files/Viewport/Content/True Tiles Material Pack"}
+  - ui_wait: {path: "**/SettingsDialog(Clone)/ScrollView/Viewport/Content", cond: stable}
+  - expect_ui:
+      "**/SettingsDialog(Clone)/ScrollView/Viewport/Content/Entry(Clone)": {count: 6}
+      "**/SettingsDialog(Clone)/ScrollView/Viewport/Content/Entry(Clone)/Title/Text": {any_text: "Misc Tiles"}
+  - expect_ui:
+      "**/SettingsDialog(Clone)/ScrollView/Viewport/Content/Entry(Clone)/Title/Text": {any_text: "Prehistoric"}
+  - expect_ui:
+      "**/SettingsDialog(Clone)/ScrollView/Viewport/Content/Entry(Clone)/Title/Text": {any_text: "Aquatic"}
+  - ui_dump: {name: packs, root: "**/SettingsDialog(Clone)/ScrollView/Viewport/Content"}

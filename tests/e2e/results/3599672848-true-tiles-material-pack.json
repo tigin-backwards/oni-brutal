@@ -1,0 +1,71 @@
+{
+ "spec": "mods/3599672848-true-tiles-material-pack.yaml",
+ "mods": [
+  "2815406414",
+  "3599672848"
+ ],
+ "verdict": "failed",
+ "why": "a run of ours failed",
+ "findings": [],
+ "note": "spec fails in ours: with True Tiles, the pack's texture packs load and its Specialty textures are used in both players, but True Tiles finds packs with Directory.GetDirectories, which returns folder names sorted in the original and in directory (readdir) order in ours, so its settings list (Mods screen, Texture Packs) orders the pack's three equal-order packs Aquatic, Prehistoric, Misc Tiles in the original and Misc Tiles, Aquatic, Prehistoric in ours, and loads their textures in a different order",
+ "updated": "2026-10-24",
+ "commit": "4d33697",
+ "mod_dlls": {
+  "2815406414": {
+   "TrueTiles.dll": "ccd24cf608fa27ada9eef6f7dbcc25498329d553db6dbdf7985c137a7c0034ac"
+  },
+  "3599672848": {}
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-162544-109dda",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T16:25:44",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-162751-cd4ac8",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-24T16:27:51",
+    "lane": 17,
+    "reasons": [
+     "ui_dump packs: 7 difference(s)"
+    ],
+    "reference_run": "20261024-162544-109dda",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "packs": {
+      "differences": 7
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261024-162751-cd4ac8",
+    "index": 2,
+    "verdict": "fail",
+    "date": "2026-10-24T16:53:29",
+    "lane": 17,
+    "reasons": [
+     "ui_dump packs: 7 difference(s)"
+    ],
+    "reference_run": "20261024-162544-109dda",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "packs": {
+      "differences": 7
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

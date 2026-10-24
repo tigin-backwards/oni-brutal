@@ -121,7 +121,6 @@ differences = {
 unplayed = {
     '2077848080': 'not played: it supports the base game only (`supportedContent: VANILLA_ID`), and every spec fixture is a Spaced Out colony',
     # Batch 14: content packs without code.
-    '3599672848': 'not played: textures for True Tiles, no code of its own; it does nothing without that mod',
     # Batch 17.
     '1873884303': 'not played: it supports the base game only (`supportedContent: VANILLA_ID`, and its OnLoad stops on Spaced Out), and every spec fixture is a Spaced Out colony',
     '3635632392': 'not played: a multiplayer mod (its own LiteNetLib client and server); a session needs two players on two Steam accounts',

@@ -119,10 +119,8 @@ differences = {
 }
 # Loads and Colony as swept, Played withdrawn until a spec drives the mod's UI (mod-play-testing.md).
 unplayed = {
-    # Batch 14: content packs without code.
     # Batch 17.
     '3635632392': 'not played: a multiplayer mod (its own LiteNetLib client and server); a session needs two players on two Steam accounts',
-    # Batch 18: base-game-only mods (every spec fixture is a Spaced Out colony).
     # Batch 21.
 }
 broken = {

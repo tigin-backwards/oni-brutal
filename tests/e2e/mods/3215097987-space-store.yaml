@@ -1,0 +1,27 @@
+# Space Store / 太空商店 (3215097987), classes T, S, K, O.
+#
+# What it does: a shop for space coins. Ores, seeds and other items on its price list get a
+# SELL button in their user menu (and geysers one of their own): selling deletes the item and
+# credits its price to the coins kept by the printing pod. Two toolbar tools: Space Store opens
+# a PLib dialog to buy items with the coins (paused while open), Sell Objects sells what lies
+# on the ground in a dragged area. A hotkey opens the store; PLib options size the dialog.
+# How a player reaches it: an item's user menu (SELL); the toolbar (Space Store, Sell Objects).
+# What changes: items turn into coins and coins into items.
+#
+# setup drops 1000 kg of sandstone in the dug-out corridor west of the printing pod and
+# selects it; its SELL button takes it away for 0.2 coins.
+from: early-base
+mods: [3215097987]
+setup:
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"SandStone\").substance", method: SpawnResource, args: [[109.5, 206.5, -12], 1000, 300, 255, 0]}}
+  - driver: {setup.call: {target: "SelectTool.Instance", method: Select, args: [{"$": "last:GetComponent<KSelectable>"}]}}
+steps:
+  - expect_state:
+      "type:SpaceStore.StaticVars::coinSaver.coin": 0
+      "selected:GetComponent<SpaceStore.SellButtons.ElementSellButton>": exists
+  - ui_wait: {path: "**/UserMenuScreen/Buttons/SELLButton", cond: stable}
+  - click: {ui: "**/UserMenuScreen/Buttons/SELLButton"}
+  - expect_state:
+      "type:SpaceStore.StaticVars::coinSaver.coin": "> 0.19"
+  - expect_state:
+      "type:SpaceStore.StaticVars::coinSaver.coin": "< 0.21"

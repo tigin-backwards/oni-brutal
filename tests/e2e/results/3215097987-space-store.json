@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3215097987-space-store.yaml",
+ "mods": [
+  "3215097987"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "1000 kg of sandstone dropped and selected (setup); its SELL user-menu button takes it away and credits 0.2 space coins",
+ "updated": "2026-10-23",
+ "commit": "c6eae87",
+ "mod_dlls": {
+  "3215097987": {
+   "SpaceStore.dll": "6283d214f0076ce1d233ad9a6aee42e0f9dab8c846d07b43efc4eaa54b5def74"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-220612-1cc9f0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T22:15:32",
+    "lane": 13,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-222944-de75e0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T22:37:59",
+    "lane": 13,
+    "reference_run": "20261023-220612-1cc9f0",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-222944-de75e0",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T22:38:48",
+    "lane": 13,
+    "reference_run": "20261023-220612-1cc9f0",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

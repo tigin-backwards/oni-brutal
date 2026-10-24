@@ -291,7 +291,9 @@ For the controls above:
   - Mouse events go to the window under the mouse, or to the window whose control holds the
     mouse.
   - Key events go to the focused window, or to the window holding the keyboard control.
-- **Focus:** a `MouseDown` inside a window focuses it, brings it to the front, and is used.
+- **Focus:** a `MouseDown` inside a window focuses it and brings it to the front. The order
+  of calls, the stacking of windows and whether the press is used were measured: "GUILayout,
+  measured", part 4, holds where it differs from this list.
 - **Lifetime:** a window that its behaviour did not call during a frame's Layout is gone.
 - **Return value:** the window's rect, moved by dragging since the last call; otherwise the
   rect passed in.
@@ -299,8 +301,8 @@ For the controls above:
   window. Each window has its own control IDs.
 - **Test:** the call order for one frame is behaviour Layout, window Layout, behaviour Repaint,
   window Repaint.
-- **`GUILayout.Window`** sizes the window to fit its laid-out content, within the rect's size
-  and its options.
+- **`GUILayout.Window`** sizes the window from its laid-out content, the rect's size and its
+  options, by the measured rule in "GUILayout, measured", part 3.
 
 **Window functions:**
 - **`GUI.DragWindow(rect)`**, inside a window function: a press in `rect` and a drag move the
@@ -341,8 +343,9 @@ contents[, style], options)`**, with string, texture and GUIContent overloads:
   laid out.
 - During the following event of the same OnGUI call, the same calls in the same order return
   the computed rects.
-- A mismatch is an error, as Unity's documentation describes for changing the control count
-  between Layout and Repaint.
+- What a mismatch does, how big entries are and how they are spaced, and how a
+  `GUILayout.Window` is sized were measured: see "GUILayout, measured" below. Where this
+  section and that one disagree, that one holds.
 
 **Groups:**
 - `BeginHorizontal`/`EndHorizontal` and `BeginVertical`/`EndVertical` nest groups.
@@ -675,8 +678,9 @@ prints them.
      102, and then gui, its behaviour, got it as `Used`.
 
    This is not the order "Dispatch of OnGUI" and "Windows" describe (each behaviour's Layout
-   and event, with its windows right after it). Keep that order unless a mod needs this one;
-   the rules above hold within any order of calls.
+   and event, with its windows right after it). "GUILayout, measured" (part 4) measured it
+   in full and settles it: the windows of every behaviour come after all the behaviours, in
+   every event.
 7. **`tooltipRect`** starts as (0, 0, 0 × 0). Only a label sets it: `GUI.Label` or
    `GUILayout.Label` with a non-empty tooltip, hovered, during Repaint. It becomes a rect of
    size 0 at the mouse position in the label's own coordinates:
@@ -733,6 +737,296 @@ slider content (those controls take no `GUIContent`), `GUI.Toolbar` and `Selecti
 buttons, `GUIStyle.Draw` called directly with a content, and a matrix other than the
 identity.
 
+### GUILayout, measured (2026-10-24)
+
+Found by the same mod spec as "GUI.tooltip": Customize Duplicant traits (Workshop 3687060621,
+`tests/e2e/mods/3687060621-customize-duplicant-traits.yaml`). Its editor is a `GUI.Window`
+whose function lays out, with GUILayout, a scroll view of traits, a text field and a SAVE
+button in a horizontal group, then either a label ("No presets saved yet.", `Height(40)`) or
+a `GUILayout.BeginScrollView(Height(80))` of preset rows (a label, LOAD and DEL), then a
+second scroll view and [ CLOSE EDITOR ]. The SAVE handler writes a preset file part-way
+through the MouseUp event, so the calls after it ask for a scroll view where the Layout
+before them recorded a label. This implementation then throws `ArgumentException: GUILayout
+mismatch: entry 7 was asked for in a group of 13 entries during Used` from
+`GUILayout.BeginScrollView`, and the crash screen opens. Its entries are also taller (labels
+20.95 against 19 or 20), so DEL sits at about y 367 against 355.
+
+**Measured** with `PROBE_SCENARIO=guilayout` (tools/UnityProbe, `GuiLayout.cs`, lines `GL …`,
+10 s into the main menu, about 80 s; `PROBE_GL_PART=size`, `wsize`, `order` or `mm` runs one
+part). The skin is `GUI.skin` as the game has it (the built-in "GameSkin", font
+`LegacyRuntime` at size 13). `tools/UnityProbe/gl-check.py rule LOG` checks the rules below
+(3,112 checks hold on the original's log), `gl-check.py diff ORIG OURS` lists every
+difference, and `gl-check.py show LOG [size|ws|ord|mm]` prints a part. Values are in the
+coordinates `GUILayoutUtility.GetLastRect` gives: those of the innermost clip (an area, a
+scroll view's content, a window), not of the group.
+
+The skin's styles, as `(left, right, top, bottom)`:
+
+| style | padding | margin | border | other |
+|---|---|---|---|---|
+| label | 0,0,3,3 | 4,4,4,4 | 0 | word wrap, rich text |
+| button | 6,6,3,3 | 4,4,4,4 | 6,6,6,4 | centred |
+| toggle | 15,0,3,0 | 4,4,4,4 | 14,0,14,0 | overflow -1,0,-4,0 |
+| textField | 3,3,3,3 | 4,4,4,4 | 4,4,4,4 | |
+| textArea | 3,3,3,3 | 4,4,4,4 | 4,4,4,4 | word wrap |
+| box | 4,4,4,4 | 4,4,4,4 | 6,6,6,6 | |
+| window | 10,10,20,10 | 0 | 8,8,18,8 | content offset (0, -18) |
+| scrollView | 0 | 0 | 0 | |
+| verticalScrollbar | 0,0,1,1 | 1,4,4,4 | 0,0,9,9 | fixed width 15 |
+| horizontalScrollbar | 0 | 4,4,1,4 | 9,9,0,0 | fixed height 15 |
+
+Every style's font is null (the skin's font); `lineHeight` reads 14 for all of them.
+
+#### 1. Calls that differ from the Layout before them
+
+During Layout, GUILayout records an entry per call (a leaf for a control, `Space`,
+`FlexibleSpace` or `GetRect`; a group for `BeginHorizontal`, `BeginVertical`,
+`BeginScrollView`; areas go in a list of their own). In every later event of the same OnGUI
+call or window function, each call takes the next recorded entry of the current group, by
+position only. What the entry was recorded for does not matter, with one exception (a
+group). Cases measured in OnGUI, in a scroll view in OnGUI, in a `GUI.Window`, in a scroll
+view in a `GUI.Window` and in a `GUILayout.Window`, all alike:
+
+1. **A leaf call takes the next entry's rect, whatever it was.**
+   - Content or size arguments are ignored: a label whose text grew to two lines, or a
+     `GetRect(200, 60)` recorded as `GetRect(20, 10)`, gets the recorded rect.
+   - An inserted label, `Space` or `FlexibleSpace` takes the rect of the entry recorded where
+     it now stands, and every later call shifts by one.
+   - A leaf call where a group was recorded gets the group's whole rect (a label in place of
+     a horizontal group or a scroll view gets that group's rect). The group's children are
+     never read, and the calls after it go on with the group's next sibling.
+2. **Fewer calls than entries:** nothing happens. Entries left over are ignored, and
+   `EndHorizontal`/`EndVertical`/`EndScrollView` close the group without an error.
+3. **More calls than entries:** it depends on the event.
+   - **Repaint:** the call throws `ArgumentException` with the message `Getting control N's
+     position in a group with only N controls when doing repaint` + "\n" + `Aborting`, where
+     N is the entry count of the group (also its index: "control 3 ... only 3"). The same
+     holds for `BeginArea` when no area was recorded ("control 0 ... only 0").
+   - **Other events** (MouseDown, MouseUp): no exception. The call gets the rect of the
+     group's last entry again.
+4. **A Begin call where a leaf was recorded** (`BeginHorizontal`, `BeginVertical` or
+   `BeginScrollView` in place of a label) throws `ExitGUIException` with the message
+   `GUILayout: Mismatched LayoutGroup.` followed by the event type as `EventType.ToString()`
+   gives it: `repaint`, `mouseDown`, `mouseUp` (the lower-case aliases). The group is not
+   opened. A Begin call where any group was recorded takes it, even of another kind: a
+   `BeginHorizontal` in place of a recorded `BeginVertical` lays its children out
+   vertically, as recorded.
+5. **During an event whose type is `Used`, nothing is checked.** Every GUILayout call returns
+   the dummy rect (0, 0, 1 × 1), as during Layout; Begin and End calls succeed, more or fewer
+   or other calls than recorded raise nothing, and no entry is consumed. This is what a
+   button handler meets: `GUILayout.Button` uses the MouseUp that clicks it, so every call
+   after a click (SAVE adding the preset scroll view, DEL removing a row) runs in a `Used`
+   event and gets (0, 0, 1 × 1). The same after `Event.current.Use()` in a MouseDown, and
+   in the behaviour's OnGUI after its window used the event. Controls before the click got
+   their real rects in that event.
+6. **What the player does with an exception that escapes:**
+   - The `ArgumentException` of rule 3 is logged as an exception (`LogType.Exception`, its
+     message as above). `ExitGUIException` (rule 4) is not logged at all.
+   - Either ends that OnGUI call or window function only. The other behaviours and the
+     other windows are still called for the same event, and the window keeps being shown.
+   - In a window function left inside a `BeginScrollView`, the player also logs the error
+     `GUI Error: You are pushing more GUIClips than you are popping. Make sure they are
+     balanced.`
+   - The next event starts afresh: the next Layout records the calls as made, and the
+     frames after run as before.
+7. **When the caller catches the exception** and goes on: after an `ArgumentException` the
+   position does not advance (each later call in that group throws too, `End` still closes
+   it). After the `ExitGUIException` of rule 4 the group was not opened: the calls that
+   follow take the parent's next entries, and the matching `End` closes the parent (an
+   `EndArea` with no area left throws `InvalidOperationException: Stack empty.`, and an
+   `EndArea` that closes a scroll view's clip logs `Invalid GUIClip stack popping`).
+8. **`GUILayoutUtility.GetLastRect` straight after a Begin call** logs the error `You cannot
+   call GetLast immediately after beginning a group.` and returns (0, 0, 1 × 1). After an
+   End call it returns the group's rect.
+
+#### 2. Entry sizes and spacing
+
+**Text height.** With the legacy font at size `s` (the style's `fontSize`, or 13 when it
+is 0), one line of text is `s + 0.01` high and each further line adds `1.1 × s`:
+13.01, 27.31, 41.61 for one to three lines at 13; 8.01 and 16.81 at 8; 30.01 and 63.01 at
+30. Bold and rich text are the same height. An empty text is one `lineHeight` (14).
+`CalcSize` adds the padding: a label "x" is 6.19 × 19.01, a button 18.19 × 19.01, a toggle
+21.19 × 16.01, a box 14.19 × 21.01. Border and overflow do not count.
+
+**An entry's size** (at the default skin, in a 400-wide area):
+- **Width:** an entry stretches to the group's width when its style stretches (all of the
+  skin's text styles do). Otherwise, and as its minimum, it is `ceil(CalcSize.x)` ("x" in a
+  label: 7; in a button: 19). `Width(w)` fixes it. A word-wrapping style takes
+  `CalcMinMaxWidth` (min the widest word, max the whole text).
+- **Height, styles without word wrap** (button, toggle, textField, box):
+  `ceil(CalcSize.y)`: button 20, 34, 48 for one to three lines; toggle 17; box 22.
+- **Height, word-wrapping styles** (label, textArea): `CalcHeight(content, width)` at the
+  entry's final width, unrounded (19.01, 33.31, 47.61), and the group rounds it (below).
+- `fixedHeight` replaces the height (a label with 50 is 50); `Height(h)` likewise; a
+  `Box("", Height(2), ExpandWidth(true))` is 2 high.
+
+**Rounding.** A group places its entries along its axis from an unrounded running position
+(sizes as above, unrounded), and rounds each entry's position and size on that axis to the
+nearest whole number. Across the axis the size is not rounded. So labels are 19 high in a
+vertical group and 19.01 in a horizontal one, and fifteen labels in a window put the last at
+`round(20 + 14 × (19.01 + 4)) = 342`.
+
+**Spacing along a group's axis.** Between two neighbours the gap is the larger of the first
+one's trailing margin and the next one's leading margin (label after label: 4, so labels sit
+at y 0, 23, 46; margins 10 then 3: 10; 2 then 20: 20). `Space(n)` and `FlexibleSpace` take no
+margin and no gap of their own: they start where the previous entry ends, and the next entry
+keeps its leading margin after them (label, `Space(10)`, label: 0, 19, 33). A `Space` entry's
+rect reads x -4 (its zero margin less the group's, below) and width 0.
+
+**Edges of a group without a style** (`BeginVertical()`, `BeginHorizontal()`, an area
+without a style, and the root of OnGUI). The group passes its children's margins out:
+- Its own margin is, across its axis, the smallest of its children's margins on that side,
+  and along its axis the first child's leading margin and the last child's trailing margin.
+- Each child is inset across the axis by its margin less that smallest one, and the first
+  starts at 0. So labels (margin 4) in an area start at (0, 0) and span the full 400; a
+  label with margin 8 among them starts at x 4 and is 392 wide; after a margin-0 label,
+  margin-4 labels start at x 4.
+- An area or the OnGUI root drops these margins (it has no parent).
+- Example (`grp.vertical.mixed`): a label, then a group of a margin-0 label and a margin-4
+  label, then a label: the first label at x 4 (the area's smallest margin is the group's 0),
+  the group at (0, 23, 400 × 42), its children at x 0 and 4, the last label at y 69.
+
+**Edges of a group with a style** (`BeginVertical(GUI.skin.box)`, `BeginArea(rect, style)`,
+a window's content, a scroll view's content). Each child is inset by the larger of the
+style's padding and its own margin, side by side; between children the margin rule above
+holds. The group's own margin is its style's margin.
+- In a box (padding 4) a label sits at (4, 4) and is 392 wide; the group is 400 × 27.
+- Padding 2: a label at (4, 4); a label with margin 8 at (8, 8), the next label at x 4.
+- Padding (5, 6, 7, 8): a label at (5, 7), 389 wide; the group is 34 high (7 + 19 + 8).
+- An area with the window style: (10, 20).
+
+**The OnGUI root** is a vertical group from (0, 0) that is not as wide as the screen: it is
+as wide as its widest entry's minimum, and stretching entries take that width. A label
+"root0" and a button "root1" are both 42 wide; add a `Label(…, Width(300))` and all are 300.
+
+**`BeginArea(rect)`** places its content at the rect's origin: a `GUILayout.Button` first in
+an area at (20, 180) is at (0, 0) in the area, (20, 180) on the screen, as wide as the area.
+
+**Scroll views** (`GUILayout.BeginScrollView`):
+- The view is an entry of the parent with the `scrollView` style (no padding, no margin).
+  Without options it stretches both ways: in a 400 × 400 area after nothing, a scroll view of
+  two labels is 400 × 377 (the label after it takes the rest). `Height(h)` fixes it;
+  `MinHeight(50), MaxHeight(70)` gives 70 when there is room, whatever the content.
+- The content is a group with a style (no padding), so its entries keep their full margins:
+  labels at (4, 4) and 392 wide in a 400-wide view; a margin-0 label at (0, 0).
+- When the content is taller than the view, the vertical scrollbar takes its fixed width
+  plus its left margin (15 + 1) from the content: labels are 376 wide. Asking for it
+  (`alwaysShowVertical`) does the same.
+- Content wider than the view (`Width(600)`) keeps its width.
+- A background style passed in is the view's style: a box background gives the view the
+  box's margin.
+
+**Windows.** A `GUILayout.Window` and the GUILayout content of a `GUI.Window` are laid out in
+a group with the window style: the first label at (10, 20) in window coordinates (the
+padding), 280 wide in a 300-wide window, the next at y 43. With a style of padding (5, 6,
+7, 8): (5, 7), 289 wide. (With `GUIStyle.none` the first label read (4, 0), 292 wide:
+measured, not explained by the rule above.)
+
+#### 3. `GUILayout.Window`'s rect
+
+- **During Layout** the call returns the rect passed in, unchanged.
+- **In every other event** it returns the laid-out rect: the position passed in, and per
+  axis the larger of the content's minimum size and the size passed in after the options:
+  `height = max(contentMin, clamp(given.height, MinHeight, MaxHeight))`, with `Height(h)`
+  standing for the given height and `ExpandHeight` changing nothing; the same for the width
+  with `Width`, `MinWidth`, `MaxWidth`.
+  - The content's minimum height is the padding (20 + 10) plus the entries' unrounded
+    heights and gaps: two labels give 30 + 19.01 + 4 + 19.01 = 72.02, fifteen give 371.15.
+  - The content never shrinks below what it needs: `Height(100)` or `MaxHeight(100)` with
+    371.15 of content returns 371.15; with 72.02 of content `MaxHeight(100)` on a given 300
+    returns 100.
+  - Measured: given 300 × 300 and two labels: 300 × 300 (the mod's case: it keeps 300). Given
+    100 × 50: 100 × 72.02. Given 0 × 0: 42 × 72.02. `Width(250)`: 250; `MinWidth(400)`: 400;
+    `Height(250)` or `MinHeight(250)`: 250; `Width(100), Height(100)` on 300 × 300: 100 × 100.
+    Labels wrap to the given width rather than widening the window (100 wide: 100 ×
+    800.15).
+- **Between frames:** each frame's result depends only on that frame's rect and content.
+  Fed back (`rect = GUILayout.Window(...)`), it grows with the content and shrinks with it
+  down to the rect fed in, which by then is the earlier result: content growing from one to
+  sixteen labels and back, on 200 × 50 fed back, returned 50, 118.04, ... 479.96 and then
+  stayed at 479.96. Not fed back, it followed the content (back to 50). A given size growing
+  or shrinking each frame is returned as given once it exceeds the content.
+- The window lays its content out at the returned size.
+
+#### 4. Order of calls and windows
+
+Measured with two behaviours (`gui`, enabled first, and `gui2`) and `GUI.Window`s declared
+by them (`gui` in the order 402, 401, 403; `gui2` 405), then windows added, dropped and
+reordered. The rule settles "GUI.tooltip" rule 6.
+
+1. **Each event** is sent to every behaviour's OnGUI, and then to the windows of all the
+   behaviours:
+   - Layout: `gui`, `gui2`, then every window from front to back.
+   - Repaint: `gui2`, `gui` (the reverse), then every window from back to front.
+   - MouseDown and MouseUp: first the front window under the mouse, if any (only that one),
+     then `gui`, `gui2`. A press on a window's empty area reaches the behaviours as
+     `MouseDown`, not `Used`; a press a control uses reaches them as `Used`.
+   - The player sends no MouseMove events.
+   - Each mouse event is preceded by its own Layout (behaviours, then windows).
+2. **Stacking:**
+   - A window declared in a frame that it was not declared in the frame before goes in
+     front of all the others. Several new in one frame go in front in the order they were
+     declared, the first declared frontmost: at first 402, 401, 403, 405 from front to back.
+   - So the first-declared window is in front when all appear together, and a window
+     declared later is in front of those already shown: 404 added later went in front, then
+     400 (declared first in code but new) in front of it; 402 dropped for a frame and
+     declared again came back in front; 406 of `gui2` in front of `gui`'s.
+   - A window not declared during a frame's Layout is gone (it loses its place).
+   - A press on a window brings it to the front at once: its next Layout has it first.
+3. **`GUI.BringWindowToFront(id)` and `BringWindowToBack(id)`**, called in OnGUI during
+   Layout, take effect in that same Layout's window pass (the windows run after the
+   behaviours). Called during Repaint, they take effect from the next frame. Called outside
+   OnGUI (in Update), `BringWindowToFront` neither throws nor changes anything.
+4. **`GUI.FocusWindow(id)` and `GUI.UnfocusWindow()`** do not change the order.
+
+#### Where this implementation deviates
+
+From the same probe. In a full run the size part stopped at once on a missing member
+(`Font.lineHeight`), so it was run again on its own (`PROBE_GL_PART=size`). `gl-check.py
+rule` fails 1,468 of 3,374 checks of the other parts and 183 of 194 size checks; `diff` finds
+989 differences in the other parts and 145 size and style lines:
+
+| Case | original | this implementation |
+|---|---|---|
+| a Button's handler adds a scroll view (the mod's SAVE) | the rest of the event gets (0, 0, 1 × 1); no error | `ArgumentException: GUILayout mismatch: entry 3 was asked for in a group of 9 entries during Used` from `BeginScrollView`; logged, window function aborted |
+| any mismatch while the type is `Used` | nothing checked; every call (0, 0, 1 × 1) | real rects, and the mismatch rules of the other events, with its own exception |
+| more calls than entries, MouseDown/MouseUp | the last entry's rect again | `ArgumentException` ("GUILayout mismatch: entry N was asked for in a group of N entries during MouseDown. ...") |
+| more calls than entries, Repaint | `ArgumentException`, "Getting control N's position in a group with only N controls when doing repaint\nAborting" | `ArgumentException` with the message above |
+| a leaf call where a group was recorded | the group's rect | `ArgumentException` ("GUILayout mismatch: entry 2 ...") |
+| a Begin call where a leaf was recorded | `ExitGUIException` "GUILayout: Mismatched LayoutGroup.repaint", not logged | `ArgumentException`, logged |
+| `BeginHorizontal` where a vertical group was recorded | takes it, laid out as recorded | `ArgumentException` |
+| `BeginArea` with no area recorded | `ArgumentException` ("control 0 ... only 0") | `ArgumentException` ("entry 2 ... of 3"): the area counts as an entry of the parent |
+| `GetLastRect` after a Begin call | logs an error, (0, 0, 1 × 1) | a rect (the enclosing area's 400 × 400 or 400 × 200 here), no error |
+| `Font.lineHeight` | 14 | `MissingMethodException` (no member) |
+| a style's `lineHeight` | 14 | 14.94873 |
+| one line of text at size 13; two; three | 13.01; 27.31; 41.61 (`s + 0.01 + 1.1 s` per line) | 14.95; 29.90; 44.85 |
+| a label's height in a vertical group | `round(CalcHeight)`: 19, 33, 48 | 20.94873, 35.89746, 50.84619 (unrounded) |
+| a button's, toggle's, box's height | `ceil(CalcSize.y)`: 20, 17, 22 | 20.94873, 17.94873, 22.94873 |
+| label "x" width with `ExpandWidth(false)` | 7 (`ceil` of 6.19) | 7 |
+| positions along a group | rounded per entry | unrounded (y 28.94873, 53.89746, …) |
+| first label in an area at (20, 20), no style | (0, 0, 400 × 19) | (4, 4, 392 × 20.95): margins kept at the edges |
+| the OnGUI root | from (0, 0), as wide as its widest entry (42, or 300) | from (4, 4), 1272 wide (the screen less margins) |
+| a group or area with a style (box) | children at max(padding, margin): (4, 4) | padding + margin: (8, 8); a vertical box group (12, 12) |
+| a group without a style | margins passed out to the parent (`grp.vertical.mixed`: group at (0, 23, 400 × 42)) | group at (0, 28.95, 400 × 49.9), children inset by their own margins |
+| `Space(10)` between labels | rect (-4, 19, 0 × 10); next label at 33 | (0, 28.95, 0 × 10); next at 42.95 |
+| scroll view without options, two labels, 400 × 400 area | 400 × 377 | 400 × 371.05 |
+| scroll content with a vertical scrollbar | 376 wide (bar 15 + 1) | 372 wide |
+| window content (`GUILayout.Window` and `GUI.Window`) | first label (10, 20), 280 wide | (14, 24), 272 wide |
+| `GUILayout.Window` during Layout | the rect passed in | the laid-out rect |
+| `GUILayout.Window` 300 × 300 with two labels | 300 × 300 (given is the minimum) | 300 × 83.9 (shrinks to content) |
+| `GUILayout.Window` with `Height(100)` or `MaxHeight(100)`, content 371 | 371.15 (content wins) | 100 |
+| order of calls (two behaviours with windows) | `gui`, `gui2`, then all windows, each event (part 4) | `gui`, its windows, then `gui2`, its windows, per event; Layout and Repaint both in declaration order |
+| a new window | in front; several new together: the first declared frontmost | drawn in declaration order, so the last declared is in front (402, 401, 403 at first: 403 in front) |
+| `GUI.FocusWindow(401)` | no change of order | brings 401 to the front |
+| mouse events | front window under the mouse, then `gui`, `gui2` | `gui2` first, then `gui`'s window under the mouse, then `gui` unless the window used it; MouseMove events are sent |
+| a press on a window's empty area | the behaviours get `MouseDown` | the behaviour gets nothing |
+
+The mod's failure is the first row; its DEL offset comes from the label, button and margin
+rows (each row about 2 pixels taller, and the window content inset 4 more). The rows on
+order and windows were probed with `GUI.Window`; `GUI.ModalWindow`, `GUI.depth`, nested
+`GUILayout.BeginArea` inside scroll views, keyboard events and `GUILayout.Toolbar` were not
+covered.
+
 ## Tests
 
 `tests/OniBrutal.UnityEngine.Tests/IMGUITests.cs` already pins the rules marked "Test" above.
@@ -748,3 +1042,7 @@ match your design. Add tests for these rules:
 - `GetStyle` fallbacks;
 - `Event.KeyboardEvent`;
 - `GUI.tooltip`, rules 1 to 5 of its section, with the mouse placed through the event queue.
+- "GUILayout, measured": the mismatch rules 1 to 5 (Repaint, MouseDown and Used), the entry
+  heights and gaps of part 2 (label 19, button 20, toggle 17, box 22; labels at 0, 23, 46),
+  the margin and padding insets, `GUILayout.Window`'s rect (part 3) and the order of calls
+  and windows (part 4).

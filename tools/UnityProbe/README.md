@@ -279,6 +279,22 @@ the player's (it focuses the largest mapped window). Check the rules with
 `tools/UnityProbe/tt-check.py rule LOG`, and compare the players with `tt-check.py diff ORIG
 OURS`. `docs/cleanroom/imgui.md` ("GUI.tooltip") records what it measured.
 
+With `PROBE_SCENARIO=guilayout` only the GUILayout probe runs (`GuiLayout.cs`, lines `GL …`, 10 s
+into the main menu, about 80 s; `PROBE_GL_PART=size`, `wsize`, `order` or `mm` runs one part).
+`size` logs the default skin's styles and the rects GUILayout gives: every control kind with
+one to three lines, other font sizes, paddings and margins, sequences of entries, groups and
+areas with and without a style, scroll views and window content. `wsize` logs
+`GUILayout.Window`'s returned rect against the rect passed in, with options and content or size
+changing between frames. `order` logs every OnGUI call and window function per event, for two
+behaviours with windows added, dropped, brought to the front or back, focused and clicked
+(through XTest, as the tooltip probe; the EventSystem is disabled meanwhile). `mm` changes the
+GUILayout calls of one event against the Layout before it (entries added, removed, regrouped;
+in OnGUI, scroll views and windows; during Repaint, MouseDown, MouseUp and `Used`, and through a
+button's handler as Customize Duplicant traits' SAVE and DEL), and logs each call's rect or
+exception and what the player logs. Check the rules with `tools/UnityProbe/gl-check.py rule
+LOG`, and compare the players with `gl-check.py diff ORIG OURS`. `docs/cleanroom/imgui.md`
+("GUILayout, measured") records what it measured.
+
 ## UI semantics (`UiSemantics.cs`, `UIS` lines)
 
 Ten seconds into the front end, after the front-end dump, it builds small hierarchies on an

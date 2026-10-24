@@ -1,0 +1,33 @@
+# Too Many Dupes (3746576803), with Dupery Fixed (3172734005), which it requires. Class P
+# (content only: no DLL).
+#
+# What it does: ships a personalities.json of 18 new Duplicant personalities (Spiky, Weaver,
+# Bob, Iggy, ...), each with its own accessories kanim (anim/assets/NAME_accessories: hair and
+# hat hair) and a dream icon (dreamicons/). Dupery finds the file (any case) in the mod's
+# folder at Db.Initialize, loads the accessories and icons, and adds the personalities to the
+# game's pool, so the printing pod and new colonies can offer them.
+# How a player reaches it: printing pod and new-colony Duplicants.
+# What changes: which personalities, and so which looks, Duplicants can have.
+#
+# The pool is checked: Spiky and Weaver are personalities with their names and traits, Spiky's
+# hair an accessory from the pack's kanim and his dream icon a sprite. Setup gives Nikola
+# Spiky's look (Accessorizer.ApplyMinionPersonality, what a printed Spiky gets) and selects
+# him; the shot shows the pack's hair drawn on him.
+from: early-base
+mods: [3172734005, 3746576803]
+setup:
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[1].GetComponent<Accessorizer>", method: ApplyMinionPersonality, args: [{"$": "Db.Get().Personalities.Get(\"SPIKY\")"}]}}
+  - driver: {setup.call: {target: "SelectTool.Instance", method: Select, args: [{"$": "Components.LiveMinionIdentities.Items[1]"}]}}
+steps:
+  - expect_state:
+      "Db.Get().Personalities.Get(\"SPIKY\").Name": Spiky
+      "Db.Get().Personalities.Get(\"SPIKY\").stresstrait": UglyCrier
+      "Db.Get().Personalities.Get(\"SPIKY\").joyTrait": StickerBomber
+      "Db.Get().Personalities.Get(\"WEAVER\").Name": Weaver
+      "Db.Get().Personalities.Get(\"WEAVER\").genderStringKey": MALE
+      "Db.Get().Personalities.Count": "== original"
+      "Db.Get().Accessories.Get(\"hair_spiky\").animFile.name": spiky_accessories_kanim
+      "Db.Get().Accessories.Get(\"hat_hair_spiky\")": exists
+      "Assets.GetSprite(\"dreamicon_spiky\").name": dreamicon_spiky
+      "count:Components.LiveMinionIdentities.Items[1].GetComponent<Accessorizer>.GetAccessories()[*] if .Get().Id == hair_spiky": 1
+  - world_shot: {name: spiky, ortho: 3, at: [124, 208]}

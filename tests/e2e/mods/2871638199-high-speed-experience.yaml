@@ -1,0 +1,22 @@
+# High speed experience / 高速经验 (2871638199), classes P, O.
+#
+# What it does: every grant of skill experience to a Duplicant (MinionResume.AddExperience: the
+# passive trickle each tick and the aptitude-weighted grant from work) is replaced by a fixed
+# amount, a PLib option (10 by default, 1-100, restart required, in Controler.json), so
+# Duplicants earn skill points at a rate the player sets.
+# How a player reaches it: nothing to press; the Skills screen shows the points.
+# What changes: how fast Duplicants gain skill points.
+#
+# Options here: 20 a grant. The game is run for 10 seconds: the passive trickle alone (a few
+# hundredths of a point a second in the game) brings in thousands of points per Duplicant.
+from: early-base
+mods: [2871638199]
+options:
+  "2871638199": {$file: Controler.json, a1: 20.0}
+steps:
+  - expect_state:
+      "sum:Components.MinionResumes.Items[*].TotalExperienceGained": {save_as: before}
+      "Components.MinionResumes.Items.Count": {save_as: dupes}
+  - run: {seconds: 10}
+  - expect_state:
+      "sum:Components.MinionResumes.Items[*].TotalExperienceGained": "> before + 500 * dupes"

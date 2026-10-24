@@ -1,0 +1,56 @@
+{
+ "spec": "mods/2871638199-high-speed-experience.yaml",
+ "mods": [
+  "2871638199"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a fixed grant of 20 per experience call (option); ten game seconds bring every Duplicant more than 500 experience",
+ "updated": "2026-10-23",
+ "commit": "765a9c0",
+ "mod_dlls": {
+  "2871638199": {
+   "High speed experience╕▀╦┘╛¡╤Θ.dll": "db650e248009508747829736ea7d96941e95f228fc63f6547106e688170ba432",
+   "PLib.dll": "b862c5db2b3cd6df09a62d4a30782e91e2b24e8e1bfac08d991c9cc89a984ba9"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-183417-5e8543",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T18:34:17",
+    "lane": 13,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-184853-6f6439",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T21:11:15",
+    "lane": 12,
+    "reference_run": "20261023-183417-5e8543",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-184853-6f6439",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T21:12:24",
+    "lane": 12,
+    "reference_run": "20261023-183417-5e8543",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

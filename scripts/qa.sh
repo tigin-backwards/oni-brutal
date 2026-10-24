@@ -192,11 +192,17 @@ quiet_begin() # STAGE
     # cores skewed a perf run by 13%): wait, at most QA_QUIET_MAX_MIN minutes, until under
     # QA_QUIET_CORES cores' worth of CPU is busy.
     local busy waited=0 max=$(( ${QA_QUIET_MAX_MIN:-30} * 60 ))
-    while busy=$(cores_busy); awk -v b="$busy" -v m="${QA_QUIET_CORES:-2}" 'BEGIN { exit !(b > m) }'; do
+    while busy=$(cores_busy); win=$(windows_game); [ -n "$win" ] || awk -v b="$busy" -v m="${QA_QUIET_CORES:-2}" 'BEGIN { exit !(b > m) }'; do
+        [ $waited -eq 0 ] && [ -n "$win" ] && note "$1: waiting while a game runs on Windows ($win), whose load WSL can't see"
         [ $waited -eq 0 ] && note "$1: waiting for the machine to go quiet ($busy cores busy; most: $(ps -eo pcpu=,comm= --sort=-pcpu | head -1 | xargs))"
         if [ $waited -ge $max ]; then note "$1: still $busy cores busy after ${QA_QUIET_MAX_MIN:-30} min; measuring anyway"; break; fi
         sleep 15; waited=$((waited + 20))
     done
+}
+windows_game() # a game running on the Windows side (the user playing, or a Windows test run): its names
+{
+    command -v tasklist.exe > /dev/null || return 0
+    tasklist.exe /NH 2>/dev/null | tr -d '\r' | awk 'tolower($1) ~ /^(onibrutal|oxygennotincluded|brutalnotincluded)\.exe$/ { print $1 }' | sort -u | paste -sd, -
 }
 cores_busy() # cores' worth of CPU busy over 5 s, from /proc/stat
 {

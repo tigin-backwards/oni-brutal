@@ -1,0 +1,27 @@
+# Controlled Warnings (3649415088), classes P, O.
+#
+# What it does: a postfix on TrappedDuplicantDiagnostic.CheckTrapped raises a notification
+# "NAME is Trapped!" for an idle Duplicant who can reach neither the printing pod, a warp
+# receiver, their own bed nor a busy Duplicant, and clears it once they can; if the Duplicant
+# is also out of breath it becomes a red "TRAPPED & SUFFOCATING!" alert. PLib options turn the
+# alert on or off, make it persist, set a cooldown, the escalation and a pause on it.
+# How a player reaches it: a Duplicant walled in.
+# What changes: trapped Duplicants are announced by name.
+#
+# setup opens a two-cell pocket of oxygen (10 kg a cell, enough to breathe for the run) inside
+# the solid rock east of the base (140, 208-209) and moves the second Duplicant into it. While
+# the game runs the Duplicant idles there, cut off, and the notification with their name
+# appears.
+from: early-base
+mods: [3649415088]
+require_log: ['\[ControlledWarnings\] Loaded']
+setup:
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [132428, Oxygen, {"$": "CellEventLogger.Instance.SandBoxTool"}, 10.0, 300.0]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [133064, Oxygen, {"$": "CellEventLogger.Instance.SandBoxTool"}, 10.0, 300.0]}}
+  - driver: {setup.call: {type: TransformExtensions, method: SetPosition, args: [{"$": "Components.LiveMinionIdentities.Items[1].transform"}, [140.5, 208.0, 0.0]]}}
+steps:
+  - run: {seconds: 60}
+  - expect_state:
+      "Components.LiveMinionIdentities.Items[1].transform.position.x": "> 140"
+  - expect_ui: {"**/NotificationScreen/**": {any_text: "~is Trapped!"}}
+  - ui_dump: {name: trapped, root: "**/NotificationScreen/Notifications/NormalLabel"}

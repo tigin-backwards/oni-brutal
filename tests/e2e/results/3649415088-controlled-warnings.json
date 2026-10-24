@@ -1,0 +1,63 @@
+{
+ "spec": "mods/3649415088-controlled-warnings.yaml",
+ "mods": [
+  "3649415088"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Duplicant moved into a sealed pocket of rock idles there, and the mod's \"NAME is Trapped!\" notification appears; the notification label matches",
+ "updated": "2026-10-24",
+ "commit": "1dd8b80",
+ "mod_dlls": {
+  "3649415088": {
+   "ControlledWarnings.dll": "126f55fe7aed3dd9ba859fbe3ee54e48c8720c624b79ec8cad379cce81ed6d22"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-081636-bf4174",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T08:16:36",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-081822-991475",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T08:18:22",
+    "lane": 16,
+    "reference_run": "20261024-081636-bf4174",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "trapped": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261024-081822-991475",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T08:19:27",
+    "lane": 16,
+    "reference_run": "20261024-081636-bf4174",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "trapped": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

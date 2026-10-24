@@ -1,0 +1,61 @@
+{
+ "spec": "mods/2543819221-4kw-900kw-wire.yaml",
+ "mods": [
+  "2543819221"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "Conductive Wire carries 4 kW and Conductive Heavy-Watt Wire 900 kW; the latter picked in the Power menu (card shot), dragged, built by power technicians from steel and selected (details shot)",
+ "updated": "2026-10-24",
+ "commit": "8c6493b",
+ "mod_dlls": {
+  "2543819221": {
+   "Updated 4000w.dll": "5a4067315ddebbbb35599903ba387c739b399e46d834803c7d4d829b49c4d451"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-070323-907cc9",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T07:42:52",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-075324-d013a0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T07:54:09",
+    "lane": 15,
+    "reference_run": "20261024-070323-907cc9",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.007747,
+     "details": 0.002155
+    }
+   },
+   {
+    "run": "20261024-075324-d013a0",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T07:55:23",
+    "lane": 15,
+    "reference_run": "20261024-070323-907cc9",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.007747,
+     "details": 0.002155
+    }
+   }
+  ]
+ }
+}

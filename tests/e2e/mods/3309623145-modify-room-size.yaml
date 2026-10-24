@@ -1,0 +1,28 @@
+# 自定义修改房间大小（Modify the room size） (3309623145), classes P, O.
+#
+# What it does: PLib options (Controler.json) set the minimum and maximum size of each room
+# type (Washroom, Latrine, Barracks, Luxury Barracks, Private Bedroom, Great Hall, Mess Hall,
+# Kitchen, Massage Clinic, Hospital, Power Plant, Greenhouse, Stable, Laboratory, Recreation
+# Room, ...; the game's are 12 and 64 or 96 tiles): a postfix on the RoomType constructor
+# replaces their size constraints, and the room prober's maximum room size is raised to 500
+# cells after each refresh.
+# How a player reaches it: the Mods screen's options; the Room overlay (its legend's
+# criteria).
+# What changes: which areas count as rooms.
+#
+# Options here: Latrine 1 to 200 tiles, Barracks 4 to 300. The Latrine's and the Barracks'
+# constraints read the new sizes, and the Room overlay is opened.
+from: early-base
+mods: [3309623145]
+options:
+  "3309623145": {$file: Controler.json, LatrineMinSize: 1, LatrineMaxSize: 200, BarracksMinSize: 4, BarracksMaxSize: 300}
+steps:
+  - expect_state:
+      "count:Db.Get().RoomTypes.Latrine.additional_constraints[*] if .name == 'Maximum size: 200 tiles'": 1
+      "count:Db.Get().RoomTypes.Latrine.additional_constraints[*] if .name == 'Minimum size: 1 tiles'": 1
+      "count:Db.Get().RoomTypes.Barracks.additional_constraints[*] if .name == 'Maximum size: 300 tiles'": 1
+  - click: {ui: "**/OverlaysBarHolder/OverlaysBar/Toggle:Room Overlay"}
+  - ui_wait: {path: "**/OverlayLegend", cond: stable}
+  - expect_ui:
+      "**/OverlayLegend/TitleBar/Label": {text: "ROOM OVERLAY"}
+  - shot: {name: legend, crop: "**/OverlayLegend", threshold: 0.04}

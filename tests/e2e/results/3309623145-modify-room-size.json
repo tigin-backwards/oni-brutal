@@ -1,0 +1,60 @@
+{
+ "spec": "mods/3309623145-modify-room-size.yaml",
+ "mods": [
+  "3309623145"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Latrine's and Barracks' size constraints read the options' 200 and 300 tiles; the Room overlay's legend shot",
+ "updated": "2026-10-24",
+ "commit": "8c6493b",
+ "mod_dlls": {
+  "3309623145": {
+   "PLib.dll": "5d6a8ef9d87143b90113548016180078efaf112d69afe0cdf1073a6125b33773",
+   "│°╖┐┤≤╨í.dll": "611d8eef82fece1453ec1bb4cb28815971282fe264ade800eb34a95830c8f111"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-070323-907cc9",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T07:41:35",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-075324-2b6a6b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T07:53:24",
+    "lane": 14,
+    "reference_run": "20261024-070323-907cc9",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "legend": 2e-05
+    }
+   },
+   {
+    "run": "20261024-075324-2b6a6b",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T07:54:17",
+    "lane": 14,
+    "reference_run": "20261024-070323-907cc9",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "legend": 2e-05
+    }
+   }
+  ]
+ }
+}

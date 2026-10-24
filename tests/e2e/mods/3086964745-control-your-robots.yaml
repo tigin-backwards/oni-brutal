@@ -1,0 +1,35 @@
+# Control your Robots (3086964745), classes P, S, O.
+#
+# What it does: rovers (the Rover and the Biobot, BaseRoverConfig) get a Turn Off / Turn On
+# button in their menu (RobotTurnOffOn, a Switch): turned off, a rover is suspended in sleep
+# mode (the RobotSuspend tag; a "Sleep mode" status with a Zzz icon, a lower battery drain)
+# and can be moved by a Duplicant like a wrangled critter. Rovers also get a row on the
+# Priorities screen and personal priorities, may do life-support errands, a low-power idle
+# mode, door permissions; dead rovers can be deconstructed; Flydos land idle to save power;
+# the railgun may launch rovers. PLib options switch the parts.
+# How a player reaches it: the rover's menu buttons; the Priorities screen.
+# What changes: rovers can be switched off, parked and managed like Duplicants.
+#
+# setup drops a Rover (ScoutRover) on the floor of the dug-out corridor west of the printing
+# pod. Selected, it shows the Turn Off button; pressed, a Duplicant comes to switch it off
+# and the rover is suspended.
+from: early-base
+mods: [3086964745]
+setup:
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(0, 111, 207, \"ScoutRover\", \"Creatures\")", method: SetActive, args: [true]}}
+steps:
+  - run: {seconds: 1}
+  - driver: {camera.set: {cell: [111, 208], ortho: 8}}
+  - click_world: {cell: [111, 206], select: ScoutRover}
+  - ui_wait: {path: "**/DetailsScreen/UserMenuButtons/UserMenuScreen/Buttons", cond: stable}
+  - expect_ui:
+      "**/UserMenuScreen/Buttons/Turn OffButton/Text": {text: "Turn Off"}
+  - ui_dump: {name: buttons, root: "**/DetailsScreen/UserMenuButtons/UserMenuScreen"}
+  - click: {ui: "**/UserMenuScreen/Buttons/Turn OffButton"}
+  # A Duplicant walks over and flips the switch (a toggle errand).
+  - run: {seconds: 200}
+  - expect_state:
+      "selected:KPrefabID.HasTag(\"RobotSuspend\")": true
+  - expect_ui:
+      "**/UserMenuScreen/Buttons/Turn OnButton/Text": {text: "Turn On"}
+  - shot: {name: details, crop: "**/DetailsScreen", threshold: 0.04}

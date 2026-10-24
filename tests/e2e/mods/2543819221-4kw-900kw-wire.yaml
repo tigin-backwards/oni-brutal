@@ -1,0 +1,52 @@
+# 【2024-09-FIXED】[VANILLA + DLC SUPPORT] 4KW/900KW WIRE (2543819221), class P.
+#
+# What it does: Conductive Wire (rating Max2000) carries 4 kW instead of 2 kW and Conductive
+# Heavy-Watt Wire (Max50000) 900 kW instead of 50 kW (a prefix that replaces
+# Wire.GetMaxWattageAsFloat; Max500, Max1000 and Max20000 keep the game's values).
+# How a player reaches it: building Conductive Wire or Conductive Heavy-Watt Wire (Power,
+# researched with Pretty Good Conductors) and loading a circuit on it.
+# What changes: conductive circuits overload only far above the game's limits.
+#
+# setup grants Pretty Good Conductors, teaches two Duplicants Power Technician, and spawns
+# steel. Conductive Heavy-Watt Wire is picked
+# in the Power menu, its card read (900 kW), and a run of four cells dragged in the dug-out
+# corridor west of the printing pod, built and selected.
+from: early-base
+mods: [2543819221]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"PrettyGoodConductors\")", method: Purchased}}
+  # The build menu shows a category once one of its buildings is researched, as it learns.
+  - driver: {setup.call: {target: "Game.Instance", method: Trigger, args: [-107300940]}}
+  - driver: {setup.call: {target: "PlanScreen.Instance._researchedDefs", method: Clear}}
+  # Conductive Heavy-Watt Wire is built only by a Duplicant who can power-tinker.
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[1].GetComponent<MinionResume>", method: MasterSkill, args: [Technicals1]}}
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[1].GetComponent<MinionResume>", method: MasterSkill, args: [Technicals2]}}
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[2].GetComponent<MinionResume>", method: MasterSkill, args: [Technicals1]}}
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[2].GetComponent<MinionResume>", method: MasterSkill, args: [Technicals2]}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Steel\").substance", method: SpawnResource, args: [[111.5, 206.5, -12], 900, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Wire.GetMaxWattageAsFloat(\"Max500\")": 500
+      "Wire.GetMaxWattageAsFloat(\"Max1000\")": 1000
+      "Wire.GetMaxWattageAsFloat(\"Max2000\")": 4000
+      "Wire.GetMaxWattageAsFloat(\"Max20000\")": 20000
+      "Wire.GetMaxWattageAsFloat(\"Max50000\")": 900000
+  - run: {seconds: 5}
+  - driver: {camera.set: {cell: [111, 208], ortho: 10}}
+  - click: {ui: "**/PlanScreen/Toggle:Power"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/WireRefinedHighWattage Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/WireRefinedHighWattage Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
+  - shot: {name: product, crop: "**/ProductInfoScreen", threshold: 0.04}
+  - drag: {from: [109, 207], to: [112, 207]}
+  - key: {code: Escape}
+  - expect: {blueprints: {WireRefinedHighWattage: 4}}
+  - run: {seconds: 1500, until: {buildings: {WireRefinedHighWattage: 4}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [111, 208], ortho: 8}}
+  - click_world: {cell: [110, 207], select: WireRefinedHighWattage}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Heavi-Watt Conductive Wire"}
+  - expect_state:
+      "selected:Wire.MaxWattageRating": Max50000
+  - shot: {name: details, crop: "**/DetailsScreen", threshold: 0.04}

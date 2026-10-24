@@ -1,0 +1,36 @@
+# Ach/Res : Names (2020077262), class P (message titles).
+#
+# What it does: the "Research Complete" message in the top-left message list names the tech
+# on a second line in bold (a postfix on ResearchCompleteMessage.GetTitle), and so does an
+# "Achievement Earned" message name its achievement (a prefix on
+# ColonyAchievementTracker.TriggerNewAchievementCompleted, a postfix on
+# AchievementEarnedMessage.GetTitle). Opened, the message's dialog keeps only the first line
+# as its title (a postfix on MessageDialogFrame.SetMessage cuts at "<BR>").
+# How a player reaches it: completing a research or an achievement; clicking the message.
+# What changes: the message list says which tech or achievement it is about.
+#
+# setup completes Basic Farming (FarmingTech) through the research queue, the way the
+# research station would. Its message joins early-base's three and reads the tech's name; it
+# is opened by a click, and the dialog's title keeps the first line only. Achievements need far more colony and are not driven.
+from: early-base
+mods: [2020077262]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"FarmingTech\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+steps:
+  - expect_state:
+      "Research.Instance.GetTechInstance(\"FarmingTech\").IsComplete()": true
+      "Messenger.Instance.Count": 3
+  - expect_ui:
+      "**/NotificationScreen/Messages/MessageLabel/Label/Text": {any_text: "/Research Complete.*Basic Farming/"}
+  # The new message slides in from the left.
+  - ui_wait: {path: "**/NotificationScreen/Messages", cond: stable, frames: 300}
+  - ui_dump: {name: messages, root: "**/NotificationScreen/Messages"}
+  - shot: {name: messages, crop: "**/NotificationScreen/Messages", threshold: 0.04}
+  # The fourth message, below early-base's log entry and two videos.
+  - click: {ui: "**/NotificationScreen/Messages/MessageLabel/Label/Collider", index: 3}
+  - expect_state:
+      "all:MessageDialogFrame::[0].title.text": "RESEARCH COMPLETE"
+  # Some 120 frames while the dialog fades in (the paused game's pause button stays put).
+  - ui_wait: {path: "**/SpeedControlScreen/PauseButton", cond: stable, stable: 120, frames: 600}
+  - shot: {name: dialog, threshold: 0.04}

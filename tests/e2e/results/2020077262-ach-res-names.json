@@ -1,0 +1,69 @@
+{
+ "spec": "mods/2020077262-ach-res-names.yaml",
+ "mods": [
+  "2020077262"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a completed research's message names the tech (Basic Farming) on a second line (message list dumped and shot); opened by a click, the dialog's title keeps the first line (shot)",
+ "updated": "2026-10-24",
+ "commit": "2673b5e",
+ "mod_dlls": {
+  "2020077262": {
+   "ST.achname.dll": "eade03949ab23bb03741097d51c3af89ff48a080a00643b11524dea7363f6bcb"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-071545-b84323",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T07:36:40",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-073847-fce3d1",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T07:38:47",
+    "lane": 15,
+    "reference_run": "20261024-071545-b84323",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "messages": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "messages": 0.000301,
+     "dialog": 0.015262
+    }
+   },
+   {
+    "run": "20261024-073847-fce3d1",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T07:39:54",
+    "lane": 15,
+    "reference_run": "20261024-071545-b84323",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "messages": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "messages": 0.000301,
+     "dialog": 0.015125
+    }
+   }
+  ]
+ }
+}

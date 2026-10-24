@@ -1,0 +1,67 @@
+{
+ "spec": "mods/3086964745-control-your-robots.yaml",
+ "mods": [
+  "3086964745"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Rover dropped in the corridor and selected shows Turn Off (menu dumped); pressed, a Duplicant switches it off and it is suspended (RobotSuspend), the button now Turn On (details shot)",
+ "updated": "2026-10-24",
+ "commit": "8c6493b",
+ "mod_dlls": {
+  "3086964745": {
+   "ControlYourRobots.dll": "58821ce15045f1b99b9cadbf2679bf94562c2d3caa21105f57e88824aad31507"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-070323-907cc9",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T07:33:23",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-074507-c8b43d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T07:45:07",
+    "lane": 14,
+    "reference_run": "20261024-070323-907cc9",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "buttons": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "details": 0.006501
+    }
+   },
+   {
+    "run": "20261024-074507-c8b43d",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T07:47:14",
+    "lane": 14,
+    "reference_run": "20261024-070323-907cc9",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "buttons": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "details": 0.006501
+    }
+   }
+  ]
+ }
+}

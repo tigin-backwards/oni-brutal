@@ -1,0 +1,27 @@
+# Smoother Light (Vanilla/DLC) (1839645620), classes V, P, O.
+#
+# What it does: a light reaches the cells whose squared distance from it is up to its range
+# squared plus a tolerance (a prefix replacing DiscreteShadowCaster.GetVisDistance; the game
+# allows the range squared exactly), so round lights look rounder; a PLib option sets the
+# tolerance (default 1), another lets light through Mesh Tiles and Airflow Tiles.
+# How a player reaches it: the Mods screen's options; any light; the Light overlay.
+# What changes: which cells a light lights.
+#
+# Options here: tolerance 4. The printing pod's light (range 5, from cell 125,210) reaches
+# 120,208 in its room, 29 squared cells away, which the game alone leaves dark; the room's
+# light is summed. The Light overlay is opened and the pod's room shot.
+from: early-base
+mods: [1839645620]
+options:
+  "1839645620": {LightRangeTolerance: 4, LightThroughMeshTiles: false}
+steps:
+  - expect_state:
+      "type:AsLimc.SmootherLight.Settings::_instance.LightRangeTolerance": 4
+      "all:Telepad::[0].GetComponent<Light2D>.origin": 133685
+      "Grid.LightIntensity.get_Item(132408)": "> 0"
+  - expect_state:
+      "Grid.LightIntensity.get_Item(132408)": "== original"
+      "Grid.LightIntensity.get_Item(132418)": "== original"
+      "cells:118,205..132,214::Grid.LightIntensity.get_Item({cell})": "== original"
+  - click: {ui: "**/OverlaysBarHolder/OverlaysBar/Toggle:Light Overlay"}
+  - world_shot: {name: light, ortho: 6, at: [125, 208]}

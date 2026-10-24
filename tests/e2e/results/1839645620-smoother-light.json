@@ -1,0 +1,60 @@
+{
+ "spec": "mods/1839645620-smoother-light.yaml",
+ "mods": [
+  "1839645620"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with tolerance 4 the printing pod's light reaches a cell 29 squared cells away; the pod room's light summed as in the original; the Light overlay's world shot",
+ "updated": "2026-10-24",
+ "commit": "8c6493b",
+ "mod_dlls": {
+  "1839645620": {
+   "PLib.dll": "93073fdf44dbe9fd7c0afe19e56341be862cc2d732090dee30999cf60e2e160d",
+   "SmootherLight.dll": "a252ba0c47d98b7a92fb21023a3ebe11c2d19b9eb69aaad0e17880cf7348238f"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-070323-907cc9",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T07:40:59",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-074507-454372",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T07:45:07",
+    "lane": 15,
+    "reference_run": "20261024-070323-907cc9",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "light": 0.000983
+    }
+   },
+   {
+    "run": "20261024-074507-454372",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T07:46:35",
+    "lane": 15,
+    "reference_run": "20261024-070323-907cc9",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "light": 0.000922
+    }
+   }
+  ]
+ }
+}

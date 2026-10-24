@@ -160,6 +160,15 @@ MonoBehaviour (whether it is alive, its instance id, name, hide flags and `ToStr
 Awake and OnEnable run and when, what reaches the log), then Instantiate, DestroyImmediate and
 Destroy on it. `ScriptableObjectNewTests` encodes the results.
 
+With `PROBE_SCENARIO=statics` only the statics probe runs (`StaticValues.cs`, lines `SV …`, at mod
+load): every public static property and field of `Color` and `Color32`, found by reflection (so
+each player lists what it has), with the components' float bits; `GarbageCollector.isIncremental`;
+and a new `TextMesh`'s `alignment` and what reads back after each value is set. Compare the
+players with `tools/UnityProbe/sv-check.py diff ORIG OURS` (bits, not the "R" text), and print
+the engine's colour table from the original's log with `sv-check.py cs LOG`. Measured
+2026-10-23: 157 named colours, none on `Color32`; `isIncremental` False; alignment Left by
+default and any value read back as set. `ModApiTests` encodes them.
+
 ## UI semantics (`UiSemantics.cs`, `UIS` lines)
 
 Ten seconds into the front end, after the front-end dump, it builds small hierarchies on an

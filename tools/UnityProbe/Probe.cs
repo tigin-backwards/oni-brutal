@@ -64,6 +64,12 @@ namespace SemanticsProbe
                 FloatPrecision.Run();
                 return;
             }
+            if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "statics")
+            {
+                Rec.Log("=== values: statics");
+                StaticValues.Run();
+                return;
+            }
             if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "submesh")
             {
                 go.AddComponent<SubMesh>();

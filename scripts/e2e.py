@@ -233,7 +233,8 @@ def check_step(where, kind, value, in_setup):
         need(not isinstance(value, dict) or (isinstance(value.get('via', []), list) and all(_cell(c) for c in value.get('via', []))),
              'drag `via` is a list of world cells [x, y] passed through in order')
     elif kind == 'click_world':
-        need(isinstance(value, dict) and _cell(value.get('cell')), 'click_world takes {cell: [x, y]}')
+        need(isinstance(value, dict) and (_cell(value.get('cell')) != _cell(value.get('pos'))),
+             'click_world takes {cell: [x, y]} or {pos: [x, y]} (a world position)')
         need(not isinstance(value, dict) or isinstance(value.get('select', ''), str),
              'click_world `select` is the prefab ID to click until it is selected')
     elif kind == 'scroll':
@@ -1036,10 +1037,11 @@ class Driver:
         # The driver holds its queue while it waits: a slow player may take a while.
         return self.request('ui.wait', timeout=max(self.timeout, frames), path=path, cond=cond, frames=frames, **more)
 
-    def to_screen(self, cell):
-        result = self.request('world.to_screen', cell=list(cell))
+    def to_screen(self, cell, pos=False):
+        """Where a cell's centre (or, with POS, the world position [x, y]) is on screen."""
+        result = self.request('world.to_screen', **{'pos' if pos else 'cell': list(cell)})
         if result.get('onscreen') is False:
-            raise SpecFailure(f'cell {list(cell)} is off screen (at {result["x"]}, {result["y"]})')
+            raise SpecFailure(f'{"position" if pos else "cell"} {list(cell)} is off screen (at {result["x"]}, {result["y"]})')
         return result['x'], result['y']
 
     def to_cell(self, x, y):
@@ -2113,7 +2115,8 @@ class Run:
         elif kind == 'click':
             self.click_element(value, value.get('mods', ()), value.get('button', 'left'), bool(value.get('double')))
         elif kind == 'click_world':
-            x, y = self.need_driver().to_screen(value['cell'])
+            where = value.get('cell', value.get('pos'))
+            x, y = self.need_driver().to_screen(where, pos='pos' in value)
             self.need_input().click(x, y, button=value.get('button', 'left'), mods=value.get('mods', ()))
             if value.get('select'):
                 # Clicking the same cell again picks the next object under it, as a player does
@@ -2126,7 +2129,7 @@ class Run:
                     if selected == value['select']:
                         break
                     if clicks == 5:
-                        raise SpecFailure(f'no {value["select"]} selected at {value["cell"]} after 5 clicks '
+                        raise SpecFailure(f'no {value["select"]} selected at {where} after 5 clicks '
                                           f'(last: {selected})')
                     self.input.click(x, y)
         elif kind == 'toggle':

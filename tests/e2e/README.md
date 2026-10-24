@@ -162,6 +162,7 @@ and nothing is clicked. A click is: move, 2 frames of hover, press, 2 frames, re
 - drag: {from: [109, 207], via: [[109, 209], [110, 209]], to: [110, 207]}   # through cells in order
 - click_world: {cell: [150, 212]}
 - click_world: {cell: [106, 206], select: PiapiPlantHelper}  # clicks again until that is selected
+- click_world: {pos: [109.5, 206.2], select: Granite}          # a world position: debris lies low in its cell
 - scroll: {at: center, notches: -40}                           # or at: [x, y] (a cell), or a UI path
 - tool: {toolbar: Sweep}                  # a ToolMenu collection by its text or icon name
 - tool: {ui: "**/ToolMenu/**/SomeButton"}

@@ -26,9 +26,16 @@ namespace OniBrutal.Assets.Files
         public List<ScriptTypeRef> ScriptTypes { get; } = new();
         public List<External> Externals { get; } = new();
 
-        readonly byte[] bytes;
+        readonly byte[]? bytes;
+        readonly MappedFile? mapped;
         long dataOffset;
         bool bigEndianData;
+
+        SerializedFile(string name, MappedFile mapped)
+        {
+            Name = name;
+            this.mapped = mapped;
+        }
 
         SerializedFile(string name, byte[] bytes)
         {
@@ -36,7 +43,17 @@ namespace OniBrutal.Assets.Files
             this.bytes = bytes;
         }
 
-        public static SerializedFile Open(string path) => Parse(Path.GetFileName(path), File.ReadAllBytes(path));
+        /// A file on disk, mapped (files of 2 GB or more are not serialized files' sizes).
+        public static SerializedFile Open(string path)
+        {
+            var mapped = new MappedFile(path);
+            if (mapped.Length >= int.MaxValue) return Parse(Path.GetFileName(path), File.ReadAllBytes(path));
+            var f = new SerializedFile(Path.GetFileName(path), mapped);
+            f.ReadMetadata();
+            return f;
+        }
+
+        DataReader Reader(int offset, int length) => mapped != null ? new DataReader(mapped, offset, length) : new DataReader(bytes!, offset, length);
 
         public static SerializedFile Parse(string name, byte[] bytes)
         {
@@ -47,7 +64,7 @@ namespace OniBrutal.Assets.Files
 
         void ReadMetadata()
         {
-            var r = new DataReader(bytes) { BigEndian = true };
+            var r = mapped != null ? new DataReader(mapped, 0, checked((int)mapped.Length)) { BigEndian = true } : new DataReader(bytes!) { BigEndian = true };
             r.ReadUInt32(); // metadata size (legacy)
             r.ReadUInt32(); // file size (legacy)
             Version = (int)r.ReadUInt32();
@@ -164,7 +181,11 @@ namespace OniBrutal.Assets.Files
 
         /// A reader over one object's data.
         public DataReader OpenObject(ObjectInfo info)
-            => new(bytes, checked((int)(dataOffset + info.ByteStart)), info.ByteSize) { BigEndian = bigEndianData };
+        {
+            var r = Reader(checked((int)(dataOffset + info.ByteStart)), info.ByteSize);
+            r.BigEndian = bigEndianData;
+            return r;
+        }
 
         public SerializedType TypeOf(ObjectInfo info) => Types[info.TypeIndex];
     }

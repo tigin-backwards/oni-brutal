@@ -5,10 +5,12 @@ using System.Text;
 
 namespace OniBrutal.Assets.IO
 {
-    /// Sequential reader over a byte buffer, little- or big-endian.
-    public sealed class DataReader
+    /// Sequential reader over a byte buffer or a mapped file, little- or big-endian.
+    public sealed unsafe class DataReader
     {
-        readonly byte[] buffer;
+        readonly byte[]? buffer;
+        // A mapped file's bytes instead of `buffer` (MappedFile).
+        readonly byte* pointer;
         readonly int start;
         readonly int end;
         int position;
@@ -21,6 +23,16 @@ namespace OniBrutal.Assets.IO
         {
             if (offset < 0 || length < 0 || offset + length > buffer.Length) throw new ArgumentOutOfRangeException(nameof(length));
             this.buffer = buffer;
+            start = offset;
+            end = offset + length;
+            position = offset;
+        }
+
+        /// A window of a mapped file.
+        public DataReader(MappedFile file, int offset, int length)
+        {
+            if (offset < 0 || length < 0 || (long)offset + length > file.Length) throw new ArgumentOutOfRangeException(nameof(length));
+            pointer = file.Pointer;
             start = offset;
             end = offset + length;
             position = offset;
@@ -39,14 +51,13 @@ namespace OniBrutal.Assets.IO
 
         public int Length => end - start;
         public int Remaining => end - position;
-        public byte[] Buffer => buffer;
         public int AbsolutePosition => position;
 
         ReadOnlySpan<byte> Take(int count)
         {
             if (count < 0 || position + count > end)
                 throw new EndOfStreamException($"Read of {count} bytes at {Position} past the end ({Length}).");
-            var span = new ReadOnlySpan<byte>(buffer, position, count);
+            var span = buffer != null ? new ReadOnlySpan<byte>(buffer, position, count) : new ReadOnlySpan<byte>(pointer + position, count);
             position += count;
             return span;
         }
@@ -80,11 +91,11 @@ namespace OniBrutal.Assets.IO
         /// Null-terminated UTF-8 string.
         public string ReadCString()
         {
-            int i = position;
-            while (i < end && buffer[i] != 0) i++;
-            if (i == end) throw new EndOfStreamException("Unterminated string.");
-            var s = Encoding.UTF8.GetString(buffer, position, i - position);
-            position = i + 1;
+            var rest = buffer != null ? new ReadOnlySpan<byte>(buffer, position, end - position) : new ReadOnlySpan<byte>(pointer + position, end - position);
+            int length = rest.IndexOf((byte)0);
+            if (length < 0) throw new EndOfStreamException("Unterminated string.");
+            var s = Encoding.UTF8.GetString(rest[..length]);
+            position += length + 1;
             return s;
         }
 

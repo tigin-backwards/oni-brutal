@@ -42,6 +42,10 @@ namespace OniBrutal.Desktop
         readonly bool scripted;
 
         const int GLFW_ANY_PLATFORM = 0x00060000;
+        // GLFW 3.4's string hint, which the binding's GlfwWindowHint does not name.
+        const GlfwWindowHint GLFW_WAYLAND_APP_ID = (GlfwWindowHint)0x00026001;
+        /// The original Linux player's executable name, its X11 WM_CLASS.
+        const string ApplicationId = "OxygenNotIncluded";
 
         public GlfwPlatform(WindowSettings settings)
         {
@@ -70,6 +74,15 @@ namespace OniBrutal.Desktop
             Glfw.WindowHint(GlfwWindowHint.Visible, GLFW_FALSE);
             // Scripted runs take no input from the desktop and do not take its focus either.
             Glfw.WindowHint(GlfwWindowHint.FocusOnShow, settings.IgnoreUserInput ? GLFW_FALSE : GLFW_TRUE);
+            // The window identifies itself as the original's does, so desktops group it with,
+            // and take its icon from, the same launchers. Unity's Linux player names the X11
+            // class and instance after its executable (WM_CLASS "OxygenNotIncluded",
+            // "OxygenNotIncluded" as shipped); GLFW would use the title. Unity's Wayland app ID
+            // is unmeasured here, so ours takes the X11 class, the name a .desktop entry's
+            // StartupWMClass already matches.
+            Glfw.WindowHint(GlfwWindowHint.X11ClassName, ApplicationId);
+            Glfw.WindowHint(GlfwWindowHint.X11InstanceName, ApplicationId);
+            Glfw.WindowHint(GLFW_WAYLAND_APP_ID, ApplicationId);
 
             var monitor = Glfw.PrimaryMonitor;
             var monitors = Glfw.GetMonitors();

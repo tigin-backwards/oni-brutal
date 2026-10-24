@@ -767,7 +767,9 @@ game itself keeps saves, mods and its settings under `Documents\Klei\OxygenNotIn
 (`Environment.GetFolderPath`). The Windows build is the same game build as the Linux one
 (ChangeList 744825) and its shaders carry OpenGL programs next to the Direct3D ones, so the same
 device runs its data. Natives resolve per platform (`Plugins/x86_64/<name>.dll` on Windows,
-`Plugins/lib<name>.so` on Linux); Steamworks.NET is built per runtime identifier (library name
+`Plugins/lib<name>.so` on Linux, and for the macOS bundle the executable of
+`Contents/PlugIns/<name>.bundle`: `GameLayout`, which tells the layout from the install's files;
+macOS is groundwork only, `docs/research/metal-backend-design.md`); Steamworks.NET is built per runtime identifier (library name
 and callback packing differ); FreeType comes from BRUTAL's package on both. Company/product/version
 come from `globalgamemanagers` PlayerSettings. The host takes `--game <dir>` (default
 `~/projects/oni-linux`), `--headless` (no window, no GL: logic-only frames for tests),

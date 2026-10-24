@@ -197,8 +197,8 @@ Unity's Linux build ships them half-stripped. That doesn't matter, since nothing
   either reflection or the parameter blob can fill. The same model would let the GL device drop
   some reflection calls.
 - The vertex stage ends with the channel mask our GL path already uses (`ShaderVariant.ChannelMask`),
-  followed by pairs mapping channels to `[[ attribute(n) ]]`. The pair encoding was inferred from
-  a few programs only and should be confirmed by a `check-metal` extension before relying on it.
+  followed by pairs mapping channels to `[[ attribute(n) ]]`: (channel, 13 + n), confirmed for all
+  522 vertex programs by `check-metal` (`MetalProgram.Inputs`).
 
 ### 1.5 Conventions baked into the programs
 
@@ -578,14 +578,22 @@ AppKit), so loading GLFW first is enough; otherwise `dlopen` CoreGraphics.
 
 ### 6.1 Verifiable here (done or ready)
 
+Status as of 2026-10-24; the details are in `docs/research/metal-backend-design.md` §1–§2.
+`scripts/check.sh` runs every check marked *in the gate*, the Mac ones when the depot is present
+(`ONI_MAC_APP`, by default this machine's Steam depot download).
+
 | Check | Status |
 |---|---|
-| osx-x64 self-contained publish of the host | **Done**: builds; x86_64 Mach-O apphost; Brutal natives missing (§3.2). |
-| Shader data parses; Metal reflection consistent with MSL | **Done**: `ShaderSurvey check-metal` 1057/1057. Can run in `scripts/check.sh` once a Mac data folder is available locally. |
-| Variant coverage Metal vs GL | **Done** (§1.3). |
-| Backend-neutral refactors (§2.3) | Can be done and covered by the existing GL e2e and screenshot suites. |
-| Projection, flip and cbuffer-packing logic | Unit-testable on Linux. The cbuffer packer can be tested against the parameter blobs, and against the GL `$Globals` std140 layout, which the GL device already reflects. |
-| Mac host paths (`Paths.Configure`, bundle native resolution) | Unit-testable with a fake `.app` tree; `NativeLibrary.Load` itself needs a Mac. |
+| osx-x64 self-contained publish of the host | **Verified, in the gate**: builds (about 20 s warm), x86_64 Mach-O apphost; Steamworks.NET builds for osx-x64 with `UNITY_STANDALONE_OSX`. Brutal natives missing (§3.2). |
+| Shader data parses; Metal reflection consistent with MSL | **Verified, in the gate**: `ShaderSurvey check-metal` 1057/1057, now also each entry decoded by the engine's reader and its vertex attribute table (component 13 + n = `[[ attribute(n) ]]`) against the MSL. |
+| Metal program loading in the engine | **Verified**: `ShaderPrograms.Load(shader, 14)`, Metal variants per stage, `SelectStages`; all 1057 programs and blobs decode (`ShaderDataTests`); the GLCore path decodes all 583 Linux and 596 Mac GLCore variants as before. |
+| Metal parameters against GLCore's | **Verified, in the gate**: `ShaderSurvey compare-metal`: every Metal program is selected by a GLCore variant; 10700 constants, 1860 textures and 69 storage blocks agree; the differences fall in six explained classes (built-in cbuffers loose on GLCore, `hlslcc_zcmp` samplers, `texture.read`, the GLCore blob's lossy `$Globals` and int type code, 9 GLCore-only keyword variants) plus VR multiview. |
+| Variant coverage Metal vs GL | **Done** (§1.3), and in `compare-metal`. |
+| Constant-buffer packing | **Verified**: `MetalConstantBuffers` against all 2688 bound buffers' 9576 members' blob offsets and the MSL structs' layout, and against the 10172 default-block uniforms (53624 values) the GL device sets for the same draw in 570 GLCore variants (`MetalConstantBufferTests`). |
+| P/Invokes against the Mac dylibs | **Verified, in the gate**: `--check-natives`: SimDLL 32/32, fmodstudio 571/571, steam_api 924/930 (the 6 are missing on Linux too); cimgui, EOS, Rail and encrypted-ticket libraries not shipped, as expected. |
+| Mac host paths (`GameLayout`, `Paths.ConfigureMac`, bundle native resolution) | **Verified** on fake `.app` trees (`GameLayoutTests`); the host reads the depot's bundle (`--check-assets`: 0 failures). `NativeLibrary.Load` and the user folders' real locations need a Mac. |
+| Backend-neutral refactors (§2.3) | **Designed** (`metal-backend-design.md` §3), not done: they touch the per-frame render path. Covered, when done, by the GL e2e and screenshot suites. |
+| Projection and flip logic | **Designed** (`metal-backend-design.md` §6); unit-testable once the neutral `ClipConventions` exists. |
 | Headless player on Mac data **under Linux** | Not possible: SimDLL is Mach-O. |
 
 **MSL compilation on Linux.** No toolchain exists. Apple's "Metal Developer Tools for Windows"
@@ -712,9 +720,13 @@ dotnet build tools/ShaderSurvey -c Release
 dotnet out/bin/ShaderSurvey/release/ShaderSurvey.dll summary DATADIR
 dotnet out/bin/ShaderSurvey/release/ShaderSurvey.dll variants DATADIR > variants.tsv
 dotnet out/bin/ShaderSurvey/release/ShaderSurvey.dll dump DATADIR 'Klei/BatchedAnimation' OUT 14
+dotnet out/bin/ShaderSurvey/release/ShaderSurvey.dll params DATADIR 'Klei/BatchedAnimation' 14
 dotnet out/bin/ShaderSurvey/release/ShaderSurvey.dll check-metal DATADIR
+dotnet out/bin/ShaderSurvey/release/ShaderSurvey.dll compare-metal DATADIR [all|CLASS]
 ```
 
 DATADIR is a data folder: `OxygenNotIncluded.app/Contents/Resources/Data` or
-`OxygenNotIncluded_Data`. Platform 14 is Metal, 15 GLCore. `tools/AssemblyDiff` compared the
-two builds' assemblies (§1.6).
+`OxygenNotIncluded_Data`. Platform 14 is Metal, 15 GLCore. The survey reads the data through the
+readers in `src/OniBrutal.Assets/Shaders/` that the engine uses. `tools/AssemblyDiff` compared the
+two builds' assemblies (§1.6). The host's `--check-natives` (`--game` a game folder or an `.app`)
+checks the P/Invokes against an install's plugins.

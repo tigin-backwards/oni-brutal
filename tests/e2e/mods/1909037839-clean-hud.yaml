@@ -1,0 +1,29 @@
+# Clean HUD (1909037839), classes S, O, V.
+#
+# What it does: tidies the HUD from PLib options: the vignette's opacity (0 by default, the
+# game's is 47 %; a prefix on Vignette.OnSpawn) and the red and yellow alert vignettes'
+# (AlertVignetteAlpha); hides the build watermark at the top left (postfixes on
+# BuildWatermark.OnPrefabInit and RefreshText); gives every management button at the top
+# right the small format (a transpiler on ManagementMenu.OnPrefabInit); and makes the
+# out-of-bounds warning a faint solid colour (LightBufferCompositor patches).
+# How a player reaches it: the Mods screen's options; then the colony's HUD.
+# What changes: the HUD's look.
+#
+# Options here: a vignette of 25 %, alert vignettes of 20 %, no watermark, small buttons. The
+# vignette's colour and the watermark are read back; the management buttons are dumped and
+# shot.
+from: early-base
+mods: [1909037839]
+options:
+  "1909037839": {VignetteAlpha: 0.25, AlertVignetteAlpha: 0.2, IsWatermarkDisabled: true, UseSmallButtons: true}
+steps:
+  - expect_state:
+      "Vignette.Instance.image.color.a": 0.25
+      "Vignette.Instance.redAlertColor.a": 0.2
+      "Vignette.Instance.yellowAlertColor.a": 0.2
+      "BuildWatermark.Instance.gameObject.activeSelf": false
+  - expect_ui:
+      "**/TopRightPanel/TopRightInfoPanelButtons/Toggle:VITALS": {active: true}
+      "**/ScreenSpaceOverlayCanvas/BuildWatermark": {exists: false}
+  - ui_dump: {name: buttons, root: "**/TopRightPanel/TopRightInfoPanelButtons"}
+  - shot: {name: buttons, crop: "**/TopRightPanel/TopRightInfoPanelButtons", threshold: 0.04}

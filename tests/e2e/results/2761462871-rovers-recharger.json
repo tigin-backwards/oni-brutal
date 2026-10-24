@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2761462871-rovers-recharger.yaml",
+ "mods": [
+  "2761462871"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with 100 kg of fuel a charge, a Rover's Recharger built in the corridor and selected stores 300 kg and refills by 100 kg",
+ "updated": "2026-10-23",
+ "commit": "4d36e91",
+ "mod_dlls": {
+  "2761462871": {
+   "RoverRefueling.dll": "c322f2139ce09f7e47ca60e93840b813f7539fdad8000bd53884663c5ba687f8"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-213015-a227da",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T21:40:52",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-221805-99f59b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T22:18:05",
+    "lane": 17,
+    "reference_run": "20261023-213015-a227da",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-221805-99f59b",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T22:19:51",
+    "lane": 17,
+    "reference_run": "20261023-213015-a227da",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -1,0 +1,93 @@
+{
+ "spec": "mods/3734826909-search-overlay.yaml",
+ "mods": [
+  "3734826909"
+ ],
+ "verdict": "warning",
+ "why": "known findings: scroll-normalized-position",
+ "findings": [
+  "scroll-normalized-position"
+ ],
+ "note": "the overlay opens from its button; \"sandstone\" typed into its legend's field offers two rows; choosing the material sums its mass in the legend; legend dumped and shot, the map's matches shot",
+ "updated": "2026-10-23",
+ "commit": "4d36e91",
+ "mod_dlls": {
+  "3734826909": {
+   "MaterialSearchOverlay.dll": "f6677d19330c25f497384b0bf3009c94d0b064d795da3e50eb1c50b17ef0d43f"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-220418-70b026",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T22:04:19",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-221808-5b4b95",
+    "index": 1,
+    "verdict": "warn",
+    "date": "2026-10-23T22:18:08",
+    "lane": 16,
+    "reference_run": "20261023-220418-70b026",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "dropdown": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 2
+      }
+     },
+     "legend": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 2
+      }
+     }
+    },
+    "shots": {
+     "legend": 0.00932,
+     "matches": 6.4e-05
+    }
+   },
+   {
+    "run": "20261023-221808-5b4b95",
+    "index": 2,
+    "verdict": "warn",
+    "date": "2026-10-23T22:19:32",
+    "lane": 16,
+    "reference_run": "20261023-220418-70b026",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "dropdown": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 2
+      }
+     },
+     "legend": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 2
+      }
+     }
+    },
+    "shots": {
+     "legend": 0.00932,
+     "matches": 6e-05
+    }
+   }
+  ]
+ }
+}

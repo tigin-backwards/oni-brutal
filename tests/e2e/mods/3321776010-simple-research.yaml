@@ -1,0 +1,26 @@
+# 简易研究 simple research (3321776010), class P (building definitions).
+#
+# What it does: replaces the set-up of the three late research stations (prefixes that skip
+# their ConfigureBuildingTemplate): the Materials Study Terminal (NuclearResearchCenter) takes
+# 75 kg of uranium ore by delivery instead of radbolts, and the Virtual Planetarium
+# (CosmicResearchCenter) and the Orbital Data Collection Lab (DLC1CosmicResearchCenter) take
+# 300 kg of plastic instead of research databanks, 5 kg a point.
+# How a player reaches it: building one of those stations (late research).
+# What changes: what those stations consume.
+#
+# A smaller spec: the stations need late research and a 4x4 or 5x3 floor that early-base does
+# not have free near the pod. The stations' prefabs are read: the Orbital Data Collection Lab
+# (the Spaced Out one) and the Materials Study Terminal ask for the mod's materials. The colony
+# then runs.
+from: early-base
+mods: [3321776010]
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"DLC1CosmicResearchCenter\").BuildingComplete.GetComponent<ManualDeliveryKG>.RequestedItemTag.Name": Polypropylene
+      "Assets.GetBuildingDef(\"DLC1CosmicResearchCenter\").BuildingComplete.GetComponent<ManualDeliveryKG>.capacity": 300
+      "Assets.GetBuildingDef(\"DLC1CosmicResearchCenter\").BuildingComplete.GetComponent<ResearchCenter>.mass_per_point": 5
+      "Assets.GetBuildingDef(\"DLC1CosmicResearchCenter\").BuildingComplete.GetComponent<ResearchCenter>.research_point_type_id": orbital
+      "Assets.GetBuildingDef(\"NuclearResearchCenter\").BuildingComplete.GetComponent<ManualDeliveryKG>.RequestedItemTag.Name": UraniumOre
+      "Assets.GetBuildingDef(\"NuclearResearchCenter\").BuildingComplete.GetComponent<ResearchCenter>.research_point_type_id": nuclear
+  - run: {seconds: 60}
+  - expect: {duplicants: 3, buildings: {ResearchCenter: 1}}

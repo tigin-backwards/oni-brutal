@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3321776010-simple-research.yaml",
+ "mods": [
+  "3321776010"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "smaller spec (the stations need late research and room): the Orbital Data Collection Lab asks for 300 kg of plastic at 5 kg a point and the Materials Study Terminal for uranium ore; the colony runs a minute",
+ "updated": "2026-10-23",
+ "commit": "4d36e91",
+ "mod_dlls": {
+  "3321776010": {
+   "╕ⁿ╚▌╥╫╡─╤╨╛┐.dll": "8ac6b3c60c3390b4c9e022169036414e481d605ba8e30f4e52d749ba4f92d705"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-213015-a227da",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T21:48:00",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-222142-061fc8",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T22:21:42",
+    "lane": 17,
+    "reference_run": "20261023-213015-a227da",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-222142-061fc8",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T22:23:03",
+    "lane": 17,
+    "reference_run": "20261023-213015-a227da",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

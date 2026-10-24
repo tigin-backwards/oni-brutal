@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2350553957-smelter.yaml",
+ "mods": [
+  "2350553957"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Smelter built in the corridor and selected is unpowered and has its recipes",
+ "updated": "2026-10-23",
+ "commit": "4d36e91",
+ "mod_dlls": {
+  "2350553957": {
+   "Smelter.dll": "47fe95797e640fc97688db8b3717eb57f3077a206e2ee7aed3b7b5b2da4d2908"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-192206-4b9a39",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T20:54:44",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-220448-404bbf",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T22:12:58",
+    "lane": 16,
+    "reference_run": "20261023-192206-4b9a39",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-220448-404bbf",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T22:14:14",
+    "lane": 17,
+    "reference_run": "20261023-192206-4b9a39",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

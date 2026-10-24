@@ -1,0 +1,39 @@
+# Search Overlay (Material Search Overlay) (3734826909), classes S, K, O, V.
+#
+# What it does: adds a Material Search overlay (a button at the end of the overlay bar, and
+# a bindable key): its legend gets a search field, typing in it lists the matching materials,
+# items, critters, plants and more in a dropdown (with type badges, a PLib option), and the
+# overlay highlights every match on the map, natural tiles, debris and buildings alike; a
+# label sums the matching mass in each.
+# How a player reaches it: the overlay bar, Material Search Overlay; its legend's search
+# field and dropdown.
+# What changes: a way to find things on the map.
+#
+# The overlay is opened from its button; "sandstone" is typed into the legend's field, the
+# dropdown offers Sandstone (a material and an artifact), and the material is chosen: the
+# legend then sums the sandstone in the colony, and the map shows the matches.
+from: early-base
+mods: [3734826909]
+steps:
+  - driver: {camera.set: {cell: [118, 208], ortho: 12}}
+  - click: {ui: "**/OverlaysBarHolder/OverlaysBar/Toggle:Material Search Overlay"}
+  - ui_wait: {path: "**/TopRight/OverlayLegend", cond: stable}
+  - expect_ui:
+      "**/OverlayLegend/TitleBar/Label": {text: "MATERIAL SEARCH OVERLAY"}
+      "**/OverlayLegend/MaterialSearchInput/Text Area/Placeholder Text": {text: "Type a name to search..."}
+  - click: {ui: "**/OverlayLegend/MaterialSearchInput"}
+  - type: {ui: "**/OverlayLegend/MaterialSearchInput", text: "sandstone"}
+  - ui_wait: {path: "**/OverlayLegend/DropdownItems", cond: stable}
+  - expect_ui:
+      "**/OverlayLegend/DropdownItems/Row_Sandstone/Type": {any_text: "Material"}
+      "**/OverlayLegend/DropdownItems/Row_Sandstone": {count: 2}
+  - ui_dump: {name: dropdown, root: "**/TopRight/OverlayLegend"}
+  - click: {ui: "**/OverlayLegend/DropdownItems/Row_Sandstone", index: 0}
+  - ui_wait: {path: "**/OverlayLegend/MassLabel", cond: stable}
+  - expect_ui:
+      "**/OverlayLegend/MassLabel": {text: "/^Natural Tile: [\\d.,]+ t \\|  Debris: [\\d.,]+ t \\|  Buildings: /"}
+  - expect_state:
+      "type:BobbyModding.MaterialSearchOverlay.MaterialSearchOverlay::Instance.Matches.Elements": {contains: SandStone}
+  - ui_dump: {name: legend, root: "**/TopRight/OverlayLegend"}
+  - shot: {name: legend, crop: "**/TopRight/OverlayLegend", threshold: 0.04}
+  - world_shot: {name: matches, ortho: 12, at: [118, 208]}

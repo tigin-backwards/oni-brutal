@@ -1,0 +1,67 @@
+{
+ "spec": "mods/1909037839-clean-hud.yaml",
+ "mods": [
+  "1909037839"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "options set the vignette to 25 %, the alert vignettes to 20 %, the watermark off and small management buttons; colours and watermark read back, the button row dumped and shot",
+ "updated": "2026-10-23",
+ "commit": "4d36e91",
+ "mod_dlls": {
+  "1909037839": {
+   "CleanHUD.dll": "f0c5e5024151d356ab22ec03278fd12f055d524db098126eef0903dc571cbaee"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-220418-70b026",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T22:04:18",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-221441-100ca5",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T22:15:02",
+    "lane": 16,
+    "reference_run": "20261023-220418-70b026",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "buttons": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "buttons": 0.009638
+    }
+   },
+   {
+    "run": "20261023-221441-100ca5",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T22:16:36",
+    "lane": 16,
+    "reference_run": "20261023-220418-70b026",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "buttons": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "buttons": 0.009576
+    }
+   }
+  ]
+ }
+}

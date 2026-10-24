@@ -1,0 +1,42 @@
+# Extended Building Width (3024728464), classes T, S, K, O.
+#
+# What it does: makes chosen buildings come in many widths. By default every conduit bridge
+# (gas, liquid, conveyor, wire, logic, radbolt) gets copies 2 to 16 cells wide
+# (GasConduitBridge_width4 and so on, generated at load with stretched animations and scaled
+# costs); in the build tool, Alt+C picks the next wider copy and Alt+X the next narrower one
+# (a BuildTool.OnKeyDown prefix). Copy Building copies the original. PLib dialogs in the
+# Mods screen edit which buildings, their widths and how their animations stretch.
+# How a player reaches it: the build menu, a bridge; then Alt+C / Alt+X while placing.
+# What changes: bridges that span more cells.
+#
+# setup grants Gas Piping. The Gas Bridge (3 cells) is chosen in the Ventilation menu; Alt+C
+# twice makes the tool place a 5-wide bridge and Alt+X takes it back to 4; that bridge is
+# placed in the corridor west of the printing pod.
+from: early-base
+mods: [3024728464]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"GasPiping\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"GasConduitBridge_width4\").WidthInCells": 4
+      "Assets.GetBuildingDef(\"GasConduitBridge_width16\").WidthInCells": 16
+  - run: {seconds: 5}
+  - driver: {camera.set: {cell: [112, 208], ortho: 10}}
+  - click: {ui: "**/PlanScreen/Toggle:Ventilation"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/GasConduitBridge Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/GasConduitBridge Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen/MaterialSelectionPanel", cond: stable}
+  - expect_state: {"BuildTool.Instance.def.PrefabID": GasConduitBridge}
+  - key: {code: "Alt+C", at: [112, 208]}
+  - key: {code: "Alt+C", at: [112, 208]}
+  - expect_state:
+      "BuildTool.Instance.def.PrefabID": GasConduitBridge_width5
+      "BuildTool.Instance.def.WidthInCells": 5
+  - key: {code: "Alt+X", at: [112, 208]}
+  - expect_state:
+      "BuildTool.Instance.def.PrefabID": GasConduitBridge_width4
+      "BuildTool.Instance.def.Name": {contains: "(width 4)"}
+  - click_world: {cell: [112, 208]}
+  - key: {code: Escape}
+  - expect: {blueprints: {GasConduitBridge_width4: 1}}

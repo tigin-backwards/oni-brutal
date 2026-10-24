@@ -1,0 +1,56 @@
+{
+ "spec": "mods/3024728464-extended-building-width.yaml",
+ "mods": [
+  "3024728464"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Gas Bridge chosen in the Ventilation menu becomes 5 wide with Alt+C twice and 4 with Alt+X; the 4-wide bridge is placed as a blueprint",
+ "updated": "2026-10-23",
+ "commit": "4d36e91",
+ "mod_dlls": {
+  "3024728464": {
+   "ExtendedBuildingWidth.dll": "821e06dab04814c91a1a9476a034790f6179f2adec26ed83c73018f8f6e01b6a",
+   "PLib.dll": "93073fdf44dbe9fd7c0afe19e56341be862cc2d732090dee30999cf60e2e160d"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-220418-70b026",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T22:05:43",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-222107-743521",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T22:24:27",
+    "lane": 17,
+    "reference_run": "20261023-220418-70b026",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-222107-743521",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T22:25:33",
+    "lane": 17,
+    "reference_run": "20261023-220418-70b026",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

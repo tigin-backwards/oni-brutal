@@ -1,0 +1,39 @@
+# Rover's Recharger (2761462871), classes B, O (Spaced Out only).
+#
+# What it does: adds the Rover's Recharger (2x3, 200 kg of raw metal, after the Sweepy Dock in
+# the Utilities menu, researched with Artificial Friends): a station a Rover with a low
+# battery walks to and recharges at for 30 s, burning 150 kg of a combustible liquid per
+# charge from its pipe or by delivery (it stores three charges, 450 kg). It is built without
+# a Duplicant's work once its materials are delivered. A Rover's low battery gets the game's
+# low-battery status and a tag that sends it there; the Rover module can carry fuel for it
+# (a fuel cargo bay). PLib options set the charge time, the fuel per charge and the cargo
+# bay.
+# How a player reaches it: the build menu (Utilities); the recharger's details screen.
+# What changes: Rovers that can be recharged instead of dying when their battery runs out.
+#
+# Options here: 100 kg of fuel per charge (300 kg stored). setup grants Artificial Friends and
+# spawns copper ore; the recharger is built in the dug-out corridor west of the printing pod
+# and selected.
+from: early-base
+mods: [2761462871]
+options:
+  "2761462871": {fuel_mass_per_charge: 100.0}
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"ArtificialFriends\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Cuprite\").substance", method: SpawnResource, args: [[114.5, 207.5, -12], 300, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"ArtificialFriends\").unlockedItemIDs": {contains: RoverRefuelingStation}
+      "Assets.GetBuildingDef(\"RoverRefuelingStation\").BuildingComplete.GetComponent<Storage>.capacityKg": 300
+  - build: {prefab: RoverRefuelingStation, at: [113, 206]}
+  - expect: {blueprints: {RoverRefuelingStation: 1}}
+  - run: {seconds: 1200, until: {buildings: {RoverRefuelingStation: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [114, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: RoverRefuelingStation}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Recharger"}
+  - expect_state:
+      "selected:Storage.capacityKg": 300
+      "selected:GetComponent<ManualDeliveryKG>.refillMass": 100

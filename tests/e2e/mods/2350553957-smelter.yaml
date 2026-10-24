@@ -1,0 +1,35 @@
+# Smelter (2350553957), classes B, O.
+#
+# What it does: adds the Smelter (3x3, 400 kg of metal and 800 kg of raw mineral, after the
+# Kiln in the Refining menu, researched with Brute-Force Refinement): an unpowered,
+# fuel-burning refinery that a Duplicant works, cooled by a liquid coolant from its pipe. It
+# smelts metal ores into refined metal, sand into glass, and (by PLib options) wolframite,
+# phosphorite, plastic, sulfur and resin into their refined forms. Options also let the Metal
+# Refinery drop or reuse its overheated coolant.
+# How a player reaches it: the build menu (Refining); the Smelter's recipe side screen.
+# What changes: an early metal refinery.
+#
+# setup grants Brute-Force Refinement and spawns copper ore and sandstone. The Smelter is
+# built in the dug-out corridor west of the printing pod and selected: its recipe screen
+# opens beside the details.
+from: early-base
+mods: [2350553957]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"BasicRefinement\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Cuprite\").substance", method: SpawnResource, args: [[114.5, 207.5, -12], 500, 300, 255, 0]}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"SandStone\").substance", method: SpawnResource, args: [[114.5, 207.5, -12], 900, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"BasicRefinement\").unlockedItemIDs": {contains: Smelter}
+      "Assets.GetBuildingDef(\"Smelter\").RequiresPowerInput": false
+  - build: {prefab: Smelter, at: [113, 206]}
+  - expect: {blueprints: {Smelter: 1}}
+  - run: {seconds: 1500, until: {buildings: {Smelter: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [114, 208], ortho: 8}}
+  - click_world: {cell: [114, 207], select: Smelter}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Smelter"}
+  - expect_state:
+      "selected:GetComponent<ComplexFabricator>.GetRecipes().Length": "> 3"

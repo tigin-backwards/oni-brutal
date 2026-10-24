@@ -34,6 +34,23 @@ under a disabled root canvas (or an inactive one) draw, take raycasts and keep t
 `PROBE_CAPTURE_DIR` for its screenshots, read back by pixel; `CanvasTests` and `SceneRootsTests`
 encode the results.
 
+With `PROBE_SCENARIO=canvasorder` only the canvas order probe runs (`CanvasOrder.cs`, lines `CO …`,
+in a colony, 120 frames after it loads): the draw order of root overlay canvases that tie on
+sorting order, after one change at a time (enabling, activation, sortingOrder set, reparenting,
+nested canvases, instantiation, sibling order). Each step is a screenshot in `PROBE_CAPTURE_DIR`;
+`co-check.py DIR [DIR2]` prints the canvases bottom to top for each. `CanvasTests`
+(`CanvasesTiedOnSortingOrderDrawInListOrder`) encodes the results. It and the draw order probe
+run in a colony through `scripts/e2e.py`: copy OniMcp's mod folder (E2E_ONIMCP) with
+`SemanticsProbe.dll` added, point E2E_ONIMCP at the copy, set `PROBE_SCENARIO` and
+`PROBE_CAPTURE_DIR`, and run a spec that waits for `**/CanvasOrderProbeDone` (or
+`**/DrawOrderProbeDone`, with the camera at [109, 209], orthographic size 4).
+
+With `PROBE_SCENARIO=draworder` only the draw order probe runs (`DrawOrder.cs`, lines `DO …`): pairs
+of transparent Graphics.DrawMesh quads at z -23.5 (as KAnimBatchManager draws), at the same
+distance, a float step apart and 1e-4 apart, submitted in both orders, with their materials
+created in both orders and with unit or float.MaxValue bounds. `do-check.py LOG DIR` prints which
+quad is on top; `DrawMeshTests` (`TransparentDrawsAtTheSameDistanceGoByMaterial`) encodes it.
+
 Both players write the same version stamp for the mod (ARCHITECTURE D3), so one `mods.json`
 serves both. In U59 that stamp is `692750779`, with `enabledForDlc: ["", "EXPANSION1_ID"]`;
 with another stamp the game reinstalls the mod and disables it.

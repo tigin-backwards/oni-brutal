@@ -23,6 +23,16 @@ namespace SemanticsProbe
                 go.AddComponent<CanvasProbe>();
                 return;
             }
+            if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "canvasorder")
+            {
+                go.AddComponent<CanvasOrder>();
+                return;
+            }
+            if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "draworder")
+            {
+                go.AddComponent<DrawOrder>();
+                return;
+            }
             if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "textwidth")
             {
                 go.AddComponent<TextWidth>();

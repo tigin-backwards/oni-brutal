@@ -30,22 +30,29 @@ else
     failed+=(osx-x64-publish); echo "osx-x64 publish failed: out/publish-osx-x64.log"
 fi
 # The macOS build's shaders (docs/research/macos-feasibility.md §6.1), when its data is here: Metal
-# reflection against the MSL, and every Metal program's parameters against GLCore's.
-mac_data="${ONI_MAC_APP:-/mnt/c/Program Files (x86)/Steam/steamapps/content/app_457140/depot_457142/OxygenNotIncluded.app}/Contents/Resources/Data"
+# reflection against the MSL, every Metal program's parameters against GLCore's, and the natives.
+mac_app="${ONI_MAC_APP:-/mnt/c/Program Files (x86)/Steam/steamapps/content/app_457140/depot_457142/OxygenNotIncluded.app}"
+mac_data="$mac_app/Contents/Resources/Data"
 if [ -d "$mac_data" ]; then
     survey=("$root/out/bin/ShaderSurvey/debug/ShaderSurvey")
     "${survey[@]}" check-metal "$mac_data" | tail -1 || failed+=(check-metal)
     compare=$("${survey[@]}" compare-metal "$mac_data") || failed+=(compare-metal)
     echo "compare-metal: $(head -1 <<< "$compare"); $(tail -1 <<< "$compare")"
     grep -A20 UNEXPLAINED <<< "$compare" | head -40 || true
+    # The host's P/Invokes against the Mac bundle's plugins (their Mach-O exports).
+    natives=$("$root/out/bin/OniBrutal.Host/debug/OniBrutal" --game "$mac_app" --check-natives --log "$root/out/check-natives-mac.log") || failed+=(check-natives-mac)
+    echo "check-natives (macOS): $(grep -E '^  (SimDLL|fmodstudio|steam_api):' <<< "$natives" | sed -E 's/^  ([^:]+): ([0-9]+ of [0-9]+).*/\1 \2/' | paste -sd, -); $(tail -1 <<< "$natives")"
+    grep -E 'MISSING|NO PLUGIN' <<< "$natives" || true
 else
-    echo "macOS data not found: Metal shader checks skipped (set ONI_MAC_APP)"
+    echo "macOS data not found: its shader and native checks skipped (set ONI_MAC_APP)"
 fi
 "$root/scripts/build-engine.sh" >/dev/null
 "$root/scripts/apicheck.sh" > "$root/out/apicheck-summary.txt" || true; head -2 "$root/out/apicheck-summary.txt"
 "$root/out/bin/OniBrutal.Host/debug/OniBrutal" --game "$game" --check-types --log "$root/out/check-types.log" | grep -vE '^(ok   [A-Za-z0-9.-]+ +[0-9]+ types|from )'
 "$root/out/bin/OniBrutal.Host/debug/OniBrutal" --game "$game" --check-assets --log "$root/out/check-assets.log" | grep -v '^\[engine\]'
 "$root/out/bin/OniBrutal.Host/debug/OniBrutal" --game "$game" --check-bind --log "$root/out/check-bind.log" | grep -v '^\[engine\]'
+natives=$("$root/out/bin/OniBrutal.Host/debug/OniBrutal" --game "$game" --check-natives --log "$root/out/check-natives.log") || failed+=(check-natives)
+echo "check-natives: $(tail -1 <<< "$natives")"; grep -E 'MISSING|NO PLUGIN' <<< "$natives" || true
 "$root/scripts/build-packages.sh" >/dev/null; echo "packages: $(sed -n 2p "$root/out/apicheck-packages.txt")"
 "$root/out/bin/OniBrutal.Host/debug/OniBrutal" --game "$game" --shipped-ui-packages --check-types --log "$root/out/check-types-shipped.log" | grep -vE '^(ok   [A-Za-z0-9.-]+ +[0-9]+ types|from )'
 "$root/out/bin/OniBrutal.Host/debug/OniBrutal" --game "$game" --shipped-ui-packages --check-bind --log "$root/out/check-bind-shipped.log" | grep -v '^\[engine\]'

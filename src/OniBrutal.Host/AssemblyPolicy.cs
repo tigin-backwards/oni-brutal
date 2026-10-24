@@ -144,5 +144,34 @@ namespace OniBrutal.Host
             StringComparer.OrdinalIgnoreCase);
 
         internal static bool IsFrameworkAssembly(string simple) => framework.Contains(simple);
+
+        /// The assembly files the host runs with (--check-natives): its own (the host directory's,
+        /// framework ones aside: the engine, the Steamworks.NET port, BRUTAL…), the UI packages it
+        /// serves, and those of Managed/ that Resolve would load (the game and its libraries; not
+        /// Mono's class libraries, Unity's modules or support packages, or what ours replace).
+        public static List<string> RuntimeAssemblyPaths()
+        {
+            var result = new List<string>();
+            var names = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            void Add(string path)
+            {
+                if (names.Add(Path.GetFileNameWithoutExtension(path))) result.Add(path);
+            }
+            foreach (var path in Directory.EnumerateFiles(AppContext.BaseDirectory, "*.dll").Order(StringComparer.Ordinal))
+            {
+                var simple = Path.GetFileNameWithoutExtension(path);
+                if (!simple.StartsWith("System.", StringComparison.Ordinal) && !simple.StartsWith("Microsoft.", StringComparison.Ordinal)) Add(path);
+            }
+            if (packagesDir != null && Directory.Exists(packagesDir))
+                foreach (var path in Directory.EnumerateFiles(packagesDir, "*.dll").Order(StringComparer.Ordinal)) Add(path);
+            foreach (var path in Directory.EnumerateFiles(managedDir, "*.dll").Order(StringComparer.Ordinal))
+            {
+                var simple = Path.GetFileNameWithoutExtension(path);
+                if (IsFrameworkAssembly(simple) || IsUnityEngineModule(simple) || unitySupportPackages.Contains(simple) || monoClassLibraries.Contains(simple)
+                    || (packagesDir != null && replacedPackages.Contains(simple) && names.Contains(simple))) continue;
+                Add(path);
+            }
+            return result;
+        }
     }
 }

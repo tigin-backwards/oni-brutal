@@ -1762,6 +1762,214 @@ Not measured: `<line-height>`, `<line-indent>`, sprites taller than the text, au
 a line that grows part-way (whether it shrinks to fit the whole line or the part before the
 cut), Page mode and `maxVisibleLines`, and world-space `TextMeshPro`.
 
+### The caret after an edit ends (measured 2026-10-24)
+
+Found by two mod specs. A value typed into a capacity side screen's field and submitted with
+Enter leaves the original's `KInputTextField` with `caretPosition` at the end of the text: 3
+for "500" (Adjustable Transformers, `tests/e2e/mods/1885249412-adjustable-transformers.yaml`,
+ui_dump `capacity-set`, `…/CapacityControlSideScreen#1/ValidContent#1/Max#1/VerticalLayout#1/InputField#1`)
+and 5 for "50000" (Measuring Cup, `3336359859-measuring-cup.yaml`). This implementation reports
+0. The spec clicks the field, presses Ctrl+A and Backspace, types the value and presses
+Return. Klei's `KInputField` (the side screen's `KNumberInputField`) listens to `onEndEdit`: it
+sets `text` to the parsed value again and calls `DeactivateInputField()` at the end of the
+frame. The game's field prefabs (all 28 `TMP_InputField`s loaded at the main menu but one)
+have `resetOnDeActivation` and `onFocusSelectAll` on. A new `TMP_InputField` has
+`resetOnDeActivation` on as well.
+
+**Measured** with `PROBE_SCENARIO=inputcaret` (tools/UnityProbe, `InputCaret.cs`, lines `IC
+end …`). Each field is a `KInputTextField` built as `InputText.cs` builds the slider row's
+field, but 120 wide. Its text comes from one of five sources:
+- typing "500" or "50000" (`ProcessEvent`, one character at a time);
+- Ctrl+A, Backspace and then typing, over a text "1000" set from code;
+- typing and then Shift+Home (a selection: caret 0, anchor at the end);
+- `text =` while the field is focused;
+- `text =` before the field is focused.
+
+The edit then ends in one of six ways: `ProcessEvent` of Return, `OnSubmit(BaseEventData)`,
+`DeactivateInputField()`, `DeactivateInputField(true)`, deselection
+(`EventSystem.SetSelectedGameObject(null)`), or disabling the GameObject. Each case runs with
+`resetOnDeActivation` and `onFocusSelectAll` off and on. Some runs add the listeners Klei's
+`KInputField` adds; their `onEndEdit` sets the same text, a shorter one ("5"), a longer one
+("500123") or the parsed number. In the `IC end x …` cases the keys are real: the probe sends
+them to the player's window through XTest, as `scripts/e2e.py` types, so they reach the field
+through the event system and `OnUpdateSelected`. Those cases end with Return, Escape or
+deselection. Each step logs `text`, `caretPosition`, `selectionAnchorPosition`,
+`selectionFocusPosition`, `stringPosition`, `selectionStringAnchorPosition`, `isFocused` and
+whether the event system has the field selected. Each event logs the caret it was sent
+with. After the end the field is activated again (`onFocusSelectAll` as set) and "9" is typed,
+which shows where the string position really was. That is 246 `ProcessEvent` cases and 44
+cases with real keys. `tools/UnityProbe/ic-check.py rule LOG` checks the rules below, and they
+hold for all 290 in the shipped package's log. `ic-check.py diff ORIG OURS end|x` compares two
+players' logs.
+
+1. **Ending an edit leaves the caret and the selection where they were.** That holds for every
+   way of ending above, with real keys and through `ProcessEvent`. `resetOnDeActivation` makes
+   no difference, and neither does `DeactivateInputField(true)`'s `clearSelection`.
+   - Typed "500" and Return: `caretPosition`, `selectionAnchorPosition` and
+     `selectionFocusPosition` stay 3, and so do `stringPosition` and
+     `selectionStringAnchorPosition`. Typed "50000": 5.
+   - A selection stays: after Shift+Home, the caret stays 0 and the anchor 3, through Return,
+     deselection and `DeactivateInputField(true)`.
+   - A text set from code keeps the caret where it was: at 0 after `text =` on a focused field.
+   - Activating the field again starts from there: "9" typed after it goes in at the end
+     ("5009", caret 4), with `onFocusSelectAll` off.
+   - **A shorter text cuts them.** When a listener, or Escape's restore of the original text,
+     sets a text shorter than the caret's position, the caret and the anchor become that
+     text's length. They do not move back when the text grows again. `onEndEdit` setting "5"
+     after "500" leaves 1/1. Escape after typing "500" in an empty field restores "" (0/0),
+     and a listener's "0" after that stays at 0/0. A longer text ("500123") keeps 3/3.
+   - Klei's flow (`onEndEdit` sets the parsed value, then `DeactivateInputField()` at the end
+     of the frame) keeps 3 for "500" and 5 for "50000". This is the value the two specs read.
+2. **`onEndEdit`** is sent:
+   - on Enter (real keys, single-line): `onSubmit`, then `onEndEdit`, then the field is
+     deselected (`onDeselect`). That order holds whatever `resetOnDeActivation` says.
+   - on Escape (real keys): after the restored text's `onValueChanged`, before `onDeselect`.
+   - by `DeactivateInputField()`, deselection and disabling only when `resetOnDeActivation`
+     is on. With it off, deselection and `DeactivateInputField()` send `onDeselect` alone, and
+     disabling sends nothing.
+   - by `DeactivateInputField(true)` always.
+   - Each is sent with the caret where it was (`endEdit:"500"@3/3/3/3`).
+  - Each `onValueChanged` of a typed character is sent with the caret after it: typing "500"
+    reports `"5"@1/1/1/1`, `"50"@2/2/2/2` and `"500"@3/3/3/3` (caret, anchor, focus, string
+    position).
+3. **`OnSubmit(BaseEventData)` on a focused field** sends `onSubmit`, then ends the edit as
+   `DeactivateInputField()` does (rule 2), and deselects the field. Not measured: `OnSubmit` on
+   a field that is not focused.
+4. **`ProcessEvent` of Return** (KeyCode Return, character '\n', single-line) does nothing: the
+   field stays focused, its text unchanged, and no event is sent. Only Enter through the event
+   system ends the edit.
+5. **Select-all on focus** (`onFocusSelectAll` on, measured with a text set before focus) puts
+   the caret at 0 and the anchor at the end: `caretPosition` 0, `selectionAnchorPosition` 3,
+   `stringPosition` 0, `selectionStringAnchorPosition` 3. This is the order Ctrl+A gives
+   (described above).
+6. **The character positions follow the string positions a frame late after Ctrl+A in
+   `ProcessEvent`.** Right after it, `selectionStringAnchorPosition` is 4 in "1000" while
+   `selectionAnchorPosition` still reads 0. With real keys, two frames later, both read 4.
+   Nothing in the game reads them in between.
+
+**Where this implementation deviates** (`TMP_InputField.cs`):
+- `DeactivateInputField(bool)` puts both string positions to 0 when `resetOnDeActivation` or
+  `clearSelection` is set. The game's fields have `resetOnDeActivation` on, so every ended edit
+  leaves the caret at 0. That is the specs' `caretPosition=0`, and the field typed into again
+  starts at 0 ("9500" where the original gives "5009"). Measured in 68 of the 290 cases. Keep
+  the positions. Cut them to the length of each new text, which `SetText` already does.
+- It sends `onEndEdit` on every deactivation. The original sends it only with
+  `resetOnDeActivation` or `clearSelection`, or on Enter and Escape (rule 2). That differs for
+  fields with `resetOnDeActivation` off, which a Klei listener then never hears.
+- `OnSubmit(BaseEventData)` on a focused field does nothing. The original submits and ends the
+  edit (rule 3). With real keys, Enter sends `onSubmit` once in both players.
+- Select-all on focus puts the anchor at 0 and the caret at the end, the reverse of rule 5.
+- The character positions follow the string positions at once (rule 6). Not worth matching.
+- Inside the events the character positions lag instead. While a typed character's
+  `onValueChanged` runs, `caretPosition` still reads the position before it. Typing "500"
+  reports `changed:"5"@0/0/0/1`, `"50"@1/1/1/2` and `"500"@2/2/2/3`, where the original reports
+  `@1/1/1/1`, `@2/2/2/2` and `@3/3/3/3`. `stringPosition` (the last value) is right in both. A
+  listener that reads `caretPosition` in `onValueChanged` gets the new caret in the original.
+- `onEndEdit` is sent after the positions are reset, so with `resetOnDeActivation` on it
+  reports `@0/0/0/0` where the original reports the caret as it was.
+- It matches the original on rule 4, on Enter's event order, and on the caret with
+  `resetOnDeActivation` off.
+- `ic-check.py rule` holds for 94 of 326 cases of our log (end, x and cull). `ic-check.py
+  diff` finds 910 of the 2,055 `ProcessEvent` steps different, and 149 of the 324 steps with
+  real keys.
+
+| Case | shipped: caret/anchor after; events | this implementation |
+|---|---|---|
+| Ctrl+A, Backspace, "500", Return (real keys), `resetOnDeActivation` on: the specs | 3/3; submit, endEdit, deselect | 0/0; the same events |
+| the same with Klei's `onEndEdit` (text set again, deactivate at end of frame) | 3/3 | 0/0 |
+| the same, "50000" | 5/5 | 0/0 |
+| the same, `resetOnDeActivation` off | 3/3; submit, endEdit, deselect | the same |
+| "500" typed, deselected, `resetOnDeActivation` on | 3/3; endEdit, deselect | 0/0; endEdit, deselect |
+| the same, `resetOnDeActivation` off | 3/3; deselect | 3/3; endEdit, deselect |
+| "500" typed, `DeactivateInputField(true)`, `resetOnDeActivation` off | 3/3; endEdit, deselect | 0/0; endEdit, deselect |
+| "500" typed, Shift+Home, Return (real keys), `resetOnDeActivation` on | 0/3 | 0/0 |
+| "500" typed, the GameObject disabled, `resetOnDeActivation` off | 3/3; nothing | 3/3; endEdit |
+| "500" typed, `onEndEdit` sets "5", `resetOnDeActivation` on | 1/1 | 0/0 |
+| "500" typed into "" and Escape (real keys) | 0/0, text ""; changed, endEdit, deselect | the same |
+| "500" typed over "1000" and Escape, `resetOnDeActivation` on | 3/3, text "1000" | 0/0 |
+| "500" typed, `OnSubmit(BaseEventData)`, `resetOnDeActivation` on | 3/3; submit, endEdit, deselect, unfocused | 3/3; nothing, still focused |
+| "500" typed, `ProcessEvent(Return)` | 3/3, still focused; nothing | the same |
+| text "500" before focus, `onFocusSelectAll` on | caret 0, anchor 3 | caret 3, anchor 0 |
+
+Not measured: multi-line fields (Enter in `MultiLineSubmit` and `MultiLineNewline`), Tab,
+`readOnly`, fields on a touch keyboard, and what `resetOnDeActivation` changes if anything (it
+moved neither the caret, the selection nor the text in any case here).
+
+### The caret graphic and RectMask2D (measured 2026-10-24)
+
+Found by a mod spec: Mods Presets Organizer (`tests/e2e/mods/3284635963-mods-presets-organizer.yaml`,
+ui_dump `presets`, `…/preset_add#6/input_field_holder#0/Caret#0`). The field has never been
+focused. Its caret (`TMP_SelectionCaret`) is a child of `input_field_holder`, which has the
+`RectMask2D`. The caret was left at its defaults: 100 × 100, centred, at world (−213.94,
+272.28)–(−127.94, 358.28). That happens when PLib's patch of `AssignPositioningIfNeeded` loses
+its coroutine, as described under "when the label and the caret are set up". The holder's
+rect runs from (302.11, 616.28) to (458.52, 633.48), so the caret's rect lies wholly outside
+the clip. Under "RectMask2D culling" in `ugui.md` an `Image` there would be culled. The
+original does not cull the caret's `CanvasRenderer`; ours does.
+
+**Measured** with `PROBE_SCENARIO=inputcaret` (lines `IC cull …`). The fields are built as
+above, active or enabled after a frame, on a canvas of scale 1. The caret is either at its
+defaults (the probe's Harmony prefix skips `AssignPositioningIfNeeded`, so the caret stays 100 ×
+100 at the world origin, outside the viewport's clip) or placed over the text. The field sits
+in one of three places:
+- `own`: only its viewport's `RectMask2D`;
+- `outer-in`: also inside an outer 300 × 100 `RectMask2D`;
+- `outer-out`: moved 200 up, out of the outer mask, so the two clips do not intersect.
+
+Each field is never focused, focused with "12" typed, or focused and then deselected. An
+`Image` with the caret's rect, the caret's sibling, is the control. Each step logs the caret's,
+the text's and the control's `CanvasRenderer.cull`, `hasRectClipping`, rect in canvas space
+and mesh (`CanvasRenderer.GetMesh`). The steps are: two frames, focus, the mask moved by 1 and
+back, the field moved by 1, the caret's GameObject and graphic toggled, the caret moved by 1,
+the field disabled and enabled. Then come direct calls of the caret's and the control's
+`Cull(clipRect, validRect)`: a rect far off with `true`, a rect over everything with `true`,
+and the far rect with `false`. 36 cases. `ic-check.py rule` checks the rule and it holds for all
+36 in the shipped package's log. `ic-check.py diff ORIG OURS cull` compares the players.
+
+- **The caret graphic is culled only when its clip rect is invalid.** Its
+  `Cull(clipRect, validRect)` sets `canvasRenderer.cull` to `!validRect`, whatever its rect,
+  its mesh and the clip rect are.
+  - With a valid clip, it is never culled: at its defaults outside the clip (`own`,
+    `outer-in`), never focused or focused, in every step above.
+  - Its mesh makes no difference: with no vertices (never focused, or after an edit ended) and
+    with its 4-vertex quad lying outside the clip (focused at its defaults), it is not culled.
+  - In the same steps the control `Image` with the same rect is culled (`MaskableGraphic`'s
+    rule in `ugui.md`).
+  - Called directly: `Cull(far, true)` leaves it not culled (or un-culls it), `Cull(far,
+    false)` culls it.
+  - When the clip rect is invalid (`outer-out`, the masks do not overlap), the caret is culled
+    with everything else under the mask, and `hasRectClipping` is false.
+- **It is registered with the masks like any `MaskableGraphic`.** `maskable` is true, and
+  `hasRectClipping` is true under a valid clip from the first canvas update after the field is
+  enabled. So the clip still cuts its pixels; only the cull is skipped.
+- **Measured on the way:** after a direct `Cull` call un-culled an `Image` that the mask
+  culls, the original culled it again a frame later with nothing moved. Ours keeps the value
+  of the call until something moves. Only code that calls `Cull` itself would see it.
+
+**Where this implementation deviates.** `TMP_SelectionCaret` (`src/Unity.TextMeshPro/Input/TMP_SelectionCaret.cs`)
+has no `Cull` of its own, so it culls with its rect as `MaskableGraphic` does:
+- The caret at its defaults outside the clip is culled in every step with a valid clip (12
+  cases). That is the presets organizer's `Caret#0`.
+- A caret placed over the text is culled after it moves, because the text's rect has a height
+  of −1 and so overlaps nothing (12 cases).
+- `Cull(far, true)` culls it.
+- `ic-check.py diff … cull` finds 210 of the 540 steps different: 198 in the caret's cull, and
+  24 in the control's a frame after the direct calls (the re-cull noted above).
+
+Give it a `Cull(Rect clipRect, bool validRect)` that sets `canvasRenderer.cull = !validRect`
+(and raises the cull-state change as the base does when the value changes).
+
+| Case (`cull …`) | shipped: caret culled | this implementation |
+|---|---|---|
+| defaults, `own`, never focused (the presets organizer) | no | yes |
+| defaults, `own`, focused (quad outside the clip) | no | yes |
+| defaults, `outer-in`, any | no | yes |
+| placed, `own`, after the caret moved by 1 | no | yes |
+| any, `outer-out` (clip rect invalid) | yes | yes |
+| `Cull(far, true)` called directly | no | yes |
+| `Cull(far, false)` called directly | yes | yes |
+| the control `Image`, defaults' rect, `own` | yes | yes |
+
 ## Verification
 
 1. **Build:**

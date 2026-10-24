@@ -1216,6 +1216,13 @@ of 20. The kinds:
 | text whose box is out after an alignment change | culled one frame later | not culled |
 | Modify Difficulty Settings, "Care Packages" label | culled; shown when scrolled 100 up, culled again back | not culled |
 
+**An exception: TextMeshPro's caret graphic** (measured 2026-10-24). `TMP_SelectionCaret`, the
+graphic a `TMP_InputField` draws its caret and selection with, is registered with the masks
+and clipped like any `MaskableGraphic`, but its `Cull` ignores its rect and mesh: it is culled
+only when the clip rect is invalid. `textmeshpro.md` ("The caret graphic and RectMask2D")
+records the measurement. The same probe found that the original re-culls an `Image` a frame
+after a direct `Cull` call un-culled it, with nothing moved.
+
 ### Scrollbar presses on the track (measured 2026-10-23)
 
 Found through the vanilla Consumables screen (`tests/e2e/consumables-scroll.yaml`). Its header

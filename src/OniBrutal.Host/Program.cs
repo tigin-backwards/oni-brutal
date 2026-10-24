@@ -63,23 +63,43 @@ namespace OniBrutal.Host
             if (options.TraceExceptions) ExceptionTrace.Install();
             if (options.RunHome != null) RunHome.Install(options.RunHome);
             if (options.AudioWav != null) AudioCapture.Install(options.AudioWav);
-            ModVersionStamp.Install();
-            MonoValueTypeHashes.Install();
-            ModAccess.Install();
-            TranspiledCalls.Install();
-            TranspiledTryEntries.Install();
-            UnboxedMethods.Install();
-            SharedGenerics.Install();
-            PatchFrames.Install();
-            PInvokePatches.Install();
-            PatchDependents.Install();
-            MonoEnumFormat.Install();
-            // Special folders' paths are given whether or not they exist, as Mono gives them (D24).
-            MonoFolderPaths.Install();
-            GameTweaks.GameTweaks.Install(options.GameTweaks);
-            StateMachineSaveNames.Install(dataDir, AppContext.BaseDirectory);
-            StartupStats.Mark("host patches installed");
-            return Player.Run(options, dataDir);
+            // The patches of the game's and Harmony's own methods are made on another thread while
+            // the player opens its window (no game code runs before they are all in: Player.Run
+            // waits for them before the first scene). Those of the runtime's own methods, which the
+            // engine itself calls meanwhile, are made after, on this thread, in the same order.
+            Exception? patchFailure = null;
+            var gamePatches = new Thread(() =>
+            {
+                try
+                {
+                    ModVersionStamp.Install();
+                    MonoValueTypeHashes.Install();
+                    ModAccess.Install();
+                    TranspiledCalls.Install();
+                    TranspiledTryEntries.Install();
+                    UnboxedMethods.Install();
+                    SharedGenerics.Install();
+                    PatchFrames.Install();
+                    PInvokePatches.Install();
+                    PatchDependents.Install();
+                }
+                catch (Exception e)
+                {
+                    patchFailure = e;
+                }
+            }) { Name = "Host patches" };
+            gamePatches.Start();
+            return Player.Run(options, dataDir, () =>
+            {
+                gamePatches.Join();
+                if (patchFailure != null) System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw(patchFailure);
+                MonoEnumFormat.Install();
+                // Special folders' paths are given whether or not they exist, as Mono gives them (D24).
+                MonoFolderPaths.Install();
+                GameTweaks.GameTweaks.Install(options.GameTweaks);
+                StateMachineSaveNames.Install(dataDir, AppContext.BaseDirectory);
+                StartupStats.Mark("host patches installed");
+            });
         }
 
         /// M0 gate: every type of every loaded assembly must load, as the game's whole-domain

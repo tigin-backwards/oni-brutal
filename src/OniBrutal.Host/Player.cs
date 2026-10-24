@@ -14,7 +14,9 @@ namespace OniBrutal.Host
     /// The player: start-up in Unity's order, then the frame loop.
     internal static class Player
     {
-        public static int Run(Options options, string dataDir)
+        /// `patches`: the host's patches, put in before the first scene loads (game code runs
+        /// from there on).
+        public static int Run(Options options, string dataDir, Action patches)
         {
             StartupStats.Mark("player starts");
             AssetSystem.Initialize(dataDir);
@@ -42,6 +44,7 @@ namespace OniBrutal.Host
             OniBrutal.Engine.IMGUI.GUIManager.Install();
             EngineLog.Engine($"Project: {EngineConfig.CompanyName} / {EngineConfig.ProductName} {EngineConfig.Version} (Unity {EngineConfig.UnityVersion})");
 
+            patches();
             var hooks = RuntimeInitializeHooks.Load(dataDir);
             hooks.Run(RuntimeInitializeLoadType.SubsystemRegistration);
             hooks.Run(RuntimeInitializeLoadType.AfterAssembliesLoaded);

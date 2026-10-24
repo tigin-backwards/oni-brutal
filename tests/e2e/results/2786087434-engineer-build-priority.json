@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2786087434-engineer-build-priority.yaml",
+ "mods": [
+  "2786087434"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Conveyor Rail blueprint with its cuprite delivered gets an EngBuild chore; the Priorities screen shows the Engineer Building column",
+ "updated": "2026-10-24",
+ "commit": "802e6b7",
+ "mod_dlls": {
+  "2786087434": {
+   "ONI-EngineeringPriority.dll": "a41a302bd9a7f9e9b7792fe40c08c7bac19ce46b59ca10bca25238faef717333"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-132720-e5f5c6",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T13:27:20",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-132948-75782b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T13:29:48",
+    "lane": 16,
+    "reference_run": "20261024-132720-e5f5c6",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-132948-75782b",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T13:29:49",
+    "lane": 17,
+    "reference_run": "20261024-132720-e5f5c6",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

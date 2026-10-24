@@ -1,0 +1,32 @@
+# Engineer Build Priority (2786087434), class P (with a Priorities column).
+#
+# What it does: adds an "Engineer Building" errand group (and its EngBuild chore type, after
+# Build) so that buildings needing a construction skill (conveyor rails, heavi-watt joint plates,
+# steam turbines) get their own column in the Priorities screen. A postfix on
+# Constructable.PlaceDiggables swaps such a blueprint's Build chore for an EngBuild one.
+# How a player reaches it: the Priorities screen; any blueprint that needs a skill to build.
+# What changes: skilled construction can be prioritised apart from the rest.
+#
+# setup grants Solid Transport research and drops cuprite in the corridor west of the printing
+# pod. A Conveyor Rail blueprint is placed there; once its cuprite is delivered, its build chore
+# is EngBuild (no one has the skill, so it stays unbuilt). The Priorities screen shows the new
+# column.
+from: early-base
+mods: [2786087434]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"SolidTransport\")", method: Purchased}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Cuprite\").substance", method: SpawnResource, args: [[111.5, 206.5, -12], 200, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Db.Get().ChoreGroups.TryGet(\"EngBuild\").Name": Engineer Building
+      "Db.Get().ChoreTypes.TryGet(\"EngBuild\").groups[0].Id": EngBuild
+  - build: {prefab: SolidConduit, at: [109, 209]}
+  - expect: {blueprints: {SolidConduit: 1}}
+  - run: {seconds: 150}
+  - expect_state:
+      "all:Constructable::Length": 1
+      "all:Constructable::[0].buildChore.choreType.Id": EngBuild
+  - open: {management: priorities}
+  - ui_wait: {path: "**/JobsTableScreen", cond: stable}
+  - expect_ui:
+      "**/JobsTableScreen/HeaderContent/prefab_row_header/OptionSelectorHeader/LabelHeader/Label": {any_text: "Engineer Building"}

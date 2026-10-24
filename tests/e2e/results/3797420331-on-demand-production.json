@@ -1,0 +1,73 @@
+{
+ "spec": "mods/3797420331-on-demand-production.yaml",
+ "mods": [
+  "3797420331"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Compost is built and selected: its On-Demand Production side screen shows Forever, and a click on the mode button makes it Maintain; the side screen matches",
+ "updated": "2026-10-24",
+ "commit": "0bbf8a4",
+ "mod_dlls": {
+  "3797420331": {
+   "OnDemandProduction.dll": "97d95f9a896cd154f63e90b8f95441c5986dbd1d043799666ab9e18d4e6c9663"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-074329-585582",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T07:52:46",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-081038-54d47c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T08:10:38",
+    "lane": 17,
+    "reference_run": "20261024-074329-585582",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "stock": {
+      "differences": 0
+     },
+     "stock-maintain": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "details": 0.0
+    }
+   },
+   {
+    "run": "20261024-081038-54d47c",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T08:11:53",
+    "lane": 17,
+    "reference_run": "20261024-074329-585582",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "stock": {
+      "differences": 0
+     },
+     "stock-maintain": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "details": 0.0
+    }
+   }
+  ]
+ }
+}

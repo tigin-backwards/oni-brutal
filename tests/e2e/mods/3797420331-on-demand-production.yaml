@@ -1,0 +1,38 @@
+# On-Demand Production (3797420331), classes S, P.
+#
+# What it does: production buildings get three modes, Once, Maintain and Forever. On recipe
+# fabricators (a StockRecipeController on every ComplexFabricator) the recipe queue screen gets
+# a mode button, and Maintain pauses a recipe once the world's Resources list holds the number
+# set. The Fertilizer Synthesizer, the Compost, the Power Control Station and the Farm Station
+# get a side screen of their own ("On-Demand Production", a BuildingStockController): a count
+# field with - and + buttons, a kg/t unit toggle and a mode button (Forever or Maintain; Auto
+# or Maintain for the two tool makers), which holds the building through an Operational flag.
+# A Settings button on the Mods screen switches those four off.
+# How a player reaches it: selecting a production building; its side screen.
+# What changes: buildings that stop when the colony has enough.
+#
+# setup grants Composting (FarmingTech) and spawns sandstone. A Compost is built in the dug-out
+# corridor west of the printing pod and selected: its On-Demand Production side screen shows
+# Forever; a click on the mode button makes it Maintain (2 t).
+from: early-base
+mods: [3797420331]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"FarmingTech\")", method: Purchased}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"SandStone\").substance", method: SpawnResource, args: [[114.5, 206.5, -12], 600, 300, 255, 0]}}
+require_log: ['\[OnDemandProduction\] loaded']
+steps:
+  - build: {prefab: Compost, at: [113, 206]}
+  - expect: {blueprints: {Compost: 1}}
+  - run: {seconds: 900, until: {buildings: {Compost: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [113, 207], ortho: 8}}
+  - click_world: {cell: [113, 206], select: Compost}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/OnDemandBuildingStock", cond: stable}
+  - expect_state:
+      "selected:GetComponent<StockProduction.BuildingStockController>.CurrentMode": Forever
+  - ui_dump: {name: stock, root: "**/OnDemandBuildingStock"}
+  - shot: {name: details, crop: "**/DetailsScreen", threshold: 0.04}
+  - click: {ui: "**/OnDemandBuildingStock/**/StockQueueRow/InfiniteButton"}
+  - expect_state:
+      "selected:GetComponent<StockProduction.BuildingStockController>.CurrentMode": Maintain
+  - expect_ui: {"**/OnDemandBuildingStock/**/StockQueueRow/InfiniteButton/Text": {text: "Maintain"}}
+  - ui_dump: {name: stock-maintain, root: "**/OnDemandBuildingStock"}

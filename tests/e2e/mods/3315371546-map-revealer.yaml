@@ -1,0 +1,19 @@
+# Map Revealer (3315371546), class P.
+#
+# What it does: a postfix on GridVisibility.Reveal, which runs whenever a Duplicant or another
+# revealer moves into a new cell: it reveals every cell of that cell's world, and has the
+# world's spawner spawn everything it holds (critters, geysers, buried objects).
+# How a player reaches it: play; the first Duplicant step reveals the asteroid.
+# What changes: the whole asteroid is uncovered at once.
+#
+# Two corners of the starting asteroid (240 x 380 cells), far from the base and hidden in the
+# fixture, are revealed once the game has run (the first reveal happens while the save loads),
+# and the world shot of one shows its cells.
+from: early-base
+mods: [3315371546]
+steps:
+  - run: {seconds: 30}
+  - expect_state:
+      "cells:10,20..30,40::Grid.Visible[{cell}]": 112455
+      "cells:200,340..220,360::Grid.Visible[{cell}]": 112455
+  - world_shot: {name: corner, ortho: 12, at: [20, 30]}

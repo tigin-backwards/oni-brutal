@@ -1,0 +1,61 @@
+{
+ "spec": "mods/3308563978-chemical-processing-biochemistry.yaml",
+ "mods": [
+  "3308563978"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Expeller Press's card opens in the Refining menu; the press is built (unpowered) and selected, its recipe list showing; the new elements exist; card and details match",
+ "updated": "2026-10-24",
+ "commit": "0bbf8a4",
+ "mod_dlls": {
+  "3308563978": {
+   "Biochemistry.dll": "5515a84c47efe09c118ca87e6ea1b7cbb11b7abae364f407b47b6991968e883e"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-071024-3cf6e4",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T07:37:19",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-075900-90a64f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T07:59:00",
+    "lane": 17,
+    "reference_run": "20261024-071024-3cf6e4",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.007747,
+     "details": 0.0
+    }
+   },
+   {
+    "run": "20261024-075900-90a64f",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T08:00:41",
+    "lane": 17,
+    "reference_run": "20261024-071024-3cf6e4",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.007747,
+     "details": 0.0
+    }
+   }
+  ]
+ }
+}

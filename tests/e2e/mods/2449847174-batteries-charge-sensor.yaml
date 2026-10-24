@@ -1,0 +1,39 @@
+# Batteries Charge Sensor (2449847174), class B.
+#
+# What it does: adds the Batteries Charge Sensor (Automation menu, Advanced Power Regulation;
+# 1x1 of refined metal), which sits on a power circuit and reads the charge of every battery on
+# it: it sends a green signal from when the charge falls to its low threshold until it reaches
+# its high one (an activation range side screen, 0-100 %, like the Smart Battery's), and shows
+# the stored energy as a status line.
+# How a player reaches it: the build menu (Automation), after research; its side screen.
+# What changes: one sensor watches a whole circuit's batteries.
+#
+# setup grants the research and spawns steel. The sensor is built, unwired, in the dug-out
+# corridor west of the printing pod and selected: its status reads the stored energy (none,
+# on no circuit), and 30 and 80 typed into its range fields set its thresholds.
+from: early-base
+mods: [2449847174]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"AdvancedPowerRegulation\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Steel\").substance", method: SpawnResource, args: [[109.5, 206.5, -12], 100, 300, 255, 0]}}
+steps:
+  - build: {prefab: BatteriesChargeSensor, at: [113, 206], material: Steel}
+  - expect: {blueprints: {BatteriesChargeSensor: 1}}
+  - run: {seconds: 900, until: {buildings: {BatteriesChargeSensor: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [113, 207], ortho: 8}}
+  - click_world: {cell: [113, 206], select: BatteriesChargeSensor}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/ActivationRangeSideScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Batteries Charge Sensor"}
+      "**/SimpleInfoScreen/**/StatusItemTemplate/TextLayout/Value": {any_text: "~Stored energy"}
+  - expect_state:
+      "selected:GetComponent<BatteriesChargeSensor.BatteriesChargeSensor>.ActivateValue": 100
+      "selected:GetComponent<BatteriesChargeSensor.BatteriesChargeSensor>.DeactivateValue": 0
+  - ui_dump: {name: range, root: "**/ActivationRangeSideScreen"}
+  - shot: {name: details, crop: "**/DetailsScreen", threshold: 0.04}
+  - type: {ui: "**/ActivationRangeSideScreen/**/ActivateInput", text: "80", enter: true, clear: true}
+  - type: {ui: "**/ActivationRangeSideScreen/**/DeactivateInput", text: "30", enter: true, clear: true}
+  - expect_state:
+      "selected:GetComponent<BatteriesChargeSensor.BatteriesChargeSensor>.ActivateValue": 80
+      "selected:GetComponent<BatteriesChargeSensor.BatteriesChargeSensor>.DeactivateValue": 30

@@ -1,0 +1,34 @@
+# Enclosed Telescope Tune-Up (2630438094), classes P, O.
+#
+# What it does: tunes the Enclosed Telescope (Spaced Out): 240 W instead of 120, glass added to
+# its cost (a second material slot), a scan radius of 5 hexes instead of 4, its scanning
+# 50 % faster while it is fed oxygen, no building it inside a rocket, and its gas pipe made
+# optional (its RequireInputs no longer requires the conduit, and its chores no longer need
+# oxygen). Each is a PLib option.
+# How a player reaches it: the build menu (Rocketry, after Sky Detectors).
+# What changes: the telescope's cost, power and scanning.
+#
+# Smaller spec: the telescope needs the Sky Detectors research, glass and a view of the sky,
+# which early-base lacks. setup grants the research; the telescope's definition carries the
+# changes, and its card in the Rocketry menu shows glass among its materials.
+from: early-base
+mods: [2630438094]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"SkyDetectors\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Game.Instance", method: Trigger, args: [-107300940]}}
+  - driver: {setup.call: {target: "PlanScreen.Instance._researchedDefs", method: Clear}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"ClusterTelescopeEnclosed\").EnergyConsumptionWhenActive": 240
+      "Assets.GetBuildingDef(\"ClusterTelescopeEnclosed\").MaterialCategory.Length": 2
+      "Assets.GetBuildingDef(\"ClusterTelescopeEnclosed\").MaterialCategory[1]": Glasses
+      "Assets.GetBuildingDef(\"ClusterTelescopeEnclosed\").BuildingComplete.GetComponent<RequireInputs>.requireConduit": false
+      "Assets.GetBuildingDef(\"ClusterTelescopeEnclosed\").BuildingComplete.GetComponent<KPrefabID>.HasTag(\"NotRocketInteriorBuilding\")": true
+  - run: {seconds: 5}
+  - click: {ui: "**/PlanScreen/Toggle:Rocketry"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/ClusterTelescopeEnclosed Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/ClusterTelescopeEnclosed Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
+  - shot: {name: product, crop: "**/ProductInfoScreen", threshold: 0.04}
+  - key: {code: Escape}

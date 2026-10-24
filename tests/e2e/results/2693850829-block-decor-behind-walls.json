@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2693850829-block-decor-behind-walls.yaml",
+ "mods": [
+  "2693850829"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "Drywall built by Duplicants over a copper ore wire takes away that wire's decor penalty (the wires' summed decor rises by 4.5)",
+ "updated": "2026-10-24",
+ "commit": "0bbf8a4",
+ "mod_dlls": {
+  "2693850829": {
+   "BlockDecorBehindWalls.dll": "ca4700ed30cefd24fcbcd939a89afbb2d55671f7992c397150895a2ec7772961"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-071024-3cf6e4",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T07:35:16",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-075619-fde2da",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T07:56:19",
+    "lane": 17,
+    "reference_run": "20261024-071024-3cf6e4",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-075619-fde2da",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T07:57:40",
+    "lane": 17,
+    "reference_run": "20261024-071024-3cf6e4",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

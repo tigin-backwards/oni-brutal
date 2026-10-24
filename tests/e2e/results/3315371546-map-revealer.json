@@ -1,0 +1,59 @@
+{
+ "spec": "mods/3315371546-map-revealer.yaml",
+ "mods": [
+  "3315371546"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "two far corners of the starting asteroid, hidden in the fixture, are fully revealed once the game runs, and the world shot of one matches",
+ "updated": "2026-10-24",
+ "commit": "0bbf8a4",
+ "mod_dlls": {
+  "3315371546": {
+   "MapRevealer.dll": "a5dcd5a2510515aea706819bda74a59161d7337afe611c9647cadcd585d406c1"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-071024-3cf6e4",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T07:41:17",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-080344-5b3a06",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T08:03:44",
+    "lane": 17,
+    "reference_run": "20261024-071024-3cf6e4",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "corner": 0.008596
+    }
+   },
+   {
+    "run": "20261024-080344-5b3a06",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T08:04:55",
+    "lane": 17,
+    "reference_run": "20261024-071024-3cf6e4",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "corner": 0.008826
+    }
+   }
+  ]
+ }
+}

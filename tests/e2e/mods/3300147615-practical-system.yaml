@@ -1,0 +1,42 @@
+# I_实用系统_Practical System 1.6 (3300147615), classes B, P, O.
+#
+# What it does: adds two Utilities buildings without research: the Constant Temperature Space
+# (I003GG1, 1x1, any buildable material, no power) which every 200 ms pulls the cells within
+# 2 of it a fifth of the way to its target temperature (a slider from -270 to 8000 degrees,
+# 26 by default), and the Temperature Field (I004GG1, the same over a chosen width and height).
+# It also rebuilds the Thermo Regulator and Aquatuner (a fixed -20 degrees with their own
+# slider), lets the Liquid Tepidizer pick a target temperature and overheat at 1000 K, and
+# makes the Ice Maker bigger and faster. PLib options switch the parts.
+# How a player reaches it: the build menu (Utilities); the building's slider side screen.
+# What changes: buildings that hold a spot at a set temperature.
+#
+# A Constant Temperature Space is built of sandstone in the dug-out corridor west of the
+# printing pod and selected; 60 is typed into its slider's field, and after the game runs
+# for 30 s the air in the cells around it is more than 10 degrees warmer, on its way to 333 K.
+from: early-base
+mods: [3300147615]
+setup:
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"SandStone\").substance", method: SpawnResource, args: [[114.5, 206.5, -12], 1000, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"LiquidHeater\").OverheatTemperature": 1000
+      "Assets.GetBuildingDef(\"IceMachine\").EnergyConsumptionWhenActive": 240
+  - build: {prefab: I003GG1, at: [113, 206], material: SandStone}
+  - expect: {blueprints: {I003GG1: 1}}
+  - run: {seconds: 900, until: {buildings: {I003GG1: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [113, 207], ortho: 8}}
+  - click_world: {cell: [113, 206], select: I003GG1}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/SingleSliderSideScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<I_实用系统_1._0.I003GG1K0>.targetTemperature": 299.15
+  - ui_dump: {name: slider, root: "**/SingleSliderSideScreen"}
+  - expect_state:
+      "Grid.Temperature.get_Item(131130)": {save_as: start}
+      "Grid.Temperature.get_Item(131765)": {save_as: start2}
+  - type: {ui: "**/SingleSliderSideScreen/**/*Input*", text: "60", enter: true, clear: true}
+  - expect_state:
+      "selected:GetComponent<I_实用系统_1._0.I003GG1K0>.targetTemperature": 333.15
+  - run: {seconds: 30}
+  - expect_state:
+      "Grid.Temperature.get_Item(131130)": "> start + 10"
+      "Grid.Temperature.get_Item(131765)": "> start2 + 10"

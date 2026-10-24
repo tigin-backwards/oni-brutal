@@ -1,0 +1,42 @@
+# Adjustable Auto Sweeper (Deprecated) (2971184827), class S (side screens on a vanilla
+# building), P.
+#
+# What it does: the Auto-Sweeper (SolidTransferArm) gets a control (SolidTransferArmControl)
+# with a range slider from 1 to 32 cells (4 in the game) and a "Cross Wall" checkbox; the range
+# sets its pickup range, its reach and its range visualizer, and with Cross Wall a transpiler in
+# SolidTransferArm.AsyncUpdate treats items behind walls as reachable.
+# How a player reaches it: selecting an Auto-Sweeper; its side screens.
+# What changes: sweepers that reach further, and through walls.
+#
+# setup grants Smart Storage, gives two Duplicants the Mechatronics Engineering skill it
+# takes to build one, and spawns steel. An Auto-Sweeper is built, unpowered, in the
+# dug-out corridor west of the printing pod and selected: 10 typed into the range slider's
+# field gives it a 10-cell range, and the Cross Wall checkbox is ticked.
+from: early-base
+mods: [2971184827]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"SmartStorage\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  # Building an Auto-Sweeper takes the Mechatronics Engineering skill.
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[1].GetComponent<MinionResume>", method: GrantSkill, args: [Engineering1]}}
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[2].GetComponent<MinionResume>", method: GrantSkill, args: [Engineering1]}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Steel\").substance", method: SpawnResource, args: [[114.5, 206.5, -12], 400, 300, 255, 0]}}
+steps:
+  - build: {prefab: SolidTransferArm, at: [113, 206], material: Steel}
+  - expect: {blueprints: {SolidTransferArm: 1}}
+  - run: {seconds: 900, until: {buildings: {SolidTransferArm: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [113, 207], ortho: 8}}
+  - click_world: {cell: [113, 206], select: SolidTransferArm}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/IntSliderSideScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<SolidTransferArm>.pickupRange": 4
+      "selected:GetComponent<AdjustableSolidTransferArm.SolidTransferArmControl>.isCrossWall": false
+  - ui_dump: {name: slider, root: "**/IntSliderSideScreen"}
+  - type: {ui: "**/IntSliderSideScreen/**/*Input*", text: "10", enter: true, clear: true}
+  - expect_state:
+      "selected:GetComponent<SolidTransferArm>.pickupRange": 10
+      "selected:GetComponent<RangeVisualizer>.RangeMax.x": 10
+  - click: {ui: "**/SingleCheckboxSideScreen/**/CheckboxGroup/CheckBox"}
+  - expect_state:
+      "selected:GetComponent<AdjustableSolidTransferArm.SolidTransferArmControl>.isCrossWall": true
+  - shot: {name: details, crop: "**/DetailsScreen", threshold: 0.04}

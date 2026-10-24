@@ -1,0 +1,64 @@
+{
+ "spec": "mods/3300147615-practical-system.yaml",
+ "mods": [
+  "3300147615"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Constant Temperature Space is built and selected; 60 typed into its slider field sets its target to 333 K, and the cells around it warm by more than 10 degrees within 30 s; the slider screen matches",
+ "updated": "2026-10-24",
+ "commit": "0bbf8a4",
+ "mod_dlls": {
+  "3300147615": {
+   "I_╩╡╙├╧╡═│_1.0.dll": "b54086f2f026234a7b897b6482baabbbd2cdd2958a209210fb2b6dd56732e183",
+   "PLib.dll": "b862c5db2b3cd6df09a62d4a30782e91e2b24e8e1bfac08d991c9cc89a984ba9"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-074329-585582",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T07:56:07",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-080027-882658",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T08:00:27",
+    "lane": 16,
+    "reference_run": "20261024-074329-585582",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "slider": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261024-080027-882658",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T08:01:46",
+    "lane": 16,
+    "reference_run": "20261024-074329-585582",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "slider": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

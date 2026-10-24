@@ -1,0 +1,67 @@
+{
+ "spec": "mods/2449847174-batteries-charge-sensor.yaml",
+ "mods": [
+  "2449847174"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the sensor is built (unwired) and selected: its status reads the stored energy, and 80 and 30 typed into its activation range fields set its thresholds; range screen and details match",
+ "updated": "2026-10-24",
+ "commit": "0bbf8a4",
+ "mod_dlls": {
+  "2449847174": {
+   "BatteriesChargeSensor.dll": "8c660733da6da4385ad637f926f060464c38e95f314c684818263a41184d9a30"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-074329-585582",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T07:47:56",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-080818-7d3766",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T08:08:18",
+    "lane": 17,
+    "reference_run": "20261024-074329-585582",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "range": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "details": 0.002155
+    }
+   },
+   {
+    "run": "20261024-080818-7d3766",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T08:09:26",
+    "lane": 17,
+    "reference_run": "20261024-074329-585582",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "range": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "details": 0.002155
+    }
+   }
+  ]
+ }
+}

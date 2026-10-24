@@ -1,0 +1,35 @@
+# Wall Electrolyzer 穿墙电解器 (2881906313), classes B, O.
+#
+# What it does: adds the Wall Electrolyzer (Electrolyzer1, Oxygen menu, no research): a 1x1
+# electrolyzer of any metal hung from a ceiling, fed water by pipe, 120 W. It emits its oxygen
+# three cells above itself (through the ceiling it hangs from) and its hydrogen in its own
+# cell. PLib options (Config.json) set the oxygen share (0.888), the output temperature
+# (20 degrees) and the water it takes per second (1 kg).
+# How a player reaches it: the build menu (Oxygen).
+# What changes: oxygen goes up through the ceiling, hydrogen stays below.
+#
+# options set 2 kg of water a second. The Wall Electrolyzer is built, unpowered and unpiped,
+# under the ceiling of the printing pod's room, west of the pod, and selected: its
+# converter takes 2 kg/s and puts oxygen 3 cells up.
+from: early-base
+mods: [2881906313]
+options:
+  "2881906313": {$file: Config.json, Shui: 2.0}
+setup:
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Cuprite\").substance", method: SpawnResource, args: [[114.5, 206.5, -12], 400, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"Electrolyzer1\").BuildLocationRule": OnCeiling
+      "Assets.GetBuildingDef(\"Electrolyzer1\").BuildingComplete.GetComponent<ElementConverter>.consumedElements[0].MassConsumptionRate": 2
+      "Assets.GetBuildingDef(\"Electrolyzer1\").BuildingComplete.GetComponent<ElementConverter>.outputElements[0].outputElementOffset.y": 3
+  - build: {prefab: Electrolyzer1, at: [122, 210]}
+  - expect: {blueprints: {Electrolyzer1: 1}}
+  - run: {seconds: 900, until: {buildings: {Electrolyzer1: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [122, 209], ortho: 8}}
+  - click_world: {cell: [122, 210], select: Electrolyzer1}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Wall Electrolyzer"}
+  - expect_state:
+      "selected:GetComponent<ConduitConsumer>.consumptionRate": 2.1
+  - shot: {name: details, crop: "**/DetailsScreen", threshold: 0.04}

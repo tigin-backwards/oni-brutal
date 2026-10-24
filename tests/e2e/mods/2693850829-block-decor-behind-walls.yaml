@@ -1,0 +1,30 @@
+# Block Decor Effects Behind Walls (2693850829), classes P, O.
+#
+# What it does: a building whose cells are all covered by a finished backwall (Drywall, Tempered
+# Glass Drywall) gives no decor: a prefix on DecorProvider.AddDecor sets its decor to 0 for
+# buildings on a scene layer below the main building layer (wires, pipes, rails and the like).
+# Postfixes on BuildingComplete.OnSpawn and OnCleanUp refresh the decor of everything in a
+# backwall's cells when one is built or removed. A PLib option leaves heavy-watt wires out.
+# How a player reaches it: building drywall over wires or pipes.
+# What changes: the decor penalty of hidden wires disappears.
+#
+# setup lays a copper ore Wire (decor -4.5) at (110, 206) in the dug-out corridor west of the
+# printing pod beside the base's own, grants Textile Production (Clothing, for Drywall) and
+# spawns sandstone. The wires' decor is summed; Drywall is built over the new wire, and the sum
+# rises by that wire's penalty.
+from: early-base
+mods: [2693850829]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Wire\")", method: Build, args: [131126, Neutral, null, [Cuprite], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"Clothing\")", method: Purchased}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"SandStone\").substance", method: SpawnResource, args: [[113.5, 206.5, -12], 300, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "sum:all:Wire::[*].GetComponent<DecorProvider>.currDecor": {save_as: before}
+  - expect_state: {"sum:all:Wire::[*].GetComponent<DecorProvider>.currDecor": "<= -4"}
+  - build: {prefab: ExteriorWall, at: [110, 206], material: SandStone}
+  - expect: {blueprints: {ExteriorWall: 1}}
+  - run: {seconds: 900, until: {buildings: {ExteriorWall: 1}, pending_construction: 0}}
+  - run: {seconds: 2}
+  - expect_state:
+      "sum:all:Wire::[*].GetComponent<DecorProvider>.currDecor": ">= before + 4"

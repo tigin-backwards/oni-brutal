@@ -1,0 +1,43 @@
+# Chemical Processing - Biochemistry (3308563978), class B.
+#
+# What it does: adds biochemistry elements (vegetable oil, compressed biomass, biodiesel,
+# bioplastic) and buildings, each in a vanilla tech: the Expeller Press (Refining, Basic
+# Refinement; 5x3, metal, 120 W) presses foods and seeds into vegetable oil and biomass, an
+# anaerobic digester, an algae growing basin, a biodiesel refinery and generator and a
+# bioplastic printer; critters' diets learn the new elements.
+# How a player reaches it: the build menu (Refining, Oxygen, Power), after research; the
+# fabricator's recipe side screen.
+# What changes: new production chains from food.
+#
+# setup grants Basic Refinement and spawns copper ore. The Expeller Press's card opens in the
+# Refining menu; the press is built, unpowered, at the west end of the dug-out corridor west of
+# the printing pod and selected: its recipe list shows (Meal Lice, Sleet Wheat Grain and others
+# into oil), and the new elements exist.
+from: early-base
+mods: [3308563978]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"BasicRefinement\")", method: Purchased}}
+  - driver: {setup.call: {target: "Game.Instance", method: Trigger, args: [-107300940]}}
+  - driver: {setup.call: {target: "PlanScreen.Instance._researchedDefs", method: Clear}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Cuprite\").substance", method: SpawnResource, args: [[114.5, 206.5, -12], 600, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "ElementLoader.FindElementByName(\"LiquidVegeOil\")": exists
+      "ElementLoader.FindElementByName(\"SolidBiomass\")": exists
+  - run: {seconds: 5}
+  - driver: {camera.set: {cell: [110, 208], ortho: 10}}
+  - click: {ui: "**/PlanScreen/Toggle:Refinement"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/Biochemistry_ExpellerPress Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/Biochemistry_ExpellerPress Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
+  - shot: {name: product, crop: "**/ProductInfoScreen", threshold: 0.04}
+  - key: {code: Escape}
+  - build: {prefab: Biochemistry_ExpellerPress, at: [106, 206]}
+  - expect: {blueprints: {Biochemistry_ExpellerPress: 1}}
+  - run: {seconds: 1500, until: {buildings: {Biochemistry_ExpellerPress: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [108, 208], ortho: 8}}
+  - click_world: {cell: [108, 207], select: Biochemistry_ExpellerPress}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/ComplexFabricatorSideScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Expeller Press"}
+  - shot: {name: details, crop: "**/DetailsScreen", threshold: 0.04}

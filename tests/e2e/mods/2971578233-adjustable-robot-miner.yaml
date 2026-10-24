@@ -1,0 +1,37 @@
+# Adjustable Robot Miner (2971578233), classes P, S.
+#
+# What it does: the Robo-Miner's mining area can be set, 2 to 64 tiles high and wide (default
+# 9 by 16, the game's), with two sliders in a "Robo-Miner Settings" side screen (the game's dual
+# slider side screen, the mod's AutoMinerControl as its target); its range visualizer follows,
+# and copy settings carries the size.
+# How a player reaches it: selecting a Robo-Miner.
+# What changes: the area a Robo-Miner digs.
+#
+# setup builds a Robo-Miner in the corridor west of the printing pod. It is selected; its side
+# screen shows the two sliders. 12 typed into the first field makes the area 12 high, 8 typed
+# into the second makes it 8 wide (from 3 cells left of the miner), and the range visualizer
+# follows.
+from: early-base
+mods: [2971578233]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"AutoMiner\")", method: Build, args: [{"$": "Grid.XYToCell(109, 206)"}, Neutral, null, [Copper], 300.0, DEFAULT_FACADE]}}
+steps:
+  - run: {seconds: 1}
+  - expect_state:
+      "all:AutoMiner::[0].height": 9
+      "all:AutoMiner::[0].width": 16
+  - driver: {camera.set: {cell: [110, 208], ortho: 8}}
+  - click_world: {cell: [109, 207], select: AutoMiner}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/DualSliderSideScreen", cond: stable}
+  - ui_dump: {name: sliders, root: "**/DualSliderSideScreen"}
+  - ui_wait: {path: "**/DualSliderSideScreen/Contents/NumberInputField1", cond: stable}
+  - type: {ui: "**/DualSliderSideScreen/Contents/NumberInputField1", text: "12", enter: true, clear: true}
+  - expect_state:
+      "selected:GetComponent<AutoMiner>.height": 12
+      "selected:GetComponent<AdjustableRobotMiner.AutoMinerControl>.minerHeight": 12
+  - ui_wait: {path: "**/DualSliderSideScreen/Contents/NumberInputField2", cond: stable}
+  - type: {ui: "**/DualSliderSideScreen/Contents/NumberInputField2", text: "8", enter: true, clear: true}
+  - expect_state:
+      "selected:GetComponent<AutoMiner>.width": 8
+      "selected:GetComponent<AutoMiner>.x": -3
+      "selected:GetComponent<RangeVisualizer>.RangeMax.y": 10

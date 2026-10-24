@@ -1,0 +1,27 @@
+# Hide Panel On Build (2062232295), class P (UI).
+#
+# What it does: the hover card that follows the pointer while a build tool is active (the
+# building's name, materials and placement warnings) is no longer drawn (a prefix returning
+# false on BuildToolHoverTextCard.UpdateHoverElements).
+# How a player reaches it: picking any building in the build menu and moving over the world.
+# What changes: no hover card while placing buildings.
+#
+# A Tile is picked in the Base menu and the pointer moved over the corridor west of the
+# printing pod: the build tool is active, yet the hover card shows none of the build tool's
+# lines (the game draws "Build Tile", "DRAG", "BACK" and the material left there; with the mod
+# the card keeps whatever was drawn before, so it is not compared).
+from: early-base
+mods: [2062232295]
+steps:
+  - run: {seconds: 5}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click: {ui: "**/PlanScreen/Toggle:Base"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/Tile Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/Tile Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
+  - key: {code: LeftShift, at: [112, 209]}
+  - ui_wait: {path: "**/HoverTextScreen", cond: stable}
+  - expect_state:
+      "PlayerController.Instance.ActiveTool.name": BuildTool
+      "count:ui:**/HoverTextScreen::GetComponentsInChildren<LocText>[*] if .text == DRAG": 0
+      "count:ui:**/HoverTextScreen::GetComponentsInChildren<LocText>[*] if .text == BACK": 0

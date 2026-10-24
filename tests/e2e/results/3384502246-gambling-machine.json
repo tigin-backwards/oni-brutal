@@ -1,0 +1,64 @@
+{
+ "spec": "mods/3384502246-gambling-machine.yaml",
+ "mods": [
+  "3384502246"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Gambling Machine built of copper with 500 kg of cuprite stored is selected (user menu dumped); One Draw uses 400 kg of it",
+ "updated": "2026-10-24",
+ "commit": "488bc55",
+ "mod_dlls": {
+  "3384502246": {
+   "Gambling Machine.dll": "2d9a659eb8bdee5ec973cfe2eab20452a5c50ad5f973ec0379c143576ffd7817",
+   "PLib.dll": "c4bb22f1bc06ebcb0dbba75a7f1bc46f63eaa3dae12c22a08729f1a6d3362dda"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-122721-fe700e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T12:37:58",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-131155-d195fa",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T13:15:12",
+    "lane": 17,
+    "reference_run": "20261024-122721-fe700e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "user-menu": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261024-131155-d195fa",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T13:15:14",
+    "lane": 16,
+    "reference_run": "20261024-122721-fe700e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "user-menu": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

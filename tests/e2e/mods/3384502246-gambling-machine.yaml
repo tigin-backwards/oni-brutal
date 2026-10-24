@@ -1,0 +1,32 @@
+# U&F-Gambling Machine 抽奖机 (3384502246), class B.
+#
+# What it does: adds the Gambling Machine (Furniture menu, after Refined Objects research; 3x3,
+# refined metal, a recreation building). Duplicants fill it with metals, food, seeds and filter
+# material chosen in its filter; its user menu has "One Draw" (400 kg) and "Ten Draws"
+# (4000 kg) buttons that play an animation state machine and drop a random prize, from water and
+# sand up to rare eggs, seeds and big prizes; metal raises the chance of a good one.
+# How a player reaches it: the build menu; the machine's user menu.
+# What changes: a lottery for spare material.
+#
+# setup grants Refined Objects, builds the machine of copper in the corridor west of the
+# printing pod, stores 500 kg of cuprite in it and selects it. One Draw is clicked: 400 kg of
+# the cuprite is used, and a prize comes out.
+from: early-base
+mods: [3384502246]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"RefinedObjects\")", method: Purchased}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"GamblingMachine\")", method: Build, args: [{"$": "Grid.XYToCell(109, 206)"}, Neutral, null, [Copper], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Cuprite\").substance", method: SpawnResource, args: [[109.5, 206.5, -12], 500, 300, 255, 0]}}
+  - driver: {setup.call: {target: "all:Gambling_Machine.Gambling::[0].GetComponent<Storage>", method: Store, args: [{"$": "last:"}, false, false, true, false]}}
+  - driver: {setup.call: {target: "SelectTool.Instance", method: Select, args: [{"$": "all:Gambling_Machine.Gambling::[0].GetComponent<KSelectable>"}, false]}}
+steps:
+  - run: {seconds: 1}
+  - expect_state:
+      "Db.Get().Techs.Get(\"RefinedObjects\").unlockedItemIDs.Contains(\"GamblingMachine\")": true
+      "selected:GetComponent<Storage>.MassStored()": 500
+  - ui_wait: {path: "**/DetailsScreen/UserMenuButtons/UserMenuScreen/Buttons", cond: stable}
+  - ui_dump: {name: user-menu, root: "**/DetailsScreen/UserMenuButtons/UserMenuScreen/Buttons"}
+  - click: {ui: "**/UserMenuScreen/Buttons/*OneDrawButton"}
+  - run: {seconds: 30}
+  - expect_state:
+      "all:Gambling_Machine.Gambling::[0].GetComponent<Storage>.MassStored()": "<= 100.5"

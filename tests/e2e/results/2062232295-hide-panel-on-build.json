@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2062232295-hide-panel-on-build.yaml",
+ "mods": [
+  "2062232295"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Tile picked in the Base menu, the pointer over the corridor: the build tool is active and its hover lines (DRAG, BACK) are not drawn",
+ "updated": "2026-10-24",
+ "commit": "488bc55",
+ "mod_dlls": {
+  "2062232295": {
+   "HidePanelOnBuild.dll": "c6b1d4b9b5ab1049ead4f080ee0d2ed213403f170224f306ef08b1db485fd6bb"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-122721-fe700e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T12:36:20",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-131155-d195fa",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T13:14:06",
+    "lane": 17,
+    "reference_run": "20261024-122721-fe700e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-131155-d195fa",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T13:14:09",
+    "lane": 16,
+    "reference_run": "20261024-122721-fe700e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

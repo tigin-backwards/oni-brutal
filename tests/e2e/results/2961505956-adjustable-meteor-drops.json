@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2961505956-adjustable-meteor-drops.yaml",
+ "mods": [
+  "2961505956"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "smaller spec (a Meteor Blaster and a shower are far from early-base): with Mass Percentage 70 the Gassy Moo meteor's missile loot is seven Meat",
+ "updated": "2026-10-24",
+ "commit": "488bc55",
+ "mod_dlls": {
+  "2961505956": {
+   "MeteorDrops.dll": "97f6586098d3f770fbaf69a77b6ef2c31e02fed9fe19e615098d1c7cfe063bb7"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-122721-fe700e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T12:27:21",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-131155-d195fa",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T13:11:55",
+    "lane": 16,
+    "reference_run": "20261024-122721-fe700e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-131155-d195fa",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T13:11:56",
+    "lane": 17,
+    "reference_run": "20261024-122721-fe700e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

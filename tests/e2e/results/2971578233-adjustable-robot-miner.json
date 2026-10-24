@@ -1,0 +1,63 @@
+{
+ "spec": "mods/2971578233-adjustable-robot-miner.yaml",
+ "mods": [
+  "2971578233"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Robo-Miner is selected: its dual-slider side screen matches, and typed sizes set its mining area to 12 high and 8 wide, the range visualizer following",
+ "updated": "2026-10-24",
+ "commit": "488bc55",
+ "mod_dlls": {
+  "2971578233": {
+   "AdjustableRobotMiner.dll": "a76240d8613efff54a0756ed93d51bb2ae578852c06b073730f0d9d093084301"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-124329-b02e98",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T12:55:57",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-131155-d195fa",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T13:20:16",
+    "lane": 17,
+    "reference_run": "20261024-124329-b02e98",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "sliders": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261024-131155-d195fa",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T13:20:16",
+    "lane": 16,
+    "reference_run": "20261024-124329-b02e98",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "sliders": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

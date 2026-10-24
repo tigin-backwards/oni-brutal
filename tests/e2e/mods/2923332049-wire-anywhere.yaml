@@ -1,0 +1,35 @@
+# WireAnywhere 高压导线穿墙 (2923332049), class P.
+#
+# What it does: Heavi-Watt Wire and Conductive Heavi-Watt Wire may be built anywhere, through
+# tiles too (postfixes on their CreateBuildingDef set BuildLocationRule Anywhere, stop the
+# foundation check and move them to object layer 26); their decor and decor radius come from
+# PLib options (defaults -25/6 and -20/4, as the game's).
+# How a player reaches it: building heavi-watt wire across a wall or floor.
+# What changes: heavy wires need no gaps in the tiles.
+#
+# The options set the Heavi-Watt Wire's decor to -10 and radius to 8. setup grants Power
+# Regulation and builds a Tile in
+# the corridor west of the printing pod and spawns metal ore; a Heavi-Watt Wire blueprint is
+# placed on the tile's cell (the game alone refuses it there) and built.
+from: early-base
+mods: [2923332049]
+options:
+  "2923332049": {WireHighWattage_BaseDecor: -10, WireHighWattage_BaseDecorRadius: 8}
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"AdvancedPowerRegulation\")", method: Purchased}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Tile\")", method: Build, args: [{"$": "Grid.XYToCell(110, 208)"}, Neutral, null, [SandStone], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Cuprite\").substance", method: SpawnResource, args: [[109.5, 206.5, -12], 300, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"HighWattageWire\").BuildLocationRule": "== 'Anywhere'"
+      "Assets.GetBuildingDef(\"WireRefinedHighWattage\").BuildLocationRule": "== 'Anywhere'"
+      "Assets.GetBuildingDef(\"HighWattageWire\").BaseDecor": -10
+      "Assets.GetBuildingDef(\"HighWattageWire\").BaseDecorRadius": 8
+      "Assets.GetBuildingDef(\"WireRefinedHighWattage\").BaseDecor": -20
+      "Grid.IsSolidCell(132398)": true
+  - build: {prefab: HighWattageWire, at: [110, 208]}
+  - expect: {blueprints: {HighWattageWire: 1}}
+  - run: {seconds: 600, until: {buildings: {HighWattageWire: 1}, pending_construction: 0}}
+  - expect: {buildings: {HighWattageWire: 1}}
+  - expect_state:
+      "Grid.IsSolidCell(132398)": true

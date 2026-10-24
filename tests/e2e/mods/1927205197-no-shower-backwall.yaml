@@ -1,0 +1,24 @@
+# No Shower Backwall (1927205197), class P (art).
+#
+# What it does: the Shower is drawn with the mod's own anim, coolshower_kanim, which has no tiled
+# back wall behind it (a postfix on ShowerConfig.CreateBuildingDef replaces its AnimFiles).
+# How a player reaches it: building a Shower.
+# What changes: how a Shower looks.
+#
+# setup builds a Shower in the corridor west of the printing pod. Its def and its anim
+# controller use the mod's anim, and it is shot before the game runs, while the Duplicants
+# stand where the save left them.
+from: early-base
+mods: [1927205197]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Shower\")", method: Build, args: [{"$": "Grid.XYToCell(108, 206)"}, Neutral, null, [Cuprite], 300.0, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"Shower\").AnimFiles.Length": 1
+      "Assets.GetBuildingDef(\"Shower\").AnimFiles[0].name": coolshower_kanim
+      "all:Shower::Length": 1
+      "all:Shower::[0].GetComponent<KBatchedAnimController>.AnimFiles[0].name": coolshower_kanim
+  # Only the shower is compared: the animated space backdrop and the debris on the floor are masked.
+  - world_shot: {name: shower, ortho: 4, at: [109, 208], mask: [[0, 0, 480, 720], [715, 0, 565, 720], [480, 0, 235, 230], [480, 585, 235, 135]]}
+  - run: {seconds: 5}
+  - expect: {buildings: {Shower: 1}}

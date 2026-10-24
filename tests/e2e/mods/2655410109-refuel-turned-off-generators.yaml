@@ -1,0 +1,42 @@
+# Refuel Turned-Off Generators (2655410109), class P.
+#
+# What it does: the Coal Generator's and the Wood Burner's manual delivery no longer needs the
+# generator operational (a postfix sets ManualDeliveryKG.operationalRequirement to None), so
+# Duplicants keep refuelling a generator that automation has switched off; the game cancels
+# the fetch while it is off. (A generator disabled from its user menu still gets nothing: the
+# fetch chore itself checks the Disable Building toggle.)
+# How a player reaches it: a Coal Generator switched off by automation (a smart battery).
+# What changes: a switched-off generator still gets its coal.
+#
+# setup builds a Coal Generator in the corridor west of the printing pod, a Signal Switch wired
+# to its control port, turns the switch off (the switch's own toggle) and drops 200 kg of coal
+# nearby. The generator is not operational yet keeps its fetch, and the coal is carried in while
+# it stays switched off.
+from: early-base
+mods: [2655410109]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Generator\")", method: Build, args: [131125, Neutral, null, [Cuprite], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LogicSwitch\")", method: Build, args: [131763, Neutral, null, [Copper], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "last:GetComponent<LogicSwitch>", method: HandleToggle}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LogicWire\")", method: Build, args: [131763, Neutral, null, [Copper], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LogicWire\")", method: Build, args: [131762, Neutral, null, [Copper], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LogicWire\")", method: Build, args: [131761, Neutral, null, [Copper], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LogicWire\")", method: Build, args: [131125, Neutral, null, [Copper], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Game.Instance.logicCircuitSystem", method: SetConnections, args: ["Left", 131763, true]}}
+  - driver: {setup.call: {target: "Game.Instance.logicCircuitSystem", method: SetConnections, args: ["Left, Right", 131762, true]}}
+  - driver: {setup.call: {target: "Game.Instance.logicCircuitSystem", method: SetConnections, args: ["Right, Down", 131761, true]}}
+  - driver: {setup.call: {target: "Game.Instance.logicCircuitSystem", method: SetConnections, args: ["Up", 131125, true]}}
+  - driver: {setup.call: {target: "Game.Instance.logicCircuitSystem", method: ForceRebuildNetworks}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Carbon\").substance", method: SpawnResource, args: [[113.5, 206.5, -12], 200, 300, 255, 0]}}
+steps:
+  - run: {seconds: 2}
+  - expect_state:
+      "Assets.GetPrefab(\"Generator\").GetComponent<ManualDeliveryKG>.operationalRequirement": "== 'None'"
+      "Assets.GetPrefab(\"WoodGasGenerator\").GetComponent<ManualDeliveryKG>.operationalRequirement": "== 'None'"
+      "all:LogicSwitch::[0].IsSwitchedOn": false
+      "all:Generator::[0].GetComponent<Operational>.IsOperational": false
+      "all:Generator::[0].GetComponent<ManualDeliveryKG>.fetchList": exists
+  - run: {seconds: 300}
+  - expect_state:
+      "all:Generator::[0].GetComponent<Operational>.IsOperational": false
+      "all:Generator::[0].GetComponent<Storage>.MassStored()": "> 50"

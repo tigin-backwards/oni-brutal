@@ -1,0 +1,37 @@
+# Plastic Mesh & Airflow Tiles (2728791684), class B.
+#
+# What it does: adds two plastic tiles to the Base menu's tiles, researched with Home Luxuries
+# (Luxury): the Plastic Mesh Tile, which lets liquid and gas through, and the Plastic Airflow
+# Tile, which lets gas through; both speed Duplicants up by half, as the Plastic Tile does, and
+# draw with the mod's own tile atlases.
+# How a player reaches it: the build menu.
+# What changes: walkable floors that do not block liquid or gas.
+#
+# setup grants Home Luxuries and spawns plastic. The Plastic Mesh Tile is picked in the Base
+# menu and placed in the corridor west of the printing pod; once built its cell is a foundation
+# and still holds gas.
+from: early-base
+mods: [2728791684]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"Luxury\")", method: Purchased}}
+  - driver: {setup.call: {target: "Game.Instance", method: Trigger, args: [-107300940]}}
+  - driver: {setup.call: {target: "PlanScreen.Instance._researchedDefs", method: Clear}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Polypropylene\").substance", method: SpawnResource, args: [[112.5, 206.5, -12], 300, 300, 255, 0]}}
+steps:
+  - run: {seconds: 5}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click: {ui: "**/PlanScreen/Toggle:Base"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/RomenH_PlasticMeshTile Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/RomenH_PlasticMeshTile Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
+  - expect_ui:
+      "**/ProductInfoScreen/**": {any_text: "~Plastic Mesh Tile"}
+  - shot: {name: product, crop: "**/ProductInfoScreen", threshold: 0.04}
+  - click_world: {cell: [113, 209]}
+  - key: {code: Escape}
+  - expect: {blueprints: {RomenH_PlasticMeshTile: 1}}
+  - run: {seconds: 1500, until: {buildings: {RomenH_PlasticMeshTile: 1}, pending_construction: 0}}
+  - expect_state:
+      "Grid.BuildMasks[133037]": {contains: Foundation}
+      "Grid.Element[133037].IsSolid": false
+      "Assets.GetBuildingDef(\"RomenH_PlasticMembraneTile\")": exists

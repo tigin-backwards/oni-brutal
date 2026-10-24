@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2923332049-wire-anywhere.yaml",
+ "mods": [
+  "2923332049"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Heavi-Watt Wire blueprint is placed over a tile in the corridor and built through it; the decor options apply",
+ "updated": "2026-10-24",
+ "commit": "488bc55",
+ "mod_dlls": {
+  "2923332049": {
+   "WireAnywhere.dll": "7a44396ee079173cf338db045d7b14d2ae78bcebb55b779ef4d6113ff37399e2"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-130410-d088fa",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T13:04:11",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-131155-d195fa",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T13:22:16",
+    "lane": 17,
+    "reference_run": "20261024-130410-d088fa",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-131155-d195fa",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T13:22:17",
+    "lane": 16,
+    "reference_run": "20261024-130410-d088fa",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

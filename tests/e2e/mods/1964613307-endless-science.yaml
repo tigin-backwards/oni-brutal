@@ -1,0 +1,49 @@
+# Endless Science (1964613307), class P.
+#
+# What it does: a research station with no research to do can train Duplicants' Science instead.
+# Every ResearchCenter gets an "Enable Learning" / "Disable Learning" user-menu toggle; with it on
+# and no active research, a transpiler on UpdateWorkingState lets the station work, it converts
+# no research points, its progress bar shows the worker's Learning progress, and only Duplicants
+# within the station's Science range (PLib options: 0-6, 7-13, 14-19) may work it. The station's
+# attribute experience multiplier comes from the options.
+# How a player reaches it: a research station's user menu.
+# What changes: idle research stations become training stations.
+#
+# early-base has no research queued. setup builds a second research station in the corridor
+# west of the printing pod, powered by a charged battery, with dirt in it. It is selected and
+# Enable Learning clicked: the button turns to Disable Learning, and a Duplicant comes to work
+# the station although nothing is being researched.
+from: early-base
+mods: [1964613307]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"ResearchCenter\")", method: Build, args: [131124, Neutral, null, [Cuprite], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "last:GetComponent<Storage>", method: AddOre, args: [Dirt, 50.0, 300.0, 255, 0]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Battery\")", method: Build, args: [131126, Neutral, null, [Cuprite], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "last:GetComponent<Battery>", method: AddEnergy, args: [10000.0]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Wire\")", method: Build, args: [131124, Neutral, null, [Cuprite], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Wire\")", method: Build, args: [131125, Neutral, null, [Cuprite], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Wire\")", method: Build, args: [131126, Neutral, null, [Cuprite], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Game.Instance.electricalConduitSystem", method: SetConnections, args: ["Right", 131124, true]}}
+  - driver: {setup.call: {target: "Game.Instance.electricalConduitSystem", method: SetConnections, args: ["Left, Right", 131125, true]}}
+  - driver: {setup.call: {target: "Game.Instance.electricalConduitSystem", method: SetConnections, args: ["Left", 131126, true]}}
+  - driver: {setup.call: {target: "Game.Instance.electricalConduitSystem", method: ForceRebuildNetworks}}
+steps:
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [109, 208], ortho: 8}}
+  - click_world: {cell: [108, 207], select: ResearchCenter}
+  - ui_wait: {path: "**/DetailsScreen/UserMenuButtons/UserMenuScreen/Buttons", cond: stable}
+  - expect_state:
+      "Research.Instance.GetActiveResearch()": missing
+      "selected:GetComponent<InfiniteResearch.InfiniteResearchCenterButton>.isInfiniteMode": false
+      "selected:GetComponent<Operational>.IsOperational": false
+  - click: {ui: "**/UserMenuScreen/Buttons/Enable LearningButton"}
+  - expect_state:
+      "selected:GetComponent<InfiniteResearch.InfiniteResearchCenterButton>.isInfiniteMode": true
+      "selected:GetComponent<Operational>.IsOperational": true
+      "selected:GetComponent<ResearchCenter>.attributeExperienceMultiplier": "== original"
+  - expect_ui:
+      "**/UserMenuScreen/Buttons/Disable LearningButton": {active: true}
+  - run: {seconds: 120}
+  - expect_state:
+      "selected:GetComponent<ResearchCenter>.worker": exists
+      "Research.Instance.GetActiveResearch()": missing

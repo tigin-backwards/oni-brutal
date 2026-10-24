@@ -1,0 +1,26 @@
+# Fast Pod Notification (2712872073), class P (UI action).
+#
+# What it does: clicking the "New Printables are available" notification opens the Printing
+# Pod's selection screen at once (a postfix on BuildingStatusItems.CreateStatusItems replaces the
+# status item's notification click callback), where the game only moves the camera to the pod.
+# How a player reaches it: the notification when the pod is ready to print.
+# What changes: one click less to the printing choice.
+#
+# setup makes the next printing ready (one Immigration.Sim200ms). After a short run the
+# notification shows, the first in the list; clicking it opens the ImmigrantScreen.
+from: early-base
+mods: [2712872073]
+setup:
+  - driver: {setup.call: {target: "Immigration.Instance", method: "Sim200ms", args: [100000]}}
+steps:
+  - run: {seconds: 3}
+  - expect_state:
+      "Immigration.Instance.ImmigrantsAvailable": true
+      "ImmigrantScreen.instance.gameObject.activeInHierarchy": false
+  - ui_wait: {path: "**/NotificationScreen/Notifications", cond: stable, frames: 120}
+  - expect_ui:
+      "**/NotificationScreen/Notifications/NormalLabel/Label/Text": {text: "New Printables are available"}
+  - click: {ui: "**/NotificationScreen/Notifications/NormalLabel/Label"}
+  - ui_wait: {path: "**/ImmigrantScreen/Layout", cond: stable}
+  - expect_state:
+      "ImmigrantScreen.instance.gameObject.activeInHierarchy": true

@@ -1,0 +1,40 @@
+# BottlesToPipes (2405832625), class B.
+#
+# What it does: adds a Liquid Bottler (3x2, any metal) that fills bottles from a liquid pipe,
+# 300 kg at a time, for Duplicants to carry off (or, with its "auto drop" user-menu toggle, drops
+# them on the floor), and a Liquid Bottle Emptier (1x3, refined metal) that pours bottles back
+# into a pipe. Both are in the Plumbing menu after Improved Plumbing (ImprovedLiquidPiping).
+# How a player reaches it: the build menu; the bottler's user menu.
+# What changes: liquids can be moved by hand into and out of pipes.
+#
+# setup grants Improved Plumbing, builds a Liquid Bottler of cuprite in the corridor west of the
+# printing pod, fills its storage with 300 kg of water and selects it. The bottler fills and
+# waits for a Duplicant to fetch the bottle; its auto-drop toggle is clicked, and it drops the
+# 300 kg bottle on the floor.
+from: early-base
+mods: [2405832625]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"ImprovedLiquidPiping\")", method: Purchased}}
+  - driver: {setup.call: {target: "Game.Instance", method: Trigger, args: [-107300940]}}
+  - driver: {setup.call: {target: "PlanScreen.Instance._researchedDefs", method: Clear}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Alesseon.LiquidBottler\")", method: Build, args: [{"$": "Grid.XYToCell(109, 206)"}, Neutral, null, [Cuprite], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "all:Alesseon.LiquidBottler.Building.LiquidBottler::[0].GetComponent<Storage>", method: AddLiquid, args: [Water, 300, 300, 255, 0, false, true]}}
+  - driver: {setup.call: {target: "SelectTool.Instance", method: Select, args: [{"$": "all:Alesseon.LiquidBottler.Building.LiquidBottler::[0].GetComponent<KSelectable>"}, false]}}
+steps:
+  - run: {seconds: 10}
+  - expect_state:
+      "selected:GetComponent<Storage>.MassStored()": 300
+  - ui_wait: {path: "**/DetailsScreen/UserMenuButtons/UserMenuScreen/Buttons", cond: stable}
+  - ui_dump: {name: user-menu, root: "**/DetailsScreen/UserMenuButtons/UserMenuScreen/Buttons"}
+  - expect_state:
+      "selected:GetComponent<Alesseon.LiquidBottler.Building.LiquidBottler>.smi.GetCurrentState().name": root.ready
+      "selected:GetComponent<Alesseon.LiquidBottler.Building.LiquidBottler>.permitAutoDrop": false
+      "sum:all:Clearable::[*].GetComponent<PrimaryElement>.Mass if .GetComponent<PrimaryElement>.ElementID == Water": {save_as: loose}
+  - click: {ui: "**/UserMenuScreen/Buttons/Disable auto dropButton"}
+  - run: {seconds: 10}
+  - expect_state:
+      "selected:GetComponent<Alesseon.LiquidBottler.Building.LiquidBottler>.permitAutoDrop": true
+      "selected:GetComponent<Storage>.MassStored()": 0
+      "sum:all:Clearable::[*].GetComponent<PrimaryElement>.Mass if .GetComponent<PrimaryElement>.ElementID == Water": ">= loose - 1"
+  - expect_ui:
+      "**/UserMenuScreen/Buttons/Enable auto dropButton": {active: true}

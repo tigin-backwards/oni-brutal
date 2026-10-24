@@ -1,0 +1,23 @@
+# Adjustable Meteor Drops (2961505956), class P.
+#
+# What it does: a meteor blasted by a Meteor Blaster's missile drops Mass Percentage (PLib
+# option, 0 to 200 %, default 50) of its mass as debris, where the game drops 25 % (a prefix on
+# MissileProjectile.StatesInstance.SpawnMeteorResources sets the def's MeteorDebrisMassModifier);
+# a blasted Gassy Moo meteor drops one Meat per 10 % (the game drops three).
+# How a player reaches it: a Meteor Blaster shooting down meteors; the options in the mods screen.
+# What changes: what a blasted meteor leaves.
+#
+# A smaller spec: shooting a meteor down needs a powered, loaded Meteor Blaster and a shower,
+# far from early-base. The options set 70 %: the Gassy Moo meteor's missile loot is seven Meat,
+# and the mod's options are read as written.
+from: early-base
+mods: [2961505956]
+options:
+  "2961505956": {MassPercentage: 70}
+steps:
+  - expect_state:
+      "type:MeteorDrops.Config::Instance.MassPercentage": 70
+      "Assets.GetPrefab(\"GassyMoo\").GetComponent<GassyMooComet>.lootOnDestroyedByMissile.Length": 7
+      "Assets.GetPrefab(\"GassyMoo\").GetComponent<GassyMooComet>.lootOnDestroyedByMissile[6]": Meat
+  - run: {seconds: 5}
+  - expect: {duplicants: 3}

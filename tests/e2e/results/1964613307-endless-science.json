@@ -1,0 +1,55 @@
+{
+ "spec": "mods/1964613307-endless-science.yaml",
+ "mods": [
+  "1964613307"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a powered second research station is selected and Enable Learning clicked: with no research queued it turns operational and a Duplicant comes to work it",
+ "updated": "2026-10-24",
+ "commit": "488bc55",
+ "mod_dlls": {
+  "1964613307": {
+   "InfiniteResearch.dll": "7942ada13129033a0f3e6cf547ecb8b27e69888c63b45c77d6f706c27faf06ba"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-130410-d088fa",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T13:06:29",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-131155-d195fa",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T13:25:11",
+    "lane": 16,
+    "reference_run": "20261024-130410-d088fa",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-131155-d195fa",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T13:25:09",
+    "lane": 17,
+    "reference_run": "20261024-130410-d088fa",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

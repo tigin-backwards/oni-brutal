@@ -1,0 +1,59 @@
+{
+ "spec": "mods/2728791684-plastic-mesh-airflow-tiles.yaml",
+ "mods": [
+  "2728791684"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "after Home Luxuries the Plastic Mesh Tile is picked in the Base menu (product card shot), placed and built: a foundation that still holds gas",
+ "updated": "2026-10-24",
+ "commit": "488bc55",
+ "mod_dlls": {
+  "2728791684": {
+   "PlasticTiles.dll": "5fd63b44c4225a1bbcf396e2aa3917e5d0db5b5b9e8cdc0f7d453a6dee7ac259"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-130410-d088fa",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T13:06:14",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-131155-d195fa",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T13:23:40",
+    "lane": 17,
+    "reference_run": "20261024-130410-d088fa",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.007747
+    }
+   },
+   {
+    "run": "20261024-131155-d195fa",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T13:23:42",
+    "lane": 16,
+    "reference_run": "20261024-130410-d088fa",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.007747
+    }
+   }
+  ]
+ }
+}

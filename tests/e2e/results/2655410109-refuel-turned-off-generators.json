@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2655410109-refuel-turned-off-generators.yaml",
+ "mods": [
+  "2655410109"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Coal Generator switched off by a Signal Switch keeps its coal fetch, and Duplicants carry coal in while it stays off",
+ "updated": "2026-10-24",
+ "commit": "488bc55",
+ "mod_dlls": {
+  "2655410109": {
+   "Refuel Turned-off Generators.dll": "9c9e7f061e5f4f6231fe0c67451640f90925af6a8069096e7aa8b3d0a78be3da"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-122721-fe700e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T12:39:43",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-131155-d195fa",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T13:16:25",
+    "lane": 17,
+    "reference_run": "20261024-122721-fe700e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-131155-d195fa",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T13:16:27",
+    "lane": 16,
+    "reference_run": "20261024-122721-fe700e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2712872073-fast-pod-notification.yaml",
+ "mods": [
+  "2712872073"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with the next printing ready, a click on the \"New Printables are available\" notification opens the ImmigrantScreen",
+ "updated": "2026-10-24",
+ "commit": "488bc55",
+ "mod_dlls": {
+  "2712872073": {
+   "KFastPodNotification.dll": "e4bf086bff9e5fac96a5c84571fe20f4425aa20e4e4f7b7cb83649cb6a756db0"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-122721-fe700e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T12:34:53",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-131155-d195fa",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T13:13:02",
+    "lane": 17,
+    "reference_run": "20261024-122721-fe700e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-131155-d195fa",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T13:13:02",
+    "lane": 16,
+    "reference_run": "20261024-122721-fe700e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

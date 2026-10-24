@@ -1,0 +1,63 @@
+{
+ "spec": "mods/2405832625-bottles-to-pipes.yaml",
+ "mods": [
+  "2405832625"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Liquid Bottler filled with 300 kg of water is selected (user menu dumped); its auto-drop toggle drops the full bottle",
+ "updated": "2026-10-24",
+ "commit": "488bc55",
+ "mod_dlls": {
+  "2405832625": {
+   "LiquidBottler.dll": "45e79f11b113d9b5104d5d709b8ca44decac1b57512a1e534db203b90ca2d0dc"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-124329-b02e98",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T13:01:33",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-131155-d195fa",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T13:21:14",
+    "lane": 17,
+    "reference_run": "20261024-124329-b02e98",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "user-menu": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261024-131155-d195fa",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T13:21:14",
+    "lane": 16,
+    "reference_run": "20261024-124329-b02e98",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "user-menu": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

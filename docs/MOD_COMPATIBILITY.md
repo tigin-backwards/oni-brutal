@@ -768,7 +768,7 @@ installs get developer checks subscribers never see).
 | 747 | [Where's My Loot ?](https://steamcommunity.com/sharedfiles/filedetails/?id=2670041100) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2670041100-wheres-my-loot.yaml: an unused Neural Vacillator is selected and its Demolish button clicked; a Duplicant given the demolition skill demolishes it and a Vacillator Recharge drops where it stood (state only) |
 | 748 | [Español - Oxygen Not Included](https://steamcommunity.com/sharedfiles/filedetails/?id=935885438) | ⬜ | ⬜ | ⬜ |  |
 | 749 | [Türkçe Çeviri - 2026](https://steamcommunity.com/sharedfiles/filedetails/?id=3535190546) | ⬜ | ⬜ | ⬜ |  |
-| 750 | [Claim Notification](https://steamcommunity.com/sharedfiles/filedetails/?id=2955304767) | ✅ | ✅ | ⬜ |  |
+| 750 | [Claim Notification](https://steamcommunity.com/sharedfiles/filedetails/?id=2955304767) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2955304767-claim-notification.yaml: setup feeds Klei's offline item client an unopened Shipment X box; the mod's New Item Unlocked dialog opens, its layout and screenshot are compared, and Close dismisses it |
 | – | [Synchronized Building Groups](https://steamcommunity.com/sharedfiles/filedetails/?id=3427974009) | ✅ | ✅ | ✅ | side screen and group dialog as in the original |
 | – | [LocalCanvas-本地画框](https://steamcommunity.com/sharedfiles/filedetails/?id=3775625682) | ✅ | ✅ | ✅ | a player's images packed and shown on a canvas as in the original (needed `Texture2D.PackTextures`) |
 | – | [Morphs Not Included](https://steamcommunity.com/sharedfiles/filedetails/?id=3781314647) | ✅ | ✅ | ✅ | a colony with its new elements, 0 errors in both players (needed `Shader.GetPropertyCount/Name/Type`) |

@@ -1,0 +1,30 @@
+# Claim Notification (2955304767), class S.
+#
+# What it does: when Klei's item server reports an unopened item drop or gift box
+# (KleiItemDropScreen.HasItemsToShow), a postfix on TopLeftControlScreen's
+# RefreshKleiItemDropButton opens a dialog, "New Item Unlocked", whose button ("Claim Blueprint
+# now") opens the item drop screen; Close dismisses it. It shows once until the items are
+# claimed.
+# How a player reaches it: an item drop arriving in a colony (the top-left gift button lights
+# up at the same time).
+# What changes: a dialog instead of only the button's glow.
+#
+# The players run offline, so setup feeds Klei's item client the inventory reply the server
+# would send: one unopened Shipment X box. Its refresh lights the gift button and the mod's
+# dialog opens; Close dismisses it.
+from: early-base
+mods: [2955304767]
+setup:
+  - driver: {setup.call: {target: "KleiItems.Instance", method: OnInventoryRecieved, args: ["{\"Error\": false, \"Items\": [{\"ItemID\": 1, \"ItemType\": \"MYSTERYBOX_u44_box_a\", \"Context\": 3}]}"]}}
+steps:
+  - expect_state:
+      "KleiItemDropScreen.HasItemsToShow()": true
+  - ui_wait: {path: "Canvas/ConfirmDialog", cond: stable}
+  - expect_ui:
+      "Canvas/ConfirmDialog/**/Label": {text: "New Item Unlocked"}
+      "Canvas/ConfirmDialog/**/OKButton/Text": {text: "Claim Blueprint now"}
+  - ui_dump: {name: dialog, root: "Canvas/ConfirmDialog"}
+  - shot: {name: dialog, crop: "Canvas/ConfirmDialog/GameObject/Panel", threshold: 0.04}
+  - click: {ui: "Canvas/ConfirmDialog/**/CancelButton"}
+  - expect_ui:
+      "Canvas/ConfirmDialog": {exists: false}

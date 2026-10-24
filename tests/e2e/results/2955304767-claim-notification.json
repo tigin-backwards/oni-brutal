@@ -1,0 +1,67 @@
+{
+ "spec": "mods/2955304767-claim-notification.yaml",
+ "mods": [
+  "2955304767"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "setup feeds Klei's offline item client an unopened Shipment X box; the mod's New Item Unlocked dialog opens, its layout and screenshot are compared, and Close dismisses it",
+ "updated": "2026-10-24",
+ "commit": "ed12846",
+ "mod_dlls": {
+  "2955304767": {
+   "ClaimNotification.dll": "d467eead10698fa7e47f243a5dcc0954af39631deecedb1531b96479ae03068b"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-130156-66286d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T13:01:56",
+    "lane": 12,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-130330-710938",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T13:03:30",
+    "lane": 12,
+    "reference_run": "20261024-130156-66286d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "dialog": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "dialog": 0.0
+    }
+   },
+   {
+    "run": "20261024-130330-710938",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T13:03:31",
+    "lane": 13,
+    "reference_run": "20261024-130156-66286d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "dialog": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "dialog": 0.0
+    }
+   }
+  ]
+ }
+}

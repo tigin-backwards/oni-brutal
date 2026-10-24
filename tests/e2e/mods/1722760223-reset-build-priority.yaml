@@ -1,0 +1,41 @@
+# Reset Build Priority (1722760223), class S.
+#
+# What it does: the build menu's priority goes back to the default (5) whenever the build
+# menu's category panel closes (a prefix on PlanScreen.CloseCategoryPanel calls the material
+# panel's PriorityScreen.ResetPriority), except when the player only switches between
+# categories (OnClickCategory). In the game alone a priority picked for one blueprint stays
+# for every later one.
+# How a player reaches it: the build menu card's priority buttons, then closing the menu.
+# What changes: the priority new blueprints get.
+#
+# The Tile's card is opened from the Base category and priority 9 picked; Escape closes the
+# tool with the category, and the Tile's card opened again shows priority 5. A tile placed then
+# has priority 5.
+from: early-base
+mods: [1722760223]
+steps:
+  - run: {seconds: 5}
+  - driver: {camera.set: {cell: [104, 208], ortho: 8}}
+  - click: {ui: "**/PlanScreen/Toggle:Base"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/Tile Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/Tile Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen/**/PriorityScreen", cond: stable}
+  - click: {text: "9", under: "**/ProductInfoScreen/**/PriorityScreen"}
+  - expect_state:
+      "PlanScreen.Instance.ProductInfoScreen.materialSelectionPanel.PriorityScreen.GetLastSelectedPriority().priority_value": 9
+  - key: {code: Escape}
+  - expect_state:
+      "PlanScreen.Instance.ProductInfoScreen.materialSelectionPanel.PriorityScreen.GetLastSelectedPriority().priority_value": 5
+  - click: {ui: "**/PlanScreen/Toggle:Base"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/Tile Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/Tile Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen/**/PriorityScreen", cond: stable}
+  - expect_state:
+      "PlayerController.Instance.ActiveTool.name": BuildTool
+      "PlanScreen.Instance.ProductInfoScreen.materialSelectionPanel.PriorityScreen.GetLastSelectedPriority().priority_value": 5
+  - ui_dump: {name: priority, root: "**/ProductInfoScreen/**/PriorityScreen"}
+  - click_world: {cell: [110, 209]}
+  - key: {code: Escape}
+  - expect: {blueprints: {Tile: 1}}
+  - expect_state:
+      "count:all:Constructable::[*] if .GetComponent<Prioritizable>.GetMasterPriority().priority_value == 5": 1

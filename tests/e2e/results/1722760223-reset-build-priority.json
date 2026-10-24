@@ -1,0 +1,63 @@
+{
+ "spec": "mods/1722760223-reset-build-priority.yaml",
+ "mods": [
+  "1722760223"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "priority 9 picked on the Tile's build card; Escape closes the menu and the card's priority is 5 again (dumped as in the original), and a tile placed then has priority 5",
+ "updated": "2026-10-23",
+ "commit": "0368bca",
+ "mod_dlls": {
+  "1722760223": {
+   "ResetBuildPriority.dll": "3e659a9718f3f8eb881f5134d759177cd08378fccc1470e7fdc4e980b58829b6"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-212155-fbe646",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T21:42:08",
+    "lane": 12,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-221104-5b532a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T22:11:04",
+    "lane": 12,
+    "reference_run": "20261023-212155-fbe646",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "priority": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261023-221104-5b532a",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T22:12:18",
+    "lane": 12,
+    "reference_run": "20261023-212155-fbe646",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "priority": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

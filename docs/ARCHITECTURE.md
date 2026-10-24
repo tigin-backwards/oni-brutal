@@ -765,15 +765,42 @@ game's: the presenter thread draws Gassy Moo comets (the game's `meteor_gassymoo
 window last showed, redrawing about 60 times a second while no game frame comes, so the window
 keeps moving while the main and GL threads load. Game frames are not changed: the comets are
 drawn into the window after a frame is copied there. Once 30 frames in a row arrive within
-100 ms of each other (the main menu), the rain fades out for good.
+100 ms of each other (the main menu), the rain fades out for good. A thin bar under it shows how
+far start-up is (`StartupProgress`): it passes checkpoints, the engine's own (window, first scene,
+first frame, each content bundle, the asset unload, the menu) and the game's, recognized from its
+log lines (Steam ready, `Global`'s start, the mod system, localization). The checkpoint times of
+each launch are kept in the player's cache folder, and the next launch moves the bar between two
+checkpoints at the last launch's pace, stopping short of the next until it is reached; while the
+first scene loads it moves by the objects loaded.
 
-Textures loaded from asset files are uploaded as part of loading, as in Unity (the load queues
-them; the main thread records their upload before the next frame renders), not on first draw: first
-draws of screens with many textures (the research tree) would otherwise hitch for a second and
-throw off the game's time-based UI animation. Non-readable textures drop their CPU copy then.
-When many are pending at once (a scene's or a bundle's), their texels are read from the asset
-files on worker threads first, and the recorded uploads go to the GL thread in batches as they
-are recorded, so it uploads while the rest are read; the order of all GL work is unchanged.
+**Window messages during long frames.** The frame polls the window's messages at its start, as
+Unity does, but a start-up frame takes seconds, and Windows marks a window that has not taken its
+messages for 5 s as not responding. Long engine steps (loading an object, instantiating, adding a
+component, a log line, recording uploads, waiting for a bundle's decode) therefore pump them at
+most every 100 ms on the main thread (`MainThreadPump`, `ONI_PUMP_EVENTS=0` turns it off).
+Nothing a pump receives reaches the engine or the game within the frame: GLFW's callbacks (keys,
+characters, mouse buttons, movement, scroll, cursor entering, close, framebuffer size, window
+position, monitors) are kept in order and replayed at the start of the next frame's poll, just
+before the messages that came since, so input state, `Event`s, `Screen` sizes and focus change
+only at frame start, as before. The pump calls no game code, and no engine code but GLFW's own.
+Native work inside game code (FMOD loading its banks) cannot be interrupted: those stretches stay
+unpumped.
+
+Textures loaded from asset files are uploaded as part of loading, as in Unity, not on first
+draw: first draws of screens with many textures (the research tree) would otherwise hitch for a
+second and throw off the game's time-based UI animation. A non-readable texture loaded on the main
+thread is handed to the background uploads (`GlBackgroundUploads`) as it loads: worker threads
+read its texels from the asset file, and the GL thread uploads one texture at a time whenever it
+has no frame to execute, in load order, with a fence keeping the GPU no more than 32 MiB behind.
+A frame therefore waits at most for one texture's upload, and loading goes on meanwhile (the first
+scene's 2 GiB of animation textures go up while the game starts up; a DLC bundle's while the next
+bundles load). A draw that samples a texture still queued takes it back and records its upload
+into the frame ahead of the draw, as every upload was recorded before; so does a change to the
+texture, and a release drops it. The texture gives up its texels when queued (a non-readable
+texture keeps no CPU copy once uploaded, and the game cannot read it). Readable textures, and
+textures loaded on other threads, are uploaded by the main thread before the next frame renders;
+when many are pending at once their texels are read on worker threads first and the uploads go
+to the GL thread in batches. `ONI_BACKGROUND_UPLOADS=0` turns the background uploads off.
 
 Per-draw uniform blocks are streamed through a ring buffer that stays persistently mapped for the
 device's lifetime (`GlStreamBuffer`, ARB_buffer_storage): data is copied into the mapping, blocks

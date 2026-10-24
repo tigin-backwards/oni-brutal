@@ -232,33 +232,53 @@ isn't the bottleneck: compiling ahead of time (ReadyToRun) saved nothing measura
 ## Start-up
 
 From process start to the main menu on Linux under WSL2 (Mesa's d3d12 driver), 1280×720, three
-rounds back to back (each round: the original, ours, ours with the start-up changes), the time
-the menu first shows on screen. A game was running on the Windows side, so the rounds spread by up
-to a third; the medians:
+rounds back to back on a quiet machine, each round the original and each build of ours, with the
+page cache warm; the medians:
 
-| | Original | Before | Now |
-|---|---|---|---|
-| Every DLC | 35&nbsp;s | 40.5&nbsp;s | 25.5&nbsp;s |
-| Base game | 12.5&nbsp;s | 19&nbsp;s | 16.5&nbsp;s |
+| | Original | First round of changes | Now | Now, without background uploads |
+|---|---|---|---|---|
+| Menu on screen, every DLC | 25&nbsp;s | 21&nbsp;s | 12&nbsp;s | 20.5&nbsp;s |
+| Menu on screen, base game | 11&nbsp;s | 12&nbsp;s | 6.5&nbsp;s | 12&nbsp;s |
+| Klei's logo on screen | 4.5–5&nbsp;s | 7&nbsp;s | 2.5&nbsp;s | 6.5–7&nbsp;s |
 
-Most of it is three long frames, each with nothing on screen changing:
-- Frame 0 loads the first scene, whose Global prefab references every animation texture: about
-  2,550 textures, 2 GiB. They are uploaded before the frame renders, as in Unity, so the window
-  stays black until they are (Klei's logo is that frame). The texels are now read on worker
-  threads, straight from the mapped file into the upload buffer, and handed to the GL thread in
-  64 MiB batches while the rest are read, so reading and uploading overlap
-  (`ONI_UPLOAD_PIPELINE=0` turns it off). The frame went from 9.5–11.6 s to 7.7–10.6 s; what's
-  left is the GL thread's upload, about 400 MB/s through Mesa's d3d12 driver.
-- Frame 1 is the game's own start-up (`LaunchInitializer`: Steam, FMOD's banks, the Global
-  prefab with `Assets`, `Db` and the localization). With the DLCs it also loads each DLC's
-  content bundle, a single LZMA stream each, about 1 GiB decompressed in all, one after another
-  on the main thread: 9–11 s. The bundles in StreamingAssets (installed only with their DLC) are
-  now decompressed on worker threads from the player's start, and `AssetBundle.LoadFromFile`
-  takes the result: 0.4–0.6 s (`ONI_BUNDLE_PREFETCH=0` turns it off). Bundles the game hasn't
-  loaded when its second scene loads are dropped.
-- Frame 2, the menu's first, waits for the GL thread: with the DLCs, the bundles' 880 MiB of
-  textures were queued at the end of frame 1. 5.2–5.6 s before, 1.4–2.4 s now. Compiling the
-  menu's programs takes under 0.1 s of it.
+(Before any of the changes the menu took 40.5 s with every DLC and 19 s for the base game, on a
+busier machine.) Where the time goes now, in ms since the process started (base game, then every
+DLC):
+
+| | First round | Now |
+|---|---|---|
+| Window and GL device ready | 1,068 / 1,236 | 792 / 964 |
+| First scene loaded | 2,188 / 2,458 | 1,914 / 2,157 |
+| Frame 0 done (Klei's logo) | 6,371 / 6,595 | 2,052 / 2,295 |
+| Frame 1 done (the game's start-up) | 9,465 / 18,190 | 5,492 / 10,030 |
+| The menu's first frame done | 11,566 / 19,416 | 6,212 / 10,775 |
+
+- The first scene's Global prefab references every animation texture: about 2,550 textures,
+  2 GiB, which Unity uploads before its first frame. They now go to the GPU in the background
+  (ARCHITECTURE §3.5): the GL thread uploads them between frames, about 400 MB/s through Mesa's
+  d3d12 driver, done 3.5–3.9 s after start, while frame 1 runs the game's start-up. With every
+  DLC, the content bundles' 880 MiB of textures go up as the bundles load and are done before
+  the start-up frame ends (they used to be recorded at its end, and the menu's first frame
+  waited for them). Frame 0 went from 6.1–6.3 s to 2.0–2.3 s, the menu's first frame from
+  1.2–2.2 s to 0.7–0.8 s. The longest single upload is 10–150 ms. Through two colonies resumed from
+  the menu (DeCrew, base game; U57, every DLC; 3,000 frames each), the same two frames over
+  100 ms as before once they have loaded (115–307 ms against 126–361 ms).
+- The DLC bundles (one LZMA stream each, about 1 GiB decompressed) are decompressed on worker
+  threads from the player's start (`ONI_BUNDLE_PREFETCH=0` turns it off); loading them takes
+  the game 0.3–0.6 s instead of 9–11 s.
+- The host's patches of the game and of Harmony are made while the window opens: the window and
+  device are ready 0.28 s sooner.
+- Serialized files are mapped instead of read whole: the first scene loads about 50 ms sooner,
+  and no 391 MB array is allocated for sharedassets0.assets. Parsing its metadata (type trees,
+  the object table) takes about 10 ms, so a cache of the parsed file across launches has nothing
+  left to save; what loading the scene costs (about 1 s) is the scene's MonoBehaviours' fields
+  (about 0.6 s) and the game's own Awake (about 0.5 s).
+- What remains is the game's own start-up (Steam, FMOD loading its banks, the Global prefab
+  with `Assets`, `Db`, the mods and the localization): 3.4 s for the base game, 7.7 s with every
+  DLC, and the original's is no shorter.
+
+The original shows a black window for 4.5–5 s, then Klei's logo, still, until its menu.
+`--splash moo` (ARCHITECTURE §3.5) changes nothing in these times.
 
 `ONI_STARTUP_STATS=1` logs the start-up phases with the time since the process started, and for
-each slow frame its texel reads, uploads, program builds and GL-thread time.
+each slow frame its texel reads, uploads, program builds, GL-thread time and window-message pumps.

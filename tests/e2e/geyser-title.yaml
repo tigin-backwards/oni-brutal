@@ -1,0 +1,25 @@
+# A geyser's details screen must show its name in the title (issue #12).
+#
+# Clicking a geyser opens the details screen. DetailsScreen.UpdateTitle sets the
+# EditableTitleBar's titleText to the geyser's proper name, and a geyser is UserNameable, so the
+# edit button shows beside it. The title is GRAYSTROKE REGULAR SDF 14 pt, Truncate, unwrapped,
+# in a rect 175.13 × 22. A geyser's name ends in a number with a non-breaking hyphen (U+2011),
+# which GRAYSTROKE takes from a taller fallback font: the line is 14.69 high up to it and 23.82
+# with it. The original truncates the title at that hyphen ("Liquid Sulfur Geyser NJ24",
+# firstOverflowCharacterIndex 25). The report: our player showed only the edit and codex
+# buttons, the title empty (it checked the whole line's height at its first character, and
+# truncated there).
+#
+# The Liquid Sulfur Geyser west of the base is still buried in early-base; setup makes it
+# selectable, as uncovering it does.
+from: early-base
+setup:
+  - driver: {setup.call: {target: "all:Geyser::[0].GetComponent<KSelectable>", method: set_IsSelectable, args: [true]}}
+steps:
+  - driver: {camera.set: {cell: [92, 205], ortho: 8}}
+  - click_world: {cell: [89, 203], select: GeyserGeneric_liquid_sulfur}
+  - ui_wait: {path: "**/DetailsScreen/TitleBar", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Liquid Sulfur Geyser"}
+  - ui_dump: {name: title, root: "**/DetailsScreen/TitleBar"}
+  - shot: {name: title, crop: "**/DetailsScreen/TitleBar"}

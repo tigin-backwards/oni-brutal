@@ -1,0 +1,81 @@
+{
+ "spec": "mods/2196347807-mod-filter.yaml",
+ "mods": [
+  "2196347807"
+ ],
+ "verdict": "warning",
+ "why": "known findings: scroll-normalized-position",
+ "findings": [
+  "scroll-normalized-position"
+ ],
+ "note": "the Mods screen's search field: \"driver\" typed leaves only E2eDriver listed, the clear button brings the three mods back; the field and list compared by layout dump (no main-menu shots)",
+ "updated": "2026-10-24",
+ "commit": "280ffb5",
+ "mod_dlls": {
+  "2196347807": {
+   "ModsFilter.dll": "7c8352a5e3e3eafa063a48bb4b78aa2a71e959c2dd5c56bbc38a7f81e48c7118"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-043029-527c2d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T04:40:45",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-050110-b4b277",
+    "index": 1,
+    "verdict": "warn",
+    "date": "2026-10-24T05:01:10",
+    "lane": 17,
+    "reference_run": "20261024-043029-527c2d",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "search": {
+      "differences": 0
+     },
+     "filtered": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261024-050110-b4b277",
+    "index": 2,
+    "verdict": "warn",
+    "date": "2026-10-24T05:02:15",
+    "lane": 17,
+    "reference_run": "20261024-043029-527c2d",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "search": {
+      "differences": 0
+     },
+     "filtered": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -1,0 +1,42 @@
+# Transit Tube Overlay (3510927460), classes V, T.
+#
+# What it does: adds a Transit Tube overlay (mode "TransitTube") to the overlay bar, shown once
+# Transit Tubes are researched: it hides everything but transit tubes, their crossings and
+# access points, tints them cyan and marks entrances and exits with arrows. The tubes'
+# buildings open the overlay when picked in the build menu, their status items show in it,
+# and the deconstruct, cancel and disconnect tools get a "Transit Tubes" filter layer.
+# How a player reaches it: the overlay bar's Transit Tube button (or its hotkey).
+# What changes: a view of the tube network.
+#
+# setup grants Transit Tubes and lays a run of five tube segments in the corridor east of the
+# printing pod. The overlay is opened from its button: its mode is on and the tubes are tinted.
+from: early-base
+mods: [3510927460]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"TravelTubes\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"TravelTube\")", method: Build, args: [133044, Neutral, null, [Polypropylene], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"TravelTube\")", method: Build, args: [133045, Neutral, null, [Polypropylene], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"TravelTube\")", method: Build, args: [133046, Neutral, null, [Polypropylene], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"TravelTube\")", method: Build, args: [133047, Neutral, null, [Polypropylene], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"TravelTube\")", method: Build, args: [133048, Neutral, null, [Polypropylene], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Game.Instance.travelTubeSystem", method: SetConnections, args: ["Right", 133044, true]}}
+  - driver: {setup.call: {target: "Game.Instance.travelTubeSystem", method: SetConnections, args: ["Left, Right", 133045, true]}}
+  - driver: {setup.call: {target: "Game.Instance.travelTubeSystem", method: SetConnections, args: ["Left, Right", 133046, true]}}
+  - driver: {setup.call: {target: "Game.Instance.travelTubeSystem", method: SetConnections, args: ["Left, Right", 133047, true]}}
+  - driver: {setup.call: {target: "Game.Instance.travelTubeSystem", method: SetConnections, args: ["Left", 133048, true]}}
+  - driver: {setup.call: {target: "Game.Instance.travelTubeSystem", method: ForceRebuildNetworks}}
+steps:
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [122, 209], ortho: 8}}
+  - ui_wait: {path: "**/OverlaysBarHolder/OverlaysBar/Toggle:Transit Tube Overlay", cond: stable}
+  - ui_dump: {name: overlay-bar, root: "**/OverlaysBarHolder/OverlaysBar"}
+  - click: {ui: "**/OverlaysBarHolder/OverlaysBar/Toggle:Transit Tube Overlay"}
+  - ui_wait: {path: "**/OverlaysBarHolder/OverlaysBar/Toggle:Transit Tube Overlay", cond: "on"}
+  - expect_state: {"Hash.SDBMLower(\"TransitTube\")": {save_as: tubeMode}}
+  - expect_state:
+      "OverlayScreen.Instance.mode.HashValue": "== tubeMode"
+      "all:TravelTube::Length": 5
+      "all:TravelTube::[0].GetComponent<KBatchedAnimController>.TintColour.r": 0
+      "all:TravelTube::[0].GetComponent<KBatchedAnimController>.TintColour.g": 255
+  - world_shot: {name: tubes, ortho: 8, at: [122, 209]}

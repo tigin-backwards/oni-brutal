@@ -1,0 +1,67 @@
+{
+ "spec": "mods/3510927460-transit-tube-overlay.yaml",
+ "mods": [
+  "3510927460"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "after Transit Tubes research, five tube segments laid; the overlay bar's Transit Tube button clicked: the overlay's mode is on and the tubes are tinted cyan; the overlay bar dumped and the overlay shot",
+ "updated": "2026-10-24",
+ "commit": "280ffb5",
+ "mod_dlls": {
+  "3510927460": {
+   "TransitTubeOverlay.dll": "df3ae93b7a22ab635ba856c8b6d9269d6a779f974caa0d0b02b9af9ea15db66f"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-043029-527c2d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T04:36:53",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-045856-4882af",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T04:58:56",
+    "lane": 17,
+    "reference_run": "20261024-043029-527c2d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "overlay-bar": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "tubes": 0.002702
+    }
+   },
+   {
+    "run": "20261024-045856-4882af",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T05:00:03",
+    "lane": 17,
+    "reference_run": "20261024-043029-527c2d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "overlay-bar": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "tubes": 0.002752
+    }
+   }
+  ]
+ }
+}

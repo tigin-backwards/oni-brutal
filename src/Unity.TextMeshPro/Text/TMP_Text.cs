@@ -609,7 +609,6 @@ namespace TMPro
             {
                 if (m_HorizontalAlignment == value) return;
                 m_HorizontalAlignment = value;
-                m_textAlignment = TextAlignmentOptions.Converted;
                 Changed(layout: false);
             }
         }
@@ -621,7 +620,6 @@ namespace TMPro
             {
                 if (m_VerticalAlignment == value) return;
                 m_VerticalAlignment = value;
-                m_textAlignment = TextAlignmentOptions.Converted;
                 Changed(layout: false);
             }
         }
@@ -636,12 +634,14 @@ namespace TMPro
                 if (m_HorizontalAlignment == h && m_VerticalAlignment == v) return;
                 m_HorizontalAlignment = h;
                 m_VerticalAlignment = v;
-                m_textAlignment = value;
                 Changed(layout: false);
             }
         }
 
-        // An alignment stored by older data (m_textAlignment) replaces the two alignments.
+        // The setters change the two halves only, never the stored m_textAlignment (measured):
+        // a text whose data stores an alignment loses what was set before it first wakes.
+        // An alignment stored by older data (m_textAlignment) replaces the two alignments when
+        // the text first wakes, and is then marked converted.
         // The oldest format numbered the alignments 0-15: rows Top, Middle, Bottom and Baseline
         // of Left, Center, Right and Justified (measured: the game's data has texts with the
         // values 0 and 5 that the shipped package shows top left and centred). Other values

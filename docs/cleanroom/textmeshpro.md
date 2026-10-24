@@ -2024,9 +2024,14 @@ reflection).
   stores the source's value and shows the source's alignment when it wakes (a copy made of a
   stored-257 text shows TopLeft). So does a not-yet-woken copy moved under an active parent: it
   wakes there and loses what was set.
-- This implementation stores the set value (the setters write the stored field), so the first
-  wake applies what was set; every "hidden" case above keeps MidlineLeft in it, and the stored
-  value reads 4097 after a set.
+- This implementation stored the set value before (the setters wrote the stored field), so the
+  first wake applied what was set; every "hidden" case above kept MidlineLeft in it, and the
+  stored value read 4097 after a set.
+- **Implemented.** The setters now change the two halves only. In the same probe 537 of the
+  551 `AL` lines match the original's. The 14 that differ come from the players picking other
+  loaded texts as sources (their loaded-text lists come in different orders): the 65535
+  group's source is centred in ours, top in the original, and its copies follow it; the
+  fontStyle of three groups and which copy logs its Awake untagged follow their sources too.
 
 ## Verification
 

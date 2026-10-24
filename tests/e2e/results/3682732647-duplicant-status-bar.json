@@ -3,12 +3,12 @@
  "mods": [
   "3682732647"
  ],
- "verdict": "failed",
- "why": "a run of ours failed",
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
  "findings": [],
- "note": "the bar's cards, click-to-select and collapse work as in the original and its shot matches, but the ui_dump differs: the TMP_SubMeshUI children of the header labels (FilterBtn, Grip, CollapseBtn) have raycastTarget True in ours, False in the original (their texts set it False)",
+ "note": "the bar's cards, click-to-select and collapse work as in the original; its ui_dump and shot match. The card names clone the first usable LocText Resources.FindObjectsOfTypeAll returns, so they keep its pivot (HoverTextScreen's label in both players since the engine returns ascending instance ids)",
  "updated": "2026-10-23",
- "commit": "9bd4413",
+ "commit": "196abce",
  "mod_dlls": {
   "3682732647": {
    "DuplicantStatusBar.dll": "5075752039e7552177c786fca6bc9876a4531acb7f659a4ecafc7981141a0297"
@@ -35,20 +35,17 @@
   ],
   "ours": [
    {
-    "run": "20261023-174012-fe7a53",
+    "run": "20261023-214127-6c50ac",
     "index": 1,
-    "verdict": "fail",
-    "date": "2026-10-23T18:04:40",
+    "verdict": "pass",
+    "date": "2026-10-23T21:41:27",
     "lane": 19,
-    "reasons": [
-     "ui_dump bar: 3 difference(s)"
-    ],
     "reference_run": "20261023-174012-fe7a53",
     "new_signatures": 0,
     "findings": [],
     "ui_dump": {
      "bar": {
-      "differences": 3
+      "differences": 0
      }
     },
     "shots": {
@@ -56,11 +53,47 @@
     }
    },
    {
-    "run": "20261023-174012-fe7a53",
+    "run": "20261023-214127-6c50ac",
     "index": 2,
     "verdict": "pass",
-    "date": "2026-10-23T18:04:40",
-    "lane": 18,
+    "date": "2026-10-23T21:53:50",
+    "lane": 19,
+    "reference_run": "20261023-174012-fe7a53",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "bar": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "bar": 0.00495
+    }
+   },
+   {
+    "run": "20261023-214127-6c50ac",
+    "index": 3,
+    "verdict": "pass",
+    "date": "2026-10-23T22:01:50",
+    "lane": 19,
+    "reference_run": "20261023-174012-fe7a53",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "bar": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "bar": 0.00495
+    }
+   },
+   {
+    "run": "20261023-214127-6c50ac",
+    "index": 4,
+    "verdict": "pass",
+    "date": "2026-10-23T22:02:47",
+    "lane": 19,
     "reference_run": "20261023-174012-fe7a53",
     "new_signatures": 0,
     "findings": [],

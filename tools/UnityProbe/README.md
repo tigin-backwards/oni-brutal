@@ -160,6 +160,17 @@ past the preferred width. Check the rule with `tools/UnityProbe/wc-check.py rule
 compare the players with `wc-check.py diff ORIG OURS`. `textmeshpro.md` ("Words and their
 separators") records what it measured.
 
+With `PROBE_SCENARIO=tallline` only the tall-line probe runs (`TallLine.cs`, lines `TL …`, 10 s
+into the main menu, about ten seconds). It lays out texts whose line grows taller part-way: the
+geyser names' U+2011 from a fallback font, `<size>`, `<voffset>` and spaces in `<size>`, on the
+first line and on later ones, in GRAYSTROKE REGULAR SDF 14 and 12 pt and NotoSans-Regular
+14 pt, with Overflow, Truncate and Ellipsis, wrapping on and off. It sweeps the rect's height
+from 0 to 70 and logs each distinct result (`isTextOverflowing`, `firstOverflowCharacterIndex`,
+`isTextTruncated`, the counts, each record and each line's metrics), each text's layout in a
+tall rect (`metrics`), and the details screen's title in its own rect. Check the rule with
+`tools/UnityProbe/tl-check.py rule LOG`, and compare the players with `tl-check.py diff ORIG
+OURS`. `textmeshpro.md` ("Lines that grow part-way") records what it measured.
+
 With `PROBE_SCENARIO=childactive` only the child-activation probe runs (`ChildActivation.cs`, lines
 `CA …`, 10 s into the main menu, a few seconds). A `GridLayoutGroup` (a subclass counting its
 layout calls and messages) holds nine children; some start inactive and have never been laid

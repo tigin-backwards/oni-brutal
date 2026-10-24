@@ -1659,6 +1659,102 @@ culling (measured)") records the measurement, the rule and where this implementa
 The probe also found that the original's `TMP_Text.bounds` equals the mesh's bounds, and that
 an empty text keeps 4 vertices.
 
+### Lines that grow part-way (measured 2026-10-24)
+
+Found by issue #12: a geyser's details screen shows no name. The title is a `LocText`
+(GRAYSTROKE REGULAR SDF 14 pt, Truncate, no wrapping, top left, extra padding and kerning as
+`SetTextStyleSetting` sets them) in a rect 175.13 × 22, showing "Liquid Sulfur Geyser NJ24‑7".
+The U+2011 before the 7 comes from a fallback font, and is taller: the line is 14.69 high
+without it (GRAYSTROKE's ascender 13.29 and descender −1.40) and 23.82 with it. The shipped
+package shows "Liquid Sulfur Geyser NJ24", with `isTextOverflowing` true,
+`firstOverflowCharacterIndex` 25, 26 records (the blank record last) and one line. This
+implementation reports index 0 and shows nothing: 0 records, 0 lines, no sub-mesh. Every geyser
+and vent has such a name, so every one has an empty title.
+
+Measured with `PROBE_SCENARIO=tallline` (tools/UnityProbe, `TallLine.cs`, lines `TL …`), at the
+main menu. The texts were 19 lines that grow taller part-way:
+- the U+2011 of geyser names ("Liquid Sulfur Geyser NJ24‑7", "Chlorine Gas Vent AB12‑3",
+  "NJ24‑7", "‑7", "AAAA‑", "‑AAAA");
+- `<size=150%>` before, between and after ordinary letters, and two sizes in one line;
+- `<voffset=±0.4em>`, a smaller `<size=60%>`, and spaces in `<size=150%>`;
+- the same on a second line after a line feed, and on a line begun by wrapping (60 wide).
+
+Each was set in GRAYSTROKE REGULAR SDF 14 pt, NotoSans-Regular 14 pt and GRAYSTROKE 12 pt,
+with Overflow, Truncate and Ellipsis, wrapping on and off. The rect was 400 wide (60 for the
+wrapped text), its height swept from 0 to 70 in steps of 0.25, and each distinct result was
+logged: `isTextOverflowing`, `firstOverflowCharacterIndex`, `isTextTruncated`, `characterCount`,
+`lineCount`, and each record's code, visibility, line, and each line's ascender, descender,
+height and baseline. Each text's layout in a 400 × 1000 rect was logged too (`metrics`), and
+the title in its own rect. `tools/UnityProbe/tl-check.py rule LOG` predicts all 79,257
+400-wide sweep results of the shipped package from the rule below. `tl-check.py diff ORIG OURS`
+finds 258 of 348 cases differing in this implementation, all from the index of the first
+overflowing character.
+
+- **Each character is checked against the line as it stands when it is placed.** "Overflow at
+  white space" above says which characters are checked, and that a character overflows when
+  its line ends below the rect: the distance from the first line's top down to the line's
+  descender is greater than the rect's height. The line's ascender and descender there are
+  those of its characters so far, not of the whole line. A taller character later in the line
+  does not make the characters before it overflow. It overflows itself, at its own index.
+  - GRAYSTROKE 14 pt, the geyser's name, unwrapped: index 0 below a height of 14.69 (the
+    first letter's line), index 25 (the U+2011) from 14.75 to 23.81, none from 23.82.
+  - "AAAA<size=150%>B</size>AA" (GRAYSTROKE 14 pt, 22.04 high): 4 from 14.69 to 22.03.
+    "<size=150%>B</size>AAAA": 0 below 22.04. "AAAA<voffset=0.4em>B</voffset>AA" and the same
+    with −0.4em (20.3 high): 4 from 14.69. "AA<size=130%>B</size>AA<size=160%>C</size>AA":
+    2 from 14.75, 5 from 19.25, none from 23.75 (GRAYSTROKE 14 pt; 19.25, 24.75 and 30.5 in
+    NotoSans 14 pt).
+  - On the first line, its top is the highest ascender so far as well: a taller character
+    raises the first line's top, and the check at it measures from there.
+  - On a later line, the line's baseline sits below the line before by the usual interval
+    from the line's ascender so far. A taller character lowers the baseline by the rise in the
+    line's ascender, and the check at it measures its line's descender from there. The lines
+    before keep the first line's top.
+  - "AA\nAAAA<size=150%>B</size>AA" (GRAYSTROKE 14 pt): 0 below 14.69, 3 (the second line's
+    first letter) up to 29.38 (two lines of letters), 7 (the B) from 29.5 to 36.72, none from
+    36.73. The same with the U+2011 in place of the B: 7 from 29.5 to 38.5.
+    "AA\n<size=150%>B</size>AAAA": 3 from 14.69 to 36.72.
+  - The same with wrapping on, and in every mode. With wrapping, a line begun by wrapping is
+    checked the same way: "AAAA AAAA<size=150%>B</size>AA" 60 wide breaks after "AAAA " and
+    before the last "A". It overflows at 5 (the second line's first letter) from 14.75, at 9
+    (the B) from 29.5, at 11 (the third line) from 36.75, and not at all from 51.5
+    (GRAYSTROKE 14 pt).
+- **Truncate and Ellipsis** cut at that index as "Overflow at white space" above describes. The
+  line the cut ends is laid out with its characters before the cut only: its ascender,
+  descender, height and baseline are those of the line as it stood before the taller
+  character.
+  - The title, Truncate: "Liquid Sulfur Geyser NJ24" and the blank record, one line 14.68 high,
+    ascender 11 (the rect's top), descender −3.69, baseline −2.29, in the rect's centred
+    coordinates. Ellipsis gives "Liquid Sulfur Geyser NJ2…" and the record.
+  - "AA\nAAAA<size=150%>B</size>AA" at 400 × 30, Truncate: "AA", line feed, "AAAA" and the
+    record on line 1, whose baseline is −12.97, as without the B (Overflow: −19.62).
+- **White space in a `<size>` takes no part in the line's height.** A space inside
+  `<size=150%>` reports the ascender and descender of the text's own size in `characterInfo`.
+  It does not make its line taller, and is not counted in the preferred height.
+  - "AAAA <size=150%> </size>AA": GRAYSTROKE 12 pt 12.6 high, as "AAAA AA", and it never
+    overflows a rect 12.75 high. This implementation: 18.89 high, and index 0 below that.
+  - This differs from white space taken from a fallback font, which does deepen its line
+    ("Further characters" above). Not measured: white space in `<voffset>`, and in a
+    `<size>` smaller than the text.
+
+Where this implementation deviates (`TMP_Text.Layout.cs`): it lays out each line whole, and
+then checks the line's whole height at its first checked character. So a line that grows
+part-way overflows at its start. Truncate and Ellipsis then cut the whole line. On the first
+line nothing is shown, and that is the geyser title: index 0, 0 records. In
+"AA\nAAAA<size=150%>B</size>AA" it reports 3 where the shipped package reports 7.
+
+| Case (GRAYSTROKE REGULAR SDF 14 pt) | shipped: index; records | this implementation |
+|---|---|---|
+| the title, 175.13 × 22, Truncate | 25; "Liquid Sulfur Geyser NJ24", record | 0; nothing |
+| the title, 175.13 × 22, Ellipsis | 25; "Liquid Sulfur Geyser NJ2…", record | 0; nothing |
+| the title, 175.13 × 22, Overflow | 25; all 27 | 0; all 27 |
+| "AAAA<size=150%>B</size>AA", 400 × 20, Truncate | 4; "AAAA", record | 0; nothing |
+| "AA\nAAAA<size=150%>B</size>AA", 400 × 30, Truncate | 7; "AA", LF, "AAAA", record | 3; "AA", LF, record |
+| "AAAA <size=150%> </size>AA", 400 × 20, Truncate | none; all 8 | 0; nothing |
+
+Not measured: `<line-height>`, `<line-indent>`, sprites taller than the text, auto-size with
+a line that grows part-way (whether it shrinks to fit the whole line or the part before the
+cut), Page mode and `maxVisibleLines`, and world-space `TextMeshPro`.
+
 ## Verification
 
 1. **Build:**

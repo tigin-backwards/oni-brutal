@@ -1,0 +1,34 @@
+# Mass Based Digging (1835785649), class P.
+#
+# What it does: a postfix on Workable.GetEfficiencyMultiplier scales a Diggable's work speed
+# by 1200 kg over the dug cell's mass, clamped to 0.25..10: light cells dig up to ten times
+# faster, heavy ones up to four times slower. The game's dig time grows with mass only up to
+# 400 kg (Diggable.GetApproximateDigTime), so above that every cell of an element takes as long.
+# How a player reaches it: any dig order.
+# What changes: how long a dig takes.
+#
+# setup turns two air cells in the corridor west of the printing pod into sandstone: (109, 207)
+# of 400 kg (three times the speed) and (110, 207) of 4800 kg (a quarter of it); the game
+# digs either in 5.6 s of work. The light one is dug first, which brings a Duplicant next to
+# the heavy one; 8 s after its dig order the heavy cell still stands (a quarter of the speed
+# needs more than 10 s of work even for a skilled digger), and it falls later.
+from: early-base
+mods: [1835785649]
+setup:
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [131761, SandStone, {"$": "CellEventLogger.Instance.DebugTool"}, 400, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [131762, SandStone, {"$": "CellEventLogger.Instance.DebugTool"}, 4800, 300]}}
+steps:
+  - run: {seconds: 1}
+  - expect_state:
+      "cells:109,207..109,207::Grid.Mass.get_Item({cell})": ">= 399"
+      "cells:110,207..110,207::Grid.Mass.get_Item({cell})": "> 4000"
+      "Diggable.GetApproximateDigTime(131761)": "== original"
+      "Diggable.GetApproximateDigTime(131762)": "== original"
+  - dig: [109, 207, 109, 207]
+  - run: {seconds: 300, until: {pending_digs: 0}}
+  - expect_state: {"cells:109,207..109,207::Grid.Mass.get_Item({cell})": "< 10"}
+  - dig: [110, 207, 110, 207]
+  - run: {seconds: 8}
+  - expect_state: {"cells:110,207..110,207::Grid.Mass.get_Item({cell})": "> 4000"}
+  - run: {seconds: 600, until: {pending_digs: 0}}
+  - expect_state: {"cells:110,207..110,207::Grid.Mass.get_Item({cell})": "< 10"}

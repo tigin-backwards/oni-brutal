@@ -1,0 +1,55 @@
+{
+ "spec": "mods/1835785649-mass-based-digging.yaml",
+ "mods": [
+  "1835785649"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "of two sandstone cells the game digs equally fast, the 400 kg one is dug quickly and the 4800 kg one still stands 30 s after its order, then falls",
+ "updated": "2026-10-24",
+ "commit": "e03d5f3",
+ "mod_dlls": {
+  "1835785649": {
+   "MassBasedDigging.dll": "44fae9142a13e904128c70b0ef3370d90e2d1dde0691e4a41aba70e04da3db3f"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-110443-2905d0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T11:04:43",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-110641-7ea9c0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T11:06:41",
+    "lane": 16,
+    "reference_run": "20261024-110443-2905d0",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-110641-7ea9c0",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T11:06:42",
+    "lane": 17,
+    "reference_run": "20261024-110443-2905d0",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

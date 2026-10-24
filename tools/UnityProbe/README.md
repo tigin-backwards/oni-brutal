@@ -245,7 +245,9 @@ phase it came after. `PROBE_CD_PART=extra` runs the pixel-perfect details instea
 are told (a `CanvasRenderer` alone, disabled, transparent or culled graphics, a layout element),
 several moves in a frame, a drag, values set to themselves, new, cloned, activated and
 reparented objects, a move at the end of the frame, and nested canvases that override
-`pixelPerfect`. `ugui.md` ("Moves on pixel-perfect canvases") records what it measured, and
+`pixelPerfect`. `PROBE_CD_PART=born` runs objects made and moved in the same frame (moved
+directly, through a parent, by a layout group, cloned, moved while inactive, moved before their
+`Image` exists). `ugui.md` ("Moves on pixel-perfect canvases") records what it measured, and
 `PixelPerfectMoveTests` encodes it.
 
 With `PROBE_SCENARIO=floatprec` only the float-precision probe runs (`FloatPrecision.cs`, lines

@@ -180,28 +180,100 @@ namespace OniBrutal.Tests
         }
 
         [Fact]
-        public void InactiveAndNewObjectsAreNotTold()
+        public void InactiveObjectsAreNotTold()
         {
             var s = Build(pixelPerfect: true);
             s.C.gameObject.SetActive(false);
-            var fresh = Rect("Fresh", s.P, true);
             s.P.anchoredPosition += new Vector2(10f, 0f);
-            fresh.anchoredPosition += new Vector2(3f, 0f);
             Assert.Equal(["P after"], Run());
 
-            // Activation is not a move; the next move of the new object is told.
+            // Activation is not a move.
             s.C.gameObject.SetActive(true);
             Assert.Empty(Run());
-            fresh.anchoredPosition += new Vector2(3f, 0f);
-            Assert.Equal(["Fresh after"], Run());
         }
 
         [Fact]
-        public void AClonedObjectIsNotToldOfItsPlacement()
+        public void AMoveWhileInactiveIsNotToldOnceActivated()
         {
+            // born.inactiveActivatedMoved: moved while inactive, activated in the same frame.
+            var s = Build(pixelPerfect: true);
+            s.C.gameObject.SetActive(false);
+            s.C.anchoredPosition += new Vector2(10f, 0f);
+            s.C.gameObject.SetActive(true);
+            Assert.Empty(Run());
+        }
+
+        [Fact]
+        public void ANewObjectIsNotToldOfItsPlacement()
+        {
+            // born.control: made, parented and sized before its CanvasRenderer exists.
+            var s = Build(pixelPerfect: true);
+            Rect("Fresh", s.P, true);
+            Assert.Empty(Run());
+        }
+
+        [Fact]
+        public void ANewObjectMovedInTheFrameItWasMadeIsTold()
+        {
+            // born.moveNow, born.parentMoved: a move after the renderer exists is told after
+            // that frame's canvas update, the frame it was made in.
+            var s = Build(pixelPerfect: true);
+            var fresh = Rect("Fresh", s.P, true);
+            fresh.anchoredPosition += new Vector2(3f, 0f);
+            Assert.Equal(["Fresh after"], Run());
+
+            var other = Rect("Other", s.P, true);
+            s.P.anchoredPosition += new Vector2(10f, 0f);
+            Assert.Equal(["P after", "C after", "Fresh after", "Other after"], Run());
+        }
+
+        [Fact]
+        public void AMoveBeforeTheRendererExistsIsNotTold()
+        {
+            // born.imageAfterMove.
+            var s = Build(pixelPerfect: true);
+            var fresh = Rect("Fresh", s.P, false);
+            fresh.anchoredPosition += new Vector2(3f, 0f);
+            fresh.gameObject.AddComponent<CanvasRenderer>();
+            Assert.Empty(Run());
+        }
+
+        [Fact]
+        public void ANewObjectPlacedByItsLayoutGroupInTheFrameItWasMadeIsTold()
+        {
+            // born.group: a child added to a layout group is placed in that frame's canvas
+            // update, and told after it. The main menu's news tiles rely on this when their data
+            // arrives in the frame the menu is made.
+            var s = Build(pixelPerfect: true);
+            var group = Rect("G", s.Canvas.transform, false);
+            group.sizeDelta = new Vector2(500f, 100f);
+            var layout = group.gameObject.AddComponent<UnityEngine.UI.HorizontalLayoutGroup>();
+            layout.childControlWidth = layout.childControlHeight = true;
+            layout.childForceExpandWidth = layout.childForceExpandHeight = false;
+            layout.childAlignment = TextAnchor.MiddleRight;
+            Frame();
+            log.Clear();
+            var fresh = Rect("Fresh", group, true);
+            var element = fresh.gameObject.AddComponent<UnityEngine.UI.LayoutElement>();
+            element.preferredWidth = 30f;
+            element.preferredHeight = 30f;
+            var messages = Run();
+            Assert.Contains("Fresh during", messages);
+            Assert.Equal("Fresh after", messages[^1]);
+        }
+
+        [Fact]
+        public void AClonedObjectIsNotToldOfItsPlacementButOfItsMoves()
+        {
+            // born.clone, born.cloneMoved.
             var s = Build(pixelPerfect: true);
             Object.Instantiate(s.P.gameObject, s.Canvas.transform).name = "Clone";
             Assert.Empty(Run());
+
+            var clone = (RectTransform)Object.Instantiate(s.P.gameObject, s.Canvas.transform).transform;
+            clone.name = "Moved";
+            clone.anchoredPosition += new Vector2(5f, 0f);
+            Assert.Equal(["Moved after", "C after"], Run());
         }
     }
 }

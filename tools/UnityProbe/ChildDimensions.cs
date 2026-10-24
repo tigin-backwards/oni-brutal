@@ -154,6 +154,16 @@ namespace SemanticsProbe
             L("screen " + Screen.width + "x" + Screen.height + " scale=" + F(canvas.scaleFactor));
             yield return null;
             yield return null;
+            if (System.Environment.GetEnvironmentVariable("PROBE_CD_PART") == "born")
+            {
+                canvas.pixelPerfect = true;
+                yield return null;
+                L("=== born");
+                yield return Born();
+                Destroy(cgo);
+                L("=== done");
+                yield break;
+            }
             if (System.Environment.GetEnvironmentVariable("PROBE_CD_PART") == "extra")
             {
                 canvas.pixelPerfect = true;
@@ -296,6 +306,97 @@ namespace SemanticsProbe
                 for (int i = 0; i < 3; i++) { yield return null; phase = "co"; L(caseTag + " co " + Snap(s)); }
                 logMessages = false;
                 Destroy(s.Top.gameObject);
+                yield return null;
+            }
+        }
+
+        /// On the pixel-perfect canvas, objects that appear and then move in the same frame
+        /// (PROBE_CD_PART=born): is a move made after an object's CanvasRenderer exists told after
+        /// that frame's canvas update, or only from the next frame on? Each case makes "N" (a
+        /// rect with a spy and an Image) in a coroutine and, in the same frame, moves it: by its
+        /// anchoredPosition (at once, or in Canvas.willRenderCanvases), through its parent, by a
+        /// HorizontalLayoutGroup it was added to (in the canvas update), as a clone, as an
+        /// object made inactive and activated, and with the Image added after the move.
+        /// Found in the main menu's news row (ugui.md, "Moves on pixel-perfect canvases").
+        IEnumerator Born()
+        {
+            var cases = new[]
+            {
+                "control", "moveNow", "moveInRender", "parentMoved", "group", "groupNextFrame",
+                "clone", "cloneMoved", "cloneInGroup", "inactiveActivatedMoved", "imageAfterMove",
+                "moveNextFrame",
+            };
+            foreach (var name in cases)
+            {
+                logMessages = false;
+                var holder = NewRect("H", canvas.transform, new Vector2(300, 300));
+                var group = NewRect("G", canvas.transform, new Vector2(500, 100));
+                var hlg = group.gameObject.AddComponent<HorizontalLayoutGroup>();
+                hlg.childControlWidth = true;
+                hlg.childControlHeight = true;
+                hlg.childForceExpandWidth = false;
+                hlg.childForceExpandHeight = false;
+                hlg.childAlignment = TextAnchor.MiddleRight;
+                var a = NewRect("A", group, new Vector2(50, 50));
+                var le = a.gameObject.AddComponent<LayoutElement>();
+                le.preferredWidth = 100;
+                le.preferredHeight = 50;
+                var template = NewRect("T", holder, new Vector2(40, 40));
+                template.gameObject.AddComponent<Image>();
+                template.gameObject.AddComponent<Spy>();
+                yield return null;
+                yield return null;
+                caseTag = "born." + name;
+                logMessages = true;
+                phase = "now";
+                RectTransform n = null;
+                RectTransform MakeN(Transform parent, bool image = true)
+                {
+                    var r = NewRect("N", parent, new Vector2(20, 20));
+                    r.gameObject.AddComponent<Spy>();
+                    if (image) r.gameObject.AddComponent<Image>();
+                    var e = r.gameObject.AddComponent<LayoutElement>();
+                    e.preferredWidth = 30;
+                    e.preferredHeight = 30;
+                    return r;
+                }
+                switch (name)
+                {
+                    case "control": n = MakeN(holder); break;
+                    case "moveNow": n = MakeN(holder); n.anchoredPosition += new Vector2(10, 0); break;
+                    case "moveInRender": n = MakeN(holder); var m = n; inRender = () => m.anchoredPosition += new Vector2(10, 0); break;
+                    case "parentMoved": n = MakeN(holder); holder.anchoredPosition += new Vector2(10, 0); break;
+                    case "group": n = MakeN(group); break;
+                    case "groupNextFrame": n = MakeN(group); break;
+                    case "clone":
+                        n = (RectTransform)Instantiate(template.gameObject, holder).transform; n.name = "N"; break;
+                    case "cloneMoved":
+                        n = (RectTransform)Instantiate(template.gameObject, holder).transform; n.name = "N";
+                        n.anchoredPosition += new Vector2(10, 0); break;
+                    case "cloneInGroup":
+                        n = (RectTransform)Instantiate(template.gameObject, group).transform; n.name = "N"; break;
+                    case "inactiveActivatedMoved":
+                        n = MakeN(holder); n.gameObject.SetActive(false);
+                        n.anchoredPosition += new Vector2(10, 0); n.gameObject.SetActive(true); break;
+                    case "imageAfterMove":
+                        n = MakeN(holder, image: false); n.anchoredPosition += new Vector2(10, 0);
+                        n.gameObject.AddComponent<Image>(); break;
+                    case "moveNextFrame": n = MakeN(holder); break;
+                }
+                L(caseTag + " made pos=" + F(n.anchoredPosition) + " world=" + F((Vector2)n.position));
+                yield return null;
+                phase = "co";
+                L(caseTag + " frame1 pos=" + F(n.anchoredPosition) + " world=" + F((Vector2)n.position));
+                if (name == "moveNextFrame") n.anchoredPosition += new Vector2(10, 0);
+                if (name == "groupNextFrame") a.GetComponent<LayoutElement>().preferredWidth = 120;
+                yield return null;
+                phase = "co";
+                L(caseTag + " frame2 pos=" + F(n.anchoredPosition) + " world=" + F((Vector2)n.position));
+                yield return null;
+                L(caseTag + " end");
+                logMessages = false;
+                Destroy(holder.gameObject);
+                Destroy(group.gameObject);
                 yield return null;
             }
         }

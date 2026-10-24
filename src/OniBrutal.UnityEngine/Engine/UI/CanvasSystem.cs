@@ -357,15 +357,15 @@ namespace OniBrutal.Engine.UI
         static readonly List<RectTransformNative> movedRects = new();
         static readonly HashSet<RectTransformNative> movedSet = new();
 
-        /// Counts SendMovesOnPixelPerfectCanvases's passes (CanvasRendererNative.BornBeforePass).
-        public static int MovePass { get; private set; }
-
         /// A RectTransform's place in the world changed (a position, rotation, scale or parent
-        /// set, its own or an ancestor's). Kept when it has a CanvasRenderer, for the next pass.
+        /// set, its own or an ancestor's). Kept for the next pass when the object is active and
+        /// already has a CanvasRenderer: a move made before the renderer exists or while the
+        /// object is inactive is never told, a move made after it is, in the frame the object
+        /// was made too (measured, docs/cleanroom/ugui.md "Moves on pixel-perfect canvases").
         public static void NoteMoved(RectTransformNative rect)
         {
             var go = rect.GameObject;
-            if (go == null || go.Components.Length < 2 || PartsOf(go).Renderers.Length == 0) return;
+            if (go == null || go.Components.Length < 2 || !go.ActiveInHierarchy || PartsOf(go).Renderers.Length == 0) return;
             if (movedSet.Add(rect)) movedRects.Add(rect);
         }
 
@@ -374,11 +374,10 @@ namespace OniBrutal.Engine.UI
         /// perfect. As measured in the original (docs/cleanroom/ugui.md, "Moves on pixel-perfect
         /// canvases"): any position, rotation, scale or parent change counts, even one undone in
         /// the same frame, and so does an ancestor's; a size change alone, a sibling index, an
-        /// activation and an object made or cloned since the last pass do not. On other canvases
-        /// a move sends nothing.
+        /// activation and the placement of an object made or cloned do not. On other canvases a
+        /// move sends nothing.
         static void SendMovesOnPixelPerfectCanvases()
         {
-            int pass = MovePass++;
             if (movedRects.Count == 0) return;
             var moved = movedRects.ToArray();
             movedRects.Clear();
@@ -387,10 +386,7 @@ namespace OniBrutal.Engine.UI
             {
                 var go = rect.GameObject;
                 if (rect.Destroyed || go == null || go.Destroyed || !go.ActiveInHierarchy) continue;
-                bool established = false;
-                foreach (var r in PartsOf(go).Renderers)
-                    if (!r.Destroyed && r.BornBeforePass != pass) established = true;
-                if (!established || NearestCanvas(go) is not { } canvas || !IsPixelPerfect(canvas)) continue;
+                if (NearestCanvas(go) is not { } canvas || !IsPixelPerfect(canvas)) continue;
                 Messages.SendToComponents(go, s => s.OnRectTransformDimensionsChange);
             }
         }

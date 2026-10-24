@@ -1299,7 +1299,8 @@ child of a `HorizontalLayoutGroup`, resized or moved by it; then a copy of the n
     nothing.
   - Not a move: setting `anchoredPosition` to its value, `SetAsLastSibling`, activating an
     object, turning `pixelPerfect` on. An object made or cloned in the frame (a new object, an
-    `Instantiate` into a parent) is not told of its placement.
+    `Instantiate` into a parent) is not told of its placement. A move made after it has its
+    `CanvasRenderer` is told, in the frame it was made too (below, "Objects made in the frame").
   - The canvas that decides is the nearest one, as `Canvas.pixelPerfect` reads: a nested
     canvas that overrides `pixelPerfect` off is not told under a pixel-perfect root; one that
     overrides it on is told under a root that is not. A nested canvas that inherits follows its
@@ -1315,6 +1316,45 @@ child of a `HorizontalLayoutGroup`, resized or moved by it; then a copy of the n
 first layout whenever nothing else re-laid it out (the intro path; the `menu` scenario happened
 to get another layout). The re-send withdrawn on 2026-10-23 had covered it, but for every rect
 on every canvas, sizes included.
+
+#### Objects made in the frame (measured 2026-10-24)
+
+Found by a player at 2560 × 1440 on Windows: the news row stayed at its first full layout
+(preferred width 8, the three tiles stacked at the row's right edge, one showing past the
+screen's edge). In the original at 2560 × 1440 (PerfProbe `layout.txt`, MOTD images cached)
+the news data arrives in the frame the main menu is made: `MainMenu_Motd.Setup` hides the tiles,
+the response shows them again and the row lays out once in that frame's canvas update, with the
+buttons' widths at 0. The buttons are told after that update, in that same frame, and the row
+reaches 908.5 two frames later.
+
+**Measured** with `PROBE_SCENARIO=childdims PROBE_CD_PART=born` (lines `CD born.…`), on the
+pixel-perfect probe canvas. Each case makes N (a rect with a spy, then an `Image` and a
+`LayoutElement`) in a coroutine and changes it in the same frame:
+
+| Case | told after that frame's canvas update |
+|---|---|
+| made, nothing else (`control`) | no |
+| `anchoredPosition` set after the `Image` was added (`moveNow`) | yes |
+| moved in `Canvas.willRenderCanvases` (`moveInRender`) | yes |
+| its parent moved (`parentMoved`) | yes, N and its sibling |
+| made as a child of a `HorizontalLayoutGroup`, placed by it in the canvas update (`group`) | yes, after the setter's messages during the rebuild |
+| `Instantiate` into a parent (`clone`) | no |
+| `Instantiate`, then `anchoredPosition` set (`cloneMoved`) | yes |
+| `Instantiate` into a layout group (`cloneInGroup`) | yes |
+| deactivated, moved, activated, in that order (`inactiveActivatedMoved`) | no, nor later |
+| moved before its `Image` was added (`imageAfterMove`) | no |
+| made, moved in the next frame (`moveNextFrame`) | yes, in that frame |
+
+So a move counts from the moment the object has a `CanvasRenderer` and is active: the
+placement that comes with making, cloning or parenting it before then is not told, and neither
+is a move made while it is inactive, but every move after that is, whenever in the frame the
+object was made.
+
+**Where ours deviated.** Ours told no move of an object whose `CanvasRenderer` was made since
+the last pass, so the news row stuck at its first full layout whenever that layout came in the
+frame the menu was made: in ours only when the data arrives that early (reproduced on Linux by
+a test mod handing `MainMenu_Motd` its data inside `Setup`, which gives the player's picture
+exactly; what brought the Windows run there was not traced). It also told a move made while the object was inactive once it was activated.
 
 ### RectMask2D culling (measured 2026-10-23)
 

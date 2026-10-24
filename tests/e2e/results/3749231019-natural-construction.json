@@ -1,0 +1,59 @@
+{
+ "spec": "mods/3749231019-natural-construction.yaml",
+ "mods": [
+  "3749231019"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "three natural tiles of sandstone built in the pit leave no building: the cells become solid sandstone, not a foundation (world shot as in the original)",
+ "updated": "2026-10-23",
+ "commit": "397acff",
+ "mod_dlls": {
+  "3749231019": {
+   "NaturalConstruction.dll": "c214aeecd08cb9467b8ad894a41c6a05716105efa14bf8cd235382322fc0ace4"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-183417-5e8543",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T20:14:58",
+    "lane": 13,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-213047-94e53a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T21:43:08",
+    "lane": 13,
+    "reference_run": "20261023-183417-5e8543",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "tiles": 0.02908
+    }
+   },
+   {
+    "run": "20261023-213047-94e53a",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T21:44:31",
+    "lane": 13,
+    "reference_run": "20261023-183417-5e8543",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "tiles": 0.045815
+    }
+   }
+  ]
+ }
+}

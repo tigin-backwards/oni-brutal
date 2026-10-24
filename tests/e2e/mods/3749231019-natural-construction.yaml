@@ -1,0 +1,33 @@
+# Natural Construction - Tiles & Backwalls (3749231019), classes B, S, O.
+#
+# What it does: adds the Natural Tile and the Natural Backwall to the Base menu (researched with
+# Farming Tech, beside the Tile and the Drywall): blueprints of any solid element (100 kg by
+# default) that, when a Duplicant finishes them, leave no building but natural material: the
+# tile becomes a cell of that element (SimMessages.ReplaceAndDisplaceElement), the backwall
+# a natural back wall. The build card's material selector gets a filter bar for the many
+# solids, and PLib options set the masses and build times.
+# How a player reaches it: the build menu (Base), dragging tiles.
+# What changes: natural cells where the blueprints were.
+#
+# setup grants Farming Tech. Three natural tiles of sandstone are built in the pit in the floor
+# of the dug-out room west of the printing pod: once done, no building is left and the cells
+# are solid sandstone.
+from: early-base
+mods: [3749231019]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"FarmingTech\")", method: Purchased}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"FarmingTech\").unlockedItemIDs": {contains: NC_NaturalTile}
+      "Grid.Solid.get_Item(131123)": false
+  - build: {prefab: NC_NaturalTile, cells: [[106, 206], [107, 206], [108, 206]], material: SandStone}
+  - expect: {blueprints: {NC_NaturalTile: 3}}
+  - run: {seconds: 900, until: {pending_construction: 0}}
+  - expect: {buildings: {NC_NaturalTile: 0}}
+  - expect_state:
+      "Grid.Solid.get_Item(131122)": true
+      "Grid.Solid.get_Item(131123)": true
+      "Grid.Solid.get_Item(131124)": true
+      "Grid.Element[131123].id": SandStone
+      "Grid.Foundation.get_Item(131123)": false
+  - world_shot: {name: tiles, ortho: 3, at: [107, 207], mask: [[0, 0, 1280, 400]]}

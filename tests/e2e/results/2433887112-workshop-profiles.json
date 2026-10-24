@@ -1,0 +1,75 @@
+{
+ "spec": "mods/2433887112-workshop-profiles.yaml",
+ "mods": [
+  "2433887112"
+ ],
+ "verdict": "warning",
+ "why": "known findings: scroll-normalized-position",
+ "findings": [
+  "scroll-normalized-position"
+ ],
+ "note": "the research station's Workshop Profile side screen lists Public and the three Duplicants (dumped as in the original); clicking Nikola's row takes the station from public to the two others",
+ "updated": "2026-10-23",
+ "commit": "0368bca",
+ "mod_dlls": {
+  "2433887112": {
+   "WorkshopProfiles.dll": "e9d3f6af52de72bdfa42c9dd2345f1dc3355b5453abb99952747033ccacd67f0"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-212155-fbe646",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T21:23:50",
+    "lane": 12,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-215444-de68bb",
+    "index": 1,
+    "verdict": "warn",
+    "date": "2026-10-23T22:00:54",
+    "lane": 12,
+    "reference_run": "20261023-212155-fbe646",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "profile": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 2
+      }
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261023-215444-de68bb",
+    "index": 2,
+    "verdict": "warn",
+    "date": "2026-10-23T22:02:31",
+    "lane": 12,
+    "reference_run": "20261023-212155-fbe646",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "profile": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 2
+      }
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

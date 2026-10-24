@@ -1,0 +1,31 @@
+# Workshop Profiles (2433887112), classes S, O.
+#
+# What it does: every Duplicant-operated building (manually operated ones, fabricators, and
+# the ranching, farming and power control stations by default; a PLib option lists more) gets
+# a "Workshop Profile" side screen listing Public and each Duplicant: clicking one toggles
+# whether that Duplicant may work there. Its errands then carry a precondition ("Not allowed by
+# Workshop Profile") that keeps the others away.
+# How a player reaches it: selecting such a building, its Workshop Profile side screen.
+# What changes: who operates the building.
+#
+# The research station (manually operated) is selected; its side screen lists Public and the
+# three Duplicants (Gizmo, Nikola, Travaldo), all assigned. Clicking Nikola's row leaves the
+# station open to the other two only.
+from: early-base
+mods: [2433887112]
+steps:
+  - driver: {camera.set: {cell: [128, 208], ortho: 8}}
+  - click_world: {cell: [127, 207], select: ResearchCenter}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_wait: {path: "**/WorkshopProfileSideScreen", cond: stable}
+  - expect_state:
+      "selected:WorkshopProfile.IsPublicAllowed()": true
+  - ui_dump: {name: profile, root: "**/WorkshopProfileSideScreen"}
+  - expect_ui:
+      "**/WorkshopProfileSideScreen/**/Rows/AssignableSideScreenRow*[1]/CrewPortrait/TitleColumnContainer/TitleLabel": {text: Nikola}
+  - click: {ui: "**/WorkshopProfileSideScreen/**/Rows/AssignableSideScreenRow*", index: 1}
+  - expect_state:
+      "selected:WorkshopProfile.IsPublicAllowed()": false
+      "selected:WorkshopProfile.allowIDs.Count": 2
+  - expect_ui:
+      "**/WorkshopProfileSideScreen/**/Rows/*/AssignmentText": {any_text: "-"}

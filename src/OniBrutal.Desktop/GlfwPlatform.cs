@@ -289,14 +289,24 @@ namespace OniBrutal.Desktop
         bool pumping;
         readonly List<Action> pumped = new();
 
+        // Inside a GLFW callback, or the frame's own poll: GLFW must not be polled from a
+        // callback, and what a callback runs may log, which pumps (MainThreadPump).
+        int inGlfw;
+
         void Report(Action report)
         {
             if (pumping) pumped.Add(report);
-            else report();
+            else
+            {
+                inGlfw++;
+                try { report(); }
+                finally { inGlfw--; }
+            }
         }
 
         public void PumpEvents()
         {
+            if (pumping || inGlfw > 0) return;
             pumping = true;
             try
             {
@@ -312,13 +322,21 @@ namespace OniBrutal.Desktop
         {
             // What came in while the last frame pumped messages, in the order it came, then the
             // messages since.
-            if (pumped.Count > 0)
+            inGlfw++;
+            try
             {
-                var reports = pumped.ToArray();
-                pumped.Clear();
-                foreach (var report in reports) report();
+                if (pumped.Count > 0)
+                {
+                    var reports = pumped.ToArray();
+                    pumped.Clear();
+                    foreach (var report in reports) report();
+                }
+                Glfw.PollEvents();
             }
-            Glfw.PollEvents();
+            finally
+            {
+                inGlfw--;
+            }
             framebufferSize = window.FramebufferSize;
             if (!scripted) FollowCursorOutside();
             return !closeRequested;

@@ -140,7 +140,9 @@ namespace OniBrutal.Assets.Shaders
         }
 
         /// The common parameters and a variant's blob together (common ones first). Buffers of the
-        /// same name are merged, the blob's size and members after the common ones'.
+        /// same name are merged, the blob's members after the common ones', with the blob's size:
+        /// the common size is the pass's largest variant's (9 Metal programs of the game have a
+        /// smaller buffer than their common parameters record; a blob's is never past the MSL's).
         public static ShaderParameters Merge(ShaderParameters common, ShaderParameters variant)
         {
             var p = new ShaderParameters();
@@ -155,7 +157,7 @@ namespace OniBrutal.Assets.Shaders
                         var members = new ShaderConstant[prior.Members.Length + cb.Members.Length];
                         prior.Members.CopyTo(members, 0);
                         cb.Members.CopyTo(members, prior.Members.Length);
-                        p.ConstantBuffers[at] = new ShaderConstantBuffer(cb.Name, Math.Max(prior.Size, cb.Size), members);
+                        p.ConstantBuffers[at] = new ShaderConstantBuffer(cb.Name, cb.Size, members);
                     }
                     else
                     {

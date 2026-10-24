@@ -78,11 +78,13 @@ namespace OniBrutal.Assets.Tests
             common.Textures.Add(new ShaderTextureParameter("_MainTex", 0, 0, 2, false));
             common.ConstantBufferBindings.Add(new ShaderBufferParameter("FGlobals", 0, 1));
             var blob = ShaderParameters.Read(new ShaderBlobWriter().UInt(ShaderParameters.Magic).Int(2).Buffer("", 0, 0).Int(0)
-                .Buffer("FGlobals", 32, 1).Member("_Cutoff", 0, 1, 1, false, 0, 16).Int(0)
+                .Buffer("FGlobals", 20, 1).Member("_Cutoff", 0, 1, 1, false, 0, 16).Int(0)
                 .Int(1).Texture("_AlphaTex", 1, 1, 2).ToArray());
             var p = ShaderParameters.Merge(common, blob);
             Assert.Equal(["FGlobals", ""], p.ConstantBuffers.Select(b => b.Name));
             Assert.Equal(["_Color", "_Cutoff"], p.Buffer("FGlobals")!.Members.Select(m => m.Name));
+            // The variant's size: the common one is the pass's largest variant's.
+            Assert.Equal(20, p.Buffer("FGlobals")!.Size);
             Assert.Equal(["_MainTex", "_AlphaTex"], p.Textures.Select(t => t.Name));
             Assert.Single(p.ConstantBufferBindings);
         }
@@ -130,6 +132,22 @@ namespace OniBrutal.Assets.Tests
             Assert.Throws<InvalidDataException>(() => table.Get(2));
             Assert.Equal(ShaderCompilerPlatform.Metal, GpuProgramTypes.PlatformOf(GpuProgramTypes.MetalVertex));
             Assert.Equal(ShaderCompilerPlatform.OpenGLCore, GpuProgramTypes.PlatformOf(GpuProgramTypes.GLCore43));
+        }
+
+        [Fact]
+        public void MslStructsAreLaidOutByMetalsRules()
+        {
+            const string source = "struct FGlobals_Type\n{\n    float4 _Color;\n    float _Cutoff;\n    float _Weights[3];\n    float3 _Dir;\n    float _After;\n"
+                + "    packed_float3 _Packed;\n    int _Count;\n    float2 _Uv;\n    float3 _Offsets[2];\n    float4 hlslcc_mtx4x4_M[4];\n};\n"
+                + "struct Mtl_FragmentIn\n{\n    float2 TEXCOORD0 [[ user(TEXCOORD0) ]] ;\n};\n";
+            var layouts = MslStructs.Layouts(source);
+            var s = layouts["FGlobals_Type"];
+            Assert.Equal([0, 16, 20, 32, 48, 52, 64, 72, 80, 112], s.Select(m => m.Offset));
+            Assert.Equal(4, s[2].Stride);
+            Assert.Equal(16, s[8].Stride);
+            Assert.Equal(176, MslStructs.SizeOf(s));
+            // A struct of other members (stage inputs) is not laid out.
+            Assert.False(layouts.ContainsKey("Mtl_FragmentIn"));
         }
 
         /// Every Metal program and parameter blob of the macOS build decodes (the counts are the

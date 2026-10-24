@@ -254,7 +254,7 @@ namespace OniBrutal.Desktop.Gl
             }
         }
 
-        static void Classify(UniformBinding u, string name)
+        internal static void Classify(UniformBinding u, string name)
         {
             const string matrixPrefix = "hlslcc_mtx4x4";
             if (name.StartsWith(matrixPrefix, StringComparison.Ordinal))
@@ -404,7 +404,7 @@ namespace OniBrutal.Desktop.Gl
         static bool IsUint(uint type) => type is UnsignedIntType or UintVec2 or UintVec3 or UintVec4;
 
         /// Values as floats, `count` elements of `stride` floats (vec4 slots).
-        static int Resolve(UniformBinding u, DrawInputs d, Span<float> o)
+        internal static int Resolve(UniformBinding u, DrawInputs d, Span<float> o)
         {
             var cam = d.Camera;
             if (u.IsMatrix)

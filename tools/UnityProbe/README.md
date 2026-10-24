@@ -236,6 +236,14 @@ With `PROBE_SCENARIO=floatprec` only the float-precision probe runs (`FloatPreci
 float32 and double results differ, each line saying which one the player gave. Its header
 records what it measured: the original rounds float arithmetic to float32 only on stores.
 
+With `PROBE_SCENARIO=convert` only the conversion probe runs (`Conversions.cs`, lines `CV …`, at
+mod load, a second): NaN, the infinities and values at and beyond the edges of every integer
+type, as float32 and float64, through each unchecked IL conversion (conv.i1 to conv.u8, conv.i,
+conv.u), each checked one (conv.ovf.*), Convert.ToXxx, Math.Round and Math.Floor then (int), and
+Unity's Mathf.RoundToInt/FloorToInt/CeilToInt, Vector2Int/Vector3Int's and Color32 from Color.
+Check the rule with `tools/UnityProbe/cv-check.py rule LOG`, and compare the players with
+`cv-check.py diff ORIG OURS`. ARCHITECTURE D29 records what it measured.
+
 With `PROBE_SCENARIO=findorder` only the find-order probe runs (`FindOrder.cs`, lines `FO …`, 10 s
 into the main menu): the order of `Resources.FindObjectsOfTypeAll`. It logs every `LocText` the
 call returns (instance id, scene, activity, pivot, path) and whether the ids ascend, then

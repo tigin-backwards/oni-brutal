@@ -85,6 +85,12 @@ namespace SemanticsProbe
                 FloatPrecision.Run();
                 return;
             }
+            if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "convert")
+            {
+                Rec.Log("=== values: conversions");
+                Conversions.Run();
+                return;
+            }
             if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "statics")
             {
                 Rec.Log("=== values: statics");

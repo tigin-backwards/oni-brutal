@@ -361,6 +361,11 @@ what it logs:
 - `matmul` (`MatrixMath.cs`, `MM` and `MMS`, at mod load): Matrix4x4's products and inverse to
   the bit, and the inverse of singular and near-singular matrices;
   `mm-check.py rule LOG` tests candidate formulas, `mm-check.py diff ORIG OURS` compares players.
+- `projection` (`ProjectionMath.cs`, `PJ`, at mod load): `Matrix4x4.Perspective`, `Ortho`,
+  `Frustum`, `LookAt`, `Inverse3DAffine`, `Rotate`, `TRS` and `Quaternion.AngleAxis` to the bit,
+  degenerate inputs and the look-at and axis fallbacks' boundaries included, and cameras'
+  matrices and conversions (`WorldToScreenPoint` and the rest); `pj-check.py rule LOG` tests
+  Mesa's, GLU's and the measured formulas, `pj-check.py diff ORIG OURS` compares players.
 - `transform` (`TransformMath.cs`, `TM`, `TN`, `TR` and others, at mod load): transform
   matrices, rotations, scales, points and RectTransform corners of logged hierarchies to the bit;
   `tm-check.py rule LOG` and `tm-check.py diff ORIG OURS` read the `TM` lines; the file's header

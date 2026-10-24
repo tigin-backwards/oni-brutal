@@ -146,6 +146,11 @@ namespace SemanticsProbe
                 MatrixMath.Run();
                 return;
             }
+            if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "projection")
+            {
+                ProjectionMath.Run();
+                return;
+            }
             if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "vitalsopen")
             {
                 VitalsOpen.Install(harmony);

@@ -103,6 +103,23 @@ With `PROBE_SCENARIO=pointermove` only the pointer-move probe runs (`PointerMove
 hierarchy of handlers. It logs every `OnPointerMove`, `OnPointerEnter` and `OnPointerExit` with
 its event data. `ugui.md` ("Pointer move events") records what it measured.
 
+With `PROBE_SCENARIO=layoutcull` only the layout-and-cull probe runs (`LayoutCull.cs`, lines `LC
+…`, 10 s into the main menu, about a minute). `LC lay` lines follow a `VerticalLayoutGroup`
+(a subclass counting its layout calls) with three children through one change at a time:
+- a child's position, local position, scale, size, pivot or anchors, the group's position or
+  size, or a drag that sets a child's position every frame;
+- then a re-layout from elsewhere;
+- across fitters, child size control and `ignoreLayout`.
+
+Then come other ways to re-lay out, nested groups, and when `OnRectTransformDimensionsChange`
+arrives for rects changed in `Canvas.willRenderCanvases`. `LC cull` lines give the offsets
+across a `RectMask2D`'s edge at which `Image`s and `TextMeshProUGUI` texts of several kinds are
+culled. These are at canvas scale 1 and 1.032, with padding and softness, each with its rect and
+mesh bounds. Then come when the cull is re-evaluated, and a copy of Modify Difficulty Settings'
+toggle row. Compare the players with `tools/UnityProbe/lc-check.py diff ORIG OURS
+[--positions]`. `ugui.md` ("Moved children of layout groups", "RectMask2D culling") records what
+it measured.
+
 To run one of them in a player without the e2e runner's lanes, give it a scratch profile
 (`XDG_CONFIG_HOME`) whose `mods/Local/SemanticsProbe/` holds the DLL and the two yaml files, with
 the `mods.json` entry described above. Run the original player through `scripts/e2e.py`'s

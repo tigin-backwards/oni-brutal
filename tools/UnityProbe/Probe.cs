@@ -53,6 +53,11 @@ namespace SemanticsProbe
                 go.AddComponent<PointerMove>();
                 return;
             }
+            if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "layoutcull")
+            {
+                go.AddComponent<LayoutCull>();
+                return;
+            }
             if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "floatprec")
             {
                 Rec.Log("=== values: float precision");

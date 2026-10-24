@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2432751162-wild-planter-box.yaml",
+ "mods": [
+  "2432751162"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Wild Planter Box built in the pit and selected; Mealwood picked in its planter side screen and planted by a Duplicant grows there as a wild plant (not replanted)",
+ "updated": "2026-10-23",
+ "commit": "397acff",
+ "mod_dlls": {
+  "2432751162": {
+   "WildPlanterBox.dll": "7c6c03bb0c2b3644625b3b094336c555eaed945daf16292be4e2c5c65fe0d522"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-183417-5e8543",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T20:14:13",
+    "lane": 12,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-213047-94e53a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T21:50:19",
+    "lane": 13,
+    "reference_run": "20261023-183417-5e8543",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-213047-94e53a",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T21:55:06",
+    "lane": 13,
+    "reference_run": "20261023-183417-5e8543",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -1,0 +1,37 @@
+# Wild Planter Box (2432751162), classes B, O.
+#
+# What it does: adds the Wild Planter Box and the Wild Farm Tile to the Food menu (researched
+# with Agriculture): a planter box and a farm tile of farmable material that take crop seeds
+# but accept no irrigation or fertilizer; what grows in them counts as a wild plant (a postfix
+# on ReceptacleMonitor.SetReceptacle clears its "replanted" flag), growing slowly without
+# needing anything. Wild plants in them count for the rooms' wild-plant rules. PLib options
+# give them a power draw and a heat output (0 by default).
+# How a player reaches it: the build menu (Food), then the box's seed side screen.
+# What changes: a wild crop where the box stands.
+#
+# setup grants Agriculture, spawns dirt and drops a Mealwood seed on the floor of the room
+# west of the printing pod. The box stands at the room's west end; the seed is picked in its
+# side screen, a Duplicant plants it, and the Mealwood in the box is wild.
+from: early-base
+mods: [2432751162]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"Agriculture\")", method: Purchased}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Dirt\").substance", method: SpawnResource, args: [[112.5, 207.5, -12], 100, 300, 255, 0]}}
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131757, 0, 0, \"BasicSingleHarvestPlantSeed\", \"Ore\")", method: SetActive, args: [true]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"Agriculture\").unlockedItemIDs": {contains: WildPlanterBox}
+      "Assets.GetPrefab(\"WildPlanterBox\").GetComponent<PlantablePlot>.AcceptsIrrigation": false
+  - build: {prefab: WildPlanterBox, at: [106, 206], material: Dirt}
+  - run: {seconds: 900, until: {buildings: {WildPlanterBox: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [110, 208], ortho: 8}}
+  - click_world: {cell: [106, 206], select: WildPlanterBox}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui: {"**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Wild Planter Box"}}
+  - ui_wait: {path: "**/Config Tab - body instance/PlanterSideScreen", cond: stable}
+  - click: {text: "Mealwood", under: "**/PlanterSideScreen"}
+  - click: {ui: "**/PlanterSideScreen/Contents/ButtonArea/PlaceButton"}
+  - run: {seconds: 600}
+  - expect_state:
+      "all:WildPlanterBox::[0].GetComponent<PlantablePlot>.Occupant.GetComponent<KPrefabID>.PrefabTag.Name": BasicSingleHarvestPlant
+      "all:WildPlanterBox::[0].GetComponent<PlantablePlot>.Occupant.GetComponent<ReceptacleMonitor>.Replanted": false

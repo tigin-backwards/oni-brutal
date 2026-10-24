@@ -1,0 +1,59 @@
+# Vanilla Consumables screen: the food columns scroll horizontally in every row together, and
+# each Duplicant's row shows its portrait.
+#
+# The table scrolls only with 12 or more discovered foods, so setup discovers the base game's
+# foods. Every row has its own horizontal ScrollRect; a change in one sets the others to the
+# same normalized position (TableScreen.SetScrollersDirty). The scroll is driven twice: a
+# click on the header scrollbar's track right of the handle (the original centres the handle
+# there, value 0.5), then the wheel over a Duplicant's row.
+#
+# The `before` shot shows the portraits (Klei/BatchedAnimationUI in a nested canvas).
+from: early-base
+setup:
+  - driver: {setup.call: {target: DiscoveredResources.Instance, method: Discover, args: [MushBar, Edible]}}
+  - driver: {setup.call: {target: DiscoveredResources.Instance, method: Discover, args: [BasicPlantFood, Edible]}}
+  - driver: {setup.call: {target: DiscoveredResources.Instance, method: Discover, args: [FieldRation, Edible]}}
+  - driver: {setup.call: {target: DiscoveredResources.Instance, method: Discover, args: [PrickleFruit, Edible]}}
+  - driver: {setup.call: {target: DiscoveredResources.Instance, method: Discover, args: [Meat, Edible]}}
+  - driver: {setup.call: {target: DiscoveredResources.Instance, method: Discover, args: [CookedMeat, Edible]}}
+  - driver: {setup.call: {target: DiscoveredResources.Instance, method: Discover, args: [FriedMushBar, Edible]}}
+  - driver: {setup.call: {target: DiscoveredResources.Instance, method: Discover, args: [GrilledPrickleFruit, Edible]}}
+  - driver: {setup.call: {target: DiscoveredResources.Instance, method: Discover, args: [Pancakes, Edible]}}
+  - driver: {setup.call: {target: DiscoveredResources.Instance, method: Discover, args: [BasicPlantBar, Edible]}}
+  - driver: {setup.call: {target: DiscoveredResources.Instance, method: Discover, args: [ColdWheatBread, Edible]}}
+  - driver: {setup.call: {target: DiscoveredResources.Instance, method: Discover, args: [CookedEgg, Edible]}}
+  - driver: {setup.call: {target: DiscoveredResources.Instance, method: Discover, args: [RawEgg, Edible]}}
+  - driver: {setup.call: {target: DiscoveredResources.Instance, method: Discover, args: [Lettuce, Edible]}}
+  - driver: {setup.call: {target: DiscoveredResources.Instance, method: Discover, args: [FishMeat, Edible]}}
+  - driver: {setup.call: {target: DiscoveredResources.Instance, method: Discover, args: [CookedFish, Edible]}}
+  - driver: {setup.call: {target: DiscoveredResources.Instance, method: Discover, args: [Burger, Edible]}}
+  - driver: {setup.call: {target: DiscoveredResources.Instance, method: Discover, args: [BerryPie, Edible]}}
+  - driver: {setup.call: {target: DiscoveredResources.Instance, method: Discover, args: [SpiceBread, Edible]}}
+  - driver: {setup.call: {target: DiscoveredResources.Instance, method: Discover, args: [Salsa, Edible]}}
+  - driver: {setup.call: {target: DiscoveredResources.Instance, method: Discover, args: [FruitCake, Edible]}}
+  - driver: {setup.call: {target: DiscoveredResources.Instance, method: Discover, args: [Curry, Edible]}}
+steps:
+  - open: {management: consumables}
+  - ui_wait: {path: "**/ConsumablesTableScreen*", cond: stable}
+  - ui_dump: {name: before, root: "**/ConsumablesTableScreen*"}
+  - shot: {name: before}
+  - expect_state:
+      "ui:**/ConsumablesTableScreen/HeaderContent/prefab_row_header/Scroller::GetComponent<KScrollRect>.horizontalNormalizedPosition": "< 0.001"
+      "ui:**/ConsumablesTableScreen/**/Content/Nikola/Scroller::GetComponent<KScrollRect>.horizontalNormalizedPosition": "< 0.001"
+  # A press on the header's scrollbar track, right of the handle: one page to the right.
+  - click: {ui: "**/ConsumablesTableScreen/HeaderContent/prefab_row_header/Border/HorizontalScrollbar"}
+  - ui_wait: {path: "**/ConsumablesTableScreen/**/Content/Nikola/Scroller/Content", cond: stable}
+  - expect_state:
+      "ui:**/ConsumablesTableScreen/HeaderContent/prefab_row_header/Scroller::GetComponent<KScrollRect>.horizontalNormalizedPosition": {save_as: header}
+  - expect_state:
+      "ui:**/ConsumablesTableScreen/HeaderContent/prefab_row_header/Scroller::GetComponent<KScrollRect>.horizontalNormalizedPosition": "> 0.1"
+      "ui:**/ConsumablesTableScreen/**/Content/defaultRow/Scroller::GetComponent<KScrollRect>.horizontalNormalizedPosition": ">= header - 0.001"
+      "ui:**/ConsumablesTableScreen/**/Content/Nikola/Scroller::GetComponent<KScrollRect>.horizontalNormalizedPosition": ">= header - 0.001"
+      "ui:**/ConsumablesTableScreen/**/Content/Travaldo/Scroller::GetComponent<KScrollRect>.horizontalNormalizedPosition": "<= header + 0.001"
+  - ui_dump: {name: after-track, root: "**/ConsumablesTableScreen*"}
+  - shot: {name: after-track}
+  # The wheel over a Duplicant's row scrolls that row; the others follow.
+  - scroll: {at: "**/ConsumablesTableScreen/**/Content/Nikola/Scroller", notches: -10}
+  - ui_wait: {path: "**/ConsumablesTableScreen/HeaderContent/prefab_row_header/Scroller/Content", cond: stable}
+  - ui_dump: {name: after-wheel, root: "**/ConsumablesTableScreen*"}
+  - shot: {name: after-wheel}

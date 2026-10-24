@@ -190,12 +190,9 @@ namespace OniBrutal.Tests
             void OnRectTransformDimensionsChange() => Received.Add(InUpdate);
         }
 
-        // As measured in the original player (PerfProbe layout.txt on the main menu's news tiles):
-        // a RectTransform resized or moved during the canvas update (uGUI's layout pass) gets
-        // OnRectTransformDimensionsChange then and again once the update is over, so a layout
-        // element that changes its preferred size on it can ask for another layout pass.
-        [Fact]
-        public void ARectChangedDuringTheCanvasUpdateHearsOfItAgainAfterIt()
+        /// The messages a rect gets when its handler of Canvas.willRenderCanvases changes it
+        /// once, through change, as (inUpdate) flags: in that frame and in the next.
+        static (bool[] InFrame, bool[] Next) ChangedInTheCanvasUpdate(Action<RectTransform> change)
         {
             OniBrutal.Engine.UI.CanvasSystem.Install();
             var canvas = new GameObject("Canvas", typeof(RectTransform));
@@ -205,18 +202,59 @@ namespace OniBrutal.Tests
             var listener = child.AddComponent<DimensionsListener>();
             Frame();
             listener.Received.Clear();
-            Canvas.WillRenderCanvases resize = () =>
+            Canvas.WillRenderCanvases handler = () =>
             {
                 DimensionsListener.InUpdate = true;
-                ((RectTransform)child.transform).sizeDelta += new Vector2(10f, 0f);
+                change((RectTransform)child.transform);
                 DimensionsListener.InUpdate = false;
             };
-            Canvas.willRenderCanvases += resize;
+            Canvas.willRenderCanvases += handler;
             try { Frame(); }
-            finally { Canvas.willRenderCanvases -= resize; }
-            Assert.Equal([true, false], listener.Received);
+            finally { Canvas.willRenderCanvases -= handler; }
+            var inFrame = listener.Received.ToArray();
+            listener.Received.Clear();
             Frame();
-            Assert.Equal([true, false], listener.Received);
+            return (inFrame, listener.Received.ToArray());
+        }
+
+        // Measured in the original player (docs/cleanroom/ugui.md, "Moved children of layout
+        // groups", rule 4): a rect resized or re-pivoted from a willRenderCanvases handler hears
+        // of it once, from the setter, and nothing after the canvas update.
+        [Fact]
+        public void ARectResizedDuringTheCanvasUpdateHearsOfItOnceFromTheSetter()
+        {
+            var (inFrame, next) = ChangedInTheCanvasUpdate(rt => rt.sizeDelta += new Vector2(10f, 0f));
+            Assert.Equal([true], inFrame);
+            Assert.Empty(next);
+        }
+
+        [Fact]
+        public void ARectRepivotedDuringTheCanvasUpdateHearsOfItOnceFromTheSetter()
+        {
+            var (inFrame, next) = ChangedInTheCanvasUpdate(rt => rt.pivot = new Vector2(0f, 1f));
+            Assert.Equal([true], inFrame);
+            Assert.Empty(next);
+        }
+
+        // The same section: a rect moved there (anchoredPosition, localPosition, localScale)
+        // gets no message at all.
+        [Theory]
+        [InlineData("anchoredPosition")]
+        [InlineData("localPosition")]
+        [InlineData("localScale")]
+        public void ARectMovedDuringTheCanvasUpdateHearsNothing(string property)
+        {
+            var (inFrame, next) = ChangedInTheCanvasUpdate(rt =>
+            {
+                switch (property)
+                {
+                    case "anchoredPosition": rt.anchoredPosition += new Vector2(25f, -5f); break;
+                    case "localPosition": rt.localPosition += new Vector3(25f, -5f, 0f); break;
+                    default: rt.localScale = new Vector3(2f, 0.5f, 1f); break;
+                }
+            });
+            Assert.Empty(inFrame);
+            Assert.Empty(next);
         }
 
         [Fact]

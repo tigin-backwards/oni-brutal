@@ -287,44 +287,15 @@ namespace OniBrutal.Engine.UI
 
         // ----- Per-frame update -----
 
-        /// Set while Canvas.preWillRenderCanvases and willRenderCanvases run (uGUI's layout and
-        /// graphic rebuilds).
-        public static bool InCanvasUpdate { get; private set; }
-
-        static readonly List<RectTransformNative> changedInUpdate = new();
-        static readonly HashSet<RectTransformNative> changedSet = new();
-
-        /// A RectTransform resized or moved during the canvas update.
-        public static void NoteChangedInUpdate(RectTransformNative rect)
-        {
-            if (changedSet.Add(rect)) changedInUpdate.Add(rect);
-        }
-
-        /// Canvas.preWillRenderCanvases and willRenderCanvases. A RectTransform resized or moved
-        /// while they run gets OnRectTransformDimensionsChange again once they are over, as
-        /// measured in the original player (PerfProbe layout.txt): a layout element whose
-        /// preferred size follows its rect (the main menu's news tiles) can then ask for the
-        /// layout pass that its change during the pass could not.
+        /// Canvas.preWillRenderCanvases and willRenderCanvases (uGUI's layout and graphic
+        /// rebuilds). Nothing is sent to the rects changed while they run once they are over: a
+        /// RectTransform hears of a change of its size from the change itself, and of a move not
+        /// at all (measured in the original player, docs/cleanroom/ugui.md "Moved children of
+        /// layout groups").
         public static void RunCanvasUpdate()
         {
-            InCanvasUpdate = true;
-            try
-            {
-                Canvas.SendPreWillRenderCanvases();
-                Canvas.SendWillRenderCanvases();
-            }
-            finally
-            {
-                InCanvasUpdate = false;
-            }
-            if (changedInUpdate.Count == 0) return;
-            var changed = changedInUpdate.ToArray();
-            if (stats) statsRenotified += changed.Length;
-            changedInUpdate.Clear();
-            changedSet.Clear();
-            foreach (var rect in changed)
-                if (!rect.Destroyed && rect.GameObject.ActiveInHierarchy)
-                    Messages.SendToComponents(rect.GameObject, s => s.OnRectTransformDimensionsChange);
+            Canvas.SendPreWillRenderCanvases();
+            Canvas.SendWillRenderCanvases();
         }
 
         static void Update()
@@ -338,8 +309,8 @@ namespace OniBrutal.Engine.UI
                 statsTicks += System.Diagnostics.Stopwatch.GetTimestamp() - start;
                 if (++statsFrames == 600)
                 {
-                    EngineLog.Engine($"canvas build: {statsTicks * 1000.0 / System.Diagnostics.Stopwatch.Frequency / statsFrames:F3} ms a frame, {statsVisits / statsFrames} objects walked a frame, {statsRenotified / (double)statsFrames:F1} rects told of changes after the update, {statsRenumbered / (double)statsFrames:F2} sort roots renumbered");
-                    statsFrames = 0; statsTicks = 0; statsVisits = 0; statsRenotified = 0; statsRenumbered = 0;
+                    EngineLog.Engine($"canvas build: {statsTicks * 1000.0 / System.Diagnostics.Stopwatch.Frequency / statsFrames:F3} ms a frame, {statsVisits / statsFrames} objects walked a frame, {statsRenumbered / (double)statsFrames:F2} sort roots renumbered");
+                    statsFrames = 0; statsTicks = 0; statsVisits = 0; statsRenumbered = 0;
                 }
             }
             else Build();
@@ -573,7 +544,7 @@ namespace OniBrutal.Engine.UI
         /// ONI_CANVAS_STATS=1: the build's time and the objects it walks, a frame, every 600 frames.
         static readonly bool stats = Environment.GetEnvironmentVariable("ONI_CANVAS_STATS") == "1";
         static int statsFrames;
-        static long statsTicks, statsVisits, statsRenotified, statsRenumbered;
+        static long statsTicks, statsVisits, statsRenumbered;
         static long skipsVerified, skipsWrong;
 
         /// A skipped hidden subtree, as the walk would visit it: every element numbered by the

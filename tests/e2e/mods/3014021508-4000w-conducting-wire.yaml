@@ -1,0 +1,33 @@
+# 4000w conducting wire (3014021508), class P.
+#
+# What it does: a prefix on Wire.GetMaxWattageAsFloat raises the Conductive Wire's rating
+# (Max2000, 2 kW in the game) to 4 kW; the other ratings keep the game's values (Wire 1 kW,
+# Heavi-Watt 20 kW, Conductive Heavi-Watt 50 kW).
+# How a player reaches it: building Conductive Wire (Power menu, researched with Low-Resistance
+# Conductors).
+# What changes: a Conductive Wire circuit carries 4 kW before it overloads.
+#
+# setup grants Low-Resistance Conductors and spawns steel; three cells of Conductive
+# Wire are built in the dug-out corridor west of the printing pod and one is selected: its
+# info panel reads "Max Power: 4 kW".
+from: early-base
+mods: [3014021508]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"PrettyGoodConductors\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Steel\").substance", method: SpawnResource, args: [[114.5, 207.5, -12], 100, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Wire.GetMaxWattageAsFloat(\"Max1000\")": 1000
+      "Wire.GetMaxWattageAsFloat(\"Max2000\")": 4000
+      "Wire.GetMaxWattageAsFloat(\"Max20000\")": 20000
+  - build: {prefab: WireRefined, cells: [[110, 207], [111, 207], [112, 207]], material: Steel}
+  - expect: {blueprints: {WireRefined: 3}}
+  - run: {seconds: 900, until: {buildings: {WireRefined: 3}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [111, 208], ortho: 8}}
+  - click_world: {cell: [111, 207], select: WireRefined}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<Wire>.MaxWattageRating": Max2000
+  - expect_ui:
+      "**/DetailsScreen/**/SimpleInfoScreen/**/Descriptors/DescLabel": {any_text: "~: 4 kW"}

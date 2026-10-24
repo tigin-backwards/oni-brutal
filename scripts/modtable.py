@@ -127,6 +127,9 @@ unplayed = {
     '3430682737': 'not played: a worldgen mod (the Voidria cluster); worldgen is out of scope',
     '3599672848': 'not played: textures for True Tiles, no code of its own; it does nothing without that mod',
     '3746576803': 'not played: Duplicant personalities for Dupery Fixed, no code of its own; it does nothing without that mod',
+    # Batch 17.
+    '1873884303': 'not played: it supports the base game only (`supportedContent: VANILLA_ID`, and its OnLoad stops on Spaced Out), and every spec fixture is a Spaced Out colony',
+    '3635632392': 'not played: a multiplayer mod (its own LiteNetLib client and server); a session needs two players on two Steam accounts',
 }
 broken = {
     '1715248368': 'broken upstream: patches `Deconstructable.TriggerDestroy`, which now has two overloads',
@@ -185,6 +188,11 @@ broken.update({
 # Found by the e2e specs of batch 13: the spec fails the same way in the original.
 broken.update({
     '1703400426': 'broken upstream: its DebugHandler.OnKeyDown prefix consumes Action 173, which the game\'s Action enum now gives to SreenShot32x (the debug toggle is 174), so with debug mode on Backspace still runs the game\'s debug toggle (its paint screen opens) and reveals the map (spec tests/e2e/mods/1703400426-debug-does-not-discover-map.yaml)',
+})
+# Found by the e2e specs of batch 17: the spec fails the same way in the original.
+broken.update({
+    '2872099618': 'broken upstream: its SpaceBomb\'s BuildingComplete.OnSpawn postfix calls `SimMessages.Dig(int, int, bool)`, which the game no longer has, so a finished bomb deletes itself and marks its background as space but digs nothing (spec tests/e2e/mods/2872099618-bomb-space.yaml)',
+    '2367992483': 'broken upstream: its prefix names the 19-parameter `EntityTemplates.ExtendEntityToBasicPlant` of 2021 (the game\'s has 20); Harmony lists the method as patched and the game builds its plants through it, yet the prefix never runs, so no plant data or drop times are written or read (spec tests/e2e/mods/2367992483-automatic-harvesting.yaml)',
 })
 # Fails to load in the original only.
 original_only = {

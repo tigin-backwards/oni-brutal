@@ -1,0 +1,59 @@
+{
+ "spec": "mods/1904543022-old-liquid-reservoir.yaml",
+ "mods": [
+  "1904543022"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Liquid Reservoir built from a build order uses the mod's old animation; a paused world shot of it matches the original's",
+ "updated": "2026-10-24",
+ "commit": "676516a",
+ "mod_dlls": {
+  "1904543022": {
+   "OldLiquidReservoir.dll": "fddae5d7a1d761fa35fe40c67611463379c69b258b5d7cf02dc34fa02e343bfd"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-054739-94feff",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T05:47:40",
+    "lane": 13,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-062020-d5d81a",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T06:20:21",
+    "lane": 13,
+    "reference_run": "20261024-054739-94feff",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "reservoir": 0.031369
+    }
+   },
+   {
+    "run": "20261024-062020-d5d81a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T06:20:20",
+    "lane": 12,
+    "reference_run": "20261024-054739-94feff",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "reservoir": 0.008613
+    }
+   }
+  ]
+ }
+}

@@ -1,0 +1,59 @@
+{
+ "spec": "mods/2930191391-extra-moulding-skins.yaml",
+ "mods": [
+  "2930191391"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Corner Moulding's Blueprint tab lists the mod's six facades, and a click on one gives it that look, as in the original",
+ "updated": "2026-10-24",
+ "commit": "676516a",
+ "mod_dlls": {
+  "2930191391": {
+   "CrownMouldSkin.dll": "afe6e1cdd21394525434791f582ed986b5ba4b1d29a9c08b05d08ad96b8ff30d"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-054739-94feff",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T05:49:53",
+    "lane": 13,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-062641-acdbd1",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T06:26:41",
+    "lane": 12,
+    "reference_run": "20261024-054739-94feff",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "facades": 3e-05
+    }
+   },
+   {
+    "run": "20261024-062641-acdbd1",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T06:26:42",
+    "lane": 13,
+    "reference_run": "20261024-054739-94feff",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "facades": 0.0
+    }
+   }
+  ]
+ }
+}

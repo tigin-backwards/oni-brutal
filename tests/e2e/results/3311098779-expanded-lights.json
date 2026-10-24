@@ -1,0 +1,59 @@
+{
+ "spec": "mods/3311098779-expanded-lights.yaml",
+ "mods": [
+  "3311098779"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the stock lamps carry the mod's light shapes and the Furniture menu lists the Tile Light, as in the original (no light is powered)",
+ "updated": "2026-10-24",
+ "commit": "676516a",
+ "mod_dlls": {
+  "3311098779": {
+   "ExpandedLights.dll": "113c6c5fc998adab5df608184736fbb46f8359873964f9753c48f5b94dbc356d"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-054739-94feff",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T05:56:21",
+    "lane": 13,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-063524-bb5e06",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T06:35:24",
+    "lane": 12,
+    "reference_run": "20261024-054739-94feff",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "furniture-menu": 0.0
+    }
+   },
+   {
+    "run": "20261024-063524-bb5e06",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T06:35:25",
+    "lane": 13,
+    "reference_run": "20261024-054739-94feff",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "furniture-menu": 0.0
+    }
+   }
+  ]
+ }
+}

@@ -1,0 +1,61 @@
+{
+ "spec": "mods/1974008313-thermo-sensor-tile.yaml",
+ "mods": [
+  "1974008313"
+ ],
+ "verdict": "failed",
+ "why": "a run of ours failed",
+ "findings": [],
+ "note": "a Thermo Sensor Tile built into the floor from a build order is solid and reads its temperature, as in the original",
+ "updated": "2026-10-24",
+ "commit": "676516a",
+ "mod_dlls": {
+  "1974008313": {
+   "TileTempSensor.dll": "db3bc6c68c88ab05ecf8e530b58fe2b30edcd64d574761eedd5763cdc9ca8afd"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-054739-94feff",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T05:50:38",
+    "lane": 12,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-062800-a2eb36",
+    "index": 2,
+    "verdict": "fail",
+    "date": "2026-10-24T06:28:01",
+    "lane": 13,
+    "reasons": [
+     "step start: Remote end closed connection without response"
+    ],
+    "reference_run": "20261024-054739-94feff",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-062800-a2eb36",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-24T06:28:00",
+    "lane": 12,
+    "reasons": [
+     "step 1: Db.Get().Techs.Get(\"HVAC\").unlockedItemIDs is [\"AirConditioner\", \"LogicTemperatureSensor\", \"GasConduitTemperatureSensor\", \"GasConduitElementSensor\", \"GasConduitRadiant\", \"GasReservoir\", \"GasLimitValve\"], wanted {'contains': 'TileTempSensor'} (it held in the original: the interaction has no e"
+    ],
+    "reference_run": "20261024-054739-94feff",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

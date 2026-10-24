@@ -1,0 +1,62 @@
+{
+ "spec": "mods/3347169088-underground-conduit.yaml",
+ "mods": [
+  "3347169088"
+ ],
+ "verdict": "failed",
+ "why": "a run of ours failed",
+ "findings": [],
+ "note": "a Liquid Receiver renamed in its title bar moves to a new channel, and the Liquid Sender joins it from the Channels side screen, as in the original",
+ "updated": "2026-10-24",
+ "commit": "676516a",
+ "mod_dlls": {
+  "3347169088": {
+   "PLib.dll": "bdd637dbef718cdd52e61c0a7177bd297864a50bac1583d2837a36ff3edf07db",
+   "UndergroundConduit.dll": "879087efee9da49d356a578e5e0f73bde7962dc3d962a34bc29bf58638ab77c1"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-060548-2e3b53",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T06:07:52",
+    "lane": 13,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-064033-a67ab7",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-24T06:40:33",
+    "lane": 12,
+    "reasons": [
+     "step start: Remote end closed connection without response"
+    ],
+    "reference_run": "20261024-060548-2e3b53",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-064033-a67ab7",
+    "index": 2,
+    "verdict": "fail",
+    "date": "2026-10-24T06:40:34",
+    "lane": 13,
+    "reasons": [
+     "step start: Remote end closed connection without response"
+    ],
+    "reference_run": "20261024-060548-2e3b53",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

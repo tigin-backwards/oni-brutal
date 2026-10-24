@@ -1,0 +1,33 @@
+{
+ "spec": "mods/2872099618-bomb-space.yaml",
+ "mods": [
+  "2872099618"
+ ],
+ "verdict": "pending",
+ "why": "the spec fails in the original: a broken spec, or a mod broken upstream",
+ "findings": [],
+ "note": "",
+ "updated": "2026-10-24",
+ "commit": "676516a",
+ "mod_dlls": {
+  "2872099618": {
+   "VacuumSpaceMod.dll": "0d08a1d48fe0ba9f958328cfc54672d1ca7c471f6fff25bd41a60e9a6d165ff0"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-060548-2e3b53",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-24T06:05:49",
+    "lane": 13,
+    "reasons": [
+     "step 7: cells:110,211..114,212::Grid.Mass.get_Item({cell}) is 6680.36535, wanted < 0.2 * ceiling"
+    ],
+    "signatures": 1
+   }
+  ],
+  "ours": []
+ }
+}

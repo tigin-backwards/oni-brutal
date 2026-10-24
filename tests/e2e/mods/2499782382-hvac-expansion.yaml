@@ -1,0 +1,35 @@
+# HVAC Expansion (2499782382), class B.
+#
+# What it does: adds four buildings to the Utilities menu: the Thermo Conditioner
+# (GasRefrigerationUnit, 2x2, 240 W, researched with HVAC) and the Thermo Aquacooler
+# (LiquidRefrigerationUnit, 2x2, 1.2 kW, Liquid Tuning) heat the gas or liquid piped through
+# them by up to 14 °C and cool their surroundings by as much heat; the Auto Condenser and Auto
+# Evaporator (2x3, 960 W, a new Refrigeration Cycle tech) condense piped gases into liquids
+# and evaporate piped liquids into gases. Their info panels list the heat they move and their
+# heating factor.
+# How a player reaches it: the build menu (Utilities); the research tree.
+# What changes: piped heaters, and phase changers.
+#
+# setup grants HVAC; a Thermo Conditioner is built in the dug-out corridor west of the printing
+# pod and selected: it heats its gas by 14 °C, and its info panel shows the mod's heating
+# factor line.
+from: early-base
+mods: [2499782382]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"HVAC\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"HVAC\").unlockedItemIDs": {contains: GasRefrigerationUnit}
+      "Db.Get().Techs.Get(\"RefrigerationCycle\").unlockedItemIDs": {contains: AutoCondesner}
+  - build: {prefab: GasRefrigerationUnit, at: [113, 206]}
+  - expect: {blueprints: {GasRefrigerationUnit: 1}}
+  - run: {seconds: 1500, until: {buildings: {GasRefrigerationUnit: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [114, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: GasRefrigerationUnit}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Thermo Conditioner"}
+      "**/DetailsScreen/**/SimpleInfoScreen/**/Descriptors/DescLabel": {any_text: "~Heating factor"}
+  - expect_state:
+      "selected:GetComponent<AirConditioner>.temperatureDelta": "== original"

@@ -1,0 +1,37 @@
+# Helium Extractor (1797000169), classes B, O.
+#
+# What it does: adds the Helium Extractor (3x4, 400 kg of metal ore, 420 W, operated by a
+# Duplicant) to the Refining menu, researched with Superheated Forging: piped natural gas
+# (0.5 kg/s by default) is split into helium (5 %) and propane (90 %), piped out of two
+# outputs, and sulfur (5 %), dropped. It enables the game's unused helium and propane
+# elements, makes propane a combustible gas, and lets the Natural Gas Generator, the Gourmet
+# Cooking Station and the Food Dehydrator burn any combustible gas. PLib options set the power,
+# the rate, no operator, and helium's real heat properties.
+# How a player reaches it: the build menu (Refining); the extractor's side screen and errand.
+# What changes: a source of helium and propane.
+#
+# setup grants Superheated Forging; a Helium Extractor is built in the dug-out corridor west of
+# the printing pod and selected: it turns 0.5 kg/s of natural gas into 0.025 kg/s of helium,
+# and the Natural Gas Generator burns any combustible gas.
+from: early-base
+mods: [1797000169]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"HighTempForging\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"HighTempForging\").unlockedItemIDs": {contains: HeliumExtractor}
+      "ElementLoader.FindElementByName(\"Propane\").disabled": false
+      "Assets.GetBuildingDef(\"MethaneGenerator\").BuildingComplete.GetComponent<EnergyGenerator>.formula.inputs[0].tag.Name": CombustibleGas
+  - build: {prefab: HeliumExtractor, at: [108, 206]}
+  - expect: {blueprints: {HeliumExtractor: 1}}
+  - run: {seconds: 1500, until: {buildings: {HeliumExtractor: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [110, 208], ortho: 8}}
+  - click_world: {cell: [109, 208], select: HeliumExtractor}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Helium Extractor"}
+  - expect_state:
+      "selected:GetComponent<ElementConverter>.consumedElements[0].MassConsumptionRate": 0.5
+      "selected:GetComponent<ElementConverter>.outputElements[1].elementHash": Helium
+      "selected:GetComponent<ElementConverter>.outputElements[1].massGenerationRate": 0.025

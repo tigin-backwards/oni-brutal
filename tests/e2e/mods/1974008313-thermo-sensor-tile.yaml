@@ -1,0 +1,36 @@
+# Thermo Sensor Tile (1974008313), class B.
+#
+# What it does: adds the Thermo Sensor Tile (TileTempSensor, a 1x1 solid tile of 50 kg of
+# refined metal) to the Automation menu after the Thermo Sensor, researched with HVAC: a floor
+# tile with the game's LogicTemperatureSensor (0 to 9999 K), so it reads the temperature of the
+# tile itself, which exchanges heat with the tiles around it, and sends a green or red signal
+# as the game's Thermo Sensor does.
+# How a player reaches it: the build menu (Automation); its threshold side screen.
+# What changes: a temperature sensor built into a floor.
+#
+# setup grants HVAC and spawns steel; a Thermo Sensor Tile is built into the corridor floor west
+# of the printing pod and selected: it is a solid tile, its side screen is the game's
+# temperature threshold screen, and it reads the tile's temperature.
+from: early-base
+mods: [1974008313]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"HVAC\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Steel\").substance", method: SpawnResource, args: [[114.5, 207.5, -12], 100, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"HVAC\").unlockedItemIDs": {contains: TileTempSensor}
+  - build: {prefab: TileTempSensor, at: [109, 206], material: Steel}
+  - expect: {blueprints: {TileTempSensor: 1}}
+  - run: {seconds: 900, until: {buildings: {TileTempSensor: 1}, pending_construction: 0}}
+  - run: {seconds: 5}
+  - expect_state:
+      "cells:109,206..109,206::Grid.Mass.get_Item({cell})": "> 10"
+  - driver: {camera.set: {cell: [110, 208], ortho: 8}}
+  - click_world: {cell: [109, 206], select: TileTempSensor}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Thermo Sensor Tile"}
+  - expect_state:
+      "selected:GetComponent<LogicTemperatureSensor>.maxTemp": 9999
+      "selected:GetComponent<LogicTemperatureSensor>.CurrentValue": "> 250"

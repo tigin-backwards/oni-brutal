@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2986814502-bigger-construction-distance.yaml",
+ "mods": [
+  "2986814502"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a dig order on the corridor's cuprite ceiling, five cells above the floor, is dug from the floor, as in the original",
+ "updated": "2026-10-24",
+ "commit": "676516a",
+ "mod_dlls": {
+  "2986814502": {
+   "σδ│▀╓«╝Σ.dll": "7656c7a27ea4e0538cc15374ae2a66068ad06bb334253fa0d18ff58c9520dc39"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-050648-9c109f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T05:09:53",
+    "lane": 13,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-061623-ca002c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T06:16:23",
+    "lane": 12,
+    "reference_run": "20261024-050648-9c109f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-061623-ca002c",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T06:16:24",
+    "lane": 13,
+    "reference_run": "20261024-050648-9c109f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

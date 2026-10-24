@@ -1,0 +1,43 @@
+# Fast Air Filter 高速空气净化器 (3423434329), classes P, O.
+#
+# What it does: a transpiler on AirFilterConfig.ConfigureBuildingTemplate multiplies the
+# Deodorizer's rates by a PLib option (AirFilterSpeed, default 4.5): the sand and polluted
+# oxygen it consumes, the clay and oxygen it makes, and its polluted-oxygen intake buffer
+# (0.5 kg in the game, here twice the new consumption); another option (AirFilterRadius, 3 to
+# 6) widens the radius it draws polluted oxygen from, and a third (AirFilterUsePower) can take
+# its power input away.
+# How a player reaches it: the Mods screen's options; then building a Deodorizer (Oxygen menu,
+# researched with Filtration).
+# What changes: one Deodorizer cleans as much as several.
+#
+# Options here: speed 5, radius 4, no power. setup grants Filtration; a Deodorizer is built in
+# the dug-out corridor west of the printing pod and selected: it turns 0.5 kg/s of polluted
+# oxygen into 0.45 kg/s of oxygen (0.1 and 0.09 in the game), from 4 cells around, unpowered.
+from: early-base
+mods: [3423434329]
+options:
+  "3423434329": {AirFilterSpeed: 5.0, AirFilterRadius: 4, AirFilterUsePower: false}
+require_log: ['FastAirFilter Modify Oxygen output']
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"DirectedAirStreams\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"AirFilter\").RequiresPowerInput": false
+  - build: {prefab: AirFilter, at: [113, 206]}
+  - expect: {blueprints: {AirFilter: 1}}
+  - run: {seconds: 900, until: {buildings: {AirFilter: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 206], select: AirFilter}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Deodorizer"}
+  - expect_state:
+      "selected:GetComponent<ElementConverter>.consumedElements[1].MassConsumptionRate": ">= 0.499"
+      "selected:GetComponent<ElementConverter>.outputElements[1].massGenerationRate": ">= 0.449"
+      "selected:GetComponent<ElementConsumer>.consumptionRadius": 4
+      "selected:GetComponent<ElementConsumer>.capacityKG": ">= 0.999"
+  - expect_state:
+      "selected:GetComponent<ElementConverter>.consumedElements[1].MassConsumptionRate": "<= 0.501"
+      "selected:GetComponent<ElementConverter>.outputElements[1].massGenerationRate": "<= 0.451"
+      "selected:GetComponent<ElementConsumer>.capacityKG": "<= 1.001"

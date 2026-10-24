@@ -1,0 +1,32 @@
+# ExpandedLights [Prehistoric DLC] (3311098779), classes B, V.
+#
+# What it does: adds three lights to the Furniture menu's lights: the Floodlight (Low-Resistance
+# Conductors), the LED Light (Catalytics) and the Tile Light (Artistry, 1x1 of plastic, 5 W,
+# built behind other buildings), with light shapes of their own registered through PLib's
+# light manager (cones, beams, semicircles). It also gives the game's Ceiling Light a fixed
+# semicircle and the Lamp a smooth circle at 4 W, both with 0.1 kDTU/s of heat.
+# How a player reaches it: the build menu (Furniture); the light overlay.
+# What changes: new lights, and the stock lights' shapes.
+#
+# A smaller spec: a light shines only when powered, and early-base has no powered circuit. The
+# stock lights carry the mod's shapes (as in the original) and the Lamp draws 4 W; with Artistry
+# granted, the Furniture menu lists the Tile Light, and looks as in the original.
+from: early-base
+mods: [3311098779]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"Artistry\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"Artistry\").unlockedItemIDs": {contains: TileLight}
+      "Assets.GetBuildingDef(\"FloorLamp\").EnergyConsumptionWhenActive": 4
+      "Assets.GetBuildingDef(\"FloorLamp\").BuildingComplete.GetComponent<Light2D>.shape": "== original"
+      "Assets.GetBuildingDef(\"CeilingLight\").BuildingComplete.GetComponent<Light2D>.shape": "== original"
+      "Assets.GetBuildingDef(\"TileLight\").BuildingComplete.GetComponent<Light2D>.shape": "== original"
+  - run: {seconds: 5}
+  - driver: {camera.set: {cell: [114, 208], ortho: 10}}
+  - click: {ui: "**/PlanScreen/Toggle:Furniture"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/TileLight Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/TileLight Group*": {active: true}
+  - shot: {name: furniture-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}

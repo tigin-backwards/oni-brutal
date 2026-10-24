@@ -1,0 +1,61 @@
+{
+ "spec": "mods/3757329324-natural-plant-tool.yaml",
+ "mods": [
+  "3757329324"
+ ],
+ "verdict": "failed",
+ "why": "a run of ours failed",
+ "findings": [],
+ "note": "the toolbar's planting tool, dragged under three dropped Mealwood seeds, plants three wild Mealwood, as in the original",
+ "updated": "2026-10-24",
+ "commit": "676516a",
+ "mod_dlls": {
+  "3757329324": {
+   "NaturalPlantTool.dll": "2b7c1db297204bf2786229f9abbe8cb2fb2b3a444eab28291178a91171b88bf0"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-061132-eb685b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T06:11:32",
+    "lane": 12,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-064156-ec402f",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-24T06:41:56",
+    "lane": 12,
+    "reasons": [
+     "step start: Remote end closed connection without response"
+    ],
+    "reference_run": "20261024-061132-eb685b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-064156-ec402f",
+    "index": 2,
+    "verdict": "fail",
+    "date": "2026-10-24T06:41:57",
+    "lane": 13,
+    "reasons": [
+     "step start: Remote end closed connection without response"
+    ],
+    "reference_run": "20261024-061132-eb685b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

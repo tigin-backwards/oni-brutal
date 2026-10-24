@@ -1,0 +1,61 @@
+{
+ "spec": "mods/2576243780-vacuum-food-storage.yaml",
+ "mods": [
+  "2576243780"
+ ],
+ "verdict": "failed",
+ "why": "a run of ours failed",
+ "findings": [],
+ "note": "a Mush Bar in a vacuum cell is deep frozen, one in the corridor's air is not, as in the original",
+ "updated": "2026-10-24",
+ "commit": "676516a",
+ "mod_dlls": {
+  "2576243780": {
+   "Vacuum Food Storage.dll": "37d8f4055f7d441f36034888ebe160b68c87a1b8d6d557c4a8de0dd018867013"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-054739-94feff",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T05:57:03",
+    "lane": 12,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-063801-712f96",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-24T06:38:01",
+    "lane": 12,
+    "reasons": [
+     "step start: Remote end closed connection without response"
+    ],
+    "reference_run": "20261024-054739-94feff",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-063801-712f96",
+    "index": 2,
+    "verdict": "fail",
+    "date": "2026-10-24T06:38:02",
+    "lane": 13,
+    "reasons": [
+     "step start: Remote end closed connection without response"
+    ],
+    "reference_run": "20261024-054739-94feff",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

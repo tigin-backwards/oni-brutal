@@ -1,0 +1,62 @@
+{
+ "spec": "mods/2879300160-big-fountain.yaml",
+ "mods": [
+  "2879300160"
+ ],
+ "verdict": "failed",
+ "why": "a run of ours failed",
+ "findings": [],
+ "note": "a colony geyser erupts all the time (eruption and active shares 1), at 10 kg maximum pressure and ten times its average rate, as in the original",
+ "updated": "2026-10-24",
+ "commit": "676516a",
+ "mod_dlls": {
+  "2879300160": {
+   "PLib.dll": "b862c5db2b3cd6df09a62d4a30782e91e2b24e8e1bfac08d991c9cc89a984ba9",
+   "┤≤┼τ╚¬Big fountain.dll": "6a09b920ec4a20c17521509107d1c94126624447593c0f85445299d6d4547bbd"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-050648-9c109f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T05:06:49",
+    "lane": 13,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-061244-d25615",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-24T06:12:44",
+    "lane": 12,
+    "reasons": [
+     "step 3: all:Geyser::[0].configuration.GetEmitRate() is 50.163364, wanted <= 1.001 * mass / 60 (it held in the original: the interaction has no effect in ours)"
+    ],
+    "reference_run": "20261024-050648-9c109f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-061244-d25615",
+    "index": 2,
+    "verdict": "fail",
+    "date": "2026-10-24T06:12:45",
+    "lane": 13,
+    "reasons": [
+     "step 3: all:Geyser::[0].configuration.GetEmitRate() is 50.163364, wanted <= 1.001 * mass / 60 (it held in the original: the interaction has no effect in ours)"
+    ],
+    "reference_run": "20261024-050648-9c109f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

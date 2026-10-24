@@ -1,0 +1,55 @@
+{
+ "spec": "mods/1797000169-helium-extractor.yaml",
+ "mods": [
+  "1797000169"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Helium Extractor built from a build order splits natural gas into helium and propane at the mod's rates, and natural gas generators burn any combustible gas, as in the original",
+ "updated": "2026-10-24",
+ "commit": "676516a",
+ "mod_dlls": {
+  "1797000169": {
+   "HeliumExtractor.dll": "255b91427c39079064590affe22f210f75050b22faf58fdc63a7dd7440a8fe42"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-052205-1ff69b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T05:24:52",
+    "lane": 12,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-062245-a1eccf",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T06:22:45",
+    "lane": 12,
+    "reference_run": "20261024-052205-1ff69b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-062245-a1eccf",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T06:22:46",
+    "lane": 13,
+    "reference_run": "20261024-052205-1ff69b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

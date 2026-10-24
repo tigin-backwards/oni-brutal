@@ -1,0 +1,24 @@
+# Custom Overcrowded (2511882154), classes P, O.
+#
+# What it does: on load it sets TUNING.CREATURES.SPACE_REQUIREMENTS.TIER1-TIER4 (the room a
+# critter needs before it is cramped: 4, 8, 12 and 16 cells in the game) to its PLib options,
+# 0 by default, which turns overcrowding off for those critters (a critter with 0 gets no
+# OvercrowdingMonitor requirement).
+# How a player reaches it: the Mods screen's options; then ranching any critter.
+# What changes: how many critters fit in a stable before they are Cramped.
+#
+# Options here: tier 3 (Hatches, Dreckos, Pips, Shine Bugs...) needs 3 cells, the other tiers
+# 0. The tiers read the options, and so do the critters' tunings built from them.
+from: early-base
+mods: [2511882154]
+options:
+  "2511882154": {SPACE_REQUIREMENTS_TIER1: 0, SPACE_REQUIREMENTS_TIER2: 0, SPACE_REQUIREMENTS_TIER3: 3, SPACE_REQUIREMENTS_TIER4: 0}
+require_log: ['TIER 3 VALE: 12']
+steps:
+  - expect_state:
+      "type:TUNING.CREATURES+SPACE_REQUIREMENTS::TIER1": 0
+      "type:TUNING.CREATURES+SPACE_REQUIREMENTS::TIER2": 0
+      "type:TUNING.CREATURES+SPACE_REQUIREMENTS::TIER3": 3
+      "type:TUNING.CREATURES+SPACE_REQUIREMENTS::TIER4": 0
+      "HatchTuning.PEN_SIZE_PER_CREATURE": 3
+      "DreckoTuning.PEN_SIZE_PER_CREATURE": 3

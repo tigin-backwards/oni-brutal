@@ -1,0 +1,28 @@
+# 大喷泉Big fountain (2879300160), classes P, O.
+#
+# What it does: postfixes on GeyserInstanceConfiguration make every geyser erupt all the time
+# (GetIterationPercent and GetYearPercent return 1, so it is never idle or dormant), multiply
+# its emit rate by a PLib option (a1, "Eruption mass multiple", default 10) and set its maximum
+# pressure to another option (d1, default 10 kg).
+# How a player reaches it: any geyser, vent or volcano in the colony; the options through the
+# Mods screen (Controler.json).
+# What changes: geysers emit ten times as much, without pauses, until 10 kg of pressure.
+#
+# Options here: the defaults (a1 10, d1 10). A geyser of the colony is read: its eruption share
+# and its active share are 1, its maximum pressure 10, and it emits a tenth of its mass per
+# cycle every second's worth of 60 (the game's rate over a full cycle, times 10).
+from: early-base
+mods: [2879300160]
+options:
+  "2879300160": {$file: Controler.json, a1: 10.0, d1: 10.0}
+steps:
+  - expect_state:
+      "all:Geyser::Length": ">= 1"
+      "all:Geyser::[0].configuration.GetIterationPercent()": 1
+      "all:Geyser::[0].configuration.GetYearPercent()": 1
+      "all:Geyser::[0].configuration.GetMaxPressure()": 10
+      "all:Geyser::[0].configuration.GetMassPerCycle()": {save_as: mass}
+  - expect_state:
+      "all:Geyser::[0].configuration.GetEmitRate()": ">= 0.999 * mass / 60"
+  - expect_state:
+      "all:Geyser::[0].configuration.GetEmitRate()": "<= 1.001 * mass / 60"

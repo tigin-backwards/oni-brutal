@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2499782382-hvac-expansion.yaml",
+ "mods": [
+  "2499782382"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Thermo Conditioner built from a build order shows the mod's heating lines, as in the original",
+ "updated": "2026-10-24",
+ "commit": "676516a",
+ "mod_dlls": {
+  "2499782382": {
+   "HVAC Expansion.dll": "1d692b9ab4d68231fc39f253732161a8b487a77de9bf278bb742493234b382f0"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-054739-94feff",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T05:51:34",
+    "lane": 13,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-062901-f4d6a3",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T06:29:02",
+    "lane": 13,
+    "reference_run": "20261024-054739-94feff",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-062901-f4d6a3",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T06:29:01",
+    "lane": 12,
+    "reference_run": "20261024-054739-94feff",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -1,0 +1,56 @@
+{
+ "spec": "mods/3423434329-fast-air-filter.yaml",
+ "mods": [
+  "3423434329"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Deodorizer built from a build order needs no power and converts five times the polluted oxygen from 4 cells around, as in the original",
+ "updated": "2026-10-24",
+ "commit": "676516a",
+ "mod_dlls": {
+  "3423434329": {
+   "FastAirFilter.dll": "15ef5101a7e58140f3b65addfb71fea94018705966c3880a1670d75cc1ed05b5",
+   "PLib.dll": "b862c5db2b3cd6df09a62d4a30782e91e2b24e8e1bfac08d991c9cc89a984ba9"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-050648-9c109f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T05:12:01",
+    "lane": 13,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-061852-2707f8",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T06:18:52",
+    "lane": 12,
+    "reference_run": "20261024-050648-9c109f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-061852-2707f8",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T06:18:53",
+    "lane": 13,
+    "reference_run": "20261024-050648-9c109f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

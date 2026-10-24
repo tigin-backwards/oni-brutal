@@ -1,0 +1,56 @@
+{
+ "spec": "mods/2511882154-custom-overcrowded.yaml",
+ "mods": [
+  "2511882154"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the critter space tiers read the options (tier 3 at 3 cells), and the Hatch and Drecko tunings built from them, as in the original",
+ "updated": "2026-10-24",
+ "commit": "676516a",
+ "mod_dlls": {
+  "2511882154": {
+   "Custom_Overcrowded.dll": "3d301b6e217d1dbad97992da7c1b5c9c0a7d35df8318793e9b728ef2e997ec38",
+   "PLib.dll": "2e5990872a1e94c663ce3c6951862b303a146bc2f6f9d43c7a80cc489ad5c7fe"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-050648-9c109f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T05:08:17",
+    "lane": 13,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-061442-2611bf",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T06:14:42",
+    "lane": 12,
+    "reference_run": "20261024-050648-9c109f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-061442-2611bf",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T06:14:43",
+    "lane": 13,
+    "reference_run": "20261024-050648-9c109f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

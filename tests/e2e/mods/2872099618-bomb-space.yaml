@@ -1,0 +1,30 @@
+# Bomb Space 真空炸弹 (2872099618), class B.
+#
+# What it does: adds the SpaceBomb (VacuumSpaceMod, 1x1, 800 kg of metal ore) to the Base
+# menu. When it is finished building it digs out every cell in a square around itself (7
+# cells each way by default, VacuumSpaceMod.yaml beside the mods folder; each cell shifted by
+# up to two at random), marks the background zone it stands in as space, posts a notification
+# that the background redraws after a save, and deletes itself.
+# How a player reaches it: the build menu (Base).
+# What changes: a large hole, open to space, without digging.
+#
+# A SpaceBomb is built in the dug-out corridor west of the printing pod. Once built it is gone,
+# and so is the cuprite ceiling above the corridor (y 211-212), which the game's own digging
+# would have left.
+#
+# Broken upstream: the dig calls SimMessages.Dig(int, int, bool), which the game no longer has.
+# The postfix runs (the finished bomb is deleted, its background marked as space) and throws a
+# MissingMethodException at the dig, so the ceiling stays; the same in the original.
+from: early-base
+mods: [2872099618]
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"VacuumSpaceMod\").ShowInBuildMenu": true
+      "cells:110,211..114,212::Grid.Mass.get_Item({cell})": {save_as: ceiling}
+  - build: {prefab: VacuumSpaceMod, at: [113, 206]}
+  - expect: {blueprints: {VacuumSpaceMod: 1}}
+  - run: {seconds: 1500, until: {blueprints: {VacuumSpaceMod: 0}, pending_construction: 0}}
+  - run: {seconds: 5}
+  - expect: {buildings: {VacuumSpaceMod: 0}, blueprints: {VacuumSpaceMod: 0}}
+  - expect_state:
+      "cells:110,211..114,212::Grid.Mass.get_Item({cell})": "< 0.2 * ceiling"

@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3079759380-endless-telescope.yaml",
+ "mods": [
+  "3079759380"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Telescope built from a build order carries the mod's deep-space component (study itself needs power, open sky and a Duplicant)",
+ "updated": "2026-10-24",
+ "commit": "676516a",
+ "mod_dlls": {
+  "3079759380": {
+   "EndlessTelescope.dll": "1dce28306b3da28882e26f6bccb2c6b213c962444460908bc0bd8c8fbc448720"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-054739-94feff",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T05:52:42",
+    "lane": 12,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-063059-132217",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T06:30:59",
+    "lane": 12,
+    "reference_run": "20261024-054739-94feff",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-063059-132217",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T06:31:00",
+    "lane": 13,
+    "reference_run": "20261024-054739-94feff",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

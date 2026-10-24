@@ -1,0 +1,50 @@
+# Underground Conduit (3347169088), classes B, S, V, O.
+#
+# What it does: adds sender and receiver terminals for liquids (Plumbing), gases (Ventilation),
+# solids and storage (Shipping), power (Power), automation (Automation), radbolts and heat
+# (Utilities), all 1x1 of refined metal. Terminals sharing a channel move their contents with no
+# pipe between them. A terminal's channel is its name: renaming it in the details screen's title
+# bar creates or joins that channel, and a "Channels" side screen (cloned from the broadcast
+# channel screen) lists the channels with their senders and receivers, a click joining one. It
+# adds a heat conduit overlay. PLib options set each kind's power draw and the heat conduit's
+# efficiency.
+# How a player reaches it: the build menu; the title bar's rename button; the side screen.
+# What changes: wireless pipes.
+#
+# Options here: no power for the terminals. setup spawns steel; a Liquid Sender and a Liquid
+# Receiver are built in the dug-out corridor west of the printing pod. The receiver is renamed
+# "e2e", which moves it to a new channel e2e; the sender's side screen then lists both
+# channels, and a click on e2e moves the sender there too.
+from: early-base
+mods: [3347169088]
+options:
+  "3347169088": {GasPowerReq: 0, LiquidPowerReq: 0, SolidPowerReq: 0, ThermalEfficiency: 1.0}
+setup:
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Steel\").substance", method: SpawnResource, args: [[114.5, 207.5, -12], 200, 300, 255, 0]}}
+steps:
+  - build: {prefab: KIN.UndergroundConduit.LiquidSender, at: [110, 206], material: Steel}
+  - build: {prefab: KIN.UndergroundConduit.LiquidReceiver, at: [113, 206], material: Steel}
+  - run: {seconds: 900, until: {pending_construction: 0}}
+  - expect_state:
+      "all:UndergroundConduit.Sender::Length": 1
+      "all:UndergroundConduit.Receiver::Length": 1
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [113, 206], select: KIN.UndergroundConduit.LiquidReceiver}
+  - ui_wait: {path: "**/DetailsScreen/**/ChannelSideScreen", cond: stable}
+  - click: {ui: "**/DetailsScreen/TitleBar/Border/LabelGroup/RenameButton"}
+  - ui_wait: {path: "**/DetailsScreen/TitleBar/Border/LabelGroup/LocTextInputField", cond: stable}
+  - type: {ui: "**/DetailsScreen/TitleBar/Border/LabelGroup/LocTextInputField", text: "e2e", enter: true, clear: true}
+  - expect_state:
+      "selected:GetComponent<UndergroundConduit.Terminal>.Channel.Name": e2e
+  - click_world: {cell: [110, 206], select: KIN.UndergroundConduit.LiquidSender}
+  - ui_wait: {path: "**/DetailsScreen/**/ChannelSideScreen/**/Rows/e2e", cond: stable}
+  - expect_ui:
+      "**/ChannelSideScreen/**/Rows/e2e/Labels/DistanceLabel": {text: "Senders: 0 | Receivers: 1"}
+  - ui_dump: {name: channels, root: "**/DetailsScreen/**/ChannelSideScreen"}
+  - click: {ui: "**/ChannelSideScreen/**/Rows/e2e"}
+  # The row acts on a click once a double click is ruled out, 0.22 s later.
+  - ui_wait: {path: "**/ChannelSideScreen/**/Rows/e2e/Labels/DistanceLabel", cond: text, value: "Senders: 1 | Receivers: 1", frames: 300}
+  - expect_state:
+      "selected:GetComponent<UndergroundConduit.Terminal>.Channel.Name": e2e
+  - expect_ui:
+      "**/ChannelSideScreen/**/Rows/e2e/Labels/DistanceLabel": {text: "Senders: 1 | Receivers: 1"}

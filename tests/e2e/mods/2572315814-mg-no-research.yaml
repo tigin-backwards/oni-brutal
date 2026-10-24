@@ -1,0 +1,26 @@
+# [MG]No research(无需研究) (2572315814), class P (a patch on the research screen's click).
+#
+# What it does: a postfix on ResearchEntry.OnResearchClicked, after the game has made the
+# clicked tech (or its first missing prerequisite) the active research, adds to it the cost of
+# every tech not yet complete, in each research type, so the active research is bought at once.
+# How a player reaches it: the research screen; a click on any tech.
+# What changes: research needs no research stations.
+#
+# The research screen is opened and Agriculture, two techs behind Basic Farming, is clicked:
+# Basic Farming, which had no points, is complete straight away, and so is the rest of the
+# queue up to Agriculture, as in the original.
+from: early-base
+mods: [2572315814]
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"FarmingTech\").IsComplete()": false
+      "Db.Get().Techs.Get(\"Agriculture\").IsComplete()": false
+  - open: {management: research}
+  - ui_wait: {path: "**/FullScreenUICanvases/ResearchScreen", cond: stable}
+  - ui_wait: {path: "**/ResearchScreen/Content/ScrollRectRoot/ScrollContent", cond: stable, frames: 600}
+  - click: {ui: "**/ScrollContent/*\"AGRICULTURE\"* Panel"}
+  - expect_state:
+      "Db.Get().Techs.Get(\"FarmingTech\").IsComplete()": true
+  - expect_state:
+      "Db.Get().Techs.Get(\"Agriculture\").IsComplete()": "== original"
+      "Research.Instance.GetResearchQueue().Count": "== original"

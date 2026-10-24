@@ -1,0 +1,82 @@
+{
+ "spec": "mods/2549295369-resize-dup-ui.yaml",
+ "mods": [
+  "2549295369"
+ ],
+ "verdict": "failed",
+ "why": "a run of ours failed",
+ "findings": [],
+ "note": "the Vitals and Consumables screens open 200 px taller, as in the original (the Priorities screen's postfix throws in both players)",
+ "updated": "2026-10-24",
+ "commit": "676516a",
+ "mod_dlls": {
+  "2549295369": {
+   "ResizeDupUi.dll": "17e66507a19504ae60a5f12e8d1595d6cd40f3d93ddfe2bbd9cb09e491fc19a8"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-054739-94feff",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T05:49:06",
+    "lane": 12,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-062526-257d94",
+    "index": 1,
+    "verdict": "warn",
+    "date": "2026-10-24T06:25:26",
+    "lane": 12,
+    "reference_run": "20261024-054739-94feff",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "vitals": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 2
+      }
+     }
+    },
+    "shots": {
+     "vitals": 4.2e-05,
+     "consumables": 1.3e-05
+    }
+   },
+   {
+    "run": "20261024-062526-257d94",
+    "index": 2,
+    "verdict": "fail",
+    "date": "2026-10-24T06:25:27",
+    "lane": 13,
+    "reasons": [
+     "ui_dump vitals: 2 difference(s)"
+    ],
+    "reference_run": "20261024-054739-94feff",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "vitals": {
+      "differences": 2,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "vitals": 0.000137,
+     "consumables": 1.3e-05
+    }
+   }
+  ]
+ }
+}

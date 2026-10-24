@@ -1,0 +1,61 @@
+{
+ "spec": "mods/3595057668-batch-modify-styles.yaml",
+ "mods": [
+  "3595057668"
+ ],
+ "verdict": "failed",
+ "why": "a run of ours failed",
+ "findings": [],
+ "note": "a Cot's blueprint picked in its Blueprint tab is batch-applied by the mod's button and drag to the colony's other Cot, as in the original",
+ "updated": "2026-10-24",
+ "commit": "676516a",
+ "mod_dlls": {
+  "3595057668": {
+   "BatchModifyStyles.dll": "26fb1dc6a59401a79150f68a91a7a7a39323e0d070631bbb798606bef9d51cb6"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-053220-d64e2f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T05:35:37",
+    "lane": 13,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-063851-e8901b",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-24T06:38:51",
+    "lane": 12,
+    "reasons": [
+     "step start: Remote end closed connection without response"
+    ],
+    "reference_run": "20261024-053220-d64e2f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-063851-e8901b",
+    "index": 2,
+    "verdict": "fail",
+    "date": "2026-10-24T06:38:52",
+    "lane": 13,
+    "reasons": [
+     "step start: Remote end closed connection without response"
+    ],
+    "reference_run": "20261024-053220-d64e2f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

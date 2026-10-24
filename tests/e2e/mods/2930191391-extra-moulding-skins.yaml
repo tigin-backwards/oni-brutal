@@ -1,0 +1,40 @@
+# Extra Moulding Skins [Vanilla + DLC] (2930191391), class V (building facades).
+#
+# What it does: adds six facades (blueprints) for the Corner Moulding (Bulky Crescent, Sprouting
+# Blossom, Hand Fan, Sleek Angled, Greek Ornament, Elegant Arc), each with its own kanim, as
+# Universal permits (always owned), and a "Mouldings" subcategory to the Supply Closet.
+# How a player reaches it: the facade picker when building a Corner Moulding, or a built one's
+# Blueprint tab.
+# What changes: how corner mouldings can look.
+#
+# setup grants Art Fundamentals and places a finished Corner Moulding in the corridor's upper
+# right corner west of the printing pod (115, 210), which is selected. Its Blueprint tab lists
+# the mod's six facades with the game's, and a click on the last one gives the moulding that
+# look.
+from: early-base
+mods: [2930191391]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"Artistry\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"CornerMoulding\")", method: Build, args: [{"$": "Grid.XYToCell(115, 210)"}, "FlipH", null, ["SandStone"], 293.15, "DEFAULT_FACADE", false]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"CornerMoulding\").AvailableFacades": {contains: CMS_corner_moulding_g}
+      "Db.Get().Permits.BuildingFacades.TryGet(\"CMS_corner_moulding_g\").IsUnlocked()": true
+  - run: {seconds: 1}
+  - expect: {buildings: {CornerMoulding: 1}}
+  - driver: {camera.set: {cell: [114, 208], ortho: 8}}
+  - click_world: {cell: [115, 210], select: CornerMoulding}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - click: {ui: "**/DetailsScreen/SideScreen/SidescreenTabHeader/TabRow/Blueprints Tab Instance"}
+  - ui_wait: {path: "**/CosmeticsPanel/**/FacadeSelector", cond: stable}
+  - expect_ui:
+      "**/CosmeticsPanel/**/FacadeSelector/Container/Content/FacadeTogglePrefab": {count: 9}
+  - shot: {name: facades, crop: "**/CosmeticsPanel/**/FacadeSelector", threshold: 0.04}
+  - click: {ui: "**/CosmeticsPanel/**/FacadeSelector/Container/Content/FacadeTogglePrefab", index: 8}
+  - run: {seconds: 1}
+  - expect_state:
+      "selected:GetComponent<BuildingFacade>.CurrentFacade": "== original"
+      "selected:GetComponent<KBatchedAnimController>.AnimFiles[0].name": "== original"
+  - expect_state:
+      "selected:GetComponent<BuildingFacade>.CurrentFacade": {contains: CMS_corner_moulding}

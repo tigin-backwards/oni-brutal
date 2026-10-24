@@ -1,0 +1,33 @@
+{
+ "spec": "mods/2367992483-automatic-harvesting.yaml",
+ "mods": [
+  "2367992483"
+ ],
+ "verdict": "pending",
+ "why": "the spec fails in the original: a broken spec, or a mod broken upstream",
+ "findings": [],
+ "note": "",
+ "updated": "2026-10-24",
+ "commit": "676516a",
+ "mod_dlls": {
+  "2367992483": {
+   "AutomaticHarvesting.dll": "2c02a55b27434219b001eb2a17f5c80525622acbcda29535bddc65f6494c5a94"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-060548-2e3b53",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-24T06:05:48",
+    "lane": 12,
+    "reasons": [
+     "step 2: type:AutomaticHarvestingHuang.Config_2021_01_20::config is null, wanted exists; file:mods/HuangConfigs/AutomaticHarvesting.json is null, wanted exists"
+    ],
+    "signatures": 0
+   }
+  ],
+  "ours": []
+ }
+}

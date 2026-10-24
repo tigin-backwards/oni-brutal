@@ -1,0 +1,43 @@
+# Batch Modify Styles (3595057668), classes T, S.
+#
+# What it does: puts a "Batch Apply Blueprint" button at the bottom of the details screen's
+# Blueprint tab (a copy of the material tab's change button). For a selected building with
+# facades (or a Duplicant) it remembers the look and opens a drag tool: every building of the
+# same kind (or Duplicant) inside the dragged box gets that facade (or outfit), and a popup
+# counts them. Escape or a right click goes back to the select tool.
+# How a player reaches it: select a building, open its Blueprint tab, click the button, drag.
+# What changes: one look applied to many buildings at once.
+#
+# A Cot is built in the dug-out corridor west of the printing pod, beside early-base's own Cot
+# (east of the pod). The new Cot is selected, given a blueprint in its Blueprint tab, and that
+# blueprint is batch-applied over both Cots: the old one takes it too.
+from: early-base
+mods: [3595057668]
+steps:
+  - build: {prefab: Bed, at: [113, 206]}
+  - expect: {blueprints: {Bed: 1}}
+  - run: {seconds: 900, until: {buildings: {Bed: 2}, pending_construction: 0}}
+  - expect_state:
+      "all:Bed::Length": 2
+  - driver: {camera.set: {cell: [123, 208], ortho: 14}}
+  - click_world: {cell: [113, 206], select: Bed}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - click: {ui: "**/DetailsScreen/SideScreen/SidescreenTabHeader/TabRow/Blueprints Tab Instance"}
+  - ui_wait: {path: "**/CosmeticsPanel/**/FacadeSelector", cond: stable}
+  - click: {ui: "**/CosmeticsPanel/**/FacadeSelector/Container/Content/FacadeTogglePrefab", index: 1}
+  - run: {seconds: 1}
+  - expect_state:
+      "selected:GetComponent<BuildingFacade>.CurrentFacade": "== original"
+  - scroll: {at: "**/DetailsScreen/SideScreen/Body/BodySkin/CategoryHeader/Horizontal/ScrollRect", notches: -10}
+  - ui_wait: {path: "**/CosmeticsPanel/BatchModifyButton", cond: stable}
+  - expect_ui:
+      "**/CosmeticsPanel/BatchModifyButton/Label": {text: "Batch Apply Blueprint"}
+  - click: {ui: "**/CosmeticsPanel/BatchModifyButton"}
+  - expect_state:
+      "PlayerController.Instance.ActiveTool.name": BatchSkinTool
+  - drag: {from: [112, 206], to: [134, 208]}
+  - key: {code: Escape}
+  - run: {seconds: 1}
+  - expect_state:
+      "all:Bed::[0].GetComponent<BuildingFacade>.CurrentFacade": "== original"
+      "all:Bed::[1].GetComponent<BuildingFacade>.CurrentFacade": "== original"

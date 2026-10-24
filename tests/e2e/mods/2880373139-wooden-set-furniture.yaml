@@ -1,0 +1,40 @@
+# [reupload] Wooden Set - Furniture by Ronivan (2880373139), classes B, S.
+#
+# What it does: adds eight wooden decor buildings to the Furniture menu (a wooden bed and
+# pedestal with Art Fundamentals, a cozy bed, fireplace and chair with Renaissance Art, a table
+# and a shelf with Interior Decor, a kitchen hood with Fine Dining), built from raw minerals or
+# metal and wood. The table, shelf and others carry a SelectableSign: a side screen cloned from
+# the monument's ("Sign Side Screen") shows one button per look, and a click plays that look.
+# How a player reaches it: the build menu (Furniture); the building's side screen.
+# What changes: decor buildings with switchable looks.
+#
+# setup grants Interior Decor and spawns wood; a Wooden Table is built in the dug-out corridor
+# west of the printing pod and selected: its side screen offers nine looks, as in the original,
+# and a click on the third one shows it.
+from: early-base
+mods: [2880373139]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"InteriorDecor\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"WoodLog\").substance", method: SpawnResource, args: [[114.5, 207.5, -12], 200, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"InteriorDecor\").unlockedItemIDs": {contains: WoodenSetFurnitureReuploaded_WoodenTable}
+  - build: {prefab: WoodenSetFurnitureReuploaded_WoodenTable, at: [113, 206]}
+  - expect_state:
+      "count:all:Constructable::[*] if .gameObject.name == WoodenSetFurnitureReuploaded_WoodenTableUnderConstruction": 1
+  - run: {seconds: 1500, until: {pending_construction: 0}}
+  - expect_state:
+      "all:SelectableSign::Length": 1
+  - driver: {camera.set: {cell: [114, 208], ortho: 8}}
+  - click_world: {cell: [114, 206], select: WoodenSetFurnitureReuploaded_WoodenTable}
+  - ui_wait: {path: "**/DetailsScreen/**/Sign Side Screen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Wooden Table"}
+      "**/Sign Side Screen/Content/Scroll/Grid/ButtonPrefab": {count: 9}
+  - ui_dump: {name: sign-screen, root: "**/DetailsScreen/**/Sign Side Screen"}
+  - shot: {name: sign-screen, crop: "**/DetailsScreen/**/Sign Side Screen", threshold: 0.04}
+  - click: {ui: "**/Sign Side Screen/Content/Scroll/Grid/ButtonPrefab", index: 2}
+  - expect_state:
+      "selected:GetComponent<WoodenSetFurniture.SelectableSign>.selectedIndex": 2
+      "selected:GetComponent<WoodenSetFurniture.SelectableSign>.GetCurrentVariant()": art_b

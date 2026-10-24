@@ -1,0 +1,30 @@
+# Endless Telescope (3079759380), class P.
+#
+# What it does: a transpiler on ClusterTelescope.Instance.CheckHasAnalyzeTarget lets the
+# Telescope look for unrevealed starmap hexes within 100 hexes instead of its 3 (the enclosed
+# one's 4). Each telescope gets a DeepSpaceTelescope component: past its own radius, study runs
+# at 1 / (1 + hexes beyond), shown by a "Studying Deep Space" status while a Duplicant works.
+# How a player reaches it: building a Telescope (Stations menu, researched with Advanced
+# Research) once the hexes around the asteroid are revealed.
+# What changes: a telescope never runs out of hexes to study.
+#
+# A smaller spec: study needs a powered telescope under open sky and a Duplicant at it, which
+# early-base has not. setup grants Advanced Research; a Telescope is built in the dug-out
+# corridor west of the printing pod and selected: it carries the mod's DeepSpaceTelescope at
+# full efficiency (no target yet).
+from: early-base
+mods: [3079759380]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"AdvancedResearch\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+steps:
+  - build: {prefab: ClusterTelescope, at: [113, 206]}
+  - expect: {blueprints: {ClusterTelescope: 1}}
+  - run: {seconds: 1500, until: {buildings: {ClusterTelescope: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [114, 208], ortho: 8}}
+  - click_world: {cell: [114, 207], select: ClusterTelescope}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Telescope"}
+  - expect_state:
+      "selected:GetComponent<EndlessTelescope.DeepSpaceTelescope>.EfficiencyMultiplier": 1

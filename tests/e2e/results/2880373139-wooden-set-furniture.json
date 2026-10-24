@@ -1,0 +1,79 @@
+{
+ "spec": "mods/2880373139-wooden-set-furniture.yaml",
+ "mods": [
+  "2880373139"
+ ],
+ "verdict": "warning",
+ "why": "known findings: scroll-normalized-position",
+ "findings": [
+  "scroll-normalized-position"
+ ],
+ "note": "a Wooden Table built from a build order shows its nine looks in the mod's side screen, and a click switches the look, as in the original",
+ "updated": "2026-10-24",
+ "commit": "676516a",
+ "mod_dlls": {
+  "2880373139": {
+   "WoodenSetFurniture.dll": "9fe4a37ac841ecaeafa69a944d163a8f4e0c33c0c3797da3906b5f67f09439b9"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-054739-94feff",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T05:54:16",
+    "lane": 13,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-063225-6517af",
+    "index": 1,
+    "verdict": "warn",
+    "date": "2026-10-24T06:32:25",
+    "lane": 12,
+    "reference_run": "20261024-054739-94feff",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "sign-screen": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "sign-screen": 0.000274
+    }
+   },
+   {
+    "run": "20261024-063225-6517af",
+    "index": 2,
+    "verdict": "warn",
+    "date": "2026-10-24T06:32:26",
+    "lane": 13,
+    "reference_run": "20261024-054739-94feff",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "sign-screen": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "sign-screen": 0.000274
+    }
+   }
+  ]
+ }
+}

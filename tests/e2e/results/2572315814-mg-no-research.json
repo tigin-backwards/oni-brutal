@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2572315814-mg-no-research.yaml",
+ "mods": [
+  "2572315814"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a click on Agriculture in the research screen completes it and its missing prerequisites at once, as in the original",
+ "updated": "2026-10-24",
+ "commit": "676516a",
+ "mod_dlls": {
+  "2572315814": {
+   "MG_NoResearch.dll": "359f58bedf3ff4e2cc7c0e52650525cd60acaff972fb1c6e75dabf58940a552e"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-050648-9c109f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T05:08:41",
+    "lane": 12,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-061536-b050af",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T06:15:36",
+    "lane": 12,
+    "reference_run": "20261024-050648-9c109f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-061536-b050af",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T06:15:37",
+    "lane": 13,
+    "reference_run": "20261024-050648-9c109f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

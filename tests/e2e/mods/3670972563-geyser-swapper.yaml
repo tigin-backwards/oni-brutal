@@ -1,0 +1,42 @@
+# Geyser Swapper (3670972563), classes S, O.
+#
+# What it does: selecting a geyser, vent or volcano (or the Tidal Spring and Thermal Gas Fissure
+# of the Aquatic pack) shows a "Geyser Converter" panel beside the details screen, built from
+# uGUI Text and Buttons: a target-type button opens a scrolling list of every geyser type; Start
+# conversion begins converting the geyser into the chosen type, which (by difficulty) needs it
+# analyzed first, a Thermium seal, a Geotuner in conversion mode and delivered materials (800 kg
+# of Thermium by default), and a success roll; "Upgrade" adds 1-3 % output. Its options dialog
+# opens from the Mods screen.
+# How a player reaches it: select a geyser; the panel's buttons.
+# What changes: geysers can be turned into other types.
+#
+# setup places a Steam Vent in the dug-out corridor west of the printing pod. It is selected:
+# the converter panel shows it; the target button opens the type list, its second type is picked
+# from it, and Start conversion reports that the vent must be analyzed first.
+from: early-base
+mods: [3670972563]
+setup:
+  - driver: {setup.call: {type: Scenario, method: SpawnPrefab, args: [{"$": "Grid.XYToCell(113, 206)"}, 0, 0, "GeyserGeneric_steam", "BuildingBack"]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+mask_text: ['[A-Z]{2}\d{2}.\d']
+steps:
+  - run: {seconds: 1}
+  - driver: {camera.set: {cell: [114, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: GeyserGeneric_steam}
+  - ui_wait: {path: "**/DetailsScreen/GeyserSwapperSidePanel", cond: stable}
+  - expect_ui:
+      "**/GeyserSwapperSidePanel/Header/Label": {text: "Geyser Converter"}
+      "**/GeyserSwapperSidePanel/Label": {any_text: "~Steam Vent"}
+  - ui_dump: {name: panel, root: "**/DetailsScreen/GeyserSwapperSidePanel"}
+  - shot: {name: panel, crop: "**/DetailsScreen/GeyserSwapperSidePanel", threshold: 0.04}
+  - click: {ui: "**/DetailsScreen/GeyserSwapperSidePanel/*", index: 4}
+  - ui_wait: {path: "**/GeyserSwapperSidePanel/TypeList", cond: stable}
+  - scroll: {at: "**/GeyserSwapperSidePanel/TypeList", notches: 20}
+  - ui_wait: {path: "**/GeyserSwapperSidePanel/TypeList/Viewport/Content", cond: stable}
+  - click: {ui: "**/GeyserSwapperSidePanel/TypeList/Viewport/Content/*", index: 1}
+  - expect_state:
+      "all:GeyserSwapper.GeyserSwapperUI::[0].selectedOptionKey": "== original"
+  - click: {ui: "**/GeyserSwapperSidePanel/Start conversion"}
+  - expect_ui:
+      "**/GeyserSwapperSidePanel/Label": {any_text: "~analyze"}
+  - ui_dump: {name: panel-picked, root: "**/DetailsScreen/GeyserSwapperSidePanel"}

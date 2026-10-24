@@ -1,0 +1,27 @@
+# 植物自动收获 (Automatic Harvesting Plants) (2367992483), class P.
+#
+# What it does: a prefix on EntityTemplates.ExtendEntityToBasicPlant records every plant's
+# max_age (how long a ripe plant waits before it drops its harvest by itself) in
+# mods/HuangConfigs/AutomaticHarvesting.json, and on later starts reads per-plant drop times
+# from AutomaticHarvesting.config.json in the same folder, so ripe plants harvest themselves
+# sooner.
+# How a player reaches it: the JSON files beside the mods folder; then any farm.
+# What changes: ripe plants drop their harvest after the configured time.
+#
+# The patch names the 19-parameter ExtendEntityToBasicPlant of 2021; the game's method has 20
+# parameters now (require_Backwall_Foundation was added). Harmony still attaches it to that
+# method, and the game builds its plants through it (Mealwood carries the Crop and
+# UprootedMonitor it adds), yet the prefix never runs: its config is never created, and no
+# data file is written.
+from: early-base
+mods: [2367992483]
+steps:
+  # The mod is loaded with one patched method, and the game's plants were built...
+  - expect_state:
+      "count:Global.Instance.modManager.mods[*] if .staticID == 2367992483.Local and .loaded_mod_data.patched_methods.Count == 1": 1
+      "Assets.GetPrefab(\"BasicSingleHarvestPlant\").GetComponent<Crop>.cropId": BasicPlantFood
+      "Assets.GetPrefab(\"BasicSingleHarvestPlant\").GetComponent<UprootedMonitor>.name": BasicSingleHarvestPlant
+  # ...but the prefix never ran: no config, no data file.
+  - expect_state:
+      "type:AutomaticHarvestingHuang.Config_2021_01_20::config": exists
+      "file:mods/HuangConfigs/AutomaticHarvesting.json": exists

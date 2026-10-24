@@ -1,0 +1,32 @@
+# Old Liquid Reservoir [Visual] (1904543022), class V (a building's art).
+#
+# What it does: a postfix on LiquidReservoirConfig.CreateBuildingDef gives the Liquid
+# Reservoir the mod's old_liquidreservoir_kanim (the reservoir's look before the game redrew
+# it) instead of liquidreservoir_kanim. Nothing else changes.
+# How a player reaches it: building a Liquid Reservoir (Plumbing menu, researched with
+# Improved Plumbing).
+# What changes: how the reservoir looks.
+#
+# setup grants Improved Plumbing; a Liquid Reservoir is built in the dug-out corridor west of
+# the printing pod and selected: it uses the mod's animation, and a paused shot of it matches
+# the original's.
+from: early-base
+mods: [1904543022]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"ImprovedLiquidPiping\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"LiquidReservoir\").AnimFiles[0].name": old_liquidreservoir_kanim
+  - build: {prefab: LiquidReservoir, at: [113, 206]}
+  - expect: {blueprints: {LiquidReservoir: 1}}
+  - run: {seconds: 1500, until: {buildings: {LiquidReservoir: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: LiquidReservoir}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Liquid Reservoir"}
+  - expect_state:
+      "selected:GetComponent<KBatchedAnimController>.AnimFiles[0].name": old_liquidreservoir_kanim
+  # Its lower half is masked: Duplicants walk past it.
+  - world_shot: {name: reservoir, ortho: 2, at: [114, 208], hide_ui: true, mask: [[0, 360, 1280, 360]]}

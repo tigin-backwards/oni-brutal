@@ -1,0 +1,36 @@
+# 自然种植工具 (Natural Plant Tool) (3757329324), class T.
+#
+# What it does: adds a drag tool to the toolbar's basic tools ("自然种植工具", the farm
+# errand icon). For each cell dragged over, a seed lying on the cell above it is planted there
+# at once as a wild plant (no planter box, no Duplicant), if the plant could grow on that
+# ground; the seed stack loses one unit (the last one is deleted). Its hover card reads
+# "Natural Plant Tool", Sow / Back.
+# How a player reaches it: the toolbar; a drag along a floor.
+# What changes: wild plants where seeds were dropped.
+#
+# setup drops three Mealwood seeds on the corridor floor west of the printing pod (x 108-110,
+# y 206). The tool is picked from the toolbar and dragged along the floor below them (y 205):
+# three wild Mealwood plants grow there and the seeds are gone.
+from: early-base
+mods: [3757329324]
+setup:
+  - driver: {setup.call: {type: Scenario, method: SpawnPrefab, args: [{"$": "Grid.XYToCell(108, 206)"}, 0, 0, "BasicSingleHarvestPlantSeed", "Ore"]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+  - driver: {setup.call: {type: Scenario, method: SpawnPrefab, args: [{"$": "Grid.XYToCell(109, 206)"}, 0, 0, "BasicSingleHarvestPlantSeed", "Ore"]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+  - driver: {setup.call: {type: Scenario, method: SpawnPrefab, args: [{"$": "Grid.XYToCell(110, 206)"}, 0, 0, "BasicSingleHarvestPlantSeed", "Ore"]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+steps:
+  - expect_state:
+      "count:all:Uprootable::[*] if .GetComponent<KPrefabID>.PrefabTag.Name == BasicSingleHarvestPlant": {save_as: plants}
+      "count:all:PlantableSeed::[*] if .GetComponent<KPrefabID>.PrefabTag.Name == BasicSingleHarvestPlantSeed": {save_as: seeds}
+  - expect_state:
+      "count:all:PlantableSeed::[*] if .GetComponent<KPrefabID>.PrefabTag.Name == BasicSingleHarvestPlantSeed": ">= 3"
+  - driver: {camera.set: {cell: [110, 207], ortho: 8}}
+  - tool: {toolbar: "自然种植工具"}
+  - drag: {from: [108, 205], to: [110, 205]}
+  - key: {code: Escape}
+  - run: {seconds: 1}
+  - expect_state:
+      "count:all:Uprootable::[*] if .GetComponent<KPrefabID>.PrefabTag.Name == BasicSingleHarvestPlant": "== plants + 3"
+      "count:all:PlantableSeed::[*] if .GetComponent<KPrefabID>.PrefabTag.Name == BasicSingleHarvestPlantSeed": "== seeds - 3"

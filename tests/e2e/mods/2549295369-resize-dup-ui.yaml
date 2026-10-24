@@ -1,0 +1,35 @@
+# Resize Dup UI (2549295369), classes S (vanilla screens resized), O.
+#
+# What it does: postfixes on the Vitals, Consumables and Priorities (Jobs) screens'
+# OnActivate and on the Schedule screen's OnSpawn make each screen taller by a PLib option
+# (HeightAdjustment, default 300 px): the screen's RectTransform and the LayoutElement around
+# its scroll view grow by that much, so more Duplicant rows show without scrolling. On the
+# Priorities screen it also moves the options button.
+# How a player reaches it: the management bar (Vitals V, Consumables F, Priorities L,
+# Schedule .); the Mods screen's options.
+# What changes: the Duplicant management screens are taller.
+#
+# The Priorities screen is broken upstream: its postfix looks for an "OptionsButton" the screen
+# no longer has, throws, and the game's crash handler quits (the same in the original).
+#
+# Options here: 200 px. The Vitals screen and then the Consumables screen are opened: each is
+# 200 px taller than the game's (its scroll view's LayoutElement), as in the original, and
+# looks as in the original.
+from: early-base
+mods: [2549295369]
+options:
+  "2549295369": {HeightAdjustment: 200}
+mask_text: ['\d+(\.\d+)?\s*(kcal|%|kg|g)']
+steps:
+  - open: {management: vitals}
+  - ui_wait: {path: "**/VitalsTableScreen", cond: stable, frames: 30}
+  - expect_state:
+      "ui:**/VitalsTableScreen::GetComponentInChildren<KScrollRect>.GetComponentInParent<LayoutElement>.preferredHeight": "== original"
+      "ui:**/VitalsTableScreen::GetComponent<RectTransform>.sizeDelta.y": "== original"
+  - ui_dump: {name: vitals, root: "**/VitalsTableScreen"}
+  - shot: {name: vitals, crop: "**/VitalsTableScreen", threshold: 0.04}
+  - open: {management: consumables}
+  - ui_wait: {path: "**/ConsumablesTableScreen", cond: stable, frames: 30}
+  - expect_state:
+      "ui:**/ConsumablesTableScreen::GetComponentInChildren<KScrollRect>.GetComponentInParent<LayoutElement>.preferredHeight": "== original"
+  - shot: {name: consumables, crop: "**/ConsumablesTableScreen", threshold: 0.04}

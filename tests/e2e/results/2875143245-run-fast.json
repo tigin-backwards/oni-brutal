@@ -1,0 +1,56 @@
+{
+ "spec": "mods/2875143245-run-fast.yaml",
+ "mods": [
+  "2875143245"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the movement tunings read 5, and so do the speed multipliers of the Tile and Metal Tile prefabs and of the colony's built tiles, as in the original",
+ "updated": "2026-10-24",
+ "commit": "676516a",
+ "mod_dlls": {
+  "2875143245": {
+   "PLib.dll": "b862c5db2b3cd6df09a62d4a30782e91e2b24e8e1bfac08d991c9cc89a984ba9",
+   "P_┼▄┐∞┐∞.dll": "587eccc482ffc8c359e79bd0a1f905026689b72d0a43ca5d4c5ff2b47cb39f8b"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-050648-9c109f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T05:10:24",
+    "lane": 12,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-061743-586410",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T06:17:43",
+    "lane": 12,
+    "reference_run": "20261024-050648-9c109f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-061743-586410",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T06:17:44",
+    "lane": 13,
+    "reference_run": "20261024-050648-9c109f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

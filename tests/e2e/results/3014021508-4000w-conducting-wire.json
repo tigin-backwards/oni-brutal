@@ -1,0 +1,56 @@
+{
+ "spec": "mods/3014021508-4000w-conducting-wire.yaml",
+ "mods": [
+  "3014021508"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "Conductive Wire built from a build order is rated 4 kW, and its info panel says so, as in the original",
+ "updated": "2026-10-24",
+ "commit": "676516a",
+ "mod_dlls": {
+  "3014021508": {
+   "4000w╡╝╧▀.dll": "ef58dc4a81e68767e94849a2a590b8dc6e2651b42666b8fa76f3addbefe847af",
+   "PLib.dll": "5d6a8ef9d87143b90113548016180078efaf112d69afe0cdf1073a6125b33773"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-050648-9c109f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T05:06:48",
+    "lane": 12,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-061330-5576e0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T06:13:30",
+    "lane": 12,
+    "reference_run": "20261024-050648-9c109f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-061330-5576e0",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T06:13:31",
+    "lane": 13,
+    "reference_run": "20261024-050648-9c109f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

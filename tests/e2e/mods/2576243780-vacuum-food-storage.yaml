@@ -1,0 +1,28 @@
+# Vacuum Food Storage (2576243780), class P.
+#
+# What it does: a prefix replaces Rottable.RefrigerationLevel: food lying in a vacuum cell is
+# Deep Frozen whatever its temperature (the game ranks it by the food's own temperature, so
+# warm food in a vacuum is merely kept from rotting by the sterile atmosphere, and shows as
+# unrefrigerated).
+# How a player reaches it: storing food in a vacuum (a pumped-out room, a storage bin in space).
+# What changes: food in a vacuum counts as deep frozen.
+#
+# setup empties one cell of algae under the corridor west of the printing pod (110, 204),
+# enclosed by algae, and drops a Mush Bar at 20 °C there, and a Mush Fry in the corridor's air
+# (113, 207). After a short run the Mush Bar is tagged Deep Frozen and the Mush Fry is not.
+from: early-base
+mods: [2576243780]
+setup:
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(110, 204)"}, "Vacuum", null, 0, 0, 255, 0, -1]}}
+  - driver: {setup.call: {type: Scenario, method: SpawnPrefab, args: [{"$": "Grid.XYToCell(110, 204)"}, 0, 0, "MushBar", "Ore"]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+  - driver: {setup.call: {type: Scenario, method: SpawnPrefab, args: [{"$": "Grid.XYToCell(113, 207)"}, 0, 0, "FriedMushBar", "Ore"]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+steps:
+  - run: {seconds: 5}
+  - expect_state:
+      "Grid.Element[129854].id": Vacuum
+  - expect_state:
+      "count:all:Edible::[*] if .gameObject.name == MushBar": 1
+      "count:all:Edible::[*] if .gameObject.name == MushBar and .GetComponent<KPrefabID>.HasTag(\"DeepFrozen\") == true": 1
+      "count:all:Edible::[*] if .gameObject.name == FriedMushBar and .GetComponent<KPrefabID>.HasTag(\"DeepFrozen\") == true": 0

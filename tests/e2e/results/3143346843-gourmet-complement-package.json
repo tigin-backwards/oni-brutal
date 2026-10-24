@@ -1,0 +1,59 @@
+{
+ "spec": "mods/3143346843-gourmet-complement-package.yaml",
+ "mods": [
+  "3143346843"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the new foods and the crab bar recipe exist; a Microbe Musher built and selected shows its recipe list, the details screen matching the original's",
+ "updated": "2026-10-24",
+ "commit": "f834d94",
+ "mod_dlls": {
+  "3143346843": {
+   "GourmetComplementPackage.dll": "2dc295dfe9d5be97c18e9d9d34fa9881fb2ae4ed7a2cfeb48bb2647b53f9c969"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-062933-4c755b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T06:34:48",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-072305-1040f9",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T07:23:05",
+    "lane": 17,
+    "reference_run": "20261024-062933-4c755b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "recipes": 0.0
+    }
+   },
+   {
+    "run": "20261024-072305-1040f9",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T07:24:32",
+    "lane": 17,
+    "reference_run": "20261024-062933-4c755b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "recipes": 0.0
+    }
+   }
+  ]
+ }
+}

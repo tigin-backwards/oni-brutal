@@ -1,0 +1,61 @@
+{
+ "spec": "mods/2737084838-half-door-modern.yaml",
+ "mods": [
+  "2737084838"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Half Pneumatic Door is picked in the Base menu, placed, built and selected: a one-cell door at half animation height; card and details match",
+ "updated": "2026-10-24",
+ "commit": "f834d94",
+ "mod_dlls": {
+  "2737084838": {
+   "Modern HalfDoor.dll": "9841567d121333eda96ff8341d43d58376431f297483631565d8bb559f986a39"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-064932-a26cbc",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T06:50:58",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-073103-789533",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T07:31:03",
+    "lane": 17,
+    "reference_run": "20261024-064932-a26cbc",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.007747,
+     "details": 0.0
+    }
+   },
+   {
+    "run": "20261024-073103-789533",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T07:32:27",
+    "lane": 17,
+    "reference_run": "20261024-064932-a26cbc",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.007747,
+     "details": 0.0
+    }
+   }
+  ]
+ }
+}

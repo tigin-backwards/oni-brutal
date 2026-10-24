@@ -1,0 +1,37 @@
+# Configurable Airlock Door (3742298908), classes P, O.
+#
+# What it does: a companion to Peter Han's Airlock Door (2094698134), active only when that mod
+# is loaded. Its PLib options set the doors' recharge power (240 W by default, against 120),
+# energy capacity, energy per use, door speed (a multiplier on the door's anim speed) and
+# purge time (a multiplier on CalculateVacuumTime); postfixes on the Airlock Door's and the
+# Insulated Airlock Door's CreateBuildingDef and DoPostConfigureComplete apply them. A postfix on
+# AirlockDoor.OnSpawn refreshes the charge meter after a load.
+# How a player reaches it: the Mods screen's options; building an Airlock Door.
+# What changes: the doors' power use and charge.
+#
+# options set 300 W, 12,000 J of capacity and 2,000 J a use. setup grants Improved Ventilation
+# and copper; the door is built, unwired, in the dug-out corridor west of the printing pod and
+# selected: it carries the configured energy values and wattage.
+from: early-base
+mods: [2094698134, 3742298908]
+options:
+  azrazalea.AirlockDoorTweaks: {RechargePowerWatts: 300, EnergyCapacity: 12000, EnergyPerUse: 2000}
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"ImprovedGasPiping\")", method: Purchased}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Copper\").substance", method: SpawnResource, args: [[114.5, 207.5, -12], 800, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"PAirlockDoor\").EnergyConsumptionWhenActive": 300
+      "Assets.GetBuildingDef(\"PAirlockDoor\").BuildingComplete.GetComponent<AirlockDoor>.EnergyPerUse": 2000
+  - build: {prefab: PAirlockDoor, at: [112, 207], material: Copper}
+  - expect: {blueprints: {PAirlockDoor: 1}}
+  - run: {seconds: 900, until: {buildings: {PAirlockDoor: 1}, pending_construction: 0}}
+  - click_world: {cell: [113, 207]}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Airlock Door"}
+  - expect_state:
+      "selected:AirlockDoor.EnergyCapacity": 12000
+      "selected:AirlockDoor.EnergyPerUse": 2000
+      "selected:GetComponent<EnergyConsumer>.BaseWattageRating": 300
+  - shot: {name: details, crop: "**/DetailsScreen", threshold: 0.04}

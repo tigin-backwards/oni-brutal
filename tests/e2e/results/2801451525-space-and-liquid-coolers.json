@@ -1,0 +1,61 @@
+{
+ "spec": "mods/2801451525-space-and-liquid-coolers.yaml",
+ "mods": [
+  "2801451525"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Space Cooler's card opens in the Utilities menu, it is placed there, built (unpowered) and selected: it removes 400 kW down to -200 degrees; card and details match",
+ "updated": "2026-10-24",
+ "commit": "f834d94",
+ "mod_dlls": {
+  "2801451525": {
+   "ShinseiSuperHeater.dll": "8b9d89aa4cfc453d15ca6c4c7b0c5e0034e69a9838387015c93e3851fb0ecdc3"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-064051-912e90",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T06:47:30",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-072807-233f6a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T07:28:07",
+    "lane": 17,
+    "reference_run": "20261024-064051-912e90",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.007747,
+     "details": 0.002164
+    }
+   },
+   {
+    "run": "20261024-072807-233f6a",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T07:29:33",
+    "lane": 17,
+    "reference_run": "20261024-064051-912e90",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.007747,
+     "details": 0.002164
+    }
+   }
+  ]
+ }
+}

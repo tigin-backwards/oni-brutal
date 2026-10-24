@@ -1,0 +1,59 @@
+{
+ "spec": "mods/2879250656-automatic-oil-refinery.yaml",
+ "mods": [
+  "2879250656"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "an Oil Refinery is built (unpowered, unpiped) and selected: a WaterPurifier with the mod's converter (10 kg/s crude oil to petroleum and 2 kg/s refined carbon), dropper and logic port; details match",
+ "updated": "2026-10-24",
+ "commit": "f834d94",
+ "mod_dlls": {
+  "2879250656": {
+   "╫╘╢»╘¡╙═╛½┴╢╞≈.dll": "715e96364b25e46ea9efc01f3e1514e5e85ea547840df7bcd66f0846e0e135b4"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-064932-a26cbc",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T07:03:31",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-074215-9b1b0f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T07:42:15",
+    "lane": 17,
+    "reference_run": "20261024-064932-a26cbc",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "details": 0.0
+    }
+   },
+   {
+    "run": "20261024-074215-9b1b0f",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T07:43:35",
+    "lane": 17,
+    "reference_run": "20261024-064932-a26cbc",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "details": 0.0
+    }
+   }
+  ]
+ }
+}

@@ -1,0 +1,60 @@
+{
+ "spec": "mods/2868765158-configurable-heaters.yaml",
+ "mods": [
+  "2868765158"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "options set the Space Heater's target to 50 degrees; one is built and selected and heats to 323.15 K, and the Tepidizer's definition carries the mod's heat and wattage; details match",
+ "updated": "2026-10-24",
+ "commit": "f834d94",
+ "mod_dlls": {
+  "2868765158": {
+   "Heaters Expanded.dll": "2fafddb496aee1eacef4b48c9e104db53728c8a93b0ce03765bc632810386c6d",
+   "PLib.dll": "d87814a7d5d74fa0e94bc5435cd770d3746438f494208b6f356a2ab999169c52"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-064932-a26cbc",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T06:54:58",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-073645-19a55d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T07:36:45",
+    "lane": 17,
+    "reference_run": "20261024-064932-a26cbc",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "details": 0.002155
+    }
+   },
+   {
+    "run": "20261024-073645-19a55d",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T07:38:38",
+    "lane": 17,
+    "reference_run": "20261024-064932-a26cbc",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "details": 0.002155
+    }
+   }
+  ]
+ }
+}

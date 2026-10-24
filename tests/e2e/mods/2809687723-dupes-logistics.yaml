@@ -1,0 +1,48 @@
+# Dupes Logistics (2809687723), classes B, O.
+#
+# What it does: adds solid-logistics buildings, each switchable in its PLib options
+# (LogisticsConfig.json, with capacities): three 1x1 Storage Pods (Green, Blue, Red; Basic
+# Refinement) that hold 800 t of solids each and can be built anywhere, two storage cabinets
+# (a normal and a refrigerated one), and small conveyor pieces (rail, bridge, filter, loader,
+# receptacle, vent) and a small auto-sweeper (Smart Storage).
+# How a player reaches it: the build menu (Shipping), after research; the pods' side screens
+# (storage filters, capacity).
+# What changes: compact storage, and smaller conveyor parts.
+#
+# setup grants Basic Refinement and spawns copper ore. A Green Storage Pod is picked in the
+# Shipping menu and placed in the dug-out corridor west of the printing pod, built and selected:
+# it holds 800,000 kg, its capacity slider goes that far, and 1000 typed into its field sets
+# its user capacity.
+from: early-base
+mods: [2809687723]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"BasicRefinement\")", method: Purchased}}
+  - driver: {setup.call: {target: "Game.Instance", method: Trigger, args: [-107300940]}}
+  - driver: {setup.call: {target: "PlanScreen.Instance._researchedDefs", method: Clear}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Cuprite\").substance", method: SpawnResource, args: [[109.5, 206.5, -12], 300, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"StoragePod_A\").BuildingComplete.GetComponent<Storage>.capacityKg": 800000
+  - run: {seconds: 5}
+  - driver: {camera.set: {cell: [113, 208], ortho: 10}}
+  - click: {ui: "**/PlanScreen/Toggle:Shipping"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/StoragePod_A Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/StoragePod_A Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
+  - shot: {name: product, crop: "**/ProductInfoScreen", threshold: 0.04}
+  - click_world: {cell: [113, 206]}
+  - key: {code: Escape}
+  - expect: {blueprints: {StoragePod_A: 1}}
+  - run: {seconds: 900, until: {buildings: {StoragePod_A: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [113, 207], ortho: 8}}
+  - click_world: {cell: [113, 206], select: StoragePod_A}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/CapacityControlSideScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Green Storage Pod"}
+  - expect_state:
+      "selected:GetComponent<Storage>.capacityKg": 800000
+      "ui:**/CapacityControlSideScreen/**/Slider::GetComponent<KSlider>.maxValue": 800000
+  - type: {ui: "**/CapacityControlSideScreen/**/*Input*", text: "1000", enter: true, clear: true}
+  - expect_state:
+      "selected:GetComponent<StorageLocker>.UserMaxCapacity": 1000
+  - ui_dump: {name: capacity, root: "**/CapacityControlSideScreen"}

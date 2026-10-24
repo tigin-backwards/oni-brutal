@@ -1,0 +1,31 @@
+# Deodorizers Drop Canisters (2972215569), class P.
+#
+# What it does: a prefix on Deconstructable.OnCompleteWork: when a Deodorizer (AirFilter) is
+# deconstructed, the gas in its storage (the polluted oxygen it has taken in) is dropped as
+# items, gas canisters, instead of being vented into the room as the game does.
+# How a player reaches it: deconstructing a Deodorizer that has been working.
+# What changes: the gas a deconstructed Deodorizer held lies on the floor as canisters.
+#
+# setup builds a Deodorizer at (113, 206) in the dug-out corridor west of the printing pod and
+# puts 5 kg of polluted oxygen into its storage, as a working one holds. It is marked with
+# the Deconstruct tool; once Duplicants have taken it down, the 5 kg of polluted oxygen (an
+# item in the storage before) still lies in the world as items, where the game vents it.
+from: early-base
+mods: [2972215569]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"AirFilter\")", method: Build, args: [131129, Neutral, null, [Cuprite], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "all:AirFilter::[0].storage", method: AddGasChunk, args: [ContaminatedOxygen, 5.0, 300.0, 255, 0, false]}}
+steps:
+  - expect_state:
+      "all:AirFilter::[0].storage.MassStored()": ">= 4.9"
+      "sum:all:Pickupable::[*].GetComponent<PrimaryElement>.Mass if .GetComponent<PrimaryElement>.ElementID == ContaminatedOxygen": ">= 4.9"
+  - run: {seconds: 1}
+  - driver: {camera.set: {cell: [113, 207], ortho: 10}}
+  - tool: {key: X}
+  - drag: {from: [113, 206], to: [113, 206]}
+  - key: {code: Escape}
+  - run: {seconds: 600, until: {buildings: {AirFilter: 0}}}
+  - run: {seconds: 2}
+  - expect_state:
+      "sum:all:Pickupable::[*].GetComponent<PrimaryElement>.Mass if .GetComponent<PrimaryElement>.ElementID == ContaminatedOxygen": ">= 4.9"
+      "all:AirFilter::Length": 0

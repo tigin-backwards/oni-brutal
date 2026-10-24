@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2972215569-deodorizers-drop-canisters.yaml",
+ "mods": [
+  "2972215569"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Deodorizer holding 5 kg of polluted oxygen is deconstructed with the Deconstruct tool, and the gas lies in the world as items instead of being vented",
+ "updated": "2026-10-24",
+ "commit": "f834d94",
+ "mod_dlls": {
+  "2972215569": {
+   "DeodorizerCanister.dll": "e0d9a5d405c7454a199506f4ac6c2ba331491d3b90ba02a12971b3d3ffe50abb"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-064932-a26cbc",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T07:07:35",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-075257-100d67",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T07:52:57",
+    "lane": 17,
+    "reference_run": "20261024-064932-a26cbc",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-075257-100d67",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T07:54:11",
+    "lane": 17,
+    "reference_run": "20261024-064932-a26cbc",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -1,0 +1,38 @@
+# [DLC SUPPORT] wheezeWort no comsumption (3128087621), class P.
+#
+# What it does: a postfix on ColdBreatherConfig.CreatePrefab sets the Wheezewort's emit
+# temperature change to -5 degrees, adds a Phosphorite fertilizer need at 0 kg/s (so it takes
+# none) and widens its temperature range to 0 K - infinity, so it never wilts from heat or
+# cold. A second postfix lets the Flower Pot take crop and aquatic seeds besides decor seeds.
+# How a player reaches it: planting a Wheezewort; planting crops in a Flower Pot.
+# What changes: a Wheezewort that needs nothing; Flower Pots that grow food.
+#
+# setup spawns a Wheezewort in the dug-out corridor west of the printing pod, grants Interior
+# Decor and spawns sandstone. The plant carries the changed values and stays alive while the
+# game runs; a Flower Pot is built there and selected, and accepts crop seeds.
+from: early-base
+mods: [3128087621]
+setup:
+  - driver: {setup.call: {type: Scenario, method: SpawnPrefab, args: [131130, 0, 0, "ColdBreather", "BuildingBack"]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"InteriorDecor\")", method: Purchased}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"SandStone\").substance", method: SpawnResource, args: [[109.5, 206.5, -12], 400, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"ColdBreather\").GetComponent<ColdBreather>.deltaEmitTemperature": -5
+      "all:ColdBreather::[0].GetComponent<TemperatureVulnerable>.internalTemperatureLethal_High": Infinity
+      "all:ColdBreather::[0].GetComponent<TemperatureVulnerable>.internalTemperatureLethal_Low": 0
+  - run: {seconds: 60}
+  - expect_state:
+      "all:ColdBreather::Length": 1
+      "all:ColdBreather::[0].GetComponent<KPrefabID>.HasTag(\"Wilting\")": false
+  - build: {prefab: FlowerVase, at: [113, 206], material: SandStone}
+  - expect: {blueprints: {FlowerVase: 1}}
+  - run: {seconds: 900, until: {buildings: {FlowerVase: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [113, 207], ortho: 8}}
+  - click_world: {cell: [113, 206], select: FlowerVase}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<PlantablePlot>.possibleDepositObjectTags": {contains: CropSeed}
+  - expect_state:
+      "selected:GetComponent<PlantablePlot>.possibleDepositObjectTags": {contains: WaterSeed}

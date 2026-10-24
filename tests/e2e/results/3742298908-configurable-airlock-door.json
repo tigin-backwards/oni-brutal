@@ -1,0 +1,63 @@
+{
+ "spec": "mods/3742298908-configurable-airlock-door.yaml",
+ "mods": [
+  "2094698134",
+  "3742298908"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with Airlock Door, options set 300 W, 12,000 J and 2,000 J a use; the door is built, unwired, and selected and carries them; details match",
+ "updated": "2026-10-24",
+ "commit": "f834d94",
+ "mod_dlls": {
+  "2094698134": {
+   "AirlockDoor.dll": "b1395b57799ff9fbbaff3e3f49ceece2749c6866809a82c4fb20f2b15ff396ef"
+  },
+  "3742298908": {
+   "AirlockDoorTweaks.dll": "d38a249ba0d2333735a18db945420c18e18c704971fedef513556cdad899f3f2"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-064932-a26cbc",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T07:05:19",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-074454-4594c5",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T07:44:54",
+    "lane": 17,
+    "reference_run": "20261024-064932-a26cbc",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "details": 0.0
+    }
+   },
+   {
+    "run": "20261024-074454-4594c5",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T07:46:33",
+    "lane": 17,
+    "reference_run": "20261024-064932-a26cbc",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "details": 0.0
+    }
+   }
+  ]
+ }
+}

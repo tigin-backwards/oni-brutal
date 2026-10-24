@@ -1,0 +1,32 @@
+# Quick Priority (2726552567), class K.
+#
+# What it does: postfixes on the constructors of the Dig, Deconstruct, Attack, Capture, Empty
+# Pipe and Harvest tools set their interceptNumberKeysForPriority, so with one of these tools
+# active the number keys 1-9 (and 0, for the top priority) set the tool's priority, as they
+# already do for Sweep, Mop and Disinfect, instead of opening a build menu category.
+# How a player reaches it: pick the Dig tool (G), press a number key.
+# What changes: the priority the next orders get.
+#
+# The Dig tool is picked with its hotkey, 7 is pressed: the tool's priority screen shows 7 and
+# no build menu category opens; a dig order dragged over the sandstone east end of the
+# corridor west of the printing pod gets priority 7.
+from: early-base
+mods: [2726552567]
+steps:
+  - expect_state:
+      "type:DigTool::Instance.interceptNumberKeysForPriority": true
+      "type:DeconstructTool::Instance.interceptNumberKeysForPriority": true
+      "type:HarvestTool::Instance.interceptNumberKeysForPriority": true
+  - run: {seconds: 1}
+  - driver: {camera.set: {cell: [118, 209], ortho: 10}}
+  - tool: {key: G}
+  - expect_state: {"PlayerController.Instance.ActiveTool.name": "== 'DigTool'"}
+  - key: {code: Alpha7}
+  - expect_state:
+      "ToolMenu.Instance.PriorityScreen.GetLastSelectedPriority().priority_value": 7
+      "PlanScreen.Instance.ActiveCategoryToggleInfo": missing
+  - shot: {name: priority, crop: "**/ToolMenu/PriorityScreen", threshold: 0.04}
+  - drag: {from: [119, 209], to: [120, 210]}
+  - key: {code: Escape}
+  - expect_state:
+      "count:all:Diggable::[*] if .GetComponent<Prioritizable>.GetMasterPriority().priority_value == 7": ">= 4"

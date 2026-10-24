@@ -1,0 +1,59 @@
+{
+ "spec": "mods/2726552567-quick-priority.yaml",
+ "mods": [
+  "2726552567"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Dig tool picked by its hotkey takes 7 from the number key (no build menu opens), and the dug cells get priority 7; the priority screen matches",
+ "updated": "2026-10-24",
+ "commit": "f834d94",
+ "mod_dlls": {
+  "2726552567": {
+   "QuickPriority.dll": "54030819e2fafe0324ae9ce4c324133328387f7a3e1d1317af12b4be755d0dc3"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-062118-139e05",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T06:27:05",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-071008-53919c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T07:10:08",
+    "lane": 17,
+    "reference_run": "20261024-062118-139e05",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "priority": 0.0
+    }
+   },
+   {
+    "run": "20261024-071008-53919c",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T07:18:40",
+    "lane": 17,
+    "reference_run": "20261024-062118-139e05",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "priority": 0.0
+    }
+   }
+  ]
+ }
+}

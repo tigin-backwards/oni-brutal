@@ -1,0 +1,34 @@
+# Buildable Neural Vacillator (2715752713), classes B, O.
+#
+# What it does: adds a buildable Neural Vacillator frame (BuildableGeneShuffler, 4x3, refined
+# metal and glass, Medicine menu, researched with Pharmacology IV / MedicineIV). Duplicants fill
+# it with brine and a Morb; a Duplicant with the Compounding skill then prepares it, and it
+# turns into a working, already used Neural Vacillator (a recharge is still needed). Patches let
+# a built Vacillator be deconstructed for its materials, make demolishing a natural one drop a
+# Vacillator Recharge, and add a Morb to the Printing Pod's care packages. PLib options set
+# the construction and preparation times.
+# How a player reaches it: the build menu (Medicine), after research.
+# What changes: Neural Vacillators can be built.
+#
+# Smaller spec: the frame needs late research, refined metal, glass, brine, a Morb and a
+# skilled Duplicant, and is too wide for early-base's corridor. setup grants the research; the
+# frame's card opens in the Medicine menu, and the Morb is among the care packages.
+from: early-base
+mods: [2715752713]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"MedicineIV\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Game.Instance", method: Trigger, args: [-107300940]}}
+  - driver: {setup.call: {target: "PlanScreen.Instance._researchedDefs", method: Clear}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"BuildableGeneShuffler\").MaterialCategory.Length": 2
+      "Assets.GetPrefab(\"GeneShuffler\").GetComponent<BuildableGeneShuffler.BuildedGeneShuffler>": exists
+      "Immigration.Instance.carePackages[-1].id": Glom
+  - run: {seconds: 5}
+  - click: {ui: "**/PlanScreen/Toggle:Medicine"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/BuildableGeneShuffler Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/BuildableGeneShuffler Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
+  - shot: {name: product, crop: "**/ProductInfoScreen", threshold: 0.04}
+  - key: {code: Escape}

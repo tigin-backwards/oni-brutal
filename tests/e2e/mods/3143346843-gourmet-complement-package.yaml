@@ -1,0 +1,30 @@
+# 美食小吃V3 (Gourmet Complement Package) (3143346843), class P (new foods and recipes).
+#
+# What it does: adds 15 foods, named in Chinese (Takoyaki, omelette rice, kimchi, dumplings,
+# egg soup, crab bar, ...), with recipes on the Microbe Musher (the crab bar, from shellfish
+# meat, sleet wheat grain and water), the Electric Grill and the Gas Range, and counts the meat
+# dishes among them toward the Carnivore achievement.
+# How a player reaches it: a cooking station's recipe list.
+# What changes: more dishes to cook.
+#
+# The new foods' prefabs and the crab bar recipe exist; a Microbe Musher (no research) is built
+# in the dug-out corridor west of the printing pod and selected, and its recipe list has one
+# row more than the game's own.
+from: early-base
+mods: [3143346843]
+setup:
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"SandStone\").substance", method: SpawnResource, args: [[109.5, 206.5, -12], 600, 300, 255, 0]}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Cuprite\").substance", method: SpawnResource, args: [[110.5, 206.5, -12], 600, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"CrabBar\")": exists
+      "Assets.GetPrefab(\"Takoyaki\")": exists
+      "Assets.GetPrefab(\"Dumplings\")": exists
+      "ComplexRecipeManager.Get().GetRecipe(\"MicrobeMusher_I_ShellfishMeat_ColdWheatSeed_Water_O_CrabBar\").fabricators[0]": MicrobeMusher
+  - build: {prefab: MicrobeMusher, at: [113, 206]}
+  - expect: {blueprints: {MicrobeMusher: 1}}
+  - run: {seconds: 900, until: {buildings: {MicrobeMusher: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: MicrobeMusher}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/ComplexFabricatorSideScreen", cond: stable}
+  - shot: {name: recipes, crop: "**/DetailsScreen", threshold: 0.04}

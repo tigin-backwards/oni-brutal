@@ -1,0 +1,37 @@
+# automatic OilRefinery 自动原油精炼器 (2879250656), class P (a vanilla building rebuilt).
+#
+# What it does: replaces the Oil Refinery's definition and template: still 4x4 and 480 W, of
+# any metal, but rotatable, with a logic input, and run without a Duplicant: a WaterPurifier
+# with an element converter turns 10 kg/s of crude oil from its input pipe into 10 kg/s of
+# petroleum (piped out) and 2 kg/s of refined carbon, dropped in 50 kg lumps (ElementDropper).
+# How a player reaches it: building an Oil Refinery (Refining, Improved Combustion).
+# What changes: an unattended refinery that also yields refined carbon.
+#
+# setup grants Improved Combustion and spawns copper ore. An Oil Refinery is built, unpowered
+# and unpiped, at the west end of the dug-out corridor west of the printing pod and selected:
+# it is a WaterPurifier with the mod's converter, dropper and logic port, needing no operator.
+from: early-base
+mods: [2879250656]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"ImprovedCombustion\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Cuprite\").substance", method: SpawnResource, args: [[114.5, 206.5, -12], 600, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"OilRefinery\").PermittedRotations": FlipH
+      "Assets.GetBuildingDef(\"OilRefinery\").LogicInputPorts.Count": 1
+  - build: {prefab: OilRefinery, at: [106, 206]}
+  - expect: {blueprints: {OilRefinery: 1}}
+  - run: {seconds: 1500, until: {buildings: {OilRefinery: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [108, 208], ortho: 8}}
+  - click_world: {cell: [107, 207], select: OilRefinery}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<WaterPurifier>": exists
+      "selected:GetComponent<OilRefinery>": missing
+      "selected:GetComponent<ElementDropper>.emitMass": 50
+      "selected:GetComponent<ElementConverter>.outputElements[1].massGenerationRate": 2
+      "selected:GetComponent<ConduitConsumer>.capacityKG": 100
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Oil Refinery"}
+  - shot: {name: details, crop: "**/DetailsScreen", threshold: 0.04}

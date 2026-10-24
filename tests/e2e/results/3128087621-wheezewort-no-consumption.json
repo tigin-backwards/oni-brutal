@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3128087621-wheezewort-no-consumption.yaml",
+ "mods": [
+  "3128087621"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a spawned Wheezewort carries the -5 degree emit change and a 0 K to infinite temperature range and stays alive; a Flower Pot built and selected accepts crop and aquatic seeds",
+ "updated": "2026-10-24",
+ "commit": "f834d94",
+ "mod_dlls": {
+  "3128087621": {
+   "newcoldbreather.dll": "7df262109e09db28fb43e074e0dfb0711d93d9477f200b61e6c6e3ced1241ed6"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-062933-4c755b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T06:32:29",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-071946-ff1209",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T07:19:46",
+    "lane": 17,
+    "reference_run": "20261024-062933-4c755b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-071946-ff1209",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T07:21:26",
+    "lane": 17,
+    "reference_run": "20261024-062933-4c755b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

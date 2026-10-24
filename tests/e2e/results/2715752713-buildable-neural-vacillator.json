@@ -1,0 +1,59 @@
+{
+ "spec": "mods/2715752713-buildable-neural-vacillator.yaml",
+ "mods": [
+  "2715752713"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "smaller spec (late research, glass, brine, a Morb and a skilled Duplicant): after Pharmacology IV the frame's card opens in the Medicine menu and matches, and a Morb is among the care packages",
+ "updated": "2026-10-24",
+ "commit": "f834d94",
+ "mod_dlls": {
+  "2715752713": {
+   "BuildableGeneShuffler.dll": "6c42fa95ef82948561338c817241ea988869314340464fab7ed2a2177fb9ebad"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-062933-4c755b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T06:37:23",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-072555-5b21ed",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T07:25:55",
+    "lane": 17,
+    "reference_run": "20261024-062933-4c755b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.0
+    }
+   },
+   {
+    "run": "20261024-072555-5b21ed",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T07:27:03",
+    "lane": 17,
+    "reference_run": "20261024-062933-4c755b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.0
+    }
+   }
+  ]
+ }
+}

@@ -1,0 +1,36 @@
+# Configurable Heaters (2868765158), classes P, O.
+#
+# What it does: PLib options set the Space Heater's target temperature (70 degrees by default)
+# and the Liquid Tepidizer's heat (4096 kW of its own, none exhausted), wattage (960 W) and
+# target temperature (85 degrees); postfixes on the two configs apply them, and a wattage of 0
+# drops the Tepidizer's power input.
+# How a player reaches it: the Mods screen's options; building a heater.
+# What changes: heaters that stop at a chosen temperature.
+#
+# options set the Space Heater's target to 50 degrees. setup grants Temperature Modulation and
+# spawns copper ore; a Space Heater is built in the dug-out corridor west of the printing pod
+# and selected: it heats to 323.15 K.
+from: early-base
+mods: [2868765158]
+options:
+  Daron.ConfigurableHeaters: {SHtarget: 50}
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"TemperatureModulation\")", method: Purchased}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Cuprite\").substance", method: SpawnResource, args: [[109.5, 206.5, -12], 600, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"SpaceHeater\").BuildingComplete.GetComponent<SpaceHeater>.targetTemperature": 323.15
+      "Assets.GetBuildingDef(\"LiquidHeater\").SelfHeatKilowattsWhenActive": 4096
+      "Assets.GetBuildingDef(\"LiquidHeater\").ExhaustKilowattsWhenActive": 0
+      "Assets.GetBuildingDef(\"LiquidHeater\").EnergyConsumptionWhenActive": 960
+  - build: {prefab: SpaceHeater, at: [113, 206]}
+  - expect: {blueprints: {SpaceHeater: 1}}
+  - run: {seconds: 1200, until: {buildings: {SpaceHeater: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [113, 207], ortho: 8}}
+  - click_world: {cell: [113, 206], select: SpaceHeater}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<SpaceHeater>.targetTemperature": 323.15
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Space Heater"}
+  - shot: {name: details, crop: "**/DetailsScreen", threshold: 0.04}

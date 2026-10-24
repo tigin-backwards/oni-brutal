@@ -1,0 +1,74 @@
+{
+ "spec": "mods/2809687723-dupes-logistics.yaml",
+ "mods": [
+  "2809687723"
+ ],
+ "verdict": "failed",
+ "why": "a run of ours failed",
+ "findings": [],
+ "note": "the Green Storage Pod is picked in the Shipping menu, built and selected: it holds 800 t and its capacity slider goes that far; fails in ours on the known open difference of a KInputTextField's caretPosition after a submitted edit (0 in ours, 4 in the original) in its capacity field",
+ "updated": "2026-10-24",
+ "commit": "f834d94",
+ "mod_dlls": {
+  "2809687723": {
+   "Dupes Logistics.dll": "e6e4c8a3965eafdc79dcff4cba8f6f5035acfbecfb237ddd630f3898ed9de5c1",
+   "PLib.dll": "c4bb22f1bc06ebcb0dbba75a7f1bc46f63eaa3dae12c22a08729f1a6d3362dda"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-064932-a26cbc",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T06:51:09",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-073346-2ff035",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-24T07:33:46",
+    "lane": 17,
+    "reasons": [
+     "ui_dump capacity: 1 difference(s)"
+    ],
+    "reference_run": "20261024-064932-a26cbc",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "capacity": {
+      "differences": 1
+     }
+    },
+    "shots": {
+     "product": 0.007747
+    }
+   },
+   {
+    "run": "20261024-073346-2ff035",
+    "index": 2,
+    "verdict": "fail",
+    "date": "2026-10-24T07:35:14",
+    "lane": 17,
+    "reasons": [
+     "ui_dump capacity: 1 difference(s)"
+    ],
+    "reference_run": "20261024-064932-a26cbc",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "capacity": {
+      "differences": 1
+     }
+    },
+    "shots": {
+     "product": 0.007747
+    }
+   }
+  ]
+ }
+}

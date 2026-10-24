@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2033314981-default-save-settings.yaml",
+ "mods": [
+  "2033314981"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with the options set to proximity on, auto-save every 10 cycles, timelapse 256x384 and auto-disinfect off at 5000 germs: early-base loads with its own settings; a new Spaced Out! colony started from the main menu (New Game, Survival, Start, the Duplicants' Embark) gets the options' settings (state only)",
+ "updated": "2026-10-24",
+ "commit": "dd3d4ff",
+ "mod_dlls": {
+  "2033314981": {
+   "DefaultSaveSettings.dll": "05f824f01dbacefc88c9e95696772afaef75b13c5146c3a426945543c6cfaced"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-132804-957c30",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T13:28:04",
+    "lane": 12,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-133033-dc8d5a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T13:30:33",
+    "lane": 12,
+    "reference_run": "20261024-132804-957c30",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-133033-dc8d5a",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T13:30:34",
+    "lane": 13,
+    "reference_run": "20261024-132804-957c30",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

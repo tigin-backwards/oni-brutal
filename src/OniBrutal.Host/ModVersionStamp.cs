@@ -13,7 +13,8 @@ namespace OniBrutal.Host
     /// and disabled every local mod. The host replaces that one call with Mono's hash
     /// (OniBrutal.Engine.MonoStringHash), using the game's own Harmony, so the stamps are the ones
     /// the original player writes and mods.json is interchangeable between the two players. This,
-    /// StateMachineSaveNames and ModAccess are the host's only changes to game code.
+    /// StateMachineSaveNames, ModAccess and MonoValueTypeHashes are the host's only changes to
+    /// game code.
     internal static class ModVersionStamp
     {
         public static void Install()
@@ -47,5 +48,8 @@ namespace OniBrutal.Host
     public static class MonoHash
     {
         public static int OfString(string text) => MonoStringHash.Compute(text);
+
+        /// A boxed struct's hash as Mono's ValueType.GetHashCode computes it (MonoValueTypeHashes).
+        public static int OfValueType(object boxed) => MonoValueTypeHash.Compute(boxed);
     }
 }

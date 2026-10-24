@@ -98,7 +98,8 @@ game methods JIT. The differences that remain are behaviours Mono's class librar
 and .NET 10 ships out-of-band. The host restores them the way .NET documents for
 .NET Framework-era code where it can. Two serialization paths of the game are patched at run
 time where they persist runtime-specific values (D1 state-machine parameter names, D3 a local
-mod's version stamp); no other game IL is touched.
+mod's version stamp); so are mods' loading (D11) and the bubble manager's one use of a struct's
+hash as an identity (D26). No other game IL is touched.
 
 | Mono provided | Host provides | Needed by |
 |---|---|---|
@@ -347,6 +348,22 @@ past the boot checkpoint needs a Steam client logged in with an account that own
   break mods' transpilers that match IL patterns. Measured by `tools/UnityProbe`
   (FloatPrecision.cs, `PROBE_SCENARIO=floatprec`); test tools that compare players compute in
   double, where both runtimes agree.
+- **D26 Hashes of structs without a GetHashCode.** A struct that does not override GetHashCode
+  is hashed by `ValueType.GetHashCode`. Mono XORs every field into the hash
+  (`ves_icall_System_ValueType_InternalGetHashCode`: an `int` field's value, a string field's
+  `mono_string_hash_internal`, any other field's own `GetHashCode`), starting from the address
+  of a runtime structure. CoreCLR uses the first field alone when the struct holds floats or
+  references, so values that differ only in a later field collide. That is only slower in a
+  dictionary, but `BubbleManager.Archetype.GetId` uses the hash as an identity: bubbles are
+  filed under the hash of (velocity, element, fade speed), so every bubble rising straight up
+  had one id, and the first element registered under it was the one every later bubble released
+  (after an Oxy Coral's oxygen bubble, a Thermal Gas Fissure gave oxygen instead of natural
+  gas). **Resolved by a patch** (`MonoValueTypeHashes`): that call computes Mono's hash
+  (`OniBrutal.Engine.MonoValueTypeHash`, starting from 0, so ids equal Mono's up to its
+  per-process start). Scanned in Assembly-CSharp, it is the game's only such call on a struct
+  without an override. This is the host's fourth change to game code (with D1, D3 and D11).
+  `--check-types` compares two elements' archetype ids. `tests/e2e/thermal-gas-fissure.yaml`
+  checks the fissure's gas.
 
 ## 3. The engine API (`OniBrutal.UnityEngine`)
 

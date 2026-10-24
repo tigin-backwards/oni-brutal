@@ -53,6 +53,7 @@ namespace OniBrutal.Host
             if (options.RunHome != null) RunHome.Install(options.RunHome);
             if (options.AudioWav != null) AudioCapture.Install(options.AudioWav);
             ModVersionStamp.Install();
+            MonoValueTypeHashes.Install();
             ModAccess.Install();
             TranspiledCalls.Install();
             TranspiledTryEntries.Install();
@@ -526,6 +527,26 @@ namespace OniBrutal.Host
                     Environment.SetEnvironmentVariable("XDG_DESKTOP_DIR", saved.Item3);
                     try { Directory.Delete(home, true); } catch (IOException) { } catch (UnauthorizedAccessException) { }
                 }
+            });
+            Check("Bubble archetype ids of two elements (MonoValueTypeHashes)", () =>
+            {
+                MonoValueTypeHashes.Install();
+                var game = Assembly.Load("Assembly-CSharp");
+                var archetype = game.GetType("BubbleManager+Archetype", true)!;
+                var simHashes = game.GetType("SimHashes", true)!;
+                var getId = archetype.GetMethod("GetId")!;
+                int Id(string element)
+                {
+                    var value = Activator.CreateInstance(archetype, BindingFlags.Public | BindingFlags.Instance, null, [new UnityEngine.Vector2(0f, 1f), Enum.Parse(simHashes, element)], null)!;
+                    var id = getId.Invoke(value, null)!;
+                    return (int)id.GetType().GetField("hashCode")!.GetValue(id)!;
+                }
+                int oxygen = Id("Oxygen"), methane = Id("Methane");
+                // The fields' XOR, as Mono's ValueType.GetHashCode computes it (velocity, element,
+                // alphaFadeSpeed = |velocity|).
+                int expected = new UnityEngine.Vector2(0f, 1f).GetHashCode() ^ (int)Enum.Parse(simHashes, "Methane") ^ 1f.GetHashCode();
+                if (methane != expected) throw new InvalidOperationException($"Methane's id is {methane}, Mono's fields give {expected}");
+                return oxygen != methane ? $"Oxygen {oxygen}, Methane {methane}" : throw new InvalidOperationException($"both are {oxygen}");
             });
             // Last: once a mod patches enum formatting, enum names go through it for the process.
             Check("A Harmony patch of Enum.ToString() alone (MonoEnumFormat)", () =>

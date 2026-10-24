@@ -1,0 +1,93 @@
+# A Thermal Gas Fissure (UnderwaterVent, Aquatic Pack) must release natural gas.
+#
+# Underwater, the fissure sends its gas up as bubbles (BubbleManager.SpawnBubble), and each
+# bubble adds its element to the cell it pops in. The bubble manager files bubbles under an
+# archetype id: the hash of a struct of velocity, element and fade speed, from the struct's
+# inherited ValueType.GetHashCode (ARCHITECTURE D26). Mono's hash mixes in every field; CoreCLR's
+# took the velocity alone, so every bubble that rises straight up had one id, and the first
+# element filed under it was every later bubble's: after an Oxy Coral's oxygen bubble, the
+# fissure released oxygen (a reported bug).
+#
+# setup builds a pit of granite east of the printing pod, below the floor, with a cavity 4
+# cells wide and 8 tall: the fissure stands on its floor, six rows of water cover it, and the
+# top two rows are a vacuum the gas collects in. Before that, one oxygen bubble pops in the
+# room's air, as an Oxy Coral's do. Then the game runs, and the vacuum must hold natural gas.
+from: landing
+setup:
+  # The pit: granite walls around a cavity 4 cells wide, its top two rows a vacuum.
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(140, 190)"}, Granite, {"$": "CellEventLogger.Instance.SandBoxTool"}, 1000, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(141, 190)"}, Granite, {"$": "CellEventLogger.Instance.SandBoxTool"}, 1000, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(142, 190)"}, Granite, {"$": "CellEventLogger.Instance.SandBoxTool"}, 1000, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(143, 190)"}, Granite, {"$": "CellEventLogger.Instance.SandBoxTool"}, 1000, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(144, 190)"}, Granite, {"$": "CellEventLogger.Instance.SandBoxTool"}, 1000, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(145, 190)"}, Granite, {"$": "CellEventLogger.Instance.SandBoxTool"}, 1000, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(140, 191)"}, Granite, {"$": "CellEventLogger.Instance.SandBoxTool"}, 1000, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(145, 191)"}, Granite, {"$": "CellEventLogger.Instance.SandBoxTool"}, 1000, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(140, 192)"}, Granite, {"$": "CellEventLogger.Instance.SandBoxTool"}, 1000, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(145, 192)"}, Granite, {"$": "CellEventLogger.Instance.SandBoxTool"}, 1000, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(140, 193)"}, Granite, {"$": "CellEventLogger.Instance.SandBoxTool"}, 1000, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(145, 193)"}, Granite, {"$": "CellEventLogger.Instance.SandBoxTool"}, 1000, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(140, 194)"}, Granite, {"$": "CellEventLogger.Instance.SandBoxTool"}, 1000, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(145, 194)"}, Granite, {"$": "CellEventLogger.Instance.SandBoxTool"}, 1000, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(140, 195)"}, Granite, {"$": "CellEventLogger.Instance.SandBoxTool"}, 1000, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(145, 195)"}, Granite, {"$": "CellEventLogger.Instance.SandBoxTool"}, 1000, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(140, 196)"}, Granite, {"$": "CellEventLogger.Instance.SandBoxTool"}, 1000, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(145, 196)"}, Granite, {"$": "CellEventLogger.Instance.SandBoxTool"}, 1000, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(140, 197)"}, Granite, {"$": "CellEventLogger.Instance.SandBoxTool"}, 1000, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(141, 197)"}, Vacuum, {"$": "CellEventLogger.Instance.SandBoxTool"}, 0, 0]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(142, 197)"}, Vacuum, {"$": "CellEventLogger.Instance.SandBoxTool"}, 0, 0]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(143, 197)"}, Vacuum, {"$": "CellEventLogger.Instance.SandBoxTool"}, 0, 0]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(144, 197)"}, Vacuum, {"$": "CellEventLogger.Instance.SandBoxTool"}, 0, 0]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(145, 197)"}, Granite, {"$": "CellEventLogger.Instance.SandBoxTool"}, 1000, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(140, 198)"}, Granite, {"$": "CellEventLogger.Instance.SandBoxTool"}, 1000, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(141, 198)"}, Vacuum, {"$": "CellEventLogger.Instance.SandBoxTool"}, 0, 0]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(142, 198)"}, Vacuum, {"$": "CellEventLogger.Instance.SandBoxTool"}, 0, 0]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(143, 198)"}, Vacuum, {"$": "CellEventLogger.Instance.SandBoxTool"}, 0, 0]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(144, 198)"}, Vacuum, {"$": "CellEventLogger.Instance.SandBoxTool"}, 0, 0]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(145, 198)"}, Granite, {"$": "CellEventLogger.Instance.SandBoxTool"}, 1000, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(140, 199)"}, Granite, {"$": "CellEventLogger.Instance.SandBoxTool"}, 1000, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(141, 199)"}, Granite, {"$": "CellEventLogger.Instance.SandBoxTool"}, 1000, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(142, 199)"}, Granite, {"$": "CellEventLogger.Instance.SandBoxTool"}, 1000, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(143, 199)"}, Granite, {"$": "CellEventLogger.Instance.SandBoxTool"}, 1000, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(144, 199)"}, Granite, {"$": "CellEventLogger.Instance.SandBoxTool"}, 1000, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(145, 199)"}, Granite, {"$": "CellEventLogger.Instance.SandBoxTool"}, 1000, 300]}}
+  # One oxygen bubble, as an Oxy Coral releases them: it pops at once in the room's air.
+  - driver: {setup.call: {target: "BubbleManager.instance", method: SpawnBubble, args: [Oxygen, [112.5, 208.5], 0.01, 300, {"$": "type:BubbleManager+Disease::None"}]}}
+  # The fissure on the pit's floor (4x4, its lower-left cell 141,191), then the water.
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(0, 142, 191, \"UnderwaterVent\", \"BuildingBack\")", method: SetActive, args: [true]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(141, 191)"}, Water, {"$": "CellEventLogger.Instance.SandBoxTool"}, 1000, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(142, 191)"}, Water, {"$": "CellEventLogger.Instance.SandBoxTool"}, 1000, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(143, 191)"}, Water, {"$": "CellEventLogger.Instance.SandBoxTool"}, 1000, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(144, 191)"}, Water, {"$": "CellEventLogger.Instance.SandBoxTool"}, 1000, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(141, 192)"}, Water, {"$": "CellEventLogger.Instance.SandBoxTool"}, 1000, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(142, 192)"}, Water, {"$": "CellEventLogger.Instance.SandBoxTool"}, 1000, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(143, 192)"}, Water, {"$": "CellEventLogger.Instance.SandBoxTool"}, 1000, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(144, 192)"}, Water, {"$": "CellEventLogger.Instance.SandBoxTool"}, 1000, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(141, 193)"}, Water, {"$": "CellEventLogger.Instance.SandBoxTool"}, 1000, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(142, 193)"}, Water, {"$": "CellEventLogger.Instance.SandBoxTool"}, 1000, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(143, 193)"}, Water, {"$": "CellEventLogger.Instance.SandBoxTool"}, 1000, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(144, 193)"}, Water, {"$": "CellEventLogger.Instance.SandBoxTool"}, 1000, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(141, 194)"}, Water, {"$": "CellEventLogger.Instance.SandBoxTool"}, 1000, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(142, 194)"}, Water, {"$": "CellEventLogger.Instance.SandBoxTool"}, 1000, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(143, 194)"}, Water, {"$": "CellEventLogger.Instance.SandBoxTool"}, 1000, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(144, 194)"}, Water, {"$": "CellEventLogger.Instance.SandBoxTool"}, 1000, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(141, 195)"}, Water, {"$": "CellEventLogger.Instance.SandBoxTool"}, 1000, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(142, 195)"}, Water, {"$": "CellEventLogger.Instance.SandBoxTool"}, 1000, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(143, 195)"}, Water, {"$": "CellEventLogger.Instance.SandBoxTool"}, 1000, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(144, 195)"}, Water, {"$": "CellEventLogger.Instance.SandBoxTool"}, 1000, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(141, 196)"}, Water, {"$": "CellEventLogger.Instance.SandBoxTool"}, 1000, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(142, 196)"}, Water, {"$": "CellEventLogger.Instance.SandBoxTool"}, 1000, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(143, 196)"}, Water, {"$": "CellEventLogger.Instance.SandBoxTool"}, 1000, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(144, 196)"}, Water, {"$": "CellEventLogger.Instance.SandBoxTool"}, 1000, 300]}}
+steps:
+  - expect_state:
+      "Grid.WidthInCells": 636
+      "Grid.Element[125434].id": "== 'Vacuum'"
+  - run: {seconds: 150}
+  - expect_state:
+      # Cells (142, 197) and (143, 198), in the gas pocket at the top of the pit.
+      "Grid.Element[125434].id": "== 'Methane'"
+      "Grid.Element[126071].id": "== 'Methane'"
+      "cells:141,197..144,198::Grid.Mass.get_Item({cell})": ">= 5"
+  - expect_state:
+      "cells:141,197..144,198::Grid.Mass.get_Item({cell})": ">= 0.8 * original"

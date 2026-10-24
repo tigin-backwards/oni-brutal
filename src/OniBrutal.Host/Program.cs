@@ -41,7 +41,7 @@ namespace OniBrutal.Host
             UnhandledExceptions.Install();
 
             AssemblyPolicy.Install(layout, AppContext.BaseDirectory, options.UiPackages, options.ShippedUiPackages);
-            if (options.CheckNatives) return NativeCheck.Run(layout, AssemblyPolicy.RuntimeAssemblyPaths());
+            if (options.CheckNatives) return NativeCheck.Run(layout, AssemblyPolicy.RuntimeAssemblyPaths(), options.NativeArch ?? AssemblyPolicy.ProcessCpu, options.NativeDir);
             var assemblies = AssemblyPolicy.PreloadScriptingAssemblies(dataDir);
             EngineConfig.BuildAssemblies = AssemblyPolicy.BuildAssemblyNames(dataDir);
             EngineLog.Engine($"Preloaded {assemblies.Count} scripting assemblies");
@@ -678,6 +678,10 @@ namespace OniBrutal.Host
         public bool CheckShaders;
         /// --check-natives: the P/Invokes against the install's plugins (NativeCheck).
         public bool CheckNatives;
+        /// With --check-natives: the architecture checked (`--native-arch x86_64|arm64`; the
+        /// process's by default) and a host folder whose natives are checked (`--native-dir`).
+        public int? NativeArch;
+        public string? NativeDir;
         public string? DumpShader;
         public string? DumpScript;
         public int Frames = -1;
@@ -775,6 +779,8 @@ namespace OniBrutal.Host
                     case "--check-bind": o.CheckBind = true; break;
                     case "--check-shaders": o.CheckShaders = true; break;
                     case "--check-natives": o.CheckNatives = true; break;
+                    case "--native-arch": o.NativeArch = OniBrutal.Engine.Platform.NativeExports.Cpu(args[++i]) ?? throw new ArgumentException("--native-arch expects x86_64 or arm64"); break;
+                    case "--native-dir": o.NativeDir = Path.GetFullPath(args[++i]); break;
                     case "--dump-shader": o.DumpShader = args[++i]; break;
                     case "--dump-script": o.DumpScript = args[++i]; break;
                     case "--frames": o.Frames = int.Parse(args[++i]); break;
@@ -863,7 +869,7 @@ namespace OniBrutal.Host
                     }
                     default:
                         Console.Error.WriteLine($"Unknown option {args[i]}");
-                        Console.Error.WriteLine("usage: OniBrutal [--game DIR] [--log FILE] [--run-home DIR] [--audio-wav DIR] [--headless] [--batchmode] [--frames N] [--native-override NAME=PATH] [--trace-exceptions] [--gl-debug] [--background] [--log-pointer-hits] [--vsync-count N] [--gpu-profile] [--no-bindless] [--input FRAME:ACTION[:ARGS]] [--input-file PATH] [--frame-stats] [--max-frame-rate N[:FRAMES]] [--dump-render-textures FRAME:DIR] [-screen-width W] [-screen-height H] [-screen-fullscreen 0|1] [-window-mode exclusive|borderless|windowed] [-monitor N] [--check-types] [--ui-packages DIR | --shipped-ui-packages] [--game-tweak NAME|all|exact] [--check-assets [--list-data-scripts FILE]] [--check-bind] [--check-shaders] [--check-natives] [--dump-shader NAME:DIR] [--capture FRAME:PATH[:SCALE]] [--probe-ui FRAME:X,Y] [--dump-ui FRAME:PATH] [--dump-ui-vertices PATH-SUBSTRING] [--dump-hierarchy FRAME:PATH] [--report-builtin-assets FILE] [--dump-component FRAME:PATH|TYPE] [-- STEAM-COMMAND]");
+                        Console.Error.WriteLine("usage: OniBrutal [--game DIR] [--log FILE] [--run-home DIR] [--audio-wav DIR] [--headless] [--batchmode] [--frames N] [--native-override NAME=PATH] [--trace-exceptions] [--gl-debug] [--background] [--log-pointer-hits] [--vsync-count N] [--gpu-profile] [--no-bindless] [--input FRAME:ACTION[:ARGS]] [--input-file PATH] [--frame-stats] [--max-frame-rate N[:FRAMES]] [--dump-render-textures FRAME:DIR] [-screen-width W] [-screen-height H] [-screen-fullscreen 0|1] [-window-mode exclusive|borderless|windowed] [-monitor N] [--check-types] [--ui-packages DIR | --shipped-ui-packages] [--game-tweak NAME|all|exact] [--check-assets [--list-data-scripts FILE]] [--check-bind] [--check-shaders] [--check-natives [--native-arch x86_64|arm64] [--native-dir DIR]] [--dump-shader NAME:DIR] [--capture FRAME:PATH[:SCALE]] [--probe-ui FRAME:X,Y] [--dump-ui FRAME:PATH] [--dump-ui-vertices PATH-SUBSTRING] [--dump-hierarchy FRAME:PATH] [--report-builtin-assets FILE] [--dump-component FRAME:PATH|TYPE] [-- STEAM-COMMAND]");
                         return null;
                 }
             }

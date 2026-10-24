@@ -16,7 +16,7 @@
          per-platform builds of this library. -->
     <!-- Platform-specific: a referencing player built for a runtime identifier gets this
          library built for the same one. -->
-    <RuntimeIdentifiers>linux-x64;win-x64;osx-x64</RuntimeIdentifiers>
+    <RuntimeIdentifiers>linux-x64;win-x64;osx-x64;osx-arm64</RuntimeIdentifiers>
     <SteamworksPlatform>UNITY_STANDALONE_LINUX</SteamworksPlatform>
     <SteamworksPlatform Condition="$(RuntimeIdentifier.StartsWith('win'))">UNITY_STANDALONE_WIN</SteamworksPlatform>
     <SteamworksPlatform Condition="$(RuntimeIdentifier.StartsWith('osx'))">UNITY_STANDALONE_OSX</SteamworksPlatform>

@@ -103,6 +103,46 @@ namespace OniBrutal.Tests
             Assert.Equal([Path.Combine(plugIns, "libcimgui.dylib"), Path.Combine(plugIns, "cimgui.dylib")], layout.PluginCandidates("cimgui", false));
         }
 
+        /// A thin Mach-O header of CPU type `cpu`, or a universal one with these slices.
+        static byte[] MachOHeader(params int[] cpus)
+        {
+            static byte[] Be(int v) => BitConverter.GetBytes(v).Reverse().ToArray();
+            if (cpus.Length == 1) return [.. BitConverter.GetBytes(0xFEEDFACF), .. BitConverter.GetBytes(cpus[0]), .. new byte[24]];
+            byte[] fat = [.. Be(unchecked((int)0xCAFEBABE)), .. Be(cpus.Length)];
+            foreach (var cpu in cpus) fat = [.. fat, .. Be(cpu), .. new byte[16]];
+            return fat;
+        }
+
+        [Fact]
+        public void APluginWithoutTheProcesssArchitectureGivesWayToTheHostsReplacement()
+        {
+            var layout = GameLayout.Find(MacApp("arch"));
+            var sim = layout.Plugin("SimDLL", windows: false);
+            File.WriteAllBytes(sim, MachOHeader(NativeExports.X8664));
+            File.WriteAllBytes(layout.Plugin("fmodstudio", false), MachOHeader(NativeExports.X8664, NativeExports.Arm64));
+            var host = Path.Combine(root, "host", GameLayout.ReplacementsFolderName);
+            Directory.CreateDirectory(host);
+            // No replacement: Klei's x86_64 SimDLL is what there is, for either process.
+            Assert.Equal((sim, false), layout.Native("SimDLL", false, NativeExports.Arm64, host));
+            Assert.Equal((sim, false), layout.Native("SimDLL", false, NativeExports.X8664, host));
+            // An x86_64 replacement does not help an arm64 process.
+            var port = Path.Combine(host, "libSimDLL.dylib");
+            File.WriteAllBytes(port, MachOHeader(NativeExports.X8664));
+            Assert.Equal((sim, false), layout.Native("SimDLL", false, NativeExports.Arm64, host));
+            // An arm64 one replaces it in an arm64 process only; a universal plugin is kept.
+            File.WriteAllBytes(port, MachOHeader(NativeExports.Arm64));
+            Assert.Equal((port, true), layout.Native("SimDLL", false, NativeExports.Arm64, host));
+            Assert.Equal((sim, false), layout.Native("SimDLL", false, NativeExports.X8664, host));
+            File.WriteAllBytes(Path.Combine(host, "libfmodstudio.dylib"), MachOHeader(NativeExports.Arm64));
+            Assert.False(layout.Native("fmodstudio", false, NativeExports.Arm64, host)!.Value.Replacement);
+            // A plugin the install lacks is replaced too; a name neither has is null.
+            File.WriteAllBytes(Path.Combine(host, "libextra.dylib"), MachOHeader(NativeExports.Arm64));
+            Assert.Equal((Path.Combine(host, "libextra.dylib"), true), layout.Native("extra", false, NativeExports.Arm64, host));
+            Assert.Null(layout.Native("cimgui", false, NativeExports.Arm64, host));
+            Assert.True(GameLayout.HasArchitecture(port, NativeExports.Arm64));
+            Assert.False(GameLayout.HasArchitecture(port, NativeExports.X8664));
+        }
+
         [Fact]
         public void PlistValuesAreReadByKey()
         {

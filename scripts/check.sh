@@ -29,6 +29,18 @@ if dotnet publish "$root/src/OniBrutal.Host" -c Release -r osx-x64 --self-contai
 else
     failed+=(osx-x64-publish); echo "osx-x64 publish failed: out/publish-osx-x64.log"
 fi
+# The primary Mac build, native on Apple Silicon: arm64 apphost (CPU type 0x0100000c), with
+# BRUTAL's osx-arm64 dylibs beside it. Its SimDLL is onimaxxing-sim's arm64 port (Klei's is
+# x86_64 only), in plugins/ when one is at hand (ONI_SIM_PORT_ARM64).
+osx_arm="$root/out/publish/osx-arm64"
+sim_port="${ONI_SIM_PORT_ARM64:-$HOME/projects/oni-worldgen/dist/simdll-macos/libSimDLL-arm64-simthread.dylib}"
+if dotnet publish "$root/src/OniBrutal.Host" -c Release -r osx-arm64 --self-contained -o "$osx_arm" -v q -nologo > "$root/out/publish-osx-arm64.log" 2>&1 \
+    && [ "$(od -An -tx4 -N8 "$osx_arm/OniBrutal" | tr -s ' ')" = " feedfacf 0100000c" ]; then
+    echo "osx-arm64 publish: $(ls "$osx_arm" | wc -l) files, arm64 Mach-O apphost"
+    if [ -f "$sim_port" ]; then mkdir -p "$osx_arm/plugins"; cp "$sim_port" "$osx_arm/plugins/libSimDLL.dylib"; else rm -f "$osx_arm/plugins/libSimDLL.dylib"; fi
+else
+    failed+=(osx-arm64-publish); echo "osx-arm64 publish failed: out/publish-osx-arm64.log"
+fi
 # The macOS build's shaders (docs/research/macos-feasibility.md §6.1), when its data is here: Metal
 # reflection against the MSL, every Metal program's parameters against GLCore's, and the natives.
 mac_app="${ONI_MAC_APP:-/mnt/c/Program Files (x86)/Steam/steamapps/content/app_457140/depot_457142/OxygenNotIncluded.app}"
@@ -39,10 +51,20 @@ if [ -d "$mac_data" ]; then
     compare=$("${survey[@]}" compare-metal "$mac_data") || failed+=(compare-metal)
     echo "compare-metal: $(head -1 <<< "$compare"); $(tail -1 <<< "$compare")"
     grep -A20 UNEXPLAINED <<< "$compare" | head -40 || true
-    # The host's P/Invokes against the Mac bundle's plugins (their Mach-O exports).
-    natives=$("$root/out/bin/OniBrutal.Host/debug/OniBrutal" --game "$mac_app" --check-natives --log "$root/out/check-natives-mac.log") || failed+=(check-natives-mac)
-    echo "check-natives (macOS): $(grep -E '^  (SimDLL|fmodstudio|steam_api):' <<< "$natives" | sed -E 's/^  ([^:]+): ([0-9]+ of [0-9]+).*/\1 \2/' | paste -sd, -); $(tail -1 <<< "$natives")"
-    grep -E 'MISSING|NO PLUGIN' <<< "$natives" || true
+    # The host's P/Invokes against the Mac bundle's plugins (their Mach-O exports), for the
+    # x86_64 build (Klei's SimDLL) and, with the port in plugins/, for the arm64 build (its arm64
+    # slices, the port, and BRUTAL's dylibs in the publish folder with what they link).
+    natives_summary() { echo "$(grep -E '^  (SimDLL|fmodstudio|steam_api|glfw|freetype|stb|glad): [0-9]+ of ' <<< "$1" | sed -E 's/^  ([^:]+): ([0-9]+ of [0-9]+).*/\1 \2/' | paste -sd, -); $(tail -1 <<< "$1")"; }
+    natives=$("$root/out/bin/OniBrutal.Host/debug/OniBrutal" --game "$mac_app" --check-natives --native-arch x86_64 --log "$root/out/check-natives-mac.log") || failed+=(check-natives-mac)
+    echo "check-natives (macOS x86_64): $(natives_summary "$natives")"
+    grep -E 'MISSING|NO PLUGIN|NO LIBRARY| CODE in' <<< "$natives" || true
+    if [ -f "$osx_arm/plugins/libSimDLL.dylib" ]; then
+        natives=$("$root/out/bin/OniBrutal.Host/debug/OniBrutal" --game "$mac_app" --check-natives --native-arch arm64 --native-dir "$osx_arm" --log "$root/out/check-natives-mac-arm64.log") || failed+=(check-natives-mac-arm64)
+        echo "check-natives (macOS arm64, onimaxxing-sim): $(natives_summary "$natives")"
+        grep -E 'MISSING|NO PLUGIN|NO LIBRARY| CODE in' <<< "$natives" || true
+    else
+        echo "check-natives (macOS arm64) skipped: no arm64 onimaxxing-sim at $sim_port (set ONI_SIM_PORT_ARM64)"
+    fi
 else
     echo "macOS data not found: its shader and native checks skipped (set ONI_MAC_APP)"
 fi

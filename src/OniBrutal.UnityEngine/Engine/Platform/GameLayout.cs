@@ -129,6 +129,40 @@ namespace OniBrutal.Engine.Platform
             return null;
         }
 
+        /// The folder beside the host that holds replacements for the game's plugins (`plugins/`).
+        public const string ReplacementsFolderName = "plugins";
+
+        /// The files a replacement for plugin `name` may be in folder `dir`.
+        public static IEnumerable<string> ReplacementCandidates(string name, string dir) =>
+            [Path.Combine(dir, $"lib{name}.dylib"), Path.Combine(dir, $"lib{name}.so"), Path.Combine(dir, $"{name}.dll")];
+
+        /// The library the host binds for plugin `name` in a process of CPU type `cpu`
+        /// (NativeExports.X8664 or Arm64): the game's plugin when it has that architecture, else a
+        /// replacement in `replacements` (the host's `plugins/` folder) that has it, else the
+        /// game's plugin (which then fails to load, as it would without a replacement). This is how
+        /// an arm64 macOS build runs on the onimaxxing-sim SimDLL: Klei's Mac SimDLL is x86_64
+        /// only, so the port shipped as `plugins/libSimDLL.dylib` is chosen, while an x86_64
+        /// process keeps Klei's. `Replacement` tells which was chosen.
+        public (string Path, bool Replacement)? Native(string name, bool windows, int cpu, string replacements)
+        {
+            var plugin = Plugin(name, windows);
+            if (plugin != null && HasArchitecture(plugin, cpu)) return (plugin, false);
+            if (replacements != null)
+                foreach (var path in ReplacementCandidates(name, replacements))
+                    if (File.Exists(path) && HasArchitecture(path, cpu)) return (path, true);
+            return plugin != null ? (plugin, false) : null;
+        }
+
+        /// Whether a library file has code for CPU type `cpu` (a file of unknown format is taken to).
+        public static bool HasArchitecture(string path, int cpu)
+        {
+            var head = new byte[4096];
+            int n;
+            using (var f = File.OpenRead(path)) n = f.ReadAtLeast(head, head.Length, throwOnEndOfStream: false);
+            var archs = NativeExports.Architectures(head.AsSpan(0, n));
+            return archs.Count == 0 || archs.Contains(cpu);
+        }
+
         /// A string value of a top-level key of an XML property list (Unity's and Klei's
         /// Info.plists are XML), or null.
         public static string PlistString(string path, string key)

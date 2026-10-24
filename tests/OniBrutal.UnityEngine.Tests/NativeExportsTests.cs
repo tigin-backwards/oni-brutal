@@ -30,7 +30,7 @@ namespace OniBrutal.Tests
 
         /// A thin x86_64 dylib: a symbol table with two defined externals, an undefined one and a
         /// local, and an export trie naming one of them and a name the table lacks.
-        static byte[] MachO()
+        static byte[] MachO(int cpu = 0x01000007)
         {
             var strings = new Bytes().U8(0).Str("_SimInit").Str("_SimStep").Str("_dlopen").Str("_local");
             int[] strx = [1, 10, 19, 27];
@@ -43,7 +43,7 @@ namespace OniBrutal.Tests
             const int header = 32, symtabCmd = 24, trieCmd = 16;
             int symoff = header + symtabCmd + trieCmd, nsyms = 4;
             int stroff = symoff + 16 * nsyms, trieoff = stroff + strings.Length;
-            var m = new Bytes().U32(0xFEEDFACF).I32(0x01000007).I32(3).U32(6).U32(2).U32(symtabCmd + trieCmd).U32(0).U32(0);
+            var m = new Bytes().U32(0xFEEDFACF).I32(cpu).I32(3).U32(6).U32(2).U32(symtabCmd + trieCmd).U32(0).U32(0);
             m.U32(0x2).U32(symtabCmd).I32(symoff).I32(nsyms).I32(stroff).I32(strings.Length);
             m.U32(0x80000033).U32(trieCmd).I32(trieoff).I32(trie.Length);
             byte[] types = [0x0F, 0x0F, 0x01, 0x0E]; // ext+sect, ext+sect, ext undefined, local
@@ -75,6 +75,45 @@ namespace OniBrutal.Tests
         }
 
         [Fact]
+        public void TheArm64SliceIsReadWhenAskedFor()
+        {
+            var arm = MachO(NativeExports.Arm64);
+            Assert.Equal("Mach-O arm64", NativeExports.Format(arm));
+            Assert.Equal(["SimFree", "SimInit", "SimStep"], NativeExports.Read(arm, NativeExports.Arm64).Order(StringComparer.Ordinal));
+            Assert.Throws<InvalidDataException>(() => NativeExports.Read(arm));
+            // A universal file whose arm64 slice exports what its x86_64 slice does not.
+            var x64 = new Bytes().U32(0xFEEDFACF).I32(NativeExports.X8664).I32(3).U32(6).U32(0).U32(0).U32(0).U32(0).ToArray();
+            var fat = new Bytes().BigEndian(0xCAFEBABE).BigEndian(2)
+                .BigEndian(0x01000007).BigEndian(3).BigEndian(4096).BigEndian((uint)x64.Length).BigEndian(12)
+                .BigEndian(0x0100000C).BigEndian(0).BigEndian(8192).BigEndian((uint)arm.Length).BigEndian(14)
+                .PadTo(4096).Raw(x64).PadTo(8192).Raw(arm).ToArray();
+            Assert.Empty(NativeExports.Read(fat));
+            Assert.Equal(["SimFree", "SimInit", "SimStep"], NativeExports.Read(fat, NativeExports.Arm64).Order(StringComparer.Ordinal));
+            Assert.Equal("arm64", NativeExports.ArchName(NativeExports.Arm64));
+            Assert.Equal(NativeExports.X8664, NativeExports.Cpu("x86_64"));
+            Assert.Null(NativeExports.Cpu("ppc"));
+        }
+
+        [Fact]
+        public void MachODependenciesAreItsDylibLoadCommands()
+        {
+            // Two loads (plain and weak) and an LC_ID_DYLIB (0xD, the library's own name), which is not one.
+            static void Dylib(Bytes b, uint cmd, string name)
+            {
+                int size = (24 + name.Length + 1 + 7) & ~7, start = b.Length;
+                b.U32(cmd).I32(size).U32(24).U32(0).U32(0x10000).U32(0x10000).Str(name).PadTo(start + size);
+            }
+            var cmds = new Bytes();
+            Dylib(cmds, 0xD, "@rpath/libfreetype.6.dylib");
+            Dylib(cmds, 0xC, "@rpath/libpng18.18.dylib");
+            Dylib(cmds, 0x80000018, "/usr/lib/libSystem.B.dylib");
+            var m = new Bytes().U32(0xFEEDFACF).I32(NativeExports.Arm64).I32(0).U32(6).U32(3).U32((uint)cmds.Length).U32(0).U32(0).Raw(cmds.ToArray()).ToArray();
+            Assert.Equal(["@rpath/libpng18.18.dylib", "/usr/lib/libSystem.B.dylib"], NativeExports.Dependencies(m, NativeExports.Arm64));
+            Assert.Equal([NativeExports.Arm64], NativeExports.Architectures(m));
+            Assert.Empty(NativeExports.Dependencies([0x7F, (byte)'E', (byte)'L', (byte)'F', 2, 1, 1, 0]));
+        }
+
+        [Fact]
         public void ElfExportsAreDynsymsDefinedGlobalsAndWeaks()
         {
             var strings = new Bytes().U8(0).Str("SimStep").Str("undefined").Str("local").Str("weak");
@@ -94,6 +133,7 @@ namespace OniBrutal.Tests
             Section(e, 3, stroff, strings.Length, 0, 0);
             var file = e.ToArray();
             Assert.Equal("ELF64", NativeExports.Format(file));
+            Assert.Equal([NativeExports.X8664], NativeExports.Architectures(file)); // e_machine 0x3E
             Assert.Equal(["SimStep", "weak"], NativeExports.Read(file).Order(StringComparer.Ordinal));
             Assert.Null(NativeExports.Format([1, 2, 3, 4, 5, 6, 7, 8]));
         }

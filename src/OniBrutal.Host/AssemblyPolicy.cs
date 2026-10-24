@@ -6,6 +6,8 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Loader;
 using System.Text.Json;
+using OniBrutal.Engine;
+using OniBrutal.Engine.Platform;
 
 namespace OniBrutal.Host
 {
@@ -95,13 +97,47 @@ namespace OniBrutal.Host
         /// (tools/SteamStub).
         public static readonly Dictionary<string, string> NativeOverrides = new(StringComparer.Ordinal);
 
+        /// The host's replacements for game plugins that lack the process's architecture
+        /// (GameLayout.Native): `plugins/` beside the host.
+        public static string ReplacementsDir => Path.Combine(AppContext.BaseDirectory, GameLayout.ReplacementsFolderName);
+
+        /// The process's architecture as a Mach-O CPU type (NativeExports.X8664 or Arm64).
+        public static int ProcessCpu => RuntimeInformation.ProcessArchitecture == Architecture.Arm64
+            ? NativeExports.Arm64 : NativeExports.X8664;
+
         /// The game's native plugins live in Plugins/ (the Unity player searches there), on macOS
-        /// in the bundle's PlugIns/<name>.bundle (GameLayout.PluginCandidates).
+        /// in the bundle's PlugIns/<name>.bundle (GameLayout.PluginCandidates). A plugin without
+        /// the process's architecture is replaced by the host's of the same name (plugins/), e.g.
+        /// the onimaxxing-sim SimDLL of an arm64 macOS build (GameLayout.Native).
         static IntPtr ResolveNative(Assembly requester, string name)
         {
-            if (NativeOverrides.TryGetValue(name, out var overridePath)) return NativeLibrary.Load(overridePath);
-            var path = layout?.Plugin(name, OperatingSystem.IsWindows());
-            return path != null ? NativeLibrary.Load(path) : IntPtr.Zero;
+            if (NativeOverrides.TryGetValue(name, out var overridePath))
+                return Announced(name, NativeLibrary.Load(overridePath), $"{overridePath} (--native-override)");
+            var native = layout?.Native(name, OperatingSystem.IsWindows(), ProcessCpu, ReplacementsDir);
+            if (native == null) return IntPtr.Zero;
+            if (native.Value.Replacement)
+                return Announced(name, NativeLibrary.Load(native.Value.Path), $"{native.Value.Path} (the host's replacement: the game's plugin has no {NativeExports.ArchName(ProcessCpu)} code)");
+            return NativeLibrary.Load(native.Value.Path);
+        }
+
+        static readonly HashSet<string> announced = new(StringComparer.Ordinal);
+
+        /// Logs, once per name, which library replaced a game plugin; for a SimDLL, also its
+        /// SYSINFO_Acquire string (onimaxxing-sim's banner, UTF-16; the game itself never calls it),
+        /// which shows the game's imports bind to that library.
+        static unsafe IntPtr Announced(string name, IntPtr handle, string what)
+        {
+            lock (announced)
+                if (!announced.Add(name)) return handle;
+            string banner = "";
+            if (name == "SimDLL" && NativeLibrary.TryGetExport(handle, "SYSINFO_Acquire", out var acquire))
+            {
+                var text = ((delegate* unmanaged<byte*>)acquire)();
+                if (text != null) banner = ": SYSINFO \"" + (text[1] == 0 ? new string((char*)text) : Marshal.PtrToStringUTF8((IntPtr)text)) + "\"";
+                if (NativeLibrary.TryGetExport(handle, "SYSINFO_Release", out var release)) ((delegate* unmanaged<void>)release)();
+            }
+            EngineLog.Engine($"Native {name}: {what}{banner}");
+            return handle;
         }
 
         /// The simple names of the assemblies the game was built with (ScriptingAssemblies.json):

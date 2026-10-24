@@ -7,66 +7,105 @@ using System.Text;
 namespace OniBrutal.Engine.Platform
 {
     /// The symbols a native library exports, read from its file without loading it: Mach-O
-    /// (thin or universal; the x86_64 slice) and ELF64. Names are as dlsym takes them (Mach-O's
-    /// leading underscore removed). For checking a platform's P/Invokes against its libraries on
-    /// another platform (the host's --check-natives).
+    /// (thin or universal; one architecture's slice, x86_64 or arm64) and ELF64. Names are as
+    /// dlsym takes them (Mach-O's leading underscore removed). For checking a platform's
+    /// P/Invokes against its libraries on another platform (the host's --check-natives).
     internal static class NativeExports
     {
         const uint MhMagic64 = 0xFEEDFACF, FatMagic = 0xCAFEBABE;
-        const int CpuTypeX8664 = 0x01000007;
+        /// Mach-O CPU types.
+        public const int X8664 = 0x01000007, Arm64 = 0x0100000C;
         const uint LcSymtab = 0x2, LcDyldInfo = 0x22, LcDyldInfoOnly = 0x80000022, LcDyldExportsTrie = 0x80000033;
 
-        /// The file's format ("Mach-O x86_64", "ELF64"), or null when it is neither.
+        /// A Mach-O CPU type's name as Apple's tools print it.
+        public static string ArchName(int cpu) => cpu switch { X8664 => "x86_64", Arm64 => "arm64", _ => $"cpu{cpu:x}" };
+
+        /// The CPU type of an architecture name (ArchName's inverse), or null.
+        public static int? Cpu(string name) => name switch { "x86_64" => X8664, "arm64" => Arm64, _ => null };
+
+        /// The file's format ("Mach-O x86_64", "Mach-O arm64", "Mach-O universal", "ELF64"), or
+        /// null when it is none of them.
         public static string Format(ReadOnlySpan<byte> file)
         {
             if (file.Length >= 4 && BinaryPrimitives.ReadUInt32BigEndian(file) == FatMagic) return "Mach-O universal";
-            if (file.Length >= 8 && BinaryPrimitives.ReadUInt32LittleEndian(file) == MhMagic64) return BinaryPrimitives.ReadInt32LittleEndian(file[4..]) == CpuTypeX8664 ? "Mach-O x86_64" : "Mach-O";
+            if (file.Length >= 8 && BinaryPrimitives.ReadUInt32LittleEndian(file) == MhMagic64)
+                return BinaryPrimitives.ReadInt32LittleEndian(file[4..]) is X8664 or Arm64 ? "Mach-O " + ArchName(BinaryPrimitives.ReadInt32LittleEndian(file[4..])) : "Mach-O";
             if (file.Length >= 5 && file[0] == 0x7F && file[1] == (byte)'E' && file[2] == (byte)'L' && file[3] == (byte)'F' && file[4] == 2) return "ELF64";
             return null;
         }
 
-        /// The architectures of a universal Mach-O (CPU types), or of a thin one.
+        /// The architectures (Mach-O CPU types) of a universal Mach-O, of a thin one, or of an ELF64
+        /// file (its machine: x86-64 as X8664, AArch64 as Arm64); empty for anything else. Reads
+        /// the headers only.
         public static List<int> Architectures(ReadOnlySpan<byte> file)
         {
             var result = new List<int>();
+            if (file.Length < 8) return result;
             if (BinaryPrimitives.ReadUInt32BigEndian(file) == FatMagic)
             {
                 int n = BinaryPrimitives.ReadInt32BigEndian(file[4..]);
-                for (int i = 0; i < n; i++) result.Add(BinaryPrimitives.ReadInt32BigEndian(file[(8 + 20 * i)..]));
+                for (int i = 0; i < n && 12 + 20 * i <= file.Length; i++) result.Add(BinaryPrimitives.ReadInt32BigEndian(file[(8 + 20 * i)..]));
             }
             else if (BinaryPrimitives.ReadUInt32LittleEndian(file) == MhMagic64) result.Add(BinaryPrimitives.ReadInt32LittleEndian(file[4..]));
+            else if (Format(file) == "ELF64" && file.Length >= 0x14)
+                switch (BinaryPrimitives.ReadUInt16LittleEndian(file[0x12..]))
+                {
+                    case 0x3E: result.Add(X8664); break;
+                    case 0xB7: result.Add(Arm64); break;
+                }
             return result;
         }
 
-        public static HashSet<string> Read(string path) => Read(File.ReadAllBytes(path));
-
-        public static HashSet<string> Read(byte[] file)
+        /// The libraries a Mach-O slice links (LC_LOAD_DYLIB, weak, re-exported, upward and lazy loads), as
+        /// their install names; empty for other formats.
+        public static List<string> Dependencies(byte[] file, int cpu = X8664)
         {
-            var span = file.AsSpan();
-            if (span.Length >= 4 && BinaryPrimitives.ReadUInt32BigEndian(span) == FatMagic) return MachO(X8664Slice(span));
-            if (span.Length >= 4 && BinaryPrimitives.ReadUInt32LittleEndian(span) == MhMagic64) return MachO(span);
+            ReadOnlySpan<byte> span = file;
+            if (span.Length >= 4 && BinaryPrimitives.ReadUInt32BigEndian(span) == FatMagic) span = Slice(span, cpu);
+            var result = new List<string>();
+            if (span.Length < 32 || BinaryPrimitives.ReadUInt32LittleEndian(span) != MhMagic64) return result;
+            int commands = BinaryPrimitives.ReadInt32LittleEndian(span[16..]), at = 32;
+            for (int c = 0; c < commands; c++)
+            {
+                uint cmd = BinaryPrimitives.ReadUInt32LittleEndian(span[at..]);
+                if (cmd is 0xC or 0x80000018 or 0x8000001F or 0x80000023 or 0x20)
+                    result.Add(CString(span, at + BinaryPrimitives.ReadInt32LittleEndian(span[(at + 8)..])));
+                at += BinaryPrimitives.ReadInt32LittleEndian(span[(at + 4)..]);
+            }
+            return result;
+        }
+
+        public static HashSet<string> Read(string path, int cpu = X8664) => Read(File.ReadAllBytes(path), cpu);
+
+        /// The exports of a Mach-O file's slice for CPU type `cpu`; an ELF file's (it has one
+        /// architecture, whatever `cpu` says).
+        public static HashSet<string> Read(byte[] file, int cpu = X8664)
+        {
+            ReadOnlySpan<byte> span = file;
+            if (span.Length >= 4 && BinaryPrimitives.ReadUInt32BigEndian(span) == FatMagic) return MachO(Slice(span, cpu), cpu);
+            if (span.Length >= 4 && BinaryPrimitives.ReadUInt32LittleEndian(span) == MhMagic64) return MachO(span, cpu);
             if (Format(span) == "ELF64") return Elf(span);
             throw new InvalidDataException("Not a Mach-O 64-bit or ELF64 file.");
         }
 
-        static ReadOnlySpan<byte> X8664Slice(ReadOnlySpan<byte> file)
+        static ReadOnlySpan<byte> Slice(ReadOnlySpan<byte> file, int cpu)
         {
             int n = BinaryPrimitives.ReadInt32BigEndian(file[4..]);
             for (int i = 0; i < n; i++)
             {
                 var arch = file[(8 + 20 * i)..];
-                if (BinaryPrimitives.ReadInt32BigEndian(arch) != CpuTypeX8664) continue;
+                if (BinaryPrimitives.ReadInt32BigEndian(arch) != cpu) continue;
                 int offset = BinaryPrimitives.ReadInt32BigEndian(arch[8..]), size = BinaryPrimitives.ReadInt32BigEndian(arch[12..]);
                 return file.Slice(offset, size);
             }
-            throw new InvalidDataException("Universal Mach-O without an x86_64 slice.");
+            throw new InvalidDataException($"Universal Mach-O without an {ArchName(cpu)} slice.");
         }
 
         /// Defined external symbols of the symbol table, and the export trie's names, together
         /// (a library's exports are the trie's; the table lists the same for the game's plugins).
-        static HashSet<string> MachO(ReadOnlySpan<byte> m)
+        static HashSet<string> MachO(ReadOnlySpan<byte> m, int cpu)
         {
-            if (BinaryPrimitives.ReadInt32LittleEndian(m[4..]) != CpuTypeX8664) throw new InvalidDataException("The Mach-O file is not x86_64.");
+            if (BinaryPrimitives.ReadInt32LittleEndian(m[4..]) != cpu) throw new InvalidDataException($"The Mach-O file is not {ArchName(cpu)}.");
             int commands = BinaryPrimitives.ReadInt32LittleEndian(m[16..]);
             int at = 32;
             var names = new HashSet<string>(StringComparer.Ordinal);

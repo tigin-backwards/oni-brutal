@@ -1644,6 +1644,15 @@ Not measured:
   tables and .NET's (only § and ¶ were found in them);
 - world-space `TextMeshPro`.
 
+### Culling under a RectMask2D (measured 2026-10-23)
+
+`TextMeshProUGUI` culls under a `RectMask2D` with the bounds of its mesh, not with its rect. The
+bounds are the box of all the mesh's vertices, the unused ones at the local origin included, so
+the pivot is always inside. The cull is re-evaluated when that mesh changes. `ugui.md` ("RectMask2D
+culling (measured)") records the measurement, the rule and where this implementation deviates.
+The probe also found that the original's `TMP_Text.bounds` equals the mesh's bounds, and that
+an empty text keeps 4 vertices.
+
 ## Verification
 
 1. **Build:**

@@ -260,7 +260,9 @@ them gets `UIVertex.simpleVert`'s defaults: normal (0, 0, −1), tangent (1, 0, 
     of its rect, shrunk by `padding`, with all enclosing RectMask2Ds' rects, all in canvas
     space.
   - **Softness:** `softness` gives the clip a soft edge.
-  - **Culling:** elements wholly outside the clip are culled.
+  - **Culling:** elements wholly outside the clip are culled: an `Image` by its rect, a
+    TextMeshPro text by its mesh's bounds, with touching edges counting as outside ("RectMask2D
+    culling (measured)" below).
   - **When:** it registers with `ClipperRegistry` and recomputes in `PerformClipping` each
     pass. When an element moves or the rect changes, the clip and cull state is updated in that
     pass.
@@ -336,7 +338,9 @@ Unity's manual describes.
   - The children's sizes are set to the cell size.
 - **Re-layout:** `LayoutGroup` re-lays out when its children, their active state, its own rect
   or its settings change, in that frame's pass. `SetDirty()` re-lays out in the next pass when
-  called during a rebuild.
+  called during a rebuild. Moving a child or the group (position or scale only) re-lays out
+  nothing; the child keeps its place until the next re-layout ("Moved children of layout groups
+  (measured)" below).
 
 **`ContentSizeFitter`:** `horizontalFit` and `verticalFit`, each Unconstrained, MinSize or
 PreferredSize. It sets the rect's size along the axis to the GameObject's layout minimum or
@@ -929,6 +933,223 @@ have none, so `dragging` stays false and `pointerDrag` null.
 This replaces the description of `HandlePointerExitAndEnter` under Input modules. That said
 that exit goes to the whole `hovered` list when the enter is unchanged. Instead, an unchanged
 enter sends only moves, and only while the pointer moves.
+
+### Moved children of layout groups (measured 2026-10-23)
+
+Found in a mod play-test: DraggableUI (Workshop 1870540864) moves a window by Alt + drag. Its
+`DraggablePanel.Update` sets the screen's own `RectTransform.anchoredPosition` (the component's
+`GetComponentInParent<RectTransform>()`, which is the screen's) every frame of the drag, from the
+pointer minus the offset it had at the press, and stops on release. Over the details panel the
+drag moves two screens, `RootMenuRight` and its child `DetailsScreen`. In the original both stay
+where they were put (`DetailsScreen` 302 → −58). In ours `DetailsScreen` is back at 302 right
+after the release. The hierarchy, from the original's dump:
+
+- `BottomPanelRight`: `VerticalLayoutGroup`, `ContentSizeFitter`;
+- `RootMenuRight`: `RootMenu`, `LayoutElement`, `ToggleGroup`, `VerticalLayoutGroup`,
+  `ContentSizeFitter`, `DraggablePanel`;
+- `DetailsScreen`: `DetailsScreen`, `VerticalLayoutGroup`, `LayoutElement`, `Image`,
+  `DraggablePanel`.
+
+**Measured** with `PROBE_SCENARIO=layoutcull` (tools/UnityProbe, `LayoutCull.cs`, lines `LC lay
+…`; `lc-check.py`). The setup is a `VerticalLayoutGroup` G (300 × 400, spacing 10, upper left, no
+force-expand) on an overlay canvas, with children A, B and C. Each child is an `Image` with a
+`LayoutElement` (preferred 120 × 50; its own size 80 × 40). G counts its `SetLayoutHorizontal`
+calls, and B and G count their `OnRectTransformDimensionsChange`. The configurations: with and
+without a `ContentSizeFitter` on G (vertical preferred), child size control on both axes, on
+neither and on one, B with `ignoreLayout`, and B with a `ContentSizeFitter` of its own. In
+each, one change is made, then two frames are watched phase by phase. Then A's preferred
+height changes (a re-layout from elsewhere), and one more frame is watched.
+
+1. **Moving does not re-lay out.** Setting a child's `anchoredPosition`, `localPosition`,
+   `position` or `localScale`, or the group's `anchoredPosition`, sends no
+   `OnRectTransformDimensionsChange` to the child or the group, and marks nothing for rebuild:
+   the group's layout calls stay at their count, for every configuration. The child stays
+   where it was put, frame after frame. A drag that sets B's `anchoredPosition` every frame
+   for three frames leaves B at the last value in every configuration. That includes B with
+   its own `ContentSizeFitter`. A hierarchy made in that frame has one deferred re-layout of
+   its own, in its third frame, which a drag in progress overrides at once.
+2. **Changing a size re-lays out in that frame.** Setting a child's `sizeDelta`, `pivot` or
+   anchors, or the group's `sizeDelta`, sends `OnRectTransformDimensionsChange` from the setter
+   (once; twice for anchors, one per property). The group then re-lays out in that frame's
+   canvas update, before `Canvas.willRenderCanvases` returns. A size the group controls is set
+   back, and every position the group drives is set again.
+3. **The next re-layout puts a moved child back.** When the group re-lays out for any reason,
+   B is placed at its layout position again, in the canvas update of the frame the rebuild was
+   asked in. This holds with child size control on or off, with or without a fitter on the
+   group, and the moved axis does not matter. A child whose `LayoutElement` has `ignoreLayout`
+   keeps both its position and its size. Measured to put B back:
+   - `LayoutRebuilder.MarkLayoutForRebuild` on B or on G;
+   - `SetLayoutDirty()` on B's `Image`, or disabling that `Image`;
+   - a changed `LayoutElement` value on B or A;
+   - a changed group setting (`spacing`);
+   - `SetActive(false)` on a sibling, a new child, `SetAsLastSibling()` on B, and disabling
+     and enabling the group;
+   - `LayoutRebuilder.ForceRebuildLayoutImmediate(G)`, at once.
+   - Nested groups: G (`VerticalLayoutGroup` + fitter) > D (`VerticalLayoutGroup`) > T1
+     (`LayoutElement`) and T2 (`TextMeshProUGUI`). Moving D, then changing T1's preferred
+     height or T2's text, re-lays out from G and puts D back. With a `LayoutElement` in
+     place of D's group, T1's change re-lays out nothing (the root search stops at D), and D
+     stays moved.
+
+   Not putting B back: `SetVerticesDirty()`, a colour change, setting a `LayoutElement` value
+   or a group setting to the value it has, setting a text to the text it has, and
+   `Canvas.ForceUpdateCanvases()` with nothing marked.
+4. **`OnRectTransformDimensionsChange` is sent once, from the change, and only for the rect's
+   size.** This includes changes made during the canvas update:
+   - A rect resized or re-pivoted from a `Canvas.willRenderCanvases` handler gets the message
+     once, from the setter. It gets nothing after the update.
+   - A rect moved there (`anchoredPosition`, `localPosition`, `localScale`) gets none.
+   - A child resized by its group during the layout rebuild gets one message, during the
+     rebuild (`CanvasUpdateRegistry.IsRebuildingLayout()` true).
+   - A child moved back by its group gets none, during the rebuild or after it. Across the
+     whole run, B's message never came after the canvas update: 0 lines in phase R, against
+     419 during the layout rebuild.
+
+**Where ours deviates.** `CanvasSystem.RunCanvasUpdate` (`src/OniBrutal.UnityEngine/Engine/UI/
+CanvasSystem.cs`) sends `OnRectTransformDimensionsChange` again, after the update, to every
+`RectTransform` that `RectTransformNative.Resolve` saw moved or resized during it
+(`NoteChangedInUpdate`). That breaks rule 4 twice:
+- **Moves.** A child moved back by its group gets a message after the update (B's count rises by
+  one on every re-layout that moves it). When the child has a component that marks the layout
+  on that message, such as a `ContentSizeFitter`, the layout is rebuilt again the next frame.
+  While something keeps moving the child, the loop never ends. Measured in ours with B carrying
+  a `ContentSizeFitter`: during the drag G re-lays out every frame (`SetLayoutHorizontal` + 1 a
+  frame), and B is back at 40 in each frame's canvas update, where the original leaves it at
+  −260. In the game, `RootMenuRight` (with its `ContentSizeFitter`) is moved by
+  `BottomPanelRight`'s group. So once any re-layout of `BottomPanelRight` happens during the
+  drag, it repeats every frame, and the one after the release puts `RootMenuRight` and
+  `DetailsScreen` back. In the original nothing re-lays out after the release, so the moved
+  windows stay.
+- **Resizes.** Every re-layout that resizes or moves a rect is followed by another one: G's layout
+  calls are one higher than the original's after each size change and each poke. A rect resized
+  from a `willRenderCanvases` handler gets two messages (the original, one). One moved there
+  through `anchoredPosition` gets one (the original, none).
+
+**What to do.**
+- Send `OnRectTransformDimensionsChange` only when the rect's size or its pivot-relative rect
+  changes, from the change itself, and never again after the canvas update.
+- A position change (`anchoredPosition`, `localPosition`, `position`, scale) sends nothing,
+  in the canvas update or out of it.
+- `CanvasTests.ARectChangedDuringTheCanvasUpdateHearsOfItAgainAfterIt` asserts the re-send. The
+  news-tile fix of 2026-10-20 (PLAN.md, from PerfProbe `layout.txt`) relied on it, and that
+  trace attributed the tiles' second message to the re-send. This probe sees no second message
+  for a rect resized in the update. Re-check the tiles before deciding: what sends their second
+  message in the original, and whether it reaches only rects whose size changed. Moves must not
+  be re-sent in any case.
+
+| Case (`lay …`) | original: B after the change, after the re-layout | ours before |
+|---|---|---|
+| csf.cwh, B `anchoredPosition.x` −200 | −140 held, no layout call; back at 60 on A's change | the same |
+| csf.cwh, B `localPosition`, `position`, `localScale`; G `anchoredPosition` | held, no layout call | the same |
+| csf.cwh, B `sizeDelta.x` +30 | width back to 120 in that frame's update; 1 message to B | the same, 2 layout calls and 2 messages |
+| csf.none, B `sizeDelta.x` +30 (size not controlled) | width 110 kept, x 55 in that frame's update | the same |
+| csf.cwh.ignB, B moved −200 | held, also after A's change | the same |
+| csf.none.Bcsf, drag (B set each frame, three frames) | −260 held, layout calls unchanged | back at 40 every frame, one layout call a frame |
+| any, drag without a fitter on B | the last value held | the same |
+| poke `SetVerticesDirty`, colour, same values, `ForceUpdateCanvases` | B stays moved | the same |
+| poke `MarkLayoutForRebuild(B)`, `SetLayoutDirty`, sibling inactive, `SetAsLastSibling` | B put back that frame | the same, with one extra layout pass |
+| nested, D moved, T2 text changed | D put back | the same, with one extra layout pass |
+| solo rect, `anchoredPosition` set in `willRenderCanvases` | no message | 1 message after the update |
+| solo rect, `sizeDelta` or `pivot` set in `willRenderCanvases` | 1 message | 2 messages |
+| DraggableUI, `DetailsScreen.anchoredPosition.x` after the drag | −58 (from 302) | 302 |
+
+### RectMask2D culling (measured 2026-10-23)
+
+Found in a mod play-test: Modify Difficulty Settings (Workshop 2962220957). The label
+`…/CustomGameSettingsChanger/Content/ScrollRectContainer/TogglePrefab#10/Label` ("Care Packages",
+a `LocText`, GRAYSTROKE REGULAR SDF 14 pt, alignment `Left`) has its `CanvasRenderer.cull` true
+in the original and false in ours. Its rect runs from world y 78.26 to 109.22. The
+`RectMask2D` on `Content` has its rect's bottom at 94.26 and a `padding` of (0, 8, 0, 8), so
+the clip's bottom is 94.26 + 8 × 1.032 = 102.52 (canvas scale 1.032). The label's mesh
+(local y −7.94 to 6.34, pivot at world y 93.74) ends at 100.29, below the clip. The rect's top
+reaches above it. Its sibling `Background` (an `Image`, 80.84 to 106.64) and that one's
+`Checkmark` (84.26 to 103.23) cross the edge and are not culled in either player. The pixels
+match: what is culled lies under the clip anyway.
+
+**Measured** with `PROBE_SCENARIO=layoutcull` (lines `LC cull …`), at canvas scale 1 and 1.032.
+Each rect is 200 × 30, placed with its centre at the mask's bottom (or top) edge plus d, for d
+from −70 to 70 in steps of 0.5 (and ±0.01, ±0.1, ±0.25). The mask is a `RectMask2D` of 600 ×
+200 at the canvas centre, also with a bottom padding of 10, a top padding of 10, or a softness
+of 20. The kinds:
+- `Image`s at pivots (0, 0.5), (0.5, 0.5) and (0.5, 1);
+- `TextMeshProUGUI`s in NotoSans-Regular 14 pt, with extra padding and kerning: "Care
+  Packages" aligned left, top left, bottom left and centre, at pivots (0, 0.5), (0.5, 1) and
+  (0.5, 0); "", " " and "AAA"; and a 100-high rect, aligned left and top left.
+
+- **The clip rect** is the mask's rect in the root canvas's space, shrunk by `padding` (x left, y
+  bottom, z right, w top), intersected with the enclosing masks' rects, as already described.
+  `softness` does not change it: with softness 20 the cull offsets are those without it.
+- **The test is `Rect.Overlaps` with exclusive edges:** a graphic is culled when its cull rect
+  does not overlap the clip rect. Touching edges count as not overlapping. An overlap of any
+  size, however partial, keeps the graphic. Measured: an `Image` whose top lies exactly on the
+  clip's bottom (d = −15) is culled; at d = −14.5 it is not. At the top edge, d = 15 is culled
+  and 14.5 is not. With a bottom padding of 10, the edge moves up by 10 (d = −5 culled). At
+  scale 1.032 the exact-touch case falls either way, through float rounding.
+- **An `Image` (the `MaskableGraphic` default) culls with its rect:** the four corners of its
+  `RectTransform` rect in the root canvas's space. The pivot makes no difference.
+- **A `TextMeshProUGUI` culls with its mesh's bounds,** not with its rect and not with
+  `textBounds`. The bounds are the axis-aligned box of all the mesh's vertices in its local
+  space, mapped to the root canvas's space. Vertices TMP leaves unused (a space's quad, the
+  slack of the vertex buffer: "Care Packages" has 52 vertices, "AAA" 16) sit at the local
+  origin. So the box always includes the pivot point. An empty text, or one of white space
+  alone, is a point at the pivot (4 vertices).
+  - Measured for every text kind: the offset at which it is culled is the one where that box
+    stops overlapping, to the 0.5 step. "Care Packages" centred vertically has a box from
+    −12.29 to 8.71 about the pivot and is culled from d = −9 at the bottom edge, where its rect
+    would be from d = −15. Aligned to the top of a 100-high rect, its glyphs run from 28.2 to
+    49.2 above the pivot, but the box starts at 0. So it is culled at the top edge from d = 0,
+    not from d = −28.
+  - In the game, the box explains the label above: it ends 2.2 below the padded clip.
+- **When the cull is evaluated:** in the clipping step of the canvas update (after the layout
+  rebuild, before the graphic rebuild), for each graphic under the mask, when:
+  - the clip rect changed (the mask moved, measured: culled in that frame);
+  - the graphic moved, through its own `anchoredPosition` or `localPosition` or a parent's;
+  - its scale or its rect's size changed (an `Image` grown into the clip is shown in that
+    frame, one shrunk out of it is culled in that frame);
+  - a text's mesh changed. After a text or font-size change, the cull follows the new mesh in
+    the same frame's update. After an alignment change, it follows one frame later. A text set
+    to "" keeps its cull. Nothing else re-evaluates it: a culled text whose mesh stays put stays
+    culled.
+  - A text made in place is culled with its first mesh from its first canvas update. That
+    mesh comes from the same update, not from the empty mesh before it: a text whose pivot
+    lies 0.5 below the clip, with glyphs reaching into it, is not culled.
+
+**Where ours deviates.**
+- `TextMeshProUGUI` has no `Cull` of its own, so it culls with its rect
+  (`MaskableGraphic.Cull`, `RootCanvasRect`). Every text kind is culled at the `Image`'s offsets
+  (d = −15 at the bottom, d = 15 at the top; −50 and 50 for the 100-high rect). Give
+  `TMP_Text`/`TextMeshProUGUI` a `Cull(clipRect, validRect)` that tests the bounds of the mesh
+  its canvas renderer was given. Our TMP builds that mesh as the original does: the probe's
+  `meshLocal` boxes match the original's, unused vertices at the origin included. Map the
+  corners of the box with the text's transform into the root canvas's space, as
+  `RootCanvasRect` maps the rect's. Then re-evaluate it when the mesh changes, as above.
+- `RectMask2D.PerformClipping` (`src/UnityEngine.UI/Core/Mask.cs`) re-culls a graphic only when
+  `canvasRenderer.hasMoved`, which follows the transform, not the rect. An `Image` resized
+  across the edge keeps its old cull (`time img size in` / `size out`). A size change must
+  count as a move here.
+- Two values the probe logged on the way: our `TMP_Text.bounds` is the glyphs' box, but the
+  original's equals the mesh's bounds (pivot included). Our empty text has 0 vertices, where
+  the original has 4. The original's `textBounds` of an empty text is the sentinel box
+  (±2147483648); ours is a point at the pivot. Neither is used by the cull above.
+
+| Case (`cull …`) | original: culled from | ours before |
+|---|---|---|
+| `Image`, any pivot, bottom edge | d ≤ −15 (top on the edge) | the same |
+| `Image`, top edge | d ≥ 15 | the same |
+| `Image`, bottom padding 10 | d ≤ −5 | the same |
+| `Image`, softness 20 | d ≤ −15 | the same |
+| "Care Packages", left (box −12.29..8.71) | d ≤ −9 | d ≤ −15 |
+| the same, top left (box −6.80..14.20) | d ≤ −14.5 | d ≤ −15 |
+| the same, bottom left (box −17.77..3.23) | d ≤ −3.5 | d ≤ −15 |
+| the same, top edge | d ≥ 12.5 | d ≥ 15 |
+| "AAA" (box −8.93..8.09) | d ≤ −8.5 | d ≤ −15 |
+| "" and " " (a point at the pivot) | d ≤ 0 (bottom), d ≥ 0 (top) | d ≤ −15, d ≥ 15 |
+| 100-high rect, top left, top edge (glyphs 28.2..49.2, box 0..49.2) | d ≥ 0 | d ≥ 50 |
+| "Care Packages", bottom padding 10 | d ≤ 1 | d ≤ −5 |
+| `Image` grown across the edge (`sizeDelta.y` +100) | shown in that frame | stays culled |
+| text whose box is out, rect in, nothing changes | culled | not culled |
+| text whose box is out after an alignment change | culled one frame later | not culled |
+| Modify Difficulty Settings, "Care Packages" label | culled; shown when scrolled 100 up, culled again back | not culled |
 
 ### Measured on the shipped package
 

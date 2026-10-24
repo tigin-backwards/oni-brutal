@@ -1,0 +1,49 @@
+# Bleachstone and Slime Refinery (1886699455), classes P, B; base game only (VANILLA_ID).
+#
+# What it does: two refineries on the Oxylite Refinery's animation, in the Refinement build
+# menu, unlocked by Catalytics (Improved Oxygen in the base game): the Bleachstone Refinery takes
+# chlorine by gas pipe and sand by delivery and makes bleach stone; the Slime Refinery takes
+# polluted oxygen and dirt and makes slime. Both need 1.2 kW, refined metal and plastic. A
+# BuildingComplete.OnSpawn postfix tints them (yellow-green and dull red) so they don't look like
+# the Oxylite Refinery.
+# How a player reaches it: research Catalytics; build menu, Refinement.
+# What changes: two buildings.
+#
+# Setup completes Catalytics (as research would) and stands one of each refinery on the surface
+# (BuildingDef.Build, revealed: the base has no 3x4 room or plastic yet). The spec opens the
+# Refinement menu, where both refineries are offered after the game's own, opens the Bleachstone
+# Refinery's product info, and checks both finished refineries carry the mod's tints.
+from: vanilla-base
+mods: [1886699455]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"Catalytics\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Game.Instance", method: Trigger, args: [-107300940]}}
+  - driver: {setup.call: {target: "PlanScreen.Instance._researchedDefs", method: Clear}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Ktoblin.BleachStoneRefinery\")", method: Build, args: [88789, "Neutral", null, ["Steel", "Polypropylene"], 293.15]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Ktoblin.SlimeRefinery\")", method: Build, args: [88794, "Neutral", null, ["Steel", "Polypropylene"], 293.15]}}
+  - driver: {setup.call: {type: GridVisibility, method: Reveal, args: [215, 348, 10, 10.0]}}
+steps:
+  - expect_state:
+      "DlcManager.IsExpansion1Active()": false
+      "Research.Instance.GetTechInstance(\"Catalytics\").IsComplete()": true
+      "Db.Get().Techs.Get(\"Catalytics\").unlockedItemIDs": {contains: Ktoblin.BleachStoneRefinery}
+  - expect_state:
+      "Db.Get().Techs.Get(\"Catalytics\").unlockedItemIDs": {contains: Ktoblin.SlimeRefinery}
+  - run: {seconds: 5}
+  - click: {ui: "**/PlanScreen/Toggle:Refinement"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/Ktoblin.BleachStoneRefinery*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/Ktoblin.SlimeRefinery*": {active: true}
+  - click: {ui: "**/BuildingGroups/**/Grid/Ktoblin.BleachStoneRefinery*"}
+  - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
+  - shot: {name: product, crop: "**/ProductInfoScreen", threshold: 0.04}
+  - key: {code: Escape}
+  # Both are OxyliteRefinery machines underneath.
+  - expect_state:
+      "count:all:OxyliteRefinery::[*] if .name == Ktoblin.BleachStoneRefineryComplete": 1
+      "count:all:OxyliteRefinery::[*] if .name == Ktoblin.SlimeRefineryComplete": 1
+  - expect_state:
+      "count:all:OxyliteRefinery::[*] if .name == Ktoblin.BleachStoneRefineryComplete and .GetComponent<KBatchedAnimController>.TintColour.r == 195 and .GetComponent<KBatchedAnimController>.TintColour.b == 125": 1
+      "count:all:OxyliteRefinery::[*] if .name == Ktoblin.SlimeRefineryComplete and .GetComponent<KBatchedAnimController>.TintColour.r == 128 and .GetComponent<KBatchedAnimController>.TintColour.g == 96": 1
+  - world_shot: {name: refineries, ortho: 5, at: [215, 348]}

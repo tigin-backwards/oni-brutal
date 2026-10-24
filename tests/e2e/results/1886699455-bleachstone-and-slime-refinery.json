@@ -1,0 +1,61 @@
+{
+ "spec": "mods/1886699455-bleachstone-and-slime-refinery.yaml",
+ "mods": [
+  "1886699455"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "played on vanilla-base (base game): after Catalytics both refineries are in the Refinement build menu (product info shot), and the two stood on the surface carry the mod's tints (world shot); they are not run (no chlorine or polluted oxygen yet)",
+ "updated": "2026-10-24",
+ "commit": "988658b",
+ "mod_dlls": {
+  "1886699455": {
+   "BleachStoneRefinery.dll": "1ca000bc374bc164f252be667e63084ba66921ad35d0b44f17a158e53f4f761d"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-171928-5dd20e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T17:19:28",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-172046-593c01",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T17:20:46",
+    "lane": 16,
+    "reference_run": "20261024-171928-5dd20e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.0,
+     "refineries": 0.001396
+    }
+   },
+   {
+    "run": "20261024-172046-593c01",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T17:21:56",
+    "lane": 16,
+    "reference_run": "20261024-171928-5dd20e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.0,
+     "refineries": 0.007588
+    }
+   }
+  ]
+ }
+}

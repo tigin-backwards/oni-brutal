@@ -160,6 +160,21 @@ past the preferred width. Check the rule with `tools/UnityProbe/wc-check.py rule
 compare the players with `wc-check.py diff ORIG OURS`. `textmeshpro.md` ("Words and their
 separators") records what it measured.
 
+With `PROBE_SCENARIO=childactive` only the child-activation probe runs (`ChildActivation.cs`, lines
+`CA …`, 10 s into the main menu, a few seconds). A `GridLayoutGroup` (a subclass counting its
+layout calls and messages) holds nine children; some start inactive and have never been laid
+out. The children are bare rects with an `Image` child, bare rects alone, `Image`s or
+`LayoutElement`s, and the grid is either a root group or nested in two `VerticalLayoutGroup`s
+with a `ContentSizeFitter`, as the build menu nests it. One step at a time: a child appears,
+one disappears, all swap after a reorder, a child's own child is toggled, the grid component is
+disabled. Each logs the messages the grid and the children receive, every
+`RectTransform.reapplyDrivenProperties`, the layout rebuild queue (read from the registry by
+reflection) and the children's positions, through two frames. Measured 2026-10-23: `SetActive`
+raises `reapplyDrivenProperties` for each RectTransform whose `activeInHierarchy` changed, the
+child before its parent, before `OnEnable`/`OnDisable`, with no
+`OnRectTransformDimensionsChange`; the group is queued at once and re-lays out in that frame.
+`ActivatedLayoutChildTests` encodes it.
+
 With `PROBE_SCENARIO=floatprec` only the float-precision probe runs (`FloatPrecision.cs`, lines
 `VAL fp …`, at mod load; the full run includes it in its values): float expressions whose
 float32 and double results differ, each line saying which one the player gave. Its header

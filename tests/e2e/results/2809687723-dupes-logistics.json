@@ -3,12 +3,12 @@
  "mods": [
   "2809687723"
  ],
- "verdict": "failed",
- "why": "a run of ours failed",
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
  "findings": [],
- "note": "the Green Storage Pod is picked in the Shipping menu, built and selected: it holds 800 t and its capacity slider goes that far; fails in ours on the known open difference of a KInputTextField's caretPosition after a submitted edit (0 in ours, 4 in the original) in its capacity field",
+ "note": "the Green Storage Pod is picked in the Shipping menu, built and selected: it holds 800 t and its capacity slider goes that far; 1000 typed in its capacity field sets it, and the capacity screen matches the original's",
  "updated": "2026-10-24",
- "commit": "f834d94",
+ "commit": "bbebfbe",
  "mod_dlls": {
   "2809687723": {
    "Dupes Logistics.dll": "e6e4c8a3965eafdc79dcff4cba8f6f5035acfbecfb237ddd630f3898ed9de5c1",
@@ -28,20 +28,17 @@
   ],
   "ours": [
    {
-    "run": "20261024-073346-2ff035",
+    "run": "20261024-082417-e90614",
     "index": 1,
-    "verdict": "fail",
-    "date": "2026-10-24T07:33:46",
-    "lane": 17,
-    "reasons": [
-     "ui_dump capacity: 1 difference(s)"
-    ],
+    "verdict": "pass",
+    "date": "2026-10-24T08:24:17",
+    "lane": 12,
     "reference_run": "20261024-064932-a26cbc",
     "new_signatures": 0,
     "findings": [],
     "ui_dump": {
      "capacity": {
-      "differences": 1
+      "differences": 0
      }
     },
     "shots": {
@@ -49,20 +46,17 @@
     }
    },
    {
-    "run": "20261024-073346-2ff035",
+    "run": "20261024-082417-e90614",
     "index": 2,
-    "verdict": "fail",
-    "date": "2026-10-24T07:35:14",
-    "lane": 17,
-    "reasons": [
-     "ui_dump capacity: 1 difference(s)"
-    ],
+    "verdict": "pass",
+    "date": "2026-10-24T08:25:31",
+    "lane": 12,
     "reference_run": "20261024-064932-a26cbc",
     "new_signatures": 0,
     "findings": [],
     "ui_dump": {
      "capacity": {
-      "differences": 1
+      "differences": 0
      }
     },
     "shots": {

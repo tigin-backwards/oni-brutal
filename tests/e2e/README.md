@@ -92,6 +92,8 @@ ignore_fields: [depth]           # NAME=VALUE members left out of every ui_dump'
 tolerance: 2                     # ui_dump rect tolerance in pixels (default 2)
 thresholds: {shot: 0.02, world_shot: 0.05}   # pixel fractions (the defaults)
 memory_gb: 11                    # the players' budget counts each player for this (default: by fixture)
+spaced_out: false                # Spaced Out off in both players (default: the fixture's mode, from its
+                                 # header's dlcIds; on for `from: main-menu`)
 setup: [...]                     # steps run first; the only place for driver setup.call
 steps: [...]
 ```
@@ -353,6 +355,20 @@ Fixtures are blessed saves (`--bless` copies a spec's `save:` into `fixtures/`, 
 - `early-base` (`early-base.yaml`): dug out on both sides of the pod, with an outhouse, a manual
   generator, an unpowered research station and a cot. Debris lies on the floors.
 - `prehistoric1`: a Prehistoric colony at cycle 1 (copied from a played save, not blessed).
+- `vanilla-base` (`vanilla-base.yaml`): a base-game colony, no Spaced Out, for mods that support
+  the base game only (`supportedContent: VANILLA_ID`). The original player starts at the main
+  menu with Spaced Out off (`from: main-menu`, `spaced_out: false`), plays New Game, Survival,
+  Classic, Terra at coordinate `SNDST-A-12345-0-0-0`, embarks, digs out both sides of the
+  printing pod and the cuprite above its west end (up a ladder), builds an outhouse, a cot, a
+  manual generator and a research station wired to it, researches Basic Farming and is saved
+  at cycle 3 (about 0.8 MB; its header's dlcIds are `[""]`). Bless it with
+  `scripts/e2e.py --player original --bless vanilla-base`. A spec `from: vanilla-base` runs
+  both players in the base game: the runner writes `EXPANSION1_ID.ENABLED: 0` into the run's
+  `kplayerprefs.yaml` for a save whose header lists no `EXPANSION1_ID`, as
+  `scripts/windows-run-home.sh` does.
+
+`from: main-menu` loads no fixture: the steps start at the main menu, as `vanilla-base.yaml`'s
+do. Spaced Out stays on there unless the spec says `spaced_out: false`.
 
 What a spec needs beyond them (a researched tech, materials, Duplicants on offer) it sets up in
 `setup:` through E2eDriver, as the pilot specs do, rather than from a later fixture.

@@ -1,0 +1,71 @@
+# A base-game colony (no Spaced Out), for mods that support the base game only
+# (`supportedContent: VANILLA_ID`). Saves the vanilla-base checkpoint.
+#
+# From the main menu with Spaced Out off: New Game, Survival, Classic, Terra at a fixed
+# coordinate, embark. Then, as early-base does: dig out both sides of the printing pod, build an
+# outhouse and a cot, climb a ladder to the cuprite above the west end, build a manual generator
+# and a research station wired to it behind the pod, research Basic Farming and play on to
+# cycle 3. (The pit west of the pod has no floor, and OniMcp's own wiring went for a far power
+# source, so the metal comes from above and the wire is laid by hand.)
+from: main-menu
+spaced_out: false
+steps:
+  - ui_wait: {path: "**/MainMenu/**/MainMenuButtons", cond: stable, frames: 3000}
+  - click: {text: "NEW GAME", under: "**/MainMenuButtons"}
+  - ui_wait: {path: "**/ModeSelectScreen/Panel/Content/RootToggles/StandardGame", cond: stable}
+  - click: {ui: "**/ModeSelectScreen/Panel/Content/RootToggles/StandardGame"}
+  - ui_wait: {path: "**/ClusterCategorySelectionScreen/Panel/Content/RootToggles/VanillaStyleGame", cond: stable}
+  - click: {ui: "**/ClusterCategorySelectionScreen/Panel/Content/RootToggles/VanillaStyleGame"}
+  - ui_wait: {path: "**/ColonyDestinationScreen2/Layout/Buttons/LaunchButton", cond: stable, frames: 3000}
+  - click: {ui: "**/CoordinateContainer/SeedInput"}
+  - ui_wait: {path: "**/CoordinateContainer/SeedInput", cond: stable}
+  - type: {ui: "**/CoordinateContainer/SeedInput", text: "SNDST-A-12345-0-0-0", clear: true, enter: true}
+  - ui_wait: {path: "**/CoordinateContainer/SeedInput/Text Area/Text", cond: text, value: "~SNDST-A-12345-0-0-0"}
+  - expect_state:
+      "CustomGameSettings.Instance.GetCurrentQualitySetting(\"ClusterLayout\").id": clusters/SandstoneDefault
+      "CustomGameSettings.Instance.GetCurrentQualitySetting(\"WorldgenSeed\").id": "12345"
+  - click: {ui: "**/ColonyDestinationScreen2/Layout/Buttons/LaunchButton"}
+  - ui_wait: {path: "**/MinionSelectScreen/Content/BottomContent/Buttons/ProceedButton", cond: stable, frames: 60000}
+  - click: {ui: "**/MinionSelectScreen/Content/BottomContent/Buttons/ProceedButton"}
+  - ui_wait: {path: "**/MinionSelectScreen", cond: gone, frames: 6000}
+  - expect_state:
+      "DlcManager.IsExpansion1Active()": false
+      "ClusterManager.Instance.WorldContainers.Count": 1
+      "Components.LiveMinionIdentities.Count": 3
+  - expect: {duplicants: 3, buildings: {Headquarters: 1}}
+  - dig: [119, 189, 123, 191]
+  - dig: [134, 189, 140, 191]
+  - run: {seconds: 900, until: {pending_digs: 0}}
+  - build: {prefab: Outhouse, at: [120, 189]}
+  - build: {prefab: Bed, at: [136, 189]}
+  # Metal for the generator, the research station and its wire: the cuprite above the west end,
+  # reached by a ladder dug upwards.
+  - build: {prefab: Ladder, cells: [[119, 189], [119, 190], [119, 191]]}
+  - run: {seconds: 1200, until: {pending_construction: 0}}
+  - dig: [119, 192, 121, 194]
+  - run: {seconds: 1200, until: {pending_digs: 0}}
+  - build: {prefab: Ladder, cells: [[119, 192], [119, 193], [119, 194]]}
+  - run: {seconds: 1200, until: {pending_construction: 0}}
+  - dig: [117, 196, 121, 196]
+  - run: {seconds: 1200, until: {pending_digs: 0}}
+  - build: {prefab: ManualGenerator, at: [130, 189]}
+  - build: {prefab: ResearchCenter, at: [122, 189]}
+  # A wire from the research station's input (its left cell) to the generator's output, behind
+  # the pod.
+  - build: {prefab: Wire, cells: [[122, 189], [123, 189], [124, 189], [125, 189], [126, 189], [127, 189], [128, 189], [129, 189], [130, 189]]}
+  - run: {seconds: 1200, until: {pending_construction: 0}}
+  - expect:
+      duplicants: 3
+      buildings: {Outhouse: 1, ResearchCenter: 1, ManualGenerator: 1, Bed: 1}
+  # Research: Basic Farming queued on the research screen, then a few cycles of play.
+  - open: {management: research}
+  # The base game's research screen names each entry by its title's link text.
+  - ui_wait: {path: "**/ResearchScreen/**/ScrollContent/*\"FARMINGTECH\"* Panel", cond: stable, frames: 600}
+  - click: {ui: "**/ResearchScreen/**/ScrollContent/*\"FARMINGTECH\"* Panel"}
+  - key: {code: Escape}
+  - expect_state:
+      "Research.Instance.GetActiveResearch().tech.Id": FarmingTech
+  - run: {seconds: 1800}
+  - expect_state:
+      "Research.Instance.GetTechInstance(\"FarmingTech\").IsComplete()": true
+  - save: vanilla-base

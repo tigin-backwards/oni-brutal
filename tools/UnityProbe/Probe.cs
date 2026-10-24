@@ -101,6 +101,11 @@ namespace SemanticsProbe
                 go.AddComponent<TallLine>();
                 return;
             }
+            if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "emptytext")
+            {
+                go.AddComponent<EmptyText>();
+                return;
+            }
             if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "wordcount")
             {
                 go.AddComponent<WordCount>();

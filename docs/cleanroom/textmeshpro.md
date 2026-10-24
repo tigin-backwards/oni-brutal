@@ -2033,6 +2033,107 @@ reflection).
   group's source is centred in ours, top in the original, and its copies follow it; the
   fontStyle of three groups and which copy logs its Awake untagged follow their sources too.
 
+### Texts with nothing to lay out (measured 2026-10-24)
+
+Found in a mod play-test: Adjustable Auto Sweeper (2971184827) shows the game's
+`IntSliderSideScreen`, whose `SliderSet.SetTarget` sets `unitsLabel.text` to the target's
+`SliderUnits`, here "". The label (`…/IntSliderSideScreen/Contents/UnitsLabel`, NotoSans 16 pt,
+95.7 × 15, top left) then reports `isTextOverflowing` true and `firstOverflowCharacterIndex` 0
+in the shipped package, and false and -1 in this implementation. The `textInfo` counts are the
+same (none). One line of NotoSans 16 pt is 21.75 high, so any visible text overflows that rect
+at 0; the label had such a text before it was set to "".
+
+Measured with `PROBE_SCENARIO=emptytext` (tools/UnityProbe, `EmptyText.cs`, lines `ET …`), at
+the main menu. The texts were "", null, a space, "<b></b>", "<color=#FF0000></color>",
+"<size=150%></size>", "<i></i><u></u>", "<b> </b>", "<br>" and U+200B, in NotoSans-Regular
+16 pt and GRAYSTROKE REGULAR SDF 12 pt, set up as `SetTextStyleSetting` does, top left, 95.7
+wide. The heights were 0, 5, 15, one line of the font and a hundredth under and over it, and
+100. Each was tried in Overflow, Truncate, Ellipsis, Masking, ScrollRect and Page, wrapping on
+and off, auto-size off and on (`fontSizeMin` 4, `fontSizeMax` the size), in a new text
+(`fresh`). Then "kg" and "AB\nCD" were laid out first, in a rect 15 high, one line + 0.01 high
+(where "AB\nCD" overflows at 3) or 100 high. Then the text was set to "", null, a space or
+"<b></b>", laid out by `ForceMeshUpdate` or by the frame's own rebuild, and the rect resized to
+100, 0 and 15 (`after`). Last, auto-size was tried with `fontSizeMax` 8 above and 4 below the
+size set (`automax`). Each case logged `isTextOverflowing`, `firstOverflowCharacterIndex`,
+`isTextTruncated`, `characterCount`, `lineCount`, `spaceCount`, `wordCount`, `pageCount`,
+`fontSize`, and then `preferredWidth` and `preferredHeight`. The flags were read before the
+preferred sizes, as E2eDriver's dump reads them, and again after. Two runs of the shipped package
+gave the same 5,904 results. `tools/UnityProbe/et-check.py rule LOG` predicts all 5,376 of them
+that the rule below covers. In this implementation it predicts 2,545, and `et-check.py diff ORIG
+OURS` finds 2,993 of 6,000 results differing.
+
+- **An empty text keeps the last overflow.** When the text is "" or null, the layout reports
+  nothing and changes neither `isTextOverflowing` nor `firstOverflowCharacterIndex`. Both stay
+  as the last layout of a text with something in it left them.
+  - "kg" in 95.7 × 15 overflows at 0, and after `text = ""` it still reports true and 0.
+    "AB\nCD" in 95.7 × 21.76 overflows at 3, and "" then reports true and 3. Where the earlier
+    text fitted (95.7 × 100, or "kg" one line + 0.01 high), "" reports false and -1.
+  - The same in every overflow mode, by `ForceMeshUpdate` or by the frame's rebuild, and after
+    the rect is resized (to 100, to 0, to 15): resizing an empty text changes nothing.
+  - A text that was never anything but empty reports false and -1 in every rect, 0 high too.
+  - The rest is cleared: `isTextTruncated` false (a Truncate that cut "kg" leaves true, 0 and
+    not truncated), `characterCount`, `lineCount`, `spaceCount`, `wordCount` and `pageCount` 0,
+    and the preferred size 0 × 0.
+  - Under auto-size, the earlier text's overflow is kept in the same way. Each earlier text here
+    fitted at some size, so each gave false and -1. `fontSize` becomes the size set (the value
+    code last gave `fontSize`), but no more than `fontSizeMax`. It does not stay at the earlier
+    text's auto-sized size: "kg" shrunk to 11 in 95.7 × 15, then "", reports 16 (`fontSizeMax`
+    16 or 24) and 12 with `fontSizeMax` 12. GRAYSTROKE 12 pt with `fontSizeMax` 8 reports 8.
+  - null behaves as "" throughout.
+- **A text of tags alone is laid out** and is not empty in this sense. "<b></b>",
+  "<color=#FF0000></color>", "<size=150%></size>" and "<i></i><u></u>" have no characters, no
+  lines and no pages. They report false and -1 in every rect, mode and wrapping, whatever came
+  before: "kg" overflowing at 0, then "<b></b>", reports false and -1. Their preferred size is
+  0.01 × 0.01, not the empty text's 0 × 0.
+- **White space alone** (a space, "<b> </b>", "<br>", U+200B) is laid out as "Overflow at white
+  space" above says: false and -1 in every rect, mode and wrapping, after an overflowing text
+  too. It has 1 character, 1 line and 1 page, `spaceCount` 1 (0 for U+200B) and `wordCount` 1,
+  and Truncate and Ellipsis keep the character. Its preferred size is 0.01 × 0.01.
+- **Auto-size with nothing visible.** A text of white space or tags alone takes `fontSizeMax`
+  in every rect, 0 high too: 24 with the size set at 16 and `fontSizeMax` 24, and 12 with
+  `fontSizeMax` 12. An empty text takes the size set, as above.
+- **Preferred size under auto-size** (noted in passing, one unwrapped line): `preferredWidth`
+  and `preferredHeight` are those of the text at `fontSizeMax`, not at the size auto-size chose.
+  "kg" shrunk to 11 in 95.7 × 15 is 18.38 × 21.76 with `fontSizeMax` 16, 27.57 × 32.63 with 24,
+  and 13.79 × 16.32 with 12. This implementation gives the same widths, but its heights are
+  those at the chosen size (14.96). That contradicts "preferredHeight uses the auto-sized size"
+  under "Measured on the shipped package" above. That line may hold for wrapped text, which
+  this probe did not try.
+
+Where this implementation deviates (`TMP_Text.Place.cs` sets `m_firstOverflowCharacterIndex`
+from each layout, an empty one too):
+- An empty text resets the overflow to false and -1. So the side screen's label, and any label
+  emptied after it overflowed, differs from the shipped package.
+- A text of tags alone has a preferred size of 0 × 0.
+- Auto-size shrinks a text of white space alone as if it had a line to fit: a space in
+  95.7 × 15 gets 11, and in 95.7 × 0 it gets 4 (`fontSizeMin`). A text of tags alone, and an
+  empty one, keep the size set, or the earlier text's auto-sized size.
+- The preferred height under auto-size is taken at the chosen size (above).
+
+| Case (NotoSans-Regular 16 pt, rect 95.7 wide) | shipped: overflowing, index; other | this implementation |
+|---|---|---|
+| "kg" at height 15, then "" (Adjustable Auto Sweeper's UnitsLabel) | true, 0; 0 characters, 0 × 0 | false, -1 |
+| the same, then the rect resized to 100 | true, 0 | false, -1 |
+| "kg" at 15, Truncate, then "" | true, 0; not truncated | false, -1; not truncated |
+| "AB\nCD" at 21.76, then "" (Overflow, Truncate, Ellipsis) | true, 3 | false, -1 |
+| "kg" at 100, then "" | false, -1 | false, -1 |
+| "kg" at 15, then null | true, 0 | false, -1 |
+| "" in a new text, any height, mode, auto-size | false, -1; 0 × 0 | the same |
+| "kg" at 15, then "<b></b>" | false, -1; 0.01 × 0.01 | false, -1; 0 × 0 |
+| "<color=#FF0000></color>" in a new text | false, -1; 0 characters, 0.01 × 0.01 | false, -1; 0 × 0 |
+| " " at 0, Truncate | false, -1; 1 character | the same |
+| " " at 15, auto-size, size 16, `fontSizeMax` 24 | `fontSize` 24 | 11 |
+| "<b></b>" at 15, auto-size, size 16, `fontSizeMax` 24 | `fontSize` 24 | 16 |
+| "kg" at 15, auto-size (11), then "", `fontSizeMax` 24 | `fontSize` 16 | 11 |
+| "" at 15, auto-size, size 16, `fontSizeMax` 12 | `fontSize` 12 | 16 |
+| "kg" at 15, auto-size (11), `fontSizeMax` 24: preferred size | 27.57 × 32.63 | 27.57 × 14.96 |
+
+Not measured: `fontSizeMin` above the size set, Linked mode, `SetText` and `SetCharArray`, an
+empty text in a `TMP_InputField` (its text is U+200B, see "Further characters" above), margins,
+and whether anything other than a layout of a non-empty text, such as a font or size change,
+clears the kept overflow. In passing, "AB\nCD" cut by Ellipsis at 21.76 reports `spaceCount` 1
+in the shipped package and 0 here.
+
 ## Verification
 
 1. **Build:**

@@ -189,6 +189,20 @@ tall rect (`metrics`), and the details screen's title in its own rect. Check the
 `tools/UnityProbe/tl-check.py rule LOG`, and compare the players with `tl-check.py diff ORIG
 OURS`. `textmeshpro.md` ("Lines that grow part-way") records what it measured.
 
+With `PROBE_SCENARIO=emptytext` only the empty-text probe runs (`EmptyText.cs`, lines `ET …`, 10 s
+into the main menu, about a minute). It lays out texts with nothing visible: "", a space, texts
+of rich-text tags alone ("<b></b>", "<b> </b>", "<br>") and U+200B, in NotoSans-Regular 16 pt
+and GRAYSTROKE REGULAR SDF 12 pt, in rects 95.7 wide and 0 to 100 high (one line of the font
+and a hundredth under and over it among them), in every overflow mode but Linked, wrapping on
+and off, auto-size off and on (`fresh` lines, a new text per case). Then "kg" and "AB\nCD" are
+laid out in a rect they overflow or fit, the text set to "", a space, "<b></b>" or null and laid
+out by `ForceMeshUpdate` or by the frame's rebuild, and the rect resized (`after` lines); and
+auto-size with `fontSizeMax` above and below `fontSize` (`automax` lines). Each logs
+`isTextOverflowing`, `firstOverflowCharacterIndex`, `isTextTruncated`, the `textInfo` counts,
+the font size and the preferred size. Check the rule with `tools/UnityProbe/et-check.py rule
+LOG`, and compare the players with `et-check.py diff ORIG OURS`. `textmeshpro.md` ("Texts with
+nothing to lay out") records what it measured.
+
 With `PROBE_SCENARIO=childactive` only the child-activation probe runs (`ChildActivation.cs`, lines
 `CA …`, 10 s into the main menu, a few seconds). A `GridLayoutGroup` (a subclass counting its
 layout calls and messages) holds nine children; some start inactive and have never been laid

@@ -14,6 +14,7 @@ class FakeGame:
     def __init__(self):
         self.elements = {}
         self.state = {}
+        self.lists = {}
         self.requests = []
         self.camera = {'pos': [0, 0], 'ortho': 20}
         self.canvases_hidden = False
@@ -113,6 +114,12 @@ class FakeGame:
                 raise Failure(f'no field or property {args["expr"]} on Research')
             value = self.state[args['expr']]
             return {'value': value, 'type': 'System.Int32' if isinstance(value, int) else 'System.Object'}
+        if cmd == 'state.each':
+            # self.lists: an expression's items, each {member: value}.
+            if args['expr'] not in self.lists:
+                raise Failure(f'no type at the start of {args["expr"]}')
+            items = [[item[m] for m in args['members']] for item in self.lists[args['expr']]]
+            return {'count': len(items), 'items': items}
         if cmd == 'camera.get':
             return dict(self.camera)
         if cmd == 'camera.set':
@@ -443,6 +450,30 @@ class DriverTests(unittest.TestCase):
         self.assertIn("no value saved as 'nothing'", str(caught.exception))
         run.original_values = {'5:inventory': 150.0}
         run.step('expect_state', {'inventory': '>= 0.9 * original'}, 5)
+
+    def test_count_and_sum_read_every_item_in_one_request(self):
+        spawnables = [{'.spawnInfo.id': 'GeyserGeneric_steam', '.isSpawned': False, '.spawnInfo.units': 2.0},
+                      {'.spawnInfo.id': 'Tile', '.isSpawned': True, '.spawnInfo.units': 0.0},
+                      {'.spawnInfo.id': 'GeyserGeneric_steam', '.isSpawned': True, '.spawnInfo.units': 180.0},
+                      {'.spawnInfo.id': 'Hatch Baby', '.isSpawned': False, '.spawnInfo.units': True}]
+        self.game.lists['SaveGame.Instance.worldGenSpawner.spawnables'] = spawnables
+        self.game.lists['all:Clearable::'] = []
+        run = self.run_for()
+        run.step('expect_state', {
+            'count:SaveGame.Instance.worldGenSpawner.spawnables[*] if .spawnInfo.id == GeyserGeneric_steam': 2,
+            "count:SaveGame.Instance.worldGenSpawner.spawnables[*] if .spawnInfo.id == 'Hatch Baby'": 1,
+            'count:SaveGame.Instance.worldGenSpawner.spawnables[*] if .isSpawned == true and .spawnInfo.id != Tile': 1,
+            'count:SaveGame.Instance.worldGenSpawner.spawnables[*]': 4,
+            'count:all:Clearable::[*] if .isMarkedForClear == true': 0,
+            # Floats compare as Python prints them; a sum adds numbers only (not booleans).
+            'count:SaveGame.Instance.worldGenSpawner.spawnables[*] if .spawnInfo.units == 180.0': 1,
+            'sum:SaveGame.Instance.worldGenSpawner.spawnables[*].spawnInfo.units': 182.0,
+            'sum:SaveGame.Instance.worldGenSpawner.spawnables[*].spawnInfo.units if .isSpawned == false': 2.0}, 1)
+        each = [args for cmd, args in self.game.requests if cmd == 'state.each']
+        self.assertEqual(len(each), 8)
+        self.assertEqual(each[-1], {'expr': 'SaveGame.Instance.worldGenSpawner.spawnables',
+                                    'members': ['.isSpawned', '.spawnInfo.units']})
+        self.assertFalse([cmd for cmd, _ in self.game.requests if cmd == 'state.get'])
 
     def test_original_value_is_compared_when_known(self):
         self.game.state['n'] = 4

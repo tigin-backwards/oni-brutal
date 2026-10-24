@@ -72,6 +72,39 @@ namespace E2eDriver
             return current is Static s2 ? s2.Type : current;
         }
 
+        /// state.each: EXPR's items (an array, list or other enumerable), and from each item
+        /// the values of MEMBERS (".a.b" paths, "" for the item itself), all in one frame. The
+        /// runner's count: and sum: read these instead of a request per item and member.
+        public static JObject Each(JObject args)
+        {
+            var expr = (string)args["expr"] ?? throw new DriverError("state.each needs expr");
+            var members = (args["members"] as JArray)?.Select(m => (string)m).ToList() ?? new List<string> { "" };
+            int depth = (int?)args["depth"] ?? 2, limit = (int?)args["limit"] ?? 200;
+            if (!(Eval(expr) is IEnumerable items) || items is string) throw new DriverError(expr + " is not a list");
+            var rows = new JArray();
+            int index = 0;
+            foreach (var item in items)
+            {
+                var row = new JArray();
+                foreach (var member in members)
+                {
+                    object current = item;
+                    try
+                    {
+                        foreach (var segment in Split(member)) current = Apply(current, segment);
+                    }
+                    catch (DriverError e)
+                    {
+                        throw new DriverError($"item {index}{member}: {e.Message}");
+                    }
+                    row.Add(Values.ToJson(current is Static s ? s.Type : current, depth, limit));
+                }
+                rows.Add(row);
+                index++;
+            }
+            return new JObject { ["count"] = index, ["items"] = rows };
+        }
+
         /// "type:NAME::rest" (rest optional); the name may hold dots, so "::" ends it.
         static bool Prefixed(string expr, string prefix, out string name, out string rest)
         {

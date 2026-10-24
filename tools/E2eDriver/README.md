@@ -321,6 +321,22 @@ A small read-only path language. The result is `{value, type}`.
 << {"ok":true,"result":{"value":1280,"type":"System.Int32"}}
 ```
 
+### state.each `{expr, members?, depth?, limit?}`
+
+The items of `expr` (an array, list or other enumerable, as `state.get` reads it), and from
+each item the values of `members`: paths in the same language, applied to the item (`".a.b"`,
+`".GetComponent<KPrefabID>.PrefabTag.Name"`, `""` for the item itself; default `[""]`). All in
+one frame, for lists too long to read an item per request.
+
+- **Result:** `{count, items}`, `items` holding one array per item with its members' values,
+  written as `state.get` writes values.
+- A member that cannot be read fails the command: `item N.member: error`.
+
+```
+>> {"cmd":"state.each","args":{"expr":"SaveGame.Instance.worldGenSpawner.spawnables","members":[".spawnInfo.id",".isSpawned"]}}
+<< {"ok":true,"result":{"count":5492,"items":[["Tile",false],["GeyserGeneric_steam",false], ...]}}
+```
+
 ### camera.get
 
 Reads `Camera.main`, or on the main menu, which has no camera tagged MainCamera, the enabled

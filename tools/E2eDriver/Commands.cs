@@ -25,6 +25,7 @@ namespace E2eDriver
                 case "world.to_screen": return WorldToScreen(a);
                 case "screen.to_cell": return ScreenToCell(a);
                 case "state.get": return State.Result(State.Eval((string)a["expr"] ?? throw new DriverError("state.get needs expr")), a);
+                case "state.each": return State.Each(a);
                 case "camera.get": return CameraGet();
                 case "camera.set": CameraSet(request); return null;
                 case "canvas.hide": CanvasHide(request); return null;

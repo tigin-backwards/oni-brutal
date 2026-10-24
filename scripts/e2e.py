@@ -143,7 +143,7 @@ TOP_KEYS = {'name', 'from', 'mods', 'options', 'setup', 'steps', 'require_log', 
 DRIVER_STEPS = {'click', 'toggle', 'dropdown', 'type', 'drag', 'tool', 'expect_ui', 'expect_state', 'ui_dump',
                 'ui_wait', 'world_shot', 'driver', 'click_world', 'scroll', 'expect_hit'}
 STEP_KINDS = {'dig', 'build', 'run', 'expect', 'call', 'save', 'shot', 'open', 'key'} | DRIVER_STEPS
-DRIVER_COMMANDS = {'ping', 'ui.find', 'ui.at', 'ui.dump', 'ui.wait', 'world.to_screen', 'screen.to_cell', 'state.get', 'camera.get',
+DRIVER_COMMANDS = {'ping', 'ui.find', 'ui.at', 'ui.dump', 'ui.wait', 'world.to_screen', 'screen.to_cell', 'state.get', 'state.each', 'camera.get',
                    'camera.set', 'canvas.hide', 'canvas.show', 'setup.call', 'seed'}
 
 
@@ -1055,6 +1055,10 @@ class Driver:
 
     def state(self, expr):
         return self.request('state.get', expr=expr)['value']
+
+    def each(self, expr, members):
+        """EXPR's items, each a list of its MEMBERS' values (state.each), in one request."""
+        return self.request('state.each', timeout=max(self.timeout, 600), expr=expr, members=members)['items']
 
     def camera_get(self):
         return self.request('camera.get')
@@ -1977,6 +1981,22 @@ def arithmetic(text, names):
     return value(tree.body)
 
 
+def aggregate_rows(how, tests, rows):
+    """count: or sum: over state.each ROWS, each the values of the TESTS' members (MEMBER, OP,
+    WANT) and, for sum, the summed member last. A member is compared as text, booleans as
+    true/false; a sum adds numbers only."""
+    as_text = lambda v: str(v).lower() if isinstance(v, bool) else str(v)
+    total = 0
+    for row in rows:
+        if all((as_text(row[i]) == want) == (op == '==') for i, (_, op, want) in enumerate(tests)):
+            if how == 'count':
+                total += 1
+            else:
+                v = row[len(tests)]
+                total += v if isinstance(v, (int, float)) and not isinstance(v, bool) else 0
+    return total
+
+
 def state_check(have, wanted, saved, original=None):
     """Whether a state.get value meets WANTED: a value, "OP EXPR" (EXPR of numbers and names,
     + - * / and parentheses; a name is a value saved with save_as, or `original`: the original
@@ -2378,14 +2398,10 @@ class Run:
 
     def aggregate(self, how, head, suffix, conditions):
         """count:HEAD[*] if .A == X and .B != Y, or sum:HEAD[*].SUFFIX [if ...]: HEAD a state.get
-        expression for an array or list (all:Clearable::), each item tested and read by its own
-        request. A condition compares the item's member as text (true/false for booleans)."""
+        expression for an array or list (all:Clearable::), its items' members read in one
+        E2eDriver request (state.each). A condition compares the item's member as text
+        (true/false for booleans)."""
         driver = self.need_driver()
-        separator = '' if head.endswith('::') else '.'
-        try:
-            n = driver.state(head + separator + 'Length')
-        except DriverError:
-            n = driver.state(head + separator + 'Count')
         tests = []
         for condition in re.split(r'\s+and\s+', conditions or '') if conditions else []:
             match = re.fullmatch(r"(\.\S+)\s*(==|!=)\s*('[^']*'|\S+)", condition.strip())
@@ -2393,17 +2409,8 @@ class Run:
                 raise SpecFailure(f'{condition!r}: a condition is .MEMBER == VALUE or .MEMBER != VALUE')
             member, op, want = match.groups()
             tests.append((member, op, want[1:-1] if want.startswith("'") else want))  # 'TEXT' may hold spaces
-        as_text = lambda v: str(v).lower() if isinstance(v, bool) else str(v)
-        total = 0
-        for i in range(n):
-            item = f'{head}[{i}]'
-            if all((as_text(driver.state(item + member)) == want) == (op == '==') for member, op, want in tests):
-                if how == 'count':
-                    total += 1
-                else:
-                    v = driver.state(item + suffix)
-                    total += v if isinstance(v, (int, float)) and not isinstance(v, bool) else 0
-        return total
+        members = [member for member, _, _ in tests] + ([suffix] if how == 'sum' else [])
+        return aggregate_rows(how, tests, driver.each(head, members))
 
     def expect_state(self, value, number):
         misses = []

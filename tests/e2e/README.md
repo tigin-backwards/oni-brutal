@@ -224,8 +224,10 @@ Besides `file:PATH`, the runner reads these, each item through its own `state.ge
   `sum:all:Clearable::[*].GetComponent<PrimaryElement>.Mass if .GetComponent<PrimaryElement>.ElementID == SandStone`.
 
 A condition compares the member's value as text (`true`/`false` for booleans; `'TEXT'` in quotes
-may hold spaces). These read one
-item a frame: a few hundred items take some seconds.
+may hold spaces). A member may call a method: `if .spawnInfo.id.StartsWith("GeyserGeneric") ==
+true`. `count:` and `sum:` read every item's members in one E2eDriver request (`state.each`), so
+lists of thousands of items (a new world's spawners) take a frame. `cells:` still reads one cell
+a frame.
 
 `== original` is checked after our run, against the value the original player recorded at the same
 step. The original run itself records it and passes.
@@ -348,6 +350,35 @@ Fixtures are blessed saves (`--bless` copies a spec's `save:` into `fixtures/`, 
 
 What a spec needs beyond them (a researched tech, materials, Duplicants on offer) it sets up in
 `setup:` through E2eDriver, as the pilot specs do, rather than from a later fixture.
+
+### A new game (worldgen mods)
+
+A worldgen mod's spec starts from `early-base` too and plays a new game from there, as a player
+would (`mods/2919833683-single-asteroid-clusters.yaml` is the pattern):
+
+1. Escape, the pause menu's Main Menu, Quit Without Saving; then New Game, `StandardGame`
+   (Survival) and the cluster category the mod's cluster has: `ClassicStyleGame`
+   (`clusterCategory: SpacedOutVanillaStyle` or 1), `SpacedOutGame` (`SpacedOutStyle`, 2) or
+   `EventGame` (`Special`), under `**/ClusterCategorySelectionScreen/Panel/Content/RootToggles/`.
+2. The carousel's clusters are `all:DestinationSelectPanel::[0].clusterKeys`.
+3. Type the cluster's coordinate, its `coordinatePrefix` and a fixed seed, into
+   `**/CoordinateContainer/SeedInput` (`PREFIX-12345-0-0-0`, `clear: true, enter: true`): the
+   screen selects that cluster and seed, whatever its category. Wait for
+   `**/Section - Destination/DestinationDetailsHeader/ClusterName` to read the cluster's name
+   (`cond: text, value: "~NAME"`); `ui_dump` the details header (the main menu cannot be shot).
+4. Click `**/ColonyDestinationScreen2/Layout/Buttons/LaunchButton`. Worldgen runs on its own
+   thread and the world loads behind the Duplicant selection: wait for
+   `**/MinionSelectScreen/Content/BottomContent/Buttons/ProceedButton` to be stable with a
+   generous budget (`frames: 60000`; real time is cheap, our player under load is slow), click
+   it (Embark) and wait for `**/MinionSelectScreen` to be `gone`.
+5. Check the generated cluster functionally, never cell by cell (mod-play-testing.md, "Worldgen
+   mods"): `ClusterManager.Instance.WorldContainers` (`.Count`, `count:... if .worldName == ...`),
+   the start world's `worldName`, `worldSize.x`/`.y`, `Biomes` (subworld folders),
+   `m_generatedSubworlds`, `WorldTraitIds`, `m_seasonIds`; templates and geysers wait among
+   `SaveGame.Instance.worldGenSpawner.spawnables` until uncovered
+   (`count:... if .spawnInfo.id == POIBunkerExteriorDoor`); starmap POIs are
+   `all:HarvestablePOIClusterGridEntity::`, `all:ArtifactPOIClusterGridEntity::`,
+   `all:TemporalTear::`.
 
 Writing a spec, `--hold` keeps the player running after the steps for a look through OniMcp
 (its port) and E2eDriver (`ui.find`, `ui.dump`, `state.get`); `--hold-on-fail` does so after a

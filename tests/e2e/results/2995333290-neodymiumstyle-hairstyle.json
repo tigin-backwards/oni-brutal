@@ -1,0 +1,61 @@
+{
+ "spec": "mods/2995333290-neodymiumstyle-hairstyle.yaml",
+ "mods": [
+  "3172734005",
+  "2995333290"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "played with Dupery Fixed: the pack's personalities (Yukkuri Reimu, Yukkuri Marisa) are in the pool with their traits; Reimu's hairstyle comes from the pack's kanim and her dream icon is a sprite; a Duplicant given Reimu's look shows the pack's hairstyle (world shot); content only",
+ "updated": "2026-10-24",
+ "commit": "082955e",
+ "mod_dlls": {
+  "3172734005": {
+   "DuperyFixed.dll": "9ef4a93958b6b80fbf086cab57821955dd344324d2192086db7ea7845e71f7f2"
+  },
+  "2995333290": {}
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-151644-c608c3",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T15:18:18",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-152212-60038c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T15:22:12",
+    "lane": 17,
+    "reference_run": "20261024-151644-c608c3",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "reimu": 0.015769
+    }
+   },
+   {
+    "run": "20261024-152212-60038c",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T15:23:16",
+    "lane": 17,
+    "reference_run": "20261024-151644-c608c3",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "reimu": 0.015452
+    }
+   }
+  ]
+ }
+}

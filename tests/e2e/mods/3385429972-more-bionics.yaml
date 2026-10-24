@@ -1,0 +1,34 @@
+# More Bionics (3385429972), with Dupery Fixed (3172734005), which it requires. Class P
+# (content only: no DLL).
+#
+# What it does: ships a PERSONALITIES.json of 9 bionic Duplicant personalities (Lynk, Hailey
+# Watt, Ribby, Greasy, ...; "Model": "BionicMinion"), with accessories kanims for their hair
+# (anim/assets/NAME_accesories, plus a head shape and mouth for Morose) and dream icons
+# (dreamicons/). Dupery finds the file at Db.Initialize, loads the accessories and icons, and
+# adds the personalities to the game's pool of bionic Duplicants (Bionic Booster Pack), so the
+# printing pod and new colonies can offer them.
+# How a player reaches it: printing pod and new-colony bionic Duplicants.
+# What changes: which personalities, and so which looks, bionic Duplicants can have.
+#
+# The pool is checked: Lynk and Hailey Watt are bionic personalities with their names and
+# traits, Lynk's hair an accessory from the pack's kanim and his dream icon a sprite. Setup
+# gives early-base's bionic Duplicant Lynk's look (Accessorizer.ApplyMinionPersonality, what a
+# printed Lynk gets) and selects him; the shot shows the pack's hair drawn on him.
+from: early-base
+mods: [3172734005, 3385429972]
+setup:
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[0].GetComponent<Accessorizer>", method: ApplyMinionPersonality, args: [{"$": "Db.Get().Personalities.Get(\"LYNK\")"}]}}
+  - driver: {setup.call: {target: "SelectTool.Instance", method: Select, args: [{"$": "Components.LiveMinionIdentities.Items[0]"}]}}
+steps:
+  - expect_state:
+      "Db.Get().Personalities.Get(\"LYNK\").Name": Lynk
+      "Db.Get().Personalities.Get(\"LYNK\").model": BionicMinion
+      "Db.Get().Personalities.Get(\"LYNK\").stresstrait": StressShocker
+      "Db.Get().Personalities.Get(\"HAILEYWATT\").Name": Hailey Watt
+      "Db.Get().Personalities.Get(\"HAILEYWATT\").model": BionicMinion
+      "Db.Get().Personalities.Count": "== original"
+      "Db.Get().Accessories.Get(\"hair_lynk\").animFile.name": lynk_accesories_kanim
+      "Assets.GetSprite(\"dreamicon_lynk\").name": dreamicon_lynk
+      "Components.LiveMinionIdentities.Items[0].model": BionicMinion
+      "count:Components.LiveMinionIdentities.Items[0].GetComponent<Accessorizer>.GetAccessories()[*] if .Get().Id == hair_lynk": 1
+  - world_shot: {name: lynk, ortho: 3, at: [124, 208]}

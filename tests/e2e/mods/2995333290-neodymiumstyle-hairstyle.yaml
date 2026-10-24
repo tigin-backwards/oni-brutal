@@ -1,0 +1,32 @@
+# NeodymiumStyle Hairstyle MOD for Dupery ALL-IN (2995333290), with Dupery Fixed (3172734005),
+# which it requires. Class P (content only: no DLL).
+#
+# What it does: ships a PERSONALITIES.json of 13 Duplicant personalities (Yukkuri Reimu,
+# Yukkuri Marisa, Patchouli, Pekora, 2B, Zundamon, ...), each with a hairstyle kanim
+# (anim/assets/NAME) and a dream icon (dreamicons/). Dupery finds the file at Db.Initialize,
+# loads the hairstyles as accessories and the icons, and adds the personalities to the game's
+# pool, so the printing pod and new colonies can offer them.
+# How a player reaches it: printing pod and new-colony Duplicants.
+# What changes: which personalities, and so which hairstyles, Duplicants can have.
+#
+# The pool is checked: Reimu and Marisa are personalities with their names and traits, Reimu's
+# hair an accessory from the pack's kanim and her dream icon a sprite. Setup gives Nikola
+# Reimu's look (Accessorizer.ApplyMinionPersonality, what a printed Reimu gets) and selects
+# him; the shot shows the pack's hairstyle drawn on him.
+from: early-base
+mods: [3172734005, 2995333290]
+setup:
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[1].GetComponent<Accessorizer>", method: ApplyMinionPersonality, args: [{"$": "Db.Get().Personalities.Get(\"REIMU\")"}]}}
+  - driver: {setup.call: {target: "SelectTool.Instance", method: Select, args: [{"$": "Components.LiveMinionIdentities.Items[1]"}]}}
+steps:
+  - expect_state:
+      "Db.Get().Personalities.Get(\"REIMU\").Name": Yukkuri Reimu
+      "Db.Get().Personalities.Get(\"REIMU\").stresstrait": BingeEater
+      "Db.Get().Personalities.Get(\"REIMU\").joyTrait": BalloonArtist
+      "Db.Get().Personalities.Get(\"MARISA\").Name": Yukkuri Marisa
+      "Db.Get().Personalities.Get(\"MARISA\").joyTrait": SparkleStreaker
+      "Db.Get().Personalities.Count": "== original"
+      "Db.Get().Accessories.Get(\"hair_reimu\").animFile.name": reimu_kanim
+      "Assets.GetSprite(\"dreamicon_Reimu\").name": dreamicon_Reimu
+      "count:Components.LiveMinionIdentities.Items[1].GetComponent<Accessorizer>.GetAccessories()[*] if .Get().Id == hair_reimu": 1
+  - world_shot: {name: reimu, ortho: 3, at: [124, 208]}

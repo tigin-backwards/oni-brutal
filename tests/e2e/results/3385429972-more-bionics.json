@@ -1,0 +1,61 @@
+{
+ "spec": "mods/3385429972-more-bionics.yaml",
+ "mods": [
+  "3172734005",
+  "3385429972"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "played with Dupery Fixed: the pack's bionic personalities (Lynk, Hailey Watt) are in the pool with their model and traits; Lynk's hair comes from the pack's kanim and his dream icon is a sprite; the bionic Duplicant given Lynk's look shows the pack's hair (world shot); content only",
+ "updated": "2026-10-24",
+ "commit": "082955e",
+ "mod_dlls": {
+  "3172734005": {
+   "DuperyFixed.dll": "9ef4a93958b6b80fbf086cab57821955dd344324d2192086db7ea7845e71f7f2"
+  },
+  "3385429972": {}
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-151644-c608c3",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T15:16:44",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-152008-3e9db2",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T15:20:08",
+    "lane": 17,
+    "reference_run": "20261024-151644-c608c3",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "lynk": 0.015196
+    }
+   },
+   {
+    "run": "20261024-152008-3e9db2",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T15:21:07",
+    "lane": 17,
+    "reference_run": "20261024-151644-c608c3",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "lynk": 0.015895
+    }
+   }
+  ]
+ }
+}

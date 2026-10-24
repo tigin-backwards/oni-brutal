@@ -3,12 +3,12 @@
  "mods": [
   "2816649817"
  ],
- "verdict": "failed",
- "why": "a run of ours failed",
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
  "findings": [],
- "note": "a Cool Steam Vent placed and selected: it erupts all its iteration and all its year in both players, but its emit rate reads 28.84 kg/s in ours against 12.47 (5 times the cycle average) in the original: the mod's GetIterationPercent postfix does not reach the copy of it inlined (through GetOnDuration) into its earlier-patched GetEmitRate, so ours divides by the vent's own 0.432 share (D21 rebuilds only direct callers)",
+ "note": "a Cool Steam Vent placed and selected: it erupts all its iteration and all its year, and its emit rate is 5 times the cycle average, as in the original (the mod's GetIterationPercent postfix now reaches the copy inlined through GetOnDuration into GetEmitRate); the side screen's title shot within 3.1 % of the original's",
  "updated": "2026-10-24",
- "commit": "bab7d9a",
+ "commit": "16ec164",
  "mod_dlls": {
   "2816649817": {
    "SuperGeyserModNew.dll": "84f61888fb995cecedd6bcff437217c7363993f85a1a300b0b2a7f7354df26eb"
@@ -27,34 +27,32 @@
   ],
   "ours": [
    {
-    "run": "20261024-054018-57c175",
+    "run": "20261024-070239-8ba5b3",
     "index": 1,
-    "verdict": "fail",
-    "date": "2026-10-24T05:40:18",
-    "lane": 17,
-    "reasons": [
-     "step 7: selected:Geyser.configuration.GetEmitRate() is 28.839571, wanted <= 0.00834 * perCycle (it held in the original: the interaction has no effect in ours)"
-    ],
+    "verdict": "pass",
+    "date": "2026-10-24T07:19:31",
+    "lane": 18,
     "reference_run": "20261024-050302-e4a1ee",
     "new_signatures": 0,
     "findings": [],
     "ui_dump": {},
-    "shots": {}
+    "shots": {
+     "title": 0.030411
+    }
    },
    {
-    "run": "20261024-054018-57c175",
+    "run": "20261024-070239-8ba5b3",
     "index": 2,
-    "verdict": "fail",
-    "date": "2026-10-24T05:41:25",
-    "lane": 17,
-    "reasons": [
-     "step 7: selected:Geyser.configuration.GetEmitRate() is 28.839571, wanted <= 0.00834 * perCycle (it held in the original: the interaction has no effect in ours)"
-    ],
+    "verdict": "pass",
+    "date": "2026-10-24T07:19:59",
+    "lane": 19,
     "reference_run": "20261024-050302-e4a1ee",
     "new_signatures": 0,
     "findings": [],
     "ui_dump": {},
-    "shots": {}
+    "shots": {
+     "title": 0.028821
+    }
    }
   ]
  }

@@ -3,12 +3,12 @@
  "mods": [
   "3486175417"
  ],
- "verdict": "failed",
- "why": "a run of ours failed",
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
  "findings": [],
- "note": "spec fails in ours: the bin holds 999,999 kg and its capacity field takes 500,000 kg in both players, but after Enter the field's KInputTextField reports caretPosition 0 in ours and 6 (the text's end) in the original",
+ "note": "the bin holds 999,999 kg and its capacity field takes 500,000 kg, as in the original; the side screen's layout dump after Enter matches",
  "updated": "2026-10-24",
- "commit": "79f5b1e",
+ "commit": "16ec164",
  "mod_dlls": {
   "3486175417": {
    "ClassLibrary1.dll": "2e584877d70a09bad9eae2ed6cb91ddc8b75bb1df6f6ae4611285c1fe1b1d7da"
@@ -27,39 +27,33 @@
   ],
   "ours": [
    {
-    "run": "20261024-053947-14db4c",
+    "run": "20261024-070239-8ba5b3",
     "index": 1,
-    "verdict": "fail",
-    "date": "2026-10-24T05:39:47",
-    "lane": 14,
-    "reasons": [
-     "ui_dump capacity: 1 difference(s)"
-    ],
+    "verdict": "pass",
+    "date": "2026-10-24T07:15:21",
+    "lane": 18,
     "reference_run": "20261024-041146-b43901",
     "new_signatures": 0,
     "findings": [],
     "ui_dump": {
      "capacity": {
-      "differences": 1
+      "differences": 0
      }
     },
     "shots": {}
    },
    {
-    "run": "20261024-053947-14db4c",
+    "run": "20261024-070239-8ba5b3",
     "index": 2,
-    "verdict": "fail",
-    "date": "2026-10-24T05:41:15",
-    "lane": 14,
-    "reasons": [
-     "ui_dump capacity: 1 difference(s)"
-    ],
+    "verdict": "pass",
+    "date": "2026-10-24T07:15:52",
+    "lane": 19,
     "reference_run": "20261024-041146-b43901",
     "new_signatures": 0,
     "findings": [],
     "ui_dump": {
      "capacity": {
-      "differences": 1
+      "differences": 0
      }
     },
     "shots": {}

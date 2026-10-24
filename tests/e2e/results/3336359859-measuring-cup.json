@@ -3,12 +3,12 @@
  "mods": [
   "3336359859"
  ],
- "verdict": "failed",
- "why": "a run of ours failed",
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
  "findings": [],
- "note": "a Bottle Emptier gets the capacity side screen (200 kg) and a value typed into its field becomes its capacity, as in the original; rerun on master 79f5b1e, the field's layout now matches, but after the typed value is submitted ours leaves its caret at 0 (5 in the original, at the end of the text)",
+ "note": "a Bottle Emptier gets the capacity side screen (200 kg) and a value typed into its field becomes its capacity, as in the original; both layout dumps, before and after the value is submitted, match",
  "updated": "2026-10-24",
- "commit": "2ceb488",
+ "commit": "16ec164",
  "mod_dlls": {
   "3336359859": {
    "BOTTLEEMPTIER_patch.dll": "73f78702eb62c114c8bd59115b0b5b69ba0d1e7301a8eb9a2c4d1826dec646fd"
@@ -27,14 +27,11 @@
   ],
   "ours": [
    {
-    "run": "20261024-040121-cfd644",
+    "run": "20261024-070239-8ba5b3",
     "index": 1,
-    "verdict": "fail",
-    "date": "2026-10-24T04:06:48",
-    "lane": 12,
-    "reasons": [
-     "ui_dump capacity-set: 1 difference(s)"
-    ],
+    "verdict": "pass",
+    "date": "2026-10-24T07:10:36",
+    "lane": 18,
     "reference_run": "20261024-035631-81d98e",
     "new_signatures": 0,
     "findings": [],
@@ -43,20 +40,17 @@
       "differences": 0
      },
      "capacity-set": {
-      "differences": 1
+      "differences": 0
      }
     },
     "shots": {}
    },
    {
-    "run": "20261024-040121-cfd644",
+    "run": "20261024-070239-8ba5b3",
     "index": 2,
-    "verdict": "fail",
-    "date": "2026-10-24T04:06:50",
-    "lane": 13,
-    "reasons": [
-     "ui_dump capacity-set: 1 difference(s)"
-    ],
+    "verdict": "pass",
+    "date": "2026-10-24T07:11:08",
+    "lane": 19,
     "reference_run": "20261024-035631-81d98e",
     "new_signatures": 0,
     "findings": [],
@@ -65,7 +59,7 @@
       "differences": 0
      },
      "capacity-set": {
-      "differences": 1
+      "differences": 0
      }
     },
     "shots": {}

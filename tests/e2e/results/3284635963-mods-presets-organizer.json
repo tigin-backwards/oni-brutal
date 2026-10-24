@@ -3,12 +3,14 @@
  "mods": [
   "3284635963"
  ],
- "verdict": "failed",
- "why": "a run of ours failed",
- "findings": [],
- "note": "the '*' button on Mods (reached from the colony via the main menu) opens the organizer as in the original (scroll-normalized-position known), but rerun on master 79f5b1e it still fails on one difference: the presets column's unused input caret (a TMP_SelectionCaret at its prefab's 100x100, left of the field) has its CanvasRenderer culled in ours, not in the original",
+ "verdict": "warning",
+ "why": "known findings: scroll-normalized-position",
+ "findings": [
+  "scroll-normalized-position"
+ ],
+ "note": "the '*' button on Mods (reached from the colony via the main menu) opens the organizer as in the original; both layout dumps match but for the presets list's scroll position (scroll-normalized-position known)",
  "updated": "2026-10-24",
- "commit": "2ceb488",
+ "commit": "16ec164",
  "mod_dlls": {
   "3284635963": {
    "ModsPresetsOrganizer.dll": "72477c4c1bcfb057052916392e5fb2b90c24caa5ba96bfa8fd045628a29d7b30"
@@ -27,14 +29,11 @@
   ],
   "ours": [
    {
-    "run": "20261024-040121-cfd644",
+    "run": "20261024-070239-8ba5b3",
     "index": 1,
-    "verdict": "fail",
-    "date": "2026-10-24T04:04:25",
-    "lane": 12,
-    "reasons": [
-     "ui_dump presets: 1 difference(s)"
-    ],
+    "verdict": "warn",
+    "date": "2026-10-24T07:11:53",
+    "lane": 18,
     "reference_run": "20261024-035631-81d98e",
     "new_signatures": 0,
     "findings": [
@@ -45,7 +44,7 @@
       "differences": 0
      },
      "presets": {
-      "differences": 1,
+      "differences": 0,
       "known": {
        "scroll-normalized-position": 1
       }
@@ -54,14 +53,11 @@
     "shots": {}
    },
    {
-    "run": "20261024-040121-cfd644",
+    "run": "20261024-070239-8ba5b3",
     "index": 2,
-    "verdict": "fail",
-    "date": "2026-10-24T04:04:26",
-    "lane": 13,
-    "reasons": [
-     "ui_dump presets: 1 difference(s)"
-    ],
+    "verdict": "warn",
+    "date": "2026-10-24T07:12:28",
+    "lane": 19,
     "reference_run": "20261024-035631-81d98e",
     "new_signatures": 0,
     "findings": [
@@ -72,7 +68,7 @@
       "differences": 0
      },
      "presets": {
-      "differences": 1,
+      "differences": 0,
       "known": {
        "scroll-normalized-position": 1
       }

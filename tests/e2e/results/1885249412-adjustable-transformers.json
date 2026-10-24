@@ -3,12 +3,12 @@
  "mods": [
   "1885249412"
  ],
- "verdict": "failed",
- "why": "a run of ours failed",
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
  "findings": [],
- "note": "a Power Transformer (small) is built and selected: its capacity side screen shows (titled Storage Capacity Control in both: the game reads the title before the mod's SetTarget postfix sets its key) and 500 typed into its field becomes the transformer's battery capacity and charge wattage, as in the original; after the typed value is submitted ours leaves the field's caret at 0 (3, at the end of the text, in the original), the measuring cup's difference",
+ "note": "a Power Transformer (small) is built and selected: its capacity side screen shows (titled Storage Capacity Control in both: the game reads the title before the mod's SetTarget postfix sets its key) and 500 typed into its field becomes the transformer's battery capacity and charge wattage, as in the original; both layout dumps, before and after the value is submitted, match",
  "updated": "2026-10-24",
- "commit": "10841b3",
+ "commit": "16ec164",
  "mod_dlls": {
   "1885249412": {
    "AdjustableTransformers.dll": "30e616b576e87d67ddc1ac40ec9ad9f9e41f6e8795660fa1a08cf2bcc73608ae"
@@ -27,14 +27,11 @@
   ],
   "ours": [
    {
-    "run": "20261024-043120-1ebc65",
+    "run": "20261024-070239-8ba5b3",
     "index": 1,
-    "verdict": "fail",
-    "date": "2026-10-24T04:40:51",
-    "lane": 13,
-    "reasons": [
-     "ui_dump capacity-set: 1 difference(s)"
-    ],
+    "verdict": "pass",
+    "date": "2026-10-24T07:02:39",
+    "lane": 18,
     "reference_run": "20261024-041938-c43b44",
     "new_signatures": 0,
     "findings": [],
@@ -43,20 +40,17 @@
       "differences": 0
      },
      "capacity-set": {
-      "differences": 1
+      "differences": 0
      }
     },
     "shots": {}
    },
    {
-    "run": "20261024-043120-1ebc65",
+    "run": "20261024-070239-8ba5b3",
     "index": 2,
-    "verdict": "fail",
-    "date": "2026-10-24T04:40:52",
-    "lane": 12,
-    "reasons": [
-     "ui_dump capacity-set: 1 difference(s)"
-    ],
+    "verdict": "pass",
+    "date": "2026-10-24T07:02:40",
+    "lane": 19,
     "reference_run": "20261024-041938-c43b44",
     "new_signatures": 0,
     "findings": [],
@@ -65,7 +59,7 @@
       "differences": 0
      },
      "capacity-set": {
-      "differences": 1
+      "differences": 0
      }
     },
     "shots": {}

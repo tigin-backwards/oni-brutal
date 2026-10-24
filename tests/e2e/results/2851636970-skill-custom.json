@@ -3,12 +3,12 @@
  "mods": [
   "2851636970"
  ],
- "verdict": "failed",
- "why": "a run of ours failed",
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
  "findings": [],
- "note": "4 interests and at least 5 traits on both cards, as in the original; rerun on master 79f5b1e, ours logs 1 signature the original lacks: the mod's random interests make CharacterContainer.SetInfoText log 'Could not find ChoreGroup' in both players, and ours writes a stack trace after that Debug.LogError (Klei's Debug.LogError, ResourceSet.Get, SetInfoText), where the original writes none, so its signature takes another frame",
+ "note": "4 interests and at least 5 traits on both cards, as in the original; the 'Could not find ChoreGroup' error the mod's random interests make SetInfoText log now has the original's signature",
  "updated": "2026-10-24",
- "commit": "2ceb488",
+ "commit": "16ec164",
  "mod_dlls": {
   "2851636970": {
    "Interest_correction.dll": "df7f6f9a4c24cc54d5c63e41191dfc42f4d3d945053ba373875ee72f5d64b5b4",
@@ -28,31 +28,25 @@
   ],
   "ours": [
    {
-    "run": "20261024-040121-cfd644",
+    "run": "20261024-070239-8ba5b3",
     "index": 1,
-    "verdict": "fail",
-    "date": "2026-10-24T04:02:05",
-    "lane": 12,
-    "reasons": [
-     "1 log signature(s) the original lacks"
-    ],
+    "verdict": "pass",
+    "date": "2026-10-24T07:20:30",
+    "lane": 18,
     "reference_run": "20261024-035631-81d98e",
-    "new_signatures": 1,
+    "new_signatures": 0,
     "findings": [],
     "ui_dump": {},
     "shots": {}
    },
    {
-    "run": "20261024-040121-cfd644",
+    "run": "20261024-070239-8ba5b3",
     "index": 2,
-    "verdict": "fail",
-    "date": "2026-10-24T04:02:06",
-    "lane": 13,
-    "reasons": [
-     "1 log signature(s) the original lacks"
-    ],
+    "verdict": "pass",
+    "date": "2026-10-24T07:20:57",
+    "lane": 19,
     "reference_run": "20261024-035631-81d98e",
-    "new_signatures": 1,
+    "new_signatures": 0,
     "findings": [],
     "ui_dump": {},
     "shots": {}

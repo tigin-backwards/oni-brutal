@@ -1,0 +1,85 @@
+{
+ "spec": "mods/3284635963-mods-presets-organizer.yaml",
+ "mods": [
+  "3284635963"
+ ],
+ "verdict": "failed",
+ "why": "a run of ours failed",
+ "findings": [],
+ "note": "spec fails in ours on one difference: the presets column's unused input caret (a TMP_SelectionCaret at its prefab's 100x100, left of the field) has its CanvasRenderer culled in ours, not in the original; the '*' button on Mods (reached from the colony via the main menu) opens the organizer as in the original otherwise (scroll-normalized-position known)",
+ "updated": "2026-10-23",
+ "commit": "c6eae87",
+ "mod_dlls": {
+  "3284635963": {
+   "ModsPresetsOrganizer.dll": "72477c4c1bcfb057052916392e5fb2b90c24caa5ba96bfa8fd045628a29d7b30"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-215444-03edfa",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T22:13:24",
+    "lane": 13,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-223809-e05930",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-23T22:38:09",
+    "lane": 12,
+    "reasons": [
+     "ui_dump presets: 1 difference(s)"
+    ],
+    "reference_run": "20261023-215444-03edfa",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "mods-button": {
+      "differences": 0
+     },
+     "presets": {
+      "differences": 1,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261023-223809-e05930",
+    "index": 2,
+    "verdict": "fail",
+    "date": "2026-10-23T22:38:58",
+    "lane": 12,
+    "reasons": [
+     "ui_dump presets: 1 difference(s)"
+    ],
+    "reference_run": "20261023-215444-03edfa",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "mods-button": {
+      "differences": 0
+     },
+     "presets": {
+      "differences": 1,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

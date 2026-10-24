@@ -1,0 +1,27 @@
+# Mods Presets Organizer (MPOrganizer) // by @Ony (3284635963), class M.
+#
+# What it does: a purple "*" button on the main menu's Mods button opens the organizer: mod
+# presets (saved lists of enabled mods, .mpo files in the mod's config folder) to create,
+# rename, apply and delete, each mod with a label; the active preset's name shows under the
+# Mods button.
+# How a player reaches it: the main menu's "*" button on Mods (from a colony: the pause menu's
+# Main Menu, then Quit Without Saving).
+# What changes: the organizer window; presets as files.
+#
+# The main menu is reached from the colony and the "*" button pressed: the organizer opens.
+# (OniMcp cannot screenshot the main menu: its layout is dumped instead.)
+from: early-base
+mods: [3284635963]
+steps:
+  - key: {code: Escape}
+  - ui_wait: {path: "**/PauseScreen/**/Main MenuButton", cond: stable}
+  - click: {ui: "**/PauseScreen/**/Main MenuButton"}
+  - ui_wait: {path: "**/ConfirmDialog/GameObject/Panel/ConfigurableButton", cond: stable}
+  - click: {ui: "**/ConfirmDialog/GameObject/Panel/ConfigurableButton"}   # Quit Without Saving
+  - ui_wait: {path: "**/MainMenu_SpacedOut/MainMenuMenubar/MainMenuButtons", cond: stable, frames: 3000}
+  - ui_wait: {path: "**/MainMenuButtons/**/holder", cond: stable}
+  - ui_dump: {name: mods-button, root: "**/MainMenuButtons/**/holder"}
+  - click: {ui: "**/MainMenuButtons/**/holder/*"}
+  - ui_wait: {path: "**/presets_list_container", cond: stable}
+  - expect_ui: {"**/presets_list_container": {active: true}}
+  - ui_dump: {name: presets, root: "**/presets_list_container"}

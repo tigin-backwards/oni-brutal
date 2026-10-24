@@ -1,0 +1,70 @@
+{
+ "spec": "mods/2882418505-vanilla-ladder.yaml",
+ "mods": [
+  "2882418505"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "options 5 up and 6 down; a column of three ladder cells built and one selected, with those speeds; its title and look as in the original",
+ "updated": "2026-10-24",
+ "commit": "0a8d2b1",
+ "mod_dlls": {
+  "2882418505": {
+   "PLib.dll": "b862c5db2b3cd6df09a62d4a30782e91e2b24e8e1bfac08d991c9cc89a984ba9",
+   "╧π▓▌╠▌╫╙20230721.dll": "eebc1ebe1f652e4c3a90c5ca7763073a259938755b3b18630724db78a2d7be88"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-041001-686fdf",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T04:19:48",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-043552-aec3c5",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T04:35:52",
+    "lane": 16,
+    "reference_run": "20261024-041001-686fdf",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "title": 0.0,
+     "ladder": 0.021632
+    }
+   },
+   {
+    "run": "20261024-043552-aec3c5",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T04:37:24",
+    "lane": 16,
+    "reference_run": "20261024-041001-686fdf",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "title": 0.0,
+     "ladder": 0.01827
+    }
+   }
+  ]
+ }
+}

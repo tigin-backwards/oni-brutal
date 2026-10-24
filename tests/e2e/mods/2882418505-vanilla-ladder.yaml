@@ -1,0 +1,34 @@
+# 香草梯子Vanilla ladder (2882418505), classes B, O.
+#
+# What it does: adds a grass-green ladder (MM20230721GG1, named "香草梯子") to the Furniture
+# build menu, no research needed: 1x1 cells of any buildable material, built by dragging, with
+# +decor. Duplicants climb it 8 times as fast as the game's ladder in both directions; PLib
+# options (Controler.json) set the upward and downward speeds (1 to 10).
+# How a player reaches it: the build menu (Furniture); the Mods screen's options.
+# What changes: a much faster ladder.
+#
+# Options here: 5 up, 6 down. A column of three ladder cells is built in the dug-out corridor
+# west of the printing pod, from the base's sandstone, and one is selected.
+from: early-base
+mods: [2882418505]
+options:
+  "2882418505": {$file: Controler.json, a1: 5.0, b1: 6.0}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"MM20230721GG1\").BuildingComplete.GetComponent<Ladder>.upwardsMovementSpeedMultiplier": 5
+      "Assets.GetBuildingDef(\"MM20230721GG1\").BuildingComplete.GetComponent<Ladder>.downwardsMovementSpeedMultiplier": 6
+      "Assets.GetBuildingDef(\"MM20230721GG1\").DragBuild": true
+  - build: {prefab: MM20230721GG1, cells: [[114, 206], [114, 207], [114, 208]], material: SandStone}
+  - expect: {blueprints: {MM20230721GG1: 3}}
+  - run: {seconds: 900, until: {buildings: {MM20230721GG1: 3}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [114, 208], ortho: 8}}
+  - click_world: {cell: [114, 207], select: MM20230721GG1}
+  - ui_wait: {path: "**/DetailsScreen/TitleBar", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~香草梯子"}
+  - expect_state:
+      "selected:Ladder.upwardsMovementSpeedMultiplier": 5
+      "selected:Ladder.downwardsMovementSpeedMultiplier": 6
+  - ui_dump: {name: title, root: "**/DetailsScreen/TitleBar"}
+  - shot: {name: title, crop: "**/DetailsScreen/TitleBar", threshold: 0.04}
+  - world_shot: {name: ladder, ortho: 6, at: [114, 208], mask: ["**/DetailsScreen"]}

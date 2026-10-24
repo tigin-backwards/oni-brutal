@@ -1,0 +1,37 @@
+# Heat Terminator热量终结者 (2842352931), classes B, O.
+#
+# What it does: adds two coolers to the Utilities build menu, no research needed: the
+# AirConditionerr (gas) and the LiquidConditionerr (liquid), 2x2 buildings of any metal with
+# the Thermo Regulator's and the Thermo Aquatuner's looks. They cool what flows through them
+# by 20 °C (gas) or 14 °C and make no heat at all. Their names are in Chinese
+# ("热量终结者（气冷机）", "热量终结者（液冷机）"). PLib options (Controler.json) set their
+# power draw, 333 W each by default.
+# How a player reaches it: the build menu (Utilities); the Mods screen's options.
+# What changes: coolers that destroy heat instead of moving it.
+#
+# Options here: 200 W for the gas cooler, 300 W for the liquid one. setup spawns cuprite; the
+# gas cooler is built in the dug-out corridor west of the printing pod and selected.
+from: early-base
+mods: [2842352931]
+options:
+  "2842352931": {$file: Controler.json, a1: 200.0, b1: 300.0}
+setup:
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Cuprite\").substance", method: SpawnResource, args: [[113.5, 206.5, -12], 500, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"AirConditionerr\").EnergyConsumptionWhenActive": 200
+      "Assets.GetBuildingDef(\"LiquidConditionerr\").EnergyConsumptionWhenActive": 300
+      "Assets.GetBuildingDef(\"AirConditionerr\").SelfHeatKilowattsWhenActive": 0
+      "Assets.GetBuildingDef(\"AirConditionerr\").BuildingComplete.GetComponent<Heat_Terminator.AirConditionerr>.temperatureDelta": -20
+  - build: {prefab: AirConditionerr, at: [114, 206]}
+  - expect: {blueprints: {AirConditionerr: 1}}
+  - run: {seconds: 1200, until: {buildings: {AirConditionerr: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [115, 208], ortho: 8}}
+  - click_world: {cell: [114, 207], select: AirConditionerr}
+  - ui_wait: {path: "**/DetailsScreen/TitleBar", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~热量终结者"}
+  - expect_state:
+      "selected:Building.Def.EnergyConsumptionWhenActive": 200
+  - ui_dump: {name: title, root: "**/DetailsScreen/TitleBar"}
+  - shot: {name: title, crop: "**/DetailsScreen/TitleBar", threshold: 0.04}

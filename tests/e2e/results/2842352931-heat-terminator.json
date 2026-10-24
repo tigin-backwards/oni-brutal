@@ -1,0 +1,68 @@
+{
+ "spec": "mods/2842352931-heat-terminator.yaml",
+ "mods": [
+  "2842352931"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "options 200 W and 300 W; the gas cooler (Chinese name) built and selected, drawing 200 W and making no heat; its title as in the original",
+ "updated": "2026-10-24",
+ "commit": "0a8d2b1",
+ "mod_dlls": {
+  "2842352931": {
+   "Heat Terminator.dll": "9895052ae2c77eeec270e736820efdd846f755e6141eac4ab844cfd0e3d4efe2",
+   "PLib.dll": "b862c5db2b3cd6df09a62d4a30782e91e2b24e8e1bfac08d991c9cc89a984ba9"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-041001-686fdf",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T04:17:18",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-043209-43e009",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T04:32:09",
+    "lane": 16,
+    "reference_run": "20261024-041001-686fdf",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "title": 0.0
+    }
+   },
+   {
+    "run": "20261024-043209-43e009",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T04:34:08",
+    "lane": 16,
+    "reference_run": "20261024-041001-686fdf",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "title": 0.0
+    }
+   }
+  ]
+ }
+}

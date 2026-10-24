@@ -2043,7 +2043,7 @@ def state_check(have, wanted, saved, original=None):
 def new_run_id():
     """An invocation's id, unique among a worktree's runs: its start time and a random part.
     Its runs are in out/e2e/SPEC/RUN_ID/PLAYER-N, and out/e2e/SPEC/latest points at the newest."""
-    return time.strftime('%Y%m%d-%H%M%S') + '-' + os.urandom(3).hex()
+    return time.strftime('%Y%m%d-%H%M%S') + '-' + os.urandom(4).hex()
 
 
 def run_folder(name, run_id, kind, index, out=None):

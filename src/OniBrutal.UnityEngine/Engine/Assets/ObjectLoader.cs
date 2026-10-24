@@ -67,6 +67,7 @@ namespace OniBrutal.Engine.Assets
         public static Object Load(SerializedFile file, long pathId)
         {
             if (pathId == 0) return null;
+            Platform.MainThreadPump.Maybe();
             var key = new Key(AssetSystem.KeyOf(file), pathId);
             if (loaded.TryGetValue(key, out var handle))
             {

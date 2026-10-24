@@ -29,6 +29,7 @@ namespace OniBrutal.Engine.Platform
             var platform = PlatformServices.Current;
             // Closing the window quits the player like Application.Quit.
             if (!platform.PollEvents(InputState.Instance)) Application.Quit();
+            MainThreadPump.Polled();
             if (platform.Focused != focused)
             {
                 focused = platform.Focused;

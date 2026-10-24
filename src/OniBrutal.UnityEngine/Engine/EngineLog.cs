@@ -79,6 +79,7 @@ namespace OniBrutal.Engine
 
             public override void WriteLine(string value)
             {
+                Platform.MainThreadPump.Maybe();
                 lock (fileLock)
                 {
                     console.WriteLine(value);
@@ -126,6 +127,7 @@ namespace OniBrutal.Engine
         /// and reaches no callback either.
         public static void Message(LogType type, string message, string logTrace, string callbackTrace)
         {
+            Platform.MainThreadPump.Maybe();
             if (!inCallback)
             {
                 Exception thrown;

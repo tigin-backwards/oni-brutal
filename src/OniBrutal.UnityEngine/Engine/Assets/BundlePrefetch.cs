@@ -96,7 +96,7 @@ namespace OniBrutal.Engine.Assets
                 }
             }
             long waitStart = System.Diagnostics.Stopwatch.GetTimestamp();
-            entry.Done.Wait();
+            while (!entry.Done.Wait(100)) Platform.MainThreadPump.Maybe();
             StartupStats.Mark($"bundle {System.IO.Path.GetFileName(full)} taken (waited {System.Diagnostics.Stopwatch.GetElapsedTime(waitStart).TotalMilliseconds:F0} ms, failed {entry.Failed})");
             if (entry.Failed || entry.Nodes == null) return null;
             try

@@ -52,6 +52,7 @@ namespace OniBrutal.Engine
 
         public static Component AddComponent(GameObjectNative go, Type type)
         {
+            Platform.MainThreadPump.Maybe();
             if (type == null)
             {
                 Debug.LogError("AddComponent with a null type");

@@ -124,18 +124,18 @@ namespace OniBrutal.Desktop
             if (scripted) InputState.Instance.MousePresent = true;
             else
             {
-                window.OnKey += OnKey;
-                window.OnChar += (_, codepoint) => feed.Text((uint)codepoint, Modifiers());
-                window.OnMouseButton += OnMouseButton;
-                window.OnCursorPos += (_, pos) => feed.MouseMoved(ToPixels(pos));
-                window.OnScroll += (_, offset) => feed.Scrolled(new Vector2((float)offset.X, (float)offset.Y), MouseGuiPosition());
-                window.OnCursorEnter += (_, entered) => InputState.Instance.MousePresent = entered;
+                window.OnKey += (w, key, scancode, action, mods) => Report(() => OnKey(w, key, scancode, action, mods));
+                window.OnChar += (_, codepoint) => Report(() => feed.Text((uint)codepoint, Modifiers()));
+                window.OnMouseButton += (w, button, action, mods) => Report(() => OnMouseButton(w, button, action, mods));
+                window.OnCursorPos += (_, pos) => Report(() => feed.MouseMoved(ToPixels(pos)));
+                window.OnScroll += (_, offset) => Report(() => feed.Scrolled(new Vector2((float)offset.X, (float)offset.Y), MouseGuiPosition()));
+                window.OnCursorEnter += (_, entered) => Report(() => InputState.Instance.MousePresent = entered);
             }
-            window.OnClose += _ => closeRequested = true;
-            window.OnFramebufferSize += (_, size) => framebufferSize = window.FramebufferSize;
-            Glfw.MonitorCallback += (_, _) => RefreshWindowState();
+            window.OnClose += _ => Report(() => closeRequested = true);
+            window.OnFramebufferSize += (_, size) => Report(() => framebufferSize = window.FramebufferSize);
+            Glfw.MonitorCallback += (_, _) => Report(RefreshWindowState);
             // The window may have moved to another monitor.
-            window.OnPosition += (_, _) => RefreshWindowState();
+            window.OnPosition += (_, _) => Report(RefreshWindowState);
             RefreshWindowState();
             InputState.Instance.MousePresent = true;
             // Unity's player starts with the pointer where it is (the game's hover card shows for
@@ -285,8 +285,39 @@ namespace OniBrutal.Desktop
             RefreshWindowState();
         }
 
+        /// Inside PumpEvents: what the callbacks report waits for the next PollEvents.
+        bool pumping;
+        readonly List<Action> pumped = new();
+
+        void Report(Action report)
+        {
+            if (pumping) pumped.Add(report);
+            else report();
+        }
+
+        public void PumpEvents()
+        {
+            pumping = true;
+            try
+            {
+                Glfw.PollEvents();
+            }
+            finally
+            {
+                pumping = false;
+            }
+        }
+
         public bool PollEvents(InputState input)
         {
+            // What came in while the last frame pumped messages, in the order it came, then the
+            // messages since.
+            if (pumped.Count > 0)
+            {
+                var reports = pumped.ToArray();
+                pumped.Clear();
+                foreach (var report in reports) report();
+            }
             Glfw.PollEvents();
             framebufferSize = window.FramebufferSize;
             if (!scripted) FollowCursorOutside();

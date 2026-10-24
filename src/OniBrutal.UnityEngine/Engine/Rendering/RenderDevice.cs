@@ -275,6 +275,7 @@ namespace OniBrutal.Engine.Rendering
                     StartupStats.UploadBytes += bytes;
                 }
                 Current.Upload(texture);
+                Platform.MainThreadPump.Maybe();
                 // Large batches go to the device as they are recorded, so it uploads while the
                 // rest are recorded.
                 sinceFlush += bytes;

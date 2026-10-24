@@ -34,12 +34,13 @@ namespace OniBrutal.Engine
             double ms = Ms(now - frameStart);
             frameStart = now;
             if (ms > 100 || frame < 3)
-                Mark($"frame {frame} took {ms:F0} ms: texel reads {Ms(Interlocked.Exchange(ref ReadTicks, 0)):F0} ms, uploads recorded {Interlocked.Exchange(ref Uploads, 0)} ({Interlocked.Exchange(ref UploadBytes, 0) >> 20} MiB) in {Ms(Interlocked.Exchange(ref UploadTicks, 0)):F0} ms, programs built {Interlocked.Exchange(ref Programs, 0)} in {Ms(Interlocked.Exchange(ref ProgramTicks, 0)):F0} ms (GL thread), main thread waited {Ms(Interlocked.Exchange(ref ProgramWaitTicks, 0)):F0} ms for programs; GL thread busy {Ms(Interlocked.Exchange(ref GlBusyTicks, 0)):F0} ms, texture uploads {Ms(Interlocked.Exchange(ref GlUploadTicks, 0)):F0} ms");
+                Mark($"frame {frame} took {ms:F0} ms: texel reads {Ms(Interlocked.Exchange(ref ReadTicks, 0)):F0} ms, uploads recorded {Interlocked.Exchange(ref Uploads, 0)} ({Interlocked.Exchange(ref UploadBytes, 0) >> 20} MiB) in {Ms(Interlocked.Exchange(ref UploadTicks, 0)):F0} ms, programs built {Interlocked.Exchange(ref Programs, 0)} in {Ms(Interlocked.Exchange(ref ProgramTicks, 0)):F0} ms (GL thread), main thread waited {Ms(Interlocked.Exchange(ref ProgramWaitTicks, 0)):F0} ms for programs; GL thread busy {Ms(Interlocked.Exchange(ref GlBusyTicks, 0)):F0} ms, texture uploads {Ms(Interlocked.Exchange(ref GlUploadTicks, 0)):F0} ms; window messages pumped {Interlocked.Exchange(ref Platform.MainThreadPump.Pumps, 0)} times, longest gap {Ms(Interlocked.Exchange(ref Platform.MainThreadPump.LongestTicks, 0)):F0} ms");
             else
             {
                 Interlocked.Exchange(ref ReadTicks, 0); Interlocked.Exchange(ref Uploads, 0); Interlocked.Exchange(ref UploadBytes, 0);
                 Interlocked.Exchange(ref UploadTicks, 0); Interlocked.Exchange(ref Programs, 0); Interlocked.Exchange(ref ProgramTicks, 0);
                 Interlocked.Exchange(ref ProgramWaitTicks, 0); Interlocked.Exchange(ref GlBusyTicks, 0); Interlocked.Exchange(ref GlUploadTicks, 0);
+                Interlocked.Exchange(ref Platform.MainThreadPump.Pumps, 0); Interlocked.Exchange(ref Platform.MainThreadPump.LongestTicks, 0);
             }
         }
     }

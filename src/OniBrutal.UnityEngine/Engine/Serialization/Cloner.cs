@@ -29,6 +29,7 @@ namespace OniBrutal.Engine.Serialization
         {
             if (original == null) throw new ArgumentException("The Object you want to instantiate is null.");
             Threads.AssertMainThread("Instantiate");
+            Platform.MainThreadPump.Maybe();
             if (original is GameObject || original is Component) return InstantiateHierarchy(original, parent, worldPositionStays, position, rotation);
             if (original is ScriptableObject so) return CloneScriptableObject(so);
             var clone = original.EngineCloneAsset();

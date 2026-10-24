@@ -66,6 +66,7 @@ namespace OniBrutal.Engine
             {
                 foreach (var info in file.Objects)
                 {
+                    Platform.MainThreadPump.Maybe();
                     var obj = ObjectLoader.Load(file, info.PathId);
                     if (obj is GameObject go) gameObjects.Add((GameObjectNative)go.Native);
                 }

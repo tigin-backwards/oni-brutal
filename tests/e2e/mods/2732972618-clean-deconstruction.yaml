@@ -1,0 +1,27 @@
+# Clean Deconstruction (2732972618), class P.
+#
+# What it does: a deconstructed building drops what it stores as items: a prefix on
+# Deconstructable.OnCompleteWork empties every Storage of the building first, gases and
+# liquids kept as items (DropAll without venting or dumping), where the game, destroying the
+# building, vents stored gas into the world.
+# How a player reaches it: deconstructing a building that holds something.
+# What changes: stored gas stays a canister on the floor instead of escaping.
+#
+# setup puts 5 kg of oxygen into the ration box's storage (east of the printing pod). The box
+# is deconstructed with the Deconstruct tool; afterwards the oxygen is still an item, on the
+# floor (the game alone vents it, one item fewer).
+from: early-base
+mods: [2732972618]
+setup:
+  - driver: {setup.call: {target: "all:RationBox::[0].GetComponent<Storage>", method: AddGasChunk, args: [Oxygen, 5, 300, 255, 0, false]}}
+steps:
+  - expect_state:
+      "count:all:RationBox::[0].GetComponent<Storage>.items[*] if .GetComponent<PrimaryElement>.ElementID == Oxygen": 1
+      "count:all:Pickupable::[*] if .GetComponent<PrimaryElement>.ElementID == Oxygen": {save_as: before}
+  - driver: {camera.set: {cell: [121, 208], ortho: 8}}
+  - tool: {toolbar: Deconstruct}
+  - drag: {from: [121, 207], to: [121, 207]}
+  - key: {code: Escape}
+  - run: {seconds: 600, until: {buildings: {RationBox: 0}}}
+  - expect_state:
+      "count:all:Pickupable::[*] if .GetComponent<PrimaryElement>.ElementID == Oxygen": ">= before"

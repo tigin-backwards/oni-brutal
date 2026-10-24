@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2732972618-clean-deconstruction.yaml",
+ "mods": [
+  "2732972618"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "5 kg of oxygen put into the ration box's storage (setup); the box deconstructed with the Deconstruct tool leaves the oxygen as an item instead of venting it",
+ "updated": "2026-10-23",
+ "commit": "bdcb3f5",
+ "mod_dlls": {
+  "2732972618": {
+   "CleanDeconstruction.dll": "d32ba18a39623aafcdd1ce1cbcd16ef2be783aaa46b7358e694a840463f84167"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261023-215444-03edfa",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T22:07:40",
+    "lane": 13,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261023-222415-9aa006",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-23T22:24:15",
+    "lane": 12,
+    "reference_run": "20261023-215444-03edfa",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261023-222415-9aa006",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-23T22:25:40",
+    "lane": 12,
+    "reference_run": "20261023-215444-03edfa",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

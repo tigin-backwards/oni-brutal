@@ -1621,11 +1621,56 @@ def mod_yaml_value(folder, key):
     return match.group(1) if match else None
 
 
+def module_name(path):
+    """The name a .NET assembly's metadata gives its module (its Module table's one row, such as
+    "大一统.dll"), or None if PATH is not one. PLib's shared config folder is named after the
+    assembly, which a Workshop download's file name may misspell (a zip's names decoded in the
+    wrong code page)."""
+    import struct
+    try:
+        with open(path, 'rb') as f:
+            data = f.read()
+        pe = struct.unpack_from('<I', data, 0x3c)[0]
+        if data[pe:pe + 4] != b'PE\0\0':
+            return None
+        sections, opt_size = struct.unpack_from('<H', data, pe + 6)[0], struct.unpack_from('<H', data, pe + 20)[0]
+        opt = pe + 24
+        dirs = opt + (96 if struct.unpack_from('<H', data, opt)[0] == 0x10b else 112)
+        cli_rva = struct.unpack_from('<I', data, dirs + 14 * 8)[0]
+        table = [struct.unpack_from('<IIII', data, opt + opt_size + 40 * i + 8) for i in range(sections)]
+
+        def offset(rva):
+            for vsize, vaddr, raw_size, raw_ptr in table:
+                if vaddr <= rva < vaddr + max(vsize, raw_size):
+                    return rva - vaddr + raw_ptr
+            raise ValueError(rva)
+        root = offset(struct.unpack_from('<I', data, offset(cli_rva) + 8)[0])
+        version_len = struct.unpack_from('<I', data, root + 12)[0]
+        pos = root + 16 + version_len
+        streams = {}
+        header = pos + 4
+        for _ in range(struct.unpack_from('<H', data, pos + 2)[0]):
+            start = struct.unpack_from('<I', data, header)[0]
+            end = data.index(b'\0', header + 8)
+            streams[data[header + 8:end].decode('ascii')] = root + start
+            header = (end + 4) & ~3
+        tables = streams.get('#~', streams.get('#-'))
+        heap_sizes = data[tables + 6]
+        valid = struct.unpack_from('<Q', data, tables + 8)[0]
+        rows = tables + 24 + 4 * bin(valid).count('1')   # the Module table's first row
+        index = struct.unpack_from('<I' if heap_sizes & 1 else '<H', data, rows + 2)[0]
+        strings = streams['#Strings'] + index
+        return data[strings:data.index(b'\0', strings)].decode('utf-8')
+    except (OSError, ValueError, KeyError, IndexError, struct.error, UnicodeDecodeError):
+        return None
+
+
 def write_options(profile, mods, options):
     """A mod's PLib options before launch: OPTIONS maps a static ID (or Workshop ID) to fields,
     merged into config.json where POptions reads it, beside the mod's assembly (every folder of
     the mod holding a DLL, as KMod may load an archived version) and in the shared location
-    mods/config/ASSEMBLY/. A `$file` field names the file instead, for a mod whose
+    mods/config/ASSEMBLY/ (named by the DLL's file and by its metadata's module name, which a
+    download may spell otherwise). A `$file` field names the file instead, for a mod whose
     [ConfigFile] gives it another name ("MiniBox.json"). Returns the files written."""
     written = []
     mods_dir = os.path.join(profile, 'mods')
@@ -1647,6 +1692,10 @@ def write_options(profile, mods, options):
                                if f.lower() == name.lower() and f != name)
                 for dll in dlls:
                     targets.add(os.path.join(mods_dir, 'config', os.path.splitext(dll)[0], name))
+                    module = module_name(os.path.join(directory, dll))
+                    if module:
+                        module = module[:-4] if module.lower().endswith('.dll') else module
+                        targets.add(os.path.join(mods_dir, 'config', module, name))
         for target in sorted(targets):
             data = {}
             if os.path.exists(target):

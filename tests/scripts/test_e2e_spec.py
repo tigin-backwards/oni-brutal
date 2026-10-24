@@ -273,6 +273,45 @@ class Options(unittest.TestCase):
             with self.assertRaises(e2e.SpecFailure):
                 e2e.write_options(profile, {'1863428350': 'SweepByType'}, {'Other': {'X': 1}})
 
+    @staticmethod
+    def tiny_assembly(module):
+        """The least of a PE file e2e.module_name reads: one section holding a CLI header and
+        metadata with a #~ stream (its Module table only) and a #Strings heap."""
+        import struct
+        strings = b'\0' + module.encode('utf-8') + b'\0'
+        strings += b'\0' * (-len(strings) % 4)
+        tables = struct.pack('<IBBBBQQI', 0, 2, 0, 0, 1, 1, 0, 1) + struct.pack('<HHHHH', 0, 1, 1, 0, 0)
+        tables += b'\0' * (-len(tables) % 4)
+        version = b'v4.0.30319\0\0'
+        headers = struct.pack('<IIHH', 0x424A5342, 0x10001, 0, 0) + struct.pack('<I', len(version)) + version
+        headers += struct.pack('<HH', 0, 2)
+        streams_at = len(headers) + 2 * 8 + 4 + 12
+        headers += struct.pack('<II', streams_at, len(tables)) + b'#~\0\0'
+        headers += struct.pack('<II', streams_at + len(tables), len(strings)) + b'#Strings\0\0\0\0'
+        metadata = headers + tables + strings
+        section_rva, raw = 0x2000, 0x200
+        cli = struct.pack('<IHHII', 72, 2, 5, section_rva + 72, len(metadata)) + b'\0' * 56
+        body = cli + metadata
+        pe = 0x80
+        coff = struct.pack('<HHIIIHH', 0x14c, 1, 0, 0, 0, 224, 0x2102)
+        optional = struct.pack('<H', 0x10b) + b'\0' * 94 + b'\0' * (14 * 8) + struct.pack('<II', section_rva, 72) + b'\0' * 8
+        section = b'.text\0\0\0' + struct.pack('<IIII', len(body), section_rva, len(body), raw) + b'\0' * 16
+        head = b'MZ' + b'\0' * 58 + struct.pack('<I', pe)
+        head += b'\0' * (pe - len(head)) + b'PE\0\0' + coff + optional + section
+        return head + b'\0' * (raw - len(head)) + body
+
+    def test_module_name_names_the_shared_config_folder(self):
+        with tempfile.TemporaryDirectory() as profile:
+            mod = os.path.join(profile, 'mods', 'Local', '2959893715')
+            os.makedirs(mod)
+            # A zip's file name decoded in the wrong code page; the metadata keeps the right one.
+            with open(os.path.join(mod, '┤≤╥╗═│.dll'), 'wb') as f:
+                f.write(self.tiny_assembly('大一统.dll'))
+            self.assertEqual(e2e.module_name(os.path.join(mod, '┤≤╥╗═│.dll')), '大一统.dll')
+            written = e2e.write_options(profile, {'2959893715': '2959893715'}, {'2959893715': {'X': 1}})
+            self.assertIn('mods/config/大一统/config.json', [os.path.relpath(w, profile) for w in written])
+        self.assertIsNone(e2e.module_name(__file__))
+
     def test_config_file_named_by_the_spec(self):
         with tempfile.TemporaryDirectory() as profile:
             mod = os.path.join(profile, 'mods', 'Local', '2890083659')

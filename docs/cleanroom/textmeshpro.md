@@ -500,8 +500,10 @@ package (M9). They refine the sections above.
   set at run time is split into its horizontal and vertical bytes.
 - **Truncation:** Truncate and Ellipsis stop where the first line that doesn't fit begins,
   leaving a blank record. Truncation keeps the part of a wrapped word that fits.
-- **Auto-size** doesn't choose a size that would break a word, and `preferredHeight` uses the
-  auto-sized size. A margin change keeps the preferred sizes until the text changes.
+- **Auto-size** doesn't choose a size that would break a word, and a wrapped text's
+  `preferredHeight` uses the auto-sized size (an unwrapped text's is at `fontSizeMax`, measured
+  in "Texts with nothing to lay out"). A margin change keeps the preferred sizes until the text
+  changes.
 - **`textBounds`** spans the characters' advances.
 - **Input field:** `inputValidator` doesn't change `characterValidation`.
 - **Dynamic font assets** use the "TextMeshPro/Mobile/Distance Field" shader.
@@ -2059,8 +2061,9 @@ size set (`automax`). Each case logged `isTextOverflowing`, `firstOverflowCharac
 `fontSize`, and then `preferredWidth` and `preferredHeight`. The flags were read before the
 preferred sizes, as E2eDriver's dump reads them, and again after. Two runs of the shipped package
 gave the same 5,904 results. `tools/UnityProbe/et-check.py rule LOG` predicts all 5,376 of them
-that the rule below covers. In this implementation it predicts 2,545, and `et-check.py diff ORIG
-OURS` finds 2,993 of 6,000 results differing.
+that the rule below covers. Before the fix this implementation followed it in 2,545 and
+`et-check.py diff ORIG OURS` found 2,993 of 6,000 results differing; now it follows all 5,376,
+and the diff finds 24 of 5,904: the `spaceCount` of "AB\nCD" cut by Ellipsis, noted at the end.
 
 - **An empty text keeps the last overflow.** When the text is "" or null, the layout reports
   nothing and changes neither `isTextOverflowing` nor `firstOverflowCharacterIndex`. Both stay
@@ -2095,22 +2098,20 @@ OURS` finds 2,993 of 6,000 results differing.
 - **Preferred size under auto-size** (noted in passing, one unwrapped line): `preferredWidth`
   and `preferredHeight` are those of the text at `fontSizeMax`, not at the size auto-size chose.
   "kg" shrunk to 11 in 95.7 × 15 is 18.38 × 21.76 with `fontSizeMax` 16, 27.57 × 32.63 with 24,
-  and 13.79 × 16.32 with 12. This implementation gives the same widths, but its heights are
-  those at the chosen size (14.96). That contradicts "preferredHeight uses the auto-sized size"
-  under "Measured on the shipped package" above. That line may hold for wrapped text, which
-  this probe did not try.
+  and 13.79 × 16.32 with 12. That narrows "preferredHeight uses the auto-sized size" under
+  "Measured on the shipped package" above, which no probe measured: this probe tried no
+  wrapped text, so a wrapped text keeps that line (its preferred height at the size auto-size
+  chose) and an unwrapped one is measured at `fontSizeMax`.
 
-Where this implementation deviates (`TMP_Text.Place.cs` sets `m_firstOverflowCharacterIndex`
-from each layout, an empty one too):
-- An empty text resets the overflow to false and -1. So the side screen's label, and any label
-  emptied after it overflowed, differs from the shipped package.
-- A text of tags alone has a preferred size of 0 × 0.
-- Auto-size shrinks a text of white space alone as if it had a line to fit: a space in
-  95.7 × 15 gets 11, and in 95.7 × 0 it gets 4 (`fontSizeMin`). A text of tags alone, and an
-  empty one, keep the size set, or the earlier text's auto-sized size.
-- The preferred height under auto-size is taken at the chosen size (above).
+Before the fix this implementation (`TMP_Text.Place.cs` set `m_firstOverflowCharacterIndex`
+from each layout, an empty one too) differed in each row of the table: an empty text reset the
+overflow to false and -1, a text of tags alone was 0 × 0, auto-size shrank white space alone
+as if it had a line to fit (a space in 95.7 × 15 got 11, in 95.7 × 0 `fontSizeMin`) and left
+tags alone and empty texts at the size set or the earlier auto-sized size, and the unwrapped
+preferred height under auto-size was taken at the chosen size (14.96 below). It now follows
+the table (`TmpEmptyTextTests`).
 
-| Case (NotoSans-Regular 16 pt, rect 95.7 wide) | shipped: overflowing, index; other | this implementation |
+| Case (NotoSans-Regular 16 pt, rect 95.7 wide) | shipped: overflowing, index; other | this implementation, before the fix |
 |---|---|---|
 | "kg" at height 15, then "" (Adjustable Auto Sweeper's UnitsLabel) | true, 0; 0 characters, 0 × 0 | false, -1 |
 | the same, then the rect resized to 100 | true, 0 | false, -1 |

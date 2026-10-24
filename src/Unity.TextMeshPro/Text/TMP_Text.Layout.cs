@@ -93,11 +93,17 @@ namespace TMPro
             string source = m_text ?? "";
             if (m_TextPreprocessor != null) source = m_TextPreprocessor.PreprocessText(source);
             s_Parser.Parse(this, source, m_Parsed);
+            m_SourceEmpty = string.IsNullOrEmpty(source);
             m_SourceCache = m_text;
             m_ParseRequired = false;
         }
 
         private protected ParsedText Parsed => m_Parsed;
+
+        // The text is "" or null: its layout reports nothing and leaves the overflow as the last
+        // layout of a text with something in it left it (measured: "Texts with nothing to lay
+        // out"). A text of tags alone is not empty in this sense.
+        private protected bool m_SourceEmpty = true;
 
         // The material slots of the text's existing sub-mesh objects, which keep their indices.
 
@@ -131,11 +137,27 @@ namespace TMPro
             m_LineSpacingAdjustment = 0f;
             m_CharWidthAdjustment = 0f;
             if (!m_enableAutoSizing) return m_fontSizeBase > 0f ? m_fontSizeBase : m_fontSize;
-            // An empty text keeps its size.
-            if (m_Parsed.Count == 0) return m_fontSize;
+            // An empty text takes the size set (not an earlier text's auto-sized one), no larger
+            // than the maximum; a text with nothing checked against the rect (white space or tags
+            // alone) takes the maximum, in any rect (measured on the shipped package).
+            if (m_SourceEmpty) return Mathf.Min(SizeSet, m_fontSizeMax);
+            if (!HasCheckedCharacter(rect)) return m_fontSizeMax;
             m_FittingAutoSize = true;
             try { return ChooseFittingSize(rect); }
             finally { m_FittingAutoSize = false; }
+        }
+
+        // The size code set: the value it last gave fontSize, or the serialized base size.
+        float SizeSet => !float.IsNaN(m_FontSizeSet) ? m_FontSizeSet : m_fontSizeBase > 0f ? m_fontSizeBase : m_fontSize;
+
+        // Whether any character of the text is checked against the rect's height (whether a
+        // character is checked does not depend on the size).
+        bool HasCheckedCharacter(Rect rect)
+        {
+            Layout(m_fontSizeMax, rect.width, rect.height);
+            for (int i = 0; i < m_LayoutCharacterCount; i++)
+                if (s_Placements[i].Checked) return true;
+            return false;
         }
 
         // While auto-size searches, a word that has to be broken because it is wider than its
@@ -232,7 +254,6 @@ namespace TMPro
 
             // 1. Characters.
             int count = 0;
-            bool endedAtStart = false;
             float space = 0f, pos = float.NaN;
             bool page = false;
             var rules = TMP_Settings.linebreakingRules;
@@ -254,7 +275,7 @@ namespace TMPro
                 // U+0003 ends the text: nothing after it is laid out, and as the first character
                 // it leaves no characters at all (measured on the shipped package).
                 bool end3 = el.Kind == ElementKind.Character && el.Unicode == 3;
-                if (end3 && count == 0) { endedAtStart = true; break; }
+                if (end3 && count == 0) break;
                 ref var p = ref pl[count++];
                 Measure(ref el, ref p, baseSize, width);
                 p.Element = e;
@@ -465,15 +486,12 @@ namespace TMPro
             m_LayoutOverflowIndex = overflowIndex;
             m_LayoutHorizontalCut = horizontalCut;
             m_LayoutCharacterCount = count;
-            m_LayoutEndedAtStart = endedAtStart;
             m_LayoutBaseSize = baseSize;
             m_LayoutHeight = height;
             return fits;
         }
 
         int m_LayoutOverflowIndex = -1, m_LayoutHorizontalCut = -1, m_LayoutCharacterCount;
-        // The text began with U+0003: it has no characters, but is not empty.
-        bool m_LayoutEndedAtStart;
         float m_LayoutBaseSize, m_LayoutHeight;
 
         // The distance from line k-1's baseline down to line k's, for line k's ascender.

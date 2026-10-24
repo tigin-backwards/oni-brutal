@@ -25,7 +25,8 @@ namespace TMPro
             info.characterCount = count;
             info.lineCount = lineCount;
             info.materialCount = parsed.Materials.Count;
-            m_firstOverflowCharacterIndex = m_LayoutOverflowIndex;
+            // An empty text keeps the last overflow; everything else is cleared.
+            if (!m_SourceEmpty) m_firstOverflowCharacterIndex = m_LayoutOverflowIndex;
             m_IsTextTruncated = false;
 
             // Which lines are shown: the page on display, and none after an overflow that hides.

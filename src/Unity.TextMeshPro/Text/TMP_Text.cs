@@ -25,6 +25,8 @@ namespace TMPro
         float m_LineSpacingAdjustment;
         float m_CharWidthAdjustment;
         float m_AutoSizedFontSize = -1f;
+        // The value code last gave fontSize (NaN: none; the serialized base size then).
+        float m_FontSizeSet = float.NaN;
         Extents m_TextExtents;
         float m_Padding;
         bool m_IsUsingBold;
@@ -523,6 +525,7 @@ namespace TMPro
             get => m_fontSize;
             set
             {
+                m_FontSizeSet = value;
                 if (m_fontSize == value) return;
                 m_havePropertiesChanged = true;
                 m_fontSize = value;

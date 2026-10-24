@@ -131,8 +131,10 @@ namespace TMPro
             if (m_fontAsset == null) return 0f;
             float rectWidth = float.IsInfinity(width) ? float.PositiveInfinity : width;
             LayoutUnadjusted(rectWidth);
+            // An empty text is 0 wide; one laid out without characters (tags alone, or U+0003
+            // first) is a hundredth wide (measured on the shipped package).
             if (m_LayoutCharacterCount == 0)
-                return m_LayoutEndedAtStart ? NextHundredth(m_margin.x + m_margin.z) : RoundUp(m_margin.x + m_margin.z);
+                return m_SourceEmpty ? RoundUp(m_margin.x + m_margin.z) : NextHundredth(m_margin.x + m_margin.z);
             double max = 0.0;
             for (int k = 0; k < s_LineCount; k++)
             {
@@ -166,12 +168,17 @@ namespace TMPro
             m_CharWidthAdjustment = widthAdjust;
         }
 
-        // From the first line's ascender to the last line's descender. With auto-size, at the
-        // size auto-size chooses for the rect.
+        // From the first line's ascender to the last line's descender. With auto-size, an
+        // unwrapped text is measured at the maximum size, as its width is (measured on the
+        // shipped package: "kg" shrunk to 11 in 95.7 x 15 is 21.76 high with fontSizeMax 16);
+        // a wrapped one at the size auto-size chooses for the rect (the M9 measurement, which
+        // the unwrapped probe did not contradict for wrapped text).
         float PreferredHeightAt(float width)
         {
             if (m_fontAsset == null) return 0f;
-            if (m_enableAutoSizing)
+            bool wraps = (m_TextWrappingMode == TextWrappingModes.Normal || m_TextWrappingMode == TextWrappingModes.PreserveWhitespace)
+                && !float.IsInfinity(width) && !float.IsNaN(width);
+            if (m_enableAutoSizing && wraps)
             {
                 float lineAdjust = m_LineSpacingAdjustment, widthAdjust = m_CharWidthAdjustment;
                 float size = ChooseFontSize(LayoutRect);
@@ -183,7 +190,7 @@ namespace TMPro
             }
             else LayoutUnadjusted(width);
             if (s_LineCount == 0)
-                return m_LayoutEndedAtStart ? NextHundredth(m_margin.y + m_margin.w) : RoundUp(m_margin.y + m_margin.w);
+                return m_SourceEmpty ? RoundUp(m_margin.y + m_margin.w) : NextHundredth(m_margin.y + m_margin.w);
             // The height goes down to the last line with a checked character (not white space;
             // a tab is checked): a text of only white space has no height, 0 (measured on the
             // shipped package: " " is 0.01 high, "A\n " one line, "\t" one line).

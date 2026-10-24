@@ -1,0 +1,27 @@
+# B 超级氧齿蕨 Super Oxyfern 1.1 (3108337158), class P.
+#
+# What it does: makes the Oxyfern breathe ten times as much carbon dioxide: a postfix on
+# OxyfernConfig.CreatePrefab gives its ElementConsumer a rate of 0.006 kg/s (the game
+# 0.000625) and its ElementConverter turns 0.006 kg/s of CO2 into 0.006 kg/s of oxygen (the
+# game 0.03125 kg/s out of 0.000625), and calls ExtendEntityToBasicPlant again; a postfix on
+# Oxyfern.SetConsumptionRate keeps the rate at 0.006 whether the fern is wild or planted.
+# How a player reaches it: an Oxyfern, wild or planted.
+# What changes: what an Oxyfern takes in and gives out.
+#
+# setup spawns an Oxyfern on the floor of the dug-out corridor west of the printing pod. Once
+# the game has run, its consumer takes 0.006 kg/s, as the prefab does.
+from: early-base
+mods: [3108337158]
+setup:
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(0, 109, 206, \"Oxyfern\", \"BuildingBack\")", method: SetActive, args: [true]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"Oxyfern\").GetComponent<ElementConsumer>.consumptionRate": ">= 0.0059"
+      "Assets.GetPrefab(\"Oxyfern\").GetComponent<ElementConverter>.outputElements[0].massGenerationRate": "<= 0.0061"
+      "Assets.GetPrefab(\"Oxyfern\").GetComponent<ElementConverter>.consumedElements[0].MassConsumptionRate": ">= 0.0059"
+      "Assets.GetPrefab(\"Oxyfern\").GetComponent<ElementConverter>.outputElements[0].elementHash": Oxygen
+  - run: {seconds: 30}
+  - expect_state:
+      "all:Oxyfern::[0].GetComponent<ElementConsumer>.consumptionRate": ">= 0.0059"
+  - expect_state:
+      "all:Oxyfern::[0].GetComponent<ElementConsumer>.consumptionRate": "<= 0.0061"

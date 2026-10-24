@@ -1,0 +1,55 @@
+{
+ "spec": "mods/1887236601-favorite-buildings.yaml",
+ "mods": [
+  "1887236601"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "in the colony, 2 starts the build tool with the Tile and 1 with the Ladder, and a click places a ladder blueprint, as in the original",
+ "updated": "2026-10-24",
+ "commit": "10841b3",
+ "mod_dlls": {
+  "1887236601": {
+   "FavoriteBuildings.dll": "f614082bf306c2525c6448b2098cb43b933f23d5cf6cdf0cc41838c2ce17c6f9"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-041938-c43b44",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T04:28:38",
+    "lane": 12,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-043120-1ebc65",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T04:43:31",
+    "lane": 13,
+    "reference_run": "20261024-041938-c43b44",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-043120-1ebc65",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T04:43:34",
+    "lane": 12,
+    "reference_run": "20261024-041938-c43b44",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

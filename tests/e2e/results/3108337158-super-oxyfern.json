@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3108337158-super-oxyfern.yaml",
+ "mods": [
+  "3108337158"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Oxyfern prefab breathes in 0.006 kg/s of CO2 and gives out 0.006 kg/s of oxygen, and a wild Oxyfern spawned in the corridor keeps that rate once the game runs, as in the original",
+ "updated": "2026-10-24",
+ "commit": "10841b3",
+ "mod_dlls": {
+  "3108337158": {
+   "B_│¼╝╢╤⌡│▌▐º.dll": "7288a69c7d850e041e5bb896bd6284b0b27d3d474e4863a5314e37f0ca7e0a7a"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-041938-c43b44",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T04:19:38",
+    "lane": 13,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-043120-1ebc65",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T04:31:20",
+    "lane": 12,
+    "reference_run": "20261024-041938-c43b44",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-043120-1ebc65",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T04:31:21",
+    "lane": 13,
+    "reference_run": "20261024-041938-c43b44",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

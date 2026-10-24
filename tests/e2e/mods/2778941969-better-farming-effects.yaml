@@ -1,0 +1,39 @@
+# Better Farming Effects and Tweaks (2778941969), classes P, O.
+#
+# What it does: a farmer's tending (Farmer's Touch) and Divergent beetles' and worms' care
+# also work on plants that do not grow crops: decorative plants (DecorSeed) and the Oxyfern,
+# Wheezewort and Oxy Coral become farm-tinkerable and get an ExtraSeedProducer (a tended
+# plant can give an extra seed); the Oxyfern gets TendedOxyfern, whose fake growing rate
+# scales its CO2 intake and oxygen output, and its oxygen leaves half a cell higher; tending
+# skips grown or wilting plants; fertilizer and irrigation stop while a plant does not grow;
+# trees, Sap Trees, Dinoferns, Saltvines and others get their own tweaks (PLib options).
+# How a player reaches it: Farmer's Touch from a Farm Station, critters; the options on the
+# Mods screen.
+# What changes: what tending does to which plants.
+#
+# A smaller spec: tending needs a Farm Station, its tools and a farming Duplicant. setup
+# spawns a wild Oxyfern and a Buddy Bud (decorative) on the floor of the dug-out corridor west
+# of the printing pod; once the game has run, both carry the mod's components, and the
+# Oxyfern's details screen opens on a click.
+from: early-base
+mods: [2778941969]
+setup:
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(0, 109, 206, \"Oxyfern\", \"BuildingBack\")", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(0, 114, 206, \"BulbPlant\", \"BuildingBack\")", method: SetActive, args: [true]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"Oxyfern\").GetComponent<ElementConverter>.outputElements[0].outputElementOffset.y": 1.5
+      "Assets.GetPrefab(\"BulbPlant\").GetComponent<BetterPlantTending.ExtraSeedProducer>.isDecorative": true
+  - run: {seconds: 10}
+  - expect_state:
+      "all:Oxyfern::[0].GetComponent<BetterPlantTending.TendedOxyfern>": exists
+      "all:Oxyfern::[0].GetComponent<Tinkerable>": exists
+      "all:Oxyfern::[0].GetComponent<BetterPlantTending.ExtraSeedProducer>.isDecorative": false
+      "count:all:BetterPlantTending.ExtraSeedProducer::[*] if .isDecorative == true": ">= 1"
+  - driver: {camera.set: {cell: [109, 207], ortho: 8}}
+  - click_world: {cell: [109, 207], select: Oxyfern}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Oxyfern"}
+  - expect_state:
+      "selected:GetComponent<Tinkerable>.tinkerMaterialTag": FarmStationTools

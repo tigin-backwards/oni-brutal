@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2778941969-better-farming-effects.yaml",
+ "mods": [
+  "2778941969"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a smaller spec (tending needs a farm station and a farmer): a spawned wild Oxyfern and Buddy Bud get the mod's farm-tinkerable, tended and extra-seed components, the Oxyfern's oxygen leaves half a cell higher, and its details screen opens on a click, as in the original",
+ "updated": "2026-10-24",
+ "commit": "10841b3",
+ "mod_dlls": {
+  "2778941969": {
+   "BetterPlantTending.dll": "4dd7e681640726160bc103a6ff952ac2f2edb0dc0eed09712a4757916ea84fde"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-041938-c43b44",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T04:24:08",
+    "lane": 13,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-043120-1ebc65",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T04:39:44",
+    "lane": 13,
+    "reference_run": "20261024-041938-c43b44",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-043120-1ebc65",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T04:39:43",
+    "lane": 12,
+    "reference_run": "20261024-041938-c43b44",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

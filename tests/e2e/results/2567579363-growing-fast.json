@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2567579363-growing-fast.yaml",
+ "mods": [
+  "2567579363"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "every Mealwood in the colony (a spawned one and the wild ones) has a maturity maximum of 1 (3 in the game) and grows, as in the original",
+ "updated": "2026-10-24",
+ "commit": "10841b3",
+ "mod_dlls": {
+  "2567579363": {
+   "MG_SuperCrop.dll": "b4140a75460bfefec8bb49c5a113a34acf3bd8b3635b487c69a735aa325eec69"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-041938-c43b44",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T04:21:05",
+    "lane": 13,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-043120-1ebc65",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T04:32:31",
+    "lane": 13,
+    "reference_run": "20261024-041938-c43b44",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-043120-1ebc65",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T04:32:31",
+    "lane": 12,
+    "reference_run": "20261024-041938-c43b44",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

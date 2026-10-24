@@ -1,0 +1,51 @@
+# Extended Bridges Fix - Bring Order To Your Factory (2820896505), class B.
+#
+# What it does: adds long (4-cell) bridges that cross two cells instead of one: Long Liquid
+# Bridge (Improved Liquid Piping), Long Gas Bridge (Improved Gas Piping), Long Conveyor Bridge
+# (Conveyor Rail), Long Power and Long Conductive Bridges (Advanced Power Regulation, Pretty
+# Good Conductors), Long Signal and Ribbon Bridges (Logic Circuits, Parallel Automation).
+# Each sits after the game's bridge in its build menu category (BUILDINGS.PLANORDER), and a
+# postfix on Building.OnSpawn widens its bridge animation.
+# How a player reaches it: the build menu (Plumbing, Ventilation, Shipping, Power,
+# Automation), after research.
+# What changes: bridges that jump two pipes, rails or wires.
+#
+# setup grants Improved Liquid Piping. The Long Liquid Bridge is picked in the build menu,
+# placed in the dug-out corridor west of the printing pod, built, and selected: it is 4
+# cells wide, with its input and output 3 cells apart.
+from: early-base
+mods: [2820896505]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"LiquidPiping\")", method: Purchased}}
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"ImprovedLiquidPiping\")", method: Purchased}}
+  # The build menu shows a category once one of its buildings is researched, as it learns.
+  - driver: {setup.call: {target: "Game.Instance", method: Trigger, args: [-107300940]}}
+  - driver: {setup.call: {target: "PlanScreen.Instance._researchedDefs", method: Clear}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"ExtendedLiquidConduitBridge\").WidthInCells": 4
+      "Assets.GetBuildingDef(\"ExtendedLiquidConduitBridge\").UtilityOutputOffset.x": 2
+      "Assets.GetBuildingDef(\"ExtendedLiquidConduitBridge\").UtilityInputOffset.x": -1
+  - run: {seconds: 5}
+  - driver: {camera.set: {cell: [111, 208], ortho: 10}}
+  - click: {ui: "**/PlanScreen/Toggle:Plumbing"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/ExtendedLiquidConduitBridge*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/ExtendedLiquidConduitBridge*"}
+  - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
+  - expect_ui:
+      "**/ProductInfoScreen/Panel/TitleBar/Label": {text: "~Long Liquid Bridge"}
+  - expect_state:
+      "PlanScreen.Instance.ProductInfoScreen.currentDef.PrefabID": ExtendedLiquidConduitBridge
+  - shot: {name: product, crop: "**/ProductInfoScreen", threshold: 0.04}
+  - click_world: {cell: [110, 208]}
+  - key: {code: Escape}
+  - expect: {blueprints: {ExtendedLiquidConduitBridge: 1}}
+  - run: {seconds: 1200, until: {buildings: {ExtendedLiquidConduitBridge: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [110, 208], ortho: 8}}
+  - click_world: {cell: [110, 208], select: ExtendedLiquidConduitBridge}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Long Liquid Bridge"}
+  - expect_state:
+      "selected:GetComponent<Building>.Def.WidthInCells": 4
+      "selected:GetComponent<KBatchedAnimController>.animWidth": 1.4

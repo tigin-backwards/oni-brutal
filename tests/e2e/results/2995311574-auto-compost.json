@@ -1,0 +1,56 @@
+{
+ "spec": "mods/2995311574-auto-compost.yaml",
+ "mods": [
+  "2995311574"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Compost is built from the build order and filled with polluted dirt by Duplicants, then composts by itself (active, dirt in its storage), with the mod's 600 kg delivery, as in the original",
+ "updated": "2026-10-24",
+ "commit": "10841b3",
+ "mod_dlls": {
+  "2995311574": {
+   "AutoCompost.dll": "0692a0ecca9438491578deee9cc523b9cabb98d25b1d715122a44d9b048ccfa9",
+   "PLib.dll": "9bf74a5ec6b897e2f82354c90de45c0ec89181087679c39e76b7cbc77de20fc6"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-041938-c43b44",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T04:23:29",
+    "lane": 12,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-043120-1ebc65",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T04:34:49",
+    "lane": 12,
+    "reference_run": "20261024-041938-c43b44",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-043120-1ebc65",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T04:34:49",
+    "lane": 13,
+    "reference_run": "20261024-041938-c43b44",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

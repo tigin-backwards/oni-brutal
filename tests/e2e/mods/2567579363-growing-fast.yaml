@@ -1,0 +1,24 @@
+# [MG]Growing fast(快速生长) (2567579363), class P.
+#
+# What it does: every growing plant ripens in a third of its time: a postfix on
+# Growing.OnPrefabInit clears the modifiers of the plant's maturity maximum and gives it a
+# third of what it was (at least 0.5). A Mealwood's maturity (3, its 1800 s in cycles) becomes
+# 1.
+# How a player reaches it: any crop, wild or planted.
+# What changes: harvests come three times as often.
+#
+# setup spawns a wild Mealwood on the floor of the dug-out corridor west of the printing pod.
+# After a run, each Mealwood's maturity maximum is 1, and they have grown.
+from: early-base
+mods: [2567579363]
+setup:
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(0, 109, 206, \"BasicSingleHarvestPlant\", \"BuildingBack\")", method: SetActive, args: [true]}}
+steps:
+  - run: {seconds: 30}
+  - expect_state:
+      "count:all:Growing::[*] if .GetComponent<KPrefabID>.PrefabTag.Name == BasicSingleHarvestPlant": {save_as: mealwoods}
+  - expect_state: {"count:all:Growing::[*] if .GetComponent<KPrefabID>.PrefabTag.Name == BasicSingleHarvestPlant": ">= 1"}
+  # Each Mealwood's maturity maximum is 1 (3 in the game).
+  - expect_state: {"sum:all:Growing::[*].maturity.GetMax() if .GetComponent<KPrefabID>.PrefabTag.Name == BasicSingleHarvestPlant": ">= 0.99 * mealwoods"}
+  - expect_state: {"sum:all:Growing::[*].maturity.GetMax() if .GetComponent<KPrefabID>.PrefabTag.Name == BasicSingleHarvestPlant": "<= 1.01 * mealwoods"}
+  - expect_state: {"sum:all:Growing::[*].maturity.value if .GetComponent<KPrefabID>.PrefabTag.Name == BasicSingleHarvestPlant": "> 0"}

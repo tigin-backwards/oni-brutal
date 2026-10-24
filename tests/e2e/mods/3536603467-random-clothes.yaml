@@ -1,0 +1,22 @@
+# Random Clothes (3536603467), classes T, O.
+#
+# What it does: dresses each Duplicant in random clothes when it spawns: a postfix on
+# MinionIdentity.OnSpawn picks, from the game's permits, a whole outfit or separate pieces
+# (tops, gloves, bottoms, shoes) for clothing, Atmo Suit and Jet Suit, applies them through
+# the WearableAccessorizer and tags the Duplicant MjRandomClothes; by default (OnlyStandart) a
+# tagged Duplicant keeps its clothes. A postfix on PlayerController.OnPrefabInit reads its
+# PLib options (which outfit kinds and pieces, every load or once).
+# How a player reaches it: the colony's Duplicants; the options on the Mods screen.
+# What changes: what Duplicants wear.
+#
+# The pick is random, so the spec checks relations: once the colony has loaded, every
+# Duplicant carries the mod's tag, which it adds only after applying the items it picked.
+from: early-base
+mods: [3536603467]
+steps:
+  - run: {seconds: 2}
+  - expect_state:
+      "Components.LiveMinionIdentities.Count": {save_as: dupes}
+  - expect_state:
+      "count:Components.LiveMinionIdentities.Items[*] if .GetComponent<KPrefabID>.HasTag(\"MjRandomClothes\") == true": "== dupes"
+      "Components.LiveMinionIdentities.Items[0].GetComponent<KPrefabID>.HasTag(\"MjRandomClothes\")": true

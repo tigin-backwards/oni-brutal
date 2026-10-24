@@ -1,0 +1,35 @@
+# 自动堆肥/ Auto Compost (2995311574), classes P, O.
+#
+# What it does: the Compost turns itself: a postfix on Compost.States.InitializeStates drops
+# the composting state's scheduled return to "awaiting flip" and sends the inert state on to
+# composting after 10.1 s, so no Duplicant has to flip it; postfixes on CompostConfig set its
+# heat (PLib options: 0 kW empty, 0.1 kW working), its delivery (600 kg capacity, refill at
+# 60 kg; the game 300 and 60), a 10 s flip and BuildingComplete.isManuallyOperated false.
+# How a player reaches it: the build menu (Food, Compost, Basic Farming); its options on the
+# Mods screen.
+# What changes: a compost heap that keeps composting by itself.
+#
+# setup grants Basic Farming and spawns sandstone and polluted dirt. A Compost is built in the
+# dug-out corridor west of the printing pod, Duplicants fill it, and it composts: it is active
+# and has made dirt.
+from: early-base
+mods: [2995311574]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"FarmingTech\")", method: Purchased}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"SandStone\").substance", method: SpawnResource, args: [[109.5, 206.5, -12], 900, 300, 255, 0]}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"ToxicSand\").substance", method: SpawnResource, args: [[110.5, 206.5, -12], 400, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"Compost\").GetComponent<ManualDeliveryKG>.capacity": 600
+      "Assets.GetPrefab(\"Compost\").GetComponent<BuildingComplete>.isManuallyOperated": false
+      "Assets.GetBuildingDef(\"Compost\").ExhaustKilowattsWhenActive": 0
+  - build: {prefab: Compost, at: [113, 206]}
+  - expect: {blueprints: {Compost: 1}}
+  - run: {seconds: 1500, until: {buildings: {Compost: 1}, pending_construction: 0}}
+  - run: {seconds: 600}
+  - driver: {camera.set: {cell: [113, 207], ortho: 8}}
+  - click_world: {cell: [113, 207], select: Compost}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<Operational>.IsActive": true
+      "selected:GetComponent<Storage>.GetMassAvailable(\"Dirt\")": "> 0"

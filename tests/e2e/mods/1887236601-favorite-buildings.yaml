@@ -1,0 +1,32 @@
+# Favorite Buildings ⭐ Custom Key Bindings // by @Ony 👾 (1887236601), classes S, K.
+#
+# What it does: binds buildings to keys: a FavoriteBuildingsComponent on Global polls the
+# keys each frame and, for a researched building, picks the best material and starts its
+# build tool. The defaults bind ` (Storage Bin; Shift: Smart Storage, Ctrl: Automatic
+# Dispenser), 1 (Ladder; Ctrl: Plastic Ladder, Shift: Fire Pole), 2 (Tile; Shift: Insulated
+# Tile), 3 (Mesh Tile; Shift: Airflow Tile), 4 to 7 (wires and their bridges), 8 and 9
+# (liquid and gas pipes, bridges, vents), 0 (Door), - (Automation Wire) and = (Conveyor
+# Rail). Prefixes switch off the game's own number keys for the build menu
+# (BuildMenu.UseHotkeyBuildMenu, KIconToggleMenu.OnKeyDown on the PlanScreen). Its own
+# config screen edits the bindings, with a cycle mode for keys bound to several buildings.
+# How a player reaches it: the number keys in a colony; the config from the Mods screen.
+# What changes: one key picks a building to place.
+#
+# In the colony, 2 starts the build tool with the Tile and 1 with the Ladder; a click in the
+# dug-out corridor west of the printing pod places a ladder blueprint.
+from: early-base
+mods: [1887236601]
+steps:
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [110, 208], ortho: 10}}
+  - key: {code: Alpha2}
+  - expect_state:
+      "PlayerController.Instance.ActiveTool.name": BuildTool
+      "BuildTool.Instance.def.PrefabID": Tile
+  - key: {code: Alpha1}
+  - expect_state:
+      "PlayerController.Instance.ActiveTool.name": BuildTool
+      "BuildTool.Instance.def.PrefabID": Ladder
+  - click_world: {cell: [109, 207]}
+  - key: {code: Escape}
+  - expect: {blueprints: {Ladder: 1}}

@@ -1,0 +1,75 @@
+{
+ "spec": "mods/1885249412-adjustable-transformers.yaml",
+ "mods": [
+  "1885249412"
+ ],
+ "verdict": "failed",
+ "why": "a run of ours failed",
+ "findings": [],
+ "note": "a Power Transformer (small) is built and selected: its capacity side screen shows (titled Storage Capacity Control in both: the game reads the title before the mod's SetTarget postfix sets its key) and 500 typed into its field becomes the transformer's battery capacity and charge wattage, as in the original; after the typed value is submitted ours leaves the field's caret at 0 (3, at the end of the text, in the original), the measuring cup's difference",
+ "updated": "2026-10-24",
+ "commit": "10841b3",
+ "mod_dlls": {
+  "1885249412": {
+   "AdjustableTransformers.dll": "30e616b576e87d67ddc1ac40ec9ad9f9e41f6e8795660fa1a08cf2bcc73608ae"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-041938-c43b44",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T04:25:50",
+    "lane": 13,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-043120-1ebc65",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-24T04:40:51",
+    "lane": 13,
+    "reasons": [
+     "ui_dump capacity-set: 1 difference(s)"
+    ],
+    "reference_run": "20261024-041938-c43b44",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "capacity": {
+      "differences": 0
+     },
+     "capacity-set": {
+      "differences": 1
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261024-043120-1ebc65",
+    "index": 2,
+    "verdict": "fail",
+    "date": "2026-10-24T04:40:52",
+    "lane": 12,
+    "reasons": [
+     "ui_dump capacity-set: 1 difference(s)"
+    ],
+    "reference_run": "20261024-041938-c43b44",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "capacity": {
+      "differences": 0
+     },
+     "capacity-set": {
+      "differences": 1
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

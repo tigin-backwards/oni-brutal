@@ -1,0 +1,44 @@
+# Adjustable Transformers (1885249412), class S.
+#
+# What it does: gives both power transformers a capacity side screen ("Transformer Wattage")
+# that caps what they pass on: a PowerTransformerAdjustable component (IUserControlledCapacity)
+# sets its battery's capacity and charge wattage to the chosen wattage, between 0 and the
+# transformer's rating, which the mod raises to 1000 W (small, default 1000) and 20000 W
+# (large, default 4000); a postfix on CapacityControlSideScreen.SetTarget renames the screen;
+# copy settings copy the wattage.
+# How a player reaches it: a built transformer's side screen, its slider and field.
+# What changes: a transformer passes on only the wattage the player sets.
+#
+# setup grants Advanced Power Regulation and spawns metal ore. A Power Transformer (small) is
+# built in the dug-out corridor west of the printing pod and selected: its capacity side
+# screen shows (still titled Storage Capacity Control, as in the original), and 500 typed into its field becomes the battery's capacity.
+from: early-base
+mods: [1885249412]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"AdvancedPowerRegulation\")", method: Purchased}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Cuprite\").substance", method: SpawnResource, args: [[109.5, 206.5, -12], 400, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"PowerTransformerSmall\").GeneratorWattageRating": 1000
+      "Assets.GetBuildingDef(\"PowerTransformer\").GeneratorWattageRating": 20000
+  - build: {prefab: PowerTransformerSmall, at: [113, 206]}
+  - expect: {blueprints: {PowerTransformerSmall: 1}}
+  - run: {seconds: 1500, until: {buildings: {PowerTransformerSmall: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [114, 207], ortho: 8}}
+  - click_world: {cell: [113, 207], select: PowerTransformerSmall}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_wait: {path: "**/CapacityControlSideScreen", cond: stable}
+  # The mod's SetTarget postfix sets the screen's titleKey, but the game reads the title
+  # before SetTarget now: the original shows the game's title as well.
+  - expect_state:
+      "ui:**/CapacityControlSideScreen::GetComponent<CapacityControlSideScreen>.titleKey": "STRINGS.UI.UISIDESCREENS.POWERTRANSFORMERWATTAGESIDESCREEN.TITLE"
+  - expect_ui:
+      "**/CapacityControlSideScreen/TitleBox/Label": {text: "Storage Capacity Control"}
+  - expect_state:
+      "selected:GetComponent<Battery>.capacity": 1000
+  - ui_dump: {name: capacity, root: "**/CapacityControlSideScreen"}
+  - type: {ui: "**/CapacityControlSideScreen/**/InputField", text: "500", enter: true, clear: true}
+  - expect_state:
+      "selected:GetComponent<Battery>.capacity": 500
+      "selected:GetComponent<Battery>.chargeWattage": 500
+  - ui_dump: {name: capacity-set, root: "**/CapacityControlSideScreen"}

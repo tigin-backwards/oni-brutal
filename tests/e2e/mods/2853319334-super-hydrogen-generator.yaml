@@ -1,0 +1,36 @@
+# Super Hydrogen Generator超级氢气发电机 (2853319334), classes P, O.
+#
+# What it does: postfixes on HydrogenGeneratorConfig.CreateBuildingDef rate the Hydrogen
+# Generator at the PLib option a1 (default 3333 W, the game 800), hold 666666 J, give off no
+# heat, and move its power output one cell left; a postfix on DoPostConfigureComplete makes it
+# burn c1 kg/s of hydrogen (default 0.1) into nothing (Controler.json, restart required).
+# How a player reaches it: the build menu (Power, Hydrogen Generator, Advanced Power
+# Regulation); its options on the Mods screen.
+# What changes: a hydrogen generator rated as the options say.
+#
+# The options set 5000 W and 0.5 kg/s. setup places a finished Hydrogen Generator (4x3, too
+# wide for the corridor's open floor between the wild plants) in the dug-out corridor west of
+# the printing pod. It is selected with a click: it is rated 5000 W and burns 0.5 kg/s.
+from: early-base
+mods: [2853319334]
+options:
+  "2853319334": {$file: Controler.json, a1: 5000.0, c1: 0.5}
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"HydrogenGenerator\")", method: Build, args: [{"$": "Grid.XYToCell(114, 206)"}, Neutral, null, [Cuprite], 300]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"HydrogenGenerator\").GeneratorWattageRating": 5000
+      "Assets.GetBuildingDef(\"HydrogenGenerator\").ExhaustKilowattsWhenActive": 0
+      "Assets.GetBuildingDef(\"HydrogenGenerator\").SelfHeatKilowattsWhenActive": 0
+      "Assets.GetBuildingDef(\"HydrogenGenerator\").GeneratorBaseCapacity": 666666
+  - run: {seconds: 5}
+  - driver: {camera.set: {cell: [114, 208], ortho: 8}}
+  - click_world: {cell: [114, 207], select: HydrogenGenerator}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Hydrogen Generator"}
+  - expect_state:
+      "selected:GetComponent<Generator>.WattageRating": 5000
+      "selected:GetComponent<Generator>.Capacity": 666666
+      "selected:GetComponent<EnergyGenerator>.formula.inputs[0].consumptionRate": 0.5
+  - shot: {name: title, crop: "**/DetailsScreen/TitleBar", threshold: 0.04}

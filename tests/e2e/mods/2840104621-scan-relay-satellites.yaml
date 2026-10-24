@@ -1,0 +1,27 @@
+# Scan & Relay Satellites (DLC) (2840104621), classes B, S, O.
+#
+# What it does: adds a Satellite Carrier rocket module (LS_SatelliteCarrierModule, among the
+# deployable and utility modules after the Artifact Transport Module, unlocked by Advanced
+# Scanners with an exploration satellite item) that builds satellites inside the rocket and
+# deploys them in space: exploration satellites reveal the starmap around them, and relay
+# satellites carry logic and the Remote Worker's and Geotuner's reach; lenses for a solar
+# satellite; side screens to pick the satellite type and to deploy or retrieve one.
+# How a player reaches it: the research screen; the rocket platform's module list; the module's
+# side screens.
+# What changes: satellites in space.
+#
+# A smaller spec: rocket modules need a rocket platform, far beyond early-base. The research
+# screen's Advanced Scanners node lists the module and the satellite among its unlocks.
+from: early-base
+mods: [2840104621]
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"AdvancedScanners\").unlockedItemIDs": {contains: LS_SatelliteCarrierModule}
+      "Assets.GetBuildingDef(\"LS_SatelliteCarrierModule\").PrefabID": LS_SatelliteCarrierModule
+  - open: {management: research}
+  # The tree glides to its clamped place after the screen opens: the dump waits for it.
+  - ui_wait: {path: "**/ResearchScreen/Content/ScrollRectRoot/ScrollContent", cond: stable, frames: 600}
+  - ui_wait: {path: "**/ResearchScreen/**/*ADVANCEDSCANNERS* Panel", cond: stable}
+  - expect_ui:
+      "**/ResearchScreen/**/*ADVANCEDSCANNERS* Panel": {active: true}
+  - ui_dump: {name: tech, root: "**/ResearchScreen/**/*ADVANCEDSCANNERS* Panel"}

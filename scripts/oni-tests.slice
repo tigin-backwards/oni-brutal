@@ -1,0 +1,5 @@
+# oni-brutal's test players and builds (scripts/contain.sh): a memory ceiling so that, when they
+# over-commit, the kernel's OOM killer acts inside this slice and the rest of WSL keeps running.
+[Slice]
+MemoryMax=50G
+MemorySwapMax=4G

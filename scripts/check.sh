@@ -5,6 +5,8 @@
 # runs' reference, scripts/m9-compare.sh).
 set -euo pipefail
 source "$(dirname "$0")/env.sh"
+# Its builds and tests run in the memory-capped test slice (scripts/contain.sh).
+[ -n "${ONI_CONTAINED:-}" ] || exec "$root/scripts/contain.sh" "$root/scripts/check.sh" "$@"
 dotnet build "$root/OniBrutal.slnx" -v q -nologo
 # Every suite runs and reports; the gate fails at the end if any of them failed.
 failed=()

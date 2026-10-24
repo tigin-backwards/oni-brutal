@@ -1488,6 +1488,9 @@ class Player:
         # server, whose environment find_display reads: input would land on the desktop.
         env.pop('DISPLAY', None)
         env.pop('XAUTHORITY', None)
+        # A preferred OOM victim in the memory-capped test slice: an over-committed machine loses a
+        # player (a machine failure, rerun), never the user's sessions (scripts/contain.sh).
+        command = [os.path.join(ROOT, 'scripts', 'contain.sh'), *command]
         if self.lane.display:
             self.start_xvfb(self.lane.display)
             env['DISPLAY'] = self.display = self.lane.display

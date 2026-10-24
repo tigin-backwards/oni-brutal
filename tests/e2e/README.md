@@ -45,6 +45,12 @@ A batch of mods, one agent per worktree, follows [Batch workflow](#batch-workflo
   player starts only while all of them stay within `E2E_MEMORY_GB` (default 40 of the machine's
   62) and their count within `E2E_MAX_PLAYERS` (default 6); one bigger than the whole budget
   starts alone. An entry whose process has gone is dropped.
+- **Memory ceiling.** Players start through `scripts/contain.sh` (as do `scripts/run.sh`,
+  `qa.sh` and `check.sh`): in the systemd user slice `oni-tests.slice` (`scripts/oni-tests.slice`,
+  50 GB, 4 GB of swap) and as preferred OOM victims. When players over-commit, the kernel kills
+  one of them inside the slice, which the run reports as a machine failure, and the user's
+  sessions keep running. Players and builds started by hand go through it too:
+  `scripts/contain.sh dotnet build …`.
 - **Perf jobs.** A run holds `perf.lock` in the lock directory shared. A perf job that must not
   share the machine takes it exclusively: `flock -x ~/.cache/oni-brutal-e2e/perf.lock
   scripts/qa.sh`. Runs also wait while `ps` shows a perf job (`qa.sh`, the sweep and measurement

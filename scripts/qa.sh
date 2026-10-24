@@ -21,6 +21,8 @@
 # (out/qa/reference), once they have been looked at; --bless-from=RUN stores a past run's.
 set -uo pipefail
 source "$(dirname "$0")/env.sh"
+# Its builds, players and tests run in the memory-capped test slice (scripts/contain.sh).
+[ -n "${ONI_CONTAINED:-}" ] || exec "$root/scripts/contain.sh" "$root/scripts/qa.sh" "$@"
 export PATH="$HOME/.dotnet:$PATH"
 bless=0; stages=(); bless_from=""
 for a in "$@"; do

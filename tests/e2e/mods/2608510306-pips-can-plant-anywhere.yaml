@@ -1,0 +1,26 @@
+# [DLC SUPPORT] Pips can plant anywhere (2608510306), class P.
+#
+# What it does: prefixes replace PlantableSeed.TestSuitableGround,
+# PlantableCellQuery.CheckValidPlotCell and SeedPlantingStates.CheckValidPlotCell, the checks a
+# Pip uses to find where to plant a seed it carries. The game refuses ground that is a built
+# tile (Grid.Foundation), as hard as 150 or more, or not the seed's replant ground, and wants a
+# solid cell below; the mod keeps only the plant's own survival checks (entombment, drowning,
+# temperature, foundation, room to grow).
+# How a player reaches it: Pips in a colony with seeds lying around.
+# What changes: Pips plant on tiles and on any ground.
+#
+# A smaller spec: a Pip's planting is random and slow. A Tile is built in the corridor west of
+# the printing pod and a Mealwood seed spawned (setup); the seed's own ground test accepts the
+# cell above the tile, which the game refuses.
+from: early-base
+mods: [2608510306]
+setup:
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131766, 0, 0, \"BasicSingleHarvestPlantSeed\", \"Ore\")", method: SetActive, args: [true]}}
+steps:
+  - build: {prefab: Tile, cells: [[113, 207]]}
+  - run: {seconds: 900, until: {buildings: {Tile: 9}, pending_construction: 0}}
+  - expect_state:
+      "Grid.Foundation.get_Item(131765)": true
+      "Grid.Solid.get_Item(132401)": false
+      "all:PlantableSeed::[0].PlantID": BasicSingleHarvestPlant
+      "all:PlantableSeed::[0].TestSuitableGround(132401)": true

@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3033774071-compost-pile-no-gas.yaml",
+ "mods": [
+  "3033774071"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Compost is built, Duplicants deliver polluted dirt, and the stored dirt carries the Sealed tag",
+ "updated": "2026-10-24",
+ "commit": "44b0ed5",
+ "mod_dlls": {
+  "3033774071": {
+   "╢╤╖╩╢╤▓╗╗ß╩═╖┼╞°╠σCompost Pile No Gas.dll": "af5bb81ef8b4f523809e82d3655afe17ef6faebbaaa17f8e5afac9958176cb32"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-083920-acf1e0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T08:48:53",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-101748-dc7963",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T10:17:48",
+    "lane": 16,
+    "reference_run": "20261024-083920-acf1e0",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-101748-dc7963",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T10:17:49",
+    "lane": 17,
+    "reference_run": "20261024-083920-acf1e0",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

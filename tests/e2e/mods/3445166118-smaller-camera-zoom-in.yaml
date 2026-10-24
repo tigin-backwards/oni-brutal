@@ -1,0 +1,20 @@
+# Smaller Camera Zoom In (3445166118), classes K, V.
+#
+# What it does: a postfix on CameraController.OnPrefabInit lowers the camera's minimum
+# orthographic size from the game's 8 to 1, so the mouse wheel zooms in much further.
+# How a player reaches it: the mouse wheel over the world.
+# What changes: how close the camera comes, and what is drawn at that size.
+#
+# The camera is put over the rock above the corridor west of the printing pod (no Duplicants
+# walk there) and zoomed in with the wheel; the views are then set through the camera.
+from: early-base
+mods: [3445166118]
+steps:
+  - expect_state:
+      "CameraController.Instance.minOrthographicSize": 1
+  - driver: {camera.set: {cell: [112, 214], ortho: 8}}
+  - scroll: {at: center, notches: 40}
+  - expect_state: {"CameraController.Instance.targetOrthographicSize": "< 4"}
+  - expect_state: {"CameraController.Instance.targetOrthographicSize": "== original"}
+  - world_shot: {name: near, ortho: 1.5, at: [112, 214]}
+  - world_shot: {name: mid, ortho: 4, at: [112, 214]}

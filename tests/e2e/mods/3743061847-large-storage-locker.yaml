@@ -1,0 +1,26 @@
+# Large Storage Locker (3743061847), class P.
+#
+# What it does: a postfix on StorageLockerConfig.ConfigureBuildingTemplate raises the Storage
+# Bin's capacity from 20000 kg to 1e9 kg. At load it also patches three fetch-chore paths
+# (the solid transfer arm's chore scan, the multi-fetch scan and a fetch-layer assert) with
+# guards that skip stale entries, logging each guard it installs.
+# How a player reaches it: a Storage Bin, its capacity side screen.
+# What changes: a storage bin holds practically everything.
+#
+# A Storage Bin is built in the corridor west of the printing pod and selected: its capacity
+# slider reads up to 1e9 kg.
+from: early-base
+mods: [3743061847]
+require_log: ['\[LargeStorageLocker\] Loaded\.', '\[LargeStorageLocker\] Fetch layer guard installed']
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"StorageLocker\").GetComponent<Storage>.capacityKg": 1000000000
+  - build: {prefab: StorageLocker, at: [109, 206]}
+  - expect: {blueprints: {StorageLocker: 1}}
+  - run: {seconds: 1500, until: {buildings: {StorageLocker: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [110, 208], ortho: 8}}
+  - click_world: {cell: [109, 207], select: StorageLocker}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/CapacityControlSideScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<Storage>.capacityKg": 1000000000
+  - ui_dump: {name: capacity, root: "**/CapacityControlSideScreen"}

@@ -1,0 +1,63 @@
+{
+ "spec": "mods/3743061847-large-storage-locker.yaml",
+ "mods": [
+  "3743061847"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Storage Bin is built and selected: its capacity is 1e9 kg, its capacity side screen dumped; the fetch guards log their install",
+ "updated": "2026-10-24",
+ "commit": "44b0ed5",
+ "mod_dlls": {
+  "3743061847": {
+   "LargeStorageLocker.dll": "6e05c0f8cf06b0abd0b566c431a839786c7f6dd270882df2ee7f5ccbae97e330"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-083920-acf1e0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T08:52:48",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-102221-30b252",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T10:22:21",
+    "lane": 16,
+    "reference_run": "20261024-083920-acf1e0",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "capacity": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261024-102221-30b252",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T10:22:22",
+    "lane": 17,
+    "reference_run": "20261024-083920-acf1e0",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "capacity": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

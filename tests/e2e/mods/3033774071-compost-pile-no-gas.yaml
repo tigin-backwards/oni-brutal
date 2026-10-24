@@ -1,0 +1,27 @@
+# 堆肥堆不会释放气体 Compost Pile No Gas (3033774071), class P.
+#
+# What it does: a postfix on CompostConfig.ConfigureBuildingTemplate gives the Compost's
+# storage the default modifiers Hide, Seal and Insulate. A sealed item (GameTags.Sealed) no
+# longer off-gasses, so polluted dirt waiting in a compost pile stops giving off polluted
+# oxygen.
+# How a player reaches it: a Compost (Farming Tech) with polluted dirt delivered to it.
+# What changes: the delivered polluted dirt is sealed in the compost's storage.
+#
+# setup grants Farming Tech and spawns polluted dirt in the corridor west of the printing pod.
+# A Compost is built there; Duplicants deliver the polluted dirt, and the stored item carries
+# the Sealed tag.
+from: early-base
+mods: [3033774071]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"FarmingTech\")", method: Purchased}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"ToxicSand\").substance", method: SpawnResource, args: [[114.5, 206.5, -12], 300, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"Compost\").GetComponent<Storage>.defaultStoredItemModifers": {contains: Seal}
+  - build: {prefab: Compost, at: [109, 206]}
+  - expect: {blueprints: {Compost: 1}}
+  - run: {seconds: 1500, until: {buildings: {Compost: 1}, pending_construction: 0}}
+  - run: {seconds: 600}
+  - expect_state:
+      "all:Compost::[0].GetComponent<Storage>.MassStored()": "> 0"
+      "all:Compost::[0].GetComponent<Storage>.items[0].GetComponent<KPrefabID>.HasTag(\"Sealed\")": true

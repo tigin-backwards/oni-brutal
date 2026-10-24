@@ -1,0 +1,61 @@
+{
+ "spec": "mods/2972057294-high-magnification.yaml",
+ "mods": [
+  "2972057294"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the camera's maximum size reads 200 and the mouse wheel zooms out past 20; world shots at sizes 40 and 120 compared",
+ "updated": "2026-10-24",
+ "commit": "44b0ed5",
+ "mod_dlls": {
+  "2972057294": {
+   "╕▀▒╢╦⌡╖┼.dll": "537b155a91aad39bb15ba40254b220399de63cba2e571bb69cb33f7fb4051b6c"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-083920-acf1e0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T08:47:27",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-101459-0f2fd4",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T10:14:59",
+    "lane": 16,
+    "reference_run": "20261024-083920-acf1e0",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "mid": 0.004211,
+     "far": 0.000416
+    }
+   },
+   {
+    "run": "20261024-101459-0f2fd4",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T10:15:00",
+    "lane": 17,
+    "reference_run": "20261024-083920-acf1e0",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "mid": 0.004229,
+     "far": 0.000416
+    }
+   }
+  ]
+ }
+}

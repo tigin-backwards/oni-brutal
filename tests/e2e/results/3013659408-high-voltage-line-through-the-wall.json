@@ -1,0 +1,56 @@
+{
+ "spec": "mods/3013659408-high-voltage-line-through-the-wall.yaml",
+ "mods": [
+  "3013659408"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Heavi-Watt Wire is laid and built through two tiles under the ration box",
+ "updated": "2026-10-24",
+ "commit": "44b0ed5",
+ "mod_dlls": {
+  "3013659408": {
+   "PLib.dll": "5d6a8ef9d87143b90113548016180078efaf112d69afe0cdf1073a6125b33773",
+   "┤⌐╟╜╕▀╤╣╧▀.dll": "3acefe352286d393dab3741ecde9deafb8b5ecc7374290d687987e3b02f92041"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-083920-acf1e0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T08:47:39",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-101549-1b96ad",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T10:15:49",
+    "lane": 16,
+    "reference_run": "20261024-083920-acf1e0",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-101549-1b96ad",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T10:15:50",
+    "lane": 17,
+    "reference_run": "20261024-083920-acf1e0",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

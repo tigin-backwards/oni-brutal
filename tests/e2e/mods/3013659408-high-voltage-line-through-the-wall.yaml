@@ -1,0 +1,25 @@
+# 穿墙高压线 High-voltage line through the wall (3013659408), class P.
+#
+# What it does: postfixes on WireHighWattageConfig and WireRefinedHighWattageConfig set the
+# Heavi-Watt Wire's and the Conductive Heavi-Watt Wire's BuildLocationRule to Anywhere (the
+# game's is NotInTiles), so they can be laid through tiles.
+# How a player reaches it: the build menu (Power), after Advanced Power Regulation.
+# What changes: heavy wires may run through floors and walls of tiles.
+#
+# setup grants Advanced Power Regulation and spawns metal ore. A Heavi-Watt Wire is dragged
+# through two of the tiles under the printing pod's ration box; it is built there.
+from: early-base
+mods: [3013659408]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"AdvancedPowerRegulation\")", method: Purchased}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Cuprite\").substance", method: SpawnResource, args: [[119.5, 206.5, -12], 600, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"HighWattageWire\").BuildLocationRule": Anywhere
+      "Assets.GetBuildingDef(\"WireRefinedHighWattage\").BuildLocationRule": Anywhere
+      "Grid.Foundation.get_Item(131137)": true
+      "Grid.Foundation.get_Item(131138)": true
+  - build: {prefab: HighWattageWire, cells: [[121, 206], [122, 206]]}
+  - expect: {blueprints: {HighWattageWire: 2}}
+  - run: {seconds: 1500, until: {buildings: {HighWattageWire: 2}, pending_construction: 0}}
+  - expect: {buildings: {Tile: ">=8"}}

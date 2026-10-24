@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2608510306-pips-can-plant-anywhere.yaml",
+ "mods": [
+  "2608510306"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Tile is built and a Mealwood seed's ground test accepts the cell above it, which the game refuses; a Pip's random planting is not played",
+ "updated": "2026-10-24",
+ "commit": "44b0ed5",
+ "mod_dlls": {
+  "2608510306": {
+   "w2o.dll": "e8c775b1e3cda6ab48bf8473fba46ec7691797df92e2b93c8cff9ea06a01b4f4"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-083920-acf1e0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T08:42:51",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-101350-11d74e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T10:13:50",
+    "lane": 16,
+    "reference_run": "20261024-083920-acf1e0",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-101350-11d74e",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T10:13:51",
+    "lane": 17,
+    "reference_run": "20261024-083920-acf1e0",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -1,0 +1,61 @@
+{
+ "spec": "mods/3445166118-smaller-camera-zoom-in.yaml",
+ "mods": [
+  "3445166118"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the camera's minimum size reads 1 and the mouse wheel zooms in below 4; world shots at sizes 1.5 and 4 compared",
+ "updated": "2026-10-24",
+ "commit": "44b0ed5",
+ "mod_dlls": {
+  "3445166118": {
+   "Smaller_Camera_Zoom_In.dll": "ef7971175a1892d86b4e70f2d0e602a48dd8f9a8d2bd79568387b2cda7187a99"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-083920-acf1e0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T08:51:08",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-101700-8377e4",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T10:17:00",
+    "lane": 16,
+    "reference_run": "20261024-083920-acf1e0",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "near": 0.012738,
+     "mid": 0.008415
+    }
+   },
+   {
+    "run": "20261024-101700-8377e4",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T10:17:01",
+    "lane": 17,
+    "reference_run": "20261024-083920-acf1e0",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "near": 0.013205,
+     "mid": 0.009248
+    }
+   }
+  ]
+ }
+}

@@ -157,11 +157,21 @@ namespace OniBrutal.Desktop.Gl
             N.glScissor(x - 2, y - 2, barWidth + 4, barHeight + 4);
             N.glClearColor(Track.R, Track.G, Track.B, 1f);
             N.glClear(ColorBufferBit);
-            int filled = (int)(barWidth * progress);
+            // The fill's edge column is part-covered, so the edge moves on smoothly even when
+            // slower than a pixel a frame.
+            float edge = barWidth * progress;
+            int filled = (int)edge;
             if (filled > 0)
             {
                 N.glScissor(x, y, filled, barHeight);
                 N.glClearColor(Fill.R, Fill.G, Fill.B, 1f);
+                N.glClear(ColorBufferBit);
+            }
+            float cover = edge - filled;
+            if (filled < barWidth && cover > 0)
+            {
+                N.glScissor(x + filled, y, 1, barHeight);
+                N.glClearColor(Track.R + (Fill.R - Track.R) * cover, Track.G + (Fill.G - Track.G) * cover, Track.B + (Fill.B - Track.B) * cover, 1f);
                 N.glClear(ColorBufferBit);
             }
             GlApi.Enable(ScissorTest, false);

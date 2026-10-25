@@ -81,10 +81,28 @@ across every core, and their pauses are about a quarter as long.
 around 11GB resident compared to 7GB in the original. This is expected behavior for faster,
 parallel collection.
 
-https://github.com/user-attachments/assets/4d230247-9966-43d6-862f-589bad164382
+https://github.com/user-attachments/assets/9d54b5ac-8583-442c-b6ad-8ddaa31e6d6d
 
-The same save, view and machine on Windows, recorded back to back; each side's frame rate was
-measured while it was recorded.
+U57 at speed 3: about 11 fps in the original, about 88 in Moono.
+
+All the videos here are the same save, view and machine on Windows, the original on the left,
+recorded back to back; each side's frame rate was measured while it was recorded.
+
+Starting the game to the main menu, every DLC: 17.3 s in the original, 11.4 s in Moono.
+
+https://github.com/user-attachments/assets/05494e54-e629-44bc-9ddc-bf60c054297d
+
+An autosave on U57: the original freezes for about 26 s, Moono for about 4 s.
+
+https://github.com/user-attachments/assets/a0534ae4-115f-4b17-b9bb-2f8c28868b89
+
+The temperature overlay on U57, panning: about 8 fps in the original, about 50 in Moono.
+
+https://github.com/user-attachments/assets/e0054f3c-0462-4333-955b-9ab5c8888810
+
+2minnow, a mid-game colony, at speed 3: about 35 fps in the original, about 110 in Moono.
+
+https://github.com/user-attachments/assets/3106d24d-67d3-4bf3-ba23-8f8dc78910f8
 
 For a more detailed breakdown, see [docs/PERFORMANCE.md](docs/PERFORMANCE.md).
 

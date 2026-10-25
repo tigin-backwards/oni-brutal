@@ -1,0 +1,26 @@
+# Overlapping autosaves: the game's own, at the end of a cycle, asked while another autosave's
+# save indicator is still starting (GameClock.DoAutoSave, as a script or a mod asks for one).
+#
+# The game's own bug, in the original as in ours, whatever the game tweaks: each autosave goes
+# through Game.StartDelayedSave, whose SaveActive.ActiveateSaveIndicator keeps one callback but
+# subscribes DoCallBack to the indicator's onAnimComplete once more. Playing "working_pre" again
+# stops the first one, which fires both subscriptions: the first runs the second autosave's
+# callback and clears it, the second calls the cleared callback, a NullReferenceException in
+# SaveActive.DoCallBack out of GameClock.AddTime. The crash screen comes up; the second
+# autosave (Cycle 2) is written whole, the first is never written.
+#
+# setup.call starts the first autosave here (nothing in the UI asks for one); the cycle's own
+# autosave follows through the simulation, two frames later. Ours must match the original's
+# log signatures (the NullReferenceException included) and stay alive.
+from: early-base
+setup:
+  # 0.05 s of game time before the end of the first cycle.
+  - driver: {setup.call: {target: "GameClock.Instance", method: SetTime, args: [599.95]}}
+  - driver: {setup.call: {target: "GameClock.Instance", method: DoAutoSave, args: [0]}}
+  - driver: {setup.call: {target: "SpeedControlScreen.Instance", method: Unpause, args: [false]}}
+steps:
+  - run: {seconds: 30}
+  - expect_state:
+      "GameClock.Instance.GetCycle()": ">= 1"
+      "file:save_files/e2e/auto_save/early-base Cycle 2.sav": exists
+      "file:save_files/e2e/auto_save/early-base Cycle 1.sav": missing

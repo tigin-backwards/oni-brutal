@@ -1,0 +1,28 @@
+# A save from the pause menu, then Main Menu and Save and Quit, while an autosave is under way.
+#
+# The pause menu's saves call SaveLoader.Save at once, while the autosave waits for its save
+# indicator (Game.StartDelayedSave): in the original the menu's save is written first, the
+# autosave (Cycle 1) once the indicator has started, then Save and Quit writes the colony again
+# and the main menu comes up. With background-save, each save waits for the writes before it
+# (BackgroundSave.WaitAll), so ours writes the same three saves, whole, in the same order.
+# setup.call starts the autosave (nothing in the UI asks for one).
+from: early-base
+setup:
+  - driver: {setup.call: {target: "GameClock.Instance", method: DoAutoSave, args: [0]}}
+steps:
+  - key: {code: Escape}
+  - ui_wait: {path: "**/PauseScreen/LayoutContent", cond: stable}
+  - click: {ui: "**/PauseScreen/LayoutContent/ButtonContent/SaveButton"}
+  - ui_wait: {path: "**/ConfirmDialog/GameObject/Panel/OKButton", cond: stable}
+  - click: {ui: "**/ConfirmDialog/GameObject/Panel/OKButton"}
+  - ui_wait: {path: "**/PauseScreen/LayoutContent/ButtonContent/SaveButton", cond: gone, frames: 6000}
+  - ui_dump: {name: pause, root: "**/PauseScreen/LayoutContent"}
+  - click: {text: "Main Menu", under: "**/PauseScreen/LayoutContent"}
+  - ui_wait: {path: "**/ConfirmDialog/GameObject/Panel/OKButton", cond: stable}
+  - ui_dump: {name: quit, root: "**/ConfirmDialog"}
+  # SAVE AND QUIT
+  - click: {ui: "**/ConfirmDialog/GameObject/Panel/OKButton"}
+  - ui_wait: {path: "**/MainMenuButtons", frames: 60000}
+  - expect_state:
+      "file:save_files/e2e/auto_save/early-base Cycle 1.sav": exists
+      "file:save_files/e2e/early-base.sav": exists

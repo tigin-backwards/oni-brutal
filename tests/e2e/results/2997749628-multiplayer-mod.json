@@ -1,0 +1,49 @@
+{
+ "spec": "mods/2997749628-multiplayer-mod.yaml",
+ "mods": [
+  "2997749628"
+ ],
+ "verdict": "pending",
+ "why": "the spec fails in the original: a broken spec, or a mod broken upstream",
+ "findings": [],
+ "note": "",
+ "updated": "2026-10-25",
+ "commit": "386e6db",
+ "mod_dlls": {
+  "2997749628": {
+   "MultiplayerMod.dll": "62ba2f303a2889849b3959d0676985c43053deb4e22d5d11ca8f08f152ab0ecd"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-071847-05f48103",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-25T07:18:47",
+    "lane": 17,
+    "reasons": [
+     "step start: the player exited (1) while loading"
+    ],
+    "signatures": 1017
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-072154-fc22de3d",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-25T07:21:54",
+    "lane": 17,
+    "reasons": [
+     "step start: the player exited (1) while loading"
+    ],
+    "reference_run": null,
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -1,0 +1,21 @@
+# Multiplayer Mod (Alpha) (2997749628), class O, base game only.
+#
+# What it does: lets several players share one colony over Steam: a host opens a session from
+# the pause menu, friends join through Steam, and every player's commands are sent to the others.
+# How a player reaches it: the pause menu (host) and Steam's join (others).
+# What changes: nothing until a session runs.
+#
+# A session needs two players on two Steam accounts, which the runner does not have, so the
+# spec only checks that the mod is enabled and a base-game colony runs with it (the base-game
+# fixture, as it supports the base game only).
+#
+# Broken upstream: its ChoreConsumerPatch prefix names a ChoreConsumer method the game no longer
+# has, so Harmony throws ("Undefined target method") while the game creates its prefabs
+# (Assets.OnPrefabInit), the game reloads its mods and the player quits before the colony loads.
+from: vanilla-base
+mods: [2997749628]
+steps:
+  - expect_state:
+      "count:Global.Instance.modManager.mods[*] if .label.id == 2997749628 and .IsEnabledForActiveDlc() == true": 1
+  - run: {seconds: 60}
+  - expect: {duplicants: 3}

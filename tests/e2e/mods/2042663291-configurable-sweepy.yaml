@@ -1,0 +1,13 @@
+# Configurable Sweepy (2042663291), classes B, S, P.
+#
+# What it does: the Sweepy Dock and its Sweepy read their numbers from the mod's config (storage,
+# battery, speed, probing radius, power use, a conveyor output), and the dock's side screen gets
+# sliders for the Sweepy's speed and probing radius (a PLib side screen).
+# How a player reaches it: build a Sweepy Dock (Robotics), select it.
+# What changes: the dock's and the Sweepy's stats; the side screen.
+from: early-base
+mods: [2042663291]
+steps:
+  - expect_state:
+      "count:Global.Instance.modManager.mods[*] if .staticID == Zonkeeh.ConfigurableSweepy and .IsEnabledForActiveDlc() == true": 1
+  - run: {seconds: 60}

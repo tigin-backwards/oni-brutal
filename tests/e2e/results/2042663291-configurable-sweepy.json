@@ -1,0 +1,49 @@
+{
+ "spec": "mods/2042663291-configurable-sweepy.yaml",
+ "mods": [
+  "2042663291"
+ ],
+ "verdict": "pending",
+ "why": "the spec fails in the original: a broken spec, or a mod broken upstream",
+ "findings": [],
+ "note": "",
+ "updated": "2026-10-25",
+ "commit": "5dea7a7",
+ "mod_dlls": {
+  "2042663291": {
+   "ConfigurableSweepy.dll": "7647952e57e40f5b58caed0860dfcf4ad3aafd313912ccb7182279f1b42cd5ae"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-062713-f4fe7226",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-25T06:28:34",
+    "lane": 18,
+    "reasons": [
+     "step start: Canvas/ConfirmDialog/GameObject/Panel/OKButton is occluded by ErrorCanvas/CrashReportScreen(Clone)/InfoBox/ModsInfo/ModsList/Files/Viewport/Content/Entry/BG (hits there: ErrorCanvas/CrashReportScreen(Clone)/InfoBox/ModsInfo/ModsList/Files/Viewport/Content/Entry/BG, ErrorCanvas/CrashRepor"
+    ],
+    "signatures": 2
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-063030-26c9968c",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-25T06:31:37",
+    "lane": 18,
+    "reasons": [
+     "step start: Canvas/ConfirmDialog/GameObject/Panel/OKButton is occluded by ErrorCanvas/CrashReportScreen(Clone)/InfoBox/ModsInfo/ModsList/Files/Viewport/Content/Entry/BG (hits there: ErrorCanvas/CrashReportScreen(Clone)/InfoBox/ModsInfo/ModsList/Files/Viewport/Content/Entry/BG, ErrorCanvas/CrashRepor"
+    ],
+    "reference_run": null,
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -217,6 +217,11 @@ broken.update({i: NO_MOD_INFO for i in (
     '1883889432', '1860778068', '1869114764', '2019457228', '1737026266', '1836181316', '2017868782',
     '1841466183', '1995546475', '1963899596')})
 broken.update({i: OLD_API for i in ('1874426480', '2276953041')})
+broken.update({
+    '1946209956': 'broken upstream: each of its outfits throws a NullReferenceException in `EquipmentConfigManager.RegisterEquipment` (its `LoadGeneratedEquipment` postfix), so `Assets.OnPrefabInit` fails, and its care package postfix throws an InvalidCastException in `Immigration.OnPrefabInit` (CaiLib reads the game\'s care packages as a `CarePackageInfo[]`, now a list), and the game quits while loading the colony (spec tests/e2e/mods/1946209956-fashionistic.yaml)',
+    '2360425208': 'broken upstream: its 600 s printing interval is set, but opening the printing pod\'s screen runs its `MinionStartingStats.GenerateTraits` prefix, which looks up each Duplicant\'s congenital trait, empty today ("Could not find Klei.AI.Trait: "), throws a NullReferenceException and opens the crash screen (spec tests/e2e/mods/2360425208-printing-pod.yaml)',
+    '2042663291': 'broken upstream: its PLib side screen looks for `DetailsScreen.sideScreenContentBody`, which the game no longer has (a DetourException in `DetailsScreen.OnPrefabInit`), so loading a colony opens the crash screen (spec tests/e2e/mods/2042663291-configurable-sweepy.yaml)',
+})
 # Translations whose file is named Strings.po: on Linux both players look for strings.po and miss
 # it (their specs fail the same way in the original).
 broken.update({

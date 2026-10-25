@@ -1,0 +1,49 @@
+{
+ "spec": "mods/1946209956-fashionistic.yaml",
+ "mods": [
+  "1946209956"
+ ],
+ "verdict": "pending",
+ "why": "the spec fails in the original: a broken spec, or a mod broken upstream",
+ "findings": [],
+ "note": "",
+ "updated": "2026-10-25",
+ "commit": "5dea7a7",
+ "mod_dlls": {
+  "1946209956": {
+   "Fashionistic2.dll": "e4d62477ef140c8f8bd53e45238c5fad89ed6f07b51a7f2fa4e47ba52547f92d"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-062713-f4fe7226",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-25T06:28:04",
+    "lane": 19,
+    "reasons": [
+     "step start: the player exited (1) while loading"
+    ],
+    "signatures": 17
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-063030-26c9968c",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-25T06:31:00",
+    "lane": 18,
+    "reasons": [
+     "step start: the player exited (1) while loading"
+    ],
+    "reference_run": null,
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -1,0 +1,55 @@
+# Printing POD 打印舱 (2360425208), classes P, S.
+#
+# What it does (its Config/PrintingPOD.ini): the printing pod waits 600 s between printings
+# instead of the game's 1800 (Immigration patches: the interval is set at load, so the wait
+# already running keeps its length, and the next one is 600 s); its screen offers 4 Duplicants
+# and 2 care packages (a transpiler on CharacterSelectionController.InitializeContainers, which
+# only rewrites the method when it has the 116 instructions of 2021); its Reject All button
+# reads Shuffle and rolls new offers instead of closing the screen; offered Duplicants get 4
+# good traits and no bad one, and 12 interests (MinionStartingStats prefixes, Spaced Out only).
+# How a player reaches it: the printing pod's side screen, "View" for the new Duplicants;
+# the Shuffle button at the bottom of that screen; printing a card.
+# What changes: the pod's timer and its offers.
+#
+# setup makes the next printing ready now. The pod's screen is opened: its reject button reads
+# Shuffle, a click on it rolls new cards and keeps the screen open, then the first Duplicant
+# card is printed and the next wait is 600 s. The cards' content is random, so only counts
+# are compared with the original's.
+from: early-base
+mods: [2360425208]
+setup:
+  - driver: {seed: 12345}
+  - driver: {setup.call: {target: "Immigration.Instance", method: Sim200ms, args: [100000]}}
+steps:
+  - expect_state:
+      "count:Global.Instance.modManager.mods[*] if .staticID == 2360425208.Local and .IsEnabledForActiveDlc() == true": 1
+      "Immigration.Instance.spawnInterval[1]": 600
+      "Immigration.Instance.ImmigrantsAvailable": true
+  - driver: {camera.set: {cell: [124, 209], ortho: 8}}
+  - click_world: {cell: [124, 208], select: Headquarters}
+  - ui_wait: {path: "**/TelepadSideScreen/Contents/Immigration/ViewButton", cond: stable}
+  - click: {ui: "**/TelepadSideScreen/Contents/Immigration/ViewButton"}
+  - ui_wait: {path: "**/ImmigrantScreen/Layout/BottomButtons", cond: stable}
+  - expect_ui:
+      "**/ImmigrantScreen/Layout/BottomButtons/**": {any_text: "Shuffle"}
+  - expect_state:
+      "ImmigrantScreen.instance.containers.Count": "== original"
+      "count:all:CharacterContainer::[*] if .stats.personality.model == Minion": {save_as: dupes}
+      "sum:all:CharacterContainer::[*].stats.Traits.Count if .stats.personality.model == Minion": "== original"
+  - click: {text: "Shuffle", under: "**/ImmigrantScreen/Layout/BottomButtons"}
+  - ui_wait: {path: "**/ImmigrantScreen/Layout/Content", cond: stable}
+  - expect_ui:
+      "**/ImmigrantScreen/Layout/BottomButtons": {active: true}
+  - expect_state:
+      "ImmigrantScreen.instance.containers.Count": "== original"
+      "count:all:CharacterContainer::[*] if .stats.personality.model == Minion": "== dupes"
+      "sum:all:CharacterContainer::[*].stats.Traits.Count if .stats.personality.model == Minion": "== original"
+  - click: {ui: "**/ImmigrantScreen/**/CharacterContainer[0]/TitleBar/LabelGroup/Label"}
+  - expect_ui: {"**/ImmigrantScreen/Layout/BottomButtons/ProceedButton": {interactable: true}}
+  - click: {ui: "**/ImmigrantScreen/Layout/BottomButtons/ProceedButton"}
+  - ui_wait: {path: "**/ImmigrantScreen", cond: gone}
+  - run: {seconds: 30, until: {duplicants: 4}}
+  - expect: {duplicants: 4}
+  - expect_state:
+      "Immigration.Instance.timeBeforeSpawn": "<= 600"
+      "Immigration.Instance.GetTotalWaitTime()": 600

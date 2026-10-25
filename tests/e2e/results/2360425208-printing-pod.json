@@ -1,0 +1,49 @@
+{
+ "spec": "mods/2360425208-printing-pod.yaml",
+ "mods": [
+  "2360425208"
+ ],
+ "verdict": "pending",
+ "why": "the spec fails in the original: a broken spec, or a mod broken upstream",
+ "findings": [],
+ "note": "",
+ "updated": "2026-10-25",
+ "commit": "f5eef62",
+ "mod_dlls": {
+  "2360425208": {
+   "TacitPrintingPOD.dll": "daad63ed431826bb5d96df25cc42d904a5bdf7f78c28bd92c4e4b188c6f4b745"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-063030-e621daf7",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-25T06:30:30",
+    "lane": 19,
+    "reasons": [
+     "step 7: **/ImmigrantScreen/Layout/BottomButtons/**: no element with text 'Shuffle' among 5"
+    ],
+    "signatures": 2
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-063207-5ef8a0ee",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-25T06:32:07",
+    "lane": 19,
+    "reasons": [
+     "step 7: **/ImmigrantScreen/Layout/BottomButtons/**: no element with text 'Shuffle' among 5"
+    ],
+    "reference_run": null,
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

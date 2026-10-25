@@ -1,0 +1,15 @@
+# Fashionistic (1946209956), classes B (equipment), P.
+#
+# What it does: twelve outfits (Grey and Orange Attire and Overalls, Builder, Cook, Digger,
+# Mechanic, Medic, Rancher, Science, Plumber), each sewn at the Clothing Fabricator from 2
+# Reed Fiber and raising one attribute by its config's BasicAttributeIncrease; three Digger
+# Outfit care packages from cycle 4.
+# How a player reaches it: the Clothing Fabricator's recipe list; the printing pod.
+# What changes: new equipment prefabs and recipes.
+from: early-base
+mods: [1946209956]
+steps:
+  - expect_state:
+      "count:Global.Instance.modManager.mods[*] if .staticID == 1946209956.Local and .IsEnabledForActiveDlc() == true": 1
+      "Assets.TryGetPrefab(\"CookOutfit\")": exists
+  - run: {seconds: 60}

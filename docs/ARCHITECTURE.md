@@ -609,6 +609,24 @@ past the boot checkpoint needs a Steam client logged in with an account that own
   copies' methods that enumerate a collection of their own interface, construct a list of it and
   name an array of such lists, and calls the second copy's; `tests/e2e/plib-options-copies.yaml`
   opens the two mods' options dialogs and two others'.
+- **D35 Strings of fields and events.** Mono prints a field as its type's full name and its name
+  (`RuntimeFieldInfo.ToString`, `String.Format("{0} {1}", FieldType, name)`), an event likewise
+  (`RuntimeEventInfo.ToString`, `EventHandlerType + " " + Name`; Unity's fork, branch
+  `unity-6000.3-mbe`). CoreCLR prints the type's short name when it is a primitive or a nested
+  type, or an array or pointer of one (`Type.FormatTypeName`): `Int32 NO_LIGHT` where Mono prints
+  `System.Int32 NO_LIGHT`. Harmony transpilers find the instructions they change by comparing
+  `operand.ToString()` with Mono's string. Darkness Not Excluded Relit's patch of
+  `Workable.GetEfficiencyMultiplier` (Lit Workspace) looks for `System.Int32 NO_LIGHT`: in the
+  original it matches; here it matched nothing, the mod logged an error and the game quit at
+  start-up. Methods, constructors, properties, parameters and locals print alike on both
+  runtimes. Of the Workshop builds in `out/ws`, three hold such a string: that mod and both builds
+  of Delivery Temperature Limit (`int` fields in its transpilers of fetch and status-item code).
+  **Resolved in** `MonoMemberStrings`: prefixes on CoreLib's `RuntimeFieldInfo.ToString` and
+  `RuntimeEventInfo.ToString` print them as Mono does, for the whole process as on Mono; an event
+  without an add method still throws as CoreCLR's does. CoreCLR caches a field's string and
+  Mono does not; neither does ours. `--check-types` prints fields of a primitive, a nested type,
+  an array, a constant and an event of a nested delegate, and transpiles a method by the field's
+  Mono string.
 
 ## 3. The engine API (`OniBrutal.UnityEngine`)
 

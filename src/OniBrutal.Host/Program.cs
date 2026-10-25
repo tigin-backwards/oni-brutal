@@ -113,6 +113,8 @@ namespace OniBrutal.Host
                 MonoEnumFormat.Install();
                 // Special folders' paths are given whether or not they exist, as Mono gives them (D24).
                 MonoFolderPaths.Install();
+                // Fields and events print as Mono prints them, which mods' transpilers compare (D35).
+                MonoMemberStrings.Install();
                 GameTweaks.GameTweaks.Install(effective.EnabledTweaks.ToHashSet(StringComparer.Ordinal));
                 if (!options.NoTweaksMenu) BrutalTweaksMenu.Install(effective, settings, settingsPath);
                 StateMachineSaveNames.Install(dataDir, AppContext.BaseDirectory);
@@ -894,6 +896,20 @@ namespace OniBrutal.Host
                     try { Directory.Delete(home, true); } catch (IOException) { } catch (UnauthorizedAccessException) { }
                 }
             });
+            Check("A transpiler that finds a field by Mono's string of it (MonoMemberStrings)", () =>
+            {
+                MonoMemberStrings.Install();
+                var texts = new[] { typeof(LitCell).GetField(nameof(LitCell.lux))!.ToString(), typeof(LitCell).GetField(nameof(LitCell.shade))!.ToString(),
+                    typeof(LitCell).GetField(nameof(LitCell.Limit))!.ToString(), typeof(LitCell).GetField(nameof(LitCell.history))!.ToString(),
+                    typeof(LitCell).GetEvent(nameof(LitCell.Changed))!.ToString(), typeof(LitCell).GetMethod(nameof(LitCell.Lit))!.ToString() };
+                var expected = new[] { "System.Int32 lux", "OniBrutal.Host.Program+LitCell+Shade shade", "System.Int32 Limit", "System.Single[] history",
+                    "OniBrutal.Host.Program+LitCell+Handler Changed", "Boolean Lit()" };
+                if (!texts.SequenceEqual(expected)) throw new InvalidOperationException($"printed {string.Join(", ", texts)}");
+                // As Darkness Not Excluded Relit's patch of Workable.GetEfficiencyMultiplier does.
+                new HarmonyLib.Harmony("OniBrutal.Host.Check").Patch(typeof(LitCell).GetMethod(nameof(LitCell.Lit)),
+                    transpiler: new HarmonyLib.HarmonyMethod(typeof(Program), nameof(BrightLux)));
+                return new LitCell().Lit() ? "fields and events print their type's full name, as on Mono, and the transpiler finds its field" : throw new InvalidOperationException("the transpiler found no field");
+            });
             Check("A mod's string-keyed ConcurrentDictionary enumerated while it grows (MonoConcurrentDictionaries)", () =>
             {
                 ModAccess.Install();
@@ -1171,6 +1187,32 @@ namespace OniBrutal.Host
             public T? last;
             public T Draw(T item) { last = item; return item; }
         }
+
+        /// CheckRuntimeServices' MonoMemberStrings check: a field of each kind CoreCLR prints by
+        /// its type's short name, and a method a transpiler finds one in.
+        sealed class LitCell
+        {
+            public sealed class Shade { }
+            public delegate void Handler();
+            public const int Limit = 10;
+            public int lux = 1;
+            public Shade? shade = null;
+            public float[]? history = null;
+            public event Handler? Changed { add { } remove { } }
+
+            [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+            public bool Lit() => lux > Limit;
+        }
+
+        static IEnumerable<HarmonyLib.CodeInstruction> BrightLux(IEnumerable<HarmonyLib.CodeInstruction> instructions)
+        {
+            foreach (var instruction in instructions)
+                yield return instruction.opcode == System.Reflection.Emit.OpCodes.Ldfld && instruction.operand.ToString() == "System.Int32 lux"
+                    ? new HarmonyLib.CodeInstruction(System.Reflection.Emit.OpCodes.Call, typeof(Program).GetMethod(nameof(Bright), BindingFlags.NonPublic | BindingFlags.Static))
+                    : instruction;
+        }
+
+        static int Bright(LitCell cell) => 1000;
 
         static int prefixedB, prefixedC, countedA;
         static void CountA() => countedA++;

@@ -188,6 +188,7 @@ after times were measured on Linux under WSL2, where the game's code ran about h
 | `fast-overlay-textures`: the copies of the main camera's targets that MultipleRenderTargetProxy makes anew and drops on every coloured overlay toggle (and resize) are released and destroyed two frames later, once nothing references them, instead of waiting for the load's UnloadUnusedAssets | U57, 100 temperature openings at 1024×768: 45 → 846 live render textures and 74 MB → 1.9 GB of them allocated, against 45 → 47 and 79 MB | exact |
 | Save tweaks: `fast-serialization`, `fast-save-type-checks`, `fast-save-compression`, `no-save-gc`, `background-save` | autosave freeze 11.7 → 4.8 s | exact, and saves still load in the original |
 | `slow-reachability`: reachability re-checked every 4 game seconds instead of every second | 1.88 → 0.53 ms | changes timing |
+| `brain-rate`: at most 30 Duplicant and 150 critter brain updates a second of real time, spread over frames, instead of 1 and 5 every rendered frame | U57 at 35–39 fps: 6.0 → 4.7–5.1 brain updates a frame, 2.7–2.8 → 2.2–2.45 ms; 2minnow at 42–45 fps: 6.0 → 4.1–4.3, 1.82 → 1.35–1.45 ms; Gluttony at 14 fps: unchanged (under 30 fps it does nothing); the frame rates within the runs' noise (2026-10-25) | changes timing |
 | `off-screen-conveyors`: items on rails off screen are placed when they stop or come into view | skips most of about 950 moves a frame | changes positions while off screen |
 | `off-world-fallers`: items that fell out of the bottom of a world are landed where they hang | A possible perf. fix in degenerate cases where debris kept at the bottom of melted rocket interiors are treated as always falling. See [case study 3](PERFORMANCE_CASE_STUDY_3.md#objects-falling-forever) | they stop counting as falling |
 
@@ -239,7 +240,6 @@ Measured ideas that didn't pay off, so nobody needs to try them again:
 - Closed screens' game scripts (toggles' and Duplicant portraits' updates): about 0.7 ms a
   frame on 2minnow after three table screens were opened, once their masks and raycasts are
   skipped; only disabling the game's own components (not exact) would remove it.
-
 ## What's left
 
 The biggest per-object costs are animation updates, cell-change

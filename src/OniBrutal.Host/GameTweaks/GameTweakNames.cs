@@ -112,10 +112,12 @@ namespace OniBrutal.Host.GameTweaks
                 "The rails carry exactly the same things, but items' positions lag while off screen."),
             new("off-world-fallers", ChangesGameplay, "Land items lost below a world", "Items that fall out the bottom of a world (a rocket's chute) land instead of falling forever.",
                 "They hang just below the world, stepped as falling every tick; landing them where they hang stops that cost."),
+            new("brain-rate", ChangesGameplay, "Brain updates held to 30 a second", "Above 30 fps, Duplicants and critters rethink their tasks as often as at 30 fps, no more.",
+                "The game updates 1 Duplicant and 5 critter brains every rendered frame; this caps them at 30 and 150 a second, spread over frames. One that just finished an errand or is under threat still gets the next update. Saves time only above 30 fps."),
         ];
 
         /// The tweaks in src/OniBrutal.GameTweaks (named here: options are read before that assembly is loaded).
-        public static readonly string[] Typed = ["off-screen-conveyors", "fast-save-type-checks", "fast-anim-cleanup", "fast-sublimation", "fast-anim-events", "fast-symbol-overrides", "fast-jobs", "fast-offset-tables", "slow-reachability", "off-world-fallers", "fast-partitioner-cleanup", "fast-anim-batches", "fast-overlays", "fast-conveyor-paths", "fast-overlay-textures"];
+        public static readonly string[] Typed = ["off-screen-conveyors", "fast-save-type-checks", "fast-anim-cleanup", "fast-sublimation", "fast-anim-events", "fast-symbol-overrides", "fast-jobs", "fast-offset-tables", "slow-reachability", "off-world-fallers", "fast-partitioner-cleanup", "fast-anim-batches", "fast-overlays", "fast-conveyor-paths", "fast-overlay-textures", "brain-rate"];
 
         /// Every `--game-tweak` name, in the screen's order.
         public static readonly string[] All = Rows.Where(r => r.IsTweak).Select(r => r.Id).ToArray();

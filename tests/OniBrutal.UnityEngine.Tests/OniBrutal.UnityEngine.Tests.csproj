@@ -30,6 +30,8 @@
     <Compile Include="../../src/OniBrutal.Host/PlayerSettings.cs" Link="Host/PlayerSettings.cs" />
     <!-- The Moono Tweaks catalog (GameTweakCatalogTests; BackgroundSave names itself from it). -->
     <Compile Include="../../src/OniBrutal.Host/GameTweaks/GameTweakNames.cs" Link="Host/GameTweakNames.cs" />
+    <!-- The brain-rate game tweak's allowance (BrainRateAllowanceTests). -->
+    <Compile Include="../../src/OniBrutal.GameTweaks/BrainRateAllowance.cs" Link="GameTweaks/BrainRateAllowance.cs" />
     <!-- The background-save game tweak's writes (BackgroundSaveTests), with the game's zlib. -->
     <Compile Include="../../src/OniBrutal.Host/GameTweaks/BackgroundSave.cs" Link="Host/BackgroundSave.cs" />
     <Reference Include="Ionic.Zip">

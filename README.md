@@ -14,7 +14,8 @@ into Unity for is reimplemented here.
 
 ## Setup
 
-You need your own copy of the game on Steam, on Linux or Windows (no macOS). Because this replaces
+You need your own copy of the game on Steam, on Linux or Windows (no macOS). Only the Steam
+version is supported for now; the Epic Games Store and WeGame (China) versions are not. Because this replaces
 the engine rather than patching the game, it can't ship as an ordinary Harmony mod. Instead, a
 setup script hooks it into the game's Steam launch options, so you still start the game from
 Steam as usual.

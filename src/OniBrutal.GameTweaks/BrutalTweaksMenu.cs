@@ -117,10 +117,11 @@ namespace OniBrutal.GameTweaks
     public class BrutalTweaksScreen : KModalScreen
     {
         const string Title = "MOONO TWEAKS";
-        /// The warning colour of the gameplay-changing section and its rows' label (amber).
+        /// The warning colour of the gameplay-changing section's heading (amber).
         const string Warning = "FFB040";
-        /// Rows tighter than the Mods screen's (10 px padding and spacing): more of them fit.
-        const int RowPadding = 4, RowSpacing = 4;
+        /// Row padding (above and below, and the left inset) and the spacing between rows: a
+        /// little tighter than the Mods screen's 10 px, so that about ten rows fit.
+        const int RowPadding = 7, RowInset = 16, RowSpacing = 6;
 
         KButton closeTitle, close, apply, reset;
         GameObject entryPrefab;
@@ -171,7 +172,8 @@ namespace OniBrutal.GameTweaks
             shown = (bool[])BrutalTweaksMenu.Saved.Clone();
             toggles = new MultiToggle[shown.Length];
             if (BrutalTweaksMenu.LockedNote.Length > 0)
-                Note($"<b>Set by the launch options:</b> {BrutalTweaksMenu.LockedNote}\n<size=11>Those rows can't be changed here. Remove the options from the game's launch options to choose them here.</size>");
+                Note($"Set by the launch options: {BrutalTweaksMenu.LockedNote}",
+                    "Those rows can't be changed here. Remove the options from the game's launch options to choose them here.");
             string group = null;
             for (int i = 0; i < BrutalTweaksMenu.Ids.Length; i++)
             {
@@ -198,33 +200,42 @@ namespace OniBrutal.GameTweaks
             bg.defaultState = KImage.ColorSelector.Inactive;
             bg.ColorState = KImage.ColorSelector.Inactive;
             var layout = entry.GetComponent<HorizontalLayoutGroup>();
-            if (layout != null) layout.padding = new RectOffset(layout.padding.left, layout.padding.right, RowPadding, RowPadding);
+            if (layout != null) layout.padding = new RectOffset(RowInset, layout.padding.right, RowPadding, RowPadding);
             return entry;
         }
 
-        void Note(string text)
+        void Note(string text, string body)
         {
             var entry = Entry("Note");
-            entry.GetReference<LocText>("Title").text = text;
+            var title = entry.GetReference<LocText>("Title");
+            title.text = text;
+            title.color = Color.white;
+            BodyLine(title, body);
             entry.GetReference<LocText>("Version").gameObject.SetActive(false);
             entry.GetReference<MultiToggle>("EnabledToggle").gameObject.SetActive(false);
             entry.gameObject.SetActive(true);
         }
 
-        /// A section's heading: its name in capitals on the list's background (no row panel).
+        /// A section's heading, as Klei heads the sections of its own screens (Game options, the
+        /// destination screen): its name in capitals, GRAYSTROKE at 18 pt (style_titleTextLarge's
+        /// size), regular and white, on the list's background with no row panel or band. The
+        /// gameplay-changing section's is amber, with a line of body text under it.
         void Heading(string group, bool changesGameplay)
         {
             var entry = Entry("Heading " + group);
             entry.GetReference<KImage>("BG").gameObject.SetActive(false);
+            var band = entry.GetComponent<Image>();
+            if (band != null) band.enabled = false;
             // Not a row: no hover highlight (the row's own MultiToggle).
             var highlight = entry.GetComponent<MultiToggle>();
             if (highlight != null) highlight.enabled = false;
             var layout = entry.GetComponent<HorizontalLayoutGroup>();
-            if (layout != null) layout.padding = new RectOffset(layout.padding.left, layout.padding.right, 6, 0);
+            if (layout != null) layout.padding = new RectOffset(RowInset, layout.padding.right, 12, 2);
             var title = entry.GetReference<LocText>("Title");
-            title.text = changesGameplay ? $"<color=#{Warning}><b>{group.ToUpperInvariant()}</b></color>  <size=11>off by default: these trade a little exactness for speed</size>"
-                : $"<b>{group.ToUpperInvariant()}</b>";
-            title.fontSize = 14;
+            title.text = group.ToUpperInvariant();
+            title.fontSize = 18;
+            title.color = changesGameplay ? Util.ColorFromHex(Warning) : Color.white;
+            if (changesGameplay) BodyLine(title, "Off by default: these trade a little exactness for speed.");
             entry.GetReference<MultiToggle>("EnabledToggle").gameObject.SetActive(false);
             entry.GetReference<LocText>("Version").gameObject.SetActive(false);
             entry.gameObject.SetActive(true);
@@ -249,21 +260,20 @@ namespace OniBrutal.GameTweaks
             // narrow, cap-height F (the original shows "conFiguration" on that screen too), and
             // "%" overhangs its advance by about a third of a space, so "% " looks unspaced.
             title.text = BrutalTweaksMenu.Titles[i];
+            // White, as Klei's headings over body text (the Mods screen's are grey-blue).
+            title.color = Color.white;
             var tooltip = Tooltip(i);
             entry.GetReference<ToolTip>("Description").toolTip = tooltip;
             var effect = BodyLine(title, BrutalTweaksMenu.Effects[i]);
             if (effect.GetComponent<ToolTip>() is { } effectTip) effectTip.toolTip = tooltip;
-            // The label beside the toggle: the warning for tweaks that change gameplay, and who
-            // set a row the launch options set.
+            // The label beside the toggle: who set a row the launch options set (the section
+            // heading says which tweaks change gameplay).
             var label = entry.GetReference<LocText>("Version");
-            var labels = new List<string>();
-            if (BrutalTweaksMenu.ChangesGameplay[i]) labels.Add($"<color=#{Warning}><b>CHANGES GAMEPLAY</b></color>");
-            if (locked) labels.Add("LAUNCH OPTION");
-            if (labels.Count > 0)
+            if (locked)
             {
-                label.text = string.Join("\n", labels);
+                label.text = "LAUNCH OPTION";
                 label.fontSize = 12;
-                // One line per label: the effect beside it wraps instead.
+                // One line: the effect beside it wraps instead.
                 label.textWrappingMode = TMPro.TextWrappingModes.NoWrap;
                 var layout = label.GetComponent<LayoutElement>();
                 if (layout != null) layout.flexibleWidth = 0f;
@@ -322,7 +332,7 @@ namespace OniBrutal.GameTweaks
             column.childControlWidth = column.childControlHeight = true;
             column.childForceExpandWidth = true;
             column.childForceExpandHeight = false;
-            column.spacing = 1f;
+            column.spacing = 2f;
             var layout = stack.AddComponent<LayoutElement>();
             layout.flexibleWidth = 1f;
             title.transform.SetParent(stack.transform, worldPositionStays: false);

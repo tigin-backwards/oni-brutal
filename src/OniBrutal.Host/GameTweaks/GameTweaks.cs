@@ -16,8 +16,9 @@ namespace OniBrutal.Host.GameTweaks
 
         public static void Install(IReadOnlySet<string> requested)
         {
-            bool On(string name) => requested.Contains(name) || requested.Contains("all")
-                || requested.Contains("exact") && Array.IndexOf(GameTweakNames.ChangingBehaviour, name) < 0;
+            // `-NAME` leaves a tweak out of `all` or `exact` (for measuring one against the rest).
+            bool On(string name) => !requested.Contains("-" + name) && (requested.Contains(name) || requested.Contains("all")
+                || requested.Contains("exact") && Array.IndexOf(GameTweakNames.ChangingBehaviour, name) < 0);
             if (requested.Count == 0) return;
             var harmony = new Harmony("OniBrutal.Host.GameTweaks");
             backgroundSave = On(BackgroundSave.Name);
@@ -68,6 +69,6 @@ namespace OniBrutal.Host.GameTweaks
         /// on every tweak but these.
         public static readonly string[] ChangingBehaviour = ["off-screen-conveyors", "slow-reachability", "off-world-fallers"];
 
-        public static bool IsKnown(string name) => name is "all" or "exact" || Array.IndexOf(All, name) >= 0;
+        public static bool IsKnown(string name) => name is "all" or "exact" || Array.IndexOf(All, name.StartsWith('-') ? name.Substring(1) : name) >= 0;
     }
 }

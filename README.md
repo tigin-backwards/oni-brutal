@@ -80,7 +80,8 @@ For a more detailed breakdown, see [docs/PERFORMANCE.md](docs/PERFORMANCE.md).
 These change how some of the game's own code does its work. Most give exactly the same results,
 faster, and the setup turns those on (`--game-tweak exact` in the launch options). The three marked
 **changes gameplay** trade a little exactness for speed, and are off unless you add them, e.g.
-`--game-tweak exact --game-tweak slow-reachability`, or `--game-tweak all` for everything.
+`--game-tweak exact --game-tweak slow-reachability`, or `--game-tweak all` for everything;
+`--game-tweak -NAME` leaves one out.
 
 - `fast-jobs`: the game's worker threads stop waking and waiting on each other for tiny jobs.
 - `fast-anim-events`, `fast-anim-cleanup`, `fast-symbol-overrides`: cheaper animation

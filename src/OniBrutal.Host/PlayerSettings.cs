@@ -103,7 +103,9 @@ namespace OniBrutal.Host
     {
         public readonly IReadOnlyList<string> AllTweaks;
         public readonly Dictionary<string, (bool On, OptionSource Source)> Tweaks = new(StringComparer.Ordinal);
-        public string Splash = "none";
+        /// The splash without a settings file or command line saying otherwise: the Gassy Moos.
+        public const string DefaultSplash = "moo";
+        public string Splash = DefaultSplash;
         public OptionSource SplashSource;
         public bool FrameStats;
         public OptionSource FrameStatsSource;
@@ -161,7 +163,7 @@ namespace OniBrutal.Host
                 if (on == DefaultOn(name, changing)) result.GameTweaks.Remove(name);
                 else result.GameTweaks[name] = on;
             }
-            if (splashMoo != null) result.Splash = splashMoo.Value ? "moo" : null;
+            if (splashMoo != null) result.Splash = (splashMoo.Value ? "moo" : "none") is var splash && splash == DefaultSplash ? null : splash;
             if (frameStats != null) result.FrameStats = frameStats.Value ? true : null;
             return result;
         }

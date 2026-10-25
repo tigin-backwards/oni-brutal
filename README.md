@@ -84,7 +84,7 @@ faster, and are on unless you turn them off. The three marked **changes gameplay
 exactness for speed, and are off unless you turn them on.
 
 Choose them on the main menu: **Brutal Tweaks**, under Mods, lists every tweak with an on/off
-switch and a line on what it does (plus the Gassy Moo loading splash and frame stats in the log).
+switch and a line on what it does (plus the Gassy Moo loading splash, on by default, and frame stats in the log).
 Changes apply when the game restarts, which the screen does for you. Your choices are kept in
 `oni-brutal/settings.json` in the game's own data folder (usually
 `~/.config/unity3d/Klei/Oxygen Not Included` on Linux,

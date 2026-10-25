@@ -794,7 +794,7 @@ player: with vSync the swap paces frames; otherwise `Application.targetFrameRate
 otherwise none. Without a display (`--headless`, `--batchmode`) frames are paced at
 `targetFrameRate` or 60 Hz.
 
-**Loading splash (`--splash moo`, off by default).** The player's own presentation, not the
+**Loading splash (`--splash moo`, on by default; `--splash none` or Brutal Tweaks turns it off).** The player's own presentation, not the
 game's: the presenter thread draws Gassy Moo comets (the game's `meteor_gassymoo` kanim, its
 `fall_loop`, read from `sharedassets0.assets` on a worker thread at start-up) over whatever the
 window last showed, redrawing about 60 times a second while no game frame comes, so the window

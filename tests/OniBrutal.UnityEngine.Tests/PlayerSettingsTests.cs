@@ -18,12 +18,12 @@ namespace OniBrutal.Tests
             => EffectiveOptions.Resolve(All, Changing, tweaks ?? [], splash, frameStats, file);
 
         [Fact]
-        public void DefaultsAreExactWithoutSplashOrFrameStats()
+        public void DefaultsAreExactWithTheSplashAndNoFrameStats()
         {
             var o = Resolve(new PlayerSettings());
             Assert.Equal(["fast-a", "fast-b"], o.EnabledTweaks);
             Assert.All(All, n => Assert.Equal(OptionSource.Default, o.Tweaks[n].Source));
-            Assert.Equal(("none", OptionSource.Default), (o.Splash, o.SplashSource));
+            Assert.Equal(("moo", OptionSource.Default), (o.Splash, o.SplashSource));
             Assert.Equal((false, OptionSource.Default), (o.FrameStats, o.FrameStatsSource));
         }
 
@@ -102,8 +102,10 @@ namespace OniBrutal.Tests
             var saved = EffectiveOptions.Apply(file, Changing,
                 new Dictionary<string, bool> { ["fast-a"] = true, ["fast-b"] = true, ["off-d"] = true }, splashMoo: false, frameStats: true);
             Assert.Equal(new Dictionary<string, bool> { ["off-d"] = true, ["slow-c"] = true }, saved.GameTweaks);
-            Assert.Null(saved.Splash);
+            Assert.Equal("none", saved.Splash);
             Assert.True(saved.FrameStats);
+            // The splash back on is its default, so the file drops it.
+            Assert.Null(EffectiveOptions.Apply(saved, Changing, new Dictionary<string, bool>(), splashMoo: true, frameStats: null).Splash);
             saved = EffectiveOptions.Apply(saved, Changing, new Dictionary<string, bool>(), splashMoo: null, frameStats: false);
             Assert.Null(saved.FrameStats);
         }
@@ -175,9 +177,9 @@ namespace OniBrutal.Tests
             var file = new PlayerSettings();
             file.GameTweaks["fast-b"] = false;
             Assert.Equal(["game tweaks on (default): fast-a", "game tweaks off (default): slow-c, off-d", "game tweaks off (the settings file): fast-b",
-                          "splash none (default)", "frame stats off (default)"], Resolve(file).Describe().ToArray());
-            Assert.Equal(["game tweaks from the command line (--game-tweak none): none", "splash moo (the command line)", "frame stats on (the command line)"],
-                Resolve(file, ["none"], "moo", true).Describe().ToArray());
+                          "splash moo (default)", "frame stats off (default)"], Resolve(file).Describe().ToArray());
+            Assert.Equal(["game tweaks from the command line (--game-tweak none): none", "splash none (the command line)", "frame stats on (the command line)"],
+                Resolve(file, ["none"], "none", true).Describe().ToArray());
         }
     }
 }

@@ -1,0 +1,69 @@
+{
+ "spec": "mods/2228381429-100k-challenge.yaml",
+ "mods": [
+  "2228381429"
+ ],
+ "verdict": "failed",
+ "why": "a run of ours failed",
+ "findings": [],
+ "note": "the base game's New Game, Survival, Classic, the cluster by its coordinate, launched and embarked: its 256 x 384 world of frigid subworlds, geysers and cold cells generate as in the original, but its asteroid list's description, whose paragraphs end in \"\\r\\n\", reports textInfo.spaceCount 53 where the original's is 50: TextMeshPro leaves a carriage return out of spaceCount (docs/cleanroom/textmeshpro.md, \"Carriage returns are not counted as spaces\"), to be implemented from that spec",
+ "updated": "2026-10-24",
+ "commit": "4eab9eb",
+ "mod_dlls": {
+  "2228381429": {
+   "Challenge100K.dll": "ac248d06ede3ae9a5ec93dd3e0f8c3f57104e9a89f3d590707a322205f1ed648"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-222305-34404834",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T22:32:35",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-223430-0df7daf1",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-24T22:36:06",
+    "lane": 16,
+    "reasons": [
+     "ui_dump asteroids: 2 difference(s)"
+    ],
+    "reference_run": "20261024-222305-34404834",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "asteroids": {
+      "differences": 2
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261024-223430-0df7daf1",
+    "index": 2,
+    "verdict": "fail",
+    "date": "2026-10-24T22:36:12",
+    "lane": 17,
+    "reasons": [
+     "ui_dump asteroids: 2 difference(s)"
+    ],
+    "reference_run": "20261024-222305-34404834",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "asteroids": {
+      "differences": 2
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

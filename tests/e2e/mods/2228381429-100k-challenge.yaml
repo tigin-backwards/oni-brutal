@@ -1,0 +1,59 @@
+# One Hundred K Challenge (2228381429), classes P, O (a worldgen mod; the base game only).
+#
+# What it does: a base-game cluster, 100K Challenge (coordinate prefix S-100K), one 256 x 384
+# asteroid of frigid copies of the classic biomes. Its code adds a temperature range of 80 to
+# 110 K and gives it to every subworld of the world warmer than its coldest ranges (a
+# TerrainCell.GetTemperatureRange postfix), lets the world's elements start below their own
+# low temperatures (a transpiler on TerrainCell.ApplyBackground), adds its strings and asteroid
+# sprite; a PLib option (Hard Mode) removes the world's geysers.
+# How a player reaches it: the main menu with Spaced Out off, New Game, Survival, Classic; the
+# carousel lists 100K Challenge.
+# What changes: the cluster a new game generates.
+#
+# From the main menu, Spaced Out off: New Game, Survival, Classic; the cluster chosen by typing
+# its coordinate (fixed seed), launched and embarked. Functional expectations
+# (mod-play-testing.md, "Worldgen mods"): the world's size, its frigid subworlds, its geysers
+# among the spawners (Hard Mode is off), and cells far from the start at the mod's 80 to 110 K
+# or colder.
+from: main-menu
+spaced_out: false
+mods: [2228381429]
+steps:
+  - ui_wait: {path: "**/MainMenu/**/MainMenuButtons", cond: stable, frames: 3000}
+  - click: {text: "NEW GAME", under: "**/MainMenuButtons"}
+  - ui_wait: {path: "**/ModeSelectScreen/Panel/Content/RootToggles/StandardGame", cond: stable}
+  - click: {ui: "**/ModeSelectScreen/Panel/Content/RootToggles/StandardGame"}
+  - ui_wait: {path: "**/ClusterCategorySelectionScreen/Panel/Content/RootToggles/VanillaStyleGame", cond: stable}
+  - click: {ui: "**/ClusterCategorySelectionScreen/Panel/Content/RootToggles/VanillaStyleGame"}
+  - ui_wait: {path: "**/ColonyDestinationScreen2/Layout/Buttons/LaunchButton", cond: stable, frames: 3000}
+  - expect_state:
+      "all:DestinationSelectPanel::[0].clusterKeys": {contains: clusters/OneHundredK}
+      "Assets.Sprites[\"Asteroid_onehundredk\"]": exists
+  - click: {ui: "**/CoordinateContainer/SeedInput"}
+  - ui_wait: {path: "**/CoordinateContainer/SeedInput", cond: stable}
+  - type: {ui: "**/CoordinateContainer/SeedInput", text: "S-100K-12345-0-0-0", clear: true, enter: true}
+  - ui_wait: {path: "**/CoordinateContainer/SeedInput/Text Area/Text", cond: text, value: "~S-100K-12345-0-0-0"}
+  - expect_ui:
+      "**/CoordinateContainer/SeedInput/Text Area/Text": {text: "~S-100K-12345-0-0-0"}
+  - expect_state:
+      "CustomGameSettings.Instance.GetCurrentQualitySetting(\"ClusterLayout\").id": clusters/OneHundredK
+  - ui_dump: {name: asteroids, root: "**/Section - Destination/World Scoll (Rect Size Set By Screen Code!)/Content/Details"}
+  - click: {ui: "**/ColonyDestinationScreen2/Layout/Buttons/LaunchButton"}
+  # Worldgen runs on its own thread; the Duplicant selection follows once the world is loaded.
+  - ui_wait: {path: "**/MinionSelectScreen/Content/BottomContent/Buttons/ProceedButton", cond: stable, frames: 60000}
+  - click: {ui: "**/MinionSelectScreen/Content/BottomContent/Buttons/ProceedButton"}
+  - ui_wait: {path: "**/MinionSelectScreen", cond: gone, frames: 6000}
+  - expect_state:
+      "DlcManager.IsExpansion1Active()": false
+      "ClusterManager.Instance.WorldContainers.Count": 1
+      "ClusterManager.Instance.GetStartWorld().worldName": worlds/OneHundredK
+      "ClusterManager.Instance.GetStartWorld().worldSize.x": 256
+      "ClusterManager.Instance.GetStartWorld().worldSize.y": 384
+      "Components.LiveMinionIdentities.Count": 3
+      "ClusterManager.Instance.GetStartWorld().m_generatedSubworlds": {contains: subworlds/sandstone/SandstoneStartFrigid}
+      "count:ClusterManager.Instance.GetStartWorld().m_generatedSubworlds[*] if .EndsWith(\"Frigid\") == true": ">= 10"
+      "count:SaveGame.Instance.worldGenSpawner.spawnables[*] if .spawnInfo.id.StartsWith(\"GeyserGeneric\") == true": ">= 1"
+  # 25 cells high in the west, far from the start: none of them warmer than 110 K (vacuum is
+  # at 0 K), where a classic world is at about 290 K.
+  - expect_state:
+      "cells:40,300..44,304::Grid.Temperature.get_Item({cell})": "<= 2750"

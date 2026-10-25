@@ -1,0 +1,101 @@
+{
+ "spec": "mods/1817639915-russian-darkdeny.yaml",
+ "mods": [
+  "1817639915"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "Russian on a colony's research and priorities screens and pause menu, then the main menu, its options and Game options screens, as in the original (screens within 0.072 % of the original's pixels)",
+ "updated": "2026-10-25",
+ "commit": "9caf612",
+ "mod_dlls": {
+  "1817639915": {}
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-003454-75470ce2",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T00:54:42",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-022425-0bae69c5",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-25T04:05:53",
+    "lane": 17,
+    "reference_run": "20261025-003454-75470ce2",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "research": {
+      "differences": 0
+     },
+     "priorities": {
+      "differences": 0
+     },
+     "pause": {
+      "differences": 0
+     },
+     "menu": {
+      "differences": 0
+     },
+     "options": {
+      "differences": 0
+     },
+     "game-options": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "priorities": 0.0,
+     "pause": 0.0,
+     "menu": 0.000722,
+     "game-options": 0.0
+    }
+   },
+   {
+    "run": "20261025-022425-0bae69c5",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T04:05:52",
+    "lane": 16,
+    "reference_run": "20261025-003454-75470ce2",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "research": {
+      "differences": 0
+     },
+     "priorities": {
+      "differences": 0
+     },
+     "pause": {
+      "differences": 0
+     },
+     "menu": {
+      "differences": 0
+     },
+     "options": {
+      "differences": 0
+     },
+     "game-options": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "priorities": 7e-06,
+     "pause": 0.0,
+     "menu": 1.8e-05,
+     "game-options": 0.0
+    }
+   }
+  ]
+ }
+}

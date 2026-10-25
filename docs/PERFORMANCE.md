@@ -83,6 +83,7 @@ The rest is the engine itself, profiled on U57 and fixed where the game leans on
 | The UI raycast leaves out the graphics under closed screens, which their own raycast would refuse (U57: about 3,700 a frame) | U57 2.0–2.3 → 0.6–0.9 ms, 2minnow 0.9–1.3 → 0.3–0.7 |
 | World rotation and scale cached (TextMeshPro reads them for every text, every frame) | 1.1 ms |
 | Script dispatch skips removal checks while nothing is being removed | 0.1–0.2 ms |
+| A canvas renderer given the same unchanged mesh again keeps its copy: the starmap's ~1,100 UI animations each set their batch's mesh every frame, which was copied and baked anew | U57 with the starmap open: allocations 28 → 0.9 MB a frame, canvas drawing about 10 → 4 ms (profiled on a busy machine) |
 
 Pooling draw records and resolving each material's values once per change also cut allocations
 by two thirds.

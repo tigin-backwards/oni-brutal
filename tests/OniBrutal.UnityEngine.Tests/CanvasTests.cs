@@ -10,6 +10,45 @@ namespace OniBrutal.Tests
 {
     public class CanvasTests : EngineTest
     {
+        /// SetMesh copies the mesh as it is then: a later change shows only with the next
+        /// SetMesh, and setting the same mesh again unchanged (the game's UI animations, every
+        /// frame) takes the same copy.
+        [Fact]
+        public void SetMeshCopiesTheMeshAsItIsThen()
+        {
+            var go = new GameObject("Element", typeof(RectTransform));
+            try
+            {
+                var renderer = go.AddComponent<CanvasRenderer>();
+                var data = (OniBrutal.Engine.UI.CanvasRendererNative)renderer.Native;
+                var mesh = new Mesh { vertices = [Vector3.zero, new Vector3(0f, 100f), new Vector3(100f, 0f)], triangles = [0, 1, 2] };
+                renderer.SetMesh(mesh);
+                var first = data.Geometry;
+                renderer.Clear();
+                Assert.Null(data.Geometry);
+                renderer.SetMesh(mesh);
+                Assert.Same(first, data.Geometry);
+
+                mesh.vertices = [Vector3.zero, new Vector3(0f, 50f), new Vector3(50f, 0f)];
+                Assert.Same(first, data.Geometry);
+                Assert.Equal(new Vector3(0f, 100f), data.Geometry.Positions[1]);
+                renderer.SetMesh(mesh);
+                Assert.NotSame(first, data.Geometry);
+                Assert.Equal(new Vector3(0f, 50f), data.Geometry.Positions[1]);
+
+                var other = new Mesh { vertices = [Vector3.zero, new Vector3(0f, 50f), new Vector3(50f, 0f)], triangles = [0, 1, 2] };
+                var second = data.Geometry;
+                renderer.SetMesh(other);
+                Assert.NotSame(second, data.Geometry);
+                renderer.SetMesh(null);
+                Assert.Null(data.Geometry);
+            }
+            finally
+            {
+                Object.DestroyImmediate(go);
+            }
+        }
+
         [Fact]
         public void NestedCanvasSortsWithTheNearestOverridingAncestor()
         {

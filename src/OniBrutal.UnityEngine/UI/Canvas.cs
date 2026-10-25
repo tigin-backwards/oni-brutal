@@ -186,13 +186,31 @@ namespace UnityEngine
             var d = Data;
             if (d.HasDepth) d.DepthBatch.DepthDirty = true;
             if (d.Baked is { } baked) baked.ReleaseResources();
+            d.CopiedGeometry = null;
+            d.CopiedFrom = null;
         }
 
-        /// Takes a copy of the mesh's geometry (Unity copies it into the canvas batch).
+        /// Takes a copy of the mesh's geometry (Unity copies it into the canvas batch). The same
+        /// mesh at the same version gives the copy it gave last (a mesh's arrays are never written
+        /// once published, and every change bumps its version): the game's UI animations set
+        /// their batch's mesh again every frame (KBatchedAnimCanvasRenderer), about 1,100 of
+        /// them on a large colony's starmap, each copy then rebaked into its canvas (U57: about
+        /// 28 MB and 7 ms a frame).
         public void SetMesh(Mesh mesh)
         {
             var d = Data;
-            d.Geometry = mesh == null ? null : CanvasGeometry.From((MeshNative)mesh.NativeOrThrow);
+            if (mesh == null) d.Geometry = null;
+            else
+            {
+                var native = (MeshNative)mesh.NativeOrThrow;
+                if (d.CopiedGeometry == null || !ReferenceEquals(d.CopiedFrom, native) || d.CopiedVersion != native.Version)
+                {
+                    d.CopiedGeometry = CanvasGeometry.From(native);
+                    d.CopiedFrom = native;
+                    d.CopiedVersion = native.Version;
+                }
+                d.Geometry = d.CopiedGeometry;
+            }
             d.Changed();
         }
 
@@ -717,6 +735,11 @@ namespace OniBrutal.Engine.UI
     internal sealed class CanvasRendererNative : ComponentNative
     {
         public CanvasGeometry Geometry;
+        /// The last copy SetMesh made, of which mesh and at which of its versions (kept through
+        /// Clear: the next SetMesh of the same mesh unchanged takes it again).
+        public CanvasGeometry CopiedGeometry;
+        public MeshNative CopiedFrom;
+        public int CopiedVersion;
         /// Property sheets of the element's draws by material and pop, with the state each was
         /// filled for (CanvasSystem.SheetFor).
         public List<(Material Material, bool Pop, PropertySheet Sheet, CanvasSystem.UiDrawState State)> DrawSheets;

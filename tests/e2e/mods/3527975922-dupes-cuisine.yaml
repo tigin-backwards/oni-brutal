@@ -1,0 +1,52 @@
+# Dupes Cuisine [Reloaded] (3527975922), classes P, B, O.
+#
+# What it does: new crops (Sunny Wheat, Kakawa Tree and its acorns, Creamcap mushrooms) that
+# new worlds grow (SettingsCache postfixes add them to biomes) and care packages offer, more
+# than thirty new foods cooked at the game's stations with their own effects (a sugar rush
+# among them), and a Food Grinder (ManualJuicer, 2 x 3, 400 kg of raw minerals, 90 W, in the
+# Food menu after Food Repurposing) that grinds fruit and seeds into slurries and juice; the
+# Microbe Musher's fish food takes the new seeds.
+# How a player reaches it: the build menu's Food category; the grinder's and the cooking
+# stations' recipe screens.
+# What changes: what Duplicants grow, cook and eat.
+#
+# setup researches Food Repurposing and drops 500 kg of sandstone in the corridor west of the
+# printing pod. The Food menu offers the Food Grinder; it is placed there (112, 206) and built,
+# and selected it shows its recipe screen (no recipe discovered yet: none of its ingredients
+# is in early-base).
+from: early-base
+mods: [3527975922]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"FoodRepurposing\")", method: Purchased}}
+  # What the game sends when a research completes (GameHashes.ResearchComplete): the build menu
+  # takes the tech's buildings in.
+  - driver: {setup.call: {target: "Game.Instance", method: Trigger, args: [-107300940, {"$": "Db.Get().Techs.Get(\"FoodRepurposing\")"}]}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"SandStone\").substance", method: SpawnResource, args: [[114.5, 207.5, -12], 500, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"ManualJuicer\")": exists
+      "Db.Get().Techs.Get(\"FoodRepurposing\").unlockedItemIDs": {contains: ManualJuicer}
+      "count:ComplexRecipeManager.Get().recipes[*] if .fabricators.Contains(\"ManualJuicer\") == true": {save_as: recipes}
+      "Assets.GetPrefab(\"MealSlurry\")": exists
+  - expect_state:
+      "count:ComplexRecipeManager.Get().recipes[*] if .fabricators.Contains(\"ManualJuicer\") == true": ">= 2"
+  - run: {seconds: 5}
+  - driver: {camera.set: {cell: [112, 208], ortho: 10}}
+  - click: {ui: "**/PlanScreen/Toggle:Food"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/ManualJuicer Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/ManualJuicer Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen/MaterialSelectionPanel", cond: stable}
+  - click_world: {cell: [112, 206]}
+  - key: {code: Escape}
+  - expect: {blueprints: {ManualJuicer: 1}}
+  - run: {seconds: 900, until: {buildings: {ManualJuicer: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: ManualJuicer}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Food Grinder"}
+  - shot: {name: title, crop: "**/DetailsScreen/TitleBar", threshold: 0.04}
+  - ui_wait: {path: "**/ComplexFabricatorSideScreen/Contents", cond: stable}
+  - expect_ui:
+      "**/ComplexFabricatorSideScreen/Contents/ButtonScrollView/Viewport/Content/NoRecipesDiscovered": {active: true}
+  - ui_dump: {name: recipes, root: "**/ComplexFabricatorSideScreen/Contents"}

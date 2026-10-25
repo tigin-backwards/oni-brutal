@@ -1,0 +1,79 @@
+{
+ "spec": "mods/3527975922-dupes-cuisine.yaml",
+ "mods": [
+  "3527975922"
+ ],
+ "verdict": "warning",
+ "why": "known findings: scroll-normalized-position",
+ "findings": [
+  "scroll-normalized-position"
+ ],
+ "note": "Food Repurposing researched: the Food menu offers the Food Grinder, placed and built by the Duplicants from sandstone; selected, its title and its recipe screen (nothing discovered yet in early-base) as in the original; the new foods' recipes registered for the grinder",
+ "updated": "2026-10-24",
+ "commit": "4eab9eb",
+ "mod_dlls": {
+  "3527975922": {
+   "Dupes Cuisine.dll": "8256bcad2c5cfe901c8638fdab48216e8502a7981fbfed745c1b8c5cd21c9961"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-213453-7f7026a0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T21:56:06",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-222200-10d4191c",
+    "index": 1,
+    "verdict": "warn",
+    "date": "2026-10-24T22:23:42",
+    "lane": 16,
+    "reference_run": "20261024-213453-7f7026a0",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "recipes": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "title": 0.0
+    }
+   },
+   {
+    "run": "20261024-222200-10d4191c",
+    "index": 2,
+    "verdict": "warn",
+    "date": "2026-10-24T22:23:44",
+    "lane": 17,
+    "reference_run": "20261024-213453-7f7026a0",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "recipes": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "title": 0.0
+    }
+   }
+  ]
+ }
+}

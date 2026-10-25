@@ -98,6 +98,7 @@ namespace OniBrutal.Host
                     PatchFrames.Install();
                     PInvokePatches.Install();
                     PatchDependents.Install();
+                    GenericMemberScopes.Install();
                 }
                 catch (Exception e)
                 {
@@ -422,6 +423,74 @@ namespace OniBrutal.Host
                     ran.Add(size.ToString());
                 }
                 return $"the later prefix runs from the earlier replacement (C of {string.Join(", ", ran)} bytes of IL)";
+            });
+            Check("Harmony patches of two copies of a library naming a generic type over their own types (GenericMemberScopes)", () =>
+            {
+                GenericMemberScopes.Install();
+                // Two assemblies, each with a copy of the same library, as mods merge PLib: an
+                // interface Library.IEntry, and Library.Dialog, whose Fill enumerates an
+                // ICollection<IEntry>, Make constructs a List<IEntry> and Rows names a List<IEntry>[].
+                // Both copies' methods get a postfix, as Advanced Mopping by Type and Ultimate Power
+                // Tweaks patch their PLib's OptionsDialog.FillModOptions.
+                var harmony = new HarmonyLib.Harmony("OniBrutal.Host.Check");
+                var entries = new Type[2];
+                var dialogs = new Type[2];
+                var held = new List<object>();
+                for (int copy = 0; copy < 2; copy++)
+                {
+                    var module = System.Reflection.Emit.AssemblyBuilder.DefineDynamicAssembly(new AssemblyName("OniBrutal.Host.ScopeCheck" + copy),
+                        System.Reflection.Emit.AssemblyBuilderAccess.Run).DefineDynamicModule("ScopeCheck" + copy);
+                    var entry = module.DefineType("Library.IEntry", TypeAttributes.Public | TypeAttributes.Interface | TypeAttributes.Abstract).CreateType();
+                    var collection = typeof(ICollection<>).MakeGenericType(entry);
+                    var enumerable = typeof(IEnumerable<>).MakeGenericType(entry);
+                    var list = typeof(List<>).MakeGenericType(entry);
+                    var getEnumerator = enumerable.GetMethod("GetEnumerator")!;
+                    var construct = list.GetConstructor(Type.EmptyTypes)!;
+                    // MonoMod's cache holds what it resolves weakly: kept alive, as a game holds them.
+                    held.Add(getEnumerator);
+                    held.Add(construct);
+                    var dialog = module.DefineType("Library.Dialog", TypeAttributes.Public | TypeAttributes.Abstract | TypeAttributes.Sealed);
+                    var fill = dialog.DefineMethod("Fill", MethodAttributes.Public | MethodAttributes.Static, typeof(bool), [collection]);
+                    var il = fill.GetILGenerator();
+                    il.Emit(System.Reflection.Emit.OpCodes.Ldarg_0);
+                    il.Emit(System.Reflection.Emit.OpCodes.Callvirt, getEnumerator);
+                    il.Emit(System.Reflection.Emit.OpCodes.Callvirt, typeof(System.Collections.IEnumerator).GetMethod("MoveNext")!);
+                    il.Emit(System.Reflection.Emit.OpCodes.Ret);
+                    var make = dialog.DefineMethod("Make", MethodAttributes.Public | MethodAttributes.Static, typeof(object), Type.EmptyTypes);
+                    il = make.GetILGenerator();
+                    il.Emit(System.Reflection.Emit.OpCodes.Newobj, construct);
+                    il.Emit(System.Reflection.Emit.OpCodes.Ret);
+                    var rows = dialog.DefineMethod("Rows", MethodAttributes.Public | MethodAttributes.Static, typeof(object), Type.EmptyTypes);
+                    il = rows.GetILGenerator();
+                    il.Emit(System.Reflection.Emit.OpCodes.Ldtoken, list.MakeArrayType());
+                    il.Emit(System.Reflection.Emit.OpCodes.Call, typeof(Type).GetMethod(nameof(Type.GetTypeFromHandle))!);
+                    il.Emit(System.Reflection.Emit.OpCodes.Ret);
+                    entries[copy] = entry;
+                    dialogs[copy] = dialog.CreateType();
+                    foreach (var name in new[] { "Fill", "Make", "Rows" })
+                        harmony.Patch(dialogs[copy].GetMethod(name), postfix: new HarmonyLib.HarmonyMethod(typeof(Program), nameof(NoOp)));
+                }
+                var wrong = new List<string>();
+                for (int copy = 0; copy < 2; copy++)
+                {
+                    var list = typeof(List<>).MakeGenericType(entries[copy]);
+                    try
+                    {
+                        dialogs[copy].GetMethod("Fill")!.Invoke(null, [Activator.CreateInstance(list)]);
+                    }
+                    catch (TargetInvocationException e)
+                    {
+                        wrong.Add($"copy {copy}'s Fill: {e.InnerException?.GetType().Name}: {e.InnerException?.Message}");
+                    }
+                    string Of(Type type) => type.GetGenericArguments()[0].Assembly.GetName().Name!;
+                    var made = dialogs[copy].GetMethod("Make")!.Invoke(null, null)!.GetType();
+                    if (made != list) wrong.Add($"copy {copy}'s Make made a List<IEntry> of {Of(made)}");
+                    var array = (Type)dialogs[copy].GetMethod("Rows")!.Invoke(null, null)!;
+                    if (array != list.MakeArrayType()) wrong.Add($"copy {copy}'s Rows named a List<IEntry>[] of {Of(array.GetElementType()!)}");
+                }
+                if (wrong.Count > 0) throw new InvalidOperationException(string.Join("; ", wrong));
+                GC.KeepAlive(held);
+                return "each copy's replacements enumerate, construct and name its own List<IEntry>";
             });
             Check("Exceptions nothing catches on other threads (UnhandledExceptions)", () =>
             {

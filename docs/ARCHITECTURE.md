@@ -570,6 +570,40 @@ past the boot checkpoint needs a Steam client logged in with an account that own
   `REFRIGERATOR`, some `DECOR20` and `MESSTABLE`); all bind to POWERBUILDING, as on Mono. A mod that cannot be rewritten loads unchanged. `--check-types` loads a mod naming
   `CRITERIA.DECOR20` (bound to the last nested class, its `NAME` read), a type within it, a
   nested type CRITERIA has, and `DUPLICANTSTATS.MOVEMENT`.
+- **D33 Patches of two copies of a library naming a generic type over their own types.** Harmony's
+  MonoMod builds a patched method's replacement from the original's IL read with Cecil and turns
+  each member it names back into reflection's (`ReflectionHelper._ResolveReflection`), through a
+  cache keyed by the member's name and the assembly of its declaring type. For a member of a
+  generic type, `IEnumerable<IOptionsEntry>.GetEnumerator`, that assembly is the generic
+  type's (mscorlib): the type arguments' are left out, on both runtimes. Mods that merge their
+  own copy of PLib have same-named types in different assemblies, and a replacement made from
+  one copy was given members of another copy's instantiations, resolved before it. The cache
+  holds what it resolves weakly: Mono's reflection objects stay alive in the domain's table, so
+  there the second copy always gets the first's; CoreCLR's can be collected in between, so here
+  it depends on whether a collection ran (a run of `plib-options-copies.yaml` logged the hits).
+  Advanced Mopping by Type and Ultimate Power Tweaks each give their copy's
+  `OptionsDialog.FillModOptions` a postfix, and a mod's options open through its own copy: the
+  second replacement enumerates its own `ICollection<IOptionsEntry>` through the other copy's
+  `IEnumerable<IOptionsEntry>`. A mod that patches the dialog of every loaded copy breaks every
+  copy's but the first, as in issue #14 (Better Farming Effects and Tweaks', Mod Updater's and
+  Advanced Batteries' dialogs, in `FillModOptions_Patch1`; the reporter's patching mod is not
+  known). Mono finds an implementation anyway: for
+  `IEnumerable<T>`, `ICollection<T>`, `IList<T>` and `IEnumerator<T>` (its "array special
+  interfaces", `class-init.c`), `mono_class_interface_offset_with_variance` (`class.c`; Unity's
+  fork, branch `unity-6000.3-mbe`) falls back to any instantiation of the same generic interface
+  the object implements, so the call reaches `List<IOptionsEntry>`'s own enumerator and the
+  dialog opens. CoreCLR's interface dispatch finds no implementation of the other instantiation
+  and throws `EntryPointNotFoundException`. **Resolved in**
+  `GenericMemberScopes`, a transpiler of `_ResolveReflection`: when a member's declaring type,
+  or a type specification's element (an array of `List<IOptionsEntry>`), is built from a generic
+  instantiation, the key also names the assembly and module of every type it is built from, so
+  each copy's replacement gets its own types; other keys are left as they were. Where Mono's
+  fallback ran the other copy's types (a `List<IOptionsEntry>` constructed in the replacement is
+  of the other copy on Mono, and a generic interface outside those four fails there, "doesn't
+  implement interface"), ours runs the replacement's own. `--check-types` patches two emitted
+  copies' methods that enumerate a collection of their own interface, construct a list of it and
+  name an array of such lists, and calls the second copy's; `tests/e2e/plib-options-copies.yaml`
+  opens the two mods' options dialogs and two others'.
 
 ## 3. The engine API (`OniBrutal.UnityEngine`)
 

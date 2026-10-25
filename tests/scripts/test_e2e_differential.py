@@ -49,6 +49,18 @@ class Differential(unittest.TestCase):
         self.assertEqual(checks['shot']['panel']['fraction'], 0.0)
         self.assertTrue(checks['shot']['panel']['ok'])
 
+    def test_ignored_fields_and_screen_positions(self):
+        """ignore_fields drops NAME=VALUE members, and the geometry's world and screen parts (a
+        panned view's content), keeping the element's own rect."""
+        a = {'/C#0/T#0': {'': 'rect 0,0,100,20 world 500,0,600,20 screen 500,700,100,20',
+                          'Image': 'color=1,1,1,1 depth=3 raycastTarget=True'}}
+        b = {'/C#0/T#0': {'': 'rect 0,0,104,20 world 517,23,621,43 screen 517,677,104,20',
+                          'Image': 'color=1,1,1,1 depth=9 raycastTarget=True'}}
+        stripped = e2e.without_fields(a, ['depth', 'world', 'screen'])['/C#0/T#0']
+        self.assertEqual(stripped, {'': 'rect 0,0,100,20', 'Image': 'color=1,1,1,1 raycastTarget=True'})
+        self.assertEqual(e2e.without_fields(b, ['depth', 'world', 'screen'])['/C#0/T#0'][''], 'rect 0,0,104,20')
+        self.assertEqual(e2e.without_fields(a, ['depth'])['/C#0/T#0'][''], a['/C#0/T#0'][''])
+
     def test_blessed_reference_round_trip(self):
         spec = {'name': 'unit-bless', 'require_log': ['PLib options saved']}
         refs = e2e.REFS

@@ -2990,10 +2990,12 @@ def differential(spec, result, reference, findings=None):
 
 def without_fields(elements, names):
     """A parsed dump without the NAME=VALUE members NAMES (such as a Graphic's depth, which
-    counts the graphics drawn before it and so moves with content elsewhere on the canvas)."""
+    counts the graphics drawn before it and so moves with content elsewhere on the canvas), and
+    without the geometry's NAME X,Y,... parts among them (world, screen: where an element is on
+    screen, for content that scrolls or pans to a place that varies)."""
     if not names:
         return elements
-    pattern = re.compile(r'\s*\b(?:' + '|'.join(re.escape(n) for n in names) + r')=\S+')
+    pattern = re.compile(r'\s*\b(?:' + '|'.join(re.escape(n) for n in names) + r')(?:=\S+|\s+-?\d[-\d.,]*)')
     return {key: {c: pattern.sub('', v) for c, v in fields.items()} for key, fields in elements.items()}
 
 

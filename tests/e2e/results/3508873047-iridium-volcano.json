@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3508873047-iridium-volcano.yaml",
+ "mods": [
+  "3508873047"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "an Iridium Volcano placed and selected: its name in the side screen's title, Molten Iridium at 3300 K, a maximum pressure of 150 kg, its rate rolled within 200 to 400 kg a cycle and as in the original to its last bits (ARCHITECTURE D25)",
+ "updated": "2026-10-24",
+ "commit": "4eab9eb",
+ "mod_dlls": {
+  "3508873047": {
+   "Geysers_Iridium_Volcano.dll": "ce06087b0ae143d7319b95f1b293f3e62cfed8a9d79fbb7ddccd2bc5c73275b9"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-222216-c845d17f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T22:28:24",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-223032-4802198d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T22:32:39",
+    "lane": 16,
+    "reference_run": "20261024-222216-c845d17f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-223032-4802198d",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T22:33:13",
+    "lane": 16,
+    "reference_run": "20261024-222216-c845d17f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

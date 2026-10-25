@@ -90,41 +90,63 @@ namespace OniBrutal.Host.GameTweaks
             string temporary = path + ".writing";
             try
             {
-                using (var output = new FileStream(temporary, FileMode.Create, FileAccess.Write, FileShare.None, 1 << 20))
+                using var output = new FileStream(temporary, FileMode.Create, FileAccess.Write, FileShare.None, 1 << 20);
+                output.Write(header);
+                if (fast)
                 {
-                    output.Write(header);
-                    if (fast)
-                    {
-                        using var zlib = new System.IO.Compression.ZLibStream(output, System.IO.Compression.CompressionLevel.Fastest, leaveOpen: true);
-                        zlib.Write(body, 0, length);
-                    }
-                    else
-                    {
-                        using var zlib = new Ionic.Zlib.ZlibStream(output, Ionic.Zlib.CompressionMode.Compress, Ionic.Zlib.CompressionLevel.BestSpeed, leaveOpen: true);
-                        zlib.Write(body, 0, length);
-                        zlib.Flush();
-                    }
+                    using var zlib = new System.IO.Compression.ZLibStream(output, System.IO.Compression.CompressionLevel.Fastest, leaveOpen: true);
+                    zlib.Write(body, 0, length);
                 }
-                // The game closes its handle on the target right after the header; a move racing
-                // that close is retried.
-                for (int attempt = 0; ; attempt++)
+                else
                 {
-                    try
-                    {
-                        File.Move(temporary, path, overwrite: true);
-                        break;
-                    }
-                    catch (IOException) when (attempt < 50)
-                    {
-                        Thread.Sleep(20);
-                    }
+                    using var zlib = new Ionic.Zlib.ZlibStream(output, Ionic.Zlib.CompressionMode.Compress, Ionic.Zlib.CompressionLevel.BestSpeed, leaveOpen: true);
+                    zlib.Write(body, 0, length);
+                    zlib.Flush();
                 }
-                EngineLog.Engine($"background save written: {path}");
             }
             catch (Exception e)
             {
+                // Unwritten (a full disk, say): the partial file is no save.
                 UnityEngine.Debug.LogError($"Background save of {path} failed: {e}");
                 try { File.Delete(temporary); } catch (Exception) { } // the write's failure is what matters
+                return;
+            }
+            // The whole save is in the temporary file from here on, and it is never deleted unless it
+            // took the save's place: another process holding the save (an antivirus scan, a cloud
+            // client, the game closing its handle on the header) is waited out, then copied over.
+            if (Replace(temporary, path)) EngineLog.Engine($"background save written: {path}");
+            else UnityEngine.Debug.LogError($"Background save of {path} could not replace the save file, which another program keeps open; the complete save is in {temporary}");
+        }
+
+        /// Moves the finished temporary file onto the save: retried for about 30 s (20 ms at first,
+        /// backing off to 500 ms), then a copy over it is tried. False when neither went through; the
+        /// temporary file is then left as it is.
+        internal static bool Replace(string temporary, string path, int waitMilliseconds = 30_000)
+        {
+            int waited = 0;
+            for (int pause = 20; ; pause = Math.Min(pause * 2, 500))
+            {
+                try
+                {
+                    File.Move(temporary, path, overwrite: true);
+                    return true;
+                }
+                catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+                {
+                    if (waited >= waitMilliseconds) break;
+                    Thread.Sleep(pause);
+                    waited += pause;
+                }
+            }
+            try
+            {
+                File.Copy(temporary, path, overwrite: true);
+                File.Delete(temporary);
+                return true;
+            }
+            catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+            {
+                return false;
             }
         }
     }

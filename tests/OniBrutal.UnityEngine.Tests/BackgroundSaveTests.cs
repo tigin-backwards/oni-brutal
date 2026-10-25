@@ -104,5 +104,23 @@ namespace OniBrutal.Tests
             // The failed save keeps the header the game wrote, as the target holds until the write.
             Assert.Equal(Header("failing"), File.ReadAllBytes(failing));
         }
+
+        /// A finished save that cannot take the save's place (another program holds the save, as an
+        /// antivirus scan or a cloud client can on Windows) is kept, never deleted: here the target
+        /// is a folder, so neither the move nor the copy goes through.
+        [Fact]
+        public void ACompleteSaveThatCannotReplaceTheTargetIsKept()
+        {
+            string temporary = Path.Combine(dir, "Kept.sav.writing"), target = Path.Combine(dir, "Kept.sav");
+            File.WriteAllBytes(temporary, [1, 2, 3]);
+            Directory.CreateDirectory(target);
+            Assert.False(BackgroundSave.Replace(temporary, target, waitMilliseconds: 50));
+            Assert.Equal([1, 2, 3], File.ReadAllBytes(temporary));
+            // Once the target is free, the same call moves the save into place.
+            Directory.Delete(target);
+            Assert.True(BackgroundSave.Replace(temporary, target, waitMilliseconds: 50));
+            Assert.Equal([1, 2, 3], File.ReadAllBytes(target));
+            Assert.False(File.Exists(temporary));
+        }
     }
 }

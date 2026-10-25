@@ -1,0 +1,63 @@
+{
+ "spec": "mods/3413401611-not-0k-but-pretty-cool-place.yaml",
+ "mods": [
+  "3413401611"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "from a colony to New Game, Survival, Classic: the carousel lists the Not 0K clusters (its temperature ranges registered through its Enum.Parse and Enum.ToString prefixes); the Spaced Out cluster chosen by typing its coordinate (its asteroid list dumped), launched and embarked: eight worlds, the 240 x 380 start world of the mod's frozen subworlds, the iced swamp world, waiting entities spawned at once (Critter Save), the Temporal Tear still shut",
+ "updated": "2026-10-24",
+ "commit": "4eab9eb",
+ "mod_dlls": {
+  "3413401611": {
+   "Not0K.dll": "c4c091524fb2eaa021d40872fe745fda3d76748d2ba645a2dbb3c50223a8d37d"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-222305-34404834",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T22:31:00",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-223430-0df7daf1",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T22:34:30",
+    "lane": 17,
+    "reference_run": "20261024-222305-34404834",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "asteroids": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261024-223430-0df7daf1",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T22:35:23",
+    "lane": 17,
+    "reference_run": "20261024-222305-34404834",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "asteroids": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -23,6 +23,11 @@ namespace SemanticsProbe
                 go.AddComponent<CanvasProbe>();
                 return;
             }
+            if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "activetarget")
+            {
+                go.AddComponent<ActiveTarget>();
+                return;
+            }
             if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "canvasorder")
             {
                 go.AddComponent<CanvasOrder>();

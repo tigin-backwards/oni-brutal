@@ -190,6 +190,14 @@ namespace OniBrutal.Engine.Rendering
                     inFrameRender = false;
                 }
             }
+            // The frame's rendering ends with the screen as the active target, whatever scripts
+            // left active before it (measured in the original, UnityProbe's activetarget
+            // scenario: the game's property-texture blits in LateUpdate leave their target
+            // active, and at WaitForEndOfFrame it is null; set there, it lasts until the next
+            // frame's rendering ends). The Timelapser reads the screen with ReadPixels at
+            // WaitForEndOfFrame for the frame it shows while a save writes its preview: from the
+            // blit's target instead, that frame was black.
+            RenderTexture.active = null;
             frameQueued.Clear();
             foreach (var q in queued)
                 if (!q.DuringRender) frameQueued.Add(q);

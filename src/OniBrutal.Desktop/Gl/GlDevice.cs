@@ -153,6 +153,7 @@ namespace OniBrutal.Desktop.Gl
             CreateDefaults();
             GlStateCache.Invalidate();
             presenter = new GlPresenter(platform.Window, Splash != null ? new GlSplash(Splash) : null, platform.FramebufferWidth, platform.FramebufferHeight);
+            platform.ContentsDamaged += presenter.Refresh;
             // From here on the context belongs to the GL thread.
             worker = new GlWorker(platform.RenderWindow, CommandFailed);
             recorder = new GlDrawRecorder(worker, DefaultTexture, RunDraw);
@@ -442,6 +443,7 @@ namespace OniBrutal.Desktop.Gl
                     mask |= DepthBufferBit | StencilBufferBit;
                 }
                 if (mask != 0) N.glClear(mask);
+                if (color && target.Colors == null) presenter.Drew(clear: scissor == null);
                 if (scissor != null) GlApi.Enable(ScissorTest, true);
                 GlStateCache.Invalidate();
                 if (GlGpuProfile.Enabled) GlGpuProfile.End("clear", q);
@@ -498,6 +500,7 @@ namespace OniBrutal.Desktop.Gl
             GlBindings.BindVertexArray(GlMeshes.VertexArray(mesh, layout, program));
             SetAbsentChannels(program, layout);
             draws++;
+            if (target.Colors == null) presenter.Drew(clear: false);
             N.glDrawElementsBaseVertex(sm.Mode, sm.Count, UnsignedInt, (void*)(sm.Offset * 4L), sm.BaseVertex);
             ForgetConstantsOfArrays(program, layout);
         }
@@ -666,6 +669,7 @@ namespace OniBrutal.Desktop.Gl
             const int stride = sizeof(float) * (3 + 4 + 32);
             var program = recorded.Program;
             BindTarget();
+            if (target.Colors == null) presenter.Drew(clear: false);
             GlStateCache.Apply(recorded.State);
             Bind(recorded);
             GlBindings.BindVertexArray(immediateVertexArray);
@@ -726,11 +730,17 @@ namespace OniBrutal.Desktop.Gl
                     GlTextures.PrepareForSampling(device, autoMips);
                     framebuffer = device.Framebuffer;
                 }
-                else framebuffer = presenter.BackBuffer(fbWidth, fbHeight);
+                else framebuffer = presenter.ReadBuffer(fbWidth, fbHeight);
                 GlApi.BindFramebuffer(ReadFramebuffer, framebuffer);
                 var read = new float[w * h * 4];
                 N.glPixelStorei(PackAlignment, 4);
                 fixed (float* p = read) N.glReadPixels(rect.x, rect.y, w, h, Rgba, Float, p);
+                if (PresentTrace.Enabled && device == null)
+                {
+                    double sum = 0;
+                    for (int i = 0; i < read.Length; i += 4) sum += 0.299 * read[i] + 0.587 * read[i + 1] + 0.114 * read[i + 2];
+                    PresentTrace.Log($"frame {Time.frameCount}: ReadPixels of the screen {rect} from framebuffer {framebuffer}: mean luminance {255 * sum / (w * h):F1}");
+                }
                 framebufferValid = false;
                 return read;
             });
@@ -787,15 +797,19 @@ namespace OniBrutal.Desktop.Gl
         {
             int interval = SwapIntervalOverride >= 0 ? SwapIntervalOverride : QualitySettings.vSyncCount;
             int width = platform.FramebufferWidth, height = platform.FramebufferHeight;
+            int frame = Time.frameCount;
             worker.Post(() =>
             {
+                presenter.Frame = frame;
                 if (gpuTiming) EndGpuTiming();
                 uniformStream?.FenceFrame();
                 if (GlGpuProfile.Enabled) GlGpuProfile.FrameEnd();
-                // The back buffer of a frame that drew nothing to the screen still exists.
-                presenter.BackBuffer(width, height);
+                // The back buffer is not allocated anew here for a window whose size changed
+                // since the frame drew: that would present undefined content (black) in place of
+                // the frame. The presenter scales the frame to the window instead.
                 long t = GlTimings.Now;
-                presenter.Present(interval);
+                presenter.Present(interval, width, height);
+                presenter.Frame = frame + 1;
                 GlTimings.Present += GlTimings.Now - t;
                 framebufferValid = false;
                 gpuTimingArmed = gpuTiming;

@@ -136,12 +136,33 @@ namespace OniBrutal.Desktop
             Glfw.MonitorCallback += (_, _) => Report(RefreshWindowState);
             // The window may have moved to another monitor.
             window.OnPosition += (_, _) => Report(RefreshWindowState);
+            // The system may have discarded what the window showed (exposure, or the compositor
+            // changing how it presents a fullscreen window as it gains or loses the focus). Told
+            // at once, during a pump too: the presenter shows the last frame again, which changes
+            // nothing the frame sees.
+            window.OnRefresh += _ => ContentsDamaged?.Invoke();
+            window.OnFocus += (_, _) => ContentsDamaged?.Invoke();
+            if (Gl.PresentTrace.Enabled)
+            {
+                window.OnFocus += (_, e) => Trace($"focus {e}");
+                window.OnIconify += (_, e) => Trace($"iconify {e}");
+                window.OnMaximize += (_, e) => Trace($"maximize {e}");
+                window.OnSize += (_, e) => Trace($"window size {e}");
+                window.OnFramebufferSize += (_, e) => Trace($"framebuffer size {e}");
+                window.OnPosition += (_, e) => Trace($"position {e}");
+                window.OnRefresh += _ => Trace("refresh (contents damaged)");
+            }
             RefreshWindowState();
             InputState.Instance.MousePresent = true;
             // Unity's player starts with the pointer where it is (the game's hover card shows for
             // what is under it before the mouse first moves); GLFW reports only movements.
             if (!scripted) feed.MouseMoved(ToPixels(window.CursorPos));
         }
+
+        /// The window's contents may need presenting again (main thread, during PollEvents).
+        public event Action ContentsDamaged;
+
+        static void Trace(string text) => Gl.PresentTrace.Log($"frame {Time.frameCount}: window {text}");
 
         // ----- IPlatform -----
 
@@ -253,6 +274,7 @@ namespace OniBrutal.Desktop
         public void SetResolution(int width, int height, FullScreenMode newMode, uint refreshNumerator, uint refreshDenominator)
         {
             newMode = Supported(newMode);
+            if (Gl.PresentTrace.Enabled) Trace($"SetResolution {width}x{height} {newMode} (was {mode}, framebuffer {framebufferSize.X}x{framebufferSize.Y})");
             var monitor = CurrentMonitor;
             var desktop = monitor.VideoMode;
             if (mode is FullScreenMode.Windowed or FullScreenMode.MaximizedWindow)

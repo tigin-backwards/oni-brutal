@@ -3,12 +3,12 @@
  "mods": [
   "3670972563"
  ],
- "verdict": "failed",
- "why": "a run of ours failed",
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
  "findings": [],
- "note": "the converter panel builds with the built-in font (Arial.ttf now gives LegacyRuntime) and its ui_dumps match the original's, layout widths included; the panel's shot still differs (4.5% of pixels, 4% allowed): the original draws the 11-point labels (9 pixels on the 0.86 canvas) about 2-3 px narrower per line, its advances there matching Liberation Sans's unrounded ones where ours are rounded, while at 8 pixels both round",
+ "note": "selecting a Steam Vent shows the converter panel, built from legacy Text in the built-in font (FreeSans glyphs at whole-pixel advances, as the original draws them); the type list opens, its second type is picked, and Start conversion asks for the vent to be analyzed first; the panel's shot is within 0.2% of the original's",
  "updated": "2026-10-24",
- "commit": "04fbe10",
+ "commit": "3209a99",
  "mod_dlls": {
   "3670972563": {
    "GeyserSwapper.dll": "1ce045ef92e133cb4c7aa2e37c0de3e71c5f47dc9408410c7b4d530de7d3062a"
@@ -27,14 +27,11 @@
   ],
   "ours": [
    {
-    "run": "20261024-081005-6982f0",
+    "run": "20261024-223421-1bf73015",
     "index": 1,
-    "verdict": "fail",
-    "date": "2026-10-24T08:10:05",
+    "verdict": "pass",
+    "date": "2026-10-24T22:34:21",
     "lane": 18,
-    "reasons": [
-     "shot panel: 4.51% of pixels differ (> 4%)"
-    ],
     "reference_run": "20261024-060548-2e3b53",
     "new_signatures": 0,
     "findings": [],
@@ -47,18 +44,15 @@
      }
     },
     "shots": {
-     "panel": 0.045114
+     "panel": 0.0018
     }
    },
    {
-    "run": "20261024-081005-6982f0",
+    "run": "20261024-223421-1bf73015",
     "index": 2,
-    "verdict": "fail",
-    "date": "2026-10-24T08:10:06",
-    "lane": 19,
-    "reasons": [
-     "shot panel: 4.50% of pixels differ (> 4%)"
-    ],
+    "verdict": "pass",
+    "date": "2026-10-24T22:35:02",
+    "lane": 18,
     "reference_run": "20261024-060548-2e3b53",
     "new_signatures": 0,
     "findings": [],
@@ -71,7 +65,7 @@
      }
     },
     "shots": {
-     "panel": 0.044965
+     "panel": 0.001737
     }
    }
   ]

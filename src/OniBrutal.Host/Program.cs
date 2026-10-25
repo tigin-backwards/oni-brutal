@@ -109,7 +109,7 @@ namespace OniBrutal.Host
                 // Special folders' paths are given whether or not they exist, as Mono gives them (D24).
                 MonoFolderPaths.Install();
                 GameTweaks.GameTweaks.Install(effective.EnabledTweaks.ToHashSet(StringComparer.Ordinal));
-                BrutalTweaksMenu.Install(effective, settings, settingsPath);
+                if (!options.NoTweaksMenu) BrutalTweaksMenu.Install(effective, settings, settingsPath);
                 StateMachineSaveNames.Install(dataDir, AppContext.BaseDirectory);
                 StartupStats.Mark("host patches installed");
             });
@@ -1087,6 +1087,9 @@ namespace OniBrutal.Host
         /// --frame-stats: average frame phase times in the log (PlayerLoop.FrameStats), over the
         /// Brutal Tweaks settings.
         public bool FrameStats;
+        /// --no-tweaks-menu: the main menu without our Brutal Tweaks button, as the original's (test
+        /// runs compared with the original game: scripts/e2e.py).
+        public bool NoTweaksMenu;
         /// Diagnostics (--log-pointer-hits): the UI element under the mouse, logged when it changes.
         public bool LogPointerHits;
         /// Diagnostics (--vsync-count N): the swap interval regardless of the quality settings.
@@ -1196,6 +1199,7 @@ namespace OniBrutal.Host
                             if (line.Trim() is { Length: > 0 } step && !step.StartsWith('#')) o.Input.Add(step);
                         break;
                     case "--frame-stats": o.FrameStats = true; break;
+                    case "--no-tweaks-menu": o.NoTweaksMenu = true; break;
                     case "--max-frame-rate":
                         {
                             var spec = args[++i].Split(':');
@@ -1267,7 +1271,7 @@ namespace OniBrutal.Host
                     }
                     default:
                         Console.Error.WriteLine($"Unknown option {args[i]}");
-                        Console.Error.WriteLine("usage: OniBrutal [--game DIR] [--log FILE] [--run-home DIR] [--audio-wav DIR] [--headless] [--batchmode] [--frames N] [--native-override NAME=PATH] [--trace-exceptions] [--gl-debug] [--background] [--splash moo|none] [--log-pointer-hits] [--vsync-count N] [--gpu-profile] [--no-bindless] [--input FRAME:ACTION[:ARGS]] [--input-file PATH] [--frame-stats] [--max-frame-rate N[:FRAMES]] [--dump-render-textures FRAME:DIR] [-screen-width W] [-screen-height H] [-screen-fullscreen 0|1] [-window-mode exclusive|borderless|windowed] [-monitor N] [--check-types] [--ui-packages DIR | --shipped-ui-packages] [--game-tweak NAME|-NAME|all|exact|none] [--check-assets [--list-data-scripts FILE]] [--check-bind] [--check-shaders] [--check-natives [--native-arch x86_64|arm64] [--native-dir DIR]] [--dump-shader NAME:DIR] [--capture FRAME:PATH[:SCALE]] [--probe-ui FRAME:X,Y] [--dump-ui FRAME:PATH] [--dump-ui-vertices PATH-SUBSTRING] [--dump-hierarchy FRAME:PATH] [--report-builtin-assets FILE] [--dump-component FRAME:PATH|TYPE] [-- STEAM-COMMAND]");
+                        Console.Error.WriteLine("usage: OniBrutal [--game DIR] [--log FILE] [--run-home DIR] [--audio-wav DIR] [--headless] [--batchmode] [--frames N] [--native-override NAME=PATH] [--trace-exceptions] [--gl-debug] [--background] [--splash moo|none] [--log-pointer-hits] [--vsync-count N] [--gpu-profile] [--no-bindless] [--input FRAME:ACTION[:ARGS]] [--input-file PATH] [--frame-stats] [--no-tweaks-menu] [--max-frame-rate N[:FRAMES]] [--dump-render-textures FRAME:DIR] [-screen-width W] [-screen-height H] [-screen-fullscreen 0|1] [-window-mode exclusive|borderless|windowed] [-monitor N] [--check-types] [--ui-packages DIR | --shipped-ui-packages] [--game-tweak NAME|-NAME|all|exact|none] [--check-assets [--list-data-scripts FILE]] [--check-bind] [--check-shaders] [--check-natives [--native-arch x86_64|arm64] [--native-dir DIR]] [--dump-shader NAME:DIR] [--capture FRAME:PATH[:SCALE]] [--probe-ui FRAME:X,Y] [--dump-ui FRAME:PATH] [--dump-ui-vertices PATH-SUBSTRING] [--dump-hierarchy FRAME:PATH] [--report-builtin-assets FILE] [--dump-component FRAME:PATH|TYPE] [-- STEAM-COMMAND]");
                         return null;
                 }
             }

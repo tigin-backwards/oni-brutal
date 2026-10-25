@@ -1575,7 +1575,9 @@ class Player:
         else:
             env.update(ONI_GAME_DIR=self.env['QA_U57_GAME'], ONI_RUN_HOME=self.home, ONI_CONFIG='release')
             command = [os.path.join(ROOT, 'scripts', 'run.sh'), '--native-override',
-                       'steam_api=' + self.env['QA_U57_STEAM'], *size, '--game-tweak', 'exact']
+                       'steam_api=' + self.env['QA_U57_STEAM'], *size, '--game-tweak', 'exact',
+                       # The original's main menu has no Brutal Tweaks button: the menus compare.
+                       '--no-tweaks-menu']
             stdout = self.log
         # The runner's own display (a desktop's) must reach neither the player nor xvfb-run's
         # server, whose environment find_display reads: input would land on the desktop.

@@ -19,28 +19,28 @@ namespace OniBrutal.GameTweaks
     /// buttons) whose ModsScreen behaviour is swapped for BrutalTweaksScreen before it wakes.
     public static class BrutalTweaksMenu
     {
-        internal static string[] Ids, Groups, GroupGains, Titles, Effects, Gains, Tooltips;
+        internal static string[] Ids, Groups, Titles, Effects, Details, Gains, Notes;
         internal static bool[] ChangesGameplay, Running, Defaults, Saved, Locked;
         internal static string LockedNote, SettingsPath;
         internal static Func<string[], bool[], string> Save;
 
-        /// One entry per row, in order: its section (`groups`; `groupGains` the gain the section's
-        /// rows share, "" for none), title, one-line effect, measured gain ("" for none) and
-        /// tooltip. `running`: each option as this run has it; `defaults`: as Reset to defaults
-        /// sets it; `locked`: set by the command line (shown, not changeable; `lockedNote` names
-        /// those arguments). `save(ids, values)` writes the changeable rows to the settings file,
-        /// returning why it could not or null.
-        public static void Install(Harmony harmony, string[] ids, string[] groups, string[] groupGains, string[] titles, string[] effects,
-            string[] gains, string[] tooltips, bool[] changesGameplay, bool[] running, bool[] defaults, bool[] locked,
+        /// One entry per row, in order: its section (`groups`), title and one-line effect, and
+        /// its tooltip's parts: how it works (`details`), its measured gain ("" for none) and the
+        /// lines after it (where it was measured, the launch option). `running`: each option as
+        /// this run has it; `defaults`: as Reset to defaults sets it; `locked`: set by the command
+        /// line (shown, not changeable; `lockedNote` names those arguments). `save(ids, values)`
+        /// writes the changeable rows to the settings file, returning why it could not or null.
+        public static void Install(Harmony harmony, string[] ids, string[] groups, string[] titles, string[] effects,
+            string[] details, string[] gains, string[] notes, bool[] changesGameplay, bool[] running, bool[] defaults, bool[] locked,
             string lockedNote, string settingsPath, Func<string[], bool[], string> save)
         {
             Ids = ids;
             Groups = groups;
-            GroupGains = groupGains;
             Titles = titles;
             Effects = effects;
+            Details = details;
             Gains = gains;
-            Tooltips = tooltips;
+            Notes = notes;
             ChangesGameplay = changesGameplay;
             Running = running;
             Defaults = defaults;
@@ -111,9 +111,9 @@ namespace OniBrutal.GameTweaks
     }
 
     /// The Moono Tweaks screen, on the Mods screen's prefab (BrutalTweaksMenu.Open): a section
-    /// heading per group, then its rows (title, one-line effect, measured gain on the right,
-    /// toggle); the footer says when changes apply beside Reset to defaults, Restart to apply and
-    /// Close.
+    /// heading per group, then its rows (title, one-line effect, toggle; how it works and its
+    /// measured gain in the tooltip); the footer says when changes apply beside Reset to
+    /// defaults, Restart to apply and Close.
     public class BrutalTweaksScreen : KModalScreen
     {
         const string Title = "MOONO TWEAKS";
@@ -178,7 +178,7 @@ namespace OniBrutal.GameTweaks
                 if (BrutalTweaksMenu.Groups[i] != group)
                 {
                     group = BrutalTweaksMenu.Groups[i];
-                    Heading(group, BrutalTweaksMenu.GroupGains[i], BrutalTweaksMenu.ChangesGameplay[i]);
+                    Heading(group, BrutalTweaksMenu.ChangesGameplay[i]);
                 }
                 Row(i);
             }
@@ -211,12 +211,14 @@ namespace OniBrutal.GameTweaks
             entry.gameObject.SetActive(true);
         }
 
-        /// A section's heading: its name in capitals on the list's background (no row panel),
-        /// and the gain its rows share on the right.
-        void Heading(string group, string gain, bool changesGameplay)
+        /// A section's heading: its name in capitals on the list's background (no row panel).
+        void Heading(string group, bool changesGameplay)
         {
             var entry = Entry("Heading " + group);
             entry.GetReference<KImage>("BG").gameObject.SetActive(false);
+            // Not a row: no hover highlight (the row's own MultiToggle).
+            var highlight = entry.GetComponent<MultiToggle>();
+            if (highlight != null) highlight.enabled = false;
             var layout = entry.GetComponent<HorizontalLayoutGroup>();
             if (layout != null) layout.padding = new RectOffset(layout.padding.left, layout.padding.right, 6, 0);
             var title = entry.GetReference<LocText>("Title");
@@ -224,25 +226,18 @@ namespace OniBrutal.GameTweaks
                 : $"<b>{group.ToUpperInvariant()}</b>";
             title.fontSize = 14;
             entry.GetReference<MultiToggle>("EnabledToggle").gameObject.SetActive(false);
-            var label = entry.GetReference<LocText>("Version");
-            if (gain.Length > 0) SideLabel(label, $"<color={Constants.POSITIVE_COLOR_STR}>{gain}</color>", 0f);
-            else label.gameObject.SetActive(false);
+            entry.GetReference<LocText>("Version").gameObject.SetActive(false);
             entry.gameObject.SetActive(true);
         }
 
-        /// The label left of the toggle (the Mods screen's version text): sized to its text, or
-        /// `width` wide and wrapped.
-        static void SideLabel(LocText label, string text, float width)
+        /// A row's tooltip, styled as the game's effect tooltips: how it works, then its measured
+        /// gain in the game's positive colour, then where that was measured and the launch option.
+        static string Tooltip(int i)
         {
-            label.text = text;
-            label.fontSize = 12;
-            label.alignment = TMPro.TextAlignmentOptions.MidlineRight;
-            var layout = label.GetComponent<LayoutElement>();
-            if (layout != null)
-            {
-                layout.flexibleWidth = 0f;
-                if (width > 0f) layout.preferredWidth = width;
-            }
+            var text = BrutalTweaksMenu.Details[i];
+            if (BrutalTweaksMenu.Gains[i].Length > 0)
+                text += (text.Length > 0 ? "\n\n" : "") + $"<color={Constants.POSITIVE_COLOR_STR}>{BrutalTweaksMenu.Gains[i]}</color>";
+            return text + (text.Length > 0 ? "\n" : "") + BrutalTweaksMenu.Notes[i];
         }
 
         void Row(int i)
@@ -251,15 +246,20 @@ namespace OniBrutal.GameTweaks
             bool locked = BrutalTweaksMenu.Locked[i];
             var title = entry.GetReference<LocText>("Title");
             title.text = $"{BrutalTweaksMenu.Titles[i]}\n<size=11>{BrutalTweaksMenu.Effects[i]}</size>";
-            entry.GetReference<ToolTip>("Description").toolTip = BrutalTweaksMenu.Tooltips[i];
-            // The label beside the toggle: the measured gain, the warning for tweaks that change
-            // gameplay, and who set a row the launch options set.
+            entry.GetReference<ToolTip>("Description").toolTip = Tooltip(i);
+            // The label beside the toggle: the warning for tweaks that change gameplay, and who
+            // set a row the launch options set.
             var label = entry.GetReference<LocText>("Version");
             var labels = new List<string>();
-            if (BrutalTweaksMenu.Gains[i].Length > 0) labels.Add($"<color={Constants.POSITIVE_COLOR_STR}>{BrutalTweaksMenu.Gains[i]}</color>");
             if (BrutalTweaksMenu.ChangesGameplay[i]) labels.Add($"<color=#{Warning}><b>CHANGES GAMEPLAY</b></color>");
             if (locked) labels.Add("LAUNCH OPTION");
-            if (labels.Count > 0) SideLabel(label, string.Join("\n", labels), BrutalTweaksMenu.Gains[i].Length > 0 ? 240f : 0f);
+            if (labels.Count > 0)
+            {
+                label.text = string.Join("\n", labels);
+                label.fontSize = 12;
+                var layout = label.GetComponent<LayoutElement>();
+                if (layout != null) layout.flexibleWidth = 0f;
+            }
             else label.gameObject.SetActive(false);
             var toggle = entry.GetReference<MultiToggle>("EnabledToggle");
             toggles[i] = toggle;
@@ -289,7 +289,8 @@ namespace OniBrutal.GameTweaks
             entry.gameObject.SetActive(true);
         }
 
-        /// A line of text at the footer's left, beside its buttons (a copy of the rows' label).
+        /// A line of text at the footer's left, beside its buttons (a copy of the rows' label): one
+        /// line in the room the three buttons leave.
         void FooterNote(string text)
         {
             var source = entryPrefab.GetComponent<HierarchyReferences>().GetReference<LocText>("Version");
@@ -304,12 +305,12 @@ namespace OniBrutal.GameTweaks
             rect.anchorMax = new Vector2(0f, 1f);
             rect.pivot = new Vector2(0f, 0.5f);
             rect.anchoredPosition = new Vector2(14f, 0f);
-            rect.sizeDelta = new Vector2(200f, 0f);
+            rect.sizeDelta = new Vector2(222f, 0f);
             var label = note.GetComponent<LocText>();
             label.text = text;
-            label.fontSize = 13;
+            label.fontSize = 12;
             label.alignment = TMPro.TextAlignmentOptions.MidlineLeft;
-            label.textWrappingMode = TMPro.TextWrappingModes.Normal;
+            label.textWrappingMode = TMPro.TextWrappingModes.NoWrap;
         }
 
         static bool Differ(bool[] a, bool[] b)

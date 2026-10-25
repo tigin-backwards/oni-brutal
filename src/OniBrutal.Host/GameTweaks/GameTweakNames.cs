@@ -40,9 +40,10 @@ namespace OniBrutal.Host.GameTweaks
         public const string FastSaveCompression = "fast-save-compression", BackgroundSave = "background-save", NoSaveGc = "no-save-gc",
             FastSerialization = "fast-serialization", FastParticleCollision = "fast-particle-collision";
 
-        // The gains shown on the screen. Measured on Linux under WSL2, where the game's code ran
-        // about half as fast as on Windows (docs/PERFORMANCE.md, "How it's measured"); a Windows
-        // remeasure is pending: update Effect, Platform and Measured together (and PERFORMANCE.md).
+        // The gains shown in the screen's tooltips. Measured on Linux under WSL2, where the game's
+        // code ran about half as fast as on Windows (docs/PERFORMANCE.md, "How it's measured"); a
+        // Windows remeasure is pending: update Effect, Platform and Measured together (and
+        // PERFORMANCE.md).
         static readonly TweakGain SaveGain = new("autosave freeze ~12 s → ~5 s on a large colony",
             "U57", "Linux under WSL2", "by 2026-10-20", "docs/PERFORMANCE.md#the-tweaks (save tweaks: 11.7 → 4.8 s)");
         static readonly TweakGain JobsGain = new("+11% frame rate on a large colony",

@@ -26,15 +26,16 @@ namespace OniBrutal.Host
                     EffectiveOptions.DefaultOn(name, GameTweakNames.ChangingBehaviour)),
             };
             var states = rows.Select(State).ToArray();
-            static string Measured(TweakGain g) => $"Measured on {g.Colony} ({g.Platform}, {g.Measured}).";
-            string Tooltip(TweakInfo row)
+            // The tooltip's parts (the screen styles the gain): the row's gain, or its group's
+            // ("Saving together: ..."); then where it was measured and the launch option.
+            static string Capitalized(string s) => s.Length > 0 ? char.ToUpperInvariant(s[0]) + s[1..] : s;
+            string GainText(TweakInfo row) => row.Gain != null ? Capitalized(row.Gain.Effect)
+                : row.Group.Gain != null ? $"{row.Group.Title} together: {row.Group.Gain.Effect}" : "";
+            string Notes(TweakInfo row)
             {
-                var lines = new List<string>();
-                if (row.Detail.Length > 0) lines.Add(row.Detail);
-                if (row.Gain != null) lines.Add(Measured(row.Gain));
-                else if (row.Group.Gain != null) lines.Add($"{row.Group.Title} together: {row.Group.Gain.Effect}. {Measured(row.Group.Gain)}");
-                lines.Add("Launch option: " + row.LaunchOption);
-                return string.Join("\n", lines);
+                var gain = row.Gain ?? row.Group.Gain;
+                var measured = gain != null ? $"Measured on {gain.Colony} ({gain.Platform}, {gain.Measured}).\n" : "";
+                return measured + "Launch option: " + row.LaunchOption;
             }
             var locked = new List<string>();
             foreach (var value in effective.CommandLineTweaks) locked.Add("--game-tweak " + value);
@@ -69,9 +70,10 @@ namespace OniBrutal.Host
 
             var install = GameTweaks.GameTweaks.TypedAssembly.GetType("OniBrutal.GameTweaks.BrutalTweaksMenu", throwOnError: true)!.GetMethod("Install")!;
             install.Invoke(null, [new Harmony("OniBrutal.Host.BrutalTweaksMenu"),
-                rows.Select(r => r.Id).ToArray(), rows.Select(r => r.Group.Title).ToArray(), rows.Select(r => r.Group.Gain?.Effect ?? "").ToArray(),
-                rows.Select(r => r.Title).ToArray(), rows.Select(r => r.Effect).ToArray(), rows.Select(r => r.Gain?.Effect ?? "").ToArray(),
-                rows.Select(Tooltip).ToArray(), rows.Select(r => r.Group == GameTweakNames.ChangesGameplay).ToArray(),
+                rows.Select(r => r.Id).ToArray(), rows.Select(r => r.Group.Title).ToArray(),
+                rows.Select(r => r.Title).ToArray(), rows.Select(r => r.Effect).ToArray(),
+                rows.Select(r => r.Detail).ToArray(), rows.Select(GainText).ToArray(), rows.Select(Notes).ToArray(),
+                rows.Select(r => r.Group == GameTweakNames.ChangesGameplay).ToArray(),
                 states.Select(s => s.On).ToArray(), states.Select(s => s.Default).ToArray(), states.Select(s => s.Locked).ToArray(),
                 string.Join(" ", locked), settingsPath, save]);
         }

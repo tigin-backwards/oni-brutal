@@ -112,7 +112,7 @@ namespace OniBrutal.Host.GameTweaks
                 "The rails carry exactly the same things, but items' positions lag while off screen."),
             new("off-world-fallers", ChangesGameplay, "Land items lost below a world", "Items that fall out the bottom of a world (a rocket's chute) stop falling forever.",
                 "They hang just below the world, stepped as falling every tick; landing them where they hang stops that cost."),
-            new("brain-rate", ChangesGameplay, "Brain updates held to 30 a second", "Above 30 fps, Duplicants and critters rethink their tasks as often as at 30 fps, no more.",
+            new("brain-rate", ChangesGameplay, "Critter and dupe brain updates capped at 30 updates a second", "Critters and dupes would otherwise update on every frame. This trims that bookkeeping above 30 fps.",
                 "The game updates 1 Duplicant and 5 critter brains every rendered frame; this caps them at 30 and 150 a second, spread over frames. One that just finished an errand or is under threat still gets the next update. Saves time only above 30 fps."),
         ];
 

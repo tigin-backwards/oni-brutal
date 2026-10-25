@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3078504174-lead-isolate-radiation.yaml",
+ "mods": [
+  "3078504174"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "lead's radiation absorption factor reads 10 as loaded, iron's as the game's; the colony runs",
+ "updated": "2026-10-25",
+ "commit": "8884175",
+ "mod_dlls": {
+  "3078504174": {
+   "E_╟ª╕⌠╛°╖°╔Σ.dll": "f443caf820d25707b6f901dcb15a514214fb1b297c3c149f48eed1eaf68fb0ce"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-193634-0de115a7",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T19:36:34",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-194023-b1397d13",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T19:40:23",
+    "lane": 16,
+    "reference_run": "20261025-193634-0de115a7",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261025-194023-b1397d13",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-25T19:40:24",
+    "lane": 17,
+    "reference_run": "20261025-193634-0de115a7",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

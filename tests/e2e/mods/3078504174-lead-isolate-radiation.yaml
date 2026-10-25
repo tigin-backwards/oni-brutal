@@ -1,0 +1,20 @@
+# Lead Isolate Radiation (3078504174), class P.
+#
+# What it does: lead's radiation absorption factor becomes 10 (a postfix on
+# ElementLoader.CopyEntryToElement), so lead tiles and walls block radiation fully where the
+# game's lead lets some through.
+# How a player reaches it: building with lead in the radiation overlay.
+# What changes: lead's element data, the factor the radiation sim reads per cell.
+#
+# early-base holds no lead, so the spec checks the element as loaded: lead's factor is 10 and
+# iron's is the game's.
+from: early-base
+mods: [3078504174]
+steps:
+  - expect_state:
+      "ElementLoader.FindElementByName(\"Lead\").radiationAbsorptionFactor": 10
+      "ElementLoader.FindElementByName(\"Iron\").radiationAbsorptionFactor": "< 10"
+  - expect_state:
+      "ElementLoader.FindElementByName(\"Iron\").radiationAbsorptionFactor": "== original"
+  - run: {seconds: 30}
+  - expect: {duplicants: 3}

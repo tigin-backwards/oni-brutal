@@ -16,7 +16,10 @@ namespace PerfProbe
     /// frame` gives the frame time. With `walltime.txt` the method timings run over the same
     /// windows. With `speed.txt` -1 the game stays paused, keeping the sim's variation out of
     /// the overlays' costs (overlays update every frame while paused). A line `capture` saves the
-    /// screen 300 frames into each hold, as overlay-NAME.png beside the probe.
+    /// screen 300 frames into each hold, as overlay-NAME.png beside the probe. A line `memory`
+    /// logs, after each hold, the process's resident memory, the live render textures (how many,
+    /// how many created, an estimate of their bytes) and the multiple render target copies among
+    /// them (`PERF overlay memory`): for following what toggling overlays leaves allocated.
     static class Overlays
     {
         /// The sweep has started, and ended (Screens' `wait overlays`).
@@ -42,7 +45,7 @@ namespace PerfProbe
             Started = true;
             var lines = System.IO.File.ReadAllLines(path);
             int hold = 1200;
-            bool capture = false;
+            bool capture = false, memory = false;
             var modes = new List<string>();
             foreach (var raw in lines)
             {
@@ -50,6 +53,7 @@ namespace PerfProbe
                 if (line.Length == 0 || line.StartsWith("#")) continue;
                 if (line.StartsWith("hold ")) { hold = int.Parse(line.Substring(5)); continue; }
                 if (line == "capture") { capture = true; continue; }
+                if (line == "memory") { memory = true; continue; }
                 modes.Add(line);
             }
             // The camera and the load settle first, then the first hold starts on a window edge.
@@ -59,6 +63,8 @@ namespace PerfProbe
             Screens.DismissDialogs();
             for (int i = 0; i < 60; i++) yield return null;
             while (Time.frameCount % 600 != 0) yield return null;
+            if (memory) LogMemory(0, "start");
+            int held = 0;
             if (wallTime) Runner.Instance.StartCoroutine(WallTime.Run(modes.Count * hold / 600));
             foreach (var entry in modes)
             {
@@ -89,10 +95,42 @@ namespace PerfProbe
                     Debug.Log($"PERF overlay {entry} window {frame / 600 - 1} f{Time.frameCount}: {(now - windowStart) * 1000f / 600f:F2} ms a frame");
                     windowStart = now;
                 }
+                if (memory) LogMemory(++held, entry);
             }
             OverlayScreen.Instance.ToggleOverlay(OverlayModes.None.ID, false);
             Debug.Log("PERF overlay done");
             Done = true;
+        }
+
+        static void LogMemory(int n, string entry)
+        {
+            long rss = 0;
+            try
+            {
+                foreach (var line in System.IO.File.ReadAllLines("/proc/self/status"))
+                    if (line.StartsWith("VmRSS:")) rss = long.Parse(line.Substring(6).Trim().Split(' ')[0]);
+            }
+            catch (System.Exception) { }
+            int created = 0, copies = 0;
+            long bytes = 0;
+            var textures = Resources.FindObjectsOfTypeAll<RenderTexture>();
+            foreach (var rt in textures)
+            {
+                if (rt.name.StartsWith("MRT") && rt.name.EndsWith("_Copy")) copies++;
+                if (!rt.IsCreated()) continue;
+                created++;
+                int texel = rt.format switch
+                {
+                    RenderTextureFormat.ARGBHalf or RenderTextureFormat.RGFloat => 8,
+                    RenderTextureFormat.ARGBFloat => 16,
+                    RenderTextureFormat.RHalf or RenderTextureFormat.R16 => 2,
+                    RenderTextureFormat.R8 => 1,
+                    RenderTextureFormat.Depth or RenderTextureFormat.Shadowmap => 0,
+                    _ => 4,
+                };
+                bytes += (long)rt.width * rt.height * (texel + (rt.depth > 0 ? 4 : 0));
+            }
+            Debug.Log($"PERF overlay memory {n} {entry} f{Time.frameCount}: rss {rss / 1024} MB, render textures {textures.Length} ({created} created, about {bytes >> 20} MB), MRT copies {copies}, managed {System.GC.GetTotalMemory(false) >> 20} MB");
         }
 
         /// The temperature overlay's legend filter, as clicking it does.

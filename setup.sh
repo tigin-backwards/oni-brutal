@@ -3,7 +3,8 @@
 #
 # Finds the game through Steam's libraries, builds the player into out/player when run from a
 # clone of the repository (a release has it in player/ beside this script), and prints the line
-# to paste into the game's Steam launch options. Run it again after updating.
+# to paste into the game's Steam launch options unless every Steam account here already has it
+# (read from Steam's localconfig.vdf, never written). Run it again after updating.
 #   ./setup.sh [GAME_DIR]
 set -euo pipefail
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -90,13 +91,80 @@ if [ -n "$inside" ]; then
 fi
 
 launch="\"$player/OniBrutal\" --game-tweak exact -- %command%"
+
+# What each Steam account here has as the game's launch options, read (never written) from its
+# localconfig.vdf: Steam keeps them under Software/Valve/Steam/apps/457140, and the account's
+# name under friends/PersonaName. Prints "persona<TAB>options" per account.
+read_launch_options()
+{
+    awk '
+    BEGIN { RS = "\0" }
+    {
+        n = 0; depth = 0; key = ""; haskey = 0; persona = ""; options = ""; i = 1; len = length($0)
+        while (i <= len) {
+            c = substr($0, i, 1)
+            if (c == "{") { path[++depth] = tolower(key); haskey = 0; i++; continue }
+            if (c == "}") { if (depth > 0) depth--; haskey = 0; i++; continue }
+            if (c != "\"") { i++; continue }
+            v = ""; i++
+            while (i <= len) {
+                c = substr($0, i, 1)
+                if (c == "\\") { v = v substr($0, i + 1, 1); i += 2; continue }
+                if (c == "\"") { i++; break }
+                v = v c; i++
+            }
+            if (!haskey) { key = v; haskey = 1; continue }
+            where = ""
+            for (d = 1; d <= depth; d++) where = where (d > 1 ? "/" : "") path[d]
+            if (where == "userlocalconfigstore/friends" && key == "PersonaName") persona = v
+            if (where == "userlocalconfigstore/software/valve/steam/apps/457140" && key == "LaunchOptions") options = v
+            haskey = 0
+        }
+        printf "%s\t%s\n", persona, options
+    }' "$1"
+}
+
+accounts=""
+for steam in "$HOME/.steam/steam" "$HOME/.local/share/Steam" "$HOME/snap/steam/common/.local/share/Steam" \
+             "$HOME/.var/app/com.valvesoftware.Steam/.local/share/Steam"; do
+    for config in "$steam"/userdata/*/config/localconfig.vdf; do
+        [ -f "$config" ] || continue
+        accounts+="$(read_launch_options "$config")"$'\n'
+    done
+done
+# One Steam install can be reached through several of those paths (~/.steam/steam is a link).
+accounts=$(printf '%s' "$accounts" | sort -u)
+# Set: the options start this player for the game (other options of the user's may be there too).
+is_set() { [[ "$1" == *"\"$player/OniBrutal\""* && "$1" == *"%command%"* ]]; }
+found=0; unset_count=0
+while IFS=$'\t' read -r persona options; do
+    [ -n "$persona$options" ] || continue
+    found=1
+    is_set "$options" || unset_count=$((unset_count + 1))
+done <<< "$accounts"
+
+say ""
+while IFS=$'\t' read -r persona options; do
+    [ -n "$persona$options" ] || continue
+    if is_set "$options"; then say "Steam already starts Oxygen Not Included on oni-brutal for $persona."
+    elif [ -n "$options" ]; then say "$persona: the launch options are set to something else: $options"
+    else say "$persona: no launch options yet."
+    fi
+done <<< "$accounts"
+if [ $found -eq 1 ] && [ $unset_count -eq 0 ]; then
+    say ""
+    say "Done. Nothing else to do: press Play in Steam."
+    say "To play the original game again, clear the launch options (right-click Oxygen Not Included → Properties)."
+    exit 0
+fi
+
 # On the clipboard where a clipboard tool exists: copied from a terminal, a long line can pick
 # up its wrapping.
 copied=""
 for tool in "wl-copy" "xclip -selection clipboard" "xsel --clipboard --input"; do
     command -v "${tool%% *}" >/dev/null 2>&1 && printf '%s' "$launch" | $tool 2>/dev/null && { copied=1; break; }
 done
-say ""
+[ $found -eq 1 ] && say ""
 if [ -n "$copied" ]; then
     say "Done. The launch options are on your clipboard. In Steam: right-click Oxygen Not Included →"
     say "Properties → Launch Options, and paste them. They are:"

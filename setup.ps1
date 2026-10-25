@@ -3,7 +3,8 @@
 # Finds the game through Steam's libraries, builds the player when run from a copy of the
 # repository (a release has it in player\ beside this script), installs it to
 # %LOCALAPPDATA%\oni-brutal\player, and puts the line for the game's Steam launch options on the
-# clipboard. The install location stays the same, so after an update running this again is all
+# clipboard unless every Steam account here already has it (read from Steam's localconfig.vdf,
+# never written). The install location stays the same, so after an update running this again is all
 # that is needed.
 #   setup.cmd [GAME_DIR], or powershell -ExecutionPolicy Bypass -File setup.ps1 [GAME_DIR]
 param([string]$Game)
@@ -84,10 +85,57 @@ if (Test-Path $player) { Remove-Item -Recurse -Force $player }
 New-Item -ItemType Directory -Force (Split-Path $player) | Out-Null
 Copy-Item -Recurse $built $player
 
-$launch = "`"$(Join-Path $player 'OniBrutal.exe')`" --game-tweak exact -- %command%"
+$exe = Join-Path $player 'OniBrutal.exe'
+$launch = "`"$exe`" --game-tweak exact -- %command%"
+
+# What each Steam account on this machine has as the game's launch options, read (never written)
+# from its localconfig.vdf: Steam keeps them under Software\Valve\Steam\apps\457140, and the
+# account's name under friends\PersonaName.
+function Read-LaunchOptions($file) {
+    $text = Get-Content -Raw -LiteralPath $file
+    $tokens = [regex]::Matches($text, '"((?:[^"\\]|\\.)*)"|[{}]')
+    $path = New-Object System.Collections.Generic.List[string]
+    $key = $null; $persona = $null; $options = $null
+    foreach ($t in $tokens) {
+        if ($t.Value -eq '{') { $path.Add($key); $key = $null; continue }
+        if ($t.Value -eq '}') { if ($path.Count) { $path.RemoveAt($path.Count - 1) }; $key = $null; continue }
+        $value = $t.Groups[1].Value -replace '\\(.)', '$1'
+        if ($null -eq $key) { $key = $value; continue }
+        $where = ($path -join '/').ToLowerInvariant()
+        if ($where -eq 'userlocalconfigstore/friends' -and $key -eq 'PersonaName') { $persona = $value }
+        if ($where -eq 'userlocalconfigstore/software/valve/steam/apps/457140' -and $key -eq 'LaunchOptions') { $options = $value }
+        $key = $null
+    }
+    [pscustomobject]@{ Persona = $persona; Options = $options }
+}
+
+$accounts = @()
+$steam = (Get-ItemProperty -Path 'HKCU:\Software\Valve\Steam' -ErrorAction SilentlyContinue).SteamPath
+if ($steam) {
+    foreach ($config in Get-ChildItem -Path (Join-Path $steam 'userdata\*\config\localconfig.vdf') -ErrorAction SilentlyContinue) {
+        try { $accounts += Read-LaunchOptions $config.FullName } catch { }
+    }
+}
+# Set: the options start this player for the game (other options of the user's may be there too).
+function Is-Set($options) { $options -and $options.Contains("`"$exe`"") -and $options.Contains('%command%') }
+$unset = @($accounts | Where-Object { -not (Is-Set $_.Options) })
+
+Write-Host ''
+if ($accounts.Count -gt 0 -and $unset.Count -eq 0) {
+    foreach ($a in $accounts) { Write-Host "Steam already starts Oxygen Not Included on oni-brutal for $($a.Persona)." -ForegroundColor Green }
+    Write-Host ''
+    Write-Host 'Done. Nothing else to do: press Play in Steam.'
+    Write-Host 'To play the original game again, clear the launch options (right-click Oxygen Not Included -> Properties).'
+    Finish 0
+}
+foreach ($a in $accounts) {
+    if (Is-Set $a.Options) { Write-Host "Steam already starts Oxygen Not Included on oni-brutal for $($a.Persona)." -ForegroundColor Green }
+    elseif ($a.Options) { Write-Host "$($a.Persona): the launch options are set to something else: $($a.Options)" -ForegroundColor Yellow }
+    else { Write-Host "$($a.Persona): no launch options yet." -ForegroundColor Yellow }
+}
 # On the clipboard: copied from the console, a long line picks up its wrapping as spaces.
 Set-Clipboard -Value $launch
-Write-Host ''
+if ($accounts.Count -gt 0) { Write-Host '' }
 Write-Host 'Done. The launch options are on your clipboard. In Steam: right-click Oxygen Not Included ->'
 Write-Host 'Properties -> Launch Options, and paste them with Ctrl+V. They are:'
 Write-Host ''

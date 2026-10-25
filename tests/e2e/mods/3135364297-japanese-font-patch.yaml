@@ -1,0 +1,34 @@
+# Japanese Font Patch (3135364297), classes P, T (TextMeshPro fonts from an asset bundle).
+#
+# What it does: under a Japanese translation, swaps the game's Noto Sans CJK JP for fonts that
+# look like the English game's: on load it reads font_info.json, loads its platform's
+# assets/PLATFORM/fonts.bundle and keeps the bundle's TMP font assets named there (a title
+# font, GN-Kin-iro_SansSerif SDF, for GRAYSTROKE text, and a heading font, Senobi-Gothic-Bold
+# SDF, for Economica text; the description falls back to NotoSansCJKjp-Regular). A prefix on
+# Localization.SwapToLocalizedFont then sets every TextStyleSetting's and LocText's font, but
+# only when the locale is Japanese, and otherwise leaves the game's own swap alone.
+# How a player reaches it: choosing a Japanese translation in the Translations screen; the game
+# applies one only from a Steam subscription, so the swap itself is not testable here.
+# What changes: the fonts of a Japanese game.
+#
+# With the English game: the bundle's fonts load as in the original (names, atlases) and
+# the game's own fonts stay in place.
+from: early-base
+mods: [3135364297]
+steps:
+  - expect_state:
+      "type:enslo.OniFontPatchJp.Patcher::Fonts.Title.name": GN-Kin-iro_SansSerif SDF
+      "type:enslo.OniFontPatchJp.Patcher::Fonts.Head.name": Senobi-Gothic-Bold SDF
+      "type:enslo.OniFontPatchJp.Patcher::Fonts.Description.name": NotoSansCJKjp-Regular
+  # Their atlases as in the original.
+  - expect_state:
+      "type:enslo.OniFontPatchJp.Patcher::Fonts.Title.atlasWidth": "== original"
+      "type:enslo.OniFontPatchJp.Patcher::Fonts.Title.atlasHeight": "== original"
+      "type:enslo.OniFontPatchJp.Patcher::Fonts.Head.atlasWidth": "== original"
+  # The English game's fonts are untouched.
+  - open: {management: research}
+  - ui_wait: {path: "**/ResearchScreen", cond: stable}
+  - expect_state:
+      "Localization.FontAsset.name": "== original"
+  # The tech tree pans as the screen opens; the list beside it is still.
+  - shot: {name: research, crop: "**/ResearchScreen", mask: [[345, 0, 935, 720]], threshold: 0.04}

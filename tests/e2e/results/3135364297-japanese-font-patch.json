@@ -1,0 +1,59 @@
+{
+ "spec": "mods/3135364297-japanese-font-patch.yaml",
+ "mods": [
+  "3135364297"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "in the English game: its OnLoad loads the two fonts of its Unity 2018.3 fonts.bundle (needed SerializedFile format 17 and the pre-2019 shader keyword list) with their atlases as in the original, and the game's own fonts stay (the research screen's list shot as in the original); the font swap itself runs only under a Japanese translation, which the game applies only from a Steam subscription, not tested",
+ "updated": "2026-10-24",
+ "commit": "3d21e74",
+ "mod_dlls": {
+  "3135364297": {
+   "OniFontPatchJp.dll": "6e059d1fe2b13afae4385af5208fbfb24bbfd3f8c938f3df30b878b7793357be"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-230153-3eae5a1f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T23:01:58",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-230304-a542d127",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T23:03:05",
+    "lane": 17,
+    "reference_run": "20261024-230153-3eae5a1f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "research": 0.0
+    }
+   },
+   {
+    "run": "20261024-230304-a542d127",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T23:03:04",
+    "lane": 16,
+    "reference_run": "20261024-230153-3eae5a1f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "research": 0.0
+    }
+   }
+  ]
+ }
+}

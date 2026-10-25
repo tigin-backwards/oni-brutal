@@ -300,6 +300,7 @@ setup:
   - driver: {seed: 12345}                            # before a random screen opens
   - driver: {setup.call: {type: "BlueprintsV2.Store", method: "Seed", args: ["e2e"]}}   # setup only
   - driver: {camera.set: {pos: [128.5, 210.5], ortho: 20}}
+  - driver: {count: {methods: ["Brain:UpdateBrain"]}}  # its calls from now on: E2eDriver.Counting.Of("Brain:UpdateBrain")
 ```
 
 `setup.call` (reflection) is allowed only in `setup:`. It may prepare a test, never perform the

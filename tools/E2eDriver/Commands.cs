@@ -32,6 +32,7 @@ namespace E2eDriver
                 case "canvas.show": CanvasShow(request); return null;
                 case "setup.call": return State.Result(State.Call(a), a);
                 case "seed": return Seeding.Seed(a);
+                case "count": return Counting.Start(a);
                 case null: throw new DriverError("the request has no cmd");
                 default: throw new DriverError("unknown command " + request.Command);
             }
@@ -353,6 +354,45 @@ namespace E2eDriver
                 Seed = next++;
                 Consumed++;
             }
+        }
+    }
+
+    /// count: the calls of game methods from now on, through a Harmony prefix on each (README.md).
+    /// Added while the game runs, the prefix is what is tested: whether a patch applies to code
+    /// compiled before it (ARCHITECTURE D34).
+    public static class Counting
+    {
+        static readonly Dictionary<System.Reflection.MethodBase, int> slots = new Dictionary<System.Reflection.MethodBase, int>();
+        static readonly Dictionary<string, int> names = new Dictionary<string, int>();
+        static int[] calls = new int[0];
+
+        public static JToken Start(JObject a)
+        {
+            var methods = a["methods"] as JArray ?? throw new DriverError("count needs methods");
+            var before = new JObject();
+            foreach (var token in methods)
+            {
+                var name = (string)token;
+                if (!names.TryGetValue(name, out int slot))
+                {
+                    var method = HarmonyLib.AccessTools.Method(name) ?? throw new DriverError("no method " + name);
+                    slot = calls.Length;
+                    Array.Resize(ref calls, slot + 1);
+                    slots[method] = slot;
+                    names[name] = slot;
+                    Mod.Harmony.Patch(method, prefix: new HarmonyLib.HarmonyMethod(typeof(Counting), nameof(Prefix)));
+                }
+                before[name] = System.Threading.Interlocked.Exchange(ref calls[slot], 0);
+            }
+            return before;
+        }
+
+        /// The calls of a method named in a count, since that count.
+        public static int Of(string name) => names.TryGetValue(name, out int slot) ? System.Threading.Volatile.Read(ref calls[slot]) : throw new DriverError("not counted: " + name);
+
+        static void Prefix(System.Reflection.MethodBase __originalMethod)
+        {
+            if (slots.TryGetValue(__originalMethod, out int slot)) System.Threading.Interlocked.Increment(ref calls[slot]);
         }
     }
 }

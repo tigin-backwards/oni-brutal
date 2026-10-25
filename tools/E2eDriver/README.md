@@ -422,6 +422,25 @@ mixing in the clock. Specs then mask such values, or assert relations between th
 << {"ok":true,"result":{"unity":42,"util":true,"krandom":true,"consumedBefore":0}}
 ```
 
+### count `{methods}`
+
+Counts the calls of game methods from now on, through a Harmony prefix on each, added the
+first time the method is named. `methods` names each as `Type:Method` (Harmony's
+`AccessTools.Method` form, `+` for a nested type), the first overload by that name. Each
+`count` restarts every count it names. The counts are static state:
+`type:E2eDriver.Counting::Of("Brain:UpdateBrain")` reads one, so `expect_state` can relate them,
+as `late-patch.yaml` relates a method's calls to its caller's.
+
+A prefix added while the game runs is the test itself: whether a patch applies to code that
+was compiled before it (ARCHITECTURE D34).
+
+- **Result:** `{"Type:Method": 0, …}`, the counts before the restart.
+
+```
+>> {"cmd":"count","args":{"methods":["Brain:UpdateBrain"]}}
+<< {"ok":true,"result":{"Brain:UpdateBrain":0}}
+```
+
 ## Errors
 
 | error | when |

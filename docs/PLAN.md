@@ -499,6 +499,44 @@ unchanged.
   Verified with ONI_TWEAK_VERIFY (the game's TryAdd run on copies, both lists compared): U57,
   4,410 paths over six rebuilds, and 2minnow, 588, none different.
 
+- `fast-overlay-textures`: MultipleRenderTargetProxy.CreateRenderTarget, run on every coloured
+  overlay toggle (temperature, germs, and the temperature legend's filters) and resize, makes new
+  copies of the main camera's targets for the liquid pass and drops the old ones undestroyed. In
+  Unity, and in ours alike (an object outside the scenes lives until Resources.UnloadUnusedAssets,
+  which the game calls only around a load), they stay allocated: U57 at 1024×768, paused, 100
+  temperature openings took the live render textures from 45 to 846 and those allocated on the
+  device from 74 MB to about 1.9 GB (50 germ openings: +250, +0.9 GB); the original Linux player
+  the same, 44 → 445 and 59 → 963 MB over 50 openings (its resident memory stays flat: the
+  textures live in video memory under WSL's d3d12). The tweak releases and destroys the copies
+  the method displaced two frames later, once the re-recorded command buffer has run, unless the
+  proxy, a shader global, a camera or RenderTexture.active still holds one; with it 300 toggles
+  leave 47 live render textures and 79 MB. Verified with ONI_TWEAK_VERIFY (every material's
+  textures and every component's texture fields searched at each release): U57, 529 textures released over 75 openings, none still referenced.
+
+  The same mechanism elsewhere (2026-10-25): the decompiled game read for objects made again and
+  dropped undestroyed, and U57 run with `ONI_OBJECT_CENSUS`/`ONI_OBJECT_SITES` through the
+  overlay sweep twice, ten management screens opened and closed four times, and 30,000 frames at
+  speed 3. After each thing's first use (lazily made batch groups, tile meshes, a screen's
+  widgets) the counts stay flat: the second overlay pass added 46 textures and 36 meshes, the
+  later screen rounds 16 meshes and 24 materials, normal play about 75 meshes every 1,200 frames, from
+  GroundRenderer's element meshes (one set per chunk and element ever seen there, kept and
+  reused: bounded, and not dropped). Read but not seen piling up:
+
+  | Site | Trigger | Left per trigger | Status |
+  |---|---|---|---|
+  | MultipleRenderTargetProxy.CreateRenderTarget | coloured overlay opened or closed, temperature filter, resize | 8 render textures, 4 allocated, about 18 MB at 1024×768 | fixed (`fast-overlay-textures`) |
+  | Diggable, Moppable, MovePickupableChore: `Renderer.material` tints | each dig, mop or move marker | one material instance (no device memory) | recorded: too small to show in the census |
+  | RangeVisualizerEffect, LargeImpactorVisualizerEffect.OnPostRender | a range of another size shown | one Alpha8 range texture (KB) | recorded |
+  | VideoScreen.PlayVideo, VideoWidget.SetClip | each video played, each codex video | a clip-sized render texture (5.5 MB at 1280×720) | recorded (not exercised) |
+  | RetireColonyUtility previews, Slideshow.SetFiles | load screen and retired colonies browsed | a preview texture and sprite each | recorded (not exercised) |
+  | LineLayer.InitAreaTexture | each report graph made | a 96×32 texture | recorded |
+
+  The rest of the game's run-time textures, meshes and materials are destroyed when replaced
+  (RenderTextureDestroyer, OnResize handlers) or made once per load (PropertyTextures,
+  SubworldZoneRenderData, freed by the load's UnloadUnusedAssets). Of 605 decompiled Workshop
+  mods none makes render textures on a repeated path (one-shot image savers; Rotate Everything's
+  LightBuffer patch destroys through the game's destroyer).
+
 Measured and not kept: the loading side of fast-serialization (a U57 load produced the same
 colony, 3 bytes of time of day apart, in 31.3 s against 31.6), an exact early-out for
 sublimation and a canvas build cache (docs/research/u57-frame-inventory.md).

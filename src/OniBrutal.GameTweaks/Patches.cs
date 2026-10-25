@@ -23,6 +23,7 @@ namespace OniBrutal.GameTweaks
                 case FastAnimBatches.Name: FastAnimBatches.Install(harmony); return true;
                 case FastOverlays.Name: FastOverlays.Install(harmony); return true;
                 case FastConveyorPaths.Name: FastConveyorPaths.Install(harmony); return true;
+                case FastOverlayTextures.Name: FastOverlayTextures.Install(harmony); return true;
                 default: return false;
             }
         }

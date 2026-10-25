@@ -61,6 +61,21 @@ A batch of mods, one agent per worktree, follows [Batch workflow](#batch-workflo
   (the perf job's pid, how long it has run and its command; the lanes' or players' holders),
   again when that changes and every 10 minutes. `--max-wait MINUTES` (or `E2E_MAX_WAIT`) fails
   the run after that long, with what it was waiting for as its reason.
+- **Hangs.** Each player has a watchdog. Its log growing, or any OniMcp or E2eDriver reply, is
+  progress. With none for `E2E_HANG_MIN` minutes (default 5) the player counts as hung:
+  `scripts/hang-dump.sh` saves diagnostics to the run folder's `hang/`, then the player is
+  killed and the run fails with `the player hung (…); diagnostics in …/hang: <the main thread's
+  state>`. The same diagnostics are taken before the player stops when a step fails after a
+  minute without progress (an OniMcp request times out at 120 s). The folder holds every
+  managed thread's stack (`managed-stacks.txt`, from `dotnet-stack report`), with `HANG_DUMP=1`
+  or when that fails a mini dump read by `dotnet-dump analyze` (`dump-stacks.txt`), gdb's
+  native stacks if gdb is installed, per-thread state, CPU and kernel wait channel
+  (`threads.txt`, `top.txt`: a busy loop or a wait), `/proc/PID/status` and the log's tail.
+  The tools are .NET global tools (`dotnet tool install -g dotnet-stack dotnet-dump`), and the
+  original player gets only the non-.NET parts. A held player (`--hold`) is never hung.
+  `ONI_TEST_HANG=FRAME[:spin|wait]` makes our player's main thread spin, or block forever,
+  after that frame (`src/OniBrutal.Host/TestHang.cs`), to try the watchdog. `scripts/qa.sh`'s
+  U57 runs have the same watchdog, keyed to PerfProbe's PERF lines (`QA_HANG_MIN`).
 - **Paused time.** The fixture loads paused. Time passes only in `run` steps. Take all UI evidence
   before the first `run`, or right after an expectation that pins the state.
 - **Output.** Each invocation has a run id (its start time and a random part, or `--run-id`), so

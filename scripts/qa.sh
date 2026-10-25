@@ -17,6 +17,12 @@
 # out/local-tools/qa.env sets QA_U57_GAME (a game folder with the DLC content), QA_U57_STEAM (a
 # Steam double owning the DLC) and QA_U57_SAVE; without it those stages are skipped, and say so.
 # It can also export the machine's GL settings for Xvfb (e.g. GALLIUM_DRIVER), which every run uses.
+# A U57 run that logs no PERF line (PerfProbe's, every 600 frames) for QA_HANG_MIN minutes (default
+# 5; the slowest legitimate gaps are about 140 s of load before the first and 110 s between two in
+# the overlay sweep) is hung: scripts/hang-dump.sh takes the managed stacks of every thread,
+# per-thread CPU and wait states and the log's tail into STAGE/hang, the player is killed and the
+# stage fails, naming that folder. ONI_TEST_HANG=FRAME[:spin|wait] (src/OniBrutal.Host/TestHang.cs)
+# hangs a player on purpose, to try it.
 # --bless stores this run's captures, signatures and frame rate as the references
 # (out/qa/reference), once they have been looked at; --bless-from=RUN stores a past run's.
 set -uo pipefail
@@ -253,8 +259,12 @@ u57_run()
     ONI_GAME_DIR="$QA_U57_GAME" ONI_RUN_HOME="$home" ONI_CONFIG=release timeout 3600 xvfb-run -a -s "-screen 0 1280x1024x24" \
         "$root/scripts/run.sh" --native-override "steam_api=$QA_U57_STEAM" -screen-width 1024 -screen-height 768 -screen-fullscreen 0 \
         --frames "$frames" --input 400:click:948,75 --input 900:click:153,192 --game-tweak all --log "$out/log.txt" "$@" > "$out/stdout.txt" 2>&1 &
-    local pid=$! peak=0 rss p
+    local pid=$! peak=0 rss p perfs=0 n progress=$SECONDS hang=$(( ${QA_HANG_MIN:-5} * 60 ))
     while kill -0 $pid 2>/dev/null; do
+        # The hang watchdog: a PERF line at least every QA_HANG_MIN minutes, the load before the
+        # first one included (see the header).
+        n=$(grep -ac '\] PERF f' "$out/stdout.txt" 2>/dev/null); n=${n:-0}
+        [ "$n" -gt "$perfs" ] && { perfs=$n; progress=$SECONDS; }
         for p in $(pgrep -x OniMoono); do
             grep -qa "$home" /proc/$p/environ 2>/dev/null || continue
             rss=$(awk '/VmRSS/ {print $2}' /proc/$p/status 2>/dev/null); rss=${rss:-0}
@@ -262,6 +272,11 @@ u57_run()
             echo "$(date +%s) $rss" >> "$out/rss.txt"
             # A runaway run is stopped before it takes the machine down.
             [ "$rss" -gt $((24 * 1024 * 1024)) ] && kill -KILL $p
+            if [ $((SECONDS - progress)) -ge $hang ] && [ ! -d "$out/hang" ]; then
+                echo "$(date '+%F %T') hang watchdog: no PERF line for ${QA_HANG_MIN:-5} min (after $perfs); diagnostics, then kill" >> "$out/stdout.txt"
+                "$root/scripts/hang-dump.sh" "$p" "$out/hang" "$out/stdout.txt" > /dev/null 2>&1
+                kill -KILL "$p"
+            fi
         done
         sleep 5
     done
@@ -274,7 +289,10 @@ u57_run()
 u57_check()
 {
     local stage=$1 out=$2 status; status=$(cat "$out/exit")
-    [ "$status" = 0 ] || fail "$stage: the player exited $status"
+    if [ -d "$out/hang" ]; then
+        fail "$stage: the player hung (no PERF line for ${QA_HANG_MIN:-5} min) and was killed; diagnostics in $out/hang"
+        sed 's/^/       /' "$out/hang/summary.txt" | tee -a "$run/summary.txt"
+    elif [ "$status" != 0 ]; then fail "$stage: the player exited $status"; fi
     python3 "$tools" signatures "$out/stdout.txt" > "$out/signatures.txt"
     if [ $bless -eq 1 ]; then
         [ "$status" = 0 ] || return # a failed run is not a reference
@@ -295,6 +313,7 @@ stage_verify()
     U57_SCREENS="consumables vitals jobs" U57_OVERLAYS="Oxygen Power Temperature Temperature:HeatFlow Temperature:StateChange TileMode Light Decor Disease Crop HarvestWhenReady Rooms LiquidConduit GasConduit SolidConveyor Logic Suit Radiation Priorities ThermalConductivity None" \
     ONI_TWEAK_VERIFY=1 ONI_VERIFY_CANVAS_SKIPS=1 ONI_VERIFY_COMPONENT_LAYOUTS=1 ONI_VERIFY_TEXEL_COPIES=1 ONI_VERIFY_PARTIAL_UPLOADS=1 ONI_VERIFY_PARALLEL_DRAWS=1 u57_run "$out" 10500
     u57_check verify "$out"
+    [ -d "$out/hang" ] && return # a hung run has nothing more to check
     local report; report=$(python3 "$tools" verify "$out/stdout.txt"); local status=$?
     echo "$report" | sed 's/^/     /' | tee -a "$run/summary.txt"
     [ $status -eq 0 ] || fail "verify: a verify mode reported mismatches"
@@ -331,6 +350,7 @@ stage_perf()
     u57_run "$out" 4800
     quiet_end
     u57_check perf "$out"
+    [ -d "$out/hang" ] && return # a hung run has nothing more to check
     local peak; peak=$(cat "$out/peak-rss")
     if [ "$peak" -lt $((16 * 1024 * 1024)) ]; then ok "perf: peak memory $((peak / 1024)) MB"; else fail "perf: peak memory $((peak / 1024)) MB (16 GB limit)"; fi
     read -r fps span windows <<< "$(python3 "$tools" perf "$out/stdout.txt")"

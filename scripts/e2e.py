@@ -893,6 +893,7 @@ class Mcp:
     def __init__(self, port):
         self.port, self.url = port, f'http://127.0.0.1:{port}/mcp/'
         self.session = None
+        self.on_reply = None  # a player's Watchdog.progress
 
     def post(self, body):
         headers = {'Content-Type': 'application/json', 'Accept': 'application/json, text/event-stream'}
@@ -902,6 +903,8 @@ class Mcp:
         with urllib.request.urlopen(request, timeout=120) as response:
             self.session = response.headers.get('Mcp-Session-Id') or self.session
             raw = response.read().decode()
+        if self.on_reply:
+            self.on_reply()
         if raw.startswith('event:') or raw.startswith('data:') or '\ndata:' in raw:
             data = [line[5:].strip() for line in raw.splitlines() if line.startswith('data:')]
             raw = data[-1] if data else '{}'
@@ -996,6 +999,7 @@ class Driver:
         self.next_id = 0
         self.frame = None  # the game frame of the last reply
         self.lock = threading.Lock()
+        self.on_reply = None  # a player's Watchdog.progress
 
     def connect(self, deadline=60, alive=lambda: True):
         end = time.time() + deadline
@@ -1037,6 +1041,8 @@ class Driver:
             except (OSError, ValueError) as e:
                 raise DriverError(f'E2eDriver {cmd}: {e}')
         self.frame = reply.get('frame', self.frame)
+        if self.on_reply:
+            self.on_reply()
         if not reply.get('ok'):
             raise DriverError(f'E2eDriver {cmd} {json.dumps(args)[:300]}: {reply.get("error")}', reply.get('result'))
         return reply.get('result')
@@ -1486,6 +1492,77 @@ def translation_prefs(mod, language=None):
     return f"strings:\n  SelectedLanguageType: UGC\n  InstalledLanguage: '{mod}'\n"
 
 
+PLAYER_NAMES = ('OniMoono', 'OxygenNotInclud')  # /proc comm: ours, the original (15 characters)
+
+
+class Watchdog(threading.Thread):
+    """A player's hang watchdog: progress is its log growing or an OniMcp or E2eDriver reply.
+    None for E2E_HANG_MIN minutes (default 5; a held player is never hung) is a hang:
+    scripts/hang-dump.sh takes its threads' stacks and states into the run's hang folder, and the
+    player is killed, so the waits the spec is in end. A step failing while the player has not
+    progressed for HANG_ON_FAIL seconds (an OniMcp request timing out at 120 s) takes the same
+    diagnostics before the player is stopped."""
+
+    HANG_ON_FAIL = 60
+
+    def __init__(self, player, minutes=None, clock=time.time, dump=None):
+        super().__init__(daemon=True)
+        self.player, self.clock = player, clock
+        self.limit = 60 * float(minutes if minutes is not None else os.environ.get('E2E_HANG_MIN', 5))
+        self.last, self.size, self.paused = clock(), None, False
+        self.hung = None  # what was found, once diagnostics were taken
+        self.lock = threading.Lock()
+        self.dump = dump or self.hang_dump
+        self.stopping = threading.Event()
+
+    def progress(self, *_):
+        self.last = self.clock()
+
+    def stalled(self):
+        """Seconds since the last progress (the log is looked at first)."""
+        try:
+            size = os.path.getsize(self.player.log)
+        except OSError:
+            size = -1
+        if (self.size is not None and size != self.size) or self.paused:
+            self.progress()
+        self.size = size
+        return self.clock() - self.last
+
+    def check(self):
+        """One look: True when the player is hung (diagnostics taken, the player killed)."""
+        if self.hung or not self.player.alive():
+            return bool(self.hung)
+        stalled = self.stalled()
+        if stalled < self.limit:
+            return False
+        self.capture(f'no log output or OniMcp/E2eDriver reply for {stalled / 60:.0f} min')
+        self.player.kill()
+        return True
+
+    def run(self):
+        while not self.stopping.wait(10) and not self.check():
+            pass
+
+    def stop(self):
+        self.stopping.set()
+
+    def capture(self, reason):
+        with self.lock:
+            if self.hung:
+                return self.hung
+            folder = os.path.join(self.player.out, 'hang')
+            pid = self.player.game_pid()
+            summary = self.dump(pid, folder) if pid else 'no player process found'
+            self.hung = f'the player hung ({reason}); diagnostics in {folder}: {summary}'
+            return self.hung
+
+    def hang_dump(self, pid, folder):
+        result = subprocess.run([os.path.join(ROOT, 'scripts', 'hang-dump.sh'), str(pid), folder, self.player.log],
+                                capture_output=True, text=True)
+        return (result.stdout.splitlines() or ['hang-dump.sh printed nothing'])[0]
+
+
 class Player:
     """One player process on its own display, with a scratch profile holding OniMcp, E2eDriver,
     the spec's mods and options, and a fixture."""
@@ -1500,6 +1577,7 @@ class Player:
         self.fixture = fixture and os.path.join(self.save_dir, os.path.basename(fixture))
         self.display = self.xauthority = None
         self.process = self.xvfb = None
+        self.watchdog = Watchdog(self)
         shutil.rmtree(out, ignore_errors=True)
         os.makedirs(os.path.join(self.profile, 'mods', 'Local'))
         os.makedirs(self.save_dir)
@@ -1614,6 +1692,7 @@ class Player:
                 self.find_display()
         with open(os.path.join(self.out, 'lane.json'), 'w') as f:
             json.dump(self.lane_record(), f)
+        self.watchdog.start()
         deadline = time.time() + 900
         while not port_open(self.lane.mcp_port):
             if self.process.poll() is not None:
@@ -1659,6 +1738,21 @@ class Player:
     def alive(self):
         return self.process is not None and self.process.poll() is None
 
+    def game_pid(self):
+        """The game process under the launch's wrappers (contain.sh, xvfb-run)."""
+        if not self.process:
+            return None
+        for p in [self.process.pid, *descendants(self.process.pid)]:
+            with contextlib.suppress(OSError):
+                with open(f'/proc/{p}/comm') as f:
+                    if f.read().strip() in PLAYER_NAMES:
+                        return p
+        return None
+
+    def kill(self):
+        with contextlib.suppress(OSError):
+            os.killpg(self.process.pid, signal.SIGKILL)
+
     def load(self, mcp):
         mcp.connect()
         if not self.fixture:
@@ -1681,6 +1775,7 @@ class Player:
         mcp.call('game_control', domain='speed', action='pause', confirm=True)
 
     def stop(self):
+        self.watchdog.stop()
         # The player outlives xvfb-run when its X server goes first: every descendant is known
         # before anything is signalled, and whatever survives SIGTERM gets SIGKILL.
         family = [p for process in (self.process, self.xvfb) if process for p in descendants(process.pid)]
@@ -2620,6 +2715,7 @@ class Run:
             self.player = Player(self.kind, self.out, self.env, fixture, self.lane, spec['mods'], spec.get('options'),
                                  driver=uses_driver, expansion1=spaced_out(spec), translation=spec.get('translation'),
                                  language=spec.get('language'))
+            self.mcp.on_reply = self.player.watchdog.progress
             records = open(os.path.join(self.out, 'results.jsonl'), 'w')
             started = time.time()
             self.player.start()
@@ -2629,6 +2725,7 @@ class Run:
             self.log(f'  loaded {spec["from"]} in {time.time() - started:.0f} s')
             if uses_driver:
                 self.driver = Driver(self.lane.driver_port).connect(120, self.player.alive)
+                self.driver.on_reply = self.player.watchdog.progress
                 self.dismiss_load_dialogs()
             steps = [('setup', i, s) for i, s in enumerate(spec['setup'], 1)] + \
                     [('steps', i, s) for i, s in enumerate(spec['steps'], 1)]
@@ -2653,8 +2750,13 @@ class Run:
                 raise SpecFailure(f'E2eDriver logged {len(errors)} error(s): {errors[0][:300]}')
         except (SpecFailure, urllib.error.URLError, ConnectionError, TimeoutError, OSError) as e:
             outcome = f'step {label}: {e}'
-            with contextlib.suppress(Exception):
-                screenshot(self.mcp, self.out, 'failure')
+            watchdog = self.player and self.player.watchdog
+            if watchdog and self.player.alive() and watchdog.stalled() >= watchdog.HANG_ON_FAIL:
+                watchdog.capture(f'no log output or OniMcp/E2eDriver reply for {watchdog.stalled():.0f} s '
+                                 'when the step failed')
+            if not (watchdog and watchdog.hung):  # a hung player takes no screenshot
+                with contextlib.suppress(Exception):
+                    screenshot(self.mcp, self.out, 'failure')
         finally:
             if self.hold and self.player and self.player.alive() and (self.hold == 'end' or outcome):
                 self.held()
@@ -2667,6 +2769,9 @@ class Run:
                 self.player.stop()
             if records:
                 records.close()
+        if self.player and self.player.watchdog.hung:
+            outcome = self.player.watchdog.hung + (f'; {outcome}' if outcome else '')
+            self.log(f'  {self.player.watchdog.hung}')
         if os.path.isdir(self.out):
             with open(os.path.join(self.out, 'values.json'), 'w') as f:
                 json.dump(self.values, f, indent=1, default=str)
@@ -2692,6 +2797,7 @@ class Run:
                  f'{self.player.display}; rm {flag} to go on')
         if self.driver:
             self.driver.close()  # others may connect meanwhile; reconnected below
+        self.player.watchdog.paused = True  # a held player waits for a person, not hung
         end = time.time() + self.HOLD_SECONDS
         wanted_since = None
         while os.path.exists(flag) and self.player.alive() and time.time() < end:

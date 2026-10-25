@@ -1,6 +1,6 @@
 # Performance
 
-How fast oni-brutal runs against the original game, why, and what's still in the way. Three
+How fast Moono runs against the original game, why, and what's still in the way. Three
 colonies stress it differently, so each has its own case study:
 - **U57**, late game, held back by the game's own logic (this document);
 - **2minnow**, mid game, where more of the frame is drawing
@@ -35,7 +35,7 @@ also ran about half as fast. The case studies' deep dives that still come from L
 **U57**, a Spaced Out colony with every DLC at cycle 17,077: 24 Duplicants, 1,186 critters, about
 62,000 buildings and 90,000 animated objects.
 
-| | Original | oni-brutal | |
+| | Original | Moono | |
 |---|---|---|---|
 | Frame rate, no tweaks | about 11.4&nbsp;fps (11.3–11.5) | about 48&nbsp;fps (47.8–48.0) | about 4.2× |
 | Frame rate, `exact` tweaks (the default) | | about 78&nbsp;fps (76–83) | about 6.9× |
@@ -47,7 +47,7 @@ also ran about half as fast. The case studies' deep dives that still come from L
 
 **2minnow**, a Spaced Out colony with every DLC at cycle 1,990, with 50 Duplicants.
 
-| | Original | oni-brutal | |
+| | Original | Moono | |
 |---|---|---|---|
 | Frame rate, no tweaks | about 26&nbsp;fps (25.2–26.3) | about 75&nbsp;fps (74.4–75.6) | about 2.9× |
 | Frame rate, `exact` tweaks (the default) | | about 91&nbsp;fps (89.7–92) | about 3.5× |
@@ -166,7 +166,7 @@ reads thousands of scattered objects, and none takes more than a couple of milli
 
 ## The tweaks
 
-Players turn them on and off on the main menu's Brutal Tweaks screen; those whose results stay
+Players turn them on and off on the main menu's Moono Tweaks screen; those whose results stay
 exactly the same are on by default (`--game-tweak exact`), and `--game-tweak NAME` names them on
 the command line. The last column says whether the game's results stay exactly the same; those
 that don't are left out of `--game-tweak exact`. The before and

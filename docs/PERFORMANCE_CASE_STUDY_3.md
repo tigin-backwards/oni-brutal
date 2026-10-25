@@ -27,7 +27,7 @@ forever. That cost about 8.5 ms a frame, the largest single item in the frame, a
 pays it too.
 
 Two ways around it were measured:
-- **A cleaned copy of the save**, with those objects destroyed (written by oni-brutal; it loads
+- **A cleaned copy of the save**, with those objects destroyed (written by Moono; it loads
   in the original too). This is the colony as it would be without the chute, and the numbers
   below use it unless they say otherwise.
 - **The `off-world-fallers` tweak** (opt-in, **changes gameplay**): an item that falls straight
@@ -45,7 +45,7 @@ reachability checks slower. Only removing them recovers that.
 
 On the cleaned save:
 
-| | Original | oni-brutal | |
+| | Original | Moono | |
 |---|---|---|---|
 | Frame rate, no tweaks | about 9.7&nbsp;fps (8.9–10.0) | about 26&nbsp;fps (21.4–27.6) | about 2.7× |
 | Frame rate, `exact` tweaks (the default) | | about 30&nbsp;fps (27.0–32.6) | about 3.1× |
@@ -56,7 +56,7 @@ On the cleaned save:
 
 On the original save, with the stuck objects:
 
-| | Original | oni-brutal | |
+| | Original | Moono | |
 |---|---|---|---|
 | Frame rate, `exact` tweaks | about 6.1&nbsp;fps (5.9–6.2) | about 18.6&nbsp;fps (16.5–19.3) | about 3× |
 | Frame rate, every tweak (with `off-world-fallers`) | | about 25&nbsp;fps (24.4–26.0) | about 4.1× |

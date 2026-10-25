@@ -38,7 +38,7 @@ only), so it is out of scope until Linux is at parity.
 ## 2. Process and assembly structure
 
 ```
-OniBrutal.Host (exe)                      entry point; ALC setup; main loop; CLI flags
+OniBrutal.Host (exe OniMoono)             entry point; ALC setup; main loop; CLI flags
  ├─ UnityEngine.*Module.dll  (generated)  type-forwarding facades, one per Unity module name
  │     └──forwards to──┐
  ├─ OniBrutal.UnityEngine.dll             THE engine API: every public UnityEngine.* / UnityEngine.*.*
@@ -810,7 +810,7 @@ player: with vSync the swap paces frames; otherwise `Application.targetFrameRate
 otherwise none. Without a display (`--headless`, `--batchmode`) frames are paced at
 `targetFrameRate` or 60 Hz.
 
-**Loading splash (`--splash moo`, on by default; `--splash none` or Brutal Tweaks turns it off).** The player's own presentation, not the
+**Loading splash (`--splash moo`, on by default; `--splash none` or Moono Tweaks turns it off).** The player's own presentation, not the
 game's: the presenter thread draws Gassy Moo comets (the game's `meteor_gassymoo` kanim, its
 `fall_loop`, read from `sharedassets0.assets` on a worker thread at start-up) over whatever the
 window last showed, redrawing about 60 times a second while no game frame comes, so the window
@@ -999,15 +999,15 @@ path and quits. Ours waits for the player to exit and starts it again with the a
 started with (recorded by the host in `ONI_BRUTAL_RESTART_ARGS`, shell-quoted, and
 `ONI_BRUTAL_RESTART_ARGV`, JSON, with `ONI_BRUTAL_RESTART_PID`).
 
-**Player options (Brutal Tweaks).** The game tweaks (`GameTweakNames`), the loading splash and
+**Player options (Moono Tweaks).** The game tweaks (`GameTweakNames`), the loading splash and
 frame stats come from three places, later ones winning: built-in defaults (every tweak but
 `ChangingBehaviour`'s, as `--game-tweak exact`; no splash; no frame stats), the settings file
-`<persistentDataPath>/oni-brutal/settings.json` (`PlayerSettings`: only the choices that differ
+`<persistentDataPath>/oni-moono/settings.json` (`PlayerSettings`: only the choices that differ
 from the defaults, so a default changed by an update reaches everyone who has not chosen
 otherwise; a run home has its own), and the command line (`EffectiveOptions`). A command line
 with any `--game-tweak` value sets the whole set of tweaks for the run (`exact`, `all`, `none`,
 names, `-NAME`), `--splash moo|none` the splash, `--frame-stats` the frame stats. The start of the
-log names the file and each option with where it came from. The main menu's **Brutal Tweaks**
+log names the file and each option with where it came from. The main menu's **Moono Tweaks**
 button, directly below Mods, opens a screen (`src/OniBrutal.GameTweaks/BrutalTweaksMenu.cs`) made
 of the game's own UI: the Mods screen's prefab instantiated inactive, its `ModsScreen` swapped for
 `BrutalTweaksScreen` before it wakes, and the menu's button prefab and style for the button. It

@@ -1,6 +1,6 @@
 # Gluttony frame inventory (2026-10-22)
 
-What Gluttony's frame is made of, system by system, why oni-brutal gains about 3× on it where
+What Gluttony's frame is made of, system by system, why Moono gains about 3× on it where
 U57 gains 7×, and what could still be made faster. Gluttony: Spaced Out, cycle 15,304, 1160×194
 cluster; the cleaned save (the 17,552 objects stuck falling below two rocket interiors
 destroyed, see [PERFORMANCE_CASE_STUDY_3.md](../PERFORMANCE_CASE_STUDY_3.md)), every tweak.

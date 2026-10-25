@@ -12,7 +12,7 @@ native Windows, 1280×720, speed 3, the median of back-to-back runs with nothing
 
 ## The numbers
 
-| | Original | oni-brutal | |
+| | Original | Moono | |
 |---|---|---|---|
 | Frame rate, no tweaks | about 26&nbsp;fps (25.2–26.3) | about 75&nbsp;fps (74.4–75.6) | about 2.9× |
 | Frame rate, `exact` tweaks (the default) | | about 91&nbsp;fps (89.7–92) | about 3.5× |

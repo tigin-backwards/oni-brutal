@@ -1,6 +1,6 @@
 # A Metal backend: design and scoping
 
-**Scope.** How oni-brutal would render on macOS through Metal, building on the macOS study
+**Scope.** How Moono would render on macOS through Metal, building on the macOS study
 (`docs/research/macos-feasibility.md`, "the study" below; §-references without a document name
 point there). OpenGL on the Mac (GL 4.1) is not a target and is not designed for here (study
 §2.4). This document has two halves:
@@ -124,7 +124,7 @@ that already have them (§6).
 
 ### 2.4 Native interface
 
-`OniBrutal --game <dir or .app> --check-natives` reads every P/Invoke of the assemblies the host
+`OniMoono --game <dir or .app> --check-natives` reads every P/Invoke of the assemblies the host
 runs with (its own, the UI packages, and those of `Managed/` the policy would load), resolves each
 library as the host does for the install's layout, and reads the exports of the plugin file
 without loading it. It reads the slice of `--native-arch` (x86_64 or arm64) and lists the

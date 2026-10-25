@@ -1,7 +1,11 @@
-# oni-brutal
+# Moono
 
-A super fast, super sussy replacement for the Unity layer of Oxygen Not Included, artisanally
-crafted by Claude.
+**Oxygen Not Included on its own engine: no Unity runtime, no Mono, just faster. Most mods still
+work.**
+
+An unofficial, super fast, super sussy replacement for the Unity layer of Oxygen Not Included,
+artisanally crafted by Claude. The name is the game's Gassy Moo plus Mono, and "no Mono": it
+reimplements Unity's runtime on .NET, so the game runs without Mono.
 
 I did this mostly for fun, to see how far Oxygen Not Included's performance can go on a modern
 .NET runtime (CoreCLR). I've had the idea for a while, but none of the existing C# renderers
@@ -19,11 +23,11 @@ setup script hooks it into the game's Steam launch options, so you still start t
 Steam as usual.
 
 1. Download the latest release from the
-   [releases page](https://github.com/tigin-backwards/oni-brutal/releases/latest):
-   `oni-brutal-…-windows-x64.zip` or `oni-brutal-…-linux-x64.tar.gz`, and extract it anywhere.
+   [releases page](https://github.com/tigin-backwards/oni-moono/releases/latest):
+   `oni-moono-…-windows-x64.zip` or `oni-moono-…-linux-x64.tar.gz`, and extract it anywhere.
    (Or clone this repository; the setup then builds the player itself, installing the .NET SDK
    for your user if you don't have it.)
-2. Run the setup script in the extracted `oni-brutal` folder:
+2. Run the setup script in the extracted `oni-moono` folder:
    - Windows: double-click `setup.cmd` (it runs `setup.ps1` and keeps the window open)
    - Linux: `./setup.sh`
 
@@ -31,10 +35,15 @@ Steam as usual.
    launch options, and puts it on your clipboard where it can.
 3. In Steam, right-click Oxygen Not Included → Properties → Launch Options, and paste that line.
 
-Then press Play in Steam as usual. The optional tweaks (below) are chosen in the game: **Brutal
+Then press Play in Steam as usual. The optional tweaks (below) are chosen in the game: **Moono
 Tweaks** on the main menu, under Mods. To update, get the new version and run the setup again; the
 launch options stay the same, and so do your tweak choices. To go back to the original game, clear
 the launch options.
+
+Coming from a release from before the Moono name (oni-brutal)? Its launch options start the old
+player (`OniBrutal`), so run the new setup once and paste the new line it prints (the player is
+now `OniMoono`, installed in an `oni-moono` folder). Your tweak choices carry over; the old
+`oni-brutal` folder can be deleted afterwards.
 
 On Linux, Steam installed as a Flatpak or a snap runs games in a sandbox that can't see most of
 your home folder; the setup notices and installs the player inside the sandbox's own folder.
@@ -50,7 +59,7 @@ top of that there are optimizations tuned to the way Oxygen Not Included uses th
 
 On a late-game save (U57: Spaced Out with every DLC, cycle 17,000+), on Windows, on the same machine, back to back:
 
-| | Original | oni-brutal | |
+| | Original | Moono | |
 |---|---|---|---|
 | Frame rate at speed&nbsp;3 (default tweaks) | about 11&nbsp;fps | about 78&nbsp;fps | about 7× |
 | Frame rate at speed&nbsp;3 (every tweak) | about 11&nbsp;fps | about 84&nbsp;fps | about 7.4× |
@@ -83,10 +92,10 @@ These change how some of the game's own code does its work. Most give exactly th
 faster, and are on unless you turn them off. The three marked **changes gameplay** trade a little
 exactness for speed, and are off unless you turn them on.
 
-Choose them on the main menu: **Brutal Tweaks**, under Mods, lists every tweak with an on/off
+Choose them on the main menu: **Moono Tweaks**, under Mods, lists every tweak with an on/off
 switch and a line on what it does (plus the Gassy Moo loading splash, on by default, and frame stats in the log).
 Changes apply when the game restarts, which the screen does for you. Your choices are kept in
-`oni-brutal/settings.json` in the game's own data folder (usually
+`oni-moono/settings.json` in the game's own data folder (usually
 `~/.config/unity3d/Klei/Oxygen Not Included` on Linux,
 `%USERPROFILE%\AppData\LocalLow\Klei\Oxygen Not Included` on Windows), which updates never touch.
 
@@ -186,7 +195,8 @@ of `~`. With Flatpak Steam, `~/.config/` becomes `~/.var/app/com.valvesoftware.S
 All rights reserved.
 
 Built on [BRUTAL](https://github.com/ahwootech/BRUTAL), Copyright (c) 2024 Ahwoo Limited.
-Oxygen Not Included is © Klei Entertainment; this project isn't affiliated with Klei or Unity.
+Oxygen Not Included is © Klei Entertainment. Moono is unofficial, and not affiliated with or
+endorsed by Klei Entertainment, Unity Technologies, or the Mono project.
 
 ## Unsigned releases
 

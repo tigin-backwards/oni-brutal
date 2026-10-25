@@ -1,6 +1,6 @@
 # Development
 
-How to build, run and test oni-brutal from source. If you just want to play, the
+How to build, run and test Moono from source. If you just want to play, the
 [README](../README.md) is all you need.
 
 ## Requirements
@@ -45,33 +45,33 @@ Unity's `-screen-width`, `-screen-height` and `-window-mode` work too. `scripts/
 lists everything.
 
 These runs have no game tweaks unless they name some (`--game-tweak exact`, …): the scripts pass
-`--game-tweak none` first, so neither the player's defaults nor a Brutal Tweaks settings file in
+`--game-tweak none` first, so neither the player's defaults nor a Moono Tweaks settings file in
 the run home changes what a test measures. `ONI_TWEAK_SETTINGS=1` leaves that out, to try the
-main menu's Brutal Tweaks screen as a player has it.
+main menu's Moono Tweaks screen as a player has it.
 
 The offline stub says you own the base game, with no DLC and no Workshop items. It's for testing
 on machines without Steam, not for playing.
 
 To play through Steam like a player does, run `./setup.sh`. It builds a self-contained player
-into `out/player` and prints the launch options line (`OniBrutal -- %command%`).
+into `out/player` and prints the launch options line (`OniMoono -- %command%`).
 
 ## Releases
 
 ```sh
 scripts/release.sh                     # out/release: the Windows zip and the Linux tar.gz
-gh release create vYYYY.MM.DD out/release/oni-brutal-*.zip out/release/oni-brutal-*.tar.gz \
+gh release create vYYYY.MM.DD out/release/oni-moono-*.zip out/release/oni-moono-*.tar.gz \
   --title "YYYY.MM.DD" --notes "..."
 ```
 
 The build compiles against the game's assemblies, so it runs where the game is installed (not in
-CI). Each archive holds an `oni-brutal` folder with the setup script, the README, `NOTICE.txt`
+CI). Each archive holds an `oni-moono` folder with the setup script, the README, `NOTICE.txt`
 and the self-contained player in `player/`; the setups install a release's player without
 building. Nothing of the game goes into them.
 
 ## Windows
 
 ```sh
-scripts/build-windows.sh       # out/win: OniBrutal.exe, Restarter.exe and the Steam stub
+scripts/build-windows.sh       # out/win: OniMoono.exe, Restarter.exe and the Steam stub
 scripts/run-windows.sh         # from WSL: a test run on the Windows install
 ```
 

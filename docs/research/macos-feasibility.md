@@ -1,6 +1,6 @@
 # macOS support: feasibility and what it would take
 
-**Scope.** Can oni-brutal (our .NET 10 player with its own OpenGL 4.5 renderer) run Oxygen Not
+**Scope.** Can Moono (our .NET 10 player with its own OpenGL 4.5 renderer) run Oxygen Not
 Included on macOS, and what would a port cost? This is research, not implementation. The
 document answers six questions:
 
@@ -897,9 +897,9 @@ two builds' assemblies (§1.6). The host's `--check-natives` (`--game` a game fo
 checks the P/Invokes against an install's plugins:
 
 ```
-OniBrutal --game OxygenNotIncluded.app --check-natives --native-arch x86_64
-OniBrutal --game OxygenNotIncluded.app --check-natives --native-arch arm64 --native-dir out/publish/osx-arm64
-OniBrutal --game OxygenNotIncluded.app --check-natives --native-arch arm64 --native-override SimDLL=libSimDLL-arm64-simthread.dylib
+OniMoono --game OxygenNotIncluded.app --check-natives --native-arch x86_64
+OniMoono --game OxygenNotIncluded.app --check-natives --native-arch arm64 --native-dir out/publish/osx-arm64
+OniMoono --game OxygenNotIncluded.app --check-natives --native-arch arm64 --native-override SimDLL=libSimDLL-arm64-simthread.dylib
 ```
 
 `--native-arch` picks the Mach-O slice. `--native-dir` names a publish folder: its BRUTAL dylibs

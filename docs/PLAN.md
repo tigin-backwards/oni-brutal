@@ -339,7 +339,7 @@ install.
 Game tweaks are changes to Klei's own code (Harmony patches in `src/OniBrutal.Host/GameTweaks`
 and `src/OniBrutal.GameTweaks`). The engine reproduces Unity; these change how the game does
 something, mostly without changing what it produces. Players choose them on the main menu's
-Brutal Tweaks screen (ARCHITECTURE §6, "Player options"): by default every tweak but those that
+Moono Tweaks screen (ARCHITECTURE §6, "Player options"): by default every tweak but those that
 change behaviour (`--game-tweak exact`); `--game-tweak NAME|-NAME|all|exact|none` on the command
 line sets them for a run, and test runs pass `none` first (`scripts/run.sh`). Measured on U57:
 - `fast-save-compression`: saves compressed and decompressed with .NET's zlib instead of

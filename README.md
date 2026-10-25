@@ -4,8 +4,6 @@ An unofficial, super fast, super sussy replacement for the Unity layer of Oxygen
 artisanally crafted by Claude. On a late-game colony the game runs at about 8× the original's
 frame rate ([Performance](#performance)).
 
-![Gassy Moos raining over the Klei logo while the game loads](docs/images/moo-splash.gif)
-
 I did this mostly for fun, to see how far Oxygen Not Included's performance can go on a modern
 .NET runtime (CoreCLR). I've had the idea for a while, but none of the existing C# renderers
 sparked joy. When [BRUTAL](https://github.com/ahwootech/BRUTAL) went open source, it seemed like

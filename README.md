@@ -4,6 +4,8 @@ An unofficial, super fast, super sussy replacement for the Unity layer of Oxygen
 artisanally crafted by Claude. On a late-game colony the game runs at about 7× the original's
 frame rate ([Performance](#performance)).
 
+![Gassy Moos raining over the Klei logo while the game loads](docs/images/moo-splash.gif)
+
 I did this mostly for fun, to see how far Oxygen Not Included's performance can go on a modern
 .NET runtime (CoreCLR). I've had the idea for a while, but none of the existing C# renderers
 sparked joy. When [BRUTAL](https://github.com/ahwootech/BRUTAL) went open source, it seemed like
@@ -32,6 +34,8 @@ Steam as usual.
    It finds your Oxygen Not Included install through Steam, and prints one line for the game's
    launch options, and puts it on your clipboard where it can.
 3. In Steam, right-click Oxygen Not Included → Properties → Launch Options, and paste that line.
+
+   ![Steam's Properties dialog with the Launch Options box](docs/images/steam-launch-options.png)
 
 Then press Play in Steam as usual. The optional tweaks (below) are chosen in the game: **Moono
 Tweaks** on the main menu, under Mods. To update, get the new version and run the setup again; the
@@ -89,6 +93,10 @@ For a more detailed breakdown, see [docs/PERFORMANCE.md](docs/PERFORMANCE.md).
 Moono also speeds up some of the game's own code. Most tweaks don't change gameplay and are on by
 default; three do, and are off. Toggle them in **Moono Tweaks** on the main menu. Full list:
 [docs/TWEAKS.md](docs/TWEAKS.md).
+
+![The main menu with the Moono Tweaks button under Mods](docs/images/main-menu.png)
+
+![The Moono Tweaks screen, a list of tweaks with checkboxes](docs/images/moono-tweaks.png)
 
 ## Save compatibility
 

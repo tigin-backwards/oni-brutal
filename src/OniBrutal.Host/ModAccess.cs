@@ -29,7 +29,10 @@ namespace OniBrutal.Host
     /// references. Every other mod assembly loads as before.
     internal static class ModAccess
     {
-        static readonly string[] gameAssemblies = ["Assembly-CSharp", "Assembly-CSharp-firstpass"];
+        /// The game's assemblies whose non-public members mods use: its code, and the Harmony it
+        /// ships (mods built against a publicized 0Harmony read its private fields, as the
+        /// Multiplayer Mod's loader reads PatchClassProcessor.containerAttributes).
+        static readonly string[] gameAssemblies = ["Assembly-CSharp", "Assembly-CSharp-firstpass", "0Harmony"];
 
         /// Rewritten mod assemblies and the files they were read from.
         static readonly ConcurrentDictionary<Assembly, string> locations = new();

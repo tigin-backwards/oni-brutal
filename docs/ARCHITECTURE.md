@@ -193,8 +193,9 @@ past the boot checkpoint needs a Steam client logged in with an account that own
   MethodAccessException when such a method is compiled. **Resolved by a patch** (`ModAccess`):
   the host replaces the `Assembly.LoadFrom` call in `KMod.DLLLoader.LoadDLLs`, and a mod
   assembly that names a game member or type its code could not reach (private, internal) is
-  given CoreCLR's `IgnoresAccessChecksTo` attribute for `Assembly-CSharp` and
-  `Assembly-CSharp-firstpass` (Mono.Cecil) and loaded from memory, its symbols with it. The
+  given CoreCLR's `IgnoresAccessChecksTo` attribute for `Assembly-CSharp`,
+  `Assembly-CSharp-firstpass` and the game's `0Harmony` (Mono.Cecil; the Multiplayer Mod reads
+  Harmony's private fields) and loaded from memory, its symbols with it. The
   game's own assemblies are not changed (making their members public instead would change what
   KSerialization saves: its default opt-out mode saves every public field and property). The mod
   still sees itself as loaded from its file: `Assembly.Location` reports the file (mods find

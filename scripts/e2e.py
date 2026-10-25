@@ -140,7 +140,9 @@ def ws_mods():
 # ---------------------------------------------------------------- specs
 
 TOP_KEYS = {'name', 'from', 'mods', 'options', 'setup', 'steps', 'require_log', 'mask_text', 'tolerance',
-            'thresholds', 'ignore_fields', 'memory_gb', 'spaced_out', 'translation'}
+            'thresholds', 'ignore_fields', 'memory_gb', 'spaced_out', 'translation', 'language'}
+# The game's own translations (`language`), as Localization.PreinstalledLanguages names them.
+PREINSTALLED_LANGUAGES = ('zh_klei', 'ko_klei', 'ru_klei')
 # `from: main-menu` loads no fixture: the steps start at the main menu (a new game's spec).
 MAIN_MENU = 'main-menu'
 # Steps that talk to E2eDriver (a spec with any of them needs it installed).
@@ -287,6 +289,10 @@ def check_spec(spec):
         problems.append('`mods` is a list of Workshop IDs')
     elif 'translation' in spec and str(spec['translation']) not in [str(m) for m in mods]:
         problems.append('`translation` names one of `mods`')
+    if 'language' in spec and spec['language'] not in PREINSTALLED_LANGUAGES:
+        problems.append(f"`language` is one of the game's own: {', '.join(PREINSTALLED_LANGUAGES)}")
+    elif 'language' in spec and 'translation' in spec:
+        problems.append('`language` and `translation` both pick the language')
     options = spec.get('options', {})
     if not isinstance(options, dict) or not all(isinstance(v, dict) for v in options.values()):
         problems.append('`options` maps a static ID to {Field: value}')
@@ -1466,11 +1472,15 @@ def translation_only(folder):
     return not any(f.lower().endswith('.dll') for _, _, files in os.walk(folder) for f in files)
 
 
-def translation_prefs(mod):
-    """kplayerprefs.yaml's strings: none, or the language a translation mod installs (`translation`).
-    The Translations screen saves these two when a player picks a mod's language, and
-    Localization.Initialize loads that mod's strings.po at the next start, whatever the mod's
-    distribution platform (its label id, the Workshop ID of a Local mod)."""
+def translation_prefs(mod, language=None):
+    """kplayerprefs.yaml's strings: none, the language a translation mod installs (`translation`),
+    or one of the game's own (`language`). The Translations screen saves these two when a player
+    picks a mod's language, and Localization.Initialize loads that mod's strings.po at the next
+    start, whatever the mod's distribution platform (its label id, the Workshop ID of a Local
+    mod); for one of the game's own it saves the type Preinstalled and the language's code, and
+    the game loads StreamingAssets/strings/strings_preinstalled_CODE.po."""
+    if language is not None:
+        return f"strings:\n  SelectedLanguageType: Preinstalled\n  SelectedLanguageCode: {language}\n"
     if mod is None:
         return 'strings: {}\n'
     return f"strings:\n  SelectedLanguageType: UGC\n  InstalledLanguage: '{mod}'\n"
@@ -1481,7 +1491,7 @@ class Player:
     the spec's mods and options, and a fixture."""
 
     def __init__(self, kind, out, env, fixture, lane, mods=(), options=None, driver=False, expansion1=True,
-                 translation=None):
+                 translation=None, language=None):
         self.kind, self.out, self.env, self.lane = kind, out, env, lane
         self.home = os.path.join(out, 'home')
         self.profile = os.path.join(self.home, *PROFILE)
@@ -1504,7 +1514,7 @@ class Player:
                        'GlobalAutoDisinfectDisabled': False, 'AutoDismissTutorialNotifications': False,
                        'ToolTextFormat': 'json'}, f)
         with open(os.path.join(self.profile, 'kplayerprefs.yaml'), 'w') as f:
-            f.write(translation_prefs(translation) + f'ints:\n  ResolutionWidth: {WIDTH}\n  ResolutionHeight: {HEIGHT}\n'
+            f.write(translation_prefs(translation, language) + f'ints:\n  ResolutionWidth: {WIDTH}\n  ResolutionHeight: {HEIGHT}\n'
                     '  RefreshRateNumerator: 60\n  RefreshRateDenominator: 1\n  FullScreen: 0\n'
                     # DlcManager reads Spaced Out as on unless this says 0.
                     + ('' if expansion1 else '  EXPANSION1_ID.ENABLED: 0\n') + 'floats: {}\n')
@@ -2608,7 +2618,8 @@ class Run:
             if fixture and not os.path.exists(fixture):
                 raise SpecFailure(f'no fixture {fixture}')
             self.player = Player(self.kind, self.out, self.env, fixture, self.lane, spec['mods'], spec.get('options'),
-                                 driver=uses_driver, expansion1=spaced_out(spec), translation=spec.get('translation'))
+                                 driver=uses_driver, expansion1=spaced_out(spec), translation=spec.get('translation'),
+                                 language=spec.get('language'))
             records = open(os.path.join(self.out, 'results.jsonl'), 'w')
             started = time.time()
             self.player.start()

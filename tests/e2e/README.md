@@ -97,6 +97,7 @@ memory_gb: 11                    # the players' budget counts each player for th
 spaced_out: false                # Spaced Out off in both players (default: the fixture's mode, from its
                                  # header's dlcIds; on for `from: main-menu`)
 translation: 929139073           # the language of this translation mod (one of `mods`), picked in the prefs
+language: zh_klei                # or one of the game's own languages (zh_klei, ko_klei, ru_klei)
 setup: [...]                     # steps run first; the only place for driver setup.call
 steps: [...]
 ```
@@ -117,9 +118,12 @@ screen (any installed mod with a `.po` is listed, Local ones too), which saves t
 restarts the game. `translation: ID` writes those prefs into the run's `kplayerprefs.yaml`
 (`SelectedLanguageType: UGC`, `InstalledLanguage: 'ID'`), so the game starts in that language;
 [`translation-screen.yaml`](translation-screen.yaml) drives the screen itself up to its restart
-dialog. The translations' specs (`mods/929139073-german-translation.yaml` and the others) check a
-colony's research and priorities screens and pause menu, then the main menu, the options menu
-and its Game options screen.
+dialog. `language: CODE` picks one of the game's own translations instead
+(`SelectedLanguageType: Preinstalled`, `SelectedLanguageCode: CODE`), as its Translations screen
+does, for mods that change the game's own strings. The translations' specs
+(`mods/929139073-german-translation.yaml` and the others) check a colony's research and
+priorities screens and pause menu, then the main menu, the options menu and its Game options
+screen.
 
 ## Steps
 

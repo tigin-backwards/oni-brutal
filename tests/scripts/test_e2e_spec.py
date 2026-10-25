@@ -374,13 +374,13 @@ class Translation(unittest.TestCase):
         def mono_hash(text):
             return 7
 
-    def player(self, root, translation):
+    def player(self, root, translation, language=None):
         onimcp = os.path.join(root, 'onimcp')
         os.makedirs(onimcp, exist_ok=True)
         old, e2e.ws_mods = e2e.ws_mods, lambda: self.FakeWs
         try:
             player = e2e.Player('ours', os.path.join(root, 'run'), {'E2E_ONIMCP': onimcp}, None, e2e.Lane(3, None),
-                                ['929139073', '1863428350'], translation=translation)
+                                ['929139073', '1863428350'], translation=translation, language=language)
         finally:
             e2e.ws_mods = old
         with open(os.path.join(player.profile, 'mods', 'mods.json')) as f:
@@ -402,6 +402,19 @@ class Translation(unittest.TestCase):
             self.assertEqual(prefs['strings'], {})
             # Still disabled: a player picks it on the Translations screen.
             self.assertEqual(mods, [('929139073', False, []), ('1863428350', True, ['', 'EXPANSION1_ID'])])
+
+    def test_a_language_of_the_game_in_the_prefs(self):
+        with tempfile.TemporaryDirectory() as root:
+            _, prefs = self.player(root, None, 'zh_klei')
+            self.assertEqual(prefs['strings'], {'SelectedLanguageType': 'Preinstalled', 'SelectedLanguageCode': 'zh_klei'})
+
+    def test_language_is_one_of_the_games_own(self):
+        self.assertEqual(e2e.check_spec({'from': 'main-menu', 'mods': [], 'language': 'zh_klei', 'steps': []}), [])
+        self.assertTrue(any('`language` is one of' in p for p in
+                            e2e.check_spec({'from': 'main-menu', 'mods': [], 'language': 'de', 'steps': []})))
+        self.assertIn('`language` and `translation` both pick the language',
+                      e2e.check_spec({'from': 'main-menu', 'mods': [929139073], 'translation': 929139073,
+                                      'language': 'zh_klei', 'steps': []}))
 
     def test_translation_names_one_of_the_mods(self):
         self.assertIn('`translation` names one of `mods`',

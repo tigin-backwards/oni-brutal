@@ -67,6 +67,7 @@ namespace UnityEngine
             native.Managed = this;
             m_Native = native;
             Volatile.Write(ref m_CachedPtr, ObjectTable.Register(native));
+            if (ObjectCensus.Sites) ObjectCensus.Created(native);
         }
 
         /// Detaches from the native record: from now on this object compares equal to null.

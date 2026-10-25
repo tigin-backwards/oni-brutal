@@ -47,6 +47,7 @@ namespace OniBrutal.Engine
         {
             Threads.SetMainThread();
             started = true;
+            ObjectCensus.Install();
         }
 
         /// Diagnostics (`--frame-stats`): average phase times logged every 60 frames.

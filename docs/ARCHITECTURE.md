@@ -1086,6 +1086,11 @@ path, material, texture, colour and group alpha; `--dump-hierarchy FRAME:PATH` l
 active flags, rects and components; `--dump-component FRAME:PATH|TYPE` logs a component's serialized fields;
 `--report-builtin-assets FILE` writes the objects a run loaded
 from Unity's built-in resource files (docs/LICENSING.md); `--check-*` run the corpus gates.
+`ONI_OBJECT_CENSUS=N[:MARK]` logs every N frames the live render textures (how many, how many
+allocated on the device, their estimated bytes), textures, meshes, materials and sprites, each
+against the census at frame MARK; with `ONI_OBJECT_SITES=1` it also lists the creation sites
+(the game or mod methods) holding most of the objects made since then: what piles up until
+Resources.UnloadUnusedAssets (ObjectCensus).
 
 CPU profiles: `perf record -e cpu-clock:u -g` (user-mode sampling needs no privileges at the
 default `perf_event_paranoid` 2) with `DOTNET_PerfMapEnabled=1`; the runtime maps JIT code twice

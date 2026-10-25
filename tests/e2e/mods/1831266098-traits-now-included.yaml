@@ -1,0 +1,46 @@
+# Traits Now Included (1831266098), class O (a worldgen mod, no code; the base game).
+#
+# What it does: replaces the base game's Terra (worldgen/worlds/SandstoneDefault.yaml) with a
+# copy whose world traits are on (disableWorldTraits: false, so the default rule of two to
+# four random traits applies) and without the subworld mixing rules of the game's own file.
+# How a player reaches it: the main menu with Spaced Out off, New Game, Survival, Classic,
+# Terra: its asteroid list shows the rolled traits, and the world generates with them.
+# What changes: a base-game Terra has world traits.
+#
+# From the main menu, Spaced Out off: New Game, Survival, Classic; Terra at a fixed
+# coordinate, launched and embarked. Functional expectations (mod-play-testing.md, "Worldgen
+# mods"): the asteroid list shows the traits (dumped), the world has two to four, as many as
+# in the original.
+from: main-menu
+spaced_out: false
+mods: [1831266098]
+steps:
+  - ui_wait: {path: "**/MainMenu/**/MainMenuButtons", cond: stable, frames: 3000}
+  - click: {text: "NEW GAME", under: "**/MainMenuButtons"}
+  - ui_wait: {path: "**/ModeSelectScreen/Panel/Content/RootToggles/StandardGame", cond: stable}
+  - click: {ui: "**/ModeSelectScreen/Panel/Content/RootToggles/StandardGame"}
+  - ui_wait: {path: "**/ClusterCategorySelectionScreen/Panel/Content/RootToggles/VanillaStyleGame", cond: stable}
+  - click: {ui: "**/ClusterCategorySelectionScreen/Panel/Content/RootToggles/VanillaStyleGame"}
+  - ui_wait: {path: "**/ColonyDestinationScreen2/Layout/Buttons/LaunchButton", cond: stable, frames: 3000}
+  - expect_state:
+      "ProcGen.SettingsCache.worlds.GetWorldData(\"worlds/SandstoneDefault\").disableWorldTraits": false
+  - click: {ui: "**/CoordinateContainer/SeedInput"}
+  - ui_wait: {path: "**/CoordinateContainer/SeedInput", cond: stable}
+  - type: {ui: "**/CoordinateContainer/SeedInput", text: "SNDST-A-12345-0-0-0", clear: true, enter: true}
+  - ui_wait: {path: "**/CoordinateContainer/SeedInput/Text Area/Text", cond: text, value: "~SNDST-A-12345-0-0-0"}
+  - expect_state:
+      "CustomGameSettings.Instance.GetCurrentQualitySetting(\"ClusterLayout\").id": clusters/SandstoneDefault
+  - ui_dump: {name: asteroids, root: "**/Section - Destination/World Scoll (Rect Size Set By Screen Code!)/Content/Details"}
+  - click: {ui: "**/ColonyDestinationScreen2/Layout/Buttons/LaunchButton"}
+  - ui_wait: {path: "**/MinionSelectScreen/Content/BottomContent/Buttons/ProceedButton", cond: stable, frames: 60000}
+  - click: {ui: "**/MinionSelectScreen/Content/BottomContent/Buttons/ProceedButton"}
+  - ui_wait: {path: "**/MinionSelectScreen", cond: gone, frames: 6000}
+  - expect_state:
+      "DlcManager.IsExpansion1Active()": false
+      "ClusterManager.Instance.GetStartWorld().worldName": worlds/SandstoneDefault
+      "Components.LiveMinionIdentities.Count": 3
+      "ClusterManager.Instance.GetStartWorld().WorldTraitIds.Count": ">= 2"
+  - expect_state:
+      "ClusterManager.Instance.GetStartWorld().WorldTraitIds.Count": "<= 4"
+  - expect_state:
+      "ClusterManager.Instance.GetStartWorld().WorldTraitIds.Count": "== original"

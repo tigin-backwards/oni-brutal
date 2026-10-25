@@ -1,0 +1,61 @@
+{
+ "spec": "mods/1831266098-traits-now-included.yaml",
+ "mods": [
+  "1831266098"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the base game's main menu, New Game, Survival, Classic, Terra at a fixed coordinate: the mod's Terra takes world traits, its asteroid list shows them (dumped, as in the original), and the generated world has as many (two to four) as the original's",
+ "updated": "2026-10-24",
+ "commit": "4eab9eb",
+ "mod_dlls": {
+  "1831266098": {}
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-222305-34404834",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T22:33:30",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-223430-0df7daf1",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T22:36:37",
+    "lane": 16,
+    "reference_run": "20261024-222305-34404834",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "asteroids": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261024-223430-0df7daf1",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T22:36:41",
+    "lane": 17,
+    "reference_run": "20261024-222305-34404834",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "asteroids": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

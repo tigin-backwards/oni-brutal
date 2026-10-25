@@ -654,7 +654,122 @@ namespace OniBrutal.Engine.UI
             if (hiddenTop && depth.IgnoringGroups == ignoringBefore) go.CanvasHiddenAt = version;
         }
 
+        // ----- Clipping out of sight -----
+        //
+        // A RectMask2D clips and culls its graphics every frame, closed screens' too: the game
+        // keeps its closed screens active, hidden by a CanvasGroup, and a table screen once
+        // opened holds a mask per row (2minnow, after Consumables, Vitals and Priorities: about
+        // 5 ms a frame on Linux). Under a hidden subtree that stops raycasts nothing it clips
+        // can be drawn or hit, so the mask skips its pass there and does a full one when it next
+        // runs: its graphics' clip rects and culling are then set from their state at that
+        // time, as the passes skipped would have left them (each is the clip and the graphic's
+        // place then, whatever came before).
+
+        /// Whether nothing at or below the object can be drawn or hit by a raycast: it is under
+        /// the top of a subtree that the last build found hidden by CanvasGroups that stop
+        /// raycasts, with no group in it that ignores its parents, nothing in it changed since
+        /// (the walk's own skip), and still hidden so; and no canvas that sorts on its own lies
+        /// between them (a graphic's raycast stops looking up at one, so the groups above it
+        /// would not stop the raycast).
+        internal static bool OutOfSight(GameObject gameObject)
+        {
+            if (!clipOutOfSight || gameObject == null || gameObject.Native is not GameObjectNative go) return false;
+            for (var t = go.Transform; t != null; t = t.Parent)
+            {
+                var o = t.GameObject;
+                if (o.CanvasHiddenAt >= 0 && o.CanvasHiddenAt == o.SubtreeVersion) return HiddenTop(o);
+                if (AnyCanvasOn(o) is { OverrideSorting: true }) return false;
+            }
+            return false;
+        }
+
+        /// A marked top still hidden: its CanvasGroups' alpha is 0 (as the build inherits it, across
+        /// canvases), and a raycast from below it meets a group that stops raycasts (as a
+        /// graphic's raycast looks up: groups up to one that ignores its parents, stopping at a
+        /// canvas that sorts on its own).
+        static bool HiddenTop(GameObjectNative top) => InheritedGroups(top).Alpha <= 0f && !Reachable(top);
+
+        static long unreachablePass, unreachableTouches = -1;
+
+        /// OutOfSight for the graphics a GraphicRaycaster tests, each answer kept for the others
+        /// below the same object while the hierarchy is unchanged. A graphic out of sight would
+        /// fail its own raycast (Graphic.Raycast: a group that stops raycasts above it), so the
+        /// raycaster leaves it out before its rect test; only its raycast filters, which decide
+        /// nothing once a group has, are not asked.
+        internal static bool Unreachable(GameObject gameObject)
+        {
+            if (!raycastOutOfSight || gameObject == null || gameObject.Native is not GameObjectNative go) return false;
+            if (unreachableTouches != Hierarchy.Touches)
+            {
+                unreachableTouches = Hierarchy.Touches;
+                unreachablePass++;
+            }
+            return Unreachable(go, unreachablePass);
+        }
+
+        static bool Unreachable(GameObjectNative o, long pass)
+        {
+            if (o.UnreachablePass == pass) return o.Unreachable;
+            bool answer;
+            if (o.CanvasHiddenAt >= 0 && o.CanvasHiddenAt == o.SubtreeVersion) answer = HiddenTop(o);
+            else if (AnyCanvasOn(o) is { OverrideSorting: true }) answer = false;
+            else answer = o.Transform.Parent is { } parent && Unreachable(parent.GameObject, pass);
+            o.UnreachablePass = pass;
+            o.Unreachable = answer;
+            return answer;
+        }
+
+        /// A new raycast: answers kept from an earlier one are not used (group states can change
+        /// without a hierarchy change only through Touch, but a frame apart they are read again).
+        internal static void BeginRaycast() => unreachableTouches = -1;
+
+        static long raycastSkipsVerified, raycastSkipsWrong;
+
+        /// ONI_VERIFY_CANVAS_SKIPS: a graphic the raycaster left out was tested as before, and it
+        /// must not have been hit.
+        internal static void VerifyUnreachable(GameObject gameObject, bool hit)
+        {
+            if (hit) EngineLog.Engine($"canvas skip wrong ({++raycastSkipsWrong}): {gameObject.name}, left out of a raycast, was hit");
+            if (++raycastSkipsVerified % 100000 == 0) EngineLog.Engine($"canvas skips: {raycastSkipsVerified} graphics left out of raycasts, {raycastSkipsWrong} wrong");
+        }
+
+        /// ONI_CLIP_OUT_OF_SIGHT=0 turns the skip off (for measuring).
+        static readonly bool clipOutOfSight = Environment.GetEnvironmentVariable("ONI_CLIP_OUT_OF_SIGHT") != "0";
+        /// ONI_RAYCAST_OUT_OF_SIGHT=0 turns the raycasts' skip off (for measuring).
+        static readonly bool raycastOutOfSight = Environment.GetEnvironmentVariable("ONI_RAYCAST_OUT_OF_SIGHT") != "0";
+        static long clipSkipsVerified, clipSkipsWrong;
+
+        /// ONI_VERIFY_CANVAS_SKIPS: a graphic whose mask skipped its pass is neither drawn (its
+        /// CanvasGroups' alpha is 0) nor reachable by a raycast (looking up from it as its
+        /// raycast filters do, a group that stops raycasts comes before any canvas that sorts on
+        /// its own and any group that ignores its parents).
+        internal static void VerifyOutOfSight(GameObject gameObject)
+        {
+            if (gameObject == null || gameObject.Native is not GameObjectNative go) return;
+            if (InheritedGroups(go).Alpha > 0f || Reachable(go))
+                EngineLog.Engine($"canvas skip wrong ({++clipSkipsWrong}): {go.Name}, clipped out of sight, can be drawn or hit");
+            if (++clipSkipsVerified % 100000 == 0) EngineLog.Engine($"canvas skips: {clipSkipsVerified} graphics skipped by masks, {clipSkipsWrong} wrong");
+        }
+
+        static bool Reachable(GameObjectNative go)
+        {
+            bool groupsIgnored = false;
+            for (var t = go.Transform; t != null; t = t.Parent)
+            {
+                var parts = PartsOf(t.GameObject);
+                foreach (var g in parts.Groups)
+                {
+                    if (!g.IsActiveAndEnabledState || groupsIgnored) continue;
+                    if (!g.BlocksRaycasts) return false;
+                    if (g.IgnoreParentGroups) groupsIgnored = true;
+                }
+                if (AnyCanvasOn(t.GameObject) is { OverrideSorting: true }) return true;
+            }
+            return true;
+        }
+
         static readonly bool verifySkips = Environment.GetEnvironmentVariable("ONI_VERIFY_CANVAS_SKIPS") == "1";
+        internal static bool VerifyingSkips => verifySkips;
         /// ONI_CANVAS_STATS=1: the build's time and the objects it walks, a frame, every 600 frames.
         static readonly bool stats = Environment.GetEnvironmentVariable("ONI_CANVAS_STATS") == "1";
         static int statsFrames;

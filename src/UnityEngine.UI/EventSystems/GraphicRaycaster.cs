@@ -152,13 +152,26 @@ namespace UnityEngine.UI
         /// that accept it, by depth from the front.
         static void CollectHits(Camera camera, Vector2 point, IList<Graphic> graphics, List<Graphic> results)
         {
+            // Graphics under a closed screen (hidden by a CanvasGroup that stops raycasts) would
+            // fail their own raycast: they are left out before the rect test
+            // (OniBrutal.Engine.UI.CanvasSystem.Unreachable). Test runs test them all and check.
+            OniBrutal.Engine.UI.CanvasSystem.BeginRaycast();
+            bool verify = OniBrutal.Engine.UI.CanvasSystem.VerifyingSkips;
             for (int i = 0; i < graphics.Count; i++)
             {
                 var g = graphics[i];
                 if (!g.raycastTarget || g.canvasRenderer.cull || g.depth == -1) continue;
-                if (!RectTransformUtility.RectangleContainsScreenPoint(g.rectTransform, point, camera, g.raycastPadding)) continue;
-                if (camera != null && camera.WorldToScreenPoint(g.rectTransform.position).z > camera.farClipPlane) continue;
-                if (g.Raycast(point, camera)) results.Add(g);
+                bool unreachable = OniBrutal.Engine.UI.CanvasSystem.Unreachable(g.gameObject);
+                if (unreachable && !verify) continue;
+                bool hit = RectTransformUtility.RectangleContainsScreenPoint(g.rectTransform, point, camera, g.raycastPadding)
+                    && (camera == null || !(camera.WorldToScreenPoint(g.rectTransform.position).z > camera.farClipPlane))
+                    && g.Raycast(point, camera);
+                if (unreachable)
+                {
+                    OniBrutal.Engine.UI.CanvasSystem.VerifyUnreachable(g.gameObject, hit);
+                    continue;
+                }
+                if (hit) results.Add(g);
             }
             results.Sort((a, b) => b.depth.CompareTo(a.depth));
         }

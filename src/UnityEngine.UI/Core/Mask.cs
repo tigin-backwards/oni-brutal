@@ -220,6 +220,20 @@ namespace UnityEngine.UI
         public virtual void PerformClipping()
         {
             if (ReferenceEquals(RootCanvas, null)) return;
+            // Under a closed screen (hidden by a CanvasGroup that stops raycasts) nothing it clips
+            // can be drawn or hit: the pass waits, and the next one sets every graphic's clip and
+            // culling from their state then (OniBrutal.Engine.UI.CanvasSystem.OutOfSight).
+            if (OniBrutal.Engine.UI.CanvasSystem.OutOfSight(gameObject))
+            {
+                forceClip = true;
+                forceSoftness = true;
+                if (OniBrutal.Engine.UI.CanvasSystem.VerifyingSkips)
+                {
+                    foreach (var m in maskableTargets) OniBrutal.Engine.UI.CanvasSystem.VerifyOutOfSight(m.gameObject);
+                    foreach (var c in clipTargets) OniBrutal.Engine.UI.CanvasSystem.VerifyOutOfSight(c.gameObject);
+                }
+                return;
+            }
             if (clippersStale)
             {
                 MaskUtilities.GetRectMasksForClip(this, clippers);

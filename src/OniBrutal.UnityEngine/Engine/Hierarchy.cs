@@ -14,8 +14,12 @@ namespace OniBrutal.Engine
         /// a subtree hidden through its CanvasGroups when nothing in it changed since its last walk.
         public static void Touch(TransformNative t)
         {
+            Touches++;
             for (; t != null; t = t.Parent) t.GameObject.SubtreeVersion++;
         }
+
+        /// Touch calls so far: answers kept from the hierarchy stand while it is unchanged.
+        public static long Touches;
 
         public static void RemoveChild(TransformNative parent, TransformNative child)
         {

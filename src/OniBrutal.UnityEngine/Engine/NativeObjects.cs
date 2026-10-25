@@ -72,6 +72,9 @@ namespace OniBrutal.Engine
         /// subtree hidden by its CanvasGroups, finding no group that ignores its parents; -1 when
         /// not known to be so.
         public long CanvasHiddenAt = -1;
+        /// CanvasSystem.Unreachable's answer for this object, and the pass it was found in.
+        public long UnreachablePass;
+        public bool Unreachable;
     }
 
     internal class ComponentNative : NativeObject

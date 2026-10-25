@@ -79,6 +79,8 @@ The rest is the engine itself, profiled on U57 and fixed where the game leans on
 | Draw queues recorded on worker threads (helpers of the engine's own that sleep between queues), uploads and posting kept in order (`ONI_PARALLEL_DRAWS=0` turns it off) | 1.2 ms (Gluttony 1.8) |
 | Component lookups: instances of one prefab share a cached layout, so `GetComponent` goes straight to what it returns instead of testing about 30 components | 1.7 ms |
 | The UI walk skips screens hidden by their groups (the game keeps its closed screens active) | 1.3 ms |
+| Rect masks under closed screens skip their clipping until the screen opens (a table screen, once opened, keeps a mask per row that clipped every frame) | after Consumables, Vitals and Priorities have been opened and closed: 2minnow 6.3 ms, U57 3.1 ms → 0.3–0.4 ms |
+| The UI raycast leaves out the graphics under closed screens, which their own raycast would refuse (U57: about 3,700 a frame) | U57 2.0–2.3 → 0.6–0.9 ms, 2minnow 0.9–1.3 → 0.3–0.7 |
 | World rotation and scale cached (TextMeshPro reads them for every text, every frame) | 1.1 ms |
 | Script dispatch skips removal checks while nothing is being removed | 0.1–0.2 ms |
 
@@ -115,7 +117,7 @@ since.
 | Conveyor items moving | 1.1 | ~950 items | every item in transit moved along its rail, every frame | `off-screen-conveyors` (changes gameplay) |
 | Radbolt collisions | 0.9 | **4 radbolts** | each one gathers all 93,840 colliders around it and asks every one whether it's a radbolt | `fast-particle-collision`: 0.44 ms |
 | Ranch stations | 0.9 | stations × critters | type checks on every ranchable critter | real work |
-| UI input | 0.7 | | raycasts on mouse events | |
+| UI input | 0.7 | | raycasts on mouse events, mostly against closed screens' graphics | closed screens left out: U57 2.0–2.3 → 0.6–0.9 ms |
 | Moving colliders | 0.7 | | partitioner re-inserts | real work |
 
 "Real work" means the time goes to objects that really do need visiting, and nothing exact was

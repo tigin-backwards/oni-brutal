@@ -30,19 +30,35 @@ def canonical(signature):
     "A:B(x)" (Unity's) and "A:B (x)" (ours before 2026-10-24). Idempotent, so it also applies
     to signatures stored by an earlier version (references)."""
     message, _, frame = signature.partition(' @ ')
+    # A trace appended to the message on its own line ("Error:" + message + " " + StackTrace, as
+    # WorldGen logs it) starts with its first frame: that frame comes before the one read from
+    # the next line, unless it is the runtime's own. .NET leaves out a frame the JIT inlined (a
+    # Dictionary indexer's), which Mono's trace has.
+    inline = re.search(r'\s{2,}at (\S.*)$', message)
+    if inline:
+        message = message[:inline.start()]
+        first = clean_frame(inline.group(1))
+        if not RUNTIME_FRAME.search(first):
+            frame = first
     message = re.sub(r'\.$', '', message.replace("'", '"').rstrip())
     # A path into the run's own folder (out/e2e/SPEC/RUN_ID/PLAYER-N/home/...) names the run
     # id, which differs between the invocations that ran the original and ours.
     message = re.sub(r'/[^"\s]*/(?:original|ours)-N/home/', 'RUN/home/', message)
     if frame:
-        frame = re.sub(r'^at ', '', frame.strip())
-        # Mono's location: "[0x…] in <mvid>:0", or the source file with symbols (ours has the
-        # engine's).
-        frame = re.sub(r' (\[N\] in .*|in <[^>]*>(:N)?)$', '', frame)
-        frame = re.sub(r'\s*\(.*\)$', '', frame).replace(':', '.')
+        frame = clean_frame(frame)
         if RUNTIME_FRAME.search(frame):
             frame = ''
     return message + (' @ ' + frame if frame else '')
+
+def clean_frame(frame):
+    """A frame's method alone, as both runtimes name it."""
+    frame = re.sub(r'^at ', '', frame.strip())
+    # Mono's location: "[0x…] in <mvid>:0", or the source file with symbols (ours has the
+    # engine's).
+    frame = re.sub(r' (\[N\] in .*|in <[^>]*>(:N)?)$', '', frame)
+    frame = re.sub(r'\s*\(.*\)$', '', frame).replace(':', '.')
+    # Mono names a generic type's parameters ("Dictionary`2[TKey,TValue]"), .NET does not.
+    return re.sub(r"(`(?:N|\d+))\[[^\]]*\]", r"\1", frame)
 
 def unknown(signatures, reference):
     """The SIGNATURES not in REFERENCE once both are canonical. A reference entry with no frame

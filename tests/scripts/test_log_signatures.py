@@ -82,6 +82,28 @@ class LogSignatures(unittest.TestCase):
         self.assertEqual(ours, mono)
         self.assertEqual(qa_tools.unknown(ours, mono), [])
 
+    def test_trace_after_the_message_on_its_line(self):
+        # WorldGen logs "Error:" + message + " " + StackTrace (More Vents Rime World's missing
+        # element). Mono's trace starts in Dictionary's indexer; .NET inlined it and starts in the
+        # game's ComposableDictionary, the first frame past the runtime's in both.
+        mono = signatures("[02:19:28.045] [42] [ERROR] Error:The given key 'Katairite' was not present in the "
+                          "dictionary.   at System.Collections.Generic.Dictionary`2[TKey,TValue].get_Item (TKey key) "
+                          "[0x0001e] in <1a79>:0 \n"
+                          "  at ProcGen.ComposableDictionary`2[Key,Value].get_Item (Key key) [0x0000c] in <faab>:0 \n"
+                          "  at ProcGenGame.WorldGen.ProcessByTerrainCell (ProcGenGame.WorldgenSimData& simData) "
+                          "[0x00619] in <b4ac>:0 \n")
+        ours = signatures("[02:25:35.027] [78] [ERROR] Error:The given key 'Katairite' was not present in the "
+                          "dictionary.    at ProcGen.ComposableDictionary`2.get_Item(Key key)\n"
+                          "   at ProcGenGame.WorldGen.ProcessByTerrainCell(WorldgenSimData& simData)\n")
+        self.assertEqual(qa_tools.unknown(ours, mono), [])
+        self.assertEqual([qa_tools.canonical(s) for s in mono],
+                         ['Error:The given key "Katairite" was not present in the dictionary @ '
+                          'ProcGen.ComposableDictionary`N.get_Item'])
+        # A different first frame still tells them apart.
+        other = signatures("[02:25:35.027] [78] [ERROR] Error:The given key 'Katairite' was not present in the dictionary.    at "
+                           "ProcGen.Other.get_Item(Key key)\n")
+        self.assertEqual(len(qa_tools.unknown(other, mono)), 1)
+
     def test_trailing_period(self):
         self.assertEqual(qa_tools.canonical('NullReferenceException: Object reference not set to an instance of an object.'),
                          qa_tools.canonical('NullReferenceException: Object reference not set to an instance of an object'))

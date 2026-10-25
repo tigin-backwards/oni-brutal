@@ -62,6 +62,9 @@ On a late-game save (U57: Spaced Out with every DLC, cycle 17,000+), on Windows,
 | Frame rate at speed&nbsp;3 (every tweak) | about 11&nbsp;fps | about 84&nbsp;fps | about 7.4× |
 | Loading the save | 2&nbsp;min&nbsp;22&nbsp;s | about 35&nbsp;s | about 4× faster |
 | Autosave freeze | about 26&nbsp;s | about 2.3&nbsp;s | about 11× shorter |
+| Starting the game, to the main menu (every DLC)\* | about 25&nbsp;s | about 12&nbsp;s | about 2× faster |
+
+\* Start-up was measured on Linux, not Windows: see [docs/PERFORMANCE.md](docs/PERFORMANCE.md#start-up).
 
 Without the save tweaks the autosave freeze is about 8 s. They bring it down to about 2.3 s by
 writing the save faster and moving the compression and file write to a background thread.
@@ -80,49 +83,13 @@ measured while it was recorded.
 
 For a more detailed breakdown, see [docs/PERFORMANCE.md](docs/PERFORMANCE.md).
 
-### Optional tweaks
+### Tweaks
 
-These change how some of the game's own code does its work. Most give exactly the same results,
-faster, and are on unless you turn them off. The three marked **changes gameplay** trade a little
-exactness for speed, and are off unless you turn them on.
-
-Choose them on the main menu: **Moono Tweaks**, under Mods, lists every tweak with an on/off
-switch and a line on what it does (plus the Gassy Moo loading splash, on by default, and frame stats in the log).
-Changes apply when the game restarts, which the screen does for you. Your choices are kept in
-`oni-moono/settings.json` in the game's own data folder (usually
-`~/.config/unity3d/Klei/Oxygen Not Included` on Linux,
-`%USERPROFILE%\AppData\LocalLow\Klei\Oxygen Not Included` on Windows), which updates never touch.
-
-Launch options still work and win over the screen, which then shows those rows as set by the
-launch options: `--game-tweak exact` (every tweak but the three), `--game-tweak all`,
-`--game-tweak none`, or tweaks by name (`--game-tweak exact --game-tweak slow-reachability`;
-`--game-tweak -NAME` leaves one out); `--splash moo|none`; `--frame-stats`. Older setups put
-`--game-tweak exact` in the launch options; remove it (the setup prints the new line) to choose in
-the game instead.
-
-- `fast-jobs`: the game's worker threads stop waking and waiting on each other for tiny jobs.
-- `fast-anim-events`, `fast-anim-cleanup`, `fast-symbol-overrides`: cheaper animation
-  bookkeeping every frame.
-- `fast-offset-tables`: Duplicants' fetch updates skip items whose work spots haven't changed.
-- `fast-sublimation`: skips sublimating items that are already blocked by full gas cells.
-- `fast-particle-collision`: radbolts stop searching every stored item for other radbolts.
-- `fast-partitioner-cleanup`: the once-a-second cleanup of the game's spatial index looks only
-  at entries that were actually removed.
-- `fast-overlays`: the overlays (temperature most of all) skip rereading what can't have
-  changed since the last frame.
-- `fast-conveyor-paths`: no hitch when conveyor rails change: their routes are found from an
-  index instead of searching every route again.
-- `fast-serialization`, `fast-save-type-checks`, `fast-save-compression`, `no-save-gc`,
-  `background-save`: much shorter autosave freezes.
-- `off-screen-conveyors` (**changes gameplay**): items travelling on conveyor rails off screen
-  are only placed where they are once they stop or come into view. The rails carry exactly the
-  same things, but the items' positions on screen and in the world lag behind meanwhile.
-- `slow-reachability` (**changes gameplay**): checks whether jobs and items can be reached less
-  often, so Duplicants may notice a newly blocked or opened path a little later.
-  Temperature and building checks are never delayed.
-- `off-world-fallers` (**changes gameplay**): items that fall out through the bottom of a world
-  (a chute out of a rocket interior) hang just below it forever, still being stepped as falling.
-  They are landed where they hang instead, so they stop costing time every tick.
+Moono also changes how some of the game's own code does its work. Most tweaks give exactly the
+same results, faster, and are on by default; three trade a little exactness for speed and are off
+unless you turn them on. Choose them in **Moono Tweaks** on the main menu. Launch options
+(`--game-tweak …`, `--splash …`, `--frame-stats`) override the screen. What each one does:
+[docs/TWEAKS.md](docs/TWEAKS.md).
 
 ## Save compatibility
 

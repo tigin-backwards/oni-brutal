@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2584106067-conveyor-loaders-are-not-machinery.yaml",
+ "mods": [
+  "2584106067"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the conveyor loader carries no industrial machinery tag (today's game no longer adds it) while the gas pump keeps it; the colony runs",
+ "updated": "2026-10-25",
+ "commit": "8884175",
+ "mod_dlls": {
+  "2584106067": {
+   "ConveyorLoadersAreNotMachinery.dll": "13e0b273433e8a4dbe142d4a3f699033debdd700720719cc279b77aed1098534"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-193634-0de115a7",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T19:36:35",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-194334-228f25d0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T19:43:34",
+    "lane": 16,
+    "reference_run": "20261025-193634-0de115a7",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261025-194334-228f25d0",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-25T19:43:35",
+    "lane": 17,
+    "reference_run": "20261025-193634-0de115a7",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

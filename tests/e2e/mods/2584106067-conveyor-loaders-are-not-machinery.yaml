@@ -1,0 +1,20 @@
+# Conveyor Loaders Are Not Machinery (2584106067), class P.
+#
+# What it does: removes the IndustrialMachinery tag from the Conveyor Loader
+# (SolidConduitInbox, a postfix on its DoPostConfigureComplete), so a room with one is not
+# barred from being a mess hall or bedroom.
+# How a player reaches it: a Conveyor Loader inside a room.
+# What changes: the loader's tags, which room constraints read. Today's game no longer tags the
+# loader as machinery, so the postfix removes a tag that is not there.
+#
+# The spec checks the loader's prefab: no IndustrialMachinery tag, while a machine the game
+# does tag (the Gas Pump) keeps it.
+from: early-base
+mods: [2584106067]
+steps:
+  - expect_state:
+      "count:Global.Instance.modManager.mods[*] if .staticID == ConveyorLoadersAreNotMachinery and .IsEnabledForActiveDlc() == true": 1
+      "Assets.GetPrefab(\"SolidConduitInbox\").GetComponent<KPrefabID>.HasTag(\"IndustrialMachinery\")": false
+      "Assets.GetPrefab(\"GasPump\").GetComponent<KPrefabID>.HasTag(\"IndustrialMachinery\")": true
+  - run: {seconds: 30}
+  - expect: {duplicants: 3}

@@ -14,6 +14,7 @@ namespace PerfProbe
         {
             Worldgen.Install(harmony, path);
             Overlays.Install(harmony, path);
+            Rebuilds.Install(harmony, path);
             if (System.IO.File.Exists(System.IO.Path.Combine(path, "layout.txt"))) LayoutTrace.Install(harmony);
             var keeper = new GameObject("PerfProbe");
             Object.DontDestroyOnLoad(keeper);
@@ -1661,7 +1662,7 @@ namespace PerfProbe
                 LoadScreen.DoLoad(save);
             }
             while (Game.Instance == null || SpeedControlScreen.Instance == null) yield return null;
-            Debug.Log($"PERF colony f{Time.frameCount} cycle {GameClock.Instance.GetCycle()}{RuntimeCounters.Jit()}");
+            Debug.Log($"PERF colony f{Time.frameCount} cycle {GameClock.Instance.GetCycle()}{RuntimeCounters.Jit()}{RuntimeCounters.Gc()}");
             if (System.IO.File.Exists(System.IO.Path.Combine(Path, "truetiles.txt"))) ReportTileTextures();
             // `localcanvas.txt`: LocalCanvas's artwork stages, and a painting set to its first local
             // image and captured (localcanvas.png).
@@ -1720,6 +1721,10 @@ namespace PerfProbe
                 view = (at, size);
             }
             if (overlays) StartCoroutine(Overlays.Run(overlaysFile, System.IO.File.Exists(WallTime.Extra)));
+            // `rebuild.txt` (Rebuilds), `screens.txt` (Screens), `cameras.txt` (Cameras).
+            if (System.IO.File.Exists(System.IO.Path.Combine(Path, "cameras.txt"))) StartCoroutine(Cameras.Run(System.IO.Path.Combine(Path, "cameras.txt")));
+            if (System.IO.File.Exists(System.IO.Path.Combine(Path, "rebuild.txt"))) StartCoroutine(Rebuilds.Run(System.IO.Path.Combine(Path, "rebuild.txt")));
+            if (System.IO.File.Exists(System.IO.Path.Combine(Path, "screens.txt"))) StartCoroutine(Screens.Run(System.IO.Path.Combine(Path, "screens.txt")));
             // `counts.txt` lists component type names (Assembly-CSharp first, then -firstpass): how
             // many of each exist, active or not, logged once the colony is up.
             var counts = System.IO.Path.Combine(Path, "counts.txt");
@@ -1816,6 +1821,10 @@ namespace PerfProbe
             var count = (long)jitInfo.GetMethod("GetCompiledMethodCount").Invoke(null, new object[] { false });
             return $" jit {time.TotalMilliseconds:F0} ms over {count} methods";
         }
+
+        /// The GC's pauses and collections (gen 0/1/2) so far (.NET; empty on Mono).
+        public static string Gc() => pause == null || allocated == null ? "" : $" gc-pause {GcPauseMs()} ms collections {System.GC.CollectionCount(0)}/{System.GC.CollectionCount(1)}/{System.GC.CollectionCount(2)} allocated {(long)allocated.Invoke(null, new object[] { false }) >> 20} MiB";
+        static readonly System.Reflection.MethodInfo allocated = typeof(System.GC).GetMethod("GetTotalAllocatedBytes", new[] { typeof(bool) });
 
         public static long GcPauseMs() => pause == null ? -1 : (long)((System.TimeSpan)pause.Invoke(null, null)).TotalMilliseconds;
     }

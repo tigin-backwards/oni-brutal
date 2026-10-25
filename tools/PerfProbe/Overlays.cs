@@ -19,6 +19,9 @@ namespace PerfProbe
     /// screen 300 frames into each hold, as overlay-NAME.png beside the probe.
     static class Overlays
     {
+        /// The sweep has started, and ended (Screens' `wait overlays`).
+        public static bool Started, Done;
+
         /// A colony that reaches a victory imperative on load (2minnow) starts the victory
         /// sequence, which hides the HUD and with it the overlay screen; the sweep skips it.
         public static void Install(HarmonyLib.Harmony harmony, string path)
@@ -36,6 +39,7 @@ namespace PerfProbe
 
         public static IEnumerator Run(string path, bool wallTime)
         {
+            Started = true;
             var lines = System.IO.File.ReadAllLines(path);
             int hold = 1200;
             bool capture = false;
@@ -88,6 +92,7 @@ namespace PerfProbe
             }
             OverlayScreen.Instance.ToggleOverlay(OverlayModes.None.ID, false);
             Debug.Log("PERF overlay done");
+            Done = true;
         }
 
         /// The temperature overlay's legend filter, as clicking it does.

@@ -15,10 +15,25 @@ namespace PerfProbe
     /// for the overlay sweep (Overlays) to end, as opening a screen closes the overlay.
     static class Screens
     {
+        /// Closes the dialogs in the way (KModalScreens), but not the management menu's own
+        /// screens: ResearchScreen is a KModalScreen, activated with the HUD and hidden while
+        /// closed, and Deactivate destroys it, after which its button throws a
+        /// NullReferenceException in KScreen.Activate (in both players).
+        public static void DismissDialogs()
+        {
+            var kept = new System.Collections.Generic.HashSet<KScreen>();
+            if (ManagementMenu.Instance != null
+                && Traverse.Create(ManagementMenu.Instance).Field("ScreenInfoMatch").GetValue() is IDictionary match)
+                foreach (var data in match.Values)
+                    if (data is ManagementMenu.ScreenData screen && screen.screen != null) kept.Add(screen.screen);
+            foreach (var d in Object.FindObjectsByType<KModalScreen>(FindObjectsSortMode.None))
+                if (!kept.Contains(d)) d.Deactivate();
+        }
+
         public static IEnumerator Run(string path)
         {
             for (int i = 0; i < 300; i++) yield return null;
-            foreach (var d in Object.FindObjectsByType<KModalScreen>(FindObjectsSortMode.None)) d.Deactivate();
+            DismissDialogs();
             foreach (var raw in System.IO.File.ReadAllLines(path))
             {
                 var words = raw.Trim().Split(new[] { ' ' }, System.StringSplitOptions.RemoveEmptyEntries);

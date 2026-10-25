@@ -56,7 +56,7 @@ namespace PerfProbe
             for (int i = 0; i < 300; i++) yield return null;
             // Dialogs the load raised (mod differences, DLC news) hide the HUD, the overlay bar
             // with it, and the overlay screen updates only while that is active.
-            foreach (var d in Object.FindObjectsByType<KModalScreen>(FindObjectsSortMode.None)) d.Deactivate();
+            Screens.DismissDialogs();
             for (int i = 0; i < 60; i++) yield return null;
             while (Time.frameCount % 600 != 0) yield return null;
             if (wallTime) Runner.Instance.StartCoroutine(WallTime.Run(modes.Count * hold / 600));

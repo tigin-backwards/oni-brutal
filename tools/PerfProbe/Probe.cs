@@ -1765,7 +1765,7 @@ namespace PerfProbe
                 if (speed < 0 && Time.frameCount % 60 == 0 && !SpeedControlScreen.Instance.IsPaused) SpeedControlScreen.Instance.Pause(false);
                 else if (speed >= 0 && Time.frameCount % 60 == 0 && (SpeedControlScreen.Instance.IsPaused || SpeedControlScreen.Instance.GetSpeed() != speed))
                 {
-                    foreach (var d in FindObjectsByType<KModalScreen>(FindObjectsSortMode.None)) d.Deactivate();
+                    Screens.DismissDialogs();
                     SpeedControlScreen.Instance.SetSpeed(speed);
                     SpeedControlScreen.Instance.Unpause(false);
                 }

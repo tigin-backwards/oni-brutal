@@ -1,0 +1,69 @@
+{
+ "spec": "mods/1810480011-geo-apocalypse.yaml",
+ "mods": [
+  "1810480011"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "from a colony to New Game, Survival, Classic, Arboria at a coordinate whose start rolls Geoapocalypse: its asteroid details list the trait (dumped, as in the original), and the generated start world has it, with dozens of random geyser spawners waiting",
+ "updated": "2026-10-24",
+ "commit": "618fde4",
+ "mod_dlls": {
+  "1810480011": {
+   "names.dll": "d8d71250191589ae1b619b7ddf097ef867b4aacb86fc82c74c97c681e37f6198"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-223954-44ca2aec",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T22:41:07",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-224357-907ed034",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T22:46:37",
+    "lane": 16,
+    "reference_run": "20261024-223954-44ca2aec",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "asteroids": {
+      "differences": 0
+     },
+     "details": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261024-224357-907ed034",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T22:47:33",
+    "lane": 16,
+    "reference_run": "20261024-223954-44ca2aec",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "asteroids": {
+      "differences": 0
+     },
+     "details": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

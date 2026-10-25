@@ -1,0 +1,49 @@
+# Geo Apocalypse {Updated} (1810480011), class O (a worldgen mod).
+#
+# What it does: a world trait, Geoapocalypse (traits/GeoApocalypse, "This asteroid has geysers
+# on its geysers!"), which any asteroid that takes random traits may roll: up to a hundred
+# more random geysers (geysers/generic, TryOne a hundred times, duplicates allowed), not with
+# Dormant Geysers. Its code adds the trait's name and description.
+# How a player reaches it: a new game whose asteroid rolls it; the destination screen lists
+# the asteroid's traits.
+# What changes: the geysers of a new world.
+#
+# From a colony: Main Menu, Quit Without Saving, New Game, Survival, Classic; Arboria at
+# V-FRST-C-12346-0-0-0, whose start asteroid rolls Geoapocalypse, Large Glaciers and Slime Molds
+# with the mod. Functional expectations (mod-play-testing.md, "Worldgen mods"): the trait is
+# listed and taken, and the start world waits with dozens of random geysers.
+from: early-base
+mods: [1810480011]
+memory_gb: 8
+steps:
+  - key: {code: Escape}
+  - ui_wait: {path: "**/PauseScreen/**/Main MenuButton", cond: stable}
+  - click: {ui: "**/PauseScreen/**/Main MenuButton"}
+  - ui_wait: {path: "**/ConfirmDialog/GameObject/Panel/ConfigurableButton", cond: stable}
+  - click: {ui: "**/ConfirmDialog/GameObject/Panel/ConfigurableButton"}   # Quit Without Saving
+  - ui_wait: {path: "**/MainMenu_SpacedOut/MainMenuMenubar/MainMenuButtons", cond: stable, frames: 3000}
+  - click: {text: "NEW GAME", under: "**/MainMenuButtons"}
+  - ui_wait: {path: "**/ModeSelectScreen/Panel/Content/RootToggles/StandardGame", cond: stable}
+  - click: {ui: "**/ModeSelectScreen/Panel/Content/RootToggles/StandardGame"}
+  - ui_wait: {path: "**/ClusterCategorySelectionScreen/Panel/Content/RootToggles/ClassicStyleGame", cond: stable}
+  - click: {ui: "**/ClusterCategorySelectionScreen/Panel/Content/RootToggles/ClassicStyleGame"}
+  - ui_wait: {path: "**/ColonyDestinationScreen2/Layout/Buttons/LaunchButton", cond: stable, frames: 3000}
+  - click: {ui: "**/CoordinateContainer/SeedInput"}
+  - ui_wait: {path: "**/CoordinateContainer/SeedInput", cond: stable}
+  - type: {ui: "**/CoordinateContainer/SeedInput", text: "V-FRST-C-12346-0-0-0", clear: true, enter: true}
+  - ui_wait: {path: "**/CoordinateContainer/SeedInput/Text Area/Text", cond: text, value: "~V-FRST-C-12346-0-0-0"}
+  - expect_state:
+      "CustomGameSettings.Instance.GetCurrentQualitySetting(\"ClusterLayout\").id": "expansion1::clusters/VanillaArboriaCluster"
+  - expect_ui:
+      "**/Section - SelectedAsteroidDetails/Content/Details/**": {any_text: "~Geoapocalypse"}
+  - ui_dump: {name: asteroids, root: "**/Section - Destination/World Scoll (Rect Size Set By Screen Code!)/Content/Details"}
+  - ui_dump: {name: details, root: "**/Section - SelectedAsteroidDetails/Content/Details"}
+  - click: {ui: "**/ColonyDestinationScreen2/Layout/Buttons/LaunchButton"}
+  - ui_wait: {path: "**/MinionSelectScreen/Content/BottomContent/Buttons/ProceedButton", cond: stable, frames: 60000}
+  - click: {ui: "**/MinionSelectScreen/Content/BottomContent/Buttons/ProceedButton"}
+  - ui_wait: {path: "**/MinionSelectScreen", cond: gone, frames: 6000}
+  - expect_state:
+      "ClusterManager.Instance.GetStartWorld().worldName": "expansion1::worlds/VanillaArboria"
+      "Components.LiveMinionIdentities.Count": 3
+      "ClusterManager.Instance.GetStartWorld().WorldTraitIds": {contains: traits/GeoApocalypse}
+      "count:SaveGame.Instance.worldGenSpawner.spawnables[*] if .spawnInfo.id == GeyserGeneric": ">= 20"

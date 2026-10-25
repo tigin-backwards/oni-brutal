@@ -140,10 +140,8 @@ Most mods should work, since the game's code and its Harmony load as shipped. Se
 Possibly. In the age of agents the initial prototype took about 5 days, so it isn't the
 insurmountable task it might once have looked like.
 
-But it has plenty of bugs, known and unknown. Its only real mandates were to leave no safe
-optimization behind, and not to crash *my* game. Much of the win comes from CoreCLR itself,
-which Unity 7's CoreCLR move should bring to the original game too, eventually (it's been in
-Soon™ territory for years).
+However, most of the wins come from CoreCLR itself, which Unity 7's CoreCLR move should bring to
+the original game too, eventually (it's been in Soon™ territory for years).
 
 This also rebuilds only what the game needs to run. Everything that Klei's development workflow
 needs from Unity would be lost:

@@ -7,7 +7,7 @@ using Xunit;
 
 namespace OniBrutal.Tests
 {
-    /// The Brutal Tweaks options (src/OniBrutal.Host/PlayerSettings.cs, compiled in here):
+    /// The Moono Tweaks options (src/OniBrutal.Host/PlayerSettings.cs, compiled in here):
     /// built-in defaults, then the settings file, then the command line; and the file's round trip.
     public class PlayerSettingsTests
     {
@@ -117,7 +117,7 @@ namespace OniBrutal.Tests
             try
             {
                 var path = PlayerSettings.PathIn(dir);
-                Assert.Equal(Path.Combine(dir, "oni-brutal", "settings.json"), path);
+                Assert.Equal(Path.Combine(dir, "oni-moono", "settings.json"), path);
                 var missing = PlayerSettings.Read(path, out var problem);
                 Assert.Null(problem);
                 Assert.Empty(missing.GameTweaks);
@@ -139,6 +139,38 @@ namespace OniBrutal.Tests
                 // An empty file records nothing.
                 new PlayerSettings().Write(path);
                 Assert.Equal("{}\n", File.ReadAllText(path));
+            }
+            finally
+            {
+                if (Directory.Exists(dir)) Directory.Delete(dir, recursive: true);
+            }
+        }
+
+        [Fact]
+        public void TheFileFromBeforeTheRenameIsCopiedOnce()
+        {
+            var dir = Path.Combine(Path.GetTempPath(), "oni-brutal-settings-" + Guid.NewGuid().ToString("N"));
+            try
+            {
+                // Neither file: nothing to copy.
+                Assert.Null(PlayerSettings.MigrateIn(dir, out var problem));
+                Assert.Null(problem);
+                Assert.False(File.Exists(PlayerSettings.PathIn(dir)));
+
+                var old = PlayerSettings.OldPathIn(dir);
+                Assert.Equal(Path.Combine(dir, "oni-brutal", "settings.json"), old);
+                var settings = new PlayerSettings { Splash = "none" };
+                settings.GameTweaks["fast-b"] = false;
+                settings.Write(old);
+                Assert.Equal(old, PlayerSettings.MigrateIn(dir, out problem));
+                Assert.Null(problem);
+                Assert.Equal(settings.ToJson(), PlayerSettings.Read(PlayerSettings.PathIn(dir), out problem).ToJson());
+                Assert.True(File.Exists(old));
+
+                // Once there is a file in the new place, the old one is never copied over it.
+                new PlayerSettings().Write(PlayerSettings.PathIn(dir));
+                Assert.Null(PlayerSettings.MigrateIn(dir, out problem));
+                Assert.Equal("{}\n", File.ReadAllText(PlayerSettings.PathIn(dir)));
             }
             finally
             {

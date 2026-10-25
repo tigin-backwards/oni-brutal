@@ -48,6 +48,9 @@ namespace OniBrutal.Host
             // The options the main menu's Moono Tweaks screen sets: defaults, then its settings
             // file in the per-user folder, then the command line.
             var settingsPath = PlayerSettings.PathIn(EngineConfig.PersistentDataPath);
+            var migrated = PlayerSettings.MigrateIn(EngineConfig.PersistentDataPath, out var migrateProblem);
+            if (migrated != null) EngineLog.Engine($"settings: copied {migrated} (from before the Moono name) to {settingsPath}");
+            if (migrateProblem != null) EngineLog.Engine($"settings: could not copy {PlayerSettings.OldPathIn(EngineConfig.PersistentDataPath)} to {settingsPath}: {migrateProblem}");
             var settings = PlayerSettings.Read(settingsPath, out var settingsProblem);
             EngineLog.Engine(settingsProblem != null ? $"settings: {settingsPath} could not be read, so defaults apply: {settingsProblem}"
                 : File.Exists(settingsPath) ? $"settings: {settingsPath}" : $"settings: {settingsPath} (none; defaults apply)");

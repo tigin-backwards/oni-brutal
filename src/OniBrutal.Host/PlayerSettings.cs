@@ -12,8 +12,8 @@ namespace OniBrutal.Host
     /// Where an option's effective value came from.
     internal enum OptionSource { Default, SettingsFile, CommandLine }
 
-    /// The player's own settings file, written by the main menu's Brutal Tweaks screen:
-    /// `<persistent data path>/oni-brutal/settings.json`, beside the game's own data in the player's
+    /// The player's own settings file, written by the main menu's Moono Tweaks screen:
+    /// `<persistent data path>/oni-moono/settings.json`, beside the game's own data in the player's
     /// per-user folder (a test run's run home has its own, so it never reads the user's; updating
     /// the player never touches it). It records only the choices that differ from the built-in
     /// defaults, so a default that changes in an update (a new tweak among them) reaches every user
@@ -30,7 +30,31 @@ namespace OniBrutal.Host
         public string? Splash;
         public bool? FrameStats;
 
-        public static string PathIn(string persistentDataPath) => Path.Combine(persistentDataPath, "oni-brutal", "settings.json");
+        public static string PathIn(string persistentDataPath) => Path.Combine(persistentDataPath, "oni-moono", "settings.json");
+        /// Where players from before the Moono name (oni-brutal) kept the file.
+        public static string OldPathIn(string persistentDataPath) => Path.Combine(persistentDataPath, "oni-brutal", "settings.json");
+
+        /// The file from before the Moono name, copied to its place once: when there is no file
+        /// at PathIn and there is one at OldPathIn (left where it was, for an older release).
+        /// Returns the old file's path when it was copied, else null; a copy that fails leaves
+        /// the reason in `problem` (and defaults then apply, as without a file).
+        public static string? MigrateIn(string persistentDataPath, out string? problem)
+        {
+            problem = null;
+            string path = PathIn(persistentDataPath), old = OldPathIn(persistentDataPath);
+            if (File.Exists(path) || !File.Exists(old)) return null;
+            try
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+                File.Copy(old, path);
+                return old;
+            }
+            catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+            {
+                problem = e.Message;
+                return null;
+            }
+        }
 
         /// The file at `path`: empty when there is none. A file that cannot be read or parsed counts
         /// as empty too, with the reason in `problem` (it is not overwritten until the screen saves).
@@ -95,7 +119,7 @@ namespace OniBrutal.Host
         public static bool IsSplash(string value) => value is "moo" or "none";
     }
 
-    /// The options the Brutal Tweaks screen sets, as this run has them: built-in defaults, then the
+    /// The options the Moono Tweaks screen sets, as this run has them: built-in defaults, then the
     /// settings file, then the command line. A command line naming any game tweak
     /// (`--game-tweak NAME|-NAME|all|exact|none`, repeatable) sets the whole set of tweaks for the
     /// run, as before the settings file existed; `--splash` and `--frame-stats` set theirs.

@@ -116,8 +116,8 @@ restarts the game. `translation: ID` writes those prefs into the run's `kplayerp
 (`SelectedLanguageType: UGC`, `InstalledLanguage: 'ID'`), so the game starts in that language;
 [`translation-screen.yaml`](translation-screen.yaml) drives the screen itself up to its restart
 dialog. The translations' specs (`mods/929139073-german-translation.yaml` and the others) check a
-colony's research screen and pause menu, then the main menu, the options menu and its Game
-options screen.
+colony's research and priorities screens and pause menu, then the main menu, the options menu
+and its Game options screen.
 
 ## Steps
 

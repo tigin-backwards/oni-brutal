@@ -122,7 +122,7 @@ spec costs to write.
 | **O** options | settings only (PLib `POptions`, `[Option]` attributes) or settings beside other features | Mods screen → Options dialog, `config.json` | low (one shared template) |
 | **V** visual | rendering, camera, overlays, shaders, textures (`CameraController`, `OverlayModes`, `SimDebugView`, materials and shaders, texture packs) | world view, overlay legend | medium (needs paused-frame shots) |
 | **M** menu / new game | acts before a colony exists: new-game flow, Mod Manager, world or duplicant generation screens | main menu, `MinionSelectScreen`, Mods screen | high |
-| **X** not testable here | translations (applied only from a Steam subscription), multiplayer sessions needing two Steam accounts | none | none |
+| **X** no code | translations (a strings.po; played through the language prefs, see "Translations" in section 10), multiplayer sessions needing two Steam accounts (not testable here) | main menu, options, a colony's screens (translations) | low |
 
 **Flags** (independent of class):
 - `touches_ui`: the mod's own code references UGUI (`UnityEngine.UI.*`), `TMPro.*` or `LocText`,
@@ -762,8 +762,26 @@ steps:
 - **Spaced Out only:** the fixtures are Spaced Out saves. Base-game-only mods (`supportedContent:
   VANILLA_ID`) need a base-game fixture. Should we add one, or record such mods as "Spaced Out
   not supported"?
-- **Not covered:** translations (Steam subscription only), multiplayer sessions (two Steam
-  accounts). These rows stay ⬜ with their current notes.
+- **Not covered:** multiplayer sessions (two Steam accounts). These rows stay ⬜ with their
+  current notes.
+- **Translations** were first left out as applied only from a Steam subscription; they are not.
+  The Translations screen (`LanguageOptionsScreen`) lists every installed mod with a `.po`
+  file, whatever its distribution platform, Local ones too, enabled or not; picking one saves
+  `SelectedLanguageType: UGC` and `InstalledLanguage: ID` (the mod's label id, its Workshop ID
+  as a Local mod) and restarts, and `Localization.Initialize` loads that mod's `strings.po`
+  at the next start. Only the Workshop button, the unsubscribe and update notices and
+  `VerifyTranslationModSubscription` need Steam. A translation must stay disabled, as a
+  subscription leaves it: KMod loads no content of an enabled one (`LoadTranslations` returns
+  false), marks it failed and opens a load error dialog. So a spec installs it as e2e installs
+  every mod, and `translation: ID` writes the two prefs (tests/e2e/README.md);
+  `tests/e2e/translation-screen.yaml` drives the screen to its restart dialog, and clicking
+  restart by hand wrote the same two prefs in both players before each quit. Each translation's
+  spec checks a colony's research and priorities screens and pause menu, then the main menu,
+  the options menu and its Game options screen, dumped and shot (a main menu shot reads the
+  lane's display). Of the 51 translations in the top 750, 38 play as in the original, 11 (the
+  Japanese, Korean and some Chinese ones) with the Game options headers' layout 0.01 taller
+  (known finding `text-height-hundredth`, docs/cleanroom/textmeshpro.md), and 2 name their
+  file Strings.po, which neither player finds on Linux.
 - **Worldgen mods** are classed by their code like any other and get specs, with functional
   expectations: the mod's worlds or clusters are offered and generate, its biomes, traits,
   templates and POIs appear, and generation ends without errors. The generated layout need not

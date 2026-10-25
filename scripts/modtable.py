@@ -201,19 +201,18 @@ broken.update({
 broken.update({
     '2029450933': 'broken upstream: its plants call the 19-parameter `EntityTemplates.ExtendEntityToBasicPlant` the game no longer has, so their prefabs fail in `Assets.OnPrefabInit` (MissingMethodException), its care package postfix throws an InvalidCastException, and loading a colony stops at "Error deserializing prefabs" and quits (spec tests/e2e/mods/2029450933-omni-flora.yaml)',
 })
+# Translations whose file is named Strings.po: on Linux both players look for strings.po and miss
+# it (their specs fail the same way in the original).
+broken.update({
+    '928441385': 'broken on Linux (a case-sensitive file system): its translation is Strings.po, the game opens strings.po, misses it (GetLanguageFile: ... missing, then a NullReferenceException in `LanguageOptionsScreen.GetLanguageFilename` opens the error dialog), keeps English, and loading a colony quits the game; Windows finds the file (spec tests/e2e/mods/928441385-korean-language.yaml)',
+    '3669382915': 'broken on Linux (a case-sensitive file system): its translation is Strings.po, the game opens strings.po, misses it (GetLanguageFile: ... missing, then a NullReferenceException in `LanguageOptionsScreen.GetLanguageFilename` opens the error dialog), keeps English, and loading a colony quits the game; Windows finds the file (spec tests/e2e/mods/3669382915-thai-mary.yaml)',
+})
 # Fails to load in the original only.
 original_only = {
     '1729794261': 'loads in ours but not in the original: Mono rejects its `PixelPack2` class (an interface method it lacks) at first use, where ours stubs the missing method (ARCHITECTURE D22); left out of the colony runs, which the original\'s error dialog stops',
 }
 unranked = {'3427974009': 'Synchronized Building Groups', '2977728791': 'Preset Manager', '3775625682': 'LocalCanvas-本地画框', '3781314647': 'Morphs Not Included',
             '3281716506': 'Mod Preset Manager (Light) [MPML]', '3746027329': 'Geyser Tab', '3671379574': 'Resource Dashboard'}
-translations = {'929139073', '927642162', '1198657258', '928606476', '928348692', '1902735059', '1269554374',
-                '1454392573', '929036307', '928441385', '1416077105', '929305589', '934649708', '931119869',
-                '1562134514', '2906930548', '929224194', '1714866600', '1823722773', '3229139332', '2769557641',
-                '2872159695', '1123693010', '1142641133', '2467094947', '2377723746',
-                '2889982891', '2819586273', '1821957996', '3327324912', '1758933220', '930830432', '1831722850', '2701205009', '1493391479', '2566414917', '1419578320', '2000481647',
-                '1135041189', '1817639915', '1561634664', '929154970', '933302292', '2679329370',
-                '3669382915', '1142343584', '3004126724', '1491121743', '1233191726', '935885438', '3535190546'}
 # Worldgen mods no sweep ran, as their specs' runs of ours found them (id -> (loads, colony)): a
 # spec that gets to its new game loaded a colony first; Single Asteroid Clusters' worlds log
 # errors while the game loads them, which open the error dialog at the main menu in ours, and
@@ -246,8 +245,6 @@ def status(mid, flags):
         return N, N, N, f'flagged by onimaxxing ({flags}); not tested'
     if mid in worldgen:
         return (*worldgen[mid], N, 'worldgen mod: spec pending (functional expectations)')
-    if mid in translations:
-        return N, N, N, 'translation: the game applies one only from a Steam subscription; not testable here'
     if mid in original_only:
         return Y, N, N, original_only[mid]
     if mid in fifth_failing:

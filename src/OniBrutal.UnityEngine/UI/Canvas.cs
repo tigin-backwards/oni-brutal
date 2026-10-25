@@ -571,14 +571,16 @@ namespace UnityEngine
         static Vector2 Transposed(Vector2 v) => new(v.y, v.x);
 
         /// The point rounded to whole screen pixels when the canvas renders pixel perfect in
-        /// screen space; otherwise unchanged.
+        /// screen space; otherwise unchanged. Halves round up (measured: a legacy Text's first
+        /// vertex at screen x 670.5 and 680.5 snaps to 671 and 681, docs/cleanroom/ugui.md
+        /// "Legacy Text glyph placement").
         public static Vector2 PixelAdjustPoint(Vector2 point, Transform elementTransform, Canvas canvas)
         {
             if (!CanvasSystem.SnapsToPixels(canvas, out var camera)) return point;
             var world = elementTransform.TransformPoint(point);
             var screen = camera != null ? camera.WorldToScreenPoint(world) : world;
-            screen.x = Mathf.Round(screen.x);
-            screen.y = Mathf.Round(screen.y);
+            screen.x = Mathf.Floor(screen.x + 0.5f);
+            screen.y = Mathf.Floor(screen.y + 0.5f);
             var snapped = camera != null ? camera.ScreenToWorldPoint(screen) : screen;
             return elementTransform.InverseTransformPoint(snapped);
         }

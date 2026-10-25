@@ -3,14 +3,12 @@
  "mods": [
   "1142343584"
  ],
- "verdict": "warning",
- "why": "known findings: text-height-hundredth",
- "findings": [
-  "text-height-hundredth"
- ],
- "note": "Traditional Chinese on a colony's research and priorities screens and pause menu, then the main menu, its options and Game options screens, as in the original (no pixel differs); the Game options headers' layout is 0.01 taller",
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "Traditional Chinese on a colony's research and priorities screens and pause menu, then the main menu, its options and Game options screens, as in the original (screens within 0.0036 % of the original's pixels)",
  "updated": "2026-10-25",
- "commit": "9caf612",
+ "commit": "2d507b8",
  "mod_dlls": {
   "1142343584": {}
  },
@@ -27,16 +25,14 @@
   ],
   "ours": [
    {
-    "run": "20261025-022425-0bae69c5",
+    "run": "20261025-053044-cec1ccbb",
     "index": 1,
-    "verdict": "warn",
-    "date": "2026-10-25T04:08:52",
-    "lane": 16,
+    "verdict": "pass",
+    "date": "2026-10-25T05:30:44",
+    "lane": 18,
     "reference_run": "20261025-003454-75470ce2",
     "new_signatures": 0,
-    "findings": [
-     "text-height-hundredth"
-    ],
+    "findings": [],
     "ui_dump": {
      "research": {
       "differences": 0
@@ -54,30 +50,25 @@
       "differences": 0
      },
      "game-options": {
-      "differences": 0,
-      "known": {
-       "text-height-hundredth": 6
-      }
+      "differences": 0
      }
     },
     "shots": {
-     "priorities": 0.0,
+     "priorities": 2e-06,
      "pause": 0.0,
-     "menu": 0.0,
+     "menu": 3.6e-05,
      "game-options": 0.0
     }
    },
    {
-    "run": "20261025-022425-0bae69c5",
+    "run": "20261025-053044-cec1ccbb",
     "index": 2,
-    "verdict": "warn",
-    "date": "2026-10-25T04:08:52",
-    "lane": 17,
+    "verdict": "pass",
+    "date": "2026-10-25T05:31:18",
+    "lane": 18,
     "reference_run": "20261025-003454-75470ce2",
     "new_signatures": 0,
-    "findings": [
-     "text-height-hundredth"
-    ],
+    "findings": [],
     "ui_dump": {
      "research": {
       "differences": 0
@@ -95,16 +86,13 @@
       "differences": 0
      },
      "game-options": {
-      "differences": 0,
-      "known": {
-       "text-height-hundredth": 6
-      }
+      "differences": 0
      }
     },
     "shots": {
-     "priorities": 0.0,
+     "priorities": 5e-06,
      "pause": 0.0,
-     "menu": 0.0,
+     "menu": 9e-06,
      "game-options": 0.0
     }
    }

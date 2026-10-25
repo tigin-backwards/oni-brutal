@@ -778,10 +778,10 @@ steps:
   restart by hand wrote the same two prefs in both players before each quit. Each translation's
   spec checks a colony's research and priorities screens and pause menu, then the main menu,
   the options menu and its Game options screen, dumped and shot (a main menu shot reads the
-  lane's display). Of the 51 translations in the top 750, 38 play as in the original, 11 (the
-  Japanese, Korean and some Chinese ones) with the Game options headers' layout 0.01 taller
-  (known finding `text-height-hundredth`, docs/cleanroom/textmeshpro.md), and 2 name their
-  file Strings.po, which neither player finds on Linux.
+  lane's display). Of the 51 translations in the top 750, 49 play as in the original (the
+  Japanese, Korean and some Chinese ones since text heights follow the shipped package's
+  hundredth rule, docs/cleanroom/textmeshpro.md; their Game options headers' layout was 0.01
+  taller before), and 2 name their file Strings.po, which neither player finds on Linux.
 - **Worldgen mods** are classed by their code like any other and get specs, with functional
   expectations: the mod's worlds or clusters are offered and generate, its biomes, traits,
   templates and POIs appear, and generation ends without errors. The generated layout need not

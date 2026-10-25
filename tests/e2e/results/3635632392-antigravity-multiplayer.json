@@ -1,0 +1,43 @@
+{
+ "spec": "mods/3635632392-antigravity-multiplayer.yaml",
+ "mods": [
+  "3635632392"
+ ],
+ "verdict": "pending",
+ "why": "0 run(s) of ours against original run 20261025-081305-d87fda7c; 2 needed",
+ "findings": [],
+ "note": "not playable: the lobby screen opens; HOST GAME and JOIN GAME stay at their first status, as Steam lobbies and P2P are not available offline",
+ "updated": "2026-10-25",
+ "commit": "4a66f06",
+ "mod_dlls": {
+  "3635632392": {
+   "Antigravity.Client.dll": "372d8c65d3cb7a9eb5d9a56446eaee789d40ff3dca7c9818704abaf8d537304d",
+   "Antigravity.Core.dll": "67a42bd06300716ac36be7c2449968c96f4128d65e4bd874771bb098fa3ca4ed",
+   "Antigravity.Patches.dll": "5d87a6420d5799e74cee165e005bb6f6dba75d589ef30b807ae7fbc184470fd6",
+   "Antigravity.Server.dll": "6cec8c226508d1d7722b32310946b7dcac94f1a8f7f4eea040998a1b339ffa15",
+   "Antigravity.dll": "9407a2b203982eb75069166c84e2f021d90acaa1e169010098ba427a0210cb4c",
+   "LiteNetLib.dll": "4eaee7d3c87c276ca83b8108a24d135516866397e22318f461034f51597eff6f"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-081305-d87fda7c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T08:13:05",
+    "lane": 16,
+    "signatures": 1
+   },
+   {
+    "run": "20261025-081305-d87fda7c",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-25T08:13:06",
+    "lane": 17,
+    "signatures": 1
+   }
+  ],
+  "ours": []
+ }
+}

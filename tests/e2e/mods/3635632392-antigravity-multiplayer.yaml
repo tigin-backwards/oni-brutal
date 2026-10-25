@@ -1,0 +1,64 @@
+# Antigravity - Multiplayer Mod (3635632392), classes S, M, P (uGUI screens it builds in code).
+#
+# What it does: several players share one colony. The host's commands (dig, build, priorities,
+# speed, research, schedules ...) are sent to the clients, which suspend their own Duplicants'
+# brains and follow the host's world (hard syncs, element and Duplicant sync).
+# How a player reaches it: the main menu's MULTIPLAYER button opens its lobby screen
+# ("MULTIPLAYER (Steam P2P)"): HOST GAME (Steam) creates a Steam lobby whose id is shown as the
+# code to share; a friend types that code and presses JOIN GAME, which joins the Steam lobby.
+# The host then presses START GAME and picks NEW COLONY or LOAD SAVE.
+# What changes: nothing until a session runs.
+#
+# The session is Steam-only. Hosting is SteamMatchmaking.CreateLobby and the lobby screen acts
+# on its LobbyCreated_t / LobbyEnter_t callbacks; joining is SteamMatchmaking.JoinLobby on the
+# code; game traffic is SteamNetworking P2P packets. The mod also carries a LiteNetLib backend
+# (LiteNetLibBackend, port 7777) and a --local-multiplayer flag, but nothing calls
+# NetworkBackendManager.InitializeLocal, and the MULTIPLAYER button sets UseLocalNetworking back
+# to false, so that backend is unreachable. The offline Steam double both players run with
+# (tools/SteamStub) returns k_uAPICallInvalid from CreateLobby and JoinLobby and delivers no
+# callback, so neither host nor client ever gets into a lobby: no session, in either player.
+# Every player also has the double's one account (76561197960265729). A session would need a
+# loopback Steam (lobbies, their callbacks and P2P packets between processes), which is more
+# than test identity: a session needs two real Steam accounts.
+#
+# This spec drives what is reachable: the MULTIPLAYER button, the lobby screen, HOST GAME and
+# JOIN GAME with a code, and checks that no lobby forms (the status stays at its first message,
+# the lobby section stays hidden). It records the original only (the mod is not playable here,
+# so no runs of ours count toward a verdict).
+from: main-menu
+mods: [3635632392]
+steps:
+  # A first start: the intro short plays; closed.
+  - ui_wait: {path: "**/VideoScreen/CloseButton", cond: stable, frames: 3000}
+  - click: {ui: "**/VideoScreen/CloseButton"}
+  - ui_wait: {path: "**/VideoScreen", cond: gone, frames: 600}
+  - ui_wait: {path: "**/MainMenu_SpacedOut/MainMenuMenubar/MainMenuButtons", cond: stable, frames: 3000}
+  - expect_state:
+      "count:Global.Instance.modManager.mods[*] if .label.id == 3635632392 and .IsEnabledForActiveDlc() == true": 1
+  - click: {text: "MULTIPLAYER", under: "**/MainMenuButtons"}
+  - ui_wait: {path: "MultiplayerLobbyScreen/Overlay/MainPanel/HostJoinSection/HostButton", cond: stable}
+  - expect_ui:
+      "MultiplayerLobbyScreen/Overlay/MainPanel/Title": {text: "MULTIPLAYER (Steam P2P)"}
+  - ui_dump: {name: lobby, root: "MultiplayerLobbyScreen/Overlay/MainPanel"}
+  - click: {ui: "MultiplayerLobbyScreen/Overlay/MainPanel/HostJoinSection/HostButton"}
+  - ui_wait: {path: "MultiplayerLobbyScreen/Overlay/MainPanel/Status", cond: text, value: "~Creating Steam lobby"}
+  # 3000 frames (10 s or more) for a lobby that never comes.
+  - ui_wait: {path: "MultiplayerLobbyScreen/Overlay/MainPanel/Status", cond: stable, stable: 3000, frames: 6000}
+  - expect_ui:
+      "MultiplayerLobbyScreen/Overlay/MainPanel/Status": {text: "Creating Steam lobby..."}
+      "MultiplayerLobbyScreen/Overlay/MainPanel/LobbySection": {exists: false}
+  - expect_state:
+      "type:Antigravity.Core.Network.SteamNetworkManager::IsInitialized": true
+      "type:Antigravity.Core.Network.SteamNetworkManager::IsConnected": false
+      "type:Antigravity.Core.Network.SteamNetworkManager::IsHost": false
+      # The double's one account, the same in every player.
+      "type:Antigravity.Core.Network.SteamNetworkManager::LocalSteamId.m_SteamID": 76561197960265729
+  - type: {ui: "MultiplayerLobbyScreen/Overlay/MainPanel/HostJoinSection/CodeInput", text: "109775240000000001", clear: true}
+  - click: {ui: "MultiplayerLobbyScreen/Overlay/MainPanel/HostJoinSection/JoinButton"}
+  - ui_wait: {path: "MultiplayerLobbyScreen/Overlay/MainPanel/Status", cond: text, value: "~Joining lobby"}
+  - ui_wait: {path: "MultiplayerLobbyScreen/Overlay/MainPanel/Status", cond: stable, stable: 3000, frames: 6000}
+  - expect_ui:
+      "MultiplayerLobbyScreen/Overlay/MainPanel/Status": {text: "Joining lobby..."}
+      "MultiplayerLobbyScreen/Overlay/MainPanel/LobbySection": {exists: false}
+  - expect_state:
+      "type:Antigravity.Core.Network.SteamNetworkManager::IsConnected": false

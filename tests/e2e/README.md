@@ -462,7 +462,9 @@ For each mod of the batch:
 
 1. **Triage.** Read its row in [docs/research/mod-triage.md](../../docs/research/mod-triage.md):
    its classes (P, B, T, S, K, O, V, M, X) and flags (`touches_ui`, `asset_bundle_ui`, ...). A
-   multiplayer mod gets no spec; a translation gets one with `translation:` (see [Mod specs and
+   multiplayer mod's session needs real Steam (lobbies, P2P), which the offline double lacks: at
+   most a spec of its menus, recorded in the original only, as
+   `mods/3635632392-antigravity-multiplayer.yaml` is; a translation gets one with `translation:` (see [Mod specs and
    fixtures](#mod-specs-and-fixtures)). A worldgen mod gets one, with functional
    expectations: its worlds generate with its content, not a layout identical to the original's
    (see mod-play-testing.md, "Worldgen mods").

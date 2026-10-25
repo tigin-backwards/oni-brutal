@@ -120,8 +120,11 @@ differences = {
 # Loads and Colony as swept, Played withdrawn until a spec drives the mod's UI (mod-play-testing.md).
 unplayed = {
     # Batch 17.
-    '3635632392': 'not played: a multiplayer mod (its own LiteNetLib client and server); a session needs two players on two Steam accounts',
     # Batch 21.
+}
+# Loads and Colony as swept; a session cannot be played here, in either player (no Played verdict).
+not_playable = {
+    '3635632392': 'not playable here, the same in the original: a session is a Steam lobby (its LiteNetLib backend is never used), and the offline Steam double creates and joins no lobby; its lobby screen opens, HOST GAME and JOIN GAME stay at their first status, on two players at once (spec tests/e2e/mods/3635632392-antigravity-multiplayer.yaml); a session needs two real Steam accounts',
 }
 broken = {
     '1715248368': 'broken upstream: patches `Deconstructable.TriggerDestroy`, which now has two overloads',
@@ -310,6 +313,8 @@ def status(mid, flags):
         return Y, Y, W, differences[mid]
     if mid in unplayed:
         return Y, Y, N, unplayed[mid]
+    if mid in not_playable:
+        return Y, Y, N, not_playable[mid]
     if mid in broken:
         return X, X, N, broken[mid] + ' (same in the original)'
     if flags:

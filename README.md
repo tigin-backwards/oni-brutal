@@ -31,8 +31,10 @@ Steam as usual.
    launch options, and puts it on your clipboard where it can.
 3. In Steam, right-click Oxygen Not Included → Properties → Launch Options, and paste that line.
 
-Then press Play in Steam as usual. To update, get the new version and run the setup again; the
-launch options stay the same. To go back to the original game, clear the launch options.
+Then press Play in Steam as usual. The optional tweaks (below) are chosen in the game: **Brutal
+Tweaks** on the main menu, under Mods. To update, get the new version and run the setup again; the
+launch options stay the same, and so do your tweak choices. To go back to the original game, clear
+the launch options.
 
 On Linux, Steam installed as a Flatpak or a snap runs games in a sandbox that can't see most of
 your home folder; the setup notices and installs the player inside the sandbox's own folder.
@@ -78,10 +80,22 @@ For a more detailed breakdown, see [docs/PERFORMANCE.md](docs/PERFORMANCE.md).
 ### Optional tweaks
 
 These change how some of the game's own code does its work. Most give exactly the same results,
-faster, and the setup turns those on (`--game-tweak exact` in the launch options). The three marked
-**changes gameplay** trade a little exactness for speed, and are off unless you add them, e.g.
-`--game-tweak exact --game-tweak slow-reachability`, or `--game-tweak all` for everything;
-`--game-tweak -NAME` leaves one out.
+faster, and are on unless you turn them off. The three marked **changes gameplay** trade a little
+exactness for speed, and are off unless you turn them on.
+
+Choose them on the main menu: **Brutal Tweaks**, under Mods, lists every tweak with an on/off
+switch and a line on what it does (plus the Gassy Moo loading splash and frame stats in the log).
+Changes apply when the game restarts, which the screen does for you. Your choices are kept in
+`oni-brutal/settings.json` in the game's own data folder (usually
+`~/.config/unity3d/Klei/Oxygen Not Included` on Linux,
+`%USERPROFILE%\AppData\LocalLow\Klei\Oxygen Not Included` on Windows), which updates never touch.
+
+Launch options still work and win over the screen, which then shows those rows as set by the
+launch options: `--game-tweak exact` (every tweak but the three), `--game-tweak all`,
+`--game-tweak none`, or tweaks by name (`--game-tweak exact --game-tweak slow-reachability`;
+`--game-tweak -NAME` leaves one out); `--splash moo|none`; `--frame-stats`. Older setups put
+`--game-tweak exact` in the launch options; remove it (the setup prints the new line) to choose in
+the game instead.
 
 - `fast-jobs`: the game's worker threads stop waking and waiting on each other for tiny jobs.
 - `fast-anim-events`, `fast-anim-cleanup`, `fast-symbol-overrides`: cheaper animation

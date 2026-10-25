@@ -90,7 +90,7 @@ if [ -n "$inside" ]; then
     say "Steam runs as a $sandbox here: the player is installed where it can see it ($player)."
 fi
 
-launch="\"$player/OniBrutal\" --game-tweak exact -- %command%"
+launch="\"$player/OniBrutal\" -- %command%"
 
 # What each Steam account here has as the game's launch options, read (never written) from its
 # localconfig.vdf: Steam keeps them under Software/Valve/Steam/apps/457140, and the account's
@@ -146,14 +146,20 @@ done <<< "$accounts"
 say ""
 while IFS=$'\t' read -r persona options; do
     [ -n "$persona$options" ] || continue
-    if is_set "$options"; then say "Steam already starts Oxygen Not Included on oni-brutal for $persona."
+    if is_set "$options"; then
+        say "Steam already starts Oxygen Not Included on oni-brutal for $persona."
+        # Options from before the Brutal Tweaks screen: they still work, and win over the screen.
+        if [[ "$options" == *"--game-tweak"* || "$options" == *"--splash"* || "$options" == *"--frame-stats"* ]]; then
+            say "  Its launch options choose the tweaks, so the game's Brutal Tweaks screen can't change those."
+            say "  To choose them in the game instead, set the launch options to: $launch"
+        fi
     elif [ -n "$options" ]; then say "$persona: the launch options are set to something else: $options"
     else say "$persona: no launch options yet."
     fi
 done <<< "$accounts"
 if [ $found -eq 1 ] && [ $unset_count -eq 0 ]; then
     say ""
-    say "Done. Nothing else to do: press Play in Steam."
+    say "Done. Nothing else to do: press Play in Steam. The optional tweaks are on the main menu: Brutal Tweaks."
     say "To play the original game again, clear the launch options (right-click Oxygen Not Included → Properties)."
     exit 0
 fi
@@ -174,4 +180,5 @@ fi
 say ""
 say "    $launch"
 say ""
-say "Then press Play as usual. To play the original game again, clear the launch options."
+say "Then press Play as usual. The optional tweaks are on the main menu: Brutal Tweaks."
+say "To play the original game again, clear the launch options."

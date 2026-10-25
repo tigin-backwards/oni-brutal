@@ -334,11 +334,14 @@ implementations, one functional specification per area. The implementations may 
 (UI shaders, default resources) remain the only Unity data, and they are read from the user's
 install.
 
-## Game tweaks (opt-in, separate from the engine)
+## Game tweaks (separate from the engine)
 
-`--game-tweak NAME` (repeatable, or `all`) applies changes to Klei's own code (Harmony patches in
-`src/OniBrutal.Host/GameTweaks`). The engine reproduces Unity; these change how the game does
-something without changing what it produces, and each is off unless asked for. Measured on U57:
+Game tweaks are changes to Klei's own code (Harmony patches in `src/OniBrutal.Host/GameTweaks`
+and `src/OniBrutal.GameTweaks`). The engine reproduces Unity; these change how the game does
+something, mostly without changing what it produces. Players choose them on the main menu's
+Brutal Tweaks screen (ARCHITECTURE §6, "Player options"): by default every tweak but those that
+change behaviour (`--game-tweak exact`); `--game-tweak NAME|-NAME|all|exact|none` on the command
+line sets them for a run, and test runs pass `none` first (`scripts/run.sh`). Measured on U57:
 - `fast-save-compression`: saves compressed and decompressed with .NET's zlib instead of
   Ionic.Zlib, the same zlib format (the original game loads these saves, and ours the
   original's); compressing 1.3–1.5 s instead of 5.0–5.5, decompressing 1.1–1.5 instead of
@@ -377,7 +380,7 @@ unchanged.
   partitioner lookups, decor and radiation, lags its place in the conveyor's flow; the flow
   itself is unaffected. U57: about 2.9 ms a frame (conveyor render tick, cell-change monitor,
   animation and collider updates). Built against the game's own types in
-  `src/OniBrutal.GameTweaks`, loaded only when one of its tweaks is asked for.
+  `src/OniBrutal.GameTweaks`, whose patches are made only when the tweak is on.
 
 - `fast-save-type-checks`: SaveLoadRoot.SaveWithoutTransform's per-component attribute check
   (Type.IsDefined, which reads metadata each time) and type name (Type.ToString, a new string

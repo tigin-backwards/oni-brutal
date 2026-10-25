@@ -44,11 +44,16 @@ are `--log FILE`, `--headless --frames N`, `--capture FRAME:PATH` and `--max-fra
 Unity's `-screen-width`, `-screen-height` and `-window-mode` work too. `scripts/run.sh --help`
 lists everything.
 
+These runs have no game tweaks unless they name some (`--game-tweak exact`, …): the scripts pass
+`--game-tweak none` first, so neither the player's defaults nor a Brutal Tweaks settings file in
+the run home changes what a test measures. `ONI_TWEAK_SETTINGS=1` leaves that out, to try the
+main menu's Brutal Tweaks screen as a player has it.
+
 The offline stub says you own the base game, with no DLC and no Workshop items. It's for testing
 on machines without Steam, not for playing.
 
 To play through Steam like a player does, run `./setup.sh`. It builds a self-contained player
-into `out/player` and prints the launch options line (`OniBrutal --game-tweak exact -- %command%`).
+into `out/player` and prints the launch options line (`OniBrutal -- %command%`).
 
 ## Releases
 

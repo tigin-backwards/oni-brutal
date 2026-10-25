@@ -86,7 +86,7 @@ New-Item -ItemType Directory -Force (Split-Path $player) | Out-Null
 Copy-Item -Recurse $built $player
 
 $exe = Join-Path $player 'OniBrutal.exe'
-$launch = "`"$exe`" --game-tweak exact -- %command%"
+$launch = "`"$exe`" -- %command%"
 
 # What each Steam account on this machine has as the game's launch options, read (never written)
 # from its localconfig.vdf: Steam keeps them under Software\Valve\Steam\apps\457140, and the
@@ -118,18 +118,26 @@ if ($steam) {
 }
 # Set: the options start this player for the game (other options of the user's may be there too).
 function Is-Set($options) { $options -and $options.Contains("`"$exe`"") -and $options.Contains('%command%') }
+# Options from before the Brutal Tweaks screen: they still work, and win over the screen.
+function Says-Set($a) {
+    Write-Host "Steam already starts Oxygen Not Included on oni-brutal for $($a.Persona)." -ForegroundColor Green
+    if ($a.Options -match '--game-tweak|--splash|--frame-stats') {
+        Write-Host "  Its launch options choose the tweaks, so the game's Brutal Tweaks screen can't change those."
+        Write-Host "  To choose them in the game instead, set the launch options to: $launch"
+    }
+}
 $unset = @($accounts | Where-Object { -not (Is-Set $_.Options) })
 
 Write-Host ''
 if ($accounts.Count -gt 0 -and $unset.Count -eq 0) {
-    foreach ($a in $accounts) { Write-Host "Steam already starts Oxygen Not Included on oni-brutal for $($a.Persona)." -ForegroundColor Green }
+    foreach ($a in $accounts) { Says-Set $a }
     Write-Host ''
-    Write-Host 'Done. Nothing else to do: press Play in Steam.'
+    Write-Host 'Done. Nothing else to do: press Play in Steam. The optional tweaks are on the main menu: Brutal Tweaks.'
     Write-Host 'To play the original game again, clear the launch options (right-click Oxygen Not Included -> Properties).'
     Finish 0
 }
 foreach ($a in $accounts) {
-    if (Is-Set $a.Options) { Write-Host "Steam already starts Oxygen Not Included on oni-brutal for $($a.Persona)." -ForegroundColor Green }
+    if (Is-Set $a.Options) { Says-Set $a }
     elseif ($a.Options) { Write-Host "$($a.Persona): the launch options are set to something else: $($a.Options)" -ForegroundColor Yellow }
     else { Write-Host "$($a.Persona): no launch options yet." -ForegroundColor Yellow }
 }
@@ -141,5 +149,6 @@ Write-Host 'Properties -> Launch Options, and paste them with Ctrl+V. They are:'
 Write-Host ''
 Write-Host "    $launch" -ForegroundColor Green
 Write-Host ''
-Write-Host 'Then press Play as usual. To play the original game again, clear the launch options.'
+Write-Host 'Then press Play as usual. The optional tweaks are on the main menu: Brutal Tweaks.'
+Write-Host 'To play the original game again, clear the launch options.'
 Finish 0

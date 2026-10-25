@@ -164,8 +164,10 @@ reads thousands of scattered objects, and none takes more than a couple of milli
 
 ## The tweaks
 
-All of them are opt-in (`--game-tweak NAME`). The last column says whether the game's results
-stay exactly the same; the two that don't are left out of `--game-tweak exact`. The before and
+Players turn them on and off on the main menu's Brutal Tweaks screen; those whose results stay
+exactly the same are on by default (`--game-tweak exact`), and `--game-tweak NAME` names them on
+the command line. The last column says whether the game's results stay exactly the same; those
+that don't are left out of `--game-tweak exact`. The before and
 after times were measured on Linux under WSL2, where the game's code ran about half as fast.
 
 | Tweak | Before → after | Results |

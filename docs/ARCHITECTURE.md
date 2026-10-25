@@ -983,6 +983,25 @@ path and quits. Ours waits for the player to exit and starts it again with the a
 started with (recorded by the host in `ONI_BRUTAL_RESTART_ARGS`, shell-quoted, and
 `ONI_BRUTAL_RESTART_ARGV`, JSON, with `ONI_BRUTAL_RESTART_PID`).
 
+**Player options (Brutal Tweaks).** The game tweaks (`GameTweakNames`), the loading splash and
+frame stats come from three places, later ones winning: built-in defaults (every tweak but
+`ChangingBehaviour`'s, as `--game-tweak exact`; no splash; no frame stats), the settings file
+`<persistentDataPath>/oni-brutal/settings.json` (`PlayerSettings`: only the choices that differ
+from the defaults, so a default changed by an update reaches everyone who has not chosen
+otherwise; a run home has its own), and the command line (`EffectiveOptions`). A command line
+with any `--game-tweak` value sets the whole set of tweaks for the run (`exact`, `all`, `none`,
+names, `-NAME`), `--splash moo|none` the splash, `--frame-stats` the frame stats. The start of the
+log names the file and each option with where it came from. The main menu's **Brutal Tweaks**
+button, directly below Mods, opens a screen (`src/OniBrutal.GameTweaks/BrutalTweaksMenu.cs`) made
+of the game's own UI: the Mods screen's prefab instantiated inactive, its `ModsScreen` swapped for
+`BrutalTweaksScreen` before it wakes, and the menu's button prefab and style for the button. It
+lists every option from that list with a toggle and a line on what it does, the tweaks that
+change gameplay labelled so, and rows the command line set dimmed and fixed; "Restart to apply"
+writes the file and restarts through `App.Restart` (the Restarter above), and the restarted player
+reads it with the same command line. Test runs pin the tweaks: `scripts/run.sh` and
+`scripts/run-windows.sh` pass `--game-tweak none` first, so a run has exactly the tweaks its own
+arguments name.
+
 Test runs (not the product): `--run-home DIR` keeps a run's per-user data under DIR (Unity's
 paths, and on Windows the Documents and local application data folders the game asks .NET for),
 `--audio-wav DIR` sends the game's audio to `DIR/fmodoutput.wav` (FMOD's WAV writer) instead of

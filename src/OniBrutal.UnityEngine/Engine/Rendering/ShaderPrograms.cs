@@ -210,7 +210,8 @@ namespace OniBrutal.Engine.Rendering
         }
 
         /// A legacy pass's OpenGLCore programs: their global and local keyword indices name
-        /// keywords through the pass's name table.
+        /// keywords through the pass's name table (before Unity 2019.1, which brought local
+        /// keywords, one list of indices does).
         public static ProgramVariant[] LegacyVariants(Fields pass)
         {
             var names = new Dictionary<int, string>();
@@ -220,7 +221,8 @@ namespace OniBrutal.Engine.Rendering
             {
                 if (!IsGlCore(Convert.ToInt32(sub["m_GpuProgramType"]))) continue;
                 var keywords = new List<string>();
-                foreach (var list in new[] { "m_GlobalKeywordIndices", "m_LocalKeywordIndices" })
+                var lists = sub.Contains("m_GlobalKeywordIndices") ? new[] { "m_GlobalKeywordIndices", "m_LocalKeywordIndices" } : new[] { "m_KeywordIndices" };
+                foreach (var list in lists)
                     foreach (var k in sub.Get<ushort[]>(list) ?? Array.Empty<ushort>())
                         keywords.Add(names.TryGetValue(k, out var name) ? name : throw new InvalidDataException($"Shader pass keyword index {k} has no name."));
                 result.Add(new ProgramVariant((int)Convert.ToUInt32(sub["m_BlobIndex"]), keywords.ToArray()));

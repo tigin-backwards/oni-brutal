@@ -7,7 +7,8 @@ using OniBrutal.Assets.TypeTrees;
 
 namespace OniBrutal.Assets.Files
 {
-    /// A Unity SerializedFile (format version 22: scenes, .assets, bundle CABs).
+    /// A Unity SerializedFile (format version 22: scenes, .assets, bundle CABs; mods' bundles back
+    /// to 17, Unity 2018.3).
     public sealed class SerializedFile
     {
         public sealed record SerializedType(int ClassId, bool IsStripped, short ScriptTypeIndex, TypeTreeNode? Tree);
@@ -69,9 +70,11 @@ namespace OniBrutal.Assets.Files
             r.ReadUInt32(); // file size (legacy)
             Version = (int)r.ReadUInt32();
             dataOffset = r.ReadUInt32();
-            // 20 and 21 (Unity 2019.3-2020.x: mods' older bundles) keep the 32-bit header; 22 added
-            // 64-bit sizes after it. Type trees and reference types read the same from 20 on.
-            if (Version < 20) throw new InvalidDataException($"{Name}: SerializedFile version {Version} is not supported (20+).");
+            // 17 to 21 (Unity 2018.3-2020.x: mods' older bundles) keep the 32-bit header; 22 added
+            // 64-bit sizes after it. Type trees and reference types read the same from 20 on; before
+            // 20 a file has no reference types and its types no dependencies, and before 19 a type
+            // tree node has no reference type hash.
+            if (Version < 17) throw new InvalidDataException($"{Name}: SerializedFile version {Version} is not supported (17+).");
             bigEndianData = r.ReadByte() != 0;
             r.Skip(3);
             if (Version >= 22)
@@ -118,8 +121,11 @@ namespace OniBrutal.Assets.Files
                 Externals.Add(new External(r.ReadCString(), guid, type));
             }
 
-            int refTypeCount = r.ReadInt32();
-            for (int i = 0; i < refTypeCount; i++) ReadType(r, isRefType: true);
+            if (Version >= 20)
+            {
+                int refTypeCount = r.ReadInt32();
+                for (int i = 0; i < refTypeCount; i++) ReadType(r, isRefType: true);
+            }
             r.ReadCString(); // user information
         }
 
@@ -133,12 +139,12 @@ namespace OniBrutal.Assets.Files
             TypeTreeNode? tree = null;
             if (EnableTypeTree)
             {
-                tree = ReadTypeTree(r);
+                tree = ReadTypeTree(r, nodeHash: Version >= 19);
                 if (isRefType)
                 {
                     r.ReadCString(); r.ReadCString(); r.ReadCString(); // class, namespace, assembly
                 }
-                else
+                else if (Version >= 20)
                 {
                     int depCount = r.ReadInt32();
                     r.Skip(depCount * 4);
@@ -149,7 +155,7 @@ namespace OniBrutal.Assets.Files
 
         /// Blob format: node count, string buffer size, fixed-size nodes, string buffer. Name and
         /// type offsets with the top bit set index Unity's common strings table.
-        static TypeTreeNode ReadTypeTree(DataReader r)
+        static TypeTreeNode ReadTypeTree(DataReader r, bool nodeHash)
         {
             int nodeCount = r.ReadInt32();
             int stringSize = r.ReadInt32();
@@ -157,7 +163,7 @@ namespace OniBrutal.Assets.Files
             for (int i = 0; i < nodeCount; i++)
             {
                 raw[i] = (r.ReadUInt16(), r.ReadByte(), r.ReadByte(), r.ReadUInt32(), r.ReadUInt32(), r.ReadInt32(), r.ReadInt32(), r.ReadUInt32());
-                r.ReadUInt64(); // ref type hash
+                if (nodeHash) r.ReadUInt64(); // ref type hash
             }
             var strings = r.ReadBytes(stringSize);
             string Str(uint offset)

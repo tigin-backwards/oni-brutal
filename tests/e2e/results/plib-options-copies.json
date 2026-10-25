@@ -1,0 +1,75 @@
+{
+ "spec": "plib-options-copies.yaml",
+ "mods": [
+  "3793108683",
+  "3792767193",
+  "2778941969",
+  "2018291283"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "from a colony to the main menu's Mods screen beside two mods that patch their own PLib copy's FillModOptions: Ultimate Power Tweaks', Advanced Mopping's, Better Farming Effects and Tweaks' and Mod Updater's options dialogs open and close; the title as in the original (issue #14, ARCHITECTURE D33)",
+ "updated": "2026-10-25",
+ "commit": "e0a7971",
+ "mod_dlls": {
+  "3793108683": {
+   "AdvancedMopping.dll": "1f7c861f9d00f9d6adb4b62557b73076b7a9b581be1cd64e1bb448fb7151a793"
+  },
+  "3792767193": {
+   "UltimatePowerTweaks.dll": "e7e9bb65a4272926db00320c53da3b983b75d35dd9c8b14ca4053997cc1bf776"
+  },
+  "2778941969": {
+   "BetterPlantTending.dll": "4dd7e681640726160bc103a6ff952ac2f2edb0dc0eed09712a4757916ea84fde"
+  },
+  "2018291283": {
+   "ModUpdateDate.dll": "afbebdd8abfce0a72e40998575ee32a7a614f33d366a9917e075d652da33f616"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-140919-13475ed8",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T14:09:19",
+    "lane": 20,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-141046-94554e48",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T14:10:46",
+    "lane": 20,
+    "reference_run": "20261025-140919-13475ed8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "upt-title": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261025-141046-94554e48",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-25T14:12:36",
+    "lane": 20,
+    "reference_run": "20261025-140919-13475ed8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "upt-title": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

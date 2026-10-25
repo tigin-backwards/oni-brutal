@@ -6,9 +6,9 @@
  "verdict": "played",
  "why": "passed once in the original and twice in ours",
  "findings": [],
- "note": "a smaller spec (tending needs a farm station and a farmer): a spawned wild Oxyfern and Buddy Bud get the mod's farm-tinkerable, tended and extra-seed components, the Oxyfern's oxygen leaves half a cell higher, and its details screen opens on a click, as in the original",
- "updated": "2026-10-24",
- "commit": "10841b3",
+ "note": "a smaller spec (tending needs a farm station and a farmer): a spawned wild Oxyfern and Buddy Bud get the mod's farm-tinkerable, tended and extra-seed components, the Oxyfern's oxygen leaves half a cell higher, and its details screen opens on a click; from the main menu's Mods screen its PLib options dialog opens with its entries and closes; as in the original",
+ "updated": "2026-10-25",
+ "commit": "e0a7971",
  "mod_dlls": {
   "2778941969": {
    "BetterPlantTending.dll": "4dd7e681640726160bc103a6ff952ac2f2edb0dc0eed09712a4757916ea84fde"
@@ -17,37 +17,45 @@
  "runs": {
   "original": [
    {
-    "run": "20261024-041938-c43b44",
+    "run": "20261025-141413-a8f3efd2",
     "index": 1,
     "verdict": "pass",
-    "date": "2026-10-24T04:24:08",
-    "lane": 13,
+    "date": "2026-10-25T14:14:13",
+    "lane": 20,
     "signatures": 0
    }
   ],
   "ours": [
    {
-    "run": "20261024-043120-1ebc65",
-    "index": 2,
+    "run": "20261025-141624-21d705a0",
+    "index": 1,
     "verdict": "pass",
-    "date": "2026-10-24T04:39:44",
-    "lane": 13,
-    "reference_run": "20261024-041938-c43b44",
+    "date": "2026-10-25T14:16:24",
+    "lane": 20,
+    "reference_run": "20261025-141413-a8f3efd2",
     "new_signatures": 0,
     "findings": [],
-    "ui_dump": {},
+    "ui_dump": {
+     "options-title": {
+      "differences": 0
+     }
+    },
     "shots": {}
    },
    {
-    "run": "20261024-043120-1ebc65",
-    "index": 1,
+    "run": "20261025-141624-21d705a0",
+    "index": 2,
     "verdict": "pass",
-    "date": "2026-10-24T04:39:43",
-    "lane": 12,
-    "reference_run": "20261024-041938-c43b44",
+    "date": "2026-10-25T14:17:05",
+    "lane": 20,
+    "reference_run": "20261025-141413-a8f3efd2",
     "new_signatures": 0,
     "findings": [],
-    "ui_dump": {},
+    "ui_dump": {
+     "options-title": {
+      "differences": 0
+     }
+    },
     "shots": {}
    }
   ]

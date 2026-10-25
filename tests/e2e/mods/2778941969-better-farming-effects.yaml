@@ -14,7 +14,8 @@
 # A smaller spec: tending needs a Farm Station, its tools and a farming Duplicant. setup
 # spawns a wild Oxyfern and a Buddy Bud (decorative) on the floor of the dug-out corridor west
 # of the printing pod; once the game has run, both carry the mod's components, and the
-# Oxyfern's details screen opens on a click.
+# Oxyfern's details screen opens on a click. Then, from the main menu's Mods screen, the mod's
+# Options opens its PLib options dialog, and Cancel closes it.
 from: early-base
 mods: [2778941969]
 setup:
@@ -37,3 +38,21 @@ steps:
       "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Oxyfern"}
   - expect_state:
       "selected:GetComponent<Tinkerable>.tinkerMaterialTag": FarmStationTools
+  # The options, from the main menu's Mods screen.
+  - key: {code: Escape}
+  - key: {code: Escape}
+  - ui_wait: {path: "**/PauseScreen/**/Main MenuButton", cond: stable}
+  - click: {ui: "**/PauseScreen/**/Main MenuButton"}
+  - ui_wait: {path: "**/ConfirmDialog/GameObject/Panel/ConfigurableButton", cond: stable}
+  - click: {ui: "**/ConfirmDialog/GameObject/Panel/ConfigurableButton"}   # Quit Without Saving
+  - ui_wait: {path: "**/MainMenu_SpacedOut/MainMenuMenubar/MainMenuButtons", cond: stable, frames: 3000}
+  - click: {text: "MODS", under: "**/MainMenuButtons"}
+  - ui_wait: {path: "**/ModsScreen/Panel", cond: stable}
+  - click: {ui: "**/ModsScreen/**/Content/Better Farming Effects and Tweaks/ModSettingsButton"}
+  - ui_wait: {path: "**/ModOptions", cond: stable}
+  - expect_ui:
+      "**/ModOptions/Title/Text": {text: "Options for Better Farming Effects and Tweaks"}
+      "**/ModOptions/Body/**/Entries/Label/Text": {any_text: "~Farmer's Touch"}
+  - ui_dump: {name: options-title, root: "**/ModOptions/Title"}
+  - click: {text: "CANCEL", under: "**/ModOptions"}
+  - ui_wait: {path: "**/ModOptions", cond: gone}

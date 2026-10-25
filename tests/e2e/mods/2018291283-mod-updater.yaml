@@ -11,7 +11,7 @@
 #
 # Every mod of a run is a local one (Workshop builds installed as local mods), so each of the
 # four rows (the mod, OniMcp, E2eDriver) gets the disabled check mark, and no Update All
-# button appears.
+# button appears. The row's Options opens the mod's PLib options dialog, and Cancel closes it.
 from: early-base
 mods: [2018291283]
 steps:
@@ -28,3 +28,10 @@ steps:
       "**/ModsScreen/Panel/ListView/Files/Viewport/Content/Mod Updater/UpdateMod": {interactable: false}
       "**/ModsScreen/**/UpdateAll": {exists: false}
   - ui_dump: {name: row, root: "**/ModsScreen/Panel/ListView/Files/Viewport/Content/Mod Updater"}
+  - click: {ui: "**/ModsScreen/**/Content/Mod Updater/ModSettingsButton"}
+  - ui_wait: {path: "**/ModOptions", cond: stable}
+  - expect_ui:
+      "**/ModOptions/Title/Text": {text: "~Mod Updater"}
+  - ui_dump: {name: options, root: "**/ModOptions"}
+  - click: {text: "CANCEL", under: "**/ModOptions"}
+  - ui_wait: {path: "**/ModOptions", cond: gone}

@@ -38,6 +38,10 @@ def read_results(folder):
             record = json.load(f)
         if record.get('verdict') not in ('played', 'warning', 'failed'):
             continue
+        # A spec outside mods/ checks an engine fix with the mods it needs
+        # (plib-options-copies.yaml), not those mods.
+        if not record.get('spec', '').startswith('mods/'):
+            continue
         # A spec is the record of the mod it is named for (mods/ID-slug.yaml); the other mods it
         # installs (a base mod an addon needs) are not played by it.
         named = os.path.basename(record.get('spec', '')).split('-')[0]

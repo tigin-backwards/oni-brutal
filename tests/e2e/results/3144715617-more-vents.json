@@ -1,0 +1,63 @@
+{
+ "spec": "mods/3144715617-more-vents.yaml",
+ "mods": [
+  "3144715617"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "from a colony to New Game, Survival, Classic: More Vents chosen by typing its coordinate (its asteroid list dumped), launched and embarked: eight worlds, the 220 x 360 start of the mod's cold subworlds, its teleport world and regolith moon, its geysers and heat sink among the spawners; its template's unknown element (Katairite) logged as in the original",
+ "updated": "2026-10-24",
+ "commit": "95d725f",
+ "mod_dlls": {
+  "3144715617": {
+   "MoreVents.dll": "b75e6c79d2e2cc2a98aaab10f91bed1ec7e2ccee6fb866b47cc93269a25e576d"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-213453-7f7026a0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T21:58:59",
+    "lane": 16,
+    "signatures": 1
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-224402-e66003f8",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T22:44:07",
+    "lane": 17,
+    "reference_run": "20261024-213453-7f7026a0",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "asteroids": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261024-224402-e66003f8",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T22:45:04",
+    "lane": 17,
+    "reference_run": "20261024-213453-7f7026a0",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "asteroids": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

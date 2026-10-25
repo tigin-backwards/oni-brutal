@@ -5,5 +5,5 @@ SAVE="${ONI_M9_SAVE:-$HOME/projects/onimaxxing/saves/DeCrew.sav}"
 FRAMES=1900
 DUMPS="500 600 1700 1880"
 ARGS=(--input 450:resize:800,600 --input 550:resize:1024,768
-      --input 620:click:891,197 --input 1600:click:511,500 --input 1750:resize:800,600)
+      --input 620:click:891,176 --input 1600:click:511,500 --input 1750:resize:800,600)
 REQUIRE=("multi-target framebuffer deleted with its textures") # the in-game resize recreates the world's targets

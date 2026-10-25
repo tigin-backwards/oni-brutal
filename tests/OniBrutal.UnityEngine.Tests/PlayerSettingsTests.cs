@@ -1,0 +1,183 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using OniBrutal.Host;
+using Xunit;
+
+namespace OniBrutal.Tests
+{
+    /// The Brutal Tweaks options (src/OniBrutal.Host/PlayerSettings.cs, compiled in here):
+    /// built-in defaults, then the settings file, then the command line; and the file's round trip.
+    public class PlayerSettingsTests
+    {
+        static readonly string[] All = ["fast-a", "fast-b", "slow-c", "off-d"];
+        static readonly string[] Changing = ["slow-c", "off-d"];
+
+        static EffectiveOptions Resolve(PlayerSettings file, string[] tweaks = null, string splash = null, bool frameStats = false)
+            => EffectiveOptions.Resolve(All, Changing, tweaks ?? [], splash, frameStats, file);
+
+        [Fact]
+        public void DefaultsAreExactWithoutSplashOrFrameStats()
+        {
+            var o = Resolve(new PlayerSettings());
+            Assert.Equal(["fast-a", "fast-b"], o.EnabledTweaks);
+            Assert.All(All, n => Assert.Equal(OptionSource.Default, o.Tweaks[n].Source));
+            Assert.Equal(("none", OptionSource.Default), (o.Splash, o.SplashSource));
+            Assert.Equal((false, OptionSource.Default), (o.FrameStats, o.FrameStatsSource));
+        }
+
+        [Fact]
+        public void SettingsFileOverridesDefaultsPerTweak()
+        {
+            var file = new PlayerSettings { Splash = "moo", FrameStats = true };
+            file.GameTweaks["fast-b"] = false;
+            file.GameTweaks["slow-c"] = true;
+            var o = Resolve(file);
+            Assert.Equal(["fast-a", "slow-c"], o.EnabledTweaks);
+            Assert.Equal(OptionSource.Default, o.Tweaks["fast-a"].Source);
+            Assert.Equal(OptionSource.SettingsFile, o.Tweaks["fast-b"].Source);
+            Assert.Equal(OptionSource.SettingsFile, o.Tweaks["slow-c"].Source);
+            Assert.Equal(("moo", OptionSource.SettingsFile), (o.Splash, o.SplashSource));
+            Assert.Equal((true, OptionSource.SettingsFile), (o.FrameStats, o.FrameStatsSource));
+        }
+
+        [Fact]
+        public void CommandLineTweaksReplaceTheFilesWholeSet()
+        {
+            var file = new PlayerSettings();
+            file.GameTweaks["slow-c"] = true;
+            file.GameTweaks["fast-a"] = false;
+            Assert.Equal(["fast-a", "fast-b"], Resolve(file, ["exact"]).EnabledTweaks);
+            Assert.Equal(["fast-a", "fast-b", "slow-c", "off-d"], Resolve(file, ["all"]).EnabledTweaks);
+            Assert.Equal(["fast-b", "slow-c"], Resolve(file, ["exact", "-fast-a", "slow-c"]).EnabledTweaks);
+            Assert.Equal(["fast-b"], Resolve(file, ["fast-b"]).EnabledTweaks);
+            Assert.All(All, n => Assert.Equal(OptionSource.CommandLine, Resolve(file, ["fast-b"]).Tweaks[n].Source));
+        }
+
+        [Fact]
+        public void NoneMeansNoTweaksWhateverTheFileAndDefaultsSay()
+        {
+            var file = new PlayerSettings();
+            file.GameTweaks["slow-c"] = true;
+            Assert.Empty(Resolve(file, ["none"]).EnabledTweaks);
+            Assert.Empty(Resolve(new PlayerSettings(), ["none"]).EnabledTweaks);
+            // Test scripts put `none` first; a run that names tweaks after it gets just those.
+            Assert.Equal(["fast-a", "fast-b"], Resolve(file, ["none", "exact"]).EnabledTweaks);
+            Assert.Equal(["off-d"], Resolve(file, ["none", "off-d"]).EnabledTweaks);
+        }
+
+        [Fact]
+        public void CommandLineSplashAndFrameStatsOverrideTheFile()
+        {
+            var file = new PlayerSettings { Splash = "moo", FrameStats = true };
+            var o = Resolve(file, splash: "none", frameStats: false);
+            Assert.Equal(("none", OptionSource.CommandLine), (o.Splash, o.SplashSource));
+            // --frame-stats only turns them on; without it the file decides.
+            Assert.Equal((true, OptionSource.SettingsFile), (o.FrameStats, o.FrameStatsSource));
+            o = Resolve(new PlayerSettings(), splash: "moo", frameStats: true);
+            Assert.Equal(("moo", OptionSource.CommandLine), (o.Splash, o.SplashSource));
+            Assert.Equal((true, OptionSource.CommandLine), (o.FrameStats, o.FrameStatsSource));
+        }
+
+        [Fact]
+        public void UnknownTweaksInTheFileAreReportedAndKept()
+        {
+            var file = PlayerSettings.Parse("""{ "gameTweaks": { "gone-tweak": true, "fast-a": false } }""");
+            var o = Resolve(file);
+            Assert.Equal(["gone-tweak"], o.UnknownTweaks);
+            Assert.Equal(["fast-b"], o.EnabledTweaks);
+            var saved = EffectiveOptions.Apply(file, Changing, new Dictionary<string, bool> { ["fast-b"] = false }, null, null);
+            Assert.True(saved.GameTweaks["gone-tweak"]);
+        }
+
+        [Fact]
+        public void ApplyRecordsOnlyWhatDiffersFromTheDefaults()
+        {
+            var file = new PlayerSettings { Splash = "moo" };
+            file.GameTweaks["fast-a"] = false;
+            file.GameTweaks["slow-c"] = true;
+            // The screen's rows: fast-a back to its default, off-d on, frame stats on, splash off;
+            // slow-c is not among them (the command line set it), so the file keeps it.
+            var saved = EffectiveOptions.Apply(file, Changing,
+                new Dictionary<string, bool> { ["fast-a"] = true, ["fast-b"] = true, ["off-d"] = true }, splashMoo: false, frameStats: true);
+            Assert.Equal(new Dictionary<string, bool> { ["off-d"] = true, ["slow-c"] = true }, saved.GameTweaks);
+            Assert.Null(saved.Splash);
+            Assert.True(saved.FrameStats);
+            saved = EffectiveOptions.Apply(saved, Changing, new Dictionary<string, bool>(), splashMoo: null, frameStats: false);
+            Assert.Null(saved.FrameStats);
+        }
+
+        [Fact]
+        public void FileRoundTrip()
+        {
+            var dir = Path.Combine(Path.GetTempPath(), "oni-brutal-settings-" + Guid.NewGuid().ToString("N"));
+            try
+            {
+                var path = PlayerSettings.PathIn(dir);
+                Assert.Equal(Path.Combine(dir, "oni-brutal", "settings.json"), path);
+                var missing = PlayerSettings.Read(path, out var problem);
+                Assert.Null(problem);
+                Assert.Empty(missing.GameTweaks);
+                Assert.Null(missing.Splash);
+                Assert.Null(missing.FrameStats);
+
+                var settings = new PlayerSettings { Splash = "moo", FrameStats = true };
+                settings.GameTweaks["slow-c"] = true;
+                settings.GameTweaks["fast-b"] = false;
+                settings.Write(path);
+                Assert.False(File.Exists(path + ".tmp"));
+                var back = PlayerSettings.Read(path, out problem);
+                Assert.Null(problem);
+                Assert.Equal(settings.GameTweaks, back.GameTweaks);
+                Assert.Equal("moo", back.Splash);
+                Assert.True(back.FrameStats);
+                Assert.Equal(settings.ToJson(), back.ToJson());
+
+                // An empty file records nothing.
+                new PlayerSettings().Write(path);
+                Assert.Equal("{}\n", File.ReadAllText(path));
+            }
+            finally
+            {
+                if (Directory.Exists(dir)) Directory.Delete(dir, recursive: true);
+            }
+        }
+
+        [Theory]
+        [InlineData("not json")]
+        [InlineData("[1, 2]")]
+        [InlineData("""{ "gameTweaks": { "fast-a": "yes" } }""")]
+        [InlineData("""{ "splash": "cows" }""")]
+        public void AnUnreadableFileCountsAsEmpty(string content)
+        {
+            var dir = Path.Combine(Path.GetTempPath(), "oni-brutal-settings-" + Guid.NewGuid().ToString("N"));
+            try
+            {
+                var path = PlayerSettings.PathIn(dir);
+                Directory.CreateDirectory(Path.GetDirectoryName(path));
+                File.WriteAllText(path, content);
+                var settings = PlayerSettings.Read(path, out var problem);
+                Assert.NotNull(problem);
+                Assert.Empty(settings.GameTweaks);
+                Assert.Null(settings.Splash);
+                Assert.Equal(["fast-a", "fast-b"], Resolve(settings).EnabledTweaks);
+            }
+            finally
+            {
+                if (Directory.Exists(dir)) Directory.Delete(dir, recursive: true);
+            }
+        }
+
+        [Fact]
+        public void TheLogSaysWhereEachOptionCameFrom()
+        {
+            var file = new PlayerSettings();
+            file.GameTweaks["fast-b"] = false;
+            Assert.Equal(["game tweaks on (default): fast-a", "game tweaks off (default): slow-c, off-d", "game tweaks off (the settings file): fast-b",
+                          "splash none (default)", "frame stats off (default)"], Resolve(file).Describe().ToArray());
+            Assert.Equal(["game tweaks from the command line (--game-tweak none): none", "splash moo (the command line)", "frame stats on (the command line)"],
+                Resolve(file, ["none"], "moo", true).Describe().ToArray());
+        }
+    }
+}

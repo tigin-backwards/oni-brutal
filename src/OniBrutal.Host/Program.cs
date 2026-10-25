@@ -45,6 +45,18 @@ namespace OniBrutal.Host
             EngineLog.Engine($"OniBrutal host starting: commit={commit} exe={Environment.ProcessPath} game={options.GameDir} .NET={Environment.Version}");
             StartupStats.Mark("host starts (runtime up)");
             UnhandledExceptions.Install();
+            // The options the main menu's Brutal Tweaks screen sets: defaults, then its settings
+            // file in the per-user folder, then the command line.
+            var settingsPath = PlayerSettings.PathIn(EngineConfig.PersistentDataPath);
+            var settings = PlayerSettings.Read(settingsPath, out var settingsProblem);
+            EngineLog.Engine(settingsProblem != null ? $"settings: {settingsPath} could not be read, so defaults apply: {settingsProblem}"
+                : File.Exists(settingsPath) ? $"settings: {settingsPath}" : $"settings: {settingsPath} (none; defaults apply)");
+            var effective = EffectiveOptions.Resolve(GameTweaks.GameTweakNames.All, GameTweaks.GameTweakNames.ChangingBehaviour,
+                options.GameTweaks, options.Splash, options.FrameStats, settings);
+            foreach (var line in effective.Describe()) EngineLog.Engine("option " + line);
+            if (effective.UnknownTweaks.Count > 0) EngineLog.Engine($"settings: not tweaks of this player, ignored: {string.Join(", ", effective.UnknownTweaks)}");
+            options.Splash = effective.Splash;
+            OniBrutal.Engine.PlayerLoop.FrameStats = effective.FrameStats;
 
             AssemblyPolicy.Install(layout, AppContext.BaseDirectory, options.UiPackages, options.ShippedUiPackages);
             if (options.CheckNatives) return NativeCheck.Run(layout, AssemblyPolicy.RuntimeAssemblyPaths(), options.NativeArch ?? AssemblyPolicy.ProcessCpu, options.NativeDir);
@@ -96,7 +108,8 @@ namespace OniBrutal.Host
                 MonoEnumFormat.Install();
                 // Special folders' paths are given whether or not they exist, as Mono gives them (D24).
                 MonoFolderPaths.Install();
-                GameTweaks.GameTweaks.Install(options.GameTweaks);
+                GameTweaks.GameTweaks.Install(effective.EnabledTweaks.ToHashSet(StringComparer.Ordinal));
+                BrutalTweaksMenu.Install(effective, settings, settingsPath);
                 StateMachineSaveNames.Install(dataDir, AppContext.BaseDirectory);
                 StartupStats.Mark("host patches installed");
             });
@@ -1006,8 +1019,9 @@ namespace OniBrutal.Host
         /// packages/ next to the host; ShippedUiPackages loads Unity's from Managed/ instead.
         public string? UiPackages;
         public bool ShippedUiPackages;
-        /// Optional changes to the game's own code (GameTweaks), by name.
-        public readonly HashSet<string> GameTweaks = new(StringComparer.Ordinal);
+        /// `--game-tweak` values, in order (GameTweaks, EffectiveOptions): when any is given, they
+        /// alone choose the game tweaks, over the Brutal Tweaks settings.
+        public readonly List<string> GameTweaks = new();
         public bool CheckAssets;
         /// With --check-assets: where to list the script classes the data uses.
         public string? ListDataScripts;
@@ -1034,8 +1048,12 @@ namespace OniBrutal.Host
         /// --background: the window takes no focus and the desktop's mouse and keyboard reach
         /// nothing (test runs on a desktop someone is using: PerfProbe-driven runs).
         public bool Background;
-        /// --splash moo: the player's own loading splash (Gassy Moos falling while it loads).
+        /// --splash moo|none: the player's own loading splash (Gassy Moos falling while it loads),
+        /// over the Brutal Tweaks settings; null when not given (then the effective value).
         public string? Splash;
+        /// --frame-stats: average frame phase times in the log (PlayerLoop.FrameStats), over the
+        /// Brutal Tweaks settings.
+        public bool FrameStats;
         /// Diagnostics (--log-pointer-hits): the UI element under the mouse, logged when it changes.
         public bool LogPointerHits;
         /// Diagnostics (--vsync-count N): the swap interval regardless of the quality settings.
@@ -1109,7 +1127,7 @@ namespace OniBrutal.Host
                         var name = args[++i];
                         if (!OniBrutal.Host.GameTweaks.GameTweakNames.IsKnown(name))
                         {
-                            Console.Error.WriteLine($"Unknown game tweak {name}; known: all, exact (all but {string.Join(", ", OniBrutal.Host.GameTweaks.GameTweakNames.ChangingBehaviour)}), {string.Join(", ", OniBrutal.Host.GameTweaks.GameTweakNames.All)}");
+                            Console.Error.WriteLine($"Unknown game tweak {name}; known: all, none, exact (all but {string.Join(", ", OniBrutal.Host.GameTweaks.GameTweakNames.ChangingBehaviour)}), {string.Join(", ", OniBrutal.Host.GameTweaks.GameTweakNames.All)}");
                             return null;
                         }
                         o.GameTweaks.Add(name);
@@ -1126,7 +1144,14 @@ namespace OniBrutal.Host
                     case "--trace-exceptions": o.TraceExceptions = true; break;
                     case "--gl-debug": o.GlDebug = true; break;
                     case "--background": o.Background = true; break;
-                    case "--splash": o.Splash = args[++i]; break;
+                    case "--splash":
+                        o.Splash = args[++i];
+                        if (!PlayerSettings.IsSplash(o.Splash))
+                        {
+                            Console.Error.WriteLine($"Unknown splash {o.Splash}; known: moo, none");
+                            return null;
+                        }
+                        break;
                     case "--log-pointer-hits": o.LogPointerHits = true; break;
                     case "--vsync-count": o.VSyncCount = int.Parse(args[++i]); break;
                     case "--gpu-profile": o.GpuProfile = true; break;
@@ -1137,7 +1162,7 @@ namespace OniBrutal.Host
                         foreach (var line in File.ReadAllLines(args[++i]))
                             if (line.Trim() is { Length: > 0 } step && !step.StartsWith('#')) o.Input.Add(step);
                         break;
-                    case "--frame-stats": OniBrutal.Engine.PlayerLoop.FrameStats = true; break;
+                    case "--frame-stats": o.FrameStats = true; break;
                     case "--max-frame-rate":
                         {
                             var spec = args[++i].Split(':');
@@ -1209,7 +1234,7 @@ namespace OniBrutal.Host
                     }
                     default:
                         Console.Error.WriteLine($"Unknown option {args[i]}");
-                        Console.Error.WriteLine("usage: OniBrutal [--game DIR] [--log FILE] [--run-home DIR] [--audio-wav DIR] [--headless] [--batchmode] [--frames N] [--native-override NAME=PATH] [--trace-exceptions] [--gl-debug] [--background] [--splash moo] [--log-pointer-hits] [--vsync-count N] [--gpu-profile] [--no-bindless] [--input FRAME:ACTION[:ARGS]] [--input-file PATH] [--frame-stats] [--max-frame-rate N[:FRAMES]] [--dump-render-textures FRAME:DIR] [-screen-width W] [-screen-height H] [-screen-fullscreen 0|1] [-window-mode exclusive|borderless|windowed] [-monitor N] [--check-types] [--ui-packages DIR | --shipped-ui-packages] [--game-tweak NAME|-NAME|all|exact] [--check-assets [--list-data-scripts FILE]] [--check-bind] [--check-shaders] [--check-natives [--native-arch x86_64|arm64] [--native-dir DIR]] [--dump-shader NAME:DIR] [--capture FRAME:PATH[:SCALE]] [--probe-ui FRAME:X,Y] [--dump-ui FRAME:PATH] [--dump-ui-vertices PATH-SUBSTRING] [--dump-hierarchy FRAME:PATH] [--report-builtin-assets FILE] [--dump-component FRAME:PATH|TYPE] [-- STEAM-COMMAND]");
+                        Console.Error.WriteLine("usage: OniBrutal [--game DIR] [--log FILE] [--run-home DIR] [--audio-wav DIR] [--headless] [--batchmode] [--frames N] [--native-override NAME=PATH] [--trace-exceptions] [--gl-debug] [--background] [--splash moo|none] [--log-pointer-hits] [--vsync-count N] [--gpu-profile] [--no-bindless] [--input FRAME:ACTION[:ARGS]] [--input-file PATH] [--frame-stats] [--max-frame-rate N[:FRAMES]] [--dump-render-textures FRAME:DIR] [-screen-width W] [-screen-height H] [-screen-fullscreen 0|1] [-window-mode exclusive|borderless|windowed] [-monitor N] [--check-types] [--ui-packages DIR | --shipped-ui-packages] [--game-tweak NAME|-NAME|all|exact|none] [--check-assets [--list-data-scripts FILE]] [--check-bind] [--check-shaders] [--check-natives [--native-arch x86_64|arm64] [--native-dir DIR]] [--dump-shader NAME:DIR] [--capture FRAME:PATH[:SCALE]] [--probe-ui FRAME:X,Y] [--dump-ui FRAME:PATH] [--dump-ui-vertices PATH-SUBSTRING] [--dump-hierarchy FRAME:PATH] [--report-builtin-assets FILE] [--dump-component FRAME:PATH|TYPE] [-- STEAM-COMMAND]");
                         return null;
                 }
             }

@@ -1,6 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <!-- Game tweaks that need the game's own types (docs/PLAN.md "Game tweaks"): built against the
-       game's assemblies like a mod, loaded by the host only when one of them is asked for. -->
+  <!-- Game tweaks that need the game's own types (docs/PLAN.md "Game tweaks"), and the main menu's
+       Brutal Tweaks screen that chooses them (BrutalTweaksMenu): built against the game's
+       assemblies like a mod, loaded by the host at start-up; a tweak's patches are made only when
+       it is on. -->
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <LangVersion>latest</LangVersion>
@@ -14,5 +16,10 @@
     <Reference Include="$(OniManaged)/Assembly-CSharp.dll" Private="false" />
     <Reference Include="$(OniManaged)/Assembly-CSharp-firstpass.dll" Private="false" />
     <Reference Include="$(OniManaged)/0Harmony.dll" Private="false" />
+    <!-- The screen's widgets (LocText is a TextMeshProUGUI, KImage a UI Image): bound at run time
+         to this project's UI packages, as the game's own assemblies are. -->
+    <Reference Include="$(OniManaged)/UnityEngine.UI.dll" Private="false" />
+    <Reference Include="$(OniManaged)/Unity.TextMeshPro.dll" Private="false" />
+    <Reference Include="$(OniManaged)/UnityEngine.UIModule.dll" Private="false" />
   </ItemGroup>
 </Project>

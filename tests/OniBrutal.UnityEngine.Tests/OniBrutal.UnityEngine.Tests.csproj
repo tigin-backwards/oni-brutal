@@ -26,6 +26,10 @@
     <ProjectReference Include="../../src/Unity.Timeline/Unity.Timeline.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <!-- The host's settings precedence and file (PlayerSettingsTests): plain .NET, compiled in. -->
+    <Compile Include="../../src/OniBrutal.Host/PlayerSettings.cs" Link="Host/PlayerSettings.cs" />
+  </ItemGroup>
+  <ItemGroup>
     <!-- The game's Harmony, as mods patch the engine with it (TmpInputSetupTests). -->
     <Reference Include="0Harmony">
       <HintPath>$(OniGameDir)/OxygenNotIncluded_Data/Managed/0Harmony.dll</HintPath>

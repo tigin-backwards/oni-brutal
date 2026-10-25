@@ -1,0 +1,63 @@
+{
+ "spec": "mods/3503014942-demolior-story-trait.yaml",
+ "mods": [
+  "3503014942"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "from a colony to New Game, Survival, Classic, Terra by its coordinate (the random story traits seeded, Demolior off): on the Story Traits tab its row chosen and its checkbox switched on (the list dumped, as in the original), launched and embarked: the start world has the story trait and the LargeImpactor season",
+ "updated": "2026-10-24",
+ "commit": "9327313",
+ "mod_dlls": {
+  "3503014942": {
+   "DemoliorStoryTrait.dll": "67658aa427b35ba37f67eb15a7bc5fb0ffbae1ad62f7a91e28ea4da297680e18"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-225429-87e4e1d3",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T22:54:29",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-225800-06add5dc",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T22:58:00",
+    "lane": 16,
+    "reference_run": "20261024-225429-87e4e1d3",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "stories": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261024-225800-06add5dc",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T22:58:21",
+    "lane": 17,
+    "reference_run": "20261024-225429-87e4e1d3",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "stories": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

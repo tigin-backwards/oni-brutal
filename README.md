@@ -189,6 +189,13 @@ Built on [BRUTAL](https://github.com/ahwootech/BRUTAL), Copyright (c) 2024 Ahwoo
 Oxygen Not Included is © Klei Entertainment. Moono is unofficial, and not affiliated with or
 endorsed by Klei Entertainment, Unity Technologies, or the Mono project.
 
+Moono is written without Unity's source code: no Unity C# reference source, decompiled Unity
+assemblies or disassembled engine binaries are used. Unity's UI packages (uGUI, TextMeshPro,
+Timeline) are reimplemented clean-room: their behaviour is measured from the outside, written up
+as specs in [docs/cleanroom](docs/cleanroom), and implemented from those specs. Code from
+open-source projects (Mono, Mesa, SGI's GLU) is used under their licences; see
+[NOTICE.txt](NOTICE.txt) and [docs/LICENSING.md](docs/LICENSING.md).
+
 ## Unsigned releases
 
 The releases are not signed, so to Windows every new one is an unknown program from the

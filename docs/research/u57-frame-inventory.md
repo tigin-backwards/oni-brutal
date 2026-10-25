@@ -393,7 +393,10 @@ data-layout spike above), not tweaks.
    the shared-generic type checks 1.92 → 0.01 ms. Verified on 47 million queries
    (ONI_VERIFY_COMPONENT_LAYOUTS=1); peak memory unchanged (14.3 GB against 14.7).
 6. **Studied:** animation updates (above: real work). Cell-change handling (above: real work).
-   Not studied: brain sensors (2.7 ms; critter searches, where gains would change behaviour).
+   Brains: where their time goes, and what the path probes and a smaller reachable area do to
+   it, in [brain-probes.md](brain-probes.md) (2026-10-25: the probes never hold up the main
+   thread; the fetch job inside a Duplicant's update is most of it; on 2 cores a smaller
+   reachable area shortens the frame).
    These are the largest game systems, but the work they do is real; any gain needs the per-object
    counts and change rates measured first.
 

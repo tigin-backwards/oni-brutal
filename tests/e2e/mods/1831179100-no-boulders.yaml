@@ -1,0 +1,50 @@
+# No Boulders (1831179100), class P (a worldgen mod).
+#
+# What it does: a postfix on ProcGen.SettingsCache.GetRandomTraits takes every world trait
+# whose id holds "Boulders" (Small, Medium, Large and Mixed Boulders) out of the traits a world
+# rolls, so no asteroid gets them; the rest of the roll stays.
+# How a player reaches it: any new game whose asteroid would roll a boulder trait; the
+# destination screen lists the asteroid's traits.
+# What changes: the traits a new world gets.
+#
+# From a colony: Main Menu, Quit Without Saving, New Game, Survival, Classic; Arboria at
+# V-FRST-C-12345-0-0-0, whose start asteroid rolls Medium Boulders and Slime Molds without the
+# mod. With it the asteroid's trait list and the generated world have Slime Molds alone.
+# Functional expectations (mod-play-testing.md, "Worldgen mods").
+from: early-base
+mods: [1831179100]
+memory_gb: 8
+steps:
+  - key: {code: Escape}
+  - ui_wait: {path: "**/PauseScreen/**/Main MenuButton", cond: stable}
+  - click: {ui: "**/PauseScreen/**/Main MenuButton"}
+  - ui_wait: {path: "**/ConfirmDialog/GameObject/Panel/ConfigurableButton", cond: stable}
+  - click: {ui: "**/ConfirmDialog/GameObject/Panel/ConfigurableButton"}   # Quit Without Saving
+  - ui_wait: {path: "**/MainMenu_SpacedOut/MainMenuMenubar/MainMenuButtons", cond: stable, frames: 3000}
+  - click: {text: "NEW GAME", under: "**/MainMenuButtons"}
+  - ui_wait: {path: "**/ModeSelectScreen/Panel/Content/RootToggles/StandardGame", cond: stable}
+  - click: {ui: "**/ModeSelectScreen/Panel/Content/RootToggles/StandardGame"}
+  - ui_wait: {path: "**/ClusterCategorySelectionScreen/Panel/Content/RootToggles/ClassicStyleGame", cond: stable}
+  - click: {ui: "**/ClusterCategorySelectionScreen/Panel/Content/RootToggles/ClassicStyleGame"}
+  - ui_wait: {path: "**/ColonyDestinationScreen2/Layout/Buttons/LaunchButton", cond: stable, frames: 3000}
+  - click: {ui: "**/CoordinateContainer/SeedInput"}
+  - ui_wait: {path: "**/CoordinateContainer/SeedInput", cond: stable}
+  - type: {ui: "**/CoordinateContainer/SeedInput", text: "V-FRST-C-12345-0-0-0", clear: true, enter: true}
+  - ui_wait: {path: "**/CoordinateContainer/SeedInput/Text Area/Text", cond: text, value: "~V-FRST-C-12345-0-0-0"}
+  - expect_state:
+      "CustomGameSettings.Instance.GetCurrentQualitySetting(\"ClusterLayout\").id": "expansion1::clusters/VanillaArboriaCluster"
+  # The asteroid details: Slime Molds, no boulders.
+  - expect_ui:
+      "**/Section - SelectedAsteroidDetails/Content/Details/**": {any_text: "~Slime Molds"}
+  - ui_dump: {name: asteroids, root: "**/Section - Destination/World Scoll (Rect Size Set By Screen Code!)/Content/Details"}
+  - ui_dump: {name: details, root: "**/Section - SelectedAsteroidDetails/Content/Details"}
+  - click: {ui: "**/ColonyDestinationScreen2/Layout/Buttons/LaunchButton"}
+  - ui_wait: {path: "**/MinionSelectScreen/Content/BottomContent/Buttons/ProceedButton", cond: stable, frames: 60000}
+  - click: {ui: "**/MinionSelectScreen/Content/BottomContent/Buttons/ProceedButton"}
+  - ui_wait: {path: "**/MinionSelectScreen", cond: gone, frames: 6000}
+  - expect_state:
+      "ClusterManager.Instance.GetStartWorld().worldName": "expansion1::worlds/VanillaArboria"
+      "Components.LiveMinionIdentities.Count": 3
+      "ClusterManager.Instance.GetStartWorld().WorldTraitIds": {contains: traits/SlimeSplats}
+      "ClusterManager.Instance.GetStartWorld().WorldTraitIds.Count": 1
+      "count:ClusterManager.Instance.WorldContainers[*] if .WorldTraitIds.Contains(\"traits/BouldersMedium\") == true": 0

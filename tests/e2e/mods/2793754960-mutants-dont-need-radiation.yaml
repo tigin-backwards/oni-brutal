@@ -1,0 +1,23 @@
+# Mutants don't need radiation to grow (2793754960), class P.
+#
+# What it does: a plant mutation's modifier of the minimum radiation a plant needs becomes 0
+# (a prefix on PlantMutation.AttributeModifier), so a mutated plant grows without radiation.
+# The game's Loose and Tight mutations (moderatelyLoose, moderatelyTight) and others add 250
+# rads to it.
+# How a player reaches it: planting a mutant seed from a radiation-grown plant.
+# What changes: the mutations' attribute modifiers, built once when the database loads.
+#
+# Mutant seeds are out of reach on early-base, so the spec reads the mutations' modifiers:
+# their minimum radiation modifier is 0, their yield modifier is the game's.
+from: early-base
+mods: [2793754960]
+steps:
+  - expect_state:
+      "Db.Get().PlantMutations.moderatelyLoose.SelfModifiers[0].AttributeId": MinRadiationThreshold
+      "Db.Get().PlantMutations.moderatelyLoose.SelfModifiers[0].Value": 0
+      "Db.Get().PlantMutations.moderatelyTight.SelfModifiers[0].Value": 0
+      "Db.Get().PlantMutations.moderatelyTight.SelfModifiers[2].Value": 0.5
+  - expect_state:
+      "Db.Get().PlantMutations.moderatelyTight.SelfModifiers.Count": "== original"
+  - run: {seconds: 30}
+  - expect: {duplicants: 3}

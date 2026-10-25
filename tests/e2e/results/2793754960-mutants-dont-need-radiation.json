@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2793754960-mutants-dont-need-radiation.yaml",
+ "mods": [
+  "2793754960"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the loose and tight plant mutations' minimum radiation modifiers read 0, their yield modifiers the game's; the colony runs",
+ "updated": "2026-10-25",
+ "commit": "8884175",
+ "mod_dlls": {
+  "2793754960": {
+   "NoRadMutants.dll": "096d45cca3689a831b758b368483e3c232a62ab5860f96c2f728c0ff5d074139"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-193634-0de115a7",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T19:38:06",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-194425-c2c00a49",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T19:44:25",
+    "lane": 16,
+    "reference_run": "20261025-193634-0de115a7",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261025-194425-c2c00a49",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-25T19:44:26",
+    "lane": 17,
+    "reference_run": "20261025-193634-0de115a7",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -248,8 +248,11 @@ namespace OniBrutal.GameTweaks
             // The Mods screen's title font, GRAYSTROKE REGULAR SDF: its own glyph for "f" is a
             // narrow, cap-height F (the original shows "conFiguration" on that screen too), and
             // "%" overhangs its advance by about a third of a space, so "% " looks unspaced.
-            title.text = $"{BrutalTweaksMenu.Titles[i]}\n<size=11>{BrutalTweaksMenu.Effects[i]}</size>";
-            entry.GetReference<ToolTip>("Description").toolTip = Tooltip(i);
+            title.text = BrutalTweaksMenu.Titles[i];
+            var tooltip = Tooltip(i);
+            entry.GetReference<ToolTip>("Description").toolTip = tooltip;
+            var effect = BodyLine(title, BrutalTweaksMenu.Effects[i]);
+            if (effect.GetComponent<ToolTip>() is { } effectTip) effectTip.toolTip = tooltip;
             // The label beside the toggle: the warning for tweaks that change gameplay, and who
             // set a row the launch options set.
             var label = entry.GetReference<LocText>("Version");
@@ -260,6 +263,8 @@ namespace OniBrutal.GameTweaks
             {
                 label.text = string.Join("\n", labels);
                 label.fontSize = 12;
+                // One line per label: the effect beside it wraps instead.
+                label.textWrappingMode = TMPro.TextWrappingModes.NoWrap;
                 var layout = label.GetComponent<LayoutElement>();
                 if (layout != null) layout.flexibleWidth = 0f;
             }
@@ -275,6 +280,8 @@ namespace OniBrutal.GameTweaks
                 bg.defaultState = KImage.ColorSelector.Disabled;
                 bg.ColorState = KImage.ColorSelector.Disabled;
                 title.color = new Color(title.color.r, title.color.g, title.color.b, 0.55f);
+                // (A group, not its colour: the text style sets the colour again when it wakes.)
+                effect.gameObject.AddComponent<CanvasGroup>().alpha = 0.55f;
                 var dim = toggle.gameObject.AddComponent<CanvasGroup>();
                 dim.alpha = 0.45f;
                 if (tip != null) tip.OnToolTip = () => $"Set by the launch options ({(shown[i] ? "on" : "off")})";
@@ -290,6 +297,47 @@ namespace OniBrutal.GameTweaks
                 if (tip != null) tip.OnToolTip = () => shown[i] ? UI.FRONTEND.MODS.TOOLTIPS.ENABLED : UI.FRONTEND.MODS.TOOLTIPS.DISABLED;
             }
             entry.gameObject.SetActive(true);
+        }
+
+        /// The game's small body text (style_bodyTextWhiteSmall: NotoSans-Regular, 12 pt, white),
+        /// as its screens set prose under a GRAYSTROKE heading; null when it isn't loaded.
+        static TextStyleSetting bodyStyle;
+        static TextStyleSetting BodyStyle()
+        {
+            if (bodyStyle == null)
+                foreach (var style in Resources.FindObjectsOfTypeAll<TextStyleSetting>())
+                    if (style.name == "style_bodyTextWhiteSmall") bodyStyle = style;
+            return bodyStyle;
+        }
+
+        /// A line of body text under a row's title: the title and a copy of it, restyled, stacked
+        /// in the title's place.
+        static LocText BodyLine(LocText title, string text)
+        {
+            var row = title.transform.parent;
+            var stack = new GameObject("TitleAndEffect", typeof(RectTransform));
+            stack.transform.SetParent(row, worldPositionStays: false);
+            stack.transform.SetSiblingIndex(title.transform.GetSiblingIndex());
+            var column = stack.AddComponent<VerticalLayoutGroup>();
+            column.childControlWidth = column.childControlHeight = true;
+            column.childForceExpandWidth = true;
+            column.childForceExpandHeight = false;
+            column.spacing = 1f;
+            var layout = stack.AddComponent<LayoutElement>();
+            layout.flexibleWidth = 1f;
+            title.transform.SetParent(stack.transform, worldPositionStays: false);
+            var line = Instantiate(title.gameObject, stack.transform, worldPositionStays: false).GetComponent<LocText>();
+            line.name = "Effect";
+            var style = BodyStyle();
+            if (style != null)
+            {
+                line.textStyleSetting = style;
+                line.ApplySettings();
+                line.GetComponent<SetTextStyleSetting>()?.SetStyle(style);
+            }
+            else line.fontSize = 12;
+            line.text = text;
+            return line;
         }
 
         /// A line of text at the footer's left, beside its buttons (a copy of the rows' label): one

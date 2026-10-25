@@ -1,0 +1,49 @@
+{
+ "spec": "mods/1848884654-pliers.yaml",
+ "mods": [
+  "1848884654"
+ ],
+ "verdict": "pending",
+ "why": "the spec fails in the original: a broken spec, or a mod broken upstream",
+ "findings": [],
+ "note": "",
+ "updated": "2026-10-25",
+ "commit": "5dea7a7",
+ "mod_dlls": {
+  "1848884654": {
+   "Pliers.dll": "2db776f8ac5d9bfe19c30de28ec24aed499286740e439142bfebb8d994ec5d61"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-062533-3ee4f399",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-25T06:25:34",
+    "lane": 17,
+    "reasons": [
+     "step 1: count:Global.Instance.modManager.mods[*] if .label.id == 1848884654 and .IsEnabledForActiveDlc() == true is 0, wanted 1"
+    ],
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-063752-33cd937a",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-25T06:37:53",
+    "lane": 17,
+    "reasons": [
+     "step 1: count:Global.Instance.modManager.mods[*] if .label.id == 1848884654 and .IsEnabledForActiveDlc() == true is 0, wanted 1"
+    ],
+    "reference_run": null,
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

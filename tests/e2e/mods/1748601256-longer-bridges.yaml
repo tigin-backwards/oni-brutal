@@ -1,0 +1,15 @@
+# Longer Bridges (1748601256).
+#
+# What it does: adds longer pipe and wire bridges.
+# How a player reaches it: the build menu.
+#
+# Broken upstream: Its Workshop build has no mod_info.yaml, which the game requires since 2021: KMod logs
+# "Is missing a mod_info.yaml file and will not be loaded" and leaves it out.
+# The spec checks that it is enabled, then runs the colony.
+from: early-base
+mods: [1748601256]
+steps:
+  - expect_state:
+      "count:Global.Instance.modManager.mods[*] if .label.id == 1748601256 and .IsEnabledForActiveDlc() == true": 1
+  - run: {seconds: 30}
+  - expect: {duplicants: 3}

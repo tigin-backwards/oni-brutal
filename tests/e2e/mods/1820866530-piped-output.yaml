@@ -1,0 +1,16 @@
+# Piped output (1820866530).
+#
+# What it does: gives buildings that drop their output a pipe output.
+# How a player reaches it: the buildings themselves.
+#
+# Broken upstream: Its Workshop build's mod_info.yaml (lastWorkingBuild 447598, 2021) names no APIVersion, so
+# KMod logs "DLLs found but not using the correct API version" and disables it: built for
+# Harmony 1, before the game moved to Harmony 2.
+# The spec checks that it is enabled, then runs the colony.
+from: early-base
+mods: [1820866530]
+steps:
+  - expect_state:
+      "count:Global.Instance.modManager.mods[*] if .label.id == 1820866530 and .IsEnabledForActiveDlc() == true": 1
+  - run: {seconds: 30}
+  - expect: {duplicants: 3}

@@ -1,0 +1,49 @@
+{
+ "spec": "mods/1835851890-drag-tool-area.yaml",
+ "mods": [
+  "1835851890"
+ ],
+ "verdict": "pending",
+ "why": "the spec fails in the original: a broken spec, or a mod broken upstream",
+ "findings": [],
+ "note": "",
+ "updated": "2026-10-25",
+ "commit": "5dea7a7",
+ "mod_dlls": {
+  "1835851890": {
+   "DragToolArea.dll": "a9beb46dcb0e3320b7bbe81002d67ccbbafaebccd66c7c5b860a135b1084b613"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-062533-3ee4f399",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-25T06:26:42",
+    "lane": 17,
+    "reasons": [
+     "step 1: count:Global.Instance.modManager.mods[*] if .label.id == 1835851890 and .IsEnabledForActiveDlc() == true is 0, wanted 1"
+    ],
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-063752-33cd937a",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-25T06:38:24",
+    "lane": 17,
+    "reasons": [
+     "step 1: count:Global.Instance.modManager.mods[*] if .label.id == 1835851890 and .IsEnabledForActiveDlc() == true is 0, wanted 1"
+    ],
+    "reference_run": null,
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

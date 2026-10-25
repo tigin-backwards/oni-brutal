@@ -1,0 +1,49 @@
+{
+ "spec": "mods/1766168866-half-door.yaml",
+ "mods": [
+  "1766168866"
+ ],
+ "verdict": "pending",
+ "why": "the spec fails in the original: a broken spec, or a mod broken upstream",
+ "findings": [],
+ "note": "",
+ "updated": "2026-10-25",
+ "commit": "5dea7a7",
+ "mod_dlls": {
+  "1766168866": {
+   "HalfDoor.dll": "0edd857a6b0e5e498f8c5896b0a7c860a8d395d1fff074283e01791ad5f60e34"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-062533-3ee4f399",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-25T06:27:29",
+    "lane": 17,
+    "reasons": [
+     "step 1: count:Global.Instance.modManager.mods[*] if .label.id == 1766168866 and .IsEnabledForActiveDlc() == true is 0, wanted 1"
+    ],
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-063752-33cd937a",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-25T06:38:48",
+    "lane": 17,
+    "reasons": [
+     "step 1: count:Global.Instance.modManager.mods[*] if .label.id == 1766168866 and .IsEnabledForActiveDlc() == true is 0, wanted 1"
+    ],
+    "reference_run": null,
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

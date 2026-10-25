@@ -222,6 +222,33 @@ broken.update({
     '2360425208': 'broken upstream: its 600 s printing interval is set, but opening the printing pod\'s screen runs its `MinionStartingStats.GenerateTraits` prefix, which looks up each Duplicant\'s congenital trait, empty today ("Could not find Klei.AI.Trait: "), throws a NullReferenceException and opens the crash screen (spec tests/e2e/mods/2360425208-printing-pod.yaml)',
     '2042663291': 'broken upstream: its PLib side screen looks for `DetailsScreen.sideScreenContentBody`, which the game no longer has (a DetourException in `DetailsScreen.OnPrefabInit`), so loading a colony opens the crash screen (spec tests/e2e/mods/2042663291-configurable-sweepy.yaml)',
 })
+
+# Flagged by onimaxxing and found by their e2e specs: the game (U59-744825) does not load them,
+# in the original as in ours.
+broken.update({
+    '1713359495': 'broken upstream: its Workshop build has no mod_info.yaml, so the game skips it ("Is missing a mod_info.yaml file and will not be loaded") and the colony loads without it (spec tests/e2e/mods/1713359495-speed-control.yaml)',
+    '1724518038': 'broken upstream: its Workshop build has no mod_info.yaml, so the game skips it ("Is missing a mod_info.yaml file and will not be loaded") and the colony loads without it (spec tests/e2e/mods/1724518038-refresh-selection.yaml)',
+    '1735550356': 'broken upstream: its Workshop build has no mod_info.yaml, so the game skips it ("Is missing a mod_info.yaml file and will not be loaded") and the colony loads without it (spec tests/e2e/mods/1735550356-self-sealing-airlocks.yaml)',
+    '1728728517': 'broken upstream: its Workshop build has no mod_info.yaml, so the game skips it ("Is missing a mod_info.yaml file and will not be loaded") and the colony loads without it (spec tests/e2e/mods/1728728517-super-miner.yaml)',
+    '1830443217': 'broken upstream: its Workshop build has no mod_info.yaml, so the game skips it ("Is missing a mod_info.yaml file and will not be loaded") and the colony loads without it (spec tests/e2e/mods/1830443217-travel-tube-crossing.yaml)',
+    '1742045344': 'broken upstream: its Workshop build has no mod_info.yaml, so the game skips it ("Is missing a mod_info.yaml file and will not be loaded") and the colony loads without it (spec tests/e2e/mods/1742045344-player-controlled-switch.yaml)',
+    '1285243247': 'broken upstream: its Workshop build has no mod_info.yaml, so the game skips it ("Is missing a mod_info.yaml file and will not be loaded") and the colony loads without it (spec tests/e2e/mods/1285243247-extra-large-map.yaml)',
+    '1748601256': 'broken upstream: its Workshop build has no mod_info.yaml, so the game skips it ("Is missing a mod_info.yaml file and will not be loaded") and the colony loads without it (spec tests/e2e/mods/1748601256-longer-bridges.yaml)',
+    '1852314427': 'broken upstream: its Workshop build has no mod_info.yaml, so the game skips it ("Is missing a mod_info.yaml file and will not be loaded") and the colony loads without it (spec tests/e2e/mods/1852314427-compact-info-cards.yaml)',
+    '1711115962': 'broken upstream: its Workshop build has no mod_info.yaml, so the game skips it ("Is missing a mod_info.yaml file and will not be loaded") and the colony loads without it (spec tests/e2e/mods/1711115962-infinite-sources.yaml)',
+    '1714094338': 'broken upstream: its Workshop build has no mod_info.yaml, so the game skips it ("Is missing a mod_info.yaml file and will not be loaded") and the colony loads without it (spec tests/e2e/mods/1714094338-buildable-aetn.yaml)',
+    '1888643088': 'broken upstream: its Workshop build has no mod_info.yaml, so the game skips it ("Is missing a mod_info.yaml file and will not be loaded") and the colony loads without it (spec tests/e2e/mods/1888643088-telescope-auto-research.yaml)',
+    '1981435171': 'broken upstream: its Workshop build has no mod_info.yaml, so the game skips it ("Is missing a mod_info.yaml file and will not be loaded") and the colony loads without it (spec tests/e2e/mods/1981435171-fan-tiles.yaml)',
+    '1885140949': 'broken upstream: its Workshop build has no mod_info.yaml, so the game skips it ("Is missing a mod_info.yaml file and will not be loaded") and the colony loads without it (spec tests/e2e/mods/1885140949-carbon-revolution.yaml)',
+    '2193798307': 'broken upstream: its Workshop build has no mod_info.yaml, so the game skips it ("Is missing a mod_info.yaml file and will not be loaded") and the colony loads without it (spec tests/e2e/mods/2193798307-autoharvest.yaml)',
+    '1814341183': 'broken upstream: built for Harmony 1 (its mod_info.yaml names no APIVersion), so the game disables it ("DLLs found but not using the correct API version") and the colony loads without it (spec tests/e2e/mods/1814341183-blueprints.yaml)',
+    '1848884654': 'broken upstream: built for Harmony 1 (its mod_info.yaml names no APIVersion), so the game disables it ("DLLs found but not using the correct API version") and the colony loads without it (spec tests/e2e/mods/1848884654-pliers.yaml)',
+    '1835851890': 'broken upstream: built for Harmony 1 (its mod_info.yaml names no APIVersion), so the game disables it ("DLLs found but not using the correct API version") and the colony loads without it, on the base-game fixture as it supports the base game only (spec tests/e2e/mods/1835851890-drag-tool-area.yaml)',
+    '1766168866': 'broken upstream: built for Harmony 1 (its mod_info.yaml names no APIVersion), so the game disables it ("DLLs found but not using the correct API version") and the colony loads without it (spec tests/e2e/mods/1766168866-half-door.yaml)',
+    '1820866530': 'broken upstream: built for Harmony 1 (its mod_info.yaml names no APIVersion), so the game disables it ("DLLs found but not using the correct API version") and the colony loads without it (spec tests/e2e/mods/1820866530-piped-output.yaml)',
+    '1836997281': 'broken upstream: built for Harmony 1 (its mod_info.yaml names no APIVersion), so the game disables it ("DLLs found but not using the correct API version") and the colony loads without it, on the base-game fixture as it supports the base game only (spec tests/e2e/mods/1836997281-claustrophobia.yaml)',
+    '1730126196': 'broken upstream: built for Harmony 1 (its mod_info.yaml names no APIVersion), so the game disables it ("DLLs found but not using the correct API version") and the colony loads without it (spec tests/e2e/mods/1730126196-pipe-pressure-valve.yaml)',
+})
 # Translations whose file is named Strings.po: on Linux both players look for strings.po and miss
 # it (their specs fail the same way in the original).
 broken.update({

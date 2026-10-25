@@ -1,0 +1,17 @@
+# Pliers (1848884654).
+#
+# What it does: adds a Pliers tool that cuts the joints between pipes, wires and
+# rails.
+# How a player reaches it: a tool in the tool menu.
+#
+# Broken upstream: Its Workshop build's mod_info.yaml (lastWorkingBuild 447598, 2021) names no APIVersion, so
+# KMod logs "DLLs found but not using the correct API version" and disables it: built for
+# Harmony 1, before the game moved to Harmony 2.
+# The spec checks that it is enabled, then runs the colony.
+from: early-base
+mods: [1848884654]
+steps:
+  - expect_state:
+      "count:Global.Instance.modManager.mods[*] if .label.id == 1848884654 and .IsEnabledForActiveDlc() == true": 1
+  - run: {seconds: 30}
+  - expect: {duplicants: 3}

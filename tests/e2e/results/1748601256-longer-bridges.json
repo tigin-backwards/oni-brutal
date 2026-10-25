@@ -1,0 +1,49 @@
+{
+ "spec": "mods/1748601256-longer-bridges.yaml",
+ "mods": [
+  "1748601256"
+ ],
+ "verdict": "pending",
+ "why": "the spec fails in the original: a broken spec, or a mod broken upstream",
+ "findings": [],
+ "note": "",
+ "updated": "2026-10-25",
+ "commit": "5dea7a7",
+ "mod_dlls": {
+  "1748601256": {
+   "ExtendedBridges.dll": "89d35d7fe48941f47f3ab1c523083e4f55deb81e14f2157825112cfe204f300c"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-062533-3ee4f399",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-25T06:31:19",
+    "lane": 16,
+    "reasons": [
+     "step 1: count:Global.Instance.modManager.mods[*] if .label.id == 1748601256 and .IsEnabledForActiveDlc() == true is 0, wanted 1"
+    ],
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-063752-33cd937a",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-25T06:40:31",
+    "lane": 16,
+    "reasons": [
+     "step 1: count:Global.Instance.modManager.mods[*] if .label.id == 1748601256 and .IsEnabledForActiveDlc() == true is 0, wanted 1"
+    ],
+    "reference_run": null,
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

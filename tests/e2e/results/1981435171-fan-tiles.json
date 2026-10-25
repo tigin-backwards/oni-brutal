@@ -1,0 +1,49 @@
+{
+ "spec": "mods/1981435171-fan-tiles.yaml",
+ "mods": [
+  "1981435171"
+ ],
+ "verdict": "pending",
+ "why": "the spec fails in the original: a broken spec, or a mod broken upstream",
+ "findings": [],
+ "note": "",
+ "updated": "2026-10-25",
+ "commit": "5dea7a7",
+ "mod_dlls": {
+  "1981435171": {
+   "Fans.dll": "e8c1db14bc90521838913956d1418e88d3fa7bc38764c20f0e7bc148f99ac365"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-062533-3ee4f399",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-25T06:35:14",
+    "lane": 17,
+    "reasons": [
+     "step 1: count:Global.Instance.modManager.mods[*] if .label.id == 1981435171 and .IsEnabledForActiveDlc() == true is 0, wanted 1"
+    ],
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-063752-33cd937a",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-25T06:42:31",
+    "lane": 16,
+    "reasons": [
+     "step 1: count:Global.Instance.modManager.mods[*] if .label.id == 1981435171 and .IsEnabledForActiveDlc() == true is 0, wanted 1"
+    ],
+    "reference_run": null,
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

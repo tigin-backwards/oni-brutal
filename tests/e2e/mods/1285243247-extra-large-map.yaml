@@ -1,0 +1,16 @@
+# Extra Large Map (1285243247).
+#
+# What it does: adds a bigger world to the new game screen (worldgen
+# files only, of 2018).
+# How a player reaches it: the new game screen.
+#
+# Broken upstream: Its Workshop build has no mod_info.yaml (and no assembly): KMod logs "Is missing a
+# mod_info.yaml file and will not be loaded" and leaves its worldgen out.
+# The spec checks that it is enabled, then runs the colony.
+from: early-base
+mods: [1285243247]
+steps:
+  - expect_state:
+      "count:Global.Instance.modManager.mods[*] if .label.id == 1285243247 and .IsEnabledForActiveDlc() == true": 1
+  - run: {seconds: 30}
+  - expect: {duplicants: 3}

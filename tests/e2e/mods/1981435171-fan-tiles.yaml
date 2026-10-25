@@ -1,0 +1,15 @@
+# Fan Tiles (1981435171).
+#
+# What it does: adds tiles that move gases and liquids through them.
+# How a player reaches it: the build menu.
+#
+# Broken upstream: Its Workshop build has no mod_info.yaml, which the game requires since 2021: KMod logs
+# "Is missing a mod_info.yaml file and will not be loaded" and leaves it out.
+# The spec checks that it is enabled, then runs the colony.
+from: early-base
+mods: [1981435171]
+steps:
+  - expect_state:
+      "count:Global.Instance.modManager.mods[*] if .label.id == 1981435171 and .IsEnabledForActiveDlc() == true": 1
+  - run: {seconds: 30}
+  - expect: {duplicants: 3}

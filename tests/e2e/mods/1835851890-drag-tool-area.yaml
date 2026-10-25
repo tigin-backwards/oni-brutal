@@ -1,0 +1,17 @@
+# [DEPRECATED] Drag Tool Area (1835851890).
+#
+# What it does: shows a drag tool's area in cells while dragging.
+# How a player reaches it: any drag tool.
+#
+# Broken upstream: Its Workshop build's mod_info.yaml (lastWorkingBuild 447213, 2021, base game only) names no APIVersion, so
+# KMod logs "DLLs found but not using the correct API version" and disables it: built for
+# Harmony 1, before the game moved to Harmony 2.
+# The spec checks that it is enabled, then runs the colony.
+# The base-game fixture, as it supports the base game only (supportedContent: VANILLA_ID).
+from: vanilla-base
+mods: [1835851890]
+steps:
+  - expect_state:
+      "count:Global.Instance.modManager.mods[*] if .label.id == 1835851890 and .IsEnabledForActiveDlc() == true": 1
+  - run: {seconds: 30}
+  - expect: {duplicants: 3}

@@ -1,0 +1,49 @@
+{
+ "spec": "mods/1714094338-buildable-aetn.yaml",
+ "mods": [
+  "1714094338"
+ ],
+ "verdict": "pending",
+ "why": "the spec fails in the original: a broken spec, or a mod broken upstream",
+ "findings": [],
+ "note": "",
+ "updated": "2026-10-25",
+ "commit": "5dea7a7",
+ "mod_dlls": {
+  "1714094338": {
+   "BuildableAETN.dll": "3ae8e8cab399e7a007382dc564e28599ffe10885936e81a14e951d7b2c8f5b87"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-062533-3ee4f399",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-25T06:33:10",
+    "lane": 17,
+    "reasons": [
+     "step 1: count:Global.Instance.modManager.mods[*] if .label.id == 1714094338 and .IsEnabledForActiveDlc() == true is 0, wanted 1"
+    ],
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-063752-33cd937a",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-25T06:41:31",
+    "lane": 17,
+    "reasons": [
+     "step 1: count:Global.Instance.modManager.mods[*] if .label.id == 1714094338 and .IsEnabledForActiveDlc() == true is 0, wanted 1"
+    ],
+    "reference_run": null,
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

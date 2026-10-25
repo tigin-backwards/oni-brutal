@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3508859197-nickel-volcano.yaml",
+ "mods": [
+  "3508859197"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Nickel Volcano placed and selected: its name in the side screen's title, Molten Nickel at 2700 K, a maximum pressure of 150 kg, its rate rolled within 200 to 400 kg a cycle and as in the original to its last bits (ARCHITECTURE D25)",
+ "updated": "2026-10-24",
+ "commit": "4eab9eb",
+ "mod_dlls": {
+  "3508859197": {
+   "Geysers_Nickel_Volcano.dll": "686edd84f0ba200b5ec48c42c2d5fb49eb68c4c61f5ac8fca05ce4913625326b"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-222216-c845d17f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T22:28:51",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-223032-4802198d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T22:33:47",
+    "lane": 16,
+    "reference_run": "20261024-222216-c845d17f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-223032-4802198d",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T22:34:20",
+    "lane": 16,
+    "reference_run": "20261024-222216-c845d17f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

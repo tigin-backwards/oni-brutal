@@ -281,10 +281,12 @@ broken.update({
     '928441385': 'broken on Linux (a case-sensitive file system): its translation is Strings.po, the game opens strings.po, misses it (GetLanguageFile: ... missing, then a NullReferenceException in `LanguageOptionsScreen.GetLanguageFilename` opens the error dialog), keeps English, and loading a colony quits the game; Windows finds the file (spec tests/e2e/mods/928441385-korean-language.yaml)',
     '3669382915': 'broken on Linux (a case-sensitive file system): its translation is Strings.po, the game opens strings.po, misses it (GetLanguageFile: ... missing, then a NullReferenceException in `LanguageOptionsScreen.GetLanguageFilename` opens the error dialog), keeps English, and loading a colony quits the game; Windows finds the file (spec tests/e2e/mods/3669382915-thai-mary.yaml)',
 })
-# Fails to load in the original only.
-original_only = {
-    '1729794261': 'loads in ours but not in the original: Mono rejects its `PixelPack2` class (an interface method it lacks) at first use, where ours stubs the missing method (ARCHITECTURE D22); left out of the colony runs, which the original\'s error dialog stops',
-}
+# Broken in the original only: ours happens to load it, so its note says how the original fails
+# and why ours does not (no "same in the original").
+broken.update({
+    '1729794261': 'broken upstream: its light class `PixelPack2` lacks three methods the game\'s interfaces now have (`ISliderControl.GetSliderTooltip(int)`, `ISidescreenButtonControl.SetButtonTextOverride` and `HorizontalGroupID`), so the original fails its Color Ceiling Light in RegisterBuilding and the game\'s prefab setup in `Assets.OnPrefabInit` ("VTable setup of type OniLight.PixelPack2 failed"), and the error dialog opens as the game starts; ours happens to load it: Mono checks a class\'s interface methods when it sets up the class\'s vtable at first use, where ours gives the class the methods it lacks, which throw only when called (ARCHITECTURE D22)',
+})
+loads_in_ours = {'1729794261'}
 unranked = {'3427974009': 'Synchronized Building Groups', '2977728791': 'Preset Manager', '3775625682': 'LocalCanvas-本地画框', '3781314647': 'Morphs Not Included',
             '3281716506': 'Mod Preset Manager (Light) [MPML]', '3746027329': 'Geyser Tab', '3671379574': 'Resource Dashboard'}
 # Worldgen mods no sweep ran, as their specs' runs of ours found them (id -> (loads, colony)): a
@@ -316,13 +318,11 @@ def status(mid, flags):
     if mid in not_playable:
         return Y, Y, N, not_playable[mid]
     if mid in broken:
-        return X, X, N, broken[mid] + ' (same in the original)'
+        return X, X, N, broken[mid] + ('' if mid in loads_in_ours else ' (same in the original)')
     if flags:
         return N, N, N, f'flagged by onimaxxing ({flags}); not tested'
     if mid in worldgen:
         return (*worldgen[mid], N, 'worldgen mod: spec pending (functional expectations)')
-    if mid in original_only:
-        return Y, N, N, original_only[mid]
     if mid in fifth_failing:
         return X, X, N, 'fails to load in the original as well, in its sweep batch'
     if mid in third_results:

@@ -11,8 +11,8 @@ I did this mostly for fun, to see how far Oxygen Not Included's performance can 
 sparked joy. When [BRUTAL](https://github.com/ahwootech/BRUTAL) went open source, it seemed like
 a good excuse to try a sexy new toy.
 
-Klei's game DLLs run as shipped, patched at load where Mono and .NET differ
-([ARCHITECTURE.md](docs/ARCHITECTURE.md)). Everything they need from Unity is reimplemented here.
+Moono runs Klei's original DLLs, patched at load where Mono and .NET
+[differ](docs/ARCHITECTURE.md). Everything they need from Unity is reimplemented here.
 
 ## Setup
 

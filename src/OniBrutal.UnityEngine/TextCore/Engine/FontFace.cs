@@ -85,24 +85,33 @@ namespace OniBrutal.Engine.Text
             if (pin.IsAllocated) pin.Free();
         }
 
-        /// Family and style names of every face in a font file, without keeping it open.
-        public static (string Family, string Style)[] ReadFaceNames(string path)
+        /// Family and style names of every face in a font file, with FreeType's bold and italic
+        /// style flags (from the OS/2 and head tables) and whether it is scalable (has outlines),
+        /// without keeping it open.
+        public static (string Family, string Style, bool Bold, bool Italic, bool Scalable)[] ReadFaceNames(string path)
         {
             var bytes = System.Text.Encoding.UTF8.GetBytes(path + "\0");
             fixed (byte* p = bytes)
             {
-                if (FT.FT_New_Face(FT.Library, p, new CLong(0), out var first) != 0) return Array.Empty<(string, string)>();
+                if (FT.FT_New_Face(FT.Library, p, new CLong(0), out var first) != 0) return Array.Empty<(string, string, bool, bool, bool)>();
                 int count = (int)first->num_faces.Value;
-                var names = new (string, string)[count];
-                names[0] = (FT.String(first->family_name), FT.String(first->style_name));
+                var names = new (string, string, bool, bool, bool)[count];
+                names[0] = Describe(first);
                 FT.FT_Done_Face(first);
                 for (int i = 1; i < count; i++)
                 {
                     if (FT.FT_New_Face(FT.Library, p, new CLong(i), out var f) != 0) continue;
-                    names[i] = (FT.String(f->family_name), FT.String(f->style_name));
+                    names[i] = Describe(f);
                     FT.FT_Done_Face(f);
                 }
                 return names;
+            }
+
+            static (string, string, bool, bool, bool) Describe(FT.FaceRec* f)
+            {
+                long flags = (long)f->style_flags.Value;
+                return (FT.String(f->family_name), FT.String(f->style_name), (flags & FT.STYLE_FLAG_BOLD) != 0, (flags & FT.STYLE_FLAG_ITALIC) != 0,
+                    ((long)f->face_flags.Value & 1) != 0);
             }
         }
     }

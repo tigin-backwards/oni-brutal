@@ -75,17 +75,80 @@ namespace UnityEngine
 
         public static int GetMaxVertsForString(string str) => str.Length * 4 + 4;
 
+        /// The glyph of a character at `size` pixels (0: the font's size) and `style`, when it is
+        /// in the font texture (dynamic fonts: after RequestCharactersInTexture or a generation
+        /// at that size; bitmap fonts: every character of the font). For a dynamic font the box
+        /// is the rendered bitmap grown by the character padding, the advance a whole number of
+        /// pixels; a character no face has is there with advance 0 and an empty box.
+        public bool GetCharacterInfo(char ch, out CharacterInfo info, int size, FontStyle style)
+        {
+            info = default;
+            var data = Data;
+#pragma warning disable CS0618 // CharacterInfo's fields
+            if (!data.Dynamic)
+            {
+                if (!data.CharacterRects.TryGetValue(data.MapCase(ch), out var r)) return false;
+                info = new CharacterInfo
+                {
+                    index = ch, size = size, style = style, width = r.Advance, flipped = r.Flipped, uv = r.Uv,
+                    vert = new Rect(r.Left, r.Top, r.Width, -r.Height),
+                };
+                return true;
+            }
+            var g = data.PlacedGlyph(new GlyphKey(ch, size == 0 ? (int)data.FontSize : size, style));
+            if (!g.Exists || !g.InTexture) return false;
+            int pad = data.Padding;
+            info = new CharacterInfo
+            {
+                index = ch, size = size, style = style, width = g.Advance, uv = data.UvOf(g),
+                vert = new Rect(g.Left - pad, g.Top + pad, g.Width + 2 * pad, -(g.Height + 2 * pad)),
+            };
+#pragma warning restore CS0618
+            return true;
+        }
+
+        public bool GetCharacterInfo(char ch, out CharacterInfo info, int size) => GetCharacterInfo(ch, out info, size, FontStyle.Normal);
+
+        public bool GetCharacterInfo(char ch, out CharacterInfo info) => GetCharacterInfo(ch, out info, 0, FontStyle.Normal);
+
+        /// A dynamic font whose glyphs come from the installed OS font of that name (as the
+        /// names Font.GetOSInstalledFontNames lists; when it is not installed, the default chain
+        /// LegacyRuntime uses), at `size` pixels, with that face's line metrics.
+        public static Font CreateDynamicFontFromOSFont(string fontname, int size) => CreateDynamicFontFromOSFont(new[] { fontname }, size);
+
+        /// As CreateDynamicFontFromOSFont(string, int), with the first of the names installed;
+        /// the font is named after the first name.
+        public static Font CreateDynamicFontFromOSFont(string[] fontnames, int size)
+        {
+            var names = fontnames == null ? Array.Empty<string>() : (string[])fontnames.Clone();
+            var font = new Font { name = names.Length > 0 ? names[0] ?? "" : "" };
+            var data = font.Data;
+            data.InitFromOSFonts(names, size);
+            data.Material = FontMaterial();
+            return font;
+        }
+
+        /// A new material for a font's texture, with the built-in font's shader.
+        static Material FontMaterial()
+        {
+            Shader shader = null;
+            try
+            {
+                shader = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf")?.material?.shader;
+            }
+            catch (System.IO.IOException)
+            {
+                // No player data (no built-in resources file).
+            }
+            shader ??= Shader.Find("GUI/Text Shader");
+            return shader == null ? null : new Material(shader) { name = "Font Material" };
+        }
+
         /// Paths of the font files installed on the system.
         public static string[] GetPathsToOSFonts() => (string[])SystemFonts.Paths.Clone();
 
-        /// Family names of the fonts installed on the system, each once.
-        public static string[] GetOSInstalledFontNames()
-        {
-            var names = new List<string>();
-            var seen = new HashSet<string>(StringComparer.Ordinal);
-            foreach (var face in SystemFonts.Faces)
-                if (seen.Add(face.familyName)) names.Add(face.familyName);
-            return names.ToArray();
-        }
+        /// The fonts installed on the system, each name once: the family, then " Bold" and
+        /// " Italic" by the face's style (measured on Linux, 2026-10-24).
+        public static string[] GetOSInstalledFontNames() => (string[])SystemFonts.OSFontNames.Clone();
     }
 }

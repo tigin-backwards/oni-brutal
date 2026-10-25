@@ -6,7 +6,6 @@ using OniBrutal.Engine.Assets;
 using OniBrutal.Engine.Rendering;
 using OniBrutal.Engine.Serialization;
 using UnityEngine;
-using UnityEngine.TextCore;
 using UnityEngine.TextCore.LowLevel;
 
 namespace OniBrutal.Engine.Text
@@ -17,8 +16,11 @@ namespace OniBrutal.Engine.Text
     {
         public bool Exists;
         public float Advance;
+        /// Dynamic fonts: the box of the bitmap FreeType renders (bitmap_left, bitmap_top,
+        /// width, rows), without the font's character padding. Bitmap fonts: the character rect.
         public int Left, Top, Width, Height;
-        /// Texture placement (bottom-left texel) when InTexture.
+        /// Texture placement when InTexture: the bottom-left texel of the glyph's rect, which
+        /// for dynamic fonts includes the character padding on every side.
         public bool InTexture;
         public int X, Y;
         /// UV rectangle for non-dynamic (bitmap) fonts, from the character rects.
@@ -117,12 +119,12 @@ namespace OniBrutal.Engine.Text
         byte[] faceData;
         bool faceDataResolved;
 
-        /// The TrueType/OpenType data glyphs come from: the font's own data; for a font
-        /// without data (built without "Include Font Data", or Unity's built-in LegacyRuntime),
-        /// the installed OS font named in m_FontNames, else the built-in default face.
-        /// The built-in LegacyRuntime font always uses the built-in default face, Liberation
-        /// Sans (the face Unity's player embeds for it: its serialized ascent, descent and line
-        /// spacing are Liberation Sans's), as do fonts whose OS fonts are not installed.
+        /// The TrueType/OpenType data the TextCore font engine loads for this font (TMP font
+        /// assets made from it): the font's own data; for a font without data (built without
+        /// "Include Font Data", or Unity's built-in LegacyRuntime), the installed OS font named
+        /// in m_FontNames, else the built-in default face, Liberation Sans (LegacyRuntime always
+        /// takes it here; unmeasured). The legacy text generator's glyphs come from the glyph
+        /// chain below instead (measured).
         public byte[] FaceData
         {
             get
@@ -151,50 +153,95 @@ namespace OniBrutal.Engine.Text
         // ----- Glyphs (dynamic fonts) -----
 
         readonly object gate = new();
-        List<FontFace> faces;
+        List<GlyphChainLink> chain;
         readonly Dictionary<GlyphKey, LegacyGlyph> glyphs = new();
-        readonly List<GlyphRect> freeRects = new(), usedRects = new();
+        readonly SkylinePacker packer = new();
 
-        /// This font's face, then its fallback fonts' faces. Separate FreeType faces from the
-        /// TextCore font engine's (each keeps its own size).
-        List<FontFace> Faces
+        /// The empty texels around each glyph of a dynamic font (m_CharacterPadding): its glyph
+        /// boxes and texture rects are the rendered bitmap grown by this on every side.
+        public int Padding => Dynamic ? Math.Max(CharacterPadding, 0) : 0;
+
+        /// The families a font without data falls back to, glyph by glyph, when none of its
+        /// m_FontNames is installed (docs/cleanroom/ugui.md, "Legacy Text glyph placement").
+        /// Measured on Linux only: FreeSans, then DejaVu Sans, then Liberation Sans; with none of
+        /// them installed a glyph has no face. On Windows and macOS (unmeasured: Arial, the
+        /// built-in font's m_FontNames, is installed there, so the names are found first) no
+        /// default chain is known; the last resort there is the built-in Liberation Sans this
+        /// engine used before, so that text stays visible.
+        static readonly string[] LinuxDefaultChain = { "FreeSans", "DejaVu Sans", "Liberation Sans" };
+
+        /// Where this font's glyphs come from, in order; each glyph from the first link whose
+        /// face (in the glyph's style) has it:
+        /// - a font with data: its data, then its m_FallbackFonts' faces;
+        /// - a font without data: the first of m_FontNames installed (exact name, as
+        ///   Font.GetOSInstalledFontNames lists them), then the platform's default chain (measured
+        ///   on Linux when no name is installed; after an installed name it is unmeasured), then
+        ///   its m_FallbackFonts' faces.
+        List<GlyphChainLink> Chain
         {
             get
             {
-                if (faces != null) return faces;
-                faces = new List<FontFace>();
-                AddFace(FaceData, faceIndex);
+                if (chain != null) return chain;
+                chain = new List<GlyphChainLink>();
+                if (Data.Length > 0) chain.Add(GlyphChainLink.FromData(this, Data, 0));
+                else
+                {
+                    foreach (var (family, style) in OSFamilies(FontNames, OperatingSystem.IsLinux(), SystemFonts.TryResolveOSFontName, f => SystemFonts.TryFindStyled(f, 0, out _)))
+                        chain.Add(GlyphChainLink.FromFamily(this, family, style));
+                    if (!OperatingSystem.IsLinux() && BuiltinFont.Data.Length > 0) chain.Add(GlyphChainLink.FromData(this, BuiltinFont.Data, 0));
+                }
                 foreach (var fallback in Fallbacks)
                 {
                     if (fallback == null) continue;
                     var fn = (FontNative)fallback.NativeOrThrow;
-                    if (fn != this) AddFace(fn.FaceData, fn.faceIndex);
+                    if (fn != this && fn.FaceData is { Length: > 0 } data) chain.Add(GlyphChainLink.FromData(this, data, fn.faceIndex));
                 }
-                return faces;
+                return chain;
             }
         }
 
-        void AddFace(byte[] data, int index)
+        internal delegate bool OSFontNameResolver(string name, out string family, out int style);
+
+        /// The installed families a font without data draws from, in order: the first of its
+        /// names installed (with the style a styled name such as "FreeSans Bold" stands for),
+        /// then on Linux the default chain's installed families, each once.
+        internal static List<(string Family, int Style)> OSFamilies(string[] names, bool linux, OSFontNameResolver resolve, Func<string, bool> installed)
         {
-            if (data == null || data.Length == 0) return;
-            if (FontFace.TryOpen(data, index, out var face) != FontEngineError.Success) return;
-            faces.Add(face);
-            lock (allFaces) allFaces.Add((new WeakReference<FontNative>(this), face));
+            var families = new List<(string, int)>();
+            string named = null;
+            foreach (var name in names)
+                if (resolve(name, out var family, out int style))
+                {
+                    families.Add((family, style));
+                    named = family;
+                    break;
+                }
+            if (linux)
+                foreach (var family in LinuxDefaultChain)
+                    if (family != named && installed(family)) families.Add((family, 0));
+            return families;
         }
 
         /// Every open face with its font, so faces of fonts the garbage collector reclaimed
         /// (unloaded assets) are closed on the main thread.
         static readonly List<(WeakReference<FontNative> Owner, FontFace Face)> allFaces = new();
 
+        internal void Register(FontFace face)
+        {
+            lock (allFaces) allFaces.Add((new WeakReference<FontNative>(this), face));
+        }
+
         /// Closes this font's faces (Font destroyed); they reopen if the font is used again.
         public void ReleaseFaces()
         {
             lock (gate)
             {
-                if (faces == null) return;
-                lock (allFaces) allFaces.RemoveAll(e => faces.Contains(e.Face));
-                foreach (var face in faces) face.Dispose();
-                faces = null;
+                if (chain == null) return;
+                var open = new List<FontFace>();
+                foreach (var link in chain) link.CollectOpen(open);
+                lock (allFaces) allFaces.RemoveAll(e => open.Contains(e.Face));
+                foreach (var face in open) face.Dispose();
+                chain = null;
             }
         }
 
@@ -213,13 +260,35 @@ namespace OniBrutal.Engine.Text
             return orphans.Count;
         }
 
-        /// Line metrics at a pixel size, from the serialized values at m_FontSize.
+        /// Line metrics at a pixel size, from the serialized values at m_FontSize, unrounded.
         public void LineMetrics(int size, out float ascent, out float descent, out float lineHeight)
         {
             float k = FontSize > 0 ? size / FontSize : 1f;
             ascent = Ascent * k;
             descent = Descent * k;
             lineHeight = LineSpacing * k;
+        }
+
+        /// The generator's line metrics at a pixel size p (measured with LegacyRuntime,
+        /// docs/cleanroom/ugui.md "Vertical metrics"): the serialized ascent, descent and line
+        /// spacing scaled by p / m_FontSize and rounded to the nearest pixel; `spacingFloor` is
+        /// the scaled line spacing rounded down (UILineInfo.height).
+        public void PixelLineMetrics(int size, out int ascent, out int descent, out int pitch, out int spacingFloor)
+        {
+            float k = FontSize > 0 ? size / FontSize : 1f;
+            ascent = (int)Math.Floor(Ascent * k + 0.5f);
+            descent = (int)Math.Floor(-Descent * k + 0.5f);
+            pitch = (int)Math.Floor(LineSpacing * k + 0.5f);
+            spacingFloor = (int)Math.Floor(LineSpacing * k);
+        }
+
+        /// The kerning between two characters in pixels at a pixel size: a dynamic font's
+        /// m_KerningValues (pixels at m_FontSize) scaled to the size and rounded to the nearest
+        /// pixel (LegacyRuntime's 21 pairs, measured; the face's own kerning is not used).
+        public int PixelKerning(int first, int second, int size)
+        {
+            if (Kerning.Count == 0 || first > 0xFFFF || second > 0xFFFF || !Kerning.TryGetValue((first, second), out float k)) return 0;
+            return (int)Math.Floor(k * size / (FontSize > 0 ? FontSize : 1f) + 0.5f);
         }
 
         public int MapCase(int c) => ConvertCase switch
@@ -229,19 +298,25 @@ namespace OniBrutal.Engine.Text
             _ => c,
         };
 
+        /// Bitmap fonts: whether the character has a rect. Dynamic fonts with data: whether a
+        /// face of the chain has it. Fonts without data (OS fonts): always true (measured with
+        /// LegacyRuntime for characters of FreeSans, DejaVu Sans, Liberation Sans and U+4E2D,
+        /// which no face of its chain has).
         public bool HasCharacter(int c)
         {
             if (!Dynamic) return CharacterRects.ContainsKey(MapCase(c));
+            if (Data.Length == 0) return true;
             lock (gate)
             {
-                foreach (var face in Faces)
-                    if (face.GlyphIndex((uint)c) != 0) return true;
+                foreach (var link in Chain)
+                    if (link.Face(0, out _) is { } face && face.GlyphIndex((uint)c) != 0) return true;
                 return false;
             }
         }
 
-        /// Layout metrics of a glyph (dynamic fonts: rendered by FreeType at `size` pixels with
-        /// synthesized bold/italic; bitmap fonts: the character rect).
+        /// Layout metrics of a glyph. Dynamic fonts: rendered by FreeType at `size` pixels from
+        /// the chain's first face that has it (an absent glyph has advance 0 and an empty box).
+        /// Bitmap fonts: the character rect.
         public LegacyGlyph GetGlyph(int codePoint, int size, FontStyle style)
         {
             if (!Dynamic) return CharacterRects.GetValueOrDefault(MapCase(codePoint));
@@ -263,11 +338,23 @@ namespace OniBrutal.Engine.Text
             _ => FT.LOAD_NO_HINTING | FT.LOAD_NO_BITMAP,
         };
 
-        /// Loads a glyph into its face's slot with the style applied; null when no face has it.
+        static int StyleBits(FontStyle style) => style switch
+        {
+            FontStyle.Bold => SystemFonts.Bold,
+            FontStyle.Italic => SystemFonts.Italic,
+            FontStyle.BoldAndItalic => SystemFonts.Bold | SystemFonts.Italic,
+            _ => 0,
+        };
+
+        /// Loads a glyph into its face's slot, with any style its face lacks synthesized; null
+        /// when no face of the chain has it.
         unsafe FontFace LoadStyled(GlyphKey key)
         {
-            foreach (var face in Faces)
+            int style = StyleBits(key.Style);
+            foreach (var link in Chain)
             {
+                var face = link.Face(style, out int synthesize);
+                if (face == null) continue;
                 uint index = face.GlyphIndex((uint)key.CodePoint);
                 if (index == 0) continue;
                 if (face.SetPixelSize(Math.Max(key.Size, 1)) != FontEngineError.Success) return null;
@@ -275,36 +362,31 @@ namespace OniBrutal.Engine.Text
                 var slot = face.Slot;
                 if (slot->format == FT.GLYPH_FORMAT_OUTLINE)
                 {
-                    if (key.Style is FontStyle.Italic or FontStyle.BoldAndItalic) FT.FT_GlyphSlot_Oblique(slot);
-                    if (key.Style is FontStyle.Bold or FontStyle.BoldAndItalic) FT.FT_GlyphSlot_Embolden(slot);
+                    if ((synthesize & SystemFonts.Italic) != 0) FT.FT_GlyphSlot_Oblique(slot);
+                    if ((synthesize & SystemFonts.Bold) != 0) FT.FT_GlyphSlot_Embolden(slot);
                 }
                 return face;
             }
             return null;
         }
 
+        int RenderMode => FontRenderingMode == 2 ? FT.RENDER_MODE_MONO : FT.RENDER_MODE_NORMAL;
+
+        /// The advance (FreeType's, rounded to the nearest whole pixel unless the font keeps
+        /// fractions) and the box of the bitmap FreeType renders.
         unsafe LegacyGlyph Measure(GlyphKey key)
         {
+            var g = new LegacyGlyph { Exists = true };
             var face = LoadStyled(key);
-            if (face == null) return default;
+            if (face == null) return g;
             var slot = face.Slot;
-            var g = new LegacyGlyph { Exists = true, Advance = slot->advance.x.Value / 64f };
-            if (ShouldRoundAdvanceValue) g.Advance = (float)Math.Round(g.Advance, MidpointRounding.AwayFromZero);
-            if (slot->format == FT.GLYPH_FORMAT_OUTLINE)
-            {
-                // The bitmap FreeType renders covers the outline's control box rounded out to
-                // whole pixels.
-                FT.FT_Outline_Get_CBox(&slot->outline, out var box);
-                int xMin = (int)Math.Floor(box.xMin.Value / 64.0), yMin = (int)Math.Floor(box.yMin.Value / 64.0);
-                int xMax = (int)Math.Ceiling(box.xMax.Value / 64.0), yMax = (int)Math.Ceiling(box.yMax.Value / 64.0);
-                if (slot->outline.n_points > 0 && xMax > xMin && yMax > yMin)
-                {
-                    g.Left = xMin;
-                    g.Top = yMax;
-                    g.Width = xMax - xMin;
-                    g.Height = yMax - yMin;
-                }
-            }
+            long advance = (long)slot->advance.x.Value;
+            g.Advance = ShouldRoundAdvanceValue ? (advance + 32) >> 6 : advance / 64f;
+            if (slot->format == FT.GLYPH_FORMAT_OUTLINE && FT.FT_Render_Glyph(slot, RenderMode) != 0) return g;
+            g.Left = slot->bitmap_left;
+            g.Top = slot->bitmap_top;
+            g.Width = (int)slot->bitmap.width;
+            g.Height = (int)slot->bitmap.rows;
             return g;
         }
 
@@ -340,38 +422,52 @@ namespace OniBrutal.Engine.Text
         /// Incremented whenever the font texture is rebuilt (glyph UVs move).
         public int AtlasVersion;
 
+        readonly List<GlyphKey> request = new();
+        readonly HashSet<GlyphKey> requested = new();
+
         bool RequestGlyphsCore(IEnumerable<GlyphKey> keys)
         {
             lock (gate)
             {
                 var t = TextureData;
                 int frame = Time.frameCount;
-                var request = new List<GlyphKey>();
-                var requested = new HashSet<GlyphKey>();
+                request.Clear();
+                requested.Clear();
+                bool missing = false;
                 foreach (var key in keys)
                 {
                     var g = GetGlyph(key.CodePoint, key.Size, key.Style);
-                    g.LastUsedFrame = frame;
-                    glyphs[key] = g;
-                    if (g.Exists && g.Width > 0 && g.Height > 0 && requested.Add(key)) request.Add(key);
+                    if (g.LastUsedFrame != frame)
+                    {
+                        g.LastUsedFrame = frame;
+                        glyphs[key] = g;
+                    }
+                    if (requested.Add(key))
+                    {
+                        request.Add(key);
+                        missing |= !g.InTexture;
+                    }
                 }
                 bool rebuilt = false;
                 if (t.Width <= 0 || t.Height <= 0 || t.Format != TextureFormat.Alpha8 || t.Memory == null)
                 {
+                    // The texture's first allocation moves no glyph: no textureRebuilt (measured:
+                    // fonts from CreateDynamicFontFromOSFont raise none on their first glyphs).
+                    foreach (var g in glyphs.Values)
+                        if (g.InTexture) { rebuilt = true; break; }
                     Reset(t, Math.Max(t.Width, InitialTextureSize), Math.Max(t.Height, InitialTextureSize));
-                    rebuilt = true;
+                    missing = request.Count > 0;
                 }
-                var missing = request.FindAll(k => !glyphs[k].InTexture);
-                if (missing.Count == 0)
+                if (!missing)
                 {
                     if (rebuilt) t.ContentChanged();
                     return rebuilt;
                 }
-                if (!PackAll(t, missing))
+                if (!PackAll(t, request))
                 {
                     var keep = new List<GlyphKey>();
                     foreach (var (key, g) in glyphs)
-                        if (g.Exists && g.Width > 0 && g.Height > 0 && (g.LastUsedFrame == frame || requested.Contains(key))) keep.Add(key);
+                        if (g.Exists && (g.LastUsedFrame == frame || requested.Contains(key))) keep.Add(key);
                     int w = t.Width, h = t.Height;
                     while (true)
                     {
@@ -394,9 +490,7 @@ namespace OniBrutal.Engine.Text
             t.MipCount = 1;
             t.Readable = true;
             t.Allocate(t.SliceSize, 0);
-            freeRects.Clear();
-            usedRects.Clear();
-            freeRects.Add(new GlyphRect(0, 0, width, height));
+            packer.Reset(width, height);
             foreach (var key in new List<GlyphKey>(glyphs.Keys))
             {
                 var g = glyphs[key];
@@ -405,64 +499,172 @@ namespace OniBrutal.Engine.Text
             }
         }
 
-        /// Packs and renders glyphs (with m_CharacterPadding texels around each); false when
-        /// one does not fit (glyphs packed before it stay).
+        /// Packs and renders glyphs, each in a rect of its bitmap plus the character padding on
+        /// every side (empty glyphs too: a space's rect is 2 × 2); false when one does not fit
+        /// (glyphs packed before it stay).
         bool PackAll(Texture2DNative t, List<GlyphKey> keys)
         {
-            int pad = Math.Max(CharacterPadding, 0);
+            int pad = Padding;
             foreach (var key in keys)
             {
                 var g = glyphs[key];
                 if (g.InTexture) continue;
-                if (!GlyphPacker.TryPack(g.Width + 2 * pad, g.Height + 2 * pad, GlyphPackingMode.BestShortSideFit, t.Width, t.Height, freeRects, usedRects, out var placed))
-                    return false;
-                g.X = placed.x + pad;
-                g.Y = placed.y + pad;
+                int w = g.Width + 2 * pad, h = g.Height + 2 * pad;
+                if (w <= 0 || h <= 0) g.X = g.Y = 0; // nothing to store
+                else if (!packer.TryPack(w, h, out g.X, out g.Y)) return false;
                 g.InTexture = true;
-                Render(t, key, ref g);
+                if (g.Width > 0 && g.Height > 0) Render(t, key, g.X + pad, g.Y + pad, g.Width, g.Height);
                 glyphs[key] = g;
             }
             return true;
         }
 
-        unsafe void Render(Texture2DNative t, GlyphKey key, ref LegacyGlyph g)
+        unsafe void Render(Texture2DNative t, GlyphKey key, int x, int y, int width, int height)
         {
             var face = LoadStyled(key);
             if (face == null) return;
             var slot = face.Slot;
-            if (slot->format == FT.GLYPH_FORMAT_OUTLINE && FT.FT_Render_Glyph(slot, FontRenderingMode == 2 ? FT.RENDER_MODE_MONO : FT.RENDER_MODE_NORMAL) != 0) return;
+            if (slot->format == FT.GLYPH_FORMAT_OUTLINE && FT.FT_Render_Glyph(slot, RenderMode) != 0) return;
             var bitmap = GlyphRasterizer.CopyBitmap(&slot->bitmap);
-            // The rendered bitmap is normally exactly the measured box; anything beyond it is
-            // clipped to the reserved rectangle.
-            var clipped = new GlyphBitmap { Width = g.Width, Height = g.Height, Pixels = new byte[g.Width * g.Height] };
-            int dx = slot->bitmap_left - g.Left, dy = g.Top - slot->bitmap_top;
-            for (int y = 0; y < bitmap.Height; y++)
-                for (int x = 0; x < bitmap.Width; x++)
-                {
-                    int cx = x + dx, cy = y + dy;
-                    if (cx < 0 || cy < 0 || cx >= g.Width || cy >= g.Height) continue;
-                    clipped.Pixels[cy * g.Width + cx] = bitmap.Rgba ? bitmap.Pixels[4 * (y * bitmap.Width + x) + 3] : bitmap.Pixels[y * bitmap.Width + x];
-                }
-            FontEngine.Blit(t, clipped, g.X, g.Y);
+            // The bitmap is the measured box; anything beyond it is clipped to the reserved rect.
+            var clipped = new GlyphBitmap { Width = width, Height = height, Pixels = new byte[width * height] };
+            for (int row = 0; row < Math.Min(bitmap.Height, height); row++)
+                for (int col = 0; col < Math.Min(bitmap.Width, width); col++)
+                    clipped.Pixels[row * width + col] = bitmap.Rgba ? bitmap.Pixels[4 * (row * bitmap.Width + col) + 3] : bitmap.Pixels[row * bitmap.Width + col];
+            FontEngine.Blit(t, clipped, x, y);
         }
 
-        /// UV rectangle (x, y, width, height) of a glyph placed in the texture.
+        /// UV rectangle (x, y, width, height) of a glyph placed in the texture: a dynamic
+        /// font's covers the padded rect.
         public Rect UvOf(in LegacyGlyph g)
         {
             if (!Dynamic) return g.Uv;
             var t = TextureData;
-            return new Rect((float)g.X / t.Width, (float)g.Y / t.Height, (float)g.Width / t.Width, (float)g.Height / t.Height);
+            int pad = Padding;
+            return new Rect((float)g.X / t.Width, (float)g.Y / t.Height, (float)(g.Width + 2 * pad) / t.Width, (float)(g.Height + 2 * pad) / t.Height);
         }
 
         public LegacyGlyph PlacedGlyph(GlyphKey key)
         {
             lock (gate) return glyphs.GetValueOrDefault(key);
         }
+
+        // ----- Fonts made from OS fonts -----
+
+        /// Font.CreateDynamicFontFromOSFont: a dynamic font without data whose glyphs come from
+        /// the first of `names` installed, else the default chain (as LegacyRuntime's), with the
+        /// line metrics of that chain's first face at `size` (measured: "Arial" here reads
+        /// FreeSans's line height 14 and ascent 10; see SfntTables.TryGetLineMetrics).
+        public void InitFromOSFonts(string[] names, int size)
+        {
+            FontNames = names;
+            FontSize = size;
+            ConvertCase = DynamicFont;
+            CharacterPadding = 1;
+            ShouldRoundAdvanceValue = true;
+            lock (gate)
+            {
+                foreach (var link in Chain)
+                {
+                    var face = link.Face(0, out _);
+                    if (face == null || !face.Tables.TryGetLineMetrics(out int ascender, out int descender, out int spacing)) continue;
+                    float k = (float)size / face.UnitsPerEm;
+                    Ascent = ascender * k;
+                    Descent = descender * k;
+                    LineSpacing = spacing * k;
+                    break;
+                }
+            }
+        }
     }
 
-    /// The built-in default font face (what Unity's player embeds for LegacyRuntime):
-    /// Liberation Sans Regular, taken from the game's own copy of it (a Font asset with that
-    /// family in its m_FontNames and data included), else from the installed OS font.
+    /// One link of a dynamic font's glyph chain: its face per style, opened on first use, and
+    /// the style FreeType synthesizes on it. A font's own data is one face for every style
+    /// (bold and italic synthesized). An installed family uses its own bold, italic and bold
+    /// italic faces (measured: FreeSansBold, FreeSansOblique and FreeSansBoldOblique, not
+    /// synthesized); a style the family does not have is synthesized on its regular face
+    /// (unmeasured).
+    internal sealed class GlyphChainLink
+    {
+        readonly FontNative owner;
+        readonly byte[] data;
+        readonly int dataIndex;
+        readonly string family;
+        readonly int baseStyle;
+        readonly FontFace[] faces = new FontFace[4];
+        readonly int[] synthesized = new int[4];
+        readonly bool[] resolved = new bool[4];
+        readonly Dictionary<(string, int), FontFace> opened = new();
+
+        GlyphChainLink(FontNative owner, byte[] data, int dataIndex, string family, int baseStyle)
+        {
+            this.owner = owner;
+            this.data = data;
+            this.dataIndex = dataIndex;
+            this.family = family;
+            this.baseStyle = baseStyle;
+        }
+
+        public static GlyphChainLink FromData(FontNative owner, byte[] data, int faceIndex) => new(owner, data, faceIndex, null, 0);
+
+        public static GlyphChainLink FromFamily(FontNative owner, string family, int baseStyle) => new(owner, null, 0, family, baseStyle);
+
+        /// The face for a style (SystemFonts' bits) and the bits FreeType must synthesize on it;
+        /// null when it cannot be opened.
+        public FontFace Face(int style, out int synthesize)
+        {
+            if (!resolved[style])
+            {
+                resolved[style] = true;
+                if (data != null)
+                {
+                    faces[style] = Open(null, dataIndex);
+                    synthesized[style] = style;
+                }
+                else
+                {
+                    int want = style | baseStyle;
+                    if (SystemFonts.TryFindStyled(family, want, out var r))
+                        faces[style] = Open(r.filePath, r.faceIndex);
+                    else if (SystemFonts.TryFindStyled(family, baseStyle, out r) || SystemFonts.TryFindStyled(family, 0, out r))
+                    {
+                        faces[style] = Open(r.filePath, r.faceIndex);
+                        synthesized[style] = want & ~baseStyle;
+                    }
+                }
+            }
+            synthesize = synthesized[style];
+            return faces[style];
+        }
+
+        FontFace Open(string path, int index)
+        {
+            if (opened.TryGetValue((path, index), out var face)) return face;
+            byte[] bytes = data;
+            if (path != null)
+            {
+                try { bytes = File.ReadAllBytes(path); }
+                catch (IOException) { bytes = null; }
+                catch (UnauthorizedAccessException) { bytes = null; }
+            }
+            if (bytes == null || bytes.Length == 0 || FontFace.TryOpen(bytes, index, out face) != FontEngineError.Success) face = null;
+            else owner.Register(face);
+            opened[(path, index)] = face;
+            return face;
+        }
+
+        public void CollectOpen(List<FontFace> into)
+        {
+            foreach (var face in opened.Values)
+                if (face != null && !into.Contains(face)) into.Add(face);
+        }
+    }
+
+    /// The built-in default face: Liberation Sans Regular (LegacyRuntime's serialized metrics
+    /// are Liberation Sans's), taken from the game's own copy of it (a Font asset with that
+    /// family in its m_FontNames and data included), else from the installed OS font. The
+    /// TextCore font engine's face for fonts without data, and the last link of their glyph
+    /// chain off Linux; on Linux the original draws LegacyRuntime from the OS fonts instead.
     internal static class BuiltinFont
     {
         static byte[] data;

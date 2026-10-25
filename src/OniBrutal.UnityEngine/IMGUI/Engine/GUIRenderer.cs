@@ -161,7 +161,7 @@ namespace OniBrutal.Engine.IMGUI
         public static void DrawText(Rect rect, string text, Font font, int fontSize, FontStyle fontStyle, TextAnchor alignment, bool wordWrap, bool richText, Color color, Rect? textClip)
         {
             if (!CanDraw || font == null || string.IsNullOrEmpty(text)) return;
-            var settings = GUIText.Settings(font, fontSize, fontStyle, alignment, wordWrap, richText, rect.size);
+            var settings = GUIText.Settings(font, fontSize, fontStyle, alignment, wordWrap, richText, rect.size, aligned: true);
             settings.color = Color.white;
             generator.Populate(text, settings);
             var texture = font.material != null ? font.material.mainTexture : null;
@@ -232,7 +232,9 @@ namespace OniBrutal.Engine.IMGUI
             }
         }
 
-        public static TextGenerationSettings Settings(Font font, int fontSize, FontStyle fontStyle, TextAnchor alignment, bool wordWrap, bool richText, Vector2 extents)
+        /// `aligned`: lines placed by the alignment in the rect (drawing, carets); otherwise the
+        /// generator's extents are the text's own size (measuring).
+        public static TextGenerationSettings Settings(Font font, int fontSize, FontStyle fontStyle, TextAnchor alignment, bool wordWrap, bool richText, Vector2 extents, bool aligned = false)
         {
             return new TextGenerationSettings
             {
@@ -245,7 +247,7 @@ namespace OniBrutal.Engine.IMGUI
                 scaleFactor = 1f,
                 textAnchor = alignment,
                 alignByGeometry = false,
-                updateBounds = true,
+                updateBounds = !aligned,
                 horizontalOverflow = wordWrap ? HorizontalWrapMode.Wrap : HorizontalWrapMode.Overflow,
                 verticalOverflow = VerticalWrapMode.Overflow,
                 generationExtents = new Vector2(Mathf.Max(0f, extents.x), Mathf.Max(0f, extents.y)),
@@ -266,8 +268,8 @@ namespace OniBrutal.Engine.IMGUI
             if (font == null || !IsLegacyRuntime(font)) return 1f;
             var native = (Text.FontNative)font.NativeOrThrow;
             int size = PixelSize(native, fontSize);
-            native.LineMetrics(size, out _, out _, out float lineHeight);
-            return lineHeight > 0f ? 1.1f * size / lineHeight : 1f;
+            native.PixelLineMetrics(size, out _, out _, out int pitch, out _);
+            return pitch > 0 ? 1.1f * size / pitch : 1f;
         }
 
         /// Height of one line of the font at the style's size (GUIStyle.lineHeight). For the
@@ -299,9 +301,9 @@ namespace OniBrutal.Engine.IMGUI
                 float s = PixelSize((Text.FontNative)font.NativeOrThrow, fontSize);
                 float height = s + 0.01f;
                 for (int i = 1; i < measure.lineCount; i++) height += 1.1f * s;
-                return new Vector2(extents.width, height);
+                return new Vector2(measure.WidestLine, height);
             }
-            return new Vector2(extents.width, Mathf.Max(extents.height, line));
+            return new Vector2(measure.WidestLine, Mathf.Max(extents.height, line));
         }
 
         /// Width of the widest unbreakable run (a word) of the text.
@@ -328,7 +330,7 @@ namespace OniBrutal.Engine.IMGUI
             }
             text ??= "";
             // Rich text is not interpreted while editing (text fields show the markup).
-            var settings = Settings(font, fontSize, fontStyle, alignment, wordWrap, false, extents);
+            var settings = Settings(font, fontSize, fontStyle, alignment, wordWrap, false, extents, aligned: true);
             measure.Populate(text, settings);
             var chars = measure.characters;
             var lines = measure.lines;

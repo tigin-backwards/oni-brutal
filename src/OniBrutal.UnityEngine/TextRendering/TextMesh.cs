@@ -197,10 +197,12 @@ namespace OniBrutal.Engine.Text
             generator.Populate(Text, settings);
             // The generator places lines in a zero-size rect; move the block so its anchor point
             // (horizontal from Anchor, which may differ from the line alignment) is the origin.
+            // rectExtents holds the block's size (its x and y read 0); the generator centred the
+            // block on the origin by the pivot (0.5, 0.5).
             var extents = generator.rectExtents;
             int anchor = (int)Anchor;
-            float ax = extents.xMin + anchor % 3 * 0.5f * extents.width;
-            float ay = extents.yMax - anchor / 3 * 0.5f * extents.height;
+            float ax = -0.5f * extents.width + anchor % 3 * 0.5f * extents.width;
+            float ay = 0.5f * extents.height - anchor / 3 * 0.5f * extents.height;
             float scale = CharacterSize * UnitsPerPixel;
 
             var verts = generator.verts;

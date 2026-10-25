@@ -878,16 +878,22 @@ TMP runs as shipped. The engine provides what it needs: `Font`, `TextCore` data 
   Gustavson's anti-aliased EDT; the field is 0.5 on the outline with spread = padding + 1
   (TMP's `_GradientScale`), measured against the game's own SDF atlases.
 - **Legacy fonts** (class 128) render glyphs on demand into the font's own `Font Texture`
-  (Alpha8, from 256², grown when a rebuild with the current frame's glyphs still overflows)
-  and raise `Font.textureRebuilt` on rebuilds. Fonts without data (the built-in
-  `LegacyRuntime`) use the built-in default face, Liberation Sans — the face Unity embeds for
-  it (LegacyRuntime's serialized metrics are Liberation Sans's) — taken from the game's own
-  Liberation Sans font asset; other data-less fonts first try the OS fonts in `m_FontNames`.
+  (Alpha8, from 256², packed on a skyline, grown when a rebuild with the current frame's glyphs
+  still overflows) and raise `Font.textureRebuilt` on rebuilds. Glyphs come from a chain of
+  faces, each glyph from the first face that has it (`FontNative.Chain`, docs/cleanroom/ugui.md
+  "Legacy Text glyph placement"): a font's own data, else (the built-in `LegacyRuntime`, fonts
+  from `CreateDynamicFontFromOSFont`) the first installed OS font of `m_FontNames`, then on
+  Linux FreeSans, DejaVu Sans and Liberation Sans, as measured; with real bold and italic
+  faces. Off Linux (unmeasured) the last link is the built-in Liberation Sans from the game's
+  own font asset, which the TextCore font engine also loads for data-less fonts. Glyphs are
+  rendered unhinted at whole-pixel sizes, with whole-pixel advances and a one-pixel padded
+  box; the generator rounds line metrics, line starts and the block's top to whole pixels, and
+  kerns by the font's serialized `m_KerningValues`.
   `Resources.GetBuiltinResource<Font>("Arial.ttf")`, the font's name before Unity renamed it
   (LegacyRuntime's `m_FontNames` is still `["Arial"]`), gives LegacyRuntime: it is the only font
   in `unity default resources`, and the original gives mods that ask for Arial (the only built-in
   name the Workshop builds in `out/ws` ask for) a font without an error. A dynamic font is laid
-  out at the text's size times the canvas scale, truncated to whole pixels (measured in the
+  out at the text's size times the canvas scale, rounded down to whole pixels (measured in the
   original: a 10-point Text on the game's 0.86 canvas is as wide as at 8 pixels).
 
 ### 3.8 Audio, video, other modules

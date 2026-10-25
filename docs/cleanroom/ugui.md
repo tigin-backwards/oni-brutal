@@ -1634,6 +1634,11 @@ rules held for every case the probe logged:
   LegacyRuntime, such fonts take their line metrics from the face: "Arial" (FreeSans) reads
   `lineHeight` 14 and `ascent` 10. LegacyRuntime keeps its serialized 14 and 11, with FreeSans
   and with DejaVu Sans alike.
+  - The same log's other fonts at 13 (FreeSans 14/10, DejaVu Sans 15/12, Liberation Sans
+    14/11, Ubuntu 14/12) fit one rule: OS/2's typographic ascender, descender and line gap
+    when its USE_TYPO_METRICS bit (fsSelection bit 7) is set (FreeSans, Ubuntu), else hhea's;
+    the line spacing is ascender − descender + line gap, both scaled to the size and read
+    rounded down (re-read from the log by the implementation, 2026-10-24).
 - **Styles use the family's own faces.** Bold, Italic and BoldAndItalic glyphs are those of
   FreeSansBold, FreeSansOblique and FreeSansBoldOblique, all 100 %. They are not synthesized
   from the regular face.
@@ -1772,12 +1777,16 @@ are used:
 - Without the 0.0001 the rule fails at exact halves. UpperLeft at pivot (1, 0) in w 100.5 starts
   at −101, where Rx(−100.5) would be −100. Upper at pivot (0.5, 0.5) in h 31 puts the top at
   16, where Ry(15.5) would be 15.
-- **`updateBounds` true:** the anchor has no effect. The extents become the text's own size
-  (L × the block height, without the 0.0001), and the pivot then places that box. With
-  pivot (0, 1) every anchor starts at (0, 0). With pivot (0.5, 0.5) "Target type" at 13 px
-  (L 63) starts at x −31 = Rx(−31.5). `rectExtents` reads (0, 0, L, block height).
-  With `updateBounds` false it reads (0, 0, W, H). The x and y of `rectExtents` are 0 in every
-  case.
+- **`updateBounds` true:** the extents become the text's own size: the block height (without
+  the 0.0001) and, unless the text wraps, the widest line's L (a wrapping text keeps the padded
+  W). The pivot places that box and the rules above then apply in it, so in a one-line text
+  that does not wrap the anchor makes no difference at pivot (0, 1): every anchor starts at
+  (0, 0). With pivot (0.5, 0.5) "Target type" at 13 px (L 63) starts at x −31 = Rx(−31.5) when
+  left or right aligned and at −32 = Rx(0) − 32 when centred; at 9 px (L 45, wrapping in
+  201.3 × 0.86) UpperLeft starts at −87 = Rx(−86.55905). All 288 of the probe's updateBounds
+  generations fit this (re-read from the log by the implementation, 2026-10-24).
+  `rectExtents` reads (0, 0, that width, block height). With `updateBounds` false it reads
+  (0, 0, W, H). The x and y of `rectExtents` are 0 in every case.
 - `generateOutOfBounds` made no difference in these one-line cases.
 - `Text` lays out with the second behaviour (aligned): rect size × canvas scale as the extents,
   and the rect's pivot. On the 0.86 canvas a centred 232 × 17 rect gives:
@@ -1804,7 +1813,9 @@ are used:
 | 12 | 0.75 | 60 / 100 / 400 | 4 / 7 / 9 |
 
 `GetPreferredWidth` and `GetPreferredHeight` with best fit on report the size without best fit
-(166 and 40 for the first row). The fitting criterion itself was not pinned down.
+(166 and 40 for the first row). The fitting criterion itself was not pinned down. With
+vertical overflow (the probe's `Text`s, 232 × 17 units) best fit took the largest size every
+time, 2 wrapped lines and all: 11 px for 13 points at 0.86, 19 for 13 at 1.5.
 
 #### Where ours deviated (2026-10-24, same probe)
 
@@ -1822,6 +1833,47 @@ the `raster`, `ci` and `fonts` parts throw `TypeLoadException`.
 - `fontSizeUsedForBestFit`: ours reports the point size (11 where the original reports 9).
 
 Of the 4246 generations both logged, none matched in its quads.
+
+**Since then** (the implementation, 2026-10-24): `lx-check.py diff --no-uv` finds every
+`ci`, `raster`, `osglyph`, `gen`, `align` and `text` line of the two players equal (28611
+lines), and the `fonts` part's other lines (`osnames`, `ospaths`, `osfont`) are the same text.
+Left out are the texture coordinates, which follow where each player's packer put a glyph in
+the font texture (the original also stores some glyphs rotated, `flipped`). Our texture holds
+glyphs with their top at the higher v; the original's at the lower. The probe also showed:
+- **Pixel-perfect snapping rounds halves up:** a `Text`'s first vertex at screen x 670.5 and
+  680.5 (the canvas at scale 1, the rect at x 0.5) shifts the mesh by +0.5 (to 671 and 681),
+  where rounding to even would give −0.5 (657.5 goes to 658 either way).
+- **The first allocation of a font texture is no rebuild:** the fonts made with
+  `CreateDynamicFontFromOSFont` raise no `Font.textureRebuilt` on their first glyphs.
+- **Installed fonts** (`GetPathsToOSFonts`, `GetOSInstalledFontNames`): the font in
+  `~/.local/share/fonts` here (Latin Modern Math) is not listed, and neither is the colour
+  bitmap face Noto Color Emoji (FreeType reports it not scalable), whose file is.
+
+#### Open questions
+
+- **Windows and macOS** were not measured. Ours takes the same mechanism there: the first of
+  `fontNames` installed (Arial for LegacyRuntime), and, as the last link of the chain, the
+  built-in Liberation Sans (the game's own copy) where Linux's default chain was measured.
+  Our macOS build scans no macOS font folder, so it reaches that last link.
+- **After an installed name**, whether the default chain still supplies the glyphs that face
+  lacks (ours: it does).
+- **A style the family has no face for** (DejaVu Sans here has no oblique): ours synthesizes it
+  on the regular face.
+- **`HasCharacter`** on a font without data returned true for every character tried; ours
+  returns true for every character. Whether a character no installed font has is false is
+  unknown.
+- **Multi-line alignment** with `updateBounds` true and the alignment of lines of different
+  widths in it, `lineSpacing` other than 1 (`UILineInfo.height` and the pitch), kerning across
+  rich-text tags and `<quad>`, and the tab stop were not measured.
+- **Best fit** with horizontal overflow (ours: width does not count) and with vertical
+  truncation without best fit (whether `rectExtents` keeps the padded height then) were not
+  measured apart.
+- **The first font texture**: the original's LegacyRuntime texture was already 256 × 256 when
+  the probe started; ours is allocated at the first glyph request.
+- **~/.fonts** and the other folders the original scans are not known; ours scans ~/.fonts and
+  `$XDG_DATA_DIRS/fonts` (default /usr/local/share and /usr/share).
+- **The TextCore font engine's face** for a font without data (a TMP font asset made from
+  LegacyRuntime): ours loads the built-in Liberation Sans; unmeasured.
 
 #### Acceptance tests
 

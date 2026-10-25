@@ -66,7 +66,9 @@ namespace OniBrutal.Tests
             Assert.Equal(13, font.fontSize);
             Assert.Equal(new[] { "Arial" }, font.fontNames);
             Assert.True(font.HasCharacter('g'));
-            Assert.False(font.HasCharacter(''));
+            // A font without data has every character (measured: U+4E2D, which no face of its
+            // glyph chain has).
+            Assert.True(font.HasCharacter((char)0x4E2D));
             Assert.Equal(FontEngineError.Success, FontEngine.LoadFontFace(font, 13f, 0));
             Assert.Equal("Liberation Sans", FontEngine.GetFaceInfo().familyName);
         }
@@ -321,11 +323,13 @@ namespace OniBrutal.Tests
             // (Ink may extend a pixel past the last advance.)
             Assert.InRange(right, 45f, 52f);
 
-            // Preferred sizes: one line without wrapping, its height the font's line height.
+            // Preferred sizes: one line without wrapping, whole pixels; its height the font's
+            // ascent and descent (18.398 at its size 16) at 14 pixels, each rounded.
             float width = gen.GetPreferredWidth("Hello", Settings(font, Vector2.zero));
             Assert.InRange(width, 25f, 40f);
+            Assert.Equal(MathF.Round(width), width);
             float height = gen.GetPreferredHeight("Hello", Settings(font, new Vector2(500f, 0f)));
-            Assert.Equal(18.398438f * 14f / 16f, height, 2);
+            Assert.Equal(16f, height);
         }
 
         [Fact]
@@ -346,11 +350,15 @@ namespace OniBrutal.Tests
             gen.GetLines(copies);
             Assert.Equal(gen.lineCount, copies.Count);
 
-            // Best fit picks the largest size that fits, within the limits.
+            // Best fit picks the largest size that fits, within the limits; lines below the
+            // rect count only when they are truncated.
             settings.resizeTextForBestFit = true;
             settings.resizeTextMinSize = 4;
             settings.resizeTextMaxSize = 60;
             settings.generationExtents = new Vector2(500f, 20f);
+            Assert.True(gen.Populate("Fit", settings));
+            Assert.Equal(60, gen.fontSizeUsedForBestFit);
+            settings.verticalOverflow = VerticalWrapMode.Truncate;
             Assert.True(gen.Populate("Fit", settings));
             int size = gen.fontSizeUsedForBestFit;
             Assert.InRange(size, 4, 59);
@@ -498,8 +506,9 @@ namespace OniBrutal.Tests
             tm.text = "Ab";
             native.Geometry();
             Assert.Equal(8, mesh.VertexCount);
-            Assert.True(mesh.Bounds.max.y <= 0.01f);
-            Assert.True(mesh.Bounds.min.x >= -0.01f);
+            // The quads include the font's one-pixel padding: 0.05 units here.
+            Assert.True(mesh.Bounds.max.y <= 0.051f);
+            Assert.True(mesh.Bounds.min.x >= -0.051f);
             Object.DestroyImmediate(go);
         }
     }

@@ -70,6 +70,31 @@ namespace OniBrutal.Engine.Text
             return true;
         }
 
+        /// A face's line metrics in design units, as fonts made from OS fonts take them (measured
+        /// 2026-10-24: FreeSans, Ubuntu, DejaVu Sans, Liberation Sans): OS/2's typographic values
+        /// when its USE_TYPO_METRICS bit (fsSelection bit 7) is set, else hhea's; the line
+        /// spacing is ascender − descender + line gap.
+        public bool TryGetLineMetrics(out int ascender, out int descender, out int lineSpacing)
+        {
+            ascender = descender = lineSpacing = 0;
+            int gap;
+            if (TryGet("OS/2", out int o) && (U16(o + 62) & 0x80) != 0)
+            {
+                ascender = S16(o + 68);
+                descender = S16(o + 70);
+                gap = S16(o + 72);
+            }
+            else if (TryGet("hhea", out int h))
+            {
+                ascender = S16(h + 4);
+                descender = S16(h + 6);
+                gap = S16(h + 8);
+            }
+            else return false;
+            lineSpacing = ascender - descender + gap;
+            return true;
+        }
+
         internal struct Os2
         {
             public short SubscriptYSize, SubscriptYOffset, SuperscriptYSize, SuperscriptYOffset, StrikeoutSize, StrikeoutPosition, XHeight, CapHeight;

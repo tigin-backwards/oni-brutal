@@ -28,6 +28,9 @@ namespace OniBrutal.Engine.Text
 
         public const long FACE_FLAG_KERNING = 1 << 6;
 
+        // FT_STYLE_FLAG_*.
+        public const long STYLE_FLAG_ITALIC = 1, STYLE_FLAG_BOLD = 2;
+
         [StructLayout(LayoutKind.Sequential)]
         public struct Vector
         {

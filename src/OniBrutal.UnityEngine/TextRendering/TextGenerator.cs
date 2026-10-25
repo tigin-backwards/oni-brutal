@@ -51,6 +51,12 @@ namespace UnityEngine
         public int characterCountVisible => characterList.Count - 1;
         public int lineCount => lineList.Count;
         public Rect rectExtents => extents;
+
+        float widestLine;
+
+        /// The widest line of the last generation, in pixels (a wrapping text's rectExtents
+        /// keeps the wrap width).
+        internal float WidestLine => widestLine;
         public int fontSizeUsedForBestFit => sizeUsed;
 
         public void GetVertices(List<UIVertex> vertices) => CopyInto(vertexList, vertices);
@@ -75,6 +81,8 @@ namespace UnityEngine
         {
         }
 
+        /// The width of the widest line, unwrapped, in pixels (whole pixels for a dynamic font).
+        /// With best fit, unwrapped and unbounded text fits at the largest size (measured).
         public float GetPreferredWidth(string str, TextGenerationSettings settings)
         {
             settings.horizontalOverflow = HorizontalWrapMode.Overflow;
@@ -84,6 +92,9 @@ namespace UnityEngine
             return extents.width;
         }
 
+        /// The height of the text's lines in pixels. With best fit, at the largest size whose
+        /// wrapped lines break no word (measured: 13 points at 0.86 in 60 units, whose 11-pixel
+        /// "conversion." is wider than the line, measure at 12 points).
         public float GetPreferredHeight(string str, TextGenerationSettings settings)
         {
             settings.verticalOverflow = VerticalWrapMode.Overflow;
@@ -127,6 +138,7 @@ namespace UnityEngine
             lineList.Clear();
             extents = default;
             sizeUsed = 0;
+            widestLine = 0f;
 
             var font = settings.font;
             if (font == null)
@@ -158,10 +170,12 @@ namespace UnityEngine
                 size = LargestFittingSize(layout, settings.resizeTextMinSize, Math.Max(settings.resizeTextMaxSize, settings.resizeTextMinSize));
             else
                 layout.Run(size);
-            sizeUsed = size;
+            // The pixel size laid out at, with best fit or without (measured).
+            sizeUsed = layout.PixelSize(size);
 
             if (layout.Emit(vertexList, characterList, lineList, out extents))
                 Font.InvokeTextureRebuilt_Internal(font);
+            widestLine = layout.WidestLine;
             return TextGenerationError.None;
         }
 
@@ -203,7 +217,10 @@ namespace OniBrutal.Engine.Text
         NoFont = 4,
     }
 
-    /// Line breaking and placement of one text for TextGenerator.
+    /// Line breaking and placement of one text for TextGenerator, in pixels (docs/cleanroom/ugui.md,
+    /// "Legacy Text glyph placement"): a dynamic font is laid out at floor(size × scale) pixels,
+    /// with whole-pixel advances, m_KerningValues scaled to the size, glyph quads of the padded
+    /// box, line metrics rounded to whole pixels, and line starts and the block's top rounded.
     internal sealed class TextLayout
     {
         enum Kind : byte { Glyph, Tag, NewLine, Tab, Quad, Hidden }
@@ -217,6 +234,9 @@ namespace OniBrutal.Engine.Text
             public Color32 Color;
             public LegacyGlyph Glyph;
             public float Advance;
+            /// Dynamic fonts: the kerning with the glyph before, applied to the pen before this
+            /// glyph is drawn (its cursor is the pen before it).
+            public int Kern;
             /// Quad: uv rectangle.
             public Rect QuadUv;
             public bool Whitespace;
@@ -227,7 +247,10 @@ namespace OniBrutal.Engine.Text
         struct Line
         {
             public int Start, End; // item range [Start, End)
-            public float Width, Ascent, Descent, Height;
+            public float Width;
+            /// Ascent (baseline below the top), block height (ascent + descent), pitch to the
+            /// next line and the line spacing rounded down, in pixels.
+            public int Ascent, Block, Pitch, SpacingFloor;
             public bool Wrapped;
         }
 
@@ -237,10 +260,13 @@ namespace OniBrutal.Engine.Text
         readonly float scale;
         readonly float maxWidth, maxHeight;
         readonly List<Line> lines = new();
-        Item[] items;
+        Item[] items = Array.Empty<Item>();
         int keptLines;
 
         public bool Fits { get; private set; }
+
+        /// The widest laid-out line in pixels (after Emit).
+        public float WidestLine { get; private set; }
 
         readonly float tabSize;
 
@@ -255,10 +281,9 @@ namespace OniBrutal.Engine.Text
             maxHeight = settings.generationExtents.y * scale;
         }
 
-        /// A dynamic font is laid out at the size times the scale factor, truncated: measured in the
-        /// original, a 10-point uGUI Text on a canvas scaled 0.86 is as wide as at 8 pixels (Geyser
-        /// Swapper's status line: a preferred width of 306.98 units, 264 pixels / 0.86), not 9.
-        int PixelSize(int size) => font.Dynamic ? Math.Max(1, (int)(size * scale)) : (int)font.FontSize;
+        /// A dynamic font is laid out at the size times the scale factor (float), rounded down:
+        /// 11 points on the game's 0.86 canvas are 9 pixels (measured).
+        public int PixelSize(int size) => font.Dynamic ? Math.Max(1, (int)(size * scale)) : (int)font.FontSize;
 
         /// Lays the text out at a base font size (unscaled).
         public void Run(int baseSize)
@@ -270,8 +295,8 @@ namespace OniBrutal.Engine.Text
             bool verticalFits = true;
             for (int i = 0; i < lines.Count; i++)
             {
-                float height = total + lines[i].Height;
-                total += lines[i].Height * settings.lineSpacing;
+                float height = total + lines[i].Block;
+                total += lines[i].Pitch * settings.lineSpacing;
                 if (height > maxHeight + 0.001f)
                 {
                     verticalFits = false;
@@ -282,7 +307,11 @@ namespace OniBrutal.Engine.Text
             bool horizontalFits = true;
             foreach (var line in lines)
                 if (line.Width > maxWidth + 0.001f) horizontalFits = false;
-            Fits = verticalFits && horizontalFits && !brokeWord;
+            // Each axis counts against a size only when it is bounded (measured: with vertical
+            // overflow best fit takes the largest size however many lines wrap; unwrapped, the
+            // largest size whatever the width).
+            Fits = (verticalFits || settings.verticalOverflow == VerticalWrapMode.Overflow)
+                   && (horizontalFits && !brokeWord || settings.horizontalOverflow == HorizontalWrapMode.Overflow);
         }
 
         bool brokeWord;
@@ -290,15 +319,17 @@ namespace OniBrutal.Engine.Text
         void BuildItems(int baseSize)
         {
             int n = text.Length;
-            items = new Item[n];
+            if (items.Length != n) items = new Item[n];
+            else Array.Clear(items);
             var color = (Color32)settings.color;
             int size = baseSize;
             bool bold = settings.fontStyle is FontStyle.Bold or FontStyle.BoldAndItalic;
             bool italic = settings.fontStyle is FontStyle.Italic or FontStyle.BoldAndItalic;
-            var colors = new Stack<Color32>();
-            var sizes = new Stack<int>();
+            Stack<Color32> colors = null;
+            Stack<int> sizes = null;
             int boldDepth = 0, italicDepth = 0;
-            var tags = settings.richText ? RichText.Parse(text) : null;
+            var tags = settings.richText && text.IndexOf('<') >= 0 ? RichText.Parse(text) : null;
+            int previousGlyph = -1;
             for (int i = 0; i < n; i++)
             {
                 if (tags != null && tags.TryGetValue(i, out var tag))
@@ -309,10 +340,12 @@ namespace OniBrutal.Engine.Text
                         case "b": boldDepth += tag.Closing ? -1 : 1; break;
                         case "i": italicDepth += tag.Closing ? -1 : 1; break;
                         case "color":
+                            colors ??= new Stack<Color32>();
                             if (tag.Closing) { if (colors.Count > 0) color = colors.Pop(); }
                             else { colors.Push(color); color = tag.Color; }
                             break;
                         case "size":
+                            sizes ??= new Stack<int>();
                             if (tag.Closing) { if (sizes.Count > 0) size = sizes.Pop(); }
                             else { sizes.Push(size); size = tag.Size; }
                             break;
@@ -321,6 +354,7 @@ namespace OniBrutal.Engine.Text
                             int px = PixelSize(tag.Size > 0 ? tag.Size : size);
                             float aspect = tag.Uv.height > 0f ? tag.Uv.width / tag.Uv.height : 1f;
                             items[i] = new Item { Kind = Kind.Quad, Size = px, Color = color, QuadUv = tag.Uv, Advance = px * aspect };
+                            previousGlyph = -1;
                             break;
                         }
                     }
@@ -340,9 +374,9 @@ namespace OniBrutal.Engine.Text
                 item.Size = pixelSize;
                 item.Style = style;
                 item.Color = color;
-                if (c == '\n') { item.Kind = Kind.NewLine; continue; }
+                if (c == '\n') { item.Kind = Kind.NewLine; previousGlyph = -1; continue; }
                 if (c == '\r') { item.Kind = Kind.Hidden; continue; }
-                if (c == '\t') { item.Kind = Kind.Tab; item.Whitespace = true; continue; }
+                if (c == '\t') { item.Kind = Kind.Tab; item.Whitespace = true; previousGlyph = -1; continue; }
                 int cp = c;
                 if (char.IsHighSurrogate(c) && i + 1 < n && char.IsLowSurrogate(text[i + 1]))
                 {
@@ -356,18 +390,14 @@ namespace OniBrutal.Engine.Text
                 if (!font.Dynamic && item.Glyph.Exists) item.Advance += font.CharacterSpacing;
                 item.Whitespace = c == ' ' || c == '​' || c == '　';
                 item.BreakBefore = IsIdeograph(cp);
-                if (cp >= 0x10000) i++;
-            }
-            // Bitmap fonts carry imported kerning pairs (pixels at their size).
-            if (!font.Dynamic && font.Kerning.Count > 0)
-            {
-                int prev = -1;
-                for (int i = 0; i < n; i++)
+                if (previousGlyph >= 0)
                 {
-                    if (items[i].Kind != Kind.Glyph) continue;
-                    if (prev >= 0 && font.Kerning.TryGetValue((items[prev].CodePoint, items[i].CodePoint), out float k)) items[prev].Advance += k;
-                    prev = i;
+                    if (font.Dynamic) item.Kern = font.PixelKerning(items[previousGlyph].CodePoint, cp, pixelSize);
+                    // Bitmap fonts carry imported kerning pairs (pixels at their size).
+                    else if (font.Kerning.TryGetValue((items[previousGlyph].CodePoint, cp), out float k)) items[previousGlyph].Advance += k;
                 }
+                previousGlyph = i;
+                if (cp >= 0x10000) i++;
             }
         }
 
@@ -381,6 +411,11 @@ namespace OniBrutal.Engine.Text
             float tab = tabSize * (space.Exists ? space.Advance : size * 0.25f);
             return tab <= 0f ? x : (float)(Math.Floor(x / tab) + 1) * tab;
         }
+
+        static bool Advances(Kind kind) => kind is Kind.Glyph or Kind.Quad or Kind.Tab;
+
+        /// The pen's move for an item: its kerning (not at a line's first item) and advance.
+        float Step(int k, int lineStart) => items[k].Advance + (k > lineStart && items[k].Kind == Kind.Glyph ? items[k].Kern : 0);
 
         void BreakLines(int basePixelSize)
         {
@@ -413,12 +448,12 @@ namespace OniBrutal.Engine.Text
                 if (item.Whitespace)
                 {
                     // Whitespace never wraps; the line may break after it.
-                    x += item.Advance;
+                    x += Step(i, start);
                     lastBreak = i + 1;
                     continue;
                 }
                 if (item.BreakBefore && i > start) lastBreak = i;
-                if (wrap && x + item.Advance > maxWidth && HasContent(start, i))
+                if (wrap && x + Step(i, start) > maxWidth && HasContent(start, i))
                 {
                     int breakAt = lastBreak > start ? lastBreak : i;
                     if (breakAt == i && lastBreak <= start) brokeWord = true;
@@ -426,9 +461,9 @@ namespace OniBrutal.Engine.Text
                     start = breakAt;
                     lastBreak = -1;
                     x = 0f;
-                    for (int k = start; k < i; k++) x += items[k].Kind is Kind.Glyph or Kind.Quad or Kind.Tab ? items[k].Advance : 0f;
+                    for (int k = start; k < i; k++) x += Advances(items[k].Kind) ? Step(k, start) : 0f;
                 }
-                x += item.Advance;
+                x += Step(i, start);
             }
             AddLine(start, items.Length, false, basePixelSize);
         }
@@ -436,7 +471,7 @@ namespace OniBrutal.Engine.Text
         bool HasContent(int start, int end)
         {
             for (int k = start; k < end; k++)
-                if (items[k].Kind is Kind.Glyph or Kind.Quad or Kind.Tab) return true;
+                if (Advances(items[k].Kind)) return true;
             return false;
         }
 
@@ -448,35 +483,41 @@ namespace OniBrutal.Engine.Text
             if (wrapped)
                 while (last >= start && (items[last].Whitespace || items[last].Kind is Kind.Tag or Kind.Hidden)) last--;
             for (int k = start; k <= last; k++)
-                if (items[k].Kind is Kind.Glyph or Kind.Quad or Kind.Tab) line.Width += items[k].Advance;
+                if (Advances(items[k].Kind)) line.Width += Step(k, start);
             // Vertical metrics: the largest size on the line (the base size when empty).
             int size = 0;
             for (int k = start; k < end; k++)
-                if (items[k].Kind is Kind.Glyph or Kind.Quad or Kind.Tab) size = Math.Max(size, items[k].Size);
+                if (Advances(items[k].Kind)) size = Math.Max(size, items[k].Size);
             if (size == 0) size = basePixelSize;
-            font.LineMetrics(size, out line.Ascent, out line.Descent, out line.Height);
+            font.PixelLineMetrics(size, out line.Ascent, out int descent, out line.Pitch, out line.SpacingFloor);
+            line.Block = line.Ascent + descent;
             lines.Add(line);
         }
+
+        // Rounding of a line's start (half up) and of the block's top (half down, toward −y).
+        static float RoundX(float v) => MathF.Floor(v + 0.5f);
+        static float RoundY(float v) => MathF.Ceiling(v - 0.5f);
+
+        readonly List<GlyphKey> keys = new();
 
         /// Places the kept lines, requests their glyphs in the font texture and writes the
         /// vertices, character infos and line infos. True when the font texture was rebuilt.
         public bool Emit(List<UIVertex> verts, List<UICharInfo> chars, List<UILineInfo> lineInfos, out Rect extents)
         {
-            var rect = new Rect(-settings.pivot.x * maxWidth, -settings.pivot.y * maxHeight, maxWidth, maxHeight);
             int count = keptLines;
             bool rebuilt = false;
             if (font.Dynamic)
             {
-                var keys = new List<GlyphKey>();
+                keys.Clear();
                 for (int l = 0; l < count; l++)
                     for (int k = lines[l].Start; k < lines[l].End; k++)
-                        if (items[k].Kind == Kind.Glyph && items[k].Glyph.Width > 0) keys.Add(new GlyphKey(items[k].CodePoint, items[k].Size, items[k].Style));
+                        if (items[k].Kind == Kind.Glyph) keys.Add(new GlyphKey(items[k].CodePoint, items[k].Size, items[k].Style));
                 rebuilt = font.RequestGlyphs(keys);
             }
 
-            // Block height: line advances, the last line by its own height.
+            // Block height: the line pitches, the last line by its own block.
             float blockHeight = 0f;
-            for (int l = 0; l < count; l++) blockHeight += l == count - 1 ? lines[l].Height : lines[l].Height * settings.lineSpacing;
+            for (int l = 0; l < count; l++) blockHeight += l == count - 1 ? lines[l].Block : lines[l].Pitch * settings.lineSpacing;
             // Offset from the block top to the first line's top.
             float boxTopOffset = 0f;
             if (settings.alignByGeometry && count > 0)
@@ -486,63 +527,82 @@ namespace OniBrutal.Engine.Text
                 GeometryExtent(0, out float firstTop, out _);
                 GeometryExtent(count - 1, out _, out float lastBottom);
                 float advance = 0f;
-                for (int l = 0; l < count - 1; l++) advance += lines[l].Height * settings.lineSpacing;
+                for (int l = 0; l < count - 1; l++) advance += lines[l].Pitch * settings.lineSpacing;
                 blockHeight = firstTop - (lastBottom - advance);
                 boxTopOffset = -firstTop;
             }
+            float widest = 0f;
+            for (int l = 0; l < count; l++) widest = Math.Max(widest, LineWidth(l, out _));
+            WidestLine = widest;
+
+            // The rect: the extents in pixels plus 0.0001 on each axis. With updateBounds, its
+            // width is the widest line's unless the text wraps, and its height the block's
+            // unless lines are truncated (measured: the probe's updateBounds generations; the
+            // truncated ones were all best fit). The pivot places it and the anchor places the
+            // lines in it.
+            bool bounds = settings.updateBounds;
+            bool wraps = settings.horizontalOverflow == HorizontalWrapMode.Wrap && maxWidth > 0f;
+            bool truncates = settings.verticalOverflow == VerticalWrapMode.Truncate;
+            float w = bounds && !wraps ? widest : maxWidth + 0.0001f, h = bounds && !truncates ? blockHeight : maxHeight + 0.0001f;
+            float xMin = -settings.pivot.x * w, yMax = (1f - settings.pivot.y) * h;
             int anchor = (int)settings.textAnchor;
             int vertical = anchor / 3, horizontal = anchor % 3;
             float blockTop = vertical switch
             {
-                0 => rect.yMax,
-                1 => rect.center.y + blockHeight * 0.5f,
-                _ => rect.yMin + blockHeight,
+                0 => RoundY(yMax),
+                1 => RoundY(yMax - (h - blockHeight) / 2f),
+                _ => RoundY(yMax - h + blockHeight),
             };
             float lineTop = blockTop + boxTopOffset;
 
-            float minX = float.MaxValue, maxX = float.MinValue;
             for (int l = 0; l < count; l++)
             {
                 var line = lines[l];
-                float width = line.Width, inkOffset = 0f;
-                if (settings.alignByGeometry && LineInk(l, out float inkLeft, out float inkRight))
-                {
-                    inkOffset = inkLeft;
-                    width = inkRight - inkLeft;
-                }
+                float width = LineWidth(l, out float inkOffset);
                 float x = horizontal switch
                 {
-                    0 => rect.xMin,
-                    1 => rect.center.x - width * 0.5f,
-                    _ => rect.xMax - width,
+                    0 => RoundX(xMin),
+                    1 => RoundX(xMin + w / 2f) - MathF.Ceiling(width / 2f),
+                    _ => RoundX(xMin + w) - width,
                 } - inkOffset;
-                minX = Math.Min(minX, x + inkOffset);
-                maxX = Math.Max(maxX, x + inkOffset + width);
                 float baseline = lineTop - line.Ascent;
-                float advanceHeight = line.Height * settings.lineSpacing;
+                float pitch = line.Pitch * settings.lineSpacing;
                 lineInfos.Add(new UILineInfo
                 {
                     startCharIdx = line.Start,
-                    height = (int)Math.Round(advanceHeight, MidpointRounding.AwayFromZero),
+                    height = line.SpacingFloor,
                     topY = lineTop,
-                    leading = advanceHeight - line.Height,
+                    leading = pitch - line.Block,
                 });
                 for (int k = line.Start; k < line.End; k++)
                 {
                     ref var item = ref items[k];
-                    chars.Add(new UICharInfo { cursorPos = new Vector2(x, lineTop), charWidth = item.Kind is Kind.Glyph or Kind.Quad or Kind.Tab ? item.Advance : 0f });
+                    chars.Add(new UICharInfo { cursorPos = new Vector2(x, lineTop), charWidth = Advances(item.Kind) ? item.Advance : 0f });
+                    if (!Advances(item.Kind)) continue;
+                    if (item.Kind == Kind.Glyph && k > line.Start) x += item.Kern;
                     if (item.Kind == Kind.Glyph) EmitGlyph(verts, ref item, x, baseline);
                     else if (item.Kind == Kind.Quad) EmitQuad(verts, ref item, x, baseline);
-                    if (item.Kind is Kind.Glyph or Kind.Quad or Kind.Tab) x += item.Advance;
+                    x += item.Advance;
                 }
                 if (l == count - 1) chars.Add(new UICharInfo { cursorPos = new Vector2(x, lineTop), charWidth = 0f });
-                lineTop -= advanceHeight;
+                lineTop -= pitch;
             }
 
-            if (!settings.updateBounds) extents = rect;
-            else if (count == 0) extents = new Rect(rect.x, rect.y, 0f, 0f);
-            else extents = new Rect(minX, blockTop - blockHeight, maxX - minX, blockHeight);
+            extents = bounds && count == 0 ? default : new Rect(0f, 0f, w, h);
             return rebuilt;
+        }
+
+        /// A line's width for alignment (by geometry: its ink's), and the offset of that width's
+        /// left edge from the pen start.
+        float LineWidth(int l, out float inkOffset)
+        {
+            inkOffset = 0f;
+            if (settings.alignByGeometry && LineInk(l, out float inkLeft, out float inkRight))
+            {
+                inkOffset = inkLeft;
+                return inkRight - inkLeft;
+            }
+            return lines[l].Width;
         }
 
         /// Ink extent (relative to the line top: top ≥ bottom) of a line's glyphs.
@@ -557,7 +617,7 @@ namespace OniBrutal.Engine.Text
                 top = Math.Max(top, items[k].Glyph.Top - line.Ascent);
                 bottom = Math.Min(bottom, items[k].Glyph.Top - items[k].Glyph.Height - line.Ascent);
             }
-            if (top == float.MinValue) { top = 0f; bottom = -line.Height; }
+            if (top == float.MinValue) { top = 0f; bottom = -line.Block; }
         }
 
         /// Horizontal ink extent of a line relative to its pen start.
@@ -570,22 +630,38 @@ namespace OniBrutal.Engine.Text
             for (int k = line.Start; k < line.End; k++)
             {
                 ref var item = ref items[k];
+                if (!Advances(item.Kind)) continue;
+                if (item.Kind == Kind.Glyph && k > line.Start) x += item.Kern;
                 if (item.Kind == Kind.Glyph && item.Glyph.Width > 0)
                 {
                     left = Math.Min(left, x + item.Glyph.Left);
                     right = Math.Max(right, x + item.Glyph.Left + item.Glyph.Width);
                 }
-                if (item.Kind is Kind.Glyph or Kind.Quad or Kind.Tab) x += item.Advance;
+                x += item.Advance;
             }
             return left != float.MaxValue;
         }
 
         void EmitGlyph(List<UIVertex> verts, ref Item item, float x, float baseline)
         {
-            if (!item.Glyph.Exists || item.Glyph.Width == 0 || item.Glyph.Height == 0) return;
-            var g = font.Dynamic ? font.PlacedGlyph(new GlyphKey(item.CodePoint, item.Size, item.Style)) : item.Glyph;
-            if (font.Dynamic && !g.InTexture) return;
-            var uv = font.UvOf(g);
+            if (!item.Glyph.Exists) return;
+            if (font.Dynamic)
+            {
+                // Every glyph but the space has a quad: its rendered box grown by the character
+                // padding (an empty glyph's is 2 × 2).
+                if (item.CodePoint == ' ') return;
+                var placed = font.PlacedGlyph(new GlyphKey(item.CodePoint, item.Size, item.Style));
+                if (!placed.InTexture) return;
+                var uvRect = font.UvOf(placed);
+                int pad = font.Padding;
+                float left = x + placed.Left - pad, top = baseline + placed.Top + pad;
+                AddQuad(verts, left, top - placed.Height - 2 * pad, left + placed.Width + 2 * pad, top,
+                    new Vector2(uvRect.xMin, uvRect.yMax), new Vector2(uvRect.xMax, uvRect.yMax), new Vector2(uvRect.xMax, uvRect.yMin), new Vector2(uvRect.xMin, uvRect.yMin), item.Color);
+                return;
+            }
+            var g = item.Glyph;
+            if (g.Width == 0 || g.Height == 0) return;
+            var uv = g.Uv;
             float x0 = x + g.Left, x1 = x0 + g.Width;
             float y1 = baseline + g.Top, y0 = y1 - g.Height;
             Vector2 tl, tr, br, bl;

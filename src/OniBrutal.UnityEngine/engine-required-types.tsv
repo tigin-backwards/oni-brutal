@@ -38,3 +38,4 @@ UnityEngine.CoreModule	UnityEngine.PlayerPrefs	# mods: settings kept in PlayerPr
 UnityEngine.Physics2DModule	UnityEngine.EdgeCollider2D	# mods' bundles (Aki's Snow Things): a prefab's edge collider
 UnityEngine.CoreModule	UnityEngine.Rendering.ShaderPropertyType	# mods (Morphs Not Included): Shader.GetPropertyType
 UnityEngine.TextRenderingModule	UnityEngine.TextAlignment	# mods (Antigravity): TextMesh.alignment
+UnityEngine.TextRenderingModule	UnityEngine.CharacterInfo	# Font.GetCharacterInfo, RequestCharactersInTexture's glyphs (the legacytext probe)

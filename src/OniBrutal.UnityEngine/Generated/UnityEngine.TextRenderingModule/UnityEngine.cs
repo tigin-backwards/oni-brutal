@@ -2,6 +2,9 @@
 #nullable disable
 namespace UnityEngine
 {
+    public partial struct CharacterInfo
+    {
+    }
     public sealed partial class Font : global::UnityEngine.Object
     {
     }

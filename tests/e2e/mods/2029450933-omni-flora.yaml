@@ -1,0 +1,30 @@
+# Omni Flora - Decorative Plants (2029450933), classes P, O.
+#
+# What it does: eight decorative plants with seeds (Prickly Lotus, Frost Blossom, Icy Shroom,
+# Myrth Rose, Rust Fern, Spore Lamp, Tropicalgae, Shlurp Coral), registered by a prefix on
+# EntityConfigManager.LoadGeneratedEntities through BaseSharlesPlantConfig
+# (EntityTemplates.ExtendEntityToBasicPlant and CreateAndRegisterSeedForPlant), each with its
+# decor by growth stage, some reacting to cold, warmth or water; a SettingsCache.LoadFiles
+# postfix adds them to the biomes' mobs so that new worlds grow them; Sea Lettuce no longer
+# drowns.
+# How a player reaches it: a new world's biomes, the plants' seeds in a flower pot.
+# What changes: decorative plants in the world.
+#
+# setup sets a Prickly Lotus down in the dug-out corridor west of the printing pod (114, 206);
+# selected, its title shows.
+from: early-base
+mods: [2029450933]
+setup:
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131130, 0, 0, \"PricklyLotus\", \"BuildingFront\")", method: SetActive, args: [true]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"PricklyLotus\")": exists
+      "Assets.GetPrefab(\"PricklyLotusSeed\")": exists
+      "Assets.GetPrefab(\"ShlurpCoralPolyp\")": exists
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [114, 208], ortho: 8}}
+  - click_world: {cell: [114, 206], select: PricklyLotus}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Prickly Lotus"}
+  - shot: {name: title, crop: "**/DetailsScreen/TitleBar", threshold: 0.04}

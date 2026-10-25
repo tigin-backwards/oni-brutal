@@ -197,6 +197,10 @@ broken.update({
     '1873884303': 'broken upstream: on the base-game fixture its `OnLoad` stops on a HarmonyException (its `DetailsScreen.OnPrefabInit` patch takes `___sideScreenContentBody`, a field the game no longer has), its scanner then fails to register ("First anim file needs to be non-null", a NullReferenceException in RegisterBuilding), and the game disables it ("Failed to load mod ...disabling") and closes before the save loads',
     '2215696830': 'broken upstream: its tile\'s `ItemPermeableTile.OnSpawn` calls `SimMessages.ClearCellProperties(int, byte)`, which the game no longer has, so every finished Item Permeable Tile throws a MissingMethodException and opens the crash report screen (spec tests/e2e/mods/2215696830-item-permeable-tiles.yaml)',
 })
+# Found by the e2e specs of batch 24: the spec fails the same way in the original.
+broken.update({
+    '2029450933': 'broken upstream: its plants call the 19-parameter `EntityTemplates.ExtendEntityToBasicPlant` the game no longer has, so their prefabs fail in `Assets.OnPrefabInit` (MissingMethodException), its care package postfix throws an InvalidCastException, and loading a colony stops at "Error deserializing prefabs" and quits (spec tests/e2e/mods/2029450933-omni-flora.yaml)',
+})
 # Fails to load in the original only.
 original_only = {
     '1729794261': 'loads in ours but not in the original: Mono rejects its `PixelPack2` class (an interface method it lacks) at first use, where ours stubs the missing method (ARCHITECTURE D22); left out of the colony runs, which the original\'s error dialog stops',

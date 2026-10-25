@@ -1,0 +1,38 @@
+# Survival Not Required (2840201171), classes P, B.
+#
+# What it does: the Printing Pod (and the Mini-Pod) becomes a source of power, oxygen and
+# water. Postfixes on HeadquartersConfig give it a 400 W generator (a DevGenerator, its power
+# output two cells east of its origin), an oxygen storage and a water storage of 10 kg each
+# with conduit dispensers (gas out one cell west, liquid two east) and an ElementConverter's
+# outputs at 0.5 kg/s of oxygen and 0.1 kg/s of water at no more than 293.15 K; a
+# Telepad.States postfix fills the storages every 200 ms while the pod is operational; an
+# Operational.UpdateOperational prefix keeps the pod operational while its outputs are not
+# connected. settings.yaml beside the DLL sets the numbers; a new game's starting base gets a
+# gas vent and a lamp beside the pod.
+# How a player reaches it: wiring or piping the Printing Pod.
+# What changes: the pod powers a building wired to it and fills its storages.
+#
+# In early-base the research station stands unpowered two cells east of the pod's power
+# output: a wire is built between them, and the pod's storages fill as the game runs.
+from: early-base
+mods: [2840201171]
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"Headquarters\").GeneratorWattageRating": 400
+      "Assets.GetBuildingDef(\"Headquarters\").RequiresPowerOutput": true
+      "all:Telepad::[0].GetComponent<DevGenerator>.wattageRating": 400
+      "all:Telepad::[0].GetComponent<ElementConverter>.outputElements.Length": 2
+      "all:ResearchCenter::[0].GetComponent<EnergyConsumer>.IsPowered": false
+  - build: {prefab: Wire, cells: [[126, 207], [127, 207]]}
+  - run: {seconds: 600, until: {pending_construction: 0}}
+  - run: {seconds: 30}
+  - expect_state:
+      "all:ResearchCenter::[0].GetComponent<EnergyConsumer>.IsPowered": true
+      "all:Telepad::[0].GetComponent<Operational>.IsOperational": true
+      "all:Telepad::[0].GetComponent<Storage>.MassStored()": ">= 9.9"
+  - driver: {camera.set: {cell: [124, 209], ortho: 8}}
+  - click_world: {cell: [124, 208], select: Headquarters}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Printing Pod"}
+  - shot: {name: title, crop: "**/DetailsScreen/TitleBar", threshold: 0.04}

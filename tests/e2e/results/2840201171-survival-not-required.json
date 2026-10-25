@@ -1,0 +1,59 @@
+{
+ "spec": "mods/2840201171-survival-not-required.yaml",
+ "mods": [
+  "2840201171"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Printing Pod a 400 W generator with oxygen and water outputs; a wire built from it to early-base's unpowered research station powers it, and the pod's oxygen storage fills to its 10 kg, as in the original",
+ "updated": "2026-10-24",
+ "commit": "4eab9eb",
+ "mod_dlls": {
+  "2840201171": {
+   "SurvivalNotRequired.dll": "56dab82c2c7758aaab44cc4ce36711ed7404efa183c08c92b3bb404e164a1e38"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-213453-7f7026a0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T21:40:43",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-222200-10d4191c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T22:22:36",
+    "lane": 16,
+    "reference_run": "20261024-213453-7f7026a0",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "title": 0.0
+    }
+   },
+   {
+    "run": "20261024-222200-10d4191c",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T22:22:37",
+    "lane": 17,
+    "reference_run": "20261024-213453-7f7026a0",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "title": 0.0
+    }
+   }
+  ]
+ }
+}

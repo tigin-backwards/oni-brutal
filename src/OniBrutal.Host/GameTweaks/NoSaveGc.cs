@@ -11,7 +11,7 @@ namespace OniBrutal.Host.GameTweaks
     /// forced collection from saving and nothing else.
     internal static class NoSaveGc
     {
-        public const string Name = "no-save-gc";
+        public const string Name = GameTweakNames.NoSaveGc;
 
         public static void Install(Harmony harmony)
             => harmony.Patch(AccessTools.Method("SaveLoader:Save", [typeof(string), typeof(bool), typeof(bool)]),

@@ -1,0 +1,156 @@
+#nullable enable
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace OniBrutal.Host.GameTweaks
+{
+    /// A row's measured gain, as a player would put it ("autosave freeze ~12 s → ~5 s on a large
+    /// colony"), with where it comes from so it can be refreshed: the colony, the platform and
+    /// when it was measured, and the document holding the measurement.
+    internal sealed record TweakGain(string Effect, string Colony, string Platform, string Measured, string Source);
+
+    /// A section of the Moono Tweaks screen. `Gain`: one shared by all of its rows (the save
+    /// tweaks are measured together).
+    internal sealed record TweakGroup(string Title, TweakGain? Gain = null);
+
+    /// One row of the Moono Tweaks screen and of docs/TWEAKS.md: `Title` in sentence case,
+    /// `Effect` one short line on what a player gets from it, `Detail` (optional) how it does it,
+    /// for the row's tooltip and the docs. `IsTweak` is false for the player's own options (the
+    /// splash and frame stats), which are rows but not `--game-tweak` names.
+    internal sealed record TweakInfo(string Id, TweakGroup Group, string Title, string Effect, string Detail = "", TweakGain? Gain = null, bool IsTweak = true)
+    {
+        /// The launch option that sets this row (shown in its tooltip).
+        public string LaunchOption => Id switch
+        {
+            GameTweakNames.SplashRow => "--splash moo",
+            GameTweakNames.FrameStatsRow => "--frame-stats",
+            _ => "--game-tweak " + Id,
+        };
+    }
+
+    /// Every row of the Moono Tweaks screen, with its group, title, one-liner and gain: the one
+    /// source for the screen (BrutalTweaksMenu), for option parsing (All, ChangingBehaviour) and
+    /// for docs/TWEAKS.md's list (generated from this; GameTweakCatalogTests fails when they
+    /// disagree, `ONI_UPDATE_DOCS=1` rewrites it). Plain .NET with no game types: options are read
+    /// before the game's assemblies (Harmony among them) can be resolved, and the tests compile it in.
+    internal static class GameTweakNames
+    {
+        public const string SplashRow = "splash", FrameStatsRow = "frame-stats";
+        public const string FastSaveCompression = "fast-save-compression", BackgroundSave = "background-save", NoSaveGc = "no-save-gc",
+            FastSerialization = "fast-serialization", FastParticleCollision = "fast-particle-collision";
+
+        // The gains shown on the screen. Measured on Linux under WSL2, where the game's code ran
+        // about half as fast as on Windows (docs/PERFORMANCE.md, "How it's measured"); a Windows
+        // remeasure is pending: update Effect, Platform and Measured together (and PERFORMANCE.md).
+        static readonly TweakGain SaveGain = new("autosave freeze ~12 s → ~5 s on a large colony",
+            "U57", "Linux under WSL2", "by 2026-10-20", "docs/PERFORMANCE.md#the-tweaks (save tweaks: 11.7 → 4.8 s)");
+        static readonly TweakGain JobsGain = new("+11% frame rate on a large colony",
+            "U57", "Linux under WSL2", "by 2026-10-20", "docs/PERFORMANCE.md#the-tweaks (fast-jobs)");
+        static readonly TweakGain OverlaysGain = new("temperature overlay ~40% cheaper",
+            "U57", "Linux under WSL2", "2026-10-24", "docs/research/overlays.md (Infrared.Update 10.44 → 6.0 ms; 2minnow 6.53 → 3.9)");
+        static readonly TweakGain ConveyorGain = new("no hitch on rail edits (was 0.05–0.5 s)",
+            "U57", "Linux under WSL2", "2026-10-25", "docs/PERFORMANCE.md#the-tweaks (a rebuild 50–510 → 2–14 ms)");
+
+        public static readonly TweakGroup General = new("General");
+        public static readonly TweakGroup Saving = new("Saving", SaveGain);
+        public static readonly TweakGroup Simulation = new("Simulation");
+        public static readonly TweakGroup Graphics = new("Graphics & overlays");
+        /// The tweaks that change what the game does: their own group, last, in the warning colour.
+        public static readonly TweakGroup ChangesGameplay = new("Changes gameplay");
+
+        public static readonly TweakGroup[] Groups = [General, Saving, Simulation, Graphics, ChangesGameplay];
+
+        /// The rows in the screen's order (by group, then as listed).
+        public static readonly TweakInfo[] Rows =
+        [
+            new(SplashRow, General, "Gassy Moo loading splash", "Gassy Moos rain over the window while the game starts, with a progress bar.", IsTweak: false),
+            new(FrameStatsRow, General, "Frame stats in the log", "Notes where the frame time goes in Player.log, for reporting slowness.",
+                "Every 60 frames.", IsTweak: false),
+
+            new(FastSerialization, Saving, "Faster save writing", "Autosaves take less time; the save file is the same.",
+                "Writes the colony's numbers without boxing each one in an object."),
+            new("fast-save-type-checks", Saving, "Faster save checks", "Autosaves skip repeating the same checks for every object.",
+                "Remembers what saving asks about each kind of component instead of asking again for every object."),
+            new(FastSaveCompression, Saving, "Faster save compression", "Saving and loading take seconds less; files stay compatible, a little larger.",
+                "Compresses with .NET's zlib instead of the game's own; the files are about 14% larger."),
+            new(BackgroundSave, Saving, "Background saving", "The save is compressed and written to disk while the game plays on.",
+                "Compression and the file write move to another thread; quitting waits for them."),
+            new(NoSaveGc, Saving, "No cleanup pause when saving", "Skips the memory cleanup the game forces after each save, a pause of its own.",
+                "Skips the full garbage collection the game asks for after saving."),
+
+            new("fast-jobs", Simulation, "Faster worker threads", "Less time lost waking idle worker threads every frame.",
+                "Wakes only as many of the game's worker threads as a job has work for, instead of all of them for every job (about 14 a frame).", JobsGain),
+            new("fast-sublimation", Simulation, "Faster sublimation", "Items that can't sublimate (polluted dirt in full gas) are skipped.",
+                "Items already blocked by full gas cells are skipped in one batched update."),
+            new(FastParticleCollision, Simulation, "Faster radbolt collisions", "Radbolts look for each other only where one can be.",
+                "A radbolt skips searching every stored item nearby when no other radbolt is close."),
+            new("fast-offset-tables", Simulation, "Faster pickup checks", "Where an item can be picked up from is rechecked only when its surroundings change.",
+                "Fetch updates recheck only the items whose work spots can have changed."),
+            new("fast-partitioner-cleanup", Simulation, "Faster spatial index cleanup", "The once-a-second tidy-up of what is where looks only at what was removed.",
+                "The spatial index's cleanup visits only the entries that were removed."),
+            new("fast-conveyor-paths", Simulation, "Faster conveyor rebuilds", "Building or removing conveyor rails no longer stalls the game.",
+                "The rails' network rebuild finds its routes from an index instead of searching every kept route again.", ConveyorGain),
+
+            new("fast-anim-events", Graphics, "Faster animation events", "Animations check their sound and effect cues with less work.",
+                "Keeps a compact copy of what each playing animation's per-frame event check reads."),
+            new("fast-anim-cleanup", Graphics, "Faster animation cleanup", "Removed animations are swept out only where one was removed.",
+                "The sweep for destroyed animations skips grid chunks that can't hold any."),
+            new("fast-anim-batches", Graphics, "Parallel animation uploads", "Animation data for the graphics card is prepared on several threads.",
+                "Animation batches write their instance and symbol data on worker threads, the rest in the game's order."),
+            new("fast-symbol-overrides", Graphics, "Fewer animation uploads", "Swapped animation parts are re-sent to the graphics card only when they change.",
+                "Unchanged symbol-override blocks of Duplicants and buildings aren't uploaded again."),
+            new("fast-overlays", Graphics, "Faster overlays", "Overlays skip rereading what can't have changed since the last frame.",
+                "Temperature passes over buildings out of view without reading them, power asks each circuit's load once a frame, the rest keep what their targets' visits read.", OverlaysGain),
+
+            new("slow-reachability", ChangesGameplay, "Slower reachability checks", "Duplicants notice a newly opened or blocked path up to 3 s later.",
+                "Which errands and items can be reached is rechecked every 4 s instead of every second; temperature and building checks are never delayed."),
+            new("off-screen-conveyors", ChangesGameplay, "Lazy unseen conveyor items", "Items riding rails off screen are placed only when they stop or come into view.",
+                "The rails carry exactly the same things, but items' positions lag while off screen."),
+            new("off-world-fallers", ChangesGameplay, "Land items lost below a world", "Items that fall out the bottom of a world (a rocket's chute) land instead of falling forever.",
+                "They hang just below the world, stepped as falling every tick; landing them where they hang stops that cost."),
+        ];
+
+        /// The tweaks in src/OniBrutal.GameTweaks (named here: options are read before that assembly is loaded).
+        public static readonly string[] Typed = ["off-screen-conveyors", "fast-save-type-checks", "fast-anim-cleanup", "fast-sublimation", "fast-anim-events", "fast-symbol-overrides", "fast-jobs", "fast-offset-tables", "slow-reachability", "off-world-fallers", "fast-partitioner-cleanup", "fast-anim-batches", "fast-overlays", "fast-conveyor-paths"];
+
+        /// Every `--game-tweak` name, in the screen's order.
+        public static readonly string[] All = Rows.Where(r => r.IsTweak).Select(r => r.Id).ToArray();
+
+        /// The tweaks that change what the game does (each documented in its class); `exact` turns
+        /// on every tweak but these.
+        public static readonly string[] ChangingBehaviour = Rows.Where(r => r.IsTweak && r.Group == ChangesGameplay).Select(r => r.Id).ToArray();
+
+        /// A `--game-tweak` value: a tweak's name, `-NAME` (left out of `all` or `exact`, for
+        /// measuring one against the rest), `all`, `exact` (all but ChangingBehaviour) or `none`
+        /// (no tweak unless one is named, whatever the settings file says: test runs).
+        public static bool IsKnown(string name) => name is "all" or "exact" or "none" || Array.IndexOf(All, name.StartsWith('-') ? name.Substring(1) : name) >= 0;
+
+        /// docs/TWEAKS.md's list of rows, between its `<!-- tweaks:begin -->` and
+        /// `<!-- tweaks:end -->` markers.
+        public static string Markdown()
+        {
+            var md = new System.Text.StringBuilder();
+            md.Append("<!-- tweaks:begin: generated from src/OniBrutal.Host/GameTweaks/GameTweakNames.cs; ONI_UPDATE_DOCS=1 with the unit tests rewrites it -->\n");
+            foreach (var group in Groups)
+            {
+                var rows = Rows.Where(r => r.Group == group && r.IsTweak).ToArray();
+                if (rows.Length == 0) continue;
+                string defaults = group == ChangesGameplay ? "off by default" : "on by default";
+                md.Append($"\n### {group.Title} ({defaults})\n\n");
+                if (group.Gain != null) md.Append($"All {rows.Length} together: {Gain(group.Gain)}.\n\n");
+                foreach (var r in rows)
+                {
+                    md.Append($"- **{r.Title}** (`{r.Id}`): {r.Effect}");
+                    if (r.Detail.Length > 0) md.Append(' ').Append(r.Detail);
+                    if (r.Gain != null) md.Append($" *Measured: {Gain(r.Gain)}.*");
+                    md.Append('\n');
+                }
+            }
+            md.Append("<!-- tweaks:end -->");
+            return md.ToString();
+        }
+
+        static string Gain(TweakGain g) => $"{g.Effect}; {g.Colony}, {g.Platform}, {g.Measured}";
+    }
+}

@@ -14,23 +14,27 @@ namespace OniBrutal.Host
     /// but not changeable.
     internal static class BrutalTweaksMenu
     {
-        public const string SplashRow = "splash", FrameStatsRow = "frame-stats";
-
         public static void Install(EffectiveOptions effective, PlayerSettings file, string settingsPath)
         {
-            var rows = new List<(string Id, string Title, string Description, bool Changes, bool On, bool Locked)>
+            // The rows, their sections and copy from the one catalog (GameTweakNames.Rows).
+            var rows = GameTweakNames.Rows;
+            (bool On, bool Locked, bool Default) State(TweakInfo row) => row.Id switch
             {
-                (SplashRow, "Loading splash: Gassy Moos", "Gassy Moos rain over the window while the game starts, with a bar showing how far it is.",
-                    false, effective.Splash == "moo", effective.SplashSource == OptionSource.CommandLine),
-                (FrameStatsRow, "Frame stats in the log", "Every 60 frames, writes where the frame time went to Player.log (for reporting slowness).",
-                    false, effective.FrameStats, effective.FrameStatsSource == OptionSource.CommandLine),
+                GameTweakNames.SplashRow => (effective.Splash == "moo", effective.SplashSource == OptionSource.CommandLine, EffectiveOptions.DefaultSplash == "moo"),
+                GameTweakNames.FrameStatsRow => (effective.FrameStats, effective.FrameStatsSource == OptionSource.CommandLine, false),
+                var name => (effective.Tweaks[name].On, effective.Tweaks[name].Source == OptionSource.CommandLine,
+                    EffectiveOptions.DefaultOn(name, GameTweakNames.ChangingBehaviour)),
             };
-            // The tweaks that keep the game's results first, then those that change gameplay.
-            foreach (var name in GameTweakNames.All.OrderBy(n => Array.IndexOf(GameTweakNames.ChangingBehaviour, n) >= 0))
+            var states = rows.Select(State).ToArray();
+            static string Measured(TweakGain g) => $"Measured on {g.Colony} ({g.Platform}, {g.Measured}).";
+            string Tooltip(TweakInfo row)
             {
-                var (title, description) = GameTweakNames.Descriptions.TryGetValue(name, out var d) ? d : (name, "");
-                var (on, source) = effective.Tweaks[name];
-                rows.Add((name, title, description, Array.IndexOf(GameTweakNames.ChangingBehaviour, name) >= 0, on, source == OptionSource.CommandLine));
+                var lines = new List<string>();
+                if (row.Detail.Length > 0) lines.Add(row.Detail);
+                if (row.Gain != null) lines.Add(Measured(row.Gain));
+                else if (row.Group.Gain != null) lines.Add($"{row.Group.Title} together: {row.Group.Gain.Effect}. {Measured(row.Group.Gain)}");
+                lines.Add("Launch option: " + row.LaunchOption);
+                return string.Join("\n", lines);
             }
             var locked = new List<string>();
             foreach (var value in effective.CommandLineTweaks) locked.Add("--game-tweak " + value);
@@ -44,8 +48,8 @@ namespace OniBrutal.Host
                 bool? splash = null, frameStats = null;
                 for (int i = 0; i < ids.Length; i++)
                 {
-                    if (ids[i] == SplashRow) splash = values[i];
-                    else if (ids[i] == FrameStatsRow) frameStats = values[i];
+                    if (ids[i] == GameTweakNames.SplashRow) splash = values[i];
+                    else if (ids[i] == GameTweakNames.FrameStatsRow) frameStats = values[i];
                     else tweaks[ids[i]] = values[i];
                 }
                 var next = EffectiveOptions.Apply(saved, GameTweakNames.ChangingBehaviour, tweaks, splash, frameStats);
@@ -65,8 +69,10 @@ namespace OniBrutal.Host
 
             var install = GameTweaks.GameTweaks.TypedAssembly.GetType("OniBrutal.GameTweaks.BrutalTweaksMenu", throwOnError: true)!.GetMethod("Install")!;
             install.Invoke(null, [new Harmony("OniBrutal.Host.BrutalTweaksMenu"),
-                rows.Select(r => r.Id).ToArray(), rows.Select(r => r.Title).ToArray(), rows.Select(r => r.Description).ToArray(),
-                rows.Select(r => r.Changes).ToArray(), rows.Select(r => r.On).ToArray(), rows.Select(r => r.Locked).ToArray(),
+                rows.Select(r => r.Id).ToArray(), rows.Select(r => r.Group.Title).ToArray(), rows.Select(r => r.Group.Gain?.Effect ?? "").ToArray(),
+                rows.Select(r => r.Title).ToArray(), rows.Select(r => r.Effect).ToArray(), rows.Select(r => r.Gain?.Effect ?? "").ToArray(),
+                rows.Select(Tooltip).ToArray(), rows.Select(r => r.Group == GameTweakNames.ChangesGameplay).ToArray(),
+                states.Select(s => s.On).ToArray(), states.Select(s => s.Default).ToArray(), states.Select(s => s.Locked).ToArray(),
                 string.Join(" ", locked), settingsPath, save]);
         }
     }

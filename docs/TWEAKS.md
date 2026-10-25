@@ -7,10 +7,12 @@ them in **Moono Tweaks** on the main menu. Measured gains are in
 
 ## Choosing them
 
-On the main menu, **Moono Tweaks** (under Mods) lists every tweak with an on/off switch and a
-line on what it does, plus two options of the player's own: the Gassy Moo loading splash (on by
-default) and frame stats in the log (off by default). Changes apply when the game restarts, which
-the screen does for you.
+On the main menu, **Moono Tweaks** (under Mods) lists every tweak with an on/off switch, in the
+sections below, each with a line on what it does and, where it is large enough to notice, its
+measured gain; hovering a row says how it works and its launch option. A **General** section
+holds two options of the player's own: the Gassy Moo loading splash (on by default) and frame
+stats in the log (off by default). **Reset to defaults** sets every row back to its default.
+Changes apply when the game restarts, which the screen does for you.
 
 Your choices are kept in `oni-moono/settings.json` in the game's own data folder (usually
 `~/.config/unity3d/Klei/Oxygen Not Included` on Linux,
@@ -45,43 +47,41 @@ opened in turn, for at least 10 game minutes, and fails on any mismatch.
 
 ## The tweaks
 
-Names are as used with `--game-tweak`.
+Grouped as on the screen. Names are as used with `--game-tweak`; the gains shown on the screen are
+those below, and the rest are in [PERFORMANCE.md](PERFORMANCE.md#the-tweaks).
 
-### Same results, on by default
+<!-- tweaks:begin: generated from src/OniBrutal.Host/GameTweaks/GameTweakNames.cs; ONI_UPDATE_DOCS=1 with the unit tests rewrites it -->
 
-- `fast-jobs`: the game's worker threads wake only as many threads as a job has work for, instead
-  of all of them every time.
-- `fast-anim-events`: animations' per-frame event checks read a compact copy of what they need.
-- `fast-anim-cleanup`: the animation grid is swept for removed animations only where one was
-  actually removed.
-- `fast-anim-batches`: the animations' data for the graphics card is prepared on worker threads
-  instead of one by one.
-- `fast-symbol-overrides`: a Duplicant's or building's symbol swaps aren't uploaded again when
-  nothing in them changed.
-- `fast-offset-tables`: where an item can be picked up from is recomputed only when something
-  around it changed.
-- `fast-sublimation`: sublimating items (polluted dirt, bleach stone...) that sit in full gas
-  cells and can't change are skipped.
-- `fast-particle-collision`: radbolts stop searching every stored item for other radbolts.
-- `fast-partitioner-cleanup`: the once-a-second cleanup of the game's spatial index looks only at
-  entries actually removed.
-- `fast-overlays`: the overlays (temperature most of all) skip rereading what can't have changed
-  since the last frame.
-- `fast-conveyor-paths`: no hitch when conveyor rails change: their routes are found from an
-  index instead of searching every route again.
-- `fast-serialization`, `fast-save-type-checks`, `fast-save-compression`, `no-save-gc`,
-  `background-save`: much shorter autosave freezes. The save is written faster, compression and
-  the file write move to a background thread, and the forced memory cleanup after each save is
-  skipped. The files stay compatible with the original game.
+### Saving (on by default)
 
-### Changes gameplay, off by default
+All 5 together: autosave freeze ~12 s → ~5 s on a large colony; U57, Linux under WSL2, by 2026-10-20.
 
-- `off-screen-conveyors`: items travelling on conveyor rails off screen are only placed where
-  they are once they stop or come into view. The rails carry exactly the same things, but the
-  items' positions on screen and in the world lag behind meanwhile.
-- `slow-reachability`: whether errands and items can be reached is checked every 4 s instead of
-  every second, so Duplicants may notice a newly blocked or opened path up to 3 s later.
-  Temperature and building checks are never delayed.
-- `off-world-fallers`: items that fall out through the bottom of a world (a chute out of a rocket
-  interior) hang just below it forever, still being stepped as falling. They are landed where
-  they hang instead, so they stop costing time every tick.
+- **Faster save writing** (`fast-serialization`): Autosaves take less time; the save file is the same. Writes the colony's numbers without boxing each one in an object.
+- **Faster save checks** (`fast-save-type-checks`): Autosaves skip repeating the same checks for every object. Remembers what saving asks about each kind of component instead of asking again for every object.
+- **Faster save compression** (`fast-save-compression`): Saving and loading take seconds less; files stay compatible, a little larger. Compresses with .NET's zlib instead of the game's own; the files are about 14% larger.
+- **Background saving** (`background-save`): The save is compressed and written to disk while the game plays on. Compression and the file write move to another thread; quitting waits for them.
+- **No cleanup pause when saving** (`no-save-gc`): Skips the memory cleanup the game forces after each save, a pause of its own. Skips the full garbage collection the game asks for after saving.
+
+### Simulation (on by default)
+
+- **Faster worker threads** (`fast-jobs`): Less time lost waking idle worker threads every frame. Wakes only as many of the game's worker threads as a job has work for, instead of all of them for every job (about 14 a frame). *Measured: +11% frame rate on a large colony; U57, Linux under WSL2, by 2026-10-20.*
+- **Faster sublimation** (`fast-sublimation`): Items that can't sublimate (polluted dirt in full gas) are skipped. Items already blocked by full gas cells are skipped in one batched update.
+- **Faster radbolt collisions** (`fast-particle-collision`): Radbolts look for each other only where one can be. A radbolt skips searching every stored item nearby when no other radbolt is close.
+- **Faster pickup checks** (`fast-offset-tables`): Where an item can be picked up from is rechecked only when its surroundings change. Fetch updates recheck only the items whose work spots can have changed.
+- **Faster spatial index cleanup** (`fast-partitioner-cleanup`): The once-a-second tidy-up of what is where looks only at what was removed. The spatial index's cleanup visits only the entries that were removed.
+- **Faster conveyor rebuilds** (`fast-conveyor-paths`): Building or removing conveyor rails no longer stalls the game. The rails' network rebuild finds its routes from an index instead of searching every kept route again. *Measured: no hitch on rail edits (was 0.05–0.5 s); U57, Linux under WSL2, 2026-10-25.*
+
+### Graphics & overlays (on by default)
+
+- **Faster animation events** (`fast-anim-events`): Animations check their sound and effect cues with less work. Keeps a compact copy of what each playing animation's per-frame event check reads.
+- **Faster animation cleanup** (`fast-anim-cleanup`): Removed animations are swept out only where one was removed. The sweep for destroyed animations skips grid chunks that can't hold any.
+- **Parallel animation uploads** (`fast-anim-batches`): Animation data for the graphics card is prepared on several threads. Animation batches write their instance and symbol data on worker threads, the rest in the game's order.
+- **Fewer animation uploads** (`fast-symbol-overrides`): Swapped animation parts are re-sent to the graphics card only when they change. Unchanged symbol-override blocks of Duplicants and buildings aren't uploaded again.
+- **Faster overlays** (`fast-overlays`): Overlays skip rereading what can't have changed since the last frame. Temperature passes over buildings out of view without reading them, power asks each circuit's load once a frame, the rest keep what their targets' visits read. *Measured: temperature overlay ~40% cheaper; U57, Linux under WSL2, 2026-10-24.*
+
+### Changes gameplay (off by default)
+
+- **Slower reachability checks** (`slow-reachability`): Duplicants notice a newly opened or blocked path up to 3 s later. Which errands and items can be reached is rechecked every 4 s instead of every second; temperature and building checks are never delayed.
+- **Lazy unseen conveyor items** (`off-screen-conveyors`): Items riding rails off screen are placed only when they stop or come into view. The rails carry exactly the same things, but items' positions lag while off screen.
+- **Land items lost below a world** (`off-world-fallers`): Items that fall out the bottom of a world (a rocket's chute) land instead of falling forever. They hang just below the world, stepped as falling every tick; landing them where they hang stops that cost.
+<!-- tweaks:end -->

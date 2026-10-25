@@ -22,7 +22,7 @@ namespace OniBrutal.Host.GameTweaks
     /// order. The bytes written are the game's (checked: SaveTest).
     internal static class FastSerialization
     {
-        public const string Name = "fast-serialization";
+        public const string Name = GameTweakNames.FastSerialization;
 
         /// Test runs only: off restores the game's own path at run time (for comparing saves).
         public static bool Enabled = true;

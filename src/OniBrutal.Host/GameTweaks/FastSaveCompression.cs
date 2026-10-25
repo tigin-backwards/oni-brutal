@@ -12,7 +12,7 @@ namespace OniBrutal.Host.GameTweaks
     /// of 2.5–3.7 s; the file is about 14% larger.
     internal static class FastSaveCompression
     {
-        public const string Name = "fast-save-compression";
+        public const string Name = GameTweakNames.FastSaveCompression;
 
         /// `compress`: false when background-save does the compressing (with this zlib).
         public static void Install(Harmony harmony, bool compress)

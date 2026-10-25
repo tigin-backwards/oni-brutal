@@ -24,7 +24,7 @@ namespace OniBrutal.Host.GameTweaks
     /// ends by an unhandled exception waits for the write too.
     internal static class BackgroundSave
     {
-        public const string Name = "background-save";
+        public const string Name = GameTweakNames.BackgroundSave;
 
         static readonly object gate = new();
         static Task pending = Task.CompletedTask;

@@ -33,7 +33,7 @@ namespace OniBrutal.Host.GameTweaks
     /// logged.
     internal static class FastParticleCollision
     {
-        public const string Name = "fast-particle-collision";
+        public const string Name = GameTweakNames.FastParticleCollision;
 
         /// The live radbolts, each with its colliders once looked up.
         static readonly List<Live> live = new();

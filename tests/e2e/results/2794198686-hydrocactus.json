@@ -1,0 +1,59 @@
+{
+ "spec": "mods/2794198686-hydrocactus.yaml",
+ "mods": [
+  "2794198686"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Hydrocactus's prefab with its 650 kg Water crop, its seed among the care packages and in the mod's biome mobs; one placed and selected shows its title as in the original",
+ "updated": "2026-10-24",
+ "commit": "4eab9eb",
+ "mod_dlls": {
+  "2794198686": {
+   "Hydrocactus.dll": "ec49a67d879b4fb47bc2de6069165597611ca41de6ebca93846c0156b3598725"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-213453-7f7026a0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T21:34:53",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-222200-10d4191c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T22:22:00",
+    "lane": 16,
+    "reference_run": "20261024-213453-7f7026a0",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "title": 0.0
+    }
+   },
+   {
+    "run": "20261024-222200-10d4191c",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T22:22:01",
+    "lane": 17,
+    "reference_run": "20261024-213453-7f7026a0",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "title": 0.0
+    }
+   }
+  ]
+ }
+}

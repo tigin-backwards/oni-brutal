@@ -1,0 +1,34 @@
+# Hydrocactus (2794198686), classes P, O (Spaced Out).
+#
+# What it does: brings back the game's deprecated Hydrocactus (FilterPlant): a postfix on
+# FilterPlantConfig.CreatePrefab takes off its DeprecatedContent tag, and a prefix sets its crop
+# (Water) to 650 kg (PLib option yield_amount); its seed joins the Printing Pod's care packages
+# (2 seeds, carepackage_seeds_amount); a SettingsCache.LoadFiles postfix tags the sedimentary,
+# forest, wasteland and swamp biomes so that new worlds grow it and bury its seeds there
+# (worldgen/mobs.yaml).
+# How a player reaches it: a care package, or a new world's biomes.
+# What changes: one more plant.
+#
+# setup sets a Hydrocactus down in the dug-out corridor west of the printing pod (114, 206).
+# Selected, its title and its crop show; the Printing Pod's care packages list its seed.
+from: early-base
+mods: [2794198686]
+setup:
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131130, 0, 0, \"FilterPlant\", \"BuildingFront\")", method: SetActive, args: [true]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"FilterPlant\").GetComponent<Crop>.cropVal.numProduced": 650
+      "Assets.GetPrefab(\"FilterPlant\").GetComponent<Crop>.cropVal.cropId": Water
+      "count:Immigration.Instance.carePackages[*] if .id == FilterPlantSeed": 1
+      "sum:Immigration.Instance.carePackages[*].quantity if .id == FilterPlantSeed": 2
+      "count:SettingsCache.mobs.MobLookupTable.Keys[*] if .StartsWith(\"med_FilterPlant\") == true": 2
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [114, 208], ortho: 8}}
+  - click_world: {cell: [114, 206], select: FilterPlant}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Hydrocactus"}
+  - expect_state:
+      "selected:GetComponent<KPrefabID>.PrefabTag.Name": FilterPlant
+      "selected:GetComponent<Growing>.ReachedNextHarvest()": false
+  - shot: {name: title, crop: "**/DetailsScreen/TitleBar", threshold: 0.04}

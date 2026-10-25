@@ -1,7 +1,7 @@
 # Moono
 
 An unofficial, super fast, super sussy replacement for the Unity layer of Oxygen Not Included,
-artisanally crafted by Claude. On a late-game colony the game runs at about 7× the original's
+artisanally crafted by Claude. On a late-game colony the game runs at about 8× the original's
 frame rate ([Performance](#performance)).
 
 ![Gassy Moos raining over the Klei logo while the game loads](docs/images/moo-splash.gif)
@@ -63,13 +63,10 @@ On a late-game save (U57: Spaced Out with every DLC, cycle 17,000+), on Windows,
 
 | | Original | Moono | |
 |---|---|---|---|
-| Frame rate at speed&nbsp;3 (default tweaks) | about 11&nbsp;fps | about 78&nbsp;fps | about 7× |
-| Frame rate at speed&nbsp;3 (every tweak) | about 11&nbsp;fps | about 84&nbsp;fps | about 7.4× |
+| Frame rate at speed&nbsp;3 (default tweaks) | about 11&nbsp;fps | about 88&nbsp;fps | about 8× |
 | Loading the save | 2&nbsp;min&nbsp;22&nbsp;s | about 35&nbsp;s | about 4× faster |
 | Autosave freeze | about 26&nbsp;s | about 2.3&nbsp;s | about 11× shorter |
-| Starting the game, to the main menu (every DLC)\* | about 25&nbsp;s | about 12&nbsp;s | about 2× faster |
-
-\* Start-up was measured on Linux, not Windows: see [docs/PERFORMANCE.md](docs/PERFORMANCE.md#start-up).
+| Starting the game, to the main menu (every DLC) | about 17&nbsp;s | about 11&nbsp;s | about 1.5× faster |
 
 Without the save tweaks the autosave freeze is about 8 s. They bring it down to about 2.3 s by
 writing the save faster and moving the compression and file write to a background thread.

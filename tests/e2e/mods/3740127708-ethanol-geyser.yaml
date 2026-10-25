@@ -1,0 +1,41 @@
+# Custom Geysers - Ethanol Geyser (3740127708), classes P, O (a worldgen mod).
+#
+# What it does: a new generic geyser, the Ethanol Geyser (GeyserGeneric_ethanol, 4 x 2): a
+# GeyserGenericConfig.GenerateConfigs postfix adds its type (Ethanol at 333.15 K, 800 to
+# 1600 kg a cycle, a maximum pressure of 500 kg), generic so that worldgen may roll it
+# wherever a random geyser goes; a Geotuner postfix gives it tuning settings; its name and
+# description are added to the strings.
+# How a player reaches it: a new world's random geysers, or the sandbox spawner.
+# What changes: one more kind of geyser.
+#
+# Functional expectations (mod-play-testing.md, "Worldgen mods"): its prefab is registered
+# beside the random geyser spawner's, and a Ethanol Geyser placed in the dug-out corridor west of the
+# printing pod is selected: its name, its element, its rolled rate within the type's range.
+from: early-base
+mods: [3740127708]
+setup:
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131124, 0, 0, \"GeyserGeneric_ethanol\", \"BuildingBack\")", method: SetActive, args: [true]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"GeyserGeneric_ethanol\")": exists
+      "Assets.GetPrefab(\"GeyserGeneric\")": exists
+  - driver: {camera.set: {cell: [110, 208], ortho: 8}}
+  - click_world: {cell: [108, 206], select: GeyserGeneric_ethanol}
+  - ui_wait: {path: "**/DetailsScreen/TitleBar", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Ethanol Geyser"}
+  - expect_state:
+      "selected:Geyser.configuration.GetElement()": "== 'Ethanol'"
+      "selected:Geyser.configuration.GetTemperature()": ">= 333.14"
+      "selected:Geyser.configuration.GetMaxPressure()": 500
+  - expect_state:
+      "selected:Geyser.configuration.GetTemperature()": "<= 333.16"
+      "selected:Geyser.configuration.scaledRate": ">= 800"
+  - expect_state:
+      "selected:Geyser.configuration.scaledRate": "<= 1600"
+  # Rolled from the world seed and the cell, as in the original: to a float's last bits, which
+  # Mono's double-precision intermediates set (ARCHITECTURE D25).
+  - expect_state:
+      "selected:Geyser.configuration.scaledRate": ">= 0.99999 * original"
+  - expect_state:
+      "selected:Geyser.configuration.scaledRate": "<= 1.00001 * original"

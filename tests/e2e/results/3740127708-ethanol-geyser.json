@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3740127708-ethanol-geyser.yaml",
+ "mods": [
+  "3740127708"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "an Ethanol Geyser placed and selected: its name in the side screen's title, Ethanol at 333.15 K, a maximum pressure of 500 kg, its rate rolled within 800 to 1600 kg a cycle and as in the original to its last bits (ARCHITECTURE D25)",
+ "updated": "2026-10-24",
+ "commit": "4eab9eb",
+ "mod_dlls": {
+  "3740127708": {
+   "Geysers_Ethanol.dll": "4d648e3b1b4984c43643a4097068daa5b2daa0beaa84c1e8caf6bacbdb8f5198"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-222216-c845d17f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T22:29:28",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-223032-4802198d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T22:34:55",
+    "lane": 16,
+    "reference_run": "20261024-222216-c845d17f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-223032-4802198d",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T22:35:32",
+    "lane": 16,
+    "reference_run": "20261024-222216-c845d17f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

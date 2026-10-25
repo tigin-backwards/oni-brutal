@@ -73,9 +73,6 @@ across every core, and their pauses are about a quarter as long.
 around 11GB resident compared to 7GB in the original. This is expected behavior for faster,
 parallel collection.
 
-Measured on a Ryzen 7 9800X3D with an RTX 3090. A mid-game colony gains less (about 3.5×, from
-26 fps to 91); [docs/PERFORMANCE_CASE_STUDY_2.md](docs/PERFORMANCE_CASE_STUDY_2.md) looks at why.
-
 https://github.com/user-attachments/assets/4d230247-9966-43d6-862f-589bad164382
 
 The same save, view and machine on Windows, recorded back to back; each side's frame rate was

@@ -215,6 +215,29 @@ Measured ideas that didn't pay off, so nobody needs to try them again:
   object at all, not the work after that.
 - Equivalents of Fast Track (Peter Han's mod), reviewed option by option: the ones that would
   matter here all change what the game does.
+- The other exact levers of oni-perf-mod (2026-10-25; Linux, U57 and 2minnow, stopwatch and
+  per-camera times at speed 3), each too cheap here or not exact:
+  - Property textures refilled only on a sim tick or a view change: `PropertyTextures.LateUpdate`
+    is 0.5–0.9 ms in all, and what it reads also changes between sim ticks (revealed cells,
+    lights); the engine already skips uploading rows that did not change.
+  - The hover card reused while nothing visible changed: building it is about 0.3 ms
+    (`InterfaceTool.LateUpdate` with the card), and it shows live values (a cell's mass and
+    temperature) that change in between.
+  - The timelapse camera and the sim overlay camera off when unused, the six texture lerpers as
+    blits: together under 0.25 ms of the main thread (each lerper 0.01–0.04 ms).
+  - Idle workers' and outfits' updates (0.02–0.06 ms), the heat effects' (0.04–0.12 ms, about
+    1,300 of them in U57), progress bars (0.02 ms); the pipe contents and per-Duplicant passes
+    cached while paused only help a paused game.
+  - The liquid and gas networks' flow pass (ConduitFlow's BuildNetworkTask, linear searches over
+    each network's edges): every network takes under 0.1 ms on the job threads; a rebuild's
+    3–12 ms is the connections pass on the main thread.
+  - The load's garbage collections: U57's load pauses for 3.2–3.9 s of its 26–28 s in 34–41
+    full collections; a larger gen0 budget (2.0–2.6 s paused) loaded in 27.7–32.0 s and the
+    non-concurrent collector in 26.6–26.8 s, no shorter. Holding collections off for the load
+    would keep its garbage too (2minnow allocates 12 GB by the time its colony starts).
+- Closed screens' game scripts (toggles' and Duplicant portraits' updates): about 0.7 ms a
+  frame on 2minnow after three table screens were opened, once their masks and raycasts are
+  skipped; only disabling the game's own components (not exact) would remove it.
 
 ## What's left
 

@@ -17,6 +17,9 @@ namespace OniBrutal.Host.GameTweaks
     /// complete; until then the target holds the header the game wrote, which is what the save
     /// lists read. Whatever reads, replaces or deletes saves waits for the writes in flight first:
     /// loading a save, the next save, the load screen's delete and move, and the end of the run.
+    /// So overlapping saves (a pause-menu save or Save and Quit during an autosave's write) are
+    /// written whole and in order, as the game writes them one after another (BackgroundSaveTests,
+    /// tests/e2e/overlap-manual.yaml).
     /// A failed write is logged; the game's own failure dialog does not appear for it. A run that
     /// ends by an unhandled exception waits for the write too.
     internal static class BackgroundSave
@@ -25,8 +28,9 @@ namespace OniBrutal.Host.GameTweaks
 
         static readonly object gate = new();
         static Task pending = Task.CompletedTask;
-        /// Compress with .NET's zlib (fast-save-compression) rather than Ionic.Zlib, as the game does.
-        static bool fast;
+        /// Compress with .NET's zlib (fast-save-compression) rather than Ionic.Zlib, as the game
+        /// does. Internal, as Compress is, for BackgroundSaveTests.
+        internal static bool fast;
 
         public static void Install(Harmony harmony, bool fastCompression)
         {
@@ -62,7 +66,7 @@ namespace OniBrutal.Host.GameTweaks
 
         /// SaveLoader.CompressContents(BinaryWriter, byte[], int): the header is in the file; the
         /// body is compressed and the whole file written in the background.
-        static bool Compress(BinaryWriter fileWriter, byte[] uncompressed, int length)
+        internal static bool Compress(BinaryWriter fileWriter, byte[] uncompressed, int length)
         {
             fileWriter.Flush();
             var file = (FileStream)fileWriter.BaseStream;

@@ -1,0 +1,108 @@
+using System;
+using System.IO;
+using System.IO.Compression;
+using OniBrutal.Host.GameTweaks;
+using Xunit;
+
+namespace OniBrutal.Tests
+{
+    /// The background-save game tweak (src/OniBrutal.Host/GameTweaks/BackgroundSave.cs, compiled
+    /// in here) with saves overlapping: an autosave's write still running when the next save
+    /// starts (a save from the pause menu, Save and Quit, the next autosave). The game saves one
+    /// at a time on its main thread, so each save finds the one before it complete on disk; with
+    /// the tweak, SaveLoader.Save waits for the writes in flight first (its prefix, WaitAll), and
+    /// every save is written whole, in order.
+    [Collection("Console")]
+    public class BackgroundSaveTests : IDisposable
+    {
+        readonly string dir = Path.Combine(Path.GetTempPath(), $"background-save-{Guid.NewGuid():N}");
+
+        public BackgroundSaveTests() => Directory.CreateDirectory(dir);
+
+        public void Dispose()
+        {
+            BackgroundSave.WaitAll();
+            Directory.Delete(dir, true);
+        }
+
+        /// What SaveLoader.Save does with the tweak: its prefix waits for the writes in flight, it
+        /// opens the target (FileMode.Create), writes the header and hands the body to
+        /// CompressContents, which the tweak replaces; then the file is closed.
+        static void Save(string path, byte[] header, byte[] body)
+        {
+            BackgroundSave.WaitAll();
+            using var writer = new BinaryWriter(File.Open(path, FileMode.Create));
+            writer.Write(header);
+            Assert.False(BackgroundSave.Compress(writer, body, body.Length));
+        }
+
+        /// A colony's serialized body: compressible, as a save is, and different per seed.
+        static byte[] Body(int seed, int length = 24 << 20)
+        {
+            var body = new byte[length];
+            var random = new Random(seed);
+            for (int i = 0; i < length; i += 64)
+                body[i + random.Next(64)] = (byte)random.Next(256);
+            return body;
+        }
+
+        static byte[] Header(string text) => System.Text.Encoding.ASCII.GetBytes(text);
+
+        /// The file holds the header, then the body as zlib (RFC 1950), as the game writes it.
+        static void AssertSaved(string path, byte[] header, byte[] body)
+        {
+            var file = File.ReadAllBytes(path);
+            Assert.Equal(header, file.AsSpan(0, header.Length).ToArray());
+            using var zlib = new ZLibStream(new MemoryStream(file, header.Length, file.Length - header.Length), CompressionMode.Decompress);
+            var read = new MemoryStream();
+            zlib.CopyTo(read);
+            Assert.True(body.AsSpan().SequenceEqual(read.ToArray()), $"{path}: the body differs");
+            Assert.False(File.Exists(path + ".writing"));
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ASaveStartedDuringAnAutosavesWriteWaitsForIt(bool fastCompression)
+        {
+            BackgroundSave.fast = fastCompression;
+            string autosave = Path.Combine(dir, "Colony Cycle 12.sav"), manual = Path.Combine(dir, "Colony.sav");
+            byte[] autoBody = Body(1), manualBody = Body(2);
+            Save(autosave, Header("autosave"), autoBody);
+            // Straight after it, as a save from the pause menu right after an autosave.
+            Save(manual, Header("manual"), manualBody);
+            // The second save began only once the first was on disk.
+            AssertSaved(autosave, Header("autosave"), autoBody);
+            BackgroundSave.WaitAll();
+            AssertSaved(manual, Header("manual"), manualBody);
+        }
+
+        [Fact]
+        public void TheSameFileSavedTwiceInARowHoldsTheSecondSave()
+        {
+            BackgroundSave.fast = false;
+            string path = Path.Combine(dir, "Colony.sav");
+            byte[] first = Body(3), second = Body(4);
+            Save(path, Header("first"), first);
+            Save(path, Header("second"), second);
+            BackgroundSave.WaitAll();
+            AssertSaved(path, Header("second"), second);
+        }
+
+        [Fact]
+        public void AFailedWriteLeavesTheNextSaveWhole()
+        {
+            BackgroundSave.fast = true;
+            string failing = Path.Combine(dir, "Failing.sav"), next = Path.Combine(dir, "Next.sav");
+            // The write's temporary file cannot be created.
+            Directory.CreateDirectory(failing + ".writing");
+            byte[] body = Body(5, 1 << 20);
+            Save(failing, Header("failing"), body);
+            Save(next, Header("next"), body);
+            BackgroundSave.WaitAll();
+            AssertSaved(next, Header("next"), body);
+            // The failed save keeps the header the game wrote, as the target holds until the write.
+            Assert.Equal(Header("failing"), File.ReadAllBytes(failing));
+        }
+    }
+}

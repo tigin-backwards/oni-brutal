@@ -28,6 +28,11 @@
   <ItemGroup>
     <!-- The host's settings precedence and file (PlayerSettingsTests): plain .NET, compiled in. -->
     <Compile Include="../../src/OniBrutal.Host/PlayerSettings.cs" Link="Host/PlayerSettings.cs" />
+    <!-- The background-save game tweak's writes (BackgroundSaveTests), with the game's zlib. -->
+    <Compile Include="../../src/OniBrutal.Host/GameTweaks/BackgroundSave.cs" Link="Host/BackgroundSave.cs" />
+    <Reference Include="Ionic.Zip">
+      <HintPath>$(OniGameDir)/OxygenNotIncluded_Data/Managed/Ionic.Zip.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <!-- The game's Harmony, as mods patch the engine with it (TmpInputSetupTests). -->

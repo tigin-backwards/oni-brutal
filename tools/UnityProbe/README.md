@@ -189,8 +189,8 @@ With `PROBE_SCENARIO=wordcount` only the word probe runs (`WordCount.cs`, lines 
 into the main menu, about a minute). It logs `textInfo.wordCount`, each word's first and last
 character index and count, each line's word count and the characters, in NotoSans-Regular 14 pt
 and GRAYSTROKE REGULAR SDF 12 pt. The texts are hyphens, dashes, non-breaking spaces,
-apostrophes, digits, CJK, tags and texts without words, then a sweep of single characters in
-"abXcd", "Xab", "abX", "12X34" and alone. Wrapped texts follow, each distinct break from 1 wide to
+apostrophes, digits, CJK, tags, texts without words and carriage returns (with `spaceCount`),
+then a sweep of single characters in "abXcd", "Xab", "abX", "12X34" and alone. Wrapped texts follow, each distinct break from 1 wide to
 past the preferred width. Check the rule with `tools/UnityProbe/wc-check.py rule LOG`, and
 compare the players with `wc-check.py diff ORIG OURS`. `textmeshpro.md` ("Words and their
 separators") records what it measured.

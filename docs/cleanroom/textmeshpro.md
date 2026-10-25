@@ -1652,6 +1652,38 @@ Not measured:
   tables and .NET's (only § and ¶ were found in them);
 - world-space `TextMeshPro`.
 
+### Carriage returns are not counted as spaces (measured 2026-10-24)
+
+Found by a mod's play-test (One Hundred K Challenge, `tests/e2e/mods/2228381429-100k-challenge.yaml`):
+the destination screen's description of its world, a `LocText` in NotoSans-Regular 14 pt, ends
+its paragraphs with "\r\n" (three of them). The shipped package reports `textInfo.spaceCount`
+50 for it, this implementation 53; `characterCount` (283), `wordCount` (49) and the lines agree.
+
+Measured with `PROBE_SCENARIO=wordcount` (see "Words and their separators"; the probe's text
+list gained the cases below), unwrapped in 400 × 100, in NotoSans-Regular 14 pt and GRAYSTROKE
+REGULAR SDF 12 pt, which agree. Run through `scripts/e2e.py` (a main-menu spec waiting for the
+probe's `WcCanvas` to go, with `E2E_ONIMCP` pointing at a copy of OniMcp's folder holding
+`SemanticsProbe.dll`); `wc-check.py diff` finds 22 of 6119 common lines differing, these
+cases in both fonts and nothing else.
+
+| Text | shipped: `spaceCount` | here before |
+|---|---|---|
+| "\r", "ab\r", "\rab", "ab\rcd" | 0 | 1 |
+| "ab\r\rcd" | 0 | 2 |
+| "ab\r\ncd", "ab\r\n", "ab\n\rcd" | 1 | 2 |
+| "ab \r\ncd" | 2 | 3 |
+| "ab\r\n\r\ncd" | 2 | 4 |
+| `"ab.\r\n\r\n<smallcaps>cd ef</smallcaps>\r\n"` | 4 | 7 |
+| "ab\u000Bcd", "ab cd" (controls) | 1 | 1 |
+
+**The rule.** CR (U+000D) adds nothing to `spaceCount`: every other white-space character
+counted before (space, line feed, tab, the vertical tab, U+2028, …) still counts one. Nothing
+else about CR changes: it is still a character of its line (`characterCount` includes it), it
+still ends a word ("ab\rcd" has the words 0–1 and 3–4 in both), and a CR alone is still one
+empty word record (0, −1), as before.
+
+Not measured: CR in wrapped text, in `TMP_InputField`, and in world-space `TextMeshPro`.
+
 ### Culling under a RectMask2D (measured 2026-10-23)
 
 `TextMeshProUGUI` culls under a `RectMask2D` with the bounds of its mesh, not with its rect. The

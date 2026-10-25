@@ -49,6 +49,10 @@ namespace SemanticsProbe
             "'", "''", "' a", "a '", "ab'", "abc'", "abcd'", "ab''", "ab'c'", "ab' ", "ab'.", "ab'\n", "ab'\ncd", "ab'-", "ab-'",
             "1'", "12'", "ab'c", "ab’", "abc’", "ab'cd'", "ab cd'", "ab cde'", "abc de'", "x ab'", "ab'<b></b>", "ab' cd'",
             "-ab'", "a-'", "-'", "ab'x'", "ab‑'", "中文'",
+            // Carriage returns, alone and before line feeds (One Hundred K Challenge's world
+            // description ends its paragraphs with "\r\n").
+            "\r", "ab\rcd", "ab\r", "\rab", "ab\r\ncd", "ab\r\n", "ab\r\n\r\ncd", "ab\n\rcd", "ab \r\ncd",
+            "ab.\r\n\r\n<smallcaps>cd ef</smallcaps>\r\n", "ab\r\rcd", "ab\u000Bcd", "ab\x2028cd",
         };
 
         static IEnumerable<int> SweepCodes()

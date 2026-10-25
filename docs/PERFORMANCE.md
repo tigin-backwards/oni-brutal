@@ -240,6 +240,43 @@ Measured ideas that didn't pay off, so nobody needs to try them again:
 - Closed screens' game scripts (toggles' and Duplicant portraits' updates): about 0.7 ms a
   frame on 2minnow after three table screens were opened, once their masks and raycasts are
   skipped; only disabling the game's own components (not exact) would remove it.
+- The rest of the [performance mods' shortlist](research/perf-mods-inventory.md#shortlist)
+  (2026-10-25; Linux, a quiet machine, U57, 2minnow and Gluttony at speed 3 with the exact
+  tweaks, PerfProbe's stopwatches; `brain-rate` is the one kept):
+  - Switched-off effects left out of the cell-change monitor and the animation updater (ONI
+    Perf's `markSkip` and `parkAnims`). Counted on Gluttony, a frame: 3,860 `MarkDirty` calls
+    on 726 transforms (a moving one is marked about five times); 175 of those have no cell-change
+    or movement handler (134 of them switched off), and 15–21 switched-off ones only their
+    animation's movement handler. `CellChangeMonitor.RenderEveryTick` is 2.4 ms there (1.2–1.3
+    on U57, 0.65 on 2minnow), mostly the handlers of objects that did change cell. Skipping the
+    handler-less transforms exactly would still have to answer `IsMoving` for them and put them
+    back in the game's order when a handler is registered on one (about 54 registrations a frame
+    land on one), and telling them apart costs as many lookups at each of the five marks as the
+    skip saves. The animation half isn't exact: a switched-off controller that once played keeps
+    its movement handler, which puts it on the update list while its Duplicant moves (142 of
+    2,700 `UpdateAnim` calls a frame on Gluttony, each returning at once); leaving it off
+    changes the list's swap-removal order, and with it the order other animations' events fire.
+  - A one-pass irrigation update (Fast Track's FlattenAverages): `IrrigationMonitor.UpdateIrrigation`
+    is 0.31 ms a frame on Gluttony (about 275 calls, 1.1 µs each), 0.11–0.12 ms on U57 and
+    0.08–0.09 ms on 2minnow; the absorbers' whole update, its storage events included, 0.9 ms on
+    Gluttony. One scan of a planter's one or two items instead of two saves part of that 1 µs.
+  - Steam polled less often (ONI Perf's `steamPoll`): `SteamManager.Update` (`SteamAPI.RunCallbacks`)
+    takes 0.004 ms and `GameInputManager.Update` (`SteamInput.RunFrame` within) 0.012–0.018 ms
+    here, but against the Steam stub; with real Steam on Windows the bound is `Global.Update`'s
+    0.3 ms in all, and callbacks run less often would arrive later.
+  - The achievement tracker (0.006–0.010 ms a frame), `TrackerTool.Update` (0.04–0.07 ms) and
+    `SuitMarker.Update` (0.05–0.10 ms, for 1 checkpoint on U57 and 5 on 2minnow and Gluttony).
+  - The colony preview read back asynchronously and encoded in the background (Fast Save's
+    Background Save). After U57's autosave (a 3.0–3.2 s frame) the preview takes one frame of
+    260–420 ms (the first after the load 6.4 s); encoding its PNG is 18 ms of that, and nearly
+    all the rest is `ReadPixels` waiting for the GL thread to draw the whole colony into the
+    preview's target, uploading the animation batches that come into view. A version that read
+    the target in the frame's GL work and encoded and wrote the PNG on another thread (the same
+    bytes, checked) only moved that wait into the next frame's present.
+  - The state-machine restore's type names cached (ONI Perf's `typeNameCache`, `smRestore`):
+    profiled through U57's 33 s load, `StateMachineSerializer` is 5% of the main thread's
+    samples (about 0.8 s) and `Type.GetType` 1.5% (about 0.26 s).
+
 ## What's left
 
 The biggest per-object costs are animation updates, cell-change

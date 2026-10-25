@@ -627,7 +627,10 @@ Optimization, Smoother Light, Smooth Borders, Lagoo.
 
 ## Shortlist
 
-Ranked by expected value in Moono. Each one starts with a measurement. Since this was written, 9 is done and 1–3, 7 and 8 are being worked on.
+Ranked by expected value in Moono. Each one starts with a measurement. Since this was written,
+9 is done; 1 is the `brain-rate` tweak (changes gameplay, off by default); 2, 3, 4, 5, 7 and the
+achievement tracker, `TrackerTool` and `SuitMarker` of 8 were measured and dropped
+([PERFORMANCE.md](../PERFORMANCE.md#tried-and-dropped) has the numbers).
 
 1. **Brains at 30 a second of real time** (non-exact, from ONI Perf `brainRate`). The game updates
    one Duplicant brain and five critter brains per rendered frame, whatever the frame rate. Moono

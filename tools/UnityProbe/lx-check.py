@@ -12,9 +12,11 @@
       compares the "ci" lines of STYLE (default Normal) with FreeType's unhinted metrics of
       FONT (a .ttf), loaded at each integer pixel size: the advance rounded half away from
       zero, and the bitmap box grown by one pixel on each side. Needs libfreetype.so.6.
-  lx-check.py diff ORIG OURS [KIND...]
+  lx-check.py diff [--no-uv] ORIG OURS [KIND...]
       the "ci", "gen", "align" and "text" lines that differ between the players, by their
       inputs, with counts per kind of line (KIND: a substring such as "cx" or "align").
+      --no-uv leaves out the texture coordinates (CharacterInfo UVs, the quads' UVs), which
+      depend on where each player's packer put the glyph in its font texture.
 
 A log is a Player.log (original) or our player's stdout. Advances and positions are compared
 as numbers: the "R" format differs between Mono and .NET.
@@ -265,7 +267,7 @@ def face(path, font, style='Normal'):
     print(f'{counts[True]} of {counts[True] + counts[False]} {style} CharacterInfos match {font}')
 
 
-def diff(orig, ours, kinds=None):
+def diff(orig, ours, kinds=None, uv=True):
     """Lines keyed by their inputs (everything up to the string, or the character, plus the
     field name that follows); the values are compared as numbers."""
     def keyed(path):
@@ -281,6 +283,10 @@ def diff(orig, ours, kinds=None):
             if key.startswith(('gen', 'text')):
                 field = rest.split('=', 1)[0]
                 key += ' ' + field
+            if not uv:
+                rest = re.sub(r' uv(BL|TR|TL)=\S+| quadUV=\S+', '', rest)
+                if rest.startswith('quads='):
+                    rest = 'quads=' + ' '.join('/'.join(q.split('/')[:4]) for q in rest[6:].split(' ') if q)
             d[key] = rest
         return d
 
@@ -330,6 +336,8 @@ if __name__ == '__main__':
         rule(sys.argv[2])
     elif len(sys.argv) >= 4 and sys.argv[1] == 'face':
         face(sys.argv[2], sys.argv[3], *(sys.argv[4:5]))
+    elif len(sys.argv) >= 5 and sys.argv[1] == 'diff' and sys.argv[2] == '--no-uv':
+        diff(sys.argv[3], sys.argv[4], sys.argv[5:], uv=False)
     elif len(sys.argv) >= 4 and sys.argv[1] == 'diff':
         diff(sys.argv[2], sys.argv[3], sys.argv[4:])
     else:

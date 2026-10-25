@@ -376,7 +376,8 @@ With `PROBE_SCENARIO=legacytext` only the legacy-text probe runs (`LegacyText.cs
 
 Check the rules with `tools/UnityProbe/lx-check.py rule LOG`, check the glyph table against a
 font file with `lx-check.py face LOG FONT STYLE`, and compare the players with `lx-check.py
-diff ORIG OURS`. To see which face the original falls back to, hide a font directory from it:
+diff ORIG OURS` (`diff --no-uv` leaves out the texture coordinates, which depend on where each
+player packs a glyph; with it ours matched every line, 2026-10-24). To see which face the original falls back to, hide a font directory from it:
 run the player under `unshare --user --map-root-user --mount` after bind-mounting an empty
 folder over the directory. `docs/cleanroom/ugui.md` ("Legacy Text glyph placement") records
 what it measured.

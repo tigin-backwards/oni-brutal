@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3609476592-darkness-not-excluded-relit.yaml",
+ "mods": [
+  "3609476592"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "Loads (its Lit Workspace transpiler of Workable.GetEfficiencyMultiplier matches its field by Mono's string, D35), plays 70 s from early-base, and the top-left Disable Darkness button turns the darkness off and on",
+ "updated": "2026-10-25",
+ "commit": "00bd4c2",
+ "mod_dlls": {
+  "3609476592": {
+   "DarknessNotExcluded.dll": "5f82a02dbf50f5f9036d6e9a7415291cbb296ea19e78d1b2fc32d26bbe560db7"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-183935-5d81e910",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T18:39:35",
+    "lane": 30,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-184215-48c3ecc3",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T18:42:15",
+    "lane": 30,
+    "reference_run": "20261025-183935-5d81e910",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261025-184215-48c3ecc3",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-25T18:45:51",
+    "lane": 30,
+    "reference_run": "20261025-183935-5d81e910",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

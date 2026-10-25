@@ -1,0 +1,29 @@
+# Darkness Not Excluded Relit (3609476592), classes P, B, S, T.
+#
+# What it does: unlit cells fade towards black (darker over a grace period of cycles) and show
+# fewer details on hover; Duplicants, the Printing Pod, Scout Rovers and some buildings carry
+# light; fog of war is revealed by light; Lit Workspace (a transpiler of
+# Workable.GetEfficiencyMultiplier), the decor bonus, sleep, Dusk Caps and Bog Buckets follow
+# lux thresholds of its PLib options; darkness can penalize attributes.
+# How a player reaches it: playing a colony; a Disable Darkness button in the top-left row
+# (TopLeftControlScreen) turns the darkness off and on; its options in the Mods screen.
+# What changes: what the colony looks like; work speed, decor and sleep under light.
+#
+# Its transpiler finds NO_LIGHT by Mono's string of the field, "System.Int32 NO_LIGHT"
+# (ARCHITECTURE D35); without it the mod logs an error at load and ours quit at start-up.
+from: early-base
+mods: [3609476592]
+steps:
+  - expect_state:
+      "count:Global.Instance.modManager.mods[*] if .staticID == Duncanois.DarknessNotExcludedRelit and .IsEnabledForActiveDlc() == true": 1
+      "type:DarknessNotIncluded.Darkness.Behavior::enabled": true
+      "type:DarknessNotIncluded.LightBonuses.MinionLitEfficiencyMultiplier::litWorkspaceLux": 1000
+  - run: {seconds: 30}
+  # The top-left button turns the darkness off, then on again.
+  - ui_wait: {path: "**/TopLeftControlPanel(Clone)/SecondaryRow/DarknessToggle", cond: stable}
+  - click: {ui: "**/TopLeftControlPanel(Clone)/SecondaryRow/DarknessToggle"}
+  - expect_state: {"type:DarknessNotIncluded.Darkness.Behavior::enabled": false}
+  - run: {seconds: 10}
+  - click: {ui: "**/TopLeftControlPanel(Clone)/SecondaryRow/DarknessToggle"}
+  - expect_state: {"type:DarknessNotIncluded.Darkness.Behavior::enabled": true}
+  - run: {seconds: 30}

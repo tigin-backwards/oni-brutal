@@ -308,6 +308,34 @@ namespace OniBrutal.Tests
             }
         }
 
+        // Measured in the original player: a stream of a bundle's bytes loads it (from the
+        // stream's position), not twice; junk gives null; a null stream throws, its parameter
+        // name Unity's sentence.
+        [Fact]
+        public void BundlesLoadFromStream()
+        {
+            AssetSystem.Initialize(DataDir);
+            var bytes = File.ReadAllBytes(Path.Combine(DataDir, "StreamingAssets", "hires_base_bundle"));
+            var thrown = Assert.Throws<ArgumentNullException>(() => AssetBundle.LoadFromStream(null));
+            Assert.Equal("ManagedStream object must be non-null", thrown.ParamName);
+            Assert.Null(AssetBundle.LoadFromStream(new MemoryStream(new byte[] { 1, 2, 3, 4 })));
+            var stream = new MemoryStream(new byte[] { 9, 9, 9 }.Concat(bytes).ToArray());
+            stream.Position = 3;
+            var bundle = AssetBundle.LoadFromStream(stream);
+            Assert.NotNull(bundle);
+            try
+            {
+                Assert.Equal(stream.Length, stream.Position);
+                Assert.Null(AssetBundle.LoadFromStream(new MemoryStream(bytes), 0));
+                Assert.NotEmpty(bundle.GetAllAssetNames());
+                Assert.NotEmpty(bundle.LoadAllAssets());
+            }
+            finally
+            {
+                bundle.Unload(true);
+            }
+        }
+
         // The prefs file as the original player writes it (measured): entries it does not know are
         // kept, strings are base64 UTF-8, floats have six significant digits, a key set with another
         // type is replaced and reads as the default for the old type.

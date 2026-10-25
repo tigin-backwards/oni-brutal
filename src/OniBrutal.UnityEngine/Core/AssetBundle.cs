@@ -54,6 +54,36 @@ namespace UnityEngine
             return AssetBundles.Mount("Memory", nodes);
         }
 
+        /// Loads a bundle from a stream of its file's bytes, read from its current position (a
+        /// mod's embedded resource). Measured in the original player: a null stream throws
+        /// ArgumentNullException (its message "stream", its parameter name Unity's sentence);
+        /// bytes that are no bundle give null with "Unable to read header from archive file: " and
+        /// "Failed to read data for the AssetBundle 'IO.Stream'."; a bundle whose files are already
+        /// loaded gives null with Unity's error naming it 'IO.Stream'.
+        public static AssetBundle LoadFromStream(Stream stream) => LoadFromStream(stream, 0, 0);
+
+        public static AssetBundle LoadFromStream(Stream stream, uint crc) => LoadFromStream(stream, crc, 0);
+
+        public static AssetBundle LoadFromStream(Stream stream, uint crc, uint managedReadBufferSize)
+        {
+            if (stream == null) throw new ArgumentNullException("ManagedStream object must be non-null", "stream");
+            Threads.AssertMainThread("AssetBundle.LoadFromStream");
+            var bytes = new MemoryStream();
+            stream.CopyTo(bytes);
+            List<(string Key, byte[] Data)> nodes;
+            try
+            {
+                nodes = AssetSystem.ReadNodes(UnityFsArchive.Parse(bytes.ToArray()));
+            }
+            catch (Exception e) when (e is IOException or InvalidDataException)
+            {
+                Debug.LogError("Unable to read header from archive file: ");
+                Debug.LogError("Failed to read data for the AssetBundle 'IO.Stream'.");
+                return null;
+            }
+            return AssetBundles.Mount("IO.Stream", nodes);
+        }
+
         /// Reads and decompresses the bundle on a worker thread; it is mounted on the main thread
         /// at the start of a later frame, when the request completes.
         public static AssetBundleCreateRequest LoadFromFileAsync(string path)

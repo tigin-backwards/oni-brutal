@@ -1,0 +1,61 @@
+{
+ "spec": "mods/2923695033-single-asteroid-with-everything.yaml",
+ "mods": [
+  "2923695033"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "from a colony to New Game, Survival, Classic: the carousel lists the four clusters; the Sandstone one chosen by typing its coordinate (its asteroid list dumped), launched and embarked: one 320 x 384 asteroid with the mod's niobium core, moo caverns, graphite caves and radioactive subworlds, wasteland, the Spaced Out volcanoes among the spawners, starmap POIs and the Temporal Tear",
+ "updated": "2026-10-24",
+ "commit": "95d725f",
+ "mod_dlls": {
+  "2923695033": {}
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-213453-7f7026a0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T21:57:38",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-224402-e66003f8",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T22:45:57",
+    "lane": 17,
+    "reference_run": "20261024-213453-7f7026a0",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "asteroids": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261024-224402-e66003f8",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T22:46:47",
+    "lane": 17,
+    "reference_run": "20261024-213453-7f7026a0",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "asteroids": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

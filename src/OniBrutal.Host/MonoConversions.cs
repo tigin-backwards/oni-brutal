@@ -43,7 +43,7 @@ namespace OniBrutal.Host
         /// `symbols` (portable PDB bytes or null) are rewritten to match.
         internal static byte[]? Adjust(byte[] image, ref byte[]? symbols, string path)
         {
-            if (!MayConvertFloats(image) && !MonoDirectoryListing.MayList(image)) return null;
+            if (!MayConvertFloats(image) && !MonoDirectoryListing.MayList(image) && !MonoModHelperDrop.MayDrop(image)) return null;
             try
             {
                 return Rewrite(image, ref symbols, path);
@@ -76,7 +76,7 @@ namespace OniBrutal.Host
         /// the player's cache folder, under the image's hash and this host build's.
         internal static byte[]? AdjustGame(byte[] image, string path)
         {
-            if (!MayConvertFloats(image) && !MonoDirectoryListing.MayList(image)) return null;
+            if (!MayConvertFloats(image) && !MonoDirectoryListing.MayList(image) && !MonoModHelperDrop.MayDrop(image)) return null;
             string? cached = null;
             try
             {
@@ -143,7 +143,9 @@ namespace OniBrutal.Host
             int converted = RewriteModule(module, out int methods, out int unsure);
             // The same pass sends its directory listings to MonoDirectoryListing (D30).
             int listings = MonoDirectoryListing.RewriteModule(module);
-            if (converted == 0 && listings == 0) return null;
+            // And MonoMod's native helper is written through a descriptor closed once (D31).
+            int drops = MonoModHelperDrop.RewriteModule(module);
+            if (converted == 0 && listings == 0 && drops == 0) return null;
             using var output = new MemoryStream();
             using var symbolOutput = new MemoryStream();
             module.Write(output, new Cecil.WriterParameters { WriteSymbols = withSymbols, SymbolStream = withSymbols ? symbolOutput : null, SymbolWriterProvider = withSymbols ? new Cil.PortablePdbWriterProvider() : null });
@@ -152,6 +154,8 @@ namespace OniBrutal.Host
                 EngineLog.Engine($"{what}: {Path.GetFileName(path)}: {converted} conversion(s) of floats in {methods} method(s) convert as on Mono" + (unsure > 0 ? $"; {unsure} left as they were (stack types not followed)" : ""));
             if (listings > 0)
                 EngineLog.Engine($"{what.Replace("conversions", "listings")}: {Path.GetFileName(path)}: {listings} directory listing(s) in Mono's order");
+            if (drops > 0)
+                EngineLog.Engine($"{what.Replace("conversions", "fixes")}: {Path.GetFileName(path)}: MonoMod's native helper file is closed once");
             return output.ToArray();
         }
 

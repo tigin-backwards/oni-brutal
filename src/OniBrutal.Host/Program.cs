@@ -182,6 +182,39 @@ namespace OniBrutal.Host
                 return string.Join(",", (List<string>)copy!);
             });
             Check("Code page IBM437 (Ionic.Zip)", () => Encoding.GetEncoding("IBM437").EncodingName);
+            Check("MonoMod's native helper written through a descriptor closed once (MonoModHelperDrop)", () =>
+            {
+                if (!OperatingSystem.IsLinux()) return "not Linux";
+                // Harmony's own drop of its exception helper, into a folder of the check's: the
+                // shipped one closes the descriptor twice, and the second close fails (EBADF).
+                // DropLibrary takes the span type Harmony carries itself: a stub makes one of an array.
+                var harmony = typeof(HarmonyLib.Harmony).Assembly;
+                var drop = harmony.GetType("MonoMod.Core.Platforms.Systems.LinuxSystem+LinuxNativeLibDrop", true)!;
+                var span = harmony.GetType("System.ReadOnlySpan`1", true)!.MakeGenericType(typeof(byte));
+                var stub = new System.Reflection.Emit.DynamicMethod("DropLibrary", typeof(string), [typeof(Stream), typeof(byte[])], drop, skipVisibility: true);
+                var il = stub.GetILGenerator();
+                il.Emit(System.Reflection.Emit.OpCodes.Ldsfld, drop.GetField("Instance", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)!);
+                il.Emit(System.Reflection.Emit.OpCodes.Ldarg_0);
+                il.Emit(System.Reflection.Emit.OpCodes.Ldarg_1);
+                il.Emit(System.Reflection.Emit.OpCodes.Newobj, span.GetConstructor([typeof(byte[])])!);
+                il.Emit(System.Reflection.Emit.OpCodes.Callvirt, drop.GetMethod("DropLibrary", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)!);
+                il.Emit(System.Reflection.Emit.OpCodes.Ret);
+                var write = stub.CreateDelegate<Func<Stream, byte[], string>>();
+                var folder = Directory.CreateTempSubdirectory("oni-brutal-check-");
+                try
+                {
+                    byte[] content = [0x7F, (byte)'E', (byte)'L', (byte)'F'];
+                    System.Runtime.InteropServices.Marshal.SetLastSystemError(0);
+                    var path = write(new MemoryStream(content), Encoding.UTF8.GetBytes(Path.Combine(folder.FullName, "helper.XXXXXX")));
+                    int errno = System.Runtime.InteropServices.Marshal.GetLastSystemError();
+                    if (!File.ReadAllBytes(path).AsSpan().SequenceEqual(content)) throw new InvalidOperationException("the file was not written");
+                    return errno == 0 ? "written, its descriptor closed once" : throw new InvalidOperationException($"a close failed (errno {errno}): the descriptor was closed twice");
+                }
+                finally
+                {
+                    folder.Delete(recursive: true);
+                }
+            });
             Check("System.Configuration's settings classes (mods' generated Properties.Settings)", () =>
                 (Type.GetType("System.Configuration.ApplicationSettingsBase, System", throwOnError: true)!).Assembly.GetName().Name!);
             Check("A Harmony patch of a value type's GetHashCode after tier-up (UnboxedMethods)", () =>

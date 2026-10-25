@@ -100,7 +100,8 @@ and .NET 10 ships out-of-band. The host restores them the way .NET documents for
 time where they persist runtime-specific values (D1 state-machine parameter names, D3 a local
 mod's version stamp); so are mods' loading (D11) and the bubble manager's one use of a struct's
 hash as an identity (D26), and the game's conversions of floats to integers are rewritten as
-they load (D29), in the same pass as its directory listings (D30). No other game IL is touched.
+they load (D29), in the same pass as its directory listings (D30) and the double close in
+0Harmony's MonoMod (D31). No other game IL is touched.
 
 | Mono provided | Host provides | Needed by |
 |---|---|---|
@@ -520,6 +521,21 @@ past the boot checkpoint needs a Steam client logged in with an account that own
   EnumerateFiles 127 instead of 83), a tree of 21 folders and 600 files in 383 instead of 312.
   `--check-types` lists a mod's folders made in another
   order, recursively and through a delegate.
+- **D31 MonoMod's helper file closed twice.** On Linux and macOS, Harmony's MonoMod writes its
+  native exception helper to a temporary file on its first patch
+  (`PosixNativeLibraryDrop.DropLibrary`: mkstemp, then, on CoreCLR,
+  `new FileStream(fd, FileAccess.Write)`, which owns the descriptor and closes it when disposed,
+  and then its own `close(fd)` once more). The second close fails harmlessly unless another
+  thread opened a file in between and was given the same descriptor number: that file loses its
+  descriptor. The host makes its first patches on another thread while the main thread opens the
+  window, and a QA run's main thread failed to load Microsoft.Extensions.ObjectPool
+  (FileNotFoundException in GLFW's type initializer, through BRUTAL's logging). Three threads
+  opening and reading a file in a loop while the patches go in lost a descriptor (EBADF) in 15 of
+  56 starts, each within 6 ms of the helper's last write; none did with the fix, in 40. Mono's
+  own path closes the descriptor once, before reopening the file by name. **Resolved in** `MonoModHelperDrop`, in `MonoConversions`' pass (D29) over the game's
+  0Harmony (cached with it) and any mod's copy of MonoMod: the FileStream is made with
+  `ownsHandle: false`, so MonoMod's own close is the only one. `--check-types` drops the helper
+  into a folder of its own and checks that no close failed.
 
 ## 3. The engine API (`OniBrutal.UnityEngine`)
 

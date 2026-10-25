@@ -1,0 +1,49 @@
+{
+ "spec": "mods/1706142008-mosaic-tile.yaml",
+ "mods": [
+  "1706142008"
+ ],
+ "verdict": "pending",
+ "why": "the spec fails in the original: a broken spec, or a mod broken upstream",
+ "findings": [],
+ "note": "",
+ "updated": "2026-10-25",
+ "commit": "18a3974",
+ "mod_dlls": {
+  "1706142008": {
+   "MosaicTile.dll": "00e33c2333e7c412054831c15e6eb1c41ec88011d5b2973dcc966869407c1781"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-065627-2d9e4703",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-25T06:58:36",
+    "lane": 17,
+    "reasons": [
+     "step start: the player exited (1) while loading"
+    ],
+    "signatures": 2
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-070646-7f15578f",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-25T07:07:58",
+    "lane": 16,
+    "reasons": [
+     "step start: the player exited (1) while loading"
+    ],
+    "reference_run": null,
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

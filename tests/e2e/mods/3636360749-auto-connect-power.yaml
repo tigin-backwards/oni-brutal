@@ -1,0 +1,16 @@
+# Auto Connect: Power (3636360749).
+#
+# What it does: adds an Auto Connect button to powered buildings and wires that plans wire to the
+# nearest power grid.
+# How a player reaches it: the building's user menu.
+#
+# Broken upstream: its Localization.Initialize postfix reads `RoomConstraints.REFRIGERATOR`, a
+# field the game no longer has (MissingFieldException at the start), and the game quits before the
+# colony loads. The spec checks that it is enabled, then runs the colony.
+from: early-base
+mods: [3636360749]
+steps:
+  - expect_state:
+      "count:Global.Instance.modManager.mods[*] if .label.id == 3636360749 and .IsEnabledForActiveDlc() == true": 1
+  - run: {seconds: 30}
+  - expect: {duplicants: 3}

@@ -1,0 +1,16 @@
+# [Deprecated] Clean Drop (2047364442).
+#
+# What it does: drops the items of a finished errand (dig, deconstruct, harvest, empty pipe) on
+# the side the Duplicant stood.
+# How a player reaches it: any errand that drops items.
+#
+# Broken upstream: it names the game's former `Worker` class (now `WorkerBase`), so its assembly
+# fails to load (TypeLoadException), the game disables it and the game quits before the colony
+# loads. The spec checks that it is enabled, then runs the colony.
+from: early-base
+mods: [2047364442]
+steps:
+  - expect_state:
+      "count:Global.Instance.modManager.mods[*] if .label.id == 2047364442 and .IsEnabledForActiveDlc() == true": 1
+  - run: {seconds: 30}
+  - expect: {duplicants: 3}

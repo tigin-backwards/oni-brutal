@@ -1,0 +1,16 @@
+# Instant Sandbox (2263043737).
+#
+# What it does: makes the dig, mop, empty pipe and deconstruct tools act at once in sandbox mode
+# with instant build on.
+# How a player reaches it: the tools, in sandbox mode.
+#
+# Broken upstream: it patches `Deconstructable.QueueDeconstruction`, which now has overloads, so
+# Harmony throws ("Ambiguous match"), the game disables it and the game quits before the colony
+# loads. The spec checks that it is enabled, then runs the colony.
+from: early-base
+mods: [2263043737]
+steps:
+  - expect_state:
+      "count:Global.Instance.modManager.mods[*] if .label.id == 2263043737 and .IsEnabledForActiveDlc() == true": 1
+  - run: {seconds: 30}
+  - expect: {duplicants: 3}

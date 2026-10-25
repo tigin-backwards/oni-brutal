@@ -1,0 +1,16 @@
+# Happy digging: Dwarf Edition (1729316811).
+#
+# What it does: scales the mass a dig yields by the digger's skills and Digging attribute, and
+# adds the efficiency to its tooltip.
+# How a player reaches it: dig orders and the Digging tooltip.
+#
+# Broken upstream: it names the game's former `Worker` class (now `WorkerBase`), so its types fail
+# to load (TypeLoadException), the game disables it and the game quits before the colony loads.
+# The spec checks that it is enabled, then runs the colony.
+from: early-base
+mods: [1729316811]
+steps:
+  - expect_state:
+      "count:Global.Instance.modManager.mods[*] if .label.id == 1729316811 and .IsEnabledForActiveDlc() == true": 1
+  - run: {seconds: 30}
+  - expect: {duplicants: 3}

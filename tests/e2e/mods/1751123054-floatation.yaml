@@ -1,0 +1,16 @@
+# Floatation (1751123054).
+#
+# What it does: makes debris lighter than the liquid it lies in float up and drift.
+# How a player reaches it: debris in liquid.
+#
+# Broken upstream: its GravityComponents.FixedUpdate prefix reads `GameTags.Minion`, a field the
+# game no longer has, so it throws a MissingFieldException on every tick and the game does not
+# advance (no game second passes in 30 s at speed 3). The spec checks that it is enabled, then
+# runs the colony.
+from: early-base
+mods: [1751123054]
+steps:
+  - expect_state:
+      "count:Global.Instance.modManager.mods[*] if .label.id == 1751123054 and .IsEnabledForActiveDlc() == true": 1
+  - run: {seconds: 30}
+  - expect: {duplicants: 3}

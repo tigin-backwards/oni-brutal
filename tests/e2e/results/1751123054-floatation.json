@@ -1,0 +1,49 @@
+{
+ "spec": "mods/1751123054-floatation.yaml",
+ "mods": [
+  "1751123054"
+ ],
+ "verdict": "pending",
+ "why": "the spec fails in the original: a broken spec, or a mod broken upstream",
+ "findings": [],
+ "note": "",
+ "updated": "2026-10-25",
+ "commit": "18a3974",
+ "mod_dlls": {
+  "1751123054": {
+   "Floating.dll": "c439a2d5b9051b5b922706973c737b540ceb25d012d81acb4202ecda1d6dbfb5"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-065627-2d9e4703",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-25T07:01:20",
+    "lane": 17,
+    "reasons": [
+     "step 2: the game did not advance: {\"active\": false, \"found\": true, \"status\": \"completed\", \"isPaused\": true, \"currentIsPaused\": true, \"requestId\": \"8cf2038916f9469f981bca46e7ef2fbc\", \"condition\": {\"fact\": \"cycle_end\", \"stableSeconds\": 0.0}, \"until\": {\"fact\": \"cycle_end\", \"stableSeconds\": 0.0}, \"world"
+    ],
+    "signatures": 1
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-070646-7f15578f",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-25T07:09:40",
+    "lane": 16,
+    "reasons": [
+     "step 2: the game did not advance: {\"active\": false, \"found\": true, \"status\": \"completed\", \"isPaused\": true, \"currentIsPaused\": true, \"requestId\": \"925f4ed0c6994a798098f104427da661\", \"condition\": {\"fact\": \"cycle_end\", \"stableSeconds\": 0.0}, \"until\": {\"fact\": \"cycle_end\", \"stableSeconds\": 0.0}, \"world"
+    ],
+    "reference_run": null,
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -1,0 +1,15 @@
+# Marble Tile (1706061612).
+#
+# What it does: adds a decorative Marble Tile.
+# How a player reaches it: the build menu (Base).
+#
+# Broken upstream: its tile names `DUPLICANTSTATS.MOVEMENT` (the game's `MOVEMENT_MODIFIERS` now),
+# so it fails in RegisterBuilding (TypeLoadException) and the game quits before the colony loads.
+# The spec checks that it is enabled, then runs the colony.
+from: early-base
+mods: [1706061612]
+steps:
+  - expect_state:
+      "count:Global.Instance.modManager.mods[*] if .label.id == 1706061612 and .IsEnabledForActiveDlc() == true": 1
+  - run: {seconds: 30}
+  - expect: {duplicants: 3}

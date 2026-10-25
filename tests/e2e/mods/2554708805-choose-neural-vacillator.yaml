@@ -1,0 +1,17 @@
+# Choose Neural Vacillator (2554708805).
+#
+# What it does: a Neural Vacillator opens a dialog that lets the player choose the trait it grants
+# (or a random one).
+# How a player reaches it: a Duplicant using a charged Neural Vacillator.
+#
+# Broken upstream: it names the game's former `Worker` class (now `WorkerBase`), so its patch type
+# fails to load (TypeLoadException), the game disables it, `Assets.OnPrefabInit` stops on a
+# ReflectionTypeLoadException and the game quits before OniMcp starts. The spec checks that it is
+# enabled, then runs the colony.
+from: early-base
+mods: [2554708805]
+steps:
+  - expect_state:
+      "count:Global.Instance.modManager.mods[*] if .label.id == 2554708805 and .IsEnabledForActiveDlc() == true": 1
+  - run: {seconds: 30}
+  - expect: {duplicants: 3}

@@ -1,0 +1,49 @@
+{
+ "spec": "mods/3636360749-auto-connect-power.yaml",
+ "mods": [
+  "3636360749"
+ ],
+ "verdict": "pending",
+ "why": "the spec fails in the original: a broken spec, or a mod broken upstream",
+ "findings": [],
+ "note": "",
+ "updated": "2026-10-25",
+ "commit": "18a3974",
+ "mod_dlls": {
+  "3636360749": {
+   "AutoConnectPower.dll": "2f836b6ab4a42ab28933349fda31138efd57237e123faed3e0642b064bef0dd4"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-065627-2d9e4703",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-25T07:00:25",
+    "lane": 16,
+    "reasons": [
+     "step start: <urlopen error [Errno 111] Connection refused>"
+    ],
+    "signatures": 1
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-070646-7f15578f",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-25T07:08:54",
+    "lane": 17,
+    "reasons": [
+     "step start: the player exited (1) while loading"
+    ],
+    "reference_run": null,
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

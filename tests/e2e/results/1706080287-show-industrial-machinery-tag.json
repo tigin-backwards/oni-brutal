@@ -1,0 +1,49 @@
+{
+ "spec": "mods/1706080287-show-industrial-machinery-tag.yaml",
+ "mods": [
+  "1706080287"
+ ],
+ "verdict": "pending",
+ "why": "the spec fails in the original: a broken spec, or a mod broken upstream",
+ "findings": [],
+ "note": "",
+ "updated": "2026-10-25",
+ "commit": "18a3974",
+ "mod_dlls": {
+  "1706080287": {
+   "ShowIndustrialMachineryTag.dll": "a794646f0209809ffc375a596a4d3d78256984869851d75f5626d67627e45ef5"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-065627-2d9e4703",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-25T07:00:04",
+    "lane": 17,
+    "reasons": [
+     "step start: the player exited (1) before OniMcp started"
+    ],
+    "signatures": 2
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-070646-7f15578f",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-25T07:08:48",
+    "lane": 16,
+    "reasons": [
+     "step start: <urlopen error [Errno 111] Connection refused>"
+    ],
+    "reference_run": null,
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

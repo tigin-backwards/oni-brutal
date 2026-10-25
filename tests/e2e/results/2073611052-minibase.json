@@ -1,0 +1,49 @@
+{
+ "spec": "mods/2073611052-minibase.yaml",
+ "mods": [
+  "2073611052"
+ ],
+ "verdict": "pending",
+ "why": "the spec fails in the original: a broken spec, or a mod broken upstream",
+ "findings": [],
+ "note": "",
+ "updated": "2026-10-25",
+ "commit": "18a3974",
+ "mod_dlls": {
+  "2073611052": {
+   "MiniBase-merged.dll": "b7683091524aefaf6eaa2a60acbe7584e988d29b9f423f88155333d9660437bf"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-065627-2d9e4703",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-25T07:00:59",
+    "lane": 17,
+    "reasons": [
+     "step start: the player exited (1) before OniMcp started"
+    ],
+    "signatures": 4
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-070646-7f15578f",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-25T07:09:23",
+    "lane": 16,
+    "reasons": [
+     "step start: the player exited (1) while loading"
+    ],
+    "reference_run": null,
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

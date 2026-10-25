@@ -1,0 +1,15 @@
+# Show Industrial Machinery Tag (1706080287).
+#
+# What it does: shows on a building's info panel when it is Industrial Machinery (for room types).
+# How a player reaches it: the selected building's info panel.
+#
+# Broken upstream: it patches `SimpleInfoScreen.SetPanels`, which the game no longer has, so
+# Harmony throws ("Undefined target method"), the game disables it and the game quits before the
+# colony loads. The spec checks that it is enabled, then runs the colony.
+from: early-base
+mods: [1706080287]
+steps:
+  - expect_state:
+      "count:Global.Instance.modManager.mods[*] if .label.id == 1706080287 and .IsEnabledForActiveDlc() == true": 1
+  - run: {seconds: 30}
+  - expect: {duplicants: 3}

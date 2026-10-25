@@ -1,0 +1,15 @@
+# Mod Translation (2692663069).
+#
+# What it does: translates other mods' strings from its translation files.
+# How a player reaches it: the strings of other mods.
+#
+# Broken upstream: it patches `EntityTemplates.CreatePlacedEntity`, which now has overloads, so
+# Harmony throws ("Ambiguous match"), the game disables it and the game quits before the colony
+# loads. The spec checks that it is enabled, then runs the colony.
+from: early-base
+mods: [2692663069]
+steps:
+  - expect_state:
+      "count:Global.Instance.modManager.mods[*] if .label.id == 2692663069 and .IsEnabledForActiveDlc() == true": 1
+  - run: {seconds: 30}
+  - expect: {duplicants: 3}

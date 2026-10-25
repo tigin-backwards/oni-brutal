@@ -1,0 +1,49 @@
+{
+ "spec": "mods/1732501619-decor-lights.yaml",
+ "mods": [
+  "1732501619"
+ ],
+ "verdict": "pending",
+ "why": "the spec fails in the original: a broken spec, or a mod broken upstream",
+ "findings": [],
+ "note": "",
+ "updated": "2026-10-25",
+ "commit": "18a3974",
+ "mod_dlls": {
+  "1732501619": {
+   "DecorLights.dll": "650f2b8b5f4b8a4feac5a5bf9690fd9a11f7687886af9e1e7b1c3292814129db"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-065627-2d9e4703",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-25T06:56:28",
+    "lane": 17,
+    "reasons": [
+     "step start: the player exited (1) while loading"
+    ],
+    "signatures": 5
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-070646-7f15578f",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-25T07:06:47",
+    "lane": 17,
+    "reasons": [
+     "step start: the player exited (1) while loading"
+    ],
+    "reference_run": null,
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

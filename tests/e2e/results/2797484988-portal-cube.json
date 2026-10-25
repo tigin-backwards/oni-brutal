@@ -1,0 +1,50 @@
+{
+ "spec": "mods/2797484988-portal-cube.yaml",
+ "mods": [
+  "2797484988"
+ ],
+ "verdict": "pending",
+ "why": "the spec fails in the original: a broken spec, or a mod broken upstream",
+ "findings": [],
+ "note": "",
+ "updated": "2026-10-25",
+ "commit": "18a3974",
+ "mod_dlls": {
+  "2797484988": {
+   "PLib.dll": "5d6a8ef9d87143b90113548016180078efaf112d69afe0cdf1073a6125b33773",
+   "Portal Cube.dll": "9030022397d366b3ff6a63d0c3f987851f3749e297adad8422d3ca43f68f2172"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-065627-2d9e4703",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-25T07:01:19",
+    "lane": 16,
+    "reasons": [
+     "step start: the player exited (1) while loading"
+    ],
+    "signatures": 10
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-070646-7f15578f",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-25T07:09:34",
+    "lane": 17,
+    "reasons": [
+     "step start: the player exited (1) while loading"
+    ],
+    "reference_run": null,
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

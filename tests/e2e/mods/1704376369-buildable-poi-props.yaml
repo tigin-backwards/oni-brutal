@@ -1,0 +1,15 @@
+# Buildable POI Props (1704376369).
+#
+# What it does: lets the props of the Gravitas facilities (windows, lamps, furniture) be built.
+# How a player reaches it: the build menu.
+#
+# Broken upstream: its Window is built of `TUNING.MATERIALS.TRANSPARENTS`, which the game no
+# longer has, so it fails in RegisterBuilding (MissingFieldException) and the game quits before
+# the colony loads. The spec checks that it is enabled, then runs the colony.
+from: early-base
+mods: [1704376369]
+steps:
+  - expect_state:
+      "count:Global.Instance.modManager.mods[*] if .label.id == 1704376369 and .IsEnabledForActiveDlc() == true": 1
+  - run: {seconds: 30}
+  - expect: {duplicants: 3}

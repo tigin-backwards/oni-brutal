@@ -1,0 +1,16 @@
+# Decor Lights (1732501619).
+#
+# What it does: adds four lamps to the Furniture menu (Lava Lamp, Salt Lamp, Ceiling Lamp,
+# Luminiferous Sphere), researched with Glass Furnishings.
+# How a player reaches it: the build menu (Furniture).
+#
+# Broken upstream: its lamps are built of `TUNING.MATERIALS.TRANSPARENTS`, which the game no
+# longer has, so every one fails in RegisterBuilding (MissingFieldException) and the game quits
+# before the colony loads. The spec checks that it is enabled, then runs the colony.
+from: early-base
+mods: [1732501619]
+steps:
+  - expect_state:
+      "count:Global.Instance.modManager.mods[*] if .label.id == 1732501619 and .IsEnabledForActiveDlc() == true": 1
+  - run: {seconds: 30}
+  - expect: {duplicants: 3}

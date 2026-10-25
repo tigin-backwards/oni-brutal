@@ -1,0 +1,15 @@
+# Mosaic Tile (1706142008).
+#
+# What it does: adds a decorative Mosaic Tile.
+# How a player reaches it: the build menu (Base).
+#
+# Broken upstream: its tile names `DUPLICANTSTATS.MOVEMENT` (the game's `MOVEMENT_MODIFIERS` now),
+# so it fails in RegisterBuilding (TypeLoadException) and the game quits before the colony loads.
+# The spec checks that it is enabled, then runs the colony.
+from: early-base
+mods: [1706142008]
+steps:
+  - expect_state:
+      "count:Global.Instance.modManager.mods[*] if .label.id == 1706142008 and .IsEnabledForActiveDlc() == true": 1
+  - run: {seconds: 30}
+  - expect: {duplicants: 3}

@@ -1,0 +1,49 @@
+{
+ "spec": "mods/1932765859-schedule-shift.yaml",
+ "mods": [
+  "1932765859"
+ ],
+ "verdict": "pending",
+ "why": "the spec fails in the original: a broken spec, or a mod broken upstream",
+ "findings": [],
+ "note": "",
+ "updated": "2026-10-25",
+ "commit": "18a3974",
+ "mod_dlls": {
+  "1932765859": {
+   "ScheduleShift.dll": "c31436bfd82dbb3d773290ce43216a2fd17fad28c8ebe0ca78a1d14bd7e877d4"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-065627-2d9e4703",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-25T06:56:27",
+    "lane": 16,
+    "reasons": [
+     "step start: the player exited (1) before OniMcp started"
+    ],
+    "signatures": 2
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-070646-7f15578f",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-25T07:06:46",
+    "lane": 16,
+    "reasons": [
+     "step start: the player exited (1) before OniMcp started"
+    ],
+    "reference_run": null,
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

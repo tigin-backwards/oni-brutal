@@ -1,0 +1,49 @@
+{
+ "spec": "mods/2059584551-insulated-joint-plate.yaml",
+ "mods": [
+  "2059584551"
+ ],
+ "verdict": "pending",
+ "why": "the spec fails in the original: a broken spec, or a mod broken upstream",
+ "findings": [],
+ "note": "",
+ "updated": "2026-10-25",
+ "commit": "18a3974",
+ "mod_dlls": {
+  "2059584551": {
+   "InsulatedJointPlate.dll": "800479d963ba66550b43cfd3591e33990366612714ad550a2e0dd76133e7deed"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-065627-2d9e4703",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-25T06:57:33",
+    "lane": 17,
+    "reasons": [
+     "step start: the player exited (1) while loading"
+    ],
+    "signatures": 5
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-070646-7f15578f",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-25T07:07:17",
+    "lane": 17,
+    "reasons": [
+     "step start: the player exited (1) while loading"
+    ],
+    "reference_run": null,
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

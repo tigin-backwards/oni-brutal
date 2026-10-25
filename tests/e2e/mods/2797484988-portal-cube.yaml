@@ -1,0 +1,16 @@
+# Portal Cube (2797484988).
+#
+# What it does: adds portal cubes that move solids, liquids, gases and Duplicants to a paired
+# cube, with their side screen.
+# How a player reaches it: the build menu, researched.
+#
+# Broken upstream: it names the game's former `Worker` class (now `WorkerBase`), so its types fail
+# to load (TypeLoadException), the game disables it and the game quits before the colony loads.
+# The spec checks that it is enabled, then runs the colony.
+from: early-base
+mods: [2797484988]
+steps:
+  - expect_state:
+      "count:Global.Instance.modManager.mods[*] if .label.id == 2797484988 and .IsEnabledForActiveDlc() == true": 1
+  - run: {seconds: 30}
+  - expect: {duplicants: 3}

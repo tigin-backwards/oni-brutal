@@ -1,0 +1,17 @@
+# MiniBase (2073611052).
+#
+# What it does: adds a small, walled starting world to the new game screen, with its own care
+# packages.
+# How a player reaches it: the new game screen.
+#
+# Broken upstream: its patch of `WorldGen.RenderOffline` fails (Harmony throws "Patching
+# exception"), the game disables it and the game quits before the colony loads. The base-game
+# fixture, as it supports the base game only. The spec checks that it is enabled, then runs the
+# colony.
+from: vanilla-base
+mods: [2073611052]
+steps:
+  - expect_state:
+      "count:Global.Instance.modManager.mods[*] if .label.id == 2073611052 and .IsEnabledForActiveDlc() == true": 1
+  - run: {seconds: 30}
+  - expect: {duplicants: 3}

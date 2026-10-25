@@ -1,0 +1,17 @@
+# schedule shift (1932765859).
+#
+# What it does: adds < and > buttons to each schedule's row that shift its blocks an hour earlier
+# or later, and a new schedule copies the last one.
+# How a player reaches it: the Schedule screen (F8).
+#
+# Broken upstream: its ScheduleScreenEntry.Setup prefix takes `___optionsPanel` and
+# `___optionsButton`, fields the game no longer has, so Harmony throws ("No such field defined in
+# class ScheduleScreenEntry"), the game disables it ("Failed to load mod ...disabling") and the
+# game quits before the colony loads. The spec checks that it is enabled, then runs the colony.
+from: early-base
+mods: [1932765859]
+steps:
+  - expect_state:
+      "count:Global.Instance.modManager.mods[*] if .label.id == 1932765859 and .IsEnabledForActiveDlc() == true": 1
+  - run: {seconds: 30}
+  - expect: {duplicants: 3}

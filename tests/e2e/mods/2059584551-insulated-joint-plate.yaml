@@ -1,0 +1,15 @@
+# Insulated Joint Plate (2059584551).
+#
+# What it does: adds long insulated wire bridges (and joint plates for heavy-watt wire).
+# How a player reaches it: the build menu (Power).
+#
+# Broken upstream: its bridges name `DUPLICANTSTATS.MOVEMENT` (the game's `MOVEMENT_MODIFIERS`
+# now), so they fail in RegisterBuilding (TypeLoadException) and the game quits before the colony
+# loads. The spec checks that it is enabled, then runs the colony.
+from: early-base
+mods: [2059584551]
+steps:
+  - expect_state:
+      "count:Global.Instance.modManager.mods[*] if .label.id == 2059584551 and .IsEnabledForActiveDlc() == true": 1
+  - run: {seconds: 30}
+  - expect: {duplicants: 3}

@@ -1,0 +1,50 @@
+{
+ "spec": "mods/2692663069-mod-translation.yaml",
+ "mods": [
+  "2692663069"
+ ],
+ "verdict": "pending",
+ "why": "the spec fails in the original: a broken spec, or a mod broken upstream",
+ "findings": [],
+ "note": "",
+ "updated": "2026-10-25",
+ "commit": "18a3974",
+ "mod_dlls": {
+  "2692663069": {
+   "ModI18n.dll": "fe7061e4f3ab53b8649e5465af989751f205057a9e4a7da9ab387bf5311af7ad",
+   "PLib.dll": "b862c5db2b3cd6df09a62d4a30782e91e2b24e8e1bfac08d991c9cc89a984ba9"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-065627-2d9e4703",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-25T07:00:51",
+    "lane": 16,
+    "reasons": [
+     "step start: the player exited (1) while loading"
+    ],
+    "signatures": 2
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-070646-7f15578f",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-25T07:09:12",
+    "lane": 17,
+    "reasons": [
+     "step start: the player exited (1) before OniMcp started"
+    ],
+    "reference_run": null,
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

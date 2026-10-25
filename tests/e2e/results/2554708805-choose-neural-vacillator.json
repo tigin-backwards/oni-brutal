@@ -1,0 +1,50 @@
+{
+ "spec": "mods/2554708805-choose-neural-vacillator.yaml",
+ "mods": [
+  "2554708805"
+ ],
+ "verdict": "pending",
+ "why": "the spec fails in the original: a broken spec, or a mod broken upstream",
+ "findings": [],
+ "note": "",
+ "updated": "2026-10-25",
+ "commit": "18a3974",
+ "mod_dlls": {
+  "2554708805": {
+   "ChooseNeuralVacillator.dll": "286bf6e2b1f3d7fc1bcce9bff354eb568011713fe6db41b0215e261ad284c339",
+   "PLib.dll": "c4bb22f1bc06ebcb0dbba75a7f1bc46f63eaa3dae12c22a08729f1a6d3362dda"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-065627-2d9e4703",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-25T06:59:38",
+    "lane": 17,
+    "reasons": [
+     "step start: the player exited (1) while loading"
+    ],
+    "signatures": 10
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-070646-7f15578f",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-25T07:08:29",
+    "lane": 16,
+    "reasons": [
+     "step start: the player exited (1) while loading"
+    ],
+    "reference_run": null,
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

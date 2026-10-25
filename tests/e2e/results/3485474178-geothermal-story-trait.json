@@ -1,0 +1,63 @@
+{
+ "spec": "mods/3485474178-geothermal-story-trait.yaml",
+ "mods": [
+  "3485474178"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "from a colony to New Game, Survival, Classic, Terra by its coordinate (the random story traits seeded, the heat pump off): on the Story Traits tab its row chosen and its checkbox switched on (the list dumped, as in the original), launched and embarked: the start world has the story trait, the geothermal controller and three or more vents among the spawners",
+ "updated": "2026-10-24",
+ "commit": "9327313",
+ "mod_dlls": {
+  "3485474178": {
+   "GeothermalStoryTrait.dll": "92e4a4c314815e26fa62200cdab16e6bb6067bc0d588483e3ffd70a63b5078f7"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-225429-87e4e1d3",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T22:56:22",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-225800-06add5dc",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T22:58:58",
+    "lane": 16,
+    "reference_run": "20261024-225429-87e4e1d3",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "stories": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261024-225800-06add5dc",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T22:59:21",
+    "lane": 17,
+    "reference_run": "20261024-225429-87e4e1d3",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "stories": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

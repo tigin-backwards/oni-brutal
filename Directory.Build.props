@@ -7,6 +7,9 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <Deterministic>true</Deterministic>
+    <!-- Release symbols name sources from the repository root (/_/src/...), not the building
+         machine's checkout: they ship with the player, and its stack traces show them. -->
+    <DeterministicSourcePaths Condition="'$(Configuration)' == 'Release'">true</DeterministicSourcePaths>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
     <!-- All engine and tool output lands in one tree so the host, facades and tests agree on paths. -->
     <ArtifactsPath>$(MSBuildThisFileDirectory)out</ArtifactsPath>

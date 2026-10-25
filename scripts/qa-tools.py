@@ -13,6 +13,7 @@ import re, sys
 
 def normalize(text):
     text = re.sub(r' \(at [^)]*\)', '', text)  # source locations change with every edit
+    text = re.sub(r' in \S+:line \d+', '', text)  # .NET's form of the same
     text = re.sub(r'0x[0-9a-fA-F]+', 'N', text)
     text = re.sub(r'\d+(\.\d+)?', 'N', text)
     return text.strip()

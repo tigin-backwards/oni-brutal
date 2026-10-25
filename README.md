@@ -107,6 +107,8 @@ the game instead.
   at entries that were actually removed.
 - `fast-overlays`: the overlays (temperature most of all) skip rereading what can't have
   changed since the last frame.
+- `fast-conveyor-paths`: no hitch when conveyor rails change: their routes are found from an
+  index instead of searching every route again.
 - `fast-serialization`, `fast-save-type-checks`, `fast-save-compression`, `no-save-gc`,
   `background-save`: much shorter autosave freezes.
 - `off-screen-conveyors` (**changes gameplay**): items travelling on conveyor rails off screen

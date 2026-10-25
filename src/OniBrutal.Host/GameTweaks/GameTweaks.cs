@@ -65,7 +65,7 @@ namespace OniBrutal.Host.GameTweaks
     internal static class GameTweakNames
     {
         /// The tweaks in src/OniBrutal.GameTweaks (named here: options are read before that assembly is loaded).
-        public static readonly string[] Typed = ["off-screen-conveyors", "fast-save-type-checks", "fast-anim-cleanup", "fast-sublimation", "fast-anim-events", "fast-symbol-overrides", "fast-jobs", "fast-offset-tables", "slow-reachability", "off-world-fallers", "fast-partitioner-cleanup", "fast-anim-batches", "fast-overlays"];
+        public static readonly string[] Typed = ["off-screen-conveyors", "fast-save-type-checks", "fast-anim-cleanup", "fast-sublimation", "fast-anim-events", "fast-symbol-overrides", "fast-jobs", "fast-offset-tables", "slow-reachability", "off-world-fallers", "fast-partitioner-cleanup", "fast-anim-batches", "fast-overlays", "fast-conveyor-paths"];
 
         public static readonly string[] All = [FastSaveCompression.Name, BackgroundSave.Name, NoSaveGc.Name, FastSerialization.Name, FastParticleCollision.Name, .. Typed];
 
@@ -100,6 +100,7 @@ namespace OniBrutal.Host.GameTweaks
             ["fast-partitioner-cleanup"] = ("Faster spatial index cleanup", "The once-a-second cleanup of the game's spatial index looks only at entries actually removed."),
             ["fast-anim-batches"] = ("Parallel animation uploads", "Prepares the animations' data for the graphics card on worker threads instead of one by one."),
             ["fast-overlays"] = ("Faster overlays", "The overlays (temperature most of all) skip rereading what cannot have changed since the last frame."),
+            ["fast-conveyor-paths"] = ("Faster conveyor rebuilds", "Finds the conveyor rails' routes from an index instead of searching every route again: no hitch when rails change."),
         };
     }
 }

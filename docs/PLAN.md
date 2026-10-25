@@ -488,6 +488,17 @@ unchanged.
   verified with ONI_TWEAK_VERIFY, no destroyed entry found in a skipped chunk), 0.48 → 0.12 ms a
   frame.
 
+- `fast-conveyor-paths`: every change to the conveyor rails, and the load, rebuilds the whole
+  network; SolidConduitFlow keeps each source-to-sink path it finds (TryAdd) after asking every
+  path already kept whether it holds the new one, which of them the new one holds, and for each
+  rail whether a kept path has it. U57 keeps 447 of 735 paths found, and TryAdd was 97% of a
+  rebuild: 50–510 ms on the main thread at each edit, 840–850 ms at the load. The tweak keeps,
+  beside the game's list, each rail's paths and places, how many paths hold it and the paths
+  starting with it, and asks the game's same questions only of the paths that can answer yes;
+  the list ends up the same, in the same order. A rebuild now takes 2–14 ms (the load's 14).
+  Verified with ONI_TWEAK_VERIFY (the game's TryAdd run on copies, both lists compared): U57,
+  4,410 paths over six rebuilds, and 2minnow, 588, none different.
+
 Measured and not kept: the loading side of fast-serialization (a U57 load produced the same
 colony, 3 bytes of time of day apart, in 31.3 s against 31.6), an exact early-out for
 sublimation and a canvas build cache (docs/research/u57-frame-inventory.md).

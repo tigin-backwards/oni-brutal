@@ -1,0 +1,24 @@
+# A Harmony patch made while a colony runs must reach the calls from code compiled before it
+# (ARCHITECTURE D34).
+#
+# BrainScheduler updates brains from each brain group's RenderEveryTick, a loop calling the
+# virtual Brain.UpdateBrain. After a minute of play that loop has tiered up, and CoreCLR's JIT
+# has inlined UpdateBrain into it for the brains it sees (critters run Brain's own UpdateBrain;
+# a Duplicant's MinionBrain calls it too). A prefix on UpdateBrain added then, as PLib's later
+# stages and mods patching from game callbacks add theirs, never ran here
+# before D34; Mono inlines no virtual method, so in the original it runs for every brain.
+#
+# E2eDriver's count adds the prefix, and one on the group's RenderEveryTick. Brains updated per
+# group update: 3.00 in the original (10482 of 3492) and here (20550 of 6848); before D34 neither
+# prefix ran once here, the group's RenderEveryTick being inlined into BrainScheduler's too.
+from: early-base
+steps:
+  - run: {seconds: 60}
+  - driver: {count: {methods: ["Brain:UpdateBrain", "BrainScheduler+BrainGroup:RenderEveryTick"]}}
+  - run: {seconds: 60}
+  - expect_state:
+      'E2eDriver.Counting.Of("BrainScheduler+BrainGroup:RenderEveryTick")': {save_as: groups}
+      'E2eDriver.Counting.Of("Brain:UpdateBrain")': {save_as: brains}
+  - expect_state:
+      'E2eDriver.Counting.Of("BrainScheduler+BrainGroup:RenderEveryTick")': "> 100"
+      'E2eDriver.Counting.Of("Brain:UpdateBrain")': ">= 2 * groups"

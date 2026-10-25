@@ -48,9 +48,18 @@ namespace OniBrutal.Host
         /// in a non-vtable slot).
         internal static unsafe bool MarkUnboxed(IntPtr stub)
         {
+            var unboxed = Unboxed(stub);
+            if (unboxed == IntPtr.Zero) return false;
+            SetFlag((byte*)unboxed, NotInline);
+            return true;
+        }
+
+        /// The unboxed MethodDesc following an unboxing stub, or zero.
+        internal static unsafe IntPtr Unboxed(IntPtr stub)
+        {
             byte* p = (byte*)stub;
             ushort flags3 = *(ushort*)(p + Flags3);
-            if ((flags3 & IsUnboxingStub) == 0) return false;
+            if ((flags3 & IsUnboxingStub) == 0) return IntPtr.Zero;
             for (int offset = Alignment; offset <= MaxStubSize; offset += Alignment)
             {
                 byte* q = p + offset;
@@ -58,10 +67,9 @@ namespace OniBrutal.Host
                 if (q[ChunkIndex] != p[ChunkIndex] + offset / Alignment) continue;
                 if ((qFlags3 & TokenRemainderMask) != (flags3 & TokenRemainderMask) || (qFlags3 & IsUnboxingStub) != 0) continue;
                 if ((*(ushort*)(q + Flags) & HasNonVtableSlot) == 0) continue;
-                SetFlag(q, NotInline);
-                return true;
+                return (IntPtr)q;
             }
-            return false;
+            return IntPtr.Zero;
         }
 
         /// m_wFlags is the high half of the aligned 32-bit word at offset 4 (little-endian); the

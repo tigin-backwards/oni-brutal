@@ -317,8 +317,9 @@ past the boot checkpoint needs a Steam client logged in with an account that own
   Harmony-heavy mods together (Fast Save, Ronivans Legacy, Research Manager, Popup Control,
   Duplicant Stat Selector, Sweep By Type, Better Automation Overlay, Favorite Resources) read
   43,600 bodies in 0.6–0.75 s and rebuild 230 times (126 replacements) in 1.2 s; Forever Eruption
-  Geyser alone rebuilds 18 times. Not covered: an override the JIT reaches by devirtualizing a
-  call to a base method (the call names the base method, whose body is followed instead).
+  Geyser alone rebuilds 18 times. The graph misses an override the JIT reaches by devirtualizing
+  a call to a base method (the call names the base method, whose body is followed instead);
+  D34's record of the JIT's own decisions covers it.
   `--check-types` patches a caller, then a method it calls, and calls the caller; and patches A,
   then C, which A reaches through B, with C of 4, 1024 and 1026 bytes of IL, and calls A.
 - **D22 Classes missing a method of an interface they list.** A mod built against an older game
@@ -609,6 +610,48 @@ past the boot checkpoint needs a Steam client logged in with an account that own
   copies' methods that enumerate a collection of their own interface, construct a list of it and
   name an array of such lists, and calls the second copy's; `tests/e2e/plib-options-copies.yaml`
   opens the two mods' options dialogs and two others'.
+- **D34 Patches of methods code compiled before had inlined.** CoreCLR's JIT inlines small
+  methods into the code it compiles at tier 1, and virtual ones it devirtualizes (by the
+  receiver's exact type, or behind a check of the type tiered PGO saw). A patch marks its method
+  not to be inlined from then on (D13), but code compiled before keeps the old body, so a patch
+  made while the game runs never ran from there. A prefix on `Brain.UpdateBrain` added a minute
+  into the early-base colony ran 0 times in a minute: the brain groups' loop, and
+  `BrainScheduler.RenderEveryTick` around it, had tiered up with it inlined. The original ran it
+  10,482 times, 3.00 per brain group update. Mono inlines only methods of under 20 bytes of IL
+  without exception clauses, and a virtual one only if it is final
+  (`mono_method_check_inlining`, `INLINE_LENGTH_LIMIT`; Unity's fork, branch
+  `unity-6000.3-mbe`), so there a late patch reaches every call but those to the smallest
+  methods. Mods rarely patch late: of the 2821 Workshop mods in onimaxxing's decompile cache,
+  about 11 make a first patch after the game world exists, and the target of two of them is a
+  small method a hot caller inlines (Resource Calculator patches
+  `KInputController.UpdateScrollStates`, 44 bytes, which `KInputController.Update` calls every
+  frame from boot, on the first `Game.OnSpawn`; Interstellar patches
+  `DebugHandler.get_NotificationsDisabled` while it builds new worlds). PLib's stages that can
+  run after a colony (`InMainMenu`, `OnStartGame`, `OnEndGame`) apply no patch in any of them.
+  Test tools patch late as well (E2eDriver's `seed` and `count`, PerfProbe). **Resolved in**
+  `PatchInliners` and `PatchDependents`: Harmony's MonoMod hands the JIT a wrapper of its
+  `ICorJitInfo` (managed JIT hook), and the host replaces the wrapper's `reportInliningDecision`
+  slot, so it records, for each method compiled, the methods its code inlined, from the JIT's own
+  decisions (no IL is read). The first time a method is patched, the code recorded as inlining it
+  is rebuilt: a Harmony replacement with its patches (as D21 rebuilds one), and a method of the
+  game or a mod as a copy, a Harmony replacement without patches built from its own IL, which
+  calls the patched method. The copy is marked not to be inlined, as a patched method is, and
+  Harmony replaces it when the method itself is patched. A compile that was under way when a patch
+  went in is rebuilt once it has finished. Not covered (logged): type initializers, shared generic
+  code (its MethodBase is over `__Canon`), Harmony's and the host's own methods; ReadyToRun code,
+  the BCL's precompiled methods, which inline one another without the JIT (a patch of a BCL
+  method misses those calls at any time); and macOS, where MonoMod hooks the JIT natively and
+  hands it no wrapper. Cost: none measured. The record is made at compile time only: U57 reached
+  the main menu in 8.6 and 8.4 s with it, 8.5 and 8.3 s without, and four `qa.sh perf` runs
+  alternating with and without gave 30.1 and 39.3 fps with it, 27.4 and 36.1 without (other
+  sessions loaded the machine; the spread between pairs is wider than any difference). Nothing
+  patches late there, so no copy is made. The late prefix on `Brain.UpdateBrain` found 3 of the
+  9677 methods recorded in 1.5 ms. A copy runs as any Harmony replacement does (optimized at
+  once, without tiered PGO), and only after a late patch of a method it inlined. `--check-types` runs two loops compiled optimized at once, one
+  inlining a static method, the other a sealed class's override through a small method compiled
+  only inlined, patches both methods, and checks that the prefixes run, and that a later patch of
+  a loop replaces its copy; `tests/e2e/late-patch.yaml` counts the late prefix on
+  `Brain.UpdateBrain` against the brain groups' updates.
 - **D35 Strings of fields and events.** Mono prints a field as its type's full name and its name
   (`RuntimeFieldInfo.ToString`, `String.Format("{0} {1}", FieldType, name)`), an event likewise
   (`RuntimeEventInfo.ToString`, `EventHandlerType + " " + Name`; Unity's fork, branch

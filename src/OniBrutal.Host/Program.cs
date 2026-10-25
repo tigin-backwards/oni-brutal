@@ -426,6 +426,83 @@ namespace OniBrutal.Host
                 }
                 return $"the later prefix runs from the earlier replacement (C of {string.Join(", ", ran)} bytes of IL)";
             });
+            Check("Harmony prefixes on methods code compiled before had inlined (PatchInliners)", () =>
+            {
+                PatchDependents.Install();
+                if (!PatchInliners.Available) return "not available with this JIT hook";
+                // Twice is a small static method, Critter.Update a sealed class's override of a virtual
+                // method. Loop calls Twice; Herd calls Update on a Critter, which the JIT devirtualizes,
+                // through Visit, a small method compiled only inlined. Both loops are compiled optimized
+                // at once (as tier 1 compiles a hot loop) and run before the prefixes are added, as a
+                // prefix on Brain.UpdateBrain went on in a colony whose brain loop had tiered up.
+                var module = System.Reflection.Emit.AssemblyBuilder.DefineDynamicAssembly(new AssemblyName("OniBrutal.Host.InlinedCheck"),
+                    System.Reflection.Emit.AssemblyBuilderAccess.Run).DefineDynamicModule("InlinedCheck");
+                var brain = module.DefineType("Brain", TypeAttributes.Public | TypeAttributes.Class);
+                var update = brain.DefineMethod("Update", MethodAttributes.Public | MethodAttributes.Virtual | MethodAttributes.HideBySig | MethodAttributes.NewSlot, typeof(int), [typeof(int)]);
+                var il = update.GetILGenerator();
+                il.Emit(System.Reflection.Emit.OpCodes.Ldarg_1); il.Emit(System.Reflection.Emit.OpCodes.Ret);
+                brain.DefineDefaultConstructor(MethodAttributes.Public);
+                var brainType = brain.CreateType();
+                var critter = module.DefineType("Critter", TypeAttributes.Public | TypeAttributes.Class | TypeAttributes.Sealed, brainType);
+                var critterUpdate = critter.DefineMethod("Update", MethodAttributes.Public | MethodAttributes.Virtual | MethodAttributes.HideBySig, typeof(int), [typeof(int)]);
+                il = critterUpdate.GetILGenerator();
+                il.Emit(System.Reflection.Emit.OpCodes.Ldarg_1); il.Emit(System.Reflection.Emit.OpCodes.Ldc_I4_2); il.Emit(System.Reflection.Emit.OpCodes.Add); il.Emit(System.Reflection.Emit.OpCodes.Ret);
+                critter.DefineDefaultConstructor(MethodAttributes.Public);
+                var critterType = critter.CreateType();
+                var type = module.DefineType("Inlined", TypeAttributes.Public | TypeAttributes.Abstract | TypeAttributes.Sealed);
+                var twice = type.DefineMethod("Twice", MethodAttributes.Public | MethodAttributes.Static, typeof(int), [typeof(int)]);
+                il = twice.GetILGenerator();
+                il.Emit(System.Reflection.Emit.OpCodes.Ldarg_0); il.Emit(System.Reflection.Emit.OpCodes.Ldc_I4_2); il.Emit(System.Reflection.Emit.OpCodes.Mul); il.Emit(System.Reflection.Emit.OpCodes.Ret);
+                var visit = type.DefineMethod("Visit", MethodAttributes.Public | MethodAttributes.Static, typeof(int), [critterType, typeof(int)]);
+                il = visit.GetILGenerator();
+                il.Emit(System.Reflection.Emit.OpCodes.Ldarg_0); il.Emit(System.Reflection.Emit.OpCodes.Ldarg_1);
+                il.Emit(System.Reflection.Emit.OpCodes.Callvirt, critterType.GetMethod("Update")!); il.Emit(System.Reflection.Emit.OpCodes.Ret);
+                // static int Loop(int n) { int s = 0; for (int i = 0; i < n; i++) s += Twice(i); return s; }
+                // static int Herd(Critter c, int n) { int s = 0; for (int i = 0; i < n; i++) s += Visit(c, i); return s; }
+                foreach (var (name, callee, critterArgument) in new[] { ("Loop", (MethodInfo)twice, false), ("Herd", visit, true) })
+                {
+                    var loop = type.DefineMethod(name, MethodAttributes.Public | MethodAttributes.Static, typeof(int), critterArgument ? [critterType, typeof(int)] : [typeof(int)]);
+                    loop.SetImplementationFlags(MethodImplAttributes.AggressiveOptimization);
+                    il = loop.GetILGenerator();
+                    var sum = il.DeclareLocal(typeof(int));
+                    var i = il.DeclareLocal(typeof(int));
+                    var test = il.DefineLabel();
+                    var body = il.DefineLabel();
+                    il.Emit(System.Reflection.Emit.OpCodes.Br, test);
+                    il.MarkLabel(body);
+                    il.Emit(System.Reflection.Emit.OpCodes.Ldloc, sum);
+                    if (critterArgument) il.Emit(System.Reflection.Emit.OpCodes.Ldarg_0);
+                    il.Emit(System.Reflection.Emit.OpCodes.Ldloc, i);
+                    il.Emit(System.Reflection.Emit.OpCodes.Call, callee);
+                    il.Emit(System.Reflection.Emit.OpCodes.Add); il.Emit(System.Reflection.Emit.OpCodes.Stloc, sum);
+                    il.Emit(System.Reflection.Emit.OpCodes.Ldloc, i); il.Emit(System.Reflection.Emit.OpCodes.Ldc_I4_1); il.Emit(System.Reflection.Emit.OpCodes.Add); il.Emit(System.Reflection.Emit.OpCodes.Stloc, i);
+                    il.MarkLabel(test);
+                    il.Emit(System.Reflection.Emit.OpCodes.Ldloc, i);
+                    il.Emit(critterArgument ? System.Reflection.Emit.OpCodes.Ldarg_1 : System.Reflection.Emit.OpCodes.Ldarg_0);
+                    il.Emit(System.Reflection.Emit.OpCodes.Blt, body);
+                    il.Emit(System.Reflection.Emit.OpCodes.Ldloc, sum); il.Emit(System.Reflection.Emit.OpCodes.Ret);
+                }
+                var inlined = type.CreateType();
+                var herd = inlined.GetMethod("Herd")!;
+                var loopMethod = inlined.GetMethod("Loop")!;
+                var aCritter = Activator.CreateInstance(critterType)!;
+                int Run() => (int)loopMethod.Invoke(null, [100])! + (int)herd.Invoke(null, [aCritter, 100])!;
+                int expected = Run();
+                var harmony = new HarmonyLib.Harmony("OniBrutal.Host.Check");
+                harmony.Patch(inlined.GetMethod("Twice"), prefix: new HarmonyLib.HarmonyMethod(typeof(Program), nameof(CountB)));
+                harmony.Patch(critterType.GetMethod("Update"), prefix: new HarmonyLib.HarmonyMethod(typeof(Program), nameof(CountC)));
+                int b = prefixedB, c = prefixedC;
+                if (Run() != expected) throw new InvalidOperationException("the copies compute another result");
+                if (prefixedB - b != 100 || prefixedC - c != 100)
+                    throw new InvalidOperationException($"Twice's prefix ran {prefixedB - b} of 100 calls, Critter.Update's {prefixedC - c} of 100");
+                // The copy of Loop is replaced when Loop is patched itself, and calls Twice's patch.
+                harmony.Patch(loopMethod, prefix: new HarmonyLib.HarmonyMethod(typeof(Program), nameof(CountA)));
+                int a = countedA;
+                b = prefixedB;
+                Run();
+                return countedA - a == 1 && prefixedB - b == 100 ? "the prefixes run from both loops, compiled before with the methods inlined; a later patch of a loop runs too"
+                    : throw new InvalidOperationException($"after Loop's own patch: its prefix ran {countedA - a} of 1 calls, Twice's {prefixedB - b} of 100");
+            });
             Check("Harmony patches of two copies of a library naming a generic type over their own types (GenericMemberScopes)", () =>
             {
                 GenericMemberScopes.Install();

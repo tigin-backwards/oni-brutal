@@ -217,7 +217,20 @@ namespace OniBrutal.Desktop
             get
             {
                 var m = window.Monitor;
-                return m.IsNull() ? Glfw.PrimaryMonitor : m;
+                if (!m.IsNull()) return m;
+                // A window (a fullscreen window too, which is a monitor-sized window): the
+                // monitor holding its centre, so a mode change keeps it on that monitor rather
+                // than moving it to the primary one.
+                var position = window.Position;
+                var size = window.Size;
+                int cx = position.X + size.X / 2, cy = position.Y + size.Y / 2;
+                foreach (var monitor in Glfw.GetMonitors())
+                {
+                    var p = monitor.Position;
+                    var mode = monitor.VideoMode;
+                    if (cx >= p.X && cy >= p.Y && cx < p.X + mode.Width && cy < p.Y + mode.Height) return monitor;
+                }
+                return Glfw.PrimaryMonitor;
             }
         }
 

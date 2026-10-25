@@ -14,7 +14,8 @@ scripts/e2e.py --player ours --repeat 2 --record --note "..." NAME   # write tes
 scripts/e2e.py --status                     # the machine's lanes, players and perf jobs
 ```
 
-A batch of mods, one agent per worktree, follows [Batch workflow](#batch-workflow).
+A batch of mods, one agent per worktree, follows [Batch workflow](#batch-workflow); which mods
+load at all, in both players, comes first from [Load sweeps](#load-sweeps).
 
 ## How a run goes
 
@@ -454,6 +455,38 @@ in the pilot:
   relations, and compare by structure only what does not follow it.
 - Some game actions need the game to have run since the load (Blueprints Expanded placed nothing
   before): a short `run` before the UI steps is allowed.
+
+## Load sweeps
+
+Before mods get specs, `scripts/mod-sweep.py` finds which of them load at all: in batches of
+about 22, each batch in the original and in ours, to the main menu and then the 2minnow colony
+(`tests/e2e/fixtures/2minnow.sav`, copied from onimaxxing's saves) played 90 s. Each run is an
+e2e.py run of a one-step spec, so lanes, the players' budget and the perf lock are the ones above.
+
+```sh
+scripts/mod-sweep.py s2000 --ranks 751-2274 --download --dry-run   # fetch the mods, list the batches
+scripts/mod-sweep.py s2000 --ranks 751-2274                       # lanes 22-25, two players at once
+scripts/mod-sweep.py s2000 --ranks 751-2274 --batches 7          # only batch 07 (delete its state to rerun)
+scripts/mod-sweep.py again --ids 3467986764 3760101842 --batch 2 --first-lane 7 --last-lane 8
+```
+
+- **Which mods.** Catalog ranks (or `--ids`), less the ones onimaxxing flags `notLoading`,
+  `crashesAtStartup` or `unanalysed`, and never a malware-flagged one. A translation is recorded,
+  not batched (the players install it disabled); a mod's catalog requirements are installed with
+  it.
+- **A batch.** First, once per sweep, both players run the save without mods: signatures only
+  ours logs there are the engine's, not a mod's. Then the original and ours run the batch side by
+  side. A mod the original disables ("Failed to load mod ...disabling") fails in the original.
+  A failing run of the original is bisected in the original until each failing mod is named, and
+  the rest of the batch runs again. Ours fails on a failing run, a mod disabled that the original
+  loaded, or a log signature that neither the original's run nor the baseline has. It is bisected
+  in ours (each half compared with the same original run) down to single mods, with the
+  signatures each logs alone. When both halves pass, the batch runs once more: a failure that
+  does not come back was flaky, and one that does is recorded for the mods of that set together.
+- **Output.** Runs and state are in `out/sweep/NAME/` (`E2E_OUT` moves it); a sweep run again goes
+  on from the first batch without a state file. Results are `sweeps/NAME.tsv`: per mod, `original` and `ours` are `ok`, `menu` (fails by or at the main
+  menu), `colony` or `-` (not run), with the error as the note. `scripts/modtable.py` reads them
+  for the Loads and Colony columns; commit them with the regenerated table.
 
 ## Batch workflow
 

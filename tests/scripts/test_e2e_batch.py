@@ -392,8 +392,13 @@ MODTABLE = os.path.join(helpers.SCRIPTS, 'modtable.py')
 class ModTable(unittest.TestCase):
     """modtable.py's Played column from tests/e2e/results records, beside its hand-written sets."""
 
-    def table(self, records):
+    def table(self, records, load_sweep=''):
         with tempfile.TemporaryDirectory() as temp:
+            load_sweeps = os.path.join(temp, 'load-sweeps')
+            os.makedirs(load_sweeps)
+            if load_sweep:
+                with open(os.path.join(load_sweeps, 's.tsv'), 'w') as f:
+                    f.write('# scripts/mod-sweep.py s\nid\trank\toriginal\tours\tnote\n' + load_sweep)
             catalog = os.path.join(temp, 'catalog.tsv')
             with open(catalog, 'w') as f:
                 # 1717463209 is in modtable's hand-written `played`, 2363561445 in `broken`.
@@ -410,7 +415,8 @@ class ModTable(unittest.TestCase):
             with open(os.path.join(sweeps, 'sweep-b0.txt'), 'w') as f:
                 f.write('9990003\n9990004\n')
             out = subprocess.run([sys.executable, MODTABLE, catalog], capture_output=True, text=True, check=True,
-                                 env=dict(os.environ, ONI_RESULTS_DIR=results, ONI_SWEEP_DIR=sweeps)).stdout
+                                 env=dict(os.environ, ONI_RESULTS_DIR=results, ONI_SWEEP_DIR=sweeps,
+                                          ONI_SWEEP_RESULTS=load_sweeps)).stdout
         return {line.split(' | ')[1].split(']')[0].lstrip('['): line for line in out.splitlines()
                 if line.startswith('| ') and '](https://steam' in line}
 
@@ -434,6 +440,19 @@ class ModTable(unittest.TestCase):
         # The hand-written entries still work where no record is.
         self.assertIn('| ✅ | ✅ | ✅ | spec tests/e2e/mods/1717463209-bigger-camera-zoom-out.yaml', rows['Bigger Camera Zoom Out'])
         self.assertIn('| ❌ | ❌ | ⬜ | broken upstream', rows['Upstream Mod'])
+
+    def test_load_sweep_results_decide_loads_and_colony(self):
+        rows = self.table({'a': self.record('9990001', 'played', 'its tool marks only sandstone')},
+                          '9990001\t2\tok\tok\t\n9990002\t3\tmenu\t-\tthe original disables it\n'
+                          '9990003\t4\tok\tcolony\tNullReferenceException @ Foo.Bar\n9990004\t5\tok\tok\t\n'
+                          '2363561445\t6\tok\tok\t\n')
+        self.assertIn('| ✅ | ✅ | ✅ | spec tests/e2e/mods/9990001-x.yaml', rows['Played Mod'])   # a record comes first
+        self.assertTrue(rows['Warned Mod'].endswith('| ❌ | ❌ | ⬜ | fails to load in the original as well, at the main '
+                                                    'menu, in its sweep batch: the original disables it |'))
+        self.assertTrue(rows['Failing Mod'].endswith('| ✅ | ⬜ | ⬜ | its colony fails in ours, in its sweep batch: '
+                                                     'NullReferenceException @ Foo.Bar |'))
+        self.assertTrue(rows['Pending Mod'].endswith('| ✅ | ✅ | ⬜ |  |'))
+        self.assertIn('| ❌ | ❌ | ⬜ | broken upstream', rows['Upstream Mod'])   # the hand-written set still decides
 
     def test_a_record_replaces_a_hand_written_entry(self):
         rows = self.table({'z': self.record('1717463209', 'warning', 'zooms out', ['nested-canvas-scale-factor'])})

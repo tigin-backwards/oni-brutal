@@ -13,8 +13,12 @@ left out, down to the rank (2274) where the mods kept, ranks 1-750 counted too, 
 Every rank in the TSV is listed in the table (LAST_RANK is its highest).
 
 What our runs recorded:
-- the sweeps' sweep-*.txt ID lists and modtable-*.tsv results in out/ (or ONI_SWEEP_DIR; in a
-  worktree whose out/ has none, the main checkout's out/);
+- the load sweeps of scripts/mod-sweep.py, tests/e2e/sweeps/*.tsv (or ONI_SWEEP_RESULTS): per mod
+  whether it fails in the original, and if not whether it fails in ours, at the main menu or in
+  the colony; a later file (by name) overrides an earlier one, and these override the older
+  sweeps below;
+- the older sweeps' sweep-*.txt ID lists and modtable-*.tsv results in out/ (or ONI_SWEEP_DIR; in
+  a worktree whose out/ has none, the main checkout's out/);
 - the spec results in tests/e2e/results/*.json (or ONI_RESULTS_DIR), written by
   `scripts/e2e.py --record`: a record's verdict and note decide the Played column, ahead of the
   hand-written status sets below, which stay for mods no spec has played yet."""
@@ -62,6 +66,33 @@ def read_results(folder):
     return by_mod
 
 
+def read_sweeps(folder):
+    """scripts/mod-sweep.py's results (tests/e2e/sweeps/NAME.tsv: id, rank, original, ours, note)
+    as {mod id: (original, ours, note)}; a later file overrides an earlier one."""
+    by_mod = {}
+    for path in sorted(glob.glob(os.path.join(folder, '*.tsv'))):
+        for line in open(path, encoding='utf-8'):
+            if line.startswith('#') or line.startswith('id\t'):
+                continue
+            mid, _, original, ours, note = (line.rstrip('\n').split('\t') + [''] * 5)[:5]
+            by_mod[mid] = (original, ours, note)
+    return by_mod
+
+
+def sweep_status(original, ours, note):
+    """(Loads, Colony, Played, note) from a load sweep's verdicts."""
+    if original in ('menu', 'colony'):
+        where = 'at the main menu' if original == 'menu' else 'in the colony'
+        return X, X, N, f'fails to load in the original as well, {where}, in its sweep batch' + (f': {note}' if note else '')
+    if ours == 'menu':
+        return N, N, N, f'fails in ours at the main menu, in its sweep batch: {note}'
+    if ours == 'colony':
+        return Y, N, N, f'its colony fails in ours, in its sweep batch: {note}'
+    if ours == 'ok':
+        return Y, Y, N, note
+    return N, N, N, note
+
+
 def read_findings(path):
     if not os.path.exists(path):
         return {}
@@ -88,6 +119,7 @@ def record_status(record, findings):
 
 SWEEPS = sweep_dir()
 RESULTS = os.environ.get('ONI_RESULTS_DIR') or os.path.join(ROOT, 'tests', 'e2e', 'results')
+SWEPT = read_sweeps(os.environ.get('ONI_SWEEP_RESULTS') or os.path.join(ROOT, 'tests', 'e2e', 'sweeps'))
 FINDINGS = read_findings(os.path.join(ROOT, 'tests', 'e2e', 'known-findings.yaml'))
 if len(sys.argv) > 2: sys.exit(__doc__)
 catalog = sys.argv[1] if len(sys.argv) == 2 else os.path.join(ROOT, 'scripts', 'mod-catalog.tsv')
@@ -335,6 +367,8 @@ def status(mid, flags):
         return Y, Y, N, not_playable[mid]
     if mid in broken:
         return X, X, N, broken[mid] + ('' if mid in loads_in_ours else ' (same in the original)')
+    if mid in SWEPT:
+        return sweep_status(*SWEPT[mid])
     if flags == 'unanalysed':
         return N, N, N, 'not analysed by onimaxxing (no malware check); not tested'
     if flags:

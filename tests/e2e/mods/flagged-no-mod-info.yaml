@@ -1,0 +1,106 @@
+# Mods onimaxxing flags as not loading, which ship no mod_info.yaml or one without
+# `APIVersion: 2` (ranks 388-746): each was built for the game of 2019-2021, before KMod required
+# a mod_info.yaml and Harmony 2.
+#
+# What they did (their titles): buildings (Meteor Defense Laser, Bleachstone Refinery, High Flow
+# Storage, Thermal Isolation Door, Shinsei Super Heaters, Waterproof Transformer + Battery, Blow
+# Dryer, Giga-Watt Wire, Radiator, Advanced Generators 2, Piped Electrolyzer, Liquid Cooler,
+# Reverse-Cycle AquaTuner, Electrolyzer suit, Advanced Storage, Assignable Showers, Extra Marble
+# Sculptures), geysers and worlds (Ethanol Geyser, more geysers, Neon Eden, Nubrion, Roller
+# Snakes, Planet Balancer, Custom World Size), and tuning or UI (speeds, sublimation in storage,
+# room size, no damage, menus, favorites, skill sets, research speed, refrigerators, sweepies,
+# pedestal and pipe germ info, heat in space, Wheezewort without phosphorite).
+# How a player reaches them: once enabled in the mods screen and the game restarted.
+# What changes today: nothing. KMod reads each mod's mod_info.yaml before it loads any of it; a
+# mod without one is skipped ("Is missing a mod_info.yaml file and will not be loaded"), and one
+# whose DLL is not declared `APIVersion: 2` loads no content ("DLLs found but not using the
+# correct API version"). Either way the mod stays disabled and the mods screen marks it.
+#
+# The spec loads the base-game colony (these mods predate Spaced Out) with all of them installed
+# and enabled, and checks that each is enabled for the active DLC: it fails in the original, as
+# KMod disabled every one of them while it scanned the mods.
+from: vanilla-base
+mods:
+  - 1733560461   # 388 Meteor Defense Laser
+  - 1875446986   # 392 Bleachstone Refinery
+  - 1840237194   # 394 AlternateFastSpeed - 1x 5x 10x
+  - 1735543242   # 406 Stop Sublimation While In Storage
+  - 1737690640   # 416 High Flow Storage
+  - 1797345263   # 426 Neon Eden
+  - 1715802131   # 434 Room Size - Outdated
+  - 1810563583   # 435 Deprecated! Uninstall! [Professional Att
+  - 2191194318   # 459 WheezeWort without Phosphorite
+  - 1810801031   # 485 Ethanol Geyser
+  - 1852077143   # 492 Lightning fast Menus
+  - 1796171773   # 496 [READ DESCRIPTION] Heavy Batteries (Laun
+  - 1728703506   # 511 No Damage - Outdated
+  - 1842684413   # 521 Assignable Showers
+  - 1808602247   # 534 Advanced Storage
+  - 1823287206   # 536 Favorites Category
+  - 1763024961   # 537 더 많은 간헐천 (add geysers, support customize
+  - 1713687582   # 540 Custom World Size - Outdated
+  - 2100888351   # 549 Electrolyzer suit
+  - 1732806087   # 587 Thermal Isolation Door
+  - 1824440419   # 594 Shinsei Super Heaters
+  - 2016657763   # 606 SmartSweepy
+  - 1874426480   # 614 Waterproof Transformer + Battery
+  - 1855385913   # 623 Blow Dryer
+  - 1934095066   # 625 item pedestal preview decor info
+  - 1984954968   # 641 [OBSOLETE] Giga-Watt Wire
+  - 1413765966   # 650 [OBSOLETE] Nubrion (Map)
+  - 1864152914   # 651 Refrigerator Balanced
+  - 1940755077   # 652 Extra Marble Sculptures
+  - 1883889432   # 654 Reverse-Cycle AquaTuner
+  - 1860778068   # 676 [Abandoned] Radiator
+  - 1869114764   # 683 Radiates Heat In Space
+  - 2019457228   # 686 Advanced Generators 2
+  - 1737026266   # 687 Piped Electrolyzer [UPDATED 07-20]
+  - 1836181316   # 691 Custom Skill Sets
+  - 2017868782   # 692 Liquid Cooler
+  - 1841466183   # 732 Faster Research
+  - 1995546475   # 738 Planet Balancer
+  - 1963899596   # 742 Roller Snakes
+  - 2276953041   # 746 Pipe Germ Info
+steps:
+  - expect_state:
+      "count:Global.Instance.modManager.mods[*] if .staticID == 1733560461.Local and .IsEnabledForActiveDlc() == true": 1
+      "count:Global.Instance.modManager.mods[*] if .staticID == 1875446986.Local and .IsEnabledForActiveDlc() == true": 1
+      "count:Global.Instance.modManager.mods[*] if .staticID == 1840237194.Local and .IsEnabledForActiveDlc() == true": 1
+      "count:Global.Instance.modManager.mods[*] if .staticID == 1735543242.Local and .IsEnabledForActiveDlc() == true": 1
+      "count:Global.Instance.modManager.mods[*] if .staticID == 1737690640.Local and .IsEnabledForActiveDlc() == true": 1
+      "count:Global.Instance.modManager.mods[*] if .staticID == 1797345263.Local and .IsEnabledForActiveDlc() == true": 1
+      "count:Global.Instance.modManager.mods[*] if .staticID == 1715802131.Local and .IsEnabledForActiveDlc() == true": 1
+      "count:Global.Instance.modManager.mods[*] if .staticID == 1810563583.Local and .IsEnabledForActiveDlc() == true": 1
+      "count:Global.Instance.modManager.mods[*] if .staticID == 2191194318.Local and .IsEnabledForActiveDlc() == true": 1
+      "count:Global.Instance.modManager.mods[*] if .staticID == 1810801031.Local and .IsEnabledForActiveDlc() == true": 1
+      "count:Global.Instance.modManager.mods[*] if .staticID == 1852077143.Local and .IsEnabledForActiveDlc() == true": 1
+      "count:Global.Instance.modManager.mods[*] if .staticID == 1796171773.Local and .IsEnabledForActiveDlc() == true": 1
+      "count:Global.Instance.modManager.mods[*] if .staticID == 1728703506.Local and .IsEnabledForActiveDlc() == true": 1
+      "count:Global.Instance.modManager.mods[*] if .staticID == 1842684413.Local and .IsEnabledForActiveDlc() == true": 1
+      "count:Global.Instance.modManager.mods[*] if .staticID == 1808602247.Local and .IsEnabledForActiveDlc() == true": 1
+      "count:Global.Instance.modManager.mods[*] if .staticID == 1823287206.Local and .IsEnabledForActiveDlc() == true": 1
+      "count:Global.Instance.modManager.mods[*] if .staticID == 1763024961.Local and .IsEnabledForActiveDlc() == true": 1
+      "count:Global.Instance.modManager.mods[*] if .staticID == 1713687582.Local and .IsEnabledForActiveDlc() == true": 1
+      "count:Global.Instance.modManager.mods[*] if .staticID == 2100888351.Local and .IsEnabledForActiveDlc() == true": 1
+      "count:Global.Instance.modManager.mods[*] if .staticID == 1732806087.Local and .IsEnabledForActiveDlc() == true": 1
+      "count:Global.Instance.modManager.mods[*] if .staticID == 1824440419.Local and .IsEnabledForActiveDlc() == true": 1
+      "count:Global.Instance.modManager.mods[*] if .staticID == 2016657763.Local and .IsEnabledForActiveDlc() == true": 1
+      "count:Global.Instance.modManager.mods[*] if .staticID == 1874426480.Local and .IsEnabledForActiveDlc() == true": 1
+      "count:Global.Instance.modManager.mods[*] if .staticID == 1855385913.Local and .IsEnabledForActiveDlc() == true": 1
+      "count:Global.Instance.modManager.mods[*] if .staticID == 1934095066.Local and .IsEnabledForActiveDlc() == true": 1
+      "count:Global.Instance.modManager.mods[*] if .staticID == 1984954968.Local and .IsEnabledForActiveDlc() == true": 1
+      "count:Global.Instance.modManager.mods[*] if .staticID == 1413765966.Local and .IsEnabledForActiveDlc() == true": 1
+      "count:Global.Instance.modManager.mods[*] if .staticID == 1864152914.Local and .IsEnabledForActiveDlc() == true": 1
+      "count:Global.Instance.modManager.mods[*] if .staticID == 1940755077.Local and .IsEnabledForActiveDlc() == true": 1
+      "count:Global.Instance.modManager.mods[*] if .staticID == 1883889432.Local and .IsEnabledForActiveDlc() == true": 1
+      "count:Global.Instance.modManager.mods[*] if .staticID == 1860778068.Local and .IsEnabledForActiveDlc() == true": 1
+      "count:Global.Instance.modManager.mods[*] if .staticID == 1869114764.Local and .IsEnabledForActiveDlc() == true": 1
+      "count:Global.Instance.modManager.mods[*] if .staticID == 2019457228.Local and .IsEnabledForActiveDlc() == true": 1
+      "count:Global.Instance.modManager.mods[*] if .staticID == 1737026266.Local and .IsEnabledForActiveDlc() == true": 1
+      "count:Global.Instance.modManager.mods[*] if .staticID == 1836181316.Local and .IsEnabledForActiveDlc() == true": 1
+      "count:Global.Instance.modManager.mods[*] if .staticID == 2017868782.Local and .IsEnabledForActiveDlc() == true": 1
+      "count:Global.Instance.modManager.mods[*] if .staticID == 1841466183.Local and .IsEnabledForActiveDlc() == true": 1
+      "count:Global.Instance.modManager.mods[*] if .staticID == 1995546475.Local and .IsEnabledForActiveDlc() == true": 1
+      "count:Global.Instance.modManager.mods[*] if .staticID == 1963899596.Local and .IsEnabledForActiveDlc() == true": 1
+      "count:Global.Instance.modManager.mods[*] if .staticID == 2276953041.Local and .IsEnabledForActiveDlc() == true": 1
+  - run: {seconds: 30}

@@ -201,6 +201,22 @@ broken.update({
 broken.update({
     '2029450933': 'broken upstream: its plants call the 19-parameter `EntityTemplates.ExtendEntityToBasicPlant` the game no longer has, so their prefabs fail in `Assets.OnPrefabInit` (MissingMethodException), its care package postfix throws an InvalidCastException, and loading a colony stops at "Error deserializing prefabs" and quits (spec tests/e2e/mods/2029450933-omni-flora.yaml)',
 })
+# Flagged by onimaxxing as not loading, played by spec tests/e2e/mods/flagged-no-mod-info.yaml on
+# the base-game colony (game build U59-744825): KMod skips them in both players.
+NO_MOD_INFO = ('broken upstream: ships no mod_info.yaml, which KMod requires since 2021: it logs "Is '
+               'missing a mod_info.yaml file and will not be loaded" and leaves the mod disabled '
+               '(spec tests/e2e/mods/flagged-no-mod-info.yaml)')
+OLD_API = ('broken upstream: its mod_info.yaml does not declare `APIVersion: 2` (a Harmony 1 mod): KMod '
+           'logs "DLLs found but not using the correct API version" and loads none of it (spec '
+           'tests/e2e/mods/flagged-no-mod-info.yaml)')
+broken.update({i: NO_MOD_INFO for i in (
+    '1733560461', '1875446986', '1840237194', '1735543242', '1737690640', '1797345263', '1715802131',
+    '1810563583', '2191194318', '1810801031', '1852077143', '1796171773', '1728703506', '1842684413',
+    '1808602247', '1823287206', '1763024961', '1713687582', '2100888351', '1732806087', '1824440419',
+    '2016657763', '1855385913', '1934095066', '1984954968', '1413765966', '1864152914', '1940755077',
+    '1883889432', '1860778068', '1869114764', '2019457228', '1737026266', '1836181316', '2017868782',
+    '1841466183', '1995546475', '1963899596')})
+broken.update({i: OLD_API for i in ('1874426480', '2276953041')})
 # Translations whose file is named Strings.po: on Linux both players look for strings.po and miss
 # it (their specs fail the same way in the original).
 broken.update({

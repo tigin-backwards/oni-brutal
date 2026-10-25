@@ -1,0 +1,211 @@
+{
+ "spec": "mods/flagged-no-mod-info.yaml",
+ "mods": [
+  "1733560461",
+  "1875446986",
+  "1840237194",
+  "1735543242",
+  "1737690640",
+  "1797345263",
+  "1715802131",
+  "1810563583",
+  "2191194318",
+  "1810801031",
+  "1852077143",
+  "1796171773",
+  "1728703506",
+  "1842684413",
+  "1808602247",
+  "1823287206",
+  "1763024961",
+  "1713687582",
+  "2100888351",
+  "1732806087",
+  "1824440419",
+  "2016657763",
+  "1874426480",
+  "1855385913",
+  "1934095066",
+  "1984954968",
+  "1413765966",
+  "1864152914",
+  "1940755077",
+  "1883889432",
+  "1860778068",
+  "1869114764",
+  "2019457228",
+  "1737026266",
+  "1836181316",
+  "2017868782",
+  "1841466183",
+  "1995546475",
+  "1963899596",
+  "2276953041"
+ ],
+ "verdict": "pending",
+ "why": "the spec fails in the original: a broken spec, or a mod broken upstream",
+ "findings": [],
+ "note": "",
+ "updated": "2026-10-25",
+ "commit": "5dea7a7",
+ "mod_dlls": {
+  "1733560461": {
+   "MeteorDefenseLaser.dll": "f6dc85a0bb83f028eff0c7ca11ee79d3716a7d3cbbda5fac13f3148c8a10e57d"
+  },
+  "1875446986": {
+   "BleachstoneRefinery.dll": "77bace74e05efe9efa4f2a5d64d34be63db96210aa6f51e54f6a3f90dc93d541"
+  },
+  "1840237194": {
+   "AlternateFastSpeed_1_5_10.dll": "99cc041ae9dc05247118bf5e8ef5be08d15e5f6cca72e3299c3fc683501ae5d2"
+  },
+  "1735543242": {
+   "NoSublimationWhenItemsAreInStorage.dll": "8f821b15395193872725f4e89351a9d72b90e962d2e07e4248308009b59fc8bf"
+  },
+  "1737690640": {
+   "HighFlowStorage.dll": "7b30ee17a790eab1f038822c68978a8315a7ee9f8a05ffc9b5aac75b9b79358f"
+  },
+  "1797345263": {
+   "NeonEden.dll": "02117b04accb514640ab49648e800c66e56c30e63e7fb100806a8ee4c395fb0d"
+  },
+  "1715802131": {
+   "RoomSize.dll": "2be777005114fadcbe1dcebedaae9f57c3e779ccde618f51aca0b5a8f60d20f4"
+  },
+  "1810563583": {
+   "ProfessionalAttire.dll": "6b7a0365e3efd811812d2d52e4365d7a9624ab4e238b5d63dd98f7a92a9a92fb"
+  },
+  "2191194318": {
+   "coldbreather!!.dll": "f9c42afe256a617e6b51fd9c9b88426627d0a6d2e402266479c86d7f73c33895"
+  },
+  "1810801031": {
+   "EthanolGeyser.dll": "a1fda6975cb7639dee37fe1377fd159f5ea7721f2384f0e999f9622d44db4aad"
+  },
+  "1852077143": {
+   "LightningFastMenus.dll": "01096a52c068572c46b44933989f77a81dd373d2ee56f4fae3831c17838ef57f"
+  },
+  "1796171773": {
+   "HeavyBatteries.dll": "eced768e18ccb17fca2fb282a8c2539364e943f5bf0f82ca924dd0c3008465b6",
+   "Newtonsoft.Json.dll": "3ac07f0372727f697b168f40e3c2d48b3539661a73591128dbab82dc0c4ab61e"
+  },
+  "1728703506": {
+   "NoDamage.dll": "dc5eb3f0ccc95ffa6ae3028a465c6d9f846b39c0fc9cd1c14f26d39d16dbda68"
+  },
+  "1842684413": {
+   "AssignableShowers.dll": "a1498fc3c3e6aa4f851b8dc2639105860edf6f94bb90b339f382951b04e7b401"
+  },
+  "1808602247": {
+   "TeleStorage.dll": "54135bc566e4d0c496f511bd66172bbd65aa89dc977b56cd56ed8fa5cf5f97f9"
+  },
+  "1823287206": {
+   "FavoritesCategory.dll": "f2fd17a514794bb1a2fee41a0baab66c34198ae155a3091c651146184a5ac72d"
+  },
+  "1763024961": {
+   "MoreSpecialGeysers.dll": "129ed6da1d79ee201c89d3c90c2163138ce82e457e7b435e97d68cdc7e77075e",
+   "SuperComicLib.Sandfile.dll": "179e1f95cb565a88ca98b59bef7de8c26edc08d370fff17569cfbcaa75819837",
+   "SuperComicModInfo.dll": "b6de5f6ae2b4f96b98d4c8449c20cf8f40ef309c4e48e1ade581d276f29f1774"
+  },
+  "1713687582": {
+   "CustomWorldSize.dll": "c9da043c01258f8c47490d52e753d027336c4f5144b8adb0d6acaa4b62b186ab"
+  },
+  "2100888351": {
+   "Electrolyzer1.dll": "1157c47ac3a565f7e28236062d75c6400b83ca46c364bb58417539f539d8b9e6"
+  },
+  "1732806087": {
+   "InsulatedPressureDoor.dll": "1fd58c21766e610f30e515c66fa439dcebca216e673990ef0791bbeefa4e5a5d"
+  },
+  "1824440419": {
+   "ShinseiSuperHeater.dll": "264082783699e21c3db45078f00093440b8aebdc5a7cb4af0aa988a8f2279d3f"
+  },
+  "2016657763": {
+   "SmartSweepy.dll": "afd54d2858a7096ad36c60561fe8423dc61faeaad31bf4da9ef8131b87d58ee9"
+  },
+  "1874426480": {
+   "WaterproofTransformer.dll": "b78fa2e604f9d56fd9928b8b4b9d273c60af2b0987cf9d5971228783cc7ba402"
+  },
+  "1855385913": {
+   "BlowDryerMod.dll": "45d7b6be87c609781ec0d633da5c64886242e5c3df3d2bed0e3376cf941251a8",
+   "PLib.dll": "63c5c4ebab786550a4e0c127adb0fde1a380b36da166359217c299491f923aaf"
+  },
+  "1934095066": {
+   "ItemPedestalPreviewDecorInfo.dll": "5f81beb56c25d104cba658cbbb6ea3ebfca2fa4a547463ef4b2e803ef80290be"
+  },
+  "1984954968": {
+   "GigawattWire.dll": "658eb136279cfee0690f89f7ff08dfb4151c734a8bb776ab63431d0b0f1f462e"
+  },
+  "1413765966": {},
+  "1864152914": {
+   "RefrigeratorBalanced.dll": "b31a0736e9d82971943583df03d422b9ae63e9577505aa535cd29b4c482379d9"
+  },
+  "1940755077": {
+   "MarbleSculptureAddon.dll": "d4efe1fd3b141eebe440858798c9f5b451fa6a83e4175d242a16669ff1801713"
+  },
+  "1883889432": {
+   "LiquidConditionerReversed.dll": "5131df9af42fa8fde39fe64c5ecc8d1f82ac93004fa22536c7e7d1d6337181b7",
+   "PLib.dll": "6e69b7e1feb70355ca72305851767657877cfa9e361a6c8cd51c5a22cca071fb"
+  },
+  "1860778068": {
+   "Radiator.dll": "e4e44de636a01d402dbc1b1203458fe2cb32adfe87e6bdfda58d9d685d53373b"
+  },
+  "1869114764": {
+   "RadiateHeatInSpace.dll": "cf1fc2decbe5c6fd34cb61bd3b1b69b09d37d79ac3c32ac05e66f70a3dacd589"
+  },
+  "2019457228": {
+   "1SuperComicLib.dll": "bce5f6218e2610e9b66fe41ac9da7f3a4b98f32867398911e59da3a4f6d05add",
+   "AdvancedGenerators.dll": "1aac25da8860c8f0d84a83570f2f4b9233f242b0df8e72b03a038c38a1d5c482",
+   "SuperComicModInfo.dll": "a1ae4770a6d40b8118ebd7949d512cf3b915a42c4f3ee54f873b92a6f713b2c0"
+  },
+  "1737026266": {
+   "PipedElectrolyzer.dll": "c572518e072fa633145c61d7316e786acaa124d65f6f91fd4afef94bc122365b"
+  },
+  "1836181316": {
+   "CustomSkillSets.dll": "e10db4dbcce3c132d69cfa42380e929584898d9bed98b608f40f2b7071a3a09d"
+  },
+  "2017868782": {
+   "LiquidCooler.dll": "3b79d44f7e4378aafacb94f900e9fe6e0ceb2b1bef81d66296767eadf6242146"
+  },
+  "1841466183": {
+   "FasterResearch.dll": "bfa9c4b2d742366d5492af21b99f2078442d0769e2b87cf940989a5d54cc70b9",
+   "KusnierLib.dll": "56de78d42d93d03ae2d65cea72c9f4b0d156839d2526aa21ce9df732d479db05"
+  },
+  "1995546475": {
+   "Planet Balancer.dll": "d07e98d8b9db79e6073b424e65dc395ade4610fab588a6fe6711f23ae356eb58"
+  },
+  "1963899596": {
+   "RollerSnakeMerged.dll": "67f38adc93c24dd78ccf919e7da8b07262788ef80fdfc2e351d564261e2cd3c3"
+  },
+  "2276953041": {
+   "ONI_PipeGermInfo.dll": "3b02c3db8178a812eb2d5a840c570c67bb5eb3a939b3bd67ccfa59dc683f322c"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-062713-f4fe7226",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-25T06:27:14",
+    "lane": 19,
+    "reasons": [
+     "step 1: count:Global.Instance.modManager.mods[*] if .staticID == 1733560461.Local and .IsEnabledForActiveDlc() == true is 0, wanted 1; count:Global.Instance.modManager.mods[*] if .staticID == 1875446986.Local and .IsEnabledForActiveDlc() == true is 0, wanted 1; count:Global.Instance.modManager.mods["
+    ],
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-063030-26c9968c",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-25T06:30:30",
+    "lane": 18,
+    "reasons": [
+     "step 1: count:Global.Instance.modManager.mods[*] if .staticID == 1733560461.Local and .IsEnabledForActiveDlc() == true is 0, wanted 1; count:Global.Instance.modManager.mods[*] if .staticID == 1875446986.Local and .IsEnabledForActiveDlc() == true is 0, wanted 1; count:Global.Instance.modManager.mods["
+    ],
+    "reference_run": null,
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

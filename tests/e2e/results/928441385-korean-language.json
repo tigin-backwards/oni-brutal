@@ -1,0 +1,31 @@
+{
+ "spec": "mods/928441385-korean-language.yaml",
+ "mods": [
+  "928441385"
+ ],
+ "verdict": "pending",
+ "why": "the spec fails in the original: a broken spec, or a mod broken upstream",
+ "findings": [],
+ "note": "on Linux neither player loads its Strings.po (the game opens strings.po): the language stays English, an error dialog opens and loading the colony quits the game",
+ "updated": "2026-10-25",
+ "commit": "dc570e0",
+ "mod_dlls": {
+  "928441385": {}
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-003454-75470ce2",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-25T01:14:28",
+    "lane": 16,
+    "reasons": [
+     "step start: the player exited (1) while loading"
+    ],
+    "signatures": 1
+   }
+  ],
+  "ours": []
+ }
+}

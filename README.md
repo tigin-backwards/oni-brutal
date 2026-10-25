@@ -137,8 +137,8 @@ Most mods should work, since the game's code and its Harmony load as shipped. Se
 
 ## Could Klei do this?
 
-Possibly. In the age of agents this took about 5 days, so it isn't the insurmountable task it
-might once have looked like.
+Possibly. In the age of agents the initial prototype took about 5 days, so it isn't the
+insurmountable task it might once have looked like.
 
 But it has plenty of bugs, known and unknown. Its only real mandates were to leave no safe
 optimization behind, and not to crash *my* game. Much of the win comes from CoreCLR itself,

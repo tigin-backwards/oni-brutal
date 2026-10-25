@@ -1,11 +1,8 @@
 # Moono
 
-**Oxygen Not Included on its own engine: no Unity runtime, no Mono, just faster. Most mods still
-work.**
-
 An unofficial, super fast, super sussy replacement for the Unity layer of Oxygen Not Included,
-artisanally crafted by Claude. The name is the game's Gassy Moo plus Mono, and "no Mono": it
-reimplements Unity's runtime on .NET, so the game runs without Mono.
+artisanally crafted by Claude. On a late-game colony the game runs at about 7× the original's
+frame rate ([Performance](#performance)).
 
 I did this mostly for fun, to see how far Oxygen Not Included's performance can go on a modern
 .NET runtime (CoreCLR). I've had the idea for a while, but none of the existing C# renderers

@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3508870243-liquid-mercury-geyser.yaml",
+ "mods": [
+  "3508870243"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Liquid Mercury Geyser placed and selected: its name in the side screen's title, Mercury at 423.15 K, a maximum pressure of 50 kg, its rate rolled within 200 to 400 kg a cycle and as in the original to its last bits (ARCHITECTURE D25)",
+ "updated": "2026-10-24",
+ "commit": "4eab9eb",
+ "mod_dlls": {
+  "3508870243": {
+   "Geysers_Liquid_Mercury.dll": "0e34119468ff253843242b7c5365ebe1f8cccc6eff0523b6a0d51a60569f4c4f"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-222216-c845d17f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T22:27:20",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-223032-4802198d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T22:31:36",
+    "lane": 16,
+    "reference_run": "20261024-222216-c845d17f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-223032-4802198d",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T22:32:07",
+    "lane": 16,
+    "reference_run": "20261024-222216-c845d17f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

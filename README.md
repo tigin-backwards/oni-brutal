@@ -171,3 +171,11 @@ All rights reserved.
 
 Built on [BRUTAL](https://github.com/ahwootech/BRUTAL), Copyright (c) 2024 Ahwoo Limited.
 Oxygen Not Included is © Klei Entertainment; this project isn't affiliated with Klei or Unity.
+
+## Unsigned releases
+
+The releases are not signed, so to Windows every new one is an unknown program from the
+internet. Extracting it or running setup may hold things up for a cloud antivirus scan, or show
+"Windows protected your PC" (click More info → Run anyway). That's okay and expected for sussy
+software like this. To skip most of it, right-click the downloaded zip → Properties → tick
+Unblock before extracting.

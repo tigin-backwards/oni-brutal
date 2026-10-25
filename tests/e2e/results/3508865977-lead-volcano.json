@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3508865977-lead-volcano.yaml",
+ "mods": [
+  "3508865977"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Lead Volcano placed and selected: its name in the side screen's title, Molten Lead at 1000 K, a maximum pressure of 150 kg, its rate rolled within 200 to 400 kg a cycle and as in the original to its last bits (ARCHITECTURE D25)",
+ "updated": "2026-10-24",
+ "commit": "4eab9eb",
+ "mod_dlls": {
+  "3508865977": {
+   "Geysers_Lead_Volcano.dll": "64422aef4c73fdc007fda78d39980d58a439f1c4c454072e1fb29b6a5a849a36"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-222216-c845d17f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T22:26:17",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-223032-4802198d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T22:30:32",
+    "lane": 16,
+    "reference_run": "20261024-222216-c845d17f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261024-223032-4802198d",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-24T22:31:02",
+    "lane": 16,
+    "reference_run": "20261024-222216-c845d17f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

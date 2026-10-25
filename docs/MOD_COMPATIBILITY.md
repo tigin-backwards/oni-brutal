@@ -532,7 +532,7 @@ installs get developer checks subscribers never see).
 | 511 | [No Damage - Outdated](https://steamcommunity.com/sharedfiles/filedetails/?id=1728703506) | ⬜ | ⬜ | ⬜ | flagged by onimaxxing (notLoading); not tested |
 | 512 | [Customize your paints](https://steamcommunity.com/sharedfiles/filedetails/?id=1906475585) | ✅ | ✅ | ✅ | spec tests/e2e/mods/1906475585-customize-your-paints.yaml: the sample picture moved to the config folder becomes a Landscape Canvas stage and kanim; a canvas set to it (in setup) is shot in the world |
 | 513 | [ภาษาไทย (Thai Language) by Mary](https://steamcommunity.com/sharedfiles/filedetails/?id=3669382915) | ⬜ | ⬜ | ⬜ | translation: the game applies one only from a Steam subscription; not testable here |
-| 514 | [Lead Volcano](https://steamcommunity.com/sharedfiles/filedetails/?id=3508865977) | ⬜ | ⬜ | ⬜ |  |
+| 514 | [Lead Volcano](https://steamcommunity.com/sharedfiles/filedetails/?id=3508865977) | ✅ | ✅ | ✅ | spec tests/e2e/mods/3508865977-lead-volcano.yaml: a Lead Volcano placed and selected: its name in the side screen's title, Molten Lead at 1000 K, a maximum pressure of 150 kg, its rate rolled within 200 to 400 kg a cycle and as in the original to its last bits (ARCHITECTURE D25) |
 | 515 | [香草梯子Vanilla ladder](https://steamcommunity.com/sharedfiles/filedetails/?id=2882418505) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2882418505-vanilla-ladder.yaml: options 5 up and 6 down; a column of three ladder cells built and one selected, with those speeds; its title and look as in the original |
 | 516 | [Demolior Story Trait](https://steamcommunity.com/sharedfiles/filedetails/?id=3503014942) | ⬜ | ⬜ | ⬜ |  |
 | 517 | [Liquid Mercury Geyser](https://steamcommunity.com/sharedfiles/filedetails/?id=3508870243) | ⬜ | ⬜ | ⬜ |  |

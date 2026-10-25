@@ -1,0 +1,49 @@
+{
+ "spec": "mods/1918000273-resculpt.yaml",
+ "mods": [
+  "1918000273"
+ ],
+ "verdict": "pending",
+ "why": "the spec fails in the original: a broken spec, or a mod broken upstream",
+ "findings": [],
+ "note": "",
+ "updated": "2026-10-25",
+ "commit": "c69d728",
+ "mod_dlls": {
+  "1918000273": {
+   "Resculpt.dll": "3cbec85cd9f1fbbd72651f921f6965e307a9f85b79511277aca3778c067d16de"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-072843-a4a11276",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-25T07:29:37",
+    "lane": 17,
+    "reasons": [
+     "step 8: all:Artable::[0].CurrentStage is \"SmallSculpture_Good4\", wanted != 'SmallSculpture_Good4'"
+    ],
+    "signatures": 1
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-073453-66286444",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-25T07:34:53",
+    "lane": 17,
+    "reasons": [
+     "step 8: all:Artable::[0].CurrentStage is \"SmallSculpture_Good4\", wanted != 'SmallSculpture_Good4'"
+    ],
+    "reference_run": null,
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

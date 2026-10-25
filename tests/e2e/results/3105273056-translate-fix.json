@@ -1,0 +1,49 @@
+{
+ "spec": "mods/3105273056-translate-fix.yaml",
+ "mods": [
+  "3105273056"
+ ],
+ "verdict": "pending",
+ "why": "the spec fails in the original: a broken spec, or a mod broken upstream",
+ "findings": [],
+ "note": "",
+ "updated": "2026-10-25",
+ "commit": "c69d728",
+ "mod_dlls": {
+  "3105273056": {
+   "TranslateFixMod.dll": "864ce9e0ba84e8e0ffc186d6604bf9dda61c061ae943e008269a7d4c75cbe2cf"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-072843-a4a11276",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-25T07:28:44",
+    "lane": 17,
+    "reasons": [
+     "step start: the player exited (1) while loading"
+    ],
+    "signatures": 3
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-073453-66286444",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-25T07:35:23",
+    "lane": 17,
+    "reasons": [
+     "step start: the player exited (1) while loading"
+    ],
+    "reference_run": null,
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

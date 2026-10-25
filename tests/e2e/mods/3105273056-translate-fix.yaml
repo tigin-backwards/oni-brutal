@@ -1,0 +1,40 @@
+# Translate Fix 翻译修正 (3105273056), class P (strings only): an earlier build of the fix
+# 3374671941 publishes for U59, the same code built against the game of 2023.
+#
+# What it does: for a player who plays in the game's own Simplified Chinese (zh_klei), fixes
+# strings the game builds before its translation loads: when the game makes the Pressure
+# Door's building definition, it reads StreamingAssets/strings/strings_preinstalled_zh_klei.po
+# and translates the labels and tooltips of the custom game settings (CustomGameSettingConfigs),
+# the traits' names and descriptions (as "Chinese(English)"), and the room constraints' names
+# (RoomConstraints), falling back to its own copies of some of them; its OnLoad loads the
+# translation early (Localization.Initialize).
+# How a player reaches it: the game in Simplified Chinese (its Translations screen); the
+# settings show on the new game screen, the constraints on rooms' info and the codex.
+# What changes: those strings, in Chinese.
+#
+# On U59 the game translates these itself: the original logs 17 settings and 52 constraints
+# with no entry to translate and 0 traits translated, and the constraints the mod has copies
+# of take its copies' (equal) names. The spec plays in Simplified Chinese (`language:
+# zh_klei`) and checks what the mod logged and those strings (it has no screen of its own).
+#
+# Broken upstream: in Chinese its copies of the room constraints (MockRoomConstraints) call a
+# RoomConstraints.Constraint constructor the game no longer has, so the Pressure Door fails in
+# RegisterBuilding (TypeInitializationException over a MissingMethodException) and the game
+# quits before the colony loads. In English it does nothing.
+from: early-base
+mods: [3105273056]
+language: zh_klei
+require_log: ['---> 验证翻译 zh_klei 铁石胃肠', '--->统计翻译次数 GameSetting :17 17', '--->统计翻译次数 Trait :0', '--->统计翻译次数 RoomConstraints :52  52 42']
+steps:
+  - expect_state:
+      "count:Global.Instance.modManager.mods[*] if .label.id == 3105273056 and .IsEnabledForActiveDlc() == true": 1
+      "Localization.GetCurrentLanguageCode()": zh_klei
+      # Its own copy (MockRoomConstraints), as the game's has no entry in the translation.
+      "RoomConstraints.CEILING_HEIGHT_4.name": "最小高度：4格"
+      "RoomConstraints.MINIMUM_SIZE_12.name": "最小尺寸：12格"
+      # Already translated by the game; the mod logs that it found no entry ("无翻译").
+      "CustomGameSettingConfigs.SandboxMode.label": "沙盒模式"
+      "CustomGameSettingConfigs.ImmuneSystem.tooltip": "影响复制人遭受病菌侵染后患病的几率"
+      "Db.Get().traits.Get(\"IronGut\").Name": "铁石胃肠"
+  - run: {seconds: 30}
+  - expect: {duplicants: 3}

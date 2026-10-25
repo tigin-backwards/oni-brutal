@@ -1,0 +1,40 @@
+# [Deprecated] Resculpt (1918000273), class S (a user-menu button), PLib.
+#
+# What it does: gives a finished artwork (a sculpture, a painting) a Resculpt (Repaint) button
+# in its user menu that changes its design to the next one of the same quality, without
+# rebuilding it, and a Rotate button to rotatable ones; its icons are added to the user
+# menu's sprites.
+# How a player reaches it: select a finished sculpture; the button is in the menu above the
+# details panel.
+# What changes: the artwork's look (its artable stage), within its quality.
+#
+# The spec builds a Sculpting Block and makes it a finished "great" one (the stage a
+# Duplicant's work would pick at random), selects it, and clicks Resculpt twice: its stage
+# moves along the great designs.
+#
+# Broken upstream: the button shows, but clicking it throws a MissingFieldException (its
+# OnResculpt reads `Db.ArtableStages`, which the game now reaches through
+# `Db.GetArtableStages()`), so the design never changes.
+from: early-base
+mods: [1918000273]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"SmallSculpture\")", method: Build, args: [{"$": "Grid.XYToCell(113, 206)"}, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "all:Artable::[0]", method: SetStage, args: [SmallSculpture_Good4, true]}}
+steps:
+  - expect_state:
+      "count:Global.Instance.modManager.mods[*] if .label.id == 1918000273 and .IsEnabledForActiveDlc() == true": 1
+      "all:Artable::[0].CurrentStage": SmallSculpture_Good4
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: SmallSculpture}
+  - ui_wait: {path: "**/UserMenuScreen/Buttons/ResculptButton", cond: stable}
+  - ui_dump: {name: user-menu, root: "**/DetailsScreen/UserMenuButtons/UserMenuScreen/Buttons"}
+  - shot: {name: user-menu, crop: "**/DetailsScreen/UserMenuButtons/UserMenuScreen/Buttons"}
+  - click: {ui: "**/UserMenuScreen/Buttons/ResculptButton"}
+  - expect_state:
+      "all:Artable::[0].CurrentStage": "!= 'SmallSculpture_Good4'"
+  - ui_wait: {path: "**/UserMenuScreen/Buttons/ResculptButton", cond: stable}
+  - click: {ui: "**/UserMenuScreen/Buttons/ResculptButton"}
+  - expect_state:
+      "all:Artable::[0].CurrentStage": {save_as: second}
+  - run: {seconds: 30}
+  - expect: {duplicants: 3, buildings: {SmallSculpture: 1}}

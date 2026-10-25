@@ -245,6 +245,8 @@ them gets `UIVertex.simpleVert`'s defaults: normal (0, 0, −1), tangent (1, 0, 
   - A font texture rebuild re-dirties every Text that uses the font
     (`FontUpdateTracker` on `Font.textureRebuilt`).
   - `fontData` (a `FontData`) holds the settings.
+  - The face, glyph metrics, kerning, pixel size, line metrics and alignment rounding of the
+    engine's generator: "Legacy Text glyph placement" below.
 - **Shadow and Outline** (`BaseMeshEffect`): `Shadow` adds a copy of the vertices at
   `effectDistance` in `effectColor`, with `useGraphicAlpha`. `Outline` adds four copies, at
   (±x, ±y). The copies are drawn first, behind the original.
@@ -1567,6 +1569,297 @@ The press of rule 2 is not applied once only:
 7. **`Update`** (protected, virtual) has no measured effect: a subclass whose override does not
    call `base.Update()` gave the same values, anchors and `onValueChanged` for a value and a
    size set from code and for a press on the track held and released.
+
+### Legacy Text glyph placement (measured 2026-10-24)
+
+Found with Geyser Swapper (Workshop 3670972563): its converter panel is built from legacy
+`Text`s in `Resources.GetBuiltinResource<Font>("Arial.ttf")` (LegacyRuntime), at 13, 11 and
+10 points on the details screen's canvas (scale 0.86, so 11, 9 and 8 pixels). The ui_dumps
+match, but the shot differs by 4.5 %. The original draws the 9-pixel labels 2 to 3 pixels
+narrower per line. The cause is not rounding. On Linux the original draws LegacyRuntime's
+glyphs from **FreeSans**, not Liberation Sans. Every advance is still a whole pixel. Liberation
+Sans's rounded advances happen to equal FreeSans's at 8 pixels ("Choose a target type and
+start conversion." is 141 pixels in both). At 9 pixels they are 179 against the original's
+166, and Liberation's unrounded sum, 169.5, happens to be close to it.
+
+**Measured** with `PROBE_SCENARIO=legacytext` (tools/UnityProbe, `LegacyText.cs`, lines `LX …`,
+10 s into the main menu, about a minute; `PROBE_LX_PART=raster,ci,gen,anchors,align,fonts,text`
+picks parts). `tools/UnityProbe/lx-check.py rule LOG` checks every rule below against a log,
+and `lx-check.py face LOG FONT STYLE` checks the CharacterInfo table against a font file
+through FreeType. Fonts were hidden from the original by bind-mounting an empty folder over
+their directory in a user and mount namespace (`unshare --user --map-root-user --mount`).
+Measured on this machine: Ubuntu with fonts-freefont-ttf 20211204 (FreeSans "Version
+0412.4271"), DejaVu, Liberation 2.1.5, TLWG, Unifont, IPA Gothic, WenQuanYi and Ubuntu. These
+rules held for every case the probe logged:
+- 2090 CharacterInfos per style for Normal and Bold (95 ASCII characters at 5 to 26 pixels),
+  and 286 each for Italic and BoldAndItalic;
+- 3544 one-line generations: 15 strings at every font size and scale factor whose product is 5
+  to 25 pixels (scales 0.5, 0.6, 0.75, 0.8, 0.86, 0.9, 1, 1.1, 1.25, 1.5 and 2), with styles,
+  anchors and widths at the panel's sizes;
+- 680 aligned generations;
+- 480 `Text` components.
+
+#### The face
+
+- **LegacyRuntime has no font data.** Its `fontNames` is ["Arial"]. Its serialized metrics
+  are at `m_FontSize` 13: `m_Ascent` 11.7685546875, `m_Descent` −2.7548828125 and
+  `m_LineSpacing` 14.94873046875. `m_KerningValues` holds 21 pairs (below), and
+  `m_CharacterPadding` is 1. `Font.lineHeight` reads 14 and `ascent` 11.
+- **Glyphs come from the OS fonts.** The `fontNames` are tried in order, by exact family name
+  among the installed fonts (`Font.GetOSInstalledFontNames()`). When none is installed (Arial
+  never is here), a default chain is used. The chain is per glyph: each character comes from
+  the first face in the chain that has it. On this machine the chain is **FreeSans, then
+  DejaVu Sans, then Liberation Sans**:
+
+  | installed | LegacyRuntime's glyphs at 20 px, `!_~JNTjmW1` advances |
+  |---|---|
+  | all | FreeSans: 7,10,10,11,15,13,5,16,19,11 |
+  | FreeSans hidden | DejaVu Sans: 8,10,17,6,15,12,6,19,20,13 |
+  | FreeSans and DejaVu hidden | Liberation Sans: 6,11,12,10,14,12,4,17,19,11 |
+  | those three hidden | none: every advance 0 (other families were installed: Loma, Ubuntu, Unifont, WenQuanYi, IPA Gothic) |
+
+  - U+2125 and U+2140, which FreeSans lacks and DejaVu Sans has, came from DejaVu Sans
+    (advances 12 and 16 at 20 px) with FreeSans installed.
+  - U+0591, in Liberation Sans alone, came from Liberation Sans: advance 0, box −3..3 ×
+    −5..1.
+  - U+4E2D, in no face of the chain (WenQuanYi has it), came from none. It has advance 0 and an
+    empty glyph box −1..1 × −1..1, and `GetCharacterInfo` still returns true.
+  - `HasCharacter` returned true for all four.
+  - Faces outside the chain that are not installed here (Arial, Helvetica, …) could not be
+    told apart from absent links of the chain.
+- **The chain for other fonts.** Fonts made with `Font.CreateDynamicFontFromOSFont` follow the
+  same lookup. A missing name ("Arial", "Helvetica", "sans-serif", "Sans", "", a made-up
+  name) gives the FreeSans chain. A list takes its first installed name: ["NoSuchFont",
+  "Liberation Sans"] and ["Arial", "Liberation Sans"] gave Liberation Sans. Unlike
+  LegacyRuntime, such fonts take their line metrics from the face: "Arial" (FreeSans) reads
+  `lineHeight` 14 and `ascent` 10. LegacyRuntime keeps its serialized 14 and 11, with FreeSans
+  and with DejaVu Sans alike.
+- **Styles use the family's own faces.** Bold, Italic and BoldAndItalic glyphs are those of
+  FreeSansBold, FreeSansOblique and FreeSansBoldOblique, all 100 %. They are not synthesized
+  from the regular face.
+- On Windows "Arial" is installed, so the chain is not reached there. That was not measured
+  (no Windows runs).
+
+#### Glyph metrics (Font.GetCharacterInfo after RequestCharactersInTexture)
+
+For a face loaded at an integer pixel size p (the em is p pixels) with FreeType, without
+hinting:
+- `advance` is the face's advance rounded to the nearest whole pixel (26.6 value plus 32,
+  divided by 64, rounded down). The obsolete float `width` holds the same whole number: no
+  fractional advance is kept at any size, 5 to 26 pixels, in any style.
+- The box is the rendered bitmap's box **grown by one pixel on every side** (the
+  `m_CharacterPadding` of 1). `minX` = bitmap_left − 1, `maxX` = bitmap_left + width + 1,
+  `minY` = bitmap_top − rows − 1, `maxY` = bitmap_top + 1. `glyphWidth` and `glyphHeight` are
+  the grown sizes, and the UVs cover the grown box.
+  - A space has the box −1..1 × −1..1.
+  - At 9 px, "C": advance 6, −1..8 × −2..8. At 20 px, "!": advance 7, box 1..6.
+- With hinting, FreeType's boxes match only 951 of 2090. Liberation Sans's metrics match 834
+  of 2090.
+- Font size 0 means the font's own size, 13.
+
+#### Pixel size
+
+The text is laid out and rasterized at **p = floor(fontSize × scaleFactor)**, the product in
+float32. `TextGenerator.fontSizeUsedForBestFit` reports p, also without best fit: 9 for 11
+points at 0.86. Rasterized sizes, one new character each, read back by `GetCharacterInfo`:
+
+| fontSize × scale | p | fontSize × scale | p |
+|---|---|---|---|
+| 11 × 0.86 = 9.46 | 9 | 9 × 0.99 = 8.91 | 8 |
+| 10 × 0.86 = 8.6 | 8 | 9 × 1.01 = 9.09 | 9 |
+| 13 × 0.86 = 11.18 | 11 | 7 × 1.3 = 9.1 | 9 |
+| 10 × 0.95 = 9.5 | 9 | 20 × 0.43 = 8.6 | 8 |
+| 19 × 0.5 = 9.5 | 9 | 16 × 0.86 = 13.76 | 13 |
+
+The glyph was in the texture at p alone, in the requested style alone.
+
+#### Horizontal placement on a line
+
+With `adv(c)` and `minX(c)`/`maxX(c)` the CharacterInfo values at p and the style:
+- **Pen:** it starts at the line's start x, an integer (below). For each character: its
+  `UICharInfo.cursorPos.x` is the pen. Then, if the character and the one before it are a
+  kerning pair, the pen moves by the pair's kerning. The glyph's quad spans pen + `minX` to
+  pen + `maxX`. Then the pen moves by `adv`.
+  - So a kerned character's cursor is the position *before* its kerning, but its quad and
+    every later cursor include the kerning.
+  - `UICharInfo.charWidth` is `adv` alone, without kerning.
+  - The extra character info after the last character (the caret slot) is at the final pen,
+    with width 0.
+- **Kerning** is LegacyRuntime's serialized `m_KerningValues`, not the face's kerning (FreeSans's
+  `kern` and `GPOS` pairs, such as AV −30/1000, have no effect). Each pair is −1 pixel at
+  `m_FontSize` 13, scaled to p and rounded to the nearest integer, so round(−p / 13): 0 at 5
+  and 6 px, −1 at 7 to 19 px, −2 at 20 to 25 px. The 21 pairs, by character:
+  `F,` `F.` `P,` `P.` `T,` `T.` `T:` `T;` `Ta` `Tc` `Te` `To` `Ts` `V,` `V.` `Y,` `Y-` `Y.` `Ye`
+  `Yo` `Yq`.
+  - The same pairs apply in Bold and Italic ("Ta": −1 at 8, 9 and 11 px).
+- **No quad for a space** (U+0020): the space advances the pen and has a UICharInfo, but adds no
+  vertices. Other characters, including those with empty bitmaps, get a quad (U+4E2D's empty
+  box, above).
+- **The preferred width** (`GetPreferredWidth`, `rectExtents.width` with `updateBounds`) is the
+  final pen of the widest line, an integer number of pixels. `Text.preferredWidth` divides it by
+  the canvas scale: "Geyser Converter" at 11 pt on 0.86 is 69 px, 80.23256 units.
+
+**The panel's labels** (UpperLeft, from x 0):
+
+| text | pt | p | cursors x (last: the end) | width |
+|---|---|---|---|---|
+| Choose a target type and start conversion. | 11 | 9 | 0,6,11,16,21,25,30,32,37,39,42,47,50,55,60,63,65,68,72,77,82,84,89,94,99,101,105,108,113,116,119,121,126,131,136,140,145,148,152,154,159,164,166 | 166 |
+| Choose a target type and start conversion. | 10 | 8 | 0,6,10,14,18,22,26,28,32,34,36,40,43,47,51,53,55,57,61,65,69,71,75,79,83,85,89,91,95,98,100,102,106,110,114,118,122,125,129,131,135,139,141 | 141 |
+| Choose a target type and start conversion. | 13 | 11 | 0,8,14,20,26,31,37,40,46,49,52,58,62,68,74,77,80,83,88,94,100,103,109,115,121,124,129,132,138,142,145,148,154,160,166,171,177,181,186,188,194,200,203 | 203 |
+| Target type | 11 | 9 | 0,6,10,13,18,23,26,28,31,35,40,45 (charWidth 6,5,3,5,5,3,2,3,4,5,5,0: "Ta" kerned −1) | 45 |
+| Target type | 10 | 8 | 0,5,8,11,15,19,21,23,25,29,33,37 | 37 |
+| Select type | 11 | 9 | 0,6,11,13,18,23,26,28,31,35,40,45 | 45 |
+| Geyser Converter | 13 | 11 | 0,8,14,19,24,30,34,37,45,51,57,62,68,72,75,81,85 | 85 |
+| Geyser Converter | 11 | 9 | 0,7,12,16,20,25,28,30,36,41,46,50,55,58,61,66,69 | 69 |
+| Geyser Converter | 10 | 8 | 0,6,10,14,18,22,25,27,33,37,41,45,49,52,54,58,61 | 61 |
+| AVAWAYTaToLTPAFaVa | 20 (scale 1) | 20 | 0,13,26,39,58,71,85,98,107,120,129,140,153,166,179,191,202,215,226 ("Ta", "To": −2) | 226 |
+
+#### Vertical metrics
+
+From LegacyRuntime's serialized values scaled to p (k = p / 13), rounded to the nearest
+integer:
+- ascent a = round(11.7685546875 k) and descent d = round(2.7548828125 k);
+- the block height of a line is B = a + d, and the preferred height of one line is B;
+- the baseline is a below the line's top. A quad's y spans baseline + `minY` to
+  baseline + `maxY`, so every vertex y is an integer;
+- the line pitch is P = round(14.94873046875 k); the next line's top is P lower, and n lines
+  are (n − 1) P + B high;
+- `UILineInfo.height` is floor(14.94873046875 k), and `UILineInfo.leading` is P − B.
+
+| p | a | d | B | P | UILineInfo.height | leading |
+|---|---|---|---|---|---|---|
+| 5 | 5 | 1 | 6 | 6 | 5 | 0 |
+| 6 | 5 | 1 | 6 | 7 | 6 | 1 |
+| 7 | 6 | 1 | 7 | 8 | 8 | 1 |
+| 8 | 7 | 2 | 9 | 9 | 9 | 0 |
+| 9 | 8 | 2 | 10 | 10 | 10 | 0 |
+| 10 | 9 | 2 | 11 | 11 | 11 | 0 |
+| 11 | 10 | 2 | 12 | 13 | 12 | 1 |
+| 12 | 11 | 3 | 14 | 14 | 13 | 0 |
+| 13 | 12 | 3 | 15 | 15 | 14 | 0 |
+| 14 | 13 | 3 | 16 | 16 | 16 | 0 |
+| 16 | 14 | 3 | 17 | 18 | 18 | 1 |
+| 20 | 18 | 4 | 22 | 23 | 22 | 1 |
+| 25 | 23 | 5 | 28 | 29 | 28 | 1 |
+
+The heights, leadings and baselines are measured at every p from 5 to 25. The pitch is
+measured at 8, 9 and 11 (wrapped lines), and the rest follow from the rule.
+
+#### Alignment and the generation extents
+
+In pixels, the extents are `generationExtents` × `scaleFactor`, plus 0.0001 on each axis
+(`rectExtents` reads 100.0001 × 30.0001 for 100 × 30). With W and H these padded sizes, the rect
+is x from xMin = −pivot.x × W, and y down from yMax = (1 − pivot.y) × H. Let L be the line's
+width (its final pen) and B the block height (several lines: (n − 1) P + B). Two roundings
+are used:
+- Rx(v) = floor(v + 0.5);
+- Ry(v) = ceil(v − 0.5), that is, ties toward −y.
+
+| anchor | line start x |
+|---|---|
+| Left | Rx(xMin) |
+| Center | Rx(xMin + W / 2) − ceil(L / 2) |
+| Right | Rx(xMin + W) − L |
+
+| anchor | block top y (the first line's top) |
+|---|---|
+| Upper | Ry(yMax) |
+| Middle | Ry(yMax − (H − B) / 2) |
+| Lower | Ry(yMax − H + B) |
+
+- A centred line rounds the centre first. "Target type" (L 63) in W 100.0001, pivot 0: Rx(50.00005)
+  − 32 = 18, where (W − L) / 2 = 18.50005 would give 19. At W 101.0001 it starts at 19.
+- Without the 0.0001 the rule fails at exact halves. UpperLeft at pivot (1, 0) in w 100.5 starts
+  at −101, where Rx(−100.5) would be −100. Upper at pivot (0.5, 0.5) in h 31 puts the top at
+  16, where Ry(15.5) would be 15.
+- **`updateBounds` true:** the anchor has no effect. The extents become the text's own size
+  (L × the block height, without the 0.0001), and the pivot then places that box. With
+  pivot (0, 1) every anchor starts at (0, 0). With pivot (0.5, 0.5) "Target type" at 13 px
+  (L 63) starts at x −31 = Rx(−31.5). `rectExtents` reads (0, 0, L, block height).
+  With `updateBounds` false it reads (0, 0, W, H). The x and y of `rectExtents` are 0 in every
+  case.
+- `generateOutOfBounds` made no difference in these one-line cases.
+- `Text` lays out with the second behaviour (aligned): rect size × canvas scale as the extents,
+  and the rect's pivot. On the 0.86 canvas a centred 232 × 17 rect gives:
+  - MiddleLeft: start −100 (Rx(−99.76005));
+  - MiddleCenter: −23 for "Target type" (L 45), −35 for "Geyser Converter" (69) and −83 for
+    "Choose a target type and start conversion." (166).
+
+  The mesh the Text hands its `CanvasRenderer` is the generator's vertices × (1 / scale), plus
+  the pixel-perfect rounding offset on a pixel-perfect canvas (see "Text (legacy)" above). On
+  the 0.86 canvas −101 becomes −117.44186 units.
+
+#### Best fit (`resizeTextForBestFit`), as observed
+
+`fontSizeUsedForBestFit` is a pixel size. The candidates are point sizes from
+`resizeTextMinSize` to `resizeTextMaxSize`, each laid out at floor(points × scale). For
+"Choose a target type and start conversion.", wrapping, in a box 20 units high:
+
+| pt max | scale | width (units) | used (px) |
+|---|---|---|---|
+| 11 | 0.86 | 60 / 100 / 400 | 5 / 7 / 9 |
+| 10 | 0.86 | 60 / 100 / 400 | 5 / 7 / 8 |
+| 13 | 0.86 | 60 / 100 / 400 | 5 / 7 / 11 |
+| 11 | 1 | 60 / 100 / 400 | 6 / 9 / 11 |
+| 12 | 0.75 | 60 / 100 / 400 | 4 / 7 / 9 |
+
+`GetPreferredWidth` and `GetPreferredHeight` with best fit on report the size without best fit
+(166 and 40 for the first row). The fitting criterion itself was not pinned down.
+
+#### Where ours deviated (2026-10-24, same probe)
+
+The diff is `lx-check.py diff ORIG OURS`. Ours lacks `CharacterInfo` and `GetCharacterInfo`:
+the `raster`, `ci` and `fonts` parts throw `TypeLoadException`.
+- The face: ours always draws LegacyRuntime from Liberation Sans.
+- Kerning: ours applies `m_KerningValues` only to non-dynamic fonts.
+- Quads: ours uses the unpadded bitmap box.
+- Baseline: ours places it at the unrounded scaled ascent (y −3.9729 where the original has
+  integers).
+- Line metrics: ours uses unrounded heights (preferred height 10.349 at 9 px where the original
+  has 10).
+- Alignment: ours does not round the line start. With `updateBounds` true, ours honours the
+  anchor, and its `rectExtents` y is −height.
+- `fontSizeUsedForBestFit`: ours reports the point size (11 where the original reports 9).
+
+Of the 4246 generations both logged, none matched in its quads.
+
+#### Acceptance tests
+
+Inputs are LegacyRuntime, with FreeSans as the face (skip when FreeSans 0412.4271 is not
+installed), UpperLeft, Overflow, pivot (0, 1), rich text on and `updateBounds` true unless
+given.
+1. **Pixel size:** fontSize 11, scale 0.86 → `fontSizeUsedForBestFit` 9. 10 × 0.95 → 9. 9 × 0.99
+   → 8. 16 × 0.86 → 13.
+2. **Panel labels:** each row of the table "The panel's labels" gives those cursors x (the
+   `UICharInfo` list, caret slot included) and that preferred width.
+3. **Kerning:** "Target type" at 11 × 0.86 → charWidth 6,5,3,5,5,3,2,3,4,5,5,0 and cursors
+   0,6,10,13,…. The quad of "a" starts at 6 − 1 + `minX`("a") = 4, and its cursorPos is 6.
+   "AVAWAYTaToLTPAFaVa" at 20 × 1 → width 226, cursors as in the table. "Ta" at 5 and 6 px →
+   no kerning; at 7 → −1.
+4. **Spaces:** "Target type" has 12 character infos and 10 quads (40 vertices), and "Choose a
+   target type and start conversion." 43 infos and 36 quads.
+5. **CharacterInfo:** 'C' at 9 px → advance 6, minX −1, maxX 8, minY −2, maxY 8. ' ' at 9 px →
+   advance 2, box −1..1 × −1..1. '!' at 20 px → advance 7, minX 1, maxX 6. Size 0 equals
+   size 13 ('A': advance 9, −1..10 × −1..11). All 2090 Normal entries equal
+   FreeType unhinted metrics as `lx-check.py face` computes them.
+6. **Fallback glyphs:** U+2125 at 20 px → advance 12 (DejaVu Sans). U+4E2D → advance 0, box
+   −1..1 × −1..1, `GetCharacterInfo` true.
+7. **Vertical:** at 9 px one line → preferred height 10, baseline 8 below the top, every quad
+   y an integer, `UILineInfo` height 10 and leading 0. At 11 px → 12, height 12, leading 1, and
+   3 wrapped lines 38 high with tops 0, −13, −26.
+8. **Alignment** (`updateBounds` false, fontSize 13, scale 1, extents w × h):
+   - "Target type" (L 63), pivot (0, 1): UpperCenter w 100 → 18, w 100.875 → 18, w 101 → 19;
+     UpperRight w 100.375 → 37, w 100.5 → 38; LowerLeft h 30.375 → top −15, h 30.5 → −16;
+     MiddleLeft h 31.875 → −8, h 32 → −9.
+   - Pivot (0.5, 0.5): UpperLeft w 100.875 → −50, w 101 → −51; UpperCenter → −32 for any w;
+     MiddleLeft → top 7 for any h; UpperRight w 101 → −12.
+   - Pivot (1, 0): UpperCenter w 101 → −83; UpperLeft w 100.5 → −101.
+   - "Steam Vent" (L 67): UpperCenter pivot (0, 1), w 100 → 16; pivot (1, 0), w 101 → −85.
+9. **updateBounds true:** any anchor in 201.3 × 30 at pivot (0, 1) → start (0, 0), and
+   `rectExtents` (0, 0, 63, 15) for "Target type" at 13 px.
+10. **Text:** a `Text` of "Target type", 11 pt, MiddleCenter, in a centred 232 × 17 rect on a
+    canvas at scale 0.86 that is not pixel perfect → generator cursors start at −23,
+    `preferredWidth` 52.32558 (45 / 0.86), and mesh x = generator x / 0.86.
 
 ### Measured on the shipped package
 

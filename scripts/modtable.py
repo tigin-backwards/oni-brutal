@@ -1,7 +1,18 @@
 #!/usr/bin/env python3
 """scripts/modtable.py [CATALOG.tsv] > docs/MOD_COMPATIBILITY.md
 The compatibility table from onimaxxing's catalog ranks (a TSV of rank, id, subscriptions, flags,
-title; default scripts/mod-catalog.tsv) and what our runs recorded:
+title; default scripts/mod-catalog.tsv) and what our runs recorded.
+
+The catalog TSV comes from onimaxxing's catalog.json (format 2, column arrays): a mod's rank is its
+place among all the catalog's mods by subscriptions, most first (a stable sort, so ties keep the
+catalog's order); its flags are analysis.breaks (crashesAtStartup, mayCrashInPlay), else
+notLoading, else empty ("unanalysed" for a mod the catalog has no analysis of). Ranks 1-750 are
+all there, flagged ones included. Beyond 750 the TSV holds only the mods that work in the
+original as far as onimaxxing knows: those flagged notLoading, crashesAtStartup or malware are
+left out, down to the rank (2274) where the mods kept, ranks 1-750 counted too, make 2000.
+Every rank in the TSV is listed in the table (LAST_RANK is its highest).
+
+What our runs recorded:
 - the sweeps' sweep-*.txt ID lists and modtable-*.tsv results in out/ (or ONI_SWEEP_DIR; in a
   worktree whose out/ has none, the main checkout's out/);
 - the spec results in tests/e2e/results/*.json (or ONI_RESULTS_DIR), written by
@@ -82,7 +93,8 @@ if len(sys.argv) > 2: sys.exit(__doc__)
 catalog = sys.argv[1] if len(sys.argv) == 2 else os.path.join(ROOT, 'scripts', 'mod-catalog.tsv')
 cat = [l.rstrip('\n').split('\t') for l in open(catalog, encoding='utf-8')]
 by_id = {r[1]: r for r in cat}
-LAST_RANK = 750
+LAST_RANK = max(int(r[0]) for r in cat)
+FULL_RANKS = 750  # every mod up to this rank; beyond it, those that work in the original
 results = read_results(RESULTS)
 
 def ids(pattern):
@@ -291,8 +303,8 @@ broken.update({
     '1729794261': 'broken upstream: its light class `PixelPack2` lacks three methods the game\'s interfaces now have (`ISliderControl.GetSliderTooltip(int)`, `ISidescreenButtonControl.SetButtonTextOverride` and `HorizontalGroupID`), so the original fails its Color Ceiling Light in RegisterBuilding and the game\'s prefab setup in `Assets.OnPrefabInit` ("VTable setup of type OniLight.PixelPack2 failed"), and the error dialog opens as the game starts; ours happens to load it: Mono checks a class\'s interface methods when it sets up the class\'s vtable at first use, where ours gives the class the methods it lacks, which throw only when called (ARCHITECTURE D22)',
 })
 loads_in_ours = {'1729794261'}
-unranked = {'3427974009': 'Synchronized Building Groups', '2977728791': 'Preset Manager', '3775625682': 'LocalCanvas-本地画框', '3781314647': 'Morphs Not Included',
-            '3281716506': 'Mod Preset Manager (Light) [MPML]', '3746027329': 'Geyser Tab', '3671379574': 'Resource Dashboard'}
+# Titles of played mods the catalog TSV does not rank (none since it reaches rank 2274).
+unranked = {}
 # Worldgen mods no sweep ran, as their specs' runs of ours found them (id -> (loads, colony)): a
 # spec that gets to its new game loaded a colony first; Single Asteroid Clusters' worlds log
 # errors while the game loads them, which open the error dialog at the main menu in ours, and
@@ -323,6 +335,8 @@ def status(mid, flags):
         return Y, Y, N, not_playable[mid]
     if mid in broken:
         return X, X, N, broken[mid] + ('' if mid in loads_in_ours else ' (same in the original)')
+    if flags == 'unanalysed':
+        return N, N, N, 'not analysed by onimaxxing (no malware check); not tested'
     if flags:
         return N, N, N, f'flagged by onimaxxing ({flags}); not tested'
     if mid in worldgen:
@@ -363,14 +377,18 @@ for mid in list(played) + [m for m in results if m not in played]:
 
 print(f'''# Mod compatibility
 
-Which Workshop mods have been tried in this player, by popularity: the {LAST_RANK} most-subscribed
-in [onimaxxing's catalog](https://onimaxxing.com/mods), and mods players reported. Worldgen mods are
-played with functional expectations (their worlds generate with their content), not identical layouts.
+Which Workshop mods have been tried in this player, by popularity in
+[onimaxxing's catalog](https://onimaxxing.com/mods): the {FULL_RANKS} most-subscribed, then down to
+rank {LAST_RANK} those the catalog flags neither as broken (not loading, crashing at startup) nor
+as malware, the 2000 that work in the original game by the catalog's analysis; and mods players
+reported.
+Worldgen mods are played with functional expectations (their worlds generate with their content),
+not identical layouts.
 
 **Columns:**
 - **Loads:** reaches the main menu with no error of ours.
 - **Colony:** loaded with its batch of about 25 mods and played 90 seconds of a Spaced Out colony,
-  with no error of ours: U57 (late game) for ranks 1–500, 2minnow (mid game) for 501–750.
+  with no error of ours: U57 (late game) for ranks 1–500, 2minnow (mid game) from 501.
 - **Played:** a save played with the mod, its screens and logs compared with the original player.
   ⚠️ means played with a small known difference, its issue linked.
 

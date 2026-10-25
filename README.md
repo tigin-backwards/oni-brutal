@@ -97,6 +97,9 @@ unless you turn them on. Choose them in **Moono Tweaks** on the main menu. Launc
 Saves from the original game should load, and saves made here should still load in the
 original game (including ones written with the `fast-save-compression` tweak).
 
+Saves come out about 14% larger: the `fast-save-compression` tweak compresses them faster but a
+little less tightly, which takes seconds off every save.
+
 ## Mod compatibility
 
 Most mods should work, since the game's code and its Harmony load as shipped. See

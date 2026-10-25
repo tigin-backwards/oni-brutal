@@ -389,7 +389,9 @@ installs get developer checks subscribers never see).
   Mono; where Mono fails as soon as the game checks the class against the interface, ours fails
   only when the missing method is called (ARCHITECTURE D22).
 - **A game class's nested type a mod names that the game no longer has.** Mono binds it to the
-  class's last nested type once that class's nested types are loaded (its log says "TypeRef
-  ResolutionScope not yet handled"); ours throws TypeLoadException, so U&F-Translate Fix stops
-  loading in Chinese where the original goes on.
+  class's last nested type when something listed that class's nested types before (its log says
+  "TypeRef ResolutionScope not yet handled") and fails it otherwise. The game lists those of its
+  strings (STRINGS) before it loads mods, and ours binds a missing one there as Mono does
+  (ARCHITECTURE D32: U&F-Translate Fix); elsewhere ours fails it, where Mono binds it only after
+  something (a mod's reflection, say) listed the class's nested types.
 - **Rephysicalized:** the reported build was the author's development build; not tracked.''')

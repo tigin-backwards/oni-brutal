@@ -42,6 +42,9 @@ namespace OniBrutal.Tests
             ["GRAYSTROKE REGULAR SDF"] = ("sharedassets0.assets", 20032),
             ["GRAYSTROKE OUTLINE SDF"] = ("sharedassets0.assets", 20031),
             ["NotoSansCJKjp-Regular"] = ("sharedassets0.assets", 20153),
+            ["NotoSansCJKkr-Regular"] = ("sharedassets0.assets", 20154),
+            ["NotoSansCJKsc-Regular"] = ("sharedassets0.assets", 20155),
+            ["NotoSansThai-Regular"] = ("resources.assets", 194),
             ["oni_sprite_assets"] = ("resources.assets", 177),
             ["EmojiOne"] = ("resources.assets", 178),
         };

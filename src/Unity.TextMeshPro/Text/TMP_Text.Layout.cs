@@ -33,6 +33,10 @@ namespace TMPro
             // Checked against the rect's height: every character but white space (a tab is
             // checked, though it is not visible).
             public bool Checked;
+            // Space-like white space or a line break from the character's own font (not a
+            // fallback): after a visible character on its line it takes no part in the line's
+            // ascender and descender (Excluded, set with the line), and reports the line's.
+            public bool OwnWhitespace, Excluded;
             // A soft hyphen's advance: it takes no room, and is drawn only where a line breaks
             // after it (0: not a soft hyphen).
             public float SoftHyphen;
@@ -521,11 +525,14 @@ namespace TMPro
             bool onlySoftHyphens = true;
             for (int i = line.First; i <= line.Last; i++)
                 if (pl[i].SoftHyphen <= 0f) { onlySoftHyphens = false; break; }
+            bool seenVisible = false;
             float asc = float.NegativeInfinity, desc = float.PositiveInfinity;
             for (int i = line.First; i <= line.Last; i++)
             {
                 ref var p = ref pl[i];
-                if (!(p.SoftHyphen > 0f && !p.Visible && !onlySoftHyphens))
+                bool excluded = p.OwnWhitespace && seenVisible;
+                seenVisible |= p.Visible;
+                if (!(p.SoftHyphen > 0f && !p.Visible && !onlySoftHyphens) && !excluded)
                 {
                     asc = Mathf.Max(asc, p.Ascender);
                     if (p.SoftHyphen <= 0f || onlySoftHyphens) desc = Mathf.Min(desc, p.Descender);
@@ -557,15 +564,27 @@ namespace TMPro
             bool onlySoftHyphens = true;
             for (int i = line.First; i <= line.Last; i++)
                 if (pl[i].SoftHyphen <= 0f) { onlySoftHyphens = false; break; }
+            // A line's ascender and descender are those of its visible characters' fonts: white
+            // space of its own font after them adds nothing (measured on the shipped package:
+            // the space in "Единицы температуры" in NotoSansCJKsc, its letters from the
+            // NotoSans fallback). White space from a fallback still counts, and so does white
+            // space before the line's first visible character (" A" in a rect 0 high does not
+            // fit at the space).
+            bool seenVisible = false;
             for (int i = line.First; i <= line.Last; i++)
             {
                 ref var p = ref pl[i];
+                p.Excluded = p.OwnWhitespace && seenVisible;
+                seenVisible |= p.Visible;
                 if (p.SoftHyphen > 0f && !p.Visible && !onlySoftHyphens) continue;
-                if (p.SoftHyphen <= 0f || onlySoftHyphens) fitDesc = Mathf.Min(fitDesc, p.Descender);
-                asc = Mathf.Max(asc, p.Ascender);
-                desc = Mathf.Min(desc, p.Descender);
+                if (!p.Excluded)
+                {
+                    if (p.SoftHyphen <= 0f || onlySoftHyphens) fitDesc = Mathf.Min(fitDesc, p.Descender);
+                    asc = Mathf.Max(asc, p.Ascender);
+                    desc = Mathf.Min(desc, p.Descender);
+                    maxAscent = Mathf.Max(maxAscent, p.Ascender);
+                }
                 gap = Mathf.Max(gap, p.Gap);
-                maxAscent = Mathf.Max(maxAscent, p.Ascender);
                 if (p.Checked) line.LastChecked = i;
                 if (p.TabStop > 0f)
                 {
@@ -632,6 +651,9 @@ namespace TMPro
             uint code = el.Unicode;
             bool sizedWhitespace = el.Kind == ElementKind.Character && code != 9 && (IsWhitespace(code) || IsLineBreak(code))
                 && (state.SizeScale != 1f || state.SizeOffset != 0f);
+            var primary = state.Font ?? m_fontAsset;
+            p.OwnWhitespace = el.Kind == ElementKind.Character && code != 9 && (IsWhitespace(code) || IsLineBreak(code))
+                && (el.Asset == null || el.Asset == primary);
             if (sizedWhitespace)
             {
                 float tagged = PointSizeOf(state, baseSize);

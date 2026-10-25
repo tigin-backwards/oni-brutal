@@ -198,8 +198,11 @@ namespace TMPro
             while (lastLine >= 0 && s_Lines[lastLine].LastChecked < 0) lastLine--;
             if (lastLine < 0) return NextHundredth(m_margin.y + m_margin.w);
             ref var last = ref s_Lines[lastLine];
-            double height = (double)s_Lines[0].Ascender - ((double)last.Baseline + last.Descender);
-            return NextHundredth(height + m_margin.y + m_margin.w);
+            // The height is a float, as the widest line's length is (measured on the shipped
+            // package: NotoSansCJKjp 24 pt's line is 35.5499992 high and gives 35.55, where the
+            // same difference in double, 35.5500002, would give 35.56).
+            float height = s_Lines[0].Ascender - (last.Baseline + last.Descender);
+            return NextHundredth((double)height + m_margin.y + m_margin.w);
         }
 
         public virtual float flexibleWidth => -1f;

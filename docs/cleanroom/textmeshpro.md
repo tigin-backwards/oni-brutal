@@ -2226,6 +2226,15 @@ and font asset. `tools/UnityProbe/th-check.py diff ORIG OURS` lists the texts th
     holds Cyrillic): 84 of the 368 differences.
   - Not measured: a line of white space alone in such a text, a line whose only visible
     characters are the primary font's, and fallbacks that are larger than the primary font.
+- **Implemented.** This implementation follows both rules: it takes the line's height as a
+  float before the rounding, and leaves white space of the text's own font after a visible
+  character out of its line's ascender and descender (white space before the line's first
+  visible character still counts: " A" in a rect 0 high does not fit at the space, as measured
+  under "Overflow at white space"). In the same probe `th-check.py diff` finds 12 of the 3,528
+  texts differing, the widths below; every height, the first line's ascender, descender and
+  baseline, and each character's ascender and descender match. `lineInfo.lineHeight` still
+  differs in 1,864 texts (17.765625 here for 17.75 in NotoSansCJKjp 12 pt "常规"), which this
+  section does not cover.
 - **Also seen** (as in "Preferred sizes to the hundredth"): widths a hundredth apart where a
   pen falls within a float step of a hundredth, NotoSansCJKkr 18 pt "온도 단위" 70.35 shipped
   and 70.36 here, NotoSansCJKjp 24 pt "Ag" 28.06 and 28.05: 12 texts, 4 of them with the

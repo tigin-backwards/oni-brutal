@@ -211,8 +211,11 @@ namespace TMPro
                     // shipped package).
                     ci.xAdvance = (float)((double)pen + p.Advance) + offsetX;
                     ci.baseLine = baselineRel + offsetY;
-                    ci.ascender = (float)((double)line.Baseline + p.Ascender) + offsetY;
-                    ci.descender = (float)((double)line.Baseline + p.Descender) + offsetY;
+                    // White space of its own font after a visible character reports the line's
+                    // ascender and descender (measured on the shipped package).
+                    bool lineMetrics = p.Excluded;
+                    ci.ascender = (float)((double)line.Baseline + (lineMetrics ? line.Ascender : p.Ascender)) + offsetY;
+                    ci.descender = (float)((double)line.Baseline + (lineMetrics ? line.Descender : p.Descender)) + offsetY;
                     float x0, x1, y0, y1;
                     // A soft hyphen that is not drawn has its corners at its origin.
                     if (p.SoftHyphen > 0f && !p.Visible)

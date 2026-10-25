@@ -1,0 +1,65 @@
+{
+ "spec": "mods/3374671941-uf-translate-fix.yaml",
+ "mods": [
+  "3374671941"
+ ],
+ "verdict": "failed",
+ "why": "a run of ours failed",
+ "findings": [],
+ "note": "in the game's Simplified Chinese (language zh_klei) the original loads and the mod's checks pass; ours stops loading: its MockRoomConstraints names STRINGS.ROOMS.CRITERIA.DECOR20, which the game no longer has, and Mono binds that missing nested type to CRITERIA's last nested class (POWERBUILDING, with the warning TypeRef ResolutionScope not yet handled) where CoreCLR throws TypeLoadException, so its type initializer fails, the Pressure Door fails to register and the game quits",
+ "updated": "2026-10-25",
+ "commit": "c69d728",
+ "mod_dlls": {
+  "3374671941": {
+   "TranslateFixMod.dll": "c86fb43d209d16438d0b3372d0232299112495fc81e1213f5a5ecbc003689402"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-073201-c08076c9",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T07:32:01",
+    "lane": 16,
+    "signatures": 1
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-074038-6a100f07",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-25T07:40:38",
+    "lane": 17,
+    "reasons": [
+     "step start: the player exited (1) while loading",
+     "4 log signature(s) the original lacks",
+     "required log lines missing: --->统计翻译次数 RoomConstraints :52  52 42"
+    ],
+    "reference_run": "20261025-073201-c08076c9",
+    "new_signatures": 4,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261025-074038-6a100f07",
+    "index": 2,
+    "verdict": "fail",
+    "date": "2026-10-25T07:40:44",
+    "lane": 16,
+    "reasons": [
+     "step start: the player exited (1) while loading",
+     "4 log signature(s) the original lacks",
+     "required log lines missing: --->统计翻译次数 RoomConstraints :52  52 42"
+    ],
+    "reference_run": "20261025-073201-c08076c9",
+    "new_signatures": 4,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

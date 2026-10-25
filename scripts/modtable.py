@@ -381,4 +381,8 @@ installs get developer checks subscribers never see).
 - **A mod class missing a method of a game interface** (built for an older game) loads, as on
   Mono; where Mono fails as soon as the game checks the class against the interface, ours fails
   only when the missing method is called (ARCHITECTURE D22).
+- **A game class's nested type a mod names that the game no longer has.** Mono binds it to the
+  class's last nested type once that class's nested types are loaded (its log says "TypeRef
+  ResolutionScope not yet handled"); ours throws TypeLoadException, so U&F-Translate Fix stops
+  loading in Chinese where the original goes on.
 - **Rephysicalized:** the reported build was the author's development build; not tracked.''')

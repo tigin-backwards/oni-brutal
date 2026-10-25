@@ -148,17 +148,21 @@ Exact by construction, each part with a verify mode (`ONI_TWEAK_VERIFY=1`):
 Each part steps aside for the frame when another Harmony owner patches what it replaces (the
 patched method then runs).
 
+Two sweeps with the tweak (the second on the final code); where they differ, both are given.
+
 | Stopwatch, ms a frame | U57 before | U57 after | 2minnow before | 2minnow after |
 |---|---|---|---|---|
-| `Infrared.Update` (temperature) | 10.44 | 6.03 | 6.53 | 3.81 |
-| `Power.Update` | 1.28 | 0.77 | 1.47 | 0.92 |
+| `Infrared.Update` (temperature) | 10.44 | 6.03, 5.98 | 6.53 | 3.81, 3.97 |
+| `Power.Update` | 1.28 | 0.77, 0.95 | 1.47 | 0.92, 0.93 |
 | · of which `GetWattsNeededWhenActive` | 0.52 | 0.07 | 0.58 | 0.07 |
-| `TileMode.Update` (materials) | 4.05 | 3.78 | 4.79 | 3.48 |
-| `Decor.Update` | 4.32 | 3.60 | 2.17 | 1.90 |
-| `ConduitMode.Update` (liquid pipes) | 1.56 | 1.64 | 0.87 | 0.72 |
+| `TileMode.Update` (materials) | 4.05 | 3.77, 3.81 | 4.79 | 3.48, 3.71 |
+| `Decor.Update` | 4.32 | 3.60, 4.03 | 2.17 | 1.90, 1.93 |
+| `ConduitMode.Update` (liquid pipes) | 1.56 | 1.64, 2.00 | 0.87 | 0.72, 0.91 |
 
-Main-thread time with the temperature overlay open, against no overlay: U57 +12.7 → +8.3 ms,
-2minnow +9.6 → +4.3 ms. The pipe and conveyor modes' own updates did not change measurably:
+Main-thread time with the temperature overlay open, against no overlay: U57 +12.7 → +8.3 and +9.0 ms,
+2minnow +9.6 → +4.3 and +5.4 ms. The other holds' main-thread times moved by up to
+±3 ms between the sweeps, overlays the tweak does not touch included, so only the stopwatch
+numbers above and the temperature overlay's gain stand out from the noise. The pipe and conveyor modes' own updates did not change measurably:
 their cost is the component lookups above, which the tweak does not keep.
 
 Verified on U57 (every overlay in turn, 300 frames each, unpaused): 27 million kept positions,

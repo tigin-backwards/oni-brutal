@@ -453,8 +453,8 @@ unchanged.
   with targets: their calls to `AddTargetIfVisible`, `RemoveOffscreenTargets` and
   `UpdateHighlightTypeOverlay` run the tweak's equal loops, passing targets already shown and
   keeping each target's transform, controller and fixed position. Paused, stopwatch, U57:
-  temperature 10.4 → 6.0 ms a frame, power 1.28 → 0.77, materials 4.05 → 3.78, decor
-  4.32 → 3.60; verified with ONI_TWEAK_VERIFY across every overlay (27 million kept positions,
+  temperature 10.4 → 6.0 ms a frame, power 1.28 → 0.77–0.95, materials 4.05 → 3.8,
+  decor 4.32 → 3.6–4.0; verified with ONI_TWEAK_VERIFY across every overlay (27 million kept positions,
   0 wrong). Details and Colony Performance Fixes' approximate equivalents in
   docs/research/overlays.md.
 

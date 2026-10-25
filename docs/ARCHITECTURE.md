@@ -447,7 +447,12 @@ past the boot checkpoint needs a Steam client logged in with an account that own
   instantiations, methods of its generic types, a virtual call reaching every virtual method of
   that name) start with a probe that throws `StackOverflowException`, with Mono's message, once
   `RuntimeHelpers.TryEnsureSufficientExecutionStack` fails; the probe is hidden from stack
-  traces. A recursion through game methods or another assembly is not covered, nor one in the
+  traces. That check wants 128 KB of stack left, so it always fails on a thread whose stack is
+  128 KB, as the game's JobManager workers (and fast-jobs') are: issue #15's Stats Unlimited
+  threw from its options getter on every worker where Mono ran it. On a stack of 256 KB or less
+  (its bounds from `pthread_getattr_np` or `GetCurrentThreadStackLimits`) the probe throws only
+  once less than half of it is left; 64 KB is enough to throw, and the handler runs at the
+  catching frame. A recursion through game methods or another assembly is not covered, nor one in the
   game's own code. A mod that cannot be rewritten loads unchanged. `--check-types` runs a mod's
   self and mutual recursions without end.
 - **D29 Float-to-integer conversions out of range.** Mono converts a float to an integer with

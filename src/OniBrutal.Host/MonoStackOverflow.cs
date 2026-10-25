@@ -29,8 +29,57 @@ namespace OniBrutal.Host
         [System.Diagnostics.StackTraceHidden]
         public static void Probe()
         {
-            if (!RuntimeHelpers.TryEnsureSufficientExecutionStack()) throw new StackOverflowException(MonoMessage);
+            if (!RuntimeHelpers.TryEnsureSufficientExecutionStack() && !SmallStackHasRoom()) throw new StackOverflowException(MonoMessage);
         }
+
+        /// TryEnsureSufficientExecutionStack wants 128 KB left, so on a thread whose whole stack
+        /// is 128 KB or less it always fails: the game's JobManager workers (and fast-jobs')
+        /// have 128 KB, and a probed method they ran threw at once (issue #15) where Mono ran
+        /// it. On a stack of 256 KB or less, the limit is half the stack instead (64 KB left
+        /// on a 128 KB worker: enough to throw, and the handler runs where the catch is).
+        [ThreadStatic] static nuint smallStackLimit;  // 0: not read yet; MaxValue: no small stack
+
+        static unsafe bool SmallStackHasRoom()
+        {
+            nuint limit = smallStackLimit;
+            if (limit == 0) smallStackLimit = limit = SmallStackLimit();
+            byte here = 0;
+            return (nuint)(&here) > limit;
+        }
+
+        internal const int SmallStack = 256 * 1024;
+
+        static unsafe nuint SmallStackLimit()
+        {
+            nuint low = 0, size = 0;
+            if (OperatingSystem.IsWindows())
+            {
+                GetCurrentThreadStackLimits(out low, out var high);
+                size = high - low;
+            }
+            else if (OperatingSystem.IsLinux())
+            {
+                byte* attr = stackalloc byte[128];  // pthread_attr_t: 56 bytes on x64 glibc
+                if (pthread_getattr_np(pthread_self(), attr) == 0)
+                {
+                    nint address, bytes;
+                    if (pthread_attr_getstack(attr, &address, &bytes) == 0) { low = (nuint)address; size = (nuint)bytes; }
+                    pthread_attr_destroy(attr);
+                }
+            }
+            return size == 0 || size > SmallStack ? nuint.MaxValue : low + size / 2;
+        }
+
+        [System.Runtime.InteropServices.DllImport("kernel32.dll")]
+        static extern void GetCurrentThreadStackLimits(out nuint low, out nuint high);
+        [System.Runtime.InteropServices.DllImport("libc")]
+        static extern unsafe int pthread_getattr_np(nint thread, byte* attr);
+        [System.Runtime.InteropServices.DllImport("libc")]
+        static extern unsafe int pthread_attr_getstack(byte* attr, nint* address, nint* size);
+        [System.Runtime.InteropServices.DllImport("libc")]
+        static extern unsafe int pthread_attr_destroy(byte* attr);
+        [System.Runtime.InteropServices.DllImport("libc")]
+        static extern nint pthread_self();
 
         /// The image with probes in its methods that can recurse, or null when it has none.
         /// `symbols` (portable PDB bytes or null) are rewritten to match.

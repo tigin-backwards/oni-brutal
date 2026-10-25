@@ -806,11 +806,27 @@ namespace OniBrutal.Host
                     var plainIl = plain.GetILGenerator();
                     plainIl.Emit(System.Reflection.Emit.OpCodes.Ldarg_0);
                     plainIl.Emit(System.Reflection.Emit.OpCodes.Ret);
+                    // Down(n) recurses n times and returns n.
+                    var down = Define("Down");
+                    var downIl = down.GetILGenerator();
+                    var more = downIl.DefineLabel();
+                    downIl.Emit(System.Reflection.Emit.OpCodes.Ldarg_0);
+                    downIl.Emit(System.Reflection.Emit.OpCodes.Brtrue, more);
+                    downIl.Emit(System.Reflection.Emit.OpCodes.Ldc_I4_0);
+                    downIl.Emit(System.Reflection.Emit.OpCodes.Ret);
+                    downIl.MarkLabel(more);
+                    downIl.Emit(System.Reflection.Emit.OpCodes.Ldarg_0);
+                    downIl.Emit(System.Reflection.Emit.OpCodes.Ldc_I4_1);
+                    downIl.Emit(System.Reflection.Emit.OpCodes.Sub);
+                    downIl.Emit(System.Reflection.Emit.OpCodes.Call, down);
+                    downIl.Emit(System.Reflection.Emit.OpCodes.Ldc_I4_1);
+                    downIl.Emit(System.Reflection.Emit.OpCodes.Add);
+                    downIl.Emit(System.Reflection.Emit.OpCodes.Ret);
                     type.CreateType();
                     var modPath = Path.Combine(dir, "OniBrutalCheckOverflowMod.dll");
                     mod.Save(modPath);
                     int probed = MonoStackOverflow.RecursiveMethods(File.ReadAllBytes(modPath)).Count;
-                    if (probed != 3) throw new InvalidOperationException($"{probed} methods found that can recurse, not 3");
+                    if (probed != 4) throw new InvalidOperationException($"{probed} methods found that can recurse, not 4");
                     var deep = ModAccess.LoadFrom(modPath).GetType("Deep")!;
                     if ((int)deep.GetMethod("Plain")!.Invoke(null, [7])! != 7) throw new InvalidOperationException("Plain changed");
                     string Overflow(string name)
@@ -829,7 +845,25 @@ namespace OniBrutal.Host
                     const string mono = "The requested operation caused a stack overflow.";
                     foreach (var name in new[] { "Recurse", "Ping" })
                         if (Overflow(name) is var message && message != mono) throw new InvalidOperationException($"{name}: {message}");
-                    return "both recursions throw StackOverflowException with Mono's message; the process goes on";
+                    // The game's JobManager workers have 128 KB stacks (issue #15): a short
+                    // recursion runs there, one without end still throws.
+                    string? onWorker = null;
+                    var worker = new Thread(() =>
+                    {
+                        try
+                        {
+                            if ((int)deep.GetMethod("Down")!.Invoke(null, [20])! != 20) onWorker = "Down(20) changed";
+                            else if (Overflow("Recurse") is var message && message != mono) onWorker = "Recurse: " + message;
+                        }
+                        catch (Exception e)
+                        {
+                            onWorker = e.GetBaseException().GetType().Name + ": " + e.GetBaseException().Message;
+                        }
+                    }, 131072);
+                    worker.Start();
+                    worker.Join();
+                    if (onWorker != null) throw new InvalidOperationException("on a 128 KB thread, " + onWorker);
+                    return "both recursions throw StackOverflowException with Mono's message, on a 128 KB thread too, where a short one runs; the process goes on";
                 }
                 finally
                 {

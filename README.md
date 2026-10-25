@@ -86,10 +86,8 @@ For a more detailed breakdown, see [docs/PERFORMANCE.md](docs/PERFORMANCE.md).
 
 ### Tweaks
 
-Moono also changes how some of the game's own code does its work. Most tweaks give exactly the
-same results, faster, and are on by default; three trade a little exactness for speed and are off
-unless you turn them on. Choose them in **Moono Tweaks** on the main menu. Launch options
-(`--game-tweak …`, `--splash …`, `--frame-stats`) override the screen. What each one does:
+Moono also speeds up some of the game's own code. Most tweaks don't change gameplay and are on by
+default; three do, and are off. Toggle them in **Moono Tweaks** on the main menu. Full list:
 [docs/TWEAKS.md](docs/TWEAKS.md).
 
 ## Save compatibility

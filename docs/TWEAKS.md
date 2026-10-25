@@ -1,9 +1,9 @@
 # Tweaks
 
-Besides its engine, Moono changes how some of the game's own code does its work. Most of these
-tweaks give exactly the same results, faster, and are on by default. Three, marked **changes
-gameplay**, trade a little exactness for speed and are off unless you turn them on. What each one
-gains is measured in [PERFORMANCE.md](PERFORMANCE.md#the-tweaks).
+Moono also speeds up some of the game's own code. Most tweaks don't change gameplay and are on by
+default. Three do, are marked **changes gameplay** below, and are off by default. Toggle any of
+them in **Moono Tweaks** on the main menu. Measured gains are in
+[PERFORMANCE.md](PERFORMANCE.md#the-tweaks).
 
 ## Choosing them
 
@@ -44,6 +44,8 @@ data. QA's verify stage runs a late-game colony with every tweak on in this mode
 opened in turn, for at least 10 game minutes, and fails on any mismatch.
 
 ## The tweaks
+
+Names are as used with `--game-tweak`.
 
 ### Same results, on by default
 

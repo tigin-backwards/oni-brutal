@@ -245,6 +245,9 @@ namespace OniBrutal.GameTweaks
             var entry = Entry(BrutalTweaksMenu.Ids[i]);
             bool locked = BrutalTweaksMenu.Locked[i];
             var title = entry.GetReference<LocText>("Title");
+            // The Mods screen's title font, GRAYSTROKE REGULAR SDF: its own glyph for "f" is a
+            // narrow, cap-height F (the original shows "conFiguration" on that screen too), and
+            // "%" overhangs its advance by about a third of a space, so "% " looks unspaced.
             title.text = $"{BrutalTweaksMenu.Titles[i]}\n<size=11>{BrutalTweaksMenu.Effects[i]}</size>";
             entry.GetReference<ToolTip>("Description").toolTip = Tooltip(i);
             // The label beside the toggle: the warning for tweaks that change gameplay, and who

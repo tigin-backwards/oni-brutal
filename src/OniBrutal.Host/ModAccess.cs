@@ -80,12 +80,13 @@ namespace OniBrutal.Host
         }
 
         /// A mod's assembly, rewritten when it reaches into the game's non-public members, with its
-        /// static readonly fields writable as Mono's are, with any class that misses a method of an
-        /// interface it lists still loadable, with a patched method's stack frame reporting its
-        /// owner type, with its string-keyed concurrent dictionaries in Mono's order, with a stack
-        /// overflow in a method that can recurse thrown as an exception, with its conversions of
-        /// floats to integers giving Mono's values, and with its directory listings in Mono's order,
-        /// as on Mono.
+        /// static readonly fields writable as Mono's are, with its references to nested types of the
+        /// game's strings that the game no longer has bound as Mono binds them, with any class that
+        /// misses a method of an interface it lists still loadable, with a patched method's stack
+        /// frame reporting its owner type, with its string-keyed concurrent dictionaries in Mono's
+        /// order, with a stack overflow in a method that can recurse thrown as an exception, with
+        /// its conversions of floats to integers giving Mono's values, and with its directory
+        /// listings in Mono's order, as on Mono.
         internal static Assembly LoadFrom(string path)
         {
             path = Path.GetFullPath(path);
@@ -109,6 +110,9 @@ namespace OniBrutal.Host
                 var pdb = Path.ChangeExtension(path, ".pdb");
                 if (File.Exists(pdb)) symbols = File.ReadAllBytes(pdb);
             }
+            // A nested type of the game's strings that the game no longer has is bound as Mono binds
+            // it (MonoNestedTypeRefs).
+            if (MonoNestedTypeRefs.Adjust(image ?? File.ReadAllBytes(path), ref symbols, path) is { } bound) image = bound;
             // A class missing a method of a game interface it lists loads, as on Mono
             // (MissingInterfaceMethods).
             if (MissingInterfaceMethods.Adjust(image ?? File.ReadAllBytes(path), ref symbols, path) is { } completed) image = completed;

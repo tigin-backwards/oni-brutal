@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 using OniBrutal.Engine;
+using Cecil = Mono.Cecil;
 
 namespace OniBrutal.Host
 {
@@ -570,6 +571,85 @@ namespace OniBrutal.Host
                         }
                     }
                     return "the class loads; calling either missing method throws TypeLoadException";
+                }
+                finally
+                {
+                    try { Directory.Delete(dir, true); } catch (IOException) { } catch (UnauthorizedAccessException) { }
+                }
+            });
+            Check("A mod's nested type of the game that the game no longer has (MonoNestedTypeRefs)", () =>
+            {
+                ModAccess.Install();
+                var dir = Directory.CreateTempSubdirectory("oni-brutal-check-").FullName;
+                try
+                {
+                    var game = AppDomain.CurrentDomain.GetAssemblies().Single(a => a.GetName().Name == "Assembly-CSharp");
+                    var criteria = game.GetType("STRINGS.ROOMS+CRITERIA", throwOnError: true)!;
+                    const BindingFlags anyNested = BindingFlags.Public | BindingFlags.NonPublic;
+                    // Mono binds the class's last nested type (by row); measured in the original
+                    // (U59-744825): DECOR20 reads POWERBUILDING's strings.
+                    var nested = criteria.GetNestedTypes(anyNested).OrderBy(t => t.MetadataToken).ToArray();
+                    var last = nested[^1];
+                    var first = nested[0];
+                    // A mod naming STRINGS.ROOMS.CRITERIA.DECOR20 (U&F-Translate Fix), a nested type
+                    // CRITERIA has (left as it is), a nested type within the missing one, and
+                    // TUNING.DUPLICANTSTATS.MOVEMENT (Mosaic Tile), outside the game's strings.
+                    var name = "OniBrutalCheckNestedMod";
+                    using var assembly = Cecil.AssemblyDefinition.CreateAssembly(new Cecil.AssemblyNameDefinition(name, new Version(1, 0)), name, Cecil.ModuleKind.Dll);
+                    var module = assembly.MainModule;
+                    var gameRef = new Cecil.AssemblyNameReference("Assembly-CSharp", game.GetName().Version);
+                    module.AssemblyReferences.Add(gameRef);
+                    Cecil.TypeReference Nested(Cecil.TypeReference outer, string inner) => new("", inner, module, gameRef) { DeclaringType = outer };
+                    var criteriaRef = Nested(new Cecil.TypeReference("STRINGS", "ROOMS", module, gameRef), "CRITERIA");
+                    var decor20 = Nested(criteriaRef, "DECOR20");
+                    var withinMissing = Nested(decor20, "INNER");
+                    var present = Nested(criteriaRef, first.Name);
+                    var movement = Nested(new Cecil.TypeReference("TUNING", "DUPLICANTSTATS", module, gameRef), "MOVEMENT");
+                    var locString = module.ImportReference(last.GetField("NAME")!.FieldType);
+                    var probe = new Cecil.TypeDefinition("", "Probe", Cecil.TypeAttributes.Public | Cecil.TypeAttributes.Abstract | Cecil.TypeAttributes.Sealed, module.TypeSystem.Object);
+                    module.Types.Add(probe);
+                    var fromHandle = module.ImportReference(typeof(Type).GetMethod(nameof(Type.GetTypeFromHandle))!);
+                    void Method(string methodName, Action<Cecil.Cil.ILProcessor> body, Cecil.TypeReference returns)
+                    {
+                        var method = new Cecil.MethodDefinition(methodName, Cecil.MethodAttributes.Public | Cecil.MethodAttributes.Static, returns);
+                        probe.Methods.Add(method);
+                        var il = method.Body.GetILProcessor();
+                        body(il);
+                        il.Emit(Cecil.Cil.OpCodes.Ret);
+                    }
+                    foreach (var (methodName, target) in new[] { ("Decor20", decor20), ("WithinMissing", withinMissing), ("Present", present), ("Movement", movement) })
+                        Method(methodName, il => { il.Emit(Cecil.Cil.OpCodes.Ldtoken, target); il.Emit(Cecil.Cil.OpCodes.Call, fromHandle); }, module.ImportReference(typeof(Type)));
+                    Method("Decor20Name", il => il.Emit(Cecil.Cil.OpCodes.Ldsfld, new Cecil.FieldReference("NAME", locString, decor20)), module.TypeSystem.Object);
+                    var modPath = Path.Combine(dir, name + ".dll");
+                    assembly.Write(modPath);
+                    using var modPe = new System.Reflection.PortableExecutable.PEReader(File.OpenRead(modPath));
+                    using var gamePe = new System.Reflection.PortableExecutable.PEReader(File.OpenRead(Path.Combine(AssemblyPolicy.ReferenceDirectories[0], "Assembly-CSharp.dll")));
+                    var bindings = MonoNestedTypeRefs.Bindings(
+                        System.Reflection.Metadata.PEReaderExtensions.GetMetadataReader(modPe), System.Reflection.Metadata.PEReaderExtensions.GetMetadataReader(gamePe));
+                    if (bindings.Count != 1 || bindings.Values.Single() is not { Name: var boundName, Missing: "DECOR20" } || boundName != last.Name)
+                        throw new InvalidOperationException("bindings: " + string.Join(", ", bindings.Values.Select(b => $"{b.Missing} -> {b.Name}")));
+                    var type = ModAccess.LoadFrom(modPath).GetType("Probe")!;
+                    object? Call(string methodName) => type.GetMethod(methodName)!.Invoke(null, null);
+                    if (Call("Decor20") as Type != last) throw new InvalidOperationException($"DECOR20 binds to {Call("Decor20")}, not {last}");
+                    if (Call("Present") as Type != first) throw new InvalidOperationException($"{first.Name} binds to {Call("Present")}");
+                    if (!ReferenceEquals(Call("Decor20Name"), last.GetField("NAME")!.GetValue(null))) throw new InvalidOperationException("DECOR20.NAME is not " + last.Name + ".NAME");
+                    string Fails(string methodName)
+                    {
+                        try
+                        {
+                            Call(methodName);
+                        }
+                        catch (Exception e) when ((e as TargetInvocationException)?.InnerException is TypeLoadException || e is TypeLoadException)
+                        {
+                            return "TypeLoadException";
+                        }
+                        throw new InvalidOperationException(methodName + " did not fail");
+                    }
+                    // POWERBUILDING has no nested INNER (Mono fails it too); MOVEMENT's class has not
+                    // had its nested types listed when a mod's code runs, so Mono fails it as well.
+                    Fails("WithinMissing");
+                    Fails("Movement");
+                    return $"CRITERIA.DECOR20 binds to {last.Name}, as on Mono; DUPLICANTSTATS.MOVEMENT and a type within DECOR20 throw TypeLoadException";
                 }
                 finally
                 {

@@ -16,12 +16,12 @@
 # of take its copies' (equal) names. The spec plays in Simplified Chinese (`language:
 # zh_klei`) and checks what the mod logged and those strings (it has no screen of its own).
 #
-# Ours differs: MockRoomConstraints names STRINGS.ROOMS.CRITERIA.DECOR20, which the game no
-# longer has. Mono binds that missing nested type to CRITERIA's last nested class (POWERBUILDING:
-# the original logs "TypeRef ResolutionScope not yet handled ... for .DECOR20", and the mod's
-# DECORATIVE_ITEM_SCORE_20 reads "电力建筑"), so its type initializer completes; CoreCLR throws a
-# TypeLoadException, the initializer fails, the Pressure Door fails to register and ours quits
-# before the colony loads.
+# Mono binds a missing nested type (MockRoomConstraints names STRINGS.ROOMS.CRITERIA.DECOR20, which
+# the game no longer has) to CRITERIA's last nested class, POWERBUILDING: the original logs
+# "TypeRef ResolutionScope not yet handled ... for .DECOR20", and the mod's
+# DECORATIVE_ITEM_SCORE_20 reads "电力建筑". CoreCLR threw a TypeLoadException, the type
+# initializer failed, the Pressure Door failed to register and ours quit before the colony loaded;
+# ours now binds it as Mono does (ARCHITECTURE D32).
 from: early-base
 mods: [3374671941]
 language: zh_klei

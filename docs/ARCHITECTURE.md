@@ -537,6 +537,39 @@ past the boot checkpoint needs a Steam client logged in with an account that own
   0Harmony (cached with it) and any mod's copy of MonoMod: the FileStream is made with
   `ownsHandle: false`, so MonoMod's own close is the only one. `--check-types` drops the helper
   into a folder of its own and checks that no close failed.
+- **D32 Nested types of the game a mod names that the game no longer has.** Mono resolves a
+  TypeRef whose scope is another TypeRef in `mono_class_from_typeref_checked`
+  (`mono/metadata/class.c`, `MONO_RESOLUTION_SCOPE_TYPEREF`; Unity's fork, branch
+  `unity-6000.3-mbe`). When the enclosing class's nested types are loaded already
+  (`nested_classes_inited`), it scans that list by name; finding none, its loop variable is left
+  on the list's last class, and after the warning "TypeRef ResolutionScope not yet handled" it
+  returns that class with no error. When they are not loaded yet, it scans the metadata, returns
+  nothing, and the reference fails with a TypeLoadException, as on CoreCLR. The list is the
+  NestedClass table's order (`mono_class_setup_nested_types`), and it is loaded only by
+  enumerating the class's nested types (`Type.GetNestedTypes`/`GetNestedType`, a nested name
+  parsed by `Type.GetType`, Mono's own lookup of an `A/B` name), so in general the result
+  depends on what ran before the mod's code. The game's strings are the exception:
+  `Global.Awake` calls `Localization.RegisterForTranslation(typeof(UI))` before it loads the
+  mods, and its `LocString.CreateLocStringKeys` enumerates the nested types (public and not) of
+  every class of the STRINGS namespace in Assembly-CSharp, recursively, in every language.
+  U&F-Translate Fix names `STRINGS.ROOMS.CRITERIA.DECOR20`, gone from the game: the original logs
+  the warning and binds it to CRITERIA's last nested class, POWERBUILDING (its 20-decor
+  constraint reads "电力建筑"), and plays; CoreCLR threw, the mod's type initializer failed and
+  the game quit while loading. Mosaic Tile, Marble Tile and Insulated Joint Plate name
+  `TUNING.DUPLICANTSTATS.MOVEMENT`, whose class nothing has enumerated by then: they fail in the
+  original too. **Resolved in**
+  `MonoNestedTypeRefs`, before `MissingInterfaceMethods` as `ModAccess` loads a mod: each nested
+  TypeRef of the mod into a class of that STRINGS tree (by the game file's metadata) whose name
+  the class lacks is renamed to the class's last nested type in the NestedClass table, and
+  references within it are looked up there, as Mono looks them up; a class with no nested types
+  fails as on Mono. Every other missing nested type is left to fail, which is Mono's result
+  unless something had enumerated its class first (not known when the mod loads; in the catalog's
+  `out/ws`, `Artable+Stage`, `ElementLoader+ElementEntry`, `Navigator+PathProbeTask` and
+  `DUPLICANTSTATS+MOVEMENT`, among others, are such references). Of the catalog's mods, 19
+  current builds name a missing nested type of `STRINGS.ROOMS.CRITERIA` (most of them
+  `REFRIGERATOR`, some `DECOR20` and `MESSTABLE`); all bind to POWERBUILDING, as on Mono. A mod that cannot be rewritten loads unchanged. `--check-types` loads a mod naming
+  `CRITERIA.DECOR20` (bound to the last nested class, its `NAME` read), a type within it, a
+  nested type CRITERIA has, and `DUPLICANTSTATS.MOVEMENT`.
 
 ## 3. The engine API (`OniBrutal.UnityEngine`)
 

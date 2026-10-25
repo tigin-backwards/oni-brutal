@@ -26,12 +26,16 @@ namespace PerfProbe
 
         static readonly Dictionary<string, long[]> totals = new Dictionary<string, long[]>();
 
+        /// walltime.txt itself: further methods to time, one `Type Method` a line (nested types as
+        /// `Outer+Inner`; every overload of the name), as the overlays' entry points.
+        public static string Extra;
+
         static void Begin(out long __state) => __state = Stopwatch.GetTimestamp();
 
         static void End(MethodBase __originalMethod, long __state)
         {
             if (!Game.IsOnMainThread()) return;
-            string key = __originalMethod.DeclaringType.Name + "." + __originalMethod.Name;
+            string key = __originalMethod.DeclaringType.FullName + "." + __originalMethod.Name;
             if (!totals.TryGetValue(key, out var t)) totals[key] = t = new long[2];
             t[0]++;
             t[1] += Stopwatch.GetTimestamp() - __state;
@@ -42,9 +46,26 @@ namespace PerfProbe
             var harmony = new Harmony("PerfProbe.WallTime");
             var begin = new HarmonyMethod(typeof(WallTime), nameof(Begin));
             var end = new HarmonyMethod(typeof(WallTime), nameof(End));
-            foreach (var (type, method) in Points)
-                foreach (var target in AccessTools.GetDeclaredMethods(AccessTools.TypeByName(type) ?? typeof(void)))
-                    if (target.Name == method && target.GetMethodBody() != null) harmony.Patch(target, prefix: begin, postfix: end);
+            var points = new List<(string Type, string Method)>(Points);
+            if (Extra != null && System.IO.File.Exists(Extra))
+                foreach (var line in System.IO.File.ReadAllLines(Extra))
+                {
+                    var words = line.Split(new[] { ' ', '\t' }, System.StringSplitOptions.RemoveEmptyEntries);
+                    if (words.Length == 2 && !words[0].StartsWith("#")) points.Add((words[0], words[1]));
+                }
+            foreach (var (type, method) in points)
+            {
+                var declaring = AccessTools.TypeByName(type);
+                if (declaring == null) { UnityEngine.Debug.Log($"PERF walltime: no type {type}"); continue; }
+                int patched = 0;
+                foreach (var target in AccessTools.GetDeclaredMethods(declaring))
+                    if (target.Name == method && target.GetMethodBody() != null && !target.ContainsGenericParameters)
+                    {
+                        try { harmony.Patch(target, prefix: begin, postfix: end); patched++; }
+                        catch (System.Exception e) { UnityEngine.Debug.Log($"PERF walltime: {type}.{method} not patched: {e.Message}"); }
+                    }
+                if (patched == 0) UnityEngine.Debug.Log($"PERF walltime: no method {type}.{method}");
+            }
             double ms = 1000.0 / Stopwatch.Frequency;
             for (int window = 0; window < windows; window++)
             {

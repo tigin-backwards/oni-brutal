@@ -13,6 +13,7 @@ namespace PerfProbe
         public override void OnLoad(HarmonyLib.Harmony harmony)
         {
             Worldgen.Install(harmony, path);
+            Overlays.Install(harmony, path);
             if (System.IO.File.Exists(System.IO.Path.Combine(path, "layout.txt"))) LayoutTrace.Install(harmony);
             var keeper = new GameObject("PerfProbe");
             Object.DontDestroyOnLoad(keeper);
@@ -67,6 +68,8 @@ namespace PerfProbe
 
     public class Runner : MonoBehaviour
     {
+        public static Runner Instance;
+
         /// The centre of the 48×28-cell window (about the view at orthographic size 12) of a world
         /// holding the fewest building cells, searched in steps of 8 cells.
         static int BuildingCells(int x, int y, int w, int h)
@@ -1608,6 +1611,7 @@ namespace PerfProbe
 
         System.Collections.IEnumerator Start()
         {
+            Instance = this;
             if (Worldgen.Mode == "run") yield return Worldgen.Run();
             // `measure.txt`: engine behaviours measured at the main menu, the same in either player
             // (Measure).
@@ -1669,7 +1673,11 @@ namespace PerfProbe
             // select tool's hover card) while the mouse has not moved, every 120 frames, 6 times.
             if (System.IO.File.Exists(System.IO.Path.Combine(Path, "pointer.txt"))) StartCoroutine(Pointer());
             // `walltime.txt`: wall time of thin game methods inside the scripts' updates (WallTime).
-            if (System.IO.File.Exists(System.IO.Path.Combine(Path, "walltime.txt"))) StartCoroutine(WallTime.Run(10));
+            // `overlays.txt`: overlays opened in turn (Overlays), which then run the walltime windows.
+            var overlaysFile = System.IO.Path.Combine(Path, "overlays.txt");
+            bool overlays = System.IO.File.Exists(overlaysFile);
+            WallTime.Extra = System.IO.Path.Combine(Path, "walltime.txt");
+            if (System.IO.File.Exists(System.IO.Path.Combine(Path, "walltime.txt")) && !overlays) StartCoroutine(WallTime.Run(10));
             if (System.IO.File.Exists(System.IO.Path.Combine(Path, "savetest.txt"))) { yield return SaveTest(); yield break; }
             if (System.IO.File.Exists(System.IO.Path.Combine(Path, "autosave.txt"))) { yield return AutosaveFreeze(); yield break; }
             // `camera.txt`: where the view stays, as world cells `x y` with an optional orthographic
@@ -1711,6 +1719,7 @@ namespace PerfProbe
                 Debug.Log($"PERF camera at {at} size {size}");
                 view = (at, size);
             }
+            if (overlays) StartCoroutine(Overlays.Run(overlaysFile, System.IO.File.Exists(WallTime.Extra)));
             // `counts.txt` lists component type names (Assembly-CSharp first, then -firstpass): how
             // many of each exist, active or not, logged once the colony is up.
             var counts = System.IO.Path.Combine(Path, "counts.txt");

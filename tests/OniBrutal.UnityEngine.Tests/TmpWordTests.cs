@@ -243,5 +243,33 @@ namespace OniBrutal.Tests
             Assert.False(info.characterInfo[4].isVisible);
             Assert.Equal('­', info.characterInfo[4].character);
         }
+
+        // Carriage returns are not counted as spaces (textmeshpro.md, "Carriage returns are not
+        // counted as spaces"): every other white-space character still counts one.
+        [Theory]
+        [InlineData(Noto, 14f)]
+        [InlineData(Graystroke, 12f)]
+        public void CarriageReturnsAreNotCountedAsSpaces(string font, float size)
+        {
+            var t = Make(font, size);
+            foreach (var (text, spaces) in new (string, int)[]
+            {
+                ("\r", 0), ("ab\r", 0), ("\rab", 0), ("ab\rcd", 0),
+                ("ab\r\rcd", 0),
+                ("ab\r\ncd", 1), ("ab\r\n", 1), ("ab\n\rcd", 1),
+                ("ab \r\ncd", 2),
+                ("ab\r\n\r\ncd", 2),
+                ("ab.\r\n\r\n<smallcaps>cd ef</smallcaps>\r\n", 4),
+                ("ab\u000Bcd", 1), ("ab\u2028cd", 1),
+            })
+                Assert.True(spaces == Lay(t, text).spaceCount, $"{text.Replace("\r", "\\r").Replace("\n", "\\n")}: {Lay(t, text).spaceCount}");
+            // A carriage return is still a character of its line and still ends a word; alone it
+            // is still one empty word.
+            var info = Lay(t, "ab\rcd");
+            Assert.Equal(5, info.characterCount);
+            Assert.Equal('\r', info.characterInfo[2].character);
+            Assert.Equal("0:1 3:4", Words(info));
+            Assert.Equal("0:-1", Words(Lay(t, "\r")));
+        }
     }
 }

@@ -261,7 +261,9 @@ namespace TMPro
                     }
                     // Line feeds count as spaces.
                     if (p.Whitespace) spacesOnLine++;
-                    if (p.Whitespace) info.spaceCount++;
+                    // The text's space count leaves carriage returns out; every other
+                    // white-space character counts one.
+                    if (p.Whitespace && el.Unicode != 13) info.spaceCount++;
                     // The text's extents (textBounds, the rendered size) span the visible
                     // characters' advances and their ascenders to descenders.
                     if (visible)

@@ -1682,6 +1682,11 @@ else about CR changes: it is still a character of its line (`characterCount` inc
 still ends a word ("ab\rcd" has the words 0–1 and 3–4 in both), and a CR alone is still one
 empty word record (0, −1), as before.
 
+**Implemented** (the text's `spaceCount` in `TMP_Text.Place.cs`; tests in `TmpWordTests`,
+`CarriageReturnsAreNotCountedAsSpaces`). In the same probe `wc-check.py diff` against the
+shipped package's run finds none of the 6119 common lines different, and no line in one log
+only; `wc-check.py rule` matches all 6119 word lists and 6047 line word counts.
+
 Not measured: CR in wrapped text, in `TMP_InputField`, and in world-space `TextMeshPro`.
 
 ### Culling under a RectMask2D (measured 2026-10-23)

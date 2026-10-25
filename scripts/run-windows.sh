@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Development/test runs of the Windows player from WSL: stages out/win (scripts/build-windows.sh)
-# in %TEMP%\oni-brutal\host and starts OniBrutal.exe on the Windows side with the Windows game
+# in %TEMP%\oni-brutal\host and starts OniMoono.exe on the Windows side with the Windows game
 # install. Test runs never touch the user's own game data, Steam account or speakers: the run
 # home (ONI_RUN_HOME, default %TEMP%\oni-brutal\run-home) takes the place of Documents,
 # AppData and LocalLow (--run-home), the offline Steam double replaces steam_api64.dll, and the
@@ -20,5 +20,5 @@ cp -r "$root/out/win/host" "$root/out/win/steamstub" "$stage/"
 stub=steamstub
 run_home="${ONI_RUN_HOME:-$win_temp\\oni-brutal\\run-home}"
 game="${ONI_WIN_GAME_DIR:-C:\\Program Files (x86)\\Steam\\steamapps\\common\\OxygenNotIncluded}"
-exec "$stage/host/OniBrutal.exe" --game "$game" --run-home "$run_home" --audio-wav "$run_home" --game-tweak none --splash none \
+exec "$stage/host/OniMoono.exe" --game "$game" --run-home "$run_home" --audio-wav "$run_home" --game-tweak none --splash none \
   --native-override "steam_api64=$win_temp\\oni-brutal\\$stub\\steam_api64.dll" "$@"

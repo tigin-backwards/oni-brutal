@@ -37,8 +37,11 @@ namespace OniBrutal.Host
         {
             foreach (var patches in new[] { patchInfo.prefixes, patchInfo.postfixes, patchInfo.finalizers, patchInfo.innerprefixes, patchInfo.innerpostfixes })
                 foreach (var patch in patches)
-                    if (patch.PatchMethod is { } method && method.Module.Assembly.GetName().Name?.StartsWith("OniBrutal", StringComparison.Ordinal) != true)
+                    if (patch.PatchMethod is { } method && !Ours(method.Module.Assembly.GetName().Name))
                         disableInlining(method);
         }
+
+        /// The host (OniMoono) and the engine's assemblies (OniBrutal.*).
+        static bool Ours(string? name) => name == "OniMoono" || name?.StartsWith("OniBrutal", StringComparison.Ordinal) == true;
     }
 }

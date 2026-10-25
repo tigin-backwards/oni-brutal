@@ -8,5 +8,5 @@ source "$(dirname "$0")/env.sh"
 managed="$game/OxygenNotIncluded_Data/Managed"
 dotnet build "$root/tools/SurfaceGen" -c Release -v q -nologo
 dotnet build "$root/src/OniBrutal.Host" -v q -nologo
-"$root/out/bin/OniBrutal.Host/debug/OniBrutal" --game "$game" --check-assets --list-data-scripts "$root/out/data-scripts.tsv" --log /dev/null > /dev/null
+"$root/out/bin/OniBrutal.Host/debug/OniMoono" --game "$game" --check-assets --list-data-scripts "$root/out/data-scripts.tsv" --log /dev/null > /dev/null
 dotnet "$root/out/bin/SurfaceGen/release/SurfaceGen.dll" packages "$managed" "$root/out/surface" "$root/src" "$root/out/data-scripts.tsv" "$root/src/UnityEngine.UI/package-required-types.tsv"

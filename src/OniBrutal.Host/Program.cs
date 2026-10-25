@@ -42,10 +42,10 @@ namespace OniBrutal.Host
             // where it runs from, so a log tells which release, or which stray copy, wrote it.
             var built = typeof(Program).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
             string commit = built?.IndexOf('+') is int plus and >= 0 ? built[(plus + 1)..] : "unknown";
-            EngineLog.Engine($"OniBrutal host starting: commit={commit} exe={Environment.ProcessPath} game={options.GameDir} .NET={Environment.Version}");
+            EngineLog.Engine($"Moono starting: commit={commit} exe={Environment.ProcessPath} game={options.GameDir} .NET={Environment.Version}");
             StartupStats.Mark("host starts (runtime up)");
             UnhandledExceptions.Install();
-            // The options the main menu's Brutal Tweaks screen sets: defaults, then its settings
+            // The options the main menu's Moono Tweaks screen sets: defaults, then its settings
             // file in the per-user folder, then the command line.
             var settingsPath = PlayerSettings.PathIn(EngineConfig.PersistentDataPath);
             var settings = PlayerSettings.Read(settingsPath, out var settingsProblem);
@@ -1053,7 +1053,7 @@ namespace OniBrutal.Host
         public string? UiPackages;
         public bool ShippedUiPackages;
         /// `--game-tweak` values, in order (GameTweaks, EffectiveOptions): when any is given, they
-        /// alone choose the game tweaks, over the Brutal Tweaks settings.
+        /// alone choose the game tweaks, over the Moono Tweaks settings.
         public readonly List<string> GameTweaks = new();
         public bool CheckAssets;
         /// With --check-assets: where to list the script classes the data uses.
@@ -1082,10 +1082,10 @@ namespace OniBrutal.Host
         /// nothing (test runs on a desktop someone is using: PerfProbe-driven runs).
         public bool Background;
         /// --splash moo|none: the player's own loading splash (Gassy Moos falling while it loads),
-        /// over the Brutal Tweaks settings; null when not given (then the effective value).
+        /// over the Moono Tweaks settings; null when not given (then the effective value).
         public string? Splash;
         /// --frame-stats: average frame phase times in the log (PlayerLoop.FrameStats), over the
-        /// Brutal Tweaks settings.
+        /// Moono Tweaks settings.
         public bool FrameStats;
         /// --no-tweaks-menu: the main menu without our Brutal Tweaks button, as the original's (test
         /// runs compared with the original game: scripts/e2e.py).
@@ -1133,7 +1133,7 @@ namespace OniBrutal.Host
                     case "--game": o.GameDir = args[++i]; break;
                     case "--":
                     {
-                        // Steam launch options `OniBrutal [options] -- %command%`: Steam's command
+                        // Steam launch options `OniMoono [options] -- %command%`: Steam's command
                         // for the game, any wrappers of Steam's (launch wrapper, reaper) followed by
                         // the game's executable and its arguments. The game directory is the
                         // executable's; the arguments after it are read as the player's (Unity's
@@ -1141,7 +1141,7 @@ namespace OniBrutal.Host
                         int exe = Array.FindIndex(args, i + 1, a => OniBrutal.Engine.Platform.GameLayout.GameDirOfExecutable(a) != null);
                         if (exe < 0)
                         {
-                            Console.Error.WriteLine("OniBrutal: no OxygenNotIncluded executable after --; the Steam launch options should end with -- %command%");
+                            Console.Error.WriteLine("Moono: no OxygenNotIncluded executable after --; the Steam launch options should end with -- %command%");
                             return null;
                         }
                         o.GameDir = OniBrutal.Engine.Platform.GameLayout.GameDirOfExecutable(args[exe])!;
@@ -1271,7 +1271,7 @@ namespace OniBrutal.Host
                     }
                     default:
                         Console.Error.WriteLine($"Unknown option {args[i]}");
-                        Console.Error.WriteLine("usage: OniBrutal [--game DIR] [--log FILE] [--run-home DIR] [--audio-wav DIR] [--headless] [--batchmode] [--frames N] [--native-override NAME=PATH] [--trace-exceptions] [--gl-debug] [--background] [--splash moo|none] [--log-pointer-hits] [--vsync-count N] [--gpu-profile] [--no-bindless] [--input FRAME:ACTION[:ARGS]] [--input-file PATH] [--frame-stats] [--no-tweaks-menu] [--max-frame-rate N[:FRAMES]] [--dump-render-textures FRAME:DIR] [-screen-width W] [-screen-height H] [-screen-fullscreen 0|1] [-window-mode exclusive|borderless|windowed] [-monitor N] [--check-types] [--ui-packages DIR | --shipped-ui-packages] [--game-tweak NAME|-NAME|all|exact|none] [--check-assets [--list-data-scripts FILE]] [--check-bind] [--check-shaders] [--check-natives [--native-arch x86_64|arm64] [--native-dir DIR]] [--dump-shader NAME:DIR] [--capture FRAME:PATH[:SCALE]] [--probe-ui FRAME:X,Y] [--dump-ui FRAME:PATH] [--dump-ui-vertices PATH-SUBSTRING] [--dump-hierarchy FRAME:PATH] [--report-builtin-assets FILE] [--dump-component FRAME:PATH|TYPE] [-- STEAM-COMMAND]");
+                        Console.Error.WriteLine("usage: OniMoono [--game DIR] [--log FILE] [--run-home DIR] [--audio-wav DIR] [--headless] [--batchmode] [--frames N] [--native-override NAME=PATH] [--trace-exceptions] [--gl-debug] [--background] [--splash moo|none] [--log-pointer-hits] [--vsync-count N] [--gpu-profile] [--no-bindless] [--input FRAME:ACTION[:ARGS]] [--input-file PATH] [--frame-stats] [--no-tweaks-menu] [--max-frame-rate N[:FRAMES]] [--dump-render-textures FRAME:DIR] [-screen-width W] [-screen-height H] [-screen-fullscreen 0|1] [-window-mode exclusive|borderless|windowed] [-monitor N] [--check-types] [--ui-packages DIR | --shipped-ui-packages] [--game-tweak NAME|-NAME|all|exact|none] [--check-assets [--list-data-scripts FILE]] [--check-bind] [--check-shaders] [--check-natives [--native-arch x86_64|arm64] [--native-dir DIR]] [--dump-shader NAME:DIR] [--capture FRAME:PATH[:SCALE]] [--probe-ui FRAME:X,Y] [--dump-ui FRAME:PATH] [--dump-ui-vertices PATH-SUBSTRING] [--dump-hierarchy FRAME:PATH] [--report-builtin-assets FILE] [--dump-component FRAME:PATH|TYPE] [-- STEAM-COMMAND]");
                         return null;
                 }
             }

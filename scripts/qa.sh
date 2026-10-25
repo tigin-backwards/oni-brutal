@@ -204,7 +204,7 @@ quiet_begin() # STAGE
 windows_game() # a game running on the Windows side (the user playing, or a Windows test run): its names
 {
     command -v tasklist.exe > /dev/null || return 0
-    tasklist.exe /NH 2>/dev/null | tr -d '\r' | awk 'tolower($1) ~ /^(onibrutal|oxygennotincluded|brutalnotincluded)\.exe$/ { print $1 }' | sort -u | paste -sd, -
+    tasklist.exe /NH 2>/dev/null | tr -d '\r' | awk 'tolower($1) ~ /^(onimoono|onibrutal|oxygennotincluded|brutalnotincluded)\.exe$/ { print $1 }' | sort -u | paste -sd, -
 }
 cores_busy() # cores' worth of CPU busy over 5 s, from /proc/stat
 {
@@ -255,7 +255,7 @@ u57_run()
         --frames "$frames" --input 400:click:948,75 --input 900:click:153,192 --game-tweak all --log "$out/log.txt" "$@" > "$out/stdout.txt" 2>&1 &
     local pid=$! peak=0 rss p
     while kill -0 $pid 2>/dev/null; do
-        for p in $(pgrep -x OniBrutal); do
+        for p in $(pgrep -x OniMoono); do
             grep -qa "$home" /proc/$p/environ 2>/dev/null || continue
             rss=$(awk '/VmRSS/ {print $2}' /proc/$p/status 2>/dev/null); rss=${rss:-0}
             [ "$rss" -gt "$peak" ] && peak=$rss

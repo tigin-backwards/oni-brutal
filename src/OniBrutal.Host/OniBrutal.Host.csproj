@@ -5,7 +5,7 @@
          window (with a taskbar entry of its own beside the game's); started from a terminal it
          writes to that terminal's console (WindowsConsole). -->
     <OutputType Condition="$(RuntimeIdentifier.StartsWith('win')) Or ('$(RuntimeIdentifier)' == '' And $([MSBuild]::IsOSPlatform('Windows')))">WinExe</OutputType>
-    <AssemblyName>OniBrutal</AssemblyName>
+    <AssemblyName>OniMoono</AssemblyName>
     <RootNamespace>OniBrutal.Host</RootNamespace>
     <!-- BinaryFormatter: the game clones worldgen settings with it (ARCHITECTURE §2.1). -->
     <EnableUnsafeBinaryFormatterSerialization>true</EnableUnsafeBinaryFormatterSerialization>
@@ -71,6 +71,11 @@
   <Target Name="CopyUiPackages" AfterTargets="Build">
     <Copy SourceFiles="@(UiPackage);@(UiPackage->'%(RootDir)%(Directory)%(Filename).pdb')" DestinationFolder="$(OutDir)packages" SkipUnchangedFiles="true" />
     <Copy SourceFiles="@(GameTweaksAssembly);@(GameTweaksAssembly->'%(RootDir)%(Directory)%(Filename).pdb')" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
+  </Target>
+  <!-- The host from before it was named OniMoono (OniBrutal, OniBrutal.exe, OniBrutal.dll …),
+       left in an output folder built before the rename: the player lists the dlls beside it. -->
+  <Target Name="RemoveOldHost" AfterTargets="Build">
+    <Delete Files="$(OutDir)OniBrutal;$(OutDir)OniBrutal.exe;$(OutDir)OniBrutal.dll;$(OutDir)OniBrutal.pdb;$(OutDir)OniBrutal.deps.json;$(OutDir)OniBrutal.runtimeconfig.json" />
   </Target>
   <!-- The UnityEngine.*Module facades the game binds to, next to the host in engine/. -->
   <Target Name="EmitFacades" AfterTargets="Build">

@@ -10,14 +10,16 @@ source "$(dirname "$0")/env.sh"
 version="${1:-$(git -C "$root" log -1 --format=%cd --date=format:%Y.%m.%d)}"
 out="$root/out/release"
 rm -rf "$out"; mkdir -p "$out"
-build() { dotnet build "$1" -c Release -r "$2" --self-contained true -p:OniGameDir="$game" -v q -nologo "-clp:ErrorsOnly;NoSummary"; }
+# Each build starts from an empty output folder, so nothing stale (the host from before it was
+# named OniMoono, OniBrutal.exe and its OniBrutal.dll) goes into an archive.
+build() { rm -rf "$root/out/bin/$(basename "$1")/release_$2"; dotnet build "$1" -c Release -r "$2" --self-contained true -p:OniGameDir="$game" -v q -nologo "-clp:ErrorsOnly;NoSummary"; }
 
 stage() { # stage DIR SETUP: the archive's oni-brutal folder
     mkdir -p "$1/player"
     cp "$root/$2" "$root/README.md" "$root/NOTICE.txt" "$1/"
 }
 
-# Windows: OniBrutal.exe with the Restarter.exe the game's App.Restart starts.
+# Windows: OniMoono.exe with the Restarter.exe the game's App.Restart starts.
 build "$root/src/OniBrutal.Host" win-x64
 build "$root/src/OniBrutal.Restarter" win-x64
 win="$out/windows/oni-brutal"
@@ -27,13 +29,13 @@ cp -r "$root/out/bin/OniBrutal.Host/release_win-x64/." "$win/player/"
 rm -f "$win/player/Restarter" "$win/player/"FacadeGen*
 cp "$root/out/bin/OniBrutal.Restarter/release_win-x64/Restarter."{exe,dll,deps.json,runtimeconfig.json} "$win/player/"
 
-# Linux: OniBrutal with the Restarter script.
+# Linux: OniMoono with the Restarter script.
 build "$root/src/OniBrutal.Host" linux-x64
 lin="$out/linux/oni-brutal"
 stage "$lin" setup.sh
 cp -r "$root/out/bin/OniBrutal.Host/release_linux-x64/." "$lin/player/"
 rm -f "$lin/player/"FacadeGen*
-chmod +x "$lin/setup.sh" "$lin/player/OniBrutal" "$lin/player/Restarter"
+chmod +x "$lin/setup.sh" "$lin/player/OniMoono" "$lin/player/Restarter"
 
 # zip for Windows; tar.gz for Linux, which keeps the executable bits.
 (cd "$out/windows" && python3 -I -c "

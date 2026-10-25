@@ -14,4 +14,4 @@ using System.Runtime.CompilerServices;
 [assembly: InternalsVisibleTo("OniBrutal.Desktop")]
 
 // The host configures the engine (paths, log, player loop).
-[assembly: InternalsVisibleTo("OniBrutal")]
+[assembly: InternalsVisibleTo("OniMoono")]

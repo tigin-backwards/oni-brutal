@@ -157,7 +157,7 @@ namespace PerfProbe
         {
             SpeedControlScreen.Instance.Pause(false);
             for (int i = 0; i < 120; i++) yield return null;
-            var flag = System.Type.GetType("OniBrutal.Host.GameTweaks.FastSerialization, OniBrutal")?.GetField("Enabled");
+            var flag = (System.Type.GetType("OniBrutal.Host.GameTweaks.FastSerialization, OniMoono") ?? System.Type.GetType("OniBrutal.Host.GameTweaks.FastSerialization, OniBrutal"))?.GetField("Enabled");
             if (flag == null) { Debug.Log("PERF savetest: fast-serialization not present"); yield break; }
             var dir = System.IO.Path.GetDirectoryName(SaveLoader.GetActiveSaveFilePath());
             // savetest.txt lists the saves to make, g (the game's serializer) or f (the tweak's).

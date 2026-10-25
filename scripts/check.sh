@@ -26,7 +26,7 @@ grep -A12 -E '^(FAIL|ERROR): ' <<< "$scripts_log" | sed 's/^/  /' || true
 # and its apphost must be an x86_64 Mach-O executable (magic feedfacf, CPU type 0x01000007).
 osx="$root/out/publish/osx-x64"
 if dotnet publish "$root/src/OniBrutal.Host" -c Release -r osx-x64 --self-contained -o "$osx" -v q -nologo > "$root/out/publish-osx-x64.log" 2>&1 \
-    && [ "$(od -An -tx4 -N8 "$osx/OniBrutal" | tr -s ' ')" = " feedfacf 01000007" ]; then
+    && [ "$(od -An -tx4 -N8 "$osx/OniMoono" | tr -s ' ')" = " feedfacf 01000007" ]; then
     echo "osx-x64 publish: $(ls "$osx" | wc -l) files, x86_64 Mach-O apphost"
 else
     failed+=(osx-x64-publish); echo "osx-x64 publish failed: out/publish-osx-x64.log"
@@ -37,7 +37,7 @@ fi
 osx_arm="$root/out/publish/osx-arm64"
 sim_port="${ONI_SIM_PORT_ARM64:-$HOME/projects/oni-worldgen/dist/simdll-macos/libSimDLL-arm64-simthread.dylib}"
 if dotnet publish "$root/src/OniBrutal.Host" -c Release -r osx-arm64 --self-contained -o "$osx_arm" -v q -nologo > "$root/out/publish-osx-arm64.log" 2>&1 \
-    && [ "$(od -An -tx4 -N8 "$osx_arm/OniBrutal" | tr -s ' ')" = " feedfacf 0100000c" ]; then
+    && [ "$(od -An -tx4 -N8 "$osx_arm/OniMoono" | tr -s ' ')" = " feedfacf 0100000c" ]; then
     echo "osx-arm64 publish: $(ls "$osx_arm" | wc -l) files, arm64 Mach-O apphost"
     if [ -f "$sim_port" ]; then mkdir -p "$osx_arm/plugins"; cp "$sim_port" "$osx_arm/plugins/libSimDLL.dylib"; else rm -f "$osx_arm/plugins/libSimDLL.dylib"; fi
 else
@@ -57,11 +57,11 @@ if [ -d "$mac_data" ]; then
     # x86_64 build (Klei's SimDLL) and, with the port in plugins/, for the arm64 build (its arm64
     # slices, the port, and BRUTAL's dylibs in the publish folder with what they link).
     natives_summary() { echo "$(grep -E '^  (SimDLL|fmodstudio|steam_api|glfw|freetype|stb|glad): [0-9]+ of ' <<< "$1" | sed -E 's/^  ([^:]+): ([0-9]+ of [0-9]+).*/\1 \2/' | paste -sd, -); $(tail -1 <<< "$1")"; }
-    natives=$("$root/out/bin/OniBrutal.Host/debug/OniBrutal" --game "$mac_app" --check-natives --native-arch x86_64 --log "$root/out/check-natives-mac.log") || failed+=(check-natives-mac)
+    natives=$("$root/out/bin/OniBrutal.Host/debug/OniMoono" --game "$mac_app" --check-natives --native-arch x86_64 --log "$root/out/check-natives-mac.log") || failed+=(check-natives-mac)
     echo "check-natives (macOS x86_64): $(natives_summary "$natives")"
     grep -E 'MISSING|NO PLUGIN|NO LIBRARY| CODE in' <<< "$natives" || true
     if [ -f "$osx_arm/plugins/libSimDLL.dylib" ]; then
-        natives=$("$root/out/bin/OniBrutal.Host/debug/OniBrutal" --game "$mac_app" --check-natives --native-arch arm64 --native-dir "$osx_arm" --log "$root/out/check-natives-mac-arm64.log") || failed+=(check-natives-mac-arm64)
+        natives=$("$root/out/bin/OniBrutal.Host/debug/OniMoono" --game "$mac_app" --check-natives --native-arch arm64 --native-dir "$osx_arm" --log "$root/out/check-natives-mac-arm64.log") || failed+=(check-natives-mac-arm64)
         echo "check-natives (macOS arm64, onimaxxing-sim): $(natives_summary "$natives")"
         grep -E 'MISSING|NO PLUGIN|NO LIBRARY| CODE in' <<< "$natives" || true
     else
@@ -72,12 +72,12 @@ else
 fi
 "$root/scripts/build-engine.sh" >/dev/null
 "$root/scripts/apicheck.sh" > "$root/out/apicheck-summary.txt" || true; head -2 "$root/out/apicheck-summary.txt"
-"$root/out/bin/OniBrutal.Host/debug/OniBrutal" --game "$game" --check-types --log "$root/out/check-types.log" | grep -vE '^(ok   [A-Za-z0-9.-]+ +[0-9]+ types|from )'
-"$root/out/bin/OniBrutal.Host/debug/OniBrutal" --game "$game" --check-assets --log "$root/out/check-assets.log" | grep -v '^\[engine\]'
-"$root/out/bin/OniBrutal.Host/debug/OniBrutal" --game "$game" --check-bind --log "$root/out/check-bind.log" | grep -v '^\[engine\]'
-natives=$("$root/out/bin/OniBrutal.Host/debug/OniBrutal" --game "$game" --check-natives --log "$root/out/check-natives.log") || failed+=(check-natives)
+"$root/out/bin/OniBrutal.Host/debug/OniMoono" --game "$game" --check-types --log "$root/out/check-types.log" | grep -vE '^(ok   [A-Za-z0-9.-]+ +[0-9]+ types|from )'
+"$root/out/bin/OniBrutal.Host/debug/OniMoono" --game "$game" --check-assets --log "$root/out/check-assets.log" | grep -v '^\[engine\]'
+"$root/out/bin/OniBrutal.Host/debug/OniMoono" --game "$game" --check-bind --log "$root/out/check-bind.log" | grep -v '^\[engine\]'
+natives=$("$root/out/bin/OniBrutal.Host/debug/OniMoono" --game "$game" --check-natives --log "$root/out/check-natives.log") || failed+=(check-natives)
 echo "check-natives: $(tail -1 <<< "$natives")"; grep -E 'MISSING|NO PLUGIN' <<< "$natives" || true
 "$root/scripts/build-packages.sh" >/dev/null; echo "packages: $(sed -n 2p "$root/out/apicheck-packages.txt")"
-"$root/out/bin/OniBrutal.Host/debug/OniBrutal" --game "$game" --shipped-ui-packages --check-types --log "$root/out/check-types-shipped.log" | grep -vE '^(ok   [A-Za-z0-9.-]+ +[0-9]+ types|from )'
-"$root/out/bin/OniBrutal.Host/debug/OniBrutal" --game "$game" --shipped-ui-packages --check-bind --log "$root/out/check-bind-shipped.log" | grep -v '^\[engine\]'
+"$root/out/bin/OniBrutal.Host/debug/OniMoono" --game "$game" --shipped-ui-packages --check-types --log "$root/out/check-types-shipped.log" | grep -vE '^(ok   [A-Za-z0-9.-]+ +[0-9]+ types|from )'
+"$root/out/bin/OniBrutal.Host/debug/OniMoono" --game "$game" --shipped-ui-packages --check-bind --log "$root/out/check-bind-shipped.log" | grep -v '^\[engine\]'
 [ ${#failed[@]} -eq 0 ] || { echo "test suites failed: ${failed[*]}"; exit 1; }

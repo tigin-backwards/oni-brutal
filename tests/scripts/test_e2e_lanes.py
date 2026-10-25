@@ -84,7 +84,7 @@ class XvfbDisplay(unittest.TestCase):
 class PerfWait(unittest.TestCase):
     def test_perf_jobs(self):
         lines = ['bash scripts/qa.sh', '/bin/bash out/local-tools/sweep11c.sh', 'python3 scripts/e2e.py early-base',
-                 '/home/x/out/bin/OniBrutal.Host/release/OniBrutal --game g', 'perf record -g -p 12',
+                 '/home/x/out/bin/OniBrutal.Host/release/OniMoono --game g', 'perf record -g -p 12',
                  'bash /home/x/projects/oni-brutal/scripts/qa.sh u57', 'vim scripts/qa.sh.orig',
                  'bash out/local-tools/measure.sh 3']
         # qa.sh is not a perf job: only its perf stage is, through perf.wanted and perf.lock.

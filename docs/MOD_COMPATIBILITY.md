@@ -842,7 +842,7 @@ installs get developer checks subscribers never see).
 | 828 | [Super compost超级堆肥](https://steamcommunity.com/sharedfiles/filedetails/?id=2863558330) | ⬜ | ⬜ | ⬜ |  |
 | 829 | [Pipe Color Overlay](https://steamcommunity.com/sharedfiles/filedetails/?id=3678142367) | ⬜ | ⬜ | ⬜ |  |
 | 830 | [Configurable Automation-controlled Doors](https://steamcommunity.com/sharedfiles/filedetails/?id=2820163949) | ⬜ | ⬜ | ⬜ |  |
-| 831 | [Darkness Not Excluded (Relit)](https://steamcommunity.com/sharedfiles/filedetails/?id=3609476592) | ⬜ | ⬜ | ⬜ |  |
+| 831 | [Darkness Not Excluded (Relit)](https://steamcommunity.com/sharedfiles/filedetails/?id=3609476592) | ✅ | ✅ | ✅ | spec tests/e2e/mods/3609476592-darkness-not-excluded-relit.yaml: Loads (its Lit Workspace transpiler of Workable.GetEfficiencyMultiplier matches its field by Mono's string, D35), plays 70 s from early-base, and the top-left Disable Darkness button turns the darkness off and on |
 | 832 | [[DLC] Fragrant Flowers](https://steamcommunity.com/sharedfiles/filedetails/?id=2924528762) | ⬜ | ⬜ | ⬜ |  |
 | 833 | [花盆种植一切](https://steamcommunity.com/sharedfiles/filedetails/?id=2881769456) | ⬜ | ⬜ | ⬜ |  |
 | 834 | [Critter Traits Reborn](https://steamcommunity.com/sharedfiles/filedetails/?id=2954005789) | ⬜ | ⬜ | ⬜ |  |

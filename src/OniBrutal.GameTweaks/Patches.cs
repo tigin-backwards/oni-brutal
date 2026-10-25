@@ -21,6 +21,7 @@ namespace OniBrutal.GameTweaks
                 case OffWorldFallers.Name: OffWorldFallers.Install(harmony); return true;
                 case FastPartitionerCleanup.Name: FastPartitionerCleanup.Install(harmony); return true;
                 case FastAnimBatches.Name: FastAnimBatches.Install(harmony); return true;
+                case FastOverlays.Name: FastOverlays.Install(harmony); return true;
                 default: return false;
             }
         }

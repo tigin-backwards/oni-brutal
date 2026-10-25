@@ -445,6 +445,19 @@ unchanged.
   and compared byte for byte), none different. The engine's transform caches were made safe
   for concurrent readers for it.
 
+- `fast-overlays`: the overlays' per-frame visits to objects. Temperature: the game's event
+  reaches every temperature visualizer (U57: about 91,000) and each reads its transform; the
+  visualizers' handler is replaced by one that keeps, by place in the handler order, the
+  positions of buildings that cannot move and passes those out of view without touching them.
+  Power: one `GetWattsNeededWhenActive` answer per circuit within a `Power.Update`. The modes
+  with targets: their calls to `AddTargetIfVisible`, `RemoveOffscreenTargets` and
+  `UpdateHighlightTypeOverlay` run the tweak's equal loops, passing targets already shown and
+  keeping each target's transform, controller and fixed position. Paused, stopwatch, U57:
+  temperature 10.4 → 6.0 ms a frame, power 1.28 → 0.77, materials 4.05 → 3.78, decor
+  4.32 → 3.60; verified with ONI_TWEAK_VERIFY across every overlay (27 million kept positions,
+  0 wrong). Details and Colony Performance Fixes' approximate equivalents in
+  docs/research/overlays.md.
+
 - `fast-jobs`: the game's JobManager wakes every worker for each Run (a kernel semaphore, 15
   workers here) and waits until all have checked in, however few the items; the main thread
   runs it about 14 times a frame in U57. The tweak runs the same items on its own workers (same

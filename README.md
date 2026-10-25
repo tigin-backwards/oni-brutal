@@ -91,6 +91,8 @@ faster, and the setup turns those on (`--game-tweak exact` in the launch options
 - `fast-particle-collision`: radbolts stop searching every stored item for other radbolts.
 - `fast-partitioner-cleanup`: the once-a-second cleanup of the game's spatial index looks only
   at entries that were actually removed.
+- `fast-overlays`: the overlays (temperature most of all) skip rereading what can't have
+  changed since the last frame.
 - `fast-serialization`, `fast-save-type-checks`, `fast-save-compression`, `no-save-gc`,
   `background-save`: much shorter autosave freezes.
 - `off-screen-conveyors` (**changes gameplay**): items travelling on conveyor rails off screen

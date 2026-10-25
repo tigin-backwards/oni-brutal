@@ -245,6 +245,8 @@ u57_run()
     cp "$QA_U57_SAVE" "$d/cloud_save_files/76561197960265729/U57/U57.sav"
     printf 'strings: {}\nints:\n  ResolutionWidth: 1024\n  ResolutionHeight: 768\n  RefreshRateNumerator: 60\n  RefreshRateDenominator: 1\n  FullScreen: 0\nfloats: {}\n' > "$d/kplayerprefs.yaml"
     cp -r "$root/out/bin/PerfProbe/release" "$d/mods/Local/PerfProbe"
+    # U57_OVERLAYS: PerfProbe opens these overlays in turn, 300 frames each (its overlays.txt).
+    [ -n "${U57_OVERLAYS:-}" ] && { echo 'hold 300'; printf '%s\n' $U57_OVERLAYS; } > "$d/mods/Local/PerfProbe/overlays.txt"
     echo '{"version":1,"mods":[{"label":{"distribution_platform":0,"id":"PerfProbe","title":"PerfProbe","version":-2037174645},"status":1,"enabled":true,"enabledForDlc":["","EXPANSION1_ID"],"crash_count":0,"reinstall_path":null,"staticID":"PerfProbe"}],"mod_load_in_progress":false}' > "$d/mods/mods.json"
     ONI_GAME_DIR="$QA_U57_GAME" ONI_RUN_HOME="$home" ONI_CONFIG=release timeout 3600 xvfb-run -a -s "-screen 0 1280x1024x24" \
         "$root/scripts/run.sh" --native-override "steam_api=$QA_U57_STEAM" -screen-width 1024 -screen-height 768 -screen-fullscreen 0 \
@@ -286,14 +288,21 @@ stage_verify()
     u57_ready || { note "verify: skipped (no out/local-tools/qa.env)"; return; }
     build_release || return
     local out="$run/verify"
+    # Every overlay is opened in turn for 300 frames, for the overlays' tweaks.
+    U57_OVERLAYS="Oxygen Power Temperature Temperature:HeatFlow Temperature:StateChange TileMode Light Decor Disease Crop HarvestWhenReady Rooms LiquidConduit GasConduit SolidConveyor Logic Suit Radiation Priorities ThermalConductivity None" \
     ONI_TWEAK_VERIFY=1 ONI_VERIFY_CANVAS_SKIPS=1 ONI_VERIFY_COMPONENT_LAYOUTS=1 ONI_VERIFY_TEXEL_COPIES=1 ONI_VERIFY_PARTIAL_UPLOADS=1 ONI_VERIFY_PARALLEL_DRAWS=1 u57_run "$out" 9000
     u57_check verify "$out"
     local report; report=$(python3 "$tools" verify "$out/stdout.txt"); local status=$?
     echo "$report" | sed 's/^/     /' | tee -a "$run/summary.txt"
     [ $status -eq 0 ] || fail "verify: a verify mode reported mismatches"
     local tweak
-    for tweak in fast-anim-events fast-anim-batches fast-sublimation fast-jobs fast-particle-collision fast-offset-tables fast-anim-cleanup fast-partitioner-cleanup "canvas skips" "component layouts" "texel copies" "partial uploads" "parallel draws"; do
+    for tweak in fast-anim-events fast-anim-batches fast-sublimation fast-jobs fast-particle-collision fast-offset-tables fast-anim-cleanup fast-partitioner-cleanup fast-overlays "canvas skips" "component layouts" "texel copies" "partial uploads" "parallel draws"; do
         echo "$report" | grep -q "$tweak:" || fail "verify: no report from $tweak"
+    done
+    # The overlays tweak reports each of its parts.
+    local part
+    for part in "power answers" "kept positions" "kept targets"; do
+        echo "$report" | grep -q "fast-overlays: .*$part" || fail "verify: no $part report from fast-overlays"
     done
     # The radbolt tweak checks two things, each with its own report.
     echo "$report" | grep -q "fast-particle-collision: .*mismatches" || fail "verify: no lookup report from fast-particle-collision"

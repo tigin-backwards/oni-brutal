@@ -179,14 +179,15 @@ after times were measured on Linux under WSL2, where the game's code ran about h
 | `fast-partitioner-cleanup`: the spatial index's cleanup looks only at entries that were removed | Gluttony: 0.38 → 0.16 ms | exact |
 | `fast-symbol-overrides`: unchanged symbol-override blocks aren't uploaded again | 1.47 → 1.20 ms | exact |
 | `fast-anim-batches`: animation batches write their controllers' instance and symbol data on worker threads, the rest in the game's order | Gluttony: 1.9–2.0 → 1.5–1.65 ms | exact |
+| `fast-overlays`: the temperature overlay passes over the buildings out of view without reading them, the power overlay asks each circuit's load once a frame, and the other overlays keep what their targets' visits read (see [research/overlays.md](research/overlays.md)) | temperature 10.4 → 6.0 ms (2minnow 6.5 → 3.8), power 1.28 → 0.77, materials 4.05 → 3.78, decor 4.32 → 3.60 | exact |
 | Save tweaks: `fast-serialization`, `fast-save-type-checks`, `fast-save-compression`, `no-save-gc`, `background-save` | autosave freeze 11.7 → 4.8 s | exact, and saves still load in the original |
 | `slow-reachability`: reachability re-checked every 4 game seconds instead of every second | 1.88 → 0.53 ms | changes timing |
 | `off-screen-conveyors`: items on rails off screen are placed when they stop or come into view | skips most of about 950 moves a frame | changes positions while off screen |
 | `off-world-fallers`: items that fell out of the bottom of a world are landed where they hang | A possible perf. fix in degenerate cases where debris kept at the bottom of melted rocket interiors are treated as always falling. See [case study 3](PERFORMANCE_CASE_STUDY_3.md#objects-falling-forever) | they stop counting as falling |
 
 The exact tweaks that skip work each have a verify mode, which recomputes whatever was skipped
-and counts disagreements. `scripts/qa.sh` runs them all on U57 for at least 10 game minutes and
-requires zero. `fast-symbol-overrides` doesn't need one: it only skips writing values that are
+and counts disagreements. `scripts/qa.sh` runs them all on U57 for at least 10 game minutes,
+opening every overlay in turn, and requires zero. `fast-symbol-overrides` doesn't need one: it only skips writing values that are
 already there.
 
 ## Tried and dropped

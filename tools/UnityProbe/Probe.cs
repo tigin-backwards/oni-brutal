@@ -205,6 +205,11 @@ namespace SemanticsProbe
                 go.AddComponent<GuiLayout>();
                 return;
             }
+            if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "legacytext")
+            {
+                go.AddComponent<LegacyText>();
+                return;
+            }
             if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "startdestroy")
             {
                 go.AddComponent<SDScenario>();

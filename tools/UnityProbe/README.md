@@ -359,6 +359,28 @@ exception and what the player logs. Check the rules with `tools/UnityProbe/gl-ch
 LOG`, and compare the players with `gl-check.py diff ORIG OURS`. `docs/cleanroom/imgui.md`
 ("GUILayout, measured") records what it measured.
 
+With `PROBE_SCENARIO=legacytext` only the legacy-text probe runs (`LegacyText.cs`, lines `LX …`,
+10 s into the main menu, about a minute; `PROBE_LX_PART` takes a comma list of `raster`, `ci`,
+`gen`, `anchors`, `align`, `fonts` and `text`). It uses the built-in font
+(`GetBuiltinResource<Font>("Arial.ttf")`, as Geyser Swapper's panel does).
+- `raster`: which pixel size and style a glyph is rendered at after one generation, at font
+  sizes × scale factors around 9 pixels.
+- `ci`: `Font.GetCharacterInfo` for printable ASCII at 5 to 26 pixels in every style.
+- `gen`: `TextGenerator` at every font size × scale factor from 5 to 25 pixels, for the panel's
+  labels and strings with kerning pairs: cursors, widths, quads, lines and preferred sizes.
+- `anchors` and `align`: the anchors, `updateBounds` and `generateOutOfBounds`, and extents in
+  eighths of a pixel at four pivots.
+- `fonts`: `Font.CreateDynamicFontFromOSFont` names and characters the default face lacks.
+- `text`: `Text` components on canvases at 0.86, 1, 0.5 and 1.5, pixel perfect or not, with
+  the mesh a `BaseMeshEffect` sees.
+
+Check the rules with `tools/UnityProbe/lx-check.py rule LOG`, check the glyph table against a
+font file with `lx-check.py face LOG FONT STYLE`, and compare the players with `lx-check.py
+diff ORIG OURS`. To see which face the original falls back to, hide a font directory from it:
+run the player under `unshare --user --map-root-user --mount` after bind-mounting an empty
+folder over the directory. `docs/cleanroom/ugui.md` ("Legacy Text glyph placement") records
+what it measured.
+
 ## UI semantics (`UiSemantics.cs`, `UIS` lines)
 
 Ten seconds into the front end, after the front-end dump, it builds small hierarchies on an

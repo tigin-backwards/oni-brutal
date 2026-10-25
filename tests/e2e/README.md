@@ -94,6 +94,7 @@ thresholds: {shot: 0.02, world_shot: 0.05}   # pixel fractions (the defaults)
 memory_gb: 11                    # the players' budget counts each player for this (default: by fixture)
 spaced_out: false                # Spaced Out off in both players (default: the fixture's mode, from its
                                  # header's dlcIds; on for `from: main-menu`)
+translation: 929139073           # the language of this translation mod (one of `mods`), picked in the prefs
 setup: [...]                     # steps run first; the only place for driver setup.call
 steps: [...]
 ```
@@ -106,6 +107,17 @@ build of it. Each Local mod's stamp is its folder name's Mono string hash
 `config.json` beside the mod's assembly, or from `mods/config/ASSEMBLY/` when the mod uses the
 shared location. The runner writes both, in every folder of the mod that holds a DLL, because KMod
 may load an archived version.
+
+A translation (a mod with a `.po` file at its root and no assembly) is installed disabled, as a
+Workshop subscription leaves a new mod: KMod loads no content of an enabled translation and
+disables it with a load error. A player picks its language on the main menu's Translations
+screen (any installed mod with a `.po` is listed, Local ones too), which saves two prefs and
+restarts the game. `translation: ID` writes those prefs into the run's `kplayerprefs.yaml`
+(`SelectedLanguageType: UGC`, `InstalledLanguage: 'ID'`), so the game starts in that language;
+[`translation-screen.yaml`](translation-screen.yaml) drives the screen itself up to its restart
+dialog. The translations' specs (`mods/929139073-german-translation.yaml` and the others) check a
+colony's research screen and pause menu, then the main menu, the options menu and its Game
+options screen.
 
 ## Steps
 
@@ -252,7 +264,10 @@ step. The original run itself records it and passes.
 
 - `shot` moves the pointer to the bottom-right corner first, then takes the whole frame through
   OniMcp. It records the crop rect (the element's `ui.find` rect) and mask rects (UI paths, or
-  screen rects `[x, y, w, h]`) beside the shot.
+  screen rects `[x, y, w, h]`) beside the shot. At the main menu and its screens (no colony),
+  where OniMcp takes no screenshot, it reads the lane's display instead (XGetImage of the
+  root window, a frame later). Ours draws BRUTAL's credit tile (IMGUI) left of the main menu's
+  news tiles: mask it in a main menu shot (`[210, 525, 60, 195]` beside the menu buttons).
 - `world_shot` sets the camera through E2eDriver (`at` is a cell, `ortho` the orthographic size),
   hides the UI canvases (`hide_ui`, default true), shoots, and shows them again. Its masks are
   screen rects or UI paths. Symbolic masks such as Duplicants are not supported yet.
@@ -388,9 +403,10 @@ would (`mods/2919833683-single-asteroid-clusters.yaml` is the pattern):
    screen selects that cluster and seed, whatever its category. Wait for
    `**/Section - Destination/DestinationDetailsHeader/ClusterName` to read the cluster's name
    (`cond: text, value: "~NAME"`); `ui_dump` the list of asteroids,
-   `**/Section - Destination/World Scoll (Rect Size Set By Screen Code!)/Content/Details` (the
-   main menu cannot be shot). Leave the coordinate row out: its input field's width after
-   typing varies from run to run in either player.
+   `**/Section - Destination/World Scoll (Rect Size Set By Screen Code!)/Content/Details` (a
+   `shot` there reads the lane's display, see
+   [Evidence](#evidence-compared-with-the-original-afterwards)). Leave the coordinate row out:
+   its input field's width after typing varies from run to run in either player.
 4. Click `**/ColonyDestinationScreen2/Layout/Buttons/LaunchButton`. Worldgen runs on its own
    thread and the world loads behind the Duplicant selection: wait for
    `**/MinionSelectScreen/Content/BottomContent/Buttons/ProceedButton` to be stable with a
@@ -439,8 +455,9 @@ merged.
 For each mod of the batch:
 
 1. **Triage.** Read its row in [docs/research/mod-triage.md](../../docs/research/mod-triage.md):
-   its classes (P, B, T, S, K, O, V, M, X) and flags (`touches_ui`, `asset_bundle_ui`, ...). An
-   X mod (a translation, multiplayer) gets no spec. A worldgen mod gets one, with functional
+   its classes (P, B, T, S, K, O, V, M, X) and flags (`touches_ui`, `asset_bundle_ui`, ...). A
+   multiplayer mod gets no spec; a translation gets one with `translation:` (see [Mod specs and
+   fixtures](#mod-specs-and-fixtures)). A worldgen mod gets one, with functional
    expectations: its worlds generate with its content, not a layout identical to the original's
    (see mod-play-testing.md, "Worldgen mods").
 2. **Decompile** it: `ilspycmd -p -o out/local-tools/moddecomp/ID out/ws/ID/MOD.dll` (never

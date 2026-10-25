@@ -354,6 +354,62 @@ class Install(unittest.TestCase):
             self.assertEqual(lane.driver_port, 8831)
 
 
+class Translation(unittest.TestCase):
+    """A translation installed and left disabled; `translation: ID` picks its language in the prefs."""
+
+    class FakeWs:
+        @staticmethod
+        def profile(mods_dir, ids):
+            # 929139073 is a translation (a strings.po alone); 1863428350 has code beside its .po.
+            for i, files in (('929139073', ['strings.po', 'preview.png']), ('1863428350', ['strings.po', 'Sweep.dll'])):
+                os.makedirs(os.path.join(mods_dir, 'Local', i))
+                for name in files:
+                    open(os.path.join(mods_dir, 'Local', i, name), 'w').close()
+            entries = [{'label': {'distribution_platform': 0, 'id': i, 'title': i, 'version': 1}, 'status': 1,
+                        'enabled': True, 'enabledForDlc': ['', 'EXPANSION1_ID'], 'staticID': i} for i in ids]
+            with open(os.path.join(mods_dir, 'mods.json'), 'w') as f:
+                json.dump({'version': 1, 'mods': entries}, f)
+
+        @staticmethod
+        def mono_hash(text):
+            return 7
+
+    def player(self, root, translation):
+        onimcp = os.path.join(root, 'onimcp')
+        os.makedirs(onimcp, exist_ok=True)
+        old, e2e.ws_mods = e2e.ws_mods, lambda: self.FakeWs
+        try:
+            player = e2e.Player('ours', os.path.join(root, 'run'), {'E2E_ONIMCP': onimcp}, None, e2e.Lane(3, None),
+                                ['929139073', '1863428350'], translation=translation)
+        finally:
+            e2e.ws_mods = old
+        with open(os.path.join(player.profile, 'mods', 'mods.json')) as f:
+            mods = json.load(f)['mods']
+        with open(os.path.join(player.profile, 'kplayerprefs.yaml')) as f:
+            prefs = yaml.safe_load(f)
+        return [(m['label']['id'], m['enabled'], m['enabledForDlc']) for m in mods[:2]], prefs
+
+    def test_the_translation_disabled_and_its_language_in_the_prefs(self):
+        with tempfile.TemporaryDirectory() as root:
+            mods, prefs = self.player(root, '929139073')
+            self.assertEqual(mods, [('929139073', False, []), ('1863428350', True, ['', 'EXPANSION1_ID'])])
+            self.assertEqual(prefs['strings'], {'SelectedLanguageType': 'UGC', 'InstalledLanguage': '929139073'})
+            self.assertEqual(prefs['ints']['ResolutionWidth'], e2e.WIDTH)
+
+    def test_without_translation_the_prefs_pick_no_language(self):
+        with tempfile.TemporaryDirectory() as root:
+            mods, prefs = self.player(root, None)
+            self.assertEqual(prefs['strings'], {})
+            # Still disabled: a player picks it on the Translations screen.
+            self.assertEqual(mods, [('929139073', False, []), ('1863428350', True, ['', 'EXPANSION1_ID'])])
+
+    def test_translation_names_one_of_the_mods(self):
+        self.assertIn('`translation` names one of `mods`',
+                      e2e.check_spec({'from': 'main-menu', 'mods': [1], 'translation': 2, 'steps': []}))
+        self.assertEqual(e2e.check_spec({'from': 'main-menu', 'mods': [929139073], 'translation': 929139073,
+                                         'steps': []}), [])
+
+
 class SpacedOut(unittest.TestCase):
     """Which mode a spec's players run in: its `spaced_out`, else its fixture's header."""
 

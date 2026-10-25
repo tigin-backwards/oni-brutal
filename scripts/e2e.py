@@ -138,7 +138,7 @@ def ws_mods():
 # ---------------------------------------------------------------- specs
 
 TOP_KEYS = {'name', 'from', 'mods', 'options', 'setup', 'steps', 'require_log', 'mask_text', 'tolerance',
-            'thresholds', 'ignore_fields', 'memory_gb', 'spaced_out'}
+            'thresholds', 'ignore_fields', 'memory_gb', 'spaced_out', 'translation'}
 # `from: main-menu` loads no fixture: the steps start at the main menu (a new game's spec).
 MAIN_MENU = 'main-menu'
 # Steps that talk to E2eDriver (a spec with any of them needs it installed).
@@ -283,6 +283,8 @@ def check_spec(spec):
     mods = spec.get('mods', [])
     if not isinstance(mods, list) or not all(re.fullmatch(r'\d+', str(m)) for m in mods):
         problems.append('`mods` is a list of Workshop IDs')
+    elif 'translation' in spec and str(spec['translation']) not in [str(m) for m in mods]:
+        problems.append('`translation` names one of `mods`')
     options = spec.get('options', {})
     if not isinstance(options, dict) or not all(isinstance(v, dict) for v in options.values()):
         problems.append('`options` maps a static ID to {Field: value}')
@@ -1264,6 +1266,39 @@ class Input:
     def _flush(self):
         self.x11.XFlush(self.dpy)
 
+    def grab(self, path):
+        """The display's whole screen as a PNG at PATH (XGetImage of the root window): what the
+        player shows where OniMcp takes no screenshot (the main menu, before a colony exists)."""
+        x11 = self.x11
+        x11.XGetImage.argtypes = [ctypes.c_void_p, ctypes.c_ulong, ctypes.c_int, ctypes.c_int, ctypes.c_uint,
+                                  ctypes.c_uint, ctypes.c_ulong, ctypes.c_int]
+        x11.XGetImage.restype = ctypes.c_void_p
+        x11.XDefaultScreen.argtypes = [ctypes.c_void_p]
+        x11.XDisplayWidth.argtypes = x11.XDisplayHeight.argtypes = [ctypes.c_void_p, ctypes.c_int]
+        x11.XSync(self.dpy, 0)
+        screen = x11.XDefaultScreen(self.dpy)
+        image = x11.XGetImage(self.dpy, x11.XDefaultRootWindow(self.dpy), 0, 0, x11.XDisplayWidth(self.dpy, screen),
+                              x11.XDisplayHeight(self.dpy, screen), ctypes.c_ulong(-1).value, 2)  # AllPlanes, ZPixmap
+        if not image:
+            raise SpecFailure(f'cannot read the screen of {self.display}')
+        try:
+            # XImage: int width, height, xoffset, format; char *data; int byte_order, bitmap_unit,
+            # bitmap_bit_order, bitmap_pad, depth, bytes_per_line, bits_per_pixel; ...
+            ints = (ctypes.c_int * 4).from_address(image)
+            data = ctypes.c_void_p.from_address(image + 16).value
+            depth, stride, bpp = (ctypes.c_int * 7).from_address(image + 24)[4:7]
+            width, height = ints[0], ints[1]
+            if bpp != 32 or depth < 24:
+                raise SpecFailure(f'{self.display}: a {depth}-bit screen at {bpp} bits a pixel')
+            from PIL import Image
+            pixels = ctypes.string_at(data, stride * height)
+            Image.frombuffer('RGB', (width, height), pixels, 'raw', 'BGRX', stride, 1).save(path)
+        finally:
+            x11.XFree.argtypes = [ctypes.c_void_p]
+            x11.XFree(ctypes.c_void_p.from_address(image + 16).value)
+            x11.XFree(image)
+        return path
+
     def keycode(self, name):
         keysym = self.x11.XStringToKeysym(name.encode())
         if not keysym and len(name) == 1:
@@ -1420,11 +1455,31 @@ def display_ready(number):
 _xvfb_start = threading.Lock()
 
 
+def translation_only(folder):
+    """Whether a mod folder is a translation: a .po file at its root (KMod's Translation
+    content, whatever the case of its name) and no assembly anywhere."""
+    if not os.path.isdir(folder) or not any(f.lower().endswith('.po') and os.path.isfile(os.path.join(folder, f))
+                                            for f in os.listdir(folder)):
+        return False
+    return not any(f.lower().endswith('.dll') for _, _, files in os.walk(folder) for f in files)
+
+
+def translation_prefs(mod):
+    """kplayerprefs.yaml's strings: none, or the language a translation mod installs (`translation`).
+    The Translations screen saves these two when a player picks a mod's language, and
+    Localization.Initialize loads that mod's strings.po at the next start, whatever the mod's
+    distribution platform (its label id, the Workshop ID of a Local mod)."""
+    if mod is None:
+        return 'strings: {}\n'
+    return f"strings:\n  SelectedLanguageType: UGC\n  InstalledLanguage: '{mod}'\n"
+
+
 class Player:
     """One player process on its own display, with a scratch profile holding OniMcp, E2eDriver,
     the spec's mods and options, and a fixture."""
 
-    def __init__(self, kind, out, env, fixture, lane, mods=(), options=None, driver=False, expansion1=True):
+    def __init__(self, kind, out, env, fixture, lane, mods=(), options=None, driver=False, expansion1=True,
+                 translation=None):
         self.kind, self.out, self.env, self.lane = kind, out, env, lane
         self.home = os.path.join(out, 'home')
         self.profile = os.path.join(self.home, *PROFILE)
@@ -1447,14 +1502,18 @@ class Player:
                        'GlobalAutoDisinfectDisabled': False, 'AutoDismissTutorialNotifications': False,
                        'ToolTextFormat': 'json'}, f)
         with open(os.path.join(self.profile, 'kplayerprefs.yaml'), 'w') as f:
-            f.write(f'strings: {{}}\nints:\n  ResolutionWidth: {WIDTH}\n  ResolutionHeight: {HEIGHT}\n'
+            f.write(translation_prefs(translation) + f'ints:\n  ResolutionWidth: {WIDTH}\n  ResolutionHeight: {HEIGHT}\n'
                     '  RefreshRateNumerator: 60\n  RefreshRateDenominator: 1\n  FullScreen: 0\n'
                     # DlcManager reads Spaced Out as on unless this says 0.
                     + ('' if expansion1 else '  EXPANSION1_ID.ENABLED: 0\n') + 'floats: {}\n')
 
     def install_mods(self, ids, driver):
         """The spec's Workshop mods as Local mods (ws-mods.py profile), then OniMcp and E2eDriver;
-        returns {folder: staticID}."""
+        returns {folder: staticID}. A translation (translation_only) is installed and left
+        disabled, as a subscription leaves a new mod: KMod loads no content of an enabled
+        translation (its Mod.LoadTranslations returns false), so it would mark an enabled one as
+        failed and disable it, with a load error dialog at the main menu. Its language is picked
+        on the Translations screen, or by the spec's `translation` (translation_prefs)."""
         mods_dir = os.path.join(self.profile, 'mods')
         entries = []
         if ids:
@@ -1462,6 +1521,9 @@ class Player:
             ws.profile(mods_dir, ids)
             with open(os.path.join(mods_dir, 'mods.json')) as f:
                 entries = json.load(f)['mods']
+            for entry in entries:
+                if translation_only(os.path.join(mods_dir, 'Local', entry['label']['id'])):
+                    entry['enabled'], entry['enabledForDlc'] = False, []
             hash_of = ws.mono_hash
         else:
             hash_of = None
@@ -2147,6 +2209,19 @@ class Run:
         self.need_input().click(*element.center, button=button, mods=mods, double=double)
         return element
 
+    def at_main_menu(self):
+        """Whether the player shows the front end (the main menu and its screens, no colony),
+        where OniMcp takes no screenshot."""
+        return bool(self.driver and self.driver.find(path='SceneInitializerFE/FrontEndManager', limit=1))
+
+    def menu_grab(self, name):
+        """A front-end shot: the lane's display grabbed (Input.grab), a frame after the pointer
+        moved away."""
+        if not (self.player and self.player.display):
+            raise SpecFailure(f'shot {name}: the main menu is shot from a lane display')
+        self.frames(5)
+        return self.need_input().grab(os.path.join(self.out, name + '.png'))
+
     def pointer_away(self):
         """The pointer off the UI before a shot (§5.4)."""
         if self.player and self.player.display:
@@ -2472,7 +2547,7 @@ class Run:
                 raise SpecFailure(f'shot {name}: crop {value["crop"]} is empty ({meta["crop"]})')
         if value.get('mask'):
             meta['masks'] = self.rects(value['mask'])
-        path = screenshot(self.mcp, self.out, name)
+        path = self.menu_grab(name) if self.at_main_menu() else screenshot(self.mcp, self.out, name)
         if not path:
             raise SpecFailure(f'shot {name}: OniMcp made no screenshot')
         meta['file'] = os.path.basename(path)
@@ -2528,7 +2603,7 @@ class Run:
             if fixture and not os.path.exists(fixture):
                 raise SpecFailure(f'no fixture {fixture}')
             self.player = Player(self.kind, self.out, self.env, fixture, self.lane, spec['mods'], spec.get('options'),
-                                 driver=uses_driver, expansion1=spaced_out(spec))
+                                 driver=uses_driver, expansion1=spaced_out(spec), translation=spec.get('translation'))
             records = open(os.path.join(self.out, 'results.jsonl'), 'w')
             started = time.time()
             self.player.start()

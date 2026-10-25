@@ -1,0 +1,36 @@
+# The Translations screen with a translation mod installed as a Local mod (German Translation,
+# 929139073), as a player picks a language from it. Not a mod's record (it is not run with
+# --record): the mods' specs set the language through `translation:`, which writes the same two
+# prefs this screen's restart button writes (SelectedLanguageType UGC, InstalledLanguage the
+# mod's id; checked by hand in both players, mod-play-testing.md, "Translations").
+#
+# From a first start (the intro short plays: closed): Translations lists the game's languages
+# and the mod (any installed mod with a strings.po, whatever its platform, enabled or not).
+# Clicking the mod opens the restart dialog in the mod's language and font; Cancel keeps the
+# game's language. Restart itself quits the player, which a spec cannot follow.
+from: main-menu
+mods: [929139073]
+steps:
+  - ui_wait: {path: "**/VideoScreen/CloseButton", cond: stable, frames: 3000}
+  - click: {ui: "**/VideoScreen/CloseButton"}
+  - ui_wait: {path: "**/VideoScreen", cond: gone, frames: 600}
+  - ui_wait: {path: "**/MainMenu_SpacedOut/MainMenuMenubar/MainMenuButtons", cond: stable, frames: 3000}
+  # Translations: the fifth of New Game, Load Game, Colony Summaries, Supply Closet,
+  # Translations, Mods, Options, Quit.
+  - click: {ui: "**/MainMenuButtons/ButtonTemplate", index: 4}
+  - ui_wait: {path: "**/LanguageOptionsMenu/Content", cond: stable}
+  - expect_ui:
+      "**/LanguageOptionsMenu/**/929139073_button": {active: true}
+      "**/LanguageOptionsMenu/**/*_button": {count: 5}
+  - ui_dump: {name: languages, root: "**/LanguageOptionsMenu/Content"}
+  - shot: {name: languages, crop: "**/LanguageOptionsMenu/Content/ScrollWindow"}
+  - click: {ui: "**/LanguageOptionsMenu/**/929139073_button"}
+  - ui_wait: {path: "**/ConfirmDialog/GameObject/Panel", cond: stable}
+  - expect_ui:
+      "**/ConfirmDialog/GameObject/Panel/OKButton/*": {any_text: "NEUSTART"}
+  - ui_dump: {name: restart, root: "**/ConfirmDialog/GameObject/Panel"}
+  - shot: {name: restart, crop: "**/ConfirmDialog/GameObject/Panel"}
+  - click: {ui: "**/ConfirmDialog/GameObject/Panel/CancelButton"}
+  - ui_wait: {path: "**/ConfirmDialog", cond: gone}
+  - expect_state:
+      "Localization.GetLocale()": missing   # no language loaded: the game's own strings

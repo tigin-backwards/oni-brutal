@@ -60,6 +60,29 @@ class Xtest(unittest.TestCase):
         self.input.type_text('e2e-Blueprint_1!')
         self.assertFalse(any(self.pressed(n) for n in ('Shift_L', 'Control_L', 'b')))
 
+    def test_grab(self):
+        """The screen read back as a PNG of its size: the root window painted one colour first
+        (a 24-bit screen: xvfb-run -a -s '-screen 0 320x200x24')."""
+        import tempfile
+        from PIL import Image
+        x11, dpy = self.x11, self.input.dpy
+        x11.XSetWindowBackground.argtypes = [ctypes.c_void_p, ctypes.c_ulong, ctypes.c_ulong]
+        x11.XClearWindow.argtypes = [ctypes.c_void_p, ctypes.c_ulong]
+        x11.XDefaultScreen.argtypes = [ctypes.c_void_p]
+        x11.XDefaultDepth.argtypes = [ctypes.c_void_p, ctypes.c_int]
+        if x11.XDefaultDepth(dpy, x11.XDefaultScreen(dpy)) != 24:
+            self.skipTest('needs a 24-bit screen')
+        root = x11.XDefaultRootWindow(dpy)
+        x11.XSetWindowBackground(dpy, root, 0xFF8020)
+        x11.XClearWindow(dpy, root)
+        with tempfile.TemporaryDirectory() as folder:
+            path = self.input.grab(os.path.join(folder, 'screen.png'))
+            with Image.open(path) as image:
+                x11.XDisplayWidth.argtypes = x11.XDisplayHeight.argtypes = [ctypes.c_void_p, ctypes.c_int]
+                screen = x11.XDefaultScreen(dpy)
+                self.assertEqual(image.size, (x11.XDisplayWidth(dpy, screen), x11.XDisplayHeight(dpy, screen)))
+                self.assertEqual(image.convert('RGB').getpixel((5, 5)), (0xFF, 0x80, 0x20))
+
 
 if __name__ == '__main__':
     unittest.main()

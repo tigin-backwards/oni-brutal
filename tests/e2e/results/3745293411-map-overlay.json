@@ -1,0 +1,94 @@
+{
+ "spec": "mods/3745293411-map-overlay.yaml",
+ "mods": [
+  "3745293411"
+ ],
+ "verdict": "warning",
+ "why": "known findings: scroll-normalized-position",
+ "findings": [
+  "scroll-normalized-position"
+ ],
+ "note": "the overlay bar's Map Overlay toggle clicked: its mode on, its legend lists early-base's Liquid Sulfur Geyser (dumped, as in the original), the world drawn in its colours within the world-shot threshold; the legend's Biomes filter clicked: the legend lists the biomes around, the world redrawn by zone colour",
+ "updated": "2026-10-24",
+ "commit": "42c7d0c",
+ "mod_dlls": {
+  "3745293411": {
+   "MapOverlay.dll": "1e4e310a7426541d70cd14aa7e042fe6d17024e7a0939c7238fa9d193b685e9e",
+   "PLib.dll": "3dc9bc06c6b54660b833d314192e6b34c578754facc6aff3c7e803b5cdc6616e"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261024-225821-b9126730",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-24T22:59:56",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261024-230116-345c51e1",
+    "index": 1,
+    "verdict": "warn",
+    "date": "2026-10-24T23:01:16",
+    "lane": 16,
+    "reference_run": "20261024-225821-b9126730",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "geysers": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     },
+     "biomes": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "geysers": 0.0,
+     "biomes": 0.0
+    }
+   },
+   {
+    "run": "20261024-230116-345c51e1",
+    "index": 2,
+    "verdict": "warn",
+    "date": "2026-10-24T23:01:32",
+    "lane": 17,
+    "reference_run": "20261024-225821-b9126730",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "geysers": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     },
+     "biomes": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "geysers": 5e-06,
+     "biomes": 1e-06
+    }
+   }
+  ]
+ }
+}

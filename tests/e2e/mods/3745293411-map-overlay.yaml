@@ -1,0 +1,41 @@
+# Map Overlay_repair (3745293411), classes P, S, V (an overlay, a repair of 2271373459).
+#
+# What it does: a Map Overlay in the overlay bar (an OverlayMenu.InitializeToggles postfix adds
+# its toggle, an OverlayScreen.RegisterModes postfix its mode): the world drawn in flat colours
+# by the current filter, Geysers (by their output element's colour), Buildings (Gravitas
+# props, the pod, warp portals), Critters, Plants or Biomes (by zone colour), each object
+# listed in the legend with its colour; the legend's filters switch between them. PLib options
+# reveal buried geysers and critters and count objects in the legend.
+# How a player reaches it: the overlay bar's Map Overlay toggle; the legend's filter buttons.
+# What changes: a new overlay, nothing in the world.
+#
+# In early-base: the Map Overlay toggle is clicked, the overlay's mode is on and its legend
+# lists what the Geysers filter finds (early-base's Liquid Sulfur Geyser); the world is shot in
+# the overlay. The legend's Biomes filter is clicked and the legend lists the biomes around.
+from: early-base
+mods: [3745293411]
+steps:
+  - expect_ui:
+      "**/OverlaysBarHolder/OverlaysBar/Toggle:Map Overlay": {exists: true}
+  - driver: {camera.set: {cell: [124, 209], ortho: 30}}
+  - click: {ui: "**/OverlaysBarHolder/OverlaysBar/Toggle:Map Overlay"}
+  - run: {seconds: 1}
+  - expect_state:
+      "OverlayScreen.Instance.mode.ToString()": "== original"
+      "type:MapOverlay.MapOverlay::ColorMap.Count": "> 0"
+  - ui_wait: {path: "**/TopRight/OverlayLegend", cond: stable}
+  - expect_ui:
+      "**/TopRight/OverlayLegend/TitleBar/Label": {text: "Map Overlay"}
+      "**/OverlayLegend/Scrollrect/Content/ActiveUnits/UnitPrefab/Description": {any_text: "~Liquid Sulfur Geyser"}
+  - ui_dump: {name: geysers, root: "**/TopRight/OverlayLegend"}
+  - world_shot: {name: geysers, ortho: 30, at: [124, 209]}
+  # The legend's first filter, Biomes.
+  - click: {ui: "**/OverlayLegend/Scrollrect/Content/OverlayParamaterMenu/Content/List/toggleEntry/Toggle", index: 0}
+  - run: {seconds: 1}
+  - ui_wait: {path: "**/TopRight/OverlayLegend", cond: stable}
+  - expect_ui:
+      "**/OverlayLegend/Scrollrect/Content/ActiveUnits/UnitPrefab/Description": {any_text: "~Sandstone"}
+  - expect_state:
+      "type:MapOverlay.MapOverlay::ColorMap.Count": "== original"
+  - ui_dump: {name: biomes, root: "**/TopRight/OverlayLegend"}
+  - world_shot: {name: biomes, ortho: 30, at: [124, 209]}

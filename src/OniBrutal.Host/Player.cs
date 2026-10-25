@@ -80,6 +80,7 @@ namespace OniBrutal.Host
                 StartupStats.FrameEnd(frame);
                 StartupProgress.FrameEnded(frame);
                 if (options.LogPointerHits) PointerHitLog.Frame(frame);
+                TestHang.Frame(frame);
                 frame++;
                 Throttle(clock, now, platform != null, frame <= options.MaxFrameRateFrames ? options.MaxFrameRate : 0);
             }

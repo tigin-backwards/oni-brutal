@@ -4,7 +4,7 @@ An unofficial, super fast, super sussy replacement for the Unity layer of Oxygen
 artisanally crafted by Claude. On a late-game colony the game runs at about 8× the original's
 frame rate ([Performance](#performance)).
 
-<img src="docs/images/moo-comet.webp" alt="A Gassy Moo falling as a comet" height="128">
+<p align="center"><img src="docs/images/moo-comet.webp" alt="A Gassy Moo falling as a comet" height="240"></p>
 
 I did this mostly for fun, to see how far Oxygen Not Included's performance can go on a modern
 .NET runtime (CoreCLR). I've had the idea for a while, but none of the existing C# renderers

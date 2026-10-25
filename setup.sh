@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# One-time setup for playing Oxygen Not Included on oni-brutal (Linux).
+# One-time setup for playing Oxygen Not Included on Moono (Linux).
 #
 # Finds the game through Steam's libraries, builds the player into out/player when run from a
 # clone of the repository (a release has it in player/ beside this script), and prints the line
@@ -26,13 +26,14 @@ find_game()
     done
 }
 
+say "Moono: Oxygen Not Included on its own engine (unofficial). Setup."
 game="${1:-$(find_game)}"
 [ -n "$game" ] || die "Oxygen Not Included wasn't found in any Steam library; install it, or pass its directory: ./setup.sh /path/to/OxygenNotIncluded"
 [ -d "$game/OxygenNotIncluded_Data/Managed" ] || die "$game isn't an Oxygen Not Included install (no OxygenNotIncluded_Data/Managed)"
 [ -x "$game/OxygenNotIncluded" ] || die "$game is the Windows build; on Linux, Steam has to install the Linux one"
 say "Game: $game"
 
-if [ -x "$here/player/OniBrutal" ]; then
+if [ -x "$here/player/OniMoono" ]; then
     player="$here/player" # a release
 else
     # A .NET SDK of the version global.json pins (a later patch release works too): one already
@@ -79,8 +80,8 @@ if [ -z "$sandbox" ]; then
     esac
 fi
 case "$sandbox" in
-    flatpak) inside="$HOME/.var/app/com.valvesoftware.Steam/data/oni-brutal/player" ;;
-    snap) inside="$HOME/snap/steam/common/oni-brutal/player" ;;
+    flatpak) inside="$HOME/.var/app/com.valvesoftware.Steam/data/oni-moono/player" ;;
+    snap) inside="$HOME/snap/steam/common/oni-moono/player" ;;
     *) inside="" ;;
 esac
 if [ -n "$inside" ]; then
@@ -90,7 +91,7 @@ if [ -n "$inside" ]; then
     say "Steam runs as a $sandbox here: the player is installed where it can see it ($player)."
 fi
 
-launch="\"$player/OniBrutal\" -- %command%"
+launch="\"$player/OniMoono\" -- %command%"
 
 # What each Steam account here has as the game's launch options, read (never written) from its
 # localconfig.vdf: Steam keeps them under Software/Valve/Steam/apps/457140, and the account's
@@ -135,32 +136,49 @@ done
 # One Steam install can be reached through several of those paths (~/.steam/steam is a link).
 accounts=$(printf '%s' "$accounts" | sort -u)
 # Set: the options start this player for the game (other options of the user's may be there too).
-is_set() { [[ "$1" == *"\"$player/OniBrutal\""* && "$1" == *"%command%"* ]]; }
+is_set() { [[ "$1" == *"\"$player/OniMoono\""* && "$1" == *"%command%"* ]]; }
+# Old: the options start the player from before the Moono name (oni-brutal's OniBrutal).
+old_player() { [[ "$1" == *"/OniBrutal\""* && "$1" == *"%command%"* ]] && { local p=${1%%/OniBrutal\"*}; printf '%s' "${p##*\"}"; }; }
+old_dirs=""
 found=0; unset_count=0
 while IFS=$'\t' read -r persona options; do
     [ -n "$persona$options" ] || continue
     found=1
     is_set "$options" || unset_count=$((unset_count + 1))
+    old=$(old_player "$options") && [ -n "$old" ] && old_dirs+="$old"$'\n'
 done <<< "$accounts"
+# The old install's folder, which this setup leaves alone: the sandbox's (oni-brutal beside
+# oni-moono) and those the old launch options name, when they are not this player's.
+[ -n "$inside" ] && old_dirs+="$(dirname "$(dirname "$inside")")/oni-brutal"$'\n'
+old_note()
+{
+    local dir
+    while IFS= read -r dir; do
+        [ -n "$dir" ] && [ -d "$dir" ] && [ "$dir" != "$player" ] || continue
+        say "The old oni-brutal player in $dir isn't used any more and can be deleted."
+    done < <(printf '%s' "$old_dirs" | sort -u)
+}
 
 say ""
 while IFS=$'\t' read -r persona options; do
     [ -n "$persona$options" ] || continue
     if is_set "$options"; then
-        say "Steam already starts Oxygen Not Included on oni-brutal for $persona."
-        # Options from before the Brutal Tweaks screen: they still work, and win over the screen.
+        say "Steam already starts Oxygen Not Included on Moono for $persona."
+        # Options from before the Moono Tweaks screen: they still work, and win over the screen.
         if [[ "$options" == *"--game-tweak"* || "$options" == *"--splash"* || "$options" == *"--frame-stats"* ]]; then
-            say "  Its launch options choose the tweaks, so the game's Brutal Tweaks screen can't change those."
+            say "  Its launch options choose the tweaks, so the game's Moono Tweaks screen can't change those."
             say "  To choose them in the game instead, set the launch options to: $launch"
         fi
+    elif [ -n "$(old_player "$options")" ]; then say "$persona: the launch options point at the old oni-brutal install; paste the new line."
     elif [ -n "$options" ]; then say "$persona: the launch options are set to something else: $options"
     else say "$persona: no launch options yet."
     fi
 done <<< "$accounts"
 if [ $found -eq 1 ] && [ $unset_count -eq 0 ]; then
     say ""
-    say "Done. Nothing else to do: press Play in Steam. The optional tweaks are on the main menu: Brutal Tweaks."
+    say "Done. Nothing else to do: press Play in Steam. The optional tweaks are on the main menu: Moono Tweaks."
     say "To play the original game again, clear the launch options (right-click Oxygen Not Included → Properties)."
+    old_note
     exit 0
 fi
 
@@ -180,5 +198,6 @@ fi
 say ""
 say "    $launch"
 say ""
-say "Then press Play as usual. The optional tweaks are on the main menu: Brutal Tweaks."
+say "Then press Play as usual. The optional tweaks are on the main menu: Moono Tweaks."
 say "To play the original game again, clear the launch options."
+old_note

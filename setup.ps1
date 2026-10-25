@@ -1,8 +1,8 @@
-# One-time setup for playing Oxygen Not Included on oni-brutal (Windows).
+# One-time setup for playing Oxygen Not Included on Moono (Windows).
 #
 # Finds the game through Steam's libraries, builds the player when run from a copy of the
 # repository (a release has it in player\ beside this script), installs it to
-# %LOCALAPPDATA%\oni-brutal\player, and puts the line for the game's Steam launch options on the
+# %LOCALAPPDATA%\oni-moono\player, and puts the line for the game's Steam launch options on the
 # clipboard unless every Steam account here already has it (read from Steam's localconfig.vdf,
 # never written). The install location stays the same, so after an update running this again is all
 # that is needed.
@@ -33,12 +33,13 @@ function Find-Game {
     return $null
 }
 
+Write-Host 'Moono: Oxygen Not Included on its own engine (unofficial). Setup.'
 if (-not $Game) { $Game = Find-Game }
 if (-not $Game) { Die "Oxygen Not Included wasn't found in any Steam library; install it, or pass its directory: setup.ps1 'C:\path\to\OxygenNotIncluded'" }
 if (-not (Test-Path (Join-Path $Game 'OxygenNotIncluded_Data\Managed'))) { Die "$Game isn't an Oxygen Not Included install (no OxygenNotIncluded_Data\Managed)" }
 Write-Host "Game: $Game"
 
-if (Test-Path (Join-Path $here 'player\OniBrutal.exe')) {
+if (Test-Path (Join-Path $here 'player\OniMoono.exe')) {
     $built = Join-Path $here 'player' # a release
 } elseif (-not (Test-Path (Join-Path $here 'global.json'))) {
     # Opened from inside the zip, Explorer runs this script alone from a temporary folder.
@@ -79,13 +80,15 @@ if (Test-Path (Join-Path $here 'player\OniBrutal.exe')) {
 }
 
 # Installed to one place, so the launch options never change.
-$player = Join-Path $env:LOCALAPPDATA 'oni-brutal\player'
-if (Get-Process -Name OniBrutal -ErrorAction SilentlyContinue) { Die 'the game is running on oni-brutal; quit it first' }
+$player = Join-Path $env:LOCALAPPDATA 'oni-moono\player'
+# The player from before the Moono name: left alone, but no longer used.
+$oldPlayer = Join-Path $env:LOCALAPPDATA 'oni-brutal'
+if (Get-Process -Name OniMoono, OniBrutal -ErrorAction SilentlyContinue) { Die 'the game is running on Moono; quit it first' }
 if (Test-Path $player) { Remove-Item -Recurse -Force $player }
 New-Item -ItemType Directory -Force (Split-Path $player) | Out-Null
 Copy-Item -Recurse $built $player
 
-$exe = Join-Path $player 'OniBrutal.exe'
+$exe = Join-Path $player 'OniMoono.exe'
 $launch = "`"$exe`" -- %command%"
 
 # What each Steam account on this machine has as the game's launch options, read (never written)
@@ -118,11 +121,16 @@ if ($steam) {
 }
 # Set: the options start this player for the game (other options of the user's may be there too).
 function Is-Set($options) { $options -and $options.Contains("`"$exe`"") -and $options.Contains('%command%') }
-# Options from before the Brutal Tweaks screen: they still work, and win over the screen.
+# Old: the options start the player from before the Moono name (oni-brutal's OniBrutal.exe).
+function Is-Old($options) { $options -and $options -match '\\OniBrutal\.exe"' -and $options.Contains('%command%') }
+function Old-Note {
+    if (Test-Path $oldPlayer) { Write-Host "The old oni-brutal player in $oldPlayer isn't used any more and can be deleted." }
+}
+# Options from before the Moono Tweaks screen: they still work, and win over the screen.
 function Says-Set($a) {
-    Write-Host "Steam already starts Oxygen Not Included on oni-brutal for $($a.Persona)." -ForegroundColor Green
+    Write-Host "Steam already starts Oxygen Not Included on Moono for $($a.Persona)." -ForegroundColor Green
     if ($a.Options -match '--game-tweak|--splash|--frame-stats') {
-        Write-Host "  Its launch options choose the tweaks, so the game's Brutal Tweaks screen can't change those."
+        Write-Host "  Its launch options choose the tweaks, so the game's Moono Tweaks screen can't change those."
         Write-Host "  To choose them in the game instead, set the launch options to: $launch"
     }
 }
@@ -132,12 +140,14 @@ Write-Host ''
 if ($accounts.Count -gt 0 -and $unset.Count -eq 0) {
     foreach ($a in $accounts) { Says-Set $a }
     Write-Host ''
-    Write-Host 'Done. Nothing else to do: press Play in Steam. The optional tweaks are on the main menu: Brutal Tweaks.'
+    Write-Host 'Done. Nothing else to do: press Play in Steam. The optional tweaks are on the main menu: Moono Tweaks.'
     Write-Host 'To play the original game again, clear the launch options (right-click Oxygen Not Included -> Properties).'
+    Old-Note
     Finish 0
 }
 foreach ($a in $accounts) {
     if (Is-Set $a.Options) { Says-Set $a }
+    elseif (Is-Old $a.Options) { Write-Host "$($a.Persona): the launch options point at the old oni-brutal install; paste the new line." -ForegroundColor Yellow }
     elseif ($a.Options) { Write-Host "$($a.Persona): the launch options are set to something else: $($a.Options)" -ForegroundColor Yellow }
     else { Write-Host "$($a.Persona): no launch options yet." -ForegroundColor Yellow }
 }
@@ -149,6 +159,7 @@ Write-Host 'Properties -> Launch Options, and paste them with Ctrl+V. They are:'
 Write-Host ''
 Write-Host "    $launch" -ForegroundColor Green
 Write-Host ''
-Write-Host 'Then press Play as usual. The optional tweaks are on the main menu: Brutal Tweaks.'
+Write-Host 'Then press Play as usual. The optional tweaks are on the main menu: Moono Tweaks.'
 Write-Host 'To play the original game again, clear the launch options.'
+Old-Note
 Finish 0

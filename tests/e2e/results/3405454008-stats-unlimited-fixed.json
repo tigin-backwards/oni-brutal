@@ -6,9 +6,9 @@
  "verdict": "played",
  "why": "passed once in the original and twice in ours",
  "findings": [],
- "note": "with digging experience times 1000 set in its StatsUnlimited.json, four cells of sandstone dug west of the pod raise the Duplicants' digging levels by two or more",
- "updated": "2026-10-23",
- "commit": "03f1f83",
+ "note": "with digging experience times 1000 set in its StatsUnlimited.json and 200 Hatches spawned (amounts update on the job workers, issue #15), four cells of sandstone dug west of the pod raise the Duplicants' digging levels by two or more",
+ "updated": "2026-10-25",
+ "commit": "26f0c60",
  "mod_dlls": {
   "3405454008": {
    "StatsUnlimitedSOMerged.dll": "279d61125078ca6540df164abd3a9e754ee931c936c2e897d0e9e4df3ad2c377"
@@ -17,34 +17,34 @@
  "runs": {
   "original": [
    {
-    "run": "20261023-160015-6fa377",
+    "run": "20261025-175209-789aa043",
     "index": 1,
     "verdict": "pass",
-    "date": "2026-10-23T16:20:15",
-    "lane": 16,
+    "date": "2026-10-25T17:52:09",
+    "lane": 26,
     "signatures": 0
    }
   ],
   "ours": [
    {
-    "run": "20261023-162600-87f34c",
+    "run": "20261025-175413-f436e29f",
     "index": 1,
     "verdict": "pass",
-    "date": "2026-10-23T16:26:00",
-    "lane": 16,
-    "reference_run": "20261023-160015-6fa377",
+    "date": "2026-10-25T17:54:13",
+    "lane": 26,
+    "reference_run": "20261025-175209-789aa043",
     "new_signatures": 0,
     "findings": [],
     "ui_dump": {},
     "shots": {}
    },
    {
-    "run": "20261023-162600-87f34c",
+    "run": "20261025-175413-f436e29f",
     "index": 2,
     "verdict": "pass",
-    "date": "2026-10-23T16:31:50",
-    "lane": 16,
-    "reference_run": "20261023-160015-6fa377",
+    "date": "2026-10-25T17:55:32",
+    "lane": 26,
+    "reference_run": "20261025-175209-789aa043",
     "new_signatures": 0,
     "findings": [],
     "ui_dump": {},

@@ -1,0 +1,16 @@
+# Taiwanese Language Patch (2070840646).
+#
+# What it does: a Traditional Chinese translation with its own font and terms, and patches to the
+# language screen, news and name labels.
+# How a player reaches it: the main menu's Translations screen.
+#
+# Broken upstream: one of its patches names `MotdServerClient`, a type the game no longer has, so
+# its assembly fails to load (TypeLoadException), the game disables it and the game quits before
+# the colony loads. The spec checks that it is enabled, then runs the colony.
+from: early-base
+mods: [2070840646]
+steps:
+  - expect_state:
+      "count:Global.Instance.modManager.mods[*] if .label.id == 2070840646 and .IsEnabledForActiveDlc() == true": 1
+  - run: {seconds: 30}
+  - expect: {duplicants: 3}

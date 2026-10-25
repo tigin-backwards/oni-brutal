@@ -251,6 +251,7 @@ broken.update({
 })
 # Flagged by onimaxxing; they load, and their e2e specs fail the same way in the original.
 broken.update({
+    '2070840646': 'broken upstream: one of its patches names `MotdServerClient`, a type the game no longer has, so it fails to load (TypeLoadException), the game disables it and the game quits before the colony loads (spec tests/e2e/mods/2070840646-taiwanese-language-patch.yaml)',
     '2997749628': 'broken upstream: its ChoreConsumerPatch names a ChoreConsumer method the game no longer has, so Harmony throws ("Undefined target method") while the game creates its prefabs and the game quits before the colony loads; a multiplayer session (two Steam accounts) was not tried (spec tests/e2e/mods/2997749628-multiplayer-mod.yaml)',
     '1932765859': 'broken upstream: its ScheduleScreenEntry.Setup prefix takes `___optionsPanel` and `___optionsButton`, fields the game no longer has, so Harmony throws ("No such field defined in class ScheduleScreenEntry"), the game disables it ("Failed to load mod ...disabling") and the game quits before the colony loads (spec tests/e2e/mods/1932765859-schedule-shift.yaml)',
     '1732501619': 'broken upstream: its lamps are built of `TUNING.MATERIALS.TRANSPARENTS`, which the game no longer has, so each fails in RegisterBuilding (MissingFieldException) and the game quits before the colony loads (spec tests/e2e/mods/1732501619-decor-lights.yaml)',

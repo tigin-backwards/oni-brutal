@@ -1,0 +1,49 @@
+{
+ "spec": "mods/2070840646-taiwanese-language-patch.yaml",
+ "mods": [
+  "2070840646"
+ ],
+ "verdict": "pending",
+ "why": "the spec fails in the original: a broken spec, or a mod broken upstream",
+ "findings": [],
+ "note": "",
+ "updated": "2026-10-25",
+ "commit": "2eebd68",
+ "mod_dlls": {
+  "2070840646": {
+   "TraditionalChinese.dll": "ac3137bcf8f8058e3d855020e5996bd6653f7e2b09b7cf53fe897c3b598cc539"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-065627-2d9e4703",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-25T06:58:30",
+    "lane": 16,
+    "reasons": [
+     "step start: <urlopen error [Errno 111] Connection refused>"
+    ],
+    "signatures": 2
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-072656-0e00b788",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-25T07:26:56",
+    "lane": 17,
+    "reasons": [
+     "step start: the player exited (1) before OniMcp started"
+    ],
+    "reference_run": null,
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

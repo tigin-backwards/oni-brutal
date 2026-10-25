@@ -2172,6 +2172,74 @@ and whether anything other than a layout of a non-empty text, such as a font or 
 clears the kept overflow. In passing, "AB\nCD" cut by Ellipsis at 21.76 reports `spaceCount` 1
 in the shipped package and 0 here.
 
+### Heights in the translations' fonts (measured 2026-10-25)
+
+Found in the translations' play-tests (`tests/e2e/mods/*`, a translation picked through the
+language prefs): with a Japanese, Chinese or Korean translation, the Game options screen's
+headers (LocText, 24 pt, NotoSansCJKjp/sc/kr through the translation's font) give their layout
+groups a preferred height 0.01 higher in this implementation: `GameOptionsScreen`'s
+`VerticalLayoutGroup` reports 459.86 where the shipped package's reports 459.84, its rows 191.56
+for 191.55 and its save options 152.3 for 152.29. Nothing differs on screen. The headers' own
+rects are 35.56 high here and 35.55 in the shipped package.
+
+Measured with `PROBE_SCENARIO=textheight` (tools/UnityProbe, `TextHeight.cs`, lines `TH …`),
+at the main menu: 21 labels in Japanese, Chinese, Korean, Thai, Cyrillic, Vietnamese and Latin
+(the Game options screen's headers among them) in NotoSansCJKjp, NotoSansCJKsc, NotoSansCJKkr,
+NotoSansThai, RobotoCondensed and NotoSans, regular, at 12, 14, 16, 18, 20, 24 and 28 pt, set up
+as `SetTextStyleSetting` does (kerning, extra padding), top left in a 400 × 60 rect, unwrapped
+and wrapped, with the rect's top at 30, 0 and 22.2 (pivot 0.5, 1 and 0.63). Each logs the
+preferred height and width with their float bits, `GetPreferredValues`, the first line's
+ascender, descender, baseline and line height, and each character's ascender, descender, scale
+and font asset. `tools/UnityProbe/th-check.py diff ORIG OURS` lists the texts that differ, and
+`th-check.py rule LOG` recomputes each one-line text's preferred height from its line.
+3,528 texts: 368 differ.
+
+- **Heights follow the rule of the widths.** Let h be the line's height as a float: its
+  ascender less its descender. `preferredHeight` is (⌊h × 100⌋ + 1) / 100, with h × 100 taken
+  exactly (in double), as "Preferred sizes to the hundredth" above says for widths. The rule
+  reproduces all 3,528 texts of the shipped package from their logged lines, but the 70 whose
+  rect top is at 22.2: there the logged line is the rect's, and its float rounding makes the
+  reconstruction, not the package, miss; the package gives the same bits at every rect.
+  - At 24 pt every font's line is 35.55 high (NotoSansCJKjp: ascender 34.8125 and descender
+    -9.625 at point size 30, scaled by 0.8; the others reach it through glyphs of the CJK
+    fonts), which as a float is 35.5499992. The shipped package gives 35.55 (3554.99992 floors to
+    3554). This implementation gives 35.56 from the same line (its ascender and descender, the
+    characters' and the rendered height 35.55 have the same bits in both), at every rect top: as
+    if h × 100 were rounded to a float (3555) before the floor. 280 of the 368 differences are
+    this one, in every font at 24 pt, wrapped or not, at every rect top.
+  - No other size measured has a line within a float step under a hundredth, so both agree on
+    the rest.
+- **A line's height comes from its visible characters.** A text set in a font that lacks some of
+  its glyphs takes them from a fallback (here NotoSans-Regular, for Cyrillic in the CJK and Thai
+  fonts). In the shipped package the line's ascender and descender, and so its baseline and
+  height, are those of the fonts of the line's visible characters; the space between the words,
+  which the primary font holds, adds nothing, and its own character info reports the line's
+  ascender and descender, not its font's. In this implementation the space's font counts too:
+  - "Единицы температуры" in NotoSansCJKsc 24 pt (its letters from NotoSans-Regular, its space
+    from NotoSansCJKsc): shipped, line ascender 30, descender -2.625, baseline 4.375 (rect top
+    at 30), height 32.625, preferred 32.63, the letters' ascender 30. Here: descender -5.53125,
+    baseline 2.15625, height 35.53125, preferred 35.54, the letters' ascender 27.78125: the
+    letters sit 2.22 lower.
+  - The same text at 12 pt in NotoSansCJKkr: shipped 16.32 (NotoSans's 12.8125 + 3.5), here
+    17.78 (NotoSansCJKkr's 13.925 + 3.85); in NotoSansThai 12 pt 16.32 and 16.89. It differs
+    at every size and rect in NotoSansCJKsc, NotoSansCJKkr and NotoSansThai (NotoSansCJKjp
+    holds Cyrillic): 84 of the 368 differences.
+  - Not measured: a line of white space alone in such a text, a line whose only visible
+    characters are the primary font's, and fallbacks that are larger than the primary font.
+- **Also seen** (as in "Preferred sizes to the hundredth"): widths a hundredth apart where a
+  pen falls within a float step of a hundredth, NotoSansCJKkr 18 pt "온도 단위" 70.35 shipped
+  and 70.36 here, NotoSansCJKjp 24 pt "Ag" 28.06 and 28.05: 12 texts, 4 of them with the
+  same height.
+
+| Font, size, text | line (ascender, descender; top at 30) | shipped preferred height | this implementation |
+|---|---|---|---|
+| NotoSansCJKjp 24, "全般" (Game options' header) | 30, -5.55 | 35.55 | 35.56 |
+| NotoSansCJKjp 24, "全般", rect top at 0 | 0, -35.55 | 35.55 | 35.56 |
+| NotoSans 24, "General" | 30, -2.625 | 32.63 | 32.63 |
+| NotoSansCJKsc 24, "Единицы температуры" | 30, -2.625 (here -5.53125) | 32.63 | 35.54 |
+| NotoSansCJKkr 12, "Единицы температуры" | 30, 13.6875 (here 12.225) | 16.32 | 17.78 |
+| NotoSansThai 12, "Единицы температуры" | 30, 13.6875 (here 13.113636) | 16.32 | 16.89 |
+
 ## Verification
 
 1. **Build:**

@@ -65,6 +65,19 @@ formatting itself. Compare the players with `tools/UnityProbe/tw-check.py diff O
 check the rounding rule with `tw-check.py rule LOG`; `docs/cleanroom/textmeshpro.md`
 ("Preferred sizes to the hundredth") records what it measured.
 
+With `PROBE_SCENARIO=textheight` only the text-height probe runs (`TextHeight.cs`, lines `TH …`,
+10 s into the main menu): TMP's preferred height and width of 21 labels in the scripts the
+Workshop's translations use (Japanese, Chinese, Korean, Thai, Cyrillic, Vietnamese, Latin) in
+NotoSansCJKjp, NotoSansCJKsc, NotoSansCJKkr, NotoSansThai, RobotoCondensed and NotoSans, at 12
+to 28 pt, set up as `SetTextStyleSetting` does, top left in a 400 × 60 rect, unwrapped and
+wrapped, with the rect's top at 30, 0 and 22.2. Each logs the first line's ascender, descender
+and baseline and each character's ascender, descender, scale and font asset (fallbacks show
+there), then a `TextHeightProbeDone` canvas appears. Compare the players with
+`tools/UnityProbe/th-check.py diff ORIG OURS`, and check the rule with `th-check.py rule LOG`;
+`docs/cleanroom/textmeshpro.md` ("Heights in the translations' fonts") records what it
+measured. It runs through `scripts/e2e.py` with a spec `from: main-menu` that waits for that
+canvas, as the canvas order probe does.
+
 With `PROBE_SCENARIO=textoverflow` only the overflow probe runs (`TextOverflow.cs`, lines `OV …`,
 10 s into the main menu): `isTextOverflowing`, `firstOverflowCharacterIndex`, `isTextTruncated`,
 the `textInfo` counts and each character's code, visibility and line, for texts of white space

@@ -76,3 +76,16 @@
   component: [rect, LocText]
   fields: [rect, world, screen, text, textInfo]
   path: '**/SimpleInfoScreen/**/Descriptors/DescLabel'
+
+- id: text-height-hundredth
+  description: >-
+    A one-line text whose line is 35.55 high (24 pt in NotoSansCJK, NotoSansThai,
+    RobotoCondensed, or NotoSans with CJK glyphs; the float 35.5499992) reports a preferred
+    height of 35.56 in ours, 35.55 in the original, which takes the hundredth rule with h x 100
+    exact (docs/cleanroom/textmeshpro.md, heights in the translations' fonts). The Game options
+    screen's 24 pt headers in the CJK translations show it in their layout groups' preferred
+    heights; no pixel differs.
+  link: docs/cleanroom/textmeshpro.md
+  component: [VerticalLayoutGroup, HorizontalLayoutGroup]
+  fields: [preferredHeight]
+  path: ['**/GameOptionsScreen', '**/GameOptionsScreen/**']

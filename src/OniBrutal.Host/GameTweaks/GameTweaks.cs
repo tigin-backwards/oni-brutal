@@ -9,14 +9,14 @@ namespace OniBrutal.Host.GameTweaks
     /// Optional changes to the game's own code, kept apart from the engine: the engine reproduces
     /// Unity, while these change how Klei's code does something, mostly without changing what it
     /// produces. Each is documented in its class with what it changes and what was measured. Which
-    /// are on comes from the Brutal Tweaks screen's settings file or the command line
+    /// are on comes from the Moono Tweaks screen's settings file or the command line
     /// (`--game-tweak`; EffectiveOptions): by default every tweak but those that change behaviour.
     internal static class GameTweaks
     {
         static bool backgroundSave;
 
         /// OniBrutal.GameTweaks.dll beside the host: the tweaks built against the game's own types,
-        /// and the main menu's Brutal Tweaks screen (BrutalTweaksMenu).
+        /// and the main menu's Moono Tweaks screen (BrutalTweaksMenu).
         public static System.Reflection.Assembly TypedAssembly => typed ??= System.Reflection.Assembly.LoadFrom(System.IO.Path.Combine(AppContext.BaseDirectory, "OniBrutal.GameTweaks.dll"));
         static System.Reflection.Assembly? typed;
 
@@ -78,7 +78,7 @@ namespace OniBrutal.Host.GameTweaks
         /// (no tweak unless one is named, whatever the settings file says: test runs).
         public static bool IsKnown(string name) => name is "all" or "exact" or "none" || Array.IndexOf(All, name.StartsWith('-') ? name.Substring(1) : name) >= 0;
 
-        /// What the Brutal Tweaks screen shows for each tweak: a title and one plain line on what
+        /// What the Moono Tweaks screen shows for each tweak: a title and one plain line on what
         /// it does (a tweak missing here shows its name).
         public static readonly Dictionary<string, (string Title, string Description)> Descriptions = new(StringComparer.Ordinal)
         {

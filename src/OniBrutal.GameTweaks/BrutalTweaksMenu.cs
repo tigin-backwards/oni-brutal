@@ -8,7 +8,7 @@ using UnityEngine.UI;
 
 namespace OniBrutal.GameTweaks
 {
-    /// The main menu's "Brutal Tweaks" button, directly below Mods (above Options when there is no
+    /// The main menu's "Moono Tweaks" button, directly below Mods (above Options when there is no
     /// Mods button), and the screen it opens: the player's options (OniBrutal.Host.BrutalTweaksMenu
     /// gives the rows), each with an on/off toggle, saved to the player's settings file and applied
     /// by the game's own restart (App.Restart, through the player's Restarter).
@@ -59,7 +59,7 @@ namespace OniBrutal.GameTweaks
                 image.colorStyleSetting = style;
                 image.ApplyColorStyleSetting();
                 var label = button.GetComponentInChildren<LocText>();
-                label.text = "BRUTAL TWEAKS";
+                label.text = "MOONO TWEAKS";
                 label.fontSize = 14;
                 int index = -1;
                 foreach (Transform child in parent.transform)
@@ -72,7 +72,7 @@ namespace OniBrutal.GameTweaks
             }
             catch (Exception e)
             {
-                Debug.LogWarning("[oni-brutal] the Brutal Tweaks button could not be added: " + e);
+                Debug.LogWarning("[Moono] the Moono Tweaks button could not be added: " + e);
             }
         }
 
@@ -100,10 +100,10 @@ namespace OniBrutal.GameTweaks
         }
     }
 
-    /// The Brutal Tweaks screen, on the Mods screen's prefab (BrutalTweaksMenu.Open).
+    /// The Moono Tweaks screen, on the Mods screen's prefab (BrutalTweaksMenu.Open).
     public class BrutalTweaksScreen : KModalScreen
     {
-        const string Title = "BRUTAL TWEAKS";
+        const string Title = "MOONO TWEAKS";
         /// The warning colour of the CHANGES GAMEPLAY label (amber).
         const string Warning = "FFB040";
 

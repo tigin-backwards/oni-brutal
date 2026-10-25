@@ -3,7 +3,7 @@
 # then start: world generation, the Duplicant selection and embark. Worldgen runs in real time on
 # its own thread, so everything after the start click (f1480) waits 1500 frames more than it
 # needs on a quiet machine (worldgen takes about 300): the run is the same on a loaded one.
-# New Game is the menu's first button (891,198 since Brutal Tweaks joined the menu, 891,223 before).
+# New Game is the menu's first button (891,198 since the tweaks button joined the menu, 891,223 before).
 FRAMES=4720
 DUMPS="620 800 1150 1250 1350 1450 3300 3900 4700"
 ARGS=(--input 420:click:891,198 --input 640:click:428,360 --input 820:click:428,360

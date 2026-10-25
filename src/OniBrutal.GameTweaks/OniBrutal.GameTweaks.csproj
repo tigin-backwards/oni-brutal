@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <!-- Game tweaks that need the game's own types (docs/PLAN.md "Game tweaks"), and the main menu's
-       Brutal Tweaks screen that chooses them (BrutalTweaksMenu): built against the game's
+       Moono Tweaks screen that chooses them (BrutalTweaksMenu): built against the game's
        assemblies like a mod, loaded by the host at start-up; a tweak's patches are made only when
        it is on. -->
   <PropertyGroup>

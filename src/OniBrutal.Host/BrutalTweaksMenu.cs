@@ -7,7 +7,7 @@ using OniBrutal.Host.GameTweaks;
 
 namespace OniBrutal.Host
 {
-    /// The main menu's "Brutal Tweaks" button and screen (OniBrutal.GameTweaks.BrutalTweaksMenu,
+    /// The main menu's "Moono Tweaks" button and screen (OniBrutal.GameTweaks.BrutalTweaksMenu,
     /// built from the game's own UI): the options EffectiveOptions resolves, each with a toggle,
     /// saved to the settings file (PlayerSettings) and applied by restarting the game. This side
     /// gives the screen its rows and saves what it chose; options the command line set are shown

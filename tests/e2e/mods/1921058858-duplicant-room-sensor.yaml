@@ -1,0 +1,30 @@
+# Duplicant Room Sensor (1921058858), classes B, P.
+#
+# What it does: adds the Duplicant Room Sensor (1x1, refined metal, Automation menu, researched
+# with Automation), which counts the Duplicants in its room and sends green above or below a
+# threshold (0 to 64) set in the game's threshold side screen. Every Duplicant gets a
+# DuplicantMonitor that records the cavity it stands in, every 200 ms, for the sensors to read.
+# How a player reaches it: the build menu (Automation), after the research; its side screen.
+# What changes: automation keyed to how many Duplicants are in a room.
+#
+# setup builds a sensor in the corridor west of the printing pod. It is selected and 2 typed as
+# its threshold. As the game runs the Duplicants' monitors fill the mod's map of cavities.
+from: early-base
+mods: [1921058858]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"DuplicantRoomSensor\")", method: Build, args: [{"$": "Grid.XYToCell(112, 206)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"LogicControl\").unlockedItemIDs": {contains: DuplicantRoomSensor}
+  - run: {seconds: 5}
+  - expect_state:
+      "type:DuplicantRoomSensor.CavityInfoDuplicants::map.Count": "> 0"
+  - driver: {camera.set: {cell: [112, 207], ortho: 8}}
+  - click_world: {cell: [112, 206], select: DuplicantRoomSensor}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/ThresholdSwitchSideScreen", cond: stable}
+  - ui_dump: {name: threshold, root: "**/ThresholdSwitchSideScreen", mask_text: ['^\d+$']}
+  - type: {ui: "**/ThresholdSwitchSideScreen/**/*Input*", text: "2", clear: true, enter: true}
+  - expect_state:
+      "selected:GetComponent<DuplicantRoomSensor.LogicDuplicantCountSensor>.countThreshold": 2
+  - run: {seconds: 10}
+  - expect: {duplicants: 3, buildings: {DuplicantRoomSensor: 1}}

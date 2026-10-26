@@ -1,0 +1,63 @@
+{
+ "spec": "mods/1921058858-duplicant-room-sensor.yaml",
+ "mods": [
+  "1921058858"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Duplicants' monitors fill the mod's cavity map; a built sensor's threshold set to 2 by typing; threshold dump matches",
+ "updated": "2026-10-26",
+ "commit": "7d456df",
+ "mod_dlls": {
+  "1921058858": {
+   "DuplicantRoomSensor.dll": "e2bc091263548056727687c98cf9be633be6347864036d8b83c530a9741d3bc7"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-220744-daa697b6",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T22:57:16",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-004255-d47e6468",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T00:44:50",
+    "lane": 14,
+    "reference_run": "20261025-220744-daa697b6",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "threshold": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261026-004255-d47e6468",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T00:45:47",
+    "lane": 14,
+    "reference_run": "20261025-220744-daa697b6",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "threshold": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3383726669-happy-digging-dwarf-edition-fixed.yaml",
+ "mods": [
+  "3383726669"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with tier 0 at 0.9, four dug sandstone cells leave 85 % or more of their mass as debris, where the game leaves half",
+ "updated": "2026-10-26",
+ "commit": "069fe17",
+ "mod_dlls": {
+  "3383726669": {
+   "HappyDiggingDwarfEditionFixed.dll": "f0a38d4b63ecaf2dcbc25c503a6dd89320630f30a0b8ac0f19c612a40ccb3351"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-023318-02f49c43",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T02:36:27",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-024545-f741d0b9",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:09:42",
+    "lane": 14,
+    "reference_run": "20261026-023318-02f49c43",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-024545-f741d0b9",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T03:10:44",
+    "lane": 14,
+    "reference_run": "20261026-023318-02f49c43",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -1,0 +1,28 @@
+# Happy Digging: Dwarf Edition Fixed Fixed (3383726669), classes P, O.
+#
+# What it does: a dig yields mass by the digger's mining skills and Digging attribute in place
+# of the game's flat half: efficiency = a tier's base + Digging / a divisor (tier 0: 0.5 +
+# Digging / 120), capped at 100 %, times 2 times the half the game drops; diggers without a
+# Duplicant use 50 %. A popup shows the efficiency at each dig, the Digging tooltip explains
+# it, and options can move the Atmo and Jet Suit's digging bonus to Strength. PLib options
+# hold each number.
+# How a player reaches it: any dig order; the Digging attribute's tooltip; the options.
+# What changes: the mass of the debris a dig leaves.
+#
+# options raise tier 0's base to 0.9, so every Duplicant of the base (none has a mining
+# skill) digs at 90 % or more. The cells dug are four of sandstone at the east end of the
+# dug-out corridor west of the printing pod; the sandstone debris is weighed before and
+# after: the game alone would leave half the cells' mass.
+from: early-base
+mods: [3383726669]
+options:
+  DigginMod: {DumbDiggerSkill: 0.9}
+steps:
+  - expect_state:
+      "cells:119,209..120,210::Grid.Mass.get_Item({cell})": {save_as: block}
+      "sum:all:Clearable::[*].GetComponent<PrimaryElement>.Mass if .GetComponent<PrimaryElement>.ElementID == SandStone": {save_as: before}
+  - expect_state: {"cells:119,209..120,210::Grid.Element[{cell}].hardness": "> 0"}
+  - dig: [119, 209, 120, 210]
+  - run: {seconds: 900, until: {pending_digs: 0}}
+  - expect_state:
+      "sum:all:Clearable::[*].GetComponent<PrimaryElement>.Mass if .GetComponent<PrimaryElement>.ElementID == SandStone": [">= before + 0.85 * block", "<= before + 1.01 * block"]

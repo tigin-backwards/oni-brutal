@@ -1,0 +1,45 @@
+# Edge Detectors and Diode (Automation) (2777145427), class B.
+#
+# What it does: adds four automation gates (2x1, Automation menu): a Diode copying its input
+# to its output (Generic Sensors), Rising and Falling Edge detectors sending one tick of
+# Green on a change of their input (Logic Circuits), and a Rising Edge Counter (Multiplexing).
+# How a player reaches it: the build menu (Automation), after the research.
+# What changes: more logic gates.
+#
+# setup grants Logic Circuits: the Automation menu offers the edge detectors. setup wires a
+# Signal Switch to a Diode in the dug-out room west of the printing pod: the Diode sends the
+# switch's Green on, and when the switch is turned off on its side screen, Red.
+from: early-base
+mods: [2777145427]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"LogicCircuits\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LogicSwitch\")", method: Build, args: [131762, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LogicWire\")", method: Build, args: [131762, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LogicWire\")", method: Build, args: [131763, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Game.Instance.logicCircuitSystem", method: SetConnections, args: ["Right", 131762, true]}}
+  - driver: {setup.call: {target: "Game.Instance.logicCircuitSystem", method: SetConnections, args: ["Left", 131763, true]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"DiodeGate\")", method: Build, args: [131763, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LogicWire\")", method: Build, args: [131764, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"LogicCircuits\").unlockedItemIDs": [{contains: RisingEdgeGate}, {contains: FallingEdgeGate}]
+  - run: {seconds: 2}
+  # A new Signal Switch is on: the Diode passes its Green on.
+  - expect_state:
+      "Game.Instance.logicCircuitManager.GetNetworkForCell(131763).OutputValue": 1
+      "Game.Instance.logicCircuitManager.GetNetworkForCell(131764).OutputValue": 1
+  - driver: {camera.set: {cell: [111, 208], ortho: 8}}
+  - click_world: {cell: [110, 207], select: LogicSwitch}
+  - ui_wait: {path: "**/PlayerControlledToggleSideScreen/Contents/Button", cond: stable}
+  - click: {ui: "**/PlayerControlledToggleSideScreen/Contents/Button"}
+  - key: {code: Escape}
+  - run: {seconds: 2}
+  - expect_state:
+      "Game.Instance.logicCircuitManager.GetNetworkForCell(131763).OutputValue": 0
+      "Game.Instance.logicCircuitManager.GetNetworkForCell(131764).OutputValue": 0
+  - click: {ui: "**/PlanScreen/Toggle:Automation"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/RisingEdgeGate Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/RisingEdgeGate Group*": {active: true}
+      "**/BuildingGroups/**/Grid/FallingEdgeGate Group*": {active: true}

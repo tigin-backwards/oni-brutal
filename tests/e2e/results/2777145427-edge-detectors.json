@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2777145427-edge-detectors.yaml",
+ "mods": [
+  "2777145427"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Diode passes a Signal Switch's Green on and Red once the switch is turned off on its side screen; the Automation menu offers the edge detectors",
+ "updated": "2026-10-26",
+ "commit": "c0c6a44a",
+ "mod_dlls": {
+  "2777145427": {
+   "EdgeDetectors.dll": "83bf40c18b99f36b7d2d2065c0a0a0a84ebdf52b7a8098500fc0585a8cf05c47"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-111423-115e2f94",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T11:14:24",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-114852-b9986540",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T11:48:52",
+    "lane": 16,
+    "reference_run": "20261026-111423-115e2f94",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-114852-b9986540",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T11:48:53",
+    "lane": 17,
+    "reference_run": "20261026-111423-115e2f94",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

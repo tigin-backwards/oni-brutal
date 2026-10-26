@@ -1,0 +1,37 @@
+# Fabricator Recipe Controller (3478214979), classes B, S (asset bundle side screens).
+#
+# What it does: adds the Fabricator Recipe Controller (CFRC_ComplexFabricatorRecipeControlAttachment,
+# 1x1, refined metal and a microchip by default, Automation menu, researched with Parallel
+# Automation), built over a cell of a fabricator. Its ribbon input's four bits each control one
+# recipe of that fabricator: green queues it endlessly, red stops it. Its side screen (Fabricator
+# Recipe Control) has a button per bit; a button opens a secondary side screen listing the
+# fabricator's recipes, with a search bar, to pick the bit's recipe.
+# How a player reaches it: the build menu (Automation), after the research; select the
+# controller; its side screen.
+# What changes: fabricators run by automation.
+#
+# setup builds a Kiln and the controller over its lower-left cell, in the corridor west of the
+# printing pod. The controller is selected: it is attached to the Kiln, and the first bit's
+# button opens the recipe list, where a click on the Ceramic recipe assigns it to that bit.
+from: early-base
+mods: [3478214979]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Kiln\")", method: Build, args: [{"$": "Grid.XYToCell(112, 206)"}, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"CFRC_ComplexFabricatorRecipeControlAttachment\")", method: Build, args: [{"$": "Grid.XYToCell(112, 206)"}, Neutral, null, [Copper, PowerStationTools], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"ParallelAutomation\").unlockedItemIDs": {contains: CFRC_ComplexFabricatorRecipeControlAttachment}
+  - run: {seconds: 2}
+  - expect_state:
+      "all:ComplexFabricatorRibbonController.Content.Scripts.Buildings.ComplexFabricatorRecipeControlAttachment::[0].HasParentFab": true
+  - driver: {camera.set: {cell: [112, 207], ortho: 8}}
+  - click_world: {cell: [112, 206], select: CFRC_ComplexFabricatorRecipeControlAttachment}
+  - ui_wait: {path: "**/RibbonSelectionSideScreen*/Content", cond: stable}
+  - ui_dump: {name: controller, root: "**/RibbonSelectionSideScreen*"}
+  - shot: {name: controller, crop: "**/RibbonSelectionSideScreen*", threshold: 0.04}
+  - click: {ui: "**/RibbonSelectionSideScreen*/Content/Button", index: 0}
+  - ui_wait: {path: "**/ListSelection_SecondarySidescreen*/SearchBar/Input", cond: stable}
+  - ui_dump: {name: recipes, root: "**/ListSelection_SecondarySidescreen*/ScrollArea/Content"}
+  - click: {ui: "**/ListSelection_SecondarySidescreen*/ScrollArea/Content/GroupEntryPrefab", index: 1}
+  - expect_state:
+      "selected:GetComponent<ComplexFabricatorRibbonController.Content.Scripts.Buildings.ComplexFabricatorRecipeControlAttachment>.GetRecipe(0).id": {contains: Ceramic}

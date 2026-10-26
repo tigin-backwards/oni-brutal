@@ -1,0 +1,73 @@
+{
+ "spec": "mods/3478214979-fabricator-recipe-control.yaml",
+ "mods": [
+  "3478214979"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a controller built over a Kiln attaches to it; its first bit's button opens the recipe list and a click assigns the Ceramic recipe; side screen and list dumps and the side screen shot match",
+ "updated": "2026-10-26",
+ "commit": "109d0ef",
+ "mod_dlls": {
+  "3478214979": {
+   "ComplexFabricatorRibbonController.dll": "cfd432bd90bfddb0fddc435a37fa68d381f0d43dc9d8121ac0369d7286fa6b14"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-010611-8d66c498",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T01:40:43",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-014248-009c9c67",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T02:03:58",
+    "lane": 14,
+    "reference_run": "20261026-010611-8d66c498",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "controller": {
+      "differences": 0
+     },
+     "recipes": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "controller": 0.0
+    }
+   },
+   {
+    "run": "20261026-014248-009c9c67",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T02:04:50",
+    "lane": 14,
+    "reference_run": "20261026-010611-8d66c498",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "controller": {
+      "differences": 0
+     },
+     "recipes": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "controller": 0.0
+    }
+   }
+  ]
+ }
+}

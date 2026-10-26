@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3317506652-refuel-turned-off-generators-frosty.yaml",
+ "mods": [
+  "3317506652"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Coal Generator switched off by automation keeps its fetch and gets its coal; the hydrogen generator's intake keeps consuming",
+ "updated": "2026-10-26",
+ "commit": "123c4c42",
+ "mod_dlls": {
+  "3317506652": {
+   "Refuel Turned-off Generators.dll": "77da6444bef22849045d6215243514128de0e06cdb975e39943cf6fd8fa0cc0e"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-023754-20737f8f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:38:33",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-042806-32dce3b5",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:28:06",
+    "lane": 15,
+    "reference_run": "20261026-023754-20737f8f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-042806-32dce3b5",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T04:30:30",
+    "lane": 15,
+    "reference_run": "20261026-023754-20737f8f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

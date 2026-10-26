@@ -1,0 +1,24 @@
+# Drecko Ranching (2094022117), class P (critters).
+#
+# What it does: Dreckos and Glossy Dreckos get extra diets eaten from a Critter Feeder (config
+# in the mod folder; by default Meal Lice, turned into five times their mass in phosphorite),
+# the Critter Feeder takes Dreckos among the critters it feeds (a postfix on
+# CreatureFeederConfig.ConfigurePost adds their species to its filters), and a Drecko fed the
+# glossy diet lays Glossy Drecko eggs at a chance of its own.
+# How a player reaches it: a Critter Feeder in a Drecko ranch.
+# What changes: Dreckos can be fed from a feeder.
+#
+# The Critter Feeder lists both Drecko species. setup builds one in the dug-out room west of
+# the printing pod; selected, its filter screen is compared with the original.
+from: early-base
+mods: [2094022117]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"CreatureFeeder\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Cuprite], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"CreatureFeeder\").BuildingComplete.GetComponent<Storage>.storageFilters": [{contains: Drecko}, {contains: DreckoPlastic}]
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: CreatureFeeder}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/TreeFilterableSideScreen", cond: stable}
+  - ui_dump: {name: filters, root: "**/TreeFilterableSideScreen"}

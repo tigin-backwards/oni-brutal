@@ -1,0 +1,63 @@
+{
+ "spec": "mods/2094022117-drecko-ranching.yaml",
+ "mods": [
+  "2094022117"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Critter Feeder lists both Drecko species; a feeder's filter screen dump matches",
+ "updated": "2026-10-26",
+ "commit": "41825254",
+ "mod_dlls": {
+  "2094022117": {
+   "DreckoRanching.dll": "88700dd3b75ec16aa0a44ecfa01c335c3cf58ce4fec3ade08ce12d3629089fd0"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-095925-af2fb1f8",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T10:09:08",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-113531-5ac877f9",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T11:35:31",
+    "lane": 16,
+    "reference_run": "20261026-095925-af2fb1f8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "filters": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261026-113531-5ac877f9",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T11:35:32",
+    "lane": 17,
+    "reference_run": "20261026-095925-af2fb1f8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "filters": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

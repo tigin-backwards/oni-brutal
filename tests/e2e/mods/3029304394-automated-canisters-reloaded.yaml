@@ -1,0 +1,33 @@
+# Automated Canisters Reloaded (3029304394), classes B, O.
+#
+# What it does: four conveyor buildings researched with Solid Space (Conveyance menu): the
+# Gas and Liquid to Solid Converters bottle pipe contents into canisters on a conveyor rail
+# (5 kg and 50 kg of storage, PLib options), and the Solid to Gas and Liquid Converters empty
+# canisters off a rail into pipes. Conveyor loaders, the transfer arm and the warp conduit
+# receiver handle fluids too.
+# How a player reaches it: the build menu, after the research; the Mods screen's options.
+# What changes: fluids travel as items on rails.
+#
+# options set the liquid converter's storage to 80 kg. setup researches Solid Space; the
+# Conveyance menu lists the four converters.
+from: early-base
+mods: [3029304394]
+options:
+  Oondanomala.AutomatedCanistersReloaded: {LiquidToSolidStorage: 80}
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"SolidSpace\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"SolidSpace\").unlockedItemIDs": [{contains: GasToSolidConverter}, {contains: LiquidToSolidConverter}, {contains: SolidToGasConverter}, {contains: SolidToLiquidConverter}]
+      "Assets.GetBuildingDef(\"LiquidToSolidConverter\").BuildingComplete.GetComponent<Storage>.capacityKg": 80
+      "Assets.GetBuildingDef(\"GasToSolidConverter\").BuildingComplete.GetComponent<Storage>.capacityKg": 5
+      "Assets.GetBuildingDef(\"SolidConduitInbox\").BuildingComplete.GetComponent<Storage>.storageFilters": [{contains: Breathable}, {contains: Unbreathable}]
+  - run: {seconds: 10}
+  - click: {ui: "**/PlanScreen/Toggle:Shipping"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/LiquidToSolidConverter Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/GasToSolidConverter Group*": {active: true}
+      "**/BuildingGroups/**/Grid/SolidToGasConverter Group*": {active: true}
+      "**/BuildingGroups/**/Grid/SolidToLiquidConverter Group*": {active: true}
+  - shot: {name: shipping-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}

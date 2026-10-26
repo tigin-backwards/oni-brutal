@@ -1,0 +1,59 @@
+{
+ "spec": "mods/3029304394-automated-canisters-reloaded.yaml",
+ "mods": [
+  "3029304394"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the four converters show in the Shipping menu after Solid Space, with the options' storage; the conveyor loader takes gases and liquids; menu shot matches",
+ "updated": "2026-10-26",
+ "commit": "1f8724f3",
+ "mod_dlls": {
+  "3029304394": {
+   "AutomatedCanistersReloaded.dll": "87a85eabec62212cd0399848a833a85d8e9b8da4c6198e86a025e7a68642742e"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-024539-704646ee",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:38:39",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-043817-3b5fd77b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:39:37",
+    "lane": 14,
+    "reference_run": "20261026-024539-704646ee",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "shipping-menu": 0.0
+    }
+   },
+   {
+    "run": "20261026-043817-3b5fd77b",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T04:42:22",
+    "lane": 14,
+    "reference_run": "20261026-024539-704646ee",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "shipping-menu": 0.0
+    }
+   }
+  ]
+ }
+}

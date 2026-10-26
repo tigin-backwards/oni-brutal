@@ -1,0 +1,79 @@
+{
+ "spec": "mods/3170592482-highlight-overlay.yaml",
+ "mods": [
+  "3170592482"
+ ],
+ "verdict": "warning",
+ "why": "known findings: scroll-normalized-position",
+ "findings": [
+  "scroll-normalized-position"
+ ],
+ "note": "the Highlight overlay turns on from its button (legend dump matches); the outhouse selected in it is shot",
+ "updated": "2026-10-26",
+ "commit": "f5be0c63",
+ "mod_dlls": {
+  "3170592482": {
+   "HighlightOverlay.dll": "e9581ff8b2c4e0a1b1b0a7ceafd3dd4f14dc30506aa9fc5e61de17c1ab39b2c6"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-095925-af2fb1f8",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T10:03:29",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-113109-7868fe1e",
+    "index": 1,
+    "verdict": "warn",
+    "date": "2026-10-26T11:31:09",
+    "lane": 16,
+    "reference_run": "20261026-095925-af2fb1f8",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "legend": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "highlight": 0.000331
+    }
+   },
+   {
+    "run": "20261026-113109-7868fe1e",
+    "index": 2,
+    "verdict": "warn",
+    "date": "2026-10-26T11:31:10",
+    "lane": 17,
+    "reference_run": "20261026-095925-af2fb1f8",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "legend": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "highlight": 0.000288
+    }
+   }
+  ]
+ }
+}

@@ -1,0 +1,23 @@
+# Highlight Overlay (3170592482), classes V, S.
+#
+# What it does: adds a Highlight overlay to the overlay menu (its own icon and hotkey slot):
+# selecting a building, critter, item, plant or tile while it is on tints everything related
+# to it (what it consumes or produces, what holds or uses the same material, ...) and greys
+# the rest; its legend (built from the game's legend prefabs) has checkboxes and filters for
+# which relations to show.
+# How a player reaches it: the overlay menu's Highlight button.
+# What changes: a search-by-relation view of the colony.
+#
+# The overlay is switched on from its button: its legend shows and is compared with the
+# original. The outhouse is selected in it, and the view is shot.
+from: early-base
+mods: [3170592482]
+steps:
+  - click: {ui: "**/OverlaysBar/Toggle:Highlight Overlay"}
+  - expect_state:
+      "OverlayScreen.Instance.mode.HashValue": -604820318   # glampi_HighlightMode
+  - ui_wait: {path: "**/OverlayLegend", cond: stable}
+  - ui_dump: {name: legend, root: "**/OverlayLegend"}
+  - driver: {camera.set: {cell: [117, 208], ortho: 8}}
+  - click_world: {cell: [116, 207], select: Outhouse}
+  - world_shot: {name: highlight, ortho: 8, at: [117, 208]}

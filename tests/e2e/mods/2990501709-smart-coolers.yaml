@@ -1,0 +1,38 @@
+# Smart Coolers (2990501709), classes P, S, O.
+#
+# What it does: the Thermo Regulator (AirConditioner) and the Thermo Aquatuner
+# (LiquidConditioner) lose the game's AirConditioner and conduit components and get a
+# HeatPumpController that moves heat itself: it can cool, heat or both, aim for a target
+# temperature of the input or the output, or change the temperature by a target delta, and
+# scale its power with the delta. A PLib side screen (SmartCoolerSideScreen: Cool Contents,
+# Heat Contents, Monitor Input, Monitor Output checkboxes and target temperature and delta
+# fields) shows when the PLib options (Settings.json) turn the controls on; all are off by
+# default.
+# How a player reaches it: select a Thermo Regulator or Aquatuner, its side screen.
+# What changes: what the building does to the gas or liquid it carries.
+#
+# The options turn on the heating and cooling, target temperature and target delta controls.
+# setup builds a Thermo Regulator in the dug-out corridor west of the printing pod. Selected,
+# its side screen shows; a click on Heat Contents lets it heat. The screen is compared with
+# the original.
+from: early-base
+mods: [2990501709]
+options:
+  "2990501709": {$file: Settings.json, DirectionalControls: true, TargetTemperatureControl: true, TargetDeltaControl: true}
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"AirConditioner\")", method: Build, args: [131129, Neutral, null, [Cuprite], 300.0, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"AirConditioner\").BuildingComplete.GetComponent<AirConditioner>": missing
+      "Assets.GetBuildingDef(\"AirConditioner\").BuildingComplete.GetComponent<SmartCoolers.Components.HeatPumpController>": exists
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: AirConditioner}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/SmartCoolerSideScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<SmartCoolers.Components.HeatPumpController>.HeatingEnabled": false
+  - ui_dump: {name: side, root: "**/DetailsScreen/SideScreen/**/SmartCoolerSideScreen"}
+  - shot: {name: side, crop: "**/DetailsScreen/SideScreen/**/SmartCoolerSideScreen", threshold: 0.04}
+  - click: {text: "Heat Contents", under: "**/SmartCoolerSideScreen"}
+  - expect_state:
+      "selected:GetComponent<SmartCoolers.Components.HeatPumpController>.HeatingEnabled": true

@@ -1,0 +1,29 @@
+# Festive Halloween Spices (2877478087), classes P, O.
+#
+# What it does: three spices for the Spice Grinder: Phospho Rufus (the eater glows, with a
+# chance of a joyful reaction), Gassy Moo (an attribute buff and gas emitted, methane or
+# polluted oxygen at a chosen rate) and Zombie (stamina); each adds a Joy Reaction chance
+# attribute to Duplicants, and PLib options set the chances, light and buffs.
+# How a player reaches it: a Spice Grinder's spice list.
+# What changes: festive food effects.
+#
+# The spices are registered; a Spice Grinder built by setup in the dug-out corridor west of
+# the printing pod is selected and lists them (shot).
+from: early-base
+mods: [2877478087]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"SpiceGrinder\")", method: Build, args: [131127, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Spices.Get(\"PHOSPHO_RUFUS_SPICE\")": exists
+      "Db.Get().Spices.Get(\"MOO_COSPLAY_SPICE\")": exists
+      "Db.Get().Spices.Get(\"ZOMBIE_COSPLAY_SPICE\")": exists
+  - run: {seconds: 2}
+  - expect: {buildings: {SpiceGrinder: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [111, 207], select: SpiceGrinder}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "SpiceGrinder.SettingOptions.Count": ">= 7"
+  - ui_wait: {path: "**/Config Tab - body instance/ConfigureConsumerSideScreen", cond: stable}
+  - shot: {name: spices, crop: "**/Config Tab - body instance/ConfigureConsumerSideScreen", threshold: 0.04}

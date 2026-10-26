@@ -1,0 +1,32 @@
+# Environment-More Volcano and Fountain 更多火山和泉水 (3414157541), classes P, O (worldgen).
+#
+# What it does: adds geyser types (a postfix on GeyserGenericConfig.GenerateConfigs: steel,
+# glass, niobium, uranium and carbon volcanoes; super coolant, petroleum, liquid phosphorus,
+# sucrose and resin fountains, named in Chinese), and gives the starting asteroid of a new
+# game a rule placing one template of each (a prefix on WorldGen.RenderOffline adds it, a
+# prefix on TemplateCache.GetTemplate would build the templates: the geyser on obsidian, in
+# vacuum). PLib options choose the base game's set, Spaced Out's, or both.
+# How a player reaches it: a new game; the geysers it uncovers.
+# What changes: new kinds of geysers.
+#
+# The template rule does not work in the original: a new game logs "Missing template
+# 'geyser_hot_water'" and the others for the starting world, and places none. The new geyser
+# types do work: setup places a steel volcano in the dug-out room west of the printing pod,
+# and selected, its title reads 钢火山 and is compared with the original. The name's random
+# suffix and the buttons after it, which move with its width, are masked.
+from: early-base
+mods: [3414157541]
+setup:
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(0, 112, 206, \"GeyserGeneric_molten_steel\", \"BuildingBack\")", method: SetActive, args: [true]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"GeyserGeneric_super_coolant\")": exists
+      "Assets.GetPrefab(\"GeyserGeneric_LiquidPhosphorus\")": exists
+      "all:Geyser::[0].configuration.typeId.HashValue": "== original"
+      "all:Geyser::[0].configuration.GetElement()": MoltenSteel
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207]}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~钢火山"}
+  - shot: {name: title, crop: "**/DetailsScreen/TitleBar", threshold: 0.04, mask: [[1044, 216, 100, 24]]}

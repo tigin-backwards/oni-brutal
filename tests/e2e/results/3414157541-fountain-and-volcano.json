@@ -1,0 +1,60 @@
+{
+ "spec": "mods/3414157541-fountain-and-volcano.yaml",
+ "mods": [
+  "3414157541"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a steel volcano placed and selected is named 钢火山 (title shot matches); the mod's starting-world templates are missing in the original too",
+ "updated": "2026-10-26",
+ "commit": "52671540",
+ "mod_dlls": {
+  "3414157541": {
+   "FountainAndVolcano.dll": "342472e4b024e96ed9a337d23a5e728e4a18946aa0ab828f10ece16a62461b0a",
+   "PLib.dll": "893dc1ea3eddd02c85d433231aae356be27be07ddfc1a98fb2c51d84748208e8"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-042232-0e5bb32c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:25:51",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-115026-890e024b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T11:50:26",
+    "lane": 16,
+    "reference_run": "20261026-042232-0e5bb32c",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "title": 0.0
+    }
+   },
+   {
+    "run": "20261026-115026-890e024b",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T11:50:27",
+    "lane": 17,
+    "reference_run": "20261026-042232-0e5bb32c",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "title": 0.0
+    }
+   }
+  ]
+ }
+}

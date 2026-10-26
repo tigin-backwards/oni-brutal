@@ -1,0 +1,29 @@
+# Pedestal Filter (3260591912), classes T, U.
+#
+# What it does: adds a search bar (a copy of the build menu's) to the top of the receptacle
+# side screen of pedestals and other receptacles: typing filters the items on offer by name,
+# and categories with a match open; element items are tinted with their colour. A
+# SingleEntityReceptacle also accepts any directional item it would otherwise refuse.
+# How a player reaches it: selecting a Pedestal (Furniture) and typing in its side screen.
+# What changes: a filterable list of things to display.
+#
+# setup builds a Pedestal in the dug-out corridor west of the printing pod; it is selected,
+# and "sand" typed into the search bar leaves fewer items shown, among them Sandstone.
+from: early-base
+mods: [3260591912]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"ItemPedestal\")", method: Build, args: [131127, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+steps:
+  - run: {seconds: 2}
+  - expect: {buildings: {ItemPedestal: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [111, 207], select: ItemPedestal}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_wait: {path: "**/DetailsScreen/**/Searchbar*/FilterInputField", cond: stable}
+  - expect_state:
+      "count:ui:**/DetailsScreen/**/Searchbar*::GetComponentInParent<ReceptacleSideScreen>.depositObjectMap.Keys[*] if .gameObject.activeSelf == true": {save_as: all}
+  - type: {ui: "**/DetailsScreen/**/Searchbar*/FilterInputField", text: "sand"}
+  - expect_state:
+      "count:ui:**/DetailsScreen/**/Searchbar*::GetComponentInParent<ReceptacleSideScreen>.depositObjectMap.Keys[*] if .gameObject.activeSelf == true": [">= 1", "< all"]
+      "count:ui:**/DetailsScreen/**/Searchbar*::GetComponentInParent<ReceptacleSideScreen>.depositObjectMap.Values[*] if .tag.Name == SandStone": 1
+  - shot: {name: filtered, crop: "**/DetailsScreen/SideScreen", threshold: 0.04}

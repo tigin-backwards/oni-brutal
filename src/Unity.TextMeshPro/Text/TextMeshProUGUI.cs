@@ -13,7 +13,18 @@ namespace TMPro
         TMP_SubMeshUI[] m_SubMeshes = new TMP_SubMeshUI[0];
         Vector2 m_LastRectSize;
         Canvas m_CanvasCache;
+        CanvasRenderer m_canvasRenderer;
 
+        // Declared here as on the shipped type (mods compiled against it call this getter): the
+        // GameObject's CanvasRenderer, the one Graphic.canvasRenderer returns.
+        public new CanvasRenderer canvasRenderer
+        {
+            get
+            {
+                if (ReferenceEquals(m_canvasRenderer, null)) m_canvasRenderer = base.canvasRenderer;
+                return m_canvasRenderer;
+            }
+        }
 
         // ----- Lifecycle -----
 

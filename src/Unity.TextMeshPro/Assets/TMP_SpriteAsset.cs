@@ -15,6 +15,14 @@ namespace TMPro
         Dictionary<uint, TMP_SpriteCharacter> m_CharacterLookup;
         Dictionary<uint, TMP_SpriteGlyph> m_GlyphLookup;
 
+        // A new asset has empty tables, so that code building one at run time (as Storage Info
+        // Plus does) can add its glyphs and characters; loaded data replaces them.
+        public TMP_SpriteAsset()
+        {
+            m_SpriteCharacterTable = new List<TMP_SpriteCharacter>();
+            m_GlyphTable = new List<TMP_SpriteGlyph>();
+        }
+
         public List<TMP_SpriteCharacter> spriteCharacterTable
         {
             get

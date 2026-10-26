@@ -11,11 +11,17 @@ namespace TMPro
     // that closes it. Choosing an item sets the value and hides the list.
     public partial class TMP_Dropdown
     {
-        GameObject m_List;
+        // The shown list, from Show until its hiding fade ends (or the dropdown is disabled).
+        // Interface: Auto Kitchen reads it by name while IsExpanded.
+        GameObject m_Dropdown;
         GameObject m_Blocker;
         readonly List<DropdownItem> m_Items = new();
         bool m_TemplateValidated;
         Coroutine m_Fade;
+        // Whether m_Fade is the shown list's hiding fade.
+        bool m_Hiding;
+        // Lists a Show replaced while they faded out: each is destroyed when its fade ends.
+        readonly List<GameObject> m_Fading = new();
         static OptionData s_NoOptionData = new();
 
         protected TMP_Dropdown()
@@ -123,7 +129,7 @@ namespace TMPro
             if (sendCallback) m_OnValueChanged.Invoke(m_Value);
         }
 
-        public bool IsExpanded => m_List != null;
+        public bool IsExpanded => m_Dropdown != null;
 
         public bool MultiSelect { get => m_MultiSelect; set => m_MultiSelect = value; }
 
@@ -143,6 +149,10 @@ namespace TMPro
         protected override void OnDisable()
         {
             ImmediateDestroyList();
+            // Lists still fading out lose their fade with the dropdown: they go now.
+            foreach (var list in m_Fading)
+                if (list != null) DestroyDropdownList(list);
+            m_Fading.Clear();
             if (m_Blocker != null) Destroy(m_Blocker);
             m_Blocker = null;
             base.OnDisable();
@@ -229,26 +239,31 @@ namespace TMPro
 
         public void Show()
         {
-            if (m_Fade != null)
+            if (!IsActive() || !IsInteractable()) return;
+            // A list fading out finishes its fade and goes; the new one takes the field
+            // (measured: Hide, then Show the next frame).
+            if (m_Dropdown != null && m_Hiding)
             {
-                StopCoroutine(m_Fade);
+                m_Fading.Add(m_Dropdown);
                 m_Fade = null;
-                ImmediateDestroyList();
+                m_Hiding = false;
+                m_Items.Clear();
+                m_Dropdown = null;
             }
-            if (!IsActive() || !IsInteractable() || m_List != null) return;
+            if (m_Dropdown != null) return;
             var rootCanvas = RootCanvas();
             if (rootCanvas == null) return;
             if (!m_TemplateValidated && !ValidateTemplate()) return;
 
             m_Template.gameObject.SetActive(true);
             m_Template.GetComponent<Canvas>().sortingLayerID = rootCanvas.sortingLayerID;
-            m_List = CreateDropdownList(m_Template.gameObject);
-            m_List.name = "Dropdown List";
-            m_List.SetActive(true);
-            var listRect = (RectTransform)m_List.transform;
+            m_Dropdown = CreateDropdownList(m_Template.gameObject);
+            m_Dropdown.name = "Dropdown List";
+            m_Dropdown.SetActive(true);
+            var listRect = (RectTransform)m_Dropdown.transform;
             listRect.SetParent(m_Template.parent, false);
 
-            var itemTemplate = m_List.GetComponentInChildren<DropdownItem>();
+            var itemTemplate = m_Dropdown.GetComponentInChildren<DropdownItem>();
             var content = (RectTransform)itemTemplate.rectTransform.parent;
             var templateItemRect = itemTemplate.rectTransform;
             templateItemRect.gameObject.SetActive(true);
@@ -351,7 +366,7 @@ namespace TMPro
             rt.sizeDelta = Vector2.zero;
             var canvas = blocker.AddComponent<Canvas>();
             canvas.overrideSorting = true;
-            var listCanvas = m_List.GetComponent<Canvas>();
+            var listCanvas = m_Dropdown.GetComponent<Canvas>();
             canvas.sortingLayerID = listCanvas.sortingLayerID;
             canvas.sortingOrder = listCanvas.sortingOrder - 1;
             Canvas parentCanvas = null;
@@ -411,7 +426,7 @@ namespace TMPro
 
         void AlphaFadeList(float duration, float start, float end)
         {
-            var group = m_List.GetComponent<CanvasGroup>();
+            var group = m_Dropdown.GetComponent<CanvasGroup>();
             if (group == null) return;
             if (duration <= 0f || end == start || !isActiveAndEnabled)
             {
@@ -419,10 +434,13 @@ namespace TMPro
                 return;
             }
             group.alpha = start;
-            m_Fade = StartCoroutine(Fade(group, duration, start, end, false));
+            m_Hiding = false;
+            m_Fade = StartCoroutine(Fade(group, duration, start, end, null));
         }
 
-        IEnumerator Fade(CanvasGroup group, float duration, float start, float end, bool destroyAfter)
+        // Fades the group; with `list`, destroys that list at the end: through
+        // ImmediateDestroyList while it is still the shown one, else alone.
+        IEnumerator Fade(CanvasGroup group, float duration, float start, float end, GameObject list)
         {
             float t = 0f;
             while (t < duration)
@@ -432,18 +450,36 @@ namespace TMPro
                 yield return null;
             }
             if (group != null) group.alpha = end;
-            m_Fade = null;
-            if (destroyAfter) ImmediateDestroyList();
+            if (list == null)
+            {
+                m_Fade = null;
+                yield break;
+            }
+            if (list == m_Dropdown)
+            {
+                m_Fade = null;
+                m_Hiding = false;
+                ImmediateDestroyList();
+            }
+            else
+            {
+                m_Fading.Remove(list);
+                DestroyDropdownList(list);
+            }
         }
 
         public void Hide()
         {
-            if (m_List != null)
+            if (m_Dropdown != null)
             {
-                var group = m_List.GetComponent<CanvasGroup>();
+                var group = m_Dropdown.GetComponent<CanvasGroup>();
                 if (m_Fade != null) StopCoroutine(m_Fade);
+                m_Fade = null;
                 if (group != null && m_AlphaFadeSpeed > 0f && isActiveAndEnabled)
-                    m_Fade = StartCoroutine(Fade(group, m_AlphaFadeSpeed, group.alpha, 0f, true));
+                {
+                    m_Hiding = true;
+                    m_Fade = StartCoroutine(Fade(group, m_AlphaFadeSpeed, group.alpha, 0f, m_Dropdown));
+                }
                 else ImmediateDestroyList();
             }
             if (m_Blocker != null) DestroyBlocker(m_Blocker);
@@ -456,10 +492,11 @@ namespace TMPro
             foreach (var item in m_Items)
                 if (item != null) DestroyItem(item);
             m_Items.Clear();
-            if (m_List != null) DestroyDropdownList(m_List);
+            if (m_Dropdown != null) DestroyDropdownList(m_Dropdown);
             if (m_Fade != null && isActiveAndEnabled) StopCoroutine(m_Fade);
             m_Fade = null;
-            m_List = null;
+            m_Hiding = false;
+            m_Dropdown = null;
         }
 
         void OnSelectItem(Toggle toggle, int index)

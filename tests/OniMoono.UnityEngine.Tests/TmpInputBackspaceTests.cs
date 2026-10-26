@@ -84,7 +84,10 @@ namespace OniMoono.Tests
 
             var keyPressed = typeof(TMP_InputField).GetMethod("KeyPressed", Instance, null, new[] { typeof(Event) }, null);
             Assert.NotNull(keyPressed);
-            Assert.True(keyPressed.IsPrivate);
+            // Protected and not virtual (textmeshpro.md, "KeyPressed is protected").
+            Assert.True(keyPressed.IsFamily);
+            Assert.False(keyPressed.IsVirtual);
+            Assert.Equal("evt", keyPressed.GetParameters()[0].Name);
             Assert.Equal("EditState", keyPressed.ReturnType.Name);
 
             var position = typeof(TMP_InputField).GetProperty("stringPositionInternal", Instance);

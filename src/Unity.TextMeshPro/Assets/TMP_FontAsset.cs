@@ -102,6 +102,8 @@ namespace TMPro
             var asset = ScriptableObject.CreateInstance<TMP_FontAsset>();
             asset.m_Version = CurrentVersion;
             asset.name = font.name + " SDF";
+            // Measured: GetSimpleHashCode(name + " Atlas Material") of the name at creation.
+            asset.materialHashCode = TMP_TextUtilities.GetSimpleHashCode(asset.name + " Atlas Material");
             asset.m_FaceInfo = FontEngine.GetFaceInfo();
             asset.m_SourceFontFile = font;
             asset.m_AtlasPopulationMode = atlasPopulationMode;
@@ -202,6 +204,8 @@ namespace TMPro
             var asset = ScriptableObject.CreateInstance<TMP_FontAsset>();
             asset.m_Version = CurrentVersion;
             asset.name = "";
+            // Measured: GetSimpleHashCode(name + " Atlas Material") of the name at creation.
+            asset.materialHashCode = TMP_TextUtilities.GetSimpleHashCode(asset.name + " Atlas Material");
             asset.m_FaceInfo = FontEngine.GetFaceInfo();
             asset.m_SourceFontFilePath = path;
             asset.m_AtlasPopulationMode = populationMode;
@@ -359,6 +363,57 @@ namespace TMPro
                 if (!characterLookupTable.ContainsKey(text[i])) missingCharacters.Add(text[i]);
             return missingCharacters.Count == 0;
         }
+
+        // Whether every code point of the text is found (a surrogate pair is one code point, a
+        // lone surrogate itself; control characters below U+0020 always are). missingCharacters
+        // is null when all are, else the missing ones in text order, repeats kept. Without
+        // searchFallbacks only this asset is looked in; with it, then its fallbacks (and theirs),
+        // TMP_Settings' fallbacks and its default font asset. tryAddCharacter adds a missing
+        // character to the first dynamic asset in that order whose face has it.
+        public bool HasCharacters(string text, out uint[] missingCharacters, bool searchFallbacks = false, bool tryAddCharacter = false)
+        {
+            missingCharacters = null;
+            List<uint> missing = null;
+            int length = text.Length;
+            for (int i = 0; i < length; i++)
+            {
+                uint unicode = text[i];
+                if (char.IsHighSurrogate(text[i]) && i + 1 < length && char.IsLowSurrogate(text[i + 1]))
+                {
+                    unicode = (uint)char.ConvertToUtf32(text[i], text[i + 1]);
+                    i++;
+                }
+                if (unicode < 0x20) continue;
+                if (FindCharacter(unicode, searchFallbacks, tryAddCharacter)) continue;
+                (missing ??= new List<uint>()).Add(unicode);
+            }
+            if (missing == null) return true;
+            missingCharacters = missing.ToArray();
+            return false;
+        }
+
+        bool FindCharacter(uint unicode, bool searchFallbacks, bool tryAdd)
+        {
+            if (HasOrAdds(this, unicode, tryAdd)) return true;
+            if (!searchFallbacks) return false;
+            var visited = new HashSet<int> { GetInstanceID() };
+            if (FallbackHasCharacter(this, unicode, tryAdd, visited)) return true;
+            var globals = TMP_Settings.fallbackFontAssets;
+            if (globals != null)
+                foreach (var f in globals)
+                {
+                    if (f == null || !visited.Add(f.GetInstanceID())) continue;
+                    if (HasOrAdds(f, unicode, tryAdd) || FallbackHasCharacter(f, unicode, tryAdd, visited)) return true;
+                }
+            var def = TMP_Settings.defaultFontAsset;
+            if (def != null && visited.Add(def.GetInstanceID()))
+                if (HasOrAdds(def, unicode, tryAdd) || FallbackHasCharacter(def, unicode, tryAdd, visited)) return true;
+            return false;
+        }
+
+        static bool HasOrAdds(TMP_FontAsset asset, uint unicode, bool tryAdd)
+            => asset.characterLookupTable.ContainsKey(unicode)
+                || (tryAdd && asset.m_AtlasPopulationMode != AtlasPopulationMode.Static && asset.TryAddCharacter(unicode, out _));
 
         // ----- Dynamic population -----
 

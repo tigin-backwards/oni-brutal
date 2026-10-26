@@ -124,5 +124,58 @@ namespace TMPro
         }
 
         internal static bool ScreenToLocal(TMP_Text text, Vector3 position, Camera camera, out Vector3 local) => ToLocal(text, position, camera, out local);
+
+        // ----- Name hashes -----
+
+        // The hash rich-text tags and the assets' hashCode use: over the UTF-16 code units from
+        // 0, hash = (hash << 5) + hash ^ c with ASCII a-z taken as A-Z (nothing else changes
+        // case), in 32-bit wrapping arithmetic. Null hashes to 0.
+        public static int GetHashCode(string s)
+        {
+            if (s == null) return 0;
+            int hash = 0;
+            unchecked
+            {
+                foreach (char c in s) hash = ((hash << 5) + hash) ^ AsciiUpper(c);
+            }
+            return hash;
+        }
+
+        // The same over the code units as they are (null throws).
+        public static int GetSimpleHashCode(string s)
+        {
+            int hash = 0;
+            unchecked
+            {
+                for (int i = 0; i < s.Length; i++) hash = ((hash << 5) + hash) ^ s[i];
+            }
+            return hash;
+        }
+
+        // From 5381, with ASCII A-Z taken as a-z (null throws).
+        public static uint GetSimpleHashCodeLowercase(string s)
+        {
+            uint hash = 5381;
+            unchecked
+            {
+                for (int i = 0; i < s.Length; i++) hash = ((hash << 5) + hash) ^ AsciiLower(s[i]);
+            }
+            return hash;
+        }
+
+        // GetHashCode's bits as unsigned (null throws, measured).
+        public static uint GetHashCodeCaseInSensitive(string s)
+        {
+            uint hash = 0;
+            unchecked
+            {
+                for (int i = 0; i < s.Length; i++) hash = ((hash << 5) + hash) ^ AsciiUpper(s[i]);
+            }
+            return hash;
+        }
+
+        static char AsciiUpper(char c) => c >= 'a' && c <= 'z' ? (char)(c - 32) : c;
+
+        static char AsciiLower(char c) => c >= 'A' && c <= 'Z' ? (char)(c + 32) : c;
     }
 }

@@ -12,7 +12,7 @@ namespace OniMoono.Tests
     {
         // An input module that only sends the selected object its update event each frame (as
         // the game's input module does).
-        sealed class SelectedUpdateModule : BaseInputModule
+        internal sealed class SelectedUpdateModule : BaseInputModule
         {
             public override void Process()
             {

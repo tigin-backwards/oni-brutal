@@ -14,7 +14,7 @@ namespace TMPro
     // shipped package does; LateUpdate scrolls the text to keep the caret visible.
     public partial class TMP_InputField
     {
-        enum EditState
+        protected enum EditState
         {
             Continue,
             Finish,
@@ -40,7 +40,16 @@ namespace TMPro
         bool m_PreventCallback;
         bool m_IsSelectAll;
         bool m_Dragging;
-        Vector2 m_ScrollOffset;
+        // The caret graphic's geometry: made in the first caret rebuild after enable, refilled
+        // with the caret quad, the selection quads or nothing, and dropped on disable.
+        // Interface: Applied Logistics Network's subclass reads m_Mesh.
+        protected Mesh m_Mesh;
+        Scrollbar m_ListenedScrollbar;
+        // The caret position and label the text was last scrolled for.
+        int m_ScrolledForPosition = -1;
+        string m_ScrolledForLabel;
+
+        protected Mesh mesh => m_Mesh ??= new Mesh();
 
         protected TMP_InputField()
         {
@@ -452,6 +461,11 @@ namespace TMPro
                 m_TextComponent.RegisterDirtyVerticesCallback(OnTextComponentDirty);
             }
             if (EnsureCaret()) AssignPositioningIfNeeded();
+            if (m_VerticalScrollbar != null)
+            {
+                m_ListenedScrollbar = m_VerticalScrollbar;
+                m_ListenedScrollbar.onValueChanged.AddListener(OnScrollbarValueChange);
+            }
             // The caret draws with the default UI material and a white texture from the start
             // (measured: the shipped package's caret renderer has them before it draws).
             if (m_Caret != null) m_Caret.canvasRenderer.SetMaterial(Graphic.defaultGraphicMaterial, Texture2D.whiteTexture);
@@ -466,13 +480,23 @@ namespace TMPro
             DeactivateInputField();
             if (m_TextComponent != null) m_TextComponent.UnregisterDirtyVerticesCallback(OnTextComponentDirty);
             CanvasUpdateRegistry.UnRegisterCanvasElementForRebuild(this);
+            if (m_ListenedScrollbar != null) m_ListenedScrollbar.onValueChanged.RemoveListener(OnScrollbarValueChange);
+            m_ListenedScrollbar = null;
+            DropMesh();
             base.OnDisable();
         }
 
         protected override void OnDestroy()
         {
             CanvasUpdateRegistry.UnRegisterCanvasElementForRebuild(this);
+            DropMesh();
             base.OnDestroy();
+        }
+
+        void DropMesh()
+        {
+            if (m_Mesh != null) Destroy(m_Mesh);
+            m_Mesh = null;
         }
 
         // The caret graphic: a child of the viewport (its first), drawn under the text. It is
@@ -502,9 +526,12 @@ namespace TMPro
         }
 
         // Places the caret's rect where the text component's is: its local transform and its
-        // rect values. Called once per caret made, from OnEnable. Interface: PLib's
-        // TextMeshProPatcher finds it by name and may skip it with a Harmony prefix (the caret
-        // then keeps the defaults it was made with).
+        // rect values. Called where the shipped package calls it: in OnEnable once per caret
+        // made, in the caret rebuild after the text was moved to keep the caret in view, and
+        // after the vertical scrollbar's value change moved the text. Interface: PLib's
+        // TextMeshProPatcher finds it by name and may skip it with a Harmony prefix, copying the
+        // values itself at the end of the frame (until then the caret is drawn where its rect
+        // was).
         void AssignPositioningIfNeeded()
         {
             if (m_TextComponent == null || caretRectTrans == null) return;
@@ -552,6 +579,7 @@ namespace TMPro
             }
             m_BlinkStart = Time.unscaledTime;
             m_CaretVisible = true;
+            m_ScrolledForPosition = -1;
             onFocus?.Invoke();
             UpdateLabel();
         }
@@ -670,8 +698,15 @@ namespace TMPro
         {
             if (m_TextComponent == null || !multiLine) return;
             float delta = eventData.scrollDelta.y * m_ScrollSensitivity;
-            m_ScrollOffset.y = Mathf.Max(0f, m_ScrollOffset.y - delta);
-            ApplyScroll();
+            var textRect = m_TextComponent.rectTransform;
+            var p = textRect.anchoredPosition;
+            float y = Mathf.Max(0f, p.y - delta);
+            if (y == p.y) return;
+            textRect.anchoredPosition = new Vector2(p.x, y);
+            // Not measured on the shipped package: the caret follows, as after the scrollbar.
+            AssignPositioningIfNeeded();
+            UpdateScrollbar();
+            MarkGeometryChanged();
         }
 
         public virtual void OnUpdateSelected(BaseEventData eventData)
@@ -713,14 +748,14 @@ namespace TMPro
                 }
             }
             if (!isFocused) return;
-            // The text laid out for the current content places the caret: scroll to it.
-            if (m_TextComponent != null && !m_TextComponent.havePropertiesChanged) KeepCaretVisible();
             UpdateBlink();
         }
 
         public void ProcessEvent(Event e) => KeyPressed(e);
 
-        EditState KeyPressed(Event evt)
+        // Interface: protected, not virtual, the parameter named evt, as shipped (mods patch it
+        // by name and a subclass may call it).
+        protected EditState KeyPressed(Event evt)
         {
             var modifiers = evt.modifiers;
             bool ctrl = SystemInfo.operatingSystemFamily == OperatingSystemFamily.MacOSX ? (modifiers & EventModifiers.Command) != 0 : (modifiers & EventModifiers.Control) != 0;
@@ -735,6 +770,9 @@ namespace TMPro
                     return EditState.Continue;
                 case KeyCode.Delete: ForwardDelete(ctrl); return EditState.Continue;
                 case KeyCode.Home: MoveTextStart(shift); return EditState.Continue;
+                // Ctrl+End goes to the text's end (measured: in a five-line field it scrolls to
+                // the last line).
+                case KeyCode.End when ctrl: MoveTextEnd(shift); return EditState.Continue;
                 case KeyCode.End: MoveToEndOfLaidOutLine(shift); return EditState.Continue;
                 case KeyCode.A when ctrlOnly: SelectAll(); return EditState.Continue;
                 case KeyCode.C when ctrlOnly:
@@ -1359,13 +1397,26 @@ namespace TMPro
             var vh = new VertexHelper();
             if (isFocused && m_TextComponent != null && m_TextComponent.textInfo != null)
             {
+                // The text laid out for the current content places the caret: after the caret or
+                // the text changed, the text moves to keep the caret in view, and the caret's rect
+                // follows it. A redraw for the blink alone leaves a scrolled text where it is.
+                if (!m_TextComponent.havePropertiesChanged && (m_ScrolledForPosition != m_StringSelectPosition || !ReferenceEquals(m_ScrolledForLabel, m_LabelShown)))
+                {
+                    m_ScrolledForPosition = m_StringSelectPosition;
+                    m_ScrolledForLabel = m_LabelShown;
+                    if (KeepCaretVisible())
+                    {
+                        AssignPositioningIfNeeded();
+                        UpdateScrollbar();
+                    }
+                }
                 if (HasSelection) GenerateSelection(vh);
                 else if (m_CaretVisible) GenerateCaret(vh);
             }
-            var mesh = m_Caret.WorkMesh;
-            vh.FillMesh(mesh);
+            var target = mesh;
+            vh.FillMesh(target);
             vh.Dispose();
-            m_Caret.canvasRenderer.SetMesh(mesh);
+            m_Caret.canvasRenderer.SetMesh(target);
         }
 
         // Local position of the caret at string position `pos` (in the text's space): at the
@@ -1398,9 +1449,8 @@ namespace TMPro
         {
             CaretGeometry(m_StringSelectPosition, out float x, out float top, out float bottom);
             float width = Mathf.Max(1, m_CaretWidth);
-            var offset = TextToCaretOffset();
             Color32 color = caretColor;
-            AddQuad(vh, x + offset.x, bottom + offset.y, x + width + offset.x, top + offset.y, color);
+            AddQuad(vh, x, bottom, x + width, top, color);
         }
 
         void GenerateSelection(VertexHelper vh)
@@ -1409,7 +1459,6 @@ namespace TMPro
             int start = Mathf.Clamp(CharacterIndexOf(SelectionStart), 0, Math.Max(0, info.characterCount - 1));
             int end = Mathf.Clamp(CharacterIndexOf(SelectionEnd), 0, Math.Max(0, info.characterCount - 1));
             if (info.characterCount == 0) return;
-            var offset = TextToCaretOffset();
             Color32 color = m_SelectionColor;
             int i = start;
             while (i < end)
@@ -1420,57 +1469,85 @@ namespace TMPro
                 while (j + 1 < end && info.characterInfo[j + 1].lineNumber == line) j++;
                 float x1 = info.characterInfo[j].xAdvance;
                 ref var li = ref info.lineInfo[line];
-                AddQuad(vh, x0 + offset.x, li.descender + offset.y, x1 + offset.x, li.ascender + offset.y, color);
+                AddQuad(vh, x0, li.descender, x1, li.ascender, color, true);
                 i = j + 1;
             }
         }
 
-        static void AddQuad(VertexHelper vh, float x0, float y0, float x1, float y1, Color32 color)
+        // A caret quad's corners go bottom left, top left, top right, bottom right; a selection
+        // quad's bottom left, bottom right, top right, top left (measured in m_Mesh).
+        static void AddQuad(VertexHelper vh, float x0, float y0, float x1, float y1, Color32 color, bool selection = false)
         {
             int v = vh.currentVertCount;
             vh.AddVert(new Vector3(x0, y0, 0f), color, Vector2.zero);
-            vh.AddVert(new Vector3(x0, y1, 0f), color, Vector2.zero);
+            vh.AddVert(selection ? new Vector3(x1, y0, 0f) : new Vector3(x0, y1, 0f), color, Vector2.zero);
             vh.AddVert(new Vector3(x1, y1, 0f), color, Vector2.zero);
-            vh.AddVert(new Vector3(x1, y0, 0f), color, Vector2.zero);
+            vh.AddVert(selection ? new Vector3(x0, y1, 0f) : new Vector3(x1, y0, 0f), color, Vector2.zero);
             vh.AddTriangle(v, v + 1, v + 2);
             vh.AddTriangle(v + 2, v + 3, v);
         }
 
-        // The offset from the text's local space to the caret graphic's.
-        Vector2 TextToCaretOffset()
-        {
-            var textRect = m_TextComponent.rectTransform;
-            var caretRect = m_Caret.rectTransform;
-            var p = caretRect.InverseTransformPoint(textRect.TransformPoint(Vector3.zero));
-            return new Vector2(p.x, p.y);
-        }
-
-        // Scrolls the text horizontally (single line) or vertically (multi-line) so that the
-        // caret stays inside the viewport.
-        void KeepCaretVisible()
+        // Moves the text (horizontally for a single line, vertically for multi-line) so that the
+        // caret is inside the viewport. True when it moved. The caret's geometry is in the
+        // text's local space, drawn in the caret's rect, which follows the text's.
+        bool KeepCaretVisible()
         {
             var viewport = m_TextViewport;
-            if (viewport == null || m_TextComponent == null) return;
+            if (viewport == null || m_TextComponent == null) return false;
             var info = m_TextComponent.textInfo;
-            if (info.characterCount == 0) return;
+            if (info.characterCount == 0) return false;
             CaretGeometry(m_StringSelectPosition, out float x, out float top, out float bottom);
             var textRect = m_TextComponent.rectTransform;
             var view = viewport.rect;
-            Vector3 caretInView = viewport.InverseTransformPoint(textRect.TransformPoint(new Vector3(x, 0f, 0f)));
-            float shift = 0f;
             if (!multiLine)
             {
+                Vector3 caretInView = viewport.InverseTransformPoint(textRect.TransformPoint(new Vector3(x, 0f, 0f)));
+                float shift = 0f;
                 if (caretInView.x > view.xMax) shift = view.xMax - caretInView.x - m_CaretWidth;
                 else if (caretInView.x < view.xMin) shift = view.xMin - caretInView.x;
-                if (shift != 0f) textRect.anchoredPosition += new Vector2(shift, 0f);
+                if (shift == 0f) return false;
+                textRect.anchoredPosition += new Vector2(shift, 0f);
+                return true;
             }
+            float topInView = viewport.InverseTransformPoint(textRect.TransformPoint(new Vector3(x, top, 0f))).y;
+            float bottomInView = viewport.InverseTransformPoint(textRect.TransformPoint(new Vector3(x, bottom, 0f))).y;
+            float rise = 0f;
+            if (bottomInView < view.yMin) rise = view.yMin - bottomInView;
+            else if (topInView > view.yMax) rise = view.yMax - topInView;
+            if (rise == 0f) return false;
+            textRect.anchoredPosition += new Vector2(0f, rise);
+            return true;
         }
 
-        void ApplyScroll()
+        // The multi-line text's height beyond the viewport's: how far it can scroll.
+        float ScrollableHeight()
         {
-            if (m_TextComponent == null) return;
+            if (m_TextComponent == null || m_TextViewport == null) return 0f;
+            var info = m_TextComponent.textInfo;
+            if (info == null || info.lineCount == 0) return 0f;
+            float height = info.lineInfo[0].ascender - info.lineInfo[info.lineCount - 1].descender;
+            return Mathf.Max(0f, height - m_TextViewport.rect.height);
+        }
+
+        // The vertical scrollbar's value moved: the text goes to that scroll (0 its start, 1 its
+        // end) and the caret's rect follows (measured: in the change's handler).
+        void OnScrollbarValueChange(float value)
+        {
+            if (m_TextComponent == null || !multiLine) return;
             var textRect = m_TextComponent.rectTransform;
-            textRect.anchoredPosition = new Vector2(textRect.anchoredPosition.x, m_ScrollOffset.y);
+            textRect.anchoredPosition = new Vector2(textRect.anchoredPosition.x, value * ScrollableHeight());
+            AssignPositioningIfNeeded();
+            MarkGeometryChanged();
+        }
+
+        // Shows the text's scroll on the vertical scrollbar, without sending its change.
+        void UpdateScrollbar()
+        {
+            if (m_VerticalScrollbar == null || m_TextComponent == null || !multiLine) return;
+            float scrollable = ScrollableHeight();
+            float view = m_TextViewport != null ? m_TextViewport.rect.height : 0f;
+            m_VerticalScrollbar.size = scrollable > 0f ? view / (view + scrollable) : 1f;
+            m_VerticalScrollbar.SetValueWithoutNotify(scrollable > 0f ? Mathf.Clamp01(m_TextComponent.rectTransform.anchoredPosition.y / scrollable) : 0f);
         }
 
         // The string position of the character under a screen point.

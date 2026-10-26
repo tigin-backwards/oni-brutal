@@ -29,11 +29,17 @@ namespace TMPro
 
         static readonly HashSet<uint> s_ReportedMissing = new();
 
+        // The last parse had a sprite or font tag whose asset nothing provided: the shipped
+        // package asks again at each layout (OnSpriteAssetRequest is raised each time), so the
+        // text is parsed again at its next layout rather than kept.
+        public bool MissedAsset { get; private set; }
+
         public void Parse(TMP_Text text, string source, ParsedText output)
         {
             m_Text = text;
             m_Out = output;
             output.Clear();
+            MissedAsset = false;
             m_RichText = text.richText;
             m_Escapes = text.parseCtrlCharacters;
             m_Bold = m_Italic = m_Underline = m_Strike = m_Superscript = m_Subscript = m_Highlight = m_SmallCaps = m_Lower = m_Upper = m_NoBreak = 0;
@@ -501,7 +507,8 @@ namespace TMPro
                 case "gradient":
                     if (closing) return Pop("gradient");
                     {
-                        var gradient = Resources.Load<TMP_ColorGradient>((TMP_Settings.defaultColorGradientPresetsPath ?? "") + tag.Value);
+                        if (!MaterialReferenceManager.TryGetColorGradientPreset(TMP_TextUtilities.GetHashCode(tag.Value), out var gradient) || gradient == null)
+                            gradient = Resources.Load<TMP_ColorGradient>((TMP_Settings.defaultColorGradientPresetsPath ?? "") + tag.Value);
                         if (gradient == null) return false;
                         Push("gradient").Gradient = gradient;
                         return true;
@@ -700,7 +707,9 @@ namespace TMPro
             var defaultSprites = m_Text.spriteAsset ?? TMP_Settings.defaultSpriteAsset;
             TMP_SpriteAsset asset = null;
             int index = -1;
-            string assetName = tag.HasValue && !IsInteger(tag.Value) ? tag.Value : null;
+            // An unquoted name runs to the tag's end (measured: <sprite=a index=0> names "a
+            // index=0").
+            string assetName = tag.HasValue && !IsInteger(tag.Value) ? tag.UnquotedValueToEnd ?? tag.Value : null;
             if (assetName != null)
             {
                 asset = FindSpriteAsset(assetName);
@@ -713,8 +722,11 @@ namespace TMPro
             if (tag.TryAttribute("name", out var spriteName))
             {
                 var found = TMP_SpriteAsset.SearchForSpriteByName(asset, spriteName, true, out index);
-                if (found == null) return false;
-                asset = found;
+                if (found != null) asset = found;
+                // In an asset the tag names, a name it lacks gives sprite 0; in the default
+                // sprite asset the tag stays as text (measured).
+                else if (assetName != null) index = 0;
+                else return false;
             }
             if (index < 0 || index >= asset.spriteCharacterTable.Count) return false;
             ref var e = ref m_Out.Add();
@@ -743,51 +755,69 @@ namespace TMPro
             return true;
         }
 
+        // A <font="NAME"> tag's asset: "default" is the text's font; otherwise the font
+        // MaterialReferenceManager holds under GetHashCode(NAME), whatever case NAME is in. A font
+        // that is not registered is not found by its name (measured: not even the text's own).
+        // Then TMP_Text.OnFontAssetRequest is raised, and then the font is looked for under the
+        // Resources path for font assets, where the game's one font tag finds Bangers SDF; what
+        // either finds is registered under that hash (measured).
         TMP_FontAsset FindFont(string name)
         {
             if (string.IsNullOrEmpty(name)) return null;
             if (name.Equals("default", StringComparison.OrdinalIgnoreCase)) return m_Text.font;
-            var primary = m_Text.font;
-            if (primary != null && primary.name == name) return primary;
-            if (s_Fonts.TryGetValue(name, out var cached) && cached != null) return cached;
-            var path = "Fonts & Materials/" + name;
-            var font = Resources.Load<TMP_FontAsset>(path);
-            if (font == null)
-                foreach (var f in Resources.FindObjectsOfTypeAll<TMP_FontAsset>())
-                    if (f.name == name) { font = f; break; }
-            if (font != null) s_Fonts[name] = font;
+            int hash = TMP_TextUtilities.GetHashCode(name);
+            if (MaterialReferenceManager.TryGetFontAsset(hash, out var font) && font != null) return font;
+            font = TMP_Text.RequestFontAsset(hash, name);
+            if (font == null) font = FromResources<TMP_FontAsset>(s_FontMisses, hash, (TMP_Settings.defaultFontAssetPath ?? DefaultFontPath) + name);
+            if (font != null) MaterialReferenceManager.AddRequestedFont(hash, font);
+            else MissedAsset = true;
             return font;
         }
 
-        static readonly Dictionary<string, TMP_FontAsset> s_Fonts = new(StringComparer.Ordinal);
-        static readonly Dictionary<string, TMP_SpriteAsset> s_SpriteAssets = new(StringComparer.Ordinal);
-        static readonly Dictionary<string, Material> s_Materials = new(StringComparer.Ordinal);
+        const string DefaultFontPath = "Fonts & Materials/";
 
+        // Names (by hash) that Resources does not hold, so that a tag naming one does not search
+        // the resources again at every layout.
+        static readonly HashSet<int> s_FontMisses = new();
+        static readonly HashSet<int> s_SpriteMisses = new();
+        static readonly HashSet<int> s_MaterialMisses = new();
+
+        static T FromResources<T>(HashSet<int> misses, int hash, string path) where T : UnityEngine.Object
+        {
+            if (misses.Contains(hash)) return null;
+            var asset = Resources.Load<T>(path);
+            if (asset == null) misses.Add(hash);
+            return asset;
+        }
+
+        // A material named in a tag: the registry's under the name's hash, the font's own by name,
+        // or the one under the Resources path for font materials, which is then registered under
+        // that hash (measured: "Bangers SDF - Drop Shadow").
         static Material FindMaterial(string name, TMP_FontAsset font)
         {
             if (string.IsNullOrEmpty(name)) return null;
+            int hash = TMP_TextUtilities.GetHashCode(name);
+            if (MaterialReferenceManager.TryGetMaterial(hash, out var material) && material != null) return material;
             if (font != null && font.material != null && font.material.name == name) return font.material;
-            if (s_Materials.TryGetValue(name, out var cached) && cached != null) return cached;
-            var material = Resources.Load<Material>("Fonts & Materials/" + name);
-            if (material == null)
-                foreach (var m in Resources.FindObjectsOfTypeAll<Material>())
-                    if (m.name == name) { material = m; break; }
-            if (material != null) s_Materials[name] = material;
+            material = FromResources<Material>(s_MaterialMisses, hash, (TMP_Settings.defaultFontAssetPath ?? DefaultFontPath) + name);
+            if (material != null) MaterialReferenceManager.AddFontMaterial(hash, material);
             return material;
         }
 
+        // A <sprite="NAME"> tag's asset: the one MaterialReferenceManager holds under
+        // GetHashCode(NAME). Not the text's own sprite asset or any other loaded one by its name
+        // (measured). Then TMP_Text.OnSpriteAssetRequest is raised (its last handler's result
+        // counts), and then the asset is looked for under the Resources path for sprite assets,
+        // where the game's tags find oni_sprite_assets; what either finds is registered under
+        // that hash. With neither, the event is raised again at the next layout (measured).
         TMP_SpriteAsset FindSpriteAsset(string name)
         {
-            var own = m_Text.spriteAsset;
-            if (own != null && own.name == name) return own;
-            var def = TMP_Settings.defaultSpriteAsset;
-            if (def != null && def.name == name) return def;
-            if (s_SpriteAssets.TryGetValue(name, out var cached) && cached != null) return cached;
-            var asset = Resources.Load<TMP_SpriteAsset>((TMP_Settings.defaultSpriteAssetPath ?? "") + name);
-            if (asset == null)
-                foreach (var a in Resources.FindObjectsOfTypeAll<TMP_SpriteAsset>())
-                    if (a.name == name) { asset = a; break; }
-            if (asset != null) s_SpriteAssets[name] = asset;
+            int hash = TMP_TextUtilities.GetHashCode(name);
+            if (MaterialReferenceManager.TryGetSpriteAsset(hash, out var asset) && asset != null) return asset;
+            asset = TMP_Text.RequestSpriteAsset(hash, name);
+            if (asset == null) asset = FromResources<TMP_SpriteAsset>(s_SpriteMisses, hash, (TMP_Settings.defaultSpriteAssetPath ?? "") + name);
+            if (asset != null) MaterialReferenceManager.AddSpriteAsset(hash, asset);
+            else MissedAsset = true;
             return asset;
         }
 
@@ -1024,6 +1054,9 @@ namespace TMPro
             public readonly string Value;
             public readonly int ValueStart;
             public readonly int ValueLength;
+            // An unquoted value with everything after it to the tag's end ("a index=0" in
+            // <sprite=a index=0>); null for a quoted one.
+            public readonly string UnquotedValueToEnd;
             readonly List<(string, string)> m_Attributes;
 
             public bool HasValue => Value != null;
@@ -1045,7 +1078,9 @@ namespace TMPro
                 if (i < to && s[i] == '=')
                 {
                     i++;
+                    bool quoted = i < to && (s[i] == '"' || s[i] == '\'');
                     if (!ReadValue(s, ref i, to, out Value, out ValueStart, out ValueLength)) return;
+                    if (!quoted) UnquotedValueToEnd = s.Substring(ValueStart, to - ValueStart);
                     ValueStart -= from;
                 }
                 m_Attributes = null;

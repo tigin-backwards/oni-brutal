@@ -99,7 +99,7 @@ namespace TMPro
             s_Parser.Parse(this, source, m_Parsed);
             m_SourceEmpty = string.IsNullOrEmpty(source);
             m_SourceCache = m_text;
-            m_ParseRequired = false;
+            m_ParseRequired = s_Parser.MissedAsset;
         }
 
         private protected ParsedText Parsed => m_Parsed;

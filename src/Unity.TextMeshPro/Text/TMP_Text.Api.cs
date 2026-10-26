@@ -6,6 +6,18 @@ namespace TMPro
     // Layout queries and immediate updates.
     public abstract partial class TMP_Text
     {
+        // Raised, with the name's hash (TMP_TextUtilities.GetHashCode) and the name, when a
+        // <sprite="NAME"> tag names an asset MaterialReferenceManager does not hold. The last
+        // handler's non-null result is drawn and registered under that hash.
+        public static event Func<int, string, TMP_SpriteAsset> OnSpriteAssetRequest;
+
+        // The same for <font="NAME"> tags (not measured on the shipped package).
+        public static event Func<int, string, TMP_FontAsset> OnFontAssetRequest;
+
+        internal static TMP_SpriteAsset RequestSpriteAsset(int hashCode, string name) => OnSpriteAssetRequest?.Invoke(hashCode, name);
+
+        internal static TMP_FontAsset RequestFontAsset(int hashCode, string name) => OnFontAssetRequest?.Invoke(hashCode, name);
+
         // Lays the text out and regenerates its mesh now (normally the canvas rebuild does).
         public virtual void ForceMeshUpdate(bool ignoreActiveState = false, bool forceTextReparsing = false)
         {

@@ -13,12 +13,14 @@ namespace TMPro
 
         public int instanceID => GetInstanceID();
 
-        // The hash of the asset's name, as rich-text tags refer to assets by name.
+        // The key MaterialReferenceManager and rich-text tags find the asset by: the hash of its
+        // name (TMP_TextUtilities.GetHashCode), taken when first read while 0 and kept through
+        // renames; a value set is kept.
         public int hashCode
         {
             get
             {
-                if (m_HashCode == 0) m_HashCode = TextHash.Of(name);
+                if (m_HashCode == 0) m_HashCode = TMP_TextUtilities.GetHashCode(name);
                 return m_HashCode;
             }
             set => m_HashCode = value;
@@ -28,11 +30,16 @@ namespace TMPro
 
         public Material material { get => m_Material; set => m_Material = value; }
 
+        // The material's key in MaterialReferenceManager, taken when first read while 0 as
+        // GetSimpleHashCode(name + " Atlas Material"), which the shipped package reports for
+        // most game fonts and for a font asset made at run time (with its name then). So fonts
+        // that share one material have keys of their own (measured: GRAYSTROKE NAME SDF and
+        // GRAYSTROKE OUTLINE SDF both add).
         public int materialHashCode
         {
             get
             {
-                if (m_MaterialHashCode == 0 && m_Material != null) m_MaterialHashCode = TextHash.Of(m_Material.name);
+                if (m_MaterialHashCode == 0) m_MaterialHashCode = TMP_TextUtilities.GetSimpleHashCode(name + " Atlas Material");
                 return m_MaterialHashCode;
             }
             set => m_MaterialHashCode = value;

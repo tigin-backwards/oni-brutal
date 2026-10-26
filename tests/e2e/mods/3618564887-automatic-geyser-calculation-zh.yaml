@@ -1,0 +1,30 @@
+# 间歇泉自动计算 (Automatic Geyser Calculation, Chinese) (3618564887), class P.
+#
+# What it does: as Automatic Geyser Calculation (2631833478), in Chinese: a geyser's
+# descriptors (its info panel and tooltips) gain a 流量信息 (flow information) section computed
+# from its configuration: the average active flow and the buffer an eruption needs, then, once
+# the geyser has been analysed, the total average flow and the dormancy buffer (（需分析）,
+# requires analysis, until then), and heating or cooling figures against a steam turbine's or a
+# room's temperature (a postfix on Geyser.GetDescriptors).
+# How a player reaches it: select a geyser.
+# What changes: more lines in the geyser's status panel.
+#
+# setup places a cool steam vent in the dug-out corridor west of the printing pod; nobody in
+# early-base can analyse it, so the unanalysed lines are checked. The flow figures follow the
+# vent's random configuration: they are masked in the dump.
+from: early-base
+mods: [3618564887]
+setup:
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(0, 112, 206, \"GeyserGeneric_steam\", \"BuildingBack\")", method: SetActive, args: [true]}}
+steps:
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 207]}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state: {"selected:GetComponent<Geyser>": exists}
+  - expect_ui:
+      "**/SimpleInfoScreen/**/Descriptors/DescLabel": {any_text: "~流量信息"}
+  - expect_ui:
+      "**/SimpleInfoScreen/**/Descriptors/DescLabel": {any_text: "~平均活跃流速："}
+  - expect_ui:
+      "**/SimpleInfoScreen/**/Descriptors/DescLabel": {any_text: "~总平均流速：（需分析）"}
+  - ui_dump: {name: descriptors, root: "**/SimpleInfoScreen/**/ContentStatus/Descriptors", mask_text: ['[\d.,]+']}

@@ -1,0 +1,75 @@
+{
+ "spec": "mods/3618564887-automatic-geyser-calculation-zh.yaml",
+ "mods": [
+  "3618564887"
+ ],
+ "verdict": "warning",
+ "why": "known findings: float-tostring-shortest",
+ "findings": [
+  "float-tostring-shortest"
+ ],
+ "note": "a steam vent's info panel shows the Chinese flow lines (流量信息, 平均活跃流速, 总平均流速：（需分析）); its heat lines print floats with the shortest round-trip digits (float-tostring-shortest), so two labels and their fallback-font sub-meshes are a few pixels wider",
+ "updated": "2026-10-26",
+ "commit": "25e7e0c3",
+ "mod_dlls": {
+  "3618564887": {
+   "AutomaticGeyserCalculation.dll": "8863f92b3d23b6ec381df5809aa2700a8e8002276158832374c7041e26856747"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-023730-5710265c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T02:40:40",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-040957-88640db8",
+    "index": 1,
+    "verdict": "warn",
+    "date": "2026-10-26T04:09:57",
+    "lane": 16,
+    "reference_run": "20261026-023730-5710265c",
+    "new_signatures": 0,
+    "findings": [
+     "float-tostring-shortest"
+    ],
+    "ui_dump": {
+     "descriptors": {
+      "differences": 0,
+      "known": {
+       "float-tostring-shortest": 8
+      }
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261026-040957-88640db8",
+    "index": 2,
+    "verdict": "warn",
+    "date": "2026-10-26T04:09:58",
+    "lane": 17,
+    "reference_run": "20261026-023730-5710265c",
+    "new_signatures": 0,
+    "findings": [
+     "float-tostring-shortest"
+    ],
+    "ui_dump": {
+     "descriptors": {
+      "differences": 0,
+      "known": {
+       "float-tostring-shortest": 8
+      }
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

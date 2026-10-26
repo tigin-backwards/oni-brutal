@@ -1,0 +1,67 @@
+{
+ "spec": "mods/3629077549-morning-exercise.yaml",
+ "mods": [
+  "3629077549"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "after Pharmacology the Medicine menu lists the exerciser (shot); the Schedule screen has the Morning Exercise paint button (dumped)",
+ "updated": "2026-10-26",
+ "commit": "8ef77bae",
+ "mod_dlls": {
+  "3629077549": {
+   "MorningExercise.dll": "55b7afb891f859e08e43c358639d14e753aa2c454d4d7ce09b3c64a647e65055"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-171918-7bbacea2",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T17:38:44",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-175306-72ae15bd",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T18:27:07",
+    "lane": 14,
+    "reference_run": "20261026-171918-7bbacea2",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "paint-button": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "medicine-menu": 0.0
+    }
+   },
+   {
+    "run": "20261026-175306-72ae15bd",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T18:28:17",
+    "lane": 14,
+    "reference_run": "20261026-171918-7bbacea2",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "paint-button": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "medicine-menu": 0.0
+    }
+   }
+  ]
+ }
+}

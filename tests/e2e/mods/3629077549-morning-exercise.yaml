@@ -1,0 +1,31 @@
+# Morning Exercise (3629077549), classes B, O.
+#
+# What it does: a Morning Exercise schedule block (its own schedule group and chore type) and
+# a 2x2 Manual Exerciser in the Medicine menu, researched with Pharmacology (MedicineI).
+# During that block Duplicants exercise on an exerciser for PLib options' seconds and get a
+# Warm Up buff of Athletics (Bionic Duplicants: Morale). The Schedule screen gets a paint
+# button for the block.
+# How a player reaches it: the Schedule screen's paint buttons; the build menu (Medicine).
+# What changes: an exercise period that buffs Duplicants.
+#
+# setup researches Pharmacology; the Medicine menu lists the exerciser (shot), and the
+# Schedule screen has the Morning Exercise paint button (dumped).
+from: early-base
+mods: [3629077549]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"MedicineI\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+steps:
+  - expect_state:
+      "Db.Get().ScheduleGroups.Get(\"MorningExercise\")": exists
+      "Db.Get().ChoreTypes.Get(\"MorningExercise\")": exists
+      "Db.Get().Techs.Get(\"MedicineI\").unlockedItemIDs": {contains: ManualExerciser}
+  - run: {seconds: 10}
+  - click: {ui: "**/PlanScreen/Toggle:Medicine"}
+  # The build menu catches up over frames: 120 frames for all of it to settle.
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/ManualExerciser Group*", cond: stable, stable: 120, frames: 600}
+  - shot: {name: medicine-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
+  - key: {code: Escape}
+  - open: {management: schedule}
+  - ui_wait: {path: "**/ScheduleScreen/**/MorningExercise", cond: stable}
+  - ui_dump: {name: paint-button, root: "**/ScheduleScreen/**/MorningExercise"}

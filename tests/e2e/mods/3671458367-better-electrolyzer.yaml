@@ -1,0 +1,37 @@
+# 更好的电解器 Better Electrolyzer (3671458367), class B.
+#
+# What it does: adds the BetterElectrolyzer after the Electrolyzer in the Oxygen menu,
+# researched with Improved Oxygen (Air Systems): a 3x2 metal building with a water input and
+# two gas outputs, oxygen to one pipe and hydrogen to the other, its power (120 W), oxygen
+# (888 g/s), hydrogen (112 g/s), heat and output temperature (343 K) set by PLib options.
+# How a player reaches it: the build menu (Oxygen), after the research; the Mods screen's
+# options.
+# What changes: an electrolyzer with piped outputs.
+#
+# options set 60 W and 500 g/s of oxygen; setup researches Air Systems; the Oxygen menu lists
+# it, and one built by setup in the dug-out corridor west of the printing pod is selected.
+from: early-base
+mods: [3671458367]
+options:
+  "3671458367": {PowerConsumption: 60, OxygenOutput: 500}
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"ImprovedOxygen\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"BetterElectrolyzer\")", method: Build, args: [131129, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"ImprovedOxygen\").unlockedItemIDs": {contains: BetterElectrolyzer}
+      "Assets.GetBuildingDef(\"BetterElectrolyzer\").EnergyConsumptionWhenActive": 60
+      "Assets.GetBuildingDef(\"BetterElectrolyzer\").OutputConduitType": "== 'Gas'"
+  - run: {seconds: 10}
+  - expect: {buildings: {BetterElectrolyzer: 1}}
+  - click: {ui: "**/PlanScreen/Toggle:Oxygen"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/BetterElectrolyzer Group*", cond: stable}
+  - ui_dump: {name: diffuser-button, root: "**/BuildingGroups/**/Grid/MineralDeoxidizer Group*"}
+  - shot: {name: oxygen-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
+  - key: {code: Escape}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: BetterElectrolyzer}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "/./"}

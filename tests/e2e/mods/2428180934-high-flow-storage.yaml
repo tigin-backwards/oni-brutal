@@ -1,0 +1,35 @@
+# High Flow Storage Updated (2428180934), class B.
+#
+# What it does: adds gas and liquid reservoirs with three input and three output pipe ports
+# (horizontal 5x3 and vertical versions, Base menu, researched with Ventilation and Liquid
+# Tuning), tinted, with a storage sensor logic output; sizes, costs, capacities and colours come
+# from its HighFlowStorageConfig.json. The older single-version buildings stay, deprecated, for
+# old saves. The extra ports are drawn in the pipe overlays.
+# How a player reaches it: the build menu (Base), after the research.
+# What changes: reservoirs fed and emptied by several pipes at once.
+#
+# setup grants Ventilation and builds a High Flow Gas Reservoir in the corridor west of the
+# printing pod. It shows in the Base menu; the built one is selected, its storage as large as
+# the config makes it.
+from: early-base
+mods: [2428180934]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"HVAC\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Nightinggale.HighFlowGasReservoir2\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Cuprite], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"HVAC\").unlockedItemIDs": {contains: Nightinggale.HighFlowGasReservoir2}
+  - run: {seconds: 2}
+  - click: {ui: "**/PlanScreen/Toggle:Base"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/Nightinggale.HighFlowGasReservoir2 Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/Nightinggale.HighFlowGasReservoir2 Group*": {active: true}
+  - key: {code: Escape}
+  - expect_ui: {"**/PauseScreen": {exists: false}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 208], select: Nightinggale.HighFlowGasReservoir2}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<Storage>.capacityKg": "== original"
+      "selected:GetComponents<NightLib.PortConduitConsumer>.Length": 3

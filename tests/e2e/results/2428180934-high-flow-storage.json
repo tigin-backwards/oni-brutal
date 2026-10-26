@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2428180934-high-flow-storage.yaml",
+ "mods": [
+  "2428180934"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the High Flow Gas Reservoir shows in the Base menu after Ventilation; a built one has three intake ports and the config's capacity",
+ "updated": "2026-10-26",
+ "commit": "efbf118",
+ "mod_dlls": {
+  "2428180934": {
+   "High Flow Storage - DLC Fix.dll": "a15599c47b92fd3023a247faffef9828277b2a1ef810426febaa82e7fd38907f"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-002114-2cca05f1",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T00:47:40",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-010009-bbd76b26",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T01:07:00",
+    "lane": 14,
+    "reference_run": "20261026-002114-2cca05f1",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-010009-bbd76b26",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T01:07:56",
+    "lane": 14,
+    "reference_run": "20261026-002114-2cca05f1",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

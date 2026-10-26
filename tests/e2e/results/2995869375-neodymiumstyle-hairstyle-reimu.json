@@ -1,0 +1,57 @@
+{
+ "spec": "mods/2995869375-neodymiumstyle-hairstyle-reimu.yaml",
+ "mods": [
+  "3172734005",
+  "2995869375"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with Dupery Fixed, Reimu joins the personalities and her hair loads as an accessory",
+ "updated": "2026-10-26",
+ "commit": "0d7d459",
+ "mod_dlls": {
+  "3172734005": {
+   "DuperyFixed.dll": "9ef4a93958b6b80fbf086cab57821955dd344324d2192086db7ea7845e71f7f2"
+  },
+  "2995869375": {}
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-222040-75e4a4a6",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T23:58:20",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-014806-86936942",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T01:51:37",
+    "lane": 14,
+    "reference_run": "20261025-222040-75e4a4a6",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-014806-86936942",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T01:52:32",
+    "lane": 14,
+    "reference_run": "20261025-222040-75e4a4a6",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

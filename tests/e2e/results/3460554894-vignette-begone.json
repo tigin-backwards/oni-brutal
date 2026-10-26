@@ -1,0 +1,67 @@
+{
+ "spec": "mods/3460554894-vignette-begone.yaml",
+ "mods": [
+  "3460554894"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the new toggle beside Red Alert shows and hides the vignette (alpha 0.47 and 0); the row of toggles as in the original",
+ "updated": "2026-10-26",
+ "commit": "bbc2ade",
+ "mod_dlls": {
+  "3460554894": {
+   "VignetteBegone.dll": "138759210426585ad44007bf37831b593bcb9cdf8946d2cede76536f736b429e"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-212024-3ac7afec",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T21:21:46",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-000859-e0fab40b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T00:08:59",
+    "lane": 16,
+    "reference_run": "20261025-212024-3ac7afec",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "row": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "row": 0.0
+    }
+   },
+   {
+    "run": "20261026-000859-e0fab40b",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T00:09:00",
+    "lane": 17,
+    "reference_run": "20261025-212024-3ac7afec",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "row": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "row": 0.0
+    }
+   }
+  ]
+ }
+}

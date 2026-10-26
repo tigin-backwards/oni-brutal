@@ -1,0 +1,30 @@
+# VignetteBegone 移除晕影 (3460554894), classes V, S.
+#
+# What it does: hides the screen's dark vignette. A postfix on MeterScreen.OnSpawn copies the
+# top-left Red Alert toggle into a new toggle beside it (lights-off icon, tooltip "切换关闭屏幕晕影")
+# that turns the vignette's alpha to 0 or back to the game's (0.47); the choice is kept in the
+# "VignetteHidden" player pref (hidden by default). While hidden, a prefix on Vignette.Reset
+# also keeps the red and yellow alert tints and their sounds away.
+# How a player reaches it: the new toggle next to Red Alert, top left.
+# What changes: the vignette over the world.
+#
+# The colony loads with the vignette hidden. A click on the new toggle shows it (alpha 0.47) and
+# a second click hides it again; the row of toggles is compared with the original.
+from: early-base
+mods: [3460554894]
+steps:
+  - expect_ui:
+      "**/TopLeftControlPanel(Clone)/SecondaryRow/RedAlertButton": {count: 2}
+  - expect_state:
+      "type:VignetteBegone.VignetteController::IsHidden": true
+      "Vignette.Instance.image.color.a": 0
+  - ui_dump: {name: row, root: "**/TopLeftControlPanel(Clone)/SecondaryRow"}
+  - shot: {name: row, crop: "**/TopLeftControlPanel(Clone)/SecondaryRow", threshold: 0.04}
+  - click: {ui: "**/TopLeftControlPanel(Clone)/SecondaryRow/RedAlertButton", index: 1}
+  - expect_state:
+      "type:VignetteBegone.VignetteController::IsHidden": false
+      "Vignette.Instance.image.color.a": "> 0.4"
+  - click: {ui: "**/TopLeftControlPanel(Clone)/SecondaryRow/RedAlertButton", index: 1}
+  - expect_state:
+      "type:VignetteBegone.VignetteController::IsHidden": true
+      "Vignette.Instance.image.color.a": 0

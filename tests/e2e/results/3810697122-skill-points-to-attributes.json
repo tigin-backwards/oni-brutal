@@ -1,0 +1,68 @@
+{
+ "spec": "mods/3810697122-skill-points-to-attributes.yaml",
+ "mods": [
+  "3810697122"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Skills screen's Attribute Exchange toggle opens the mod's panel, and a click on Digging spends a skill point for 3 Digging levels; the panel's layout and pixels as in the original",
+ "updated": "2026-10-26",
+ "commit": "bbc2ade",
+ "mod_dlls": {
+  "3810697122": {
+   "PLib.dll": "3dc9bc06c6b54660b833d314192e6b34c578754facc6aff3c7e803b5cdc6616e",
+   "SkillPointAttributes.dll": "7c0c87dfff93a2dd96f1d45d71ccc091479ba50bc50b4f10c606b7458352f191"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-213830-247c699a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T21:38:30",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-001943-5d3aeb6a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T00:19:43",
+    "lane": 16,
+    "reference_run": "20261025-213830-247c699a",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "panel": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "panel": 0.0
+    }
+   },
+   {
+    "run": "20261026-001943-5d3aeb6a",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T00:19:44",
+    "lane": 17,
+    "reference_run": "20261025-213830-247c699a",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "panel": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "panel": 0.0
+    }
+   }
+  ]
+ }
+}

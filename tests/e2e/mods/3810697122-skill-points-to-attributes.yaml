@@ -1,0 +1,43 @@
+# 技能点兑换属性 / Skill Points to Attributes (3810697122), classes S, O.
+#
+# What it does: unspent skill points can be traded for attribute levels. The Skills screen gets
+# an "Attribute Exchange" toggle at its top right that opens a panel of twelve attributes
+# (uGUI made in code: SkillPointAttributeToggle, SkillPointAttributePanel/AttributeGrid); a
+# click on one spends a skill point (shift-click five) for AttributePointsPerSkillPoint levels
+# (PLib option, default 1). A SkillPointAttributeBank on each Duplicant keeps the ledger, a
+# postfix on MinionResume.AvailableSkillpoints subtracts what was spent, transpilers fix the
+# Printing Pod's and Skills Board's reminders, and the Skill Scrubber refunds. Options also
+# pick English or Chinese labels and a morale cost.
+# How a player reaches it: the Skills screen (L), its Attribute Exchange toggle.
+# What changes: a Duplicant's attributes, for skill points.
+#
+# The options pick English and 3 levels a point. setup grants each Duplicant a skill point.
+# The Skills screen opens, the toggle opens the panel, and a click on Digging raises the
+# selected Duplicant's Digging by 3 for one skill point.
+from: early-base
+mods: [3810697122]
+options:
+  SkillPointAttributes: {$file: SkillPointAttributes.json, UseEnglishInterface: true, AttributePointsPerSkillPoint: 3}
+setup:
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[0].GetComponent<MinionResume>", method: ForceAddSkillPoint}}
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[1].GetComponent<MinionResume>", method: ForceAddSkillPoint}}
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[2].GetComponent<MinionResume>", method: ForceAddSkillPoint}}
+steps:
+  - open: {management: skills}
+  - ui_wait: {path: "**/SkillsScreen/Minions/SelectedDuplicant/Top/BoxButtons/CurrentLevel", cond: stable}
+  - expect_ui:
+      "**/SkillsScreen/SkillPointAttributeToggle/Label": {text: "Attribute Exchange ▼"}
+  - expect_state:
+      "ui:**/SkillsScreen::GetComponent<SkillsScreen>.CurrentlySelectedMinion.GetComponent<MinionResume>.AvailableSkillpoints": {save_as: points}
+      "ui:**/SkillsScreen::GetComponent<SkillsScreen>.CurrentlySelectedMinion.GetComponent<AttributeLevels>.GetAttributeLevel(\"Digging\").level": {save_as: digging}
+  - expect_state: {"ui:**/SkillsScreen::GetComponent<SkillsScreen>.CurrentlySelectedMinion.GetComponent<MinionResume>.AvailableSkillpoints": ">= 1"}
+  - click: {ui: "**/SkillsScreen/SkillPointAttributeToggle"}
+  - ui_wait: {path: "**/SkillsScreen/SkillPointAttributePanel/AttributeGrid", cond: stable}
+  - expect_ui:
+      "**/SkillsScreen/SkillPointAttributeToggle/Label": {text: "Attribute Exchange ▲"}
+  - ui_dump: {name: panel, root: "**/SkillsScreen/SkillPointAttributePanel"}
+  - shot: {name: panel, crop: "**/SkillsScreen/SkillPointAttributePanel", threshold: 0.04}
+  - click: {ui: "**/SkillPointAttributePanel/AttributeGrid/Digging"}
+  - expect_state:
+      "ui:**/SkillsScreen::GetComponent<SkillsScreen>.CurrentlySelectedMinion.GetComponent<AttributeLevels>.GetAttributeLevel(\"Digging\").level": "== digging + 3"
+      "ui:**/SkillsScreen::GetComponent<SkillsScreen>.CurrentlySelectedMinion.GetComponent<MinionResume>.AvailableSkillpoints": "== points - 1"

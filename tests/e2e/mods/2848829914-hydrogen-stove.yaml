@@ -1,0 +1,33 @@
+# 氢气灶HydrogenStove (2848829914), classes B, O.
+#
+# What it does: adds the Hydrogen Gas Range (GourmetCookingStation1, 3x3, any metal, Food
+# menu, researched with Fine Dining): a Gas Range burning hydrogen (0.1 kg/s, piped in) that
+# cooks the Gas Range's dishes without a Duplicant operating it; its wattage is a PLib option
+# (333 W by default, 1 to 666).
+# How a player reaches it: the build menu (Food), after the research; its recipe list.
+# What changes: an automatic gas range on hydrogen.
+#
+# setup grants Fine Dining: the Food menu offers it. setup builds one in the dug-out room west
+# of the printing pod, and selected, its recipe list is compared with the original.
+from: early-base
+mods: [2848829914]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"FineDining\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"GourmetCookingStation1\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Cuprite], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"FineDining\").unlockedItemIDs": {contains: GourmetCookingStation1}
+      "Assets.GetBuildingDef(\"GourmetCookingStation1\").EnergyConsumptionWhenActive": 333
+      "Assets.GetPrefab(\"GourmetCookingStation1\").GetComponent<ComplexFabricator>.duplicantOperated": false
+      "count:ComplexRecipeManager.Get().recipes[*] if .fabricators[0].Name == GourmetCookingStation1": ">= 2"
+  - run: {seconds: 10}
+  - click: {ui: "**/PlanScreen/Toggle:Food"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/GourmetCookingStation1 Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/GourmetCookingStation1 Group*": {active: true}
+  - key: {code: Escape}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: GourmetCookingStation1}
+  - ui_wait: {path: "**/ComplexFabricatorSideScreen/Contents/ButtonScrollView", cond: stable}
+  - ui_dump: {name: recipes, root: "**/ComplexFabricatorSideScreen/Contents/ButtonScrollView"}

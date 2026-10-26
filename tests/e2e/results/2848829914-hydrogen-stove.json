@@ -1,0 +1,76 @@
+{
+ "spec": "mods/2848829914-hydrogen-stove.yaml",
+ "mods": [
+  "2848829914"
+ ],
+ "verdict": "warning",
+ "why": "known findings: scroll-normalized-position",
+ "findings": [
+  "scroll-normalized-position"
+ ],
+ "note": "after Fine Dining the Food menu offers the Hydrogen Gas Range (333 W, no operator); its recipe list dump matches",
+ "updated": "2026-10-26",
+ "commit": "bcfce375",
+ "mod_dlls": {
+  "2848829914": {
+   "H2 Gourmet Cooking Station╟Γ╞°╘ε.dll": "b6e3d3d4987fef27b74b0eb9e267128f35e50b85c93be1ff8e183dff638dd8b0",
+   "PLib.dll": "b862c5db2b3cd6df09a62d4a30782e91e2b24e8e1bfac08d991c9cc89a984ba9"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-043257-c0eef0ae",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:46:51",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-110458-787d771d",
+    "index": 1,
+    "verdict": "warn",
+    "date": "2026-10-26T11:04:58",
+    "lane": 16,
+    "reference_run": "20261026-043257-c0eef0ae",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "recipes": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261026-110458-787d771d",
+    "index": 2,
+    "verdict": "warn",
+    "date": "2026-10-26T11:04:59",
+    "lane": 17,
+    "reference_run": "20261026-043257-c0eef0ae",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "recipes": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

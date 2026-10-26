@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3373024595-engies-tuneup-inactivity-refund.yaml",
+ "mods": [
+  "3373024595"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "an unfuelled Coal Generator's tune-up effect hardly runs down in a minute of game time",
+ "updated": "2026-10-26",
+ "commit": "ca87ffb1",
+ "mod_dlls": {
+  "3373024595": {
+   "Engies_Tuneup_Inactivity_Refund.dll": "3b36bbc5fe8d21b3fd4e596ba1f80106aea8d6d9be5088be11483c004f78cb83"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-033203-6e82e943",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:55:14",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-041946-bf0f1e33",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:19:46",
+    "lane": 16,
+    "reference_run": "20261026-033203-6e82e943",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-041946-bf0f1e33",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T04:19:47",
+    "lane": 17,
+    "reference_run": "20261026-033203-6e82e943",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

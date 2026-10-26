@@ -1,0 +1,29 @@
+# Engies Tuneup Inactivity Refund (3373024595), classes P, O.
+#
+# What it does: the generators a Power Technician can tune up (Tinkerable.MakePowerTinkerable:
+# the coal, wood, hydrogen, natural gas, petroleum and peat generators) get a tracker: while
+# such a generator stands inactive, its Engie's Tune-Up effect does not run down (its time
+# is given back every 4 s, and settled when the generator runs again). A PLib option sets the
+# effect's duration (1800 s, the game's).
+# How a player reaches it: a tuned-up generator that runs out of fuel or is switched off.
+# What changes: tune-ups last for the generator's working time.
+#
+# setup builds an unfuelled Coal Generator in the dug-out room west of the printing pod and
+# gives it the tune-up effect. After a minute of game time the effect has hardly run down
+# (the game's would be a minute shorter).
+from: early-base
+mods: [3373024595]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Generator\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Cuprite], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "all:EnergyGenerator::[0].GetComponent<Effects>", method: Add, args: [PowerTinker, true]}}
+steps:
+  - expect_state:
+      "Db.Get().effects.Get(\"PowerTinker\").duration": 1800
+      "all:EnergyGenerator::[0].GetComponent<EngiesTuneupRefundTracker>": exists
+      "all:EnergyGenerator::[0].GetComponent<Operational>.IsActive": false
+  - run: {seconds: 5}
+  - expect_state:
+      "all:EnergyGenerator::[0].GetComponent<Effects>.Get(\"PowerTinker\").timeRemaining": {save_as: before}
+  - run: {seconds: 60}
+  - expect_state:
+      "all:EnergyGenerator::[0].GetComponent<Effects>.Get(\"PowerTinker\").timeRemaining": ">= before - 10"

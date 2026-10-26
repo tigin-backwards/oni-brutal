@@ -1,0 +1,64 @@
+{
+ "spec": "mods/1886183536-eco-friendly-toilet.yaml",
+ "mods": [
+  "1886183536"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Plumbing menu offers the toilet (shot matches); one built asks for dirt and water and shows its title (shot matches)",
+ "updated": "2026-10-26",
+ "commit": "12885256",
+ "mod_dlls": {
+  "1886183536": {
+   "0SuperComicLib.ModONI.dll": "ab1b3ec34fc2bbf90810844205824364128cf59acfcf291bebf5ffa1917c23d7",
+   "EcoFriendlyToilet_OV3.dll": "0c4e40ec862a34744f1c1e9bee889c5ecb3af47524f2ef6562e66b07d9dba2bb",
+   "VYaml.Annotations.dll": "3d41df55af5e3f3cbb0db9028a7bc952317470fa427be3e9f6e51565ca8b23ba",
+   "VYaml.dll": "dc85a16a973d7395628269ea36597104d4399e9e00c498e3728dfcdec2f0ed85"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-042232-0e5bb32c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:27:24",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-101739-32a4c516",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T10:17:39",
+    "lane": 16,
+    "reference_run": "20261026-042232-0e5bb32c",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "plumbing-menu": 0.0,
+     "title": 0.0
+    }
+   },
+   {
+    "run": "20261026-101739-32a4c516",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T10:17:40",
+    "lane": 17,
+    "reference_run": "20261026-042232-0e5bb32c",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "plumbing-menu": 0.0,
+     "title": 0.0
+    }
+   }
+  ]
+ }
+}

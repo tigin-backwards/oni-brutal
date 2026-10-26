@@ -1,0 +1,36 @@
+# [Vanilla + DLC] Eco-friendly Toilet & Farm+ OV3.0 (1886183536), class B.
+#
+# What it does: adds, on SuperComic's library, an Eco-friendly Toilet (EcoFriendlyToilet, 2x3,
+# drawn as the outhouse, Plumbing): fed dirt and water, it leaves 9 kg of fertilizer for
+# each use, and counts down 24 flushes between cleanings; an Auto-purifying Wash Basin
+# (AutoPurifyWashsink, Medicine); a Wild Farm Tile (Food) and two wild flower pots
+# (Furniture), where plants grow as if wild. It asks to add the last three to Agriculture and
+# Interior Decor, but no tech lists them in the original.
+# How a player reaches it: the build menu (Plumbing, Medicine, Food, Furniture).
+# What changes: more toilets, wash basins and planters.
+#
+# The Plumbing menu offers the toilet. setup builds one in the dug-out room west of the
+# printing pod: it asks for dirt and water, and selected, it shows its title.
+from: early-base
+mods: [1886183536]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"EcoFriendlyToilet\")", method: Build, args: [{"$": "Grid.XYToCell(111, 207)"}, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"AutoPurifyWashsink\")": exists
+      "Assets.GetBuildingDef(\"EcoFriendlyWildFarmTile\")": exists
+      "count:all:FerzToilet::[0].GetComponents<ManualDeliveryKG>[*] if .RequestedItemTag.Name == Dirt": 1
+      "count:all:FerzToilet::[0].GetComponents<ManualDeliveryKG>[*] if .RequestedItemTag.Name == Water": 1
+  - run: {seconds: 10}
+  - click: {ui: "**/PlanScreen/Toggle:Plumbing"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/EcoFriendlyToilet Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/EcoFriendlyToilet Group*": {active: true}
+  - shot: {name: plumbing-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
+  - key: {code: Escape}
+  - driver: {camera.set: {cell: [111, 208], ortho: 8}}
+  - click_world: {cell: [111, 208], select: EcoFriendlyToilet}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "/./"}
+  - shot: {name: title, crop: "**/DetailsScreen/TitleBar", threshold: 0.04}

@@ -1,0 +1,37 @@
+# Instant Dirt & Wild Plants (AKA: Buildable Dirt Tile And Wild Plants) (3732005635), classes
+# B, O.
+#
+# What it does: adds the Buildable Dirt Tile (BuildableDirtTile, in the Utilities menu, no
+# research), built from 200 kg of dirt (DirtMass, a PLib option): once built, it turns into a
+# natural dirt cell of that mass, and, with the option SelectedPlant, a wild plant of that
+# kind spawns on it (or under it, for hanging plants) once the dirt is there.
+# How a player reaches it: the build menu (Utilities); the options on the Mods screen.
+# What changes: natural tiles and wild plants where the player wants them.
+#
+# The option picks a Buddy Bud (BulbPlant). setup spawns dirt; a Buildable Dirt Tile is built
+# in the corridor west of the printing pod (113, 207): the cell becomes natural dirt and a wild
+# Buddy Bud grows on it.
+from: early-base
+mods: [3732005635]
+options:
+  "3732005635": {$file: BuildableDirtTileOptions.json, SelectedPlant: BulbPlant, DirtMass: 200.0}
+setup:
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Dirt\").substance", method: SpawnResource, args: [[111.5, 207.5, -12], 400, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "count:all:KPrefabID::[*] if .PrefabTag.Name == BulbPlant": {save_as: buds}
+  - run: {seconds: 5}
+  - click: {ui: "**/PlanScreen/Toggle:Utilities"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/BuildableDirtTile Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/BuildableDirtTile Group*": {active: true}
+  - key: {code: Escape}
+  - expect_ui: {"**/PauseScreen": {exists: false}}
+  - build: {prefab: BuildableDirtTile, cells: [[113, 207]], material: Dirt}
+  - run: {seconds: 1500, until: {pending_construction: 0}}
+  - run: {seconds: 5}
+  - expect_state:
+      "Grid.Element[131765].id": Dirt      # (113, 207)
+      "Grid.Mass.get_Item(131765)": "> 150"
+      "count:all:KPrefabID::[*] if .PrefabTag.Name == BulbPlant": "== buds + 1"
+      "count:all:KPrefabID::[*] if .PrefabTag.Name == BuildableDirtTile": 0

@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3732005635-instant-dirt-and-wild-plants.yaml",
+ "mods": [
+  "3732005635"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Buildable Dirt Tile built from the Utilities menu turns into natural dirt with the Buddy Bud its option picks",
+ "updated": "2026-10-25",
+ "commit": "bd353b5",
+ "mod_dlls": {
+  "3732005635": {
+   "mod1.dll": "699e14a50721e157f9f3bc3a278f68c2cc7477fcb385816fa5c4aff9a210877a"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-200219-ef1e47f8",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T20:35:02",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-211614-4fb7da09",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T21:16:14",
+    "lane": 14,
+    "reference_run": "20261025-200219-ef1e47f8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261025-211614-4fb7da09",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-25T21:17:21",
+    "lane": 14,
+    "reference_run": "20261025-200219-ef1e47f8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

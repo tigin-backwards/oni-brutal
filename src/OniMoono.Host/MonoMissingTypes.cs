@@ -67,9 +67,10 @@ namespace OniMoono.Host
             {
                 return Rewrite(image, ref symbols, path, tokens);
             }
-            catch (Exception e) when (e is Cecil.AssemblyResolutionException or BadImageFormatException or InvalidOperationException or ArgumentException)
+            catch (Exception e) when (e is Cecil.AssemblyResolutionException or BadImageFormatException or InvalidOperationException or ArgumentException or NullReferenceException)
             {
-                // The mod loads as it is: such methods fail as CoreCLR fails them.
+                // The mod loads as it is: such methods fail as CoreCLR fails them. (Cecil's writer
+                // throws NullReferenceException on debug information it cannot map.)
                 EngineLog.Engine($"mod missing types: {Path.GetFileName(path)} not rewritten ({e.GetType().Name}: {e.Message}); it loads unchanged");
                 return null;
             }

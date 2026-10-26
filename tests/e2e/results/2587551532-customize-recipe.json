@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2587551532-customize-recipe.yaml",
+ "mods": [
+  "2587551532"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the mod writes its default config and makes its three default recipes (logged as in the original); the recipe counts are the original's and the colony runs",
+ "updated": "2026-10-26",
+ "commit": "bbc2ade",
+ "mod_dlls": {
+  "2587551532": {
+   "CustomizeRecipe.dll": "b0da657711d278742aa2a01b14a3d1f3fda84220a8b46636981e1b258bd58911"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-010231-72032d11",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T01:02:31",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-011338-1376fdd1",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T01:13:38",
+    "lane": 16,
+    "reference_run": "20261026-010231-72032d11",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-011338-1376fdd1",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T01:13:39",
+    "lane": 17,
+    "reference_run": "20261026-010231-72032d11",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -1,0 +1,27 @@
+# Customize Recipe (2587551532), classes P, O.
+#
+# What it does: recipes of fabricators are read from mods/CustomizeRecipe.json (PLib options,
+# written with defaults on first start): each entry edits a recipe by id or adds one to a
+# fabricator, with inputs, outputs, time, description and output temperature. A postfix on
+# ComplexRecipeManager.PostProcess applies them; options make everything fast or free, and an
+# options button dumps every recipe into the file. The defaults add three Rock Crusher recipes
+# (one from water and dirt, one turning regolith into sand and dirt, and a fossil one) and a
+# Glass Forge recipe extracting phosphorus from phosphorite.
+# How a player reaches it: the config file or the Mods screen's options; then the
+# fabricators' recipe lists.
+# What changes: what fabricators can make.
+#
+# The mod writes its default config and logs the three recipes it makes (the Rock Crusher
+# example and regolith recipes, the Glass Forge's phosphorus); the recipe manager holds as many
+# recipes, and as many Rock Crusher ones, as in the original; the colony runs.
+from: early-base
+mods: [2587551532]
+require_log: ['Making new Recipe: RockCrusher_NewExampleRecipe1', 'Making new Recipe: RockCrusher_I_Regolith_O_Sand', 'Making new Recipe: GlassForge_I_Phosphorite_O_LiquidPhosphorus']
+steps:
+  - expect_state:
+      "count:ComplexRecipeManager.Get().recipes[*] if .fabricators[0].Name == RockCrusher": "== original"
+      "count:ComplexRecipeManager.Get().recipes[*]": "== original"
+  - expect_state:
+      "file:mods/CustomizeRecipe.json": exists
+  - run: {seconds: 30}
+  - expect: {duplicants: 3}

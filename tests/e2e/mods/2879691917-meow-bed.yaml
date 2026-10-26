@@ -1,0 +1,29 @@
+# 喵喵床 Meow bed (2879691917), class B.
+#
+# What it does: adds a cat-shaped plastic bed, K41M41GG41H1, to the Furniture menu: a luxury
+# bed (the Comfy Bed's stamina and health effects, counted for bedrooms that need a luxury
+# bed, +decor).
+# How a player reaches it: the build menu (Furniture).
+# What changes: another luxury bed.
+#
+# The prefab is read; a bed built by setup in the dug-out corridor west of the printing pod is
+# selected, and the Furniture menu lists it.
+from: early-base
+mods: [2879691917]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"K41M41GG41H1\")", method: Build, args: [131129, Neutral, null, [Polypropylene], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"K41M41GG41H1\").GetComponent<Bed>.effects": [{contains: LuxuryBedStamina}, {contains: BedHealth}]
+      "Assets.GetPrefab(\"K41M41GG41H1\").GetComponent<KPrefabID>.HasTag(\"LuxuryBedType\")": true
+  - run: {seconds: 2}
+  - expect: {buildings: {K41M41GG41H1: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: K41M41GG41H1}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:Ownable.slotID": Bed
+  - key: {code: Escape}
+  - click: {ui: "**/PlanScreen/Toggle:Furniture"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/K41M41GG41H1 Group*", cond: stable}
+  - shot: {name: furniture-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}

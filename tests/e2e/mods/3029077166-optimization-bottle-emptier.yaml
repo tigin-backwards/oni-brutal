@@ -1,0 +1,31 @@
+# 优化空罐器Optimization Bottle Emptier (3029077166), classes P, S.
+#
+# What it does: the Bottle Emptier and the Canister Emptier hold up to 1000 t, and each gets a
+# slider side screen that sets how fast it empties: 1 to 100 kg/s for the bottle emptier (10
+# by default), 0.1 to 10 kg/s for the canister emptier (0.2); the setting copies with Copy
+# Settings.
+# How a player reaches it: the emptier's side screen slider.
+# What changes: faster emptiers.
+#
+# setup builds a Bottle Emptier in the dug-out corridor west of the printing pod; it is
+# selected and 25 typed into its slider's field: it empties at 25 kg/s.
+from: early-base
+mods: [3029077166]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"BottleEmptier\")", method: Build, args: [131129, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"BottleEmptier\").BuildingComplete.GetComponent<Storage>.capacityKg": 1000000
+      "Assets.GetBuildingDef(\"BottleEmptierGas\").BuildingComplete.GetComponent<Storage>.capacityKg": 1000000
+  - run: {seconds: 2}
+  - expect: {buildings: {BottleEmptier: 1}}
+  - driver: {camera.set: {cell: [113, 207], ortho: 8}}
+  - click_world: {cell: [113, 206], select: BottleEmptier}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/SingleSliderSideScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<BottleEmptier>.emptyRate": 10
+  - ui_dump: {name: slider, root: "**/SingleSliderSideScreen"}
+  - type: {ui: "**/SingleSliderSideScreen/Contents/NumberInputField", text: "25", clear: true, enter: true}
+  - expect_state:
+      "selected:GetComponent<BottleEmptier>.emptyRate": 25
+  - shot: {name: details, crop: "**/DetailsScreen", threshold: 0.04}

@@ -1,0 +1,68 @@
+{
+ "spec": "mods/3029077166-optimization-bottle-emptier.yaml",
+ "mods": [
+  "3029077166"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "emptiers hold 1000 t; a Bottle Emptier's slider side screen, 25 typed in, empties at 25 kg/s; slider dump and details shot match",
+ "updated": "2026-10-26",
+ "commit": "403df7df",
+ "mod_dlls": {
+  "3029077166": {
+   "PLib.dll": "b862c5db2b3cd6df09a62d4a30782e91e2b24e8e1bfac08d991c9cc89a984ba9",
+   "┐╒╣▐╞≈.dll": "b24d331ea8d393b6c3168fd8ee2a87f7f60305f4a7452c279bc9c0294cd783c2"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-024205-d1d3e5ef",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T02:51:00",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-031717-628db45a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:17:17",
+    "lane": 14,
+    "reference_run": "20261026-024205-d1d3e5ef",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "slider": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "details": 0.0
+    }
+   },
+   {
+    "run": "20261026-031717-628db45a",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T03:18:01",
+    "lane": 14,
+    "reference_run": "20261026-024205-d1d3e5ef",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "slider": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "details": 0.0
+    }
+   }
+  ]
+ }
+}

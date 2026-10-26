@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2860569135-roller-snakes-reborn.yaml",
+ "mods": [
+  "2860569135"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the mod's critters and foods exist; a spawned Roller Snake is selected and lives on as the game runs",
+ "updated": "2026-10-26",
+ "commit": "69f94b6",
+ "mod_dlls": {
+  "2860569135": {
+   "RollerSnakeMerged.dll": "71df9c43c6e474b9595a9193f0a86436069ebc6a8028fa89a156ff1bbc1e0840"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-000654-98a7a75e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T00:32:43",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-015721-0293a438",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T01:57:21",
+    "lane": 15,
+    "reference_run": "20261026-000654-98a7a75e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-015721-0293a438",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T01:58:18",
+    "lane": 15,
+    "reference_run": "20261026-000654-98a7a75e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

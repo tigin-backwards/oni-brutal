@@ -1,0 +1,33 @@
+# Roller Snakes Reborn (2860569135), classes P (a critter), M (worldgen content).
+#
+# What it does: adds the Roller Snake species (RollerSnake and the Steel Roller Snake, their
+# babies and eggs), desert critters that eat Cactus Flesh; the Cactus Fruit plant and its
+# foods (grilled flesh, flower salad), the Aqua Bulb (crushed in the Rock Crusher), a desert
+# test biome and world, codex entries, care packages, a Critter Feeder filter and the Critter
+# Manipulator's species text.
+# How a player reaches it: its worlds and care packages; the critters in the codex and the
+# world.
+# What changes: a new critter family and its plants.
+#
+# setup spawns a Roller Snake in the corridor west of the printing pod. It is selected: its
+# name and family show, it carries the species tag, and it lives on as the game runs.
+from: early-base
+mods: [2860569135]
+setup:
+  - driver: {setup.call: {type: Scenario, method: SpawnPrefab, args: [{"$": "Grid.XYToCell(111, 207)"}, 0, 0, RollerSnake, Creatures]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"RollerSnakeBaby\")": exists
+      "Assets.GetPrefab(\"RollerSnakeSteelBaby\")": exists
+      "Assets.GetPrefab(\"CactusFlesh\")": exists
+      "count:all:CreatureBrain::[*] if .species.Name == RollerSnakeSpecies": 1
+  - driver: {camera.set: {cell: [111, 208], ortho: 8}}
+  - click_world: {cell: [111, 207], select: RollerSnake}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<KPrefabID>.PrefabTag.Name": RollerSnake
+  - run: {seconds: 30}
+  - expect_state:
+      "count:all:CreatureBrain::[*] if .species.Name == RollerSnakeSpecies": 1
+  - expect: {duplicants: 3}

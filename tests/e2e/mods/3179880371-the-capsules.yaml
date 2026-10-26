@@ -14,9 +14,17 @@
 # The Mining Capsule: three sandstone cells above the corridor west of the printing pod are
 # marked for digging (the Duplicants' digging errand turned off in setup, so that they leave
 # them alone), the capsule is placed from the build menu, and its Boom! button digs them.
+#
+# Its laser sweeps a row of marked cells in 0.2 game seconds and digs the cell under the beam's
+# end at each frame, so a frame longer than a twentieth of a second of game time skips cells. A
+# busy machine draws the player at 2 frames a second, a game second a frame at speed 3 (Unity
+# caps a frame at 1/3 s): only the row's last cell was dug. setup caps a frame at ONI's fixed
+# step (0.03 s; Unity allows no less), and the Boom! runs at speed 1, as at 33 frames a second
+# or more; a slow machine only runs the game slower than real time.
 from: early-base
 mods: [3179880371]
 setup:
+  - driver: {setup.call: {type: "UnityEngine.Time", method: set_maximumDeltaTime, args: [0.03]}}
   - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"HVAC\")"}, true]}}
   - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
   # Digging is taken off the Duplicants' errands, so only the capsule digs.
@@ -43,7 +51,7 @@ steps:
   - ui_wait: {path: "**/UserMenuScreen/Buttons/Boom!Button", cond: stable}
   - ui_dump: {name: menu, root: "**/UserMenuScreen/Buttons/Boom!Button"}
   - click: {ui: "**/UserMenuScreen/Buttons/Boom!Button"}
-  - run: {seconds: 8}
+  - run: {seconds: 8, speed: 1}
   - expect: {pending_digs: 0, buildings: {MiningCapsule: 0}}
   - expect_state:
       "Grid.Solid.get_Item(133678)": false

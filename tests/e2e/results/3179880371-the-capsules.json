@@ -7,8 +7,8 @@
  "why": "passed once in the original and twice in ours",
  "findings": [],
  "note": "a Mining Capsule placed from the Ventilation build menu, whose Boom! button in its user menu digs three marked sandstone cells within seconds (the Duplicants' digging errand off) and vanishes; the button's layout matches (the Water Lock side screen is not reached)",
- "updated": "2026-10-23",
- "commit": "ef59995",
+ "updated": "2026-10-26",
+ "commit": "ffedd21d",
  "mod_dlls": {
   "3179880371": {
    "Capsure 2.0.dll": "262884e1dcc79423d8f980b6b6c8275ef4d21212130121031ae1c668b8951c17",
@@ -18,22 +18,30 @@
  "runs": {
   "original": [
    {
-    "run": "20261023-022714-1c7455",
+    "run": "20261026-135756-73b20f30",
     "index": 1,
     "verdict": "pass",
-    "date": "2026-10-23T02:27:14",
-    "lane": 10,
+    "date": "2026-10-26T13:57:56",
+    "lane": 34,
+    "signatures": 0
+   },
+   {
+    "run": "20261026-135756-73b20f30",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T13:57:57",
+    "lane": 35,
     "signatures": 0
    }
   ],
   "ours": [
    {
-    "run": "20261023-022832-c0f6c5",
-    "index": 1,
+    "run": "20261026-135756-73b20f30",
+    "index": 2,
     "verdict": "pass",
-    "date": "2026-10-23T02:29:08",
-    "lane": 11,
-    "reference_run": "20261023-022714-1c7455",
+    "date": "2026-10-26T14:10:50",
+    "lane": 34,
+    "reference_run": "20261026-135756-73b20f30",
     "new_signatures": 0,
     "findings": [],
     "ui_dump": {
@@ -44,12 +52,12 @@
     "shots": {}
    },
    {
-    "run": "20261023-022832-c0f6c5",
-    "index": 2,
+    "run": "20261026-135756-73b20f30",
+    "index": 1,
     "verdict": "pass",
-    "date": "2026-10-23T02:29:37",
-    "lane": 10,
-    "reference_run": "20261023-022714-1c7455",
+    "date": "2026-10-26T14:10:50",
+    "lane": 35,
+    "reference_run": "20261026-135756-73b20f30",
     "new_signatures": 0,
     "findings": [],
     "ui_dump": {

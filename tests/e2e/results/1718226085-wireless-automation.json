@@ -7,8 +7,8 @@
  "why": "the spec fails in the original: a broken spec, or a mod broken upstream",
  "findings": [],
  "note": "",
- "updated": "2026-10-23",
- "commit": "7efbed1",
+ "updated": "2026-10-26",
+ "commit": "ffedd21d",
  "mod_dlls": {
   "1718226085": {
    "WirelessAutomation.dll": "51e2074ae8033c753a85d1de0c4b1636d29fa843dcc7b06093c8b333eddca55b"
@@ -17,11 +17,22 @@
  "runs": {
   "original": [
    {
-    "run": "20261023-123333-3bbe4d",
+    "run": "20261026-141832-e2cc680a",
     "index": 1,
     "verdict": "fail",
-    "date": "2026-10-23T12:56:56",
-    "lane": 13,
+    "date": "2026-10-26T14:18:32",
+    "lane": 34,
+    "reasons": [
+     "step start: the player exited (-6) while loading"
+    ],
+    "signatures": 21
+   },
+   {
+    "run": "20261026-141832-e2cc680a",
+    "index": 2,
+    "verdict": "fail",
+    "date": "2026-10-26T14:18:33",
+    "lane": 35,
     "reasons": [
      "step start: the player exited (-6) while loading"
     ],

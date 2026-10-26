@@ -1,0 +1,19 @@
+# Carry capacity modifier (3242595525), classes P, O.
+#
+# What it does: a postfix on MinionIdentity.ApplyCustomGameSettings gives each Duplicant a
+# multiplier on its Carry Capacity attribute, a PLib option in percent (+50 % by default,
+# -1000 to 1000).
+# How a player reaches it: the Mods screen's options; any Duplicant.
+# What changes: Duplicants carry more (or less) at a time.
+#
+# options set +100 %: a Duplicant's carry capacity is doubled (400 kg or more), the same
+# value as in the original.
+from: early-base
+mods: [3242595525]
+options:
+  CarryCapacityModifier: {CarryModifier: 100}
+steps:
+  - expect_state:
+      "Components.LiveMinionIdentities.Items[1].GetComponent<MinionModifiers>.attributes.Get(\"CarryAmount\").GetTotalValue()": [">= 400", "== original"]
+  - run: {seconds: 10}
+  - expect: {duplicants: 3}

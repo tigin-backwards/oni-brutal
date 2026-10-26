@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3242595525-carry-capacity-modifier.yaml",
+ "mods": [
+  "3242595525"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "its option at +100 % doubles a Duplicant's carry capacity, to the original's value",
+ "updated": "2026-10-26",
+ "commit": "df5493c6",
+ "mod_dlls": {
+  "3242595525": {
+   "CarryCapacityModifierMod.dll": "f1498fb62919dda1478079719bbe2c81fe0052ca04af08b9065f333fdd2c1daf"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-023754-20737f8f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:26:59",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-035814-b78599e5",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:58:14",
+    "lane": 14,
+    "reference_run": "20261026-023754-20737f8f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-035814-b78599e5",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T03:59:01",
+    "lane": 14,
+    "reference_run": "20261026-023754-20737f8f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

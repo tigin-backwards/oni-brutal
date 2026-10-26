@@ -1,0 +1,20 @@
+# Always Show Capacity (2026932869), classes V, S.
+#
+# What it does: a postfix on SimpleInfoScreen.RefreshStoragePanel appends what the selected
+# object's storages hold and their capacity to the storage panel's header: "Contents: 12 kg /
+# 150 kg".
+# How a player reaches it: selecting any building with storage.
+# What changes: the info panel's storage header.
+#
+# setup selects the ration box at the printing pod (early-base's only storage building): its
+# storage header ends in " / 150 kg".
+from: early-base
+mods: [2026932869]
+setup:
+  - driver: {setup.call: {target: "SelectTool.Instance", method: Select, args: [{"$": "all:RationBox::[0].GetComponent<KSelectable>"}]}}
+steps:
+  - expect_state:
+      "selected:GetComponent<RationBox>": exists
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui: {"**/SimpleInfoScreen/**": {any_text: "~ / 150 kg"}}
+  - shot: {name: info, crop: "**/DetailsScreen", threshold: 0.04}

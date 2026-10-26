@@ -1,0 +1,59 @@
+{
+ "spec": "mods/2026932869-always-show-capacity.yaml",
+ "mods": [
+  "2026932869"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the ration box's storage header ends in \" / 150 kg\"",
+ "updated": "2026-10-25",
+ "commit": "bd353b5",
+ "mod_dlls": {
+  "2026932869": {
+   "ShowStorageCapacity.dll": "5a329440cee2326ac762d3989785b1ce88f1bff532b234c688e3bed9fb86a8d8"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-195133-9810c702",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T19:54:43",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-210327-629f9e64",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T21:03:27",
+    "lane": 15,
+    "reference_run": "20261025-195133-9810c702",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "info": 0.0
+    }
+   },
+   {
+    "run": "20261025-210327-629f9e64",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-25T21:04:13",
+    "lane": 15,
+    "reference_run": "20261025-195133-9810c702",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "info": 0.0
+    }
+   }
+  ]
+ }
+}

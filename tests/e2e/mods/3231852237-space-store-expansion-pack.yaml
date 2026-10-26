@@ -1,0 +1,27 @@
+# Space Store Expansion Pack 太空商店拓展包 (3231852237), classes P, S.
+#
+# What it does: with Space Store (3215097987, whose mods/spacestore folder it writes its goods
+# list into at load, and quits the game without), adds the Geo-Seed (Store_GeoSeed), an item
+# for the store to sell: selected, it shows a side screen (cloned from the artable selection
+# screen) with a button per geyser type and the oil well; picking one and applying turns the
+# seed into that geyser where it lies.
+# How a player reaches it: a Geo-Seed bought or dropped in the colony, its side screen.
+# What changes: geysers placed by the player.
+#
+# A Geo-Seed is dropped in the dug-out corridor west of the printing pod and selected: its side
+# screen lists the geyser types.
+from: early-base
+mods: [3215097987, 3231852237]
+setup:
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131129, 0, 0, \"Store_GeoSeed\", \"Ore\")", method: SetActive, args: [true]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"Store_GeoSeed\").GetComponent<StoreGoods.GeoActivator>": exists
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [113, 207], ortho: 6}}
+  - click_world: {cell: [113, 206], select: Store_GeoSeed}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/GeoActivatorSideScreen", cond: stable}
+  - expect_state:
+      "ui:**/GeoActivatorSideScreen::GetComponentsInChildren<MultiToggle>.Length": [">= 10", "== original"]
+  - ui_dump: {name: side-screen, root: "**/GeoActivatorSideScreen"}
+  - shot: {name: details, crop: "**/DetailsScreen", threshold: 0.04}

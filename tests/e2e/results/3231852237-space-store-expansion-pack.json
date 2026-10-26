@@ -1,0 +1,71 @@
+{
+ "spec": "mods/3231852237-space-store-expansion-pack.yaml",
+ "mods": [
+  "3215097987",
+  "3231852237"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with Space Store, a dropped Geo-Seed is selected: its side screen lists a button per geyser type; side-screen dump and details shot match",
+ "updated": "2026-10-26",
+ "commit": "48701cd1",
+ "mod_dlls": {
+  "3215097987": {
+   "SpaceStore.dll": "6283d214f0076ce1d233ad9a6aee42e0f9dab8c846d07b43efc4eaa54b5def74"
+  },
+  "3231852237": {
+   "StoreGoods.dll": "efc5c3b386f34630b8805f14597d1318d2fe1f825b64d1ec5a18d41c8496d298"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-031612-56dd35ca",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:21:47",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-035645-4ffe786d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:08:12",
+    "lane": 15,
+    "reference_run": "20261026-031612-56dd35ca",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "side-screen": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "details": 0.0
+    }
+   },
+   {
+    "run": "20261026-035645-4ffe786d",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T04:08:54",
+    "lane": 15,
+    "reference_run": "20261026-031612-56dd35ca",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "side-screen": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "details": 0.0
+    }
+   }
+  ]
+ }
+}

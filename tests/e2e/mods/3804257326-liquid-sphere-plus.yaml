@@ -1,0 +1,24 @@
+# 液体球 Plus [Liquid Sphere Plus] (3804257326), classes B, T, S.
+#
+# What it does: Liquid Sphere with gases too: Liquid and Gas Orbs (and background variants)
+# in the Utilities menu, researched with Plumbing and Ventilation, built from any liquid or
+# gas; a mode panel picks the mass (one drop, a swimmable mass, a full cell or a custom
+# mass), and a finished orb turns into its element in its cell and vanishes.
+# How a player reaches it: the build menu (Utilities), then an element in the material panel.
+# What changes: liquids and gases placed cell by cell.
+#
+# An orb of water built by setup in the dug-out corridor west of the printing pod becomes
+# water in its cell, and the orb is gone.
+from: early-base
+mods: [3804257326]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LiquidBuildOrb\")", method: Build, args: [131127, Neutral, null, [Water], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"GasBuildOrb\")": exists
+      "Assets.GetBuildingDef(\"GasBuildOrbBg\")": exists
+      "Db.Get().Techs.Get(\"LiquidPiping\").unlockedItemIDs": {contains: LiquidBuildOrb}
+  - run: {seconds: 2}
+  - expect: {buildings: {LiquidBuildOrb: 0}}
+  - expect_state:
+      "Grid.Element[131127].id": Water

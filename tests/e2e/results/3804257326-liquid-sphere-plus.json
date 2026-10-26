@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3804257326-liquid-sphere-plus.yaml",
+ "mods": [
+  "3804257326"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "an orb of water built in the corridor turns into water in its cell",
+ "updated": "2026-10-26",
+ "commit": "fd4e5b95",
+ "mod_dlls": {
+  "3804257326": {
+   "LiquidDropPlacerPlus.dll": "31cb6495f04acb0c69bcb419bf058172c27fb866e8ff0d89f8fc9c74d1c0417f"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-182320-3e5178eb",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T18:45:51",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-192551-82b3b3ca",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T19:30:51",
+    "lane": 15,
+    "reference_run": "20261026-182320-3e5178eb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-192551-82b3b3ca",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T19:31:42",
+    "lane": 15,
+    "reference_run": "20261026-182320-3e5178eb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

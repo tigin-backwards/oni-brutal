@@ -1,0 +1,39 @@
+# Sensor Graph (with CSV Export) (3651879332), classes P, S.
+#
+# What it does: every threshold sensor and automated notifier (a postfix on
+# BuildingComplete.OnPrefabInit) gets a logger and side screen controls: START RECORD / STOP
+# RECORD, Open graph, a clear-data button, a sample rate slider (10 s by default) and, for
+# the notifier, a mute checkbox. Recording samples the sensor's reading; Open graph opens a
+# draggable window of the mod's own (uGUI, on the main canvas) drawing the history as a line
+# graph with min, max and a hover tooltip.
+# How a player reaches it: select a sensor; its side screen buttons.
+# What changes: sensors keep and show a history.
+#
+# setup builds a Thermo Sensor in the dug-out room west of the printing pod. Selected, its
+# START RECORD button is pressed and the game runs a minute: the logger holds samples, and
+# Open graph opens the graph window. Its name carries the sensor's instance id, masked; where
+# its crosshair sits follows the samples under the pointer, so the dump compares sizes, not
+# places on screen. The window goes under GameObject.Find("Canvas"): of ONI's two root canvases
+# of that name, the one kept from the front end (sort order 32766), which draws it above the
+# game's screens.
+from: early-base
+mods: [3651879332]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LogicTemperatureSensor\")", method: Build, args: [{"$": "Grid.XYToCell(112, 208)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 208], select: LogicTemperatureSensor}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen", cond: stable}
+  - click: {text: "START RECORD", under: "**/DetailsScreen/SideScreen"}
+  - expect_state:
+      "selected:PrecisionLogger.isLogging": true
+  - run: {seconds: 60}
+  - expect_state:
+      "selected:PrecisionLogger.values.Count": ">= 4"
+  - click: {text: "Open graph", under: "**/DetailsScreen/SideScreen"}
+  - ui_wait: {path: "**/PrecisionGraph_*", cond: stable}
+  - expect_state:
+      "GameObject.Find(\"Canvas\").GetComponent<Canvas>.sortingOrder": "== original"
+      "count:all:Canvas::[*] if .name == Canvas": "== original"
+  - ui_dump: {name: graph, root: "**/PrecisionGraph_*", mask_text: ['[\d.,]+'], mask_path: ['(?<=PrecisionGraph_)-?\d+'],
+              ignore_fields: [world, screen]}

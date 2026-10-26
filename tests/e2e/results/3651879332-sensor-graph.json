@@ -1,0 +1,63 @@
+{
+ "spec": "mods/3651879332-sensor-graph.yaml",
+ "mods": [
+  "3651879332"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Thermo Sensor's START RECORD button logs samples over a minute, and Open graph opens the mod's graph window under the front end's canvas (dump matches, numbers masked)",
+ "updated": "2026-10-26",
+ "commit": "4ad54c2f",
+ "mod_dlls": {
+  "3651879332": {
+   "SensorGraph.dll": "69b42d80139770f4e6ace378affc71bb954ebfb02307499d06f933176d3eadd9"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-111742-eae409c7",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T11:17:42",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-122645-a7942792",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T12:26:45",
+    "lane": 16,
+    "reference_run": "20261026-111742-eae409c7",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "graph": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261026-122645-a7942792",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T12:26:46",
+    "lane": 17,
+    "reference_run": "20261026-111742-eae409c7",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "graph": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

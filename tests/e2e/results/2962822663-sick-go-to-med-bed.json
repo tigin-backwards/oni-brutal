@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2962822663-sick-go-to-med-bed.yaml",
+ "mods": [
+  "2962822663"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with all three Duplicants sick, a Sick Bay is assigned to one by a click in its assignment side screen",
+ "updated": "2026-10-26",
+ "commit": "bbc2ade",
+ "mod_dlls": {
+  "2962822663": {
+   "SickGoToMedBed.dll": "8bc53b74edb163187c6a24d5e7048272def6ecf7440ccaa08d4fd3484b8fe918"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-211154-b6568d8b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T21:13:46",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-000332-54e3b324",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T00:03:32",
+    "lane": 16,
+    "reference_run": "20261025-211154-b6568d8b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-000332-54e3b324",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T00:03:33",
+    "lane": 17,
+    "reference_run": "20261025-211154-b6568d8b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

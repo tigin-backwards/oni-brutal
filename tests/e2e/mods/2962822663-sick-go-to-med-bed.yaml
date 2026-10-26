@@ -1,0 +1,32 @@
+# Sick Go To Med Bed (2962822663), class P.
+#
+# What it does: a sick Duplicant may be assigned to a Sick Bay (MedicalCot) by hand: a postfix
+# on Clinic.CanManuallyAssignTo accepts any Duplicant with a sickness where the game asks for
+# a low health or a sickness the cot treats. With Diseases Reimagined loaded it also raises
+# its slime sickness's severity (not loaded here).
+# How a player reaches it: select a Sick Bay, then a Duplicant in its assignment side screen.
+# What changes: who may lie in the cot.
+#
+# setup builds a Sick Bay in the dug-out corridor west of the printing pod and gives all three
+# Duplicants food poisoning. The cot is selected and a Duplicant's row in its assignment side
+# screen clicked: the cot is assigned to them.
+from: early-base
+mods: [2962822663]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"MedicalCot\")", method: Build, args: [131128, Neutral, null, [SandStone], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[0].GetComponent<MinionModifiers>.sicknesses", method: CreateInstance, args: [{"$": "Db.Get().Sicknesses.FoodSickness"}]}}
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[1].GetComponent<MinionModifiers>.sicknesses", method: CreateInstance, args: [{"$": "Db.Get().Sicknesses.FoodSickness"}]}}
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[2].GetComponent<MinionModifiers>.sicknesses", method: CreateInstance, args: [{"$": "Db.Get().Sicknesses.FoodSickness"}]}}
+steps:
+  - expect_state:
+      "Components.LiveMinionIdentities.Items[0].GetComponent<MinionModifiers>.sicknesses.Count": 1
+      "all:Clinic::[0].GetComponent<Assignable>.assignee": missing
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [112, 206], select: MedicalCot}
+  - ui_wait: {path: "**/AssignableSideScreen/ValidContent/Contents/ContentScrollRect/RowContainer/Rows", cond: stable}
+  - expect_ui:
+      "**/AssignableSideScreen/ValidContent/Contents/ContentScrollRect/RowContainer/Rows/AssignableSideScreenRow": {active: true}
+  - click: {ui: "**/AssignableSideScreen/ValidContent/Contents/ContentScrollRect/RowContainer/Rows/AssignableSideScreenRow", index: 1}
+  - run: {seconds: 1}
+  - expect_state:
+      "all:Clinic::[0].GetComponent<Assignable>.assignee": exists

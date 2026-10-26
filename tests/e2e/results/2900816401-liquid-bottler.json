@@ -1,0 +1,64 @@
+{
+ "spec": "mods/2900816401-liquid-bottler.yaml",
+ "mods": [
+  "2900816401"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the bottler shows in the Plumbing menu; a built one's slider set to 200 kg by typing sets its storage and intake; slider dump matches",
+ "updated": "2026-10-26",
+ "commit": "0840b05",
+ "mod_dlls": {
+  "2900816401": {
+   "PLib.dll": "b862c5db2b3cd6df09a62d4a30782e91e2b24e8e1bfac08d991c9cc89a984ba9",
+   "╥║╠σ╣α╫░╞≈Liquid Bottler.dll": "a34964cc0e7ec3309ede9e96f29f2e7df3bfcf28ab98fd4bb01974b358dcb35d"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-222040-75e4a4a6",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T23:39:06",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-012952-f655a86c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T01:29:52",
+    "lane": 15,
+    "reference_run": "20261025-222040-75e4a4a6",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "slider": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261026-012952-f655a86c",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T01:30:28",
+    "lane": 15,
+    "reference_run": "20261025-222040-75e4a4a6",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "slider": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

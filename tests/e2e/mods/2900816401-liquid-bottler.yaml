@@ -1,0 +1,33 @@
+# 液体灌装器 Liquid Bottler (2900816401), class B.
+#
+# What it does: adds the Liquid Bottler (MM20230827GG1, 3x2, any metal, Plumbing menu, no
+# research): it fills from a liquid pipe into its storage and, once full, offers the bottle for
+# Duplicants to pick up, as the game's Gas Canister Filler does for gas. A slider (1 to 999 kg,
+# 50 by default) sets the bottle size: its storage and its pipe intake capacity.
+# How a player reaches it: the build menu (Plumbing); its side screen.
+# What changes: liquids bottled from pipes in any amount.
+#
+# setup builds a bottler in the corridor west of the printing pod. It is selected and 200 typed
+# into its slider's field: it bottles 200 kg.
+from: early-base
+mods: [2900816401]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"MM20230827GG1\")", method: Build, args: [{"$": "Grid.XYToCell(111, 207)"}, Neutral, null, [Cuprite], 293.15, DEFAULT_FACADE]}}
+steps:
+  - run: {seconds: 2}
+  - click: {ui: "**/PlanScreen/Toggle:Plumbing"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/MM20230827GG1 Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/MM20230827GG1 Group*": {active: true}
+  - key: {code: Escape}
+  - expect_ui: {"**/PauseScreen": {exists: false}}
+  - driver: {camera.set: {cell: [111, 208], ortho: 8}}
+  - click_world: {cell: [111, 207], select: MM20230827GG1}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/SingleSliderSideScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<Storage>.capacityKg": 50
+  - ui_dump: {name: slider, root: "**/SingleSliderSideScreen"}
+  - type: {ui: "**/SingleSliderSideScreen/Contents/NumberInputField", text: "200", clear: true, enter: true}
+  - expect_state:
+      "selected:GetComponent<Storage>.capacityKg": 200
+      "selected:GetComponent<ConduitConsumer>.capacityKG": 200

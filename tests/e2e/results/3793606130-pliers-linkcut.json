@@ -1,0 +1,63 @@
+{
+ "spec": "mods/3793606130-pliers-linkcut.yaml",
+ "mods": [
+  "3793606130"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the toolbar's Connect button picks the tool, its filter menu shows, and a drag along three unconnected wires connects them; filter menu dump matches",
+ "updated": "2026-10-26",
+ "commit": "183ac88",
+ "mod_dlls": {
+  "3793606130": {
+   "Pliers++_LinkCut.dll": "8730aeb2466f6b0b6b6fd8e156577f67225baaaa7b71c96e7343ee6679c3c698"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-003541-39fc8dbf",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T01:04:27",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-012326-7e8eb4ed",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T01:32:07",
+    "lane": 15,
+    "reference_run": "20261026-003541-39fc8dbf",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "filter": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261026-012326-7e8eb4ed",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T01:32:55",
+    "lane": 15,
+    "reference_run": "20261026-003541-39fc8dbf",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "filter": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

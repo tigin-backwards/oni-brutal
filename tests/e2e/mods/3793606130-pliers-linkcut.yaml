@@ -1,0 +1,37 @@
+# Pliers++_LinkCut - Connect Tool (3793606130), classes T, K.
+#
+# What it does: adds a Connect tool to the toolbar (its own PLib key binding, Shift+C), a
+# filtered drag tool, the reverse of the game's Disconnect tool: dragged over wires, pipes, rails
+# or automation it restores the connections between their cells, with its own cursor and
+# visualizer sprites (DXT5 textures embedded in the DLL). The game's Disconnect tool is set to
+# drag mode instead of single-cell mode.
+# How a player reaches it: the toolbar's Connect button or its hotkey; drag over utilities.
+# What changes: cut utility links can be restored.
+#
+# The tool and its sprites exist. setup lays three unconnected wires in the corridor west of
+# the printing pod. The Connect button picks the tool, its filter menu shows, and a drag along the
+# wires connects them (the middle one to both sides); Escape puts it away.
+from: early-base
+mods: [3793606130]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Wire\")", method: Build, args: [{"$": "Grid.XYToCell(110, 208)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Wire\")", method: Build, args: [{"$": "Grid.XYToCell(111, 208)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Wire\")", method: Build, args: [{"$": "Grid.XYToCell(112, 208)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "type:PliersPlus.Tools.ConnectTool::Instance": exists
+      "type:PliersPlus.Mod::ConnectIconSprite": exists
+      "type:PliersPlus.Mod::ConnectVisualizerSprite": exists
+      "Game.Instance.electricalConduitSystem.GetConnections(132399, true)": "== original"
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [111, 208], ortho: 8}}
+  - tool: {toolbar: Connect}
+  - expect_state:
+      "PlayerController.Instance.ActiveTool.GetType().Name": ConnectTool
+  - ui_wait: {path: "**/ToolMenu/ToolParameters/Content", cond: stable}
+  - ui_dump: {name: filter, root: "**/ToolMenu/ToolParameters/Content"}
+  - drag: {from: [110, 208], to: [112, 208]}
+  - expect_state:
+      "Game.Instance.electricalConduitSystem.GetConnections(132399, true)": "== 'Left, Right'"
+  - key: {code: Escape}
+  - expect: {duplicants: 3}

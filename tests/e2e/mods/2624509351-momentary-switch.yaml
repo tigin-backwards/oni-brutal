@@ -1,0 +1,30 @@
+# Momentary switch (2624509351), class B.
+#
+# What it does: adds a Momentary Switch beside the Signal Switch in the Automation menu: a
+# switch whose side screen button turns it on (or, normally closed, off) for a delay set by a
+# slider (0.1 to 10 s, 1 s by default), after which it flips back.
+# How a player reaches it: the build menu (Automation); its side screen button and slider.
+# What changes: a push button for automation.
+#
+# setup builds a switch in the dug-out corridor west of the printing pod; it is selected, its
+# side screen button pressed: the switch is on, and two seconds later off again.
+from: early-base
+mods: [2624509351]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"MomentarySwitch\")", method: Build, args: [131766, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - run: {seconds: 2}
+  - expect: {buildings: {MomentarySwitch: 1}}
+  - expect_state:
+      "all:Switch::[0].IsSwitchedOn": false
+  - driver: {camera.set: {cell: [114, 208], ortho: 8}}
+  - click_world: {cell: [114, 207], select: MomentarySwitch}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/MomentarySwitchSideScreen", cond: stable}
+  - ui_dump: {name: switch, root: "**/DetailsScreen/SideScreen", ignore_fields: [isFocused, caretPosition]}
+  - click: {ui: "**/MomentarySwitchSideScreen/MomentarySwitchSideScreenButton"}
+  - run: {seconds: 0.4}
+  - expect_state:
+      "all:Switch::[0].IsSwitchedOn": true
+  - run: {seconds: 2}
+  - expect_state:
+      "all:Switch::[0].IsSwitchedOn": false

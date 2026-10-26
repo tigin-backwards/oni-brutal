@@ -1,0 +1,63 @@
+{
+ "spec": "mods/2624509351-momentary-switch.yaml",
+ "mods": [
+  "2624509351"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a selected switch's side screen button turns it on, and it turns off again two seconds later (dumped)",
+ "updated": "2026-10-26",
+ "commit": "69617875",
+ "mod_dlls": {
+  "2624509351": {
+   "MomentarySwitch.dll": "d000102e8b9376a411cc5c1a822aee77741252ee0d5a9930cc65ea9eb66a3fff"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-113228-a0d69cd2",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T11:34:23",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-151101-b3c9c4ce",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T15:11:01",
+    "lane": 14,
+    "reference_run": "20261026-113228-a0d69cd2",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "switch": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261026-151101-b3c9c4ce",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T15:11:02",
+    "lane": 15,
+    "reference_run": "20261026-113228-a0d69cd2",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "switch": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

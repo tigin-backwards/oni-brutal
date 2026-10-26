@@ -1,0 +1,56 @@
+{
+ "spec": "mods/2902461362-more-useful-slicksters.yaml",
+ "mods": [
+  "2902461362"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "its option sets the Longhair Slickster's decor to 300 within 7 cells; the colony runs",
+ "updated": "2026-10-26",
+ "commit": "d483e149",
+ "mod_dlls": {
+  "2902461362": {
+   "PLib.dll": "b862c5db2b3cd6df09a62d4a30782e91e2b24e8e1bfac08d991c9cc89a984ba9",
+   "╕ⁿ╙╨╙├╡─╕í╙═╔·╬∩.dll": "78fe25938a62d0146e6288bc0a89145329bd7b7a85b1aa5fcfd48bea5782c80a"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-041239-763a2a09",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:16:39",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-041823-deed9457",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:21:24",
+    "lane": 14,
+    "reference_run": "20261026-041239-763a2a09",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-041823-deed9457",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T04:22:14",
+    "lane": 14,
+    "reference_run": "20261026-041239-763a2a09",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

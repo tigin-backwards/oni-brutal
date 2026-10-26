@@ -1,0 +1,21 @@
+# 更有用的浮油生物 More useful Slicksters (2902461362), classes P, O.
+#
+# What it does: a prefix and postfix on the Slicksters' SetupDiet retune them by PLib options:
+# the carbon dioxide eaters take 100 kg a cycle (20 in the game) and turn it into crude oil
+# 1:1 (0.5); the Longhair Slickster breathes 10 kg of oxygen a cycle (30) and gives decor 200
+# within 7 cells (50).
+# How a player reaches it: the Mods screen's options; ranching Slicksters.
+# What changes: Slicksters that make more oil and decor.
+#
+# options set the Longhair's decor to 300: its prefab's decor provider reads 300 within 7
+# cells; the colony runs.
+from: early-base
+mods: [2902461362]
+options:
+  "2902461362": {长毛浮油生物装饰度: 300}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"OilFloaterDecor\").GetComponent<DecorProvider>.baseDecor": 300
+      "Assets.GetPrefab(\"OilFloaterDecor\").GetComponent<DecorProvider>.baseRadius": 7
+  - run: {seconds: 10}
+  - expect: {duplicants: 3}

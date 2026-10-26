@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3129448555-super-compost.yaml",
+ "mods": [
+  "3129448555"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Compost's converter runs at 1 kg/s; a built Compost has it and is selected",
+ "updated": "2026-10-26",
+ "commit": "510fc9b",
+ "mod_dlls": {
+  "3129448555": {
+   "│¼╝╢╢╤╖╩╢╤.dll": "dab2f682503c1bee0c15a064f060c2f71202a54131618701613990612616208d"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-215725-746bb295",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T21:57:26",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-000801-e5ada640",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T00:08:01",
+    "lane": 14,
+    "reference_run": "20261025-215725-746bb295",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-000801-e5ada640",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T00:08:51",
+    "lane": 14,
+    "reference_run": "20261025-215725-746bb295",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

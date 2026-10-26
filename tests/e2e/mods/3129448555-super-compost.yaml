@@ -1,0 +1,28 @@
+# 超级堆肥堆 10x / Super Compost (3129448555), class P.
+#
+# What it does: a postfix on CompostConfig.ConfigureBuildingTemplate replaces the Compost's
+# element converter: it consumes 1 kg/s of compostables and makes 1 kg/s of dirt at 30 °C, ten
+# times the game's 0.1 kg/s.
+# How a player reaches it: building a Compost.
+# What changes: how fast a Compost turns polluted dirt and rot into dirt.
+#
+# setup builds a Compost in the corridor west of the printing pod; its converter and the
+# prefab's run at 1 kg/s. The Compost is selected and the game runs.
+from: early-base
+mods: [3129448555]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Compost\")", method: Build, args: [{"$": "Grid.XYToCell(112, 206)"}, Neutral, null, [SandStone], 300.0, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"Compost\").GetComponent<ElementConverter>.consumedElements[0].MassConsumptionRate": 1
+      "Assets.GetPrefab(\"Compost\").GetComponent<ElementConverter>.outputElements[0].massGenerationRate": 1
+      "all:Compost::[0].GetComponent<ElementConverter>.outputElements[0].massGenerationRate": 1
+      "all:Compost::[0].GetComponent<ElementConverter>.outputElements[0].elementHash": Dirt
+  - run: {seconds: 5}
+  - driver: {camera.set: {cell: [112, 207], ortho: 8}}
+  - click_world: {cell: [112, 207], select: Compost}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Compost"}
+  - run: {seconds: 10}
+  - expect: {duplicants: 3, buildings: {Compost: 1}}

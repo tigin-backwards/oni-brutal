@@ -2,8 +2,8 @@
 # Restarter EXECUTABLE: the helper the game's App.Restart starts from the player's directory
 # (Klei ships one next to their player) before quitting, e.g. after a language change. Once the
 # player has exited, the executable is started again with the arguments the player was started
-# with, which the host records in ONI_BRUTAL_RESTART_ARGS (shell-quoted).
+# with, which the host records in ONI_MOONO_RESTART_ARGS (shell-quoted).
 exe="$1"
 while kill -0 "$PPID" 2>/dev/null; do sleep 0.2; done
-eval "set -- ${ONI_BRUTAL_RESTART_ARGS:-}"
+eval "set -- ${ONI_MOONO_RESTART_ARGS:-}"
 exec "$exe" "$@"

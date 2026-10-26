@@ -11,8 +11,9 @@ line by running it there too (before merging or rebasing onto the renamed master
 commits. What keeps the old name, and why, is the KEEP list; hand-written changes that a
 plain replacement can't make (migrations, compatibility with older players) are FIXUPS.
 BRUTAL (Ahwoo's framework: its packages, namespaces, licence and credit) is a different name
-and is left alone, as are the ONI_* environment variables and the machine-wide lock folder
-~/.cache/oni-brutal-e2e that every checkout's e2e and QA runs share.
+and is left alone, as are the ONI_* environment variables (except the host's ONI_BRUTAL_RESTART_*
+for the Restarter, which ship together) and the machine-wide lock folder ~/.cache/oni-brutal-e2e
+that every checkout's e2e and QA runs share.
 """
 import os, re, subprocess, sys
 
@@ -28,6 +29,8 @@ EXPLICIT = [
     (re.compile(r'\boni-brutal\.(tests\.|original-isolation)'), r'oni-moono.\1'),  # Harmony/BepInEx ids
     (re.compile(r'"oni-brutal (play-test driver|frame-rate probe)'), r'"Moono \1'),  # mod.yaml
     (re.compile(r'\boni_brutal_missing_export\b'), 'oni_moono_missing_export'),
+    # The host's arguments for the Restarter, which ships with it: no older player reads them.
+    (re.compile(r'\bONI_BRUTAL_RESTART_(ARGS|ARGV|PID)\b'), r'ONI_MOONO_RESTART_\1'),
 ]
 
 # (path regex, span regex, reason): spans the replacements leave alone, and that the audit
@@ -58,7 +61,6 @@ KEEP = [
 ALLOWED = [
     r'oni-brutal-e2e',  # the machine-wide lock folder, shared with every checkout and branch
     r'projects[/-]oni-brutal\b',  # the checkout's own folder (and Claude's project folder)
-    r'ONI_BRUTAL_RESTART_(?:ARGS|ARGV|PID)',  # ONI_* environment variables stay
     r'%TEMP%\\oni-brutal\b|\$win_temp\\\\oni-brutal\b|\)/oni-brutal"',  # run-windows.sh's staging folder
 ]
 ALLOWED_FILES = {  # whole files whose oni-brutal mentions record the pre-Moono player or research

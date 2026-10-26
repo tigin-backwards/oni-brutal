@@ -1133,8 +1133,8 @@ come from `globalgamemanagers` PlayerSettings. The host takes `--game <dir>` (de
 The host directory carries a `Restarter` (`Restarter.exe` on Windows, a .NET program), as Klei's
 player directory does: `App.Restart` (language change) starts it with the player's executable
 path and quits. Ours waits for the player to exit and starts it again with the arguments it was
-started with (recorded by the host in `ONI_BRUTAL_RESTART_ARGS`, shell-quoted, and
-`ONI_BRUTAL_RESTART_ARGV`, JSON, with `ONI_BRUTAL_RESTART_PID`).
+started with (recorded by the host in `ONI_MOONO_RESTART_ARGS`, shell-quoted, and
+`ONI_MOONO_RESTART_ARGV`, JSON, with `ONI_MOONO_RESTART_PID`).
 
 **Player options (Moono Tweaks).** The game tweaks (`GameTweakNames`), the loading splash and
 frame stats come from three places, later ones winning: built-in defaults (every tweak but

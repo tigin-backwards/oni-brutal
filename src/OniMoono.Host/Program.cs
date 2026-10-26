@@ -20,9 +20,9 @@ namespace OniMoono.Host
             // For the Restarter next to the host (App.Restart): the arguments to start again with
             // (shell-quoted for the Linux script; as a JSON array with the process id for the
             // Windows one) and the process to wait for.
-            Environment.SetEnvironmentVariable("ONI_BRUTAL_RESTART_ARGS", string.Join(" ", args.Select(a => "'" + a.Replace("'", "'\\''") + "'")));
-            Environment.SetEnvironmentVariable("ONI_BRUTAL_RESTART_ARGV", System.Text.Json.JsonSerializer.Serialize(args));
-            Environment.SetEnvironmentVariable("ONI_BRUTAL_RESTART_PID", Environment.ProcessId.ToString(System.Globalization.CultureInfo.InvariantCulture));
+            Environment.SetEnvironmentVariable("ONI_MOONO_RESTART_ARGS", string.Join(" ", args.Select(a => "'" + a.Replace("'", "'\\''") + "'")));
+            Environment.SetEnvironmentVariable("ONI_MOONO_RESTART_ARGV", System.Text.Json.JsonSerializer.Serialize(args));
+            Environment.SetEnvironmentVariable("ONI_MOONO_RESTART_PID", Environment.ProcessId.ToString(System.Globalization.CultureInfo.InvariantCulture));
 
             // The install's layout: OxygenNotIncluded_Data beside the game (Linux, Windows) or the
             // macOS bundle OxygenNotIncluded.app, told from the files (GameLayout).

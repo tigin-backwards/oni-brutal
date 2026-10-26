@@ -68,9 +68,6 @@ On a late-game save (U57: Spaced Out with every DLC, cycle 17,000+), on Windows,
 | Autosave freeze | about 26&nbsp;s | about 2.3&nbsp;s | about 11× shorter |
 | Starting the game, to the main menu (every DLC, second launch) | about 17.4&nbsp;s | about 9.8&nbsp;s | about 1.8× faster |
 
-Without the save tweaks the autosave freeze is about 8 s. They bring it down to about 2.3 s by
-writing the save faster and moving the compression and file write to a background thread.
-
 Garbage-collection hitches are mostly gone: collections now run in the background, spread
 across every core, and their pauses are about a quarter as long.
 

@@ -1,0 +1,63 @@
+{
+ "spec": "mods/2999788349-deconstructable-poi-props.yaml",
+ "mods": [
+  "2999788349"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Teleporter Transmitter's user menu offers Demolish, and a click orders the demolition (Cancel Demolition, a chore); the user menu as in the original",
+ "updated": "2026-10-26",
+ "commit": "1c3fbcb",
+ "mod_dlls": {
+  "2999788349": {
+   "FixDeconstructableProps.dll": "f0e0790b907b3b6478f4bc4981a098de44cb960ef0a143ea99ccd434b2b1b407"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-011229-67e63957",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T01:12:29",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-013400-994dc8f7",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T01:34:00",
+    "lane": 16,
+    "reference_run": "20261026-011229-67e63957",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "usermenu": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261026-013400-994dc8f7",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T01:34:01",
+    "lane": 17,
+    "reference_run": "20261026-011229-67e63957",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "usermenu": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

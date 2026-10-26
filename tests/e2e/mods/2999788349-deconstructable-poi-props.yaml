@@ -1,0 +1,40 @@
+# [FIX] Deconstructable POI Props (2999788349), class P.
+#
+# What it does: Gravitas props the game keeps can be taken down: the Cryo Tank's Demolishable
+# allows demolition, the bunker door, the conduit warp sender and receiver and the temporal
+# tear opener allow deconstruction, and the warp receiver and portal get a Demolishable.
+# How a player reaches it: select the prop, its user menu's Demolish (or the Deconstruct tool).
+# What changes: those props can be removed for their materials.
+#
+# Today's game sets a Cryo Tank's demolition itself when it spawns (allowed once its Duplicant
+# is out), so the spec takes the Teleporter Transmitter (WarpPortal) instead: setup places one
+# in the dug-out corridor west of the printing pod. Selected, its user menu offers Demolish;
+# a click orders the demolition (the button turns to Cancel Demolition, a chore waits for a
+# Duplicant with the demolition skill). The game's Personnel Teleporter event that pops up for
+# the found teleporter is dismissed first.
+from: early-base
+mods: [2999788349]
+setup:
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(0, 112, 206, \"WarpPortal\", \"Building\")", method: SetActive, args: [true]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"CryoTank\").GetComponent<Demolishable>.allowDemolition": true
+      "Assets.GetPrefab(\"WarpPortal\").GetComponent<Demolishable>": exists
+      "count:all:WarpPortal::[*]": 1
+  # The game greets a selected teleporter with its Personnel Teleporter event; it is dismissed.
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: WarpPortal}
+  - ui_wait: {path: "**/EventInfoScreen", cond: stable, frames: 1200}
+  - click: {text: "See Destination", under: "**/EventInfoScreen"}
+  - key: {code: Escape}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: WarpPortal}
+  - ui_wait: {path: "**/DetailsScreen/UserMenuButtons/UserMenuScreen/Buttons", cond: stable}
+  - ui_dump: {name: usermenu, root: "**/DetailsScreen/UserMenuButtons/UserMenuScreen/Buttons"}
+  - click: {ui: "**/UserMenuScreen/Buttons/DemolishButton"}
+  - expect_ui:
+      "**/UserMenuScreen/Buttons/Cancel DemolitionButton": {active: true}
+  - expect_state:
+      "all:WarpPortal::[0].GetComponent<Demolishable>.chore": exists
+      "all:WarpPortal::[0].GetComponent<Demolishable>.isMarkedForDemolition": true

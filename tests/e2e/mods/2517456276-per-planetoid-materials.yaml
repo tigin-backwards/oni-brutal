@@ -1,0 +1,26 @@
+# [Deprecated] Per-planetoid Materials (2517456276), class P.
+#
+# What it does: the build menu remembers the last material picked for each building per
+# planetoid instead of for the whole cluster. A ModState on the save game keeps a dictionary
+# keyed by world, recipe and selector; postfixes on MaterialSelectorSerializer.SetSelectedElement
+# and GetPreviousElement write and read it.
+# How a player reaches it: picking a material in the build menu, then switching planetoids.
+# What changes: which material the build menu offers first on each planetoid.
+#
+# The Manual Generator is picked in the Power menu and its first material clicked: the mod's
+# state on the save game records the pick for the start world.
+from: early-base
+mods: [2517456276]
+steps:
+  - expect_state:
+      "SaveGame.Instance.GetComponent<OxygenNotIncluded.PerPlanetoidMaterials.ModState>._selectedElements.Count": {save_as: picks}
+  - run: {seconds: 5}
+  - driver: {camera.set: {cell: [114, 208], ortho: 10}}
+  - click: {ui: "**/PlanScreen/Toggle:Power"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/ManualGenerator Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/ManualGenerator Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen/MaterialSelectionPanel", cond: stable}
+  - click: {ui: "**/MaterialSelectorTemplate/**/Toggles/MaterialSelection_*"}
+  - key: {code: Escape}
+  - expect_state:
+      "SaveGame.Instance.GetComponent<OxygenNotIncluded.PerPlanetoidMaterials.ModState>._selectedElements.Count": "> picks"

@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2517456276-per-planetoid-materials.yaml",
+ "mods": [
+  "2517456276"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a material picked for the Manual Generator in the Power menu is recorded in the mod's per-world state",
+ "updated": "2026-10-26",
+ "commit": "bbc2ade",
+ "mod_dlls": {
+  "2517456276": {
+   "PerPlanetoidMaterials.dll": "2b5a4b2e9613bc83f5346322f968d7f3bbba96d145a9c9be0f71df1b2c98d369"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-212344-d9470ecf",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T21:23:44",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-000947-3bf1ec88",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T00:09:47",
+    "lane": 16,
+    "reference_run": "20261025-212344-d9470ecf",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-000947-3bf1ec88",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T00:09:48",
+    "lane": 17,
+    "reference_run": "20261025-212344-d9470ecf",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

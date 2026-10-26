@@ -1,0 +1,35 @@
+# U&F-Super Wild Planter Box 超级种植箱和土培砖 (3380661336), class B.
+#
+# What it does: adds the Wild Planter Box (1x1) and the Wild Farm Tile to the Food menu,
+# researched with Agriculture: plots of farmable material whose plants grow as wild ones (no
+# fertilizer or irrigation), with a power draw and heat set by PLib options,
+# and two room constraints counting wild plants.
+# How a player reaches it: the build menu (Food), after the research.
+# What changes: wild plants in tidy boxes.
+#
+# setup researches Agriculture; the Food menu lists both, and a box built by setup in the
+# dug-out corridor west of the printing pod is selected.
+from: early-base
+mods: [3380661336]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"Agriculture\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"WildPlanterBox\")", method: Build, args: [131127, Neutral, null, [Dirt], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"Agriculture\").unlockedItemIDs": [{contains: WildPlanterBox}, {contains: WildFarmTile}]
+      "Assets.GetBuildingDef(\"WildPlanterBox\").EnergyConsumptionWhenActive": "== original"
+      "Assets.GetPrefab(\"WildPlanterBox\").GetComponent<PlantablePlot>": exists
+  - run: {seconds: 10}
+  - expect: {buildings: {WildPlanterBox: 1}}
+  - click: {ui: "**/PlanScreen/Toggle:Food"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/WildPlanterBox Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/WildFarmTile Group*": {active: true}
+  - shot: {name: food-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
+  - key: {code: Escape}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [111, 206], select: WildPlanterBox}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:PlantablePlot.AcceptsIrrigation": false

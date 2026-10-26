@@ -1,0 +1,32 @@
+# Improved Radbolt Handling (3568711018), classes B, S. Spaced Out only.
+#
+# What it does: the Radbolt Chamber (HEPBattery) gets a rotatable output (its anim swapped for
+# one with a direction arrow, the game's radbolt direction side screen, the output one cell
+# from its centre) and an activation range side screen for its logic output (send a signal
+# between two fill levels); the Radbolt Generator, Radbolt Reflector and Radbolt Chamber's
+# first logic input becomes a ribbon whose bits set the direction; the Radbolt Joint Plate,
+# Materials Study Terminal and Diamond Press get the same fill-level logic.
+# How a player reaches it: select a Radbolt Chamber; its side screens.
+# What changes: where a Radbolt Chamber fires, and when its logic signal is sent.
+#
+# setup builds a Radbolt Chamber in the dug-out room west of the printing pod. Selected, it
+# shows the direction screen, pointing up; its Left button is clicked, and the chamber fires
+# left.
+from: early-base
+mods: [3568711018]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"HEPBattery\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Cuprite], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"HEPBattery\").HighEnergyParticleOutputOffset.y": 1
+      "Assets.GetBuildingDef(\"HEPBattery\").LogicInputPorts[0].spriteType": RibbonInput
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 208], select: HEPBattery}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/HighEnergyParticleDirectionSideScreen", cond: stable}
+  - ui_dump: {name: direction, root: "**/HighEnergyParticleDirectionSideScreen"}
+  - expect_state:
+      "selected:BatteryDirectionAddon.Direction": Up
+  - click: {ui: "**/HighEnergyParticleDirectionSideScreen/Contents/Left"}
+  - expect_state:
+      "selected:BatteryDirectionAddon.Direction": Left

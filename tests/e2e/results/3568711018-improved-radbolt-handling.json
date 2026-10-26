@@ -1,0 +1,63 @@
+{
+ "spec": "mods/3568711018-improved-radbolt-handling.yaml",
+ "mods": [
+  "3568711018"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Radbolt Chamber's direction side screen (dump matches) turns its output from up to left with a click",
+ "updated": "2026-10-26",
+ "commit": "3052ec30",
+ "mod_dlls": {
+  "3568711018": {
+   "ImprovedRadboltHandling.dll": "5352e8580bae579cbbed1fe3cfa9d7f94a0e10e7f8d2aa08fc9a1d2eb3c4d55c"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-033203-6e82e943",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:32:04",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-041125-dd7cf7a1",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:11:25",
+    "lane": 16,
+    "reference_run": "20261026-033203-6e82e943",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "direction": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261026-041125-dd7cf7a1",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T04:11:26",
+    "lane": 17,
+    "reference_run": "20261026-033203-6e82e943",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "direction": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

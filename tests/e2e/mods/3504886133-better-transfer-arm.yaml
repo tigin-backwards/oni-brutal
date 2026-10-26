@@ -1,0 +1,27 @@
+# Better_Transfer_Arm更好的机械臂 (3504886133), class P.
+#
+# What it does: the Auto-Sweeper takes far more kinds of item: its storage filters add
+# liquids, gases, food, medicine, seeds, critters, eggs, farm and industrial materials (and
+# bottles and gas canisters, the Canister Filler's output being tagged as one), at 2 t of
+# storage, and its pickup check accepts them; patches on animation overrides keep it from
+# crashing on them.
+# How a player reaches it: building an Auto-Sweeper.
+# What changes: auto-sweepers that move anything.
+#
+# An auto-sweeper is built in the dug-out corridor west of the printing pod: its storage takes
+# the original's capacity, and it is selected. (Its filter patches find no storage on the
+# template, so the built sweeper keeps the game's filters; its pickup check is the change.)
+from: early-base
+mods: [3504886133]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"SolidTransferArm\")", method: Build, args: [131129, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - run: {seconds: 5}
+  - expect: {buildings: {SolidTransferArm: 1}}
+  - expect_state:
+      "all:SolidTransferArm::[0].GetComponent<Storage>.capacityKg": "== original"
+  - driver: {camera.set: {cell: [113, 207], ortho: 8}}
+  - click_world: {cell: [113, 206], select: SolidTransferArm}
+  - ui_wait: {path: "**/DetailsScreen/TitleBar", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Auto-Sweeper"}

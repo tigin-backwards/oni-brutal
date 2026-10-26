@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3504886133-better-transfer-arm.yaml",
+ "mods": [
+  "3504886133"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a built Auto-Sweeper is selected with the original's storage; its filter patches find no storage on the template, so only its pickup check changes",
+ "updated": "2026-10-26",
+ "commit": "c17aa002",
+ "mod_dlls": {
+  "3504886133": {
+   "Better_Transfer_Arm.dll": "3e5399cf853e7f27a71972a8cf76559d4a9987eedaf348591bf821dacf539c6e"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-035547-aa59b12f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:09:38",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-041240-689bf896",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:17:50",
+    "lane": 14,
+    "reference_run": "20261026-035547-aa59b12f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-041240-689bf896",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T04:18:34",
+    "lane": 14,
+    "reference_run": "20261026-035547-aa59b12f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

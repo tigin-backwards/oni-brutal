@@ -1,0 +1,28 @@
+# 脱盐器超级加强 Super Desalt (3100867929), class P.
+#
+# What it does: the Desalinator works faster: a postfix on its ConfigureBuildingTemplate
+# multiplies its three converters (salt water, brine, murky brine) by a PLib option, 4 by
+# default: 20 kg/s of salt water into 18.6 kg/s of water and 1.4 kg/s of salt.
+# How a player reaches it: building a Desalinator; the Mods screen's options.
+# What changes: four times the throughput.
+#
+# options set the multiplier to 2; the converters are read, and a desalinator built by setup
+# in the dug-out corridor west of the printing pod is selected.
+from: early-base
+mods: [3100867929]
+options:
+  "3100867929": {OutputMultiplier: 2}
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Desalinator\")", method: Build, args: [131129, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"Desalinator\").GetComponents<ElementConverter>[0].consumedElements[0].MassConsumptionRate": 10
+      "Assets.GetPrefab(\"Desalinator\").GetComponents<ElementConverter>[0].outputElements[0].massGenerationRate": [">= 9.29", "<= 9.31"]
+      "Assets.GetPrefab(\"Desalinator\").GetComponents<ElementConverter>[1].outputElements[1].massGenerationRate": 3
+  - run: {seconds: 2}
+  - expect: {buildings: {Desalinator: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: Desalinator}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponents<ElementConverter>[0].consumedElements[0].MassConsumptionRate": 10

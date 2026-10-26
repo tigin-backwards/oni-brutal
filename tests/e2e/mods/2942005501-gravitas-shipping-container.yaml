@@ -1,0 +1,26 @@
+# Gravitas Shipping Container (2942005501), classes B, O.
+#
+# What it does: adds a 4x6 storage building of raw metal modelled on Jorge's hideout
+# (GravitasBigStorage_Container, Base menu), holding any non-edible solid up to Capacity kg (a
+# PLib option, default 250000). It is POI-unlockable: completing the Lonely Minion story
+# unlocks it (GBS_UnlockableTechs on the hideout). Six facades (Alien, Padded, Red, Retro,
+# Rusty, Starry) join the building facades and the Supply Closet.
+# How a player reaches it: finishing the Lonely Minion story, then the build menu (Base).
+# What changes: one very large storage bin.
+#
+# The capacity option is set to 5000 kg. The building's storage reads it, its facades are in
+# the database, and it is a POI-unlocked building; the colony runs.
+from: early-base
+mods: [2942005501]
+options:
+  GravitasBigStorage: {Capacity: 5000}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"GravitasBigStorage_Container\").BuildingComplete.GetComponent<Storage>.capacityKg": 5000
+      "Assets.GetBuildingDef(\"GravitasBigStorage_Container\").WidthInCells": 4
+      "Assets.GetBuildingDef(\"GravitasBigStorage_Container\").HeightInCells": 6
+      "Assets.GetBuildingDef(\"GravitasBigStorage_Container\").POIUnlockable": true
+      "Db.Get().Permits.BuildingFacades.TryGet(\"GravitasBigStorage_Container_Red\").PrefabID": GravitasBigStorage_Container
+      "Db.Get().Permits.BuildingFacades.TryGet(\"GravitasBigStorage_Container_Starry\").PrefabID": GravitasBigStorage_Container
+  - run: {seconds: 30}
+  - expect: {duplicants: 3}

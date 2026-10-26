@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2942005501-gravitas-shipping-container.yaml",
+ "mods": [
+  "2942005501"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the capacity option (5000 kg) reaches the container's storage, and its six facades are in the database and the Supply Closet; the colony runs",
+ "updated": "2026-10-26",
+ "commit": "bbc2ade",
+ "mod_dlls": {
+  "2942005501": {
+   "GravitasBigStorage.dll": "6dc219934af46490c29b50a1e03453b1b4c6971de3370bb34e18793d7e2c00f7"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-220237-6681597d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T22:04:00",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-003322-dd483670",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T00:33:22",
+    "lane": 16,
+    "reference_run": "20261025-220237-6681597d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-003322-dd483670",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T00:33:23",
+    "lane": 17,
+    "reference_run": "20261025-220237-6681597d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

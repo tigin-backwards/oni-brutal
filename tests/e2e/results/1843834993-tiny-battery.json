@@ -1,0 +1,59 @@
+{
+ "spec": "mods/1843834993-tiny-battery.yaml",
+ "mods": [
+  "1843834993"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "both batteries in the Power menu after Power Regulation; a Tiny Battery built and selected holds 5 kJ",
+ "updated": "2026-10-25",
+ "commit": "bd353b5",
+ "mod_dlls": {
+  "1843834993": {
+   "TinyBattery.dll": "0e81f785e354297ab3983abaa139beeac081c49bd4178bdff52c8c4705a81546"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-195133-9810c702",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T19:51:33",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-205931-7ea0bdcf",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T20:59:31",
+    "lane": 15,
+    "reference_run": "20261025-195133-9810c702",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "power-menu": 0.0
+    }
+   },
+   {
+    "run": "20261025-205931-7ea0bdcf",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-25T21:00:34",
+    "lane": 15,
+    "reference_run": "20261025-195133-9810c702",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "power-menu": 0.0
+    }
+   }
+  ]
+ }
+}

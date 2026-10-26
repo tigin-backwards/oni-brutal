@@ -1,0 +1,41 @@
+# Tiny Battery (1843834993), class B.
+#
+# What it does: adds two 1x1 batteries to the Power menu, researched with Power Regulation:
+# the Tiny Battery (TinyBattery, 50 kg of any metal, 5 kJ, leaks 10 % a cycle) and the Tiny
+# Smart Battery (TinySmartBattery, refined metal, with the smart battery's logic output). Both
+# rotate, are drawn at half size, and attach to a tile.
+# How a player reaches it: the build menu (Power), after the research.
+# What changes: small batteries that fit anywhere.
+#
+# setup grants Power Regulation and spawns metal ore. Both batteries show in the Power menu;
+# a Tiny Battery is built on the floor of the corridor west of the printing pod and selected:
+# it holds 5 kJ.
+from: early-base
+mods: [1843834993]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"PowerRegulation\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Cuprite\").substance", method: SpawnResource, args: [[111.5, 207.5, -12], 200, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"PowerRegulation\").unlockedItemIDs": {contains: TinySmartBattery}
+      "Assets.GetBuildingDef(\"TinyBattery\").BuildingComplete.GetComponent<Battery>.capacity": 5000
+  - run: {seconds: 5}
+  - click: {ui: "**/PlanScreen/Toggle:Power"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/TinyBattery Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/TinyBattery Group*": {active: true}
+      "**/BuildingGroups/**/Grid/TinySmartBattery Group*": {active: true}
+  - shot: {name: power-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
+  - key: {code: Escape}
+  - expect_ui: {"**/PauseScreen": {exists: false}}
+  - build: {prefab: TinyBattery, at: [113, 206]}
+  - expect: {blueprints: {TinyBattery: 1}}
+  - run: {seconds: 1500, until: {buildings: {TinyBattery: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [113, 207], ortho: 8}}
+  - click_world: {cell: [113, 206], select: TinyBattery}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<Battery>.capacity": 5000
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Tiny Battery"}

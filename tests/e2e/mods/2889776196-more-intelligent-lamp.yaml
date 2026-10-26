@@ -1,0 +1,25 @@
+# 更智能的灯 More intelligent lamp (2889776196), class S (a side screen on a vanilla building).
+#
+# What it does: the Ceiling Light gets a slider (0 to 100000 lux, 1800 by default) that sets
+# its light's lux and its wattage (0.006 W per lux: 10.8 W at 1800).
+# How a player reaches it: select a Ceiling Light; its slider side screen.
+# What changes: lamps as bright, and as hungry, as the player wants.
+#
+# setup builds a Ceiling Light under the ceiling of the corridor west of the printing pod. It
+# is selected and 5000 typed into its slider's field: it gives 5000 lux and needs 30 W.
+from: early-base
+mods: [2889776196]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"CeilingLight\")", method: Build, args: [{"$": "Grid.XYToCell(112, 209)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 209], select: CeilingLight}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/SingleSliderSideScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<Light2D>.Lux": 1800
+  - ui_dump: {name: slider, root: "**/SingleSliderSideScreen"}
+  - type: {ui: "**/SingleSliderSideScreen/Contents/NumberInputField", text: "5000", clear: true, enter: true}
+  - expect_state:
+      "selected:GetComponent<Light2D>.Lux": 5000
+      "selected:GetComponent<EnergyConsumer>.BaseWattageRating": "> 29.99"

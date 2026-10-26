@@ -1,0 +1,63 @@
+{
+ "spec": "mods/3594387679-super-refrigerator.yaml",
+ "mods": [
+  "3594387679"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Refrigerator holds 20 t at -40 C; its capacity slider (dump matches) goes to 20000 kg and takes 15000 typed in",
+ "updated": "2026-10-26",
+ "commit": "9f55216d",
+ "mod_dlls": {
+  "3594387679": {
+   "ox_ice1.dll": "476fec5b5e9c49739a08da4e71e5e1c9833158d433dd0990dc9ec4551c47a13d"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-095925-af2fb1f8",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T10:00:37",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-112353-5aa4a621",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T11:23:53",
+    "lane": 16,
+    "reference_run": "20261026-095925-af2fb1f8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "capacity": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261026-112353-5aa4a621",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T11:23:54",
+    "lane": 17,
+    "reference_run": "20261026-095925-af2fb1f8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "capacity": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

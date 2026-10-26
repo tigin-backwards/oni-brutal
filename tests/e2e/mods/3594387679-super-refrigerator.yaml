@@ -1,0 +1,27 @@
+# 超级大冰箱 Super Refrigerator (3594387679), class P.
+#
+# What it does: the Refrigerator holds 20 t (a postfix on RefrigeratorConfig's
+# DoPostConfigureComplete; the game's holds 100 kg) and keeps its food at -40 C (a postfix
+# setting the controller's simulated internal temperature to 233.15 K; the game's 274.15 K).
+# How a player reaches it: a Refrigerator's capacity side screen.
+# What changes: a bigger, colder fridge.
+#
+# setup builds a Refrigerator in the dug-out room west of the printing pod. Selected, its
+# capacity slider goes to 20000 kg; 15000 is typed into its field.
+from: early-base
+mods: [3594387679]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Refrigerator\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Cuprite], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"Refrigerator\").GetComponent<Storage>.capacityKg": 20000
+      "Assets.GetPrefab(\"Refrigerator\").GetComponent<StateMachineController>.cmpdef.defs[0].simulatedInternalTemperature": [">= 233.1", "<= 233.2"]
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: Refrigerator}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/CapacityControlSideScreen", cond: stable}
+  - expect_state:
+      "ui:**/CapacityControlSideScreen/**/Slider::GetComponent<KSlider>.maxValue": 20000
+  - ui_dump: {name: capacity, root: "**/CapacityControlSideScreen"}
+  - type: {ui: "**/CapacityControlSideScreen/ValidContent/Max/VerticalLayout/InputField", text: "15000", enter: true, clear: true}
+  - expect_state:
+      "selected:Refrigerator.UserMaxCapacity": 15000

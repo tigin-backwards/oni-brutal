@@ -1,0 +1,34 @@
+# Sweepy Mega Tweaks (3752819733), classes P, O.
+#
+# What it does: PLib options for the Sweepy and its dock: battery capacity and drain (or no
+# power use), speed, patrol radius, inventory, how much it sweeps and mops at a time, emote
+# delay; the dock's power, storage, flooding and overheating, and a liquid and a conveyor
+# output for what Sweepy collects. Sweepy gets its own nav grid (doors, falls), and the dock a
+# user menu button cycling what it cleans (both, solids, liquids, a custom filter) and a side
+# screen button that rebuilds a lost Sweepy.
+# How a player reaches it: the Mods screen's options; a built Sweepy Dock.
+# What changes: a stronger, configurable Sweepy.
+#
+# options set Sweepy's speed to 3; the definitions are read, and a Sweepy Dock built by setup
+# in the dug-out corridor west of the printing pod is selected: its cleaning button turns
+# Both into Solids only.
+from: early-base
+mods: [3752819733]
+options:
+  "3752819733": {MovementSpeed: 3}
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"SweepBotStation\")", method: Build, args: [131128, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"SweepBot\").GetComponent<Navigator>.defaultSpeed": 3
+      "Assets.GetBuildingDef(\"SweepBotStation\").OutputConduitType": "== original"
+      "Assets.GetPrefab(\"SweepBotStation\").GetComponent<SweepyDockSettings>": exists
+  - run: {seconds: 2}
+  - expect: {buildings: {SweepBotStation: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 206], select: SweepBotStation}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_wait: {path: "**/UserMenuScreen/Buttons/Cleaning: BothButton", cond: stable}
+  - ui_dump: {name: menu, root: "**/UserMenuScreen/Buttons"}
+  - click: {ui: "**/UserMenuScreen/Buttons/Cleaning: BothButton"}
+  - ui_wait: {path: "**/UserMenuScreen/Buttons/Cleaning: Solids onlyButton", cond: stable}

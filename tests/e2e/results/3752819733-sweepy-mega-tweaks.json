@@ -1,0 +1,64 @@
+{
+ "spec": "mods/3752819733-sweepy-mega-tweaks.yaml",
+ "mods": [
+  "3752819733"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "options set Sweepy's speed; a built dock's cleaning button (dumped) turns Both into Solids only",
+ "updated": "2026-10-26",
+ "commit": "e230c056",
+ "mod_dlls": {
+  "3752819733": {
+   "PLib.dll": "93073fdf44dbe9fd7c0afe19e56341be862cc2d732090dee30999cf60e2e160d",
+   "SweepyMegaTweaks.dll": "eb24ec514eceaf1a1ead392190a05847fa08b007a1b6d713cd512befc54ad454"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-182320-3e5178eb",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T18:28:43",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-185544-aa6ca87a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T19:12:01",
+    "lane": 15,
+    "reference_run": "20261026-182320-3e5178eb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "menu": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261026-185544-aa6ca87a",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T19:12:53",
+    "lane": 15,
+    "reference_run": "20261026-182320-3e5178eb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "menu": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

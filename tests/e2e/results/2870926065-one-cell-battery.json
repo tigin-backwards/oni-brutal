@@ -1,0 +1,60 @@
+{
+ "spec": "mods/2870926065-one-cell-battery.yaml",
+ "mods": [
+  "2870926065"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with its capacity option at 5000 J the 1x1 battery is picked from the Power menu, placed of copper ore and built, and holds 5000 J; its build panel as in the original",
+ "updated": "2026-10-25",
+ "commit": "78891e5",
+ "mod_dlls": {
+  "2870926065": {
+   "One cell battery╥╗╕±╡τ│╪.dll": "74f08f822c7874c791fa1ca769c018a3cff653aa1b34de705ea70bac40915a84",
+   "PLib.dll": "b862c5db2b3cd6df09a62d4a30782e91e2b24e8e1bfac08d991c9cc89a984ba9"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-195129-6325275a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T19:51:29",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-201714-da065d72",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T20:17:14",
+    "lane": 16,
+    "reference_run": "20261025-195129-6325275a",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.007747
+    }
+   },
+   {
+    "run": "20261025-201714-da065d72",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-25T20:18:23",
+    "lane": 16,
+    "reference_run": "20261025-195129-6325275a",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.007747
+    }
+   }
+  ]
+ }
+}

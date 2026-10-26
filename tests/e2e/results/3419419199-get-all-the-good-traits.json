@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3419419199-get-all-the-good-traits.yaml",
+ "mods": [
+  "3419419199"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a new game's Duplicant selection offers Duplicants with over thirty-six traits between them",
+ "updated": "2026-10-26",
+ "commit": "6b1544af",
+ "mod_dlls": {
+  "3419419199": {
+   "GetAllTheGoodTraits.dll": "aeb78c2458a7b172ea55b4b6fb1033db58f811dbba6fc263230ff078c3c9a81d"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-043257-c0eef0ae",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T05:01:10",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-102957-80d6ca34",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T10:29:57",
+    "lane": 16,
+    "reference_run": "20261026-043257-c0eef0ae",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-102957-80d6ca34",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T10:29:58",
+    "lane": 17,
+    "reference_run": "20261026-043257-c0eef0ae",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

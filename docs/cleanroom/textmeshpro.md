@@ -2277,8 +2277,9 @@ package with every member public, and ARCHITECTURE D11 lets it reach them:
   caret (or the selection, with any modifiers, as above). The mod finds it with
   `AccessTools.Method(typeof(TMP_InputField), "Backspace")`, by name alone. An overload with
   other parameters breaks the mod, so there must be exactly one method of that name.
-- `EditState KeyPressed(Event evt)`: private, instance. The Backspace key reaches `Backspace()`
-  through a direct call in this method, with only the field itself as the call's argument.
+- `EditState KeyPressed(Event evt)`: protected, instance, not virtual (corrected: "`KeyPressed`
+  is protected" below). The Backspace key reaches `Backspace()` through a direct call in this
+  method, with only the field itself as the call's argument.
   The mod's transpiler swaps that call for its own static `Wrapper(TMP_InputField, Event)`,
   which takes the event (`evt`, the method's first parameter) as well. With any other
   argument on the call, the method that results is invalid (what happens here today:
@@ -2713,6 +2714,42 @@ implementation finds today by searching loaded objects by name (`TextParser.Find
 `FindSpriteAsset`) differs: the original finds no unregistered asset by name. Not measured:
 assets under `Resources` paths (`TMP_Settings.defaultFontAssetPath`, "Sprite Assets/"), which
 the game has none of for these names, and `OnFontAssetRequest`.
+
+#### Tags naming assets under Resources (measured 2026-10-26)
+
+**Why:** the game's own sprite tags name `oni_sprite_assets` (`<sprite="oni_sprite_assets"
+name="oni_sprite_assets_germs">` and the other freshness, battery and syrup tree icons), which
+no code registers; it is at `Sprite Assets/oni_sprite_assets` in Resources. The only font tag in
+the game's code, in TextMeshPro's example scripts, names `Bangers SDF` with the material `Bangers
+SDF - Drop Shadow`, both at `Fonts & Materials/`. The paths are `TMP_Settings.defaultFontAssetPath`
+("Fonts & Materials/") and `defaultSpriteAssetPath` ("Sprite Assets/").
+
+**Measured** with `PROBE_TG_PART=resources` (lines `TG res …`), on a NotoSans text, with a handler
+on each request event that returns null:
+- `<sprite="oni_sprite_assets" …>`: `OnSpriteAssetRequest` is raised once with
+  `(GetHashCode(NAME), NAME)`; then the sprite is drawn from the asset under Resources, and the
+  asset is registered under that hash (`TryGetSpriteAsset` true afterwards; the next tags of
+  that name, in any case, raise nothing). The same for `EmojiOne`.
+- `<font="Bangers SDF" material="Bangers SDF - Drop Shadow">BANG</font>`: `OnFontAssetRequest` is
+  raised once, then the font under Resources is used and registered under the tag's hash, and
+  the material under Resources is used and registered under `GetHashCode(material name)`. Any
+  case finds it afterwards. `<font="LiberationSans SDF">` likewise.
+- An unknown font: `OnFontAssetRequest` is raised twice per `ForceMeshUpdate`, and the opening
+  tag stays as text. Its closing tag `</font>` is taken as a tag all the same
+  (`a<font="ProbeNoSuchFont">bc`), as is a closing tag with no font open (`ab</font>c` shows
+  "abc").
+- `<material="LiberationSans SDF - Outline">` finds the material under Resources.
+
+**The assets' `materialHashCode` read from the game's fonts** (`TG hash font-material`): for most
+it is `GetSimpleHashCode(name + " Atlas Material")` of the font's name (GRAYSTROKE REGULAR,
+OUTLINE and ITEM DROP SDF, LiberationSans SDF and its fallback, the Noto fonts), the value an
+asset made by `CreateFontAsset` has too. Two are `GetSimpleHashCode` of their material's name
+(Economica-Bold-OTF SDF, GRAYSTROKE NAME SDF). No serialized field holds it.
+
+**Requirement:** a tag's asset not in the registry is asked for with the request event first,
+then loaded from the Resources path for its kind; what either gives is registered under the
+tag's hash. A `materialHashCode` not set is `GetSimpleHashCode(name + " Atlas Material")`, so
+fonts that share one material keep keys of their own (both GRAYSTROKE fonts above add).
 
 ## Verification
 

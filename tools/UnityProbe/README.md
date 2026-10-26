@@ -144,8 +144,10 @@ calling methods' names) and whether the caret's rect matches the text's, through
 `TMP_Dropdown.m_Dropdown` through Show and Hide. `TG chars` covers `TMP_FontAsset.HasCharacters(
 string, out uint[], bool, bool)`, `TG hash` `TMP_TextUtilities.GetHashCode`, `TG renderer`
 `TextMeshProUGUI.canvasRenderer`, and `TG sprite` and `TG font` the `MaterialReferenceManager`
-registrations and `TMP_Text.OnSpriteAssetRequest`. `PROBE_TG_PART=meta`, `assign`, `mesh`,
-`dropdown`, `chars`, `hash`, `renderer`, `sprite` or `font` runs one part. It ends by creating
+registrations and `TMP_Text.OnSpriteAssetRequest`. `TG res` lines follow the game's own sprite
+and font tags, which name assets under Resources paths. `PROBE_TG_PART=meta`, `assign`, `mesh`,
+`dropdown`, `chars`, `hash`, `renderer`, `sprite`, `font` or `resources` runs one part. It ends
+by creating
 `TmpGapsProbeDone`, for a spec's `ui_wait`. `textmeshpro.md` ("Package members mods reach")
 records what it measured.
 

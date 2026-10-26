@@ -1,6 +1,7 @@
 // Package members that Workshop mods reach and this implementation lacks or calls elsewhere
 // ("PROBE ... TG ..."), at the main menu. With PROBE_SCENARIO=tmpgaps only this probe runs;
-// PROBE_TG_PART=meta, assign, mesh, dropdown, chars, hash, renderer, sprite or font runs one part.
+// PROBE_TG_PART=meta, assign, mesh, dropdown, chars, hash, renderer, sprite, font or resources
+// runs one part.
 //
 // meta: the members' metadata by reflection (visibility, static, virtual, signature, field type).
 // assign: who calls TMP_InputField.AssignPositioningIfNeeded and when. A Harmony prefix counts
@@ -20,6 +21,7 @@
 // sprite: MaterialReferenceManager.AddSpriteAsset and TMP_Text.OnSpriteAssetRequest: which
 //   sprite tags find which asset, when the event is raised and with what.
 // font: MaterialReferenceManager.AddFontAsset: which font tags find which asset.
+// resources: the game's own sprite and font tags, which name assets under Resources paths.
 #pragma warning disable CS0618 // enableKerning, as SetTextStyleSetting.ApplyStyle sets it
 using System;
 using System.Collections;
@@ -182,6 +184,7 @@ namespace SemanticsProbe
             if (P("renderer")) Step("renderer", () => Renderer(cgo.transform));
             if (P("sprite")) yield return StartCoroutine(Sprites(cgo.transform));
             if (P("font")) yield return StartCoroutine(Fonts(cgo.transform));
+            if (P("resources")) yield return StartCoroutine(ResourceTags(cgo.transform));
             Destroy(cgo);
             L("=== done");
             var done = new GameObject("TmpGapsProbeDone", typeof(RectTransform));
@@ -1309,6 +1312,94 @@ namespace SemanticsProbe
             // Null.
             try { MaterialReferenceManager.AddFontAsset(null); L("font AddFontAsset(null) ok"); }
             catch (Exception e) { L("font AddFontAsset(null) threw " + e.GetType().Name); }
+            Destroy(go);
+            yield return null;
+        }
+
+        // ----- Tags naming assets under Resources -----
+
+        static readonly List<string> fontRequests = new List<string>();
+
+        static TMP_FontAsset FontRequest(int hashCode, string assetName)
+        {
+            fontRequests.Add("(" + hashCode + "," + Esc(assetName) + ")");
+            return null;
+        }
+
+        static string MaterialsOf(TextMeshProUGUI t)
+        {
+            var ti = t.textInfo;
+            var names = new List<string>();
+            for (int i = 0; i < ti.materialCount; i++) names.Add(ti.meshInfo[i].material == null ? "null" : ti.meshInfo[i].material.name);
+            return "mats=" + Esc(string.Join("|", names.ToArray()));
+        }
+
+        // The game's own tags name assets under Resources ("Sprite Assets/oni_sprite_assets",
+        // "Fonts & Materials/Bangers SDF"), which no code registers: whether they are found,
+        // whether OnSpriteAssetRequest / OnFontAssetRequest are raised for them first, and
+        // whether they are registered afterwards. Also how an unfound font tag's closing tag
+        // reads.
+        IEnumerator ResourceTags(Transform root)
+        {
+            L("res paths font=" + Esc(TMP_Settings.defaultFontAssetPath) + " sprite=" + Esc(TMP_Settings.defaultSpriteAssetPath));
+            L("res initially " + TryFont("Bangers SDF") + " " + TryFont("LiberationSans SDF"));
+            {
+                TMP_SpriteAsset got;
+                L("res initially TryGetSpriteAsset(oni_sprite_assets)=" + MaterialReferenceManager.TryGetSpriteAsset(TMP_TextUtilities.GetHashCode("oni_sprite_assets"), out got));
+            }
+            var go = new GameObject("tg-res", typeof(RectTransform));
+            go.transform.SetParent(root, false);
+            var t = go.AddComponent<TextMeshProUGUI>();
+            t.font = font; t.fontSize = 14;
+            t.rectTransform.sizeDelta = new Vector2(600, 40);
+            yield return null;
+            TMP_Text.OnSpriteAssetRequest += Request;
+            var fontEvent = typeof(TMP_Text).GetEvent("OnFontAssetRequest");
+            Delegate fontHandler = null;
+            if (fontEvent != null)
+            {
+                fontHandler = Delegate.CreateDelegate(fontEvent.EventHandlerType, typeof(TmpGaps).GetMethod(nameof(FontRequest), BindingFlags.Static | BindingFlags.NonPublic));
+                fontEvent.AddEventHandler(null, fontHandler);
+            }
+            L("res font event=" + (fontEvent != null));
+            void Case(string label, string text)
+            {
+                requests.Clear();
+                fontRequests.Clear();
+                t.text = text;
+                t.ForceMeshUpdate();
+                L("res " + label + " text=" + Esc(text) + " " + Glyphs(t) + " " + FontsOf(t) + " " + MaterialsOf(t)
+                    + " spriteRequests=" + (requests.Count == 0 ? "-" : string.Join(" ", requests.ToArray()))
+                    + " fontRequests=" + (fontRequests.Count == 0 ? "-" : string.Join(" ", fontRequests.ToArray())));
+            }
+            Case("sprite game", "a<sprite=\"oni_sprite_assets\" name=\"oni_sprite_assets_germs\">b");
+            Case("sprite game other-case", "a<sprite=\"ONI_SPRITE_ASSETS\" name=\"oni_sprite_assets_fresh\">b");
+            Case("sprite game index", "a<sprite=\"oni_sprite_assets\" index=1>b");
+            Case("sprite resources EmojiOne", "a<sprite=\"EmojiOne\" index=0>b");
+            {
+                TMP_SpriteAsset got;
+                bool ok = MaterialReferenceManager.TryGetSpriteAsset(TMP_TextUtilities.GetHashCode("oni_sprite_assets"), out got);
+                L("res after TryGetSpriteAsset(oni_sprite_assets)=" + ok + (got == null ? "" : " " + Esc(got.name)));
+                ok = MaterialReferenceManager.TryGetSpriteAsset(TMP_TextUtilities.GetHashCode("EmojiOne"), out got);
+                L("res after TryGetSpriteAsset(EmojiOne)=" + ok);
+            }
+            Case("font game", "a<font=\"Bangers SDF\" material=\"Bangers SDF - Drop Shadow\">BANG</font>c");
+            Case("font game no-material", "a<font=\"Bangers SDF\">BANG</font>c");
+            Case("font game other-case", "a<font=\"bangers sdf\">BANG</font>c");
+            Case("font resources LiberationSans", "a<font=\"LiberationSans SDF\">b</font>c");
+            L("res after " + TryFont("Bangers SDF") + " " + TryFont("bangers sdf") + " " + TryFont("LiberationSans SDF"));
+            {
+                Material m;
+                bool ok = MaterialReferenceManager.TryGetMaterial(TMP_TextUtilities.GetHashCode("Bangers SDF - Drop Shadow"), out m);
+                L("res after TryGetMaterial(hash(Bangers SDF - Drop Shadow))=" + ok);
+            }
+            // Unfound fonts: the closing tag, and a closing tag with nothing open.
+            Case("font unknown closing", "a<font=\"ProbeNoSuchFont\">b</font>c");
+            Case("font lone closing", "ab</font>c");
+            Case("font unknown nested", "a<font=\"default\">b<font=\"ProbeNoSuchFont\">c</font>d</font>e");
+            Case("material resources", "a<material=\"LiberationSans SDF - Outline\">b</material>c");
+            TMP_Text.OnSpriteAssetRequest -= Request;
+            if (fontHandler != null) fontEvent.RemoveEventHandler(null, fontHandler);
             Destroy(go);
             yield return null;
         }

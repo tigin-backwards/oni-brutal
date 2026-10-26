@@ -1,0 +1,56 @@
+{
+ "spec": "mods/2880489644-high-strength-atmo-suit.yaml",
+ "mods": [
+  "2880489644"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the suits' prefabs exist and the Crafting Station's recipes for them number as in the original",
+ "updated": "2026-10-26",
+ "commit": "df5493c6",
+ "mod_dlls": {
+  "2880489644": {
+   "PLib.dll": "5d6a8ef9d87143b90113548016180078efaf112d69afe0cdf1073a6125b33773",
+   "│╬╔┴─ú╨═╠µ╗╗.dll": "f121d0dcabb1bc941e1601af9f6241d3a434357b255cbf19e75c42294a3e94b0"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-031612-56dd35ca",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:20:26",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-032328-712beb8e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:55:19",
+    "lane": 15,
+    "reference_run": "20261026-031612-56dd35ca",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-032328-712beb8e",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T03:56:00",
+    "lane": 15,
+    "reference_run": "20261026-031612-56dd35ca",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

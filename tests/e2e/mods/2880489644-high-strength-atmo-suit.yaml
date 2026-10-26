@@ -1,0 +1,17 @@
+# High-Strength Atmo Suit 高强度气压服 (2880489644), class P (equipment).
+#
+# What it does: adds atmo suits with other looks (澄闪, LIN, REED, 埃拉托 and a gold one), made
+# at the Crafting Station: they do not wear out and hold more oxygen; suit docks take them.
+# How a player reaches it: the Crafting Station's recipes; a suit dock.
+# What changes: more atmo suits.
+#
+# The suits' prefabs and the Crafting Station's recipes for them are read.
+from: early-base
+mods: [2880489644]
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"atmosuit1\")": exists
+      "count:ComplexRecipeManager.Get().recipes[*] if .fabricators[0] == CraftingTable and .results[0].material == atmosuit1": ">= 1"
+      "count:ComplexRecipeManager.Get().recipes[*] if .fabricators[0] == CraftingTable": "== original"
+  - run: {seconds: 10}
+  - expect: {duplicants: 3}

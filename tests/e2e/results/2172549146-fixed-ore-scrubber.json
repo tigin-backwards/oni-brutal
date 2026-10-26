@@ -1,0 +1,63 @@
+{
+ "spec": "mods/2172549146-fixed-ore-scrubber.yaml",
+ "mods": [
+  "2172549146"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "an Ore Scrubber built after Filtration gets the drop-all workable and removes 480000 germs a use",
+ "updated": "2026-10-25",
+ "commit": "bd353b5",
+ "mod_dlls": {
+  "2172549146": {
+   "FixedOreScrubber.dll": "ffc5c5e532944cf7f4ac12631ee501ec5d734d291bebb63a8d571858fcb73c5d"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-200219-ef1e47f8",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T20:22:15",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-205920-4d58df0d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T20:59:20",
+    "lane": 14,
+    "reference_run": "20261025-200219-ef1e47f8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "user-menu": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261025-205920-4d58df0d",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-25T21:00:20",
+    "lane": 14,
+    "reference_run": "20261025-200219-ef1e47f8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "user-menu": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

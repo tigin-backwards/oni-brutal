@@ -1,0 +1,32 @@
+# Fixed Ore Scrubber (2172549146), classes P, O.
+#
+# What it does: fixes the Ore Scrubber. A transpiler on its states makes a Duplicant who stops
+# scrubbing go back to "not ready" rather than "ready"; a prefix on its reactable turns a
+# Duplicant walking left to face the scrubber; the scrubber removes GermRemovalAmount germs a
+# use (480000 by default, a PLib option) and, with AllowStorageEjection (on by default), gets
+# the game's DropAllWorkable, an "Empty Storage" user menu button that ejects its chlorine.
+# How a player reaches it: a built Ore Scrubber, its user menu; the options on the Mods screen.
+# What changes: scrubbers work as intended, and their chlorine can be emptied.
+#
+# setup grants Filtration (LiquidFiltering) and spawns metal ore. An Ore Scrubber is built in
+# the corridor west of the printing pod and selected: it has the drop-all workable, whose Empty
+# Storage button shows once the scrubber holds chlorine.
+from: early-base
+mods: [2172549146]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"LiquidFiltering\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Cuprite\").substance", method: SpawnResource, args: [[111.5, 207.5, -12], 400, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"OreScrubber\").GetComponent<OreScrubber>.diseaseRemovalCount": 480000
+      "Assets.GetPrefab(\"OreScrubber\").GetComponent<DropAllWorkable>": exists
+  - build: {prefab: OreScrubber, at: [113, 206]}
+  - expect: {blueprints: {OreScrubber: 1}}
+  - run: {seconds: 1500, until: {buildings: {OreScrubber: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [114, 207], ortho: 8}}
+  - click_world: {cell: [114, 207], select: OreScrubber}
+  - ui_wait: {path: "**/DetailsScreen/UserMenuButtons/UserMenuScreen/Buttons", cond: stable}
+  - expect_state:
+      "selected:GetComponent<DropAllWorkable>": exists
+  - ui_dump: {name: user-menu, root: "**/DetailsScreen/UserMenuButtons/UserMenuScreen/Buttons"}

@@ -1,0 +1,37 @@
+# Superpipe超级管道 -K34 (2868798283), classes P, O.
+#
+# What it does: a postfix on Game.OnPrefabInit replaces the game's gas and liquid conduit flows
+# (and their visualizers) with ones whose pipes carry more per cell: gas a1 kg (1 to 10,
+# default 1) and liquid b1 kg (10 to 100, default 10), PLib options, restart required.
+# How a player reaches it: the options on the Mods screen; any pipe.
+# What changes: pipe throughput.
+#
+# The options set 5 kg for gas and 50 kg for liquid pipes: the game's conduit flows carry that
+# much. Then the mod's options dialog opens from the main menu's Mods screen and Cancel closes
+# it.
+from: early-base
+mods: [2868798283]
+options:
+  "2868798283": {$file: K34M34GG34H1.json, a1: 5.0, b1: 50.0}
+steps:
+  - expect_state:
+      "Game.Instance.gasConduitFlow.MaxMass": 5
+      "Game.Instance.liquidConduitFlow.MaxMass": 50
+  - run: {seconds: 10}
+  - expect: {duplicants: 3}
+  - key: {code: Escape}
+  - ui_wait: {path: "**/PauseScreen/**/Main MenuButton", cond: stable}
+  - click: {ui: "**/PauseScreen/**/Main MenuButton"}
+  - ui_wait: {path: "**/ConfirmDialog/GameObject/Panel/ConfigurableButton", cond: stable}
+  - click: {ui: "**/ConfirmDialog/GameObject/Panel/ConfigurableButton"}   # Quit Without Saving
+  - ui_wait: {path: "**/MainMenu_SpacedOut/MainMenuMenubar/MainMenuButtons", cond: stable, frames: 3000}
+  - click: {text: "MODS", under: "**/MainMenuButtons"}
+  - ui_wait: {path: "**/ModsScreen/Panel", cond: stable}
+  - click: {ui: "**/ModsScreen/**/Content/Superpipe超级管道 -K34/ModSettingsButton"}
+  - ui_wait: {path: "**/ModOptions", cond: stable}
+  - expect_ui:
+      "**/ModOptions/Body/**/Entries/Label/Text": {any_text: "气体管道容量"}
+  - ui_dump: {name: options, root: "**/ModOptions"}
+  - shot: {name: options, crop: "**/ModOptions"}
+  - click: {text: "CANCEL", under: "**/ModOptions"}
+  - ui_wait: {path: "**/ModOptions", cond: gone}

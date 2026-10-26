@@ -1,0 +1,68 @@
+{
+ "spec": "mods/2868798283-superpipe.yaml",
+ "mods": [
+  "2868798283"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "its options give 5 kg gas and 50 kg liquid pipes; its PLib options dialog opens from the Mods screen",
+ "updated": "2026-10-25",
+ "commit": "bd353b5",
+ "mod_dlls": {
+  "2868798283": {
+   "K-34-│¼╝╢╣▄╡└.dll": "18ba7af28c28b35d62a93cd7786172eb8760d3a0427990a120d4f2520bad1fa4",
+   "PLib.dll": "b862c5db2b3cd6df09a62d4a30782e91e2b24e8e1bfac08d991c9cc89a984ba9"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-195133-9810c702",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T19:58:49",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-210142-ac28e37f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T21:01:42",
+    "lane": 15,
+    "reference_run": "20261025-195133-9810c702",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "options": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "options": 0.0
+    }
+   },
+   {
+    "run": "20261025-210142-ac28e37f",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-25T21:02:37",
+    "lane": 15,
+    "reference_run": "20261025-195133-9810c702",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "options": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "options": 0.0
+    }
+   }
+  ]
+ }
+}

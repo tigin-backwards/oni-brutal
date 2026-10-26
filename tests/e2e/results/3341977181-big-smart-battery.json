@@ -1,0 +1,68 @@
+{
+ "spec": "mods/3341977181-big-smart-battery.yaml",
+ "mods": [
+  "3341977181"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "built of copper after Acoustics and selected, it holds 400 kJ; its activation range screen as in the original",
+ "updated": "2026-10-25",
+ "commit": "bd353b5",
+ "mod_dlls": {
+  "3341977181": {
+   "BCSmartBattery.dll": "d7a94d937122d4240e7ec1ab64262b12f606d725463ac60e40768344ba3eadf6",
+   "PLib.dll": "dcbf61d8876760e2e270e9884215422fefe63950caeef2897a57f72298d617c2"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-201720-b5f6d528",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T20:42:24",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-205845-ef9e26c1",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T21:06:50",
+    "lane": 15,
+    "reference_run": "20261025-201720-b5f6d528",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "range": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "range": 0.0
+    }
+   },
+   {
+    "run": "20261025-205845-ef9e26c1",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-25T21:08:21",
+    "lane": 15,
+    "reference_run": "20261025-201720-b5f6d528",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "range": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "range": 0.0
+    }
+   }
+  ]
+ }
+}

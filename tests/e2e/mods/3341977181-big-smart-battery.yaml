@@ -1,0 +1,41 @@
+# 大智能电池(可配置) / Big Smart Battery, configurable (3341977181), classes B, O.
+#
+# What it does: adds 大智能电池 (BCSmartBattery, 2x2, 200 kg of refined metal, in the Power
+# menu, researched with Acoustics): a Smart Battery that stores 400 kJ (the PLib option
+# Battery, in J, restart required) and leaks 2/3 J/s, with the smart battery's logic output
+# and its activation range side screen.
+# How a player reaches it: the build menu (Power), after the research.
+# What changes: a much bigger smart battery.
+#
+# setup grants Acoustics and spawns copper. The battery is built in the corridor west of the
+# printing pod and selected: it holds 400 kJ and shows the smart battery's side screen.
+from: early-base
+mods: [3341977181]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"Acoustics\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Copper\").substance", method: SpawnResource, args: [[111.5, 207.5, -12], 400, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"Acoustics\").unlockedItemIDs": {contains: BCSmartBattery}
+      "Assets.GetBuildingDef(\"BCSmartBattery\").BuildingComplete.GetComponent<Battery>.capacity": 400000
+  - run: {seconds: 5}
+  - click: {ui: "**/PlanScreen/Toggle:Power"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/BCSmartBattery Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/BCSmartBattery Group*": {active: true}
+  - key: {code: Escape}
+  - expect_ui: {"**/PauseScreen": {exists: false}}
+  - build: {prefab: BCSmartBattery, at: [113, 206]}
+  - expect: {blueprints: {BCSmartBattery: 1}}
+  - run: {seconds: 1500, until: {buildings: {BCSmartBattery: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [113, 207], ortho: 8}}
+  - click_world: {cell: [113, 207], select: BCSmartBattery}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<BatterySmart>.capacity": 400000
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~大智能电池"}
+  - ui_wait: {path: "**/*RangeSideScreen*", cond: stable}
+  - ui_dump: {name: range, root: "**/*RangeSideScreen*"}
+  - shot: {name: range, crop: "**/*RangeSideScreen*"}

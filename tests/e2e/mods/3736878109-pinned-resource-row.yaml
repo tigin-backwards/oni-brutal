@@ -1,0 +1,29 @@
+# Pinned Resource Row (3736878109), classes S, O.
+#
+# What it does: clicking the "NEW" label of a newly discovered resource in the pinned
+# resources panel (top right, under the resources header) pins that resource, where the game
+# only clears the label (a postfix on MultiToggle.OnPointerClick); with the PLib option Type set
+# to All, every new discovery is pinned as the panel syncs its rows.
+# How a player reaches it: the pinned resources panel's NEW labels.
+# What changes: new resources get pinned with a click.
+#
+# early-base has a dozen new discoveries, Coal (Carbon) first in the panel. Its NEW label is
+# clicked: coal is pinned and no longer new. The panel is compared with the original before
+# and after.
+from: early-base
+mods: [3736878109]
+steps:
+  - run: {seconds: 2}
+  - expect_state:
+      "DiscoveredResources.Instance.newDiscoveries": {contains: Carbon}
+      "ClusterManager.Instance.activeWorld.worldInventory.pinnedResources.Count": 0
+  - ui_wait: {path: "**/PinnedResourcesPanel/Resources/EntryContainer", cond: stable}
+  - expect_ui:
+      "**/PinnedResourcesPanel/Resources/EntryContainer/Line/TitleLabel": {text: Coal}
+  - ui_dump: {name: before, root: "**/PinnedResourcesPanel/Resources/EntryContainer", mask_text: ['[\d.,]+ ?[a-zA-Z]*']}
+  - click: {ui: "**/PinnedResourcesPanel/Resources/EntryContainer/Line/NewLabel", index: 0}
+  - expect_state:
+      "ClusterManager.Instance.activeWorld.worldInventory.pinnedResources": {contains: Carbon}
+      "count:DiscoveredResources.Instance.newDiscoveries.Keys[*] if .Name == Carbon": 0
+  - ui_wait: {path: "**/PinnedResourcesPanel/Resources/EntryContainer", cond: stable}
+  - ui_dump: {name: after, root: "**/PinnedResourcesPanel/Resources/EntryContainer", mask_text: ['[\d.,]+ ?[a-zA-Z]*']}

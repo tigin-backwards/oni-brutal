@@ -1,0 +1,69 @@
+{
+ "spec": "mods/3736878109-pinned-resource-row.yaml",
+ "mods": [
+  "3736878109"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "clicking Coal's NEW label in the pinned resources panel pins coal and clears it as new (panel dumps before and after match)",
+ "updated": "2026-10-26",
+ "commit": "9277b586",
+ "mod_dlls": {
+  "3736878109": {
+   "MJPinnedResourceRow.dll": "5d6351023882a223cc9d54ea58af962e232abb68988da1247a8b38acf9ffab24"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-042232-0e5bb32c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:28:54",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-115203-7e5e1132",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T11:52:03",
+    "lane": 16,
+    "reference_run": "20261026-042232-0e5bb32c",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "before": {
+      "differences": 0
+     },
+     "after": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261026-115203-7e5e1132",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T11:52:04",
+    "lane": 17,
+    "reference_run": "20261026-042232-0e5bb32c",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "before": {
+      "differences": 0
+     },
+     "after": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

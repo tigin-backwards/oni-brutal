@@ -1,0 +1,67 @@
+{
+ "spec": "mods/3709844715-quota-storage.yaml",
+ "mods": [
+  "3709844715"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Storage Bin's user-menu button turns quota control on and the button and quota side screen follow; the side screen's layout and pixels as in the original",
+ "updated": "2026-10-26",
+ "commit": "bbc2ade",
+ "mod_dlls": {
+  "3709844715": {
+   "Quota Storage.dll": "18d9805e220ceb9a62d708fb53f1327b8f37d8ec12ddd50e48062a2d03387e5e"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-005722-743e9c48",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T00:57:22",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-010932-e81f7494",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T01:09:32",
+    "lane": 16,
+    "reference_run": "20261026-005722-743e9c48",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "quota": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "quota": 0.0
+    }
+   },
+   {
+    "run": "20261026-010932-e81f7494",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T01:09:33",
+    "lane": 17,
+    "reference_run": "20261026-005722-743e9c48",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "quota": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "quota": 0.0
+    }
+   }
+  ]
+ }
+}

@@ -1,0 +1,32 @@
+# Quota Storage 定额存储箱 (3709844715), classes S, P.
+#
+# What it does: storage bins can keep a set amount of each item. Every StorageLocker gets a
+# GranularController with a user-menu toggle ("开启定额控制" / "关闭定额控制", quota control on
+# and off). With it on, a side screen made in code (GranularControlScreen) lists the bin's
+# allowed items with a minimum and maximum per item, saved and loaded as presets; the bin
+# fetches each item up to its maximum, refills below its minimum and drops the excess.
+# How a player reaches it: select a Storage Bin, its user menu, then its side screen.
+# What changes: what and how much a bin fetches.
+#
+# setup builds a Storage Bin in the dug-out corridor west of the printing pod. Selected, its
+# user menu offers quota control; a click turns it on, the button turns to its off label and
+# the quota panel (资源配置, with its save and load buttons) shows; it is compared with the original.
+from: early-base
+mods: [3709844715]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"StorageLocker\")", method: Build, args: [131128, Neutral, null, [SandStone], 300.0, DEFAULT_FACADE]}}
+steps:
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: StorageLocker}
+  - ui_wait: {path: "**/DetailsScreen/UserMenuButtons/UserMenuScreen/Buttons", cond: stable}
+  - expect_state:
+      "selected:GetComponent<Granular_Storage_Control.GranularController>.NeedControlFlag": false
+  - click: {ui: "**/UserMenuScreen/Buttons/开启定额控制Button"}
+  - expect_state:
+      "selected:GetComponent<Granular_Storage_Control.GranularController>.NeedControlFlag": true
+  - expect_ui:
+      "**/UserMenuScreen/Buttons/关闭定额控制Button": {active: true}
+  - ui_wait: {path: "**/ButtonArea/SaveButton", cond: stable}
+  - ui_dump: {name: quota, root: "**/ButtonArea"}
+  - shot: {name: quota, crop: "**/ButtonArea", threshold: 0.04}

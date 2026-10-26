@@ -41,6 +41,9 @@ Write-Host "Game: $Game"
 
 if (Test-Path (Join-Path $here 'player\OniMoono.exe')) {
     $built = Join-Path $here 'player' # a release
+    # Extracted over a release from before the Moono name, player\ still holds that player
+    # (OniBrutal.exe and its OniBrutal.* assemblies), which this one doesn't use.
+    Get-ChildItem -LiteralPath $built -File -Filter 'OniBrutal.*' | Where-Object Name -like 'OniBrutal.*' | Remove-Item -Force
 } elseif (-not (Test-Path (Join-Path $here 'global.json'))) {
     # Opened from inside the zip, Explorer runs this script alone from a temporary folder.
     Die 'extract the whole zip first (right-click it -> Extract All), then run setup.cmd from the extracted folder'
@@ -68,14 +71,14 @@ if (Test-Path (Join-Path $here 'player\OniMoono.exe')) {
 
     Write-Host 'Building the player (a few minutes the first time)...'
     # Self-contained: it carries its own .NET runtime.
-    foreach ($project in 'src\OniBrutal.Host', 'src\OniBrutal.Restarter') {
+    foreach ($project in 'src\OniMoono.Host', 'src\OniMoono.Restarter') {
         # The output is shown only if the build fails.
         $output = & $dotnet build (Join-Path $here $project) -c Release -r win-x64 --self-contained true "-p:OniGameDir=$Game" -v q -nologo 2>&1
         if ($LASTEXITCODE -ne 0) { $output | Write-Host; Die 'the build failed' }
     }
-    $built = Join-Path $here 'out\bin\OniBrutal.Host\release_win-x64'
+    $built = Join-Path $here 'out\bin\OniMoono.Host\release_win-x64'
     Remove-Item -Force (Join-Path $built 'Restarter'), (Join-Path $built 'FacadeGen.*') -ErrorAction SilentlyContinue
-    $restarter = Join-Path $here 'out\bin\OniBrutal.Restarter\release_win-x64'
+    $restarter = Join-Path $here 'out\bin\OniMoono.Restarter\release_win-x64'
     foreach ($file in 'Restarter.exe', 'Restarter.dll', 'Restarter.deps.json', 'Restarter.runtimeconfig.json') { Copy-Item (Join-Path $restarter $file) $built }
 }
 

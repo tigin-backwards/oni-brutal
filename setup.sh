@@ -35,6 +35,9 @@ say "Game: $game"
 
 if [ -x "$here/player/OniMoono" ]; then
     player="$here/player" # a release
+    # Extracted over a release from before the Moono name, player/ still holds that player
+    # (OniBrutal and its OniBrutal.* assemblies), which this one doesn't use.
+    rm -f "$player/OniBrutal" "$player"/OniBrutal.*
 else
     # A .NET SDK of the version global.json pins (a later patch release works too): one already
     # installed, or one installed into ~/.dotnet (no root needed).
@@ -57,13 +60,13 @@ else
     # Self-contained: it carries its own .NET runtime, so it runs where Steam starts it (a snap's
     # Steam can't see ~/.dotnet).
     # The output is shown only if the build fails.
-    if ! output=$("$dotnet" build "$here/src/OniBrutal.Host" -c Release -r linux-x64 --self-contained true -p:OniGameDir="$game" -v q -nologo 2>&1); then
+    if ! output=$("$dotnet" build "$here/src/OniMoono.Host" -c Release -r linux-x64 --self-contained true -p:OniGameDir="$game" -v q -nologo 2>&1); then
         printf '%s\n' "$output" >&2
         die "the build failed"
     fi
     player="$here/out/player"
     rm -rf "$player"
-    cp -r "$here/out/bin/OniBrutal.Host/release_linux-x64" "$player"
+    cp -r "$here/out/bin/OniMoono.Host/release_linux-x64" "$player"
     rm -f "$player"/FacadeGen*
 fi
 

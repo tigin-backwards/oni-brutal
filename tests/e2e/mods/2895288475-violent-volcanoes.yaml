@@ -1,0 +1,30 @@
+# Violent Volcanoes (2895288475), classes P, O.
+#
+# What it does: while a Minor Volcano or a Volcano erupts, it throws three burning rocks a
+# second (Volcano Burst, a MagmaComet: the eruption's temperature, a fifth to a third of its
+# emission rate in mass) up and sideways from 4 tiles above it; they fall under gravity and,
+# with the PLib option CreateNaturalTiles (on by default), leave natural tiles of TileMaterial
+# (igneous rock by default) where they land.
+# How a player reaches it: an erupting volcano.
+# What changes: volcanoes throw hot rock around them.
+#
+# setup spawns a Minor Volcano in the dug-out room west of the printing pod and shifts its time
+# to the start of its active period, so it erupts. A few seconds later Volcano Bursts are in
+# flight: comets are spawned, three a second.
+from: early-base
+mods: [2895288475]
+setup:
+  - driver: {setup.call: {type: Scenario, method: SpawnPrefab, args: [{"$": "Grid.XYToCell(111, 207)"}, 0, 0, GeyserGeneric_small_volcano, BuildingBack]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "last:GetComponent<Geyser>", method: ShiftTimeTo, args: [ActiveState]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"MagmaComet\").GetComponent<Comet>.EXHAUST_ELEMENT": Magma
+  - driver: {count: {methods: ["Comet:OnSpawn"]}}
+  - run: {seconds: 1}
+  - expect_state:
+      "last:GetComponent<Geyser>.smi.GetCurrentState().name": {contains: erupt}
+  - run: {seconds: 4}
+  # Three a second while it erupts; the colony has no meteor shower now.
+  - expect_state:
+      'E2eDriver.Counting.Of("Comet:OnSpawn")': ">= 3"

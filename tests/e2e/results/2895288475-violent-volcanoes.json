@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2895288475-violent-volcanoes.yaml",
+ "mods": [
+  "2895288475"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Minor Volcano shifted to its eruption throws Volcano Burst comets, three a second",
+ "updated": "2026-10-26",
+ "commit": "a452aaa",
+ "mod_dlls": {
+  "2895288475": {
+   "ViolentVolcanoes.dll": "ab1580b71f7bf7e8d88c6a367fdb2c4276c02b92920f57174318995156003add"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-023730-5710265c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T02:55:00",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-030304-599b5cf7",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:03:04",
+    "lane": 16,
+    "reference_run": "20261026-023730-5710265c",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-030304-599b5cf7",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T03:03:05",
+    "lane": 17,
+    "reference_run": "20261026-023730-5710265c",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

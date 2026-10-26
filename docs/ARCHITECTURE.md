@@ -198,8 +198,9 @@ game or mod code can notice. Each says how it is resolved, or why it is kept.
   the host replaces the `Assembly.LoadFrom` call in `KMod.DLLLoader.LoadDLLs`, and a mod
   assembly that names a game member or type its code could not reach (private, internal) is
   given CoreCLR's `IgnoresAccessChecksTo` attribute for `Assembly-CSharp`,
-  `Assembly-CSharp-firstpass` and the game's `0Harmony` (Mono.Cecil; the Multiplayer Mod reads
-  Harmony's private fields) and loaded from memory, its symbols with it. The
+  `Assembly-CSharp-firstpass`, the game's `0Harmony` (Mono.Cecil; the Multiplayer Mod reads
+  Harmony's private fields) and `Unity.TextMeshPro` (Text Input Hotkeys calls
+  `TMP_InputField.Backspace()`) and loaded from memory, its symbols with it. The
   game's own assemblies are not changed (making their members public instead would change what
   KSerialization saves: its default opt-out mode saves every public field and property). The mod
   still sees itself as loaded from its file: `Assembly.Location` reports the file (mods find

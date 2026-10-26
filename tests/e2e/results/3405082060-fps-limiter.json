@@ -1,0 +1,67 @@
+{
+ "spec": "mods/3405082060-fps-limiter.yaml",
+ "mods": [
+  "3405082060"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "its option sets vsync off and a 60 fps target, in the colony and at the main menu; options dialog as in the original",
+ "updated": "2026-10-25",
+ "commit": "a9add53",
+ "mod_dlls": {
+  "3405082060": {
+   "FPSLimiter.dll": "e3e0338e7e209e3e135ca88a4657cc07937650b63b47d5029676858991348c1b"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-195133-9810c702",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T20:08:54",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-213036-8d879f8a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T21:30:36",
+    "lane": 15,
+    "reference_run": "20261025-195133-9810c702",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "options": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "options": 0.0
+    }
+   },
+   {
+    "run": "20261025-213036-8d879f8a",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-25T21:31:21",
+    "lane": 15,
+    "reference_run": "20261025-195133-9810c702",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "options": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "options": 0.0
+    }
+   }
+  ]
+ }
+}

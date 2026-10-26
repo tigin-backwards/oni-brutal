@@ -1,0 +1,36 @@
+# Help! My GPU screams at the main menu! (FPS Limiter) (3405082060), classes V, O.
+#
+# What it does: on load, turns vsync off (QualitySettings.vSyncCount 0) and caps the frame rate
+# at the PLib option FPSLimit (Application.targetFrameRate, 120 by default, 1 to 1000; restart
+# required), at the main menu and in the colony alike.
+# How a player reaches it: the options on the Mods screen.
+# What changes: the game's frame rate cap.
+#
+# The option sets 60: the game runs with vsync off and a 60 fps target. Then the options
+# dialog opens from the main menu's Mods screen and Cancel closes it.
+from: early-base
+mods: [3405082060]
+options:
+  FPSLimiter: {FPSLimit: 60}
+steps:
+  - expect_state:
+      "UnityEngine.Application.targetFrameRate": 60
+      "UnityEngine.QualitySettings.vSyncCount": 0
+  - key: {code: Escape}
+  - ui_wait: {path: "**/PauseScreen/**/Main MenuButton", cond: stable}
+  - click: {ui: "**/PauseScreen/**/Main MenuButton"}
+  - ui_wait: {path: "**/ConfirmDialog/GameObject/Panel/ConfigurableButton", cond: stable}
+  - click: {ui: "**/ConfirmDialog/GameObject/Panel/ConfigurableButton"}   # Quit Without Saving
+  - ui_wait: {path: "**/MainMenu_SpacedOut/MainMenuMenubar/MainMenuButtons", cond: stable, frames: 3000}
+  - expect_state:
+      "UnityEngine.Application.targetFrameRate": 60
+  - click: {text: "MODS", under: "**/MainMenuButtons"}
+  - ui_wait: {path: "**/ModsScreen/Panel", cond: stable}
+  - click: {ui: "**/ModsScreen/**/Content/Help! My GPU screams at the main menu! (FPS Limiter)/ModSettingsButton"}
+  - ui_wait: {path: "**/ModOptions", cond: stable}
+  - expect_ui:
+      "**/ModOptions/Body/**/Entries/Label/Text": {any_text: "FPS Limit"}
+  - ui_dump: {name: options, root: "**/ModOptions"}
+  - shot: {name: options, crop: "**/ModOptions"}
+  - click: {text: "CANCEL", under: "**/ModOptions"}
+  - ui_wait: {path: "**/ModOptions", cond: gone}

@@ -360,6 +360,15 @@ the engine's colour table from the original's log with `sv-check.py cs LOG`. Mea
 2026-10-23: 157 named colours, none on `Color32`; `isIncremental` False; alignment Left by
 default and any value read back as set. `ModApiTests` encodes them.
 
+With `PROBE_SCENARIO=callingasm` only the calling-assembly probe runs (`CallingAssembly.cs`,
+lines `CA …`, at mod load): what `Assembly.GetCallingAssembly()`, `GetExecutingAssembly()` and
+`new StackTrace()` report in Harmony prefixes and postfixes of the probe's constructors and
+methods called from an emitted assembly, `CallerAsm` (directly, from another patched
+constructor, through `MethodInfo.Invoke` and `Activator`), in a patched method's own body, and
+in small and non-inlined methods nothing patches. It runs through `scripts/e2e.py` with a spec
+`from: main-menu`, as the canvas order probe does. ARCHITECTURE D41 records what it measured;
+`--check-types` ("GetCallingAssembly in a mod's patches …") encodes it.
+
 With `PROBE_SCENARIO=logthreads` only the log-threads probe runs (`LogThreads.cs`, lines `LT …`,
 10 s into the main menu): a managed `Thread`, a thread-pool item, a `Task` and the main thread
 log each type through `UnityEngine.Debug`, `Debug.unityLogger` and Klei's `Debug`, and handlers

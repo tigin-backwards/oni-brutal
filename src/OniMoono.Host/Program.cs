@@ -104,6 +104,7 @@ namespace OniMoono.Host
                     SharedGenerics.Install();
                     SharedInstantiations.Install();
                     PatchFrames.Install();
+                    MonoCallingAssembly.Install();
                     PInvokePatches.Install();
                     PatchDependents.Install();
                     GenericMemberScopes.Install();
@@ -1060,6 +1061,114 @@ namespace OniMoono.Host
                     try { Directory.Delete(dir, true); } catch (IOException) { } catch (UnauthorizedAccessException) { }
                 }
             });
+            Check("GetCallingAssembly in a mod's patches of constructors and a method (MonoCallingAssembly)", () =>
+            {
+                ModAccess.Install();
+                PatchFrames.Install();
+                MonoCallingAssembly.Install();
+                var dir = Directory.CreateTempSubdirectory("oni-moono-check-").FullName;
+                try
+                {
+                    System.Reflection.Emit.ModuleBuilder Module(string name) => System.Reflection.Emit.AssemblyBuilder.DefineDynamicAssembly(new AssemblyName(name), System.Reflection.Emit.AssemblyBuilderAccess.Run).DefineDynamicModule(name);
+                    // The game: Recipe(), Recipe(int), which calls Recipe(), and Run(int).
+                    var recipe = Module("CheckCallingGame").DefineType("Recipe", TypeAttributes.Public);
+                    var x = recipe.DefineField("X", typeof(int), FieldAttributes.Public);
+                    var ctor0 = recipe.DefineConstructor(MethodAttributes.Public, CallingConventions.Standard, Type.EmptyTypes);
+                    var il = ctor0.GetILGenerator();
+                    il.Emit(System.Reflection.Emit.OpCodes.Ldarg_0); il.Emit(System.Reflection.Emit.OpCodes.Call, typeof(object).GetConstructor(Type.EmptyTypes)!);
+                    il.Emit(System.Reflection.Emit.OpCodes.Ldarg_0); il.Emit(System.Reflection.Emit.OpCodes.Ldc_I4_1); il.Emit(System.Reflection.Emit.OpCodes.Stfld, x);
+                    il.Emit(System.Reflection.Emit.OpCodes.Ret);
+                    var ctor1 = recipe.DefineConstructor(MethodAttributes.Public, CallingConventions.Standard, [typeof(int)]);
+                    il = ctor1.GetILGenerator();
+                    il.Emit(System.Reflection.Emit.OpCodes.Ldarg_0); il.Emit(System.Reflection.Emit.OpCodes.Call, ctor0);
+                    il.Emit(System.Reflection.Emit.OpCodes.Ldarg_0); il.Emit(System.Reflection.Emit.OpCodes.Ldarg_1); il.Emit(System.Reflection.Emit.OpCodes.Stfld, x);
+                    il.Emit(System.Reflection.Emit.OpCodes.Ret);
+                    var runBuilder = recipe.DefineMethod("Run", MethodAttributes.Public | MethodAttributes.Static, typeof(int), [typeof(int)]);
+                    il = runBuilder.GetILGenerator();
+                    il.Emit(System.Reflection.Emit.OpCodes.Ldarg_0); il.Emit(System.Reflection.Emit.OpCodes.Ldc_I4_1); il.Emit(System.Reflection.Emit.OpCodes.Add); il.Emit(System.Reflection.Emit.OpCodes.Ret);
+                    var game = recipe.CreateType();
+                    // The mod (Mod Origin Info's shape): postfixes and a prefix keep what
+                    // GetCallingAssembly returns; Who returns it.
+                    var modBuilder = new System.Reflection.Emit.PersistedAssemblyBuilder(new AssemblyName("OniMoonoCheckCallingMod"), typeof(object).Assembly);
+                    var type = modBuilder.DefineDynamicModule("OniMoonoCheckCallingMod").DefineType("Origins", TypeAttributes.Public);
+                    var getCalling = typeof(Assembly).GetMethod(nameof(Assembly.GetCallingAssembly))!;
+                    foreach (var name in new[] { "Ctor0", "Ctor1", "Run" })
+                    {
+                        var seen = type.DefineField(name, typeof(Assembly), FieldAttributes.Public | FieldAttributes.Static);
+                        il = type.DefineMethod(name == "Run" ? "RunPrefix" : name + "Postfix", MethodAttributes.Public | MethodAttributes.Static, typeof(void), Type.EmptyTypes).GetILGenerator();
+                        il.Emit(System.Reflection.Emit.OpCodes.Call, getCalling); il.Emit(System.Reflection.Emit.OpCodes.Stsfld, seen); il.Emit(System.Reflection.Emit.OpCodes.Ret);
+                    }
+                    il = type.DefineMethod("Who", MethodAttributes.Public | MethodAttributes.Static, typeof(Assembly), Type.EmptyTypes).GetILGenerator();
+                    il.Emit(System.Reflection.Emit.OpCodes.Call, getCalling); il.Emit(System.Reflection.Emit.OpCodes.Ret);
+                    type.CreateType();
+                    var modPath = Path.Combine(dir, "OniMoonoCheckCallingMod.dll");
+                    modBuilder.Save(modPath);
+                    var origins = ModAccess.LoadFrom(modPath).GetType("Origins")!;
+                    var harmony = new HarmonyLib.Harmony("OniMoono.Host.Check");
+                    harmony.Patch(game.GetConstructor(Type.EmptyTypes), postfix: new HarmonyLib.HarmonyMethod(origins.GetMethod("Ctor0Postfix")));
+                    harmony.Patch(game.GetConstructor([typeof(int)]), postfix: new HarmonyLib.HarmonyMethod(origins.GetMethod("Ctor1Postfix")));
+                    var run = game.GetMethod("Run")!;
+                    harmony.Patch(run, prefix: new HarmonyLib.HarmonyMethod(origins.GetMethod("RunPrefix")));
+                    // A method of a loaded (not emitted) assembly, called first through reflection.
+                    var run2 = typeof(Program).GetMethod(nameof(ReflectedTarget), BindingFlags.NonPublic | BindingFlags.Static)!;
+                    harmony.Patch(run2, prefix: new HarmonyLib.HarmonyMethod(origins.GetMethod("RunPrefix")));
+                    // The caller, a third assembly: the game's constructors, Run directly and
+                    // through reflection, and the mod's Who.
+                    var c = Module("CheckCallingCaller").DefineType("Caller", TypeAttributes.Public | TypeAttributes.Abstract | TypeAttributes.Sealed);
+                    void Define(string name, Action<System.Reflection.Emit.ILGenerator> body)
+                    {
+                        var m = c.DefineMethod(name, MethodAttributes.Public | MethodAttributes.Static, typeof(object), Type.EmptyTypes);
+                        var emit = m.GetILGenerator();
+                        body(emit);
+                        emit.Emit(System.Reflection.Emit.OpCodes.Ret);
+                    }
+                    Define("MakeA", g => g.Emit(System.Reflection.Emit.OpCodes.Newobj, game.GetConstructor(Type.EmptyTypes)!));
+                    Define("MakeB", g => { g.Emit(System.Reflection.Emit.OpCodes.Ldc_I4_4); g.Emit(System.Reflection.Emit.OpCodes.Newobj, game.GetConstructor([typeof(int)])!); });
+                    Define("CallRun", g => { g.Emit(System.Reflection.Emit.OpCodes.Ldc_I4_2); g.Emit(System.Reflection.Emit.OpCodes.Call, run); g.Emit(System.Reflection.Emit.OpCodes.Box, typeof(int)); });
+                    void DefineInvoke(string name, MethodInfo target) => Define(name, g =>
+                    {
+                        g.Emit(System.Reflection.Emit.OpCodes.Ldtoken, target);
+                        g.Emit(System.Reflection.Emit.OpCodes.Call, typeof(MethodBase).GetMethod(nameof(MethodBase.GetMethodFromHandle), [typeof(RuntimeMethodHandle)])!);
+                        g.Emit(System.Reflection.Emit.OpCodes.Ldnull);
+                        g.Emit(System.Reflection.Emit.OpCodes.Ldc_I4_1); g.Emit(System.Reflection.Emit.OpCodes.Newarr, typeof(object));
+                        g.Emit(System.Reflection.Emit.OpCodes.Dup); g.Emit(System.Reflection.Emit.OpCodes.Ldc_I4_0);
+                        g.Emit(System.Reflection.Emit.OpCodes.Ldc_I4_7); g.Emit(System.Reflection.Emit.OpCodes.Box, typeof(int)); g.Emit(System.Reflection.Emit.OpCodes.Stelem_Ref);
+                        g.Emit(System.Reflection.Emit.OpCodes.Callvirt, typeof(MethodBase).GetMethod(nameof(MethodBase.Invoke), [typeof(object), typeof(object[])])!);
+                    });
+                    DefineInvoke("InvokeRun", run);
+                    DefineInvoke("InvokeRun2", run2);
+                    Define("CallWho", g => g.Emit(System.Reflection.Emit.OpCodes.Call, origins.GetMethod("Who")!));
+                    var caller = c.CreateType();
+                    Func<object> Call(string name) => caller.GetMethod(name)!.CreateDelegate<Func<object>>();
+                    Assembly? Seen(string field) => (Assembly?)origins.GetField(field)!.GetValue(null);
+                    void Clear() { foreach (var f in new[] { "Ctor0", "Ctor1", "Run" }) origins.GetField(f)!.SetValue(null, null); }
+                    var wrong = new List<string>();
+                    void Expect(string what, Assembly? seen) { if (seen?.GetName().Name != "CheckCallingCaller") wrong.Add($"{what}: {seen?.GetName().Name ?? "null"}"); }
+                    var (makeA, makeB, callRun, invokeRun, callWho) = (Call("MakeA"), Call("MakeB"), Call("CallRun"), Call("InvokeRun"), Call("CallWho"));
+                    // A first call through reflection goes through RuntimeMethodHandle.InvokeMethod,
+                    // later ones through an emitted stub.
+                    Clear(); Call("InvokeRun2")(); Expect("a prefix of a method first called through reflection", Seen("Run"));
+                    // Past the callers' tier-up. Recipe()'s replacement tail-calls its postfix, so
+                    // its frame is gone; Recipe(int)'s calls Recipe() and keeps its frame.
+                    for (int round = 0; round < 30 && wrong.Count == 0; round++)
+                    {
+                        for (int i = 0; i < 100; i++)
+                        {
+                            Clear(); makeA(); Expect("Recipe()'s postfix", Seen("Ctor0"));
+                            Clear(); makeB(); Expect("Recipe(int)'s postfix", Seen("Ctor1")); Expect("Recipe()'s postfix from Recipe(int)", Seen("Ctor0"));
+                            Clear(); callRun(); Expect("Run's prefix", Seen("Run"));
+                            Expect("Who", (Assembly)callWho());
+                        }
+                        Clear(); invokeRun(); Expect("Run's prefix through reflection", Seen("Run"));
+                        System.Threading.Thread.Sleep(10);
+                    }
+                    return wrong.Count == 0 ? "the patches name the caller's assembly, as on Mono" : throw new InvalidOperationException(string.Join("; ", wrong.Distinct()));
+                }
+                finally
+                {
+                    try { Directory.Delete(dir, true); } catch (IOException) { } catch (UnauthorizedAccessException) { }
+                }
+            });
             Check("A mod's recursion without end (MonoStackOverflow)", () =>
             {
                 ModAccess.Install();
@@ -1600,6 +1709,8 @@ namespace OniMoono.Host
 
         /// CheckRuntimeServices' patch of Enum.ToString(), as element mods write theirs.
         static void NoOp() { }
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+        static int ReflectedTarget(int v) => v + 2;
 
         static void NamedDay(Enum __instance, ref string __result)
         {

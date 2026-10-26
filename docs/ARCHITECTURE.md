@@ -823,6 +823,39 @@ game or mod code can notice. Each says how it is resolved, or why it is kept.
   names a missing type fails in its callers only. A mod that cannot be rewritten loads unchanged.
   `--check-types` loads a mod whose method calls a game method by a missing return type behind a
   branch not taken, and one whose isinst names the missing type.
+- **D41 The calling assembly of a patch method.** Harmony calls a mod's prefixes, postfixes and
+  finalizers from the replacement it builds for the patched method, a dynamic method owned by
+  MonoMod's `DynamicMethodDefinition` (in 0Harmony). Mono's `Assembly.GetCallingAssembly` walks
+  past wrapper frames, dynamic methods among them, and past CoreLib's `System.Reflection`
+  (`get_caller_no_reflection`, `metadata/icall.c`; Unity's fork, branch `unity-6000.3-mbe`), so a
+  patch method that asks is told the assembly of the code that called the patched method.
+  Measured in the original player (tools/UnityProbe, `PROBE_SCENARIO=callingasm`: patched
+  members of the probe called from an emitted assembly): prefixes and postfixes of a method and
+  of constructors, one of them called from the other's replacement and one through
+  `MethodInfo.Invoke`, name the caller's assembly; through `Activator.CreateInstance`, mscorlib.
+  CoreCLR stops at the replacement and names 0Harmony, unless the JIT made the call to the patch
+  method a tail call (a postfix last in a replacement that returns nothing), which leaves no
+  replacement frame. Mod Origin Info's postfixes on the constructors of `ComplexRecipe`,
+  `GeyserType` and `Spice` look up the mod by that assembly: in the early-base colony with Smol
+  Generators and Roller Snakes Reborn they recorded no modded recipe, where the original records
+  6, and 17 modded things where it records 23. **Resolved in** `MonoCallingAssembly`: a postfix
+  on CoreLib's `GetCallingAssembly`, for the whole process as on Mono, walks the stack as Mono
+  does whenever CoreCLR's answer is 0Harmony (the owner of every replacement): past the asking
+  method, the first frame that is neither a dynamic method nor in CoreLib's `System.Reflection`,
+  nor CoreLib's `RuntimeMethodHandle`, whose `InvokeMethod` calls a method invoked by reflection
+  where Mono's runtime-invoke wrapper does (the probe's first `MethodInfo.Invoke` in our player).
+  The probe then reports as the original does in every case but the one below.
+  `GetExecutingAssembly` names the patch method's assembly on both runtimes (D19 keeps its
+  frame), and `new StackTrace()` lists the replacement's frame on both (D23). Not covered: a call
+  in a patched method's own body, which runs in the replacement: Mono names 0Harmony there (the
+  owner's assembly, measured), ours the caller's; dynamic methods owned elsewhere (a mod's own),
+  which Mono walks past too. Cost: none measured. With the postfix, a call to a method returning
+  `GetCallingAssembly()` takes 400 ns, as without it (release build); the walk, made only for
+  Harmony's replacements and 0Harmony's own calls, 9 to 15 µs at 25 frames. `--check-types`
+  patches an emitted game's two constructors, one calling the other, and a method, and calls
+  them from a third assembly, directly and through reflection, past tier-up;
+  `tests/e2e/mods/3757075889-mod-origin-info.yaml` compares the mod's records with the
+  original's.
 
 ## 3. The engine API (`OniMoono.UnityEngine`)
 

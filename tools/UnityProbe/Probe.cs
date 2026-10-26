@@ -123,6 +123,12 @@ namespace SemanticsProbe
                 DirectoryOrder.Run();
                 return;
             }
+            if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "callingasm")
+            {
+                Rec.Log("=== values: calling assembly");
+                CallingAssembly.Run(harmony);
+                return;
+            }
             if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "memberorder")
             {
                 Rec.Log("=== values: member order");

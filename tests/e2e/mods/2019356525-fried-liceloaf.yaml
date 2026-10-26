@@ -1,0 +1,26 @@
+# Fried Liceloaf (2019356525), class B.
+#
+# What it does: adds a food, Fried Liceloaf (2200 kcal, quality 1, rots like cooked food), and
+# its Electric Grill recipe: one Liceloaf (BasicPlantBar) makes one Fried Liceloaf in the
+# standard cook time.
+# How a player reaches it: an Electric Grill's recipe list; the food, once cooked.
+# What changes: another way to eat Liceloaf.
+#
+# The recipe is registered for the grill; setup drops a Fried Liceloaf on the floor of the
+# corridor west of the printing pod and selects it: its title and its food values show.
+from: early-base
+mods: [2019356525]
+setup:
+  - driver: {setup.call: {type: Scenario, method: SpawnPrefab, args: [{"$": "Grid.XYToCell(111, 206)"}, 0, 0, "FriedLiceloaf", "Ore"]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "SelectTool.Instance", method: Select, args: [{"$": "last:GetComponent<KSelectable>"}]}}
+steps:
+  - expect_state:
+      "EdiblesManager.GetFoodInfo(\"FriedLiceloaf\").CaloriesPerUnit": 2200000
+      "EdiblesManager.GetFoodInfo(\"FriedLiceloaf\").Quality": 1
+      "count:ComplexRecipeManager.Get().recipes[*] if .id.EndsWith(\"FriedLiceloaf\") == true and .fabricators[0].Name == CookingStation": 1
+  - run: {seconds: 3}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Fried Liceloaf"}
+  - expect_ui: {"**/SimpleInfoScreen/**": {any_text: "~2,200"}}

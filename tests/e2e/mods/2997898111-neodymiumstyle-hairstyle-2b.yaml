@@ -1,0 +1,26 @@
+# NeodymiumStyle Hairstyle MOD "2B" (2997898111), class X (content for Dupery).
+#
+# What it does: no code. With Dupery (here Dupery Fixed, 3172734005, which the catalog names as
+# its requirement), its PERSONALITIES.json adds two printable Duplicant personalities named 2B,
+# a standard one (2B, Banshee stress reaction, Sparkle Streaker joy trait) and a bionic one
+# (2BBIO, Stress Shocker, Robo Dancer), whose hair, hair_2b, comes from the mod's anim folder;
+# strings/ja.po translates its description.
+# How a player reaches it: Duplicants printed or picked for a new colony; the Duplicant's
+# Personality tab.
+# What changes: another personality in the pool, with its own hairstyle.
+#
+# Dupery imports the personality into the game's Personalities and loads the hair as an
+# accessory, as its log says.
+from: early-base
+mods: [3172734005, 2997898111]
+require_log: ['\[Dupery\]: accessory hair_2b successfully loaded']
+steps:
+  - expect_state:
+      "Db.Get().Personalities.TryGet(\"2B\")": exists
+      "Db.Get().Personalities.TryGet(\"2B\").Disabled": false
+      "Db.Get().Personalities.TryGet(\"2BBIO\")": exists
+      "Db.Get().Personalities.TryGet(\"2BBIO\").Disabled": false
+      "Db.Get().Accessories.TryGet(\"hair_2b\")": exists
+      "Db.Get().Personalities.Count": "== original"
+  - run: {seconds: 10}
+  - expect: {duplicants: 3}

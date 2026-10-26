@@ -1,0 +1,57 @@
+{
+ "spec": "mods/2997898111-neodymiumstyle-hairstyle-2b.yaml",
+ "mods": [
+  "3172734005",
+  "2997898111"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with Dupery Fixed, the standard and bionic 2B join the personalities and their hair loads as an accessory",
+ "updated": "2026-10-26",
+ "commit": "b0907b5",
+ "mod_dlls": {
+  "3172734005": {
+   "DuperyFixed.dll": "9ef4a93958b6b80fbf086cab57821955dd344324d2192086db7ea7845e71f7f2"
+  },
+  "2997898111": {}
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-222040-75e4a4a6",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T00:26:39",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-010303-ccb82be3",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T01:33:40",
+    "lane": 15,
+    "reference_run": "20261025-222040-75e4a4a6",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-010303-ccb82be3",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T01:34:31",
+    "lane": 15,
+    "reference_run": "20261025-222040-75e4a4a6",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

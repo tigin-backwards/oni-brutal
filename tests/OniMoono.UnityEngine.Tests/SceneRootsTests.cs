@@ -34,6 +34,32 @@ namespace OniMoono.Tests
             Assert.Equal(expected, RootNames());
         }
 
+        /// A transform made its own parent stays where it was and nothing is logged, as in Unity
+        /// (Momentary Switch's side screen does it); a child made the parent still logs.
+        [Fact]
+        public void SetParentToSelfIsIgnoredSilently()
+        {
+            var logs = new System.Collections.Generic.List<string>();
+            Application.LogCallback log = (message, _, _) => logs.Add(message);
+            Application.logMessageReceived += log;
+            try
+            {
+                var a = new GameObject("self");
+                var child = new GameObject("child");
+                child.transform.SetParent(a.transform, false);
+                a.transform.SetParent(a.transform);
+                Assert.Null(a.transform.parent);
+                Assert.Empty(logs);
+                a.transform.SetParent(child.transform);
+                Assert.Null(a.transform.parent);
+                Assert.Single(logs);
+            }
+            finally
+            {
+                Application.logMessageReceived -= log;
+            }
+        }
+
         /// FindObjectsByType in hierarchy order; an inactive object and everything under it count
         /// only when inactive objects are asked for.
         [Fact]

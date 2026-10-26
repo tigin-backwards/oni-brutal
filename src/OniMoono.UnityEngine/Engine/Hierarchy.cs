@@ -66,6 +66,10 @@ namespace OniMoono.Engine
         public static void SetParent(TransformNative t, TransformNative newParent, bool worldPositionStays)
         {
             if (t.Parent == newParent) return;
+            // A transform made its own parent is left as it is, without a message: Unity logs
+            // nothing (Momentary Switch's side screen does this twice, spec
+            // tests/e2e/mods/2624509351-momentary-switch.yaml).
+            if (newParent == t) return;
             var go = t.GameObject;
             if (newParent != null && IsAncestorOrSelf(t, newParent))
             {

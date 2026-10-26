@@ -1,0 +1,27 @@
+# U&F Resize Dup UI 界面优化 (3406758275), classes V, O.
+#
+# What it does: makes the Duplicant management screens taller: postfixes on the Vitals and
+# Consumables screens' OnActivate, the Schedule screen's OnSpawn and the Priorities screen's
+# ConfigureOptionsPanel add HeightAdjustment pixels (a PLib option, 300 by default) to the
+# screen's height and to its scroll view's preferred height, so more Duplicant rows show.
+# How a player reaches it: the management screens (Vitals, Consumables, Schedule, Priorities).
+# What changes: the screens' height.
+#
+# The Vitals and Consumables screens open from the management bar: each is 300 px taller
+# than the game makes it, as in the original.
+from: early-base
+mods: [3406758275]
+steps:
+  - open: {management: vitals}
+  - ui_wait: {path: "**/VitalsTableScreen", cond: stable}
+  - expect_state:
+      "ui:**/VitalsTableScreen::GetComponent<UnityEngine.RectTransform>.sizeDelta.y": "== original"
+      "ui:**/VitalsTableScreen::GetComponentInChildren<KScrollRect>.GetComponentInParent<UnityEngine.UI.LayoutElement>.preferredHeight": "== original"
+  - ui_dump: {name: vitals, root: "**/VitalsTableScreen"}
+  - shot: {name: vitals, crop: "**/VitalsTableScreen", threshold: 0.04}
+  - open: {management: consumables}
+  - ui_wait: {path: "**/ConsumablesTableScreen", cond: stable}
+  - expect_state:
+      "ui:**/ConsumablesTableScreen::GetComponent<UnityEngine.RectTransform>.sizeDelta.y": "== original"
+  - ui_dump: {name: consumables, root: "**/ConsumablesTableScreen"}
+  - shot: {name: consumables, crop: "**/ConsumablesTableScreen", threshold: 0.04}

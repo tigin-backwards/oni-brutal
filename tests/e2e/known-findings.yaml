@@ -32,8 +32,9 @@
     A ScrollRect whose content exactly fits its viewport reports a normalizedPosition axis (and
     its Scrollbar's value) of 1 in ours, 0 in the original: which one is decided by the
     sub-ulp rounding of the transformed corners (docs/cleanroom/ugui.md, ScrollRect measured).
+    A disabled one (the Consumables screen's per-row scrollers) reads the same.
   link: tests/e2e/mods/3468585385-blueprints-expanded.yaml
-  component: [ScrollRect, KScrollRect, Scrollbar]
+  component: [ScrollRect, KScrollRect, Scrollbar, ScrollRect(off), KScrollRect(off)]
   fields: [normalizedPosition, value]
 
 - id: unused-input-caret-layout

@@ -1,0 +1,94 @@
+{
+ "spec": "mods/3406758275-resize-dup-ui.yaml",
+ "mods": [
+  "3406758275"
+ ],
+ "verdict": "warning",
+ "why": "known findings: scroll-normalized-position",
+ "findings": [
+  "scroll-normalized-position"
+ ],
+ "note": "the Vitals and Consumables screens open taller, by the same height as in the original",
+ "updated": "2026-10-25",
+ "commit": "941441e",
+ "mod_dlls": {
+  "3406758275": {
+   "PLib.dll": "bdd637dbef718cdd52e61c0a7177bd297864a50bac1583d2837a36ff3edf07db",
+   "ResizeDupUiMerged.dll": "d8e0c9705f3a5787fea97a140432c4e313fc783a53b754a84a36dcdfb5f63fb0"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-200219-ef1e47f8",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T20:30:46",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-211948-612e1b59",
+    "index": 1,
+    "verdict": "warn",
+    "date": "2026-10-25T21:22:19",
+    "lane": 14,
+    "reference_run": "20261025-200219-ef1e47f8",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "vitals": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     },
+     "consumables": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 7
+      }
+     }
+    },
+    "shots": {
+     "vitals": 7e-05,
+     "consumables": 6.5e-05
+    }
+   },
+   {
+    "run": "20261025-211948-612e1b59",
+    "index": 2,
+    "verdict": "warn",
+    "date": "2026-10-25T21:23:03",
+    "lane": 14,
+    "reference_run": "20261025-200219-ef1e47f8",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "vitals": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     },
+     "consumables": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 4
+      }
+     }
+    },
+    "shots": {
+     "vitals": 7e-05,
+     "consumables": 6.5e-05
+    }
+   }
+  ]
+ }
+}

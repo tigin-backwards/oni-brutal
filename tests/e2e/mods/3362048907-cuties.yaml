@@ -1,0 +1,22 @@
+# Cuties (3362048907), class X (content for Dupery).
+#
+# What it does: no code. With Dupery (here Dupery Fixed, 3172734005, which it requires), its
+# personalities.json adds two Duplicant personalities, Myles (male, Ugly Crier, Sparkle
+# Streaker) and Ann (female, Aggressive, Sticker Bomber), with hairstyles hair_myles and
+# hair_ann from the mod's anim folder; strings in Russian, Chinese and Korean go with them.
+# How a player reaches it: Duplicants printed or picked for a new colony.
+# What changes: two more personalities in the pool, with their hairstyles.
+#
+# Dupery imports both personalities into the game's Personalities and loads their hair.
+from: early-base
+mods: [3172734005, 3362048907]
+require_log: ['\[Dupery\]: accessory hair_myles successfully loaded', '\[Dupery\]: accessory hair_ann successfully loaded']
+steps:
+  - expect_state:
+      "Db.Get().Personalities.TryGet(\"MYLES\")": exists
+      "Db.Get().Personalities.TryGet(\"ANN\")": exists
+      "Db.Get().Accessories.TryGet(\"hair_myles\")": exists
+      "Db.Get().Accessories.TryGet(\"hair_ann\")": exists
+      "Db.Get().Personalities.Count": "== original"
+  - run: {seconds: 10}
+  - expect: {duplicants: 3}

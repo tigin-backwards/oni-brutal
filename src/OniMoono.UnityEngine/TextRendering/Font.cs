@@ -128,6 +128,16 @@ namespace UnityEngine
             return font;
         }
 
+        /// The player's internal entry point for a dynamic font made from a font file, which mods
+        /// call by reflection (ONI Vietnamese Beautiful Font builds its TMP fonts from it): the
+        /// font takes the file's data, named after the file, at 16 pixels.
+        static void Internal_CreateFontFromPath(Font self, string fontPath)
+        {
+            var data = self.Data;
+            data.InitFromData(System.IO.File.ReadAllBytes(fontPath), System.IO.Path.GetFileNameWithoutExtension(fontPath), 16);
+            data.Material = FontMaterial();
+        }
+
         /// A new material for a font's texture, with the built-in font's shader.
         static Material FontMaterial()
         {

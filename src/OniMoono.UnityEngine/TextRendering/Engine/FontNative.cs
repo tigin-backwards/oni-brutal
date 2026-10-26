@@ -557,6 +557,23 @@ namespace OniMoono.Engine.Text
         /// FreeSans's line height 14 and ascent 10; see SfntTables.TryGetLineMetrics).
         public void InitFromOSFonts(string[] names, int size)
         {
+            InitDynamic(names, size);
+        }
+
+        /// A dynamic font made from a TrueType/OpenType file's data: its glyphs, and the faces the
+        /// TextCore font engine loads for it (TMP font assets), come from that data, with its
+        /// line metrics at `size`.
+        public void InitFromData(byte[] data, string name, int size)
+        {
+            Data = data ?? Array.Empty<byte>();
+            faceData = null;
+            faceDataResolved = false;
+            lock (gate) chain = null;
+            InitDynamic(new[] { name }, size);
+        }
+
+        void InitDynamic(string[] names, int size)
+        {
             FontNames = names;
             FontSize = size;
             ConvertCase = DynamicFont;

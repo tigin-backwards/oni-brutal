@@ -1,0 +1,24 @@
+# Force Eruption T2 强制喷发 (3080318955), class S (a user menu button).
+#
+# What it does: a postfix on Geyser.OnSpawn gives every geyser a "Force Eruption" user menu
+# button: it turns the geyser's element emitter on at once, and a 10 s real-time timer turns
+# the emitter off again. (It renames its button info "Stop Eruption", but the menu's refresh
+# builds a new one, so the button keeps its name.)
+# How a player reaches it: select a geyser; its user menu.
+# What changes: geysers erupt on demand, briefly.
+#
+# setup spawns a Steam Geyser in the corridor west of the printing pod and selects it. Its
+# Force Eruption button turns its emitter on.
+from: early-base
+mods: [3080318955]
+setup:
+  - driver: {setup.call: {type: Scenario, method: SpawnPrefab, args: [{"$": "Grid.XYToCell(112, 207)"}, 0, 0, GeyserGeneric_steam, BuildingBack]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "SelectTool.Instance", method: Select, args: [{"$": "last:GetComponent<KSelectable>"}, false]}}
+steps:
+  - ui_wait: {path: "**/UserMenuScreen/Buttons/Force EruptionButton", cond: stable}
+  - click: {ui: "**/UserMenuScreen/Buttons/Force EruptionButton"}
+  - expect_state:
+      "selected:GetComponent<ElementEmitter>.IsSimActive": true
+  - run: {seconds: 5}
+  - expect: {duplicants: 3}

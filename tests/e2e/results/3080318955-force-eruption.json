@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3080318955-force-eruption.yaml",
+ "mods": [
+  "3080318955"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a spawned Steam Geyser's Force Eruption user menu button turns its emitter on",
+ "updated": "2026-10-26",
+ "commit": "3f68295",
+ "mod_dlls": {
+  "3080318955": {
+   "ForceEruptionMod.dll": "f68d41d724e56f9eef12ea90d5519340da92af0fe7859cd3ece4fc928ded86d9"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-010611-8d66c498",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T01:42:09",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-014346-7cd2723d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T01:44:51",
+    "lane": 14,
+    "reference_run": "20261026-010611-8d66c498",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-014346-7cd2723d",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T01:45:42",
+    "lane": 14,
+    "reference_run": "20261026-010611-8d66c498",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

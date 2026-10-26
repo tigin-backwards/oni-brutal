@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3243965346-infinite-capacity-reservoir-retro.yaml",
+ "mods": [
+  "3243965346"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "water piped from a reservoir into the mod's reservoir is counted in hundreds of kilograms while its real storage stays at 40 kg or less, and its status reads the total",
+ "updated": "2026-10-25",
+ "commit": "bbc2ade",
+ "mod_dlls": {
+  "3243965346": {
+   "FullCapacityReservoir_Retro.dll": "93eb5213b8e2f194f0a550053427016c68eeab6669aa95843731fc780c484d8e"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-210731-f2300056",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T21:07:31",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-235524-d744da3f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T23:55:24",
+    "lane": 16,
+    "reference_run": "20261025-210731-f2300056",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261025-235524-d744da3f",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-25T23:55:25",
+    "lane": 17,
+    "reference_run": "20261025-210731-f2300056",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

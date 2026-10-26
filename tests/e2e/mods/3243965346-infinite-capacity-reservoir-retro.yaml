@@ -1,0 +1,52 @@
+# 真·无限气液库 Infinite Capacity Reservoir Retro Version (3243965346), class B.
+#
+# What it does: adds an infinite Liquid Reservoir (FullLiquidReservoirOld, Improved Liquid
+# Piping) and Gas Reservoir (FullGasReservoirOld, HVAC), 2x3 of metal. Their real storage holds
+# 40 kg of one element; a FullReservoir component moves whatever passes three quarters of that
+# into a virtual store (any amount, at a mass-weighted temperature) and feeds it back when the
+# storage falls below a quarter. A status item reads the stored total ("已储存：..."), an icon of
+# the element shows beside the building, other elements are dropped, and deconstructing it
+# drops the virtual store as a chunk.
+# How a player reaches it: the build menu (Plumbing, Ventilation).
+# What changes: one reservoir holds any amount.
+#
+# setup builds a game Liquid Reservoir holding 600 kg of water and the mod's reservoir in the
+# dug-out corridor west of the printing pod, joined by a liquid pipe into the mod's input. Over
+# 60 s of play the water flows over: the mod's reservoir counts hundreds of kilograms while its
+# real storage stays at 40 kg or less.
+from: early-base
+mods: [3243965346]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LiquidReservoir\")", method: Build, args: [131126, Neutral, null, [Cuprite], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "last:GetComponent<Storage>", method: AddLiquid, args: [Water, 600.0, 300.0, 255, 0]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"FullLiquidReservoirOld\")", method: Build, args: [131130, Neutral, null, [Cuprite], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LiquidConduit\")", method: Build, args: [131126, Neutral, null, [SandStone], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LiquidConduit\")", method: Build, args: [131127, Neutral, null, [SandStone], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LiquidConduit\")", method: Build, args: [131128, Neutral, null, [SandStone], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LiquidConduit\")", method: Build, args: [131129, Neutral, null, [SandStone], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LiquidConduit\")", method: Build, args: [131130, Neutral, null, [SandStone], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LiquidConduit\")", method: Build, args: [131131, Neutral, null, [SandStone], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LiquidConduit\")", method: Build, args: [131767, Neutral, null, [SandStone], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LiquidConduit\")", method: Build, args: [132403, Neutral, null, [SandStone], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Game.Instance.liquidConduitSystem", method: SetConnections, args: ["Right", 131126, true]}}
+  - driver: {setup.call: {target: "Game.Instance.liquidConduitSystem", method: SetConnections, args: ["Left, Right", 131127, true]}}
+  - driver: {setup.call: {target: "Game.Instance.liquidConduitSystem", method: SetConnections, args: ["Left, Right", 131128, true]}}
+  - driver: {setup.call: {target: "Game.Instance.liquidConduitSystem", method: SetConnections, args: ["Left, Right", 131129, true]}}
+  - driver: {setup.call: {target: "Game.Instance.liquidConduitSystem", method: SetConnections, args: ["Left, Right", 131130, true]}}
+  - driver: {setup.call: {target: "Game.Instance.liquidConduitSystem", method: SetConnections, args: ["Left, Up", 131131, true]}}
+  - driver: {setup.call: {target: "Game.Instance.liquidConduitSystem", method: SetConnections, args: ["Up, Down", 131767, true]}}
+  - driver: {setup.call: {target: "Game.Instance.liquidConduitSystem", method: SetConnections, args: ["Down", 132403, true]}}
+  - driver: {setup.call: {target: "Game.Instance.liquidConduitSystem", method: ForceRebuildNetworks}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"ImprovedLiquidPiping\").unlockedItemIDs": {contains: FullLiquidReservoirOld}
+      "all:FullCapacityReservoir_Retro.FullReservoir::[0].n()": 0
+  - run: {seconds: 60}
+  - expect_state:
+      "all:FullCapacityReservoir_Retro.FullReservoir::[0].n()": ">= 300"
+      "all:FullCapacityReservoir_Retro.FullReservoir::[0].GetComponent<Storage>.MassStored()": "<= 40"
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [114, 207], select: FullLiquidReservoirOld}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/SimpleInfoScreen/**/StatusItemTemplate/**": {any_text: "~已储存"}

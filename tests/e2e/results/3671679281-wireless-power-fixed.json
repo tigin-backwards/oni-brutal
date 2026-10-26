@@ -1,0 +1,69 @@
+{
+ "spec": "mods/3671679281-wireless-power-fixed.yaml",
+ "mods": [
+  "3671679281"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Wireless Power Receiver built of steel and selected shows its PLib side screen as in the original",
+ "updated": "2026-10-25",
+ "commit": "09ee696",
+ "mod_dlls": {
+  "3671679281": {
+   "PLib.dll": "48c63fd4654b6fbb390afdac71a3d29194eeb9405eca4290cba6e4fbf60805ce",
+   "WirelessPower.dll": "731ceefddb1a2deaf8dec5afc957c91440e1e9d12df4bbb1e05aaa39fc929b7a",
+   "Zolibrary.dll": "8c653f176ffab48b1796aff4fd208852c002661fd4b1a1c59a9bcf3aaeea0579"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-195133-9810c702",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T20:13:54",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-213559-61f36e70",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T21:35:59",
+    "lane": 14,
+    "reference_run": "20261025-195133-9810c702",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "receiver": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "receiver": 0.0
+    }
+   },
+   {
+    "run": "20261025-213559-61f36e70",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-25T21:36:00",
+    "lane": 15,
+    "reference_run": "20261025-195133-9810c702",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "receiver": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "receiver": 0.0
+    }
+   }
+  ]
+ }
+}

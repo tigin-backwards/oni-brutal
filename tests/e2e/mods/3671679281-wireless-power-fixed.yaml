@@ -1,0 +1,42 @@
+# Wireless Power - Fixed (3671679281), classes B, S.
+#
+# What it does: adds three buildings to the Power menu, researched with Low-Resistance
+# Conductors (PrettyGoodConductors), built of steel: a Wireless Power Sender and a Wireless
+# Power Receiver (1x2) and a Wireless Power Battery (2x3). Senders take power from their
+# circuit and receivers give it out on theirs, on one of the wireless channels, through the
+# mod's grid (patches on CircuitManager and EnergySim). Each gets a side screen built in code
+# with PLib UI (channel, transfer wattage and battery threshold sliders), registered into the
+# DetailsScreen's side screens; selecting one highlights its channel's partners.
+# How a player reaches it: the build menu (Power), after the research; the side screens.
+# What changes: power without wires, by channel.
+#
+# setup grants the research and spawns steel. A Wireless Power Receiver is built in the
+# corridor west of the printing pod and selected: its side screen shows its sliders.
+from: early-base
+mods: [3671679281]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"PrettyGoodConductors\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Steel\").substance", method: SpawnResource, args: [[111.5, 207.5, -12], 400, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"PrettyGoodConductors\").unlockedItemIDs": {contains: WirelessPowerReceiver}
+  - run: {seconds: 5}
+  - click: {ui: "**/PlanScreen/Toggle:Power"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/WirelessPowerReceiver Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/WirelessPowerSender Group*": {active: true}
+      "**/BuildingGroups/**/Grid/WirelessPowerBattery Group*": {active: true}
+  - key: {code: Escape}
+  - expect_ui: {"**/PauseScreen": {exists: false}}
+  - build: {prefab: WirelessPowerReceiver, at: [113, 206]}
+  - expect: {blueprints: {WirelessPowerReceiver: 1}}
+  - run: {seconds: 1500, until: {buildings: {WirelessPowerReceiver: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [113, 207], ortho: 8}}
+  - click_world: {cell: [113, 206], select: WirelessPowerReceiver}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<WirelessPower.Components.WirelessPowerReceiver>": exists
+  - ui_wait: {path: "**/WirelessPowerReceiverSideScreen", cond: stable}
+  - ui_dump: {name: receiver, root: "**/WirelessPowerReceiverSideScreen"}
+  - shot: {name: receiver, crop: "**/WirelessPowerReceiverSideScreen"}

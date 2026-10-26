@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3021827424-broken-rocket-interior-port-fix.yaml",
+ "mods": [
+  "3021827424"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the rocket interior ports and tiles are in the build menu, deconstructable and the ports unique per world; the colony runs",
+ "updated": "2026-10-25",
+ "commit": "3d254cb",
+ "mod_dlls": {
+  "3021827424": {
+   "BrokenRocketInteriorPortFix.dll": "5b07fe6de6ad475e9910215977b2be0ecb9226e1b6e52a04dbef5c812c7f28e9"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-204944-92d933cd",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T20:51:05",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-220934-578d10ba",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T22:09:34",
+    "lane": 16,
+    "reference_run": "20261025-204944-92d933cd",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261025-220934-578d10ba",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-25T22:09:35",
+    "lane": 17,
+    "reference_run": "20261025-204944-92d933cd",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -1,0 +1,23 @@
+# Help I accidentally broke my rocket interior ports - Fix (3021827424), class P.
+#
+# What it does: a save whose rocket lost an interior port no longer crashes: prefixes on
+# ClustercraftExteriorDoor.GetTargetWorld and TargetCell fall back to the rocket's interior
+# world and its corner cell when the door has no target. It also puts the interior gas and
+# liquid input and output ports, the rocket wall tile and the window tile into the build menu
+# (no longer debug-only), deconstructable, each port unique per interior.
+# How a player reaches it: a rocket interior, the build menu.
+# What changes: lost rocket ports can be rebuilt, and such a save loads.
+#
+# early-base has no rocket, so the spec reads the defs and prefabs: the ports and tiles are in
+# the build menu and deconstructable, and the ports unique per world; the colony runs.
+from: early-base
+mods: [3021827424]
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"RocketInteriorGasInputPort\").ShowInBuildMenu": true
+      "Assets.GetBuildingDef(\"RocketInteriorGasInputPort\").DebugOnly": false
+      "Assets.GetBuildingDef(\"RocketWallTile\").ShowInBuildMenu": true
+      "Assets.GetBuildingDef(\"RocketInteriorLiquidOutputPort\").BuildingComplete.GetComponent<Deconstructable>.allowDeconstruction": true
+      "Assets.GetBuildingDef(\"RocketInteriorLiquidOutputPort\").BuildingComplete.GetComponent<KPrefabID>.HasTag(\"UniquePerWorld\")": true
+  - run: {seconds: 30}
+  - expect: {duplicants: 3}

@@ -1,0 +1,25 @@
+# Auto Harvest - 植物自动收割 (3732732522), class P.
+#
+# What it does: every Harvestable gets an AutoHarvestComponent: once a plant set to harvest
+# when ready is grown, it harvests itself (its produce drops where it stands) instead of
+# waiting for a Duplicant's harvest errand; branches of Sea Trees and vines too.
+# How a player reaches it: a plant's "Enable auto-harvest" button.
+# What changes: produce drops on ripening.
+#
+# setup plants a wild Mealwood on the floor of the dug-out corridor west of the printing pod,
+# grows it fully and sets it to harvest when ready; a few seconds later it has harvested
+# itself and its Meal Lice lies beside it.
+from: early-base
+mods: [3732732522]
+setup:
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131127, 0, 0, \"BasicSingleHarvestPlant\", \"BuildingFront\")", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "all:HarvestDesignatable::[0]", method: SetHarvestWhenReady, args: [true]}}
+  - driver: {setup.call: {target: "all:Growing::[0]", method: OverrideMaturityLevel, args: [1.0]}}
+steps:
+  - expect_state:
+      "all:Growing::[0].GetComponent<AutoHarvestComponent>": exists
+      "count:all:Clearable::[*] if .name.StartsWith(\"BasicPlantFood\") == true": {save_as: food}
+  - run: {seconds: 3}
+  - expect_state:
+      "all:Growing::[0].IsGrown()": false
+      "count:all:Clearable::[*] if .name.StartsWith(\"BasicPlantFood\") == true": "> food"

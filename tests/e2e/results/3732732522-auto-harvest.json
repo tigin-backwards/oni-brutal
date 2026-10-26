@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3732732522-auto-harvest.yaml",
+ "mods": [
+  "3732732522"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a ripe wild Mealwood set to harvest when ready harvests itself",
+ "updated": "2026-10-26",
+ "commit": "f898d18a",
+ "mod_dlls": {
+  "3732732522": {
+   "╓▓╬∩╫╘╢»═╤┬Σ.dll": "a538c9fd3786c9988ec20b2825c67424ea8283d060cdf7be447c3ec7c0dfc98e"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-102152-42394c53",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T10:44:35",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-150143-eb459935",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T15:07:31",
+    "lane": 14,
+    "reference_run": "20261026-102152-42394c53",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-150143-eb459935",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T15:07:38",
+    "lane": 15,
+    "reference_run": "20261026-102152-42394c53",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -1,0 +1,56 @@
+{
+ "spec": "mods/3733064550-advanced-atmo-suit.yaml",
+ "mods": [
+  "3733064550"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "an empty Atmo Suit lying in the corridor fills its own oxygen tank; the suit never wears out",
+ "updated": "2026-10-26",
+ "commit": "f898d18a",
+ "mod_dlls": {
+  "3733064550": {
+   "PLib.dll": "79350ee2d4eea7a879c6eebc12acca89bdd1d2a93ed7b396b875a7907a91d1e2",
+   "│╬╔┴─ú╨═╠µ╗╗.dll": "acf3c9eae0516b4789318977bcaea3b5e005a21815d92a43e2b23b333482099f"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-102152-42394c53",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T10:26:54",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-150143-eb459935",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T15:08:26",
+    "lane": 14,
+    "reference_run": "20261026-102152-42394c53",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-150143-eb459935",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T15:08:32",
+    "lane": 15,
+    "reference_run": "20261026-102152-42394c53",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

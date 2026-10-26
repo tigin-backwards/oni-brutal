@@ -1,0 +1,24 @@
+# 高级气压服 Advanced Atmo Suit (3733064550), classes P, O.
+#
+# What it does: replaces the Atmo Suit's definition: it never wears out, adds 90 % radiation
+# resistance, takes one of six skins (an option), and refills its own oxygen tank from nothing
+# (SuitOxygenRefiller, 0.2 kg/s, the "Automatic inflation" option, on by default); a
+# dangerous option adds a jet pack that refuels itself. The Crafting Station gets a recipe of
+# 1,000 kg of metal ore for one.
+# How a player reaches it: the Crafting Station's recipes; equipping the suit at a dock.
+# What changes: suits that need no oxygen supply.
+#
+# The prefab and recipe are read; setup drops an empty suit in the dug-out corridor west of
+# the printing pod, and its tank fills on its own.
+from: early-base
+mods: [3733064550]
+setup:
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131127, 0, 0, \"Atmo_Suit\", \"Ore\")", method: SetActive, args: [true]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"Atmo_Suit\").GetComponent<Durability>.durabilityLossPerCycle": 0
+      "count:ComplexRecipeManager.Get().recipes[*] if .results[0].material == Atmo_Suit": "== original"
+      "all:SuitTank::[0].GetTankAmount()": {save_as: before}
+  - run: {seconds: 20}
+  - expect_state:
+      "all:SuitTank::[0].GetTankAmount()": "> before + 1"

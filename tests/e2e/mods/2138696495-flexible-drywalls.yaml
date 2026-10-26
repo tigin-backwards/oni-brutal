@@ -1,0 +1,32 @@
+# Flexible Drywalls / Build Over Drywall (2138696495), class P.
+#
+# What it does: the Drywall (ExteriorWall) may be built anywhere: a postfix on its
+# CreateBuildingDef sets its build location rule to Anywhere and stops it checking its
+# foundation, where the game keeps it out of tiles.
+# How a player reaches it: the build menu (Base), placing a Drywall.
+# What changes: drywall behind tiles and other buildings.
+#
+# setup researches Textile Production (the drywall's tech) and builds a tile on the floor of the dug-out corridor west of the printing pod; a drywall
+# picked from the Base menu is placed on the tile's cell with a click, and built.
+from: early-base
+mods: [2138696495]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"Clothing\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Tile\")", method: Build, args: [131128, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"ExteriorWall\").BuildLocationRule": "== 'Anywhere'"
+      "Assets.GetBuildingDef(\"ExteriorWall\").ContinuouslyCheckFoundation": false
+  - run: {seconds: 2}
+  - expect: {buildings: {Tile: ">= 1"}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click: {ui: "**/PlanScreen/Toggle:Base"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/ExteriorWall Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/ExteriorWall Group*"}
+  - ui_wait: {path: "**/PlanBuildingSelectionPanel/ProductInfoScreen", cond: stable}
+  - click_world: {cell: [112, 206]}
+  - key: {code: Escape}
+  - expect: {blueprints: {ExteriorWall: 1}}
+  - run: {seconds: 900, until: {pending_construction: 0}}
+  - expect: {buildings: {ExteriorWall: 1}}

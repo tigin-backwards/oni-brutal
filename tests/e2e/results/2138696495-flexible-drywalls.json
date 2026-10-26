@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2138696495-flexible-drywalls.yaml",
+ "mods": [
+  "2138696495"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a drywall picked from the Base menu is placed over a tile and built",
+ "updated": "2026-10-26",
+ "commit": "17f325ef",
+ "mod_dlls": {
+  "2138696495": {
+   "BuildOverDrywall.dll": "c8598bdfc0eaf66d89dc01a56c2c20f90e7e896305404e713de5b9bdb7ae6d61"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-114619-1abc381b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T11:53:06",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-133411-75254ba7",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T13:52:40",
+    "lane": 14,
+    "reference_run": "20261026-114619-1abc381b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-133411-75254ba7",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T13:52:51",
+    "lane": 15,
+    "reference_run": "20261026-114619-1abc381b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

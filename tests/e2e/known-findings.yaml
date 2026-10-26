@@ -77,3 +77,20 @@
   component: [rect, LocText]
   fields: [rect, world, screen, text, textInfo]
   path: '**/SimpleInfoScreen/**/Descriptors/DescLabel'
+
+- id: vitals-first-frame-scrollbar
+  description: >-
+    The Vitals screen's scrollbar opens with a size and value that vary from run to run in the
+    original as in ours: its scroll rect's first update runs while the screen is at scale 0 and
+    overshoots by an amount that depends on that frame's delta time, and whether a later update
+    clears it depends on the grown bounds moving by an ulp (docs/cleanroom/ugui.md, ScrollRect:
+    bounds to the bit). Five original runs dumped value 0, size 1 once and value 1, sizes 0.97
+    to 0.99, four times; eight of ours value 0, size 1 once and value 1, sizes 0.98 to 1, seven
+    times. Its handle's rect follows the size.
+  link: docs/cleanroom/ugui.md
+  component: [Scrollbar, rect]
+  fields: [value, size, rect, world, screen]
+  path: ['**/VitalsTableScreen/Content/Scroll View/Scrollbar', '**/VitalsTableScreen/Content/Scroll View/Scrollbar/Sliding Area/Handle']
+  original: '^(value=[01] size=(1|0\.9\d*) |rect )'
+  ours: '^(value=[01] size=(1|0\.9\d*) |rect )'
+  specs: [3774780988-schedule-priority-screen-expander]

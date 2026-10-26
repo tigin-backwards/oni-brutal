@@ -8,7 +8,11 @@
 # F).
 # What changes: the screens are larger than the game's own.
 #
-# Each screen is opened and its size compared with the original's, then dumped.
+# Each screen is opened and its size compared with the original's, then dumped. The Vitals
+# scrollbar's size and value vary from run to run in the original too (its first update runs
+# under scale 0 and depends on that frame's delta time); the known finding
+# vitals-first-frame-scrollbar lets them differ (docs/cleanroom/ugui.md, "ScrollRect: bounds to
+# the bit").
 from: early-base
 mods: [3774780988]
 mask_text: ['\d+(\.\d+)?\s*(kcal|%|kg|g)']

@@ -1,0 +1,32 @@
+# Reorderable Todo List (3718696016), class S.
+#
+# What it does: a to-do list above the notifications, top left (a TodoList component on the
+# SaveGame, saved with it; its UI is built with PLib in NotificationScreen.OnSpawn): "Add task"
+# adds a row and opens an "Edit task" dialog with a title field and "Save current place" (the
+# camera position, which clicking the task's title returns to); rows can be reordered, nested
+# as sub-tasks, folded, filtered by world and deleted (with a confirmation).
+# How a player reaches it: the list's buttons, top left of the colony screen.
+# What changes: nothing in the colony; a player's notes, kept in the save.
+#
+# The list is empty in early-base. "Add task" adds Task 1 and opens its dialog; a title typed
+# into its field renames the task and its row.
+from: early-base
+mods: [3718696016]
+steps:
+  - expect_state:
+      "type:TodoList.TodoList::Instance.TodoItems.Count": 0
+  - ui_wait: {path: "**/SharedNotificationModContainer/TodoList_Content", cond: stable}
+  - ui_dump: {name: list, root: "**/SharedNotificationModContainer/TodoList_Content"}
+  - click: {ui: "**/TodoList_Content/**/AddNewItemButton"}
+  - expect_state:
+      "type:TodoList.TodoList::Instance.TodoItems.Count": 1
+      "type:TodoList.TodoList::Instance.TodoItems[0].Title": Task 1
+  - ui_wait: {path: "**/TodoItemPanel", cond: stable}
+  - ui_dump: {name: dialog, root: "**/TodoItemPanel"}
+  - shot: {name: dialog, crop: "**/TodoItemPanel"}
+  - type: {ui: "**/TodoItemPanel/**/TodoItemName", text: "Dig to the geyser", clear: true, enter: true}
+  - expect_state:
+      "type:TodoList.TodoList::Instance.TodoItems[0].Title": Dig to the geyser
+  - expect_ui:
+      "**/TodoList_Content/**/TodoRow_1_*/**/Title/**": {any_text: "Dig to the geyser"}
+  - ui_dump: {name: list-task, root: "**/SharedNotificationModContainer/TodoList_Content"}

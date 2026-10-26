@@ -1,0 +1,80 @@
+{
+ "spec": "mods/3718696016-reorderable-todo-list.yaml",
+ "mods": [
+  "3718696016"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "Add task adds Task 1 and opens its PLib dialog; a typed title renames the task and its row",
+ "updated": "2026-10-25",
+ "commit": "bd353b5",
+ "mod_dlls": {
+  "3718696016": {
+   "PLib.dll": "3dc9bc06c6b54660b833d314192e6b34c578754facc6aff3c7e803b5cdc6616e",
+   "TodoList.dll": "5968e3d3ba5869baf2423ed54484a21eb9601c0c52727e2a707e538cb593c7f2"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-201720-b5f6d528",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T20:56:40",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-211317-daf3dff3",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T21:13:17",
+    "lane": 15,
+    "reference_run": "20261025-201720-b5f6d528",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "list": {
+      "differences": 0
+     },
+     "dialog": {
+      "differences": 0
+     },
+     "list-task": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "dialog": 0.011932
+    }
+   },
+   {
+    "run": "20261025-211317-daf3dff3",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-25T21:14:01",
+    "lane": 15,
+    "reference_run": "20261025-201720-b5f6d528",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "list": {
+      "differences": 0
+     },
+     "dialog": {
+      "differences": 0
+     },
+     "list-task": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "dialog": 0.011932
+    }
+   }
+  ]
+ }
+}

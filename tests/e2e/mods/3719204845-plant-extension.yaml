@@ -1,0 +1,35 @@
+# 人造植物 / PlantExtension (3719204845), classes B, O.
+#
+# What it does: adds artificial plants: a Seed Maker (SeedMaker, 2x2, raw metal, a manually
+# operated fabricator, Food menu, Agriculture) makes artificial seeds of some forty plants
+# (Mealwood to Bonbon Tree and the DLCs' plants), which grow only on the Artificial Medium
+# (ArtificialMedium, a rotatable farm tile, Food, Agriculture) and need no irrigation or
+# atmosphere; with the PLib option EnableAutoHarvest an artificial plant harvests itself when
+# ripe.
+# How a player reaches it: the build menu (Food), after Agriculture; the Seed Maker's recipes.
+# What changes: farming without the plants' needs.
+#
+# setup grants Agriculture: the Food menu offers both buildings. setup builds a Seed Maker in
+# the dug-out room west of the printing pod, and selected, its recipe list offers the seeds.
+from: early-base
+mods: [3719204845]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"Agriculture\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"SeedMaker\")", method: Build, args: [{"$": "Grid.XYToCell(111, 207)"}, Neutral, null, [Cuprite], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"Agriculture\").unlockedItemIDs": [{contains: SeedMaker}, {contains: ArtificialMedium}]
+      "count:ComplexRecipeManager.Get().recipes[*] if .fabricators[0].Name == SeedMaker": ">= 10"
+  - run: {seconds: 10}
+  - click: {ui: "**/PlanScreen/Toggle:Food"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/SeedMaker Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/SeedMaker Group*": {active: true}
+      "**/BuildingGroups/**/Grid/ArtificialMedium Group*": {active: true}
+  - shot: {name: food-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
+  - key: {code: Escape}
+  - driver: {camera.set: {cell: [111, 208], ortho: 8}}
+  - click_world: {cell: [111, 207], select: SeedMaker}
+  - ui_wait: {path: "**/ComplexFabricatorSideScreen/Contents/ButtonScrollView", cond: stable}
+  - ui_dump: {name: recipes, root: "**/ComplexFabricatorSideScreen/Contents/ButtonScrollView"}

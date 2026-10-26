@@ -1,0 +1,56 @@
+{
+ "spec": "mods/3586981589-dig-mass-tweak.yaml",
+ "mods": [
+  "3586981589"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with a 1.5 multiplier, digging two sandstone cells leaves 1.4 times their mass or more in debris",
+ "updated": "2026-10-26",
+ "commit": "f898d18a",
+ "mod_dlls": {
+  "3586981589": {
+   "DigMassTweak.dll": "e9be4fdf00f0aa20dd30f4721df238b1fd5bf28427bef0827a02db8e28e6607b",
+   "PLib.dll": "bdd637dbef718cdd52e61c0a7177bd297864a50bac1583d2837a36ff3edf07db"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-105851-04eb8ffa",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T11:25:43",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-145036-c077f4e4",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T15:00:23",
+    "lane": 14,
+    "reference_run": "20261026-105851-04eb8ffa",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-145036-c077f4e4",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T15:00:25",
+    "lane": 15,
+    "reference_run": "20261026-105851-04eb8ffa",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

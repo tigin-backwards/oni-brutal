@@ -1,0 +1,22 @@
+# Dig Mass Tweak 挖掘质量调整 (3586981589), class P.
+#
+# What it does: a transpiler on WorldDamage.OnDigComplete scales the mass a dug cell drops by
+# twice a PLib option (1 by default), so the game's half becomes the full mass, or more.
+# How a player reaches it: digging; the Mods screen's options.
+# What changes: more debris from digging.
+#
+# options set the multiplier to 1.5; two cells of sandstone east of the dug-out corridor are
+# dug, and the sandstone debris grows by about 1.5 times their mass.
+from: early-base
+mods: [3586981589]
+options:
+  "3586981589": {DigMassMultiplier: 1.5}
+steps:
+  - expect_state:
+      "cells:119,208..120,209::Grid.Mass.get_Item({cell})": {save_as: block}
+      "cells:119,208..120,209::Grid.Element[{cell}].hardness": "> 0"
+      "sum:all:Clearable::[*].GetComponent<PrimaryElement>.Mass if .GetComponent<PrimaryElement>.ElementID == SandStone": {save_as: before}
+  - dig: [119, 209, 120, 210]
+  - run: {seconds: 900, until: {pending_digs: 0}}
+  - expect_state:
+      "sum:all:Clearable::[*].GetComponent<PrimaryElement>.Mass if .GetComponent<PrimaryElement>.ElementID == SandStone": ">= before + 1.4 * block"

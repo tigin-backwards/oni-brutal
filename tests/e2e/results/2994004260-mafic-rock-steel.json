@@ -1,0 +1,79 @@
+{
+ "spec": "mods/2994004260-mafic-rock-steel.yaml",
+ "mods": [
+  "2994004260"
+ ],
+ "verdict": "warning",
+ "why": "known findings: scroll-normalized-position",
+ "findings": [
+  "scroll-normalized-position"
+ ],
+ "note": "the Metal Refinery offers steel from mafic rock and refined carbon; its recipe list shot matches and its dump differs only in the list's scroll position (scroll-normalized-position)",
+ "updated": "2026-10-26",
+ "commit": "4ecf9b3b",
+ "mod_dlls": {
+  "2994004260": {
+   "╛½┴╢├╛╠·╓╩╤╥╔·▓·╠·.dll": "afc51859db451eaaf8ceb729913cf24dc424e11cf452fa3d9558c16da7373ab9"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-023730-5710265c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T02:39:14",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-031421-72dc9fe1",
+    "index": 1,
+    "verdict": "warn",
+    "date": "2026-10-26T03:14:21",
+    "lane": 16,
+    "reference_run": "20261026-023730-5710265c",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "recipes": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "recipes": 0.0
+    }
+   },
+   {
+    "run": "20261026-031421-72dc9fe1",
+    "index": 2,
+    "verdict": "warn",
+    "date": "2026-10-26T03:14:22",
+    "lane": 17,
+    "reference_run": "20261026-023730-5710265c",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "recipes": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "recipes": 0.0
+    }
+   }
+  ]
+ }
+}

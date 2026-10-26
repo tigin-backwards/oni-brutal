@@ -1,0 +1,49 @@
+# Geyser Cracking (Song of the Moo Update) (2874440740), classes P, O.
+#
+# What it does: every geyser gets a Crackable workable and a 100 kg storage (a prefix on
+# StateMachineComponent<Geyser.StatesInstance>.OnCmpEnable). Once the geyser is analysed, the
+# mod asks for 100 kg of sulfur (KgPerCrack) delivered to it, and its user menu gets "Start
+# Cracking": a researcher then works the geyser for 120 s, and each crack raises its output
+# by 15 to 30 % of its type's maximum (MinPerCrack, MaxPerCrack), up to 400 % (MaxCracking).
+# In instant build mode the button cracks at once. Its effect line says how far it has come.
+# How a player reaches it: an analysed geyser's user menu (Start Cracking, Cancel Cracking).
+# What changes: the geyser's emission rate.
+#
+# The Liquid Sulfur Geyser west of the base is still buried in early-base; setup makes it
+# selectable (as uncovering it does) and turns on instant build mode (the debug toggle). The
+# geyser is analysed with its side screen button; then its Start Cracking button raises its
+# rate at once.
+from: early-base
+mods: [2874440740]
+setup:
+  - driver: {setup.call: {target: "all:Geyser::[0].GetComponent<KSelectable>", method: set_IsSelectable, args: [true]}}
+  - driver: {setup.call: {type: DebugHandler, method: ToggleInstantBuildMode}}
+steps:
+  - expect_state:
+      "DebugHandler.InstantBuildMode": true
+      "all:Geyser::[0].GetComponent<HexiGeyserCracking.Crackable>": exists
+      "all:Geyser::[0].GetComponent<Storage>.capacityKg": 100
+      "all:Geyser::[0].GetComponent<Studyable>.Studied": false
+      "all:Geyser::[0].configuration.scaledRate": {save_as: rate}
+  - driver: {camera.set: {cell: [92, 205], ortho: 8}}
+  - click_world: {cell: [89, 203], select: GeyserGeneric_liquid_sulfur}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_wait: {path: "**/ButtonMenuSideScreen/Buttons/Button", cond: stable}
+  - click: {text: "ANALYZE", under: "**/ButtonMenuSideScreen"}
+  - expect_state:
+      "selected:Studyable.Studied": true
+  - run: {seconds: 3}
+  - expect_state:
+      "selected:GetComponent<HexiGeyserCracking.CrackableButton>": exists
+      "selected:GetComponent<ManualDeliveryKG>.RequestedItemTag": Sulfur
+  # The user menu takes the new button when the geyser is selected again.
+  - key: {code: Escape}
+  - ui_wait: {path: "**/DetailsScreen", cond: gone}
+  - click_world: {cell: [89, 203], select: GeyserGeneric_liquid_sulfur}
+  - ui_wait: {path: "**/UserMenuScreen/Buttons/Start CrackingButton", cond: stable}
+  - ui_dump: {name: user-menu, root: "**/DetailsScreen/UserMenuButtons/UserMenuScreen/Buttons"}
+  - click: {ui: "**/UserMenuScreen/Buttons/Start CrackingButton"}
+  - expect_state:
+      "selected:Geyser.configuration.scaledRate": "> 1.1 * rate"
+      "selected:GetComponent<HexiGeyserCracking.Crackable>.markedForCracking": false
+  - expect_ui: {"**/SimpleInfoScreen/**": {any_text: "~Cracking: "}}

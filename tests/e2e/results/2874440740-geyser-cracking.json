@@ -1,0 +1,63 @@
+{
+ "spec": "mods/2874440740-geyser-cracking.yaml",
+ "mods": [
+  "2874440740"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "an analysed geyser's Start Cracking button (instant build mode) raises its rate; user menu as in the original",
+ "updated": "2026-10-25",
+ "commit": "bd353b5",
+ "mod_dlls": {
+  "2874440740": {
+   "ONI-GeyserCrackingMerged.dll": "8917583776fc76be9f70944733cc0f4517ab7982c9816b075cfb71a989d33c40"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-195133-9810c702",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T20:00:07",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-204936-90cb61e7",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T20:49:36",
+    "lane": 15,
+    "reference_run": "20261025-195133-9810c702",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "user-menu": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261025-204936-90cb61e7",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-25T20:50:25",
+    "lane": 15,
+    "reference_run": "20261025-195133-9810c702",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "user-menu": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3052222549-trash-cans.yaml",
+ "mods": [
+  "3052222549"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a solid trash can with 50 kg of sandstone in it is empty a few seconds later and reads as the mod's can",
+ "updated": "2026-10-25",
+ "commit": "e342899",
+ "mod_dlls": {
+  "3052222549": {
+   "NeutroniumTrashCan.dll": "9ff192333a9a007a17f5b046287f118a67058ef205a4f5f3de6eb9850252b122"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-205639-e0fb7d24",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T20:56:40",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-225743-a62c646a",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-25T22:57:44",
+    "lane": 17,
+    "reference_run": "20261025-205639-e0fb7d24",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261025-225743-a62c646a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T22:57:43",
+    "lane": 16,
+    "reference_run": "20261025-205639-e0fb7d24",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

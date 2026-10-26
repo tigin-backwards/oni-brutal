@@ -1,0 +1,30 @@
+# Trash Cans (3052222549), class B.
+#
+# What it does: adds five 1x1 trash cans to the Utilities menu (researched with Smart Storage):
+# a Neutronium Trash Can and an Artifact Trash Can that Duplicants fill with special items or
+# artifacts, and solid, liquid and gas cans fed by a conveyor rail or a pipe. Each holds what
+# it gets in a storage that a NeutroniumTrashCan component empties every second by destroying
+# the items.
+# How a player reaches it: the build menu (Utilities), then deliveries or pipes.
+# What changes: items put in a can are gone.
+#
+# setup builds a Solid Trash Can in the dug-out corridor west of the printing pod and puts
+# 50 kg of sandstone in it. A few seconds of play later the can is empty; selected, it reads as
+# the mod's can.
+from: early-base
+mods: [3052222549]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"NTC_SolidTrashCan\")", method: Build, args: [131129, Neutral, null, [Cuprite], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "last:GetComponent<Storage>", method: AddOre, args: [SandStone, 50.0, 300.0, 255, 0]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"SmartStorage\").unlockedItemIDs": {contains: NTC_SolidTrashCan}
+      "all:NeutroniumTrashCan.NeutroniumTrashCan::[0].GetComponent<Storage>.MassStored()": ">= 50"
+  - run: {seconds: 3}
+  - expect_state:
+      "all:NeutroniumTrashCan.NeutroniumTrashCan::[0].GetComponent<Storage>.MassStored()": 0
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 206], select: NTC_SolidTrashCan}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Trash Can"}

@@ -1,0 +1,24 @@
+# Sanishells Clear Water (2833476342), class P (critters).
+#
+# What it does: an adult Sanishell (CrabFreshWater) gets two passive consumers and converters
+# (postfixes on CrabFreshWaterConfig.CreateCrabFreshWater and OnSpawn): within 3 cells it
+# takes in polluted water and murky brine, 0.5 kg/s each, and gives back 99 % as water and
+# brine, the rest as polluted dirt, in a 10 kg storage of its own.
+# How a player reaches it: Sanishells in polluted water.
+# What changes: Sanishells clean the water they live in.
+#
+# The prefab has the consumers; setup spawns a Sanishell in the dug-out room west of the
+# printing pod, and it has them too.
+from: early-base
+mods: [2833476342]
+setup:
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131762, 0, 0, \"CrabFreshWater\", \"Creatures\")", method: SetActive, args: [true]}}
+steps:
+  - expect_state:
+      "count:Assets.GetPrefab(\"CrabFreshWater\").GetComponents<PassiveElementConsumer>[*] if .elementToConsume == DirtyWater": 1
+      "count:Assets.GetPrefab(\"CrabFreshWater\").GetComponents<PassiveElementConsumer>[*] if .elementToConsume == MurkyBrine": 1
+      "count:Assets.GetPrefab(\"CrabFreshWater\").GetComponents<ElementDropper>[*] if .emitTag.Name == ToxicSand": 1
+      "count:Assets.GetPrefab(\"CrabFreshWaterBaby\").GetComponents<PassiveElementConsumer>[*] if .elementToConsume == DirtyWater": 0
+  - run: {seconds: 2}
+  - expect_state:
+      "count:all:PassiveElementConsumer::[*] if .elementToConsume == DirtyWater": 1

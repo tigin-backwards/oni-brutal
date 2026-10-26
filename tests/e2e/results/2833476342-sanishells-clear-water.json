@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2833476342-sanishells-clear-water.yaml",
+ "mods": [
+  "2833476342"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "Sanishells carry consumers for polluted water and murky brine and a polluted dirt dropper; a spawned one has them",
+ "updated": "2026-10-26",
+ "commit": "0a08fc16",
+ "mod_dlls": {
+  "2833476342": {
+   "Sanishells Clear Water.dll": "619162581cff7e6e426bb90f545bccb409a9c2942f0b4c4f6e76e7f4b8247c24"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-043257-c0eef0ae",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:35:47",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-104017-80f62803",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T10:40:17",
+    "lane": 16,
+    "reference_run": "20261026-043257-c0eef0ae",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-104017-80f62803",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T10:40:18",
+    "lane": 17,
+    "reference_run": "20261026-043257-c0eef0ae",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using UnityEngine.TextCore.LowLevel;
 
@@ -164,8 +165,69 @@ namespace OniMoono.Engine.Text
             return g;
         }
 
+        /// What Render gives for each glyph: FreeType's part one glyph
+        /// after another, the distance fields of the SDF modes in parallel.
+        public static GlyphBitmap[] RenderAll(FontFace face, uint[] glyphIndexes, GlyphRenderMode mode, int padding)
+        {
+            var bitmaps = new GlyphBitmap[glyphIndexes.Length];
+            if (!IsSdf(mode))
+            {
+                for (int i = 0; i < bitmaps.Length; i++) bitmaps[i] = Render(face, glyphIndexes[i], mode, padding);
+                return bitmaps;
+            }
+            // In batches of at most about BatchCoverage coverage samples held at once.
+            var fields = new List<PendingField>();
+            long samples = 0;
+            for (int i = 0; i < bitmaps.Length; i++)
+            {
+                if (!face.Load(glyphIndexes[i], LoadFlags(mode))) continue;
+                bitmaps[i] = PrepareSdf(face.Slot, (int)mode, padding, out var field);
+                if (field == null) continue;
+                fields.Add(field);
+                samples += field.Coverage.Length;
+                if (samples >= BatchCoverage) Finish();
+            }
+            Finish();
+            return bitmaps;
+
+            void Finish()
+            {
+                if (fields.Count == 1) fields[0].Finish();
+                else if (fields.Count > 1) System.Threading.Tasks.Parallel.ForEach(fields, f => f.Finish());
+                fields.Clear();
+                samples = 0;
+            }
+        }
+
+        const long BatchCoverage = 4 << 20;
+
+        /// A glyph's coverage awaiting its distance field.
+        sealed class PendingField
+        {
+            public GlyphBitmap Glyph;
+            public double[] Coverage;
+            public int Width, Height, Scale;
+            public float Spread;
+
+            public void Finish()
+            {
+                Glyph.Pixels = DistanceField.Generate(Coverage, Width, Height, Scale, Spread);
+                Coverage = null;
+            }
+        }
+
         static GlyphBitmap RenderSdf(FontFace face, FT.GlyphSlotRec* slot, int m, int padding)
         {
+            var g = PrepareSdf(slot, m, padding, out var field);
+            field?.Finish();
+            return g;
+        }
+
+        /// The SDF glyph with everything but its field, which `field` makes (null when the
+        /// glyph is empty or not an outline).
+        static GlyphBitmap PrepareSdf(FT.GlyphSlotRec* slot, int m, int padding, out PendingField field)
+        {
+            field = null;
             int scale = (m & Mode32x) != 0 ? 32 : (m & Mode16x) != 0 ? 16 : (m & Mode8x) != 0 ? 8 : 1;
             bool antialiased = (m & ModeSdfaa) != 0;
             var g = new GlyphBitmap { Advance = slot->metrics.horiAdvance.Value / 64f };
@@ -189,10 +251,9 @@ namespace OniMoono.Engine.Text
                 var matrix = new FT.Matrix { xx = new CLong(scale << 16), yy = new CLong(scale << 16) };
                 FT.FT_Outline_Transform(&slot->outline, &matrix);
             }
-            var coverage = Rasterize(&slot->outline, bw, bh, antialiased);
             g.Width = pw;
             g.Height = ph;
-            g.Pixels = DistanceField.Generate(coverage, bw, bh, scale, padding + 1);
+            field = new PendingField { Glyph = g, Coverage = Rasterize(&slot->outline, bw, bh, antialiased), Width = bw, Height = bh, Scale = scale, Spread = padding + 1 };
             return g;
         }
 

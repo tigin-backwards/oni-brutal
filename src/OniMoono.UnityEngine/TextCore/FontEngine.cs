@@ -310,6 +310,28 @@ namespace UnityEngine.TextCore.LowLevel
             }
         }
 
+        // Glyphs rendered ahead by RenderGlyphsAhead, by face, size, glyph, mode and padding.
+        static readonly Dictionary<(FontFace Face, int Size, uint Glyph, GlyphRenderMode Mode, int Padding), GlyphBitmap> s_Rendered = new();
+
+        /// Renders glyphs of the current face that are about to be added one by one (the
+        /// distance fields in parallel), for TryAddGlyphToTexture to take instead of rendering
+        /// them itself; ForgetGlyphsAhead drops what is left. A glyph renders the same either way.
+        internal static void RenderGlyphsAhead(uint[] glyphIndexes, int padding, GlyphRenderMode renderMode)
+        {
+            lock (s_Gate)
+            {
+                if (s_Face == null || glyphIndexes == null || glyphIndexes.Length < 2) return;
+                var bitmaps = GlyphRasterizer.RenderAll(s_Face, glyphIndexes, renderMode, padding);
+                for (int i = 0; i < glyphIndexes.Length; i++)
+                    if (bitmaps[i] != null) s_Rendered[(s_Face, s_PointSize, glyphIndexes[i], renderMode, padding)] = bitmaps[i];
+            }
+        }
+
+        internal static void ForgetGlyphsAhead()
+        {
+            lock (s_Gate) s_Rendered.Clear();
+        }
+
         /// Clears an atlas texture to zero and uploads it.
         internal static void ResetAtlasTexture(Texture2D texture)
         {
@@ -337,7 +359,8 @@ namespace UnityEngine.TextCore.LowLevel
         static bool TryAddGlyph(Texture2DNative atlas, uint glyphIndex, int padding, GlyphPackingMode packingMode, List<GlyphRect> free, List<GlyphRect> used, GlyphRenderMode renderMode, out Glyph glyph)
         {
             glyph = null;
-            var bitmap = GlyphRasterizer.Render(s_Face, glyphIndex, renderMode, padding);
+            if (!s_Rendered.Remove((s_Face, s_PointSize, glyphIndex, renderMode, padding), out var bitmap))
+                bitmap = GlyphRasterizer.Render(s_Face, glyphIndex, renderMode, padding);
             if (bitmap == null) return false;
             bool sdf = GlyphRasterizer.IsSdf(renderMode);
             int w = sdf ? Math.Max(bitmap.Width - 2 * padding, 0) : bitmap.Width;
@@ -432,6 +455,24 @@ namespace UnityEngine.TextCore.LowLevel
                 if (s_Face == null || glyphIndexes == null) return null;
                 var set = new HashSet<uint>(glyphIndexes);
                 var pairs = s_Face.Tables.PairAdjustments((a, b) => set.Contains(a) && set.Contains(b));
+                if (pairs.Count == 0) return null;
+                var records = new GlyphPairAdjustmentRecord[pairs.Count + 1];
+                for (int i = 0; i < pairs.Count; i++) records[i] = PairRecord(pairs[i].First, pairs[i].V1, pairs[i].Second, pairs[i].V2);
+                return records;
+            }
+        }
+
+        /// The records GetPairAdjustmentRecords(glyphIndexes) gives that have `glyphIndex` (one
+        /// of glyphIndexes) as their first or second glyph, in its order and terminated alike,
+        /// without expanding the font's other pairs: dynamic font assets ask this per glyph.
+        internal static GlyphPairAdjustmentRecord[] GetPairAdjustmentRecordsOf(uint glyphIndex, IEnumerable<uint> glyphIndexes)
+        {
+            lock (s_Gate)
+            {
+                if (s_Face == null || glyphIndexes == null) return null;
+                var set = new HashSet<uint>(glyphIndexes);
+                if (!set.Contains(glyphIndex)) return null;
+                var pairs = s_Face.Tables.PairAdjustmentsOf(glyphIndex, set);
                 if (pairs.Count == 0) return null;
                 var records = new GlyphPairAdjustmentRecord[pairs.Count + 1];
                 for (int i = 0; i < pairs.Count; i++) records[i] = PairRecord(pairs[i].First, pairs[i].V1, pairs[i].Second, pairs[i].V2);

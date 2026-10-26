@@ -112,68 +112,121 @@ namespace OniMoono.Engine.Text
             return -0.5 * (gx + gy) + Math.Sqrt(2.0 * gx * gy * (1.0 - a));
         }
 
-        static double Candidate(double[] img, double[] gxImg, double[] gyImg, int w, int c, int xc, int yc, int xi, int yi)
+        const double Epsilon = 1e-3;
+
+        // A candidate is at least its vector's length minus this: EdgeDistance is never below
+        // -(gx + gy) / 2 for a unit normal, -√2/2.
+        const double MaxEdgeShortening = 0.75;
+
+        /// Sequential sweeps until no pixel changes: down the rows (each row left to right
+        /// against its left, upper-left, upper and upper-right neighbours, then right to left
+        /// against its right one), then up the rows mirrored. A neighbour proposes its closest
+        /// edge pixel; it is taken when it is closer by more than Epsilon.
+        ///
+        /// A pixel's step depends only on its own state and its neighbours' in that pass, and
+        /// taking it twice in a row changes nothing (each candidate the second time is no
+        /// closer by more than Epsilon than the result). So from the second sweep on, a pixel
+        /// whose state and neighbours have not changed since its step one sweep earlier is
+        /// skipped: every step has a time, and each pixel the time of its last change.
+        static unsafe void Sweep(double[] img, double[] gx, double[] gy, int w, int h, int[] distX, int[] distY, double[] dist)
         {
-            int closest = c - xc - yc * w;
-            if ((uint)closest >= (uint)img.Length) return Far;
-            double a = Math.Clamp(img[closest], 0.0, 1.0);
-            if (a == 0.0) return Far;
-            double di = Math.Sqrt((double)xi * xi + (double)yi * yi);
-            double df = di == 0 ? EdgeDistance(gxImg[closest], gyImg[closest], a) : EdgeDistance(xi, yi, a);
-            return di + df;
+            var changedAt = new int[img.Length];
+            fixed (double* pImg = img, pGx = gx, pGy = gy, pDist = dist)
+            fixed (int* pX = distX, pY = distY, at = changedAt)
+            {
+                var s = new State { Img = pImg, Gx = pGx, Gy = pGy, Dist = pDist, X = pX, Y = pY, W = w, N = img.Length };
+                // The current step's time; `before` is the time of the same step a sweep earlier
+                // (none in the first sweep, nor once the times would overflow).
+                int t = 0, stepsPerSweep = 0;
+                bool skip = false, changed;
+                do
+                {
+                    changed = false;
+                    for (int y = 1; y < h; y++)
+                    {
+                        int row = y * w;
+                        for (int x = 0; x < w; x++)
+                        {
+                            int i = row + x, before = ++t - stepsPerSweep;
+                            if (s.Dist[i] <= 0) continue;
+                            if (skip && at[i] <= before && at[i - w] <= before && (x == 0 || (at[i - 1] <= before && at[i - w - 1] <= before)) && (x == w - 1 || at[i - w + 1] <= before)) continue;
+                            bool any = false;
+                            if (x > 0) any |= s.Relax(i, i - 1, -1, 0);
+                            if (x > 0) any |= s.Relax(i, i - w - 1, -1, -1);
+                            any |= s.Relax(i, i - w, 0, -1);
+                            if (x < w - 1) any |= s.Relax(i, i - w + 1, 1, -1);
+                            if (any) { at[i] = t; changed = true; }
+                        }
+                        for (int x = w - 2; x >= 0; x--)
+                        {
+                            int i = row + x, before = ++t - stepsPerSweep;
+                            if (s.Dist[i] <= 0 || (skip && at[i] <= before && at[i + 1] <= before)) continue;
+                            if (s.Relax(i, i + 1, 1, 0)) { at[i] = t; changed = true; }
+                        }
+                    }
+                    for (int y = h - 2; y >= 0; y--)
+                    {
+                        int row = y * w;
+                        for (int x = w - 1; x >= 0; x--)
+                        {
+                            int i = row + x, before = ++t - stepsPerSweep;
+                            if (s.Dist[i] <= 0) continue;
+                            if (skip && at[i] <= before && at[i + w] <= before && (x == w - 1 || (at[i + 1] <= before && at[i + w + 1] <= before)) && (x == 0 || at[i + w - 1] <= before)) continue;
+                            bool any = false;
+                            if (x < w - 1) any |= s.Relax(i, i + 1, 1, 0);
+                            if (x < w - 1) any |= s.Relax(i, i + w + 1, 1, 1);
+                            any |= s.Relax(i, i + w, 0, 1);
+                            if (x > 0) any |= s.Relax(i, i + w - 1, -1, 1);
+                            if (any) { at[i] = t; changed = true; }
+                        }
+                        for (int x = 1; x < w; x++)
+                        {
+                            int i = row + x, before = ++t - stepsPerSweep;
+                            if (s.Dist[i] <= 0 || (skip && at[i] <= before && at[i - 1] <= before)) continue;
+                            if (s.Relax(i, i - 1, -1, 0)) { at[i] = t; changed = true; }
+                        }
+                    }
+                    if (stepsPerSweep == 0)
+                    {
+                        stepsPerSweep = t;
+                        skip = true;
+                    }
+                    // Times stay below int.MaxValue through the next sweep, or skipping stops.
+                    skip &= (long)t + stepsPerSweep < int.MaxValue;
+                }
+                while (changed);
+            }
         }
 
-        // Neighbour offsets tested by each pass, as (dx, dy) to the neighbour.
-        static readonly (int X, int Y)[] DownRight = { (-1, 0), (-1, -1), (0, -1), (1, -1) };
-        static readonly (int X, int Y)[] DownLeft = { (1, 0) };
-        static readonly (int X, int Y)[] UpLeft = { (1, 0), (1, 1), (0, 1), (-1, 1) };
-        static readonly (int X, int Y)[] UpRight = { (-1, 0) };
-
-        static void Sweep(double[] img, double[] gx, double[] gy, int w, int h, int[] distX, int[] distY, double[] dist)
+        unsafe struct State
         {
-            const double Epsilon = 1e-3;
-            bool changed;
-            do
-            {
-                changed = false;
-                for (int y = 1; y < h; y++)
-                {
-                    for (int x = 0; x < w; x++) changed |= Relax(x, y, DownRight);
-                    for (int x = w - 2; x >= 0; x--) changed |= Relax(x, y, DownLeft);
-                }
-                for (int y = h - 2; y >= 0; y--)
-                {
-                    for (int x = w - 1; x >= 0; x--) changed |= Relax(x, y, UpLeft);
-                    for (int x = 1; x < w; x++) changed |= Relax(x, y, UpRight);
-                }
-            }
-            while (changed);
+            public double* Img, Gx, Gy, Dist;
+            public int* X, Y;
+            public int W, N;
 
-            bool Relax(int x, int y, (int X, int Y)[] neighbours)
+            /// Pixel i against neighbour c at offset (nx, ny): the vector from i to c's closest
+            /// edge pixel, taken when it gives a distance shorter by more than Epsilon. Far
+            /// candidates (no edge pixel) are never taken, and one whose length alone rules it
+            /// out is not evaluated further.
+            [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+            public bool Relax(int i, int c, int nx, int ny)
             {
-                int i = y * w + x;
-                double old = dist[i];
-                if (old <= 0) return false;
-                bool any = false;
-                foreach (var (nx, ny) in neighbours)
-                {
-                    int px = x + nx, py = y + ny;
-                    if (px < 0 || px >= w || py < 0 || py >= h) continue;
-                    int c = py * w + px;
-                    int cx = distX[c], cy = distY[c];
-                    // The candidate vector from this pixel to the neighbour's closest edge pixel.
-                    int newX = cx - nx, newY = cy - ny;
-                    double d = Candidate(img, gx, gy, w, c, cx, cy, newX, newY);
-                    if (d < old - Epsilon)
-                    {
-                        distX[i] = newX;
-                        distY[i] = newY;
-                        dist[i] = d;
-                        old = d;
-                        any = true;
-                    }
-                }
-                return any;
+                int cx = X[c], cy = Y[c];
+                int closest = c - cx - cy * W;
+                if ((uint)closest >= (uint)N) return false;
+                double a = Math.Clamp(Img[closest], 0.0, 1.0);
+                if (a == 0.0) return false;
+                int newX = cx - nx, newY = cy - ny;
+                double limit = Dist[i] - Epsilon;
+                double di = Math.Sqrt((double)newX * newX + (double)newY * newY);
+                if (di - MaxEdgeShortening >= limit) return false;
+                double df = di == 0 ? EdgeDistance(Gx[closest], Gy[closest], a) : EdgeDistance(newX, newY, a);
+                double d = di + df;
+                if (!(d < limit)) return false;
+                X[i] = newX;
+                Y[i] = newY;
+                Dist[i] = d;
+                return true;
             }
         }
     }

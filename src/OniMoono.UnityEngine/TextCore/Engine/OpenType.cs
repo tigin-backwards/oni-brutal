@@ -287,6 +287,18 @@ namespace OniMoono.Engine.Text
         /// over the glyphs listed in the second class definition (class 0 is not expanded) and
         /// records whose two value records are both zero are dropped. `accept` filters pairs.
         public List<(uint First, ValueRecord V1, uint Second, ValueRecord V2)> PairAdjustments(Func<uint, uint, bool> accept)
+            => PairAdjustments(accept, null, 0);
+
+        /// The pair adjustments between `glyph` and the glyphs of `glyphs` (which holds it), in
+        /// either order: what PairAdjustments gives for those pairs, in its order, without
+        /// expanding the pairs of other glyphs.
+        public List<(uint First, ValueRecord V1, uint Second, ValueRecord V2)> PairAdjustmentsOf(uint glyph, HashSet<uint> glyphs)
+            => PairAdjustments((_, _) => true, glyphs, glyph);
+
+        // With `scope`, only the pairs of `glyph` with a glyph of `scope` are visited (`glyph`
+        // first and the other in `scope`, or the other way round). Each such pair is visited
+        // in the same subtable order as without a scope, so the same subtable decides it.
+        List<(uint First, ValueRecord V1, uint Second, ValueRecord V2)> PairAdjustments(Func<uint, uint, bool> accept, HashSet<uint> scope, uint glyph)
         {
             var result = new List<(uint, ValueRecord, uint, ValueRecord)>();
             var seen = new HashSet<ulong>();
@@ -304,6 +316,9 @@ namespace OniMoono.Engine.Text
                     for (int i = 0; i < firsts.Count && i < setCount; i++)
                     {
                         uint first = firsts[i];
+                        // Which second glyphs: 0 every one, 1 those in scope, 2 only `glyph`.
+                        int seconds = scope == null ? 0 : first == glyph ? 1 : scope.Contains(first) ? 2 : -1;
+                        if (seconds < 0) continue;
                         int set = sub + U16(sub + 10 + 2 * i);
                         int pairs = U16(set);
                         int recSize = 2 + s1 + s2;
@@ -311,6 +326,7 @@ namespace OniMoono.Engine.Text
                         {
                             int r = set + 2 + recSize * p;
                             uint second = U16(r);
+                            if (seconds == 1 ? !scope.Contains(second) : seconds == 2 && second != glyph) continue;
                             Add(first, second, ReadValue(r + 2, vf1), ReadValue(r + 2 + s1, vf2));
                         }
                     }
@@ -320,12 +336,20 @@ namespace OniMoono.Engine.Text
                     int classDef1 = sub + U16(sub + 8), classDef2 = sub + U16(sub + 10);
                     int class1Count = U16(sub + 12), class2Count = U16(sub + 14);
                     var seconds = ClassMembers(classDef2);
+                    List<(uint Glyph, int Class)> inScope = null, ofGlyph = null;
+                    if (scope != null)
+                    {
+                        inScope = seconds.FindAll(m => scope.Contains(m.Glyph));
+                        ofGlyph = seconds.FindAll(m => m.Glyph == glyph);
+                    }
                     int recSize = s1 + s2;
                     foreach (uint first in firsts)
                     {
+                        var list = scope == null ? seconds : first == glyph ? inScope : scope.Contains(first) ? ofGlyph : null;
+                        if (list == null || list.Count == 0) continue;
                         int c1 = ClassOf(classDef1, first);
                         if (c1 >= class1Count) continue;
-                        foreach (var (second, c2) in seconds)
+                        foreach (var (second, c2) in list)
                         {
                             if (c2 >= class2Count) continue;
                             int r = sub + 16 + (c1 * class2Count + c2) * recSize;

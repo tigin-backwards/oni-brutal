@@ -369,8 +369,13 @@ namespace TMPro
             var missing = new List<uint>();
             if (unicodes != null && m_AtlasPopulationMode != AtlasPopulationMode.Static)
             {
-                foreach (uint u in unicodes)
-                    if (!characterLookupTable.ContainsKey(u) && !TryAddCharacter(u, out _)) missing.Add(u);
+                RenderGlyphsAhead(unicodes);
+                try
+                {
+                    foreach (uint u in unicodes)
+                        if (!characterLookupTable.ContainsKey(u) && !TryAddCharacter(u, out _)) missing.Add(u);
+                }
+                finally { FontEngine.ForgetGlyphsAhead(); }
             }
             else if (unicodes != null)
             {
@@ -401,6 +406,22 @@ namespace TMPro
             foreach (uint u in missing) text.Append(char.ConvertFromUtf32((int)u));
             missingCharacters = text.ToString();
             return all;
+        }
+
+        // Has the engine render the new glyphs of these characters together (in parallel)
+        // before TryAddCharacter adds them one by one.
+        void RenderGlyphsAhead(uint[] unicodes)
+        {
+            if ((m_SourceFontFile == null && string.IsNullOrEmpty(m_SourceFontFilePath)) || m_FaceLoadFailed || unicodes.Length < 2) return;
+            if (!LoadFace()) return;
+            var glyphs = new List<uint>();
+            var seen = new HashSet<uint>();
+            foreach (uint u in unicodes)
+            {
+                if (characterLookupTable.ContainsKey(u) || (m_MissingUnicodes != null && m_MissingUnicodes.Contains(u))) continue;
+                if (FontEngine.TryGetGlyphIndex(u, out uint glyphIndex) && !glyphLookupTable.ContainsKey(glyphIndex) && seen.Add(glyphIndex)) glyphs.Add(glyphIndex);
+            }
+            FontEngine.RenderGlyphsAhead(glyphs.ToArray(), m_AtlasPadding, m_AtlasRenderMode);
         }
 
         // Renders the character's glyph into the current atlas texture (a new one when the
@@ -463,8 +484,7 @@ namespace TMPro
         // Kerning pairs between the new glyph and the glyphs already in the asset.
         void AddPairAdjustments(uint glyphIndex)
         {
-            var indices = new List<uint>(m_GlyphLookup.Keys);
-            var records = FontEngine.GetPairAdjustmentRecords(indices);
+            var records = FontEngine.GetPairAdjustmentRecordsOf(glyphIndex, m_GlyphLookup.Keys);
             if (records == null) return;
             m_FontFeatureTable.m_GlyphPairAdjustmentRecords ??= new List<GlyphPairAdjustmentRecord>();
             foreach (var r in records)

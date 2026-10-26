@@ -1,0 +1,59 @@
+{
+ "spec": "mods/2689785207-sealed-and-insulated-containers.yaml",
+ "mods": [
+  "2689785207"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "both containers show in the Base menu after their research, with the options' 5000 kg and ceramic; sealing and insulating storage; menu shot matches",
+ "updated": "2026-10-26",
+ "commit": "069fe17",
+ "mod_dlls": {
+  "2689785207": {
+   "SealedContainer.dll": "005b19ded71b45d1eca8c38822570ba678c312edcc53d5f91baee9f6ea45d805"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-023318-02f49c43",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T02:33:34",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-024545-f741d0b9",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:06:35",
+    "lane": 14,
+    "reference_run": "20261026-023318-02f49c43",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "base-menu": 0.0
+    }
+   },
+   {
+    "run": "20261026-024545-f741d0b9",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T03:07:26",
+    "lane": 14,
+    "reference_run": "20261026-023318-02f49c43",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "base-menu": 0.0
+    }
+   }
+  ]
+ }
+}

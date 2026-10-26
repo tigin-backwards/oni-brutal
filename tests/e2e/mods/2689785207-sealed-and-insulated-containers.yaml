@@ -1,0 +1,36 @@
+# Sealed and Insulated Containers (2689785207), classes B, O.
+#
+# What it does: two 1x2 storage bins beside the Storage Bin in the Base menu: the Sealed
+# Container (raw minerals and plastic, Pressure Management) keeps its contents from
+# sublimating, and the Insulated Container (insulite and plastic, or ceramic and plastic with
+# the option off; Temperature Modulation) also keeps them from exchanging heat. A PLib option
+# sets their capacity (20 t by default).
+# How a player reaches it: the build menu, after the research; the Mods screen's options.
+# What changes: storage that seals or insulates what it holds.
+#
+# options set the capacity to 5000 kg and lift the insulite requirement. setup researches both
+# techs; the Base menu lists both containers, and their storage seals and insulates.
+from: early-base
+mods: [2689785207]
+options:
+  shelena_malk.SealedContainer: {Capacity: 5000, RequireSuperInsulator: false}
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"PressureManagement\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"TemperatureModulation\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"PressureManagement\").unlockedItemIDs": {contains: SealedContainer}
+      "Db.Get().Techs.Get(\"TemperatureModulation\").unlockedItemIDs": {contains: InsulatedContainer}
+      "Assets.GetBuildingDef(\"SealedContainer\").BuildingComplete.GetComponent<Storage>.capacityKg": 5000
+      "Assets.GetBuildingDef(\"InsulatedContainer\").BuildingComplete.GetComponent<Storage>.defaultStoredItemModifers": [{contains: Seal}, {contains: Insulate}]
+      "Assets.GetBuildingDef(\"SealedContainer\").BuildingComplete.GetComponent<Storage>.defaultStoredItemModifers": {contains: Seal}
+      "Assets.GetBuildingDef(\"InsulatedContainer\").MaterialCategory[0]": Ceramic
+  - run: {seconds: 10}
+  - click: {ui: "**/PlanScreen/Toggle:Base"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/InsulatedContainer Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/SealedContainer Group*": {active: true}
+      "**/BuildingGroups/**/Grid/InsulatedContainer Group*": {active: true}
+  - shot: {name: base-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}

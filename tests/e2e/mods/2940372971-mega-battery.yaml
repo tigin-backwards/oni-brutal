@@ -1,0 +1,35 @@
+# Mega Battery (2940372971), class B. Spaced Out only.
+#
+# What it does: adds the Mega Battery (BatteryLarge, 3x2, 500 kg of any metal, drawn with the
+# rocket battery pack's anim, Power menu, researched with Low-Resistance Conductors): 100 kJ,
+# leaking 4.17 J/s, its power port on its left cell; Mega Batteries stack on top of each other
+# (an attach point on top, placed on the one below).
+# How a player reaches it: the build menu (Power), after the research.
+# What changes: a stackable large battery.
+#
+# setup grants Low-Resistance Conductors: the battery shows in the Power menu. setup builds
+# one on the floor west of the printing pod, and it is selected: it holds 100 kJ.
+from: early-base
+mods: [2940372971]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"PrettyGoodConductors\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"BatteryLarge\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Cuprite], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"PrettyGoodConductors\").unlockedItemIDs": {contains: BatteryLarge}
+  - run: {seconds: 2}
+  - click: {ui: "**/PlanScreen/Toggle:Power"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/BatteryLarge Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/BatteryLarge Group*": {active: true}
+  - key: {code: Escape}
+  - expect_ui: {"**/PauseScreen": {exists: false}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: BatteryLarge}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<Battery>.capacity": 100000
+      "selected:GetComponent<BuildingAttachPoint>.points.Length": 1
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Mega Battery"}

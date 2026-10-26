@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2940372971-mega-battery.yaml",
+ "mods": [
+  "2940372971"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Mega Battery shows in the Power menu after Low-Resistance Conductors; a built one holds 100 kJ and has its stacking point",
+ "updated": "2026-10-26",
+ "commit": "37a6f66",
+ "mod_dlls": {
+  "2940372971": {
+   "MegaBattery.dll": "4e180952f12c6613c18dd87e4cf3f8485d2914eb3e45ddbdddd1cf10c8df2a14"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-000654-98a7a75e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T00:43:21",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-015755-f6d8f76d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T01:57:55",
+    "lane": 14,
+    "reference_run": "20261026-000654-98a7a75e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-015755-f6d8f76d",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T01:58:40",
+    "lane": 14,
+    "reference_run": "20261026-000654-98a7a75e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

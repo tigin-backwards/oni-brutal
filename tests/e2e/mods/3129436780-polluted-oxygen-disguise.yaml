@@ -1,0 +1,20 @@
+# Polluted Oxygen Disguise 蓝色污染氧 (3129436780), class V.
+#
+# What it does: a postfix on ElementLoader.ManifestSubstanceForElement colours polluted oxygen
+# like oxygen (a translucent light blue, 46, 192, 231), and a prefix replacing
+# PropertyTextures.UpdateDanger marks every cell as dangerous to breathe except oxygen and
+# polluted oxygen, so the world shows no warning over polluted oxygen.
+# How a player reaches it: polluted oxygen in the world.
+# What changes: polluted oxygen looks like oxygen.
+#
+# Polluted oxygen's substance has the new colour; the colony runs, the danger texture updating.
+from: early-base
+mods: [3129436780]
+steps:
+  - expect_state:
+      "ElementLoader.FindElementByName(\"ContaminatedOxygen\").substance.colour.r": 46
+      "ElementLoader.FindElementByName(\"ContaminatedOxygen\").substance.colour.g": 192
+      "ElementLoader.FindElementByName(\"ContaminatedOxygen\").substance.colour.b": 231
+      "ElementLoader.FindElementByName(\"ContaminatedOxygen\").substance.colour.a": 133
+  - run: {seconds: 20}
+  - expect: {duplicants: 3}

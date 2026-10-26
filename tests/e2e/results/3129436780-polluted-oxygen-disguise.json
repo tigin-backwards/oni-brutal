@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3129436780-polluted-oxygen-disguise.yaml",
+ "mods": [
+  "3129436780"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "polluted oxygen's substance takes the oxygen-like colour; the colony runs with the danger texture replaced",
+ "updated": "2026-10-26",
+ "commit": "35a771d",
+ "mod_dlls": {
+  "3129436780": {
+   "PollutedOxygenDisguise.dll": "1bb0b3c82f51884314baff28ee314546b57a9e52ad09aa876dc0acde2431a074"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-222040-75e4a4a6",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T23:47:48",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-013105-3f4e5fda",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T01:35:35",
+    "lane": 14,
+    "reference_run": "20261025-222040-75e4a4a6",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-013105-3f4e5fda",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T01:36:27",
+    "lane": 14,
+    "reference_run": "20261025-222040-75e4a4a6",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

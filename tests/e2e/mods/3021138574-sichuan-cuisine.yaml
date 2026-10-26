@@ -1,0 +1,27 @@
+# 川菜 Sichuan Cuisine -K14 (3021138574), class E.
+#
+# What it does: nine Sichuan dishes (K14M14GG14H1 to H9), each a food entity with its own
+# calories, quality and spoil time and the Good Eats effect, cooked at the Gas Range from
+# fish, meat, plants and lots of Pincha Pepper (RecipeUtils.AddComplexRecipe).
+# How a player reaches it: the Gas Range's recipe list.
+# What changes: more gourmet meals.
+#
+# The foods and recipes are read; a Gas Range built by setup in the dug-out corridor west of
+# the printing pod is selected and lists them.
+from: early-base
+mods: [3021138574]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"GourmetCookingStation\")", method: Build, args: [131129, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"K14M14GG14H1\").GetComponent<Edible>": exists
+      "Assets.GetPrefab(\"K14M14GG14H9\").GetComponent<Edible>": exists
+      "count:ComplexRecipeManager.Get().recipes[*] if .fabricators[0].Name == GourmetCookingStation and .results[0].material.Name.StartsWith(\"K14M14GG14H\") == true": 9
+      "EdiblesManager.GetFoodInfo(\"K14M14GG14H3\").CaloriesPerUnit": 2000000
+  - run: {seconds: 2}
+  - expect: {buildings: {GourmetCookingStation: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: GourmetCookingStation}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "count:selected:ComplexFabricator.GetRecipes()[*] if .results[0].material.Name.StartsWith(\"K14M14GG14H\") == true": 9

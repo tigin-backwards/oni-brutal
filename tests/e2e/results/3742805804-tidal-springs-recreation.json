@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3742805804-tidal-springs-recreation.yaml",
+ "mods": [
+  "3742805804"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Tidal Spring's riding effects and recreation component are registered",
+ "updated": "2026-10-26",
+ "commit": "fd4e5b95",
+ "mod_dlls": {
+  "3742805804": {
+   "dupes use tidal springs for recreation.dll": "2a9d4e33bff51ca0c0258f7ed89661037184abff6b9dc3bbb303728703d8a1ea"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-185246-86fbde8e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T19:07:38",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-192551-82b3b3ca",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T19:41:04",
+    "lane": 15,
+    "reference_run": "20261026-185246-86fbde8e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-192551-82b3b3ca",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T19:41:58",
+    "lane": 15,
+    "reference_run": "20261026-185246-86fbde8e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

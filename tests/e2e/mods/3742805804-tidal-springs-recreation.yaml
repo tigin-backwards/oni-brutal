@@ -1,0 +1,19 @@
+# Dupes use Tidal Springs for recreation (3742805804), class P.
+#
+# What it does: the Tidal Spring (SmallReefGeyser, DLC5 content) gets two recreation spots:
+# during downtime, while it erupts, Duplicants ride it for 30 s (Riding the Tide) and come away Tide Swept, a Morale bonus (Lightly Tide Swept
+# for a short ride), tracked so they do not ride again at once.
+# How a player reaches it: Duplicants' downtime near an erupting Tidal Spring.
+# What changes: a new leisure activity.
+#
+# The effects and the spring's recreation component are read; the colony runs a while.
+from: early-base
+mods: [3742805804]
+steps:
+  - expect_state:
+      "Db.Get().effects.Get(\"TidalSpringTideSwept\")": exists
+      "Db.Get().effects.Get(\"TidalSpringLightlyTideSwept\")": exists
+      "Db.Get().effects.Get(\"TidalSpringRiding\")": exists
+      "Assets.GetPrefab(\"SmallReefGeyser\").GetComponent<TidalSpringRecreation>": exists
+  - run: {seconds: 5}
+  - expect: {duplicants: 3}

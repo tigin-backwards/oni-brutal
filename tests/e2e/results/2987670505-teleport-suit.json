@@ -1,0 +1,68 @@
+{
+ "spec": "mods/2987670505-teleport-suit.yaml",
+ "mods": [
+  "2987670505"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Teleportation overlay turns on and off from the overlay bar; the Stations menu lists the suit locker",
+ "updated": "2026-10-25",
+ "commit": "ee1fba4",
+ "mod_dlls": {
+  "2987670505": {
+   "PLib.dll": "893dc1ea3eddd02c85d433231aae356be27be07ddfc1a98fb2c51d84748208e8",
+   "TeleportSuitMod.dll": "160186a254875fd7ff285ff099a78b1bd3d848e6b6cb6f75e41d26229c8d2f3a"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-200219-ef1e47f8",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T20:37:01",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-211826-7c863146",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T21:18:26",
+    "lane": 14,
+    "reference_run": "20261025-200219-ef1e47f8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "overlays": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "overlay": 0.000278
+    }
+   },
+   {
+    "run": "20261025-211826-7c863146",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-25T21:19:13",
+    "lane": 14,
+    "reference_run": "20261025-200219-ef1e47f8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "overlays": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "overlay": 0.000237
+    }
+   }
+  ]
+ }
+}

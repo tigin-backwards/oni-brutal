@@ -1,0 +1,39 @@
+# [Beta]传送服 Teleport Suit (2987670505), classes B, V, T, O.
+#
+# What it does: adds the Teleport Suit, made at the Exosuit Forge, and its dock, the Teleport
+# Suit Locker (2x4, in the Stations menu): a Duplicant wearing the suit teleports to where it
+# is going instead of walking (its own navigator), using the suit's battery. Both, and the
+# Teleportation overlay that shows where teleporting is allowed, come with Radiation
+# Protection (Jetpacks in the base game); a tool, bound to a PLib action, marks areas teleport
+# restricted. PLib options set the suit's numbers.
+# How a player reaches it: the overlay bar's Teleportation Overlay button; the Stations menu;
+# the Exosuit Forge's recipes.
+# What changes: how suited Duplicants travel.
+#
+# setup grants Radiation Protection. The overlay bar has the Teleportation Overlay, which a
+# click turns on and off; the Stations menu lists the locker.
+from: early-base
+mods: [2987670505]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"RadiationProtection\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+steps:
+  - expect_state:
+      "type:TeleportSuitMod.TeleportationOverlay::ID.HashValue": {save_as: teleport}
+      "Db.Get().Techs.Get(\"RadiationProtection\").unlockedItemIDs": {contains: TeleportSuitTechItem}
+      "Assets.GetPrefab(\"Teleport_Suit\")": exists
+  - run: {seconds: 5}
+  - expect_ui:
+      "**/OverlaysBarHolder/OverlaysBar/Toggle:Teleportation Overlay": {exists: true}
+  - click: {ui: "**/OverlaysBarHolder/OverlaysBar/Toggle:Teleportation Overlay"}
+  - expect_state:
+      "OverlayScreen.Instance.mode.HashValue": "== teleport"
+  - ui_dump: {name: overlays, root: "**/OverlaysBarHolder/OverlaysBar"}
+  - world_shot: {name: overlay, ortho: 12, at: [122, 208], hide_ui: true}
+  - click: {ui: "**/OverlaysBarHolder/OverlaysBar/Toggle:Teleportation Overlay"}
+  - expect_state:
+      "OverlayScreen.Instance.mode.HashValue": "!= teleport"
+  - click: {ui: "**/PlanScreen/Toggle:Stations"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/TeleportSuitLocker Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/TeleportSuitLocker Group*": {active: true}

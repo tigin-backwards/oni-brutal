@@ -8,6 +8,6 @@
     <OutputType>WinExe</OutputType>
     <AssemblyName>Restarter</AssemblyName>
     <RootNamespace>OniMoono.Restarter</RootNamespace>
-    <ApplicationIcon>../OniMoono.Host/Steela.ico</ApplicationIcon>
+    <ApplicationIcon>../OniMoono.Host/Moo.ico</ApplicationIcon>
   </PropertyGroup>
 </Project>

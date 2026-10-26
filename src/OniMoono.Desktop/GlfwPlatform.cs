@@ -190,12 +190,12 @@ namespace OniMoono.Desktop
         /// Monitor DPI from its physical size (0 when the monitor does not report one, as Unity).
         public float Dpi => dpi ??= MonitorDpi(CurrentMonitor);
 
-        /// The window and taskbar icon (Steela, embedded). Wayland has no window icons: the
+        /// The window and taskbar icon (the falling Gassy Moo, embedded). Wayland has no window icons: the
         /// compositor takes them from the desktop entry, and GLFW reports an error if asked.
         static unsafe void SetIcon(GlfwWindow window)
         {
             if (Glfw.GetPlatform() == Brutal.GlfwApi.GlfwPlatform.Wayland) return;
-            using var stream = typeof(GlfwPlatform).Assembly.GetManifestResourceStream("Steela.png");
+            using var stream = typeof(GlfwPlatform).Assembly.GetManifestResourceStream("Moo.png");
             var data = new byte[stream.Length];
             stream.ReadExactly(data);
             using var image = Brutal.StbApi.Stb.LoadFromMemory(data, 4);

@@ -14,7 +14,7 @@
     <PackageReference Include="Ahwoo.BRUTAL.OpenGl" />
   </ItemGroup>
   <ItemGroup>
-    <!-- The window icon (GlfwPlatform.SetIcon); OniMoono.Host/Steela.ico is the same image. -->
-    <EmbeddedResource Include="Steela.png" LogicalName="Steela.png" />
+    <!-- The window icon (GlfwPlatform.SetIcon); OniMoono.Host/Moo.ico is the same image. -->
+    <EmbeddedResource Include="Moo.png" LogicalName="Moo.png" />
   </ItemGroup>
 </Project>

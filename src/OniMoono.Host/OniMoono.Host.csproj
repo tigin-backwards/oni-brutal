@@ -14,8 +14,9 @@
     <ServerGarbageCollection>true</ServerGarbageCollection>
     <ConcurrentGarbageCollection>true</ConcurrentGarbageCollection>
     <TieredPGO>true</TieredPGO>
-    <!-- The executable's icon on Windows (Steela; the window icon is OniMoono.Desktop/Steela.png). -->
-    <ApplicationIcon>Steela.ico</ApplicationIcon>
+    <!-- The executable's icon on Windows (the falling Gassy Moo from the game's meteor_gassymoo
+         kanim; the window icon is OniMoono.Desktop/Moo.png). -->
+    <ApplicationIcon>Moo.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../OniMoono.UnityEngine/OniMoono.UnityEngine.csproj" />

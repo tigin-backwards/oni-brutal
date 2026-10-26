@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2018086455-faster-bunker-door.yaml",
+ "mods": [
+  "2018086455"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Bunker Door's Open button, pressed, has it open within two minutes unpowered (0.1 for the game's 0.01)",
+ "updated": "2026-10-26",
+ "commit": "4ecf9b3b",
+ "mod_dlls": {
+  "2018086455": {
+   "FasterBunkerDoor.dll": "e1c853b55a4fcf2af31c322ec412c28c8aae76a1ab72fbefdb8fd3b1a79cd668"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-023730-5710265c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T02:37:31",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-031601-3ba74530",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:16:01",
+    "lane": 16,
+    "reference_run": "20261026-023730-5710265c",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-031601-3ba74530",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T03:16:02",
+    "lane": 17,
+    "reference_run": "20261026-023730-5710265c",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

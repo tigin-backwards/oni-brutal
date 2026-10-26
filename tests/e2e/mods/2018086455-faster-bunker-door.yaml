@@ -1,0 +1,30 @@
+# Faster Bunker Door (2018086455), class P.
+#
+# What it does: a prefix replacing BunkerDoorConfig.DoPostConfigureComplete makes the Bunker
+# Door's door open and close ten times as fast unpowered (0.1 for 0.01) and twenty times as
+# fast powered (2 for 0.1), the rest of the door kept as the game sets it up.
+# How a player reaches it: a Bunker Door's side screen (Open, Close).
+# What changes: how long a Bunker Door takes to open or shut.
+#
+# setup builds an unpowered Bunker Door across the dug-out room west of the printing pod. It is
+# selected and its Open button pressed; a Duplicant toggles it, and within two minutes it is
+# open (the game's would take minutes more at 0.01).
+from: early-base
+mods: [2018086455]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"BunkerDoor\")", method: Build, args: [{"$": "Grid.XYToCell(112, 209)"}, Neutral, null, [Steel], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"BunkerDoor\").GetComponent<Door>.unpoweredAnimSpeed": 0.1
+      "Assets.GetPrefab(\"BunkerDoor\").GetComponent<Door>.poweredAnimSpeed": 2
+      "Assets.GetPrefab(\"BunkerDoor\").GetComponent<KPrefabID>.HasTag(\"Bunker\")": true
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 209], select: BunkerDoor}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/DoorToggleSideScreen", cond: stable}
+  - click: {ui: "**/DoorToggleSideScreen/Contents/Buttons/Openbutton"}
+  - expect_state:
+      "selected:GetComponent<Door>.RequestedState": Opened
+  - key: {code: Escape}
+  - run: {seconds: 120}
+  - expect_state:
+      "count:all:Door::[*] if .GetComponent<KPrefabID>.PrefabTag.Name == BunkerDoor and .IsOpen() == true": 1

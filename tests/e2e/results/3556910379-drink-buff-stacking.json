@@ -1,0 +1,56 @@
+{
+ "spec": "mods/3556910379-drink-buff-stacking.yaml",
+ "mods": [
+  "3556910379"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "an Espresso Machine lets a Duplicant with the recently-had-a-drink effect use it (GetWorkerPriority says yes)",
+ "updated": "2026-10-26",
+ "commit": "ef6c795a",
+ "mod_dlls": {
+  "3556910379": {
+   "BuffOverlay.dll": "71a38ff3fb1c2540641cce7ea60bffbba17dec3ba453618f04559232f53a8fb7",
+   "PLib.dll": "bdd637dbef718cdd52e61c0a7177bd297864a50bac1583d2837a36ff3edf07db"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-042232-0e5bb32c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:30:18",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-102218-6f00f0bd",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T10:22:18",
+    "lane": 16,
+    "reference_run": "20261026-042232-0e5bb32c",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-102218-6f00f0bd",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T10:22:19",
+    "lane": 17,
+    "reference_run": "20261026-042232-0e5bb32c",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -1,0 +1,22 @@
+# 汽水机咖啡榨汁机BUFF叠加 (3556910379), class P.
+#
+# What it does: postfixes on the Espresso Machine's, Juicer's and Soda Fountain's
+# GetWorkerPriority let a Duplicant use them even while it has the shared "recently had a
+# drink" effect (RecentlyRecDrink), which the game checks to send it elsewhere, so the three
+# drinks' morale buffs stack.
+# How a player reaches it: Duplicants' downtime with the three machines built.
+# What changes: a Duplicant may have all three drinks' buffs at once.
+#
+# setup builds an Espresso Machine in the dug-out room west of the printing pod, gives a
+# Duplicant the RecentlyRecDrink effect, and asks the machine whether that Duplicant may use
+# it: it may (the game says no).
+from: early-base
+mods: [3556910379]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"EspressoMachine\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Cuprite], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[1].GetComponent<Effects>", method: Add, args: [RecentlyRecDrink, true]}}
+  - driver: {setup.call: {target: "all:EspressoMachineWorkable::[0]", method: GetWorkerPriority, args: [{"$": "Components.LiveMinionIdentities.Items[1].GetComponent<WorkerBase>"}, 0]}}
+steps:
+  - expect_state:
+      "Components.LiveMinionIdentities.Items[1].GetComponent<Effects>.HasEffect(\"RecentlyRecDrink\")": true
+      "last:": true

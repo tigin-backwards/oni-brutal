@@ -1,0 +1,35 @@
+# Text Input Hotkeys (3165114076, Aze.DeleteFullWord).
+#
+# What it does: in every TextMeshPro input field, Ctrl+Backspace deletes the word before the
+# caret and Ctrl+Shift+Backspace everything before it; plain Backspace deletes one character as
+# before. It patches TMP_InputField.KeyPressed (a transpiler that routes the Backspace call
+# through its own method) and copies Backspace() with a reverse patch that removes N characters.
+# How a player reaches it: any text field, with the keyboard.
+# What changes: the two Ctrl shortcuts; without the mod the game's fields delete one character
+# whatever the modifiers.
+#
+# The build menu's search field gets "liquid pump"; Ctrl+Backspace leaves "liquid ", then "gas"
+# is typed and Ctrl+Shift+Backspace empties the field. Ours does not load the mod: its
+# TextMeshPro lacks the members the mod patches (docs/cleanroom/textmeshpro.md, "Backspace with
+# modifiers, and the members Text Input Hotkeys patches").
+from: early-base
+mods: [3165114076]
+steps:
+  - click: {ui: "**/PlanScreen/Toggle:Base"}
+  - click: {ui: "**/BuildingGroups/Searchbar/FilterInputField"}
+  - type: {ui: "**/BuildingGroups/Searchbar/FilterInputField", text: "liquid pump"}
+  - expect_ui:
+      "**/BuildingGroups/Searchbar/FilterInputField/Text Area/Text": {text: "/^liquid pump\\W?$/"}
+  - key: {code: "Backspace"}
+  - expect_ui:
+      "**/BuildingGroups/Searchbar/FilterInputField/Text Area/Text": {text: "/^liquid pum\\W?$/"}
+  - key: {code: "Ctrl+Backspace"}
+  - expect_ui:
+      "**/BuildingGroups/Searchbar/FilterInputField/Text Area/Text": {text: "/^liquid \\W?$/"}
+  - ui_dump: {name: word-deleted, root: "**/BuildingGroups/Searchbar"}
+  - type: {ui: "**/BuildingGroups/Searchbar/FilterInputField", text: "gas"}
+  - expect_ui:
+      "**/BuildingGroups/Searchbar/FilterInputField/Text Area/Text": {text: "/^liquid gas\\W?$/"}
+  - key: {code: "Ctrl+Shift+Backspace"}
+  - expect_ui:
+      "**/BuildingGroups/Searchbar/FilterInputField/Text Area/Text": {text: "/^\\W?$/"}

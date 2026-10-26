@@ -2249,6 +2249,60 @@ and font asset. `tools/UnityProbe/th-check.py diff ORIG OURS` lists the texts th
 | NotoSansCJKkr 12, "Единицы температуры" | 30, 13.6875 (here 12.225) | 16.32 | 17.78 |
 | NotoSansThai 12, "Единицы температуры" | 30, 13.6875 (here 13.113636) | 16.32 | 16.89 |
 
+### Backspace with modifiers, and the members Text Input Hotkeys patches (measured 2026-10-25)
+
+Found in the load sweep `s2000`: Text Input Hotkeys (Workshop 3165114076, `Aze.DeleteFullWord`)
+loads in the original and fails to load here. Harmony throws `InvalidProgramException` while it
+patches `TMP_InputField.KeyPressed(Event)`, KMod disables the mod and the player quits while it
+loads.
+
+**Measured in the original,** with the build menu's search field (a `KInputTextField`), real
+keys through XTEST (`scripts/e2e.py`, scratch specs typing "liquid pump", then a modifier with
+Backspace, then "gas", then Ctrl+Shift+Backspace):
+
+| Keys | Shipped package, no mod | Shipped package with the mod | This implementation, no mod |
+|---|---|---|---|
+| Backspace after "liquid pump" | "liquid pum" | "liquid pum" | "liquid pum" |
+| Ctrl+Backspace after "liquid pump" | "liquid pum", caret 10 | "liquid ", caret 7 | "liquid ", caret 7 |
+| Ctrl+Shift+Backspace after "…gas" | one character removed | everything before the caret removed (""), caret 0 | the word "gas" removed |
+
+- **The shipped package ignores Ctrl and Shift on Backspace:** it removes the one character
+  before the caret, or the selection, whatever the modifiers. This implementation removes the
+  word before the caret on Ctrl+Backspace, which differs. Backspace must remove one character
+  with any modifiers. Deleting by word is what the mod adds.
+
+**Why the names are interface:** the mod's code (read from its assembly) needs these members of
+`TMP_InputField`, under these names and signatures. It was compiled against a copy of the
+package with every member public, and ARCHITECTURE D11 lets it reach them:
+- `void Backspace()`: private, instance, no parameters. It removes the character before the
+  caret (or the selection, with any modifiers, as above). The mod finds it with
+  `AccessTools.Method(typeof(TMP_InputField), "Backspace")`, by name alone. An overload with
+  other parameters breaks the mod, so there must be exactly one method of that name.
+- `EditState KeyPressed(Event evt)`: private, instance. The Backspace key reaches `Backspace()`
+  through a direct call in this method, with only the field itself as the call's argument.
+  The mod's transpiler swaps that call for its own static `Wrapper(TMP_InputField, Event)`,
+  which takes the event (`evt`, the method's first parameter) as well. With any other
+  argument on the call, the method that results is invalid (what happens here today:
+  `Backspace(bool)` is called with the Ctrl state).
+- `int stringPositionInternal { get; }`: an internal property, the caret's position in the
+  text (the string index, not the character index). The mod reads it on Ctrl+Shift+Backspace
+  as the count of characters before the caret.
+- `int FindPrevWordBegin()`: private, instance. The string index where the word before the
+  caret begins. The mod deletes `stringPositionInternal - FindPrevWordBegin()` characters on
+  Ctrl+Backspace. Measured through the mod: after "liquid pump" (caret 11) it is 7.
+- **`Backspace()`'s body is copied by the mod** (a Harmony reverse patch, `MultiBackspace(
+  TMP_InputField instance, int charsToRemove)`). Its transpiler finds each call to
+  `string.Remove(int, int)` in the body. It replaces the two nearest `ldc.i4.1` before that
+  call and the nearest one after it with the count, and leaves all else as it is. So when
+  `Backspace()` removes one character, the constant 1 must appear in its IL as `ldc.i4.1`
+  exactly three times around that removal. Twice before the `Remove` call: the removal's start
+  (caret − 1) and its length (1). Once after it: the caret moving back by 1. In that order, and
+  with no other `ldc.i4.1` in between. Measured through the mod: Ctrl+Shift+Backspace
+  after "liquid gas" (caret 10) leaves "" and caret 0, so all three take the count. Any
+  other `Remove(int, int)` call in the body is rewritten the same way.
+- Nothing else in the 2119 Workshop builds in `out/ws` names `FindPrevWordBegin` or
+  `stringPositionInternal`, apart from copies of the shipped package that mods carry.
+
 ## Verification
 
 1. **Build:**

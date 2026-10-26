@@ -1,0 +1,63 @@
+{
+ "spec": "mods/2533799658-radbolt-automation.yaml",
+ "mods": [
+  "2533799658"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "radbolt buildings get an automation port; a built Radiation Lab's range side screen (dumped) takes 80 and 20",
+ "updated": "2026-10-26",
+ "commit": "7e465f40",
+ "mod_dlls": {
+  "2533799658": {
+   "RadboltAutomation.dll": "9f862ce96d245d5a0a0b09c7ccc70bbb09aeeac13bd26348c5c4c0113d866a6e"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-173427-72c0b636",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T17:50:47",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-180507-0915b6e7",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T18:34:08",
+    "lane": 14,
+    "reference_run": "20261026-173427-72c0b636",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "range": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261026-180507-0915b6e7",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T18:35:06",
+    "lane": 14,
+    "reference_run": "20261026-173427-72c0b636",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "range": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -1,0 +1,32 @@
+# Radbolt Automation (2533799658), class P.
+#
+# What it does: the radbolt buildings (Radbolt Chamber, Radiation Lab, Radbolt Engine, Diamond
+# Press, the radbolt reflector and others) get an automation output port and an activation
+# range side screen: the port sends green while the stored radbolts are within the range, as
+# a Smart Reservoir does; the Diamond Press stores 4,000 radbolts.
+# How a player reaches it: a built radbolt building's side screen and automation port.
+# What changes: radbolt storage that automation can read.
+#
+# A Radiation Lab (NuclearResearchCenter) built by setup in the dug-out corridor west of the
+# printing pod is selected: its range side screen (dumped) takes 80 and 20.
+from: early-base
+mods: [2533799658]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"NuclearResearchCenter\")", method: Build, args: [131128, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"NuclearResearchCenter\").LogicOutputPorts.Count": 1
+      "Assets.GetBuildingDef(\"HEPEngine\").LogicOutputPorts.Count": 1
+      "Assets.GetPrefab(\"DiamondPress\").GetComponent<HighEnergyParticleStorage>.capacity": 4000
+  - run: {seconds: 2}
+  - expect: {buildings: {NuclearResearchCenter: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 206], select: NuclearResearchCenter}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/ActivationRangeSideScreen", cond: stable}
+  - ui_dump: {name: range, root: "**/ActivationRangeSideScreen"}
+  - type: {ui: "**/ActivationRangeSideScreen/**/ActivateInput", text: "80", enter: true, clear: true}
+  - type: {ui: "**/ActivationRangeSideScreen/**/DeactivateInput", text: "20", enter: true, clear: true}
+  - expect_state:
+      "selected:HighEnergyParticleAutomation.ActivateValue": 80
+      "selected:HighEnergyParticleAutomation.DeactivateValue": 20

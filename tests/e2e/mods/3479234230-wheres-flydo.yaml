@@ -1,0 +1,30 @@
+# Where's Flydo (3479234230), class B (Bionic Booster Pack).
+#
+# What it does: the Soldering Station gets a side screen button, "Find Flydo: N Total", that
+# moves the camera to the next Flydo of its world on each press, and Flydos become nameable
+# (UserNameable on the FetchDrone prefab).
+# How a player reaches it: selecting a Soldering Station; its button.
+# What changes: lost Flydos are found.
+#
+# setup builds a Soldering Station in the dug-out corridor west of the printing pod and lets a
+# Flydo loose beside it; the station is selected, the camera moved away, and the button brings
+# it back to the Flydo.
+from: early-base
+mods: [3479234230]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"AdvancedCraftingTable\")", method: Build, args: [131132, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131129, 0, 0, \"FetchDrone\", \"Creatures\")", method: SetActive, args: [true]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"FetchDrone\").GetComponent<UserNameable>": exists
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [114, 208], ortho: 8}}
+  - click_world: {cell: [116, 207], select: AdvancedCraftingTable}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/ButtonMenuSideScreen/Buttons/Button/Label": {any_text: "Find Flydo: 1 Total"}
+  - driver: {camera.set: {cell: [140, 230], ortho: 8}}
+  - click: {text: "Find Flydo: 1 Total", under: "**/ButtonMenuSideScreen"}
+  - expect_state:
+      "CameraController.Instance.targetPos.x": [">= 108", "<= 119"]
+      "CameraController.Instance.targetPos.y": [">= 200", "<= 213"]

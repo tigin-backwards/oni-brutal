@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3479234230-wheres-flydo.yaml",
+ "mods": [
+  "3479234230"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a selected Soldering Station's Find Flydo button brings the camera back to the Flydo",
+ "updated": "2026-10-26",
+ "commit": "f898d18a",
+ "mod_dlls": {
+  "3479234230": {
+   "Where_s_Flydo.dll": "2a3c2f0dc80ce0462334908f6473e2e8efb97813310c8ebdce8f742f43590407"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-114619-1abc381b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T11:48:46",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-145036-c077f4e4",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T14:53:20",
+    "lane": 14,
+    "reference_run": "20261026-114619-1abc381b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-145036-c077f4e4",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T14:53:22",
+    "lane": 15,
+    "reference_run": "20261026-114619-1abc381b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

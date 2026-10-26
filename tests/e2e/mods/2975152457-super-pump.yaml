@@ -1,0 +1,32 @@
+# 超级泵 Super Pump (2975152457), class P.
+#
+# What it does: postfixes on the pumps' DoPostConfigureComplete raise what they take in per
+# second and hold: the Gas Pump 10 kg/s into 20 kg of storage (the game's 0.5 kg/s and 1 kg),
+# the Mini Gas Pump 5 kg/s and 10 kg, the Liquid Pump 100 kg/s and 200 kg (10 kg/s and 20 kg)
+# and the Mini Liquid Pump 50 kg/s and 100 kg.
+# How a player reaches it: building pumps.
+# What changes: how fast pumps empty a room.
+#
+# The four pump prefabs carry the new rates; setup builds a Gas Pump in the corridor west of the
+# printing pod, which has them too, and it is selected.
+from: early-base
+mods: [2975152457]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"GasPump\")", method: Build, args: [{"$": "Grid.XYToCell(112, 206)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"GasPump\").GetComponent<ElementConsumer>.consumptionRate": 10
+      "Assets.GetPrefab(\"GasPump\").GetComponent<Storage>.capacityKg": 20
+      "Assets.GetPrefab(\"GasMiniPump\").GetComponent<ElementConsumer>.consumptionRate": 5
+      "Assets.GetPrefab(\"LiquidPump\").GetComponent<ElementConsumer>.consumptionRate": 100
+      "Assets.GetPrefab(\"LiquidPump\").GetComponent<Storage>.capacityKg": 200
+      "Assets.GetPrefab(\"LiquidMiniPump\").GetComponent<ElementConsumer>.consumptionRate": 50
+      "all:Pump::[0].GetComponent<ElementConsumer>.consumptionRate": 10
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [112, 207], ortho: 8}}
+  - click_world: {cell: [112, 207], select: GasPump}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<Storage>.capacityKg": 20
+  - run: {seconds: 10}
+  - expect: {duplicants: 3}

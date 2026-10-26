@@ -1,0 +1,57 @@
+{
+ "spec": "mods/3247021036-neodymiumstyle-hairstyle-sakuya.yaml",
+ "mods": [
+  "3172734005",
+  "3247021036"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with Dupery Fixed, Sakuya joins the personalities and her hair loads as an accessory",
+ "updated": "2026-10-26",
+ "commit": "b339b3c0",
+ "mod_dlls": {
+  "3172734005": {
+   "DuperyFixed.dll": "9ef4a93958b6b80fbf086cab57821955dd344324d2192086db7ea7845e71f7f2"
+  },
+  "3247021036": {}
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-043257-c0eef0ae",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:41:13",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-104317-b1ccec1c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T10:43:17",
+    "lane": 16,
+    "reference_run": "20261026-043257-c0eef0ae",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-104317-b1ccec1c",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T10:43:18",
+    "lane": 17,
+    "reference_run": "20261026-043257-c0eef0ae",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -1,0 +1,64 @@
+{
+ "spec": "mods/3743875118-plant-auto-drop.yaml",
+ "mods": [
+  "3743875118"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a spawned Mealwood starts with harvest off, the mod's default; user-menu dump matches",
+ "updated": "2026-10-26",
+ "commit": "0a17f97b",
+ "mod_dlls": {
+  "3743875118": {
+   "PLib.dll": "bdd637dbef718cdd52e61c0a7177bd297864a50bac1583d2837a36ff3edf07db",
+   "┐╔╣┤╤í╡─╫╘╢»╩╒╗±╨┬░µ.dll": "db4179b53fc07d7c1ff6b5a0828992b3f591e9f3f7edf0c04b4858580472246f"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-032328-d309aee4",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:09:59",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-041950-8b7299d7",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:19:50",
+    "lane": 14,
+    "reference_run": "20261026-032328-d309aee4",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "user-menu": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261026-041950-8b7299d7",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T04:20:37",
+    "lane": 14,
+    "reference_run": "20261026-032328-d309aee4",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "user-menu": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

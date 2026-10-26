@@ -1,0 +1,26 @@
+# 植物成熟自动掉落 Plant Auto Drop (3743875118), classes P, O.
+#
+# What it does: ripe plants drop their crop by themselves (a SetCanBeHarvested prefix harvests
+# them on the next frame), per plant type in its PLib options (PlantSAutoDrop_ModPlants.json
+# for modded plants), and the Pincha Pepper's and clam's harvests too; with "only when harvest
+# is disabled" (on in the shipped config) a plant auto-drops only once its harvest toggle is
+# off, which the toggle then triggers at once; plants start with harvest off, and a replanted
+# or mutated plant keeps the cell's toggle.
+# How a player reaches it: a plant's harvest toggle in its user menu; the options.
+# What changes: crops drop without Duplicants.
+#
+# A Mealwood spawned in the dug-out corridor west of the printing pod starts with harvest off
+# (the game's default is on); it is selected and its user menu dumped. (A wild plant offers no
+# harvest toggle to click.)
+from: early-base
+mods: [3743875118]
+setup:
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131129, 0, 0, \"BasicSingleHarvestPlant\", \"BuildingBack\")", method: SetActive, args: [true]}}
+steps:
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [113, 207], ortho: 8}}
+  - click_world: {cell: [113, 206], select: BasicSingleHarvestPlant}
+  - ui_wait: {path: "**/UserMenuScreen/Buttons", cond: stable}
+  - expect_state:
+      "selected:GetComponent<HarvestDesignatable>.HarvestWhenReady": false
+  - ui_dump: {name: user-menu, root: "**/UserMenuScreen/Buttons"}

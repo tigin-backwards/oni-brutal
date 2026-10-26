@@ -1305,10 +1305,12 @@ TMP runs as shipped. The engine provides what it needs: `Font`, `TextCore` data 
   converter. The game's clips have no audio tracks (and the game sets `audioOutputMode = None`);
   video audio is not played.
 - `Animator`: AnimatorController state machine + AnimationClip curve evaluation for the
-  properties the game animates (UI). `ParticleSystem`: the modules the prefabs actually enable. Features no game data
-  uses (mods' effects: clamp velocity, collision, lights, sub emitters, other shapes and
-  texture-sheet or trail variants…) are not simulated; the system loads without each and logs it
-  once (`[engine] particles: … is not simulated`).
+  properties the game animates (UI). `ParticleSystem`: the modules the prefabs actually enable,
+  and for systems mods build by script `Emit(EmitParams, count)`, the velocity limit and z
+  rotation over lifetime, as measured (`tools/UnityProbe`, `particleemit`). Features no game data
+  uses (in mods' bundles: clamp velocity, rotation, collision, lights, sub emitters, other shapes
+  and texture-sheet or trail variants…) are not simulated; the system loads without each and logs
+  it once (`[engine] particles: … is not simulated`).
 - `UnityWebRequest` → `HttpClient`; `ImageConversion` → stb_image / stb_image_write
   (`Ahwoo.BRUTAL.Stb`); `JsonUtility` → the shared layout builder; `Physics.Raycast` → the
   colliders present in data; IMGUI → clipboard and the event/GUI surface the code paths touch.

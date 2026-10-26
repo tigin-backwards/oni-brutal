@@ -415,5 +415,188 @@ namespace OniMoono.Tests
             Frames(60 * 2 + 5);
             Assert.False(ps.IsAlive());
         }
+
+        /// A system set up as ManualMiner sets up its laser's sparks: world space, no emission.
+        static ParticleSystem Scripted()
+        {
+            var go = new GameObject("sparks");
+            go.transform.position = new Vector3(100f, 200f, 0f);
+            var ps = go.AddComponent<ParticleSystem>();
+            var main = ps.main;
+            main.loop = false;
+            main.playOnAwake = true;
+            main.simulationSpace = ParticleSystemSimulationSpace.World;
+            var emission = ps.emission;
+            emission.enabled = false;
+            return ps;
+        }
+
+        static ParticleSystem.EmitParams Full() => new()
+        {
+            position = new Vector3(110f, 205f, -3f),
+            velocity = new Vector3(4f, 3f, 0f),
+            startSize = 0.25f,
+            startLifetime = 0.3f,
+            startColor = new Color32(76, 255, 255, 255),
+            rotation = 90f,
+        };
+
+        /// Measured in the original (tools/UnityProbe, particleemit): the modules' defaults on a
+        /// new component, and what setters keep.
+        [Fact]
+        public void ScriptedModulesHaveUnityDefaults()
+        {
+            var ps = new GameObject("defaults").AddComponent<ParticleSystem>();
+            var main = ps.main;
+            Assert.Equal((true, ParticleSystemSimulationSpace.Local, 5f), (main.playOnAwake, main.simulationSpace, main.startSpeed.constant));
+            var limit = ps.limitVelocityOverLifetime;
+            Assert.Equal((false, 1f, 0f), (limit.enabled, limit.limit.constant, limit.dampen));
+            var rotation = ps.rotationOverLifetime;
+            Assert.Equal((false, false, 0.7853982f), (rotation.enabled, rotation.separateAxes, rotation.z.constant));
+            var trails = ps.trails;
+            Assert.Equal((false, 1f, 1f, 0.2f, true, true, 1f), (trails.enabled, trails.ratio, trails.lifetime.constant, trails.minVertexDistance,
+                trails.sizeAffectsWidth, trails.inheritParticleColor, trails.widthOverTrail.constant));
+            Assert.Equal((ParticleSystemGradientMode.Color, Color.white), (trails.colorOverTrail.mode, trails.colorOverTrail.color));
+            var size = ps.sizeOverLifetime;
+            Assert.False(size.enabled);
+            Assert.Equal((ParticleSystemCurveMode.Curve, 1f, 0f, 0.5f, 1f), (size.size.mode, size.size.curveMultiplier, size.size.curve.Evaluate(0f),
+                size.size.curve.Evaluate(0.5f), size.size.curve.Evaluate(1f)));
+            Assert.Equal(ParticleSystemRenderMode.Billboard, ps.GetComponent<ParticleSystemRenderer>().renderMode);
+            limit.dampen = 1.5f;
+            Assert.Equal(1f, limit.dampen);
+            limit.dampen = -1f;
+            Assert.Equal(0f, limit.dampen);
+            trails.ratio = 1.5f;
+            Assert.Equal(1f, trails.ratio);
+            main.startSpeed = 0f;
+            main.simulationSpace = ParticleSystemSimulationSpace.World;
+            Assert.Equal((0f, ParticleSystemSimulationSpace.World), (main.startSpeed.constant, main.simulationSpace));
+            Object.DestroyImmediate(ps.gameObject);
+        }
+
+        /// Measured: Emit(EmitParams) makes its particles at once, the set values as given (a
+        /// position without the shape, in simulation space), the rest from the modules.
+        [Fact]
+        public void EmitParamsOverrideTheModules()
+        {
+            var ps = Scripted();
+            Frames(2);
+            ps.Emit(Full(), 1);
+            var p = ps.Data.Particles[0];
+            Assert.Equal((new Vector3(110f, 205f, -3f), new Vector3(4f, 3f, 0f), new Vector3(0.25f, 0.25f, 0.25f), 0.3f),
+                (p.Position, p.Velocity, p.StartSize, p.Lifetime));
+            Assert.Equal(90f * Mathf.Deg2Rad, p.Rotation.z, 5);
+            Assert.Equal((Color)new Color32(76, 255, 255, 255), p.StartColor);
+            ps.Clear();
+
+            // A position set and no velocity: straight along +Z at the start speed.
+            var e = Full();
+            e.ResetVelocity();
+            ps.Emit(e, 1);
+            Assert.Equal(new Vector3(0f, 0f, 5f), ps.Data.Particles[0].Velocity);
+            ps.Clear();
+
+            // No position: the emitter's, offset by the cone's base (radius 1, z 0).
+            e = Full();
+            e.ResetPosition();
+            e.ResetStartSize();
+            e.ResetStartLifetime();
+            e.ResetRotation();
+            e.ResetStartColor();
+            ps.Emit(e, 1);
+            p = ps.Data.Particles[0];
+            Assert.InRange((p.Position - new Vector3(100f, 200f, 0f)).magnitude, 0f, 1.0001f);
+            Assert.Equal(0f, p.Position.z);
+            Assert.Equal((new Vector3(1f, 1f, 1f), 5f, 0f, Color.white), (p.StartSize, p.Lifetime, p.Rotation.z, p.StartColor));
+            ps.Clear();
+
+            // With the shape applied, the position is offset by it.
+            e = Full();
+            e.applyShapeToPosition = true;
+            ps.Emit(e, 1);
+            p = ps.Data.Particles[0];
+            Assert.InRange((p.Position - new Vector3(110f, 205f, -3f)).magnitude, 0f, 1.0001f);
+            Assert.Equal(-3f, p.Position.z);
+            ps.Clear();
+
+            var main = ps.main;
+            main.maxParticles = 5;
+            for (int i = 0; i < 4; i++) ps.Emit(Full(), 2);
+            Assert.Equal(5, ps.particleCount);
+            Object.DestroyImmediate(ps.gameObject);
+        }
+
+        /// Measured: a stopped system that is given particles plays, without emitting, until they
+        /// are gone, and they age meanwhile.
+        [Fact]
+        public void EmitOnAStoppedSystemPlaysUntilItsParticlesDie()
+        {
+            var ps = Scripted();
+            Frames(1);
+            ps.Stop();
+            Frames(2);
+            Assert.True(ps.isStopped);
+            ps.Emit(Full(), 1);
+            Assert.Equal((true, false, false), (ps.isPlaying, ps.isStopped, ps.isEmitting));
+            Frames(3);
+            Assert.InRange(ps.Data.Particles[0].Age, 0.04f, 0.06f);
+            Frames(30);
+            Assert.Equal((false, true, 0), (ps.isPlaying, ps.isStopped, ps.particleCount));
+            Object.DestroyImmediate(ps.gameObject);
+        }
+
+        /// Measured speeds over steps of Simulate: the speed over the limit shrinks by
+        /// (1 - dampen) every 1/30 s, before the particle moves.
+        [Theory]
+        [InlineData(1f, 0.2f, 0.01f, new[] { 9.417236f, 8.872207f, 8.362469f, 7.88573742f, 7.439875f, 7.022883f },
+            new[] { 110.09417f, 110.182892f, 110.266518f, 110.345375f, 110.419777f, 110.490005f })]
+        [InlineData(1f, 0.2f, 0.1f, new[] { 5.608f, 3.35929561f, 2.207959f, 1.61847484f, 1.31665909f, 1.1621294f },
+            new[] { 110.702705f, 111.11129f, 111.369286f, 111.550179f, 111.691589f, 111.8128f })]
+        [InlineData(1f, 0.5f, 0.05f, new[] { 4.18198f, 2.12499976f, 1.39774752f, 1.140625f, 1.0497185f, 1.01757813f },
+            new[] { 110.263336f, 110.388763f, 110.465431f, 110.524864f, 110.5782f, 110.629379f })]
+        [InlineData(3f, 0.5f, 0.02f, new[] { 7.61827755f, 6.046927f, 5.01022243f, 4.326252f, 3.875f, 3.57728481f },
+            new[] { 110.152367f, 110.273308f, 110.373512f, 110.460037f, 110.537537f, 110.609085f })]
+        [InlineData(3f, 1f, 0.05f, new[] { 3f, 3f, 3f, 3f, 3f, 3f },
+            new[] { 110.149994f, 110.299988f, 110.449982f, 110.599976f, 110.749969f, 110.899963f })]
+        public void LimitVelocityDampensTheExcessSpeed(float limit, float dampen, float dt, float[] speeds, float[] positions)
+        {
+            var ps = Scripted();
+            var module = ps.limitVelocityOverLifetime;
+            module.enabled = true;
+            module.limit = new ParticleSystem.MinMaxCurve(limit);
+            module.dampen = dampen;
+            var e = Full();
+            e.velocity = new Vector3(10f, 0f, 0f);
+            e.startLifetime = 5f;
+            ps.Emit(e, 1);
+            ps.Pause();
+            for (int i = 0; i < speeds.Length; i++)
+            {
+                ps.Simulate(dt, true, false, false);
+                var p = ps.Data.Particles[0];
+                Assert.Equal(speeds[i], p.Velocity.x, 3);
+                Assert.Equal(positions[i], p.Position.x, 3);
+            }
+            Object.DestroyImmediate(ps.gameObject);
+        }
+
+        /// Measured: rotation over lifetime is in radians a second (a constant 2 turns a particle
+        /// 5.73 degrees in 0.05 s).
+        [Fact]
+        public void RotationOverLifetimeTurnsInRadiansASecond()
+        {
+            var ps = Scripted();
+            var rotation = ps.rotationOverLifetime;
+            rotation.enabled = true;
+            rotation.z = new ParticleSystem.MinMaxCurve(2f);
+            var e = Full();
+            e.rotation = 0f;
+            e.startLifetime = 5f;
+            ps.Emit(e, 1);
+            ps.Pause();
+            ps.Simulate(0.05f, true, false, false);
+            Assert.Equal(5.729578f, ps.Data.Particles[0].Rotation.z * Mathf.Rad2Deg, 3);
+            Object.DestroyImmediate(ps.gameObject);
+        }
     }
 }

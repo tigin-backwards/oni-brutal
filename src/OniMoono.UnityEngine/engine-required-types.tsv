@@ -34,6 +34,13 @@ UnityEngine.ParticleSystemModule	UnityEngine.ParticleSystem+ColorOverLifetimeMod
 UnityEngine.ParticleSystemModule	UnityEngine.ParticleSystem+MinMaxCurve	# mods (Decor Pack S): MainModule.startLifetime, EmissionModule.rateOverTime
 UnityEngine.ParticleSystemModule	UnityEngine.ParticleSystemCurveMode	# MinMaxCurve.mode
 UnityEngine.ParticleSystemModule	UnityEngine.ParticleSystem+NoiseModule	# mods (Decor Pack S): ParticleSystem.noise
+UnityEngine.ParticleSystemModule	UnityEngine.ParticleSystem+EmitParams	# mods (ManualMiner): ParticleSystem.Emit(EmitParams, int)
+UnityEngine.ParticleSystemModule	UnityEngine.ParticleSystem+LimitVelocityOverLifetimeModule	# mods (ManualMiner): ParticleSystem.limitVelocityOverLifetime
+UnityEngine.ParticleSystemModule	UnityEngine.ParticleSystem+RotationOverLifetimeModule	# mods (ManualMiner): ParticleSystem.rotationOverLifetime
+UnityEngine.ParticleSystemModule	UnityEngine.ParticleSystem+SizeOverLifetimeModule	# mods (ManualMiner): ParticleSystem.sizeOverLifetime
+UnityEngine.ParticleSystemModule	UnityEngine.ParticleSystem+TrailModule	# mods (ManualMiner): ParticleSystem.trails
+UnityEngine.ParticleSystemModule	UnityEngine.ParticleSystemRenderMode	# ParticleSystemRenderer.renderMode
+UnityEngine.ParticleSystemModule	UnityEngine.ParticleSystemSimulationSpace	# MainModule.simulationSpace
 UnityEngine.CoreModule	UnityEngine.PlayerPrefs	# mods: settings kept in PlayerPrefs (DuplicantStatusBar-style UIs)
 UnityEngine.Physics2DModule	UnityEngine.EdgeCollider2D	# mods' bundles (Aki's Snow Things): a prefab's edge collider
 UnityEngine.CoreModule	UnityEngine.Rendering.ShaderPropertyType	# mods (Morphs Not Included): Shader.GetPropertyType

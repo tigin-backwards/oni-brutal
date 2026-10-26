@@ -117,11 +117,24 @@ namespace OniMoono.Engine.Particles
         // Size over lifetime.
         public bool SizeEnabled;
         public bool SizeSeparateAxes;
-        public MinMaxCurveData SizeX, SizeY, SizeZ;
+        /// A new component's: a curve from 0 to 1 over the lifetime (measured).
+        public MinMaxCurveData SizeX = LinearRise(), SizeY = LinearRise(), SizeZ = LinearRise();
+
+        // Limit velocity over lifetime (scripts only: a bundle's module is not read). A new
+        // component's limit is 1 and its dampen 0 (measured).
+        public bool LimitEnabled;
+        public MinMaxCurveData Limit = MinMaxCurveData.Const(1f);
+        /// Kept within [0, 1], as Unity keeps it.
+        public float LimitDampen;
+
+        // Rotation over lifetime (scripts only, z): radians a second, 45° on a new component.
+        public bool RotationEnabled;
+        public bool RotationSeparateAxes;
+        public MinMaxCurveData RotationZ = MinMaxCurveData.Const(0.7853982f);
 
         // Color over lifetime.
         public bool ColorEnabled;
-        public MinMaxGradientData ColorOverLifetime;
+        public MinMaxGradientData ColorOverLifetime = MinMaxGradientData.White();
 
         // Color by speed.
         public bool ColorBySpeedEnabled;
@@ -145,20 +158,28 @@ namespace OniMoono.Engine.Particles
         public float Cycles = 1f;
 
         // Trails (per-particle mode, stretched texture).
+        // A new component's values are measured ones.
         public bool TrailsEnabled;
-        public float TrailRatio;
-        public MinMaxCurveData TrailLifetime;
-        public float TrailMinVertexDistance;
-        public bool TrailDieWithParticles;
-        public bool TrailSizeAffectsWidth;
+        public float TrailRatio = 1f;
+        public MinMaxCurveData TrailLifetime = MinMaxCurveData.Const(1f);
+        public float TrailMinVertexDistance = 0.2f;
+        public bool TrailDieWithParticles = true;
+        public bool TrailSizeAffectsWidth = true;
         public bool TrailSizeAffectsLifetime;
-        public bool TrailInheritParticleColor;
-        public MinMaxGradientData TrailColorOverLifetime;
-        public MinMaxCurveData TrailWidthOverTrail;
-        public MinMaxGradientData TrailColorOverTrail;
+        public bool TrailInheritParticleColor = true;
+        public MinMaxGradientData TrailColorOverLifetime = MinMaxGradientData.White();
+        public MinMaxCurveData TrailWidthOverTrail = MinMaxCurveData.Const(1f);
+        public MinMaxGradientData TrailColorOverTrail = MinMaxGradientData.White();
 
         // Sub emitters (listed for the API; the module itself is never enabled in the data).
         public SubEmitterData[] SubEmitters = Array.Empty<SubEmitterData>();
+
+        static MinMaxCurveData LinearRise() => new()
+        {
+            Mode = MinMaxCurveData.Curve,
+            Scalar = 1f,
+            MaxCurve = new AnimationCurve(new Keyframe(0f, 0f, 0f, 1f), new Keyframe(1f, 1f, 1f, 0f)),
+        };
 
         public ParticleConfig Clone()
         {

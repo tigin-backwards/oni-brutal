@@ -44,7 +44,16 @@ namespace OniMoono.Engine.Particles
             RotFlip = 9, Color = 10, ShapeA = 11, ShapeB = 12, ShapeC = 13, ShapeD = 14, ShapeE = 15, ShapeF = 16,
             Gravity = 17, ForceX = 18, ForceY = 19, ForceZ = 20, SizeOverLifetime = 21, ColorOverLifetime = 22,
             ColorBySpeed = 23, FrameOverTime = 24, StartFrame = 25, Trail = 26, TrailLifetime = 27, TrailColor = 28,
-            TrailWidth = 29;
+            TrailWidth = 29, Limit = 30, RotationOverLifetime = 31;
+    }
+
+    /// What ParticleSystem.Emit(EmitParams, count) sets of its particles; null takes the modules'.
+    internal struct EmitOverrides
+    {
+        public Vector3? Position, Velocity;
+        public float? StartSize, StartLifetime, RotationDegrees;
+        public Color32? StartColor;
+        public bool ApplyShapeToPosition;
     }
 
     /// Engine side of a ParticleSystem: its modules (Config) and its simulation state.
@@ -207,15 +216,23 @@ namespace OniMoono.Engine.Particles
             StopActionPending = Config.StopAction != 0;
         }
 
-        /// Fast-forwards by t seconds in steps (Time.fixedDeltaTime when fixedTimeStep, else the
-        /// maximum particle delta time), then leaves the system paused. restart starts it over.
+        /// Fast-forwards by t seconds in steps (Time.fixedDeltaTime when fixedTimeStep, else equal
+        /// steps no longer than the maximum particle delta time, as a frame's: measured), then
+        /// leaves the system paused. restart starts it over.
         public void Simulate(float t, bool restart, bool fixedTimeStep)
         {
             if (restart) Reset();
             if (!Playing) Start();
             Paused = false;
             hasPreviousEmitterPosition = false;
-            RunFixed(t * Config.SimulationSpeed, fixedTimeStep ? UnityEngine.Time.fixedDeltaTime : UnityEngine.Time.maximumParticleDeltaTime);
+            float run = t * Config.SimulationSpeed;
+            float step = UnityEngine.Time.fixedDeltaTime;
+            if (!fixedTimeStep)
+            {
+                float max = UnityEngine.Time.maximumParticleDeltaTime;
+                step = max > 0f && run > 0f ? run / Math.Max(1, (int)MathF.Ceiling(run / max)) : run;
+            }
+            RunFixed(run, step);
             if (Playing) Paused = true;
         }
 
@@ -426,7 +443,30 @@ namespace OniMoono.Engine.Particles
             }
         }
 
-        void EmitParticle(float te, float age, in EmitContext ctx)
+        /// Emit(EmitParams, count), as measured: particles made at once at age 0, from the main and
+        /// shape modules where the parameters set nothing. A position set places them there, in
+        /// simulation space, without the shape (its direction too: they leave along +Z) unless
+        /// applyShapeToPosition, which offsets them by it. A system not playing then plays, without
+        /// emitting, and stops once they are gone.
+        public void Emit(EmitOverrides overrides, int count)
+        {
+            if (count <= 0) return;
+            if (!Playing)
+            {
+                random = new ParticleRandom(Config.AutoRandomSeed ? ParticleRandom.NextAutoSeed() : Config.RandomSeed);
+                Playing = true;
+                Paused = false;
+                StopEmitting = true;
+                StopActionPending = false;
+            }
+            var emitter = CaptureEmitter();
+            var ctx = new EmitContext(emitter, emitter.Position, 0f, 1f, 0f);
+            for (int i = 0; i < count; i++) EmitParticle(Time, 0f, ctx, overrides);
+        }
+
+        void EmitParticle(float te, float age, in EmitContext ctx) => EmitParticle(te, age, ctx, null);
+
+        void EmitParticle(float te, float age, in EmitContext ctx, EmitOverrides? overrides)
         {
             var c = Config;
             if (count >= c.MaxParticles) return;
@@ -435,7 +475,8 @@ namespace OniMoono.Engine.Particles
             float R(uint salt) => ParticleRandom.Hash01(seed, salt);
 
             var p = new Particle { Seed = seed };
-            p.Lifetime = c.StartLifetime.Evaluate(normalized, R(Salt.Lifetime));
+            var o = overrides ?? default;
+            p.Lifetime = o.StartLifetime ?? c.StartLifetime.Evaluate(normalized, R(Salt.Lifetime));
             if (!(p.Lifetime > 0f) || age >= p.Lifetime) return;
             float speed = c.StartSpeed.Evaluate(normalized, R(Salt.Speed));
             float sx = c.StartSizeX.Evaluate(normalized, R(Salt.SizeX));
@@ -448,8 +489,17 @@ namespace OniMoono.Engine.Particles
                 : new Vector3(0f, 0f, rz);
             if (c.RandomizeRotationDirection > 0f && R(Salt.RotFlip) < c.RandomizeRotationDirection) p.Rotation = -p.Rotation;
             p.StartColor = c.StartColor.Evaluate(normalized, R(Salt.Color));
+            if (o.StartSize is float size) p.StartSize = new Vector3(size, size, size);
+            if (o.RotationDegrees is float degrees) p.Rotation = new Vector3(0f, 0f, degrees * Mathf.Deg2Rad);
+            if (o.StartColor is Color32 color) p.StartColor = color;
 
-            ShapeSample(seed, out var position, out var direction);
+            Vector3 position, direction;
+            if (o.Position.HasValue && !o.ApplyShapeToPosition)
+            {
+                position = Vector3.zero;
+                direction = Vector3.forward;
+            }
+            else ShapeSample(seed, out position, out direction);
             if (c.Shape.Enabled && c.Shape.AlignToDirection && direction != Vector3.zero)
             {
                 var e = Quaternion.LookRotation(direction).eulerAngles * Mathf.Deg2Rad;
@@ -471,6 +521,9 @@ namespace OniMoono.Engine.Particles
                 p.Position = position;
                 p.Velocity = velocity;
             }
+            // Parameters are in simulation space; a set position takes the emitter's place.
+            if (o.Position is Vector3 at) p.Position = o.ApplyShapeToPosition ? at + (p.Position - (c.SimulationSpace == 1 ? ctx.PositionAtAge(age) : Vector3.zero)) : at;
+            if (o.Velocity is Vector3 v) p.Velocity = v;
 
             if (c.TrailsEnabled && R(Salt.Trail) < c.TrailRatio)
             {
@@ -632,7 +685,21 @@ namespace OniMoono.Engine.Particles
                 accel += force;
             }
             p.Velocity += accel * h;
+            if (c.LimitEnabled)
+            {
+                // The speed over the limit shrinks by (1 - dampen) every 1/30 s, before the
+                // particle moves; a dampen of 1 holds it at the limit (measured).
+                float limit = c.Limit.Evaluate(p.Age / p.Lifetime, ParticleRandom.Hash01(p.Seed, Salt.Limit));
+                float speed = p.Velocity.magnitude;
+                if (speed > limit && speed > 0f)
+                {
+                    float kept = MathF.Pow(1f - c.LimitDampen, h * 30f);
+                    p.Velocity *= (limit + (speed - limit) * kept) / speed;
+                }
+            }
             p.Position += p.Velocity * h;
+            if (c.RotationEnabled)
+                p.Rotation.z += c.RotationZ.Evaluate(p.Age / p.Lifetime, ParticleRandom.Hash01(p.Seed, Salt.RotationOverLifetime)) * h;
         }
 
         /// Records trail points as particles move and drops expired points.

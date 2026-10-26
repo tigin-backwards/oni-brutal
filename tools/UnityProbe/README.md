@@ -366,6 +366,16 @@ at the main menu): Application.wantsToQuit, quitting and unloading handlers and 
 around three Application.Quit() calls three frames apart (a handler refuses the first and throws
 at the second). The player quits at the second. `QuitEventsTests` encodes the results.
 
+With `PROBE_SCENARIO=particleemit` only the particle probe runs (`ParticleEmit.cs`, lines `PE …`,
+10 s into the main menu, about a second): particle systems built by script as ManualMiner
+(3638972299) builds its laser's sparks. It logs the modules' defaults on a new component and what
+setters keep, the particles `Emit(EmitParams, count)` makes with each parameter set or left out,
+Emit on a playing, a stopped and a never-played system, a velocity limit's speeds over steps of
+`Simulate`, and rotation and size over lifetime. It runs through `scripts/e2e.py` with OniMcp's
+mod folder as above and a spec `from: main-menu` that waits for `**/ParticleEmitProbeDone`.
+`ParticleTests` (`EmitParamsOverrideTheModules`, `LimitVelocityDampensTheExcessSpeed` and
+others) encodes the results.
+
 With `PROBE_SCENARIO=destroyflags` only the destroy-flags probe runs (`DestroyFlags.cs`, lines
 `DF …`, at the main menu): the active flags each component sees in its OnDisable and OnDestroy
 when a GameObject is destroyed (with Destroy and DestroyImmediate; active, inactive, under an

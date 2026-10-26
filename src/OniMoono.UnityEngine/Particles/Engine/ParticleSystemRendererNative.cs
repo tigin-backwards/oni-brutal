@@ -169,7 +169,7 @@ namespace OniMoono.Engine.Particles
         {
             objectToWorld = Matrix4x4.identity;
             var ps = System;
-            if (ps == null || RenderMode == 5) return false;
+            if (ps == null || RenderMode is 4 or 5) return false;
             var particles = ps.Particles;
             bool trails = ps.Config.TrailsEnabled || ps.OrphanTrails.Count > 0;
             if (particles.Length == 0 && ps.OrphanTrails.Count == 0) return false;

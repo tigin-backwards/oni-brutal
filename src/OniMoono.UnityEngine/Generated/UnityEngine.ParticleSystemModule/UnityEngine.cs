@@ -26,6 +26,18 @@ namespace UnityEngine
     }
     public partial class ParticleSystem
     {
+        public partial struct EmitParams
+        {
+        }
+    }
+    public partial class ParticleSystem
+    {
+        public partial struct LimitVelocityOverLifetimeModule
+        {
+        }
+    }
+    public partial class ParticleSystem
+    {
         public partial struct MainModule
         {
         }
@@ -52,13 +64,31 @@ namespace UnityEngine
     }
     public partial class ParticleSystem
     {
+        public partial struct RotationOverLifetimeModule
+        {
+        }
+    }
+    public partial class ParticleSystem
+    {
         public partial struct ShapeModule
         {
         }
     }
     public partial class ParticleSystem
     {
+        public partial struct SizeOverLifetimeModule
+        {
+        }
+    }
+    public partial class ParticleSystem
+    {
         public partial struct SubEmittersModule
+        {
+        }
+    }
+    public partial class ParticleSystem
+    {
+        public partial struct TrailModule
         {
         }
     }
@@ -77,9 +107,24 @@ namespace UnityEngine
         TwoGradients = 3,
         RandomColor = 4,
     }
+    public enum ParticleSystemRenderMode
+    {
+        Billboard = 0,
+        Stretch = 1,
+        HorizontalBillboard = 2,
+        VerticalBillboard = 3,
+        Mesh = 4,
+        None = 5,
+    }
     [global::UnityEngine.RequireComponent(typeof(global::UnityEngine.Transform))]
     public sealed partial class ParticleSystemRenderer : global::UnityEngine.Renderer
     {
+    }
+    public enum ParticleSystemSimulationSpace
+    {
+        Local = 0,
+        World = 1,
+        Custom = 2,
     }
     public enum ParticleSystemStopAction
     {

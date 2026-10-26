@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3520953238-water-sieve-cleans-germs.yaml",
+ "mods": [
+  "3520953238"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Water Sieve on tiles, powered and piped, sieves polluted water carrying a million germs, and nothing it holds keeps a germ",
+ "updated": "2026-10-26",
+ "commit": "a90b2bc",
+ "mod_dlls": {
+  "3520953238": {
+   "nogermsieve.dll": "5e4f8bd623c1b9f7d75201a500deb7be43b313e2430d9b084bf5a318bb93a716"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-014459-2846dc4d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T01:48:18",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-015006-df211491",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T01:59:16",
+    "lane": 15,
+    "reference_run": "20261026-014459-2846dc4d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-015006-df211491",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T02:00:15",
+    "lane": 15,
+    "reference_run": "20261026-014459-2846dc4d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

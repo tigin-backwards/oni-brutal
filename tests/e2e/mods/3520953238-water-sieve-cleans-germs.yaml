@@ -1,0 +1,42 @@
+# Water Sieve cleans germs / No germ sieve (3520953238), class P.
+#
+# What it does: a postfix on ElementConverter.ConvertMass removes all germs from everything a
+# Water Sieve stores, each time it converts, so the water it pipes out is clean (the game's
+# keeps the polluted water's germs).
+# How a player reaches it: a working Water Sieve.
+# What changes: sieved water carries no germs.
+#
+# setup builds a Water Sieve on tiles in the corridor west of the printing pod, powers it from a charged
+# Battery beside it, lays a pipe on its ports and fills it with 100 kg of polluted water carrying a million food
+# poisoning germs and 100 kg of sand. As the game runs, the sieve makes water, and nothing in it
+# has germs.
+from: early-base
+mods: [3520953238]
+setup:
+  # Tiles under it: the floor here has pits, and a building needs a solid foundation to run.
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Tile\")", method: Build, args: [{"$": "Grid.XYToCell(111, 206)"}, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Tile\")", method: Build, args: [{"$": "Grid.XYToCell(112, 206)"}, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Tile\")", method: Build, args: [{"$": "Grid.XYToCell(113, 206)"}, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Tile\")", method: Build, args: [{"$": "Grid.XYToCell(114, 206)"}, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"WaterPurifier\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Battery\")", method: Build, args: [{"$": "Grid.XYToCell(115, 207)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Wire\")", method: Build, args: [{"$": "Grid.XYToCell(114, 207)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Wire\")", method: Build, args: [{"$": "Grid.XYToCell(115, 207)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Game.Instance.electricalConduitSystem", method: SetConnections, args: ["Right", {"$": "Grid.XYToCell(114, 207)"}, true]}}
+  - driver: {setup.call: {target: "Game.Instance.electricalConduitSystem", method: SetConnections, args: ["Left", {"$": "Grid.XYToCell(115, 207)"}, true]}}
+  # A pipe on its input and on its output port, which a sieve needs to run.
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LiquidConduit\")", method: Build, args: [{"$": "Grid.XYToCell(111, 209)"}, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LiquidConduit\")", method: Build, args: [{"$": "Grid.XYToCell(114, 209)"}, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "all:Battery::[0]", method: AddEnergy, args: [10000.0]}}
+  - driver: {setup.call: {target: "all:WaterPurifier::[0].GetComponent<Storage>", method: AddLiquid, args: [DirtyWater, 100.0, 300.0, {"$": "Db.Get().Diseases.GetIndex(\"FoodPoisoning\")"}, 1000000, false, true]}}
+  - driver: {setup.call: {target: "all:WaterPurifier::[0].GetComponent<Storage>", method: AddOre, args: [Sand, 100.0, 300.0, 255, 0, false, true]}}
+steps:
+  - expect_state:
+      "sum:all:WaterPurifier::[0].GetComponent<Storage>.items[*].GetComponent<PrimaryElement>.DiseaseCount": "> 0"
+  - run: {seconds: 2}
+  - expect_state:
+      "all:WaterPurifier::[0].GetComponent<Operational>.IsOperational": true
+  - run: {seconds: 20}
+  - expect_state:
+      "sum:all:WaterPurifier::[0].GetComponent<Storage>.items[*].GetComponent<PrimaryElement>.Mass if .GetComponent<PrimaryElement>.ElementID == Water": "> 1"
+      "sum:all:WaterPurifier::[0].GetComponent<Storage>.items[*].GetComponent<PrimaryElement>.DiseaseCount": 0

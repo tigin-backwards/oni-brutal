@@ -1,0 +1,73 @@
+{
+ "spec": "mods/3145638633-auto-remove-baby.yaml",
+ "mods": [
+  "3145638633"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a built Incubator's user menu has Autoremove Enable; a click turns it on and renames it",
+ "updated": "2026-10-25",
+ "commit": "bd353b5",
+ "mod_dlls": {
+  "3145638633": {
+   "egg.dll": "9ce11a1d9770cd451708766a280958e5fc012efad9fcd77d797fd815043e0b3a"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-201720-b5f6d528",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T20:54:22",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-210949-ab0a031d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T21:09:49",
+    "lane": 15,
+    "reference_run": "20261025-201720-b5f6d528",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "user-menu": {
+      "differences": 0
+     },
+     "user-menu-on": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "user-menu-on": 0.0
+    }
+   },
+   {
+    "run": "20261025-210949-ab0a031d",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-25T21:11:36",
+    "lane": 15,
+    "reference_run": "20261025-201720-b5f6d528",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "user-menu": {
+      "differences": 0
+     },
+     "user-menu-on": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "user-menu-on": 0.0
+    }
+   }
+  ]
+ }
+}

@@ -1,0 +1,36 @@
+# Auto Remove Baby (3145638633), classes B, S.
+#
+# What it does: gives the Incubator (EggIncubator) a user menu toggle, "Autoremove Enable" /
+# "Autoremove Disable" (an Eggbutton component, saved, copied by copy settings). While it is
+# on, a postfix on EggIncubator.StoreBaby drops everything from the incubator's storage, so a
+# hatched baby leaves the incubator at once instead of staying in it.
+# How a player reaches it: a built Incubator's user menu button.
+# What changes: babies are let out of the incubator as they hatch.
+#
+# setup grants Critter Ranching II (AnimalControl) and spawns copper. An Incubator is built in
+# the corridor west of the printing pod and selected: its user menu has the mod's button, and
+# a click turns autoremove on and renames it.
+from: early-base
+mods: [3145638633]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"AnimalControl\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Copper\").substance", method: SpawnResource, args: [[111.5, 207.5, -12], 400, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"EggIncubator\").GetComponent<egg.Eggbutton>": exists
+  - build: {prefab: EggIncubator, at: [113, 206], material: Copper}
+  - expect: {blueprints: {EggIncubator: 1}}
+  - run: {seconds: 1500, until: {buildings: {EggIncubator: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [113, 207], ortho: 8}}
+  - click_world: {cell: [113, 207], select: EggIncubator}
+  - ui_wait: {path: "**/DetailsScreen/UserMenuButtons/UserMenuScreen/Buttons", cond: stable}
+  - expect_state:
+      "selected:GetComponent<egg.Eggbutton>.autoremove": false
+  - ui_dump: {name: user-menu, root: "**/DetailsScreen/UserMenuButtons/UserMenuScreen/Buttons"}
+  - click: {ui: "**/UserMenuScreen/Buttons/Autoremove EnableButton"}
+  - expect_state:
+      "selected:GetComponent<egg.Eggbutton>.autoremove": true
+  - ui_wait: {path: "**/UserMenuScreen/Buttons/Autoremove DisableButton", cond: stable}
+  - ui_dump: {name: user-menu-on, root: "**/DetailsScreen/UserMenuButtons/UserMenuScreen/Buttons"}
+  - shot: {name: user-menu-on, crop: "**/DetailsScreen/UserMenuButtons/UserMenuScreen/Buttons"}

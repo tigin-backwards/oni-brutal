@@ -1,0 +1,67 @@
+{
+ "spec": "mods/3408518726-loading-pip.yaml",
+ "mods": [
+  "3408518726"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with the option naming the Hatch, quitting to the main menu shows a loading screen with the Hatch's icon; the options dialog opens from the Mods screen; dump and shot match",
+ "updated": "2026-10-26",
+ "commit": "6407549",
+ "mod_dlls": {
+  "3408518726": {
+   "LoadingPip.dll": "62ab2d565dac5e8425d7e166acde5d3885ede76f1e67414e5cd3e1ea41c3a471"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-220744-daa697b6",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T22:44:47",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-003746-224c0bcd",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T00:37:46",
+    "lane": 15,
+    "reference_run": "20261025-220744-daa697b6",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "options": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "options": 0.0
+    }
+   },
+   {
+    "run": "20261026-003746-224c0bcd",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T00:40:25",
+    "lane": 15,
+    "reference_run": "20261025-220744-daa697b6",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "options": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "options": 0.0
+    }
+   }
+  ]
+ }
+}

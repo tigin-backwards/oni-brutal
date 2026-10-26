@@ -1,0 +1,36 @@
+# Loading Pip - Customizable Loading Screen (3408518726), classes V, O.
+#
+# What it does: a postfix on LoadingOverlay.Load replaces the loading screen's Pip with the icon
+# of the entity named in its PLib option "Loading icon Id/Name" (Squirrel by default, by ID or
+# by name), or a random one (a critter, a custom icon from the mod's assets folder, or anything)
+# as its Randomize option says; the options dialog also has buttons to open the icon folder and
+# for a Primal Aspid. PNGs in its assets folder are loaded as sprites at start.
+# How a player reaches it: any loading screen (loading a save, quitting to the main menu); the
+# options on the Mods screen.
+# What changes: the loading screen's icon.
+#
+# The option names the Hatch. Quitting to the main menu shows the loading screen, which takes
+# the Hatch's icon (the mod logs where it took it from); then the mod's options dialog opens
+# from the Mods screen and Cancel closes it.
+from: early-base
+mods: [3408518726]
+options:
+  LoadingPip: {LoadingIdPrefabId: Hatch}
+require_log: ['fetching image from: .*Hatch']
+steps:
+  - key: {code: Escape}
+  - ui_wait: {path: "**/PauseScreen/**/Main MenuButton", cond: stable}
+  - click: {ui: "**/PauseScreen/**/Main MenuButton"}
+  - ui_wait: {path: "**/ConfirmDialog/GameObject/Panel/ConfigurableButton", cond: stable}
+  - click: {ui: "**/ConfirmDialog/GameObject/Panel/ConfigurableButton"}   # Quit Without Saving
+  - ui_wait: {path: "**/MainMenu_SpacedOut/MainMenuMenubar/MainMenuButtons", cond: stable, frames: 3000}
+  - click: {text: "MODS", under: "**/MainMenuButtons"}
+  - ui_wait: {path: "**/ModsScreen/Panel", cond: stable}
+  - click: {ui: "**/ModsScreen/**/Content/Loading Pip/ModSettingsButton"}
+  - ui_wait: {path: "**/ModOptions", cond: stable}
+  - expect_ui:
+      "**/ModOptions/Body/**/Entries/Label/Text": {any_text: "Loading icon Id/Name"}
+  - ui_dump: {name: options, root: "**/ModOptions"}
+  - shot: {name: options, crop: "**/ModOptions"}
+  - click: {text: "CANCEL", under: "**/ModOptions"}
+  - ui_wait: {path: "**/ModOptions", cond: gone}

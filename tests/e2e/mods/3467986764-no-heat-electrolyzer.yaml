@@ -1,0 +1,27 @@
+# 暖噗噗元气电解器 No-Heat Electrolyzer (3467986764), class P.
+#
+# What it does: the Electrolyzer makes no heat (no exhaust or self heat), ignores the
+# overpressure limit (RoomForPressure), puts out its gases at a constant 20 degrees and gains
+# a gas output port (0, 1) that pipes the oxygen and hydrogen it stores; a descriptor signs it.
+# How a player reaches it: building an Electrolyzer.
+# What changes: a cool electrolyzer that never stops for pressure.
+#
+# The def is read; an electrolyzer built in the dug-out corridor west of the printing pod is
+# selected.
+from: early-base
+mods: [3467986764]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Electrolyzer\")", method: Build, args: [131129, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"Electrolyzer\").SelfHeatKilowattsWhenActive": 0
+      "Assets.GetBuildingDef(\"Electrolyzer\").ExhaustKilowattsWhenActive": 0
+      "Assets.GetBuildingDef(\"Electrolyzer\").OutputConduitType": "== 'Gas'"
+      "Assets.GetBuildingDef(\"Electrolyzer\").UtilityOutputOffset.y": 1
+  - run: {seconds: 2}
+  - expect: {buildings: {Electrolyzer: 1}}
+  - driver: {camera.set: {cell: [113, 207], ortho: 8}}
+  - click_world: {cell: [113, 206], select: Electrolyzer}
+  - ui_wait: {path: "**/DetailsScreen/TitleBar", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Electrolyzer"}

@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3467986764-no-heat-electrolyzer.yaml",
+ "mods": [
+  "3467986764"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Electrolyzer's def makes no heat and has a gas output port; a built one is selected",
+ "updated": "2026-10-26",
+ "commit": "df5493c6",
+ "mod_dlls": {
+  "3467986764": {
+   "NoHeatElectrolyzer.dll": "598b766215a66f2560533f6ff17722ede536c623c37fe571e791d9bd40cf6f81"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-024539-704646ee",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:45:45",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-035530-80dce9f6",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:56:45",
+    "lane": 15,
+    "reference_run": "20261026-024539-704646ee",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-035530-80dce9f6",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T03:57:24",
+    "lane": 15,
+    "reference_run": "20261026-024539-704646ee",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

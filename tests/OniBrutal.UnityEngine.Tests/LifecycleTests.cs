@@ -231,6 +231,87 @@ namespace OniBrutal.Tests
                 Recorder.Log.FindAll(e => e.EndsWith(":OnDisable") || e.EndsWith(":OnDestroy")));
         }
 
+        /// Logs the active flags its OnDisable and OnDestroy see.
+        public class FlagRecorder : MonoBehaviour
+        {
+            public string label = "";
+            string Flags() => (gameObject.activeSelf ? "self" : "-") + "/" + (gameObject.activeInHierarchy ? "hier" : "-");
+            void OnDisable() => Recorder.Log.Add(label + ":OnDisable " + Flags());
+            void OnDestroy() => Recorder.Log.Add(label + ":OnDestroy " + Flags());
+        }
+
+        // UnityProbe's destroyflags scenario in the original player: the GameObject Destroy or
+        // DestroyImmediate names turns inactive itself before its subtree's OnDisable and
+        // OnDestroy at destruction; descendants keep activeSelf; a component destroyed alone
+        // leaves its object active. KMonoBehaviour.OnDestroy releases a KObject's event system on
+        // `!gameObject.activeSelf`: left alive, a destroyed RocketControlStation's tag handler
+        // threw at a rocket's launch.
+
+        static FlagRecorder MakeFlags(string label, Transform parent)
+        {
+            var go = new GameObject(label);
+            go.transform.SetParent(parent);
+            var r = go.AddComponent<FlagRecorder>();
+            r.label = label;
+            return r;
+        }
+
+        [Fact]
+        public void DestroyedObjectIsInactiveInItsOwnOnDestroy()
+        {
+            var a = MakeFlags("A", null);
+            var ac = MakeFlags("AC", a.transform);
+            MakeFlags("ACC", ac.transform);
+            Frame();
+            Recorder.Log.Clear();
+            Object.Destroy(a.gameObject);
+            Assert.True(a.gameObject.activeSelf); // until destruction
+            Frame();
+            Assert.Equal(["A:OnDisable self/hier", "AC:OnDisable self/hier", "ACC:OnDisable self/-",
+                          "A:OnDestroy -/-", "AC:OnDestroy self/-", "ACC:OnDestroy self/-"], Recorder.Log);
+        }
+
+        [Fact]
+        public void DestroyImmediateDeactivatesTheObjectBeforeItsOnDisable()
+        {
+            var c = MakeFlags("C", null);
+            MakeFlags("CC", c.transform);
+            Frame();
+            Recorder.Log.Clear();
+            Object.DestroyImmediate(c.gameObject);
+            Assert.Equal(["CC:OnDisable self/-", "C:OnDisable -/-", "C:OnDestroy -/-", "CC:OnDestroy self/-"], Recorder.Log);
+        }
+
+        [Fact]
+        public void DestroyedChildUnderAnInactiveParentIsInactiveInOnDestroy()
+        {
+            var p = MakeFlags("P", null);
+            var e = MakeFlags("E", p.transform);
+            var q = MakeFlags("Q", null);
+            var qc = MakeFlags("QC", q.transform);
+            Frame();
+            p.gameObject.SetActive(false);
+            Recorder.Log.Clear();
+            Object.Destroy(e.gameObject);
+            Object.Destroy(qc.gameObject);
+            Frame();
+            Assert.Equal(["QC:OnDisable self/hier", "E:OnDestroy -/-", "QC:OnDestroy -/-"], Recorder.Log);
+            Assert.True(q.gameObject.activeSelf);
+        }
+
+        [Fact]
+        public void DestroyedComponentLeavesItsObjectActive()
+        {
+            var b = MakeFlags("B", null);
+            var go = b.gameObject;
+            Frame();
+            Recorder.Log.Clear();
+            Object.Destroy(b);
+            Frame();
+            Assert.Equal(["B:OnDisable self/hier", "B:OnDestroy self/hier"], Recorder.Log);
+            Assert.True(go.activeSelf);
+        }
+
         [Fact]
         public void ObjectsAwaitingDestructionAreNotEnabledAgain()
         {

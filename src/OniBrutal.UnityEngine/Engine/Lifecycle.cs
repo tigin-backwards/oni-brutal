@@ -451,14 +451,16 @@ namespace OniBrutal.Engine
             }
         }
 
-        public static void DestroyNow(Object obj)
+        /// Destroys OBJ now. A scene's unload passes `unloading`: its roots keep their active flag
+        /// (not measured there), where Destroy and DestroyImmediate clear it.
+        public static void DestroyNow(Object obj, bool unloading = false)
         {
             var native = obj.Native;
             if (native == null || native.Destroyed) return;
             switch (obj)
             {
                 case GameObject go:
-                    DestroyGameObject((GameObjectNative)native);
+                    DestroyGameObject((GameObjectNative)native, unloading);
                     break;
                 case Transform:
                     Debug.LogError("Destroying the transform component is not permitted. Destroy the GameObject instead.");
@@ -481,9 +483,16 @@ namespace OniBrutal.Engine
             }
         }
 
-        static void DestroyGameObject(GameObjectNative go)
+        static void DestroyGameObject(GameObjectNative go, bool unloading)
         {
             var t = go.Transform;
+            // 0. The destroyed object itself turns inactive (activeSelf false) before its
+            //    subtree's OnDisable and OnDestroy; its descendants keep their own flags (measured
+            //    in the original player, UnityProbe's destroyflags: Destroy and DestroyImmediate,
+            //    of an active object, an inactive one and one under an inactive parent).
+            //    KMonoBehaviour.OnDestroy releases its KObject's event system only when it sees
+            //    activeSelf false.
+            if (!unloading) go.ActiveSelf = false;
             // 1. Leave the active state: OnDisable for what is still enabled, deepest objects
             //    first (as Unity's player orders it when destroying).
             if (go.ActiveInHierarchy) DeactivateForDestroy(go);

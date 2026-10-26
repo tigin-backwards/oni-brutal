@@ -732,7 +732,10 @@ citing why.
     recurse in Unity's order (Awake/OnEnable for the whole subtree, parent first; OnDisable
     children-first when deactivating).
   - `Destroy` is deferred to the end of the frame; `DestroyImmediate` is synchronous,
-    children first, with `OnDisable` then `OnDestroy`.
+    children first, with `OnDisable` then `OnDestroy`. The GameObject either names turns
+    inactive itself (`activeSelf` false) before its subtree's callbacks at destruction, its
+    descendants keeping their own flag (UnityProbe's destroyflags): `KMonoBehaviour.OnDestroy`
+    releases the object's `KObject` event system only on `!activeSelf`.
   - Exceptions in a message are logged through `Debug.LogException` and do not stop the frame,
     as in Unity.
 - **Script execution order** comes from `MonoScript.m_ExecutionOrder` in

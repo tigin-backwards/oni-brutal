@@ -125,7 +125,7 @@ namespace OniBrutal.Engine
         static void Unload(SceneRecord scene, bool notify)
         {
             foreach (var root in scene.Roots.ToArray())
-                if (root.Managed != null && root.Managed.Native != null) Lifecycle.DestroyNow(root.Managed);
+                if (root.Managed != null && root.Managed.Native != null) Lifecycle.DestroyNow(root.Managed, unloading: true);
             if (notify) UnityEngine.SceneManagement.SceneManager.RaiseSceneUnloaded(scene);
             Scenes.Remove(scene);
         }

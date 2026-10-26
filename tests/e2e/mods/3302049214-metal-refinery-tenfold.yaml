@@ -1,0 +1,32 @@
+# 金属精炼器10倍产出 Metal Refinery 10x Output (3302049214), class P.
+#
+# What it does: replaces the Metal Refinery's configuration (a prefix on
+# MetalRefineryConfig.ConfigureBuildingTemplate): it needs no Duplicant, holds 2,000 kg of
+# output, its definition draws 1,200 W with a decor of +100 in 10 tiles, and it creates
+# recipes turning 100 kg of ore into 1,000 kg of refined metal (steel: 70 kg iron, 29 refined
+# carbon and 1 lime into 1,000 kg).
+# How a player reaches it: building a Metal Refinery (Refinement, after Smelting).
+# What changes: the refinery's power, decor and operation.
+#
+# Its recipes share their IDs with the game's own and none of them reaches the recipe list:
+# the original lists the game's 14 and no 1,000 kg one, and so must ours. The definitions are
+# read; a refinery built by setup in the dug-out corridor west of the printing pod is
+# selected.
+from: early-base
+mods: [3302049214]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"MetalRefinery\")", method: Build, args: [131129, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"MetalRefinery\").EnergyConsumptionWhenActive": 1200
+      "Assets.GetBuildingDef(\"MetalRefinery\").BaseDecor": 100
+      "Assets.GetPrefab(\"MetalRefinery\").GetComponent<ComplexFabricator>.duplicantOperated": false
+      "count:ComplexRecipeManager.Get().recipes[*] if .fabricators[0].Name == MetalRefinery": "== original"
+      "count:ComplexRecipeManager.Get().recipes[*] if .fabricators[0].Name == MetalRefinery and .results[0].amount == 1000": "== original"
+  - run: {seconds: 2}
+  - expect: {buildings: {MetalRefinery: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: MetalRefinery}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:ComplexFabricator.outStorage.capacityKg": 2000

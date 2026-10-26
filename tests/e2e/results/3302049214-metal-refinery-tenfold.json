@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3302049214-metal-refinery-tenfold.yaml",
+ "mods": [
+  "3302049214"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the refinery draws 1,200 W with +100 decor and needs no operator; a built one is selected and holds 2,000 kg of output; its 1,000 kg recipes reach neither player's recipe list",
+ "updated": "2026-10-26",
+ "commit": "f898d18a",
+ "mod_dlls": {
+  "3302049214": {
+   "╜≡╩⌠╛½┴╢╞≈10▒╢▓·│÷.dll": "77a4d2617ae550c152df1d4ff029c65ca38ce05b839402091916005a616a1b53"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-102152-42394c53",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T10:21:53",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-143450-564c3455",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T14:41:23",
+    "lane": 14,
+    "reference_run": "20261026-102152-42394c53",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-143450-564c3455",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T14:41:24",
+    "lane": 15,
+    "reference_run": "20261026-102152-42394c53",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

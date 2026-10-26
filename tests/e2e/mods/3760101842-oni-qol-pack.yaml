@@ -1,0 +1,21 @@
+# ONI QoL Pack 缺氧 QoL 补充包 (3760101842), classes P, V, O.
+#
+# What it does: eight quality-of-life features, each a PLib option (all on by default): idle
+# Flydos park at their dock, Duplicants finish the job at hand when their shift ends (and it
+# counts as downtime), priorities follow each Duplicant's skills (auto specialization), a
+# finished building moves a Duplicant out of its cells (anti-entombment), the camera can zoom
+# out over the whole planet, fabricators chain orders without a pause, and the long-commute
+# notification is dropped. A self-check logs what it enabled at game start.
+# How a player reaches it: the Mods screen's options; playing the colony.
+# What changes: Duplicants and the camera behave more sensibly.
+#
+# The colony runs a minute: the mod announces itself and the camera's zoom limit is the
+# original's (the whole planet).
+from: early-base
+mods: [3760101842]
+require_log: ['\[常识包\] 已加载']
+steps:
+  - run: {seconds: 60}
+  - expect: {duplicants: 3}
+  - expect_state:
+      "CameraController.Instance.maxOrthographicSize": "== original"

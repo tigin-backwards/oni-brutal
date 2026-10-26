@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3760101842-oni-qol-pack.yaml",
+ "mods": [
+  "3760101842"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the colony runs a minute with all eight features on: the mod's load line, and the camera's zoom limit matches the original's",
+ "updated": "2026-10-26",
+ "commit": "d24ca54f",
+ "mod_dlls": {
+  "3760101842": {
+   "CommonSensePack.dll": "ae96710b1276b7fafd659804d6412a6206e248a0a8b4fdba2f39a04b72d75ede"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-025019-77e7dd66",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:02:36",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-041346-0f417ab3",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:13:46",
+    "lane": 15,
+    "reference_run": "20261026-025019-77e7dd66",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-041346-0f417ab3",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T04:14:48",
+    "lane": 15,
+    "reference_run": "20261026-025019-77e7dd66",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

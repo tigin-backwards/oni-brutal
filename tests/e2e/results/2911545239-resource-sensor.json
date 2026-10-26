@@ -1,0 +1,67 @@
+{
+ "spec": "mods/2911545239-resource-sensor.yaml",
+ "mods": [
+  "2911545239"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a built sensor's side screen starts in Distance mode and a click on Global Mode switches it; side screen dump and shot match",
+ "updated": "2026-10-26",
+ "commit": "a873423",
+ "mod_dlls": {
+  "2911545239": {
+   "ResourceSensor.dll": "88e2fec3a11a881dcfbcaf16257515ab2c378aa1d3ae1270d79b0ac8fe37bf87"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-220744-daa697b6",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T00:01:44",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-010916-6268dd33",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T01:23:26",
+    "lane": 15,
+    "reference_run": "20261025-220744-daa697b6",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "sensor": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "sensor": 0.0
+    }
+   },
+   {
+    "run": "20261026-010916-6268dd33",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T01:24:02",
+    "lane": 15,
+    "reference_run": "20261025-220744-daa697b6",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "sensor": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "sensor": 0.0
+    }
+   }
+  ]
+ }
+}

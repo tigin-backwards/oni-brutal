@@ -1,0 +1,32 @@
+# Resource Sensor (2911545239), classes B, S (side screens cloned from the game's).
+#
+# What it does: adds the Resource Sensor (LogicResourceSensor, 1x1, refined metal, Automation
+# menu, researched with Generic Sensors). It counts the resources chosen in its filter (food and
+# solids) lying within a distance (0 to 20 tiles, 3 by default), in its room, or in the whole
+# world, optionally counting what storage buildings hold, and sends green above or below a
+# threshold. Its side screen, cloned from the Critter Sensor's, has Distance, Room and Global
+# mode boxes, a distance slider cloned from the capacity side screen, and Include Storage
+# Buildings; the threshold and filter screens are the game's.
+# How a player reaches it: the build menu (Automation), after the research; its side screens.
+# What changes: automation keyed to resource counts.
+#
+# setup builds a sensor in a pit of the floor west of the printing pod. It is selected: its
+# side screen is in Distance mode, and a click on Global Mode switches it.
+from: early-base
+mods: [2911545239]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LogicResourceSensor\")", method: Build, args: [{"$": "Grid.XYToCell(113, 206)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"GenericSensors\").unlockedItemIDs": {contains: LogicResourceSensor}
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [113, 207], ortho: 8}}
+  - click_world: {cell: [113, 206], select: LogicResourceSensor}
+  - ui_wait: {path: "**/ResourceSensorSideScreen/Contents", cond: stable}
+  - expect_state:
+      "selected:GetComponent<ResourceSensor.LogicResourceSensor>.mode": Distance
+  - ui_dump: {name: sensor, root: "**/ResourceSensorSideScreen"}
+  - shot: {name: sensor, crop: "**/ResourceSensorSideScreen", threshold: 0.04}
+  - click: {ui: "**/ResourceSensorSideScreen/**/CountGlobalCheckBox"}
+  - expect_state:
+      "selected:GetComponent<ResourceSensor.LogicResourceSensor>.mode": Global

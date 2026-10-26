@@ -1,0 +1,37 @@
+# Advanced Coolers (高级冷却器修复版) (3762029573), classes B, S, O.
+#
+# What it does: two coolers in the Utilities menu: a 2x2 Space Cooler (Temperature
+# Modulation) that removes heat from the air, and a 4x1 Liquid Cooler (Liquid Temperature)
+# built on the game's Liquid Tepidizer with negative heat; PLib options set their cooling and
+# wattage and whether they need Fullerene; patches on SpaceHeater widen the tepidizer's slider
+# and turbo mode for the Liquid Cooler.
+# How a player reaches it: the build menu (Utilities), after the research.
+# What changes: buildings that cool instead of heat.
+#
+# options set the Space Cooler to 300 W; setup researches Temperature Modulation; the
+# Utilities menu lists the Space Cooler (shot), and one built by setup in the dug-out
+# corridor west of the printing pod is selected.
+from: early-base
+mods: [3762029573]
+options:
+  "3762029573": {SCWattage: 300}
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"TemperatureModulation\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"SpaceCooler\")", method: Build, args: [131127, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"SpaceCooler\").EnergyConsumptionWhenActive": 300
+      "Assets.GetBuildingDef(\"SpaceCooler\").SelfHeatKilowattsWhenActive": "< 0"
+      "Db.Get().Techs.Get(\"LiquidTemperature\").unlockedItemIDs": {contains: LiquidCooler}
+  - run: {seconds: 10}
+  - expect: {buildings: {SpaceCooler: 1}}
+  - click: {ui: "**/PlanScreen/Toggle:Utilities"}
+  # The build menu catches up over frames: 120 frames for all of it to settle.
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/SpaceCooler Group*", cond: stable, stable: 120, frames: 600}
+  - shot: {name: utilities-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
+  - key: {code: Escape}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [111, 206], select: SpaceCooler}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_dump: {name: title, root: "**/DetailsScreen/TitleBar/Border/LabelGroup"}

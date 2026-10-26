@@ -1,0 +1,68 @@
+{
+ "spec": "mods/3762029573-advanced-coolers.yaml",
+ "mods": [
+  "3762029573"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "after Temperature Modulation the Utilities menu lists the Space Cooler (shot); a built one draws the options' 300 W (dumped)",
+ "updated": "2026-10-26",
+ "commit": "fd4e5b95",
+ "mod_dlls": {
+  "3762029573": {
+   "Advanced Coolers.dll": "9e55c004e57e7dc7f7bb5ff955eaa313a66a56292039a671a47effe564606cda",
+   "PLib.dll": "d87814a7d5d74fa0e94bc5435cd770d3746438f494208b6f356a2ab999169c52"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-182320-3e5178eb",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T18:46:54",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-192551-82b3b3ca",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T19:32:35",
+    "lane": 15,
+    "reference_run": "20261026-182320-3e5178eb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "utilities-menu": 0.0
+    }
+   },
+   {
+    "run": "20261026-192551-82b3b3ca",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T19:33:48",
+    "lane": 15,
+    "reference_run": "20261026-182320-3e5178eb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "utilities-menu": 0.0
+    }
+   }
+  ]
+ }
+}

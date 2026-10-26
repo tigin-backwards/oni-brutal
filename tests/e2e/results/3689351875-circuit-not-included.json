@@ -1,0 +1,73 @@
+{
+ "spec": "mods/3689351875-circuit-not-included.yaml",
+ "mods": [
+  "3689351875"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a built Circuit 2x2's side screen opens the mod's editor with Edit and Cancel closes it; side screen and editor dumps and the editor shot match",
+ "updated": "2026-10-26",
+ "commit": "dffa862",
+ "mod_dlls": {
+  "3689351875": {
+   "CircuitNotIncluded.dll": "092e3b9243bb26c36204769463bea99b831b68871dfb248931d0fba61cfbead3"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-220744-daa697b6",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T22:08:10",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-000707-6890b8be",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T00:35:23",
+    "lane": 15,
+    "reference_run": "20261025-220744-daa697b6",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "sidescreen": {
+      "differences": 0
+     },
+     "editor": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "editor": 0.0
+    }
+   },
+   {
+    "run": "20261026-000707-6890b8be",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T00:37:02",
+    "lane": 15,
+    "reference_run": "20261025-220744-daa697b6",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "sidescreen": {
+      "differences": 0
+     },
+     "editor": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "editor": 2e-06
+    }
+   }
+  ]
+ }
+}

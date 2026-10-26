@@ -1,0 +1,35 @@
+# Circuit Not Included (3689351875), classes B, S.
+#
+# What it does: adds eight Circuit buildings (Circuit_1x2 to Circuit_2x5, 15 kg of refined
+# metal per cell) to the Automation menu, researched with Duplicant Traffic Control. Each holds a
+# custom circuit: input, output and ribbon ports on its cells, and outputs given by logic
+# expressions (NOT, AND, XOR, OR, buffer, filter) of its inputs. A side screen (Circuit
+# properties) lists the circuit's ports and has an Edit button that opens the mod's editor, a
+# PLib modal screen with the circuit's name, a grid of its cells, an editor panel and Save,
+# Clear and Cancel buttons.
+# How a player reaches it: the build menu (Automation); select a circuit; Edit.
+# What changes: custom logic gates.
+#
+# setup builds a Circuit 2x2 in the corridor west of the printing pod. It is selected: its side
+# screen shows, Edit opens the editor and Cancel closes it.
+from: early-base
+mods: [3689351875]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Circuit_2x2\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Copper], 300.0, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"DupeTrafficControl\").unlockedItemIDs": {contains: Circuit_2x5}
+      "all:CircuitNotIncluded.Core.Circuit::Length": 1
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: Circuit_2x2}
+  - ui_wait: {path: "**/CircuitSideScreen*", cond: stable}
+  - ui_dump: {name: sidescreen, root: "**/CircuitSideScreen*"}
+  - click: {text: "Edit", under: "**/CircuitSideScreen*"}
+  - ui_wait: {path: "**/CircuitScreen", cond: stable}
+  - expect_ui:
+      "**/CircuitScreen/**/InfoText/Text": {text: "~Operations"}
+  - ui_dump: {name: editor, root: "**/CircuitScreen"}
+  - shot: {name: editor, threshold: 0.04}
+  - click: {text: "Cancel", under: "**/CircuitScreen"}
+  - ui_wait: {path: "**/CircuitScreen", cond: gone}

@@ -1,0 +1,55 @@
+{
+ "spec": "mods/1837044017-microbe-musher-with-light.yaml",
+ "mods": [
+  "1837044017"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Microbe Musher carries the mod's light, off while idle; a built one is selected and the colony runs",
+ "updated": "2026-10-26",
+ "commit": "f6bb5c7",
+ "mod_dlls": {
+  "1837044017": {
+   "MicrobeMusherWithLight.dll": "d16d885b2b2771b5b118ae96820b5e58c0c6745b897deffd7520311e9712bf5b"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-222040-75e4a4a6",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T23:55:16",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-013921-bab6ad35",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T01:46:27",
+    "lane": 14,
+    "reference_run": "20261025-222040-75e4a4a6",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-013921-bab6ad35",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T01:47:18",
+    "lane": 14,
+    "reference_run": "20261025-222040-75e4a4a6",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

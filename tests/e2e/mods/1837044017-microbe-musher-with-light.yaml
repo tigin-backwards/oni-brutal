@@ -1,0 +1,28 @@
+# Microbe Musher With Light (1837044017), class P.
+#
+# What it does: a postfix on MicrobeMusherConfig.DoPostConfigureComplete gives the Microbe
+# Musher a yellow light (range 3, offset over its work spot) and a state machine that turns it
+# on while the musher is active and off otherwise, with the Emitting Light status.
+# How a player reaches it: a Microbe Musher at work.
+# What changes: a lit workplace for the cook.
+#
+# The prefab carries the light, off; setup builds a Microbe Musher in the corridor west of the
+# printing pod: idle, its light stays off.
+from: early-base
+mods: [1837044017]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"MicrobeMusher\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Cuprite], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"MicrobeMusher\").GetComponent<Light2D>": exists
+      "Assets.GetPrefab(\"MicrobeMusher\").GetComponent<Light2D>.Range": 3
+      "Assets.GetPrefab(\"MicrobeMusher\").GetComponent<Light2D>.enabled": false
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 208], select: MicrobeMusher}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<Light2D>.enabled": false
+      "selected:GetComponent<Operational>.IsActive": false
+  - run: {seconds: 10}
+  - expect: {duplicants: 3, buildings: {MicrobeMusher: 1}}

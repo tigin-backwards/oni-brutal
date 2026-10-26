@@ -1,0 +1,30 @@
+# Gas Pump Power Tweak (2481823855), classes P, O.
+#
+# What it does: the Gas Pump, the Mini Gas Pump and the Gas Filter draw the wattage the PLib
+# options give (defaults 120, 60 and 60 W; the game's 240, 60 and 120), postfixes on their
+# CreateBuildingDef. It logs each value.
+# How a player reaches it: the Mods screen's options; then the buildings' power use.
+# What changes: those buildings' power draw.
+#
+# The options are set to 200, 30 and 90 W. The defs read them, the log names them, and a Gas
+# Pump built in the dug-out corridor west of the printing pod shows the wattage when
+# selected.
+from: early-base
+mods: [2481823855]
+options:
+  AL.GasPumpPowerTweak: {GasPumpWattage: 200, MiniGasPumpWattage: 30, GasFilterWattage: 90}
+require_log: ['Gas pump power consumption set to 200', 'Gas Filter power consumption set to 90']
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"GasPump\")", method: Build, args: [131765, Neutral, null, [Cuprite], 300.0, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"GasPump\").EnergyConsumptionWhenActive": 200
+      "Assets.GetBuildingDef(\"GasMiniPump\").EnergyConsumptionWhenActive": 30
+      "Assets.GetBuildingDef(\"GasFilter\").EnergyConsumptionWhenActive": 90
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: GasPump}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Gas Pump"}
+  - expect_state:
+      "selected:EnergyConsumer.WattsNeededWhenActive": 200

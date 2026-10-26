@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2481823855-gas-pump-power-tweak.yaml",
+ "mods": [
+  "2481823855"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with the options at 200, 30 and 90 W the gas pump, mini gas pump and gas filter draw them, the log names them, and a built gas pump shows 200 W when selected",
+ "updated": "2026-10-25",
+ "commit": "d3a5a07",
+ "mod_dlls": {
+  "2481823855": {
+   "Gas Pump Power Tweak Merged.dll": "088a6a203e9028decaa0f87f13fc75511c7bedc488cb2df56b5b91eee0dc1520"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-195901-01a97acc",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T19:59:02",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-202751-398981b0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T20:27:51",
+    "lane": 16,
+    "reference_run": "20261025-195901-01a97acc",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261025-202751-398981b0",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-25T20:28:36",
+    "lane": 16,
+    "reference_run": "20261025-195901-01a97acc",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

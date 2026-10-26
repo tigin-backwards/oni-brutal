@@ -1,0 +1,24 @@
+# Flood Fill Tools (3703748819), classes T, O.
+#
+# What it does: every drag tool and the build tool get a SmartFillToolInjector. Holding the
+# left button still on a cell (0.5 s by default) starts a flood fill from it, one cell a frame
+# with the tool's visualizer: the dig tool spreads over the same element, the mop over liquid,
+# others over open cells or tiles, stopping at doors (an option); releasing applies the tool to
+# every claimed cell. PLib options: doors count as solids, the hold delay, diagonal spreading.
+# How a player reaches it: any tool; hold the left button without moving.
+# What changes: big areas marked with one held click.
+#
+# The dig tool is picked (G) and the left button held still over the rock above the corridor
+# west of the printing pod for 300 frames: on release, the connected cells of its element are
+# marked for digging, several where a click marks one.
+from: early-base
+mods: [3703748819]
+steps:
+  - expect: {pending_digs: 0}
+  - driver: {camera.set: {cell: [112, 210], ortho: 10}}
+  - tool: {key: G}
+  - drag: {from: [111, 211], to: [111, 211], hold: 300}
+  - key: {code: Escape}
+  - expect: {pending_digs: "> 3"}
+  - expect_state:
+      "count:all:SmartAreaFill.Content.Scripts.SmartFillToolInjector::[*] if .enabled == true": "== original"

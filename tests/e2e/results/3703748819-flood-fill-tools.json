@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3703748819-flood-fill-tools.yaml",
+ "mods": [
+  "3703748819"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the dig tool held still over rock floods its connected cells and marks them for digging on release, several where a click marks one",
+ "updated": "2026-10-26",
+ "commit": "6944fde",
+ "mod_dlls": {
+  "3703748819": {
+   "SmartAreaFill.dll": "6a7d7e73cb8506a9685494e284fbd455728defc66b65ea8030820e37bc79db3f"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-000654-98a7a75e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T00:26:30",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-014043-21fcf467",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T01:49:54",
+    "lane": 15,
+    "reference_run": "20261026-000654-98a7a75e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-014043-21fcf467",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T01:50:45",
+    "lane": 15,
+    "reference_run": "20261026-000654-98a7a75e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

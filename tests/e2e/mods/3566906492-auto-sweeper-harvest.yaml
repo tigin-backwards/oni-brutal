@@ -1,0 +1,36 @@
+# Auto-Sweeper Harvest (3566906492), class P.
+#
+# What it does: Auto-Sweepers harvest plants: a postfix on SolidTransferArm.OnSpawn adds a
+# SweeperHarvestConfig (harvesting on) and an updater that, every 1.5 s while the sweeper is
+# operational, harvests the first ripe plant within its range.
+# How a player reaches it: building a powered Auto-Sweeper near plants.
+# What changes: ripe plants harvested without a Duplicant.
+#
+# setup builds an Auto-Sweeper in the dug-out corridor west of the printing pod, wired to a
+# charged battery, and grows a wild Mealwood two cells from it to ripeness; seconds later the
+# sweeper has harvested it and Meal Lice lies on the floor.
+from: early-base
+mods: [3566906492]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"SolidTransferArm\")", method: Build, args: [{"$": "Grid.XYToCell(114, 206)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Battery\")", method: Build, args: [{"$": "Grid.XYToCell(116, 206)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Wire\")", method: Build, args: [{"$": "Grid.XYToCell(114, 206)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Wire\")", method: Build, args: [{"$": "Grid.XYToCell(115, 206)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Wire\")", method: Build, args: [{"$": "Grid.XYToCell(116, 206)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Game.Instance.electricalConduitSystem", method: SetConnections, args: ["Right", {"$": "Grid.XYToCell(114, 206)"}, true]}}
+  - driver: {setup.call: {target: "Game.Instance.electricalConduitSystem", method: SetConnections, args: ["Left, Right", {"$": "Grid.XYToCell(115, 206)"}, true]}}
+  - driver: {setup.call: {target: "Game.Instance.electricalConduitSystem", method: SetConnections, args: ["Left", {"$": "Grid.XYToCell(116, 206)"}, true]}}
+  - driver: {setup.call: {target: "all:Battery::[0]", method: AddEnergy, args: [10000.0]}}
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131128, 0, 0, \"BasicSingleHarvestPlant\", \"BuildingFront\")", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "all:Growing::[0]", method: OverrideMaturityLevel, args: [1.0]}}
+steps:
+  - expect_state:
+      "all:Growing::[0].IsGrown()": true
+      "count:all:Clearable::[*] if .name.StartsWith(\"BasicPlantFood\") == true": {save_as: food}
+  - run: {seconds: 2}
+  - expect_state:
+      "all:SolidTransferArm::[0].GetComponent<Operational>.IsOperational": true
+  - run: {seconds: 8}
+  - expect_state:
+      "all:Growing::[0].IsGrown()": false
+      "count:all:Clearable::[*] if .name.StartsWith(\"BasicPlantFood\") == true": "> food"

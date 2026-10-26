@@ -1,0 +1,68 @@
+{
+ "spec": "mods/3334327664-piping-system.yaml",
+ "mods": [
+  "3334327664"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with the oxygen fan's option off, the Ventilation menu lists the pack's fans and bridges but not that fan, and the methane fan is placed from it; the menu's layout and pixels as in the original",
+ "updated": "2026-10-26",
+ "commit": "bbc2ade",
+ "mod_dlls": {
+  "3334327664": {
+   "C_╣▄╡└╧╡═│_1.0.dll": "67bca6a8659e4dbeda8522ca77b6e63034ee5b4292681748086cc8d767330e30",
+   "PLib.dll": "b862c5db2b3cd6df09a62d4a30782e91e2b24e8e1bfac08d991c9cc89a984ba9"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-214258-53d10fac",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T21:42:58",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-003047-3f347e40",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T00:30:47",
+    "lane": 16,
+    "reference_run": "20261025-214258-53d10fac",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "hvac": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "hvac": 0.0
+    }
+   },
+   {
+    "run": "20261026-003047-3f347e40",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T00:30:48",
+    "lane": 17,
+    "reference_run": "20261025-214258-53d10fac",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "hvac": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "hvac": 0.0
+    }
+   }
+  ]
+ }
+}

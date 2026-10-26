@@ -1,0 +1,41 @@
+# C 管道系统 Piping System 1.5 (3334327664), classes B, P, O.
+#
+# What it does: a pack of plumbing and ventilation changes, each behind a PLib option
+# (C000GG0.json, all on but one by default). New buildings: conductive gas and liquid pipes
+# (C005GG1, C006GG1), a nuclear waste bucket (C011GG1), a gold shower (C013GG1), six
+# single-gas exhaust fans (C015GG1-6: methane, chlorine, hydrogen, polluted oxygen, oxygen,
+# carbon dioxide), two- and three-cell gas and liquid bridges (C020GG1-2, C021GG1-2), a flush
+# toilet (C023GG1), a liquid bottler (C024GG1), a mini liquid pump (C025GG1) and waste liquid
+# and gas tanks (C026GG1, C027GG1). Patches make insulated pipes conduct no heat, valves,
+# shutoffs and pipe sensors buildable through walls, pumps bigger, and more. A building whose
+# option is off is Deprecated, so the build menu hides it.
+# How a player reaches it: the build menu (Ventilation, Plumbing), the Mods screen's options.
+# What changes: many pipe buildings and their numbers.
+#
+# The option of the oxygen fan (C015GG5) is turned off. The Ventilation menu lists the
+# methane fan and the bridges but not the oxygen fan; the menu is compared with the original.
+# The methane fan is placed from it in the dug-out corridor west of the printing pod.
+from: early-base
+mods: [3334327664]
+options:
+  "3334327664": {$file: C000GG0.json, C015GG5: false}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"C015GG5\").Deprecated": true
+      "Assets.GetBuildingDef(\"C015GG1\").Deprecated": false
+      "Assets.GetBuildingDef(\"C020GG1\").Deprecated": false
+  - run: {seconds: 5}
+  - driver: {camera.set: {cell: [114, 208], ortho: 10}}
+  - click: {ui: "**/PlanScreen/Toggle:Ventilation"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/C015GG1 Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/C020GG1 Group*": {active: true}
+      "**/BuildingGroups/**/Grid/C015GG5 Group*": {exists: false}
+  - ui_dump: {name: hvac, root: "**/PlanBuildingSelectionPanel/BuildingGroups"}
+  - shot: {name: hvac, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
+  - click: {ui: "**/BuildingGroups/**/Grid/C015GG1 Group*"}
+  - ui_wait: {path: "**/PlanBuildingSelectionPanel/ProductInfoScreen", cond: stable}
+  - click: {ui: "**/MaterialSelectorTemplate/**/Toggles/MaterialSelection_*"}
+  - click_world: {cell: [113, 207]}
+  - key: {code: Escape}
+  - expect: {blueprints: {C015GG1: 1}}

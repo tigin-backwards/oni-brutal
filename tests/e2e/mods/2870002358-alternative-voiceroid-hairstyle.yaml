@@ -1,0 +1,25 @@
+# Alternative Voiceroid Hairstyle For Dupery (2870002358), class X (content for Dupery).
+#
+# What it does: no code. With Dupery, its personalities.json adds 26 printable Duplicant
+# personalities (Yuzuki Yukari, Kizuna Akari, the Kotonoha sisters, Zundamon and others), each
+# with its own hair from the mod's anim folder; strings/ja.po translates them. The catalog
+# names Dupery 2679326313 as its requirement, which is gone from the Workshop: Dupery Fixed
+# (3172734005) reads the same files.
+# How a player reaches it: Duplicants printed or picked for a new colony; the Duplicant's
+# Personality tab.
+# What changes: more personalities in the pool, with their hairstyles.
+#
+# Dupery imports the personalities into the game's Personalities and loads their hair as
+# accessories, as its log says.
+from: early-base
+mods: [3172734005, 2870002358]
+require_log: ['\[Dupery\]: accessory hair_zundamon successfully loaded', '\[Dupery\]: accessory hair_kotonoha_akane successfully loaded']
+steps:
+  - expect_state:
+      "Db.Get().Personalities.TryGet(\"YUZUKI_YUKARI\")": exists
+      "Db.Get().Personalities.TryGet(\"ZUNDAMON\")": exists
+      "Db.Get().Personalities.TryGet(\"YUKKURI_YOUMU\").Disabled": false
+      "Db.Get().Accessories.TryGet(\"hair_zundamon\")": exists
+      "Db.Get().Personalities.Count": "== original"
+  - run: {seconds: 10}
+  - expect: {duplicants: 3}

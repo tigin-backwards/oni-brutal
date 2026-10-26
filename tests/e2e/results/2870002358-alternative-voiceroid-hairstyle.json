@@ -1,0 +1,57 @@
+{
+ "spec": "mods/2870002358-alternative-voiceroid-hairstyle.yaml",
+ "mods": [
+  "3172734005",
+  "2870002358"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with Dupery Fixed, its 26 personalities join the pool and their hair loads as accessories",
+ "updated": "2026-10-25",
+ "commit": "a9add53",
+ "mod_dlls": {
+  "3172734005": {
+   "DuperyFixed.dll": "9ef4a93958b6b80fbf086cab57821955dd344324d2192086db7ea7845e71f7f2"
+  },
+  "2870002358": {}
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-195133-9810c702",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T20:00:05",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-212859-f1bbaf34",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T21:28:59",
+    "lane": 15,
+    "reference_run": "20261025-195133-9810c702",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261025-212859-f1bbaf34",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-25T21:29:48",
+    "lane": 15,
+    "reference_run": "20261025-195133-9810c702",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

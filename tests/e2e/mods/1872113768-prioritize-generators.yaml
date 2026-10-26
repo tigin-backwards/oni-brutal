@@ -1,0 +1,27 @@
+# Tune-Up: Prioritize Generators (1872113768), class P.
+#
+# What it does: fuel-burning and other generators get a priority: postfixes on the
+# DoPostConfigureComplete of the Steam Turbine, Coal, Wood, Hydrogen, Natural Gas and
+# Petroleum Generators and the Solar Panel add Prioritizable, so their delivery errands follow
+# the priority set on their side screen.
+# How a player reaches it: selecting a generator; its priority buttons.
+# What changes: generators can be refuelled first.
+#
+# The prefabs are read; a Coal Generator built by setup in the dug-out corridor west of the
+# printing pod is selected and has the default priority.
+from: early-base
+mods: [1872113768]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Generator\")", method: Build, args: [131129, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"Generator\").GetComponent<Prioritizable>": exists
+      "Assets.GetPrefab(\"WoodGasGenerator\").GetComponent<Prioritizable>": exists
+      "Assets.GetPrefab(\"SolarPanel\").GetComponent<Prioritizable>": exists
+  - run: {seconds: 2}
+  - expect: {buildings: {Generator: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: Generator}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:Prioritizable.GetMasterPriority().priority_value": 5

@@ -1,0 +1,55 @@
+{
+ "spec": "mods/1872113768-prioritize-generators.yaml",
+ "mods": [
+  "1872113768"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "generators carry a priority; a built Coal Generator is selected",
+ "updated": "2026-10-26",
+ "commit": "17f325ef",
+ "mod_dlls": {
+  "1872113768": {
+   "PrioritizeEverything.dll": "0da21c011f7b4e2c902a9bccc9c712808b1e77b0a2214446779c2b65906e2f15"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-105851-04eb8ffa",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T11:13:24",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-133411-75254ba7",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T13:49:36",
+    "lane": 14,
+    "reference_run": "20261026-105851-04eb8ffa",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-133411-75254ba7",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T13:49:48",
+    "lane": 15,
+    "reference_run": "20261026-105851-04eb8ffa",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

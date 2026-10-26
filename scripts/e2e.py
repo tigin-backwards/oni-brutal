@@ -2700,7 +2700,9 @@ class Run:
             misses = []
             for path, wanted in value.items():
                 # `active: false` asks about an inactive element, which only inactive: true finds.
-                found = self.need_driver().find(path=path, inactive='active' in wanted)
+                # any_text looks at every match, not only ui.find's default 50.
+                found = self.need_driver().find(path=path, inactive='active' in wanted,
+                                                limit=1000 if 'any_text' in wanted else None)
                 active = [e for e in found if e.active is not False]
                 element = (active or found or [None])[0]
                 fields = {k: v for k, v in wanted.items() if k not in ('count', 'any_text')}

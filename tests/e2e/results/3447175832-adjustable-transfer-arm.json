@@ -1,0 +1,68 @@
+{
+ "spec": "mods/3447175832-adjustable-transfer-arm.yaml",
+ "mods": [
+  "3447175832"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "an Auto-Sweeper's range slider set to 10 by typing and its Cross Wall box ticked; slider dump and details shot match",
+ "updated": "2026-10-26",
+ "commit": "c143f1e",
+ "mod_dlls": {
+  "3447175832": {
+   "PLib.dll": "bdd637dbef718cdd52e61c0a7177bd297864a50bac1583d2837a36ff3edf07db",
+   "TransferArm.dll": "19724c5dc3310e8b0278f2e7db0c19676cc800307cd9b452f3fe672673e8da0d"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-215725-746bb295",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T22:00:13",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-000946-b60cbe4d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T00:09:46",
+    "lane": 14,
+    "reference_run": "20261025-215725-746bb295",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "slider": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "details": 4.1e-05
+    }
+   },
+   {
+    "run": "20261026-000946-b60cbe4d",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T00:10:33",
+    "lane": 14,
+    "reference_run": "20261025-215725-746bb295",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "slider": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "details": 4.1e-05
+    }
+   }
+  ]
+ }
+}

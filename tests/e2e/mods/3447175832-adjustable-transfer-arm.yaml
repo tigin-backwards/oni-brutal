@@ -1,0 +1,35 @@
+# U&F Adjustable Transfer Arm 可调节自动清扫器 (3447175832), classes S (side screens on a
+# vanilla building), P.
+#
+# What it does: the Auto-Sweeper (SolidTransferArm) gets a control (TransferArm's
+# SolidTransferArmControl) with a range slider from 1 to 31 cells (4 in the game) and a "Cross
+# Wall" checkbox; the range sets its pickup range, its reach and its range visualizer, and with
+# Cross Wall a transpiler in SolidTransferArm.AsyncUpdate treats items behind walls as
+# reachable. Copy Settings copies both.
+# How a player reaches it: selecting an Auto-Sweeper; its side screens.
+# What changes: sweepers that reach further, and through walls.
+#
+# setup builds an Auto-Sweeper, unpowered, in the corridor west of the printing pod. It is
+# selected: 10 typed into the range slider's field gives it a 10-cell range, and the Cross Wall
+# checkbox is ticked.
+from: early-base
+mods: [3447175832]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"SolidTransferArm\")", method: Build, args: [{"$": "Grid.XYToCell(113, 206)"}, Neutral, null, [Steel], 300.0, DEFAULT_FACADE]}}
+steps:
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [113, 207], ortho: 8}}
+  - click_world: {cell: [113, 206], select: SolidTransferArm}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/IntSliderSideScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<SolidTransferArm>.pickupRange": 4
+      "selected:GetComponent<TransferArm.SolidTransferArmControl>.isCrossWall": false
+  - ui_dump: {name: slider, root: "**/IntSliderSideScreen"}
+  - type: {ui: "**/IntSliderSideScreen/**/*Input*", text: "10", enter: true, clear: true}
+  - expect_state:
+      "selected:GetComponent<SolidTransferArm>.pickupRange": 10
+      "selected:GetComponent<RangeVisualizer>.RangeMax.x": 10
+  - click: {ui: "**/SingleCheckboxSideScreen/**/CheckboxGroup/CheckBox"}
+  - expect_state:
+      "selected:GetComponent<TransferArm.SolidTransferArmControl>.isCrossWall": true
+  - shot: {name: details, crop: "**/DetailsScreen", threshold: 0.04}

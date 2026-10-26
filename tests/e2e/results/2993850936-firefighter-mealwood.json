@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2993850936-firefighter-mealwood.yaml",
+ "mods": [
+  "2993850936"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "Meal Lice grow in 600 s and Mealwood's prefab takes -55 to 125 C; a wild Mealwood spawned and selected shows its card",
+ "updated": "2026-10-25",
+ "commit": "a9add53",
+ "mod_dlls": {
+  "2993850936": {
+   "SuperMealwood.dll": "a396d6cf0647b3156410fbe1257f6b71f30d479c69ba90260c3c6091043a8545"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-205844-dfce1bd7",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T21:18:54",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-212555-2bce4ad1",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T21:28:30",
+    "lane": 14,
+    "reference_run": "20261025-205844-dfce1bd7",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261025-212555-2bce4ad1",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-25T21:29:19",
+    "lane": 14,
+    "reference_run": "20261025-205844-dfce1bd7",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -1,0 +1,29 @@
+# 快用你万能的米虱想想办法啊/Firefighter Mealwood (2993850936), class P.
+#
+# What it does: a postfix on the Crop.CropVal constructor makes Mealwood's crop (Meal Lice,
+# BasicPlantFood) take 600 s to grow instead of 1800 s; a postfix on
+# BasicSingleHarvestPlantConfig.CreatePrefab lets Mealwood grow in any of three gases and
+# widens its temperature range to -55 to 125 °C (lethal below -55 or above 125 °C, 0 to 40 °C
+# comfortable).
+# How a player reaches it: any Mealwood.
+# What changes: Mealwood grows three times as fast, almost anywhere.
+#
+# The crop table and the plant's prefab carry the changes; setup plants a wild Mealwood on the
+# floor of the corridor west of the printing pod and selects it: its info card opens.
+from: early-base
+mods: [2993850936]
+setup:
+  - driver: {setup.call: {type: Scenario, method: SpawnPrefab, args: [0, 114, 206, "BasicSingleHarvestPlant", "BuildingBack"]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "SelectTool.Instance", method: Select, args: [{"$": "last:GetComponent<KSelectable>"}]}}
+steps:
+  - expect_state:
+      "sum:TUNING.CROPS.CROP_TYPES[*].cropDuration if .cropId == BasicPlantFood": 600
+      "Assets.GetPrefab(\"BasicSingleHarvestPlant\").GetComponent<TemperatureVulnerable>.TemperatureLethalLow": 218.15
+      "Assets.GetPrefab(\"BasicSingleHarvestPlant\").GetComponent<TemperatureVulnerable>.TemperatureLethalHigh": 398.15
+  - run: {seconds: 5}
+  - expect_state:
+      "selected:KPrefabID.PrefabTag.Name": BasicSingleHarvestPlant
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Mealwood"}

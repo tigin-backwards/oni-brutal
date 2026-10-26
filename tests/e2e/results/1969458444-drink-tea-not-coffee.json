@@ -1,0 +1,59 @@
+{
+ "spec": "mods/1969458444-drink-tea-not-coffee.yaml",
+ "mods": [
+  "1969458444"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a built Espresso Machine is titled Tea Station in its details screen; details shot matches",
+ "updated": "2026-10-26",
+ "commit": "df5493c6",
+ "mod_dlls": {
+  "1969458444": {
+   "DrinkTeaNotCoffee.dll": "65a9cfaa7218fcfea24ca0b16998b7c0d06594164e6458e7b45dbbe92bdbe06b"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-024205-d1d3e5ef",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T02:58:23",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-030710-096f4fc9",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:24:20",
+    "lane": 15,
+    "reference_run": "20261026-024205-d1d3e5ef",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "details": 0.0
+    }
+   },
+   {
+    "run": "20261026-030710-096f4fc9",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T03:25:03",
+    "lane": 15,
+    "reference_run": "20261026-024205-d1d3e5ef",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "details": 0.0
+    }
+   }
+  ]
+ }
+}

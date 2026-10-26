@@ -1,0 +1,24 @@
+# Drink Tea Not Coffee (1969458444), class P (strings).
+#
+# What it does: renames the Espresso Machine to the Tea Station, espresso to tea and its
+# effect to "Drank Tea", with their descriptions (STRINGS replaced at load).
+# How a player reaches it: the Espresso Machine anywhere in the game.
+# What changes: names only.
+#
+# An espresso machine built in the dug-out corridor west of the printing pod is selected: its
+# title reads Tea Station.
+from: early-base
+mods: [1969458444]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"EspressoMachine\")", method: Build, args: [131129, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"EspressoMachine\").Name": {contains: Tea Station}
+  - run: {seconds: 2}
+  - expect: {buildings: {EspressoMachine: 1}}
+  - driver: {camera.set: {cell: [113, 207], ortho: 8}}
+  - click_world: {cell: [113, 206], select: EspressoMachine}
+  - ui_wait: {path: "**/DetailsScreen/TitleBar", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Tea Station"}
+  - shot: {name: details, crop: "**/DetailsScreen", threshold: 0.04}

@@ -1,0 +1,19 @@
+# Help, none of my mod options are working after the DLC update - fix (3291978062), class P.
+#
+# What it does: a prefix replaces DlcManager.IsContentActive. It was meant to answer from
+# IsContentSubscribed for the base game and Spaced Out (so PLib's options, which ask it, keep
+# working); as built it answers false for every content ID.
+# How a player reaches it: nothing to use; mods asking whether content is active.
+# What changes: IsContentActive is always false.
+#
+# IsContentActive answers false for Spaced Out and the base game, as in the original; the
+# colony runs.
+from: early-base
+mods: [3291978062]
+steps:
+  - expect_state:
+      "DlcManager.IsContentActive(\"EXPANSION1_ID\")": false
+      "DlcManager.IsContentActive(\"\")": false
+      "DlcManager.IsContentSubscribed(\"EXPANSION1_ID\")": "== original"
+  - run: {seconds: 30}
+  - expect: {duplicants: 3}

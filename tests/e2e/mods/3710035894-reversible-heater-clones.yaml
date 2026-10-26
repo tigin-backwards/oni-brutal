@@ -1,0 +1,46 @@
+# Reversible Heater Clones (3710035894, CookiePlayRu.ReversibleHeaterClones).
+#
+# What it does: adds two buildings that bring the cells around them to a target temperature from
+# -120 to 120 degrees, heating or cooling: an air clone of the Space Heater
+# (CookiePlayRu_ReversibleAirHeaterClone, 2x2, 240 W) and a liquid clone of the Liquid Tepidizer
+# (CookiePlayRu_ReversibleLiquidHeaterClone, 4x1, 960 W). They take the originals' places in
+# Temperature Modulation and Liquid Temperature research, and the originals leave the build menu.
+# How a player reaches it: the Utilities build menu; selecting a clone shows the Space Heater's
+# target temperature slider with the mod's range. The mod's ◀/▶ buttons beside the slider never
+# appear in either player (it looks for a legacy InputField; the game's is a KNumberInputField),
+# and two of its patches name methods the game no longer has, in both players.
+# What changes: buildings that cool as well as heat.
+#
+# setup grants Temperature Modulation and spawns copper ore. The air clone is built in the
+# corridor west of the printing pod and selected: its slider runs from -120 to 120 degrees and
+# starts at 21; -50 typed into the slider's field sets the clone's target.
+from: early-base
+mods: [3710035894]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"TemperatureModulation\")", method: Purchased}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Cuprite\").substance", method: SpawnResource, args: [[115.5, 207.5, -12], 600, 300, 255, 0]}}
+require_log: ['\[ReversibleHeaterClones\] Tech swap TemperatureModulation: removed=True, added=True',
+              '\[ReversibleHeaterClones\] Forced ShowInBuildMenu=false for SpaceHeater']
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"SpaceHeater\").ShowInBuildMenu": false
+      "Db.Get().Techs.Get(\"TemperatureModulation\").unlockedItemIDs.Contains(\"CookiePlayRu_ReversibleAirHeaterClone\")": true
+      "Db.Get().Techs.Get(\"TemperatureModulation\").unlockedItemIDs.Contains(\"SpaceHeater\")": false
+  - build: {prefab: CookiePlayRu_ReversibleAirHeaterClone, at: [113, 206]}
+  - expect: {blueprints: {CookiePlayRu_ReversibleAirHeaterClone: 1}}
+  - run: {seconds: 1200, until: {buildings: {CookiePlayRu_ReversibleAirHeaterClone: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: CookiePlayRu_ReversibleAirHeaterClone}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/SingleSliderSideScreen", cond: stable}
+  - expect_ui:
+      "**/SingleSliderSideScreen/Contents/MinLabel": {text: "-120°C"}
+      "**/SingleSliderSideScreen/Contents/MaxLabel": {text: "120°C"}
+  - expect_state:
+      "selected:GetComponent<ReversibleHeaterClones.ReversibleAirThermalController>.TargetTemperatureCelsius": 21
+  - ui_dump: {name: side-screen, root: "**/SingleSliderSideScreen"}
+  - type: {ui: "**/SingleSliderSideScreen/Contents/NumberInputField", text: "-50", enter: true, clear: true}
+  - expect_state:
+      "selected:GetComponent<ReversibleHeaterClones.ReversibleAirThermalController>.TargetTemperatureCelsius": -50
+      "selected:GetComponent<SpaceHeater>.targetTemperature": "== original"
+  - ui_dump: {name: side-screen-set, root: "**/SingleSliderSideScreen"}
+  - run: {seconds: 30}

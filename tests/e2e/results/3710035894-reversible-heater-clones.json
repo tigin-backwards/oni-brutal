@@ -1,0 +1,69 @@
+{
+ "spec": "mods/3710035894-reversible-heater-clones.yaml",
+ "mods": [
+  "3710035894"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the air clone is built and selected; its target temperature slider runs from -120 to 120 degrees, and -50 typed into it sets the clone's target (side screen dumped); the mod's arrow buttons appear in neither player",
+ "updated": "2026-10-25",
+ "commit": "7d70b2e",
+ "mod_dlls": {
+  "3710035894": {
+   "ReversibleHeaterClones.dll": "cbc055f760e1c7d1ce90e4cdf06b6999e9f3e7c9fcd3ce138d711682db0711e0"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-220142-24645b0f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T22:01:42",
+    "lane": 34,
+    "signatures": 2
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-220430-eaa47fbf",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T22:04:30",
+    "lane": 34,
+    "reference_run": "20261025-220142-24645b0f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "side-screen": {
+      "differences": 0
+     },
+     "side-screen-set": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261025-220430-eaa47fbf",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-25T22:06:05",
+    "lane": 34,
+    "reference_run": "20261025-220142-24645b0f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "side-screen": {
+      "differences": 0
+     },
+     "side-screen-set": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

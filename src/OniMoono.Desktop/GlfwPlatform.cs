@@ -374,7 +374,10 @@ namespace OniMoono.Desktop
             }
             framebufferSize = window.FramebufferSize;
             if (!scripted) FollowCursorOutside();
-            return !closeRequested;
+            // Each close of the window is one quit request: Application.wantsToQuit may refuse it.
+            bool open = !closeRequested;
+            closeRequested = false;
+            return open;
         }
 
         /// Unity's Input.mousePosition follows the pointer outside the window too, relative to the

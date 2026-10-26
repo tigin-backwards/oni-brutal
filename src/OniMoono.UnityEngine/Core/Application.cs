@@ -47,6 +47,54 @@ namespace UnityEngine
 
         public static void Quit() => Quit(0);
 
+        /// Asked at the end of the frame a quit was requested in, after WaitForEndOfFrame, each
+        /// handler in turn: one that answers false cancels the quit, and the handlers after it are
+        /// not asked; one that throws is logged and counts as agreeing (UnityProbe's quitevents).
+        public static event Func<bool> wantsToQuit;
+
+        /// Raised once the quit goes ahead, after OnApplicationQuit and before objects are
+        /// destroyed. A handler that throws is logged, and the handlers after it do not run
+        /// (UnityProbe's quitevents).
+        public static event Action quitting;
+
+        /// Unity raises it when a player embedded in another application (Unity as a Library)
+        /// unloads; a standalone player never does (UnityProbe's quitevents: not at its quit).
+        public static event Action unloading
+        {
+            add => s_Unloading += value;
+            remove => s_Unloading -= value;
+        }
+        static Action s_Unloading;
+
+        internal static bool WantsToQuit()
+        {
+            if (wantsToQuit == null) return true;
+            foreach (Func<bool> handler in wantsToQuit.GetInvocationList())
+            {
+                try
+                {
+                    if (!handler()) return false;
+                }
+                catch (Exception e)
+                {
+                    Debug.LogException(e);
+                }
+            }
+            return true;
+        }
+
+        internal static void RaiseQuitting()
+        {
+            try
+            {
+                quitting?.Invoke();
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+            }
+        }
+
         /// The Linux player hands URLs to the desktop's opener.
         public static void OpenURL(string url)
         {

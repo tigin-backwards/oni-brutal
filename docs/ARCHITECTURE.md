@@ -906,8 +906,12 @@ PostLateUpdate  Canvas.willRenderCanvases (uGUI layout/graphic rebuild) → rend
                 → screen-space-overlay canvases → WaitForEndOfFrame coroutines → present
 ```
 
-Quit (`Application.Quit`, or `--frames N` in test runs): `OnApplicationQuit` to every active
-behaviour, every scene unloaded (OnDisable/OnDestroy), the graphics device and window closed,
+Quit (`Application.Quit`, closing the window, or `--frames N` in test runs): a requested quit is
+put to `Application.wantsToQuit` at the end of its frame, after WaitForEndOfFrame, each handler in
+turn (one that answers false cancels it and the rest are not asked; one that throws is logged and
+counts as agreeing); then `OnApplicationQuit` to every active behaviour, `Application.quitting`
+(a handler's exception ends it), every scene unloaded (OnDisable/OnDestroy), the graphics device
+and window closed,
 the log closed, then the process ends with `_exit(code)`: game threads may still be inside
 native plugins (SimDLL worldgen), and running the plugins' static destructors under them crashes
 or deadlocks. The game registers no `ProcessExit` handlers.

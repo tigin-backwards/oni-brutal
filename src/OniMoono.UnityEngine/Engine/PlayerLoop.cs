@@ -36,6 +36,12 @@ namespace OniMoono.Engine
 
         static bool started;
 
+        /// Whether Application.wantsToQuit agreed to the quit requested.
+        static bool quitAgreed;
+
+        /// Forgets a quit that went ahead (tests, which go on running frames after one).
+        internal static void ForgetQuit() => QuitRequested = quitAgreed = false;
+
         public static void RequestQuit(int exitCode)
         {
             if (QuitRequested) return;
@@ -200,16 +206,24 @@ namespace OniMoono.Engine
             Mark(2);
             Present?.Invoke();
             Event.DiscardUnconsumed();
+            // A quit requested this frame is put to Application.wantsToQuit now, after
+            // WaitForEndOfFrame (UnityProbe's quitevents); a refusal cancels it.
+            if (QuitRequested && !quitAgreed)
+            {
+                if (Application.WantsToQuit()) quitAgreed = true;
+                else QuitRequested = false;
+            }
             Mark(3);
             EndStats();
         }
 
         /// Unity sends OnApplicationQuit to every active MonoBehaviour before shutting down, then
-        /// saves PlayerPrefs.
+        /// raises Application.quitting (UnityProbe's quitevents), then saves PlayerPrefs.
         public static void SendApplicationQuit()
         {
             foreach (var go in Finder.AllSceneGameObjects())
                 Messages.SendToComponents(go, s => s.OnApplicationQuit);
+            Application.RaiseQuitting();
             PlayerPrefs.SaveOnQuit();
         }
 

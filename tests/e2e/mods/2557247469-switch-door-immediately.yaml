@@ -1,0 +1,38 @@
+# [MG]SwitchDoorImmediately 马上关门 (2557247469), class P.
+#
+# What it does: door and building toggles take effect at once, with no Duplicant errand. A
+# prefix on Door.QueueStateChange sets the requested and current control state, refreshes the
+# door and opens or closes it on the spot; a prefix on BuildingEnabledButton.OnMenuToggle
+# toggles the building directly (HandleToggle).
+# How a player reaches it: a door's Open / Auto / Lock side screen; any building's Disable
+# Building user-menu button.
+# What changes: those changes no longer wait for a Duplicant to come and flip the switch.
+#
+# setup builds a Pneumatic Door in the dug-out corridor west of the printing pod. Selected, a
+# click on its lock button locks it at once, the game paused. The base's Manual Generator,
+# selected, is disabled at once by its Disable Building button.
+from: early-base
+mods: [2557247469]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Door\")", method: Build, args: [131128, Neutral, null, [Cuprite], 300.0, DEFAULT_FACADE]}}
+steps:
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: Door}
+  - ui_wait: {path: "**/DoorToggleSideScreen/Contents/Buttons", cond: stable}
+  - expect_state:
+      "selected:Door.CurrentState": Auto
+  - click: {ui: "**/DoorToggleSideScreen/Contents/Buttons/CloseButton"}
+  - expect_state:
+      "selected:Door.CurrentState": Locked
+      "selected:Door.RequestedState": Locked
+  - ui_dump: {name: door, root: "**/Config Tab - body instance/DoorToggleSideScreen"}
+  - driver: {camera.set: {cell: [129, 208], ortho: 8}}
+  - click_world: {cell: [129, 207], select: ManualGenerator}
+  - ui_wait: {path: "**/DetailsScreen/UserMenuButtons/UserMenuScreen/Buttons", cond: stable}
+  - expect_state:
+      "selected:BuildingEnabledButton.IsEnabled": true
+  - click: {ui: "**/UserMenuScreen/Buttons/Disable BuildingButton"}
+  - expect_state:
+      "selected:BuildingEnabledButton.IsEnabled": false
+  - expect_ui:
+      "**/UserMenuScreen/Buttons/Enable BuildingButton": {active: true}

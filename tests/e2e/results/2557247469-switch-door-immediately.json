@@ -1,0 +1,63 @@
+{
+ "spec": "mods/2557247469-switch-door-immediately.yaml",
+ "mods": [
+  "2557247469"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a door's lock button locks it at once and a Manual Generator's Disable Building button disables it at once, with the game paused; the door side screen as in the original",
+ "updated": "2026-10-26",
+ "commit": "bbc2ade",
+ "mod_dlls": {
+  "2557247469": {
+   "MG_Immediately.dll": "cbcb05885c11290f68d190ecb42b9254019e9099b107204ac904251f2a8dea70"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-212024-3ac7afec",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T21:20:24",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-000724-b1875444",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T00:07:24",
+    "lane": 16,
+    "reference_run": "20261025-212024-3ac7afec",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "door": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261026-000724-b1875444",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T00:07:25",
+    "lane": 17,
+    "reference_run": "20261025-212024-3ac7afec",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "door": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

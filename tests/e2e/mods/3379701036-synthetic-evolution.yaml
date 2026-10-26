@@ -1,0 +1,35 @@
+# Synthetic Evolution 机械飞升 (3379701036), class S (a user menu button).
+#
+# What it does: with The Bionic Booster Pack, a dead Duplicant's menu gets a "Synthetic
+# Evolution" button: it prints a Bionic Duplicant where the body lies (Amari, Meep, Ari, Nails
+# and Pei become their bionic counterparts, others a random bionic personality) and removes the
+# body.
+# How a player reaches it: select a dead Duplicant; its user menu.
+# What changes: a dead Duplicant comes back as a bionic one.
+#
+# setup moves the second Duplicant into the dug-out room west of the printing pod and kills it.
+# Once it has died, its body is selected and the button pressed: the colony has three living
+# Duplicants again, two of them bionic, and no body.
+from: early-base
+mods: [3379701036]
+setup:
+  - driver: {setup.call: {type: TransformExtensions, method: SetPosition, args: [{"$": "Components.LiveMinionIdentities.Items[1].transform"}, {"$": "Grid.CellToPosCBC(131762, \"Move\")"}]}}
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[1].GetComponent<StateMachineController>.GetSMI(\"DeathMonitor+Instance\")", method: Kill, args: [{"$": "Db.Get().Deaths.Generic"}]}}
+steps:
+  - expect_state:
+      "Game.IsDlcActiveForCurrentSave(\"DLC3_ID\")": true
+  - run: {seconds: 30, until: {duplicants: 2}}
+  - run: {seconds: 10}
+  - expect: {duplicants: 2}
+  - expect_state:
+      "count:Components.MinionIdentities.Items[*] if .GetComponent<KPrefabID>.HasTag(\"Dead\") == true": 1
+      "count:Components.LiveMinionIdentities.Items[*] if .model.Name == BionicMinion": 1
+  - driver: {camera.set: {cell: [110, 208], ortho: 8}}
+  - click_world: {cell: [110, 207], select: Minion}
+  - ui_wait: {path: "**/UserMenuScreen/Buttons/Synthetic EvolutionButton", cond: stable}
+  - click: {ui: "**/UserMenuScreen/Buttons/Synthetic EvolutionButton"}
+  - run: {seconds: 5}
+  - expect: {duplicants: 3}
+  - expect_state:
+      "count:Components.LiveMinionIdentities.Items[*] if .model.Name == BionicMinion": 2
+      "count:Components.MinionIdentities.Items[*] if .GetComponent<KPrefabID>.HasTag(\"Dead\") == true": 0

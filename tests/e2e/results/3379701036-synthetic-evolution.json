@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3379701036-synthetic-evolution.yaml",
+ "mods": [
+  "3379701036"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a killed Duplicant's body gets the Synthetic Evolution button; pressed, a bionic Duplicant takes its place and the body goes",
+ "updated": "2026-10-26",
+ "commit": "a452aaa",
+ "mod_dlls": {
+  "3379701036": {
+   "SyntheticEvolution.dll": "08c0811ae9c9c381212353772772d9041a7864fec7e0b848824a0486400a514c"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-023730-5710265c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T02:37:30",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-031208-397b015b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:12:08",
+    "lane": 16,
+    "reference_run": "20261026-023730-5710265c",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-031208-397b015b",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T03:12:09",
+    "lane": 17,
+    "reference_run": "20261026-023730-5710265c",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

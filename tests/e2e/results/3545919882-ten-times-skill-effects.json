@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3545919882-ten-times-skill-effects.yaml",
+ "mods": [
+  "3545919882"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the attribute converters are ten times the game's, a Duplicant's too",
+ "updated": "2026-10-26",
+ "commit": "28b4e36a",
+ "mod_dlls": {
+  "3545919882": {
+   "10▒╢╨í╚╦╝╝─▄╨º╣√.dll": "116ef40582a1b0cc098aa27335c8ab25f8d25ff933e56fa1cf9b610fb1eff723"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-175250-0ae88632",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T18:08:20",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-183436-06bd7bbf",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T18:56:14",
+    "lane": 15,
+    "reference_run": "20261026-175250-0ae88632",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-183436-06bd7bbf",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T18:57:09",
+    "lane": 15,
+    "reference_run": "20261026-175250-0ae88632",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

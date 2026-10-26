@@ -1,0 +1,22 @@
+# 小人10倍技能效果 10x Duplicant skill effects (3545919882), class P.
+#
+# What it does: a transpiler on the AttributeConverters constructor multiplies the converters'
+# constants tenfold (0.25 to 2.5, 0.05 to 0.5, 0.4 to 4, 40 to 400 and so on), so each
+# attribute point speeds digging, building, research, cooking and the rest ten times more.
+# How a player reaches it: it is passive, in every Duplicant.
+# What changes: Duplicants work much faster.
+#
+# The converters' multipliers are read, and a Duplicant's construction speed converts at the
+# new rate after the game runs.
+from: early-base
+mods: [3545919882]
+steps:
+  - expect_state:
+      "Db.Get().AttributeConverters.ConstructionSpeed.multiplier": 2.5
+      "Db.Get().AttributeConverters.DiggingSpeed.multiplier": 2.5
+      "Db.Get().AttributeConverters.ResearchSpeed.multiplier": 4
+      "Db.Get().AttributeConverters.CarryAmountFromStrength.multiplier": 400
+      "Db.Get().AttributeConverters.MovementSpeed.multiplier": 0.1
+  - run: {seconds: 2}
+  - expect_state:
+      "Components.LiveMinionIdentities.Items[1].GetComponent<Klei.AI.AttributeConverters>.GetConverter(\"ConstructionSpeed\").converter.multiplier": 2.5

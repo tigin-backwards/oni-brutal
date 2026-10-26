@@ -1,0 +1,23 @@
+# Soggy Carpets (2719163704), class P.
+#
+# What it does: Carpeted Tiles soak up liquid: each gets a 500 kg storage and a passive
+# consumer that takes liquid from the cell above (1 kg/s), and drips it out below when the cell
+# underneath is open, a mesh tile or another carpet (options set the drip rate and the
+# pressure it drips into).
+# How a player reaches it: building Carpeted Tiles where liquid lies.
+# What changes: carpets that hold and pass on water.
+#
+# setup builds a carpet on the floor of the dug-out corridor west of the printing pod and
+# pours 30 kg of water above it: the water ends up in the carpet.
+from: early-base
+mods: [2719163704]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"CarpetTile\")", method: Build, args: [131128, Neutral, null, [SandStone, BasicFabric], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {type: SimMessages, method: AddRemoveSubstance, args: [131764, Water, null, 30, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"CarpetTile\").GetComponent<Storage>.capacityKg": 500
+  - run: {seconds: 60}
+  - expect: {buildings: {CarpetTile: 1}}
+  - expect_state:
+      "all:PassiveElementConsumer::[0].GetComponent<Storage>.MassStored()": "> 0.5"

@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2719163704-soggy-carpets.yaml",
+ "mods": [
+  "2719163704"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a carpet tile soaks up water poured over it",
+ "updated": "2026-10-26",
+ "commit": "f898d18a",
+ "mod_dlls": {
+  "2719163704": {
+   "SoggyCarpets.dll": "5a167ade16512524e2e0eb503f166fa4063320c568f0145c6272c2b1d7502c0f"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-102152-42394c53",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T10:28:39",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-135852-94c2bbc0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T14:02:07",
+    "lane": 14,
+    "reference_run": "20261026-102152-42394c53",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-135852-94c2bbc0",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T14:04:19",
+    "lane": 14,
+    "reference_run": "20261026-102152-42394c53",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

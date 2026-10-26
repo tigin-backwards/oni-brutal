@@ -1,0 +1,18 @@
+# 超级氧气扩散器 Super Oxygen Diffuser (3119833849), class P.
+#
+# What it does: a postfix on the Oxygen Diffuser's template makes it turn 1 g/s of algae into
+# 500 kg/s of oxygen at 30 degrees; a second postfix meant for its def (1 W, no heat) names a
+# method the config does not have ("CrealtBuildingDef").
+# How a player reaches it: building an Oxygen Diffuser.
+# What changes: a diffuser that floods the base with oxygen.
+#
+# The diffuser's converter is read from its def, and its power left as the game's.
+from: early-base
+mods: [3119833849]
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"MineralDeoxidizer\").BuildingComplete.GetComponent<ElementConverter>.outputElements[0].massGenerationRate": 500
+      "Assets.GetBuildingDef(\"MineralDeoxidizer\").BuildingComplete.GetComponent<ElementConverter>.consumedElements[0].MassConsumptionRate": [">= 0.00099", "<= 0.00101"]
+      "Assets.GetBuildingDef(\"MineralDeoxidizer\").EnergyConsumptionWhenActive": "== original"
+  - run: {seconds: 10}
+  - expect: {duplicants: 3}

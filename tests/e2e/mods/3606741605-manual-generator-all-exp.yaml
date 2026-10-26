@@ -1,0 +1,37 @@
+# 人力发电机可获取所有属性经验 / ManualGeneratorMod (3606741605), classes P, O.
+#
+# What it does: with its PLib option on (off by default, restart required), a postfix on
+# ManualGenerator.OnWorkTick gives the Duplicant running a Manual Generator experience in every
+# attribute (Construction, Excavation, Machinery, Athletics, Science, Cuisine, Medicine,
+# Strength, Creativity, Agriculture, Husbandry, Piloting) at the all-day rate, times a second
+# option (1 to 10).
+# How a player reaches it: the options on the Mods screen; a Duplicant on a Manual Generator.
+# What changes: generator duty trains every attribute.
+#
+# The options turn it on at rate 10. setup builds an empty Battery beside the base's Manual
+# Generator and wires them, so a standard Duplicant runs the generator (the bionic one is kept
+# off it): the Duplicants' Creativity experience, which nothing else trains here, grows.
+from: early-base
+mods: [3606741605]
+options:
+  ManualGeneratorMod: {$file: ModSetting.json, ManualGeneratorGetAllExp: true, ManualGeneratorGetAllExpRate: 10.0}
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Battery\")", method: Build, args: [{"$": "Grid.XYToCell(131, 207)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Wire\")", method: Build, args: [{"$": "Grid.XYToCell(129, 207)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Wire\")", method: Build, args: [{"$": "Grid.XYToCell(130, 207)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Wire\")", method: Build, args: [{"$": "Grid.XYToCell(131, 207)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Game.Instance.electricalConduitSystem", method: SetConnections, args: ["Right", {"$": "Grid.XYToCell(129, 207)"}, true]}}
+  - driver: {setup.call: {target: "Game.Instance.electricalConduitSystem", method: SetConnections, args: ["Left, Right", {"$": "Grid.XYToCell(130, 207)"}, true]}}
+  - driver: {setup.call: {target: "Game.Instance.electricalConduitSystem", method: SetConnections, args: ["Left", {"$": "Grid.XYToCell(131, 207)"}, true]}}
+  # The bionic Duplicant gains no attribute experience: it is kept off machine operating, so a
+  # standard Duplicant takes the generator.
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[0].GetComponent<ChoreConsumer>", method: SetPersonalPriority, args: [{"$": "Db.Get().ChoreGroups.MachineOperating"}, 0]}}
+steps:
+  - expect_state:
+      "Components.LiveMinionIdentities.Items[0].model": BionicMinion
+      "sum:Components.LiveMinionIdentities.Items[*].GetComponent<AttributeLevels>.GetAttributeLevel(\"Art\").experience": {save_as: art0}
+  - run: {seconds: 120}
+  - expect_state:
+      "sum:Components.LiveMinionIdentities.Items[*].GetComponent<AttributeLevels>.GetAttributeLevel(\"Art\").experience": "> art0 + 1"
+      "all:Battery::[0].JoulesAvailable": "> 0"
+  - expect: {duplicants: 3}

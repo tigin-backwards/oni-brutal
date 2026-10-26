@@ -1,0 +1,56 @@
+{
+ "spec": "mods/3606741605-manual-generator-all-exp.yaml",
+ "mods": [
+  "3606741605"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with the option on, a standard Duplicant running a Manual Generator wired to an empty battery gains Creativity experience, which nothing else trains here, and the battery charges",
+ "updated": "2026-10-26",
+ "commit": "5485339",
+ "mod_dlls": {
+  "3606741605": {
+   "ManualGeneratorMod.dll": "08ffd478d63ae5f012c30085691e0a4efbede38d57782489517d167a44dec500",
+   "PLib.dll": "bdd637dbef718cdd52e61c0a7177bd297864a50bac1583d2837a36ff3edf07db"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-015548-a3580f2d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T02:01:18",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-020407-ccde3879",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T02:04:12",
+    "lane": 15,
+    "reference_run": "20261026-015548-a3580f2d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-020407-ccde3879",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T02:05:38",
+    "lane": 15,
+    "reference_run": "20261026-015548-a3580f2d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

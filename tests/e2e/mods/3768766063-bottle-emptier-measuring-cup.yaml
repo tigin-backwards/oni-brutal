@@ -1,0 +1,28 @@
+# 取水大爷的量杯 / Bottle Emptier Measuring Cup (3768766063), classes P, S, O.
+#
+# What it does: the liquid Bottle Emptier gets the game's capacity side screen, in grams: a
+# delivery limit of 0 to 200 kg (200 kg by default; mods/config/BottleEmptierMeasuringCup/
+# config.json, written from the mod's defaults) caps how much each delivery errand brings (a
+# transpiler swaps the Storage.Capacity call in its chore for the limit).
+# How a player reaches it: select a Bottle Emptier; its capacity side screen.
+# What changes: how much liquid each trip to an emptier carries.
+#
+# setup builds a Bottle Emptier in the dug-out room west of the printing pod. Selected, its
+# capacity screen shows 200000 g; 5000 is typed into its field: the limit is 5 kg.
+from: early-base
+mods: [3768766063]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"BottleEmptier\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "file:mods/config/BottleEmptierMeasuringCup/config.json": exists
+      "all:BottleEmptier::[0].GetComponent<BottleEmptierDeliveryController>.UserMaxCapacity": 200000
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: BottleEmptier}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/CapacityControlSideScreen", cond: stable}
+  - expect_state:
+      "ui:**/CapacityControlSideScreen/**/Slider::GetComponent<KSlider>.maxValue": 200000
+  - ui_dump: {name: capacity, root: "**/CapacityControlSideScreen"}
+  - type: {ui: "**/CapacityControlSideScreen/ValidContent/Max/VerticalLayout/InputField", text: "5000", enter: true, clear: true}
+  - expect_state:
+      "selected:BottleEmptierDeliveryController.UserMaxCapacity": 5000

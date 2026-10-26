@@ -1,0 +1,63 @@
+{
+ "spec": "mods/3768766063-bottle-emptier-measuring-cup.yaml",
+ "mods": [
+  "3768766063"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Bottle Emptier gets the capacity screen in grams (dump matches): 200000 g by default, 5000 typed in sets 5 kg",
+ "updated": "2026-10-26",
+ "commit": "b790289a",
+ "mod_dlls": {
+  "3768766063": {
+   "BottleEmptierMeasuringCup.dll": "8c6166bcdbc7aaf131e5c77443f36184f873531c2867199fc045ebb292c1ebca"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-095925-af2fb1f8",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T10:04:26",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-113148-21a38bd7",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T11:31:48",
+    "lane": 16,
+    "reference_run": "20261026-095925-af2fb1f8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "capacity": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261026-113148-21a38bd7",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T11:31:49",
+    "lane": 17,
+    "reference_run": "20261026-095925-af2fb1f8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "capacity": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

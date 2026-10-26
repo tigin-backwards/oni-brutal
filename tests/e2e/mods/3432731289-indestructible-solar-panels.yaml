@@ -1,0 +1,25 @@
+# Indestructible Solar Panels (3432731289), class P.
+#
+# What it does: a postfix on SolarPanelConfig.CreateBuildingDef makes the Solar Panel
+# unbreakable and invincible (meteors and other damage leave it whole) and lowers its overheat
+# temperature to 400 K.
+# How a player reaches it: a Solar Panel under a meteor shower.
+# What changes: solar panels take no damage.
+#
+# The Solar Panel's definition is checked, and setup builds one in the dug-out room west of the
+# printing pod, which is selected.
+from: early-base
+mods: [3432731289]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"SolarPanel\")", method: Build, args: [{"$": "Grid.XYToCell(113, 207)"}, Neutral, null, [Glass], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"SolarPanel\").Breakable": false
+      "Assets.GetBuildingDef(\"SolarPanel\").Invincible": true
+      "Assets.GetBuildingDef(\"SolarPanel\").OverheatTemperature": 400
+      "all:SolarPanel::[0].GetComponent<Building>.Def.Invincible": true
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 208], select: SolarPanel}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Solar Panel"}

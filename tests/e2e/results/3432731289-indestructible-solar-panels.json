@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3432731289-indestructible-solar-panels.yaml",
+ "mods": [
+  "3432731289"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Solar Panel is unbreakable and invincible with a 400 K overheat temperature; one built is selected",
+ "updated": "2026-10-26",
+ "commit": "c56bc4a9",
+ "mod_dlls": {
+  "3432731289": {
+   "indestructibleSolarPanel.dll": "ea356cea85822f30c81175362a72eb53f4d604e5be4b1fde5a5f063b880d5742"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-023730-5710265c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T02:44:58",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-033126-ffcd9dff",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:31:26",
+    "lane": 16,
+    "reference_run": "20261026-023730-5710265c",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-033126-ffcd9dff",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T03:31:27",
+    "lane": 17,
+    "reference_run": "20261026-023730-5710265c",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

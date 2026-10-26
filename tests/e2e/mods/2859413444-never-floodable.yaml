@@ -1,0 +1,28 @@
+# P 永不淹没 Never Floodable (2859413444), class P.
+#
+# What it does: a prefix on BuildingLoader.CreateBuildingComplete clears BuildingDef.Floodable
+# for every building but the Critter Condo, so no building gets a Floodable component: liquid
+# over a building never stops it.
+# How a player reaches it: any building standing in liquid.
+# What changes: no building floods.
+#
+# setup pours 5 t of water into each of the outhouse's bottom cells (116 and 117, 207).
+# After a run no building in the colony has a Floodable, and the outhouse in the water is still
+# operational, not flooded.
+from: early-base
+mods: [2859413444]
+setup:
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(116, 207)"}, "Water", null, 5000, 300, 255, 0, -1]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(117, 207)"}, "Water", null, 5000, 300, 255, 0, -1]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"Outhouse\").Floodable": false
+      "Assets.GetBuildingDef(\"ResearchCenter\").Floodable": false
+      "Assets.GetBuildingDef(\"CritterCondo\").Floodable": true
+  - run: {seconds: 10}
+  - expect_state:
+      "Grid.Element[131768].id": Water     # (116, 207)
+      "Grid.Mass.get_Item(131768)": "> 100"
+  - expect_state:
+      "all:Floodable::Length": 0
+      "all:Toilet::[0].GetComponent<Operational>.IsOperational": true

@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2859413444-never-floodable.yaml",
+ "mods": [
+  "2859413444"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "no building has a Floodable; the outhouse stands in poured water and stays operational",
+ "updated": "2026-10-25",
+ "commit": "bd353b5",
+ "mod_dlls": {
+  "2859413444": {
+   "P_╙└▓╗╤═├╗.dll": "4da152f32360022ffe9f90e0013aa9087f072d7f32c0f170369fdda2c327ba95"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-200219-ef1e47f8",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T20:25:16",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-210443-18752e58",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T21:04:43",
+    "lane": 14,
+    "reference_run": "20261025-200219-ef1e47f8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261025-210443-18752e58",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-25T21:05:42",
+    "lane": 14,
+    "reference_run": "20261025-200219-ef1e47f8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -111,7 +111,7 @@ default; three do, and are off. Toggle them in **Moono Tweaks** on the main menu
 
 ![The main menu with the Moono Tweaks button under Mods](docs/images/main-menu.png)
 
-![The Moono Tweaks screen, a list of tweaks with checkboxes](docs/images/moono-tweaks.png)
+<p align="center"><img src="docs/images/moono-tweaks.png" alt="The Moono Tweaks screen, a list of tweaks with checkboxes"></p>
 
 ## Save compatibility
 

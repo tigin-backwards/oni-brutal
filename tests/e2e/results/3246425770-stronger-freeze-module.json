@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3246425770-stronger-freeze-module.yaml",
+ "mods": [
+  "3246425770"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Half Freeze Module replaces itself with its tiles, chute, rails and controller, and the controller lays its radiant pipes as the game runs",
+ "updated": "2026-10-26",
+ "commit": "c3cadc3",
+ "mod_dlls": {
+  "3246425770": {
+   "EasyFreezeModuleStrengthened.dll": "52355eb3621438a836e3dad73655a119153e97a2c211d8a3c4290e22f398d254"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-222040-75e4a4a6",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T00:01:23",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-015328-969f7897",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T01:53:28",
+    "lane": 14,
+    "reference_run": "20261025-222040-75e4a4a6",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-015328-969f7897",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T01:54:21",
+    "lane": 14,
+    "reference_run": "20261025-222040-75e4a4a6",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

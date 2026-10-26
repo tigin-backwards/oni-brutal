@@ -1,0 +1,26 @@
+# 更强的食物保鲜逃课 / Stronger food preservation module (3246425770), class B.
+#
+# What it does: adds a Half Freeze Module (HalfFreezePre, 2x4, raw minerals and metal, Food
+# menu, researched with Solid Transport, built by conveyor engineers). When it is completed it
+# replaces itself with a food-freezing nook: four Insulated Tiles of its material, a Conveyor
+# Chute and conveyor rails, and a Controller (StableGadget) that every 4 s keeps its two cells
+# at a trace of hydrogen at -73 °C, chills what lies there and lays radiant gas and liquid
+# pipes under itself.
+# How a player reaches it: the build menu (Food), after the research.
+# What changes: an easy sterile cold store for food.
+#
+# setup builds a Half Freeze Module in the corridor west of the printing pod: on spawn it
+# leaves the tiles, chute, rails and controller in its place; as the game runs the controller
+# lays its pipes.
+from: early-base
+mods: [3246425770]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"HalfFreezePre\")", method: Build, args: [{"$": "Grid.XYToCell(111, 207)"}, Neutral, null, [SandStone, Cuprite], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"SolidTransport\").unlockedItemIDs": {contains: HalfFreezePre}
+  - run: {seconds: 10}
+  - expect: {buildings: {InsulationTile: 4, SolidVent: 1, StableGadget: 1, HalfFreezePre: 0}}
+  - expect_state:
+      "count:all:Building::[*] if .Def.PrefabID == GasConduitRadiant": ">= 1"
+  - expect: {duplicants: 3}

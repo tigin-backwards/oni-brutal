@@ -1,0 +1,20 @@
+# Blueprints Button More Hints (3494066563), class S (a tooltip).
+#
+# What it does: a prefix replacing TopLeftControlScreen.RefreshKleiItemDropButton: when there
+# are blueprint drops to open, the top-left blueprints button's tooltip also says how many
+# unopened items wait; with none, it keeps the game's "no items" tooltip and state.
+# How a player reaches it: hovering the top-left blueprints (item drop) button.
+# What changes: the button's tooltip.
+#
+# Here the Steam double has no drops to open, so the button keeps the game's "No new
+# blueprints to unlock" tooltip and state, read and compared with the original.
+from: early-base
+mods: [3494066563]
+steps:
+  - run: {seconds: 2}
+  # The offline Steam double has no blueprint drops: the no-items tooltip and state.
+  - expect_state:
+      "KleiItemDropScreen.HasItemsToShow()": false
+      "TopLeftControlScreen.Instance.kleiItemDropButton.CurrentState": 1
+      "TopLeftControlScreen.Instance.kleiItemDropButton.GetComponent<ToolTip>.multiStringToolTips": {equals: ["No new blueprints to unlock"]}
+  - ui_dump: {name: button, root: "**/TopLeftControlPanel(Clone)/SecondaryRow/OpenKleiItemDropScreenButton"}

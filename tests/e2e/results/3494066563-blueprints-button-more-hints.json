@@ -1,0 +1,63 @@
+{
+ "spec": "mods/3494066563-blueprints-button-more-hints.yaml",
+ "mods": [
+  "3494066563"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with no blueprint drops the top-left button keeps the game's tooltip and state (dump matches)",
+ "updated": "2026-10-26",
+ "commit": "e0e73e18",
+ "mod_dlls": {
+  "3494066563": {
+   "BlueprintsButtonTooltip.dll": "f37c30a0e97a9f636ee89f2aa96c1b2d6e5771002d5ca66674505726bf90c7a6"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-095925-af2fb1f8",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T10:10:24",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-114527-2655f716",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T11:45:27",
+    "lane": 16,
+    "reference_run": "20261026-095925-af2fb1f8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "button": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261026-114527-2655f716",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T11:45:28",
+    "lane": 17,
+    "reference_run": "20261026-095925-af2fb1f8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "button": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

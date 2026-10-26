@@ -1,0 +1,20 @@
+# Mutations++ (3583419724), class P.
+#
+# What it does: mutated plants are no longer sterile: SeedProducer.Configure turns the
+# sterile production type into the harvest type, and a mutant plant's harvest may drop a seed
+# with one more mutation (up to three; 40 % with one, 20 % with two, scaled by the radiation
+# on the plant against its threshold); AttributeInstance.GetTotalValue patches keep the
+# mutations' attribute effects.
+# How a player reaches it: harvesting a mutated plant.
+# What changes: mutant seeds can stack mutations.
+#
+# Its effects need a mutant plant harvested under radiation, by chance; the spec reads the
+# Mealwood's seed producer and the mutations against the original's, and runs the colony.
+from: early-base
+mods: [3583419724]
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"BasicSingleHarvestPlant\").GetComponent<SeedProducer>.seedInfo.productionType": "!= 'Sterile'"
+      "count:Db.Get().PlantMutations.resources[*] if .Id != ''": "== original"
+  - run: {seconds: 10}
+  - expect: {duplicants: 3}

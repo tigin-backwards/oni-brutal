@@ -1,0 +1,18 @@
+# Relic Hunter (1927259233), class P. Base game only.
+#
+# What it does: makes the game's unused Relic Hunter trait (Archaeologist: a Duplicant who
+# almost always finds an artifact on a space mission) a positive trait new Duplicants can
+# roll (epic rarity, a small stat cost, exclusive with Cannot Research and Uncultured): a
+# prefix on Db.Initialize adds it to DUPLICANTSTATS.GOODTRAITS.
+# How a player reaches it: Duplicants printed or picked, with the trait.
+# What changes: one more good trait in the pool.
+#
+# In the base-game colony the trait is among the good traits and positive.
+from: vanilla-base
+mods: [1927259233]
+steps:
+  - expect_state:
+      "count:TUNING.DUPLICANTSTATS.GOODTRAITS[*] if .id == Archaeologist": 1
+      "Db.Get().traits.Get(\"Archaeologist\").PositiveTrait": true
+  - run: {seconds: 10}
+  - expect: {duplicants: 3}

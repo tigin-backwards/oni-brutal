@@ -1,0 +1,55 @@
+{
+ "spec": "mods/1927259233-relic-hunter.yaml",
+ "mods": [
+  "1927259233"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "in the base game the Relic Hunter trait is among the good traits and positive",
+ "updated": "2026-10-26",
+ "commit": "3194e24a",
+ "mod_dlls": {
+  "1927259233": {
+   "Archaeologist.dll": "c2ba29eda7c96db133bc0fc8f89b11ba9833758ff5737986b57c12e3cf15444e"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-043257-c0eef0ae",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:51:48",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-111023-802cdd35",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T11:10:23",
+    "lane": 16,
+    "reference_run": "20261026-043257-c0eef0ae",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-111023-802cdd35",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T11:10:24",
+    "lane": 17,
+    "reference_run": "20261026-043257-c0eef0ae",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

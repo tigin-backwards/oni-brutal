@@ -448,15 +448,27 @@ namespace OniMoono.Host
                 }
                 return results.Count == 1 && results.Contains("CheckMod") ? "the postfix's assembly calls, as in Mono" : throw new InvalidOperationException($"the caller was {string.Join(", ", results)}");
             });
-            Check("A Harmony prefix on a P/Invoke whose export is missing (PInvokePatches)", () =>
+            Check("Harmony prefixes on P/Invokes, one whose export is missing (PInvokePatches)", () =>
             {
                 PInvokePatches.Install();
-                new HarmonyLib.Harmony("OniMoono.Host.Check").Patch(typeof(Program).GetMethod(nameof(MissingExport), BindingFlags.NonPublic | BindingFlags.Static),
+                var harmony = new HarmonyLib.Harmony("OniMoono.Host.Check");
+                harmony.Patch(typeof(Program).GetMethod(nameof(MissingExport), BindingFlags.NonPublic | BindingFlags.Static),
                     prefix: new HarmonyLib.HarmonyMethod(typeof(Program), nameof(SkipMissing)));
-                for (int i = 0; i < 1000; i++) MissingExport();
-                // A P/Invoke never called before still binds to its own export (libc's: Linux).
-                int pid = OperatingSystem.IsLinux() ? OtherExport() : Environment.ProcessId;
-                return skipped == 1000 && pid == Environment.ProcessId ? "the prefix runs; other P/Invokes bind as before" : throw new InvalidOperationException($"skipped {skipped}, getpid {pid}");
+                // A caller compiled after the patch and optimized, as game and mod code is (a debug
+                // build's own methods are not): the JIT would inline the P/Invoke's transition past
+                // the detour. This lambda was compiled before the patch: it does not call them.
+                var callMissing = Caller<Action>(nameof(MissingExport));
+                for (int i = 0; i < 1000; i++) callMissing();
+                if (skipped != 1000) throw new InvalidOperationException($"skipped {skipped} of 1000 calls");
+                if (!OperatingSystem.IsLinux()) return "the prefix runs from optimized callers";
+                // An export that exists (libc's): optimized callers would call it past the detour.
+                harmony.Patch(typeof(Program).GetMethod(nameof(SkippedExport), BindingFlags.NonPublic | BindingFlags.Static),
+                    prefix: new HarmonyLib.HarmonyMethod(typeof(Program), nameof(SkipExport)));
+                var callSkipped = Caller<Action>(nameof(SkippedExport));
+                for (int i = 0; i < 1000; i++) callSkipped();
+                // A P/Invoke never called before still binds to its own export.
+                int pid = OtherExport();
+                return skippedExport == 1000 && pid == Environment.ProcessId ? "the prefixes run from optimized callers; other P/Invokes bind as before" : throw new InvalidOperationException($"skipped {skippedExport} of 1000 calls to an export, getpid {pid}");
             });
             Check("A Harmony prefix on a method an earlier patch's replacement calls (PatchDependents)", () =>
             {
@@ -1375,15 +1387,31 @@ namespace OniMoono.Host
             return failures;
         }
 
-        /// CheckRuntimeServices' P/Invokes: one whose export no library has, one that exists.
+        /// CheckRuntimeServices' P/Invokes: one whose export no library has, ones whose exports exist.
         [System.Runtime.InteropServices.DllImport("libc", EntryPoint = "oni_moono_missing_export")]
         static extern void MissingExport();
 
         [System.Runtime.InteropServices.DllImport("libc", EntryPoint = "getpid")]
         static extern int OtherExport();
 
-        static int skipped;
+        [System.Runtime.InteropServices.DllImport("libc", EntryPoint = "endpwent")]
+        static extern void SkippedExport();
+
+        static int skipped, skippedExport;
         static bool SkipMissing() { skipped++; return false; }
+        static bool SkipExport() { skippedExport++; return false; }
+
+        /// A dynamic method calling one of Program's P/Invokes, compiled optimized in any build.
+        static T Caller<T>(string pinvoke) where T : Delegate
+        {
+            var target = typeof(Program).GetMethod(pinvoke, BindingFlags.NonPublic | BindingFlags.Static)!;
+            // Anonymously hosted: one owned by a type of this assembly is compiled as debug code
+            // in a debug build.
+            var caller = new System.Reflection.Emit.DynamicMethod("Call" + pinvoke, target.ReturnType, Type.EmptyTypes, restrictedSkipVisibility: true);
+            var il = caller.GetILGenerator();
+            il.Emit(System.Reflection.Emit.OpCodes.Call, target); il.Emit(System.Reflection.Emit.OpCodes.Ret);
+            return caller.CreateDelegate<T>();
+        }
 
         sealed class SharedPool<T> where T : class
         {

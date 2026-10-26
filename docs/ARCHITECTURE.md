@@ -302,7 +302,15 @@ game or mod code can notice. Each says how it is resolved, or why it is kept.
   game's Linux cimgui does not export, and load in the original player. **Resolved in**
   `PInvokePatches`: a missing export or library does not fail the preparation of a P/Invoke; the
   detour goes on the method's own entry, other P/Invokes bind as before, and calling the original
-  still fails as on Mono. `--check-types` patches a P/Invoke to a missing export.
+  still fails as on Mono. CoreCLR's JIT also inlines the transition of a P/Invoke that needs no
+  marshalling into optimized callers (all game and mod code, even at tier 0; not a debug build's
+  own code), which then call the native target directly, never the detour: the prefix was
+  skipped, and a missing export threw. `PInvokePatches` marks a P/Invoke prepared for a patch as
+  needing marshalling (CoreCLR 10's cached flag on its MethodDesc), so code compiled from then
+  on, including a tier-up of a caller compiled before, calls its entry. A caller's code compiled
+  before the patch still calls past it until it is recompiled. `--check-types` patches a P/Invoke
+  to a missing export and one to an export libc has, and calls each from a dynamic method
+  (compiled optimized in either build); `scripts/check.sh` runs it on the release build too.
 - **D21 Patches of methods an earlier replacement calls or inlines.** Harmony compiles a patched
   method's replacement fully optimized, and CoreCLR's JIT inlines methods it calls, and, through
   them, the methods those call; a method patched later is marked not to be inlined from then on,

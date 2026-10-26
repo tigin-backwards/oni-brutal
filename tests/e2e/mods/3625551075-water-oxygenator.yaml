@@ -1,0 +1,28 @@
+# 水氧機 (Water Oxygenator) (3625551075), classes B, S.
+#
+# What it does: adds the Water Oxygenator (WaterOxygenator, 2x2, metal, Oxygen menu,
+# researched with Improved Oxygen, 120 W): it consumes the liquid piped into it and turns it
+# into any liquid and gas chosen on its side screen (oxygen by default), at a mass,
+# temperature, power and heat set there, piping or dumping them out. The side screen is the
+# mod's own UI, built inside the game's storage filter screen.
+# How a player reaches it: the build menu (Oxygen), after the research; its side screen.
+# What changes: a configurable converter.
+#
+# setup builds one in the dug-out room west of the printing pod. Selected, its side screen
+# shows the mod's panel, compared with the original: its heat production field reads 1.2
+# here and 1.3 in the original (the default 1.25 rounded to one decimal, ARCHITECTURE D2).
+from: early-base
+mods: [3625551075]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"WaterOxygenator\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Cuprite], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"ImprovedOxygen\").unlockedItemIDs": {contains: WaterOxygenator}
+      "all:WaterOxygenator::[0].gasElement": Oxygen
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: WaterOxygenator}
+  - ui_wait: {path: "**/TreeFilterableSideScreen/WaterOxygenatorCustomUI", cond: stable}
+  - ui_dump: {name: side-screen, root: "**/TreeFilterableSideScreen/WaterOxygenatorCustomUI"}
+  # The heat production field reads 1.25 rounded to one decimal (fixed-format-midpoint).
+  - shot: {name: side-screen, crop: "**/TreeFilterableSideScreen/WaterOxygenatorCustomUI", mask: [[910, 551, 44, 19]]}

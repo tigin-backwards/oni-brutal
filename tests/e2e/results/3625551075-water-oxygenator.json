@@ -1,0 +1,85 @@
+{
+ "spec": "mods/3625551075-water-oxygenator.yaml",
+ "mods": [
+  "3625551075"
+ ],
+ "verdict": "warning",
+ "why": "known findings: fixed-format-midpoint, scroll-normalized-position",
+ "findings": [
+  "fixed-format-midpoint",
+  "scroll-normalized-position"
+ ],
+ "note": "a Water Oxygenator's side screen shows the mod's panel inside the storage filter screen (shot matches); its heat production field reads 1.25 rounded the .NET way, 1.2 for the original's 1.3 (fixed-format-midpoint)",
+ "updated": "2026-10-26",
+ "commit": "e55058f3",
+ "mod_dlls": {
+  "3625551075": {
+   "ClassLibrary1.dll": "416ca0f0048e7a5a57be9efc78bccd57b53ea361718c629cbf2b49fb6c08b1c4",
+   "PLib.dll": "48c63fd4654b6fbb390afdac71a3d29194eeb9405eca4290cba6e4fbf60805ce"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-095925-af2fb1f8",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T09:59:26",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-111912-e067f307",
+    "index": 1,
+    "verdict": "warn",
+    "date": "2026-10-26T11:19:12",
+    "lane": 16,
+    "reference_run": "20261026-095925-af2fb1f8",
+    "new_signatures": 0,
+    "findings": [
+     "fixed-format-midpoint",
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "side-screen": {
+      "differences": 0,
+      "known": {
+       "fixed-format-midpoint": 2,
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "side-screen": 0.0
+    }
+   },
+   {
+    "run": "20261026-111912-e067f307",
+    "index": 2,
+    "verdict": "warn",
+    "date": "2026-10-26T11:19:13",
+    "lane": 17,
+    "reference_run": "20261026-095925-af2fb1f8",
+    "new_signatures": 0,
+    "findings": [
+     "fixed-format-midpoint",
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "side-screen": {
+      "differences": 0,
+      "known": {
+       "fixed-format-midpoint": 2,
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "side-screen": 0.0
+    }
+   }
+  ]
+ }
+}

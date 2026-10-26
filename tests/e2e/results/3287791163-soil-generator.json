@@ -1,0 +1,56 @@
+{
+ "spec": "mods/3287791163-soil-generator.yaml",
+ "mods": [
+  "3287791163"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "an Earth Generator on tiles, wired to an empty battery and holding 100 kg of dirt, burns the dirt and charges the battery",
+ "updated": "2026-10-26",
+ "commit": "6944fde",
+ "mod_dlls": {
+  "3287791163": {
+   "OxyMod1.dll": "af143eb1a9230ee5549cac644c17fb87e75cfb9490b60b900d7d5ca151894960",
+   "PLib.dll": "b862c5db2b3cd6df09a62d4a30782e91e2b24e8e1bfac08d991c9cc89a984ba9"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-014459-2846dc4d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T01:46:44",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-014847-a7e072b5",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T01:49:48",
+    "lane": 14,
+    "reference_run": "20261026-014459-2846dc4d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-014847-a7e072b5",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T01:50:44",
+    "lane": 14,
+    "reference_run": "20261026-014459-2846dc4d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

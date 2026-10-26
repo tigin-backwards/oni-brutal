@@ -1,0 +1,43 @@
+# 泥土发电制氧 Soil power generation and oxygen production (3287791163), class B.
+#
+# What it does: adds the Earth Generator (Earth_Generator, 3x3, any metal, Power menu,
+# researched with Combustion): Duplicants deliver dirt (600 kg of storage), and it burns 1 kg/s
+# of it for 600 W, giving off 0.4 kg/s of oxygen at 27 °C, without heat; it is switched by
+# automation and can be tuned.
+# How a player reaches it: the build menu (Power), after the research.
+# What changes: power and oxygen from dirt.
+#
+# setup builds a generator on tiles in the corridor west of the printing pod, wires it to an empty
+# Battery and stores 100 kg of dirt in it. As the game runs it burns dirt and the battery
+# charges.
+from: early-base
+mods: [3287791163]
+setup:
+  # Tiles under it: the floor here has pits, and a building needs a solid foundation to run.
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Tile\")", method: Build, args: [{"$": "Grid.XYToCell(111, 206)"}, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Tile\")", method: Build, args: [{"$": "Grid.XYToCell(112, 206)"}, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Tile\")", method: Build, args: [{"$": "Grid.XYToCell(113, 206)"}, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Earth_Generator\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Cuprite], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Battery\")", method: Build, args: [{"$": "Grid.XYToCell(115, 207)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Wire\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Wire\")", method: Build, args: [{"$": "Grid.XYToCell(113, 207)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Wire\")", method: Build, args: [{"$": "Grid.XYToCell(114, 207)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Wire\")", method: Build, args: [{"$": "Grid.XYToCell(115, 207)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Game.Instance.electricalConduitSystem", method: SetConnections, args: ["Right", {"$": "Grid.XYToCell(112, 207)"}, true]}}
+  - driver: {setup.call: {target: "Game.Instance.electricalConduitSystem", method: SetConnections, args: ["Left, Right", {"$": "Grid.XYToCell(113, 207)"}, true]}}
+  - driver: {setup.call: {target: "Game.Instance.electricalConduitSystem", method: SetConnections, args: ["Left, Right", {"$": "Grid.XYToCell(114, 207)"}, true]}}
+  - driver: {setup.call: {target: "Game.Instance.electricalConduitSystem", method: SetConnections, args: ["Left", {"$": "Grid.XYToCell(115, 207)"}, true]}}
+  - driver: {setup.call: {target: "all:EnergyGenerator::[0].GetComponent<Storage>", method: AddOre, args: [Dirt, 100.0, 300.0, 255, 0, false, true]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"Combustion\").unlockedItemIDs": {contains: Earth_Generator}
+      "Assets.GetBuildingDef(\"Earth_Generator\").GeneratorWattageRating": 600
+      "all:EnergyGenerator::[0].GetComponent<Storage>.MassStored()": 100
+  - run: {seconds: 2}
+  - expect_state:
+      "all:EnergyGenerator::[0].GetComponent<Operational>.IsOperational": true
+  - run: {seconds: 20}
+  - expect_state:
+      "all:EnergyGenerator::[0].GetComponent<Storage>.MassStored()": "< 95"
+      "all:Battery::[0].JoulesAvailable": "> 0"
+  - expect: {duplicants: 3}

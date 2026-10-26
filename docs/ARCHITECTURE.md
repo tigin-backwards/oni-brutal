@@ -31,9 +31,9 @@ We replace **all three**: (1) and (2) with our engine, (3) with .NET 10.
 Nothing from `UnityPlayer.so`, `UnityEngine.*Module.dll`, or Mono is loaded.
 
 The reference install is the Linux build at `~/projects/oni-linux` (Unity 6000.3.5f2,
-`m_GraphicsAPIs = [OpenGLCore]`). The target platform is **linux-x64**. Windows needs
-Windows-matching native plugins and shader data (the Windows build carries D3D11 programs
-only), so it is out of scope until Linux is at parity.
+`m_GraphicsAPIs = [OpenGLCore]`). The target platform is **linux-x64**. The Windows player
+runs the Windows build's own natives and data, whose shaders carry OpenGL programs beside the
+Direct3D ones (§6).
 
 ## 2. Process and assembly structure
 
@@ -96,12 +96,15 @@ we never call `SetDllImportResolver` on BRUTAL assemblies. The Vulkan loader nam
 Binding and JIT are clean: every BCL reference in the game resolves on .NET 10 and all ~82k
 game methods JIT. The differences that remain are behaviours Mono's class libraries provided
 and .NET 10 ships out-of-band. The host restores them the way .NET documents for
-.NET Framework-era code where it can. Two serialization paths of the game are patched at run
-time where they persist runtime-specific values (D1 state-machine parameter names, D3 a local
-mod's version stamp); so are mods' loading (D11) and the bubble manager's one use of a struct's
-hash as an identity (D26), and the game's conversions of floats to integers are rewritten as
-they load (D29), in the same pass as its directory listings (D30) and the double close in
-0Harmony's MonoMod (D31). No other game IL is touched.
+.NET Framework-era code where it can. Game methods are patched at run time only where they
+persist or depend on runtime-specific values: two serialization paths (D1 state-machine
+parameter names, D3 a local mod's version stamp), mods' loading (D11) and the bubble manager's
+one use of a struct's hash as an identity (D26). The game's conversions of floats to integers
+are rewritten as its assemblies load (D29), in the same pass as its directory listings (D30)
+and the double close in 0Harmony's MonoMod (D31). The game's Harmony is adjusted where patches
+would run differently on CoreCLR (D12–D14, D17–D21, D33, D34), and mods' assemblies are
+rewritten as they load where their IL relies on Mono (D11, D22, D23, D27–D32). No other
+game IL is touched.
 
 | Mono provided | Host provides | Needed by |
 |---|---|---|
@@ -126,7 +129,8 @@ documented. The host serves it instead of the shipped copy.
 `SteamManager` call `Application.Quit(2)`, and our `Application.Quit` honours it. Running
 past the boot checkpoint needs a Steam client logged in with an account that owns the game.
 
-**Documented deviations** (inherent to the runtime swap; not fixable without patching game IL):
+**Documented deviations**: where Mono and CoreCLR, or Unity's player and ours, differ in ways
+game or mod code can notice. Each says how it is resolved, or why it is kept.
 
 - **D1 State-machine parameters in saves.** `StateMachineSerializer` stores and matches
   parameters by their context type's `Type.FullName`, whose generic arguments are
@@ -155,10 +159,10 @@ past the boot checkpoint needs a Steam client logged in with an account that own
   it. **Resolved by a patch:** the host (`ModVersionStamp`) uses the game's Harmony to replace
   that one call with Mono's algorithm (`OniMoono.Engine.MonoStringHash`, the .NET Framework
   64-bit hash, checked against the original player with tools/UnityProbe). Stamps are then
-  stable and equal to the original player's, so `mods.json` works in both players. This is
-  one of the host's two changes to game code (with D1); game code's other `GetHashCode` calls stay
-  randomized, and none of them is persisted. A `mods.json` written before the patch carries
-  random stamps: each local mod asks for a restart once and has to be re-enabled once.
+  stable and equal to the original player's, so `mods.json` works in both players. Game code's
+  other `GetHashCode` calls stay randomized, and none of them is persisted. A `mods.json`
+  written before the patch carries random stamps: each local mod asks for a restart once and has
+  to be re-enabled once.
 - **D4 `Thread.Abort`** throws on CoreCLR; reached only by `ThreadedHttps.End` after a 2 s join
   timeout at shutdown.
 - **D5 `Process.MainModule`** is the host executable; `App.Restart` relaunches the host (we make
@@ -200,7 +204,7 @@ past the boot checkpoint needs a Steam client logged in with an account that own
   KSerialization saves: its default opt-out mode saves every public field and property). The mod
   still sees itself as loaded from its file: `Assembly.Location` reports the file (mods find
   their folders from it) and its folder is searched for its references. Other mods load as
-  before. This is the host's third change to game code (with D1 and D3).
+  before.
 - **D12 `callvirt` to a static method.** Mono compiles one as a call; CoreCLR's JIT rejects the
   method ("Method not found: '?'"). C# compilers never emit it, but Harmony transpilers that
   swap an instance call for a static helper and keep the opcode do (Mod Updater's patch of
@@ -273,8 +277,9 @@ past the boot checkpoint needs a Steam client logged in with an account that own
   frame after a few seconds of hovering). **Resolved** in `SharedGenerics`, which subscribes to
   MonoMod's method-compiled event and hands MonoMod's handler every patched method of a generic
   class that has the recompiled method's handle (instantiations sharing code share their method
-  handle). `--check-types` patches an emitted generic class's method for one argument and calls
-  it for another past tier-up.
+  handle). Code that inlined such shared code before the patch is not rebuilt (D34).
+  `--check-types` patches an emitted generic class's method for one argument and calls it for
+  another past tier-up.
 - **D19 Patch methods' frames.** Harmony calls a mod's prefixes, postfixes and finalizers from
   the replacement it builds for the patched method, a dynamic method owned by 0Harmony. CoreCLR's
   JIT inlines a small patch method into it, so what the patch method calls sees 0Harmony as its
@@ -401,7 +406,7 @@ past the boot checkpoint needs a Steam client logged in with an account that own
   (after an Oxy Coral's oxygen bubble, a Thermal Gas Fissure gave oxygen instead of natural
   gas). **Resolved by a patch** (`MonoValueTypeHashes`): that call computes Mono's hash
   (`OniMoono.Engine.MonoValueTypeHash`, starting from 0, so ids equal Mono's up to its
-  per-process start). This is the host's fourth change to game code (with D1, D3 and D11).
+  per-process start).
   **Scanned** (2026-10-23, Mono.Cecil over IL: `constrained.` or `box` before
   `object::GetHashCode`, `EqualityComparer<T>.GetHashCode` and `HashCode` over such a struct;
   a struct as a dictionary key only hashes to a bucket and is left out): every game assembly
@@ -455,7 +460,8 @@ past the boot checkpoint needs a Steam client logged in with an account that own
   once less than half of it is left; 64 KB is enough to throw, and the handler runs at the
   catching frame. A recursion through game methods or another assembly is not covered, nor one in the
   game's own code. A mod that cannot be rewritten loads unchanged. `--check-types` runs a mod's
-  self and mutual recursions without end.
+  self and mutual recursions without end, and a short recursion and one without end on a 128 KB
+  thread.
 - **D29 Float-to-integer conversions out of range.** Mono converts a float to an integer with
   the processor's truncating instruction (cvttsd2si), which gives the target's minimum for NaN,
   the infinities and values whose truncation is out of range; CoreCLR saturates since .NET 9
@@ -670,6 +676,11 @@ past the boot checkpoint needs a Steam client logged in with an account that own
   Mono does not; neither does ours. `--check-types` prints fields of a primitive, a nested type,
   an array, a constant and an event of a nested delegate, and transpiles a method by the field's
   Mono string.
+- **D36 Log size.** Unity's `Player.log` has no cap, and a mod throwing on every frame filled one
+  player's log to 2 GB (issue #15). Kept on purpose: the engine's log (`CappedLogFile`) keeps its
+  first 20 MB as written and, past them, only the last 20 MB or so, behind a banner of dashes
+  saying how many bytes were cut there; the file stays under about 60 MB. `ONI_LOG_FULL=1`
+  turns the cap off.
 
 ## 3. The engine API (`OniMoono.UnityEngine`)
 
@@ -732,10 +743,11 @@ citing why.
     recurse in Unity's order (Awake/OnEnable for the whole subtree, parent first; OnDisable
     children-first when deactivating).
   - `Destroy` is deferred to the end of the frame; `DestroyImmediate` is synchronous,
-    children first, with `OnDisable` then `OnDestroy`. The GameObject either names turns
-    inactive itself (`activeSelf` false) before its subtree's callbacks at destruction, its
-    descendants keeping their own flag (UnityProbe's destroyflags): `KMonoBehaviour.OnDestroy`
-    releases the object's `KObject` event system only on `!activeSelf`.
+    children first, with `OnDisable` then `OnDestroy`. The GameObject passed to either turns
+    inactive itself (`activeSelf` false) before its subtree's callbacks, its descendants keeping
+    their own flag, and a component destroyed alone leaves its object active (UnityProbe's
+    destroyflags): `KMonoBehaviour.OnDestroy` releases the object's `KObject` event system only
+    on `!activeSelf`.
   - Exceptions in a message are logged through `Debug.LogException` and do not stop the frame,
     as in Unity.
 - **Script execution order** comes from `MonoScript.m_ExecutionOrder` in
@@ -1105,9 +1117,10 @@ HTTP and FMOD threads call into the engine. Our rules:
 
 `Vector2/3/4`, `Quaternion`, `Matrix4x4`, `Color`, `Mathf`, … are implemented with Unity's
 formulas (including `Mathf.Approximately`, `RoundToInt` banker's rounding, `Random.Range`
-inclusive/exclusive rules, `Quaternion.Euler` order ZXY). Bit-exact float results are out of
-scope; algorithmic equivalence is not. The runtime's float rounding differs from Unity's Mono
-(D25) and so does its number formatting (D2).
+inclusive/exclusive rules, `Quaternion.Euler` order ZXY). Results follow the original bit for
+bit where that was measured and matters (D25 lists them); elsewhere the aim is algorithmic
+equivalence. The runtime's float rounding differs from Unity's Mono (D25) and so does its number
+formatting (D2).
 
 ## 6. Configuration and paths
 
@@ -1128,7 +1141,7 @@ macOS is groundwork only, `docs/research/metal-backend-design.md`); Steamworks.N
 and callback packing differ); FreeType comes from BRUTAL's package on both. Company/product/version
 come from `globalgamemanagers` PlayerSettings. The host takes `--game <dir>` (default
 `~/projects/oni-linux`), `--headless` (no window, no GL: logic-only frames for tests),
-`--frames N`, `--screenshot <dir>` (debug captures), and `--log <file>`.
+`--frames N`, `--capture FRAME:PATH` (§7), and `--log <file>`.
 
 The host directory carries a `Restarter` (`Restarter.exe` on Windows, a .NET program), as Klei's
 player directory does: `App.Restart` (language change) starts it with the player's executable
@@ -1138,7 +1151,7 @@ started with (recorded by the host in `ONI_MOONO_RESTART_ARGS`, shell-quoted, an
 
 **Player options (Moono Tweaks).** The game tweaks (`GameTweakNames`), the loading splash and
 frame stats come from three places, later ones winning: built-in defaults (every tweak but
-`ChangingBehaviour`'s, as `--game-tweak exact`; no splash; no frame stats), the settings file
+`ChangingBehaviour`'s, as `--game-tweak exact`; the moo splash; no frame stats), the settings file
 `<persistentDataPath>/oni-moono/settings.json` (`PlayerSettings`: only the choices that differ
 from the defaults, so a default changed by an update reaches everyone who has not chosen
 otherwise; a run home has its own), and the command line (`EffectiveOptions`). A command line
@@ -1151,9 +1164,10 @@ of the game's own UI: the Mods screen's prefab instantiated inactive, its `ModsS
 lists every option from that list with a toggle and a line on what it does, the tweaks that
 change gameplay labelled so, and rows the command line set dimmed and fixed; "Restart to apply"
 writes the file and restarts through `App.Restart` (the Restarter above), and the restarted player
-reads it with the same command line. Test runs pin the tweaks: `scripts/run.sh` and
-`scripts/run-windows.sh` pass `--game-tweak none` first, so a run has exactly the tweaks its own
-arguments name.
+reads it with the same command line. `--no-tweaks-menu` leaves the button out, as in the
+original's menu (e2e runs compared with it). Test runs pin the options: `scripts/run.sh` and
+`scripts/run-windows.sh` pass `--game-tweak none --splash none` first, so a run has exactly the
+tweaks and splash its own arguments name.
 
 Test runs (not the product): `--run-home DIR` keeps a run's per-user data under DIR (Unity's
 paths, and on Windows the Documents and local application data folders the game asks .NET for),
@@ -1172,7 +1186,7 @@ stack trace, and its callbacks get an empty one, although `Application.GetStackT
 reports ScriptOnly for each type. An exception gets its own frames, innermost exception first, in
 Mono's format (`  at A.B (System.String s) [0x0001f] in <mvid>:0`), then the managed frames of the
 `LogException` call in Unity's (`A:B(String)`), the engine's frames left out where the original's
-are native (`Engine/LogTraces.cs`).
+are native (`Engine/LogTraces.cs`). Unlike Unity's, the file is capped at about 60 MB (D36).
 
 Development diagnostics (host options, never needed by players): `--trace-exceptions` logs every
 first-chance exception with per-frame IL offsets (the game ships without symbols; the offset
@@ -1233,7 +1247,7 @@ suppressions only), central package versions in `Directory.Packages.props`.
    semantics, layout of uGUI (via the shipped DLL), shader variant selection.
 4. **Headless boot runs** asserting the scene/bootstrap sequence reaches defined checkpoints
    with zero logged exceptions.
-5. **Visual checks:** `--screenshot` captures at checkpoints, reviewed against reference
+5. **Visual checks:** `--capture` screenshots at checkpoints, reviewed against reference
    screenshots of the real game.
 6. **Gameplay soak:** new colony → N cycles → save → reload → continue, no exceptions.
 7. **Offline Steam test double** (`tools/SteamStub`, `scripts/run-offline.sh`). The game

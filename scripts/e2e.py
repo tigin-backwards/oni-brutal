@@ -2462,8 +2462,9 @@ class Run:
         return rects
 
     # Dialogs a load may open, by their header text: a fixture saved with other mods than the
-    # spec's opens "MOD DIFFERENCES" in both players. Its OK button is pressed like a player would.
-    LOAD_DIALOGS = ('MOD DIFFERENCES',)
+    # spec's opens "MOD DIFFERENCES" in both players (in a spec's `language:`, the game's own
+    # translation of it). Its OK button is pressed like a player would.
+    LOAD_DIALOGS = ('MOD DIFFERENCES', '模组差异', '모드 차이', 'РАЗЛИЧИЯ МОДОВ')
 
     def dismiss_load_dialogs(self):
         for _ in range(5):

@@ -2,6 +2,7 @@ using System.Linq;
 using System;
 using System.Collections.Generic;
 using Brutal.GlfwApi;
+using Brutal.GlfwApi.Win32;
 using Brutal.Numerics;
 using OniMoono.Engine.Platform;
 using UnityEngine;
@@ -204,7 +205,36 @@ namespace OniMoono.Desktop
                 var icon = new GlfwImage { Width = image.Width, Height = image.Height, Pixels = pixels };
                 Glfw.PInvoke.SetWindowIcon(window, 1, &icon);
             }
+            if (OperatingSystem.IsWindows()) SetClassIcon(window);
         }
+
+        /// The taskbar asks the window for its icon, and while the main thread is busy loading the
+        /// game (no message pump) it gives up and takes the window class's, which GLFW leaves as
+        /// Windows' generic one. The class gets the exe's icon (resource 32512, the .NET SDK's
+        /// ApplicationIcon), at the sizes the shell wants.
+        static void SetClassIcon(GlfwWindow window)
+        {
+            const int GCLP_HICON = -14, GCLP_HICONSM = -34, SM_CXICON = 11, SM_CYICON = 12, SM_CXSMICON = 49, SM_CYSMICON = 50;
+            var module = GetModuleHandleW(IntPtr.Zero);
+            var big = LoadImageW(module, 32512, 1, GetSystemMetrics(SM_CXICON), GetSystemMetrics(SM_CYICON), 0);
+            var small = LoadImageW(module, 32512, 1, GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON), 0);
+            if (big == IntPtr.Zero || small == IntPtr.Zero) return; // a host without the icon (tests)
+            var hwnd = (IntPtr)window.GetWin32Window();
+            SetClassLongPtrW(hwnd, GCLP_HICON, big);
+            SetClassLongPtrW(hwnd, GCLP_HICONSM, small);
+        }
+
+        [System.Runtime.InteropServices.DllImport("kernel32.dll")]
+        static extern IntPtr GetModuleHandleW(IntPtr name);
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        static extern IntPtr LoadImageW(IntPtr module, nint name, uint type, int width, int height, uint flags);
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        static extern int GetSystemMetrics(int index);
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        static extern IntPtr SetClassLongPtrW(IntPtr hwnd, int index, IntPtr value);
 
         static float MonitorDpi(GlfwMonitor m)
         {

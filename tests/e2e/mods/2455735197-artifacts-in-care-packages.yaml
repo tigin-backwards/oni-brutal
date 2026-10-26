@@ -1,0 +1,30 @@
+# Artifacts in Care Packages (2455735197), classes P, O.
+#
+# What it does: the Printing Pod may offer artifacts as care packages. A transpiler on
+# Immigration.RandomCarePackage adds a random draw (RandomArtifactDropTableSlots entries,
+# weighted down by the artifacts the colony already has, DynamicProbability) from every
+# artifact whose tier's cycle has come: tier 0 after CyclesUntilTier0 cycles (150), each
+# further tier CyclesUntilTierNext later (25), and a Neural Vacillator recharge after the last.
+# In Spaced Out, a printed artifact can be terrestrial (SpawnContents) and lies in its
+# entombed look (SetAnimToInfo). PLib options.
+# How a player reaches it: the Printing Pod's offers, from the cycle the options set.
+# What changes: artifacts among the care packages.
+#
+# The options bring tier 0 to cycle 1 and each further tier one cycle later, with 30 slots;
+# setup moves the clock to cycle 6 (GetCycle 5): the mod's draw holds the artifacts of tiers
+# 0 to 4, and the pod's own pick goes through the mod's injection.
+from: early-base
+mods: [2455735197]
+options:
+  "2455735197": {CyclesUntilTier0: 1, CyclesUntilTierNext: 1, RandomArtifactDropTableSlots: 30}
+setup:
+  - driver: {setup.call: {target: "GameClock.Instance", method: SetTime, args: [3000]}}
+steps:
+  - expect_state:
+      "GameClock.Instance.GetCycle()": 5
+      "type:ArtifactCarePackages.ArtifactImmigration::Instance": exists
+      "type:ArtifactCarePackages.ArtifactImmigration::Instance.DropTableSlots": 30
+  - expect_state:
+      "type:ArtifactCarePackages.ArtifactImmigration::Instance.GetRandomCarePackages().Count": ">= 3"
+  - expect_state:
+      "Immigration.Instance.RandomCarePackage().id": exists

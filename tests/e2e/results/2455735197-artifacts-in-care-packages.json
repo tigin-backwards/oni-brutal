@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2455735197-artifacts-in-care-packages.yaml",
+ "mods": [
+  "2455735197"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with its options brought forward, the pod's care package draw holds artifacts at cycle 6",
+ "updated": "2026-10-25",
+ "commit": "8884175",
+ "mod_dlls": {
+  "2455735197": {
+   "ArtifactCarePackages.dll": "532255e893104b5cab9959185b5e121945fcd3eee0a28ebb0c9d1ed8765bb91f"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-194153-495dc922",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T19:47:18",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-201854-1d275cbe",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T20:18:54",
+    "lane": 14,
+    "reference_run": "20261025-194153-495dc922",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261025-201854-1d275cbe",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-25T20:19:38",
+    "lane": 14,
+    "reference_run": "20261025-194153-495dc922",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

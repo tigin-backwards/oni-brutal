@@ -1,0 +1,56 @@
+{
+ "spec": "mods/2894982816-efficient-massage-table.yaml",
+ "mods": [
+  "2894982816"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "its option at -50 makes the Massage Table relieve 500 % stress a cycle, alone and in a room",
+ "updated": "2026-10-26",
+ "commit": "a452aaa",
+ "mod_dlls": {
+  "2894982816": {
+   "PLib.dll": "b862c5db2b3cd6df09a62d4a30782e91e2b24e8e1bfac08d991c9cc89a984ba9",
+   "╕▀╨º░┤─ª┤▓ Efficient Massage Table.dll": "f1a45a44364ee7f4f792de6d2674d0e7c20f607b8ec639a2fe8faa2dd9c8704f"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-022709-87387b70",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T02:32:23",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-023425-4430a720",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T02:57:03",
+    "lane": 15,
+    "reference_run": "20261026-022709-87387b70",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-023425-4430a720",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T02:57:45",
+    "lane": 15,
+    "reference_run": "20261026-022709-87387b70",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

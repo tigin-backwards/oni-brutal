@@ -1,0 +1,19 @@
+# 高效按摩床 Efficient Massage Table (2894982816), classes P, O.
+#
+# What it does: a postfix on the Massage Table's config sets its stress relief, alone and in a
+# room, to ten times a PLib option (a percentage from -100 to -1, -10 by default): -100 % a
+# cycle where the game's table gives -30.
+# How a player reaches it: the Mods screen's options; using a Massage Table.
+# What changes: massage tables relieve more stress.
+#
+# options set the rate to -50: the table's relaxation point relieves 500 % a cycle.
+from: early-base
+mods: [2894982816]
+options:
+  "2894982816": {$file: Controler.json, a1: -50}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"MassageTable\").BuildingComplete.GetComponent<MassageTable>.stressModificationValue": -500
+      "Assets.GetBuildingDef(\"MassageTable\").BuildingComplete.GetComponent<MassageTable>.roomStressModificationValue": -500
+  - run: {seconds: 10}
+  - expect: {duplicants: 3}

@@ -1,0 +1,32 @@
+# Packaged Bleach Stone (3262486834), class P.
+#
+# What it does: bleach stone can be packed so it stops giving off chlorine: the Apothecary
+# gets a recipe (Medicine II) turning 5 kg of bleach stone into a Bleach Stone Pack
+# (llunak.PackagedBleachStone), and the Apothecary's storages seal what they hold. The Hand
+# Sanitizer, the Hot Tub and the Geotuner take packs instead of loose bleach stone
+# (transpilers on HandSanitizer.Work.OnWorkTick and RefreshMeters, prefixes on the hot tub's
+# and geotuner's checks); the sanitizer's use and delivery amounts are divided by five.
+# How a player reaches it: the Apothecary's recipe list; the buildings that use bleach stone.
+# What changes: what those buildings are fed with.
+#
+# The pack, its recipe at the Apothecary and the Hand Sanitizer's delivery are checked on the
+# loaded game. setup builds an Apothecary in the dug-out corridor west of the printing pod
+# with Medicine II researched; selected, its recipe list offers the pack and is compared with
+# the original.
+from: early-base
+mods: [3262486834]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"MedicineII\")", method: Purchased}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Apothecary\")", method: Build, args: [131125, Neutral, null, [Cuprite], 300.0, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"llunak.PackagedBleachStone\").GetComponent<PrimaryElement>.ElementID": BleachStone
+      "count:ComplexRecipeManager.Get().recipes[*] if .requiredTech == MedicineII and .results[0].material.Name == llunak.PackagedBleachStone": 1
+      "Assets.GetBuildingDef(\"HandSanitizer\").BuildingComplete.GetComponent<ManualDeliveryKG>.RequestedItemTag.Name": llunak.PackagedBleachStone
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [109, 207], select: Apothecary}
+  - ui_wait: {path: "**/ComplexFabricatorSideScreen/Contents/ButtonScrollView", cond: stable}
+  - expect_ui:
+      "**/ComplexFabricatorSideScreen/**/RecipeButtonWithQueue/Button/ToIcons/Label": {any_text: "~Bleach Stone Pack"}
+  - ui_dump: {name: recipes, root: "**/ComplexFabricatorSideScreen/Contents/ButtonScrollView"}

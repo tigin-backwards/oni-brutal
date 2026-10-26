@@ -1,0 +1,75 @@
+{
+ "spec": "mods/3262486834-packaged-bleach-stone.yaml",
+ "mods": [
+  "3262486834"
+ ],
+ "verdict": "warning",
+ "why": "known findings: scroll-normalized-position",
+ "findings": [
+  "scroll-normalized-position"
+ ],
+ "note": "the pack, its Apothecary recipe and the Hand Sanitizer's delivery of packs are in the game; the Apothecary's recipe list offers the pack as in the original",
+ "updated": "2026-10-26",
+ "commit": "bbc2ade",
+ "mod_dlls": {
+  "3262486834": {
+   "PackagedBleachStone.dll": "d7ab92e5808caadabdfdaa00fbfb26e3fd2c2c68774c6963b2ecaf7c4fd9c5d3"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-212657-04ba411a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T21:26:57",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-001201-f056fd3f",
+    "index": 1,
+    "verdict": "warn",
+    "date": "2026-10-26T00:12:01",
+    "lane": 16,
+    "reference_run": "20261025-212657-04ba411a",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "recipes": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261026-001201-f056fd3f",
+    "index": 2,
+    "verdict": "warn",
+    "date": "2026-10-26T00:12:02",
+    "lane": 17,
+    "reference_run": "20261025-212657-04ba411a",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "recipes": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -1,0 +1,63 @@
+{
+ "spec": "mods/3075237915-force-mutate.yaml",
+ "mods": [
+  "3075237915"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a wild Mealwood's +Force Mutations button (dumped) mutates and identifies it",
+ "updated": "2026-10-26",
+ "commit": "8ef77bae",
+ "mod_dlls": {
+  "3075237915": {
+   "ForceMutateMod.dll": "fced8a18fabbcd88354e3e0910c3c031b30dff23bffee88806e0f6cd6235403a"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-171918-7bbacea2",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T17:35:16",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-175306-72ae15bd",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T18:25:19",
+    "lane": 14,
+    "reference_run": "20261026-171918-7bbacea2",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "menu": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261026-175306-72ae15bd",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T18:26:13",
+    "lane": 14,
+    "reference_run": "20261026-171918-7bbacea2",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "menu": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

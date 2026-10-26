@@ -1,0 +1,27 @@
+# Force Mutate 手动添加变异 (3075237915), class P.
+#
+# What it does: every plant that can mutate (MutantPlant) gets a "+Force Mutations" button in
+# its user menu: pressing it mutates the plant, analyzes it and identifies its subspecies.
+# How a player reaches it: a selected plant's user menu button.
+# What changes: mutant plants without waiting for radiation.
+#
+# A wild Mealwood spawned by setup in the dug-out corridor west of the printing pod is
+# selected; its "+Force Mutations" button is pressed, and the plant is then a mutant.
+from: early-base
+mods: [3075237915]
+setup:
+  - driver: {seed: 12345}
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131130, 0, 0, \"BasicSingleHarvestPlant\", \"BuildingBack\")", method: SetActive, args: [true]}}
+steps:
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [114, 208], ortho: 8}}
+  - click_world: {cell: [114, 207], select: BasicSingleHarvestPlant}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:MutantPlant.IsOriginal": true
+  - ui_wait: {path: "**/UserMenuScreen/Buttons/+Force MutationsButton", cond: stable}
+  - ui_dump: {name: menu, root: "**/UserMenuScreen/Buttons/+Force MutationsButton"}
+  - click: {ui: "**/UserMenuScreen/Buttons/+Force MutationsButton"}
+  - expect_state:
+      "selected:MutantPlant.IsOriginal": false
+      "selected:MutantPlant.IsIdentified": true

@@ -1,0 +1,59 @@
+{
+ "spec": "mods/3743438381-water-ball.yaml",
+ "mods": [
+  "3743438381"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "water beside a column of Airflow Tiles is drawn as an open surface (world shot matches)",
+ "updated": "2026-10-26",
+ "commit": "0a08fc16",
+ "mod_dlls": {
+  "3743438381": {
+   "WaterBall.dll": "fe1f7467dec5f4709efa67e16eca1f954f5d46c5bed1e4b6c12f931514a78bfa"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-043257-c0eef0ae",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:38:04",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-104109-fde9decd",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T10:41:09",
+    "lane": 16,
+    "reference_run": "20261026-043257-c0eef0ae",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "water": 0.009504
+    }
+   },
+   {
+    "run": "20261026-104109-fde9decd",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T10:41:10",
+    "lane": 17,
+    "reference_run": "20261026-043257-c0eef0ae",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "water": 0.008794
+    }
+   }
+  ]
+ }
+}

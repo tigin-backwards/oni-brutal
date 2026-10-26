@@ -1,0 +1,26 @@
+# 水馒头 (Water Ball) (3743438381), class V.
+#
+# What it does: replaces PropertyTextures.UpdateSolidLiquidGasMass, the texture the liquid
+# shader reads (solid, liquid, gas and mass per cell): a cell of a building that keeps liquid
+# out but is see-through and does not replace the element (an Airflow Tile) is no longer
+# marked as a liquid wall, so liquid next to it is drawn as an open surface, a rounded "water
+# ball", instead of pressed flat against a wall.
+# How a player reaches it: liquid beside Airflow Tiles.
+# What changes: how that liquid is drawn.
+#
+# setup builds a column of Airflow Tiles in the dug-out room west of the printing pod and puts
+# water beside it. After a few seconds the scene is shot with the UI hidden and compared with
+# the original.
+from: early-base
+mods: [3743438381]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"GasPermeableMembrane\")", method: Build, args: [{"$": "Grid.XYToCell(114, 206)"}, Neutral, null, [Cuprite], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"GasPermeableMembrane\")", method: Build, args: [{"$": "Grid.XYToCell(114, 208)"}, Neutral, null, [Cuprite], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"GasPermeableMembrane\")", method: Build, args: [{"$": "Grid.XYToCell(114, 207)"}, Neutral, null, [Cuprite], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [131128, Water, {"$": "CellEventLogger.Instance.DebugTool"}, 400.0, 300.0]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [131129, Water, {"$": "CellEventLogger.Instance.DebugTool"}, 400.0, 300.0]}}
+steps:
+  - run: {seconds: 5}
+  - expect_state:
+      "cells:112,206..113,206::Grid.Mass.get_Item({cell})": "> 100"
+  - world_shot: {name: water, ortho: 4, at: [114, 207]}

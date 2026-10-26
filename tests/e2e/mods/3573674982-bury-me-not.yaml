@@ -1,0 +1,25 @@
+# Bury Me Not! (3573674982), class P.
+#
+# What it does: every pickupable gets a NeutroniumMole: when its cell turns solid and that
+# solid is neutronium, it moves the item to the nearest open cell next to it instead of
+# leaving it entombed for good. On load, an EntombedItemManager postfix also digs out the
+# buried items it finds in neutronium (its log counts them).
+# How a player reaches it: nothing to do; items no longer get stuck in neutronium.
+# What changes: debris never entombs itself in neutronium.
+#
+# setup drops sandstone on the floor of the dug-out corridor west of the printing pod and
+# fills that cell with neutronium: the item is moved up out of it, not entombed.
+from: early-base
+mods: [3573674982]
+require_log: ['EntombedItemManager\.OnSpawn, total buried item count: \d+, neutronium items found: 0']
+setup:
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Sandstone\").substance", method: SpawnResource, args: [[113.5, 206.5, -12], 50, 300, 255, 0]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [131129, Unobtanium, null, 2000, 300]}}
+steps:
+  - run: {seconds: 5}
+  - expect_state:
+      "Grid.Element[131129].id": Unobtanium
+      "Grid.Solid.get_Item(131129)": true
+      "last:GetComponent<KPrefabID>.HasTag(\"Entombed\")": false
+      "last:transform.position.y": [">= 207", "== original"]
+      "last:transform.position.x": "== original"

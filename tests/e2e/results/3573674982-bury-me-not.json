@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3573674982-bury-me-not.yaml",
+ "mods": [
+  "3573674982"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "sandstone whose cell is filled with neutronium is moved out of it, not entombed; its load-time check logs no buried items",
+ "updated": "2026-10-26",
+ "commit": "069fe17",
+ "mod_dlls": {
+  "3573674982": {
+   "UndigYourself.dll": "f89032ee9ab9de03e7495f3e9451129ab6c2899d2b2edf12cc167e133a9cc417"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-023318-02f49c43",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T02:34:03",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-024545-f741d0b9",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:08:11",
+    "lane": 14,
+    "reference_run": "20261026-023318-02f49c43",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-024545-f741d0b9",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T03:08:57",
+    "lane": 14,
+    "reference_run": "20261026-023318-02f49c43",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -1,0 +1,19 @@
+# 复制人移速自定义 Dupes speed custom Settings (3456696039), classes P, O.
+#
+# What it does: a prefix replacing BipedTransitionLayer.BeginTransition makes Duplicants run
+# faster: each step's speed becomes 2 x SpeedMultiplier and its anim speed is multiplied by
+# AnimSpeedMultiplier (PLib options, 3 each by default, 1 to 100), so they cross the colony
+# about six times as fast.
+# How a player reaches it: any Duplicant walking.
+# What changes: how fast Duplicants move.
+#
+# setup sends a Duplicant from the printing pod to the west end of the dug-out room west of
+# it, about thirteen tiles: it is there within four seconds.
+from: early-base
+mods: [3456696039]
+setup:
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[1].GetComponent<StateMachineController>.GetSMI(\"MoveToLocationMonitor+Instance\")", method: MoveToLocation, args: [131126]}}
+steps:
+  - run: {seconds: 4}
+  - expect_state:
+      "Components.LiveMinionIdentities.Items[1].GetComponent<Navigator>.cachedCell": 131126

@@ -1,0 +1,33 @@
+{
+ "spec": "mods/3456696039-dupes-speed-custom.yaml",
+ "mods": [
+  "3456696039"
+ ],
+ "verdict": "pending",
+ "why": "the spec fails in the original: a broken spec, or a mod broken upstream",
+ "findings": [],
+ "note": "broken upstream: it needs PLib 4.8.1, which it does not ship; the game disables it and restarts before the colony loads, in the original too",
+ "updated": "2026-10-26",
+ "commit": "55a0d989",
+ "mod_dlls": {
+  "3456696039": {
+   "dupespeeds.dll": "c06a4d5dbc555ae48f8d19e46cb2fdf195e2b7c4c990ac3921438c050605e94f"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-042232-0e5bb32c",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-26T04:31:32",
+    "lane": 16,
+    "reasons": [
+     "step start: the player exited (1) while loading"
+    ],
+    "signatures": 2
+   }
+  ],
+  "ours": []
+ }
+}

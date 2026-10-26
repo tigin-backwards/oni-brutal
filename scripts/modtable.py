@@ -251,6 +251,10 @@ broken.update({
 broken.update({
     '2029450933': 'broken upstream: its plants call the 19-parameter `EntityTemplates.ExtendEntityToBasicPlant` the game no longer has, so their prefabs fail in `Assets.OnPrefabInit` (MissingMethodException), its care package postfix throws an InvalidCastException, and loading a colony stops at "Error deserializing prefabs" and quits (spec tests/e2e/mods/2029450933-omni-flora.yaml)',
 })
+# Found by the e2e specs of ranks 1046 to 1130: the spec fails the same way in the original.
+broken.update({
+    '3456696039': 'broken upstream: its DLL references PLib 4.8.1 but ships without it, so loading it throws a FileNotFoundException while Harmony reads its patch attributes, the game disables it and restarts before the colony loads; it loads only beside another mod that ships PLib (spec tests/e2e/mods/3456696039-dupes-speed-custom.yaml)',
+})
 # Flagged by onimaxxing as not loading, played by spec tests/e2e/mods/flagged-no-mod-info.yaml on
 # the base-game colony (game build U59-744825): KMod skips them in both players.
 NO_MOD_INFO = ('broken upstream: ships no mod_info.yaml, which KMod requires since 2021: it logs "Is '

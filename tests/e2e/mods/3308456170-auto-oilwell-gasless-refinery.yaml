@@ -1,0 +1,31 @@
+# 油井自动排放天然气和无天然气原油精炼器 Auto Oil Well and Gasless Oil Refinery (3308456170), class P.
+#
+# What it does: the Oil Well vents its natural gas on its own (a postfix on
+# OilWellCap.AddGasPressure releases 50 kg whenever the pressure is over a tenth), and the Oil
+# Refinery puts out only petroleum: its converter makes the options' petroleum (10 kg/s by
+# default, 1 to 10) and natural gas (0 by default), and it overpressures at 20 kg.
+# How a player reaches it: building an Oil Well or an Oil Refinery; the Mods screen's options.
+# What changes: no venting errands, no gas from refining.
+#
+# options set petroleum to 8 kg/s; the refinery's converter is read, and one built by setup in
+# the dug-out corridor west of the printing pod is selected.
+from: early-base
+mods: [3308456170]
+options:
+  "3308456170": {$file: Controler.json, a1: 8}
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"OilRefinery\")", method: Build, args: [131129, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"OilRefinery\").GetComponent<ElementConverter>.outputElements.Length": 2
+      "Assets.GetPrefab(\"OilRefinery\").GetComponent<ElementConverter>.outputElements[0].massGenerationRate": 8
+      "Assets.GetPrefab(\"OilRefinery\").GetComponent<ElementConverter>.outputElements[0].elementHash": Petroleum
+      "Assets.GetPrefab(\"OilRefinery\").GetComponent<ElementConverter>.outputElements[1].massGenerationRate": 0
+      "Assets.GetPrefab(\"OilRefinery\").GetComponent<OilRefinery>.overpressureMass": 20
+  - run: {seconds: 2}
+  - expect: {buildings: {OilRefinery: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: OilRefinery}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:ElementConverter.outputElements[0].massGenerationRate": 8

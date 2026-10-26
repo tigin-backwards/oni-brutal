@@ -85,6 +85,12 @@ fi
 "$root/scripts/build-engine.sh" >/dev/null
 "$root/scripts/apicheck.sh" > "$root/out/apicheck-summary.txt" || true; head -2 "$root/out/apicheck-summary.txt"
 "$root/out/bin/OniMoono.Host/debug/OniMoono" --game "$game" --check-types --log "$root/out/check-types.log" | grep -vE '^(ok   [A-Za-z0-9.-]+ +[0-9]+ types|from )'
+# Again on the release build, which releases ship: the host's own code is compiled optimized
+# there, as the game's is, and not in the debug build.
+dotnet build "$root/src/OniMoono.Host" -c Release -v q -nologo "-clp:ErrorsOnly;NoSummary"
+types=$("$root/out/bin/OniMoono.Host/release/OniMoono" --game "$game" --check-types --log "$root/out/check-types-release.log") || failed+=(check-types-release)
+echo "check-types (release build): $(grep -c '^ok ' <<< "$types") ok, $(grep -c '^FAIL ' <<< "$types") failed"
+grep -A8 '^FAIL ' <<< "$types" || true
 "$root/out/bin/OniMoono.Host/debug/OniMoono" --game "$game" --check-assets --log "$root/out/check-assets.log" | grep -v '^\[engine\]'
 "$root/out/bin/OniMoono.Host/debug/OniMoono" --game "$game" --check-bind --log "$root/out/check-bind.log" | grep -v '^\[engine\]'
 natives=$("$root/out/bin/OniMoono.Host/debug/OniMoono" --game "$game" --check-natives --log "$root/out/check-natives.log") || failed+=(check-natives)

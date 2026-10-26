@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3207798260-overjoy-chance-rebalance.yaml",
+ "mods": [
+  "3207798260"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Duplicant with about 100 morale over its expectations is told yes five times out of five whether it should be overjoyed",
+ "updated": "2026-10-26",
+ "commit": "6406e8f2",
+ "mod_dlls": {
+  "3207798260": {
+   "OverJoyChanceAdvance.dll": "a676f07fa44c762c50d522aa0d024dfbc08bf862db59c850c5f5b86760dcfde9"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-095925-af2fb1f8",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T10:03:10",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-112946-657c0a81",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T11:29:46",
+    "lane": 16,
+    "reference_run": "20261026-095925-af2fb1f8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-112946-657c0a81",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T11:29:47",
+    "lane": 17,
+    "reference_run": "20261026-095925-af2fb1f8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

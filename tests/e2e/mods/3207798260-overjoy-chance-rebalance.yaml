@@ -1,0 +1,33 @@
+# Overjoy Chance Rebalance (3207798260), class P.
+#
+# What it does: a transpiler on JoyBehaviourMonitor.Instance.ShouldBeOverjoyed replaces the
+# game's chance of an overjoyed response (morale 8 to 20 points above expectations mapped to
+# 0.08 % to 0.21 % per check) with twice the excess as a percentage: 8 points above give 16 %,
+# 50 or more always.
+# How a player reaches it: Duplicants with morale well above their expectations.
+# What changes: overjoyed responses come often.
+#
+# setup lifts a Duplicant's morale far above its expectations with ten of the game's morale
+# effects: asked five times whether it should be overjoyed, the game says yes each time
+# (at the game's 0.21 % it would almost never).
+from: early-base
+mods: [3207798260]
+setup:
+  # Ten of the game's morale effects at once, about 100 points of morale.
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[1].GetComponent<Effects>", method: Add, args: [SuddenMoraleHelper, true]}}
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[1].GetComponent<Effects>", method: Add, args: [Edible3, true]}}
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[1].GetComponent<Effects>", method: Add, args: [Decor5, true]}}
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[1].GetComponent<Effects>", method: Add, args: [StarryEyed, true]}}
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[1].GetComponent<Effects>", method: Add, args: [SpaceTourist, true]}}
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[1].GetComponent<Effects>", method: Add, args: [BeachChairLit, true]}}
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[1].GetComponent<Effects>", method: Add, args: [RoomNatureReserve, true]}}
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[1].GetComponent<Effects>", method: Add, args: [CryoFriend, true]}}
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[1].GetComponent<Effects>", method: Add, args: [HotTub, true]}}
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[1].GetComponent<Effects>", method: Add, args: [VerticalWindTunnel, true]}}
+steps:
+  # Each call draws a new chance; the game's would almost never say yes.
+  - expect_state: {"Components.LiveMinionIdentities.Items[1].GetComponent<StateMachineController>.GetSMI(\"JoyBehaviourMonitor+Instance\").ShouldBeOverjoyed()": true}
+  - expect_state: {"Components.LiveMinionIdentities.Items[1].GetComponent<StateMachineController>.GetSMI(\"JoyBehaviourMonitor+Instance\").ShouldBeOverjoyed()": true}
+  - expect_state: {"Components.LiveMinionIdentities.Items[1].GetComponent<StateMachineController>.GetSMI(\"JoyBehaviourMonitor+Instance\").ShouldBeOverjoyed()": true}
+  - expect_state: {"Components.LiveMinionIdentities.Items[1].GetComponent<StateMachineController>.GetSMI(\"JoyBehaviourMonitor+Instance\").ShouldBeOverjoyed()": true}
+  - expect_state: {"Components.LiveMinionIdentities.Items[1].GetComponent<StateMachineController>.GetSMI(\"JoyBehaviourMonitor+Instance\").ShouldBeOverjoyed()": true}

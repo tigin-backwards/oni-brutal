@@ -1,0 +1,33 @@
+# Don't Crab my Wild Ecosystem (3750737880), class P.
+#
+# What it does: Pokeshells and squids leave wild critters alone. Before the database's post
+# processing it walks every critter prefab with a CreatureBrain: where it has both an
+# EggProtectionMonitor and a ThreatMonitor, Wild joins their ally and friendly tags; and the
+# Morb, the Beeta and the Gnit carry the Wild tag themselves.
+# How a player reaches it: wild critters beside a Pokeshell or a squid.
+# What changes: whom an egg-guarding critter attacks.
+#
+# The spec reads the critter prefabs: the Pokeshell has the threat and egg protection monitors
+# the mod extends, and the Morb and the Beeta are tagged Wild; it places a wild Pokeshell and a wild
+# Hatch side by side in the dug-out corridor west of the printing pod and runs the colony:
+# both live.
+from: early-base
+mods: [3750737880]
+setup:
+  - driver: {setup.call: {type: GameUtil, method: KInstantiate, args: [{"$": "Assets.GetPrefab(\"Crab\")"}, [111.5, 206.01, -24.5], Creatures]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+  - driver: {setup.call: {type: GameUtil, method: KInstantiate, args: [{"$": "Assets.GetPrefab(\"Hatch\")"}, [113.5, 206.01, -24.5], Creatures]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+steps:
+  - expect_state:
+      "count:Assets.GetPrefab(\"Crab\").GetComponent<StateMachineController>.cmpdef.defs[*] if .GetType().FullName == 'ThreatMonitor+Def'": 1
+      "Assets.GetPrefab(\"Glom\").GetComponent<KPrefabID>.HasTag(\"Wild\")": true
+      "Assets.GetPrefab(\"Bee\").GetComponent<KPrefabID>.HasTag(\"Wild\")": true
+  - expect_state:
+      "count:Assets.GetPrefab(\"Crab\").GetComponent<StateMachineController>.cmpdef.defs[*] if .GetType().FullName == 'EggProtectionMonitor+Def'": 1
+  - expect_state:
+      "count:all:CreatureBrain::[*] if .GetComponent<KPrefabID>.PrefabTag.Name == Hatch": {save_as: hatches}
+  - run: {seconds: 60}
+  - expect_state:
+      "count:all:CreatureBrain::[*] if .GetComponent<KPrefabID>.PrefabTag.Name == Crab": 1
+      "count:all:CreatureBrain::[*] if .GetComponent<KPrefabID>.PrefabTag.Name == Hatch": "== hatches"

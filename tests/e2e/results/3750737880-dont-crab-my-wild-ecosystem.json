@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3750737880-dont-crab-my-wild-ecosystem.yaml",
+ "mods": [
+  "3750737880"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Pokeshell carries the monitors the mod extends, the Morb and Beeta are tagged Wild, and a wild Pokeshell and Hatch placed side by side both live through 60 s of play",
+ "updated": "2026-10-26",
+ "commit": "bbc2ade",
+ "mod_dlls": {
+  "3750737880": {
+   "DontCrabWildCritters.dll": "f11b58998edd33a8b4ea2a6d82d19978d391763b6e4f71d3abd5763f13b09dda"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-001805-5ae0b27b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T00:18:05",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-005427-db643277",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T00:54:27",
+    "lane": 16,
+    "reference_run": "20261026-001805-5ae0b27b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-005427-db643277",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T00:54:28",
+    "lane": 17,
+    "reference_run": "20261026-001805-5ae0b27b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

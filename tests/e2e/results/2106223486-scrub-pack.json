@@ -1,0 +1,60 @@
+{
+ "spec": "mods/2106223486-scrub-pack.yaml",
+ "mods": [
+  "2106223486"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "after Advanced Research the Oxygen menu lists the scrubbers (shot); a built Vacuumizer is selected",
+ "updated": "2026-10-26",
+ "commit": "17f325ef",
+ "mod_dlls": {
+  "2106223486": {
+   "(Darth Nihilus)_ScrubPack.dll": "1e063f4c8791f859ba41ab4c70215ee2517782af7749f2908e89ec922b832496",
+   "PLib.dll": "893dc1ea3eddd02c85d433231aae356be27be07ddfc1a98fb2c51d84748208e8"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-114619-1abc381b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T11:51:36",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-133411-75254ba7",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T13:51:34",
+    "lane": 14,
+    "reference_run": "20261026-114619-1abc381b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "oxygen-menu": 0.0
+    }
+   },
+   {
+    "run": "20261026-133411-75254ba7",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T13:51:46",
+    "lane": 15,
+    "reference_run": "20261026-114619-1abc381b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "oxygen-menu": 0.027649
+    }
+   }
+  ]
+ }
+}

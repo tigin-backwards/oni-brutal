@@ -1,0 +1,35 @@
+# Scrub Pack (2106223486), class B.
+#
+# What it does: twelve buildings researched with Advanced Research: in the Oxygen menu,
+# scrubbers that take chlorine, carbon (coal), steam, sour gas, natural gas, salt water and
+# polluted oxygen out of the air or a pipe (some piped), and in Utilities a Water Scrubber
+# (and a piped one) and a Vacuumizer and Mini Vacuumizer that pump gas away to make vacuum.
+# How a player reaches it: the build menu (Oxygen, Utilities), after the research.
+# What changes: machines that clean or empty rooms of gases.
+#
+# setup researches Advanced Research; the Oxygen menu lists the scrubbers, and a
+# Vacuumizer built by setup in the dug-out corridor west of the printing pod is selected.
+from: early-base
+mods: [2106223486]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"AdvancedResearch\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Vacuumizer\")", method: Build, args: [131129, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"AdvancedResearch\").unlockedItemIDs": [{contains: Vacuumizer}, {contains: COALSCRUBBER}, {contains: SteamScrubber}, {contains: WaterScrubberPiped}]
+      "Assets.GetPrefab(\"Vacuumizer\").GetComponent<ElementConsumer>": exists
+  - run: {seconds: 10}
+  - expect: {buildings: {Vacuumizer: 1}}
+  - click: {ui: "**/PlanScreen/Toggle:Oxygen"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/COALSCRUBBER Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/SteamScrubber Group*": {active: true}
+      "**/BuildingGroups/**/Grid/PollutedOxygenScrubberPiped Group*": {active: true}
+  - shot: {name: oxygen-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
+  - key: {code: Escape}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 206], select: Vacuumizer}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Vacuumizer"}

@@ -1,0 +1,30 @@
+# F 站台系统 Platform System 1.7 (3316755325), classes P, S, O.
+#
+# What it does: suits and their stations: the four suit checkpoints (Atmo, Jet, Lead, Oxygen
+# Mask) also store clothing like a locker (100 t); each suit and the Oxygen Mask gets a
+# slider (100 to 1000 kg) setting its oxygen tank's capacity; the suit docks fill faster
+# (100 kg/s pipes, larger stores); the Jet Suit burns half the fuel (0.1 kg/s, a PLib
+# option, F000GG0.json, for the game's 0.2).
+# How a player reaches it: a suit's or mask's slider side screen; the checkpoints' storage.
+# What changes: bigger suit tanks, faster docks, storing clothes at checkpoints.
+#
+# The checkpoints and docks are checked on their prefabs. setup drops an Oxygen Mask in the
+# dug-out room west of the printing pod; selected, its slider is set to 500 by its field: its
+# tank holds 500 kg.
+from: early-base
+mods: [3316755325]
+setup:
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131126, 0, 0, \"Oxygen_Mask\", \"Ore\")", method: SetActive, args: [true]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"SuitMarker\").GetComponent<StorageLocker>": exists
+      "Assets.GetPrefab(\"OxygenMaskLocker\").GetComponent<ConduitConsumer>.consumptionRate": 100
+      "Assets.GetPrefab(\"Oxygen_Mask\").GetComponent<F004GG1K1>": exists
+  - run: {seconds: 1}
+  - driver: {camera.set: {cell: [110, 207], ortho: 6}}
+  - click_world: {pos: [110.5, 206.2], select: Oxygen_Mask}   # an item lies low in its cell
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/SingleSliderSideScreen", cond: stable}
+  - ui_dump: {name: slider, root: "**/SingleSliderSideScreen"}
+  - type: {ui: "**/SingleSliderSideScreen/Contents/NumberInputField", text: "500", clear: true, enter: true}
+  - expect_state:
+      "selected:SuitTank.capacity": 500

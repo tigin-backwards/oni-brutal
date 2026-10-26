@@ -1,0 +1,64 @@
+{
+ "spec": "mods/3316755325-platform-system.yaml",
+ "mods": [
+  "3316755325"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "an Oxygen Mask's slider (dump matches) set to 500 gives it a 500 kg tank; suit checkpoints store clothes and docks fill faster",
+ "updated": "2026-10-26",
+ "commit": "0a4d5060",
+ "mod_dlls": {
+  "3316755325": {
+   "F_╒╛╠¿╧╡═│_1.0.dll": "8a952f8a0ca7364567e5d8e0b2cdb6ea7c89be1651c8745cc1bcd5ec9177369a",
+   "PLib.dll": "b862c5db2b3cd6df09a62d4a30782e91e2b24e8e1bfac08d991c9cc89a984ba9"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-095925-af2fb1f8",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T10:07:44",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-113403-cbfc1ec6",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T11:34:03",
+    "lane": 16,
+    "reference_run": "20261026-095925-af2fb1f8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "slider": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261026-113403-cbfc1ec6",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T11:34:04",
+    "lane": 17,
+    "reference_run": "20261026-095925-af2fb1f8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "slider": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

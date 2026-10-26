@@ -1,0 +1,69 @@
+{
+ "spec": "mods/3757075889-mod-origin-info.yaml",
+ "mods": [
+  "3757075889",
+  "3008287025",
+  "2860569135"
+ ],
+ "verdict": "failed",
+ "why": "a run of ours failed",
+ "findings": [],
+ "note": "with Smol Generators and Roller Snakes, a Smol Smart Battery's info panel names its mod in both players, but ours records no modded recipes (0, the original 6) and fewer modded content entries (17, the original 23): the mod's postfixes on the ComplexRecipe, GeyserType and Spice constructors call Assembly.GetCallingAssembly, which names the mod that made the recipe on Mono and another assembly in ours",
+ "updated": "2026-10-26",
+ "commit": "22a076d",
+ "mod_dlls": {
+  "3757075889": {
+   "ModOriginInfo.dll": "75fb70ef332c49ef2b5d78ba1eebb3b2c682045bde3ab4221260f5bd52fcfff7"
+  },
+  "3008287025": {
+   "SmolHyddrogenGeneratorMod.dll": "dbdb8fa144b779849a40d713da8df44b9fe31303c7e538f3909391db98df0b17"
+  },
+  "2860569135": {
+   "RollerSnakeMerged.dll": "71df9c43c6e474b9595a9193f0a86436069ebc6a8028fa89a156ff1bbc1e0840"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-222040-75e4a4a6",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T23:22:20",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-012844-283dcabd",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-26T01:28:44",
+    "lane": 15,
+    "reasons": [
+     "step 1: type:ModOriginInfo.ModAssets::ModdedRecipes.Count is 0, wanted == original; type:ModOriginInfo.ModAssets::ModdedContentPrefabIdToModId.Count is 17, wanted == original (it held in the original: the interaction has no effect in ours)"
+    ],
+    "reference_run": "20261025-222040-75e4a4a6",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-012844-283dcabd",
+    "index": 2,
+    "verdict": "fail",
+    "date": "2026-10-26T01:29:17",
+    "lane": 15,
+    "reasons": [
+     "step 1: type:ModOriginInfo.ModAssets::ModdedRecipes.Count is 0, wanted == original; type:ModOriginInfo.ModAssets::ModdedContentPrefabIdToModId.Count is 17, wanted == original (it held in the original: the interaction has no effect in ours)"
+    ],
+    "reference_run": "20261025-222040-75e4a4a6",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

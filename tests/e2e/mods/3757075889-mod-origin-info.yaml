@@ -1,0 +1,31 @@
+# Mod Origin Info Display (3757075889), class S (labels on vanilla screens).
+#
+# What it does: records which mod added each building, entity, element, recipe, geyser and
+# spice (patches on the game's registries, and on the constructors of ComplexRecipe, GeyserType
+# and Spice, keyed by the calling assembly), and labels them: "Modded Building, added by: MOD"
+# in a selected object's info panel, the build menu's product info, the codex, the Research
+# screen's item tooltips, recipe queues and the spice grinder. Modded buildings also get their
+# mod's name as a search term.
+# How a player reaches it: select modded content; the build menu; the codex.
+# What changes: where modded content comes from is shown.
+#
+# It is played with Smol Generators (3008287025) and Roller Snakes Reborn (2860569135), whose
+# buildings, critters and recipes it records as in the original. setup builds a Smol Smart
+# Battery in a pit of the floor west of the printing pod; selected, its info panel names Smol
+# Generators.
+from: early-base
+mods: [3757075889, 3008287025, 2860569135]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"SmolSmartBattery\")", method: Build, args: [{"$": "Grid.XYToCell(113, 206)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "type:ModOriginInfo.ModAssets::ModdedBuildings.Count": "== original"
+      "type:ModOriginInfo.ModAssets::ModdedRecipes.Count": "== original"
+      "type:ModOriginInfo.ModAssets::ModdedContentPrefabIdToModId.Count": "== original"
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [113, 207], ortho: 8}}
+  - click_world: {cell: [113, 206], select: SmolSmartBattery}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/SimpleInfoScreen/**/ModOriginInfo_PanelLabel*": {any_text: "~Smol Generators"}
+  - ui_dump: {name: info, root: "**/SimpleInfoScreen", mask_text: ['\d+(\.\d+)? ?(J|kJ|W|%|°C|kg|g)']}

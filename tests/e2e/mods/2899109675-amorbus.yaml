@@ -1,0 +1,25 @@
+# Amorbus (2899109675), classes P, O.
+#
+# What it does: the Morb (Glom) gets an Among Us crewmate's anim (amorbus_sus_kanim, or the
+# older one with the PLib option off) with the Morb's sounds and its own name; with Twitch
+# Integration, three events spawn crewmates and imposters (their prefabs are registered
+# either way).
+# How a player reaches it: Morbs, which spawn from Duplicants' corpses and gas.
+# What changes: the Morb looks like a crewmate.
+#
+# The prefabs are read; a Morb spawned by setup in the dug-out corridor west of the printing
+# pod is selected (its name dumped) and drawn with the mod's anim (world shot).
+from: early-base
+mods: [2899109675]
+setup:
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131128, 0, 0, \"Glom\", \"Creatures\")", method: SetActive, args: [true]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"Glom\").GetComponent<KBatchedAnimController>.AnimFiles[0].name": amorbus_sus_kanim
+      "Assets.GetPrefab(\"AMOGUS_Twitch_Crewmate\")": exists
+      "Assets.GetPrefab(\"AMOGUS_Twitch_Imposter\")": exists
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 206], select: Glom}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_dump: {name: title, root: "**/DetailsScreen/TitleBar/Border/LabelGroup"}
+  - world_shot: {name: morb, ortho: 4, at: [112, 206], hide_ui: true}

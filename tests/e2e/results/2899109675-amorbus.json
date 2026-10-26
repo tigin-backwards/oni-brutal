@@ -1,0 +1,67 @@
+{
+ "spec": "mods/2899109675-amorbus.yaml",
+ "mods": [
+  "2899109675"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a spawned Morb is drawn as a crewmate (world shot, title dumped); the Twitch prefabs exist",
+ "updated": "2026-10-26",
+ "commit": "7e465f40",
+ "mod_dlls": {
+  "2899109675": {
+   "AmogusMorb.dll": "b76a4d8f458c220d9ee2db5d0aebe954bf41c9acbd727c0a6fedd1fa1eaa7e97"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-173427-72c0b636",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T17:57:59",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-180507-0915b6e7",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T18:42:13",
+    "lane": 14,
+    "reference_run": "20261026-173427-72c0b636",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "morb": 0.048111
+    }
+   },
+   {
+    "run": "20261026-180507-0915b6e7",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T18:43:06",
+    "lane": 14,
+    "reference_run": "20261026-173427-72c0b636",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "morb": 0.049227
+    }
+   }
+  ]
+ }
+}

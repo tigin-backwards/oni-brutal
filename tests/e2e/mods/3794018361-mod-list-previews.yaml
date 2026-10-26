@@ -1,0 +1,28 @@
+# Mod List Previews (3794018361), classes M, S.
+#
+# What it does: a postfix on ModsScreen.BuildDisplay puts a cover image at the left of every
+# row of the Mods screen (an MLP_Preview frame holding a RawImage): the Workshop preview of a
+# Steam mod, downloaded and cached, or the preview.png in a Local or Dev mod's folder, or a
+# placeholder; it adds a settings row of its own. A prefix on Manager.Sanitize marks loaded
+# Steam mods subscribed. The catalog lists Mod Profile Manager (2854869130) and Mod Updater
+# (2018291283) as its requirements: both are installed with it.
+# How a player reaches it: the main menu's Mods screen.
+# What changes: the Mods screen's rows show covers.
+#
+# From the main menu, the Mods screen opens: the mod's own row (a Local mod, with a
+# preview.png) has its cover frame with an image in it.
+from: main-menu
+mods: [2854869130, 2018291283, 3794018361]
+steps:
+  # A first start: the intro short plays; closed.
+  - ui_wait: {path: "**/VideoScreen/CloseButton", cond: stable, frames: 3000}
+  - click: {ui: "**/VideoScreen/CloseButton"}
+  - ui_wait: {path: "**/VideoScreen", cond: gone, frames: 600}
+  - ui_wait: {path: "**/MainMenu_SpacedOut/MainMenuMenubar/MainMenuButtons", cond: stable, frames: 3000}
+  - click: {text: "MODS", under: "**/MainMenuButtons"}
+  - ui_wait: {path: "**/ModsScreen/Panel", cond: stable}
+  - ui_wait: {path: "**/ModsScreen/**/Content/Mod List Previews/**/MLP_Preview", cond: stable, frames: 600}
+  - expect_state:
+      "ui:**/ModsScreen/**/Content/Mod List Previews/**/MLP_Preview/Plate/Image::GetComponent<UnityEngine.UI.RawImage>.texture": exists
+  - ui_dump: {name: row, root: "**/ModsScreen/**/Content/Mod List Previews"}
+  - shot: {name: mods, crop: "**/ModsScreen/Panel", threshold: 0.04}

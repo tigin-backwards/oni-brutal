@@ -1,0 +1,75 @@
+{
+ "spec": "mods/3794018361-mod-list-previews.yaml",
+ "mods": [
+  "2854869130",
+  "2018291283",
+  "3794018361"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Mods screen's rows get cover frames; its own row shows its preview.png",
+ "updated": "2026-10-25",
+ "commit": "a9add53",
+ "mod_dlls": {
+  "2854869130": {
+   "SaveGameModLoader.dll": "a711ed99e522cb644d6e9c002490b41dc0bd4d48f52b9506d79801942a83ea48"
+  },
+  "2018291283": {
+   "ModUpdateDate.dll": "afbebdd8abfce0a72e40998575ee32a7a614f33d366a9917e075d652da33f616"
+  },
+  "3794018361": {
+   "ModListPreviews.dll": "c23fbc8c163579df89f6a0545b3e199d16d3091ca1fda4b08e2c8224a5b47d67"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-195133-9810c702",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T20:15:57",
+    "lane": 14,
+    "signatures": 1
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-213207-6ba29953",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T21:32:07",
+    "lane": 15,
+    "reference_run": "20261025-195133-9810c702",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "row": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "mods": 0.002754
+    }
+   },
+   {
+    "run": "20261025-213207-6ba29953",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-25T21:32:38",
+    "lane": 15,
+    "reference_run": "20261025-195133-9810c702",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "row": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "mods": 0.002754
+    }
+   }
+  ]
+ }
+}

@@ -1,0 +1,30 @@
+# 主动洗手 Active Hand Washing (3020589190), classes P, O.
+#
+# What it does: a postfix on HandSanitizer.States.InitializeStates makes every ready wash basin
+# or sink offer an errand, Active Washing Hands, to Duplicants carrying more germs than a PLib
+# option (1 by default), at a priority from its options (Personal Needs class, 6), during the
+# schedule blocks its options allow (recreation and hygiene by default; work and sleep too).
+# How a player reaches it: build a Wash Basin; the options on the Mods screen.
+# What changes: germy Duplicants go and wash on their own.
+#
+# The options allow washing at any time. setup builds a Wash Basin in a pit of the floor west
+# of the printing pod, fills it with water and puts 100000 food poisoning germs on the first
+# Duplicant: the basin offers the mod's errand, and the Duplicant washes them off.
+from: early-base
+mods: [3020589190]
+options:
+  "3020589190": {$file: ActiveHandWashing.json, ConfigVersion: 1, germCount: 1, prioritValue: 9, RecreationTime: true, WorkTime: true, SleepTime: true, HygieneTime: true}
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"WashBasin\")", method: Build, args: [{"$": "Grid.XYToCell(113, 206)"}, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "all:HandSanitizer::[0].GetComponent<Storage>", method: AddLiquid, args: [Water, 50.0, 300.0, 255, 0, false, true]}}
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[0].GetComponent<PrimaryElement>", method: AddDisease, args: [{"$": "Db.Get().Diseases.GetIndex(\"FoodPoisoning\")"}, 100000, "e2e"]}}
+steps:
+  - expect_state:
+      "Components.LiveMinionIdentities.Items[0].GetComponent<PrimaryElement>.DiseaseCount": ">= 100000"
+  - run: {seconds: 5}
+  - expect_state:
+      "Db.Get().ChoreTypes.TryGet(\"ActiveHandWashing\")": exists
+  - run: {seconds: 200}
+  - expect_state:
+      "Components.LiveMinionIdentities.Items[0].GetComponent<PrimaryElement>.DiseaseCount": "< 100000"
+  - expect: {duplicants: 3}

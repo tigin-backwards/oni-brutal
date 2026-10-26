@@ -1,0 +1,56 @@
+{
+ "spec": "mods/3020589190-active-hand-washing.yaml",
+ "mods": [
+  "3020589190"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a ready Wash Basin offers the mod's Active Washing Hands errand, and a Duplicant carrying 100000 germs washes them off",
+ "updated": "2026-10-26",
+ "commit": "38e717d",
+ "mod_dlls": {
+  "3020589190": {
+   "ActiveHandWashing.dll": "8d6ff54789ce36d3034da42fcdbc8ef7f053380aca93f0fff052ff1cb2e3f66c",
+   "PLib.dll": "893dc1ea3eddd02c85d433231aae356be27be07ddfc1a98fb2c51d84748208e8"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-222040-75e4a4a6",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T00:04:40",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-003542-0b70370a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T00:49:47",
+    "lane": 14,
+    "reference_run": "20261025-222040-75e4a4a6",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-003542-0b70370a",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T00:51:40",
+    "lane": 14,
+    "reference_run": "20261025-222040-75e4a4a6",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

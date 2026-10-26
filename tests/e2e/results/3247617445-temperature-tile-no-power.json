@@ -1,0 +1,63 @@
+{
+ "spec": "mods/3247617445-temperature-tile-no-power.yaml",
+ "mods": [
+  "3247617445"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the tile's slider set to 60 °C by typing; its cell warms past 55 °C as the game runs; slider dump matches",
+ "updated": "2026-10-26",
+ "commit": "77e7e3b",
+ "mod_dlls": {
+  "3247617445": {
+   "TempAdjustmentTileNoPower.dll": "db605160dfacaa6dbddc717f8dd44c0f78efcd417955c4acbd410045f7cd619b"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-215725-746bb295",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T22:02:12",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-001441-42a5d5c9",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T00:14:41",
+    "lane": 14,
+    "reference_run": "20261025-215725-746bb295",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "slider": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261026-001441-42a5d5c9",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T00:15:38",
+    "lane": 14,
+    "reference_run": "20261025-215725-746bb295",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "slider": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

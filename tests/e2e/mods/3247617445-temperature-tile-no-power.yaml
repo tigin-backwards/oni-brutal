@@ -1,0 +1,31 @@
+# 控温砖（无需电力版） / Temperature Modulation Tile, without power (3247617445), class B.
+#
+# What it does: adds a 1x1 tile (TATileNP, 400 kg of refined metal, Utilities menu, researched
+# with Temperature Modulation) with a slider for a target temperature (-270 to 2999 °C, 20 by
+# default). Every 4 s, while operational (an automation input may turn it off), it replaces its
+# own cell's element at the same mass with a temperature two thirds of the way to the target:
+# no power, no heat moved.
+# How a player reaches it: the build menu (Utilities), after the research; its side screen.
+# What changes: a tile that holds its cell at a set temperature.
+#
+# setup builds the tile under the ceiling of the corridor west of the printing pod. It is
+# selected and 60 typed into its slider's field; after the game runs, the tile's cell is near
+# 60 °C.
+from: early-base
+mods: [3247617445]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"TATileNP\")", method: Build, args: [{"$": "Grid.XYToCell(112, 209)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"TemperatureModulation\").unlockedItemIDs": {contains: TATileNP}
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 209], select: TATileNP}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/SingleSliderSideScreen", cond: stable}
+  - ui_dump: {name: slider, root: "**/SingleSliderSideScreen"}
+  - type: {ui: "**/SingleSliderSideScreen/Contents/NumberInputField", text: "60", clear: true, enter: true}
+  - expect_state:
+      "selected:GetComponent<TempAdjustmentTileNoPower.TATileNP>.targetTemp": 60
+  - run: {seconds: 30}
+  - expect_state:
+      "cells:112,209..112,209::Grid.Temperature.get_Item({cell})": "> 328"

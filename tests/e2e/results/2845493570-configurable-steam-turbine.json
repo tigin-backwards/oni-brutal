@@ -1,0 +1,64 @@
+{
+ "spec": "mods/2845493570-configurable-steam-turbine.yaml",
+ "mods": [
+  "2845493570"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the options' wattage and output temperature reach the turbine; its slider reads 90, and 50 typed in sets the water output to 50 C; the slider as in the original",
+ "updated": "2026-10-25",
+ "commit": "bbc2ade",
+ "mod_dlls": {
+  "2845493570": {
+   "ConfigurableSteamTurbine.dll": "135ae5c3ca350cd4345a85a41a916426c280173a63f2f5b84721f5fef57ff576",
+   "PLib.dll": "d87814a7d5d74fa0e94bc5435cd770d3746438f494208b6f356a2ab999169c52"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-210923-f043eb35",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T21:09:23",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-235705-df466a1c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T23:57:05",
+    "lane": 16,
+    "reference_run": "20261025-210923-f043eb35",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "slider": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261025-235705-df466a1c",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-25T23:57:06",
+    "lane": 17,
+    "reference_run": "20261025-210923-f043eb35",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "slider": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

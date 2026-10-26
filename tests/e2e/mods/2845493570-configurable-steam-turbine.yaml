@@ -1,0 +1,35 @@
+# Configurable Steam Turbine (2845493570), classes P, S, O.
+#
+# What it does: the Steam Turbine's numbers come from PLib options: its wattage (default 850),
+# the steam temperatures it starts at and peaks at (125 and 200 C), its water output
+# temperature (95 C), self-heat and its share of waste heat, its heat when active and how much
+# steam it pumps (2 kg/s). A TurbineSlider adds a slider side screen that sets the output water
+# temperature per turbine (0-100), copied with the building's settings; the turbine's
+# overheat temperature follows it plus a set margin.
+# How a player reaches it: the Mods screen's options; a turbine's slider side screen.
+# What changes: the turbine's output and temperatures.
+#
+# The wattage option is set to 1000 W and the output to 90 C. setup builds a Steam Turbine in
+# the dug-out corridor west of the printing pod. Selected, its slider reads 90; 50 typed in
+# makes the water come out at 50 C.
+from: early-base
+mods: [2845493570]
+options:
+  Daron.SteamTurbineConfig: {maxWattage: 1000, outputTempC: 90}
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"SteamTurbine2\")", method: Build, args: [131129, Neutral, null, [Copper, Cuprite], 300.0, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"SteamTurbine2\").GeneratorWattageRating": 1000
+      "SteamTurbineConfig2.MAX_WATTAGE": 1000
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: SteamTurbine2}
+  - ui_wait: {path: "**/SingleSliderSideScreen/Contents/NumberInputField", cond: stable}
+  - expect_state:
+      "selected:GetComponent<ConfigurableSteamTurbine.TurbineSlider>.SLIDER": 90
+  - ui_dump: {name: slider, root: "**/Config Tab - body instance/SingleSliderSideScreen"}
+  - type: {ui: "**/SingleSliderSideScreen/Contents/NumberInputField", text: "50", enter: true, clear: true}
+  - expect_state:
+      "selected:GetComponent<ConfigurableSteamTurbine.TurbineSlider>.SLIDER": 50
+      "selected:SteamTurbine.outputElementTemperature": 323.15

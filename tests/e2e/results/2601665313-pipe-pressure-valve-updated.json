@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2601665313-pipe-pressure-valve-updated.yaml",
+ "mods": [
+  "2601665313"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the gas and liquid pressure valves are in their techs, a built liquid valve carries the mod's dispenser and reads as the mod's valve",
+ "updated": "2026-10-26",
+ "commit": "bbc2ade",
+ "mod_dlls": {
+  "2601665313": {
+   "PipePressureValve.dll": "9f3321840e0a15849547378d752be5c1ff8c595dd5db90092e5f510d96a3c82b"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-221448-14f5b304",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T22:14:48",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-004104-42e271f5",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T00:41:04",
+    "lane": 16,
+    "reference_run": "20261025-221448-14f5b304",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-004104-42e271f5",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T00:41:05",
+    "lane": 17,
+    "reference_run": "20261025-221448-14f5b304",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

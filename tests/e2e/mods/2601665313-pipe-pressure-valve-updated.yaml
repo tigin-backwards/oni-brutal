@@ -1,0 +1,30 @@
+# Pipe Pressure Valve Updated (2601665313), class B.
+#
+# What it does: adds a Gas and a Liquid Pressure Valve (GasCPressureValve beside the gas logic
+# valve; LiquidCPressureValve beside the liquid logic valve, Improved Liquid Piping), tinted
+# logic valves that hold back a pipe's flow in a small storage and let
+# it out only as full packets (PressureValveConduitDispenser: liquid at 22 kg of 25 into
+# 10 kg packets, gas at 0.9 kg into 1 kg ones), merging the small dots of a sparse pipe.
+# How a player reaches it: the build menu (Plumbing, Ventilation), on a pipe.
+# What changes: a pipe behind the valve carries full packets.
+#
+# setup builds a Liquid Pressure Valve in the dug-out corridor west of the printing pod. Its
+# prefab carries the mod's dispenser at the mod's thresholds, and selected, it reads as the
+# mod's valve.
+from: early-base
+mods: [2601665313]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LiquidCPressureValve\")", method: Build, args: [131765, Neutral, null, [Cuprite], 300.0, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"ImprovedLiquidPiping\").unlockedItemIDs": {contains: LiquidCPressureValve}
+      "Assets.GetBuildingDef(\"LiquidCPressureValve\").BuildingComplete.GetComponent<PipePressureValve.PressureValveConduitDispenser>.pipeCapacity": 10
+      "all:PipePressureValve.PressureValveConduitDispenser::[0].outputThreshold": "== original"
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: LiquidCPressureValve}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Liquid Pressure Valve"}
+  - run: {seconds: 30}
+  - expect: {duplicants: 3}

@@ -285,6 +285,7 @@ step. The original run itself records it and passes.
 
 ```yaml
 - ui_dump: {name: selector, root: "**/BlueprintSelector", mask_text: ['\d{4}-\d\d-\d\d']}
+- ui_dump: {name: graph, root: "**/Graph_*", mask_path: ['(?<=Graph_)-?\d+']}   # ids in element names
 - shot: {name: selector, crop: "**/BlueprintSelector", mask: ["**/Portrait", "**/DateLabel", [0, 0, 64, 64]]}
 - shot: {name: dialog, crop: "**/Dialog", threshold: 0.04}     # a text-dense screen
 - shot: overview                                               # the whole frame

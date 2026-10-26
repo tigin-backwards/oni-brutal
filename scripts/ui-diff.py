@@ -14,13 +14,29 @@ QUOTED = re.compile(r'"(?:[^"\\]|\\.)*"')
 NUMBER = re.compile(r'-?\d+(?:\.\d+)?')
 
 
+def split_components(line):
+    """LINE split at its ' | ' separators, not those inside quoted text."""
+    parts, start, at = [], 0, 0
+    while True:
+        sep = line.find(' | ', at)
+        quote = QUOTED.search(line, at)
+        if quote and (sep < 0 or quote.start() < sep):
+            at = quote.end()
+            continue
+        if sep < 0:
+            parts.append(line[start:])
+            return parts
+        parts.append(line[start:sep])
+        start = at = sep + 3
+
+
 def parse(path):
     elements = {}
     for line in open(path, encoding='utf-8'):
         line = line.rstrip('\n')
         if not line or line.startswith('  '):  # vertex listings (--dump-ui-vertices)
             continue
-        head, *components = line.split(' | ')
+        head, *components = split_components(line)
         key, _, rest = head.partition('\t')
         fields = {'': rest}
         for c in components:

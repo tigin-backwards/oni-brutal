@@ -2606,6 +2606,7 @@ class Run:
                 f.write(text)
             self.evidence['ui_dump'].append({'name': value['name'], 'root': value['root'],
                                              'mask_text': value.get('mask_text', []),
+                                             'mask_path': value.get('mask_path', []),
                                              'ignore_fields': value.get('ignore_fields', [])})
         elif kind == 'driver':
             (command, args), = value.items()
@@ -3176,7 +3177,9 @@ def differential(spec, result, reference, findings=None):
             continue
         masks = list(spec.get('mask_text', [])) + list(dump.get('mask_text', []))
         fields = list(IGNORE_FIELDS) + list(spec.get('ignore_fields', [])) + list(dump.get('ignore_fields', []))
-        lines = ui_diff.diff(without_fields(ui_diff.parse(a), fields), without_fields(ui_diff.parse(b), fields),
+        paths = dump.get('mask_path', [])
+        lines = ui_diff.diff(masked_paths(without_fields(ui_diff.parse(a), fields), paths),
+                             masked_paths(without_fields(ui_diff.parse(b), fields), paths),
                              tolerance=tolerance, mask_text=masks)
         differences, known = [], {}
         for line in lines:
@@ -3231,6 +3234,14 @@ def differential(spec, result, reference, findings=None):
     checks['expect_original'] = deferred
     checks['findings'] = sorted(cited)
     return checks, reasons
+
+
+def masked_paths(elements, patterns):
+    """A parsed dump with each match of PATTERNS in its element paths replaced by '#', for names
+    that carry a number varying from run to run (such as an instance id)."""
+    for p in patterns:
+        elements = {re.sub(p, '#', key): fields for key, fields in elements.items()}
+    return elements
 
 
 def without_fields(elements, names):

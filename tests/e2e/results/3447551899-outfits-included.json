@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3447551899-outfits-included.yaml",
+ "mods": [
+  "3447551899"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Invisible Atmo Belt is a clothing permit of the Atmo Suit belt category, with the original's permit count; the colony runs",
+ "updated": "2026-10-26",
+ "commit": "bbc2ade",
+ "mod_dlls": {
+  "3447551899": {
+   "OutfitsIncluded.dll": "a28ed6238a454be6eb214166257acb08be9390aeee1538cccef2c9ee2463b9bf"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-212514-72cb29d5",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T21:25:14",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-001109-83ebc737",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T00:11:09",
+    "lane": 16,
+    "reference_run": "20261025-212514-72cb29d5",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-001109-83ebc737",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T00:11:10",
+    "lane": 17,
+    "reference_run": "20261025-212514-72cb29d5",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

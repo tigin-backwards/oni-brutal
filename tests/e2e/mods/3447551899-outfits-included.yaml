@@ -1,0 +1,22 @@
+# Outfits Included (3447551899), class P (content loader).
+#
+# What it does: a loader for outfit pack mods. At Db load it reads each pack's
+# outfits_included/clothing_items.json (and outfits), registers the items as clothing permits
+# with their kanims and strings, adds them to the Supply Closet's subcategories, and keeps
+# Duplicants' outfits that use them through saves. Its own pack holds one item, an Invisible
+# Atmo Belt (oi_empty_atmo_belt).
+# How a player reaches it: the Supply Closet and a Duplicant's wardrobe.
+# What changes: more clothing to dress Duplicants in.
+#
+# The spec reads the permits: the Invisible Atmo Belt is a clothing item of the Atmo Suit belt
+# category with its name, and the colony runs.
+from: early-base
+mods: [3447551899]
+steps:
+  - expect_state:
+      "Db.Get().Permits.ClothingItems.TryGet(\"oi_empty_atmo_belt\").Name": Invisible Atmo Belt
+      "Db.Get().Permits.ClothingItems.TryGet(\"oi_empty_atmo_belt\").Category": AtmoSuitBelt
+  - expect_state:
+      "Db.Get().Permits.ClothingItems.Count": "== original"
+  - run: {seconds: 30}
+  - expect: {duplicants: 3}

@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2646217495-cooling-element.yaml",
+ "mods": [
+  "2646217495"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Utilities menu lists it after Temperature Modulation; built and selected, unpowered, it stays off",
+ "updated": "2026-10-25",
+ "commit": "bd353b5",
+ "mod_dlls": {
+  "2646217495": {
+   "CoolingElement.dll": "b18138e4a63a169bdc9490fffadfd89a0338e0c7e643e45fadb937806c6c7b8b"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-200219-ef1e47f8",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T20:27:04",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-210821-1e0b7485",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T21:08:21",
+    "lane": 14,
+    "reference_run": "20261025-200219-ef1e47f8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261025-210821-1e0b7485",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-25T21:09:28",
+    "lane": 14,
+    "reference_run": "20261025-200219-ef1e47f8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

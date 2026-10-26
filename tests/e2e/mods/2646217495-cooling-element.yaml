@@ -1,0 +1,38 @@
+# Cooling Element (Continued) (2646217495), class B.
+#
+# What it does: adds the Cooling Element (CoolingElement, 1x1, 400 kg of refined metal, in the
+# Utilities menu, researched with Temperature Modulation): a powered block (240 W) that, while
+# running, removes 660 kW of heat from where it stands (negative self-heat), down to 50 K; it
+# never floods or overheats. A small state machine plays its on and off animations.
+# How a player reaches it: the build menu (Utilities), after the research.
+# What changes: a compact cooler.
+#
+# setup grants Temperature Modulation and spawns copper. The element is built in the corridor
+# west of the printing pod and selected: unpowered, it stays off.
+from: early-base
+mods: [2646217495]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"TemperatureModulation\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Copper\").substance", method: SpawnResource, args: [[111.5, 207.5, -12], 600, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"TemperatureModulation\").unlockedItemIDs": {contains: CoolingElement}
+      "Assets.GetBuildingDef(\"CoolingElement\").SelfHeatKilowattsWhenActive": -660
+  - run: {seconds: 5}
+  - click: {ui: "**/PlanScreen/Toggle:Utilities"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/CoolingElement Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/CoolingElement Group*": {active: true}
+  - key: {code: Escape}
+  - expect_ui: {"**/PauseScreen": {exists: false}}
+  - build: {prefab: CoolingElement, at: [113, 207]}
+  - expect: {blueprints: {CoolingElement: 1}}
+  - run: {seconds: 1500, until: {buildings: {CoolingElement: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [113, 207], ortho: 8}}
+  - click_world: {cell: [113, 207], select: CoolingElement}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<Operational>.IsActive": false
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Cooling Element"}

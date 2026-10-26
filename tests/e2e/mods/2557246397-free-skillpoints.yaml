@@ -1,0 +1,26 @@
+# [Vanilla + DLC] Free Skillpoints (2557246397), classes K, O.
+#
+# What it does: a click on a skill in the Skills screen first grants the selected Duplicant a
+# skill point when they have none (a prefix on SkillWidget.OnPointerClick, ForceAddSkillPoint),
+# so the skill can be learned at once. It works in sandbox mode, or everywhere when
+# FreeSkillpoints.Settings.json beside the DLL says UseWithoutSandbox (shipped false).
+# How a player reaches it: the Skills screen (L), a click on a skill.
+# What changes: skills never wait for experience.
+#
+# The settings file is written with UseWithoutSandbox true. The Skills screen opens on a
+# Duplicant without skill points (a bionic one, Gizmo); a click on Improved Gears I teaches it
+# them.
+from: early-base
+mods: [2557246397]
+options:
+  "2557246397": {$file: FreeSkillpoints.Settings.json, UseWithoutSandbox: true}
+steps:
+  - open: {management: skills}
+  - ui_wait: {path: "**/SkillsScreen/Minions/SelectedDuplicant/Top/BoxButtons/CurrentLevel", cond: stable}
+  - expect_state:
+      "ui:**/SkillsScreen::GetComponent<SkillsScreen>.CurrentlySelectedMinion.GetComponent<MinionResume>.AvailableSkillpoints": 0
+      "ui:**/SkillsScreen::GetComponent<SkillsScreen>.CurrentlySelectedMinion.GetComponent<MinionResume>.HasMasteredSkill(\"BionicsB1\")": false
+  - click: {text: "~Improved Gears I</link>", under: "**/SkillsScreen"}
+  - expect_state:
+      "ui:**/SkillsScreen::GetComponent<SkillsScreen>.CurrentlySelectedMinion.GetComponent<MinionResume>.HasMasteredSkill(\"BionicsB1\")": true
+  - ui_dump: {name: level, root: "**/SkillsScreen/Minions/SelectedDuplicant/Top/BoxButtons"}

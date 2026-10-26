@@ -1,0 +1,63 @@
+{
+ "spec": "mods/2557246397-free-skillpoints.yaml",
+ "mods": [
+  "2557246397"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with UseWithoutSandbox set, a click on Improved Gears I in the Skills screen grants the selected Duplicant without skill points one and teaches the skill; the level box as in the original",
+ "updated": "2026-10-26",
+ "commit": "bbc2ade",
+ "mod_dlls": {
+  "2557246397": {
+   "FreeSkillpoints.dll": "1bbc8859220ac1a7c436e7b3971384adce6acb0e9572a63d7781cde73f9a7dd0"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-213510-fa8e0246",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T21:35:10",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-001659-37f0c34f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T00:16:59",
+    "lane": 16,
+    "reference_run": "20261025-213510-fa8e0246",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "level": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261026-001659-37f0c34f",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T00:17:00",
+    "lane": 17,
+    "reference_run": "20261025-213510-fa8e0246",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "level": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

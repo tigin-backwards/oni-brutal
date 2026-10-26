@@ -1,0 +1,63 @@
+{
+ "spec": "mods/3010706556-show-undiscovered.yaml",
+ "mods": [
+  "3010706556"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "on early-base niobium, diamond and Pip eggs count as discovered; a Storage Bin's filter screen dump matches",
+ "updated": "2026-10-26",
+ "commit": "2646616f",
+ "mod_dlls": {
+  "3010706556": {
+   "ShowUndiscoveredMerged.dll": "31fff1a1f3d5ded800e8918248b9ea060c49c82b2aecb235be7c24c6885b437e"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-043257-c0eef0ae",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T05:01:01",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-102808-48a0f9f9",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T10:28:08",
+    "lane": 16,
+    "reference_run": "20261026-043257-c0eef0ae",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "filters": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261026-102808-48a0f9f9",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T10:28:09",
+    "lane": 17,
+    "reference_run": "20261026-043257-c0eef0ae",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "filters": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

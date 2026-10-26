@@ -1,0 +1,28 @@
+# Show Undiscovered (3010706556), classes P, O.
+#
+# What it does: as a colony loads (a postfix on Game.OnSpawn) it marks every element, food,
+# critter and egg, seed, medicine, clothing item and a few extras of the active DLCs as
+# discovered (DiscoveredResources.Discover), so storage filters, ration boxes, the
+# consumables screen and the resources list offer them before the colony has seen them; PLib
+# options turn that off or log each discovery.
+# How a player reaches it: any filter screen of a loaded colony.
+# What changes: undiscovered things are listed everywhere.
+#
+# On early-base niobium, diamond and Pip eggs count as discovered. setup builds a Storage Bin
+# in the dug-out room west of the printing pod; selected, its filter screen is compared with
+# the original.
+from: early-base
+mods: [3010706556]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"StorageLocker\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Cuprite], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "DiscoveredResources.Instance.IsDiscovered(\"Niobium\")": true
+      "DiscoveredResources.Instance.IsDiscovered(\"Diamond\")": true
+      "DiscoveredResources.Instance.IsDiscovered(\"SquirrelEgg\")": true
+      "DiscoveredResources.Instance.newDiscoveries.Count": "== original"
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: StorageLocker}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/TreeFilterableSideScreen", cond: stable}
+  - ui_dump: {name: filters, root: "**/TreeFilterableSideScreen"}

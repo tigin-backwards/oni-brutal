@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2954005789-critter-traits-reborn.yaml",
+ "mods": [
+  "2954005789"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Hatch placed in the corridor rolls the mod's traits and its details open; the colony runs",
+ "updated": "2026-10-26",
+ "commit": "bbc2ade",
+ "mod_dlls": {
+  "2954005789": {
+   "CritterTraitsReborn.dll": "d76383e9afe033186ab33ef880dca5bc3887f60f3144c25c65bc1980a7dbd350"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-211848-0db7c02e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T21:18:48",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-000623-b3a5e443",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T00:06:23",
+    "lane": 16,
+    "reference_run": "20261025-211848-0db7c02e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-000623-b3a5e443",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T00:06:24",
+    "lane": 17,
+    "reference_run": "20261025-211848-0db7c02e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

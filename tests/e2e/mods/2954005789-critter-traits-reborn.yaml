@@ -1,0 +1,31 @@
+# Critter Traits Reborn (2954005789), classes P, S.
+#
+# What it does: critters are born with up to three random traits (size, speed, lifespan,
+# fertility, glowing, noisy, stinky and others, grouped by kind and rolled by probability), a
+# CritterTraits component added to every basic creature (a postfix on
+# EntityTemplates.ExtendEntityToBasicCreature); eggs pass their parents' traits on. A prefix on
+# SimpleInfoScreen.OnSelectTarget adds a Traits panel to a critter's details.
+# How a player reaches it: selecting a critter.
+# What changes: critters differ from one another, and their details show their traits.
+#
+# setup places a Hatch in the dug-out corridor west of the printing pod. It has rolled its
+# traits (random, so only their number is checked); selected, its details open with the
+# Traits panel when it has any, and the colony runs.
+from: early-base
+mods: [2954005789]
+setup:
+  - driver: {seed: 12345}
+  - driver: {setup.call: {type: GameUtil, method: KInstantiate, args: [{"$": "Assets.GetPrefab(\"Hatch\")"}, [111.5, 206.01, -24.5], Creatures]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"Hatch\").GetComponent<CritterTraitsReborn.Components.CritterTraits>": exists
+      "all:CritterTraitsReborn.Components.CritterTraits::[0].appliedCritterTraits": true
+      "all:CritterTraitsReborn.Components.CritterTraits::[0].GetComponent<Traits>.TraitList.Count": "<= 8"
+  - driver: {camera.set: {cell: [111, 207], ortho: 6}}
+  - click_world: {pos: [111.5, 206.5], select: Hatch}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Hatch"}
+  - run: {seconds: 30}
+  - expect: {duplicants: 3}

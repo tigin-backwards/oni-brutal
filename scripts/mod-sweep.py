@@ -30,9 +30,12 @@ at most --players (default 2) players at once. Per batch:
   3. ours fails where its run fails, where it disables a mod the original loaded, or where it
      logs a signature (qa-tools.py signatures) neither the original's batch run nor the baseline
      has; it is then bisected in ours, its halves compared with the same original run, until each
-     failing mod is named, with the signatures it logs alone. Halves that both pass are a failure
-     of the mods together (an interaction, recorded for each of them) or a flaky one: the batch is
-     run once more and a failure that does not come back is noted, not counted.
+     failing mod is named, with the signatures it logs alone. A mod so named runs alone in the
+     original too: when it fails there as well (it loaded in its batch only through another mod
+     of it, a library it does not ship), it fails in the original, not in ours. Halves that both
+     pass are a failure of the mods together (an interaction, recorded for each of them) or a
+     flaky one: the batch is run once more and a failure that does not come back is noted, not
+     counted.
 A failure's stage is the main menu when the player had not begun loading the save ("Loading save
 file:" in its log), else the colony.
 
@@ -303,11 +306,20 @@ def sweep_batch(runner, number, batch, baseline, names):
                 say(f'{tag}: ours passes the second time; the first failure was flaky')
                 break
             continue
+        # A mod that fails in ours alone runs alone in the original too: one that loaded in its
+        # batch only through another mod of it (a library it does not ship) fails there as well.
+        named = [part for part, run in found if run is not None]
+        alone = dict(zip([p[0] for p in named], runner.many([('original', part, tag) for part in named]))) if named else {}
         for part, run in found:
             if run is None:
                 for m in part:
                     verdicts.setdefault(m, ('ok', stage(ours), 'fails in ours only together with '
                                             + ', '.join(x for x in part if x != m) + ': ' + judge.why(ours)[:400]))
+                continue
+            original_alone = alone[part[0]]
+            if original_fails(original_alone) or names[part[0]] & set(original_alone['disabled']):
+                verdicts[part[0]] = (stage(original_alone), '-', 'fails alone in the original too (it loads only with '
+                                     'another mod of its batch): ' + original_why(original_alone, baseline['original']))
             else:
                 verdicts[part[0]] = ('ok', stage(run), judge.why(run)[:600])
         break

@@ -491,7 +491,9 @@ scripts/mod-sweep.py again --ids 3467986764 3760101842 --batch 2 --first-lane 7 
   the rest of the batch runs again. Ours fails on a failing run, a mod disabled that the original
   loaded, or a log signature that neither the original's run nor the baseline has. It is bisected
   in ours (each half compared with the same original run) down to single mods, with the
-  signatures each logs alone. When both halves pass, the batch runs once more: a failure that
+  signatures each logs alone. A mod so named runs alone in the original too, and fails there
+  when it does (one that loaded in its batch only through a library another mod of it ships,
+  as Plant Growth Time needs PLib). When both halves pass, the batch runs once more: a failure that
   does not come back was flaky, and one that does is recorded for the mods of that set together.
 - **Output.** Runs and state are in `out/sweep/NAME/` (`E2E_OUT` moves it); a sweep run again goes
   on from the first batch without a state file. Results are `sweeps/NAME.tsv`: per mod, `original` and `ours` are `ok`, `menu` (fails by or at the main

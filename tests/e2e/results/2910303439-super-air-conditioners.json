@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2910303439-super-air-conditioners.yaml",
+ "mods": [
+  "2910303439"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a built Thermo Regulator cools by 25 °C",
+ "updated": "2026-10-26",
+ "commit": "7e465f40",
+ "mod_dlls": {
+  "2910303439": {
+   "ONIMod.dll": "7b8878cb055ad70ff5a12b36dc40e8c03a5639760d515bbaaf61e8aad323ba03"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-173427-72c0b636",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T17:59:46",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-180507-0915b6e7",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T18:43:57",
+    "lane": 14,
+    "reference_run": "20261026-173427-72c0b636",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-180507-0915b6e7",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T18:44:49",
+    "lane": 14,
+    "reference_run": "20261026-173427-72c0b636",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

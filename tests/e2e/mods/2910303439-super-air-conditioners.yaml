@@ -1,0 +1,23 @@
+# Super air conditioners (2910303439), class P.
+#
+# What it does: a prefix on AirConditioner.Sim200ms sets every Thermo Regulator's and Thermo
+# Aquatuner's temperature change to -25 °C (the game's: -14).
+# How a player reaches it: building a Thermo Regulator or Aquatuner.
+# What changes: stronger cooling.
+#
+# A Thermo Regulator built by setup in the dug-out corridor west of the printing pod is
+# selected after the game runs, and its temperature change is -25.
+from: early-base
+mods: [2910303439]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"AirConditioner\")", method: Build, args: [131128, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"AirConditioner\").GetComponent<AirConditioner>.temperatureDelta": -14
+  - run: {seconds: 2}
+  - expect: {buildings: {AirConditioner: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 206], select: AirConditioner}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:AirConditioner.temperatureDelta": -25

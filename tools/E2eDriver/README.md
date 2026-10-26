@@ -157,7 +157,7 @@ Who is answering, and where.
     "scene":"frontend","screen":{"w":1280,"h":720},"port":8811,"paused":null,"world":false}}
 ```
 
-- `player`: `ours` when an `OniBrutal*` assembly is loaded, else `original`.
+- `player`: `ours` when an `OniMoono*` (or older `OniBrutal*`) assembly is loaded, else `original`.
 - `paused`: `SpeedControlScreen.IsPaused`, or `null` before a colony is loaded.
 - `world`: whether a colony's grid is loaded.
 

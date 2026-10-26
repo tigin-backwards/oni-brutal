@@ -3,7 +3,7 @@
 A mod for the original game, built against the local install's assemblies, that measures how
 Unity's player behaves where documentation is silent (lifecycle timing around `Destroy`,
 reactivation of objects awaiting destruction, `OnApplicationQuit` order). The engine's behaviour
-in those areas follows its output; `tests/OniBrutal.UnityEngine.Tests/LifecycleTests.cs` encodes
+in those areas follows its output; `tests/OniMoono.UnityEngine.Tests/LifecycleTests.cs` encodes
 the results.
 
 Use it only with a scratch copy of the game and a scratch profile (`XDG_CONFIG_HOME`), never the

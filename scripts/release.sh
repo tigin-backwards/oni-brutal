@@ -20,20 +20,20 @@ stage() { # stage DIR SETUP: the archive's oni-moono folder
 }
 
 # Windows: OniMoono.exe with the Restarter.exe the game's App.Restart starts.
-build "$root/src/OniBrutal.Host" win-x64
-build "$root/src/OniBrutal.Restarter" win-x64
+build "$root/src/OniMoono.Host" win-x64
+build "$root/src/OniMoono.Restarter" win-x64
 win="$out/windows/oni-moono"
 stage "$win" setup.ps1
 cp "$root/setup.cmd" "$win/"
-cp -r "$root/out/bin/OniBrutal.Host/release_win-x64/." "$win/player/"
+cp -r "$root/out/bin/OniMoono.Host/release_win-x64/." "$win/player/"
 rm -f "$win/player/Restarter" "$win/player/"FacadeGen*
-cp "$root/out/bin/OniBrutal.Restarter/release_win-x64/Restarter."{exe,dll,deps.json,runtimeconfig.json} "$win/player/"
+cp "$root/out/bin/OniMoono.Restarter/release_win-x64/Restarter."{exe,dll,deps.json,runtimeconfig.json} "$win/player/"
 
 # Linux: OniMoono with the Restarter script.
-build "$root/src/OniBrutal.Host" linux-x64
+build "$root/src/OniMoono.Host" linux-x64
 lin="$out/linux/oni-moono"
 stage "$lin" setup.sh
-cp -r "$root/out/bin/OniBrutal.Host/release_linux-x64/." "$lin/player/"
+cp -r "$root/out/bin/OniMoono.Host/release_linux-x64/." "$lin/player/"
 rm -f "$lin/player/"FacadeGen*
 chmod +x "$lin/setup.sh" "$lin/player/OniMoono" "$lin/player/Restarter"
 

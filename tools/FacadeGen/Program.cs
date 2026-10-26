@@ -1,6 +1,6 @@
 // Builds the UnityEngine.*Module facade assemblies. Each facade carries only type forwarders,
 // so game IL compiled against e.g. [UnityEngine.CoreModule]UnityEngine.GameObject binds to the
-// implementation in OniBrutal.UnityEngine (ARCHITECTURE §2).
+// implementation in OniMoono.UnityEngine (ARCHITECTURE §2).
 //
 //   FacadeGen map <unityManagedDir> <out.tsv>
 //       Records which Unity module defines each public type (module<TAB>full type name).

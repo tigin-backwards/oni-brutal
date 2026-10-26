@@ -19,8 +19,8 @@ How to build, run and test Moono from source. If you just want to play, the
 ## Build
 
 ```sh
-dotnet build OniBrutal.slnx              # debug: engine, host, tools, tests
-dotnet build src/OniBrutal.Host -c Release
+dotnet build OniMoono.slnx              # debug: engine, host, tools, tests
+dotnet build src/OniMoono.Host -c Release
 ```
 
 Both write to `out/bin/<project>/<config>/`. The host's output has everything needed to run: the

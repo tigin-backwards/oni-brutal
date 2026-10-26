@@ -50,7 +50,7 @@ opened in turn, for at least 10 game minutes, and fails on any mismatch.
 Grouped as on the screen. Names are as used with `--game-tweak`; the gains in the screen's
 tooltips are those below, and the rest are in [PERFORMANCE.md](PERFORMANCE.md#the-tweaks).
 
-<!-- tweaks:begin: generated from src/OniBrutal.Host/GameTweaks/GameTweakNames.cs; ONI_UPDATE_DOCS=1 with the unit tests rewrites it -->
+<!-- tweaks:begin: generated from src/OniMoono.Host/GameTweaks/GameTweakNames.cs; ONI_UPDATE_DOCS=1 with the unit tests rewrites it -->
 
 ### Saving (on by default)
 

@@ -4,16 +4,16 @@ using BepInEx;
 using BepInEx.Unity.Mono;
 using HarmonyLib;
 
-namespace OniBrutal.OriginalIsolation
+namespace OniMoono.OriginalIsolation
 {
     /// TEST INFRASTRUCTURE for comparisons with the original Windows player, never shipped: run in
     /// a renamed copy of the game (scripts/original-windows.sh), it gives the original the same
-    /// isolation our host gives itself (OniBrutal.Host RunHome and AudioCapture). Documents and
+    /// isolation our host gives itself (OniMoono.Host RunHome and AudioCapture). Documents and
     /// the local application data folder answer folders under ONI_RUN_HOME, so saves, settings,
     /// mods and the write test stay out of the user's own; FMOD writes the game's audio to
     /// fmodoutput.wav in the run home instead of the sound device. Without ONI_RUN_HOME the
     /// player is ended before the game reads any user data.
-    [BepInPlugin("oni-brutal.original-isolation", "OriginalIsolation", "1.0.0")]
+    [BepInPlugin("oni-moono.original-isolation", "OriginalIsolation", "1.0.0")]
     public class Plugin : BaseUnityPlugin
     {
         static string documents = "", localAppData = "";
@@ -32,7 +32,7 @@ namespace OniBrutal.OriginalIsolation
             Directory.CreateDirectory(documents);
             Directory.CreateDirectory(localAppData);
             Environment.CurrentDirectory = home;
-            var harmony = new Harmony("oni-brutal.original-isolation");
+            var harmony = new Harmony("oni-moono.original-isolation");
             var withOption = typeof(Environment).GetMethod(nameof(Environment.GetFolderPath), new[] { typeof(Environment.SpecialFolder), typeof(Environment.SpecialFolderOption) });
             var plain = typeof(Environment).GetMethod(nameof(Environment.GetFolderPath), new[] { typeof(Environment.SpecialFolder) });
             harmony.Patch(withOption, prefix: new HarmonyMethod(typeof(Plugin), nameof(FolderPrefix)));

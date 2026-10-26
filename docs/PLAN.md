@@ -40,12 +40,12 @@ Unity's engine replaced by our implementation on BRUTAL, at close to parity with
    (central versions: `Ahwoo.BRUTAL.*` 2026.10.x, xunit, compat packages), `.editorconfig`,
    analyzer policy, `global.json` pinning SDK 10.0.402.
 2. `tools/FacadeGen`: reads Unity's original module assemblies to map type → module, intersects
-   with the types implemented in `OniBrutal.UnityEngine`, and emits one facade project per
+   with the types implemented in `OniMoono.UnityEngine`, and emits one facade project per
    module (`UnityEngine.CoreModule` … plus `UnityEngine.dll`), version 0.0.0.0, unsigned.
 3. `tools/ApiCheck` wired as `scripts/apicheck.sh` over the full consumer set
    (Assembly-CSharp, firstpass, UnityEngine.UI, Unity.TextMeshPro, Unity.Timeline, FMODUnity*,
    ImGui.NET, Steamworks.NET), writing `out/apicheck.json` and a summary by module.
-4. `OniBrutal.Host`: game ALC with the resolution policy, native library resolver, eager
+4. `OniMoono.Host`: game ALC with the resolution policy, native library resolver, eager
    preload, compat packages, code pages, runtimeconfig switches, CLI flags
    (`--game`, `--headless`, `--frames`, `--log`, `--screenshot`).
 5. Steamworks.NET 20.1.0 port in `src/ThirdParty/Steamworks.NET` (pinned upstream commit,
@@ -100,8 +100,8 @@ run reaches `SteamManager` and exits with code 2, exactly like the original.
 
 ### M3 — Graphics
 
-1. `OniBrutal.Platform`: GLFW window + GL 4.5 core context, events, vsync, resize.
-2. `OniBrutal.Graphics`: GL device (buffers, textures incl. DXT/BC upload, RTs/MRT, FBOs,
+1. `OniMoono.Platform`: GLFW window + GL 4.5 core context, events, vsync, resize.
+2. `OniMoono.Graphics`: GL device (buffers, textures incl. DXT/BC upload, RTs/MRT, FBOs,
    samplers, state), Unity shader runtime (SerializedShader parse, LZ4 blobs, GLSL split,
    variant selection, parameter binding, material-driven render state), program cache.
 3. Engine rendering: Texture2D/RenderTexture/Texture2DArray/Texture3D, Mesh, Material,
@@ -336,8 +336,8 @@ install.
 
 ## Game tweaks (separate from the engine)
 
-Game tweaks are changes to Klei's own code (Harmony patches in `src/OniBrutal.Host/GameTweaks`
-and `src/OniBrutal.GameTweaks`). The engine reproduces Unity; these change how the game does
+Game tweaks are changes to Klei's own code (Harmony patches in `src/OniMoono.Host/GameTweaks`
+and `src/OniMoono.GameTweaks`). The engine reproduces Unity; these change how the game does
 something, mostly without changing what it produces. Players choose them on the main menu's
 Moono Tweaks screen (ARCHITECTURE §6, "Player options"): by default every tweak but those that
 change behaviour (`--game-tweak exact`); `--game-tweak NAME|-NAME|all|exact|none` on the command
@@ -380,7 +380,7 @@ unchanged.
   partitioner lookups, decor and radiation, lags its place in the conveyor's flow; the flow
   itself is unaffected. U57: about 2.9 ms a frame (conveyor render tick, cell-change monitor,
   animation and collider updates). Built against the game's own types in
-  `src/OniBrutal.GameTweaks`, whose patches are made only when the tweak is on.
+  `src/OniMoono.GameTweaks`, whose patches are made only when the tweak is on.
 
 - `fast-save-type-checks`: SaveLoadRoot.SaveWithoutTransform's per-component attribute check
   (Type.IsDefined, which reads metadata each time) and type name (Type.ToString, a new string

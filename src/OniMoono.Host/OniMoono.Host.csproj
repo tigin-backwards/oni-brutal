@@ -1,0 +1,84 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <!-- On Windows a GUI-subsystem executable: started by Steam or Explorer it opens no console
+         window (with a taskbar entry of its own beside the game's); started from a terminal it
+         writes to that terminal's console (WindowsConsole). -->
+    <OutputType Condition="$(RuntimeIdentifier.StartsWith('win')) Or ('$(RuntimeIdentifier)' == '' And $([MSBuild]::IsOSPlatform('Windows')))">WinExe</OutputType>
+    <AssemblyName>OniMoono</AssemblyName>
+    <RootNamespace>OniMoono.Host</RootNamespace>
+    <!-- BinaryFormatter: the game clones worldgen settings with it (ARCHITECTURE §2.1). -->
+    <EnableUnsafeBinaryFormatterSerialization>true</EnableUnsafeBinaryFormatterSerialization>
+    <!-- Server GC: collections run on every core, so pauses are about a quarter as long and the
+         autosave hitch about a third (U57, PLAN §Status); about 2 GB more memory there. -->
+    <ServerGarbageCollection>true</ServerGarbageCollection>
+    <ConcurrentGarbageCollection>true</ConcurrentGarbageCollection>
+    <TieredPGO>true</TieredPGO>
+    <!-- The executable's icon on Windows (Steela; the window icon is OniMoono.Desktop/Steela.png). -->
+    <ApplicationIcon>Steela.ico</ApplicationIcon>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../OniMoono.UnityEngine/OniMoono.UnityEngine.csproj" />
+    <ProjectReference Include="../OniMoono.Desktop/OniMoono.Desktop.csproj" />
+    <ProjectReference Include="../Unity.InternalAPIEngineBridge.004/Unity.InternalAPIEngineBridge.004.csproj" />
+    <!-- Steamworks.NET built for CoreCLR; replaces the shipped copy (ARCHITECTURE §2.1). -->
+    <ProjectReference Include="../ThirdParty/Steamworks.NET/Steamworks.NET.csproj" />
+    <!-- A build tool: built for the build machine, not for the player's runtime identifier, so
+         EmitFacades finds it in its plain output folder. -->
+    <ProjectReference Include="../../tools/FacadeGen/FacadeGen.csproj" ReferenceOutputAssembly="false" GlobalPropertiesToRemove="RuntimeIdentifier;SelfContained" />
+    <!-- This project's replacements of Unity's UI packages (PLAN M9), next to the host in
+         packages/; the game binds to them by name at run time (AssemblyPolicy). -->
+    <ProjectReference Include="../UnityEngine.UI/UnityEngine.UI.csproj" ReferenceOutputAssembly="false" OutputItemType="UiPackage" />
+    <ProjectReference Include="../Unity.TextMeshPro/Unity.TextMeshPro.csproj" ReferenceOutputAssembly="false" OutputItemType="UiPackage" />
+    <ProjectReference Include="../Unity.Timeline/Unity.Timeline.csproj" ReferenceOutputAssembly="false" OutputItemType="UiPackage" />
+    <!-- Game tweaks built against the game's assemblies, beside the host; loaded only when asked for. -->
+    <ProjectReference Include="../OniMoono.GameTweaks/OniMoono.GameTweaks.csproj" ReferenceOutputAssembly="false" OutputItemType="GameTweaksAssembly" SetTargetFramework="TargetFramework=netstandard2.1" GlobalPropertiesToRemove="RuntimeIdentifier;SelfContained" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- The game's Harmony, loaded from Managed/ at run time; patches KMod.Local (ModVersionStamp). -->
+    <Reference Include="0Harmony">
+      <HintPath>$(OniGameDir)/OxygenNotIncluded_Data/Managed/0Harmony.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <!-- The game's zlib, loaded from Managed/ at run time; the background-save game tweak
+         compresses with it as the game does. -->
+    <Reference Include="Ionic.Zip">
+      <HintPath>$(OniGameDir)/OxygenNotIncluded_Data/Managed/Ionic.Zip.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <!-- The game's FMOD wrapper, loaded from Managed/ at run time; AudioCapture (test runs only). -->
+    <Reference Include="FMODUnity">
+      <HintPath>$(OniGameDir)/OxygenNotIncluded_Data/Managed/FMODUnity.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <!-- Out-of-band framework pieces that Mono's class libraries provided in-box. -->
+    <PackageReference Include="System.Security.Permissions" />
+    <PackageReference Include="System.Runtime.Serialization.Formatters" />
+    <PackageReference Include="System.CodeDom" />
+    <PackageReference Include="System.Configuration.ConfigurationManager" />
+    <!-- Rewrites mod assemblies built against publicized game assemblies (ModAccess, ARCHITECTURE D11). -->
+    <PackageReference Include="Mono.Cecil" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- The helper App.Restart starts from the player's directory. -->
+    <None Include="Restarter" CopyToOutputDirectory="PreserveNewest" />
+    <!-- BRUTAL License §2.2 and §2.3: the logo on the main menu (BrutalCredit), NOTICE.txt beside the player. -->
+    <EmbeddedResource Include="Branding/LOGO_BRUTAL_WHT.png" LogicalName="LOGO_BRUTAL_WHT.png" />
+    <None Include="../../NOTICE.txt" Link="NOTICE.txt" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+  <Target Name="CopyUiPackages" AfterTargets="Build">
+    <Copy SourceFiles="@(UiPackage);@(UiPackage->'%(RootDir)%(Directory)%(Filename).pdb')" DestinationFolder="$(OutDir)packages" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(GameTweaksAssembly);@(GameTweaksAssembly->'%(RootDir)%(Directory)%(Filename).pdb')" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
+  </Target>
+  <!-- The host from before it was named OniMoono (OniBrutal, OniBrutal.exe, OniBrutal.dll …),
+       left in an output folder built before the rename: the player lists the dlls beside it. -->
+  <Target Name="RemoveOldHost" AfterTargets="Build">
+    <Delete Files="$(OutDir)OniBrutal;$(OutDir)OniBrutal.exe;$(OutDir)OniBrutal.dll;$(OutDir)OniBrutal.pdb;$(OutDir)OniBrutal.deps.json;$(OutDir)OniBrutal.runtimeconfig.json" />
+  </Target>
+  <!-- The UnityEngine.*Module facades the game binds to, next to the host in engine/. -->
+  <Target Name="EmitFacades" AfterTargets="Build">
+    <Exec Command="&quot;$(DOTNET_HOST_PATH)&quot; &quot;$(ArtifactsPath)/bin/FacadeGen/$(Configuration.ToLowerInvariant())/FacadeGen.dll&quot; emit &quot;$(MSBuildThisFileDirectory)../Facades/unity-module-map.tsv&quot; &quot;$(OutDir)engine&quot; &quot;$(OutDir)OniMoono.UnityEngine.dll&quot;" />
+  </Target>
+</Project>

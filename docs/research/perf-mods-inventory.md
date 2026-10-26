@@ -45,7 +45,7 @@ performance).
   - What it changes: `QualitySettings.vSyncCount = 0` and `Application.targetFrameRate`.
   - Exact: Yes, a display setting.
   - In Moono: The player paces by vSync, else by `targetFrameRate`, and `--max-frame-rate` caps
-    either (`OniBrutal.Host/Player.cs`, `Throttle`). These mods work through the same API.
+    either (`OniMoono.Host/Player.cs`, `Throttle`). These mods work through the same API.
   - Gain: None to frame time. It caps a menu running at thousands of fps.
 - **Process priority High, re-applied every 10 s**: not applicable (the player's choice, not the
   engine's).

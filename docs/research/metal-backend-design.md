@@ -24,14 +24,14 @@ inferred from the shipped data, the dylibs' symbol tables were read as data.
 
 | Piece | Where | Verified by |
 |---|---|---|
-| Shader blob readers: platform blob table, Metal program entries (keywords, entry point, MSL, channel mask, vertex attribute table), parameter blobs merged with a pass stage's common parameters | `src/OniBrutal.Assets/Shaders/` (`ShaderProgramTable`, `MetalProgram`, `ShaderParameters`, `PlayerSubprograms`) | `tests/OniBrutal.Assets.Tests/ShaderDataTests.cs`: hand-written fixtures in the shipped layout; all 1057 Metal programs and parameter blobs of the Mac data decode (522 vertex, 535 fragment, 120 shaders) |
-| Program loading per platform: `ShaderPrograms.Load(shader, 14 or 15)`, Metal variants per stage (`ShaderPass.MetalVertexVariants`, `MetalFragmentVariants`), `ShaderPrograms.SelectStages`, `ShaderNative.ProgramsFor`, `RenderDevice.ShaderPlatform` | `src/OniBrutal.UnityEngine/Engine/Rendering/ShaderPrograms.cs`, `ShaderNative.cs`, `RenderDevice.cs` | `tests/OniBrutal.UnityEngine.Tests/MetalShaderProgramTests.cs`; the GLCore path is unchanged: every GLCore variant of the Linux and Mac data (583 and 596) decodes to the same keywords, stage sources and channel masks before and after (a scratch comparison, not kept) |
+| Shader blob readers: platform blob table, Metal program entries (keywords, entry point, MSL, channel mask, vertex attribute table), parameter blobs merged with a pass stage's common parameters | `src/OniMoono.Assets/Shaders/` (`ShaderProgramTable`, `MetalProgram`, `ShaderParameters`, `PlayerSubprograms`) | `tests/OniMoono.Assets.Tests/ShaderDataTests.cs`: hand-written fixtures in the shipped layout; all 1057 Metal programs and parameter blobs of the Mac data decode (522 vertex, 535 fragment, 120 shaders) |
+| Program loading per platform: `ShaderPrograms.Load(shader, 14 or 15)`, Metal variants per stage (`ShaderPass.MetalVertexVariants`, `MetalFragmentVariants`), `ShaderPrograms.SelectStages`, `ShaderNative.ProgramsFor`, `RenderDevice.ShaderPlatform` | `src/OniMoono.UnityEngine/Engine/Rendering/ShaderPrograms.cs`, `ShaderNative.cs`, `RenderDevice.cs` | `tests/OniMoono.UnityEngine.Tests/MetalShaderProgramTests.cs`; the GLCore path is unchanged: every GLCore variant of the Linux and Mac data (583 and 596) decodes to the same keywords, stage sources and channel masks before and after (a scratch comparison, not kept) |
 | Metal parameters against GLCore's | `tools/ShaderSurvey` `compare-metal` (`MetalCompare.cs`), `check-metal` | §2; `scripts/check.sh` runs both when the Mac data is present |
-| Constant-buffer packer | `src/OniBrutal.Desktop/Metal/MetalConstantBuffers.cs` | `tests/OniBrutal.UnityEngine.Tests/MetalConstantBufferTests.cs`: §2.3 |
+| Constant-buffer packer | `src/OniMoono.Desktop/Metal/MetalConstantBuffers.cs` | `tests/OniMoono.UnityEngine.Tests/MetalConstantBufferTests.cs`: §2.3 |
 | osx-arm64 cross-publish (the primary build) and osx-x64 (the fallback) | `scripts/check.sh` | self-contained publishes, arm64 and x86_64 Mach-O apphosts, every gate run; the arm64 one carries BRUTAL's dylibs and, when at hand, onimaxxing-sim in `plugins/` |
-| Native interface, both architectures | `src/OniBrutal.Host/NativeCheck.cs` (`--check-natives`, `--native-arch`, `--native-dir`), `src/OniBrutal.UnityEngine/Engine/Platform/NativeExports.cs` (slices, ELF machine, Mach-O dependencies) | §2.4; `NativeExportsTests` on hand-built Mach-O and ELF files |
+| Native interface, both architectures | `src/OniMoono.Host/NativeCheck.cs` (`--check-natives`, `--native-arch`, `--native-dir`), `src/OniMoono.UnityEngine/Engine/Platform/NativeExports.cs` (slices, ELF machine, Mach-O dependencies) | §2.4; `NativeExportsTests` on hand-built Mach-O and ELF files |
 | SimDLL replacement for arm64 | `GameLayout.Native`, `AssemblyPolicy.ResolveNative`: a plugin without the process's architecture gives way to `plugins/lib<name>.dylib` | `GameLayoutTests`; the port bound on Linux with `--native-override` (study §3.4) |
-| Mac host paths | `src/OniBrutal.UnityEngine/Engine/Platform/GameLayout.cs` (`GameLayout`, `MacUserFolders`), `Program.cs` (`Paths.ConfigureMac`), `AssemblyPolicy.ResolveNative` | `GameLayoutTests` on fake `.app` trees; `--check-assets` and `--check-natives` read the depot's bundle on Linux |
+| Mac host paths | `src/OniMoono.UnityEngine/Engine/Platform/GameLayout.cs` (`GameLayout`, `MacUserFolders`), `Program.cs` (`Paths.ConfigureMac`), `AssemblyPolicy.ResolveNative` | `GameLayoutTests` on fake `.app` trees; `--check-assets` and `--check-natives` read the depot's bundle on Linux |
 
 ---
 
@@ -164,14 +164,14 @@ executable `Contents/MacOS/Oxygen Not Included`; the default install is
 
 `RenderDevice` (17 members, study §2.1) stays the seam; a `MetalDevice : RenderDevice` implements
 it, and `ShaderPlatform` (now on `RenderDevice`) returns 14. What has to move first is the
-backend-neutral logic that lives in `src/OniBrutal.Desktop/Gl/` (study §2.3). This refactor is
+backend-neutral logic that lives in `src/OniMoono.Desktop/Gl/` (study §2.3). This refactor is
 **designed here, not done**: it touches the per-frame render path, so it should be done as its own
 series, each step keeping the GL device's output and frame time.
 
 ### 3.1 Target shape
 
-New engine-side home: `src/OniBrutal.UnityEngine/Engine/Rendering/Device/` (namespace
-`OniBrutal.Engine.Rendering.Device`), internal, visible to `OniBrutal.Desktop`.
+New engine-side home: `src/OniMoono.UnityEngine/Engine/Rendering/Device/` (namespace
+`OniMoono.Engine.Rendering.Device`), internal, visible to `OniMoono.Desktop`.
 
 | Neutral piece | From | Contents |
 |---|---|---|
@@ -210,13 +210,13 @@ on the large colony (`docs/research/u57-frame-inventory.md` method) to keep the 
 
 **Choice: raw `objc_msgSend` through typed function pointers, hand-written for the subset used.**
 
-- `src/OniBrutal.Desktop/Metal/ObjC.cs`: `libobjc` (`/usr/lib/libobjc.A.dylib`) through
+- `src/OniMoono.Desktop/Metal/ObjC.cs`: `libobjc` (`/usr/lib/libobjc.A.dylib`) through
   `NativeLibrary`; `objc_getClass`, `sel_registerName`, `objc_msgSend`,
   `objc_autoreleasePoolPush`/`Pop`, `objc_retain`/`objc_release`. Selectors resolved once into
   `static readonly IntPtr` fields. Each call site casts `objc_msgSend` to its exact signature,
   e.g. `((delegate* unmanaged<IntPtr, IntPtr, IntPtr, nuint, IntPtr>)msgSend)(device, newBufferWithLength, length, options)`;
   no marshalling stubs, no `DllImport` overload families.
-- `src/OniBrutal.Desktop/Metal/MetalApi.cs`: thin typed wrappers (`MTLDevice`, `MTLCommandQueue`,
+- `src/OniMoono.Desktop/Metal/MetalApi.cs`: thin typed wrappers (`MTLDevice`, `MTLCommandQueue`,
   `MTLLibrary`… as `readonly struct` handles) for about 150 selectors, plus `MTLCreateSystemDefaultDevice`
   from `Metal.framework`. Structs by value as Apple declares them: `MTLRegion` (48 bytes),
   `MTLViewport` (6 doubles), `MTLScissorRect`, `MTLClearColor`, `MTLSize`, `MTLOrigin`.
@@ -408,14 +408,14 @@ or buffer the GPU is still reading races with it. The design keeps GL's semantic
 
 | File | Role |
 |---|---|
-| `src/OniBrutal.Desktop/Metal/ObjC.cs`, `MetalApi.cs` | Interop (§4) |
-| `src/OniBrutal.Desktop/Metal/MetalDevice.cs`, `MetalCaps.cs` | `RenderDevice`, `GraphicsCaps` (`GraphicsDeviceType.Metal`, formats) |
-| `src/OniBrutal.Desktop/Metal/MetalWorker.cs` | Render thread (§9) |
-| `src/OniBrutal.Desktop/Metal/MetalPrograms.cs`, `MetalPipelines.cs` | Libraries, functions, pipeline and depth-stencil caches (§5) |
-| `src/OniBrutal.Desktop/Metal/MetalConstantBuffers.cs` | Packer (done, §2.3) |
-| `src/OniBrutal.Desktop/Metal/MetalStreamBuffer.cs`, `MetalTextures.cs`, `MetalMeshes.cs` | Ring, textures, render targets, meshes (§7, §8) |
-| `src/OniBrutal.Desktop/Metal/MetalSurface.cs` | Layer, drawables, present (§9) |
-| `src/OniBrutal.UnityEngine/Engine/Rendering/Device/*` | The neutral pieces (§3) |
+| `src/OniMoono.Desktop/Metal/ObjC.cs`, `MetalApi.cs` | Interop (§4) |
+| `src/OniMoono.Desktop/Metal/MetalDevice.cs`, `MetalCaps.cs` | `RenderDevice`, `GraphicsCaps` (`GraphicsDeviceType.Metal`, formats) |
+| `src/OniMoono.Desktop/Metal/MetalWorker.cs` | Render thread (§9) |
+| `src/OniMoono.Desktop/Metal/MetalPrograms.cs`, `MetalPipelines.cs` | Libraries, functions, pipeline and depth-stencil caches (§5) |
+| `src/OniMoono.Desktop/Metal/MetalConstantBuffers.cs` | Packer (done, §2.3) |
+| `src/OniMoono.Desktop/Metal/MetalStreamBuffer.cs`, `MetalTextures.cs`, `MetalMeshes.cs` | Ring, textures, render targets, meshes (§7, §8) |
+| `src/OniMoono.Desktop/Metal/MetalSurface.cs` | Layer, drawables, present (§9) |
+| `src/OniMoono.UnityEngine/Engine/Rendering/Device/*` | The neutral pieces (§3) |
 
 Size: as the study estimates, about 4000–5000 lines for the device, 1000–2000 of interop, and
 about 1000 moved out of `Gl/`.

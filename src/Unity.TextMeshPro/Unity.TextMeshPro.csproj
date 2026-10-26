@@ -10,7 +10,7 @@
     <NoWarn>$(NoWarn);CS0108;CS0114;CS0660;CS0661;CS8981;CS0649;CS0169;CS0414</NoWarn>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="../OniBrutal.UnityEngine/OniBrutal.UnityEngine.csproj" />
+    <ProjectReference Include="../OniMoono.UnityEngine/OniMoono.UnityEngine.csproj" />
     <ProjectReference Include="../UnityEngine.UI/UnityEngine.UI.csproj" />
   </ItemGroup>
 

@@ -1,7 +1,7 @@
 # Clean-room rewrites
 
 Some engine code was ported from Unity's own managed C# rather than written independently: the
-IMGUI module (`src/OniBrutal.UnityEngine/IMGUI/`) and UnityEvents (`Core/UnityEvents.cs`). It
+IMGUI module (`src/OniMoono.UnityEngine/IMGUI/`) and UnityEvents (`Core/UnityEvents.cs`). It
 reproduced Unity's private structure, internal names and quirks. Unity's C# reference source is
 published under a reference-only licence, so that code is replaced. This folder holds the
 specifications the replacements are written from, and the rules for writing them.

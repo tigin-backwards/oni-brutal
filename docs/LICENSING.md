@@ -9,8 +9,8 @@ versions shipped with the game.
 
 | Unity component | Replacement |
 |---|---|
-| `UnityPlayer.so` (the native engine) | `OniBrutal.Host`, `OniBrutal.Desktop` (BRUTAL GLFW/OpenGL) |
-| `UnityEngine.dll`, the 77 `UnityEngine.*Module.dll` | `OniBrutal.UnityEngine` and generated forwarding facades |
+| `UnityPlayer.so` (the native engine) | `OniMoono.Host`, `OniMoono.Desktop` (BRUTAL GLFW/OpenGL) |
+| `UnityEngine.dll`, the 77 `UnityEngine.*Module.dll` | `OniMoono.UnityEngine` and generated forwarding facades |
 | `Unity.InternalAPIEngineBridge.004.dll` | `src/Unity.InternalAPIEngineBridge.004` |
 | `UnityEngine.UI.dll`, `Unity.TextMeshPro.dll`, `Unity.Timeline.dll` | `src/UnityEngine.UI`, `src/Unity.TextMeshPro`, `src/Unity.Timeline` (clean-room, PLAN M9; below) |
 | Mono runtime and class libraries | stock .NET 10 CoreCLR |
@@ -74,19 +74,19 @@ Steamworks (`libsteam_api.so`, Steamworks.NET under MIT); `cimgui.so` (Dear ImGu
 
 ## Third-party code in this repository
 
-- `src/OniBrutal.UnityEngine/Video/Engine/Vp8/`: a port of the VP8 reference decoder ("dixie")
+- `src/OniMoono.UnityEngine/Video/Engine/Vp8/`: a port of the VP8 reference decoder ("dixie")
   published in RFC 6386, Section 20, © 2010–2011 Google Inc., BSD-style licence with an
   additional patent grant (`src/ThirdParty/rfc6386/LICENSE`, `PATENTS`).
 - `src/ThirdParty/Steamworks.NET`: Steamworks.NET 20.1.0, MIT.
-- `src/OniBrutal.UnityEngine/Math/MesaInverse.cs` (`Matrix4x4.inverse`): a port of
+- `src/OniMoono.UnityEngine/Math/MesaInverse.cs` (`Matrix4x4.inverse`): a port of
   `invert_matrix_general` from Mesa's `src/mesa/math/m_matrix.c` (Mesa 20.3.5, from the
   release tarball at archive.mesa3d.org; Mesa 21 replaced it with `util_invert_mat4x4`),
   © 1999–2005 Brian Paul, MIT. The notice is in the file's header and in `NOTICE.txt`, which
   ships beside the player. The original player's inverse was measured to equal it bit for bit
   (`docs/cleanroom/ugui.md`, "Transform hierarchy to the bit").
-- `src/OniBrutal.UnityEngine/Math/MesaFrustum.cs` (`Matrix4x4.Frustum`): a port of
+- `src/OniMoono.UnityEngine/Math/MesaFrustum.cs` (`Matrix4x4.Frustum`): a port of
   `_math_matrix_frustum` from the same Mesa 20.3.5 file, same copyright and MIT notice.
-- `src/OniBrutal.UnityEngine/Math/GluLookAt.cs` (`Matrix4x4.LookAt`): the basis arithmetic of
+- `src/OniMoono.UnityEngine/Math/GluLookAt.cs` (`Matrix4x4.LookAt`): the basis arithmetic of
   `gluLookAt` and its `normalize` and `cross` helpers from GLU's `src/libutil/project.c` (GLU
   9.0.3, release tarball at archive.mesa3d.org), © 1991–2000 Silicon Graphics, Inc., SGI Free
   Software License B 2.0 (X11-equivalent). The notice is in the file's header and in
@@ -97,7 +97,7 @@ Steamworks (`libsteam_api.so`, Steamworks.NET under MIT); `cimgui.so` (Dear ImGu
 
 ## Provenance of the bundled type trees
 
-`src/OniBrutal.Assets/Data/typetrees-6000.3.5f2.json.gz` describes how Unity 6000.3.5f2 lays
+`src/OniMoono.Assets/Data/typetrees-6000.3.5f2.json.gz` describes how Unity 6000.3.5f2 lays
 out each native class's fields in a release build. The game's data files don't include this
 information, so the asset reader needs it. It is a compacted copy (field names, types, sizes and
 flags only) of the `InfoJson_6000.3.5f2.json` dump in AssetRipper's public TypeTreeDumps

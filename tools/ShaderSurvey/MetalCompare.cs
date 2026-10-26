@@ -1,6 +1,6 @@
 using System.Text;
-using OniBrutal.Assets.Shaders;
-using OniBrutal.Assets.TypeTrees;
+using OniMoono.Assets.Shaders;
+using OniMoono.Assets.TypeTrees;
 
 namespace ShaderSurvey;
 

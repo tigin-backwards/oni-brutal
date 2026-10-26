@@ -9,7 +9,7 @@ The public API and the internal members other assemblies use stay as they are. T
 internal members uGUI uses, run `tools/ApiCheck` (`scripts/check.sh`), which reports missing
 members after a change. Private structure, private names and statement order are yours.
 
-All paths are under `src/OniBrutal.UnityEngine/`.
+All paths are under `src/OniMoono.UnityEngine/`.
 
 ## 1. UI Toolkit events and runtime (`UIElements/EventBase.cs`, `PointerEvents.cs`, `OtherEvents.cs`, `Runtime.cs`, `Panels.cs`)
 
@@ -294,7 +294,7 @@ the velocity is 0.
   - both test suites have 0 failures;
   - ApiCheck shows no more than 13 missing members;
   - the host checks report no failures.
-- `dotnet test tests/OniBrutal.UnityEngine.Tests` passes.
+- `dotnet test tests/OniMoono.UnityEngine.Tests` passes.
 - New tests, where there are none yet:
   - pools: counts, the release check, the max size;
   - HSV round trips and edge cases: grey, black, H = 1, negative H;
@@ -311,7 +311,7 @@ The whole `TextGenerator` class is removed in the rewrite branch, so the generat
 rewritten as well.
 
 - Generation clears the outputs and fails without a font.
-- Layout is done with the project's `OniBrutal.Engine.Text.TextLayout`, in the same file. Its
+- Layout is done with the project's `OniMoono.Engine.Text.TextLayout`, in the same file. Its
   interface:
   - a constructor taking the font's native object, the string, the settings, the scale factor
     (`scaleFactor`, or 1 when it is not positive) and the tab size;

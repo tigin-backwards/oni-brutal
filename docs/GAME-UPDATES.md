@@ -6,7 +6,7 @@ every change, but the place a new build can break assumptions this engine makes 
 
 - **Videos, every frame.** The unit tests compare the first 60 frames of each clip with libvpx.
   With a new build, compare every frame of every clip:
-  `ONI_FULL_VIDEO_CHECK=1 LD_LIBRARY_PATH=<dir with libvpx.so.9> out/bin/OniBrutal.UnityEngine.Tests/debug/OniBrutal.UnityEngine.Tests -method OniBrutal.Tests.Vp8DecoderTests.ClipsDecodeAsLibvpxDecodesThem`
+  `ONI_FULL_VIDEO_CHECK=1 LD_LIBRARY_PATH=<dir with libvpx.so.9> out/bin/OniMoono.UnityEngine.Tests/debug/OniMoono.UnityEngine.Tests -method OniMoono.Tests.Vp8DecoderTests.ClipsDecodeAsLibvpxDecodesThem`
   (about 17,000 frames, most of an hour in a debug build). Without a system libvpx, Ubuntu's
   package can be unpacked into a scratch directory: `apt-get download libvpx9`, then
   `dpkg-deb -x libvpx9_*.deb <dir>`.

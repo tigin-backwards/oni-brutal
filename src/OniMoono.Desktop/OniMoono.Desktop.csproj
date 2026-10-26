@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <!-- The desktop platform: a GLFW window with its input, and the OpenGL 4.5 core render
+         device that executes the game's shader programs (ARCHITECTURE §3.5-3.6). -->
+    <RootNamespace>OniMoono.Desktop</RootNamespace>
+    <!-- Engine-side code: Unity's API carries no nullability annotations (as the engine). -->
+    <Nullable>disable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../OniMoono.UnityEngine/OniMoono.UnityEngine.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Ahwoo.BRUTAL.Glfw" />
+    <PackageReference Include="Ahwoo.BRUTAL.OpenGl" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- The window icon (GlfwPlatform.SetIcon); OniMoono.Host/Steela.ico is the same image. -->
+    <EmbeddedResource Include="Steela.png" LogicalName="Steela.png" />
+  </ItemGroup>
+</Project>

@@ -1,4 +1,4 @@
-# Writing engine code (`src/OniBrutal.UnityEngine`)
+# Writing engine code (`src/OniMoono.UnityEngine`)
 
 Rules for every hand-written file in the engine assembly. The why is in `ARCHITECTURE.md`.
 
@@ -12,7 +12,7 @@ Rules for every hand-written file in the engine assembly. The why is in `ARCHITE
   (no base list, no modifiers besides accessibility). For Unity types that are *internal*, write
   `partial class X` with no accessibility modifier.
 - Never declare a public type that Unity doesn't have: FacadeGen fails the build. Engine
-  internals go in namespace `OniBrutal.Engine` (or nested `OniBrutal.*`) and are `internal`.
+  internals go in namespace `OniMoono.Engine` (or nested `OniMoono.*`) and are `internal`.
 
 ## Which members exist
 
@@ -36,10 +36,10 @@ Rules for every hand-written file in the engine assembly. The why is in `ARCHITE
 - Behaviour follows Unity's documented and observable behaviour. Comment non-obvious rules
   (e.g. "inclusive at min, exclusive at max").
 - **No managed reference fields on `UnityEngine.Object` subclasses** except what Unity itself
-  declares there. Engine state for objects lives on the "native side" (`OniBrutal.Engine`
+  declares there. Engine state for objects lives on the "native side" (`OniMoono.Engine`
   records reached through `Object.m_CachedPtr`). Game code reflects over component fields.
 - Value types keep Unity's exact public fields (KSerialization reflects over them).
-- Threading: see ARCHITECTURE §4. Main-thread-only APIs call `OniBrutal.Engine.Threads.AssertMainThread(name)`.
+- Threading: see ARCHITECTURE §4. Main-thread-only APIs call `OniMoono.Engine.Threads.AssertMainThread(name)`.
 
 ## Style
 

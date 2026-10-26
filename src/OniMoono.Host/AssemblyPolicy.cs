@@ -1,0 +1,216 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Runtime.Loader;
+using System.Text.Json;
+using OniMoono.Engine;
+using OniMoono.Engine.Platform;
+
+namespace OniMoono.Host
+{
+    /// Where every assembly the game asks for comes from (ARCHITECTURE §2):
+    ///
+    /// 1. The .NET framework (the trusted platform assemblies) answers first, so Mono's BCL copies
+    ///    in Managed/ (mscorlib, System.*, Mono.Security, I18N…) are never loaded.
+    /// 2. Unity engine assemblies (UnityEngine, UnityEngine.*Module) resolve to our facades in
+    ///    engine/, which forward to OniMoono.UnityEngine; the engine bridge ships with the host.
+    /// 3. Unity's packages (UnityEngine.UI, TextMeshPro, Timeline) are this project's replacements
+    ///    (PLAN M9), from packages/ next to the host or `--ui-packages DIR`; with
+    ///    `--shipped-ui-packages` (differential runs) they load as shipped from Managed/.
+    /// 4. Everything else — the game and its third-party libraries — loads from Managed/.
+    ///
+    /// The game runs in the default load context, so its Type.GetType, Assembly.Load and
+    /// AppDomain queries behave as they did under Unity.
+    internal static class AssemblyPolicy
+    {
+        /// Unity's own support packages listed in ScriptingAssemblies.json. They implement engine
+        /// features (Burst, native collections, profiler integration) that our engine replaces, and
+        /// no game assembly references them, so they are not loaded.
+        static readonly HashSet<string> unitySupportPackages = new(StringComparer.Ordinal)
+        {
+            "Unity.Burst", "Unity.Burst.Unsafe", "Unity.Collections", "Unity.Collections.LowLevel.ILSupport",
+            "Unity.Mathematics", "Unity.MemoryProfiler", "Unity.Multiplayer.Center.Common", "Unity.Profiling.Core",
+        };
+
+        /// Mono class libraries shipped in Managed/ that the framework does not carry. They target
+        /// Mono's runtime internals; their roles are filled by .NET (code pages: the host registers
+        /// CodePagesEncodingProvider). Never loaded.
+        static readonly HashSet<string> monoClassLibraries = new(StringComparer.Ordinal)
+        {
+            "I18N", "I18N.West", "Mono.Security", "System.ComponentModel.Composition",
+            "System.ServiceModel.Internals", "System.EnterpriseServices",
+        };
+
+        static string managedDir = "";
+
+        /// Where the game's assemblies and our engine facades are (ModAccess resolves mods' references there).
+        public static string[] ReferenceDirectories => [managedDir, engineDir];
+        static OniMoono.Engine.Platform.GameLayout? layout;
+        static string engineDir = "";
+
+        /// The Unity packages this project replaces (PLAN M9).
+        static readonly HashSet<string> replacedPackages = new(StringComparer.Ordinal) { "UnityEngine.UI", "Unity.TextMeshPro", "Unity.Timeline" };
+
+        /// Where the replacements load from; null loads the shipped packages from Managed/.
+        static string? packagesDir;
+
+        /// `uiPackagesDir` null: the replacements the host ships in packages/; `shippedUiPackages`:
+        /// none.
+        public static void Install(OniMoono.Engine.Platform.GameLayout game, string hostDir, string? uiPackagesDir = null, bool shippedUiPackages = false)
+        {
+            packagesDir = shippedUiPackages ? null : uiPackagesDir ?? Path.Combine(hostDir, "packages");
+            layout = game;
+            managedDir = Path.Combine(game.DataDir, "Managed");
+            engineDir = Path.Combine(hostDir, "engine");
+            AssemblyLoadContext.Default.Resolving += Resolve;
+            AssemblyLoadContext.Default.ResolvingUnmanagedDll += ResolveNative;
+        }
+
+        static bool IsEngineAssembly(string name) => File.Exists(Path.Combine(engineDir, name + ".dll"));
+
+        /// Unity's engine modules: only our implementation may provide them. A module we have no
+        /// facade for is one nothing references, so it is never loaded.
+        static bool IsUnityEngineModule(string name) => name == "UnityEngine" || (name.StartsWith("UnityEngine.", StringComparison.Ordinal) && name.EndsWith("Module", StringComparison.Ordinal));
+
+        static Assembly? Resolve(AssemblyLoadContext context, AssemblyName name)
+        {
+            var simple = name.Name;
+            if (string.IsNullOrEmpty(simple)) return null;
+            if (IsEngineAssembly(simple)) return context.LoadFromAssemblyPath(Path.Combine(engineDir, simple + ".dll"));
+            if (IsUnityEngineModule(simple)) return null;
+            if (unitySupportPackages.Contains(simple) || monoClassLibraries.Contains(simple)) return null;
+            // A replacement present in the packages directory wins; a package without one loads
+            // as shipped (one package can be compared while the others are Unity's).
+            if (packagesDir != null && replacedPackages.Contains(simple) && File.Exists(Path.Combine(packagesDir, simple + ".dll")))
+                return context.LoadFromAssemblyPath(Path.Combine(packagesDir, simple + ".dll"));
+            var path = Path.Combine(managedDir, simple + ".dll");
+            if (!File.Exists(path)) return null;
+            var image = MonoFieldSemantics.Adjust(path);
+            // Its conversions of floats to integers give Mono's values out of range (MonoConversions)
+            // and its directory listings come in Mono's order (MonoDirectoryListing).
+            if (MonoConversions.AdjustGame(image ?? File.ReadAllBytes(path), path) is { } converted) image = converted;
+            return image == null ? context.LoadFromAssemblyPath(path) : context.LoadFromStream(new MemoryStream(image));
+        }
+
+        /// Development and test runs only (`--native-override NAME=PATH`): a native library
+        /// loaded instead of the game's plugin of that name, e.g. the offline Steam test double
+        /// (tools/SteamStub).
+        public static readonly Dictionary<string, string> NativeOverrides = new(StringComparer.Ordinal);
+
+        /// The host's replacements for game plugins that lack the process's architecture
+        /// (GameLayout.Native): `plugins/` beside the host.
+        public static string ReplacementsDir => Path.Combine(AppContext.BaseDirectory, GameLayout.ReplacementsFolderName);
+
+        /// The process's architecture as a Mach-O CPU type (NativeExports.X8664 or Arm64).
+        public static int ProcessCpu => RuntimeInformation.ProcessArchitecture == Architecture.Arm64
+            ? NativeExports.Arm64 : NativeExports.X8664;
+
+        /// The game's native plugins live in Plugins/ (the Unity player searches there), on macOS
+        /// in the bundle's PlugIns/<name>.bundle (GameLayout.PluginCandidates). A plugin without
+        /// the process's architecture is replaced by the host's of the same name (plugins/), e.g.
+        /// the onimaxxing-sim SimDLL of an arm64 macOS build (GameLayout.Native).
+        static IntPtr ResolveNative(Assembly requester, string name)
+        {
+            if (NativeOverrides.TryGetValue(name, out var overridePath))
+                return Announced(name, NativeLibrary.Load(overridePath), $"{overridePath} (--native-override)");
+            var native = layout?.Native(name, OperatingSystem.IsWindows(), ProcessCpu, ReplacementsDir);
+            if (native == null) return IntPtr.Zero;
+            if (native.Value.Replacement)
+                return Announced(name, NativeLibrary.Load(native.Value.Path), $"{native.Value.Path} (the host's replacement: the game's plugin has no {NativeExports.ArchName(ProcessCpu)} code)");
+            return NativeLibrary.Load(native.Value.Path);
+        }
+
+        static readonly HashSet<string> announced = new(StringComparer.Ordinal);
+
+        /// Logs, once per name, which library replaced a game plugin; for a SimDLL, also its
+        /// SYSINFO_Acquire string (onimaxxing-sim's banner, UTF-16; the game itself never calls it),
+        /// which shows the game's imports bind to that library.
+        static unsafe IntPtr Announced(string name, IntPtr handle, string what)
+        {
+            lock (announced)
+                if (!announced.Add(name)) return handle;
+            string banner = "";
+            if (name == "SimDLL" && NativeLibrary.TryGetExport(handle, "SYSINFO_Acquire", out var acquire))
+            {
+                var text = ((delegate* unmanaged<byte*>)acquire)();
+                if (text != null) banner = ": SYSINFO \"" + (text[1] == 0 ? new string((char*)text) : Marshal.PtrToStringUTF8((IntPtr)text)) + "\"";
+                if (NativeLibrary.TryGetExport(handle, "SYSINFO_Release", out var release)) ((delegate* unmanaged<void>)release)();
+            }
+            EngineLog.Engine($"Native {name}: {what}{banner}");
+            return handle;
+        }
+
+        /// The simple names of the assemblies the game was built with (ScriptingAssemblies.json):
+        /// Unity's serializer knows the types of these only (JsonUtility, JsonLayout).
+        public static HashSet<string> BuildAssemblyNames(string gameDataDir)
+        {
+            var json = JsonDocument.Parse(File.ReadAllText(Path.Combine(gameDataDir, "ScriptingAssemblies.json")));
+            var names = new HashSet<string>(StringComparer.Ordinal);
+            foreach (var entry in json.RootElement.GetProperty("names"u8).EnumerateArray())
+                names.Add(Path.GetFileNameWithoutExtension(entry.GetString()!));
+            return names;
+        }
+
+        /// Loads the scripting assemblies up front, as the Unity player does: the game snapshots
+        /// AppDomain.GetAssemblies() early and resolves saved type names against that snapshot.
+        public static List<Assembly> PreloadScriptingAssemblies(string gameDataDir)
+        {
+            var json = JsonDocument.Parse(File.ReadAllText(Path.Combine(gameDataDir, "ScriptingAssemblies.json")));
+            var loaded = new List<Assembly>();
+            foreach (var entry in json.RootElement.GetProperty("names"u8).EnumerateArray())
+            {
+                var simple = Path.GetFileNameWithoutExtension(entry.GetString()!);
+                if (unitySupportPackages.Contains(simple) || monoClassLibraries.Contains(simple)) continue;
+                if (IsFrameworkAssembly(simple)) continue;
+                if (IsUnityEngineModule(simple)) continue; // ours load on demand through the facades
+                bool replaced = packagesDir != null && replacedPackages.Contains(simple) && File.Exists(Path.Combine(packagesDir, simple + ".dll"));
+                if (!replaced && !IsEngineAssembly(simple) && !File.Exists(Path.Combine(managedDir, simple + ".dll"))) continue;
+                loaded.Add(Assembly.Load(new AssemblyName(simple)));
+            }
+            return loaded;
+        }
+
+        /// Assemblies of the shared framework (the trusted platform assemblies that live in the
+        /// runtime directory or in packages the host ships, as opposed to the host's own projects).
+        static readonly HashSet<string> framework = new(
+            ((string)AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES")!).Split(Path.PathSeparator)
+                .Where(p => !Path.GetDirectoryName(p)!.Equals(AppContext.BaseDirectory.TrimEnd(Path.DirectorySeparatorChar), StringComparison.Ordinal)
+                            || Path.GetFileName(p).StartsWith("System.", StringComparison.Ordinal))
+                .Select(p => Path.GetFileNameWithoutExtension(p)!),
+            StringComparer.OrdinalIgnoreCase);
+
+        internal static bool IsFrameworkAssembly(string simple) => framework.Contains(simple);
+
+        /// The assembly files the host runs with (--check-natives): its own (the host directory's,
+        /// framework ones aside: the engine, the Steamworks.NET port, BRUTAL…), the UI packages it
+        /// serves, and those of Managed/ that Resolve would load (the game and its libraries; not
+        /// Mono's class libraries, Unity's modules or support packages, or what ours replace).
+        public static List<string> RuntimeAssemblyPaths()
+        {
+            var result = new List<string>();
+            var names = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            void Add(string path)
+            {
+                if (names.Add(Path.GetFileNameWithoutExtension(path))) result.Add(path);
+            }
+            foreach (var path in Directory.EnumerateFiles(AppContext.BaseDirectory, "*.dll").Order(StringComparer.Ordinal))
+            {
+                var simple = Path.GetFileNameWithoutExtension(path);
+                if (!simple.StartsWith("System.", StringComparison.Ordinal) && !simple.StartsWith("Microsoft.", StringComparison.Ordinal)) Add(path);
+            }
+            if (packagesDir != null && Directory.Exists(packagesDir))
+                foreach (var path in Directory.EnumerateFiles(packagesDir, "*.dll").Order(StringComparer.Ordinal)) Add(path);
+            foreach (var path in Directory.EnumerateFiles(managedDir, "*.dll").Order(StringComparer.Ordinal))
+            {
+                var simple = Path.GetFileNameWithoutExtension(path);
+                if (IsFrameworkAssembly(simple) || IsUnityEngineModule(simple) || unitySupportPackages.Contains(simple) || monoClassLibraries.Contains(simple)
+                    || (packagesDir != null && replacedPackages.Contains(simple) && names.Contains(simple))) continue;
+                Add(path);
+            }
+            return result;
+        }
+    }
+}

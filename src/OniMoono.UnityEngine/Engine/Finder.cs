@@ -1,0 +1,105 @@
+using System;
+using System.Collections.Generic;
+using UnityEngine;
+
+namespace OniMoono.Engine
+{
+    /// Object searches over the loaded scenes (FindObjectsByType, GameObject.Find, …).
+    internal static class Finder
+    {
+        /// Every GameObject in loaded scenes and DontDestroyOnLoad, in hierarchy order.
+        public static IEnumerable<GameObjectNative> AllSceneGameObjects() => Collect(activeOnly: false);
+
+        public static IEnumerable<GameObjectNative> ActiveGameObjects() => Collect(activeOnly: true);
+
+        /// The scenes' GameObjects in hierarchy order (pre-order from each root), collected before
+        /// they are returned so callers may change the hierarchy. With activeOnly, inactive
+        /// subtrees are skipped whole: no descendant of an inactive object is active.
+        static List<GameObjectNative> Collect(bool activeOnly)
+        {
+            var result = new List<GameObjectNative>();
+            var stack = new Stack<TransformNative>();
+            foreach (var scene in Scenes.WithDontDestroyOnLoad())
+                foreach (var root in scene.Roots.ToArray())
+                {
+                    stack.Push(root.Transform);
+                    while (stack.Count > 0)
+                    {
+                        var t = stack.Pop();
+                        var go = t.GameObject;
+                        if (activeOnly && !go.ActiveInHierarchy) continue;
+                        result.Add(go);
+                        var children = t.Children;
+                        for (int i = children.Length - 1; i >= 0; i--) stack.Push(children[i]);
+                    }
+                }
+            return result;
+        }
+
+        /// Objects of `type` that live in scenes: GameObjects and their components. Those on
+        /// inactive GameObjects are included only when asked. A disabled Behaviour on an active
+        /// GameObject is always included, as measured in the original (UnityProbe CanvasProbe:
+        /// FindObjectsByType and FindObjectsOfType with Exclude or without the flag, and
+        /// FindFirstObjectByType, return a disabled Canvas and a disabled MonoBehaviour).
+        public static IEnumerable<UnityEngine.Object> SceneObjects(Type type, bool includeInactive, FindObjectsSortMode sortMode)
+        {
+            var results = new List<UnityEngine.Object>();
+            bool gameObjects = type.IsAssignableFrom(typeof(GameObject));
+            bool components = type == typeof(UnityEngine.Object) || typeof(Component).IsAssignableFrom(type) || type.IsInterface;
+            // Whether a concrete component class matches: the same few classes recur thousands of times.
+            var matches = new Dictionary<Type, bool>();
+            foreach (var go in Collect(activeOnly: !includeInactive))
+            {
+                if (gameObjects) results.Add(go.Managed);
+                if (!components) continue;
+                foreach (var c in go.Components)
+                {
+                    // A missing script has no object to find.
+                    if (c is null or MissingScript) continue;
+                    var ct = c.GetType();
+                    if (!matches.TryGetValue(ct, out bool match)) matches[ct] = match = type.IsAssignableFrom(ct);
+                    if (!match) continue;
+                    results.Add(c);
+                }
+            }
+            if (sortMode == FindObjectsSortMode.InstanceID)
+                results.Sort((a, b) => a.GetInstanceID().CompareTo(b.GetInstanceID()));
+            return results;
+        }
+
+        /// GameObject.Find: by name among active objects, or by '/'-separated path from a root.
+        public static GameObject FindGameObject(string name)
+        {
+            if (string.IsNullOrEmpty(name)) return null;
+            if (name.Contains('/'))
+            {
+                var parts = name.TrimStart('/').Split('/');
+                bool fromRoot = name.StartsWith('/');
+                foreach (var go in ActiveGameObjects())
+                {
+                    if (fromRoot && go.Transform.Parent != null) continue;
+                    if (go.Name != parts[0]) continue;
+                    var t = FindPath(go.Transform, parts, 1);
+                    if (t != null && t.GameObject.ActiveInHierarchy) return (GameObject)t.GameObject.Managed;
+                }
+                return null;
+            }
+            foreach (var go in ActiveGameObjects())
+                if (go.Name == name) return (GameObject)go.Managed;
+            return null;
+        }
+
+        /// Transform.Find semantics: each path segment names a direct child.
+        public static TransformNative FindPath(TransformNative from, string[] parts, int index)
+        {
+            if (index == parts.Length) return from;
+            foreach (var child in from.Children)
+            {
+                if (child.Name != parts[index] && child.GameObject.Name != parts[index]) continue;
+                var found = FindPath(child, parts, index + 1);
+                if (found != null) return found;
+            }
+            return null;
+        }
+    }
+}

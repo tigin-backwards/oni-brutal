@@ -3,8 +3,8 @@
 Unity's immediate-mode GUI: `MonoBehaviour.OnGUI`, `Event`, `GUI`, `GUILayout`,
 `GUILayoutUtility`, `GUIUtility`, `GUIContent`, `GUIStyle`, `GUIStyleState`, `GUISkin`,
 `GUISettings`, `TextEditor`, and the internal `GUIClip`. The code lives in
-`src/OniBrutal.UnityEngine/IMGUI/`, with engine-side services in the namespace
-`OniBrutal.Engine.IMGUI`.
+`src/OniMoono.UnityEngine/IMGUI/`, with engine-side services in the namespace
+`OniMoono.Engine.IMGUI`.
 
 Where the game uses it:
 - **Debug tools** in `Assembly-CSharp-firstpass`.
@@ -34,15 +34,15 @@ also use members the engine keeps internal.
 
 Other engine code calls these, so they must keep working. Their names may change if you update
 the callers:
-- `OniBrutal.Engine.IMGUI.GUIManager.Install()`: the host calls it once at startup
-  (`src/OniBrutal.Host/Player.cs`).
+- `OniMoono.Engine.IMGUI.GUIManager.Install()`: the host calls it once at startup
+  (`src/OniMoono.Host/Player.cs`).
 - `GUIManager.Register(BehaviourNative)` and `Unregister(BehaviourNative)`: called when a
   behaviour becomes enabled or disabled (`Engine/BehaviourManager.cs`).
   - A behaviour takes part in IMGUI when its script declares an `OnGUI` method, of any
     visibility.
   - `BehaviourNative.Script.OnGUI` calls the method.
 - `UnityEngine.Event.Enqueue(Event)` (internal): the platform layer queues one event per input
-  occurrence (`src/OniBrutal.Desktop/GlfwPlatform.cs`, `InputStateFeed`).
+  occurrence (`src/OniMoono.Desktop/GlfwPlatform.cs`, `InputStateFeed`).
   - A key press arrives as a `KeyDown` with its key code, followed by a second `KeyDown` with
     `KeyCode.None` and the typed character.
   - Mouse positions are in GUI coordinates: origin at the top left, y downwards.
@@ -142,7 +142,7 @@ absolute and clip-local coordinates, as Unity's documentation for the equivalent
 
 ### Dispatch of OnGUI
 
-These rules are pinned by tests in `tests/OniBrutal.UnityEngine.Tests/IMGUITests.cs`.
+These rules are pinned by tests in `tests/OniMoono.UnityEngine.Tests/IMGUITests.cs`.
 
 **Each frame:**
 1. For every queued input event, in order, the event is sent to the behaviours.
@@ -1029,7 +1029,7 @@ covered.
 
 ## Tests
 
-`tests/OniBrutal.UnityEngine.Tests/IMGUITests.cs` already pins the rules marked "Test" above.
+`tests/OniMoono.UnityEngine.Tests/IMGUITests.cs` already pins the rules marked "Test" above.
 Keep every assertion. You may change the test setup lines that name engine internals, such as
 `GUIManager.Install()`, `GUIManager.Reset()`, `GUIStateData.Reset()` and `Event.Enqueue`, to
 match your design. Add tests for these rules:

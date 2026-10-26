@@ -51,7 +51,7 @@ namespace E2eDriver
 
         static JToken Ping()
         {
-            bool ours = AppDomain.CurrentDomain.GetAssemblies().Any(x => x.GetName().Name.StartsWith("OniBrutal", StringComparison.Ordinal));
+            bool ours = AppDomain.CurrentDomain.GetAssemblies().Any(x => x.GetName().Name.StartsWith("OniMoono", StringComparison.Ordinal) || x.GetName().Name.StartsWith("OniBrutal", StringComparison.Ordinal));
             return new JObject
             {
                 ["driver"] = Driver.Version,

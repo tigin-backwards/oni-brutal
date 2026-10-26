@@ -1,0 +1,446 @@
+using System;
+using System.Collections.Generic;
+using System.Reflection;
+using System.Reflection.Emit;
+using System.Threading;
+using System.Threading.Tasks;
+using HarmonyLib;
+using Unity.Collections;
+using UnityEngine;
+
+namespace OniMoono.GameTweaks
+{
+    /// Game tweak `fast-anim-batches` (opt-in). Every frame KAnimBatchManager.UpdateDirty walks
+    /// the visible batch sets, and each batch with dirty controllers writes, per dirty
+    /// controller and in order: its instance data (frame, position, transform, colours: 112
+    /// bytes into the batch's data texture), its symbol instance block (into the batch's symbol
+    /// texture, when its version changed), then applies its symbol overrides (game code with side
+    /// effects: SymbolOverrideController, FaceGraph, the batch's atlases and property block) and
+    /// writes the override block. Gluttony: about 1.9 ms a frame on Linux, spent reading
+    /// scattered controllers and copying blocks.
+    ///
+    /// The tweak does the first two writes for every dirty batch beforehand, on worker threads
+    /// (one batch to a worker at a time, the main thread waiting), then lets the game's loop run
+    /// as before, with those two calls replaced by a check that skips a controller already
+    /// written. The override block write, which must follow the controller's own override
+    /// application, is answered in the loop (written or not, by the game's own slot test) and
+    /// its copy made after the loop, again on workers. Everything else (applying overrides,
+    /// texture creation, Apply, which only marks a texture changed, the dirty bookkeeping) runs
+    /// in the game's own order on the main thread. Each batch's writes touch only its own
+    /// textures and slots, and the controllers registered with it (a controller is in one batch).
+    /// What the writes read (frame, visibility, position, transforms, the symbol instance and
+    /// override blocks) is not changed by applying another controller's overrides, so writing
+    /// them earlier or later gives the same bytes. The engine's transform caches are safe for
+    /// concurrent readers.
+    ///
+    /// Written on the main thread in the game's order as before: batches being set up (Init),
+    /// UI batches (their transform reads UI layout), controllers that are not exactly a
+    /// KBatchedAnimController, and those whose position comes from a delegate other than
+    /// KBatchedAnimTracker's. Frames with few dirty controllers are left to the game. If another
+    /// Harmony owner patches any method on the write path, the tweak stays off.
+    ///
+    /// With ONI_TWEAK_VERIFY=1 each skipped write is redone at its original place into scratch
+    /// memory and compared byte for byte with what the worker wrote, the symbol slot's version is
+    /// checked against the controller's, a written controller the game's loop never reached
+    /// counts as a mismatch, and each override block written after the loop must still have the
+    /// version it had when the loop reached it. Gluttony (Linux, stopwatch, steady windows):
+    /// 1.92–2.01 → 1.49–1.65 ms a frame; what stays on the main thread is mostly applying the
+    /// overrides (SymbolOverrideController, FaceGraph), which is game logic with side effects.
+    public static class FastAnimBatches
+    {
+        public const string Name = "fast-anim-batches";
+
+        const int InstanceBytes = 112;
+        /// Below this many dirty controllers in a frame the game's loop runs alone.
+        const int MinParallel = 128;
+
+        static readonly bool verify = Environment.GetEnvironmentVariable("ONI_TWEAK_VERIFY") == "1";
+        static readonly bool timing = Environment.GetEnvironmentVariable("ONI_TWEAK_TIMING") == "1";
+        static readonly bool serialOnly = Environment.GetEnvironmentVariable("ONI_FAST_ANIM_BATCHES_SERIAL") == "1";
+
+        static readonly AccessTools.FieldRef<KAnimBatchManager, List<BatchSet>> activeBatchSets =
+            AccessTools.FieldRefAccess<KAnimBatchManager, List<BatchSet>>("activeBatchSets");
+        static readonly AccessTools.FieldRef<KAnimBatch, bool> needsWrite = AccessTools.FieldRefAccess<KAnimBatch, bool>("needsWrite");
+        static readonly AccessTools.FieldRef<KAnimBatch, List<int>> dirtySet = AccessTools.FieldRefAccess<KAnimBatch, List<int>>("dirtySet");
+        static readonly AccessTools.FieldRef<KAnimBatch, KAnimBatch.SymbolInstanceSlot[]> symbolSlots =
+            AccessTools.FieldRefAccess<KAnimBatch, KAnimBatch.SymbolInstanceSlot[]>("symbolInstanceSlots");
+
+        static readonly MethodInfo writeInstanceMethod = AccessTools.Method(typeof(KAnimBatch), "WriteBatchedAnimInstanceData");
+        static readonly MethodInfo writeSymbolsMethod = AccessTools.Method(typeof(KAnimBatch), "WriteSymbolInstanceData");
+        static readonly MethodInfo writeOverridesMethod = AccessTools.Method(typeof(KAnimBatch), "WriteSymbolOverrideInfoTex");
+        static readonly AccessTools.FieldRef<KAnimBatch, KAnimBatch.SymbolOverrideInfoSlot[]> overrideSlots =
+            AccessTools.FieldRefAccess<KAnimBatch, KAnimBatch.SymbolOverrideInfoSlot[]>("symbolOverrideInfoSlots");
+        static readonly Action<KAnimBatch, int, KAnimConverter.IAnimConverter, NativeArray<byte>> writeInstance =
+            AccessTools.MethodDelegate<Action<KAnimBatch, int, KAnimConverter.IAnimConverter, NativeArray<byte>>>(writeInstanceMethod);
+        static readonly Func<KAnimBatch, int, KAnimConverter.IAnimConverter, NativeArray<byte>, bool> writeSymbols =
+            AccessTools.MethodDelegate<Func<KAnimBatch, int, KAnimConverter.IAnimConverter, NativeArray<byte>, bool>>(writeSymbolsMethod);
+        static readonly Func<KAnimBatch, int, KAnimConverter.IAnimConverter, NativeArray<byte>, bool> writeOverrides =
+            AccessTools.MethodDelegate<Func<KAnimBatch, int, KAnimConverter.IAnimConverter, NativeArray<byte>, bool>>(writeOverridesMethod);
+        static readonly MethodInfo trackerPosition = AccessTools.Method(typeof(KBatchedAnimTracker), "MyAnimGetPosition");
+
+        /// A batch's writes done ahead for the current pass, by controller index.
+        sealed class Work
+        {
+            public KAnimBatch Batch;
+            public int Pass;
+            public int[] DonePass = new int[0];
+            public KAnimConverter.IAnimConverter[] Controller = new KAnimConverter.IAnimConverter[0];
+            public bool[] SymbolsWritten = new bool[0];
+            /// Override blocks to write after the loop: index, controller, its version then.
+            public int DeferPass;
+            public NativeArray<byte> OverrideData;
+            public readonly List<(int Index, KAnimConverter.IAnimConverter Controller, int Version)> Deferred = new List<(int, KAnimConverter.IAnimConverter, int)>();
+
+            public void Fit(int count)
+            {
+                if (DonePass.Length >= count) return;
+                int n = Math.Max(count, DonePass.Length * 2);
+                Array.Resize(ref DonePass, n);
+                Array.Resize(ref Controller, n);
+                Array.Resize(ref SymbolsWritten, n);
+            }
+        }
+
+        /// By KAnimBatch.id (sequential from 0).
+        static Work[] works = new Work[256];
+        static readonly List<Work> pending = new List<Work>();
+        static int pass;
+        static bool checkedPatches, off;
+        static int passesSincePatchCheck;
+        static long written, consumed, mismatches, checks, frames, parallelFrames;
+        static long ticksTotal, ticksParallel;
+        static long started;
+        // Verify mode's scratch for redone writes (main thread only): a texture's memory, as
+        // the game makes its NativeArrays (64 KB).
+        static Texture2D scratchTexture;
+        static NativeArray<byte> scratch;
+
+        static readonly Action<int> body = Body;
+        static readonly List<Work> deferring = new List<Work>();
+        static readonly Action<int> deferBody = DeferBody;
+        static long deferred;
+
+        public static void Install(Harmony harmony)
+        {
+            if (writeInstanceMethod == null || writeSymbolsMethod == null || writeOverridesMethod == null || trackerPosition == null)
+                throw new InvalidOperationException($"{Name}: the game's batch write methods were not found");
+            harmony.Patch(AccessTools.Method(typeof(KAnimBatch), nameof(KAnimBatch.UpdateDirty)),
+                transpiler: new HarmonyMethod(typeof(FastAnimBatches), nameof(Transpile)));
+            harmony.Patch(AccessTools.Method(typeof(KAnimBatchManager), nameof(KAnimBatchManager.UpdateDirty)),
+                prefix: new HarmonyMethod(typeof(FastAnimBatches), nameof(Prefix)) { priority = Priority.Last },
+                postfix: new HarmonyMethod(typeof(FastAnimBatches), nameof(Postfix)) { priority = Priority.First });
+        }
+
+        /// KAnimBatch.UpdateDirty: its two per-controller write calls go through WriteInstance
+        /// and WriteSymbols (same arguments, the batch first).
+        static IEnumerable<CodeInstruction> Transpile(IEnumerable<CodeInstruction> instructions)
+        {
+            int found = 0;
+            foreach (var i in instructions)
+            {
+                if (i.Calls(writeInstanceMethod)) { i.opcode = OpCodes.Call; i.operand = AccessTools.Method(typeof(FastAnimBatches), nameof(WriteInstance)); found++; }
+                else if (i.Calls(writeSymbolsMethod)) { i.opcode = OpCodes.Call; i.operand = AccessTools.Method(typeof(FastAnimBatches), nameof(WriteSymbols)); found++; }
+                else if (i.Calls(writeOverridesMethod)) { i.opcode = OpCodes.Call; i.operand = AccessTools.Method(typeof(FastAnimBatches), nameof(WriteOverrides)); found++; }
+                yield return i;
+            }
+            if (found != 3) throw new InvalidOperationException($"{Name}: expected the three write calls in KAnimBatch.UpdateDirty, found {found}");
+        }
+
+        /// The methods whose code runs on the workers: patched by anyone else, the tweak is off.
+        static IEnumerable<MethodBase> WritePath()
+        {
+            yield return AccessTools.Method(typeof(KAnimBatch), nameof(KAnimBatch.UpdateDirty));
+            yield return writeInstanceMethod;
+            yield return writeSymbolsMethod;
+            yield return writeOverridesMethod;
+            yield return AccessTools.Method(typeof(SymbolOverrideInfoGpuData), nameof(SymbolOverrideInfoGpuData.WriteToTexture));
+            yield return AccessTools.PropertyGetter(typeof(KBatchedAnimController), "symbolOverrideInfoGpuData");
+            yield return AccessTools.Method(typeof(KBatchedAnimInstanceData), nameof(KBatchedAnimInstanceData.WriteToTexture));
+            yield return AccessTools.Method(typeof(SymbolInstanceGpuData), nameof(SymbolInstanceGpuData.WriteToTexture));
+            var c = typeof(KBatchedAnimController);
+            foreach (var name in new[] { "GetCurrentFrameIndex", "IsVisible", "GetCurrentNumFrames", "GetPostProcessingParams", "GetFirstFrameIndex",
+                         "GetPositionData", "GetBatchInstanceData", "GetSymbolTransform", "GetSymbolLocalTransform" })
+                yield return AccessTools.Method(c, name);
+            yield return AccessTools.Method(c, nameof(KBatchedAnimController.GetTransformMatrix), Type.EmptyTypes);
+            yield return AccessTools.PropertyGetter(c, "symbolInstanceGpuData");
+            var b = typeof(KAnimControllerBase);
+            yield return AccessTools.PropertyGetter(b, nameof(KAnimControllerBase.PositionIncludingOffset));
+            yield return AccessTools.PropertyGetter(b, nameof(KAnimControllerBase.Offset));
+            yield return AccessTools.Method(b, nameof(KAnimControllerBase.GetPivotSymbolPosition));
+            yield return trackerPosition;
+            yield return AccessTools.Method(typeof(TransformExtensions), nameof(TransformExtensions.GetPosition));
+        }
+
+        static void CheckPatches()
+        {
+            foreach (var method in WritePath())
+            {
+                if (method == null) { Disable("a write-path method was not found"); return; }
+                var info = Harmony.GetPatchInfo(method);
+                if (info == null) continue;
+                foreach (var owner in info.Owners)
+                    if (owner != "OniMoono.Host.GameTweaks") { Disable($"{owner} patches {method.DeclaringType?.Name}.{method.Name}"); return; }
+            }
+        }
+
+        static void Disable(string why)
+        {
+            off = true;
+            global::Debug.Log($"{Name}: off ({why})");
+        }
+
+        static void Prefix(KAnimBatchManager __instance, bool __runOriginal)
+        {
+            if (timing) started = System.Diagnostics.Stopwatch.GetTimestamp();
+            if (!__runOriginal || !__instance.isReady || serialOnly) return;
+            // Mods patch while loading; the check is repeated now and then for late ones.
+            if (!checkedPatches || ++passesSincePatchCheck >= 3000)
+            {
+                checkedPatches = true;
+                passesSincePatchCheck = 0;
+                if (!off) CheckPatches();
+            }
+            if (off) return;
+            frames++;
+            pass++;
+            pending.Clear();
+            int dirty = 0;
+            foreach (var set in activeBatchSets(__instance))
+            {
+                if (!set.dirty) continue;
+                for (int i = 0; i < set.batchCount; i++)
+                {
+                    var batch = set.GetBatch(i);
+                    if (!needsWrite(batch) || batch.dataTex == null || !batch.isSetup || batch.symbolInstanceTex == null
+                        || batch.materialType == KAnimBatchGroup.MaterialType.UI) continue;
+                    var ds = dirtySet(batch);
+                    if (ds.Count == 0) continue;
+                    var work = WorkOf(batch);
+                    if (work.Pass == pass) continue; // a set listed twice: its second walk finds it clean
+                    work.Pass = pass;
+                    work.Fit(batch.size);
+                    pending.Add(work);
+                    dirty += ds.Count;
+                }
+            }
+            if (dirty < MinParallel || pending.Count < 2)
+            {
+                pending.Clear();
+                return;
+            }
+            parallelFrames++;
+            long t0 = timing ? System.Diagnostics.Stopwatch.GetTimestamp() : 0;
+            Parallel.For(0, pending.Count, body);
+            if (timing) ticksParallel += System.Diagnostics.Stopwatch.GetTimestamp() - t0;
+        }
+
+        static void Postfix()
+        {
+            if (pending.Count > 0)
+            {
+                // The override blocks the loop left: each batch's on one worker, then checked.
+                if (deferring.Count > 0)
+                {
+                    long t1 = timing ? System.Diagnostics.Stopwatch.GetTimestamp() : 0;
+                    if (deferring.Count == 1) DeferBody(0);
+                    else Parallel.For(0, deferring.Count, deferBody);
+                    if (timing) ticksParallel += System.Diagnostics.Stopwatch.GetTimestamp() - t1;
+                    if (verify) VerifyDeferred();
+                    deferring.Clear();
+                }
+                if (verify)
+                {
+                    // Every controller written ahead must have been reached by the game's loop.
+                    foreach (var work in pending)
+                        for (int i = 0; i < work.DonePass.Length; i++)
+                            if (work.DonePass[i] == work.Pass)
+                            {
+                                work.DonePass[i] = 0;
+                                global::Debug.Log($"{Name}: a controller written ahead was not reached by the game's loop ({++mismatches})");
+                            }
+                    if (frames % 600 == 0)
+                        global::Debug.Log($"{Name}: {written} written ahead, {consumed} skipped in the loop, {deferred} override blocks written after it, {checks} checks, {mismatches} mismatches");
+                }
+                pending.Clear();
+            }
+            if (timing)
+            {
+                ticksTotal += System.Diagnostics.Stopwatch.GetTimestamp() - started;
+                if (++timedFrames % 600 == 0)
+                {
+                    double ms = 1000.0 / System.Diagnostics.Stopwatch.Frequency / 600;
+                    global::Debug.Log($"{Name}: timing {ticksTotal * ms:F3} ms a frame, workers {ticksParallel * ms:F3} ms, {parallelFrames} of {frames} frames in parallel");
+                    ticksTotal = ticksParallel = 0;
+                }
+            }
+        }
+
+        /// KAnimBatch.WriteSymbolOverrideInfoTex, in a frame the workers took part in: when the
+        /// slot is stale (the game would write), the block is written after the loop instead
+        /// and the game's answer (written) returned now. The texture's Apply that follows only
+        /// marks it changed; nothing reads its memory before the frame is drawn.
+        static bool WriteOverrides(KAnimBatch batch, int index, KAnimConverter.IAnimConverter controller, NativeArray<byte> data)
+        {
+            if (pending.Count == 0) return writeOverrides(batch, index, controller, data);
+            var slot = overrideSlots(batch)[index];
+            var gpu = controller.symbolOverrideInfoGpuData;
+            if (slot.symbolOverrideInfo == gpu && slot.dataVersion == gpu.version) return false;
+            var work = WorkOf(batch);
+            if (work.DeferPass != pass)
+            {
+                work.DeferPass = pass;
+                work.Deferred.Clear();
+                work.OverrideData = data;
+                deferring.Add(work);
+            }
+            work.Deferred.Add((index, controller, gpu.version));
+            deferred++;
+            return true;
+        }
+
+        static void DeferBody(int index)
+        {
+            var work = deferring[index];
+            foreach (var (i, controller, _) in work.Deferred) writeOverrides(work.Batch, i, controller, work.OverrideData);
+        }
+
+        /// Each block written after the loop is the one the game would have written in it: its
+        /// version unchanged since, and now current in its slot.
+        static void VerifyDeferred()
+        {
+            foreach (var work in deferring)
+            {
+                var slots = overrideSlots(work.Batch);
+                foreach (var (i, controller, version) in work.Deferred)
+                {
+                    checks++;
+                    var gpu = controller.symbolOverrideInfoGpuData;
+                    if (gpu.version != version || slots[i].symbolOverrideInfo != gpu || slots[i].dataVersion != version)
+                        global::Debug.Log($"{Name}: override block of {controller.GetName()} changed after the game's loop reached it ({++mismatches})");
+                }
+            }
+        }
+
+        static long timedFrames;
+
+        static Work WorkOf(KAnimBatch batch)
+        {
+            int id = batch.id;
+            if (id >= works.Length) Array.Resize(ref works, Math.Max(id + 1, works.Length * 2));
+            var work = works[id];
+            if (work == null || work.Batch != batch) works[id] = work = new Work { Batch = batch };
+            return work;
+        }
+
+        /// One batch's instance and symbol writes, for its dirty controllers in the game's order;
+        /// any it cannot write here are left to the game's loop.
+        static void Body(int index)
+        {
+            var work = pending[index];
+            var batch = work.Batch;
+            var data = batch.dataTex.GetDataPointer();
+            var symbols = batch.symbolInstanceTex.GetDataPointer();
+            var controllers = batch.Controllers;
+            int count = 0;
+            foreach (int i in dirtySet(batch))
+            {
+                var c = controllers[i];
+                // The game's loop skips these itself (null or destroyed).
+                if (c == null || !(c as UnityEngine.Object != null)) continue;
+                if (!(c is KBatchedAnimController k) || k.GetType() != typeof(KBatchedAnimController)
+                    || k.materialType == KAnimBatchGroup.MaterialType.UI || !PlainPosition(k.getPositionDataFunctionInUse)) continue;
+                try
+                {
+                    writeInstance(batch, i, c, data);
+                    work.SymbolsWritten[i] = writeSymbols(batch, i, c, symbols);
+                }
+                catch (Exception)
+                {
+                    // Left to the game's loop, which throws at the same place.
+                    break;
+                }
+                work.Controller[i] = c;
+                work.DonePass[i] = work.Pass;
+                count++;
+            }
+            Interlocked.Add(ref written, count);
+        }
+
+        static bool PlainPosition(Func<Vector4> f)
+        {
+            if (f == null) return true;
+            foreach (var d in f.GetInvocationList())
+                if (d.Method != trackerPosition) return false;
+            return true;
+        }
+
+        static Work Done(KAnimBatch batch, int index, KAnimConverter.IAnimConverter controller)
+        {
+            if (pending.Count == 0) return null;
+            int id = batch.id;
+            if (id >= works.Length) return null;
+            var work = works[id];
+            if (work == null || work.Batch != batch || work.Pass != pass || index >= work.DonePass.Length
+                || work.DonePass[index] != pass || !ReferenceEquals(work.Controller[index], controller)) return null;
+            return work;
+        }
+
+        /// KAnimBatch.WriteBatchedAnimInstanceData, skipped when a worker wrote it this pass.
+        static void WriteInstance(KAnimBatch batch, int index, KAnimConverter.IAnimConverter controller, NativeArray<byte> data)
+        {
+            var work = Done(batch, index, controller);
+            if (work == null)
+            {
+                writeInstance(batch, index, controller, data);
+                return;
+            }
+            consumed++;
+            if (verify)
+            {
+                if (scratchTexture == null)
+                {
+                    scratchTexture = new Texture2D(64, 64, TextureFormat.RGBAFloat, false);
+                    scratch = scratchTexture.GetRawTextureData<byte>();
+                }
+                controller.GetBatchInstanceData().WriteToTexture(scratch, 0, index);
+                checks++;
+                if (!Same(scratch, 0, data, index * InstanceBytes, InstanceBytes))
+                    global::Debug.Log($"{Name}: instance data of {controller.GetName()} differs from the game's write ({++mismatches})");
+            }
+        }
+
+        /// KAnimBatch.WriteSymbolInstanceData, answered from the worker's write this pass. The
+        /// skip marks the controller reached (the symbol write follows the instance write).
+        static bool WriteSymbols(KAnimBatch batch, int index, KAnimConverter.IAnimConverter controller, NativeArray<byte> data)
+        {
+            var work = Done(batch, index, controller);
+            if (work == null) return writeSymbols(batch, index, controller, data);
+            work.DonePass[index] = 0;
+            work.Controller[index] = null;
+            if (verify)
+            {
+                // The game would find the slot current now, and the texture holds the block.
+                var slot = symbolSlots(batch)[index];
+                var gpu = controller.symbolInstanceGpuData;
+                checks++;
+                if (slot.symbolInstanceData != gpu || slot.dataVersion != gpu.version)
+                    global::Debug.Log($"{Name}: symbol block of {controller.GetName()} changed after the worker's write ({++mismatches})");
+                int size = batch.group.data.maxSymbolsPerBuild * 8 * 4;
+                if (size <= scratch.Length)
+                {
+                    gpu.WriteToTexture(scratch, 0, index);
+                    if (!Same(scratch, 0, data, index * size, size))
+                        global::Debug.Log($"{Name}: symbol block of {controller.GetName()} differs from the game's write ({++mismatches})");
+                }
+            }
+            return work.SymbolsWritten[index];
+        }
+
+        static bool Same(NativeArray<byte> a, int aStart, NativeArray<byte> b, int bStart, int length)
+        {
+            for (int i = 0; i < length; i++)
+                if (a[aStart + i] != b[bStart + i]) return false;
+            return true;
+        }
+    }
+}

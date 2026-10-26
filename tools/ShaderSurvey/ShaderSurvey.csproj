@@ -4,6 +4,6 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="../../src/OniBrutal.Assets/OniBrutal.Assets.csproj" />
+    <ProjectReference Include="../../src/OniMoono.Assets/OniMoono.Assets.csproj" />
   </ItemGroup>
 </Project>

@@ -6,13 +6,13 @@
 set -euo pipefail
 source "$(dirname "$0")/env.sh"
 config="${1:-release}"
-dotnet build "$root/src/OniBrutal.Host" -c "$config" -r win-x64 --self-contained false -v q -nologo
-dotnet build "$root/src/OniBrutal.Restarter" -c "$config" -r win-x64 --self-contained false -v q -nologo
+dotnet build "$root/src/OniMoono.Host" -c "$config" -r win-x64 --self-contained false -v q -nologo
+dotnet build "$root/src/OniMoono.Restarter" -c "$config" -r win-x64 --self-contained false -v q -nologo
 out="$root/out/win"
 rm -rf "$out"; mkdir -p "$out/host" "$out/steamstub"
-cp -r "$root/out/bin/OniBrutal.Host/${config}_win-x64/." "$out/host/"
+cp -r "$root/out/bin/OniMoono.Host/${config}_win-x64/." "$out/host/"
 # The host from before it was named OniMoono (OniBrutal.exe), should the build folder still hold it.
 rm -f "$out/host/Restarter" "$out/host/FacadeGen."* "$out/host/OniBrutal."{exe,dll,pdb,deps.json,runtimeconfig.json}
-cp "$root/out/bin/OniBrutal.Restarter/${config}_win-x64/Restarter."{exe,dll,runtimeconfig.json} "$out/host/"
+cp "$root/out/bin/OniMoono.Restarter/${config}_win-x64/Restarter."{exe,dll,runtimeconfig.json} "$out/host/"
 python3 -I "$root/tools/SteamStub/gen.py" "$root/src/ThirdParty/Steamworks.NET/Runtime/autogen/NativeMethods.cs" "$out/steamstub/steam_api64.dll"
 echo "$out"

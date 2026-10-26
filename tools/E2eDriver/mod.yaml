@@ -1,3 +1,3 @@
 title: "E2eDriver"
-description: "oni-brutal play-test driver: UI queries, state reads and camera control over a local JSON-lines socket"
+description: "Moono play-test driver: UI queries, state reads and camera control over a local JSON-lines socket"
 staticID: E2eDriver

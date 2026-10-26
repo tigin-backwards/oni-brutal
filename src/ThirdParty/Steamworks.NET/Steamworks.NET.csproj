@@ -23,6 +23,6 @@
     <DefineConstants>$(DefineConstants);$(SteamworksPlatform);UNITY_STANDALONE;UNITY_64;UNITY_5_3_OR_NEWER;UNITY_2017_1_OR_NEWER;UNITY_2020_1_OR_NEWER;UNITY_2021_1_OR_NEWER;UNITY_2022_1_OR_NEWER;UNITY_6000_0_OR_NEWER</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="../../OniBrutal.UnityEngine/OniBrutal.UnityEngine.csproj" />
+    <ProjectReference Include="../../OniMoono.UnityEngine/OniMoono.UnityEngine.csproj" />
   </ItemGroup>
 </Project>

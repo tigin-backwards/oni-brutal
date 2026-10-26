@@ -15,13 +15,13 @@
 //                               slot must be accounted for; every vertex input of the attribute
 //                               table must be the attribute the MSL declares for its channel
 //   compare-metal DATADIR       Metal parameters against GLCore's (MetalCompare.cs)
-// It reads the shipped release type trees (OniBrutal.Assets), so it needs no engine or device.
+// It reads the shipped release type trees (OniMoono.Assets), so it needs no engine or device.
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
-using OniBrutal.Assets.Files;
-using OniBrutal.Assets.Shaders;
-using OniBrutal.Assets.TypeTrees;
+using OniMoono.Assets.Files;
+using OniMoono.Assets.Shaders;
+using OniMoono.Assets.TypeTrees;
 using ShaderSurvey;
 
 if (args.Length < 2)

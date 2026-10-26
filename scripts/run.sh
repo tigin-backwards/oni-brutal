@@ -17,4 +17,4 @@ mkdir -p "$home/config" "$home/cache"
 export XDG_CONFIG_HOME="$home/config" XDG_CACHE_HOME="$home/cache"
 tweaks=(--game-tweak none --splash none)
 [ "${ONI_TWEAK_SETTINGS:-}" = 1 ] && tweaks=()
-exec "$root/scripts/contain.sh" "$root/out/bin/OniBrutal.Host/${ONI_CONFIG:-debug}/OniMoono" --game "$game" "${tweaks[@]}" "$@"
+exec "$root/scripts/contain.sh" "$root/out/bin/OniMoono.Host/${ONI_CONFIG:-debug}/OniMoono" --game "$game" "${tweaks[@]}" "$@"

@@ -38,16 +38,16 @@ only), so it is out of scope until Linux is at parity.
 ## 2. Process and assembly structure
 
 ```
-OniBrutal.Host (exe OniMoono)             entry point; ALC setup; main loop; CLI flags
+OniMoono.Host (exe OniMoono)             entry point; ALC setup; main loop; CLI flags
  ├─ UnityEngine.*Module.dll  (generated)  type-forwarding facades, one per Unity module name
  │     └──forwards to──┐
- ├─ OniBrutal.UnityEngine.dll             THE engine API: every public UnityEngine.* / UnityEngine.*.*
+ ├─ OniMoono.UnityEngine.dll             THE engine API: every public UnityEngine.* / UnityEngine.*.*
  │     │                                  type the game, uGUI, TMP, Timeline and FMODUnity reference
- │     ├─ OniBrutal.Assets.dll            Unity file formats: SerializedFile, UnityFS, type trees,
+ │     ├─ OniMoono.Assets.dll            Unity file formats: SerializedFile, UnityFS, type trees,
  │     │                                  LZ4/LZMA, object readers, managed-layout builder. No engine types.
- │     ├─ OniBrutal.Graphics.dll          GL 4.5 core device: buffers, textures, programs, state,
+ │     ├─ OniMoono.Graphics.dll          GL 4.5 core device: buffers, textures, programs, state,
  │     │                                  framebuffers; Unity shader-blob runtime. No engine types.
- │     ├─ OniBrutal.Platform.dll          GLFW window, GL context, input events, clipboard, cursors,
+ │     ├─ OniMoono.Platform.dll          GLFW window, GL context, input events, clipboard, cursors,
  │     │                                  display modes, timing.
  │     └─ BRUTAL packages                 Ahwoo.BRUTAL.{Core,Glfw,OpenGl,Numerics,Stb,…}
  └─ game assemblies from Managed/ (unmodified on disk)
@@ -55,7 +55,7 @@ OniBrutal.Host (exe OniMoono)             entry point; ALC setup; main loop; CLI
 
 **Why facades.** Game IL binds to `[UnityEngine.CoreModule]UnityEngine.GameObject`,
 `[UnityEngine.UIModule]UnityEngine.Canvas`, and so on. CoreCLR follows `TypeForwardedTo`, so a
-facade named `UnityEngine.CoreModule` that forwards to `OniBrutal.UnityEngine` binds every
+facade named `UnityEngine.CoreModule` that forwards to `OniMoono.UnityEngine` binds every
 reference exactly as compiled, while the implementation lives in one assembly with ordinary
 `internal` access between subsystems (Unity itself relies on `InternalsVisibleTo` between its
 modules; we avoid needing that). The facade sources are **generated** by `tools/FacadeGen` from
@@ -67,7 +67,7 @@ completeness.
 Our facades carry the same names and version `0.0.0.0`.
 
 **Load context.** The game runs in the **default** AssemblyLoadContext, so its `Type.GetType`,
-`Assembly.Load` and `AppDomain` queries behave as under Unity. `src/OniBrutal.Host/AssemblyPolicy.cs`
+`Assembly.Load` and `AppDomain` queries behave as under Unity. `src/OniMoono.Host/AssemblyPolicy.cs`
 resolves names the framework does not provide:
 
 1. Names in the .NET shared framework always win, so Mono's BCL copies in `Managed/` are never
@@ -135,7 +135,7 @@ past the boot checkpoint needs a Steam client logged in with an account that own
   at their defaults: a large colony (DeCrew, cycle 17628) lost all fifteen Duplicants within
   four cycles, its food and suit docks unreachable, where the original keeps it alive.
   **Resolved by a patch:** the host (`StateMachineSaveNames`) has the serializer use the names
-  the original player writes (`OniBrutal.Engine.MonoTypeNames`, each type argument's assembly
+  the original player writes (`OniMoono.Engine.MonoTypeNames`, each type argument's assembly
   taken from the game's own Mono class libraries in `Managed/` or the engine facades), so saves
   load fully in both players in both directions. Saves written by this player before the patch
   carry CoreCLR names; their state-machine parameters load at defaults once. Everything else in
@@ -153,7 +153,7 @@ past the boot checkpoint needs a Steam client logged in with an account that own
   (`KMod.Local.Subscribe`: `directoryName.GetHashCode()`). Left alone, the stamp differs at
   every launch, so `KMod.Manager` treats the mod as changed, asks for a restart and disables
   it. **Resolved by a patch:** the host (`ModVersionStamp`) uses the game's Harmony to replace
-  that one call with Mono's algorithm (`OniBrutal.Engine.MonoStringHash`, the .NET Framework
+  that one call with Mono's algorithm (`OniMoono.Engine.MonoStringHash`, the .NET Framework
   64-bit hash, checked against the original player with tools/UnityProbe). Stamps are then
   stable and equal to the original player's, so `mods.json` works in both players. This is
   one of the host's two changes to game code (with D1); game code's other `GetHashCode` calls stay
@@ -400,7 +400,7 @@ past the boot checkpoint needs a Steam client logged in with an account that own
   had one id, and the first element registered under it was the one every later bubble released
   (after an Oxy Coral's oxygen bubble, a Thermal Gas Fissure gave oxygen instead of natural
   gas). **Resolved by a patch** (`MonoValueTypeHashes`): that call computes Mono's hash
-  (`OniBrutal.Engine.MonoValueTypeHash`, starting from 0, so ids equal Mono's up to its
+  (`OniMoono.Engine.MonoValueTypeHash`, starting from 0, so ids equal Mono's up to its
   per-process start). This is the host's fourth change to game code (with D1, D3 and D11).
   **Scanned** (2026-10-23, Mono.Cecil over IL: `constrained.` or `box` before
   `object::GetHashCode`, `EqualityComparer<T>.GetHashCode` and `HashCode` over such a struct;
@@ -471,7 +471,7 @@ past the boot checkpoint needs a Steam client logged in with an account that own
   zero-extended (Mono's amd64 back end; -1 gives 4294967295). Unity's `Mathf.RoundToInt`,
   `FloorToInt`, `CeilToInt` and `Vector2Int`/`Vector3Int`'s follow conv.i4. The checked
   conversions (conv.ovf.*), `Convert.ToXxx` and `Color32` from a `Color` agree in both players.
-  **Resolved in** the engine's `Mathf` (`OniBrutal.Engine.MonoConvert`: the processor's
+  **Resolved in** the engine's `Mathf` (`OniMoono.Engine.MonoConvert`: the processor's
   truncating instructions through `Sse2`, an equivalent comparison elsewhere) and in
   `MonoConversions`: as a game assembly from `Managed/` or a mod's assembly loads, each
   unchecked conversion whose operand is a float (found by following the IL's stack types along
@@ -485,7 +485,7 @@ past the boot checkpoint needs a Steam client logged in with an account that own
   alternating without and with the rewrite gave 32.9 and 43.8 fps without, 37.5 and 39.7 with
   (another session loaded the machine between runs; the spread between runs of one build is
   wider than any difference); rewriting the game's assemblies at load takes 2.4 s, so the
-  images are kept in the player's cache folder (`OniBrutal/conversions`, by the image's hash
+  images are kept in the player's cache folder (`oni-moono/conversions`, by the image's hash
   and the host build) and later starts read them. A Harmony transpiler sees the call where the
   IL had the conversion: no mod assembly in the catalog names an unchecked `OpCodes.Conv_*`
   field (`Conv_I4` and the rest), and none of our transpilers does. Not covered: our own UI packages and the
@@ -516,7 +516,7 @@ past the boot checkpoint needs a Steam client logged in with an account that own
   `Managed/` (cached with it) and each mod's: every call of those methods (call, callvirt, and
   ldftn of `Directory`'s; a `DirectoryInfo` method's instance becomes the first parameter) calls
   the host's instead, which lists with .NET's own method (the same entries, paths and exceptions,
-  thrown as eagerly) and reorders (`OniBrutal.Engine.MonoDirectoryOrder`): a folder's results
+  thrown as eagerly) and reorders (`OniMoono.Engine.MonoDirectoryOrder`): a folder's results
   are read in full and sorted when first enumerated; a recursive one lists each folder alone (its
   `FileSystemEnumerable` reports the subfolders it would enter and does not), sorts its results,
   and queues its subfolders sorted, skipping one gone before its turn as .NET's walk does. A
@@ -671,7 +671,7 @@ past the boot checkpoint needs a Steam client logged in with an account that own
   an array, a constant and an event of a nested delegate, and transpiles a method by the field's
   Mono string.
 
-## 3. The engine API (`OniBrutal.UnityEngine`)
+## 3. The engine API (`OniMoono.UnityEngine`)
 
 ### 3.1 Surface rule
 
@@ -770,7 +770,7 @@ citing why.
 
 ### 3.3 Player loop
 
-One thread, Unity's order (*usage §1.3, §3.5*), driven by `OniBrutal.Host`:
+One thread, Unity's order (*usage §1.3, §3.5*), driven by `OniMoono.Host`:
 
 ```
 Initialization  time update (Time.*), pending scene-load completion
@@ -826,7 +826,7 @@ Coroutines are Unity's state machine: an `IEnumerator` is advanced immediately b
 
 ### 3.4 Serialization and assets
 
-**Readers (`OniBrutal.Assets`)** parse SerializedFile v22 (big-endian header, little-endian
+**Readers (`OniMoono.Assets`)** parse SerializedFile v22 (big-endian header, little-endian
 data), UnityFS bundles (LZMA, LZ4/LZ4HC block and blocks-info compression), `.resS`/`.resource`
 streaming, and resolve PPtrs (`fileID` → externals, `pathID`). Built-in files map to
 `OxygenNotIncluded_Data/Resources/`.
@@ -876,7 +876,7 @@ GLSL with relaxed default-uniform-block rules and re-deriving Unity's GL binding
 GL 4.5 is available on Linux drivers and on WSLg hardware via Mesa d3d12 (verified: GL 4.6 core
 on an RTX 3090 with `GALLIUM_DRIVER=d3d12`).)
 
-**Shader runtime (`OniBrutal.Graphics`).** From `SerializedShader`: properties, subshaders,
+**Shader runtime (`OniMoono.Graphics`).** From `SerializedShader`: properties, subshaders,
 passes, tags, render state (blend/ZTest/ZWrite/Cull/ColorMask/Stencil/Offset — each either a
 constant or a reference to a material property, e.g. `[_SrcAlpha]`), keyword space, and the
 platform-15 program blobs (LZ4). For each pass, variant selection matches Unity's
@@ -887,7 +887,7 @@ on first use and cached by (shader, pass, variant). Uniform binding follows the 
 matrices). Fixed-function GLSL helpers Unity injects (`#ifdef VERTEX`/`FRAGMENT` sections) are
 split exactly as Unity's GL device does.
 
-**Engine renderer (`OniBrutal.UnityEngine`, Rendering namespace).** Unity's built-in forward
+**Engine renderer (`OniMoono.UnityEngine`, Rendering namespace).** Unity's built-in forward
 renderer, restricted to what the game uses (*usage §1*):
 
 - Cameras render in ascending `depth`; per camera: `OnPreCull` → cull (layer mask, Renderer
@@ -1007,7 +1007,7 @@ merging is an optimisation we may add only where it cannot change the result).
 
 ### 3.6 Platform
 
-`OniBrutal.Platform` wraps `Brutal.Glfw`: one window with a GL 4.5 core context, vsync,
+`OniMoono.Platform` wraps `Brutal.Glfw`: one window with a GL 4.5 core context, vsync,
 resize, fullscreen/windowed modes (`Screen.*`), monitors/resolutions, DPI, keyboard
 (GLFW key → Unity `KeyCode`), text input (UTF-32 via our own char-callback handling where
 BRUTAL's 16-bit truncation would corrupt input), mouse buttons/position (bottom-left origin)
@@ -1145,9 +1145,9 @@ otherwise; a run home has its own), and the command line (`EffectiveOptions`). A
 with any `--game-tweak` value sets the whole set of tweaks for the run (`exact`, `all`, `none`,
 names, `-NAME`), `--splash moo|none` the splash, `--frame-stats` the frame stats. The start of the
 log names the file and each option with where it came from. The main menu's **Moono Tweaks**
-button, directly below Mods, opens a screen (`src/OniBrutal.GameTweaks/BrutalTweaksMenu.cs`) made
+button, directly below Mods, opens a screen (`src/OniMoono.GameTweaks/MoonoTweaksMenu.cs`) made
 of the game's own UI: the Mods screen's prefab instantiated inactive, its `ModsScreen` swapped for
-`BrutalTweaksScreen` before it wakes, and the menu's button prefab and style for the button. It
+`MoonoTweaksScreen` before it wakes, and the menu's button prefab and style for the button. It
 lists every option from that list with a toggle and a line on what it does, the tweaks that
 change gameplay labelled so, and rows the command line set dimmed and fixed; "Restart to apply"
 writes the file and restarts through `App.Restart` (the Restarter above), and the restarted player
@@ -1206,15 +1206,15 @@ and GC-poll time that perf does not), so it is not used for self time.
 
 ```
 docs/                     PLAN.md, ARCHITECTURE.md, research/, decisions are recorded inline
-src/OniBrutal.Assets/     file formats and readers
-src/OniBrutal.Graphics/   GL device and Unity shader runtime
-src/OniBrutal.Platform/   window/input
-src/OniBrutal.UnityEngine/ engine API implementation (namespaces mirror Unity's)
-src/OniBrutal.Host/       executable
+src/OniMoono.Assets/     file formats and readers
+src/OniMoono.Graphics/   GL device and Unity shader runtime
+src/OniMoono.Platform/   window/input
+src/OniMoono.UnityEngine/ engine API implementation (namespaces mirror Unity's)
+src/OniMoono.Host/       executable
 src/Facades/              generated UnityEngine.*Module facade projects (do not edit)
 src/Unity.InternalAPIEngineBridge.004/  engine-side bridge that the shipped TMP calls into
 src/ThirdParty/Steamworks.NET/          upstream 20.1.0 source port (see §2.1)
-tests/                    xunit: OniBrutal.Assets.Tests, OniBrutal.UnityEngine.Tests, …
+tests/                    xunit: OniMoono.Assets.Tests, OniMoono.UnityEngine.Tests, …
 tools/Inventory, tools/ApiCheck, tools/FacadeGen
 cache/ (ignored)          decompiled code, BRUTAL clone, inventories, type trees
 ```

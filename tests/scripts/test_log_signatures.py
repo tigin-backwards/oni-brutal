@@ -67,11 +67,18 @@ class LogSignatures(unittest.TestCase):
         # The engine has symbols: Mono's format then names the file where the original names <mvid>.
         ours = signatures('NullReferenceException: x\n'
                           '  at UnityEngine.Transform.set_parent (UnityEngine.Transform value) [0x00012] in '
-                          '/w/src/OniBrutal.UnityEngine/Core/Transform.cs:40 \n')
+                          '/w/src/OniMoono.UnityEngine/Core/Transform.cs:40 \n')
         mono = signatures('NullReferenceException: x\n'
                           '  at UnityEngine.Transform.set_parent (UnityEngine.Transform value) [0x00012] in <abc>:0 \n')
         self.assertEqual(ours, mono)
         self.assertEqual(mono, ['NullReferenceException: x @ UnityEngine.Transform.set_parent'])
+
+    def test_references_from_before_the_rename(self):
+        # A reference stored when the engine's namespaces were OniBrutal.* still matches.
+        self.assertEqual(qa_tools.unknown(['InvalidCastException: to OniMoono.Engine.X'],
+                                          ['InvalidCastException: to OniBrutal.Engine.X']), [])
+        self.assertEqual(signatures('NullReferenceException: x\n  at OniBrutal.Engine.EngineLog.Log ()\n'),
+                         signatures('NullReferenceException: x\n  at OniMoono.Engine.EngineLog.Log ()\n'))
 
     def test_run_folder_is_masked(self):
         # The original and ours run in separate invocations, each in a folder of its run id.

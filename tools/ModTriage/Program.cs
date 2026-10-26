@@ -94,7 +94,7 @@ return 0;
 static string FindRepo()
 {
     for (var dir = Directory.GetCurrentDirectory(); dir != null; dir = Path.GetDirectoryName(dir))
-        if (File.Exists(Path.Combine(dir, "OniBrutal.slnx"))) return dir;
+        if (File.Exists(Path.Combine(dir, "OniMoono.slnx"))) return dir;
     return Directory.GetCurrentDirectory();
 }
 

@@ -1,6 +1,6 @@
-using OniBrutal.Assets.Files;
-using OniBrutal.Assets.Shaders;
-using OniBrutal.Assets.TypeTrees;
+using OniMoono.Assets.Files;
+using OniMoono.Assets.Shaders;
+using OniMoono.Assets.TypeTrees;
 
 namespace ShaderSurvey;
 

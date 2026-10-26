@@ -1667,7 +1667,7 @@ class Player:
             command = [os.path.join(ROOT, 'scripts', 'run.sh'), '--native-override',
                        'steam_api=' + self.env['QA_U57_STEAM'], *size,
                        *(a for t in os.environ.get('E2E_GAME_TWEAKS', 'exact').split() for a in ('--game-tweak', t)),
-                       # The original's main menu has no Brutal Tweaks button: the menus compare.
+                       # The original's main menu has no Moono Tweaks button: the menus compare.
                        '--no-tweaks-menu']
             stdout = self.log
         # The runner's own display (a desktop's) must reach neither the player nor xvfb-run's

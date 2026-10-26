@@ -43,7 +43,7 @@ The game also:
 `scripts/build-packages.sh` runs ApiCheck for the game's references; it must report nothing
 missing.
 
-**The engine:** it is this project's own code (`src/OniBrutal.UnityEngine`) and gives
+**The engine:** it is this project's own code (`src/OniMoono.UnityEngine`) and gives
 `Unity.TextMeshPro` access to its internals. The parts used here:
 - **`UnityEngine.TextCore`:** `FaceInfo`, `Glyph`, `GlyphRect`, `GlyphMetrics`, and
   `TextCore.LowLevel.FontEngine`, a FreeType-backed font engine that loads font files,
@@ -2256,7 +2256,7 @@ and font asset. `tools/UnityProbe/th-check.py diff ORIG OURS` lists the texts th
      the game.
    - The mixed check covers Unity's shipped uGUI and Timeline: while they are Unity's, your
      TextMeshPro calls into the shipped uGUI, so use only its public and protected API.
-2. **Unit tests** (`tests/OniBrutal.UnityEngine.Tests`, with a reference to the package
+2. **Unit tests** (`tests/OniMoono.UnityEngine.Tests`, with a reference to the package
    project):
    - rich-text parsing;
    - wrapping and the line-breaking rules;

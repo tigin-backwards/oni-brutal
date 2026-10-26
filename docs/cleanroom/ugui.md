@@ -47,7 +47,7 @@ nothing missing.
 These classes rely on the protected and virtual members of their bases, and on the order of the
 UIBehaviour messages described below.
 
-**The engine:** the engine's API is this project's own code (`src/OniBrutal.UnityEngine`). The
+**The engine:** the engine's API is this project's own code (`src/OniMoono.UnityEngine`). The
 engine grants `UnityEngine.UI` access to its internals. The parts uGUI builds on:
 - `Canvas`, `CanvasRenderer`, `CanvasGroup` and `RectTransform`;
 - `RectTransformUtility`;
@@ -1210,7 +1210,7 @@ height changes (a re-layout from elsewhere), and one more frame is watched.
      whole run, B's message never came after the canvas update: 0 lines in phase R, against
      419 during the layout rebuild.
 
-**Where ours deviates.** `CanvasSystem.RunCanvasUpdate` (`src/OniBrutal.UnityEngine/Engine/UI/
+**Where ours deviates.** `CanvasSystem.RunCanvasUpdate` (`src/OniMoono.UnityEngine/Engine/UI/
 CanvasSystem.cs`) sends `OnRectTransformDimensionsChange` again, after the update, to every
 `RectTransform` that `RectTransformNative.Resolve` saw moved or resized during it
 (`NoteChangedInUpdate`). That breaks rule 4 twice:
@@ -1928,7 +1928,7 @@ Found by the M9 differential runs; they refine the sections above.
 ## Verification
 
 1. **Build:** `scripts/build-packages.sh` builds the package and runs ApiCheck: nothing missing.
-2. **Unit tests**, in `tests/OniBrutal.UnityEngine.Tests`, with a new reference to the package
+2. **Unit tests**, in `tests/OniMoono.UnityEngine.Tests`, with a new reference to the package
    project:
    - the canvas update order;
    - each Image type's vertices;

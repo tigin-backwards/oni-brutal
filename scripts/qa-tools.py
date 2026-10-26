@@ -22,7 +22,7 @@ def normalize(text):
 # System.IO.FileStream, .NET's Interop.ThrowExceptionForIoErrno, Unity's or our logger, our
 # engine's dispatch), so a signature keeps the message alone when that frame is one of these.
 RUNTIME_FRAME = re.compile(r'^(System|Interop|Microsoft|Mono)\.|^UnityEngine\.(Debug|Logger|DebugLogHandler|StackTraceUtility)\.'
-                           r'|^OniBrutal\.')
+                           r'|^(?:OniMoono|OniBrutal)\.')
 
 def canonical(signature):
     """A signature as both runtimes write it: Mono and .NET word some exception messages
@@ -30,6 +30,7 @@ def canonical(signature):
     "at A.B (x) [N] in <…>:N" (an exception's own, in both players; with symbols, in a file),
     "A:B(x)" (Unity's) and "A:B (x)" (ours before 2026-10-24). Idempotent, so it also applies
     to signatures stored by an earlier version (references)."""
+    signature = signature.replace('OniBrutal.', 'OniMoono.')  # stored before the rename
     message, _, frame = signature.partition(' @ ')
     # A trace appended to the message on its own line ("Error:" + message + " " + StackTrace, as
     # WorldGen logs it) starts with its first frame: that frame comes before the one read from

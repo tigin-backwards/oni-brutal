@@ -57,7 +57,7 @@ def unpack(i):
 
 def mono_hash(s):
     """string.GetHashCode as Unity's 64-bit Mono computes it: the .NET Framework 64-bit algorithm,
-    as OniBrutal.Engine.MonoStringHash (checked against the original player)."""
+    as OniMoono.Engine.MonoStringHash (checked against the original player)."""
     def i32(x):
         x &= 0xffffffff
         return x - (1 << 32) if x & 0x80000000 else x

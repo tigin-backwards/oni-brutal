@@ -18,7 +18,7 @@ It ends with a phased plan, the risks and a recommendation.
   `/mnt/c/Program Files (x86)/Steam/steamapps/content/app_457140/depot_457142/OxygenNotIncluded.app`,
   Unity 6000.3.5f2 (`Contents/Info.plist`), the same game build as our Linux install
   (`~/projects/oni-linux`, both carry `KleiVersion.ChangeList` 744825).
-- Our asset reader (`src/OniBrutal.Assets`) on that data, through a new survey tool,
+- Our asset reader (`src/OniMoono.Assets`) on that data, through a new survey tool,
   `tools/ShaderSurvey` (committed with this document).
 - Mach-O headers read with a small header parser; file listings; md5 of every data file.
 - The Klei decomp (`out/local-tools/decomp`, "AC" = Assembly-CSharp, "FP" = firstpass), read only.
@@ -92,7 +92,7 @@ byte-identical. The Mac adds 13 programs:
 The last is the only one game code toggles (`AC/LightBufferCompositor.cs:50,54`). Linux and the
 Metal set both lack it, so a Metal player renders that pass as our Linux player does today.
 
-So our existing loader (`ShaderPrograms.Load`, `src/OniBrutal.UnityEngine/Engine/Rendering/ShaderPrograms.cs:52`)
+So our existing loader (`ShaderPrograms.Load`, `src/OniMoono.UnityEngine/Engine/Rendering/ShaderPrograms.cs:52`)
 reads the Mac data unchanged. That makes a GL path on the Mac possible as far as the data goes;
 §2.4 covers why it is not the target.
 
@@ -148,7 +148,7 @@ From `scripts/cmpvar.py` and `scripts/cov.py`:
 ### 1.4 Uniforms and bindings: the parameter blobs
 
 GLCore variants are bound through **GL reflection** today:
-- `GlPrograms.Reflect`, `src/OniBrutal.Desktop/Gl/GlPrograms.cs:214-253`: `glGetActiveUniform`,
+- `GlPrograms.Reflect`, `src/OniMoono.Desktop/Gl/GlPrograms.cs:214-253`: `glGetActiveUniform`,
   uniform-block offsets, sampler units assigned in order;
 - attributes by HLSLcc name `in_POSITION0…` (`:116-120`).
 
@@ -234,7 +234,7 @@ on Mac, as they do with Klei's player.
 
 ### 2.1 The device interface
 
-`RenderDevice` (`src/OniBrutal.UnityEngine/Engine/Rendering/RenderDevice.cs:55-121`) is an
+`RenderDevice` (`src/OniMoono.UnityEngine/Engine/Rendering/RenderDevice.cs:55-121`) is an
 abstract class with 17 overridable members:
 
 | Concern | Members |
@@ -252,7 +252,7 @@ abstract class with 17 overridable members:
 `NullRenderDevice` (`RenderDevice.cs:157-181`) already runs the game headless. The platform side
 is `IPlatform` (`Engine/Platform/IPlatform.cs:10-37`), which has nothing GL-specific in it.
 
-The GL backend is 4358 lines in `src/OniBrutal.Desktop/Gl/`:
+The GL backend is 4358 lines in `src/OniMoono.Desktop/Gl/`:
 
 | File | Lines |
 |---|---|
@@ -375,7 +375,7 @@ recommended.
   is supported on macOS Arm64"
   (https://github.com/dotnet/core/blob/main/release-notes/10.0/supported-os.md). .NET 11 has the
   same table and still ships macOS x64; no osx-x64 deprecation is announced.
-- **Verified here.** `dotnet publish src/OniBrutal.Host -c Release -r osx-x64 --self-contained`
+- **Verified here.** `dotnet publish src/OniMoono.Host -c Release -r osx-x64 --self-contained`
   succeeds on Linux. It produces an x86_64 Mach-O apphost, `libcoreclr.dylib` and so on, 84 MB
   (`pub-osx-x64/`). Self-contained avoids the side-by-side x64 SDK under `/usr/local/share/dotnet/x64`.
 - **Open CoreCLR bugs under Rosetta**, all open as of 2026-10:
@@ -453,7 +453,7 @@ of the C runtime's maths (`ucrt_libm`) and takes only allocation and threads fro
 **The x86_64 build stays as the fallback**, with Klei's SimDLL under Rosetta, for as long as
 Rosetta runs it (§3.1).
 
-**How the host picks the sim.** `GameLayout.Native` (`src/OniBrutal.UnityEngine/Engine/Platform/GameLayout.cs`)
+**How the host picks the sim.** `GameLayout.Native` (`src/OniMoono.UnityEngine/Engine/Platform/GameLayout.cs`)
 is used by `AssemblyPolicy.ResolveNative`. A game plugin is used when it has the process's
 architecture. Otherwise the host takes a replacement of the same name from `plugins/` beside the
 host (`plugins/libSimDLL.dylib`), if that file has the architecture. The result:
@@ -641,7 +641,7 @@ How the columns are read:
   `~/Library/Application Support/Steam/steamapps/common/OxygenNotIncluded/OxygenNotIncluded.app`
   **(to verify)**, with `libraryfolders.vdf` in the same Steam root, so `setup.sh`'s `find_game`
   loop works with one more root.
-- `Program.Main` hard-codes `GameDir/OxygenNotIncluded_Data` (`src/OniBrutal.Host/Program.cs:25`).
+- `Program.Main` hard-codes `GameDir/OxygenNotIncluded_Data` (`src/OniMoono.Host/Program.cs:25`).
   On macOS it should accept the `.app` (or its parent) and use `Contents/Resources/Data`.
 - `Application.dataPath` is a separate value. Unity's Mac player reports the bundle's
   `Contents` folder (Unity-documented behaviour, **to verify**). Our `EngineConfig.DataPath` is
@@ -680,7 +680,7 @@ How the columns are read:
 
 - The game P/Invokes bare names: `SimDLL` (`AC/Sim.cs` 9 imports, `AC/ConduitTemperatureManager.cs` 7,
   `FP/Klei/KProfilerPlugin.cs` 16), `fmodstudio`/`fmod` (FMODUnity) and `steam_api` (Steamworks.NET).
-- `AssemblyPolicy.ResolveNative` (`src/OniBrutal.Host/AssemblyPolicy.cs:101-111`) looks in
+- `AssemblyPolicy.ResolveNative` (`src/OniMoono.Host/AssemblyPolicy.cs:101-111`) looks in
   `Plugins/` for `lib{name}.so`, `{name}.so` and `{name}`. On macOS it must look for
   `Contents/PlugIns/{name}.bundle/Contents/MacOS/{name}` (the executable named by the bundle's
   `CFBundleExecutable`, which is `SimDLL`, `fmodstudio`, `resonanceaudio`), then
@@ -707,7 +707,7 @@ How the columns are read:
   `.so` with GNU `as`/`ld`. A Mach-O build needs `clang -arch x86_64 -dynamiclib` on a Mac, or
   `llvm-mc` + `ld64.lld` (no clang or lld is installed on this machine). Small job.
 - **Restarter.** The game runs `<dir of MainModule.FileName>/Restarter <exe>` (`FP/App.cs:38,54-67`).
-  Our `src/OniBrutal.Host/Restarter` is a POSIX `sh` script and works on macOS unchanged, as long
+  Our `src/OniMoono.Host/Restarter` is a POSIX `sh` script and works on macOS unchanged, as long
   as it sits beside our host executable (not in Klei's `Contents/MacOS`).
 - **Launching from Steam.** As on Linux, the user's launch option points Steam at our player with
   `%command%` after it (Steam on macOS supports launch options the same way). `setup.sh` needs a
@@ -794,7 +794,7 @@ rendering, and GitHub won't fix it (#14836).
 - osx-arm64 build and unit tests natively (arm64 runner); osx-x64 under Rosetta or on an Intel runner;
 - `ShaderSurvey check-metal`;
 - a Metal smoke test that compiles every MSL variant and builds pipelines, the Metal equivalent
-  of `--check-shaders` (`src/OniBrutal.Host/ShaderCheck.cs`); avoid MSAA on Intel runners;
+  of `--check-shaders` (`src/OniMoono.Host/ShaderCheck.cs`); avoid MSAA on Intel runners;
 - the headless player (`--headless --frames N`) natively with onimaxxing-sim, and x86_64 under
   Rosetta with Klei's SimDLL, which exercises the platform port end to end without rendering;
 - a few rendered frames and `--capture` screenshots, compared loosely: a paravirtual GPU will not
@@ -877,7 +877,7 @@ Recommended course:
 
 ## Appendix: tools
 
-`tools/ShaderSurvey` (committed). It references only `OniBrutal.Assets` and needs no engine or
+`tools/ShaderSurvey` (committed). It references only `OniMoono.Assets` and needs no engine or
 device:
 
 ```
@@ -892,7 +892,7 @@ dotnet out/bin/ShaderSurvey/release/ShaderSurvey.dll compare-metal DATADIR [all|
 
 DATADIR is a data folder: `OxygenNotIncluded.app/Contents/Resources/Data` or
 `OxygenNotIncluded_Data`. Platform 14 is Metal, 15 GLCore. The survey reads the data through the
-readers in `src/OniBrutal.Assets/Shaders/` that the engine uses. `tools/AssemblyDiff` compared the
+readers in `src/OniMoono.Assets/Shaders/` that the engine uses. `tools/AssemblyDiff` compared the
 two builds' assemblies (§1.6). The host's `--check-natives` (`--game` a game folder or an `.app`)
 checks the P/Invokes against an install's plugins:
 

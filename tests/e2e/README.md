@@ -75,7 +75,7 @@ load at all, in both players, comes first from [Load sweeps](#load-sweeps).
   The tools are .NET global tools (`dotnet tool install -g dotnet-stack dotnet-dump`), and the
   original player gets only the non-.NET parts. A held player (`--hold`) is never hung.
   `ONI_TEST_HANG=FRAME[:spin|wait]` makes our player's main thread spin, or block forever,
-  after that frame (`src/OniBrutal.Host/TestHang.cs`), to try the watchdog. `scripts/qa.sh`'s
+  after that frame (`src/OniMoono.Host/TestHang.cs`), to try the watchdog. `scripts/qa.sh`'s
   U57 runs have the same watchdog, keyed to PerfProbe's PERF lines (`QA_HANG_MIN`).
 - **Paused time.** The fixture loads paused. Time passes only in `run` steps. Take all UI evidence
   before the first `run`, or right after an expectation that pins the state.
@@ -500,7 +500,7 @@ ln -s ~/projects/oni-brutal/out/local-tools out/local-tools    # qa.env, OniMcp,
 ln -s ~/projects/oni-brutal/out/ws out/ws                      # the Workshop builds
 cp ~/projects/oni-brutal/tests/e2e/fixtures/*.sav tests/e2e/fixtures/   # or bless early-base
 export PATH=$HOME/.dotnet:$HOME/.dotnet/tools:$PATH DOTNET_ROOT=$HOME/.dotnet
-dotnet build src/OniBrutal.Host -c Release
+dotnet build src/OniMoono.Host -c Release
 dotnet build tools/E2eDriver -c Release
 ```
 

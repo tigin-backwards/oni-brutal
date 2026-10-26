@@ -21,7 +21,7 @@
 # 5; the slowest legitimate gaps are about 140 s of load before the first and 110 s between two in
 # the overlay sweep) is hung: scripts/hang-dump.sh takes the managed stacks of every thread,
 # per-thread CPU and wait states and the log's tail into STAGE/hang, the player is killed and the
-# stage fails, naming that folder. ONI_TEST_HANG=FRAME[:spin|wait] (src/OniBrutal.Host/TestHang.cs)
+# stage fails, naming that folder. ONI_TEST_HANG=FRAME[:spin|wait] (src/OniMoono.Host/TestHang.cs)
 # hangs a player on purpose, to try it.
 # --bless stores this run's captures, signatures and frame rate as the references
 # (out/qa/reference), once they have been looked at; --bless-from=RUN stores a past run's.
@@ -72,7 +72,7 @@ build_release()
     [ $built -eq 1 ] && return 0
     if "$root/scripts/build-engine.sh" release > "$run/build-release.txt" 2>&1 \
        && "$root/scripts/build-packages.sh" >> "$run/build-release.txt" 2>&1 \
-       && dotnet build "$root/src/OniBrutal.Host" -c Release -v q -nologo >> "$run/build-release.txt" 2>&1 \
+       && dotnet build "$root/src/OniMoono.Host" -c Release -v q -nologo >> "$run/build-release.txt" 2>&1 \
        && dotnet build "$root/tools/PerfProbe" -c Release -v q -nologo >> "$run/build-release.txt" 2>&1; then
         built=1; return 0
     fi

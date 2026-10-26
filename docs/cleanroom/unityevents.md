@@ -1,6 +1,6 @@
 # UnityEvents: functional specification
 
-Namespace `UnityEngine.Events`, in the engine assembly (`src/OniBrutal.UnityEngine`). A
+Namespace `UnityEngine.Events`, in the engine assembly (`src/OniMoono.UnityEngine`). A
 UnityEvent is a list of callbacks that a component invokes. uGUI uses one for every interaction
 (a button's `onClick`, a slider's `onValueChanged`); the game's code adds listeners at run time and
 invokes events of its own.
@@ -126,7 +126,7 @@ those points.
 
 ## Tests to write
 
-These go in `tests/OniBrutal.UnityEngine.Tests/UnityEventTests.cs`, and they come before the
+These go in `tests/OniMoono.UnityEngine.Tests/UnityEventTests.cs`, and they come before the
 implementation:
 - The listener order.
 - Every mode, with resolution through base types and non-public methods.

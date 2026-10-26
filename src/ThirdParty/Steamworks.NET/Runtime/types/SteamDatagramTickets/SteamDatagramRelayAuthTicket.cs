@@ -111,7 +111,7 @@ namespace Steamworks
 			[MarshalAs(UnmanagedType.ByValArray, SizeConst = 28)]
 			byte[] m_szName;
 
-			// OniBrutal port: upstream overlaps a managed byte[] with the integer members, which
+			// OniMoono port: upstream overlaps a managed byte[] with the integer members, which
 			// CoreCLR's type loader rejects. A fixed buffer keeps the same 128-byte native layout
 			// with no object reference in the union.
 			[StructLayout(LayoutKind.Explicit)]

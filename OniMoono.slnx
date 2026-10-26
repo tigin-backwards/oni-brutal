@@ -1,0 +1,32 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/OniMoono.Assets/OniMoono.Assets.csproj" />
+    <Project Path="src/OniMoono.Desktop/OniMoono.Desktop.csproj" />
+    <Project Path="src/OniMoono.GameTweaks/OniMoono.GameTweaks.csproj" />
+    <Project Path="src/OniMoono.Host/OniMoono.Host.csproj" />
+    <Project Path="src/OniMoono.Restarter/OniMoono.Restarter.csproj" />
+    <Project Path="src/OniMoono.UnityEngine/OniMoono.UnityEngine.csproj" />
+    <Project Path="src/Unity.InternalAPIEngineBridge.004/Unity.InternalAPIEngineBridge.004.csproj" />
+    <Project Path="src/Unity.TextMeshPro/Unity.TextMeshPro.csproj" />
+    <Project Path="src/Unity.Timeline/Unity.Timeline.csproj" />
+    <Project Path="src/UnityEngine.UI/UnityEngine.UI.csproj" />
+  </Folder>
+  <Folder Name="/src/ThirdParty/">
+    <Project Path="src/ThirdParty/Steamworks.NET/Steamworks.NET.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/OniMoono.Assets.Tests/OniMoono.Assets.Tests.csproj" />
+    <Project Path="tests/OniMoono.UnityEngine.Tests/OniMoono.UnityEngine.Tests.csproj" />
+    <Project Path="tests/ModTriage.Tests/ModTriage.Tests.csproj" />
+  </Folder>
+  <Folder Name="/tools/">
+    <Project Path="tools/ApiCheck/ApiCheck.csproj" />
+    <Project Path="tools/AssemblyDiff/AssemblyDiff.csproj" />
+    <Project Path="tools/FacadeGen/FacadeGen.csproj" />
+    <Project Path="tools/Inventory/Inventory.csproj" />
+    <Project Path="tools/ModTriage/ModTriage.csproj" />
+    <Project Path="tools/ShaderSurvey/ShaderSurvey.csproj" />
+    <Project Path="tools/SurfaceGen/SurfaceGen.csproj" />
+    <Project Path="tools/UnityApi/UnityApi.csproj" />
+  </Folder>
+</Solution>

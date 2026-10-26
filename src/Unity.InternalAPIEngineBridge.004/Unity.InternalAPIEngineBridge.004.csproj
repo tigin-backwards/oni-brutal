@@ -8,6 +8,6 @@
     <Nullable>disable</Nullable>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="../OniBrutal.UnityEngine/OniBrutal.UnityEngine.csproj" />
+    <ProjectReference Include="../OniMoono.UnityEngine/OniMoono.UnityEngine.csproj" />
   </ItemGroup>
 </Project>

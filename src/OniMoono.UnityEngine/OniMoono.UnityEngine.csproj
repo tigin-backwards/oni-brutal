@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <!-- Implementation of Unity's public engine API. Game IL binds to it through the generated
+         UnityEngine.*Module forwarding facades (ARCHITECTURE §2). Unity's own assemblies are
+         version 0.0.0.0 and unsigned; so is this one. -->
+    <AssemblyVersion>0.0.0.0</AssemblyVersion>
+    <RootNamespace>UnityEngine</RootNamespace>
+    <!-- Unity's API carries no nullability annotations; reproducing it exactly means none here. -->
+    <Nullable>disable</Nullable>
+    <!-- Unity's API uses lower-case member names and other conventions we must reproduce exactly. -->
+    <NoWarn>$(NoWarn);CS0108;CS0114;CS0660;CS0661;CS8981</NoWarn>
+    <!-- Serialized fields are assigned by the asset deserializer and the cloner through reflection. -->
+    <NoWarn>$(NoWarn);CS0649</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../OniMoono.Assets/OniMoono.Assets.csproj" />
+    <!-- stb_image: PNG/JPEG decoding for ImageConversion.LoadImage. -->
+    <PackageReference Include="Ahwoo.BRUTAL.Stb" />
+    <!-- FreeType (native only): glyph rasterization for TextCore and legacy fonts. -->
+    <PackageReference Include="Ahwoo.BRUTAL.FreeType" />
+  </ItemGroup>
+</Project>

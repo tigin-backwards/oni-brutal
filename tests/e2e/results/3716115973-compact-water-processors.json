@@ -1,0 +1,59 @@
+{
+ "spec": "mods/3716115973-compact-water-processors.yaml",
+ "mods": [
+  "3716115973"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "after the research the Refinement menu lists the compact sieve and desalinator (shot); a built sieve is selected",
+ "updated": "2026-10-26",
+ "commit": "69617875",
+ "mod_dlls": {
+  "3716115973": {
+   "CompactWaterSieve.dll": "4a1e25172cdbf22318c2b5cd2c3b3f59a479abf0849f6aa7fa273d8c8a70524e"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-105851-04eb8ffa",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T11:10:41",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-151101-b3c9c4ce",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T15:11:59",
+    "lane": 15,
+    "reference_run": "20261026-105851-04eb8ffa",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "refinement-menu": 0.0
+    }
+   },
+   {
+    "run": "20261026-151101-b3c9c4ce",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T15:11:58",
+    "lane": 14,
+    "reference_run": "20261026-105851-04eb8ffa",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "refinement-menu": 0.0
+    }
+   }
+  ]
+ }
+}

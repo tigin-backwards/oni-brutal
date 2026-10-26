@@ -1,0 +1,42 @@
+# Compact Water Processors (3716115973), class B.
+#
+# What it does: smaller versions of five buildings, each beside the game's own in its menu
+# and research: the Compact Water Sieve (Refinement, Distillation), Compact Desalinator
+# (Refinement, Liquid Filtering), Compact Aquatuner (Utilities, Liquid Temperature), Small
+# Carbon Skimmer (Oxygen, with the Carbon Skimmer) and, in Spaced Out, Small Radbolt Chamber
+# (Radiation, with the Radbolt Chamber); the build menu draws their icons fitted to its
+# buttons.
+# How a player reaches it: the build menu, after the research.
+# What changes: the same machines in less space.
+#
+# setup researches Distillation and Liquid Filtering; the Refinement menu lists the sieve and
+# the desalinator, and a sieve built by setup in the dug-out corridor west of the printing pod
+# is selected.
+from: early-base
+mods: [3716115973]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"LiquidFiltering\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"Distillation\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"CompactWaterSieve\")", method: Build, args: [131127, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"Distillation\").unlockedItemIDs": {contains: CompactWaterSieve}
+      "Db.Get().Techs.Get(\"LiquidFiltering\").unlockedItemIDs": {contains: CompactDesalinator}
+      "Db.Get().Techs.Get(\"LiquidTemperature\").unlockedItemIDs": {contains: CompactAquatuner}
+      "Assets.GetBuildingDef(\"SmallCarbonSkimmer\")": exists
+      "Assets.GetBuildingDef(\"SmallRadboltChamber\")": exists
+  - run: {seconds: 10}
+  - expect: {buildings: {CompactWaterSieve: 1}}
+  - click: {ui: "**/PlanScreen/Toggle:Refinement"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/CompactWaterSieve Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/CompactDesalinator Group*": {active: true}
+  - shot: {name: refinement-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
+  - key: {code: Escape}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [111, 206], select: CompactWaterSieve}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Compact"}

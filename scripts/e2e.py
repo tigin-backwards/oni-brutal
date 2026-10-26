@@ -2138,9 +2138,9 @@ def run_steps(mcp, seconds, until, log, resumed, speed=3):
                 mcp.call('game_control', domain='speed', action='resume', confirm=True)
                 resumed.append(True)
             stalls += 1
-            if stalls >= 10:
+            if stalls >= 60:
                 raise SpecFailure(f'the game did not advance: {json.dumps(step)[:600]}')
-            time.sleep(3)
+            time.sleep(0.5)
             continue
         stalls = 0
         spent += elapsed

@@ -1,0 +1,68 @@
+{
+ "spec": "mods/2976666381-oxygen-mask-protection.yaml",
+ "mods": [
+  "2976666381"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Oxygen Mask's definition blocks eye irritation and tags its wearer airtight; options dialog as in the original",
+ "updated": "2026-10-25",
+ "commit": "bd353b5",
+ "mod_dlls": {
+  "2976666381": {
+   "ONI Mod Oxygen Mask.dll": "407bf50a080f006db2a8c0a1fc6943486984fb63dcf943de7d4627898d89b654",
+   "PLib.dll": "432e28fbecb2d422a46eafe489a446f946ec828acfb2b721f7fe6df19d84cd7c"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-195133-9810c702",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T20:01:28",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-210502-32080878",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T21:05:02",
+    "lane": 15,
+    "reference_run": "20261025-195133-9810c702",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "options": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "options": 0.0
+    }
+   },
+   {
+    "run": "20261025-210502-32080878",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-25T21:05:56",
+    "lane": 15,
+    "reference_run": "20261025-195133-9810c702",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "options": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "options": 0.0
+    }
+   }
+  ]
+ }
+}

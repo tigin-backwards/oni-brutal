@@ -1,0 +1,36 @@
+# Oxygen Mask Eye Protection & No CO2 Exhale (2976666381), classes P, O.
+#
+# What it does: postfixes on OxygenMaskConfig.CreateEquipmentDef make the Oxygen Mask protect
+# its wearer from the Minor and Major Irritation effects (eye irritation from chlorine and
+# similar gases), and, with the option StoreCO2 (on by default, restart required), tag the
+# wearer as wearing an airtight suit, so the mask stores the CO2 the Duplicant breathes out
+# instead of letting it out into the room.
+# How a player reaches it: an Oxygen Mask, worn from an Oxygen Mask Dock; the options on the
+# Mods screen.
+# What changes: what a masked Duplicant suffers and exhales.
+#
+# The mask's equipment definition carries both changes; then the mod's options dialog opens
+# from the main menu's Mods screen and Cancel closes it.
+from: early-base
+mods: [2976666381]
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"Oxygen_Mask\").GetComponent<Equippable>.def.AdditionalTags": {contains: AirtightSuit}
+      "count:Assets.GetPrefab(\"Oxygen_Mask\").GetComponent<Equippable>.def.EffectImmunites[*] if .Id == MinorIrritation": 1
+      "count:Assets.GetPrefab(\"Oxygen_Mask\").GetComponent<Equippable>.def.EffectImmunites[*] if .Id == MajorIrritation": 1
+  - key: {code: Escape}
+  - ui_wait: {path: "**/PauseScreen/**/Main MenuButton", cond: stable}
+  - click: {ui: "**/PauseScreen/**/Main MenuButton"}
+  - ui_wait: {path: "**/ConfirmDialog/GameObject/Panel/ConfigurableButton", cond: stable}
+  - click: {ui: "**/ConfirmDialog/GameObject/Panel/ConfigurableButton"}   # Quit Without Saving
+  - ui_wait: {path: "**/MainMenu_SpacedOut/MainMenuMenubar/MainMenuButtons", cond: stable, frames: 3000}
+  - click: {text: "MODS", under: "**/MainMenuButtons"}
+  - ui_wait: {path: "**/ModsScreen/Panel", cond: stable}
+  - click: {ui: "**/ModsScreen/**/Content/Oxygen Mask Protection/ModSettingsButton"}
+  - ui_wait: {path: "**/ModOptions", cond: stable}
+  - expect_ui:
+      "**/ModOptions/Body/**/Entries/Label/Text": {any_text: "StoreCO2"}
+  - ui_dump: {name: options, root: "**/ModOptions"}
+  - shot: {name: options, crop: "**/ModOptions"}
+  - click: {text: "CANCEL", under: "**/ModOptions"}
+  - ui_wait: {path: "**/ModOptions", cond: gone}

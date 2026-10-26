@@ -1,0 +1,59 @@
+{
+ "spec": "mods/2836461351-easysteamturbine.yaml",
+ "mods": [
+  "2836461351"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Steam Turbine's prefab runs from 90 °C steam and puts out 20 °C water; its card opens from the Power menu",
+ "updated": "2026-10-25",
+ "commit": "bd353b5",
+ "mod_dlls": {
+  "2836461351": {
+   "EasySteamTurbine.dll": "524f8d8be7a3bf4885b2ee45ac03c8dd963826a4bf2574f2e59b94cae41fbb1f"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-195133-9810c702",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T19:57:30",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-202245-18c1afff",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T20:41:06",
+    "lane": 15,
+    "reference_run": "20261025-195133-9810c702",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "turbine-card": 0.0
+    }
+   },
+   {
+    "run": "20261025-202245-18c1afff",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-25T20:44:15",
+    "lane": 15,
+    "reference_run": "20261025-195133-9810c702",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "turbine-card": 0.0
+    }
+   }
+  ]
+ }
+}

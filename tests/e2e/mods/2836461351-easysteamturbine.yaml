@@ -1,0 +1,26 @@
+# EasySteamTurbine (2836461351), class P.
+#
+# What it does: a postfix on SteamTurbineConfig2.DoPostConfigureComplete lowers the Steam
+# Turbine's minimum steam temperature from 125 °C to 90 °C (minActiveTemperature 363.15 K) and
+# makes the water it puts out 20 °C (outputElementTemperature 293.15 K) instead of 95 °C.
+# How a player reaches it: a Steam Turbine, built as usual (Power, after Renewable Energy).
+# What changes: turbines run on cooler steam and give back cold water.
+#
+# The turbine's prefab carries both values; setup grants Renewable Energy and the turbine's
+# card opens from the Power menu.
+from: early-base
+mods: [2836461351]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"RenewableEnergy\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"SteamTurbine2\").GetComponent<SteamTurbine>.minActiveTemperature": 363.15
+      "Assets.GetPrefab(\"SteamTurbine2\").GetComponent<SteamTurbine>.outputElementTemperature": 293.15
+  - run: {seconds: 5}
+  - click: {ui: "**/PlanScreen/Toggle:Power"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/SteamTurbine2 Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/SteamTurbine2 Group*"}
+  - ui_wait: {path: "**/PlanBuildingSelectionPanel/ProductInfoScreen", cond: stable}
+  - expect_state: {"PlayerController.Instance.ActiveTool.name": PrebuildTool}   # no steel nor plastic yet
+  - shot: {name: turbine-card, crop: "**/PlanBuildingSelectionPanel/ProductInfoScreen", threshold: 0.04}

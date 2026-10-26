@@ -1,0 +1,25 @@
+# Debris Melts to Debris (2570834434), class P.
+#
+# What it does: debris whose element turns into another solid when heated (algae, slime and
+# fertilizer into dirt, dirt into sand, clay into ceramic, coal into refined carbon) becomes
+# debris of that solid: a prefix on SimTemperatureTransfer.DoOreMeltTransition spawns the new
+# element as a pile of the same mass and temperature, where the game turns it into a solid
+# tile.
+# How a player reaches it: heating such debris.
+# What changes: no natural tiles out of melted debris.
+#
+# setup drops 100 kg of algae at 450 K (above its 398 K transition) on the floor of the
+# dug-out corridor west of the printing pod: it becomes 100 kg of dirt debris, and the cell
+# stays open.
+from: early-base
+mods: [2570834434]
+setup:
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Algae\").substance", method: SpawnResource, args: [[112.5, 206.5, -12], 100, 450, 255, 0]}}
+steps:
+  - expect_state:
+      "sum:all:Clearable::[*].GetComponent<PrimaryElement>.Mass if .GetComponent<PrimaryElement>.ElementID == Dirt": {save_as: dirt}
+  - run: {seconds: 10}
+  - expect_state:
+      "count:all:Clearable::[*] if .GetComponent<PrimaryElement>.ElementID == Algae": 0
+      "sum:all:Clearable::[*].GetComponent<PrimaryElement>.Mass if .GetComponent<PrimaryElement>.ElementID == Dirt": [">= dirt + 99", "<= dirt + 101"]
+      "Grid.IsSolidCell(131128)": false

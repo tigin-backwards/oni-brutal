@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2570834434-debris-melts-to-debris.yaml",
+ "mods": [
+  "2570834434"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "hot algae debris becomes 100 kg of dirt debris and the cell stays open",
+ "updated": "2026-10-26",
+ "commit": "17f325ef",
+ "mod_dlls": {
+  "2570834434": {
+   "DebrisMeltsToDebris.dll": "0be26d323da4bbe524f83e5707e7ebf196b80c432f06d6da312b75596bc7fcd1"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-100522-abd03b4b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T10:07:40",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-133411-75254ba7",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T13:56:57",
+    "lane": 15,
+    "reference_run": "20261026-100522-abd03b4b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-133411-75254ba7",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T13:57:52",
+    "lane": 14,
+    "reference_run": "20261026-100522-abd03b4b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

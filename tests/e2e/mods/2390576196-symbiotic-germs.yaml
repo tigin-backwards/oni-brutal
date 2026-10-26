@@ -1,0 +1,19 @@
+# [Vanilla + DLC] Symbiotic Germs (2390576196), class P.
+#
+# What it does: germs bring bonuses, scaled by how many a critter or plant carries (settings in
+# a JSON file beside the mod): Slicksters, Pacus, Dreckos and Puffs poop extra; Mealwood and Bog
+# Buckets give extra food, Sleet Wheat and Nosh Sprouts may double their harvest, Dusk Caps
+# release extra polluted oxygen and Pincha Peppers change temperature (patches on
+# CreatureCalorieMonitor.Poop and Crop.SpawnAndGetSomeFruit).
+# How a player reaches it: it is passive.
+# What changes: germy critters and crops yield more.
+#
+# The settings load with their defaults; the colony runs a while.
+from: early-base
+mods: [2390576196]
+steps:
+  - expect_state:
+      "type:SymbioticGerms.Settings::Instance.MaxMealLiceBonus": 0.2
+      "type:SymbioticGerms.Settings::Instance.MaxDuskCupBonus": 2
+  - run: {seconds: 10}
+  - expect: {duplicants: 3}

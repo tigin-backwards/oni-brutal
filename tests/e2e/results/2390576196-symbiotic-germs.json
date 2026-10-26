@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2390576196-symbiotic-germs.yaml",
+ "mods": [
+  "2390576196"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the settings load with their defaults; the colony plays on",
+ "updated": "2026-10-26",
+ "commit": "8ef77bae",
+ "mod_dlls": {
+  "2390576196": {
+   "SymbioticGerms.dll": "7a46e9413712a55eb4a1f44acb378ef32389dad8533dd1b02bc9f5ac2894099b"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-173427-72c0b636",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T17:47:12",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-175306-72ae15bd",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T18:31:53",
+    "lane": 14,
+    "reference_run": "20261026-173427-72c0b636",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-175306-72ae15bd",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T18:32:58",
+    "lane": 14,
+    "reference_run": "20261026-173427-72c0b636",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

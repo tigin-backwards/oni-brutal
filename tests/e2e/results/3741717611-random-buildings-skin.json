@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3741717611-random-buildings-skin.yaml",
+ "mods": [
+  "3741717611"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with the tool-only option, the Random Building Skin tool dragged over three cots gives them blueprints; a cot not dragged over keeps its look",
+ "updated": "2026-10-26",
+ "commit": "a452aaa",
+ "mod_dlls": {
+  "3741717611": {
+   "MJRandomBuildingSkin.dll": "814f6a26cfab78c92afc7a2cb5569dd8755226f336d6b3ac7f431b3337d47a0d"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-023730-5710265c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T02:52:07",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-030142-9a379fe8",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:01:42",
+    "lane": 16,
+    "reference_run": "20261026-023730-5710265c",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-030142-9a379fe8",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T03:01:43",
+    "lane": 17,
+    "reference_run": "20261026-023730-5710265c",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

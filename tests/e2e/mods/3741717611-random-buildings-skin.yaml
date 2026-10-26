@@ -1,0 +1,33 @@
+# Random Buildings Skin (3741717611), classes T, P, O.
+#
+# What it does: a postfix on BuildingDef.Build gives each building that has blueprints (skins)
+# a random one as it is built, the default look among them; and a Random Building Skin tool in
+# the toolbar (a filtered drag tool) does the same to the buildings in the dragged area. PLib
+# options choose when (Type: 1 both, 2 only the tool), from which skins (all or unlocked ones)
+# and for which buildings (all, or the ones ticked in a long list).
+# How a player reaches it: building anything; the toolbar's Random Building Skin button.
+# What changes: buildings' looks.
+#
+# With Type 2 (the tool only), setup builds three cots in the dug-out room west of the printing
+# pod: they keep the default look. The tool is dragged over them, and at least one of them has
+# a skin then (each draws one of the cot's 8 skins or the default).
+from: early-base
+mods: [3741717611]
+options:
+  MauroJunior.RandomBuildingsSkin: {Type: 2}
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Bed\")", method: Build, args: [{"$": "Grid.XYToCell(110, 207)"}, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Bed\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Bed\")", method: Build, args: [{"$": "Grid.XYToCell(114, 207)"}, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"Bed\").AvailableFacades.Count": ">= 1"
+      "count:all:Bed::[*] if .GetComponent<BuildingFacade>.IsOriginal == true": 4
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - tool: {toolbar: "Random Building Skin"}
+  - drag: {from: [110, 207], to: [115, 208]}
+  - key: {code: Escape}
+  - expect_state:
+      "count:all:Bed::[*] if .GetComponent<BuildingFacade>.IsOriginal == false": ">= 1"
+      # The cot east of the pod was not dragged over.
+      "count:all:Bed::[*] if .GetComponent<BuildingFacade>.IsOriginal == true": ">= 1"

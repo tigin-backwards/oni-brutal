@@ -1,0 +1,74 @@
+{
+ "spec": "mods/3054711075-temperature-field.yaml",
+ "mods": [
+  "3054711075"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the block from the Utilities menu, built and selected, shows its two slider screens; 50 typed sets a 50 °C target",
+ "updated": "2026-10-25",
+ "commit": "9be5843",
+ "mod_dlls": {
+  "3054711075": {
+   "PLib.dll": "b862c5db2b3cd6df09a62d4a30782e91e2b24e8e1bfac08d991c9cc89a984ba9",
+   "║π╬┬┐╒╝Σ.dll": "f3894e3003424e467f88c65bc8fd67e79f34c1a996c541b61e9b17024f3554ba"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-195133-9810c702",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T20:02:54",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-213309-c96fb844",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T21:33:09",
+    "lane": 15,
+    "reference_run": "20261025-195133-9810c702",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "temperature": {
+      "differences": 0
+     },
+     "range": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "side-screens": 4.1e-05
+    }
+   },
+   {
+    "run": "20261025-213309-c96fb844",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-25T21:34:22",
+    "lane": 15,
+    "reference_run": "20261025-195133-9810c702",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "temperature": {
+      "differences": 0
+     },
+     "range": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "side-screens": 4.1e-05
+    }
+   }
+  ]
+ }
+}

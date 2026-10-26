@@ -1,0 +1,41 @@
+# 温度场Temperature Field -146 (3054711075), classes B, S.
+#
+# What it does: adds the Temperature field (MM202310181205GG1, 1x1, any buildable material,
+# in the Utilities menu, no research), a ladder-like block that every 200 ms moves the cells
+# around it a fifth of the way to its target temperature (26 °C by default), out of nowhere.
+# Its side screens: a single slider for the temperature (-200 to 200 °C) and a dual slider for
+# the field's width and height (1 to 32 cells, 2 by default), with a range visualizer; a
+# prefix on DualSliderSideScreen.SetTarget numbers its slider sets. Copy settings copy all.
+# How a player reaches it: the build menu (Utilities); the built block's side screens.
+# What changes: the temperature of a small area.
+#
+# setup spawns sandstone. The block is built in the corridor west of the printing pod and
+# selected: its sliders show, and 50 typed into the temperature field sets a 50 °C target.
+from: early-base
+mods: [3054711075]
+setup:
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"SandStone\").substance", method: SpawnResource, args: [[111.5, 207.5, -12], 400, 300, 255, 0]}}
+steps:
+  - run: {seconds: 5}
+  - click: {ui: "**/PlanScreen/Toggle:Utilities"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/MM202310181205GG1 Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/MM202310181205GG1 Group*": {active: true}
+  - key: {code: Escape}
+  - expect_ui: {"**/PauseScreen": {exists: false}}
+  - build: {prefab: MM202310181205GG1, at: [113, 207], material: SandStone}
+  - expect: {blueprints: {MM202310181205GG1: 1}}
+  - run: {seconds: 1500, until: {buildings: {MM202310181205GG1: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [113, 207], ortho: 8}}
+  - click_world: {cell: [113, 207], select: MM202310181205GG1}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<恒温空间.ZZ01MM202310181205GG1>.targetTemperature": 299
+      "selected:GetComponent<恒温空间.ZZ01MM202310181205GG1>.effectWidth": 2
+  - ui_wait: {path: "**/SingleSliderSideScreen", cond: stable}
+  - ui_dump: {name: temperature, root: "**/SingleSliderSideScreen"}
+  - ui_dump: {name: range, root: "**/DualSliderSideScreen"}
+  - shot: {name: side-screens, crop: "**/DetailsScreen", threshold: 0.04}
+  - type: {ui: "**/SingleSliderSideScreen/**/NumberInputField", text: "50", clear: true, enter: true}
+  - expect_state:
+      "selected:GetComponent<恒温空间.ZZ01MM202310181205GG1>.targetTemperature": 323

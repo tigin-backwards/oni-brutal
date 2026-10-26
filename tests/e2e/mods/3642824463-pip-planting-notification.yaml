@@ -1,0 +1,25 @@
+# Pip Planting Notification (3642824463), class P.
+#
+# What it does: an adult Pip gets a "Notify on Planting" checkbox in its side screen; while it
+# is ticked, each seed the Pip plants raises a notification naming it, and clicking the
+# notification zooms onto the planted cell and points arrows at it for 10 s.
+# How a player reaches it: a selected Pip's side screen.
+# What changes: the player learns where Pips bury seeds.
+#
+# A Pip spawned by setup in the dug-out corridor west of the printing pod is selected; its
+# checkbox (dumped) is ticked and the Pip's setting is then on.
+from: early-base
+mods: [3642824463]
+setup:
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131128, 0, 0, \"Squirrel\", \"Creatures\")", method: SetActive, args: [true]}}
+steps:
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 206], select: Squirrel}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_wait: {path: "**/SingleCheckboxSideScreen/Contents/CheckboxGroup", cond: stable}
+  - expect_ui:
+      "**/SingleCheckboxSideScreen/Contents/CheckboxGroup/Label": {text: "Notify on Planting"}
+  - ui_dump: {name: checkbox, root: "**/SingleCheckboxSideScreen"}
+  - expect_state: {"selected:PipNotificator.GetCheckboxValue()": false}
+  - click: {ui: "**/SingleCheckboxSideScreen/Contents/CheckboxGroup/CheckBox"}
+  - expect_state: {"selected:PipNotificator.GetCheckboxValue()": true}

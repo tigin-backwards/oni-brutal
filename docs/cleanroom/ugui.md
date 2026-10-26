@@ -739,6 +739,19 @@ screen opened with a scrollbar of size 0.94 to 0.98 in about half of our runs, 1
   whether the grown bounds move by an ulp still differs between the players for a given
   layout, and both remain timing-dependent: the stale size shows in the original too (3 runs
   of 12, sizes 0.995 to 0.9985), and in either player after a slow frame.
+- **Schedule & Priority Screen Expander** (3774780988, measured 2026-10-26 with `vitalsopen` in
+  its spec, `PROBE_VO_SCREEN=VitalsTableScreen`) opens the same Vitals screen, and its dump
+  differs from one original run to the next. The screen's first update is under scale 0 in both
+  players, and the overshoot then depends on that frame's `unscaledDeltaTime` (73 and 92 ms in
+  two original runs: content moved down 7.27 and 10.05, scrollbar sizes 0.976 and 0.966; 38 and
+  22 ms in ours: 2.45 and 0.91, sizes 0.992 and 0.997). Whether a later update clears it depends
+  on the grown bounds moving by an ulp, as above. In five original runs the dumped scrollbar was
+  value 0, size 1 once and value 1 with sizes 0.97 to 0.99 four times; in eight of ours, value 0,
+  size 1 once and value 1 with sizes 0.98 to 1 seven times. The spec's failure ("0.98 against 1")
+  compares with the one original run that cleared it. Nothing here is for this package to
+  change: the spec needs to leave that scrollbar's size and value out of its comparison, or
+  match them with a tolerance and either value, as the known `scroll-normalized-position`
+  finding does for the normalized position.
 
 **Transform hierarchy to the bit** (measured 2026-10-24, `tools/UnityProbe`
 `PROBE_SCENARIO=transform`, lines `TN`, `TR`, `TQ`, `TQS`, `TD`, `TQN`; the U57 player on this

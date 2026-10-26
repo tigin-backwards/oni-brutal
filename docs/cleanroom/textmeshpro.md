@@ -2751,6 +2751,165 @@ then loaded from the Resources path for its kind; what either gives is registere
 tag's hash. A `materialHashCode` not set is `GetSimpleHashCode(name + " Atlas Material")`, so
 fonts that share one material keep keys of their own (both GRAYSTROKE fonts above add).
 
+### A font set to null (measured 2026-10-26)
+
+**Why:** Smart Coolers (2990501709) builds its side screen with PLib. PLib's checkboxes give
+their `LocText` labels a `TextStyleSetting` made with `new` and no `sdfFont`, so the game's style
+code sets the text's `font` to null when the label wakes. In the shipped package the labels lay
+out in the default font ("Cool Contents", Bold 14 pt: 100.65 wide, so the checkbox is 123.65
+wide). In this implementation the font stays null and nothing is laid out: `textInfo` counts 0
+characters, the text's preferred width is 0, the checkbox is 23 wide and "Heat Contents" has
+nothing to click.
+
+**Measured** with `PROBE_SCENARIO=modtext PROBE_MX_PART=font` (tools/UnityProbe, `ModText.cs`,
+lines `MX font …`), at the main menu. The default font asset (`TMP_Settings.defaultFontAsset`)
+is LiberationSans SDF.
+- On a `TextMeshProUGUI` that has woken, `font = null` reads back the default font asset at
+  once, and `fontSharedMaterial` becomes that font's material. "Cool Contents" then lays out in
+  it (36 pt: 13 characters, preferred width 228.56), after `ForceMeshUpdate` and after the
+  frame's rebuild alike.
+- The same on a text that was already laid out in NotoSans-Regular (preferred width 237.57):
+  right after `font = null` the getter returns the default font, the material is the default
+  font's and the preferred width is 228.56, before any `ForceMeshUpdate`.
+- On a text that has not woken (added to an inactive object), `font = null` reads back null
+  until the object is activated; from then on it reads the default font, and the text lays out
+  in it.
+- PLib's sequence (an inactive object, `AddComponent<LocText>`, its `key` set to "" and its
+  `textStyleSetting` to `new TextStyleSetting { fontSize = 14, textColor = black, style = Bold,
+  enableWordWrapping = false }`, then activation, `alignment` Center and the text): the font
+  reads LiberationSans SDF after activation, and "Cool Contents" lays out with 13 characters,
+  preferred width 100.65 and height 15.65. With NotoSans-Regular as the style's `sdfFont` the
+  text uses NotoSans (97.43 × 19.04).
+- A `LocText` with the game's default style given `font = null` after waking: the default font,
+  laid out.
+
+**This implementation:** the getter returns null in every case above after `font = null`, the
+material stays the previous one, and the text lays out nothing (0 characters, preferred size
+0 × 0).
+
+**Requirement:** setting `font` to null on a text that has woken makes it use the default font
+asset, as if that asset had been assigned: the getter returns it, the shared material becomes
+its material, and the layout follows. A text that has not woken keeps null until it wakes, and
+takes the default font asset then (as a text without a font does).
+
+### The ellipsis glyph in Bold and Italic texts (measured 2026-10-26)
+
+**Why:** Rookie Quest Guide (3738243630) makes its sidebar's material headers ("Pitcher Pump",
+"Wash Basin", "Outhouse") as `TextMeshProUGUI`s in the default font, 12 pt, Bold, with
+`overflowMode` Ellipsis, in rects they fit (238 × 22). The shipped package gives each a second
+material and a `TMP_SubMeshUI` child although no ellipsis is shown (`textInfo.materialCount` 2);
+this implementation has one material and no sub-mesh.
+
+**Measured** with `PROBE_SCENARIO=modtext PROBE_MX_PART=ellipsis,bold` (lines `MX ellipsis …`,
+`MX bold …`), labels built as the mod builds them (text, size, alignment MidlineLeft, style,
+then the mode), at widths 238 and 30 or 40. LiberationSans SDF has no typefaces in its font
+weight table. The global fallbacks end with Roboto-Regular SDF, whose table has Roboto-Italic SDF
+as the italic of weight 400 (entry 4), and Roboto-Bold SDF and Roboto-BoldItalic SDF as the
+regular and italic of weight 700 (entry 7). LiberationSans SDF holds U+2026 itself.
+- **Ellipsis mode with a style the primary font has no typeface for** takes its ellipsis from
+  the first typeface for that style found in the fallback search: Bold from Roboto-Bold SDF,
+  Italic from Roboto-Italic SDF, Bold and Italic from Roboto-BoldItalic SDF. That font's material
+  is part of the text from the start. Each layout counts it as a material even when the text
+  fits and nothing is cut. It is material index 1, ahead of fallbacks the text's own characters
+  need (a "▪" from LiberationSans SDF - Fallback comes second, index 2, and `materialCount` is
+  3). Its sub-mesh exists with an empty quad (4 vertices). An empty text in this mode has the
+  material count 2 as well.
+- When the text is cut, the ellipsis is drawn from that font and material: "Pitcher Pump", Bold,
+  30 wide: "Pit", "…" from Roboto-Bold SDF (material 1, advance 4.965 at 12 pt), then the blank
+  record; 40 wide: "Pitch", the ellipsis and the record (7 records). Italic, 30 wide: "Pitc", "…" from
+  Roboto-Italic SDF (advance 3.645).
+- A "…" typed in the text is an ordinary character: from LiberationSans SDF in every style (Bold:
+  advance 12.84, the font's own glyph widened as Bold is), material 0, and no extra material in
+  Overflow mode.
+- Normal style in Ellipsis mode: the ellipsis is LiberationSans SDF's own, and no extra material
+  or sub-mesh appears (material count 1).
+- Not measured: a primary font whose own weight table has the style's typeface, and Underline
+  or other styles.
+
+**This implementation** takes the ellipsis from the primary font in every style, so a Bold or
+Italic Ellipsis text has no extra material or sub-mesh. Where it cuts, its ellipsis is the
+primary's glyph, widened for Bold (12.84), so fewer letters fit: "Pitcher Pump" Bold at 40
+wide shows "Pitc" and the ellipsis where the shipped package shows "Pitch".
+
+**Requirement:** in Ellipsis mode, resolve the ellipsis character for the text's style before
+the layout. If the primary font has no typeface for the style, search the fallbacks, as for a
+missing character, for a font whose weight table has a typeface for the style, and take the
+ellipsis from that typeface. Count its material among the text's materials, ahead of those of
+the characters, with its sub-mesh, whether or not the ellipsis is drawn. With no such typeface,
+use the primary font's ellipsis as now.
+
+**Also seen** (not needed by the mod): `HasCharacter('…', searchFallbacks: true)` is true on
+LiberationSans SDF - Fallback and NotoSansThai-Regular in the shipped package (the character is
+in a global fallback), false here; the blank record that ends a cut text reports LiberationSans
+SDF as its font asset there and null here.
+
+### Line gaps and preferred heights with fallback glyphs (measured 2026-10-26)
+
+**Why:** Social Life (3775109476) shows a summary of five lines in GRAYSTROKE REGULAR SDF 13 pt
+(`LocText`, wrapping, top left, 740 wide), whose first and last lines have a "·" (U+00B7) that
+GRAYSTROKE lacks; it comes from NotoNaskhArabic-Regular. The text's preferred height is 85.14 in
+the shipped package and 85.17 here. Rookie Quest Guide's disclaimer (default font 9 pt, wrapping,
+1212 wide, two lines of CJK characters from NotoSansCJKjp and NotoSansCJKsc) is 26.96 high there
+and 26.66 here.
+
+**Measured** with `PROBE_SCENARIO=modtext PROBE_MX_PART=lines` (lines `MX lines …`: the mods'
+texts and variations) and `PROBE_MX_PART=pref PROBE_MX_PREF=2` (lines `MX pref …`: two- to
+four-line texts in GRAYSTROKE 13 pt with "·" from NotoNaskhArabic and in LiberationSans SDF 9 pt
+with "免" from NotoSansCJKjp, placed first, last or between, with white space, `<size>` and
+`<voffset>`, wrapping on and off). Each logs the preferred height in a rect 0 high, each line's
+ascender, descender, baseline and line height and each character's ascender, descender and
+baseline in a rect 1000 high. `tools/UnityProbe/mx-check.py rule LOG` checks both rules below
+against a log: the shipped package matches all 136 line intervals and all 100 preferred
+heights; this implementation 48 and 52.
+
+The faces involved (pointSize, lineHeight, ascentLine, descentLine; scale 1): GRAYSTROKE 124,
+130.0625, 117.6875, −12.4375; NotoNaskhArabic 32, 54.5, 34.1875, −20.25; LiberationSans 86,
+98.8916, 77.8535156, −18.22461; NotoSansCJKjp 30, 44.375, 34.8125, −9.625; NotoSansCJKsc 32,
+47.375, 37.125, −10.25. Below, a character's ascender and descender are those `characterInfo`
+reports, relative to its baseline, and the primary font's line gap G is its lineHeight less its
+ascent and its descent's depth, scaled to the text's size: GRAYSTROKE 13 pt −0.006552,
+LiberationSans 9 pt 0.294432.
+- **A line's height** (`lineInfo.lineHeight`) is the largest (ascender − descender) among its
+  characters, plus G. A character from a fallback font contributes its own ascender and
+  descender, not its font's lineHeight: the first summary line is 22.115234 − 0.006552 =
+  22.1086826 high (NotoNaskhArabic's lineHeight would give 22.140625, as this implementation
+  reports), and the disclaimer's lines 13.33125 + 0.294432 = 13.6256838 (NotoSansCJKjp's
+  height; NotoSansCJKsc's is smaller). G is the text's size even in a `<size>` (measured with
+  `<size=150%>` lines); a `<voffset>` moves ascender and descender together and leaves the
+  height.
+- **The interval** from line k−1's baseline down to line k's is line k−1's height less line
+  k−1's ascender, plus line k's ascender (its final one, after it grows part-way, "Lines that
+  grow part-way" above). The height and the ascender are each the line's largest; they need not
+  come from one character. "免责声明\nAB" (9 pt): 13.6256838 − 10.44375 + 8.147463 = 11.32939.
+  This implementation takes the largest of the characters' own (lineHeight − ascent) instead,
+  with each fallback font's lineHeight: 11.03027 there, and 20.59015 for 20.558228 in the
+  summary.
+- **The preferred height** is the first line's top less the lowest of these bottoms:
+  - the last line's descender (as the laid-out lines give it);
+  - on each line after the first that has a visible character after its first character: the
+    first character's descender below a baseline lowered by L, where L is the line before's
+    ascender less that first character's ascender, when L is positive.
+  The second term is how the shipped package's preferred height exceeds the extent of the laid
+  out lines. Only a last line could show it here; on earlier lines it lies above later lines'
+  bottoms. Then the rounding of "Preferred sizes to the hundredth" applies.
+  - "·\nB" 35.76 (the lines' extent, 35.7508); "·\nBB", "·\n B" and "·\nB B" 37.31 (L = 13.888672
+    − 12.338227 = 1.550445); "·\nB " 35.76 (the space after "B" is not visible); "·\nB\nBB" 49.39
+    (the line before is "B": L = 0); "B\n·\nBB" 50.94. "·\nBB·" 44.23: the second term lies
+    above the "·"'s own descender.
+  - "免\nAB" 25.98 for an extent of 23.6804 (L = 10.44375 − 8.147463); "免\nB免B" 28.28: L less
+    the difference of the two descenders, 2.2963 − 0.9803. "<size=150%>B</size>\nBB" (13 pt)
+    40.27 for 34.10; "·\nB<size=150%>B</size>" 43.48: the first B's descender, though the
+    larger B's is lower in the laid-out line.
+- The mods' texts follow: the summary 85.14 (its last line has a "·"), the disclaimer 26.96
+  (from the line height alone), Social Life's "Couples: 0 · Cold wars: 0\nColony: Neutral (0)"
+  37.31 (here 35.79). Texts whose glyphs are all the primary font's, or whose fallbacks are no
+  taller than it (NotoSans-Regular's "·"), are unchanged.
+
+**Requirement:** take each character's part in its line's height as its ascender less its
+descender plus the primary font's line gap at the text's size, take the line's height and
+ascender as separate maximums, and space the lines by the interval above. Compute the preferred
+height with the extra bottom candidate above.
+
 ## Verification
 
 1. **Build:**

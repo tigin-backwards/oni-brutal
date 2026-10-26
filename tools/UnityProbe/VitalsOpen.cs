@@ -13,6 +13,8 @@
 // Rebuild calls and OnRectTransformDimensionsChange, with the content's and viewport's heights;
 // in its first three LateUpdates, before and after, the inputs of the content's bounds bit for
 // bit ("geo").
+// PROBE_VO_SCREEN=VitalsTableScreen limits the geometry to that screen (Schedule & Priority Screen
+// Expander's spec opens the Priorities screen first).
 // With PROBE_SCENARIO=vitalsopen only this probe runs. It needs a colony to be loaded and a table
 // screen to be opened (the e2e runner's Resize Dup UI spec does both).
 using System.Collections;
@@ -102,10 +104,31 @@ namespace SemanticsProbe
                 + " sv=" + F(((RectTransform)s.transform).rect.height) + " bar=" + (bar == null ? "none" : F(bar.value) + "/" + F(bar.size))
                 + (s.content == null ? "" : " apx=" + F(s.content.anchoredPosition.x) + " cw=" + F(s.content.rect.width) + " vw=" + F(view.rect.width)
                     + " cpos=" + V3(s.content.position) + " vpos=" + V3(view.position) + " cscale=" + V3(s.content.lossyScale))
-                + " cb=" + B(HarmonyLib.Traverse.Create(s).Field("m_ContentBounds").GetValue<Bounds>());
+                + " cb=" + B(HarmonyLib.Traverse.Create(s).Field("m_ContentBounds").GetValue<Bounds>()) + Prev(s);
         }
 
+        /// The previous update's bounds the scroll rect compares with, bit for bit: the shipped
+        /// package's private field, or this implementation's.
+        static string Prev(KScrollRect s)
+        {
+            foreach (var name in new[] { "m_PrevContentBounds", "previousContentBounds" })
+            {
+                var f = HarmonyLib.AccessTools.Field(typeof(UnityEngine.UI.ScrollRect), name);
+                if (f == null) continue;
+                var b = (Bounds)f.GetValue(s);
+                return " prev=" + B(b) + " prevc=" + Bits(b.center.y) + "/" + Bits(b.extents.y)
+                    + " cur=" + Bits(HarmonyLib.Traverse.Create(s).Field("m_ContentBounds").GetValue<Bounds>().center.y);
+            }
+            return " prev=?";
+        }
+
+        static string Bits(float v) => System.BitConverter.ToInt32(System.BitConverter.GetBytes(v), 0).ToString("X8");
+
         static int geometryLogged;
+        // PROBE_VO_SCREEN names the table screen whose first LateUpdates log the geometry (all
+        // screens when unset; the first three updates overall).
+        static readonly string GeoScreen = System.Environment.GetEnvironmentVariable("PROBE_VO_SCREEN");
+        static bool GeoFor(TableScreen screen) => string.IsNullOrEmpty(GeoScreen) || screen.GetType().Name == GeoScreen;
 
         static string M(Matrix4x4 m)
         {
@@ -152,7 +175,7 @@ namespace SemanticsProbe
             var screen = __instance.GetComponentInParent<TableScreen>();
             if (screen == null || __instance.verticalScrollbar == null) return;
             L(screen.GetType().Name + " KScrollRect.LateUpdate begin dt=" + F(Time.unscaledDeltaTime) + " scale=" + Scale(screen) + " " + ScrollState(__instance));
-            if (geometryLogged < 3) Geometry(__instance, "before" + geometryLogged);
+            if (geometryLogged < 3 && GeoFor(screen)) Geometry(__instance, "before" + geometryLogged);
         }
 
         public static void ScrollAfter(KScrollRect __instance)
@@ -161,7 +184,7 @@ namespace SemanticsProbe
             var screen = __instance.GetComponentInParent<TableScreen>();
             if (screen == null || __instance.verticalScrollbar == null) return;
             L(screen.GetType().Name + " KScrollRect.LateUpdate end " + ScrollState(__instance));
-            if (geometryLogged < 3) Geometry(__instance, "after" + geometryLogged++);
+            if (geometryLogged < 3 && GeoFor(screen)) Geometry(__instance, "after" + geometryLogged++);
         }
 
         IEnumerator EndOfFrames()

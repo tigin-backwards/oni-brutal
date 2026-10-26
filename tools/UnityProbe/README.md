@@ -459,6 +459,22 @@ run the player under `unshare --user --map-root-user --mount` after bind-mountin
 folder over the directory. `docs/cleanroom/ugui.md` ("Legacy Text glyph placement") records
 what it measured.
 
+With `PROBE_SCENARIO=modtext` only the mod-text probe runs (`ModText.cs`, lines `MX …`, 10 s into
+the main menu, a few seconds; `PROBE_MX_PART` takes a comma list of `font`, `ellipsis`, `bold`,
+`lines` and `pref`). It builds texts as three Workshop mods do. `font`: `font = null` on texts
+before and after they wake, and PLib's `LocText` with a `TextStyleSetting` made with `new`
+(Smart Coolers). `ellipsis` and `bold`: short Bold and Italic labels in each overflow mode, the
+fonts and materials of their characters and ellipsis and their sub-meshes, and the fonts' weight
+tables (Rookie Quest Guide). `lines`: Social Life's summary and Rookie Quest Guide's disclaimer,
+multi-line texts with glyphs from taller fallback fonts, with their preferred heights and line
+metrics. `pref`: two- to four-line texts that tell the line-interval and preferred-height rules
+apart (`PROBE_MX_PREF=2` for the set with each character's metrics). A `face` line gives each
+font's face values. It runs through `scripts/e2e.py` with a spec `from: main-menu` that waits
+(and times out) on `**/MxProbeDone`, as the text-height probe does. Compare the players with
+`tools/UnityProbe/mx-check.py diff ORIG OURS [PART]` and check the rules with `mx-check.py rule
+LOG`. `textmeshpro.md` ("A font set to null", "The ellipsis glyph in Bold and Italic texts",
+"Line gaps and preferred heights with fallback glyphs") records what it measured.
+
 ## UI semantics (`UiSemantics.cs`, `UIS` lines)
 
 Ten seconds into the front end, after the front-end dump, it builds small hierarchies on an
@@ -503,7 +519,9 @@ what it logs:
   activation, and the inputs of its scroll rect's bounds to the bit (`geo`). It needs a colony
   and a table screen opened: install the probe as a Local mod in an e2e run of the Resize Dup UI
   spec (a scratch `ONI_WS` holding it as an item, the spec's `mods` naming that item, and
-  `PROBE_SCENARIO` in the runner's environment).
+  `PROBE_SCENARIO` in the runner's environment), or with `SemanticsProbe.dll` in a copy of
+  OniMcp's mod folder. `PROBE_VO_SCREEN=VitalsTableScreen` limits the bit-for-bit lines to that
+  screen. Each update also logs the bounds the scroll rect compares with (`prev=`).
 - `updorder` (`UpdateOrder.cs`, `UO`): the order Update and LateUpdate reach behaviours of one
   execution order made at different times, KScreenManager and an object made in OnLoad among
   them.

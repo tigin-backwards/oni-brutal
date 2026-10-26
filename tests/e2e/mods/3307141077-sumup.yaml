@@ -1,0 +1,21 @@
+# Sumup (3307141077), class T.
+#
+# What it does: a Sumup tool in the tool menu: dragging it over an area opens a dialog that
+# lists each element there, heaviest first, with its total mass, the mass a dig would leave
+# for solids, and its average temperature.
+# How a player reaches it: the tool menu's Sumup button, then a drag.
+# What changes: a resource count for any area.
+#
+# The tool is picked from the tool menu and dragged over the algae under the corridor west
+# of the printing pod; the dialog opens and lists Algae with its masses.
+from: early-base
+mods: [3307141077]
+steps:
+  - driver: {camera.set: {cell: [112, 206], ortho: 10}}
+  - tool: {toolbar: Sumup}
+  - expect_state: {"PlayerController.Instance.ActiveTool.name": SumupTool}
+  - drag: {from: [108, 203], to: [116, 205]}
+  - ui_wait: {path: "**/ConfirmDialog/GameObject/Text", cond: stable}
+  - expect_ui:
+      "**/ConfirmDialog/GameObject/Text": {text: "/Algae(</link>)?\\n Total Mass: /"}
+  - ui_dump: {name: dialog, root: "**/ConfirmDialog", mask_text: ['[\d ]+\.\d\d', '-?\d+(\.\d+)?']}

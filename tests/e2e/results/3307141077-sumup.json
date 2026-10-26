@@ -1,0 +1,63 @@
+{
+ "spec": "mods/3307141077-sumup.yaml",
+ "mods": [
+  "3307141077"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Sumup tool dragged over algae opens a dialog of its masses (dumped)",
+ "updated": "2026-10-26",
+ "commit": "28b4e36a",
+ "mod_dlls": {
+  "3307141077": {
+   "Sumup.dll": "101bc255ed1cd19f8f96ca6355ce2b7eefa12198a228a57123be359809fa0c9a"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-175250-0ae88632",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T18:11:45",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-183436-06bd7bbf",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T19:01:52",
+    "lane": 15,
+    "reference_run": "20261026-175250-0ae88632",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "dialog": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261026-183436-06bd7bbf",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T19:02:47",
+    "lane": 15,
+    "reference_run": "20261026-175250-0ae88632",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "dialog": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

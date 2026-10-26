@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3726410223-fasttrack-simplified-chinese.yaml",
+ "mods": [
+  "3726410223"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "its Chinese strings for Fast Track's options are registered",
+ "updated": "2026-10-25",
+ "commit": "8884175",
+ "mod_dlls": {
+  "3726410223": {
+   "FastTrack-SimplifiedChinese.dll": "6217946039f4356b6d255f8e15e85ccfdf25d46ea2701dfd85d0d76741f57248"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-194153-495dc922",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T19:48:30",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-202022-f65a57ec",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T20:20:22",
+    "lane": 14,
+    "reference_run": "20261025-194153-495dc922",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261025-202022-f65a57ec",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-25T20:21:20",
+    "lane": 14,
+    "reference_run": "20261025-194153-495dc922",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -1,0 +1,19 @@
+# FastTrack-Simplified Chinese Translation (3726410223), class X.
+#
+# What it does: a postfix on Localization.Initialize adds Simplified Chinese strings for Fast
+# Track's options (STRINGS.UI.FRONTEND.FASTTRACK.* and STRINGS.UI.TOOLTIPS.FASTTRACK.*), with
+# Strings.Add, whatever the game's language; it logs "execute successful".
+# How a player reaches it: Fast Track's options dialog, which reads those keys.
+# What changes: Fast Track's options read in Chinese.
+#
+# Fast Track itself is not on the Workshop: the spec checks the strings the mod registers.
+from: early-base
+mods: [3726410223]
+require_log: ['execute successful']
+steps:
+  - expect_state:
+      "Strings.Get(\"STRINGS.UI.FRONTEND.FASTTRACK.CATEGORY_BUILDINGS\").String": "建筑"
+      "Strings.Get(\"STRINGS.UI.FRONTEND.FASTTRACK.NODISEASE\").String": "禁用疾病"
+      "Strings.Get(\"STRINGS.UI.TOOLTIPS.FASTTRACK.WATERMARK.OFF\").String": "在游戏中完全隐藏版本水印。"
+  - run: {seconds: 10}
+  - expect: {duplicants: 3}

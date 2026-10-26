@@ -1,0 +1,34 @@
+# AlwaysRequestSuitLocker (2908269000), classes P, O.
+#
+# What it does: postfixes on SuitLocker.DropSuit and SuitLocker.EquipTo set the dock's
+# isWaitingForSuit, so a dock whose suit was undocked or taken by a Duplicant asks for another
+# suit at once (the game leaves it empty). PLib options choose the docks it applies to: Oxygen
+# Mask and Atmo Suit docks (on by default) and Jet Suit docks (off).
+# How a player reaches it: an Atmo Suit Dock's side screen (Undock Suit), or a Duplicant taking
+# a suit from it; the options on the Mods screen.
+# What changes: docks keep requesting suits.
+#
+# setup builds an Atmo Suit Dock in the corridor west of the printing pod, docks an Atmo Suit in
+# it and configures it to request no suit. The dock is selected and its Undock Suit button
+# clicked: the suit drops and the dock waits for a suit, where the game's would stay empty.
+from: early-base
+mods: [2908269000]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"SuitLocker\")", method: Build, args: [131129, Neutral, null, [Steel], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {type: GameUtil, method: KInstantiate, args: [{"$": "Assets.GetPrefab(\"Atmo_Suit\")"}, [110.5, 206.5, -12], Ore]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "all:SuitLocker::[0].GetComponent<Storage>", method: Store, args: [{"$": "all:SuitTank::[0].gameObject"}, false, false, true, false]}}
+  - driver: {setup.call: {target: "all:SuitLocker::[0]", method: ConfigNoSuit}}
+steps:
+  - run: {seconds: 2}
+  - expect_state:
+      "all:SuitLocker::[0].GetStoredOutfit()": exists
+      "all:SuitLocker::[0].smi.GetCurrentState().name": {contains: charging}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 208], select: SuitLocker}
+  - ui_wait: {path: "**/SuitLockerSideScreen*", cond: stable}
+  - click: {text: "Undock Suit", under: "**/SuitLockerSideScreen*"}
+  - expect_state:
+      "all:SuitLocker::[0].GetStoredOutfit()": missing
+      "all:SuitLocker::[0].smi.GetCurrentState().name": {contains: waitingforsuit}
+  - ui_dump: {name: dock, root: "**/SuitLockerSideScreen*"}

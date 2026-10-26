@@ -1,0 +1,64 @@
+{
+ "spec": "mods/2908269000-always-request-suit-locker.yaml",
+ "mods": [
+  "2908269000"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "an Atmo Suit Dock's Undock Suit button drops its suit and the dock asks for another at once; dock side screen dump matches",
+ "updated": "2026-10-26",
+ "commit": "72d9619",
+ "mod_dlls": {
+  "2908269000": {
+   "AlwaysRequestSuitLocker.dll": "3f4b144b053b89d55d544b05ac6b4a776e1ce814a7a58c9117eb5b51910fd006",
+   "PLib.dll": "1cb4b1b3a9904d4da385f14cfbd399b1d2d6281e1495187e04d0ad990b84aaaa"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-215725-746bb295",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T21:57:25",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-224314-5ac0200a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T00:06:15",
+    "lane": 14,
+    "reference_run": "20261025-215725-746bb295",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "dock": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261025-224314-5ac0200a",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T00:07:08",
+    "lane": 14,
+    "reference_run": "20261025-215725-746bb295",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "dock": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -326,6 +326,23 @@ MonoBehaviour (whether it is alive, its instance id, name, hide flags and `ToStr
 Awake and OnEnable run and when, what reaches the log), then Instantiate, DestroyImmediate and
 Destroy on it. `ScriptableObjectNewTests` encodes the results.
 
+With `PROBE_SCENARIO=missingtypes` only the missing-types probe runs (`MissingTypes.cs`, lines
+`MT …`, at the main menu; a `MissingTypesProbeDone` canvas appears at the end). It is built
+against `Gone/v1`'s ProbeGone; put `Gone/v2`'s build (`dotnet build Gone/v2 -c Release`) beside
+SemanticsProbe.dll instead, which lacks the type Gone and the method Keeper.Removed. Each case is
+a method naming Gone one way (a call by its return or parameter type, a field of it, isinst,
+castclass, newobj, newarr, ldtoken, a generic argument, a local, a catch clause, a call to the
+probe's own method with Gone in its signature, two of them in either order), called twice: the
+exception's type, message and first frame, and whether any of the method ran. Then components
+and a ScriptableObject without a parameterless constructor: what AddComponent, CreateInstance and
+Instantiate make, which messages run and what is logged. ARCHITECTURE D40 and §3.2 record what
+it measured; `NoParameterlessConstructorTests` and `--check-types` encode it.
+
+With `PROBE_SCENARIO=quitevents` only the quit-events probe runs (`QuitEvents.cs`, lines `QE …`,
+at the main menu): Application.wantsToQuit, quitting and unloading handlers and OnApplicationQuit,
+around three Application.Quit() calls three frames apart (a handler refuses the first and throws
+at the second). The player quits at the second. `QuitEventsTests` encodes the results.
+
 With `PROBE_SCENARIO=destroyflags` only the destroy-flags probe runs (`DestroyFlags.cs`, lines
 `DF …`, at the main menu): the active flags each component sees in its OnDisable and OnDestroy
 when a GameObject is destroyed (with Destroy and DestroyImmediate; active, inactive, under an

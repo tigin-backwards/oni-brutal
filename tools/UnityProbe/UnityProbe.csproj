@@ -28,5 +28,11 @@
     <Reference Include="$(OniManaged)/Assembly-CSharp-firstpass.dll" Private="false" />
     <Reference Include="$(OniManaged)/0Harmony.dll" Private="false" />
   </ItemGroup>
+  <!-- MissingTypes.cs is built against ProbeGone v1; the mod folder gets v2 (Gone/v2), which
+       lacks the types and members v1 has. -->
+  <ItemGroup>
+    <Compile Remove="Gone/**" />
+    <ProjectReference Include="Gone/v1/ProbeGoneV1.csproj" />
+  </ItemGroup>
 </Project>
 

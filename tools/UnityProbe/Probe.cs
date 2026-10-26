@@ -161,6 +161,16 @@ namespace SemanticsProbe
                 go.AddComponent<WordCount>();
                 return;
             }
+            if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "missingtypes")
+            {
+                go.AddComponent<MissingTypes>();
+                return;
+            }
+            if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "quitevents")
+            {
+                go.AddComponent<QuitEvents>();
+                return;
+            }
             if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "newobject")
             {
                 go.AddComponent<NewObject>();

@@ -1,0 +1,24 @@
+# Slide Down Ladders (2981741974), class P.
+#
+# What it does: a postfix on Ladder.OnPrefabInit marks every ladder cell as a fire pole too
+# (Grid.HasPole beside Grid.HasLadder), so Duplicants slide down any ladder as they would a pole
+# and still climb it as a ladder.
+# How a player reaches it: building a ladder.
+# What changes: ladders are fast on the way down.
+#
+# A three-cell ladder is built in the dug-out corridor west of the printing pod: its cells read
+# as poles and ladders both.
+from: early-base
+mods: [2981741974]
+steps:
+  - expect_state:
+      "Grid.WidthInCells": 636
+      "Grid.HasPole.get_Item(131765)": false
+  - build: {prefab: Ladder, cells: [[113, 206], [113, 207], [113, 208]]}
+  - expect: {blueprints: {Ladder: 3}}
+  - run: {seconds: 900, until: {buildings: {Ladder: 3}, pending_construction: 0}}
+  - expect_state:
+      "Grid.HasPole.get_Item(131129)": true
+      "Grid.HasPole.get_Item(131765)": true
+      "Grid.HasLadder.get_Item(131765)": true
+      "Grid.HasPole.get_Item(132401)": true

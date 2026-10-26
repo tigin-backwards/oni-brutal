@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2981741974-slide-down-ladders.yaml",
+ "mods": [
+  "2981741974"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a three-cell ladder built by Duplicants reads as fire pole and ladder in every cell",
+ "updated": "2026-10-26",
+ "commit": "a452aaa",
+ "mod_dlls": {
+  "2981741974": {
+   "SlideDownLadders.dll": "4d97b09c51b06c7f51101b6a7ae6a7dfe0a9dad67b20abaccb0ff573b74b4535"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-022709-87387b70",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T02:27:09",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-023425-4430a720",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T02:44:36",
+    "lane": 15,
+    "reference_run": "20261026-022709-87387b70",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-023425-4430a720",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T02:48:32",
+    "lane": 15,
+    "reference_run": "20261026-022709-87387b70",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

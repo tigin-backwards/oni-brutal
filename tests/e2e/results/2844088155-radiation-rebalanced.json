@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2844088155-radiation-rebalanced.yaml",
+ "mods": [
+  "2844088155"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Radiation Eater tuning is the mod's; the colony plays on",
+ "updated": "2026-10-26",
+ "commit": "7e465f40",
+ "mod_dlls": {
+  "2844088155": {
+   "RadiationRebalanced.dll": "31792707f4c220146fe94c481f2760926cd3461f1b94f95f2998d15302d7af99"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-173427-72c0b636",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T17:51:52",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-180507-0915b6e7",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T18:36:02",
+    "lane": 14,
+    "reference_run": "20261026-173427-72c0b636",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-180507-0915b6e7",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T18:36:58",
+    "lane": 14,
+    "reference_run": "20261026-173427-72c0b636",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

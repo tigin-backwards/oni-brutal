@@ -1,0 +1,19 @@
+# [DLC] Radiation Rebalanced (2844088155), class P.
+#
+# What it does: settings in a JSON file beside the mod retune radiation: the Radiation Eater
+# trait consumes 600 rads a cycle for 500 kcal (TUNING.TRAITS), plant mutations are five times
+# likelier with radiation, glow sticks and the emitters of Beeta hives, Shine Bugs,
+# Wheezeworts, Beetas and radiation lamps get their own rads and ranges, and trait rarities
+# change.
+# How a player reaches it: it is passive.
+# What changes: radiation that is easier to use.
+#
+# The Radiation Eater tuning is read: 1 rad a second recovered, 833 kcal per 1,000 rads.
+from: early-base
+mods: [2844088155]
+steps:
+  - expect_state:
+      "TUNING.TRAITS.RADIATION_EATER_RECOVERY": -1
+      "TUNING.TRAITS.RADS_TO_CALS": [">= 833.3", "<= 833.4"]
+  - run: {seconds: 5}
+  - expect: {duplicants: 3}

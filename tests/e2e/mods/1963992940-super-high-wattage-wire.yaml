@@ -1,0 +1,30 @@
+# Super High Wattage Wire (1963992940), classes B, P.
+#
+# What it does: adds the Super High Wattage Wire (SuperHighWattageWire, gold-drawn, Power,
+# researched with Advanced Power Regulation) carrying the top rating, and raises the wires'
+# ratings (a postfix on Wire.GetMaxWattageAsFloat): 500 W and 1 kW as before, the Max2000 and
+# Max20000 ratings 20 kW, Max50000 and above 100 kW; wire descriptions show the new figures.
+# How a player reaches it: the build menu (Power), after the research.
+# What changes: what wires carry.
+#
+# setup grants Advanced Power Regulation: the wire shows in the Power menu. setup builds one
+# in the dug-out room west of the printing pod: it is rated Max50000, 100 kW.
+from: early-base
+mods: [1963992940]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"AdvancedPowerRegulation\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"SuperHighWattageWire\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Gold], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"AdvancedPowerRegulation\").unlockedItemIDs": {contains: SuperHighWattageWire}
+      "Wire.GetMaxWattageAsFloat(\"Max2000\")": 20000
+      "Wire.GetMaxWattageAsFloat(\"Max50000\")": 100000
+      "Wire.GetMaxWattageAsFloat(\"Max1000\")": 1000
+      "count:all:Wire::[*] if .MaxWattageRating == Max50000": 1
+  - run: {seconds: 10}
+  - click: {ui: "**/PlanScreen/Toggle:Power"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/SuperHighWattageWire Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/SuperHighWattageWire Group*": {active: true}
+  - shot: {name: power-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}

@@ -1,0 +1,59 @@
+{
+ "spec": "mods/1963992940-super-high-wattage-wire.yaml",
+ "mods": [
+  "1963992940"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Power menu offers the Super High Wattage Wire after Advanced Power Regulation (shot matches); one built is rated Max50000, and wire ratings read 20 kW and 100 kW",
+ "updated": "2026-10-26",
+ "commit": "f5dcce1c",
+ "mod_dlls": {
+  "1963992940": {
+   "ONI_TONG.dll": "917020bea558aacae81996e659a00199434169d980d933691f584677b729c8af"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-033203-6e82e943",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:46:52",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-041335-8abd0ec9",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:13:35",
+    "lane": 16,
+    "reference_run": "20261026-033203-6e82e943",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "power-menu": 0.0
+    }
+   },
+   {
+    "run": "20261026-041335-8abd0ec9",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T04:13:36",
+    "lane": 17,
+    "reference_run": "20261026-033203-6e82e943",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "power-menu": 0.0
+    }
+   }
+  ]
+ }
+}

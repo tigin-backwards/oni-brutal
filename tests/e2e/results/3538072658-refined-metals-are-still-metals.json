@@ -1,0 +1,59 @@
+{
+ "spec": "mods/3538072658-refined-metals-are-still-metals.yaml",
+ "mods": [
+  "3538072658"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "refined copper, steel and enriched uranium carry the Metal tag: the Manual Generator's metal-ore panel offers the copper, it is picked and placed, and the generator is built of copper; the material panel as in the original",
+ "updated": "2026-10-25",
+ "commit": "78891e5",
+ "mod_dlls": {
+  "3538072658": {
+   "RefinedMetalsAreStillMetals.dll": "20ecd3d223531a75d3fd4404e920cfacdb1791160df9c95edb12c74f60ccd3ce"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-194609-7e6ec6de",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T19:48:11",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-201457-3eaf3ff8",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T20:14:57",
+    "lane": 16,
+    "reference_run": "20261025-194609-7e6ec6de",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "materials": 0.009182
+    }
+   },
+   {
+    "run": "20261025-201457-3eaf3ff8",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-25T20:16:07",
+    "lane": 16,
+    "reference_run": "20261025-194609-7e6ec6de",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "materials": 0.009182
+    }
+   }
+  ]
+ }
+}

@@ -13,11 +13,12 @@ namespace OniBrutal.Engine
     internal static class EngineLog
     {
         static readonly object fileLock = new();
-        static StreamWriter file;
+        static CappedLogFile file;
 
         static TextWriter console;
 
-        /// Opens the log file (overwriting it, as Unity does). Called once by the host. Like the
+        /// Opens the log file (overwriting it, as Unity does; capped, unlike Unity's: CappedLogFile).
+        /// Called once by the host. Like the
         /// original player's log, it also takes the process's console output: the game's own
         /// logger writes its [INFO] lines with Console.WriteLine. With `keepPrevious` (the
         /// player's default log, not one named on the command line), the last session's log is
@@ -36,7 +37,7 @@ namespace OniBrutal.Engine
             }
             lock (fileLock)
             {
-                file = new StreamWriter(new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.ReadWrite), new UTF8Encoding(false)) { AutoFlush = true };
+                file = new CappedLogFile(path);
                 console ??= Console.Out;
                 Console.SetOut(new LogWriter(console));
             }

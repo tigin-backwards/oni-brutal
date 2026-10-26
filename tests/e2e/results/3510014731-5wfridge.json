@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3510014731-5wfridge.yaml",
+ "mods": [
+  "3510014731"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Refrigerator's definition and a built one draw 5 W; it is selected and the colony runs",
+ "updated": "2026-10-26",
+ "commit": "f8e1940",
+ "mod_dlls": {
+  "3510014731": {
+   "5WFridge.dll": "255fa2a5773a1a756b2319875cf5f6e7643671d2143f60acfcfd495c983e9a19"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-220744-daa697b6",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T23:53:06",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-010431-3ab80320",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T01:05:52",
+    "lane": 15,
+    "reference_run": "20261025-220744-daa697b6",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-010431-3ab80320",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T01:06:36",
+    "lane": 15,
+    "reference_run": "20261025-220744-daa697b6",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

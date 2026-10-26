@@ -1,0 +1,26 @@
+# 5WFridge (3510014731), class P.
+#
+# What it does: postfixes on RefrigeratorConfig make the Refrigerator draw 5 W while cooling
+# (the game's 120 W) and 3 W in its power saver mode (20 W).
+# How a player reaches it: building a Refrigerator.
+# What changes: cheap refrigerators.
+#
+# The Refrigerator's definition and its controller carry the new wattages; setup builds one in
+# a pit of the floor west of the printing pod, and it is selected.
+from: early-base
+mods: [3510014731]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Refrigerator\")", method: Build, args: [{"$": "Grid.XYToCell(113, 206)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"Refrigerator\").EnergyConsumptionWhenActive": 5
+      "all:Refrigerator::[0].GetComponent<EnergyConsumer>.WattsNeededWhenActive": "<= 5"
+      "all:Refrigerator::[0].GetComponent<EnergyConsumer>.BaseWattageRating": 5
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [113, 207], ortho: 8}}
+  - click_world: {cell: [113, 206], select: Refrigerator}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Refrigerator"}
+  - run: {seconds: 5}
+  - expect: {duplicants: 3, buildings: {Refrigerator: 1}}

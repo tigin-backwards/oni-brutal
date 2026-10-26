@@ -1,0 +1,30 @@
+# Full of Juice (3706917570), class P.
+#
+# What it does: the Juicer gets biome-themed juices: its storage accepts the ingredients of
+# each (Bristle Berry, Sleet Wheat Grain, Dusk Cap, Bog Jelly, Grubfruit and others, those of
+# the DLCs in play), with paused deliveries, and a recipe chooser (FewOptionSideScreen) whose
+# choice resumes that ingredient's delivery and gives the drink a buff (heat, cold or germ
+# resistance, Excavation, Science) registered as an effect.
+# How a player reaches it: selecting a Juicer; its recipe list.
+# What changes: juices with buffs.
+#
+# setup builds a Juicer in the dug-out corridor west of the printing pod; it is selected, and
+# Mushroom Blend picked from its list.
+from: early-base
+mods: [3706917570]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Juicer\")", method: Build, args: [131127, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"Juicer\").GetComponent<Storage>.storageFilters": [{contains: Mushroom}, {contains: PrickleFruit}]
+  - run: {seconds: 2}
+  - expect: {buildings: {Juicer: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [111, 207], select: Juicer}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/FewOptionSelectionSideScreen", cond: stable}
+  - ui_dump: {name: recipes, root: "**/FewOptionSelectionSideScreen"}
+  - click: {text: "Mushroom Blend", under: "**/FewOptionSelectionSideScreen"}
+  - expect_state:
+      "selected:JuicerRecipeManager.GetSelectedOption().Name": "== original"
+      "selected:JuicerRecipeManager.GetSelectedRecipe().DisplayName": {contains: Mushroom}
+  - shot: {name: recipes-picked, crop: "**/FewOptionSelectionSideScreen", threshold: 0.04}

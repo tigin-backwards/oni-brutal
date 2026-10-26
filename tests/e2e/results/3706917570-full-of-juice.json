@@ -1,0 +1,67 @@
+{
+ "spec": "mods/3706917570-full-of-juice.yaml",
+ "mods": [
+  "3706917570"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a selected Juicer lists the mod's juices (dumped); Mushroom Blend picked from it is selected (shot)",
+ "updated": "2026-10-26",
+ "commit": "f898d18a",
+ "mod_dlls": {
+  "3706917570": {
+   "FullOfJuice.dll": "de6a452cb7936f3d771b0109ab8a678a31b4aa56f8d85c9f34356245e417c5da"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-113228-a0d69cd2",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T11:35:40",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-150143-eb459935",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T15:05:26",
+    "lane": 14,
+    "reference_run": "20261026-113228-a0d69cd2",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "recipes": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "recipes-picked": 7.5e-05
+    }
+   },
+   {
+    "run": "20261026-150143-eb459935",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T15:05:28",
+    "lane": 15,
+    "reference_run": "20261026-113228-a0d69cd2",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "recipes": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "recipes-picked": 7.5e-05
+    }
+   }
+  ]
+ }
+}

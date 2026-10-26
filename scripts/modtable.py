@@ -321,6 +321,8 @@ broken.update({
     '2073611052': 'broken upstream: its `WorldGen.RenderOffline` patch fails (HarmonyException), the game disables it and the game quits before the colony loads, on the base-game fixture as it supports the base game only (spec tests/e2e/mods/2073611052-minibase.yaml)',
     '2797484988': 'broken upstream: it names the game\'s former `Worker` class (now `WorkerBase`), so its types fail to load, the game disables it and the game quits before the colony loads (spec tests/e2e/mods/2797484988-portal-cube.yaml)',
     '1751123054': 'broken upstream: its GravityComponents.FixedUpdate prefix reads `GameTags.Minion`, a field the game no longer has, so it throws a MissingFieldException on every tick and the game does not advance (spec tests/e2e/mods/1751123054-floatation.yaml)',
+    '3119833849': 'broken upstream: its two Harmony patches are attributes on methods of classes without a class-level `[HarmonyPatch]`, which `PatchAll` skips (one also names `CrealtBuildingDef`, a method the config lacks), so the Oxygen Diffuser keeps the game\'s 0.5 kg/s (spec tests/e2e/mods/3119833849-super-oxygen-diffuser.yaml)',
+    '1870621007': 'broken upstream: the Trapdoor Ladder\'s OnSpawn calls `SimMessages.SetCellProperties(int, byte)`, which the game no longer has (MissingMethodException), so its cell is a ladder but no door or fake floor (spec tests/e2e/mods/1870621007-trapdoors-floor-hatches.yaml)',
 })
 # Translations whose file is named Strings.po: on Linux both players look for strings.po and miss
 # it (their specs fail the same way in the original).

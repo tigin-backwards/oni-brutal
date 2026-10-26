@@ -867,7 +867,9 @@ check over all ~18.8k MonoBehaviours in the build is the proof that the rules ar
 The layout builder is shared by three users: **file deserialization, `Object.Instantiate`
 cloning, and `JsonUtility`**. Cloning is serialization-shaped, not a shallow copy: only
 serialized fields are copied; references to objects inside the cloned hierarchy are remapped
-to the clones; external references are kept; `ISerializationCallbackReceiver` hooks run
+to the clones; external references are kept; the serializer has no null, so a null string,
+array, list or serializable class is `""`, empty or a new instance in the clone (measured in the
+original player; issue #17); `ISerializationCallbackReceiver` hooks run
 (`OnBeforeSerialize` on the source, `OnAfterDeserialize` on the clone). Non-serialized fields
 of the clone keep their constructor/initializer values.
 

@@ -17,7 +17,8 @@ namespace OniMoono.Engine.Serialization
     /// - References to objects inside the cloned hierarchy point to their clones; other references
     ///   are kept.
     /// - Values are copied by their declared type: a null serializable class becomes a new
-    ///   instance, null arrays and lists become empty ones, and a subclass instance in a field of a
+    ///   instance, null arrays and lists become empty ones, a null string becomes "" (the
+    ///   source keeps its null), and a subclass instance in a field of a
     ///   base type becomes an instance of the base type (no polymorphism without
     ///   [SerializeReference]).
     /// - ISerializationCallbackReceiver: OnBeforeSerialize on the originals, OnAfterDeserialize on
@@ -205,8 +206,11 @@ namespace OniMoono.Engine.Serialization
                 Expression value = f.Shape.Kind switch
                 {
                     ValueKind.ObjectReference => Expression.Convert(Expression.Call(typeof(Cloner).GetMethod(nameof(Remap), BindingFlags.Static | BindingFlags.NonPublic), Expression.Convert(read, typeof(Object)), remapArg), field.FieldType),
+                    ValueKind.Array when f.Shape.Element.Kind == ValueKind.String => Expression.Call(typeof(Cloner).GetMethod(nameof(CopyStringArray), BindingFlags.Static | BindingFlags.NonPublic), read),
+                    ValueKind.List when f.Shape.Element.Kind == ValueKind.String => Expression.Call(typeof(Cloner).GetMethod(nameof(CopyStringList), BindingFlags.Static | BindingFlags.NonPublic), read),
                     ValueKind.Array when IsPlainValue(f.Shape.Element) => Expression.Call(typeof(Cloner).GetMethod(nameof(CopyPlainArray), BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(field.FieldType.GetElementType()), read),
                     ValueKind.List when IsPlainValue(f.Shape.Element) => Expression.Call(typeof(Cloner).GetMethod(nameof(CopyPlainList), BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(field.FieldType.GetGenericArguments()[0]), read),
+                    ValueKind.String => Expression.Coalesce(read, Expression.Constant("")),
                     _ when IsPlainValue(f.Shape) => read,
                     // A null serializable class becomes an instance in the source too (below).
                     ValueKind.Composite when !f.Shape.IsValueType => Expression.Convert(Expression.Call(typeof(Cloner).GetMethod(nameof(CopyValue), BindingFlags.Static | BindingFlags.NonPublic),
@@ -230,6 +234,25 @@ namespace OniMoono.Engine.Serialization
         static T[] CopyPlainArray<T>(T[] src) => src == null || src.Length == 0 ? [] : (T[])src.Clone();
 
         static List<T> CopyPlainList<T>(List<T> src) => src == null ? [] : new List<T>(src);
+
+        // Unity's serializer has no null string: it writes one as "", measured in the original
+        // player (issue #17: WannaPrint's side screen, added with AddComponent, keeps a null
+        // titleKey and its clone reads "").
+        static string[] CopyStringArray(string[] src)
+        {
+            if (src == null || src.Length == 0) return [];
+            var dst = new string[src.Length];
+            for (int i = 0; i < src.Length; i++) dst[i] = src[i] ?? "";
+            return dst;
+        }
+
+        static List<string> CopyStringList(List<string> src)
+        {
+            if (src == null) return [];
+            var dst = new List<string>(src.Count);
+            foreach (var s in src) dst.Add(s ?? "");
+            return dst;
+        }
 
         static void Invoke(Action a, Object context)
         {
@@ -270,8 +293,10 @@ namespace OniMoono.Engine.Serialization
                         foreach (var item in src) dst.Add(CopyValue(item, shape.Element, remap, depth));
                     return dst;
                 }
+                case ValueKind.String:
+                    return value ?? "";
                 default:
-                    // Primitives, strings, enums and built-in structs are values.
+                    // Primitives, enums and built-in structs are values.
                     return value;
             }
         }

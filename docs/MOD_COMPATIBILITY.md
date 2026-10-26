@@ -983,7 +983,7 @@ installs get developer checks subscribers never see).
 | 984 | [G 火箭系统 Rocket System 1.2](https://steamcommunity.com/sharedfiles/filedetails/?id=3357219777) | ⬜ | ⬜ | ⬜ |  |
 | 985 | [Visualization of sensor data](https://steamcommunity.com/sharedfiles/filedetails/?id=2845382372) | ⬜ | ⬜ | ⬜ |  |
 | 986 | [Rotatable Power Transformers (Vanilla/DLC)](https://steamcommunity.com/sharedfiles/filedetails/?id=1727987491) | ⬜ | ⬜ | ⬜ |  |
-| 987 | [Text Input Hotkeys](https://steamcommunity.com/sharedfiles/filedetails/?id=3165114076) | ⬜ | ⬜ | ⬜ |  |
+| 987 | [Text Input Hotkeys](https://steamcommunity.com/sharedfiles/filedetails/?id=3165114076) | ⬜ | ⬜ | ⬜ | spec fails in ours: tests/e2e/mods/3165114076-text-input-hotkeys.yaml: the build menu's search field: Ctrl+Backspace deletes the word before the caret and Ctrl+Shift+Backspace the rest; ours does not load the mod, as its TextMeshPro lacks the Backspace() and members the mod patches (docs/cleanroom/textmeshpro.md) (a run of ours failed) |
 | 988 | [Customize Elements](https://steamcommunity.com/sharedfiles/filedetails/?id=2549477669) | ⬜ | ⬜ | ⬜ |  |
 | 989 | [Atomic Suits Pack](https://steamcommunity.com/sharedfiles/filedetails/?id=3447554654) | ⬜ | ⬜ | ⬜ |  |
 | 990 | [[MG]SuperMiner(超级矿机)](https://steamcommunity.com/sharedfiles/filedetails/?id=2558070245) | ⬜ | ⬜ | ⬜ |  |
@@ -995,7 +995,7 @@ installs get developer checks subscribers never see).
 | 996 | [Deconstructable Rocket Tiles (DLC only)](https://steamcommunity.com/sharedfiles/filedetails/?id=2377629562) | ⬜ | ⬜ | ⬜ |  |
 | 997 | [Cuties](https://steamcommunity.com/sharedfiles/filedetails/?id=3362048907) | ⬜ | ⬜ | ⬜ |  |
 | 998 | [CheapBuilding建筑费用减少](https://steamcommunity.com/sharedfiles/filedetails/?id=2915322068) | ⬜ | ⬜ | ⬜ |  |
-| 999 | [Reversible Heater Clones](https://steamcommunity.com/sharedfiles/filedetails/?id=3710035894) | ⬜ | ⬜ | ⬜ |  |
+| 999 | [Reversible Heater Clones](https://steamcommunity.com/sharedfiles/filedetails/?id=3710035894) | ✅ | ✅ | ✅ | spec tests/e2e/mods/3710035894-reversible-heater-clones.yaml: the air clone is built and selected; its target temperature slider runs from -120 to 120 degrees, and -50 typed into it sets the clone's target (side screen dumped); the mod's arrow buttons appear in neither player |
 | 1000 | [Handy Herbs](https://steamcommunity.com/sharedfiles/filedetails/?id=3286478591) | ⬜ | ⬜ | ⬜ |  |
 | 1001 | [Basic 3 Worlds](https://steamcommunity.com/sharedfiles/filedetails/?id=3003736085) | ⬜ | ⬜ | ⬜ |  |
 | 1002 | [Custom Pipe Colors](https://steamcommunity.com/sharedfiles/filedetails/?id=2167499088) | ⬜ | ⬜ | ⬜ |  |

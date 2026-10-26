@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3016925992-change-some-chore-group.yaml",
+ "mods": [
+  "3016925992"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "food, equipment and ranching fetches belong to the Store errand group only; the colony runs",
+ "updated": "2026-10-26",
+ "commit": "05162a9",
+ "mod_dlls": {
+  "3016925992": {
+   "ChangeChoreType.dll": "34299ae29a5cdf907460617aaf1163647f29874f044dfc3c614e0a1663484d49"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-215725-746bb295",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T22:03:54",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-001633-7a485921",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T00:16:33",
+    "lane": 14,
+    "reference_run": "20261025-215725-746bb295",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-001633-7a485921",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T00:17:29",
+    "lane": 14,
+    "reference_run": "20261025-215725-746bb295",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

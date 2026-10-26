@@ -1,0 +1,22 @@
+# Change Some Chore Group (3016925992), class P.
+#
+# What it does: a prefix on ChoreTypes.Add moves three fetch errands into the Store errand
+# group (Storage) alone: food fetching (FoodFetch) and equipment fetching (EquipmentFetch), in
+# the game Supply's (Hauling), and ranching fetches (RanchingFetch), in the game Ranching's and
+# Supply's.
+# How a player reaches it: the Priorities screen; who does those errands.
+# What changes: those deliveries follow the Store priority instead of Supply's and Ranching's.
+#
+# The three chore types belong to the Storage group only, others keep theirs; the colony runs.
+from: early-base
+mods: [3016925992]
+steps:
+  - expect_state:
+      "Db.Get().ChoreTypes.FoodFetch.groups.Length": 1
+      "Db.Get().ChoreTypes.FoodFetch.groups[0].Id": Storage
+      "Db.Get().ChoreTypes.EquipmentFetch.groups[0].Id": Storage
+      "Db.Get().ChoreTypes.RanchingFetch.groups.Length": 1
+      "Db.Get().ChoreTypes.RanchingFetch.groups[0].Id": Storage
+      "Db.Get().ChoreTypes.CookFetch.groups.Length": 2
+  - run: {seconds: 30}
+  - expect: {duplicants: 3}

@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2693498411-transparent-solar-panels.yaml",
+ "mods": [
+  "2693498411"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Solar Panel's def lets light through and turns a full circle; a built panel leaves its cells open",
+ "updated": "2026-10-26",
+ "commit": "df5493c6",
+ "mod_dlls": {
+  "2693498411": {
+   "TransparentSolarPanels.dll": "b3843062aca1dae6bbe84854c177e06f9111f6bb752088aa8751028d79421562"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-023754-20737f8f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:28:24",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-035947-1da918fc",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:59:47",
+    "lane": 14,
+    "reference_run": "20261026-023754-20737f8f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-035947-1da918fc",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T04:00:27",
+    "lane": 14,
+    "reference_run": "20261026-023754-20737f8f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

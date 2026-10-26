@@ -1,0 +1,29 @@
+# Transparent Solar Panels (2693498411), class P.
+#
+# What it does: the Solar Panel's def lets light through its cells (BlockTileIsTransparent) and
+# may be rotated a full turn; a prefix replaces its DoPostConfigureComplete with one that adds
+# the repairable, the panel and its active controller but not the solid base, so panels can be
+# stacked and walked through.
+# How a player reaches it: building a Solar Panel.
+# What changes: solar panels that do not block light or movement.
+#
+# setup builds a Solar Panel (7 x 3) in the dug-out corridor west of the printing pod: after a
+# moment its cells are not solid.
+from: early-base
+mods: [2693498411]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"SolarPanel\")", method: Build, args: [131129, Neutral, null, [Glass], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"SolarPanel\").BlockTileIsTransparent": true
+      "Assets.GetBuildingDef(\"SolarPanel\").PermittedRotations": "== 'R360'"
+  - run: {seconds: 5}
+  - expect: {buildings: {SolarPanel: 1}}
+  - expect_state:
+      "Grid.Solid.get_Item(131129)": false
+      "Grid.Solid.get_Item(131766)": false
+  - driver: {camera.set: {cell: [113, 207], ortho: 8}}
+  - click_world: {cell: [113, 207], select: SolarPanel}
+  - ui_wait: {path: "**/DetailsScreen/TitleBar", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Solar Panel"}

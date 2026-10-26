@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2712885117-dont-use-mutated-plants.yaml",
+ "mods": [
+  "2712885117"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Microbe Musher's Allow using mutations button, pressed, allows them and turns into Prevent using mutations",
+ "updated": "2026-10-26",
+ "commit": "2a55c40e",
+ "mod_dlls": {
+  "2712885117": {
+   "DontUseMutatedPlants.dll": "38216b89c5663183f34bea72b85a7c5db70f1773f52836c77457c36aea44a40a"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-043257-c0eef0ae",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:44:02",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-110259-d514aba1",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T11:02:59",
+    "lane": 16,
+    "reference_run": "20261026-043257-c0eef0ae",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-110259-d514aba1",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T11:03:00",
+    "lane": 17,
+    "reference_run": "20261026-043257-c0eef0ae",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

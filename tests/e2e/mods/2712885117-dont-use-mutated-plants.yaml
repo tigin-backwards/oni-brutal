@@ -1,0 +1,29 @@
+# Don't use mutated plants/seeds (2712885117), classes P, S (a user menu button), O.
+#
+# What it does: cooking stations (Microbe Musher, Electric Grill, Gas Range), the Fish Feeder
+# and, with a PLib option (on in the mod's config.json), the Conveyor Loader get an "Allow
+# using mutations" / "Prevent using mutations" user menu button; while prevented (the
+# default), fetches to them skip mutated plant products and seeds (postfixes on
+# FetchManager.IsFetchablePickup and the fetch area chore), and unidentified mutants always.
+# How a player reaches it: select a cooking station; its user menu.
+# What changes: which ingredients a station accepts.
+#
+# setup builds a Microbe Musher in the dug-out room west of the printing pod. Selected, its
+# Allow using mutations button is pressed; the station now allows them, and its button reads
+# Prevent using mutations.
+from: early-base
+mods: [2712885117]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"MicrobeMusher\")", method: Build, args: [{"$": "Grid.XYToCell(111, 207)"}, Neutral, null, [Cuprite], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "all:MicrobeMusher::[0].GetComponent<AllowUseMutationsComp>.AllowUsageOfMutations": false
+      "Assets.GetPrefab(\"FishFeeder\").GetComponent<AllowUseMutationsComp>": exists
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [111, 208], ortho: 8}}
+  - click_world: {cell: [111, 207], select: MicrobeMusher}
+  - ui_wait: {path: "**/UserMenuScreen/Buttons/Allow using mutationsButton", cond: stable}
+  - click: {ui: "**/UserMenuScreen/Buttons/Allow using mutationsButton"}
+  - expect_state:
+      "selected:AllowUseMutationsComp.AllowUsageOfMutations": true
+  - ui_wait: {path: "**/UserMenuScreen/Buttons/Prevent using mutationsButton", cond: stable}

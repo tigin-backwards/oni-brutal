@@ -1,0 +1,27 @@
+# ArchipelagoNotIncluded (3415553359), classes P, O (an Archipelago multiworld client).
+#
+# What it does: connects the game to an Archipelago randomizer server (PLib options: URL,
+# port, slot name, password, reconnecting): research and buildings become items other
+# players' games send, and research completed here is sent out as checks (patches on
+# BuildingDef.IsAvailable, Research.CheckBuyResearch, Tech.IsComplete, the Printing Pod,
+# monuments, sandbox, ...). It also adds a Spaced Out-style ice tile, "Monument" goal and
+# the items' list (DefaultItemList.json).
+# How a player reaches it: a new game tied to an Archipelago session; the Mods screen.
+# What changes: progress comes from the multiworld.
+#
+# Without a session (there is no server here) the colony plays as usual: the mod's save data
+# allows no resource checks, and the build menu offers the game's buildings.
+from: early-base
+mods: [3415553359]
+steps:
+  - expect_state:
+      "type:ArchipelagoNotIncluded.APSaveData::Instance.AllowResourceChecks": false
+      "Assets.GetBuildingDef(\"Outhouse\").IsAvailable()": true
+  - run: {seconds: 10}
+  - click: {ui: "**/PlanScreen/Toggle:Base"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/Ladder Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/Ladder Group*": {active: true}
+  - key: {code: Escape}
+  - run: {seconds: 10}
+  - expect: {duplicants: 3}

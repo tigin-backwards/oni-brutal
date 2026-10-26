@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3415553359-archipelago-not-included.yaml",
+ "mods": [
+  "3415553359"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "without an Archipelago session the colony plays as usual: no resource checks, the build menu offers the game's buildings",
+ "updated": "2026-10-26",
+ "commit": "ece30742",
+ "mod_dlls": {
+  "3415553359": {
+   "ArchipelagoNotIncluded.dll": "9e25d862d0691cad0d8d92fdf24c91985a41d70cdd445374c95dbd902d489f59"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-043257-c0eef0ae",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:51:48",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-110843-de5c5cab",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T11:08:43",
+    "lane": 16,
+    "reference_run": "20261026-043257-c0eef0ae",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-110843-de5c5cab",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T11:08:44",
+    "lane": 17,
+    "reference_run": "20261026-043257-c0eef0ae",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -1,0 +1,56 @@
+{
+ "spec": "mods/2867460635-pipeline-inspection-in-wall.yaml",
+ "mods": [
+  "2867460635"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the pipe sensors' build location rule is Conduit, so they fit in walls",
+ "updated": "2026-10-26",
+ "commit": "906e9515",
+ "mod_dlls": {
+  "2867460635": {
+   "PLib.dll": "b862c5db2b3cd6df09a62d4a30782e91e2b24e8e1bfac08d991c9cc89a984ba9",
+   "Pipeline inspection in wall╣▄╡└╝∞▓Γ┐╔┤⌐╟╜.dll": "2731f8ae25bb731136eb5ed7790bc445a2186bc44ebd8d280dfda5c33d476699"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-024539-704646ee",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:41:20",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-044750-839bfa4f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:47:50",
+    "lane": 14,
+    "reference_run": "20261026-024539-704646ee",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-044750-839bfa4f",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T04:47:51",
+    "lane": 15,
+    "reference_run": "20261026-024539-704646ee",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

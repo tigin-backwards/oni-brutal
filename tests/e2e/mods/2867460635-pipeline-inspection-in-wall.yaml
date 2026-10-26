@@ -1,0 +1,18 @@
+# Pipeline inspection in wall管道检测可穿墙 (2867460635), class P.
+#
+# What it does: a postfix on ConduitSensorConfig.CreateBuildingDef changes the pipe sensors'
+# (liquid and gas pipe thermo, germ and element sensors) build location rule to Conduit, so
+# they can be placed on any pipe, inside walls and tiles too.
+# How a player reaches it: building a pipe sensor.
+# What changes: sensors that fit in walls.
+#
+# The sensors' defs are read.
+from: early-base
+mods: [2867460635]
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"LiquidConduitTemperatureSensor\").BuildLocationRule": "== 'Conduit'"
+      "Assets.GetBuildingDef(\"GasConduitElementSensor\").BuildLocationRule": "== 'Conduit'"
+      "Assets.GetBuildingDef(\"LiquidConduitDiseaseSensor\").BuildLocationRule": "== 'Conduit'"
+  - run: {seconds: 10}
+  - expect: {duplicants: 3}

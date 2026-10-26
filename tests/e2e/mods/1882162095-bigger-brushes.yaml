@@ -1,0 +1,40 @@
+# Bigger Brushes (1882162095), classes O, V.
+#
+# What it does: a postfix on SandboxToolParameterMenu.OnSpawn sets the sandbox brush size
+# slider's range to MinSize..MaxSize from Config.json beside the mod (1 and 25 by default; the
+# game's is 1 to 10). The mod writes the file on load when it is missing.
+# How a player reaches it: sandbox mode (enabled in the game options, then the SANDBOX button),
+# the Brush tool, its Size slider.
+# What changes: brushes up to 25 cells wide.
+#
+# Sandbox is enabled through the game options as a player would, and the Brush tool picked:
+# its size slider runs from 1 to 25.
+from: early-base
+mods: [1882162095]
+steps:
+  - expect_state:
+      "SandboxToolParameterMenu.instance.brushRadiusSlider.slideMaxValue": 25
+  - key: {code: Escape}
+  - ui_wait: {path: "**/PauseScreen/LayoutContent", cond: stable}
+  - click: {ui: "**/PauseScreen/LayoutContent/ButtonContent/OptionsButton"}
+  - ui_wait: {path: "**/OptionsMenu/CenterContent/Content/Buttons/GameButton", cond: stable}
+  - click: {ui: "**/OptionsMenu/CenterContent/Content/Buttons/GameButton"}
+  - ui_wait: {path: "**/InGameContent/UnlockSandbox/Checkbox", cond: stable}
+  - click: {ui: "**/InGameContent/UnlockSandbox/Checkbox"}
+  - ui_wait: {path: "**/ConfirmDialog/GameObject/Panel/OKButton", cond: stable}
+  - click: {ui: "**/ConfirmDialog/GameObject/Panel/OKButton"}
+  - expect_state: {"SaveGame.Instance.sandboxEnabled": true}
+  - click: {ui: "**/OptionsMenu/CenterContent/Content/BottomButtons/DoneButton"}
+  - key: {code: Escape}
+  - ui_wait: {path: "**/PauseScreen", cond: gone}
+  - click: {ui: "**/TopLeftControlPanel(Clone)/SecondaryRow/SandboxToggle"}
+  - expect_state: {"Game.Instance.SandboxModeActive": true}
+  - click: {text: "Brush", under: "**/ToolMenu/prefabToolRow/SandboxToolSet"}
+  - expect_state:
+      "PlayerController.Instance.ActiveTool.name": SandboxBrushTool
+      "SandboxToolParameterMenu.instance.brushRadiusSlider.slider.maxValue": 25
+      "SandboxToolParameterMenu.instance.brushRadiusSlider.slider.minValue": 1
+      "file:mods/Local/1882162095/Config.json": exists
+  - ui_wait: {path: "**/ToolMenu/SandboxToolParameters", cond: stable}
+  - ui_dump: {name: brush-menu, root: "**/ToolMenu/SandboxToolParameters"}
+  - shot: {name: brush-menu, crop: "**/ToolMenu/SandboxToolParameters", threshold: 0.04}

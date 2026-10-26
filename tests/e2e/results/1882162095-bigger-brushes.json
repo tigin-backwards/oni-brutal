@@ -1,0 +1,67 @@
+{
+ "spec": "mods/1882162095-bigger-brushes.yaml",
+ "mods": [
+  "1882162095"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "sandbox enabled from the options; the Brush tool's size slider runs 1 to 25; its parameter menu as in the original",
+ "updated": "2026-10-25",
+ "commit": "bd353b5",
+ "mod_dlls": {
+  "1882162095": {
+   "BiggerBrushes.dll": "7f137f475d38d9ab7b0f5cd7c23a34d4eeb2a85635dac8d068363db82a1bd007"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-200219-ef1e47f8",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T20:22:04",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-204159-103f2ad3",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T20:57:56",
+    "lane": 14,
+    "reference_run": "20261025-200219-ef1e47f8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "brush-menu": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "brush-menu": 0.0
+    }
+   },
+   {
+    "run": "20261025-204159-103f2ad3",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-25T20:58:38",
+    "lane": 14,
+    "reference_run": "20261025-200219-ef1e47f8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "brush-menu": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "brush-menu": 1.3e-05
+    }
+   }
+  ]
+ }
+}

@@ -1,0 +1,61 @@
+{
+ "spec": "mods/2462236549-spaced-out-rime.yaml",
+ "mods": [
+  "2462236549"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "New Game, Spaced Out, the Rime cluster at a fixed coordinate: its start world RimeMoonlet generates at 200x300 with the mod's subworlds (asteroid list dumped)",
+ "updated": "2026-10-26",
+ "commit": "17f325ef",
+ "mod_dlls": {
+  "2462236549": {}
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-105851-04eb8ffa",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T11:14:44",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-133411-75254ba7",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T13:55:39",
+    "lane": 15,
+    "reference_run": "20261026-105851-04eb8ffa",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "asteroids": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261026-133411-75254ba7",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T13:55:28",
+    "lane": 14,
+    "reference_run": "20261026-105851-04eb8ffa",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "asteroids": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

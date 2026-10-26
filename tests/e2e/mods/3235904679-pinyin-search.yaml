@@ -1,0 +1,25 @@
+# PinYinSearch (3235904679), class P (search).
+#
+# What it does: in a Chinese game, searches match pinyin: a building's search terms gain the
+# pinyin of its name, initials and full (户外厕所, the Outhouse, gets "hwcs" and "huwaicesuo",
+# from a dictionary of the game's names or TinyPinyin), and the resources screen's, item
+# filters' and storage filters' searches compare the text with the name plus its pinyin. The
+# build menu's search passes a building at a score of 60.
+# How a player reaches it: the build menu's search field (and the other search fields).
+# What changes: Chinese names are found by typing pinyin.
+#
+# The game runs in Chinese. "hwcs" is typed into the build menu's search field: the Outhouse
+# is among the results.
+from: early-base
+mods: [3235904679]
+language: zh_klei
+steps:
+  - click: {ui: "**/PlanScreen/Toggle:基地"}   # Base, named in Chinese
+  - expect_ui:
+      "**/BuildingGroups/Searchbar/FilterInputField": {active: true}
+  - click: {ui: "**/BuildingGroups/Searchbar/FilterInputField"}
+  - type: {ui: "**/BuildingGroups/Searchbar/FilterInputField", text: "hwcs"}
+  - ui_wait: {path: "**/BuildingGroups/Viewport/Contents/*/Grid/Outhouse Group*", cond: active}
+  - ui_wait: {path: "**/BuildingGroups/Viewport/Contents", cond: stable}
+  - ui_dump: {name: results, root: "**/PlanBuildingSelectionPanel/BuildingGroups/Viewport"}
+  - shot: {name: results, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}

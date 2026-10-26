@@ -1,0 +1,68 @@
+{
+ "spec": "mods/3235904679-pinyin-search.yaml",
+ "mods": [
+  "3235904679"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "in Chinese, \"hwcs\" typed into the build menu's search finds the Outhouse (户外厕所); results dump and shot match",
+ "updated": "2026-10-26",
+ "commit": "3fe94323",
+ "mod_dlls": {
+  "3235904679": {
+   "PinYinSearch ONI-MOD.dll": "833378859208aef50c75113de7139356788ec21160aaea4859d61ba8ed6ea216",
+   "TinyPinyin.dll": "e1851142068590eeadd323e8ff564f7b5ed595e422474e1ebd35ed98eba104a3"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-042232-0e5bb32c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:30:16",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-102405-1a1968c9",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T10:24:05",
+    "lane": 16,
+    "reference_run": "20261026-042232-0e5bb32c",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "results": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "results": 0.000161
+    }
+   },
+   {
+    "run": "20261026-102405-1a1968c9",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T10:24:06",
+    "lane": 17,
+    "reference_run": "20261026-042232-0e5bb32c",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "results": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "results": 0.000161
+    }
+   }
+  ]
+ }
+}

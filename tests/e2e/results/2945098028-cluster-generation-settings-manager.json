@@ -1,0 +1,63 @@
+{
+ "spec": "mods/2945098028-cluster-generation-settings-manager.yaml",
+ "mods": [
+  "2945098028"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a new game's Spaced Out carousel offers its cluster, and the cluster file it writes follows the options (15 rings); the cluster is not generated",
+ "updated": "2026-10-26",
+ "commit": "123c4c42",
+ "mod_dlls": {
+  "2945098028": {
+   "CGSMMerged.dll": "daf46343d0178707a6fc3baa64c2608d1791e056edc4802c1ba530d16c117ab4"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-032000-bf713d8e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:34:41",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-043619-a5d6856c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:37:59",
+    "lane": 14,
+    "reference_run": "20261026-032000-bf713d8e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "destination": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261026-043619-a5d6856c",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T04:38:47",
+    "lane": 14,
+    "reference_run": "20261026-032000-bf713d8e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "destination": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

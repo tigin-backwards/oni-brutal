@@ -1,0 +1,28 @@
+# In-Game Debug Menu (God Mode & Crisis Manager) (3686726286), class P.
+#
+# What it does: a DEBUG toggle beside the top-left Sandbox toggle switches instant build, dig
+# and deconstruct (DebugHandler.InstantBuildMode) and shows six more buttons: HEAL, STRESS
+# (every Duplicant's stress to 0), FOOD, CLEAN (germs), HAPPY (negative effects removed) and
+# REVEAL (the fog of war cleared).
+# How a player reaches it: the buttons at the top left of the colony screen.
+# What changes: cheats at a click.
+#
+# setup raises a Duplicant's stress to 50 %; DEBUG is clicked (instant build turns on and the
+# buttons appear, dumped), then STRESS, and the Duplicant's stress is 0.
+from: early-base
+mods: [3686726286]
+setup:
+  - driver: {setup.call: {target: "Db.Get().Amounts.Stress", method: Lookup, args: [{"$": "Components.LiveMinionIdentities.Items[1].gameObject"}]}}
+  - driver: {setup.call: {target: "last:", method: SetValue, args: [50]}}
+steps:
+  - expect_state:
+      "Components.LiveMinionIdentities.Items[1].GetComponent<Modifiers>.amounts.Get(\"Stress\").value": 50
+      "DebugHandler.InstantBuildMode": false
+  - ui_wait: {path: "**/GodModeToggle", cond: stable}
+  - click: {ui: "**/GodModeToggle"}
+  - expect_state: {"DebugHandler.InstantBuildMode": true}
+  - ui_wait: {path: "**/StressBtn", cond: stable}
+  - ui_dump: {name: buttons, root: "**/StressBtn"}
+  - click: {ui: "**/StressBtn"}
+  - expect_state:
+      "Components.LiveMinionIdentities.Items[1].GetComponent<Modifiers>.amounts.Get(\"Stress\").value": 0

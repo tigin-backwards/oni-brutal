@@ -1,0 +1,21 @@
+# 植物生长时间和掉落量修改 (Plant Growth Time and Drop Amount Set) (2283591824), classes P, O.
+#
+# What it does: at the substance hookup it writes the game's crop table (each crop's growth
+# time, yield and renewability) to mods/HuangConfigs/PlantProduct.josn and a config,
+# PlantProduct.config.josn, the player edits; each crop listed in the config takes its growth
+# time and yield from there, and is made renewable.
+# How a player reaches it: editing the config file in the mods folder.
+# What changes: crops grow and yield as configured.
+#
+# On a first start the mod writes both files and applies the config, the game's values: the
+# crop table holds as many crops as in the original, all renewable.
+from: early-base
+mods: [2283591824]
+steps:
+  - expect_state:
+      "file:mods/HuangConfigs/PlantProduct.josn": exists
+      "file:mods/HuangConfigs/PlantProduct.config.josn": exists
+      "count:TUNING.CROPS.CROP_TYPES[*] if .renewable == false": 0
+      "count:TUNING.CROPS.CROP_TYPES[*] if .renewable == true": "== original"
+  - run: {seconds: 10}
+  - expect: {duplicants: 3}

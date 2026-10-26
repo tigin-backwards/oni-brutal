@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2283591824-plant-growth-and-drop-set.yaml",
+ "mods": [
+  "2283591824"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "on a first start it writes its crop table and config to mods/HuangConfigs and applies it: every crop renewable, as many as in the original",
+ "updated": "2026-10-26",
+ "commit": "d24ca54f",
+ "mod_dlls": {
+  "2283591824": {
+   "PlantGrowAndProductNumSet.dll": "bd0aa784ac8ea6e06e1ca7407f65b47753400f36242c7601fc217e0574de8c01"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-025019-77e7dd66",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:01:12",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-032420-76b75275",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:12:22",
+    "lane": 15,
+    "reference_run": "20261026-025019-77e7dd66",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-032420-76b75275",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T04:13:04",
+    "lane": 15,
+    "reference_run": "20261026-025019-77e7dd66",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

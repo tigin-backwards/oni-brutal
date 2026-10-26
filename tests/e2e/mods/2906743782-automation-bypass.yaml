@@ -1,0 +1,31 @@
+# Automation Bypass (2906743782), classes P, S (a user menu button), V.
+#
+# What it does: every building with an automation input gets an "Ignore Automation" /
+# "Receive Automation" user menu button: ignoring, its logic-controlled operational flag stays
+# on whatever its wire says (a prefix on LogicOperationalController.CheckWireState), it shows
+# an "Automation Bypassed" status, and the automation overlay draws its input port in orange
+# with a bypass icon (and a legend entry).
+# How a player reaches it: select a building with an automation port; its user menu.
+# What changes: a building runs regardless of its automation wire.
+#
+# setup builds a Ceiling Light in the dug-out room west of the printing pod with an automation
+# wire on its port and nothing driving it: the light's logic flag is off. Selected, its Ignore
+# Automation button is pressed: the flag is on, and the button now reads Receive Automation.
+from: early-base
+mods: [2906743782]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"CeilingLight\")", method: Build, args: [{"$": "Grid.XYToCell(112, 209)"}, Neutral, null, [Cuprite], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LogicWire\")", method: Build, args: [{"$": "Grid.XYToCell(112, 209)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 209], select: CeilingLight}
+  - ui_wait: {path: "**/UserMenuScreen/Buttons/Ignore AutomationButton", cond: stable}
+  - expect_state:
+      "selected:ToggleButton.IsEnabled": false
+      "count:selected:Operational.Flags[*] if .Key.Name == LogicOperational and .Value == false": 1
+  - click: {ui: "**/UserMenuScreen/Buttons/Ignore AutomationButton"}
+  - expect_state:
+      "selected:ToggleButton.IsEnabled": true
+      "count:selected:Operational.Flags[*] if .Key.Name == LogicOperational and .Value == true": 1
+  - ui_wait: {path: "**/UserMenuScreen/Buttons/Receive AutomationButton", cond: stable}

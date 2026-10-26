@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2906743782-automation-bypass.yaml",
+ "mods": [
+  "2906743782"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Ceiling Light's Ignore Automation button turns its logic flag on against a silent wire and becomes Receive Automation",
+ "updated": "2026-10-26",
+ "commit": "6c955e5f",
+ "mod_dlls": {
+  "2906743782": {
+   "AutomationBypass.dll": "fa24d7d8dd1fd0f723d2ece808347c08c9ae48a4ec16eb34504b0c665c8199bf"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-095925-af2fb1f8",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T10:01:47",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-112716-16699e17",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T11:27:16",
+    "lane": 16,
+    "reference_run": "20261026-095925-af2fb1f8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-112716-16699e17",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T11:27:17",
+    "lane": 17,
+    "reference_run": "20261026-095925-af2fb1f8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

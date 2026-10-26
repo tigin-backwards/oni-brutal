@@ -1,0 +1,21 @@
+# Compact Research (3522638280), class S (tweaks to a vanilla screen).
+#
+# What it does: UtilLibs' shared research tweaks. On the Research screen, a tech that unlocks
+# more than eight items shows seven of their icons and a "+N" icon in place of the rest, until
+# the pointer hovers it (patches on ResearchEntry.GetFreeIcon, SetTech, SetEverythingOff and
+# OnHover); the screen's connection lines are drawn differently, and the research complete
+# message names the right items for such techs.
+# How a player reaches it: the Research screen.
+# What changes: big techs take less room on the Research screen.
+#
+# The Research screen opens with the mod's patches applied. No tech of this game unlocks more
+# than eight items, so none is collapsed (as many as in the original), and the screen matches.
+from: early-base
+mods: [3522638280]
+steps:
+  - open: {management: research}
+  - ui_wait: {path: "**/ResearchScreen", cond: stable}
+  - expect_state:
+      "type:UtilLibs.SharedTweaks.ResearchScreenCollapseEntries::CollapsedIndicators.Count": "== original"
+  # The tech tree pans as the screen opens; the list beside it is still.
+  - shot: {name: research, crop: "**/ResearchScreen", mask: [[345, 0, 935, 720]], threshold: 0.04}

@@ -1,0 +1,59 @@
+{
+ "spec": "mods/3522638280-compact-research.yaml",
+ "mods": [
+  "3522638280"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Research screen opens with the mod's patches in place; no tech of this game has more than eight items, so nothing collapses, as in the original; the screen's list shot matches",
+ "updated": "2026-10-26",
+ "commit": "761a2b5",
+ "mod_dlls": {
+  "3522638280": {
+   "CompactResearchTweaks.dll": "c0936c71f0ff22cfc24375ce8d0e55623162cf89cc67379f96bbc06d1bd3c90e"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-005252-77046734",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T01:34:05",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-020241-7bc6e2a5",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T02:02:41",
+    "lane": 15,
+    "reference_run": "20261026-005252-77046734",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "research": 0.0
+    }
+   },
+   {
+    "run": "20261026-020241-7bc6e2a5",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T02:03:27",
+    "lane": 15,
+    "reference_run": "20261026-005252-77046734",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "research": 0.0
+    }
+   }
+  ]
+ }
+}

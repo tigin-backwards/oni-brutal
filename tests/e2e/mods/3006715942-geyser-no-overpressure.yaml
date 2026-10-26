@@ -1,0 +1,20 @@
+# 喷泉无压力反应 (3006715942), class P.
+#
+# What it does: a postfix on GeyserInstanceConfiguration.GetMaxPressure makes every geyser's
+# maximum pressure float.MaxValue, so no geyser stops erupting for overpressure.
+# How a player reaches it: a geyser erupting into a full room.
+# What changes: geysers never overpressure.
+#
+# setup places a steam geyser in the dug-out room west of the printing pod; selected, its
+# maximum pressure is float.MaxValue (the game's is a few kilograms).
+from: early-base
+mods: [3006715942]
+setup:
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(0, 112, 206, \"GeyserGeneric_steam\", \"BuildingBack\")", method: SetActive, args: [true]}}
+steps:
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 207]}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<Geyser>.configuration.GetMaxPressure()": "> 1000000000000"
+      "selected:GetComponent<ElementEmitter>.maxPressure": "> 1000000000000"

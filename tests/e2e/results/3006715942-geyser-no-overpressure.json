@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3006715942-geyser-no-overpressure.yaml",
+ "mods": [
+  "3006715942"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a steam geyser placed and selected has an effectively unlimited maximum pressure, in its configuration and its emitter",
+ "updated": "2026-10-26",
+ "commit": "5717d112",
+ "mod_dlls": {
+  "3006715942": {
+   "┼τ╚¬╬▐╤╣┴ª╖┤╙ª.dll": "e72f0a3b3291d0a0f621f233f5621c199b391e623152fefa4e39360abb6b6ce2"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-033203-6e82e943",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:48:17",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-041600-9197ad3e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:16:00",
+    "lane": 16,
+    "reference_run": "20261026-033203-6e82e943",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-041600-9197ad3e",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T04:16:01",
+    "lane": 17,
+    "reference_run": "20261026-033203-6e82e943",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -1,0 +1,24 @@
+# [visual] Became Green (2586992909), class V.
+#
+# What it does: a postfix on the Compost's states keeps its pile green between states: once it
+# has composted, its insufficient-mass, inert and disabled states play the composting_pst
+# animation first, then their own (idle_half, composting, on), where the game goes straight
+# to them.
+# How a player reaches it: a Compost in use.
+# What changes: how a compost looks.
+#
+# setup builds a Compost in the dug-out corridor west of the printing pod: never having
+# composted, it shows the game's "off" animation; it is selected and shot.
+from: early-base
+mods: [2586992909]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Compost\")", method: Build, args: [131129, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+steps:
+  - run: {seconds: 5}
+  - expect: {buildings: {Compost: 1}}
+  - driver: {camera.set: {cell: [113, 207], ortho: 8}}
+  - click_world: {cell: [113, 207], select: Compost}
+  - ui_wait: {path: "**/DetailsScreen/TitleBar", cond: stable}
+  - expect_state:
+      "selected:KBatchedAnimController.GetCurrentAnim().name": "off"
+  - world_shot: {name: compost, ortho: 4, at: [113, 207], mask: [[0, 0, 1280, 200]]}

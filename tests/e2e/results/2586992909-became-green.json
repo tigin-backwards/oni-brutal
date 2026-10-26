@@ -1,0 +1,59 @@
+{
+ "spec": "mods/2586992909-became-green.yaml",
+ "mods": [
+  "2586992909"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a built Compost is selected in its resting state; the world shot of it matches",
+ "updated": "2026-10-26",
+ "commit": "7f0364bc",
+ "mod_dlls": {
+  "2586992909": {
+   "GreenCompost.dll": "37bdaef3e1eb222fa7970118acffe0721875a4580c9e19e54aa9ddadc6e60b24"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-030709-d22e398a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:27:20",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-042926-755cf97f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:29:26",
+    "lane": 14,
+    "reference_run": "20261026-030709-d22e398a",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "compost": 0.00595
+    }
+   },
+   {
+    "run": "20261026-042926-755cf97f",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T04:30:13",
+    "lane": 14,
+    "reference_run": "20261026-030709-d22e398a",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "compost": 0.007042
+    }
+   }
+  ]
+ }
+}

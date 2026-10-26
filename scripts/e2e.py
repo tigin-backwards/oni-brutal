@@ -2468,7 +2468,20 @@ class Run:
             ok = self.driver.find(path=dialog + '/**/OKButton') or self.driver.find(text='OK', under=dialog)
             if not ok:
                 raise SpecFailure(f'{dialog}: no OK button to dismiss it')
-            self.click_element({'ui': ok[0].path})
+            # A mod's notice at load may be another dialog on the same path, shown above this one
+            # (Project Expedition's): a player closes the topmost first. The dialogs are told
+            # apart by their element keys' sibling indices; the last one is on top.
+            def sibling(element):
+                parts = element.raw.get('key', '').split('/')
+                part = parts[len(dialog.split('/'))] if len(parts) > len(dialog.split('/')) else ''
+                return int(part.rsplit('#', 1)[1]) if '#' in part else 0
+            top = max(range(len(ok)), key=lambda i: sibling(ok[i]))
+            if sibling(ok[top]) != sibling(headers[0]):
+                self.log(f'  dismissing the dialog above it ({ok[top].path})')
+                self.click_element({'ui': ok[top].path, 'index': top})
+                self.frames(10)
+                continue
+            self.click_element({'ui': ok[top].path, 'index': top})
             self.driver.wait(dialog, 'gone', 120)
 
     # -- steps

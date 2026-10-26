@@ -18,10 +18,8 @@ steps:
   - expect_state:
       "type:VaricolouredBalloons.VaricolouredBalloonsPatches::MyBalloons.Count": 2
       "type:VaricolouredBalloons.VaricolouredBalloonsPatches::MyBalloons[0].Id": VBalloonOrangeLongSparkles
-      "type:VaricolouredBalloons.VaricolouredBalloonsPatches::MyBalloons[1].balloonOverrideSymbolIDs.Length": "> 1"
-      "type:VaricolouredBalloons.VaricolouredBalloonsPatches::MyBalloons[1].balloonOverrideSymbolIDs.Length": "== original"
-      "type:VaricolouredBalloons.VaricolouredBalloonsPatches::BalloonOverrides.Count": "> 2"
-      "type:VaricolouredBalloons.VaricolouredBalloonsPatches::BalloonOverrides.Count": "== original"
+      "type:VaricolouredBalloons.VaricolouredBalloonsPatches::MyBalloons[1].balloonOverrideSymbolIDs.Length": ["> 1", "== original"]
+      "type:VaricolouredBalloons.VaricolouredBalloonsPatches::BalloonOverrides.Count": ["> 2", "== original"]
       "Assets.GetPrefab(\"EquippableBalloon\").GetComponent<VaricolouredBalloons.ModdedEquippableBalloon>": exists
   - run: {seconds: 5}
   - expect: {duplicants: 3}

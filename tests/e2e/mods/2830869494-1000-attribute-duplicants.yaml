@@ -14,11 +14,10 @@ from: early-base
 mods: [2830869494]
 steps:
   - expect_state:
-      "Components.LiveMinionIdentities.Items[1].GetComponent<Modifiers>.attributes.Get(\"Construction\").GetTotalValue()": ">= 990"
+      "Components.LiveMinionIdentities.Items[1].GetComponent<Modifiers>.attributes.Get(\"Construction\").GetTotalValue()": [">= 990", "== original"]
       "Components.LiveMinionIdentities.Items[1].GetComponent<Modifiers>.attributes.Get(\"Digging\").GetTotalValue()": ">= 990"
       "Components.LiveMinionIdentities.Items[2].GetComponent<Modifiers>.attributes.Get(\"Athletics\").GetTotalValue()": ">= 990"
       "Components.LiveMinionIdentities.Items[2].GetComponent<Modifiers>.attributes.Get(\"Learning\").GetTotalValue()": ">= 990"
       "Components.LiveMinionIdentities.Items[0].GetComponent<Modifiers>.attributes.Get(\"Construction\").GetTotalValue()": ">= 990"
-      "Components.LiveMinionIdentities.Items[1].GetComponent<Modifiers>.attributes.Get(\"Construction\").GetTotalValue()": "== original"
   - dig: [119, 209, 120, 210]
   - run: {seconds: 300, until: {pending_digs: 0}}

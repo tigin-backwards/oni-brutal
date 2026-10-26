@@ -138,6 +138,78 @@ steps:
             os.remove(f.name)
 
 
+    def test_load_spec_rejects_a_repeated_key(self):
+        text = ('from: early-base\nsteps:\n  - expect_state:\n      "A.B": "> 1"\n      "C": 2\n'
+                '      "A.B": "== original"\n')
+        with tempfile.NamedTemporaryFile('w', suffix='.yaml', delete=False) as f:
+            f.write(text)
+        try:
+            with self.assertRaises(e2e.SpecError) as caught:
+                e2e.load_spec(f.name)
+            message = str(caught.exception)
+            self.assertIn(f.name, message)
+            self.assertIn("'A.B'", message)
+            self.assertIn('lines 4 and 6', message)
+            with open(f.name, 'w') as g:  # at the top level too
+                g.write('from: early-base\nsteps: []\nfrom: landing\n')
+            with self.assertRaisesRegex(e2e.SpecError, "'from' is repeated, at lines 1 and 3"):
+                e2e.load_spec(f.name)
+        finally:
+            os.remove(f.name)
+
+    def test_every_committed_spec_loads(self):
+        # Without a repeated key anywhere, and with every count:/sum: parsed.
+        for folder in (e2e.SPECS, os.path.join(e2e.SPECS, 'mods')):
+            for name in sorted(os.listdir(folder)):
+                if name.endswith('.yaml') and name != 'known-findings.yaml':
+                    e2e.load_spec(os.path.join(folder, name))
+        e2e.load_findings()
+
+    def test_check_reports_a_bad_aggregate(self):
+        s = spec('from: x\nsteps:\n  - expect_state: {"count:all:X::[*] if .name == two words": 1}\n')
+        self.assertEqual(len(e2e.check_spec(s)), 1)
+        s = spec('from: x\nsteps:\n  - expect_state: {"count:all:X::[*] if .name == \'two words\'": 1}\n')
+        self.assertEqual(e2e.check_spec(s), [])
+        s = spec('from: x\nsteps:\n  - expect_state: {"a": []}\n')
+        self.assertEqual(len(e2e.check_spec(s)), 1)
+
+
+class Aggregates(unittest.TestCase):
+    parse = staticmethod(e2e.parse_aggregate)
+
+    def test_plain_forms(self):
+        self.assertIsNone(self.parse('Research.Instance.queuedTech.Count'))
+        self.assertEqual(self.parse('count:all:Clearable::[*] if .isMarkedForClear == true'),
+                         ('count', 'all:Clearable::', '', [('.isMarkedForClear', '==', 'true')]))
+        self.assertEqual(self.parse('count:all:X::[*]'), ('count', 'all:X::', '', []))
+        self.assertEqual(
+            self.parse('sum:all:Clearable::[*].GetComponent<PrimaryElement>.Mass if '
+                       '.GetComponent<PrimaryElement>.ElementID == SandStone and .a != 1'),
+            ('sum', 'all:Clearable::', '.GetComponent<PrimaryElement>.Mass',
+             [('.GetComponent<PrimaryElement>.ElementID', '==', 'SandStone'), ('.a', '!=', '1')]))
+
+    def test_quoted_text_is_kept_whole(self):
+        tests = lambda expr: self.parse(expr)[3]
+        self.assertEqual(tests("count:X[*] if .name == 'Maximum size: 200 tiles'"),
+                         [('.name', '==', 'Maximum size: 200 tiles')])
+        self.assertEqual(tests("count:X[*] if .name == 'Salt and Pepper' and .b == 1"),
+                         [('.name', '==', 'Salt and Pepper'), ('.b', '==', '1')])
+        self.assertEqual(tests("count:X[*] if .name != 'a == b'"), [('.name', '!=', 'a == b')])
+        self.assertEqual(tests('count:X[*] if .name == "it\'s here"'), [('.name', '==', "it's here")])
+        self.assertEqual(tests('count:X[*] if .id.StartsWith("Geyser and Vent") == true'),
+                         [('.id.StartsWith("Geyser and Vent")', '==', 'true')])
+        self.assertEqual(tests('count:X[*] if .Get(a, b) == 2'), [('.Get(a, b)', '==', '2')])
+        self.assertEqual(self.parse('sum:X[*].Get("a b").Mass if .c == 1')[2], '.Get("a b").Mass')
+        self.assertEqual(self.parse('count:Db.Get("x [*] y").List[*]')[1], 'Db.Get("x [*] y").List')
+
+    def test_bad_forms(self):
+        for expr in ('count:X[*] if .name == two words', "count:X[*] if .name == 'open", 'count:X[*] if name == 1',
+                     'count:X[*] if .a == 1 == 2', 'count:X[*] if ', 'count:X', 'count:[*]', 'sum:X[*].a b',
+                     'count:X[*] if .a == 1 and', "count:X[*] if .a == 'x'y'"):
+            with self.assertRaises(e2e.SpecFailure, msg=expr):
+                self.parse(expr)
+
+
 class Arguments(unittest.TestCase):
     def test_defaults(self):
         o = e2e.parse_args(['early-base'])
@@ -214,6 +286,17 @@ class Expectations(unittest.TestCase):
         # A boolean is compared as itself, not as a number.
         self.assertEqual(self.check(False, '== original', original=False), (True, False))
         self.assertEqual(self.check(True, '== original', original=False), (False, False))
+
+    def test_a_list_of_checks(self):
+        self.assertEqual(self.check(997.0, ['>= 990', '<= 1010']), (True, False))
+        self.assertEqual(self.check(980.0, ['>= 990', '<= 1010']), (False, False))
+        self.assertEqual(self.check(['A', 'B'], [{'contains': 'A'}, {'contains': 'B'}]), (True, False))
+        self.assertEqual(self.check(['A'], [{'contains': 'A'}, {'contains': 'B'}]), (False, False))
+        # One part waits for the original; the others are checked now.
+        self.assertEqual(self.check(3, ['> 1', '== original']), (True, True))
+        self.assertEqual(self.check(1, ['> 1', '== original']), (False, True))
+        self.assertEqual(self.check(3, ['> 1', '== original'], original=3), (True, False))
+        self.assertEqual(self.check(3, ['> 1', '== original'], original=4), (False, False))
 
     def test_ui(self):
         element = e2e.Element({'path': 'a/b', 'rect': {'x': 0, 'y': 0, 'w': 10, 'h': 10}, 'active': True, 'isOn': False,

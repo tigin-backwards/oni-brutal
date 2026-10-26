@@ -255,7 +255,12 @@ frames before it fails. An `expect_state` value is one of:
   (`">= before + 0.95 * dug"`, `">= 0.9 * original"`);
 - `"== 'TEXT'"` or `"!= 'TEXT'"`: text in quotes, for names such as an enum's;
 - `exists` or `missing`;
-- `{contains: X}`, `{equals: X}` or `{save_as: NAME}`.
+- `{contains: X}`, `{equals: X}` or `{save_as: NAME}`;
+- a list of these, which holds when each of them does: `[">= 990", "== original"]`,
+  `[{contains: TECTile}, {contains: RomenH_TEGTile}]` (a literal list is `{equals: [...]}`).
+
+A mapping never repeats a key: YAML would keep only the last, so the loader rejects a spec that
+does, naming the key and both lines. Several checks on one expression go in a list.
 
 Besides `file:PATH`, the runner reads these, each item through its own `state.get`:
 - `cells:X1,Y1..X2,Y2::EXPR`: the sum of EXPR over a rectangle of cells, `{cell}` standing for
@@ -265,9 +270,11 @@ Besides `file:PATH`, the runner reads these, each item through its own `state.ge
 - `sum:HEAD[*].MEMBER if ...`: the sum of a member over the items that match, as in
   `sum:all:Clearable::[*].GetComponent<PrimaryElement>.Mass if .GetComponent<PrimaryElement>.ElementID == SandStone`.
 
-A condition compares the member's value as text (`true`/`false` for booleans; `'TEXT'` in quotes
-may hold spaces). A member may call a method: `if .spawnInfo.id.StartsWith("GeyserGeneric") ==
-true`. `count:` and `sum:` read every item's members in one E2eDriver request (`state.each`), so
+A condition compares the member's value as text (`true`/`false` for booleans; `'TEXT'` or
+`"TEXT"` in quotes may hold spaces, `and` and `==`, and a value with a space must be quoted). A
+member may call a method, its quoted arguments and parentheses kept whole: `if
+.spawnInfo.id.StartsWith("GeyserGeneric") == true`. `--check` reports a `count:` or `sum:` that
+does not parse. `count:` and `sum:` read every item's members in one E2eDriver request (`state.each`), so
 lists of thousands of items (a new world's spawners) take a frame. `cells:` still reads one cell
 a frame.
 

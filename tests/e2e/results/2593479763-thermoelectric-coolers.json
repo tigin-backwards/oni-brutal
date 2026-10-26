@@ -7,8 +7,8 @@
  "why": "passed once in the original and twice in ours",
  "findings": [],
  "note": "option 300 W; after Low-Resistance Conductors, the TEC Tile picked in the Utilities menu (card shot), placed, built from ceramic and copper and selected",
- "updated": "2026-10-24",
- "commit": "439a1de",
+ "updated": "2026-10-26",
+ "commit": "61be872",
  "mod_dlls": {
   "2593479763": {
    "TECBlock.dll": "f7a039cc352c03bc02e89b4a31dff0a162ef83bb667c04e4767153eda52b9da2"
@@ -27,11 +27,11 @@
   ],
   "ours": [
    {
-    "run": "20261024-055636-00f42a",
+    "run": "20261026-021153-1d355549",
     "index": 1,
     "verdict": "pass",
-    "date": "2026-10-24T05:56:36",
-    "lane": 17,
+    "date": "2026-10-26T02:11:53",
+    "lane": 34,
     "reference_run": "20261024-050302-e4a1ee",
     "new_signatures": 0,
     "findings": [],
@@ -41,11 +41,11 @@
     }
    },
    {
-    "run": "20261024-055636-00f42a",
+    "run": "20261026-021153-1d355549",
     "index": 2,
     "verdict": "pass",
-    "date": "2026-10-24T05:58:04",
-    "lane": 17,
+    "date": "2026-10-26T02:13:04",
+    "lane": 34,
     "reference_run": "20261024-050302-e4a1ee",
     "new_signatures": 0,
     "findings": [],

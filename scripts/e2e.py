@@ -183,6 +183,13 @@ def check_step(where, kind, value, in_setup):
         need(isinstance(value, dict) and isinstance(value.get('seconds'), (int, float)), 'run takes {seconds: N}')
     elif kind in ('expect', 'expect_state'):
         need(isinstance(value, dict) and value, f'{kind} takes a mapping of expectations')
+        if kind == 'expect_state' and isinstance(value, dict):
+            for expr, wanted in value.items():
+                need(not isinstance(wanted, list) or wanted, f'{expr}: a list of checks is not empty')
+                try:
+                    parse_aggregate(str(expr))
+                except SpecFailure as e:
+                    problems.append(f'{where}: {e}')
     elif kind == 'call':
         need(isinstance(value, dict) and value.get('tool'), 'call takes {tool, args}')
     elif kind == 'save':
@@ -318,11 +325,39 @@ def check_spec(spec):
     return problems
 
 
+def load_yaml(path):
+    """PATH's YAML, as yaml.safe_load reads it, but a mapping that repeats a key is a SpecError
+    (PyYAML keeps the last one, so the checks under the others would never run)."""
+    import yaml
+
+    class Loader(yaml.SafeLoader):
+        pass
+
+    def mapping(loader, node, deep=False):
+        lines = {}
+        for key_node, _ in node.value:
+            if key_node.tag == 'tag:yaml.org,2002:merge':
+                continue
+            key = loader.construct_object(key_node, deep=True)
+            try:
+                hash(key)
+            except TypeError:
+                continue  # safe_load's own error says so
+            line = key_node.start_mark.line + 1
+            if key in lines:
+                raise SpecError(f'{path}: key {key!r} is repeated, at lines {lines[key]} and {line} '
+                                '(YAML keeps only the last; give a list of checks instead)')
+            lines[key] = line
+        return yaml.SafeLoader.construct_mapping(loader, node, deep)
+
+    Loader.add_constructor(yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, mapping)
+    with open(path) as f:
+        return yaml.load(f, Loader=Loader)
+
+
 def load_spec(name):
     path = name if name.endswith('.yaml') else os.path.join(SPECS, name + '.yaml')
-    import yaml
-    with open(path) as f:
-        spec = yaml.safe_load(f)
+    spec = load_yaml(path)
     problems = check_spec(spec)
     if problems:
         raise SpecError(f'{path}:\n  ' + '\n  '.join(problems))
@@ -2190,6 +2225,68 @@ def arithmetic(text, names):
     return value(tree.body)
 
 
+def mask_quoted(text, nested=True):
+    """TEXT with each character inside quotes ('...' or "...", the quotes too) and, when NESTED,
+    inside () and [], as NUL: what is left is the text's top level, the same length."""
+    out, quote, depth = list(text), None, 0
+    for i, c in enumerate(text):
+        if quote:
+            quote = None if c == quote else quote
+        elif c in '\'"':
+            quote = c
+        elif nested and c in '([':
+            depth += 1
+        elif nested and c in ')]' and depth:
+            depth -= 1
+        elif not depth:
+            continue
+        out[i] = '\0'
+    if quote:
+        raise SpecFailure(f'{text!r}: a {quote} quote is not closed')
+    return ''.join(out)
+
+
+def parse_condition(text):
+    """.MEMBER == VALUE or .MEMBER != VALUE as (MEMBER, OP, VALUE). VALUE is a word, or 'TEXT' or
+    "TEXT" in quotes, which may hold spaces, `and` and `==`; so may a member's quoted arguments."""
+    text = text.strip()
+    top = mask_quoted(text)
+    ops = list(re.finditer(r'==|!=', top))
+    member = text[:ops[0].start()].strip() if len(ops) == 1 else ''
+    want = text[ops[0].end():].strip() if len(ops) == 1 else ''
+    quoted = len(want) >= 2 and want[0] in '\'"' and want[-1] == want[0] and want[0] not in want[1:-1]
+    if not (member.startswith('.') and not re.search(r'\s', mask_quoted(member)) and want
+            and (quoted or not re.search(r'[\s\'"]', want))):
+        raise SpecFailure(f'{text!r}: a condition is .MEMBER == VALUE or .MEMBER != VALUE '
+                          "(VALUE in quotes if it holds spaces)")
+    return member, ops[0].group(), want[1:-1] if quoted else want
+
+
+def parse_aggregate(expr):
+    """count:HEAD[*] [if CONDITION and ...] or sum:HEAD[*].SUFFIX [if ...] as (HOW, HEAD, SUFFIX,
+    [(MEMBER, OP, VALUE)...]); None for any other expression. Quoted text (in HEAD, SUFFIX or the
+    conditions) is never split."""
+    how = re.match(r'(count|sum):', expr)
+    if not how:
+        return None
+    star = mask_quoted(expr, False).find('[*]')
+    if star < 0:
+        raise SpecFailure(f'{expr!r}: {how.group(1)}: reads HEAD[*]')
+    head, rest = expr[how.end():star], expr[star + 3:]
+    top = mask_quoted(rest)
+    split = re.search(r'\s+if\s+', top)
+    suffix, conditions = (rest[:split.start()], rest[split.end():]) if split else (rest, None)
+    if not head.strip() or re.search(r'\s', mask_quoted(suffix)) or (conditions is not None and not conditions.strip()):
+        raise SpecFailure(f'{expr!r}: {how.group(1)}:HEAD[*]{".SUFFIX" if how.group(1) == "sum" else ""} [if .MEMBER == VALUE and ...]')
+    tests = []
+    if conditions is not None:
+        top, start = mask_quoted(conditions), 0
+        for match in list(re.finditer(r'\s+and\s+', top)) + [None]:
+            tests.append(parse_condition(conditions[start:match.start() if match else None]))
+            start = match and match.end()
+    return how.group(1), head, suffix, tests
+
+
 def aggregate_rows(how, tests, rows):
     """count: or sum: over state.each ROWS, each the values of the TESTS' members (MEMBER, OP,
     WANT) and, for sum, the summed member last. A member is compared as text, booleans as
@@ -2211,7 +2308,15 @@ def state_check(have, wanted, saved, original=None):
     + - * / and parentheses; a name is a value saved with save_as, or `original`: the original
     player's value at this step), exists / missing,
     or {contains: X}, {equals: X}, {save_as: NAME}. Returns (ok, deferred): deferred when it
-    refers to the original and no original value is known yet."""
+    refers to the original and no original value is known yet. A list of these holds when each
+    of them does (several checks on one expression: a mapping cannot repeat a key)."""
+    if isinstance(wanted, list):
+        ok, deferred = True, False
+        for one in wanted:
+            one_ok, one_deferred = state_check(have, one, saved, original)
+            ok &= one_ok
+            deferred |= one_deferred
+        return ok, deferred
     if isinstance(wanted, dict):
         ok = True
         if 'save_as' in wanted:
@@ -2600,9 +2705,9 @@ class Run:
                 return len(os.listdir(path))  # a folder's value: how many entries it holds
             with open(path, encoding='utf-8', errors='replace') as f:
                 return f.read()
-        each = re.fullmatch(r'(count|sum):(.+?)\[\*\](\S*)(?:\s+if\s+(.+))?', expr)
+        each = parse_aggregate(expr)
         if each:
-            return self.aggregate(*each.groups())
+            return self.aggregate(*each)
         cells = re.fullmatch(r'cells:(\d+),(\d+)\.\.(\d+),(\d+)::(.+)', expr)
         if cells:
             # The sum of EXPR over a rectangle of cells, {cell} standing for each cell's index.
@@ -2618,19 +2723,11 @@ class Run:
             return total
         return self.need_driver().state(expr)
 
-    def aggregate(self, how, head, suffix, conditions):
-        """count:HEAD[*] if .A == X and .B != Y, or sum:HEAD[*].SUFFIX [if ...]: HEAD a state.get
-        expression for an array or list (all:Clearable::), its items' members read in one
-        E2eDriver request (state.each). A condition compares the item's member as text
-        (true/false for booleans)."""
+    def aggregate(self, how, head, suffix, tests):
+        """count:HEAD[*] if .A == X and .B != Y, or sum:HEAD[*].SUFFIX [if ...] (parse_aggregate):
+        HEAD a state.get expression for an array or list (all:Clearable::), its items' members
+        read in one E2eDriver request (state.each)."""
         driver = self.need_driver()
-        tests = []
-        for condition in re.split(r'\s+and\s+', conditions or '') if conditions else []:
-            match = re.fullmatch(r"(\.\S+)\s*(==|!=)\s*('[^']*'|\S+)", condition.strip())
-            if not match:
-                raise SpecFailure(f'{condition!r}: a condition is .MEMBER == VALUE or .MEMBER != VALUE')
-            member, op, want = match.groups()
-            tests.append((member, op, want[1:-1] if want.startswith("'") else want))  # 'TEXT' may hold spaces
         members = [member for member, _, _ in tests] + ([suffix] if how == 'sum' else [])
         return aggregate_rows(how, tests, driver.each(head, members))
 
@@ -2872,9 +2969,7 @@ def load_findings(path=None):
     path = path or KNOWN_FINDINGS
     if not os.path.exists(path):
         return []
-    import yaml
-    with open(path) as f:
-        findings = yaml.safe_load(f) or []
+    findings = load_yaml(path) or []
     problems = check_findings(findings)
     if problems:
         raise SpecError(f'{path}:\n  ' + '\n  '.join(problems))
@@ -3102,7 +3197,10 @@ def differential(spec, result, reference, findings=None):
         if original is None:
             deferred.append({'step': v['step'], 'expr': v['expr'], 'ok': None, 'note': 'no original value'})
             continue
-        ok, _ = state_check(v['value'], v['wanted'], {}, original)
+        wanted = v['wanted']
+        if isinstance(wanted, list):  # only the checks that wait for the original; ours ran the rest
+            wanted = [w for w in wanted if isinstance(w, str) and re.search(r'\boriginal\b', w)]
+        ok, _ = state_check(v['value'], wanted, {}, original)
         deferred.append({'step': v['step'], 'expr': v['expr'], 'ours': v['value'], 'original': original, 'ok': ok})
         if not ok:
             reasons.append(f'step {v["step"]}: {v["expr"]} is {v["value"]}, wanted {v["wanted"]} ({original} in the original)')

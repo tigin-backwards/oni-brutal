@@ -1,0 +1,81 @@
+{
+ "spec": "mods/3815900814-auto-kitchen.yaml",
+ "mods": [
+  "3815900814"
+ ],
+ "verdict": "warning",
+ "why": "known findings: scroll-normalized-position",
+ "findings": [
+  "scroll-normalized-position"
+ ],
+ "note": "a Microbe Musher's config rows show; the chef dropdown opens with the mod's list (laid out while shown), as in the original, and picking Travaldo names him in the caption",
+ "updated": "2026-10-26",
+ "commit": "91bfe30",
+ "mod_dlls": {
+  "3815900814": {
+   "AutoFoodProcessing.dll": "0a459ed0af044cecf5677db2c1689289453bffff48618d76660785c2e4a1009e"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-022612-93c85572",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T02:26:12",
+    "lane": 32,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-022751-cc89dab7",
+    "index": 1,
+    "verdict": "warn",
+    "date": "2026-10-26T02:27:51",
+    "lane": 32,
+    "reference_run": "20261026-022612-93c85572",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "buttons": {
+      "differences": 0
+     },
+     "list": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 2
+      }
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261026-022751-cc89dab7",
+    "index": 2,
+    "verdict": "warn",
+    "date": "2026-10-26T02:32:32",
+    "lane": 32,
+    "reference_run": "20261026-022612-93c85572",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "buttons": {
+      "differences": 0
+     },
+     "list": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 2
+      }
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

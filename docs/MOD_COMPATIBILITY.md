@@ -1169,7 +1169,7 @@ installs get developer checks subscribers never see).
 | 1195 | [Full of Juice](https://steamcommunity.com/sharedfiles/filedetails/?id=3706917570) | ⬜ | ⬜ | ⬜ |  |
 | 1196 | [川菜 -K14](https://steamcommunity.com/sharedfiles/filedetails/?id=3021138574) | ⬜ | ⬜ | ⬜ |  |
 | 1197 | [[Fix] Ethanol Geyser](https://steamcommunity.com/sharedfiles/filedetails/?id=2998321975) | ⬜ | ⬜ | ⬜ |  |
-| 1198 | [Expeditions: The Shattered Planet](https://steamcommunity.com/sharedfiles/filedetails/?id=3803506841) | ⬜ | ⬜ | ⬜ |  |
+| 1198 | [Expeditions: The Shattered Planet](https://steamcommunity.com/sharedfiles/filedetails/?id=3803506841) | ✅ | ✅ | ✅ | spec tests/e2e/mods/3803506841-expeditions.yaml: the portal is built and its Expeditions screen opens with its header and patch notes as in the original |
 | 1199 | [RT-Generator](https://steamcommunity.com/sharedfiles/filedetails/?id=3174662603) | ⬜ | ⬜ | ⬜ |  |
 | 1200 | [[DLC Only] Spaced Out Rime (under construction)](https://steamcommunity.com/sharedfiles/filedetails/?id=2462236549) | ⬜ | ⬜ | ⬜ |  |
 | 1201 | [[Vanilla + DLC] Move Duplicant by Middle Mouse Button Updated](https://steamcommunity.com/sharedfiles/filedetails/?id=2848571032) | ⬜ | ⬜ | ⬜ |  |
@@ -1760,7 +1760,7 @@ installs get developer checks subscribers never see).
 | 1855 | [POB-Bionic Besties 仿生小伙伴](https://steamcommunity.com/sharedfiles/filedetails/?id=3404416193) | ⬜ | ⬜ | ⬜ |  |
 | 1856 | [Direct Irrigation](https://steamcommunity.com/sharedfiles/filedetails/?id=3743535837) | ⬜ | ⬜ | ⬜ |  |
 | 1857 | [全技能增幅块(AllAttributeBooster)](https://steamcommunity.com/sharedfiles/filedetails/?id=3577617954) | ⬜ | ⬜ | ⬜ |  |
-| 1858 | [Applied Logistics Network[ALN] 应用物流网络](https://steamcommunity.com/sharedfiles/filedetails/?id=3753045682) | ⬜ | ⬜ | ⬜ |  |
+| 1858 | [Applied Logistics Network[ALN] 应用物流网络](https://steamcommunity.com/sharedfiles/filedetails/?id=3753045682) | ✅ | ✅ | ✅ | spec tests/e2e/mods/3753045682-applied-logistics-network.yaml: an ALN Terminal is built; its config side screen and terminal panel show as in the original, and typing into the panel's filter (the mod's TMP_InputField subclass) works |
 | 1859 | [飞吧，游戏君Fly, game](https://steamcommunity.com/sharedfiles/filedetails/?id=2972754416) | ⬜ | ⬜ | ⬜ |  |
 | 1860 | [Expanded Lights (Updated)](https://steamcommunity.com/sharedfiles/filedetails/?id=3800125328) | ⬜ | ⬜ | ⬜ |  |
 | 1861 | [大型蒸汽涡轮机（Large steam turbine）](https://steamcommunity.com/sharedfiles/filedetails/?id=3547626800) | ⬜ | ⬜ | ⬜ |  |
@@ -1827,7 +1827,7 @@ installs get developer checks subscribers never see).
 | 1933 | [NamedStorage](https://steamcommunity.com/sharedfiles/filedetails/?id=2991018571) | ⬜ | ⬜ | ⬜ |  |
 | 1934 | [No Minimum Temperature](https://steamcommunity.com/sharedfiles/filedetails/?id=2800997047) | ⬜ | ⬜ | ⬜ |  |
 | 1935 | [火箭套娃](https://steamcommunity.com/sharedfiles/filedetails/?id=3454818548) | ⬜ | ⬜ | ⬜ |  |
-| 1936 | [Project Expedition](https://steamcommunity.com/sharedfiles/filedetails/?id=3803418607) | ⬜ | ⬜ | ⬜ |  |
+| 1936 | [Project Expedition](https://steamcommunity.com/sharedfiles/filedetails/?id=3803418607) | ⬜ | ⬜ | ⬜ | spec fails in ours: tests/e2e/mods/3803418607-project-expedition.yaml: fails in ours before its first step: the mod's prospecting scan, a postfix on NavPathDrawer, calls Graphics.DrawMeshNow(Mesh, Matrix4x4), which the engine lacks (MissingMethodException every frame, and the game's crash screen). In the original the Cave Entrance's expedition window opens with its status, journal and crew (a run of ours failed) |
 | 1937 | [Discord Rich Presence](https://steamcommunity.com/sharedfiles/filedetails/?id=3752842483) | ⬜ | ⬜ | ⬜ |  |
 | 1938 | [](https://steamcommunity.com/sharedfiles/filedetails/?id=3095987024) | ⬜ | ⬜ | ⬜ |  |
 | 1939 | [Veggie Hatch eat Wood](https://steamcommunity.com/sharedfiles/filedetails/?id=2847963606) | ⬜ | ⬜ | ⬜ |  |
@@ -1964,7 +1964,7 @@ installs get developer checks subscribers never see).
 | 2099 | [Critter Rename](https://steamcommunity.com/sharedfiles/filedetails/?id=3536307961) | ⬜ | ⬜ | ⬜ |  |
 | 2100 | [Retirement NOT Included!](https://steamcommunity.com/sharedfiles/filedetails/?id=3669014459) | ⬜ | ⬜ | ⬜ |  |
 | 2101 | [Medium/Small/Mixed Glaciers](https://steamcommunity.com/sharedfiles/filedetails/?id=1924502103) | ⬜ | ⬜ | ⬜ |  |
-| 2102 | [自动厨房 · Auto Kitchen](https://steamcommunity.com/sharedfiles/filedetails/?id=3815900814) | ⬜ | ⬜ | ⬜ |  |
+| 2102 | [自动厨房 · Auto Kitchen](https://steamcommunity.com/sharedfiles/filedetails/?id=3815900814) | ✅ | ✅ | ⚠️ | spec tests/e2e/mods/3815900814-auto-kitchen.yaml: a Microbe Musher's config rows show; the chef dropdown opens with the mod's list (laid out while shown), as in the original, and picking Travaldo names him in the caption; known findings: `scroll-normalized-position` |
 | 2103 | [UpgradeConduits](https://steamcommunity.com/sharedfiles/filedetails/?id=3664027081) | ⬜ | ⬜ | ⬜ |  |
 | 2104 | [Chaos Reigns](https://steamcommunity.com/sharedfiles/filedetails/?id=3384420807) | ⬜ | ⬜ | ⬜ |  |
 | 2105 | [Medium Power Transformer / 중형 변압기](https://steamcommunity.com/sharedfiles/filedetails/?id=3691374894) | ⬜ | ⬜ | ⬜ |  |
@@ -2011,7 +2011,7 @@ installs get developer checks subscribers never see).
 | 2153 | [Pressure Damage Notification](https://steamcommunity.com/sharedfiles/filedetails/?id=3794685601) | ⬜ | ⬜ | ⬜ |  |
 | 2154 | [10x Gas Pipe Flow](https://steamcommunity.com/sharedfiles/filedetails/?id=3733343625) | ⬜ | ⬜ | ⬜ |  |
 | 2155 | [Rocket Logic](https://steamcommunity.com/sharedfiles/filedetails/?id=2544278649) | ⬜ | ⬜ | ⬜ |  |
-| 2157 | [Schedule & Priority Screen Expander](https://steamcommunity.com/sharedfiles/filedetails/?id=3774780988) | ⬜ | ⬜ | ⬜ |  |
+| 2157 | [Schedule & Priority Screen Expander](https://steamcommunity.com/sharedfiles/filedetails/?id=3774780988) | ⬜ | ⬜ | ⬜ | spec fails in ours: tests/e2e/mods/3774780988-schedule-priority-screen-expander.yaml: the four management screens open at the mod's sizes, as in the original (sizes equal); the Schedule, Priorities and Consumables dumps match, but the enlarged Vitals scroll view's scrollbar reads size 0.98 (value 1) against the original's 1 (value 0), its content and viewport rects equal (a run of ours failed) |
 | 2158 | [Uniform Storage Distribution](https://steamcommunity.com/sharedfiles/filedetails/?id=3741933887) | ⬜ | ⬜ | ⬜ |  |
 | 2159 | [烟花Fireworks](https://steamcommunity.com/sharedfiles/filedetails/?id=2890628700) | ⬜ | ⬜ | ⬜ |  |
 | 2160 | [Cargo Bay Capacity Ports](https://steamcommunity.com/sharedfiles/filedetails/?id=2861868848) | ⬜ | ⬜ | ⬜ |  |
@@ -2034,7 +2034,7 @@ installs get developer checks subscribers never see).
 | 2177 | [More electrolysis更多电解](https://steamcommunity.com/sharedfiles/filedetails/?id=3572721874) | ⬜ | ⬜ | ⬜ |  |
 | 2178 | [乙醇蒸馏器.改](https://steamcommunity.com/sharedfiles/filedetails/?id=2984784113) | ⬜ | ⬜ | ⬜ |  |
 | 2179 | [Default Deconstruct](https://steamcommunity.com/sharedfiles/filedetails/?id=2798967122) | ⬜ | ⬜ | ⬜ |  |
-| 2180 | [Storage Info Plus / 存储信息显示增强](https://steamcommunity.com/sharedfiles/filedetails/?id=3777521625) | ⬜ | ⬜ | ⬜ |  |
+| 2180 | [Storage Info Plus / 存储信息显示增强](https://steamcommunity.com/sharedfiles/filedetails/?id=3777521625) | ✅ | ✅ | ✅ | spec tests/e2e/mods/3777521625-storage-info-plus.yaml: the outhouse's and a new Microbe Musher's storages show in the mod's groups with their contents and capacities, as in the original; its sip_divider sprite lines were not reached from these screens |
 | 2181 | [Big Mod](https://steamcommunity.com/sharedfiles/filedetails/?id=2817871454) | ⬜ | ⬜ | ⬜ |  |
 | 2182 | [魔改电解器左氢右氧](https://steamcommunity.com/sharedfiles/filedetails/?id=2984782534) | ⬜ | ⬜ | ⬜ |  |
 | 2183 | [A new hope](https://steamcommunity.com/sharedfiles/filedetails/?id=2977857632) | ⬜ | ⬜ | ⬜ |  |

@@ -1,0 +1,97 @@
+{
+ "spec": "mods/3774780988-schedule-priority-screen-expander.yaml",
+ "mods": [
+  "3774780988"
+ ],
+ "verdict": "failed",
+ "why": "a run of ours failed",
+ "findings": [],
+ "note": "the four management screens open at the mod's sizes, as in the original (sizes equal); the Schedule, Priorities and Consumables dumps match, but the enlarged Vitals scroll view's scrollbar reads size 0.98 (value 1) against the original's 1 (value 0), its content and viewport rects equal",
+ "updated": "2026-10-26",
+ "commit": "91bfe30",
+ "mod_dlls": {
+  "3774780988": {
+   "SchedulePriorityScreenExpander.dll": "1f8d48ce45cbff22b3853dc3272c9e1087a876faa88c6f14866731d32c50cd90"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-013152-58258267",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T01:31:52",
+    "lane": 32,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-013729-976ad7ab",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-26T01:37:29",
+    "lane": 32,
+    "reasons": [
+     "ui_dump vitals: 2 difference(s)"
+    ],
+    "reference_run": "20261026-013152-58258267",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "schedule": {
+      "differences": 0
+     },
+     "priorities": {
+      "differences": 0
+     },
+     "vitals": {
+      "differences": 2
+     },
+     "consumables": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 4
+      }
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261026-013729-976ad7ab",
+    "index": 2,
+    "verdict": "fail",
+    "date": "2026-10-26T01:38:25",
+    "lane": 32,
+    "reasons": [
+     "ui_dump vitals: 2 difference(s)"
+    ],
+    "reference_run": "20261026-013152-58258267",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "schedule": {
+      "differences": 0
+     },
+     "priorities": {
+      "differences": 0
+     },
+     "vitals": {
+      "differences": 2
+     },
+     "consumables": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 4
+      }
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -1,0 +1,38 @@
+# Applied Logistics Network [ALN] (3753045682).
+#
+# What it does: digital storage and logistics in the manner of AE2: storage cells and drives on
+# numbered channels, terminals Duplicants deposit to and take from, import and export
+# interfaces, crafting and assembly interfaces, a recipe terminal, a heat exchanger, an energy
+# pool and more, under its own research (ALN_Base first). Selecting an ALN Terminal shows its
+# config side screen (channel, capacity summary, sweep, sustenance, barrel, detection and
+# delivery toggles) and its terminal panel, whose item list is filtered by a text field. That
+# field is the mod's ALN_InputTextField, a TMP_InputField subclass that reads the protected
+# m_Mesh for its caret diagnostics (docs/cleanroom/textmeshpro.md, "TMP_InputField.m_Mesh").
+# How a player reaches it: research ALN's first tech, build an ALN Terminal, select it.
+# What changes: items are stored in and fetched from the network.
+#
+# setup grants ALN_Base and spawns copper; a terminal is built west of the printing pod and
+# selected. Its side screen and terminal panel header are compared with the original's, and
+# "dirt" is typed into the panel's filter field.
+from: early-base
+mods: [3753045682]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"ALN_Base\")", method: Purchased}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Copper\").substance", method: SpawnResource, args: [[109.5, 206.5, -12], 600, 300, 255, 0]}}
+steps:
+  - run: {seconds: 5}
+  - build: {prefab: ALN_TERMINAL, at: [113, 206], material: Copper}
+  - run: {seconds: 1500, until: {buildings: {ALN_TERMINAL: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [114, 207], ortho: 8}}
+  - click_world: {cell: [113, 206], select: ALN_TERMINAL}
+  - ui_wait: {path: "**/ALN_TerminalConfigScreenPrefab", cond: stable}
+  - expect_ui:
+      "**/ALN_TerminalConfigScreenPrefab/ChannelSelector/ALN_Dropdown/DropdownHeader/Label": {text: "Channel 1"}
+      "**/ALN_TerminalConfigScreenPrefab/DeliveryRow/DeliveryToggleBtn/Content/Text": {text: "Everyone"}
+  - ui_dump: {name: config, root: "**/ALN_TerminalConfigScreenPrefab"}
+  - ui_wait: {path: "**/ALN_TerminalPanelScreen/ContentPanel/Header", cond: stable}
+  - ui_dump: {name: panel-header, root: "**/ALN_TerminalPanelScreen/ContentPanel/Header"}
+  - type: {ui: "**/ALN_TerminalPanelScreen/ContentPanel/ContentArea/FilterRow/InputContainer/TMP_InputField", text: "dirt"}
+  - expect_state:
+      "ui:**/ALN_TerminalPanelScreen/ContentPanel/ContentArea/FilterRow/InputContainer/TMP_InputField::GetComponent<TMPro.TMP_InputField>.text": dirt
+  - ui_dump: {name: filter, root: "**/ALN_TerminalPanelScreen/ContentPanel/ContentArea/FilterRow"}

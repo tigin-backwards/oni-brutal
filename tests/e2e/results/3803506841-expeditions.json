@@ -1,0 +1,69 @@
+{
+ "spec": "mods/3803506841-expeditions.yaml",
+ "mods": [
+  "3803506841"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the portal is built and its Expeditions screen opens with its header and patch notes as in the original",
+ "updated": "2026-10-26",
+ "commit": "91bfe30",
+ "mod_dlls": {
+  "3803506841": {
+   "Expeditions.dll": "6fd3970be6968b9a08600a2a066f74599c3407287ac15b870637ef07874299d6"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-030538-e5073872",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:05:38",
+    "lane": 33,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-030732-b0605992",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:07:32",
+    "lane": 33,
+    "reference_run": "20261026-030538-e5073872",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "header": {
+      "differences": 0
+     },
+     "patch-notes-tabs": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261026-030732-b0605992",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T03:08:43",
+    "lane": 33,
+    "reference_run": "20261026-030538-e5073872",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "header": {
+      "differences": 0
+     },
+     "patch-notes-tabs": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

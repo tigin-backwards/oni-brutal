@@ -1,0 +1,39 @@
+# Expeditions: The Shattered Planet (3803506841).
+#
+# What it does: adds an Expeditions Portal (ExpeditionTerminal, Brute-Force Refinement, 3 × 2,
+# refined metal) whose config side screen has "Open Expeditions", "Items Shop" and "Buy
+# Coupons". Its Expeditions screen sends one Duplicant to a persistent site on The Shattered
+# Planet: a home page with a progression gauge, missions with decisions, supplies and a field
+# inventory, and a patch notes overlay shown first. Choosing fonts for its texts, it checks a
+# font's coverage with TMP_FontAsset.HasCharacters(string, out uint[], bool, bool)
+# (docs/cleanroom/textmeshpro.md).
+# How a player reaches it: research Brute-Force Refinement, build the portal, select it and
+# press "Open Expeditions".
+# What changes: Duplicants can be sent on expeditions from the portal.
+#
+# setup grants Brute-Force Refinement and spawns copper; the portal is built west of the
+# printing pod, selected, and its screen opened. The screen's header and the patch notes
+# dialog are compared with the original's.
+from: early-base
+mods: [3803506841]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"BasicRefinement\")", method: Purchased}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Copper\").substance", method: SpawnResource, args: [[109.5, 206.5, -12], 400, 300, 255, 0]}}
+steps:
+  - run: {seconds: 5}
+  - build: {prefab: ExpeditionTerminal, at: [113, 206], material: Copper}
+  - run: {seconds: 1500, until: {buildings: {ExpeditionTerminal: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [114, 207], ortho: 8}}
+  - click_world: {cell: [114, 206], select: ExpeditionTerminal}
+  - ui_wait: {path: "**/ButtonMenuSideScreen/Buttons", cond: stable}
+  - expect_ui:
+      "**/ButtonMenuSideScreen/Buttons/Button[0]/Label": {text: "Open Expeditions"}
+      "**/ButtonMenuSideScreen/Buttons/Button[1]/Label": {text: "Items Shop"}
+  - click: {ui: "**/ButtonMenuSideScreen/Buttons/Button[0]"}
+  - ui_wait: {path: "**/ExpeditionsScreen/Window/Header", cond: stable}
+  - expect_ui:
+      "**/ExpeditionsScreen/Window/Header/Text": {text: "Expeditions"}
+      "**/ExpeditionsScreen/Window/Header/BetaBadge/Text": {text: "Beta"}
+  - ui_dump: {name: header, root: "**/ExpeditionsScreen/Window/Header"}
+  - ui_wait: {path: "**/ExpeditionsScreen/ExpeditionPatchNotesOverlay/PatchNotesDialog", cond: stable}
+  - ui_dump: {name: patch-notes-tabs, root: "**/PatchNotesDialog/PatchNotesStack/PatchNotesTabs"}

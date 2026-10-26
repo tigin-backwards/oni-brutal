@@ -1,0 +1,39 @@
+# Schedule & Priority Screen Expander (3774780988).
+#
+# What it does: makes the management screens bigger: the Schedule, Priorities, Vitals and
+# Consumables screens open larger, so more rows and columns show without scrolling. On the way
+# it reads its labels' TextMeshProUGUI.canvasRenderer, the getter the shipped package declares
+# on TextMeshProUGUI (docs/cleanroom/textmeshpro.md, "TextMeshProUGUI.canvasRenderer").
+# How a player reaches it: the management bar (Schedule ., Priorities L, Vitals V, Consumables
+# F).
+# What changes: the screens are larger than the game's own.
+#
+# Each screen is opened and its size compared with the original's, then dumped.
+from: early-base
+mods: [3774780988]
+mask_text: ['\d+(\.\d+)?\s*(kcal|%|kg|g)']
+steps:
+  - open: {key: Period}
+  - ui_wait: {path: "**/ScheduleScreen", cond: stable, frames: 30}
+  - expect_state:
+      "ui:**/ScheduleScreen::GetComponent<RectTransform>.rect.width": "== original"
+      "ui:**/ScheduleScreen::GetComponent<RectTransform>.rect.height": "== original"
+  - ui_dump: {name: schedule, root: "**/ScheduleScreen"}
+  - open: {management: priorities}
+  - ui_wait: {path: "**/JobsTableScreen", cond: stable, frames: 30}
+  - expect_state:
+      "ui:**/JobsTableScreen::GetComponent<RectTransform>.rect.width": "== original"
+      "ui:**/JobsTableScreen::GetComponent<RectTransform>.rect.height": "== original"
+  - ui_dump: {name: priorities, root: "**/JobsTableScreen"}
+  - open: {management: vitals}
+  - ui_wait: {path: "**/VitalsTableScreen", cond: stable, frames: 30}
+  - expect_state:
+      "ui:**/VitalsTableScreen::GetComponent<RectTransform>.rect.width": "== original"
+      "ui:**/VitalsTableScreen::GetComponent<RectTransform>.rect.height": "== original"
+  - ui_dump: {name: vitals, root: "**/VitalsTableScreen"}
+  - open: {management: consumables}
+  - ui_wait: {path: "**/ConsumablesTableScreen", cond: stable, frames: 30}
+  - expect_state:
+      "ui:**/ConsumablesTableScreen::GetComponent<RectTransform>.rect.width": "== original"
+      "ui:**/ConsumablesTableScreen::GetComponent<RectTransform>.rect.height": "== original"
+  - ui_dump: {name: consumables, root: "**/ConsumablesTableScreen"}

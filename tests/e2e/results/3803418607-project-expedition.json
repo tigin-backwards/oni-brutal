@@ -1,0 +1,63 @@
+{
+ "spec": "mods/3803418607-project-expedition.yaml",
+ "mods": [
+  "3803418607"
+ ],
+ "verdict": "failed",
+ "why": "a run of ours failed",
+ "findings": [],
+ "note": "fails in ours before its first step: the mod's prospecting scan, a postfix on NavPathDrawer, calls Graphics.DrawMeshNow(Mesh, Matrix4x4), which the engine lacks (MissingMethodException every frame, and the game's crash screen). In the original the Cave Entrance's expedition window opens with its status, journal and crew",
+ "updated": "2026-10-26",
+ "commit": "91bfe30e",
+ "mod_dlls": {
+  "3803418607": {
+   "ProjectExpedition.dll": "9a8513340264e2fa8ef830d40ac0338d6c20fea6322dcbfa75f6a0469d6750b6"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-040631-5fdfeae1",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:06:31",
+    "lane": 33,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-040822-b95bc4e7",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-26T04:08:22",
+    "lane": 32,
+    "reasons": [
+     "step start: Canvas/ConfirmDialog/GameObject/Panel/OKButton is occluded by ErrorCanvas/CrashReportScreen(Clone)/Buttons/MoreInfoButton/Text (hits there: ErrorCanvas/CrashReportScreen(Clone)/Buttons/MoreInfoButton/Text, ErrorCanvas/CrashReportScreen(Clone)/Buttons/MoreInfoButton, ErrorCanvas/CrashRepo",
+     "1 log signature(s) the original lacks"
+    ],
+    "reference_run": "20261026-040631-5fdfeae1",
+    "new_signatures": 1,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-040822-b95bc4e7",
+    "index": 2,
+    "verdict": "fail",
+    "date": "2026-10-26T04:09:07",
+    "lane": 32,
+    "reasons": [
+     "step start: Canvas/ConfirmDialog/GameObject/Panel/OKButton is occluded by ErrorCanvas/CrashReportScreen(Clone)/Buttons/MoreInfoButton/Text (hits there: ErrorCanvas/CrashReportScreen(Clone)/Buttons/MoreInfoButton/Text, ErrorCanvas/CrashReportScreen(Clone)/Buttons/MoreInfoButton, ErrorCanvas/CrashRepo",
+     "1 log signature(s) the original lacks"
+    ],
+    "reference_run": "20261026-040631-5fdfeae1",
+    "new_signatures": 1,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

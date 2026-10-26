@@ -1,0 +1,52 @@
+# Storage Info Plus (3777521625).
+#
+# What it does: the details screen's info tab lists every visible Storage of the selected
+# building in its own group, titled by what it is for (Storage, Ingredient Input, Processing,
+# Product Output, Pipe or Rail input and output, Construction Materials) with its mass against
+# its capacity, and under it each stored item with its temperature and mass ("• None" when
+# empty). It builds a sprite asset at run time ("sip_divider"), registers it with
+# MaterialReferenceManager and answers TMP_Text.OnSpriteAssetRequest for it, for divider lines
+# in its texts (docs/cleanroom/textmeshpro.md, "MaterialReferenceManager and
+# TMP_Text.OnSpriteAssetRequest"); without those members its panel code fails.
+# How a player reaches it: select any building with a storage.
+# What changes: the info tab shows the storages and their contents.
+#
+# The outhouse (its dirt) and a newly built Microbe Musher (its three empty storages) are
+# selected and their groups' texts checked; the elements are named by instance ids, which the
+# players number differently, so they are not dumped. The divider lines were not reached from
+# these screens.
+from: early-base
+mods: [3777521625]
+setup:
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Cuprite\").substance", method: SpawnResource, args: [[109.5, 206.5, -12], 500, 300, 255, 0]}}
+steps:
+  - driver: {camera.set: {cell: [122, 208], ortho: 10}}
+  - click_world: {cell: [116, 207], select: Outhouse}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/SimpleInfoScreen/**/ContentStatus/sip_h_*": {text: "Storage (200 kg / 20 t)"}
+      "**/SimpleInfoScreen/**/ContentStatus/sip_s_*/mainLabel": {text: "~Dirt"}
+      "**/SimpleInfoScreen/**/ContentStatus/sip_s_*/label3": {text: "200 kg"}
+  - key: {code: Escape}
+  - run: {seconds: 5}
+  - driver: {camera.set: {cell: [113, 208], ortho: 10}}
+  - click: {ui: "**/PlanScreen/Toggle:Food"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/MicrobeMusher Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/MicrobeMusher Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
+  - click_world: {cell: [114, 206]}
+  - key: {code: Escape}
+  - expect: {blueprints: {MicrobeMusher: 1}}
+  - run: {seconds: 1500, until: {buildings: {MicrobeMusher: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [114, 207], ortho: 8}}
+  - click_world: {cell: [114, 206], select: MicrobeMusher}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/SimpleInfoScreen/**/ContentStatus/sip_h_*": {count: 3}
+      "**/SimpleInfoScreen/**/ContentStatus/sip_empty_*": {count: 3}
+  - expect_ui:
+      "**/SimpleInfoScreen/**/ContentStatus/sip_h_*": {any_text: "Ingredient Input (0 kg / 20 t)"}
+  - expect_ui:
+      "**/SimpleInfoScreen/**/ContentStatus/sip_h_*": {any_text: "Processing (0 kg / 20 t)"}
+  - expect_ui:
+      "**/SimpleInfoScreen/**/ContentStatus/sip_h_*": {any_text: "Product Output (0 kg / 20 t)"}

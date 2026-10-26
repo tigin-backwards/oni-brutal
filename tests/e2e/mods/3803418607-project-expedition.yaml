@@ -1,0 +1,50 @@
+# Project Expedition (3803418607).
+#
+# What it does: a reinforced Cave Entrance (MattsExpeditionCaveEntrance, 4 × 4, raw minerals,
+# its own Expedition build category and research) sends up to four Duplicants on expeditions
+# into the asteroid, with an illustrated journey map, exploration checkpoints, a journal and
+# timed return travel, and many expedition buildings after it. On loading an older colony it
+# shows a notice about its regenerated deposits. Its expedition window's texts use a game font
+# it first registers with MaterialReferenceManager.AddFontAsset (docs/cleanroom/textmeshpro.md,
+# "MaterialReferenceManager and TMP_Text.OnSpriteAssetRequest").
+# How a player reaches it: research the entrance, build it, select it and press "Open
+# Expedition".
+# What changes: Duplicants can explore the asteroid's depths and bring back finds.
+#
+# setup grants the entrance's tech and spawns sandstone; the entrance is placed from its build
+# category west of the printing pod, built, selected and its window opened. The window's
+# status, journal and tab are compared with the original's (the crew rows are named by
+# instance ids, which the players number differently).
+from: early-base
+mods: [3803418607]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"ExpeditionTechEntrance\")", method: Purchased}}
+  # The build menu shows a category once one of its buildings is researched, as it learns.
+  - driver: {setup.call: {target: "Game.Instance", method: Trigger, args: [-107300940]}}
+  - driver: {setup.call: {target: "PlanScreen.Instance._researchedDefs", method: Clear}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"SandStone\").substance", method: SpawnResource, args: [[113.5, 206.5, -12], 600, 300, 255, 0]}}
+steps:
+  - run: {seconds: 5}
+  - driver: {camera.set: {cell: [110, 208], ortho: 10}}
+  - click: {ui: "**/PlanScreen/Toggle:Expedition"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/MattsExpeditionCaveEntrance Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/MattsExpeditionCaveEntrance Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
+  - click_world: {cell: [109, 206]}
+  - key: {code: Escape}
+  - expect: {blueprints: {MattsExpeditionCaveEntrance: 1}}
+  - run: {seconds: 1500, until: {buildings: {MattsExpeditionCaveEntrance: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [110, 208], ortho: 8}}
+  - click_world: {cell: [109, 207], select: MattsExpeditionCaveEntrance}
+  - ui_wait: {path: "**/ButtonMenuSideScreen/Buttons", cond: stable}
+  - expect_ui:
+      "**/ButtonMenuSideScreen/Buttons/Button[0]/Label": {text: "Open Expedition"}
+  - click: {ui: "**/ButtonMenuSideScreen/Buttons/Button[0]"}
+  - ui_wait: {path: "**/ProjectExpeditionWindow/ExpeditionPanel", cond: stable}
+  - expect_ui:
+      "**/ProjectExpeditionWindow/ExpeditionPanel/Status": {text: "Ready for an expedition"}
+      "**/ProjectExpeditionWindow/ExpeditionPanel/JournalTab/Label": {text: "Expedition Journal"}
+      "**/ProjectExpeditionWindow/ExpeditionPanel/CrewList/CrewListContent/Crew_*": {count: 3}
+  - ui_dump: {name: status, root: "**/ProjectExpeditionWindow/ExpeditionPanel/Status"}
+  - ui_dump: {name: journal, root: "**/ProjectExpeditionWindow/ExpeditionPanel/Journal"}
+  - ui_dump: {name: journal-tab, root: "**/ProjectExpeditionWindow/ExpeditionPanel/JournalTab"}

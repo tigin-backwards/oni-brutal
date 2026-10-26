@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3777521625-storage-info-plus.yaml",
+ "mods": [
+  "3777521625"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the outhouse's and a new Microbe Musher's storages show in the mod's groups with their contents and capacities, as in the original; its sip_divider sprite lines were not reached from these screens",
+ "updated": "2026-10-26",
+ "commit": "91bfe30",
+ "mod_dlls": {
+  "3777521625": {
+   "StorageInfoPlus.dll": "77711ec86f180868f95ee257baeaaee0313ecfdd3f82cd589c5188765117fff3"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-021100-072c9344",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T02:11:00",
+    "lane": 32,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-021253-955a3ff1",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T02:12:53",
+    "lane": 32,
+    "reference_run": "20261026-021100-072c9344",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-021253-955a3ff1",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T02:14:03",
+    "lane": 32,
+    "reference_run": "20261026-021100-072c9344",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

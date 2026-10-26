@@ -1,0 +1,76 @@
+{
+ "spec": "mods/3753045682-applied-logistics-network.yaml",
+ "mods": [
+  "3753045682"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "an ALN Terminal is built; its config side screen and terminal panel show as in the original, and typing into the panel's filter (the mod's TMP_InputField subclass) works",
+ "updated": "2026-10-26",
+ "commit": "91bfe30e",
+ "mod_dlls": {
+  "3753045682": {
+   "ALN.PLib.dll": "5ee2e498b4d0eb1cdd2853d5a6936e819cf82072b9c7d56bf2040a3a44d6a1b9",
+   "Applied Logistics Network.dll": "d01f451ea4267f048c1b91d6b81d267cd85a285e3638a150916b0376b048ca36"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-032705-2d9ec422",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:27:05",
+    "lane": 33,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-032857-e5dee605",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:28:57",
+    "lane": 32,
+    "reference_run": "20261026-032705-2d9ec422",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "config": {
+      "differences": 0
+     },
+     "panel-header": {
+      "differences": 0
+     },
+     "filter": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261026-032857-e5dee605",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T03:30:00",
+    "lane": 32,
+    "reference_run": "20261026-032705-2d9ec422",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "config": {
+      "differences": 0
+     },
+     "panel-header": {
+      "differences": 0
+     },
+     "filter": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

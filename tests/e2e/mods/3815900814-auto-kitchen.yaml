@@ -1,0 +1,48 @@
+# 自动厨房 · Auto Kitchen (3815900814).
+#
+# What it does: the game's food buildings get three rows on their config side screen: an
+# automatic processing button (green on, red off, off by default), a Duplicant supply button
+# (whether Duplicants may deliver its ingredients while automatic processing is on), and a
+# "Linked chef" dropdown that picks the Duplicant whose cooking skill the station uses; its list
+# is refreshed when it is opened. While the list is shown the mod lays it out itself each frame,
+# reading TMP_Dropdown.m_Dropdown, the shown list (docs/cleanroom/textmeshpro.md,
+# "TMP_Dropdown.m_Dropdown, the shown list").
+# How a player reaches it: select a cooking building and open its config tab.
+# What changes: a station can cook without a Duplicant at it; the settings are saved.
+#
+# A Microbe Musher is built west of the printing pod (from cuprite spawned there) and selected.
+# Its config rows are compared with the original's, then the chef dropdown is opened (its list
+# compared while it is shown: "Automatic: Highest Cooking" and the three Duplicants with their
+# Cooking) and Travaldo is picked, which the caption then names.
+from: early-base
+mods: [3815900814]
+setup:
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Cuprite\").substance", method: SpawnResource, args: [[109.5, 206.5, -12], 500, 300, 255, 0]}}
+steps:
+  - run: {seconds: 5}
+  - driver: {camera.set: {cell: [113, 208], ortho: 10}}
+  - click: {ui: "**/PlanScreen/Toggle:Food"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/MicrobeMusher Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/MicrobeMusher Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
+  - click_world: {cell: [114, 206]}
+  - key: {code: Escape}
+  - expect: {blueprints: {MicrobeMusher: 1}}
+  - run: {seconds: 1500, until: {buildings: {MicrobeMusher: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [114, 207], ortho: 8}}
+  - click_world: {cell: [114, 206], select: MicrobeMusher}
+  - ui_wait: {path: "**/ButtonMenuSideScreen/Buttons/AutoFoodChefSelector", cond: stable}
+  - expect_ui:
+      "**/ButtonMenuSideScreen/Buttons/Button[0]/Label": {text: "Auto processing: Off"}
+  - ui_dump: {name: buttons, root: "**/ButtonMenuSideScreen/Buttons"}
+  - click: {ui: "**/ButtonMenuSideScreen/Buttons/AutoFoodChefSelector"}
+  - ui_wait: {path: "**/AutoFoodChefSelector/Dropdown List", cond: stable}
+  - expect_state:
+      "ui:**/ButtonMenuSideScreen/Buttons/AutoFoodChefSelector::GetComponent<TMPro.TMP_Dropdown>.IsExpanded": true
+  - ui_dump: {name: list, root: "**/AutoFoodChefSelector/Dropdown List"}
+  - expect_ui:
+      "**/AutoFoodChefSelector/Dropdown List/Viewport/Content/Item*": {count: 4}
+  - click: {ui: "**/AutoFoodChefSelector/Dropdown List/Viewport/Content/Item 1: Travaldo*"}
+  - ui_wait: {path: "**/AutoFoodChefSelector/Dropdown List", cond: gone}
+  - expect_ui:
+      "**/AutoFoodChefSelector/ChefCaption": {text: "~Travaldo"}

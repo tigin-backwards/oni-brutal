@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using OniMoono.Engine;
@@ -45,6 +46,15 @@ namespace UnityEngine
             // outer object's base constructor runs: its record is put back afterwards.
             var outerNative = s_PendingNative;
             var outerType = s_PendingType;
+            // A class without a parameterless constructor is created with no constructor run at
+            // all, its base classes' and field initializers included (UnityProbe's missingtypes:
+            // Trash Cans' components have only a constructor taking a state).
+            if (!HasParameterlessConstructor(type))
+            {
+                var bare = (T)RuntimeHelpers.GetUninitializedObject(type);
+                bare.Bind(native);
+                return bare;
+            }
             s_PendingNative = native;
             s_PendingType = type;
             try
@@ -59,6 +69,11 @@ namespace UnityEngine
                 s_PendingType = outerType;
             }
         }
+
+        static readonly System.Collections.Concurrent.ConcurrentDictionary<Type, bool> parameterless = new();
+
+        static bool HasParameterlessConstructor(Type type) => parameterless.GetOrAdd(type, static t => t.IsAbstract
+            || t.GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, Type.EmptyTypes, null) != null);
 
         /// Attaches a fresh native record to this managed object.
         internal void Bind(NativeObject native)

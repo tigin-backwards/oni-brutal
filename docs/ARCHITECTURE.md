@@ -862,7 +862,10 @@ citing why.
   queue does.
 - `ScriptableObject` and `MonoBehaviour` instances are created with
   `RuntimeHelpers.GetUninitializedObject` + the parameterless constructor, as Unity does
-  (field initializers run, then deserialization overwrites serialized fields).
+  (field initializers run, then deserialization overwrites serialized fields). A class without
+  one is created with no constructor run at all, its base classes' and field initializers
+  included, and nothing is logged (UnityProbe's missingtypes; Trash Cans' components have only
+  a constructor taking a state).
 - **Costs at ONI's scale.** A late-game colony holds hundreds of thousands of objects, most of
   them scene roots (buildings, items, critters), and creates, destroys and re-parents them
   constantly (an item stored is parented to its storage). Scene roots are therefore an ordered

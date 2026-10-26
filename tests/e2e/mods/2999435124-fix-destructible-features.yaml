@@ -1,0 +1,34 @@
+# [FIX] Destructible Features (Geysers & Volcanoes) (2999435124), class P.
+#
+# What it does: gives every geyser and volcano (GeyserGenericConfig.CreateGeyser) and the oil
+# reservoir (OilWellConfig.CreatePrefab) the game's own Demolishable workable, with a work
+# time of 1500 s: their user menu gets the game's Demolish button, which queues a demolition
+# errand for a Duplicant with the demolition skill; when it is done the feature is gone.
+# How a player reaches it: selecting a geyser, its Demolish button.
+# What changes: geysers can be removed.
+#
+# setup reveals the liquid sulfur geyser west of the base (89, 203) and makes it selectable. It is selected and
+# Demolish pressed: the geyser is marked for demolition, and the button turns into Cancel
+# Demolition. (No Duplicant has the skill, so it is not demolished.) The 1500 s is on the
+# prefab; the spawned geyser's Demolishable reports 30 s, in the original too.
+from: early-base
+mods: [2999435124]
+setup:
+  - driver: {setup.call: {type: GridVisibility, method: Reveal, args: [89, 204, 8, 8]}}
+  - driver: {setup.call: {target: "all:Geyser::[0].GetComponent<KSelectable>", method: set_IsSelectable, args: [true]}}
+steps:
+  - run: {seconds: 1}
+  - expect_state:
+      "all:Geyser::Length": 1
+      "all:Geyser::[0].GetComponent<Demolishable>": exists
+      "Assets.GetPrefab(\"GeyserGeneric_liquid_sulfur\").GetComponent<Demolishable>.workTime": 1500
+      "Assets.GetPrefab(\"OilWell\").GetComponent<Demolishable>": exists
+  - driver: {camera.set: {cell: [92, 205], ortho: 8}}
+  - click_world: {cell: [89, 203], select: GeyserGeneric_liquid_sulfur}
+  - ui_wait: {path: "**/DetailsScreen/UserMenuButtons/UserMenuScreen/Buttons", cond: stable}
+  - ui_dump: {name: user-menu, root: "**/DetailsScreen/UserMenuButtons/UserMenuScreen/Buttons"}
+  - click: {ui: "**/UserMenuScreen/Buttons/DemolishButton"}
+  - expect_state:
+      "selected:GetComponent<Demolishable>.isMarkedForDemolition": true
+      "selected:GetComponent<Demolishable>.chore": exists
+  - ui_wait: {path: "**/UserMenuScreen/Buttons/Cancel DemolitionButton", cond: stable}

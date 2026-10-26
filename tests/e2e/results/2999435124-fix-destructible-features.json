@@ -1,0 +1,63 @@
+{
+ "spec": "mods/2999435124-fix-destructible-features.yaml",
+ "mods": [
+  "2999435124"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a revealed geyser gets the game's Demolish button; pressed, it is marked for demolition with its errand",
+ "updated": "2026-10-25",
+ "commit": "a9add53",
+ "mod_dlls": {
+  "2999435124": {
+   "FixDestructibleFeatures.dll": "9376bda5bc75f62d91ca69e3015a0be45e151838f960f0a3e21189761a8820ae"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-205844-dfce1bd7",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T21:22:26",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-213008-ec274f15",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T21:30:08",
+    "lane": 14,
+    "reference_run": "20261025-205844-dfce1bd7",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "user-menu": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261025-213008-ec274f15",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-25T21:30:55",
+    "lane": 14,
+    "reference_run": "20261025-205844-dfce1bd7",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "user-menu": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -1,0 +1,45 @@
+# 香草之家 Rustic House (3004770489), class B.
+#
+# What it does: adds rustic furniture, researched with Interior Decor: a flush toilet
+# (UI20230714FF02, Plumbing), a luxury 2x2 rocking bed (UI20230714FF06), a dining table
+# (UI20230714FF07, Food), a 1x1 firefly ceiling lamp (UI20230714FF08) and a flower pot
+# (UI20230714FF09, with three facades), the others in Furniture. The lamp has a slider (0 to
+# 100 tiles, 8 by default) that sets its light's range, its lux (200 per tile) and its wattage.
+# How a player reaches it: the build menu, after the research; the lamp's side screen.
+# What changes: decorative buildings, and a lamp with an adjustable range.
+#
+# setup grants Interior Decor and builds a firefly lamp on the ceiling of the corridor west of
+# the printing pod. The buildings show in the Furniture menu; the lamp is selected and 20 typed
+# into its slider's field: its light reaches 20 tiles at 4000 lux.
+from: early-base
+mods: [3004770489]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"InteriorDecor\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"UI20230714FF08\")", method: Build, args: [{"$": "Grid.XYToCell(112, 209)"}, Neutral, null, [Copper], 300.0, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"InteriorDecor\").unlockedItemIDs": {contains: UI20230714FF06}
+      "Assets.GetBuildingDef(\"UI20230714FF06\").WidthInCells": 2
+  # Long enough for the build menu to have counted the base's materials: right after the load it
+  # shows some buildings unaffordable for a moment, in either player.
+  - run: {seconds: 10}
+  - click: {ui: "**/PlanScreen/Toggle:Furniture"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/UI20230714FF06 Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/UI20230714FF06 Group*": {active: true}
+      "**/BuildingGroups/**/Grid/UI20230714FF08 Group*": {active: true}
+      "**/BuildingGroups/**/Grid/UI20230714FF09 Group*": {active: true}
+  - shot: {name: furniture-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
+  - key: {code: Escape}
+  - expect_ui: {"**/PauseScreen": {exists: false}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 209], select: UI20230714FF08}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/SingleSliderSideScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<Light2D>.Range": 8
+  - ui_dump: {name: slider, root: "**/SingleSliderSideScreen"}
+  - type: {ui: "**/SingleSliderSideScreen/Contents/NumberInputField", text: "20", clear: true, enter: true}
+  - expect_state:
+      "selected:GetComponent<Light2D>.Range": 20
+      "selected:GetComponent<Light2D>.Lux": 4000

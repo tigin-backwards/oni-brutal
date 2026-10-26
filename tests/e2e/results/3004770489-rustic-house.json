@@ -1,0 +1,68 @@
+{
+ "spec": "mods/3004770489-rustic-house.yaml",
+ "mods": [
+  "3004770489"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the buildings show in the Furniture menu after Interior Decor; the firefly lamp's slider set to 20 lights 20 tiles at 4000 lux; menu shot and slider dump match",
+ "updated": "2026-10-26",
+ "commit": "f857f16",
+ "mod_dlls": {
+  "3004770489": {
+   "PLib.dll": "b862c5db2b3cd6df09a62d4a30782e91e2b24e8e1bfac08d991c9cc89a984ba9",
+   "R_╧π▓▌╓«╝╥.dll": "7370300dae48c3adf3c7a7e7a5ec3b514ba014ce9b1696565996ca2363406923"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-015712-0ac00902",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T02:05:42",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-020735-a55e49a3",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T02:07:35",
+    "lane": 14,
+    "reference_run": "20261026-015712-0ac00902",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "slider": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "furniture-menu": 0.0
+    }
+   },
+   {
+    "run": "20261026-020735-a55e49a3",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T02:08:27",
+    "lane": 14,
+    "reference_run": "20261026-015712-0ac00902",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "slider": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "furniture-menu": 0.0
+    }
+   }
+  ]
+ }
+}

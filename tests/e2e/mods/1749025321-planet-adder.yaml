@@ -1,0 +1,21 @@
+# Planet Adder (1749025321), class P. Base game only.
+#
+# What it does: a prefix on StarmapScreen.LoadPlanets (run as the starmap screen is created)
+# reads the mod folder's config.txt, lines "Type,distance,orbit" (its example file lists Ice
+# Giant to Volcano Planet and the DLC planets), adds those space
+# destinations to the colony's starmap, then renames the file so it happens once. The
+# config.txt it ships is empty, so as installed it adds nothing and keeps the file.
+# How a player reaches it: editing config.txt, then loading a base-game colony.
+# What changes: more destinations to send rockets to.
+#
+# In the base-game colony the starmap holds the game's destinations, and the empty config.txt
+# is still in place.
+from: vanilla-base
+mods: [1749025321]
+steps:
+  - expect_state:
+      "Game.Instance.spacecraftManager.destinations.Count": [">= 20", "== original"]
+      "count:Game.Instance.spacecraftManager.destinations[*] if .type == Earth": 1
+      "file:mods/Local/1749025321/config.txt": exists
+  - run: {seconds: 10}
+  - expect: {duplicants: 3}

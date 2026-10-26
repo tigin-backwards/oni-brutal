@@ -1,0 +1,55 @@
+{
+ "spec": "mods/1749025321-planet-adder.yaml",
+ "mods": [
+  "1749025321"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "in the base game, with the empty config.txt it ships, the starmap keeps the game's destinations and the file stays",
+ "updated": "2026-10-26",
+ "commit": "9154eba6",
+ "mod_dlls": {
+  "1749025321": {
+   "Planet Adder.dll": "823c27c53afbbc21d7699cf3daaf8570f853a30c2b7bf303154f57e40bc44d11"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-095925-af2fb1f8",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T10:01:15",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-112435-e27cde08",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T11:24:35",
+    "lane": 16,
+    "reference_run": "20261026-095925-af2fb1f8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-112435-e27cde08",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T11:24:36",
+    "lane": 17,
+    "reference_run": "20261026-095925-af2fb1f8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

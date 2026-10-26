@@ -1,0 +1,60 @@
+{
+ "spec": "mods/2881000917-catalytic-co2-to-ethanol.yaml",
+ "mods": [
+  "2881000917"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the building is picked from the Oxygen menu, placed and built of copper ore, with its CO2 consumer and ethanol converter; its build panel as in the original",
+ "updated": "2026-10-25",
+ "commit": "3d254cb",
+ "mod_dlls": {
+  "2881000917": {
+   "PLib.dll": "b862c5db2b3cd6df09a62d4a30782e91e2b24e8e1bfac08d991c9cc89a984ba9",
+   "┤▀╗»CO2╓╞╥╥┤╝ Catalytic CO2 to ethanol.dll": "811dd4cc1899f0ef70677041c1d9777699cda54ce255c3482a64344a98d076c1"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-204944-92d933cd",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T20:49:45",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-220704-90d0dfc0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T22:07:04",
+    "lane": 16,
+    "reference_run": "20261025-204944-92d933cd",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.007747
+    }
+   },
+   {
+    "run": "20261025-220704-90d0dfc0",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-25T22:07:05",
+    "lane": 17,
+    "reference_run": "20261025-204944-92d933cd",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.007747
+    }
+   }
+  ]
+ }
+}

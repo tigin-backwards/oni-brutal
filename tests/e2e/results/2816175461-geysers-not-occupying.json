@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2816175461-geysers-not-occupying.yaml",
+ "mods": [
+  "2816175461"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a tile is ordered on the upper row of a cool steam vent and built there, the vent staying in place",
+ "updated": "2026-10-25",
+ "commit": "99cab62",
+ "mod_dlls": {
+  "2816175461": {
+   "GeyserNotOccupying.dll": "7ea20fa49d423c4c07c7009fac213be28baa006e5707f065758c8cd1ff67adc4"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-195901-01a97acc",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T20:03:18",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-202920-c9475ba8",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T20:29:20",
+    "lane": 16,
+    "reference_run": "20261025-195901-01a97acc",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261025-202920-c9475ba8",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-25T20:30:24",
+    "lane": 16,
+    "reference_run": "20261025-195901-01a97acc",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

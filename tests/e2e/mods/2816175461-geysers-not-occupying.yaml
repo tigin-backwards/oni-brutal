@@ -1,0 +1,25 @@
+# 在泉上建造 / GeysersNotOccupying (2816175461), class P.
+#
+# What it does: buildings may stand over a geyser. A postfix on GeyserGenericConfig.CreateGeyser
+# moves the geyser's OccupyArea to an object layer of its own (38) instead of the Building
+# layer, and a postfix on BuildingDef.IsAreaClear lets a building through when the only thing
+# in its cells is a geyser. The debug and sandbox destroy tools also remove what is on that
+# layer.
+# How a player reaches it: placing a building, such as a tile, on a geyser.
+# What changes: a tile can cap a geyser's vent.
+#
+# setup places a cool steam vent in the dug-out corridor west of the printing pod. A tile is
+# ordered on the vent's upper row and built there.
+from: early-base
+mods: [2816175461]
+setup:
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(0, 112, 206, \"GeyserGeneric_steam\", \"BuildingBack\")", method: SetActive, args: [true]}}
+steps:
+  - expect_state:
+      "count:all:Geyser::[*] if .transform.position.x == 112.5": 1
+  - build: {prefab: Tile, cells: [[113, 207]], material: SandStone}
+  - expect: {blueprints: {Tile: 1}}
+  - run: {seconds: 900, until: {pending_construction: 0}}
+  - expect_state:
+      "Grid.Solid.get_Item(131765)": true
+      "count:all:Geyser::[*] if .transform.position.x == 112.5": 1

@@ -1,0 +1,21 @@
+# SuperComic's MODs Language Pack - EN/JA/ZH (Reworked) (2785073113), class X (strings).
+#
+# What it does: no code: English, Japanese and Chinese string files (en-us.txt, ja-jp.txt,
+# zh-cn.txt, one folder per mod, and scpatch.conf) for SuperComic's mods (Eco-friendly
+# Toilet, Advanced Generator, Fast Wireless, the support package), read by those mods'
+# library.
+# How a player reaches it: SuperComic's mods' names and texts, in the game's language.
+# What changes: those mods' strings.
+#
+# With the Eco-friendly Toilet (1886183536), the toilet's name and status strings are loaded,
+# and the Plumbing menu shows it.
+from: early-base
+mods: [1886183536, 2785073113]
+steps:
+  - expect_state:
+      "Strings.Get(\"STRINGS.BUILDINGS.PREFABS.ECOFRIENDLYTOILET.NAME\").String": {contains: Eco-Friendly}
+  - run: {seconds: 10}
+  - click: {ui: "**/PlanScreen/Toggle:Plumbing"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/EcoFriendlyToilet Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/EcoFriendlyToilet Group*": {active: true}

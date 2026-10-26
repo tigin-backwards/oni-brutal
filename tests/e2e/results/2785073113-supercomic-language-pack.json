@@ -1,0 +1,60 @@
+{
+ "spec": "mods/2785073113-supercomic-language-pack.yaml",
+ "mods": [
+  "1886183536",
+  "2785073113"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with the Eco-friendly Toilet, its strings are loaded and the Plumbing menu offers it",
+ "updated": "2026-10-26",
+ "commit": "ec85d7ad",
+ "mod_dlls": {
+  "1886183536": {
+   "0SuperComicLib.ModONI.dll": "ab1b3ec34fc2bbf90810844205824364128cf59acfcf291bebf5ffa1917c23d7",
+   "EcoFriendlyToilet_OV3.dll": "0c4e40ec862a34744f1c1e9bee889c5ecb3af47524f2ef6562e66b07d9dba2bb",
+   "VYaml.Annotations.dll": "3d41df55af5e3f3cbb0db9028a7bc952317470fa427be3e9f6e51565ca8b23ba",
+   "VYaml.dll": "dc85a16a973d7395628269ea36597104d4399e9e00c498e3728dfcdec2f0ed85"
+  },
+  "2785073113": {}
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-043257-c0eef0ae",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:59:11",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-102900-e76c3996",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T10:29:00",
+    "lane": 16,
+    "reference_run": "20261026-043257-c0eef0ae",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-102900-e76c3996",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T10:29:01",
+    "lane": 17,
+    "reference_run": "20261026-043257-c0eef0ae",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

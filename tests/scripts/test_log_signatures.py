@@ -137,6 +137,26 @@ class LogSignatures(unittest.TestCase):
         self.assertEqual(signatures('A: a\n ---> B: b\n ---> C: c\n   at M.N()\n'),
                          signatures('A: a ---> B: b ---> C: c\n  at M.N () [0x00000] in <x>:0\n'))
 
+    def test_harmony_replacement_frames(self):
+        # Printerceptor Reimagined logs Harmony's refusal of an inherited method: the original
+        # runs PatchProcessor.Patch unpatched, ours a replacement of it (D14).
+        mono = signatures('[03:46:57.029] [1] [WARNING] [GravitasMod] Patch failed for KScreen.OnCleanUp: '
+                          'System.ArgumentException: You can only patch implemented methods/constructors.\n'
+                          '  at HarmonyLib.PatchProcessor.Patch () [0x00051] in <f14b>:0 \n'
+                          '  at HarmonyLib.Harmony.Patch (System.Reflection.MethodBase original) [0x0002a] in <f14b>:0 \n')
+        ours = signatures('[03:46:47.742] [1] [WARNING] [GravitasMod] Patch failed for KScreen.OnCleanUp: '
+                          'System.ArgumentException: You can only patch implemented methods/constructors.\n'
+                          '   at HarmonyLib.PatchProcessor.Patch_Patch2(PatchProcessor this)\n'
+                          '   at HarmonyLib.Harmony.Patch(MethodBase original)\n')
+        self.assertEqual(ours, mono)
+        self.assertTrue(mono[0].endswith(' @ HarmonyLib.PatchProcessor.Patch'))
+        # Mono's frame of a replacement names MonoMod's owner type first.
+        wrapped = signatures('NullReferenceException: x\n'
+                             '  at (wrapper dynamic-method) MonoMod.Utils.DynamicMethodDefinition.'
+                             'OverlayScreen.RegisterModes_Patch1(OverlayScreen)\n')
+        self.assertEqual(wrapped, signatures('NullReferenceException: x\n   at OverlayScreen.RegisterModes_Patch3(OverlayScreen this)\n'))
+        self.assertEqual(wrapped, ['NullReferenceException: x @ OverlayScreen.RegisterModes'])
+
     def test_trailing_period(self):
         self.assertEqual(qa_tools.canonical('NullReferenceException: Object reference not set to an instance of an object.'),
                          qa_tools.canonical('NullReferenceException: Object reference not set to an instance of an object'))

@@ -55,6 +55,12 @@ def canonical(signature):
 def clean_frame(frame):
     """A frame's method alone, as both runtimes name it."""
     frame = re.sub(r'^at ', '', frame.strip())
+    # A Harmony replacement's frame is its patched method's: Mono names it "(wrapper
+    # dynamic-method) MonoMod.Utils.DynamicMethodDefinition.T.M_PatchN", .NET "T.M_PatchN", and
+    # ours patches some of Harmony's own methods (ARCHITECTURE D14, D38) that the original runs
+    # unpatched, so a mod's failed patch shows "PatchProcessor.Patch_Patch2" in ours alone.
+    frame = re.sub(r'^\(wrapper dynamic-method\) (?:MonoMod\.Utils\.DynamicMethodDefinition\.)?', '', frame)
+    frame = re.sub(r'_Patch(?:N|\d+)(?=\s*(?:\(|$))', '', frame)
     # Mono's location: "[0x…] in <mvid>:0", or the source file with symbols (ours has the
     # engine's).
     frame = re.sub(r' (\[N\] in .*|in <[^>]*>(:N)?)$', '', frame)

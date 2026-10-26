@@ -363,7 +363,12 @@ game or mod code can notice. Each says how it is resolved, or why it is kept.
   a null there ended the game's asset setup when another mod had patched a `CreatePrefab` (the
   save never loaded). **Resolved in** `MonoStackFrames`: a mod's calls to `StackFrame.GetMethod`
   (found in its metadata) call the host's instead, which reports a dynamic method with an owner
-  as declared by the owner. Writing the rewritten mod resolves its references against the
+  as declared by the owner. In a trace's text, Mono names a replacement's frame `(wrapper
+  dynamic-method) MonoMod.Utils.DynamicMethodDefinition.T.M_PatchN` and CoreCLR `T.M_PatchN`;
+  the test tools' log signatures (`qa-tools.py`) read either as `T.M`, the method patched, since
+  the host patches some of Harmony's own methods (D14, D38) that the original runs unpatched:
+  Printerceptor Reimagined's refused patches showed `PatchProcessor.Patch_Patch2` in ours alone.
+  Writing the rewritten mod resolves its references against the
   assemblies already loaded (an enum default value's type: PLib's mods), and a mod that cannot be
   rewritten loads unchanged. `--check-types` walks the stack from a patched method of a mod
   whose method takes a game enum with a default value.

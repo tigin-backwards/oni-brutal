@@ -1,0 +1,22 @@
+# Customize Elements (2549477669), classes P, O.
+#
+# What it does: a JSON config in the mods folder (written with defaults on first start) sets
+# any element's properties before the element table is finalised: heat capacity,
+# conductivity, molar mass, strength, flow, hardness, transitions, sublimation, material
+# category, tags and attributes such as overheat temperature and decor. The defaults make
+# metals (copper, gold, iron, aluminum, cobalt, lead, tungsten, depleted uranium) buildable as
+# any material, oxygen a molar mass of 15.9, niobium and thermium +100 degrees overheat and +5
+# decor, and bleach stone sublimate differently.
+# How a player reaches it: editing the config file.
+# What changes: element properties.
+#
+# On a first start the defaults apply: oxygen's molar mass and copper's tags are read.
+from: early-base
+mods: [2549477669]
+steps:
+  - expect_state:
+      "ElementLoader.FindElementByName(\"Oxygen\").molarMass": [">= 15.89", "<= 15.91"]
+      "ElementLoader.FindElementByName(\"Copper\").oreTags": [{contains: BuildableAny}, {contains: Metal}]
+      "ElementLoader.FindElementByName(\"Katairite\").oreTags": {contains: BuildableRaw}
+  - run: {seconds: 10}
+  - expect: {duplicants: 3}

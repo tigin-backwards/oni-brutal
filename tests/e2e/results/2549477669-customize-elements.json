@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2549477669-customize-elements.yaml",
+ "mods": [
+  "2549477669"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "its default config applies on a first start: oxygen's molar mass 15.9, copper and katairite buildable as any material",
+ "updated": "2026-10-26",
+ "commit": "7f0364bc",
+ "mod_dlls": {
+  "2549477669": {
+   "CustomizeElements.dll": "a91a5c09fe83e114c2d4941446f572c8e0af3d962f8b8b08d0a9d0f32290c354"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-025019-77e7dd66",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:11:19",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-042622-81d0096c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:26:22",
+    "lane": 14,
+    "reference_run": "20261026-025019-77e7dd66",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-042622-81d0096c",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T04:27:08",
+    "lane": 14,
+    "reference_run": "20261026-025019-77e7dd66",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -1,0 +1,67 @@
+{
+ "spec": "mods/3426316307-bionic-overclock.yaml",
+ "mods": [
+  "3426316307"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a bionic Duplicant with the Overclocking skill shows the mod's slider on its Config tab; 50 typed overclocks it by half; slider dump and shot match",
+ "updated": "2026-10-26",
+ "commit": "3187167",
+ "mod_dlls": {
+  "3426316307": {
+   "Bionic_Overclock.dll": "6e62b4ba13bc21dfe801ed155b2948fcb5cfd7127735fd3a905d95a8c91f06a3"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-000654-98a7a75e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T00:36:02",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-010700-3fdcf4a9",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T01:08:46",
+    "lane": 14,
+    "reference_run": "20261026-000654-98a7a75e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "slider": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "slider": 0.0
+    }
+   },
+   {
+    "run": "20261026-010700-3fdcf4a9",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T01:09:36",
+    "lane": 14,
+    "reference_run": "20261026-000654-98a7a75e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "slider": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "slider": 0.0
+    }
+   }
+  ]
+ }
+}

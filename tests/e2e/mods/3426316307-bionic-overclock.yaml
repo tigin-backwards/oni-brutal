@@ -1,0 +1,34 @@
+# Bionic Overclock (3426316307), classes P, S (a slider side screen on Duplicants). Needs
+# The Bionic Booster Pack.
+#
+# What it does: adds a bionic skill, Overclocking (BionicsOverclock, its own skill group), and
+# gives bionic Duplicants an Overclocker: once the skill is learned, a slider (-80 to +100 %)
+# on the Duplicant scales the attribute bonuses of its boosters, its wattage and its gear oil
+# use by that much. A transpiler on CharacterContainer.OnSpawn adds the group where printing
+# cards list bionic skills.
+# How a player reaches it: the Skills screen; select a bionic Duplicant with the skill.
+# What changes: bionics traded between power and skill.
+#
+# setup grants the bionic Duplicant the skill and selects it. On its Config tab, 50 is typed
+# into its slider's field: it is overclocked by half, and its wattage modifier says so.
+from: early-base
+mods: [3426316307]
+setup:
+  - driver: {setup.call: {target: "all:Bionic_Overclock.Overclocker::[0].GetComponent<MinionResume>", method: GrantSkill, args: [BionicsOverclock]}}
+  - driver: {setup.call: {target: "SelectTool.Instance", method: Select, args: [{"$": "all:Bionic_Overclock.Overclocker::[0].GetComponent<KSelectable>"}, false]}}
+steps:
+  - expect_state:
+      "Db.Get().Skills.TryGet(\"BionicsOverclock\")": exists
+      "Db.Get().SkillGroups.TryGet(\"Overclock\")": exists
+      "all:Bionic_Overclock.Overclocker::Length": 1
+  - ui_wait: {path: "**/DetailsScreen/SideScreen", cond: stable}
+  - click: {text: "Config", under: "**/DetailsScreen/SideScreen"}
+  - ui_wait: {path: "**/MultiSliderSideScreen/Sliders/SliderContents", cond: stable}
+  - ui_dump: {name: slider, root: "**/MultiSliderSideScreen"}
+  - shot: {name: slider, crop: "**/MultiSliderSideScreen"}
+  - type: {ui: "**/MultiSliderSideScreen/Sliders/SliderContents[0]/TitleRow/NumberInputField", text: "50", clear: true, enter: true}
+  - expect_state:
+      "selected:GetComponent<Bionic_Overclock.Overclocker>.overclockFactor": 0.5
+      "selected:GetComponent<Bionic_Overclock.Overclocker>.overclockWattageModifier.name": {contains: "Overclock: +"}
+  - run: {seconds: 10}
+  - expect: {duplicants: 3}

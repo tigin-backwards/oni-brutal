@@ -1,0 +1,59 @@
+{
+ "spec": "mods/2931324205-r-petal-wall.yaml",
+ "mods": [
+  "2931324205"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Petal Wall shows in the Furniture menu with its 8 facades; a built one gives decor 3; menu shot matches",
+ "updated": "2026-10-26",
+ "commit": "069fe17",
+ "mod_dlls": {
+  "2931324205": {
+   "R_╗¿░Ω╟╜.dll": "a3d58aa50e9bb02ff6c8baa27bae3da5c4ac9617f7bb4f32d87c5d64c0afb8c5"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-023318-02f49c43",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T02:40:02",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-024545-f741d0b9",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:13:31",
+    "lane": 14,
+    "reference_run": "20261026-023318-02f49c43",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "furniture-menu": 0.0
+    }
+   },
+   {
+    "run": "20261026-024545-f741d0b9",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T03:14:26",
+    "lane": 14,
+    "reference_run": "20261026-023318-02f49c43",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "furniture-menu": 0.0
+    }
+   }
+  ]
+ }
+}

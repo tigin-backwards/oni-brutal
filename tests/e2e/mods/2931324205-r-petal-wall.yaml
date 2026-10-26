@@ -1,0 +1,31 @@
+# R花瓣墙 Petal Wall (2931324205), class B.
+#
+# What it does: adds the Petal Wall (R039GG1) to the Furniture menu: a 1x1 backwall of any
+# buildable material, decor +3 within 2 cells, that tiles with its neighbours, with eight more
+# flower facades (R039GG1L2 to L9).
+# How a player reaches it: the build menu (Furniture).
+# What changes: a decorative backwall.
+#
+# The Furniture menu lists the wall; one is built in the dug-out corridor west of the printing
+# pod and selected.
+from: early-base
+mods: [2931324205]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"R039GG1\")", method: Build, args: [131129, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"R039GG1\").BuildingComplete.GetComponent<KPrefabID>.HasTag(\"Backwall\")": true
+      "count:Db.Get().Permits.BuildingFacades.resources[*] if .PrefabID == R039GG1": 8
+  - run: {seconds: 10}
+  - expect: {buildings: {R039GG1: 1}}
+  - click: {ui: "**/PlanScreen/Toggle:Furniture"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/R039GG1 Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/R039GG1 Group*": {active: true}
+  - shot: {name: furniture-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
+  - key: {code: Escape}
+  - driver: {camera.set: {cell: [113, 207], ortho: 8}}
+  - click_world: {cell: [113, 206], select: R039GG1}
+  - ui_wait: {path: "**/DetailsScreen/TitleBar", cond: stable}
+  - expect_state:
+      "selected:GetComponent<DecorProvider>.baseDecor": 3

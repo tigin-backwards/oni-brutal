@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2997605883-boxes-boxes-boxes.yaml",
+ "mods": [
+  "2997605883"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "storage bins and smart storage bins insulate, seal and hide their contents; a built bin's storage does",
+ "updated": "2026-10-26",
+ "commit": "df5493c6",
+ "mod_dlls": {
+  "2997605883": {
+   "╧Σ╫╙╧Σ╫╙╧Σ╫╙.dll": "c29a1cc7e9437f975e3c82fa66d3092f2f52c740e0b936f27376302117e5e778"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-024539-704646ee",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:47:03",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-035806-ff10265d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:59:36",
+    "lane": 15,
+    "reference_run": "20261026-024539-704646ee",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-035806-ff10265d",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T04:00:18",
+    "lane": 15,
+    "reference_run": "20261026-024539-704646ee",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

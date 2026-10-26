@@ -1,0 +1,21 @@
+# 箱子箱子箱子 (2997605883), class P.
+#
+# What it does: postfixes on the Storage Bin's and the Smart Storage Bin's configs set their
+# storage modifiers to insulate, seal and hide what they hold (StoredItemModifier 1, 2, 0).
+# How a player reaches it: building a storage bin.
+# What changes: storage bins that keep their contents' temperature and stop sublimation.
+#
+# The bins' default modifiers are read; a storage bin built in the dug-out corridor west of
+# the printing pod holds them.
+from: early-base
+mods: [2997605883]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"StorageLocker\")", method: Build, args: [131129, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"StorageLocker\").BuildingComplete.GetComponent<Storage>.defaultStoredItemModifers": [{contains: Insulate}, {contains: Seal}, {contains: Hide}]
+      "Assets.GetBuildingDef(\"StorageLockerSmart\").BuildingComplete.GetComponent<Storage>.defaultStoredItemModifers": [{contains: Insulate}, {contains: Seal}]
+  - run: {seconds: 2}
+  - expect: {buildings: {StorageLocker: 1}}
+  - expect_state:
+      "all:StorageLocker::[0].GetComponent<Storage>.defaultStoredItemModifers": {contains: Insulate}

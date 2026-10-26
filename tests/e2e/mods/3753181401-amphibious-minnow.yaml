@@ -1,0 +1,26 @@
+# Amphibious Minnow (Species Mod) (3753181401), classes P, S.
+#
+# What it does: adds a Duplicant model, the amphibious Duplicant (AquaticMinion: its own
+# prefab, stats, gills that need moisture and breathe water, its own skills, traits, effects
+# and status items), and an aquatic Minnow personality (AQUATIC_MINNOW, the Freediver trait);
+# with the PLib option AquaticCrew every standard personality gets an aquatic twin. Patches
+# reach the Duplicant selection, vitals and skills screens, access control and the
+# moisturizing buildings (showers, hot tubs, saunas, water coolers, ...).
+# How a player reaches it: Duplicants printed or picked; their screens.
+# What changes: a water-breathing kind of Duplicant.
+#
+# The model's prefab and the aquatic Minnow are in the game's database; the Skills screen
+# opens with the mod's patches in place.
+from: early-base
+mods: [3753181401]
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"AquaticMinion\")": exists
+      "Db.Get().Personalities.TryGet(\"AQUATIC_MINNOW\").model.Name": AquaticMinion
+      "Db.Get().Personalities.Count": "== original"
+  - run: {seconds: 2}
+  - open: {management: skills}
+  - ui_wait: {path: "**/SkillsScreen", cond: stable}
+  - key: {code: Escape}
+  - run: {seconds: 10}
+  - expect: {duplicants: 3}

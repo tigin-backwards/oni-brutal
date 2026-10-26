@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3753181401-amphibious-minnow.yaml",
+ "mods": [
+  "3753181401"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the amphibious Duplicant model and the aquatic Minnow are in the database; the Skills screen opens",
+ "updated": "2026-10-26",
+ "commit": "f2a4f4de",
+ "mod_dlls": {
+  "3753181401": {
+   "AquaticMinnowMinion.dll": "07d53aaccbf39248c49f08810150bca7216c381f7d6d35c1dcb49b4f3f388478"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-043257-c0eef0ae",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:50:22",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-110706-4d5ef688",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T11:07:06",
+    "lane": 16,
+    "reference_run": "20261026-043257-c0eef0ae",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-110706-4d5ef688",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T11:07:07",
+    "lane": 17,
+    "reference_run": "20261026-043257-c0eef0ae",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -1,0 +1,57 @@
+{
+ "spec": "mods/2996322065-neodymiumstyle-hairstyle-pekora.yaml",
+ "mods": [
+  "3172734005",
+  "2996322065"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with Dupery Fixed, Pekora joins the personalities and her hair loads as an accessory",
+ "updated": "2026-10-26",
+ "commit": "dcda4dc",
+ "mod_dlls": {
+  "3172734005": {
+   "DuperyFixed.dll": "9ef4a93958b6b80fbf086cab57821955dd344324d2192086db7ea7845e71f7f2"
+  },
+  "2996322065": {}
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-222040-75e4a4a6",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T00:15:25",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-005336-dc86f137",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T00:53:36",
+    "lane": 14,
+    "reference_run": "20261025-222040-75e4a4a6",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-005336-dc86f137",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T00:54:22",
+    "lane": 14,
+    "reference_run": "20261025-222040-75e4a4a6",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

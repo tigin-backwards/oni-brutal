@@ -1,0 +1,33 @@
+# [DLC] Fragrant Flowers (2924528762), classes B, P, O.
+#
+# What it does: adds three flowers (Duskbloom Lavender, Rimed Mallow, Spinosa Rose) and their
+# boosted forms, spawned in worldgen and care packages, that give off scents: new "germs"
+# (Lavender, Mallow, Rose Scent) that grant Duplicants and critters effects when smelled. Their
+# harvests make foods (Duskbun, Duskjam, Spinosa Cake and Syrup) and scent cans, which a
+# Vaporizer (Medical menu, Medicine II research) spreads. PLib options tune the bonuses,
+# durations, spawn density and which flowers exist.
+# How a player reaches it: finding or planting the flowers; the Vaporizer.
+# What changes: decor plants that buff those who smell them.
+#
+# The scents are in the database and the Vaporizer in Medicine II. setup places a Duskbloom
+# Lavender in the dug-out corridor west of the printing pod; selected, it reads as the mod's
+# plant, and the colony runs beside it.
+from: early-base
+mods: [2924528762]
+setup:
+  - driver: {setup.call: {type: GameUtil, method: KInstantiate, args: [{"$": "Assets.GetPrefab(\"DuskbloomLavender\")"}, [112.5, 206.0, -12], BuildingBack]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+steps:
+  - expect_state:
+      "Db.Get().Diseases.TryGet(\"LavenderScent\").Id": LavenderScent
+      "Db.Get().Techs.Get(\"MedicineII\").unlockedItemIDs": {contains: Vaporizer}
+      "Assets.GetPrefab(\"LavenderSeed\")": exists
+  - driver: {camera.set: {cell: [112, 207], ortho: 6}}
+  - click_world: {cell: [112, 207], select: DuskbloomLavender}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Duskbloom Lavender"}
+  - run: {seconds: 60}
+  - expect_state:
+      "count:all:KPrefabID::[*] if .PrefabTag.Name == DuskbloomLavender": 1
+  - expect: {duplicants: 3}

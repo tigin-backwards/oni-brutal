@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2924528762-fragrant-flowers.yaml",
+ "mods": [
+  "2924528762"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the scents and the Vaporizer are in the game, a Duskbloom Lavender placed in the corridor reads as the mod's plant and lives through 60 s of play",
+ "updated": "2026-10-26",
+ "commit": "bbc2ade",
+ "mod_dlls": {
+  "2924528762": {
+   "FragrantFlowers.dll": "4374e8c0314e8e0ce4383b119bb9ffb0fb983cb365250a3f2cfae33d8eca7d66"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-211703-c9c58a8f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T21:17:03",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-000520-e92856e9",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T00:05:20",
+    "lane": 16,
+    "reference_run": "20261025-211703-c9c58a8f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-000520-e92856e9",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T00:05:21",
+    "lane": 17,
+    "reference_run": "20261025-211703-c9c58a8f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

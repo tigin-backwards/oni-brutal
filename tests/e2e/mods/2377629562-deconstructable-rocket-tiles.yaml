@@ -1,0 +1,23 @@
+# Deconstructable Rocket Tiles (DLC only) (2377629562), class P.
+#
+# What it does: the rocket interior's wall and window tiles are no longer invincible: they
+# can be deconstructed and replaced (Deconstructable.allowDeconstruction, Replaceable).
+# How a player reaches it: a rocket's interior, the deconstruct tool.
+# What changes: rocket interiors can be rebuilt.
+#
+# The tiles' defs are read; a rocket wall tile built in the dug-out corridor west of the
+# printing pod may be deconstructed.
+from: early-base
+mods: [2377629562]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"RocketWallTile\")", method: Build, args: [131129, Neutral, null, [Steel], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"RocketWallTile\").Invincible": false
+      "Assets.GetBuildingDef(\"RocketEnvelopeWindowTile\").Invincible": false
+      "Assets.GetBuildingDef(\"RocketWallTile\").Replaceable": true
+      "Assets.GetBuildingDef(\"RocketEnvelopeWindowTile\").BuildingComplete.GetComponent<Deconstructable>.allowDeconstruction": true
+  - run: {seconds: 2}
+  - expect: {buildings: {RocketWallTile: 1}}
+  - expect_state:
+      "count:all:Deconstructable::[*] if .allowDeconstruction == true and .name == 'RocketWallTileComplete'": 1

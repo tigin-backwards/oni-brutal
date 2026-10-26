@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2377629562-deconstructable-rocket-tiles.yaml",
+ "mods": [
+  "2377629562"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "rocket wall and window tiles are no longer invincible; a built wall tile may be deconstructed",
+ "updated": "2026-10-26",
+ "commit": "df5493c6",
+ "mod_dlls": {
+  "2377629562": {
+   "DeconstructableRocketTiles.dll": "5898046e9bf7f116ca9aa2e6a8a6fe8df77d7f76ed0e3f648e0de5f5be22c331"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-023754-20737f8f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:31:15",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-040105-6a762438",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:03:51",
+    "lane": 14,
+    "reference_run": "20261026-023754-20737f8f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-040105-6a762438",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T04:04:30",
+    "lane": 14,
+    "reference_run": "20261026-023754-20737f8f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

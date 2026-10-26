@@ -1,0 +1,75 @@
+{
+ "spec": "mods/3339050792-advanced-storage.yaml",
+ "mods": [
+  "3339050792"
+ ],
+ "verdict": "warning",
+ "why": "known findings: scroll-normalized-position",
+ "findings": [
+  "scroll-normalized-position"
+ ],
+ "note": "a built Advanced Gas Storage joins the shared store and asks for a filter; its filter screen dump matches",
+ "updated": "2026-10-26",
+ "commit": "b088186",
+ "mod_dlls": {
+  "3339050792": {
+   "TeleStorage.dll": "80d30ba9e2b8d0c5ccbdea61deca1cd92b3c4353a28d05cd30eee56cdf72823e"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-000654-98a7a75e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T00:38:47",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-011154-aa946cfe",
+    "index": 1,
+    "verdict": "warn",
+    "date": "2026-10-26T01:11:54",
+    "lane": 14,
+    "reference_run": "20261026-000654-98a7a75e",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "filter": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261026-011154-aa946cfe",
+    "index": 2,
+    "verdict": "warn",
+    "date": "2026-10-26T01:15:19",
+    "lane": 14,
+    "reference_run": "20261026-000654-98a7a75e",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "filter": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

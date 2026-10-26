@@ -1,0 +1,26 @@
+# Advanced Storage V5 (3339050792), class B.
+#
+# What it does: adds Advanced Gas Storage and Advanced Liquid Storage (TeleStorageGas and
+# TeleStorageLiquid, 5x3, steel, plastic and diamond, Base menu, no research). Whatever their
+# input pipes bring goes into one store shared by all of them, without limit; each pipes out
+# the element chosen in its filter side screen, at the flow its slider sets (10 kg/s by
+# default), and the info panel lists the shared store's contents.
+# How a player reaches it: the build menu (Base); the filter and flow side screens.
+# What changes: limitless storage, shared across the map.
+#
+# setup builds an Advanced Gas Storage in the corridor west of the printing pod. It is
+# selected: with nothing chosen it asks for a filter, and its filter screen shows.
+from: early-base
+mods: [3339050792]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"TeleStorageGas\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Steel, Plastic, Diamond], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "type:TeleStorage.TeleStorageData::Instance.storageContainers.Count": 1
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 208], select: TeleStorageGas}
+  - ui_wait: {path: "**/FilterSideScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<TeleStorage.TeleStorage>.FilteredElement": "== original"
+  - ui_dump: {name: filter, root: "**/FilterSideScreen"}

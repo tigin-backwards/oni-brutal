@@ -1,0 +1,23 @@
+# 无负载电线 / Wire without a load limit (3104741758), class P.
+#
+# What it does: a prefix on Wire.GetMaxWattageAsFloat makes every wire rating carry 1e12 W, so
+# no wire or conductive wire ever overloads, and a postfix on WireConfig.CreateBuildingDef
+# makes the plain Wire build instantly (construction time 0).
+# How a player reaches it: building wires and running power through them.
+# What changes: wires never break from overload.
+#
+# Every rating carries 1e12 W and the Wire builds in no time. setup lays a wire in the corridor
+# west of the printing pod; its rating's limit is that too, and the colony runs.
+from: early-base
+mods: [3104741758]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Wire\")", method: Build, args: [{"$": "Grid.XYToCell(111, 208)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Wire.GetMaxWattageAsFloat(\"Max1000\")": ">= 999999999999"
+      "Wire.GetMaxWattageAsFloat(\"Max500\")": ">= 999999999999"
+      "Wire.GetMaxWattageAsFloat(\"Max50000\")": ">= 999999999999"
+      "Assets.GetBuildingDef(\"Wire\").ConstructionTime": 0
+      "all:Wire::[0].GetMaxWattageRating()": Max1000
+  - run: {seconds: 10}
+  - expect: {duplicants: 3}

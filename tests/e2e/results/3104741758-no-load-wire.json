@@ -1,0 +1,56 @@
+{
+ "spec": "mods/3104741758-no-load-wire.yaml",
+ "mods": [
+  "3104741758"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "every wire rating carries 1e12 W and the Wire builds in no time; a laid wire's rating too, and the colony runs",
+ "updated": "2026-10-26",
+ "commit": "5f4deea",
+ "mod_dlls": {
+  "3104741758": {
+   "PLib.dll": "b862c5db2b3cd6df09a62d4a30782e91e2b24e8e1bfac08d991c9cc89a984ba9",
+   "╬▐╕║╘╪╡τ╧▀.dll": "c1ea79f58c2dc09520e164dc5e924faa805b6f731668e01a46561ebb61925348"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-003541-39fc8dbf",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T00:58:36",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-012041-708fea08",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T01:20:41",
+    "lane": 15,
+    "reference_run": "20261026-003541-39fc8dbf",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-012041-708fea08",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T01:21:18",
+    "lane": 15,
+    "reference_run": "20261026-003541-39fc8dbf",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

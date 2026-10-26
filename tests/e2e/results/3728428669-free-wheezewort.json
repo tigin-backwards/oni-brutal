@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3728428669-free-wheezewort.yaml",
+ "mods": [
+  "3728428669"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Wheezewort prefab has no fertilizer delivery or fertilization monitor and the mod logs it; one placed in the corridor lives through 30 s of play",
+ "updated": "2026-10-26",
+ "commit": "bbc2ade",
+ "mod_dlls": {
+  "3728428669": {
+   "FreeWheezewort.dll": "e65651342ee334ded44242c3216bb03d8cbe15dc8a06a31c7223cc6202af5008"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-211154-b6568d8b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T21:11:55",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-000239-dddc698e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T00:02:39",
+    "lane": 16,
+    "reference_run": "20261025-211154-b6568d8b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-000239-dddc698e",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T00:02:40",
+    "lane": 17,
+    "reference_run": "20261025-211154-b6568d8b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

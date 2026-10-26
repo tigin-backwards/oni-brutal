@@ -1,0 +1,27 @@
+# Free Wheezewort - No Phosphorite (3728428669), class P.
+#
+# What it does: the Wheezewort (ColdBreather) no longer asks for phosphorite: a postfix on
+# ColdBreatherConfig.CreatePrefab removes its fertilization monitor def and destroys its
+# manual deliveries (it also clears a PlantElementAbsorber's consumed elements, a struct the
+# prefab does not hold, which changes nothing). It logs each step.
+# How a player reaches it: planting a Wheezewort in a planter.
+# What changes: a domestic Wheezewort grows without fertilizer.
+#
+# The spec reads the plant's prefab (no manual delivery, no FertilizationMonitor def) and the
+# mod's log lines; it places a Wheezewort in the dug-out corridor west of the printing pod and
+# runs the colony.
+from: early-base
+mods: [3728428669]
+require_log: ['FreeWheezewort: cleared all fertilizer requirements']
+setup:
+  - driver: {setup.call: {type: GameUtil, method: KInstantiate, args: [{"$": "Assets.GetPrefab(\"ColdBreather\")"}, [112.5, 206.0, -12], BuildingBack]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"ColdBreather\").GetComponents<ManualDeliveryKG>.Length": 0
+      "count:Assets.GetPrefab(\"ColdBreather\").GetComponent<StateMachineController>.cmpdef.defs[*] if .GetType().FullName == 'FertilizationMonitor+Def'": 0
+      "count:all:ColdBreather::[*]": 1
+  - run: {seconds: 30}
+  - expect_state:
+      "count:all:ColdBreather::[*]": 1
+  - expect: {duplicants: 3}

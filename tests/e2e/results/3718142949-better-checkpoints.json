@@ -1,0 +1,79 @@
+{
+ "spec": "mods/3718142949-better-checkpoints.yaml",
+ "mods": [
+  "3718142949"
+ ],
+ "verdict": "warning",
+ "why": "known findings: scroll-normalized-position",
+ "findings": [
+  "scroll-normalized-position"
+ ],
+ "note": "an Atmo Suit Checkpoint's access side screen shows the mod's With Suit, No Suit and Block columns; a click on No Suit sets that Duplicant's rule; screen dump and shot match",
+ "updated": "2026-10-25",
+ "commit": "5c2e0ad",
+ "mod_dlls": {
+  "3718142949": {
+   "BetterCheckpoints.dll": "cb3697f20599398fefd7695a6020cef6552a9572f3b7d6ce7f73a83912c3f2bb"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-215219-e1dfde50",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T21:52:19",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-220709-7003d75c",
+    "index": 1,
+    "verdict": "warn",
+    "date": "2026-10-25T22:07:09",
+    "lane": 14,
+    "reference_run": "20261025-215219-e1dfde50",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "access": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "access": 0.0
+    }
+   },
+   {
+    "run": "20261025-220709-7003d75c",
+    "index": 2,
+    "verdict": "warn",
+    "date": "2026-10-25T22:07:10",
+    "lane": 15,
+    "reference_run": "20261025-215219-e1dfde50",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "access": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "access": 0.0
+    }
+   }
+  ]
+ }
+}

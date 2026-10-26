@@ -1,0 +1,38 @@
+# Better Checkpoints (3718142949), classes P, S, O.
+#
+# What it does: Atmo Suit Checkpoints (and Oxygen Mask Checkpoints) get a CheckpointAccessControl
+# with per-Duplicant rules, and the game's Access Permissions side screen shows three check boxes
+# per standard Duplicant at such a checkpoint ("With Suit", "No Suit", "Block") in place of the
+# door's direction toggles, under a label row the mod builds. The suit reactables and the
+# return-suit errand follow the rules (pass only with a suit, only without one, or not at all).
+# The PLib option Bionic Duplicants (Default or Bypass, restarts the game) decides how bionic
+# Duplicants are treated.
+# How a player reaches it: select an Atmo Suit Checkpoint; its Access Permissions side screen.
+# What changes: who may pass a checkpoint, with or without a suit.
+#
+# setup builds an Atmo Suit Dock and an Atmo Suit Checkpoint in the corridor west of the
+# printing pod. The checkpoint is selected: its side screen has the mod's columns, and a click
+# on the first Duplicant's "No Suit" box sets that Duplicant's rule.
+from: early-base
+mods: [3718142949]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"SuitLocker\")", method: Build, args: [131129, Neutral, null, [Steel], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"SuitMarker\")", method: Build, args: [131130, Neutral, null, [Steel], 300.0, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"SuitMarker\").GetComponent<BetterCheckpoints.CheckpointAccessControl>": exists
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [114, 208], ortho: 8}}
+  - click_world: {cell: [114, 208], select: SuitMarker}
+  - ui_wait: {path: "**/AccessControlSideScreen", cond: stable}
+  - ui_wait: {path: "**/AccessControlSideScreen/**/BC_SuitColumnLabelRow", cond: stable}
+  - expect_ui:
+      "**/AccessControlSideScreen/**/BC_SuitColumnLabelRow": {active: true}
+  - expect_ui:
+      "**/AccessControlSideScreen/**/BC_SuitColumns": {count: 3}
+  - ui_dump: {name: access, root: "**/AccessControlSideScreen"}
+  - shot: {name: access, crop: "**/AccessControlSideScreen", threshold: 0.04}
+  - click: {ui: "**/AccessControlSideScreen/**/BC_WithoutSuitCheck", index: 0}
+  - expect_state:
+      "selected:GetComponent<BetterCheckpoints.CheckpointAccessControl>.withoutSuitOverridesByMinionId.Count": 1
+      "selected:GetComponent<BetterCheckpoints.CheckpointAccessControl>.withSuitOverridesByMinionId.Count": 1

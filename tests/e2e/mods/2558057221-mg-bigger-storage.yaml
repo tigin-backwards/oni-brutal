@@ -1,0 +1,30 @@
+# [MG]Bigger Storage[超级存储] (2558057221), class P.
+#
+# What it does: a postfix on Storage.OnSpawn multiplies the capacity of every building's
+# storage by 30 (and its user capacity slider and conduit intake with it), except a list of
+# buildings whose storage holds their own inputs (refrigerators, showers, sinks, suit docks,
+# farm tiles and others); gas and liquid reservoirs and orbital cargo modules hold 100 t. The
+# Gas Reservoir's definition is rebuilt (2x3, 400 kg of metal). Rocket fuel and oxidizer
+# tanks hold 30 times as much.
+# How a player reaches it: any storage building.
+# What changes: storage capacity.
+#
+# The ration box at the printing pod holds 4500 kg instead of 150. A Storage Bin is built in
+# the corridor west of the printing pod and selected: its capacity side screen goes up to
+# 600 t.
+from: early-base
+mods: [2558057221]
+steps:
+  - expect_state:
+      "all:RationBox::[0].GetComponent<Storage>.capacityKg": 4500
+  - build: {prefab: StorageLocker, at: [113, 206], material: SandStone}
+  - expect: {blueprints: {StorageLocker: 1}}
+  - run: {seconds: 1500, until: {buildings: {StorageLocker: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [113, 207], ortho: 8}}
+  - click_world: {cell: [113, 207], select: StorageLocker}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<Storage>.capacityKg": 600000
+  - ui_wait: {path: "**/CapacityControlSideScreen", cond: stable}
+  - ui_dump: {name: capacity, root: "**/CapacityControlSideScreen"}
+  - shot: {name: capacity, crop: "**/CapacityControlSideScreen"}

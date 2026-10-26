@@ -1,0 +1,67 @@
+{
+ "spec": "mods/2558057221-mg-bigger-storage.yaml",
+ "mods": [
+  "2558057221"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the ration box holds 4500 kg; a Storage Bin's capacity screen goes to 600 t, as in the original",
+ "updated": "2026-10-25",
+ "commit": "bd353b5",
+ "mod_dlls": {
+  "2558057221": {
+   "MG_BiggerStorage.dll": "c8f2096543f8c4b422dc28afa3f9a24e56e57a309f5a2bfe904adc9a9408ee19"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-200219-ef1e47f8",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T20:28:57",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-211036-f34a1ba0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T21:10:36",
+    "lane": 14,
+    "reference_run": "20261025-200219-ef1e47f8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "capacity": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "capacity": 0.009295
+    }
+   },
+   {
+    "run": "20261025-211036-f34a1ba0",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-25T21:11:43",
+    "lane": 14,
+    "reference_run": "20261025-200219-ef1e47f8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "capacity": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "capacity": 0.009295
+    }
+   }
+  ]
+ }
+}

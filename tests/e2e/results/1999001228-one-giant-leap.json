@@ -1,0 +1,55 @@
+{
+ "spec": "mods/1999001228-one-giant-leap.yaml",
+ "mods": [
+  "1999001228"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the mod's colony initiatives are in the database, and the Colony Summary lists Empire Builder and John Henry",
+ "updated": "2026-10-26",
+ "commit": "4bcb5658",
+ "mod_dlls": {
+  "1999001228": {
+   "MoreAchievements.dll": "f04f2cca478f9ee20f7aad4d7cc2e932b641357b976cc4e910c126a71f77daf4"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-042232-0e5bb32c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:28:54",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-102003-0046671e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T10:20:03",
+    "lane": 16,
+    "reference_run": "20261026-042232-0e5bb32c",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-102003-0046671e",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T10:20:04",
+    "lane": 17,
+    "reference_run": "20261026-042232-0e5bb32c",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

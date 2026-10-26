@@ -1,0 +1,28 @@
+# One Giant Leap (1999001228), classes P, S.
+#
+# What it does: adds about thirty Colony Initiatives (colony achievements, with icons of their
+# own): build 2500 buildings (Empire Builder), dig 10000 tiles (John Henry), reach cycle 1000,
+# use the Neural Vacillator 10 times, slide 10 km down fire poles, print 35 Duplicants, kill
+# 100 critters, overload a heavy wire, heat a building to 2500 K, see every critter kind, eat
+# a balanced diet, ... tracked by patches on the game events they count (BuildingComplete,
+# Diggable, DeathMonitor, Butcherable, GeneShuffler and others).
+# How a player reaches it: the pause menu's Colony Summary, its Colony Initiatives list.
+# What changes: more achievements to track.
+#
+# The achievements are in the game's database; the Colony Summary lists Empire Builder and
+# John Henry among its initiatives.
+from: early-base
+mods: [1999001228]
+steps:
+  - expect_state:
+      "Db.Get().ColonyAchievements.TryGet(\"EmpireBuilder\")": exists
+      "Db.Get().ColonyAchievements.TryGet(\"JohnHenry\")": exists
+      "Db.Get().ColonyAchievements.Count": "== original"
+  - key: {code: Escape}
+  - ui_wait: {path: "**/PauseScreen/**/Colony SummaryButton", cond: stable}
+  - click: {ui: "**/PauseScreen/**/Colony SummaryButton"}
+  - ui_wait: {path: "**/RetiredColonyInfoScreen/**/Achievements/Header", cond: stable}
+  - expect_ui:
+      "**/AchievementScroll/Content/AchievementPrefab/Header/Labels/NameLabel": {any_text: Empire Builder}
+  - expect_ui:
+      "**/AchievementScroll/Content/AchievementPrefab/Header/Labels/NameLabel": {any_text: John Henry}

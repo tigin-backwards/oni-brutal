@@ -1,0 +1,23 @@
+# 液体球 [Liquid Sphere] (3754754434), classes B, T, S.
+#
+# What it does: a 1x1 Liquid Orb (and a background variant) in the Utilities menu, built from
+# any liquid: the material selector lists liquids, a mode picks one drop, a swimmable mass, a
+# full cell or a custom mass, and when the orb is finished it turns into that liquid in its
+# cell and vanishes.
+# How a player reaches it: the build menu (Utilities), then a liquid in the material panel.
+# What changes: liquids placed cell by cell.
+#
+# An orb of water built by setup in the dug-out corridor west of the printing pod becomes
+# water in its cell, and the orb is gone.
+from: early-base
+mods: [3754754434]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LiquidBuildOrb\")", method: Build, args: [131127, Neutral, null, [Water], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"LiquidBuildOrbBg\")": exists
+      "Assets.GetBuildingDef(\"LiquidBuildOrb\").MaterialCategory[0]": LiquidBuildMaterial
+  - run: {seconds: 2}
+  - expect: {buildings: {LiquidBuildOrb: 0}}
+  - expect_state:
+      "Grid.Element[131127].id": Water

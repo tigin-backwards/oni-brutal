@@ -1,0 +1,22 @@
+# Steam Turbines do not generate heat (3129405632), class P.
+#
+# What it does: Insulite counts as plastic, so a Steam Turbine can be built of it; a turbine
+# whose second material is Insulite sends none of its waste heat into itself, generates no
+# heat of its own, and gets the mod's insulated look (a prefix on SteamTurbine.OnSpawn).
+# How a player reaches it: building a Steam Turbine with Insulite.
+# What changes: a heat-free turbine.
+#
+# Insulite's tags are read; setup builds an Insulite turbine in the dug-out corridor west of
+# the printing pod, which wastes no heat.
+from: early-base
+mods: [3129405632]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"SteamTurbine2\")", method: Build, args: [131130, Neutral, null, [Copper, SuperInsulator], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "ElementLoader.FindElementByName(\"SuperInsulator\").oreTags": {contains: Plastic}
+  - run: {seconds: 2}
+  - expect: {buildings: {SteamTurbine2: 1}}
+  - expect_state:
+      "all:SteamTurbine::[0].wasteHeatToTurbinePercent": 0
+      "all:SteamTurbine::[0].GetComponent<Building>.Def.SelfHeatKilowattsWhenActive": 0

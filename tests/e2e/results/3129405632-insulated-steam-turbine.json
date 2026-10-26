@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3129405632-insulated-steam-turbine.yaml",
+ "mods": [
+  "3129405632"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "Insulite counts as plastic; an Insulite turbine wastes no heat",
+ "updated": "2026-10-26",
+ "commit": "f898d18a",
+ "mod_dlls": {
+  "3129405632": {
+   "tur.dll": "42393fee92a4fad8dd981f59ca84822c9edbf87cda14027df8580df0f02e6ef8"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-102152-42394c53",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T10:54:46",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-142203-a4af3f09",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T14:33:05",
+    "lane": 15,
+    "reference_run": "20261026-102152-42394c53",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-142203-a4af3f09",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T14:33:59",
+    "lane": 14,
+    "reference_run": "20261026-102152-42394c53",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

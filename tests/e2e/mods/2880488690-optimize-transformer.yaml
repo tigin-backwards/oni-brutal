@@ -1,0 +1,30 @@
+# 优化变压器 Optimize transformer (2880488690), class B.
+#
+# What it does: the Power Transformer passes 20,000 W and the Large Power Transformer 50,000 W,
+# and two 2x1 transformers of 1,000 W and 2,000 W (byq1kw, byq2kw) join the Power menu.
+# How a player reaches it: the build menu (Power).
+# What changes: transformers for every load.
+#
+# The Power menu lists the small transformers (shot); a 1,000 W transformer built by setup in
+# the dug-out corridor west of the printing pod is selected and rated 1,000 W.
+from: early-base
+mods: [2880488690]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"byq1kw\")", method: Build, args: [131128, Neutral, null, [Cuprite], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"PowerTransformerSmall\").GeneratorWattageRating": 20000
+      "Assets.GetBuildingDef(\"PowerTransformer\").GeneratorWattageRating": 50000
+      "Assets.GetBuildingDef(\"byq2kw\").GeneratorWattageRating": 2000
+  - run: {seconds: 10}
+  - expect: {buildings: {byq1kw: 1}}
+  - click: {ui: "**/PlanScreen/Toggle:Power"}
+  # The build menu catches up over frames: 120 frames for all of it to settle.
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/byq2kw Group*", cond: stable, stable: 120, frames: 600}
+  - shot: {name: power-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
+  - key: {code: Escape}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 206], select: byq1kw}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:Battery.capacity": 1000

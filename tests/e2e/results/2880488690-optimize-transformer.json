@@ -1,0 +1,60 @@
+{
+ "spec": "mods/2880488690-optimize-transformer.yaml",
+ "mods": [
+  "2880488690"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Power menu lists the small transformers (shot); a built 1,000 W one is selected, and the game's transformers pass 20 and 50 kW",
+ "updated": "2026-10-26",
+ "commit": "7e465f40",
+ "mod_dlls": {
+  "2880488690": {
+   "PLib.dll": "b862c5db2b3cd6df09a62d4a30782e91e2b24e8e1bfac08d991c9cc89a984ba9",
+   "╙┼╗»▒Σ╤╣╞≈Optimize transformer.dll": "cb61ff6fbf657424acea5aef2cbb8efb940a2660f16fc918446d7890c8ed9c17"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-173427-72c0b636",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T17:55:08",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-180507-0915b6e7",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T18:39:44",
+    "lane": 14,
+    "reference_run": "20261026-173427-72c0b636",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "power-menu": 0.0
+    }
+   },
+   {
+    "run": "20261026-180507-0915b6e7",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T18:41:02",
+    "lane": 14,
+    "reference_run": "20261026-173427-72c0b636",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "power-menu": 0.0
+    }
+   }
+  ]
+ }
+}

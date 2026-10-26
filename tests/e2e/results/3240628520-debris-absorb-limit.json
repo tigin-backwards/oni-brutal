@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3240628520-debris-absorb-limit.yaml",
+ "mods": [
+  "3240628520"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "two 20,000 kg piles of diamond dropped onto each other merge into one of 40,000 kg",
+ "updated": "2026-10-26",
+ "commit": "f898d18a",
+ "mod_dlls": {
+  "3240628520": {
+   "Remove25tAbsorbLimiit.dll": "30aacd55bb5ab846e23ef6a4e8c2e238f2b745bf9571597ec60a3b8bb8ffe035"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-100332-943d5c3f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T10:03:32",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-143450-564c3455",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T14:38:11",
+    "lane": 14,
+    "reference_run": "20261026-100332-943d5c3f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-143450-564c3455",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T14:38:13",
+    "lane": 15,
+    "reference_run": "20261026-100332-943d5c3f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

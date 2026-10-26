@@ -1,0 +1,22 @@
+# 碎片合并无限制 Remove 25t Absorb Limit (3240628520), class P.
+#
+# What it does: replaces the game's rule for merging debris of one element
+# (ElementSplitterComponents.CanFirstAbsorbSecond): a pile that lands on another of the same
+# element is absorbed while both weigh less than 100,000 kg together, where the game stops at
+# 25,000 kg.
+# How a player reaches it: debris falling onto debris (digging, dropping, sweeping).
+# What changes: bigger piles of debris.
+#
+# setup drops 20,000 kg of Diamond on the floor of the dug-out corridor west of the printing
+# pod and another 20,000 kg two cells above it: the second falls onto the first and merges
+# into one 40,000 kg pile (the game keeps two).
+from: early-base
+mods: [3240628520]
+setup:
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Diamond\").substance", method: SpawnResource, args: [[112.5, 206.5, -12], 20000, 300, 255, 0]}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Diamond\").substance", method: SpawnResource, args: [[112.5, 208.5, -12], 20000, 300, 255, 0]}}
+steps:
+  - run: {seconds: 5}
+  - expect_state:
+      "count:all:Clearable::[*] if .GetComponent<PrimaryElement>.ElementID == Diamond": 1
+      "sum:all:Clearable::[*].GetComponent<PrimaryElement>.Mass if .GetComponent<PrimaryElement>.ElementID == Diamond": 40000

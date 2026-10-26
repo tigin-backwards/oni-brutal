@@ -1,0 +1,28 @@
+# Better Coolers (2970435539), classes P, S.
+#
+# What it does: the Thermo Regulator and Thermo Aquatuner get a target temperature (a slider
+# side screen, 0 to 5000 K, 20 degrees by default): a transpiler on AirConditioner.UpdateState
+# cools what passes through only down to that target, and drops the heat the building would
+# otherwise add to itself by the same amount.
+# How a player reaches it: the cooler's side screen slider.
+# What changes: coolers that stop at a chosen temperature.
+#
+# setup builds a Thermo Regulator in the dug-out corridor west of the printing pod; it is
+# selected and 10 typed into its slider's field: its target reads 283.15 K.
+from: early-base
+mods: [2970435539]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"AirConditioner\")", method: Build, args: [131129, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - run: {seconds: 2}
+  - expect: {buildings: {AirConditioner: 1}}
+  - driver: {camera.set: {cell: [113, 207], ortho: 8}}
+  - click_world: {cell: [113, 206], select: AirConditioner}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/SingleSliderSideScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<BetterCoolers.BetterCoolerControl>.TargetTemp": [">= 293.14", "<= 293.16"]
+  - ui_dump: {name: slider, root: "**/SingleSliderSideScreen"}
+  - type: {ui: "**/SingleSliderSideScreen/Contents/NumberInputField", text: "10", clear: true, enter: true}
+  - expect_state:
+      "selected:GetComponent<BetterCoolers.BetterCoolerControl>.TargetTemp": [">= 283.14", "<= 283.16"]
+  - shot: {name: details, crop: "**/DetailsScreen", threshold: 0.04}

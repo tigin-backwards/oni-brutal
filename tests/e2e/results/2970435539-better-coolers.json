@@ -1,0 +1,67 @@
+{
+ "spec": "mods/2970435539-better-coolers.yaml",
+ "mods": [
+  "2970435539"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a built Thermo Regulator's target-temperature slider side screen, 10 typed in, sets 283.15 K; slider dump and details shot match",
+ "updated": "2026-10-26",
+ "commit": "df5493c6",
+ "mod_dlls": {
+  "2970435539": {
+   "BetterCoolers.dll": "9a03db631562a3279af4e18fb8eff223ffba66d7faeb63f4fe2e06a0f7852693"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-023754-20737f8f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:45:28",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-034925-932cc3cc",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:58:06",
+    "lane": 15,
+    "reference_run": "20261026-023754-20737f8f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "slider": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "details": 4.1e-05
+    }
+   },
+   {
+    "run": "20261026-034925-932cc3cc",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T03:58:52",
+    "lane": 15,
+    "reference_run": "20261026-023754-20737f8f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "slider": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "details": 4.1e-05
+    }
+   }
+  ]
+ }
+}

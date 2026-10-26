@@ -80,9 +80,9 @@ across every core, and their pauses are about a quarter as long.
 around 11GB resident compared to 7GB in the original. This is expected behavior for faster,
 parallel collection.
 
-https://github.com/user-attachments/assets/9d54b5ac-8583-442c-b6ad-8ddaa31e6d6d
-
 U57 at speed 3: about 11 fps in the original, about 88 in Moono.
+
+https://github.com/user-attachments/assets/9d54b5ac-8583-442c-b6ad-8ddaa31e6d6d
 
 Starting the game to the main menu, every DLC, second launch: 17.6 s in the original, 10.0 s in
 Moono.

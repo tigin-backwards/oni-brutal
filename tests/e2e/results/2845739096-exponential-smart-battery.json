@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2845739096-exponential-smart-battery.yaml",
+ "mods": [
+  "2845739096"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the smart battery is ordered and built of copper and holds over 1e38 J without leaking",
+ "updated": "2026-10-25",
+ "commit": "2f336b5",
+ "mod_dlls": {
+  "2845739096": {
+   "ExponentialBattery.dll": "ae844a64b301108c7b306ad01a9cbca5e69f5326af9bf5d80a99f5224bf492df"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-204056-92b74a79",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T20:40:56",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-214745-16e9495e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T21:47:45",
+    "lane": 16,
+    "reference_run": "20261025-204056-92b74a79",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261025-214745-16e9495e",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-25T21:47:46",
+    "lane": 17,
+    "reference_run": "20261025-204056-92b74a79",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

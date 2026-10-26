@@ -1,0 +1,35 @@
+# Pipe Network Overlay (3678142367), class V.
+#
+# What it does: in the liquid and gas plumbing overlays, each separate pipe network gets its own
+# colour. A postfix on ConduitMode.Update blends the tint of every overlay target that is part
+# of a network (pipes, bridges) 70 % towards one of 16 hues picked by the network's id, and a
+# postfix on ConduitFlowVisualizer.GetCellTintColour does the same for the pipe contents.
+# How a player reaches it: the Liquid Plumbing (F6) or Gas Plumbing (F7) overlay.
+# What changes: the colours of pipes in those overlays.
+#
+# setup lays two separate two-cell liquid pipes in the dug-out corridor west of the printing
+# pod. The Liquid Plumbing overlay opens with F6: no pipe keeps a white tint, their tints are
+# the original's, and the overlay is shot and compared with the original.
+from: early-base
+mods: [3678142367]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LiquidConduit\")", method: Build, args: [131763, Neutral, null, [SandStone], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LiquidConduit\")", method: Build, args: [131764, Neutral, null, [SandStone], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LiquidConduit\")", method: Build, args: [131767, Neutral, null, [SandStone], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LiquidConduit\")", method: Build, args: [131768, Neutral, null, [SandStone], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Game.Instance.liquidConduitSystem", method: SetConnections, args: ["Right", 131763, true]}}
+  - driver: {setup.call: {target: "Game.Instance.liquidConduitSystem", method: SetConnections, args: ["Left", 131764, true]}}
+  - driver: {setup.call: {target: "Game.Instance.liquidConduitSystem", method: SetConnections, args: ["Right", 131767, true]}}
+  - driver: {setup.call: {target: "Game.Instance.liquidConduitSystem", method: SetConnections, args: ["Left", 131768, true]}}
+  - driver: {setup.call: {target: "Game.Instance.liquidConduitSystem", method: ForceRebuildNetworks}}
+steps:
+  - run: {seconds: 1}
+  - driver: {camera.set: {cell: [113, 208], ortho: 6}}
+  - key: {code: F6}
+  - run: {seconds: 1}
+  - expect_state:
+      "count:all:Conduit::[*]": 4
+      "count:all:Conduit::[*] if .GetComponent<KBatchedAnimController>.TintColour.g == 255": 0
+      "sum:all:Conduit::[*].GetComponent<KBatchedAnimController>.TintColour.g": "== original"
+  - world_shot: {name: overlay, ortho: 6, at: [113, 208], hide_ui: true}
+  - key: {code: F6}

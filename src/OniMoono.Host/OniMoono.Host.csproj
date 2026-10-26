@@ -73,9 +73,15 @@
     <Copy SourceFiles="@(UiPackage);@(UiPackage->'%(RootDir)%(Directory)%(Filename).pdb')" DestinationFolder="$(OutDir)packages" SkipUnchangedFiles="true" />
     <Copy SourceFiles="@(GameTweaksAssembly);@(GameTweaksAssembly->'%(RootDir)%(Directory)%(Filename).pdb')" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
   </Target>
-  <!-- A published host carries them too (the host does not start without them). -->
-  <Target Name="PublishUiPackages" AfterTargets="Publish">
+  <!-- A published host carries what the build targets add to the output: the UI packages, the
+       game tweaks and the engine facades (the host does not start without them). -->
+  <Target Name="PublishBuildOnlyFiles" AfterTargets="Publish">
+    <ItemGroup>
+      <PublishedFacade Include="$(OutDir)engine/*" />
+    </ItemGroup>
     <Copy SourceFiles="@(UiPackage);@(UiPackage->'%(RootDir)%(Directory)%(Filename).pdb')" DestinationFolder="$(PublishDir)packages" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(GameTweaksAssembly);@(GameTweaksAssembly->'%(RootDir)%(Directory)%(Filename).pdb')" DestinationFolder="$(PublishDir)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(PublishedFacade)" DestinationFolder="$(PublishDir)engine" SkipUnchangedFiles="true" />
   </Target>
   <!-- The host from before it was named OniMoono (OniBrutal, OniBrutal.exe, OniBrutal.dll …),
        left in an output folder built before the rename: the player lists the dlls beside it. -->

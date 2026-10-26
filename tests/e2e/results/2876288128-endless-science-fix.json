@@ -3,12 +3,12 @@
  "mods": [
   "2876288128"
  ],
- "verdict": "failed",
- "why": "a run of ours failed",
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
  "findings": [],
- "note": "Enable Learning turns a powered, idle research station operational and a Duplicant comes to work it, in both players; but when the work starts the mod's progress bar prefix references the game's former Worker type: the original logs a TypeLoadException (\"Could not resolve type ... expected class 'Worker'\"), ours a MissingMethodException for 'Worker Workable.get_worker()', a new log signature",
- "updated": "2026-10-25",
- "commit": "ed8ad03",
+ "note": "Enable Learning turns a powered, idle research station operational and a Duplicant comes to work it, in both players; the mod's progress bar prefix names the game's former Worker type and fails at every call in both, with the same TypeLoadException",
+ "updated": "2026-10-26",
+ "commit": "941c173",
  "mod_dlls": {
   "2876288128": {
    "InfiniteResearchMod.dll": "d1d9ebab8890b15c6aafff009bb573b4ab2a0e307c9ae9e9b9ef84174e5e0d12"
@@ -17,26 +17,23 @@
  "runs": {
   "original": [
    {
-    "run": "20261025-194609-7e6ec6de",
+    "run": "20261026-015414-0194f874",
     "index": 1,
     "verdict": "pass",
-    "date": "2026-10-25T19:46:09",
-    "lane": 16,
+    "date": "2026-10-26T01:54:14",
+    "lane": 30,
     "signatures": 3
    }
   ],
   "ours": [
    {
-    "run": "20261025-200739-51523960",
+    "run": "20261026-020411-39ec16e8",
     "index": 1,
-    "verdict": "fail",
-    "date": "2026-10-25T20:07:39",
-    "lane": 16,
-    "reasons": [
-     "1 log signature(s) the original lacks"
-    ],
-    "reference_run": "20261025-194609-7e6ec6de",
-    "new_signatures": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T02:04:11",
+    "lane": 30,
+    "reference_run": "20261026-015414-0194f874",
+    "new_signatures": 0,
     "findings": [],
     "ui_dump": {
      "usermenu": {
@@ -46,16 +43,13 @@
     "shots": {}
    },
    {
-    "run": "20261025-200739-51523960",
+    "run": "20261026-020411-39ec16e8",
     "index": 2,
-    "verdict": "fail",
-    "date": "2026-10-25T20:11:01",
-    "lane": 16,
-    "reasons": [
-     "2 log signature(s) the original lacks"
-    ],
-    "reference_run": "20261025-194609-7e6ec6de",
-    "new_signatures": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T02:05:42",
+    "lane": 30,
+    "reference_run": "20261026-015414-0194f874",
+    "new_signatures": 0,
     "findings": [],
     "ui_dump": {
      "usermenu": {

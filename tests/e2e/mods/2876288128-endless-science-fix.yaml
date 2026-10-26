@@ -14,9 +14,17 @@
 # west of the printing pod, powered by a charged battery, with dirt in it. It is selected and
 # Enable Learning clicked: the button turns to Disable Learning, the station turns operational,
 # and a Duplicant comes to work it although nothing is being researched.
+#
+# Broken upstream: when the work starts, the mod's progress bar prefix calls the game's former
+# `Worker Workable.get_worker()`, so the prefix fails to compile at every call and the game logs
+# the error in both players (ARCHITECTURE D40). The game's log line names the Duplicant; setup
+# gives the three one name, so the players' lines agree whoever takes the chore.
 from: early-base
 mods: [2876288128]
 setup:
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[0]", method: SetName, args: [Duplicant]}}
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[1]", method: SetName, args: [Duplicant]}}
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[2]", method: SetName, args: [Duplicant]}}
   - driver: {setup.call: {target: "Assets.GetBuildingDef(\"ResearchCenter\")", method: Build, args: [131124, Neutral, null, [Cuprite], 300.0, DEFAULT_FACADE]}}
   - driver: {setup.call: {target: "last:GetComponent<Storage>", method: AddOre, args: [Dirt, 50.0, 300.0, 255, 0]}}
   - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Battery\")", method: Build, args: [131126, Neutral, null, [Cuprite], 300.0, DEFAULT_FACADE]}}

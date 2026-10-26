@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 # The project's verification gate (ARCHITECTURE §9): build everything, unit tests, API
 # conformance summary, and the host's type-load / runtime-services check against the game, with
-# this project's UI packages (the default) and with Unity's shipped ones (the differential
-# runs' reference, scripts/m9-compare.sh).
+# this project's UI packages.
 set -euo pipefail
 source "$(dirname "$0")/env.sh"
 # Its builds and tests run in the memory-capped test slice (scripts/contain.sh).
@@ -78,6 +77,4 @@ fi
 natives=$("$root/out/bin/OniMoono.Host/debug/OniMoono" --game "$game" --check-natives --log "$root/out/check-natives.log") || failed+=(check-natives)
 echo "check-natives: $(tail -1 <<< "$natives")"; grep -E 'MISSING|NO PLUGIN' <<< "$natives" || true
 "$root/scripts/build-packages.sh" >/dev/null; echo "packages: $(sed -n 2p "$root/out/apicheck-packages.txt")"
-"$root/out/bin/OniMoono.Host/debug/OniMoono" --game "$game" --shipped-ui-packages --check-types --log "$root/out/check-types-shipped.log" | grep -vE '^(ok   [A-Za-z0-9.-]+ +[0-9]+ types|from )'
-"$root/out/bin/OniMoono.Host/debug/OniMoono" --game "$game" --shipped-ui-packages --check-bind --log "$root/out/check-bind-shipped.log" | grep -v '^\[engine\]'
 [ ${#failed[@]} -eq 0 ] || { echo "test suites failed: ${failed[*]}"; exit 1; }

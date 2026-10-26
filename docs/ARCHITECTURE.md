@@ -19,8 +19,7 @@ CoreCLR, with Unity's engine replaced by our own implementation built on BRUTAL.
 We replace **all three**: (1) and (2) with our engine, (3) with .NET 10. Unity's packages the
 game ships in `Managed/` (`UnityEngine.UI.dll`, `Unity.TextMeshPro.dll`, `Unity.Timeline.dll`)
 are replaced too, by this project's clean-room versions of the same names (`src/UnityEngine.UI`,
-`src/Unity.TextMeshPro`, `src/Unity.Timeline`; docs/cleanroom); `--shipped-ui-packages` loads
-Unity's instead, as the reference for differential runs.
+`src/Unity.TextMeshPro`, `src/Unity.Timeline`; docs/cleanroom). The host never loads Unity's.
 
 **What we keep, unmodified, as game code:**
 
@@ -81,7 +80,8 @@ resolves names the framework does not provide:
    Multiplayer.Center.Common) are not loaded: they implement engine features we replace and no
    game assembly references them.
 4. Unity's UI packages (uGUI, TMP, Timeline) are this project's (PLAN M9), from `packages/`
-   next to the host; `--shipped-ui-packages` loads the shipped ones from `Managed/` instead.
+   next to the host, never the shipped ones from `Managed/`; the host stops with an error when
+   one is missing.
 5. Everything else loads from `Managed/` (game and third-party libraries). Our Steamworks.NET
    port and the engine bridge ship with the host and therefore take precedence.
 

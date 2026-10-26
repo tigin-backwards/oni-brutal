@@ -29,8 +29,7 @@ These are Unity *packages* compiled into the game build; the game's own code ref
 The replacements were written clean-room from functional specifications
 (`docs/cleanroom/`); their implementers did not read the shipped code. Their type headers and
 serialized fields are generated from the shipped assemblies' metadata, which the game's data
-binds to. The shipped packages load only with `--shipped-ui-packages`, a development switch for
-the differential comparisons.
+binds to. The shipped packages are never loaded; the build tools read their metadata only.
 
 | Assembly | Role | Loaded |
 |---|---|---|

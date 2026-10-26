@@ -76,7 +76,7 @@ FRAME_FALLBACK = 0.1   # seconds a "frame" lasts without E2eDriver to count real
 # stages run beside specs, counted in the players' budget as one QA_GB player (Budget).
 QA_JOBS = [r'(^|/)scripts/qa\.sh\b']
 QA_GB = 15          # E2E_QA_GB: QA's verify stage runs U57 (0: not counted)
-PERF_JOBS = [r'(^|/)scripts/m9-compare\.sh\b', r'(^|/)scripts/flamegraph\.py\b',
+PERF_JOBS = [r'(^|/)scripts/flamegraph\.py\b',
              r'out/local-tools/(sweep|measure|ft-bench|compare-queued|minnow-prof|glut-prof|queue|orig-queue|tw-run)',
              r'^perf (record|stat)\b']
 

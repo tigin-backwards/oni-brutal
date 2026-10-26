@@ -150,12 +150,13 @@ Legend: `[x]` verified · `[ ]` not yet verified · `[~]` deviation (see the not
 
 ## M9: this project's UI packages against the shipped ones
 
-`scripts/m9-compare.sh` runs each scenario with Unity's shipped packages and with this
-project's (`src/UnityEngine.UI`, `src/Unity.TextMeshPro`, `src/Unity.Timeline`, written from
-`docs/cleanroom/`). The uGUI results below were taken with the shipped TextMeshPro on both
-sides; the TextMeshPro results with all three of ours.
-A difference is accepted when a run of the same scenario with the shipped package on both sides
-(a baseline, `scripts/m9-compare.sh SCENARIO OUT EMPTY-DIR`) shows it too.
+These results come from differential runs, since retired, that ran each scenario with Unity's
+shipped packages and with this project's (`src/UnityEngine.UI`, `src/Unity.TextMeshPro`,
+`src/Unity.Timeline`, written from `docs/cleanroom/`). The host now loads only this project's;
+new comparisons are against the original Unity player (`scripts/e2e.py --player both`). The
+uGUI results below were taken with the shipped TextMeshPro on both sides; the TextMeshPro
+results with all three of ours. A difference was accepted when a run of the same scenario with
+the shipped package on both sides showed it too.
 
 - [x] `menu`, `options` (both legacy dropdowns opened and closed, the UI scale slider, the audio
   sliders and a checkbox), `management` (Priorities with the wheel, Vitals, Consumables): no

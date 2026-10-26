@@ -439,8 +439,7 @@ overlay canvas of its own (scale 1) and logs frame by frame. Each line is `PROBE
 - `depth`: `CanvasRenderer.absoluteDepth`/`relativeDepth` and `Graphic.depth` for renderers
   of every kind on one canvas. Then one change at a time, to see which changes renumber it.
 
-Run it in both players with the same DLL; in ours, `--shipped-ui-packages` separates the
-packages from the engine. Then compare:
+Run it in both players with the same DLL. Then compare:
 
 ```
 tools/UnityProbe/uis-check.py diff ORIG/Player.log OURS/stdout.txt [scroll|input|depth]

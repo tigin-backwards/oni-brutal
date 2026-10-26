@@ -3,7 +3,7 @@
 #   scripts/qa.sh [--bless] [STAGE...]        (stages default to all of them, in this order)
 # Stages:
 #   unit     the build, both test suites and scripts/check.sh (API conformance, type loading,
-#            assets, binding), with this project's UI packages and Unity's shipped ones.
+#            assets, binding).
 #   dogfood  scripted sessions through the game, each a scenario (scripts/qa-scenarios, or a
 #            scripts/m9-scenarios name): the menu, a new game to embark, a colony's screens and
 #            overlays, typing, save and load, a window resize, clicks within one frame. Fails on a
@@ -118,8 +118,7 @@ run_scenario() # NAME
         u57_ready || { note "dogfood $name: skipped (needs the DLC setup in out/local-tools/qa.env)"; return; }
         gamedir=$QA_U57_GAME; runner=("$root/scripts/run.sh" --native-override "steam_api=$QA_U57_STEAM")
     fi
-    # QA_EXTRA_ARGS: host arguments added to every scenario (e.g. --shipped-ui-packages, for
-    # comparing a scenario with Unity's UI packages).
+    # QA_EXTRA_ARGS: host arguments added to every scenario (e.g. --game-tweak none).
     [ -n "${QA_EXTRA_ARGS:-}" ] && read -ra extra <<< "$QA_EXTRA_ARGS" && ARGS+=("${extra[@]}")
     local home="$out/home" d
     rm -rf "${out:?}"; mkdir -p "$out"

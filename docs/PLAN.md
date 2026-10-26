@@ -247,9 +247,9 @@ Open:
 
 **Status:** this project's uGUI, TextMeshPro and Timeline are written (`src/UnityEngine.UI`,
 `src/Unity.TextMeshPro`, `src/Unity.Timeline`) and are what the host loads by default, from
-`packages/` next to it; `--shipped-ui-packages` loads Unity's instead (the differential runs'
-reference). Their tests pass against both the shipped packages and ours (47 uGUI, 71
-TextMeshPro and Timeline), ApiCheck finds nothing missing, and the differential runs differ only
+`packages/` next to it (the `--shipped-ui-packages` switch that loaded Unity's for the
+differential runs was removed 2026-10-26; the host only loads ours). Their tests pass against
+both the shipped packages and ours (47 uGUI, 71 TextMeshPro and Timeline), ApiCheck finds nothing missing, and the differential runs differ only
 where two shipped runs do or by float rounding (`docs/PARITY.md`). Frame rates (Windows, PerfProbe,
 speed 3, runs alternated; the machine was busier than for the 48–56 fps measurement, so absolute
 figures are lower, and that build measured the same now): DeCrew 35.3–36.3 fps with ours
@@ -287,8 +287,9 @@ implementations, one functional specification per area. The implementations may 
   the game needs, and the exact serialized fields. Like `tools/SurfaceGen`, it never reads
   method bodies.
 - **Unity's public documentation:** the uGUI and TextMeshPro manuals and API references.
-- **The shipped packages as a black box:** `--shipped-ui-packages` or `--ui-packages DIR` picks
-  which assemblies a run loads. A differential dump records the results of both on the same screens, and the
+- **The shipped packages as a black box:** `--shipped-ui-packages` or `--ui-packages DIR` picked
+  which assemblies a run loaded (both removed 2026-10-26; compare with the original player
+  now). A differential dump records the results of both on the same screens, and the
   implementations are judged on the difference. They never read the shipped code.
 
 **Stages**, each closed by the gate below:

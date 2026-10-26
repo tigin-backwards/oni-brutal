@@ -18,8 +18,7 @@ namespace OniMoono.Host
     /// 2. Unity engine assemblies (UnityEngine, UnityEngine.*Module) resolve to our facades in
     ///    engine/, which forward to OniMoono.UnityEngine; the engine bridge ships with the host.
     /// 3. Unity's packages (UnityEngine.UI, TextMeshPro, Timeline) are this project's replacements
-    ///    (PLAN M9), from packages/ next to the host or `--ui-packages DIR`; with
-    ///    `--shipped-ui-packages` (differential runs) they load as shipped from Managed/.
+    ///    (PLAN M9), from packages/ next to the host, never Unity's from Managed/.
     /// 4. Everything else — the game and its third-party libraries — loads from Managed/.
     ///
     /// The game runs in the default load context, so its Type.GetType, Assembly.Load and
@@ -54,14 +53,16 @@ namespace OniMoono.Host
         /// The Unity packages this project replaces (PLAN M9).
         static readonly HashSet<string> replacedPackages = new(StringComparer.Ordinal) { "UnityEngine.UI", "Unity.TextMeshPro", "Unity.Timeline" };
 
-        /// Where the replacements load from; null loads the shipped packages from Managed/.
-        static string? packagesDir;
+        /// Where the replacements load from: packages/ next to the host.
+        static string packagesDir = "";
 
-        /// `uiPackagesDir` null: the replacements the host ships in packages/; `shippedUiPackages`:
-        /// none.
-        public static void Install(OniMoono.Engine.Platform.GameLayout game, string hostDir, string? uiPackagesDir = null, bool shippedUiPackages = false)
+        /// The replacements missing from packages/ next to the host (an incomplete install).
+        public static List<string> MissingPackages(string hostDir) =>
+            replacedPackages.Order(StringComparer.Ordinal).Where(p => !File.Exists(Path.Combine(hostDir, "packages", p + ".dll"))).ToList();
+
+        public static void Install(OniMoono.Engine.Platform.GameLayout game, string hostDir)
         {
-            packagesDir = shippedUiPackages ? null : uiPackagesDir ?? Path.Combine(hostDir, "packages");
+            packagesDir = Path.Combine(hostDir, "packages");
             layout = game;
             managedDir = Path.Combine(game.DataDir, "Managed");
             engineDir = Path.Combine(hostDir, "engine");
@@ -82,10 +83,8 @@ namespace OniMoono.Host
             if (IsEngineAssembly(simple)) return context.LoadFromAssemblyPath(Path.Combine(engineDir, simple + ".dll"));
             if (IsUnityEngineModule(simple)) return null;
             if (unitySupportPackages.Contains(simple) || monoClassLibraries.Contains(simple)) return null;
-            // A replacement present in the packages directory wins; a package without one loads
-            // as shipped (one package can be compared while the others are Unity's).
-            if (packagesDir != null && replacedPackages.Contains(simple) && File.Exists(Path.Combine(packagesDir, simple + ".dll")))
-                return context.LoadFromAssemblyPath(Path.Combine(packagesDir, simple + ".dll"));
+            // Unity's packages come from packages/ only (Program checks they are all there).
+            if (replacedPackages.Contains(simple)) return context.LoadFromAssemblyPath(Path.Combine(packagesDir, simple + ".dll"));
             var path = Path.Combine(managedDir, simple + ".dll");
             if (!File.Exists(path)) return null;
             var image = MonoFieldSemantics.Adjust(path);
@@ -166,8 +165,7 @@ namespace OniMoono.Host
                 if (unitySupportPackages.Contains(simple) || monoClassLibraries.Contains(simple)) continue;
                 if (IsFrameworkAssembly(simple)) continue;
                 if (IsUnityEngineModule(simple)) continue; // ours load on demand through the facades
-                bool replaced = packagesDir != null && replacedPackages.Contains(simple) && File.Exists(Path.Combine(packagesDir, simple + ".dll"));
-                if (!replaced && !IsEngineAssembly(simple) && !File.Exists(Path.Combine(managedDir, simple + ".dll"))) continue;
+                if (!replacedPackages.Contains(simple) && !IsEngineAssembly(simple) && !File.Exists(Path.Combine(managedDir, simple + ".dll"))) continue;
                 loaded.Add(Assembly.Load(new AssemblyName(simple)));
             }
             return loaded;
@@ -201,13 +199,13 @@ namespace OniMoono.Host
                 var simple = Path.GetFileNameWithoutExtension(path);
                 if (!simple.StartsWith("System.", StringComparison.Ordinal) && !simple.StartsWith("Microsoft.", StringComparison.Ordinal)) Add(path);
             }
-            if (packagesDir != null && Directory.Exists(packagesDir))
+            if (Directory.Exists(packagesDir))
                 foreach (var path in Directory.EnumerateFiles(packagesDir, "*.dll").Order(StringComparer.Ordinal)) Add(path);
             foreach (var path in Directory.EnumerateFiles(managedDir, "*.dll").Order(StringComparer.Ordinal))
             {
                 var simple = Path.GetFileNameWithoutExtension(path);
                 if (IsFrameworkAssembly(simple) || IsUnityEngineModule(simple) || unitySupportPackages.Contains(simple) || monoClassLibraries.Contains(simple)
-                    || (packagesDir != null && replacedPackages.Contains(simple) && names.Contains(simple))) continue;
+                    || replacedPackages.Contains(simple)) continue;
                 Add(path);
             }
             return result;

@@ -58,8 +58,7 @@ assets. They define what the vertex channels and material properties mean.
 **uGUI:** this package builds on uGUI (`MaskableGraphic`, `CanvasUpdateRegistry`,
 `LayoutUtility`, `ILayoutElement`, `Selectable`, the event system). Until this project's uGUI
 is finished, compile against the shipped `UnityEngine.UI.dll` as a metadata reference only.
-At run time, `scripts/m9-compare.sh` loads your TextMeshPro with the shipped uGUI when
-out/packages holds only `Unity.TextMeshPro.dll`. Use only uGUI's public and protected API.
+Use only uGUI's public and protected API.
 
 ## Behaviour
 
@@ -519,8 +518,8 @@ package (M9). They refine the sections above.
 ### Corrections from the defect review (2026-10-20)
 
 A review of this implementation found these behaviours missing or wrong. Each must first be
-measured on the shipped package as a black box (a test, or `--dump-ui` / `--dump-ui-vertices` in
-a differential run, with `--shipped-ui-packages`), then matched. Where the measurement differs
+measured on the shipped package as a black box (a test, or `--dump-ui` / `--dump-ui-vertices`
+compared with the same screen in the original Unity player), then matched. Where the measurement differs
 from what is described here, the measurement wins and this section is corrected.
 
 1. **Horizontal overflow with wrapping off.** With word wrapping off and `Ellipsis` or
@@ -2735,8 +2734,7 @@ the game has none of for these names, and `OnFontAssetRequest`.
    - the input field's editing and validation;
    - dynamic font assets, through the engine's FontEngine;
    - the style sheet.
-3. **Differential runs** (`scripts/m9-compare.sh`), loading this TextMeshPro, with uGUI shipped
-   or this project's:
+3. **Differential runs** against the original Unity player (`scripts/e2e.py --player both`):
    - The `menu` and `colony` scenarios, plus scenarios you add for long texts with wrapping and
      auto-size, localization fonts, links, the input fields and the dropdowns.
    - No differences beyond the tolerance in the geometry hashes, `textInfo` counts and font

@@ -1944,12 +1944,10 @@ Found by the M9 differential runs; they refine the sections above.
 
    Where the documentation leaves a number open, measure it against the shipped package
    through a scenario run, not the shipped code.
-3. **Differential runs** (`scripts/m9-compare.sh`), loading this uGUI with the shipped
-   TextMeshPro:
+3. **Differential runs** against the original Unity player (`scripts/e2e.py --player both`):
    - `menu` and `colony` with no differences beyond the tolerance;
    - new scenarios as you need them, for example a new game, the research screen, the
-     management screens, a dropdown and the scroll views. Add them to `scripts/m9-scenarios/`.
+     management screens, a dropdown and the scroll views. Add them as specs in `tests/e2e/`.
 
    Explain every remaining difference.
-4. **Performance:** DeCrew's frame rate is not worse than with the shipped package
-   (`scripts/m9-compare.sh colony`; compare the frame-stats lines).
+4. **Performance:** DeCrew's frame rate is not worse than in the original player.

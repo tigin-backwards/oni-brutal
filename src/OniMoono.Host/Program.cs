@@ -62,7 +62,14 @@ namespace OniMoono.Host
             options.Splash = effective.Splash;
             OniMoono.Engine.PlayerLoop.FrameStats = effective.FrameStats;
 
-            AssemblyPolicy.Install(layout, AppContext.BaseDirectory, options.UiPackages, options.ShippedUiPackages);
+            // This project's UI packages, never Unity's: without all of them the install is broken.
+            var missingPackages = AssemblyPolicy.MissingPackages(AppContext.BaseDirectory);
+            if (missingPackages.Count > 0)
+            {
+                EngineLog.Engine($"Moono's UI packages are missing from {Path.Combine(AppContext.BaseDirectory, "packages")}: {string.Join(", ", missingPackages.Select(p => p + ".dll"))}. Reinstall Moono (or rebuild the host).");
+                return 2;
+            }
+            AssemblyPolicy.Install(layout, AppContext.BaseDirectory);
             if (options.CheckNatives) return NativeCheck.Run(layout, AssemblyPolicy.RuntimeAssemblyPaths(), options.NativeArch ?? AssemblyPolicy.ProcessCpu, options.NativeDir);
             var assemblies = AssemblyPolicy.PreloadScriptingAssemblies(dataDir);
             EngineConfig.BuildAssemblies = AssemblyPolicy.BuildAssemblyNames(dataDir);
@@ -1446,10 +1453,6 @@ namespace OniMoono.Host
         public bool Headless;
         public bool BatchMode;
         public bool CheckTypes;
-        /// This project's replacements of Unity's packages (PLAN M9) from this directory instead of
-        /// packages/ next to the host; ShippedUiPackages loads Unity's from Managed/ instead.
-        public string? UiPackages;
-        public bool ShippedUiPackages;
         /// `--game-tweak` values, in order (GameTweaks, EffectiveOptions): when any is given, they
         /// alone choose the game tweaks, over the Moono Tweaks settings.
         public readonly List<string> GameTweaks = new();
@@ -1554,8 +1557,6 @@ namespace OniMoono.Host
                     case "--check-types": o.CheckTypes = true; break;
                     case "--check-assets": o.CheckAssets = true; break;
                     case "--list-data-scripts": o.ListDataScripts = args[++i]; break;
-                    case "--ui-packages": o.UiPackages = Path.GetFullPath(args[++i]); break;
-                    case "--shipped-ui-packages": o.ShippedUiPackages = true; break;
                     case "--game-tweak":
                     {
                         var name = args[++i];
@@ -1669,7 +1670,7 @@ namespace OniMoono.Host
                     }
                     default:
                         Console.Error.WriteLine($"Unknown option {args[i]}");
-                        Console.Error.WriteLine("usage: OniMoono [--game DIR] [--log FILE] [--run-home DIR] [--audio-wav DIR] [--headless] [--batchmode] [--frames N] [--native-override NAME=PATH] [--trace-exceptions] [--gl-debug] [--background] [--splash moo|none] [--log-pointer-hits] [--vsync-count N] [--gpu-profile] [--no-bindless] [--input FRAME:ACTION[:ARGS]] [--input-file PATH] [--frame-stats] [--no-tweaks-menu] [--max-frame-rate N[:FRAMES]] [--dump-render-textures FRAME:DIR] [-screen-width W] [-screen-height H] [-screen-fullscreen 0|1] [-window-mode exclusive|borderless|windowed] [-monitor N] [--check-types] [--ui-packages DIR | --shipped-ui-packages] [--game-tweak NAME|-NAME|all|exact|none] [--check-assets [--list-data-scripts FILE]] [--check-bind] [--check-shaders] [--check-natives [--native-arch x86_64|arm64] [--native-dir DIR]] [--dump-shader NAME:DIR] [--capture FRAME:PATH[:SCALE]] [--probe-ui FRAME:X,Y] [--dump-ui FRAME:PATH] [--dump-ui-vertices PATH-SUBSTRING] [--dump-hierarchy FRAME:PATH] [--report-builtin-assets FILE] [--dump-component FRAME:PATH|TYPE] [-- STEAM-COMMAND]");
+                        Console.Error.WriteLine("usage: OniMoono [--game DIR] [--log FILE] [--run-home DIR] [--audio-wav DIR] [--headless] [--batchmode] [--frames N] [--native-override NAME=PATH] [--trace-exceptions] [--gl-debug] [--background] [--splash moo|none] [--log-pointer-hits] [--vsync-count N] [--gpu-profile] [--no-bindless] [--input FRAME:ACTION[:ARGS]] [--input-file PATH] [--frame-stats] [--no-tweaks-menu] [--max-frame-rate N[:FRAMES]] [--dump-render-textures FRAME:DIR] [-screen-width W] [-screen-height H] [-screen-fullscreen 0|1] [-window-mode exclusive|borderless|windowed] [-monitor N] [--check-types] [--game-tweak NAME|-NAME|all|exact|none] [--check-assets [--list-data-scripts FILE]] [--check-bind] [--check-shaders] [--check-natives [--native-arch x86_64|arm64] [--native-dir DIR]] [--dump-shader NAME:DIR] [--capture FRAME:PATH[:SCALE]] [--probe-ui FRAME:X,Y] [--dump-ui FRAME:PATH] [--dump-ui-vertices PATH-SUBSTRING] [--dump-hierarchy FRAME:PATH] [--report-builtin-assets FILE] [--dump-component FRAME:PATH|TYPE] [-- STEAM-COMMAND]");
                         return null;
                 }
             }

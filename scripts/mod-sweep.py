@@ -36,7 +36,9 @@ at most --players (default 2) players at once. Per batch:
      pass are a failure of the mods together (an interaction, recorded for each of them) or a
      flaky one: the batch is run once more and a failure that does not come back is noted, not
      counted.
-A failure's stage is the main menu when the player had not begun loading the save ("Loading save
+A bisection first splits off the mods whose own assemblies the failing run's errors name (its
+frames), else it halves the set. A failure's stage is the main menu when the player had not
+begun loading the save ("Loading save
 file:" in its log), else the colony.
 
 tests/e2e/sweeps/NAME.tsv: comment lines (#), then a header and one line per mod: id, rank,
@@ -70,6 +72,7 @@ e2e = load_e2e()
 qa_tools = e2e.load_script('qa-tools.py')
 ws = e2e.ws_mods()
 say_lock = threading.Lock()
+OWN = {}  # {mod id: its own assemblies' names}
 
 
 def say(text):
@@ -152,6 +155,11 @@ class Runner:
                 result = e2e.Run(spec, kind, 1, self.env, lane, log, run_id=self.run_id).execute()
         finally:
             lane.release()
+        if result['outcome'] and re.search(r'is off screen|is occluded by|no OK button', result['outcome']) \
+                and not re.search(r'CrashReportScreen|ErrorCanvas', result['outcome']):
+            # The runner could not get past a dialog: no verdict on the mods; the sweep stops. A
+            # crash screen over the dialog is the game's failure, which counts.
+            raise RuntimeError(f'{label} {kind}: the runner failed, not the mods: {result["outcome"]}')
         if result.get('out'):
             # The run's profile (the mods, the save) is large; its logs and screenshot stay.
             shutil.rmtree(os.path.join(result['out'], 'home'), ignore_errors=True)
@@ -160,7 +168,7 @@ class Runner:
         found = {'kind': kind, 'mods': list(mods), 'outcome': result['outcome'], 'out': result['out'],
                  'signatures': sorted(result['signatures']), 'loading': mark >= 0,
                  'menu_signatures': sorted(signatures_of(text[:mark] if mark >= 0 else text)),
-                 'disabled': sorted(set(DISABLED.findall(text)))}
+                 'disabled': sorted(set(DISABLED.findall(text))), 'errors': error_text(text)}
         log(f'{"ok" if not found["outcome"] else found["outcome"][:200]}; {len(found["signatures"])} signature(s)'
             + (f', disabled: {", ".join(found["disabled"])}' if found['disabled'] else ''))
         return found
@@ -225,19 +233,49 @@ def original_fails(run):
     return bool(run['outcome'])
 
 
-def bisect(runner, kind, mods, fails, tag):
+LIBRARIES = re.compile(r'^(0Harmony|PLib.*|Newtonsoft\.Json|System\..*|Mono\..*|Microsoft\..*|UnityEngine.*)$', re.I)
+
+
+def assemblies(folder):
+    """The names of a mod's own assemblies (its DLLs, less the libraries mods ship)."""
+    names = set()
+    for _, _, files in os.walk(folder):
+        names |= {f[:-4] for f in files if f.lower().endswith('.dll') and not LIBRARIES.match(f[:-4])}
+    return {n for n in names if len(n) >= 4}
+
+
+def error_text(text):
+    """A log's error lines with the frames after each, where a failing mod names itself."""
+    lines = text.splitlines()
+    keep = []
+    for i, line in enumerate(lines):
+        if re.search(r'\b\w+(Exception|Error)\b|\[ERROR\]|Failed to patch', line):
+            keep += lines[i:i + 9]
+    return '\n'.join(keep)
+
+
+def suspects(run, mods, own):
+    """The mods of MODS whose assemblies (OWN: {id: names}) the run's errors name."""
+    text = run.get('errors', '')
+    return [m for m in mods if any(re.search(rf'(?<![\w.]){re.escape(n)}[.:]', text) for n in own.get(m, ()))]
+
+
+def bisect(runner, kind, mods, fails, tag, first=None):
     """The mods of a failing set MODS whose failure (FAILS(run)) comes from them alone, as
-    [(mods, run)]: one mod each, or the whole set when its halves pass (an interaction)."""
+    [(mods, run)]: one mod each, or the whole set when its halves pass (an interaction). FIRST,
+    the mods the failure's errors name, are split from the rest first, a shorter way to them."""
     if len(mods) == 1:
         return None  # the caller's run of it is the evidence
     half = len(mods) // 2
     parts = [mods[:half], mods[half:]]
+    if first and 0 < len(first) < len(mods):
+        parts = [list(first), [m for m in mods if m not in first]]
     runs = runner.many([(kind, part, tag) for part in parts])
     found = []
     for part, run in zip(parts, runs):
         if not fails(run):
             continue
-        deeper = bisect(runner, kind, part, fails, tag)
+        deeper = bisect(runner, kind, part, fails, tag, suspects(run, part, OWN))
         found += deeper if deeper is not None else [(part, run)]
     return found or [(mods, None)]
 
@@ -273,7 +311,7 @@ def sweep_batch(runner, number, batch, baseline, names):
             original, ours = runner.many([('original', mods, tag), ('ours', mods, tag)])
             continue
         say(f'{tag}: the original fails ({original["outcome"][:160]}); bisecting in the original')
-        found = bisect(runner, 'original', mods, original_fails, tag) or [(mods, original)]
+        found = bisect(runner, 'original', mods, original_fails, tag, suspects(original, mods, OWN)) or [(mods, original)]
         named = [(part, run) for part, run in found if len(part) == 1]
         for part, run in found:
             run = run or original
@@ -298,7 +336,7 @@ def sweep_batch(runner, number, batch, baseline, names):
             break
         say(f'{tag}: ours fails ({judge.why(ours)[:200]}); bisecting in ours')
         left = [m for m in mods if m not in verdicts]
-        found = bisect(runner, 'ours', left, judge.fails, tag) or [(left, ours)]
+        found = bisect(runner, 'ours', left, judge.fails, tag, suspects(ours, left, OWN)) or [(left, ours)]
         if all(run is None for _, run in found) and attempt == 0:
             say(f'{tag}: no half fails alone; the batch once more')
             ours = runner.many([('ours', [m for m in mods if m not in verdicts], tag)])[0]
@@ -341,6 +379,8 @@ def parse_args(argv):
     p.add_argument('--first-lane', type=int, default=22)
     p.add_argument('--last-lane', type=int, default=25)
     p.add_argument('--players', type=int, default=2)
+    p.add_argument('--screen', default='1280x1024',
+                   help="the players' screen: tall enough for the MOD DIFFERENCES dialog of a whole batch")
     p.add_argument('--download', action='store_true')
     p.add_argument('--batches', help='only these batch numbers: 0,3,5-7')
     p.add_argument('--dry-run', action='store_true', help='print the batches and stop')
@@ -355,6 +395,15 @@ def numbers(text):
     return out
 
 
+def plain(note):
+    """A note in a player's terms: the crash screen covering the load's dialog, as e2e.py words
+    it for a click, is the crash screen opening."""
+    note = re.sub(r'step start: \S+ is occluded by ErrorCanvas/CrashReportScreen[^;]*\)',
+                  'the crash screen opens while the save loads', note)
+    note = re.sub(r'(^|; )\S+ ~~~!', r'\1', note)  # KCrashReporter's "OBJECT ~~~!" prefix
+    return re.sub(r'^step start: the player exited \((-?\d+)\) while loading', r'the player exits (\1) while loading', note)
+
+
 def write_results(path, name, opts, ranks, state_dir):
     rows = []
     for f in sorted(os.listdir(state_dir)):
@@ -367,7 +416,7 @@ def write_results(path, name, opts, ranks, state_dir):
                 f'{opts.seconds} s of play; commit {commit}, {time.strftime("%Y-%m-%d")}\n')
         f.write('id\trank\toriginal\tours\tnote\n')
         for r in rows:
-            note = re.sub(r'\s+', ' ', r['note']).strip()
+            note = re.sub(r'\s+', ' ', plain(r['note'])).strip()
             f.write(f"{r['id']}\t{ranks.get(r['id'], '')}\t{r['original']}\t{r['ours']}\t{note}\n")
 
 
@@ -408,6 +457,7 @@ def main(argv):
         else:
             batchable.append(r['id'])
             names[r['id']] = titles(folder, r['id'])
+            OWN[r['id']] = assemblies(folder)
     json.dump({'mods': skipped}, open(os.path.join(state_dir, 'skipped.json'), 'w'), indent=1)
     batches = [batchable[i:i + opts.batch] for i in range(0, len(batchable), opts.batch)]
     say(f'{opts.name}: {len(batchable)} mods in {len(batches)} batches; {len(skipped)} not batched')
@@ -421,6 +471,9 @@ def main(argv):
         sys.exit('mod-sweep: needs ' + ', '.join(missing) + ' (out/local-tools/qa.env)')
     if not os.path.exists(os.path.join(e2e.FIXTURES, opts.save + '.sav')):
         sys.exit(f'mod-sweep: no tests/e2e/fixtures/{opts.save}.sav')
+    # A save loaded with other mods than it was saved with opens MOD DIFFERENCES, listing them;
+    # with a batch's mods its OK button falls below e2e.py's 1280x720 screen.
+    e2e.WIDTH, e2e.HEIGHT = (int(v) for v in opts.screen.split('x'))
     runner = Runner(opts.name, env, opts.save, opts.seconds, opts.first_lane, opts.last_lane, opts.players)
     runner.requires = {r['id']: [q for q in info.get(r['id'], {}).get('requires', [])
                                  if q in info and not info[q]['malware']] for r in chosen}

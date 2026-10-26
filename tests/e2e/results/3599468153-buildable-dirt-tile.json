@@ -1,0 +1,57 @@
+{
+ "spec": "mods/3599468153-buildable-dirt-tile.yaml",
+ "mods": [
+  "3599468153"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Dirt Tile ordered in the corridor is built and turns its cell into 50 kg of natural dirt, leaving no building",
+ "updated": "2026-10-26",
+ "commit": "bbc2ade",
+ "mod_dlls": {
+  "3599468153": {
+   "BuildableDirtTile.dll": "9a761bce3b83018f16ccdc76b5cbd60054467a92e7cc1e0b88673a6b8048880d",
+   "CaiLib.dll": "290754edbccd7d19d215abeabfe9b787c4f08006d960840622f42f4c5f71907e",
+   "CoolLib.dll": "29d947be9f91db883db909e8ffdf9ea5fd0dffd02e2db395d3f22c8abed4739f"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-211154-b6568d8b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T21:11:54",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-000133-002d6cbc",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T00:01:33",
+    "lane": 16,
+    "reference_run": "20261025-211154-b6568d8b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-000133-002d6cbc",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T00:01:34",
+    "lane": 17,
+    "reference_run": "20261025-211154-b6568d8b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

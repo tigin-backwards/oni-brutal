@@ -1,0 +1,29 @@
+# Buildable Dirt Tile (3599468153), class B.
+#
+# What it does: adds a Dirt Tile to the Base menu (DirtTile, researched with Basic Farming
+# beside the Ration Box): a 1x1 block of 50 kg of raw mineral (config.json: BuildMass,
+# BlockMass, BuildSpeed). Once built it is no building: a postfix on BuildingComplete.OnSpawn
+# replaces its cell with 50 kg of natural dirt at its temperature, moves debris out of the
+# cell, and deletes the building.
+# How a player reaches it: the build menu (Base).
+# What changes: a dug cell can be filled back with natural dirt.
+#
+# setup grants Basic Farming. A Dirt Tile is ordered in the top row of the dug-out corridor
+# west of the printing pod and built: the cell turns to solid dirt and no DirtTile remains.
+from: early-base
+mods: [3599468153]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"FarmingTech\")", method: Purchased}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"FarmingTech\").unlockedItemIDs": {contains: DirtTile}
+      "Grid.Solid.get_Item(132401)": false
+  - build: {prefab: DirtTile, cells: [[113, 208]], material: SandStone}
+  - expect: {blueprints: {DirtTile: 1}}
+  - run: {seconds: 900, until: {pending_construction: 0}}
+  - run: {seconds: 2}
+  - expect_state:
+      "Grid.Solid.get_Item(132401)": true
+      "Grid.Element[132401].id": Dirt
+      "Grid.Mass.get_Item(132401)": ">= 49.9"
+      "count:all:BuildingComplete::[*] if .name == DirtTileComplete": 0

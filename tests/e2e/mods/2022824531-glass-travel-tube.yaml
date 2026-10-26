@@ -1,0 +1,19 @@
+# Glass Travel Tube (2022824531), class P.
+#
+# What it does: transit tubes and their wall bridges are built of a new material category,
+# TubeMaterials, which glass, diamond, plastic and plastium join, in place of plastic only.
+# (It also sets glass's light absorption to 0.4, which the game resets to 0.1 later.)
+# How a player reaches it: the transit tube's material choice.
+# What changes: tubes of glass.
+#
+# The tubes' material categories and the materials' tags are read.
+from: early-base
+mods: [2022824531]
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"TravelTube\").MaterialCategory[0]": TubeMaterials
+      "Assets.GetBuildingDef(\"TravelTubeWallBridge\").MaterialCategory[0]": TubeMaterials
+      "ElementLoader.FindElementByName(\"Glass\").oreTags": {contains: TubeMaterials}
+      "ElementLoader.FindElementByName(\"Polypropylene\").oreTags": {contains: TubeMaterials}
+  - run: {seconds: 10}
+  - expect: {duplicants: 3}

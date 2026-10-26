@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2022824531-glass-travel-tube.yaml",
+ "mods": [
+  "2022824531"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "transit tubes and their bridges take the TubeMaterials category, which glass and plastic join",
+ "updated": "2026-10-26",
+ "commit": "df5493c6",
+ "mod_dlls": {
+  "2022824531": {
+   "GlassTravelTube.dll": "e458caa1477b9ca739fd8d15f16ccced1292e0c3617054db02060d5785966ae9"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-030709-d22e398a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:28:46",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-033625-592d7fb4",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:01:05",
+    "lane": 14,
+    "reference_run": "20261026-030709-d22e398a",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-033625-592d7fb4",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T04:01:47",
+    "lane": 14,
+    "reference_run": "20261026-030709-d22e398a",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

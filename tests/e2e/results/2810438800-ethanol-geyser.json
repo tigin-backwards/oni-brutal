@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2810438800-ethanol-geyser.yaml",
+ "mods": [
+  "2810438800"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Chilled Ethanol Geyser placed as worldgen would reads as one and erupts ethanol at 263 K; the colony runs",
+ "updated": "2026-10-25",
+ "commit": "d3a5a07",
+ "mod_dlls": {
+  "2810438800": {
+   "EthanolGeyser.dll": "19500343579da3ed042ed1bef983aef493424162d28c6533bf8d7cb30c4e6b89"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-195129-6325275a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T19:57:33",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-202552-5dc81a43",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T20:25:52",
+    "lane": 16,
+    "reference_run": "20261025-195129-6325275a",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261025-202552-5dc81a43",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-25T20:26:53",
+    "lane": 16,
+    "reference_run": "20261025-195129-6325275a",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

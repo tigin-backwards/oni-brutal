@@ -1,0 +1,28 @@
+# Ethanol Geyser (rebuild) (2810438800), class P (worldgen content).
+#
+# What it does: adds a Chilled Ethanol Geyser (a postfix on GeyserGenericConfig.GenerateConfigs:
+# GeyserGeneric_chilled_ethanol, 4x2, ethanol at 263 K, 1000-2000 kg per eruption), with its
+# kanim and names, and a template rule (poi/poi_rust_geyser_ethanol, three per world, at
+# depth) added to every world's worldgen (a postfix on Worlds.UpdateWorldCache).
+# How a player reaches it: finding one in a new world, or the sandbox.
+# What changes: one more geyser kind, generated in every world.
+#
+# setup places a Chilled Ethanol Geyser in the dug-out corridor west of the printing pod, as
+# worldgen would, at random settings. Selected, it reads as the mod's geyser and emits ethanol.
+from: early-base
+mods: [2810438800]
+setup:
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(0, 112, 206, \"GeyserGeneric_chilled_ethanol\", \"BuildingBack\")", method: SetActive, args: [true]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"GeyserGeneric_chilled_ethanol\").GetComponent<KPrefabID>.PrefabTag.Name": GeyserGeneric_chilled_ethanol
+  - driver: {camera.set: {cell: [112, 207], ortho: 8}}
+  - click_world: {cell: [112, 207], select: GeyserGeneric_chilled_ethanol}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Chilled Ethanol Geyser"}
+  - expect_state:
+      "selected:Geyser.configuration.GetElement()": Ethanol
+      "selected:Geyser.configuration.geyserType.temperature": 263.15
+  - run: {seconds: 30}
+  - expect: {duplicants: 3}

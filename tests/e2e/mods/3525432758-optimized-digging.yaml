@@ -1,0 +1,35 @@
+# Optimized Digging (3525432758), class P (skills).
+#
+# What it does: adds three Mining skills, Optimized Digging (after Hard Digging), Super and
+# Ultra Optimized Digging (after the next Mining skills), with badges loaded from PNGs, and
+# replaces WorldDamage.OnDigComplete: a cell a Duplicant dug drops 50 % of its mass, plus 1 %
+# per two points of Digging (at most 10 %), plus 5, 10 and 20 % for the three skills (at most
+# all of it).
+# How a player reaches it: the Skills screen; any dig order.
+# What changes: the mass of the debris a dig leaves.
+#
+# setup teaches the two non-bionic Duplicants Hard Digging and Optimized Digging and takes
+# digging off the bionic one's errands. Four sandstone cells at the east end of the dug-out
+# corridor west of the printing pod are dug: at least 55 % of their mass lies as debris then
+# (the game leaves 50 %).
+from: early-base
+mods: [3525432758]
+setup:
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[0].GetComponent<ChoreConsumer>", method: SetPermittedByUser, args: [{"$": "Db.Get().ChoreGroups.Dig"}, false]}}
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[1].GetComponent<MinionResume>", method: MasterSkill, args: [Mining1]}}
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[1].GetComponent<MinionResume>", method: MasterSkill, args: [OptimizedDiggingSkill]}}
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[2].GetComponent<MinionResume>", method: MasterSkill, args: [Mining1]}}
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[2].GetComponent<MinionResume>", method: MasterSkill, args: [OptimizedDiggingSkill]}}
+steps:
+  - expect_state:
+      "Db.Get().Skills.Get(\"OptimizedDiggingSkill\").priorSkills[0]": Mining1
+      "Db.Get().Skills.Get(\"UltraOptimizedDiggingSkill\").tier": 3
+      "Components.LiveMinionIdentities.Items[1].GetComponent<MinionResume>.HasPerk(\"OptimizedDigging\")": true
+  - expect_state:
+      "cells:119,209..120,210::Grid.Mass.get_Item({cell})": {save_as: block}
+      "sum:all:Clearable::[*].GetComponent<PrimaryElement>.Mass if .GetComponent<PrimaryElement>.ElementID == SandStone": {save_as: before}
+  - expect_state: {"cells:119,209..120,210::Grid.Element[{cell}].hardness": "> 0"}
+  - dig: [119, 209, 120, 210]
+  - run: {seconds: 900, until: {pending_digs: 0}}
+  - expect_state:
+      "sum:all:Clearable::[*].GetComponent<PrimaryElement>.Mass if .GetComponent<PrimaryElement>.ElementID == SandStone": ">= before + 0.549 * block"

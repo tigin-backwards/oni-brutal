@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3525432758-optimized-digging.yaml",
+ "mods": [
+  "3525432758"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "two Duplicants with Optimized Digging leave at least 55 % of the dug sandstone as debris (the game leaves 50 %)",
+ "updated": "2026-10-26",
+ "commit": "73db1930",
+ "mod_dlls": {
+  "3525432758": {
+   "OptimizedDigging.dll": "fc2611f6e454bc108a542061da4fcacfe506de515f3394703501c23abb49b35e"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-023730-5710265c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T02:41:05",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-032011-604df9b7",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:20:11",
+    "lane": 16,
+    "reference_run": "20261026-023730-5710265c",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-032011-604df9b7",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T03:20:12",
+    "lane": 17,
+    "reference_run": "20261026-023730-5710265c",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

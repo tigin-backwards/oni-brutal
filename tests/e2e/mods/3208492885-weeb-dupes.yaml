@@ -1,0 +1,26 @@
+# Weeb Dupes (3208492885), class P.
+#
+# What it does: a tier-0 Weeb skill in the Research group, for standard and Bionic Duplicants
+# (WD_WEEB, WD_WEEB_BIONIC), with perks of +1 Learning and +15 Decor and a cat-ear hat
+# (hat_role_weeb1, an accessory of the Hat slot).
+# How a player reaches it: the Skills screen.
+# What changes: a cheap skill that makes a Duplicant prettier and smarter.
+#
+# setup gives the first Duplicant (Bionic) a skill point; the Skills screen lists Weeb
+# (dumped), and clicking it masters the Bionic Weeb skill.
+from: early-base
+mods: [3208492885]
+setup:
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[0].GetComponent<MinionResume>", method: ForceAddSkillPoint}}
+steps:
+  - expect_state:
+      "Db.Get().Skills.Get(\"WD_WEEB\").perks.Count": 2
+      "Db.Get().Skills.Get(\"WD_WEEB_BIONIC\")": exists
+      "Db.Get().AccessorySlots.Hat.Lookup(\"hat_role_weeb1\")": exists
+  - open: {management: skills}
+  - ui_wait: {path: "**/SkillsScreen/Content/Skills/ScrollRect/ScrollContent/Table", cond: stable}
+  - expect_ui:
+      "**/SkillsScreen/**/PrefabSkillWidget/Header/Label": {any_text: "~Weeb"}
+  - click: {text: "~Weeb", under: "**/SkillsScreen"}
+  - expect_state:
+      "Components.LiveMinionIdentities.Items[0].GetComponent<MinionResume>.HasMasteredSkill(\"WD_WEEB_BIONIC\")": true

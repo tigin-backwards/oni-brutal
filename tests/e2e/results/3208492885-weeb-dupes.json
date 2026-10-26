@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3208492885-weeb-dupes.yaml",
+ "mods": [
+  "3208492885"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Skills screen lists Weeb, and clicking it with a skill point masters the Bionic Weeb skill",
+ "updated": "2026-10-26",
+ "commit": "28b4e36a",
+ "mod_dlls": {
+  "3208492885": {
+   "WeebDupe.dll": "eacf467ab28b1012201bd8a33a364cbf148e55747973ad658e62af89d3228aa9"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-175250-0ae88632",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T18:15:10",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-183436-06bd7bbf",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T19:05:25",
+    "lane": 15,
+    "reference_run": "20261026-175250-0ae88632",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-183436-06bd7bbf",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T19:06:13",
+    "lane": 15,
+    "reference_run": "20261026-175250-0ae88632",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -1,0 +1,59 @@
+{
+ "spec": "mods/3641397524-bottle-emptier-variable-size-fixed.yaml",
+ "mods": [
+  "3641397524"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "built by Duplicants and selected: its capacity slider runs to 200,000 g, and 50000 typed in sets 50 kg; details shot matches",
+ "updated": "2026-10-26",
+ "commit": "403df7df",
+ "mod_dlls": {
+  "3641397524": {
+   "BottleEmptierVar.dll": "b68c32de05c7db00a6a2fdd52966bb4addd684ce9ebeb672e3f0290c2f6f0639"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-024205-d1d3e5ef",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T02:48:45",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-032006-417bc579",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:20:06",
+    "lane": 14,
+    "reference_run": "20261026-024205-d1d3e5ef",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "details": 0.0
+    }
+   },
+   {
+    "run": "20261026-032006-417bc579",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T03:21:11",
+    "lane": 14,
+    "reference_run": "20261026-024205-d1d3e5ef",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "details": 0.0
+    }
+   }
+  ]
+ }
+}

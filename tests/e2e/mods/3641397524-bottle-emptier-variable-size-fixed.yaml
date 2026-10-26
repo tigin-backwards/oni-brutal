@@ -1,0 +1,31 @@
+# Bottle Emptier Variable Size FIXED (3641397524), class B.
+#
+# What it does: a fixed build of Bottle Emptier Variable Size: the Bottle Emptier Variable
+# Size in the Plumbing menu beside the Bottle Emptier (no research), a 1x3 bottle emptier of
+# raw mineral whose storage size is set on a capacity slider in its side screen, 0 to
+# 200,000 g (200 kg, the game's emptier's fixed size), with the game's "allow manual pumping
+# station fetching" button.
+# How a player reaches it: the build menu (Plumbing); the emptier's capacity side screen.
+# What changes: emptiers that take bottles in small amounts.
+#
+# The emptier is built of sandstone in the dug-out corridor west of the printing pod and
+# selected; 50000 typed into its capacity field sets its storage to 50 kg.
+from: early-base
+mods: [3641397524]
+setup:
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"SandStone\").substance", method: SpawnResource, args: [[113.5, 207.5, -12], 600, 300, 255, 0]}}
+steps:
+  - build: {prefab: BottleEmptierVar, at: [113, 206], material: SandStone}
+  - expect: {blueprints: {BottleEmptierVar: 1}}
+  - run: {seconds: 900, until: {buildings: {BottleEmptierVar: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: BottleEmptierVar}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/CapacityControlSideScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<Storage>.capacityKg": "== original"
+      "ui:**/CapacityControlSideScreen/**/Slider::GetComponent<KSlider>.maxValue": 200000
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Bottle Emptier Variable Size"}
+  - shot: {name: details, crop: "**/DetailsScreen", threshold: 0.04}
+  - type: {ui: "**/CapacityControlSideScreen/**/*Input*", text: "50000", enter: true, clear: true}
+  - expect_state: {"selected:GetComponent<Storage>.capacityKg": 50}

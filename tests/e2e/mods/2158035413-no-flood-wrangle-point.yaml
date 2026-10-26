@@ -1,0 +1,24 @@
+# Never Flood Critter Drop-Off/Pick-Up / No Flood Wrangle Point (2158035413), class P.
+#
+# What it does: the Critter Drop-Off and Critter Pick-Up (and the old Creature Delivery Point)
+# cannot flood: a postfix on each CreateBuildingDef sets Floodable to false.
+# How a player reaches it: building them where water gathers.
+# What changes: ranching points that keep working under water.
+#
+# The definitions are read; setup builds a Critter Drop-Off in the dug-out corridor west of
+# the printing pod and pours 400 kg of water over it, and it never floods.
+from: early-base
+mods: [2158035413]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"CritterDropOff\")", method: Build, args: [131127, Neutral, null, [Cuprite], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {type: SimMessages, method: AddRemoveSubstance, args: [131127, Water, null, 400, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"CritterDropOff\").Floodable": false
+      "Assets.GetBuildingDef(\"CritterPickUp\").Floodable": false
+      "Assets.GetPrefab(\"CritterDropOff\").GetComponent<Floodable>": missing
+  - run: {seconds: 20}
+  - expect: {buildings: {CritterDropOff: 1}}
+  - expect_state:
+      "Grid.Mass.get_Item(131127)": "> 10"
+      "count:all:KPrefabID::[*] if .PrefabTag.Name == CritterDropOff and .HasTag(\"Flooded\") == true": 0

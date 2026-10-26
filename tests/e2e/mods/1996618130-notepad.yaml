@@ -1,0 +1,38 @@
+# Notepad (1996618130), classes B, S.
+#
+# What it does: adds the Notepad (1x1, any buildable material, in the Furniture menu,
+# researched with Interior Decor) and an LED light (with Generic Sensors): a note on the map.
+# Its side screen, built with PLib, has a "Description" text area, a grid of icons to show
+# over it, and a tooltip font size field; the note's text shows in the hover card over it
+# (a patch on SelectToolHoverTextCard), and its animation turns from empty to full once it
+# holds text. Blueprint mods can copy its data.
+# How a player reaches it: the build menu (Furniture), after the research; its side screen.
+# What changes: notes left in the base.
+#
+# setup grants Interior Decor and spawns sandstone. A Notepad is built in the corridor west of
+# the printing pod and selected: its side screen shows, and text typed into its area is kept
+# on the note.
+from: early-base
+mods: [1996618130]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"InteriorDecor\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"SandStone\").substance", method: SpawnResource, args: [[111.5, 207.5, -12], 200, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"InteriorDecor\").unlockedItemIDs": {contains: Notepad}
+  - build: {prefab: Notepad, at: [113, 207], material: SandStone}
+  - expect: {blueprints: {Notepad: 1}}
+  - run: {seconds: 1500, until: {buildings: {Notepad: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [113, 207], ortho: 8}}
+  - click_world: {cell: [113, 207], select: Notepad}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<Notepad.Notepad>.contentText": ""
+  - ui_wait: {path: "**/NotepadSideScreenPanel", cond: stable}
+  - ui_dump: {name: notepad, root: "**/NotepadSideScreenPanel"}
+  - shot: {name: notepad, crop: "**/NotepadSideScreenPanel"}
+  - type: {ui: "**/NotepadSideScreenPanel/Notepad text field", text: "Pump the water here"}
+  - click: {ui: "**/NotepadSideScreenPanel/description label"}
+  - expect_state:
+      "selected:GetComponent<Notepad.Notepad>.contentText": Pump the water here

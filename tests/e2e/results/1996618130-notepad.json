@@ -1,0 +1,67 @@
+{
+ "spec": "mods/1996618130-notepad.yaml",
+ "mods": [
+  "1996618130"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Notepad built after Interior Decor shows its PLib side screen; typed text is kept on the note",
+ "updated": "2026-10-25",
+ "commit": "bd353b5",
+ "mod_dlls": {
+  "1996618130": {
+   "Notepad.dll": "83cad9b1e82edc8bd3722c5e364ac430beba510fea5bab224d18445165cbbee8"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-200219-ef1e47f8",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T20:32:34",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-211411-491aa482",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T21:14:11",
+    "lane": 14,
+    "reference_run": "20261025-200219-ef1e47f8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "notepad": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "notepad": 0.0
+    }
+   },
+   {
+    "run": "20261025-211411-491aa482",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-25T21:15:12",
+    "lane": 14,
+    "reference_run": "20261025-200219-ef1e47f8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "notepad": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "notepad": 0.0
+    }
+   }
+  ]
+ }
+}

@@ -1,0 +1,20 @@
+# Elemental Charcoal (3357294645), class P.
+#
+# What it does: wood (WoodLog) heated past 200 degrees turns into coal instead of carbon
+# dioxide (its high-temperature transition, patched into the element YAML), and the Kiln gets
+# a recipe that bakes 100 kg of wood into 50 kg of coal in 40 s.
+# How a player reaches it: heating wood; the Kiln's recipe list.
+# What changes: charcoal from wood.
+#
+# The wood element's transition and the kiln's recipes are read.
+from: early-base
+mods: [3357294645]
+require_log: ['Changed wood transition target to Carbon']
+steps:
+  - expect_state:
+      "ElementLoader.FindElementByName(\"WoodLog\").highTempTransitionTarget": Carbon
+      "ElementLoader.FindElementByName(\"WoodLog\").highTemp": [">= 473.14", "<= 473.16"]
+      "count:ComplexRecipeManager.Get().recipes[*] if .fabricators[0] == Kiln and .results[0].material == Carbon": ">= 1"
+      "count:ComplexRecipeManager.Get().recipes[*] if .fabricators[0] == Kiln and .ingredients[0].material == WoodLog": ">= 1"
+  - run: {seconds: 10}
+  - expect: {duplicants: 3}

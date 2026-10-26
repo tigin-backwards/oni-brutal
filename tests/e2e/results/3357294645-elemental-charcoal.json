@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3357294645-elemental-charcoal.yaml",
+ "mods": [
+  "3357294645"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "wood's high-temperature transition is coal at 200 degrees, and the Kiln bakes wood into coal",
+ "updated": "2026-10-26",
+ "commit": "df5493c6",
+ "mod_dlls": {
+  "3357294645": {
+   "ElementalWood.dll": "bca40dcf1fe32e344d8bc0719333648ea01228a26b1b72e85e85946d59666246"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-030709-d22e398a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:30:09",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-040230-82d86479",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:02:30",
+    "lane": 14,
+    "reference_run": "20261026-030709-d22e398a",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-040230-82d86479",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T04:03:09",
+    "lane": 14,
+    "reference_run": "20261026-030709-d22e398a",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

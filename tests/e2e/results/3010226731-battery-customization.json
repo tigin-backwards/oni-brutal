@@ -1,0 +1,60 @@
+{
+ "spec": "mods/3010226731-battery-customization.yaml",
+ "mods": [
+  "3010226731"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "its option at 300 kJ sets the battery's capacity and the jumbo battery's 1200 kJ; a built battery is selected; details shot matches",
+ "updated": "2026-10-26",
+ "commit": "df5493c6",
+ "mod_dlls": {
+  "3010226731": {
+   "BatteryCustomization.dll": "3f7261f45fb3bc02bdd34405af8cd2c4e8c2c2b0e4daa641764e3d5772b4ce8f",
+   "PLib.dll": "bdd637dbef718cdd52e61c0a7177bd297864a50bac1583d2837a36ff3edf07db"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-024539-704646ee",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:49:37",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-040218-1c8c5739",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:02:18",
+    "lane": 15,
+    "reference_run": "20261026-024539-704646ee",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "details": 4.1e-05
+    }
+   },
+   {
+    "run": "20261026-040218-1c8c5739",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T04:02:57",
+    "lane": 15,
+    "reference_run": "20261026-024539-704646ee",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "details": 4.1e-05
+    }
+   }
+  ]
+ }
+}

@@ -1,0 +1,29 @@
+# 小中大电池容量与漏电自定义 Battery Customization (3010226731), classes P, O.
+#
+# What it does: the Battery, Jumbo Battery and Smart Battery are rebuilt with PLib options:
+# the battery's capacity in kJ (200 by default; the jumbo battery four times that) and its
+# leak per cycle (0, none; negative values recharge it). Battery.ConsumeEnergy is replaced to
+# clamp the charge to the new capacity.
+# How a player reaches it: the Mods screen's options; building batteries.
+# What changes: batteries that hold more and do not leak.
+#
+# options set the capacity to 300 kJ: the battery holds 300 kJ and the jumbo battery 1200 kJ;
+# a battery built in the dug-out corridor west of the printing pod is selected.
+from: early-base
+mods: [3010226731]
+options:
+  "3010226731": {SetCapacity: 300}
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Battery\")", method: Build, args: [131129, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"Battery\").BuildingComplete.GetComponent<Battery>.capacity": 300000
+      "Assets.GetBuildingDef(\"BatteryMedium\").BuildingComplete.GetComponent<Battery>.capacity": 1200000
+  - run: {seconds: 2}
+  - expect: {buildings: {Battery: 1}}
+  - driver: {camera.set: {cell: [113, 207], ortho: 8}}
+  - click_world: {cell: [113, 206], select: Battery}
+  - ui_wait: {path: "**/DetailsScreen/TitleBar", cond: stable}
+  - expect_state:
+      "selected:GetComponent<Battery>.capacity": 300000
+  - shot: {name: details, crop: "**/DetailsScreen", threshold: 0.04}

@@ -1,0 +1,27 @@
+# U&F-More Food 更多食物 (3380780873), class P (foods, recipes).
+#
+# What it does: adds eighteen foods with their own sprites (bunny roll, mooncakes, lily cake,
+# curry bar, jelly, shredded pork with chili, fried meat, hot pumpkin, churros, salsa fresca,
+# rum jelly, ...), cooked on the Electric Grill, the Gas Range and the Deep Fryer, named in
+# English or Chinese by the game's language.
+# How a player reaches it: a cooking station's recipe list.
+# What changes: more dishes to cook.
+#
+# The foods' prefabs and their recipes exist; setup builds an Electric Grill in the dug-out
+# room west of the printing pod, and selected, its recipe list offers the new dishes.
+from: early-base
+mods: [3380780873]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"CookingStation\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Cuprite], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"BunnyRoll\")": exists
+      "Assets.GetPrefab(\"Churros\")": exists
+      "Assets.GetPrefab(\"GrubfruitRhumJelly\")": exists
+      "count:ComplexRecipeManager.Get().recipes[*] if .results[0].material.Name == BunnyRoll and .fabricators[0].Name == CookingStation": ">= 1"
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: CookingStation}
+  - ui_wait: {path: "**/ComplexFabricatorSideScreen/Contents/ButtonScrollView", cond: stable}
+  - ui_dump: {name: recipes, root: "**/ComplexFabricatorSideScreen/Contents/ButtonScrollView"}
+  - shot: {name: recipes, crop: "**/DetailsScreen", threshold: 0.04}

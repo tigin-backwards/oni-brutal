@@ -1,0 +1,80 @@
+{
+ "spec": "mods/3380780873-uf-more-food.yaml",
+ "mods": [
+  "3380780873"
+ ],
+ "verdict": "warning",
+ "why": "known findings: scroll-normalized-position",
+ "findings": [
+  "scroll-normalized-position"
+ ],
+ "note": "the foods and their recipes exist; an Electric Grill's recipe list offers them (shot matches), its dump differing only in the list's scroll position (scroll-normalized-position)",
+ "updated": "2026-10-26",
+ "commit": "104479d6",
+ "mod_dlls": {
+  "3380780873": {
+   "Morefood.dll": "16ce0bf7d0763711a5d7a90e5d0cf7e87c623b843ee85c746ba3ee8e077bee74",
+   "PLib.dll": "bdd637dbef718cdd52e61c0a7177bd297864a50bac1583d2837a36ff3edf07db"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-033203-6e82e943",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:53:37",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-041723-86e88940",
+    "index": 1,
+    "verdict": "warn",
+    "date": "2026-10-26T04:17:23",
+    "lane": 16,
+    "reference_run": "20261026-033203-6e82e943",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "recipes": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "recipes": 0.0
+    }
+   },
+   {
+    "run": "20261026-041723-86e88940",
+    "index": 2,
+    "verdict": "warn",
+    "date": "2026-10-26T04:17:24",
+    "lane": 17,
+    "reference_run": "20261026-033203-6e82e943",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "recipes": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "recipes": 0.0
+    }
+   }
+  ]
+ }
+}

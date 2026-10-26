@@ -1,0 +1,57 @@
+{
+ "spec": "mods/2998905657-neodymiumstyle-hairstyle-akane.yaml",
+ "mods": [
+  "3172734005",
+  "2998905657"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with Dupery Fixed, Akane joins the personalities and her hair loads as an accessory",
+ "updated": "2026-10-25",
+ "commit": "a9add53",
+ "mod_dlls": {
+  "3172734005": {
+   "DuperyFixed.dll": "9ef4a93958b6b80fbf086cab57821955dd344324d2192086db7ea7845e71f7f2"
+  },
+  "2998905657": {}
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-195133-9810c702",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T20:01:30",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-210650-d6cb8332",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T21:23:45",
+    "lane": 14,
+    "reference_run": "20261025-195133-9810c702",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261025-210650-d6cb8332",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-25T21:24:35",
+    "lane": 14,
+    "reference_run": "20261025-195133-9810c702",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -1,0 +1,33 @@
+# Trapdoors & Floor Hatches Revived (3523317587), class B.
+#
+# What it does: adds the Trapdoor Ladder Tile to the Base menu, researched with Refined
+# Objects: a 1x1 metal floor tile that is also a ladder (LadderHatch marks its cell a ladder
+# and passable for Duplicants while it stays solid), so it seals rooms and stops debris yet
+# lets Duplicants climb through.
+# How a player reaches it: the build menu (Base), after the research.
+# What changes: solid floors Duplicants can climb through.
+#
+# setup researches Refined Objects; the Base menu lists the tile, and one is ordered and
+# built of cuprite in the middle of the dug-out corridor west of the printing pod: its cell
+# is solid, a ladder, and passable.
+from: early-base
+mods: [3523317587]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"RefinedObjects\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"RefinedObjects\").unlockedItemIDs": {contains: TrapdoorLadderTile}
+  - run: {seconds: 10}
+  - click: {ui: "**/PlanScreen/Toggle:Base"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/TrapdoorLadderTile Group*", cond: stable}
+  - shot: {name: base-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
+  - key: {code: Escape}
+  - build: {prefab: TrapdoorLadderTile, cells: [[112, 207]], material: Cuprite}
+  - expect: {blueprints: {TrapdoorLadderTile: 1}}
+  - run: {seconds: 900, until: {pending_construction: 0}}
+  - expect: {buildings: {TrapdoorLadderTile: 1}}
+  - expect_state:
+      "Grid.IsSolidCell(131764)": true
+      "Grid.HasLadder.get_Item(131764)": true
+      "Grid.DupePassable.get_Item(131764)": true

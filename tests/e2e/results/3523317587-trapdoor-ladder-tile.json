@@ -1,0 +1,59 @@
+{
+ "spec": "mods/3523317587-trapdoor-ladder-tile.yaml",
+ "mods": [
+  "3523317587"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "after Refined Objects the Base menu lists the tile (shot); one ordered and built is solid, a ladder and passable",
+ "updated": "2026-10-26",
+ "commit": "f898d18a",
+ "mod_dlls": {
+  "3523317587": {
+   "ladderhatchrevived.dll": "699d437240324369f4971b5fdf323a55af3856246deb314b5dab80a1fa3176b3"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-114619-1abc381b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T11:46:19",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-145036-c077f4e4",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T14:54:59",
+    "lane": 14,
+    "reference_run": "20261026-114619-1abc381b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "base-menu": 0.0
+    }
+   },
+   {
+    "run": "20261026-145036-c077f4e4",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T14:55:01",
+    "lane": 15,
+    "reference_run": "20261026-114619-1abc381b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "base-menu": 0.0
+    }
+   }
+  ]
+ }
+}

@@ -1,0 +1,42 @@
+# Flip Anything (2470399096), class P.
+#
+# What it does: every building that is not a tile can be flipped left to right while it is
+# placed (a postfix on BuildingTemplates.CreateBuildingDef sets PermittedRotations to FlipH
+# unless the build location rule is Tile). Patches on ItemPedestal.OnOccupantChanged and
+# DirectionControl.SetAllowedDirection mirror a pedestal's occupant and a flipped building's
+# direction arrows.
+# How a player reaches it: the build menu, then the rotate key (O) while placing.
+# What changes: a building the game places one way only, such as the Storage Bin, can be
+# placed mirrored; a tile stays as the game has it.
+#
+# The Storage Bin (Base) is chosen from the build menu, flipped with O and placed in the
+# dug-out corridor west of the printing pod; its blueprint keeps the flip.
+from: early-base
+mods: [2470399096]
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"StorageLocker\").PermittedRotations": FlipH
+      "Assets.GetBuildingDef(\"CeilingLight\").PermittedRotations": FlipH
+  - expect_state:
+      "Assets.GetBuildingDef(\"Tile\").PermittedRotations": "== original"
+  # The build menu offers materials only once the game has run a little.
+  - run: {seconds: 5}
+  - driver: {camera.set: {cell: [114, 208], ortho: 10}}
+  - open: {key: Alpha1}
+  - ui_wait: {path: "**/PlanBuildingSelectionPanel/BuildingGroups", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/StorageLocker Group*"}
+  - ui_wait: {path: "**/PlanBuildingSelectionPanel/ProductInfoScreen", cond: stable}
+  - click: {ui: "**/MaterialSelectorTemplate/**/Toggles/MaterialSelection_*"}
+  - expect_state:
+      "PlayerController.Instance.ActiveTool.name": BuildTool
+  - key: {code: O, at: [113, 206]}
+  - expect_state:
+      "BuildTool.Instance.GetBuildingOrientation": FlipH
+  - click_world: {cell: [113, 206]}
+  - key: {code: Escape}
+  - expect: {blueprints: {StorageLocker: 1}}
+  - expect_state:
+      "count:all:Constructable::[*] if .GetComponent<Rotatable>.GetOrientation() == FlipH": 1
+  - run: {seconds: 900, until: {buildings: {StorageLocker: 1}, pending_construction: 0}}
+  - expect_state:
+      "count:all:StorageLocker::[*] if .GetComponent<Rotatable>.GetOrientation() == FlipH": 1

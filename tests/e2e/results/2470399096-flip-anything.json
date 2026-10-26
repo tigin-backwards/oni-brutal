@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2470399096-flip-anything.yaml",
+ "mods": [
+  "2470399096"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Storage Bin is chosen from the build menu, flipped with O, placed and built mirrored; tiles keep the game's rotations",
+ "updated": "2026-10-25",
+ "commit": "ed8ad03",
+ "mod_dlls": {
+  "2470399096": {
+   "FlipAnything.dll": "55ef2cf3b1be935f17706ecf4e47867042802b458abce55560c4dff419bd6991"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-194609-7e6ec6de",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T19:46:10",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-201234-9b467f92",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T20:12:34",
+    "lane": 16,
+    "reference_run": "20261025-194609-7e6ec6de",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261025-201234-9b467f92",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-25T20:13:44",
+    "lane": 16,
+    "reference_run": "20261025-194609-7e6ec6de",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

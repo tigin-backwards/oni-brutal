@@ -1,0 +1,59 @@
+{
+ "spec": "mods/2737502623-tinted-aquatuner-liquid.yaml",
+ "mods": [
+  "2737502623"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the aquatuner carries the mod's tint component and reads as the game's aquatuner; its world shot within the original's",
+ "updated": "2026-10-25",
+ "commit": "e342899",
+ "mod_dlls": {
+  "2737502623": {
+   "Tinted Aquatuner Liquid.dll": "b99fbf3a0506fc2f0728289d1713dda6290aaad57535244c444196ea36aaaed7"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-205504-3ffda7ba",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T20:55:04",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-225435-9019e11f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T22:54:35",
+    "lane": 16,
+    "reference_run": "20261025-205504-3ffda7ba",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "aquatuner": 0.028785
+    }
+   },
+   {
+    "run": "20261025-225435-9019e11f",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-25T22:54:41",
+    "lane": 17,
+    "reference_run": "20261025-205504-3ffda7ba",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "aquatuner": 0.030371
+    }
+   }
+  ]
+ }
+}

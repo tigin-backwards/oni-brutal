@@ -1,0 +1,27 @@
+# Tinted Aquatuner Liquid [OBSOLETE] (2737502623), class V.
+#
+# What it does: the Thermo Aquatuner (LiquidConditioner) gets an AquatunerTint component: when
+# its storage changes it tints the kanim's "liquid" symbol with the stored liquid's UI colour,
+# and clears the tint when the aquatuner stops. Its anim folder replaces the aquatuner's
+# kanim with one that has that symbol.
+# How a player reaches it: an aquatuner running with liquid in it.
+# What changes: the aquatuner shows the colour of the liquid it cools.
+#
+# setup builds an aquatuner in the dug-out corridor west of the printing pod. It carries the
+# mod's component; selected, it reads as the game's aquatuner.
+from: early-base
+mods: [2737502623]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LiquidConditioner\")", method: Build, args: [131129, Neutral, null, [Cuprite], 300.0, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"LiquidConditioner\").BuildingComplete.GetComponent<Tinted_Aquatuner_Liquid.AquatunerTint>": exists
+      "count:all:Tinted_Aquatuner_Liquid.AquatunerTint::[*]": 1
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: LiquidConditioner}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Thermo Aquatuner"}
+  - world_shot: {name: aquatuner, ortho: 6, at: [114, 207], hide_ui: true}
+  - run: {seconds: 30}
+  - expect: {duplicants: 3}

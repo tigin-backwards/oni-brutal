@@ -1,0 +1,19 @@
+# 小人工作最大等级上限自定义 Duplicant attribute cap (3571290810), class P.
+#
+# What it does: a prefix on AttributeLevel.AddExperience caps every attribute at level 50
+# (where the game stops at 20), lifts one below 5 to 15 the first time it gains experience,
+# and above 5 multiplies the experience gained by the level.
+# How a player reaches it: Duplicants working (digging, building, researching).
+# What changes: attributes trained to 15 at once, and on up to 50.
+#
+# The Duplicants dig out two cells east of the west corridor of early-base; a digger's
+# Excavation is then 15 (none had 15 before).
+from: early-base
+mods: [3571290810]
+steps:
+  - expect_state:
+      "count:Components.LiveMinionIdentities.Items[*] if .GetComponent<AttributeLevels>.GetAttributeLevel(\"Digging\").level == 15": 0
+  - dig: [119, 207, 120, 209]
+  - run: {seconds: 600, until: {pending_digs: 0}}
+  - expect_state:
+      "count:Components.LiveMinionIdentities.Items[*] if .GetComponent<AttributeLevels>.GetAttributeLevel(\"Digging\").level == 15": ">= 1"

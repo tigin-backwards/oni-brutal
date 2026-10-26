@@ -25,6 +25,14 @@ namespace UnityEngine
             Blits.Blit(source, dest, mat, pass, Vector2.one, Vector2.zero);
         }
 
+        /// Drawing goes to rt (null: the screen), which becomes RenderTexture.active, with the
+        /// viewport over the whole target.
+        public static void SetRenderTarget(RenderTexture rt)
+        {
+            Threads.AssertMainThread("SetRenderTarget");
+            Blits.SetTarget(rt);
+        }
+
         /// Runs the command buffer now (outside camera rendering).
         public static void ExecuteCommandBuffer(UnityEngine.Rendering.CommandBuffer buffer)
         {
@@ -99,6 +107,30 @@ namespace UnityEngine
 
         public static void DrawMesh(Mesh mesh, Matrix4x4 matrix, Material material, int layer, Camera camera, int submeshIndex, MaterialPropertyBlock properties, ShadowCastingMode castShadows, bool receiveShadows, Transform probeAnchor, LightProbeUsage lightProbeUsage)
             => DrawMesh(mesh, matrix, material, layer, camera, submeshIndex, properties);
+
+        // ----- DrawMeshNow (immediate, with the pass set by Material.SetPass) -----
+
+        public static void DrawMeshNow(Mesh mesh, Vector3 position, Quaternion rotation)
+            => DrawMeshNow(mesh, Matrix4x4.TRS(position, rotation, Vector3.one), -1);
+
+        public static void DrawMeshNow(Mesh mesh, Vector3 position, Quaternion rotation, int materialIndex)
+            => DrawMeshNow(mesh, Matrix4x4.TRS(position, rotation, Vector3.one), materialIndex);
+
+        public static void DrawMeshNow(Mesh mesh, Matrix4x4 matrix) => DrawMeshNow(mesh, matrix, -1);
+
+        /// Draws the mesh now with the pass the last Material.SetPass set: sub-mesh
+        /// materialIndex, or each sub-mesh in turn for -1. Measured in the original
+        /// (tools/UnityProbe, drawmeshnow): the matrix places the mesh in the world, which the
+        /// rendering camera's view and GL's projection (GL.LoadProjectionMatrix, LoadOrtho,
+        /// LoadPixelMatrix) bring to the target; GL.modelview plays no part. Outside a camera's
+        /// rendering nothing is drawn.
+        public static void DrawMeshNow(Mesh mesh, Matrix4x4 matrix, int materialIndex)
+        {
+            if (mesh == null) throw new ArgumentNullException(nameof(mesh));
+            Threads.AssertMainThread("DrawMeshNow");
+            if (FrameRenderer.Current == null) return;
+            GraphicsDevice.Current.DrawMeshNow(mesh.Data, materialIndex, matrix, GLState.View, GLState.Projection);
+        }
 
         // ----- DrawTexture (immediate, in the current GL matrices) -----
 
@@ -175,6 +207,17 @@ namespace UnityEngine
             => GraphicsDevice.Current.Clear(clearColor, clearDepth, backgroundColor, depth);
 
         public static void Viewport(Rect pixelRect) => GraphicsDevice.Current.SetViewport(pixelRect);
+
+        static bool s_SRGBWrite;
+
+        /// Whether drawing converts linear colours to sRGB, kept as set; false at first, as in the
+        /// original (tools/UnityProbe, drawmeshnow). The game's colour space is gamma, where
+        /// colours are written as they are: the renderer converts nothing.
+        public static bool sRGBWrite
+        {
+            get => s_SRGBWrite;
+            set => s_SRGBWrite = value;
+        }
     }
 
     /// Gizmos are drawn only in the editor's scene and game views; in a player every drawing
@@ -223,11 +266,16 @@ namespace OniMoono.Engine.Rendering
             }
         }
 
+        /// The view of the camera rendering (Graphics.DrawMeshNow's; GL.modelview does not
+        /// change it).
+        public static Matrix4x4 View = Matrix4x4.identity;
+
         /// While a camera renders, GL starts from its view and projection.
         public static void BeginCamera(CameraNative cam)
         {
             ModelView = cam.WorldToCamera;
             Projection = cam.Projection;
+            View = cam.WorldToCamera;
         }
 
         public static void Push() => stack.Push((ModelView, Projection));
@@ -317,14 +365,22 @@ namespace OniMoono.Engine.Rendering
             }
         }
 
-        static void BeginFullTarget(RenderTexture dest)
+        /// Drawing goes to dest (null: the screen), which becomes RenderTexture.active, over its
+        /// whole area (Graphics.SetRenderTarget). Returns the target's size in pixels.
+        public static Vector2 SetTarget(RenderTexture dest)
         {
             RenderTexture.active = dest;
             var device = GraphicsDevice.Current;
             FrameRenderer.Bind(device, dest == null ? FrameRenderer.ScreenBinding : RenderTargetBinding.Of((RenderTextureNative)dest.NativeOrThrow));
             var size = dest == null ? GLState.TargetSize * FrameRenderer.ScreenScale : GLState.TargetSize;
             device.SetViewport(new Rect(0f, 0f, size.x, size.y));
-            device.SetCamera(new CameraConstants(Matrix4x4.identity, Matrix4x4.Ortho(0f, 1f, 0f, 1f, -1f, 1f), Vector3.zero, -1f, 1f, true, size));
+            return size;
+        }
+
+        static void BeginFullTarget(RenderTexture dest)
+        {
+            var size = SetTarget(dest);
+            GraphicsDevice.Current.SetCamera(new CameraConstants(Matrix4x4.identity, Matrix4x4.Ortho(0f, 1f, 0f, 1f, -1f, 1f), Vector3.zero, -1f, 1f, true, size));
         }
 
         public static void Blit(Texture source, RenderTexture dest, Material mat, int pass, Vector2 scale, Vector2 offset)

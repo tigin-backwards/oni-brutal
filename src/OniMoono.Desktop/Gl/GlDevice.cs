@@ -605,25 +605,9 @@ namespace OniMoono.Desktop.Gl
         /// the object transform under an identity view.
         public override void DrawImmediate(ImmediatePrimitive primitive, ReadOnlySpan<ImmediateVertex> vertices, Matrix4x4 modelView, Matrix4x4 projection)
         {
-            if (passMaterial == null || vertices.Length == 0) return;
-            var material = (MaterialNative)passMaterial.NativeOrThrow;
-            if (material.Shader == null) return;
-            var shader = (ShaderNative)material.Shader.NativeOrThrow;
-            var sub = shader.ActiveSubShader;
-            if (sub == null || passIndex >= sub.Passes.Length) return;
-            var pass = sub.Passes[passIndex];
-            int blob = ShaderPrograms.SelectVariant(pass, k => GlDrawRecorder.KeywordEnabled(k, material, null));
-            if (blob < 0) return;
-            var program = recorder.Program(shader, blob);
-            if (program.Id == 0) return;
-            var inputs = new DrawInputs
-            {
-                ObjectToWorld = modelView,
-                Camera = camera with { View = Matrix4x4.identity, Projection = projection },
-                Material = material,
-                Shader = shader,
-            };
-            var recorded = recorder.Record(program, recorder.StateOf(pass), inputs, worker.Arena);
+            if (vertices.Length == 0) return;
+            var recorded = RecordPass(modelView, Matrix4x4.identity, projection, out var shader);
+            if (recorded == null) return;
 
             // Interleaved: position, colour, eight texture coordinates.
             const int stride = sizeof(float) * (3 + 4 + 32);
@@ -662,6 +646,52 @@ namespace OniMoono.Desktop.Gl
                 ExecuteImmediate(recorded, primitive, data, count, indices);
                 if (GlGpuProfile.Enabled) GlGpuProfile.End(recorded.Label, q);
             });
+        }
+
+        /// Records the pass set by SetPass for one immediate draw. Null when the pass has nothing
+        /// to draw with (no shader, no program for its keywords).
+        ProgramInputs RecordPass(Matrix4x4 objectToWorld, Matrix4x4 view, Matrix4x4 projection, out ShaderNative shader)
+        {
+            shader = null;
+            if (passMaterial == null) return null;
+            var material = (MaterialNative)passMaterial.NativeOrThrow;
+            if (material.Shader == null) return null;
+            shader = (ShaderNative)material.Shader.NativeOrThrow;
+            var sub = shader.ActiveSubShader;
+            if (sub == null || passIndex >= sub.Passes.Length) return null;
+            var pass = sub.Passes[passIndex];
+            int blob = ShaderPrograms.SelectVariant(pass, k => GlDrawRecorder.KeywordEnabled(k, material, null));
+            if (blob < 0) return null;
+            var program = recorder.Program(shader, blob);
+            if (program.Id == 0) return null;
+            var inputs = new DrawInputs
+            {
+                ObjectToWorld = objectToWorld,
+                Camera = camera with { View = view, Projection = projection },
+                Material = material,
+                Shader = shader,
+            };
+            return recorder.Record(program, recorder.StateOf(pass), inputs, worker.Arena);
+        }
+
+        /// Graphics.DrawMeshNow: the mesh's sub-mesh (-1: each in turn) with the pass set by
+        /// SetPass, drawn as a mesh draw is.
+        public override void DrawMeshNow(MeshNative mesh, int subMesh, Matrix4x4 objectToWorld, Matrix4x4 view, Matrix4x4 projection)
+        {
+            int count = mesh.SubMeshes.Count;
+            if (count == 0 || subMesh >= count) return;
+            int first = subMesh < 0 ? 0 : subMesh, last = subMesh < 0 ? count - 1 : subMesh;
+            var device = GlMeshes.Prepare(worker, mesh);
+            for (int s = first; s <= last; s++)
+            {
+                var recorded = RecordPass(objectToWorld, view, projection, out var shader);
+                if (recorded == null) return;
+                if (GlGpuProfile.Enabled) recorded.Label = "mesh now " + shader.ShaderName;
+                recorded.Mesh = device;
+                recorded.Layout = device.Layout;
+                recorded.SubMesh = device.SubMeshes[s];
+                worker.Post(recorded.RunDraw);
+            }
         }
 
         void ExecuteImmediate(ProgramInputs recorded, ImmediatePrimitive primitive, float[] data, int count, int[] indices)

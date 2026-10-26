@@ -51,6 +51,15 @@ distance, a float step apart and 1e-4 apart, submitted in both orders, with thei
 created in both orders and with unit or float.MaxValue bounds. `do-check.py LOG DIR` prints which
 quad is on top; `DrawMeshTests` (`TransparentDrawsAtTheSameDistanceGoByMaterial`) encodes it.
 
+With `PROBE_SCENARIO=drawmeshnow` only the DrawMeshNow probe runs (`DrawMeshNow.cs`, lines `DMN
+…`, 10 s into the main menu, a few seconds): meshes drawn with Graphics.DrawMeshNow into a 16 × 16
+render texture and read back as a character map, outside rendering and from a camera's
+`onPostRender` and `OnRenderImage`, under the camera's matrices, GL.modelview, the pixel matrix,
+LoadOrtho and loaded projections. It runs through `scripts/e2e.py` with OniMcp's mod folder as
+above and a spec `from: main-menu` that waits for `**/DrawMeshNowProbeDone`; diff the players'
+`DMN` lines. The file's header lists the cases and what they measured; `DrawMeshTests`
+(`DrawMeshNowDrawsWithThePassSetInTheCameraView`) encodes it.
+
 Both players write the same version stamp for the mod (ARCHITECTURE D3), so one `mods.json`
 serves both. In U59 that stamp is `692750779`, with `enabledForDlc: ["", "EXPANSION1_ID"]`;
 with another stamp the game reinstalls the mod and disables it.

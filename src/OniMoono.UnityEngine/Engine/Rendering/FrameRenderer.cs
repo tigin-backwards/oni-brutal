@@ -446,6 +446,7 @@ namespace OniMoono.Engine.Rendering
             var previous = Current;
             Current = camera;
             var previousActive = RenderTexture.active;
+            var previousView = GLState.View;
             try
             {
                 RenderCameraCore(camera, cam);
@@ -454,6 +455,7 @@ namespace OniMoono.Engine.Rendering
             {
                 Current = previous;
                 RenderTexture.active = previousActive;
+                GLState.View = previousView;
             }
         }
 

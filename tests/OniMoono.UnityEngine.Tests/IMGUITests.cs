@@ -57,6 +57,10 @@ namespace OniMoono.Tests
         }
         public override void DrawImmediate(OniMoono.Engine.Rendering.ImmediatePrimitive primitive, ReadOnlySpan<OniMoono.Engine.Rendering.ImmediateVertex> vertices, Matrix4x4 modelView, Matrix4x4 projection)
             => Draws.Add((pass, vertices.ToArray(), projection));
+        /// Graphics.DrawMeshNow draws: the pass's material, mesh, sub-mesh and matrices.
+        public readonly List<(Material Material, OniMoono.Engine.Rendering.MeshNative Mesh, int SubMesh, Matrix4x4 ObjectToWorld, Matrix4x4 View, Matrix4x4 Projection)> MeshNowDraws = new();
+        public override void DrawMeshNow(OniMoono.Engine.Rendering.MeshNative mesh, int subMesh, Matrix4x4 objectToWorld, Matrix4x4 view, Matrix4x4 projection)
+            => MeshNowDraws.Add((pass, mesh, subMesh, objectToWorld, view, projection));
         public override void Present() { }
     }
 

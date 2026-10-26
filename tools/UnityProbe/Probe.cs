@@ -22,6 +22,11 @@ namespace SemanticsProbe
                 go.AddComponent<CanvasProbe>();
                 return;
             }
+            if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "drawmeshnow")
+            {
+                go.AddComponent<DrawMeshNow>();
+                return;
+            }
             if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "activetarget")
             {
                 go.AddComponent<ActiveTarget>();

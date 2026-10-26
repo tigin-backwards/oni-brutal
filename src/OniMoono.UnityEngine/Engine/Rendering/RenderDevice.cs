@@ -124,6 +124,10 @@ namespace OniMoono.Engine.Rendering
         /// Draws GL immediate-mode geometry with the pass activated by SetPass.
         public abstract void DrawImmediate(ImmediatePrimitive primitive, ReadOnlySpan<ImmediateVertex> vertices, Matrix4x4 modelView, Matrix4x4 projection);
 
+        /// Draws a mesh's sub-mesh (-1: every sub-mesh, in order) with the pass activated by
+        /// SetPass, placed by objectToWorld under that view and projection (Graphics.DrawMeshNow).
+        public abstract void DrawMeshNow(MeshNative mesh, int subMesh, Matrix4x4 objectToWorld, Matrix4x4 view, Matrix4x4 projection);
+
         /// Shows the frame (swap buffers).
         public abstract void Present();
 
@@ -202,6 +206,7 @@ namespace OniMoono.Engine.Rendering
         protected override void ApplyCamera(in CameraConstants camera) { }
         public override void Draw(in DrawRequest draw) { }
         public override void DrawImmediate(ImmediatePrimitive primitive, ReadOnlySpan<ImmediateVertex> vertices, Matrix4x4 modelView, Matrix4x4 projection) { }
+        public override void DrawMeshNow(MeshNative mesh, int subMesh, Matrix4x4 objectToWorld, Matrix4x4 view, Matrix4x4 projection) { }
         public override void Present() { }
     }
 

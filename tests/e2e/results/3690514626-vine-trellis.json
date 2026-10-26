@@ -1,0 +1,74 @@
+{
+ "spec": "mods/3690514626-vine-trellis.yaml",
+ "mods": [
+  "3690514626"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "Vine Post and Rail show in the Utilities menu after Agriculture; a built post's direction button flips it; menu shot and user-menu dumps match",
+ "updated": "2026-10-26",
+ "commit": "7f0364bc",
+ "mod_dlls": {
+  "3690514626": {
+   "PLib.dll": "48c63fd4654b6fbb390afdac71a3d29194eeb9405eca4290cba6e4fbf60805ce",
+   "VineTrellis.dll": "92c2e2e45e1b3f4f03cfa3099e3b3a7ca45d9d626c3881fea8f89900f8a9acf8"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-025019-77e7dd66",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:08:22",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-041655-19779996",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:23:00",
+    "lane": 14,
+    "reference_run": "20261026-025019-77e7dd66",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "user-menu-before": {
+      "differences": 0
+     },
+     "user-menu-after": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "utilities-menu": 0.0
+    }
+   },
+   {
+    "run": "20261026-041655-19779996",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T04:23:50",
+    "lane": 14,
+    "reference_run": "20261026-025019-77e7dd66",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "user-menu-before": {
+      "differences": 0
+     },
+     "user-menu-after": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "utilities-menu": 0.0
+    }
+   }
+  ]
+ }
+}

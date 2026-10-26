@@ -1,0 +1,39 @@
+# Vine Trellis (3690514626), classes B, P, O.
+#
+# What it does: two backwall buildings in the Utilities menu, researched with Agriculture: the
+# Vine Post (1x2, vertical) and the Vine Rail (horizontal) guide Ovagro Vines (Prehistoric
+# Planet Pack) through open space without blocking movement or splitting rooms; they tint to
+# their material, tile with each other, and a user-menu button sets the vine's exit side (Left
+# or Right) or surface (Below or Above). A PLib debug option speeds vines at trellises.
+# How a player reaches it: the build menu, after the research; the trellis's user menu.
+# What changes: vines that can be steered.
+#
+# setup researches Agriculture and builds a Vine Post in the dug-out corridor west of the
+# printing pod; the Utilities menu lists both trellises, and the post's direction button is
+# clicked.
+from: early-base
+mods: [3690514626]
+require_log: ['\[VineTrellis\] All patches applied']
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"Agriculture\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"VinePost\")", method: Build, args: [131129, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"Agriculture\").unlockedItemIDs": [{contains: VinePost}, {contains: VineRail}]
+      "Assets.GetBuildingDef(\"VinePost\").BuildingComplete.GetComponent<KPrefabID>.HasTag(\"Backwall\")": true
+  - run: {seconds: 10}
+  - expect: {buildings: {VinePost: 1}}
+  - click: {ui: "**/PlanScreen/Toggle:Utilities"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/VinePost Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/VineRail Group*": {active: true}
+  - shot: {name: utilities-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
+  - key: {code: Escape}
+  - driver: {camera.set: {cell: [113, 207], ortho: 8}}
+  - click_world: {cell: [113, 206], select: VinePost}
+  - ui_wait: {path: "**/UserMenuScreen/Buttons/Vine*Button", cond: stable}
+  - ui_dump: {name: user-menu-before, root: "**/UserMenuScreen/Buttons"}
+  - click: {ui: "**/UserMenuScreen/Buttons/Vine*Button"}
+  - ui_wait: {path: "**/UserMenuScreen/Buttons/Vine*Button", cond: stable}
+  - ui_dump: {name: user-menu-after, root: "**/UserMenuScreen/Buttons"}

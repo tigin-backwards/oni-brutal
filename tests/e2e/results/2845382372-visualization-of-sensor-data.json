@@ -1,0 +1,67 @@
+{
+ "spec": "mods/2845382372-visualization-of-sensor-data.yaml",
+ "mods": [
+  "2845382372"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a built Thermo Sensor's Start Emitting button starts it emitting and becomes Stop; user-menu dump and shot match",
+ "updated": "2026-10-26",
+ "commit": "7f0364bc",
+ "mod_dlls": {
+  "2845382372": {
+   "wuxian.dll": "8c8231f88ee754b0d484f89f3d1194e632e8bd73eda7db2f6a4eef6d7692ee4d"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-023754-20737f8f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:37:07",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-042635-5040e44d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:26:35",
+    "lane": 15,
+    "reference_run": "20261026-023754-20737f8f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "user-menu": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "user-menu": 0.0
+    }
+   },
+   {
+    "run": "20261026-042635-5040e44d",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T04:27:22",
+    "lane": 15,
+    "reference_run": "20261026-023754-20737f8f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "user-menu": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "user-menu": 0.0
+    }
+   }
+  ]
+ }
+}

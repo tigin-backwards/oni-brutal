@@ -1,0 +1,32 @@
+# Visualization of sensor data (2845382372), classes B, P.
+#
+# What it does: sensors (wattage, temperature, gas and liquid pressure, radiation, critter
+# count) become wireless emitters: a user-menu button starts or stops broadcasting their
+# reading on a channel (a slider), another switches its unit (Kelvin or the player's unit,
+# grams or kilograms, watts or kilowatts). Seven LED receivers in the Automation menu show the
+# value on the channel, digit by digit (ones to hundred-thousands) or its sign.
+# How a player reaches it: a sensor's user menu and slider; the build menu (Automation).
+# What changes: sensor readings shown on wireless displays.
+#
+# A Thermo Sensor built in the dug-out corridor west of the printing pod is selected; its
+# "Start Emitting Signalss" button starts it emitting and turns into "Stop Emitting Signals".
+from: early-base
+mods: [2845382372]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LogicTemperatureSensor\")", method: Build, args: [131129, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"WirelessSignalReceiver1\")": exists
+      "Assets.GetBuildingDef(\"WirelessSignalReceiverPositive\")": exists
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [113, 207], ortho: 8}}
+  - click_world: {cell: [113, 206], select: LogicTemperatureSensor}
+  - ui_wait: {path: "**/UserMenuScreen/Buttons/Start Emitting SignalssButton", cond: stable}
+  - expect_state:
+      "selected:GetComponent<wuxian.temper>.is_emitting": false
+  - ui_dump: {name: user-menu, root: "**/UserMenuScreen/Buttons"}
+  - click: {ui: "**/UserMenuScreen/Buttons/Start Emitting SignalssButton"}
+  - ui_wait: {path: "**/UserMenuScreen/Buttons/Stop Emitting SignalsButton", cond: stable}
+  - expect_state:
+      "selected:GetComponent<wuxian.temper>.is_emitting": true
+  - shot: {name: user-menu, crop: "**/UserMenuScreen", threshold: 0.04}

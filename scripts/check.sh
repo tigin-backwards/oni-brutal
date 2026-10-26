@@ -21,23 +21,26 @@ tests ModTriage.Tests
 scripts_log=$(python3 -m unittest discover -s "$root/tests/scripts" 2>&1) || failed+=(scripts)
 echo "scripts: $(tail -1 <<< "$scripts_log")"
 grep -A12 -E '^(FAIL|ERROR): ' <<< "$scripts_log" | sed 's/^/  /' || true
+# Each publish carries the UI packages in packages/ (the host does not start without them); an
+# earlier publish's are removed first, so they cannot stand in.
+has_packages() { local p; for p in UnityEngine.UI Unity.TextMeshPro Unity.Timeline; do [ -f "$1/packages/$p.dll" ] || { echo "$1/packages/$p.dll missing"; return 1; }; done; }
 # The host cross-published for macOS (x86_64, run under Rosetta on Apple Silicon): it must build,
 # and its apphost must be an x86_64 Mach-O executable (magic feedfacf, CPU type 0x01000007).
-osx="$root/out/publish/osx-x64"
+osx="$root/out/publish/osx-x64"; rm -rf "$osx/packages"
 if dotnet publish "$root/src/OniMoono.Host" -c Release -r osx-x64 --self-contained -o "$osx" -v q -nologo > "$root/out/publish-osx-x64.log" 2>&1 \
-    && [ "$(od -An -tx4 -N8 "$osx/OniMoono" | tr -s ' ')" = " feedfacf 01000007" ]; then
-    echo "osx-x64 publish: $(ls "$osx" | wc -l) files, x86_64 Mach-O apphost"
+    && [ "$(od -An -tx4 -N8 "$osx/OniMoono" | tr -s ' ')" = " feedfacf 01000007" ] && has_packages "$osx"; then
+    echo "osx-x64 publish: $(ls "$osx" | wc -l) files, x86_64 Mach-O apphost, UI packages"
 else
     failed+=(osx-x64-publish); echo "osx-x64 publish failed: out/publish-osx-x64.log"
 fi
 # The primary Mac build, native on Apple Silicon: arm64 apphost (CPU type 0x0100000c), with
 # BRUTAL's osx-arm64 dylibs beside it. Its SimDLL is onimaxxing-sim's arm64 port (Klei's is
 # x86_64 only), in plugins/ when one is at hand (ONI_SIM_PORT_ARM64).
-osx_arm="$root/out/publish/osx-arm64"
+osx_arm="$root/out/publish/osx-arm64"; rm -rf "$osx_arm/packages"
 sim_port="${ONI_SIM_PORT_ARM64:-$HOME/projects/oni-worldgen/dist/simdll-macos/libSimDLL-arm64-simthread.dylib}"
 if dotnet publish "$root/src/OniMoono.Host" -c Release -r osx-arm64 --self-contained -o "$osx_arm" -v q -nologo > "$root/out/publish-osx-arm64.log" 2>&1 \
-    && [ "$(od -An -tx4 -N8 "$osx_arm/OniMoono" | tr -s ' ')" = " feedfacf 0100000c" ]; then
-    echo "osx-arm64 publish: $(ls "$osx_arm" | wc -l) files, arm64 Mach-O apphost"
+    && [ "$(od -An -tx4 -N8 "$osx_arm/OniMoono" | tr -s ' ')" = " feedfacf 0100000c" ] && has_packages "$osx_arm"; then
+    echo "osx-arm64 publish: $(ls "$osx_arm" | wc -l) files, arm64 Mach-O apphost, UI packages"
     if [ -f "$sim_port" ]; then mkdir -p "$osx_arm/plugins"; cp "$sim_port" "$osx_arm/plugins/libSimDLL.dylib"; else rm -f "$osx_arm/plugins/libSimDLL.dylib"; fi
 else
     failed+=(osx-arm64-publish); echo "osx-arm64 publish failed: out/publish-osx-arm64.log"

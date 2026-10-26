@@ -1,0 +1,23 @@
+# NeodymiumStyle Hairstyle MOD "PATCHOULI" (2995870038), class X (content for Dupery).
+#
+# What it does: no code. With Dupery (here Dupery Fixed, 3172734005, which the catalog names as
+# its requirement), its PERSONALITIES.json adds a printable Duplicant personality, Patchouli
+# (female, Binge Eater stress reaction, Super Productive joy trait), whose hair,
+# hair_patchouli, comes from the mod's anim folder; strings/ translates its description.
+# How a player reaches it: Duplicants printed or picked for a new colony; the Duplicant's
+# Personality tab.
+# What changes: another personality in the pool, with its own hairstyle.
+#
+# Dupery imports the personality into the game's Personalities and loads the hair as an
+# accessory, as its log says.
+from: early-base
+mods: [3172734005, 2995870038]
+require_log: ['\[Dupery\]: accessory hair_patchouli successfully loaded']
+steps:
+  - expect_state:
+      "Db.Get().Personalities.TryGet(\"PATCHOULI\")": exists
+      "Db.Get().Personalities.TryGet(\"PATCHOULI\").Disabled": false
+      "Db.Get().Accessories.TryGet(\"hair_patchouli\")": exists
+      "Db.Get().Personalities.Count": "== original"
+  - run: {seconds: 10}
+  - expect: {duplicants: 3}

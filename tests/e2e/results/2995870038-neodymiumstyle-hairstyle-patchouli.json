@@ -1,0 +1,57 @@
+{
+ "spec": "mods/2995870038-neodymiumstyle-hairstyle-patchouli.yaml",
+ "mods": [
+  "3172734005",
+  "2995870038"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with Dupery Fixed, Patchouli joins the personalities and her hair loads as an accessory",
+ "updated": "2026-10-26",
+ "commit": "24d5292d",
+ "mod_dlls": {
+  "3172734005": {
+   "DuperyFixed.dll": "9ef4a93958b6b80fbf086cab57821955dd344324d2192086db7ea7845e71f7f2"
+  },
+  "2995870038": {}
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-043257-c0eef0ae",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:41:22",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-105812-26c522a0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T10:58:12",
+    "lane": 16,
+    "reference_run": "20261026-043257-c0eef0ae",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-105812-26c522a0",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T10:58:13",
+    "lane": 17,
+    "reference_run": "20261026-043257-c0eef0ae",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

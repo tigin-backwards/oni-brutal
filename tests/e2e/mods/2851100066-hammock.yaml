@@ -1,0 +1,30 @@
+# R 吊床 Hammock (2851100066), class B.
+#
+# What it does: adds a 4x3 plastic hammock, R006GG1, to the Furniture menu: a luxury bed
+# (the Comfy Bed's stamina and health effects, a bed for bedrooms that need a luxury one,
+# +decor), with a second look, R006GG1L2, as a building facade.
+# How a player reaches it: the build menu (Furniture).
+# What changes: another luxury bed.
+#
+# The prefab and facade are read; a hammock built by setup in the dug-out corridor west of
+# the printing pod is selected, and the Furniture menu lists it.
+from: early-base
+mods: [2851100066]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"R006GG1\")", method: Build, args: [131129, Neutral, null, [Polypropylene], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"R006GG1\").GetComponent<Bed>.effects": [{contains: LuxuryBedStamina}, {contains: BedHealth}]
+      "Assets.GetPrefab(\"R006GG1\").GetComponent<KPrefabID>.HasTag(\"LuxuryBedType\")": true
+      "Db.GetBuildingFacades().TryGet(\"R006GG1L2\")": exists
+  - run: {seconds: 2}
+  - expect: {buildings: {R006GG1: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: R006GG1}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:Ownable.slotID": Bed
+  - key: {code: Escape}
+  - click: {ui: "**/PlanScreen/Toggle:Furniture"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/R006GG1 Group*", cond: stable}
+  - shot: {name: furniture-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}

@@ -1,0 +1,31 @@
+# 花盆种植一切 Flower Vase Enhancement (2881769456), classes P, O.
+#
+# What it does: the Flower Pot (FlowerVase) takes crop, aquatic, large and backwall seeds besides
+# decor seeds, can be built anywhere and flipped upside down, and (option, on by default) soaks
+# up the liquid its plant needs from the cells around it (AutoIrrigatedFlowerPot and five
+# PassiveElementConsumers). PLib options (Config.json) scale every plant's fertilizer and
+# liquid use, set the Wheezewort's cooling, and can make the pot a solid tile.
+# How a player reaches it: a Flower Pot's planting side screen.
+# What changes: what a flower pot grows and how plants are fed.
+#
+# setup builds a Flower Pot in the dug-out corridor west of the printing pod and spawns a
+# Mealwood seed. The pot's planting side screen lists Mealwood among the seeds it takes; the list
+# is compared with the original.
+from: early-base
+mods: [2881769456]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"FlowerVase\")", method: Build, args: [131129, Neutral, null, [SandStone], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131757, 0, 0, \"BasicSingleHarvestPlantSeed\", \"Ore\")", method: SetActive, args: [true]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"FlowerVase\").BuildLocationRule": Anywhere
+      "Assets.GetBuildingDef(\"FlowerVase\").PermittedRotations": FlipV
+      "Assets.GetBuildingDef(\"FlowerVase\").BuildingComplete.GetComponent<PlantablePlot>.possibleDepositObjectTags": {contains: CropSeed}
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [110, 208], ortho: 8}}
+  - click_world: {cell: [113, 206], select: FlowerVase}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_wait: {path: "**/Config Tab - body instance/PlanterSideScreen", cond: stable}
+  - expect_ui:
+      "**/PlanterSideScreen/**/GridLayout/Toggle/RequestToggle/Label": {any_text: "~Mealwood"}
+  - ui_dump: {name: planter, root: "**/Config Tab - body instance/PlanterSideScreen/Contents/ScrollRow"}

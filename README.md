@@ -66,7 +66,7 @@ On a late-game save (U57: Spaced Out with every DLC, cycle 17,000+), on Windows,
 | Frame rate at speed&nbsp;3 (default tweaks) | about 11&nbsp;fps | about 88&nbsp;fps | about 8× |
 | Loading the save | 2&nbsp;min&nbsp;22&nbsp;s | about 35&nbsp;s | about 4× faster |
 | Autosave freeze | about 26&nbsp;s | about 2.3&nbsp;s | about 11× shorter |
-| Starting the game, to the main menu (every DLC) | about 17&nbsp;s | about 11&nbsp;s | about 1.5× faster |
+| Starting the game, to the main menu (every DLC, second launch) | about 17.4&nbsp;s | about 9.8&nbsp;s | about 1.8× faster |
 
 Without the save tweaks the autosave freeze is about 8 s. They bring it down to about 2.3 s by
 writing the save faster and moving the compression and file write to a background thread.

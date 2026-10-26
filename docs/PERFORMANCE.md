@@ -299,6 +299,16 @@ isn't the bottleneck: compiling ahead of time (ReadyToRun) saved nothing measura
 
 ## Start-up
 
+On Windows (2026-10-25, master ab5b342), every DLC, 1280×720 on the second
+display, both players with a warm-up launch in the same run home first (a second launch: Moono's
+first launch after a new build also rewrites the game's assemblies, about 2.3 s, then cached),
+priority raised, the machine quiet: the original reached the main menu in 17.41 s and Moono in
+9.79 s, about 1.8× faster. Recording the screen added about 0.2 s to each (original 17.44, 17.61,
+17.71 s; Moono 10.90, 10.02, 9.94 s). Moono's window appears after about 1.3 s, the original's
+after 0.45 s; the biggest single wait in both is the game's own FMOD bank loading (about 2.8 s).
+
+The Linux breakdown below is older and taken differently (first launches, page cache warm):
+
 From process start to the main menu on Linux under WSL2 (Mesa's d3d12 driver), 1280×720, three
 rounds back to back on a quiet machine, each round the original and each build of ours, with the
 page cache warm; the medians:

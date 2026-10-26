@@ -1,0 +1,39 @@
+# RT-Generator (3174662603), class B.
+#
+# What it does: adds the Radioisotope Thermoelectric Generator to the Power menu, researched
+# with Superheated Forging: a 1x1 refined-metal generator of 60 W that burns 0.5 g/s of
+# enriched uranium (40 kg of storage, delivered by Duplicants) into depleted uranium.
+# How a player reaches it: the build menu (Power), after the research.
+# What changes: steady power from uranium.
+#
+# setup researches Superheated Forging and builds a generator in the dug-out corridor west of
+# the printing pod, wired to a battery, with 10 kg of enriched uranium in it; it charges the
+# battery and burns uranium.
+from: early-base
+mods: [3174662603]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"HighPressureForging\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"RTGenerator\")", method: Build, args: [{"$": "Grid.XYToCell(112, 206)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Battery\")", method: Build, args: [{"$": "Grid.XYToCell(115, 206)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Wire\")", method: Build, args: [{"$": "Grid.XYToCell(112, 206)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Wire\")", method: Build, args: [{"$": "Grid.XYToCell(113, 206)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Wire\")", method: Build, args: [{"$": "Grid.XYToCell(114, 206)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Wire\")", method: Build, args: [{"$": "Grid.XYToCell(115, 206)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Game.Instance.electricalConduitSystem", method: SetConnections, args: ["Right", {"$": "Grid.XYToCell(112, 206)"}, true]}}
+  - driver: {setup.call: {target: "Game.Instance.electricalConduitSystem", method: SetConnections, args: ["Left, Right", {"$": "Grid.XYToCell(113, 206)"}, true]}}
+  - driver: {setup.call: {target: "Game.Instance.electricalConduitSystem", method: SetConnections, args: ["Left, Right", {"$": "Grid.XYToCell(114, 206)"}, true]}}
+  - driver: {setup.call: {target: "Game.Instance.electricalConduitSystem", method: SetConnections, args: ["Left", {"$": "Grid.XYToCell(115, 206)"}, true]}}
+  - driver: {setup.call: {target: "all:EnergyGenerator::[0].GetComponent<Storage>", method: AddOre, args: [EnrichedUranium, 10.0, 300.0, 255, 0, false, true]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"HighPressureForging\").unlockedItemIDs": {contains: RTGenerator}
+      "Assets.GetBuildingDef(\"RTGenerator\").GeneratorWattageRating": 60
+      "all:EnergyGenerator::[0].GetComponent<Storage>.MassStored()": 10
+  - run: {seconds: 30}
+  - expect_state:
+      "all:EnergyGenerator::[0].GetComponent<Storage>.MassStored()": "< 10"
+      "all:Battery::[0].JoulesAvailable": "> 0"
+  - click: {ui: "**/PlanScreen/Toggle:Power"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/RTGenerator Group*", cond: stable}
+  - shot: {name: power-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}

@@ -847,7 +847,7 @@ installs get developer checks subscribers never see).
 | 833 | [花盆种植一切](https://steamcommunity.com/sharedfiles/filedetails/?id=2881769456) | ✅ | ✅ | ⚠️ | spec tests/e2e/mods/2881769456-flower-vase-enhancement.yaml: a Flower Pot takes crop seeds: its planting side screen lists Mealwood, and the list's layout is the original's; known findings: `scroll-normalized-position` |
 | 834 | [Critter Traits Reborn](https://steamcommunity.com/sharedfiles/filedetails/?id=2954005789) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2954005789-critter-traits-reborn.yaml: a Hatch placed in the corridor rolls the mod's traits and its details open; the colony runs |
 | 835 | [Conveyor Loaders Are Not Machinery](https://steamcommunity.com/sharedfiles/filedetails/?id=2584106067) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2584106067-conveyor-loaders-are-not-machinery.yaml: the conveyor loader carries no industrial machinery tag (today's game no longer adds it) while the gas pump keeps it; the colony runs |
-| 836 | [Endless Science fix 无限学习](https://steamcommunity.com/sharedfiles/filedetails/?id=2876288128) | ⬜ | ⬜ | ⬜ | spec fails in ours: tests/e2e/mods/2876288128-endless-science-fix.yaml: Enable Learning turns a powered, idle research station operational and a Duplicant comes to work it, in both players; but when the work starts the mod's progress bar prefix references the game's former Worker type: the original logs a TypeLoadException ("Could not resolve type ... expected class 'Worker'"), ours a MissingMethodException for 'Worker Workable.get_worker()', a new log signature (a run of ours failed) |
+| 836 | [Endless Science fix 无限学习](https://steamcommunity.com/sharedfiles/filedetails/?id=2876288128) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2876288128-endless-science-fix.yaml: Enable Learning turns a powered, idle research station operational and a Duplicant comes to work it, in both players; the mod's progress bar prefix names the game's former Worker type and fails at every call in both, with the same TypeLoadException |
 | 837 | [Resource Dashboard](https://steamcommunity.com/sharedfiles/filedetails/?id=3671379574) | ✅ | ✅ | ✅ | spec tests/e2e/mods/3671379574-resource-dashboard.yaml: after 150 s of play, the resources panel's Dashboard button opens the window; a row selects the graph and the search filters the rows in the original; in ours the mod fails to load and the player exits while loading (uGUI lacks IPointerMoveHandler: docs/cleanroom/ugui.md, Pointer move events) |
 | 838 | [[Vanilla + DLC] Free Skillpoints](https://steamcommunity.com/sharedfiles/filedetails/?id=2557246397) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2557246397-free-skillpoints.yaml: with UseWithoutSandbox set, a click on Improved Gears I in the Skills screen grants the selected Duplicant without skill points one and teaches the skill; the level box as in the original |
 | 839 | [铅隔绝辐射Lead Isolate Radiation -K15](https://steamcommunity.com/sharedfiles/filedetails/?id=3078504174) | ✅ | ✅ | ✅ | spec tests/e2e/mods/3078504174-lead-isolate-radiation.yaml: lead's radiation absorption factor reads 10 as loaded, iron's as the game's; the colony runs |
@@ -1060,7 +1060,7 @@ installs get developer checks subscribers never see).
 | 1068 | [Potato Power Banks](https://steamcommunity.com/sharedfiles/filedetails/?id=3386552780) | ⬜ | ⬜ | ⬜ |  |
 | 1069 | [Pinned Resource Row](https://steamcommunity.com/sharedfiles/filedetails/?id=3736878109) | ⬜ | ⬜ | ⬜ |  |
 | 1070 | [Super High Wattage Wire （read only and stop update the mod ,you try to update from GITHUB for youself, look detail）](https://steamcommunity.com/sharedfiles/filedetails/?id=1963992940) | ⬜ | ⬜ | ⬜ |  |
-| 1071 | [Trash Cans (Trashcans Fixed)](https://steamcommunity.com/sharedfiles/filedetails/?id=3398520692) | ⬜ | ⬜ | ⬜ |  |
+| 1071 | [Trash Cans (Trashcans Fixed)](https://steamcommunity.com/sharedfiles/filedetails/?id=3398520692) | ✅ | ✅ | ✅ | spec tests/e2e/mods/3398520692-trash-cans.yaml: a Liquid Trash Can (its AutoFluidTrashCans has no parameterless constructor) built with 50 kg of water: Drop Contents empties it; the user menu matches the original |
 | 1072 | [人造植物 / PlantExtension](https://steamcommunity.com/sharedfiles/filedetails/?id=3719204845) | ⬜ | ⬜ | ⬜ |  |
 | 1073 | [喷泉无压力反应](https://steamcommunity.com/sharedfiles/filedetails/?id=3006715942) | ⬜ | ⬜ | ⬜ |  |
 | 1074 | [One Giant Leap](https://steamcommunity.com/sharedfiles/filedetails/?id=1999001228) | ⬜ | ⬜ | ⬜ |  |
@@ -1068,7 +1068,7 @@ installs get developer checks subscribers never see).
 | 1077 | [PinYinSearch](https://steamcommunity.com/sharedfiles/filedetails/?id=3235904679) | ⬜ | ⬜ | ⬜ |  |
 | 1078 | [汽水机咖啡榨汁机BUFF叠加](https://steamcommunity.com/sharedfiles/filedetails/?id=3556910379) | ⬜ | ⬜ | ⬜ |  |
 | 1079 | [Dupes speed custom Settings](https://steamcommunity.com/sharedfiles/filedetails/?id=3456696039) | ⬜ | ⬜ | ⬜ |  |
-| 1080 | [Printerceptor Reimagined + Minnow's Shop](https://steamcommunity.com/sharedfiles/filedetails/?id=3637505541) | ⬜ | ⬜ | ⬜ |  |
+| 1080 | [Printerceptor Reimagined + Minnow's Shop](https://steamcommunity.com/sharedfiles/filedetails/?id=3637505541) | ✅ | ✅ | ✅ | spec tests/e2e/mods/3637505541-printerceptor-reimagined.yaml: loads and applies its patches (four refused by Harmony in both players), and the colony plays a minute; the Printerceptor shop is not reached (a story-trait building early-base lacks) |
 | 1081 | [U&F-More Food 更多食物](https://steamcommunity.com/sharedfiles/filedetails/?id=3380780873) | ⬜ | ⬜ | ⬜ |  |
 | 1083 | [Oxygen Not Included Ukraine](https://steamcommunity.com/sharedfiles/filedetails/?id=1332127867) | ⬜ | ⬜ | ⬜ |  |
 | 1084 | [水氧機 (Water Oxygenator)](https://steamcommunity.com/sharedfiles/filedetails/?id=3625551075) | ⬜ | ⬜ | ⬜ |  |
@@ -1109,7 +1109,7 @@ installs get developer checks subscribers never see).
 | 1124 | [Upgradeable Dupes And Critters](https://steamcommunity.com/sharedfiles/filedetails/?id=3329512249) | ⬜ | ⬜ | ⬜ |  |
 | 1125 | [魔女的箱子](https://steamcommunity.com/sharedfiles/filedetails/?id=3022610348) | ⬜ | ⬜ | ⬜ |  |
 | 1126 | [F 站台系统 Platform System 1.7](https://steamcommunity.com/sharedfiles/filedetails/?id=3316755325) | ⬜ | ⬜ | ⬜ |  |
-| 1127 | [更好的存档（BetterSave）](https://steamcommunity.com/sharedfiles/filedetails/?id=3805601277) | ⬜ | ⬜ | ⬜ |  |
+| 1127 | [更好的存档（BetterSave）](https://steamcommunity.com/sharedfiles/filedetails/?id=3805601277) | ✅ | ✅ | ✅ | spec tests/e2e/mods/3805601277-better-save.yaml: saved from the pause menu through the mod's save pipeline, then loaded back through the Load screen: Duplicants and buildings as before; Application.quitting subscribed |
 | 1128 | [Attribute XP Bars](https://steamcommunity.com/sharedfiles/filedetails/?id=3759482835) | ⬜ | ⬜ | ⬜ |  |
 | 1129 | [Drecko Ranching](https://steamcommunity.com/sharedfiles/filedetails/?id=2094022117) | ⬜ | ⬜ | ⬜ |  |
 | 1130 | [Hot Nuclear Power](https://steamcommunity.com/sharedfiles/filedetails/?id=2633732356) | ⬜ | ⬜ | ⬜ |  |

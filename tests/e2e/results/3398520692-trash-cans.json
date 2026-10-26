@@ -1,0 +1,63 @@
+{
+ "spec": "mods/3398520692-trash-cans.yaml",
+ "mods": [
+  "3398520692"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Liquid Trash Can (its AutoFluidTrashCans has no parameterless constructor) built with 50 kg of water: Drop Contents empties it; the user menu matches the original",
+ "updated": "2026-10-26",
+ "commit": "9dbd487",
+ "mod_dlls": {
+  "3398520692": {
+   "TrashCans.dll": "fa958ada7c76632af23dd271b080a66a28cc596c939c159ac29b8bb7806f74e8"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-015748-782d3b45",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T01:57:48",
+    "lane": 30,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-015929-7edf8de0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T01:59:29",
+    "lane": 30,
+    "reference_run": "20261026-015748-782d3b45",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "usermenu": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261026-015929-7edf8de0",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T02:00:22",
+    "lane": 30,
+    "reference_run": "20261026-015748-782d3b45",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "usermenu": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

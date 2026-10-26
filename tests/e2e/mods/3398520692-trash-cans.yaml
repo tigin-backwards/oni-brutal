@@ -1,0 +1,36 @@
+# Trash Cans (Trashcans Fixed) (3398520692).
+#
+# What it does: four storage buildings under Base > Storage (Smart Storage tech) whose contents
+# can be destroyed: Gas, Solid, Liquid and Artifact Trash Cans. Each has a storage, an "Empty
+# Trash" side-screen button that deletes what it holds, a side screen to empty it on a timer, a
+# "Drop Contents" user-menu button that drops it all, a logic port, and by default needs 60 W.
+# The gas and liquid cans take a pipe (AutoFluidTrashCans, a component with only a constructor
+# taking a state, which Unity creates without running any constructor); the solid one a
+# conveyor rail. PLib options set power, timers, capacity and flooding per can.
+# How a player reaches it: the build menu, then a can's side screen and user menu.
+# What changes: what is stored in a can is gone or dropped.
+#
+# The cans need no power here (options). setup builds a Liquid Trash Can in the corridor west of
+# the printing pod and puts 50 kg of water in it. It is selected; Drop Contents empties it.
+from: early-base
+mods: [3398520692]
+options:
+  SonJeremy.TrashCans: {LiquidTrashCansRequirePower: false}
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LiquidTrashCans\")", method: Build, args: [131124, Neutral, null, [Cuprite], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "last:GetComponent<Storage>", method: AddLiquid, args: [Water, 50.0, 300.0, 255, 0]}}
+steps:
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [109, 208], ortho: 8}}
+  - click_world: {cell: [108, 207], select: LiquidTrashCans}
+  - ui_wait: {path: "**/DetailsScreen/UserMenuButtons/UserMenuScreen/Buttons", cond: stable}
+  - expect_state:
+      "selected:GetComponent<SonJeremy.TrashCans.AutoConsumption.AutoFluidTrashCans>": exists
+      "selected:GetComponent<SonJeremy.TrashCans.TrashCans>.AutoTrash": false
+      "selected:GetComponent<Storage>.MassStored()": 50
+  - ui_dump: {name: usermenu, root: "**/DetailsScreen/UserMenuButtons/UserMenuScreen/Buttons"}
+  - click: {ui: "**/UserMenuScreen/Buttons/Drop ContentsButton"}
+  - expect_state:
+      "selected:GetComponent<Storage>.MassStored()": 0
+  - run: {seconds: 10}
+  - expect: {duplicants: 3, buildings: {LiquidTrashCans: 1}}

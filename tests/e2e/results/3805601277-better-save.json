@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3805601277-better-save.yaml",
+ "mods": [
+  "3805601277"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "saved from the pause menu through the mod's save pipeline, then loaded back through the Load screen: Duplicants and buildings as before; Application.quitting subscribed",
+ "updated": "2026-10-26",
+ "commit": "941c173",
+ "mod_dlls": {
+  "3805601277": {
+   "BetterSave.dll": "a1d6f3a500984f98ed211875fe6e987387bc56e8440d8b0582c0137073a4d3b6"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-015018-c5d30f99",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T01:50:18",
+    "lane": 30,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-021429-ea467781",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T02:14:29",
+    "lane": 30,
+    "reference_run": "20261026-015018-c5d30f99",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-021429-ea467781",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T02:15:28",
+    "lane": 30,
+    "reference_run": "20261026-015018-c5d30f99",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3637505541-printerceptor-reimagined.yaml",
+ "mods": [
+  "3637505541"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "loads and applies its patches (four refused by Harmony in both players), and the colony plays a minute; the Printerceptor shop is not reached (a story-trait building early-base lacks)",
+ "updated": "2026-10-26",
+ "commit": "941c173",
+ "mod_dlls": {
+  "3637505541": {
+   "GravitasMod.dll": "27b5509b6c65cc7f20be8b1bd6a6b4f2b852e9199699e2493a61b2a02a0de1cd"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-015214-84f6cabe",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T01:52:14",
+    "lane": 30,
+    "signatures": 4
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-020203-1188d2a5",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T02:02:03",
+    "lane": 30,
+    "reference_run": "20261026-015214-84f6cabe",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-020203-1188d2a5",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T02:03:05",
+    "lane": 30,
+    "reference_run": "20261026-015214-84f6cabe",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

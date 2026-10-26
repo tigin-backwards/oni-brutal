@@ -1,0 +1,38 @@
+# 更好的存档 (BetterSave) (3805601277).
+#
+# What it does: makes saving faster. Its patches of the save pipeline (SaveLoader.Save) write the
+# file on a background thread, replace the serializer's reflection with compiled accessors
+# (checked against reflection), cache IsDefined lookups in SaveLoadRoot, gate the garbage
+# collector's mode around a save, take the thumbnail off the main thread and watch the frame
+# times; at quit (Application.quitting and Game.OnApplicationQuit) it waits for the background
+# writes and logs its summaries. PLib options (config.json) set the GC mode and logging.
+# How a player reaches it: every save.
+# What changes: the time a save takes; the file is the same save.
+#
+# The game is saved from the pause menu, then that save is loaded through the Load screen: the
+# colony comes back with its Duplicants and buildings.
+from: early-base
+mods: [3805601277]
+require_log: ['\[更好的存档\] 已加载']
+steps:
+  - run: {seconds: 2}
+  - key: {code: Escape}
+  - ui_wait: {path: "**/PauseScreen/LayoutContent", cond: stable}
+  - click: {ui: "**/PauseScreen/LayoutContent/ButtonContent/SaveButton"}
+  - ui_wait: {path: "**/ConfirmDialog/GameObject/Panel/OKButton", cond: stable}
+  - click: {ui: "**/ConfirmDialog/GameObject/Panel/OKButton"}
+  # Saved: the game renames the save button after its new label, "Already Saved".
+  - ui_wait: {path: "**/PauseScreen/LayoutContent/ButtonContent/SaveButton", cond: gone, frames: 1200}
+  - expect_ui: {"**/PauseScreen/LayoutContent/ButtonContent/**": {any_text: "~Already Saved"}}
+  - expect_state: {"file:save_files/e2e/early-base.sav": exists}
+  # Load, the colony, then its newest save (the one just made).
+  - ui_wait: {path: "**/PauseScreen/LayoutContent/ButtonContent/LoadButton", cond: stable}
+  - click: {ui: "**/PauseScreen/LayoutContent/ButtonContent/LoadButton"}
+  - ui_wait: {path: "**/LoadScreen/Panel/ColonyList/ListView/Files/Viewport/Content/Prefab_ColonyButton", cond: stable}
+  - click: {ui: "**/LoadScreen/Panel/ColonyList/ListView/Files/Viewport/Content/Prefab_ColonyButton"}
+  - ui_wait: {path: "**/LoadScreen/Panel/ColonyView/ListView/Files/Viewport/Content/SaveTemplate(Clone)/TitleContainer/SaveText", cond: text, value: early-base}
+  - click: {ui: "**/LoadScreen/Panel/ColonyView/ListView/Files/Viewport/Content/SaveTemplate(Clone)/LoadButton"}
+  - ui_wait: {path: "**/LoadScreen", cond: gone, frames: 6000}
+  - ui_wait: {path: "**/BottomPanelRight/ToolMenu", cond: stable, frames: 6000}
+  - run: {seconds: 10}
+  - expect: {duplicants: 3, buildings: {Outhouse: 1, ManualGenerator: 1, ResearchCenter: 1}}

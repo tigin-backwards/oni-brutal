@@ -1,0 +1,19 @@
+# Printerceptor Reimagined + Minnow's Shop (3637505541).
+#
+# What it does: reworks the Printerceptor (the Hijacked Headquarters story trait's building) into
+# a shop: data banks and other currencies buy printables, a cart and a sell screen, ticket rolls,
+# mutated seeds and resource packs, through Harmony patches of the Printerceptor's screen, side
+# screen, state machine and storage, and of KScreen and KModalScreen. Four of its patches name
+# a screen's inherited method and Harmony refuses them, in both players ("You can only patch
+# implemented methods"); ours named its own Harmony replacement in the trace (ARCHITECTURE D23).
+# How a player reaches it: the Printerceptor's side screen, once the story trait has it.
+# What changes: what the Printerceptor prints and what it costs.
+#
+# early-base has no Printerceptor: the mod loads, applies its patches, and the colony plays a
+# minute with them.
+from: early-base
+mods: [3637505541]
+require_log: ['\[GravitasMod\] Patched 1 PrintSelectedEntity methods']
+steps:
+  - run: {seconds: 60}
+  - expect: {duplicants: 3}

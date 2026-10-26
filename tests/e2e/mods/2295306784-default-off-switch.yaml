@@ -1,0 +1,26 @@
+# Default Off Switch (2295306784), classes P, O.
+#
+# What it does: postfixes on LogicSwitchConfig and SwitchConfig set the default state of new
+# Signal Switches and Power Switches from its PLib options, Off for both by default (the game
+# builds them on).
+# How a player reaches it: building switches; the options on the Mods screen.
+# What changes: new switches start off.
+#
+# Both prefabs default to off. setup builds a Power Switch in a pit of the floor west of the
+# printing pod: it starts off.
+from: early-base
+mods: [2295306784]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Switch\")", method: Build, args: [{"$": "Grid.XYToCell(113, 206)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"Switch\").GetComponent<Switch>.defaultState": false
+      "Assets.GetPrefab(\"LogicSwitch\").GetComponent<LogicSwitch>.defaultState": false
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [113, 207], ortho: 8}}
+  - click_world: {cell: [113, 206], select: Switch}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<Switch>.IsSwitchedOn": false
+  - run: {seconds: 5}
+  - expect: {duplicants: 3}

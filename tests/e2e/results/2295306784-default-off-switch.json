@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2295306784-default-off-switch.yaml",
+ "mods": [
+  "2295306784"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "new Power and Signal Switches default to off; a built Power Switch starts off",
+ "updated": "2026-10-26",
+ "commit": "ef2f053",
+ "mod_dlls": {
+  "2295306784": {
+   "DefaultOffSwitch.dll": "5e04564cbb4237a1abe40f5aff950558b0cc69177b667d3fc05ae3f650db955c"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-222040-75e4a4a6",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T00:19:42",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-005659-6239bb9d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T00:56:59",
+    "lane": 14,
+    "reference_run": "20261025-222040-75e4a4a6",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-005659-6239bb9d",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T00:57:50",
+    "lane": 14,
+    "reference_run": "20261025-222040-75e4a4a6",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

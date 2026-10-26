@@ -1,0 +1,50 @@
+# Water World (2992152587), class M (worldgen).
+#
+# What it does: adds a Spaced Out cluster, Water World (coordinate prefix WATERWORLD, the
+# special category, difficulty 5): a 200x200 start asteroid of water around a forest start
+# with the mod's own base template (bases/Allin1), its water, iron and flipped-bottom subworlds
+# and biomes, a flipped inferno warp asteroid and the game's mini asteroids and moonlets, with
+# the usual starmap POIs. Its Db.Initialize prefix adds the cluster's name and description.
+# How a player reaches it: New Game, its asteroid in the destination carousel.
+# What changes: one more cluster to start on.
+#
+# From early-base the game is quit to the main menu and a new Survival game started; the
+# coordinate WATERWORLD-12345-0-0-0 picks the cluster. Its asteroid list is compared with the
+# original's; it generates, the Duplicants embark, and the start world is the mod's, 200 by
+# 200, with its water subworld, among a dozen asteroids.
+from: early-base
+mods: [2992152587]
+memory_gb: 8
+steps:
+  - key: {code: Escape}
+  - ui_wait: {path: "**/PauseScreen/**/Main MenuButton", cond: stable}
+  - click: {ui: "**/PauseScreen/**/Main MenuButton"}
+  - ui_wait: {path: "**/ConfirmDialog/GameObject/Panel/ConfigurableButton", cond: stable}
+  - click: {ui: "**/ConfirmDialog/GameObject/Panel/ConfigurableButton"}   # Quit Without Saving
+  - ui_wait: {path: "**/MainMenu_SpacedOut/MainMenuMenubar/MainMenuButtons", cond: stable, frames: 3000}
+  - click: {text: "NEW GAME", under: "**/MainMenuButtons"}
+  - ui_wait: {path: "**/ModeSelectScreen/Panel/Content/RootToggles/StandardGame", cond: stable}
+  - click: {ui: "**/ModeSelectScreen/Panel/Content/RootToggles/StandardGame"}
+  - ui_wait: {path: "**/ClusterCategorySelectionScreen/Panel/Content/RootToggles/EventGame", cond: stable}
+  - click: {ui: "**/ClusterCategorySelectionScreen/Panel/Content/RootToggles/EventGame"}
+  - ui_wait: {path: "**/ColonyDestinationScreen2/Layout/Buttons/LaunchButton", cond: stable, frames: 3000}
+  - expect_state:
+      "count:all:DestinationSelectPanel::[0].clusterKeys[*] if .EndsWith(\"clusters/WaterWorld\") == true": 1
+  - click: {ui: "**/CoordinateContainer/SeedInput"}
+  - ui_wait: {path: "**/CoordinateContainer/SeedInput", cond: stable}
+  - type: {ui: "**/CoordinateContainer/SeedInput", text: "WATERWORLD-12345-0-0-0", clear: true, enter: true}
+  - ui_wait: {path: "**/Section - Destination/DestinationDetailsHeader/ClusterName", cond: text, value: "~WaterWorld"}
+  - ui_dump: {name: asteroids, root: "**/Section - Destination/World Scoll (Rect Size Set By Screen Code!)/Content/Details"}
+  - click: {ui: "**/ColonyDestinationScreen2/Layout/Buttons/LaunchButton"}
+  - ui_wait: {path: "**/MinionSelectScreen/Content/BottomContent/Buttons/ProceedButton", cond: stable, frames: 60000}
+  - click: {ui: "**/MinionSelectScreen/Content/BottomContent/Buttons/ProceedButton"}
+  - ui_wait: {path: "**/MinionSelectScreen", cond: gone, frames: 6000}
+  - expect_state:
+      "ClusterManager.Instance.GetStartWorld().worldName.EndsWith(\"worlds/WaterWorld\")": true
+      "ClusterManager.Instance.GetStartWorld().worldSize.x": 200
+      "ClusterManager.Instance.GetStartWorld().worldSize.y": 200
+      "ClusterManager.Instance.WorldContainers.Count": ">= 10"
+      "Components.LiveMinionIdentities.Count": 3
+      "all:TemporalTear::Length": 1
+  - expect_state:
+      "count:ClusterManager.Instance.GetStartWorld().m_generatedSubworlds[*] if .EndsWith(\"subworlds/water\") == true": ">= 1"

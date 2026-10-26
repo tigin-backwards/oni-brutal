@@ -1,0 +1,63 @@
+{
+ "spec": "mods/2992152587-water-world.yaml",
+ "mods": [
+  "2992152587"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a new game on the Water World coordinate generates the mod's 200x200 start world with its water subworld among a dozen asteroids, and the Duplicants embark; the asteroid list as in the original",
+ "updated": "2026-10-26",
+ "commit": "bbc2ade",
+ "mod_dlls": {
+  "2992152587": {
+   "WaterWorld.dll": "ce0bd202fa87303abe6fc86ea924dbc0803a54d7cffcb4871e8f03f4214b6171"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-211509-004657dd",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T21:15:09",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-000416-bb928400",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T00:04:16",
+    "lane": 16,
+    "reference_run": "20261025-211509-004657dd",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "asteroids": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261026-000416-bb928400",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T00:04:17",
+    "lane": 17,
+    "reference_run": "20261025-211509-004657dd",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "asteroids": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

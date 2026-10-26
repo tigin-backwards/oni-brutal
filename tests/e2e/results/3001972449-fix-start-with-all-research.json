@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3001972449-fix-start-with-all-research.yaml",
+ "mods": [
+  "3001972449"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a new game's Game Settings checkbox turns Start with all Research on, and the colony that embarks has every tech researched",
+ "updated": "2026-10-26",
+ "commit": "bbc2ade",
+ "mod_dlls": {
+  "3001972449": {
+   "FixStartWithAllResearch.dll": "c15bddec10865b4fb2e6dd485c9d7497323d7bdc6feffee33c86604437bb602d"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-005204-cba53bde",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T00:52:04",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-010401-be6795fe",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T01:04:01",
+    "lane": 16,
+    "reference_run": "20261026-005204-cba53bde",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-010401-be6795fe",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T01:04:02",
+    "lane": 17,
+    "reference_run": "20261026-005204-cba53bde",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

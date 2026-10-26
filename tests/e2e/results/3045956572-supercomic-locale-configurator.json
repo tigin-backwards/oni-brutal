@@ -1,0 +1,59 @@
+{
+ "spec": "mods/3045956572-supercomic-locale-configurator.yaml",
+ "mods": [
+  "3045956572"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "its custom mod DLL loader announces itself and writes its shared settings file; the colony runs",
+ "updated": "2026-10-26",
+ "commit": "ec01e583",
+ "mod_dlls": {
+  "3045956572": {
+   "0SuperComicLib.ModONI.dll": "ab1b3ec34fc2bbf90810844205824364128cf59acfcf291bebf5ffa1917c23d7",
+   "1SCLocStringManager_OV3.dll": "4e6c6b8101e405b7d4b8e6cc340afb4891ef5f33b453da6f3b9ff4f2063378df",
+   "PLib.dll": "48c63fd4654b6fbb390afdac71a3d29194eeb9405eca4290cba6e4fbf60805ce",
+   "VYaml.Annotations.dll": "3d41df55af5e3f3cbb0db9028a7bc952317470fa427be3e9f6e51565ca8b23ba",
+   "VYaml.dll": "dc85a16a973d7395628269ea36597104d4399e9e00c498e3728dfcdec2f0ed85"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-024205-d1d3e5ef",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:05:12",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-032720-2c24b125",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:07:05",
+    "lane": 14,
+    "reference_run": "20261026-024205-d1d3e5ef",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-032720-2c24b125",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T04:07:48",
+    "lane": 14,
+    "reference_run": "20261026-024205-d1d3e5ef",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

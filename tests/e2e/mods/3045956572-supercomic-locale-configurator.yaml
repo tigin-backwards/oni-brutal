@@ -1,0 +1,18 @@
+# SuperComic's Locale Configurator (3045956572), classes P, O.
+#
+# What it does: a library for SuperComic's mods: a user_mod_manifest.yaml names the mod's
+# assembly (1SCLocStringManager_OV3.dll), which a custom mod DLL loader loads with its
+# dependencies; string resources come from YAML per language with fallbacks, and a PLib
+# options screen orders the preferred languages, saved in mods/config/scoxni-*.yaml.
+# How a player reaches it: the Mods screen's options; the mods that use it.
+# What changes: nothing by itself; other mods' strings follow the preferred language.
+#
+# The loader announces itself, and its shared settings files are written.
+from: early-base
+mods: [3045956572]
+require_log: ['\[SCOXNI\] A custom mod DLL loader is being used']
+steps:
+  - expect_state:
+      "file:mods/config/scoxni-global.common.yaml": exists
+  - run: {seconds: 10}
+  - expect: {duplicants: 3}

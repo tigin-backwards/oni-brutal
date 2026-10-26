@@ -1,0 +1,37 @@
+# WannaPrint: Bio-Inks (3747431307), a fork of Bio-Inks: Rechargeable Printing Pod
+# (2869608898); issue #17.
+#
+# What it does: the printing pod takes bio-inks (made at the crafting table, or refunded when
+# all of its offers are rejected): a side screen on the pod picks an ink from a dropdown and
+# orders it delivered (Deliver), then prints at once a bonus set of offers shaped by the ink. It
+# adds items (books, dice, a cat drawing, a leek) and random Duplicant presets.
+# How a player reaches it: select the printing pod; its side screen sits above the pod's own in
+# the Config tab.
+# What changes: printing on demand.
+#
+# The side screen is added with AddComponent and never sets its titleKey, so the Config tab is
+# titled Strings.Get(titleKey). Unity's Instantiate gives the instance "" ("MISSING."); ours
+# kept null and threw NullReferenceException in Strings.Get on every click on the pod (#17).
+# The pod is selected twice (deselected with Escape between), as a player clicking it again.
+from: early-base
+mods: [3747431307]
+steps:
+  - driver: {camera.set: {cell: [124, 208], ortho: 8}}
+  - click_world: {cell: [124, 208], select: Headquarters}
+  - expect_state:
+      "selected:GetComponent<PrintingPodRecharge.Content.Cmps.BioPrinter>": exists
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/Config Tab - body instance/Title/TitleLabel": {text: "MISSING."}
+      "**/BioInkSidescreen/Contents/BeakerSelector/Dropdown": {active: true}
+      "**/BioInkSidescreen/Contents/Buttons/Deliver": {active: true}
+      "**/TelepadSideScreen/Contents/Immigration/ViewButton": {active: true}
+  - ui_dump: {name: config-tab, root: "**/SideScreen/Body/Config Tab - body instance/Title", mask_text: ['\d+(\.\d+)? cycles']}
+  - ui_dump: {name: bio-ink, root: "**/BioInkSidescreen"}
+  - key: {code: Escape}
+  - ui_wait: {path: "**/BioInkSidescreen", cond: gone}
+  - click_world: {cell: [124, 208], select: Headquarters}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/BioInkSidescreen/Contents/BeakerSelector/Dropdown": {active: true}
+      "**/TelepadSideScreen/Contents/Immigration/ViewButton": {active: true}

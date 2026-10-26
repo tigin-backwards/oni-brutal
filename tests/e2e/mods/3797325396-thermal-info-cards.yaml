@@ -1,0 +1,39 @@
+# Thermal Info Cards (3797325396), with WannaPrint: Bio-Inks (3747431307) and Duplicant Stat
+# Selector (2856555858), the mods of issue #17.
+#
+# What it does: Thermal Tooltips and Better Info Cards in one mod. The build menu's material
+# panel lists the completed building's thermal conductivity, thermal mass and melting point for
+# the material under the pointer, instead of the game's effects list; the hover cards show heat
+# energy, thermal mass and phase-change temperatures, and cards of the same kind are grouped.
+# It postfixes SelectTool.Select (selection cycling over the grouped cards).
+# How a player reaches it: the build menu (any building, its materials); hovering the world;
+# clicking objects.
+# What changes: the material panel's effects, and the hover cards.
+#
+# Issue #17: with these three mods, clicking the printing pod threw NullReferenceException in
+# Strings.Get, under SelectTool.Select (this mod's patch) and DetailsScreen.OnSelectObject
+# (Duplicant Stat Selector's). The cause was WannaPrint's side screen alone
+# (mods/3747431307-wannaprint-bio-inks.yaml). The pod is clicked here with all three; then the
+# Tile's material panel shows this mod's thermal lines.
+from: early-base
+mods: [3797325396, 3747431307, 2856555858]
+require_log: ['\[ThermalInfoCards\] hover tooltip ready']
+steps:
+  - driver: {camera.set: {cell: [124, 208], ortho: 8}}
+  - click_world: {cell: [124, 208], select: Headquarters}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/Config Tab - body instance/Title/TitleLabel": {text: "MISSING."}
+      "**/BioInkSidescreen/Contents/BeakerSelector/Dropdown": {active: true}
+      "**/TelepadSideScreen/Contents/Immigration/ViewButton": {active: true}
+  - key: {code: Escape}
+  - ui_wait: {path: "**/BioInkSidescreen", cond: gone}
+  - run: {seconds: 5}
+  - driver: {camera.set: {cell: [126, 208], ortho: 10}}
+  - click: {ui: "**/PlanScreen/Toggle:Base"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/Tile Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/Tile Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
+  - expect_ui:
+      "**/ProductInfoScreen/**/MaterialEffects/DescLabel": {any_text: "~Thermal Conductivity"}
+  - shot: {name: materials, crop: "**/ProductInfoScreen", threshold: 0.04}

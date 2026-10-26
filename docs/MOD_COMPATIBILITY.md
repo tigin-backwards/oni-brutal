@@ -1877,7 +1877,7 @@ installs get developer checks subscribers never see).
 | 1992 | [Replace Jointplates](https://steamcommunity.com/sharedfiles/filedetails/?id=3748116345) | ⬜ | ⬜ | ⬜ |  |
 | 1993 | [Dynamic Window Height](https://steamcommunity.com/sharedfiles/filedetails/?id=3743988171) | ⬜ | ⬜ | ⬜ |  |
 | 1994 | [Deconstruct Rover chore on shut down](https://steamcommunity.com/sharedfiles/filedetails/?id=3212502461) | ⬜ | ⬜ | ⬜ |  |
-| 1997 | [Thermal Info Cards](https://steamcommunity.com/sharedfiles/filedetails/?id=3797325396) | ⬜ | ⬜ | ⬜ |  |
+| 1997 | [Thermal Info Cards](https://steamcommunity.com/sharedfiles/filedetails/?id=3797325396) | ✅ | ✅ | ✅ | spec tests/e2e/mods/3797325396-thermal-info-cards.yaml: with WannaPrint and Duplicant Stat Selector (issue #17): the printing pod clicked without an exception, then the Tile's material panel lists the thermal lines; the panel matches the original's by pixels |
 | 1999 | [Wall Air Conditioner](https://steamcommunity.com/sharedfiles/filedetails/?id=3795634377) | ⬜ | ⬜ | ⬜ |  |
 | 2000 | [more food](https://steamcommunity.com/sharedfiles/filedetails/?id=2957924585) | ⬜ | ⬜ | ⬜ |  |
 | 2001 | [超级液培砖 Super Hydroponic Farm](https://steamcommunity.com/sharedfiles/filedetails/?id=3757306688) | ⬜ | ⬜ | ⬜ |  |
@@ -1994,7 +1994,7 @@ installs get developer checks subscribers never see).
 | 2134 | [Invisible door看不见的门](https://steamcommunity.com/sharedfiles/filedetails/?id=2859116081) | ⬜ | ⬜ | ⬜ |  |
 | 2135 | [Pei Only！ 裴！](https://steamcommunity.com/sharedfiles/filedetails/?id=3093919356) | ⬜ | ⬜ | ⬜ |  |
 | 2136 | [超级冰雕Super Ice Sculpture](https://steamcommunity.com/sharedfiles/filedetails/?id=2881537956) | ⬜ | ⬜ | ⬜ |  |
-| 2137 | [WannaPrint: Bio-Inks](https://steamcommunity.com/sharedfiles/filedetails/?id=3747431307) | ⬜ | ⬜ | ⬜ |  |
+| 2137 | [WannaPrint: Bio-Inks](https://steamcommunity.com/sharedfiles/filedetails/?id=3747431307) | ✅ | ✅ | ✅ | spec tests/e2e/mods/3747431307-wannaprint-bio-inks.yaml: the printing pod selected twice: the side screen's ink dropdown and buttons above the pod's own, the Config tab titled MISSING. as in the original (issue #17: our Instantiate kept a null titleKey and Strings.Get threw); its screens match the original's by structure |
 | 2138 | [Tiangong Duplicant Sensor天工复制人探测器](https://steamcommunity.com/sharedfiles/filedetails/?id=2847688104) | ⬜ | ⬜ | ⬜ |  |
 | 2139 | [No Atmo Suit Swim Penalty - 移除气压服游泳惩罚](https://steamcommunity.com/sharedfiles/filedetails/?id=3776423893) | ⬜ | ⬜ | ⬜ |  |
 | 2140 | [微芯片效果5 倍时长 Microchip Duration 5x](https://steamcommunity.com/sharedfiles/filedetails/?id=3771257593) | ⬜ | ⬜ | ⬜ |  |

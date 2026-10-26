@@ -1,0 +1,68 @@
+{
+ "spec": "mods/3797325396-thermal-info-cards.yaml",
+ "mods": [
+  "3797325396",
+  "3747431307",
+  "2856555858"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with WannaPrint and Duplicant Stat Selector (issue #17): the printing pod clicked without an exception, then the Tile's material panel lists the thermal lines; the panel matches the original's by pixels",
+ "updated": "2026-10-25",
+ "commit": "7af3027",
+ "mod_dlls": {
+  "3797325396": {
+   "ThermalInfoCards.dll": "1c22ac7bf673f659818d54b4b40c663e6d93ce25a1333b2d40cb3860fb442d7d"
+  },
+  "3747431307": {
+   "FUtility.dll": "66ebb59537629220dc14641bdb51064960fdac7cd0de3f8b6236241ed672ec72",
+   "WannaPrint.dll": "d4b2f979b1387a968a7d02a85d74b3983426d994346a163c9019e76e931ee9b7"
+  },
+  "2856555858": {
+   "SetStartDupes.dll": "93a74457da3280e266fbf3bfa115dc547373def3f197415223f45612a9fd473d"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-214733-ad16f2e0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T21:52:56",
+    "lane": 32,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-215917-99ac898f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T21:59:17",
+    "lane": 32,
+    "reference_run": "20261025-214733-ad16f2e0",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "materials": 0.007747
+    }
+   },
+   {
+    "run": "20261025-215917-99ac898f",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-25T22:01:58",
+    "lane": 32,
+    "reference_run": "20261025-214733-ad16f2e0",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "materials": 0.007747
+    }
+   }
+  ]
+ }
+}

@@ -1,0 +1,70 @@
+{
+ "spec": "mods/3747431307-wannaprint-bio-inks.yaml",
+ "mods": [
+  "3747431307"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the printing pod selected twice: the side screen's ink dropdown and buttons above the pod's own, the Config tab titled MISSING. as in the original (issue #17: our Instantiate kept a null titleKey and Strings.Get threw); its screens match the original's by structure",
+ "updated": "2026-10-25",
+ "commit": "7af3027",
+ "mod_dlls": {
+  "3747431307": {
+   "FUtility.dll": "66ebb59537629220dc14641bdb51064960fdac7cd0de3f8b6236241ed672ec72",
+   "WannaPrint.dll": "d4b2f979b1387a968a7d02a85d74b3983426d994346a163c9019e76e931ee9b7"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-214733-ad16f2e0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T21:47:33",
+    "lane": 32,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-215443-ff0ba1ca",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T21:54:43",
+    "lane": 32,
+    "reference_run": "20261025-214733-ad16f2e0",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "config-tab": {
+      "differences": 0
+     },
+     "bio-ink": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261025-215443-ff0ba1ca",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-25T21:58:09",
+    "lane": 32,
+    "reference_run": "20261025-214733-ad16f2e0",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "config-tab": {
+      "differences": 0
+     },
+     "bio-ink": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

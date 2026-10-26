@@ -1,0 +1,63 @@
+{
+ "spec": "mods/2326745828-illumination-sensor.yaml",
+ "mods": [
+  "2326745828"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "an Illumination Sensor's threshold screen (dump matches) takes 500 lux typed in, and in the unlit room the sensor turns on",
+ "updated": "2026-10-26",
+ "commit": "365d7f52",
+ "mod_dlls": {
+  "2326745828": {
+   "IlluminationSensor.dll": "4cf4a8f27fb0f9775740d5f45faf1b0cb0bc5eeb0c092728239cc82e90c9f9a1"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-033203-6e82e943",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:39:14",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-041208-4755b804",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:12:08",
+    "lane": 16,
+    "reference_run": "20261026-033203-6e82e943",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "threshold": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261026-041208-4755b804",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T04:12:09",
+    "lane": 17,
+    "reference_run": "20261026-033203-6e82e943",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "threshold": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

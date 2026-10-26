@@ -1,0 +1,34 @@
+# [Vanilla + DLC] Illumination Sensor (2326745828), classes B, S.
+#
+# What it does: adds the Illumination Sensor (LogicIlluminationSensor, 1x1, refined metal,
+# Automation, researched with Generic Sensors), a threshold switch on the light falling on its
+# cell: it sends Green above or below a lux threshold set on the game's threshold side screen,
+# with blueprints of its own. The mod marks it deprecated since the game has its own light
+# sensor, so it is no longer offered in the build menu; built ones keep working.
+# How a player reaches it: an existing sensor's side screen.
+# What changes: an automation signal on light.
+#
+# setup builds one in the unlit dug-out room west of the printing pod. Selected, its threshold
+# screen is set to 500 lux (below): in the dark it turns on.
+from: early-base
+mods: [2326745828]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LogicIlluminationSensor\")", method: Build, args: [{"$": "Grid.XYToCell(112, 208)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"LogicIlluminationSensor\").Deprecated": true
+      "Db.Get().Techs.Get(\"GenericSensors\").unlockedItemIDs": {contains: LogicIlluminationSensor}
+  - run: {seconds: 2}
+  - expect_state:
+      "all:LogicIlluminationSensor::[0].IsSwitchedOn": false
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 208], select: LogicIlluminationSensor}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/ThresholdSwitchSideScreen", cond: stable}
+  - ui_dump: {name: threshold, root: "**/ThresholdSwitchSideScreen"}
+  - type: {ui: "**/ThresholdSwitchSideScreen/**/NumberInputField", text: "500", clear: true, enter: true}
+  - expect_state:
+      "selected:LogicIlluminationSensor.thresholdIllumination": 500
+  - key: {code: Escape}
+  - run: {seconds: 2}
+  - expect_state:
+      "all:LogicIlluminationSensor::[0].IsSwitchedOn": true

@@ -1,0 +1,56 @@
+{
+ "spec": "mods/3376657142-super-solar-panel.yaml",
+ "mods": [
+  "3376657142"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "options set the Solar Panel's wattage; a built one is selected",
+ "updated": "2026-10-26",
+ "commit": "f898d18a",
+ "mod_dlls": {
+  "3376657142": {
+   "PLib.dll": "bdd637dbef718cdd52e61c0a7177bd297864a50bac1583d2837a36ff3edf07db",
+   "SuperSolarPanel.dll": "053aa12d7a59531bf4aa99d00de65cf2b8758cb3470b90409027f0591d49b933"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-105851-04eb8ffa",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T11:23:02",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-145036-c077f4e4",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T14:50:36",
+    "lane": 14,
+    "reference_run": "20261026-105851-04eb8ffa",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-145036-c077f4e4",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T14:50:37",
+    "lane": 15,
+    "reference_run": "20261026-105851-04eb8ffa",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

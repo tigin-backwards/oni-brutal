@@ -1,0 +1,27 @@
+# Building-Super Solar Panel 超级太阳能发电板 (3376657142), class P.
+#
+# What it does: the Solar Panel and the rocket's Solar Panel Module produce up to the PLib
+# options' wattage (3333 W each by default): postfixes on their CreateBuildingDef raise the
+# rating, and transpilers in SolarPanel and ModuleSolarPanel replace the game's caps.
+# How a player reaches it: building a Solar Panel; the Mods screen's options.
+# What changes: solar panels of thousands of watts.
+#
+# options set the panel to 1500 W; the definitions are read, and a panel built by setup in the
+# dug-out corridor west of the printing pod is selected.
+from: early-base
+mods: [3376657142]
+options:
+  "3376657142": {$file: Controler.json, Supersolarpanel: 1500}
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"SolarPanel\")", method: Build, args: [131130, Neutral, null, [Glass], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"SolarPanel\").GeneratorWattageRating": 1500
+      "Assets.GetBuildingDef(\"SolarPanelModule\").GeneratorWattageRating": 3333
+  - run: {seconds: 2}
+  - expect: {buildings: {SolarPanel: 1}}
+  - driver: {camera.set: {cell: [114, 208], ortho: 8}}
+  - click_world: {cell: [114, 207], select: SolarPanel}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:Generator.WattageRating": 1500

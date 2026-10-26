@@ -1,0 +1,25 @@
+# FixSteamTurbineBug 修复蒸汽机吞水bug (3739024899), class P.
+#
+# What it does: a Steam Turbine that is not operational no longer pumps steam (a prefix on
+# SteamTurbine.Pump returns early), and when a turbine spawns, any steam left in its gas
+# storage is turned into water in its liquid storage and logged.
+# How a player reaches it: a Steam Turbine over steam, switched off or without power.
+# What changes: a disabled turbine stops swallowing steam.
+#
+# setup builds a Steam Turbine in the dug-out corridor west of the printing pod, with no steam
+# under it. Over 30 s of play it stays inoperational and its gas storage stays empty;
+# selected, it reads as the game's turbine.
+from: early-base
+mods: [3739024899]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"SteamTurbine2\")", method: Build, args: [131129, Neutral, null, [Copper, Cuprite], 300.0, DEFAULT_FACADE]}}
+steps:
+  - run: {seconds: 30}
+  - expect_state:
+      "all:SteamTurbine::[0].GetComponent<Operational>.IsOperational": false
+      "all:SteamTurbine::[0].gasStorage.MassStored()": 0
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: SteamTurbine2}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Steam Turbine"}

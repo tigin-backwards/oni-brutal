@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3739024899-fix-steam-turbine-bug.yaml",
+ "mods": [
+  "3739024899"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a steam turbine with no steam under it stays inoperational and pumps nothing over 30 s, and reads as the game's turbine",
+ "updated": "2026-10-26",
+ "commit": "bbc2ade",
+ "mod_dlls": {
+  "3739024899": {
+   "FixSteamTurbineBug.dll": "edfdaf828f87d8b847ab6eea3137883c96a85bdb2e3c1f1b7944fd50b223325b"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-210923-f043eb35",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T21:09:24",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-235840-6e4b6851",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T23:58:40",
+    "lane": 16,
+    "reference_run": "20261025-210923-f043eb35",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261025-235840-6e4b6851",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-25T23:58:41",
+    "lane": 17,
+    "reference_run": "20261025-210923-f043eb35",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

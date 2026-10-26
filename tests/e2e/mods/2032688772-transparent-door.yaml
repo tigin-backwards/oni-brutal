@@ -1,0 +1,31 @@
+# Transparent Door (2032688772), class B.
+#
+# What it does: six glass doors in the Base menu, researched with Home Luxuries: a
+# Transparent Door (1x2 of glass and refined metal, a powered mechanised airlock) and Tiny
+# one, and Transparent Bunker Doors (tiny, small, normal and big, of glass and steel); all
+# let light through, their cells transparent like a window tile's.
+# How a player reaches it: the build menu (Base), after the research.
+# What changes: doors light passes through.
+#
+# setup researches Home Luxuries; the Base menu lists the doors, and a Transparent Door built
+# by setup in the dug-out corridor west of the printing pod leaves its cells transparent.
+from: early-base
+mods: [2032688772]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"Luxury\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"TransparentDoor\")", method: Build, args: [131127, Neutral, null, [Glass, Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"Luxury\").unlockedItemIDs": [{contains: TransparentDoor}, {contains: BigTransparentBunkerDoor}]
+      "Assets.GetBuildingDef(\"TransparentDoor\").BlockTileIsTransparent": true
+  - run: {seconds: 10}
+  - expect: {buildings: {TransparentDoor: 1}}
+  - expect_state:
+      "Grid.Transparent.get_Item(131127)": true
+      "Grid.Transparent.get_Item(131763)": true
+  - click: {ui: "**/PlanScreen/Toggle:Base"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/TransparentDoor Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/BigTransparentBunkerDoor Group*": {active: true}
+  - shot: {name: base-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}

@@ -1,0 +1,59 @@
+{
+ "spec": "mods/2032688772-transparent-door.yaml",
+ "mods": [
+  "2032688772"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "after Home Luxuries the Base menu lists the six doors (shot); a built door's cells are transparent",
+ "updated": "2026-10-26",
+ "commit": "17f325ef",
+ "mod_dlls": {
+  "2032688772": {
+   "TransparentDoor.dll": "fccc14237633cc64b06ef8ec35a6548147639888e23dd94027fb1906a7bfd384"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-102152-42394c53",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T10:53:26",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-133411-75254ba7",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T13:50:30",
+    "lane": 14,
+    "reference_run": "20261026-102152-42394c53",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "base-menu": 0.0
+    }
+   },
+   {
+    "run": "20261026-133411-75254ba7",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T13:50:41",
+    "lane": 15,
+    "reference_run": "20261026-102152-42394c53",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "base-menu": 0.031008
+    }
+   }
+  ]
+ }
+}

@@ -1,0 +1,33 @@
+# 用污水制造铁 Using sewage to produce iron (3130411418), class B.
+#
+# What it does: adds the Iron Maker (ProductionIron, 4x3, drawn as the Water Sieve, Refinement
+# menu, researched with Improved Oxygen, 120 W): it takes polluted water by pipe and turns
+# each kilogram into 10 kg of water (piped out) and 5 kg each of dirt and iron, dropped beside
+# it in 10 kg lumps.
+# How a player reaches it: the build menu (Refinement), after the research.
+# What changes: water, dirt and iron out of polluted water.
+#
+# setup grants Improved Oxygen: the Refinement menu offers it. setup builds one in the dug-out
+# room west of the printing pod, which is selected.
+from: early-base
+mods: [3130411418]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"ImprovedOxygen\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"ProductionIron\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Cuprite], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"ImprovedOxygen\").unlockedItemIDs": {contains: ProductionIron}
+      "Assets.GetPrefab(\"ProductionIron\").GetComponent<ElementConverter>.outputElements[2].elementHash": Iron
+      "Assets.GetPrefab(\"ProductionIron\").GetComponent<ElementConverter>.outputElements[0].massGenerationRate": 10
+  - run: {seconds: 10}
+  - click: {ui: "**/PlanScreen/Toggle:Refinement"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/ProductionIron Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/ProductionIron Group*": {active: true}
+  - key: {code: Escape}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 208], select: ProductionIron}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<KPrefabID>.PrefabTag.Name": ProductionIron

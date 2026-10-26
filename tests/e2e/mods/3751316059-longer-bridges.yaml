@@ -1,0 +1,37 @@
+# Longer Bridges (3751316059), classes B, V.
+#
+# What it does: wire, conductive wire, rubber, heavi-watt, logic, ribbon, conveyor, liquid
+# and gas bridges three and four tiles longer than the game's (and heavi-watt joint plates two
+# and three tiles wide, researched with the game's), each beside its original in the build
+# menu; logic bridges are tinted by their signal in the automation overlay.
+# How a player reaches it: the build menu (Power, Plumbing, Ventilation, Automation,
+# Shipping).
+# What changes: longer spans over obstacles.
+#
+# The Power menu lists the longer wire bridges (shot); a four-tile gas bridge built by setup
+# in the dug-out corridor west of the printing pod is selected, and its ports are the long
+# ones.
+from: early-base
+mods: [3751316059]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"qiguanqiao2\")", method: Build, args: [131128, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"qiguanqiao2\").WidthInCells": 4
+      "Assets.GetBuildingDef(\"qiguanqiao3\").WidthInCells": 5
+      "Assets.GetBuildingDef(\"qiguanqiao3\").UtilityInputOffset.x": -2
+      "Assets.GetBuildingDef(\"dianxianqiao2\")": exists
+      "Assets.GetBuildingDef(\"LogicWireBridge3\")": exists
+  - run: {seconds: 10}
+  - expect: {buildings: {qiguanqiao2: 1}}
+  - click: {ui: "**/PlanScreen/Toggle:Power"}
+  # The build menu catches up over frames: 120 frames for all of it to settle.
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/dianxianqiao2 Group*", cond: stable, stable: 120, frames: 600}
+  - shot: {name: power-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
+  - key: {code: Escape}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 206], select: qiguanqiao2}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {exists: true}
+  - ui_dump: {name: title, root: "**/DetailsScreen/TitleBar/Border/LabelGroup"}

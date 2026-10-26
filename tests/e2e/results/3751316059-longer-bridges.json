@@ -1,0 +1,68 @@
+{
+ "spec": "mods/3751316059-longer-bridges.yaml",
+ "mods": [
+  "3751316059"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Power menu lists the long wire bridges (shot); a built four-tile gas bridge is selected (dumped)",
+ "updated": "2026-10-26",
+ "commit": "28b4e36a",
+ "mod_dlls": {
+  "3751316059": {
+   "MagpieExtension.dll": "655dbc42e8b4ab6f65eb742be980a0825913d74e9290ffe46fd3285bf38e0373",
+   "MagpieExtensionRonivans.dll": "9324f4f16e9edd4885343e5e93062f9cb878c9a01c28ef4053a1a2fbe3b06a6f"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-175250-0ae88632",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T18:18:25",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-183436-06bd7bbf",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T19:07:01",
+    "lane": 15,
+    "reference_run": "20261026-175250-0ae88632",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "power-menu": 0.0
+    }
+   },
+   {
+    "run": "20261026-183436-06bd7bbf",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T19:08:12",
+    "lane": 15,
+    "reference_run": "20261026-175250-0ae88632",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "power-menu": 0.0
+    }
+   }
+  ]
+ }
+}

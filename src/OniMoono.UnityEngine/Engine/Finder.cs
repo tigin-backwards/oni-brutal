@@ -84,9 +84,14 @@ namespace OniMoono.Engine
                 }
                 return null;
             }
+            // Among active objects of that name, the one that became active first (measured in
+            // the original: a scene object found before a later DontDestroyOnLoad one and after an
+            // earlier one, and an object deactivated and activated again found after one activated
+            // in between).
+            GameObjectNative first = null;
             foreach (var go in ActiveGameObjects())
-                if (go.Name == name) return (GameObject)go.Managed;
-            return null;
+                if (go.Name == name && (first == null || go.ActivatedAt < first.ActivatedAt)) first = go;
+            return (GameObject)first?.Managed;
         }
 
         /// Transform.Find semantics: each path segment names a direct child.

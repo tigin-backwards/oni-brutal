@@ -50,6 +50,34 @@ namespace OniMoono.Tests
             Assert.Equal(new[] { "a", "b", "c" }, all.Select(x => x.name));
         }
 
+        /// GameObject.Find returns, of the active objects with that name, the one activated first,
+        /// whatever their scenes: ONI's DontDestroyOnLoad "Canvas" before the backend scene's,
+        /// a scene object before a later DontDestroyOnLoad one, and an object deactivated and
+        /// activated again after one activated in between (measured in the original with E2eDriver
+        /// setup calls).
+        [Fact]
+        public void FindReturnsTheObjectActivatedFirst()
+        {
+            var kept = new GameObject("same") { layer = 1 };
+            Object.DontDestroyOnLoad(kept);
+            var scene = new GameObject("same") { layer = 2 };
+            Assert.Same(kept, GameObject.Find("same"));
+
+            var older = new GameObject("other") { layer = 1 };
+            var newer = new GameObject("other") { layer = 2 };
+            Object.DontDestroyOnLoad(newer);
+            Assert.Same(older, GameObject.Find("other"));
+
+            var first = new GameObject("again");
+            var second = new GameObject("again");
+            Assert.Same(first, GameObject.Find("again"));
+            first.SetActive(false);
+            first.SetActive(true);
+            Assert.Same(second, GameObject.Find("again"));
+            Object.DestroyImmediate(kept);
+            Assert.Same(scene, GameObject.Find("same"));
+        }
+
         sealed class Marker : MonoBehaviour { }
 
         static void Host(string name, bool active, bool enabled)

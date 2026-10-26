@@ -53,7 +53,20 @@ namespace OniMoono.Engine
         public string Tag = "Untagged";
         public bool ActiveSelf = true;
         /// Cached activeInHierarchy, maintained by activation changes.
-        public bool ActiveInHierarchy;
+        public bool ActiveInHierarchy
+        {
+            get => activeInHierarchy;
+            set
+            {
+                if (value && !activeInHierarchy) ActivatedAt = ++activations;
+                activeInHierarchy = value;
+            }
+        }
+        bool activeInHierarchy;
+        /// When it last became active in its hierarchy, counting activations (main thread):
+        /// GameObject.Find returns the match activated first.
+        public long ActivatedAt;
+        static long activations;
         /// Owning scene; null for prefab assets and other objects that are not in a scene.
         public SceneRecord Scene;
         public bool IsStatic;

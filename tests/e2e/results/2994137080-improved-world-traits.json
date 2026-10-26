@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2994137080-improved-world-traits.yaml",
+ "mods": [
+  "2994137080"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the worldgen settings hold the mod's traits (Guaranteed Power, Guaranteed Water) and replaced ones",
+ "updated": "2026-10-26",
+ "commit": "fd4e5b95",
+ "mod_dlls": {
+  "2994137080": {
+   "Improved World Traits.dll": "1727e2a29e7141f7441775016de5486fadde5692f8fa1dd3b7dd4c3a788ec423"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-182320-3e5178eb",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T18:32:31",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-192551-82b3b3ca",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T19:25:51",
+    "lane": 15,
+    "reference_run": "20261026-182320-3e5178eb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-192551-82b3b3ca",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T19:26:42",
+    "lane": 15,
+    "reference_run": "20261026-182320-3e5178eb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

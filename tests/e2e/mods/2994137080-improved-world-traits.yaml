@@ -1,0 +1,20 @@
+# Improved World Traits [UPDATED] (2994137080), class P.
+#
+# What it does: worldgen files that replace the game's world traits (boulders, geysers, oil,
+# metal and the rest, with larger or surer effects) and add four (Guaranteed Water, Guaranteed
+# Power, Guaranteed Resources and one with almost no geysers), whose strings a prefix on
+# Db.Initialize adds.
+# How a player reaches it: a new game rolls its world traits from these.
+# What changes: world traits that matter more.
+#
+# The worldgen settings hold the mod's traits: Guaranteed Power with its colour and geyser
+# rules, and the replaced Geodes; the strings are registered.
+from: early-base
+mods: [2994137080]
+steps:
+  - expect_state:
+      "ProcGen.SettingsCache.GetCachedWorldTrait(\"traits/PowerProducers\", false).colorHex": F7347A
+      "ProcGen.SettingsCache.GetCachedWorldTrait(\"traits/PowerProducers\", false).additionalWorldTemplateRules.Count": ">= 2"
+      "ProcGen.SettingsCache.GetCachedWorldTrait(\"traits/WaterProducers\", false)": exists
+      "ProcGen.SettingsCache.GetCachedWorldTrait(\"traits/Geodes\", false).additionalWorldTemplateRules.Count": "== original"
+      "Strings.Get(\"STRINGS.WORLD_TRAITS.IMPROVED_TRAITS_POWERPRODUCERS.NAME\").String": Guaranteed Power

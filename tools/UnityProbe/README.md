@@ -340,6 +340,18 @@ and a ScriptableObject without a parameterless constructor: what AddComponent, C
 Instantiate make, which messages run and what is logged. ARCHITECTURE D40 and §3.2 record what
 it measured; `NoParameterlessConstructorTests` and `--check-types` encode it.
 
+With `PROBE_SCENARIO=missingmembers` only the missing-members probe runs (`MissingMembers.cs`,
+lines `MM …`, at the main menu; a `MissingMembersProbeDone` canvas appears at the end), with
+`Gone/v2`'s build in the mod folder as for missingtypes: v2 lacks or retypes the members v1's
+Keeper, Box<T>, Pair and GlobalKeeper (no namespace) have. Each case is a method naming one of
+them (static, instance and virtual methods, a constructor, a property, a changed parameter type,
+generic methods and types, nested types, by-ref and array parameters, fields, and orders against
+a missing type), called twice: the exception's type, message, first frame and `ToString()`, and
+whether any of the method ran. Then how such an exception reaches the log through the game's
+`KMonoBehaviour.Spawn` pattern (`DebugUtil.LogExceptionCallstack`), `Debug.LogException` and
+`Debug.LogError(e.ToString())`. Run it through `scripts/e2e.py` as the canvas probes are, with a
+spec that loads any colony. ARCHITECTURE D42 records what it measured; `--check-types` encodes it.
+
 With `PROBE_SCENARIO=quitevents` only the quit-events probe runs (`QuitEvents.cs`, lines `QE …`,
 at the main menu): Application.wantsToQuit, quitting and unloading handlers and OnApplicationQuit,
 around three Application.Quit() calls three frames apart (a handler refuses the first and throws

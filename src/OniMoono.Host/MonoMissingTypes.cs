@@ -33,8 +33,9 @@ namespace OniMoono.Host
     /// then the IL), a top-level type missing from an assembly already loaded whose types are the
     /// same in both players (the game's own from Managed/, other than Unity's and the class
     /// libraries, and mods') gets the body Mono's compilation gives it: it throws Mono's
-    /// exception, and is hidden from stack traces. Missing members of types that exist, nested
-    /// types (D32) and assemblies not loaded yet are left as they were.
+    /// exception, and is hidden from stack traces. So does a method naming a member its type lacks
+    /// (MonoMissingMembers, D42), first in the same IL order. Nested types (D32) and assemblies not
+    /// loaded yet are left as they were.
     public static class MonoMissingTypes
     {
         const string LostError = "Failure has occurred while loading a type.";
@@ -51,21 +52,26 @@ namespace OniMoono.Host
         internal static byte[]? Adjust(byte[] image, ref byte[]? symbols, string path)
         {
             Dictionary<(string Assembly, string Namespace, string Name), int> tokens;
+            Dictionary<int, MonoMissingMembers.Missing> members;
             try
             {
-                using var pe = new PEReader(File.OpenRead(path));
-                if (!pe.HasMetadata) return null;
-                var md = pe.GetMetadataReader();
-                tokens = MissingTypeRefs(md);
+                using (var pe = new PEReader(File.OpenRead(path)))
+                {
+                    if (!pe.HasMetadata) return null;
+                    tokens = MissingTypeRefs(pe.GetMetadataReader());
+                }
+                // Members by the tokens of the image as earlier passes left it, which Cecil reads.
+                using var current = new PEReader(new MemoryStream(image, writable: false));
+                members = MonoMissingMembers.Find(current.GetMetadataReader());
             }
             catch (Exception e) when (e is BadImageFormatException or IOException or UnauthorizedAccessException)
             {
                 return null;
             }
-            if (tokens.Count == 0) return null;
+            if (tokens.Count == 0 && members.Count == 0) return null;
             try
             {
-                return Rewrite(image, ref symbols, path, tokens);
+                return Rewrite(image, ref symbols, path, tokens, members);
             }
             catch (Exception e) when (e is Cecil.AssemblyResolutionException or BadImageFormatException or InvalidOperationException or ArgumentException or NullReferenceException)
             {
@@ -103,25 +109,34 @@ namespace OniMoono.Host
                 assembly.GetType(key.Item2.Length == 0 ? key.Item3 : key.Item2 + "." + key.Item3, throwOnError: false) == null);
         }
 
-        static Assembly? Loaded(string simpleName)
+        static readonly ConcurrentDictionary<string, Assembly> loaded = new(StringComparer.OrdinalIgnoreCase);
+
+        internal static Assembly? Loaded(string simpleName)
         {
+            if (loaded.TryGetValue(simpleName, out var known)) return known;
             foreach (var assembly in AssemblyLoadContext.Default.Assemblies)
-                if (!assembly.IsDynamic && string.Equals(assembly.GetName().Name, simpleName, StringComparison.OrdinalIgnoreCase)) return assembly;
+                if (!assembly.IsDynamic && string.Equals(assembly.GetName().Name, simpleName, StringComparison.OrdinalIgnoreCase))
+                    return loaded.GetOrAdd(simpleName, assembly);
             return null;
         }
 
+        static readonly ConcurrentDictionary<Assembly, bool> sameInBothPlayers = new();
+
         /// A mod's assembly, or the game's own from Managed/: not Unity's engine or packages (ours
         /// are not Unity's), nor Mono's class libraries there (the framework answers for them).
-        static bool SameInBothPlayers(Assembly assembly)
+        internal static bool SameInBothPlayers(Assembly assembly) =>
+            mods.ContainsKey(assembly) || sameInBothPlayers.GetOrAdd(assembly, GameOwn);
+
+        static bool GameOwn(Assembly assembly)
         {
-            if (mods.ContainsKey(assembly)) return true;
             var name = assembly.GetName().Name!;
             if (name.StartsWith("Unity", StringComparison.Ordinal) || AssemblyPolicy.ReferenceDirectories[0] is not { Length: > 0 } managed
                 || !File.Exists(Path.Combine(managed, name + ".dll"))) return false;
             return assembly.Location is not { Length: > 0 } location || !location.StartsWith(RuntimeEnvironment.GetRuntimeDirectory(), StringComparison.Ordinal);
         }
 
-        static byte[]? Rewrite(byte[] image, ref byte[]? symbols, string path, Dictionary<(string Assembly, string Namespace, string Name), int> tokens)
+        static byte[]? Rewrite(byte[] image, ref byte[]? symbols, string path, Dictionary<(string Assembly, string Namespace, string Name), int> tokens,
+            Dictionary<int, MonoMissingMembers.Missing> members)
         {
             using var resolver = LoadedFirstResolver.ForMod(path);
             bool withSymbols = symbols != null;
@@ -142,28 +157,34 @@ namespace OniMoono.Host
                 module = Cecil.ModuleDefinition.ReadModule(new MemoryStream(image), new Cecil.ReaderParameters { AssemblyResolver = resolver });
             }
             using var owned = module;
-            var scan = new Scan(tokens);
-            var failing = new List<(Cecil.MethodDefinition Method, string Message, string Type)>();
+            var scan = new Scan(tokens, members);
+            var failing = new List<(Cecil.MethodDefinition Method, string Message, string Type, Type Exception)>();
             foreach (var type in module.GetTypes())
                 foreach (var method in type.Methods)
-                    if (method.HasBody && scan.Failure(method) is var (message, missing))
-                        failing.Add((method, message, missing));
+                    if (method.HasBody && scan.Failure(method) is var (message, missing, exception))
+                        failing.Add((method, message, missing, exception));
             if (failing.Count == 0) return null;
-            var typeLoad = module.ImportReference(typeof(TypeLoadException).GetConstructor([typeof(string)])!);
+            var constructors = new Dictionary<Type, Cecil.MethodReference>();
             var hidden = module.ImportReference(typeof(System.Diagnostics.StackTraceHiddenAttribute).GetConstructor(Type.EmptyTypes)!);
-            foreach (var (method, message, _) in failing) Throw(method, message, typeLoad, hidden);
+            foreach (var (method, message, _, exception) in failing)
+            {
+                if (!constructors.TryGetValue(exception, out var constructor))
+                    constructors[exception] = constructor = module.ImportReference(exception.GetConstructor([typeof(string)])!);
+                Throw(method, message, constructor, hidden);
+            }
             using var output = new MemoryStream();
             using var symbolOutput = new MemoryStream();
             module.Write(output, new Cecil.WriterParameters { WriteSymbols = withSymbols, SymbolStream = withSymbols ? symbolOutput : null, SymbolWriterProvider = withSymbols ? new Cecil.Cil.PortablePdbWriterProvider() : null });
             symbols = withSymbols ? symbolOutput.ToArray() : null;
             var names = string.Join(", ", failing.Select(f => f.Type).Distinct().Take(8));
-            EngineLog.Engine($"mod missing types: {Path.GetFileName(path)}: {failing.Count} method(s) name types their assemblies lack ({names}); they throw TypeLoadException as Mono's compilation of them does");
+            EngineLog.Engine($"mod missing types: {Path.GetFileName(path)}: {failing.Count} method(s) name types or members their assemblies lack ({names}); they throw as Mono's compilation of them does");
             return output.ToArray();
         }
 
-        /// The method's body becomes `throw new TypeLoadException(message)`, its frame hidden: on
-        /// Mono it never runs, and the exception comes from its caller's frame.
-        static void Throw(Cecil.MethodDefinition method, string message, Cecil.MethodReference typeLoad, Cecil.MethodReference hidden)
+        /// The method's body becomes `throw new TypeLoadException(message)` (or MissingMethodException,
+        /// MissingFieldException), its frame hidden: on Mono it never runs, and the exception comes
+        /// from its caller's frame.
+        static void Throw(Cecil.MethodDefinition method, string message, Cecil.MethodReference exception, Cecil.MethodReference hidden)
         {
             var body = method.Body;
             body.Instructions.Clear();
@@ -172,7 +193,7 @@ namespace OniMoono.Host
             body.InitLocals = false;
             var il = body.GetILProcessor();
             il.Emit(Cecil.Cil.OpCodes.Ldstr, message);
-            il.Emit(Cecil.Cil.OpCodes.Newobj, typeLoad);
+            il.Emit(Cecil.Cil.OpCodes.Newobj, exception);
             il.Emit(Cecil.Cil.OpCodes.Throw);
             method.DebugInformation.SequencePoints.Clear();
             method.DebugInformation.Scope = null;
@@ -181,11 +202,13 @@ namespace OniMoono.Host
             method.CustomAttributes.Add(new Cecil.CustomAttribute(hidden));
         }
 
-        /// Where Mono's compilation of a method first fails on a missing type, and its message.
-        internal sealed class Scan(Dictionary<(string Assembly, string Namespace, string Name), int> tokens)
+        /// Where Mono's compilation of a method first fails on a missing type or member, and its
+        /// message.
+        internal sealed class Scan(Dictionary<(string Assembly, string Namespace, string Name), int> tokens, Dictionary<int, MonoMissingMembers.Missing> members)
         {
-            /// The message and the missing type's name, or null when the method compiles on Mono.
-            public (string Message, string Type)? Failure(Cecil.MethodDefinition method)
+            /// The message, the missing type's or member's name and the exception's type, or null
+            /// when the method compiles on Mono.
+            public (string Message, string Type, Type Exception)? Failure(Cecil.MethodDefinition method)
             {
                 var body = method.Body;
                 // The header first (metadata.c, mono_metadata_parse_mh_full): the exception clauses'
@@ -205,10 +228,13 @@ namespace OniMoono.Host
                                 if (InMember(called) is { } t) return Kept(t);
                             }
                             else if (Called(called) is { } failure) return failure;
+                            // A member reference the type has no member for (D42).
+                            if (Absent((called as Cecil.GenericInstanceMethod)?.ElementMethod ?? called) is { } absent) return absent;
                             break;
                         case Cecil.FieldReference field:
                             if ((field is Cecil.FieldDefinition ? Missing(field.FieldType) : Missing(field.DeclaringType) ?? Missing(field.FieldType)) is { } f)
                                 return code == Cecil.Cil.Code.Ldtoken ? Kept(f) : Lost(f);
+                            if (Absent(field) is { } absentField) return absentField;
                             break;
                         case Cecil.TypeReference type:
                             if (Missing(type) is { } m)
@@ -223,10 +249,18 @@ namespace OniMoono.Host
                 return null;
             }
 
+            /// A member reference MonoMissingMembers found no member for: Mono keeps the lookup's
+            /// error (MissingMethodException or MissingFieldException).
+            (string, string, Type)? Absent(Cecil.MemberReference member)
+            {
+                if (member is Cecil.IMemberDefinition || !members.TryGetValue(member.MetadataToken.ToInt32(), out var missing)) return null;
+                return (missing.Message, member.DeclaringType.Name + "." + member.Name, missing.Field ? typeof(MissingFieldException) : typeof(MissingMethodException));
+            }
+
             /// A call, newobj, jmp, ldftn or ldvirtftn: a member reference (and a generic
             /// instantiation's arguments) is resolved keeping its error; the mod's own method is
             /// found, and its signature fails later, the error dropped.
-            (string, string)? Called(Cecil.MethodReference method)
+            (string, string, Type)? Called(Cecil.MethodReference method)
             {
                 if (method is Cecil.GenericInstanceMethod generic)
                 {
@@ -277,16 +311,16 @@ namespace OniMoono.Host
                 return type.Scope is Cecil.AssemblyNameReference assembly && tokens.ContainsKey((assembly.Name, type.Namespace, type.Name)) ? type : null;
             }
 
-            (string, string) Kept(Cecil.TypeReference type)
+            (string, string, Type) Kept(Cecil.TypeReference type)
             {
                 var assembly = (Cecil.AssemblyNameReference)type.Scope;
                 var name = type.Namespace.Length == 0 ? type.Name : type.Namespace + "." + type.Name;
                 var token = tokens[(assembly.Name, type.Namespace, type.Name)];
-                return ($"Could not resolve type with token {token:x8} from typeref (expected class '{name}' in assembly '{MonoAssemblyName(assembly)}')", name);
+                return ($"Could not resolve type with token {token:x8} from typeref (expected class '{name}' in assembly '{MonoAssemblyName(assembly)}')", name, typeof(TypeLoadException));
             }
 
-            static (string, string) Lost(Cecil.TypeReference type) =>
-                (LostError, type.Namespace.Length == 0 ? type.Name : type.Namespace + "." + type.Name);
+            static (string, string, Type) Lost(Cecil.TypeReference type) =>
+                (LostError, type.Namespace.Length == 0 ? type.Name : type.Namespace + "." + type.Name, typeof(TypeLoadException));
         }
 
         /// An assembly reference as Mono prints it (metadata/assembly.c, mono_stringify_assembly_name).

@@ -32,6 +32,18 @@ namespace LogTraceSubjects
             return null;
         }
 
+        // As the host gives a mod's method that Mono's compilation fails (MonoMissingTypes): its
+        // frame is hidden, so the trace starts at its caller as on Mono.
+        [System.Diagnostics.StackTraceHidden]
+        static void Hidden() => throw new MissingMethodException("Method not found: void .SimMessages.SetCellProperties(int,byte)");
+
+        public static Exception FromHidden()
+        {
+            try { Hidden(); }
+            catch (Exception e) { return e; }
+            return null;
+        }
+
         public static void Report(Exception e) => UnityEngine.Debug.LogException(e);
 
         public static void ReportError(string message) => UnityEngine.Debug.LogError(message);
@@ -184,6 +196,21 @@ namespace OniMoono.Tests
             var e = Outer<int>.Inner.Thrown(1, new int[2]);
             var (_, stack, _) = Assert.Single(Received(() => Thrower.Report(e), "generic 12"));
             Assert.StartsWith("LogTraceSubjects.Outer`1+Inner[TA].Thrown (TA value, System.Int32[] counts) (at ", stack);
+        }
+
+        [Fact]
+        public void AHiddenFrameIsLeftOut()
+        {
+            var e = Thrower.FromHidden();
+            string text = null;
+            var got = Received(() => text = LogText(() => Thrower.Report(e)), "SetCellProperties");
+            var lines = text.Replace("\r\n", "\n").Split('\n');
+            int at = Array.IndexOf(lines, "MissingMethodException: Method not found: void .SimMessages.SetCellProperties(int,byte)");
+            Assert.True(at >= 0, text);
+            Assert.Matches(@"^  at LogTraceSubjects\.Thrower\.FromHidden \(\) \[0x[0-9a-f]{5}\] in .+:\d+ $", lines[at + 1]);
+            Assert.Equal("UnityEngine.Debug:LogException(Exception)", lines[at + 2]);
+            var (_, stack, _) = Assert.Single(got);
+            Assert.StartsWith("LogTraceSubjects.Thrower.FromHidden () (at ", stack);
         }
 
         [Fact]

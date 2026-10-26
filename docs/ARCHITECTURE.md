@@ -106,7 +106,7 @@ one use of a struct's hash as an identity (D26). The game's conversions of float
 are rewritten as its assemblies load (D29), in the same pass as its directory listings (D30)
 and the double close in 0Harmony's MonoMod (D31). The game's Harmony is adjusted where patches
 would run differently on CoreCLR (D12–D14, D17–D21, D33, D34), and mods' assemblies are
-rewritten as they load where their IL relies on Mono (D11, D22, D23, D27–D32, D40). No other
+rewritten as they load where their IL relies on Mono (D11, D22, D23, D27–D32, D40, D42). No other
 game IL is touched.
 
 | Mono provided | Host provides | Needed by |
@@ -816,9 +816,8 @@ game or mod code can notice. Each says how it is resolved, or why it is kept.
   already loaded whose types both players share (a mod's, or the game's own from `Managed/`:
   not Unity's engine or packages, nor Mono's class libraries) gets the body Mono's compilation
   gives it, throwing Mono's exception with the token of the mod's file, and is hidden from stack
-  traces (`StackTraceHidden`), so the trace starts at its caller as Mono's does. Not covered:
-  members missing from a type that exists (Mono's "Method not found: void ProbeGone.Keeper.Removed()"
-  against CoreCLR's "…: 'Void ProbeGone.Keeper.Removed()'."), missing nested types (D32 binds
+  traces (`StackTraceHidden`), so the trace starts at its caller as Mono's does. Members
+  missing from a type that exists are D42's. Not covered: missing nested types (D32 binds
   some of them), and assemblies not loaded yet when the mod loads; a method whose own signature
   names a missing type fails in its callers only. A mod that cannot be rewritten loads unchanged.
   `--check-types` loads a mod whose method calls a game method by a missing return type behind a
@@ -856,6 +855,52 @@ game or mod code can notice. Each says how it is resolved, or why it is kept.
   them from a third assembly, directly and through reflection, past tier-up;
   `tests/e2e/mods/3757075889-mod-origin-info.yaml` compares the mod's records with the
   original's.
+- **D42 Methods naming a member its type no longer has.** A mod built for an older game calls
+  methods or reads fields the game has since removed or retyped: Trapdoors & Floor Hatches' OnSpawn
+  calls `SimMessages.SetCellProperties(int, byte)`. As for a missing type (D40), both runtimes fail
+  the method naming it as a whole when it is compiled, but word it differently. Mono keeps the
+  member lookup's error (`CHECK_CFG_ERROR` in `mini/method-to-ir.c`; Unity's fork, branch
+  `unity-6000.3-mbe`) and throws it from the caller's frame: "Method not found: void
+  .SimMessages.SetCellProperties(int,byte)" (`mono_error_set_method_missing`,
+  `metadata/exception.c`): the return type, the class's namespace, '.' (also when the namespace is
+  empty, so a nested class is ".Inner"), its name ("Box`1" for a generic one), '.', the method's
+  name, "<!0,…>" for a generic method, and the parameters joined by ',', each as
+  `mono_type_get_desc` writes it (`metadata/debug-helpers.c`: int, byte, single, string, int&,
+  string[,], `System.Collections.Generic.Dictionary`2<string, int[]>`, Outer/Inner, !0 for a type
+  parameter, !!0 for a method's). A field: "Field not found: int .GlobalKeeper.Field Due to: Could
+  not find field in class" (`field_from_memberref`, `metadata/loader.c`), a field of the same name
+  but another type included. Measured in the original player (`tools/UnityProbe`,
+  `PROBE_SCENARIO=missingmembers`: 30 cases, among them static, instance and virtual methods, a
+  constructor, a property, a changed parameter type, generic types and methods, nested types,
+  by-ref and array parameters and fields; the first missing type or member in IL order decides,
+  as in D40). CoreCLR says "Method not found: 'Void SimMessages.SetCellProperties(Int32,
+  Byte)'." from the failing method's own frame. The game logs the exception as
+  `KMonoBehaviour.Spawn` catches it, with `DebugUtil.LogExceptionCallstack(…, e.ToString(), e)`:
+  the message and the exception's frames. On Mono the failing method has no frame, so the trace
+  is `at KMonoBehaviour.Spawn ()` alone; ours started with `LadderHatch.OnSpawn()`, which made the
+  log signature (message and first frame past the runtime's) one the original lacks.
+  **Resolved in** `MonoMissingMembers`, in `MonoMissingTypes`' pass as a mod loads: each member
+  reference whose type exists in an assembly the same in both players (D40), but has no member of
+  that name and signature in it or its bases (a constructor in the type alone; an interface's
+  methods in the interfaces it extends, then System.Object), looked up with reflection over the
+  types loaded here, gets Mono's message, and each method naming one gets the body Mono's
+  compilation gives it: it throws MissingMethodException or MissingFieldException with that
+  message, hidden from stack traces. The engine's Unity-format trace of a logged exception
+  (`LogTraces`) now leaves hidden frames out too, as `Exception.StackTrace` does. The probe then
+  reports as the original does, but for the trace's format (CoreCLR's "   at A.B()", which the
+  log signatures already treat alike). Not covered: members of Unity's engine and packages and of
+  the class libraries (our API's gaps: D40's assemblies), member references whose signature names
+  a type not resolvable when the mod loads (the mod's own, another mod's not loaded yet: they
+  fail as CoreCLR fails them), vararg and function-pointer signatures. A member the lookup finds
+  is one the runtime binds: across the 2,119 Workshop mods in `out/ws` (2,890 assemblies, 2.2
+  million member references), none of the 2,089 references the lookup reports missing resolved on
+  CoreCLR (`Module.ResolveMember`), and those CoreCLR could not resolve that it passed over name
+  Unity's or the class libraries' members or a missing type (D40). Cost: the lookup over those
+  assemblies took 3.4 s, 1.2 ms an assembly (release build); it reads metadata, and Cecil reads
+  only a mod that names a missing type or member.
+  `--check-types` loads a mod calling `SimMessages.SetCellProperties(int, byte)` behind a branch
+  not taken, a generic game type's instance method by a by-ref array of its parameter, a generic
+  method and a nested type's field the game lacks, and two members it has (one on a base class).
 
 ## 3. The engine API (`OniMoono.UnityEngine`)
 

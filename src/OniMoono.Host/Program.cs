@@ -1009,6 +1009,127 @@ namespace OniMoono.Host
                     try { Directory.Delete(dir, true); } catch (IOException) { } catch (UnauthorizedAccessException) { }
                 }
             });
+            Check("A mod's methods naming a member the game no longer has (MonoMissingMembers)", () =>
+            {
+                ModAccess.Install();
+                var dir = Directory.CreateTempSubdirectory("oni-moono-check-").FullName;
+                try
+                {
+                    var game = AppDomain.CurrentDomain.GetAssemblies().Single(a => a.GetName().Name == "Assembly-CSharp");
+                    var firstpass = AppDomain.CurrentDomain.GetAssemblies().Single(a => a.GetName().Name == "Assembly-CSharp-firstpass");
+                    const string gone = "OniMoonoCheckGone";
+                    // As Trapdoors & Floor Hatches' OnSpawn: `call void SimMessages::SetCellProperties(int32,
+                    // uint8)` behind a branch not taken, the game having no such overload. Each method
+                    // below names one missing member: Mono fails it as a whole, from its caller's frame,
+                    // with the lookup's message.
+                    var simMessages = game.GetType("SimMessages", throwOnError: true)!;
+                    if (simMessages.GetMethod("SetCellProperties", [typeof(int), typeof(byte)]) != null) throw new InvalidOperationException("SimMessages.SetCellProperties(int, byte) is in the game");
+                    var generic = game.GetExportedTypes().First(t => t.IsGenericTypeDefinition && t.GetGenericArguments().Length == 1 && t.Namespace == null && !t.IsNested && !t.IsInterface);
+                    var nested = game.GetExportedTypes().First(t => t.IsNested && !t.IsGenericType && t.DeclaringType!.Namespace == null && !t.DeclaringType.IsGenericType && !t.IsInterface);
+                    var name = "OniMoonoCheckGoneMembersMod";
+                    using var assembly = Cecil.AssemblyDefinition.CreateAssembly(new Cecil.AssemblyNameDefinition(name, new Version(1, 0)), name, Cecil.ModuleKind.Dll);
+                    var module = assembly.MainModule;
+                    var ts = module.TypeSystem;
+                    var probe = new Cecil.TypeDefinition("", "Probe", Cecil.TypeAttributes.Public | Cecil.TypeAttributes.Abstract | Cecil.TypeAttributes.Sealed, ts.Object);
+                    module.Types.Add(probe);
+                    Cecil.MethodDefinition Method(string methodName, Cecil.TypeReference returns, Action<Cecil.Cil.ILProcessor> body, params Cecil.TypeReference[] parameters)
+                    {
+                        var method = new Cecil.MethodDefinition(methodName, Cecil.MethodAttributes.Public | Cecil.MethodAttributes.Static, returns);
+                        foreach (var parameter in parameters) method.Parameters.Add(new Cecil.ParameterDefinition(parameter));
+                        probe.Methods.Add(method);
+                        body(method.Body.GetILProcessor());
+                        return method;
+                    }
+                    // `if (flag) <emit>`, then return 7.
+                    Cecil.MethodDefinition Behind(string methodName, Action<Cecil.Cil.ILProcessor> emit) => Method(methodName, ts.Int32, il =>
+                    {
+                        var skip = il.Create(Cecil.Cil.OpCodes.Ldc_I4_7);
+                        il.Emit(Cecil.Cil.OpCodes.Ldarg_0);
+                        il.Emit(Cecil.Cil.OpCodes.Brfalse, skip);
+                        emit(il);
+                        il.Append(skip);
+                        il.Emit(Cecil.Cil.OpCodes.Ret);
+                    }, ts.Boolean);
+                    var setCell = new Cecil.MethodReference("SetCellProperties", ts.Void, module.ImportReference(simMessages));
+                    setCell.Parameters.Add(new Cecil.ParameterDefinition(ts.Int32));
+                    setCell.Parameters.Add(new Cecil.ParameterDefinition(ts.Byte));
+                    var inner = Behind("Inner", il => { il.Emit(Cecil.Cil.OpCodes.Ldc_I4_1); il.Emit(Cecil.Cil.OpCodes.Ldc_I4_8); il.Emit(Cecil.Cil.OpCodes.Call, setCell); });
+                    Method("Outer", ts.Int32, il => { il.Emit(Cecil.Cil.OpCodes.Ldc_I4_0); il.Emit(Cecil.Cil.OpCodes.Call, inner); il.Emit(Cecil.Cil.OpCodes.Ret); });
+                    // A generic type's instance method by a by-ref array of its parameter.
+                    var open = module.ImportReference(generic);
+                    var instance = new Cecil.GenericInstanceType(open);
+                    instance.GenericArguments.Add(ts.Int32);
+                    var onGeneric = new Cecil.MethodReference(gone, ts.Void, instance) { HasThis = true };
+                    onGeneric.Parameters.Add(new Cecil.ParameterDefinition(new Cecil.ByReferenceType(new Cecil.ArrayType(open.GenericParameters[0]))));
+                    Behind("OnGeneric", il => { il.Emit(Cecil.Cil.OpCodes.Ldnull); il.Emit(Cecil.Cil.OpCodes.Ldnull); il.Emit(Cecil.Cil.OpCodes.Callvirt, onGeneric); });
+                    // A generic method of SimMessages, and a nested type's static field.
+                    var genericMethod = new Cecil.MethodReference(gone, ts.Void, module.ImportReference(simMessages));
+                    var t = new Cecil.GenericParameter("T", genericMethod);
+                    genericMethod.GenericParameters.Add(t);
+                    genericMethod.Parameters.Add(new Cecil.ParameterDefinition(t));
+                    var call = new Cecil.GenericInstanceMethod(genericMethod);
+                    call.GenericArguments.Add(ts.String);
+                    Behind("GenericMethod", il => { il.Emit(Cecil.Cil.OpCodes.Ldnull); il.Emit(Cecil.Cil.OpCodes.Call, call); });
+                    var field = new Cecil.FieldReference(gone, ts.Int32, module.ImportReference(nested));
+                    Behind("NestedField", il => { il.Emit(Cecil.Cil.OpCodes.Ldsfld, field); il.Emit(Cecil.Cil.OpCodes.Pop); });
+                    // Found: a method of the game by its own signature, and one of KMonoBehaviour named
+                    // on Workable.
+                    var xyToCell = new Cecil.MethodReference("XYToCell", ts.Int32, module.ImportReference(game.GetType("Grid", throwOnError: true)!));
+                    xyToCell.Parameters.Add(new Cecil.ParameterDefinition(ts.Int32));
+                    xyToCell.Parameters.Add(new Cecil.ParameterDefinition(ts.Int32));
+                    var trigger = new Cecil.MethodReference("Trigger", ts.Void, module.ImportReference(game.GetType("Workable", throwOnError: true)!)) { HasThis = true };
+                    trigger.Parameters.Add(new Cecil.ParameterDefinition(ts.Int32));
+                    trigger.Parameters.Add(new Cecil.ParameterDefinition(ts.Object));
+                    if (firstpass.GetType("KMonoBehaviour", throwOnError: true)!.GetMethod("Trigger", [typeof(int), typeof(object)]) == null) throw new InvalidOperationException("KMonoBehaviour.Trigger(int, object) changed");
+                    Method("Fine", ts.Int32, il =>
+                    {
+                        var skip = il.Create(Cecil.Cil.OpCodes.Ldc_I4_2);
+                        il.Emit(Cecil.Cil.OpCodes.Ldarg_0);
+                        il.Emit(Cecil.Cil.OpCodes.Brfalse, skip);
+                        il.Emit(Cecil.Cil.OpCodes.Ldnull);
+                        il.Emit(Cecil.Cil.OpCodes.Ldc_I4_0);
+                        il.Emit(Cecil.Cil.OpCodes.Ldnull);
+                        il.Emit(Cecil.Cil.OpCodes.Callvirt, trigger);
+                        il.Append(skip);
+                        il.Emit(Cecil.Cil.OpCodes.Ldc_I4_3);
+                        il.Emit(Cecil.Cil.OpCodes.Call, xyToCell);
+                        il.Emit(Cecil.Cil.OpCodes.Ret);
+                    }, ts.Boolean);
+                    var modPath = Path.Combine(dir, name + ".dll");
+                    assembly.Write(modPath);
+                    var type = ModAccess.LoadFrom(modPath).GetType("Probe")!;
+                    Exception Fails(string methodName, object?[]? args)
+                    {
+                        try
+                        {
+                            type.GetMethod(methodName)!.Invoke(null, BindingFlags.DoNotWrapExceptions, null, args, null);
+                        }
+                        catch (Exception e) when (e is MissingMethodException or MissingFieldException)
+                        {
+                            return e;
+                        }
+                        throw new InvalidOperationException(methodName + " did not throw MissingMethodException or MissingFieldException");
+                    }
+                    void Expect(Exception e, Type exception, string message)
+                    {
+                        if (e.GetType() != exception || e.Message != message) throw new InvalidOperationException($"{e.GetType().Name} \"{e.Message}\", not {exception.Name} \"{message}\"");
+                    }
+                    var outer = Fails("Outer", null);
+                    Expect(outer, typeof(MissingMethodException), "Method not found: void .SimMessages.SetCellProperties(int,byte)");
+                    var first = outer.StackTrace!.Split('\n')[0].Trim();
+                    if (!first.StartsWith("at Probe.Outer(", StringComparison.Ordinal)) throw new InvalidOperationException("Outer's first frame: " + first);
+                    Expect(Fails("OnGeneric", [false]), typeof(MissingMethodException), $"Method not found: void .{generic.Name}.{gone}(!0[]&)");
+                    Expect(Fails("GenericMethod", [false]), typeof(MissingMethodException), $"Method not found: void .SimMessages.{gone}<!0>(!!0)");
+                    Expect(Fails("NestedField", [false]), typeof(MissingFieldException), $"Field not found: int .{nested.Name}.{gone} Due to: Could not find field in class");
+                    var cell = type.GetMethod("Fine")!.Invoke(null, [false])!;
+                    if ((int)cell != (int)game.GetType("Grid")!.GetMethod("XYToCell")!.Invoke(null, [2, 3])!) throw new InvalidOperationException("Fine changed");
+                    return $"the methods throw Mono's MissingMethodException and MissingFieldException from their caller's frame ({first}); members found in the type or its bases are left";
+                }
+                finally
+                {
+                    try { Directory.Delete(dir, true); } catch (IOException) { } catch (UnauthorizedAccessException) { }
+                }
+            });
             Check("A mod's stack walk through a patched method (MonoStackFrames)", () =>
             {
                 ModAccess.Install();

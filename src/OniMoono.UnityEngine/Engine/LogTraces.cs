@@ -46,7 +46,9 @@ namespace OniMoono.Engine
                 for (int f = 0; f < end; f++)
                 {
                     var method = frames[f].GetMethod();
-                    if (method == null) continue;
+                    // Left out as Exception.StackTrace leaves it out: a mod's method that throws as
+                    // Mono's compilation of it would (the host's MonoMissingTypes) has no frame on Mono.
+                    if (method == null || Hidden(method)) continue;
                     string name = MonoMethod(method);
                     string file = frames[f].GetFileName();
                     string location = file != null ? file + ":" + frames[f].GetFileLineNumber() : "<" + ModuleId(method) + ">:0";
@@ -80,6 +82,9 @@ namespace OniMoono.Engine
             }
             return sb.ToString();
         }
+
+        static bool Hidden(MethodBase m) =>
+            m.IsDefined(typeof(StackTraceHiddenAttribute), false) || (m.DeclaringType?.IsDefined(typeof(StackTraceHiddenAttribute), false) ?? false);
 
         static string Condition(Exception e) => e.GetType().Name + ": " + e.Message;
 

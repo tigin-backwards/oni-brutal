@@ -1,0 +1,56 @@
+{
+ "spec": "mods/3344810103-p-base-system.yaml",
+ "mods": [
+  "3344810103"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "its movement option at 3 sets the tiles' speed; a placed geyser erupts at the original's (fivefold) rate; its P017GG1 storage box is listed but never defined",
+ "updated": "2026-10-26",
+ "commit": "403df7df",
+ "mod_dlls": {
+  "3344810103": {
+   "PLib.dll": "b862c5db2b3cd6df09a62d4a30782e91e2b24e8e1bfac08d991c9cc89a984ba9",
+   "P_╗∙┤í╧╡═│_1.0.dll": "b409a0c479d6c3de9600075aa4d88b6a3d2262efd414a90b1e919fc9fc8bcf5b"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-024205-d1d3e5ef",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T02:44:16",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-031847-7cfdd51e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:18:47",
+    "lane": 14,
+    "reference_run": "20261026-024205-d1d3e5ef",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-031847-7cfdd51e",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T03:19:24",
+    "lane": 14,
+    "reference_run": "20261026-024205-d1d3e5ef",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -1,0 +1,30 @@
+# P 基础系统 Base System 1.4 (3344810103), classes P, O.
+#
+# What it does: PLib options (P000GG0.json, in the shared config folder) retune the base:
+# tiles (storage, farm, bunker, carpet, plastic and others) and Duplicants' movement take one
+# speed multiplier (5 by default); storage bins and storage tiles seal and insulate; geysers
+# erupt five times the mass, with no overpressure; Duplicants reach five cells farther. (It
+# also lists a one-cell storage box, P017GG1, in the Base menu, but defines no such building.)
+# How a player reaches it: the Mods screen's options.
+# What changes: a faster, roomier base.
+#
+# options set the movement multiplier to 3: the tiles' speed follows; a geyser placed in the
+# dug-out corridor west of the printing pod erupts at the original's (fivefold) rate.
+from: early-base
+mods: [3344810103]
+options:
+  "3344810103": {$file: P000GG0.json, P014GG1X1: 3}
+setup:
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131124, 0, 0, \"GeyserGeneric_steam\", \"BuildingBack\")", method: SetActive, args: [true]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"PlasticTile\").BuildingComplete.GetComponent<SimCellOccupier>.movementSpeedMultiplier": 3
+      "Assets.GetBuildingDef(\"StorageTile\").BuildingComplete.GetComponent<SimCellOccupier>.movementSpeedMultiplier": 3
+  - driver: {camera.set: {cell: [110, 208], ortho: 8}}
+  - click_world: {cell: [108, 206], select: GeyserGeneric_steam}
+  - ui_wait: {path: "**/DetailsScreen/TitleBar", cond: stable}
+  - expect_state:
+      "selected:Geyser.configuration.GetEmitRate()": "> 0"
+      "selected:Geyser.configuration.scaledRate": [">= 0.99999 * original", "<= 1.00001 * original"]
+  - expect_state:
+      "selected:Geyser.configuration.GetEmitRate()": [">= 0.99999 * original", "<= 1.00001 * original"]

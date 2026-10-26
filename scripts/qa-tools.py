@@ -74,8 +74,20 @@ def new_signatures(reference, new):
     for line in unknown(read(new), read(reference)):
         print(line)
 
+def joined_inner_exceptions(lines):
+    """LINES with each inner exception on its outer one's line: .NET's Exception.ToString starts
+    " ---> Inner: message" on a line of its own, Mono's continues the outer message's line
+    (ARCHITECTURE D37)."""
+    out = []
+    for line in lines:
+        if out and re.match(r'\s*---> ', line):
+            out[-1] = out[-1].rstrip() + ' ' + line.strip()
+        else:
+            out.append(line)
+    return out
+
 def signatures(path):
-    lines = open(path, encoding='utf-8', errors='replace').read().splitlines()
+    lines = joined_inner_exceptions(open(path, encoding='utf-8', errors='replace').read().splitlines())
     found = set()
     for i, line in enumerate(lines):
         body = re.sub(r'^\[[^\]]*\] \[\d+\] \[[A-Z]+\] ', '', line)

@@ -111,6 +111,32 @@ class LogSignatures(unittest.TestCase):
                            "ProcGen.Other.get_Item(Key key)\n")
         self.assertEqual(len(qa_tools.unknown(other, mono)), 1)
 
+    def test_inner_exception_on_its_own_line(self):
+        # A mod logs "Failed patch X: " + exception (Reversible Heater Clones): Mono's
+        # Exception.ToString continues the outer message with " ---> Inner: message", .NET's
+        # starts that on a new line. One signature in both, as Mono writes it.
+        mono = signatures('[23:58:02.227] [1] [WARNING] [RHC] Failed patch P: HarmonyLib.HarmonyException: Patching '
+                          'exception in method null ---> System.ArgumentException: Undefined target method for '
+                          'patch method static System.Void P::Prefix(System.Object[] __args)\n'
+                          '  at HarmonyLib.PatchClassProcessor.PatchWithAttributes (System.Reflection.MethodBase& '
+                          'lastOriginal) [0x00045] in <a1b2>:0 \n'
+                          '   --- End of inner exception stack trace ---\n'
+                          '  at HarmonyLib.PatchClassProcessor.ReportException (System.Exception exception, '
+                          'System.Reflection.MethodBase original) [0x00045] in <a1b2>:0 \n')
+        ours = signatures('[00:33:03.277] [1] [WARNING] [RHC] Failed patch P: HarmonyLib.HarmonyException: Patching '
+                          'exception in method null\n'
+                          ' ---> System.ArgumentException: Undefined target method for patch method static '
+                          'System.Void P::Prefix(System.Object[] __args)\n'
+                          '   at HarmonyLib.PatchClassProcessor.PatchWithAttributes(MethodBase& lastOriginal)\n'
+                          '   --- End of inner exception stack trace ---\n'
+                          '   at HarmonyLib.PatchClassProcessor.ReportException(Exception exception, MethodBase '
+                          'original)\n')
+        self.assertEqual(ours, mono)
+        self.assertEqual(len(ours), 1)
+        # Inner exceptions of inner exceptions join the same line.
+        self.assertEqual(signatures('A: a\n ---> B: b\n ---> C: c\n   at M.N()\n'),
+                         signatures('A: a ---> B: b ---> C: c\n  at M.N () [0x00000] in <x>:0\n'))
+
     def test_trailing_period(self):
         self.assertEqual(qa_tools.canonical('NullReferenceException: Object reference not set to an instance of an object.'),
                          qa_tools.canonical('NullReferenceException: Object reference not set to an instance of an object'))

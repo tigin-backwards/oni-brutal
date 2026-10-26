@@ -681,6 +681,15 @@ game or mod code can notice. Each says how it is resolved, or why it is kept.
   first 20 MB as written and, past them, only the last 20 MB or so, behind a banner of dashes
   saying how many bytes were cut there; the file stays under about 60 MB. `ONI_LOG_FULL=1`
   turns the cap off.
+- **D37 Exception strings with inner exceptions.** Mono's `Exception.ToString` continues the
+  outer message on its line: `Outer: message ---> Inner: message`, then the inner frames.
+  .NET's starts ` ---> Inner: message` on a line of its own. A mod that logs
+  `"…: " + exception` writes one line in the original's log where ours has two (Reversible
+  Heater Clones logs so the two patches that fail in both players). Kept: it is log text, and
+  the frames below it differ between the runtimes anyway (Mono's `[0x…] in <mvid>:0`). The
+  test tools' log signatures (`qa-tools.py`) join such a line onto the one before it, so the
+  two players' logs give the same signature; the load sweep had counted the second line as an
+  error only ours logged.
 
 ## 3. The engine API (`OniMoono.UnityEngine`)
 

@@ -1,0 +1,22 @@
+# 吃人肉 (3318646518), class P.
+#
+# What it does: a Duplicant who dies leaves meat: a postfix on MinionModifiers.OnDeath spawns
+# a Meat in each of the nine cells around the body (moved to an open cell when solid), and
+# reports their calories as butchered.
+# How a player reaches it: a Duplicant dying.
+# What changes: nine pieces of meat beside every corpse.
+#
+# setup wounds a Duplicant past its hit points; once it has died there is meat in the colony,
+# nine pieces of it.
+from: early-base
+mods: [3318646518]
+setup:
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[2].GetComponent<Health>", method: Damage, args: [1000.0]}}
+steps:
+  - expect_state:
+      "count:all:Edible::[*] if .name.StartsWith(\"Meat\") == true": 0
+  - run: {seconds: 1200, until: {duplicants: 2}}
+  - expect: {duplicants: 2}
+  - run: {seconds: 2}
+  - expect_state:
+      "sum:all:Edible::[*].GetComponent<PrimaryElement>.Units if .name.StartsWith(\"Meat\") == true": 9

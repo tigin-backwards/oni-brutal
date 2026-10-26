@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3318646518-cannibal-meat.yaml",
+ "mods": [
+  "3318646518"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Duplicant that dies leaves nine pieces of meat",
+ "updated": "2026-10-26",
+ "commit": "f898d18a",
+ "mod_dlls": {
+  "3318646518": {
+   "LastLegacy.dll": "bdc7602075eef831d2521355d6d2f4b2aafa15863bed759a8f699f68a64ad12f"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-102152-42394c53",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T10:39:36",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-143450-564c3455",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T14:44:07",
+    "lane": 14,
+    "reference_run": "20261026-102152-42394c53",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-143450-564c3455",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T14:44:10",
+    "lane": 15,
+    "reference_run": "20261026-102152-42394c53",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

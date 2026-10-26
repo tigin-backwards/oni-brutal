@@ -1,0 +1,26 @@
+# Social Life: Duplicant Friendships & Romance 社交生活 (3775109476), classes P, S.
+#
+# What it does: Duplicants keep relationships with each other: greetings, chats, shared
+# meals, care when sick, arguments and apologies move them along friendship and romance
+# tracks, with effects on morale and work, a chronicle of events and dialogue popups (from
+# offline packs; an optional LLM client is used only when an API key is configured, none
+# here). It adds a Social screen to the management menu (Toggle:Social, a KScreen made in
+# code), a Social tab in Duplicants' details, a user-menu button for personalities and an
+# options page on the Mods screen.
+# How a player reaches it: the management menu's Social button; a Duplicant's details.
+# What changes: Duplicants' relationships and the morale effects that follow.
+#
+# The management menu has the Social toggle; a click opens the mod's screen, which is dumped
+# and shot and compared with the original. The colony then runs a while.
+from: early-base
+mods: [3775109476]
+steps:
+  - expect_ui:
+      "**/TopRightInfoPanelButtons/Toggle:Social": {active: true}
+  - click: {ui: "**/TopRightInfoPanelButtons/Toggle:Social"}
+  - ui_wait: {path: "**/ONI AI Social Management Screen", cond: stable}
+  - ui_dump: {name: social, root: "**/ONI AI Social Management Screen"}
+  - shot: {name: social, crop: "**/ONI AI Social Management Screen", threshold: 0.04}
+  - click: {ui: "**/TopRightInfoPanelButtons/Toggle:Social"}
+  - run: {seconds: 60}
+  - expect: {duplicants: 3}

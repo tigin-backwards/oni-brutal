@@ -1,0 +1,93 @@
+{
+ "spec": "mods/3775109476-social-life.yaml",
+ "mods": [
+  "3775109476"
+ ],
+ "verdict": "failed",
+ "why": "a run of ours failed",
+ "findings": [],
+ "note": "the management menu's Social toggle opens the mod's screen and the colony runs, as in the original; the screen's summary text (5 lines with a fallback-font middle dot) is 0.03 px taller in ours (85.17 vs 85.14), shifting its layout groups' preferred heights",
+ "updated": "2026-10-26",
+ "commit": "bbc2ade",
+ "mod_dlls": {
+  "3775109476": {
+   "Hank.SocialChronicle.dll": "24f24731bab0ad8078d88f00496821b9354a09ae819c83f57d06f7f59318667c",
+   "Hank.SocialContent.dll": "0ee6d8cff36f70fc6822a0000a72731612fc10578329ff7edacb1311732dd045",
+   "Hank.SocialCore.dll": "03da23df0657965d2e24cd50aec1dfa5332b13e6a87af2250293bf51c1f2883a",
+   "Hank.SocialDialogue.dll": "207ffc1945681e2222b088610f142a52b97f559505ac314281007c15ac2e56e7",
+   "Hank.SocialI18n.dll": "9696044cec43b70fbcae0ad70a9b77cc46caa5f0be58c46d81e6459e33402103",
+   "Hank.SocialViewModels.dll": "25ede526fc791cea0177d86d56a61a1e14d9cf25f57a130852c7e5e960fb5033",
+   "Hank.V2Facts.dll": "d544ed0714dd0c4515134482989a0c69071a3c2e698ed39768f4fa1a064fb782",
+   "Hank.V2Pack.dll": "d879189f3f0bd42e0e7f962972bd366b8958f1cbf1c8d9fc67d0ae127b5ce108",
+   "Hank.V2Render.dll": "922459355645bf112981e800460a83779f6deee9f0ca097448820efe722ba630",
+   "Hank.V2Select.dll": "f165f8f8ab3a33f4ef5d032ffb875f432dca4b1e3dd89471c4aaccfca79ab69a",
+   "ONIAiSocial.dll": "08bad5a45bf3f9c9f44e3c2763608d6ba92e0cd08eda3b242f97cc47107e206c"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-213131-b5befd47",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T21:31:31",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-001354-de9d87c3",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-26T00:13:54",
+    "lane": 16,
+    "reasons": [
+     "ui_dump social: 2 difference(s)"
+    ],
+    "reference_run": "20261025-213131-b5befd47",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "social": {
+      "differences": 2,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "social": 0.000569
+    }
+   },
+   {
+    "run": "20261026-001354-de9d87c3",
+    "index": 2,
+    "verdict": "fail",
+    "date": "2026-10-26T00:13:55",
+    "lane": 17,
+    "reasons": [
+     "ui_dump social: 2 difference(s)"
+    ],
+    "reference_run": "20261025-213131-b5befd47",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "social": {
+      "differences": 2,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "social": 0.000569
+    }
+   }
+  ]
+ }
+}

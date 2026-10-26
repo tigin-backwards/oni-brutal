@@ -1,0 +1,73 @@
+{
+ "spec": "mods/3427974009-synchronized-building-groups.yaml",
+ "mods": [
+  "3427974009"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Storage Bin's group side screen opens the secondary screen, and \"e2e\" typed and confirmed puts the bin in group e2e; both screens' dumps and the secondary's shot match",
+ "updated": "2026-10-26",
+ "commit": "07f2083",
+ "mod_dlls": {
+  "3427974009": {
+   "SettingsSyncGroups.dll": "30e870438cf476cb6e5b5e3f16fa2c0b3ce717ea2eb2fe058cfb5300ada62d22"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-000654-98a7a75e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T00:21:06",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-013830-cee95fa2",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T01:39:21",
+    "lane": 14,
+    "reference_run": "20261026-000654-98a7a75e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "group": {
+      "differences": 0
+     },
+     "secondary": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "secondary": 0.0
+    }
+   },
+   {
+    "run": "20261026-013830-cee95fa2",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T01:40:02",
+    "lane": 14,
+    "reference_run": "20261026-000654-98a7a75e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "group": {
+      "differences": 0
+     },
+     "secondary": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "secondary": 0.0
+    }
+   }
+  ]
+ }
+}

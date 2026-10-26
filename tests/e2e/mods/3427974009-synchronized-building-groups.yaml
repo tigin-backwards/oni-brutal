@@ -1,0 +1,34 @@
+# Synchronized Building Groups (3427974009), classes S (asset bundle side screens), P.
+#
+# What it does: every building with Copy Settings gets a SyncGroupCarrier and a side screen,
+# Building Settings Group, that names its settings group. Its button opens a secondary side
+# screen (Change settings group) listing the groups that buildings of the same kind have, with a
+# search bar to type a new name and a confirm button. Buildings of one group share settings:
+# joining a group copies the settings of another member, and leaving the side screen copies the
+# building's settings to the rest of its group.
+# How a player reaches it: select a building with copyable settings; its group side screen.
+# What changes: settings kept in sync across groups of buildings, as in Factorio.
+#
+# setup builds a Storage Bin in the corridor west of the printing pod. It is selected, the
+# group side screen's button opens the secondary screen, and "e2e" is typed and confirmed: the
+# bin belongs to group e2e.
+from: early-base
+mods: [3427974009]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"StorageLocker\")", method: Build, args: [{"$": "Grid.XYToCell(112, 206)"}, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+steps:
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [112, 207], ortho: 8}}
+  - click_world: {cell: [112, 207], select: StorageLocker}
+  - ui_wait: {path: "**/BuildingGroupSideScreen*/Content/Button", cond: stable}
+  - expect_ui:
+      "**/BuildingGroupSideScreen*/Content/Label": {text: "[no group assigned]"}
+  - ui_dump: {name: group, root: "**/BuildingGroupSideScreen*"}
+  - click: {ui: "**/BuildingGroupSideScreen*/Content/Button"}
+  - ui_wait: {path: "**/GroupAssignment_SecondarySidescreen*/SearchBar/Input", cond: stable}
+  - ui_dump: {name: secondary, root: "**/GroupAssignment_SecondarySidescreen*"}
+  - shot: {name: secondary, crop: "**/GroupAssignment_SecondarySidescreen*", threshold: 0.04}
+  - type: {ui: "**/GroupAssignment_SecondarySidescreen*/SearchBar/Input", text: "e2e", clear: true}
+  - click: {ui: "**/GroupAssignment_SecondarySidescreen*/SearchBar/ConfirmButton"}
+  - expect_state:
+      "selected:GetComponent<SettingsSyncGroups.Scripts.SyncGroupCarrier>._assignedGroupName": e2e

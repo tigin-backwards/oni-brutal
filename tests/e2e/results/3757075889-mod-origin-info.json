@@ -5,12 +5,12 @@
   "3008287025",
   "2860569135"
  ],
- "verdict": "failed",
- "why": "a run of ours failed",
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
  "findings": [],
- "note": "with Smol Generators and Roller Snakes, a Smol Smart Battery's info panel names its mod in both players, but ours records no modded recipes (0, the original 6) and fewer modded content entries (17, the original 23): the mod's postfixes on the ComplexRecipe, GeyserType and Spice constructors call Assembly.GetCallingAssembly, which names the mod that made the recipe on Mono and another assembly in ours",
+ "note": "with Smol Generators and Roller Snakes Reborn, the mod records the same modded buildings, recipes and content as the original (its constructor postfixes' GetCallingAssembly names the mod that made each recipe, as on Mono), and a Smol Smart Battery's info panel names Smol Generators",
  "updated": "2026-10-26",
- "commit": "22a076d",
+ "commit": "1d4696b",
  "mod_dlls": {
   "3757075889": {
    "ModOriginInfo.dll": "75fb70ef332c49ef2b5d78ba1eebb3b2c682045bde3ab4221260f5bd52fcfff7"
@@ -35,33 +35,35 @@
   ],
   "ours": [
    {
-    "run": "20261026-012844-283dcabd",
+    "run": "20261026-030640-dc164ee6",
     "index": 1,
-    "verdict": "fail",
-    "date": "2026-10-26T01:28:44",
-    "lane": 15,
-    "reasons": [
-     "step 1: type:ModOriginInfo.ModAssets::ModdedRecipes.Count is 0, wanted == original; type:ModOriginInfo.ModAssets::ModdedContentPrefabIdToModId.Count is 17, wanted == original (it held in the original: the interaction has no effect in ours)"
-    ],
+    "verdict": "pass",
+    "date": "2026-10-26T03:06:40",
+    "lane": 32,
     "reference_run": "20261025-222040-75e4a4a6",
     "new_signatures": 0,
     "findings": [],
-    "ui_dump": {},
+    "ui_dump": {
+     "info": {
+      "differences": 0
+     }
+    },
     "shots": {}
    },
    {
-    "run": "20261026-012844-283dcabd",
+    "run": "20261026-030640-dc164ee6",
     "index": 2,
-    "verdict": "fail",
-    "date": "2026-10-26T01:29:17",
-    "lane": 15,
-    "reasons": [
-     "step 1: type:ModOriginInfo.ModAssets::ModdedRecipes.Count is 0, wanted == original; type:ModOriginInfo.ModAssets::ModdedContentPrefabIdToModId.Count is 17, wanted == original (it held in the original: the interaction has no effect in ours)"
-    ],
+    "verdict": "pass",
+    "date": "2026-10-26T03:10:41",
+    "lane": 32,
     "reference_run": "20261025-222040-75e4a4a6",
     "new_signatures": 0,
     "findings": [],
-    "ui_dump": {},
+    "ui_dump": {
+     "info": {
+      "differences": 0
+     }
+    },
     "shots": {}
    }
   ]

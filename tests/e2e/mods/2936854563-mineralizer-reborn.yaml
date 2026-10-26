@@ -1,0 +1,44 @@
+# Mineralizer Reborn (2936854563), classes B, S, O.
+#
+# What it does: adds the Mineralizer (4x2, 200 kg of any metal, in the Refinement menu beside
+# the Desalinator, researched with Filtration): a powered building (120 W, a PLib option) that
+# takes water from a pipe, has a mineral delivered and pipes out the mix: water and salt make
+# salt water, water and more salt brine, and water and sucrose nectar (if the DLC has it).
+# Which one is picked on its side screen (the game's few-option screen, an
+# IFewOptionSideScreen), and the delivery follows the choice.
+# How a player reaches it: the build menu (Refinement), after the research; its side screen.
+# What changes: a way to make salt water, brine and nectar.
+#
+# setup grants Filtration and spawns metal ore. A Mineralizer is built on the floor west of
+# the corridor west of the printing pod (106, 206) and selected: it makes salt water, and
+# picking Brine on its side screen switches its mineral to that recipe's.
+from: early-base
+mods: [2936854563]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"LiquidFiltering\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Cuprite\").substance", method: SpawnResource, args: [[109.5, 206.5, -12], 400, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"LiquidFiltering\").unlockedItemIDs": {contains: Mineralizer}
+  - run: {seconds: 5}
+  - click: {ui: "**/PlanScreen/Toggle:Refinement"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/Mineralizer Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/Mineralizer Group*": {active: true}
+  - key: {code: Escape}
+  - expect_ui: {"**/PauseScreen": {exists: false}}
+  - build: {prefab: Mineralizer, at: [106, 206], material: Cuprite}
+  - expect: {blueprints: {Mineralizer: 1}}
+  - run: {seconds: 1500, until: {buildings: {Mineralizer: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [108, 207], ortho: 8}}
+  - click_world: {cell: [107, 207], select: Mineralizer}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<MineralizerReborn.Mineralizer>.mineral.Name": SaltWater
+  - ui_wait: {path: "**/FewOptionSelectionSideScreen", cond: stable}
+  - ui_dump: {name: options, root: "**/FewOptionSelectionSideScreen"}
+  - shot: {name: options, crop: "**/FewOptionSelectionSideScreen"}
+  - click: {text: "Brine", under: "**/FewOptionSelectionSideScreen"}
+  - expect_state:
+      "selected:GetComponent<MineralizerReborn.Mineralizer>.mineral.Name": Brine

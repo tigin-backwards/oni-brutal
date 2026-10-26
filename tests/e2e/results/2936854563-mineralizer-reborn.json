@@ -1,0 +1,67 @@
+{
+ "spec": "mods/2936854563-mineralizer-reborn.yaml",
+ "mods": [
+  "2936854563"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "built from the Refinement menu after Filtration, it makes salt water; Brine picked on its option screen switches its recipe; screen as in the original",
+ "updated": "2026-10-25",
+ "commit": "7a141cf",
+ "mod_dlls": {
+  "2936854563": {
+   "MineralizerReborn.dll": "fb4c69be3609ec303af8314753f45f8ee577c49810e56d347e8267fd0b722342"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-212840-e691216e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T21:34:00",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-213605-1f1e7f18",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T21:37:30",
+    "lane": 14,
+    "reference_run": "20261025-212840-e691216e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "options": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "options": 7.5e-05
+    }
+   },
+   {
+    "run": "20261025-213605-1f1e7f18",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-25T21:37:31",
+    "lane": 15,
+    "reference_run": "20261025-212840-e691216e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "options": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "options": 7.5e-05
+    }
+   }
+  ]
+ }
+}

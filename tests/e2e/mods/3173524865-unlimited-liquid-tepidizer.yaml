@@ -1,0 +1,35 @@
+# Unlimired Liquid Tepidizer 热得快 (3173524865), class B.
+#
+# What it does: a 4x1 Direct Heater in the Utilities menu, researched with Temperature
+# Modulation: it draws 1,200 W and pours 4,000 kW of heat into the liquid or gas around it,
+# with no temperature cap (it overheats at 9,000 K), stalling with a status item when there is
+# too little mass around it; automation can switch it.
+# How a player reaches it: the build menu (Utilities).
+# What changes: a very strong heater.
+#
+# setup researches Temperature Modulation; the Utilities menu lists the heater (shot), and one
+# built by setup in the dug-out corridor west of the printing pod is selected.
+from: early-base
+mods: [3173524865]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"TemperatureModulation\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"DirectHeater\")", method: Build, args: [131128, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"TemperatureModulation\").unlockedItemIDs": {contains: DirectHeater}
+      "Assets.GetBuildingDef(\"DirectHeater\").SelfHeatKilowattsWhenActive": 4000
+      "Assets.GetBuildingDef(\"DirectHeater\").EnergyConsumptionWhenActive": 1200
+  - run: {seconds: 10}
+  - expect: {buildings: {DirectHeater: 1}}
+  - click: {ui: "**/PlanScreen/Toggle:Utilities"}
+  # The build menu catches up over frames: 120 frames for all of it to settle.
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/DirectHeater Group*", cond: stable, stable: 120, frames: 600}
+  - shot: {name: utilities-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
+  - key: {code: Escape}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 206], select: DirectHeater}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:DirectHeater": exists
+  - ui_dump: {name: title, root: "**/DetailsScreen/TitleBar/Border/LabelGroup"}

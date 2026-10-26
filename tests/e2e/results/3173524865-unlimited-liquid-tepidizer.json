@@ -1,0 +1,67 @@
+{
+ "spec": "mods/3173524865-unlimited-liquid-tepidizer.yaml",
+ "mods": [
+  "3173524865"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "after Temperature Modulation the Utilities menu lists the Direct Heater (shot); a built one is selected (dumped)",
+ "updated": "2026-10-26",
+ "commit": "fd4e5b95",
+ "mod_dlls": {
+  "3173524865": {
+   "ONIHeater.dll": "df952bbae553c516d930b79d91c5cdf2e176c467730ebec51c8698738c625b15"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-185246-86fbde8e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T19:00:00",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-192551-82b3b3ca",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T19:38:48",
+    "lane": 15,
+    "reference_run": "20261026-185246-86fbde8e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "utilities-menu": 0.0
+    }
+   },
+   {
+    "run": "20261026-192551-82b3b3ca",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T19:39:54",
+    "lane": 15,
+    "reference_run": "20261026-185246-86fbde8e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "utilities-menu": 0.0
+    }
+   }
+  ]
+ }
+}

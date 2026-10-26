@@ -1,0 +1,24 @@
+# Never Flood Critter Drop-Off fixed (2667192005), class P.
+#
+# What it does: postfixes on CritterDropOffConfig's and CritterPickUpConfig's CreateBuildingDef
+# make the Critter Drop-Off and Critter Pick-Up not floodable, so they keep working under
+# water (aquatic ranches).
+# How a player reaches it: a drop-off or pick-up in a flooded room.
+# What changes: those buildings never stop for flooding.
+#
+# Both definitions are not floodable, and a Critter Drop-Off built by setup in the dug-out room
+# west of the printing pod has no Floodable component.
+from: early-base
+mods: [2667192005]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"CritterDropOff\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Cuprite], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"CritterDropOff\").Floodable": false
+      "Assets.GetBuildingDef(\"CritterPickUp\").Floodable": false
+      "all:CreatureDeliveryPoint::[0].GetComponent<Floodable>": missing
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: CritterDropOff}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<KPrefabID>.PrefabTag.Name": CritterDropOff

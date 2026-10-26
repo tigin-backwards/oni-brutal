@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2667192005-never-flood-critter-drop-off.yaml",
+ "mods": [
+  "2667192005"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Critter Drop-Off and Pick-Up are not floodable; a drop-off built has no Floodable component",
+ "updated": "2026-10-26",
+ "commit": "2d8424ee",
+ "mod_dlls": {
+  "2667192005": {
+   "NoFloodWranglePoint.dll": "88f05f8ee776196aa348ac2d5a0c707b124ca17fd9a96fff88f6e595232cf099"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-043257-c0eef0ae",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:32:58",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-103527-eaf4a46a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T10:35:27",
+    "lane": 16,
+    "reference_run": "20261026-043257-c0eef0ae",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-103527-eaf4a46a",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T10:35:28",
+    "lane": 17,
+    "reference_run": "20261026-043257-c0eef0ae",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

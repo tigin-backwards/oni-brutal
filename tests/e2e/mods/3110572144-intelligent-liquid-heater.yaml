@@ -1,0 +1,41 @@
+# I 智能液体加热器 Intelligent Liquid Heater (3110572144), classes B, S.
+#
+# What it does: gives the Liquid Tepidizer (LiquidHeater) a target temperature slider: a
+# component (I002GGG1K2, IMultiSliderControl) shows one slider, -200 to 300 °C (default 26),
+# in the multi-slider side screen and sets the heater's SpaceHeater.targetTemperature to it;
+# copy settings copy it. It also raises the heater's overheat temperature to 1000 °C and adds a
+# minimum operating temperature of 13.15 K.
+# How a player reaches it: a built Liquid Tepidizer's side screen.
+# What changes: a tepidizer stops heating at the temperature the player sets.
+#
+# setup grants Liquid Tuning (LiquidTemperature) and spawns metal ore. A tepidizer is built in
+# the corridor west of the printing pod and selected: its slider shows 26 °C, and 50 typed
+# into its field makes the target 50 °C.
+from: early-base
+mods: [3110572144]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"LiquidTemperature\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Cuprite\").substance", method: SpawnResource, args: [[111.5, 207.5, -12], 800, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"LiquidHeater\").OverheatTemperature": 1000
+  - build: {prefab: LiquidHeater, at: [112, 208]}   # it may hang in the air; plants grow below
+  - expect: {blueprints: {LiquidHeater: 1}}
+  - run: {seconds: 1500, until: {buildings: {LiquidHeater: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [113, 207], ortho: 8}}
+  - click_world: {cell: [113, 208], select: LiquidHeater}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_wait: {path: "**/MultiSliderSideScreen/Sliders/SliderContents", cond: stable}
+  - expect_state:
+      "selected:GetComponent<SpaceHeater>.targetTemperature": "> 299.14"
+  - expect_state:
+      "selected:GetComponent<SpaceHeater>.targetTemperature": "< 299.16"
+  - ui_dump: {name: slider, root: "**/MultiSliderSideScreen"}
+  - shot: {name: slider, crop: "**/MultiSliderSideScreen"}
+  - type: {ui: "**/MultiSliderSideScreen/Sliders/SliderContents[0]/TitleRow/NumberInputField", text: "50", clear: true, enter: true}
+  - expect_state:
+      "selected:GetComponent<SpaceHeater>.targetTemperature": "> 323.14"
+  - expect_state:
+      "selected:GetComponent<SpaceHeater>.targetTemperature": "< 323.16"
+  - ui_dump: {name: slider-set, root: "**/MultiSliderSideScreen"}

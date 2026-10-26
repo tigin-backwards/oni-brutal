@@ -1,0 +1,74 @@
+{
+ "spec": "mods/3110572144-intelligent-liquid-heater.yaml",
+ "mods": [
+  "3110572144"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a built Liquid Tepidizer's slider shows 26 °C; 50 typed into it sets the target; slider screen as in the original",
+ "updated": "2026-10-25",
+ "commit": "bd353b5",
+ "mod_dlls": {
+  "3110572144": {
+   "I_╓╟─▄╥║╠σ╝╙╚╚╞≈.dll": "4d8cc48143a7ec83801e1bdab476b38e7b3967cfb029b3f467db308888d8b975",
+   "PLib.dll": "b862c5db2b3cd6df09a62d4a30782e91e2b24e8e1bfac08d991c9cc89a984ba9"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-195133-9810c702",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T20:04:12",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-204505-1ea60059",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T20:45:05",
+    "lane": 15,
+    "reference_run": "20261025-195133-9810c702",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "slider": {
+      "differences": 0
+     },
+     "slider-set": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "slider": 0.0
+    }
+   },
+   {
+    "run": "20261025-204505-1ea60059",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-25T20:46:09",
+    "lane": 15,
+    "reference_run": "20261025-195133-9810c702",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "slider": {
+      "differences": 0
+     },
+     "slider-set": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "slider": 0.0
+    }
+   }
+  ]
+ }
+}

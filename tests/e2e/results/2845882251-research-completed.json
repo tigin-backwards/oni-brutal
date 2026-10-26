@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2845882251-research-completed.yaml",
+ "mods": [
+  "2845882251"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the research queue completed empty opens the Research screen",
+ "updated": "2026-10-26",
+ "commit": "8ef77bae",
+ "mod_dlls": {
+  "2845882251": {
+   "ResearchCompleted.dll": "d496e86b3c4b6ac49593b8c65b91f9b45c4d9ccda0b8e9289013d2451cd8f218"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-171918-7bbacea2",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T17:26:09",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-175306-72ae15bd",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T18:21:21",
+    "lane": 14,
+    "reference_run": "20261026-171918-7bbacea2",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-175306-72ae15bd",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T18:22:27",
+    "lane": 14,
+    "reference_run": "20261026-171918-7bbacea2",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

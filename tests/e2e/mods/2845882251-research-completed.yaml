@@ -1,0 +1,21 @@
+# Research Completed (2845882251), class P.
+#
+# What it does: a postfix on Research.GetNextTech opens the Research screen when the last
+# queued research completes and nothing is left to research.
+# How a player reaches it: finishing a research queue.
+# What changes: the Research screen opens by itself to pick the next research.
+#
+# setup queues Interior Decor and completes it, which empties the queue: the Research screen
+# is open when the steps start, and nothing is queued.
+from: early-base
+mods: [2845882251]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"InteriorDecor\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+steps:
+  - expect_state:
+      "Research.Instance.GetTargetResearch()": missing
+      "Research.Instance.GetTechInstance(\"InteriorDecor\").IsComplete()": true
+  - ui_wait: {path: "**/ResearchScreen", cond: active}
+  - expect_ui:
+      "**/ResearchScreen": {active: true}

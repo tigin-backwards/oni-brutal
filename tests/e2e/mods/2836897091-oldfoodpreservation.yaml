@@ -1,0 +1,29 @@
+# OldFoodPreservation (2836897091), class P.
+#
+# What it does: a postfix on Rottable.RefrigerationLevel makes it return Frozen for every piece
+# of food, wherever it lies and however warm: all food is Deep Frozen. The atmosphere's share
+# of the rot stays.
+# How a player reaches it: any food in the colony.
+# What changes: food rots only from the gas around it.
+#
+# setup drops a Mush Fry at 20 °C on the floor of the corridor west of the printing pod
+# (111, 206), in oxygen, and selects it. After a short run it is tagged Deep Frozen, and its
+# rot rate is the oxygen's -0.3 a second only.
+from: early-base
+mods: [2836897091]
+setup:
+  - driver: {setup.call: {type: Scenario, method: SpawnPrefab, args: [{"$": "Grid.XYToCell(111, 206)"}, 0, 0, "FriedMushBar", "Ore"]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "SelectTool.Instance", method: Select, args: [{"$": "last:GetComponent<KSelectable>"}]}}
+steps:
+  - run: {seconds: 5}
+  - expect_state:
+      "count:all:Edible::[*] if .gameObject.name == FriedMushBar": 1
+      "count:all:Edible::[*] if .gameObject.name == FriedMushBar and .GetComponent<KPrefabID>.HasTag(\"DeepFrozen\") == true": 1
+      "count:all:Edible::[*] if .gameObject.name == FriedMushBar and .GetComponent<KPrefabID>.HasTag(\"Refrigerated\") == true": 0
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<Modifiers>.amounts.Get(\"Rot\").deltaAttribute.GetTotalValue()": "> -0.31"
+  - expect_state:
+      "selected:GetComponent<Modifiers>.amounts.Get(\"Rot\").deltaAttribute.GetTotalValue()": "< -0.29"
+  - shot: {name: info, crop: "**/DetailsScreen", threshold: 0.04}

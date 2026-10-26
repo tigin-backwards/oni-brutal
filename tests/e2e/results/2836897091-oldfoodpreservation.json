@@ -1,0 +1,59 @@
+{
+ "spec": "mods/2836897091-oldfoodpreservation.yaml",
+ "mods": [
+  "2836897091"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Mush Fry in oxygen is Deep Frozen and rots only at the gas's -0.3 a second",
+ "updated": "2026-10-25",
+ "commit": "bd353b5",
+ "mod_dlls": {
+  "2836897091": {
+   "OldFoodPreservation.dll": "5f328a0a98ddee7be9a3d36bca5d68052aaaf84d22739704334e90ed15d18a05"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-200219-ef1e47f8",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T20:23:39",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-210124-e7ed67c6",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T21:01:24",
+    "lane": 14,
+    "reference_run": "20261025-200219-ef1e47f8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "info": 0.004188
+    }
+   },
+   {
+    "run": "20261025-210124-e7ed67c6",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-25T21:02:10",
+    "lane": 14,
+    "reference_run": "20261025-200219-ef1e47f8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "info": 0.004188
+    }
+   }
+  ]
+ }
+}

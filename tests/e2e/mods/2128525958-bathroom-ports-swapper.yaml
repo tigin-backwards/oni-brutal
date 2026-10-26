@@ -1,0 +1,22 @@
+# Bathroom Items Liquid Ports Swapper (2128525958), class P.
+#
+# What it does: postfixes on the Lavatory's, Shower's and Sink's defs swap their liquid ports:
+# the input moves to (1, 1) and the output to (0, 0).
+# How a player reaches it: building those fixtures (their port icons).
+# What changes: plumbing layouts for bathrooms.
+#
+# The three defs' port offsets are read.
+from: early-base
+mods: [2128525958]
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"FlushToilet\").UtilityInputOffset.x": 1
+      "Assets.GetBuildingDef(\"FlushToilet\").UtilityInputOffset.y": 1
+      "Assets.GetBuildingDef(\"FlushToilet\").UtilityOutputOffset.x": 0
+      "Assets.GetBuildingDef(\"FlushToilet\").UtilityOutputOffset.y": 0
+      "Assets.GetBuildingDef(\"Shower\").UtilityInputOffset.x": 1
+      "Assets.GetBuildingDef(\"Shower\").UtilityOutputOffset.x": 0
+      "Assets.GetBuildingDef(\"WashSink\").UtilityInputOffset.y": 1
+      "Assets.GetBuildingDef(\"WashSink\").UtilityOutputOffset.y": 0
+  - run: {seconds: 10}
+  - expect: {duplicants: 3}

@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2128525958-bathroom-ports-swapper.yaml",
+ "mods": [
+  "2128525958"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Lavatory's, Shower's and Sink's liquid ports are swapped in their defs",
+ "updated": "2026-10-26",
+ "commit": "7f0364bc",
+ "mod_dlls": {
+  "2128525958": {
+   "Bathroom Items Liquid Ports Swapper.dll": "7f13b9ed037bcf4ead3b3c431b35de9d56f954e60941f7f97f7456db1669c53c"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-023754-20737f8f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:35:34",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-042501-043e3333",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:25:01",
+    "lane": 15,
+    "reference_run": "20261026-023754-20737f8f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-042501-043e3333",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T04:25:50",
+    "lane": 15,
+    "reference_run": "20261026-023754-20737f8f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

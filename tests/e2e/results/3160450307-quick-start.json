@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3160450307-quick-start.yaml",
+ "mods": [
+  "3160450307"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with Advanced Early applied to existing colonies (attributes left out: the original hangs in that loop on this fixture), the save is marked, the Duplicants get skill points and research completes as in the original",
+ "updated": "2026-10-26",
+ "commit": "aab79b4",
+ "mod_dlls": {
+  "3160450307": {
+   "QuickStartMerged.dll": "a6417c3ee84dce946eca46ecd29c4ceb29b9133f71c10124f7cde233ec9ac7ba"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-005252-77046734",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T01:32:33",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-013559-d77ecc9f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T02:01:10",
+    "lane": 15,
+    "reference_run": "20261026-005252-77046734",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-013559-d77ecc9f",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T02:01:54",
+    "lane": 15,
+    "reference_run": "20261026-005252-77046734",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

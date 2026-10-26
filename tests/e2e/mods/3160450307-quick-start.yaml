@@ -1,0 +1,25 @@
+# Quick Start (3160450307), classes P, O.
+#
+# What it does: when a colony starts (or, with its scope option, when an existing one loads
+# that it has not touched yet), it applies a start level from its PLib options (Advanced Early
+# by default, up to End): it spawns materials, items and critters, completes research, gives
+# every Duplicant skill points and raises their generalist attributes (5 per level each), and
+# marks the save as done (a SavedState on the SaveGame).
+# How a player reaches it: the options on the Mods screen; a new colony.
+# What changes: a head start.
+#
+# The options apply Advanced Early to existing colonies too, so the fixture is upgraded on
+# load: the save is marked, each Duplicant has at least 5 skill points and research is done, as
+# in the original. The attribute upgrade is left out: in the original its loop never ends on
+# this fixture (it hangs after "Upgrading dupe ... attributes").
+from: early-base
+mods: [3160450307]
+options:
+  MikeB26.QuickStart: {startLevel: 1, scope: 1, includeAttr: false}
+steps:
+  - expect_state:
+      "SaveGame.Instance.GetComponent<QuickStart.SavedState>.GameWasModified": true
+      "sum:Components.LiveMinionIdentities.Items[*].GetComponent<MinionResume>.TotalSkillPointsGained": ">= 15"
+      "count:Db.Get().Techs.resources[*] if .IsComplete() == true": "== original"
+  - run: {seconds: 10}
+  - expect: {duplicants: 3}

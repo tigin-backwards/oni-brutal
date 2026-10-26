@@ -5,7 +5,8 @@
 # --tolerance compares the geometry (an element's rect and world corners) within PX pixels, and its
 # size within PX or 2 %, whichever is larger; an element that is 0-sized in the second dump only
 # differs whatever the tolerance. --mask-text replaces each match of REGEX inside quoted strings
-# (text fields) with '#' before comparing, for numbers or dates a spec names.
+# (text fields) with '#' before comparing, for numbers or dates a spec names; a field whose text
+# a mask changed has its textInfo counts masked too.
 import os, re, sys
 
 SIZE_FRACTION = 0.02
@@ -37,7 +38,10 @@ def mask(value, patterns):
         for p in patterns:
             text = re.sub(p, '#', text)
         return text
-    return QUOTED.sub(masked, value)
+    out = QUOTED.sub(masked, value)
+    if out != value:  # textInfo counts the text's characters, lines and words
+        out = re.sub(r'\btextInfo=\S+', 'textInfo=#', out)
+    return out
 
 
 def geometry(text):

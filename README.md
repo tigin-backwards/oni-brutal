@@ -68,6 +68,11 @@ On a late-game save (U57: Spaced Out with every DLC, cycle 17,000+), on Windows,
 | Autosave freeze | about 26&nbsp;s | about 2.3&nbsp;s | about 11× shorter |
 | Starting the game, to the main menu (every DLC, second launch) | about 17.4&nbsp;s | about 9.8&nbsp;s | about 1.8× faster |
 
+How much faster it runs depends on your hardware. Moono removes the runtime's overhead, so the
+faster your CPU, the more of the gain you see. On slower machines, you'll get bottlenecked by other
+things sooner: running out of memory, or the game's C++ simulation itself, which Moono doesn't
+speed up (particularly on very large custom maps).
+
 Garbage-collection hitches are mostly gone: collections now run in the background, spread
 across every core, and their pauses are about a quarter as long.
 

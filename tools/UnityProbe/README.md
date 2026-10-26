@@ -298,6 +298,14 @@ MonoBehaviour (whether it is alive, its instance id, name, hide flags and `ToStr
 Awake and OnEnable run and when, what reaches the log), then Instantiate, DestroyImmediate and
 Destroy on it. `ScriptableObjectNewTests` encodes the results.
 
+With `PROBE_SCENARIO=destroyflags` only the destroy-flags probe runs (`DestroyFlags.cs`, lines
+`DF …`, at the main menu): the active flags each component sees in its OnDisable and OnDestroy
+when a GameObject is destroyed (with Destroy and DestroyImmediate; active, inactive, under an
+inactive parent; its child and grandchild) and when a component is destroyed alone, then
+whether `KObjectManager` released the event system of a destroyed `KMonoBehaviour`. A
+`DestroyFlagsProbeDone` canvas appears at the end. `LifecycleTests`
+(`DestroyedObjectIsInactiveInItsOwnOnDestroy` and the three after it) encodes the results.
+
 With `PROBE_SCENARIO=statics` only the statics probe runs (`StaticValues.cs`, lines `SV …`, at mod
 load): every public static property and field of `Color` and `Color32`, found by reflection (so
 each player lists what it has), with the components' float bits; `GarbageCollector.isIncremental`;

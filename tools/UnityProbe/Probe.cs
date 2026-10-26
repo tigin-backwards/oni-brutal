@@ -215,6 +215,11 @@ namespace SemanticsProbe
                 go.AddComponent<LegacyText>();
                 return;
             }
+            if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "destroyflags")
+            {
+                go.AddComponent<DestroyFlags>();
+                return;
+            }
             if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "startdestroy")
             {
                 go.AddComponent<SDScenario>();

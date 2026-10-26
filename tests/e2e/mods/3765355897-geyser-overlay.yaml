@@ -1,0 +1,29 @@
+# Geyser Overlay (3765355897), classes V, S, K.
+#
+# What it does: adds a Geysers overlay (a button at the end of the overlay bar, and a
+# bindable key): it dims the map and highlights every geyser, its legend lists the geyser
+# types found (click one to fly the camera to it), and hovering a geyser shows its type and
+# details in the hover card.
+# How a player reaches it: the overlay bar, Geysers.
+# What changes: a way to find geysers.
+#
+# A steam geyser is placed in the dug-out corridor west of the printing pod; the overlay is
+# opened from its button: the legend lists the geysers, and the map is shot.
+from: early-base
+mods: [3765355897]
+require_log: ['Added the Geysers overlay toolbar button']
+setup:
+  # The geyser's name takes a random suffix: the same seed in both players.
+  - driver: {seed: 12345}
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131124, 0, 0, \"GeyserGeneric_steam\", \"BuildingBack\")", method: SetActive, args: [true]}}
+steps:
+  - driver: {camera.set: {cell: [118, 208], ortho: 12}}
+  - click: {ui: "**/OverlaysBarHolder/OverlaysBar/Toggle:Geysers"}
+  - ui_wait: {path: "**/TopRight/OverlayLegend", cond: stable}
+  - expect_ui:
+      "**/OverlayLegend/TitleBar/Label": {text: "GEYSERS"}
+  - expect_state:
+      "OverlayScreen.Instance.GetMode().ToString()": "!= 'None'"
+  - ui_dump: {name: legend, root: "**/TopRight/OverlayLegend"}
+  - shot: {name: legend, crop: "**/TopRight/OverlayLegend", threshold: 0.04}
+  - world_shot: {name: overlay, ortho: 12, at: [118, 208]}

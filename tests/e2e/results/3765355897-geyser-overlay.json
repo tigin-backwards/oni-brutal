@@ -1,0 +1,81 @@
+{
+ "spec": "mods/3765355897-geyser-overlay.yaml",
+ "mods": [
+  "3765355897"
+ ],
+ "verdict": "warning",
+ "why": "known findings: scroll-normalized-position",
+ "findings": [
+  "scroll-normalized-position"
+ ],
+ "note": "the Geysers overlay opens from its button over a placed geyser: legend dump and shot and the overlay's world shot match",
+ "updated": "2026-10-26",
+ "commit": "2adfab00",
+ "mod_dlls": {
+  "3765355897": {
+   "GeyserOverlay.dll": "e694f186c8798eceae84081b2f2c02f6293a01af8c6510b366395ec911ddaedc"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-041722-55ace87c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:38:17",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-043941-945ea724",
+    "index": 1,
+    "verdict": "warn",
+    "date": "2026-10-26T04:39:41",
+    "lane": 15,
+    "reference_run": "20261026-041722-55ace87c",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "legend": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "legend": 9e-05,
+     "overlay": 2.7e-05
+    }
+   },
+   {
+    "run": "20261026-043941-945ea724",
+    "index": 2,
+    "verdict": "warn",
+    "date": "2026-10-26T04:40:19",
+    "lane": 15,
+    "reference_run": "20261026-041722-55ace87c",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "legend": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "legend": 9e-05,
+     "overlay": 3.9e-05
+    }
+   }
+  ]
+ }
+}

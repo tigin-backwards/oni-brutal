@@ -1,0 +1,43 @@
+# Configurable Automatic Machine (2877460966), classes P, O.
+#
+# What it does: postfixes on the configs of twelve fabricators (Metal Refinery, Microbe
+# Musher, Electric Grill, Gas Range, Egg Cracker, Rock Granulator, Glass Forge, Molecular
+# Forge, Textile Loom, Exosuit Forge, Apothecary, Oil Refinery) make them work with no
+# Duplicant at the controls: BuildingComplete.isManuallyOperated and
+# ComplexFabricator.duplicantOperated become false; the Oil Refinery gets the mod's own
+# AutomaticOilRefinery instead. Each machine has a PLib option (all on by default; restart
+# required).
+# How a player reaches it: the machines, built as usual; the options on the Mods screen.
+# What changes: fabricators run unattended once their ingredients are delivered.
+#
+# The machines' prefabs are checked, then the mod's options dialog opens from the main menu's
+# Mods screen, lists the machines, and Cancel closes it.
+from: early-base
+mods: [2877460966]
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"Apothecary\").GetComponent<ComplexFabricator>.duplicantOperated": false
+      "Assets.GetPrefab(\"Apothecary\").GetComponent<BuildingComplete>.isManuallyOperated": false
+      "Assets.GetPrefab(\"RockCrusher\").GetComponent<ComplexFabricator>.duplicantOperated": false
+      "Assets.GetPrefab(\"MetalRefinery\").GetComponent<ComplexFabricator>.duplicantOperated": false
+      "Assets.GetPrefab(\"CookingStation\").GetComponent<ComplexFabricator>.duplicantOperated": false
+      "Assets.GetPrefab(\"MicrobeMusher\").GetComponent<ComplexFabricator>.duplicantOperated": false
+      "Assets.GetPrefab(\"OilRefinery\").GetComponent<XCroSs_ONI_Mod.AutomaticMachineConfig.AutomaticOilRefinery>": exists
+      "Assets.GetPrefab(\"OilRefinery\").GetComponent<BuildingComplete>.isManuallyOperated": false
+  - key: {code: Escape}
+  - ui_wait: {path: "**/PauseScreen/**/Main MenuButton", cond: stable}
+  - click: {ui: "**/PauseScreen/**/Main MenuButton"}
+  - ui_wait: {path: "**/ConfirmDialog/GameObject/Panel/ConfigurableButton", cond: stable}
+  - click: {ui: "**/ConfirmDialog/GameObject/Panel/ConfigurableButton"}   # Quit Without Saving
+  - ui_wait: {path: "**/MainMenu_SpacedOut/MainMenuMenubar/MainMenuButtons", cond: stable, frames: 3000}
+  - click: {text: "MODS", under: "**/MainMenuButtons"}
+  - ui_wait: {path: "**/ModsScreen/Panel", cond: stable}
+  - click: {ui: "**/ModsScreen/**/Content/Configurable Automatic Machine/ModSettingsButton"}
+  - ui_wait: {path: "**/ModOptions", cond: stable}
+  - expect_ui:
+      "**/ModOptions/Title/Text": {text: "Options for Configurable Automatic Machine"}
+      "**/ModOptions/Body/**/Entries/Label/Text": {any_text: "Metal Refinery"}
+  - ui_dump: {name: options, root: "**/ModOptions"}
+  - shot: {name: options, crop: "**/ModOptions"}
+  - click: {text: "CANCEL", under: "**/ModOptions"}
+  - ui_wait: {path: "**/ModOptions", cond: gone}

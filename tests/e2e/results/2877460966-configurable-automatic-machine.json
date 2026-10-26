@@ -1,0 +1,80 @@
+{
+ "spec": "mods/2877460966-configurable-automatic-machine.yaml",
+ "mods": [
+  "2877460966"
+ ],
+ "verdict": "warning",
+ "why": "known findings: scroll-normalized-position",
+ "findings": [
+  "scroll-normalized-position"
+ ],
+ "note": "the twelve fabricators' prefabs need no operator; its PLib options dialog opens from the Mods screen",
+ "updated": "2026-10-25",
+ "commit": "8884175",
+ "mod_dlls": {
+  "2877460966": {
+   "ConfigurableAutomaticMachine.dll": "61f1d3b11cc2b62edd7eeda584bf63bb539075ea7f6336d796f9b3d52d6c993e",
+   "PLib.dll": "d87814a7d5d74fa0e94bc5435cd770d3746438f494208b6f356a2ab999169c52"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-194153-495dc922",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T19:46:02",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-201725-cb815eaf",
+    "index": 1,
+    "verdict": "warn",
+    "date": "2026-10-25T20:17:25",
+    "lane": 14,
+    "reference_run": "20261025-194153-495dc922",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "options": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "options": 0.0
+    }
+   },
+   {
+    "run": "20261025-201725-cb815eaf",
+    "index": 2,
+    "verdict": "warn",
+    "date": "2026-10-25T20:18:09",
+    "lane": 14,
+    "reference_run": "20261025-194153-495dc922",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "options": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "options": 0.0
+    }
+   }
+  ]
+ }
+}

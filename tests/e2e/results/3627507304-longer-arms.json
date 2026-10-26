@@ -1,0 +1,79 @@
+{
+ "spec": "mods/3627507304-longer-arms.yaml",
+ "mods": [
+  "3627507304"
+ ],
+ "verdict": "warning",
+ "why": "known findings: scroll-normalized-position",
+ "findings": [
+  "scroll-normalized-position"
+ ],
+ "note": "the reach tables are expanded as in the original; the options dialog opens from the Mods screen; dump and shot match",
+ "updated": "2026-10-26",
+ "commit": "3b05ed7",
+ "mod_dlls": {
+  "3627507304": {
+   "LongerArms.dll": "b3201240aac6793690b9b7210bc7cc74bc320984ac27c7fffec7184e6ae9901f"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-222040-75e4a4a6",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T22:57:49",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-012723-b7d4a3cd",
+    "index": 1,
+    "verdict": "warn",
+    "date": "2026-10-26T01:27:23",
+    "lane": 15,
+    "reference_run": "20261025-222040-75e4a4a6",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "options": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "options": 0.0
+    }
+   },
+   {
+    "run": "20261026-012723-b7d4a3cd",
+    "index": 2,
+    "verdict": "warn",
+    "date": "2026-10-26T01:28:03",
+    "lane": 15,
+    "reference_run": "20261025-222040-75e4a4a6",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "options": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "options": 0.0
+    }
+   }
+  ]
+ }
+}

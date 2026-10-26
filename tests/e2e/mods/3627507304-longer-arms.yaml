@@ -1,0 +1,38 @@
+# Longer Arms (3627507304), classes P, O.
+#
+# What it does: a postfix on Game.OnPrefabInit adds paths to the game's reach tables
+# (OffsetGroups.InvertedStandardTable and ...WithCorners): Duplicants reach further up (PLib
+# option Vertical Reach, 1 extra cell by default, up to 10) and sideways (Horizontal Reach, 1),
+# diagonals capped at 3 in its Safe Mode (on by default) so they do not reach through walls.
+# It also moves an older config folder name to the new one.
+# How a player reaches it: errands on cells out of the game's reach (a ceiling 5 cells up); the
+# options on the Mods screen.
+# What changes: what Duplicants can reach without ladders.
+#
+# The reach tables are expanded, to as many paths as in the original; the colony runs. Then the
+# mod's options dialog opens from the main menu's Mods screen and Cancel closes it.
+from: early-base
+mods: [3627507304]
+steps:
+  - expect_state:
+      "type:LongerArms.LongerArmsPatches::OffsetsExpanded": true
+      "OffsetGroups.InvertedStandardTable.Length": "== original"
+      "OffsetGroups.InvertedStandardTableWithCorners.Length": "== original"
+  - run: {seconds: 10}
+  - expect: {duplicants: 3}
+  - key: {code: Escape}
+  - ui_wait: {path: "**/PauseScreen/**/Main MenuButton", cond: stable}
+  - click: {ui: "**/PauseScreen/**/Main MenuButton"}
+  - ui_wait: {path: "**/ConfirmDialog/GameObject/Panel/ConfigurableButton", cond: stable}
+  - click: {ui: "**/ConfirmDialog/GameObject/Panel/ConfigurableButton"}   # Quit Without Saving
+  - ui_wait: {path: "**/MainMenu_SpacedOut/MainMenuMenubar/MainMenuButtons", cond: stable, frames: 3000}
+  - click: {text: "MODS", under: "**/MainMenuButtons"}
+  - ui_wait: {path: "**/ModsScreen/Panel", cond: stable}
+  - click: {ui: "**/ModsScreen/**/Content/Longer Arms/ModSettingsButton"}
+  - ui_wait: {path: "**/ModOptions", cond: stable}
+  - expect_ui:
+      "**/ModOptions/Body/**/Entries/Label/Text": {any_text: "Vertical Reach (cells)"}
+  - ui_dump: {name: options, root: "**/ModOptions"}
+  - shot: {name: options, crop: "**/ModOptions"}
+  - click: {text: "CANCEL", under: "**/ModOptions"}
+  - ui_wait: {path: "**/ModOptions", cond: gone}

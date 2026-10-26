@@ -1,0 +1,68 @@
+{
+ "spec": "mods/2251056721-ztransport.yaml",
+ "mods": [
+  "2251056721"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Power menu lists the joule senders (shot); a built sender's ZTransport button opens its options dialog (dumped)",
+ "updated": "2026-10-26",
+ "commit": "8ef77bae",
+ "mod_dlls": {
+  "2251056721": {
+   "PLib.dll": "8e82d13eb0e00fe29fbc639f15f8edc572cc72332369f64150cdc07b86ad9bc4",
+   "ZTransport.dll": "d1ac788278d2d95d1021800052bc9207e80e6277f566bf6b5f3a52076831084c"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-173427-72c0b636",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T17:42:14",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-175306-72ae15bd",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T18:29:27",
+    "lane": 14,
+    "reference_run": "20261026-173427-72c0b636",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "options": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "power-menu": 0.0
+    }
+   },
+   {
+    "run": "20261026-175306-72ae15bd",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T18:30:42",
+    "lane": 14,
+    "reference_run": "20261026-173427-72c0b636",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "options": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "power-menu": 0.0
+    }
+   }
+  ]
+ }
+}

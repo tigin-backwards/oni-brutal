@@ -1,0 +1,37 @@
+# ZTransport (2251056721), classes B, S, M.
+#
+# What it does: sender and receiver buildings for power, gas, liquid, conveyor items and a drop
+# box, which pass their contents to a matching building in another game through a ZTransport
+# server (TCP, port 5496 by default), paired by coordinates shown as a status item; each has a
+# "ZTransport" user menu button that opens a PLib dialog of the server's address, port, ping
+# interval and message size.
+# How a player reaches it: the build menu (Power, Ventilation, Plumbing, Shipping), then a
+# building's user menu.
+# What changes: resources shared between colonies.
+#
+# The Power menu lists the joule senders and receivers (shot); a Joule Sender built by setup
+# in the dug-out corridor west of the printing pod is selected, and its ZTransport button opens
+# the options dialog (dumped). No server runs, so nothing is sent.
+from: early-base
+mods: [2251056721]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"ZJoulesSender\")", method: Build, args: [131128, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"ZJoulesRecver50kW\")": exists
+      "Assets.GetBuildingDef(\"ZGasSender\")": exists
+      "Assets.GetBuildingDef(\"ZDropBoxOut\")": exists
+  - run: {seconds: 10}
+  - expect: {buildings: {ZJoulesSender: 1}}
+  - click: {ui: "**/PlanScreen/Toggle:Power"}
+  # The build menu catches up over frames: 120 frames for all of it to settle.
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/ZJoulesSender Group*", cond: stable, stable: 120, frames: 600}
+  - shot: {name: power-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
+  - key: {code: Escape}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 206], select: ZJoulesSender}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_wait: {path: "**/UserMenuScreen/Buttons/ZTransportButton", cond: stable}
+  - click: {ui: "**/UserMenuScreen/Buttons/ZTransportButton"}
+  - ui_wait: {path: "**/ZTransportOptions", cond: stable}
+  - ui_dump: {name: options, root: "**/ZTransportOptions"}

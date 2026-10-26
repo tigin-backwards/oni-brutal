@@ -1,0 +1,36 @@
+# RemoveDailyReports (1870873514), class P.
+#
+# What it does: keeps saves small by emptying old daily reports: a postfix on
+# ReportManager.OnNightTime clears the entries of every report but the newest ten when night
+# falls (the reports stay listed, without their numbers).
+# How a player reaches it: playing past nightfall; the Reports screen shows old cycles empty.
+# What changes: report entries older than ten cycles are gone.
+#
+# early-base is in its first cycle, with no reports yet: setup puts today's report into the
+# list eleven times, so the list holds twelve once night falls and adds it again; then the mod
+# empties the old ones, and with them today's (the night's own entries come back into it), while
+# a new day's report begins.
+from: early-base
+mods: [1870873514]
+setup:
+  - driver: {setup.call: {target: "ReportManager.Instance.reports", method: Insert, args: [0, {"$": "ReportManager.Instance.TodaysReport"}]}}
+  - driver: {setup.call: {target: "ReportManager.Instance.reports", method: Insert, args: [0, {"$": "ReportManager.Instance.TodaysReport"}]}}
+  - driver: {setup.call: {target: "ReportManager.Instance.reports", method: Insert, args: [0, {"$": "ReportManager.Instance.TodaysReport"}]}}
+  - driver: {setup.call: {target: "ReportManager.Instance.reports", method: Insert, args: [0, {"$": "ReportManager.Instance.TodaysReport"}]}}
+  - driver: {setup.call: {target: "ReportManager.Instance.reports", method: Insert, args: [0, {"$": "ReportManager.Instance.TodaysReport"}]}}
+  - driver: {setup.call: {target: "ReportManager.Instance.reports", method: Insert, args: [0, {"$": "ReportManager.Instance.TodaysReport"}]}}
+  - driver: {setup.call: {target: "ReportManager.Instance.reports", method: Insert, args: [0, {"$": "ReportManager.Instance.TodaysReport"}]}}
+  - driver: {setup.call: {target: "ReportManager.Instance.reports", method: Insert, args: [0, {"$": "ReportManager.Instance.TodaysReport"}]}}
+  - driver: {setup.call: {target: "ReportManager.Instance.reports", method: Insert, args: [0, {"$": "ReportManager.Instance.TodaysReport"}]}}
+  - driver: {setup.call: {target: "ReportManager.Instance.reports", method: Insert, args: [0, {"$": "ReportManager.Instance.TodaysReport"}]}}
+  - driver: {setup.call: {target: "ReportManager.Instance.reports", method: Insert, args: [0, {"$": "ReportManager.Instance.TodaysReport"}]}}
+steps:
+  - expect_state:
+      "ReportManager.Instance.reports.Count": {save_as: before}
+      "ReportManager.Instance.reports[0].reportEntries.Count": {save_as: entries}
+      "ReportManager.Instance.TodaysReport.day": {save_as: day}
+  - run: {seconds: 600}
+  - expect_state:
+      "ReportManager.Instance.reports.Count": "== before + 1"
+      "ReportManager.Instance.reports[0].reportEntries.Count": ["< entries", "== original"]
+      "ReportManager.Instance.TodaysReport.day": "== day + 1"

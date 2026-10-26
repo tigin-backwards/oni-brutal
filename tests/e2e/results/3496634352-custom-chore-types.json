@@ -1,0 +1,63 @@
+{
+ "spec": "mods/3496634352-custom-chore-types.yaml",
+ "mods": [
+  "3496634352"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "Relieve Self in the outhouse's Errands tab opens the group window (dumped); a group ticked and confirmed becomes the errand's only group",
+ "updated": "2026-10-26",
+ "commit": "fd4e5b95",
+ "mod_dlls": {
+  "3496634352": {
+   "CustomChoreType.dll": "4ba123a969670200119ffe9a245faf4c0a3fc50bc74d2892350662260edf9d66"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-182320-3e5178eb",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T18:39:25",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-192551-82b3b3ca",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T19:29:14",
+    "lane": 15,
+    "reference_run": "20261026-182320-3e5178eb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "groups": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261026-192551-82b3b3ca",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T19:30:04",
+    "lane": 15,
+    "reference_run": "20261026-182320-3e5178eb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "groups": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

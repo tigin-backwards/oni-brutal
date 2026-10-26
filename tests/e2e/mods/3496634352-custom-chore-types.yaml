@@ -1,0 +1,30 @@
+# Custom Chore Types (3496634352), class S.
+#
+# What it does: clicking an errand's name in a building's Errands tab opens a small window
+# (from the mod's asset bundle) of every chore group's icon; the groups ticked and confirmed
+# become that errand type's groups, so it follows those priorities, saved in
+# mods/custom_chore_types_config.json and applied at Db.Initialize; a Clear button restores the
+# game's groups.
+# How a player reaches it: a selected building's Errands tab, then an errand's name.
+# What changes: which priority column an errand answers to.
+#
+# setup selects the outhouse; in its Errands tab, clicking Relieve Self opens the window
+# (dumped), the first group (Combat) is ticked and confirmed: the errand then belongs to Combat
+# alone and the file is written.
+from: early-base
+mods: [3496634352]
+setup:
+  - driver: {setup.call: {target: "SelectTool.Instance", method: Select, args: [{"$": "all:Toilet::[0].GetComponent<KSelectable>"}]}}
+steps:
+  - ui_wait: {path: "**/DetailsScreen/Tabs/TabHeader/tab: BUILDINGCHORES", cond: stable}
+  - click: {ui: "**/DetailsScreen/Tabs/TabHeader/tab: BUILDINGCHORES"}
+  - ui_wait: {path: "**/BuildingChorePanel/**/ChoreRow/Labels/Label", cond: stable}
+  - click: {text: "Relieve Self", under: "**/BuildingChorePanel"}
+  - ui_wait: {path: "**/CustomChoreGroup/Content/Groups", cond: stable}
+  - ui_dump: {name: groups, root: "**/CustomChoreGroup"}
+  - click: {ui: "**/CustomChoreGroup/Content/Groups/ChoreGroup"}
+  - click: {ui: "**/CustomChoreGroup/Content/Confirm"}
+  - expect_state:
+      "Db.Get().ChoreTypes.Get(\"Pee\").groups.Length": 1
+      "Db.Get().ChoreTypes.Get(\"Pee\").groups[0].Id": Combat
+      "file:mods/custom_chore_types_config.json": exists

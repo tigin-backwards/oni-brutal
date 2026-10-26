@@ -1,0 +1,59 @@
+{
+ "spec": "mods/1959636284-cooling-element.yaml",
+ "mods": [
+  "1959636284"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Cooling Element shows in the Utilities menu after Temperature Modulation, drawing 240 W and taking 660 kDTU/s; menu shot matches",
+ "updated": "2026-10-26",
+ "commit": "c17aa002",
+ "mod_dlls": {
+  "1959636284": {
+   "CoolingElement.dll": "b18138e4a63a169bdc9490fffadfd89a0338e0c7e643e45fadb937806c6c7b8b"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-023754-20737f8f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:46:48",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-035936-de03c3cb",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:19:36",
+    "lane": 15,
+    "reference_run": "20261026-023754-20737f8f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "utilities-menu": 0.0
+    }
+   },
+   {
+    "run": "20261026-035936-de03c3cb",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T04:20:26",
+    "lane": 15,
+    "reference_run": "20261026-023754-20737f8f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "utilities-menu": 0.0
+    }
+   }
+  ]
+ }
+}

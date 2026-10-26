@@ -1,0 +1,26 @@
+# Cooling Element (1959636284), class B.
+#
+# What it does: adds the Cooling Element to the Utilities menu (researched with Temperature
+# Modulation): a 1x1 building of refined metal that draws 240 W and takes 660 kDTU/s of heat
+# out of its surroundings, down to -223 degrees.
+# How a player reaches it: the build menu, after the research.
+# What changes: a building that cools.
+#
+# setup researches Temperature Modulation; the Utilities menu lists the element, and its def
+# holds its power and heat.
+from: early-base
+mods: [1959636284]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"TemperatureModulation\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"TemperatureModulation\").unlockedItemIDs": {contains: CoolingElement}
+      "Assets.GetBuildingDef(\"CoolingElement\").SelfHeatKilowattsWhenActive": -660
+      "Assets.GetBuildingDef(\"CoolingElement\").EnergyConsumptionWhenActive": 240
+  - run: {seconds: 10}
+  - click: {ui: "**/PlanScreen/Toggle:Utilities"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/CoolingElement Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/CoolingElement Group*": {active: true}
+  - shot: {name: utilities-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}

@@ -1,0 +1,64 @@
+{
+ "spec": "mods/3606730745-storage-capacity-mod.yaml",
+ "mods": [
+  "3606730745"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "options set the bin and reservoir capacities; a built bin's capacity control offers 50,000 kg (dumped)",
+ "updated": "2026-10-26",
+ "commit": "f898d18a",
+ "mod_dlls": {
+  "3606730745": {
+   "PLib.dll": "bdd637dbef718cdd52e61c0a7177bd297864a50bac1583d2837a36ff3edf07db",
+   "StorageMod.dll": "07d6088c05db6965bde10eea6a768bae16ea113ed008f89d6a60e044bf738110"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-102152-42394c53",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T10:34:56",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-150143-eb459935",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T15:01:43",
+    "lane": 14,
+    "reference_run": "20261026-102152-42394c53",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "capacity": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261026-150143-eb459935",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T15:01:44",
+    "lane": 15,
+    "reference_run": "20261026-102152-42394c53",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "capacity": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

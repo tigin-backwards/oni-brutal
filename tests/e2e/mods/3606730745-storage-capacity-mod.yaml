@@ -1,0 +1,34 @@
+# 存储箱修改(可配置) StorageMod(YH) (3606730745), class P.
+#
+# What it does: PLib options set the capacity, in tonnes, of the Storage Tile (1 by default),
+# the Storage Bin and Smart Storage Bin (20 each), the Liquid Reservoir (5) and the Gas
+# Reservoir (1), their conduit inputs included.
+# How a player reaches it: building those; the Mods screen's options.
+# What changes: bigger storage.
+#
+# options set the Storage Bin to 50 t and the Liquid Reservoir to 8 t; the definitions are
+# read, and a bin built by setup in the dug-out corridor west of the printing pod offers up
+# to 50,000 kg in its capacity control.
+from: early-base
+mods: [3606730745]
+options:
+  "3606730745": {$file: ModSetting.json, StorageLockerCapacityKg: 50, LiquidReservoirCapacityKg: 8}
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"StorageLocker\")", method: Build, args: [131127, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"StorageLocker\").GetComponent<Storage>.capacityKg": 50000
+      "Assets.GetPrefab(\"StorageLockerSmart\").GetComponent<Storage>.capacityKg": 20000
+      "Assets.GetPrefab(\"LiquidReservoir\").GetComponent<Storage>.capacityKg": 8000
+      "Assets.GetPrefab(\"LiquidReservoir\").GetComponent<ConduitConsumer>.capacityKG": 8000
+      "Assets.GetPrefab(\"GasReservoir\").GetComponent<Storage>.capacityKg": 1000
+      "Assets.GetPrefab(\"StorageTile\").GetComponent<Storage>.capacityKg": 1000
+  - run: {seconds: 2}
+  - expect: {buildings: {StorageLocker: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [111, 207], select: StorageLocker}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_wait: {path: "**/CapacityControlSideScreen", cond: stable}
+  - expect_state:
+      "ui:**/CapacityControlSideScreen::GetComponent<CapacityControlSideScreen>.target.MaxCapacity": 50000
+  - ui_dump: {name: capacity, root: "**/CapacityControlSideScreen"}

@@ -1120,7 +1120,7 @@ installs get developer checks subscribers never see).
 | 1138 | [Debris Melts to Debris](https://steamcommunity.com/sharedfiles/filedetails/?id=2570834434) | ⬜ | ⬜ | ⬜ |  |
 | 1139 | [Język Polski ONI & DLC W.I.P](https://steamcommunity.com/sharedfiles/filedetails/?id=2746246303) | ⬜ | ⬜ | ⬜ |  |
 | 1140 | [Decoration of everything万物装饰](https://steamcommunity.com/sharedfiles/filedetails/?id=2868395237) | ⬜ | ⬜ | ⬜ |  |
-| 1141 | [ManualMiner](https://steamcommunity.com/sharedfiles/filedetails/?id=3638972299) | ⬜ | ⬜ | ⬜ |  |
+| 1141 | [ManualMiner](https://steamcommunity.com/sharedfiles/filedetails/?id=3638972299) | ✅ | ✅ | ✅ | spec tests/e2e/mods/3638972299-manual-miner.yaml: the trigger key held over cuprite: the laser and its sparks are drawn and the cell is dug, in both players |
 | 1143 | [FasterResearchRevived](https://steamcommunity.com/sharedfiles/filedetails/?id=2814417161) | ⬜ | ⬜ | ⬜ |  |
 | 1144 | [R 精致梯子 Exquisite Ladder 1.2](https://steamcommunity.com/sharedfiles/filedetails/?id=2843896901) | ⬜ | ⬜ | ⬜ |  |
 | 1145 | [油井自动排放天然气和无天然气原油精炼器（Auto oilwell and None nature gas crude oil refiners）](https://steamcommunity.com/sharedfiles/filedetails/?id=3308456170) | ⬜ | ⬜ | ⬜ |  |
@@ -1130,9 +1130,9 @@ installs get developer checks subscribers never see).
 | 1149 | [Pedestal Filter](https://steamcommunity.com/sharedfiles/filedetails/?id=3260591912) | ⬜ | ⬜ | ⬜ |  |
 | 1150 | [狗子的取水量杯](https://steamcommunity.com/sharedfiles/filedetails/?id=3630055851) | ⬜ | ⬜ | ⬜ |  |
 | 1151 | [Trapdoors & Floor Hatches Revived](https://steamcommunity.com/sharedfiles/filedetails/?id=3523317587) | ⬜ | ⬜ | ⬜ |  |
-| 1152 | [Delivery Temperature Limit](https://steamcommunity.com/sharedfiles/filedetails/?id=2963257205) | ⬜ | ⬜ | ⬜ |  |
+| 1152 | [Delivery Temperature Limit](https://steamcommunity.com/sharedfiles/filedetails/?id=2963257205) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2963257205-delivery-temperature-limit.yaml: two storage bins taking dirt, one limited to 300-400 K: after 5 min of play it holds none and the other some, in both players; its side screen is empty in both (its PLib names TMPro.FaceInfo, gone from TextMeshPro) and dumps alike |
 | 1153 | [Auto-Sweeper Harvest](https://steamcommunity.com/sharedfiles/filedetails/?id=3566906492) | ⬜ | ⬜ | ⬜ |  |
-| 1154 | [植物生长时间](https://steamcommunity.com/sharedfiles/filedetails/?id=3002268593) | ⬜ | ⬜ | ⬜ |  |
+| 1154 | [植物生长时间](https://steamcommunity.com/sharedfiles/filedetails/?id=3002268593) | ✅ | ✅ | ✅ | spec tests/e2e/mods/3002268593-plant-growth-time.yaml: loaded after Smoother Light, whose PLib it uses: its options dialog from the Mods screen, the growth rate at 5, dumps as in the original |
 | 1155 | [Soggy Carpets](https://steamcommunity.com/sharedfiles/filedetails/?id=2719163704) | ⬜ | ⬜ | ⬜ |  |
 | 1157 | [U&F-Super Oxygen Diffuser超级氧气扩散机](https://steamcommunity.com/sharedfiles/filedetails/?id=3377035496) | ⬜ | ⬜ | ⬜ |  |
 | 1159 | [Liquid Lock Builder](https://steamcommunity.com/sharedfiles/filedetails/?id=2627892585) | ⬜ | ⬜ | ⬜ |  |
@@ -1180,7 +1180,7 @@ installs get developer checks subscribers never see).
 | 1206 | [Tune-Up: Prioritize Generators](https://steamcommunity.com/sharedfiles/filedetails/?id=1872113768) | ⬜ | ⬜ | ⬜ |  |
 | 1207 | [喵喵床Meow bed](https://steamcommunity.com/sharedfiles/filedetails/?id=2879691917) | ⬜ | ⬜ | ⬜ |  |
 | 1208 | [Dig Mass Tweak 挖掘质量调整](https://steamcommunity.com/sharedfiles/filedetails/?id=3586981589) | ⬜ | ⬜ | ⬜ |  |
-| 1209 | [Fixes and Tweaks](https://steamcommunity.com/sharedfiles/filedetails/?id=2967596358) | ⬜ | ⬜ | ⬜ |  |
+| 1209 | [Fixes and Tweaks](https://steamcommunity.com/sharedfiles/filedetails/?id=2967596358) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2967596358-fixes-and-tweaks.yaml: the Crops diagnostic of a colony without farm plots is Normal in both players (the game's says it has no farms) |
 | 1210 | [Traits Now Included (DLC-compatible)](https://steamcommunity.com/sharedfiles/filedetails/?id=2682170372) | ⬜ | ⬜ | ⬜ |  |
 | 1211 | [脱盐器超级加强](https://steamcommunity.com/sharedfiles/filedetails/?id=3100867929) | ⬜ | ⬜ | ⬜ |  |
 | 1212 | [小人工作最大等级上限自定义](https://steamcommunity.com/sharedfiles/filedetails/?id=3571290810) | ⬜ | ⬜ | ⬜ |  |

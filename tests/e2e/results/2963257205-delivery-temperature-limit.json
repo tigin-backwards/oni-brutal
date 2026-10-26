@@ -1,0 +1,71 @@
+{
+ "spec": "mods/2963257205-delivery-temperature-limit.yaml",
+ "mods": [
+  "2963257205"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "two storage bins taking dirt, one limited to 300-400 K: after 5 min of play it holds none and the other some, in both players; its side screen is empty in both (its PLib names TMPro.FaceInfo, gone from TextMeshPro) and dumps alike",
+ "updated": "2026-10-26",
+ "commit": "abb9565e",
+ "mod_dlls": {
+  "2963257205": {
+   "DeliveryTemperatureLimit.dll": "b00e0104932eab86f1a1ed5574aed80a14c7c47043c91b9ef4ba7abe5bba46cd"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-120737-47ba5c5d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T12:07:37",
+    "lane": 34,
+    "signatures": 2
+   },
+   {
+    "run": "20261026-120737-47ba5c5d",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T12:07:38",
+    "lane": 35,
+    "signatures": 2
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-120737-47ba5c5d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T12:12:31",
+    "lane": 35,
+    "reference_run": "20261026-120737-47ba5c5d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "sidescreen": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261026-120737-47ba5c5d",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T12:12:31",
+    "lane": 34,
+    "reference_run": "20261026-120737-47ba5c5d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "sidescreen": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

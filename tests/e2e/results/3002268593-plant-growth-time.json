@@ -1,0 +1,76 @@
+{
+ "spec": "mods/3002268593-plant-growth-time.yaml",
+ "mods": [
+  "1839645620",
+  "3002268593"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "loaded after Smoother Light, whose PLib it uses: its options dialog from the Mods screen, the growth rate at 5, dumps as in the original",
+ "updated": "2026-10-26",
+ "commit": "abb9565e",
+ "mod_dlls": {
+  "1839645620": {
+   "PLib.dll": "93073fdf44dbe9fd7c0afe19e56341be862cc2d732090dee30999cf60e2e160d",
+   "SmootherLight.dll": "a252ba0c47d98b7a92fb21023a3ebe11c2d19b9eb69aaad0e17880cf7348238f"
+  },
+  "3002268593": {
+   "╓▓╬∩╔·│ñ╩▒╝Σ.dll": "134cb5759ae1f89db97392c30b0af6043b27bdfe56d5da5b55ffb6ae31f05e59"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-113731-0137ed61",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T11:45:40",
+    "lane": 36,
+    "signatures": 0
+   },
+   {
+    "run": "20261026-113731-0137ed61",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T11:49:17",
+    "lane": 35,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-113731-0137ed61",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T11:50:36",
+    "lane": 35,
+    "reference_run": "20261026-113731-0137ed61",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "options": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261026-113731-0137ed61",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T11:50:36",
+    "lane": 36,
+    "reference_run": "20261026-113731-0137ed61",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "options": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -1,0 +1,63 @@
+{
+ "spec": "mods/2967596358-fixes-and-tweaks.yaml",
+ "mods": [
+  "2967596358"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Crops diagnostic of a colony without farm plots is Normal in both players (the game's says it has no farms)",
+ "updated": "2026-10-26",
+ "commit": "abb9565e",
+ "mod_dlls": {
+  "2967596358": {
+   "FixesAndTweaks.dll": "fdcb5fffc5864f49627015239117fad85d657886485ac536a0895f90cf77e170"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-113731-0137ed61",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T11:41:00",
+    "lane": 36,
+    "signatures": 0
+   },
+   {
+    "run": "20261026-113731-0137ed61",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T11:42:28",
+    "lane": 36,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-113731-0137ed61",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T11:43:57",
+    "lane": 36,
+    "reference_run": "20261026-113731-0137ed61",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-113731-0137ed61",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T11:44:48",
+    "lane": 36,
+    "reference_run": "20261026-113731-0137ed61",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

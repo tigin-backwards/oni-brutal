@@ -1,0 +1,32 @@
+# 植物生长时间, Plant Growth Time (3002268593), classes P, O.
+#
+# What it does: a PLib option, 植物生长倍率 (growth rate, 1 to 20, default 5), and a transpiler of
+# Growing's static constructor meant to multiply its GROWTH_RATE and WILD_GROWTH_RATE constants
+# by it. Growing no longer has those fields or a static constructor, so plants grow as in the
+# base game, in both players.
+# How a player reaches it: the Mods screen, the mod's Options.
+# What changes: nothing in play in this game version.
+#
+# The mod references PLib without shipping it: it loads only after a mod that ships PLib.dll
+# (here Smoother Light, 1839645620), in the original as in ours (the load sweep found it loaded
+# in a batch with such a mod and failed alone). From a colony to the main menu's Mods screen:
+# its Options open its dialog with the rate at 5, and Cancel closes it.
+from: early-base
+mods: [1839645620, 3002268593]
+steps:
+  - key: {code: Escape}
+  - ui_wait: {path: "**/PauseScreen/**/Main MenuButton", cond: stable}
+  - click: {ui: "**/PauseScreen/**/Main MenuButton"}
+  - ui_wait: {path: "**/ConfirmDialog/GameObject/Panel/ConfigurableButton", cond: stable}
+  - click: {ui: "**/ConfirmDialog/GameObject/Panel/ConfigurableButton"}   # Quit Without Saving
+  - ui_wait: {path: "**/MainMenu_SpacedOut/MainMenuMenubar/MainMenuButtons", cond: stable, frames: 3000}
+  - click: {text: "MODS", under: "**/MainMenuButtons"}
+  - ui_wait: {path: "**/ModsScreen/Panel", cond: stable}
+  - click: {ui: "**/ModsScreen/**/Content/植物生长时间/ModSettingsButton"}
+  - ui_wait: {path: "**/ModOptions", cond: stable}
+  - expect_ui:
+      "**/ModOptions/Title/Text": {text: "~植物生长时间"}
+      "**/ModOptions/Body/**/Entries/Label/Text": {any_text: "~植物生长倍率"}
+  - ui_dump: {name: options, root: "**/ModOptions"}
+  - click: {text: "CANCEL", under: "**/ModOptions"}
+  - ui_wait: {path: "**/ModOptions", cond: gone}

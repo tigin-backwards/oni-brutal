@@ -1,0 +1,64 @@
+{
+ "spec": "mods/3638972299-manual-miner.yaml",
+ "mods": [
+  "3638972299"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the trigger key held over cuprite: the laser and its sparks are drawn and the cell is dug, in both players",
+ "updated": "2026-10-26",
+ "commit": "abb9565e",
+ "mod_dlls": {
+  "3638972299": {
+   "ManualMiner.dll": "5e0329db84b006d70829cea215822b2b27e5ca022327648c7dfac71eb2a8edc3",
+   "PLib.dll": "48c63fd4654b6fbb390afdac71a3d29194eeb9405eca4290cba6e4fbf60805ce"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-114508-19b081a3",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T11:45:08",
+    "lane": 34,
+    "signatures": 0
+   },
+   {
+    "run": "20261026-114508-19b081a3",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T11:45:09",
+    "lane": 37,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-114508-19b081a3",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T11:51:07",
+    "lane": 34,
+    "reference_run": "20261026-114508-19b081a3",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-114508-19b081a3",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T11:51:07",
+    "lane": 37,
+    "reference_run": "20261026-114508-19b081a3",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

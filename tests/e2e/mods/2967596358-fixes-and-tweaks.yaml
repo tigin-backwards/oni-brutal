@@ -1,0 +1,23 @@
+# Fixes and Tweaks (2967596358), classes P, O.
+#
+# What it does: about thirty small fixes and tweaks, each a PLib option (all on by default):
+# faster scrolling in the management screens, Ctrl hiding hover text, notifications that do not
+# expire or are not shown (attribute increases, cycle reports, schedules), colony diagnostics
+# that no longer warn needlessly ("Check colony has farms" off, "Check farms are planted" only
+# with farm plots), time sensors that hold a zero interval, timelapse screenshots of every
+# discovered planetoid (a transpiler of Timelapser.SetPostionAndOrtho that skips buildings of
+# other worlds; it leaves a value on the stack where it branches back, ARCHITECTURE D43), and
+# others.
+# How a player reaches it: most work without input; the options are in the Mods screen.
+# What changes: fewer and steadier warnings and notifications.
+#
+# early-base has no farm plots, which the game's Crops diagnostic reports as a concern ("Check
+# colony has farms"). With the mod both of its farm criteria pass: after a few seconds of play
+# the start world's Crops diagnostic is Normal, as in the original.
+from: early-base
+mods: [2967596358]
+steps:
+  - run: {seconds: 15}
+  - expect_state:
+      "count:ColonyDiagnosticUtility.Instance.worldDiagnostics[0][*] if .GetType().Name == FarmDiagnostic": 1
+      "count:ColonyDiagnosticUtility.Instance.worldDiagnostics[0][*] if .GetType().Name == FarmDiagnostic and .LatestResult.opinion == Normal": 1

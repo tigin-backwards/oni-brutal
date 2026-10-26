@@ -1,0 +1,41 @@
+# Delivery Temperature Limit (2963257205), classes P, S.
+#
+# What it does: storage buildings, feeders, planters and the refining and cooking stations get a
+# TemperatureLimit component: a low and a high temperature (kelvin) between which items may be
+# delivered to them. Fetch errands, the fetch manager's pickup lists and the "no reachable
+# items" status items skip items outside the range (patches of FetchManager, FetchAreaChore and
+# its Begin lambda, found by the nested type name "FetchAreaChore/StatesInstance/<>c__DisplayClass17_0",
+# GlobalChoreProvider and FetchListStatusItemUpdater.Render200ms). A side screen (PLib text fields
+# for both limits) is meant to set them; in this game version it shows no fields in either
+# player.
+# How a player reaches it: select a storage building; its "Temperature Limit" side screen.
+# What changes: storages only take items within their range.
+#
+# setup builds two Storage Bins in the dug-out corridor west of the printing pod, both accepting
+# dirt (about 295 K on the floor there). The east one gets the range 300-400 K, the west one none.
+# The east bin is selected (its side screen is there, and empty, as in the original); after five
+# minutes of play the west bin holds dirt and the east one none.
+from: early-base
+mods: [2963257205]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"StorageLocker\")", method: Build, args: [131130, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "last:GetComponent<DeliveryTemperatureLimit.TemperatureLimit>", method: SetHighLimit, args: [400]}}
+  - driver: {setup.call: {target: "last:GetComponent<DeliveryTemperatureLimit.TemperatureLimit>", method: SetLowLimit, args: [300]}}
+  - driver: {setup.call: {target: "last:GetComponent<TreeFilterable>", method: AddTagToFilter, args: [Dirt]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"StorageLocker\")", method: Build, args: [131127, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "last:GetComponent<TreeFilterable>", method: AddTagToFilter, args: [Dirt]}}
+steps:
+  - expect_state:
+      "count:all:DeliveryTemperatureLimit.TemperatureLimit::[*] if .LowLimit == 300 and .HighLimit == 400": 1
+  - driver: {camera.set: {cell: [114, 208], ortho: 8}}
+  - click_world: {cell: [114, 207], select: StorageLocker}
+  - ui_wait: {path: "**/DetailsScreen/**/TemperatureLimitSideScreen", cond: stable}
+  - expect_ui:
+      "**/TemperatureLimitSideScreen": {active: true}
+  - expect_state:
+      "selected:GetComponent<DeliveryTemperatureLimit.TemperatureLimit>.HighLimit": 400
+  - ui_dump: {name: sidescreen, root: "**/TemperatureLimitSideScreen"}
+  - run: {seconds: 300}
+  - expect_state:
+      "sum:all:StorageLocker::[*].GetComponent<Storage>.MassStored() if .GetComponent<DeliveryTemperatureLimit.TemperatureLimit>.HighLimit == 400": 0
+      "sum:all:StorageLocker::[*].GetComponent<Storage>.MassStored() if .GetComponent<DeliveryTemperatureLimit.TemperatureLimit>.HighLimit == 0": "> 0"

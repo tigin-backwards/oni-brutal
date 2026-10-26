@@ -1,0 +1,38 @@
+# ManualMiner (3638972299), classes P, V, O.
+#
+# What it does: while the player holds the trigger key (a PLib option, the shipped config.json's
+# Mouse4) with the select tool active, every solid cell within Range (an option, 1 by default:
+# the cell alone) of the pointer takes dig damage each frame (Diggable.DoDigTick), as a
+# Duplicant's digging does, and a laser is drawn from the bottom of the screen to the cell: two
+# LineRenderers and a ParticleSystem it builds by script (world space, no emission, a velocity
+# limit and size over lifetime; sparks and a flash made with Emit(EmitParams) every frame), in
+# the style the Style option picks (Classic, Helix with rotation over lifetime and trails, Plasma
+# with trails), with a sound.
+# How a player reaches it: hold the key over rock.
+# What changes: the player digs without Duplicants.
+#
+# The key is set to the right Ctrl, which the game leaves free, and the style to Classic. The
+# pointer is put on the cuprite above the dug-out corridor west of the printing pod and the key
+# held: half a second into play the laser is drawn and its particle system holds sparks; within
+# 20 s the cell is dug and the laser is off.
+from: early-base
+mods: [3638972299]
+options:
+  "3638972299": {TriggerKey: 305, Style: 0, Range: 1}
+steps:
+  - driver: {camera.set: {cell: [112, 209], ortho: 8}}
+  - expect_state:
+      "Grid.Solid.get_Item(134308)": true
+      "Grid.Element[134308].id": Cuprite
+  - key: {code: RightControl, down: true, at: [112, 211]}
+  - run: {seconds: 0.5}
+  - expect_state:
+      "count:all:CursorLaserMining.Visual_Classic::[*]": 1
+      "all:CursorLaserMining.Visual_Classic::[0].masterFX.particleCount": "> 0"
+      "all:CursorLaserMining.Visual_Classic::[0].masterFX.isPlaying": true
+      "all:CursorLaserMining.Visual_Classic::[0].coreBeam.enabled": true
+  - run: {seconds: 20}
+  - expect_state:
+      "Grid.Solid.get_Item(134308)": false
+      "all:CursorLaserMining.Visual_Classic::[0].coreBeam.enabled": false
+  - key: {code: RightControl, up: true}

@@ -388,8 +388,9 @@ A reflective call. **The runner allows it only in a spec's `setup:` block**, nev
     as a `Tech` or a `GameObject`. `SelectTool.Instance.Select` with
     `[{"$": "all:ResearchCenter::[0]"}]` selects the research station.
 
-  Missing trailing arguments take their defaults. Among the overloads, exact kinds win: a
-  JSON integer picks `int` over `float`.
+  Missing trailing arguments take their defaults. An `out` or `ref` parameter takes a value of
+  its element type, and a trailing `out` one may be left out; the result is the return value
+  only. Among the overloads, exact kinds win: a JSON integer picks `int` over `float`.
 
 - **Result:** `{value, type}` of the return value, as in `state.get`.
 

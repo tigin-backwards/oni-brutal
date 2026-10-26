@@ -266,12 +266,16 @@ namespace E2eDriver
                 int score = 0;
                 for (int i = 0; i < ps.Length && fits; i++)
                 {
+                    // An out or ref parameter takes a value of its element type; an out one may
+                    // be left out.
+                    var pt = ps[i].ParameterType.IsByRef ? ps[i].ParameterType.GetElementType() : ps[i].ParameterType;
                     if (i < args.Count)
                     {
-                        fits = Values.Convert(args[i], ps[i].ParameterType, out values[i]);
-                        if (fits && Exact(args[i], ps[i].ParameterType)) score += 2;
+                        fits = Values.Convert(args[i], pt, out values[i]);
+                        if (fits && Exact(args[i], pt)) score += 2;
                     }
                     else if (ps[i].IsOptional) { values[i] = ps[i].DefaultValue is DBNull ? Type.Missing : ps[i].DefaultValue; score--; }
+                    else if (ps[i].IsOut) { values[i] = pt.IsValueType ? Activator.CreateInstance(pt) : null; score--; }
                     else fits = false;
                 }
                 if (fits && score > bestScore) { best = m; bestValues = values; bestScore = score; }

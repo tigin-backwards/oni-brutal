@@ -1,0 +1,23 @@
+# Atmo Suit - More Oxygen 气压服更多氧气 (2866118101), classes P, O.
+#
+# What it does: the Atmo Suit's and the Jet Suit's oxygen tanks hold a1 and c1 kg (PLib
+# options, default 333, Controler.json; the game's 75), and the Atmo Suit and Jet Suit Docks
+# take b1 kg of oxygen from their pipe (default 333). The Jet Suit Dock's storage holds
+# 999999 kg. The option d1 is read by nothing.
+# How a player reaches it: Atmo Suits and their docks (Hazard Protection research).
+# What changes: how long a suited Duplicant breathes, how much oxygen a dock buffers.
+#
+# Suits and docks are far beyond early-base, so the spec sets the options to 500, 400 and 600
+# and reads them back from the suits' and docks' prefabs; the colony runs.
+from: early-base
+mods: [2866118101]
+options:
+  "2866118101": {$file: Controler.json, a1: 500, b1: 400, c1: 600}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"Atmo_Suit\").GetComponent<SuitTank>.capacity": 500
+      "Assets.GetPrefab(\"Jet_Suit\").GetComponent<SuitTank>.capacity": 600
+      "Assets.GetBuildingDef(\"SuitLocker\").BuildingComplete.GetComponent<ConduitConsumer>.capacityKG": 400
+      "Assets.GetBuildingDef(\"JetSuitLocker\").BuildingComplete.GetComponent<ConduitConsumer>.capacityKG": 400
+  - run: {seconds: 30}
+  - expect: {duplicants: 3}

@@ -1,0 +1,56 @@
+{
+ "spec": "mods/3606719577-duplicants-attributes-configurable.yaml",
+ "mods": [
+  "3606719577"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with all interests, 3 points, only good traits and an unlimited mop set in the options, every standard Duplicant the Printing Pod offers has all 13 interests and the bad trait list is the good one",
+ "updated": "2026-10-26",
+ "commit": "bbc2ade",
+ "mod_dlls": {
+  "3606719577": {
+   "DuplicantsMod.dll": "65d8b245d5b7fdf4c8bf298ca735c81b58abdca26cb749d21a006326ec7ce572",
+   "PLib.dll": "bdd637dbef718cdd52e61c0a7177bd297864a50bac1583d2837a36ff3edf07db"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-213830-247c699a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T21:38:31",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-002327-5bc8fd5b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T00:23:27",
+    "lane": 16,
+    "reference_run": "20261025-213830-247c699a",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-002327-5bc8fd5b",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T00:23:28",
+    "lane": 17,
+    "reference_run": "20261025-213830-247c699a",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

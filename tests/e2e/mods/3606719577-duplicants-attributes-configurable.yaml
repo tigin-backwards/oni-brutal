@@ -1,0 +1,39 @@
+# 复制人属性修改(可配置) DuplicantsMod(YH) (3606719577), classes P, O.
+#
+# What it does: PLib options (ModSetting.json) for Duplicants: every standard Duplicant
+# printed gets an interest in every skill group (a prefix on MinionStartingStats.
+# GenerateAptitudes) at a chosen number of attribute points (DUPLICANTSTATS.
+# APTITUDE_ATTRIBUTE_BONUSES); attribute and skill experience rates and attribute caps (prefixes
+# on AttributeLevel.AddExperience and MinionResume.AddExperience); a fixed morale cost per
+# skill (MinionResume.UpdateExpectations); only good traits (the bad trait list becomes the
+# good one); no limit on the mop tool; and bionic booster values. All off or the game's by
+# default.
+# How a player reaches it: the Mods screen's options; then the Printing Pod's choices.
+# What changes: what new Duplicants come with and how fast they learn.
+#
+# The options turn on all interests (3 points each), only good traits and an unlimited mop.
+# setup makes the Printing Pod ready; its screen opens and every standard Duplicant on offer
+# has all 13 interests.
+from: early-base
+mods: [3606719577]
+options:
+  "3606719577": {$file: ModSetting.json, DuplicantsAllAptitudes: true, DuplicantsAptitudespoints: 3, DuplicantsAllGoodTraits: true, MaxMopAmtNotLimitEnable: true}
+setup:
+  - driver: {setup.call: {target: "Immigration.Instance", method: "Sim200ms", args: [100000]}}
+steps:
+  - expect_state:
+      "TUNING.DUPLICANTSTATS.APTITUDE_ATTRIBUTE_BONUSES[0]": 3
+      "TUNING.DUPLICANTSTATS.APTITUDE_ATTRIBUTE_BONUSES.Length": 13
+      "TUNING.DUPLICANTSTATS.GOODTRAITS.Count": {save_as: good}
+      "MopTool.maxMopAmt": "== 'Infinity'"
+  - expect_state:
+      "TUNING.DUPLICANTSTATS.BADTRAITS.Count": "== good"
+      "TUNING.DUPLICANTSTATS.BADTRAITS[0].id": "== original"
+  - expect_state: {"Immigration.Instance.ImmigrantsAvailable": true}
+  - call: {tool: building_control, args: {domain: side_surface, surface: facility, kind: telepad, action: open_immigrants, confirm: true}}
+  - ui_wait: {path: "**/ImmigrantScreen/Layout", cond: stable}
+  - expect_state:
+      "count:all:CharacterContainer::[*] if .stats.personality.model.Name == Minion": {save_as: dupes}
+  - expect_state:
+      "count:all:CharacterContainer::[*] if .stats.personality.model.Name == Minion and .stats.skillAptitudes.Count == 13": "== dupes"
+  - expect_ui: {"**/ImmigrantScreen/Layout/Content/CharacterContainer/Details/**": {any_text: "INTERESTS"}}

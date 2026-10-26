@@ -213,7 +213,23 @@ namespace TMPro
             // The height is a float, as the widest line's length is (measured on the shipped
             // package: NotoSansCJKjp 24 pt's line is 35.5499992 high and gives 35.55, where the
             // same difference in double, 35.5500002, would give 35.56).
-            float height = s_Lines[0].Ascender - (last.Baseline + last.Descender);
+            float bottom = last.Baseline + last.Descender;
+            // On a later line with a visible character after its first, the first character
+            // also counts, its baseline lowered by L, the line before's ascender less its own,
+            // when L is positive (measured on the shipped package: "Line gaps and preferred
+            // heights with fallback glyphs").
+            var pl = s_Placements;
+            for (int k = 1; k <= lastLine; k++)
+            {
+                ref var line = ref s_Lines[k];
+                bool visibleAfterFirst = false;
+                for (int i = line.First + 1; i <= line.Last && !visibleAfterFirst; i++) visibleAfterFirst = pl[i].Visible;
+                if (!visibleAfterFirst) continue;
+                ref var first = ref pl[line.First];
+                float lift = s_Lines[k - 1].Ascender - first.Ascender;
+                if (lift > 0f) bottom = Mathf.Min(bottom, line.Baseline - lift + first.Descender);
+            }
+            float height = s_Lines[0].Ascender - bottom;
             return NextHundredth((double)height + m_margin.y + m_margin.w);
         }
 

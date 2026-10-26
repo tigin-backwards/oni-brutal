@@ -24,7 +24,10 @@ namespace TMPro
             public float FontScale;      // of the font at the character's size
             public float XScale;         // horizontal factor (character width adjustment)
             public float BaselineShift;  // superscript, subscript and <voffset>
-            public float Ascender, Descender, Gap;  // font metrics at the size (Gap: line height − ascender)
+            public float Ascender, Descender;  // font metrics at the size
+            // The character's part in its line's height: its ascender less its descender, plus
+            // the primary font's line gap at the text's size (Gap).
+            public float Height, Gap;
             public float Top, Bottom, Left, Right;  // glyph box (pixels, from origin and baseline)
             public float MonoOffset;
             public float KernY;          // glyph placement from kerning pairs (y)
@@ -54,8 +57,6 @@ namespace TMPro
             // Set by placement: the pen and baseline relative to the line, and the line's offset
             // into the rect.
             public float Pen, BaselineRel, OffsetX, OffsetY;
-            // The font's line height at the character's size.
-            public float FontLineHeight;
         }
 
         private protected struct LineData
@@ -66,7 +67,8 @@ namespace TMPro
             // Whether the line's descender is below the rect (its characters do not fit the
             // height).
             public bool Below;
-            public float Ascender, Descender, Gap, MaxAscent, FontLineHeight;
+            // Height: the largest of the characters' Height (lineInfo.lineHeight).
+            public float Ascender, Descender, Height, MaxAscent;
             // The descender without a soft hyphen drawn where the line breaks: what the line
             // must fit in the rect (the hyphen is drawn after the line was found to fit).
             public float FitDescender;
@@ -498,13 +500,15 @@ namespace TMPro
         int m_LayoutOverflowIndex = -1, m_LayoutHorizontalCut = -1, m_LayoutCharacterCount;
         float m_LayoutBaseSize, m_LayoutHeight;
 
-        // The distance from line k-1's baseline down to line k's, for line k's ascender.
+        // The distance from line k-1's baseline down to line k's, for line k's ascender: line
+        // k-1's height less its ascender, plus line k's ascender (measured on the shipped
+        // package: "Line gaps and preferred heights with fallback glyphs").
         private protected float LineInterval(int k, float ascender, float baseSize)
         {
             var pl = s_Placements;
             ref var prev = ref s_Lines[k - 1];
             ref var line = ref s_Lines[k];
-            float interval = prev.Gap + ascender;
+            float interval = prev.Height - prev.Ascender + ascender;
             if (!float.IsNaN(pl[line.First].LineHeightOverride)) interval = pl[line.First].LineHeightOverride;
             interval += (m_lineSpacing - m_LineSpacingAdjustment) * 0.01f * baseSize;
             if (prev.EndsWithLineFeed) interval += m_paragraphSpacing * 0.01f * baseSize;
@@ -551,13 +555,12 @@ namespace TMPro
 
         static void FinishLine(ref LineData line, Placement[] pl, float baseSize)
         {
-            float asc = float.NegativeInfinity, desc = float.PositiveInfinity, gap = float.NegativeInfinity, maxAscent = float.NegativeInfinity;
+            float asc = float.NegativeInfinity, desc = float.PositiveInfinity, height = float.NegativeInfinity, maxAscent = float.NegativeInfinity;
             float fitDesc = float.PositiveInfinity;
             line.FirstVisible = -1;
             line.LastVisible = -1;
             line.LastChecked = -1;
             line.TabStart = line.TabEnd = -1f;
-            line.FontLineHeight = 0f;
             line.Visible = line.Spaces = 0;
             // A soft hyphen that is not drawn takes no part in the line's metrics (measured on
             // the shipped package), unless the line has nothing else.
@@ -584,14 +587,16 @@ namespace TMPro
                     desc = Mathf.Min(desc, p.Descender);
                     maxAscent = Mathf.Max(maxAscent, p.Ascender);
                 }
-                gap = Mathf.Max(gap, p.Gap);
+                // White space that reports its line's ascender and descender (as they stand
+                // where it is) takes part in the height with them.
+                if (p.Excluded) height = Mathf.Max(height, asc - desc + p.Gap);
+                else height = Mathf.Max(height, p.Height);
                 if (p.Checked) line.LastChecked = i;
                 if (p.TabStop > 0f)
                 {
                     line.TabStart = p.X - line.StartX;
                     line.TabEnd = p.X + p.Advance - line.StartX;
                 }
-                line.FontLineHeight = Mathf.Max(line.FontLineHeight, p.FontLineHeight);
                 if (p.Visible)
                 {
                     if (line.FirstVisible < 0) line.FirstVisible = i;
@@ -603,7 +608,7 @@ namespace TMPro
             line.Ascender = asc;
             line.Descender = desc;
             line.FitDescender = fitDesc;
-            line.Gap = gap;
+            line.Height = height;
             line.MaxAscent = maxAscent;
             line.Length = line.LastVisible >= 0 ? pl[line.LastVisible].X + pl[line.LastVisible].GlyphAdvance - line.StartX : 0f;
         }
@@ -665,8 +670,11 @@ namespace TMPro
             p.XScale = (1f - m_CharWidthAdjustment) * m_characterHorizontalScale;
             p.Ascender = face.ascentLine * metricScale + shift;
             p.Descender = face.descentLine * metricScale + shift;
-            p.Gap = (face.lineHeight - face.ascentLine) * metricScale - shift;
-            p.FontLineHeight = face.lineHeight * metricScale;
+            // The line gap is the primary font's at the text's size, whatever font the glyph
+            // comes from and whatever size tags say (measured on the shipped package).
+            var gapFace = primary.faceInfo;
+            p.Gap = (gapFace.lineHeight - gapFace.ascentLine + gapFace.descentLine) * (baseSize / gapFace.pointSize * gapFace.scale);
+            p.Height = p.Ascender - p.Descender + p.Gap;
             p.SetPen = float.NaN;
             p.LineHeightOverride = state.HasLineHeight ? state.LineHeight.Resolve(size, face.lineHeight * fontScale) : float.NaN;
             p.WidthLimit = state.HasWidth ? state.Width.Resolve(size, width) : float.NaN;

@@ -290,7 +290,7 @@ namespace TMPro
                 li.ascender = baseline + line.Ascender;
                 li.baseline = baseline;
                 li.descender = baseline + line.Descender;
-                li.lineHeight = line.FontLineHeight;
+                li.lineHeight = line.Height;
                 // maxAdvance is where the last visible character's glyph advance ends (in the
                 // rect, without its spacing); length is from the line's start to the right edge of
                 // that character's glyph (synthesized bold widening it), without padding (both

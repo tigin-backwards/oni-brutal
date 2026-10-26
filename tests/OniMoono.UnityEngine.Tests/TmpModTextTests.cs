@@ -81,5 +81,97 @@ namespace OniMoono.Tests
             Assert.Equal(100.65f, t.preferredWidth);
             Assert.Equal(15.65f, t.preferredHeight);
         }
+
+        // ----- Line gaps and preferred heights with fallback glyphs (Social Life, Rookie
+        // Quest Guide) -----
+
+        static TextMeshProUGUI Lines(string font, float size, string text, float width, bool wrap = true)
+        {
+            var t = NewText(new Vector2(width, 0f));
+            if (font != null) t.font = TmpTestSupport.FindAsset<TMP_FontAsset>(font);
+            t.fontSize = size;
+            t.textWrappingMode = wrap ? TextWrappingModes.Normal : TextWrappingModes.NoWrap;
+            t.alignment = TextAlignmentOptions.TopLeft;
+            t.text = text;
+            return t;
+        }
+
+        [Theory]
+        [InlineData("·\nB", 35.76f)]
+        [InlineData("·\nBB", 37.31f)]
+        [InlineData("·\nB B", 37.31f)]
+        [InlineData("·\nB ", 35.76f)]
+        [InlineData("·\n B", 37.31f)]
+        [InlineData("·\nBB·", 44.23f)]
+        [InlineData("·\nB\nBB", 49.39f)]
+        [InlineData("B\n·\nBB", 50.94f)]
+        [InlineData("·\n\nBB", 49.39f)]
+        [InlineData("·\nB\nB\nBB", 63.03f)]
+        [InlineData("B\nBB", 27.28f)]
+        [InlineData("<size=150%>B</size>\nBB", 40.27f)]
+        [InlineData("<size=150%>B</size>\nB", 34.1f)]
+        [InlineData("B<voffset=0.5em>B</voffset>\nBB", 40.28f)]
+        [InlineData("·\nB<size=150%>B</size>", 43.48f)]
+        [InlineData("·\nB<size=60%>B</size>", 37.31f)]
+        public void GraystrokeWithAFallbackDot(string text, float height)
+        {
+            foreach (bool wrap in new[] { true, false })
+                Assert.Equal(height, Lines("GRAYSTROKE REGULAR SDF", 13f, text, 740f, wrap).preferredHeight);
+        }
+
+        [Theory]
+        [InlineData("免\nBB", 25.98f)]
+        [InlineData("免\nB ", 23.69f)]
+        [InlineData("免\nBB免", 28.28f)]
+        [InlineData("免\n免B", 26.96f)]
+        [InlineData("B\n免\nBB", 36.33f)]
+        [InlineData("免\nB\nB\nBB", 44.38f)]
+        [InlineData("B\nBB", 20.41f)]
+        [InlineData("<size=150%>B</size>\nBB", 29.51f)]
+        [InlineData("B<voffset=0.5em>B</voffset>\nBB", 29.41f)]
+        [InlineData("免\nB<size=150%>B</size>", 30.06f)]
+        public void LiberationSansWithAFallbackCjkCharacter(string text, float height)
+        {
+            foreach (bool wrap in new[] { true, false })
+                Assert.Equal(height, Lines(null, 9f, text, 1212f, wrap).preferredHeight);
+        }
+
+        // A line's height is its tallest character's ascender less descender (the fallback's
+        // own, not its font's line height) plus the primary font's line gap.
+        [Fact]
+        public void ALineWithAFallbackDotIsAsHighAsTheDotPlusTheGap()
+        {
+            var t = Lines("GRAYSTROKE REGULAR SDF", 13f, "·\nB", 740f);
+            t.rectTransform.sizeDelta = new Vector2(740f, 1000f);
+            t.ForceMeshUpdate();
+            var info = t.textInfo;
+            Assert.Equal("NotoNaskhArabic-Regular", info.characterInfo[0].fontAsset.name);
+            Assert.Equal(22.1086826f, info.lineInfo[0].lineHeight, 4);
+            Assert.Equal(13.6355848f, info.lineInfo[1].lineHeight, 4);
+            // The interval: line 0's height less its ascender, plus line 1's ascender.
+            float interval = info.lineInfo[0].baseline - info.lineInfo[1].baseline;
+            Assert.Equal(20.558228f, interval, 4);
+        }
+
+        [Fact]
+        public void TheDisclaimersLinesSpaceByTheCjkHeight()
+        {
+            var t = Lines(null, 9f, "免责声明\nAB", 1212f);
+            t.rectTransform.sizeDelta = new Vector2(1212f, 1000f);
+            t.ForceMeshUpdate();
+            var info = t.textInfo;
+            Assert.Equal(13.6256838f, info.lineInfo[0].lineHeight, 4);
+            Assert.Equal(11.32939f, info.lineInfo[0].baseline - info.lineInfo[1].baseline, 4);
+        }
+
+        [Fact]
+        public void TheModsTexts()
+        {
+            const string summary = "Couples: 0 · Cold wars: 0 · Best friends: 0\nColony: Neutral (0)\nLiving duplicants: 0\nRelationships: 0\nMatches: 0 · Blocks: 0";
+            Assert.Equal(85.14f, Lines("GRAYSTROKE REGULAR SDF", 13f, summary, 740f).preferredHeight);
+            Assert.Equal(37.31f, Lines("GRAYSTROKE REGULAR SDF", 13f, "Couples: 0 · Cold wars: 0\nColony: Neutral (0)", 740f).preferredHeight);
+            const string disclaimer = "免责声明：本模组为无偿、非商业的教学辅助工具；任务内容仅对B站UP主「大叔追云彩」《缺氧新手活过100天》系列视频作提纲式引用，不含画面/音频/完整文案转载，著作权归原作者；本模组与 Klei Entertainment 无隶属关系，不修改付费内容；若涉侵权，请通过工坊留言或 GitHub Issues 联系，本人将立即删除相应功能。";
+            Assert.Equal(26.96f, Lines(null, 9f, disclaimer, 1212f).preferredHeight);
+        }
     }
 }

@@ -1,0 +1,20 @@
+# Atomic Suits Pack (3447554654), class X (content for Outfits Included).
+#
+# What it does: no code. With Outfits Included (3447551899, which it requires), its
+# outfits_included/clothing_items.json adds Atomic Age clothing and atmo suit pieces
+# (adventurer and cadet helmets, bodies, tanks, gloves and boots in several colours) with
+# their kanims, and clothing_outfits.json assembles them into outfits.
+# How a player reaches it: the Supply Closet and a Duplicant's wardrobe.
+# What changes: more clothing to dress Duplicants in.
+#
+# The spec reads the permits: the red adventurer helmet is an atmo suit helmet with its name,
+# and the clothing items number as many as in the original.
+from: early-base
+mods: [3447551899, 3447554654]
+steps:
+  - expect_state:
+      "Db.Get().Permits.ClothingItems.TryGet(\"asp_red_adventurer_atmo_helmet\").Name": Adventurer Helmet (Red)
+      "Db.Get().Permits.ClothingItems.TryGet(\"asp_red_adventurer_atmo_helmet\").Category": AtmoSuitHelmet
+      "Db.Get().Permits.ClothingItems.Count": "== original"
+  - run: {seconds: 30}
+  - expect: {duplicants: 3}

@@ -1,0 +1,57 @@
+{
+ "spec": "mods/3447554654-atomic-suits-pack.yaml",
+ "mods": [
+  "3447551899",
+  "3447554654"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with Outfits Included, its clothing items are permits with their names and categories, as many as in the original",
+ "updated": "2026-10-26",
+ "commit": "df5493c6",
+ "mod_dlls": {
+  "3447551899": {
+   "OutfitsIncluded.dll": "a28ed6238a454be6eb214166257acb08be9390aeee1538cccef2c9ee2463b9bf"
+  },
+  "3447554654": {}
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-024539-704646ee",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:53:50",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-040633-3c211ba2",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:06:33",
+    "lane": 15,
+    "reference_run": "20261026-024539-704646ee",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-040633-3c211ba2",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T04:07:22",
+    "lane": 15,
+    "reference_run": "20261026-024539-704646ee",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

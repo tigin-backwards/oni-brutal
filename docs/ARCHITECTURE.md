@@ -16,19 +16,22 @@ CoreCLR, with Unity's engine replaced by our own implementation built on BRUTAL.
 2. the engine's managed API: `UnityEngine.*Module.dll` (thin C# over the native player);
 3. the Mono runtime and its class libraries (`MonoBleedingEdge`, `Managed/mscorlib.dll`, …).
 
-We replace **all three**: (1) and (2) with our engine, (3) with .NET 10.
+We replace **all three**: (1) and (2) with our engine, (3) with .NET 10. Unity's packages the
+game ships in `Managed/` (`UnityEngine.UI.dll`, `Unity.TextMeshPro.dll`, `Unity.Timeline.dll`)
+are replaced too, by this project's clean-room versions of the same names (`src/UnityEngine.UI`,
+`src/Unity.TextMeshPro`, `src/Unity.Timeline`; docs/cleanroom); `--shipped-ui-packages` loads
+Unity's instead, as the reference for differential runs.
 
 **What we keep, unmodified, as game code:**
 
 | Assembly | Why it stays |
 |---|---|
 | `Assembly-CSharp`, `Assembly-CSharp-firstpass` | The game. |
-| `UnityEngine.UI.dll`, `Unity.TextMeshPro.dll`, `Unity.Timeline.dll` | *Superseded by PLAN M9: replaced by this project's clean-room packages; the shipped ones remain the differential reference.* Package code compiled into the game, running only on the public `UnityEngine.*` API. The shipped TextMeshPro is a **Klei fork** (`KForceUpdateDirty`, `TMP_StyleSheet.instance`); the game subclasses uGUI types and depends on their protected surface and internal ordering (*usage §8*). Reimplementing them would re-derive behaviour the game was tuned against and lose Klei's changes. They are treated exactly like `Assembly-CSharp`: IL we execute, not engine we replace. |
 | `FMODUnity*.dll`, `com.rlabrecque.steamworks.net.dll`, `ImGui.NET.dll`, `Newtonsoft.Json`, `VYaml`, `LibNoiseDotNet`, `Ionic.Zip`, `ArabicSupport`, … | Third-party game dependencies. |
 | Native plugins (`libSimDLL.so`, `libfmodstudio.so`, `libresonanceaudio.so`, `libsteam_api.so`, `cimgui.so`) | The game's own natives, P/Invoked by game code. |
 | All data files (`globalgamemanagers*`, `level*`, `*.assets`, `.resS`, `resources.resource`, `StreamingAssets/**`, `Resources/unity default resources`, `Resources/unity_builtin_extra`) | Loaded read-only by our asset layer. |
 
-Nothing from `UnityPlayer.so`, `UnityEngine.*Module.dll`, or Mono is loaded.
+Nothing from `UnityPlayer.so`, `UnityEngine.*Module.dll`, Unity's packages or Mono is loaded.
 
 The reference install is the Linux build at `~/projects/oni-linux` (Unity 6000.3.5f2,
 `m_GraphicsAPIs = [OpenGLCore]`). The target platform is **linux-x64**. The Windows player
@@ -981,9 +984,10 @@ drawn into the window after a frame is copied there. Once 30 frames in a row arr
 far start-up is (`StartupProgress`): it passes checkpoints, the engine's own (window, first scene,
 first frame, each content bundle, the asset unload, the menu) and the game's, recognized from its
 log lines (Steam ready, `Global`'s start, the mod system, localization). The checkpoint times of
-each launch are kept in the player's cache folder, and the next launch moves the bar between two
-checkpoints at the last launch's pace, stopping short of the next until it is reached; while the
-first scene loads it moves by the objects loaded.
+each launch are kept in the player's cache folder. Between two checkpoints the bar eases towards
+the next at the last launch's pace (about 80% of the way by the expected time, then creeping on,
+never reaching it before it is passed), and while the first scene loads it moves by the objects
+loaded; the drawn bar follows that with a 0.25 s smoothing, so it never stalls or jumps.
 
 **Window messages during long frames.** The frame polls the window's messages at its start, as
 Unity does, but a start-up frame takes seconds, and Windows marks a window that has not taken its

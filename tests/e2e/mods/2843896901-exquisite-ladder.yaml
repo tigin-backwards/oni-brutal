@@ -1,0 +1,33 @@
+# R 精致梯子 Exquisite Ladder (2843896901), class B.
+#
+# What it does: three decorative 1x1 ladders in the Furniture menu: R004GG1 (+20 decor, its
+# speed an option, twice as fast going down), R004GG2 of wood (+10 decor) and R004GG3 of
+# refined metal (+40 decor in 8 tiles, 1.5 times the option's speed both ways). The three
+# speed multipliers are PLib options (1 to 10).
+# How a player reaches it: the build menu (Furniture); the Mods screen's options.
+# What changes: faster, prettier ladders.
+#
+# options set the metal ladder's multiplier to 2 (so 3 times a ladder's speed). The Furniture
+# menu lists the three; a metal ladder built by setup in the dug-out corridor west of the
+# printing pod is a ladder cell.
+from: early-base
+mods: [2843896901]
+options:
+  "2843896901": {$file: R004GGX.json, R004GG3X1: 2}
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"R004GG3\")", method: Build, args: [131128, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"R004GG3\").GetComponent<Ladder>.upwardsMovementSpeedMultiplier": 3
+      "Assets.GetPrefab(\"R004GG1\").GetComponent<Ladder>.downwardsMovementSpeedMultiplier": 2
+      "Assets.GetBuildingDef(\"R004GG3\").BaseDecor": 40
+  - run: {seconds: 10}
+  - expect: {buildings: {R004GG3: 1}}
+  - expect_state:
+      "Grid.HasLadder.get_Item(131128)": true
+  - click: {ui: "**/PlanScreen/Toggle:Furniture"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/R004GG3 Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/R004GG1 Group*": {active: true}
+      "**/BuildingGroups/**/Grid/R004GG2 Group*": {active: true}
+  - shot: {name: furniture-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}

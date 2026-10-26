@@ -1,0 +1,60 @@
+{
+ "spec": "mods/2843896901-exquisite-ladder.yaml",
+ "mods": [
+  "2843896901"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "options set the metal ladder's speed; a built one is a ladder cell, and the Furniture menu lists the three ladders (shot)",
+ "updated": "2026-10-26",
+ "commit": "f898d18a",
+ "mod_dlls": {
+  "2843896901": {
+   "PLib.dll": "b862c5db2b3cd6df09a62d4a30782e91e2b24e8e1bfac08d991c9cc89a984ba9",
+   "R_╛½╓┬╠▌╫╙.dll": "17ba07c413192d8a04ea7135acc0917eb18f62c5e49d786d229ef06dfcb40206"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-102152-42394c53",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T10:23:44",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-135852-94c2bbc0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T14:05:11",
+    "lane": 15,
+    "reference_run": "20261026-102152-42394c53",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "furniture-menu": 0.0
+    }
+   },
+   {
+    "run": "20261026-135852-94c2bbc0",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T14:06:12",
+    "lane": 15,
+    "reference_run": "20261026-102152-42394c53",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "furniture-menu": 0.0
+    }
+   }
+  ]
+ }
+}

@@ -1,0 +1,63 @@
+{
+ "spec": "mods/2839508628-increased-meter-limits.yaml",
+ "mods": [
+  "2839508628"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Liquid Meter Valve's side screen takes 4000 kg (the game stops at 500); the meters' limits are 5000; the side screen dump matches",
+ "updated": "2026-10-26",
+ "commit": "a452aaa",
+ "mod_dlls": {
+  "2839508628": {
+   "IncreasedMeterLimit.dll": "9138fb8c85e3347fccf9d40b4e66550bd484ce84db511b0c8298a828b12a9e7c"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-023730-5710265c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T02:50:21",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-025730-9101ed57",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T02:57:31",
+    "lane": 17,
+    "reference_run": "20261026-023730-5710265c",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "side-screen": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261026-025730-9101ed57",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T02:57:30",
+    "lane": 16,
+    "reference_run": "20261026-023730-5710265c",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "side-screen": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

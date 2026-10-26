@@ -1,0 +1,26 @@
+# Increased Meter Limits (2839508628), classes P, O.
+#
+# What it does: raises the limit of the Liquid, Gas and Conveyor Meter valves (500 kg or units
+# in the game) to PLib options of 1 to 99999, 5000 by default, with their side screen slider's
+# ranges stretched to match.
+# How a player reaches it: a meter valve's side screen (slider and number field).
+# What changes: how much a meter lets through before it shuts.
+#
+# setup builds a Liquid Meter Valve in the dug-out room west of the printing pod. It is
+# selected and 4000 typed into its side screen's field: its limit is 4000 kg.
+from: early-base
+mods: [2839508628]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LiquidLimitValve\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Cuprite], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"LiquidLimitValve\").GetComponent<LimitValve>.maxLimitKg": 5000
+      "Assets.GetPrefab(\"GasLimitValve\").GetComponent<LimitValve>.maxLimitKg": 5000
+      "Assets.GetPrefab(\"SolidLimitValve\").GetComponent<LimitValve>.maxLimitKg": 5000
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: LiquidLimitValve}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/LimitValveSideScreen", cond: stable}
+  - ui_dump: {name: side-screen, root: "**/LimitValveSideScreen"}
+  - type: {ui: "**/LimitValveSideScreen/**/NumberInputField", text: "4000", clear: true, enter: true}
+  - expect_state:
+      "selected:GetComponent<LimitValve>.Limit": 4000

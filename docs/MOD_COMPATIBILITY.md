@@ -2133,4 +2133,6 @@ installs get developer checks subscribers never see).
   strings (STRINGS) before it loads mods, and ours binds a missing one there as Mono does
   (ARCHITECTURE D32: U&F-Translate Fix); elsewhere ours fails it, where Mono binds it only after
   something (a mod's reflection, say) listed the class's nested types.
-- **Rephysicalized:** the reported build was the author's development build; not tracked.
+- **Transpilers on Unity's UI code** (uGUI, TextMeshPro) are not supported: they need the exact
+  IL of Unity's builds, which ours does not have. Ordinary Harmony patches on those classes
+  work. Text Input Hotkeys transpiles TMP_InputField.Backspace.

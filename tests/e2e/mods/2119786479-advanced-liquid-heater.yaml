@@ -1,0 +1,40 @@
+# Advanced Liquid Heater (2119786479), class B.
+#
+# What it does: adds the Advance Liquid Heater (AdvancedLiquidHeater, 2x1, 400 kg of any metal,
+# in the Utilities menu, researched with Liquid Tuning): a powered liquid heater (800 W) that
+# heats the liquid it is submerged in up to 1300 K, with 8000 kW of exhaust heat, from 100 kg
+# of liquid; it never floods. Its numbers come from config.json beside the mod.
+# How a player reaches it: the build menu (Utilities), after the research.
+# What changes: a much hotter tepidizer.
+#
+# setup grants Liquid Tuning and spawns metal ore. The heater shows in the Utilities menu, is
+# built in the corridor west of the printing pod and selected: its target is 1300 K.
+from: early-base
+mods: [2119786479]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"LiquidTemperature\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Cuprite\").substance", method: SpawnResource, args: [[111.5, 207.5, -12], 800, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"LiquidTemperature\").unlockedItemIDs": {contains: AdvancedLiquidHeater}
+      "Assets.GetBuildingDef(\"AdvancedLiquidHeater\").EnergyConsumptionWhenActive": 800
+  - run: {seconds: 5}
+  - click: {ui: "**/PlanScreen/Toggle:Utilities"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/AdvancedLiquidHeater Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/AdvancedLiquidHeater Group*": {active: true}
+  - shot: {name: utilities-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
+  - key: {code: Escape}
+  - expect_ui: {"**/PauseScreen": {exists: false}}
+  - build: {prefab: AdvancedLiquidHeater, at: [113, 206]}
+  - expect: {blueprints: {AdvancedLiquidHeater: 1}}
+  - run: {seconds: 1500, until: {buildings: {AdvancedLiquidHeater: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [113, 207], ortho: 8}}
+  - click_world: {cell: [113, 206], select: AdvancedLiquidHeater}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<SpaceHeater>.targetTemperature": 1300
+      "selected:GetComponent<Floodable>": missing
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Advance Liquid Heater"}

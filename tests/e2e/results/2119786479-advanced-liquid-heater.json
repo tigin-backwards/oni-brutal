@@ -1,0 +1,59 @@
+{
+ "spec": "mods/2119786479-advanced-liquid-heater.yaml",
+ "mods": [
+  "2119786479"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Utilities menu lists it after Liquid Tuning; built and selected, it targets 1300 K",
+ "updated": "2026-10-25",
+ "commit": "bd353b5",
+ "mod_dlls": {
+  "2119786479": {
+   "AdvancedLiquidHeater.dll": "f18b1649de03b905cc1133ab68e251859efd11ec69ee6a127149c3e5f2c744f4"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-195133-9810c702",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T19:55:54",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-204720-67170b67",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T20:47:20",
+    "lane": 15,
+    "reference_run": "20261025-195133-9810c702",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "utilities-menu": 0.0
+    }
+   },
+   {
+    "run": "20261025-204720-67170b67",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-25T20:48:29",
+    "lane": 15,
+    "reference_run": "20261025-195133-9810c702",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "utilities-menu": 0.0
+    }
+   }
+  ]
+ }
+}

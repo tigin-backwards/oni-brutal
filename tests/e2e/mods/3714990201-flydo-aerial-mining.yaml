@@ -1,0 +1,33 @@
+# Flydo: The Flying Digger (3714990201), class P. The Bionic Booster Pack.
+#
+# What it does: the Flydo (FetchDrone) gets a miner monitor and has digging permitted again:
+# every second an idle, operational Flydo looks for a cell marked for digging within 4 cells,
+# reachable from above, and takes a dig errand on it, drawing its laser on the cell while it
+# works.
+# How a player reaches it: a working Flydo near dig orders.
+# What changes: Flydos dig.
+#
+# setup takes digging off the three Duplicants' errands and spawns a Flydo with a charged power
+# bank in the dug-out room west of the printing pod. Three floor cells under it are marked for
+# digging: the Flydo digs them out.
+from: early-base
+mods: [3714990201]
+setup:
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[0].GetComponent<ChoreConsumer>", method: SetPermittedByUser, args: [{"$": "Db.Get().ChoreGroups.Dig"}, false]}}
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[1].GetComponent<ChoreConsumer>", method: SetPermittedByUser, args: [{"$": "Db.Get().ChoreGroups.Dig"}, false]}}
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[2].GetComponent<ChoreConsumer>", method: SetPermittedByUser, args: [{"$": "Db.Get().ChoreGroups.Dig"}, false]}}
+  - driver: {setup.call: {type: Scenario, method: SpawnPrefab, args: [{"$": "Grid.XYToCell(113, 206)"}, 0, 0, FetchDrone, Creatures]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+  - driver: {setup.call: {type: Scenario, method: SpawnPrefab, args: [{"$": "Grid.XYToCell(113, 206)"}, 0, 0, Electrobank, Ore]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "all:FetchDrone::[0].GetComponents<Storage>[1]", method: Store, args: [{"$": "last:"}]}}
+steps:
+  - expect_state:
+      "all:FetchDrone::[0].GetComponent<FlydoMinerMonitor>": exists
+  - expect_state:
+      "cells:112,205..114,205::Grid.Element[{cell}].hardness": "> 0"
+  - dig: [112, 205, 114, 205]
+  - run: {seconds: 600, until: {pending_digs: 0}}
+  - expect: {pending_digs: 0}
+  - expect_state:
+      "cells:112,205..114,205::Grid.Element[{cell}].hardness": 0

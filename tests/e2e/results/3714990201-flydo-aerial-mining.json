@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3714990201-flydo-aerial-mining.yaml",
+ "mods": [
+  "3714990201"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Flydo with a charged power bank digs out three floor cells marked for digging while the Duplicants may not dig",
+ "updated": "2026-10-26",
+ "commit": "6100bf87",
+ "mod_dlls": {
+  "3714990201": {
+   "FlydoAerialMining.dll": "0e3b55200bc291d7e94801c9206ad2a290321e54a330fb368695b89cbb479cfe"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-042232-0e5bb32c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:27:13",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-101857-880d347b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T10:18:57",
+    "lane": 16,
+    "reference_run": "20261026-042232-0e5bb32c",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-101857-880d347b",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T10:18:58",
+    "lane": 17,
+    "reference_run": "20261026-042232-0e5bb32c",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -1,0 +1,35 @@
+# Self-Sealing Airlocks: Restored (3747421197), class P.
+#
+# What it does: a prefix replacing Door.SetSimState keeps an airlock's cells filled with the
+# door's own material while it opens for a Duplicant on Auto, so no gas or liquid passes (the
+# game digs the cells out, which lets them through); a door set to Open still empties its
+# cells. The pneumatic door is left as it is. Duplicants use doors with the remote-use anim.
+# How a player reaches it: any Manual or Mechanized Airlock on Auto.
+# What changes: airlocks seal while Duplicants walk through.
+#
+# setup builds a Manual Airlock across the dug-out room west of the printing pod and sends a
+# Duplicant from the pod to the room's far end, through it. The door opens for it with its two
+# cells refilled with its own material and closes again (four ReplaceAndDisplaceElement calls,
+# OnSimDoorOpened called back; the game digs the cells out on opening, two calls), and they
+# hold the door's copper ore when it has passed.
+from: early-base
+mods: [3747421197]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"ManualPressureDoor\")", method: Build, args: [{"$": "Grid.XYToCell(113, 206)"}, Neutral, null, [Cuprite], 293.15, DEFAULT_FACADE]}}
+  - driver: {count: {methods: ["Door:OnSimDoorOpened", "SimMessages:ReplaceAndDisplaceElement"]}}
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[1].GetComponent<StateMachineController>.GetSMI(\"MoveToLocationMonitor+Instance\")", method: MoveToLocation, args: [131126]}}
+steps:
+  - expect_state:
+      "all:Door::[0].GetComponent<KPrefabID>.PrefabTag.Name": ManualPressureDoor
+      "all:Door::[0].overrideAnims[0].name": anim_use_remote_kanim
+  - run: {seconds: 1}
+  - expect_state:
+      "Grid.Element[131765].id": Cuprite
+      "Grid.Element[131129].id": Cuprite
+  - run: {seconds: 60}
+  - expect_state:
+      'E2eDriver.Counting.Of("Door:OnSimDoorOpened")': ">= 1"
+      'E2eDriver.Counting.Of("SimMessages:ReplaceAndDisplaceElement")': ">= 4"
+      "Components.LiveMinionIdentities.Items[1].GetComponent<StateMachineController>.GetSMI(\"MoveToLocationMonitor+Instance\").GetCurrentState().name": root.satisfied
+      "Grid.Element[131765].id": Cuprite
+      "Grid.Element[131129].id": Cuprite

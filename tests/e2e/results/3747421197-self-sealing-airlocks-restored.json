@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3747421197-self-sealing-airlocks-restored.yaml",
+ "mods": [
+  "3747421197"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Duplicant sent through a Manual Airlock has it refill its cells with its own material while open and closed (four ReplaceAndDisplaceElement calls, OnSimDoorOpened called back); the cells hold copper ore after",
+ "updated": "2026-10-26",
+ "commit": "162780a4",
+ "mod_dlls": {
+  "3747421197": {
+   "SelfSealingAirlocks.dll": "114de41d23d20a59a3cd05848d710efb4f8e46268a3f67965e7fa63be9a319f8"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-042232-0e5bb32c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:22:33",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-101139-60570127",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T10:11:39",
+    "lane": 16,
+    "reference_run": "20261026-042232-0e5bb32c",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-101139-60570127",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T10:11:40",
+    "lane": 17,
+    "reference_run": "20261026-042232-0e5bb32c",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

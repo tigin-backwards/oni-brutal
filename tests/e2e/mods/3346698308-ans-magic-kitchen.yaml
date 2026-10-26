@@ -1,0 +1,34 @@
+# T 安的魔法厨房 An's Magic Kitchen 2.9 (3346698308), classes B, P (foods, plants), O.
+#
+# What it does: adds, in the Food menu with no research, a seed research station (TA001GG1,
+# 3x3, 100 W: trades materials for seeds), and three kitchens (UA001GG1 to UA003GG1) cooking
+# the mod's dishes (ice creams, teas, ...); new plants (T001GG1 and others) with codex entries;
+# more recipes on the Electric Grill, the Gas Range and the Deep Fryer. PLib options
+# (T000GG0.json) switch the kitchens and dishes on or off.
+# How a player reaches it: the build menu (Food); the stations' recipe lists.
+# What changes: more food buildings, dishes and plants.
+#
+# The Food menu offers the four buildings. setup builds the seed research station in the
+# dug-out room west of the printing pod, and selected, its recipe list is compared with the
+# original.
+from: early-base
+mods: [3346698308]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"TA001GG1\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"UA001GG1\")": exists
+      "count:ComplexRecipeManager.Get().recipes[*] if .fabricators[0].Name == TA001GG1": ">= 1"
+  - run: {seconds: 10}
+  - click: {ui: "**/PlanScreen/Toggle:Food"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/TA001GG1 Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/TA001GG1 Group*": {active: true}
+      "**/BuildingGroups/**/Grid/UA001GG1 Group*": {active: true}
+      "**/BuildingGroups/**/Grid/UA003GG1 Group*": {active: true}
+  - shot: {name: food-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
+  - key: {code: Escape}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: TA001GG1}
+  - ui_wait: {path: "**/ComplexFabricatorSideScreen/Contents/ButtonScrollView", cond: stable}
+  - ui_dump: {name: recipes, root: "**/ComplexFabricatorSideScreen/Contents/ButtonScrollView"}

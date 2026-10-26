@@ -1,0 +1,80 @@
+{
+ "spec": "mods/3346698308-ans-magic-kitchen.yaml",
+ "mods": [
+  "3346698308"
+ ],
+ "verdict": "warning",
+ "why": "known findings: scroll-normalized-position",
+ "findings": [
+  "scroll-normalized-position"
+ ],
+ "note": "the Food menu offers the seed research station and the three kitchens (shot matches); the station's recipe list differs only in its scroll position (scroll-normalized-position)",
+ "updated": "2026-10-26",
+ "commit": "ca87ffb1",
+ "mod_dlls": {
+  "3346698308": {
+   "PLib.dll": "b862c5db2b3cd6df09a62d4a30782e91e2b24e8e1bfac08d991c9cc89a984ba9",
+   "T_░▓╡──º╖¿│°╖┐_2.0.dll": "d228421c13844aa02db4321a2e7b934889ce86fa7e66b9b3b6e38096ca276fa3"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-033203-6e82e943",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:56:52",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-042053-694bd1ec",
+    "index": 1,
+    "verdict": "warn",
+    "date": "2026-10-26T04:20:53",
+    "lane": 16,
+    "reference_run": "20261026-033203-6e82e943",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "recipes": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "food-menu": 0.0
+    }
+   },
+   {
+    "run": "20261026-042053-694bd1ec",
+    "index": 2,
+    "verdict": "warn",
+    "date": "2026-10-26T04:20:54",
+    "lane": 17,
+    "reference_run": "20261026-033203-6e82e943",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "recipes": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "food-menu": 0.0
+    }
+   }
+  ]
+ }
+}

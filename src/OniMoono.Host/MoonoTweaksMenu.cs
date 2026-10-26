@@ -27,16 +27,11 @@ namespace OniMoono.Host
             };
             var states = rows.Select(State).ToArray();
             // The tooltip's parts (the screen styles the gain): the row's gain, or its group's
-            // ("Saving together: ..."); then where it was measured and the launch option.
+            // ("Saving together: ..."); then the launch option.
             static string Capitalized(string s) => s.Length > 0 ? char.ToUpperInvariant(s[0]) + s[1..] : s;
             string GainText(TweakInfo row) => row.Gain != null ? Capitalized(row.Gain.Effect)
                 : row.Group.Gain != null ? $"{row.Group.Title} together: {row.Group.Gain.Effect}" : "";
-            string Notes(TweakInfo row)
-            {
-                var gain = row.Gain ?? row.Group.Gain;
-                var measured = gain != null ? $"Measured on {gain.Colony} ({gain.Platform}, {gain.Measured}).\n" : "";
-                return measured + "Launch option: " + row.LaunchOption;
-            }
+            string Notes(TweakInfo row) => "Launch option: " + row.LaunchOption;
             var locked = new List<string>();
             foreach (var value in effective.CommandLineTweaks) locked.Add("--game-tweak " + value);
             if (effective.SplashSource == OptionSource.CommandLine) locked.Add("--splash " + effective.Splash);

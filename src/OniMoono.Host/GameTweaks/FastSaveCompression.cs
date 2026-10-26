@@ -17,14 +17,17 @@ namespace OniMoono.Host.GameTweaks
         /// `compress`: false when background-save does the compressing (with this zlib).
         public static void Install(Harmony harmony, bool compress)
         {
-            if (compress) harmony.Patch(AccessTools.Method("SaveLoader:CompressContents"), prefix: new HarmonyMethod(typeof(FastSaveCompression), nameof(Compress)));
+            // Mods' prefixes run first (Better Save takes the body itself).
+            if (compress) harmony.Patch(AccessTools.Method("SaveLoader:CompressContents"), prefix: new HarmonyMethod(typeof(FastSaveCompression), nameof(Compress)) { priority = Priority.Last });
             harmony.Patch(AccessTools.Method("SaveLoader:DecompressContents"), prefix: new HarmonyMethod(typeof(FastSaveCompression), nameof(Decompress)));
         }
 
         /// SaveLoader.CompressContents(BinaryWriter, byte[], int): the compressed body follows the
-        /// header already written, and the file is closed when the stream is, as before.
+        /// header already written, and the file is closed when the stream is, as before. A writer
+        /// that is not the game's file (Better Save's, into memory) is left to the game.
         static bool Compress(BinaryWriter fileWriter, byte[] uncompressed, int length)
         {
+            if (fileWriter.BaseStream is not FileStream) return true;
             using var zlib = new ZLibStream(fileWriter.BaseStream, CompressionLevel.Fastest);
             zlib.Write(uncompressed, 0, length);
             return false;

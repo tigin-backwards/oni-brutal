@@ -36,6 +36,18 @@ namespace OniMoono.Tests
             Assert.False(BackgroundSave.Compress(writer, body, body.Length));
         }
 
+        /// Better Save swaps the game's file for a MemoryStream and writes the save itself: the
+        /// tweak leaves such a writer to the method's other patches and the game.
+        [Fact]
+        public void AWriterIntoMemoryIsLeftToTheGame()
+        {
+            using var writer = new BinaryWriter(new MemoryStream());
+            writer.Write(Header("header"));
+            var body = Body(1, 1024);
+            Assert.True(BackgroundSave.Compress(writer, body, body.Length));
+            Assert.Equal(6, writer.BaseStream.Length);
+        }
+
         /// A colony's serialized body: compressible, as a save is, and different per seed.
         static byte[] Body(int seed, int length = 24 << 20)
         {

@@ -15,7 +15,9 @@ namespace OniMoono.GameTweaks
     ///
     /// Both answers depend only on the type, so they are kept per type: the same booleans and the
     /// same name are used, from the first time each type is asked. Only those two calls in that
-    /// method are replaced.
+    /// method are replaced. Mods' transpilers of the method run first and see the game's calls
+    /// (Better Save replaces the same IsDefined calls with its own cache, and gave up when it
+    /// found ours); what they leave of them is replaced.
     public static class FastSaveTypeChecks
     {
         public const string Name = "fast-save-type-checks";
@@ -24,7 +26,10 @@ namespace OniMoono.GameTweaks
         static readonly ConcurrentDictionary<Type, string> names = new ConcurrentDictionary<Type, string>();
 
         public static void Install(Harmony harmony)
-            => harmony.Patch(AccessTools.Method(typeof(SaveLoadRoot), nameof(SaveLoadRoot.SaveWithoutTransform)), transpiler: new HarmonyMethod(typeof(FastSaveTypeChecks), nameof(Transpiler)));
+            => harmony.Patch(AccessTools.Method(typeof(SaveLoadRoot), nameof(SaveLoadRoot.SaveWithoutTransform)),
+                transpiler: new HarmonyMethod(typeof(FastSaveTypeChecks), nameof(Transpiler)) { priority = Priority.Last });
+
+        static bool reported;
 
         static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
         {
@@ -54,7 +59,11 @@ namespace OniMoono.GameTweaks
                 previous = i;
                 yield return i;
             }
-            if (checks != 2 || typeNames != 1) throw new InvalidOperationException($"{Name}: expected 2 IsDefined and 1 type name in SaveLoadRoot.SaveWithoutTransform, found {checks} and {typeNames}");
+            if ((checks != 2 || typeNames != 1) && !reported)
+            {
+                reported = true;
+                global::Debug.Log($"{Name}: SaveLoadRoot.SaveWithoutTransform has {checks} of the game's 2 IsDefined calls and {typeNames} of its 1 type name left (another patch changed it); those are kept per type");
+            }
         }
 
         /// MemberInfo.IsDefined(attributeType, inherit), kept per member.

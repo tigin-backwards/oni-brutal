@@ -44,7 +44,8 @@ namespace OniMoono.Host.GameTweaks
                 lock (gate) t = pending;
                 t.Wait(TimeSpan.FromSeconds(30));
             };
-            harmony.Patch(AccessTools.Method("SaveLoader:CompressContents"), prefix: new HarmonyMethod(typeof(BackgroundSave), nameof(Compress)));
+            // Mods' prefixes run first (Better Save takes the body itself).
+            harmony.Patch(AccessTools.Method("SaveLoader:CompressContents"), prefix: new HarmonyMethod(typeof(BackgroundSave), nameof(Compress)) { priority = Priority.Last });
             var wait = new HarmonyMethod(typeof(BackgroundSave), nameof(WaitPrefix));
             harmony.Patch(AccessTools.Method("SaveLoader:Save", [typeof(string), typeof(bool), typeof(bool)]), prefix: wait);
             harmony.Patch(AccessTools.Method("SaveLoader:Load", [typeof(string)]), prefix: wait);
@@ -65,11 +66,13 @@ namespace OniMoono.Host.GameTweaks
         }
 
         /// SaveLoader.CompressContents(BinaryWriter, byte[], int): the header is in the file; the
-        /// body is compressed and the whole file written in the background.
+        /// body is compressed and the whole file written in the background. A writer that is not
+        /// the game's file (Better Save writes the save into memory and to disk itself) is left to
+        /// the rest of the method's patches and the game.
         internal static bool Compress(BinaryWriter fileWriter, byte[] uncompressed, int length)
         {
+            if (fileWriter.BaseStream is not FileStream file) return true;
             fileWriter.Flush();
-            var file = (FileStream)fileWriter.BaseStream;
             string path = file.Name;
             var header = new byte[file.Position];
             file.Position = 0;

@@ -1,0 +1,23 @@
+# [Fix] Ethanol Geyser (2998321975), classes P, W.
+#
+# What it does: adds a Chilled Ethanol geyser type (GeyserGeneric_chilled_ethanol, ethanol
+# at 263 K) to the generic geysers, and to every world's template rules the rust-biome
+# ethanol geyser POI (poi_rust_geyser_ethanol), so new worlds get it.
+# How a player reaches it: a new game's worlds; the geyser itself where it spawns.
+# What changes: a cold ethanol geyser.
+#
+# The geyser prefab is read; one spawned by setup in the dug-out corridor west of the printing
+# pod spouts ethanol.
+from: early-base
+mods: [2998321975]
+setup:
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131127, 0, 0, \"GeyserGeneric_chilled_ethanol\", \"BuildingBack\")", method: SetActive, args: [true]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"GeyserGeneric_chilled_ethanol\")": exists
+  - run: {seconds: 2}
+  - expect_state:
+      "all:Geyser::[0].configuration.typeId": "== original"
+      "all:Geyser::[0].GetComponent<KPrefabID>.PrefabTag.Name": GeyserGeneric_chilled_ethanol
+      "all:Geyser::[0].configuration.GetElement()": Ethanol
+      "all:Geyser::[0].configuration.GetTemperature()": [">= 263.1", "<= 263.2"]

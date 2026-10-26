@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2998321975-ethanol-geyser-fix.yaml",
+ "mods": [
+  "2998321975"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a spawned Chilled Ethanol geyser spouts ethanol at 263 K",
+ "updated": "2026-10-26",
+ "commit": "f898d18a",
+ "mod_dlls": {
+  "2998321975": {
+   "EthanolGeyser.dll": "c64bcd0d26e1ab47e7983ad516a4a19fea0651162208d03f0bf86571fa654ab8"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-114619-1abc381b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T11:55:46",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-142203-a4af3f09",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T14:26:35",
+    "lane": 14,
+    "reference_run": "20261026-114619-1abc381b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-142203-a4af3f09",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T14:27:25",
+    "lane": 14,
+    "reference_run": "20261026-114619-1abc381b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

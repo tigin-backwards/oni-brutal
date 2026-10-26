@@ -1,0 +1,33 @@
+# "Move Here" Command Tile (2901813453), classes B, S.
+#
+# What it does: adds the Move Here Command Tile (MDH_GoHereTile, a 1x1 floor tile, refined
+# metal and raw material, 10 W, Automation menu after the Floor Switch, researched with
+# Duplicant Traffic Control) with an automation input: a Duplicant is assigned to it on its
+# side screen, and on a green signal that Duplicant is ordered to walk onto it (a move chore),
+# until the signal goes red. Morb Rovers become nameable.
+# How a player reaches it: the build menu (Automation), after the research; its assignment
+# side screen.
+# What changes: Duplicants sent somewhere by automation.
+#
+# setup grants Duplicant Traffic Control: the Automation menu offers the tile. setup builds one
+# in the floor of the dug-out room west of the printing pod; selected, a Duplicant is assigned
+# to it on its side screen.
+from: early-base
+mods: [2901813453]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"DupeTrafficControl\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"MDH_GoHereTile\")", method: Build, args: [{"$": "Grid.XYToCell(112, 205)"}, Neutral, null, [Copper, SandStone], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"DupeTrafficControl\").unlockedItemIDs": {contains: MDH_GoHereTile}
+  - run: {seconds: 10}
+  - click: {ui: "**/PlanScreen/Toggle:Automation"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/MDH_GoHereTile Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/MDH_GoHereTile Group*": {active: true}
+  - key: {code: Escape}
+  - driver: {camera.set: {cell: [112, 207], ortho: 8}}
+  - click_world: {cell: [112, 205], select: MDH_GoHereTile}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/AssignableSideScreen", cond: stable}
+  - ui_dump: {name: assign, root: "**/AssignableSideScreen", mask_text: ['.+']}

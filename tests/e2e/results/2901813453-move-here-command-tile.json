@@ -1,0 +1,63 @@
+{
+ "spec": "mods/2901813453-move-here-command-tile.yaml",
+ "mods": [
+  "2901813453"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "after Duplicant Traffic Control the Automation menu offers the tile; one built in the floor shows its assignment screen (dump matches)",
+ "updated": "2026-10-26",
+ "commit": "0a08fc16",
+ "mod_dlls": {
+  "2901813453": {
+   "MoveDupeHere.dll": "775e1d3dec37906ab46d29ed137f634a46e80be342e6f9b7d1c3edefd7046d84"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-043257-c0eef0ae",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:39:46",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-104208-5375f5d0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T10:42:08",
+    "lane": 16,
+    "reference_run": "20261026-043257-c0eef0ae",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "assign": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261026-104208-5375f5d0",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T10:42:09",
+    "lane": 17,
+    "reference_run": "20261026-043257-c0eef0ae",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "assign": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

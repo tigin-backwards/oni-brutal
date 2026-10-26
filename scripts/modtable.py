@@ -255,6 +255,13 @@ broken.update({
 broken.update({
     '3456696039': 'broken upstream: its DLL references PLib 4.8.1 but ships without it, so loading it throws a FileNotFoundException while Harmony reads its patch attributes, the game disables it and restarts before the colony loads; it loads only beside another mod that ships PLib (spec tests/e2e/mods/3456696039-dupes-speed-custom.yaml)',
 })
+# Found by the e2e specs of ranks 1131-1215: the spec fails the same way in the original.
+broken.update({
+    '1863180631': 'broken upstream: its `ToolParameterMenu.PopulateMenu` postfix calls `ChangeToSetting` with the layer\'s name through Traverse, but the game\'s method now takes a widget, so the call finds nothing and the Deconstruct tool\'s filter stays on All (spec tests/e2e/mods/1863180631-set-default-deconstruct-layer.yaml)',
+    '2627892585': 'broken upstream: its builder\'s state machine subscribes to `TreeFilterable.OnFilterChanged` as an `Action<Tag[]>`, a field the game now types differently, so the finished building throws a MissingFieldException in `LiquidLockBuilder.OnSpawn` and the crash screen opens (spec tests/e2e/mods/2627892585-liquid-lock-builder.yaml)',
+    '3635077282': 'broken upstream: a Multi-Selection Gas Sensor standing in oxygen, with oxygen in its filter, never switches on (spec tests/e2e/mods/3635077282-multi-selection-sensors.yaml)',
+    '2848571032': 'broken upstream: a middle click on a reachable cell, with a Duplicant selected, does not send it there; the Duplicant stays where it stood (spec tests/e2e/mods/2848571032-move-duplicant-middle-click.yaml)',
+})
 # Flagged by onimaxxing as not loading, played by spec tests/e2e/mods/flagged-no-mod-info.yaml on
 # the base-game colony (game build U59-744825): KMod skips them in both players.
 NO_MOD_INFO = ('broken upstream: ships no mod_info.yaml, which KMod requires since 2021: it logs "Is '

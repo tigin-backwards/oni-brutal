@@ -1,0 +1,33 @@
+{
+ "spec": "mods/2627892585-liquid-lock-builder.yaml",
+ "mods": [
+  "2627892585"
+ ],
+ "verdict": "pending",
+ "why": "the spec fails in the original: a broken spec, or a mod broken upstream",
+ "findings": [],
+ "note": "",
+ "updated": "2026-10-26",
+ "commit": "e04e91bc",
+ "mod_dlls": {
+  "2627892585": {
+   "LiquidLockBuilder.dll": "3721a2bf5a243d2bfd24fd60c04dba1d6feb0ed2bfb2fd848b31836224920734"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-113228-a0d69cd2",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-26T11:37:02",
+    "lane": 15,
+    "reasons": [
+     "step 14: no LiquidLockBuilder selected at [112, 207] after 5 clicks (last: None)"
+    ],
+    "signatures": 2
+   }
+  ],
+  "ours": []
+ }
+}

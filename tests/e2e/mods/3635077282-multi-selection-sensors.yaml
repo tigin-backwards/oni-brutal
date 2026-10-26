@@ -1,0 +1,32 @@
+# Multi Selection Sensors (3635077282), class B.
+#
+# What it does: five sensors that test for several elements at once: Multi-Selection Gas and
+# Liquid Sensors (Automation menu, with the game's element sensors' research) and Gas Pipe,
+# Liquid Pipe and Conveyor Sensors (HVAC, Plumbing, Conveyance); each has a checklist
+# (TreeFilterable side screen) and sends a green signal while the element in its cell or pipe
+# is any of those checked.
+# How a player reaches it: the build menu, after the research; the sensor's element filter.
+# What changes: one sensor instead of several.
+#
+# setup builds a Multi-Selection Gas Sensor in the dug-out corridor west of the printing pod,
+# in oxygen, and checks oxygen in its filter; the sensor switches on, and its side screen
+# shows the element filter.
+from: early-base
+mods: [3635077282]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"MultiLogicElementSensorGas\")", method: Build, args: [131764, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "all:Switch::[0].GetComponent<TreeFilterable>", method: AddTagToFilter, args: [Oxygen]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"MultiGasConduitElementSensor\").GetComponent<TreeFilterable>": exists
+      "Assets.GetPrefab(\"MultiSolidConduitElementSensor\")": exists
+      "Grid.Element[131764].id": Oxygen
+  - run: {seconds: 3}
+  - expect: {buildings: {MultiLogicElementSensorGas: 1}}
+  - expect_state:
+      "all:Switch::[0].IsSwitchedOn": true
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: MultiLogicElementSensorGas}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/TreeFilterableSideScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/SideScreen/**/Title/TitleLabel": {text: "Element Filter"}

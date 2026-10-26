@@ -1,0 +1,33 @@
+{
+ "spec": "mods/2848571032-move-duplicant-middle-click.yaml",
+ "mods": [
+  "2848571032"
+ ],
+ "verdict": "pending",
+ "why": "the spec fails in the original: a broken spec, or a mod broken upstream",
+ "findings": [],
+ "note": "",
+ "updated": "2026-10-26",
+ "commit": "e04e91bc",
+ "mod_dlls": {
+  "2848571032": {
+   "MoveDuplicateByMiddleClick.dll": "5551d4444b85f0d180328e141aec16c352ccf89a49af86ea0fc5981b2589a034"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-115912-aa2e4a22",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-26T11:59:12",
+    "lane": 14,
+    "reasons": [
+     "step 6: Components.LiveMinionIdentities.Items[1].transform.position.x is 124.5, wanted > x + 2"
+    ],
+    "signatures": 0
+   }
+  ],
+  "ours": []
+ }
+}

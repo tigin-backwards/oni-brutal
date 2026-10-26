@@ -1,0 +1,24 @@
+# [Vanilla + DLC] Move Duplicant by Middle Mouse Button Updated (2848571032), class T.
+#
+# What it does: with a Duplicant selected, a middle click on a reachable cell sends it there,
+# as its "Move To" user menu button would (MoveToLocationMonitor.MoveToLocation); an
+# unreachable cell plays the negative sound.
+# How a player reaches it: select a Duplicant, middle-click in the world.
+# What changes: moving Duplicants by hand without the Move To tool.
+#
+# setup selects a Duplicant; a middle click on the floor of the dug-out corridor east of the
+# printing pod sends it on its way there.
+from: early-base
+mods: [2848571032]
+setup:
+  - driver: {setup.call: {target: "SelectTool.Instance", method: Select, args: [{"$": "Components.LiveMinionIdentities.Items[1]"}]}}
+steps:
+  - run: {seconds: 2}
+  - expect_state:
+      "selected:KPrefabID.PrefabTag.Name": Minion
+      "Components.LiveMinionIdentities.Items[1].transform.position.x": [{save_as: x}, "< 128"]
+  - driver: {camera.set: {cell: [124, 208], ortho: 12}}
+  - click_world: {cell: [134, 207], button: middle}
+  - run: {seconds: 10}
+  - expect_state:
+      "Components.LiveMinionIdentities.Items[1].transform.position.x": "> x + 2"

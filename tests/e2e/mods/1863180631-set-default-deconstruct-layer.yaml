@@ -1,0 +1,26 @@
+# Set Default Deconstruct Layer (1863180631), class T.
+#
+# What it does: the Deconstruct tool's filter menu opens on a chosen layer instead of All:
+# a postfix on ToolParameterMenu.PopulateMenu switches it to the layer named in the mod's
+# Config.json (SelectedLayer: Buildings by default; All, Power Wires, Liquid Pipes, Gas
+# Pipes, Conveyor Rails, Automation, Background Buildings), the first time in a session or
+# every time (DefaultEveryTime).
+# How a player reaches it: the Deconstruct tool (X); the setting is in Config.json beside the
+# mod.
+# What changes: the tool's filter starts on that layer.
+#
+# Config.json picks Power Wires; the Deconstruct tool is opened with its hotkey and its
+# filter menu is read.
+from: early-base
+mods: [1863180631]
+options:
+  "1863180631": {$file: Config.json, SelectedLayer: Power Wires}
+steps:
+  - run: {seconds: 2}
+  - key: {code: X}
+  - ui_wait: {path: "**/ToolMenu/ToolParameters/Content", cond: stable}
+  - expect_state:
+      "PlayerController.Instance.ActiveTool.name": DeconstructTool
+      "ToolMenu.Instance.toolParameterMenu.widgets[\"WIRES\"].data.state": "== 'On'"
+      "ToolMenu.Instance.toolParameterMenu.widgets[\"ALL\"].data.state": "== 'Off'"
+  - shot: {name: filter, crop: "**/ToolMenu/ToolParameters/Content", threshold: 0.04}

@@ -1,0 +1,33 @@
+{
+ "spec": "mods/1863180631-set-default-deconstruct-layer.yaml",
+ "mods": [
+  "1863180631"
+ ],
+ "verdict": "pending",
+ "why": "the spec fails in the original: a broken spec, or a mod broken upstream",
+ "findings": [],
+ "note": "",
+ "updated": "2026-10-26",
+ "commit": "e04e91bc",
+ "mod_dlls": {
+  "1863180631": {
+   "SetDefaultDeconstructLayer.dll": "331b3bfa4bdfaa322ca8fa2acf2ea7381ae64b3e7423f3842162375c98bc4eb5"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-101011-aa145397",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-26T10:10:12",
+    "lane": 15,
+    "reasons": [
+     "step 4: ToolMenu.Instance.toolParameterMenu.widgets[\"WIRES\"].data.state is \"Off\", wanted == 'On'; ToolMenu.Instance.toolParameterMenu.widgets[\"ALL\"].data.state is \"On\", wanted == 'Off'"
+    ],
+    "signatures": 0
+   }
+  ],
+  "ours": []
+ }
+}

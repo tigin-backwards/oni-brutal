@@ -1,0 +1,33 @@
+{
+ "spec": "mods/3635077282-multi-selection-sensors.yaml",
+ "mods": [
+  "3635077282"
+ ],
+ "verdict": "pending",
+ "why": "the spec fails in the original: a broken spec, or a mod broken upstream",
+ "findings": [],
+ "note": "",
+ "updated": "2026-10-26",
+ "commit": "e04e91bc",
+ "mod_dlls": {
+  "3635077282": {
+   "MultiSelectionSensors.dll": "be090fc139b9f15ff8bfc1043adabda2f7e13d89831a99e15c8f2314018ec08d"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-114619-1abc381b",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-26T11:46:20",
+    "lane": 15,
+    "reasons": [
+     "step 4: all:Switch::[0].IsSwitchedOn is false, wanted True"
+    ],
+    "signatures": 0
+   }
+  ],
+  "ours": []
+ }
+}

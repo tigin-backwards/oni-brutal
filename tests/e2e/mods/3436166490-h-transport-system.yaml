@@ -1,0 +1,39 @@
+# H 运输系统 Transport System 1.6 (3436166490), classes B, O.
+#
+# What it does: PLib options switch on a set of conveyor changes: the Auto-Sweeper gets a
+# range slider (1 to 30 tiles, 6 by default; with an option its power grows with the range),
+# conveyor rails carry the options' mass per packet (100 kg instead of 20), the Robo-Miner
+# digs harder materials, farther and without losing mass, and three buildings join the
+# Shipping menu (H006GG1, H006GG2 and H007GG1, among them a buildable solid pump).
+# How a player reaches it: the build menu (Shipping); a built Auto-Sweeper's side screen.
+# What changes: a faster, longer-reaching conveyor network.
+#
+# setup researches Smart Storage and Solid Transport; the Shipping menu lists the mod's
+# buildings (shot), and an Auto-Sweeper built by setup in the dug-out corridor west of the
+# printing pod is selected: its slider field takes 10 and its range is then 10 (dumped).
+from: early-base
+mods: [3436166490]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"SolidTransport\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"SolidTransferArm\")", method: Build, args: [131128, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"H006GG1\")": exists
+      "Assets.GetBuildingDef(\"H006GG2\")": exists
+      "Assets.GetBuildingDef(\"H007GG1\")": exists
+  - run: {seconds: 10}
+  - expect: {buildings: {SolidTransferArm: 1}}
+  - click: {ui: "**/PlanScreen/Toggle:Shipping"}
+  # The build menu catches up over frames: 120 frames for all of it to settle.
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/H007GG1 Group*", cond: stable, stable: 120, frames: 600}
+  - shot: {name: shipping-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
+  - key: {code: Escape}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 206], select: SolidTransferArm}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/SingleSliderSideScreen", cond: stable}
+  - ui_dump: {name: slider, root: "**/SingleSliderSideScreen"}
+  - type: {ui: "**/SingleSliderSideScreen/**/*Input*", text: "10", enter: true, clear: true}
+  - expect_state:
+      "selected:SolidTransferArm.pickupRange": 10

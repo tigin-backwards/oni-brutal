@@ -1,0 +1,59 @@
+{
+ "spec": "mods/3621278256-algae-grower.yaml",
+ "mods": [
+  "3621278256"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Algae Grower shows in the Oxygen menu after Basic Farming; a built one scales its converter by the light on it and asks for water; menu shot matches",
+ "updated": "2026-10-26",
+ "commit": "26541bd",
+ "mod_dlls": {
+  "3621278256": {
+   "AlgaeGrower.dll": "5040518b4e3ba6b03df3eacf71bcbe085925b8aed2b7460a660b21cab1fa977e"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-015659-d06c2edb",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T02:07:04",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-020850-2e3b5efb",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T02:08:50",
+    "lane": 15,
+    "reference_run": "20261026-015659-d06c2edb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "oxygen-menu": 0.0
+    }
+   },
+   {
+    "run": "20261026-020850-2e3b5efb",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T02:09:26",
+    "lane": 14,
+    "reference_run": "20261026-015659-d06c2edb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "oxygen-menu": 0.0
+    }
+   }
+  ]
+ }
+}

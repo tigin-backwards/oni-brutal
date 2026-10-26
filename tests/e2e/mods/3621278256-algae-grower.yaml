@@ -1,0 +1,39 @@
+# [New Building] Algae Grower 藻类培养箱 (3621278256), class B.
+#
+# What it does: adds the Algae Grower (AlgaeGrower, 3x2, raw metal, Oxygen menu, researched with
+# Basic Farming). It takes water by delivery or pipe (360 kg) and carbon dioxide, and turns
+# 0.1125 kg/s of water and 0.275 kg/s of CO2 into 0.1 kg/s of oxygen and 0.1875 kg/s of algae,
+# scaled every second by the light on it (1000 lux is 100 %, at least 1 %); it drops its algae
+# every 100 kg. Strings come from its translations folder.
+# How a player reaches it: the build menu (Oxygen), after the research.
+# What changes: an oxygen and algae source driven by light.
+#
+# setup grants Basic Farming and builds an Algae Grower in the corridor west of the printing
+# pod. It shows in the Oxygen menu; the built one is selected, its converter scaled by the
+# light where it stands, and it asks for water.
+from: early-base
+mods: [3621278256]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"FarmingTech\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"AlgaeGrower\")", method: Build, args: [{"$": "Grid.XYToCell(111, 207)"}, Neutral, null, [Cuprite], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"FarmingTech\").unlockedItemIDs": {contains: AlgaeGrower}
+      "Assets.GetPrefab(\"AlgaeGrower\").GetComponent<ElementConverter>.outputElements[1].massGenerationRate": 0.1875
+  # Long enough for the build menu to have counted the base's materials: right after the load it
+  # shows some buildings unaffordable for a moment, in either player.
+  - run: {seconds: 10}
+  - click: {ui: "**/PlanScreen/Toggle:Oxygen"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/AlgaeGrower Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/AlgaeGrower Group*": {active: true}
+  - shot: {name: oxygen-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
+  - key: {code: Escape}
+  - expect_ui: {"**/PauseScreen": {exists: false}}
+  - driver: {camera.set: {cell: [111, 208], ortho: 8}}
+  - click_world: {cell: [111, 207], select: AlgaeGrower}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<ElementConverter>.OutputMultiplier": ">= 0.01"
+      "selected:GetComponent<ManualDeliveryKG>.RequestedItemTag.Name": Water

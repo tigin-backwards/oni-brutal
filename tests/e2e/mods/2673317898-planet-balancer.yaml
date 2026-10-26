@@ -1,0 +1,18 @@
+# Planet Balancer [fixed] (2673317898), class P (base game).
+#
+# What it does: a prefix on the base game's StarmapScreen.LoadPlanets adds one destination of
+# every space destination type the starmap lacks, at a distance of 7 to 15 and an orbit
+# position seeded from the existing destinations, so every kind can be visited.
+# How a player reaches it: the Starmap screen.
+# What changes: a starmap with at least one of each destination.
+#
+# The base-game colony's Starmap is opened and its destinations counted against the
+# original's. (In neither player did the opened Starmap gain the missing types: the spec
+# could not reach the moment the mod's prefix adds them.)
+from: vanilla-base
+mods: [2673317898]
+steps:
+  - open: {management: starmap}
+  - run: {seconds: 2}
+  - expect_state:
+      "count:Game.Instance.spacecraftManager.destinations[*] if .type != ''": "== original"

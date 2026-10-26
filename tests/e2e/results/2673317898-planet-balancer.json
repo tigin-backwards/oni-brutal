@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2673317898-planet-balancer.yaml",
+ "mods": [
+  "2673317898"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the base-game Starmap opens and its destinations number as in the original; the types the mod adds were not observed in either player",
+ "updated": "2026-10-26",
+ "commit": "feeca01d",
+ "mod_dlls": {
+  "2673317898": {
+   "Planet Balancer.dll": "c9bc8919a02b68c1133b4bc6e8ccff815b3f30d9906f53c0bd53edf566995a41"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-043220-6baf08a2",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:36:15",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-043759-0d884636",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:41:00",
+    "lane": 15,
+    "reference_run": "20261026-043220-6baf08a2",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-043759-0d884636",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T04:41:35",
+    "lane": 15,
+    "reference_run": "20261026-043220-6baf08a2",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

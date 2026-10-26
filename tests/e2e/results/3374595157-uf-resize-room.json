@@ -1,0 +1,56 @@
+{
+ "spec": "mods/3374595157-uf-resize-room.yaml",
+ "mods": [
+  "3374595157"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Latrine, Bedroom and Great Hall allow 480 cells and the Nature Reserve 120, as the shipped options say",
+ "updated": "2026-10-26",
+ "commit": "fa47f8ac",
+ "mod_dlls": {
+  "3374595157": {
+   "PLib.dll": "893dc1ea3eddd02c85d433231aae356be27be07ddfc1a98fb2c51d84748208e8",
+   "Roomsize.dll": "a73c920becd4ebf961fca397f41eb6ee49319677f7f18e36f6f2e35b168a9e0a"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-033203-6e82e943",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:58:20",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-042145-1ee922da",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:21:45",
+    "lane": 16,
+    "reference_run": "20261026-033203-6e82e943",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-042145-1ee922da",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T04:21:46",
+    "lane": 17,
+    "reference_run": "20261026-033203-6e82e943",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

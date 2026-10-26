@@ -1,0 +1,23 @@
+# U&F-Resize Room 修改房间大小 (3374595157), classes P, O.
+#
+# What it does: lets rooms be larger: the room prober's maximum cavity becomes 500 cells (a
+# postfix on RoomProber.RefreshRooms), and a postfix on the RoomType constructor swaps each
+# room type's maximum size (96 or 120 cells) for 120, 240 or 480, per room type, from PLib
+# options (Controller.json; the mod ships 480 for all but the Nature Reserve, 120).
+# How a player reaches it: building rooms; the Mods screen's options.
+# What changes: how big a room may be.
+#
+# The Latrine, the Bedroom and the Great Hall allow 480 cells, the Nature Reserve 120, as the
+# shipped options say.
+from: early-base
+mods: [3374595157]
+steps:
+  - expect_state:
+      "count:Db.Get().RoomTypes.Latrine.additional_constraints[*] if .name.Contains(\"480\") == true": 1
+      "count:Db.Get().RoomTypes.Bedroom.additional_constraints[*] if .name.Contains(\"480\") == true": 1
+      "count:Db.Get().RoomTypes.GreatHall.additional_constraints[*] if .name.Contains(\"480\") == true": 1
+      "count:Db.Get().RoomTypes.NatureReserve.additional_constraints[*] if .name.Contains(\"120\") == true": 1
+  - expect_state:
+      "count:Db.Get().RoomTypes.Latrine.additional_constraints[*] if .name.Contains(\"120\") == true": 0
+  - run: {seconds: 5}
+  - expect: {duplicants: 3}

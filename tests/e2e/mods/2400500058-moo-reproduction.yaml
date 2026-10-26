@@ -1,0 +1,29 @@
+# Moo Reproduction (2400500058), classes P, O.
+#
+# What it does: Gassy Moos (and Diesel Moos) get a live-birth fertility monitor in place of
+# eggs: a Moo is Expecting from birth, its Fertility rises over 45 cycles (four times as fast
+# when happy and tame), and at 100 % it gives birth to a Moo Calf (MooBaby), a half-size
+# baby that grows up into a Moo. Butchered Moos drop 2 meat; a PLib option turns off the Moo
+# meteors (on by default).
+# How a player reaches it: a Moo in the colony (ranched or brought in).
+# What changes: Moos breed.
+#
+# A Moo is spawned in the dug-out corridor west of the printing pod and selected: it carries
+# the Expecting tag and a Fertility amount, and the Moo Calf prefabs exist.
+from: early-base
+mods: [2400500058]
+setup:
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131129, 0, 0, \"Moo\", \"Creatures\")", method: SetActive, args: [true]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"MooBaby\")": exists
+      "Assets.GetPrefab(\"DieselMooBaby\")": exists
+      "Assets.GetPrefab(\"Moo\").GetComponent<Modifiers>.initialAmounts": {contains: Fertility}
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [113, 207], ortho: 8}}
+  - click_world: {cell: [113, 206], select: Moo}
+  - ui_wait: {path: "**/DetailsScreen/TitleBar", cond: stable}
+  - expect_state:
+      "selected:GetComponent<KPrefabID>.HasTag(\"Expecting\")": true
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Gassy Moo"}

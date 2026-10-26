@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2400500058-moo-reproduction.yaml",
+ "mods": [
+  "2400500058"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a spawned Gassy Moo is Expecting with a Fertility amount; the Moo Calf prefabs exist",
+ "updated": "2026-10-26",
+ "commit": "a452aaa",
+ "mod_dlls": {
+  "2400500058": {
+   "MooReproduction.dll": "4e63c66e9e1c52651efca70f318161168fb9b96a09289bd6c17a4f38e2e51404"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-022709-87387b70",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T02:29:23",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-023425-4430a720",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T02:49:49",
+    "lane": 15,
+    "reference_run": "20261026-022709-87387b70",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-023425-4430a720",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T02:50:49",
+    "lane": 15,
+    "reference_run": "20261026-022709-87387b70",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

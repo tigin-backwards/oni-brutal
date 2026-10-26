@@ -134,7 +134,7 @@ namespace PerfProbe
         }
 
         /// The temperature overlay's legend filter, as clicking it does.
-        static void SetTemperatureFilter(string filter)
+        internal static void SetTemperatureFilter(string filter)
         {
             var temperature = OverlayLegendModes().Find(m => m is OverlayModes.Temperature);
             if (temperature?.legendFilters == null) return;

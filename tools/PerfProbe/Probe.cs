@@ -104,7 +104,7 @@ namespace PerfProbe
         }
 
         /// The view camera.txt asked for, held there.
-        (Vector3 At, float Size)? view;
+        internal (Vector3 At, float Size)? view;
 
         static Vector3 QuietestView(WorldContainer world)
         {
@@ -1613,6 +1613,8 @@ namespace PerfProbe
         System.Collections.IEnumerator Start()
         {
             Instance = this;
+            // `fpsclock.txt`, `noautosave.txt`, `actions.txt`: comparison videos (Video).
+            if (System.IO.File.Exists(System.IO.Path.Combine(Path, "fpsclock.txt"))) StartCoroutine(Video.Clock());
             if (Worldgen.Mode == "run") yield return Worldgen.Run();
             // `measure.txt`: engine behaviours measured at the main menu, the same in either player
             // (Measure).
@@ -1721,6 +1723,8 @@ namespace PerfProbe
                 view = (at, size);
             }
             if (overlays) StartCoroutine(Overlays.Run(overlaysFile, System.IO.File.Exists(WallTime.Extra)));
+            if (System.IO.File.Exists(System.IO.Path.Combine(Path, "noautosave.txt"))) Video.NoAutosave(true);
+            if (System.IO.File.Exists(System.IO.Path.Combine(Path, "actions.txt"))) StartCoroutine(Video.Actions(this, Path));
             // `rebuild.txt` (Rebuilds), `screens.txt` (Screens), `starmap.txt` (Starmap), `cameras.txt` (Cameras).
             if (System.IO.File.Exists(System.IO.Path.Combine(Path, "cameras.txt"))) StartCoroutine(Cameras.Run(System.IO.Path.Combine(Path, "cameras.txt")));
             if (System.IO.File.Exists(System.IO.Path.Combine(Path, "rebuild.txt"))) StartCoroutine(Rebuilds.Run(System.IO.Path.Combine(Path, "rebuild.txt")));

@@ -1,0 +1,36 @@
+# 控温砖 Temperature Moderation Tile (3227539567), class B.
+#
+# What it does: adds the TATile to the Utilities menu, researched with Temperature
+# Modulation: a transparent 1x1 refined-metal floor tile with a temperature slider (-270 to
+# 2999 degrees, 20 by default); while it is operational it pulls its cell's temperature two
+# thirds of the way to the target every 4 s.
+# How a player reaches it: the build menu (Utilities), after the research; its side screen.
+# What changes: a tile that heats or cools to a set temperature.
+#
+# setup researches Temperature Modulation; the Utilities menu lists the tile, and one built by
+# setup on the floor of the dug-out corridor west of the printing pod is selected and set to
+# 50 degrees through its slider's field.
+from: early-base
+mods: [3227539567]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"TemperatureModulation\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"TATile\")", method: Build, args: [131128, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"TemperatureModulation\").unlockedItemIDs": {contains: TATile}
+      "Assets.GetBuildingDef(\"TATile\").BlockTileIsTransparent": true
+  - run: {seconds: 10}
+  - expect: {buildings: {TATile: 1}}
+  - click: {ui: "**/PlanScreen/Toggle:Utilities"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/TATile Group*", cond: stable}
+  - shot: {name: utilities-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
+  - key: {code: Escape}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 206], select: TATile}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/SingleSliderSideScreen", cond: stable}
+  - ui_dump: {name: slider, root: "**/SingleSliderSideScreen"}
+  - type: {ui: "**/SingleSliderSideScreen/**/*Input*", text: "50", enter: true, clear: true}
+  - expect_state:
+      "ui:**/SingleSliderSideScreen::GetComponent<SingleSliderSideScreen>.target.GetSliderValue(0)": 50

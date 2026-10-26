@@ -1,0 +1,56 @@
+{
+ "spec": "mods/2863558330-super-compost.yaml",
+ "mods": [
+  "2863558330"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with 2 kg/s set in the options, a compost with polluted dirt drops at least 60 kg of dirt in 60 s without a Duplicant turning it",
+ "updated": "2026-10-25",
+ "commit": "3d254cb",
+ "mod_dlls": {
+  "2863558330": {
+   "Automatic compost╫╘╢»╢╤╖╩.dll": "c75a4374eb6efe61cdefe0aab8bda17543a10980eb27b9a0dbaad5ddbd4272cf",
+   "PLib.dll": "b862c5db2b3cd6df09a62d4a30782e91e2b24e8e1bfac08d991c9cc89a984ba9"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-204056-92b74a79",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T20:42:54",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-220127-c5fc6b79",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T22:01:27",
+    "lane": 16,
+    "reference_run": "20261025-204056-92b74a79",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261025-220127-c5fc6b79",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-25T22:01:28",
+    "lane": 17,
+    "reference_run": "20261025-204056-92b74a79",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

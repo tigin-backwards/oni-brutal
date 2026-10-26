@@ -1,0 +1,32 @@
+# Super compost 超级堆肥 (2863558330), classes P, O.
+#
+# What it does: the Compost needs no Duplicant to turn it (BuildingComplete.isManuallyOperated
+# false), its turning takes a1 seconds (PLib option "Work time", default 1, the game's 20),
+# it makes a2 kg of dirt a second (option, default 1, the game's 0.1), gives off b1 kDTU/s
+# (default 0.1) and no exhaust heat, and it is drawn with the mod's AutomaticCompost_kanim.
+# It still consumes compostables at the game's 0.1 kg/s.
+# How a player reaches it: the Compost (Refinement), fed with polluted dirt.
+# What changes: compost makes ten times as much dirt as it takes in, untended.
+#
+# The dirt option is set to 2 kg/s. setup builds a Compost in the dug-out corridor west of the
+# printing pod and puts 200 kg of polluted dirt in it. Over 60 s of play it drops at least
+# 60 kg of dirt beside itself, while the polluted dirt goes down by a few kilograms.
+from: early-base
+mods: [2863558330]
+options:
+  "2863558330": {$file: Controler.json, a2: 2}
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Compost\")", method: Build, args: [131128, Neutral, null, [SandStone], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "last:GetComponent<Storage>", method: AddOre, args: [ToxicSand, 200.0, 300.0, 255, 0]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"Compost\").BuildingComplete.GetComponent<BuildingComplete>.isManuallyOperated": false
+      "Assets.GetBuildingDef(\"Compost\").BuildingComplete.GetComponent<ElementConverter>.outputElements[0].massGenerationRate": 2
+      "Assets.GetBuildingDef(\"Compost\").BuildingComplete.GetComponent<CompostWorkable>.workTime": 1
+      "Assets.GetBuildingDef(\"Compost\").ExhaustKilowattsWhenActive": 0
+      "Assets.GetBuildingDef(\"Compost\").AnimFiles[0].name": AutomaticCompost_kanim
+      "sum:all:Pickupable::[*].GetComponent<PrimaryElement>.Mass if .GetComponent<PrimaryElement>.ElementID == Dirt": {save_as: dirt}
+  - run: {seconds: 60}
+  - expect_state:
+      "sum:all:Pickupable::[*].GetComponent<PrimaryElement>.Mass if .GetComponent<PrimaryElement>.ElementID == Dirt": ">= dirt + 60"
+      "all:Compost::[0].GetComponent<Storage>.GetMassAvailable(\"ToxicSand\")": "< 199"

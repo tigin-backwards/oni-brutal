@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2167499088-custom-pipe-colors.yaml",
+ "mods": [
+  "2167499088"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "its options set the overlay colour set's conduit colours; the Plumbing overlay opens",
+ "updated": "2026-10-26",
+ "commit": "123c4c42",
+ "mod_dlls": {
+  "2167499088": {
+   "OldPipeColor.dll": "d4dbb6f3549ca7491e242e11a8369e6e16f35b3e846fb5589571871cab5db04e"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-023754-20737f8f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:41:29",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-043249-4d765868",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:32:49",
+    "lane": 15,
+    "reference_run": "20261026-023754-20737f8f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-043249-4d765868",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T04:33:26",
+    "lane": 15,
+    "reference_run": "20261026-023754-20737f8f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

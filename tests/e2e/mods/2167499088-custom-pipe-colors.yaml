@@ -1,0 +1,27 @@
+# Custom Pipe Colors (2167499088), classes V, O.
+#
+# What it does: at game start the colour set's conduit colours, which the plumbing and
+# ventilation overlays draw pipes in, are set from three PLib colour options: insulated pipes
+# orange (220, 144, 48), the former colour, normal ones grey (201, 201, 201) and radiant ones
+# gold (231, 193, 68).
+# How a player reaches it: the Mods screen's options; the Plumbing and Ventilation overlays.
+# What changes: the colours of pipes in the overlays.
+#
+# options set insulated pipes green. The colour set holds the options' colours (alpha 0, as
+# the game's), and the Plumbing overlay opens over the base.
+from: early-base
+mods: [2167499088]
+options:
+  PeterHan.OldPipeColor: {InsulatedColor: {r: 40, g: 200, b: 60, a: 255}}
+steps:
+  - expect_state:
+      "GlobalAssets.Instance.colorSetOptions[0].conduitInsulated.g": 200
+      "GlobalAssets.Instance.colorSetOptions[0].conduitInsulated.r": 40
+      "GlobalAssets.Instance.colorSetOptions[0].conduitInsulated.a": 0
+      "GlobalAssets.Instance.colorSetOptions[0].conduitNormal.r": 201
+      "GlobalAssets.Instance.colorSetOptions[0].conduitRadiant.g": 193
+  - driver: {camera.set: {cell: [120, 208], ortho: 12}}
+  - click: {ui: "**/OverlaysBarHolder/OverlaysBar/Toggle:Plumbing Overlay"}
+  - ui_wait: {path: "**/TopRight/OverlayLegend", cond: stable}
+  - expect_state:
+      "OverlayScreen.Instance.GetMode().ToString()": "== original"

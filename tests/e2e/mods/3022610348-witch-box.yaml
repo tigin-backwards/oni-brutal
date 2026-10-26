@@ -1,0 +1,36 @@
+# 魔女的箱子 (Witch's Box) (3022610348), class B.
+#
+# What it does: adds a 1x1 storage box (MM20230819GG1, refined metal, Base menu, researched with
+# Smart Storage) holding 2,000,000 kg of any non-edible solid, with the game's storage filter
+# and capacity side screens, a name, and a second look as a blueprint (facade).
+# How a player reaches it: the build menu (Base), after the research; its side screens.
+# What changes: a tiny box that holds a mountain.
+#
+# setup grants Smart Storage: the Base menu offers it. setup builds one in the dug-out room
+# west of the printing pod; selected, its capacity slider goes to 2,000,000 kg, and 500000 is
+# typed into its field (the field takes six digits).
+from: early-base
+mods: [3022610348]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"SmartStorage\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"MM20230819GG1\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"SmartStorage\").unlockedItemIDs": {contains: MM20230819GG1}
+      "Assets.GetBuildingDef(\"MM20230819GG1\").AvailableFacades": {contains: MM20230819GG1UI02}
+  - run: {seconds: 10}
+  - click: {ui: "**/PlanScreen/Toggle:Base"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/MM20230819GG1 Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/MM20230819GG1 Group*": {active: true}
+  - key: {code: Escape}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: MM20230819GG1}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/CapacityControlSideScreen", cond: stable}
+  - expect_state:
+      "ui:**/CapacityControlSideScreen/**/Slider::GetComponent<KSlider>.maxValue": 2000000
+  - ui_dump: {name: capacity, root: "**/CapacityControlSideScreen"}
+  - type: {ui: "**/CapacityControlSideScreen/ValidContent/Max/VerticalLayout/InputField", text: "500000", enter: true, clear: true}
+  - expect_state:
+      "selected:MM2023M819GG1X1.UserMaxCapacity": 500000

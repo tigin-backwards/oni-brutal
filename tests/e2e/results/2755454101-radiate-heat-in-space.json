@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2755454101-radiate-heat-in-space.yaml",
+ "mods": [
+  "2755454101"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a battery far from space carries the mod's emissivity and reads as the game's battery; the Radiative Tile is in Smelting",
+ "updated": "2026-10-26",
+ "commit": "bbc2ade",
+ "mod_dlls": {
+  "2755454101": {
+   "RadiateHeatInSpace.dll": "cf77b4f60499c05fb38dce22e8ceb189fb12e7566f371596faa1d9e9d0fb4dfa"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-232215-4c365bc4",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T23:22:15",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-004203-b51e5a5b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T00:42:03",
+    "lane": 16,
+    "reference_run": "20261025-232215-4c365bc4",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-004203-b51e5a5b",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T00:42:04",
+    "lane": 17,
+    "reference_run": "20261025-232215-4c365bc4",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

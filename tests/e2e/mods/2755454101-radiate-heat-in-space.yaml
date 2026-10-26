@@ -1,0 +1,31 @@
+# Radiate Heat in Space (updated and configurable) (2755454101), classes P, B, O.
+#
+# What it does: buildings in space shed heat by radiation (and take some from the sun). A
+# prefix on Assets.AddBuildingDef gives every building in the PLib options' RadiativeBuildings
+# list (batteries, transformers, auto-sweepers, lamps, launchpad ports, ...) a RadiateHeat
+# component of its emissivity; its state machine shows "Not in space", "Too cold" or the heat
+# it radiates. A Radiative Tile (Base menu, Smelting) radiates too.
+# How a player reaches it: those buildings exposed to space, their status items.
+# What changes: buildings in space cool themselves.
+#
+# setup builds a Battery in the dug-out corridor west of the printing pod, far from space. The
+# built battery carries the mod's RadiateHeat at an emissivity of 0.8 and, selected, reads as
+# the game's battery.
+from: early-base
+mods: [2755454101]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Battery\")", method: Build, args: [131129, Neutral, null, [Cuprite], 300.0, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"Battery\").BuildingComplete.GetComponent<RadiateHeatInSpace.RadiateHeat>.Emissivity": 0.8
+      "Assets.GetBuildingDef(\"RadiativeTile\").IsTilePiece": true
+      "Db.Get().Techs.Get(\"Smelting\").unlockedItemIDs": {contains: RadiativeTile}
+  - run: {seconds: 3}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: Battery}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Battery"}
+  - expect_state:
+      "count:all:RadiateHeatInSpace.RadiateHeat::[*]": 1
+      "all:RadiateHeatInSpace.RadiateHeat::[0].Emissivity": 0.8

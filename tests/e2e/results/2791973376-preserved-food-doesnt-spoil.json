@@ -1,0 +1,63 @@
+{
+ "spec": "mods/2791973376-preserved-food-doesnt-spoil.yaml",
+ "mods": [
+  "2791973376"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "Pickled Meal and the other listed foods cannot rot (no Rottable def) while the Mush Bar still does, and Berry Sludge is quality 4; a Pickled Meal's details as in the original",
+ "updated": "2026-10-25",
+ "commit": "3d254cb",
+ "mod_dlls": {
+  "2791973376": {
+   "Unspoilables.dll": "8d15ab62b093623f224d07ffc951b8a02058ce2a1131f968c721b5a7955612ed"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-204805-5a2c1c19",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T20:48:05",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-220536-f1096744",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T22:05:36",
+    "lane": 16,
+    "reference_run": "20261025-204805-5a2c1c19",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "details": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261025-220536-f1096744",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-25T22:05:37",
+    "lane": 17,
+    "reference_run": "20261025-204805-5a2c1c19",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "details": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

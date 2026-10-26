@@ -1,0 +1,35 @@
+# Preserved Food doesn't spoil (2791973376), class P.
+#
+# What it does: Pickled Meal, Grubfruit Preserve (WormSuperFood) and the seeds and small foods
+# (Bean, Sleet Wheat Grain, Pincha Peppernut, butterfly seed, fern food, Nori) can no longer
+# rot, and Berry Sludge (FruitCake) rises to quality 4. It writes the game's FOOD_TYPES before
+# the food prefabs are made, so their Rottable state machine is never added.
+# How a player reaches it: storing those foods.
+# What changes: their freshness never drops; Berry Sludge counts as better food.
+#
+# The Pickled Meal's prefab carries no Rottable def and its food info says it cannot rot,
+# while the Mush Bar rots as in the game. setup spawns a Pickled Meal in the
+# dug-out corridor west of the printing pod; selected, its details screen is as in the
+# original.
+from: early-base
+mods: [2791973376]
+setup:
+  - driver: {setup.call: {type: GameUtil, method: KInstantiate, args: [{"$": "Assets.GetPrefab(\"PickledMeal\")"}, [113.5, 206.5, -12], Ore]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+steps:
+  - expect_state:
+      "EdiblesManager.GetFoodInfo(\"PickledMeal\").CanRot": false
+      "EdiblesManager.GetFoodInfo(\"WormSuperFood\").CanRot": false
+      "EdiblesManager.GetFoodInfo(\"BeanPlantSeed\").CanRot": false
+      "EdiblesManager.GetFoodInfo(\"FruitCake\").Quality": 4
+      "EdiblesManager.GetFoodInfo(\"MushBar\").CanRot": true
+      "count:Assets.GetPrefab(\"PickledMeal\").GetComponent<StateMachineController>.cmpdef.defs[*] if .GetType().FullName == 'Rottable+Def'": 0
+      "count:Assets.GetPrefab(\"MushBar\").GetComponent<StateMachineController>.cmpdef.defs[*] if .GetType().FullName == 'Rottable+Def'": 1
+  - driver: {camera.set: {cell: [113, 207], ortho: 6}}
+  - click_world: {pos: [113.5, 206.2], select: PickledMeal}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Pickled Meal"}
+  - ui_dump: {name: details, root: "**/DetailsScreen/**/SimpleInfoScreen", mask_text: ['\d+(\.\d+)?\s*°C', '\d+(\.\d+)?\s*kg']}
+  - run: {seconds: 30}
+  - expect: {duplicants: 3}

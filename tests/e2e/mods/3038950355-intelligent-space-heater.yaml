@@ -1,0 +1,30 @@
+# 智能空间加热器 Intelligent Space Heater (3038950355), class P.
+#
+# What it does: the Space Heater gets a slider for its target temperature (-200 to 200 °C, 26
+# by default), copied with building settings, works from 13.15 K, overheats at 873.15 K and
+# draws 130 W with 3 kW of exhaust heat (postfixes on SpaceHeaterConfig).
+# How a player reaches it: a built Space Heater's side screen.
+# What changes: a heater that holds a room at a chosen temperature.
+#
+# A Space Heater built by setup in the dug-out corridor west of the printing pod is selected:
+# the mod's component holds the heater at 26 °C. Its slider is not shown: the side screen
+# shows the game's own power slider (dumped), in the original too.
+from: early-base
+mods: [3038950355]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"SpaceHeater\")", method: Build, args: [131127, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"SpaceHeater\").EnergyConsumptionWhenActive": 130
+      "Assets.GetBuildingDef(\"SpaceHeater\").OverheatTemperature": [">= 873.1", "<= 873.2"]
+  - run: {seconds: 2}
+  - expect: {buildings: {SpaceHeater: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [111, 207], select: SpaceHeater}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/SingleSliderSideScreen", cond: stable}
+  - ui_dump: {name: slider, root: "**/SingleSliderSideScreen"}
+  - expect_state:
+      "selected:CSKZMM20230921GG1.AA": 26
+      "selected:SpaceHeater.targetTemperature": [">= 299.1", "<= 299.2"]
+      "selected:MinimumOperatingTemperature.minimumTemperature": [">= 13.1", "<= 13.2"]

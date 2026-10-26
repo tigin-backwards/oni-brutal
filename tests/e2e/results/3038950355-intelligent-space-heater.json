@@ -1,0 +1,63 @@
+{
+ "spec": "mods/3038950355-intelligent-space-heater.yaml",
+ "mods": [
+  "3038950355"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the heater draws 130 W and overheats at 600 °C; a built one holds 26 °C, and its side screen shows the game's power slider, not the mod's, in the original too (dumped)",
+ "updated": "2026-10-26",
+ "commit": "28b4e36a",
+ "mod_dlls": {
+  "3038950355": {
+   "╓╟─▄┐╒╝Σ╝╙╚╚╞≈Intelligent Space Heater.dll": "b4f3061868f1820679405dd2458233ce88262c3128dcad89afee4b7e405c8dce"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-175250-0ae88632",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T18:04:36",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-183436-06bd7bbf",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T18:54:27",
+    "lane": 15,
+    "reference_run": "20261026-175250-0ae88632",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "slider": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261026-183436-06bd7bbf",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T18:55:20",
+    "lane": 15,
+    "reference_run": "20261026-175250-0ae88632",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "slider": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

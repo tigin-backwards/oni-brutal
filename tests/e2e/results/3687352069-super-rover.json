@@ -1,0 +1,56 @@
+{
+ "spec": "mods/3687352069-super-rover.yaml",
+ "mods": [
+  "3687352069"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Scout Rover carries the mod's components and the kit recipe is registered; a spawned rover lives on and the Priorities screen opens with it, as in the original",
+ "updated": "2026-10-26",
+ "commit": "c124dd2",
+ "mod_dlls": {
+  "3687352069": {
+   "PLib.dll": "bdd637dbef718cdd52e61c0a7177bd297864a50bac1583d2837a36ff3edf07db",
+   "SuperRover.dll": "266db4393041f2742d51491ec35c58408bfd963484817df96ab478fa65faf5d0"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-002114-2cca05f1",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T00:45:58",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-005256-163a7baa",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T00:58:32",
+    "lane": 14,
+    "reference_run": "20261026-002114-2cca05f1",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-005256-163a7baa",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T00:59:20",
+    "lane": 14,
+    "reference_run": "20261026-002114-2cca05f1",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -1,0 +1,35 @@
+# Super Rover (3687352069), classes P, S (rows on vanilla screens), O. Spaced Out.
+#
+# What it does: makes the Scout Rover a full worker: attributes, traits and skills as a
+# Duplicant has, every errand group (research, cooking and operating machines by PLib
+# options), building anything, recharging from stations or bionic power banks, an optional
+# infinite battery and a colony-wide cap; it adds a Scout Rover Kit crafted at the Crafting
+# Station that deploys into a rover and repacks it, and puts rovers in the Priorities screen and
+# other Duplicant tables, with many crash shields on game code rovers were never meant to run.
+# How a player reaches it: the Crafting Station's recipes; a Scout Rover; the Priorities
+# screen; the options on the Mods screen.
+# What changes: rovers as extra Duplicants.
+#
+# The Scout Rover prefab carries the mod's components and the kit recipe is registered. setup
+# spawns a Scout Rover in the corridor west of the printing pod; the game runs and the
+# Priorities screen opens with it, as in the original.
+from: early-base
+mods: [3687352069]
+setup:
+  - driver: {setup.call: {type: Scenario, method: SpawnPrefab, args: [{"$": "Grid.XYToCell(111, 207)"}, 0, 0, ScoutRover, Creatures]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"ScoutRover\").GetComponent<SuperRover.RoverTraitsComponent>": exists
+      "Assets.GetPrefab(\"ScoutRoverKit\")": exists
+      "type:SuperRover.SuperRoverMod::CustomRecipeIDs.Count": "== original"
+      "all:SuperRover.RoverTraitsComponent::Length": 1
+  - run: {seconds: 10}
+  - expect_state:
+      "all:SuperRover.RoverTraitsComponent::Length": 1
+  - open: {management: priorities}
+  - ui_wait: {path: "**/JobsTableScreen", cond: stable}
+  - expect_state:
+      "count:all:SuperRover.RoverRowIdentity::[*] if .enabled == true": "== original"
+  - key: {code: Escape}
+  - expect: {duplicants: 3}

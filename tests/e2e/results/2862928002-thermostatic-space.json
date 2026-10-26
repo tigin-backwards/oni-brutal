@@ -1,0 +1,64 @@
+{
+ "spec": "mods/2862928002-thermostatic-space.yaml",
+ "mods": [
+  "2862928002"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Thermostatic Space set to 60 on its slider (dump matches) warms the air around it past 50 C within half a minute",
+ "updated": "2026-10-26",
+ "commit": "f7057299",
+ "mod_dlls": {
+  "2862928002": {
+   "PLib.dll": "b862c5db2b3cd6df09a62d4a30782e91e2b24e8e1bfac08d991c9cc89a984ba9",
+   "Thermostatic Space║π╬┬┐╒╝Σ.dll": "2397f4e3ccd028724ba8c8f8b339bc17810b6e55a68e8ef189d9b2ab348a1586"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-043257-c0eef0ae",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:34:39",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-103917-f59f83a9",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T10:39:17",
+    "lane": 16,
+    "reference_run": "20261026-043257-c0eef0ae",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "slider": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261026-103917-f59f83a9",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T10:39:18",
+    "lane": 17,
+    "reference_run": "20261026-043257-c0eef0ae",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "slider": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

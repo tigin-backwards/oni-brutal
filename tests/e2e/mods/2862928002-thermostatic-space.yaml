@@ -1,0 +1,30 @@
+# Thermostatic Space恒温空间 (2862928002), classes B, O.
+#
+# What it does: adds the Thermostatic Space (hwkj, 1x1, any buildable material, Utilities menu,
+# no research): every 0.2 s it pushes each cell within a radius (8, a PLib option, 1 to 33)
+# a fifth of the way to its target temperature, set on a slider of -100 to 100 C (20 C by
+# default).
+# How a player reaches it: the build menu (Utilities); its slider side screen.
+# What changes: a room kept at a set temperature, for free.
+#
+# setup builds one in the dug-out room west of the printing pod. Selected, 60 is typed into its
+# slider's field: its target is 333.15 K, and within half a minute the air around it is
+# warmer than 50 C.
+from: early-base
+mods: [2862928002]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"hwkj\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "cells:113,208..113,208::Grid.Temperature.get_Item({cell})": "< 310"
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: hwkj}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/SingleSliderSideScreen", cond: stable}
+  - ui_dump: {name: slider, root: "**/SingleSliderSideScreen"}
+  - type: {ui: "**/SingleSliderSideScreen/Contents/NumberInputField", text: "60", clear: true, enter: true}
+  - expect_state:
+      "selected:hwkj.targetTemperature": [">= 333.1", "<= 333.2"]
+  - key: {code: Escape}
+  - run: {seconds: 30}
+  - expect_state:
+      "cells:113,208..113,208::Grid.Temperature.get_Item({cell})": "> 323"

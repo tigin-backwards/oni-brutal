@@ -1,0 +1,21 @@
+# Natural Backwall (3746622017), class B.
+#
+# What it does: adds the Natural Backwall to the Base menu after the Drywall: a 1x1 backwall
+# of any solid material that, once built, writes its element, mass and temperature into the
+# cell's native backwall data (SimMessages.SetBackwallData), the same data world-generated
+# backwall uses, and deletes itself.
+# How a player reaches it: the build menu (Base).
+# What changes: natural backwall where it was built.
+#
+# Two natural backwalls are built of sandstone in the dug-out corridor west of the printing
+# pod: once done, no building remains. (A shot of the wall differs by where the Duplicants
+# stand, so it is left out.)
+from: early-base
+mods: [3746622017]
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"NaturalBackwallPlacer\").MaterialCategory[0]": Solid
+  - build: {prefab: NaturalBackwallPlacer, cells: [[113, 207], [114, 207]], material: SandStone}
+  - expect: {blueprints: {NaturalBackwallPlacer: 2}}
+  - run: {seconds: 900, until: {pending_construction: 0}}
+  - expect: {buildings: {NaturalBackwallPlacer: 0}}

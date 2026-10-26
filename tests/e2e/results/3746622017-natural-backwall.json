@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3746622017-natural-backwall.yaml",
+ "mods": [
+  "3746622017"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "two natural backwalls built by Duplicants turn into natural backwall and leave no building",
+ "updated": "2026-10-26",
+ "commit": "561febb3",
+ "mod_dlls": {
+  "3746622017": {
+   "NaturalBackwallPlacer.dll": "740ea9a33890a0856e39f769231cc3285e74b9010b3450d8d3e015e3edd3f46d"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-045304-0bae5d68",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:53:04",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-045447-681ae2d3",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:54:47",
+    "lane": 14,
+    "reference_run": "20261026-045304-0bae5d68",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-045447-681ae2d3",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T04:54:48",
+    "lane": 15,
+    "reference_run": "20261026-045304-0bae5d68",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

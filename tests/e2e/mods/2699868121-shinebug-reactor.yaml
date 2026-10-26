@@ -1,0 +1,48 @@
+# Shinebug Reactor (2699868121), classes B, O.
+#
+# What it does: adds the Shinebug Reactor (ShinebugReactor, 9x5, glass and refined metal,
+# Power menu, researched with Renewable Energy): Shine Bug eggs delivered to it (by hand or
+# conveyor, 400 kg) hatch inside, and the bugs live in it as simulated creatures whose light
+# makes power (up to 1200 W, a PLib option) and, with radiation on, radbolts fired in a
+# direction set on the game's radbolt direction side screen; they lay eggs and die by the
+# reproduction option. An egg incubator's and egg cracker's storage priority fix is an option.
+# How a player reaches it: the build menu (Power), after the research; its side screens.
+# What changes: power from shine bugs.
+#
+# setup grants Renewable Energy: the reactor shows in the Power menu. setup builds one in the
+# dug-out room west of the printing pod, with a wire on its power port, and stores a Shine Bug
+# egg in it, about to hatch: the egg hatches into a bug living in the reactor, which lights
+# up.
+from: early-base
+mods: [2699868121]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"RenewableEnergy\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  # The room is 9 wide over its full height but for one rock corner: it is cleared, so the
+  # reactor is not entombed.
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [133667, Oxygen, {"$": "CellEventLogger.Instance.DebugTool"}, 1.0, 293.15]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"ShinebugReactor\")", method: Build, args: [{"$": "Grid.XYToCell(111, 206)"}, Neutral, null, [Glass, Copper], 293.15, DEFAULT_FACADE]}}
+  # A wire on its power port: a generator runs only on a circuit.
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Wire\")", method: Build, args: [131127, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {type: Scenario, method: SpawnPrefab, args: [{"$": "Grid.XYToCell(111, 206)"}, 0, 0, LightBugEgg, Ore]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+  # The reactor drops what its filter does not accept: Shine Bug eggs are ticked, as a player
+  # ticks them on its side screen.
+  - driver: {setup.call: {target: "all:ShinebugReactor::[0].GetComponent<TreeFilterable>", method: AddTagToFilter, args: [LightBugEgg]}}
+  - driver: {setup.call: {target: "all:ShinebugReactor::[0].GetComponent<Storage>", method: Store, args: [{"$": "last:"}]}}
+  - driver: {setup.call: {target: "last:GetComponent<Modifiers>.amounts.Get(\"Incubation\")", method: SetValue, args: [99.95]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"RenewableEnergy\").unlockedItemIDs": {contains: ShinebugReactor}
+      "all:ShinebugReactor::[0].GetComponent<Storage>.Count": 1
+  - run: {seconds: 2}
+  - click: {ui: "**/PlanScreen/Toggle:Power"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/ShinebugReactor Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/ShinebugReactor Group*": {active: true}
+  - key: {code: Escape}
+  - run: {seconds: 120}
+  - expect_state:
+      "all:ShinebugReactor::[0].Creatures.Count": 1
+      "all:ShinebugReactor::[0].Creatures[0].Id": LightBug
+      "all:ShinebugReactor::[0].CurrentLight": "> 0"

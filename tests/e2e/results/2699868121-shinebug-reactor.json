@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2699868121-shinebug-reactor.yaml",
+ "mods": [
+  "2699868121"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "after Renewable Energy the Power menu offers the reactor; a Shine Bug egg stored in one hatches into a bug living in it, which lights the wired reactor",
+ "updated": "2026-10-26",
+ "commit": "83557b7f",
+ "mod_dlls": {
+  "2699868121": {
+   "ShinebugReactor.dll": "d9b1edd158f1e05dea48c9455832f87c773cec5ac8057806722ab2f38cc22d74"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-095925-af2fb1f8",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T09:59:25",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-112226-6837e33b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T11:22:26",
+    "lane": 16,
+    "reference_run": "20261026-095925-af2fb1f8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-112226-6837e33b",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T11:22:27",
+    "lane": 17,
+    "reference_run": "20261026-095925-af2fb1f8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

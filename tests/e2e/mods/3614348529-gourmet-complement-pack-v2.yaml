@@ -1,0 +1,29 @@
+# 更新鲜的美食小吃V2.0 (NEW Gourmet Complement Pack) (3614348529), class P (foods, recipes).
+#
+# What it does: adds eleven foods, named in Chinese: pressed noodles (PiapiNoodles, from sleet
+# wheat grain or fern food and water, on the Microbe Musher), fried noodles with egg on the
+# Electric Grill, and on the Gas Range tomato-and-egg, bean-and-meat and fish noodles, three
+# dairy-and-vegetable dishes and a mushroom soup; fried and baked tofu on the Deep Fryer and
+# Smoker (some need the DLC their ingredients come from).
+# How a player reaches it: a cooking station's recipe list.
+# What changes: more dishes to cook.
+#
+# The foods' prefabs and their recipes exist; setup builds a Microbe Musher in the dug-out
+# room west of the printing pod, and selected, its recipe list offers the pressed noodles.
+from: early-base
+mods: [3614348529]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"MicrobeMusher\")", method: Build, args: [{"$": "Grid.XYToCell(111, 207)"}, Neutral, null, [Cuprite], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"PiapiNoodles\")": exists
+      "Assets.GetPrefab(\"PiapiTomatoEggNoodles\")": exists
+      "Assets.GetPrefab(\"PiapiMushroomSoup\")": exists
+      "count:ComplexRecipeManager.Get().recipes[*] if .results[0].material.Name == PiapiNoodles and .fabricators[0].Name == MicrobeMusher": ">= 1"
+      "count:ComplexRecipeManager.Get().recipes[*] if .results[0].material.Name == PiapiMushroomSoup and .fabricators[0].Name == GourmetCookingStation": ">= 1"
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [111, 208], ortho: 8}}
+  - click_world: {cell: [111, 207], select: MicrobeMusher}
+  - ui_wait: {path: "**/ComplexFabricatorSideScreen/Contents/ButtonScrollView", cond: stable}
+  - ui_dump: {name: recipes, root: "**/ComplexFabricatorSideScreen/Contents/ButtonScrollView"}
+  - shot: {name: recipes, crop: "**/DetailsScreen", threshold: 0.04}

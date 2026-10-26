@@ -1,0 +1,79 @@
+{
+ "spec": "mods/3614348529-gourmet-complement-pack-v2.yaml",
+ "mods": [
+  "3614348529"
+ ],
+ "verdict": "warning",
+ "why": "known findings: scroll-normalized-position",
+ "findings": [
+  "scroll-normalized-position"
+ ],
+ "note": "the foods and recipes exist; a Microbe Musher's recipe list offers the pressed noodles (dump and shot)",
+ "updated": "2026-10-26",
+ "commit": "12885256",
+ "mod_dlls": {
+  "3614348529": {
+   "GourmetComplementPackage2.dll": "3cb33013decb15406e8e7436422454597334143ba37e1f04e673a30e2befd0ee"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-042232-0e5bb32c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:25:58",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-101651-c6b24366",
+    "index": 1,
+    "verdict": "warn",
+    "date": "2026-10-26T10:16:51",
+    "lane": 16,
+    "reference_run": "20261026-042232-0e5bb32c",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "recipes": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "recipes": 0.0
+    }
+   },
+   {
+    "run": "20261026-101651-c6b24366",
+    "index": 2,
+    "verdict": "warn",
+    "date": "2026-10-26T10:16:52",
+    "lane": 17,
+    "reference_run": "20261026-042232-0e5bb32c",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "recipes": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "recipes": 0.0
+    }
+   }
+  ]
+ }
+}

@@ -1,0 +1,21 @@
+# CheapBuilding建筑费用减少 (2915322068), class P.
+#
+# What it does: a postfix on BuildingTemplates.CreateBuildingDef divides every building's
+# material masses by ten (rounded down, at least 1 kg).
+# How a player reaches it: any building.
+# What changes: buildings cost a tenth of their materials.
+#
+# The defs' masses are read: a ladder costs 10 kg, a tile 20 kg; a ladder is built in the
+# dug-out corridor west of the printing pod.
+from: early-base
+mods: [2915322068]
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"Ladder\").Mass[0]": 10
+      "Assets.GetBuildingDef(\"Tile\").Mass[0]": 20
+      "Assets.GetBuildingDef(\"ManualGenerator\").Mass[0]": 20
+  - build: {prefab: Ladder, cells: [[113, 206]]}
+  - expect: {blueprints: {Ladder: 1}}
+  - run: {seconds: 900, until: {buildings: {Ladder: 1}, pending_construction: 0}}
+  - expect_state:
+      "all:Ladder::[0].GetComponent<PrimaryElement>.Mass": 10

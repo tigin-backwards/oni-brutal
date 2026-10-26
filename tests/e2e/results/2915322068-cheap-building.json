@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2915322068-cheap-building.yaml",
+ "mods": [
+  "2915322068"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "buildings cost a tenth of their materials; a ladder built by the Duplicants weighs 10 kg",
+ "updated": "2026-10-26",
+ "commit": "df5493c6",
+ "mod_dlls": {
+  "2915322068": {
+   "CheapBuildingMod.dll": "a6c5191aee1082fb67ece2bdec306e647238bcbd5f5179ae238c8976f89fdf52"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-023754-20737f8f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:32:31",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-040508-4329498c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:05:08",
+    "lane": 14,
+    "reference_run": "20261026-023754-20737f8f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-040508-4329498c",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T04:06:06",
+    "lane": 14,
+    "reference_run": "20261026-023754-20737f8f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

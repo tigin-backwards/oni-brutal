@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2493249462-sandbox-mutant-plants.yaml",
+ "mods": [
+  "2493249462"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "in Sandbox mode a Mealwood's Mutate user menu button mutates it, its new subspecies identified at once",
+ "updated": "2026-10-26",
+ "commit": "f79c69c",
+ "mod_dlls": {
+  "2493249462": {
+   "SandboxMutantPlant.dll": "df718b3ad69454fd1762bd4a8af38b2d0d471be32d28e8205de5eafb53696c3a"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-000654-98a7a75e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T00:37:32",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-011031-d6497017",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T01:10:31",
+    "lane": 14,
+    "reference_run": "20261026-000654-98a7a75e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-011031-d6497017",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T01:11:12",
+    "lane": 14,
+    "reference_run": "20261026-000654-98a7a75e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

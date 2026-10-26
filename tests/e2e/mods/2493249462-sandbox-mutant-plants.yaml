@@ -1,0 +1,29 @@
+# Sandbox: Mutant Plants (2493249462), class S (user menu buttons).
+#
+# What it does: in Sandbox mode, an unmutated plant or any seed gets a "Mutate" button in its
+# user menu that gives it a random mutation (and its branches the same), discovers the new
+# subspecies and tags it as a mutated seed; an unidentified mutant gets an "Identify" button
+# that identifies its subspecies without the Botanical Analyzer. Turning sandbox mode on or off
+# refreshes the menu.
+# How a player reaches it: Sandbox mode; select a plant or seed; its user menu.
+# What changes: mutant seeds and plants without radiation or analysis.
+#
+# setup turns Sandbox mode on, spawns a Mealwood in a pit of the floor west of the printing pod
+# and selects it. Its Mutate button mutates it, and a plant's new subspecies is identified at
+# once (no Identify button is needed).
+from: early-base
+mods: [2493249462]
+setup:
+  - driver: {seed: 12345}
+  - driver: {setup.call: {target: "Game.Instance", method: set_SandboxModeActive, args: [true]}}
+  - driver: {setup.call: {type: GameUtil, method: KInstantiate, args: [{"$": "Assets.GetPrefab(\"BasicSingleHarvestPlant\")"}, [113.5, 206.0, -12], BuildingBack]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "SelectTool.Instance", method: Select, args: [{"$": "last:GetComponent<KSelectable>"}, false]}}
+steps:
+  - ui_wait: {path: "**/UserMenuScreen/Buttons/MutateButton", cond: stable}
+  - expect_state:
+      "selected:GetComponent<MutantPlant>.IsOriginal": true
+  - click: {ui: "**/UserMenuScreen/Buttons/MutateButton"}
+  - expect_state:
+      "selected:GetComponent<MutantPlant>.IsOriginal": false
+      "selected:GetComponent<MutantPlant>.IsIdentified": true

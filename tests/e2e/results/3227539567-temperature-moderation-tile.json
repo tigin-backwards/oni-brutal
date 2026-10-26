@@ -8,7 +8,7 @@
  "findings": [],
  "note": "after Temperature Modulation the Utilities menu lists the tile (shot); a built one's slider field takes 50 (dumped)",
  "updated": "2026-10-26",
- "commit": "69617875",
+ "commit": "196a9303",
  "mod_dlls": {
   "3227539567": {
    "TempAdjustmentTile.dll": "76067963a378048aa58fbbe4a6c56b6c46486ddeb40e1f3cf8eca30ee2e6a2df"
@@ -17,22 +17,30 @@
  "runs": {
   "original": [
    {
-    "run": "20261026-105851-04eb8ffa",
+    "run": "20261026-163138-8e6a8125",
     "index": 1,
     "verdict": "pass",
-    "date": "2026-10-26T11:21:35",
+    "date": "2026-10-26T16:47:11",
     "lane": 15,
+    "signatures": 0
+   },
+   {
+    "run": "20261026-163138-8e6a8125",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T16:54:15",
+    "lane": 14,
     "signatures": 0
    }
   ],
   "ours": [
    {
-    "run": "20261026-151101-b3c9c4ce",
+    "run": "20261026-163138-8e6a8125",
     "index": 1,
     "verdict": "pass",
-    "date": "2026-10-26T15:13:07",
-    "lane": 15,
-    "reference_run": "20261026-105851-04eb8ffa",
+    "date": "2026-10-26T16:59:32",
+    "lane": 14,
+    "reference_run": "20261026-163138-8e6a8125",
     "new_signatures": 0,
     "findings": [],
     "ui_dump": {
@@ -45,12 +53,12 @@
     }
    },
    {
-    "run": "20261026-151101-b3c9c4ce",
+    "run": "20261026-163138-8e6a8125",
     "index": 2,
     "verdict": "pass",
-    "date": "2026-10-26T15:13:07",
-    "lane": 14,
-    "reference_run": "20261026-105851-04eb8ffa",
+    "date": "2026-10-26T16:59:32",
+    "lane": 15,
+    "reference_run": "20261026-163138-8e6a8125",
     "new_signatures": 0,
     "findings": [],
     "ui_dump": {

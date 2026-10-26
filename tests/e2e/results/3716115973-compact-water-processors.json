@@ -8,7 +8,7 @@
  "findings": [],
  "note": "after the research the Refinement menu lists the compact sieve and desalinator (shot); a built sieve is selected",
  "updated": "2026-10-26",
- "commit": "69617875",
+ "commit": "196a9303",
  "mod_dlls": {
   "3716115973": {
    "CompactWaterSieve.dll": "4a1e25172cdbf22318c2b5cd2c3b3f59a479abf0849f6aa7fa273d8c8a70524e"
@@ -17,22 +17,30 @@
  "runs": {
   "original": [
    {
-    "run": "20261026-105851-04eb8ffa",
+    "run": "20261026-163138-8e6a8125",
     "index": 1,
     "verdict": "pass",
-    "date": "2026-10-26T11:10:41",
+    "date": "2026-10-26T16:38:06",
+    "lane": 14,
+    "signatures": 0
+   },
+   {
+    "run": "20261026-163138-8e6a8125",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T16:45:49",
     "lane": 14,
     "signatures": 0
    }
   ],
   "ours": [
    {
-    "run": "20261026-151101-b3c9c4ce",
-    "index": 2,
+    "run": "20261026-163138-8e6a8125",
+    "index": 1,
     "verdict": "pass",
-    "date": "2026-10-26T15:11:59",
-    "lane": 15,
-    "reference_run": "20261026-105851-04eb8ffa",
+    "date": "2026-10-26T16:52:42",
+    "lane": 14,
+    "reference_run": "20261026-163138-8e6a8125",
     "new_signatures": 0,
     "findings": [],
     "ui_dump": {},
@@ -41,12 +49,12 @@
     }
    },
    {
-    "run": "20261026-151101-b3c9c4ce",
-    "index": 1,
+    "run": "20261026-163138-8e6a8125",
+    "index": 2,
     "verdict": "pass",
-    "date": "2026-10-26T15:11:58",
-    "lane": 14,
-    "reference_run": "20261026-105851-04eb8ffa",
+    "date": "2026-10-26T16:54:08",
+    "lane": 15,
+    "reference_run": "20261026-163138-8e6a8125",
     "new_signatures": 0,
     "findings": [],
     "ui_dump": {},

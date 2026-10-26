@@ -26,7 +26,10 @@ steps:
   - run: {seconds: 10}
   - expect: {buildings: {BetterElectrolyzer: 1}}
   - click: {ui: "**/PlanScreen/Toggle:Oxygen"}
-  - ui_wait: {path: "**/BuildingGroups/**/Grid/BetterElectrolyzer Group*", cond: stable}
+  # The build menu catches up over frames: the game counts one inventory tag a frame, checks
+  # ten buildings' requirements a frame and repaints ten buttons a frame, so soon after the
+  # first run a button can still be greyed: 120 frames for all of it to settle.
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/BetterElectrolyzer Group*", cond: stable, stable: 120, frames: 600}
   - ui_dump: {name: diffuser-button, root: "**/BuildingGroups/**/Grid/MineralDeoxidizer Group*"}
   - shot: {name: oxygen-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
   - key: {code: Escape}

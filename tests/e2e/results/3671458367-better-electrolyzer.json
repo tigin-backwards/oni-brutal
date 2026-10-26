@@ -3,12 +3,12 @@
  "mods": [
   "3671458367"
  ],
- "verdict": "failed",
- "why": "a run of ours failed",
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
  "findings": [],
  "note": "options set the electrolyzer's power; after Air Systems the Oxygen menu lists it and a built one is selected; the menu's shot fails in ours now and then: one of its icons (a different one each time) is drawn grey, where its button's ui_dump matches the original's",
  "updated": "2026-10-26",
- "commit": "69617875",
+ "commit": "196a9303",
  "mod_dlls": {
   "3671458367": {
    "PLib.dll": "48c63fd4654b6fbb390afdac71a3d29194eeb9405eca4290cba6e4fbf60805ce",
@@ -18,25 +18,30 @@
  "runs": {
   "original": [
    {
-    "run": "20261026-152133-ebee36df",
+    "run": "20261026-163138-8e6a8125",
     "index": 1,
     "verdict": "pass",
-    "date": "2026-10-26T15:21:33",
+    "date": "2026-10-26T16:31:38",
     "lane": 14,
+    "signatures": 0
+   },
+   {
+    "run": "20261026-163138-8e6a8125",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T16:31:39",
+    "lane": 15,
     "signatures": 0
    }
   ],
   "ours": [
    {
-    "run": "20261026-152522-ffbb7eec",
+    "run": "20261026-163138-8e6a8125",
     "index": 1,
-    "verdict": "fail",
-    "date": "2026-10-26T15:25:22",
-    "lane": 14,
-    "reasons": [
-     "shot oxygen-menu: 4.64% of pixels differ (> 4%)"
-    ],
-    "reference_run": "20261026-152133-ebee36df",
+    "verdict": "pass",
+    "date": "2026-10-26T16:43:15",
+    "lane": 15,
+    "reference_run": "20261026-163138-8e6a8125",
     "new_signatures": 0,
     "findings": [],
     "ui_dump": {
@@ -45,16 +50,16 @@
      }
     },
     "shots": {
-     "oxygen-menu": 0.046421
+     "oxygen-menu": 0.0
     }
    },
    {
-    "run": "20261026-152522-ffbb7eec",
+    "run": "20261026-163138-8e6a8125",
     "index": 2,
     "verdict": "pass",
-    "date": "2026-10-26T15:25:23",
+    "date": "2026-10-26T16:45:17",
     "lane": 15,
-    "reference_run": "20261026-152133-ebee36df",
+    "reference_run": "20261026-163138-8e6a8125",
     "new_signatures": 0,
     "findings": [],
     "ui_dump": {

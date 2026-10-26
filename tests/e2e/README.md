@@ -79,6 +79,11 @@ load at all, in both players, comes first from [Load sweeps](#load-sweeps).
   U57 runs have the same watchdog, keyed to PerfProbe's PERF lines (`QA_HANG_MIN`).
 - **Paused time.** The fixture loads paused. Time passes only in `run` steps. Take all UI evidence
   before the first `run`, or right after an expectation that pins the state.
+- **The build menu catches up over frames.** The game counts the colony's inventory one tag a
+  frame (only once time has run), checks ten buildings' requirements a frame and repaints ten
+  of the menu's buttons a frame. A category opened soon after the first `run` can show a
+  button greyed (not affordable) for a few dozen frames, at a different button in each run.
+  Before a shot of the menu, wait for it to settle: `ui_wait` with `cond: stable, stable: 120`.
 - **Output.** Each invocation has a run id (its start time and a random part, or `--run-id`), so
   invocations never overwrite each other. Each run writes to `out/e2e/SPEC/RUN_ID/PLAYER-N/`
   (`out/e2e/SPEC/latest` points at the newest run id):

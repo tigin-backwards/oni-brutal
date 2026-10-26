@@ -1,0 +1,21 @@
+# 喷泉修改 (Geyser Set) (2223751324), class P.
+#
+# What it does: a postfix on GeyserGenericConfig.GenerateConfigs writes the game's geyser types
+# (element, temperature, rates, pressure, active periods, germs) to
+# mods/HuangConfigs/Geyser.josn, and a copy wrapped with a header to Geyser.config.josn. From the
+# next start, each geyser type listed in Geyser.config.josn takes that file's values, so a
+# player edits the file to change geysers.
+# How a player reaches it: the two files beside the mods folder; geysers.
+# What changes: geyser output, as configured.
+#
+# The first start writes both files and leaves the geyser types as the game has them.
+from: early-base
+mods: [2223751324]
+steps:
+  - expect_state:
+      "file:mods/HuangConfigs/Geyser.josn": exists
+      "file:mods/HuangConfigs/Geyser.config.josn": exists
+      "type:GeyserSetHuang.GeyserConfig_2021_01_15::config.GeyserData.Count": "== original"
+      "type:GeyserSetHuang.GeyserConfig_2021_01_15::config.IsReadConfig": false
+  - run: {seconds: 10}
+  - expect: {duplicants: 3}

@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2223751324-geyser-set.yaml",
+ "mods": [
+  "2223751324"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the first start writes Geyser.josn and Geyser.config.josn and leaves the geyser types as they are",
+ "updated": "2026-10-26",
+ "commit": "cd91869",
+ "mod_dlls": {
+  "2223751324": {
+   "GeyserSet.dll": "c3b1881ae08553759e0db66136977b5229a8e5cee1527ba8c0fbf6aca4239262"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-215725-746bb295",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T22:05:33",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-001816-fb00dd47",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T00:18:16",
+    "lane": 14,
+    "reference_run": "20261025-215725-746bb295",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-001816-fb00dd47",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T00:18:57",
+    "lane": 14,
+    "reference_run": "20261025-215725-746bb295",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

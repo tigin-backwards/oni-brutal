@@ -926,15 +926,21 @@ def why_failed(value):
 class Mcp:
     """A minimal client for OniMcp's streamable HTTP endpoint (JSON text results)."""
 
+    # OniMcp from 2026-10-23 accepts only this version; earlier builds also take 2025-06-18.
+    PROTOCOL = '2025-11-25'
+
     def __init__(self, port):
         self.port, self.url = port, f'http://127.0.0.1:{port}/mcp/'
         self.session = None
+        self.version = None  # the protocol version initialize agreed on, sent with later requests
         self.on_reply = None  # a player's Watchdog.progress
 
     def post(self, body):
         headers = {'Content-Type': 'application/json', 'Accept': 'application/json, text/event-stream'}
         if self.session:
             headers['Mcp-Session-Id'] = self.session
+        if self.version:
+            headers['MCP-Protocol-Version'] = self.version
         request = urllib.request.Request(self.url, data=json.dumps(body).encode(), headers=headers)
         with urllib.request.urlopen(request, timeout=120) as response:
             self.session = response.headers.get('Mcp-Session-Id') or self.session
@@ -947,9 +953,10 @@ class Mcp:
         return json.loads(raw) if raw.strip() else {}
 
     def connect(self):
-        self.session = None
-        self.post({'jsonrpc': '2.0', 'id': 1, 'method': 'initialize', 'params': {
-            'protocolVersion': '2025-06-18', 'capabilities': {}, 'clientInfo': {'name': 'e2e', 'version': '1'}}})
+        self.session = self.version = None
+        reply = self.post({'jsonrpc': '2.0', 'id': 1, 'method': 'initialize', 'params': {
+            'protocolVersion': self.PROTOCOL, 'capabilities': {}, 'clientInfo': {'name': 'e2e', 'version': '1'}}})
+        self.version = reply.get('result', {}).get('protocolVersion') or self.PROTOCOL
         self.post({'jsonrpc': '2.0', 'method': 'notifications/initialized'})
 
     @staticmethod

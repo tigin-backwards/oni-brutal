@@ -3,15 +3,16 @@
   scripts/onimcp.py [DEST]     fetch the commit below, build it against the game (ONI_GAME_DIR,
                                as scripts/env.sh), and copy the mod into DEST (default
                                out/local-tools/onimcp, where qa.env's E2E_ONIMCP points)
-Its licence does not allow vendoring it, so it is fetched from its author's repository
-(github.com/LIghtJUNction/OniMods) rather than kept in this one. The specs depend on its tools'
-arguments, which change between commits (its v0.2.5 release takes coordinates only in
-coordinate_control), so a new commit is taken by changing COMMIT after the e2e specs pass with it."""
+It is fetched from its author's repository (github.com/LIghtJUNction/OniMods) and built here
+rather than kept in this one: its licence (AUL-1.0-draft.1) puts duties on copies kept and
+changed. The specs depend on its tools' arguments and protocol, which change between commits (its
+v0.2.5 release takes coordinates only in coordinate_control; from 2026-10-23 it takes only MCP
+2025-11-25), so a new commit is taken by changing COMMIT after the e2e specs pass with it."""
 import os, shutil, subprocess, sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 REPO = 'https://github.com/LIghtJUNction/OniMods.git'
-COMMIT = 'd53b05307ec43d8d9b71e1d70f494c62e053a434'
+COMMIT = '997e926f8d87809e402553fa0ea79924b7245ccd'
 SOURCE = os.path.join(ROOT, 'out', 'local-tools', 'onimcp-src')
 
 

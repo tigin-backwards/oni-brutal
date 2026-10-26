@@ -334,6 +334,25 @@ class RunStep(unittest.TestCase):
             e2e.time.sleep = sleep
         self.assertEqual(calls, ['step_until', 'resume', 'step_until', 'step_until', 'pause'])
 
+    def test_speed_reaches_each_step(self):
+        speeds = []
+
+        class Mcp:
+            def call(self, tool, **args):
+                speeds.append(args.get('speed'))
+                return {'elapsedGameSeconds': 8.0, 'status': 'completed'}
+        self.assertEqual(e2e.run(Mcp(), 8, speed=1), 8.0)
+        self.assertEqual(speeds, [1])
+
+    def test_speed_is_checked(self):
+        s = spec('''
+from: early-base
+steps:
+  - run: {seconds: 8, speed: 1}
+  - run: {seconds: 8, speed: 10}
+''')
+        self.assertEqual(e2e.check_spec(s), ['steps 2: run speed is 1, 2 or 3'])
+
 
 class Options(unittest.TestCase):
     def test_plib_config_beside_each_dll_and_shared(self):

@@ -154,6 +154,7 @@ paths from a `ui.find` or `ui_dump` of a run, not from guesses.
 - build: {prefab: Outhouse, at: [119, 207]}      # a blueprint, its lower-left cell at x, y
 - build: {prefab: Tile, cells: [[1, 2], [2, 2]], priority: 7, material: Granite}
 - run: {seconds: 600, until: {pending_digs: 0}}  # game time at speed 3, until `until` holds
+- run: {seconds: 8, speed: 1}                    # at speed 1 (or 2)
 - expect: {duplicants: 3, buildings: {Bed: 1}, pending_construction: 0, rooms: {Latrine: 1}}
 - call: {tool: navigation_control, args: {action: focus_cell, x: 140, y: 207}}   # any OniMcp tool
 - save: early-base                               # saved; --bless copies it into fixtures/

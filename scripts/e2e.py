@@ -182,6 +182,7 @@ def check_step(where, kind, value, in_setup):
              'build takes {prefab, at: [x, y]} or {prefab, cells: [...]}')
     elif kind == 'run':
         need(isinstance(value, dict) and isinstance(value.get('seconds'), (int, float)), 'run takes {seconds: N}')
+        need(not isinstance(value, dict) or value.get('speed', 3) in (1, 2, 3), 'run speed is 1, 2 or 3')
     elif kind in ('expect', 'expect_state'):
         need(isinstance(value, dict) and value, f'{kind} takes a mapping of expectations')
         if kind == 'expect_state' and isinstance(value, dict):
@@ -2107,25 +2108,25 @@ def build_results(report):
     return found
 
 
-def run(mcp, seconds, until=None, log=None):
-    """Game time at speed 3 in steps of up to a minute, until `until` holds or the time is spent;
-    the game is paused again afterwards (UI steps happen in paused time)."""
+def run(mcp, seconds, until=None, log=None, speed=3):
+    """Game time at `speed` (1-3) in steps of up to a minute, until `until` holds or the time is
+    spent; the game is paused again afterwards (UI steps happen in paused time)."""
     resumed = []
     try:
-        return run_steps(mcp, seconds, until, log, resumed)
+        return run_steps(mcp, seconds, until, log, resumed, speed)
     finally:
         if resumed:
             with contextlib.suppress(SpecFailure, OSError):  # never hide the step's own failure
                 mcp.call('game_control', domain='speed', action='pause', confirm=True)
 
 
-def run_steps(mcp, seconds, until, log, resumed):
+def run_steps(mcp, seconds, until, log, resumed, speed=3):
     spent, stalls = 0.0, 0
     while spent < seconds:
         if until and not unmet(mcp, until):
             return spent
         step = mcp.call('game_control', domain='speed', action='step_until', until={'fact': 'cycle_end'},
-                        speed=3, maxGameSeconds=min(60, seconds - spent), maxWallSeconds=30, confirm=True)
+                        speed=speed, maxGameSeconds=min(60, seconds - spent), maxWallSeconds=30, confirm=True)
         elapsed = step.get('elapsedGameSeconds', 0) if isinstance(step, dict) else 0
         if log:
             log(f'  ran {elapsed:.0f} s ({step.get("reason") or step.get("status")})')
@@ -2502,7 +2503,7 @@ class Run:
             cells = value.get('cells') or [value['at']]
             build(mcp, value['prefab'], cells, value.get('priority', 5), value.get('material'), value.get('wire', False))
         elif kind == 'run':
-            spent = run(mcp, value['seconds'], value.get('until'), self.log)
+            spent = run(mcp, value['seconds'], value.get('until'), self.log, value.get('speed', 3))
             self.log(f'  run: {spent:.0f} game seconds')
         elif kind == 'expect':
             misses = unmet(mcp, value)

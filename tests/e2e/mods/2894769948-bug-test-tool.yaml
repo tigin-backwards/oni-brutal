@@ -1,0 +1,30 @@
+# BUG测试工具 BUG test tool one -K20 (2894769948), class P.
+#
+# What it does: postfixes on the game's debug-only buildings (the dev heater, generator, light,
+# life support, radiation emitter, radbolt spawner and solid, liquid and gas pumps) clear their
+# DebugOnly flag and make them unfloodable, not overheatable, without structure temperature or
+# thermal conductivity, so they can be built in a normal game.
+# How a player reaches it: the build menu, where the dev buildings then show.
+# What changes: testing buildings outside debug mode.
+#
+# The defs are read; a dev generator built in the dug-out corridor west of the printing pod
+# runs.
+from: early-base
+mods: [2894769948]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"DevGenerator\")", method: Build, args: [131129, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"DevHeater\").DebugOnly": false
+      "Assets.GetBuildingDef(\"DevGenerator\").DebugOnly": false
+      "Assets.GetBuildingDef(\"DevPumpGas\").DebugOnly": false
+      "Assets.GetBuildingDef(\"DevLifeSupport\").DebugOnly": false
+      "Assets.GetBuildingDef(\"DevHeater\").ThermalConductivity": 0
+      "Assets.GetBuildingDef(\"DevHeater\").Overheatable": false
+  - run: {seconds: 5}
+  - expect: {buildings: {DevGenerator: 1}}
+  - driver: {camera.set: {cell: [113, 207], ortho: 8}}
+  - click_world: {cell: [113, 206], select: DevGenerator}
+  - ui_wait: {path: "**/DetailsScreen/TitleBar", cond: stable}
+  - expect_state:
+      "selected:KPrefabID.PrefabTag.Name": DevGenerator

@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2894769948-bug-test-tool.yaml",
+ "mods": [
+  "2894769948"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the dev buildings are no longer debug-only; a dev generator is built and selected",
+ "updated": "2026-10-26",
+ "commit": "123c4c42",
+ "mod_dlls": {
+  "2894769948": {
+   "BUG▓Γ╩╘╣ñ╛▀.dll": "4e698be9e8582ac26aab47859df0f9f169d35b5987611467550a4e0f11d962b4"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-023754-20737f8f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:42:48",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-043404-ed99f1de",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:34:04",
+    "lane": 15,
+    "reference_run": "20261026-023754-20737f8f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-043404-ed99f1de",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T04:34:49",
+    "lane": 15,
+    "reference_run": "20261026-023754-20737f8f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

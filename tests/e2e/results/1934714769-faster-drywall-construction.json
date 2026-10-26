@@ -1,0 +1,55 @@
+{
+ "spec": "mods/1934714769-faster-drywall-construction.yaml",
+ "mods": [
+  "1934714769"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Drywall and Tempshift Plate build in 3 s; a drywall is built by the Duplicants after Clothing",
+ "updated": "2026-10-26",
+ "commit": "46c4b403",
+ "mod_dlls": {
+  "1934714769": {
+   "Drywall.dll": "32ac2d12e87091a8bd7fa630f78bda8dbb2a04c54bd0c4c10d14f3ce77d9a339"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-033624-0bfdff9f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:12:25",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-041626-33f64e95",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:21:18",
+    "lane": 15,
+    "reference_run": "20261026-033624-0bfdff9f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-041626-33f64e95",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T04:22:22",
+    "lane": 15,
+    "reference_run": "20261026-033624-0bfdff9f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

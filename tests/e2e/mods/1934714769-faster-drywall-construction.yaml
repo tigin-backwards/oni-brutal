@@ -1,0 +1,22 @@
+# Faster Drywall&Plate Construction 干板墙&变温板快建 (1934714769), class P.
+#
+# What it does: postfixes on the Drywall's and the Tempshift Plate's defs cut their
+# construction time to 3 s (30 and 120 in the game).
+# How a player reaches it: building either.
+# What changes: walls go up faster.
+#
+# The defs are read; setup researches Clothing (the drywall's tech), and a drywall is built
+# in the dug-out corridor west of the printing pod.
+from: early-base
+mods: [1934714769]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"Clothing\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"ExteriorWall\").ConstructionTime": 3
+      "Assets.GetBuildingDef(\"ThermalBlock\").ConstructionTime": 3
+  - build: {prefab: ExteriorWall, cells: [[113, 206]]}
+  - expect: {blueprints: {ExteriorWall: 1}}
+  - run: {seconds: 900, until: {buildings: {ExteriorWall: 1}, pending_construction: 0}}
+  - expect: {buildings: {ExteriorWall: 1}}

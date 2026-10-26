@@ -1,0 +1,67 @@
+{
+ "spec": "mods/2886144715-rotatable-radbolt-chamber.yaml",
+ "mods": [
+  "2886144715"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Radbolt Chamber shows the radbolt direction side screen and a click on Right turns its output; side screen dump and shot match",
+ "updated": "2026-10-26",
+ "commit": "0c5c86d",
+ "mod_dlls": {
+  "2886144715": {
+   "RotatableRadboltStorage.dll": "03133c8a0928367bfde535eba16b705b37d7812739f3ab5a64ce35df12b7dd5e"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-000654-98a7a75e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T00:40:07",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-011555-2d861c58",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T01:15:55",
+    "lane": 14,
+    "reference_run": "20261026-000654-98a7a75e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "direction": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "direction": 0.0
+    }
+   },
+   {
+    "run": "20261026-011555-2d861c58",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T01:16:31",
+    "lane": 14,
+    "reference_run": "20261026-000654-98a7a75e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "direction": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "direction": 0.0
+    }
+   }
+  ]
+ }
+}

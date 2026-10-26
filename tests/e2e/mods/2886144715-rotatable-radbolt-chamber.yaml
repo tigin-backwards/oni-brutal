@@ -1,0 +1,30 @@
+# [Deprecated] Rotatable Radbolt Chamber Output (DLC) (2886144715), classes P, S (a vanilla side
+# screen on another building).
+#
+# What it does: the Radbolt Chamber (HEPBattery) gets a BatteryDirectionAddon, a rotatable
+# anim and an output one cell up: the game's radbolt direction side screen shows for it, and a
+# prefix on HEPBattery.Fire sends its radbolts out in the chosen one of eight directions from
+# the cell that way.
+# How a player reaches it: select a Radbolt Chamber; its direction side screen.
+# What changes: radbolt chambers fire in any direction.
+#
+# setup builds a Radbolt Chamber in the corridor west of the printing pod. It is selected: the
+# direction side screen shows, and a click on Right turns its output.
+from: early-base
+mods: [2886144715]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"HEPBattery\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"HEPBattery\").HighEnergyParticleOutputOffset.y": 1
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 208], select: HEPBattery}
+  - ui_wait: {path: "**/HighEnergyParticleDirectionSideScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<RotatableRadboltStorage.BatteryDirectionAddon>.Direction": "== original"
+  - ui_dump: {name: direction, root: "**/HighEnergyParticleDirectionSideScreen"}
+  - shot: {name: direction, crop: "**/HighEnergyParticleDirectionSideScreen"}
+  - click: {ui: "**/HighEnergyParticleDirectionSideScreen/Contents/Right"}
+  - expect_state:
+      "selected:GetComponent<RotatableRadboltStorage.BatteryDirectionAddon>.Direction": Right

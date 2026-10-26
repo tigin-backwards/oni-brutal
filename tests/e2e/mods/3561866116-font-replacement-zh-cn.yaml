@@ -1,0 +1,33 @@
+# Font Replacement in Simplified Chinese 简体中文字体替换 (3561866116), classes V, S (fonts).
+#
+# What it does: for a player in Simplified Chinese, replaces the game's Chinese UI font with
+# three TMP fonts from its asset bundle (assets/fonts_bundle_other off Windows): a title, a
+# header and a description font, picked per text by its style and object name. Postfixes on
+# LocText.OnEnable, Start and SwapFont and on SetTextStyleSetting.ApplyStyle apply them, and a
+# prefix on the TMP text setter puts a few English leftovers ("Standard Duplicant", "Minimum")
+# into Chinese. In other languages it does nothing.
+# How a player reaches it: the game in Simplified Chinese; every screen.
+# What changes: the look of Chinese text.
+#
+# The spec plays in the game's own Simplified Chinese (`language: zh_klei`). The bundle's title
+# and header fonts load (its Linux bundle holds no description font, so descriptions keep the
+# game's font, as the mod logs), the mod sees the language as Chinese, and the build menu's
+# category labels are drawn in the mod's fonts; the menu's structure and look are compared with
+# the original.
+from: early-base
+mods: [3561866116]
+language: zh_klei
+require_log: ['HeaderFont 状态: 成功', 'TitleFont 状态: 成功']
+steps:
+  - expect_state:
+      "Localization.GetCurrentLanguageCode()": zh_klei
+      "type:OniFontPatchZhCN.CustomFontAssets::IsZhCN": true
+      "type:OniFontPatchZhCN.CustomFontAssets::MyHeaderFont": exists
+      "type:OniFontPatchZhCN.CustomFontAssets::MyTitleFont": exists
+      "type:OniFontPatchZhCN.CustomFontAssets::MyDescriptionFont": missing
+  - expect_state:
+      "ui:**/PlanScreen/Toggle:*::GetComponentInChildren<LocText>.font.name": {contains: my}
+  - ui_dump: {name: plan, root: "**/PlanScreen"}
+  - shot: {name: plan, crop: "**/PlanScreen", threshold: 0.04}
+  - run: {seconds: 30}
+  - expect: {duplicants: 3}

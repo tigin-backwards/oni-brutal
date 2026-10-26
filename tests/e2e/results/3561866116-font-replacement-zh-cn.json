@@ -1,0 +1,67 @@
+{
+ "spec": "mods/3561866116-font-replacement-zh-cn.yaml",
+ "mods": [
+  "3561866116"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "in Simplified Chinese the bundle's title and header fonts load (no description font in its Linux bundle, as in the original) and the build menu's category labels use them; the menu's layout and pixels as in the original",
+ "updated": "2026-10-26",
+ "commit": "bbc2ade",
+ "mod_dlls": {
+  "3561866116": {
+   "OniFontPatchZhCN.dll": "725c5d3ef02e7e7f6b274ed16720185a7a56d2a12987274e4e867f1ddd97a4e0"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-005544-dfc5eb0b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T00:55:44",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-010732-f5b2ea10",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T01:07:32",
+    "lane": 16,
+    "reference_run": "20261026-005544-dfc5eb0b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "plan": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "plan": 0.0
+    }
+   },
+   {
+    "run": "20261026-010732-f5b2ea10",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T01:07:33",
+    "lane": 17,
+    "reference_run": "20261026-005544-dfc5eb0b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "plan": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "plan": 0.0
+    }
+   }
+  ]
+ }
+}

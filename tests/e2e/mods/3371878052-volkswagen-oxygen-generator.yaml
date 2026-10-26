@@ -1,0 +1,28 @@
+# 制氧机电解水大众版 Volkswagen Oxygen Generator (3371878052), classes B, O.
+#
+# What it does: adds a cheap electrolyzer, Electrolyzer1 ("制氧机（大众版）"), to the Oxygen menu:
+# a 2x2 metal building on 120 W that takes piped water and puts out oxygen (0.88 kg/s, a PLib
+# option) into its pipe and hydrogen (0.11 kg/s) into the room, both at 70 degrees.
+# How a player reaches it: the build menu (Oxygen); the Mods screen's options.
+# What changes: a piped electrolyzer.
+#
+# options set the oxygen output to 2 kg/s. The converter's outputs are read; one built in the
+# dug-out corridor west of the printing pod is selected.
+from: early-base
+mods: [3371878052]
+options:
+  "3371878052": {$file: Controler.json, a1: 2}
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Electrolyzer1\")", method: Build, args: [131129, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"Electrolyzer1\").BuildingComplete.GetComponent<ElementConverter>.outputElements[0].massGenerationRate": 2
+      "Assets.GetBuildingDef(\"Electrolyzer1\").BuildingComplete.GetComponent<ElementConverter>.outputElements[1].massGenerationRate": [">= 0.109", "<= 0.111"]
+      "Assets.GetBuildingDef(\"Electrolyzer1\").EnergyConsumptionWhenActive": 120
+  - run: {seconds: 2}
+  - expect: {buildings: {Electrolyzer1: 1}}
+  - driver: {camera.set: {cell: [113, 207], ortho: 8}}
+  - click_world: {cell: [113, 206], select: Electrolyzer1}
+  - ui_wait: {path: "**/DetailsScreen/TitleBar", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~制氧机"}

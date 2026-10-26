@@ -1,0 +1,56 @@
+{
+ "spec": "mods/3371878052-volkswagen-oxygen-generator.yaml",
+ "mods": [
+  "3371878052"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "its electrolyzer's converter follows the options (2 kg/s of oxygen); a built one is selected and named",
+ "updated": "2026-10-26",
+ "commit": "906e9515",
+ "mod_dlls": {
+  "3371878052": {
+   "PLib.dll": "b862c5db2b3cd6df09a62d4a30782e91e2b24e8e1bfac08d991c9cc89a984ba9",
+   "Volkswagen Oxygen Generator.dll": "5f1fdad58c72596406b55d087395594a4e95ceb0c050e17e999da26182c79ab9"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-024539-704646ee",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:42:42",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-044925-5b7a6e41",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:49:25",
+    "lane": 14,
+    "reference_run": "20261026-024539-704646ee",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-044925-5b7a6e41",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T04:49:26",
+    "lane": 15,
+    "reference_run": "20261026-024539-704646ee",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

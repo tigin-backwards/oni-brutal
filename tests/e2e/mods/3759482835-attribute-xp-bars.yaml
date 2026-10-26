@@ -1,0 +1,25 @@
+# Attribute XP Bars (3759482835), classes V, S, O.
+#
+# What it does: above each Duplicant's name tag (a postfix on NameDisplayScreen.AddNewEntry
+# attaches an "AttributeXpBars" widget) it shows a progress bar, with icon, name and level,
+# for each attribute the Duplicant is training while it works (a postfix on
+# AttributeLevels.AddExperience), lingering 2.5 s after the last gain; PLib options choose the
+# attributes, the style, size, colours (presets) and aliases, with a live preview in the
+# options dialog.
+# How a player reaches it: Duplicants at work; the Mods screen's options.
+# What changes: XP progress shown in the world.
+#
+# The two standard Duplicants' name tags carry the widget (the bionic one trains no
+# attributes). Four sandstone cells at the east end of the dug-out corridor west of the
+# printing pod are dug: the tracker hears the Digging XP.
+from: early-base
+mods: [3759482835]
+steps:
+  - run: {seconds: 2}
+  - expect_ui:
+      "**/AttributeXpBars": {count: 2}
+  - driver: {count: {methods: ["AttributeXpBars.XpTracker:OnGain"]}}
+  - dig: [119, 209, 120, 210]
+  - run: {seconds: 900, until: {pending_digs: 0}}
+  - expect_state:
+      'E2eDriver.Counting.Of("AttributeXpBars.XpTracker:OnGain")': "> 0"

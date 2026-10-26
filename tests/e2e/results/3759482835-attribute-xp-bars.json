@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3759482835-attribute-xp-bars.yaml",
+ "mods": [
+  "3759482835"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the two standard Duplicants' name tags carry the XP bar widget, and digging feeds its tracker",
+ "updated": "2026-10-26",
+ "commit": "a1f9bed7",
+ "mod_dlls": {
+  "3759482835": {
+   "AttributeXpBars.dll": "3d68f03a80a52d270da95a99048598652c9de499a4587436ec014cb694a22314"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-095925-af2fb1f8",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T10:09:04",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-113700-1b604041",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T11:37:00",
+    "lane": 16,
+    "reference_run": "20261026-095925-af2fb1f8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-113700-1b604041",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T11:37:01",
+    "lane": 17,
+    "reference_run": "20261026-095925-af2fb1f8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

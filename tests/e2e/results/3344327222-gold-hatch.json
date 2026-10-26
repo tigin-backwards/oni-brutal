@@ -1,0 +1,59 @@
+{
+ "spec": "mods/3344327222-gold-hatch.yaml",
+ "mods": [
+  "3344327222"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Gold Hatch, its baby and egg exist; a spawned Gold Hatch is selected and named; details shot matches",
+ "updated": "2026-10-26",
+ "commit": "df5493c6",
+ "mod_dlls": {
+  "3344327222": {
+   "GoldHatch.dll": "e822f7a30430aefd77c7c1826f19e416c9dc75443d17ef8fc05441a6c19d130e"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-024205-d1d3e5ef",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:00:59",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-032548-e09e58d7",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:25:48",
+    "lane": 15,
+    "reference_run": "20261026-024205-d1d3e5ef",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "details": 4.1e-05
+    }
+   },
+   {
+    "run": "20261026-032548-e09e58d7",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T03:26:34",
+    "lane": 15,
+    "reference_run": "20261026-024205-d1d3e5ef",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "details": 4.1e-05
+    }
+   }
+  ]
+ }
+}

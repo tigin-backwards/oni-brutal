@@ -1,0 +1,27 @@
+# Gold Hatch [FM] (3344327222), class P (a critter morph).
+#
+# What it does: adds the Gold Hatch (HatchGold), a hatch morph that eats metals and excretes
+# gold, with its baby (the Gold Hatchling), its egg and kanims; Hatch eggs may hatch one (2 %,
+# 22 % for the Smooth Hatch's), more so for a hatch eating gold (a dietary egg modifier), and
+# the metal hatches' diet takes gold too.
+# How a player reaches it: breeding Hatches.
+# What changes: one more hatch.
+#
+# The prefabs exist; a Gold Hatch spawned in the dug-out corridor west of the printing pod is
+# selected.
+from: early-base
+mods: [3344327222]
+setup:
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131129, 0, 0, \"HatchGold\", \"Creatures\")", method: SetActive, args: [true]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"HatchGold\")": exists
+      "Assets.GetPrefab(\"HatchGoldBaby\")": exists
+      "Assets.GetPrefab(\"HatchGoldEgg\")": exists
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [113, 207], ortho: 8}}
+  - click_world: {cell: [113, 206], select: HatchGold}
+  - ui_wait: {path: "**/DetailsScreen/TitleBar", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Gold Hatch"}
+  - shot: {name: details, crop: "**/DetailsScreen", threshold: 0.04}

@@ -1,0 +1,25 @@
+# 2x3 Shower 2x3淋浴间 (2854756453), class P (art).
+#
+# What it does: a postfix on the Shower's def makes it 2x3 (the game's is 2x4) and draws it
+# with the mod's Shower1_kanim.
+# How a player reaches it: building a Shower.
+# What changes: a shorter shower.
+#
+# The def is read; a shower built in the dug-out corridor west of the printing pod (three
+# cells high) is selected and shot.
+from: early-base
+mods: [2854756453]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Shower\")", method: Build, args: [131129, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"Shower\").HeightInCells": 3
+      "Assets.GetBuildingDef(\"Shower\").AnimFiles[0].name": Shower1_kanim
+  - run: {seconds: 2}
+  - expect: {buildings: {Shower: 1}}
+  - driver: {camera.set: {cell: [113, 207], ortho: 8}}
+  - click_world: {cell: [113, 207], select: Shower}
+  - ui_wait: {path: "**/DetailsScreen/TitleBar", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Shower"}
+  - world_shot: {name: shower, ortho: 4, at: [113, 207], mask: [[0, 0, 1280, 200]]}

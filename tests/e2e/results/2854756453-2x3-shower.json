@@ -1,0 +1,60 @@
+{
+ "spec": "mods/2854756453-2x3-shower.yaml",
+ "mods": [
+  "2854756453"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Shower is 2x3 with the mod's kanim; a built one is selected; the world shot matches",
+ "updated": "2026-10-26",
+ "commit": "df5493c6",
+ "mod_dlls": {
+  "2854756453": {
+   "2x2Shower2x2┴▄╘í╝Σ.dll": "9423dde19bd2177f81094aa0158d39560267f9623e529bf7f4e7ba67750f93b1",
+   "PLib.dll": "b862c5db2b3cd6df09a62d4a30782e91e2b24e8e1bfac08d991c9cc89a984ba9"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-024539-704646ee",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:48:25",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-040055-44f5ee87",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:00:55",
+    "lane": 15,
+    "reference_run": "20261026-024539-704646ee",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "shower": 0.008681
+    }
+   },
+   {
+    "run": "20261026-040055-44f5ee87",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T04:01:34",
+    "lane": 15,
+    "reference_run": "20261026-024539-704646ee",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "shower": 0.006851
+    }
+   }
+  ]
+ }
+}

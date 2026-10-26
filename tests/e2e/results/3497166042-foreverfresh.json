@@ -1,0 +1,59 @@
+{
+ "spec": "mods/3497166042-foreverfresh.yaml",
+ "mods": [
+  "3497166042"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Mush Fry in oxygen is Deep Frozen and its rot rate is 0",
+ "updated": "2026-10-25",
+ "commit": "bd353b5",
+ "mod_dlls": {
+  "3497166042": {
+   "ForeverFresh.dll": "43e37b2cbce5ec573bd67b341d5b78ab9995b9f2caa22749bdfa81efefebcce8"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-200219-ef1e47f8",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T20:24:08",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-210301-ee98e85b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T21:03:01",
+    "lane": 14,
+    "reference_run": "20261025-200219-ef1e47f8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "info": 0.002155
+    }
+   },
+   {
+    "run": "20261025-210301-ee98e85b",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-25T21:03:52",
+    "lane": 14,
+    "reference_run": "20261025-200219-ef1e47f8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "info": 0.002155
+    }
+   }
+  ]
+ }
+}

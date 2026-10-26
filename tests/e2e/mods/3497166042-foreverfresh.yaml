@@ -1,0 +1,26 @@
+# ForeverFresh (3497166042), class P.
+#
+# What it does: postfixes on Rottable.RefrigerationLevel and Rottable.AtmosphereQuality make
+# every piece of food count as Frozen and as lying in a sterilizing atmosphere, wherever it is:
+# both rot modifiers are 0, so food never loses freshness.
+# How a player reaches it: any food in the colony.
+# What changes: food keeps forever, at any temperature, in any gas.
+#
+# setup drops a Mush Fry at 20 °C on the floor of the corridor west of the printing pod
+# (111, 206), in oxygen, which would make it rot, and selects it. After a short run it is
+# tagged Deep Frozen and its rot rate is 0.
+from: early-base
+mods: [3497166042]
+setup:
+  - driver: {setup.call: {type: Scenario, method: SpawnPrefab, args: [{"$": "Grid.XYToCell(111, 206)"}, 0, 0, "FriedMushBar", "Ore"]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "SelectTool.Instance", method: Select, args: [{"$": "last:GetComponent<KSelectable>"}]}}
+steps:
+  - run: {seconds: 5}
+  - expect_state:
+      "count:all:Edible::[*] if .gameObject.name == FriedMushBar": 1
+      "count:all:Edible::[*] if .gameObject.name == FriedMushBar and .GetComponent<KPrefabID>.HasTag(\"DeepFrozen\") == true": 1
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<Modifiers>.amounts.Get(\"Rot\").deltaAttribute.GetTotalValue()": 0
+  - shot: {name: info, crop: "**/DetailsScreen", threshold: 0.04}

@@ -271,7 +271,8 @@ game or mod code can notice. Each says how it is resolved, or why it is kept.
   or that the analysis cannot follow, is left as it was, and each change is logged.
   `--check-types` transpiles a method so and runs it.
 - **D18 Patches of a generic class's shared code.** A method of a generic class instantiated
-  over reference types runs code that every such instantiation shares, on Mono as on CoreCLR, so
+  over reference types only runs code that every such instantiation shares, on Mono as on
+  CoreCLR (with a value type argument too, on CoreCLR only: D38), so
   a patch of one instantiation's method applies to all (Better Info Cards patches
   `HoverTextDrawer.Pool<MonoBehaviour>.Draw`, which the game never instantiates, to see the
   widgets its `Pool<Image>` and `Pool<LocText>` draw). When tiered compilation recompiles that
@@ -694,6 +695,42 @@ game or mod code can notice. Each says how it is resolved, or why it is kept.
   test tools' log signatures (`qa-tools.py`) join such a line onto the one before it, so the
   two players' logs give the same signature; the load sweep had counted the second line as an
   error only ours logged.
+- **D38 Patches of a generic class's code shared over a value type argument.** CoreCLR shares a
+  generic class's code among the instantiations whose type arguments differ only in reference
+  types, also when other arguments are value types: every state machine's
+  `StateMachine<…>.Parameter<float>.Set` runs one body, `Parameter<__Canon, __Canon, __Canon,
+  __Canon, float>.Set`. Mono's JIT shares code only when every type argument is a reference type
+  (`mono_method_is_generic_sharable_full`, `mini-generic-sharing.c`: partial sharing, over
+  primitive and enum arguments, is for full AOT or the `partial-sharing` debug option; Unity's
+  fork, branch `unity-6000.3-mbe`), so there each such instantiation has code of its own, and a
+  Harmony patch of one runs for that one alone. Harmony builds the replacement for the
+  instantiation patched, with that instantiation's types where the shared code looks them up in
+  the object's own; detoured onto the shared code, it ran for every other instantiation, whose
+  objects fail its casts. Critter Condo Save Fix prefixes the critter condo monitor's
+  `Parameter<float>.Set`: every state machine's float parameter then threw InvalidCastException
+  (`Context[FetchChore+States,…]` to `Context[CritterCondoInteractMontior,…]`), and loading a save
+  failed (issue #16, from `Rottable.Instance`'s constructor). The original loads it.
+  **Resolved in** `SharedInstantiations`, a prefix of Harmony's `PatchTools.DetourMethod`: the
+  shared code of an instance method of a class instantiated over a value type and a type it
+  shares code over is detoured to a dispatcher. An object of the patched instantiation (or of a
+  class derived from it) runs its replacement; one of another instantiation runs that
+  instantiation's replacement when Harmony patched it too, else a copy of its own IL, made the
+  first time it is called (as D34 makes a copy, which D34 rebuilds when a method it inlined is
+  patched later). The dispatcher takes `this` as an object: typed as the instantiation, the JIT
+  takes the type check for granted. A struct's method, a static method and a generic method take
+  their instantiation as a hidden argument, which a dispatcher cannot read: they are left as
+  they were, logged. Instantiations over reference types only share code on both runtimes (D18)
+  and are left as they were. A call through the dispatcher costs a type check and an indirect
+  tail call, and for an instantiation other than the patched one a lookup of the object's type.
+  Cost at load: none measured. U57 patches no such method (PerfProbe is its only mod), and the
+  prefix looks once at each patched method's type arguments; in alternating runs, while other
+  sessions ran 2 to 6 players, U57 reached the main menu in 20.1, 16.7, 20.0 and 19.9 s with it,
+  16.6, 15.6, 22.1, 21.2 and 17.9 s without, and loaded in 44.9, 35.6, 40.0 and 39.9 s with it,
+  37.0, 25.5, 40.1, 44.4 and 46.8 s without. `--check-types` patches an emitted
+  `Outer<string>.Param<float>.Set`, which casts its object to `Ctx<A, V>`, calls it for string, a
+  class derived from it, Version and Uri past tier-up, then patches Uri's too;
+  `tests/e2e/mods/3773818206-critter-condo-save-fix.yaml` tames a hatch that used a condo,
+  saves, loads the save through the Load screen and reads how long its monitor waits.
 
 ## 3. The engine API (`OniMoono.UnityEngine`)
 

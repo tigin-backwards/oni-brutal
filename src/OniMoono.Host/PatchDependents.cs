@@ -257,8 +257,9 @@ namespace OniMoono.Host
 
         /// Rebuilds each method's replacement as Harmony rebuilds one when a patch is added: with its
         /// patches, or, for a method without (code of the game or a mod, D34), as a copy compiled
-        /// from its own IL, which Harmony replaces when the method is patched itself.
-        internal static void Rebuild(List<MethodBase> methods, string why)
+        /// from its own IL, which Harmony replaces when the method is patched itself. A copy D38
+        /// needs (`anyCopy`) is made of any method with IL.
+        internal static void Rebuild(List<MethodBase> methods, string why, bool anyCopy = false)
         {
             if (methods.Count == 0) return;
             bool wasRebuilding = rebuilding;
@@ -269,7 +270,7 @@ namespace OniMoono.Host
                 {
                     var info = getPatchInfo.Invoke(null, [method]);
                     bool copy = info == null;
-                    if (copy && !PatchInliners.IsCopy(method) && !PatchInliners.Copyable(method, out var not))
+                    if (copy && !anyCopy && !PatchInliners.IsCopy(method) && !PatchInliners.Copyable(method, out var not))
                     {
                         EngineLog.Engine($"patch inliners: {method.DeclaringType?.FullName}.{method.Name} not rebuilt, though {why}: {not}");
                         continue;

@@ -95,6 +95,7 @@ namespace OniMoono.Host
                     TranspiledTryEntries.Install();
                     UnboxedMethods.Install();
                     SharedGenerics.Install();
+                    SharedInstantiations.Install();
                     PatchFrames.Install();
                     PInvokePatches.Install();
                     PatchDependents.Install();
@@ -314,6 +315,94 @@ namespace OniMoono.Host
                     System.Threading.Thread.Sleep(20);
                 }
                 return missed == 0 ? "every call ran the patch" : throw new InvalidOperationException($"{missed} calls ran the original");
+            });
+            Check("Harmony patches of one instantiation of a generic class's method over reference and value types (SharedInstantiations)", () =>
+            {
+                SharedGenerics.Install();
+                SharedInstantiations.Install();
+                PatchDependents.Install(); // the copies of the instantiations not patched
+                // Emitted, so that its code is optimized whatever this build is (a dispatcher typing
+                // `this` as the patched class had its type check taken for granted only so):
+                // Outer<A>.Param<V>.Set(V, object), which casts its object to Ctx<A, V>, as
+                // StateMachine<…>.Parameter<float>.Set casts its context; Sub<A>, a Param<float>.
+                // CoreCLR shares Param<string, float>'s code with Param<Version, float>'s; Mono does
+                // not (a value type argument), so a patch of the first is not run for the second.
+                var module = System.Reflection.Emit.AssemblyBuilder.DefineDynamicAssembly(new AssemblyName("OniMoono.Host.InstantiationCheck"),
+                    System.Reflection.Emit.AssemblyBuilderAccess.Run).DefineDynamicModule("InstantiationCheck");
+                var ctx = module.DefineType("Ctx", TypeAttributes.Public | TypeAttributes.Sealed);
+                var ctxArgs = ctx.DefineGenericParameters("A", "V");
+                var ctxValue = ctx.DefineField("value", ctxArgs[1], FieldAttributes.Public);
+                ctx.DefineDefaultConstructor(MethodAttributes.Public);
+                var outer = module.DefineType("Outer", TypeAttributes.Public);
+                outer.DefineGenericParameters("A");
+                var param = outer.DefineNestedType("Param", TypeAttributes.NestedPublic);
+                var args = param.DefineGenericParameters("A", "V");
+                var last = param.DefineField("last", args[1], FieldAttributes.Public);
+                param.DefineDefaultConstructor(MethodAttributes.Public);
+                var set = param.DefineMethod("Set", MethodAttributes.Public | MethodAttributes.HideBySig, args[1], [args[1], typeof(object)]);
+                var il = set.GetILGenerator();
+                var ctxOfParam = ctx.MakeGenericType(args[0], args[1]);
+                il.Emit(System.Reflection.Emit.OpCodes.Ldarg_2);
+                il.Emit(System.Reflection.Emit.OpCodes.Castclass, ctxOfParam);
+                il.Emit(System.Reflection.Emit.OpCodes.Ldarg_1);
+                il.Emit(System.Reflection.Emit.OpCodes.Stfld, System.Reflection.Emit.TypeBuilder.GetField(ctxOfParam, ctxValue));
+                il.Emit(System.Reflection.Emit.OpCodes.Ldarg_0);
+                il.Emit(System.Reflection.Emit.OpCodes.Ldarg_1);
+                il.Emit(System.Reflection.Emit.OpCodes.Stfld, System.Reflection.Emit.TypeBuilder.GetField(param.MakeGenericType(args[0], args[1]), last));
+                il.Emit(System.Reflection.Emit.OpCodes.Ldarg_1);
+                il.Emit(System.Reflection.Emit.OpCodes.Ret);
+                var ctxType = ctx.CreateType();
+                outer.CreateType();
+                var paramType = param.CreateType();
+                var sub = module.DefineType("Sub", TypeAttributes.Public | TypeAttributes.Sealed);
+                var subBase = paramType.MakeGenericType(sub.DefineGenericParameters("A")[0], typeof(float));
+                sub.SetParent(subBase);
+                il = sub.DefineConstructor(MethodAttributes.Public, CallingConventions.Standard, Type.EmptyTypes).GetILGenerator();
+                il.Emit(System.Reflection.Emit.OpCodes.Ldarg_0);
+                il.Emit(System.Reflection.Emit.OpCodes.Call, System.Reflection.Emit.TypeBuilder.GetConstructor(subBase, paramType.GetConstructor(Type.EmptyTypes)!));
+                il.Emit(System.Reflection.Emit.OpCodes.Ret);
+                var subType = sub.CreateType();
+                Type Param(Type a) => paramType.MakeGenericType(a, typeof(float));
+                // A compiled caller of each instantiation, called past tier-up, as D18's check calls
+                // Pool<string>.Draw.
+                var caller = module.DefineType("Caller", TypeAttributes.Public | TypeAttributes.Sealed | TypeAttributes.Abstract);
+                foreach (var a in new[] { typeof(string), typeof(Version), typeof(Uri) })
+                {
+                    il = caller.DefineMethod("Run" + a.Name, MethodAttributes.Public | MethodAttributes.Static, typeof(float), [typeof(object), typeof(object), typeof(float)]).GetILGenerator();
+                    il.Emit(System.Reflection.Emit.OpCodes.Ldarg_0);
+                    il.Emit(System.Reflection.Emit.OpCodes.Castclass, Param(a));
+                    il.Emit(System.Reflection.Emit.OpCodes.Ldarg_2);
+                    il.Emit(System.Reflection.Emit.OpCodes.Ldarg_1);
+                    il.Emit(System.Reflection.Emit.OpCodes.Call, Param(a).GetMethod("Set")!);
+                    il.Emit(System.Reflection.Emit.OpCodes.Ret);
+                }
+                var callerType = caller.CreateType();
+                Func<object, object, float, float> Run(Type a) => callerType.GetMethod("Run" + a.Name)!.CreateDelegate<Func<object, object, float, float>>();
+                var harmony = new HarmonyLib.Harmony("OniMoono.Host.Check");
+                harmony.Patch(Param(typeof(string)).GetMethod("Set"), prefix: new HarmonyLib.HarmonyMethod(typeof(Program), nameof(CountStringParam)));
+                object New(Type type) => Activator.CreateInstance(type)!;
+                var (runString, runVersion, runUri) = (Run(typeof(string)), Run(typeof(Version)), Run(typeof(Uri)));
+                var (stringParam, versionParam, uriParam, stringSub) = (New(Param(typeof(string))), New(Param(typeof(Version))), New(Param(typeof(Uri))), New(subType.MakeGenericType(typeof(string))));
+                var (stringCtx, versionCtx, uriCtx) = (New(ctxType.MakeGenericType(typeof(string), typeof(float))), New(ctxType.MakeGenericType(typeof(Version), typeof(float))), New(ctxType.MakeGenericType(typeof(Uri), typeof(float))));
+                int wrong = 0;
+                for (int round = 0; round < 100; round++)
+                {
+                    if (round == 50)
+                        harmony.Patch(Param(typeof(Uri)).GetMethod("Set"), prefix: new HarmonyLib.HarmonyMethod(typeof(Program), nameof(CountUriParam)));
+                    var (strings, uris) = (stringPatched, uriPatched);
+                    for (int i = 0; i < 100; i++)
+                    {
+                        runString(stringParam, stringCtx, 1f);
+                        runString(stringSub, stringCtx, 1f);
+                        runVersion(versionParam, versionCtx, i);
+                        runUri(uriParam, uriCtx, 1f);
+                    }
+                    if (stringPatched - strings != 200 || uriPatched - uris != (round >= 50 ? 100 : 0)) wrong++;
+                    System.Threading.Thread.Sleep(20);
+                }
+                if (wrong > 0) throw new InvalidOperationException($"{wrong} rounds ran another instantiation's patch, or not their own");
+                return (float)versionCtx.GetType().GetField("value")!.GetValue(versionCtx)! == 99f && (float)versionParam.GetType().GetField("last")!.GetValue(versionParam)! == 99f
+                    ? "each instantiation runs its own patches, the others their own code" : throw new InvalidOperationException("Param<Version>.Set stored nothing");
             });
             Check("GetCallingAssembly in a helper a Harmony postfix calls (PatchFrames)", () =>
             {
@@ -1298,6 +1387,10 @@ namespace OniMoono.Host
 
         static int drawn;
         static void CountDraw() => drawn++;
+
+        static int stringPatched, uriPatched;
+        static void CountStringParam() => stringPatched++;
+        static void CountUriParam() => uriPatched++;
 
         /// CheckRuntimeServices' method whose transpiled copy enters its try block with a value on the stack.
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]

@@ -1,0 +1,27 @@
+# Enable/Disable manual delivery (3387132147), classes P, S.
+#
+# What it does: every building with a manual delivery, a fabricator's ingredients or a planter
+# gets a user-menu button, "Abandon delivery", which marks it automation-only: Duplicants stop
+# delivering to it (only conveyors may). The button then reads "Allow delivery" and undoes it;
+# the setting copies with Copy Settings.
+# How a player reaches it: the selected building's user menu.
+# What changes: deliveries to a building can be turned off.
+#
+# The research station is selected and its "Abandon delivery" button clicked: it becomes
+# automation-only and the button turns into "Allow delivery".
+from: early-base
+mods: [3387132147]
+setup:
+  - driver: {setup.call: {target: "SelectTool.Instance", method: Select, args: [{"$": "all:ResearchCenter::[0]"}]}}
+steps:
+  - ui_wait: {path: "**/UserMenuScreen/Buttons/Abandon deliveryButton", cond: stable}
+  - expect_state:
+      "selected:GetComponent<Bans>.automationOnly": false
+  - ui_dump: {name: user-menu, root: "**/UserMenuScreen/Buttons"}
+  - click: {ui: "**/UserMenuScreen/Buttons/Abandon deliveryButton"}
+  - ui_wait: {path: "**/UserMenuScreen/Buttons/Allow deliveryButton", cond: stable}
+  - expect_state:
+      "selected:GetComponent<Bans>.automationOnly": true
+      "selected:GetComponent<Automatable>.GetAutomationOnly()": true
+  - expect_ui:
+      "**/UserMenuScreen/Buttons/Abandon deliveryButton": {exists: false}

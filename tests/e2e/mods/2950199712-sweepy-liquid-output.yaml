@@ -1,0 +1,26 @@
+# Sweepy liquid output (2950199712), class P.
+#
+# What it does: the Sweepy Dock gets a liquid output pipe (offset 1, 1): its definition gains
+# an output conduit and the dock a ConduitDispenser that empties the liquid Sweepy mopped up
+# (the dock's liquid storage) into the pipe.
+# How a player reaches it: building a Sweepy Dock and piping its new output.
+# What changes: mopped liquid leaves the dock by pipe.
+#
+# The definition and prefab are read; a dock built by setup in the dug-out corridor west of
+# the printing pod is selected.
+from: early-base
+mods: [2950199712]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"SweepBotStation\")", method: Build, args: [131128, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"SweepBotStation\").OutputConduitType": "== 'Liquid'"
+      "Assets.GetPrefab(\"SweepBotStation\").GetComponent<ConduitDispenser>.conduitType": "== 'Liquid'"
+      "Assets.GetPrefab(\"SweepBotStation\").GetComponent<ConduitDispenser>.storage.fetchCategory": "== 'StorageSweepOnly'"
+  - run: {seconds: 2}
+  - expect: {buildings: {SweepBotStation: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: SweepBotStation}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:ConduitDispenser.conduitType": "== 'Liquid'"

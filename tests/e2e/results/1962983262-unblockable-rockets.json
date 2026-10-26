@@ -1,0 +1,55 @@
+{
+ "spec": "mods/1962983262-unblockable-rockets.yaml",
+ "mods": [
+  "1962983262"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "space counts as reachable from a cell deep in rock",
+ "updated": "2026-10-26",
+ "commit": "2e6a9342",
+ "mod_dlls": {
+  "1962983262": {
+   "UnblockableRockets.dll": "68c57577e78ed2940cdf43bfc783b575cc25180f9ce3b95f71b36b2ed13e3316"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-043257-c0eef0ae",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:49:10",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-110547-368cd384",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T11:05:47",
+    "lane": 16,
+    "reference_run": "20261026-043257-c0eef0ae",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-110547-368cd384",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T11:05:48",
+    "lane": 17,
+    "reference_run": "20261026-043257-c0eef0ae",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

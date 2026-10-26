@@ -1,0 +1,18 @@
+# Unblockable Rockets (1962983262), class P.
+#
+# What it does: a prefix replacing ConditionFlightPathIsClear.CanReachSpace says every
+# rocket's path to space is clear, whatever is above it, so tiles and buildings over a
+# rocket no longer keep it from launching.
+# How a player reaches it: a rocket under a roof.
+# What changes: the "flight path clear" launch condition always holds.
+#
+# setup asks whether space can be reached from a cell deep in the rock above the colony: it
+# can (the game finds the rock in the way).
+from: early-base
+mods: [1962983262]
+setup:
+  - driver: {setup.call: {type: ConditionFlightPathIsClear, method: CanReachSpace, args: [{"$": "Grid.XYToCell(112, 220)"}, 0, 0]}}
+steps:
+  - expect_state:
+      "cells:112,220..112,221::Grid.Element[{cell}].hardness": "> 0"
+      "last:": true

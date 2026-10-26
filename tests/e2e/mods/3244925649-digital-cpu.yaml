@@ -1,0 +1,29 @@
+# Digital CPU 数字化CPU (3244925649), classes B, S.
+#
+# What it does: adds programmable logic: CPUs with 2, 4 or 8 inputs and outputs (FCPU2/4/8, an
+# assembly language; FCPU2JS/4JS/8JS, JavaScript through NiL.JS), digital sensors, constants,
+# 8-32 segment displays, batteries, reservoirs and storage that put numbers on logic ribbons,
+# and wireless broadcasters and receivers, researched with new Fast CPU and Digit Sensors
+# techs. Side screens made in code (FCPUSideScreen: Write program, Show manual, speed,
+# require-enable) and an editor window from its asset bundle program the CPU; the codex gets
+# its manual.
+# How a player reaches it: the build menu (Automation), then a CPU's side screen.
+# What changes: logic circuits that run programs.
+#
+# setup builds a 4-port CPU in the dug-out corridor west of the printing pod. Selected, its
+# side screen shows; it is compared with the original.
+from: early-base
+mods: [3244925649]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"FCPU4\")", method: Build, args: [131129, Neutral, null, [Copper], 300.0, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"FastCPU\").unlockedItemIDs": {contains: FCPU4JS}
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 206], select: FCPU4}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/FCPUSideScreen", cond: stable}
+  - expect_ui:
+      "**/FCPUSideScreen/**": {any_text: "Write program"}
+  - ui_dump: {name: side, root: "**/DetailsScreen/SideScreen/**/FCPUSideScreen"}
+  - shot: {name: side, crop: "**/DetailsScreen/SideScreen/**/FCPUSideScreen", threshold: 0.04}

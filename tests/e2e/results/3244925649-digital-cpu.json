@@ -1,0 +1,69 @@
+{
+ "spec": "mods/3244925649-digital-cpu.yaml",
+ "mods": [
+  "3244925649"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a built 4-port CPU's side screen shows its Write program and Show manual buttons; the side screen's layout and pixels as in the original",
+ "updated": "2026-10-25",
+ "commit": "bbc2ade",
+ "mod_dlls": {
+  "3244925649": {
+   "NiL.JS.dll": "f499fe73b79921299fe1e6c10ed93021ea2a783f59e2916419431df0bb62bd82",
+   "ONICPU.dll": "1388ed28bc0dfa77f27ea123032c8cd5fb6095bbb9dd30365b9a09370325af2f",
+   "netstandard.dll": "6ae62e082dc494a2433984177f60ca4db5fae69b1f360a8b33754172b310b8c5"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-210345-8271a1b5",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T21:03:45",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-235201-8d0ca7f5",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T23:52:01",
+    "lane": 16,
+    "reference_run": "20261025-210345-8271a1b5",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "side": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "side": 0.003028
+    }
+   },
+   {
+    "run": "20261025-235201-8d0ca7f5",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-25T23:52:02",
+    "lane": 17,
+    "reference_run": "20261025-210345-8271a1b5",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "side": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "side": 0.003028
+    }
+   }
+  ]
+ }
+}

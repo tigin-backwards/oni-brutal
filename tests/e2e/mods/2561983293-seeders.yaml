@@ -1,0 +1,42 @@
+# Seeders (2561983293), classes B, O.
+#
+# What it does: two 2x2 fabricators in the Utilities menu, run without an operator: the Seed
+# fabricator turns fossil, algae, fertilizer, water and a plant's food into one seed of each
+# of twenty plants, and the Creety egg fabricator makes critter eggs. A PLib option sets the
+# mass of each ingredient (10 kg by default).
+# How a player reaches it: the build menu (Utilities), then the fabricator's recipe list.
+# What changes: seeds and eggs made from common materials.
+#
+# options set the ingredients' mass to 20 kg; after Advanced Research (where the mod means to
+# put them) the Utilities menu lists both fabricators (shot), and a Seed fabricator built by
+# setup in the dug-out corridor west of the printing pod is selected, its recipes of 20 kg
+# ingredients listed (dumped).
+from: early-base
+mods: [2561983293]
+options:
+  "2561983293": {$file: Seeders.json, UseMass: 20}
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"AdvancedResearch\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"KDSeederSeed\")", method: Build, args: [131127, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"KDSeederEgg\")": exists
+      "Assets.GetPrefab(\"KDSeederSeed\").GetComponent<ComplexFabricator>.duplicantOperated": false
+  - run: {seconds: 10}
+  - expect: {buildings: {KDSeederSeed: 1}}
+  - click: {ui: "**/PlanScreen/Toggle:Utilities"}
+  # The build menu catches up over frames: 120 frames for all of it to settle.
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/KDSeederSeed Group*", cond: stable, stable: 120, frames: 600}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/KDSeederEgg Group*": {active: true}
+  - shot: {name: utilities-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
+  - key: {code: Escape}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [111, 207], select: KDSeederSeed}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:ComplexFabricator.GetRecipes().Length": ">= 20"
+      "selected:ComplexFabricator.GetRecipes()[0].ingredients[0].amount": 20
+  - ui_wait: {path: "**/ComplexFabricatorSideScreen/Contents/ButtonScrollView", cond: stable}
+  - ui_dump: {name: recipes, root: "**/ComplexFabricatorSideScreen/Contents/ButtonScrollView"}

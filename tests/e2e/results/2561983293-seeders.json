@@ -1,0 +1,80 @@
+{
+ "spec": "mods/2561983293-seeders.yaml",
+ "mods": [
+  "2561983293"
+ ],
+ "verdict": "warning",
+ "why": "known findings: scroll-normalized-position",
+ "findings": [
+  "scroll-normalized-position"
+ ],
+ "note": "after Advanced Research the Utilities menu lists both fabricators (shot); a built seed fabricator lists its recipes of the options' 20 kg ingredients (dumped)",
+ "updated": "2026-10-26",
+ "commit": "28b4e36a",
+ "mod_dlls": {
+  "2561983293": {
+   "(Darth Nihilus)_Seeders.dll": "af7ba6957b4c705e369aef012933d577f0d536789f96f9dec8edaee8d371baf7",
+   "PLib.dll": "893dc1ea3eddd02c85d433231aae356be27be07ddfc1a98fb2c51d84748208e8"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-175250-0ae88632",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T18:03:10",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-183436-06bd7bbf",
+    "index": 1,
+    "verdict": "warn",
+    "date": "2026-10-26T18:51:57",
+    "lane": 15,
+    "reference_run": "20261026-175250-0ae88632",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "recipes": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 2
+      }
+     }
+    },
+    "shots": {
+     "utilities-menu": 0.0
+    }
+   },
+   {
+    "run": "20261026-183436-06bd7bbf",
+    "index": 2,
+    "verdict": "warn",
+    "date": "2026-10-26T18:53:13",
+    "lane": 15,
+    "reference_run": "20261026-175250-0ae88632",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "recipes": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 2
+      }
+     }
+    },
+    "shots": {
+     "utilities-menu": 0.0
+    }
+   }
+  ]
+ }
+}

@@ -1,0 +1,41 @@
+# 反熵热量中和器 / MassiveHeatSink (3352492406), classes B, O.
+#
+# What it does: adds a buildable Anti Entropy Thermo-Nullifier (MyMassiveHeatSink, 4x4, raw
+# metal, Utilities menu, researched with Pressure Management): fed hydrogen by pipe (0.01
+# kg/s), it removes heat, as much as its PLib option says (its shipped config.json: -500 kW),
+# above a minimum working temperature (another option). It is made of the game's Thermo-
+# Nullifier element and switched by automation.
+# How a player reaches it: the build menu (Utilities), after the research; the options on the
+# Mods screen.
+# What changes: a buildable, tunable heat sink.
+#
+# The options set -100 kW above 0 °C, and the building's definition takes them. setup grants
+# Pressure Management: the heat sink shows in the Utilities menu; one built in the corridor
+# west of the printing pod is selected.
+from: early-base
+mods: [3352492406]
+options:
+  MyMassiveHeatSink: {ExhaustKilowattsWhenActive: -100.0, minimumTemperature: 0.0}
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"PressureManagement\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"MyMassiveHeatSink\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Cuprite], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"PressureManagement\").unlockedItemIDs": {contains: MyMassiveHeatSink}
+      "Assets.GetBuildingDef(\"MyMassiveHeatSink\").ExhaustKilowattsWhenActive": -100
+      "Assets.GetPrefab(\"MyMassiveHeatSink\").GetComponent<MinimumOperatingTemperature>.minimumTemperature": 273.15
+  - run: {seconds: 2}
+  - click: {ui: "**/PlanScreen/Toggle:Utilities"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/MyMassiveHeatSink Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/MyMassiveHeatSink Group*": {active: true}
+  - key: {code: Escape}
+  - expect_ui: {"**/PauseScreen": {exists: false}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 208], select: MyMassiveHeatSink}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<PrimaryElement>.ElementID": "== original"
+  - run: {seconds: 10}
+  - expect: {duplicants: 3, buildings: {MyMassiveHeatSink: 1}}

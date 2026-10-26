@@ -1,0 +1,56 @@
+{
+ "spec": "mods/3352492406-massive-heat-sink.yaml",
+ "mods": [
+  "3352492406"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with the options at -100 kW above 0 °C, the heat sink's definition takes them; it shows in the Utilities menu after Pressure Management; a built one is selected",
+ "updated": "2026-10-26",
+ "commit": "7b4d31d",
+ "mod_dlls": {
+  "3352492406": {
+   "MyMassiveHeatSink.dll": "be2d3c6bac1da40a5cce5bd81b7811d218c1751a28bfde8182bbe2797a8f39e0",
+   "PLib.dll": "5d6a8ef9d87143b90113548016180078efaf112d69afe0cdf1073a6125b33773"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-000654-98a7a75e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T00:41:35",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-011708-1d76af91",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T01:56:14",
+    "lane": 14,
+    "reference_run": "20261026-000654-98a7a75e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-011708-1d76af91",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T01:57:04",
+    "lane": 14,
+    "reference_run": "20261026-000654-98a7a75e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

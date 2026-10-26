@@ -84,9 +84,6 @@ https://github.com/user-attachments/assets/9d54b5ac-8583-442c-b6ad-8ddaa31e6d6d
 
 U57 at speed 3: about 11 fps in the original, about 88 in Moono.
 
-All the videos here are the same save, view and machine on Windows, the original on the left,
-recorded back to back; each side's frame rate was measured while it was recorded.
-
 Starting the game to the main menu, every DLC, second launch: 17.6 s in the original, 10.0 s in
 Moono.
 

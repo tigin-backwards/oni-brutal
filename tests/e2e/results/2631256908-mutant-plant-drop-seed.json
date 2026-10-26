@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2631256908-mutant-plant-drop-seed.yaml",
+ "mods": [
+  "2631256908"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Mealwood given a random mutation keeps dropping seeds on harvest instead of turning sterile",
+ "updated": "2026-10-26",
+ "commit": "8f3828b",
+ "mod_dlls": {
+  "2631256908": {
+   "Mutant Drop Seeds.dll": "1fc66991223bd504677ffcab2048985db054b3966f47cd2c809444070b13cb54"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-220744-daa697b6",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T23:22:29",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-004647-044584f5",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T00:46:47",
+    "lane": 14,
+    "reference_run": "20261025-220744-daa697b6",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-004647-044584f5",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T00:47:39",
+    "lane": 14,
+    "reference_run": "20261025-220744-daa697b6",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

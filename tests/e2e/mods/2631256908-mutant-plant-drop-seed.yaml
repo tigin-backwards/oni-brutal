@@ -1,0 +1,27 @@
+# Mutant Plant Drop Seed (2631256908), class P.
+#
+# What it does: a transpiler on PlantMutation.ApplyFunctionalTo replaces the Sterile production
+# type the game gives a mutated plant that drops seeds on harvest with Harvest, so mutant
+# plants keep dropping (mutant) seeds when harvested.
+# How a player reaches it: growing mutant plants (from mutant seeds, after radiation).
+# What changes: mutant plants are no longer sterile.
+#
+# setup spawns a Mealwood in the corridor west of the printing pod, gives it a random mutation
+# and applies it, as a mutant seed's plant would get: its seed producer still drops seeds on
+# harvest.
+from: early-base
+mods: [2631256908]
+setup:
+  - driver: {seed: 12345}
+  - driver: {setup.call: {type: GameUtil, method: KInstantiate, args: [{"$": "Assets.GetPrefab(\"BasicSingleHarvestPlant\")"}, [112.5, 206.0, -12], BuildingBack]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "last:GetComponent<MutantPlant>", method: Mutate}}
+  - driver: {setup.call: {target: "last:GetComponent<MutantPlant>", method: ApplyMutations}}
+steps:
+  - expect_state:
+      "last:GetComponent<MutantPlant>.IsOriginal": false
+      "last:GetComponent<SeedProducer>.seedInfo.productionType": Harvest
+  - run: {seconds: 10}
+  - expect_state:
+      "last:GetComponent<SeedProducer>.seedInfo.productionType": Harvest
+  - expect: {duplicants: 3}

@@ -1,0 +1,28 @@
+# Decoration of everything 万物装饰 (2868395237), class P.
+#
+# What it does: every building gets the same decor: a postfix on
+# BuildingTemplates.CreateBuildingDef sets each definition's decor and decor radius to the
+# mod's options (10 and 10 by default, 1 to 10 each).
+# How a player reaches it: any building; the options on the Mods screen.
+# What changes: decor around every building, tiles and wires included.
+#
+# options set decor 5 in 3 tiles; definitions are read, and the outhouse, which the game gives
+# -10 decor, is selected.
+from: early-base
+mods: [2868395237]
+options:
+  "2868395237": {$file: Controler.json, a1: 5, b1: 3}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"Outhouse\").BaseDecor": 5
+      "Assets.GetBuildingDef(\"Outhouse\").BaseDecorRadius": 3
+      "Assets.GetBuildingDef(\"Tile\").BaseDecor": 5
+      "Assets.GetBuildingDef(\"Wire\").BaseDecor": 5
+      "Assets.GetBuildingDef(\"Bed\").BaseDecorRadius": 3
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [117, 208], ortho: 8}}
+  - click_world: {cell: [116, 207], select: Outhouse}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:DecorProvider.baseDecor": 5
+      "selected:DecorProvider.baseRadius": 3

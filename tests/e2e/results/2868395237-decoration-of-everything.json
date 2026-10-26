@@ -1,0 +1,56 @@
+{
+ "spec": "mods/2868395237-decoration-of-everything.yaml",
+ "mods": [
+  "2868395237"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "options set every building's decor to 5 in 3 tiles; the selected outhouse has it",
+ "updated": "2026-10-26",
+ "commit": "f898d18a",
+ "mod_dlls": {
+  "2868395237": {
+   "Decoration of everything═≥╬∩╫░╩╬.dll": "5d1c36ebfe8d32507b6e2e5dcc3127b851461124914b2a743ea1e8f0c574bcf8",
+   "PLib.dll": "b862c5db2b3cd6df09a62d4a30782e91e2b24e8e1bfac08d991c9cc89a984ba9"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-100522-abd03b4b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T10:08:23",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-135852-94c2bbc0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T14:11:07",
+    "lane": 15,
+    "reference_run": "20261026-100522-abd03b4b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-135852-94c2bbc0",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T14:11:59",
+    "lane": 15,
+    "reference_run": "20261026-100522-abd03b4b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

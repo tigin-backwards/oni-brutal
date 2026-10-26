@@ -1,0 +1,31 @@
+# 温室藻类种植箱 AlgaeTerrarium (3644196006), class B.
+#
+# What it does: a 3x4 powered greenhouse (EchoAlgaeTerrarium, 140 W, a water input) in the
+# Oxygen menu, researched with Basic Farming: it takes algae, water and carbon dioxide, makes
+# oxygen and more algae, lights its surroundings and drops what it makes.
+# How a player reaches it: the build menu (Oxygen), after Basic Farming.
+# What changes: an algae farm that pays for itself.
+#
+# setup researches Basic Farming; the Oxygen menu lists the terrarium (shot), and one built by
+# setup in the dug-out corridor west of the printing pod is selected.
+from: early-base
+mods: [3644196006]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"FarmingTech\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"EchoAlgaeTerrarium\")", method: Build, args: [131128, Neutral, null, [Cuprite], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"FarmingTech\").unlockedItemIDs": {contains: EchoAlgaeTerrarium}
+      "Assets.GetBuildingDef(\"EchoAlgaeTerrarium\").EnergyConsumptionWhenActive": 140
+  - run: {seconds: 10}
+  - expect: {buildings: {EchoAlgaeTerrarium: 1}}
+  - click: {ui: "**/PlanScreen/Toggle:Oxygen"}
+  # The build menu catches up over frames: 120 frames for all of it to settle.
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/EchoAlgaeTerrarium Group*", cond: stable, stable: 120, frames: 600}
+  - shot: {name: oxygen-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
+  - key: {code: Escape}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 206], select: EchoAlgaeTerrarium}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_dump: {name: title, root: "**/DetailsScreen/TitleBar/Border/LabelGroup"}

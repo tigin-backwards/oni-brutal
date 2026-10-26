@@ -1,0 +1,67 @@
+{
+ "spec": "mods/3644196006-algae-terrarium.yaml",
+ "mods": [
+  "3644196006"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "after Basic Farming the Oxygen menu lists the terrarium (shot); a built one is selected (dumped)",
+ "updated": "2026-10-26",
+ "commit": "fd4e5b95",
+ "mod_dlls": {
+  "3644196006": {
+   "EchoAlgaeTerrarium.dll": "f8d073f1c956053dcd4ef6678c9489f026c533435c9307e9fa773dd75a5ef6dc"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-185246-86fbde8e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T19:14:31",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-192551-82b3b3ca",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T19:42:54",
+    "lane": 15,
+    "reference_run": "20261026-185246-86fbde8e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "oxygen-menu": 0.0
+    }
+   },
+   {
+    "run": "20261026-192551-82b3b3ca",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T19:44:07",
+    "lane": 15,
+    "reference_run": "20261026-185246-86fbde8e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "oxygen-menu": 0.0
+    }
+   }
+  ]
+ }
+}

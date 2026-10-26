@@ -1,0 +1,22 @@
+# 复制人呼出氧气（or一切气体） / Duplicants exhale oxygen, or any gas (3343067865), classes P, O.
+#
+# What it does: transpilers on OxygenBreather.Sim200ms and CO2Manager.Sim33ms replace the carbon
+# dioxide Duplicants breathe out with the gas chosen in its PLib option (oxygen by default, or
+# one of 24 others), and a postfix sets the mass of each breath out from another option (20 g
+# by default, up to 10 kg), restart required.
+# How a player reaches it: the options on the Mods screen; Duplicants breathing.
+# What changes: what, and how much, Duplicants breathe out.
+#
+# The options set 100 g of oxygen a breath. As the game runs, every Duplicant's breather emits
+# 100 g at a time.
+from: early-base
+mods: [3343067865]
+options:
+  xyONImod.EmitO2: {$file: Config.json, EmitGasMass: 100.0, EmitGasType: 0}
+steps:
+  - run: {seconds: 5}
+  - expect_state:
+      "count:Components.LiveMinionIdentities.Items[*] if .GetComponent<OxygenBreather>.O2toCO2conversion == 0.1": "== original"
+      "count:Components.LiveMinionIdentities.Items[*] if .GetComponent<OxygenBreather>.minCO2ToEmit == 0.1": ">= 2"
+  - run: {seconds: 60}
+  - expect: {duplicants: 3}

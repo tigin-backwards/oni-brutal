@@ -1,0 +1,58 @@
+{
+ "spec": "mods/3343067865-dupes-exhale-oxygen.yaml",
+ "mods": [
+  "3343067865"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with the options set to 100 g of oxygen a breath, the Duplicants' breathers emit 100 g at a time; the colony runs",
+ "updated": "2026-10-26",
+ "commit": "83f91ce",
+ "mod_dlls": {
+  "3343067865": {
+   "EmitO2.dll": "4b0df2c8b1ad0e515a1ca253da3c4437074852b148e5035767b04c7963bd942a",
+   "PLibCore.dll": "f2332bfe863d4e56960ecf9fc6c980484187caadb1d970d222833fd5c7c65006",
+   "PLibOptions.dll": "750be4ba3678b94ee7320b8a417458d7158d917baaec332be8ed3e9c1a77c765",
+   "PLibUI.dll": "07473afe0a3891aa47163eeb3e4ec572ec3f3311db41dd4d95c2c7202ec4f2b5"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-222040-75e4a4a6",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T23:53:29",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-013714-d938ea09",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T01:37:14",
+    "lane": 14,
+    "reference_run": "20261025-222040-75e4a4a6",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-013714-d938ea09",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T01:38:19",
+    "lane": 14,
+    "reference_run": "20261025-222040-75e4a4a6",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

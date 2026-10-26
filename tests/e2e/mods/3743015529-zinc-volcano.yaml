@@ -1,0 +1,29 @@
+# Custom Geysers - Zinc Volcano (3743015529), class P (worldgen content).
+#
+# What it does: adds a Zinc Volcano to the geysers a world can generate (a postfix on
+# GeyserGenericConfig.GenerateConfigs: GeyserGeneric_molten_zinc, 3x3, molten zinc at
+# 1100 K, 200-400 kg per eruption), with its kanim, names, and Geotuner settings (phosphorus,
+# +20 % mass, +50 K). Its templates/geysers folder holds the template worldgen places.
+# How a player reaches it: finding one in a new world, or the sandbox.
+# What changes: one more geyser kind.
+#
+# setup places a Zinc Volcano in the dug-out corridor west of the printing pod, as worldgen
+# would, at random settings. Selected, it reads as a Zinc Volcano that emits molten zinc.
+from: early-base
+mods: [3743015529]
+setup:
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(0, 112, 206, \"GeyserGeneric_molten_zinc\", \"BuildingBack\")", method: SetActive, args: [true]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"GeyserGeneric_molten_zinc\").GetComponent<KPrefabID>.PrefabTag.Name": GeyserGeneric_molten_zinc
+  - driver: {camera.set: {cell: [112, 207], ortho: 8}}
+  - click_world: {cell: [112, 207], select: GeyserGeneric_molten_zinc}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Zinc Volcano"}
+  - expect_state:
+      "selected:Geyser.configuration.GetElement()": MoltenZinc
+      "selected:Geyser.configuration.geyserType.temperature": 1100
+      "selected:Geyser.configuration.geyserType.maxPressure": 150
+  - run: {seconds: 30}
+  - expect: {duplicants: 3}

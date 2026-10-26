@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3743015529-zinc-volcano.yaml",
+ "mods": [
+  "3743015529"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Zinc Volcano placed as worldgen would reads as one and erupts molten zinc at 1100 K; the colony runs",
+ "updated": "2026-10-25",
+ "commit": "78891e5",
+ "mod_dlls": {
+  "3743015529": {
+   "Geysers_Zinc_Volcano.dll": "e3237f28609c424a04faeec0510d12aa83718178b4f24ce8d516ea45a50775ca"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-195129-6325275a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T19:56:08",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-202134-20fcc203",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T20:21:34",
+    "lane": 16,
+    "reference_run": "20261025-195129-6325275a",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261025-202134-20fcc203",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-25T20:22:35",
+    "lane": 16,
+    "reference_run": "20261025-195129-6325275a",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

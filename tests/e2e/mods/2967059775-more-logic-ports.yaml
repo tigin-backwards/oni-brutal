@@ -1,0 +1,29 @@
+# [Vanilla + DLC] More Logic Ports (2967059775), class P.
+#
+# What it does: after Db.Initialize it patches seventeen buildings' configs by hand (planter
+# boxes, farm tiles, reservoirs, bottle emptiers, the Smart Storage Bin, the refrigerator, the
+# pumping station and others): each gets an automation input port and a
+# LogicOperationalController, so a red signal disables it.
+# How a player reaches it: wiring automation to those buildings.
+# What changes: farms, reservoirs and the rest can be switched by automation.
+#
+# The buildings' definitions are read; a Planter Box built by setup in the dug-out corridor
+# west of the printing pod is selected and has the controller.
+from: early-base
+mods: [2967059775]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"PlanterBox\")", method: Build, args: [131128, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"PlanterBox\").LogicInputPorts.Count": 1
+      "Assets.GetBuildingDef(\"LiquidReservoir\").LogicInputPorts.Count": 1
+      "Assets.GetBuildingDef(\"BottleEmptier\").LogicInputPorts.Count": 1
+      "Assets.GetPrefab(\"FarmTile\").GetComponent<LogicOperationalController>": exists
+  - run: {seconds: 2}
+  - expect: {buildings: {PlanterBox: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 206], select: PlanterBox}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:LogicOperationalController": exists
+      "selected:LogicPorts.inputPortInfo.Length": 1

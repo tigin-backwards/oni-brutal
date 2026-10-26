@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2967059775-more-logic-ports.yaml",
+ "mods": [
+  "2967059775"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "planter boxes, reservoirs and bottle emptiers get an automation port; a built planter box has the controller",
+ "updated": "2026-10-26",
+ "commit": "28b4e36a",
+ "mod_dlls": {
+  "2967059775": {
+   "MoreLogicPorts.dll": "25c7927024bbc1c9d8c23bfd5de783dd98a98160651b9e592797c078f1e63719"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-175250-0ae88632",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T18:11:34",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-183436-06bd7bbf",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T18:59:58",
+    "lane": 15,
+    "reference_run": "20261026-175250-0ae88632",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-183436-06bd7bbf",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T19:00:54",
+    "lane": 15,
+    "reference_run": "20261026-175250-0ae88632",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

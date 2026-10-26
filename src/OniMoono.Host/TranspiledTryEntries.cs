@@ -26,8 +26,11 @@ namespace OniMoono.Host
             new Harmony("OniMoono.Host.TranspiledTryEntries").Patch(getResult, postfix: new HarmonyMethod(typeof(TranspiledTryEntries), nameof(Postfix)));
         }
 
-        static void Postfix(List<CodeInstruction> __result, MethodBase method)
+        static void Postfix(List<CodeInstruction> __result, ILGenerator generator, MethodBase method)
         {
+            // Joins reached with values on the stack from one side only are evened first (D43),
+            // since the depths below need consistent ones.
+            TranspiledStackJoins.Even(__result, generator, method);
             // Each pass empties the outermost try entered with values; nested ones show in the next.
             for (int pass = 0; pass < 64; pass++)
             {
@@ -73,7 +76,7 @@ namespace OniMoono.Host
             return false;
         }
 
-        static bool IsHandler(ExceptionBlockType type) => type is ExceptionBlockType.BeginCatchBlock or ExceptionBlockType.BeginExceptFilterBlock
+        internal static bool IsHandler(ExceptionBlockType type) => type is ExceptionBlockType.BeginCatchBlock or ExceptionBlockType.BeginExceptFilterBlock
             or ExceptionBlockType.BeginFinallyBlock or ExceptionBlockType.BeginFaultBlock;
 
         /// The stack depth before each instruction (-1 where none reaches it); null when the code
@@ -123,7 +126,7 @@ namespace OniMoono.Host
             return depths;
         }
 
-        static IEnumerable<Label> Targets(CodeInstruction instruction) => instruction.operand switch
+        internal static IEnumerable<Label> Targets(CodeInstruction instruction) => instruction.operand switch
         {
             Label label => [label],
             Label[] labels => labels,
@@ -134,7 +137,7 @@ namespace OniMoono.Host
         /// as their operands say; unknowns as the whole stack, which keeps the method unchanged).
         static int Pops(CodeInstruction instruction) => Pops(instruction, null) is int n and >= 0 ? n : int.MaxValue / 2;
 
-        static int Pops(CodeInstruction instruction, MethodBase? method)
+        internal static int Pops(CodeInstruction instruction, MethodBase? method)
         {
             var opcode = instruction.opcode;
             if (opcode == OpCodes.Ret)
@@ -157,7 +160,7 @@ namespace OniMoono.Host
             }
         }
 
-        static int Pushes(CodeInstruction instruction)
+        internal static int Pushes(CodeInstruction instruction)
         {
             var opcode = instruction.opcode;
             switch (opcode.StackBehaviourPush)

@@ -31,8 +31,9 @@ namespace OniMoono.Host
     ///
     /// As a mod loads, each of its methods that names, in Mono's order (exception clauses, locals,
     /// then the IL), a top-level type missing from an assembly already loaded whose types are the
-    /// same in both players (the game's own from Managed/, other than Unity's and the class
-    /// libraries, and mods') gets the body Mono's compilation gives it: it throws Mono's
+    /// same in both players (the game's own from Managed/, other than the class libraries, and
+    /// mods'; of Unity's engine and packages, which ours replace, a type both ours and Unity's copy
+    /// in Managed/ lack) gets the body Mono's compilation gives it: it throws Mono's
     /// exception, and is hidden from stack traces. So does a method naming a member its type lacks
     /// (MonoMissingMembers, D42), first in the same IL order. Nested types (D32) and assemblies not
     /// loaded yet are left as they were.
@@ -101,12 +102,54 @@ namespace OniMoono.Host
         static readonly ConcurrentDictionary<(string, string, string), bool> known = new();
 
         /// Whether the assembly loaded under that simple name (compared ignoring case, as Mono binds
-        /// it: D15) lacks the type, when its types are the same in both players.
+        /// it: D15) lacks the type, when its types are the same in both players; for Unity's engine
+        /// and packages, ours, whether both ours and the original's copy in Managed/ lack it (a type
+        /// Unity's copy has and ours lacks is our API's gap, which fails as CoreCLR fails it).
         static bool IsMissing(string assemblyName, string ns, string name)
         {
-            if (Loaded(assemblyName) is not { } assembly || !SameInBothPlayers(assembly)) return false;
+            if (Loaded(assemblyName) is not { } assembly) return false;
+            bool same = SameInBothPlayers(assembly);
+            if (!same && UnityTypes(assembly) == null) return false;
             return known.GetOrAdd((assembly.GetName().Name!, ns, name), key =>
-                assembly.GetType(key.Item2.Length == 0 ? key.Item3 : key.Item2 + "." + key.Item3, throwOnError: false) == null);
+                assembly.GetType(key.Item2.Length == 0 ? key.Item3 : key.Item2 + "." + key.Item3, throwOnError: false) == null
+                && (same || !UnityTypes(assembly)!.Contains((key.Item2, key.Item3))));
+        }
+
+        static readonly ConcurrentDictionary<string, HashSet<(string, string)>?> unityTypes = new(StringComparer.Ordinal);
+
+        /// The top-level types (defined or forwarded) of the original's copy of a Unity assembly
+        /// ours replaces (Managed/NAME.dll), or null for another assembly.
+        internal static HashSet<(string Namespace, string Name)>? UnityTypes(Assembly assembly)
+        {
+            var name = assembly.GetName().Name!;
+            if (!name.StartsWith("Unity", StringComparison.Ordinal) || AssemblyPolicy.ReferenceDirectories[0] is not { Length: > 0 } managed) return null;
+            return unityTypes.GetOrAdd(name, n =>
+            {
+                var path = Path.Combine(managed, n + ".dll");
+                if (!File.Exists(path)) return null;
+                try
+                {
+                    using var pe = new PEReader(File.OpenRead(path));
+                    if (!pe.HasMetadata) return null;
+                    var md = pe.GetMetadataReader();
+                    var types = new HashSet<(string, string)>();
+                    foreach (var handle in md.TypeDefinitions)
+                    {
+                        var type = md.GetTypeDefinition(handle);
+                        if (type.GetDeclaringType().IsNil) types.Add((md.GetString(type.Namespace), md.GetString(type.Name)));
+                    }
+                    foreach (var handle in md.ExportedTypes)
+                    {
+                        var type = md.GetExportedType(handle);
+                        if (type.Implementation.Kind != HandleKind.ExportedType) types.Add((md.GetString(type.Namespace), md.GetString(type.Name)));
+                    }
+                    return types;
+                }
+                catch (Exception e) when (e is BadImageFormatException or IOException or UnauthorizedAccessException)
+                {
+                    return null;
+                }
+            });
         }
 
         static readonly ConcurrentDictionary<string, Assembly> loaded = new(StringComparer.OrdinalIgnoreCase);

@@ -174,7 +174,7 @@ code that recognizes older players).
 differ in ways game or mod code notices (D1–D36), each with how the host resolves it or why it is
 kept. The host patches a few game methods (D1, D3, D11, D26), rewrites game and mod IL as it
 loads where it depends on Mono (D29–D31 for both; mods' alone in D22, D23, D27, D28 and D32), and
-adjusts the game's Harmony where patches would run differently (D12–D14, D17–D21, D33, D34).
+adjusts the game's Harmony where patches would run differently (D12–D14, D17–D21, D33, D34, D43).
 
 Float arithmetic in game code rounds as .NET does, not as Unity's Mono (D25); the engine's own
 math follows the original bit for bit where that was measured.

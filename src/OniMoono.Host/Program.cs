@@ -127,6 +127,8 @@ namespace OniMoono.Host
                 // Fields and properties are listed in Mono's order, which the game numbers state
                 // machines' parameters and adds components in (D39).
                 MonoReflectionOrder.Install();
+                // Assembly.GetType takes '/' between nested types, as Mono's does (D44).
+                MonoNestedTypeNames.Install();
                 GameTweaks.GameTweaks.Install(effective.EnabledTweaks.ToHashSet(StringComparer.Ordinal));
                 if (!options.NoTweaksMenu) MoonoTweaksMenu.Install(effective, settings, settingsPath);
                 StateMachineSaveNames.Install(dataDir, AppContext.BaseDirectory);
@@ -281,6 +283,14 @@ namespace OniMoono.Host
                     transpiler: new HarmonyLib.HarmonyMethod(typeof(Program), nameof(LeaveValueBehind)));
                 int doubled = Guarded(21);
                 return doubled == 42 ? "the method compiles and runs as in Mono" : throw new InvalidOperationException($"returned {doubled}");
+            });
+            Check("A transpiler branching to a loop's head with a value left on the stack (TranspiledStackJoins)", () =>
+            {
+                TranspiledTryEntries.Install();
+                new HarmonyLib.Harmony("OniMoono.Host.Check").Patch(typeof(Program).GetMethod(nameof(SumAll), BindingFlags.NonPublic | BindingFlags.Static),
+                    transpiler: new HarmonyLib.HarmonyMethod(typeof(Program), nameof(SkipEven)));
+                int sum = SumAll([1, 2, 3, 4, 5]);
+                return sum == 9 ? "the method compiles and skips as in Mono" : throw new InvalidOperationException($"returned {sum}");
             });
             Check("A Harmony patch of a generic class's method for one reference type argument (SharedGenerics)", () =>
             {
@@ -973,6 +983,24 @@ namespace OniMoono.Host
                         il.Emit(Cecil.Cil.OpCodes.Ret);
                     }, module.TypeSystem.Object);
                     Method("Fine", module.TypeSystem.Int32, il => { il.Emit(Cecil.Cil.OpCodes.Ldc_I4_5); il.Emit(Cecil.Cil.OpCodes.Ret); });
+                    // As Delivery Temperature Limit's copy of PLib (PUIUtils.GetEmWidth): a type that
+                    // both Unity's TextMeshPro (Managed/) and ours lack, TMPro.FaceInfo.
+                    var tmp = AppDomain.CurrentDomain.GetAssemblies().Single(a => a.GetName().Name == "Unity.TextMeshPro");
+                    if (tmp.GetType("TMPro.FaceInfo") != null) throw new InvalidOperationException("TMPro.FaceInfo is in our TextMeshPro");
+                    var tmpRef = new Cecil.AssemblyNameReference("Unity.TextMeshPro", new Version(0, 0, 0, 0));
+                    module.AssemblyReferences.Add(tmpRef);
+                    var faceInfoRef = new Cecil.TypeReference("TMPro", "FaceInfo", module, tmpRef, valueType: false);
+                    var faceInfoCtor = new Cecil.MethodReference(".ctor", module.TypeSystem.Void, faceInfoRef) { HasThis = true };
+                    Method("Package", module.TypeSystem.Int32, il =>
+                    {
+                        var skip = il.Create(Cecil.Cil.OpCodes.Ldc_I4_3);
+                        il.Emit(Cecil.Cil.OpCodes.Ldarg_0);
+                        il.Emit(Cecil.Cil.OpCodes.Brfalse, skip);
+                        il.Emit(Cecil.Cil.OpCodes.Newobj, faceInfoCtor);
+                        il.Emit(Cecil.Cil.OpCodes.Pop);
+                        il.Append(skip);
+                        il.Emit(Cecil.Cil.OpCodes.Ret);
+                    }, module.TypeSystem.Boolean);
                     var modPath = Path.Combine(dir, name + ".dll");
                     assembly.Write(modPath);
                     int token;
@@ -1002,7 +1030,16 @@ namespace OniMoono.Host
                     var isInst = Fails("IsInst", [null]);
                     if (isInst.Message != "Failure has occurred while loading a type.") throw new InvalidOperationException("IsInst: " + isInst.Message);
                     if ((int)type.GetMethod("Fine")!.Invoke(null, null)! != 5) throw new InvalidOperationException("Fine changed");
-                    return $"the method throws Mono's TypeLoadException from its caller's frame ({first}); isinst gives Mono's message without the type";
+                    int faceInfoToken;
+                    using (var pe = new System.Reflection.PortableExecutable.PEReader(File.OpenRead(modPath)))
+                    {
+                        var md = System.Reflection.Metadata.PEReaderExtensions.GetMetadataReader(pe);
+                        faceInfoToken = System.Reflection.Metadata.Ecma335.MetadataTokens.GetToken(md.TypeReferences.Single(h => md.GetString(md.GetTypeReference(h).Name) == "FaceInfo"));
+                    }
+                    var package = Fails("Package", [false]);
+                    var packageExpected = $"Could not resolve type with token {faceInfoToken:x8} from typeref (expected class 'TMPro.FaceInfo' in assembly 'Unity.TextMeshPro, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null')";
+                    if (package.Message != packageExpected) throw new InvalidOperationException($"Package: \"{package.Message}\", not \"{packageExpected}\"");
+                    return $"the method throws Mono's TypeLoadException from its caller's frame ({first}), also for a type Unity's package and ours both lack; isinst gives Mono's message without the type";
                 }
                 finally
                 {
@@ -1421,6 +1458,25 @@ namespace OniMoono.Host
                     transpiler: new HarmonyLib.HarmonyMethod(typeof(Program), nameof(BrightLux)));
                 return new LitCell().Lit() ? "fields and events print their type's full name, as on Mono, and the transpiler finds its field" : throw new InvalidOperationException("the transpiler found no field");
             });
+            Check("A nested type named with '/' by Assembly.GetType (MonoNestedTypeNames)", () =>
+            {
+                MonoNestedTypeNames.Install();
+                // As Delivery Temperature Limit finds FetchAreaChore/StatesInstance/<>c__DisplayClass17_0.
+                var assembly = typeof(Program).Assembly;
+                var found = new[] { assembly.GetType("OniMoono.Host.Program/LitCell/Shade"), assembly.GetType("OniMoono.Host.Program/LitCell+Shade", false),
+                    assembly.GetType("oniMoono.host.program/litcell/shade", false, true) };
+                if (found.Any(t => t != typeof(LitCell.Shade))) throw new InvalidOperationException($"found {string.Join(", ", found.Select(t => t?.FullName ?? "null"))}");
+                if (assembly.GetType("OniMoono.Host.Program/Missing") != null) throw new InvalidOperationException("found a type that does not exist");
+                try
+                {
+                    assembly.GetType("OniMoono.Host.Program/Missing", throwOnError: true);
+                    throw new InvalidOperationException("a missing type did not throw");
+                }
+                catch (TypeLoadException)
+                {
+                }
+                return "found as on Mono";
+            });
             Check("Fields and properties of a class whose method a mod patches, in Mono's order (MonoReflectionOrder)", () =>
             {
                 MonoReflectionOrder.Install();
@@ -1827,6 +1883,32 @@ namespace OniMoono.Host
         /// The transpiler: a value pushed first and never used, as Better Info Cards leaves one.
         static IEnumerable<HarmonyLib.CodeInstruction> LeaveValueBehind(IEnumerable<HarmonyLib.CodeInstruction> instructions) =>
             instructions.Prepend(new HarmonyLib.CodeInstruction(System.Reflection.Emit.OpCodes.Ldc_I4_7));
+
+        static int SumAll(List<int> values)
+        {
+            int sum = 0;
+            foreach (var value in values) sum += value;
+            return sum;
+        }
+
+        static bool IsOdd(int value) => (value & 1) != 0;
+
+        /// The transpiler: as Fixes and Tweaks' patch of Timelapser.SetPostionAndOrtho, a test of
+        /// the current item (kept on the stack by a dup) that branches back to the loop's head
+        /// when it fails, leaving the item behind.
+        static IEnumerable<HarmonyLib.CodeInstruction> SkipEven(IEnumerable<HarmonyLib.CodeInstruction> instructions)
+        {
+            var codes = instructions.ToList();
+            int head = codes.FindIndex(c => c.opcode == System.Reflection.Emit.OpCodes.Br || c.opcode == System.Reflection.Emit.OpCodes.Br_S);
+            int current = codes.FindIndex(c => c.operand is MethodInfo { Name: "get_Current" });
+            if (head < 0 || current < 0) throw new InvalidOperationException("the loop was not found");
+            codes.InsertRange(current + 1, [
+                new HarmonyLib.CodeInstruction(System.Reflection.Emit.OpCodes.Dup),
+                new HarmonyLib.CodeInstruction(System.Reflection.Emit.OpCodes.Call, typeof(Program).GetMethod(nameof(IsOdd), BindingFlags.NonPublic | BindingFlags.Static)),
+                new HarmonyLib.CodeInstruction(System.Reflection.Emit.OpCodes.Brfalse_S, codes[head].operand),
+            ]);
+            return codes;
+        }
 
         /// CheckRuntimeServices' patch of Enum.ToString(), as element mods write theirs.
         static void NoOp() { }

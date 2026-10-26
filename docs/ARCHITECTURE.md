@@ -105,7 +105,7 @@ parameter names, D3 a local mod's version stamp), mods' loading (D11) and the bu
 one use of a struct's hash as an identity (D26). The game's conversions of floats to integers
 are rewritten as its assemblies load (D29), in the same pass as its directory listings (D30)
 and the double close in 0Harmony's MonoMod (D31). The game's Harmony is adjusted where patches
-would run differently on CoreCLR (D12–D14, D17–D21, D33, D34), and mods' assemblies are
+would run differently on CoreCLR (D12–D14, D17–D21, D33, D34, D43), and mods' assemblies are
 rewritten as they load where their IL relies on Mono (D11, D22, D23, D27–D32, D40, D42). No other
 game IL is touched.
 
@@ -813,15 +813,18 @@ game or mod code can notice. Each says how it is resolved, or why it is kept.
   fails in both players when a Duplicant starts its work, but ours logged a signature the
   original lacks. **Resolved in** `MonoMissingTypes`, after `MonoNestedTypeRefs` as `ModAccess`
   loads a mod: each method that names, in that order, a top-level type missing from an assembly
-  already loaded whose types both players share (a mod's, or the game's own from `Managed/`:
-  not Unity's engine or packages, nor Mono's class libraries) gets the body Mono's compilation
+  already loaded whose types both players share (a mod's, or the game's own from `Managed/`,
+  not Mono's class libraries; of Unity's engine and packages, which ours replace, a type that
+  both ours and Unity's copy in `Managed/` lack: Delivery Temperature Limit's copy of PLib names
+  `TMPro.FaceInfo`, which TextMeshPro no longer has) gets the body Mono's compilation
   gives it, throwing Mono's exception with the token of the mod's file, and is hidden from stack
   traces (`StackTraceHidden`), so the trace starts at its caller as Mono's does. Members
   missing from a type that exists are D42's. Not covered: missing nested types (D32 binds
   some of them), and assemblies not loaded yet when the mod loads; a method whose own signature
   names a missing type fails in its callers only. A mod that cannot be rewritten loads unchanged.
   `--check-types` loads a mod whose method calls a game method by a missing return type behind a
-  branch not taken, and one whose isinst names the missing type.
+  branch not taken, one whose isinst names the missing type, and one constructing
+  `TMPro.FaceInfo`.
 - **D41 The calling assembly of a patch method.** Harmony calls a mod's prefixes, postfixes and
   finalizers from the replacement it builds for the patched method, a dynamic method owned by
   MonoMod's `DynamicMethodDefinition` (in 0Harmony). Mono's `Assembly.GetCallingAssembly` walks
@@ -901,6 +904,35 @@ game or mod code can notice. Each says how it is resolved, or why it is kept.
   `--check-types` loads a mod calling `SimMessages.SetCellProperties(int, byte)` behind a branch
   not taken, a generic game type's instance method by a by-ref array of its parameter, a generic
   method and a nested type's field the game lacks, and two members it has (one on a base class).
+- **D43 A join reached with values on the stack from one side only.** ECMA-335 requires every
+  path into an instruction to bring the same stack depth; CoreCLR's JIT refuses a method where
+  one does not (InvalidProgramException when Harmony applies the patch). Mono's JIT checks only
+  the paths that bring values: a block left with an empty stack hands its successors nothing
+  (`handle_stack_args` in `mini/method-to-ir.c` returns at once for no values), so a join that
+  one path reaches with values and another with none compiles, and the code after it, valid with
+  the empty stack, never takes them. Transpilers that insert a test branching back with the
+  tested value still on the stack produce such methods: Fixes and Tweaks' patch of
+  `Timelapser.SetPostionAndOrtho` jumps to its `foreach`'s head with a `BuildingComplete` left
+  over, and the mod failed to load (it loads in the original). **Resolved by a patch** of the
+  game's Harmony (`TranspiledStackJoins`, run before D17's pass on the same
+  `CodeTranspiler.GetResult`): where the stack depths of the instructions its transpilers produce
+  disagree only so, each path bringing values to a join reached with an empty stack elsewhere
+  pops them on its way (before an unconditional branch, after the instruction falling through,
+  or in a trampoline for a conditional branch). A method whose depths differ otherwise (two
+  non-empty depths, a switch, code after the join taking the values) is left as it was, and
+  each change is logged. `--check-types` transpiles a `foreach` so and runs it.
+- **D44 Nested types named with '/'.** Mono's lookup of a class by name takes '/' between a
+  nested type and its outer type as well as '+' (`metadata/class.c`: the name is split at its
+  first '/', and `return_nested_in` follows the rest one '/' at a time), so
+  `Assembly.GetType("Outer/Inner")` finds `Outer+Inner`, as ILDasm and Cecil spell it. CoreCLR's
+  type name parser takes '+' only and returns null: Delivery Temperature Limit looks up
+  `FetchAreaChore/StatesInstance/<>c__DisplayClass17_0` to patch a lambda of the game's, logged
+  an error the game reports with its error dialog, and the game quit (it loads in the original).
+  **Resolved in** `MonoNestedTypeNames`: a prefix of CoreLib's
+  `RuntimeAssembly.GetType(string, bool, bool)`, which every `Assembly.GetType` overload calls,
+  spells a '/' as '+' (no CLR type name holds one otherwise). `Type.GetType` is left as it is.
+  `--check-types` finds a nested type of a nested type so, ignoring case too, and a missing one
+  as before.
 
 ## 3. The engine API (`OniMoono.UnityEngine`)
 

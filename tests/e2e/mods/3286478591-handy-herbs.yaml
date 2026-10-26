@@ -1,0 +1,29 @@
+# Handy Herbs (3286478591), class P (plants and food).
+#
+# What it does: adds five plants with seeds and crops: the Drake Mouth (DragonPlant, Drake
+# Heart), the Mantleer (Mantle Berry; it glows), the Rockonion (Rockonion Bulb), the
+# Spiralcicle (Spiralcicle Nut) and the Sweet Bell Mushroom (Sweet Bell Mushroom Cap), their
+# crops registered in CROPS.CROP_TYPES (100 to 150 s a cycle's worth); Dreckos eat the Sweet
+# Bell Mushroom too.
+# How a player reaches it: seeds found in the world; planting them; the crops as food.
+# What changes: more crops and foods.
+#
+# The plants, seeds and crops exist; a Sweet Bell Mushroom spawned in the dug-out corridor
+# west of the printing pod is selected.
+from: early-base
+mods: [3286478591]
+setup:
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131129, 0, 0, \"SweetBellPlant\", \"BuildingFront\")", method: SetActive, args: [true]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"DragonPlant\")": exists
+      "Assets.GetPrefab(\"MantleerPlntSeed\")": exists
+      "Assets.GetPrefab(\"RockonionFruit\")": exists
+      "Assets.GetPrefab(\"SpiralciclePlant\")": exists
+      "count:TUNING.CROPS.CROP_TYPES[*] if .cropId == SweetBellFruit": 1
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [113, 207], ortho: 8}}
+  - click_world: {cell: [113, 206], select: SweetBellPlant}
+  - ui_wait: {path: "**/DetailsScreen/TitleBar", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Sweet Bell Mushroom"}

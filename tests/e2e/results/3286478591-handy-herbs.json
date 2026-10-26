@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3286478591-handy-herbs.yaml",
+ "mods": [
+  "3286478591"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the five plants, seeds and crops exist and the crops join the crop table; a spawned Sweet Bell Mushroom is selected and named",
+ "updated": "2026-10-26",
+ "commit": "edab06f6",
+ "mod_dlls": {
+  "3286478591": {
+   "ExoticCuisine.dll": "697ae5c05fdd88fa830057f6207fd204888bfa4e2ed9fb0de670a75a58430dd2"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-025019-77e7dd66",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T02:59:48",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-031613-5a880de8",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:23:03",
+    "lane": 15,
+    "reference_run": "20261026-025019-77e7dd66",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-031613-5a880de8",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T03:23:42",
+    "lane": 15,
+    "reference_run": "20261026-025019-77e7dd66",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

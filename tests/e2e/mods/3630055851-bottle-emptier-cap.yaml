@@ -1,0 +1,33 @@
+# 狗子的取水量杯 Bottle Emptier Cap (3630055851), class B.
+#
+# What it does: gives the Bottle Emptier a capacity control: its configuration is replaced
+# (200 kg of liquid storage) and its BottleEmptier by a BottleEmptierCap that is
+# IUserControlledCapacity, so the side screen gets the storage capacity slider, and the fetch
+# errand asks for that amount (the value counted in grams, a thousandth of it in kg).
+# Copying settings carries the capacity over.
+# How a player reaches it: selecting a Bottle Emptier.
+# What changes: how much a Bottle Emptier fetches at once.
+#
+# setup builds a Bottle Emptier in the dug-out corridor west of the printing pod; it is
+# selected, and 50000 is typed into its capacity control.
+from: early-base
+mods: [3630055851]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"BottleEmptier\")", method: Build, args: [131127, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"BottleEmptier\").GetComponent<Storage>.capacityKg": 200
+  - run: {seconds: 2}
+  - expect: {buildings: {BottleEmptier: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [111, 207], select: BottleEmptier}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_wait: {path: "**/CapacityControlSideScreen", cond: stable}
+  - expect_state:
+      "ui:**/CapacityControlSideScreen::GetComponent<CapacityControlSideScreen>.target.MaxCapacity": 200000
+  - ui_dump: {name: capacity, root: "**/CapacityControlSideScreen"}
+  - type: {ui: "**/CapacityControlSideScreen/**/InputField", text: "50000", enter: true, clear: true}
+  - expect_state:
+      "ui:**/CapacityControlSideScreen::GetComponent<CapacityControlSideScreen>.target.UserMaxCapacity": 50000
+  - ui_dump: {name: capacity-set, root: "**/CapacityControlSideScreen"}
+  - shot: {name: capacity-set, crop: "**/CapacityControlSideScreen", threshold: 0.04}

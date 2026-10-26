@@ -1,0 +1,73 @@
+{
+ "spec": "mods/3630055851-bottle-emptier-cap.yaml",
+ "mods": [
+  "3630055851"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a selected Bottle Emptier's capacity control takes 50000 (dumped and shot)",
+ "updated": "2026-10-26",
+ "commit": "f898d18a",
+ "mod_dlls": {
+  "3630055851": {
+   "BottleEmptierCap.dll": "193df2c3e5cfa1ece8754b1aa3f36e87f30e073200b6426655329900459107f8"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-102152-42394c53",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T10:29:51",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-150143-eb459935",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T15:03:25",
+    "lane": 14,
+    "reference_run": "20261026-102152-42394c53",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "capacity": {
+      "differences": 0
+     },
+     "capacity-set": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "capacity-set": 0.009129
+    }
+   },
+   {
+    "run": "20261026-150143-eb459935",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T15:03:28",
+    "lane": 15,
+    "reference_run": "20261026-102152-42394c53",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "capacity": {
+      "differences": 0
+     },
+     "capacity-set": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "capacity-set": 0.009129
+    }
+   }
+  ]
+ }
+}

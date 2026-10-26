@@ -1,0 +1,24 @@
+# 浮油生物进化！Evolution！ (3462398525), class P (critters).
+#
+# What it does: a prefix and postfix on BaseOilFloaterConfig.SetupDiet make Slicksters eat
+# faster for the same food: the carbon dioxide eaters (Slickster, Molten Slickster) breathe in
+# six times as much a second at a sixth of the calories per kilogram, so they make six times
+# the oil; the Longhair Slickster breathes twice the oxygen at half the calories. A prefix on
+# ExtendEntityToBasicCreature means to give the Longhair Slickster four death drops; in the
+# original it still drops two meat.
+# How a player reaches it: a Slickster ranch.
+# What changes: how much gas Slicksters take in and turn into oil.
+#
+# setup spawns a Slickster and a Longhair Slickster in the dug-out room west of the printing
+# pod: their gas consumption rates are 3 and 1 kg/s (the game's 0.5).
+from: early-base
+mods: [3462398525]
+setup:
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131762, 0, 0, \"Oilfloater\", \"Creatures\")", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131764, 0, 0, \"OilfloaterDecor\", \"Creatures\")", method: SetActive, args: [true]}}
+steps:
+  - run: {seconds: 1}
+  - expect_state:
+      "count:all:OilFloaterMovementSound::[*] if .GetComponent<KPrefabID>.PrefabTag.Name == Oilfloater and .GetComponent<StateMachineController>.GetSMI(\"GasAndLiquidConsumerMonitor+Instance\").def.consumptionRate == 3.0": 1
+      "count:all:OilFloaterMovementSound::[*] if .GetComponent<KPrefabID>.PrefabTag.Name == OilfloaterDecor and .GetComponent<StateMachineController>.GetSMI(\"GasAndLiquidConsumerMonitor+Instance\").def.consumptionRate == 1.0": 1
+      "Assets.GetPrefab(\"OilfloaterDecor\").GetComponent<Butcherable>.drops": {equals: {Meat: 2.0}}

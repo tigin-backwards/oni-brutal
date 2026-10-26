@@ -1,0 +1,56 @@
+{
+ "spec": "mods/3462398525-slickster-evolution.yaml",
+ "mods": [
+  "3462398525"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Slickster takes in 3 kg/s of carbon dioxide and a Longhair Slickster 1 kg/s of oxygen (the game's 0.5)",
+ "updated": "2026-10-26",
+ "commit": "a8f38b2e",
+ "mod_dlls": {
+  "3462398525": {
+   "PLib.dll": "93073fdf44dbe9fd7c0afe19e56341be862cc2d732090dee30999cf60e2e160d",
+   "╕í╙╬╔·╬∩.dll": "46596e8c646d49b205c03460b98b9b18a210070f40cded64e7759ea890c2e016"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-042232-0e5bb32c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:31:33",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-102458-29ce35a3",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T10:24:58",
+    "lane": 16,
+    "reference_run": "20261026-042232-0e5bb32c",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-102458-29ce35a3",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T10:24:59",
+    "lane": 17,
+    "reference_run": "20261026-042232-0e5bb32c",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

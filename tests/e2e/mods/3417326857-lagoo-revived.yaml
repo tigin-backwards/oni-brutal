@@ -1,0 +1,28 @@
+# Lagoo Revived (3417326857), classes P, O.
+#
+# What it does: the Lagoo, a cold-adapted Pip morph (SquirrelLagoo, its baby and egg), with
+# its own anims mapped to the UI's sprites; hugging one gives a Duplicant the Warm Touch effect
+# for a PLib option's number of cycles; raptors eat it, and the Printing Pod offers its egg as
+# a care package.
+# How a player reaches it: Lagoos hatch from their eggs or come from the Printing Pod.
+# What changes: a new critter.
+#
+# The prefabs are read; a Lagoo spawned by setup in the dug-out corridor west of the printing
+# pod is selected (its name dumped) and lives.
+from: early-base
+mods: [3417326857]
+setup:
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131128, 0, 0, \"SquirrelLagoo\", \"Creatures\")", method: SetActive, args: [true]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"SquirrelLagooBaby\")": exists
+      "Assets.GetPrefab(\"SquirrelLagooEgg\")": exists
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 206], select: SquirrelLagoo}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Lagoo"}
+  - ui_dump: {name: title, root: "**/DetailsScreen/TitleBar/Border/LabelGroup"}
+  - run: {seconds: 5}
+  - expect_state:
+      "count:all:CreatureBrain::[*] if .GetComponent<KPrefabID>.PrefabTag.Name == SquirrelLagoo": 1

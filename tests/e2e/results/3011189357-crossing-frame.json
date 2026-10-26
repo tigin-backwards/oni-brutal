@@ -1,0 +1,59 @@
+{
+ "spec": "mods/3011189357-crossing-frame.yaml",
+ "mods": [
+  "3011189357"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Two Wire Bridge joins the wires at its ends into one network; the Power menu offers the bridges (shot matches)",
+ "updated": "2026-10-26",
+ "commit": "34af3dfa",
+ "mod_dlls": {
+  "3011189357": {
+   "MM20230727GG1.dll": "910d58ce19ce8cc292a8511c8d37169d0dd87299fd43f3b43c9f5aaffa704159"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-043257-c0eef0ae",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:45:28",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-110404-dd155369",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T11:04:04",
+    "lane": 16,
+    "reference_run": "20261026-043257-c0eef0ae",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "power-menu": 0.0
+    }
+   },
+   {
+    "run": "20261026-110404-dd155369",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T11:04:05",
+    "lane": 17,
+    "reference_run": "20261026-043257-c0eef0ae",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "power-menu": 0.0
+    }
+   }
+  ]
+ }
+}

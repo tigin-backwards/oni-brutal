@@ -1,0 +1,32 @@
+# 跨越架Crossing Frame (3011189357), class B.
+#
+# What it does: adds longer bridges, no research needed: wire, heavy-watt wire, gas pipe and
+# liquid pipe bridges crossing two cells (4 wide, MM20230727GG1UI1 to UI4) or three
+# (MM20230727GG1UI5 to UI8), in the Power, Ventilation and Plumbing menus, rotatable.
+# How a player reaches it: the build menu (Power, Ventilation, Plumbing).
+# What changes: utilities hop over more cells.
+#
+# The Power menu offers the wire bridges. setup builds a Two Wire Bridge in the dug-out room
+# west of the printing pod with a wire at each end: both ends are one network.
+from: early-base
+mods: [3011189357]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Wire\")", method: Build, args: [132399, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Wire\")", method: Build, args: [132402, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"MM20230727GG1UI2\")", method: Build, args: [132400, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"MM20230727GG1UI2\").WidthInCells": 4
+      "Assets.GetBuildingDef(\"MM20230727GG1UI6\").WidthInCells": 5
+  - run: {seconds: 2}
+  - expect_state:
+      "Game.Instance.electricalConduitSystem.GetNetworkForCell(132399).id": {save_as: west}
+  - expect_state:
+      "Game.Instance.electricalConduitSystem.GetNetworkForCell(132402).id": "== west"
+  - run: {seconds: 8}
+  - click: {ui: "**/PlanScreen/Toggle:Power"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/MM20230727GG1UI2 Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/MM20230727GG1UI1 Group*": {active: true}
+      "**/BuildingGroups/**/Grid/MM20230727GG1UI6 Group*": {active: true}
+  - shot: {name: power-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}

@@ -1,0 +1,33 @@
+# Wall Attachment Pumps (3757698960), class B.
+#
+# What it does: adds a Wall Attachment Gas Pump (beside the Gas Pump, Ventilation) and a Wall
+# Attachment Liquid Pump (beside the Liquid Pump, Plumbing), researched with Valve
+# Miniaturization: 1x1 pumps of refined metal and a gasket, attached to a floor, wall or
+# ceiling, that draw 120 W and pump gas or liquid from the far side of the tile they sit on
+# (a RotatablePump sampling 2 cells behind, rotated with the building; it pumps only where
+# that side has gas or liquid in line of sight).
+# How a player reaches it: the build menu (Ventilation, Plumbing).
+# What changes: pumps that reach through a wall.
+#
+# setup builds a Wall Attachment Gas Pump on the floor of the dug-out corridor west of the
+# printing pod. Its pump samples the cell two below it, under the floor; selected, it reads as
+# the mod's pump.
+from: early-base
+mods: [3757698960]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"WAP_GasPump\")", method: Build, args: [131129, Neutral, null, [Copper, Copper], 300.0, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"ValveMiniaturization\").unlockedItemIDs": {contains: WAP_GasPump}
+  - expect_state:
+      "Db.Get().Techs.Get(\"ValveMiniaturization\").unlockedItemIDs": {contains: WAP_LiquidPump}
+  - expect_state:
+      "Assets.GetBuildingDef(\"WAP_GasPump\").EnergyConsumptionWhenActive": 120
+      "all:WallAttachmentPumps.Content.Scripts.RotatablePump::[0].PumpOffset.y": -2
+      "all:WallAttachmentPumps.Content.Scripts.RotatablePump::[0].consumer.sampleCellOffset.y": -2
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 206], select: WAP_GasPump}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Wall Attachment Gas Pump"}

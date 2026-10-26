@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3757698960-wall-attachment-pumps.yaml",
+ "mods": [
+  "3757698960"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a wall attachment gas pump built on the floor samples the cell two below it and reads as the mod's pump; both pumps are in Valve Miniaturization",
+ "updated": "2026-10-25",
+ "commit": "bbc2ade",
+ "mod_dlls": {
+  "3757698960": {
+   "WallAttachmentPumps.dll": "6849bb6e71215003e484c50f0e85f74c882d3ef2637d3c9e7050f7133062f6b7"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-205925-359c5b20",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T20:59:25",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-234744-9cbedfaa",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T23:47:44",
+    "lane": 16,
+    "reference_run": "20261025-205925-359c5b20",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261025-234744-9cbedfaa",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-25T23:48:45",
+    "lane": 16,
+    "reference_run": "20261025-205925-359c5b20",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

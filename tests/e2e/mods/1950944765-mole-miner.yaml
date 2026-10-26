@@ -1,0 +1,27 @@
+# Mole Miner (Hot Shots) (1950944765), class P.
+#
+# What it does: postfixes on AutoMinerConfig make the Robo-Miner unentombable (its BuildingDef's
+# Entombable is false, so it gets no EntombVulnerable) and tag it Bunker, so falling meteors do
+# not damage it: it can sit inside the rock it digs.
+# How a player reaches it: a Robo-Miner, built as usual.
+# What changes: Robo-Miners keep working buried, and survive meteor showers.
+#
+# The Robo-Miner's definition and prefab carry both changes; its card opens from the
+# Shipping menu once Robotic Tools is researched.
+from: early-base
+mods: [1950944765]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"RoboticTools\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"AutoMiner\").Entombable": false
+      "Assets.GetBuildingDef(\"AutoMiner\").BuildingComplete.GetComponent<EntombVulnerable>": missing
+      "Assets.GetBuildingDef(\"AutoMiner\").BuildingComplete.GetComponent<KPrefabID>.HasTag(\"Bunker\")": true
+      "Db.Get().Techs.Get(\"RoboticTools\").unlockedItemIDs": {contains: AutoMiner}
+  - run: {seconds: 5}
+  - click: {ui: "**/PlanScreen/Toggle:Shipping"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/AutoMiner Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/AutoMiner Group*"}
+  - ui_wait: {path: "**/PlanBuildingSelectionPanel/ProductInfoScreen", cond: stable}
+  - shot: {name: miner-card, crop: "**/PlanBuildingSelectionPanel/ProductInfoScreen", threshold: 0.04}

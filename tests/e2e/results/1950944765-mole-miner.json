@@ -1,0 +1,59 @@
+{
+ "spec": "mods/1950944765-mole-miner.yaml",
+ "mods": [
+  "1950944765"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Robo-Miner's definition is unentombable and bunker-tagged; its card opens from the Shipping menu",
+ "updated": "2026-10-25",
+ "commit": "a9add53",
+ "mod_dlls": {
+  "1950944765": {
+   "Mole Miner.dll": "175220aad144daca4056a8909758266f922678cfc8659644f37812914d753205"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-195133-9810c702",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T19:53:19",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-212523-ce6977fb",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T21:25:23",
+    "lane": 14,
+    "reference_run": "20261025-195133-9810c702",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "miner-card": 0.0
+    }
+   },
+   {
+    "run": "20261025-212523-ce6977fb",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-25T21:25:39",
+    "lane": 15,
+    "reference_run": "20261025-195133-9810c702",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "miner-card": 0.0
+    }
+   }
+  ]
+ }
+}

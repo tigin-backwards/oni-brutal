@@ -9,9 +9,11 @@
 # whatever the modifiers.
 #
 # The build menu's search field gets "liquid pump"; Ctrl+Backspace leaves "liquid ", then "gas"
-# is typed and Ctrl+Shift+Backspace empties the field. Ours does not load the mod: its
-# TextMeshPro lacks the members the mod patches (docs/cleanroom/textmeshpro.md, "Backspace with
-# modifiers, and the members Text Input Hotkeys patches").
+# is typed and Ctrl+Shift+Backspace empties the field. Ours loads the mod and Backspace removes a
+# character, but Ctrl+Backspace removes one too: the reverse patch rewrites constants in
+# Backspace()'s IL, which ours does not match (transpilers on Unity package internals are not
+# supported; docs/cleanroom/textmeshpro.md, "Backspace with modifiers, and the members Text
+# Input Hotkeys patches").
 from: early-base
 mods: [3165114076]
 steps:

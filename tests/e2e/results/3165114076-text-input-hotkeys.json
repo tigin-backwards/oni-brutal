@@ -6,9 +6,9 @@
  "verdict": "failed",
  "why": "a run of ours failed",
  "findings": [],
- "note": "the build menu's search field: Ctrl+Backspace deletes the word before the caret and Ctrl+Shift+Backspace the rest; ours does not load the mod, as its TextMeshPro lacks the Backspace() and members the mod patches (docs/cleanroom/textmeshpro.md)",
+ "note": "its transpiler and reverse patch of TMP_InputField.Backspace need Unity's exact IL, which Moono does not match (transpilers on Unity package internals are not supported)",
  "updated": "2026-10-25",
- "commit": "7d70b2e",
+ "commit": "689574a",
  "mod_dlls": {
   "3165114076": {
    "DeleteFullWord.dll": "71d84607c6218a25dbca3c6db7e55b834ecd7c37df8d4ee2181551ee390ee06c"
@@ -27,33 +27,31 @@
   ],
   "ours": [
    {
-    "run": "20261025-220904-03c5db92",
+    "run": "20261025-224420-1922b551",
     "index": 1,
     "verdict": "fail",
-    "date": "2026-10-25T22:09:04",
-    "lane": 34,
+    "date": "2026-10-25T22:44:20",
+    "lane": 30,
     "reasons": [
-     "step start: the player exited (1) while loading",
-     "2 log signature(s) the original lacks"
+     "step 8: **/BuildingGroups/Searchbar/FilterInputField/Text Area/Text: text is 'liquid pu\\u200b', wanted '/^liquid \\\\W?$/' (it held in the original: the interaction has no effect in ours)"
     ],
     "reference_run": "20261025-220722-70322fdd",
-    "new_signatures": 2,
+    "new_signatures": 0,
     "findings": [],
     "ui_dump": {},
     "shots": {}
    },
    {
-    "run": "20261025-220904-03c5db92",
+    "run": "20261025-224420-1922b551",
     "index": 2,
     "verdict": "fail",
-    "date": "2026-10-25T22:11:46",
-    "lane": 34,
+    "date": "2026-10-25T22:53:06",
+    "lane": 30,
     "reasons": [
-     "step start: the player exited (1) while loading",
-     "2 log signature(s) the original lacks"
+     "step 8: **/BuildingGroups/Searchbar/FilterInputField/Text Area/Text: text is 'liquid pu\\u200b', wanted '/^liquid \\\\W?$/' (it held in the original: the interaction has no effect in ours)"
     ],
     "reference_run": "20261025-220722-70322fdd",
-    "new_signatures": 2,
+    "new_signatures": 0,
     "findings": [],
     "ui_dump": {},
     "shots": {}

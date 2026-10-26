@@ -1,0 +1,24 @@
+# Drywall Colours (2942359329), class P (facades).
+#
+# What it does: adds coloured and patterned facades (skins) to the Drywall: deep red, satsuma
+# orange, lemon yellow, kelly green, cobalt blue, flamingo pink and patterns such as volcano,
+# carrots, algae, bubbles, hearts and cobblestone, each with its kanim.
+# How a player reaches it: the Drywall's facade picker in the build menu or its side screen.
+# What changes: more looks for drywall.
+#
+# The facades are counted among the drywall's; a drywall built in the dug-out corridor west
+# of the printing pod is selected.
+from: early-base
+mods: [2942359329]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"ExteriorWall\")", method: Build, args: [131129, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "count:Db.Get().Permits.BuildingFacades.resources[*] if .PrefabID == ExteriorWall": [">= 12", "== original"]
+  - run: {seconds: 2}
+  - expect: {buildings: {ExteriorWall: 1}}
+  - driver: {camera.set: {cell: [113, 207], ortho: 8}}
+  - click_world: {cell: [113, 206], select: ExteriorWall}
+  - ui_wait: {path: "**/DetailsScreen/TitleBar", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Drywall"}

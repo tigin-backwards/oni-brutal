@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2942359329-drywall-colours.yaml",
+ "mods": [
+  "2942359329"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the drywall's facades number as in the original (12 or more); a built drywall is selected",
+ "updated": "2026-10-26",
+ "commit": "403df7df",
+ "mod_dlls": {
+  "2942359329": {
+   "DrywallPatternColours.dll": "e325dbe2be1ae8d4950f15c4675d20c4ce1a181c2557c0c607cb436ac6f19360"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-024205-d1d3e5ef",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T02:57:04",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-025942-f5cf280e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:15:18",
+    "lane": 14,
+    "reference_run": "20261026-024205-d1d3e5ef",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-025942-f5cf280e",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T03:16:27",
+    "lane": 14,
+    "reference_run": "20261026-024205-d1d3e5ef",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

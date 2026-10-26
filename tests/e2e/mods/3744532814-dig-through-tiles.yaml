@@ -1,0 +1,33 @@
+# Dig Through Tiles (3744532814), classes T, P.
+#
+# What it does: a prefix replaces DigTool.PlaceDig so the Dig tool also marks cells that have a
+# natural backwall behind a solid or built tile (the game marks a backwall only behind an open
+# cell); prefixes on Diggable.OnWorkTick and OnSolidChanged then dig out the backwall behind a
+# built tile and leave the tile standing. Everything else the tool does goes through the
+# mod's copy of the game's code.
+# How a player reaches it: the Dig tool (G), dragged over tiles in a world with natural
+# backwalls (the Prehistoric asteroids).
+# What changes: backwalls can be dug from behind tiles.
+#
+# Neither fixture has natural backwalls near the base (early-base none, prehistoric1 none
+# around the printing pod), so the spec checks the tool through the mod's PlaceDig: dragged
+# over the sandstone east of the cot (136 to 137, 207 to 208) and over the built tiles under
+# the printing pod (122 to 124, 206), it marks the four natural cells and none of the tiles,
+# and the Duplicants dig them out.
+from: early-base
+mods: [3744532814]
+require_log: ['\[DigThroughTiles\] Dig Through Tiles Mod Loadad']
+steps:
+  - driver: {camera.set: {cell: [130, 208], ortho: 10}}
+  - tool: {toolbar: Dig}
+  - expect_state:
+      "PlayerController.Instance.ActiveTool.name": DigTool
+  - drag: {from: [136, 207], to: [137, 208]}
+  - drag: {from: [122, 206], to: [124, 206]}
+  - expect: {pending_digs: 4}
+  - key: {code: Escape}
+  - run: {seconds: 900, until: {pending_digs: 0}}
+  - expect_state:
+      "Grid.Element[131788].id": "!= 'SandStone'"     # (136, 207)
+      "Grid.Element[132425].id": "!= 'SandStone'"     # (137, 208)
+  - expect: {buildings: {Tile: ">= 8"}}

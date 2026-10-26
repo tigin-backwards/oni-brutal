@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3744532814-dig-through-tiles.yaml",
+ "mods": [
+  "3744532814"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Dig tool through the mod's PlaceDig marks natural cells and skips built tiles; no fixture has natural backwalls",
+ "updated": "2026-10-25",
+ "commit": "bd353b5",
+ "mod_dlls": {
+  "3744532814": {
+   "DigThroughTiles.dll": "c3b82467b1016839e8daa77828bdb2fb890282657b1e2901b541651d3e0dfed2"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-204159-fb799f33",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T20:54:28",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-211644-10282fbb",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T21:16:44",
+    "lane": 15,
+    "reference_run": "20261025-204159-fb799f33",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261025-211644-10282fbb",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-25T21:17:47",
+    "lane": 15,
+    "reference_run": "20261025-204159-fb799f33",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

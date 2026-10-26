@@ -1,0 +1,26 @@
+# Sealed Critter Feeders (2130729222), class P.
+#
+# What it does: the Critter Feeder's storage seals what it holds (a prefix on
+# Assets.AddBuildingDef gives CreatureFeeder's storage StandardSealedStorage modifiers), so
+# food in it no longer rots or off-gasses. It logs the change.
+# How a player reaches it: a Critter Feeder (Ranching) filled with food.
+# What changes: the feeder's stored items.
+#
+# setup builds a Critter Feeder in the dug-out corridor west of the printing pod; its storage
+# carries the seal modifier, from the prefab as from the built feeder.
+from: early-base
+mods: [2130729222]
+require_log: ['Tweaked CreatureFeeder to StandardSealedStorage']
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"CreatureFeeder\")", method: Build, args: [131128, Neutral, null, [SandStone], 300.0, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"CreatureFeeder\").BuildingComplete.GetComponent<Storage>.defaultStoredItemModifers": {contains: Seal}
+      "all:CreatureFeeder::[0].GetComponent<Storage>.defaultStoredItemModifers": {contains: Seal}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: CreatureFeeder}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Critter Feeder"}
+  - run: {seconds: 30}
+  - expect: {duplicants: 3}

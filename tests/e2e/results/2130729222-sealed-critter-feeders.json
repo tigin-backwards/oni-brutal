@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2130729222-sealed-critter-feeders.yaml",
+ "mods": [
+  "2130729222"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the critter feeder's storage seals what it holds, on the prefab and on a built feeder; the mod's log line is there",
+ "updated": "2026-10-25",
+ "commit": "99cab62",
+ "mod_dlls": {
+  "2130729222": {
+   "SealedCritterFeeders.dll": "d1102d3f8b9e16200d92c880c4c0292e0ce21189c4ae9b8b805685951e55fcfa"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-195901-01a97acc",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T20:03:37",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-203138-a9ad9edc",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T20:31:38",
+    "lane": 16,
+    "reference_run": "20261025-195901-01a97acc",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261025-203138-a9ad9edc",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-25T20:31:39",
+    "lane": 17,
+    "reference_run": "20261025-195901-01a97acc",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -2308,6 +2308,413 @@ package with every member public, and ARCHITECTURE D11 lets it reach them:
 - Nothing else in the 2119 Workshop builds in `out/ws` names `FindPrevWordBegin` or
   `stringPositionInternal`, apart from copies of the shipped package that mods carry.
 
+### Package members mods reach (measured 2026-10-25)
+
+Found by a survey of the Workshop mods' patches and reflection on the UI packages: members that
+mods patch, read by reflection, read from a subclass or call, which this implementation lacks or
+calls at other points. ARCHITECTURE D11 supports ordinary Harmony patches (prefixes, postfixes,
+finalizers) and reflection on the package's internals, not transpilers. So for each member the
+interface is its name, its signature and visibility, and the points it is called at, never its
+IL.
+
+**Measured** with `PROBE_SCENARIO=tmpgaps` (tools/UnityProbe, `TmpGaps.cs`, lines `TG …`, 10 s
+into the main menu, through `scripts/e2e.py --player original` with OniMcp's mod folder). The
+metadata (visibility, `static`, `virtual`, parameter names and defaults, field types) is read
+by reflection in the player (`TG meta`). Behaviour is measured on objects built in code under an
+overlay canvas: `KInputTextField`s and plain `TMP_InputField`s as `InputText.cs` builds them (160
+× 24, NotoSans-Regular 14), a `TMP_Dropdown` with a template in the layout uGUI's documentation
+describes, dynamic font assets from `TMP_FontAsset.CreateFontAsset("DejaVu Sans", "Book")`, and
+8 × 8 sprite assets built as Storage Info Plus builds its own. `PROBE_TG_PART` runs one part.
+OniMcp carries PLib, whose `TextMeshProPatcher` prefixes `AssignPositioningIfNeeded`. The
+`assign` part runs once with that prefix in place and once after the probe removes it.
+
+#### Where `TMP_InputField.AssignPositioningIfNeeded` is called
+
+**Why:** PLib (`PeterHan.PLib.UI.TextMeshProPatcher`, embedded in 845 catalog mods, applied once
+by the newest PLib loaded) puts a Harmony prefix on this method. The prefix takes
+`___caretRectTrans` and `___m_TextComponent`. When the caret's eight rect values (below) differ
+from the text component's, it starts a coroutine on the field that copies them at the end of the
+frame, and skips the method. StorageNetwork (3732422991) has the same prefix. So the method must
+be called at the shipped package's points: if this implementation calls it less often, a caret
+that drifts from its text is never realigned, with or without PLib.
+
+**Interface (metadata):** `private void AssignPositioningIfNeeded()`, instance, no parameters,
+not virtual. The field it reads is `private RectTransform caretRectTrans` ("The input field's
+layout values" and "Text set from code" already require both; the caret is made in `OnEnable`).
+
+**What it does** (with PLib's prefix removed): it copies the text component's RectTransform onto
+the caret's: `localPosition`, `localRotation`, `localScale`, `anchorMin`, `anchorMax`,
+`anchoredPosition`, `sizeDelta` and `pivot`. Measured with a Harmony prefix and postfix: on entry
+the caret differs (a new caret: anchoredPosition (−640, −360), 100 × 100; later, the text moved
+by a scroll), on return it matches, in every call below, including a direct call through
+reflection.
+
+**The points it is called at.** The probe's prefix counts the calls per field and records the
+calling methods (`System.Diagnostics.StackTrace`). The points were the same for
+`KInputTextField` and `TMP_InputField`, and with PLib's prefix in place or removed:
+1. **`OnEnable`, once, when it makes the caret** (enabling a field with a text component and no
+   caret yet: `SetActive(true)`, and `Instantiate` of an active field, whose clone makes its own
+   caret). A later enable, with the caret already made, does not call it, nor does disabling and
+   enabling the component.
+2. **While the caret's geometry is generated, when the text is moved to keep the caret in
+   view.** That is in the canvas's graphics rebuild (`UpdateGeometry` → `OnFillVBO` →
+   `GenerateCaret` → a method that moves the text relative to the viewport → this method),
+   after the text component's RectTransform has been moved. Measured:
+   - Single line, focused: setting a text longer than the field ("a much longer text that
+     scrolls out of the field to the right") and End. The next frame's rebuild moves the text
+     to anchoredPosition x −183.82, then calls the method once, and the caret matches the text
+     again.
+   - Multi-line (`MultiLineNewline`, wrapping on, 160 × 40): five lines and Ctrl+End. The next
+     frame's rebuild moves the text up (y 56.3) and calls it once.
+   - It is not called in rebuilds where the text stays where it is: typing "d" into "abc", Ctrl+A,
+     the caret's blink, or frames with the caret in view.
+3. **When the vertical scrollbar's value changes** (a multi-line field with `verticalScrollbar`
+   set): the scrollbar's `onValueChanged` reaches the field's handler, which moves the text to
+   the scrolled position and calls the method. It was called twice for each change: twice in
+   the frame the field was first focused (the scrollbar was set up then), and twice when the
+   probe set `Scrollbar.value = 0.2`.
+
+**Where it is not called** (each step logged, then one to three frames): `text =` (focused or
+not), typing, Ctrl+A, the text component's RectTransform moved from code (focused or not), the
+field resized, `LayoutRebuilder.ForceRebuildLayoutImmediate`, `Canvas.ForceUpdateCanvases`,
+`ForceLabelUpdate`, select, `ActivateInputField`, the frames of focus, `DeactivateInputField`,
+deselection, disabling and enabling the component, `SetActive(false)` and `SetActive(true)` of
+a field that has its caret, reparenting, and assigning `textComponent` or `textViewport`.
+It is not called once a frame. (This refines "Input field and dropdown", which says it runs
+nowhere but `OnEnable`: that was measured on fields that never scrolled.)
+
+**So a caret drifts in the shipped package too.** After the text component's rect is moved from
+code (anchoredPosition (5, 3), sizeDelta (−20, −4)), the caret keeps its old values through
+frames, focus and typing, until one of the points above copies them. The same holds after the
+text is reassigned to another component.
+
+**With PLib's prefix**, the same calls arrive. The prefix finds the caret different and defers
+the copy to the end of the frame: the caret still differs in the frame's `LateUpdate` and
+`willRenderCanvases`, and matches in a coroutine waiting for `WaitForEndOfFrame` started after
+it.
+
+**Requirement:**
+- Keep the method and the field with these names and signatures.
+- Call it at the three points: in `OnEnable` right after the caret is made; after the field moves
+  its text component's RectTransform to keep the caret in the viewport (horizontally for a single
+  line, vertically for multi-line), in the same rebuild; and after the vertical scrollbar's value
+  change moves the text (at least once per change; the original calls it twice). Not elsewhere,
+  and not once a frame.
+- Since the caret's rect follows the text's at those points, the caret geometry must be drawn in
+  a rect equal to the text's after them, wherever the text has moved.
+
+**Where this implementation deviated before** (`Input/TMP_InputField.cs`): it calls the method
+only from `OnEnable`. It scrolls by moving the text component's RectTransform
+(`KeepCaretVisible`, `ApplyScroll`) and draws the caret through an offset between the text's
+and the caret's rects, so the caret's rect is never realigned after a scroll and the prefixes
+above never run then.
+
+#### `TMP_Dropdown.m_Dropdown`, the shown list
+
+**Why:** Auto Kitchen (自动厨房, 3815900814) arranges its dropdown's list in a `LateUpdate`. It
+finds `AccessTools.Field(typeof(TMP_Dropdown), "m_Dropdown")`, and while `IsExpanded` is true it
+reads the field as a `GameObject`, takes its `ScrollRect` and `RectTransform`, and lays out the
+`Toggle`s under `ScrollRect.content`. It checks for null, so without the field its arranging
+turns off silently.
+
+**Interface (metadata):** `private GameObject m_Dropdown` (instance, not serialized). Beside it
+the shipped type has `private GameObject m_Blocker`. `IsExpanded` is a public get-only property.
+
+**Measured** (a dropdown with three options, its template `Template` (Image, ScrollRect) →
+`Viewport` (Image, Mask) → `Content` → `Item` (Toggle) with background, checkmark and
+`TextMeshProUGUI` label):
+- **Before the first `Show()`**, and on the game's two `NumericDropdown`s at the main menu: null.
+- **`Show()`** sets it at once to the new list: a GameObject named `Dropdown List`, a child of
+  the dropdown itself (path `…/tgdd/Dropdown List`), active, with the components
+  `RectTransform, CanvasRenderer, Image, ScrollRect, Canvas, GraphicRaycaster, CanvasGroup` in
+  that order. That is the template's clone with a `Canvas`, `GraphicRaycaster` and `CanvasGroup`
+  added. Its `ScrollRect.content` holds the template's item (inactive) and one item per option:
+  4 `Toggle`s with inactive ones, named `Item 0: Alpha`, `Item 1: Beta`, `Item 2: Gamma`.
+  The `CanvasGroup` fades in from alpha near 0.
+- **A second `Show()` while shown** keeps the same list.
+- **`Hide()`** does not clear it. The list fades out (alpha down to 0 over about 0.15 s of
+  unscaled time). The field keeps the list, and `IsExpanded` stays true, through the fade. In
+  the frame the fade ends, the field becomes null and `IsExpanded` false, and the list
+  GameObject is gone the frame after (it is destroyed at the end of the fade). The blocker is
+  gone the frame after `Hide()`.
+- **Choosing an item** (a toggle's `isOn` set, or a click on another item): `onValueChanged`
+  runs with the field still set and `IsExpanded` true. Then it is hidden as by `Hide()`, and the
+  field clears when the fade ends.
+- **`value` set from code while shown** sends `onValueChanged` with the field set, and leaves
+  the list shown.
+- **`Show()` and `Hide()` in one frame:** the field is set, and clears when the fade ends.
+- **`Hide()` then `Show()` the next frame:** `Show()` makes a new list and puts it in the field,
+  while the old one finishes its fade and is destroyed. The field keeps the new one.
+- **The dropdown's GameObject deactivated while shown:** the field is null at once and
+  `IsExpanded` false. The old list is inactive (its parent is) and gone the next frame.
+- **The component disabled while shown:** the field is null at once, `IsExpanded` false, and
+  the list is still alive in that frame. It was gone 0.6 s later; not measured frame by frame.
+- **The dropdown destroyed while shown:** the list goes with it (it is a child).
+- In every step, `IsExpanded` was true exactly when the field was set.
+
+**Requirement:** a private instance field `GameObject m_Dropdown` that holds the shown list from
+`Show()` until the hiding fade ends (or the dropdown is disabled), and is null otherwise. The list
+GameObject carries the template's `ScrollRect` (with `content` holding one `Toggle` per option)
+and its `RectTransform`. `IsExpanded` is true exactly while the field is set.
+
+**Where this implementation deviated before** (`Input/TMP_Dropdown.cs`): the list is held in a
+field named `m_List`, so the lookup finds nothing.
+
+#### `TMP_InputField.m_Mesh`, the caret's mesh
+
+**Why:** Applied Logistics Network (3753045682) derives `ALN_InputTextField` from
+`TMP_InputField` and reads `base.m_Mesh` in its diagnostics (`CaretStateSnapshot`):
+`m_Mesh != null ? m_Mesh.vertexCount : -1`. The field is compiled into its assembly as a field
+reference, so without it the method throws `MissingFieldException`.
+
+**Interface (metadata):** `protected Mesh m_Mesh` (instance, not serialized). The shipped type
+also has a get-only `protected Mesh mesh` property.
+
+**Measured** (fields with `caretColor` (10, 20, 30, 255), `customCaretColor` on and
+`selectionColor` (200, 100, 50, 128); the same for `KInputTextField` and `TMP_InputField`):
+- **Null** before the field is first enabled, and still null right after `SetActive(true)`.
+- **A new `Mesh` (name "", hideFlags None) from the first canvas rebuild after enabling.** It
+  is the caret graphic's geometry, in the caret's local space:
+  - not focused: 0 vertices;
+  - focused, caret shown: one quad, 4 vertices and 2 triangles, the caret's width (1) by the
+    line's height: (−77, −8.03) to (−76, 11) at the start of the text, (−51.95, −8.03) to (−50.95,
+    11) after "dabc", every vertex in the caret colour;
+  - during the blink's hidden half: 0 vertices;
+  - with a selection: one quad per selected line, in `selectionColor`: "ab" of "dabc" selected
+    gives 4 vertices from (−68.4, −8.03) to (−51.95, 11) in (200, 100, 50, 128);
+  - after `DeactivateInputField`: 0 vertices from the next rebuild.
+- **The same `Mesh` object** through all of that: it is refilled, not replaced.
+  (`CanvasRenderer.GetMesh()` on the caret returns another copy each upload, with the same vertex
+  count.)
+- **`SetActive(false)` (OnDisable) sets it to null.** The next enable leaves it null until the
+  first rebuild, which makes a new one.
+- When it is refilled: in the canvas rebuilds that redraw the caret (focus, each change of the
+  blink, a selection made with Shift+Left and `ForceLabelUpdate`: the next frame). After "d" was
+  typed through `ProcessEvent` it kept the old caret position for the two frames logged, until
+  the blink redrew it.
+
+**Requirement:** a protected instance field `Mesh m_Mesh` (and the protected get-only `mesh`)
+that holds the caret graphic's current geometry as above: made on the first caret rebuild after
+enable, refilled with the caret quad, the selection quads or nothing, and set to null on disable.
+Mods only read `vertexCount`; the vertex values above are what the original holds.
+
+**Where this implementation deviated before:** the caret graphic (`TMP_SelectionCaret`) owns
+the work mesh; `TMP_InputField` has no `m_Mesh` or `mesh`.
+
+#### `TMP_InputField.KeyPressed` is protected
+
+**Interface (metadata):** `protected EditState KeyPressed(Event evt)`: instance, not virtual,
+parameter named `evt`. (The section "Backspace with modifiers" gives what is called inside it.)
+
+**Why:** Vision Not Included (3683507975), Storage Quotas (3781549526) and ONI Multiplayer
+(3807965885) find it by name for Harmony prefixes that inject `evt` or check that it exists;
+those work at either visibility. A subclass of `TMP_InputField` in a mod can call it only if it
+is protected; no mod in the catalog does so today.
+
+**Requirement:** declare it `protected`, with this signature and parameter name. No change of
+behaviour. This implementation declares it private.
+
+#### `TMP_FontAsset.HasCharacters(string, out uint[], bool, bool)`
+
+**Why:** Expeditions: The Shattered Planet (3803506841) checks a candidate font's coverage with
+`HasCharacters(characters, out missing, true, false)` and counts `missing?.Length`. ONI
+Multiplayer (3807965885) checks one code point at a time with `(text, out missing, true, true)`.
+Without the overload both throw `MissingMethodException`.
+
+**Interface (metadata):** `public bool HasCharacters(string text, out uint[] missingCharacters,
+bool searchFallbacks = false, bool tryAddCharacter = false)`. Beside it: `HasCharacters(string)`,
+`HasCharacters(string text, out List<char> missingCharacters)`, `HasCharacter(int)` and
+`HasCharacter(char character, bool searchFallbacks = false, bool tryAddCharacter = false)`.
+
+**Measured** on NotoSans-Regular (static, 1,977 characters, no fallbacks of its own), on dynamic
+DejaVu Sans assets (empty tables), with `TMP_Settings.fallbackFontAssets` (11 fonts, the Noto
+CJK, Arabic, Hebrew and Thai fonts among them) and `TMP_Settings.defaultFontAsset`
+(LiberationSans SDF) as loaded, and with them cleared by the probe:
+- **Return:** true when every character is found, else false.
+- **`missingCharacters`:** null when the result is true (also for ""), else the missing code
+  points in the order of the text, with repeats: "a一一b丁" gives [4E00, 4E00, 4E01].
+- **Code points:** a surrogate pair is one code point ("x😀y" on NotoSans: [1F600]); a lone
+  surrogate is reported as itself ([D83D]).
+- **Control characters are never missing:** U+0003, tab, LF and CR count as found in an empty
+  dynamic asset. Space, U+00A0, U+00AD, U+200B and U+2060 do not.
+- **`""`:** true, null. **`null`:** throws `NullReferenceException`.
+- **`searchFallbacks` false:** only the asset's own character table (and, with
+  `tryAddCharacter`, its own atlas).
+- **`searchFallbacks` true:** a character not in the asset is looked for, in turn, in its
+  `fallbackFontAssetTable` (and their fallbacks, recursively), then in
+  `TMP_Settings.fallbackFontAssets`, then in `TMP_Settings.defaultFontAsset`:
+  - "一" and "☃" on NotoSans: found (in the global fallbacks); with the global list cleared,
+    missing.
+  - "abc" on an empty dynamic asset, with the global list cleared: found (in the default font
+    asset); with the default font asset cleared too, [61] for "a".
+  - A fallback's own fallback is searched: "─" found in a fallback two levels down.
+- **`tryAddCharacter` true:** a character the asset lacks is added to it when its
+  `atlasPopulationMode` is dynamic and its face has the glyph; `characterTable` grows by one per
+  character. With `searchFallbacks`, the asset itself is tried (and added to) first: "eé" on an
+  empty dynamic asset adds both to it. Then each fallback in turn: "a☃" on NotoSans with a dynamic
+  fallback adds "☃" to that fallback (its table 0 → 1), and with nesting, to the nested one. An
+  asset in `Static` mode adds nothing, even with a face that has the glyph. Characters the face
+  lacks stay missing ("一" in DejaVu Sans) and are not added. Already present characters are not
+  added again.
+- With `tryAddCharacter` false, nothing is added anywhere.
+
+**Requirement:** the overload with this signature, parameter names and defaults, behaving as
+above.
+
+#### `TextMeshProUGUI.canvasRenderer`
+
+**Why:** Duplicant Status Bar (3682732647) and Schedule & Priority Screen Expander (3774780988)
+read `label.canvasRenderer` on a `TextMeshProUGUI`/`LocText`. Their assemblies were compiled
+against the shipped type, which declares its own getter, so the call names
+`TextMeshProUGUI.get_canvasRenderer`. Without it the call throws `MissingMethodException`.
+
+**Interface (metadata):** `public CanvasRenderer canvasRenderer { get; }` declared on
+`TextMeshProUGUI`, not virtual (it hides `Graphic.canvasRenderer`, which is also a non-virtual
+getter), no setter. The shipped type keeps it in a private field `CanvasRenderer
+m_canvasRenderer`; `TMP_SubMeshUI` declares no such property.
+
+**Measured:** it returns the GameObject's `CanvasRenderer` component (the one
+`GetComponent<CanvasRenderer>()` returns, also what `Graphic.canvasRenderer` returns) in every
+case: on an inactive GameObject before `Awake`, whether it or `Graphic`'s getter is read first;
+after activation; on a text made active at once; after a layout; on a `LocText` in the scene;
+and called through reflection on the declared getter.
+
+**Requirement:** declare the getter on `TextMeshProUGUI`, returning the same component as
+`Graphic.canvasRenderer`, at every point of the object's life.
+
+#### `TMP_TextUtilities.GetHashCode(string)`
+
+**Why:** Storage Info Plus (3777521625) sets its sprite asset's `hashCode` to
+`TMP_TextUtilities.GetHashCode("sip_divider")` and registers it under that key (next section).
+
+**Interface (metadata):** `public static int GetHashCode(string s)`. The shipped type also has
+`public static int GetSimpleHashCode(string s)`, `public static uint
+GetSimpleHashCodeLowercase(string s)` and `public static uint GetHashCodeCaseInSensitive(string
+s)`.
+
+**Measured** (27 strings; the formulas below give every value): the hash runs over the string's
+UTF-16 code units, starting at 0, with `hash = ((hash << 5) + hash) ^ c` in 32-bit wrapping
+arithmetic, where `c` is the code unit with ASCII `a`–`z` changed to `A`–`Z`. Nothing else is
+changed: "é" (233), "ı" (305) and "ß" (223) hash as themselves. So:
+- "" → 0, "a" and "A" → 65, "ab" → 2083, "abc", "ABC" and "aBc" → 68800, "a b" → 69667,
+  "sip_divider" and "SIP_DIVIDER" → −197458124, "NotoSans-Regular" → 382882690, "😀" (two code
+  units) → 1769949, "abcdefghijklmnopqrstuvwxyz0123456789" → 1902480570.
+- **null → 0** (no exception).
+- The others: `GetSimpleHashCode` is the same without the case change ("a" 97, "sip_divider"
+  1165012724) and throws `NullReferenceException` on null. `GetHashCodeCaseInSensitive` gives
+  `GetHashCode`'s bits as `uint` (4097509172 for "sip_divider"). `GetSimpleHashCodeLowercase`
+  starts at 5381 and changes `A`–`Z` to `a`–`z` ("" 5381, "a" and "A" 177604).
+- **The assets' `hashCode`:** every game font and sprite asset reports `GetHashCode(name)`.
+  `TMP_Asset.hashCode` (public get and set) returns the stored value; when that is 0, the getter
+  computes `GetHashCode(name)`, stores it and returns it. A new sprite asset reads 0 while its
+  name is "" (whose hash is 0), then 85746282 after it is named "fresh"; renamed "renamed", it
+  keeps 85746282. A value set (12345) is kept through a rename.
+- **The assets' `materialHashCode`** (public get and set on `TMP_Asset`) is stored data: the game
+  fonts' values are not the hash of their material's name (some are `GetSimpleHashCode` of it).
+  An asset from `CreateFontAsset` has `GetSimpleHashCode(name + " Atlas Material")` of its name
+  at creation, "", so every such asset has −2006316128, whatever it is named later.
+
+**Requirement:** `GetHashCode(string)` as above (the other three are public in the shipped
+package too). `TMP_Asset.hashCode`'s getter fills itself from the name when 0.
+
+#### `MaterialReferenceManager` and `TMP_Text.OnSpriteAssetRequest`
+
+**Why:**
+- Storage Info Plus (3777521625) builds a sprite asset "sip_divider" at run time, registers it
+  with `MaterialReferenceManager.AddSpriteAsset(asset.hashCode, asset)`, adds a handler to the
+  static event `TMP_Text.OnSpriteAssetRequest` that returns it for the name "sip_divider", and
+  writes `<sprite="sip_divider" name="sip_divider_line">` into its texts.
+- Project Expedition (3803418607) calls `MaterialReferenceManager.AddFontAsset(font)` with a game
+  font before it builds texts with it.
+- This implementation has no `MaterialReferenceManager` type and no such event, so the methods
+  of both mods that name them fail when they are compiled.
+
+**Interface (metadata):** `public class MaterialReferenceManager` (the shipped type has a
+constructor) with:
+- `public static MaterialReferenceManager instance { get; }`;
+- `public static void AddFontAsset(TMP_FontAsset fontAsset)`;
+- `public static void AddSpriteAsset(TMP_SpriteAsset spriteAsset)` and `public static void
+  AddSpriteAsset(int hashCode, TMP_SpriteAsset spriteAsset)`;
+- `public static void AddFontMaterial(int hashCode, Material material)`;
+- `public static void AddColorGradientPreset(int hashCode, TMP_ColorGradient spriteAsset)`;
+- `public bool Contains(TMP_FontAsset font)` and `public bool Contains(TMP_SpriteAsset sprite)`;
+- `public static bool TryGetFontAsset(int hashCode, out TMP_FontAsset fontAsset)`,
+  `TryGetSpriteAsset(int hashCode, out TMP_SpriteAsset spriteAsset)`, `TryGetMaterial(int
+  hashCode, out Material material)` and `TryGetColorGradientPreset(int hashCode, out
+  TMP_ColorGradient gradientPreset)`, all static.
+
+On `TMP_Text`: `public static event Func<int, string, TMP_SpriteAsset> OnSpriteAssetRequest`
+and, beside it, `public static event Func<int, string, TMP_FontAsset> OnFontAssetRequest`.
+
+**Measured, the registry:**
+- **Initially** no game font is registered (NotoSans-Regular, NotoSans-Bold, GRAYSTROKE REGULAR
+  SDF, RobotoCondensed-Regular), not even the font every main-menu text uses, nor the default
+  sprite asset (XB360Sheet, `TMP_Settings.defaultSpriteAsset`).
+- **`AddSpriteAsset(int, asset)`** registers the asset under that key. A second add under the same
+  key keeps the first asset and throws nothing. `AddSpriteAsset(asset)` registers it under
+  `asset.hashCode`.
+- **`AddFontAsset(font)`** registers the font under `font.hashCode` and its material under
+  `font.materialHashCode` (`TryGetMaterial(materialHashCode)` returns `font.material`). Adding the
+  same font again does nothing and throws nothing, even when its material key is taken. Another
+  font under a font key already taken is ignored (the first
+  stays). Another font whose `materialHashCode` is taken (two `CreateFontAsset` assets, which
+  share one value) is registered as a font, and then the material's add throws
+  `ArgumentException` ("An item with the same key has already been added. Key: −2006316128") out
+  of `AddFontAsset`. Two game fonts that share one material object (GRAYSTROKE NAME SDF and
+  GRAYSTROKE OUTLINE SDF) have different `materialHashCode`s and both add. `AddFontAsset(null)`
+  throws `NullReferenceException`.
+- A font renamed after it was added stays under its old key (its `hashCode` does not change).
+
+**Measured, sprite tags** (`<sprite="NAME" index=N>` or `name="…"`, laid out by `ForceMeshUpdate`
+and by the frame's rebuild):
+- **The asset is looked up by `GetHashCode(NAME)` in the registry**, so case does not matter
+  (`"PROBE_REG"` finds `probe_reg`), and an asset registered under another key is found only by
+  that key (an asset named `probe_x` registered under the hash of "probe_alias" is found by
+  `<sprite="probe_alias" …>`, not by `<sprite="probe_x" …>`). The text's own `spriteAsset`, even
+  when it is the asset named in the tag, is not found by name, and neither is a live sprite
+  asset that is not registered.
+- **When it is not registered, `OnSpriteAssetRequest` is raised** with `(GetHashCode(NAME),
+  NAME)`:
+  - **The handler returns an asset:** the sprite is drawn from it, and the asset is registered
+    under that key: `TryGetSpriteAsset` finds it afterwards, and later layouts of that name do
+    not raise the event again, even after the handler stops returning it.
+  - **The handler returns null (or there is no handler):** the tag stays in the text as
+    literal characters (`a<sprite="probe_unreg" index=0>b`, 32 characters), and the event is
+    raised again in every later layout: twice per `ForceMeshUpdate` and per frame rebuild that
+    lays the text out, three times for `GetPreferredValues`. Setting `text` alone does not
+    raise it; the layout does.
+  - **Several handlers:** the event is invoked as one multicast delegate; all handlers run, and
+    only the last one's return value counts (a non-null asset from the first, then null from the
+    second, leaves the tag as text).
+  - **Unquoted:** `<sprite=probe_unreg index=0>` raises it with the name `probe_unreg index=0`
+    (the rest of the tag) and its hash.
+  - It is not raised for `<sprite=N>` (the default sprite asset: XB360Sheet's sprite N), for
+    `<sprite name="…">` without an asset name (a name the default sprite asset lacks leaves the
+    tag as text), or with `richText` off. After the handler is removed it is not raised.
+- **In a found asset:** `index=0` gives sprite 0; an index past the end leaves the tag as text;
+  `name="reg_line"` gives that sprite, and a name the asset lacks gave sprite 0.
+- The sprite adds a material: `textInfo.materialCount` 2 for a text with one sprite.
+
+**Measured, font tags** (`<font="NAME">…</font>`):
+- **Looked up by `GetHashCode(NAME)` in the registry**, case-insensitive and quoted or not.
+  `<font="default">` is the text's own font.
+- **Not registered:** the tag stays as literal text: game fonts by name ("Economica-Bold-OTF SDF",
+  "GRAYSTROKE NAME SDF"), even the text's own font ("NotoSans-Regular"), and an unknown name.
+  The text keeps its font for what follows.
+- **Registered by `AddFontAsset`:** the characters inside use it (`[ProbeFontA]b`, a second
+  material). A font registered with `hashCode` set to the hash of "AliasC" is found by
+  `<font="AliasC">`, not by its name. A font renamed after registration is found by its old
+  name only.
+
+**Requirement:** the `MaterialReferenceManager` type with these static members, keyed by the
+hashes above; sprite and font tags that look their assets up in it by `GetHashCode(NAME)`; and
+`OnSpriteAssetRequest`, raised (with the hash and the name) for each sprite tag whose asset is not
+registered, whose last handler's non-null result is drawn and registered. What this
+implementation finds today by searching loaded objects by name (`TextParser.FindFont`,
+`FindSpriteAsset`) differs: the original finds no unregistered asset by name. Not measured:
+assets under `Resources` paths (`TMP_Settings.defaultFontAssetPath`, "Sprite Assets/"), which
+the game has none of for these names, and `OnFontAssetRequest`.
+
 ## Verification
 
 1. **Build:**

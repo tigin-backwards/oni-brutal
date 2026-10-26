@@ -135,6 +135,20 @@ Return, Escape or deselection. `IC cull` lines log the caret graphic's
 compare the players with `ic-check.py diff ORIG OURS [end|x|cull]`. `textmeshpro.md` ("The
 caret after an edit ends", "The caret graphic and RectMask2D") records what it measured.
 
+With `PROBE_SCENARIO=tmpgaps` only the TMP gaps probe runs (`TmpGaps.cs`, lines `TG …`, 10 s
+into the main menu, about half a minute): package members that Workshop mods reach and this
+implementation lacked. `TG meta` lines give their metadata by reflection. `TG assign` lines log
+each call of `TMP_InputField.AssignPositioningIfNeeded` (a Harmony prefix and postfix, with the
+calling methods' names) and whether the caret's rect matches the text's, through a field's life.
+`TG mesh` lines follow the protected `m_Mesh`, `TG dropdown` lines the private
+`TMP_Dropdown.m_Dropdown` through Show and Hide. `TG chars` covers `TMP_FontAsset.HasCharacters(
+string, out uint[], bool, bool)`, `TG hash` `TMP_TextUtilities.GetHashCode`, `TG renderer`
+`TextMeshProUGUI.canvasRenderer`, and `TG sprite` and `TG font` the `MaterialReferenceManager`
+registrations and `TMP_Text.OnSpriteAssetRequest`. `PROBE_TG_PART=meta`, `assign`, `mesh`,
+`dropdown`, `chars`, `hash`, `renderer`, `sprite` or `font` runs one part. It ends by creating
+`TmpGapsProbeDone`, for a spec's `ui_wait`. `textmeshpro.md` ("Package members mods reach")
+records what it measured.
+
 With `PROBE_SCENARIO=fontasset` only the font-asset probe runs (`FontAsset.cs`, lines `FA …`, 10 s
 into the main menu, a few seconds). It calls `TMP_FontAsset.CreateFontAsset` by family and style
 name and by file path, with installed and missing families, other cases, empty and null names,

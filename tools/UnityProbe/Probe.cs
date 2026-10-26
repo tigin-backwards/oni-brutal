@@ -69,6 +69,12 @@ namespace SemanticsProbe
                 go.AddComponent<InputCaret>();
                 return;
             }
+            if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "tmpgaps")
+            {
+                TmpGaps.Install(harmony);
+                go.AddComponent<TmpGaps>();
+                return;
+            }
             if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "fontasset")
             {
                 go.AddComponent<FontAsset>();

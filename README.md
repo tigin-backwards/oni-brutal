@@ -42,11 +42,6 @@ Tweaks** on the main menu, under Mods. To update, get the new version and run th
 launch options stay the same, and so do your tweak choices. To go back to the original game, clear
 the launch options.
 
-Coming from a release from before the Moono name (oni-brutal)? Its launch options start the old
-player (`OniBrutal`), so run the new setup once and paste the new line it prints (the player is
-now `OniMoono`, installed in an `oni-moono` folder). Your tweak choices carry over; the old
-`oni-brutal` folder can be deleted afterwards.
-
 On Linux, Steam installed as a Flatpak or a snap runs games in a sandbox that can't see most of
 your home folder; the setup notices and installs the player inside the sandbox's own folder.
 (Snap is tested; Flatpak isn't yet.)

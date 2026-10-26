@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3103089853-backup-suit.yaml",
+ "mods": [
+  "3103089853"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the checkpoint stores and requests a spare Atmo Suit; a built one is selected",
+ "updated": "2026-10-26",
+ "commit": "f898d18a",
+ "mod_dlls": {
+  "3103089853": {
+   "SuitCheckpointStorgeMod.dll": "40357558c4707da55bd1aed0aa2ce75ff777edc0c23bc55834518652823c7e86"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-105851-04eb8ffa",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T11:07:42",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-142203-a4af3f09",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T14:32:09",
+    "lane": 15,
+    "reference_run": "20261026-105851-04eb8ffa",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-142203-a4af3f09",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T14:33:02",
+    "lane": 14,
+    "reference_run": "20261026-105851-04eb8ffa",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

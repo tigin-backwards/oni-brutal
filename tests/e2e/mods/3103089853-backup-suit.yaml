@@ -1,0 +1,27 @@
+# Backup Suit 备用气压服 (3103089853), class P.
+#
+# What it does: the Atmo Suit Checkpoint keeps a spare suit: a postfix on
+# SuitMarkerConfig.DoPostConfigureComplete gives it a 5 kg sealed storage that Duplicants fill
+# with an Atmo Suit (a critical fetch errand), shown in its side screen, and makes it nameable.
+# How a player reaches it: building an Atmo Suit Checkpoint.
+# What changes: a suit waiting at each checkpoint.
+#
+# The prefab is read; a checkpoint built by setup in the dug-out corridor west of the printing
+# pod is selected and asks for a suit.
+from: early-base
+mods: [3103089853]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"SuitMarker\")", method: Build, args: [131127, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"SuitMarker\").GetComponent<Storage>.capacityKg": 5
+      "Assets.GetPrefab(\"SuitMarker\").GetComponent<ManualDeliveryKG>.RequestedItemTag.Name": Atmo_Suit
+      "Assets.GetPrefab(\"SuitMarker\").GetComponent<UserNameable>": exists
+  - run: {seconds: 2}
+  - expect: {buildings: {SuitMarker: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [111, 207], select: SuitMarker}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:ManualDeliveryKG.capacity": 5
+      "selected:Storage.capacityKg": 5

@@ -1,0 +1,35 @@
+# Cells of Interest (3766829264), classes V, O.
+#
+# What it does: while a building is being placed (a postfix on BuildTool.OnActivateTool adds a
+# tint controller to the placement visualizer), the cells it will use are tinted on the world
+# canvas: where a Duplicant stands to work it, and where its gas, liquid or solid output lands
+# (optionally its pipe output ports and heat-exchange cells), striped where several meet; a
+# legend panel at the top right of the screen names the colours shown. PLib options switch
+# each class and set the opacities.
+# How a player reaches it: the build menu, any building with outputs or a work cell.
+# What changes: tints and a legend while placing.
+#
+# An Oxygen Diffuser is picked from the Oxygen menu and held over the dug-out room west of the
+# printing pod: its gas output cells are tinted and the legend shows, compared with the
+# original.
+from: early-base
+mods: [3766829264]
+steps:
+  - run: {seconds: 5}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click: {ui: "**/PlanScreen/Toggle:Oxygen"}
+  - ui_wait: {path: "**/PlanBuildingSelectionPanel/BuildingGroups", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/MineralDeoxidizer Group*"}
+  - ui_wait: {path: "**/PlanBuildingSelectionPanel/ProductInfoScreen", cond: stable}
+  - click: {ui: "**/MaterialSelectorTemplate/**/Toggles/MaterialSelection_*"}
+  - expect_state:
+      "PlayerController.Instance.ActiveTool.name": BuildTool
+  - key: {code: LeftShift, at: [112, 207]}   # moves the pointer over the room
+  - ui_wait: {path: "**/CoiLegendPanel", cond: stable}
+  - expect_ui:
+      "**/CoiTint": {count: ">= 1"}
+  - ui_dump: {name: legend, root: "**/CoiLegendPanel"}
+  - shot: {name: legend, crop: "**/CoiLegendPanel"}
+  - key: {code: Escape}
+  - expect_ui:
+      "**/CoiLegendPanel": {exists: false}

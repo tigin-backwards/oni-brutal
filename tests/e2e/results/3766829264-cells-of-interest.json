@@ -1,0 +1,67 @@
+{
+ "spec": "mods/3766829264-cells-of-interest.yaml",
+ "mods": [
+  "3766829264"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "an Oxygen Diffuser picked and held over the room tints its cells on the world canvas and shows the mod's legend (dump and shot match); Escape hides it",
+ "updated": "2026-10-26",
+ "commit": "a6a057a0",
+ "mod_dlls": {
+  "3766829264": {
+   "CellsOfInterest.dll": "91db1784f494a1adf3b53ecb75ae79ad1ce10fdc0586aca8a4a1c98175c1edaf"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-042232-0e5bb32c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:24:13",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-101357-1480f673",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T10:13:57",
+    "lane": 16,
+    "reference_run": "20261026-042232-0e5bb32c",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "legend": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "legend": 0.0
+    }
+   },
+   {
+    "run": "20261026-101357-1480f673",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T10:13:58",
+    "lane": 17,
+    "reference_run": "20261026-042232-0e5bb32c",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "legend": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "legend": 0.0
+    }
+   }
+  ]
+ }
+}

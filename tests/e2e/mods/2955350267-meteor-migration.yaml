@@ -1,0 +1,20 @@
+# Meteor Migration [DLC] (2955350267), class P.
+#
+# What it does: brings old Spaced Out saves' meteor showers up to date: a postfix on
+# WorldContainer.RefreshFixedTraits replaces a planetoid's seasons with its world file's when
+# it has none or still has the retired "MeteorShowers" season, and logs what it did ("Migrated
+# Meteor Showers for ..." or "no migration required for ...").
+# How a player reaches it: loading a save.
+# What changes: which meteor seasons each planetoid has.
+#
+# early-base is a current save: the mod logs its check for the planetoids, and their seasons
+# are the original's; the colony runs.
+from: early-base
+mods: [2955350267]
+require_log: ['no migration required for|Migrated Meteor Showers for']
+steps:
+  - expect_state:
+      "ClusterManager.Instance.GetStartWorld().GetSeasonIds().Count": "== original"
+      "count:ClusterManager.Instance.WorldContainers[*] if .IsModuleInterior == false": "== original"
+  - run: {seconds: 30}
+  - expect: {duplicants: 3}

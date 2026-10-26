@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2955350267-meteor-migration.yaml",
+ "mods": [
+  "2955350267"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the mod logs its meteor check for the planetoids, whose seasons are the original's; the colony runs",
+ "updated": "2026-10-26",
+ "commit": "bbc2ade",
+ "mod_dlls": {
+  "2955350267": {
+   "MeteorMigration.dll": "bd3f84604ba7f2b907e8387915b26e5dc34b60c8d7e365266342f02fcecb7557"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-213335-94305313",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T21:33:35",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-001508-7823497d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T00:15:08",
+    "lane": 16,
+    "reference_run": "20261025-213335-94305313",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-001508-7823497d",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T00:16:01",
+    "lane": 16,
+    "reference_run": "20261025-213335-94305313",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

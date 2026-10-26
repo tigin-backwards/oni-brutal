@@ -1,0 +1,40 @@
+# Gold Rush 淘金热 (2848299481), classes B, O.
+#
+# What it does: adds 天工-污水淘金机, a polluted-water gold washer (WaterPurifier1, 4x3, any
+# metal, Oxygen menu, researched with Improved Oxygen): powered (333 W) and piped, it turns 5
+# kg/s of polluted water into clean water (piped out), dropping dirt (0.2 kg/s) and gold (0.02)
+# and giving off polluted oxygen (0.88) and hydrogen (0.11); all these rates and the power are
+# PLib options (restart required).
+# How a player reaches it: the build menu (Oxygen), after the research; the options on the Mods
+# screen.
+# What changes: gold from polluted water.
+#
+# The options set 200 W and 0.05 kg/s of gold, and the definition and converter take them.
+# setup grants Improved Oxygen: the washer shows in the Oxygen menu; one built in the corridor
+# west of the printing pod is selected.
+from: early-base
+mods: [2848299481]
+options:
+  "2848299481": {$file: Controler.json, a1: 200.0, c3: 0.05}
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"ImprovedOxygen\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"WaterPurifier1\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Cuprite], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"ImprovedOxygen\").unlockedItemIDs": {contains: WaterPurifier1}
+      "Assets.GetBuildingDef(\"WaterPurifier1\").EnergyConsumptionWhenActive": 200
+      "Assets.GetPrefab(\"WaterPurifier1\").GetComponent<ElementConverter>.outputElements[2].elementHash": Gold
+      "Assets.GetPrefab(\"WaterPurifier1\").GetComponent<ElementConverter>.outputElements[2].massGenerationRate": 0.05
+  - run: {seconds: 2}
+  - click: {ui: "**/PlanScreen/Toggle:Oxygen"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/WaterPurifier1 Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/WaterPurifier1 Group*": {active: true}
+  - key: {code: Escape}
+  - expect_ui: {"**/PauseScreen": {exists: false}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 208], select: WaterPurifier1}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~天工-污水淘金机"}

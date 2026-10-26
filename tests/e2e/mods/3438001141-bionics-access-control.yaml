@@ -1,0 +1,26 @@
+# [DEPRECATED] Bionics Access Control (3438001141), class P.
+#
+# What it does: the game now splits door permissions between standard and bionic Duplicants
+# itself; what is left of the mod gives every AccessControl (doors) an AccessControl_Extension
+# (a postfix on AccessControl.OnPrefabInit), which hands a bionic default permission saved by
+# its older versions over to the game's own setting, two frames after the door spawns.
+# How a player reaches it: a door's access control side screen.
+# What changes: doors from older saves keep their bionic default; new doors as in the game.
+#
+# setup spawns metal ore. A Pneumatic Door is built in the corridor west of the printing pod
+# and selected: it carries the mod's component, and its access side screen shows.
+from: early-base
+mods: [3438001141]
+setup:
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Cuprite\").substance", method: SpawnResource, args: [[111.5, 207.5, -12], 400, 300, 255, 0]}}
+steps:
+  - build: {prefab: Door, at: [113, 206]}
+  - expect: {blueprints: {Door: 1}}
+  - run: {seconds: 1500, until: {buildings: {Door: 2}, pending_construction: 0}}   # one more than the save's
+  - driver: {camera.set: {cell: [113, 207], ortho: 8}}
+  - click_world: {cell: [113, 207], select: Door}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<DupeModelAccessPermissions.Content.Scripts.AccessControl_Extension>": exists
+  - ui_wait: {path: "**/AccessControlSideScreen", cond: stable}
+  - ui_dump: {name: access, root: "**/AccessControlSideScreen"}

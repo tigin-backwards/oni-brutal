@@ -1,0 +1,75 @@
+{
+ "spec": "mods/3438001141-bionics-access-control.yaml",
+ "mods": [
+  "3438001141"
+ ],
+ "verdict": "warning",
+ "why": "known findings: scroll-normalized-position",
+ "findings": [
+  "scroll-normalized-position"
+ ],
+ "note": "a Pneumatic Door built and selected carries the mod's component; its access screen as in the original",
+ "updated": "2026-10-25",
+ "commit": "a9add53",
+ "mod_dlls": {
+  "3438001141": {
+   "DupeModelAccessPermissions.dll": "a29aa19bed4bcb164784cf80f29e5959558212ccfbe097182fd2cd5c3f8e26ae"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-205844-dfce1bd7",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T21:23:48",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-213140-14384ab8",
+    "index": 1,
+    "verdict": "warn",
+    "date": "2026-10-25T21:31:40",
+    "lane": 14,
+    "reference_run": "20261025-205844-dfce1bd7",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "access": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261025-213140-14384ab8",
+    "index": 2,
+    "verdict": "warn",
+    "date": "2026-10-25T21:32:46",
+    "lane": 14,
+    "reference_run": "20261025-205844-dfce1bd7",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "access": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

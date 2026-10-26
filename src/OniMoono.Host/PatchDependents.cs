@@ -290,7 +290,7 @@ namespace OniMoono.Host
                     {
                         copying = false;
                     }
-                    EngineLog.Engine($"patch dependents: {method.DeclaringType?.FullName}.{method.Name} {(copy ? "copied" : "rebuilt")}, as {why}");
+                    EngineLog.Engine($"patch dependents: {method.DeclaringType}.{method.Name} {(copy ? "copied" : "rebuilt")}, as {why}");
                 }
             }
             finally

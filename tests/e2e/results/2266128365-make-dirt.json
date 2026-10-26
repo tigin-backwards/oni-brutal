@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2266128365-make-dirt.yaml",
+ "mods": [
+  "2266128365"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "its two dirt recipes join the Rock Crusher's; a built crusher is selected and lists both",
+ "updated": "2026-10-26",
+ "commit": "df5493c6",
+ "mod_dlls": {
+  "2266128365": {
+   "MakeDirt.dll": "efc4eb3fd5251dda6fdeb0a6c3f28995bb70972e33ac12d822d1d24430e5499e"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-023754-20737f8f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:25:30",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-034642-0245854c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:55:28",
+    "lane": 14,
+    "reference_run": "20261026-023754-20737f8f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-034642-0245854c",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T03:56:09",
+    "lane": 14,
+    "reference_run": "20261026-023754-20737f8f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

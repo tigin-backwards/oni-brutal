@@ -1,0 +1,26 @@
+# Make Dirt (2266128365), class P.
+#
+# What it does: a postfix on the Rock Crusher's config adds two recipes that make 100 kg of
+# dirt in 40 s: one from 80 kg of sand, 10 kg of clay and 10 kg of phosphorite, one from 56 kg
+# of sand, 8 kg of clay and 36 kg of fertilizer.
+# How a player reaches it: the Rock Crusher's recipe list.
+# What changes: dirt can be made.
+#
+# The recipes are counted among the crusher's, and a crusher built in the dug-out
+# corridor west of the printing pod is selected: its recipe screen lists them.
+from: early-base
+mods: [2266128365]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"RockCrusher\")", method: Build, args: [131129, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "count:ComplexRecipeManager.Get().recipes[*] if .results[0].material == Dirt and .fabricators[0] == RockCrusher": 2
+      "count:ComplexRecipeManager.Get().recipes[*] if .fabricators[0] == RockCrusher": "== original"
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [113, 207], ortho: 8}}
+  - click_world: {cell: [113, 207], select: RockCrusher}
+  - ui_wait: {path: "**/DetailsScreen/TitleBar", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Rock Crusher"}
+  - expect_state:
+      "count:selected:ComplexFabricator.GetRecipes()[*] if .results[0].material == Dirt": 2

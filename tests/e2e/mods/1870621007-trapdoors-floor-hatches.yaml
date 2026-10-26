@@ -1,0 +1,25 @@
+# [Deprecated] - Trapdoors & Floor Hatches (1870621007), class B.
+#
+# What it does: adds the Trapdoor Ladder (StormShark.TrapdoorLadder) to the Base menu: a
+# 1x1 metal floor tile with a ladder inside: Duplicants pass through it vertically as through a
+# door, it catches falling debris as a floor, and it tiles with its neighbours.
+# How a player reaches it: the build menu (Base).
+# What changes: a floor Duplicants can climb through.
+#
+# A trapdoor built in the dug-out corridor west of the printing pod should make its cell a
+# ladder, a door and a fake floor. Broken upstream: its OnSpawn calls
+# SimMessages.SetCellProperties(int, byte), which the game no longer has, so the cell is a
+# ladder only (a MissingMethodException in both players).
+from: early-base
+mods: [1870621007]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"StormShark.TrapdoorLadder\")", method: Build, args: [131765, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"StormShark.TrapdoorLadder\").IsFoundation": true
+  - run: {seconds: 5}
+  - expect: {buildings: {StormShark.TrapdoorLadder: 1}}
+  - expect_state:
+      "Grid.HasLadder.get_Item(131765)": true
+      "Grid.HasDoor.get_Item(131765)": true
+      "Grid.FakeFloor.get_Item(131765)": true

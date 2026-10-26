@@ -1,0 +1,64 @@
+{
+ "spec": "mods/1870621007-trapdoors-floor-hatches.yaml",
+ "mods": [
+  "1870621007"
+ ],
+ "verdict": "pending",
+ "why": "the spec fails in the original: a broken spec, or a mod broken upstream",
+ "findings": [],
+ "note": "broken upstream: the trapdoor's OnSpawn throws a MissingMethodException, so its cell is a ladder but no door or fake floor",
+ "updated": "2026-10-26",
+ "commit": "c17aa002",
+ "mod_dlls": {
+  "1870621007": {
+   "FloorHatches.dll": "ec3da9dca230cd8bc4517bfcc87c162d121e05da3a31f10f61ead9c6d3c3f0af"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-041040-bf8368df",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-26T04:18:05",
+    "lane": 15,
+    "reasons": [
+     "step 4: Grid.HasDoor.get_Item(131765) is false, wanted True; Grid.FakeFloor.get_Item(131765) is false, wanted True"
+    ],
+    "signatures": 2
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-040351-1fefeaa7",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-26T04:08:32",
+    "lane": 14,
+    "reasons": [
+     "2 log signature(s) the original lacks"
+    ],
+    "reference_run": "20261026-030709-d22e398a",
+    "new_signatures": 2,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-040351-1fefeaa7",
+    "index": 2,
+    "verdict": "fail",
+    "date": "2026-10-26T04:09:16",
+    "lane": 14,
+    "reasons": [
+     "2 log signature(s) the original lacks"
+    ],
+    "reference_run": "20261026-030709-d22e398a",
+    "new_signatures": 2,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

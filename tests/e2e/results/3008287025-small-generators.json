@@ -1,0 +1,59 @@
+{
+ "spec": "mods/3008287025-small-generators.yaml",
+ "mods": [
+  "3008287025"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the six buildings show in the Power menu after the research; a Smol Smart Battery is built and holds 5 kJ; menu shot matches",
+ "updated": "2026-10-25",
+ "commit": "5c2e0ad",
+ "mod_dlls": {
+  "3008287025": {
+   "SmolHyddrogenGeneratorMod.dll": "dbdb8fa144b779849a40d713da8df44b9fe31303c7e538f3909391db98df0b17"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-215219-e1dfde50",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T21:52:20",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-220901-7e02d192",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T22:09:01",
+    "lane": 15,
+    "reference_run": "20261025-215219-e1dfde50",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "power-menu": 0.0
+    }
+   },
+   {
+    "run": "20261025-220901-7e02d192",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-25T22:15:41",
+    "lane": 15,
+    "reference_run": "20261025-215219-e1dfde50",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "power-menu": 0.0
+    }
+   }
+  ]
+ }
+}

@@ -1,0 +1,44 @@
+# Smol Generators (3008287025), class B.
+#
+# What it does: adds six small power buildings to the Power menu, drawn at half size: a 3x1
+# Hydrogen Generator (200 W), Methane and Petroleum Generators, a Steam Turbine and a 2x2 Coal
+# Generator (300 W), researched with Valve Miniaturization, and a 1x1 Smart Battery
+# (SmolSmartBattery, 5 kJ, no leak, with the smart battery's logic output) researched with
+# Advanced Power Regulation. The game's single slider side screen is hidden on the generators.
+# How a player reaches it: the build menu (Power), after the research.
+# What changes: compact generators and a compact smart battery.
+#
+# setup grants both techs and spawns copper. The buildings show in the Power menu; a Smol Smart
+# Battery is built in the corridor west of the printing pod and selected: it holds 5 kJ.
+from: early-base
+mods: [3008287025]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"ValveMiniaturization\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"AdvancedPowerRegulation\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Copper\").substance", method: SpawnResource, args: [[111.5, 207.5, -12], 200, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"ValveMiniaturization\").unlockedItemIDs": {contains: SmolCoalGenerator}
+      "Db.Get().Techs.Get(\"AdvancedPowerRegulation\").unlockedItemIDs": {contains: SmolSmartBattery}
+      "Assets.GetBuildingDef(\"SmolHydrogenGenerator\").GeneratorWattageRating": 200
+      "Assets.GetBuildingDef(\"SmolCoalGenerator\").WidthInCells": 2
+  - run: {seconds: 5}
+  - click: {ui: "**/PlanScreen/Toggle:Power"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/SmolSmartBattery Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/SmolCoalGenerator Group*": {active: true}
+      "**/BuildingGroups/**/Grid/SmolHydrogenGenerator Group*": {active: true}
+      "**/BuildingGroups/**/Grid/SmolSmartBattery Group*": {active: true}
+  - shot: {name: power-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
+  - key: {code: Escape}
+  - expect_ui: {"**/PauseScreen": {exists: false}}
+  - build: {prefab: SmolSmartBattery, at: [113, 206], material: Copper}
+  - expect: {blueprints: {SmolSmartBattery: 1}}
+  - run: {seconds: 1500, until: {buildings: {SmolSmartBattery: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [113, 207], ortho: 8}}
+  - click_world: {cell: [113, 206], select: SmolSmartBattery}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<BatterySmart>.capacity": 5000

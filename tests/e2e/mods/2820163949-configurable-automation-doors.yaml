@@ -1,0 +1,36 @@
+# Configurable Automation-controlled Doors (2820163949), classes P, S.
+#
+# What it does: a door wired to automation can pick what a green and a red signal do. Every door
+# gets a SmartLogicDoor (green Open and red Locked, the game's behaviour, by default); a
+# transpiler on Door.OnLogicValueChanged asks it for the requested state; and a PLib side screen
+# (SmartLogicDoorSideScreen), shown while the door's logic port is connected, offers three
+# checkboxes: Open / Locked, Open / Auto and Auto / Locked. The ports' descriptions and copied
+# settings follow.
+# How a player reaches it: select a door with an automation wire on its port.
+# What changes: what a red signal does to the door.
+#
+# setup builds a Pneumatic Door in the dug-out corridor west of the printing pod with a logic
+# wire on its port and no signal (red), so the door is locked. Selected, its side screen shows;
+# a click on Open / Auto makes a red signal mean Auto and the door is requested unlocked.
+from: early-base
+mods: [2820163949]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Door\")", method: Build, args: [131128, Neutral, null, [Cuprite], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LogicWire\")", method: Build, args: [131128, Neutral, null, [Cuprite], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Game.Instance.logicCircuitSystem", method: ForceRebuildNetworks}}
+steps:
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: Door}
+  - ui_wait: {path: "**/Config Tab - body instance/SmartLogicDoorSideScreen/MainPanel", cond: stable}
+  - expect_state:
+      "selected:GetComponent<SmartLogicDoors.SmartLogicDoor>.RedState": Locked
+      "selected:GetComponent<SmartLogicDoors.SmartLogicDoor>.GreenState": Opened
+      "selected:Door.requestedState": Locked
+  - ui_dump: {name: side, root: "**/Config Tab - body instance/SmartLogicDoorSideScreen"}
+  - shot: {name: side, crop: "**/Config Tab - body instance/SmartLogicDoorSideScreen", threshold: 0.04}
+  - click: {ui: "**/SmartLogicDoorSideScreen/MainPanel/opened_auto"}
+  - expect_state:
+      "selected:GetComponent<SmartLogicDoors.SmartLogicDoor>.RedState": Auto
+      "selected:GetComponent<SmartLogicDoors.SmartLogicDoor>.GreenState": Opened
+      "selected:Door.requestedState": Auto

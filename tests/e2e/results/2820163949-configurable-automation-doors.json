@@ -1,0 +1,67 @@
+{
+ "spec": "mods/2820163949-configurable-automation-doors.yaml",
+ "mods": [
+  "2820163949"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a door with a logic wire shows the mod's side screen, and Open / Auto makes a red signal request Auto; the side screen's layout and pixels as in the original",
+ "updated": "2026-10-26",
+ "commit": "bbc2ade",
+ "mod_dlls": {
+  "2820163949": {
+   "SmartLogicDoors.dll": "f5af09188a50da2926cbcfa4fb17247f4451979b66bbb0224ca0b5949b7671e4"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-212024-3ac7afec",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T21:20:25",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-000811-83a2ba2d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T00:08:11",
+    "lane": 16,
+    "reference_run": "20261025-212024-3ac7afec",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "side": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "side": 0.0
+    }
+   },
+   {
+    "run": "20261026-000811-83a2ba2d",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T00:08:12",
+    "lane": 17,
+    "reference_run": "20261025-212024-3ac7afec",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "side": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "side": 0.0
+    }
+   }
+  ]
+ }
+}

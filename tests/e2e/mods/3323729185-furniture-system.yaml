@@ -1,0 +1,28 @@
+# R 家具系统 Furniture System 2.4 (3323729185), classes B, O.
+#
+# What it does: adds about thirty decorative buildings to the Furniture menu, no research
+# needed (R003GG1 to R036GG1: ice ladders and ice sculptures, lamps, flower walls, trims drawn
+# in front of buildings, a bed, a jukebox...), each switched on or off by a PLib option
+# (R000GG0.json). The ice ladder (R004GG1, 1x1, ice) climbs at the game's speed and lets
+# Duplicants slide down eight times as fast.
+# How a player reaches it: the build menu's Furniture category.
+# What changes: more decor buildings.
+#
+# The Furniture menu shows the mod's buildings. setup builds an ice ladder in the dug-out
+# room west of the printing pod: it is a ladder sliding down at 8x.
+from: early-base
+mods: [3323729185]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"R004GG1\")", method: Build, args: [{"$": "Grid.XYToCell(111, 207)"}, Neutral, null, [Ice], 260.0, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"R004GG1\").Deprecated": false
+      "count:all:Ladder::[*] if .downwardsMovementSpeedMultiplier == 8.0": 1
+  - run: {seconds: 10}
+  - click: {ui: "**/PlanScreen/Toggle:Furniture"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/R004GG1 Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/R003GG1 Group*": {active: true}
+      "**/BuildingGroups/**/Grid/R004GG1 Group*": {active: true}
+      "**/BuildingGroups/**/Grid/R035GG1 Group*": {active: true}
+  - shot: {name: furniture-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}

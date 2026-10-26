@@ -1,0 +1,60 @@
+{
+ "spec": "mods/3323729185-furniture-system.yaml",
+ "mods": [
+  "3323729185"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Furniture menu shows the mod's buildings (its shot matches); an ice ladder built lets Duplicants slide down at 8x",
+ "updated": "2026-10-26",
+ "commit": "49bbd5ac",
+ "mod_dlls": {
+  "3323729185": {
+   "PLib.dll": "b862c5db2b3cd6df09a62d4a30782e91e2b24e8e1bfac08d991c9cc89a984ba9",
+   "R_╝╥╛▀╧╡═│_2.0.dll": "f41759f67c82d7a7d4c9f194093c2388d6a80f8dff417f0c362a3d3c52f85ac3"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-033203-6e82e943",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:32:03",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-041037-dfbc4f23",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:10:37",
+    "lane": 16,
+    "reference_run": "20261026-033203-6e82e943",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "furniture-menu": 0.0
+    }
+   },
+   {
+    "run": "20261026-041037-dfbc4f23",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T04:10:38",
+    "lane": 17,
+    "reference_run": "20261026-033203-6e82e943",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "furniture-menu": 0.0
+    }
+   }
+  ]
+ }
+}

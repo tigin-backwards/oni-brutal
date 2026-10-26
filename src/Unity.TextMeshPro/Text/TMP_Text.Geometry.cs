@@ -45,11 +45,18 @@ namespace TMPro
 
             // Quads per material: visible characters and their decorations.
             Span<int> needed = materialCount <= 32 ? stackalloc int[materialCount] : new int[materialCount];
+            // The ellipsis's own material (a fallback's or a typeface's): its buffer is made for
+            // the text's characters, an empty quad, and the ellipsis drawn where the text is cut
+            // takes that quad (measured on the shipped package: the sub-mesh has 4 vertices
+            // either way).
+            int ellipsisMaterial = m_overflowMode == TextOverflowModes.Ellipsis && parsed.Ellipsis.Element != null ? parsed.Ellipsis.MaterialIndex : 0;
+            int ellipsisDrawn = 0;
             for (int i = 0; i < count; i++)
             {
                 // A visible zero-width space takes no quad of its own (see below).
                 if (!chars[i].isVisible || chars[i].character == '\u200B') continue;
                 needed[chars[i].materialReferenceIndex]++;
+                if (ellipsisMaterial > 0 && s_Placements[i].Element == parsed.Count && chars[i].materialReferenceIndex == ellipsisMaterial) ellipsisDrawn++;
             }
             CountDecorations(needed);
 
@@ -60,7 +67,8 @@ namespace TMPro
                 var mesh = MeshForMaterial(m);
                 // A new buffer holds the quads and one more; when a later layout needs more quads
                 // than it holds, it grows to the next power of two of that number plus one.
-                if (mi.vertices == null || mi.mesh != mesh || mi.QuadCapacity == 0) mi = new TMP_MeshInfo(mesh, needed[m] + 1);
+                int spare = m == ellipsisMaterial && ellipsisDrawn > 0 ? 0 : 1;
+                if (mi.vertices == null || mi.mesh != mesh || mi.QuadCapacity == 0) mi = new TMP_MeshInfo(mesh, needed[m] + spare);
                 else if (mi.QuadCapacity < needed[m]) mi.ResizeMeshInfo(Mathf.NextPowerOfTwo(needed[m] + 1));
                 mi.material = m < parsed.Materials.Count ? parsed.Materials[m].Material : m_sharedMaterial;
                 mi.vertexCount = 0;

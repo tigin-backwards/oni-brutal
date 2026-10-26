@@ -734,7 +734,13 @@ namespace TMPro
                 // Every character that is not white space draws its glyph's quad; the zero-width
                 // space only where white space is preserved (measured on the shipped package).
                 p.Visible = !p.Whitespace && glyph != null && (c != 0x200B || m_TextWrappingMode == TextWrappingModes.PreserveWhitespace || m_TextWrappingMode == TextWrappingModes.PreserveWhitespaceNoWrap);
-                float styleSpacing = p.Bold ? font.boldSpacing : font.normalSpacingOffset;
+                // An ellipsis from a Bold typeface (measured with the text's own font) is spaced
+                // as the text's bold characters are, though its glyph is not made bold (measured
+                // on the shipped package: Roboto-Bold SDF's "…" in a Bold LiberationSans SDF text
+                // advances 4.965 at 12 pt, its glyph's 4.125 and the bold spacing).
+                bool boldTypefaceEllipsis = metricsFont != null && el.AlternateTypeface
+                    && ((state.Style & FontStyles.Bold) != 0 || state.Weight >= FontWeight.Bold);
+                float styleSpacing = p.Bold ? font.boldSpacing : boldTypefaceEllipsis ? metricsFont.boldSpacing : font.normalSpacingOffset;
                 spacing = (m_characterSpacing + styleSpacing) * em;
                 if (c == 32 || c == 0xA0) spacing += m_wordSpacing * em;
                 if (c == 9 && el.Kind == ElementKind.Character)

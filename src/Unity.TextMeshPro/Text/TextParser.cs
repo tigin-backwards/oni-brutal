@@ -291,11 +291,68 @@ namespace TMPro
             e.Kind = ElementKind.Character;
             e.Unicode = e.SourceUnicode = 0x2026;
             e.State = state;
+            // In a style the text's font has no typeface for, the ellipsis comes from the first
+            // typeface for that style among the fonts a missing character is looked for in
+            // (measured on the shipped package: "The ellipsis glyph in Bold and Italic texts").
+            var primary = state.Font ?? m_Text.font;
+            if (primary != null && NeedsTypeface(state) && TypefaceFor(primary, state) == null
+                && FindStyledEllipsis(primary, state, out var styled, out var styledFont))
+            {
+                e.Element = styled;
+                e.Asset = styledFont;
+                e.AlternateTypeface = true;
+                e.MaterialIndex = MaterialFor(styledFont, state, false, AtlasOf(styled));
+                return;
+            }
             if (!ResolveGlyph(0x2026, state, out var character, out var asset, out bool alternate)) return;
             e.Element = character;
             e.Asset = asset;
             e.AlternateTypeface = alternate;
             e.MaterialIndex = MaterialFor(asset, state, false, AtlasOf(character));
+        }
+
+        // Whether the state's style asks for a typeface of a font's weight table.
+        static bool NeedsTypeface(TextState state) =>
+            (state.Style & (FontStyles.Bold | FontStyles.Italic)) != 0 || state.Weight != FontWeight.Regular;
+
+        // The typeface of a font's weight table for the state's style (null: none).
+        static TMP_FontAsset TypefaceFor(TMP_FontAsset font, TextState state)
+        {
+            bool bold = (state.Style & FontStyles.Bold) != 0;
+            bool italic = (state.Style & FontStyles.Italic) != 0;
+            int weight = bold ? 7 : (int)state.Weight / 100;
+            var weights = font.fontWeightTable;
+            if (weights == null || weight < 0 || weight >= weights.Length) return null;
+            return italic ? weights[weight].italicTypeface : weights[weight].regularTypeface;
+        }
+
+        // The ellipsis of the first typeface for the state's style in the primary font's
+        // fallbacks (depth-first), the global fallbacks and the default font asset.
+        static bool FindStyledEllipsis(TMP_FontAsset primary, TextState state, out TMP_Character character, out TMP_FontAsset typeface)
+        {
+            character = null;
+            typeface = null;
+            var visited = new HashSet<int> { primary.GetInstanceID() };
+            if (StyledEllipsisIn(primary.fallbackFontAssetTable, state, visited, out character, out typeface)) return true;
+            var global = TMP_Settings.fallbackFontAssets;
+            if (global != null && StyledEllipsisIn(global, state, visited, out character, out typeface)) return true;
+            var fallback = TMP_Settings.defaultFontAsset;
+            return fallback != null && StyledEllipsisIn(new List<TMP_FontAsset> { fallback }, state, visited, out character, out typeface);
+        }
+
+        static bool StyledEllipsisIn(List<TMP_FontAsset> fonts, TextState state, HashSet<int> visited, out TMP_Character character, out TMP_FontAsset typeface)
+        {
+            character = null;
+            typeface = null;
+            if (fonts == null) return false;
+            foreach (var f in fonts)
+            {
+                if (f == null || !visited.Add(f.GetInstanceID())) continue;
+                typeface = TypefaceFor(f, state);
+                if (typeface != null && typeface.TryGetLocalCharacter(0x2026, out character)) return true;
+                if (StyledEllipsisIn(f.fallbackFontAssetTable, state, visited, out character, out typeface)) return true;
+            }
+            return false;
         }
 
         static uint ToUpper(uint u) => u < 0x10000 ? char.ToUpperInvariant((char)u) : u;

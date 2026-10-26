@@ -170,8 +170,10 @@ namespace TMPro
                         // The record where truncation stopped: U+0003, at the source index of
                         // the character it stopped at and the pen position there, not drawn
                         // (measured on the shipped package; the input field's caret goes there).
+                        // It reports the text's font asset.
                         float at = p.X + offsetX, baselineAt = line.Baseline + offsetY;
                         ci.character = (char)3;
+                        ci.fontAsset = m_fontAsset;
                         ci.index = el.SourceIndex;
                         ci.lineNumber = k;
                         ci.pageNumber = line.Page;

@@ -236,6 +236,7 @@ namespace TMPro
                 m_GeneratedScale = CurrentScale();
                 ClearRenderedGeometry();
                 for (int i = 0; i < textInfo.meshInfo.Length; i++) textInfo.meshInfo[i].vertexCount = 0;
+                UploadEmptySubMeshes();
                 m_havePropertiesChanged = false;
                 TMPro_EventManager.ON_TEXT_CHANGED(this);
                 return;
@@ -463,9 +464,27 @@ namespace TMPro
         private protected override Mesh MeshForMaterial(int index)
         {
             if (index == 0) return MeshCache ??= new Mesh { name = "TextMeshPro UI Mesh" };
-            if (index == 1) AssignSubMeshes(Parsed.Materials.Count);
+            if (index == 1)
+            {
+                AssignSubMeshes(Parsed.Materials.Count);
+                MakeSubMeshesInDrawOrder(Parsed.Materials.Count);
+            }
             var sub = SubMesh(index);
             return sub.mesh;
+        }
+
+        // Sub-meshes are made in the order of the characters drawn with them, those of
+        // materials nothing is drawn with (an ellipsis's) after them (measured on the shipped
+        // package: a fallback's sub-mesh comes before the ellipsis's typeface's).
+        void MakeSubMeshesInDrawOrder(int materialCount)
+        {
+            var info = textInfo;
+            var chars = info.characterInfo;
+            for (int c = 0; c < info.characterCount; c++)
+            {
+                int m = chars[c].materialReferenceIndex;
+                if (m > 0 && m < materialCount && chars[c].isVisible) SubMesh(m);
+            }
         }
 
         TMP_SubMeshUI SubMesh(int index)
@@ -488,22 +507,8 @@ namespace TMPro
             UploadMesh(ref main, mesh, TMP_VertexDataUpdateFlags.All);
             canvasRenderer.SetMesh(mesh);
             AssignSubMeshes(materialCount);
-            for (int i = 1; i < materialCount; i++)
-            {
-                var sub = SubMesh(i);
-                var slot = Parsed.Materials[i];
-                sub.Configure(slot.Material, slot.Asset, i);
-                if (!sub.gameObject.activeSelf) sub.gameObject.SetActive(true);
-                if (!sub.enabled) sub.enabled = true;
-                sub.DisabledWithText = false;
-                // Every generation that fills the sub-mesh gives it the text's raycastTarget,
-                // through the property: a change to true lists it as a raycast target (measured).
-                sub.raycastTarget = raycastTarget;
-                if (sub.rectTransform.pivot != rectTransform.pivot) sub.rectTransform.pivot = rectTransform.pivot;
-                ref var mi = ref info.meshInfo[i];
-                UploadMesh(ref mi, sub.mesh, TMP_VertexDataUpdateFlags.All);
-                sub.canvasRenderer.SetMesh(sub.mesh);
-            }
+            MakeSubMeshesInDrawOrder(materialCount);
+            for (int i = 1; i < materialCount; i++) UploadSubMesh(i);
             // Sub-meshes this layout does not use draw nothing.
             for (int i = materialCount; i <= m_SubMeshes.Length; i++)
             {
@@ -511,6 +516,43 @@ namespace TMPro
                 if (sub == null) continue;
                 if (i < info.meshInfo.Length) info.meshInfo[i].vertexCount = 0;
                 sub.ClearGeometry();
+            }
+        }
+
+        void UploadSubMesh(int i)
+        {
+            var sub = SubMesh(i);
+            var slot = Parsed.Materials[i];
+            sub.Configure(slot.Material, slot.Asset, i);
+            if (!sub.gameObject.activeSelf) sub.gameObject.SetActive(true);
+            if (!sub.enabled) sub.enabled = true;
+            sub.DisabledWithText = false;
+            // Every generation that fills the sub-mesh gives it the text's raycastTarget,
+            // through the property: a change to true lists it as a raycast target (measured).
+            sub.raycastTarget = raycastTarget;
+            if (sub.rectTransform.pivot != rectTransform.pivot) sub.rectTransform.pivot = rectTransform.pivot;
+            ref var mi = ref textInfo.meshInfo[i];
+            UploadMesh(ref mi, sub.mesh, TMP_VertexDataUpdateFlags.All);
+            sub.canvasRenderer.SetMesh(sub.mesh);
+        }
+
+        // A text with nothing laid out still has the sub-meshes of the materials it has from
+        // the start (an ellipsis's), each with an empty quad (measured on the shipped package:
+        // "The ellipsis glyph in Bold and Italic texts").
+        void UploadEmptySubMeshes()
+        {
+            int count = Parsed.Materials.Count;
+            if (count <= 1) return;
+            AssignSubMeshes(count);
+            for (int m = 1; m < count; m++)
+            {
+                ref var mi = ref textInfo.meshInfo[m];
+                var mesh = SubMesh(m).mesh;
+                if (mi.vertices == null || mi.mesh != mesh || mi.QuadCapacity == 0) mi = new TMP_MeshInfo(mesh, 1);
+                mi.material = Parsed.Materials[m].Material;
+                mi.vertexCount = 0;
+                mi.ClearUnusedVertices(0);
+                UploadSubMesh(m);
             }
         }
 

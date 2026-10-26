@@ -82,6 +82,109 @@ namespace OniMoono.Tests
             Assert.Equal(15.65f, t.preferredHeight);
         }
 
+        // ----- The ellipsis glyph in Bold and Italic texts (Rookie Quest Guide) -----
+
+        static TextMeshProUGUI Header(string text, FontStyles style, float width, TextOverflowModes mode = TextOverflowModes.Ellipsis)
+        {
+            var t = NewText(new Vector2(width, 22f));
+            t.text = text;
+            t.fontSize = 12f;
+            t.alignment = TextAlignmentOptions.MidlineLeft;
+            t.fontStyle = style;
+            t.overflowMode = mode;
+            t.ForceMeshUpdate();
+            return t;
+        }
+
+        static TMP_SubMeshUI[] SubMeshes(TMP_Text t) => t.GetComponentsInChildren<TMP_SubMeshUI>(true);
+
+        [Theory]
+        [InlineData(FontStyles.Bold, "Roboto-Bold SDF")]
+        [InlineData(FontStyles.Italic, "Roboto-Italic SDF")]
+        [InlineData(FontStyles.Bold | FontStyles.Italic, "Roboto-BoldItalic SDF")]
+        public void AStyledTextThatFitsHasTheEllipsisTypefacesMaterial(FontStyles style, string typeface)
+        {
+            var t = Header("Pitcher Pump", style, 238f);
+            Assert.Equal(12, t.textInfo.characterCount);
+            Assert.Equal(2, t.textInfo.materialCount);
+            var subs = SubMeshes(t);
+            Assert.Single(subs);
+            Assert.Equal(typeface, subs[0].fontAsset.name);
+            Assert.Equal(4, subs[0].mesh.vertexCount);
+        }
+
+        [Fact]
+        public void AnEmptyBoldEllipsisTextHasTwoMaterials()
+        {
+            var t = Header("", FontStyles.Bold, 238f);
+            Assert.Equal(0, t.textInfo.characterCount);
+            Assert.Equal(2, t.textInfo.materialCount);
+            var subs = SubMeshes(t);
+            Assert.Single(subs);
+            Assert.Equal("Roboto-Bold SDF", subs[0].fontAsset.name);
+            Assert.Equal(4, subs[0].mesh.vertexCount);
+        }
+
+        // The ellipsis's material comes ahead of a fallback the characters need; its sub-mesh is
+        // made after the fallback's.
+        [Fact]
+        public void TheEllipsisMaterialComesAheadOfTheCharacters()
+        {
+            var t = Header("▪ Pitcher Pump", FontStyles.Bold, 238f);
+            Assert.Equal(3, t.textInfo.materialCount);
+            Assert.Equal("LiberationSans SDF - Fallback", t.textInfo.characterInfo[0].fontAsset.name);
+            Assert.Equal(2, t.textInfo.characterInfo[0].materialReferenceIndex);
+            var subs = SubMeshes(t);
+            Assert.Equal(2, subs.Length);
+            Assert.Equal("LiberationSans SDF - Fallback", subs[0].fontAsset.name);
+            Assert.Equal("Roboto-Bold SDF", subs[1].fontAsset.name);
+        }
+
+        [Theory]
+        [InlineData(FontStyles.Bold, 30f, "Pit", "Roboto-Bold SDF", 4.965f)]
+        [InlineData(FontStyles.Bold, 40f, "Pitch", "Roboto-Bold SDF", 4.965f)]
+        [InlineData(FontStyles.Italic, 30f, "Pitc", "Roboto-Italic SDF", 3.6453495f)]
+        public void ACutTextDrawsTheTypefacesEllipsis(FontStyles style, float width, string shown, string typeface, float advance)
+        {
+            var t = Header("Pitcher Pump", style, width);
+            var info = t.textInfo;
+            Assert.Equal(shown.Length + 2, info.characterCount);
+            for (int i = 0; i < shown.Length; i++) Assert.Equal(shown[i], info.characterInfo[i].character);
+            var e = info.characterInfo[shown.Length];
+            Assert.Equal('…', e.character);
+            Assert.Equal(typeface, e.fontAsset.name);
+            Assert.Equal(1, e.materialReferenceIndex);
+            Assert.Equal(advance, e.xAdvance - e.origin, 3);
+            var blank = info.characterInfo[shown.Length + 1];
+            Assert.Equal('\u0003', blank.character);
+            Assert.Same(Default, blank.fontAsset);
+            Assert.Equal(4, SubMeshes(t)[0].mesh.vertexCount);
+        }
+
+        [Fact]
+        public void ATypedEllipsisIsAnOrdinaryCharacter()
+        {
+            var t = Header("…", FontStyles.Bold, 238f, TextOverflowModes.Overflow);
+            var e = t.textInfo.characterInfo[0];
+            Assert.Equal("LiberationSans SDF", e.fontAsset.name);
+            Assert.Equal(0, e.materialReferenceIndex);
+            Assert.Equal(12.84f, e.xAdvance - e.origin, 3);
+            Assert.Equal(1, t.textInfo.materialCount);
+            Assert.Empty(SubMeshes(t));
+        }
+
+        [Fact]
+        public void ARegularEllipsisTextHasNoExtraMaterial()
+        {
+            var t = Header("Pitcher Pump", FontStyles.Normal, 238f);
+            Assert.Equal(1, t.textInfo.materialCount);
+            Assert.Empty(SubMeshes(t));
+            t = Header("Pitcher Pump", FontStyles.Normal, 40f);
+            var e = t.textInfo.characterInfo[t.textInfo.characterCount - 2];
+            Assert.Equal('…', e.character);
+            Assert.Equal("LiberationSans SDF", e.fontAsset.name);
+        }
+
         // ----- Line gaps and preferred heights with fallback glyphs (Social Life, Rookie
         // Quest Guide) -----
 

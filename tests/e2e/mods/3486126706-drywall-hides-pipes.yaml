@@ -1,0 +1,21 @@
+# 隐藏管道 Drywall Hides Pipes (3486126706), class P.
+#
+# What it does: the Drywall and the Tempshift Plate are drawn in front of pipes, wires and
+# conveyor rails: postfixes on their CreateBuildingDef move them to another scene layer, so
+# the walls hide what runs behind them.
+# How a player reaches it: building a Drywall over pipes or wires.
+# What changes: hidden pipes and wires.
+#
+# The two definitions' layers are read (the original's, not the Backwall), and setup builds a
+# drywall over a wire in the dug-out corridor west of the printing pod.
+from: early-base
+mods: [3486126706]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Wire\")", method: Build, args: [131764, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"ExteriorWall\")", method: Build, args: [131764, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"ExteriorWall\").SceneLayer": ["== original", "!= 'Backwall'"]
+      "Assets.GetBuildingDef(\"ThermalBlock\").SceneLayer": "== original"
+  - run: {seconds: 2}
+  - expect: {buildings: {ExteriorWall: 1, Wire: ">= 1"}}

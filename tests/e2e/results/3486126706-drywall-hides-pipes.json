@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3486126706-drywall-hides-pipes.yaml",
+ "mods": [
+  "3486126706"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the drywall and Tempshift Plate move to the original's scene layer; a drywall is built over a wire",
+ "updated": "2026-10-26",
+ "commit": "f898d18a",
+ "mod_dlls": {
+  "3486126706": {
+   "DrywallHidesPipes.dll": "393fd046494c930dbfdcfd16e1d98221d223955f98dd604d1b2c3224284f754c"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-113228-a0d69cd2",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T11:42:43",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-145036-c077f4e4",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T14:54:10",
+    "lane": 14,
+    "reference_run": "20261026-113228-a0d69cd2",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-145036-c077f4e4",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T14:54:12",
+    "lane": 15,
+    "reference_run": "20261026-113228-a0d69cd2",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

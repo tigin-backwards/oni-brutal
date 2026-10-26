@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3794979035-fabricate-it-now.yaml",
+ "mods": [
+  "3794979035"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a powered research station with Basic Farming picked gets dirt delivered and research progress within two minutes",
+ "updated": "2026-10-25",
+ "commit": "3d254cb",
+ "mod_dlls": {
+  "3794979035": {
+   "FabricateItNow.dll": "32cc6e40c5f93b8b77c086608b4a027108c4c61edc78942caf4a264c6371d3ad"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-204944-92d933cd",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T20:51:36",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-221233-14364fcc",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T22:12:33",
+    "lane": 16,
+    "reference_run": "20261025-204944-92d933cd",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261025-221233-14364fcc",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-25T22:12:34",
+    "lane": 17,
+    "reference_run": "20261025-204944-92d933cd",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

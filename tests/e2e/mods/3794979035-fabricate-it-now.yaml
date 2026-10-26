@@ -1,0 +1,33 @@
+# Fabricate it Now! (3794979035), class P.
+#
+# What it does: a fabricator or research station starts its work as soon as its ingredients
+# arrive, instead of on its next periodic update: a postfix on ComplexFabricator.OnFetchComplete
+# runs Sim1000ms when the queue changed and nobody works the machine, and a ResearchCenter
+# runs Sim200ms whenever its storage is used.
+# How a player reaches it: any fabricator or research station with an order.
+# What changes: the delay between a delivery and the work.
+#
+# setup builds a second research station in the corridor west of the printing pod, powered by
+# a charged battery, and picks Basic Farming to research. Duplicants deliver dirt to it and
+# research starts: within two minutes Basic Farming has progress.
+from: early-base
+mods: [3794979035]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"ResearchCenter\")", method: Build, args: [131124, Neutral, null, [Cuprite], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Battery\")", method: Build, args: [131126, Neutral, null, [Cuprite], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "last:GetComponent<Battery>", method: AddEnergy, args: [10000.0]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Wire\")", method: Build, args: [131124, Neutral, null, [Cuprite], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Wire\")", method: Build, args: [131125, Neutral, null, [Cuprite], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Wire\")", method: Build, args: [131126, Neutral, null, [Cuprite], 300.0, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Game.Instance.electricalConduitSystem", method: SetConnections, args: ["Right", 131124, true]}}
+  - driver: {setup.call: {target: "Game.Instance.electricalConduitSystem", method: SetConnections, args: ["Left, Right", 131125, true]}}
+  - driver: {setup.call: {target: "Game.Instance.electricalConduitSystem", method: SetConnections, args: ["Left", 131126, true]}}
+  - driver: {setup.call: {target: "Game.Instance.electricalConduitSystem", method: ForceRebuildNetworks}}
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"FarmingTech\")"}]}}
+steps:
+  - expect_state:
+      "Research.Instance.GetActiveResearch().tech.Id": FarmingTech
+      "Research.Instance.GetActiveResearch().progressInventory.PointsByTypeID[\"basic\"]": 0
+  - run: {seconds: 120}
+  - expect_state:
+      "Research.Instance.GetActiveResearch().progressInventory.PointsByTypeID[\"basic\"]": "> 0"

@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3518862481-no-sublimation.yaml",
+ "mods": [
+  "3518862481"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "100 kg each of slime and bleach stone lying in open air keep their mass over 60 s of play",
+ "updated": "2026-10-25",
+ "commit": "d3a5a07",
+ "mod_dlls": {
+  "3518862481": {
+   "nosublimate.dll": "bbc60d27ef9b00c9e65be6104b728f389b0f4095ade87e5778d75d009c92cd2a"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-195129-6325275a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T19:56:03",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-202332-ce057d7f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T20:23:32",
+    "lane": 16,
+    "reference_run": "20261025-195129-6325275a",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261025-202332-ce057d7f",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-25T20:24:41",
+    "lane": 16,
+    "reference_run": "20261025-195129-6325275a",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

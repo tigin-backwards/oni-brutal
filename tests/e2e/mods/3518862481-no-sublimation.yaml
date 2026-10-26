@@ -1,0 +1,24 @@
+# No sublimation (3518862481), class P.
+#
+# What it does: slime, polluted dirt, polluted mud, bleach stone and polluted water no longer
+# give off gas (a prefix on Sublimates.Sim200ms skips it for those five elements); other
+# sublimating items go on as in the game.
+# How a player reaches it: leaving slime or bleach stone lying about.
+# What changes: no polluted oxygen or chlorine from them, and they keep their mass.
+#
+# setup spawns 100 kg of slime and 100 kg of bleach stone in the dug-out corridor west of the
+# printing pod, in open air where the game would let them off-gas. After 60 s of play they
+# still weigh 100 kg each.
+from: early-base
+mods: [3518862481]
+setup:
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"SlimeMold\").substance", method: SpawnResource, args: [[111.5, 206.5, -12], 100, 300, 255, 0]}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"BleachStone\").substance", method: SpawnResource, args: [[112.5, 206.5, -12], 100, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "sum:all:Sublimates::[*].GetComponent<PrimaryElement>.Mass if .GetComponent<PrimaryElement>.ElementID == SlimeMold": ">= 100"
+      "sum:all:Sublimates::[*].GetComponent<PrimaryElement>.Mass if .GetComponent<PrimaryElement>.ElementID == BleachStone": ">= 100"
+  - run: {seconds: 60}
+  - expect_state:
+      "sum:all:Sublimates::[*].GetComponent<PrimaryElement>.Mass if .GetComponent<PrimaryElement>.ElementID == SlimeMold": ">= 99.999"
+      "sum:all:Sublimates::[*].GetComponent<PrimaryElement>.Mass if .GetComponent<PrimaryElement>.ElementID == BleachStone": ">= 99.999"

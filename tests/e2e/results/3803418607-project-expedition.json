@@ -3,12 +3,14 @@
  "mods": [
   "3803418607"
  ],
- "verdict": "failed",
- "why": "a run of ours failed",
- "findings": [],
- "note": "fails in ours before its first step: the mod's prospecting scan, a postfix on NavPathDrawer, calls Graphics.DrawMeshNow(Mesh, Matrix4x4), which the engine lacks (MissingMethodException every frame, and the game's crash screen). In the original the Cave Entrance's expedition window opens with its status, journal and crew",
+ "verdict": "warning",
+ "why": "known findings: scroll-normalized-position",
+ "findings": [
+  "scroll-normalized-position"
+ ],
+ "note": "the Cave Entrance is built and its expedition window opens with its status, journal and crew as in the original but for the known scrollbar value. The spec does not reach a prospecting scan, which draws with Graphics.DrawMeshNow from NavPathDrawer.OnPostRender; tools/UnityProbe's drawmeshnow probe draws as the scan does and matches the original",
  "updated": "2026-10-26",
- "commit": "91bfe30e",
+ "commit": "a372cfbb",
  "mod_dlls": {
   "3803418607": {
    "ProjectExpedition.dll": "9a8513340264e2fa8ef830d40ac0338d6c20fea6322dcbfa75f6a0469d6750b6"
@@ -17,45 +19,75 @@
  "runs": {
   "original": [
    {
-    "run": "20261026-040631-5fdfeae1",
+    "run": "20261026-101703-0548aca0",
     "index": 1,
     "verdict": "pass",
-    "date": "2026-10-26T04:06:31",
-    "lane": 33,
+    "date": "2026-10-26T10:17:03",
+    "lane": 34,
+    "signatures": 0
+   },
+   {
+    "run": "20261026-101703-0548aca0",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T10:19:27",
+    "lane": 34,
     "signatures": 0
    }
   ],
   "ours": [
    {
-    "run": "20261026-040822-b95bc4e7",
+    "run": "20261026-101703-0548aca0",
     "index": 1,
-    "verdict": "fail",
-    "date": "2026-10-26T04:08:22",
-    "lane": 32,
-    "reasons": [
-     "step start: Canvas/ConfirmDialog/GameObject/Panel/OKButton is occluded by ErrorCanvas/CrashReportScreen(Clone)/Buttons/MoreInfoButton/Text (hits there: ErrorCanvas/CrashReportScreen(Clone)/Buttons/MoreInfoButton/Text, ErrorCanvas/CrashReportScreen(Clone)/Buttons/MoreInfoButton, ErrorCanvas/CrashRepo",
-     "1 log signature(s) the original lacks"
+    "verdict": "warn",
+    "date": "2026-10-26T10:21:14",
+    "lane": 34,
+    "reference_run": "20261026-101703-0548aca0",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
     ],
-    "reference_run": "20261026-040631-5fdfeae1",
-    "new_signatures": 1,
-    "findings": [],
-    "ui_dump": {},
+    "ui_dump": {
+     "status": {
+      "differences": 0
+     },
+     "journal": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     },
+     "journal-tab": {
+      "differences": 0
+     }
+    },
     "shots": {}
    },
    {
-    "run": "20261026-040822-b95bc4e7",
+    "run": "20261026-101703-0548aca0",
     "index": 2,
-    "verdict": "fail",
-    "date": "2026-10-26T04:09:07",
-    "lane": 32,
-    "reasons": [
-     "step start: Canvas/ConfirmDialog/GameObject/Panel/OKButton is occluded by ErrorCanvas/CrashReportScreen(Clone)/Buttons/MoreInfoButton/Text (hits there: ErrorCanvas/CrashReportScreen(Clone)/Buttons/MoreInfoButton/Text, ErrorCanvas/CrashReportScreen(Clone)/Buttons/MoreInfoButton, ErrorCanvas/CrashRepo",
-     "1 log signature(s) the original lacks"
+    "verdict": "warn",
+    "date": "2026-10-26T10:22:30",
+    "lane": 34,
+    "reference_run": "20261026-101703-0548aca0",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
     ],
-    "reference_run": "20261026-040631-5fdfeae1",
-    "new_signatures": 1,
-    "findings": [],
-    "ui_dump": {},
+    "ui_dump": {
+     "status": {
+      "differences": 0
+     },
+     "journal": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     },
+     "journal-tab": {
+      "differences": 0
+     }
+    },
     "shots": {}
    }
   ]

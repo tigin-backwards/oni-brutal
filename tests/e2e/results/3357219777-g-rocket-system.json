@@ -1,0 +1,56 @@
+{
+ "spec": "mods/3357219777-g-rocket-system.yaml",
+ "mods": [
+  "3357219777"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "its options set the cargo bays to 20 t; the bays, the drillcone's delivery and the engines' height follow them",
+ "updated": "2026-10-26",
+ "commit": "069fe17",
+ "mod_dlls": {
+  "3357219777": {
+   "G_╗≡╝²╧╡═│_1.0.dll": "3793ac0d214c2653f04211e164789aa9685b4a9ef9ac63fb9d34109967b373f3",
+   "PLib.dll": "b862c5db2b3cd6df09a62d4a30782e91e2b24e8e1bfac08d991c9cc89a984ba9"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-023318-02f49c43",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T02:38:25",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-024545-f741d0b9",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:11:47",
+    "lane": 14,
+    "reference_run": "20261026-023318-02f49c43",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-024545-f741d0b9",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T03:12:33",
+    "lane": 14,
+    "reference_run": "20261026-023318-02f49c43",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

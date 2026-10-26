@@ -1,0 +1,26 @@
+# G 火箭系统 Rocket System 1.2 (3357219777), classes P, O.
+#
+# What it does: PLib options (G000GG0.json, in the shared config folder) retune Spaced Out's
+# rockets: the drillcone holds and asks for 100 t of diamond and drills at speed 50; the large
+# and small cargo bays (solid, liquid, gas) hold 10 t each; every engine's maximum height, burn
+# and power can be set (50 tiles by default); the rover's battery, the telescopes' range and
+# the enclosed telescope's power, the liquid fuel tank's input and the starmap POIs' recharge
+# speed are others.
+# How a player reaches it: the Mods screen's options; building rockets.
+# What changes: bigger cargo bays, taller rockets, faster drilling.
+#
+# options set the cargo bays to 20 t; the cargo bays' storage, the drillcone's delivery and
+# the hydrogen engine's maximum height follow the options.
+from: early-base
+mods: [3357219777]
+options:
+  "3357219777": {$file: G000GG0.json, G004GG1X1: 20000}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"LiquidCargoBaySmall\").BuildingComplete.GetComponent<Storage>.capacityKg": 20000
+      "Assets.GetBuildingDef(\"CargoBayCluster\").BuildingComplete.GetComponent<Storage>.capacityKg": 20000
+      "Assets.GetBuildingDef(\"GasCargoBayCluster\").BuildingComplete.GetComponent<Storage>.capacityKg": 20000
+      "Assets.GetBuildingDef(\"NoseconeHarvest\").BuildingComplete.GetComponent<ManualDeliveryKG>.capacity": 100000
+      "Assets.GetBuildingDef(\"HydrogenEngineCluster\").BuildingComplete.GetComponent<RocketEngineCluster>.maxHeight": 50
+  - run: {seconds: 10}
+  - expect: {duplicants: 3}

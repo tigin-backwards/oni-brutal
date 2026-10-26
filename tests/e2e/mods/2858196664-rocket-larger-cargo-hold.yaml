@@ -1,0 +1,23 @@
+# Rocket's Larger Cargo Hold 火箭更大货舱 (2858196664), class P.
+#
+# What it does: the Spaced Out cargo bays hold what PLib options say: the large liquid, gas
+# and solid bays 33,333 kg by default and the small ones 11,111 kg (postfixes on their
+# DoPostConfigureComplete extend them again with the new capacity).
+# How a player reaches it: building cargo bays on a rocket; the Mods screen's options.
+# What changes: bigger cargo bays.
+#
+# options set the large solid bay to 50,000 kg and the small liquid one to 2,000 kg; the
+# prefabs' storage is read.
+from: early-base
+mods: [2858196664]
+options:
+  "2858196664": {$file: Controler.json, e1: 50000, b1: 2000}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"CargoBayCluster\").GetComponent<Storage>.capacityKg": 50000
+      "Assets.GetPrefab(\"LiquidCargoBaySmall\").GetComponent<Storage>.capacityKg": 2000
+      "Assets.GetPrefab(\"LiquidCargoBayCluster\").GetComponent<Storage>.capacityKg": 33333
+      "Assets.GetPrefab(\"GasCargoBaySmall\").GetComponent<Storage>.capacityKg": 11111
+  - run: {seconds: 2}
+  - expect_state:
+      "Assets.GetPrefab(\"CargoBayCluster\").GetComponent<CargoBayCluster>.storage.capacityKg": 50000

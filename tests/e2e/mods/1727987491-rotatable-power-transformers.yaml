@@ -1,0 +1,23 @@
+# Rotatable Power Transformers (Vanilla/DLC) (1727987491), class P.
+#
+# What it does: postfixes on the two power transformers' defs let them rotate a full turn
+# (R360), place them by any foundation side (OnFoundationRotatable) and keep checking it.
+# How a player reaches it: building a transformer (the rotate key, O).
+# What changes: transformers that fit sideways or upside down.
+#
+# The defs are read, and a transformer is built rotated by 90 degrees in the dug-out corridor
+# west of the printing pod.
+from: early-base
+mods: [1727987491]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"PowerTransformerSmall\")", method: Build, args: [131129, R90, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"PowerTransformer\").PermittedRotations": "== 'R360'"
+      "Assets.GetBuildingDef(\"PowerTransformerSmall\").PermittedRotations": "== 'R360'"
+      "Assets.GetBuildingDef(\"PowerTransformerSmall\").ContinuouslyCheckFoundation": true
+      "Assets.GetBuildingDef(\"PowerTransformer\").BuildLocationRule": "== 'OnFoundationRotatable'"
+  - run: {seconds: 5}
+  - expect: {buildings: {PowerTransformerSmall: 1}}
+  - expect_state:
+      "all:PowerTransformer::[0].GetComponent<Rotatable>.Orientation": "== 'R90'"

@@ -1,0 +1,55 @@
+{
+ "spec": "mods/1727987491-rotatable-power-transformers.yaml",
+ "mods": [
+  "1727987491"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "both transformers rotate a full circle on any foundation side; one is built rotated by 90 degrees",
+ "updated": "2026-10-26",
+ "commit": "906e9515",
+ "mod_dlls": {
+  "1727987491": {
+   "RotatablePowerTransformer.dll": "9fdbf9d33b504ed152e83f7249383aca8629b261114fc20cf597749d60de5cde"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-024539-704646ee",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:39:59",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-044531-0f162007",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:45:31",
+    "lane": 14,
+    "reference_run": "20261026-024539-704646ee",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-044531-0f162007",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T04:45:32",
+    "lane": 15,
+    "reference_run": "20261026-024539-704646ee",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

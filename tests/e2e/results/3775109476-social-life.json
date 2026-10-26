@@ -3,12 +3,14 @@
  "mods": [
   "3775109476"
  ],
- "verdict": "failed",
- "why": "a run of ours failed",
- "findings": [],
+ "verdict": "warning",
+ "why": "known findings: scroll-normalized-position",
+ "findings": [
+  "scroll-normalized-position"
+ ],
  "note": "the management menu's Social toggle opens the mod's screen and the colony runs, as in the original; the screen's summary text (5 lines with a fallback-font middle dot) is 0.03 px taller in ours (85.17 vs 85.14), shifting its layout groups' preferred heights",
  "updated": "2026-10-26",
- "commit": "bbc2ade",
+ "commit": "ce92fe52",
  "mod_dlls": {
   "3775109476": {
    "Hank.SocialChronicle.dll": "24f24731bab0ad8078d88f00496821b9354a09ae819c83f57d06f7f59318667c",
@@ -27,32 +29,37 @@
  "runs": {
   "original": [
    {
-    "run": "20261025-213131-b5befd47",
+    "run": "20261026-111709-c46c2703",
     "index": 1,
     "verdict": "pass",
-    "date": "2026-10-25T21:31:31",
-    "lane": 16,
+    "date": "2026-10-26T11:25:15",
+    "lane": 32,
+    "signatures": 0
+   },
+   {
+    "run": "20261026-111709-c46c2703",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T11:27:04",
+    "lane": 32,
     "signatures": 0
    }
   ],
   "ours": [
    {
-    "run": "20261026-001354-de9d87c3",
+    "run": "20261026-111709-c46c2703",
     "index": 1,
-    "verdict": "fail",
-    "date": "2026-10-26T00:13:54",
-    "lane": 16,
-    "reasons": [
-     "ui_dump social: 2 difference(s)"
-    ],
-    "reference_run": "20261025-213131-b5befd47",
+    "verdict": "warn",
+    "date": "2026-10-26T11:28:55",
+    "lane": 32,
+    "reference_run": "20261026-111709-c46c2703",
     "new_signatures": 0,
     "findings": [
      "scroll-normalized-position"
     ],
     "ui_dump": {
      "social": {
-      "differences": 2,
+      "differences": 0,
       "known": {
        "scroll-normalized-position": 1
       }
@@ -63,22 +70,19 @@
     }
    },
    {
-    "run": "20261026-001354-de9d87c3",
+    "run": "20261026-111709-c46c2703",
     "index": 2,
-    "verdict": "fail",
-    "date": "2026-10-26T00:13:55",
-    "lane": 17,
-    "reasons": [
-     "ui_dump social: 2 difference(s)"
-    ],
-    "reference_run": "20261025-213131-b5befd47",
+    "verdict": "warn",
+    "date": "2026-10-26T11:29:29",
+    "lane": 33,
+    "reference_run": "20261026-111709-c46c2703",
     "new_signatures": 0,
     "findings": [
      "scroll-normalized-position"
     ],
     "ui_dump": {
      "social": {
-      "differences": 2,
+      "differences": 0,
       "known": {
        "scroll-normalized-position": 1
       }

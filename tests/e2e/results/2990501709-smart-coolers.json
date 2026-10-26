@@ -3,12 +3,12 @@
  "mods": [
   "2990501709"
  ],
- "verdict": "failed",
- "why": "a run of ours failed",
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
  "findings": [],
  "note": "the Thermo Regulator's side screen shows and Heat Contents works in the original; in ours the PLib checkboxes' labels lay out with no characters (textInfo 0, a checkbox 23 px wide instead of 124), so Heat Contents has no clickable text and 42 layout differences remain",
  "updated": "2026-10-26",
- "commit": "bbc2ade",
+ "commit": "ce92fe52",
  "mod_dlls": {
   "2990501709": {
    "SmartCoolers.dll": "478042622c9c0fe31ed4c92b1d32b733aae7a73ad0b5e8875b932360b35e383e"
@@ -17,59 +17,57 @@
  "runs": {
   "original": [
    {
-    "run": "20261025-220237-6681597d",
+    "run": "20261026-111709-c46c2703",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T11:17:10",
+    "lane": 33,
+    "signatures": 0
+   },
+   {
+    "run": "20261026-111709-c46c2703",
     "index": 1,
     "verdict": "pass",
-    "date": "2026-10-25T22:02:37",
-    "lane": 16,
+    "date": "2026-10-26T11:17:09",
+    "lane": 32,
     "signatures": 0
    }
   ],
   "ours": [
    {
-    "run": "20261026-003234-4e4c76bb",
+    "run": "20261026-111709-c46c2703",
     "index": 1,
-    "verdict": "fail",
-    "date": "2026-10-26T00:32:34",
-    "lane": 16,
-    "reasons": [
-     "step 9: GameScreenManager/ScreenSpaceOverlayCanvas/BottomPanelRight/RootMenuRight/DetailsScreen/SideScreen/Body/Config Tab - body instance/SmartCoolerSideScreen/GridPanel/CheckBox/AlignmentWrapper/Text is off screen (rect (896.53, 544.13, 0.0, 0.0))",
-     "ui_dump side: 42 difference(s)",
-     "shot side: 15.19% of pixels differ (> 4%)"
-    ],
-    "reference_run": "20261025-220237-6681597d",
+    "verdict": "pass",
+    "date": "2026-10-26T11:23:04",
+    "lane": 32,
+    "reference_run": "20261026-111709-c46c2703",
     "new_signatures": 0,
     "findings": [],
     "ui_dump": {
      "side": {
-      "differences": 42
+      "differences": 0
      }
     },
     "shots": {
-     "side": 0.15185
+     "side": 0.0
     }
    },
    {
-    "run": "20261026-003234-4e4c76bb",
+    "run": "20261026-111709-c46c2703",
     "index": 2,
-    "verdict": "fail",
-    "date": "2026-10-26T00:32:35",
-    "lane": 17,
-    "reasons": [
-     "step 9: GameScreenManager/ScreenSpaceOverlayCanvas/BottomPanelRight/RootMenuRight/DetailsScreen/SideScreen/Body/Config Tab - body instance/SmartCoolerSideScreen/GridPanel/CheckBox/AlignmentWrapper/Text is off screen (rect (896.53, 544.13, 0.0, 0.0))",
-     "ui_dump side: 42 difference(s)",
-     "shot side: 15.19% of pixels differ (> 4%)"
-    ],
-    "reference_run": "20261025-220237-6681597d",
+    "verdict": "pass",
+    "date": "2026-10-26T11:23:41",
+    "lane": 33,
+    "reference_run": "20261026-111709-c46c2703",
     "new_signatures": 0,
     "findings": [],
     "ui_dump": {
      "side": {
-      "differences": 42
+      "differences": 0
      }
     },
     "shots": {
-     "side": 0.15185
+     "side": 0.0
     }
    }
   ]

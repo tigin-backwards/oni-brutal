@@ -1,0 +1,33 @@
+# Water Boiler 沸水器 (3306319445), class B.
+#
+# What it does: adds the Water Boiler to the Utilities menu, researched with Advanced
+# Research: a 1x3 refined-metal building on 200 W with a liquid input that boils water,
+# salt water, brine and polluted water into steam (salt, and dirt from polluted water, left
+# over). A slider on its side screen sets the steam's temperature, 100 to 300 degrees.
+# How a player reaches it: the build menu (Utilities), after the research; its side screen.
+# What changes: steam from piped water.
+#
+# The research and converters are read; a boiler built by setup in the dug-out corridor west
+# of the printing pod is selected, and 150 is typed into its slider's field: every converter's
+# steam is then at least 423.15 K.
+from: early-base
+mods: [3306319445]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"WaterBoiler\")", method: Build, args: [131127, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"AdvancedResearch\").unlockedItemIDs": {contains: WaterBoiler}
+      "Assets.GetPrefab(\"WaterBoiler\").GetComponents<ElementConverter>.Length": 4
+      "Assets.GetBuildingDef(\"WaterBoiler\").EnergyConsumptionWhenActive": 200
+  - run: {seconds: 2}
+  - expect: {buildings: {WaterBoiler: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [111, 207], select: WaterBoiler}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/IntSliderSideScreen", cond: stable}
+  - ui_dump: {name: slider, root: "**/IntSliderSideScreen"}
+  - type: {ui: "**/IntSliderSideScreen/**/*Input*", text: "150", enter: true, clear: true}
+  - expect_state:
+      "selected:GetComponents<ElementConverter>[0].outputElements[0].minOutputTemperature": [">= 423.1", "<= 423.2"]
+      "selected:GetComponents<ElementConverter>[3].outputElements[0].minOutputTemperature": [">= 423.1", "<= 423.2"]
+  - shot: {name: slider-set, crop: "**/IntSliderSideScreen", threshold: 0.04}

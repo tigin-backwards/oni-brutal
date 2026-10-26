@@ -1,0 +1,68 @@
+{
+ "spec": "mods/3306319445-water-boiler.yaml",
+ "mods": [
+  "3306319445"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a selected boiler's slider field takes 150 and every converter's steam is then 423 K (dumped and shot)",
+ "updated": "2026-10-26",
+ "commit": "f898d18a",
+ "mod_dlls": {
+  "3306319445": {
+   "PLib.dll": "b862c5db2b3cd6df09a62d4a30782e91e2b24e8e1bfac08d991c9cc89a984ba9",
+   "WaterBoiler.dll": "44ec8673e7162a0ce5c5158e800cb910234ad7b99d3dceef71b6fc233bb65fbf"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-102152-42394c53",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T10:32:05",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-143450-564c3455",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T14:42:17",
+    "lane": 14,
+    "reference_run": "20261026-102152-42394c53",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "slider": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "slider-set": 0.008433
+    }
+   },
+   {
+    "run": "20261026-143450-564c3455",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T14:42:19",
+    "lane": 15,
+    "reference_run": "20261026-102152-42394c53",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "slider": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "slider-set": 0.008433
+    }
+   }
+  ]
+ }
+}

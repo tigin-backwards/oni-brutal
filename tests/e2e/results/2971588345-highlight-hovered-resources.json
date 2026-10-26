@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2971588345-highlight-hovered-resources.yaml",
+ "mods": [
+  "2971588345"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with the pointer on the pinned Sandstone row, every Sandstone pile is highlighted",
+ "updated": "2026-10-26",
+ "commit": "f898d18a",
+ "mod_dlls": {
+  "2971588345": {
+   "Highlight On Hover.dll": "bf22de9951af2ce47f781efd5e52d5a64872f7ed114bde64b0a2f8299a96f421"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-113228-a0d69cd2",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T11:32:29",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-142203-a4af3f09",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T14:24:47",
+    "lane": 14,
+    "reference_run": "20261026-113228-a0d69cd2",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-142203-a4af3f09",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T14:25:41",
+    "lane": 14,
+    "reference_run": "20261026-113228-a0d69cd2",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

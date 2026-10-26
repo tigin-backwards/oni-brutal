@@ -1,0 +1,24 @@
+# Highlight Debris / Highlight Hovered Resources (2971588345), classes T, U.
+#
+# What it does: hovering a row of the pinned resources panel (top right) highlights every
+# loose item of that resource in the world: a postfix on PinnedResourcesPanel.CreateRow adds
+# onEnter and onExit handlers to the row and its pin toggle that hover and unhover the items'
+# KSelectables (their anim's highlight colour).
+# How a player reaches it: pointing at a row of the pinned resources panel.
+# What changes: the debris of that resource lights up.
+#
+# setup pins Sandstone; with the pointer brought onto its row (a click on its name), every
+# Sandstone pile is highlighted.
+from: early-base
+mods: [2971588345]
+setup:
+  - driver: {setup.call: {target: "ClusterManager.Instance.activeWorld.worldInventory.pinnedResources", method: Add, args: [SandStone]}}
+steps:
+  - run: {seconds: 5}
+  - expect_state:
+      "count:all:Pickupable::[*] if .GetComponent<KPrefabID>.PrefabTag.Name == SandStone and .storage == None": [{save_as: piles}, "> 1"]
+      "sum:all:Pickupable::[*].GetComponent<KBatchedAnimController>.HighlightColour.r if .GetComponent<KPrefabID>.PrefabTag.Name == SandStone": 0
+  - ui_wait: {path: "**/PinnedResourcesPanel/Resources/EntryContainer", cond: stable}
+  - click: {text: "Sandstone", under: "**/PinnedResourcesPanel"}
+  - expect_state:
+      "sum:all:Pickupable::[*].GetComponent<KBatchedAnimController>.HighlightColour.r if .GetComponent<KPrefabID>.PrefabTag.Name == SandStone and .storage == None": ">= 0.24 * piles"

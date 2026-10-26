@@ -1,0 +1,70 @@
+{
+ "spec": "mods/1722812098-fast-wireless-automation.yaml",
+ "mods": [
+  "1722812098"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Automation menu lists the emitter and receiver (shot); a built emitter's side screen is dumped",
+ "updated": "2026-10-26",
+ "commit": "17f325ef",
+ "mod_dlls": {
+  "1722812098": {
+   "0SuperComicLib.ModONI.dll": "ab1b3ec34fc2bbf90810844205824364128cf59acfcf291bebf5ffa1917c23d7",
+   "FastWirelessAutomation_OV3.dll": "352bf671fa87325994f852c8c567d1a3e005e14637cfd1f7a2a664f80f269c64",
+   "VYaml.Annotations.dll": "3d41df55af5e3f3cbb0db9028a7bc952317470fa427be3e9f6e51565ca8b23ba",
+   "VYaml.dll": "dc85a16a973d7395628269ea36597104d4399e9e00c498e3728dfcdec2f0ed85"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-114619-1abc381b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T11:54:20",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-133411-75254ba7",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T13:34:11",
+    "lane": 14,
+    "reference_run": "20261026-114619-1abc381b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "emitter": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "automation-menu": 0.0
+    }
+   },
+   {
+    "run": "20261026-133411-75254ba7",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T13:34:12",
+    "lane": 15,
+    "reference_run": "20261026-114619-1abc381b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "emitter": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "automation-menu": 0.0
+    }
+   }
+  ]
+ }
+}

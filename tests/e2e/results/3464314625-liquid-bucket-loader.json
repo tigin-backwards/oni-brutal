@@ -1,0 +1,56 @@
+{
+ "spec": "mods/3464314625-liquid-bucket-loader.yaml",
+ "mods": [
+  "3464314625"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Bottle Filler fed by a pipe from a reservoir, its capacity set to 20 kg in its side screen, drops filled bottles by itself during 60 s of play",
+ "updated": "2026-10-26",
+ "commit": "bbc2ade",
+ "mod_dlls": {
+  "3464314625": {
+   "PLib.dll": "93073fdf44dbe9fd7c0afe19e56341be862cc2d732090dee30999cf60e2e160d",
+   "╥║╠σ╫░═░╞≈.dll": "ad11bf938c146eebf527397681cedb1bb86fd1db7dcfaadb066ec487d9f9febb"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-235333-07ffabb6",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T23:53:33",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-005039-fc342753",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T00:50:39",
+    "lane": 16,
+    "reference_run": "20261025-235333-07ffabb6",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-005039-fc342753",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T00:50:40",
+    "lane": 17,
+    "reference_run": "20261025-235333-07ffabb6",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

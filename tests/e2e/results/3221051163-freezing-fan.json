@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3221051163-freezing-fan.yaml",
+ "mods": [
+  "3221051163"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "an Ice-E Fan built with a wire on its output runs as a 240 W generator",
+ "updated": "2026-10-25",
+ "commit": "bd353b5",
+ "mod_dlls": {
+  "3221051163": {
+   "└Σ╢│╖τ╔╚.dll": "51dbdadf44b8ea25fb70bdd609d3023314e22882c3eeb0ca053b663c673184b8"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-204159-fb799f33",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T20:52:38",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-211438-57aed5cf",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T21:14:38",
+    "lane": 15,
+    "reference_run": "20261025-204159-fb799f33",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261025-211438-57aed5cf",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-25T21:15:43",
+    "lane": 15,
+    "reference_run": "20261025-204159-fb799f33",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

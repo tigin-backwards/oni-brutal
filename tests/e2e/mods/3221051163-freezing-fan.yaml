@@ -1,0 +1,35 @@
+# 冷冻风扇Freezing fan (3221051163), class B.
+#
+# What it does: prefixes replace the Ice-E Fan's (IceCooledFan) definition and setup: it needs
+# no ice and no operator any more, and becomes a generator (a ThermoelectricPowerGenerator,
+# 240 W) that, while running, takes 120 kW of heat from its surroundings; 400 kg of any metal,
+# logic controlled, power-tinkerable, never floods.
+# How a player reaches it: the build menu (Utilities), after Temperature Modulation.
+# What changes: a fan that cools and powers its circuit.
+#
+# setup grants Temperature Modulation and spawns metal ore. The fan is built in the corridor
+# west of the printing pod, with a wire on its power output, and selected: it runs, as a
+# generator.
+from: early-base
+mods: [3221051163]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"TemperatureModulation\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Cuprite\").substance", method: SpawnResource, args: [[111.5, 207.5, -12], 600, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"IceCooledFan\").GeneratorWattageRating": 240
+      "Assets.GetBuildingDef(\"IceCooledFan\").ExhaustKilowattsWhenActive": -120
+      "Assets.GetBuildingDef(\"IceCooledFan\").BuildingComplete.GetComponent<IntraObjectHandler.ThermoelectricPowerGenerator>": exists
+  - build: {prefab: IceCooledFan, at: [113, 206]}
+  - build: {prefab: Wire, cells: [[113, 206]]}
+  - run: {seconds: 1500, until: {buildings: {IceCooledFan: 1, Wire: 3}, pending_construction: 0}}   # the save has two wires already
+  - run: {seconds: 5}
+  - driver: {camera.set: {cell: [113, 207], ortho: 8}}
+  - click_world: {cell: [114, 207], select: IceCooledFan}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<Operational>.IsActive": true
+      "selected:GetComponent<IntraObjectHandler.ThermoelectricPowerGenerator>.WattageRating": 240
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Ice-E Fan"}

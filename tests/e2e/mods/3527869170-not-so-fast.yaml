@@ -1,0 +1,20 @@
+# Not So Fast Running Animations (3527869170), classes P, O.
+#
+# What it does: a postfix on BipedTransitionLayer.BeginTransition slows Duplicants' looping
+# walk, ladder and pole animations to the PLib option's percentage (80) and damps speeds over
+# 1.25 by the overspeed option (50 %); fire poles slide five times faster first.
+# How a player reaches it: it is passive, on every walking Duplicant.
+# What changes: calmer running animations.
+#
+# options set the speed to 60 %; the mod's multipliers are read once the colony is loaded, and
+# the Duplicants walk a while.
+from: early-base
+mods: [3527869170]
+options:
+  "3527869170": {Speed: 60}
+steps:
+  - expect_state:
+      "type:NotSoFast.NotSoFastPatch::SpeedMultiplier": [">= 0.59", "<= 0.61"]
+      "type:NotSoFast.NotSoFastPatch::OverspeedMultiplier": 0.5
+  - run: {seconds: 10}
+  - expect: {duplicants: 3}

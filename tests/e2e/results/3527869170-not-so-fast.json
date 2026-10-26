@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3527869170-not-so-fast.yaml",
+ "mods": [
+  "3527869170"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "options set the run animation speed, read once the colony loads",
+ "updated": "2026-10-26",
+ "commit": "fd4e5b95",
+ "mod_dlls": {
+  "3527869170": {
+   "NotSoFast.dll": "c66d09ab57a4968f659068e04dbac484f7cb35cc497d05fd3b7ab061285ca079"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-185246-86fbde8e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T18:52:46",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-192551-82b3b3ca",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T19:34:58",
+    "lane": 15,
+    "reference_run": "20261026-185246-86fbde8e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-192551-82b3b3ca",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T19:35:59",
+    "lane": 15,
+    "reference_run": "20261026-185246-86fbde8e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

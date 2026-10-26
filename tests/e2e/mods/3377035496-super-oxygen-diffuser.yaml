@@ -1,0 +1,32 @@
+# U&F-Super Oxygen Diffuser 超级氧气扩散机 (3377035496), class P.
+#
+# What it does: the Oxygen Diffuser's numbers become PLib options: its power draw (120 W by
+# default), oxygen made (the option times 0.5 kg/s) and algae eaten (the option times
+# 0.55 kg/s), the pressure it stops at (the option times 1.8 kg) and the oxygen's
+# temperature (303 K plus the option).
+# How a player reaches it: building an Oxygen Diffuser; the Mods screen's options.
+# What changes: a stronger or cheaper diffuser.
+#
+# options set 60 W, 4 (2 kg/s of oxygen), 2 (1.1 kg/s of algae), 3 (5.4 kg) and +10 degrees;
+# the definition and converter are read, and a diffuser built by setup in the dug-out
+# corridor west of the printing pod is selected.
+from: early-base
+mods: [3377035496]
+options:
+  "3377035496": {$file: Controler.json, Power: 60, Oxygen: 4, Algae: 2, Pressure: 3, Tem: 10}
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"MineralDeoxidizer\")", method: Build, args: [131127, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"MineralDeoxidizer\").EnergyConsumptionWhenActive": 60
+      "Assets.GetPrefab(\"MineralDeoxidizer\").GetComponent<ElementConverter>.outputElements[0].massGenerationRate": 2
+      "Assets.GetPrefab(\"MineralDeoxidizer\").GetComponent<ElementConverter>.outputElements[0].minOutputTemperature": 313
+      "Assets.GetPrefab(\"MineralDeoxidizer\").GetComponent<ElementConverter>.consumedElements[0].MassConsumptionRate": [">= 1.099", "<= 1.101"]
+      "Assets.GetPrefab(\"MineralDeoxidizer\").GetComponent<Electrolyzer>.maxMass": [">= 5.39", "<= 5.41"]
+  - run: {seconds: 2}
+  - expect: {buildings: {MineralDeoxidizer: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [111, 207], select: MineralDeoxidizer}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:ElementConverter.outputElements[0].massGenerationRate": 2

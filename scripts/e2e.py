@@ -32,7 +32,8 @@ starting; specs also wait while ps shows a perf job. Each wait says what it wait
 
 Needs, in the environment or out/local-tools/qa.env: QA_U57_GAME and QA_U57_STEAM (the DLC
 content and a Steam double owning it, as for qa.sh's U57 stages), E2E_ONIMCP (a build of
-OniMcp's mod folder; its licence does not allow vendoring it), E2E_DRIVER (E2eDriver's mod
+OniMcp's mod folder at the commit scripts/onimcp.py pins and builds; its licence does not
+allow vendoring it), E2E_DRIVER (E2eDriver's mod
 folder; default out/bin/E2eDriver/release) for specs that use it and, for --player original or
 both, E2E_ORIGINAL (the original player's executable, with a DLC-owning Steam double in its
 Plugins). Our player runs with the users' default game tweaks (`--game-tweak exact`), or with

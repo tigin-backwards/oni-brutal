@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3591826138-leaky-caramel-fissure.yaml",
+ "mods": [
+  "3591826138"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a placed Leaky Caramel Fissure is selected: its name, liquid sucrose at 200 degrees, max pressure and rolled rate match the original's",
+ "updated": "2026-10-26",
+ "commit": "a452aaa",
+ "mod_dlls": {
+  "3591826138": {
+   "Geysers_Leaky_Caramel.dll": "80e3f501e7b04f5dbf05e56ad59a7efea1687826bad52dfc9393e849e60de880"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-022709-87387b70",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T02:29:47",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-023425-4430a720",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T02:51:45",
+    "lane": 15,
+    "reference_run": "20261026-022709-87387b70",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-023425-4430a720",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T02:52:37",
+    "lane": 15,
+    "reference_run": "20261026-022709-87387b70",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

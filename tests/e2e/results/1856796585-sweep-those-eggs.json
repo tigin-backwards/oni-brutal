@@ -1,0 +1,63 @@
+{
+ "spec": "mods/1856796585-sweep-those-eggs.yaml",
+ "mods": [
+  "1856796585"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a board's capacity control set to 1 marks two of three Hatch eggs for sweeping (dumped)",
+ "updated": "2026-10-26",
+ "commit": "17f325ef",
+ "mod_dlls": {
+  "1856796585": {
+   "EggCritterSurplus.dll": "ad37151c565da2bb63d145a6c6b377d15cfcd62b848fa7d49a95383d734cefee"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-105851-04eb8ffa",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T11:04:59",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-133411-75254ba7",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T13:35:18",
+    "lane": 14,
+    "reference_run": "20261026-105851-04eb8ffa",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "capacity": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261026-133411-75254ba7",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T13:35:21",
+    "lane": 15,
+    "reference_run": "20261026-105851-04eb8ffa",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "capacity": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

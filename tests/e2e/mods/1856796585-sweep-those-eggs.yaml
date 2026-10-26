@@ -1,0 +1,36 @@
+# Sweep Those Eggs (1856796585), class B.
+#
+# What it does: adds the Ranching Bulletin Board to the Food menu, researched with Ranching:
+# a 1x1 raw-metal building with a capacity control (critters and eggs allowed, 8 by
+# default) and a checkbox; every 4 s it counts the eggs and critters of its room, and while
+# there are too many it marks the youngest eggs for sweeping (and with the checkbox,
+# critters for wrangling).
+# How a player reaches it: the build menu (Food), after the research; its side screen.
+# What changes: surplus eggs swept up without marking them by hand.
+#
+# setup builds a board in the dug-out corridor west of the printing pod and lays three Hatch
+# eggs there; the board is selected and its capacity set to 1, and two of the eggs are
+# marked for sweeping.
+from: early-base
+mods: [1856796585]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"EggCritterSurplus\")", method: Build, args: [131130, Neutral, null, [Cuprite], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131127, 0, 0, \"HatchEgg\", \"Ore\")", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131128, 0, 0, \"HatchEgg\", \"Ore\")", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131129, 0, 0, \"HatchEgg\", \"Ore\")", method: SetActive, args: [true]}}
+steps:
+  - run: {seconds: 2}
+  - expect: {buildings: {EggCritterSurplus: 1}}
+  - expect_state:
+      "count:all:Clearable::[*] if .isMarkedForClear == true and .name.StartsWith(\"HatchEgg\") == true": 0
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {pos: [114.5, 206.5], select: EggCritterSurplus}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_wait: {path: "**/CapacityControlSideScreen", cond: stable}
+  - ui_dump: {name: capacity, root: "**/CapacityControlSideScreen"}
+  - type: {ui: "**/CapacityControlSideScreen/**/InputField", text: "1", enter: true, clear: true}
+  - expect_state:
+      "ui:**/CapacityControlSideScreen::GetComponent<CapacityControlSideScreen>.target.UserMaxCapacity": 1
+  - run: {seconds: 10}
+  - expect_state:
+      "count:all:Clearable::[*] if .isMarkedForClear == true and .name.StartsWith(\"HatchEgg\") == true": 2

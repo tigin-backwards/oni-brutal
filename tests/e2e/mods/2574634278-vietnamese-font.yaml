@@ -1,0 +1,27 @@
+# ONI Vietnamese Beautiful Font (2574634278), class V (fonts).
+#
+# What it does: builds TextMeshPro font assets at run time from the TTF and OTF files in its
+# Fonts folder (FontEngine, a dynamic atlas filled with the Vietnamese characters): Graystroke
+# (its config.json names it) and Roboto Condensed in four styles. After Db.Initialize and on
+# every font swap it adds Graystroke as a fallback of the game's Graystroke fonts and puts the
+# Roboto fonts on every text style and LocText; its Localization.GetLocale postfix reports the
+# configured language code (vi) and direction.
+# How a player reaches it: every text on every screen.
+# What changes: the game's fonts.
+#
+# The five fonts are built and the game's texts use them, as the mod logs; the pause menu is
+# shot with them, and the colony runs.
+from: early-base
+mods: [2574634278]
+require_log: ['Đã tải \d+/5 font', 'Applied: \d+ GRAYSTROKE fallbacks']
+steps:
+  - expect_state:
+      "type:oni_vietnamese.Patches::robotoRegularFont": exists
+      "type:oni_vietnamese.Patches::graystrokeFont": exists
+      "type:oni_vietnamese.Patches::robotoRegularFont.characterTable.Count": ">= 229"
+  - key: {code: Escape}
+  - ui_wait: {path: "**/PauseScreen/**/Main MenuButton", cond: stable}
+  - shot: {name: pause, crop: "**/PauseScreen", threshold: 0.04}
+  - key: {code: Escape}
+  - run: {seconds: 10}
+  - expect: {duplicants: 3}

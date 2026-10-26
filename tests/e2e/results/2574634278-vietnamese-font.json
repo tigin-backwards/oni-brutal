@@ -1,0 +1,59 @@
+{
+ "spec": "mods/2574634278-vietnamese-font.yaml",
+ "mods": [
+  "2574634278"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the mod builds its five fonts from TTF and OTF files and puts them on the game's texts, as its log says; the pause menu shot with them matches",
+ "updated": "2026-10-26",
+ "commit": "4c0b281",
+ "mod_dlls": {
+  "2574634278": {
+   "oni-vietnamese.dll": "62314bf0a0ba4c6ffe92a67d033b6ba9fd28ae416686d015fc66da3c0c10643a"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-013354-10385a50",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T01:38:30",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-014015-ddacbe60",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T01:44:10",
+    "lane": 15,
+    "reference_run": "20261026-013354-10385a50",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "pause": 9e-06
+    }
+   },
+   {
+    "run": "20261026-014015-ddacbe60",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T01:45:25",
+    "lane": 15,
+    "reference_run": "20261026-013354-10385a50",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "pause": 1.1e-05
+    }
+   }
+  ]
+ }
+}

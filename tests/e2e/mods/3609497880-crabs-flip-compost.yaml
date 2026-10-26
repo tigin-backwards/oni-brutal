@@ -1,0 +1,22 @@
+# Crabs flip Compost (3609497880), class P.
+#
+# What it does: Pokeshells turn compost: their prefabs get a FlippCompostMonitor that, every
+# 20 to 60 s, looks within 25 cells for a Compost waiting to be flipped and nobody working it,
+# walks beside it and does the flip in place of a Duplicant's errand (patches on the compost's
+# and the approach behaviour's state machines).
+# How a player reaches it: keeping Pokeshells near a Compost.
+# What changes: no compost-turning errands for Duplicants.
+#
+# The Pokeshell prefabs are read: each carries the mod's monitor; one is spawned by setup
+# in the dug-out corridor west of the printing pod.
+from: early-base
+mods: [3609497880]
+setup:
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131127, 0, 0, \"Crab\", \"Creatures\")", method: SetActive, args: [true]}}
+steps:
+  - expect_state:
+      "count:Assets.GetPrefab(\"Crab\").GetComponent<StateMachineController>.cmpdef.defs[*] if .GetType().FullName == \"CrabsFlippCompost.FlippCompostMonitor+Def\"": 1
+      "count:Assets.GetPrefab(\"CrabWood\").GetComponent<StateMachineController>.cmpdef.defs[*] if .GetType().FullName == \"CrabsFlippCompost.FlippCompostMonitor+Def\"": 1
+  - run: {seconds: 5}
+  - expect_state:
+      "count:all:KPrefabID::[*] if .PrefabTag.Name == Crab": 1

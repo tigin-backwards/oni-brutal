@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3609497880-crabs-flip-compost.yaml",
+ "mods": [
+  "3609497880"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "Pokeshell prefabs carry the mod's compost monitor; a spawned one lives",
+ "updated": "2026-10-26",
+ "commit": "f898d18a",
+ "mod_dlls": {
+  "3609497880": {
+   "CrabsFlippCompost.dll": "b48aba4cb00e2d58a428712a3c823c7be0780be06de7005cdf5c5417a824a42d"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-105851-04eb8ffa",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T11:26:19",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-150143-eb459935",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T15:02:33",
+    "lane": 14,
+    "reference_run": "20261026-105851-04eb8ffa",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-150143-eb459935",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T15:02:34",
+    "lane": 15,
+    "reference_run": "20261026-105851-04eb8ffa",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

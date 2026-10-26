@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2984793466-food-does-not-rot.yaml",
+ "mods": [
+  "2984793466"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "no food can rot: a Mush Fry dropped in the corridor has no rot amount",
+ "updated": "2026-10-25",
+ "commit": "8884175",
+ "mod_dlls": {
+  "2984793466": {
+   "╚▒╤⌡╩│╬∩▓╗╗ß╕»└├.dll": "39a011feb8d43ddc5777be1ccd715b96a178b69a8c2a4b5d027a7ae968a8030b"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-193647-8f01e0fb",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T19:39:44",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-195152-cb86fc57",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T20:16:17",
+    "lane": 15,
+    "reference_run": "20261025-193647-8f01e0fb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261025-195152-cb86fc57",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-25T20:16:38",
+    "lane": 14,
+    "reference_run": "20261025-193647-8f01e0fb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

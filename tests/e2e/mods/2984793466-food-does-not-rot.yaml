@@ -1,0 +1,24 @@
+# 缺氧食物不会腐烂 / food does not rot (2984793466), class P.
+#
+# What it does: a postfix on the EdiblesManager.FoodInfo constructor sets CanRot false for
+# every food, so EntityTemplates.ExtendEntityToFood gives no food a Rottable (it is made
+# compostable instead): food has no freshness at all.
+# How a player reaches it: any food in the colony.
+# What changes: food never spoils; its info card shows no freshness.
+#
+# setup drops a Mush Fry in the corridor west of the printing pod (113, 207). It carries no
+# rot amount, nor any rot tag.
+from: early-base
+mods: [2984793466]
+setup:
+  - driver: {setup.call: {type: Scenario, method: SpawnPrefab, args: [{"$": "Grid.XYToCell(113, 207)"}, 0, 0, "FriedMushBar", "Ore"]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+steps:
+  - expect_state:
+      "EdiblesManager.GetFoodInfo(\"FriedMushBar\").CanRot": false
+      "EdiblesManager.GetFoodInfo(\"MushBar\").CanRot": false
+  - run: {seconds: 5}
+  - expect_state:
+      "count:all:Edible::[*] if .gameObject.name == FriedMushBar": 1
+      "count:all:Edible::[*] if .gameObject.name == FriedMushBar and .GetComponent<Modifiers>.amounts.Count == 0": 1
+      "count:all:Edible::[*] if .gameObject.name == FriedMushBar and .GetComponent<KPrefabID>.HasTag(\"DeepFrozen\") == true": 0

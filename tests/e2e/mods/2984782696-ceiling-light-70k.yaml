@@ -1,0 +1,30 @@
+# 魔改吸顶灯7万64, Modified Ceiling Light 70000 lux (2984782696), class B.
+#
+# What it does: adds a ceiling light to the Furniture menu (CeilingLight11, researched with
+# Refractive Decor beside the game's ceiling light): 1x1, of any metal, placeable anywhere,
+# drawing 10 W, that casts 70000 lux in a cone of range 64 (the game's light: 1800 lux, 8).
+# How a player reaches it: the build menu (Furniture).
+# What changes: a light that floods a large area.
+#
+# setup grants Refractive Decor. The light is ordered of copper ore under the ceiling of the
+# dug-out corridor west of the printing pod and built; selected, its Light2D carries the mod's
+# lux and range. It stays unpowered.
+from: early-base
+mods: [2984782696]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"RefractiveDecor\")", method: Purchased}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"RefractiveDecor\").unlockedItemIDs": {contains: CeilingLight11}
+  - build: {prefab: CeilingLight11, material: Cuprite, at: [113, 208]}
+  - expect: {blueprints: {CeilingLight11: 1}}
+  - run: {seconds: 900, until: {buildings: {CeilingLight11: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [114, 208], ortho: 10}}
+  - click_world: {cell: [113, 208], select: CeilingLight11}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~魔改吸顶灯7万64"}
+  - expect_state:
+      "selected:Light2D.Lux": 70000
+      "selected:Light2D.Range": 64
+      "selected:Building.Def.EnergyConsumptionWhenActive": 10

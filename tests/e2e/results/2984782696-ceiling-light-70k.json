@@ -1,0 +1,56 @@
+{
+ "spec": "mods/2984782696-ceiling-light-70k.yaml",
+ "mods": [
+  "2984782696"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the ceiling light is ordered and built under the corridor's ceiling and carries 70000 lux at range 64",
+ "updated": "2026-10-25",
+ "commit": "3d254cb",
+ "mod_dlls": {
+  "2984782696": {
+   "PLib.dll": "b862c5db2b3cd6df09a62d4a30782e91e2b24e8e1bfac08d991c9cc89a984ba9",
+   "─º╕─╬ⁿ╢Ñ╡╞7═≥64.dll": "638fe7aa94171883e1ade9c74dfe8d6889fa02dc89f3ad0ecae9d81922b1ed23"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-204056-92b74a79",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T20:40:57",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-215431-9c431e2a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T21:54:31",
+    "lane": 16,
+    "reference_run": "20261025-204056-92b74a79",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261025-215431-9c431e2a",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-25T21:54:32",
+    "lane": 17,
+    "reference_run": "20261025-204056-92b74a79",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

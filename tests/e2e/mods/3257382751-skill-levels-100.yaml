@@ -1,0 +1,19 @@
+# 小人技能等级速升100上限 Duplicant attributes to 100 (3257382751), class P.
+#
+# What it does: a prefix on AttributeLevel.AddExperience lifts any attribute below level 100
+# to 100 the first time it gains experience, then adds the experience as the game does up to
+# the game's level cap.
+# How a player reaches it: Duplicants working (digging, building, researching).
+# What changes: every attribute a Duplicant trains jumps to 100.
+#
+# No Duplicant has Excavation 100 in early-base; they dig out two cells east of its west
+# corridor, and a digger's Excavation is then 100.
+from: early-base
+mods: [3257382751]
+steps:
+  - expect_state:
+      "count:Components.LiveMinionIdentities.Items[*] if .GetComponent<AttributeLevels>.GetAttributeLevel(\"Digging\").level == 100": 0
+  - dig: [119, 207, 120, 209]
+  - run: {seconds: 600, until: {pending_digs: 0}}
+  - expect_state:
+      "count:Components.LiveMinionIdentities.Items[*] if .GetComponent<AttributeLevels>.GetAttributeLevel(\"Digging\").level == 100": ">= 1"

@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3257382751-skill-levels-100.yaml",
+ "mods": [
+  "3257382751"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "digging lifts a Duplicant's Excavation to 100",
+ "updated": "2026-10-26",
+ "commit": "f898d18a",
+ "mod_dlls": {
+  "3257382751": {
+   "╨í╚╦╝╝─▄╡╚╝╢╦┘╔²100╔╧╧▐.dll": "b4396779d90892dd958093b3188e1e9a69f305691962f9c5d75e2fd515a6c21f"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-105851-04eb8ffa",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T11:23:00",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-143450-564c3455",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T14:39:04",
+    "lane": 14,
+    "reference_run": "20261026-105851-04eb8ffa",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-143450-564c3455",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T14:39:06",
+    "lane": 15,
+    "reference_run": "20261026-105851-04eb8ffa",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

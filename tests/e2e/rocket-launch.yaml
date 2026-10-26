@@ -1,0 +1,82 @@
+# A Spaced Out rocket launched from its Rocket Control Station, after the station has been
+# deconstructed and built again inside the rocket.
+#
+# The fixture is a forum save (Klei bug tracker 351956, "Test DLC", a sandbox colony at cycle 0)
+# with two rockets on launch pads; the Calipso XL (kerosene engine, liquid oxidizer and fuel tanks,
+# small habitat) stands on the starting asteroid at hex (0, 0). Setup prepares it as a player
+# would over a few cycles: Nikola learns Rocket Piloting, joins its crew and is taken aboard, its
+# oxidizer tank is filled and its destination is the next hex east.
+#
+# Each Rocket Control Station subscribes to its rocket's tag changes and never unsubscribes. A
+# station that is destroyed stays subscribed; when the rocket launches, its handler runs on the
+# destroyed station, whose KMonoBehaviour.Trigger is a no-op once KObjectManager has released its
+# event system. The game releases it only when OnDestroy sees `!gameObject.activeSelf`, which a
+# destroyed GameObject reports in Unity. Ours kept activeSelf true there, so the event system
+# stayed alive and the launch threw a NullReferenceException in
+# RocketControlStation.OnTagsChanged (Clustercraft.Launch -> SetCraftStatus -> UpdateGroundTags),
+# the Duplicant's StartWork on RocketControlStationLaunchWorkable failing with it.
+from: rockets-so
+setup:
+  # The save's rockets were placed in sandbox mode; building a control station needs Space Program.
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"SpaceProgram\")", method: Purchased}}
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[0].GetComponent<MinionResume>", method: MasterSkill, args: [RocketPiloting1]}}
+  - driver: {setup.call: {target: "Components.Clustercrafts.Items[1].ModuleInterface.ClusterModules[3].Get().GetComponent<AssignmentGroupController>", method: SetMember, args: [{"$": "Components.LiveMinionIdentities.Items[0].assignableProxy.Get()"}, true]}}
+  - driver: {setup.call: {target: "Components.Clustercrafts.Items[1].ModuleInterface.ClusterModules[3].Get().GetComponent<ClustercraftExteriorDoor>", method: FerryMinion, args: [{"$": "Components.LiveMinionIdentities.Items[0].gameObject"}]}}
+  # Without this he finishes the errand the save gave him, back on the asteroid.
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[0].GetComponent<ChoreDriver>", method: StopChore}}
+  # The cabin (world 10, x 650 to 655, y 14 to 19) is a vacuum: 150 kg of oxygen for him to
+  # breathe, 25 kg in each of (651, 16), (654, 16), (652, 17), (653, 17), (651, 18) and
+  # (654, 18) (cell = x + 736 y).
+  - driver: {setup.call: {type: SimMessages, method: AddRemoveSubstance, args: [12427, Oxygen, null, 25.0, 300.0, 255, 0]}}
+  - driver: {setup.call: {type: SimMessages, method: AddRemoveSubstance, args: [12430, Oxygen, null, 25.0, 300.0, 255, 0]}}
+  - driver: {setup.call: {type: SimMessages, method: AddRemoveSubstance, args: [13164, Oxygen, null, 25.0, 300.0, 255, 0]}}
+  - driver: {setup.call: {type: SimMessages, method: AddRemoveSubstance, args: [13165, Oxygen, null, 25.0, 300.0, 255, 0]}}
+  - driver: {setup.call: {type: SimMessages, method: AddRemoveSubstance, args: [13899, Oxygen, null, 25.0, 300.0, 255, 0]}}
+  - driver: {setup.call: {type: SimMessages, method: AddRemoveSubstance, args: [13902, Oxygen, null, 25.0, 300.0, 255, 0]}}
+  - driver: {setup.call: {target: "Components.Clustercrafts.Items[1].ModuleInterface.ClusterModules[1].Get().GetComponent<OxidizerTank>.storage", method: AddLiquid, args: [LiquidOxygen, 450, 60, 255, 0]}}
+  - driver: {setup.call: {target: "Components.Clustercrafts.Items[1].GetComponent<RocketClusterDestinationSelector>", method: SetDestination, args: [{"$": "AxialI.EAST"}]}}
+steps:
+  # The save predates two rounds of changes, and the game shows a dialog for each, the later
+  # one on top.
+  - expect_ui: {"**/SpriteListDialog": {count: 2}}
+  - click: {ui: "**/SpriteListDialog/**/ConfigurableButton", index: 1}
+  - expect_ui: {"**/SpriteListDialog": {count: 1}}
+  - click: {ui: "**/SpriteListDialog/**/ConfigurableButton"}
+  - ui_wait: {path: "**/SpriteListDialog", cond: gone, frames: 120}
+  - expect_state:
+      "Components.Clustercrafts.Items[1].Name": "== 'Calipso XL'"
+      "Components.LiveMinionIdentities.Items[0].name": "== 'Nikola'"
+      "Components.Clustercrafts.Items[1].ModuleInterface.CheckPreppedForLaunch()": true
+      "Components.RocketControlStations.Count": 2
+      "Components.LiveMinionIdentities.Items[0].transform.position.x": "> 640"
+  # Inside the rocket (world 10): Nikola deconstructs its control station and builds it again
+  # from the copper ore it drops.
+  - call: {tool: navigation_control, args: {action: set_active_world, worldId: 10}}
+  - driver: {camera.set: {cell: [652, 15], ortho: 8}}
+  - tool: {toolbar: Deconstruct}
+  - drag: {from: [651, 14], to: [653, 15]}
+  - key: {code: Escape}
+  - run: {seconds: 120}
+  - expect_state:
+      "Components.RocketControlStations.Count": 1
+      "Components.Clustercrafts.Items[1].ModuleInterface.CheckPreppedForLaunch()": false
+  - build: {prefab: RocketControlStation, at: [652, 14]}
+  - run: {seconds: 300}
+  - expect_state:
+      "Components.RocketControlStations.Count": 2
+      "Components.Clustercrafts.Items[1].ModuleInterface.CheckPreppedForLaunch()": true
+  # Outside: the habitat's launch button, with no warnings (its crew is aboard). Nikola pilots
+  # the rocket off the pad.
+  - call: {tool: navigation_control, args: {action: set_active_world, worldId: 0}}
+  - driver: {camera.set: {cell: [76, 253], ortho: 10}}
+  - click_world: {cell: [76, 253], select: HabitatModuleSmall}
+  - ui_wait: {path: "**/LaunchButtonSideScreen/ButtonContainer/LaunchButton", cond: interactable, frames: 300}
+  - expect_ui: {"**/LaunchButtonSideScreen/ButtonContainer/LaunchButton/Label": {text: "BEGIN LAUNCH SEQUENCE"}}
+  # Nikola may be at the station already, and the rocket then leaves (and the side screen
+  # closes) in the frames after the click.
+  - click: {ui: "**/LaunchButtonSideScreen/ButtonContainer/LaunchButton"}
+  - run: {seconds: 300}
+  - expect_state:
+      "Components.Clustercrafts.Items[1].Status": "== 'InFlight'"
+      "Components.Clustercrafts.Items[1].GetComponent<KPrefabID>.HasTag(\"RocketOnGround\")": false
+      "Components.Clustercrafts.Items[1].GetComponent<KPrefabID>.HasTag(\"RocketInSpace\")": true

@@ -2031,7 +2031,8 @@ def build(mcp, prefab, cells, priority=5, material=None, wire=False):
                         compact=False, view='default')
         text = page.get('content', '') if isinstance(page, dict) else str(page)
         bounds = re.search(r'X=(\d+)~(\d+)', text)
-        line = next((l for l in text.splitlines() if l.startswith(f'Y={y}:')), None)
+        # The map pads rows to three digits (Y=014: in a rocket's cabin).
+        line = next((l for l in text.splitlines() if re.match(rf'Y=0*{y}:', l)), None)
         if not bounds or line is None:
             raise SpecFailure(f'row {y} is not on the viewport map')
         x0, x_end = int(bounds.group(1)), int(bounds.group(2))

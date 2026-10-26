@@ -393,6 +393,9 @@ Fixtures are blessed saves (`--bless` copies a spec's `save:` into `fixtures/`, 
 - `early-base` (`early-base.yaml`): dug out on both sides of the pod, with an outhouse, a manual
   generator, an unpowered research station and a cot. Debris lies on the floors.
 - `prehistoric1`: a Prehistoric colony at cycle 1 (copied from a played save, not blessed).
+- `rockets-so`: a Spaced Out sandbox colony with two rockets on launch pads, copied from a Klei
+  bug-tracker save (onimaxxing's `saves/forum-so/351956__Test_-_fuel_oxy.sav`, not blessed),
+  for [`rocket-launch.yaml`](rocket-launch.yaml).
 - `vanilla-base` (`vanilla-base.yaml`): a base-game colony, no Spaced Out, for mods that support
   the base game only (`supportedContent: VANILLA_ID`). The original player starts at the main
   menu with Spaced Out off (`from: main-menu`, `spaced_out: false`), plays New Game, Survival,

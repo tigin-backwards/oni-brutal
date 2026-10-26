@@ -1,0 +1,49 @@
+{
+ "spec": "rocket-launch.yaml",
+ "mods": [],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Spaced Out rocket's control station deconstructed and rebuilt inside it, then the rocket launched from the habitat's launch button and piloted off the pad; the destroyed station stays subscribed to the rocket's tags, and its handler does nothing at the launch, as in the original",
+ "updated": "2026-10-25",
+ "commit": "00bd4c2",
+ "mod_dlls": {},
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-201119-03c6485e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T20:11:19",
+    "lane": 32,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-201732-af48dc94",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T20:17:32",
+    "lane": 32,
+    "reference_run": "20261025-201119-03c6485e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261025-201732-af48dc94",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-25T20:22:27",
+    "lane": 32,
+    "reference_run": "20261025-201119-03c6485e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

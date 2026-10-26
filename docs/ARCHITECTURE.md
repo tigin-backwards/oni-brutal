@@ -106,7 +106,7 @@ one use of a struct's hash as an identity (D26). The game's conversions of float
 are rewritten as its assemblies load (D29), in the same pass as its directory listings (D30)
 and the double close in 0Harmony's MonoMod (D31). The game's Harmony is adjusted where patches
 would run differently on CoreCLR (D12–D14, D17–D21, D33, D34), and mods' assemblies are
-rewritten as they load where their IL relies on Mono (D11, D22, D23, D27–D32). No other
+rewritten as they load where their IL relies on Mono (D11, D22, D23, D27–D32, D40). No other
 game IL is touched.
 
 | Mono provided | Host provides | Needed by |
@@ -786,6 +786,38 @@ game or mod code can notice. Each says how it is resolved, or why it is kept.
   instead of 0.8. `--check-types` patches a method of a class whose fields and
   properties, and its base's, interleave instance, static and constant ones, and lists them;
   `MonoMemberOrderTests` sorts the probe's types as the original lists them.
+- **D40 Methods naming a type its assembly no longer has.** A mod built for an older game names
+  types the game has since renamed or removed: Endless Science fix's progress-bar prefix calls
+  `Worker Workable.get_worker()`, and `Worker` became `WorkerBase`. Both runtimes fail such a
+  method as a whole when it is compiled, at every call, before any of it runs, but report it
+  differently (measured in both players with `tools/UnityProbe`, `PROBE_SCENARIO=missingtypes`,
+  a library built with a type and run without it). Mono throws a TypeLoadException from the
+  caller's frame, the failing method having none in the trace. Its message depends on where the
+  JIT meets the type (`mini/method-to-ir.c`; Unity's fork, branch `unity-6000.3-mbe`): where it
+  keeps the resolution's error, "Could not resolve type with token 01000071 from typeref
+  (expected class 'Worker' in assembly 'Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+  PublicKeyToken=null')" (`mono_class_from_typeref_checked`, `metadata/class.c`): exception
+  clauses and locals, read first with the method's header, then calls, newobj, ldftn and jmp on
+  a member reference or a generic method's arguments, ldtoken and calli; where it drops it
+  (`CHECK_TYPELOAD`), "Failure has occurred while loading a type.": the type operands (castclass,
+  isinst, newarr, box and the rest), fields, and a call to the mod's own method whose signature
+  names the type. The first such place in IL order decides. CoreCLR's trace starts at the
+  failing method, and it says "Method not found: 'Worker Workable.get_worker()'.", "Field not
+  found: …" or "Could not load type 'Worker' from assembly …"; a call to the mod's own method
+  with such a signature fails in the method called, after the caller has run. Endless Science fix
+  fails in both players when a Duplicant starts its work, but ours logged a signature the
+  original lacks. **Resolved in** `MonoMissingTypes`, after `MonoNestedTypeRefs` as `ModAccess`
+  loads a mod: each method that names, in that order, a top-level type missing from an assembly
+  already loaded whose types both players share (a mod's, or the game's own from `Managed/`:
+  not Unity's engine or packages, nor Mono's class libraries) gets the body Mono's compilation
+  gives it, throwing Mono's exception with the token of the mod's file, and is hidden from stack
+  traces (`StackTraceHidden`), so the trace starts at its caller as Mono's does. Not covered:
+  members missing from a type that exists (Mono's "Method not found: void ProbeGone.Keeper.Removed()"
+  against CoreCLR's "…: 'Void ProbeGone.Keeper.Removed()'."), missing nested types (D32 binds
+  some of them), and assemblies not loaded yet when the mod loads; a method whose own signature
+  names a missing type fails in its callers only. A mod that cannot be rewritten loads unchanged.
+  `--check-types` loads a mod whose method calls a game method by a missing return type behind a
+  branch not taken, and one whose isinst names the missing type.
 
 ## 3. The engine API (`OniMoono.UnityEngine`)
 

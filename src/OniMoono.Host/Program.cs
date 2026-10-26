@@ -915,6 +915,99 @@ namespace OniMoono.Host
                     try { Directory.Delete(dir, true); } catch (IOException) { } catch (UnauthorizedAccessException) { }
                 }
             });
+            Check("A mod's methods naming a type the game no longer has (MonoMissingTypes)", () =>
+            {
+                ModAccess.Install();
+                var dir = Directory.CreateTempSubdirectory("oni-moono-check-").FullName;
+                try
+                {
+                    var game = AppDomain.CurrentDomain.GetAssemblies().Single(a => a.GetName().Name == "Assembly-CSharp");
+                    const string gone = "OniMoonoCheckGone";
+                    if (game.GetType(gone) != null) throw new InvalidOperationException(gone + " is in the game");
+                    // As Endless Science fix's prefix: `callvirt Worker Workable::get_worker()` behind a
+                    // branch not taken, Worker gone from the game. Inner fails as a whole, on Mono with
+                    // its message from the caller's frame; IsInst drops the error (Mono's generic
+                    // message); Fine names no missing type.
+                    var name = "OniMoonoCheckGoneMod";
+                    using var assembly = Cecil.AssemblyDefinition.CreateAssembly(new Cecil.AssemblyNameDefinition(name, new Version(1, 0)), name, Cecil.ModuleKind.Dll);
+                    var module = assembly.MainModule;
+                    var gameRef = new Cecil.AssemblyNameReference("Assembly-CSharp", game.GetName().Version);
+                    module.AssemblyReferences.Add(gameRef);
+                    var goneRef = new Cecil.TypeReference("", gone, module, gameRef);
+                    var workable = module.ImportReference(game.GetType("Workable", throwOnError: true)!);
+                    var getWorker = new Cecil.MethodReference("get_worker", goneRef, workable) { HasThis = true };
+                    var probe = new Cecil.TypeDefinition("", "Probe", Cecil.TypeAttributes.Public | Cecil.TypeAttributes.Abstract | Cecil.TypeAttributes.Sealed, module.TypeSystem.Object);
+                    module.Types.Add(probe);
+                    Cecil.MethodDefinition Method(string methodName, Cecil.TypeReference returns, Action<Cecil.Cil.ILProcessor> body, params Cecil.TypeReference[] parameters)
+                    {
+                        var method = new Cecil.MethodDefinition(methodName, Cecil.MethodAttributes.Public | Cecil.MethodAttributes.Static, returns);
+                        foreach (var parameter in parameters) method.Parameters.Add(new Cecil.ParameterDefinition(parameter));
+                        probe.Methods.Add(method);
+                        body(method.Body.GetILProcessor());
+                        return method;
+                    }
+                    var inner = Method("Inner", module.TypeSystem.Int32, il =>
+                    {
+                        var skip = il.Create(Cecil.Cil.OpCodes.Ldc_I4_7);
+                        il.Emit(Cecil.Cil.OpCodes.Ldarg_0);
+                        il.Emit(Cecil.Cil.OpCodes.Brfalse, skip);
+                        il.Emit(Cecil.Cil.OpCodes.Ldnull);
+                        il.Emit(Cecil.Cil.OpCodes.Callvirt, getWorker);
+                        il.Emit(Cecil.Cil.OpCodes.Pop);
+                        il.Append(skip);
+                        il.Emit(Cecil.Cil.OpCodes.Ret);
+                    }, module.TypeSystem.Boolean);
+                    Method("Outer", module.TypeSystem.Int32, il =>
+                    {
+                        il.Emit(Cecil.Cil.OpCodes.Ldc_I4_0);
+                        il.Emit(Cecil.Cil.OpCodes.Call, inner);
+                        il.Emit(Cecil.Cil.OpCodes.Ret);
+                    });
+                    Method("IsInst", module.TypeSystem.Boolean, il =>
+                    {
+                        il.Emit(Cecil.Cil.OpCodes.Ldarg_0);
+                        il.Emit(Cecil.Cil.OpCodes.Isinst, goneRef);
+                        il.Emit(Cecil.Cil.OpCodes.Ldnull);
+                        il.Emit(Cecil.Cil.OpCodes.Cgt_Un);
+                        il.Emit(Cecil.Cil.OpCodes.Ret);
+                    }, module.TypeSystem.Object);
+                    Method("Fine", module.TypeSystem.Int32, il => { il.Emit(Cecil.Cil.OpCodes.Ldc_I4_5); il.Emit(Cecil.Cil.OpCodes.Ret); });
+                    var modPath = Path.Combine(dir, name + ".dll");
+                    assembly.Write(modPath);
+                    int token;
+                    using (var pe = new System.Reflection.PortableExecutable.PEReader(File.OpenRead(modPath)))
+                    {
+                        var md = System.Reflection.Metadata.PEReaderExtensions.GetMetadataReader(pe);
+                        token = System.Reflection.Metadata.Ecma335.MetadataTokens.GetToken(md.TypeReferences.Single(h => md.GetString(md.GetTypeReference(h).Name) == gone));
+                    }
+                    var type = ModAccess.LoadFrom(modPath).GetType("Probe")!;
+                    TypeLoadException Fails(string methodName, object?[]? args)
+                    {
+                        try
+                        {
+                            type.GetMethod(methodName)!.Invoke(null, BindingFlags.DoNotWrapExceptions, null, args, null);
+                        }
+                        catch (TypeLoadException e)
+                        {
+                            return e;
+                        }
+                        throw new InvalidOperationException(methodName + " did not throw TypeLoadException");
+                    }
+                    var expected = $"Could not resolve type with token {token:x8} from typeref (expected class '{gone}' in assembly 'Assembly-CSharp, Version={game.GetName().Version}, Culture=neutral, PublicKeyToken=null')";
+                    var outer = Fails("Outer", null);
+                    if (outer.Message != expected) throw new InvalidOperationException($"Outer: \"{outer.Message}\", not \"{expected}\"");
+                    var first = outer.StackTrace!.Split('\n')[0].Trim();
+                    if (!first.StartsWith("at Probe.Outer(", StringComparison.Ordinal)) throw new InvalidOperationException("Outer's first frame: " + first);
+                    var isInst = Fails("IsInst", [null]);
+                    if (isInst.Message != "Failure has occurred while loading a type.") throw new InvalidOperationException("IsInst: " + isInst.Message);
+                    if ((int)type.GetMethod("Fine")!.Invoke(null, null)! != 5) throw new InvalidOperationException("Fine changed");
+                    return $"the method throws Mono's TypeLoadException from its caller's frame ({first}); isinst gives Mono's message without the type";
+                }
+                finally
+                {
+                    try { Directory.Delete(dir, true); } catch (IOException) { } catch (UnauthorizedAccessException) { }
+                }
+            });
             Check("A mod's stack walk through a patched method (MonoStackFrames)", () =>
             {
                 ModAccess.Install();

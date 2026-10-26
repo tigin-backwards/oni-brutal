@@ -82,7 +82,8 @@ namespace OniMoono.Host
 
         /// A mod's assembly, rewritten when it reaches into the game's non-public members, with its
         /// static readonly fields writable as Mono's are, with its references to nested types of the
-        /// game's strings that the game no longer has bound as Mono binds them, with any class that
+        /// game's strings that the game no longer has bound as Mono binds them, with each method that
+        /// names a type its assembly lacks throwing as Mono's compilation of it does, with any class that
         /// misses a method of an interface it lists still loadable, with a patched method's stack
         /// frame reporting its owner type, with its string-keyed concurrent dictionaries in Mono's
         /// order, with a stack overflow in a method that can recurse thrown as an exception, with
@@ -114,6 +115,9 @@ namespace OniMoono.Host
             // A nested type of the game's strings that the game no longer has is bound as Mono binds
             // it (MonoNestedTypeRefs).
             if (MonoNestedTypeRefs.Adjust(image ?? File.ReadAllBytes(path), ref symbols, path) is { } bound) image = bound;
+            // A method naming a type its assembly lacks throws as Mono's compilation of it does
+            // (MonoMissingTypes).
+            if (MonoMissingTypes.Adjust(image ?? File.ReadAllBytes(path), ref symbols, path) is { } failing) image = failing;
             // A class missing a method of a game interface it lists loads, as on Mono
             // (MissingInterfaceMethods).
             if (MissingInterfaceMethods.Adjust(image ?? File.ReadAllBytes(path), ref symbols, path) is { } completed) image = completed;
@@ -126,7 +130,7 @@ namespace OniMoono.Host
             // Its conversions of floats to integers give Mono's values out of range (MonoConversions),
             // and its directory listings come in Mono's order (MonoDirectoryListing, in that pass).
             if (MonoConversions.Adjust(image ?? File.ReadAllBytes(path), ref symbols, path) is { } converted) image = converted;
-            if (image == null) return Assembly.LoadFrom(path);
+            if (image == null) return Recorded(Assembly.LoadFrom(path));
             Assembly assembly;
             try
             {
@@ -141,6 +145,13 @@ namespace OniMoono.Host
             byPath[path] = assembly;
             lock (directories)
                 if (!directories.Contains(Path.GetDirectoryName(path)!)) directories.Add(Path.GetDirectoryName(path)!);
+            return Recorded(assembly);
+        }
+
+        /// A mod's assembly, once loaded: its types are the same in both players (MonoMissingTypes).
+        static Assembly Recorded(Assembly assembly)
+        {
+            MonoMissingTypes.ModLoaded(assembly);
             return assembly;
         }
 

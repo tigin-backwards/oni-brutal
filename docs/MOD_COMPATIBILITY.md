@@ -1102,7 +1102,7 @@ installs get developer checks subscribers never see).
 | 1115 | [Unblockable Rockets](https://steamcommunity.com/sharedfiles/filedetails/?id=1962983262) | ⬜ | ⬜ | ⬜ |  |
 | 1117 | [Edge Detectors and Diode (Automation)](https://steamcommunity.com/sharedfiles/filedetails/?id=2777145427) | ⬜ | ⬜ | ⬜ |  |
 | 1119 | [Amphibious Minnow (Species Mod)](https://steamcommunity.com/sharedfiles/filedetails/?id=3753181401) | ⬜ | ⬜ | ⬜ |  |
-| 1120 | [小动物公寓bug修复](https://steamcommunity.com/sharedfiles/filedetails/?id=3773818206) | ⬜ | ⬜ | ⬜ |  |
+| 1120 | [小动物公寓bug修复](https://steamcommunity.com/sharedfiles/filedetails/?id=3773818206) | ✅ | ✅ | ✅ | spec tests/e2e/mods/3773818206-critter-condo-save-fix.yaml: a tame hatch that used a condo is saved and the save loaded through the Load screen: its monitor waits the effect's 570 s left, not 600 s (issue #16: no save loaded before ARCHITECTURE D38) |
 | 1121 | [ArchipelagoNotIncluded](https://steamcommunity.com/sharedfiles/filedetails/?id=3415553359) | ⬜ | ⬜ | ⬜ |  |
 | 1122 | [[reupload] Wooden Set - Structures by Ronivan](https://steamcommunity.com/sharedfiles/filedetails/?id=2880319200) | ⬜ | ⬜ | ⬜ |  |
 | 1123 | [Relic Hunter](https://steamcommunity.com/sharedfiles/filedetails/?id=1927259233) | ⬜ | ⬜ | ⬜ |  |

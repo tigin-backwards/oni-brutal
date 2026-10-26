@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3773818206-critter-condo-save-fix.yaml",
+ "mods": [
+  "3773818206"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a tame hatch that used a condo is saved and the save loaded through the Load screen: its monitor waits the effect's 570 s left, not 600 s (issue #16: no save loaded before ARCHITECTURE D38)",
+ "updated": "2026-10-26",
+ "commit": "674bc3d",
+ "mod_dlls": {
+  "3773818206": {
+   "CritterCondoFix.dll": "9a2ec0260b3bbc1a05637a106d560abd6ea4eff9a1b15a1da8aa119032869719"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-235631-b8405b5f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T23:56:31",
+    "lane": 30,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-235821-16194892",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T23:58:21",
+    "lane": 30,
+    "reference_run": "20261025-235631-b8405b5f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261025-235821-16194892",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-25T23:59:29",
+    "lane": 30,
+    "reference_run": "20261025-235631-b8405b5f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

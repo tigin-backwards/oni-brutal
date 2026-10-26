@@ -1,0 +1,60 @@
+# Critter Condo Save Fix (3773818206), class P.
+#
+# What it does: a critter that used a critter condo (ground, underwater or airborne) has the
+# condo's effect for a cycle, and its CritterCondoInteractMontior waits as long before it looks
+# for a condo again (its remainingSecondsForEffect parameter, set to 600 s when the monitor
+# enters satisfied). The game saves the parameter but sets it to 600 again whenever the monitor
+# starts, so after a load every tame critter waits a full cycle again. The mod's postfix on
+# StateMachineController.Restore and its prefix on the monitor's Parameter<float>.Set give the
+# parameter the time the effect has left. An option (on by default) also drops a condo target
+# the critter cannot reach (a prefix on FindCondoTarget), not exercised here.
+# How a player reaches it: loading a save with a tame critter that used a condo.
+# What changes: the critter's wait after a load, the effect's time left instead of 600 s.
+#
+# Issue #16: on CoreCLR the prefix's replacement ran for every state machine's
+# Parameter<float>.Set (code CoreCLR shares among them), and loading any save failed with
+# InvalidCastException (ARCHITECTURE D38).
+#
+# Setup spawns a hatch, tames it, gives it the condo's effect and puts its monitor in satisfied
+# (600 s). The spec runs 30 s, saves, loads that save through the pause menu's Load screen, and
+# checks that the monitor now waits the effect's time left.
+from: early-base
+mods: [3773818206]
+setup:
+  - driver: {setup.call: {type: GameUtil, method: KInstantiate, args: [{"$": "Assets.GetPrefab(\"Hatch\")"}, [110.5, 206.01, -24.5], Creatures]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "last:GetComponent<Effects>", method: Add, args: [InteractedWithCritterCondo, true]}}
+  - driver: {setup.call: {target: "last:gameObject.GetComponent<StateMachineController>.GetSMI(\"CritterCondoInteractMontior+Instance\")", method: GoTo, args: [root.satisfied]}}
+  - driver: {setup.call: {target: "last:gameObject.GetComponent<StateMachineController>.GetSMI(\"WildnessMonitor+Instance\")", method: DebugTame}}
+steps:
+  - run: {seconds: 30}
+  # One tame critter with the condo's effect (570 s of it left); its monitor waits 600 s, the
+  # fixture's wild critters' monitors none. The monitor's two parameters (remainingSecondsForEffect
+  # and masterTarget) come in the order the runtime lists the state machine's fields, which
+  # differs between the players: the wait is the sum of the parameter found first and second.
+  - expect_state:
+      "count:all:CreatureBrain::[*] if .GetComponent<KPrefabID>.HasTag(\"Wild\") == false": 1
+      "count:all:CreatureBrain::[*] if .GetComponent<Effects>.HasEffect(\"InteractedWithCritterCondo\") == true": 1
+      "sum:all:CreatureBrain::[*].GetComponent<StateMachineController>.GetSMI(\"CritterCondoInteractMontior+Instance\").GetParameterContexts()[0].value if .GetComponent<StateMachineController>.GetSMI(\"CritterCondoInteractMontior+Instance\").GetParameterContexts()[0].parameter.name == remainingSecondsForEffect": {save_as: first}
+  - expect_state: {"sum:all:CreatureBrain::[*].GetComponent<StateMachineController>.GetSMI(\"CritterCondoInteractMontior+Instance\").GetParameterContexts()[1].value if .GetComponent<StateMachineController>.GetSMI(\"CritterCondoInteractMontior+Instance\").GetParameterContexts()[1].parameter.name == remainingSecondsForEffect": "== 600 - first"}
+  - save: condo
+  # Pause menu, Load, the colony, then the newest save's Load Game (the save just made).
+  - key: {code: Escape}
+  - ui_wait: {path: "**/PauseScreen/LayoutContent/ButtonContent/LoadButton", cond: stable}
+  - click: {ui: "**/PauseScreen/LayoutContent/ButtonContent/LoadButton"}
+  - ui_wait: {path: "**/LoadScreen/Panel/ColonyList/ListView/Files/Viewport/Content/Prefab_ColonyButton", cond: stable}
+  - click: {ui: "**/LoadScreen/Panel/ColonyList/ListView/Files/Viewport/Content/Prefab_ColonyButton"}
+  - ui_wait: {path: "**/LoadScreen/Panel/ColonyView/ListView/Files/Viewport/Content/SaveTemplate(Clone)/TitleContainer/SaveText", cond: text, value: condo}
+  - click: {ui: "**/LoadScreen/Panel/ColonyView/ListView/Files/Viewport/Content/SaveTemplate(Clone)/LoadButton"}
+  # The Load screen goes with the old game; the loaded one's HUD settles.
+  - ui_wait: {path: "**/LoadScreen", cond: gone, frames: 6000}
+  - ui_wait: {path: "**/BottomPanelRight/ToolMenu", cond: stable, frames: 6000}
+  # The mod's work: the monitor waits the 570 s the effect has left, not 600 s again.
+  - expect_state:
+      "count:all:CreatureBrain::[*] if .GetComponent<KPrefabID>.HasTag(\"Wild\") == false": 1
+      "count:all:CreatureBrain::[*] if .GetComponent<Effects>.HasEffect(\"InteractedWithCritterCondo\") == true": 1
+      "sum:all:CreatureBrain::[*].GetComponent<StateMachineController>.GetSMI(\"CritterCondoInteractMontior+Instance\").GetParameterContexts()[0].value if .GetComponent<StateMachineController>.GetSMI(\"CritterCondoInteractMontior+Instance\").GetParameterContexts()[0].parameter.name == remainingSecondsForEffect": {save_as: loaded}
+  - expect_state: {"sum:all:CreatureBrain::[*].GetComponent<StateMachineController>.GetSMI(\"CritterCondoInteractMontior+Instance\").GetParameterContexts()[1].value if .GetComponent<StateMachineController>.GetSMI(\"CritterCondoInteractMontior+Instance\").GetParameterContexts()[1].parameter.name == remainingSecondsForEffect": "< 600 - loaded"}
+  - expect_state: {"sum:all:CreatureBrain::[*].GetComponent<StateMachineController>.GetSMI(\"CritterCondoInteractMontior+Instance\").GetParameterContexts()[1].value if .GetComponent<StateMachineController>.GetSMI(\"CritterCondoInteractMontior+Instance\").GetParameterContexts()[1].parameter.name == remainingSecondsForEffect": ">= 560 - loaded"}
+  - run: {seconds: 10}
+  - expect: {duplicants: 3}

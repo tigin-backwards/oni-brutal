@@ -731,6 +731,53 @@ game or mod code can notice. Each says how it is resolved, or why it is kept.
   class derived from it, Version and Uri past tier-up, then patches Uri's too;
   `tests/e2e/mods/3773818206-critter-condo-save-fix.yaml` tames a hatch that used a condo,
   saves, loads the save through the Load screen and reads how long its monitor waits.
+- **D39 Order of fields and properties.** Mono lists a type's fields and properties class by
+  class from the type to its bases, each class's in its metadata order
+  (`ves_icall_RuntimeType_GetFields_native` and `GetPropertiesByName_native`, `icall.c`, over
+  `mono_class_get_fields_lazy` and `mono_class_get_properties`; Unity's fork, branch
+  `unity-6000.3-mbe`). CoreCLR walks the classes in the same order, but lists a class's instance
+  fields, then its static fields, then its constants (`RuntimeTypeCache.PopulateFields`). And on
+  CoreCLR only, Harmony's MonoMod sorts the cached field and property lists of each type that the
+  IL of a method it patches names by metadata token (`ReflectionHelper.FixReflectionCache`, from
+  `MethodBodyReader` and `DynamicMethodDefinition`; on Mono it finds no such cache and does
+  nothing), across classes and assemblies, so a base class's members can come first, depending on
+  what has been patched. Measured in both players (tools/UnityProbe,
+  `PROBE_SCENARIO=memberorder`, at the main menu with OniMcp and E2eDriver loaded): of the
+  game's 20,700 types (Assembly-CSharp and firstpass), GetFields with every flag listed the same
+  fields in another order for 789 (732 within a class, 57 across classes), GetFields of instance
+  fields for 114 and GetProperties for 50 (both across classes). Methods, events,
+  nested types and constructors come in the same order (for the game's classes; System.Object's
+  methods are each class library's). The order matters where the game numbers or creates things
+  in it. `StateMachine.CreateStates` numbers a state machine's parameters in its fields' order:
+  with Critter Condo Save Fix, whose patch of `CritterCondoInteractMontior.FindCondoTarget` names
+  the monitor's fields, its parameters were masterTarget and remainingSecondsForEffect here and
+  the other way round in the original. Saves match parameters by name, so they load either way;
+  the order they are written in, and a mod reading a parameter by position, differed. Without
+  mods, the 216 state machines of the early-base colony number theirs as the original does.
+  `MyAttributeManager` finds or adds, and then spawns, the components of a component's `MyCmpAdd`,
+  `MyCmpGet` and `MyCmpReq` fields in the fields' order, keeping the first field of a name: with
+  only the host's and the test mods' patches, Navigator, SuitLocker and HighEnergyParticle had
+  their StateMachineController (their base class's field) found and spawned before their own
+  components. KSerialization (one class at a time, instance fields), Db's
+  `ResourceSet.ResolveReferences` (by name) and GameComps (one class's static fields) come out
+  alike. **Resolved in** `MonoReflectionOrder`: postfixes on CoreLib's
+  `RuntimeType.GetFields(BindingFlags)` and `GetProperties(BindingFlags)` reorder each result
+  (`OniMoono.Engine.MonoMemberOrder`): class by class from the type to its bases, each class's by
+  metadata token; a result already in that order is left as it is. That is for the whole
+  process, as on Mono, and covers the overloads that call them (`GetFields()`,
+  `TypeInfo.DeclaredFields`, `FindMembers`). The members stay CoreCLR's: where the class libraries
+  differ (System.Delegate's properties, the engine's classes' private fields), so do the lists.
+  MonoMod's sort is left alone. Not covered: `GetMembers` and `GetMember` (no game code calls
+  them). Kept: `GetInterfaces` (Mono walks a hash table of interfaces keyed by type token,
+  CoreCLR its interface map; 1981 game types differ) and custom attributes (CoreCLR returns
+  pseudo-attributes such as `[Serializable]` first, Mono last; 1432 types), which the game looks
+  up by type, never by position. Cost: none measured. Starting, loading U57 (56 s while other
+  sessions ran four players) and playing 10 s made 276,000 calls, which spent 20 ms in the
+  postfixes all told (timed in them). A list in order is checked and left; one MonoMod sorted is
+  sorted again on each call: GetFields of 130 instance fields over five classes takes 2.4 µs
+  instead of 0.8. `--check-types` patches a method of a class whose fields and
+  properties, and its base's, interleave instance, static and constant ones, and lists them;
+  `MonoMemberOrderTests` sorts the probe's types as the original lists them.
 
 ## 3. The engine API (`OniMoono.UnityEngine`)
 

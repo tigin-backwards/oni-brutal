@@ -30,8 +30,8 @@ steps:
   - run: {seconds: 30}
   # One tame critter with the condo's effect (570 s of it left); its monitor waits 600 s, the
   # fixture's wild critters' monitors none. The monitor's two parameters (remainingSecondsForEffect
-  # and masterTarget) come in the order the runtime lists the state machine's fields, which
-  # differs between the players: the wait is the sum of the parameter found first and second.
+  # and masterTarget) come in the order the runtime lists the state machine's fields (Mono's in
+  # both players, ARCHITECTURE D39): the wait is the sum of the parameter found first and second.
   - expect_state:
       "count:all:CreatureBrain::[*] if .GetComponent<KPrefabID>.HasTag(\"Wild\") == false": 1
       "count:all:CreatureBrain::[*] if .GetComponent<Effects>.HasEffect(\"InteractedWithCritterCondo\") == true": 1

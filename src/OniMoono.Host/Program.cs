@@ -123,6 +123,9 @@ namespace OniMoono.Host
                 MonoFolderPaths.Install();
                 // Fields and events print as Mono prints them, which mods' transpilers compare (D35).
                 MonoMemberStrings.Install();
+                // Fields and properties are listed in Mono's order, which the game numbers state
+                // machines' parameters and adds components in (D39).
+                MonoReflectionOrder.Install();
                 GameTweaks.GameTweaks.Install(effective.EnabledTweaks.ToHashSet(StringComparer.Ordinal));
                 if (!options.NoTweaksMenu) MoonoTweaksMenu.Install(effective, settings, settingsPath);
                 StateMachineSaveNames.Install(dataDir, AppContext.BaseDirectory);
@@ -1083,6 +1086,33 @@ namespace OniMoono.Host
                     transpiler: new HarmonyLib.HarmonyMethod(typeof(Program), nameof(BrightLux)));
                 return new LitCell().Lit() ? "fields and events print their type's full name, as on Mono, and the transpiler finds its field" : throw new InvalidOperationException("the transpiler found no field");
             });
+            Check("Fields and properties of a class whose method a mod patches, in Mono's order (MonoReflectionOrder)", () =>
+            {
+                MonoReflectionOrder.Install();
+                // As Critter Condo Save Fix patches CritterCondoInteractMontior.FindCondoTarget:
+                // MonoMod re-sorts the cached members of the types the method's IL names.
+                new HarmonyLib.Harmony("OniMoono.Host.Check").Patch(typeof(OrderLeaf).GetMethod(nameof(OrderLeaf.Sum)),
+                    prefix: new HarmonyLib.HarmonyMethod(typeof(Program), nameof(CountOrder)));
+                const BindingFlags every = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy;
+                string Names(IEnumerable<MemberInfo> members) => string.Join(" ", members.Select(m => m.Name));
+                var lists = new[]
+                {
+                    Names(typeof(OrderLeaf).GetFields(every)),
+                    Names(typeof(OrderLeaf).GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy)),
+                    Names(typeof(OrderLeaf).GetFields()),
+                    Names(typeof(OrderLeaf).GetProperties(every)),
+                };
+                // The original's order: the class's own members in metadata order, then its base's.
+                var expected = new[]
+                {
+                    "leafA leafStatic LeafConst leafB <LeafP>k__BackingField <LeafS>k__BackingField rootA rootStatic RootConst rootB",
+                    "leafA leafB <LeafP>k__BackingField rootA rootB",
+                    "leafA leafStatic LeafConst leafB rootA rootB",
+                    "LeafP LeafS RootP",
+                };
+                if (!lists.SequenceEqual(expected)) throw new InvalidOperationException($"listed {string.Join("; ", lists)}");
+                return new OrderLeaf().Sum() == 0 && orderPatched > 0 ? "a class's own fields and properties, then its base's, each in metadata order, as on Mono" : throw new InvalidOperationException("the prefix did not run");
+            });
             Check("A mod's string-keyed ConcurrentDictionary enumerated while it grows (MonoConcurrentDictionaries)", () =>
             {
                 ModAccess.Install();
@@ -1377,6 +1407,30 @@ namespace OniMoono.Host
             public bool Lit() => lux > Limit;
         }
 
+        /// CheckRuntimeServices' MonoReflectionOrder check: instance, static and constant fields
+        /// interleaved, in a class and its base, and a method a mod patches that names them.
+        class OrderRoot
+        {
+            public int rootA = 0;
+            public static int rootStatic = 0;
+            public const int RootConst = 3;
+            public int rootB = 0;
+            public int RootP { get; set; }
+        }
+
+        sealed class OrderLeaf : OrderRoot
+        {
+            public int leafA = 0;
+            public static int leafStatic = 0;
+            public const int LeafConst = 2;
+            public int leafB = 0;
+            public int LeafP { get; set; }
+            public static int LeafS { get; set; }
+
+            [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+            public int Sum() => leafA + leafB + rootA + rootB + LeafP + RootP + leafStatic + rootStatic + LeafS;
+        }
+
         static IEnumerable<HarmonyLib.CodeInstruction> BrightLux(IEnumerable<HarmonyLib.CodeInstruction> instructions)
         {
             foreach (var instruction in instructions)
@@ -1386,6 +1440,9 @@ namespace OniMoono.Host
         }
 
         static int Bright(LitCell cell) => 1000;
+
+        static int orderPatched;
+        static void CountOrder() => orderPatched++;
 
         static int prefixedB, prefixedC, countedA;
         static void CountA() => countedA++;

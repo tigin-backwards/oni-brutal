@@ -1,0 +1,25 @@
+# MSJ Transmission Line 梦世界 输电线 (2853460032), classes P, O.
+#
+# What it does: a postfix on Wire.GetMaxWattageAsFloat makes every wire rating carry the load
+# its PLib option sets (33333 W by default, 1 to 66666, restart required); Heavi-Watt and
+# conductive Heavi-Watt wires may be built anywhere, not only where tiles do not block them;
+# the plain Wire is drawn with the mod's anim (Wire1_kanim).
+# How a player reaches it: building wires; the options on the Mods screen.
+# What changes: wire limits and looks.
+#
+# The option sets 20000 W: every rating carries it. The Wire uses the mod's anim and the
+# Heavi-Watt wires build anywhere. setup lays a wire in the corridor west of the printing pod.
+from: early-base
+mods: [2853460032]
+options:
+  "2853460032": {$file: Controler.json, c1: 20000.0}
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Wire\")", method: Build, args: [{"$": "Grid.XYToCell(111, 208)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Wire.GetMaxWattageAsFloat(\"Max1000\")": 20000
+      "Wire.GetMaxWattageAsFloat(\"Max20000\")": 20000
+      "Assets.GetBuildingDef(\"Wire\").AnimFiles[0].name": Wire1_kanim
+      "Assets.GetBuildingDef(\"HighWattageWire\").BuildLocationRule": Anywhere
+  - run: {seconds: 10}
+  - expect: {duplicants: 3}

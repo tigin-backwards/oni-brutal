@@ -1,0 +1,56 @@
+{
+ "spec": "mods/2853460032-msj-transmission-line.yaml",
+ "mods": [
+  "2853460032"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with the option at 20000 W, every wire rating carries it; the Wire uses the mod's anim and Heavi-Watt wires build anywhere; the colony runs",
+ "updated": "2026-10-26",
+ "commit": "fd3dd65",
+ "mod_dlls": {
+  "2853460032": {
+   "MSJ Transmission Line├╬╩└╜τ ╩Σ╡τ╧▀.dll": "4463137712db397ab62ed3f81de15d201d0f699bfc9d658c266a12951753baa9",
+   "PLib.dll": "b862c5db2b3cd6df09a62d4a30782e91e2b24e8e1bfac08d991c9cc89a984ba9"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-003541-39fc8dbf",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T00:55:31",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-011926-1bdf69de",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T01:19:26",
+    "lane": 15,
+    "reference_run": "20261026-003541-39fc8dbf",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-011926-1bdf69de",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T01:20:04",
+    "lane": 15,
+    "reference_run": "20261026-003541-39fc8dbf",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

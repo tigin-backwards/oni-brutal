@@ -1,0 +1,29 @@
+# Automatic Dispenser: transfer only from Lower Priority (1889255373), class P.
+#
+# What it does: a postfix on ObjectDispenserConfig.DoPostConfigureComplete sets the Automatic
+# Dispenser's storage to take items only from storages of lower priority
+# (Storage.onlyTransferFromLowerPriority), as lockers do, so Duplicants stop shuttling items
+# between a dispenser and the storage it is fed from.
+# How a player reaches it: an Automatic Dispenser and a storage of the same or higher priority.
+# What changes: where a dispenser's items may be fetched from.
+#
+# setup builds an Automatic Dispenser and, beside it, a Storage Bin holding 200 kg of diamond
+# (both at the default priority, both accepting diamond only; no diamond lies anywhere else).
+# In five minutes nothing moves from the bin to the dispenser.
+from: early-base
+mods: [1889255373]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"ObjectDispenser\")", method: Build, args: [{"$": "Grid.XYToCell(111, 207)"}, Neutral, null, [Cuprite], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "all:ObjectDispenser::[0].GetComponent<TreeFilterable>", method: AddTagToFilter, args: [Diamond]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"StorageLocker\")", method: Build, args: [{"$": "Grid.XYToCell(113, 207)"}, Neutral, null, [Cuprite], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "all:StorageLocker::[0].GetComponent<TreeFilterable>", method: AddTagToFilter, args: [Diamond]}}
+  - driver: {setup.call: {target: "all:StorageLocker::[0].GetComponent<Storage>", method: AddOre, args: [Diamond, 200.0, 293.15, 255, 0, false, true]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"ObjectDispenser\").GetComponent<Storage>.onlyTransferFromLowerPriority": true
+      "all:ObjectDispenser::[0].GetComponent<Storage>.ShouldOnlyTransferFromLowerPriority": true
+      "all:StorageLocker::[0].GetComponent<Storage>.MassStored()": 200
+  - run: {seconds: 300}
+  - expect_state:
+      "all:ObjectDispenser::[0].GetComponent<Storage>.MassStored()": 0
+      "all:StorageLocker::[0].GetComponent<Storage>.MassStored()": 200

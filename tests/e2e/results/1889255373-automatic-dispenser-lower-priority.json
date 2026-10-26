@@ -1,0 +1,55 @@
+{
+ "spec": "mods/1889255373-automatic-dispenser-lower-priority.yaml",
+ "mods": [
+  "1889255373"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "an Automatic Dispenser takes nothing in five minutes from a Storage Bin of the same priority holding what it accepts",
+ "updated": "2026-10-26",
+ "commit": "215cbb42",
+ "mod_dlls": {
+  "1889255373": {
+   "AutomaticDispenserOnlyTransferFromLowerPriority.dll": "a931434473790a0a330f8a768600dc04d48139ebe04cfb4ebe89bfe958b40b4b"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-023730-5710265c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T02:42:47",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-032640-8debcccf",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:26:40",
+    "lane": 16,
+    "reference_run": "20261026-023730-5710265c",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-032640-8debcccf",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T03:26:41",
+    "lane": 17,
+    "reference_run": "20261026-023730-5710265c",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

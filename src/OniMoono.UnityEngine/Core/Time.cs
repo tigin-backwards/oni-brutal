@@ -44,16 +44,23 @@ namespace UnityEngine
             set => s_TimeScale = value;
         }
 
+        // The longest frame is never shorter than a fixed step, whichever is set (measured in the
+        // player: a maximum of 0.01 under ONI's 0.03 step reads 0.03, and a step of 0.5 raises a
+        // maximum of 0.2 to 0.5).
         public static float fixedDeltaTime
         {
             get => s_FixedDeltaTime;
-            set => s_FixedDeltaTime = value < 0.0001f ? 0.0001f : value;
+            set
+            {
+                s_FixedDeltaTime = value < 0.0001f ? 0.0001f : value;
+                if (s_MaximumDeltaTime < s_FixedDeltaTime) s_MaximumDeltaTime = s_FixedDeltaTime;
+            }
         }
 
         public static float maximumDeltaTime
         {
             get => s_MaximumDeltaTime;
-            set => s_MaximumDeltaTime = value;
+            set => s_MaximumDeltaTime = value < s_FixedDeltaTime ? s_FixedDeltaTime : value;
         }
 
         public static float maximumParticleDeltaTime

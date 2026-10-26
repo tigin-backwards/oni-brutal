@@ -29,6 +29,26 @@ namespace OniMoono.Tests
         }
 
         [Fact]
+        public void MaximumDeltaTimeIsNeverBelowTheFixedStep()
+        {
+            float fixedStep = Time.fixedDeltaTime, maximum = Time.maximumDeltaTime;
+            try
+            {
+                Time.fixedDeltaTime = 0.03f;
+                Time.maximumDeltaTime = 0.01f;
+                Assert.Equal(0.03f, Time.maximumDeltaTime);
+                Time.maximumDeltaTime = 0.2f;
+                Time.fixedDeltaTime = 0.5f;
+                Assert.Equal(0.5f, Time.maximumDeltaTime);
+            }
+            finally
+            {
+                Time.fixedDeltaTime = fixedStep;
+                Time.maximumDeltaTime = maximum;
+            }
+        }
+
+        [Fact]
         public void FixedTimeFollowsTimeInWholeSteps()
         {
             Time.BeginFrame(0.1f);

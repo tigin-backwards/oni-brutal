@@ -1,0 +1,27 @@
+# DirectErrandAssignment (3798979006), classes T, U.
+#
+# What it does: each errand listed in a building's Errands tab gets an "Assign" button (a
+# PLib button added by a postfix on BuildingChoresPanel.AddChoreEntry); pressing it selects
+# the errand and lists the Duplicants, and picking one gives it that errand at once.
+# How a player reaches it: selecting a building or blueprint, its Errands tab, Assign.
+# What changes: errands handed to a chosen Duplicant.
+#
+# A tile blueprint is ordered in the dug-out corridor west of the printing pod and selected;
+# its Errands tab lists the build errand with the Assign button, and pressing it selects the
+# errand.
+from: early-base
+mods: [3798979006]
+steps:
+  - build: {prefab: Tile, cells: [[112, 207]], material: SandStone}
+  - expect: {blueprints: {Tile: 1}}
+  - run: {seconds: 1}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: TileUnderConstruction}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - click: {ui: "**/DetailsScreen/Tabs/TabHeader/tab: BUILDINGCHORES"}
+  - ui_wait: {path: "**/DetailsScreen/**/DirectAssignButton", cond: stable}
+  - ui_dump: {name: errands, root: "**/DetailsScreen/**/DirectAssignButton"}
+  - click: {ui: "**/DetailsScreen/**/DirectAssignButton"}
+  - expect_state:
+      "type:ONI.DirectErrandAssignment.DirectAssignController::selectedChore": exists
+      "type:ONI.DirectErrandAssignment.DirectAssignController::selectedChore.choreType.Id": "== original"

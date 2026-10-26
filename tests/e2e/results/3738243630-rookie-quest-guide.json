@@ -1,0 +1,83 @@
+{
+ "spec": "mods/3738243630-rookie-quest-guide.yaml",
+ "mods": [
+  "3738243630"
+ ],
+ "verdict": "failed",
+ "why": "a run of ours failed",
+ "findings": [],
+ "note": "the management menu's 百天助手 button opens the quest panel and closes it; the panel's dump differs: three sidebar labels keep a TMP sub-mesh (two materials) in the original that ours does not have, and a layout height differs by 0.3 px",
+ "updated": "2026-10-26",
+ "commit": "ade7830",
+ "mod_dlls": {
+  "3738243630": {
+   "Rookie100.dll": "80b85d1cc1bcd97fd7010e288830ffa2aa8b490a9aff906ad3f9600bd2d1c189"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-002114-2cca05f1",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T00:49:04",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-010846-c7e2dc8f",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-26T01:09:16",
+    "lane": 15,
+    "reasons": [
+     "ui_dump panel: 7 difference(s)"
+    ],
+    "reference_run": "20261026-002114-2cca05f1",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "panel": {
+      "differences": 7,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "panel": 0.004608
+    }
+   },
+   {
+    "run": "20261026-010846-c7e2dc8f",
+    "index": 2,
+    "verdict": "fail",
+    "date": "2026-10-26T01:10:11",
+    "lane": 15,
+    "reasons": [
+     "ui_dump panel: 7 difference(s)"
+    ],
+    "reference_run": "20261026-002114-2cca05f1",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "panel": {
+      "differences": 7,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "panel": 0.004546
+    }
+   }
+  ]
+ }
+}

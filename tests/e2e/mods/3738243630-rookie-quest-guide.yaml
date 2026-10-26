@@ -1,0 +1,27 @@
+# 任务系统 (Rookie 100-Day Quest Guide) (3738243630), classes S, P.
+#
+# What it does: a teaching aid for new players. It adds a management menu button (百天助手,
+# "100-day helper") that opens a quest panel, built in code: a tree of staged quests and lessons
+# from its quests.json and curriculum (from first steps to space), their objectives checked
+# against the colony by a quest tracker, rewards, short lesson films and demos, and a movable
+# Duplicant monitor HUD; progress is kept per colony in quest_progress.json.
+# How a player reaches it: the management menu's 百天助手 button.
+# What changes: a guided path through the first hundred cycles.
+#
+# The tracker and monitor are on Game. The management menu's button opens the quest panel,
+# which matches the original's, and a second click closes it.
+from: early-base
+mods: [3738243630]
+steps:
+  - expect_state:
+      "Game.Instance.GetComponent<Rookie100.QuestTracker>": exists
+      "Game.Instance.GetComponent<Rookie100.Monitoring.DuplicantMonitor>": exists
+  - ui_wait: {path: "**/Rookie100ManagementButton", cond: stable}
+  - click: {ui: "**/Rookie100ManagementButton"}
+  - ui_wait: {path: "**/Rookie100QuestPanel", cond: stable}
+  - ui_dump: {name: panel, root: "**/Rookie100QuestPanel"}
+  - shot: {name: panel, crop: "**/Rookie100QuestPanel", threshold: 0.04}
+  - click: {ui: "**/Rookie100ManagementButton"}
+  - expect_ui: {"**/Rookie100QuestPanel": {exists: false}}
+  - run: {seconds: 10}
+  - expect: {duplicants: 3}

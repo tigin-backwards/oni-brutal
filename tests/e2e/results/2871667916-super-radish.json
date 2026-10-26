@@ -1,0 +1,56 @@
+{
+ "spec": "mods/2871667916-super-radish.yaml",
+ "mods": [
+  "2871667916"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "options set the Wheezewort's radiation; it is fertilizable; a planted one emits the option's rads",
+ "updated": "2026-10-26",
+ "commit": "f898d18a",
+ "mod_dlls": {
+  "2871667916": {
+   "Ice radish no radiate▒∙╧ó┬▄▓╖╬▐╖°╔Σ.dll": "8481170edff20951c595d93b9fd0aafab968f4773555e6bffff8f2d993c33763",
+   "PLib.dll": "b862c5db2b3cd6df09a62d4a30782e91e2b24e8e1bfac08d991c9cc89a984ba9"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-105851-04eb8ffa",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T11:10:38",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-135852-94c2bbc0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T14:12:53",
+    "lane": 15,
+    "reference_run": "20261026-105851-04eb8ffa",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-135852-94c2bbc0",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T14:13:45",
+    "lane": 15,
+    "reference_run": "20261026-105851-04eb8ffa",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

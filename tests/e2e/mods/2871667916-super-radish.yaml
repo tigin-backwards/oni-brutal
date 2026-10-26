@@ -1,0 +1,24 @@
+# Super radish 超级萝卜 / Ice radish no radiate (2871667916), class P.
+#
+# What it does: the Wheezewort emits the options' radiation (0 by default) instead of the
+# game's, also after replanting; it becomes fertilizable with phosphorite (0.01 kg/s by
+# default) and takes a temperature range of 123 to 423 K.
+# How a player reaches it: Wheezeworts; the Mods screen's options.
+# What changes: no radiation from Wheezeworts.
+#
+# options set 5 rads; the prefab is read, and a Wheezewort planted by setup in the dug-out
+# corridor west of the printing pod emits 5.
+from: early-base
+mods: [2871667916]
+options:
+  "2871667916": {$file: Controler.json, a1: 5}
+setup:
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131127, 0, 0, \"ColdBreather\", \"BuildingFront\")", method: SetActive, args: [true]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"ColdBreather\").GetComponent<RadiationEmitter>.emitRads": 5
+      "Assets.GetPrefab(\"ColdBreather\").GetComponent<TemperatureVulnerable>.internalTemperatureLethal_Low": [">= 123.1", "<= 123.2"]
+      "count:Assets.GetPrefab(\"ColdBreather\").GetComponent<StateMachineController>.cmpdef.defs[*] if .GetType().FullName == \"FertilizationMonitor+Def\"": 1
+  - run: {seconds: 2}
+  - expect_state:
+      "all:ColdBreather::[0].GetComponent<RadiationEmitter>.emitRads": 5

@@ -1,0 +1,75 @@
+{
+ "spec": "mods/3329512249-upgradeable-dupes-and-critters.yaml",
+ "mods": [
+  "3329512249"
+ ],
+ "verdict": "warning",
+ "why": "known findings: scroll-normalized-position",
+ "findings": [
+  "scroll-normalized-position"
+ ],
+ "note": "after Medicine IV the Medicine menu offers the Nuclear Apothecary and Injection Chamber; the apothecary's recipe list dump matches",
+ "updated": "2026-10-26",
+ "commit": "3a31d14b",
+ "mod_dlls": {
+  "3329512249": {
+   "Upgradeable_Dupes_And_Critters.dll": "8482c9d9bb1a43ac32d16104333f5c0e4efb717bab204363d924cdd7feec7c79"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-095925-af2fb1f8",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T10:05:41",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-113226-bfc7d38a",
+    "index": 1,
+    "verdict": "warn",
+    "date": "2026-10-26T11:32:26",
+    "lane": 16,
+    "reference_run": "20261026-095925-af2fb1f8",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "recipes": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261026-113226-bfc7d38a",
+    "index": 2,
+    "verdict": "warn",
+    "date": "2026-10-26T11:32:27",
+    "lane": 17,
+    "reference_run": "20261026-095925-af2fb1f8",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "recipes": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

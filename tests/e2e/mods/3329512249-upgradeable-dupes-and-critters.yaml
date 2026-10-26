@@ -1,0 +1,34 @@
+# Upgradeable Dupes And Critters (3329512249), classes B, O. Spaced Out only.
+#
+# What it does: adds Radioactive Serum, made at a Nuclear Apothecary (NuclearApothecary, 3x3,
+# radbolts and enriched uranium, Medicine IV) and given at an Injection Chamber (Medicine
+# IV); a Duplicant Upgrader (Nuclear Research) and Critter Upgrader (Bioengineering) raise a
+# Duplicant's or critter's stats with it, and an Upgraded Egg Cracker (Fine Dining); PLib
+# options set the gains.
+# How a player reaches it: the build menu (Medicine, Stations, Food), after the research.
+# What changes: serum-boosted Duplicants and critters.
+#
+# setup grants Medicine IV: the Medicine menu offers the apothecary and the chamber. setup
+# builds a Nuclear Apothecary in the dug-out room west of the printing pod, and selected, its
+# recipe list offers the serum.
+from: early-base
+mods: [3329512249]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"MedicineIV\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"NuclearApothecary\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"MedicineIV\").unlockedItemIDs": [{contains: NuclearApothecary}, {contains: InjectionChamber}]
+      "count:ComplexRecipeManager.Get().recipes[*] if .fabricators[0].Name == NuclearApothecary": ">= 1"
+  - run: {seconds: 10}
+  - click: {ui: "**/PlanScreen/Toggle:Medicine"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/NuclearApothecary Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/NuclearApothecary Group*": {active: true}
+      "**/BuildingGroups/**/Grid/InjectionChamber Group*": {active: true}
+  - key: {code: Escape}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: NuclearApothecary}
+  - ui_wait: {path: "**/ComplexFabricatorSideScreen/Contents/ButtonScrollView", cond: stable}
+  - ui_dump: {name: recipes, root: "**/ComplexFabricatorSideScreen/Contents/ButtonScrollView"}

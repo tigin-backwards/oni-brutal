@@ -1,0 +1,44 @@
+# AutomaticHarvest 自动收获机 (3623778703), class B.
+#
+# What it does: adds an Automatic Harvester (AutomaticHarvestConfig, 1x1, 120 W, Conveyance
+# menu, researched with Smart Storage). While powered and not full, it scans the open cells 8
+# to each side and 3 up and down in its line of sight for plants ready to harvest, cancels their
+# harvest errands, points its arm at each and harvests it, and stores what drops (food, seeds,
+# organics) in its 20 t storage, which a conveyor output empties; a logic output reports it.
+# How a player reaches it: the build menu (Conveyance), after the research.
+# What changes: farms harvested without Duplicants.
+#
+# setup builds a harvester in a pit of the floor west of the printing pod, powers it from a
+# charged Battery beside it, and spawns a grown Mealwood in the next pit. As the game
+# runs, the harvester harvests the Mealwood and stores its Meal Lice.
+from: early-base
+mods: [3623778703]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"AutomaticHarvestConfig\")", method: Build, args: [{"$": "Grid.XYToCell(114, 206)"}, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Battery\")", method: Build, args: [{"$": "Grid.XYToCell(115, 207)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Wire\")", method: Build, args: [{"$": "Grid.XYToCell(114, 206)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Wire\")", method: Build, args: [{"$": "Grid.XYToCell(114, 207)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Wire\")", method: Build, args: [{"$": "Grid.XYToCell(115, 207)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Game.Instance.electricalConduitSystem", method: SetConnections, args: ["Up", {"$": "Grid.XYToCell(114, 206)"}, true]}}
+  - driver: {setup.call: {target: "Game.Instance.electricalConduitSystem", method: SetConnections, args: ["Down, Right", {"$": "Grid.XYToCell(114, 207)"}, true]}}
+  - driver: {setup.call: {target: "Game.Instance.electricalConduitSystem", method: SetConnections, args: ["Left", {"$": "Grid.XYToCell(115, 207)"}, true]}}
+  - driver: {setup.call: {type: GameUtil, method: KInstantiate, args: [{"$": "Assets.GetPrefab(\"BasicSingleHarvestPlant\")"}, [113.5, 206.0, -12], BuildingBack]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "last:GetComponent<Growing>", method: OverrideMaturityLevel, args: [1.0]}}
+  - driver: {setup.call: {target: "all:Battery::[0]", method: AddEnergy, args: [10000.0]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"SmartStorage\").unlockedItemIDs": {contains: AutomaticHarvestConfig}
+      "all:AutomaticHarvest.AutomaticHarvestK::Length": 1
+  - run: {seconds: 2}
+  - expect_state:
+      "all:AutomaticHarvest.AutomaticHarvestK::[0].GetComponent<Storage>.capacityKg": 20000
+  - driver: {camera.set: {cell: [114, 207], ortho: 8}}
+  - click_world: {cell: [114, 206], select: AutomaticHarvestConfig}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Automatic Harvester"}
+  - key: {code: Escape}
+  - run: {seconds: 30}
+  - expect_state:
+      "all:AutomaticHarvest.AutomaticHarvestK::[0].GetComponent<Storage>.MassStored()": "> 0"

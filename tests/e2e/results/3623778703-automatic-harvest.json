@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3623778703-automatic-harvest.yaml",
+ "mods": [
+  "3623778703"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a harvester powered from a charged battery harvests a grown Mealwood beside it and stores its Meal Lice; it is selected",
+ "updated": "2026-10-26",
+ "commit": "71e523e",
+ "mod_dlls": {
+  "3623778703": {
+   "AutomaticHarvest.dll": "7d2a719f39938043d9ad7002ed42e952e2fa6c68e9b5a927a1e6c3a7112a00a2"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-003541-39fc8dbf",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T01:02:53",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-012155-2f602176",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T01:21:55",
+    "lane": 15,
+    "reference_run": "20261026-003541-39fc8dbf",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-012155-2f602176",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T01:22:41",
+    "lane": 15,
+    "reference_run": "20261026-003541-39fc8dbf",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

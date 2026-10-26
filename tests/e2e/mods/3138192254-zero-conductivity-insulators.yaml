@@ -1,0 +1,18 @@
+# Super Insulator and Abyssalite with ZERO thermal conductivity (3138192254), class P.
+#
+# What it does: a postfix on ElementLoader.Load sets the thermal conductivity of Insulite
+# (SuperInsulator) and Abyssalite (Katairite) to 0, so nothing conducts heat through them.
+# How a player reaches it: building with or digging past those elements.
+# What changes: perfect insulation.
+#
+# The two elements are read, and Granite's stays the game's.
+from: early-base
+mods: [3138192254]
+steps:
+  - expect_state:
+      "ElementLoader.FindElementByName(\"SuperInsulator\").thermalConductivity": 0
+      "ElementLoader.FindElementByName(\"Katairite\").thermalConductivity": 0
+      "ElementLoader.FindElementByName(\"Granite\").thermalConductivity": "> 0"
+  - run: {seconds: 2}
+  - expect_state:
+      "ElementLoader.FindElementByName(\"Katairite\").thermalConductivity": 0

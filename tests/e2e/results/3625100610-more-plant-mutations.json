@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3625100610-more-plant-mutations.yaml",
+ "mods": [
+  "3625100610"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Ginger, Grassy and GlowStick mutations join the game's, as many as in the original",
+ "updated": "2026-10-26",
+ "commit": "7f0364bc",
+ "mod_dlls": {
+  "3625100610": {
+   "MorePlantMutations.dll": "563d7ccc9e192afc915253beef0f2e8ac7d8c3709932ae88cc6d05a177b64456"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-025019-77e7dd66",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:09:53",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-042442-c7ba9304",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:24:42",
+    "lane": 14,
+    "reference_run": "20261026-025019-77e7dd66",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-042442-c7ba9304",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T04:25:34",
+    "lane": 14,
+    "reference_run": "20261026-025019-77e7dd66",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

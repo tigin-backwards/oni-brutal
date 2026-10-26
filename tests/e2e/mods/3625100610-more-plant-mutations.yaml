@@ -1,0 +1,20 @@
+# More Plant Mutations (3625100610), classes P, V, O.
+#
+# What it does: adds plant mutations to the game's set (Spaced Out): Ginger (Spicy, a pincha
+# pepper crop bonus), Grassy (Husky, Gas Grass only, plant fiber bonus), GlowStick (Radiance:
+# the plant emits light and radiation, by PLib options), each with its symbol overrides and
+# kanims; mutated branches skip the radiation effect.
+# How a player reaches it: analysing mutant seeds grown under radiation.
+# What changes: more mutations to find.
+#
+# The new mutations are in the game's PlantMutations, as many as in the original.
+from: early-base
+mods: [3625100610]
+steps:
+  - expect_state:
+      "Db.Get().PlantMutations.TryGet(\"Ginger\")": exists
+      "Db.Get().PlantMutations.TryGet(\"Grassy\")": exists
+      "Db.Get().PlantMutations.TryGet(\"GlowStick\")": exists
+      "Db.Get().PlantMutations.Count": "== original"
+  - run: {seconds: 10}
+  - expect: {duplicants: 3}

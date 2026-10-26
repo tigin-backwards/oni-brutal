@@ -1,0 +1,32 @@
+# Free Horizontal Build (3640719341), classes T, S, O.
+#
+# What it does: the build tool places buildings at any horizontal position, not only on the
+# grid (a modifier key snaps back to it), lets buildings overlap, unlocks rotation for the
+# buildings it allows (a Rotatable is added), and gives them two user-menu buttons, "Layer:
+# Bring forward" and "Layer: Send backward", that move their render layer; positions and layers
+# are saved with the building and its blueprints. Its own options dialog (CloverLib) turns
+# each feature on or off, and an experimental one embeds buildings in tiles.
+# How a player reaches it: the build tool; a building's user menu; the Mods screen's options.
+# What changes: free placement and layering of buildings.
+#
+# A floor lamp built in the dug-out corridor west of the printing pod is rotatable; it is
+# selected and brought forward a layer from its user menu.
+from: early-base
+mods: [3640719341]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"FloorLamp\")", method: Build, args: [131129, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"FloorLamp\").BuildingComplete.GetComponent<FreeHorizontalBuild.FreeBuildData>": exists
+  - run: {seconds: 2}
+  - expect: {buildings: {FloorLamp: 1}}
+  - driver: {camera.set: {cell: [113, 207], ortho: 8}}
+  - click_world: {cell: [113, 206], select: FloorLamp}
+  - ui_wait: {path: "**/UserMenuScreen/Buttons/Layer: Bring forwardButton", cond: stable}
+  - expect_state:
+      "selected:GetComponent<FreeHorizontalBuild.FreeBuildData>.LayerOffset": 0
+  - ui_dump: {name: user-menu, root: "**/UserMenuScreen/Buttons"}
+  - click: {ui: "**/UserMenuScreen/Buttons/Layer: Bring forwardButton"}
+  - expect_state:
+      "selected:GetComponent<FreeHorizontalBuild.FreeBuildData>.LayerOffset": 1
+  - shot: {name: user-menu, crop: "**/UserMenuScreen", threshold: 0.04}

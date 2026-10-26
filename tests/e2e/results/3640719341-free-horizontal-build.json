@@ -1,0 +1,67 @@
+{
+ "spec": "mods/3640719341-free-horizontal-build.yaml",
+ "mods": [
+  "3640719341"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a built floor lamp gets the mod's placement data; its Layer: Bring forward button raises its layer; user-menu dump and shot match",
+ "updated": "2026-10-26",
+ "commit": "7f0364bc",
+ "mod_dlls": {
+  "3640719341": {
+   "FreeHorizontalBuild.dll": "7ab9bd54d2cc13d9b575e22a96b7376ee367486ae8ec3ea2a43f4c5b5ce86c60"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-025019-77e7dd66",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:13:36",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-042754-ea89c09d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:27:54",
+    "lane": 14,
+    "reference_run": "20261026-025019-77e7dd66",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "user-menu": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "user-menu": 0.0
+    }
+   },
+   {
+    "run": "20261026-042754-ea89c09d",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T04:28:38",
+    "lane": 14,
+    "reference_run": "20261026-025019-77e7dd66",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "user-menu": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "user-menu": 0.0
+    }
+   }
+  ]
+ }
+}

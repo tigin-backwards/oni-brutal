@@ -1,0 +1,75 @@
+{
+ "spec": "mods/3386552780-potato-power-banks.yaml",
+ "mods": [
+  "3386552780"
+ ],
+ "verdict": "warning",
+ "why": "known findings: scroll-normalized-position",
+ "findings": [
+  "scroll-normalized-position"
+ ],
+ "note": "the potato power banks and their Crafting Station recipes exist; the station's recipe list dump matches",
+ "updated": "2026-10-26",
+ "commit": "a608ddd5",
+ "mod_dlls": {
+  "3386552780": {
+   "PotatoElectrobanks.dll": "c4175b9649a1c7ded228f2b1ee530f258e2fba5b86d15c0555b8809a037ea243"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-043257-c0eef0ae",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:57:46",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-111130-046e0997",
+    "index": 1,
+    "verdict": "warn",
+    "date": "2026-10-26T11:11:30",
+    "lane": 16,
+    "reference_run": "20261026-043257-c0eef0ae",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "recipes": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261026-111130-046e0997",
+    "index": 2,
+    "verdict": "warn",
+    "date": "2026-10-26T11:11:31",
+    "lane": 17,
+    "reference_run": "20261026-043257-c0eef0ae",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "recipes": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

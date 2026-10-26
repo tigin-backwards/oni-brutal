@@ -1,0 +1,26 @@
+# Potato Power Banks (3386552780), class P (items, recipes). The Bionic Booster Pack.
+#
+# What it does: adds five Potato Power Banks (PotatoElectrobank_Muckroot, _Carrot, _Sucrose,
+# _Shinebug_Egg, _Plugslug_Egg) crafted at the Crafting Station from food or eggs: small,
+# perishable power banks only Bionic Duplicants and Flydos use (patches on their battery
+# monitors and the Flydo's storage); they rot like food, are stored as food, and, unless a
+# PLib option allows it, Power Bank Dischargers refuse them.
+# How a player reaches it: the Crafting Station's recipe list.
+# What changes: power banks out of food.
+#
+# The banks' prefabs and their recipes exist; setup builds a Crafting Station in the dug-out
+# room west of the printing pod, and selected, its recipe list is compared with the original.
+from: early-base
+mods: [3386552780]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"CraftingTable\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Cuprite], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"PotatoElectrobank_Carrot\")": exists
+      "Assets.GetPrefab(\"PotatoElectrobank_Muckroot\").GetComponent<Electrobank>": exists
+      "count:ComplexRecipeManager.Get().recipes[*] if .fabricators[0].Name == CraftingTable and .results[0].material.Name.StartsWith(\"PotatoElectrobank_\") == true": ">= 3"
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: CraftingTable}
+  - ui_wait: {path: "**/ComplexFabricatorSideScreen/Contents/ButtonScrollView", cond: stable}
+  - ui_dump: {name: recipes, root: "**/ComplexFabricatorSideScreen/Contents/ButtonScrollView"}

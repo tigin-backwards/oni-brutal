@@ -123,6 +123,18 @@ namespace SemanticsProbe
                 DirectoryOrder.Run();
                 return;
             }
+            if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "memberorder")
+            {
+                Rec.Log("=== values: member order");
+                MemberOrder.Run();
+                MemberOrder.HookDump(harmony);
+                return;
+            }
+            if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "smorder")
+            {
+                MemberOrder.Hook(harmony);
+                return;
+            }
             if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "statics")
             {
                 Rec.Log("=== values: statics");

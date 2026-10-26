@@ -299,6 +299,20 @@ after its first step. The tree stays in the temporary folder (its path is the fi
 `ls -U` shows the folder's own order. Compare the players' lines directly (`diff`).
 ARCHITECTURE D30 records what it measured, and `MonoDirectoryOrderTests` encodes it.
 
+With `PROBE_SCENARIO=memberorder` only the member-order probe runs (`MemberOrder.cs`, lines `MO …`,
+at mod load): the order of `GetFields`, `GetMethods`, `GetProperties`, `GetEvents`,
+`GetNestedTypes`, `GetConstructors`, `GetInterfaces`, `GetMembers` and `GetCustomAttributes` for
+the probe's types (fields of every kind interleaved, a generic base class, overrides, hidden
+properties) and for `CritterCondoInteractMontior`, and the parameters `CreateStates` numbers. At
+the main menu it writes the same lists for every type of Assembly-CSharp and firstpass, with the
+fields `MyAttributeManager` injects, to `memberorder-mono.tsv` or `memberorder-coreclr.tsv` in
+`PROBE_OUT` (its path is logged), then a `MemberOrderProbeDone` canvas appears; compare two files
+with `tools/UnityProbe/mo-check.py ORIG OURS [CALL [N]]`. With `PROBE_SCENARIO=smorder` it logs,
+in a colony, each state machine the game makes (`MO SM …`: its parameters as numbered and its
+parameter fields as listed then). Both run through `scripts/e2e.py` with OniMcp's mod folder
+holding `SemanticsProbe.dll` (as the canvas order probe does). ARCHITECTURE D39 records what
+they measured, and `MonoMemberOrderTests` encodes it.
+
 With `PROBE_SCENARIO=findorder` only the find-order probe runs (`FindOrder.cs`, lines `FO …`, 10 s
 into the main menu): the order of `Resources.FindObjectsOfTypeAll`. It logs every `LocText` the
 call returns (instance id, scene, activity, pivot, path) and whether the ids ascend, then

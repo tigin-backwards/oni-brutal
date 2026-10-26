@@ -1,0 +1,28 @@
+# U&F-Instant Sandbox 即时沙盒 (3464929672), class T (the game's tools changed).
+#
+# What it does: in Sandbox mode with the sandbox's Instant Build on (or in debug instant build),
+# the game's tools act at once: the dig tool destroys solid cells instead of ordering digs, the
+# mop tool mops any amount at once, deconstruction completes immediately and the empty pipe
+# tool empties pipes on the spot. Outside sandbox, the dig tool also marks plants in open cells
+# for uprooting, and orders digs as the game does.
+# How a player reaches it: Sandbox mode; the toolbar's tools.
+# What changes: instant tools in sandbox.
+#
+# setup turns Sandbox mode on (Instant Build is on by default). The dig tool (G) dragged over
+# the rock above the corridor west of the printing pod removes it at once, with no dig orders.
+from: early-base
+mods: [3464929672]
+setup:
+  - driver: {setup.call: {target: "Game.Instance", method: set_SandboxModeActive, args: [true]}}
+steps:
+  - expect_state:
+      "SandboxToolParameterMenu.instance.settings.InstantBuild": true
+      "cells:110,210..112,211::Grid.Mass.get_Item({cell})": {save_as: rock}
+  - driver: {camera.set: {cell: [111, 210], ortho: 10}}
+  - tool: {key: G}
+  - drag: {from: [110, 210], to: [112, 211]}
+  - key: {code: Escape}
+  - run: {seconds: 2}
+  - expect: {pending_digs: 0}
+  - expect_state:
+      "cells:110,210..112,211::Grid.Mass.get_Item({cell})": "< 0.1 * rock"

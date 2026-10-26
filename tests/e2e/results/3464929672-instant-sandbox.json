@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3464929672-instant-sandbox.yaml",
+ "mods": [
+  "3464929672"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "in Sandbox mode the dig tool dragged over rock removes it at once, with no dig orders",
+ "updated": "2026-10-26",
+ "commit": "35a771d",
+ "mod_dlls": {
+  "3464929672": {
+   "InstantSandbox.dll": "38cadf8ef6351882fdbecd18b6c6cf97d8cef4301272056e8eb6b11048ba984e"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-222040-75e4a4a6",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T00:29:32",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-013520-4ab3f133",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T01:35:20",
+    "lane": 15,
+    "reference_run": "20261025-222040-75e4a4a6",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-013520-4ab3f133",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T01:36:08",
+    "lane": 15,
+    "reference_run": "20261025-222040-75e4a4a6",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -2300,6 +2300,11 @@ package with every member public, and ARCHITECTURE D11 lets it reach them:
   with no other `ldc.i4.1` in between. Measured through the mod: Ctrl+Shift+Backspace
   after "liquid gas" (caret 10) leaves "" and caret 0, so all three take the count. Any
   other `Remove(int, int)` call in the body is rewritten the same way.
+  **Out of scope by policy:** Moono supports ordinary Harmony patches on the packages' internals
+  (prefixes, postfixes, reflection on members, private ones included), so the members above
+  exist with these signatures and are called at the same points. It does not match the shipped
+  IL for transpilers and reverse patches, which is too fragile to keep: `Backspace()`'s IL is
+  not shaped for this rewrite, and the mod's Ctrl shortcuts are not expected to work.
 - Nothing else in the 2119 Workshop builds in `out/ws` names `FindPrevWordBegin` or
   `stringPositionInternal`, apart from copies of the shipped package that mods carry.
 

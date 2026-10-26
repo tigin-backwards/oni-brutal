@@ -361,6 +361,9 @@ namespace TMPro
             }
         }
 
+        // The caret's string index (Text Input Hotkeys reads it).
+        internal int stringPositionInternal => m_StringSelectPosition;
+
         public int selectionStringAnchorPosition
         {
             get => m_StringPosition;
@@ -726,7 +729,10 @@ namespace TMPro
             bool ctrlOnly = ctrl && !alt && !shift;
             switch (evt.keyCode)
             {
-                case KeyCode.Backspace: Backspace(ctrl); return EditState.Continue;
+                case KeyCode.Backspace:
+                    // One character whatever the modifiers (measured).
+                    Backspace();
+                    return EditState.Continue;
                 case KeyCode.Delete: ForwardDelete(ctrl); return EditState.Continue;
                 case KeyCode.Home: MoveTextStart(shift); return EditState.Continue;
                 case KeyCode.End: MoveToEndOfLaidOutLine(shift); return EditState.Continue;
@@ -907,7 +913,9 @@ namespace TMPro
             return ch;
         }
 
-        void Backspace(bool word)
+        // Removes the selection, or the character before the caret (a surrogate pair whole),
+        // whatever the modifiers (measured).
+        void Backspace()
         {
             if (m_ReadOnly) return;
             if (HasSelection)
@@ -921,8 +929,8 @@ namespace TMPro
                 if (m_Text.Length == 0) SendOnValueChanged();
                 return;
             }
-            int start = word ? PreviousWordStart(m_StringSelectPosition) : m_StringSelectPosition - 1;
-            if (!word && start > 0 && char.IsLowSurrogate(m_Text[start]) && char.IsHighSurrogate(m_Text[start - 1])) start--;
+            int start = m_StringSelectPosition - 1;
+            if (start > 0 && char.IsLowSurrogate(m_Text[start]) && char.IsHighSurrogate(m_Text[start - 1])) start--;
             m_Text = m_Text.Remove(start, m_StringSelectPosition - start);
             m_StringPosition = m_StringSelectPosition = start;
             SendOnValueChanged();
@@ -1058,7 +1066,7 @@ namespace TMPro
             // A step moves to the laid-out character before the caret's, where its source begins
             // (over the tags between them).
             int p;
-            if (ctrl) p = PreviousWordStart(m_StringSelectPosition);
+            if (ctrl) p = FindPrevWordBegin();
             else if (CurrentTextInfo() is { characterCount: > 0 })
             {
                 int k = CharacterIndexOf(m_StringSelectPosition);
@@ -1129,9 +1137,11 @@ namespace TMPro
             MarkGeometryChanged();
         }
 
-        int PreviousWordStart(int pos)
+        // The string index where the word before the caret begins (Text Input Hotkeys deletes
+        // back to it on Ctrl+Backspace).
+        int FindPrevWordBegin()
         {
-            int p = pos - 1;
+            int p = m_StringSelectPosition - 1;
             while (p > 0 && !char.IsLetterOrDigit(m_Text[p])) p--;
             while (p > 0 && char.IsLetterOrDigit(m_Text[p - 1])) p--;
             return Math.Max(0, p);

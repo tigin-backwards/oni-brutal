@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3018763783-super-duplicants.yaml",
+ "mods": [
+  "3018763783"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a selected Duplicant's Make Super! user menu button raises its attributes to level 10000",
+ "updated": "2026-10-26",
+ "commit": "dd026c4",
+ "mod_dlls": {
+  "3018763783": {
+   "SuperDupe.dll": "b5ebf08f699575b31ca5f9edc59718fefffe0baac2cdd7704f9237f60ea1aae5"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-220744-daa697b6",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T00:00:12",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-010736-1d90e268",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T01:07:36",
+    "lane": 15,
+    "reference_run": "20261025-220744-daa697b6",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-010736-1d90e268",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T01:08:26",
+    "lane": 15,
+    "reference_run": "20261025-220744-daa697b6",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

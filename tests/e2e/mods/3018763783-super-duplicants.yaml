@@ -1,0 +1,24 @@
+# Super Duplicants! (3018763783), class S (a user menu button).
+#
+# What it does: a postfix on Navigator.OnRefreshUserMenu gives every living Duplicant (and any
+# other navigator) a "Make Super!" button that sets all its attributes (Construction to
+# Generator Output) to level 10000, or 1000 more once they are there.
+# How a player reaches it: select a Duplicant; its user menu.
+# What changes: Duplicants with absurd attributes.
+#
+# setup selects the first Duplicant. Its Make Super! button is clicked: its Creativity and
+# Excavation are at level 10000.
+from: early-base
+mods: [3018763783]
+setup:
+  - driver: {setup.call: {target: "SelectTool.Instance", method: Select, args: [{"$": "Components.LiveMinionIdentities.Items[0].GetComponent<KSelectable>"}, false]}}
+steps:
+  - ui_wait: {path: "**/UserMenuScreen/Buttons/Make Super!Button", cond: stable}
+  - expect_state:
+      "selected:GetComponent<AttributeLevels>.GetAttributeLevel(\"Art\").GetLevel()": "< 10000"
+  - click: {ui: "**/UserMenuScreen/Buttons/Make Super!Button"}
+  - expect_state:
+      "selected:GetComponent<AttributeLevels>.GetAttributeLevel(\"Art\").GetLevel()": 10000
+      "selected:GetComponent<AttributeLevels>.GetAttributeLevel(\"Digging\").GetLevel()": 10000
+  - run: {seconds: 10}
+  - expect: {duplicants: 3}

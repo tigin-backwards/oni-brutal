@@ -1,0 +1,23 @@
+# Auto Wrangle Babies Too (2857018172), class P.
+#
+# What it does: a postfix on EntityTemplates.ExtendEntityToBeingABaby gives every baby critter
+# the FixedCapturableMonitor that adult critters have, so a Critter Drop-Off's auto-wrangle
+# takes babies too.
+# How a player reaches it: a Critter Drop-Off with auto-wrangle and babies in the room.
+# What changes: babies are wrangled automatically.
+#
+# A baby Hatch's prefab carries the monitor, and a spawned Hatchling is fixed-capturable.
+from: early-base
+mods: [2857018172]
+setup:
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131129, 0, 0, \"HatchBaby\", \"Creatures\")", method: SetActive, args: [true]}}
+steps:
+  - expect_state:
+      "count:Assets.GetPrefab(\"HatchBaby\").GetComponent<StateMachineController>.cmpdef.defs[*] if .GetType().FullName == 'FixedCapturableMonitor+Def'": 1
+      "count:Assets.GetPrefab(\"Hatch\").GetComponent<StateMachineController>.cmpdef.defs[*] if .GetType().FullName == 'FixedCapturableMonitor+Def'": 1
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [113, 207], ortho: 8}}
+  - click_world: {cell: [113, 206], select: HatchBaby}
+  - ui_wait: {path: "**/DetailsScreen/TitleBar", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Hatchling"}

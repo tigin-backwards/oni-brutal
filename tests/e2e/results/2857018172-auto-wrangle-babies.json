@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2857018172-auto-wrangle-babies.yaml",
+ "mods": [
+  "2857018172"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "baby critters get the fixed-capturable monitor; a spawned Hatchling is selected",
+ "updated": "2026-10-26",
+ "commit": "7f0364bc",
+ "mod_dlls": {
+  "2857018172": {
+   "AutoWrangleBabies.dll": "3b601eb45d8dd9d70263910a8d449977c49572c04d09746d22984a310c7ff9a6"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-023754-20737f8f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:34:08",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-040705-038ecbf7",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:23:26",
+    "lane": 15,
+    "reference_run": "20261026-023754-20737f8f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-040705-038ecbf7",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T04:24:13",
+    "lane": 15,
+    "reference_run": "20261026-023754-20737f8f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

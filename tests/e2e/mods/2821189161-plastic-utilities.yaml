@@ -1,0 +1,35 @@
+# Plastic Utilities (2821189161), class B.
+#
+# What it does: adds plastic utilities, researched with Home Luxuries: Plastic Gas and Liquid
+# Pipes (no decor penalty, better insulation, drawn blue in the flow overlays through a prefix
+# on ConduitFlowVisualizer.GetCellTintColour), Plastic Gas and Liquid Vents, and two plastic
+# walls (Bubble Wall, Checker Wall); a PLib option hides pipes and wires behind walls.
+# How a player reaches it: the build menus (Ventilation, Plumbing, Utilities), after the
+# research.
+# What changes: decor-friendly plumbing.
+#
+# setup grants Home Luxuries and lays three Plastic Gas Pipes in the corridor west of the
+# printing pod: their cells are tracked for the blue tint, and the Ventilation menu lists them.
+from: early-base
+mods: [2821189161]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"Luxury\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"RomenH_PlasticGasConduit\")", method: Build, args: [{"$": "Grid.XYToCell(110, 208)"}, Neutral, null, [Polypropylene], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"RomenH_PlasticGasConduit\")", method: Build, args: [{"$": "Grid.XYToCell(111, 208)"}, Neutral, null, [Polypropylene], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"RomenH_PlasticGasConduit\")", method: Build, args: [{"$": "Grid.XYToCell(112, 208)"}, Neutral, null, [Polypropylene], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"Luxury\").unlockedItemIDs": {contains: RomenH_PlasticGasConduit}
+      "Assets.GetBuildingDef(\"RomenH_PlasticGasConduit\").ThermalConductivity": 0.5
+  - run: {seconds: 2}
+  - expect_state:
+      "type:RomenH.PlasticUtilities.FlowVisualizerPatches::plasticGasConduitCells.Count": 3
+  - click: {ui: "**/PlanScreen/Toggle:Ventilation"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/RomenH_PlasticGasConduit Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/RomenH_PlasticGasConduit Group*": {active: true}
+      "**/BuildingGroups/**/Grid/RomenH_PlasticGasVent Group*": {active: true}
+  - shot: {name: ventilation-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
+  - key: {code: Escape}
+  - expect: {duplicants: 3}

@@ -1,0 +1,59 @@
+{
+ "spec": "mods/2821189161-plastic-utilities.yaml",
+ "mods": [
+  "2821189161"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the plastic pipes and vents show in the Ventilation menu after Home Luxuries; three laid Plastic Gas Pipes are tracked for their blue tint; menu shot matches",
+ "updated": "2026-10-26",
+ "commit": "57b5bdf",
+ "mod_dlls": {
+  "2821189161": {
+   "PlasticUtilities.dll": "f2f361597ae54fa2ecfa7651fb6d422e2b4dba357dbed2957c356cdc871abce8"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-003541-39fc8dbf",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T00:52:18",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-010611-1a7fd928",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T01:11:02",
+    "lane": 15,
+    "reference_run": "20261026-003541-39fc8dbf",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "ventilation-menu": 0.0
+    }
+   },
+   {
+    "run": "20261026-010611-1a7fd928",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T01:11:50",
+    "lane": 15,
+    "reference_run": "20261026-003541-39fc8dbf",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "ventilation-menu": 0.0
+    }
+   }
+  ]
+ }
+}

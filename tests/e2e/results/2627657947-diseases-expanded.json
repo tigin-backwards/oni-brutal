@@ -1,0 +1,59 @@
+{
+ "spec": "mods/2627657947-diseases-expanded.yaml",
+ "mods": [
+  "2627657947"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the game's diseases include the mod's, as many as in the original, with its medical research type; Pharmacology unlocks the Germcatcher; the Research screen opens, its list shot matching, and the colony runs",
+ "updated": "2026-10-26",
+ "commit": "278f450",
+ "mod_dlls": {
+  "2627657947": {
+   "DiseasesExpanded.dll": "272badf3cd6cef1aaa74a86ff58bbd2e111103a849369dbbe718cb1fb1f88a7f"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-013354-10385a50",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T01:39:51",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-014144-28ebeb67",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T01:54:40",
+    "lane": 15,
+    "reference_run": "20261026-013354-10385a50",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "research": 0.0
+    }
+   },
+   {
+    "run": "20261026-014144-28ebeb67",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T01:55:04",
+    "lane": 14,
+    "reference_run": "20261026-013354-10385a50",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "research": 0.0
+    }
+   }
+  ]
+ }
+}

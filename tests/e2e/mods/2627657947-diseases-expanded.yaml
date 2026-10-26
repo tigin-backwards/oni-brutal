@@ -1,0 +1,39 @@
+# [Vanilla + DLC] Diseases Expanded (2627657947), classes P, B, M.
+#
+# What it does: adds germs and the sicknesses they cause (Abandoned, Hunger, Bog Insects, Frost
+# Shards, Spindly, Gassy, Alien, Mutating and Rust germs, Medical Nanobots), their cures,
+# vaccines and germ flasks, a medical research type (the Apothecary makes it) with tiers of the
+# research tree that cost it, medical buildings (the Germcatcher with Pharmacology, the Vaccine
+# Apothecary, a Shield Generator, a Nanobot Forge and a Nanobot Replicator with Medicine IV),
+# random disease events, worldgen germs and a Rusty Water geyser; outhouses and lavatories stop
+# being assignable.
+# How a player reaches it: germs in the world; the Medicine menu; the Research screen.
+# What changes: a far bigger germ game.
+#
+# The game's diseases include the mod's, as many as in the original, and the medical research
+# type exists. setup grants Pharmacology, which unlocks the Germcatcher; the Research screen
+# opens with the medical research costs; the colony runs.
+from: early-base
+mods: [2627657947]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"MedicineI\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+steps:
+  - expect_state:
+      "Db.Get().Diseases.TryGet(\"HungerGerms\")": exists
+      "Db.Get().Diseases.TryGet(\"MedicalNanobots\")": exists
+      "Db.Get().Diseases.TryGet(\"RustGerms\")": exists
+      "Db.Get().Diseases.Count": "== original"
+      # The id only: reading the whole ResearchType runs its recipe getter, which calls itself
+      # (a stack overflow Mono survives and CoreCLR does not).
+      "Research.Instance.researchTypes.GetResearchType(\"medical\").id": medical
+      "Db.Get().Techs.Get(\"MedicineI\").unlockedItemIDs": {contains: Germcatcher}
+      "Assets.GetBuildingDef(\"Germcatcher\")": exists
+  - run: {seconds: 3}
+  - open: {management: research}
+  - ui_wait: {path: "**/ResearchScreen", cond: stable}
+  # The tech tree pans as the screen opens; the list beside it is still.
+  - shot: {name: research, crop: "**/ResearchScreen", mask: [[345, 0, 935, 720]], threshold: 0.04}
+  - key: {code: Escape}
+  - run: {seconds: 60}
+  - expect: {duplicants: 3}

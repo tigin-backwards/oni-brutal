@@ -1,0 +1,34 @@
+# Hot Nuclear Power (Realistic Nuclear Power) (2633732356), class B. Spaced Out only.
+#
+# What it does: adds a Nuclear Fuel Rod and a Radium Fuel Rod (1x1 tiles in the Radiation
+# menu, Nuclear Propulsion research) that heat up when fed enriched uranium (or radium,
+# respectively) and a Pressure Steam Turbine (1x3, Power menu, Renewable Energy) for very hot
+# steam, giving half of what it generates.
+# How a player reaches it: the build menu (Radiation, Power), after the research.
+# What changes: nuclear heat sources and a high-temperature turbine.
+#
+# setup grants Renewable Energy and Nuclear Propulsion: the Power menu offers the turbine and
+# the Radiation menu the rods.
+from: early-base
+mods: [2633732356]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"RenewableEnergy\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"NuclearPropulsion\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"RenewableEnergy\").unlockedItemIDs": {contains: PressureSteamTurbine}
+      "Db.Get().Techs.Get(\"NuclearPropulsion\").unlockedItemIDs": [{contains: NuclearFuelRod}, {contains: RadiumFuelRod}]
+      "Assets.GetBuildingDef(\"PressureSteamTurbine\").HeightInCells": 3
+  - run: {seconds: 10}
+  - click: {ui: "**/PlanScreen/Toggle:Power"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/PressureSteamTurbine Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/PressureSteamTurbine Group*": {active: true}
+  - click: {ui: "**/PlanScreen/Toggle:Radiation"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/NuclearFuelRod Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/NuclearFuelRod Group*": {active: true}
+      "**/BuildingGroups/**/Grid/RadiumFuelRod Group*": {active: true}
+  - shot: {name: radiation-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}

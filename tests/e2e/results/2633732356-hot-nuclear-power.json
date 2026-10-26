@@ -1,0 +1,60 @@
+{
+ "spec": "mods/2633732356-hot-nuclear-power.yaml",
+ "mods": [
+  "2633732356"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Power menu offers the Pressure Steam Turbine and the Radiation menu the two fuel rods (shot matches)",
+ "updated": "2026-10-26",
+ "commit": "c4f8d080",
+ "mod_dlls": {
+  "2633732356": {
+   "RainbowCommons.dll": "284e5ba2da33b556a8d8d5b02dc522eef1ae28f062fb6a100665c0a93151bca7",
+   "RealisticNuclearPowerPlant.dll": "896cc50c3888f4d5bdc93ef753e5cf8678f7cb8b04b726a9c7eacae07f6fab9a"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-095925-af2fb1f8",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T10:06:22",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-113316-58221300",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T11:33:16",
+    "lane": 16,
+    "reference_run": "20261026-095925-af2fb1f8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "radiation-menu": 0.0
+    }
+   },
+   {
+    "run": "20261026-113316-58221300",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T11:33:17",
+    "lane": 17,
+    "reference_run": "20261026-095925-af2fb1f8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "radiation-menu": 0.0
+    }
+   }
+  ]
+ }
+}

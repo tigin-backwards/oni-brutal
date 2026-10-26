@@ -1,0 +1,35 @@
+# 真.巨型电池 / True Giant Battery (3016368916), class B.
+#
+# What it does: adds 真.巨型电池 (RealBatteryMedium, 4x4, 1600 kg of any metal, in the Power
+# menu with no research), a battery holding 400 kJ that leaks 1/3 J/s, drawn with the Jumbo
+# Battery's anim at twice its size (a postfix on Building.OnSpawn).
+# How a player reaches it: the build menu (Power).
+# What changes: a very big battery.
+#
+# The battery shows in the Power menu; setup builds one in the corridor west of the printing
+# pod, and it is selected: it holds 400 kJ and is drawn at double size.
+from: early-base
+mods: [3016368916]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"RealBatteryMedium\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Cuprite], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"RealBatteryMedium\").WidthInCells": 4
+  # Long enough for the build menu to have counted the base's metal ore: right after the load
+  # the menu shows the Wire and the Battery unaffordable for a moment, in either player.
+  - run: {seconds: 10}
+  - click: {ui: "**/PlanScreen/Toggle:Power"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/RealBatteryMedium Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/RealBatteryMedium Group*": {active: true}
+  - shot: {name: power-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
+  - key: {code: Escape}
+  - expect_ui: {"**/PauseScreen": {exists: false}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 208], select: RealBatteryMedium}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<Battery>.capacity": 400000
+      "selected:GetComponent<KBatchedAnimController>.animWidth": 2
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~真.巨型电池"}

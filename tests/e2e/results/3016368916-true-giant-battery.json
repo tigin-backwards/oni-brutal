@@ -1,0 +1,60 @@
+{
+ "spec": "mods/3016368916-true-giant-battery.yaml",
+ "mods": [
+  "3016368916"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the battery shows in the Power menu; a built one holds 400 kJ and is drawn at double size; menu shot matches",
+ "updated": "2026-10-26",
+ "commit": "9d43552",
+ "mod_dlls": {
+  "3016368916": {
+   "PLib.dll": "5d6a8ef9d87143b90113548016180078efaf112d69afe0cdf1073a6125b33773",
+   "╒µ.╛▐╨═╡τ│╪.dll": "d846e4a4cf8de5e86a55a76d695c176f2b19625136336031ace21bf010b02a26"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-013354-10385a50",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T01:41:30",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-014315-8afa78ee",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T01:48:06",
+    "lane": 14,
+    "reference_run": "20261026-013354-10385a50",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "power-menu": 0.0
+    }
+   },
+   {
+    "run": "20261026-014315-8afa78ee",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T01:48:59",
+    "lane": 14,
+    "reference_run": "20261026-013354-10385a50",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "power-menu": 0.0
+    }
+   }
+  ]
+ }
+}

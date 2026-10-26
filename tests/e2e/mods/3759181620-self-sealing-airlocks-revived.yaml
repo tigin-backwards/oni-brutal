@@ -1,0 +1,35 @@
+# Self-sealing Airlocks Revived (U59 Fix) (3759181620), class P.
+#
+# What it does: a prefix replaces Door.SetSimState for every door but the pneumatic one: an
+# open door set to Auto keeps its cells filled with its own material (gas and liquid
+# impermeable) while Duplicants pass; only a door set to Open empties its cells. A door anim
+# override and cleanup patch go with it.
+# How a player reaches it: any manual airlock or other door on Auto.
+# What changes: doors that never leak gas or liquid.
+#
+# A manual airlock built in the dug-out corridor west of the printing pod, in Auto and closed
+# (solid copper), is set to Open from its side screen; once a Duplicant has toggled it, the
+# mod's open branch has cleared its cells (gas flows in).
+from: early-base
+mods: [3759181620]
+require_log: ['Adding door anim override']
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"ManualPressureDoor\")", method: Build, args: [131129, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - run: {seconds: 3}
+  - expect: {buildings: {ManualPressureDoor: 1}}
+  - expect_state:
+      "all:Door::[0].CurrentState": "== 'Auto'"
+      "Grid.Element[131129].id": Copper
+  - driver: {camera.set: {cell: [113, 207], ortho: 8}}
+  - click_world: {cell: [113, 206], select: ManualPressureDoor}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/DoorToggleSideScreen", cond: stable}
+  - ui_dump: {name: door, root: "**/DoorToggleSideScreen"}
+  - click: {ui: "**/DoorToggleSideScreen/**/Openbutton"}
+  - expect_state:
+      "all:Door::[0].RequestedState": "== 'Opened'"
+  # A Duplicant comes to toggle it.
+  - run: {seconds: 120}
+  - expect_state:
+      "all:Door::[0].CurrentState": "== 'Opened'"
+      "Grid.Solid.get_Item(131129)": false

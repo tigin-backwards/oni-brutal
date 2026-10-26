@@ -1,0 +1,63 @@
+{
+ "spec": "mods/3759181620-self-sealing-airlocks-revived.yaml",
+ "mods": [
+  "3759181620"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a built manual airlock is closed and solid in Auto; set to Open from its side screen, a Duplicant opens it and its cell clears; side-screen dump matches",
+ "updated": "2026-10-26",
+ "commit": "167c57fe",
+ "mod_dlls": {
+  "3759181620": {
+   "SelfSealingAirlocks.dll": "1908c512391f3a0b795e5ce93e292161615eb5b8206583012e0691da40ee514e"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-041626-205666e3",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:31:56",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-043447-bea26c46",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:42:07",
+    "lane": 15,
+    "reference_run": "20261026-041626-205666e3",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "door": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261026-043447-bea26c46",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T04:43:48",
+    "lane": 15,
+    "reference_run": "20261026-041626-205666e3",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "door": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

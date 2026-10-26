@@ -143,7 +143,6 @@ fifth_failing = set(ids('sweep-o-excluded.txt'))
 
 played = {
     '2837919908': 'clicks select what is under the cursor (its flat-scaled world selector); played on U57 and the Twinkleverse save it was reported with',
-    '3427974009': 'side screen and group dialog as in the original',
     '1960947963': 'hover cards draw as in the original (needed ARCHITECTURE D17, D18)',
     '2815406414': 'tiles connect as in the original (needed D21)',
     '3630759126': 'menu and U57 colony with 0 errors (needed its IMGUI and asset bundle API, D20, the TMP caret fix); a multiplayer session needs two Steam accounts, not tested',

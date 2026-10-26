@@ -1,0 +1,28 @@
+# 超级手动气闸 Super Manual Airlock (3004006350), class P.
+#
+# What it does: the Manual Airlock insulates: its definition gets a thermal conductivity of
+# 0, and its configuration an Insulator, tile temperature and an InsulatingDoor, its cells
+# kept liquid and gas tight.
+# How a player reaches it: building a Manual Airlock.
+# What changes: airlocks that pass no heat.
+#
+# The definition and prefab are read; an airlock built by setup in the dug-out corridor west
+# of the printing pod is selected.
+from: early-base
+mods: [3004006350]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"ManualPressureDoor\")", method: Build, args: [131127, Neutral, null, [Cuprite], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"ManualPressureDoor\").ThermalConductivity": 0
+      "Assets.GetPrefab(\"ManualPressureDoor\").GetComponent<Insulator>": exists
+      "Assets.GetPrefab(\"ManualPressureDoor\").GetComponent<SimCellOccupier>.setLiquidImpermeable": true
+      "Assets.GetPrefab(\"ManualPressureDoor\").GetComponent<SimCellOccupier>.setGasImpermeable": true
+  - run: {seconds: 2}
+  - expect: {buildings: {ManualPressureDoor: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [111, 207], select: ManualPressureDoor}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:Insulator": exists
+      "selected:TileTemperature": exists

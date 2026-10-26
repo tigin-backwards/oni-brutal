@@ -1,0 +1,56 @@
+{
+ "spec": "mods/3004006350-super-manual-airlock.yaml",
+ "mods": [
+  "3004006350"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Manual Airlock conducts no heat and insulates; a built one is selected",
+ "updated": "2026-10-26",
+ "commit": "f898d18a",
+ "mod_dlls": {
+  "3004006350": {
+   "PLib.dll": "5d6a8ef9d87143b90113548016180078efaf112d69afe0cdf1073a6125b33773",
+   "│¼╝╢╞°╒ó├┼.dll": "567d132937b863cab1f79b3667cdbd6f3faed470c6db907764171c4d7a0318cc"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-102152-42394c53",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T10:37:43",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-142203-a4af3f09",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T14:28:14",
+    "lane": 14,
+    "reference_run": "20261026-102152-42394c53",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-142203-a4af3f09",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T14:29:14",
+    "lane": 14,
+    "reference_run": "20261026-102152-42394c53",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

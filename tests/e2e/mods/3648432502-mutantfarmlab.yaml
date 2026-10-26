@@ -1,0 +1,46 @@
+# 变异农场实验室 (MutantFarmLab) (3648432502), classes B, S, O.
+#
+# What it does: adds four buildings: the Mutant Farm Lab (4x3, Stations, Bioengineering), in
+# which a Duplicant who can identify mutant seeds spends radbolts to mutate seeds; a radiation
+# lamp (CustomRadiationLight, 3x1, Radiation menu, Nuclear Research), fed with radbolts, whose
+# side screen slider (0 to 5) sets how strongly it irradiates; a radbolt adapter; and a
+# radiation farm tile (Food, Food Repurposing). Planter patches let mutated plants grow two
+# heads. PLib options; Hjson translations.
+# How a player reaches it: the build menu, after the research; the buildings' side screens.
+# What changes: a way to breed mutant seeds without a natural radiation source.
+#
+# setup grants Nuclear Research and spawns metal ore. A radiation lamp is built in the
+# corridor west of the printing pod and selected: its slider shows 0, and 3 typed into its
+# field sets the lamp's level and its emitter's rads.
+from: early-base
+mods: [3648432502]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"NuclearResearch\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Cuprite\").substance", method: SpawnResource, args: [[111.5, 207.5, -12], 200, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"NuclearResearch\").unlockedItemIDs": {contains: CustomRadiationLight}
+      "Db.Get().Techs.Get(\"Bioengineering\").unlockedItemIDs": {contains: MutantFarmLab}
+  - run: {seconds: 5}
+  - click: {ui: "**/PlanScreen/Toggle:Radiation"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/CustomRadiationLight Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/RadiationParticleAdapter Group*": {active: true}
+  - key: {code: Escape}
+  - expect_ui: {"**/PauseScreen": {exists: false}}
+  - build: {prefab: CustomRadiationLight, at: [112, 208]}
+  - expect: {blueprints: {CustomRadiationLight: 1}}
+  - run: {seconds: 1500, until: {buildings: {CustomRadiationLight: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 208], select: CustomRadiationLight}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<MutantFarmLab.CustomRadiationLight>.RadiationLevel": 0
+  - ui_wait: {path: "**/SingleSliderSideScreen", cond: stable}
+  - ui_dump: {name: lamp, root: "**/SingleSliderSideScreen"}
+  - shot: {name: lamp, crop: "**/SingleSliderSideScreen"}
+  - type: {ui: "**/SingleSliderSideScreen/**/NumberInputField", text: "3", clear: true, enter: true}
+  - expect_state:
+      "selected:GetComponent<MutantFarmLab.CustomRadiationLight>.RadiationLevel": 3
+      "selected:GetComponent<RadiationEmitter>.emitRads": "> 0"

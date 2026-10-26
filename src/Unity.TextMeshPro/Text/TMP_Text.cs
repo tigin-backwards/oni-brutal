@@ -208,17 +208,24 @@ namespace TMPro
 
         // ----- Fonts and materials -----
 
+        // Set to null on a text that has woken, the font is the default font asset, as if that
+        // asset had been assigned (measured on the shipped package: "A font set to null"). A
+        // text that has not woken keeps null, and takes the default when it wakes.
         public TMP_FontAsset font
         {
             get => m_fontAsset;
             set
             {
+                if (value == null && m_Woken) value = TMP_Settings.defaultFontAsset;
                 if (m_fontAsset == value) return;
                 m_fontAsset = value;
                 LoadFontAsset();
                 FontChanged();
             }
         }
+
+        // Whether the text has woken (Awake has run).
+        private protected bool m_Woken;
 
         // Called when the font asset changes: the shared material follows the font's.
         private protected virtual void LoadFontAsset()

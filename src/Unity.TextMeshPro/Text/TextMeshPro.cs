@@ -62,6 +62,7 @@ namespace TMPro
             // The text info starts new (the data's serialized one is not used: a text that never
             // laid out reports one material, as the shipped package's does).
             m_textInfo = new TMP_TextInfo(this);
+            m_Woken = true;
             if (m_fontAsset == null) m_fontAsset = TMP_Settings.defaultFontAsset;
             if (m_sharedMaterial == null && m_fontAsset != null) m_sharedMaterial = m_fontAsset.material;
             m_fontColor32 = m_fontColor;

@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3740131305-salt-volcano.yaml",
+ "mods": [
+  "3740131305"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a placed Salt Volcano is selected: its name, molten salt at 1600 K, max pressure and rolled rate match the original's",
+ "updated": "2026-10-26",
+ "commit": "a452aaa",
+ "mod_dlls": {
+  "3740131305": {
+   "Geysers_Salt_Volcano.dll": "9f62fbf8ab87e52b02195974f1ac2ac179ef0250cfc2d02c268f379e13952880"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-022709-87387b70",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T02:30:41",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-023425-4430a720",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T02:53:28",
+    "lane": 15,
+    "reference_run": "20261026-022709-87387b70",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-023425-4430a720",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T02:54:17",
+    "lane": 15,
+    "reference_run": "20261026-022709-87387b70",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

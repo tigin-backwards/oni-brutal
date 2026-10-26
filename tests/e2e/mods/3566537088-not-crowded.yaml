@@ -1,0 +1,35 @@
+# Not crowded 不在拥挤 (3566537088), class P.
+#
+# What it does: critters need no room: Harmony prefixes on OvercrowdingMonitor give every
+# critter and egg a personal space of 0 and make its region never overcrowded or confined,
+# so no Crowded, Cramped or Confined effects.
+# How a player reaches it: keeping many critters in a small room.
+# What changes: no overcrowding penalties.
+#
+# setup lets sixteen Hatches loose in the dug-out corridor west of the printing pod, far more
+# than its cells would hold; after a while none of them is overcrowded or confined.
+from: early-base
+mods: [3566537088]
+setup:
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131126, 0, 0, \"Hatch\", \"Creatures\")", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131126, 0, 0, \"Hatch\", \"Creatures\")", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131127, 0, 0, \"Hatch\", \"Creatures\")", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131127, 0, 0, \"Hatch\", \"Creatures\")", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131128, 0, 0, \"Hatch\", \"Creatures\")", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131128, 0, 0, \"Hatch\", \"Creatures\")", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131129, 0, 0, \"Hatch\", \"Creatures\")", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131129, 0, 0, \"Hatch\", \"Creatures\")", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131130, 0, 0, \"Hatch\", \"Creatures\")", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131130, 0, 0, \"Hatch\", \"Creatures\")", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131131, 0, 0, \"Hatch\", \"Creatures\")", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131131, 0, 0, \"Hatch\", \"Creatures\")", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131132, 0, 0, \"Hatch\", \"Creatures\")", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131132, 0, 0, \"Hatch\", \"Creatures\")", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131133, 0, 0, \"Hatch\", \"Creatures\")", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131133, 0, 0, \"Hatch\", \"Creatures\")", method: SetActive, args: [true]}}
+steps:
+  - run: {seconds: 30}
+  - expect_state:
+      "count:all:KPrefabID::[*] if .PrefabTag.Name == Hatch": ">= 16"
+      "count:all:KPrefabID::[*] if .PrefabTag.Name == Hatch and .HasTag(\"Overcrowded\") == true": 0
+      "count:all:KPrefabID::[*] if .PrefabTag.Name == Hatch and .HasTag(\"Confined\") == true": 0

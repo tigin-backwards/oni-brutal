@@ -1,0 +1,59 @@
+{
+ "spec": "mods/2959309464-build-priority-keys.yaml",
+ "mods": [
+  "2959309464"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with the Tile picked in the Base menu, the 7 key sets the card's priority (shot) and the placed blueprint gets priority 7",
+ "updated": "2026-10-26",
+ "commit": "f898d18a",
+ "mod_dlls": {
+  "2959309464": {
+   "BuildPriorityKeys.dll": "b784bda3f2815e4762178f02341801766f3e2406b78cf6055b1d585b59708da3"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-101011-aa145397",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T10:13:30",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-142203-a4af3f09",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T14:22:53",
+    "lane": 14,
+    "reference_run": "20261026-101011-aa145397",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "card": 0.007747
+    }
+   },
+   {
+    "run": "20261026-142203-a4af3f09",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T14:23:50",
+    "lane": 14,
+    "reference_run": "20261026-101011-aa145397",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "card": 0.007747
+    }
+   }
+  ]
+ }
+}

@@ -1,0 +1,33 @@
+# Build Priority Keys (2959309464), class T.
+#
+# What it does: while a building's card is open in the build menu, the number keys set the
+# build priority (1 to 9, 0 for emergency) instead of switching build menu categories: a
+# prefix on KScreen.OnKeyDown lets the card's MaterialSelectionPanel take those actions and
+# set its PriorityScreen.
+# How a player reaches it: the build menu, a building picked, then a number key.
+# What changes: the priority the blueprint will get.
+#
+# The Tile is picked from the Base menu; pressing 7 sets the card's priority to 7 and leaves
+# the Base menu open; a tile placed in the dug-out corridor west of the printing pod gets
+# priority 7.
+from: early-base
+mods: [2959309464]
+steps:
+  - run: {seconds: 5}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click: {ui: "**/PlanScreen/Toggle:Base"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/Tile Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/Tile Group*"}
+  - ui_wait: {path: "**/PlanBuildingSelectionPanel/ProductInfoScreen", cond: stable}
+  - key: {code: Alpha7}
+  - expect_state:
+      "PlanScreen.Instance.ProductInfoScreen.materialSelectionPanel.PriorityScreen.lastSelectedPriority.priority_value": 7
+      "PlayerController.Instance.ActiveTool.name": BuildTool
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/Tile Group*": {active: true}
+  - shot: {name: card, crop: "**/PlanBuildingSelectionPanel/ProductInfoScreen", threshold: 0.04}
+  - click_world: {cell: [112, 207]}
+  - key: {code: Escape}
+  - expect: {blueprints: {Tile: 1}}
+  - expect_state:
+      "all:Constructable::[0].GetComponent<Prioritizable>.GetMasterPriority().priority_value": 7

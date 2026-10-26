@@ -1,0 +1,26 @@
+# 太空服容量可调 Space suit capacity adjustable (3094695022), class P.
+#
+# What it does: the Atmo, Jet and Lead Suits get a slider (100 to 1000 kg, 100 by default)
+# that sets their oxygen tank's capacity, kept on every frame, and the suit docks copy it.
+# How a player reaches it: selecting a suit lying about or docked; its slider side screen.
+# What changes: suits holding up to ten times the oxygen.
+#
+# setup drops an Atmo Suit in the dug-out corridor west of the printing pod; it is selected,
+# and 500 typed into its slider's field makes its tank hold 500 kg.
+from: early-base
+mods: [3094695022]
+setup:
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131127, 0, 0, \"Atmo_Suit\", \"Ore\")", method: SetActive, args: [true]}}
+steps:
+  - run: {seconds: 2}
+  - expect_state:
+      "all:SuitTank::[0].capacity": 100
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {pos: [111.5, 206.2], select: Atmo_Suit}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/SingleSliderSideScreen", cond: stable}
+  - ui_dump: {name: slider, root: "**/SingleSliderSideScreen"}
+  - type: {ui: "**/SingleSliderSideScreen/**/*Input*", text: "500", enter: true, clear: true}
+  - run: {seconds: 1}
+  - expect_state:
+      "selected:SuitTank.capacity": 500

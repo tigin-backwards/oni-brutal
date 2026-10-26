@@ -28,7 +28,14 @@ engine, BRUTAL's native libraries, and the Unity module facades in `engine/`. Th
 its own copy of the engine, so after changing the engine, rebuild the host too.
 
 `scripts/build-engine.sh [debug|release]` also lays out `out/engine` (the engine and its facades
-without the host), which the API conformance check reads.
+without the host), which the API conformance check reads. `scripts/build-packages.sh` builds our
+uGUI, TextMeshPro and Timeline into `out/packages`.
+
+Test players and builds run through `scripts/contain.sh CMD...`, which starts them in the
+memory-capped systemd user slice `oni-tests.slice` (`scripts/oni-tests.slice`, installed into
+`~/.config/systemd/user` when it changes) as preferred OOM victims, so a player that over-commits
+is killed instead of your session or WSL. `run.sh`, `check.sh`, `qa.sh` and `e2e.py` use it on
+their own; use it for builds started by hand too: `scripts/contain.sh dotnet build …`.
 
 ## Run
 
@@ -41,32 +48,52 @@ ONI_CONFIG=release scripts/run.sh
 Both scripts keep saves, settings and mods in `out/run-home` (or `ONI_RUN_HOME`), away from your
 real profile in `~/.config/unity3d`. Any other arguments go to the host. Useful ones for testing
 are `--log FILE`, `--headless --frames N`, `--capture FRAME:PATH` and `--max-frame-rate N`.
-Unity's `-screen-width`, `-screen-height` and `-window-mode` work too. `scripts/run.sh --help`
-lists everything.
+Unity's `-screen-width`, `-screen-height` and `-window-mode` work too. An unknown option, such as
+`scripts/run.sh --help`, prints the host's usage line with every option.
 
-These runs have no game tweaks unless they name some (`--game-tweak exact`, …): the scripts pass
-`--game-tweak none` first, so neither the player's defaults nor a Moono Tweaks settings file in
+The player's options come from built-in defaults, then the settings file
+`<persistentDataPath>/oni-moono/settings.json` that the main menu's Moono Tweaks screen writes,
+then the command line: `--game-tweak exact|all|none|NAME|-NAME` (repeatable; any of them sets the
+whole set), `--splash moo|none` and `--frame-stats`. `--no-tweaks-menu` leaves the Moono Tweaks
+button off the main menu, as in the original. [TWEAKS.md](TWEAKS.md) lists the tweaks and their
+verify mode (`ONI_TWEAK_VERIFY=1`).
+
+These runs have no game tweaks and no splash unless they name some: the scripts pass
+`--game-tweak none --splash none` first, so neither the player's defaults nor a settings file in
 the run home changes what a test measures. `ONI_TWEAK_SETTINGS=1` leaves that out, to try the
-main menu's Moono Tweaks screen as a player has it.
+Moono Tweaks screen as a player has it.
+
+`Player.log` keeps its first 20 MB and its last 20 MB or so, cut with a banner between them;
+`ONI_LOG_FULL=1` keeps all of it. More diagnostics (`--trace-exceptions`, `--dump-hierarchy`,
+`ONI_OBJECT_CENSUS`, …) are in [ARCHITECTURE.md](ARCHITECTURE.md) §7.
 
 The offline stub says you own the base game, with no DLC and no Workshop items. It's for testing
 on machines without Steam, not for playing.
 
-To play through Steam like a player does, run `./setup.sh`. It builds a self-contained player
-into `out/player` and prints the launch options line (`OniMoono -- %command%`).
+## Setup
+
+To play through Steam like a player does, run `./setup.sh` (Linux) or `setup.cmd` (Windows, which
+runs `setup.ps1`). From a clone they build a self-contained player first (`setup.sh` into
+`out/player`); from a release they use the archive's `player/`, after deleting the `OniBrutal`
+and `OniBrutal.*` files an older release extracted there may have left. `setup.ps1` installs the
+player into `%LOCALAPPDATA%\oni-moono\player`. Both print the launch options line
+(`OniMoono -- %command%`), or say that every Steam account already has it. On Linux,
+`ONI_STEAM_SANDBOX=flatpak|snap|none` overrides the guess of how Steam is sandboxed.
 
 ## Releases
 
 ```sh
 scripts/release.sh                     # out/release: the Windows zip and the Linux tar.gz
-gh release create vYYYY.MM.DD out/release/oni-moono-*.zip out/release/oni-moono-*.tar.gz \
-  --title "YYYY.MM.DD" --notes "..."
+gh release create vYYYY.MM.DD.NN out/release/oni-moono-*.zip out/release/oni-moono-*.tar.gz \
+  --title "YYYY.MM.DD.NN" --notes "..."
 ```
 
-The build compiles against the game's assemblies, so it runs where the game is installed (not in
-CI). Each archive holds an `oni-moono` folder with the setup script, the README, `NOTICE.txt`
-and the self-contained player in `player/`; the setups install a release's player without
-building. Nothing of the game goes into them.
+`release.sh [VERSION]` names the archives by VERSION, by default the date of HEAD's commit. The
+tag and title add a two-digit counter for the day (`.01` for its first release), so releases sort
+as text. The build compiles against the game's assemblies, so it runs where the game is installed
+(not in CI). Each archive holds an `oni-moono` folder with the setup script, the README,
+`NOTICE.txt` and the self-contained player in `player/`; the setups install a release's player
+without building. Nothing of the game goes into them.
 
 ## Windows
 
@@ -81,7 +108,7 @@ it on the Steam install (`ONI_WIN_GAME_DIR` to change that). Test runs stay away
 data, Steam account and speakers:
 - `--run-home` gives the game its own Documents, AppData and LocalLow under
   `%TEMP%\oni-brutal\run-home` (`ONI_RUN_HOME`)
-- the Steam stub replaces `steam_api64.dll`
+- the Steam stub replaces `steam_api64.dll` (`ONI_STEAM_STUB` names another one)
 - `--audio-wav` writes the game's sound to `fmodoutput.wav` there
 
 To compare against the original Windows player under the same isolation:
@@ -103,31 +130,54 @@ script has the details.
 
 ```sh
 scripts/check.sh               # before every commit
-scripts/qa.sh                  # the full harness
+scripts/qa.sh [STAGE...]       # the full harness: unit, dogfood, verify, perf
+scripts/e2e.py SPEC...         # end-to-end specs: tests/e2e
 ```
 
-`check.sh` builds the solution and runs both test suites. Then it checks the game's assemblies
-against the engine's API, and runs the host's type, asset and binding checks against the
+`check.sh` builds the solution, runs the test suites and the scripts' tests
+(`tests/scripts`), and cross-publishes the macOS host. Then it checks the game's assemblies
+against the engine's API, and runs the host's type, asset, binding and native checks against the
 installed game. Some tests read shaders and fonts from the game, so it needs to be installed.
 
-`qa.sh` runs the unit stage, then scripted play sessions compared against reference captures
-(menu, new game, colony, every main screen and overlay, typing, save, load, resize). It finishes
-with a large colony in verify mode with every tweak, and a performance check. The large-colony
-stages need local setup in `out/local-tools/qa.env`, and are skipped without it.
+`qa.sh` runs four stages, all by default: `unit` (the build and `check.sh`), `dogfood` (scripted
+play sessions compared against reference captures: menu, new game, colony, every main screen and
+overlay, typing, save, load, resize), `verify` (a large colony with every tweak in verify mode)
+and `perf` (its frame rate and memory against the reference). `--bless` stores a run's results as
+the references once they have been looked at. The large-colony stages need local setup in
+`out/local-tools/qa.env`, and are skipped without it. A large-colony run that logs no frame rate
+for `QA_HANG_MIN` minutes (default 5) is hung: its stacks go to the stage's `hang` folder
+(`scripts/hang-dump.sh`) before it is killed; `ONI_TEST_HANG=FRAME[:spin|wait]` hangs one on
+purpose.
+
+`e2e.py` plays a spec (a fixture save, Workshop mods, orders and UI input) in our player, the
+original or both, and checks what came of it. Runners in every worktree share lanes (ports and
+an Xvfb display each), a players' memory budget and locks in `~/.cache/oni-brutal-e2e`
+(`E2E_LOCK_DIR`); `scripts/e2e.py --status` shows them. `qa.sh`'s perf stage writes `perf.wanted`
+there, so no new spec starts, and takes `perf.lock` exclusively once the running ones finish;
+other perf jobs can do the same with `flock -x ~/.cache/oni-brutal-e2e/perf.lock CMD`.
+[tests/e2e/README.md](../tests/e2e/README.md) describes specs, lanes and verdicts.
+`scripts/mod-sweep.py NAME` runs Workshop mods in batches through the same machinery, in both
+players, and bisects failing batches; `scripts/modtable.py > docs/MOD_COMPATIBILITY.md`
+regenerates the compatibility table from the results.
+
+## The OniMoono rename
+
+The internals were renamed from OniBrutal to OniMoono. `scripts/rename-internals.py` does that
+rename and is idempotent: run it on a branch from before the rename before merging or rebasing it
+onto master. `--dry-run` shows what it would change, and `--audit` lists what still names the old
+one and fails on anything not kept on purpose (the lock folder, the Windows staging folder, the
+code that recognizes older players).
 
 ## Known differences
 
-A few number formats in game code and a handful of smaller gaps are documented as deviations in
-`docs/ARCHITECTURE.md` (D1–D12). Three are fixed by small patches the host makes to game code,
-the only ones it makes:
-- D1: state-machine values in saves from the original player loaded at their defaults
-- D3: local mods disabled at every launch
-- D11: mods built against publicized game assemblies failing CoreCLR's access checks
+[ARCHITECTURE.md](ARCHITECTURE.md) §2.1 lists where Mono and .NET, or Unity's player and ours,
+differ in ways game or mod code notices (D1–D36), each with how the host resolves it or why it is
+kept. The host patches a few game methods (D1, D3, D11, D26), rewrites game and mod IL as it
+loads where it depends on Mono (D29–D31 for both; mods' alone in D22, D23, D27, D28 and D32), and
+adjusts the game's Harmony where patches would run differently (D12–D14, D17–D21, D33, D34).
 
-D12 adjusts the game's Harmony instead: a transpiler's `callvirt` to a static method becomes a
-call, as Mono runs it.
-
-Floating-point results aren't bit-identical to Mono's, and aren't meant to be.
+Float arithmetic in game code rounds as .NET does, not as Unity's Mono (D25); the engine's own
+math follows the original bit for bit where that was measured.
 
 ## Documents
 
@@ -135,8 +185,11 @@ Floating-point results aren't bit-identical to Mono's, and aren't meant to be.
 - `docs/ARCHITECTURE.md`: how the pieces fit together, and the deviations
 - `docs/PARITY.md`: what has been compared against the original player, and how
 - `docs/PERFORMANCE.md`: where the frame time goes, and what each change bought
+- `docs/TWEAKS.md`: the game tweaks, and how "exactly the same" is checked
+- `docs/MOD_COMPATIBILITY.md`: which Workshop mods work, generated by `scripts/modtable.py`
 - `docs/ENGINE-CONVENTIONS.md`: coding rules for the engine
 - `docs/LICENSING.md`: what we redistribute, and what we rely on the game install for
 - `docs/GAME-UPDATES.md`: checks to run again when the game updates
+- `tests/e2e/README.md`: end-to-end specs, how they run, and the mod batch workflow
 - `tools/UnityProbe`: a mod that records how the original player behaves, so the same scenarios
   can be compared in both players

@@ -1,0 +1,25 @@
+# Oil Well石油井 (2841918251), class B.
+#
+# What it does: adds a second Oil Well (OilWelll, 4x4, refined metal, Utilities menu, no
+# research), built on an oil reservoir like the game's: it takes water by pipe and turns each
+# kilogram into 10 kg of petroleum at 363 K (the game's makes crude oil), and builds up no
+# natural gas pressure (its gas rate is 0).
+# How a player reaches it: the build menu (Utilities), placed on an oil reservoir.
+# What changes: a well that makes ten times its water in petroleum.
+#
+# The Utilities menu offers it, and its converter makes 10 kg of petroleum per kilogram of
+# water.
+from: early-base
+mods: [2841918251]
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"OilWelll\").BuildLocationRule": BuildingAttachPoint
+      "Assets.GetPrefab(\"OilWelll\").GetComponent<ElementConverter>.outputElements[0].elementHash": Petroleum
+      "Assets.GetPrefab(\"OilWelll\").GetComponent<ElementConverter>.outputElements[0].massGenerationRate": 10
+      "Assets.GetPrefab(\"OilWelll\").GetComponent<OilWellCap>.addGasRate": 0
+  - run: {seconds: 10}
+  - click: {ui: "**/PlanScreen/Toggle:Utilities"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/OilWelll Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/OilWelll Group*": {active: true}
+  - shot: {name: utilities-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}

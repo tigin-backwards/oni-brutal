@@ -1,0 +1,59 @@
+{
+ "spec": "mods/2841918251-oil-well.yaml",
+ "mods": [
+  "2841918251"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Utilities menu offers the second Oil Well (shot matches); it makes 10 kg of petroleum per kilogram of water",
+ "updated": "2026-10-26",
+ "commit": "c709e04e",
+ "mod_dlls": {
+  "2841918251": {
+   "oil well.dll": "c986fee84a783ecda5901fe35e4a4d6291b570cee70a85f9db01431d00637fab"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-043257-c0eef0ae",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:42:40",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-105944-212584be",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T10:59:44",
+    "lane": 16,
+    "reference_run": "20261026-043257-c0eef0ae",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "utilities-menu": 0.0
+    }
+   },
+   {
+    "run": "20261026-105944-212584be",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T10:59:45",
+    "lane": 17,
+    "reference_run": "20261026-043257-c0eef0ae",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "utilities-menu": 0.0
+    }
+   }
+  ]
+ }
+}

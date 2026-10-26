@@ -1,0 +1,63 @@
+{
+ "spec": "mods/3003736085-basic-3-worlds.yaml",
+ "mods": [
+  "3003736085"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a new Survival game on the coordinate Vortex-12345-0-0-0 generates the mod's 380x380 Vortex start asteroid with its forest start and wasteland subworlds; the asteroid list dump matches",
+ "updated": "2026-10-26",
+ "commit": "edab06f6",
+ "mod_dlls": {
+  "3003736085": {
+   "Basic3Worlds.dll": "2dd1748c26e25356c46a10cb558cba2e0fe73e3baec79d0cc6fc79048ded332d"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-025019-77e7dd66",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:15:11",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-032001-8fd8b4be",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:22:12",
+    "lane": 14,
+    "reference_run": "20261026-025019-77e7dd66",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "asteroids": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261026-032001-8fd8b4be",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T03:24:29",
+    "lane": 14,
+    "reference_run": "20261026-025019-77e7dd66",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "asteroids": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

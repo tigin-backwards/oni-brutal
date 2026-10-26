@@ -1,0 +1,27 @@
+# AutomaticForge (2836891839), class P.
+#
+# What it does: postfixes on GlassForgeConfig and SupermaterialRefineryConfig's
+# ConfigureBuildingTemplate set their fabricators' duplicantOperated false: the Glass Forge
+# and the Molecular Forge run their recipes with no Duplicant at the controls once the
+# ingredients are delivered.
+# How a player reaches it: the two forges, built as usual.
+# What changes: the forges run unattended.
+#
+# Both forges' prefabs carry the change; the Glass Forge's card opens from the Refinement
+# menu once High Temperature Forging is researched.
+from: early-base
+mods: [2836891839]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"HighTempForging\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"GlassForge\").GetComponent<ComplexFabricator>.duplicantOperated": false
+      "Assets.GetPrefab(\"SupermaterialRefinery\").GetComponent<ComplexFabricator>.duplicantOperated": false
+      "Assets.GetPrefab(\"MetalRefinery\").GetComponent<ComplexFabricator>.duplicantOperated": true
+  - run: {seconds: 5}
+  - click: {ui: "**/PlanScreen/Toggle:Refinement"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/GlassForge Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/GlassForge Group*"}
+  - ui_wait: {path: "**/PlanBuildingSelectionPanel/ProductInfoScreen", cond: stable}
+  - shot: {name: forge-card, crop: "**/PlanBuildingSelectionPanel/ProductInfoScreen", threshold: 0.04}

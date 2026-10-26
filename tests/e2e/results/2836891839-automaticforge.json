@@ -1,0 +1,59 @@
+{
+ "spec": "mods/2836891839-automaticforge.yaml",
+ "mods": [
+  "2836891839"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Glass and Molecular Forges' prefabs need no operator; the Glass Forge's card opens from the Refinement menu",
+ "updated": "2026-10-25",
+ "commit": "bd353b5",
+ "mod_dlls": {
+  "2836891839": {
+   "AutomaticForge.dll": "8c131a3a1ddc28f1b834bb9ec9c1253477016fa8fb186d79054238f18aeb127b"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261025-200219-ef1e47f8",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T20:25:45",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261025-210637-89625940",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-25T21:06:37",
+    "lane": 14,
+    "reference_run": "20261025-200219-ef1e47f8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "forge-card": 0.007747
+    }
+   },
+   {
+    "run": "20261025-210637-89625940",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-25T21:07:33",
+    "lane": 14,
+    "reference_run": "20261025-200219-ef1e47f8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "forge-card": 0.007747
+    }
+   }
+  ]
+ }
+}

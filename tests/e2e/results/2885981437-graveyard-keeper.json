@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2885981437-graveyard-keeper.yaml",
+ "mods": [
+  "2885981437"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Duplicant that dies leaves a corpse that is a plantable crop seed",
+ "updated": "2026-10-26",
+ "commit": "f898d18a",
+ "mod_dlls": {
+  "2885981437": {
+   "GraveyardKeeper.dll": "0ea62cbc1c2706ce1834dedea9af72505a71ae34ae5b78d1f4a76083012b0e2f"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-113228-a0d69cd2",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T11:41:19",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-135852-94c2bbc0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T14:15:21",
+    "lane": 14,
+    "reference_run": "20261026-113228-a0d69cd2",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-135852-94c2bbc0",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T14:15:27",
+    "lane": 15,
+    "reference_run": "20261026-113228-a0d69cd2",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

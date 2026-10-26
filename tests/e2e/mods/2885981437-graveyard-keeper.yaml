@@ -1,0 +1,22 @@
+# Graveyard Keeper (2885981437), class P.
+#
+# What it does: Pips bury the dead: a postfix on RationalAi's dead state tags a Duplicant's
+# corpse as a crop seed with a PlantableSeed of a Sporechid, and transpilers and prefixes on SeedPlantingStates let a Pip
+# pick the corpse up and plant it; the grave's fetch errand skips corpses a Pip has reserved.
+# How a player reaches it: a Duplicant dying where Pips live.
+# What changes: corpses turn into plants.
+#
+# setup wounds a Duplicant past its hit points; once it has died, its corpse is a crop seed
+# with a PlantableSeed.
+from: early-base
+mods: [2885981437]
+setup:
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[2].GetComponent<Health>", method: Damage, args: [1000.0]}}
+steps:
+  - run: {seconds: 1200, until: {duplicants: 2}}
+  - expect: {duplicants: 2}
+  - run: {seconds: 2}
+  - expect_state:
+      "count:all:KPrefabID::[*] if .HasTag(\"Corpse\") == true": 1
+      "count:all:KPrefabID::[*] if .HasTag(\"Corpse\") == true and .HasTag(\"CropSeed\") == true": 1
+      "count:all:PlantableSeed::[*] if .GetComponent<KPrefabID>.HasTag(\"Corpse\") == true": 1

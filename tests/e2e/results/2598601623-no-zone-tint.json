@@ -1,0 +1,59 @@
+{
+ "spec": "mods/2598601623-no-zone-tint.yaml",
+ "mods": [
+  "2598601623"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the biomes' zone colours are a neutral grey but space's; the world shot matches",
+ "updated": "2026-10-26",
+ "commit": "123c4c42",
+ "mod_dlls": {
+  "2598601623": {
+   "NoZoneTint.dll": "7a0391adaebb427e30d117b3a632a9d6f798cf8ce258eab6777e87f853edd64b"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-023754-20737f8f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T03:44:05",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-043528-69fbd9fa",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T04:35:28",
+    "lane": 15,
+    "reference_run": "20261026-023754-20737f8f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "base": 0.021666
+    }
+   },
+   {
+    "run": "20261026-043528-69fbd9fa",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T04:36:07",
+    "lane": 15,
+    "reference_run": "20261026-023754-20737f8f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "base": 0.022087
+    }
+   }
+  ]
+ }
+}

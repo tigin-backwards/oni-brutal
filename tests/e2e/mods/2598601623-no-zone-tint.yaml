@@ -1,0 +1,18 @@
+# No Zone Tint (2598601623), class V.
+#
+# What it does: a prefix on SubworldZoneRenderData.GenerateTexture sets every biome's zone
+# colour but space's (index 7) to a neutral grey (220, 220, 220), so terrain and foreground
+# items are no longer tinted by their biome; backgrounds keep theirs.
+# How a player reaches it: nothing to do: the world view.
+# What changes: the world's colours.
+#
+# The zone colours are read, and the base is shot with the UI hidden.
+from: early-base
+mods: [2598601623]
+steps:
+  - expect_state:
+      "all:SubworldZoneRenderData::[0].zoneColours[0].r": 220
+      "all:SubworldZoneRenderData::[0].zoneColours[1].g": 220
+      "all:SubworldZoneRenderData::[0].zoneColours[3].b": 220
+      "all:SubworldZoneRenderData::[0].zoneColours[7].r": "== original"
+  - world_shot: {name: base, ortho: 10, at: [122, 208], mask: [[540, 280, 260, 200]]}

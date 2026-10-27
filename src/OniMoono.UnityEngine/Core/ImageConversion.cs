@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.IO.Compression;
+using System.Runtime.InteropServices;
 using Brutal.StbApi;
 using OniMoono.Engine;
 using OniMoono.Engine.Rendering;
@@ -68,36 +69,103 @@ namespace UnityEngine
         }
 
         /// PNG of level 0: RGB for formats without alpha, greyscale for single-channel red
-        /// formats, RGBA otherwise; 8 bits per channel.
+        /// formats, RGBA otherwise; 8 bits per channel. Null, with an error, for a compressed
+        /// format; an unreadable texture throws (measured in the original player, as for JPG
+        /// and TGA).
         public static byte[] EncodeToPNG(this Texture2D tex)
         {
-            if (tex == null) throw new ArgumentNullException(nameof(tex));
-            var native = (Texture2DNative)tex.NativeOrThrow;
-            if (!native.Readable)
-            {
-                Debug.LogError($"Texture '{tex.name}' is not readable, the texture memory can not be accessed from scripts.", tex);
-                return null;
-            }
-            var format = native.Format;
-            if (!TextureFormats.CanDecode(format))
-            {
-                Debug.LogError($"Unable to encode texture in format {format} to PNG.", tex);
-                return null;
-            }
-            return Encode(format, native.Memory.Slice(0, native.MipSize(0)), native.Width, native.Height);
+            if (!Level0(tex, out var format, out var mip, out int w, out int h)) return null;
+            int channels = Channels(format);
+            return Png.Encode(w, h, channels, Rows(format, mip, w, h, channels, topDown: true, bgr: false, rowPrefix: 1));
+        }
+
+        public static byte[] EncodeToJPG(this Texture2D tex) => EncodeToJPG(tex, 75);
+
+        /// Baseline JPEG of level 0 at `quality` clamped to 1..100: greyscale for single-channel
+        /// red formats, RGB otherwise, alpha dropped (not blended), Alpha8 as black. Null, with an
+        /// error, for a compressed format; an unreadable texture throws (measured in the original
+        /// player). stb's writer differs from the original's (libjpeg's tables) in form, not in
+        /// what decodes: the original subsamples chroma 2 x 2 at every quality (stb only up to
+        /// 90), writes grey as one component (stb: three, the chroma flat) and uses 16-bit
+        /// quantisation tables at the lowest qualities (stb clamps them to 8 bits).
+        public static byte[] EncodeToJPG(this Texture2D tex, int quality)
+        {
+            if (!Level0(tex, out var format, out var mip, out int w, out int h)) return null;
+            int channels = Channels(format) == 1 ? 1 : 3;
+            return Jpeg.Encode(w, h, channels, Rows(format, mip, w, h, channels, topDown: true, bgr: false, rowPrefix: 0), quality);
+        }
+
+        /// Uncompressed TGA of level 0 (image type 2, or 3 for greyscale; rows bottom to top, no
+        /// alpha bits in the descriptor): 8-bit greyscale for single-channel red formats, BGR for
+        /// formats without alpha, BGRA otherwise. Null, with an error, for a compressed format;
+        /// an unreadable texture throws (measured in the original player).
+        public static byte[] EncodeToTGA(this Texture2D tex)
+        {
+            if (!Level0(tex, out var format, out var mip, out int w, out int h)) return null;
+            int channels = Channels(format);
+            return Tga.Encode(w, h, channels, Rows(format, mip, w, h, channels, topDown: false, bgr: true, rowPrefix: 0));
         }
 
         /// PNG of raw texels whose rows run bottom to top, `rowBytes` apart (0: packed), as
         /// EncodeToPNG writes a texture of that format (measured in the original player with
         /// RGBA, sRGB RGBA, BGRA, RGB rows with padding and R8 data). Null, with an error, for a
         /// format the engine cannot decode.
-        public static unsafe byte[] EncodeArrayToPNG(Array array, GraphicsFormat format, uint width, uint height, uint rowBytes = 0)
+        public static byte[] EncodeArrayToPNG(Array array, GraphicsFormat format, uint width, uint height, uint rowBytes = 0)
+        {
+            var texels = Pack(array, format, width, height, rowBytes, "PNG", out var textureFormat);
+            if (texels == null) return null;
+            int w = (int)width, h = (int)height, channels = Channels(textureFormat);
+            return Png.Encode(w, h, channels, Rows(textureFormat, texels, w, h, channels, topDown: true, bgr: false, rowPrefix: 1));
+        }
+
+        /// JPEG of raw texels, as EncodeArrayToPNG reads them and EncodeToJPG writes them.
+        public static byte[] EncodeArrayToJPG(Array array, GraphicsFormat format, uint width, uint height, uint rowBytes = 0, int quality = 75)
+        {
+            var texels = Pack(array, format, width, height, rowBytes, "JPG", out var textureFormat);
+            if (texels == null) return null;
+            int w = (int)width, h = (int)height, channels = Channels(textureFormat) == 1 ? 1 : 3;
+            return Jpeg.Encode(w, h, channels, Rows(textureFormat, texels, w, h, channels, topDown: true, bgr: false, rowPrefix: 0), quality);
+        }
+
+        /// TGA of raw texels, as EncodeArrayToPNG reads them and EncodeToTGA writes them.
+        public static byte[] EncodeArrayToTGA(Array array, GraphicsFormat format, uint width, uint height, uint rowBytes = 0)
+        {
+            var texels = Pack(array, format, width, height, rowBytes, "TGA", out var textureFormat);
+            if (texels == null) return null;
+            int w = (int)width, h = (int)height, channels = Channels(textureFormat);
+            return Tga.Encode(w, h, channels, Rows(textureFormat, texels, w, h, channels, topDown: false, bgr: true, rowPrefix: 0));
+        }
+
+        /// A texture's level 0 for the EncodeTo functions. An unreadable texture throws
+        /// ArgumentException; a compressed format logs an error (false).
+        static bool Level0(Texture2D tex, out TextureFormat format, out ReadOnlySpan<byte> mip, out int width, out int height)
+        {
+            if (tex == null) throw new ArgumentNullException(nameof(tex));
+            var native = (Texture2DNative)tex.NativeOrThrow;
+            if (!native.Readable)
+                throw new ArgumentException($"Texture '{tex.name}' is not readable. For this reason, scripts cannot access the memory allocated to it. You can make this texture readable in the Texture Import Settings.");
+            format = native.Format;
+            width = native.Width;
+            height = native.Height;
+            if (!TextureFormats.CanEncode(format))
+            {
+                Debug.LogError("Unsupported texture format - Texture2D::EncodeTo functions do not support compressed texture formats.");
+                mip = default;
+                return false;
+            }
+            mip = native.Memory.Span.Slice(0, (int)native.MipSize(0));
+            return true;
+        }
+
+        /// Raw rows `rowBytes` apart (0: packed), packed; null, with an error, for a format the
+        /// engine cannot decode.
+        static unsafe byte[] Pack(Array array, GraphicsFormat format, uint width, uint height, uint rowBytes, string kind, out TextureFormat textureFormat)
         {
             if (array == null) throw new ArgumentNullException(nameof(array));
-            var textureFormat = GraphicsFormatUtility.GetTextureFormat(format);
+            textureFormat = GraphicsFormatUtility.GetTextureFormat(format);
             if (textureFormat == 0 || !TextureFormats.CanDecode(textureFormat))
             {
-                Debug.LogError($"Unable to encode texture in format {format} to PNG.");
+                Debug.LogError($"Unable to encode texture in format {format} to {kind}.");
                 return null;
             }
             int w = (int)width, h = (int)height;
@@ -110,7 +178,7 @@ namespace UnityEngine
                 if (source.Length < (long)stride * (h - 1) + packed) throw new ArgumentException("The array is too small for the image.", nameof(array));
                 var texels = new byte[packed * h];
                 for (int y = 0; y < h; y++) source.Slice(y * stride, packed).CopyTo(texels.AsSpan(y * packed));
-                return Encode(textureFormat, texels, w, h);
+                return texels;
             }
             finally
             {
@@ -118,37 +186,71 @@ namespace UnityEngine
             }
         }
 
-        /// PNG of a level's texels (rows bottom to top): RGB for formats without alpha, greyscale
-        /// for single-channel red formats, RGBA otherwise; 8 bits per channel.
-        static byte[] Encode(TextureFormat format, ReadOnlySpan<byte> mip, int w, int h)
+        /// The encoders' channels for a format: 1 (grey) for single-channel red formats, 3 for
+        /// formats without alpha, 4 otherwise (Alpha8 included; measured in the original).
+        static int Channels(TextureFormat format) => format switch
         {
-            int channels = format switch
+            TextureFormat.R8 or TextureFormat.R16 or TextureFormat.RHalf or TextureFormat.RFloat or TextureFormat.BC4 => 1,
+            TextureFormat.RGB24 or TextureFormat.RGB565 or TextureFormat.RG16 or TextureFormat.RG32 or TextureFormat.RGHalf
+                or TextureFormat.RGFloat or TextureFormat.RGB48 or TextureFormat.DXT1 => 3,
+            _ => 4,
+        };
+
+        /// A texel as the encoders read it (measured in the original): Alpha8 as black with alpha
+        /// (GetPixel reads white), RGB565 with its bits repeated into the low ones, two-channel
+        /// formats with blue 1, other channels rounded half up from their values.
+        static Color32 Texel(TextureFormat format, ReadOnlySpan<byte> mip, int w, int x, int y)
+        {
+            if (format == TextureFormat.Alpha8) return new Color32(0, 0, 0, mip[y * w + x]);
+            if (format == TextureFormat.RGB565)
             {
-                TextureFormat.RGB24 or TextureFormat.RGB565 or TextureFormat.DXT1 or TextureFormat.RGB48 => 3,
-                TextureFormat.R8 or TextureFormat.R16 or TextureFormat.RHalf or TextureFormat.RFloat or TextureFormat.BC4 => 1,
-                _ => 4,
-            };
-            var raw = new byte[h * (w * channels + 1)];
+                int v = mip[(y * w + x) * 2] | mip[(y * w + x) * 2 + 1] << 8;
+                int r = v >> 11, g = (v >> 5) & 63, b = v & 31;
+                return new Color32((byte)(r << 3 | r >> 2), (byte)(g << 2 | g >> 4), (byte)(b << 3 | b >> 2), 255);
+            }
+            var c = TextureFormats.Decode(format, mip, w, x, y);
+            bool twoChannels = format is TextureFormat.RG16 or TextureFormat.RG32 or TextureFormat.RGHalf or TextureFormat.RGFloat or TextureFormat.BC5;
+            return new Color32(ToByte(c.r), ToByte(c.g), twoChannels ? (byte)255 : ToByte(c.b), ToByte(c.a));
+        }
+
+        static byte ToByte(float f) => (byte)(Mathf.Clamp01(f) * 255f + 0.5f);
+
+        /// A level's texels (rows bottom to top in `mip`) as 8-bit rows of `channels` (grey: red),
+        /// top row first or last, RGB(A) or BGR(A), each row after `rowPrefix` zero bytes.
+        static byte[] Rows(TextureFormat format, ReadOnlySpan<byte> mip, int w, int h, int channels, bool topDown, bool bgr, int rowPrefix)
+        {
+            int rowSize = rowPrefix + w * channels;
+            var rows = new byte[h * rowSize];
             for (int y = 0; y < h; y++)
             {
-                int row = y * (w * channels + 1);
-                raw[row] = 0; // filter: none
-                int srcY = h - 1 - y;
+                int row = y * rowSize + rowPrefix;
+                int srcY = topDown ? h - 1 - y : y;
+                if (format == TextureFormat.RGBA32 && channels == 4 && !bgr)
+                {
+                    mip.Slice(srcY * w * 4, w * 4).CopyTo(rows.AsSpan(row));
+                    continue;
+                }
+                if (format == TextureFormat.RGB24 && channels == 3 && !bgr)
+                {
+                    mip.Slice(srcY * w * 3, w * 3).CopyTo(rows.AsSpan(row));
+                    continue;
+                }
                 for (int x = 0; x < w; x++)
                 {
-                    var c = (Color32)TextureFormats.Decode(format, mip, w, x, srcY);
-                    int o = row + 1 + x * channels;
-                    if (channels == 1) raw[o] = c.r;
-                    else
+                    var c = Texel(format, mip, w, x, srcY);
+                    int o = row + x * channels;
+                    if (channels == 1)
                     {
-                        raw[o] = c.r;
-                        raw[o + 1] = c.g;
-                        raw[o + 2] = c.b;
-                        if (channels == 4) raw[o + 3] = c.a;
+                        rows[o] = c.r;
+                        continue;
                     }
+                    rows[o] = bgr ? c.b : c.r;
+                    rows[o + 1] = c.g;
+                    rows[o + 2] = bgr ? c.r : c.b;
+                    if (channels == 4) rows[o + 3] = c.a;
                 }
             }
-            return Png.Encode(w, h, channels, raw);
+            return rows;
         }
     }
 }
@@ -253,6 +355,60 @@ namespace OniMoono.Engine
             b[offset + 1] = (byte)(value >> 16);
             b[offset + 2] = (byte)(value >> 8);
             b[offset + 3] = (byte)value;
+        }
+    }
+
+    /// Baseline JPEG through stb_image_write, in BRUTAL.Stb's native library (whose bindings
+    /// cover only the file writers): stbi_write_jpg_to_func, collecting the output in memory.
+    internal static unsafe class Jpeg
+    {
+        static delegate* unmanaged<delegate* unmanaged<void*, void*, int, void>, void*, int, int, int, void*, int, int> write;
+
+        /// JPEG of 8-bit rows, top row first, of 1 (grey) or 3 (RGB) channels; quality clamped to
+        /// 1..100.
+        public static byte[] Encode(int width, int height, int channels, byte[] rows, int quality)
+        {
+            if (write == null)
+            {
+                var library = NativeLibrary.Load("stb", typeof(Stb).Assembly, null);
+                write = (delegate* unmanaged<delegate* unmanaged<void*, void*, int, void>, void*, int, int, int, void*, int, int>)NativeLibrary.GetExport(library, "stbi_write_jpg_to_func");
+            }
+            var output = new MemoryStream();
+            var handle = GCHandle.Alloc(output);
+            try
+            {
+                fixed (byte* data = rows)
+                    if (write(&Append, (void*)GCHandle.ToIntPtr(handle), width, height, channels, data, Math.Clamp(quality, 1, 100)) == 0)
+                        return null;
+            }
+            finally
+            {
+                handle.Free();
+            }
+            return output.ToArray();
+        }
+
+        [UnmanagedCallersOnly]
+        static void Append(void* context, void* data, int size)
+            => ((MemoryStream)GCHandle.FromIntPtr((IntPtr)context).Target).Write(new ReadOnlySpan<byte>(data, size));
+    }
+
+    /// Uncompressed TGA writer: an 18-byte header (no image id, no colour map, no footer), then
+    /// the rows as given.
+    internal static class Tga
+    {
+        /// TGA of 8-bit rows, bottom row first: grey (image type 3), BGR or BGRA (type 2).
+        public static byte[] Encode(int width, int height, int channels, byte[] rows)
+        {
+            var tga = new byte[18 + rows.Length];
+            tga[2] = (byte)(channels == 1 ? 3 : 2);
+            tga[12] = (byte)width;
+            tga[13] = (byte)(width >> 8);
+            tga[14] = (byte)height;
+            tga[15] = (byte)(height >> 8);
+            tga[16] = (byte)(channels * 8);
+            rows.CopyTo(tga, 18);
+            return tga;
         }
     }
 }

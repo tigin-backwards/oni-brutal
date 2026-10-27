@@ -131,6 +131,17 @@ namespace UnityEngine
 
     public partial class Texture2D
     {
+        /// EncodeToEXR's options (the engine writes no EXR; mods name the type).
+        [Flags]
+        public enum EXRFlags
+        {
+            None = 0,
+            OutputAsFloat = 1,
+            CompressZIP = 2,
+            CompressRLE = 4,
+            CompressPIZ = 8,
+        }
+
         public Texture2D(int width, int height)
             : this(width, height, TextureFormat.RGBA32, GenerateAllMips, linear: false, createUninitialized: false) { }
 

@@ -115,6 +115,12 @@ namespace SemanticsProbe
                 FloatPrecision.Run();
                 return;
             }
+            if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "jpg")
+            {
+                Rec.Log("=== values: jpg encode");
+                JpgEncode.Run();
+                return;
+            }
             if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "convert")
             {
                 Rec.Log("=== values: conversions");

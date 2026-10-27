@@ -301,6 +301,14 @@ Unity's Mathf.RoundToInt/FloorToInt/CeilToInt, Vector2Int/Vector3Int's and Color
 Check the rule with `tools/UnityProbe/cv-check.py rule LOG`, and compare the players with
 `cv-check.py diff ORIG OURS`. ARCHITECTURE D29 records what it measured.
 
+With `PROBE_SCENARIO=jpg` only the image-encoder probe runs (`JpgEncode.cs`, lines `JPG …`, at
+mod load): `EncodeToJPG`, `EncodeToTGA` and `EncodeToPNG` of gradient textures in each
+uncompressed, HDR and block-compressed format, an unreadable one and JPEG qualities from -5 to
+1000, with each JPEG's frame header (components, sampling, first quantisation value). The files
+go to `jpg-mono` or `jpg-coreclr` in `PROBE_OUT`; `tools/UnityProbe/jpg-check.py ORIG OURS`
+decodes both players' files and prints each JPEG's error against the original's PNG and whether
+the TGAs and PNGs are equal. `ImageEncodeTests` encodes what it measured.
+
 With `PROBE_SCENARIO=dirorder` only the directory-listing probe runs (`DirectoryOrder.cs`, lines
 `DL …`, at mod load): a tree of files and folders whose names tell UTF-8 byte order, UTF-16
 code unit order and case-insensitive orders apart, made in another order, listed through every

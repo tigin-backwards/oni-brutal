@@ -1,0 +1,59 @@
+{
+ "spec": "mods/3091810586-hydrocarbon-polymerization-machine.yaml",
+ "mods": [
+  "3091810586"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "Catalytics researched, the Utilities menu shot lists the machine; its recipe makes crude oil",
+ "updated": "2026-10-27",
+ "commit": "b8e90d44",
+ "mod_dlls": {
+  "3091810586": {
+   "Tanqingjuheji.dll": "83827e3b0b2f0d599e8abc1d1c81252646236eaef94109fa40f9b1496bcda185"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-054228-6d816ef2",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T06:14:08",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-070541-c1e82ff0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T07:19:57",
+    "lane": 16,
+    "reference_run": "20261027-054228-6d816ef2",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "utilities-menu": 0.0
+    }
+   },
+   {
+    "run": "20261027-070541-c1e82ff0",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T07:20:55",
+    "lane": 16,
+    "reference_run": "20261027-054228-6d816ef2",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "utilities-menu": 0.0
+    }
+   }
+  ]
+ }
+}

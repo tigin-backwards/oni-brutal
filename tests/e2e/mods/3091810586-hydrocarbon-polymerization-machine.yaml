@@ -1,0 +1,27 @@
+# Hydrocarbon polymerization machine (3091810586), class B.
+#
+# What it does: adds the Tanqingjuheji building to the Utilities menu, researched with
+# Catalytics: a 2x2 unpowered machine of refined metal that takes carbon dioxide from the air
+# around it (6 kg/s in a radius of 3) and hydrogen from a gas pipe, and puts out crude oil
+# (5 kg/s of CO2 and 0.02 kg/s of hydrogen into 3 kg/s of oil) into a liquid pipe.
+# How a player reaches it: the research screen, then the build menu (Utilities).
+# What changes: a CO2 sink that makes oil.
+#
+# setup researches Catalytics; the machine shows in the Utilities menu, and its prefab holds
+# the converter's recipe.
+from: early-base
+mods: [3091810586]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"Catalytics\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"Catalytics\").unlockedItemIDs": {contains: Tanqingjuheji}
+      "Assets.GetPrefab(\"Tanqingjuheji\").GetComponent<ElementConverter>.outputElements[0].elementHash": "== 'CrudeOil'"
+      "Assets.GetPrefab(\"Tanqingjuheji\").GetComponent<ElementConverter>.outputElements[0].massGenerationRate": 3
+  - run: {seconds: 10}
+  - click: {ui: "**/PlanScreen/Toggle:Utilities"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/Tanqingjuheji Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/Tanqingjuheji Group*": {active: true}
+  - shot: {name: utilities-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}

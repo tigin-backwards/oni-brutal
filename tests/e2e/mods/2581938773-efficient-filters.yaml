@@ -1,0 +1,29 @@
+# Efficient Filters (2581938773), class P,O.
+#
+# What it does: postfixes on the Gas, Liquid and Solid Filters' CreateBuildingDef set their
+# power draw from PLib options (10 to 120 W each, 10 W by default; the options file is named
+# LiquidBottlerConfig.json, beside the mod).
+# How a player reaches it: PLib options; building a filter.
+# What changes: filters draw less power.
+#
+# The options set 30 W for gas and 20 W for liquid, solid left at 10 W. The definitions are
+# read; a Gas Filter built by setup in the dug-out corridor west of the printing pod is
+# selected and needs 30 W.
+from: early-base
+mods: [2581938773]
+options:
+  "2581938773": {$file: LiquidBottlerConfig.json, GasWatts: 30, LiquidWatts: 20, SolidWatts: 10}
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"GasFilter\")", method: Build, args: [131765, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"GasFilter\").EnergyConsumptionWhenActive": 30
+      "Assets.GetBuildingDef(\"LiquidFilter\").EnergyConsumptionWhenActive": 20
+      "Assets.GetBuildingDef(\"SolidFilter\").EnergyConsumptionWhenActive": 10
+  - run: {seconds: 2}
+  - expect: {buildings: {GasFilter: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: GasFilter}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:EnergyConsumer.WattsNeededWhenActive": 30

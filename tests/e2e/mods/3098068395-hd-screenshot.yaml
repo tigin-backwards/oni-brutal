@@ -1,0 +1,27 @@
+# HD Screenshot (3098068395), class S,O,V.
+#
+# What it does: adds "Take a HD Screenshot" to the pause menu: it frames the whole active world
+# in timelapse mode, renders the base and overlay cameras into a render texture of the PLib
+# options' size (6144x8192 by default), writes it as a JPG or PNG to HD_Screenshots/ under the
+# game's folder, restores the camera, and pops up a dialog naming the file, with tips.
+# How a player reaches it: the pause menu (Escape).
+# What changes: one-click full-colony screenshots.
+#
+# With a 1024x1024 PNG set in its options, the button is pressed: a file appears in
+# HD_Screenshots/, and the dialog (dumped, the path masked) says where.
+from: early-base
+mods: [3098068395]
+options:
+  HDScreenshot: {ScreenshotWidth: 1024, ScreenshotHeight: 1024, SavedImageFormat: 0, HideTipsTextOnScreenshot: false}
+steps:
+  - run: {seconds: 2}
+  - expect_state:
+      "file:HD_Screenshots": missing
+  - key: {code: Escape}
+  - ui_wait: {path: "**/PauseScreen/**/Take a HD ScreenshotButton", cond: stable}
+  - ui_dump: {name: pause, root: "**/PauseScreen"}
+  - click: {ui: "**/PauseScreen/**/Take a HD ScreenshotButton"}
+  - ui_wait: {path: "**/ConfirmDialog*", cond: stable, frames: 600}
+  - expect_state:
+      "file:HD_Screenshots": ">= 1"
+  - ui_dump: {name: dialog, root: "**/ConfirmDialog*", mask_text: ['HD_Screenshots\S*']}

@@ -1,0 +1,72 @@
+{
+ "spec": "mods/3098068395-hd-screenshot.yaml",
+ "mods": [
+  "3098068395"
+ ],
+ "verdict": "failed",
+ "why": "a run of ours failed",
+ "findings": [],
+ "note": "the pause menu's Take a HD Screenshot writes the file and opens its dialog in the original; ours lacks ImageConversion.EncodeToJPG, so the writing method fails (MissingMethodException) and no dialog opens",
+ "updated": "2026-10-26",
+ "commit": "cbabaaf0",
+ "mod_dlls": {
+  "3098068395": {
+   "HDScreenShot.dll": "bf0d533f71e2fff41195a6ca531314b22c6388c90524032f3a605606990aa556",
+   "Pholib.dll": "d5795860c1337c547286ce4c1af36ae181ab8d571b5b081c759a339233c4156c"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-155051-8ce3a25e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T16:33:20",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-204743-febfde17",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-26T21:37:34",
+    "lane": 17,
+    "reasons": [
+     "step 7: E2eDriver ui.wait {\"path\": \"**/ConfirmDialog*\", \"cond\": \"stable\", \"frames\": 600}: timeout: stable not met within 600 frames",
+     "1 log signature(s) the original lacks"
+    ],
+    "reference_run": "20261026-155051-8ce3a25e",
+    "new_signatures": 1,
+    "findings": [],
+    "ui_dump": {
+     "pause": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261026-204743-febfde17",
+    "index": 2,
+    "verdict": "fail",
+    "date": "2026-10-26T21:37:44",
+    "lane": 16,
+    "reasons": [
+     "step 7: E2eDriver ui.wait {\"path\": \"**/ConfirmDialog*\", \"cond\": \"stable\", \"frames\": 600}: timeout: stable not met within 600 frames",
+     "1 log signature(s) the original lacks"
+    ],
+    "reference_run": "20261026-155051-8ce3a25e",
+    "new_signatures": 1,
+    "findings": [],
+    "ui_dump": {
+     "pause": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

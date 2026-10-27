@@ -1,0 +1,32 @@
+# Medicine Expanded (3208353436), class P (items, recipes, effects).
+#
+# What it does: adds nine self-administered medicines made at the Apothecary once Medicine IV
+# is researched: Sugar (Candy), Mood Booster, Caffeine Pill, Rad Pill,
+# Advanced Rad Pill, Buffout, Mentats, Regenerative Serum and Experiment 52C, each with an
+# effect of a cycle or so (stamina, stress, attributes, radiation resistance) and its own
+# condition on who takes it (a postfix on MedicinalPillWorkable.CanBeTakenBy: tired, stressed,
+# irradiated; not bionic).
+# How a player reaches it: research Medicine IV, then the Apothecary's recipe list.
+# What changes: more medicines to make and their effects.
+#
+# setup researches Medicine IV and builds an Apothecary in the corridor west of the printing
+# pod; its recipe list holds the nine new pills, and the pills' items and effects exist.
+from: early-base
+mods: [3208353436]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"MedicineIV\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Apothecary\")", method: Build, args: [131765, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"CaffeinePill\").GetComponent<MedicinalPill>": exists
+      "Assets.GetPrefab(\"Mentats\").GetComponent<MedicinalPill>": exists
+      "Db.Get().effects.Get(\"Medicine_CaffeinePill\").Name": Caffeinated
+      "count:ComplexRecipeManager.Get().recipes[*] if .fabricators[0].Name == Apothecary and .requiredTech == MedicineIV": ">= 9"
+  - run: {seconds: 2}
+  - expect: {buildings: {Apothecary: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: Apothecary}
+  - ui_wait: {path: "**/ComplexFabricatorSideScreen/Contents/ButtonScrollView", cond: stable}
+  - ui_dump: {name: recipes, root: "**/ComplexFabricatorSideScreen/Contents/ButtonScrollView"}
+  - shot: {name: recipes, crop: "**/DetailsScreen", threshold: 0.04}

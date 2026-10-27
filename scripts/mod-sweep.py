@@ -57,6 +57,7 @@ CATALOG_JSON = os.environ.get('ONI_CATALOG_JSON') or os.path.expanduser(
     '~/projects/onimaxxing/apps/onimaxxing/.mods-data/public/catalog.json')
 SKIPPED_FLAGS = ('notLoading', 'crashesAtStartup', 'unanalysed')
 LOAD_MARK = 'Loading save file:'
+GL_REFUSED = re.compile(r'failed to create drisw screen|X_GLXCreateContext|VersionUnavailable')
 DISABLED = re.compile(r'Failed to load mod (.*?)\.\.\.disabling')
 
 
@@ -163,7 +164,11 @@ class Runner:
         if result.get('out'):
             # The run's profile (the mods, the save) is large; its logs and screenshot stay.
             shutil.rmtree(os.path.join(result['out'], 'home'), ignore_errors=True)
-        text =open(result['log'], encoding='utf-8', errors='replace').read() if result.get('log') and os.path.exists(result['log']) else ''
+        text = open(result['log'], encoding='utf-8', errors='replace').read() if result.get('log') and os.path.exists(result['log']) else ''
+        if result['outcome'] and GL_REFUSED.search(text):
+            # The machine's GL driver refused the player a context (too many players hold one):
+            # no verdict on the mods; the sweep stops, and the batch runs again when resumed.
+            raise RuntimeError(f'{label} {kind}: the GL driver refused a context, not the mods: {result["outcome"]}')
         mark = text.find(LOAD_MARK)
         found = {'kind': kind, 'mods': list(mods), 'outcome': result['outcome'], 'out': result['out'],
                  'signatures': sorted(result['signatures']), 'loading': mark >= 0,

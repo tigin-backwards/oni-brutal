@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3514600142-deconstruct-oxygen-masks.yaml",
+ "mods": [
+  "3514600142"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "an oxygen mask's user menu has Deconstruct; a click orders it (Cancel Deconstruct shows), and a Duplicant takes the mask apart",
+ "updated": "2026-10-27",
+ "commit": "ce13fcbb",
+ "mod_dlls": {
+  "3514600142": {
+   "Modo.DeconstructOxygenMasks.dll": "e26683d951ace284e0017d2445c9c13c27a26949b8c7b4ddc1cf5d356c156bbb"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-114113-564df08f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T12:30:53",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-145937-c0e57bfa",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T14:59:37",
+    "lane": 15,
+    "reference_run": "20261027-114113-564df08f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-145937-c0e57bfa",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T15:12:22",
+    "lane": 15,
+    "reference_run": "20261027-114113-564df08f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

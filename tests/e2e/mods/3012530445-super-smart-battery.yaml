@@ -1,0 +1,26 @@
+# Super Smart Bettery (3012530445), class P.
+#
+# What it does: a transpiler on BatterySmartConfig.DoPostConfigureComplete swaps the Smart
+# Battery's constants: 8 GJ of capacity instead of 20 kJ, and 4 J/s of leak instead of 2/3.
+# How a player reaches it: build a Smart Battery.
+# What changes: a smart battery that holds far more.
+#
+# setup builds a Smart Battery in the corridor west of the printing pod; selected, it holds
+# 8 GJ.
+from: early-base
+mods: [3012530445]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"BatterySmart\")", method: Build, args: [131764, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"BatterySmart\").GetComponent<BatterySmart>.capacity": 8000000000
+      "Assets.GetPrefab(\"BatterySmart\").GetComponent<BatterySmart>.joulesLostPerSecond": 4
+  - run: {seconds: 2}
+  - expect: {buildings: {BatterySmart: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: BatterySmart}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<BatterySmart>.capacity": 8000000000
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Smart Battery"}

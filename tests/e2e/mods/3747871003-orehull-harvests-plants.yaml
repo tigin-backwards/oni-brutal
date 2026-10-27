@@ -1,0 +1,29 @@
+# Orehull harvests Plants (3747871003), classes P (art).
+#
+# What it does: with the Prehistoric Planet pack's Orehull (sea turtle) loaded, adult Orehulls
+# get the Stomp monitor (60 s cooldown, radius 10) other critters use to stomp plants, inserted
+# in their chore table, so they walk to ripe plants within reach (and the cell beside and below
+# them) and harvest them, with the mod's stomping animation (turtle_stomping_kanim) and sounds
+# and their own status items ("going to harvest", "harvesting"); closed clams are left alone.
+# How a player reaches it: Orehulls near ripe plants.
+# What changes: Orehulls harvest crops.
+#
+# The adult Orehull prefab carries the Stomp monitor's def with the mod's values and the
+# stomping animation; one set down in setup in the corridor west of the printing pod runs the
+# monitor.
+from: early-base
+mods: [3747871003]
+setup:
+  - driver: {setup.call: {type: Scenario, method: SpawnPrefab, args: [131762, 0, 0, "SeaTurtle", "Creatures"]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "SelectTool.Instance", method: Select, args: [{"$": "last:GetComponent<KSelectable>"}]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"SeaTurtle\").GetComponent<StateMachineController>.cmpdef.defs[14].Cooldown": 60
+      "Assets.GetPrefab(\"SeaTurtle\").GetComponent<StateMachineController>.cmpdef.defs[14].radius": 10
+      "Assets.GetPrefab(\"SeaTurtle\").GetComponent<KBatchedAnimController>.AnimFiles[2].name": "== 'turtle_stomping_kanim'"
+      "Assets.GetPrefab(\"SeaTurtle\").GetComponent<StateMachineController>.cmpdef.defs.Count": "== original"
+  - run: {seconds: 5}
+  - expect_state:
+      "selected:KPrefabID.PrefabTag.Name": SeaTurtle
+      "selected:StateMachineController.cmpdef.defs[14].Cooldown": 60

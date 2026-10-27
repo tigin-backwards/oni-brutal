@@ -1,0 +1,64 @@
+{
+ "spec": "mods/3012838836-super-steam-turbine.yaml",
+ "mods": [
+  "3012838836"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Steam Turbine built in the corridor has the mod's temperatures and slider (dumped); 50 typed sets its pump rate",
+ "updated": "2026-10-27",
+ "commit": "7a56f5f6",
+ "mod_dlls": {
+  "3012838836": {
+   "N_│¼╝╢╒⌠╞√╗·.dll": "93992832b238cba8d13604a38c635e6253628c199be67e6be030c3756a8d541d",
+   "PLib.dll": "b862c5db2b3cd6df09a62d4a30782e91e2b24e8e1bfac08d991c9cc89a984ba9"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-021227-f470d6f8",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T02:21:52",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-032309-0dfef98e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T03:23:09",
+    "lane": 14,
+    "reference_run": "20261027-021227-f470d6f8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "slider": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261027-032309-0dfef98e",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T03:23:10",
+    "lane": 15,
+    "reference_run": "20261027-021227-f470d6f8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "slider": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

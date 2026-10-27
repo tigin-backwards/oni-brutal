@@ -1,0 +1,30 @@
+# 超级蒸汽机 (Super steam turbine) (3012838836), classes B, S, O.
+#
+# What it does: the Steam Turbine turns 10% of its waste heat into itself (PLib options in
+# Controler.json: waste heat share, 90 °C minimum steam, 20 °C output water), tolerates
+# 150 °C, and gets a slider side screen, 1 to 100 kg (26 by default), for how much steam it
+# pumps per second; settings copy.
+# How a player reaches it: the turbine's side screen; the Mods screen's options.
+# What changes: a stronger, configurable steam turbine.
+#
+# One built by setup in the dug-out corridor west of the printing pod is selected: it has
+# the mod's temperatures and a 26 kg/s pump rate; 50 typed into its slider's field sets 50.
+from: early-base
+mods: [3012838836]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"SteamTurbine2\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Copper, Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - run: {seconds: 2}
+  - expect: {buildings: {SteamTurbine2: 1}}
+  - driver: {camera.set: {cell: [114, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: SteamTurbine2}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/SingleSliderSideScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<SteamTurbine>.minActiveTemperature": 363.15
+      "selected:GetComponent<SteamTurbine>.outputElementTemperature": 293.15
+      "selected:GetComponent<SteamTurbine>.pumpKGRate": 26
+  - ui_dump: {name: slider, root: "**/Config Tab - body instance/SingleSliderSideScreen"}
+  - type: {ui: "**/SingleSliderSideScreen/Contents/NumberInputField", text: "50", enter: true, clear: true}
+  - expect_state:
+      "selected:GetComponent<N_超级蒸汽机.N003GG1K1>.AA": 50
+      "selected:GetComponent<SteamTurbine>.pumpKGRate": 50

@@ -1,0 +1,68 @@
+{
+ "spec": "mods/3600136029-seed-mutate.yaml",
+ "mods": [
+  "3600136029"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a seed's Choose Mutation opens the PLib dialog (dumped and shot); Easygoing makes it that mutant, identified",
+ "updated": "2026-10-27",
+ "commit": "118ec327",
+ "mod_dlls": {
+  "3600136029": {
+   "PLib.dll": "b862c5db2b3cd6df09a62d4a30782e91e2b24e8e1bfac08d991c9cc89a984ba9",
+   "╓╓╫╙▒Σ╥∞.dll": "a83d97f2ce7e08505d71e5e843160798ff839dc4dc24d17b9233002c0660ea33"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-051715-c581e5cb",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T06:00:51",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-093954-1b0a3d67",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T09:39:54",
+    "lane": 15,
+    "reference_run": "20261027-051715-c581e5cb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "dialog": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "dialog": 0.0
+    }
+   },
+   {
+    "run": "20261027-093954-1b0a3d67",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T09:40:48",
+    "lane": 15,
+    "reference_run": "20261027-051715-c581e5cb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "dialog": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "dialog": 0.0
+    }
+   }
+  ]
+ }
+}

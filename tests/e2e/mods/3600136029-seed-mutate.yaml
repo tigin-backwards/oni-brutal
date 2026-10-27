@@ -1,0 +1,30 @@
+# 种子变异 Seed Mutate (3600136029), classes S, O.
+#
+# What it does: every seed (a MutantPlant that is not yet a plant) gets a user-menu button,
+# Choose Mutation, which opens a PLib dialog (选择变异) listing the game's plant mutations and
+# 随机 (random): a click mutates the seed into that sub-species (or a random one), discovers
+# it, and with the PLib option Is Identified (on) identifies it too.
+# How a player reaches it: select a seed lying in the world; its user menu.
+# What changes: mutant seeds on demand.
+#
+# setup lays a Mealwood seed in the dug-out corridor west of the printing pod. Selected, its
+# user menu has Choose Mutation; the dialog lists the mutations (dumped and compared in a
+# shot), and Easygoing (moderatelyLoose) makes the seed that mutant, identified.
+from: early-base
+mods: [3600136029]
+setup:
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(0, 112, 206, \"BasicSingleHarvestPlantSeed\", \"Ore\")", method: SetActive, args: [true]}}
+steps:
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [112, 207], ortho: 5}}
+  - click_world: {pos: [112.5, 206.2], select: BasicSingleHarvestPlantSeed}
+  - ui_wait: {path: "**/DetailsScreen/UserMenuButtons/UserMenuScreen/Buttons/Choose MutationButton", cond: stable}
+  - click: {ui: "**/UserMenuScreen/Buttons/Choose MutationButton"}
+  - ui_wait: {path: "**/MutationSelect", cond: stable}
+  - ui_dump: {name: dialog, root: "**/MutationSelect"}
+  - shot: {name: dialog, crop: "**/MutationSelect", threshold: 0.04}
+  - click: {ui: "**/MutationSelect/**/moderatelyLoose"}
+  - ui_wait: {path: "**/MutationSelect", cond: gone}
+  - expect_state:
+      "selected:GetComponent<MutantPlant>.MutationIDs": {equals: [moderatelyLoose]}
+      "selected:GetComponent<MutantPlant>.IsIdentified": true

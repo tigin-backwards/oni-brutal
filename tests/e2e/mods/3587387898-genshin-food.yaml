@@ -1,0 +1,32 @@
+# genshin food 原神食物 (3587387898), classes B, P.
+#
+# What it does: adds 36 foods from Genshin Impact as food items with their own kanims (Cream,
+# Cheese, Rice Buns, Bird Egg Sushi...), each with calories, quality, spoil time and effects,
+# and a recipe at a game fabricator (Microbe Musher, Electric Grill, Gas Range, Sushi Bar...)
+# from the game's ingredients; those its DLCs cannot make are skipped, with a log line.
+# How a player reaches it: a fabricator's recipe side screen; the food in storage.
+# What changes: more meals to cook.
+#
+# The foods exist with their calories; a Microbe Musher built by setup in the dug-out corridor
+# west of the printing pod offers the mod's recipes (as many as the original's); a Cream laid
+# on the floor is selected and named.
+from: early-base
+mods: [3587387898]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"MicrobeMusher\")", method: Build, args: [{"$": "Grid.XYToCell(110, 206)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(0, 114, 206, \"Cream\", \"Ore\")", method: SetActive, args: [true]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"Cream\").GetComponent<Edible>": exists
+      "Assets.GetPrefab(\"Cream\").GetComponent<Edible>.FoodInfo.CaloriesPerUnit": "== original"
+      "count:ComplexRecipeManager.Get().recipes[*] if .results[0].material.Name == Cream": 1
+      "count:ComplexRecipeManager.Get().recipes[*] if .fabricators[0].Name == MicrobeMusher": "== original"
+  - run: {seconds: 2}
+  - expect: {buildings: {MicrobeMusher: 1}}
+  - driver: {camera.set: {cell: [112, 207], ortho: 6}}
+  - click_world: {pos: [114.5, 206.2], select: Cream}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "/\\S/"}
+  - expect_state:
+      "selected:GetComponent<Edible>.FoodID": Cream

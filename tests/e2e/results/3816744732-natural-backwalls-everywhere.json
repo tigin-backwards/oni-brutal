@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3816744732-natural-backwalls-everywhere.yaml",
+ "mods": [
+  "3816744732"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a new classic Terra game logs a census of backwalls",
+ "updated": "2026-10-27",
+ "commit": "4aef527c",
+ "mod_dlls": {
+  "3816744732": {
+   "NaturalBackwalls.dll": "2a36aaf3e4aa52f4fd14ac98fad2386d1f5a832d2b585fce793630537726c096"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-092853-dabffb17",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T11:09:50",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-112647-00d12e1d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T11:34:58",
+    "lane": 17,
+    "reference_run": "20261027-092853-dabffb17",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-112647-00d12e1d",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T11:36:14",
+    "lane": 17,
+    "reference_run": "20261027-092853-dabffb17",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

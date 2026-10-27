@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3771254169-farmers-touch-5x.yaml",
+ "mods": [
+  "3771254169"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the mod loads (logged) and the Farmer's Touch effect it extends keeps the game's duration; no farm is tended",
+ "updated": "2026-10-27",
+ "commit": "2c41026e",
+ "mod_dlls": {
+  "3771254169": {
+   "FarmTinkerDuration5x.dll": "a001f148c0ca40edf588953d785ff41c79058fe752d7344d5bdb3f9b0a94f43c"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-114113-564df08f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T12:24:08",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-145811-b4662999",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T14:58:11",
+    "lane": 15,
+    "reference_run": "20261027-114113-564df08f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-145811-b4662999",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T14:58:54",
+    "lane": 15,
+    "reference_run": "20261027-114113-564df08f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

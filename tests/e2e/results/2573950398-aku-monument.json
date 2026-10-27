@@ -1,0 +1,59 @@
+{
+ "spec": "mods/2573950398-aku-monument.yaml",
+ "mods": [
+  "2573950398"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the monument parts use the mod's animations; its base built in the corridor is drawn with them (world shot)",
+ "updated": "2026-10-27",
+ "commit": "3e5de188",
+ "mod_dlls": {
+  "2573950398": {
+   "Aku_Monument.dll": "89770bfa620a9bb8310149369331e6117333bab6b90736d4e8aa7c428ac2ff74"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-114104-90e83e51",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T12:26:09",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-142005-938e90c5",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T14:20:05",
+    "lane": 14,
+    "reference_run": "20261027-114104-90e83e51",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "monument": 0.004656
+    }
+   },
+   {
+    "run": "20261027-142005-938e90c5",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T14:20:55",
+    "lane": 14,
+    "reference_run": "20261027-114104-90e83e51",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "monument": 0.005492
+    }
+   }
+  ]
+ }
+}

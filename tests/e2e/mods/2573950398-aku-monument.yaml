@@ -1,0 +1,23 @@
+# Aku Monument (2573950398), class P (art).
+#
+# What it does: postfixes on the three Great Monument parts' CreateBuildingDef give them the
+# mod's animations (victory_monument_base, _middle and _upper), an Aku statue in place of the
+# game's monument.
+# How a player reaches it: building the Great Monument (late game).
+# What changes: how the monument looks.
+#
+# The three parts' defs use the mod's animations. Setup builds the monument's base in the
+# corridor west of the printing pod; it is drawn with the mod's art (a world shot).
+from: early-base
+mods: [2573950398]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"MonumentBottom\")", method: Build, args: [{"$": "Grid.XYToCell(113, 207)"}, Neutral, null, [Steel, Obsidian], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"MonumentBottom\").AnimFiles[0].name": "== 'victory_monument_base_kanim'"
+      "Assets.GetBuildingDef(\"MonumentMiddle\").AnimFiles[0].name": "== 'victory_monument_middle_kanim'"
+      "Assets.GetBuildingDef(\"MonumentTop\").AnimFiles[0].name": "== 'victory_monument_upper_kanim'"
+      "Assets.GetBuildingDef(\"MonumentBottom\").AnimFiles.Length": 1
+  - run: {seconds: 2}
+  - expect: {buildings: {MonumentBottom: 1}}
+  - world_shot: {name: monument, ortho: 6, at: [113, 209], threshold: 0.08}

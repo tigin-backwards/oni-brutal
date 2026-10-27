@@ -1,0 +1,63 @@
+{
+ "spec": "mods/3732422991-storagenetwork.yaml",
+ "mods": [
+  "3732422991"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the mod's techs unlock its buildings; a small solid server built in the corridor is selected (title dumped) and stores what the original's does",
+ "updated": "2026-10-27",
+ "commit": "2cdb06ed",
+ "mod_dlls": {
+  "3732422991": {
+   "StorageNetwork.dll": "a82337dc4f5411a3589f1c66743d8e609a276c54bc82921bd4dcedf46abccdf9"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-235258-afb42cfe",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T23:52:59",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-012208-b0ea3be9",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T01:22:08",
+    "lane": 14,
+    "reference_run": "20261026-235258-afb42cfe",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261027-012208-b0ea3be9",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T01:22:09",
+    "lane": 15,
+    "reference_run": "20261026-235258-afb42cfe",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

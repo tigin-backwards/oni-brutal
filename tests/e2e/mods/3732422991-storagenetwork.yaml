@@ -1,0 +1,31 @@
+# StorageNetwork-储存网络 (3732422991), classes B, S.
+#
+# What it does: a storage network: a Storage Network Core (one per world), solid, liquid, gas,
+# particle, battery and cold-storage servers in three sizes, input and output ports for each
+# kind, an energy sensor, a programmable logic block with a web editor, a relay module and an
+# order production centre; eight research techs of its own unlock them, and a panel lists
+# what the network holds.
+# How a player reaches it: the research screen, then the build menu; the buildings' side
+# screens and the network panel.
+# What changes: storage pooled across the network's buildings.
+#
+# The mod's techs unlock its buildings; a small solid server built by setup in the dug-out
+# corridor west of the printing pod is selected: it stores what the original's does (its
+# title dumped).
+from: early-base
+mods: [3732422991]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"StorageNetworkSmallSolidServer\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"StorageNetworkResearchSmallStorage\").unlockedItemIDs": {contains: StorageNetworkSmallSolidServer}
+      "Db.Get().Techs.Get(\"StorageNetworkResearchCore\").unlockedItemIDs": {contains: StorageNetworkCore}
+      "Db.Get().Techs.Get(\"StorageNetworkResearchRelay\").unlockedItemIDs": {contains: StorageNetworkRelayModule}
+  - run: {seconds: 2}
+  - expect: {buildings: {StorageNetworkSmallSolidServer: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: StorageNetworkSmallSolidServer}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_dump: {name: title, root: "**/DetailsScreen/TitleBar/Border/LabelGroup"}
+  - expect_state:
+      "selected:GetComponent<Storage>.capacityKg": [">= 25000", "== original"]

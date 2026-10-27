@@ -1,0 +1,25 @@
+# 永不过热液冷机1瓦耗电（Low power consumption, no overheating） (3133678595), class P.
+#
+# What it does: the Thermo Aquatuner draws 1 W, never overheats and cannot be entombed.
+# How a player reaches it: the Thermo Aquatuner, in the build menu as before.
+# What changes: a nearly free aquatuner that only melting stops.
+#
+# The def holds the mod's values; one built by setup in the dug-out corridor west of the
+# printing pod is selected: it needs 1 W (its title dumped).
+from: early-base
+mods: [3133678595]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LiquidConditioner\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"LiquidConditioner\").EnergyConsumptionWhenActive": 1
+      "Assets.GetBuildingDef(\"LiquidConditioner\").Overheatable": false
+      "Assets.GetBuildingDef(\"LiquidConditioner\").Entombable": false
+  - run: {seconds: 2}
+  - expect: {buildings: {LiquidConditioner: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: LiquidConditioner}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_dump: {name: title, root: "**/DetailsScreen/TitleBar/Border/LabelGroup"}
+  - expect_state:
+      "selected:GetComponent<EnergyConsumer>.WattsNeededWhenActive": 1

@@ -1,0 +1,64 @@
+{
+ "spec": "mods/3133678595-never-overheat-liquid-cooler.yaml",
+ "mods": [
+  "3133678595"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the aquatuner's def draws 1 W and never overheats; one built in the corridor needs 1 W (title dumped)",
+ "updated": "2026-10-27",
+ "commit": "7224eee1",
+ "mod_dlls": {
+  "3133678595": {
+   "Low power consumption, no overheating.dll": "7f14f6d2d5f1e991bbd9456882e16598d7567c59a92ac6125862d0f06f896572",
+   "PLib.dll": "432e28fbecb2d422a46eafe489a446f946ec828acfb2b721f7fe6df19d84cd7c"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-005510-07dc8c66",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T00:58:16",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-020209-38a5684a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T02:02:09",
+    "lane": 14,
+    "reference_run": "20261027-005510-07dc8c66",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261027-020209-38a5684a",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T02:02:10",
+    "lane": 15,
+    "reference_run": "20261027-005510-07dc8c66",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

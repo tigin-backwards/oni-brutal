@@ -1,0 +1,67 @@
+{
+ "spec": "mods/3133795636-super-smart-storage-box.yaml",
+ "mods": [
+  "3133795636"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "an unpowered Smart Storage Bin shows the activation-range side screen (dumped and shot); Advanced Mode turns on by its button",
+ "updated": "2026-10-27",
+ "commit": "4374f7b5",
+ "mod_dlls": {
+  "3133795636": {
+   "newstorage.dll": "47ffc41de11294633d30ec20c97a5bb5a2cf79bd713c8ec61d34a6bfa6250ed9"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-071843-a098de75",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T07:18:43",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-090628-27695c5f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T09:06:28",
+    "lane": 14,
+    "reference_run": "20261027-071843-a098de75",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "range": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "range": 0.0
+    }
+   },
+   {
+    "run": "20261027-090628-27695c5f",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T09:07:18",
+    "lane": 14,
+    "reference_run": "20261027-071843-a098de75",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "range": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "range": 0.0
+    }
+   }
+  ]
+ }
+}

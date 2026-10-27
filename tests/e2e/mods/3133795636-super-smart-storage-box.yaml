@@ -1,0 +1,35 @@
+# Super Smart Storage BOX (3133795636), classes B, S.
+#
+# What it does: the Smart Storage Bin needs no power, and its configuration is replaced: its
+# logic port now follows a SmartReservoir1 with an activation range (green below the lower
+# percentage, 10 %, until it is filled to the upper, 90 %, like a Smart Reservoir), shown in an
+# activation-range side screen; a user-menu button switches between General Mode and Advanced
+# Mode, where deliveries stop while the signal is red. The game's automation side screen is
+# hidden for it.
+# How a player reaches it: select a Smart Storage Bin; its side screen and user menu.
+# What changes: a bin that refills by hysteresis, without power.
+#
+# setup builds a Smart Storage Bin in the dug-out corridor west of the printing pod. Selected,
+# it shows the activation-range side screen; Advanced Mode turns advanced mode on.
+from: early-base
+mods: [3133795636]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"StorageLockerSmart\")", method: Build, args: [{"$": "Grid.XYToCell(112, 206)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"StorageLockerSmart\").RequiresPowerInput": false
+  - run: {seconds: 2}
+  - expect: {buildings: {StorageLockerSmart: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: StorageLockerSmart}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/ActivationRangeSideScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<SmartReservoir1>.activated": true
+      "selected:GetComponent<SmartReservoir1>.isadnvance": false
+      "selected:GetComponent<Operational>.IsOperational": true
+  - ui_dump: {name: range, root: "**/DetailsScreen/SideScreen/**/ActivationRangeSideScreen"}
+  - shot: {name: range, crop: "**/DetailsScreen/SideScreen/**/ActivationRangeSideScreen", threshold: 0.04}
+  - ui_wait: {path: "**/DetailsScreen/UserMenuButtons/UserMenuScreen/Buttons/Advanced ModeButton", cond: stable}
+  - click: {ui: "**/UserMenuScreen/Buttons/Advanced ModeButton"}
+  - expect_state:
+      "selected:GetComponent<SmartReservoir1>.isadnvance": true

@@ -1,0 +1,25 @@
+# Show Liquid on Airflow Tiles (3163125334), class P; PLib options.
+#
+# What it does: an Airflow Tile gets an AirflowTileLiquidChecker. While liquid lies on it or
+# beside it, the tile is respawned as a solid cell occupier that replaces its cell's element
+# (doReplaceElement), so the liquid is drawn on top of the tile instead of seeming to vanish
+# into it; a transpiler on SimCellOccupier.OnSpawn lets it respawn without the repair
+# subscription twice. Option: solar panels' foundation tiles solid.
+# How a player reaches it: build an Airflow Tile next to liquid.
+# What changes: liquid next to airflow tiles shows.
+#
+# setup builds an Airflow Tile in the hollow under the corridor west of the printing pod and
+# pours 600 kg of water beside it; with the water beside it, the tile replaces its element.
+from: early-base
+mods: [3163125334]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"GasPermeableMembrane\")", method: Build, args: [131128, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {type: SimMessages, method: AddRemoveSubstance, args: [131127, Water, null, 600, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"GasPermeableMembrane\").GetComponent<AirflowTileLiquidChecker>": exists
+  - run: {seconds: 10}
+  - expect: {buildings: {GasPermeableMembrane: 1}}
+  - expect_state:
+      "all:AirflowTileLiquidChecker::[0].GetComponent<SimCellOccupier>.doReplaceElement": true
+  - world_shot: {name: tile, ortho: 6, at: [113, 208]}

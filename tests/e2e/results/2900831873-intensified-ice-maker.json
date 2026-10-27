@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2900831873-intensified-ice-maker.yaml",
+ "mods": [
+  "2900831873"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Ice Maker's power, heat and capacity are the mod's; one selected shows them",
+ "updated": "2026-10-27",
+ "commit": "63edd627",
+ "mod_dlls": {
+  "2900831873": {
+   "╟┐╗»╓╞▒∙╗·Intensified ice maker.dll": "0122e880f4f55d837fce9384eecf1f8b6e8853f1e61061d14215318ea9fac215"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-042211-787cf357",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T04:43:03",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-090152-ec1c3821",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T09:01:52",
+    "lane": 14,
+    "reference_run": "20261027-042211-787cf357",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-090152-ec1c3821",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T09:05:38",
+    "lane": 14,
+    "reference_run": "20261027-042211-787cf357",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

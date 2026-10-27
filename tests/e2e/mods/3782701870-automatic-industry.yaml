@@ -1,0 +1,29 @@
+# [2027/QoL] Automatic Industry 2.5.0 (3782701870), class S,K,O,M.
+#
+# What it does: makes Duplicant-operated machines run by themselves: after the buildings are
+# generated it gives every fabricator an AutoFabricatorController (and an
+# AutoBuildingCustomizer), and drivers to research stations, ranch stations, valves, the
+# Auto-Sweeper and others; a prefix on ComplexFabricator.OnSpawn clears a fabricator's
+# duplicantOperated when its automation is on (on by default), status items show the
+# automation, and a building editor window and many PLib options tune it per building.
+# How a player reaches it: building any machine; PLib options and the building editor.
+# What changes: machines work without operators.
+#
+# The Rock Granulator's prefab carries the controller; one built by setup in the dug-out
+# corridor west of the printing pod is selected and needs no operator.
+from: early-base
+mods: [3782701870]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"RockCrusher\")", method: Build, args: [131765, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"RockCrusher\").GetComponent<AutoFabricatorController>": exists
+      "Assets.GetPrefab(\"RockCrusher\").GetComponent<AutoBuildingCustomizer>": exists
+  - run: {seconds: 2}
+  - expect: {buildings: {RockCrusher: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: RockCrusher}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:ComplexFabricator.duplicantOperated": false
+      "selected:BuildingComplete.isManuallyOperated": false

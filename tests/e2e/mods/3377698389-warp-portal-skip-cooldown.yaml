@@ -1,0 +1,22 @@
+# Warp Portal Skip Cooldown (3377698389), class P.
+#
+# What it does: a postfix on WarpPortalSM.InitializeStates adds an Enter callback to the
+# Teleporter Transmitter's recharging state that sets it charged and sends it back to idle,
+# so it can warp again at once instead of after 3,000 s.
+# How a player reaches it: warping a Duplicant through a Teleporter Transmitter.
+# What changes: no cooldown between warps.
+#
+# setup places a Teleporter Transmitter in the dug-out corridor west of the printing pod,
+# part way through a recharge (as after a warp): it spawns into recharging, and is idle and
+# charged again at once.
+from: early-base
+mods: [3377698389]
+setup:
+  - driver: {setup.call: {type: Scenario, method: SpawnPrefab, args: [131765, 0, 0, WarpPortal, Building]}}
+  - driver: {setup.call: {target: "last:GetComponent<WarpPortal>.GetType().GetField(\"rechargeProgress\")", method: SetValue, args: [{"$": "last:GetComponent<WarpPortal>"}, {"$": "UnityEngine.Mathf.Abs(100.0)"}]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+steps:
+  - run: {seconds: 2}
+  - expect_state:
+      "all:WarpPortal::[0].IsConsumed": false
+      "all:WarpPortal::[0].warpPortalSMI.GetCurrentState().name": root.idle

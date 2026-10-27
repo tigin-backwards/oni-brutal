@@ -1,0 +1,33 @@
+# High Temperature Liquid Pump (3684473759), class B.
+#
+# What it does: adds the High Temperature Liquid Pump to the Plumbing menu, researched with
+# Improved Liquid Piping: a liquid pump built to survive hot liquids. Its power draw follows
+# what it pumps (cool liquid, hot liquid, or hot liquid with crude oil as a lubricant it
+# consumes at 0.1 kg/s), and it puts the heat out as exhaust.
+# How a player reaches it: the research screen, then the build menu (Plumbing).
+# What changes: a pump for magma and other hot liquids.
+#
+# setup researches Improved Liquid Piping and builds the pump in the corridor west of the
+# printing pod; it shows in the Plumbing menu, and selected it holds its lubricant converter.
+from: early-base
+mods: [3684473759]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"ImprovedLiquidPiping\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"HighTemperatureLiquidPump\")", method: Build, args: [131765, Neutral, null, [Steel], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"ImprovedLiquidPiping\").unlockedItemIDs": {contains: HighTemperatureLiquidPump}
+  - run: {seconds: 5}
+  - expect: {buildings: {HighTemperatureLiquidPump: 1}}
+  - click: {ui: "**/PlanScreen/Toggle:Plumbing"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/HighTemperatureLiquidPump Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/HighTemperatureLiquidPump Group*": {active: true}
+  - shot: {name: plumbing-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
+  - key: {code: Escape}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: HighTemperatureLiquidPump}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<ElementConverter>.consumedElements[0].Tag.Name": CrudeOil

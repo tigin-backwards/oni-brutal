@@ -1,0 +1,59 @@
+{
+ "spec": "mods/3684473759-high-temperature-liquid-pump.yaml",
+ "mods": [
+  "3684473759"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "Improved Liquid Piping researched, the Plumbing menu shot lists the pump; built, it consumes crude oil",
+ "updated": "2026-10-27",
+ "commit": "434c8f48",
+ "mod_dlls": {
+  "3684473759": {
+   "HTLPump.dll": "80e934f93a68e68119fbfc7c5e2a269c2705aac14414dffd437dbdaaf4110308"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-092853-dabffb17",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T10:22:47",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-102849-d33d3487",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T10:37:17",
+    "lane": 17,
+    "reference_run": "20261027-092853-dabffb17",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "plumbing-menu": 0.0
+    }
+   },
+   {
+    "run": "20261027-102849-d33d3487",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T10:38:12",
+    "lane": 17,
+    "reference_run": "20261027-092853-dabffb17",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "plumbing-menu": 0.0
+    }
+   }
+  ]
+ }
+}

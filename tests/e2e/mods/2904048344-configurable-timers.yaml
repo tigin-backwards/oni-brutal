@@ -1,0 +1,28 @@
+# Configurable Timers (2904048344), class S.
+#
+# What it does: the Timer Sensor's side screen gets a "Current Time" row, a slider and number
+# field copied from the screen's own, that shows where the timer is in its cycle and sets it:
+# typing a time sets the time elapsed in the current state, and the slider moves the timer
+# across its green and red parts.
+# How a player reaches it: a built Timer Sensor's side screen.
+# What changes: timers can be put in phase.
+#
+# A Timer Sensor built by setup in the dug-out corridor west of the printing pod is selected;
+# the Current Time row is there (dumped) and its field takes 5, the time elapsed then.
+from: early-base
+mods: [2904048344]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LogicTimerSensor\")", method: Build, args: [131128, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - run: {seconds: 2}
+  - expect: {buildings: {LogicTimerSensor: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 206], select: LogicTimerSensor}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_wait: {path: "**/TimerSideScreen/Contents/TimerContainer", cond: stable}
+  - expect_ui:
+      "**/TimerSideScreen/Contents/CurrentTimeLabel": {text: "Current Time"}
+  - ui_dump: {name: timer, root: "**/TimerSideScreen/Contents/TimerContainer", mask_text: ['\d+(\.\d+)?'], ignore_fields: [value]}   # the slider follows the time elapsed
+  - type: {ui: "**/TimerSideScreen/Contents/TimerContainer/NumberInputField", text: "5", enter: true, clear: true}
+  - expect_state:
+      "selected:LogicTimerSensor.timeElapsedInCurrentState": [">= 5", "< 6"]

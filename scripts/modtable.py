@@ -482,4 +482,7 @@ installs get developer checks subscribers never see).
   something (a mod's reflection, say) listed the class's nested types.
 - **Transpilers on Unity's UI code** (uGUI, TextMeshPro) are not supported: they need the exact
   IL of Unity's builds, which ours does not have. Ordinary Harmony patches on those classes
-  work. Text Input Hotkeys transpiles TMP_InputField.Backspace.''')
+  work. Text Input Hotkeys transpiles TMP_InputField.Backspace.
+- **Out-of-range NativeArray access:** a write is dropped and a read gives the default value,
+  where Unity's release player reads or writes the memory past the array (ARCHITECTURE D46).
+  Affected: Zoned Auto Sweeper.''')

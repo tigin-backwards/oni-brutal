@@ -1467,7 +1467,7 @@ installs get developer checks subscribers never see).
 | 1527 | [Independent Pufts (Hot Shots)](https://steamcommunity.com/sharedfiles/filedetails/?id=1955246030) | ✅ | ✅ | ✅ | spec tests/e2e/mods/1955246030-independent-pufts.yaml: the Puft egg chances and fertility modifiers are the mod's; a Puft Prince lives with its decor |
 | 1529 | [The FoodOverhaul Mod](https://steamcommunity.com/sharedfiles/filedetails/?id=3747771996) | ✅ | ✅ | ✅ | spec tests/e2e/mods/3747771996-food-overhaul.yaml: the mod initialises; its traits and food effects as in the original; the colony eats |
 | 1530 | [Controlled Power](https://steamcommunity.com/sharedfiles/filedetails/?id=3673526385) | ✅ | ✅ | ✅ | spec tests/e2e/mods/3673526385-controlled-power.yaml: a Power Diode's side screen (dumped and shot) shows backward logic sharing on |
-| 1531 | [Zoned Auto Sweeper](https://steamcommunity.com/sharedfiles/filedetails/?id=3745253371) | ✅ | ✅ | ⬜ | spec fails in ours: tests/e2e/mods/3745253371-zoned-auto-sweeper.yaml: Enable Zone Mode turns zone mode on in both; in ours the game's RangeVisualizerEffect.OnPostRender then writes past the end of the occlusion texture's GetPixelData array (the mod's zone ranges outgrow the texture), our NativeArray throws IndexOutOfRangeException where Unity's player does not check, and the crash screen opens (a run of ours failed) |
+| 1531 | [Zoned Auto Sweeper](https://steamcommunity.com/sharedfiles/filedetails/?id=3745253371) | ✅ | ✅ | ✅ | spec tests/e2e/mods/3745253371-zoned-auto-sweeper.yaml: Enable Zone Mode turns zone mode on and the zone buttons appear in both. With zone mode on, the game's RangeVisualizerEffect.OnPostRender writes past the end of an occlusion texture's GetPixelData array, which Unity's release player doesn't check and ours now drops (as in the original, no crash) |
 | 1532 | [Wild Harvest](https://steamcommunity.com/sharedfiles/filedetails/?id=2594664745) | ✅ | ✅ | ✅ | spec tests/e2e/mods/2594664745-wild-harvest.yaml: every wild harvestable plant is marked to harvest when ready |
 | 1533 | [Excavation Yield Configurable](https://steamcommunity.com/sharedfiles/filedetails/?id=3686522238) | ✅ | ✅ | ✅ | spec tests/e2e/mods/3686522238-excavation-yield-configurable.yaml: multiplier 1: four dug sandstone cells leave their whole mass as debris |
 | 1534 | [缺氧属性修改(OxygenNotIncluded Attribute Modification)](https://steamcommunity.com/sharedfiles/filedetails/?id=3558002322) | ✅ | ✅ | ✅ | spec tests/e2e/mods/3558002322-attribute-modification.yaml: the cheat values hold (logged); the printing pod is ready; the manual generator gives 4 MW |
@@ -2136,3 +2136,6 @@ installs get developer checks subscribers never see).
 - **Transpilers on Unity's UI code** (uGUI, TextMeshPro) are not supported: they need the exact
   IL of Unity's builds, which ours does not have. Ordinary Harmony patches on those classes
   work. Text Input Hotkeys transpiles TMP_InputField.Backspace.
+- **Out-of-range NativeArray access:** a write is dropped and a read gives the default value,
+  where Unity's release player reads or writes the memory past the array (ARCHITECTURE D46).
+  Affected: Zoned Auto Sweeper.

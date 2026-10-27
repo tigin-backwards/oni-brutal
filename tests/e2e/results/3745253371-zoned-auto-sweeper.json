@@ -3,12 +3,12 @@
  "mods": [
   "3745253371"
  ],
- "verdict": "failed",
- "why": "a run of ours failed",
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
  "findings": [],
- "note": "Enable Zone Mode turns zone mode on in both; in ours the game's RangeVisualizerEffect.OnPostRender then writes past the end of the occlusion texture's GetPixelData array (the mod's zone ranges outgrow the texture), our NativeArray throws IndexOutOfRangeException where Unity's player does not check, and the crash screen opens",
+ "note": "Enable Zone Mode turns zone mode on and the zone buttons appear in both. With zone mode on, the game's RangeVisualizerEffect.OnPostRender writes past the end of an occlusion texture's GetPixelData array, which Unity's release player doesn't check and ours now drops (as in the original, no crash)",
  "updated": "2026-10-27",
- "commit": "e799bfde",
+ "commit": "ecf2040f",
  "mod_dlls": {
   "3745253371": {
    "ZonedSolidTransferArm.dll": "d25882d79677be73b94e0bed02f9c3bbcab79a6a33331b6543bd4bb3a6cc2d74"
@@ -17,65 +17,63 @@
  "runs": {
   "original": [
    {
-    "run": "20261027-051715-c581e5cb",
+    "run": "20261027-111615-4ef65e7e",
     "index": 1,
     "verdict": "pass",
-    "date": "2026-10-27T06:11:14",
-    "lane": 15,
+    "date": "2026-10-27T11:16:15",
+    "lane": 32,
+    "signatures": 0
+   },
+   {
+    "run": "20261027-111615-4ef65e7e",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T11:25:37",
+    "lane": 32,
     "signatures": 0
    }
   ],
   "ours": [
    {
-    "run": "20261027-093508-2fccf687",
+    "run": "20261027-111615-4ef65e7e",
     "index": 1,
-    "verdict": "fail",
-    "date": "2026-10-27T09:35:08",
-    "lane": 14,
-    "reasons": [
-     "1 log signature(s) the original lacks",
-     "ui_dump menu-zone: 1 difference(s)",
-     "shot menu-zone: 87.12% of pixels differ (> 2%)"
-    ],
-    "reference_run": "20261027-051715-c581e5cb",
-    "new_signatures": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T11:29:14",
+    "lane": 32,
+    "reference_run": "20261027-111615-4ef65e7e",
+    "new_signatures": 0,
     "findings": [],
     "ui_dump": {
      "menu": {
       "differences": 0
      },
      "menu-zone": {
-      "differences": 1
+      "differences": 0
      }
     },
     "shots": {
-     "menu-zone": 0.871236
+     "menu-zone": 0.0
     }
    },
    {
-    "run": "20261027-093508-2fccf687",
+    "run": "20261027-111615-4ef65e7e",
     "index": 2,
-    "verdict": "fail",
-    "date": "2026-10-27T09:36:02",
-    "lane": 14,
-    "reasons": [
-     "2 log signature(s) the original lacks",
-     "ui_dump menu-zone: 1 difference(s)",
-     "shot menu-zone: 87.12% of pixels differ (> 2%)"
-    ],
-    "reference_run": "20261027-051715-c581e5cb",
-    "new_signatures": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T11:30:06",
+    "lane": 32,
+    "reference_run": "20261027-111615-4ef65e7e",
+    "new_signatures": 0,
     "findings": [],
     "ui_dump": {
      "menu": {
       "differences": 0
      },
      "menu-zone": {
-      "differences": 1
+      "differences": 0
      }
     },
     "shots": {
-     "menu-zone": 0.871236
+     "menu-zone": 0.0
     }
    }
   ]

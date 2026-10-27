@@ -34,23 +34,42 @@ namespace Unity.Collections
         public int Length => m_Length;
         public bool IsCreated => m_Buffer != null;
 
+        /// Unity's release player doesn't check the index and reads or writes the memory past
+        /// the array; here an out-of-range write is dropped and an out-of-range read gives
+        /// default(T), logged once a process (NativeArrayRange). An array that isn't created
+        /// (or is disposed) still throws.
         public T this[int index]
         {
             get
             {
-                CheckIndex(index);
+                if ((uint)index >= (uint)m_Length) return OutOfRangeRead(index);
                 return Unsafe.Read<T>((byte*)m_Buffer + (long)index * Unsafe.SizeOf<T>());
             }
             set
             {
-                CheckIndex(index);
+                if ((uint)index >= (uint)m_Length) { OutOfRangeWrite(index); return; }
                 Unsafe.Write((byte*)m_Buffer + (long)index * Unsafe.SizeOf<T>(), value);
             }
         }
 
-        void CheckIndex(int index)
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        T OutOfRangeRead(int index)
         {
-            if ((uint)index >= (uint)m_Length)
+            CheckCreated(index);
+            NativeArrayRange.Report($"read of index {index} in a NativeArray<{typeof(T).Name}> of length {m_Length} gives default");
+            return default;
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        void OutOfRangeWrite(int index)
+        {
+            CheckCreated(index);
+            NativeArrayRange.Report($"write to index {index} in a NativeArray<{typeof(T).Name}> of length {m_Length} is dropped");
+        }
+
+        void CheckCreated(int index)
+        {
+            if (m_Buffer == null)
                 throw new IndexOutOfRangeException($"Index {index} is out of range of '{m_Length}' Length.");
         }
 
@@ -69,53 +88,70 @@ namespace Unity.Collections
             return result;
         }
 
+        // The copies and GetSubArray check their ranges only with Unity's collections checks,
+        // which its release player leaves out; here only the in-range part is copied (or
+        // viewed), logged once a process as the indexer is.
+
         public void CopyFrom(T[] array)
         {
-            if (array.Length != m_Length) throw new ArgumentException("source and destination length must be the same");
-            Copy(array, 0, this, 0, m_Length);
+            if (array == null) throw new ArgumentNullException(nameof(array));
+            Copy(array, 0, this, 0, array.Length);
         }
 
         public void CopyTo(T[] array)
         {
-            if (array.Length != m_Length) throw new ArgumentException("source and destination length must be the same");
+            if (array == null) throw new ArgumentNullException(nameof(array));
             Copy(this, 0, array, 0, m_Length);
         }
 
         public NativeArray<T> GetSubArray(int start, int length)
         {
-            if (start < 0 || length < 0 || start + length > m_Length) throw new ArgumentOutOfRangeException(nameof(start));
+            // No view keeps the caller's indices for a negative start or length, so those throw.
+            if (start < 0 || length < 0) throw new ArgumentOutOfRangeException(nameof(start));
+            if (start > m_Length - length)
+            {
+                int clipped = Math.Max(0, m_Length - start);
+                NativeArrayRange.Report($"GetSubArray({start}, {length}) of a NativeArray<{typeof(T).Name}> of length {m_Length} is cut to length {clipped}");
+                start = Math.Min(start, m_Length);
+                length = clipped;
+            }
             return new NativeArray<T>((byte*)m_Buffer + (long)start * Unsafe.SizeOf<T>(), length, owned: false);
         }
 
-        static void CheckRange(int index, int length, int total, string name)
+        /// Narrows a copy of `length` elements to the part that lies within both arrays; false
+        /// when nothing is left to copy.
+        static bool ClipRange(ref int srcIndex, int srcTotal, ref int dstIndex, int dstTotal, ref int length)
         {
-            if (index < 0 || length < 0 || index + length > total)
-                throw new ArgumentOutOfRangeException(name, "Index and length must refer to a location within the array.");
+            if (srcIndex >= 0 && dstIndex >= 0 && length >= 0 && srcIndex <= srcTotal - length && dstIndex <= dstTotal - length)
+                return length > 0;
+            long skip = Math.Max(0L, -(long)Math.Min(srcIndex, dstIndex));
+            long end = Math.Min(length, Math.Min((long)srcTotal - srcIndex, (long)dstTotal - dstIndex));
+            int count = (int)Math.Max(0L, end - skip);
+            NativeArrayRange.Report($"copy of {length} elements from index {srcIndex} of {srcTotal} to index {dstIndex} of {dstTotal} (NativeArray<{typeof(T).Name}>) copies only the {count} in range");
+            if (count == 0) return false;
+            srcIndex += (int)skip;
+            dstIndex += (int)skip;
+            length = count;
+            return true;
         }
 
         public static void Copy(T[] src, int srcIndex, NativeArray<T> dst, int dstIndex, int length)
         {
             if (src == null) throw new ArgumentNullException(nameof(src));
-            CheckRange(srcIndex, length, src.Length, nameof(srcIndex));
-            CheckRange(dstIndex, length, dst.m_Length, nameof(dstIndex));
-            if (length == 0) return;
+            if (!ClipRange(ref srcIndex, src.Length, ref dstIndex, dst.m_Length, ref length)) return;
             new ReadOnlySpan<T>(src, srcIndex, length).CopyTo(new Span<T>((byte*)dst.m_Buffer + (long)dstIndex * Unsafe.SizeOf<T>(), length));
         }
 
         public static void Copy(NativeArray<T> src, int srcIndex, T[] dst, int dstIndex, int length)
         {
             if (dst == null) throw new ArgumentNullException(nameof(dst));
-            CheckRange(srcIndex, length, src.m_Length, nameof(srcIndex));
-            CheckRange(dstIndex, length, dst.Length, nameof(dstIndex));
-            if (length == 0) return;
+            if (!ClipRange(ref srcIndex, src.m_Length, ref dstIndex, dst.Length, ref length)) return;
             new ReadOnlySpan<T>((byte*)src.m_Buffer + (long)srcIndex * Unsafe.SizeOf<T>(), length).CopyTo(new Span<T>(dst, dstIndex, length));
         }
 
         public static void Copy(NativeArray<T> src, int srcIndex, NativeArray<T> dst, int dstIndex, int length)
         {
-            CheckRange(srcIndex, length, src.m_Length, nameof(srcIndex));
-            CheckRange(dstIndex, length, dst.m_Length, nameof(dstIndex));
-            if (length == 0) return;
+            if (!ClipRange(ref srcIndex, src.m_Length, ref dstIndex, dst.m_Length, ref length)) return;
             Buffer.MemoryCopy((byte*)src.m_Buffer + (long)srcIndex * Unsafe.SizeOf<T>(), (byte*)dst.m_Buffer + (long)dstIndex * Unsafe.SizeOf<T>(),
                 (long)length * Unsafe.SizeOf<T>(), (long)length * Unsafe.SizeOf<T>());
         }
@@ -151,6 +187,26 @@ namespace Unity.Collections
         public override int GetHashCode() => ((int)(nint)m_Buffer * 397) ^ m_Length;
         public static bool operator ==(NativeArray<T> left, NativeArray<T> right) => left.Equals(right);
         public static bool operator !=(NativeArray<T> left, NativeArray<T> right) => !left.Equals(right);
+    }
+}
+
+namespace Unity.Collections
+{
+    /// The first out-of-range NativeArray access in the process, logged once: Unity's release
+    /// player doesn't check it, so the original carries on past the array's memory; ours drops
+    /// it instead of throwing.
+    internal static class NativeArrayRange
+    {
+        static int logged;
+
+        internal static void Report(string what)
+        {
+            if (System.Threading.Interlocked.Exchange(ref logged, 1) != 0) return;
+            OniMoono.Engine.EngineLog.Engine($"NativeArray: {what} (Unity's release player doesn't check the range and reaches past the array; later ones aren't logged)\n{OniMoono.Engine.EngineLog.CaptureStackTrace()}");
+        }
+
+        /// For tests: the next one is logged again.
+        internal static void ResetForTests() => logged = 0;
     }
 }
 

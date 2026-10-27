@@ -1,0 +1,36 @@
+# 燃气灶魔改 (2984769656), class B.
+#
+# What it does: adds 燃气灶魔改 (GourmetCookingStation1), a 1x2 metal "gas range" on the telephone's
+# body in the Food menu, researched with Food Repurposing: it needs no Duplicant, draws 1 W,
+# takes water from a liquid pipe and turns a nanogram of water into 100 servings of a gourmet
+# dish (Salsa, Mushroom Wrap, Surf'n'Turf, Spiced Bread, Spicy Tofu, Curry, Burger and, in
+# Spaced Out, Berry Pie, ...).
+# How a player reaches it: the build menu (Food), after the research; its recipe side screen.
+# What changes: food out of almost nothing.
+#
+# Setup researches Food Repurposing and builds one in the corridor west of the printing pod; the
+# tech unlocks it, the game's recipe list holds its recipes, and its side screen lists them.
+from: early-base
+mods: [2984769656]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"FoodRepurposing\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"GourmetCookingStation1\")", method: Build, args: [131129, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"FoodRepurposing\").unlockedItemIDs": {contains: GourmetCookingStation1}
+      "Assets.GetBuildingDef(\"GourmetCookingStation1\").InputConduitType": Liquid
+      "Assets.GetPrefab(\"GourmetCookingStation1\").GetComponent<ComplexFabricator>.duplicantOperated": false
+      "count:ComplexRecipeManager.Get().recipes[*] if .fabricators[0].Name == GourmetCookingStation1 and .ingredients[0].material.Name == Water": ">= 7"
+      "count:ComplexRecipeManager.Get().recipes[*] if .fabricators[0].Name == GourmetCookingStation1 and .results[0].material.Name == Burger": 1
+  - run: {seconds: 5}
+  - click: {ui: "**/PlanScreen/Toggle:Food"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/GourmetCookingStation1 Group*", cond: stable}
+  - shot: {name: food-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
+  - key: {code: Escape}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: GourmetCookingStation1}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/ComplexFabricatorSideScreen", cond: stable}
+  - expect_state:
+      "count:selected:ComplexFabricator.GetRecipes()[*] if .results[0].material.Name == Burger": 1
+  - ui_dump: {name: recipes, root: "**/ComplexFabricatorSideScreen/Contents"}

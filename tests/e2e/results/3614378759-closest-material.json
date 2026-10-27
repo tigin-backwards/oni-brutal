@@ -1,0 +1,64 @@
+{
+ "spec": "mods/3614378759-closest-material.yaml",
+ "mods": [
+  "3614378759"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Tile card's Closest Material button (dumped) turns the mode on, and a tile placed with it becomes a blueprint",
+ "updated": "2026-10-27",
+ "commit": "1ae06b70",
+ "mod_dlls": {
+  "3614378759": {
+   "CloserMaterial.dll": "e00575473268df8887f66c1123efe63d64161284cf5ced0efcd803833f74fc57",
+   "PLib.dll": "2e5990872a1e94c663ce3c6951862b303a146bc2f6f9d43c7a80cc489ad5c7fe"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-013141-9697dcd2",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T01:31:42",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-025140-90b01dba",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T02:51:40",
+    "lane": 14,
+    "reference_run": "20261027-013141-9697dcd2",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "closest": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261027-025140-90b01dba",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T02:51:41",
+    "lane": 15,
+    "reference_run": "20261027-013141-9697dcd2",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "closest": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

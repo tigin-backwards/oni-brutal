@@ -1,0 +1,35 @@
+# Closest Material（就近取材）mod汉化 (3614378759), classes S, T.
+#
+# What it does: the build menu's material panel gets a Closest Material toggle button: while it
+# is on, a placed blueprint takes the material nearest to it of the kinds the recipe allows,
+# not the one chosen; a plan tool in the toolbar re-plans existing buildings the same way.
+# How a player reaches it: the button under the material choice of any building card; the
+# tool in the bottom toolbar.
+# What changes: blueprints use what lies close by.
+#
+# The Tile's card (Base) shows the button (dumped); a click turns the mode on, the button
+# swaps for its lit twin, and a tile placed in the dug-out corridor west of the printing pod
+# becomes a blueprint.
+from: early-base
+mods: [3614378759]
+steps:
+  # The colony's inventory is counted only once time has run.
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [114, 208], ortho: 10}}
+  - open: {key: Alpha1}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/Tile Group*", cond: stable, stable: 120, frames: 600}
+  - click: {ui: "**/BuildingGroups/**/Grid/Tile Group*"}
+  - ui_wait: {path: "**/PlanBuildingSelectionPanel/ProductInfoScreen", cond: stable}
+  - expect_state:
+      "type:CloserMaterial.Info.InfoData::ACTIVE": false
+  - ui_dump: {name: closest, root: "**/MainPanelClosestElement"}
+  - click: {ui: "**/MainPanelClosestElement/ButtonClosestElement"}
+  - expect_state:
+      "type:CloserMaterial.Info.InfoData::ACTIVE": true
+  - expect_ui:
+      "**/MainPanelClosestElement/option": {active: true}
+  - click: {ui: "**/MaterialSelectorTemplate/**/Toggles/MaterialSelection_*"}
+  - expect_state: {"PlayerController.Instance.ActiveTool.name": BuildTool}
+  - click_world: {cell: [113, 207]}
+  - key: {code: Escape}
+  - expect: {blueprints: {Tile: 1}}

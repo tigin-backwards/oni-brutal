@@ -1,0 +1,63 @@
+{
+ "spec": "mods/2596397252-pure-rust.yaml",
+ "mods": [
+  "2596397252"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a new game of the Pure Rust cluster (fixed seed) generates its worlds and geyser types and is embarked; asteroid list dumped",
+ "updated": "2026-10-27",
+ "commit": "1ae06b70",
+ "mod_dlls": {
+  "2596397252": {
+   "PureRust.dll": "eaced6e5dcb7a9280f6c8d92588beaf6b8076dad78e17b6e57aec925a023b709"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-013141-9697dcd2",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T01:53:03",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-025807-b06cfb18",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T02:58:07",
+    "lane": 14,
+    "reference_run": "20261027-013141-9697dcd2",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "asteroids": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261027-025807-b06cfb18",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T02:58:08",
+    "lane": 15,
+    "reference_run": "20261027-013141-9697dcd2",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "asteroids": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

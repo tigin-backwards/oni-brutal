@@ -1,0 +1,33 @@
+# Copy Materials Tool (3626072188), classes P, U.
+#
+# What it does: every building's user menu gains a "Copy Materials" button. It arms the Copy
+# Settings tool in a material mode: buildings of the same kind dragged over are deconstructed
+# and rebuilt of the source's material (keeping their orientation, pipe and wire connections
+# and settings); a building already of that material just gets the settings copied.
+# How a player reaches it: select a building, press Copy Materials, drag over others.
+# What changes: buildings can be rebuilt in another material by a drag.
+#
+# setup builds two ladders in the corridor west of the printing pod: one of copper ore, one
+# of sandstone. The copper one's Copy Materials button arms the tool; a click on the
+# sandstone ladder marks it for deconstruction, with a watcher that rebuilds it in copper
+# ore.
+from: early-base
+mods: [3626072188]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Ladder\")", method: Build, args: [131764, Neutral, null, [Cuprite], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Ladder\")", method: Build, args: [131766, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+steps:
+  - run: {seconds: 2}
+  - expect: {buildings: {Ladder: ">= 2"}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: Ladder}
+  - ui_wait: {path: "**/DetailsScreen/UserMenuButtons/UserMenuScreen/Buttons", cond: stable}
+  - ui_dump: {name: user-menu, root: "**/DetailsScreen/UserMenuButtons/UserMenuScreen/Buttons"}
+  - click: {text: "Copy Materials", under: "**/UserMenuScreen"}
+  - expect_state:
+      "type:CopyMaterials.Patches.CopySettingsToolPatches::isMaterialCopyMode": true
+  - click_world: {cell: [114, 207]}
+  - key: {code: Escape}
+  - expect_state:
+      "count:all:Deconstructable::[*] if .GetComponent<PrimaryElement>.ElementID == SandStone and .isMarkedForDeconstruction == true": 1
+      "count:all:CopyMaterials.Logic.CopyMaterialsWatcher::[*] if .enabled == true": 1

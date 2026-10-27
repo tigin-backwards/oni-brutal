@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3442937887-starmap-shenanigans.yaml",
+ "mods": [
+  "3442937887"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the starmap POIs carry the mod's components, as many as in the original",
+ "updated": "2026-10-27",
+ "commit": "437ec043",
+ "mod_dlls": {
+  "3442937887": {
+   "Starmap_Shenanigans.dll": "9a3ef3d7d9b05052fa10e863ee2f9414513a8bf2f728f100bfbe0d5650434b89"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-030200-7c6f97e5",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T03:15:35",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-034242-ca60a5d2",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T03:42:42",
+    "lane": 14,
+    "reference_run": "20261027-030200-7c6f97e5",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-034242-ca60a5d2",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T03:42:43",
+    "lane": 15,
+    "reference_run": "20261027-030200-7c6f97e5",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

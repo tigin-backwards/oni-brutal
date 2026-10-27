@@ -1,0 +1,19 @@
+# Starmap Shenanigans (3442937887), classes S, T (sandbox).
+#
+# What it does: in sandbox mode, starmap entities get side-screen buttons and tools of the
+# mod's: move an entity to another hex, morph a harvestable or artifact POI into another kind,
+# duplicate it, destroy asteroids, POIs, meteors and hex inventories, create an asteroid, and
+# grow the starmap; the components are added to every starmap entity as it spawns, and the
+# starmap screen and the top-left controls get the mod's buttons.
+# How a player reaches it: the starmap, with sandbox mode on.
+# What changes: an editable starmap.
+#
+# The colony's starmap POIs carry the mod's destroy and morph components (as many as in the
+# original).
+from: early-base
+mods: [3442937887]
+steps:
+  - expect_state:
+      "all:Starmap_Shenanigans.DestroyPOIButton::Length": [">= 1", "== original"]
+      "all:Starmap_Shenanigans.MorphHarvestablePOI::Length": "== original"
+      "all:Starmap_Shenanigans.DestroyAsteroidButton::Length": "== original"

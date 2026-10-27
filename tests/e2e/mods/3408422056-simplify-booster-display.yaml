@@ -1,0 +1,32 @@
+# Simplify display of booster assigned (3408422056), class S.
+#
+# What it does: a prefix replaces OwnablesSecondSideScreen.RefreshItemListOptions: for a
+# Duplicant's equipment and Bionic booster slots the list of items to assign shows one row per
+# item name, not one per item, and leaves out items assigned to others.
+# How a player reaches it: a selected Duplicant's Config tab, then a slot (a suit, a booster).
+# What changes: short lists of boosters and suits.
+#
+# setup lays three Atmo Suits in the corridor west of the printing pod and selects a
+# Duplicant; its Suits slot lists them as one row (dumped).
+from: early-base
+mods: [3408422056]
+setup:
+  - driver: {setup.call: {type: Scenario, method: SpawnPrefab, args: [131126, 0, 0, "Atmo_Suit", "Ore"]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+  - driver: {setup.call: {type: Scenario, method: SpawnPrefab, args: [131126, 0, 0, "Atmo_Suit", "Ore"]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+  - driver: {setup.call: {type: Scenario, method: SpawnPrefab, args: [131126, 0, 0, "Atmo_Suit", "Ore"]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "SelectTool.Instance", method: Select, args: [{"$": "Components.LiveMinionIdentities.Items[1].GetComponent<KSelectable>"}]}}
+steps:
+  - run: {seconds: 1}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/SidescreenTabHeader/TabRow/Config Tab Instance", cond: stable}
+  - click: {ui: "**/DetailsScreen/SideScreen/SidescreenTabHeader/TabRow/Config Tab Instance"}
+  - ui_wait: {path: "**/OwnablesSidescreen/**/SlotRow/layout", cond: stable}
+  - click: {ui: "**/OwnablesSidescreen/**/SlotRow/layout"}
+  - ui_wait: {path: "**/OwnablesSecondSidescreen/body/ContentScrollRect/content", cond: stable}
+  - expect_state:
+      "ui:**/OwnablesSecondSidescreen::GetComponent<OwnablesSecondSideScreen>.Slot.ID": Suit
+  - expect_ui:
+      "**/OwnablesSecondSidescreen/**/NameLabel": {count: 2, any_text: "~Atmo Suit"}
+  - ui_dump: {name: suits, root: "**/OwnablesSecondSidescreen/body/ContentScrollRect/content"}

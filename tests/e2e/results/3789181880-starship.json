@@ -1,0 +1,56 @@
+{
+ "spec": "mods/3789181880-starship.yaml",
+ "mods": [
+  "3789181880"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the save loads into a grid 1024 cells high; the small habitat research unlocks the StarShip habitat module with its 130x130 interior settings; the colony plays on",
+ "updated": "2026-10-27",
+ "commit": "ecf2040f",
+ "mod_dlls": {
+  "3789181880": {
+   "PLib.dll": "55ce409618e6d102a1bcd0298911f3df49dda9a94ee153d02403035a1d6101d6",
+   "starship.dll": "83cd4760999ea1d351d9247c7cda0c4964dd7486b1f3f324c14ddbffc77d52c1"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-102545-317b751b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T10:36:40",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-111045-fc383b4a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T11:10:45",
+    "lane": 15,
+    "reference_run": "20261027-102545-317b751b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-111045-fc383b4a",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T11:13:14",
+    "lane": 15,
+    "reference_run": "20261027-102545-317b751b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

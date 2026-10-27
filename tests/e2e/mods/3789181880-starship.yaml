@@ -1,0 +1,33 @@
+# 星舰修复版 (starship) (3789181880), classes B, O, P.
+#
+# What it does: adds the StarShip, a 5x4 Spaced Out habitat rocket module researched with the
+# small habitat module (Space Program), whose interior world is as big as its PLib options say
+# (config.json: 130x130 as shipped) instead of the game's 32x32, with a background image of the
+# player's choice. To make room for such interiors it raises the grid's height to 1024 cells on
+# load (patches on GridSettings.Reset, Sim.AllocateCells and SaveLoader.Load) for clusters at
+# least 500 cells wide. Smaller patches let mini pods, toilets and envelope tiles be built and
+# deconstructed inside it.
+# How a player reaches it: a launch pad's module list, after the research.
+# What changes: a habitat with a huge interior; a taller grid.
+#
+# The early-base save loads into a grid 1024 cells high; setup researches the small habitat
+# module, whose unlocks list the StarShip, a rocket module with a 130x130 interior template.
+from: early-base
+mods: [3789181880]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.TryGetTechForTechItem(\"HabitatModuleSmall\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+steps:
+  - expect_state:
+      "Grid.HeightInCells": 1024
+      "Grid.WidthInCells": "== original"
+      "Db.Get().Techs.TryGetTechForTechItem(\"HabitatModuleSmall\").unlockedItemIDs": {contains: StarShip}
+      "Db.Get().Techs.TryGetTechForTechItem(\"StarShip\").IsComplete()": true
+      "Assets.GetBuildingDef(\"StarShip\").WidthInCells": 5
+      "Assets.GetPrefab(\"StarShip\").GetComponent<PassengerRocketModule>": exists
+      "Assets.GetPrefab(\"StarShip\").GetComponent<ClustercraftExteriorDoor>.interiorTemplateName": "== 'expansion1::interiors/habitat_starship'"
+      "type:星舰修复版.GeneratedBuildings_LoadGeneratedBuildings+RocketInteriorSizePatch::UserWidth": 130
+      "type:星舰修复版.GeneratedBuildings_LoadGeneratedBuildings+RocketInteriorSizePatch::UserHeight": 130
+  # The colony still plays on the taller grid.
+  - run: {seconds: 30}
+  - expect: {duplicants: ">=3"}

@@ -1,0 +1,63 @@
+{
+ "spec": "mods/3499114295-always-request-suit-locker-fixed.yaml",
+ "mods": [
+  "3499114295"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a suit dock built in the corridor loads and is selected (title dumped); the equip path needs a suit this save lacks",
+ "updated": "2026-10-27",
+ "commit": "77aef08d",
+ "mod_dlls": {
+  "3499114295": {
+   "AlwaysRequestSuitLocker-fixed.dll": "da259c5d39fcc68c44b87f57456277bea72bd474fb2bf4daaf2dfb0864108875"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-235258-afb42cfe",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T00:06:06",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-012542-156244c6",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T01:25:42",
+    "lane": 14,
+    "reference_run": "20261026-235258-afb42cfe",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261027-012542-156244c6",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T01:25:43",
+    "lane": 15,
+    "reference_run": "20261026-235258-afb42cfe",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

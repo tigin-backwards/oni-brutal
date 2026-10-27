@@ -1,0 +1,25 @@
+# AlwaysRequestSuitLocker fixed (3499114295), class P.
+#
+# What it does: a prefix replaces SuitLocker.EquipTo: the stored suit is dropped, assigned and
+# equipped at priority 5 even when it was marked at a lower one, its equip chore cancelled,
+# and the locker asks for a returned suit at once (returnSuitWorkable's chore).
+# How a player reaches it: it is passive; Atmo Suit Docks behave so whenever a Duplicant
+# takes a suit.
+# What changes: docks keep requesting suits.
+#
+# A dock built by setup in the dug-out corridor west of the printing pod is selected: it
+# loads as the original's does (its title and suit side screen dumped). The equip itself
+# needs a suit and a checkpoint crossing, which this save lacks.
+from: early-base
+mods: [3499114295]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"SuitLocker\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - run: {seconds: 2}
+  - expect: {buildings: {SuitLocker: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: SuitLocker}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_dump: {name: title, root: "**/DetailsScreen/TitleBar/Border/LabelGroup"}
+  - expect_state:
+      "selected:GetComponent<SuitLocker>.GetStoredOutfit()": missing

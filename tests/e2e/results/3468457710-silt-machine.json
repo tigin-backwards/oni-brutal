@@ -1,0 +1,60 @@
+{
+ "spec": "mods/3468457710-silt-machine.yaml",
+ "mods": [
+  "3468457710"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Food menu lists the Natural Plant Box (shot matches) and its build card opens; its converter takes polluted oxygen and gold and makes slime",
+ "updated": "2026-10-27",
+ "commit": "ecf2040f",
+ "mod_dlls": {
+  "3468457710": {
+   "PLib.dll": "93073fdf44dbe9fd7c0afe19e56341be862cc2d732090dee30999cf60e2e160d",
+   "╙┘─α╗·fixed.dll": "c7258b81d3ac0ae97b33ff7b7af3dad7c753548ffd6173cdc328ae375252efb0"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-102545-317b751b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T10:43:05",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-111548-bda0f68b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T11:15:48",
+    "lane": 15,
+    "reference_run": "20261027-102545-317b751b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "food-menu": 0.0
+    }
+   },
+   {
+    "run": "20261027-111548-bda0f68b",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T11:16:52",
+    "lane": 15,
+    "reference_run": "20261027-102545-317b751b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "food-menu": 0.0
+    }
+   }
+  ]
+ }
+}

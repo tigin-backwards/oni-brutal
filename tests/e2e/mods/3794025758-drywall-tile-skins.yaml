@@ -1,0 +1,18 @@
+# Drywall Tile Skins (3794025758), classes V, S.
+#
+# What it does: makes a Drywall blueprint (facade) of each loaded tile texture and of the walls
+# it ships (builtin_walls), drawn as the tile's interior with no borders, and adds them to the
+# Drywall's skins and the supply closet; a settings screen from the Mods screen picks which
+# groups are offered.
+# How a player reaches it: the Drywall's skin selector in the build menu; the Mods screen.
+# What changes: more Drywall looks.
+#
+# The game holds the mod's facades for the Drywall, as many as in the original, and the
+# Drywall offers them.
+from: early-base
+mods: [3794025758]
+require_log: ['\[DrywallTileSkins\] facades \(']
+steps:
+  - expect_state:
+      "count:Db.Get().Permits.BuildingFacades.resources[*] if .Id.StartsWith(\"DTS_ExteriorWall_\") == true": [">= 1", "== original"]
+      "Assets.GetBuildingDef(\"ExteriorWall\").AvailableFacades.Count": "== original"

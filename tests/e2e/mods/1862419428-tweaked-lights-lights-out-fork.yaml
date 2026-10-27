@@ -1,0 +1,25 @@
+# Tweaked Lights - Lights Out Fork (1862419428), class P.
+#
+# What it does: postfixes on the light defs make the Ceiling Light draw 3 W (the game's 10)
+# and the Lamp 2 W (the game's 8), each with 0.05 kDTU/s of heat.
+# How a player reaches it: build a Lamp or a Ceiling Light.
+# What changes: lights cost almost no power.
+#
+# setup builds a Lamp in the corridor west of the printing pod; selected, it draws 2 W.
+from: early-base
+mods: [1862419428]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"FloorLamp\")", method: Build, args: [131764, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"CeilingLight\").EnergyConsumptionWhenActive": 3
+      "Assets.GetBuildingDef(\"FloorLamp\").EnergyConsumptionWhenActive": 2
+  - run: {seconds: 2}
+  - expect: {buildings: {FloorLamp: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: FloorLamp}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<EnergyConsumer>.BaseWattageRating": 2
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Lamp"}

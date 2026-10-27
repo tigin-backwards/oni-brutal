@@ -1,0 +1,23 @@
+# Building-Super Manual Generator 超级人力发电机 (3390256280), class P,O.
+#
+# What it does: a postfix on ManualGeneratorConfig.CreateBuildingDef sets the Manual
+# Generator's wattage and base capacity from a PLib option (1 W to 666,666 W, Controler.json
+# beside the mod, shipped at 666,666 W) and removes its exhaust and self-heat.
+# How a player reaches it: PLib options; the Manual Generator.
+# What changes: a hamster wheel that powers anything.
+#
+# The option is set to 5,000 W. The definition is read; early-base's Manual Generator is
+# selected and rated 5,000 W.
+from: early-base
+mods: [3390256280]
+options:
+  "3390256280": {$file: Controler.json, Power: 5000.0}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"ManualGenerator\").GeneratorWattageRating": 5000
+      "Assets.GetBuildingDef(\"ManualGenerator\").GeneratorBaseCapacity": 5000
+      "Assets.GetBuildingDef(\"ManualGenerator\").SelfHeatKilowattsWhenActive": 0
+  - run: {seconds: 2}
+  - expect: {buildings: {ManualGenerator: 1}}
+  - expect_state:
+      "all:Generator::[0].WattageRating": 5000

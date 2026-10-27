@@ -1,0 +1,56 @@
+{
+ "spec": "mods/3390256280-super-manual-generator.yaml",
+ "mods": [
+  "3390256280"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the option sets the Manual Generator to 5,000 W; the colony's generator is rated 5,000 W",
+ "updated": "2026-10-26",
+ "commit": "cbabaaf0",
+ "mod_dlls": {
+  "3390256280": {
+   "ManualGenerator.dll": "1699bbdf98cc564566c651fb8a1bf9ba721578a6fcb33406c34a6a84fd9235eb",
+   "PLib.dll": "bdd637dbef718cdd52e61c0a7177bd297864a50bac1583d2837a36ff3edf07db"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-182241-89a16e7c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T18:38:35",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-204743-febfde17",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T21:52:28",
+    "lane": 17,
+    "reference_run": "20261026-182241-89a16e7c",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-204743-febfde17",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T21:52:36",
+    "lane": 16,
+    "reference_run": "20261026-182241-89a16e7c",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

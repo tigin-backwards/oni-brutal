@@ -1,0 +1,18 @@
+# 低新鲜度食物优先 · Stale Food First (3815691075), class P.
+#
+# What it does: a transpiler on FetchManager.FindEdibleFetchTarget scores each food a
+# Duplicant may eat by its freshness first (the least fresh wins), the game's own score
+# breaking ties; it refuses to patch, with a log line, if the method's code is not the one it
+# knows.
+# How a player reaches it: it is passive; Duplicants choosing what to eat.
+# What changes: old food is eaten before it spoils.
+#
+# The mod loads and patches (its refusal line is not logged), and the colony plays on.
+from: early-base
+mods: [3815691075]
+require_log: ['\[StaleFoodFirst\] Loaded 1\.0\.0']
+steps:
+  - run: {seconds: 30}
+  - expect: {duplicants: 3}
+  - expect_state:
+      "Components.LiveMinionIdentities.Count": 3

@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2778228823-crematorium.yaml",
+ "mods": [
+  "2778228823"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a lump laid in a grave is taken and the grave's cell turns to lime",
+ "updated": "2026-10-27",
+ "commit": "3461972c",
+ "mod_dlls": {
+  "2778228823": {
+   "huozang.dll": "3b4d674918c84ee03690e9664f61e687710cb642acecec390e5069874907d6e8"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-051715-c581e5cb",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T06:26:46",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-085122-ad822e35",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T08:51:22",
+    "lane": 14,
+    "reference_run": "20261027-051715-c581e5cb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-085122-ad822e35",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T08:52:11",
+    "lane": 14,
+    "reference_run": "20261027-051715-c581e5cb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -1,0 +1,24 @@
+# Crematorium | 火葬场 (2778228823), class P.
+#
+# What it does: a postfix on Grave.OnStorageChanged leaves 2.4 kg of lime at 373 K in the
+# grave's cell each time something is laid in a Tasteful Memorial: the body is cremated to
+# lime.
+# How a player reaches it: a Duplicant buries a body in a grave.
+# What changes: graves give lime.
+#
+# setup builds a grave in the dug-out corridor west of the printing pod, with no lime about;
+# a lump of dirt laid in its storage (as a body would be) is taken, and its cell turns to
+# lime.
+from: early-base
+mods: [2778228823]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Grave\")", method: Build, args: [{"$": "Grid.XYToCell(112, 206)"}, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Dirt\").substance", method: SpawnResource, args: [[114.5, 206.5, -12], 5, 300, 255, 0]}}
+  - driver: {setup.call: {target: "all:Grave::[0].GetComponent<Storage>", method: Store, args: [{"$": "last:"}]}}
+steps:
+  - run: {seconds: 3}
+  - expect: {buildings: {Grave: 1}}
+  - expect_state:
+      "all:Grave::[0].graveName": exists
+      "Grid.Element[131128].id": Lime
+      "Grid.Mass.get_Item(131128)": "== original"

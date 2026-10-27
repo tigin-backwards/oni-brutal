@@ -1,0 +1,37 @@
+# Deconstruct Oxygen Masks (3514600142), classes P, S, O.
+#
+# What it does: gives oxygen masks (new and worn) a "Deconstruct" user-menu button. Clicked, a
+# Duplicant takes down the mask at a crafting-station work animation and gets its material back
+# as debris; clicked again before that, the order is cancelled ("Cancel Deconstruct"). A crafted
+# mask's primary element becomes its most massive solid ingredient, and its mass is the mod's
+# option (50 kg by default) instead of the game's.
+# How a player reaches it: an oxygen mask lying around, its user menu.
+# What changes: masks can be turned back into metal.
+#
+# An oxygen mask is set down in setup in the corridor west of the printing pod. Selected, its
+# user menu has the Deconstruct button; a click orders it, and a Duplicant deconstructs it: the
+# mask is gone.
+from: early-base
+mods: [3514600142]
+setup:
+  - driver: {setup.call: {type: Scenario, method: SpawnPrefab, args: [{"$": "Grid.XYToCell(112, 207)"}, 0, 0, "Oxygen_Mask", "Ore"]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "SelectTool.Instance", method: Select, args: [{"$": "last:GetComponent<KSelectable>"}]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"Oxygen_Mask\").GetComponent<Modo.DeconstructOxygenMasks.ItemDeconstructable>": exists
+      "Assets.GetPrefab(\"Worn_Oxygen_Mask\").GetComponent<Modo.DeconstructOxygenMasks.ItemDeconstructable>": exists
+      "count:all:Modo.DeconstructOxygenMasks.ItemDeconstructable::[*] if .name == Oxygen_Mask": 1
+  - run: {seconds: 2}
+  - ui_wait: {path: "**/DetailsScreen/UserMenuButtons/UserMenuScreen", cond: stable}
+  - expect_state: {"selected:PrimaryElement.Mass": "== original"}
+  - expect_ui:
+      "**/UserMenuScreen/Buttons/**": {any_text: "Deconstruct"}
+  - click: {text: "Deconstruct", under: "**/UserMenuScreen"}
+  - ui_wait: {path: "**/DetailsScreen/UserMenuButtons/UserMenuScreen", cond: stable}
+  - expect_ui:
+      "**/UserMenuScreen/Buttons/**": {any_text: "Cancel Deconstruct"}
+  - key: {code: Escape}
+  - run: {seconds: 600}
+  - expect_state:
+      "count:all:Modo.DeconstructOxygenMasks.ItemDeconstructable::[*] if .name == Oxygen_Mask": 0

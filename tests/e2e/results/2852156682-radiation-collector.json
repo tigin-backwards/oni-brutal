@@ -1,0 +1,64 @@
+{
+ "spec": "mods/2852156682-radiation-collector.yaml",
+ "mods": [
+  "2852156682"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Radbolt Generator's power, interval and storage are the mod's; its slider reaches 1000 (dumped)",
+ "updated": "2026-10-27",
+ "commit": "ee48268b",
+ "mod_dlls": {
+  "2852156682": {
+   "PLib.dll": "b862c5db2b3cd6df09a62d4a30782e91e2b24e8e1bfac08d991c9cc89a984ba9",
+   "Quebec Pull And Radiation Collector┐²░╬╓«╖°╔Σ╩╒╝»╞≈.dll": "4e402874561855eb7269b026ea0b4d62e13027e22b7ba8a40afa65b23cd9c75d"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-051715-c581e5cb",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T05:32:31",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-093808-c21e0e87",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T09:38:08",
+    "lane": 15,
+    "reference_run": "20261027-051715-c581e5cb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "slider": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261027-093808-c21e0e87",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T09:39:01",
+    "lane": 15,
+    "reference_run": "20261027-051715-c581e5cb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "slider": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

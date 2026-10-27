@@ -1,0 +1,28 @@
+# Quebec Pull And Radiation Collector魁拔之辐射收集器 (2852156682), classes P, O.
+#
+# What it does: radbolt storage keeps 1.1 times what it is given (a postfix on
+# HighEnergyParticleStorage.Store; PLib option, 1 to 2); the Radbolt Generator draws 333 W,
+# heats by 1 kW and exhausts nothing, launches every second at least, stores 1000 radbolts and
+# its launch slider reaches 1000 (options in Controler.json, restart required).
+# How a player reaches it: build a Radbolt Generator; the options on the Mods screen.
+# What changes: a stronger radbolt generator and more radbolts everywhere.
+#
+# The generator's definition and prefab carry the values; one built by setup in the dug-out
+# corridor west of the printing pod is selected: its launch slider reaches 1000.
+from: early-base
+mods: [2852156682]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"HighEnergyParticleSpawner\")", method: Build, args: [{"$": "Grid.XYToCell(112, 206)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"HighEnergyParticleSpawner\").EnergyConsumptionWhenActive": 333
+      "Assets.GetPrefab(\"HighEnergyParticleSpawner\").GetComponent<HighEnergyParticleSpawner>.minLaunchInterval": 1
+      "Assets.GetPrefab(\"HighEnergyParticleSpawner\").GetComponent<HighEnergyParticleStorage>.capacity": 1000
+  - run: {seconds: 2}
+  - expect: {buildings: {HighEnergyParticleSpawner: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: HighEnergyParticleSpawner}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/SingleSliderSideScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<HighEnergyParticleSpawner>.maxSlider": 1000
+  - ui_dump: {name: slider, root: "**/Config Tab - body instance/SingleSliderSideScreen"}

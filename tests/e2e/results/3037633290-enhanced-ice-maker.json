@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3037633290-enhanced-ice-maker.yaml",
+ "mods": [
+  "3037633290"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Ice Maker's power, heat, heat removal and storages are the mod's; one selected shows them",
+ "updated": "2026-10-27",
+ "commit": "dfc91086",
+ "mod_dlls": {
+  "3037633290": {
+   "I_╟┐╗»╓╞▒∙╗·.dll": "268ae84195e5f413a1677ed02b1cd3f4a6721deca0224484c75f6e687adb6a91"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-051715-c581e5cb",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T05:35:51",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-092640-b4139872",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T09:26:40",
+    "lane": 14,
+    "reference_run": "20261027-051715-c581e5cb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-092640-b4139872",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T09:27:28",
+    "lane": 14,
+    "reference_run": "20261027-051715-c581e5cb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -1,0 +1,29 @@
+# I 强化制冰机 Enhanced Ice Maker (3037633290), class P.
+#
+# What it does: the Ice Maker draws 80 W, heats itself by 20 kW and exhausts 8 kW, removes
+# 500 kDTU/s instead of 20, takes 200 kg of water per delivery, and gets a second storage of
+# 2000 kg for its ice (its water and ice storages set again).
+# How a player reaches it: build an Ice Maker.
+# What changes: a much stronger ice maker.
+#
+# The Ice Maker's definition and prefab carry the values; one built by setup in the dug-out
+# corridor west of the printing pod, selected, shows them.
+from: early-base
+mods: [3037633290]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"IceMachine\")", method: Build, args: [{"$": "Grid.XYToCell(112, 206)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"IceMachine\").EnergyConsumptionWhenActive": 80
+      "Assets.GetBuildingDef(\"IceMachine\").SelfHeatKilowattsWhenActive": 20
+      "Assets.GetPrefab(\"IceMachine\").GetComponent<IceMachine>.heatRemovalRate": 500
+      "Assets.GetPrefab(\"IceMachine\").GetComponent<ManualDeliveryKG>.capacity": 200
+      "Assets.GetPrefab(\"IceMachine\").GetComponents<Storage>.Length": "== original"
+  - run: {seconds: 2}
+  - expect: {buildings: {IceMachine: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: IceMachine}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<IceMachine>.heatRemovalRate": 500
+      "selected:GetComponent<IceMachine>.iceStorage.capacityKg": 2000

@@ -1,0 +1,37 @@
+# 水生成氧气和乙醇 Water generates oxygen and ethanol (3297925875), class B.
+#
+# What it does: adds Crazy_Electrolyzer (水制氧和乙醇), a 2x2 electrolyzer researched with
+# Improved Oxygen, to the Oxygen menu: piped water, 1 kg/s, becomes 1 kg/s of oxygen at
+# 300 K, emitted, and 1 kg/s of ethanol, stored and dropped. It draws 120 W and has a logic
+# input.
+# How a player reaches it: the build menu (Oxygen), after the research.
+# What changes: water into oxygen and ethanol, mass doubled.
+#
+# The converter is read; setup researches Improved Oxygen, the Oxygen menu lists the building
+# (shot), and one built by setup in the dug-out corridor west of the printing pod is
+# selected.
+from: early-base
+mods: [3297925875]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"ImprovedOxygen\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Crazy_Electrolyzer\")", method: Build, args: [131765, Neutral, null, [Cuprite], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"ImprovedOxygen\").unlockedItemIDs": {contains: Crazy_Electrolyzer}
+      "Assets.GetPrefab(\"Crazy_Electrolyzer\").GetComponent<ElementConverter>.consumedElements[0].MassConsumptionRate": 1
+      "Assets.GetPrefab(\"Crazy_Electrolyzer\").GetComponent<ElementConverter>.outputElements[0].elementHash": "== 'Oxygen'"
+      "Assets.GetPrefab(\"Crazy_Electrolyzer\").GetComponent<ElementConverter>.outputElements[1].elementHash": "== 'Ethanol'"
+      "Assets.GetPrefab(\"Crazy_Electrolyzer\").GetComponent<ElementConverter>.outputElements[1].massGenerationRate": 1
+  - run: {seconds: 10}
+  - expect: {buildings: {Crazy_Electrolyzer: 1}}
+  - click: {ui: "**/PlanScreen/Toggle:Oxygen"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/Crazy_Electrolyzer Group*", cond: stable, stable: 120, frames: 600}
+  - shot: {name: oxygen-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
+  - key: {code: Escape}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: Crazy_Electrolyzer}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:Electrolyzer.maxMass": 1.8
+      "selected:ConduitConsumer.capacityTag.Name": Water

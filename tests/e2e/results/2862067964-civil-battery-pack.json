@@ -1,0 +1,60 @@
+{
+ "spec": "mods/2862067964-civil-battery-pack.yaml",
+ "mods": [
+  "2862067964"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "options set 200 kJ; the Power menu lists the pack (shot), and a built one holds it",
+ "updated": "2026-10-26",
+ "commit": "c7b16a61",
+ "mod_dlls": {
+  "2862067964": {
+   "Civil battery pack├±╙├╡τ│╪╫Θ.dll": "1b023e034d952a294269c1348ca845a4eb3e36a8e7706ace44c71bce16609c27",
+   "PLib.dll": "b862c5db2b3cd6df09a62d4a30782e91e2b24e8e1bfac08d991c9cc89a984ba9"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-203918-0b6e3624",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T21:03:29",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-213856-d4539d05",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T22:08:12",
+    "lane": 15,
+    "reference_run": "20261026-203918-0b6e3624",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "power-menu": 0.0
+    }
+   },
+   {
+    "run": "20261026-213856-d4539d05",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T22:08:51",
+    "lane": 14,
+    "reference_run": "20261026-203918-0b6e3624",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "power-menu": 0.0
+    }
+   }
+  ]
+ }
+}

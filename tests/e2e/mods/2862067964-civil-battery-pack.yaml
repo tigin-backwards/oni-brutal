@@ -1,0 +1,31 @@
+# Civil battery pack民用电池组 (2862067964), classes B, O.
+#
+# What it does: a stackable 3x2 battery (the rocket battery pack's anim, built on a floor or on
+# another of its kind) in the Power menu, holding the PLib options' joules (333,333) and
+# leaking 0.66 J/s.
+# How a player reaches it: the build menu (Power).
+# What changes: compact, stackable power storage.
+#
+# options set 200,000 J; the Power menu lists the pack (shot), and one built by setup in the
+# dug-out corridor west of the printing pod is selected and holds 200,000 J.
+from: early-base
+mods: [2862067964]
+options:
+  "2862067964": {$file: Controler.json, a1: 200000}
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Civilbatterypack\")", method: Build, args: [131128, Neutral, null, [Cuprite], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"Civilbatterypack\").GetComponent<Battery>.capacity": 200000
+  - run: {seconds: 10}
+  - expect: {buildings: {Civilbatterypack: 1}}
+  - click: {ui: "**/PlanScreen/Toggle:Power"}
+  # The build menu catches up over frames: 120 frames for all of it to settle.
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/Civilbatterypack Group*", cond: stable, stable: 120, frames: 600}
+  - shot: {name: power-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
+  - key: {code: Escape}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 206], select: Civilbatterypack}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:Battery.capacity": 200000

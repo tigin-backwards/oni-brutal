@@ -1,0 +1,26 @@
+# Fix Store Errand Priority (3177260238), class P.
+#
+# What it does: a prefix on ChoreTypes.Add moves four errands into the Supply (Storage)
+# errand group: Deliver Food (FoodFetch) to Supply alone, Equipment Fetch to Supply alone,
+# Transport (sweeping and storing) and Empty Storage to Supply and Tidying (Basekeeping), so
+# a Duplicant's Supply priority governs them.
+# How a player reaches it: the Priorities screen's Supply column, and which Duplicants take
+# those errands.
+# What changes: the errand groups of those four chore types.
+#
+# The chore types' groups are read, and the Supply group lists Deliver Food.
+from: early-base
+mods: [3177260238]
+steps:
+  - expect_state:
+      "Db.Get().ChoreTypes.FoodFetch.groups.Length": 1
+      "Db.Get().ChoreTypes.FoodFetch.groups[0].Id": Storage
+      "Db.Get().ChoreTypes.EquipmentFetch.groups.Length": 1
+      "Db.Get().ChoreTypes.EquipmentFetch.groups[0].Id": Storage
+      "Db.Get().ChoreTypes.Transport.groups.Length": 2
+      "Db.Get().ChoreTypes.Transport.groups[0].Id": Storage
+      "Db.Get().ChoreTypes.Transport.groups[1].Id": Basekeeping
+      "Db.Get().ChoreTypes.EmptyStorage.groups[1].Id": Basekeeping
+      "count:Db.Get().ChoreGroups.Storage.choreTypes[*] if .Id == FoodFetch": 1
+  - run: {seconds: 2}
+  - expect: {duplicants: 3}

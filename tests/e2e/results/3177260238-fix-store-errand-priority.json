@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3177260238-fix-store-errand-priority.yaml",
+ "mods": [
+  "3177260238"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "Deliver Food, Equipment Fetch, Transport and Empty Storage belong to the Supply errand group",
+ "updated": "2026-10-26",
+ "commit": "cbabaaf0",
+ "mod_dlls": {
+  "3177260238": {
+   "FixStoreErrandPriority.dll": "b12515f7b1715f5544897dee2b9bb8c33dd605a410dff7ea2f7377a1db3c141b"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-151429-7c585a60",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T15:35:12",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-204743-febfde17",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T22:15:40",
+    "lane": 17,
+    "reference_run": "20261026-151429-7c585a60",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-204743-febfde17",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T22:15:40",
+    "lane": 16,
+    "reference_run": "20261026-151429-7c585a60",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

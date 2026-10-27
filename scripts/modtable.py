@@ -272,6 +272,10 @@ broken.update({
     '3479021027': 'broken upstream: its merged PLib asks for TMPro.FaceInfo, which the game\'s TextMeshPro no longer has, so selecting a storage bin or any other building it covers throws a TypeLoadException and opens the crash screen (spec tests/e2e/mods/3479021027-delivery-temperature-limit-fixed.yaml)',
     '2877166424': 'broken upstream: a completed Nuclear Waste Reactor throws a NullReferenceException in Polymerizer.UpdateOilMeter (its kanim has no oil meter) and the crash screen opens (spec tests/e2e/mods/2877166424-nuclear-waste-disposal.yaml)',
 })
+# Found by the e2e specs of ranks 1471-1555: the spec fails the same way in the original.
+broken.update({
+    '2368685352': 'broken upstream: its compressors\' and ports\' operational-changed handler casts the event\'s data to a type the game no longer sends, so every finished Quantum Compressor or port throws an InvalidCastException in EnergyConsumer.OnPrefabInit and the crash screen opens (spec tests/e2e/mods/2368685352-quantum-compressors.yaml)',
+})
 # Flagged by onimaxxing as not loading, played by spec tests/e2e/mods/flagged-no-mod-info.yaml on
 # the base-game colony (game build U59-744825): KMod skips them in both players.
 NO_MOD_INFO = ('broken upstream: ships no mod_info.yaml, which KMod requires since 2021: it logs "Is '

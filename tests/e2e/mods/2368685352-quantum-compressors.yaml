@@ -1,0 +1,39 @@
+# Quantum Compressors (2368685352), classes B, S.
+#
+# What it does: adds wireless bulk storage for gases and liquids: the Gas Quantum Compressor
+# (5x3, 20 t) and the Liquid Quantum Compressor (2x3, 100 t) in the Base menu, and quantum
+# intakes and outlets (1x2, Ventilation and Plumbing menus, an element filter each) that put
+# piped gas or liquid into the compressors' shared store, or take it out, anywhere on the
+# map; the storage draws 240 W, each port 10 W (a JSON config holds costs and capacities).
+# The gas ones are researched with Ventilation (HVAC); for the liquid ones it names the tech
+# LIQUIDTEMPERATURE.
+# How a player reaches it: the build menu, then the outlets' filter side screens.
+# What changes: piping without pipes.
+#
+# Ventilation unlocks the gas ones (Liquid Tuning's list is the original's); a Liquid Quantum Compressor and a Quantum
+# Liquid Outlet built by setup in the dug-out corridor west of the printing pod are selected
+# in turn: the compressor holds 100 t, and the outlet shows its element filter.
+#
+# Broken upstream: the original throws an InvalidCastException in the mod's operational-changed
+# handler (QuantumCompressorComponent) as each building spawns, and the crash screen opens over
+# the colony, so nothing can be selected.
+from: early-base
+mods: [2368685352]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LiquidQuantumCompressor\")", method: Build, args: [{"$": "Grid.XYToCell(110, 206)"}, Neutral, null, [Copper, Polypropylene, Glass], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LiquidCompressorOutlet\")", method: Build, args: [{"$": "Grid.XYToCell(114, 206)"}, Neutral, null, [Copper, Polypropylene], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"HVAC\").unlockedItemIDs": [{contains: GasQuantumCompressor}, {contains: GasCompressorIntake}]
+      "Db.Get().Techs.Get(\"LiquidTemperature\").unlockedItemIDs": "== original"
+      "Assets.GetBuildingDef(\"LiquidQuantumCompressor\").EnergyConsumptionWhenActive": 240
+  - run: {seconds: 2}
+  - expect: {buildings: {LiquidQuantumCompressor: 1, LiquidCompressorOutlet: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [110, 207], select: LiquidQuantumCompressor}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<Storage>.capacityKg": 100000
+  - click_world: {cell: [114, 207], select: LiquidCompressorOutlet}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/FilterSideScreen", cond: stable}
+  - ui_dump: {name: filter, root: "**/DetailsScreen/SideScreen/**/FilterSideScreen"}

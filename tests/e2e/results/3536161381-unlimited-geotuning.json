@@ -1,0 +1,63 @@
+{
+ "spec": "mods/3536161381-unlimited-geotuning.yaml",
+ "mods": [
+  "3536161381"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Geotuner built in the corridor is selected: its side screen dumped",
+ "updated": "2026-10-27",
+ "commit": "7224eee1",
+ "mod_dlls": {
+  "3536161381": {
+   "GeoTuner super.dll": "4d0b6c7a3770dcc9ce9079dcd2da09b81b8e4102f0726e05df7c09069c316dba"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-005510-07dc8c66",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T01:14:42",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-020944-429aa908",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T02:09:44",
+    "lane": 14,
+    "reference_run": "20261027-005510-07dc8c66",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "geotuner": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261027-020944-429aa908",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T02:09:45",
+    "lane": 15,
+    "reference_run": "20261027-005510-07dc8c66",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "geotuner": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

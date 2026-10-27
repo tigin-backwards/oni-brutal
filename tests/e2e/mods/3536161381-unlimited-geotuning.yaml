@@ -1,0 +1,21 @@
+# 无限调谐 (Unlimited geotuning) (3536161381), classes S, P.
+#
+# What it does: the Geotuner's side screen lets up to 100 geotuners target one geyser (5 in
+# the game: a transpiler on GeoTunerSideScreen.SetRow), and a row's click picks the geyser for
+# the selected tuner by the mod's own handler.
+# How a player reaches it: a Geotuner's side screen.
+# What changes: more tuners per geyser.
+#
+# A Geotuner built by setup in the dug-out corridor west of the printing pod is selected: its
+# side screen opens with its geyser rows (dumped).
+from: early-base
+mods: [3536161381]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"GeoTuner\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - run: {seconds: 2}
+  - expect: {buildings: {GeoTuner: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: GeoTuner}
+  - ui_wait: {path: "**/DetailsScreen/**/GeoTunerSideScreen", cond: stable}
+  - ui_dump: {name: geotuner, root: "**/GeoTunerSideScreen"}

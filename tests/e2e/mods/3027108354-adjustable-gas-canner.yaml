@@ -1,0 +1,29 @@
+# 可调节的气体罐装器Adjustable Gas Canner (3027108354), classes B, S.
+#
+# What it does: the Canister Filler (GasBottler) gets a slider side screen, 0 to 999 kg
+# (50 by default), that sets how much gas it fills before a canister is ready: its storage
+# and its pipe consumer's capacity; copying settings copies it.
+# How a player reaches it: the Canister Filler's side screen.
+# What changes: canisters of any size.
+#
+# One built by setup in the dug-out corridor west of the printing pod is selected: its slider
+# (dumped) reads 50 kg, and 200 typed into its field sets both capacities.
+from: early-base
+mods: [3027108354]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"GasBottler\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - run: {seconds: 2}
+  - expect: {buildings: {GasBottler: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: GasBottler}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/SingleSliderSideScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<可调节的气体罐装器Adjustable_Gas_Canner.CSKZMM20230828GG1>.AA": 50
+      "selected:GetComponent<Storage>.capacityKg": 50
+  - ui_dump: {name: slider, root: "**/Config Tab - body instance/SingleSliderSideScreen"}
+  - type: {ui: "**/SingleSliderSideScreen/Contents/NumberInputField", text: "200", enter: true, clear: true}
+  - expect_state:
+      "selected:GetComponent<可调节的气体罐装器Adjustable_Gas_Canner.CSKZMM20230828GG1>.AA": 200
+      "selected:GetComponent<Storage>.capacityKg": 200
+      "selected:GetComponent<ConduitConsumer>.capacityKG": 200

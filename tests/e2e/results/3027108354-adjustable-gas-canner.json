@@ -1,0 +1,64 @@
+{
+ "spec": "mods/3027108354-adjustable-gas-canner.yaml",
+ "mods": [
+  "3027108354"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Canister Filler built in the corridor gets the mod's slider (dumped); 200 typed into it sets its capacities",
+ "updated": "2026-10-27",
+ "commit": "77aef08d",
+ "mod_dlls": {
+  "3027108354": {
+   "PLib.dll": "b862c5db2b3cd6df09a62d4a30782e91e2b24e8e1bfac08d991c9cc89a984ba9",
+   "┐╔╡≈╜┌╡─╞°╠σ╣▐╫░╞≈Adjustable Gas Canner.dll": "a0a50a25199267e1284665cbce7b70975d732e06f948a4e6cb0f26d6e1730791"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-235258-afb42cfe",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T00:17:27",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-013047-3d7e6e3d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T01:30:47",
+    "lane": 14,
+    "reference_run": "20261026-235258-afb42cfe",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "slider": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261027-013047-3d7e6e3d",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T01:30:48",
+    "lane": 15,
+    "reference_run": "20261026-235258-afb42cfe",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "slider": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

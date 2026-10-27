@@ -1,0 +1,32 @@
+# Power Needed is 1W[Vanilla+DLC] (1994592210), class P.
+#
+# What it does: postfixes on nine buildings' CreateBuildingDef cut their power draw: the
+# Robo-Miner, Bunker Door, Conveyor Loader, Gantry, Glass Forge, Sun Lamp and Auto-Sweeper to
+# 1 W, the Incubator to 0.01 W and the Liquid Aquatuner to 240 W.
+# How a player reaches it: building any of them.
+# What changes: their power draw.
+#
+# The definitions are read; an Auto-Sweeper built by setup in the dug-out corridor west of the
+# printing pod is selected and needs 1 W.
+from: early-base
+mods: [1994592210]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"SolidTransferArm\")", method: Build, args: [131765, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"AutoMiner\").EnergyConsumptionWhenActive": 1
+      "Assets.GetBuildingDef(\"BunkerDoor\").EnergyConsumptionWhenActive": 1
+      "Assets.GetBuildingDef(\"SolidConduitInbox\").EnergyConsumptionWhenActive": 1
+      "Assets.GetBuildingDef(\"EggIncubator\").EnergyConsumptionWhenActive": 0.01
+      "Assets.GetBuildingDef(\"Gantry\").EnergyConsumptionWhenActive": 1
+      "Assets.GetBuildingDef(\"GlassForge\").EnergyConsumptionWhenActive": 1
+      "Assets.GetBuildingDef(\"LiquidConditioner\").EnergyConsumptionWhenActive": 240
+      "Assets.GetBuildingDef(\"SunLamp\").EnergyConsumptionWhenActive": 1
+      "Assets.GetBuildingDef(\"SolidTransferArm\").EnergyConsumptionWhenActive": 1
+  - run: {seconds: 2}
+  - expect: {buildings: {SolidTransferArm: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: SolidTransferArm}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:EnergyConsumer.WattsNeededWhenActive": 1

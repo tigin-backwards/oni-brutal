@@ -1,0 +1,63 @@
+{
+ "spec": "mods/2999492290-fix-storage-pod.yaml",
+ "mods": [
+  "2999492290"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the research unlocks both pods; a Storage Pod built in the corridor is selected (title dumped) and holds what the original's does",
+ "updated": "2026-10-27",
+ "commit": "77aef08d",
+ "mod_dlls": {
+  "2999492290": {
+   "FixStoragePod.dll": "956145cb83273bbf1996fe979c3e6c97ccdd689e033eb5568e78c37b03cdabc7"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-235258-afb42cfe",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T00:09:33",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-012633-f3e454d6",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T01:26:33",
+    "lane": 14,
+    "reference_run": "20261026-235258-afb42cfe",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261027-012633-f3e454d6",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T01:26:34",
+    "lane": 15,
+    "reference_run": "20261026-235258-afb42cfe",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -1,0 +1,26 @@
+# [FIX] Storage Pod (贮藏舱) (2999492290), classes B, O.
+#
+# What it does: a 1x1 Storage Pod (StoragePodConfig, Base menu, Refined Renovations) that can
+# be placed anywhere and stores solids, and a Cool Pod (CoolPodConfig, Food menu,
+# Agriculture) that keeps food; their capacities are PLib options.
+# How a player reaches it: the build menu (Base, Food), after the research.
+# What changes: small storage that fits anywhere.
+#
+# The research unlocks both; a Storage Pod built by setup in the dug-out corridor west of the
+# printing pod is selected (its title dumped): it holds what the original's does.
+from: early-base
+mods: [2999492290]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"StoragePodConfig\")", method: Build, args: [{"$": "Grid.XYToCell(112, 208)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"RefinedObjects\").unlockedItemIDs": {contains: StoragePodConfig}
+      "Db.Get().Techs.Get(\"Agriculture\").unlockedItemIDs": {contains: CoolPodConfig}
+  - run: {seconds: 2}
+  - expect: {buildings: {StoragePodConfig: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: StoragePodConfig}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_dump: {name: title, root: "**/DetailsScreen/TitleBar/Border/LabelGroup"}
+  - expect_state:
+      "selected:GetComponent<Storage>.capacityKg": "== original"

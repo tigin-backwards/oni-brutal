@@ -1,0 +1,20 @@
+# Melted Building Rebuild (3478682836), class P.
+#
+# What it does: a prefix on StructureTemperatureComponents.DoMelt notes a melting building's
+# def, position, orientation, construction materials and facade, and on the next frame
+# places a blueprint of it again with the same materials.
+# How a player reaches it: let a building melt.
+# What changes: melted buildings are queued for rebuilding.
+#
+# setup builds a ladder of ice in the corridor west of the printing pod, far above ice's
+# melting point. It melts, and a blueprint of an ice ladder takes its place.
+from: early-base
+mods: [3478682836]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Ladder\")", method: Build, args: [131765, Neutral, null, [Ice], 320, DEFAULT_FACADE]}}
+steps:
+  - expect: {buildings: {Ladder: 1}}
+  - run: {seconds: 30, until: {blueprints: {Ladder: 1}}}
+  - expect: {blueprints: {Ladder: 1}}
+  - expect_state:
+      "count:all:Constructable::[*] if .selectedElementsTags[0].Name == Ice": 1

@@ -266,6 +266,10 @@ broken.update({
 broken.update({
     '2021224960': 'broken upstream: its Empty Storage button names action 273, which is now `BuildMenuLeft` and bound to no key, so building the button\'s tooltip throws an ArgumentException and selecting any storage building opens the crash screen (spec tests/e2e/mods/2021224960-empty-the-storage.yaml)',
 })
+# Found by the e2e specs of ranks 1386-1470: the spec fails the same way in the original.
+broken.update({
+    '2883456864': 'broken upstream: its side screen is never added (it looks for DetailsScreen.sideScreenContentBody, which the game no longer has), so the sign\'s picture cannot be chosen (spec tests/e2e/mods/2883456864-flying-fantasy.yaml)',
+})
 # Flagged by onimaxxing as not loading, played by spec tests/e2e/mods/flagged-no-mod-info.yaml on
 # the base-game colony (game build U59-744825): KMod skips them in both players.
 NO_MOD_INFO = ('broken upstream: ships no mod_info.yaml, which KMod requires since 2021: it logs "Is '

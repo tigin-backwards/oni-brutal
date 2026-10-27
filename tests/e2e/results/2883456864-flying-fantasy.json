@@ -1,0 +1,33 @@
+{
+ "spec": "mods/2883456864-flying-fantasy.yaml",
+ "mods": [
+  "2883456864"
+ ],
+ "verdict": "pending",
+ "why": "the spec fails in the original: a broken spec, or a mod broken upstream",
+ "findings": [],
+ "note": "",
+ "updated": "2026-10-27",
+ "commit": "49fae931",
+ "mod_dlls": {
+  "2883456864": {
+   "╖¡╖╔╗├├╬Flying Fantasy.dll": "4e1ac5c3c7fac126064ddead8684e8c214c38a4273c0a5416c8725663a290de2"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-235258-afb42cfe",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-26T23:52:58",
+    "lane": 14,
+    "reasons": [
+     "step 5: E2eDriver ui.wait {\"path\": \"**/DetailsScreen/**/\\u6807\\u5fd7\\u4fa7\\u5c4f*\", \"cond\": \"stable\", \"frames\": 300}: timeout: stable not met within 300 frames"
+    ],
+    "signatures": 0
+   }
+  ],
+  "ours": []
+ }
+}

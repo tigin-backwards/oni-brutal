@@ -1,0 +1,27 @@
+# 粉碎镁铁质岩生产铁 (2994335358), class P.
+#
+# What it does: a postfix on RockCrusherConfig.ConfigureBuildingTemplate adds a Rock Granulator
+# recipe: 100 kg of mafic rock crushed in 40 s into 40 kg of iron and 60 kg of sand.
+# How a player reaches it: a Rock Granulator's recipe list.
+# What changes: iron from mafic rock.
+#
+# The recipe is read; a Rock Granulator built by setup in the dug-out corridor west of the
+# printing pod is selected and its recipe list dumped and shot.
+from: early-base
+mods: [2994335358]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"RockCrusher\")", method: Build, args: [131765, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "ComplexRecipeManager.Get().GetRecipe(\"RockCrusher_I_MaficRock_O_Iron_Sand\").fabricators[0]": RockCrusher
+      "ComplexRecipeManager.Get().GetRecipe(\"RockCrusher_I_MaficRock_O_Iron_Sand\").time": 40
+      "ComplexRecipeManager.Get().GetRecipe(\"RockCrusher_I_MaficRock_O_Iron_Sand\").ingredients[0].amount": 100
+      "ComplexRecipeManager.Get().GetRecipe(\"RockCrusher_I_MaficRock_O_Iron_Sand\").results[0].amount": 40
+      "ComplexRecipeManager.Get().GetRecipe(\"RockCrusher_I_MaficRock_O_Iron_Sand\").results[1].amount": 60
+  - run: {seconds: 2}
+  - expect: {buildings: {RockCrusher: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: RockCrusher}
+  - ui_wait: {path: "**/ComplexFabricatorSideScreen/Contents/ButtonScrollView", cond: stable}
+  - ui_dump: {name: recipes, root: "**/ComplexFabricatorSideScreen/Contents/ButtonScrollView"}
+  - shot: {name: recipes, crop: "**/DetailsScreen", threshold: 0.04}

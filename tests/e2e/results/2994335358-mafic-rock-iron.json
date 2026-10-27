@@ -1,0 +1,79 @@
+{
+ "spec": "mods/2994335358-mafic-rock-iron.yaml",
+ "mods": [
+  "2994335358"
+ ],
+ "verdict": "warning",
+ "why": "known findings: scroll-normalized-position",
+ "findings": [
+  "scroll-normalized-position"
+ ],
+ "note": "the Rock Granulator turns 100 kg of mafic rock into 40 kg of iron and 60 kg of sand; its recipe list (dump and shot match)",
+ "updated": "2026-10-26",
+ "commit": "cbabaaf0",
+ "mod_dlls": {
+  "2994335358": {
+   "╖█╦Θ├╛╠·╓╩╤╥╔·▓·╠·.dll": "2080e3396bae303ec9744e3eef0b2ed24a5d2c7ce1bde1b6a079b97fc8a29e09"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-155051-8ce3a25e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T16:24:44",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-204743-febfde17",
+    "index": 1,
+    "verdict": "warn",
+    "date": "2026-10-26T21:23:50",
+    "lane": 17,
+    "reference_run": "20261026-155051-8ce3a25e",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "recipes": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "recipes": 0.0
+    }
+   },
+   {
+    "run": "20261026-204743-febfde17",
+    "index": 2,
+    "verdict": "warn",
+    "date": "2026-10-26T21:24:07",
+    "lane": 16,
+    "reference_run": "20261026-155051-8ce3a25e",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "recipes": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "recipes": 0.0
+    }
+   }
+  ]
+ }
+}

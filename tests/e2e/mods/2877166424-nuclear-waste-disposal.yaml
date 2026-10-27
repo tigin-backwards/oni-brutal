@@ -1,0 +1,36 @@
+# Nuclear waste disposal核废料处理 (2877166424), classes B, O.
+#
+# What it does: two Spaced Out reactors in the radiation (HEP) menu: a 3x2 Nuclear Waste
+# Reactor (hflgt) that takes nuclear waste by delivery and turns it into iron (dropped in
+# 30 kg lumps) while giving off radiation, and a liquid one for nuclear waste water (hflyt);
+# their power, heat and radiation are PLib options (Controler.json; 2222 W, 33, 11 rads for
+# the liquid one by default).
+# How a player reaches it: the build menu (Radiation); the Mods screen's options.
+# What changes: nuclear waste can be disposed of.
+#
+# One solid reactor built by setup in the dug-out corridor west of the printing pod is
+# selected (its title dumped): it asks for nuclear waste and has the mod's converter and
+# radiation emitter.
+#
+# Broken upstream: the solid reactor uses the game's Polymerizer for its output, whose
+# OnSpawn updates an oil meter the reactor's kanim does not have: a completed reactor throws
+# a NullReferenceException in Polymerizer.UpdateOilMeter and the crash screen opens.
+from: early-base
+mods: [2877166424]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"hflgt\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"hflgt\").EnergyConsumptionWhenActive": "== original"
+      "Assets.GetBuildingDef(\"hflyt\").WidthInCells": "== original"
+  - run: {seconds: 2}
+  - expect: {buildings: {hflgt: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: hflgt}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_dump: {name: title, root: "**/DetailsScreen/TitleBar/Border/LabelGroup"}
+  - expect_state:
+      "selected:GetComponent<ManualDeliveryKG>.RequestedItemTag.Name": NuclearWaste
+      "selected:GetComponent<ElementConverter>.outputElements[0].massGenerationRate": 0.6
+      "selected:GetComponent<RadiationEmitter>.emitRadiusX": 4
+      "selected:GetComponent<Polymerizer>.emitMass": 30

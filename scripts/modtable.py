@@ -270,6 +270,7 @@ broken.update({
 broken.update({
     '2883456864': 'broken upstream: its side screen is never added (it looks for DetailsScreen.sideScreenContentBody, which the game no longer has), so the sign\'s picture cannot be chosen (spec tests/e2e/mods/2883456864-flying-fantasy.yaml)',
     '3479021027': 'broken upstream: its merged PLib asks for TMPro.FaceInfo, which the game\'s TextMeshPro no longer has, so selecting a storage bin or any other building it covers throws a TypeLoadException and opens the crash screen (spec tests/e2e/mods/3479021027-delivery-temperature-limit-fixed.yaml)',
+    '2877166424': 'broken upstream: a completed Nuclear Waste Reactor throws a NullReferenceException in Polymerizer.UpdateOilMeter (its kanim has no oil meter) and the crash screen opens (spec tests/e2e/mods/2877166424-nuclear-waste-disposal.yaml)',
 })
 # Flagged by onimaxxing as not loading, played by spec tests/e2e/mods/flagged-no-mod-info.yaml on
 # the base-game colony (game build U59-744825): KMod skips them in both players.

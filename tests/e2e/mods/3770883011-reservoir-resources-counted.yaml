@@ -1,0 +1,24 @@
+# Reservoir Resources Counted (3770883011), class P.
+#
+# What it does: liquid and gas reservoirs keep their contents private (StoredPrivate), so the
+# game leaves them out of the colony's resource counts. The mod registers every reservoir's
+# storage when it spawns and, in WorldInventory.GetTotalAmount for the active world, adds what
+# the reservoirs hold of a tag to what lies or is stored openly.
+# How a player reaches it: the resources panel (and anything reading the colony's totals).
+# What changes: water in a liquid reservoir counts as the colony's water.
+#
+# Setup builds a liquid reservoir in the corridor west of the printing pod and puts 500 kg of
+# water in it (what its pipe would bring). The active world's total of water includes it, and
+# the reservoir is registered with the mod.
+from: early-base
+mods: [3770883011]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LiquidReservoir\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Cuprite], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "last:GetComponent<Storage>", method: AddLiquid, args: [Water, 500, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "type:GasLiquidReservoirResourceFix.ReservoirRegistry::KnownReservoirStorages.Count": 1
+      "all:Reservoir::[0].GetComponent<Storage>.GetMassAvailable(\"Water\")": 500
+  - run: {seconds: 2}
+  - expect_state:
+      "ClusterManager.Instance.activeWorld.worldInventory.GetTotalAmount(\"Water\", false)": [">= 500", "== original"]

@@ -37,8 +37,8 @@ in start-up and before the main menu.
 - **JSON lines.** Each request is one JSON object on one line, and so is each response. A client
   may keep one connection open for many requests. Several clients may connect at once.
 - **Main thread, one per frame.** Requests are queued and handled on the game's main thread, in
-  `Update`, one per frame. A command that spans frames (`ui.wait`, `camera.set`,
-  `canvas.hide`, `canvas.show`) holds the queue until it answers. So a client gets its
+  `Update`, one per frame. A command that spans frames (`ui.wait`, `buildmenu.settled`,
+  `camera.set`, `canvas.hide`, `canvas.show`) holds the queue until it answers. So a client gets its
   answers in the order it sent the requests.
 
 ### Request
@@ -188,7 +188,7 @@ The elements matching every filter given, in hierarchy order, each one described
     "rect":{"x":420.5,"y":251.35,"w":439.0,"h":24.0},"center":{"x":640.0,"y":263.35},"text":"MOD DIFFERENCES", ...}]}}
 ```
 
-### ui.dump `{root?, inactive?, file?}`
+### ui.dump `{root?, inactive?, file?, settle?}`
 
 The subtree of every element matching `root`, one line per element, in the `--dump-ui` line
 format that `scripts/ui-diff.py` compares. Without `root`, all canvases are dumped. A match
@@ -219,6 +219,10 @@ CanvasRenderer geometry hashes are not recorded: they cannot be read through pub
 - With `file`, the lines are written to that file, and the result is
   `{roots, count, file}`.
 - Without `file`, the result is `{roots, count, lines: [...]}`.
+- With `settle: N`, it first waits up to N frames for the build menu to settle, as
+  `buildmenu.settled` does, and dumps in the frame the menu is found settled: at once when it
+  already is, so the dump sees the same frame as without the wait. The result then also holds
+  the last check as `settle`, and a menu that does not settle fails as `buildmenu.settled` does.
 
 ```
 >> {"id":4,"cmd":"ui.dump","args":{"root":"**/ConfirmDialog/GameObject/Panel"}}
@@ -442,6 +446,44 @@ was compiled before it (ARCHITECTURE D34).
 << {"ok":true,"result":{"Brain:UpdateBrain":0}}
 ```
 
+### buildmenu.settled `{frames?}`
+
+Whether the build menu (PlanScreen) shows what the game would compute for it now. The game
+catches up over frames: each WorldInventory recounts one tag a frame, and PlanScreen re-checks
+ten buildings' requirements, repaints ten building buttons and one category button a frame. The
+menu is settled when all of these hold at once:
+
+- every world's WorldInventory holds, for each tag, the amount its `Update` would count now
+  (the amounts of the tag's pickupables in that world, not privately stored);
+- every building button is shown or hidden as the game's filter decides now: the open
+  category's buttons whose research is done (`PlanScreen.TechRequirementsMet`), or the search's
+  passing scores;
+- for every shown button, PlanScreen's cached state equals `GetBuildableStateForDef` now, and
+  the button shows that state: its MultiToggle state, its icon's material (in colour or
+  desaturated) and its research overlay, as `PlanBuildingToggle.RefreshDisplay` paints them;
+- no shown button was repainted earlier in the same frame: a repaint sets the button's label
+  font size, which TextMeshPro's auto-sizing replaces only at the end of the frame, so a dump
+  in that frame would read a size that depends on where the round-robin repaint is;
+- every category button's images, visibility and research icon show what its buildings'
+  states give now (`SetCategoryButtonState`);
+- no panel resize is pending, and the panel has finished expanding or collapsing.
+
+Without a colony or a PlanScreen it is settled. A closed menu checks only the inventories and
+the category buttons.
+
+- `frames`: with 0 (the default), one check now. Otherwise it checks once a frame until the
+  menu is settled, or fails after that many frames with `timeout: the build menu did not settle
+  within N frames`, its `result` holding the last check.
+- **Result:** `{settled, menu, open, visible, stale, reasons, ms, frames, maxMs}`. `menu` is
+  whether a PlanScreen is up, `open` whether a category (or search) panel is open, `visible`
+  how many building buttons are shown, `stale` how many things are stale, and `reasons` the
+  first twelve of them. `ms` is the last check's time and `maxMs` the slowest check's.
+
+```
+>> {"cmd":"buildmenu.settled","args":{"frames":600}}
+<< {"ok":true,"result":{"settled":true,"menu":true,"open":true,"visible":12,"stale":0,"reasons":[],"ms":0.41,"frames":37,"maxMs":0.62}}
+```
+
 ## Errors
 
 | error | when |
@@ -452,4 +494,4 @@ was compiled before it (ARCHITECTURE D34).
 | `no world is loaded` | `world.to_screen` with a cell, or `screen.to_cell`, outside a colony |
 | `no type X`, `no field or property X on T`, `no method X on T`, `no overload of T.M takes (…)` | state.get and setup.call |
 | `X: the value before it is null` | a path stepped through null |
-| `timeout: …` | ui.wait |
+| `timeout: …` | ui.wait, buildmenu.settled |

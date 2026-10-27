@@ -20,7 +20,12 @@ namespace E2eDriver
                 case "ping": return Ping();
                 case "ui.find": return UiFind(a);
                 case "ui.at": return Ui.Hit((float)(a["x"] ?? throw new DriverError("ui.at needs x")), (float)(a["y"] ?? throw new DriverError("ui.at needs y")), null, (int?)a["hits"] ?? 8);
-                case "ui.dump": return UiDump(a);
+                case "ui.dump":
+                    // settle: N waits up to N frames for the build menu first, and dumps in the
+                    // frame it is found settled.
+                    if (a["settle"] != null)
+                        return BuildMenu.Then(request, (int)a["settle"], check => { var dump = (JObject)UiDump(a); dump["settle"] = check; return dump; });
+                    return UiDump(a);
                 case "ui.wait": UiWait(request); return null;
                 case "world.to_screen": return WorldToScreen(a);
                 case "screen.to_cell": return ScreenToCell(a);
@@ -33,6 +38,7 @@ namespace E2eDriver
                 case "setup.call": return State.Result(State.Call(a), a);
                 case "seed": return Seeding.Seed(a);
                 case "count": return Counting.Start(a);
+                case "buildmenu.settled": return BuildMenu.Settled(request);
                 case null: throw new DriverError("the request has no cmd");
                 default: throw new DriverError("unknown command " + request.Command);
             }

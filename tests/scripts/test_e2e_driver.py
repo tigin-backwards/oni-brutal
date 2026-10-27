@@ -18,6 +18,7 @@ class FakeGame:
         self.requests = []
         self.camera = {'pos': [0, 0], 'ortho': 20}
         self.canvases_hidden = False
+        self.build_menu = {'settled': True, 'open': False, 'reasons': []}  # buildmenu.settled's check
         self.lock = threading.Lock()
 
     def add(self, path, rect, hit=None, as_name=None, **fields):
@@ -86,6 +87,9 @@ class FakeGame:
                 return {'path': None, 'relation': 'none', 'count': 0}
             hit = on_top[-1]['hit']
             return {'path': hit, 'relation': None, 'count': 1, 'all': [{'path': hit, 'relation': None}]}
+        if cmd == 'ui.dump' and 'settle' in args:
+            check = self.handle('buildmenu.settled', {'frames': args['settle']})
+            return dict(self.handle('ui.dump', {k: v for k, v in args.items() if k != 'settle'}), settle=check)
         if cmd == 'ui.dump':
             # Every element's ancestors are GameObjects too.
             objects = {'/'.join(p.split('/')[:i + 1]) for p in self.elements for i in range(p.count('/') + 1)}
@@ -131,6 +135,11 @@ class FakeGame:
         if cmd == 'canvas.show':
             self.canvases_hidden = False
             return {'shown': 2}
+        if cmd == 'buildmenu.settled':
+            check = dict(self.build_menu, frames=0 if self.build_menu['settled'] else args.get('frames', 0))
+            if not check['settled'] and args.get('frames'):
+                raise Failure(f'timeout: the build menu did not settle within {args["frames"]} frames', check)
+            return check
         if cmd == 'seed':
             return {'unity': args['n'], 'util': True, 'krandom': True, 'consumedBefore': 0}
         if cmd == 'setup.call':
@@ -501,6 +510,20 @@ class DriverTests(unittest.TestCase):
         self.assertEqual([e['name'] for e in run.evidence['world_shot']], ['zoomed'])
         run.step('shot', 'plain', 4)  # the old form
         self.assertTrue(os.path.exists(os.path.join(self.temp.name, 'plain.png')))
+
+    def test_evidence_waits_for_the_build_menu(self):
+        self.game.add('Screen/Menu', [0, 0, 100, 100])
+        run = self.run_for()
+        self.game.build_menu = {'settled': True, 'open': True, 'reasons': [], 'frames': 3}
+        run.step('ui_dump', {'name': 'menu', 'root': 'Screen/Menu'}, 1)
+        self.assertIn(('ui.dump', {'root': 'Screen/Menu', 'settle': e2e.BUILD_MENU_FRAMES}), self.game.requests)
+        run.step('shot', {'name': 'menu'}, 2)
+        self.assertIn(('buildmenu.settled', {'frames': e2e.BUILD_MENU_FRAMES}), self.game.requests)
+        self.game.build_menu = {'settled': False, 'open': True, 'reasons': ['Tile: shows state 2, wants 0 (Complete)']}
+        with self.assertRaisesRegex(e2e.SpecFailure, 'shot menu: the build menu did not settle within 600 frames: Tile: shows'):
+            run.step('shot', {'name': 'menu'}, 3)
+        with self.assertRaisesRegex(e2e.SpecFailure, 'ui_dump menu: the build menu did not settle'):
+            run.step('ui_dump', {'name': 'menu', 'root': 'Screen/Menu'}, 4)
 
     def test_driver_and_wait_steps(self):
         run = self.run_for()

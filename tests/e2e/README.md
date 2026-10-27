@@ -81,10 +81,12 @@ load at all, in both players, comes first from [Load sweeps](#load-sweeps).
 - **Paused time.** The fixture loads paused. Time passes only in `run` steps. Take all UI evidence
   before the first `run`, or right after an expectation that pins the state.
 - **The build menu catches up over frames.** The game counts the colony's inventory one tag a
-  frame (only once time has run), checks ten buildings' requirements a frame and repaints ten
-  of the menu's buttons a frame. A category opened soon after the first `run` can show a
-  button greyed (not affordable) for a few dozen frames, at a different button in each run.
-  Before a shot of the menu, wait for it to settle: `ui_wait` with `cond: stable, stable: 120`.
+  frame, checks ten buildings' requirements a frame and repaints ten of the menu's buttons a
+  frame, so a button can show a stale state (greyed, not affordable) for dozens of frames after
+  something changes. Before each `shot` and `ui_dump` the runner therefore waits, in both
+  players, until E2eDriver's `buildmenu.settled` holds: every shown button and category button
+  shows the state the game computes for it now, and the inventory counts are current. A menu
+  that does not settle within 600 frames fails the step with the stale buttons as its reason.
 - **Output.** Each invocation has a run id (its start time and a random part, or `--run-id`), so
   invocations never overwrite each other. Each run writes to `out/e2e/SPEC/RUN_ID/PLAYER-N/`
   (`out/e2e/SPEC/latest` points at the newest run id):

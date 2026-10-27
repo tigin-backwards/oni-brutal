@@ -71,6 +71,7 @@ UI_TOLERANCE = 2       # pixels, for ui-diff.py --tolerance
 # is numbered differently in our player, whatever is drawn (tests/e2e/README.md, Verdicts).
 IGNORE_FIELDS = ('depth',)
 FRAME_FALLBACK = 0.1   # seconds a "frame" lasts without E2eDriver to count real ones
+BUILD_MENU_FRAMES = 600  # the most frames a shot or ui_dump waits for the build menu to settle
 # Perf jobs a spec never starts beside (matched against `ps -eo args`): the sweep and measurement
 # scripts, profilers. QA (scripts/qa.sh) is not one: only its perf stage needs a quiet machine,
 # and it says so through perf.wanted and an exclusive hold of perf.lock (machine_lock); its other
@@ -1126,9 +1127,20 @@ class Driver:
     def dump(self, root):
         return ''.join(line + '\n' for line in self.request('ui.dump', root=root)['lines'])
 
+    def dump_settled(self, root, frames=BUILD_MENU_FRAMES):
+        """ROOT's subtree as dump() gives it, after waiting up to FRAMES frames for the build
+        menu to settle, in the frame it is found settled: (the text, the settle check)."""
+        result = self.request('ui.dump', timeout=max(self.timeout, frames), root=root, settle=frames)
+        return ''.join(line + '\n' for line in result['lines']), result.get('settle')
+
     def wait(self, path, cond='exists', frames=300, **more):
         # The driver holds its queue while it waits: a slow player may take a while.
         return self.request('ui.wait', timeout=max(self.timeout, frames), path=path, cond=cond, frames=frames, **more)
+
+    def build_menu_settled(self, frames=BUILD_MENU_FRAMES):
+        """Waits up to FRAMES frames for the build menu to show what the game would compute for
+        it now (buildmenu.settled); the check's result."""
+        return self.request('buildmenu.settled', timeout=max(self.timeout, frames), frames=frames)
 
     def to_screen(self, cell, pos=False):
         """Where a cell's centre (or, with POS, the world position [x, y]) is on screen."""
@@ -2447,6 +2459,27 @@ class Run:
         self.frames(5)
         return self.need_input().grab(os.path.join(self.out, name + '.png'))
 
+    def settle_build_menu(self, what, wait=None):
+        """Before evidence of the UI: while a build menu category is open, waits for the menu to
+        catch up (the game recounts, re-checks and repaints it over frames). WAIT makes the
+        request and returns (its value, the check); by default buildmenu.settled alone. Fails
+        when the menu does not settle within BUILD_MENU_FRAMES; returns WAIT's value."""
+        if not self.driver:
+            return None
+        wait = wait or (lambda: (None, self.driver.build_menu_settled()))
+        try:
+            value, result = wait()
+        except DriverError as e:
+            last = e.result if isinstance(e.result, dict) else {}
+            if last.get('reasons'):
+                raise SpecFailure(f'{what}: the build menu did not settle within {BUILD_MENU_FRAMES} frames: '
+                                  + '; '.join(last['reasons'][:6])) from None
+            raise SpecFailure(f'{what}: {e}') from None
+        if result and (result.get('open') or result.get('frames')):
+            self.log(f'  {what}: the build menu settled in {result.get("frames", 0)} frames '
+                     f'(checks took up to {result.get("maxMs")} ms)')
+        return value
+
     def pointer_away(self):
         """The pointer off the UI before a shot (§5.4)."""
         if self.player and self.player.display:
@@ -2601,7 +2634,11 @@ class Run:
             more = {k: value[k] for k in ('value', 'stable', 'under') if k in value}
             self.need_driver().wait(value['path'], value.get('cond', 'exists'), value.get('frames', 300), **more)
         elif kind == 'ui_dump':
-            text = self.need_driver().dump(value['root'])
+            # In the frame the menu is found settled: a menu already settled is dumped in the
+            # same frame as without the wait.
+            self.need_driver()
+            text = self.settle_build_menu(f'ui_dump {value["name"]}',
+                                          lambda: self.driver.dump_settled(value['root']))
             path = os.path.join(self.out, value['name'] + '.ui.txt')
             with open(path, 'w') as f:
                 f.write(text)
@@ -2772,6 +2809,9 @@ class Run:
     def shot(self, value):
         name = value['name']
         self.pointer_away()
+        menu = self.at_main_menu()
+        if not menu:
+            self.settle_build_menu(f'shot {name}')
         meta = {'name': name, 'crop': None, 'masks': [], 'threshold': value.get('threshold')}
         if value.get('crop'):
             meta['crop'] = list(self.need_driver().find_one({'ui': value['crop']}).rect)
@@ -2781,7 +2821,7 @@ class Run:
                 raise SpecFailure(f'shot {name}: crop {value["crop"]} is empty ({meta["crop"]})')
         if value.get('mask'):
             meta['masks'] = self.rects(value['mask'])
-        path = self.menu_grab(name) if self.at_main_menu() else screenshot(self.mcp, self.out, name)
+        path = self.menu_grab(name) if menu else screenshot(self.mcp, self.out, name)
         if not path:
             raise SpecFailure(f'shot {name}: OniMcp made no screenshot')
         meta['file'] = os.path.basename(path)

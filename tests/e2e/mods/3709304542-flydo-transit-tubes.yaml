@@ -1,0 +1,20 @@
+# Flydo uses Transit Tubes (3709304542), class P (Bionic Booster Pack).
+#
+# What it does: the Flydo's nav grid (RobotFlyerGrid1x1) gets the Tube nav type, transitions
+# in and out of and along transit tubes (and through tube bridges) and a validator for tube
+# cells; the Flydo gets a tube travel kanim (flydo_loco_tube_kanim), cannot drown and is not
+# submerged while in a tube.
+# How a player reaches it: build transit tubes where Flydos fly.
+# What changes: Flydos travel by transit tube.
+#
+# The Flydo's nav grid holds the Tube nav type and as many transitions as in the original;
+# the Flydo prefab carries the tube kanim; the colony plays on.
+from: early-base
+mods: [3709304542]
+steps:
+  - expect_state:
+      "Pathfinding.Instance.GetNavGrid(\"RobotFlyerGrid1x1\").ValidNavTypes": [{contains: Tube}, {contains: Hover}]
+      "Pathfinding.Instance.GetNavGrid(\"RobotFlyerGrid1x1\").transitions.Length": "== original"
+      "count:Assets.GetPrefab(\"FetchDrone\").GetComponent<KBatchedAnimController>.animFiles[*] if .name == flydo_loco_tube_kanim": 1
+  - run: {seconds: 10}
+  - expect: {duplicants: 3}

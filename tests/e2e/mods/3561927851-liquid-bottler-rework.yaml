@@ -1,0 +1,32 @@
+# Liquid Bottler rework (3561927851), classes B, O.
+#
+# What it does: adds a Liquid Bottler (LIQUIDBOTTLER1, "Liquid Bottler (c) Emphasia", 3x2, any
+# metal, Utilities menu, researched with Advanced Research): its liquid pipe input fills a
+# 1000 kg store, which it bottles in 350 kg bottles for Duplicants to carry (PLib options:
+# bottle capacity, intake rate, store size, restart required). The mod's AutoDrop (drop the
+# store when a bottle's worth is in) and its automation side screen are hidden behind a
+# component its patch looks up on the building.
+# How a player reaches it: the build menu (Utilities), then its side screens.
+# What changes: liquids by the bottle.
+#
+# Advanced Research unlocks it; one built by setup in the dug-out corridor west of the printing
+# pod has the mod's capacities; selected, it is named and bottles 350 kg at a time.
+from: early-base
+mods: [3561927851]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LIQUIDBOTTLER1\")", method: Build, args: [{"$": "Grid.XYToCell(112, 206)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"AdvancedResearch\").unlockedItemIDs": {contains: LIQUIDBOTTLER1}
+      "Assets.GetPrefab(\"LIQUIDBOTTLER1\").GetComponent<Storage>.capacityKg": 1000
+      "Assets.GetPrefab(\"LIQUIDBOTTLER1\").GetComponent<Bottler>.userMaxCapacity": 350
+  - run: {seconds: 2}
+  - expect: {buildings: {LIQUIDBOTTLER1: 1}}
+  - driver: {camera.set: {cell: [113, 207], ortho: 8}}
+  - click_world: {cell: [113, 207], select: LIQUIDBOTTLER1}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Liquid Bottler (c) Emphasia"}
+  - expect_state:
+      "selected:GetComponent<Bottler>.userMaxCapacity": 350
+      "selected:GetComponent<ConduitConsumer>.consumptionRate": 10

@@ -1,0 +1,63 @@
+{
+ "spec": "mods/2841251487-wall-pedestal.yaml",
+ "mods": [
+  "2841251487"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "Artistry unlocks it; one built in the corridor is selected: its receptacle side screen dumped",
+ "updated": "2026-10-27",
+ "commit": "8aca3886",
+ "mod_dlls": {
+  "2841251487": {
+   "WallPedestal.dll": "ac686c8bcbd2dfa4223652a24f456fd327d62ac8a8c751c12ca071ec31d9331c"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-034613-b5bca064",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T03:46:13",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-034914-67eb0e53",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T03:49:14",
+    "lane": 14,
+    "reference_run": "20261027-034613-b5bca064",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "receptacle": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261027-034914-67eb0e53",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T03:49:15",
+    "lane": 15,
+    "reference_run": "20261027-034613-b5bca064",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "receptacle": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

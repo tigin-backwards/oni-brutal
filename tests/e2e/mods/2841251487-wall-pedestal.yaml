@@ -1,0 +1,28 @@
+# Wall Pedestal (2841251487), class B.
+#
+# What it does: a 1x1 Wall Pedestal (WallItemFrame) in the Furniture menu, researched with
+# Artistry, that can be placed anywhere (on a wall too) and displays one object as the Pedestal
+# does, doubling its decor.
+# How a player reaches it: the build menu (Furniture), after the research; its receptacle side
+# screen picks the object.
+# What changes: pedestals on walls.
+#
+# Artistry unlocks it; one built by setup in the dug-out corridor west of the printing pod is
+# selected: its receptacle side screen (dumped) offers displayable objects.
+from: early-base
+mods: [2841251487]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"WallItemFrame\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+  # A 1x1 pedestal on the backwall takes no world click in either player: setup selects it.
+  - driver: {setup.call: {target: "SelectTool.Instance", method: Select, args: [{"$": "all:ItemPedestal::[0].GetComponent<KSelectable>"}]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"Artistry\").unlockedItemIDs": {contains: WallItemFrame}
+  - run: {seconds: 2}
+  - expect: {buildings: {WallItemFrame: 1}}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/*Receptacle*", frames: 600}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_dump: {name: receptacle, root: "**/DetailsScreen/SideScreen/**/*Receptacle*"}
+  - expect_state:
+      "selected:GetComponent<SingleEntityReceptacle>": exists
+      "selected:GetComponent<ItemPedestal>": exists

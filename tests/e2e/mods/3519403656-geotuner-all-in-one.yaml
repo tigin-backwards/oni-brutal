@@ -1,0 +1,41 @@
+# GeoTuner all in one 调谐仪(多合一) (3519403656), class S,O.
+#
+# What it does: one Geotuner tunes a geyser as several would. The Geotuner gets a
+# GeoTunerAdjustable, a user-controlled capacity (1 to the Max Tuning Count option, 5), so its
+# side screen has a capacity control: the tuning count. The count multiplies the geyser
+# boost, the materials it is fed and, with the Energy Consumption option, its power (120 W
+# times the count times the Products Ratio option, set each frame in its Update). The geyser
+# list's rows get the mod's tooltip, and a geyser takes one tuner only.
+# How a player reaches it: selecting a Geotuner; PLib options.
+# What changes: a single Geotuner with a count of 3 does the work of three.
+#
+# The Products Ratio option is set to 2. setup builds a Geotuner in the dug-out corridor west
+# of the printing pod; it is selected, its capacity control (dumped) takes 3 typed in, and its
+# power need goes from 240 W to 720 W.
+from: early-base
+mods: [3519403656]
+options:
+  laz_yh.GeoTuner_mod: {Geyser_Ratio: 2.0}
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"GeoTuner\")", method: Build, args: [131129, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"GeoTuner\").GetComponent<GeoTunerAdjustable>": exists
+  - run: {seconds: 2}
+  - expect: {buildings: {GeoTuner: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: GeoTuner}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_wait: {path: "**/CapacityControlSideScreen", cond: stable}
+  - expect_state:
+      "selected:GeoTunerAdjustable.MaxCapacity": 5
+      "selected:GeoTunerAdjustable.UserMaxCapacity": 1
+      "selected:EnergyConsumer.WattsNeededWhenActive": 240
+  - ui_dump: {name: capacity, root: "**/CapacityControlSideScreen"}
+  - type: {ui: "**/CapacityControlSideScreen/**/InputField", text: "3", enter: true, clear: true}
+  - expect_state:
+      "selected:GeoTunerAdjustable.UserMaxCapacity": 3
+  - ui_wait: {path: "**/CapacityControlSideScreen", cond: stable}
+  - expect_state:
+      "selected:EnergyConsumer.WattsNeededWhenActive": 720
+  - ui_dump: {name: capacity-set, root: "**/CapacityControlSideScreen"}

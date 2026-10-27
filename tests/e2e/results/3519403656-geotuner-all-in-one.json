@@ -1,0 +1,69 @@
+{
+ "spec": "mods/3519403656-geotuner-all-in-one.yaml",
+ "mods": [
+  "3519403656"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "options double the products ratio; a built Geotuner's capacity control (dumps match) takes 3 and its power need goes from 240 W to 720 W",
+ "updated": "2026-10-26",
+ "commit": "cbabaaf0",
+ "mod_dlls": {
+  "3519403656": {
+   "GeoTuner_mod.dll": "3c6befe51e5eff5b0e18a1d50bf951fb52381fd0451cc38e775bc954b9fe9d89"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-151429-7c585a60",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T15:44:10",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-204743-febfde17",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T21:58:40",
+    "lane": 17,
+    "reference_run": "20261026-151429-7c585a60",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "capacity": {
+      "differences": 0
+     },
+     "capacity-set": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261026-204743-febfde17",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T21:59:42",
+    "lane": 17,
+    "reference_run": "20261026-151429-7c585a60",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "capacity": {
+      "differences": 0
+     },
+     "capacity-set": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

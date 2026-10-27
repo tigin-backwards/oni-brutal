@@ -1,0 +1,56 @@
+{
+ "spec": "mods/2846006297-enhanced-radiation-engine.yaml",
+ "mods": [
+  "2846006297"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Radiation Engine prefab has the 666,666 radbolt tank, 333,333 storage, maximum height 35 and the strong efficiency",
+ "updated": "2026-10-27",
+ "commit": "ecf2040f",
+ "mod_dlls": {
+  "2846006297": {
+   "Enhanced Radiation Engine.dll": "560253bdc43b98b9aa4435d9574719c94fbc03f6592c73e2ab3ccccd401633d0",
+   "PLib.dll": "b862c5db2b3cd6df09a62d4a30782e91e2b24e8e1bfac08d991c9cc89a984ba9"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-103032-617b0bb3",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T10:51:48",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-111930-890933da",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T11:19:30",
+    "lane": 15,
+    "reference_run": "20261027-103032-617b0bb3",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-111930-890933da",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T11:20:15",
+    "lane": 15,
+    "reference_run": "20261027-103032-617b0bb3",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

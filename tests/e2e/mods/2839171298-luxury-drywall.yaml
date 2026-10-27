@@ -1,0 +1,35 @@
+# Luxury Drywall (2839171298), class B,S.
+#
+# What it does: adds the Luxury Drywall, LuxuryWall, to the Utilities menu after Hazard
+# Protection (Suits): a Drywall (backwall, insulating, a ZoneTile) drawn from the mod's
+# luxury_walls kanim in 20 patterns and 7 colours. Selected, it shows the mod's Luxury Wall
+# side screen (PLib): an icon of the look, a Type and a Color combo box; picking one plays
+# that pattern_colour animation on the wall. Copying settings carries the look.
+# How a player reaches it: the build menu (Utilities), after the research; selecting a wall.
+# What changes: patterned backwalls.
+#
+# setup builds a Luxury Drywall in the dug-out corridor west of the printing pod; it is
+# selected, its side screen dumped (chess, white), and Stars picked in its Type box.
+from: early-base
+mods: [2839171298]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LuxuryWall\")", method: Build, args: [131765, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"Suits\").unlockedItemIDs": {contains: LuxuryWall}
+  - run: {seconds: 2}
+  - expect: {buildings: {LuxuryWall: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: LuxuryWall}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_wait: {path: "**/LuxuryWallSideScreen*", cond: stable}
+  - expect_state:
+      "selected:LuxuryTypeSelectorWall.GetValue(0)": chess
+      "selected:LuxuryTypeSelectorWall.GetValue(1)": white
+  - ui_dump: {name: wall-screen, root: "**/LuxuryWallSideScreen*"}
+  - click: {ui: "**/LuxuryWallType"}
+  - click: {ui: "**/LuxuryWallType/PullDown/Viewport/Content/RowEntry", index: 1}
+  - expect_state:
+      "selected:LuxuryTypeSelectorWall.GetValue(0)": stars
+      "selected:KBatchedAnimController.currentAnim.HashValue": "== original"
+  - ui_dump: {name: wall-stars, root: "**/LuxuryWallSideScreen*"}

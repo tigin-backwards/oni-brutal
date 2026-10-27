@@ -1,0 +1,69 @@
+{
+ "spec": "mods/2839171298-luxury-drywall.yaml",
+ "mods": [
+  "2839171298"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a built Luxury Drywall's side screen (dump matches) picks Stars from its Type box and the wall plays that look",
+ "updated": "2026-10-26",
+ "commit": "cbabaaf0",
+ "mod_dlls": {
+  "2839171298": {
+   "LuxuryDecoration.dll": "820563120e7708f4e307797fa7f02ea3356b6471d965208bf830ef3a147a7d3d"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-192612-e52c7dc9",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T19:26:13",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-204743-febfde17",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T21:15:03",
+    "lane": 17,
+    "reference_run": "20261026-192612-e52c7dc9",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "wall-screen": {
+      "differences": 0
+     },
+     "wall-stars": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261026-204743-febfde17",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T21:15:19",
+    "lane": 16,
+    "reference_run": "20261026-192612-e52c7dc9",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "wall-screen": {
+      "differences": 0
+     },
+     "wall-stars": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

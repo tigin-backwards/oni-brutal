@@ -1,0 +1,17 @@
+# 农民的呵护效果5倍时长 Farmers Touch Duration 5x (3771254169), class P.
+#
+# What it does: a postfix on Tinkerable.OnCompleteWork finds the effect the tinkering just put
+# on the plant and, when it is Farmer's Touch (FarmTinker), multiplies its remaining time by
+# five, logging the new duration.
+# How a player reaches it: a farmer tending plants at a Farm Station.
+# What changes: how long Farmer's Touch lasts on a plant.
+#
+# The mod logs that it loaded, and the Farmer's Touch effect it extends exists with the game's
+# duration (the mod changes the instance on the plant, not the effect).
+from: early-base
+mods: [3771254169]
+require_log: ['\[FarmTinkerDuration5x\] Loaded\. Farmer.s Touch duration x5\.']
+steps:
+  - expect_state:
+      "Db.Get().effects.Get(\"FarmTinker\").duration": "== original"
+      "type:FarmTinkerDuration5x.Settings::DurationMultiplier": 5

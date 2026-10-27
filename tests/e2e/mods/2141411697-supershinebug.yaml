@@ -1,0 +1,20 @@
+# SuperShineBug (2141411697), class P.
+#
+# What it does: every Shine Bug morph's light (BaseLightBugConfig) shines at 50000 lux.
+# How a player reaches it: Shine Bugs, wherever they live.
+# What changes: very bright shine bugs.
+#
+# The Shine Bug prefabs shine at 50000 lux, and a Shine Bug spawned by setup in the dug-out
+# corridor west of the printing pod shines so.
+from: early-base
+mods: [2141411697]
+setup:
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131128, 0, 0, \"LightBug\", \"Creatures\")", method: SetActive, args: [true]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"LightBug\").GetComponent<Light2D>.Lux": 50000
+      "Assets.GetPrefab(\"LightBugBlue\").GetComponent<Light2D>.Lux": 50000
+      "Assets.GetPrefab(\"LightBugCrystal\").GetComponent<Light2D>.Lux": 50000
+  - run: {seconds: 2}
+  - expect_state:
+      "count:all:Light2D::[*] if .Lux == 50000": ">= 1"

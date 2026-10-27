@@ -1,0 +1,25 @@
+# Enhanced rocket engine增强火箭引擎 (2858701369), classes P, O.
+#
+# What it does: every Spaced Out rocket engine (radbolt, carbon dioxide, sugar, steam, small
+# and large petroleum, hydrogen) gets a very tall maximum height, strong efficiency, an
+# insignificant burden and a very low fuel cost per distance; their power comes from PLib
+# options in Controler.json (34, 23, 16, 27, 31, 48 and 55 by default), written into the
+# game's ENGINE_POWER tuning.
+# How a player reaches it: the Mods screen's options; the engines in the rocket builder.
+# What changes: stronger, cheaper engines.
+#
+# With the carbon dioxide engine's power set to 40 in the options, the tuning reads 40 and the
+# engine's prefab has the mod's height, efficiency and performance.
+from: early-base
+mods: [2858701369]
+options:
+  "2858701369": {$file: Controler.json, a2: 40}
+steps:
+  - expect_state: {"type:TUNING.ROCKETRY+ROCKET_HEIGHT::VERY_TALL": {save_as: tall}}
+  - expect_state:
+      "type:TUNING.ROCKETRY+ENGINE_POWER::EARLY_STRONG": 40
+      "type:TUNING.ROCKETRY+ENGINE_POWER::LATE_VERY_STRONG": 55
+      "Assets.GetPrefab(\"CO2Engine\").GetComponent<RocketEngineCluster>.maxHeight": "== tall"
+      "Assets.GetPrefab(\"CO2Engine\").GetComponent<RocketEngineCluster>.efficiency": "== original"
+      "Assets.GetPrefab(\"CO2Engine\").GetComponent<RocketModuleCluster>.performanceStats.EnginePower": 40
+      "Assets.GetPrefab(\"HydrogenEngineCluster\").GetComponent<RocketModuleCluster>.performanceStats.EnginePower": 55

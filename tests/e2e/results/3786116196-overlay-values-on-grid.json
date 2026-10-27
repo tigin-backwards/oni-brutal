@@ -1,0 +1,79 @@
+{
+ "spec": "mods/3786116196-overlay-values-on-grid.yaml",
+ "mods": [
+  "3786116196"
+ ],
+ "verdict": "warning",
+ "why": "known findings: scroll-normalized-position",
+ "findings": [
+  "scroll-normalized-position"
+ ],
+ "note": "the Decor overlay legend's Display ON filter shows decor numbers on the cells (dump, world shot)",
+ "updated": "2026-10-27",
+ "commit": "4aef527c",
+ "mod_dlls": {
+  "3786116196": {
+   "OverlayValuesOnGrid.dll": "625ef450aaf2e312091d9ca587b6d34e15bfbf17fbef6d8e183100a8c55b9b10"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-092853-dabffb17",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T10:47:49",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-112647-00d12e1d",
+    "index": 1,
+    "verdict": "warn",
+    "date": "2026-10-27T11:26:47",
+    "lane": 17,
+    "reference_run": "20261027-092853-dabffb17",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "legend": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "decor-values": 0.000441
+    }
+   },
+   {
+    "run": "20261027-112647-00d12e1d",
+    "index": 2,
+    "verdict": "warn",
+    "date": "2026-10-27T11:31:51",
+    "lane": 17,
+    "reference_run": "20261027-092853-dabffb17",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "legend": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "decor-values": 0.000409
+    }
+   }
+  ]
+ }
+}

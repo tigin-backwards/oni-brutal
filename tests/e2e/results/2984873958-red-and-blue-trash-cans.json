@@ -1,0 +1,64 @@
+{
+ "spec": "mods/2984873958-red-and-blue-trash-cans.yaml",
+ "mods": [
+  "2984873958"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the can's skins exist; one built in the corridor has the deleting component (title dumped)",
+ "updated": "2026-10-27",
+ "commit": "7224eee1",
+ "mod_dlls": {
+  "2984873958": {
+   "PLib.dll": "b862c5db2b3cd6df09a62d4a30782e91e2b24e8e1bfac08d991c9cc89a984ba9",
+   "P_║∞╔½║═└╢╔½╡─└¼╗°═░.dll": "0a83e55fcd84c05941bd69a28753fb1a4a2bae30875d5b8c7e5198d93a964e3e"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-005510-07dc8c66",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T01:01:42",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-020347-745f002d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T02:03:47",
+    "lane": 14,
+    "reference_run": "20261027-005510-07dc8c66",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261027-020347-745f002d",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T02:03:48",
+    "lane": 15,
+    "reference_run": "20261027-005510-07dc8c66",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

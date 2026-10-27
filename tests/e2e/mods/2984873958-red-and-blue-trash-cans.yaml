@@ -1,0 +1,26 @@
+# P 红色和蓝色的垃圾桶 Red And Blue Trash Cans 1.4 (2984873958), class B.
+#
+# What it does: a 1x1 Blue Trash Can (P015GG1) in the Base menu: a storage bin for non-edible
+# solids that deletes whatever it holds every second; three skins (red and others) are added
+# as its facades.
+# How a player reaches it: the build menu (Base); its storage filter side screen.
+# What changes: a bin that destroys what is delivered.
+#
+# The can's three skins exist; one built by setup in the dug-out corridor west of the printing
+# pod is selected: it has the deleting component, and its filter side screen is dumped.
+from: early-base
+mods: [2984873958]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"P015GG1\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Permits.BuildingFacades.TryGet(\"P015GG1L2\").PrefabID": P015GG1
+      "Db.Get().Permits.BuildingFacades.TryGet(\"P015GG1L4\").PrefabID": P015GG1
+  - run: {seconds: 2}
+  - expect: {buildings: {P015GG1: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: P015GG1}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<P_红色和蓝色的垃圾桶.P015GG1K1>": exists
+  - ui_dump: {name: title, root: "**/DetailsScreen/TitleBar/Border/LabelGroup"}

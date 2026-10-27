@@ -1,0 +1,30 @@
+# Auto-Exit-Neural-Vacillators (3674542335), class P.
+#
+# What it does: a postfix on GeneShufflerSM.InitializeStates schedules, on entering the
+# Neural Vacillator's working.complete state, a 5 s timer that ends the work: the Duplicant
+# gets its new trait and leaves without the player pressing the side screen's button (the
+# game waits for it forever, the Duplicant stuck in the machine).
+# How a player reaches it: assign a Duplicant to a charged Neural Vacillator.
+# What changes: no Duplicant is forgotten in the vacillator.
+#
+# setup places a charged Neural Vacillator east of the printing pod's outhouse and selects it.
+# Nikola is assigned to it in its side screen; he uses it, and a few seconds later the machine
+# is spent and he has one more trait, with nobody pressing its button.
+from: early-base
+mods: [3674542335]
+setup:
+  - driver: {seed: 12345}
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131771, 0, 0, \"GeneShuffler\", \"Building\")", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "SelectTool.Instance", method: Select, args: [{"$": "all:GeneShuffler::[0].GetComponent<KSelectable>"}]}}
+steps:
+  - expect_state:
+      "all:GeneShuffler::[0].IsConsumed": false
+      "Components.LiveMinionIdentities.Items[1].name": Nikola
+      "Components.LiveMinionIdentities.Items[1].GetComponent<Traits>.TraitList.Count": {save_as: traits}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/AssignableSideScreen", cond: stable}
+  - click: {text: "Nikola", under: "**/AssignableSideScreen/**/AssignableSideScreenRow"}
+  - run: {seconds: 120}
+  - expect_state:
+      "all:GeneShuffler::[0].IsConsumed": true
+      "all:GeneShuffler::[0].IsWorking": false
+      "Components.LiveMinionIdentities.Items[1].GetComponent<Traits>.TraitList.Count": "== traits + 1"

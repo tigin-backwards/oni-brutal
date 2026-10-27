@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3384096443-4kw-electric-wire.yaml",
+ "mods": [
+  "3384096443"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "conductive wire is rated 4 kW, a built one too",
+ "updated": "2026-10-26",
+ "commit": "c7b16a61",
+ "mod_dlls": {
+  "3384096443": {
+   "ElectricWireOpt.dll": "adec37d9fc68eb99b7f6261cfd65b5d451f68ea26ebd0e7771bd9a459b459238"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-203918-0b6e3624",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T21:27:51",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-213856-d4539d05",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T22:16:52",
+    "lane": 14,
+    "reference_run": "20261026-203918-0b6e3624",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-213856-d4539d05",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T22:18:02",
+    "lane": 15,
+    "reference_run": "20261026-203918-0b6e3624",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

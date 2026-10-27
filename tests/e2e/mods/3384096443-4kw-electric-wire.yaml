@@ -1,0 +1,25 @@
+# 4kw electric wire (3384096443), class P.
+#
+# What it does: a prefix on Wire.GetMaxWattageAsFloat raises the conductive wire's rating
+# (Max2000) to 4,000 W and keeps the others' (500, 1,000, 20,000, 50,000).
+# How a player reaches it: building conductive wire.
+# What changes: conductive wire carries twice the load.
+#
+# The ratings are read; a conductive wire built by setup in the dug-out corridor west of the
+# printing pod is selected: its rating is Max2000, which the mod makes 4,000 W.
+from: early-base
+mods: [3384096443]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"WireRefined\")", method: Build, args: [131128, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Wire.GetMaxWattageAsFloat(\"Max2000\")": 4000
+      "Wire.GetMaxWattageAsFloat(\"Max1000\")": 1000
+      "Wire.GetMaxWattageAsFloat(\"Max20000\")": 20000
+  - run: {seconds: 2}
+  - expect: {buildings: {WireRefined: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 206], select: WireRefined}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:Wire.GetMaxWattageRating()": Max2000

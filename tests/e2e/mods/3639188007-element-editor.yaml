@@ -1,0 +1,26 @@
+# [繁/簡/EN] 元素修改器 / Element Editor (God Mode Tool) (3639188007), classes S, T, K.
+#
+# What it does: a god-mode editor in an IMGUI window (GUI.Window 8888), toggled with Ctrl+E (a
+# key binding stored in its config.json): it edits the selected cell's element, mass,
+# temperature, radiation and germs (with locks that hold them), shifts phases, flood-fills,
+# clears or paints areas by drag modes; it revives, heals and edits Duplicants, tames and
+# grows critters and plants. Escape closes it; patches keep world clicks from passing through
+# the window.
+# How a player reaches it: Ctrl+E in a colony; the window's buttons and fields.
+# What changes: anything in the world.
+#
+# Ctrl+E opens the window (compared in a shot of the whole frame, the colony paused behind
+# it); Escape closes it again.
+from: early-base
+mods: [3639188007]
+require_log: ['\[ElementEditor\] Core Logic Loaded\.']
+steps:
+  - expect_state:
+      "type:ElementEditorMod.ElementEditorController::Instance.showWindow": false
+  - key: {code: "Ctrl+E"}
+  - expect_state:
+      "type:ElementEditorMod.ElementEditorController::Instance.showWindow": true
+  - shot: {name: window, threshold: 0.05}
+  - key: {code: Escape}
+  - expect_state:
+      "type:ElementEditorMod.ElementEditorController::Instance.showWindow": false

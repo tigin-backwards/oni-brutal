@@ -1,0 +1,60 @@
+{
+ "spec": "mods/3639188007-element-editor.yaml",
+ "mods": [
+  "3639188007"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "Ctrl+E opens the IMGUI editor window (whole-frame shot); Escape closes it",
+ "updated": "2026-10-27",
+ "commit": "ff6b6796",
+ "mod_dlls": {
+  "3639188007": {
+   "ElementModifier.dll": "225208cd6cfa6f9a9afb5dad93f7d383020f2334a5d5ecf66ecb71d9bb5b0f34",
+   "PLib.dll": "48c63fd4654b6fbb390afdac71a3d29194eeb9405eca4290cba6e4fbf60805ce"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-051715-c581e5cb",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T06:01:19",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-092508-42ebfe0f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T09:25:08",
+    "lane": 14,
+    "reference_run": "20261027-051715-c581e5cb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "window": 0.032442
+    }
+   },
+   {
+    "run": "20261027-092508-42ebfe0f",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T09:25:55",
+    "lane": 14,
+    "reference_run": "20261027-051715-c581e5cb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "window": 0.031306
+    }
+   }
+  ]
+ }
+}

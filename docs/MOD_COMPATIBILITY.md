@@ -1197,7 +1197,7 @@ installs get developer checks subscribers never see).
 | 1225 | [Luxury Drywall](https://steamcommunity.com/sharedfiles/filedetails/?id=2839171298) | ⬜ | ⬜ | ⬜ |  |
 | 1226 | [Conveyor Loaders Stop Loading with Disabled Automation Signal](https://steamcommunity.com/sharedfiles/filedetails/?id=3474301255) | ⬜ | ⬜ | ⬜ |  |
 | 1227 | [Store Artifacts](https://steamcommunity.com/sharedfiles/filedetails/?id=2832650525) | ⬜ | ⬜ | ⬜ |  |
-| 1228 | [Stacking bed 叠叠床](https://steamcommunity.com/sharedfiles/filedetails/?id=2857940400) | ⬜ | ⬜ | ⬜ |  |
+| 1228 | [Stacking bed 叠叠床](https://steamcommunity.com/sharedfiles/filedetails/?id=2857940400) | ❌ | ❌ | ⬜ | broken upstream: its DLL references PLib 4.8.1 but ships without it, so its `OnLoad` (`PUtil.InitLibrary`) throws a FileNotFoundException and the game quits while loading; it loads only beside another mod that ships PLib (spec tests/e2e/mods/2857940400-stacking-bed.yaml) (same in the original) |
 | 1229 | [Liquid Bottler](https://steamcommunity.com/sharedfiles/filedetails/?id=3100888062) | ⬜ | ⬜ | ⬜ |  |
 | 1230 | [Colony Cuisine / 殖民地食光](https://steamcommunity.com/sharedfiles/filedetails/?id=3799038247) | ⬜ | ⬜ | ⬜ |  |
 | 1232 | [水生成氧气和乙醇  Water generates oxygen and ethanol](https://steamcommunity.com/sharedfiles/filedetails/?id=3297925875) | ⬜ | ⬜ | ⬜ |  |
@@ -1213,7 +1213,7 @@ installs get developer checks subscribers never see).
 | 1243 | [Bigger Bottle Emptier Conduit Gas](https://steamcommunity.com/sharedfiles/filedetails/?id=3537327790) | ⬜ | ⬜ | ⬜ |  |
 | 1245 | [净水器消毒出水和肥料金汞齐泥土粘土硫藻](https://steamcommunity.com/sharedfiles/filedetails/?id=3276461530) | ⬜ | ⬜ | ⬜ |  |
 | 1246 | [OverHeat+1000[Vanilla+DLC]](https://steamcommunity.com/sharedfiles/filedetails/?id=1994613812) | ⬜ | ⬜ | ⬜ |  |
-| 1247 | [Insulated Pressure Door](https://steamcommunity.com/sharedfiles/filedetails/?id=3608466042) | ⬜ | ⬜ | ⬜ |  |
+| 1247 | [Insulated Pressure Door](https://steamcommunity.com/sharedfiles/filedetails/?id=3608466042) | ❌ | ❌ | ⬜ | broken upstream: its door's OnSpawn and Sim200ms call `SimMessages.SetCellProperties(int, byte)`, which the game no longer has (MissingMethodException), so a built Insulated Pressure Door opens the crash screen (spec tests/e2e/mods/3608466042-insulated-pressure-door.yaml) (same in the original) |
 | 1248 | [医疗箱](https://steamcommunity.com/sharedfiles/filedetails/?id=2982751229) | ⬜ | ⬜ | ⬜ |  |
 | 1249 | [Critter Settings Manager](https://steamcommunity.com/sharedfiles/filedetails/?id=3734363283) | ⬜ | ⬜ | ⬜ |  |
 | 1250 | [植物相关](https://steamcommunity.com/sharedfiles/filedetails/?id=3019685469) | ⬜ | ⬜ | ⬜ |  |

@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2938461528-ultra-coolant.yaml",
+ "mods": [
+  "2938461528"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "its three elements load; a bottle of Ultra Coolant selected shows its name",
+ "updated": "2026-10-27",
+ "commit": "a0585958",
+ "mod_dlls": {
+  "2938461528": {
+   "UltraCoolant.dll": "3ca937cdb904fc975d04543dd835bd0312650d9f6cf0eb1c1fb38534ea1c75b4"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-074831-45ab7067",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T09:25:06",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-094212-b2312f58",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T09:54:15",
+    "lane": 17,
+    "reference_run": "20261027-074831-45ab7067",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-094212-b2312f58",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T09:55:02",
+    "lane": 17,
+    "reference_run": "20261027-074831-45ab7067",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

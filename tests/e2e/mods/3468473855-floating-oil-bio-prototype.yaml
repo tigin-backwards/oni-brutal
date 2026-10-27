@@ -1,0 +1,24 @@
+# 浮油生物原型机 Floating oil bio prototype (3468473855), class B.
+#
+# What it does: adds fuyoushengwuyuanxingji (浮油生物原型机, "Natural Plant Box" outside
+# Chinese) to the Food menu: a 3x4 building on the Oxylite Refinery's look and machinery that
+# takes piped carbon dioxide (0.5 kg/s) and a trickle of delivered gold (1 g/s) and makes
+# 0.25 kg/s of solid petroleum, dropped in 10 kg lots, as a Slickster would. It draws 30 W and
+# has a logic input.
+# How a player reaches it: the build menu (Food).
+# What changes: crude-oil solids from carbon dioxide without critters.
+#
+# The converter is read; the Food menu lists the building (shot).
+from: early-base
+mods: [3468473855]
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"fuyoushengwuyuanxingji\").GetComponent<ElementConverter>.consumedElements[0].Tag.Name": CarbonDioxide
+      "Assets.GetPrefab(\"fuyoushengwuyuanxingji\").GetComponent<ElementConverter>.consumedElements[1].Tag.Name": Gold
+      "Assets.GetPrefab(\"fuyoushengwuyuanxingji\").GetComponent<ElementConverter>.outputElements[0].elementHash": "== 'SolidPetroleum'"
+      "Assets.GetPrefab(\"fuyoushengwuyuanxingji\").GetComponent<OxyliteRefinery>.emitMass": 10
+      "Assets.GetBuildingDef(\"fuyoushengwuyuanxingji\").EnergyConsumptionWhenActive": 30
+  - run: {seconds: 10}
+  - click: {ui: "**/PlanScreen/Toggle:Food"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/fuyoushengwuyuanxingji Group*", cond: stable, stable: 120, frames: 600}
+  - shot: {name: food-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}

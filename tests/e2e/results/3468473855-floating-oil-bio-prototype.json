@@ -1,0 +1,60 @@
+{
+ "spec": "mods/3468473855-floating-oil-bio-prototype.yaml",
+ "mods": [
+  "3468473855"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Food menu lists the building (shot); it turns carbon dioxide and a little gold into solid petroleum",
+ "updated": "2026-10-26",
+ "commit": "cbabaaf0",
+ "mod_dlls": {
+  "3468473855": {
+   "PLib.dll": "93073fdf44dbe9fd7c0afe19e56341be862cc2d732090dee30999cf60e2e160d",
+   "╕í╙═╔·╬∩╘¡╨═╗·.dll": "c9a0f39cbbfdff392f531646acbd33db64c20936af9a4560e07e38156989d28c"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-192612-e52c7dc9",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T19:50:12",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-204743-febfde17",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T21:57:24",
+    "lane": 17,
+    "reference_run": "20261026-192612-e52c7dc9",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "food-menu": 0.0
+    }
+   },
+   {
+    "run": "20261026-204743-febfde17",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T21:57:28",
+    "lane": 16,
+    "reference_run": "20261026-192612-e52c7dc9",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "food-menu": 0.0
+    }
+   }
+  ]
+ }
+}

@@ -1,0 +1,21 @@
+# [DLC] Better Rocketry (2598059646), classes P, O.
+#
+# What it does: PLib options set every Spaced Out engine's power, burden, range, maximum
+# height and the watts it generates in flight (an engine generating power gets a 20 kJ
+# battery), the cargo bays', oxidizer tanks' and drillcone's capacities, piloting speed, and
+# switches for five-tile rockets, ethanol fuel, heatless interior fittings and food in bays.
+# How a player reaches it: the Mods screen's options; the rocket builder.
+# What changes: rockets tuned to taste.
+#
+# With the carbon dioxide engine's power set to 40 in the options, the engine's prefab moves
+# with 40; the cargo bay holds the default 12 t (as in the original).
+from: early-base
+mods: [2598059646]
+options:
+  BetterRocketry: {CarbonEnginePower: 40}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"CO2Engine\").GetComponent<RocketModuleCluster>.performanceStats.EnginePower": 40
+      "Assets.GetPrefab(\"CO2Engine\").GetComponent<RocketEngineCluster>.maxHeight": "== original"
+      "Assets.GetBuildingDef(\"CO2Engine\").GeneratorWattageRating": "== original"
+      "Assets.GetPrefab(\"SolidCargoBaySmall\").GetComponent<CargoBayCluster>.storage.capacityKg": [12000, "== original"]

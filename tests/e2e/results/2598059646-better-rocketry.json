@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2598059646-better-rocketry.yaml",
+ "mods": [
+  "2598059646"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with the carbon dioxide engine's power option at 40, its prefab moves with 40; the cargo bay holds 12 t",
+ "updated": "2026-10-27",
+ "commit": "1ae06b70",
+ "mod_dlls": {
+  "2598059646": {
+   "BetterRocketryMerged.dll": "303ba76a937dcb19217d972210c76487700f6f9c2d514c4936a71c7f399ed59f"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-013141-9697dcd2",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T01:50:11",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-025723-d7319a49",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T02:57:23",
+    "lane": 14,
+    "reference_run": "20261027-013141-9697dcd2",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-025723-d7319a49",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T02:57:24",
+    "lane": 15,
+    "reference_run": "20261027-013141-9697dcd2",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

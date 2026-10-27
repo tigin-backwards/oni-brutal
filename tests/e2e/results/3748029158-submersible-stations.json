@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3748029158-submersible-stations.yaml",
+ "mods": [
+  "3748029158"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the ranching and farm stations are not floodable, a Farm Station built in the corridor neither",
+ "updated": "2026-10-27",
+ "commit": "7a56f5f6",
+ "mod_dlls": {
+  "3748029158": {
+   "Submersible Stations.dll": "559bf6e30e5eaeefc3df91f9afba3298ae1d9fbfb1dad6c9771ec151c6f17640"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-021227-f470d6f8",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T02:33:45",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-032658-f855122e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T03:26:58",
+    "lane": 14,
+    "reference_run": "20261027-021227-f470d6f8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-032658-f855122e",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T03:26:59",
+    "lane": 15,
+    "reference_run": "20261027-021227-f470d6f8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

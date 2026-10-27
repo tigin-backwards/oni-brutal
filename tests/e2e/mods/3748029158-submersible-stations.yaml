@@ -1,0 +1,24 @@
+# Submersible Stations (3748029158), class P.
+#
+# What it does: the Farm Station, Grooming Station (RanchStation), Critter Feeder, Critter
+# Drop-Off and Critter Pick-Up can no longer be flooded.
+# How a player reaches it: those buildings, in the build menu as before.
+# What changes: stations keep working under water.
+#
+# The defs are not floodable, and a Farm Station built by setup in the dug-out corridor west
+# of the printing pod is not either.
+from: early-base
+mods: [3748029158]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"FarmStation\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"FarmStation\").Floodable": false
+      "Assets.GetBuildingDef(\"RanchStation\").Floodable": false
+      "Assets.GetBuildingDef(\"CreatureFeeder\").Floodable": false
+      "Assets.GetBuildingDef(\"CritterDropOff\").Floodable": false
+      "Assets.GetBuildingDef(\"CritterPickUp\").Floodable": false
+  - run: {seconds: 2}
+  - expect: {buildings: {FarmStation: 1}}
+  - expect_state:
+      "Assets.GetPrefab(\"FarmStation\").GetComponent<Floodable>": missing

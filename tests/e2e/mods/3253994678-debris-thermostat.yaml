@@ -1,0 +1,28 @@
+# Debris Thermostat (3253994678), classes B, S, O.
+#
+# What it does: a 3x1 Debris Thermostat (FTMod) in the Shipping menu, researched with Solid
+# Management: a conveyor bridge, 1200 W, that brings what passes over it to a target
+# temperature set on a slider side screen, the heat going into the building.
+# How a player reaches it: the build menu (Shipping), after the research; its side screen.
+# What changes: conveyor items heated or cooled to a set temperature.
+#
+# The research unlocks it; one built by setup in the dug-out corridor west of the printing
+# pod is selected: its slider (dumped, -20 to 30 °C by default) sets the target, 5 typed into
+# its field.
+from: early-base
+mods: [3253994678]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"FTMod\")", method: Build, args: [{"$": "Grid.XYToCell(113, 208)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"SolidManagement\").unlockedItemIDs": {contains: FTMod}
+      "Assets.GetBuildingDef(\"FTMod\").EnergyConsumptionWhenActive": 1200
+  - run: {seconds: 2}
+  - expect: {buildings: {FTMod: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 208], select: FTMod}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/SingleSliderSideScreen", cond: stable}
+  - ui_dump: {name: slider, root: "**/Config Tab - body instance/SingleSliderSideScreen"}
+  - type: {ui: "**/SingleSliderSideScreen/Contents/NumberInputField", text: "5", enter: true, clear: true}
+  - expect_state:
+      "selected:GetComponent<FragmentThermostat.FragmentThermostatComponent>.targetTemperature": 5

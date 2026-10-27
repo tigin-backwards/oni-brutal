@@ -1,0 +1,34 @@
+# Advanced Wattage Sensor (3651614675), classes B, S, O.
+#
+# What it does: a 1x1 sensor after the Wattage Sensor in the Automation menu, researched with
+# Advanced Power Regulation: it switches on the circuit's average wattage against a threshold
+# (up to 1.5 times a heavi-watt wire's rating), with a label, a warning threshold (a PLib
+# option's percentage) shown on its display and in the pinned resources panel, and settings
+# that copy.
+# How a player reaches it: the build menu (Automation), then its side screens.
+# What changes: a power monitor with labels and warnings.
+#
+# setup researches Advanced Power Regulation; the Automation menu lists the sensor (shot), and
+# one built by setup in the dug-out corridor west of the printing pod is selected: its
+# threshold side screen is dumped.
+from: early-base
+mods: [3651614675]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"AdvancedPowerRegulation\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"AdvancedWattageSensor\")", method: Build, args: [131128, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"AdvancedPowerRegulation\").unlockedItemIDs": {contains: AdvancedWattageSensor}
+  - run: {seconds: 10}
+  - expect: {buildings: {AdvancedWattageSensor: 1}}
+  - click: {ui: "**/PlanScreen/Toggle:Automation"}
+  # The build menu catches up over frames: 120 frames for all of it to settle.
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/AdvancedWattageSensor Group*", cond: stable, stable: 120, frames: 600}
+  - shot: {name: automation-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
+  - key: {code: Escape}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 206], select: AdvancedWattageSensor}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/ThresholdSwitchSideScreen", cond: stable}
+  - ui_dump: {name: threshold, root: "**/ThresholdSwitchSideScreen"}

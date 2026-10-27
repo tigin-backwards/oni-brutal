@@ -1,0 +1,67 @@
+{
+ "spec": "mods/3651614675-advanced-wattage-sensor.yaml",
+ "mods": [
+  "3651614675"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "after Advanced Power Regulation the Automation menu lists the sensor (shot); a built one's threshold side screen is dumped",
+ "updated": "2026-10-26",
+ "commit": "d1e7dcee",
+ "mod_dlls": {
+  "3651614675": {
+   "AdvancedWattageSensor.dll": "e1e83c5a8da04621700cc9d10c149cd093dc9036da9faac89a2ef8d281f7f3de"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-200500-101f1b1f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T20:34:16",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-203924-ebcd6150",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T21:00:54",
+    "lane": 15,
+    "reference_run": "20261026-200500-101f1b1f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "threshold": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "automation-menu": 0.0
+    }
+   },
+   {
+    "run": "20261026-203924-ebcd6150",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T21:02:05",
+    "lane": 15,
+    "reference_run": "20261026-200500-101f1b1f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "threshold": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "automation-menu": 0.0
+    }
+   }
+  ]
+ }
+}

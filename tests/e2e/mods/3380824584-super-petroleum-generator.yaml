@@ -1,0 +1,33 @@
+# Building-Super Petroleum Generator 超级石油发电机 (3380824584), classes P, O.
+#
+# What it does: the Petroleum Generator's power, fuel use and its polluted water and carbon
+# dioxide outputs come from PLib options (Controler.json: 600 W, 2 kg/s of fuel by default;
+# the mod ships other values), its heat scales by a rating, its capacity is 666666 J; with
+# Port on it gets secondary liquid and gas output ports for the polluted water and CO2, and
+# with Place on it builds anywhere, as no foundation (restart required).
+# How a player reaches it: build a Petroleum Generator; the options on the Mods screen.
+# What changes: a configurable, much stronger generator.
+#
+# The options are set explicitly (20000 W, ports and placing on): the definition carries them;
+# one built by setup in the dug-out corridor west of the printing pod has the two secondary
+# outputs and the mod's fuel formula.
+from: early-base
+mods: [3380824584]
+options:
+  "3380824584": {$file: Controler.json, Power: 20000, Oil: 1.0, Carbondioxide: 1.0, Pollutedwater: 1.0, Rating: 1.0, Port: true, Place: true}
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"PetroleumGenerator\")", method: Build, args: [{"$": "Grid.XYToCell(112, 206)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"PetroleumGenerator\").GeneratorWattageRating": 20000
+      "Assets.GetBuildingDef(\"PetroleumGenerator\").GeneratorBaseCapacity": 666666
+      "Assets.GetBuildingDef(\"PetroleumGenerator\").BuildLocationRule": Anywhere
+      "Assets.GetPrefab(\"PetroleumGenerator\").GetComponents<ConduitSecondaryOutput>.Length": 2
+  - run: {seconds: 2}
+  - expect: {buildings: {PetroleumGenerator: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: PetroleumGenerator}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<EnergyGenerator>.formula.inputs[0].consumptionRate": 2
+      "selected:GetComponent<EnergyGenerator>.formula.outputs.Length": 2

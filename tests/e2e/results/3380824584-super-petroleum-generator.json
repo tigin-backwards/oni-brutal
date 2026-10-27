@@ -1,0 +1,56 @@
+{
+ "spec": "mods/3380824584-super-petroleum-generator.yaml",
+ "mods": [
+  "3380824584"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "options set: the generator's rating, ports and formula are the mod's; one selected shows them",
+ "updated": "2026-10-27",
+ "commit": "4b22e060",
+ "mod_dlls": {
+  "3380824584": {
+   "PLib.dll": "c4bb22f1bc06ebcb0dbba75a7f1bc46f63eaa3dae12c22a08729f1a6d3362dda",
+   "SuperPetroleumGenerator.dll": "909109b3f52e5ee509507d0694b8aef58dfee62f602f371f4b470072e1ae9eaa"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-051715-c581e5cb",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T05:42:42",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-094301-e903e960",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T09:43:01",
+    "lane": 14,
+    "reference_run": "20261027-051715-c581e5cb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-094301-e903e960",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T09:43:50",
+    "lane": 14,
+    "reference_run": "20261027-051715-c581e5cb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

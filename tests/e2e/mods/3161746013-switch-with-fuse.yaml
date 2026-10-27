@@ -1,0 +1,34 @@
+# Switch with fuse (3161746013), class B.
+#
+# What it does: every Power Switch gets a LogicPowerBuffer, a fuse: while the switch is on and
+# its circuit draws at least the fuse's limit for 10 s, it switches itself off. The limit is a
+# user-menu button labelled with it (1000 W at first) that cycles 1000, 2000, 4000, 20000 and
+# 50000 W.
+# How a player reaches it: select a Power Switch; its user menu.
+# What changes: power switches that trip on overload.
+#
+# setup builds a Power Switch in the dug-out corridor west of the printing pod. Selected, its
+# user menu shows the 1000W button; a click makes it 2000W, another 4000W.
+from: early-base
+mods: [3161746013]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Switch\")", method: Build, args: [{"$": "Grid.XYToCell(112, 206)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - run: {seconds: 2}
+  - expect: {buildings: {Switch: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 206], select: Switch}
+  - ui_wait: {path: "**/DetailsScreen/UserMenuButtons/UserMenuScreen/Buttons", cond: stable}
+  - expect_state:
+      "selected:GetComponent<SWITCH.LogicPowerBuffer>.mode": 0
+  - ui_dump: {name: menu, root: "**/DetailsScreen/UserMenuButtons/UserMenuScreen/Buttons"}
+  - click: {ui: "**/UserMenuScreen/Buttons/1000WButton"}
+  - ui_wait: {path: "**/UserMenuScreen/Buttons/2000WButton", cond: stable}
+  - expect_state:
+      "selected:GetComponent<SWITCH.LogicPowerBuffer>.mode": 1
+  - click: {ui: "**/UserMenuScreen/Buttons/2000WButton"}
+  - ui_wait: {path: "**/UserMenuScreen/Buttons/4000WButton", cond: stable}
+  - expect_state:
+      "selected:GetComponent<SWITCH.LogicPowerBuffer>.mode": 2
+  - ui_dump: {name: menu-4000, root: "**/DetailsScreen/UserMenuButtons/UserMenuScreen/Buttons"}
+  - shot: {name: menu-4000, crop: "**/DetailsScreen/UserMenuButtons/UserMenuScreen/Buttons"}

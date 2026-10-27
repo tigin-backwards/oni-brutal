@@ -1,0 +1,73 @@
+{
+ "spec": "mods/3161746013-switch-with-fuse.yaml",
+ "mods": [
+  "3161746013"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Power Switch's fuse button cycles 1000W, 2000W, 4000W by clicks; the user menu dumped and shot",
+ "updated": "2026-10-27",
+ "commit": "a8d2fbd1",
+ "mod_dlls": {
+  "3161746013": {
+   "SWITCH.dll": "c2df6209d888e8555d3e133489da6271b329df7b60e364b8626ba745979c2cec"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-051715-c581e5cb",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T06:31:20",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-075552-5a0072be",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T07:55:52",
+    "lane": 14,
+    "reference_run": "20261027-051715-c581e5cb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "menu": {
+      "differences": 0
+     },
+     "menu-4000": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "menu-4000": 0.0
+    }
+   },
+   {
+    "run": "20261027-075552-5a0072be",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T07:56:42",
+    "lane": 14,
+    "reference_run": "20261027-051715-c581e5cb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "menu": {
+      "differences": 0
+     },
+     "menu-4000": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "menu-4000": 0.0
+    }
+   }
+  ]
+ }
+}

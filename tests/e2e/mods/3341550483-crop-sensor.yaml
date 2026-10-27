@@ -1,0 +1,39 @@
+# 农作物检测器 Crop Sensor (3341550483), class B.
+#
+# What it does: adds the Crop detector (LogicPlantsCountSensor, 1x1, refined metal), an
+# Automation building unlocked by Agriculture: in a room it counts the grown plants every
+# 200 ms and sends a green signal when the count is above (or below) its threshold (0 to 64,
+# set in a threshold side screen); outside a room it reports "Not in any room".
+# How a player reaches it: research Agriculture; the Automation menu.
+# What changes: farms can be automated on ripe crops.
+#
+# Agriculture is researched in setup and a detector built in the corridor west of the
+# printing pod. The Automation menu offers it (its card); selected, the built one shows its
+# threshold side screen.
+from: early-base
+mods: [3341550483]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"Agriculture\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Game.Instance", method: Trigger, args: [-107300940]}}
+  - driver: {setup.call: {target: "PlanScreen.Instance._researchedDefs", method: Clear}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LogicPlantsCountSensor\")", method: Build, args: [131765, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"Agriculture\").unlockedItemIDs": {contains: LogicPlantsCountSensor}
+      "Assets.GetPrefab(\"LogicPlantsCountSensor\").GetComponent<LogicPlantsCountSensor.LogicPlantCountSensor>": exists
+  - run: {seconds: 3}
+  - driver: {camera.set: {cell: [113, 208], ortho: 10}}
+  - click: {ui: "**/PlanScreen/Toggle:Automation"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/LogicPlantsCountSensor Group*", cond: stable}
+  - scroll: {at: "**/PlanBuildingSelectionPanel/BuildingGroups", notches: -10}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/LogicPlantsCountSensor Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/LogicPlantsCountSensor Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
+  - shot: {name: product, crop: "**/ProductInfoScreen", threshold: 0.04}
+  - key: {code: Escape}
+  - click_world: {cell: [113, 207], select: LogicPlantsCountSensor}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/ThresholdSwitchSideScreen*", cond: stable}
+  - ui_dump: {name: threshold, root: "**/DetailsScreen/SideScreen/**/ThresholdSwitchSideScreen*"}
+  - expect_state:
+      "selected:GetComponent<LogicPlantsCountSensor.LogicPlantCountSensor>.currentCount": 0

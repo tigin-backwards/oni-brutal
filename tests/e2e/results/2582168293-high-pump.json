@@ -1,0 +1,67 @@
+{
+ "spec": "mods/2582168293-high-pump.yaml",
+ "mods": [
+  "2582168293"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "after Improved Ventilation the Ventilation menu lists both pumps (shot); a built High Pump's radius slider (dumped) takes 20",
+ "updated": "2026-10-26",
+ "commit": "73711f65",
+ "mod_dlls": {
+  "2582168293": {
+   "ONI High Pump.dll": "b213998650c99a0ef00e1571566c8b523af82c8573cf877123f24015d6b3ff3b"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-200500-101f1b1f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T20:11:38",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-202022-adf95e2b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T20:51:19",
+    "lane": 14,
+    "reference_run": "20261026-200500-101f1b1f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "slider": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "ventilation-menu": 0.0
+    }
+   },
+   {
+    "run": "20261026-202022-adf95e2b",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T20:51:28",
+    "lane": 15,
+    "reference_run": "20261026-200500-101f1b1f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "slider": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "ventilation-menu": 0.0
+    }
+   }
+  ]
+ }
+}

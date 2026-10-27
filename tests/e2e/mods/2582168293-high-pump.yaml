@@ -1,0 +1,37 @@
+# High Pump (2582168293), classes B, S.
+#
+# What it does: two 1x2 gas pumps in the Ventilation menu, researched with Improved Ventilation
+# (ImprovedGasPiping): the High Pump draws every gas within a radius into its tank (1 to 255
+# tiles on a slider, 10 by default) and a filter picks what it pipes out; the Filtered High
+# Pump draws only the filtered gas. Patches let the filter side screens and Storage.Drop work
+# with them.
+# How a player reaches it: the build menu (Ventilation), then the pump's side screens.
+# What changes: one pump clears a whole area.
+#
+# setup researches Improved Ventilation; the Ventilation menu lists both pumps (shot), and a
+# High Pump built by setup in the dug-out corridor west of the printing pod is selected: its
+# radius slider (dumped) takes 20.
+from: early-base
+mods: [2582168293]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"ImprovedGasPiping\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"GasMiniPumpHigh\")", method: Build, args: [131128, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"ImprovedGasPiping\").unlockedItemIDs": {contains: GasMiniPumpHigh}
+  - run: {seconds: 10}
+  - expect: {buildings: {GasMiniPumpHigh: 1}}
+  - click: {ui: "**/PlanScreen/Toggle:Ventilation"}
+  # The build menu catches up over frames: 120 frames for all of it to settle.
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/GasMiniPumpHighFiltered Group*", cond: stable, stable: 120, frames: 600}
+  - shot: {name: ventilation-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
+  - key: {code: Escape}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 206], select: GasMiniPumpHigh}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/SingleSliderSideScreen", cond: stable}
+  - ui_dump: {name: slider, root: "**/SingleSliderSideScreen"}
+  - type: {ui: "**/SingleSliderSideScreen/**/*Input*", text: "20", enter: true, clear: true}
+  - expect_state:
+      "ui:**/SingleSliderSideScreen::GetComponent<SingleSliderSideScreen>.target.GetSliderValue(0)": 20

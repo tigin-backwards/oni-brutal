@@ -1,0 +1,31 @@
+# Independent Pufts (Hot Shots) (1955246030), class P.
+#
+# What it does: rewrites Puft breeding: plain Pufts no longer lay Dense or Squeaky eggs, nor
+# those Puft eggs; the Puft Prince lays its own (0.7), Puft, Dense and Squeaky eggs (0.1 each)
+# and gives 80 decor in 7 cells; its fertility modifiers are replaced with dietary ones (oxygen
+# for Dense, polluted oxygen for Puft, chlorine for Squeaky eggs) and decor ones (a
+# DecorVulnerable on every Puft).
+# How a player reaches it: ranching Pufts.
+# What changes: which eggs Pufts lay.
+#
+# The egg chances and fertility modifiers are the mod's, as many as in the original; a Puft
+# Prince laid in the dug-out corridor west of the printing pod lives on, with its decor.
+from: early-base
+mods: [1955246030]
+setup:
+  - driver: {setup.call: {type: Scenario, method: SpawnPrefab, args: [0, 112, 207, PuftAlpha, Creatures]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+steps:
+  - expect_state:
+      "count:PuftTuning.EGG_CHANCES_BASE[*] if .egg.Name == PuftOxyliteEgg": 0
+      "count:PuftTuning.EGG_CHANCES_OXYLITE[*] if .egg.Name == PuftEgg": 0
+      "count:PuftTuning.EGG_CHANCES_ALPHA[*] if .egg.Name == PuftBleachstoneEgg": 1
+      "PuftTuning.EGG_CHANCES_ALPHA.Count": "== original"
+      "count:Db.Get().FertilityModifiers.resources[*] if .Id == PuftAlphaBalance": 0
+      "Db.Get().FertilityModifiers.resources.Count": "== original"
+      "Assets.GetPrefab(\"PuftAlpha\").GetComponent<DecorProvider>.baseDecor": 80
+      "Assets.GetPrefab(\"Puft\").GetComponent<Independant_Pufts.DecorVulnerable>": exists
+  - run: {seconds: 10}
+  - expect_state:
+      "last:GetComponent<KPrefabID>.PrefabTag.Name": PuftAlpha
+      "last:GetComponent<DecorProvider>.baseDecor": 80

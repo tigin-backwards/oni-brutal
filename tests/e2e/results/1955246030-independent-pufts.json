@@ -1,0 +1,55 @@
+{
+ "spec": "mods/1955246030-independent-pufts.yaml",
+ "mods": [
+  "1955246030"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Puft egg chances and fertility modifiers are the mod's; a Puft Prince lives with its decor",
+ "updated": "2026-10-27",
+ "commit": "68f257e9",
+ "mod_dlls": {
+  "1955246030": {
+   "Independant Pufts.dll": "ab155ccd869dce5941e1da66ece581c3f4af5dea22ff63b6c335a679d46898f3"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-051715-c581e5cb",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T05:17:15",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-092817-31b44599",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T09:28:17",
+    "lane": 14,
+    "reference_run": "20261027-051715-c581e5cb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-092817-31b44599",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T09:29:20",
+    "lane": 14,
+    "reference_run": "20261027-051715-c581e5cb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

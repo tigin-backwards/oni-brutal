@@ -1,0 +1,35 @@
+# 墙壁马桶抽水马桶污水产量修改 (wall and flush toilet output) (2984782124), classes B, P, O.
+#
+# What it does: the Lavatory (FlushToilet) and the Wall Toilet get +100 decor in a 16-cell
+# radius, 1000 hit points, a 15 s build of 5 kg of any buildable material, no power, heat,
+# flooding, overheating or entombing, and build anywhere; each use takes 1 kg of water and
+# gives 100 kg of polluted water at 20 C with no germs (PLib options, restart required), its
+# pipe intake holds a ton and its store 100 t (a prefix replaces FlushToilet.Flush).
+# How a player reaches it: build either toilet; the options on the Mods screen.
+# What changes: cheap, clean, decorative toilets that make more polluted water.
+#
+# The two toilets' definitions carry the mod's values; a Lavatory built by setup in the
+# dug-out corridor west of the printing pod is selected: its flush values are the mod's.
+from: early-base
+mods: [2984782124]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"FlushToilet\")", method: Build, args: [{"$": "Grid.XYToCell(112, 206)"}, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"FlushToilet\").BaseDecor": 100
+      "Assets.GetBuildingDef(\"FlushToilet\").HitPoints": 1000
+      "Assets.GetBuildingDef(\"FlushToilet\").Mass[0]": 5
+      "Assets.GetBuildingDef(\"WallToilet\").BaseDecor": 100
+      "Assets.GetBuildingDef(\"WallToilet\").BaseDecorRadius": 16
+      "Assets.GetPrefab(\"WallToilet\").GetComponent<FlushToilet>.massEmittedPerUse": 100
+  - run: {seconds: 2}
+  - expect: {buildings: {FlushToilet: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: FlushToilet}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<FlushToilet>.massConsumedPerUse": 1
+      "selected:GetComponent<FlushToilet>.massEmittedPerUse": 100
+      "selected:GetComponent<FlushToilet>.newPeeTemperature": 293.15
+      "selected:GetComponent<Storage>.capacityKg": 100000
+      "selected:GetComponent<ConduitConsumer>.capacityKG": 1000

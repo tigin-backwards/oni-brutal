@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2278463564-midnight-sun.yaml",
+ "mods": [
+  "2278463564"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "after play the shaders' time of day reads noon",
+ "updated": "2026-10-27",
+ "commit": "1ae06b70",
+ "mod_dlls": {
+  "2278463564": {
+   "MidnightSun.dll": "41d37d6c717ebfb2ede6c71d2fc780f525a9f30df8a525c329b0c31289818335"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-013141-9697dcd2",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T01:56:51",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-025923-5657f923",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T02:59:23",
+    "lane": 14,
+    "reference_run": "20261027-013141-9697dcd2",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-025923-5657f923",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T02:59:24",
+    "lane": 15,
+    "reference_run": "20261027-013141-9697dcd2",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

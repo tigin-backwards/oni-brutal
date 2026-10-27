@@ -1,0 +1,17 @@
+# Midnight Sun (Eternal Daylight) (2278463564), class V.
+#
+# What it does: after the time-of-day visuals update, the shaders' global _TimeOfDay vector is
+# set to (0, 1, 0, 0): the world is lit as at noon all the time, night's darkening is never
+# drawn (the sim's day and night go on).
+# How a player reaches it: it is passive; the world view.
+# What changes: no night tint.
+#
+# After a few seconds of play the shaders' time of day reads noon.
+from: early-base
+mods: [2278463564]
+steps:
+  - run: {seconds: 3}
+  - expect_state:
+      "Shader.GetGlobalVector(\"_TimeOfDay\").x": 0
+      "Shader.GetGlobalVector(\"_TimeOfDay\").y": 1
+      "Shader.GetGlobalVector(\"_TimeOfDay\").z": 0

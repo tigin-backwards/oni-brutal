@@ -1,0 +1,19 @@
+# [OBSOLETE] Radioactive Wheezewort [Visual] [DLC] (2933501288), class V (no code).
+#
+# What it does: ships its own coldbreather kanim (anim/assets/coldbreather), which replaces the
+# game's Wheezewort art with a radioactive-looking green one. No code.
+# How a player reaches it: any Wheezewort.
+# What changes: the Wheezewort's looks.
+#
+# setup lays a Wheezewort in the dug-out corridor west of the printing pod: it draws the mod's
+# anim (its kanim's build is the mod's, as many symbols as the original's), compared in a
+# world shot before any time passes.
+from: early-base
+mods: [2933501288]
+setup:
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(0, 112, 206, \"ColdBreather\", \"BuildingBack\")", method: SetActive, args: [true]}}
+steps:
+  - expect_state:
+      "Assets.GetAnim(\"coldbreather_kanim\").GetData().build.symbols.Length": "== original"
+      "all:ColdBreather::Length": 1
+  - world_shot: {name: wheezewort, ortho: 4, at: [112, 207]}

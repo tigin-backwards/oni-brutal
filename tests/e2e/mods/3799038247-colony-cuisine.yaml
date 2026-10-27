@@ -1,0 +1,20 @@
+# Colony Cuisine / 殖民地食光 (3799038247), class S,M.
+#
+# What it does: a food overhaul: dishes get flavours and post-meal bonuses, each Duplicant a
+# personal taste (food opinions, configurable in mods/config/ColonyCuisineV2), and meals,
+# joy reactions and the codex are extended (a food overview, a cuisine codex with its own
+# fonts); a bridge assembly shares a unified panel with other mods. On load it installs its
+# patches in one go, or removes them all, and logs which.
+# How a player reaches it: eating; the codex; Duplicants' tooltips.
+# What changes: what and how Duplicants like to eat.
+#
+# The colony loads with the mod enabled (its log says its routing loaded), and plays on with
+# its three Duplicants.
+from: early-base
+mods: [3799038247]
+require_log: ['\[ColonyCuisineV2\] Native food, intake, personal taste and seven-reaction routing loaded']
+steps:
+  - expect_state:
+      "type:ColonyCuisineV2.Runtime.CuisineRuntime::Enabled": true
+  - run: {seconds: 30}
+  - expect: {duplicants: 3}

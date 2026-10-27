@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3799038247-colony-cuisine.yaml",
+ "mods": [
+  "3799038247"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the colony loads with the mod's routing enabled (its log says so) and plays on",
+ "updated": "2026-10-26",
+ "commit": "cbabaaf0",
+ "mod_dlls": {
+  "3799038247": {
+   "ColonyCuisineV2.dll": "31590b888aba31bc585f23a082b279dd582bff2a2727b85ec6cf9ae05ce367b5"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-155051-8ce3a25e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T17:24:06",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-204743-febfde17",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T22:13:20",
+    "lane": 17,
+    "reference_run": "20261026-155051-8ce3a25e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-204743-febfde17",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T22:13:18",
+    "lane": 16,
+    "reference_run": "20261026-155051-8ce3a25e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

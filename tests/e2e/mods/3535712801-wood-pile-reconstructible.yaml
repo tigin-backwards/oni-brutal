@@ -1,0 +1,27 @@
+# Wood Pile Reconstructible (3535712801), class B.
+#
+# What it does: the Wood Pile (WoodStorage), otherwise found only in the world, is shown in the
+# Base menu's storage group, researched with Refined Renovations (RefinedObjects).
+# How a player reaches it: the build menu (Base), after the research.
+# What changes: wood piles can be built again.
+#
+# setup researches Refined Renovations; the Base menu lists the Wood Pile (shot), and its card
+# opens.
+from: early-base
+mods: [3535712801]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"RefinedObjects\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"WoodStorage\").ShowInBuildMenu": true
+      "Db.Get().Techs.Get(\"RefinedObjects\").unlockedItemIDs": {contains: WoodStorage}
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [114, 208], ortho: 10}}
+  - click: {ui: "**/PlanScreen/Toggle:Base"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/WoodStorage Group*", cond: stable, stable: 120, frames: 600}
+  - shot: {name: base-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
+  - click: {ui: "**/BuildingGroups/**/Grid/WoodStorage Group*"}
+  - ui_wait: {path: "**/PlanBuildingSelectionPanel/ProductInfoScreen", cond: stable}
+  - expect_state:
+      "PlanScreen.Instance.ProductInfoScreen.currentDef.PrefabID": WoodStorage

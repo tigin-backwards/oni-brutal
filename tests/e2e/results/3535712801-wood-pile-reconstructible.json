@@ -1,0 +1,59 @@
+{
+ "spec": "mods/3535712801-wood-pile-reconstructible.yaml",
+ "mods": [
+  "3535712801"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "after Refined Renovations the Base menu lists the Wood Pile (shot) and its card opens",
+ "updated": "2026-10-27",
+ "commit": "77aef08d",
+ "mod_dlls": {
+  "3535712801": {
+   "woodpile-reconstructible.dll": "7a934a30dbb81403d5be1680233d97e47c6ca166bc9fe24001e958e847159821"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-235258-afb42cfe",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T00:12:58",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-012906-74527cec",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T01:29:06",
+    "lane": 14,
+    "reference_run": "20261026-235258-afb42cfe",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "base-menu": 0.0
+    }
+   },
+   {
+    "run": "20261027-012906-74527cec",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T01:29:07",
+    "lane": 15,
+    "reference_run": "20261026-235258-afb42cfe",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "base-menu": 0.0
+    }
+   }
+  ]
+ }
+}

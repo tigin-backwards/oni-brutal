@@ -1,0 +1,31 @@
+# 石油裂解器 Petroleum cracker (2897919789), class B.
+#
+# What it does: a 2x2 Petroleum Cracker (PETROLEUMCRACKER) in the Utilities menu, 120 W: it
+# takes 1 kg/s of petroleum by pipe and makes 0.1 kg/s of methane, piped out, and 0.8 kg/s of
+# graphite, dropped in 100 kg lumps; it can be climbed like a ladder and switched by
+# automation.
+# How a player reaches it: the build menu (Utilities).
+# What changes: petroleum into natural gas and graphite.
+#
+# One built by setup in the dug-out corridor west of the printing pod is selected (its title
+# dumped): it has the mod's converter, storage and pipe ports.
+from: early-base
+mods: [2897919789]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"PETROLEUMCRACKER\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"PETROLEUMCRACKER\").EnergyConsumptionWhenActive": 120
+      "Assets.GetBuildingDef(\"PETROLEUMCRACKER\").InputConduitType": "== 'Liquid'"
+      "Assets.GetBuildingDef(\"PETROLEUMCRACKER\").OutputConduitType": "== 'Gas'"
+  - run: {seconds: 2}
+  - expect: {buildings: {PETROLEUMCRACKER: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: PETROLEUMCRACKER}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_dump: {name: title, root: "**/DetailsScreen/TitleBar/Border/LabelGroup"}
+  - expect_state:
+      "selected:GetComponent<ElementConverter>.outputElements.Length": 2
+      "selected:GetComponent<ElementConverter>.outputElements[1].massGenerationRate": 0.8
+      "selected:GetComponent<Storage>.capacityKg": 20
+      "selected:GetComponent<ConduitConsumer>.consumptionRate": 1

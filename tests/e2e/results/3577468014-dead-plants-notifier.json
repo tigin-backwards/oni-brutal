@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3577468014-dead-plants-notifier.yaml",
+ "mods": [
+  "3577468014"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Mealwood's death notification carries its cell; clicking it brings the camera back to the plant",
+ "updated": "2026-10-27",
+ "commit": "473708e2",
+ "mod_dlls": {
+  "3577468014": {
+   "DeadPlantsNotifier.dll": "53f6a7857b4e63042a10158eae4ed2ed6d391e39dfe342a4c227c04216d18262"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-074030-ce01876e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T07:40:30",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-093615-6137f830",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T09:36:15",
+    "lane": 15,
+    "reference_run": "20261027-074030-ce01876e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-093615-6137f830",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T09:37:11",
+    "lane": 15,
+    "reference_run": "20261027-074030-ce01876e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

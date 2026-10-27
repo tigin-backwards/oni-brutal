@@ -1,0 +1,32 @@
+# Plants have died - Where ? (3577468014), class P (on a vanilla screen).
+#
+# What it does: postfixes on the plants' CreateDeathNotification (crop plants, critter traps,
+# Bonbon Trees, vines) give the "crops have died" notification a click callback holding the
+# dead plant's cell: clicking the notification moves the camera to where it died.
+# How a player reaches it: click a Crops Died notification.
+# What changes: the player finds the dead plants.
+#
+# setup lays a Mealwood in the dug-out corridor west of the printing pod and raises its death
+# notification as a dying farm plant does (the game's CreateDeathNotification, which the mod
+# patches, on its Notifier). The camera is moved away; a click on the notification brings it
+# back to the plant.
+from: early-base
+mods: [3577468014]
+setup:
+  - driver: {setup.call: {type: Scenario, method: SpawnPrefab, args: [0, 112, 206, BasicSingleHarvestPlant, BuildingBack]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "last:", method: AddComponent, args: [Notifier]}}
+  - driver: {setup.call: {target: "last:", method: Add, args: [{"$": "last:GetComponent<StandardCropPlant>.CreateDeathNotification()"}]}}
+steps:
+  - run: {seconds: 2}
+  - expect_state:
+      "count:NotificationScreen.Instance.notifications[*] if .customClickData == 131128": 1
+  - driver: {camera.set: {cell: [150, 230], ortho: 10}}
+  - expect_state:
+      "CameraController.Instance.transform.position.x": {save_as: away}
+  - expect_ui:
+      "**/NotificationScreen/Notifications/NormalLabel[0]/Label/Text": {text: "Plants have died"}
+  - click: {ui: "**/NotificationScreen/Notifications/NormalLabel[0]/Label"}
+  - run: {seconds: 2, speed: 1}
+  - expect_state:
+      "CameraController.Instance.transform.position.x": ["< away - 20", "> 105", "< 120"]

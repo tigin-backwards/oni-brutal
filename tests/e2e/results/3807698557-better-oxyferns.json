@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3807698557-better-oxyferns.yaml",
+ "mods": [
+  "3807698557"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a wild Oxyfern selected has the spores component and +25 decor",
+ "updated": "2026-10-27",
+ "commit": "3e7fac25",
+ "mod_dlls": {
+  "3807698557": {
+   "OxyfernSporelings.dll": "7ddaae41cb4f71c2abb7dc9d716abacec2ae02f0a513717932881be82463a4bc"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-111432-ae629e14",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T11:46:03",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-115904-d98440a0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T12:09:28",
+    "lane": 16,
+    "reference_run": "20261027-111432-ae629e14",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-115904-d98440a0",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T12:10:16",
+    "lane": 16,
+    "reference_run": "20261027-111432-ae629e14",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

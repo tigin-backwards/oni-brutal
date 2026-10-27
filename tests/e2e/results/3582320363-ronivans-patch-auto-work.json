@@ -1,0 +1,60 @@
+{
+ "spec": "mods/3582320363-ronivans-patch-auto-work.yaml",
+ "mods": [
+  "3557584850",
+  "3582320363"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with Ronivans Legacy - Industrial Revolution and every switch on, its machines need no operator, and the log says so",
+ "updated": "2026-10-26",
+ "commit": "cbabaaf0",
+ "mod_dlls": {
+  "3557584850": {
+   "RonivansLegacy_ChemicalProcessing.dll": "a8f2ed8ca2162478ff021d96cf5a13e98fbdf047da64db96d8ea02c7e50bd64f"
+  },
+  "3582320363": {
+   "ONI_Ronivans_Patch.dll": "768a4bc345a57baba0368166a107e656b20b000beefe95534f356e66b66480c9",
+   "PLib.dll": "bdd637dbef718cdd52e61c0a7177bd297864a50bac1583d2837a36ff3edf07db"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-182241-89a16e7c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T18:49:27",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-204743-febfde17",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T22:03:18",
+    "lane": 16,
+    "reference_run": "20261026-182241-89a16e7c",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-204743-febfde17",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T22:04:08",
+    "lane": 17,
+    "reference_run": "20261026-182241-89a16e7c",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

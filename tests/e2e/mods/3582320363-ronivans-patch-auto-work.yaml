@@ -1,0 +1,25 @@
+# Ronivans_Patch工业革命机器自动工作补丁 (3582320363), class P,O.
+#
+# What it does: for Ronivans Legacy - Industrial Revolution (3557584850, its requirement), six
+# PLib switches (Ronivans_Patch.json, all off by default) make that mod's Advanced Metal
+# Refinery, Selective Arc Furnace, Plasma Arc Furnace, Chemical Mixing Unit, Advanced Kiln and
+# Cement Mixer run without a Duplicant: postfixes on their ConfigureBuildingTemplate clear the
+# fabricator's duplicantOperated and the building's isManuallyOperated, and log what they did.
+# How a player reaches it: PLib options; those buildings.
+# What changes: the industrial machines work unattended.
+#
+# With every switch on, the six machines' prefabs are not Duplicant-operated, and the log says
+# the refinery was changed.
+from: early-base
+mods: [3557584850, 3582320363]
+options:
+  critter ranch: {$file: Ronivans_Patch.json, 先进金属精炼机: true, 选择性电弧炉: true, 等离子电弧炉: true, 化学混合装置: true, 先进窑炉: true, 水泥搅拌机: true}
+require_log: ['先进金属精炼机：Mod已加载且开关开启，已修改为自动运行']
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"Chemical_AdvancedMetalRefinery\").GetComponent<ComplexFabricator>.duplicantOperated": false
+      "Assets.GetPrefab(\"Chemical_AdvancedKiln\").GetComponent<ComplexFabricator>.duplicantOperated": false
+      "Assets.GetPrefab(\"CementMixer\").GetComponent<ComplexFabricator>.duplicantOperated": false
+      "Assets.GetPrefab(\"Chemical_AdvancedMetalRefinery\").GetComponent<BuildingComplete>.isManuallyOperated": false
+  - run: {seconds: 2}
+  - expect: {duplicants: 3}

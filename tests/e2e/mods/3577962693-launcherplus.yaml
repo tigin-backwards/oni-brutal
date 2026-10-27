@@ -1,0 +1,33 @@
+# LauncherPlus: An On-Demand Supply Network (3577962693), classes P, U; PLib UI.
+#
+# What it does: Interplanetary Launchers (RailGun) get a Mode and Landing Beacons a request
+# list (Requests, a storage filter of what they want). Once Advanced Scanners is researched,
+# the launcher's side screen gains a "Beacon Request Triggered Only" checkbox: such a
+# launcher aims, every 15 s (option), at a beacon that requests what it holds and fires
+# only then; the beacon's filter side screen is hidden until the research.
+# How a player reaches it: research Advanced Scanners; select a launcher; select a beacon.
+# What changes: launchers ship on demand.
+#
+# Advanced Scanners is researched in setup and a launcher built in the corridor west of the
+# printing pod. Selected, its side screen has the checkbox; clicking it makes the launcher
+# demand-only.
+from: early-base
+mods: [3577962693]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"AdvancedScanners\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"RailGun\")", method: Build, args: [131764, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"RailGun\").GetComponent<LauncherPlus.Mode>": exists
+      "Assets.GetPrefab(\"LandingBeacon\").GetComponent<LauncherPlus.Requests>": exists
+  - run: {seconds: 3}
+  - driver: {camera.set: {cell: [113, 209], ortho: 10}}
+  - click_world: {cell: [112, 208], select: RailGun}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/RailGunSideScreen*/DemandMode", cond: stable}
+  - ui_dump: {name: side, root: "**/DetailsScreen/SideScreen/**/RailGunSideScreen*"}
+  - expect_state:
+      "selected:GetComponent<LauncherPlus.Mode>.demandOnly": false
+  - click: {ui: "**/RailGunSideScreen*/DemandMode"}
+  - expect_state:
+      "selected:GetComponent<LauncherPlus.Mode>.demandOnly": true

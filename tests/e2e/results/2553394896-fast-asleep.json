@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2553394896-fast-asleep.yaml",
+ "mods": [
+  "2553394896"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with both Duplicants in bed at bedtime the speed goes to ultra with ultra speed 4",
+ "updated": "2026-10-27",
+ "commit": "b13cba39",
+ "mod_dlls": {
+  "2553394896": {
+   "Fast Asleep.dll": "952180ebe02979173096f077b017f815347a10b7cd121a5f8be3526536196cfb"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-063948-e1660148",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T06:43:30",
+    "lane": 14,
+    "signatures": 1
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-082028-a1b1dbff",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T08:20:28",
+    "lane": 14,
+    "reference_run": "20261027-063948-e1660148",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-082028-a1b1dbff",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T08:23:53",
+    "lane": 14,
+    "reference_run": "20261027-063948-e1660148",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

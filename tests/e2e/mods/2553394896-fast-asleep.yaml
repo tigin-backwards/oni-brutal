@@ -1,0 +1,28 @@
+# Fast Asleep (2553394896), class P.
+#
+# What it does: prefixes on Sleepable.OnStartWork and OnStopWork count the sleeping
+# Duplicants; once all of them are asleep the game switches to its third speed with the ultra
+# speed raised to 4 (about 1.33 times the usual ultra), and the first to wake restores the
+# speed the player had.
+# How a player reaches it: it is passive; every Duplicant in bed.
+# What changes: nights pass faster.
+#
+# setup builds a second cot in the dug-out corridor west of the printing pod, takes the bionic
+# Duplicant away (it found no cot to defragment in) and makes the whole schedule bedtime. Both
+# Duplicants go to bed; with all of them asleep the speed is the third with ultra speed 4.
+from: early-base
+mods: [2553394896]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Bed\")", method: Build, args: [{"$": "Grid.XYToCell(110, 206)"}, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+  # early-base's bionic Duplicant defragments in no cot here: the colony is left to the other two.
+  - driver: {setup.call: {type: Util, method: KDestroyGameObject, args: [{"$": "Components.LiveMinionIdentities.Items[0].gameObject"}]}}
+  - driver: {setup.call: {target: "ScheduleManager.Instance.GetSchedules()[0]", method: SetBlocksToGroupDefaults, args: [[{"$": "Db.Get().ScheduleGroups.Sleep"}, {"$": "Db.Get().ScheduleGroups.Sleep"}, {"$": "Db.Get().ScheduleGroups.Sleep"}, {"$": "Db.Get().ScheduleGroups.Sleep"}, {"$": "Db.Get().ScheduleGroups.Sleep"}, {"$": "Db.Get().ScheduleGroups.Sleep"}, {"$": "Db.Get().ScheduleGroups.Sleep"}, {"$": "Db.Get().ScheduleGroups.Sleep"}, {"$": "Db.Get().ScheduleGroups.Sleep"}, {"$": "Db.Get().ScheduleGroups.Sleep"}, {"$": "Db.Get().ScheduleGroups.Sleep"}, {"$": "Db.Get().ScheduleGroups.Sleep"}, {"$": "Db.Get().ScheduleGroups.Sleep"}, {"$": "Db.Get().ScheduleGroups.Sleep"}, {"$": "Db.Get().ScheduleGroups.Sleep"}, {"$": "Db.Get().ScheduleGroups.Sleep"}, {"$": "Db.Get().ScheduleGroups.Sleep"}, {"$": "Db.Get().ScheduleGroups.Sleep"}, {"$": "Db.Get().ScheduleGroups.Sleep"}, {"$": "Db.Get().ScheduleGroups.Sleep"}, {"$": "Db.Get().ScheduleGroups.Sleep"}, {"$": "Db.Get().ScheduleGroups.Sleep"}, {"$": "Db.Get().ScheduleGroups.Sleep"}, {"$": "Db.Get().ScheduleGroups.Sleep"}]]}}
+steps:
+  - expect_state:
+      "type:Fast_Asleep.FastAsleepMonitor::isActive": false
+  - expect: {buildings: {Bed: 2}, duplicants: 2}
+  - run: {seconds: 120}
+  - expect_state:
+      "type:Fast_Asleep.FastAsleepMonitor::numSleeping": 2
+      "type:Fast_Asleep.FastAsleepMonitor::isActive": true
+      "SpeedControlScreen.Instance.ultraSpeed": 4

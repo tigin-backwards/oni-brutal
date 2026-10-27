@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2620167879-pips-plant-anywhere.yaml",
+ "mods": [
+  "2620167879"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Mealwood seed may be planted on a built tile, not in mid-air",
+ "updated": "2026-10-27",
+ "commit": "d14d4e4f",
+ "mod_dlls": {
+  "2620167879": {
+   "PipsMod.dll": "6ea3799953076dc36976c1c09ee39eac1cba9f7ec9142892489f56a7d254d63b"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-051715-c581e5cb",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T05:25:33",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-082722-7264d9ce",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T08:27:22",
+    "lane": 14,
+    "reference_run": "20261027-051715-c581e5cb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-082722-7264d9ce",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T08:28:23",
+    "lane": 14,
+    "reference_run": "20261027-051715-c581e5cb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

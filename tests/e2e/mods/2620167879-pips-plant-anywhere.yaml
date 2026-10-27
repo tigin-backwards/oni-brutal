@@ -1,0 +1,24 @@
+# Pips can plant anywhere (2620167879), class P.
+#
+# What it does: prefixes replace PlantableSeed.TestSuitableGround and the Pip's planting checks
+# (SeedPlantingStates and PlantableCellQuery.CheckValidPlotCell): a seed may be planted on any
+# ground that keeps the plant alive (not entombed, drowned, too hot or cold, or unrooted),
+# built tiles and hard rock included, without the game's natural-ground and replant-tag
+# rules; a Pip still leaves room between plants (fewer than 4 within a cell).
+# How a player reaches it: Pips plant the seeds they carry; seeds dropped on the ground.
+# What changes: where wild plants come up.
+#
+# setup builds a sandstone tile in the dug-out corridor west of the printing pod: the cell on
+# it is suitable ground for a Mealwood seed, which the game's rule refuses on a built tile.
+from: early-base
+mods: [2620167879]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Tile\")", method: Build, args: [{"$": "Grid.XYToCell(112, 206)"}, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+steps:
+  - run: {seconds: 2}
+  - expect_state:
+      "Grid.Foundation.get_Item(131128)": true
+      "Assets.GetPrefab(\"BasicSingleHarvestPlantSeed\").GetComponent<PlantableSeed>.TestSuitableGround(131764)": true
+      "Assets.GetPrefab(\"BasicSingleHarvestPlantSeed\").GetComponent<PlantableSeed>.TestSuitableGround(133036)": false
+  - run: {seconds: 10}
+  - expect: {duplicants: 3}

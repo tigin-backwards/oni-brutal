@@ -1,0 +1,31 @@
+# Weeb Pacu (2896083956), class V.
+#
+# What it does: every Pacu (the BasePacuConfig prefabs: Pacu, Tropical and Gulp Fish) gets a
+# WeebPacuSymbolHandler that attaches two anim trackers from the mod's weeb_pacu_trackers_kanim
+# to its body and mouth (a blush and waving hands); its names become PacUwU, Tropical PacUwU
+# and GUwUlp Fish, and its description gets a line.
+# How a player reaches it: any Pacu.
+# What changes: the Pacus' looks and names.
+#
+# setup lays a Pacu in water poured in the dug-out corridor west of the printing pod: it
+# carries the blush and the hands, and its name is PacUwU.
+from: early-base
+mods: [2896083956]
+setup:
+  - driver: {setup.call: {type: SimMessages, method: AddRemoveSubstance, args: [{"$": "Grid.XYToCell(112, 206)"}, Water, null, 600, 300, 255, 0]}}
+  - driver: {setup.call: {type: SimMessages, method: AddRemoveSubstance, args: [{"$": "Grid.XYToCell(113, 206)"}, Water, null, 600, 300, 255, 0]}}
+  - driver: {setup.call: {type: Scenario, method: SpawnPrefab, args: [0, 112, 206, Pacu, Creatures]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+steps:
+  - run: {seconds: 2}
+  - expect_state:
+      "STRINGS.CREATURES.SPECIES.PACU.NAME.text": {contains: PacUwU}
+      "STRINGS.CREATURES.SPECIES.PACU.VARIANT_CLEANER.NAME.text": {contains: GUwUlp Fish}
+      "last:GetComponent<WeebPacu.WeebPacuSymbolHandler>": exists
+      "last:transform.Find(\"PacuwuBlush\").GetComponent<KBatchedAnimController>.CurrentAnim.name": blush
+      "last:transform.Find(\"PacuwuHand\").GetComponent<KBatchedAnimController>.CurrentAnim.name": hands
+  - driver: {camera.set: {cell: [112, 207], ortho: 6}}
+  - click_world: {cell: [112, 206], select: Pacu}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~PacUwU"}

@@ -1,0 +1,21 @@
+# Sight Not Included Plus (2747526061), classes P, O.
+#
+# What it does: a prefix on GridVisibility.OnSpawn sets how far a Duplicant reveals the map
+# around it, by its PLib option "Duplicant sight range": Minimal (radius 5), Small (8), Medium
+# (12, the default), Almost original (15) or Original (18).
+# How a player reaches it: Duplicants walking into unexplored rock.
+# What changes: how much of the dark map each Duplicant uncovers.
+#
+# The option is set to Small: every Duplicant's GridVisibility has radius 8 and inner radius 6
+# (the game gives them 30).
+from: early-base
+mods: [2747526061]
+options:
+  Bodzio.SightNotIncluded: {SightRange: 1}
+steps:
+  - run: {seconds: 1}
+  - expect_state:
+      "count:Components.LiveMinionIdentities.Items[*] if .GetComponent<GridVisibility>.radius == 8": "== original"
+      "count:Components.LiveMinionIdentities.Items[*] if .GetComponent<GridVisibility>.radius != 8": 0
+      "count:Components.LiveMinionIdentities.Items[*] if .GetComponent<GridVisibility>.innerRadius == 6.0": "== original"
+      "Components.LiveMinionIdentities.Items[0].GetComponent<GridVisibility>.radius": 8

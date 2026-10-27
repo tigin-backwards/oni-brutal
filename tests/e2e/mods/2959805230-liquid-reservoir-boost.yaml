@@ -1,0 +1,34 @@
+# Liquid Reservoir Boost (2959805230), class P.
+#
+# What it does: a postfix on LiquidReservoirConfig.ConfigureBuildingTemplate gives the Liquid
+# Reservoir a DropAllWorkable (the "Empty Storage" button) and lets Duplicants take liquid out
+# of its storage (allowItemRemoval), so a player can bottle a reservoir's contents without
+# deconstructing it.
+# How a player reaches it: select a Liquid Reservoir holding liquid, then its Empty Storage
+# button.
+# What changes: reservoirs can be emptied into bottles.
+#
+# setup builds a Liquid Reservoir in the corridor west of the printing pod and stores 200 kg
+# of water in it. Selected, it has the Empty Storage button; clicked, a Duplicant empties it
+# and the water lies on the floor as bottles.
+from: early-base
+mods: [2959805230]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LiquidReservoir\")", method: Build, args: [131126, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "all:SmartReservoir::[0].GetComponent<Storage>", method: AddLiquid, args: [Water, 200, 300, 255, 0, false, true]}}
+steps:
+  - run: {seconds: 2}
+  - expect: {buildings: {LiquidReservoir: 1}}
+  - expect_state:
+      "Assets.GetPrefab(\"LiquidReservoir\").GetComponent<DropAllWorkable>": exists
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [110, 208], select: LiquidReservoir}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<Storage>.allowItemRemoval": true
+      "selected:GetComponent<Storage>.MassStored()": 200
+  - click: {ui: "**/UserMenuScreen/Buttons/Empty StorageButton"}
+  - run: {seconds: 150}
+  - expect_state:
+      "selected:GetComponent<Storage>.MassStored()": 0
+      "sum:all:Pickupable::[*].GetComponent<PrimaryElement>.Mass if .GetComponent<PrimaryElement>.ElementID == Water": ">= 199"

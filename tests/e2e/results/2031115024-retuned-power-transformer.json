@@ -1,0 +1,63 @@
+{
+ "spec": "mods/2031115024-retuned-power-transformer.yaml",
+ "mods": [
+  "2031115024"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the large transformer is rated 2 kW and says so; one built in the corridor is selected (title dumped)",
+ "updated": "2026-10-27",
+ "commit": "77aef08d",
+ "mod_dlls": {
+  "2031115024": {
+   "Retuned Power Transformer.dll": "7f8592cbe6e96785d3fb9350048b712fe7c7775b4061641af2d3632c38ec19d1"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-235258-afb42cfe",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T00:10:26",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-012723-75d2c368",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T01:27:23",
+    "lane": 14,
+    "reference_run": "20261026-235258-afb42cfe",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261027-012723-75d2c368",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T01:27:24",
+    "lane": 15,
+    "reference_run": "20261026-235258-afb42cfe",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

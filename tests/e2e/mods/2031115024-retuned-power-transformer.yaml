@@ -1,0 +1,24 @@
+# Retuned Power Transformer (2031115024), class P.
+#
+# What it does: the Large Power Transformer passes 2 kW instead of 4 kW (its generator
+# capacity and wattage rating), and its description and effect texts say 2 kW.
+# How a player reaches it: the Large Power Transformer, in the build menu as before.
+# What changes: a smaller large transformer.
+#
+# The def is rated 2 kW; one built by setup in the dug-out corridor west of the printing pod
+# is selected (its title dumped) and its effect text names 2 kW.
+from: early-base
+mods: [2031115024]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"PowerTransformer\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"PowerTransformer\").GeneratorWattageRating": 2000
+      "Assets.GetBuildingDef(\"PowerTransformer\").GeneratorBaseCapacity": 2000
+      "Assets.GetBuildingDef(\"PowerTransformer\").Effect": {contains: "2 kW"}
+  - run: {seconds: 2}
+  - expect: {buildings: {PowerTransformer: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: PowerTransformer}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_dump: {name: title, root: "**/DetailsScreen/TitleBar/Border/LabelGroup"}

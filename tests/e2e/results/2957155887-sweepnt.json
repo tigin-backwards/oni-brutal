@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2957155887-sweepnt.yaml",
+ "mods": [
+  "2957155887"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Sweepn't tool is picked and dragged over the corridor; in its default clear mode it marks nothing, in the original too",
+ "updated": "2026-10-26",
+ "commit": "5f21e9e9",
+ "mod_dlls": {
+  "2957155887": {
+   "IgnoreFetchMerged.dll": "bc8536471a010ac07470b522db994981acfa2ca2504d86d8b29a76e64ba076bf"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-203918-0b6e3624",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T21:52:18",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-220918-ee97ca43",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T22:30:12",
+    "lane": 15,
+    "reference_run": "20261026-203918-0b6e3624",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-220918-ee97ca43",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T22:31:16",
+    "lane": 15,
+    "reference_run": "20261026-203918-0b6e3624",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

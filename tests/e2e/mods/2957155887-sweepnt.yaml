@@ -1,0 +1,23 @@
+# Sweepn't - Ignore Sweep and Fetch (2957155887), classes T, S, K, V.
+#
+# What it does: a Sweepn't tool in the tool menu marks an area where chosen errands (sweeping,
+# storing, supplying and the like, picked in the tool's own panel, for Duplicants and for
+# Auto-Sweepers) ignore the items lying there; fetch errands, area fetches and the sweeper's
+# pickups skip them, a Sweepn't overlay shows the areas, and a selected cell's side screen
+# lists them.
+# How a player reaches it: the tool menu's Sweepn't button, then a drag.
+# What changes: debris that stays where it is.
+#
+# The tool is picked from the tool menu and dragged over the corridor west of the printing
+# pod. Its panel starts in clear mode, with no errands ticked, so the drag marks nothing, in
+# the original too.
+from: early-base
+mods: [2957155887]
+steps:
+  - driver: {camera.set: {cell: [112, 207], ortho: 10}}
+  - tool: {toolbar: "Sweepn't"}
+  - expect_state: {"PlayerController.Instance.ActiveTool.name": IgnoreFetchTool}
+  - drag: {from: [110, 206], to: [114, 207]}
+  - expect_state:
+      "type:IgnoreFetch.IgnoreStore::Instance.HasIgnored(131128)": false
+      "type:IgnoreFetch.IgnoreFetchToolMenu::Instance.IsSetMode": "== original"

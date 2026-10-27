@@ -1,0 +1,68 @@
+{
+ "spec": "mods/3630448775-material-finder.yaml",
+ "mods": [
+  "3630448775"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the top-right search button opens the finder window (dumped, shot); typing Sand narrows its cards",
+ "updated": "2026-10-27",
+ "commit": "66f9a3c2",
+ "mod_dlls": {
+  "3630448775": {
+   "MaterialFinder.dll": "506ca3784104c940fc9304171447ae40c365076f0d2e788ef521bb98d99c413e",
+   "PLib.dll": "48c63fd4654b6fbb390afdac71a3d29194eeb9405eca4290cba6e4fbf60805ce"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-233206-67d878d6",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T23:37:40",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-002312-dbd407e3",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T00:23:12",
+    "lane": 14,
+    "reference_run": "20261026-233206-67d878d6",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "window": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "window": 0.0
+    }
+   },
+   {
+    "run": "20261027-002312-dbd407e3",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T00:23:13",
+    "lane": 15,
+    "reference_run": "20261026-233206-67d878d6",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "window": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "window": 0.0
+    }
+   }
+  ]
+ }
+}

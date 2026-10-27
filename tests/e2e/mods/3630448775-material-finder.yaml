@@ -1,0 +1,26 @@
+# 資源探索 (MaterialFinder) (3630448775), classes S, K, T.
+#
+# What it does: a search button beside the management buttons at the top right (Ctrl+D too)
+# opens a window listing the discovered solids, liquids and gases, each card with what the
+# colony stores and what lies undug, a search field, category and sort buttons, locate and
+# highlight buttons; a cheat mode spawns elements, food, critters and items at the pointer.
+# Shift+click on an object searches for its material.
+# How a player reaches it: the magnifier button at the top right, or Ctrl+D.
+# What changes: a resource finder and a spawner.
+#
+# The button opens the window (dumped, shot); typing "Sand" into its search field narrows the
+# list of cards to fewer than before.
+from: early-base
+mods: [3630448775]
+steps:
+  - ui_wait: {path: "**/TopRightInfoPanelButtons/MaterialFinderButton", cond: stable}
+  - click: {ui: "**/TopRightInfoPanelButtons/MaterialFinderButton"}
+  - ui_wait: {path: "**/MaterialFinderWindow", cond: stable}
+  - expect_ui:
+      "**/MaterialFinderWindow/**/Card_*": {count: {save_as: cards}}
+  - ui_dump: {name: window, root: "**/MaterialFinderWindow"}
+  - shot: {name: window, crop: "**/MaterialFinderWindow", threshold: 0.04}
+  - type: {ui: "**/MaterialFinderWindow/**/SearchInput", text: "Sand", enter: true, clear: true}
+  - ui_wait: {path: "**/MaterialFinderWindow", cond: stable}
+  - expect_ui:
+      "**/MaterialFinderWindow/**/Card_*": {count: "< cards"}

@@ -1,0 +1,21 @@
+# 活得久的海牛Longevity Moo -K11 (3067514896), class P.
+#
+# What it does: a transpiler on MooConfig.CreateMoo replaces the Gassy Moo's standard lifespan
+# (75 cycles) with 1000 cycles.
+# How a player reaches it: any Gassy Moo.
+# What changes: the moo's maximum age.
+#
+# The Moo's base trait sets its maximum age to 1000 cycles; a Gassy Moo set down in setup has
+# that maximum age.
+from: early-base
+mods: [3067514896]
+setup:
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131762, 0, 0, \"Moo\", \"Creatures\")", method: SetActive, args: [true]}}
+steps:
+  - expect_state:
+      "Db.Get().traits.Get(\"MooBaseTrait\").SelfModifiers[3].AttributeId": AgeMax
+      "Db.Get().traits.Get(\"MooBaseTrait\").SelfModifiers[3].Value": 1000
+  - run: {seconds: 2}
+  - expect_state:
+      "count:all:CreatureBrain::[*] if .GetComponent<KPrefabID>.PrefabTag.Name == Moo": 1
+      "count:all:CreatureBrain::[*] if .GetComponent<KPrefabID>.PrefabTag.Name == Moo and .GetComponent<Modifiers>.attributes.Get(\"AgeMax\").GetTotalValue() == 1000.0": 1

@@ -1,0 +1,59 @@
+{
+ "spec": "mods/3552320454-mementos-recognize-individual-dupe-achievements.yaml",
+ "mods": [
+  "3552320454"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "Nikola hurt at work earns the injury memento and its keepsake; his Personality tab lists it (shot)",
+ "updated": "2026-10-27",
+ "commit": "3e7fac25",
+ "mod_dlls": {
+  "3552320454": {
+   "Mementos.dll": "3b96164fc354bf78869dabfa4742f88b838631132b0888157d4576237347ecf6"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-111432-ae629e14",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T11:38:30",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-115904-d98440a0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T11:59:04",
+    "lane": 16,
+    "reference_run": "20261027-111432-ae629e14",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "personality": 0.002146
+    }
+   },
+   {
+    "run": "20261027-115904-d98440a0",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T12:06:49",
+    "lane": 16,
+    "reference_run": "20261027-111432-ae629e14",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "personality": 0.002146
+    }
+   }
+  ]
+ }
+}

@@ -1,0 +1,32 @@
+# Mementos! Recognize Individual Dupe Achievements (3552320454), class U; PLib keybinds.
+#
+# What it does: Duplicants earn mementos for achievements: injured at work, rescuing an
+# incapacitated Duplicant, first to space, first to visit a planetoid, and more (postfixes on
+# Health.Damage, RescueIncapacitatedChore, Clustercraft.Launch, the minion migration and
+# cargo deployment). Each award adds a medal to the Duplicant (a MedalInfo, saved) and drops a
+# keepsake item (trophy, proclamation, rocket, planet) that can go on a pedestal. The
+# Personality tab gets a "Medals" section listing them. Local installs also get debug hotkeys
+# (Ctrl+F4 and up).
+# How a player reaches it: the Personality tab of a Duplicant; the achievements themselves.
+# What changes: medals and keepsakes for Duplicants' deeds.
+#
+# setup hurts Nikola during his work time (10 HP) and selects him: he has earned the injury
+# memento, its keepsake lies in the colony, and his Personality tab's Medals section lists it.
+from: early-base
+mods: [3552320454]
+setup:
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[1].GetComponent<Health>", method: Damage, args: [10]}}
+  - driver: {setup.call: {target: "SelectTool.Instance", method: Select, args: [{"$": "Components.LiveMinionIdentities.Items[1]"}]}}
+steps:
+  - expect_state:
+      "Components.LiveMinionIdentities.Items[1].name": Nikola
+      "Components.LiveMinionIdentities.Items[1].GetComponent<Mementos.MedalInfo>.Medals.Count": 1
+      "Components.LiveMinionIdentities.Items[1].GetComponent<Mementos.MedalInfo>.Medals[0].Name": Injured
+      "all:Mementos.MementoModifiable::Length": 1
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - click: {ui: "**/DetailsScreen/Tabs/TabHeader/tab: PERSONALITY"}
+  - ui_wait: {path: "**/DetailsScreen/Body/TabBody/ScrollRect/Content/MinionPersonalityPanel", cond: stable}
+  - expect_ui:
+      "**/MinionPersonalityPanel/**/Mementos": {text: "~Injured in the Line of Duty"}
+  - shot: {name: personality, crop: "**/DetailsScreen", threshold: 0.04}
+  - run: {seconds: 2}

@@ -1,0 +1,26 @@
+# Container Tooltips (3576799899), classes P, O.
+#
+# What it does: every building with a Storage gets a status item summarising what it holds
+# (sorted and shown by PLib options), and every filterable building one summarising its
+# filter settings, so both show in the status panel and on hover.
+# How a player reaches it: selecting or hovering a storage building.
+# What changes: contents and filters at a glance.
+#
+# A Storage Bin built by setup in the dug-out corridor west of the printing pod, holding
+# 100 kg of sandstone, is selected; its status lists the contents and the filters.
+from: early-base
+mods: [3576799899]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"StorageLocker\")", method: Build, args: [131128, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "last:GetComponent<Storage>", method: AddOre, args: [SandStone, 100, 293, 255, 0]}}
+steps:
+  - run: {seconds: 2}
+  - expect: {buildings: {StorageLocker: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 206], select: StorageLocker}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "count:selected:KSelectable.GetStatusItemGroup().items[*] if .item.Id == CONTAINERTOOLTIPSTATUSITEM": 1
+      "count:selected:KSelectable.GetStatusItemGroup().items[*] if .item.Id == CONTAINERTOOLTIPFILTERSTATUSITEM": 1
+  - expect_ui:
+      "**/SimpleInfoScreen/**/ContentStatus/StatusItemTemplate/TextLayout/Value": {any_text: "~Contents: 100 kg of"}

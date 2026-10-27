@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3576799899-container-tooltips.yaml",
+ "mods": [
+  "3576799899"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Storage Bin of sandstone shows the contents and filters status items",
+ "updated": "2026-10-26",
+ "commit": "cd454e85",
+ "mod_dlls": {
+  "3576799899": {
+   "ContainerTooltips.dll": "28e82c05be93001f5e33d5f529fc71ba5e7293618a9931cd0a4de17af4581948"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-193322-8c93fed4",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T19:36:54",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-194527-bd4e3801",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T20:16:35",
+    "lane": 14,
+    "reference_run": "20261026-193322-8c93fed4",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-194527-bd4e3801",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T20:17:29",
+    "lane": 14,
+    "reference_run": "20261026-193322-8c93fed4",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -46,3 +46,4 @@ UnityEngine.Physics2DModule	UnityEngine.EdgeCollider2D	# mods' bundles (Aki's Sn
 UnityEngine.CoreModule	UnityEngine.Rendering.ShaderPropertyType	# mods (Morphs Not Included): Shader.GetPropertyType
 UnityEngine.TextRenderingModule	UnityEngine.TextAlignment	# mods (Antigravity): TextMesh.alignment
 UnityEngine.TextRenderingModule	UnityEngine.CharacterInfo	# Font.GetCharacterInfo, RequestCharactersInTexture's glyphs (the legacytext probe)
+UnityEngine.CoreModule	UnityEngine.Rendering.BlendMode	# mods (Arknights Operators): its Spine atlas loader sets materials' blend modes

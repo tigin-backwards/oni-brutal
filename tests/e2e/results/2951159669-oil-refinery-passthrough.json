@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2951159669-oil-refinery-passthrough.yaml",
+ "mods": [
+  "2951159669"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "Crude Oil and Petroleum are tagged AnyOil, and a built Oil Refinery takes it",
+ "updated": "2026-10-26",
+ "commit": "d1e7dcee",
+ "mod_dlls": {
+  "2951159669": {
+   "OilRefineryPassthrough.dll": "bce370ca7ad6696c7bef977ca50edf4961c3f040a4c6be207d2a95f4ac19a2d0"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-200500-101f1b1f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T20:22:05",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-203924-ebcd6150",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T20:55:19",
+    "lane": 15,
+    "reference_run": "20261026-200500-101f1b1f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-203924-ebcd6150",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T20:56:14",
+    "lane": 15,
+    "reference_run": "20261026-200500-101f1b1f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

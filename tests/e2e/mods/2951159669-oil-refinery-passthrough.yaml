@@ -1,0 +1,26 @@
+# Oil Refinery Passthrough (2951159669), class P.
+#
+# What it does: Crude Oil and Petroleum get an AnyOil tag (a postfix on
+# ElementLoader.CollectElementsFromYAML), and the Oil Refinery's pipe input takes AnyOil, so
+# petroleum piped in passes through without breaking the refinery.
+# How a player reaches it: piping petroleum into an Oil Refinery.
+# What changes: mixed oil lines are safe.
+#
+# The elements' tags and the refinery's input are read; an Oil Refinery built by setup in the
+# dug-out corridor west of the printing pod is selected and takes AnyOil.
+from: early-base
+mods: [2951159669]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"OilRefinery\")", method: Build, args: [131128, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "count:ElementLoader.FindElementByName(\"Petroleum\").oreTags[*] if .Name == AnyOil": 1
+      "count:ElementLoader.FindElementByName(\"CrudeOil\").oreTags[*] if .Name == AnyOil": 1
+      "Assets.GetPrefab(\"OilRefinery\").GetComponent<ConduitConsumer>.capacityTag.Name": AnyOil
+  - run: {seconds: 2}
+  - expect: {buildings: {OilRefinery: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 206], select: OilRefinery}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:ConduitConsumer.capacityTag.Name": AnyOil

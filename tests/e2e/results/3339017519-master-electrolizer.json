@@ -1,0 +1,62 @@
+{
+ "spec": "mods/3339017519-master-electrolizer.yaml",
+ "mods": [
+  "3339017519"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "after Improved Oxygen the Oxygen menu lists the electrolyzer (shot); a built one is tinted green (world shot matches)",
+ "updated": "2026-10-26",
+ "commit": "cbabaaf0",
+ "mod_dlls": {
+  "3339017519": {
+   "MasterElectrolizer.dll": "cb2574f16d0588a17f37b9c31f58358a8fb4da3e96d7acaa71003818a4f3535f",
+   "YamlDotNet.dll": "e05c9c033c5d333e35feebbb87598ef81c178a6e28ae98cab99b2fd01be6cd9e"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-192612-e52c7dc9",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T19:36:33",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-204743-febfde17",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T21:49:02",
+    "lane": 17,
+    "reference_run": "20261026-192612-e52c7dc9",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "oxygen-menu": 0.0,
+     "built": 0.013806
+    }
+   },
+   {
+    "run": "20261026-204743-febfde17",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T21:49:08",
+    "lane": 16,
+    "reference_run": "20261026-192612-e52c7dc9",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "oxygen-menu": 0.0,
+     "built": 0.015215
+    }
+   }
+  ]
+ }
+}

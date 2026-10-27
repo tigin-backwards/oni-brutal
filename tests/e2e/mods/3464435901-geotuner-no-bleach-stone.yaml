@@ -1,0 +1,26 @@
+# 地质调谐仪不再消耗漂白石//No Bleach Stone Be Needed (3464435901), class P,O.
+#
+# What it does: when the Geotuner's definition is first made, a patch class's static
+# constructor sets every geyser category's and geyser's tuning settings to PLib options: the
+# material each tuning consumes (0 to 50 kg, 0 by default, so no bleach stone) and how long
+# its boost lasts (600 to 60,000 s, 6,000 by default), and logs the values.
+# How a player reaches it: PLib options; a Geotuner's deliveries.
+# What changes: Geotuners need little or no material and last longer.
+#
+# The options are set to 5 kg and 1,200 s: every category's and geyser's settings read so, and
+# the log says it.
+from: early-base
+mods: [3464435901]
+options:
+  "3464435901": {ConsumptionPerUse: 5.0, DurationPerUse: 1200.0}
+require_log: ['\[地质调谐仪MOD\] 配置已更新']
+steps:
+  - expect_state:
+      "GeoTunerConfig.CategorySettings.get_Item(\"WATER_CATEGORY\").quantity": 5
+      "GeoTunerConfig.CategorySettings.get_Item(\"WATER_CATEGORY\").duration": 1200
+      "GeoTunerConfig.geotunerGeyserSettings.Count": [{save_as: geysers}, ">= 10"]
+  - expect_state:
+      "sum:GeoTunerConfig.geotunerGeyserSettings.Values[*].quantity": "== 5 * geysers"
+      "sum:GeoTunerConfig.geotunerGeyserSettings.Values[*].duration": "== 1200 * geysers"
+  - run: {seconds: 2}
+  - expect: {duplicants: 3}

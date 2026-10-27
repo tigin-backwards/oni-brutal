@@ -1,0 +1,56 @@
+{
+ "spec": "mods/3464435901-geotuner-no-bleach-stone.yaml",
+ "mods": [
+  "3464435901"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "options set every geyser's tuning to 5 kg for 1,200 s, and the log says so",
+ "updated": "2026-10-26",
+ "commit": "cbabaaf0",
+ "mod_dlls": {
+  "3464435901": {
+   "PLib.dll": "93073fdf44dbe9fd7c0afe19e56341be862cc2d732090dee30999cf60e2e160d",
+   "╡╪╓╩╡≈╨│╥╟▓╗╘┘╧√║─╞»░╫╩».dll": "a9596d0c7d67bcbe91c1a37018c5f51da7fcff8902e236506fe2cce0fa333d4a"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-192612-e52c7dc9",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T19:46:57",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-204743-febfde17",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T21:56:30",
+    "lane": 17,
+    "reference_run": "20261026-192612-e52c7dc9",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-204743-febfde17",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T21:56:34",
+    "lane": 16,
+    "reference_run": "20261026-192612-e52c7dc9",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

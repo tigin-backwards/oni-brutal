@@ -1,0 +1,23 @@
+# NeodymiumStyle Hairstyle MOD "LAYNA" (3427945960), class X (content for Dupery).
+#
+# What it does: no code. With Dupery (here Dupery Fixed, 3172734005, which the catalog names as
+# its requirement), its PERSONALITIES.json adds a printable Duplicant personality, Layna
+# (female, Binge Eater stress reaction, Sparkle Streaker joy trait), whose hair, hair_layna, comes from the mod's anim folder; strings/ translates its
+# description into Japanese.
+# How a player reaches it: Duplicants printed or picked for a new colony; the Duplicant's
+# Personality tab.
+# What changes: another personality in the pool, with its own hairstyle.
+#
+# Dupery imports the personality into the game's Personalities and loads the hair as an
+# accessory, as its log says.
+from: early-base
+mods: [3172734005, 3427945960]
+require_log: ['\[Dupery\]: accessory hair_layna successfully loaded']
+steps:
+  - expect_state:
+      "Db.Get().Personalities.TryGet(\"LAYNA\")": exists
+      "Db.Get().Personalities.TryGet(\"LAYNA\").Disabled": false
+      "Db.Get().Accessories.TryGet(\"hair_layna\")": exists
+      "Db.Get().Personalities.Count": "== original"
+  - run: {seconds: 10}
+  - expect: {duplicants: 3}

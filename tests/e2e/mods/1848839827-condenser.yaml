@@ -1,0 +1,33 @@
+# Condenser (1848839827), class B.
+#
+# What it does: adds the Condenser to the Utilities menu after the Tempshift Plate, researched
+# with Temperature Modulation: a powered machine (1200 W) that takes in gas (10 kg/s), cools it
+# to 5 degrees under its condensation point and stores it as the liquid it condenses into, for a
+# pipe or a bottle.
+# How a player reaches it: the research screen, then the build menu (Utilities).
+# What changes: gases can be condensed without a heat exchanger.
+#
+# setup researches Temperature Modulation and builds a Condenser in the corridor west of the
+# printing pod; it shows in the Utilities menu and, selected, draws 1200 W.
+from: early-base
+mods: [1848839827]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"TemperatureModulation\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Condenser\")", method: Build, args: [131765, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"TemperatureModulation\").unlockedItemIDs": {contains: Condenser}
+  - run: {seconds: 5}
+  - expect: {buildings: {Condenser: 1}}
+  - click: {ui: "**/PlanScreen/Toggle:Utilities"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/Condenser Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/Condenser Group*": {active: true}
+  - shot: {name: utilities-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
+  - key: {code: Escape}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: Condenser}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<EnergyConsumer>.WattsNeededWhenActive": 1200

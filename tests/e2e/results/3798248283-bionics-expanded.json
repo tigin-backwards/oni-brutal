@@ -1,0 +1,79 @@
+{
+ "spec": "mods/3798248283-bionics-expanded.yaml",
+ "mods": [
+  "3798248283"
+ ],
+ "verdict": "warning",
+ "why": "known findings: scroll-normalized-position",
+ "findings": [
+  "scroll-normalized-position"
+ ],
+ "note": "its skills exist; the Stations menu shot lists the Booster Recycler, whose recipes are dumped",
+ "updated": "2026-10-27",
+ "commit": "3e7fac25",
+ "mod_dlls": {
+  "3798248283": {
+   "BionicBoostersPlus.dll": "7d1ff8cb560772d658b6806ea9a4766a5ef0a9ab7b3024e2e63fc370683371af"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-111432-ae629e14",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T11:41:56",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-115904-d98440a0",
+    "index": 1,
+    "verdict": "warn",
+    "date": "2026-10-27T12:07:37",
+    "lane": 16,
+    "reference_run": "20261027-111432-ae629e14",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "recipes": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "stations-menu": 0.0
+    }
+   },
+   {
+    "run": "20261027-115904-d98440a0",
+    "index": 2,
+    "verdict": "warn",
+    "date": "2026-10-27T12:08:33",
+    "lane": 16,
+    "reference_run": "20261027-111432-ae629e14",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "recipes": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "stations-menu": 0.0
+    }
+   }
+  ]
+ }
+}

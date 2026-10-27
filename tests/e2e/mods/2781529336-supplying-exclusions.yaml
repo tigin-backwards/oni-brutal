@@ -1,0 +1,19 @@
+# Supplying Exclusions (2781529336), classes P, O.
+#
+# What it does: chosen supply errands leave the Supplying (Hauling) chore group, so a
+# Duplicant with hauling disabled is not asked to deliver to them: build, doctor, fabricate,
+# farm, machine and research supply by default, cook supply too if chosen (PLib options).
+# How a player reaches it: the Mods screen's options; the priorities screen then governs
+# those errands by their own groups.
+# What changes: deliveries follow the skill they serve, not hauling.
+#
+# With the default options, Build Supply and Research Supply have no Hauling group while Cook
+# Supply keeps it.
+from: early-base
+mods: [2781529336]
+require_log: ['Supplying Exclusions: Filtered Hauling From Chore: BuildFetch', 'Supplying Exclusions: Filtered Hauling From Chore: ResearchFetch']
+steps:
+  - expect_state:
+      "count:Db.Get().ChoreTypes.BuildFetch.groups[*] if .Id == Hauling": 0
+      "count:Db.Get().ChoreTypes.ResearchFetch.groups[*] if .Id == Hauling": 0
+      "count:Db.Get().ChoreTypes.CookFetch.groups[*] if .Id == Hauling": 1

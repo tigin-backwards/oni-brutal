@@ -1,0 +1,16 @@
+# No Notification Sounds (1882035088), class P.
+#
+# What it does: NotificationScreen.PlayDingSound does nothing, so notifications arrive
+# without their ding.
+# How a player reaches it: it is passive.
+# What changes: silent notifications.
+#
+# The colony plays until notifications have come in: the screen lists them, and no ding was
+# played for any (the screen keeps no time of a last ding).
+from: early-base
+mods: [1882035088]
+steps:
+  - run: {seconds: 60}
+  - expect_state:
+      "NotificationScreen.Instance.notifications.Count": ">= 1"
+      "NotificationScreen.Instance.timeOfLastNotification.Count": 0

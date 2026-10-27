@@ -1,0 +1,55 @@
+{
+ "spec": "mods/1882035088-no-notification-sounds.yaml",
+ "mods": [
+  "1882035088"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "notifications come in during play and no ding is played",
+ "updated": "2026-10-27",
+ "commit": "7a56f5f6",
+ "mod_dlls": {
+  "1882035088": {
+   "NoNotificationSounds.dll": "e4f18d6b449e30ff9a1bdc4d80421e7f55b25f74f011e9fb201169e3f38e1be2"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-021227-f470d6f8",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T02:39:43",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-032746-5dc019f0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T03:27:46",
+    "lane": 14,
+    "reference_run": "20261027-021227-f470d6f8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-032746-5dc019f0",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T03:27:47",
+    "lane": 15,
+    "reference_run": "20261027-021227-f470d6f8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

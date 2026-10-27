@@ -1,0 +1,37 @@
+# 电线相关修改(可配置), WirePowerMod (3606733579), class P; PLib options (ModSetting.json).
+#
+# What it does: a prefix on Wire.GetMaxWattageAsFloat multiplies each wire's rating by an
+# option (Wire, Conductive Wire, Heavi-Watt, Conductive Heavi-Watt), postfixes multiply the
+# capacity of the Battery, Jumbo Battery and Smart Battery and the transformers' wattage, and
+# an option lets Conductive Heavi-Watt Wire pass through tiles.
+# How a player reaches it: build wires and batteries; the options in the mod's PLib dialog.
+# What changes: stronger wires and bigger batteries.
+#
+# Options: Wire x2, Battery x3. setup builds a Battery and a Wire in the corridor west of the
+# printing pod. The Battery, selected, holds 30 kJ; the Wire, selected, shows a 2000 W limit.
+from: early-base
+mods: [3606733579]
+options:
+  "3606733579": {$file: ModSetting.json, WireConfig: 2, BatteryRateConfig: 3}
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Battery\")", method: Build, args: [131763, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Wire\")", method: Build, args: [131766, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"Battery\").GetComponent<Battery>.capacity": 30000
+      "Assets.GetPrefab(\"BatteryMedium\").GetComponent<Battery>.capacity": 40000
+  - run: {seconds: 2}
+  - expect: {buildings: {Battery: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [111, 207], select: Battery}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<Battery>.capacity": 30000
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Battery"}
+  - click_world: {cell: [114, 207], select: Wire}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<Wire>.MaxWattageRating": "== 'Max1000'"
+  - expect_ui:
+      "**/SimpleInfoScreen/**": {any_text: "/2[,.]?000 W/"}

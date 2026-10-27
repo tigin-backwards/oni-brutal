@@ -1,0 +1,56 @@
+{
+ "spec": "mods/2872005064-hide-air-vents.yaml",
+ "mods": [
+  "2872005064"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Gas Vent sits on the backwall layer, one built in the corridor too",
+ "updated": "2026-10-27",
+ "commit": "1ae06b70",
+ "mod_dlls": {
+  "2872005064": {
+   "Hide air vents╥■▓╪┼┼╞°┐┌.dll": "76341ccb7792614754f00457119b81d0be402a8fccd7203786b1457baf6c0045",
+   "PLib.dll": "b862c5db2b3cd6df09a62d4a30782e91e2b24e8e1bfac08d991c9cc89a984ba9"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-013141-9697dcd2",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T01:41:42",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-025406-e31bed76",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T02:54:06",
+    "lane": 14,
+    "reference_run": "20261027-013141-9697dcd2",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-025406-e31bed76",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T02:54:07",
+    "lane": 15,
+    "reference_run": "20261027-013141-9697dcd2",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

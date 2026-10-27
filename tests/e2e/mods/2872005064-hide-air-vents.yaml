@@ -1,0 +1,21 @@
+# Hide air vents隐藏排气口 (2872005064), class V.
+#
+# What it does: the Gas Vent is drawn on the scene layer behind buildings (18) and placed on
+# the backwall object layer (2), so it hides behind other buildings and can share their cells.
+# How a player reaches it: the Gas Vent, in the build menu as before.
+# What changes: vents out of sight.
+#
+# The def holds the mod's layers; one built by setup in the dug-out corridor west of the
+# printing pod sits on that layer of its cell.
+from: early-base
+mods: [2872005064]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"GasVent\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"GasVent\").SceneLayer": "== original"
+      "Assets.GetBuildingDef(\"GasVent\").ObjectLayer": "== 'Backwall'"
+  - run: {seconds: 2}
+  - expect: {buildings: {GasVent: 1}}
+  - expect_state:
+      "all:Vent::[0].GetComponent<Building>.Def.ObjectLayer": "== 'Backwall'"

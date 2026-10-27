@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2570841961-untame-critters.yaml",
+ "mods": [
+  "2570841961"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a tamed Hatch lives through a while of play; the starving egg laying is not reached",
+ "updated": "2026-10-26",
+ "commit": "5f21e9e9",
+ "mod_dlls": {
+  "2570841961": {
+   "UntameCritters.dll": "c8eccba3ccb3e5bd3f278f9ebaf371f2641d1ac78f1b4d384f1714583e233afd"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-203918-0b6e3624",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T21:38:43",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-220918-ee97ca43",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T22:21:53",
+    "lane": 15,
+    "reference_run": "20261026-203918-0b6e3624",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-220918-ee97ca43",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T22:23:25",
+    "lane": 15,
+    "reference_run": "20261026-203918-0b6e3624",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

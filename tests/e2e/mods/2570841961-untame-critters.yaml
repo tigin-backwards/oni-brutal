@@ -1,0 +1,24 @@
+# Untame Critters (2570841961), class P.
+#
+# What it does: a starving tame critter lays a wild egg: around LayEggStates.ShowEgg its
+# wildness is raised to 100 while it is out of calories, then restored, so the baby hatches
+# wild.
+# How a player reaches it: letting a ranched critter starve while it lays.
+# What changes: starving ranches breed wild critters.
+#
+# A Hatch spawned by setup in the dug-out corridor west of the printing pod is tamed (the
+# Hatches' wildness is the original's) and lives through a while of play; the egg laying itself
+# is not reached.
+from: early-base
+mods: [2570841961]
+setup:
+  - driver: {setup.call: {type: Scenario, method: SpawnPrefab, args: [131128, 0, 0, "Hatch", "Creatures"]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "Db.Get().Amounts.Wildness", method: Lookup, args: [{"$": "last:"}]}}
+  - driver: {setup.call: {target: "last:", method: SetValue, args: [0]}}
+steps:
+  - expect_state:
+      "sum:all:CreatureBrain::[*].GetComponent<Modifiers>.amounts.Get(\"Wildness\").value if .GetComponent<KPrefabID>.PrefabTag.Name == Hatch": "== original"
+  - run: {seconds: 5}
+  - expect_state:
+      "count:all:CreatureBrain::[*] if .GetComponent<KPrefabID>.PrefabTag.Name == Hatch": ">= 1"

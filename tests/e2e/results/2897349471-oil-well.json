@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2897349471-oil-well.yaml",
+ "mods": [
+  "2897349471"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Oil Well's recipe makes petroleum from water at 480 W",
+ "updated": "2026-10-27",
+ "commit": "b8e90d44",
+ "mod_dlls": {
+  "2897349471": {
+   "ShiYouYouJin.dll": "9647009dbe6e008afd745e8aec57d9026cf9cb6911cea6358498609a4f6bbb25"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-063313-07ba5b84",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T06:59:06",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-070541-c1e82ff0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T07:44:42",
+    "lane": 16,
+    "reference_run": "20261027-063313-07ba5b84",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-070541-c1e82ff0",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T07:45:27",
+    "lane": 16,
+    "reference_run": "20261027-063313-07ba5b84",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

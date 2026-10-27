@@ -1,0 +1,26 @@
+# Corpses on Pedestals (3240895274), class P.
+#
+# What it does: Duplicants and robots become displayable on a Pedestal (a postfix on
+# BaseMinionConfig.BaseMinion and BaseRoverConfig.BaseRover tags them PedestalDisplayable and
+# countable), and their DeathMonitor gains a pedestal state: a body is discovered and counts as
+# an ornament when it dies, and lying on a pedestal it plays its death animation there.
+# How a player reaches it: a dead Duplicant's body, then a Pedestal's item list.
+# What changes: bodies can be put on show.
+#
+# The Duplicant and rover prefabs carry the pedestal tag; setup builds a Pedestal in the
+# corridor west of the printing pod and selects it: its side screen lists what it can hold.
+from: early-base
+mods: [3240895274]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"ItemPedestal\")", method: Build, args: [131764, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "SelectTool.Instance", method: Select, args: [{"$": "all:ItemPedestal::[0].GetComponent<KSelectable>"}]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"Minion\").GetComponent<KPrefabID>.Tags": {contains: PedestalDisplayable}
+      "Assets.GetPrefab(\"ScoutRover\").GetComponent<KPrefabID>.Tags": {contains: PedestalDisplayable}
+  - run: {seconds: 2}
+  - expect: {buildings: {ItemPedestal: 1}}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/SideScreen/**/BasicReceptacleSideScreen/**": {any_text: "Other Pedestal Displayable"}
+  - ui_dump: {name: side-screen, root: "**/DetailsScreen/SideScreen/**/BasicReceptacleSideScreen"}

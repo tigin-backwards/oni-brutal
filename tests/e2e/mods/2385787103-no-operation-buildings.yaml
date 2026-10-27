@@ -1,0 +1,28 @@
+# 自动制作 (No Operation Building For 'Space_Out' In DLC) (2385787103), class P.
+#
+# What it does: a config file it writes (mods/HuangConfigs/NoOperationDLC_SpaceOut.config.json)
+# lists the Sludge Press, Crafting Station and Diamond Press as needing no operator; postfixes
+# on their ConfigureBuildingTemplate turn off duplicantOperated for a building the file names
+# with Operation false. It matches by the template object's name.
+# How a player reaches it: it is passive; the file sets which buildings apply.
+# What changes: those fabricators work on their own.
+#
+# The config file is written, and the Crafting Station's and Diamond Press's operator flags
+# are the original's; a Crafting Station built by setup in the dug-out corridor west of the
+# printing pod is selected.
+from: early-base
+mods: [2385787103]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"CraftingTable\")", method: Build, args: [131128, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "file:mods/HuangConfigs/NoOperationDLC_SpaceOut.config.json": exists
+      "Assets.GetPrefab(\"CraftingTable\").GetComponent<ComplexFabricator>.duplicantOperated": "== original"
+      "Assets.GetPrefab(\"DiamondPress\").GetComponent<ComplexFabricator>.duplicantOperated": "== original"
+  - run: {seconds: 2}
+  - expect: {buildings: {CraftingTable: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 206], select: CraftingTable}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:ComplexFabricator.duplicantOperated": "== original"

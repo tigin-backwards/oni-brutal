@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2385787103-no-operation-buildings.yaml",
+ "mods": [
+  "2385787103"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the config file is written; the fabricators' operator flags are the original's",
+ "updated": "2026-10-26",
+ "commit": "f4f72218",
+ "mod_dlls": {
+  "2385787103": {
+   "NoOperationDLC_SpaceOut.dll": "c6e4a00956e1ad01a5523fb360d9ef0e7edfd88e578f56d65334d6a21ba96ed7"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-203918-0b6e3624",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T20:52:43",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-230700-62df17b6",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T23:07:00",
+    "lane": 15,
+    "reference_run": "20261026-203918-0b6e3624",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-230700-62df17b6",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T23:07:51",
+    "lane": 15,
+    "reference_run": "20261026-203918-0b6e3624",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

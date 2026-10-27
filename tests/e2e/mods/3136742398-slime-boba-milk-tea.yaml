@@ -1,0 +1,34 @@
+# 菌泥啵啵奶茶（生活质量类） (3136742398), class B.
+#
+# What it does: adds the MilkTeaMachine (3x3, any metal, 120 W, in the Food menu after Food
+# Repurposing): a Duplicant-operated cooking station (grill skill) that needs 5 kg of piped
+# water to work and makes two milk teas (MilkTea, quality 3, and MilkTea2, quality 5) that come
+# out germ-free; it also cleans germs off itself while it works.
+# How a player reaches it: the build menu (Food), after the research; its recipe side screen.
+# What changes: new drinks for morale.
+#
+# Setup researches Food Repurposing and builds one in the corridor west of the printing pod. The
+# tech unlocks it, the teas are foods, the game's recipe list holds them at the machine, and its
+# own recipe list (selected) offers them; without water it waits.
+from: early-base
+mods: [3136742398]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"FoodRepurposing\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"MilkTeaMachine\")", method: Build, args: [{"$": "Grid.XYToCell(113, 207)"}, Neutral, null, [Cuprite], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"FoodRepurposing\").unlockedItemIDs": {contains: MilkTeaMachine}
+      "EdiblesManager.GetFoodInfo(\"MilkTea\").Quality": 3
+      "EdiblesManager.GetFoodInfo(\"MilkTea2\").Quality": 5
+      "count:ComplexRecipeManager.Get().recipes[*] if .fabricators[0].Name == MilkTeaMachine": ">= 2"
+  - run: {seconds: 2}
+  - expect: {buildings: {MilkTeaMachine: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 208], select: MilkTeaMachine}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/ComplexFabricatorSideScreen", cond: stable}
+  - expect_state:
+      "count:selected:ComplexFabricator.GetRecipes()[*] if .results[0].material.Name == MilkTea": 1
+      "count:selected:ComplexFabricator.GetRecipes()[*] if .results[0].material.Name == MilkTea2": 1
+      "selected:GetComponent<MilkTeaMachine.MilkTeaMachine>.GetAvailableFuel()": 0
+  - ui_dump: {name: recipes, root: "**/ComplexFabricatorSideScreen/Contents"}

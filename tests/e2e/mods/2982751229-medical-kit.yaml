@@ -1,0 +1,31 @@
+# 医疗箱 (2982751229), class B.
+#
+# What it does: adds the Medical Kit, MM20230530001, to the Medicine menu: a 1x1 raw-mineral
+# storage locker (+3 decor) for medical supplies and medicine, 100 kg, nameable, sharing its
+# copy group with clothing lockers; two building facades, MM20230530001002 and …003, give it
+# other looks.
+# How a player reaches it: the build menu (Medicine).
+# What changes: a small box for pills and bandages.
+#
+# The facades are read; the Medicine menu lists the kit (shot), and one built by setup in the
+# dug-out corridor west of the printing pod is selected and its filter screen dumped.
+from: early-base
+mods: [2982751229]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"MM20230530001\")", method: Build, args: [131765, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.GetBuildingFacades().TryGet(\"MM20230530001002\")": exists
+      "Db.GetBuildingFacades().TryGet(\"MM20230530001003\")": exists
+      "Assets.GetPrefab(\"MM20230530001\").GetComponent<Storage>.storageFilters": [{contains: MedicalSupplies}, {contains: Medicine}]
+  - run: {seconds: 10}
+  - expect: {buildings: {MM20230530001: 1}}
+  - click: {ui: "**/PlanScreen/Toggle:Medicine"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/MM20230530001 Group*", cond: stable, stable: 120, frames: 600}
+  - shot: {name: medicine-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
+  - key: {code: Escape}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: MM20230530001}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_wait: {path: "**/TreeFilterableSideScreen", cond: stable}
+  - ui_dump: {name: filters, root: "**/TreeFilterableSideScreen"}

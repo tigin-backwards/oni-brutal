@@ -1,0 +1,67 @@
+{
+ "spec": "mods/2982751229-medical-kit.yaml",
+ "mods": [
+  "2982751229"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Medicine menu lists the Medical Kit (shot); a built one's filter screen (dump matches)",
+ "updated": "2026-10-26",
+ "commit": "cbabaaf0",
+ "mod_dlls": {
+  "2982751229": {
+   "╥╜┴╞╧Σ.dll": "1fd60f17bba70ddac6dc1ff28a5898586375655e8be8b7c575597d7e467c58ff"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-182241-89a16e7c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T18:30:00",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-204743-febfde17",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T21:22:14",
+    "lane": 17,
+    "reference_run": "20261026-182241-89a16e7c",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "filters": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "medicine-menu": 0.0
+    }
+   },
+   {
+    "run": "20261026-204743-febfde17",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T21:22:30",
+    "lane": 16,
+    "reference_run": "20261026-182241-89a16e7c",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "filters": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "medicine-menu": 0.0
+    }
+   }
+  ]
+ }
+}

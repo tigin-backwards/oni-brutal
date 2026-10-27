@@ -1,0 +1,67 @@
+{
+ "spec": "mods/2791613657-advanced-critter-sensor.yaml",
+ "mods": [
+  "2791613657"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "after Gourmet Meal Preparation the Automation menu lists the sensor (shot); a built one's threshold side screen is dumped",
+ "updated": "2026-10-26",
+ "commit": "73711f65",
+ "mod_dlls": {
+  "2791613657": {
+   "ONI_AdvancedCritterSensor.dll": "dc209afc6d28075a2c541d7e6a6c8cfc3fada3af80f6d33c472cd2b2d38e19f1"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-193322-8c93fed4",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T19:55:56",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-202022-adf95e2b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T20:40:31",
+    "lane": 15,
+    "reference_run": "20261026-193322-8c93fed4",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "threshold": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "automation-menu": 0.0
+    }
+   },
+   {
+    "run": "20261026-202022-adf95e2b",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T20:41:43",
+    "lane": 15,
+    "reference_run": "20261026-193322-8c93fed4",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "threshold": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "automation-menu": 0.0
+    }
+   }
+  ]
+ }
+}

@@ -1,0 +1,36 @@
+# Advanced Critter Sensor (2791613657), classes B, S.
+#
+# What it does: a PLib building after the Critter Sensor in the Automation menu, researched
+# with Gourmet Meal Preparation (FinerDining): it counts the critters and eggs of its room,
+# with a threshold (0 to 64, above or below) and a "Critter filter" side screen of two
+# checkboxes choosing whether critters and eggs count.
+# How a player reaches it: the build menu (Automation), then its side screens.
+# What changes: a critter sensor that can count eggs alone.
+#
+# setup researches Gourmet Meal Preparation; the Automation menu lists the sensor (shot), and
+# one built by setup in the dug-out corridor west of the printing pod is selected: its
+# threshold and filter side screens are there (dumped).
+from: early-base
+mods: [2791613657]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"FinerDining\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"AdvancedCritterSensor\")", method: Build, args: [131128, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"FinerDining\").unlockedItemIDs": {contains: AdvancedCritterSensor}
+  - run: {seconds: 10}
+  - expect: {buildings: {AdvancedCritterSensor: 1}}
+  - click: {ui: "**/PlanScreen/Toggle:Automation"}
+  # The build menu catches up over frames: 120 frames for all of it to settle.
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/AdvancedCritterSensor Group*", cond: stable, stable: 120, frames: 600}
+  - shot: {name: automation-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
+  - key: {code: Escape}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 206], select: AdvancedCritterSensor}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/ThresholdSwitchSideScreen", cond: stable}
+  - ui_dump: {name: threshold, root: "**/ThresholdSwitchSideScreen"}
+  - expect_state:
+      "selected:AdvancedCritterSensor.countEggs": true
+      "selected:AdvancedCritterSensor.countCritters": true

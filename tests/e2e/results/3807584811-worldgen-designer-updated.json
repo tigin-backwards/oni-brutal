@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3807584811-worldgen-designer-updated.yaml",
+ "mods": [
+  "3807584811"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "New Game: the designer category and destination button; the designer opens",
+ "updated": "2026-10-27",
+ "commit": "7a927b44",
+ "mod_dlls": {
+  "3807584811": {
+   "WorldgenDesigner.dll": "8354ea361f68714e6317fcd2d212c7c1646abb92f5b0bedf7db766c5a19e34a6"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-092853-dabffb17",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T10:58:12",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-114144-61e46230",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T11:41:44",
+    "lane": 17,
+    "reference_run": "20261027-092853-dabffb17",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-114144-61e46230",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T11:58:55",
+    "lane": 17,
+    "reference_run": "20261027-092853-dabffb17",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

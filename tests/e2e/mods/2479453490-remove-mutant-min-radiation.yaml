@@ -1,0 +1,23 @@
+# remove mutant min radiation (2479453490), class P.
+#
+# What it does: a prefix on PlantMutation.AttributeModifier drops every modifier of the plant
+# attribute MinRadiationThreshold, so no plant mutation needs radiation to grow (the game's
+# mutations all ask for 250 rads); the mutations' other modifiers stay.
+# How a player reaches it: it is passive; mutant seeds planted without radiation.
+# What changes: mutated plants grow in the dark.
+#
+# Three of the game's mutations keep their other modifiers and have no radiation threshold
+# left; the colony plays on.
+from: early-base
+mods: [2479453490]
+steps:
+  - expect_state:
+      "count:Db.Get().PlantMutations.moderatelyLoose.SelfModifiers[*] if .AttributeId == MinRadiationThreshold": 0
+      "count:Db.Get().PlantMutations.moderatelyLoose.SelfModifiers[*] if .AttributeId == YieldAmount": 1
+      "Db.Get().PlantMutations.moderatelyLoose.SelfModifiers.Count": [3, "== original"]
+      "count:Db.Get().PlantMutations.blooms.SelfModifiers[*] if .AttributeId == MinRadiationThreshold": 0
+      "Db.Get().PlantMutations.blooms.SelfModifiers.Count": [1, "== original"]
+      "count:Db.Get().PlantMutations.heavyFruit.SelfModifiers[*] if .AttributeId == MinRadiationThreshold": 0
+      "Db.Get().PlantMutations.heavyFruit.SelfModifiers.Count": "== original"
+  - run: {seconds: 10}
+  - expect: {duplicants: 3}

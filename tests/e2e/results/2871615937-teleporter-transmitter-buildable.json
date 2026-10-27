@@ -1,0 +1,67 @@
+{
+ "spec": "mods/2871615937-teleporter-transmitter-buildable.yaml",
+ "mods": [
+  "2871615937"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Base menu lists both teleporter parts (shot); a transmitter built in the corridor can be deconstructed (title dumped)",
+ "updated": "2026-10-27",
+ "commit": "437ec043",
+ "mod_dlls": {
+  "2871615937": {
+   "TeleporterBuildingMod.dll": "874c84061fa1cfd6c1a90bf4b31f0c1d14a5e2295ba71deeb62d1f193786ec26"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-033356-775c1da2",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T03:33:56",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-034417-040a48f3",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T03:44:17",
+    "lane": 14,
+    "reference_run": "20261027-033356-775c1da2",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "base-menu": 0.0
+    }
+   },
+   {
+    "run": "20261027-034417-040a48f3",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T03:44:18",
+    "lane": 15,
+    "reference_run": "20261027-033356-775c1da2",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "base-menu": 0.0
+    }
+   }
+  ]
+ }
+}

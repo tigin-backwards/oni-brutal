@@ -1,0 +1,33 @@
+# Teleporter Transmitter Buildable 复制人传送器可建造 (2871615937), class B.
+#
+# What it does: the Duplicant Teleporter's transmitter and receiver (WarpPortal and
+# WarpReceiver, Gravitas buildings found on other asteroids) can be built as WarpPortalHack
+# and WarpReceiverHack (3x3, raw metal) from the Base menu and deconstructed; a transmitter
+# warps its Duplicant to the receiver of its own pairing (WarpPortal.Warp is replaced).
+# How a player reaches it: the build menu (Base).
+# What changes: Duplicant teleporters wherever a player wants them.
+#
+# The Base menu lists both (shot); a transmitter built by setup in the dug-out corridor west
+# of the printing pod is selected (its title dumped), and it can be deconstructed.
+from: early-base
+mods: [2871615937]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"WarpPortalHack\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"WarpPortalHack\").ShowInBuildMenu": true
+      "Assets.GetBuildingDef(\"WarpReceiverHack\").ShowInBuildMenu": true
+  - run: {seconds: 2}
+  - expect_state:
+      # The built transmitter becomes the game's WarpPortal entity, the only one in this world.
+      "count:all:WarpPortal::[*] if .transform.position.x == 112.5": 1
+  - click: {ui: "**/PlanScreen/Toggle:Base"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/WarpReceiverHack Group*", cond: stable, stable: 120, frames: 600}
+  - shot: {name: base-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
+  - key: {code: Escape}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 208], select: WarpPortal}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_dump: {name: title, root: "**/DetailsScreen/TitleBar/Border/LabelGroup"}
+  - expect_state:
+      "selected:Deconstructable.allowDeconstruction": true

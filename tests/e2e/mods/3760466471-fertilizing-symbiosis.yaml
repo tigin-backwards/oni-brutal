@@ -1,0 +1,24 @@
+# Fertilizing Symbiosis (3760466471), class P.
+#
+# What it does: a critter whose diet makes what a plant or a generator consumes poops into
+# it: plants that take a fertiliser some critter excretes get a poop station (their delivery
+# capacity, the critters allowed), so do the Coal Generator (for the coal Hatches make) and
+# the Peat Burner; critters look for those stations when they poop, and the poop goes into
+# the station's storage.
+# How a player reaches it: it is passive; critters near such plants and generators.
+# What changes: critters fertilise farms and fuel generators.
+#
+# The Coal Generator's prefab is a poop station Hatches may use, with the coal delivery's
+# capacity, and Mealwood (which takes dirt) has a station as in the original.
+from: early-base
+mods: [3760466471]
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"Generator\").BuildingComplete.GetComponent<CrittersPoopToPlants.BuildingPoopStation>": exists
+      "Assets.GetBuildingDef(\"Generator\").BuildingComplete.GetComponent<CrittersPoopToPlants.BuildingPoopStation>.capacity": "== original"
+      "Assets.GetBuildingDef(\"Generator\").BuildingComplete.GetComponent<CrittersPoopToPlants.BuildingPoopStation>.allowedUsersIds": {contains: Hatch}
+      "Assets.GetPrefab(\"BasicSingleHarvestPlant\").GetComponent<CrittersPoopToPlants.PlantPoopStation>": exists
+      # The dirt delivery's capacity, (1/60) * 600 * 3 kg: 30.000002 in the original, 30.000004
+      # in ours (float intermediates kept at higher precision by Mono): compared within a gram.
+      "Assets.GetPrefab(\"BasicSingleHarvestPlant\").GetComponent<CrittersPoopToPlants.PlantPoopStation>.capacity": [">= 29.999", "<= 30.001"]
+      "Assets.GetPrefab(\"BasicSingleHarvestPlant\").GetComponent<CrittersPoopToPlants.PlantPoopStation>.allowedUsersIds": "== original"

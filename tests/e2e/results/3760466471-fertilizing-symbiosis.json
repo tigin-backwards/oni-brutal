@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3760466471-fertilizing-symbiosis.yaml",
+ "mods": [
+  "3760466471"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Coal Generator and Mealwood carry the mod's poop stations; Mealwood's capacity is 30.000004 in ours, 30.000002 in the original (float intermediates), compared within a gram",
+ "updated": "2026-10-27",
+ "commit": "437ec043",
+ "mod_dlls": {
+  "3760466471": {
+   "CrittersPoopToPlants.dll": "030ba0b86319fb3601f1a2bf07177e9e3bf010ccae9674099e0aaf97cc197d10"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-021227-f470d6f8",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T02:17:36",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-033805-d08670fb",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T03:38:05",
+    "lane": 14,
+    "reference_run": "20261027-021227-f470d6f8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-033805-d08670fb",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T03:38:06",
+    "lane": 15,
+    "reference_run": "20261027-021227-f470d6f8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

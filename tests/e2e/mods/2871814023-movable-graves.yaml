@@ -1,0 +1,35 @@
+# Movable Graves (2871814023), class P.
+#
+# What it does: an occupied Tasteful Memorial can be moved: deconstructing it drops a Headstone
+# Record (MovableGraves.GraveInfoItemConfig) carrying the Duplicant's name, epitaph, burial
+# time and look, and a record delivered to an empty grave restores them there
+# (Grave.OnStorageChanged). An occupied grave's user menu also gets Empty Grave, which after a
+# confirmation forgets its occupant.
+# How a player reaches it: deconstructing an occupied grave; its user menu.
+# What changes: graves can be moved or emptied.
+#
+# setup builds a grave in the dug-out corridor west of the printing pod and writes a burial
+# into it (a name and a burial time). Selected, its user menu (dumped) offers Empty Grave;
+# pressed and confirmed, the grave is empty again.
+from: early-base
+mods: [2871814023]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Grave\")", method: Build, args: [131765, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "last:GetComponent<Grave>.GetType().GetField(\"graveName\")", method: SetValue, args: [{"$": "last:GetComponent<Grave>"}, "Ada"]}}
+  - driver: {setup.call: {target: "last:GetComponent<Grave>.GetType().GetField(\"burialTime\")", method: SetValue, args: [{"$": "last:GetComponent<Grave>"}, {"$": "UnityEngine.Mathf.Abs(600.0)"}]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"Grave\").GetComponent<GraveDeconstructDropper>": exists
+      "Assets.GetPrefab(\"MovableGraves.GraveInfoItemConfig\")": exists
+  - run: {seconds: 2}
+  - expect_state:
+      "all:Grave::[0].burialTime": "> 0"
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: Grave}
+  - ui_wait: {path: "**/DetailsScreen/UserMenuButtons/UserMenuScreen/Buttons", cond: stable}
+  - ui_dump: {name: usermenu, root: "**/DetailsScreen/UserMenuButtons/UserMenuScreen/Buttons"}
+  - click: {ui: "**/UserMenuScreen/Buttons/Empty GraveButton"}
+  - ui_wait: {path: "**/ConfirmDialog*", cond: stable}
+  - click: {text: "OK", under: "**/ConfirmDialog*"}
+  - expect_state:
+      "all:Grave::[0].burialTime": -1

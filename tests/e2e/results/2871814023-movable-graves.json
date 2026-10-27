@@ -1,0 +1,63 @@
+{
+ "spec": "mods/2871814023-movable-graves.yaml",
+ "mods": [
+  "2871814023"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a grave with a burial, selected, offers Empty Grave in its user menu (dump matches); pressed and confirmed, the grave is empty",
+ "updated": "2026-10-26",
+ "commit": "cbabaaf0",
+ "mod_dlls": {
+  "2871814023": {
+   "MovableGraves.dll": "7fce921fc7f5f3dd99c6eff9b3008721017bcb7529e575ccd6a0a5d2b17c6297"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-182241-89a16e7c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T19:08:33",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-204743-febfde17",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T21:18:57",
+    "lane": 17,
+    "reference_run": "20261026-182241-89a16e7c",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "usermenu": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261026-204743-febfde17",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T21:19:14",
+    "lane": 16,
+    "reference_run": "20261026-182241-89a16e7c",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "usermenu": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

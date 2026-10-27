@@ -1,0 +1,31 @@
+# Signal bridge信号桥 (2878495368), class B.
+#
+# What it does: adds four longer automation wire bridges to the Automation menu, no research:
+# xhxq2 and xhxzq2 (4 cells, joining the cells one to the left and two to the right of their
+# anchor) and xhxq3 and xhxzq3 (5 cells, two to the left and two to the right), single-bit links
+# of refined metal built over anything (BuildLocationRule.LogicBridge).
+# How a player reaches it: the build menu (Automation).
+# What changes: automation signals carried over longer gaps.
+#
+# The Automation menu lists the four bridges. Setup builds a 5-cell bridge in the corridor west
+# of the printing pod; it is a logic network link between the cells two to its left and two to
+# its right.
+from: early-base
+mods: [2878495368]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"xhxq3\")", method: Build, args: [{"$": "Grid.XYToCell(113, 207)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"xhxq2\").WidthInCells": 4
+      "Assets.GetBuildingDef(\"xhxq3\").WidthInCells": 5
+      "Assets.GetBuildingDef(\"xhxzq3\").BuildLocationRule": LogicBridge
+      "Assets.GetPrefab(\"xhxq2\").GetComponent<LogicUtilityNetworkLink>.link2.x": 2
+  - run: {seconds: 5}
+  - expect: {buildings: {xhxq3: 1}}
+  - expect_state:
+      "all:LogicUtilityNetworkLink::[0].link1.x": -2
+      "all:LogicUtilityNetworkLink::[0].link2.x": 2
+      "all:LogicUtilityNetworkLink::[0].visualizeOnly": false
+  - click: {ui: "**/PlanScreen/Toggle:Automation"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/xhxq3 Group*", cond: stable}
+  - shot: {name: automation-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}

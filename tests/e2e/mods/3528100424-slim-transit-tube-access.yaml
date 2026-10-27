@@ -1,0 +1,35 @@
+# Slim Transit Tube Access (3528100424), class B.
+#
+# What it does: adds the SlimTubeLauncher to the Base menu next to the Transit Tube Access,
+# researched with Transit Tubes: a 1x2 Transit Tube Access (the game's is 3x2) that works the
+# same: 960 W, 40 kJ of charge, 1 kJ and 0.05 kg of Wax per launch.
+# How a player reaches it: the research screen, then the build menu (Base).
+# What changes: a tube entrance that fits in a one-cell gap.
+#
+# setup researches Transit Tubes and builds one in the corridor west of the printing pod; it
+# shows in the Base menu and, selected, is a tube entrance.
+from: early-base
+mods: [3528100424]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"TravelTubes\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"SlimTubeLauncher\")", method: Build, args: [131765, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"TravelTubes\").unlockedItemIDs": {contains: SlimTubeLauncher}
+      "Assets.GetBuildingDef(\"SlimTubeLauncher\").WidthInCells": 1
+      "Assets.GetBuildingDef(\"SlimTubeLauncher\").HeightInCells": 2
+  - run: {seconds: 5}
+  - expect: {buildings: {SlimTubeLauncher: 1}}
+  - click: {ui: "**/PlanScreen/Toggle:Base"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/SlimTubeLauncher Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/SlimTubeLauncher Group*": {active: true}
+  - shot: {name: base-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
+  - key: {code: Escape}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: SlimTubeLauncher}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<TravelTubeEntrance>.jouleCapacity": 40000
+      "selected:GetComponent<TravelTubeEntrance>.joulesPerLaunch": 1000

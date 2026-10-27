@@ -1,0 +1,59 @@
+{
+ "spec": "mods/3528100424-slim-transit-tube-access.yaml",
+ "mods": [
+  "3528100424"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "Transit Tubes researched, the Base menu shot lists the 1x2 tube access; built, a tube entrance",
+ "updated": "2026-10-27",
+ "commit": "e100c86e",
+ "mod_dlls": {
+  "3528100424": {
+   "slimtubelauncher.dll": "6a6adba8b7b2eddbfb4bfcf610e7a36ccf71ff1e383c95da2628d2a4455bbccd"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-074831-45ab7067",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T08:43:08",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-090819-f38336a7",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T09:32:32",
+    "lane": 17,
+    "reference_run": "20261027-074831-45ab7067",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "base-menu": 0.0
+    }
+   },
+   {
+    "run": "20261027-090819-f38336a7",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T09:33:31",
+    "lane": 17,
+    "reference_run": "20261027-074831-45ab7067",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "base-menu": 0.0
+    }
+   }
+  ]
+ }
+}

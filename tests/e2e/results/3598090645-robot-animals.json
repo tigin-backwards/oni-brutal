@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3598090645-robot-animals.yaml",
+ "mods": [
+  "3598090645"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "Smelting unlocks the robot critters; a Robot Hatch's recipe side screen opens, needing no operator",
+ "updated": "2026-10-27",
+ "commit": "4b7743e7",
+ "mod_dlls": {
+  "3598090645": {
+   "RobotAnimals.dll": "a16e502dffd12285b6736723da28bf75bb66382dcc8f6f014f04eb62b719bdcd"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-042211-787cf357",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T05:03:33",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-085440-f72c2ad1",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T08:54:40",
+    "lane": 14,
+    "reference_run": "20261027-042211-787cf357",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-085440-f72c2ad1",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T08:55:28",
+    "lane": 14,
+    "reference_run": "20261027-042211-787cf357",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

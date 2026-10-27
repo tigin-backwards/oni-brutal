@@ -1,0 +1,30 @@
+# 机械小动物 (robot critters) (3598090645), class B.
+#
+# What it does: adds six 1x1 machines to the Utilities menu, researched with Smelting, each a
+# ComplexFabricator that needs no Duplicant and no power and does a critter's conversion in
+# 120 s: the Robot Hatch (机械好吃哈奇) turns minerals and foods into coal, the Robot Puft
+# polluted oxygen into slime, the Robot Slickster carbon dioxide into crude oil, the Robot
+# Pokeshell polluted dirt into sand, the Robot Pacu algae and seeds into fish and egg shells,
+# the Robot Shove Vole minerals into meat and egg shells.
+# How a player reaches it: the build menu (Utilities), then each machine's recipe side screen.
+# What changes: critter products from machines.
+#
+# Smelting unlocks the six; a Robot Hatch built by setup in the dug-out corridor west of the
+# printing pod is selected: its recipe side screen lists the conversions (as many as the
+# original's).
+from: early-base
+mods: [3598090645]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"RobotHatch\")", method: Build, args: [{"$": "Grid.XYToCell(112, 206)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"Smelting\").unlockedItemIDs": [{contains: RobotHatch}, {contains: RobotPacu}, {contains: RobotShoveVole}]
+      "Assets.GetPrefab(\"RobotHatch\").GetComponent<ComplexFabricator>.duplicantOperated": false
+      "Assets.GetPrefab(\"RobotHatch\").GetComponent<ComplexFabricator>.GetRecipes().Length": [">= 30", "== original"]
+  - run: {seconds: 2}
+  - expect: {buildings: {RobotHatch: 1}}
+  - driver: {camera.set: {cell: [112, 207], ortho: 6}}
+  - click_world: {cell: [112, 206], select: RobotHatch}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/ComplexFabricatorSideScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<Operational>.IsOperational": true

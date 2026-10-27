@@ -1,0 +1,28 @@
+# 细电线 Thin Wire (2933355725), class B.
+#
+# What it does: adds THINWIRE20230214 to the Power menu: a wire drawn thin, drag-built like the
+# game's wire, rated for 1 kW.
+# How a player reaches it: the build menu (Power).
+# What changes: a less conspicuous wire.
+#
+# The wire shows in the Power menu; setup builds two in the corridor west of the printing pod,
+# and one selected is a 1 kW wire.
+from: early-base
+mods: [2933355725]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"THINWIRE20230214\")", method: Build, args: [131765, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"THINWIRE20230214\")", method: Build, args: [131766, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - run: {seconds: 5}
+  - click: {ui: "**/PlanScreen/Toggle:Power"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/THINWIRE20230214 Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/THINWIRE20230214 Group*": {active: true}
+  - shot: {name: power-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
+  - key: {code: Escape}
+  - driver: {camera.set: {cell: [114, 208], ortho: 8}}
+  - click_world: {cell: [114, 207], select: THINWIRE20230214}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<Wire>.MaxWattageRating": "== 'Max1000'"
+      "count:all:Wire::[*] if .GetComponent<KPrefabID>.PrefabTag.Name == THINWIRE20230214": 2

@@ -1,0 +1,22 @@
+# Temperature Insulate Farm Tiles (3137678878), class P.
+#
+# What it does: postfixes on the Farm Tile's and Hydroponic Farm's ConfigureBuildingTemplate
+# give their storage the game's insulated item modifiers (hide, insulate, seal), so seeds,
+# fertilizer and water they hold exchange no heat.
+# How a player reaches it: building a Farm Tile or Hydroponic Farm.
+# What changes: what a farm tile holds keeps its temperature.
+#
+# The prefabs' storage modifiers are read; a Farm Tile built by setup in the dug-out corridor
+# west of the printing pod has them.
+from: early-base
+mods: [3137678878]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"FarmTile\")", method: Build, args: [{"$": "Grid.XYToCell(113, 207)"}, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"FarmTile\").GetComponent<Storage>.defaultStoredItemModifers": [{contains: Insulate}, {contains: Seal}]
+      "Assets.GetPrefab(\"HydroponicFarm\").GetComponent<Storage>.defaultStoredItemModifers": {contains: Insulate}
+  - run: {seconds: 2}
+  - expect: {buildings: {FarmTile: 1}}
+  - expect_state:
+      "all:PlantablePlot::[0].GetComponent<Storage>.defaultStoredItemModifers": {contains: Insulate}

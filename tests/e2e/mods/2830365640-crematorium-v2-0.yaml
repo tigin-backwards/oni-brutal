@@ -1,0 +1,22 @@
+# Crematorium V2.0 | 火葬场 V2.0 (2830365640), class P.
+#
+# What it does: a postfix on Grave.OnStorageChanged throws a 7 kg lump of Cooked Meat at 100 °C
+# out of the Tasteful Memorial each time its storage changes, as when a body is buried.
+# How a player reaches it: bury a Duplicant's body in a Tasteful Memorial.
+# What changes: burials yield meat.
+#
+# setup builds a Tasteful Memorial in the corridor west of the printing pod and puts a lump
+# of dirt in its storage, which raises its storage-changed event; afterwards Cooked Meat lies
+# next to it.
+from: early-base
+mods: [2830365640]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Grave\")", method: Build, args: [131765, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "all:Grave::[0].GetComponent<Storage>", method: AddOre, args: [Dirt, 1, 300, 255, 0, false, true]}}
+steps:
+  - expect_state:
+      "count:all:KPrefabID::[*] if .PrefabTag.Name == CookedMeat": ">= 1"
+  - run: {seconds: 5}
+  - expect: {buildings: {Grave: 1}}
+  - expect_state:
+      "sum:all:Edible::[*].GetComponent<PrimaryElement>.Mass if .GetComponent<KPrefabID>.PrefabTag.Name == CookedMeat": ">= 7"

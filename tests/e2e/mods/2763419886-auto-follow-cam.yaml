@@ -1,0 +1,28 @@
+# Auto Follow Cam (2763419886), class V.
+#
+# What it does: an AutoCamTimer on the CameraController counts 30 s of real time while the game
+# runs and no tool but the select tool is active; then the camera follows a random Duplicant
+# (CameraController.SetFollowTarget), switching to another every 30 s. Panning the camera
+# (keys or mouse) stops it and starts the count again; following a Duplicant by hand keeps it.
+# How a player reaches it: leave the game running; pan to take the camera back.
+# What changes: an idle camera wanders between Duplicants.
+#
+# The colony runs at speed 1 for over 30 s: the camera follows a Duplicant. Holding the pan key
+# (W) takes it back: the follow ends and the count starts again.
+from: early-base
+mods: [2763419886]
+steps:
+  - expect_state:
+      "CameraController.Instance.GetComponent<AutoFollowCam.AutoCamTimer>.State": NotTracking
+      "CameraController.Instance.followTarget": missing
+  - run: {seconds: 40, speed: 1}
+  - expect_state:
+      "CameraController.Instance.GetComponent<AutoFollowCam.AutoCamTimer>.State": AutoTracking
+      "CameraController.Instance.followTarget.GetComponent<MinionIdentity>": exists
+  - key: {code: W, down: true}
+  - run: {seconds: 1, speed: 1}
+  - key: {code: W, up: true}
+  - run: {seconds: 1, speed: 1}
+  - expect_state:
+      "CameraController.Instance.GetComponent<AutoFollowCam.AutoCamTimer>.State": NotTracking
+      "CameraController.Instance.followTarget": missing

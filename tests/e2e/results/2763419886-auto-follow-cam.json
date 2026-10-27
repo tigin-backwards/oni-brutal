@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2763419886-auto-follow-cam.yaml",
+ "mods": [
+  "2763419886"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "after 30 s at speed 1 the camera follows a Duplicant; holding W takes it back and the follow ends",
+ "updated": "2026-10-27",
+ "commit": "a8d2fbd1",
+ "mod_dlls": {
+  "2763419886": {
+   "AutoFollowCam.dll": "b24ff3e9fa4dc61640265a72866a7357b0c992c1124dfdf7afc455ad7d83890e"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-040543-ba0699f4",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T04:17:02",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-075225-b4890cb8",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T07:52:25",
+    "lane": 14,
+    "reference_run": "20261027-040543-ba0699f4",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-075225-b4890cb8",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T07:54:08",
+    "lane": 14,
+    "reference_run": "20261027-040543-ba0699f4",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

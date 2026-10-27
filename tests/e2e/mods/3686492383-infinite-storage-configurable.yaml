@@ -1,0 +1,40 @@
+# Infinite Storage Configurable (3686492383), class P,O.
+#
+# What it does: multiplies the capacity of the Storage Bin, Smart Storage Bin, Ration Box,
+# Refrigerator and the liquid and gas reservoirs by its PLib option (InfiniteStorageOptions.json,
+# 2 to 100, 0 for the game's): the reservoirs' conduit intake and storage stop at 100 t, the
+# solids at 1,000 t unless the UI Safety Limit is off. With Include Batteries, every battery's
+# capacity is multiplied when it spawns. Its OnLoad patches twice (UserMod2's PatchAll, then
+# its own), so the multiplier applies twice, in the original as here.
+# How a player reaches it: PLib options; any of those buildings.
+# What changes: storage capacities.
+#
+# The options are set to 20x with batteries included and no safety limit. The prefabs'
+# capacities are read (400 times the game's, the reservoirs at 100 t); a Storage Bin and a
+# Battery built by setup in the dug-out corridor west of the printing pod are read, and the
+# bin's capacity control (dumped) offers 8,000 t.
+from: early-base
+mods: [3686492383]
+options:
+  InfiniteStorageConfigurable: {$file: InfiniteStorageOptions.json, CapacityMultiplier: 20, IncludeBatteries: true, UseSafeLimit: false}
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"StorageLocker\")", method: Build, args: [131764, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Battery\")", method: Build, args: [131767, Neutral, null, [Cuprite], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"StorageLocker\").GetComponent<Storage>.capacityKg": 8000000
+      "Assets.GetPrefab(\"Refrigerator\").GetComponent<Storage>.capacityKg": 40000
+      "Assets.GetPrefab(\"LiquidReservoir\").GetComponent<Storage>.capacityKg": 100000
+      "Assets.GetPrefab(\"LiquidReservoir\").GetComponent<ConduitConsumer>.capacityKG": 100000
+      "Assets.GetPrefab(\"GasReservoir\").GetComponent<Storage>.capacityKg": 100000
+  - run: {seconds: 2}
+  - expect: {buildings: {StorageLocker: 1, Battery: 1}}
+  - expect_state:
+      "all:Battery::[0].capacity": [">= 200000", "== original"]
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: StorageLocker}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_wait: {path: "**/CapacityControlSideScreen", cond: stable}
+  - expect_state:
+      "selected:StorageLocker.MaxCapacity": 8000000
+  - ui_dump: {name: capacity, root: "**/CapacityControlSideScreen"}

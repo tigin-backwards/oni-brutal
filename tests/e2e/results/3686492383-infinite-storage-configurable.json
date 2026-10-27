@@ -1,0 +1,66 @@
+{
+ "spec": "mods/3686492383-infinite-storage-configurable.yaml",
+ "mods": [
+  "3686492383"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "at 20x the storage capacities are 400 times the game's (the mod patches twice, as in the original); a built bin's capacity control offers 8,000 t (dump matches)",
+ "updated": "2026-10-26",
+ "commit": "9fec3604",
+ "mod_dlls": {
+  "3686492383": {
+   "InfiniteStorageConfigurable.dll": "74d024a51aa5b41fa9f5f81aca85ac918eec8de819348a7b191479b6c693a717",
+   "PLibCore.dll": "f2127c9fa9fd24e9631035d0157be71e3eebfdd2425f58cd2d0f1dc5f7e4f177",
+   "PLibOptions.dll": "024f5c0d18dc15bd93e9112434456ac930f35ab97b1769b160ba4097f49964e1",
+   "PLibUI.dll": "c9665407dcad35ef695b91396d2fc5edd62716f2aa11aa6934b22363ef537390"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-182241-89a16e7c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T18:49:38",
+    "lane": 16,
+    "signatures": 1
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-221719-7019b91c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T22:23:11",
+    "lane": 17,
+    "reference_run": "20261026-182241-89a16e7c",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "capacity": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261026-221719-7019b91c",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T22:24:50",
+    "lane": 17,
+    "reference_run": "20261026-182241-89a16e7c",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "capacity": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

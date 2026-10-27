@@ -1,0 +1,32 @@
+# Klei Stream Painting Skins (3819173399), class V.
+#
+# What it does: before Db.Initialize it registers 20 art stages from Klei's art streams, drawn
+# from its own kanims: 4 for the Blank Canvas (Puft and its variants) and 16 for the Portrait
+# Canvas (critters, Duplicants and buildings), all of the masterpiece kind, so a Duplicant
+# painting a canvas well may paint one, and the canvas's skin picker offers them.
+# How a player reaches it: a Duplicant with the art skill painting a canvas; selecting it.
+# What changes: more paintings.
+#
+# The 20 stages are in the database; a Blank Canvas built by setup in the dug-out corridor west
+# of the printing pod is given the Puft painting (as a finished painting would be): it is
+# named after it and draws the mod's anim, compared in a world shot.
+from: early-base
+mods: [3819173399]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Canvas\")", method: Build, args: [{"$": "Grid.XYToCell(112, 206)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "last:GetComponent<Artable>", method: SetStage, args: [Canvas_KleiArtstreamPainting_Puft, true]}}
+steps:
+  - expect_state:
+      "count:Db.GetArtableStages().resources[*] if .id.Contains(\"_KleiArtstreamPainting_\") == true": 20
+      "Db.GetArtableStages().Get(\"Canvas_KleiArtstreamPainting_Puft\").animFile": painting_art_puft_kanim
+  - run: {seconds: 2}
+  - expect: {buildings: {Canvas: 1}}
+  - expect_state:
+      "all:Artable::[0].CurrentStage": Canvas_KleiArtstreamPainting_Puft
+      "all:Artable::[0].GetComponent<KBatchedAnimController>.AnimFiles[0].name": painting_art_puft_kanim
+  - world_shot: {name: puft, ortho: 4, at: [113, 207]}
+  - driver: {camera.set: {cell: [113, 207], ortho: 6}}
+  - click_world: {cell: [112, 207], select: Canvas}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Puft"}

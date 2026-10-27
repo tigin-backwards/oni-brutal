@@ -1,0 +1,59 @@
+{
+ "spec": "mods/3819173399-klei-stream-paintings.yaml",
+ "mods": [
+  "3819173399"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the 20 painting stages exist; a canvas given the Puft painting draws the mod's anim (world shot) and is named",
+ "updated": "2026-10-27",
+ "commit": "bd11648f",
+ "mod_dlls": {
+  "3819173399": {
+   "KleiPaintings.dll": "203a23b0eb44be2058eaa046198db37baac0d62561111c863ed8dbac689c94bf"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-071843-a098de75",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T07:18:44",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-091118-bd9e7a09",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T09:11:18",
+    "lane": 14,
+    "reference_run": "20261027-071843-a098de75",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "puft": 0.012186
+    }
+   },
+   {
+    "run": "20261027-091118-bd9e7a09",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T09:12:10",
+    "lane": 14,
+    "reference_run": "20261027-071843-a098de75",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "puft": 0.01267
+    }
+   }
+  ]
+ }
+}

@@ -1,0 +1,21 @@
+# 汉化补丁 (ModLocalizePatch) (3802147067), classes P, X.
+#
+# What it does: a Simplified Chinese translation library for about forty Workshop mods without
+# one (localizations/MODID/zh.json): when all mods have loaded it matches the active ones by
+# static ID or Workshop ID, and its Harmony patches (on GeneratedBuildings,
+# Assets.SubstanceListHookup, the codex's food entries, the critter overlay and some mods'
+# inline strings) put the translated strings in place of the mods' English ones; it logs what
+# it matched. It can also ask a web translator for mod names, which these runs do not use.
+# How a player reaches it: playing with a mod it translates.
+# What changes: those mods' names and texts in Chinese.
+#
+# With Handy Herbs (3286478591) beside it, the mod library is matched (logged), and Handy
+# Herbs' Dragon Fruit is named as in the original.
+from: early-base
+mods: [3286478591, 3802147067]
+require_log: ['\[ModLocalizePatch\] v1\.2\.3']
+steps:
+  - expect_state:
+      "Strings.Get(\"STRINGS.ITEMS.FOOD.DRAGONPLANTFRUIT.NAME\").String": "== original"
+  - run: {seconds: 5}
+  - expect: {duplicants: 3}

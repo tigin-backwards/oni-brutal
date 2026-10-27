@@ -1,0 +1,59 @@
+{
+ "spec": "mods/3802147067-mod-localize-patch.yaml",
+ "mods": [
+  "3286478591",
+  "3802147067"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "beside Handy Herbs the library loads and matches; the Dragon Fruit is named as in the original",
+ "updated": "2026-10-27",
+ "commit": "0a39b9e3",
+ "mod_dlls": {
+  "3286478591": {
+   "ExoticCuisine.dll": "697ae5c05fdd88fa830057f6207fd204888bfa4e2ed9fb0de670a75a58430dd2"
+  },
+  "3802147067": {
+   "ModLocalizePatch.dll": "9d36a32aa58050dc14263a65e088e87bc2c96f90adb6b574e4e5a00b3d6942d5"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-042211-787cf357",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T05:11:38",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-083957-bfa21b77",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T08:39:57",
+    "lane": 14,
+    "reference_run": "20261027-042211-787cf357",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-083957-bfa21b77",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T08:40:48",
+    "lane": 14,
+    "reference_run": "20261027-042211-787cf357",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

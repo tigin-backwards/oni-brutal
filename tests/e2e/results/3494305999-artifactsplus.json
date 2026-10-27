@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3494305999-artifactsplus.yaml",
+ "mods": [
+  "3494305999"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Decor Room type is registered; a built Pedestal shows the Artifact Details section",
+ "updated": "2026-10-26",
+ "commit": "73711f65",
+ "mod_dlls": {
+  "3494305999": {
+   "ArtifactsPlus.dll": "d0ba876bd46dfe8338a9e88698b4992e37b728f9d42f61e6af84930a1ecb8027"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-193322-8c93fed4",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T20:00:53",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-202022-adf95e2b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T20:48:27",
+    "lane": 15,
+    "reference_run": "20261026-193322-8c93fed4",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-202022-adf95e2b",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T20:49:25",
+    "lane": 15,
+    "reference_run": "20261026-193322-8c93fed4",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

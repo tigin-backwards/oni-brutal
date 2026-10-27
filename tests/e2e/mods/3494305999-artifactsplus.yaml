@@ -1,0 +1,26 @@
+# ArtifactsPlus (3494305999), classes K, O.
+#
+# What it does: artifacts on a Pedestal in a room of enough decor (a new Decor Room type, or
+# Rooms Expanded's) give the Duplicants of their world attribute bonuses and effects, read
+# from a JSON config and polled every PLib option's seconds; a selected Pedestal gets an
+# "Artifact Details" section listing them, and the Duplicants' personality panel the bonuses.
+# How a player reaches it: displaying artifacts; a selected Pedestal.
+# What changes: artifacts that do something.
+#
+# The Decor Room type is registered; a Pedestal built by setup in the dug-out corridor west of
+# the printing pod is selected and shows the Artifact Details section, empty.
+from: early-base
+mods: [3494305999]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"ItemPedestal\")", method: Build, args: [131128, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().RoomTypes.TryGet(\"DecorRoom\")": exists
+  - run: {seconds: 2}
+  - expect: {buildings: {ItemPedestal: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 206], select: ItemPedestal}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/SimpleInfoScreen/CollapsableContentTemplate/Header_Title/BreakerText": {any_text: "Artifact Details"}
+      "**/SimpleInfoScreen/**/ContentStatus/artifact_name": {text: "No artifact found."}

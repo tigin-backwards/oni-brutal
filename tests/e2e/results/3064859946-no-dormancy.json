@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3064859946-no-dormancy.yaml",
+ "mods": [
+  "3064859946"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a steam vent's year is all active",
+ "updated": "2026-10-27",
+ "commit": "33d4d30d",
+ "mod_dlls": {
+  "3064859946": {
+   "No_Dormant_Geyser.dll": "22fad2beb4be2f4571c027ad9aa574fe2edf5234a636a059dfd4e328d1a396bf"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-051715-c581e5cb",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T05:38:50",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-081856-b8e43bce",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T08:18:57",
+    "lane": 14,
+    "reference_run": "20261027-051715-c581e5cb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-081856-b8e43bce",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T08:19:43",
+    "lane": 14,
+    "reference_run": "20261027-051715-c581e5cb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

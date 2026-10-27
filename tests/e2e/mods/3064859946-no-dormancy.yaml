@@ -1,0 +1,24 @@
+# No Dormancy (3064859946), class P.
+#
+# What it does: a prefix on GeyserInstanceConfiguration.Init scales every geyser's rolls
+# itself (rate, eruption period and share, activity period) and sets its active share of the
+# year to 1: geysers and vents are never dormant (with no rebalance, so about twice the
+# output).
+# How a player reaches it: any geyser.
+# What changes: no dormant periods.
+#
+# setup lays a steam vent in the dug-out corridor west of the printing pod: its configuration
+# is active all year, and the vent stays out of dormancy as it runs.
+from: early-base
+mods: [3064859946]
+setup:
+  - driver: {seed: 12345}
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(0, 112, 206, \"GeyserGeneric_steam\", \"BuildingBack\")", method: SetActive, args: [true]}}
+steps:
+  - run: {seconds: 2}
+  - expect_state:
+      "all:Geyser::[0].configuration.scaledYearPercent": 1
+      "all:Geyser::[0].configuration.GetYearLength()": {save_as: year}
+  - expect_state:
+      "all:Geyser::[0].configuration.GetYearOnDuration()": "== year"
+      "all:Geyser::[0].configuration.GetYearOffDuration()": 0

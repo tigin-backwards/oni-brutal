@@ -1,0 +1,25 @@
+# Lamp The Darkness (3126557675), class P.
+#
+# What it does: the Ceiling Light and the Lamp draw 1 W and give off 0.1 kDTU/s when on.
+# How a player reaches it: those lights, in the build menu as before.
+# What changes: lighting is almost free.
+#
+# The defs hold 1 W; a Lamp built by setup in the dug-out corridor west of the printing pod
+# is selected: it needs 1 W (its title dumped).
+from: early-base
+mods: [3126557675]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"FloorLamp\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"CeilingLight\").EnergyConsumptionWhenActive": 1
+      "Assets.GetBuildingDef(\"CeilingLight\").SelfHeatKilowattsWhenActive": 0.1
+      "Assets.GetBuildingDef(\"FloorLamp\").EnergyConsumptionWhenActive": 1
+  - run: {seconds: 2}
+  - expect: {buildings: {FloorLamp: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: FloorLamp}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_dump: {name: title, root: "**/DetailsScreen/TitleBar/Border/LabelGroup"}
+  - expect_state:
+      "selected:GetComponent<EnergyConsumer>.WattsNeededWhenActive": 1

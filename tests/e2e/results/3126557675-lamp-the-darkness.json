@@ -1,0 +1,63 @@
+{
+ "spec": "mods/3126557675-lamp-the-darkness.yaml",
+ "mods": [
+  "3126557675"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the lights' defs draw 1 W; a Lamp built in the corridor needs 1 W (title dumped)",
+ "updated": "2026-10-27",
+ "commit": "77aef08d",
+ "mod_dlls": {
+  "3126557675": {
+   "LightAndLamp.dll": "e4a0b0c21ec89b79a550b8ced7ef8058baf705757c26bf9541e30f61e1206bb3"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-235258-afb42cfe",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T00:13:50",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-012814-d2dbd1a7",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T01:28:14",
+    "lane": 14,
+    "reference_run": "20261026-235258-afb42cfe",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261027-012814-d2dbd1a7",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T01:28:15",
+    "lane": 15,
+    "reference_run": "20261026-235258-afb42cfe",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

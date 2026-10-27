@@ -1,0 +1,20 @@
+# 轮盘工具 (Roulette Tool) (3020979372), classes T, S, K.
+#
+# What it does: two PLib key bindings open radial menus at the pointer while held: Q the tools
+# (dig, build, cancel and the rest), E the overlays; pointing at an item and releasing the key
+# picks it.
+# How a player reaches it: holding Q or E in the colony.
+# What changes: tools and overlays chosen by a flick of the mouse.
+#
+# Q is held with the pointer over the corridor west of the printing pod: the tools' wheel
+# opens with the tools as items (shot) and closes on release.
+from: early-base
+mods: [3020979372]
+steps:
+  - run: {seconds: 1}
+  - driver: {camera.set: {cell: [112, 208], ortho: 10}}
+  - key: {code: Q, down: true, at: [112, 207]}
+  # The wheel's panel sits outside the UI canvases E2eDriver searches: it is compared as a
+  # shot of the screen while Q is held.
+  - shot: {name: wheel, threshold: 0.04}
+  - key: {code: Q, up: true}

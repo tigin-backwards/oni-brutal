@@ -1,0 +1,60 @@
+{
+ "spec": "mods/3020979372-roulette-tool.yaml",
+ "mods": [
+  "3020979372"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "holding Q over the corridor opens the tools wheel (shot)",
+ "updated": "2026-10-26",
+ "commit": "81398712",
+ "mod_dlls": {
+  "3020979372": {
+   "PLib.dll": "b862c5db2b3cd6df09a62d4a30782e91e2b24e8e1bfac08d991c9cc89a984ba9",
+   "RouletteTool.dll": "8fd8891d1b663f9b92dfc23ebf5111311b489d0e684e6764b41ac1103213f936"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-230700-03b9b70f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T23:07:00",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-231041-c27e7a19",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T23:17:46",
+    "lane": 14,
+    "reference_run": "20261026-230700-03b9b70f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "wheel": 0.017943
+    }
+   },
+   {
+    "run": "20261026-231041-c27e7a19",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T23:17:52",
+    "lane": 15,
+    "reference_run": "20261026-230700-03b9b70f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "wheel": 0.01814
+    }
+   }
+  ]
+ }
+}

@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2983485002-entomb-tempshiftplates.yaml",
+ "mods": [
+  "2983485002"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "Tempshift Plates are not entombable; a built one has no entombment monitor",
+ "updated": "2026-10-26",
+ "commit": "c7b16a61",
+ "mod_dlls": {
+  "2983485002": {
+   "tempshiftentombmod.dll": "55c1ab14b35b86485c2718446ffc8f8bebf48e0a7351f206ca1e2c09423d606f"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-203918-0b6e3624",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T21:08:46",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-213856-d4539d05",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T22:09:48",
+    "lane": 15,
+    "reference_run": "20261026-203918-0b6e3624",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-213856-d4539d05",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T22:10:56",
+    "lane": 15,
+    "reference_run": "20261026-203918-0b6e3624",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

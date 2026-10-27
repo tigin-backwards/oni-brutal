@@ -1,0 +1,24 @@
+# Entomb Tempshiftplates (2983485002), class P.
+#
+# What it does: a postfix on ThermalBlockConfig.CreateBuildingDef makes the Tempshift Plate not
+# entombable, so debris or liquid around it no longer marks it entombed and disabled.
+# How a player reaches it: building Tempshift Plates in liquids or under debris.
+# What changes: tempshift plates keep working when buried.
+#
+# The definition is read; a Tempshift Plate built by setup in the dug-out corridor west of the
+# printing pod is selected, and it has no entombment monitor.
+from: early-base
+mods: [2983485002]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"ThermalBlock\")", method: Build, args: [131128, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"ThermalBlock\").Entombable": false
+      "Assets.GetPrefab(\"ThermalBlock\").GetComponent<EntombVulnerable>": missing
+  - run: {seconds: 2}
+  - expect: {buildings: {ThermalBlock: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 206], select: ThermalBlock}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:EntombVulnerable": missing

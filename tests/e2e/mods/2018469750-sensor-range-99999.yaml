@@ -1,0 +1,28 @@
+# Sensor Range to 99999Kg[Vanilla+DLC] (2018469750), class P.
+#
+# What it does: transpilers on the Atmo Sensor's and the Hydro Sensor's DoPostConfigureComplete
+# replace their range maxima (20 kg and 2000 kg) with 100000 kg, so their threshold sliders
+# reach that far.
+# How a player reaches it: select an Atmo or Hydro Sensor; its threshold side screen.
+# What changes: pressure sensors that measure dense gases and deep liquids.
+#
+# Both sensors' prefabs have the new maximum; an Atmo Sensor built by setup in the dug-out
+# corridor west of the printing pod is selected, and 50000 (grams) typed into its threshold
+# field sets 50 kg, beyond the game's 20 kg.
+from: early-base
+mods: [2018469750]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LogicPressureSensorGas\")", method: Build, args: [{"$": "Grid.XYToCell(112, 206)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"LogicPressureSensorGas\").GetComponent<LogicPressureSensor>.rangeMax": 100000
+      "Assets.GetPrefab(\"LogicPressureSensorLiquid\").GetComponent<LogicPressureSensor>.rangeMax": 100000
+  - run: {seconds: 2}
+  - expect: {buildings: {LogicPressureSensorGas: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 206], select: LogicPressureSensorGas}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/ThresholdSwitchSideScreen", cond: stable}
+  - ui_dump: {name: threshold, root: "**/DetailsScreen/SideScreen/**/ThresholdSwitchSideScreen", mask_text: ['Pressure:\\n[0-9.]+ g']}
+  - type: {ui: "**/ThresholdSwitchSideScreen/**/NumberInputField", text: "50000", enter: true, clear: true}
+  - expect_state:
+      "selected:GetComponent<LogicPressureSensor>.Threshold": 50

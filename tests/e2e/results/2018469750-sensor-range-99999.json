@@ -1,0 +1,63 @@
+{
+ "spec": "mods/2018469750-sensor-range-99999.yaml",
+ "mods": [
+  "2018469750"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "both pressure sensors reach 100 t; 50000 g typed into an Atmo Sensor's threshold sets 50 kg; its side screen dumped",
+ "updated": "2026-10-27",
+ "commit": "8e829dc3",
+ "mod_dlls": {
+  "2018469750": {
+   "Sensor99999.dll": "a639e32e8683c29c8d0dc9caf4736c6cbacff7e2483e8dfa55d196108e7ebc06"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-051715-c581e5cb",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T06:21:30",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-090515-1313b4f7",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T09:05:15",
+    "lane": 15,
+    "reference_run": "20261027-051715-c581e5cb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "threshold": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261027-090515-1313b4f7",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T09:08:36",
+    "lane": 15,
+    "reference_run": "20261027-051715-c581e5cb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "threshold": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

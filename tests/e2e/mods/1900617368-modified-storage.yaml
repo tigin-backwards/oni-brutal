@@ -1,0 +1,49 @@
+# Modified Storage (1900617368), class B; base game only.
+#
+# What it does: adds a Smart Storage Bin (Ktoblin.ModifiedStorageLockerSmart, Base menu, Smart
+# Storage research) and a Refrigerator (Ktoblin.ModifiedRefrigerator, Food menu, Agriculture)
+# whose automation output follows two thresholds instead of the game's single full signal:
+# green once the storage is filled past the upper one, red again below the lower one, set in
+# an activation range side screen.
+# How a player reaches it: the research screen, then the build menu (Base, Food).
+# What changes: storages that drive automation with hysteresis.
+#
+# In the base-game colony, setup researches Smart Storage and Agriculture and builds the bin
+# by the research station, selected. Its side screen shows the high and low thresholds; both
+# buildings show in their menus.
+from: vanilla-base
+mods: [1900617368]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"SmartStorage\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"Agriculture\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Game.Instance", method: Trigger, args: [-107300940]}}
+  - driver: {setup.call: {target: "PlanScreen.Instance._researchedDefs", method: Clear}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Ktoblin.ModifiedStorageLockerSmart\")", method: Build, args: [88789, "Neutral", null, ["Copper"], 293.15]}}
+  - driver: {setup.call: {type: GridVisibility, method: Reveal, args: [215, 348, 10, 10.0]}}
+  - driver: {setup.call: {target: "SelectTool.Instance", method: Select, args: [{"$": "all:ModifiedStorage.ModifiedStorageLockerSmart::[0].GetComponent<KSelectable>"}]}}
+steps:
+  - expect_state:
+      "DlcManager.IsExpansion1Active()": false
+      "Db.Get().Techs.Get(\"SmartStorage\").unlockedItemIDs": {contains: Ktoblin.ModifiedStorageLockerSmart}
+      "Db.Get().Techs.Get(\"Agriculture\").unlockedItemIDs": {contains: Ktoblin.ModifiedRefrigerator}
+  - run: {seconds: 2}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<ModifiedStorage.ModifiedStorageLockerSmart>.DeactivateValue": "== original"
+  - expect_ui:
+      "**/DetailsScreen/SideScreen/**": {any_text: "~High Threshold"}
+  - expect_ui:
+      "**/DetailsScreen/SideScreen/**": {any_text: "~Low Threshold"}
+  - shot: {name: side-screen, crop: "**/DetailsScreen/SideScreen", threshold: 0.04}
+  - key: {code: Escape}
+  - click: {ui: "**/PlanScreen/Toggle:Base"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/Ktoblin.ModifiedStorageLockerSmart*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/Ktoblin.ModifiedStorageLockerSmart*": {active: true}
+  - key: {code: Escape}
+  - click: {ui: "**/PlanScreen/Toggle:Food"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/Ktoblin.ModifiedRefrigerator*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/Ktoblin.ModifiedRefrigerator*": {active: true}

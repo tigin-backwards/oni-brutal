@@ -1,0 +1,26 @@
+# Bigger Capacity Fixed 容量调整修复 (3799841474), classes P, O.
+#
+# What it does: multipliers from its PLib options raise the gas and liquid pipes' capacity
+# (and valves' maximum flow, the conduction panel's rate), batteries' capacity, the power
+# transformers' wattage (a setting of its own), and storage bins', reservoirs' and other
+# buildings' storage, logging each change ([BiggerCapacity] lines).
+# How a player reaches it: the Mods screen's options; pipes and buildings as before.
+# What changes: bigger pipes, batteries and storage.
+#
+# With the default options (storage four times, pipes as in the game), the pipes' capacities
+# are the original's, and a Storage Bin built by setup in the dug-out corridor west of the
+# printing pod holds more than the game's 20 t, as much as the original's.
+from: early-base
+mods: [3799841474]
+require_log: ['\[BiggerCapacity\] LiquidPipe - multiplier', '\[BiggerCapacity\] GasPipe - multiplier']
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"StorageLocker\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Game.Instance.liquidConduitFlow.MaxMass": "== original"
+      "Game.Instance.gasConduitFlow.MaxMass": "== original"
+      "Assets.GetBuildingDef(\"PowerTransformer\").GeneratorWattageRating": "== original"
+  - run: {seconds: 2}
+  - expect: {buildings: {StorageLocker: 1}}
+  - expect_state:
+      "all:StorageLocker::[0].GetComponent<Storage>.capacityKg": ["> 20000", "== original"]

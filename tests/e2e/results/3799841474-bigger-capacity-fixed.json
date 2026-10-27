@@ -1,0 +1,56 @@
+{
+ "spec": "mods/3799841474-bigger-capacity-fixed.yaml",
+ "mods": [
+  "3799841474"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Storage Bin built in the corridor holds more than the game's 20 t, and the pipes are the original's",
+ "updated": "2026-10-27",
+ "commit": "437ec043",
+ "mod_dlls": {
+  "3799841474": {
+   "BiggerCapacity.dll": "2959b93b3a2fde9531dddffa8f42430cecf82e453b701a9ab4d0c45ec0a4e163",
+   "PLib.dll": "893dc1ea3eddd02c85d433231aae356be27be07ddfc1a98fb2c51d84748208e8"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-030200-7c6f97e5",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T03:12:38",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-034153-19b995b8",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T03:41:53",
+    "lane": 14,
+    "reference_run": "20261027-030200-7c6f97e5",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-034153-19b995b8",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T03:41:54",
+    "lane": 15,
+    "reference_run": "20261027-030200-7c6f97e5",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

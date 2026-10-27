@@ -1,0 +1,24 @@
+# ReshufflingArchetype (2641977549), class S.
+#
+# What it does: a postfix on CharacterContainer.SetReshufflingState keeps a Duplicant card's
+# reshuffle button and its interest (archetype) drop-down shown whatever the state, so the
+# Printing Pod's cards can be rerolled and steered like a new colony's.
+# How a player reaches it: the Printing Pod's choices.
+# What changes: printed Duplicants can be rerolled, by interest.
+#
+# setup makes the Printing Pod ready; its screen opens through OniMcp, and every Duplicant
+# card shows its reshuffle button and its interest drop-down.
+from: early-base
+mods: [2641977549]
+setup:
+  - driver: {seed: 12345}
+  - driver: {setup.call: {target: "Immigration.Instance", method: "Sim200ms", args: [100000]}}
+steps:
+  - expect_state: {"Immigration.Instance.ImmigrantsAvailable": true}
+  - call: {tool: building_control, args: {domain: side_surface, surface: facility, kind: telepad, action: open_immigrants, confirm: true}}
+  - ui_wait: {path: "**/ImmigrantScreen/Layout", cond: stable}
+  - expect_state:
+      "count:all:CharacterContainer::[*]": [{save_as: cards}, ">= 1"]
+  - expect_state:
+      "count:all:CharacterContainer::[*] if .reshuffleButton.gameObject.activeSelf == true": "== cards"
+      "count:all:CharacterContainer::[*] if .archetypeDropDown.gameObject.activeSelf == true": "== cards"

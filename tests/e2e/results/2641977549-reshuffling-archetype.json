@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2641977549-reshuffling-archetype.yaml",
+ "mods": [
+  "2641977549"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "every Duplicant card of the Printing Pod shows its reshuffle button and interest drop-down",
+ "updated": "2026-10-26",
+ "commit": "cbabaaf0",
+ "mod_dlls": {
+  "2641977549": {
+   "ReshufflingArchetype.dll": "15ef1ce1e24578a49c49862cc19c607caac3c63e831e9fa5599135d7f6538d27"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-155051-8ce3a25e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T16:01:46",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-204743-febfde17",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T21:10:25",
+    "lane": 17,
+    "reference_run": "20261026-155051-8ce3a25e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-204743-febfde17",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T21:10:45",
+    "lane": 16,
+    "reference_run": "20261026-155051-8ce3a25e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

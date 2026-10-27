@@ -1,0 +1,30 @@
+# Critter Settings Manager (3734363283), class M.
+#
+# What it does: per-critter settings for about sixty species (life span, calories, egg laying
+# and incubation, comfortable and lethal temperatures, diet multipliers, room needs, milking),
+# kept in Klei/OxygenNotIncluded/mods/CritterSettings.json under the user's Documents
+# (written with the game's values on the first start) and
+# applied to each critter's prefab as it is made; a postfix on ModsScreen.BuildDisplay adds a
+# Config button to the mod's row in the Mods screen, which opens the mod's own settings window
+# (CritterSettingsScreen, under the front end) with a critter list and fields, and SAVE & CLOSE.
+# How a player reaches it: the main menu's Mods screen, the Config button on its row.
+# What changes: critters tuned by the player.
+#
+# From a colony, Main Menu (quit without saving), then Mods: the mod's row has the Config
+# button; clicked, the settings window opens (its title bar and buttons dumped).
+from: early-base
+mods: [3734363283]
+steps:
+  - key: {code: Escape}
+  - ui_wait: {path: "**/PauseScreen/**/Main MenuButton", cond: stable}
+  - click: {ui: "**/PauseScreen/**/Main MenuButton"}
+  - ui_wait: {path: "**/ConfirmDialog/GameObject/Panel/ConfigurableButton", cond: stable}
+  - click: {ui: "**/ConfirmDialog/GameObject/Panel/ConfigurableButton"}   # Quit Without Saving
+  - ui_wait: {path: "**/MainMenu_SpacedOut/MainMenuMenubar/MainMenuButtons", cond: stable, frames: 3000}
+  - click: {text: "MODS", under: "**/MainMenuButtons"}
+  - ui_wait: {path: "**/ModsScreen/Panel", cond: stable}
+  - ui_dump: {name: row, root: "**/ModsScreen/Panel/ListView/Files/Viewport/Content/Critter Settings Manager"}
+  - click: {ui: "**/ModsScreen/**/Content/Critter Settings Manager/ConfigButton"}
+  - ui_wait: {path: "**/CritterSettingsScreen/Overlay/Window", cond: stable}
+  - ui_dump: {name: title, root: "**/CritterSettingsScreen/Overlay/Window/TitleBar"}
+  - ui_dump: {name: buttons, root: "**/CritterSettingsScreen/Overlay/Window/BtnBar"}

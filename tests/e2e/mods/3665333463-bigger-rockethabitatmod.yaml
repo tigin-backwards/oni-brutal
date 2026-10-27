@@ -1,0 +1,20 @@
+# Bigger RocketHabitatMod (3665333463), class P.
+#
+# What it does (Spaced Out): the Spacefarer Module's interior is replaced by the mod's own
+# template, interiors/habitat_medium.yaml (28x28 cells): postfixes on
+# HabitatModuleMediumConfig.ConfigureBuildingTemplate and ClustercraftExteriorDoor.OnSpawn
+# point the module's door at "mod::interiors/habitat_medium", and prefixes on TemplateCache
+# load that path from the mod's folder.
+# How a player reaches it: build a Spacefarer Module on a rocket and enter it.
+# What changes: a bigger rocket interior.
+#
+# The module's door names the mod's template, and the template cache loads it from the mod:
+# 28 cells square.
+from: early-base
+mods: [3665333463]
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"HabitatModuleMedium\").GetComponent<ClustercraftExteriorDoor>.interiorTemplateName": "mod::interiors/habitat_medium"
+      "TemplateCache.GetTemplate(\"mod::interiors/habitat_medium\").info.size.X": 28
+      "TemplateCache.GetTemplate(\"mod::interiors/habitat_medium\").info.size.Y": 28
+      "TemplateCache.GetTemplate(\"expansion1::interiors/habitat_medium\").info.size.X": "== original"

@@ -852,11 +852,17 @@ game or mod code can notice. Each says how it is resolved, or why it is kept.
   frame), and `new StackTrace()` lists the replacement's frame on both (D23). Not covered: a call
   in a patched method's own body, which runs in the replacement: Mono names 0Harmony there (the
   owner's assembly, measured), ours the caller's; dynamic methods owned elsewhere (a mod's own),
-  which Mono walks past too. Cost: none measured. With the postfix, a call to a method returning
+  which Mono walks past too; a caller whose call is a tail call. Once a method is optimized
+  (tier 1, or with tiered compilation off), CoreCLR's JIT makes a call right before `ret` a
+  tail call, so the caller's frame is gone and its own caller is named, with or without Harmony
+  (`--check-types` named the host for `call Who; ret` and for `callvirt Invoke; ret` once they
+  tiered up, `DOTNET_TieredPGO=0` or `DOTNET_TieredCompilation=0`). Mono keeps that frame (the
+  probe's `CallWho` has that shape). Cost: none measured. With the postfix, a call to a method returning
   `GetCallingAssembly()` takes 400 ns, as without it (release build); the walk, made only for
   Harmony's replacements and 0Harmony's own calls, 9 to 15 µs at 25 frames. `--check-types`
   patches an emitted game's two constructors, one calling the other, and a method, and calls
-  them from a third assembly, directly and through reflection, past tier-up;
+  them from a third assembly, directly and through reflection, past tier-up, from callers that
+  use each result after the call, so none of their calls is a tail call;
   `tests/e2e/mods/3757075889-mod-origin-info.yaml` compares the mod's records with the
   original's.
 - **D42 Methods naming a member its type no longer has.** A mod built for an older game calls

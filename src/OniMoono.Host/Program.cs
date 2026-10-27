@@ -1356,13 +1356,18 @@ namespace OniMoono.Host
                     var run2 = typeof(Program).GetMethod(nameof(ReflectedTarget), BindingFlags.NonPublic | BindingFlags.Static)!;
                     harmony.Patch(run2, prefix: new HarmonyLib.HarmonyMethod(origins.GetMethod("RunPrefix")));
                     // The caller, a third assembly: the game's constructors, Run directly and
-                    // through reflection, and the mod's Who.
+                    // through reflection, and the mod's Who. Each keeps its frame: once optimized,
+                    // CoreCLR makes a call right before `ret` a tail call, and Who's caller or
+                    // Invoke's would be the host's lambda (Mono keeps the frame; D41's Not
+                    // covered). The result is passed to GC.KeepAlive, which compiles to nothing.
                     var c = Module("CheckCallingCaller").DefineType("Caller", TypeAttributes.Public | TypeAttributes.Abstract | TypeAttributes.Sealed);
                     void Define(string name, Action<System.Reflection.Emit.ILGenerator> body)
                     {
                         var m = c.DefineMethod(name, MethodAttributes.Public | MethodAttributes.Static, typeof(object), Type.EmptyTypes);
                         var emit = m.GetILGenerator();
                         body(emit);
+                        emit.Emit(System.Reflection.Emit.OpCodes.Dup);
+                        emit.Emit(System.Reflection.Emit.OpCodes.Call, typeof(GC).GetMethod(nameof(GC.KeepAlive))!);
                         emit.Emit(System.Reflection.Emit.OpCodes.Ret);
                     }
                     Define("MakeA", g => g.Emit(System.Reflection.Emit.OpCodes.Newobj, game.GetConstructor(Type.EmptyTypes)!));

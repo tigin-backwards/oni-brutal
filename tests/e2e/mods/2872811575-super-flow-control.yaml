@@ -1,0 +1,23 @@
+# Super flow control超级流量控制 (2872811575), class P.
+#
+# What it does: the six valves (Gas and Liquid Valve, Shutoff and Meter) get the build rule
+# Conduit instead of Anywhere: they are placed on top of an existing pipe of their kind, which
+# they replace, rather than in free cells.
+# How a player reaches it: the build menu (Plumbing, Ventilation), placing a valve.
+# What changes: valves dropped onto pipes.
+#
+# The six valves' definitions carry the Conduit rule (the game's others keep theirs); the
+# colony plays on.
+from: early-base
+mods: [2872811575]
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"LiquidValve\").BuildLocationRule": Conduit
+      "Assets.GetBuildingDef(\"LiquidLogicValve\").BuildLocationRule": Conduit
+      "Assets.GetBuildingDef(\"LiquidLimitValve\").BuildLocationRule": Conduit
+      "Assets.GetBuildingDef(\"GasValve\").BuildLocationRule": Conduit
+      "Assets.GetBuildingDef(\"GasLogicValve\").BuildLocationRule": Conduit
+      "Assets.GetBuildingDef(\"GasLimitValve\").BuildLocationRule": Conduit
+      "Assets.GetBuildingDef(\"LiquidVent\").BuildLocationRule": "== original"
+  - run: {seconds: 10}
+  - expect: {duplicants: 3}

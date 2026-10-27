@@ -1,0 +1,56 @@
+{
+ "spec": "mods/2872811575-super-flow-control.yaml",
+ "mods": [
+  "2872811575"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the six valves build on pipes (Conduit rule)",
+ "updated": "2026-10-27",
+ "commit": "1740063b",
+ "mod_dlls": {
+  "2872811575": {
+   "PLib.dll": "b862c5db2b3cd6df09a62d4a30782e91e2b24e8e1bfac08d991c9cc89a984ba9",
+   "Super flow control│¼╝╢┴≈┴┐┐╪╓╞.dll": "c2ea8bc93b41ca863eb04d6d61a846f6b05d74832a48590ad6f092321f8617ec"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-042211-787cf357",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T04:38:51",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-084652-3373ea43",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T08:46:52",
+    "lane": 14,
+    "reference_run": "20261027-042211-787cf357",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-084652-3373ea43",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T08:47:50",
+    "lane": 14,
+    "reference_run": "20261027-042211-787cf357",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

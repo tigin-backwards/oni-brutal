@@ -1,0 +1,21 @@
+# Deconstruct Only Buildings (Fix for Aquatic) (3743166025), class T.
+#
+# What it does: the first time the Deconstruct tool's filter menu opens in a game (outside an
+# overlay), a prefix on ToolParameterMenu.PopulateMenu turns the Buildings filter on and All
+# off, and a postfix sets the menu's toggles to match; later openings keep the player's
+# choice.
+# How a player reaches it: the Deconstruct tool (X).
+# What changes: deconstruct drags hit only buildings by default, not wires and pipes.
+#
+# The Deconstruct tool picked with its hotkey shows its filter menu (dumped) with Buildings
+# chosen.
+from: early-base
+mods: [3743166025]
+steps:
+  - run: {seconds: 2}
+  - tool: {key: X}
+  - expect_state:
+      "PlayerController.Instance.ActiveTool.name": DeconstructTool
+  - ui_wait: {path: "**/ToolMenu/ToolParameters/Content", cond: stable}
+  - ui_dump: {name: filters, root: "**/ToolMenu/ToolParameters"}
+  - key: {code: Escape}

@@ -1,0 +1,32 @@
+# 缺氧综合修改 (3633033132), classes T, S, O.
+#
+# What it does: some eighty patches behind PLib option switches: faster pumps with ranges
+# from the options (Gas Pump 2 kg/s), ladders 1.2 times faster, batteries that leak less,
+# larger bottle emptier and bottler capacities, Duplicant attribute multipliers (digging,
+# athletics, construction, machinery), more experience, shorter work times at showers,
+# toilets, juicers and the like, a wider mop, rocketry harvest changes, Geo Tuner limits and
+# more.
+# How a player reaches it: it is passive; the options pick which parts apply.
+# What changes: a broadly faster and easier colony.
+#
+# options set the Gas Pump's range to 3; the pump, ladder and battery definitions are read,
+# and a Gas Pump built by setup in the dug-out corridor west of the printing pod is selected.
+from: early-base
+mods: [3633033132]
+options:
+  "3633033132": {$file: AttributeMultiplier.json, GasPumpWorkRange: 3}
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"GasPump\")", method: Build, args: [131128, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"GasPump\").GetComponent<ElementConsumer>.consumptionRate": 2
+      "Assets.GetPrefab(\"GasPump\").GetComponent<ElementConsumer>.consumptionRadius": 3
+      "Assets.GetPrefab(\"Ladder\").GetComponent<Ladder>.upwardsMovementSpeedMultiplier": 1.2
+      "Assets.GetPrefab(\"Battery\").GetComponent<Battery>.joulesLostPerSecond": ["> 0.83", "< 0.84"]
+  - run: {seconds: 2}
+  - expect: {buildings: {GasPump: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 206], select: GasPump}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:ElementConsumer.consumptionRadius": 3

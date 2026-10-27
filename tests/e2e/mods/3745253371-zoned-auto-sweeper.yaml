@@ -1,0 +1,34 @@
+# Zoned Auto Sweeper (Zoned Solid Transfer Arm) (3745253371), classes T, S, K, V.
+#
+# What it does: each Auto-Sweeper gets a zone mode: user-menu buttons Enable/Disable Zone
+# Mode, then Add Zone and Remove Zone (drag tools that paint its working cells, shown as an
+# overlay), Enable/Disable Global Zone and Cross World, and item and temperature filters (a
+# side screen); in zone mode it only fetches from its cells (patches on
+# SolidTransferArm.FindFetchTarget and its async update). A Global Sweeper Zone tool in the
+# toolbar (Alt+Z, Shift+Z removes) paints a shared zone, with options to add planned
+# buildings' and swept items' cells automatically; every building gets Add/Remove Global
+# Zone in its user menu.
+# How a player reaches it: select an Auto-Sweeper; its user menu; the toolbar's tool.
+# What changes: auto-sweepers that only work where told.
+#
+# setup builds an Auto-Sweeper in the dug-out corridor west of the printing pod. Selected, its
+# user menu has Enable Zone Mode; a click turns zone mode on, and the zone buttons appear.
+from: early-base
+mods: [3745253371]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"SolidTransferArm\")", method: Build, args: [{"$": "Grid.XYToCell(112, 206)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - run: {seconds: 2}
+  - expect: {buildings: {SolidTransferArm: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 206], select: SolidTransferArm}
+  - ui_wait: {path: "**/DetailsScreen/UserMenuButtons/UserMenuScreen/Buttons/Enable Zone ModeButton", cond: stable}
+  - expect_state:
+      "selected:GetComponent<ZonedSolidTransferArm.ZonedSolidTransferArmControl>.zoneModeEnabled": false
+  - ui_dump: {name: menu, root: "**/DetailsScreen/UserMenuButtons/UserMenuScreen/Buttons"}
+  - click: {ui: "**/UserMenuScreen/Buttons/Enable Zone ModeButton"}
+  - expect_state:
+      "selected:GetComponent<ZonedSolidTransferArm.ZonedSolidTransferArmControl>.zoneModeEnabled": true
+  - ui_wait: {path: "**/DetailsScreen/UserMenuButtons/UserMenuScreen/Buttons/Add ZoneButton", cond: stable}
+  - ui_dump: {name: menu-zone, root: "**/DetailsScreen/UserMenuButtons/UserMenuScreen/Buttons"}
+  - shot: {name: menu-zone, crop: "**/DetailsScreen/UserMenuButtons/UserMenuScreen/Buttons"}

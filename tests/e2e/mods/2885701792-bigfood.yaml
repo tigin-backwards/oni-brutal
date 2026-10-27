@@ -1,0 +1,22 @@
+# 超大的食物BigFood (2885701792), class V.
+#
+# What it does: nine cooked foods (Berry Pie, Frost Burger, Frost Bun, Curried Beans, Mushroom
+# Wrap, Salsa, Spice Bread, Spicy Tofu, Surf'n'Turf) are drawn with the mod's large kanims and
+# get a one-cell collider.
+# How a player reaches it: those foods, wherever they lie or are stored.
+# What changes: bigger food on the ground.
+#
+# The prefabs use the mod's animations; a Berry Pie spawned by setup in the dug-out corridor
+# west of the printing pod is drawn with its kanim (a world shot of the corridor).
+from: early-base
+mods: [2885701792]
+setup:
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131128, 0, 0, \"BerryPie\", \"Ore\")", method: SetActive, args: [true]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"BerryPie\").GetComponent<KBatchedAnimController>.AnimFiles[0].name": BerryPieConfig_kanim
+      "Assets.GetPrefab(\"Burger\").GetComponent<KBatchedAnimController>.AnimFiles[0].name": BurgerConfig_kanim
+      "Assets.GetPrefab(\"SurfAndTurf\").GetComponent<KBatchedAnimController>.AnimFiles[0].name": SurfAndTurfConfig_kanim
+      "Assets.GetPrefab(\"Salsa\").GetComponent<KBoxCollider2D>.size.x": 1
+      "count:all:Edible::[*] if .GetComponent<KPrefabID>.PrefabTag.Name == BerryPie": 1
+      "count:all:Edible::[*] if .GetComponent<KBatchedAnimController>.AnimFiles[0].name == BerryPieConfig_kanim": 1

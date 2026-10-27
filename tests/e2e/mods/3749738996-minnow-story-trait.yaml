@@ -1,0 +1,20 @@
+# Minnow Story Trait (3749738996), class S.
+#
+# What it does: a story trait (CGM_Minnow) whose worldgen places the Minnow reef template
+# (poi/imperative/CGM_minnowPOI_A) in a reef or ocean biome, with its icon and image; on the
+# new game screen it switches the aquatic content's mixing on when picked and is turned off
+# for clusters that already hold a Minnow; its achievement counts for saves that have the
+# story.
+# How a player reaches it: New Game, the Story Traits panel.
+# What changes: a new story for any asteroid.
+#
+# The story, its worldgen trait with the reef rules and its sprites are registered.
+from: early-base
+mods: [3749738996]
+steps:
+  - expect_state:
+      "Db.Get().Stories.Get(\"CGM_Minnow\")": exists
+      "Db.Get().Stories.Get(\"CGM_Minnow\").worldgenStoryTraitKey": storytraits/CGM_MinnowTrait
+      "ProcGen.SettingsCache.GetCachedStoryTrait(\"storytraits/CGM_MinnowTrait\", false).additionalWorldTemplateRules.Count": ">= 3"
+      "Assets.GetSprite(\"CGM_MinnowTrait_icon\").name": CGM_MinnowTrait_icon
+      "Assets.GetSprite(\"CGM_MinnowTrait_image\").name": CGM_MinnowTrait_image

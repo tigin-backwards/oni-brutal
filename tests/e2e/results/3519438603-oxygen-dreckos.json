@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3519438603-oxygen-dreckos.yaml",
+ "mods": [
+  "3519438603"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a shorn Drecko in oxygen grows scales",
+ "updated": "2026-10-27",
+ "commit": "4122c070",
+ "mod_dlls": {
+  "3519438603": {
+   "oxydrecko.dll": "3a005970a5bb3a451dc0c3bc4d5873c2857cec7ffff99595be149bd60c40416e"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-071843-a098de75",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T07:22:18",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-091303-c524144d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T09:13:03",
+    "lane": 14,
+    "reference_run": "20261027-071843-a098de75",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-091303-c524144d",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T09:15:17",
+    "lane": 14,
+    "reference_run": "20261027-071843-a098de75",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

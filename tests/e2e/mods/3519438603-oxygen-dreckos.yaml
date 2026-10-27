@@ -1,0 +1,24 @@
+# Oxygen Dreckos (3519438603), class P.
+#
+# What it does: a prefix replaces ScaleGrowthMonitor.IsInCorrectAtmosphere: a critter grows
+# its scales in its own atmosphere (hydrogen for the Drecko, ...) or in oxygen.
+# How a player reaches it: ranching Dreckos in an oxygen room.
+# What changes: Dreckos grow scales (reed fiber) in breathable air.
+#
+# setup lays a shorn Drecko in the dug-out corridor west of the printing pod, which is oxygen,
+# and selects it: over a minute its scales grow, as they do not under the game's own rule.
+from: early-base
+mods: [3519438603]
+setup:
+  - driver: {setup.call: {type: Scenario, method: SpawnPrefab, args: [0, 112, 206, Drecko, Creatures]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "SelectTool.Instance", method: Select, args: [{"$": "last:GetComponent<KSelectable>"}]}}
+  - driver: {setup.call: {target: "selected:GetComponent<Modifiers>.amounts.Get(\"ScaleGrowth\")", method: SetValue, args: [0]}}   # shorn
+steps:
+  - run: {seconds: 2}
+  - expect_state:
+      "selected:GetComponent<KPrefabID>.PrefabTag.Name": Drecko
+      "selected:GetComponent<Modifiers>.amounts.Get(\"ScaleGrowth\").value": [{save_as: before}, "< 5"]
+  - run: {seconds: 60}
+  - expect_state:
+      "selected:GetComponent<Modifiers>.amounts.Get(\"ScaleGrowth\").value": "> before"

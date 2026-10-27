@@ -1,0 +1,31 @@
+# Petroleum Generator Gas Output (3387705078), class B.
+#
+# What it does: the Petroleum Generator gets a gas output port at (1, 1) that pipes its carbon
+# dioxide away (a gas ConduitDispenser on its storage, which holds 50 kg); its formula burns
+# 2 kg/s of combustible liquid into 0.5 kg/s of polluted water dropped at (0, 3) and
+# 0.75 kg/s of carbon dioxide kept for the pipe.
+# How a player reaches it: the Petroleum Generator, in the build menu as before.
+# What changes: a generator whose exhaust can be piped.
+#
+# The def has the gas output; one built by setup in the dug-out corridor west of the printing
+# pod is selected: it has the gas dispenser and the mod's formula.
+from: early-base
+mods: [3387705078]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"PetroleumGenerator\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"PetroleumGenerator\").OutputConduitType": "== 'Gas'"
+      "Assets.GetBuildingDef(\"PetroleumGenerator\").UtilityOutputOffset.x": 1
+      "Assets.GetBuildingDef(\"PetroleumGenerator\").UtilityOutputOffset.y": 1
+  - run: {seconds: 2}
+  - expect: {buildings: {PetroleumGenerator: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: PetroleumGenerator}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_dump: {name: title, root: "**/DetailsScreen/TitleBar/Border/LabelGroup"}
+  - expect_state:
+      "selected:GetComponent<ConduitDispenser>.conduitType": "== 'Gas'"
+      "selected:GetComponent<Storage>.capacityKg": 50
+      "selected:GetComponent<EnergyGenerator>.formula.outputs.Length": 2
+      "selected:GetComponent<EnergyGenerator>.formula.inputs[0].consumptionRate": 2

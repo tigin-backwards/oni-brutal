@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3770883011-reservoir-resources-counted.yaml",
+ "mods": [
+  "3770883011"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "500 kg of water in a liquid reservoir counts in the active world's water total",
+ "updated": "2026-10-27",
+ "commit": "ce13fcbb",
+ "mod_dlls": {
+  "3770883011": {
+   "GasLiquidReservoirResourceFix.dll": "93eba7748eed3ed7d03d604a8cd62c02ad37f1004ecd4827c5901a200b960bd2"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-114113-564df08f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T13:00:40",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-152534-61872dc0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T15:25:34",
+    "lane": 15,
+    "reference_run": "20261027-114113-564df08f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-152534-61872dc0",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T15:26:21",
+    "lane": 15,
+    "reference_run": "20261027-114113-564df08f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

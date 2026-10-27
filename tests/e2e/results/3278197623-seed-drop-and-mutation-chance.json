@@ -1,0 +1,63 @@
+{
+ "spec": "mods/3278197623-seed-drop-and-mutation-chance.yaml",
+ "mods": [
+  "3278197623"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Radiation Lamp built in the corridor has the mod's decor, no power, uranium storage and converter; its title dumped",
+ "updated": "2026-10-27",
+ "commit": "49fae931",
+ "mod_dlls": {
+  "3278197623": {
+   "╓╓╫╙╡⌠┬Σ╕┼┬╩╙δ▒Σ╥∞╕┼┬╩.dll": "a0242e064a4cfc742053c1dcfb9edb2633425f20d063cd82b21534347a9c0f0c"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-233206-67d878d6",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T23:32:07",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-002115-676ab72d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T00:21:15",
+    "lane": 14,
+    "reference_run": "20261026-233206-67d878d6",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261027-002115-676ab72d",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T00:21:16",
+    "lane": 15,
+    "reference_run": "20261026-233206-67d878d6",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

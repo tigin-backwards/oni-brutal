@@ -1,0 +1,31 @@
+# 种子掉落概率与变异概率 (Seed drop and mutation chance) (3278197623), class P.
+#
+# What it does: transpilers on SeedProducer raise the mutation roll's factor (0.8 to 0.95) and
+# make a picked crop drop eight seeds; the Radiation Lamp is rebuilt: +200 decor in a radius of
+# 50, no power, no heat, and it takes uranium ore (1 kg/s, 10 t storage, fetched) and turns it
+# into three outputs, dropping the solid ones in 50 kg lumps.
+# How a player reaches it: it is passive; the lamp is in the build menu as before.
+# What changes: more seeds and mutations; a lamp that is a decor and uranium machine.
+#
+# The lamp's def holds the mod's values, and one built by setup in the dug-out corridor west of
+# the printing pod has the mod's storage, converter and delivery request (its title dumped).
+from: early-base
+mods: [3278197623]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"RadiationLight\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"RadiationLight\").BaseDecor": 200
+      "Assets.GetBuildingDef(\"RadiationLight\").BaseDecorRadius": 50
+      "Assets.GetBuildingDef(\"RadiationLight\").EnergyConsumptionWhenActive": 0
+  - run: {seconds: 2}
+  - expect: {buildings: {RadiationLight: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: RadiationLight}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_dump: {name: title, root: "**/DetailsScreen/TitleBar/Border/LabelGroup"}
+  - expect_state:
+      "selected:GetComponent<Storage>.capacityKg": 10000
+      "selected:GetComponent<ElementConverter>.outputElements.Length": 3
+      "selected:GetComponent<ManualDeliveryKG>.capacity": 1000
+      "selected:GetComponent<RadiationEmitter>.emitRads": 320

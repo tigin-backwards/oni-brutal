@@ -1,0 +1,18 @@
+# Asteroid add Rare Resources.小行星增加稀有资源 (3080513426), class P.
+#
+# What it does: the first time a space POI's elements are weighed (a postfix on
+# HarvestablePOIInstanceConfiguration.GetElementsWithWeights) it adds rare elements to the
+# POI types (fullerene, niobium, enriched uranium and others) and writes them to
+# mods/HarvestablePOIConfig.json, which the player may edit; later games read that file.
+# How a player reaches it: harvesting space POIs.
+# What changes: richer space POIs.
+#
+# The colony runs a while; no POI is weighed yet (nothing is harvested), so the file is not
+# written and the POI types are as in the original.
+from: early-base
+mods: [3080513426]
+steps:
+  - run: {seconds: 2}
+  - expect_state:
+      "file:mods/HarvestablePOIConfig.json": missing
+      "sum:type:HarvestablePOIConfigurator::_poiTypes[*].harvestableElements.Count if .id == RadioactiveGasCloud": "== original"

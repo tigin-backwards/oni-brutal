@@ -1,0 +1,20 @@
+# 100% Space Exposure Challenge (3426499384), class P (title "Void World").
+#
+# What it does: a prefix on SubworldZoneRenderData.GenerateTexture turns every overworld cell's
+# zone type into space (ZoneType 7) before the zone texture is built, so the whole map counts
+# as exposed to space (and shows a space background); a postfix on DateTime.Update writes the
+# clock's cycle as a decimal number of cycles ("n3", e.g. 4.123) instead of "Cycle N".
+# How a player reaches it: load or start a colony.
+# What changes: everything is space-exposed; the clock reads in fractions of a cycle.
+#
+# In early-base, every saved overworld cell has become space, and the clock shows the time in
+# cycles with three decimals, the same text in both players.
+from: early-base
+mods: [3426499384]
+require_log: ['Making the entire grid space exposure']
+steps:
+  - expect_state:
+      "count:SaveLoader.Instance.clusterDetailSave.overworldCells[*] if .zoneType == Space": "== original"
+      "count:SaveLoader.Instance.clusterDetailSave.overworldCells[*] if .zoneType != Space": 0
+      "all:DateTime::[0].text.text": "== original"
+  - world_shot: {name: background, ortho: 20, at: [113, 215]}

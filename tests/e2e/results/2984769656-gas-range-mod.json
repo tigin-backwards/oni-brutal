@@ -1,0 +1,80 @@
+{
+ "spec": "mods/2984769656-gas-range-mod.yaml",
+ "mods": [
+  "2984769656"
+ ],
+ "verdict": "warning",
+ "why": "known findings: scroll-normalized-position",
+ "findings": [
+  "scroll-normalized-position"
+ ],
+ "note": "Food Repurposing unlocks the modified gas range; its recipes make dishes from water, listed on a built one's side screen (dump matches); the Food menu shot matches",
+ "updated": "2026-10-27",
+ "commit": "53a7608c",
+ "mod_dlls": {
+  "2984769656": {
+   "PLib.dll": "b862c5db2b3cd6df09a62d4a30782e91e2b24e8e1bfac08d991c9cc89a984ba9",
+   "╚╝╞°╘ε─º╕─.dll": "e17ce6b27f1546cb5d9ec294baf8457068751af8f156cab0e13c242b25c87411"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-114113-564df08f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T13:33:27",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-145108-153fee75",
+    "index": 1,
+    "verdict": "warn",
+    "date": "2026-10-27T15:53:08",
+    "lane": 14,
+    "reference_run": "20261027-114113-564df08f",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "recipes": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "food-menu": 0.0
+    }
+   },
+   {
+    "run": "20261027-145108-153fee75",
+    "index": 2,
+    "verdict": "warn",
+    "date": "2026-10-27T15:54:04",
+    "lane": 14,
+    "reference_run": "20261027-114113-564df08f",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "recipes": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "food-menu": 0.0
+    }
+   }
+  ]
+ }
+}

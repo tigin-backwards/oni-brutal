@@ -1,0 +1,27 @@
+# Empty Storage (3626760918), classes P, O.
+#
+# What it does: every building with a Storage gets an "Empty Storage" user menu button: by
+# default it drops the contents at once; with the PLib option off it orders an errand instead,
+# for a Duplicant with the right skill (Plumbing for fluids, Tidying for solids), taking a
+# time per 100 kg.
+# How a player reaches it: a selected building's user menu.
+# What changes: any storage can be emptied.
+#
+# A Storage Bin built by setup in the dug-out corridor west of the printing pod, holding
+# 100 kg of sandstone, is selected; its Empty Storage button drops the sandstone.
+from: early-base
+mods: [3626760918]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"StorageLocker\")", method: Build, args: [131128, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "last:GetComponent<Storage>", method: AddOre, args: [SandStone, 100, 293, 255, 0]}}
+steps:
+  - run: {seconds: 2}
+  - expect: {buildings: {StorageLocker: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 206], select: StorageLocker}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state: {"selected:Storage.MassStored()": [">= 99", "<= 101"]}
+  - ui_wait: {path: "**/UserMenuScreen/Buttons/Empty StorageButton", cond: stable}
+  - ui_dump: {name: button, root: "**/UserMenuScreen/Buttons/Empty StorageButton"}
+  - click: {ui: "**/UserMenuScreen/Buttons/Empty StorageButton"}
+  - expect_state: {"selected:Storage.MassStored()": 0}

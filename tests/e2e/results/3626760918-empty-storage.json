@@ -1,0 +1,63 @@
+{
+ "spec": "mods/3626760918-empty-storage.yaml",
+ "mods": [
+  "3626760918"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Storage Bin's Empty Storage button (dumped) drops its 100 kg of sandstone",
+ "updated": "2026-10-26",
+ "commit": "d1e7dcee",
+ "mod_dlls": {
+  "3626760918": {
+   "EmptyStorage.dll": "2e78a394bf6b365901b0b263e910e7733c5b851a1a1d3a058f780a4910222edc"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-200500-101f1b1f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T20:34:00",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-203924-ebcd6150",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T20:59:04",
+    "lane": 15,
+    "reference_run": "20261026-200500-101f1b1f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "button": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261026-203924-ebcd6150",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T21:00:00",
+    "lane": 15,
+    "reference_run": "20261026-200500-101f1b1f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "button": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

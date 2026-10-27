@@ -1,0 +1,29 @@
+# 造景灯 Landscape lamp (2928148711), class B.
+#
+# What it does: adds LANDSCAPELAMP20230204 to the Furniture menu: a 1x1 decorative light of any
+# metal built in the automation layer, 10 W, 100 lux in a radius of 3 (green light), +decor,
+# with an automation input.
+# How a player reaches it: the build menu (Furniture).
+# What changes: a small light that adds decor.
+#
+# setup builds a lamp in the corridor west of the printing pod and selects it (a click there
+# picks the room behind it): it gives 100 lux. The lamp shows in the Furniture menu.
+from: early-base
+mods: [2928148711]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LANDSCAPELAMP20230204\")", method: Build, args: [131765, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "SelectTool.Instance", method: Select, args: [{"$": "Grid.Objects.get_Item(131765, 30).GetComponent<KSelectable>"}]}}
+steps:
+  - run: {seconds: 2}
+  - expect: {buildings: {LANDSCAPELAMP20230204: 1}}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<KPrefabID>.PrefabTag.Name": LANDSCAPELAMP20230204
+      "selected:GetComponent<Light2D>.Lux": 100
+      "selected:GetComponent<Light2D>.Range": 3
+  - key: {code: Escape}
+  - click: {ui: "**/PlanScreen/Toggle:Furniture"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/LANDSCAPELAMP20230204 Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/LANDSCAPELAMP20230204 Group*": {active: true}
+  - shot: {name: furniture-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}

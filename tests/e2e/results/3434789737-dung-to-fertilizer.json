@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3434789737-dung-to-fertilizer.yaml",
+ "mods": [
+  "3434789737"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Compost loaded with polluted dirt drops fertilizer",
+ "updated": "2026-10-27",
+ "commit": "434c8f48",
+ "mod_dlls": {
+  "3434789737": {
+   "DungToFertilizer.dll": "d42310297750675f8b9c69f29e1fd27b0192813ec639779bfad5a4746e5f39be"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-092853-dabffb17",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T09:57:26",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-100256-1facd65b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T10:13:01",
+    "lane": 17,
+    "reference_run": "20261027-092853-dabffb17",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-100256-1facd65b",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T10:13:49",
+    "lane": 17,
+    "reference_run": "20261027-092853-dabffb17",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

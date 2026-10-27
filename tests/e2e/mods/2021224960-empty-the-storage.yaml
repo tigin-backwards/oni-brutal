@@ -1,0 +1,29 @@
+# Empty The Storage (2021224960), class P.
+#
+# What it does: every building with a Storage (cargo bays aside) gets an "Empty Storage" user
+# menu button that drops everything it holds at once.
+# How a player reaches it: a selected building's user menu.
+# What changes: any storage can be emptied by hand.
+#
+# Broken upstream: the button names action 273, which is now BuildMenuLeft and bound to no
+# key, so building its tooltip throws an ArgumentException: selecting any storage building
+# opens the crash screen, in the original too.
+#
+# A Storage Bin built by setup in the dug-out corridor west of the printing pod, holding
+# 100 kg of sandstone, is selected; its Empty Storage button drops the sandstone.
+from: early-base
+mods: [2021224960]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"StorageLocker\")", method: Build, args: [131128, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "last:GetComponent<Storage>", method: AddOre, args: [SandStone, 100, 293, 255, 0]}}
+steps:
+  - run: {seconds: 2}
+  - expect: {buildings: {StorageLocker: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 206], select: StorageLocker}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state: {"selected:Storage.MassStored()": [">= 99", "<= 101"]}
+  - ui_wait: {path: "**/UserMenuScreen/Buttons/Empty StorageButton", cond: stable}
+  - ui_dump: {name: button, root: "**/UserMenuScreen/Buttons/Empty StorageButton"}
+  - click: {ui: "**/UserMenuScreen/Buttons/Empty StorageButton"}
+  - expect_state: {"selected:Storage.MassStored()": 0}

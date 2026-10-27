@@ -1,0 +1,33 @@
+{
+ "spec": "mods/2021224960-empty-the-storage.yaml",
+ "mods": [
+  "2021224960"
+ ],
+ "verdict": "pending",
+ "why": "the spec fails in the original: a broken spec, or a mod broken upstream",
+ "findings": [],
+ "note": "a Storage Bin's Empty Storage button (dumped) drops its 100 kg of sandstone",
+ "updated": "2026-10-26",
+ "commit": "8ef77bae",
+ "mod_dlls": {
+  "2021224960": {
+   "EmptyTheStorage.dll": "b54467e1b51aa065adb68af6db52bbbada6d0775e5b489a2a0a0f25825b81233"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-173427-72c0b636",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-26T17:38:48",
+    "lane": 15,
+    "reasons": [
+     "step 9: GameScreenManager/ScreenSpaceOverlayCanvas/BottomPanelRight/RootMenuRight/DetailsScreen/UserMenuButtons/UserMenuScreen/Buttons/Empty StorageButton is occluded by ErrorCanvas/CrashReportScreen(Clone)/BG (hits there: ErrorCanvas/CrashReportScreen(Clone)/BG, GameScreenManager/ScreenSpaceOverlay"
+    ],
+    "signatures": 4
+   }
+  ],
+  "ours": []
+ }
+}

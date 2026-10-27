@@ -262,6 +262,10 @@ broken.update({
     '3635077282': 'broken upstream: a Multi-Selection Gas Sensor standing in oxygen, with oxygen in its filter, never switches on (spec tests/e2e/mods/3635077282-multi-selection-sensors.yaml)',
     '2848571032': 'broken upstream: a middle click on a reachable cell, with a Duplicant selected, does not send it there; the Duplicant stays where it stood (spec tests/e2e/mods/2848571032-move-duplicant-middle-click.yaml)',
 })
+# Found by the e2e specs of ranks 1301-1385: the spec fails the same way in the original.
+broken.update({
+    '2021224960': 'broken upstream: its Empty Storage button names action 273, which is now `BuildMenuLeft` and bound to no key, so building the button\'s tooltip throws an ArgumentException and selecting any storage building opens the crash screen (spec tests/e2e/mods/2021224960-empty-the-storage.yaml)',
+})
 # Flagged by onimaxxing as not loading, played by spec tests/e2e/mods/flagged-no-mod-info.yaml on
 # the base-game colony (game build U59-744825): KMod skips them in both players.
 NO_MOD_INFO = ('broken upstream: ships no mod_info.yaml, which KMod requires since 2021: it logs "Is '

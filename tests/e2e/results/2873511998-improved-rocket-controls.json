@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2873511998-improved-rocket-controls.yaml",
+ "mods": [
+  "2873511998"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a built Atmo Suit Checkpoint carries the rocket tracker, public outside rockets",
+ "updated": "2026-10-26",
+ "commit": "cd454e85",
+ "mod_dlls": {
+  "2873511998": {
+   "RocketControlledCheckpoint.dll": "d83020040f454a76f6d4e3a62807a471b6d7576886502d0122464bcfbf3ffb7f"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-192551-3c7cbcf2",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T19:25:51",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-194527-bd4e3801",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T20:04:22",
+    "lane": 14,
+    "reference_run": "20261026-192551-3c7cbcf2",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-194527-bd4e3801",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T20:13:25",
+    "lane": 14,
+    "reference_run": "20261026-192551-3c7cbcf2",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

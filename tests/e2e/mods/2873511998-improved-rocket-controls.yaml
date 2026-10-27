@@ -1,0 +1,26 @@
+# Improved Rocket Controls (2873511998), class S.
+#
+# What it does: Atmo Suit Checkpoints get a RocketTracker: inside a rocket a checkpoint can be
+# set to crew only or public (status items "Usage: Crew Only" and "Usage: Public"), the crew
+# summon side screen's request button is patched to respect it, and a checkpoint can be built
+# on the ground as well.
+# How a player reaches it: a checkpoint in a rocket's interior; the rocket's crew side screen.
+# What changes: rocket checkpoints that keep strangers out.
+#
+# An Atmo Suit Checkpoint built by setup in the dug-out corridor west of the printing pod is
+# selected: it carries the tracker, outside any rocket and public.
+from: early-base
+mods: [2873511998]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"SuitMarker\")", method: Build, args: [131128, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"SuitMarker\").GetComponent<RocketTracker>": exists
+  - run: {seconds: 2}
+  - expect: {buildings: {SuitMarker: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 206], select: SuitMarker}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:RocketTracker.insideRocket": false
+      "selected:RocketTracker.crewOnly": false

@@ -157,6 +157,11 @@ namespace SemanticsProbe
                 MemberOrder.Hook(harmony);
                 return;
             }
+            if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "nativerange")
+            {
+                NativeRanges.Run();
+                return;
+            }
             if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "statics")
             {
                 Rec.Log("=== values: statics");

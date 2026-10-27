@@ -392,6 +392,14 @@ whether `KObjectManager` released the event system of a destroyed `KMonoBehaviou
 `DestroyFlagsProbeDone` canvas appears at the end. `LifecycleTests`
 (`DestroyedObjectIsInactiveInItsOwnOnDestroy` and the three after it) encodes the results.
 
+With `PROBE_SCENARIO=nativerange` only the NativeArray range probe runs (`NativeRanges.cs`, lines
+`NR …`, at mod load, in the original player only): the indexer, `Copy`, `CopyFrom`, `CopyTo`
+and `GetSubArray` with indices and ranges before or past an array, through views of a larger
+backing array so that what an unchecked access touches is logged. It runs through
+`scripts/e2e.py` with OniMcp's mod folder as above and a spec `from: main-menu`. Measured
+2026-10-27: none of them throws (the file's header has the details). ARCHITECTURE D46 records
+it; `NativeArrayRangeTests` encodes it.
+
 With `PROBE_SCENARIO=statics` only the statics probe runs (`StaticValues.cs`, lines `SV …`, at mod
 load): every public static property and field of `Color` and `Color32`, found by reflection (so
 each player lists what it has), with the components' float bits; `GarbageCollector.isIncremental`;

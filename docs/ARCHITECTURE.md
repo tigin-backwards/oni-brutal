@@ -975,15 +975,21 @@ game or mod code can notice. Each says how it is resolved, or why it is kept.
   `--check-types` loads a strong-named copy, another version beside it, references to both
   versions and to a third, a mod's `Assembly.LoadFrom` of another version, and a reference to a
   missing assembly, and checks the AssemblyResolve events.
-- **D46 NativeArray ranges.** Unity's release player is built without its collections checks,
-  so it does not check `NativeArray` indices or copy ranges and reads and writes the memory
-  past the array. The game's `RangeVisualizerEffect.OnPostRender` writes past an occlusion texture's
+- **D46 NativeArray ranges.** Measured in the original player with UnityProbe's range probe
+  (`NativeRanges.cs`): nothing on `NativeArray` checks a range or throws for one. The indexer
+  reads and writes the memory before or past the array; `GetSubArray` gives views before or
+  past it (a negative length gives a negative `Length`); the two-array `Copy`, `CopyFrom` and
+  `CopyTo` copy the source's length whatever the destination's, past a managed array's end
+  too, and the five-argument `Copy` the length given, before or past either array. A negative
+  length writes garbage over a NativeArray and crashed the player into a managed array. The
+  game's `RangeVisualizerEffect.OnPostRender` writes past an occlusion texture's
   `GetPixelData` array when a range outgrows the texture (Zoned Auto Sweeper's zone mode), and
-  the original carries on. **Kept safe:** an out-of-range write is dropped and a read gives
-  `default(T)`; `Copy`, `CopyFrom` and `CopyTo` copy only the part within both arrays, and
-  `GetSubArray` past the end is cut to the array. The first one in a process is logged with its
-  stack. A negative `GetSubArray` start or length, and an array that is not created or is
-  disposed, still throw. In-range access costs what it did (the same compare).
+  the original carries on. **Kept safe, without exceptions:** an out-of-range write is dropped
+  and a read gives `default(T)`; the copies copy only the part within both arrays (nothing for
+  a negative length); `GetSubArray` past the end is cut to the array, and one with a negative
+  start or length is empty. The first one in a process is logged with its stack. An array that
+  is not created or is disposed still throws. In-range access costs what it did (the same
+  compare).
 
 ## 3. The engine API (`OniMoono.UnityEngine`)
 

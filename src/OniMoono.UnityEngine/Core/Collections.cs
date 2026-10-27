@@ -88,9 +88,11 @@ namespace Unity.Collections
             return result;
         }
 
-        // The copies and GetSubArray check their ranges only with Unity's collections checks,
-        // which its release player leaves out; here only the in-range part is copied (or
-        // viewed), logged once a process as the indexer is.
+        // Unity's release player checks none of the copies' or GetSubArray's ranges (measured:
+        // tools/UnityProbe/NativeRanges.cs, ARCHITECTURE D46): it copies the source's length (the
+        // two-array Copy, CopyFrom, CopyTo) or the length given, before, past or over either
+        // array, and a negative length copies garbage or crashes. Here only the part within both
+        // arrays is copied (or viewed), logged once a process as the indexer is.
 
         public void CopyFrom(T[] array)
         {
@@ -106,8 +108,14 @@ namespace Unity.Collections
 
         public NativeArray<T> GetSubArray(int start, int length)
         {
-            // No view keeps the caller's indices for a negative start or length, so those throw.
-            if (start < 0 || length < 0) throw new ArgumentOutOfRangeException(nameof(start));
+            // Unity's player gives a view before the array for a negative start, and one of a
+            // negative Length for a negative length. No view here can keep the caller's indices
+            // for those, so they give an empty one (its reads give default, its writes drop).
+            if (start < 0 || length < 0)
+            {
+                NativeArrayRange.Report($"GetSubArray({start}, {length}) of a NativeArray<{typeof(T).Name}> of length {m_Length} is empty");
+                return new NativeArray<T>(m_Buffer, 0, owned: false);
+            }
             if (start > m_Length - length)
             {
                 int clipped = Math.Max(0, m_Length - start);

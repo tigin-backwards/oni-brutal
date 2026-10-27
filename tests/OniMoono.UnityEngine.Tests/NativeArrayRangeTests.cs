@@ -5,11 +5,12 @@ using Xunit;
 
 namespace OniMoono.Tests
 {
-    // Unity's release player doesn't range-check NativeArray (the checks exist only with its
-    // collections checks, in the editor), so the original carries on where a game or mod reaches
-    // past an array; e.g. RangeVisualizerEffect writes past an occlusion texture's GetPixelData
-    // array with Zoned Auto Sweeper's zone mode. Ours drops the out-of-range part and logs the
-    // first one in the process.
+    // Unity's release player range-checks nothing on NativeArray: the indexer, Copy, CopyFrom,
+    // CopyTo and GetSubArray all reach the memory before or past an array without an exception
+    // (measured with tools/UnityProbe/NativeRanges.cs, ARCHITECTURE D46), so the original carries
+    // on where a game or mod does; e.g. RangeVisualizerEffect writes past an occlusion texture's
+    // GetPixelData array with Zoned Auto Sweeper's zone mode. Ours drops the out-of-range part,
+    // never throws for a range, and logs the first one in the process.
     [Collection("Console")]
     public class NativeArrayRangeTests
     {
@@ -119,6 +120,12 @@ namespace OniMoono.Tests
                 Assert.Equal([20, 0], back);
                 NativeArray<int>.Copy(array, 0, array, 0, -1);
                 Assert.Equal([1, 10, 20, 20], array.ToArray());
+                // The two-array overloads copy the source's length, as in Unity's player.
+                NativeArray<int>.Copy(new[] { 7, 8 }, array);
+                Assert.Equal([7, 8, 20, 20], array.ToArray());
+                var shorter = new int[3];
+                NativeArray<int>.Copy(array, shorter);
+                Assert.Equal([7, 8, 20], shorter);
             });
             Assert.Contains("copy of 3 elements from index 0 of 3 to index 2 of 4", log);
             Assert.Contains("copies only the 2 in range", log);
@@ -158,8 +165,16 @@ namespace OniMoono.Tests
             });
             Assert.Contains("GetSubArray(2, 5) of a NativeArray<Int32> of length 4 is cut to length 2", log);
             Assert.Equal([2, 3], array.GetSubArray(1, 2).ToArray());
-            Assert.Throws<ArgumentOutOfRangeException>(() => array.GetSubArray(-1, 2));
-            Assert.Throws<ArgumentOutOfRangeException>(() => array.GetSubArray(0, -1));
+            // Unity's player views the memory before the array, or gives a negative Length.
+            Logged(() =>
+            {
+                var before = array.GetSubArray(-1, 2);
+                Assert.Equal(0, before.Length);
+                before[0] = 9;
+                Assert.Equal(0, before[1]);
+                Assert.Equal(0, array.GetSubArray(0, -1).Length);
+            });
+            Assert.Equal([1, 2, 3, 4], array.ToArray());
             array.Dispose();
         }
     }

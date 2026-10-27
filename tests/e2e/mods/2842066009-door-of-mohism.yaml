@@ -1,0 +1,44 @@
+# The door of Mohism（墨家的门） (2842066009), class B.
+#
+# What it does: adds three doors to the Utilities menu, buildable from any buildable material
+# (rock, dirt, ice and the rest) and quicker than the game's: Doorr (气动门, the Pneumatic
+# Door's look, 2x the speed unpowered), ManualPressureDoorr (手动气闸, a Manual Airlock) and
+# PressureDoorr (机械气闸, a Mechanized Airlock drawing 120 W, 6x powered). Each conducts heat
+# as its material does.
+# How a player reaches it: the build menu (Utilities).
+# What changes: airlocks without metal.
+#
+# The doors are read; the Utilities menu lists them (shot), and a Manual Airlock of dirt built
+# by setup in the dug-out corridor west of the printing pod is selected, set to Open with its
+# side screen, and opens.
+from: early-base
+mods: [2842066009]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"ManualPressureDoorr\")", method: Build, args: [131765, Neutral, null, [Dirt], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"Doorr\").MaterialCategory": {contains: BuildableAny}
+      "Assets.GetBuildingDef(\"PressureDoorr\").EnergyConsumptionWhenActive": 120
+      "Assets.GetPrefab(\"ManualPressureDoorr\").GetComponent<Door>.unpoweredAnimSpeed": 2
+      "Assets.GetPrefab(\"PressureDoorr\").GetComponent<Door>.poweredAnimSpeed": 6
+  - run: {seconds: 10}
+  - expect: {buildings: {ManualPressureDoorr: 1}}
+  - click: {ui: "**/PlanScreen/Toggle:Utilities"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/PressureDoorr Group*", cond: stable, stable: 120, frames: 600}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/Doorr Group*": {active: true}
+      "**/BuildingGroups/**/Grid/ManualPressureDoorr Group*": {active: true}
+  - shot: {name: utilities-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
+  - key: {code: Escape}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: ManualPressureDoorr}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/DoorToggleSideScreen", cond: stable}
+  - expect_state:
+      "selected:PrimaryElement.ElementID": "== 'Dirt'"
+  - click: {ui: "**/DoorToggleSideScreen/Contents/Buttons/Openbutton"}
+  - expect_state:
+      "selected:GetComponent<Door>.RequestedState": Opened
+  - key: {code: Escape}
+  - run: {seconds: 20}
+  - expect_state:
+      "count:all:Door::[*] if .GetComponent<KPrefabID>.PrefabTag.Name == ManualPressureDoorr and .IsOpen() == true": 1

@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3130228843-skills-retainer.yaml",
+ "mods": [
+  "3130228843"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "Nikola, scrubbed at a powered Skill Scrubber, loses his learned skill and keeps his granted one",
+ "updated": "2026-10-27",
+ "commit": "434c8f48",
+ "mod_dlls": {
+  "3130228843": {
+   "Skills Retainer.dll": "df52ce9c946b230b562b21a622d51b6767021784edd0f7176052757aa0ef75ad"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-092853-dabffb17",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T09:28:53",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-100256-1facd65b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T10:02:56",
+    "lane": 17,
+    "reference_run": "20261027-092853-dabffb17",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-100256-1facd65b",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T10:07:14",
+    "lane": 17,
+    "reference_run": "20261027-092853-dabffb17",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

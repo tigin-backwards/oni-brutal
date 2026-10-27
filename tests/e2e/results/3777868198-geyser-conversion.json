@@ -1,0 +1,67 @@
+{
+ "spec": "mods/3777868198-geyser-conversion.yaml",
+ "mods": [
+  "3777868198"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "an analysed geyser's conversion button opens its target list (dump, shot)",
+ "updated": "2026-10-27",
+ "commit": "d2afe5dd",
+ "mod_dlls": {
+  "3777868198": {
+   "FunnyONI.GeyserConversion.dll": "8e796ff28ff91bed1ce2c2d3e8770db48f346d9c9c65b9f318dbf11e67be74d7"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-092853-dabffb17",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T10:44:24",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-104856-56f64ce0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T11:24:53",
+    "lane": 17,
+    "reference_run": "20261027-092853-dabffb17",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "targets": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "side-screen": 0.004895
+    }
+   },
+   {
+    "run": "20261027-104856-56f64ce0",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T11:25:41",
+    "lane": 17,
+    "reference_run": "20261027-092853-dabffb17",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "targets": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "side-screen": 0.004895
+    }
+   }
+  ]
+ }
+}

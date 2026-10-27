@@ -1,0 +1,30 @@
+# Bubbling Chest (3752112457), classes B, S.
+#
+# What it does: adds the Bubbling Chest (BC_BubbleChest, 1x1, any metal, Furniture menu after
+# the Park Sign, researched with Interior Decor), an aquarium ornament: under liquid it lets
+# the gas piped into it (a 5 kg store) out as bubbles at a rate set on a slider (200 g/s),
+# critters near it get a happiness effect; it has an automation port and decor.
+# How a player reaches it: the build menu (Furniture), then its slider side screen.
+# What changes: decorative bubbles in tanks.
+#
+# Interior Decor unlocks it; one built by setup in the dug-out corridor west of the printing
+# pod is selected: its slider reads 200, and 500 typed into its field sets the rate.
+from: early-base
+mods: [3752112457]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"BC_BubbleChest\")", method: Build, args: [{"$": "Grid.XYToCell(112, 206)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"InteriorDecor\").unlockedItemIDs": {contains: BC_BubbleChest}
+  - run: {seconds: 2}
+  - expect: {buildings: {BC_BubbleChest: 1}}
+  - driver: {camera.set: {cell: [112, 207], ortho: 6}}
+  - click_world: {cell: [112, 206], select: BC_BubbleChest}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/SingleSliderSideScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<BubbleChest.Content.Scripts.ChestBubbler>.bubbleRate": 200
+  - ui_dump: {name: slider, root: "**/Config Tab - body instance/SingleSliderSideScreen"}
+  - shot: {name: slider, crop: "**/Config Tab - body instance/SingleSliderSideScreen", threshold: 0.04}
+  - type: {ui: "**/SingleSliderSideScreen/Contents/NumberInputField", text: "500", enter: true, clear: true}
+  - expect_state:
+      "selected:GetComponent<BubbleChest.Content.Scripts.ChestBubbler>.bubbleRate": 500

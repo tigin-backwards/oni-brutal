@@ -1,0 +1,67 @@
+{
+ "spec": "mods/3752112457-bubbling-chest.yaml",
+ "mods": [
+  "3752112457"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Bubbling Chest's slider (dumped and shot) set to 500 g/s by typing",
+ "updated": "2026-10-27",
+ "commit": "e799bfde",
+ "mod_dlls": {
+  "3752112457": {
+   "BubbleChest.dll": "3360e7776a31eeaf26b2e762379c21c7c9ad2490b46fe3925f1d89c3227b74fd"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-051715-c581e5cb",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T06:14:42",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-093424-458e5337",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T09:34:24",
+    "lane": 15,
+    "reference_run": "20261027-051715-c581e5cb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "slider": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "slider": 0.0
+    }
+   },
+   {
+    "run": "20261027-093424-458e5337",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T09:35:19",
+    "lane": 15,
+    "reference_run": "20261027-051715-c581e5cb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "slider": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "slider": 0.0
+    }
+   }
+  ]
+ }
+}

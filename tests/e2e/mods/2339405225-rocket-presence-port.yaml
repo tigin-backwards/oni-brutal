@@ -1,0 +1,24 @@
+# [Vanilla + DLC] Rocket Presence Port (2339405225), class P.
+#
+# What it does: postfixes on every rocket engine's CreateBuildingDef give the engine a logic
+# output port, "Rocket Present", and a PresencePort component that sends a green signal while
+# the rocket is docked and a red one from launch until it is back.
+# How a player reaches it: build a rocket engine and wire its port.
+# What changes: automation can follow a rocket's presence.
+#
+# The Steam Engine and the Small Petroleum Engine of Spaced Out carry the port. setup builds a
+# Steam Engine on the floor of the corridor west of the printing pod; built, it has its
+# presence port and a logic output.
+from: early-base
+mods: [2339405225]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"SteamEngineCluster\")", method: Build, args: [131762, Neutral, null, [Steel], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"SteamEngineCluster\").LogicOutputPorts.Count": 1
+      "Assets.GetBuildingDef(\"KeroseneEngineClusterSmall\").LogicOutputPorts.Count": 1
+      "Assets.GetPrefab(\"SteamEngineCluster\").GetComponent<RocketPresenceAutomationPort.PresencePort>": exists
+  - run: {seconds: 3}
+  - expect_state:
+      "all:RocketPresenceAutomationPort.PresencePort::Length": 1
+      "all:RocketPresenceAutomationPort.PresencePort::[0].GetComponent<LogicPorts>.outputPorts.Count": 1

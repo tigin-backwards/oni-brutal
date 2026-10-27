@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3022436400-truthful-thermal-conductivity.yaml",
+ "mods": [
+  "3022436400"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the game formats a conductivity of 1/9 with the mod's digits",
+ "updated": "2026-10-27",
+ "commit": "1ae06b70",
+ "mod_dlls": {
+  "3022436400": {
+   "TruthfulThermalConductivity.dll": "3b8829c737cd04c01eca0d0d1b6a9f349338545d6bc91d009f27e674f717d33a"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-013141-9697dcd2",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T01:38:51",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-025234-2165ee48",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T02:52:34",
+    "lane": 14,
+    "reference_run": "20261027-013141-9697dcd2",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-025234-2165ee48",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T02:52:35",
+    "lane": 15,
+    "reference_run": "20261027-013141-9697dcd2",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -1,0 +1,15 @@
+# Truthful Thermal Conductivity (3022436400), classes P, S.
+#
+# What it does: transpilers on GameUtil's thermal conductivity formatting and on the details
+# screen show thermal conductivity with up to 8 decimals (format 0.000#####) instead of
+# rounding it, everywhere: material properties, the codex, tooltips; a button on the Mods
+# screen cycles five precision modes, saved in its config.json.
+# How a player reaches it: any thermal conductivity shown; the Mods screen's button.
+# What changes: precise thermal conductivity figures.
+#
+# The game formats a conductivity of 1/9 with the mod's digits, as the original does.
+from: early-base
+mods: [3022436400]
+steps:
+  - expect_state:
+      "GameUtil.GetFormattedThermalConductivity(0.11111111)": [{contains: "0.111111"}, "== original"]

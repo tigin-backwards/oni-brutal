@@ -1,0 +1,58 @@
+{
+ "spec": "mods/3686522238-excavation-yield-configurable.yaml",
+ "mods": [
+  "3686522238"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "multiplier 1: four dug sandstone cells leave their whole mass as debris",
+ "updated": "2026-10-27",
+ "commit": "485e78df",
+ "mod_dlls": {
+  "3686522238": {
+   "ExcavationYieldConfigurable.dll": "d53ab2c232e0b5d8622364e3a4727bf3cfe8054d6a33e35b29939998d0a63ccb",
+   "PLibCore.dll": "f2127c9fa9fd24e9631035d0157be71e3eebfdd2425f58cd2d0f1dc5f7e4f177",
+   "PLibOptions.dll": "024f5c0d18dc15bd93e9112434456ac930f35ab97b1769b160ba4097f49964e1",
+   "PLibUI.dll": "c9665407dcad35ef695b91396d2fc5edd62716f2aa11aa6934b22363ef537390"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-051715-c581e5cb",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T06:10:54",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-093843-0b122242",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T09:38:43",
+    "lane": 14,
+    "reference_run": "20261027-051715-c581e5cb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-093843-0b122242",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T09:40:02",
+    "lane": 14,
+    "reference_run": "20261027-051715-c581e5cb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

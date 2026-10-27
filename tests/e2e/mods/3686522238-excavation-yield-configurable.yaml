@@ -1,0 +1,26 @@
+# Excavation Yield Configurable (3686522238), classes P, O.
+#
+# What it does: a prefix on WorldDamage.OnDigComplete scales a dug cell's debris by a PLib
+# option, Yield Multiplier: 0 is the game's half, 1 the whole mass, 2 to 30 that many times
+# the whole (the mod ships 0); options also cut 95 % of the germs, set the debris to 22 C,
+# and (on by default) keep sublimating debris (slime, bleach stone) off-gassing at the
+# game's rate in spite of the mass.
+# How a player reaches it: any dig order; the options on the Mods screen.
+# What changes: the mass of the debris a dig leaves.
+#
+# The multiplier is set to 1. Four sandstone cells at the east end of the dug-out corridor
+# west of the printing pod are dug; all the sandstone debris in the base is weighed before
+# and after: it grows by the cells' whole mass, where the game would leave half.
+from: early-base
+mods: [3686522238]
+options:
+  "3686522238": {$file: ExcavationYieldOptions.json, Multiplier: 1}
+steps:
+  - expect_state:
+      "cells:119,209..120,210::Grid.Mass.get_Item({cell})": {save_as: block}
+      "sum:all:Clearable::[*].GetComponent<PrimaryElement>.Mass if .GetComponent<PrimaryElement>.ElementID == SandStone": {save_as: before}
+  - expect_state: {"cells:119,209..120,210::Grid.Element[{cell}].hardness": "> 0"}   # solid, all of it
+  - dig: [119, 209, 120, 210]
+  - run: {seconds: 900, until: {pending_digs: 0}}
+  - expect_state:
+      "sum:all:Clearable::[*].GetComponent<PrimaryElement>.Mass if .GetComponent<PrimaryElement>.ElementID == SandStone": [">= before + 0.95 * block", "<= before + 1.05 * block"]

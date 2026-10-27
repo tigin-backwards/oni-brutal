@@ -1,0 +1,43 @@
+# Advanced Wattage Sensor (2315290740), class B.
+#
+# What it does: adds a 1x1 refined-metal sensor, OniPowerSensor, to the Automation menu,
+# researched with Advanced Power Regulation: a wattage sensor whose needle shows the
+# circuit's average draw against its threshold. Its threshold side screen runs from 0 to
+# 1.5 times the heavi-watt conductive wire's 50 kW (75 kW), and its signal is green above the
+# threshold by default.
+# How a player reaches it: the build menu (Automation), after the research.
+# What changes: a wattage sensor with a working gauge.
+#
+# setup researches Advanced Power Regulation; the Automation menu lists the sensor (shot). A
+# sensor built by setup in the dug-out corridor west of the printing pod is selected, its
+# threshold screen dumped, and 500 typed into it; on no circuit it reads 0 W and stays off.
+from: early-base
+mods: [2315290740]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"AdvancedPowerRegulation\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"OniPowerSensor\")", method: Build, args: [131765, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"AdvancedPowerRegulation\").unlockedItemIDs": {contains: OniPowerSensor}
+  - run: {seconds: 10}
+  - expect: {buildings: {OniPowerSensor: 1}}
+  - click: {ui: "**/PlanScreen/Toggle:Automation"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/OniPowerSensor Group*", cond: stable, stable: 120, frames: 600}
+  - shot: {name: automation-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
+  - key: {code: Escape}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: OniPowerSensor}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/ThresholdSwitchSideScreen", cond: stable}
+  - expect_state:
+      "selected:OniPowerSensor.RangeMax": 75000
+      "selected:OniPowerSensor.ActivateAboveThreshold": true
+  - ui_dump: {name: threshold, root: "**/ThresholdSwitchSideScreen"}
+  - type: {ui: "**/ThresholdSwitchSideScreen/**/NumberInputField", text: "500", clear: true, enter: true}
+  - expect_state:
+      "selected:OniPowerSensor.Threshold": 500
+  - key: {code: Escape}
+  - run: {seconds: 2}
+  - expect_state:
+      "all:OniPowerSensor::[0].IsSwitchedOn": false
+      "all:OniPowerSensor::[0].CurrentValue": 0

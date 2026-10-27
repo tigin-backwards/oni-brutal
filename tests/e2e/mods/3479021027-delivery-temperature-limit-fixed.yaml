@@ -1,0 +1,35 @@
+# Delivery Temperature Limit [Fixed] (3479021027), classes S, P.
+#
+# What it does: storage bins, smart bins, dispensers, feeders, planters, farm tiles, filters,
+# purifiers, refineries, the outhouse, the research station and other buildings that take
+# deliveries get a temperature limit (a low and a high field on a side screen, also on the
+# build menu's material panel and the fabricators' screens): Duplicants fetch only items
+# whose temperature lies within it.
+# How a player reaches it: the building's side screen.
+# What changes: deliveries filtered by temperature.
+#
+# A Storage Bin built by setup in the dug-out corridor west of the printing pod is selected:
+# its limit side screen is dumped, and 10 and 30 typed into its fields set the limits.
+#
+# Broken upstream: the PLib merged into it calls TMPro.FaceInfo, a type the game's
+# TextMeshPro no longer has, so building the limit widget (PTextField.SetMinWidthInCharacters)
+# throws a TypeLoadException and selecting any building it covers opens the crash screen.
+from: early-base
+mods: [3479021027]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"StorageLocker\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+steps:
+  - run: {seconds: 2}
+  - expect: {buildings: {StorageLocker: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: StorageLocker}
+  - ui_wait: {path: "**/DetailsScreen/**/TemperatureLimitSideScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<DeliveryTemperatureLimit.TemperatureLimit>.IsDisabled()": true
+  - ui_dump: {name: limit, root: "**/TemperatureLimitSideScreen"}
+  - type: {ui: "**/TemperatureLimitSideScreen/**/lowLimit", text: "10", clear: true, enter: true}
+  - type: {ui: "**/TemperatureLimitSideScreen/**/highLimit", text: "30", clear: true, enter: true}
+  - expect_state:
+      "selected:GetComponent<DeliveryTemperatureLimit.TemperatureLimit>.IsDisabled()": false
+      "selected:GetComponent<DeliveryTemperatureLimit.TemperatureLimit>.LowLimit": "== original"
+      "selected:GetComponent<DeliveryTemperatureLimit.TemperatureLimit>.HighLimit": [">= 30", "== original"]

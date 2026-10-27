@@ -1,0 +1,33 @@
+{
+ "spec": "mods/3479021027-delivery-temperature-limit-fixed.yaml",
+ "mods": [
+  "3479021027"
+ ],
+ "verdict": "pending",
+ "why": "the spec fails in the original: a broken spec, or a mod broken upstream",
+ "findings": [],
+ "note": "",
+ "updated": "2026-10-27",
+ "commit": "80a679cf",
+ "mod_dlls": {
+  "3479021027": {
+   "DeliveryTemperatureLimit.dll": "9c40e251a13f564f46e370743b0eac6971ba2397e7a0b43596f0f1370ab6236d"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-005510-07dc8c66",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-27T01:15:38",
+    "lane": 15,
+    "reasons": [
+     "step 8: no active element **/TemperatureLimitSideScreen/**/lowLimit"
+    ],
+    "signatures": 2
+   }
+  ],
+  "ours": []
+ }
+}

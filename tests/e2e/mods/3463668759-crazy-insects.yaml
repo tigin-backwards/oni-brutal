@@ -1,0 +1,22 @@
+# 果虫也疯狂！Crazey Insects! (3463668759), classes P, O.
+#
+# What it does: a prefix on BaseDivergentConfig.BaseDivergent gives the Sweetle (DivergentBeetle)
+# a configurable meat drop (PLib option, 3 by default; the mod ships 4) and the Grubgrub
+# (DivergentWorm) a configurable number of plants tended per cycle (32), logging each; both
+# need a restart.
+# How a player reaches it: ranching Divergents; the options on the Mods screen.
+# What changes: more meat from Sweetles, more tending from Grubgrubs.
+#
+# The options are set explicitly (6 meat, 20 tends): the Sweetle prefab drops 6 meat and the
+# Grubgrub's tending is the original's; the mod logs both.
+from: early-base
+mods: [3463668759]
+options:
+  "3463668759": {MeatAmount: 6, TendPerCycle: 20.0}
+require_log: ['设置甲虫肉量：6单位', '设置果虫照料次数：20次/周期']
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"DivergentBeetle\").GetComponent<Butcherable>.drops[\"Meat\"]": 6
+      "Assets.GetPrefab(\"DivergentWorm\").GetComponent<Butcherable>.drops": "== original"
+  - run: {seconds: 10}
+  - expect: {duplicants: 3}

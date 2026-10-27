@@ -1,0 +1,56 @@
+{
+ "spec": "mods/3463668759-crazy-insects.yaml",
+ "mods": [
+  "3463668759"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "options set: the Sweetle drops 6 meat, both log lines",
+ "updated": "2026-10-27",
+ "commit": "56103f58",
+ "mod_dlls": {
+  "3463668759": {
+   "PLib.dll": "93073fdf44dbe9fd7c0afe19e56341be862cc2d732090dee30999cf60e2e160d",
+   "╥∞╗»│µ.dll": "ff2d9e3d4a204351b8d0150d136d26a0c556779ea73a8cfb3ea2a18296d13115"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-051715-c581e5cb",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T05:49:40",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-092109-240e76c9",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T09:21:09",
+    "lane": 14,
+    "reference_run": "20261027-051715-c581e5cb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-092109-240e76c9",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T09:22:09",
+    "lane": 14,
+    "reference_run": "20261027-051715-c581e5cb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

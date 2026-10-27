@@ -1,0 +1,63 @@
+{
+ "spec": "mods/2804447598-powerless-smart-bins.yaml",
+ "mods": [
+  "2804447598"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Smart Storage Bin needs no power; one built in the corridor is selected (title dumped)",
+ "updated": "2026-10-27",
+ "commit": "7224eee1",
+ "mod_dlls": {
+  "2804447598": {
+   "PowerlessSmartBins.dll": "05b1166e068e42389292469290d3d02627002b2044d996f5bd57209d35b55d92"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-005510-07dc8c66",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T00:58:29",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-020258-614e7dca",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T02:02:58",
+    "lane": 14,
+    "reference_run": "20261027-005510-07dc8c66",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261027-020258-614e7dca",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T02:02:59",
+    "lane": 15,
+    "reference_run": "20261027-005510-07dc8c66",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

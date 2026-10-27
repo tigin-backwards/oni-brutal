@@ -1,0 +1,24 @@
+# Powerless Smart Bins (2804447598), class P.
+#
+# What it does: the Smart Storage Bin needs no power: no power input, 0 W, no exhaust heat.
+# How a player reaches it: the Smart Storage Bin, in the build menu as before.
+# What changes: smart bins work unwired.
+#
+# The def holds the mod's values; one built by setup in the dug-out corridor west of the
+# printing pod is selected: its title is dumped.
+from: early-base
+mods: [2804447598]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"StorageLockerSmart\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"StorageLockerSmart\").RequiresPowerInput": false
+      "Assets.GetBuildingDef(\"StorageLockerSmart\").EnergyConsumptionWhenActive": 0
+  - run: {seconds: 2}
+  - expect: {buildings: {StorageLockerSmart: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: StorageLockerSmart}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_dump: {name: title, root: "**/DetailsScreen/TitleBar/Border/LabelGroup"}
+  - expect_state:
+      "selected:GetComponent<Operational>.IsOperational": "== original"

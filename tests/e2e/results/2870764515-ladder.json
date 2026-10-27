@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2870764515-ladder.yaml",
+ "mods": [
+  "2870764515"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "three Edwladder cells ordered and built by Duplicants; climbable at the normal speed",
+ "updated": "2026-10-27",
+ "commit": "77244bef",
+ "mod_dlls": {
+  "2870764515": {
+   "Edwiesel.dll": "1ea5fb4b1b0a15a0c654af83c9cccc992fb402f1fd65b4a818fd49c917ab82b7"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-042211-787cf357",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T04:38:41",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-083102-fa63a7c8",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T08:31:02",
+    "lane": 14,
+    "reference_run": "20261027-042211-787cf357",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-083102-fa63a7c8",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T08:32:51",
+    "lane": 14,
+    "reference_run": "20261027-042211-787cf357",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

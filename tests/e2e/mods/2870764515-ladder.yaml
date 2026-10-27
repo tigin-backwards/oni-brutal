@@ -1,0 +1,28 @@
+# 工程梯 ladder (2870764515), class B.
+#
+# What it does: adds the Edwladder (工程梯, "engineering ladder") to the Base menu, with no
+# research: a 1x1 ladder of 100 kg of any mineral, drag-built, that never floods, overheats
+# or entombs and needs no repair; Duplicants climb it at the normal ladder's speed.
+# How a player reaches it: the build menu (Base).
+# What changes: a ladder of any mineral.
+#
+# Three ladder cells are ordered in the dug-out corridor west of the printing pod; the
+# Duplicants build them, and the ladder is climbable.
+from: early-base
+mods: [2870764515]
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"Edwladder\").Mass[0]": 100
+      "Assets.GetBuildingDef(\"Edwladder\").Floodable": false
+  - build: {prefab: Edwladder, cells: [[113, 207], [113, 208], [113, 209]]}
+  - expect: {blueprints: {Edwladder: 3}}
+  - run: {seconds: 900, until: {buildings: {Edwladder: 3}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 208], select: Edwladder}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~工程梯"}
+  - expect_state:
+      "selected:Ladder.upwardsMovementSpeedMultiplier": 1
+      "selected:Ladder.downwardsMovementSpeedMultiplier": 1
+      "Grid.HasLadder.get_Item(132401)": true

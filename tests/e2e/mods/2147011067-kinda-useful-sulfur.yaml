@@ -1,0 +1,27 @@
+# Kinda Useful Sulfur (2147011067), class P.
+#
+# What it does: a postfix on RockCrusherConfig.ConfigureBuildingTemplate adds a Rock
+# Granulator recipe: 100 kg of sulfur into 10 kg of fertilizer and 90 kg of sand, in 40 s.
+# How a player reaches it: a Rock Granulator's recipe list.
+# What changes: sulfur becomes a source of fertilizer.
+#
+# setup builds a Rock Granulator in the corridor west of the printing pod; selected, its
+# recipe list has the sulfur recipe.
+from: early-base
+mods: [2147011067]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"RockCrusher\")", method: Build, args: [131765, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "ComplexRecipeManager.Get().GetRecipe(\"RockCrusher_I_Sulfur_O_Fertilizer_Sand\").fabricators[0]": RockCrusher
+      "ComplexRecipeManager.Get().GetRecipe(\"RockCrusher_I_Sulfur_O_Fertilizer_Sand\").time": 40
+      "ComplexRecipeManager.Get().GetRecipe(\"RockCrusher_I_Sulfur_O_Fertilizer_Sand\").ingredients[0].amount": 100
+      "ComplexRecipeManager.Get().GetRecipe(\"RockCrusher_I_Sulfur_O_Fertilizer_Sand\").results[0].amount": 10
+      "ComplexRecipeManager.Get().GetRecipe(\"RockCrusher_I_Sulfur_O_Fertilizer_Sand\").results[1].amount": 90
+  - run: {seconds: 2}
+  - expect: {buildings: {RockCrusher: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: RockCrusher}
+  - ui_wait: {path: "**/ComplexFabricatorSideScreen/Contents/ButtonScrollView", cond: stable}
+  - ui_dump: {name: recipes, root: "**/ComplexFabricatorSideScreen/Contents/ButtonScrollView"}
+  - shot: {name: recipes, crop: "**/DetailsScreen", threshold: 0.04}

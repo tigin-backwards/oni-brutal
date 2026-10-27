@@ -1,0 +1,33 @@
+# Plant Settings Manager (3733686186), class M.
+#
+# What it does: per-plant settings for the game's plants (growth time, yield, temperature,
+# fertilizer, irrigation, alternative liquids, light and special needs), kept in
+# Klei/OxygenNotIncluded/mods/PlantSettingsManager.json under the user's Documents (written
+# with the game's values on the first start) and
+# applied to each plant's prefab, to mutations and to a few plants' consumption; a postfix on
+# ModsScreen.BuildDisplay adds a Config button to the mod's row in the Mods screen, which opens
+# its own settings window (PlantSettingsManagerSettings, under the front end) with a plant
+# list, fields, RESET ALL TO DEFAULT and CLOSE.
+# How a player reaches it: the main menu's Mods screen, the Config button on its row.
+# What changes: plants tuned by the player.
+#
+# From a colony, Main Menu (quit without saving), then Mods: the mod's row has the Config
+# button; clicked, the settings window opens (its title bar, buttons and fields header
+# dumped).
+from: early-base
+mods: [3733686186]
+steps:
+  - key: {code: Escape}
+  - ui_wait: {path: "**/PauseScreen/**/Main MenuButton", cond: stable}
+  - click: {ui: "**/PauseScreen/**/Main MenuButton"}
+  - ui_wait: {path: "**/ConfirmDialog/GameObject/Panel/ConfigurableButton", cond: stable}
+  - click: {ui: "**/ConfirmDialog/GameObject/Panel/ConfigurableButton"}   # Quit Without Saving
+  - ui_wait: {path: "**/MainMenu_SpacedOut/MainMenuMenubar/MainMenuButtons", cond: stable, frames: 3000}
+  - click: {text: "MODS", under: "**/MainMenuButtons"}
+  - ui_wait: {path: "**/ModsScreen/Panel", cond: stable}
+  - ui_dump: {name: row, root: "**/ModsScreen/Panel/ListView/Files/Viewport/Content/Plant Settings Manager"}
+  - click: {ui: "**/ModsScreen/**/Content/Plant Settings Manager/ConfigButton"}
+  - ui_wait: {path: "**/PlantSettingsManagerSettings/Overlay/Window", cond: stable}
+  - ui_dump: {name: title, root: "**/PlantSettingsManagerSettings/Overlay/Window/TitleBar"}
+  - ui_dump: {name: buttons, root: "**/PlantSettingsManagerSettings/Overlay/Window/BtnBar"}
+  - ui_dump: {name: fields-header, root: "**/PlantSettingsManagerSettings/**/RightPanel/FieldsHeader"}

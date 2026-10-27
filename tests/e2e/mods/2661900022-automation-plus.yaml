@@ -1,0 +1,26 @@
+# Automation Plus (2661900022), classes B, S.
+#
+# What it does: adds five automation buildings to the Automation menu, researched with Logic
+# Circuits: the Delay Gate (DelayGATE), a pseudo-random number generator (PnrgGate), a Display
+# Adaptor, and 4-bit and 8-bit arithmetic logic units (AluGate, Alu8Gate) that combine two
+# ribbon inputs with an operator (add, subtract, multiply, compare, shift...), chosen in a
+# PLib side screen (a combo box) or from a third ribbon input.
+# How a player reaches it: the build menu (Automation), then the ALU's side screen.
+# What changes: arithmetic in automation.
+#
+# Logic Circuits unlocks the five; a 4-bit ALU built by setup in the dug-out corridor west of
+# the printing pod is selected: its side screen shows the operator Add, and Multiply picked in
+# its combo box makes it multiply.
+from: early-base
+mods: [2661900022]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"AluGate\")", method: Build, args: [{"$": "Grid.XYToCell(112, 206)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"LogicCircuits\").unlockedItemIDs": [{contains: DelayGATE}, {contains: PnrgGate}, {contains: DisplayAdaptor}, {contains: AluGate}, {contains: Alu8Gate}]
+  - run: {seconds: 2}
+  - expect: {buildings: {AluGate: 1}}
+  - driver: {camera.set: {cell: [113, 207], ortho: 8}}
+  - click_world: {cell: [112, 207], select: AluGate}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/AluGateSideScreen", cond: stable}
+  - ui_dump: {name: side, root: "**/DetailsScreen/SideScreen/**/AluGateSideScreen"}

@@ -1,0 +1,63 @@
+{
+ "spec": "mods/2661900022-automation-plus.yaml",
+ "mods": [
+  "2661900022"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "Logic Circuits unlocks the five gates; a 4-bit ALU's PLib side screen dumped",
+ "updated": "2026-10-27",
+ "commit": "45c738a4",
+ "mod_dlls": {
+  "2661900022": {
+   "AutomationPlus.dll": "9908b2fee32232524a80efc6970cf07781e20c1a1c4ab9d47d4a95a9a6f174ba"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-051715-c581e5cb",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T05:29:01",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-082923-9b04731e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T08:29:23",
+    "lane": 14,
+    "reference_run": "20261027-051715-c581e5cb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "side": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261027-082923-9b04731e",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T08:30:12",
+    "lane": 14,
+    "reference_run": "20261027-051715-c581e5cb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "side": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

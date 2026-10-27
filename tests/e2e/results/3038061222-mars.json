@@ -1,0 +1,33 @@
+{
+ "spec": "mods/3038061222-mars.yaml",
+ "mods": [
+  "3038061222"
+ ],
+ "verdict": "pending",
+ "why": "the spec fails in the original: a broken spec, or a mod broken upstream",
+ "findings": [],
+ "note": "",
+ "updated": "2026-10-27",
+ "commit": "6ea04646",
+ "mod_dlls": {
+  "3038061222": {
+   "Mars.dll": "8c9cffd6edc60a3ebe26d72a9f872a131e6f372dd02d4b761987c6b961062710"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-111432-ae629e14",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-27T11:49:27",
+    "lane": 16,
+    "reasons": [
+     "the player hung (no log output or OniMcp/E2eDriver reply for 5 min); diagnostics in /home/nigit/projects/oni-brutal/.claude/worktrees/agent-a5bb3d07232b203fc/out/e2e/3038061222-mars/20261027-111432-ae629e14/original-1/hang: hang-dump of 1056949 at 2026-10-27 11:58:01: the main thread is sleeping (fu"
+    ],
+    "signatures": 1
+   }
+  ],
+  "ours": []
+ }
+}

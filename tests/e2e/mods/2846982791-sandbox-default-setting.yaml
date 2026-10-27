@@ -1,0 +1,23 @@
+# Sandbox Default Setting (2846982791), classes P, K.
+#
+# What it does: a colony saved with sandbox enabled loads with sandbox mode on, instant build
+# on, the fog of war lifted and the camera's zoom limit raised to 400 (a Game.OnSpawn
+# postfix); in sandbox mode the colony's game over check never runs; the ultra-test-mode debug
+# key sets 30x time without the debug mode.
+# How a player reaches it: loading a sandbox colony.
+# What changes: sandbox colonies start in sandbox mode.
+#
+# rockets-so is a sandbox colony: it loads in sandbox mode with instant build, the sandbox
+# tools show in the toolbar, and the colony runs.
+from: rockets-so
+mods: [2846982791]
+require_log: ['HERE:SandboxDefaultSetting: onSpawn  enable\?=:True']
+steps:
+  - expect_state:
+      "SaveGame.Instance.sandboxEnabled": true
+      "Game.Instance.SandboxModeActive": true
+      "DebugHandler.InstantBuildMode": true
+      "CameraController.Instance.maxOrthographicSize": 400
+  - run: {seconds: 5}
+  - expect_state:
+      "Game.Instance.SandboxModeActive": true

@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2846982791-sandbox-default-setting.yaml",
+ "mods": [
+  "2846982791"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a sandbox colony loads in sandbox mode with instant build and the camera's limit raised",
+ "updated": "2026-10-27",
+ "commit": "3deab85e",
+ "mod_dlls": {
+  "2846982791": {
+   "SandboxDefaultSetting.dll": "78cb6e497fbffc415b89837dce149cc377dad7604fc5395f598bb0a7ad0cfa1e"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-042211-787cf357",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T04:35:36",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-085618-e2f77adc",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T08:56:18",
+    "lane": 14,
+    "reference_run": "20261027-042211-787cf357",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-085618-e2f77adc",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T08:57:08",
+    "lane": 14,
+    "reference_run": "20261027-042211-787cf357",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

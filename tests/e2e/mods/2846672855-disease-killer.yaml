@@ -1,0 +1,25 @@
+# Disease killer疾病杀手 (2846672855), class P.
+#
+# What it does: a postfix on FlushToiletConfig.ConfigureBuildingTemplate sets the Lavatory's
+# germs per flush, in its polluted water and on the Duplicant, to 0.
+# How a player reaches it: Duplicants using a Lavatory.
+# What changes: lavatories spread no food poisoning.
+#
+# The Lavatory's prefab adds no germs; one built by setup in the dug-out corridor west of the
+# printing pod, selected, shows the same.
+from: early-base
+mods: [2846672855]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"FlushToilet\")", method: Build, args: [{"$": "Grid.XYToCell(112, 206)"}, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"FlushToilet\").GetComponent<FlushToilet>.diseasePerFlush": 0
+      "Assets.GetPrefab(\"FlushToilet\").GetComponent<FlushToilet>.diseaseOnDupePerFlush": 0
+  - run: {seconds: 2}
+  - expect: {buildings: {FlushToilet: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: FlushToilet}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<FlushToilet>.diseasePerFlush": 0
+      "selected:GetComponent<FlushToilet>.diseaseOnDupePerFlush": 0

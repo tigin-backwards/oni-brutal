@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2846672855-disease-killer.yaml",
+ "mods": [
+  "2846672855"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Lavatory adds no germs; one selected shows it",
+ "updated": "2026-10-27",
+ "commit": "459a8268",
+ "mod_dlls": {
+  "2846672855": {
+   "Disease killer╝▓▓í╔▒╩╓.dll": "fbc73c5dc2e1141d8a87dda4459dd176363c84d094c4a11e5268aaae80c8bc62"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-042211-787cf357",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T04:35:20",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-085936-54e130cf",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T08:59:36",
+    "lane": 14,
+    "reference_run": "20261027-042211-787cf357",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-085936-54e130cf",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T09:00:24",
+    "lane": 14,
+    "reference_run": "20261027-042211-787cf357",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

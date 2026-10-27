@@ -1,0 +1,67 @@
+{
+ "spec": "mods/1892748957-smart-reservoirs.yaml",
+ "mods": [
+  "1892748957"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "after Improved Plumbing the Base menu lists the liquid reservoir (shot); a built one's range side screen is dumped",
+ "updated": "2026-10-26",
+ "commit": "f4f72218",
+ "mod_dlls": {
+  "1892748957": {
+   "SmartReservoir.dll": "5b30dc3c5f9f6b1c3e9680c8e759a75a903814742b9c5899869e6572aa232f24"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-225949-7692348a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T22:59:50",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-230700-62df17b6",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T23:16:26",
+    "lane": 14,
+    "reference_run": "20261026-225949-7692348a",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "range": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "base-menu": 0.0
+    }
+   },
+   {
+    "run": "20261026-230700-62df17b6",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T23:16:30",
+    "lane": 15,
+    "reference_run": "20261026-225949-7692348a",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "range": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "base-menu": 0.0
+    }
+   }
+  ]
+ }
+}

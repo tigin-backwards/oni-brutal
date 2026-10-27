@@ -1,0 +1,36 @@
+# Smart Reservoirs (1892748957), class B.
+#
+# What it does: a Smart Liquid Reservoir (2x3, Improved Plumbing) and a Smart Gas Reservoir
+# (5x3, Ventilation) in the Base menu: reservoirs with an automation output that is green
+# within an activation range of their fill, a capacity control and settings that copy.
+# How a player reaches it: the build menu (Base), after the research.
+# What changes: reservoirs that can drive pumps.
+#
+# setup researches Improved Plumbing; the Base menu lists the liquid reservoir (shot), and one
+# built by setup in the dug-out corridor west of the printing pod is selected: its range side
+# screen is dumped, and the mod's component holds the original's range.
+from: early-base
+mods: [1892748957]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"ImprovedLiquidPiping\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Ktoblin.SmartLiquidReservoir\")", method: Build, args: [131128, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"ImprovedLiquidPiping\").unlockedItemIDs": {contains: Ktoblin.SmartLiquidReservoir}
+      "Db.Get().Techs.Get(\"HVAC\").unlockedItemIDs": {contains: Ktoblin.SmartGasReservoir}
+  - run: {seconds: 10}
+  - expect: {buildings: {Ktoblin.SmartLiquidReservoir: 1}}
+  - click: {ui: "**/PlanScreen/Toggle:Base"}
+  # The build menu catches up over frames: 120 frames for all of it to settle.
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/Ktoblin.SmartLiquidReservoir Group*", cond: stable, stable: 120, frames: 600}
+  - shot: {name: base-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
+  - key: {code: Escape}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 206], select: Ktoblin.SmartLiquidReservoir}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/ActivationRangeSideScreen", cond: stable}
+  - ui_dump: {name: range, root: "**/ActivationRangeSideScreen"}
+  - expect_state:
+      "selected:GetComponent<SmartReservoir.SmartReservoir>.ActivateValue": "== original"
+      "selected:GetComponent<SmartReservoir.SmartReservoir>.DeactivateValue": "== original"

@@ -1,0 +1,1090 @@
+# scripts/mod-sweep.py s2000: 1088 mods, batches of 22, the save 2minnow, 90 s of play; commit 8b374a54, 2026-10-26
+id	rank	original	ours	note
+1882162095	751	ok	ok	
+2836461351	752	ok	ok	
+2936854563	753	ok	ok	
+2836897091	754	ok	ok	
+3110572144	755	ok	ok	
+3745757494	756	-	-	a translation: installed disabled, as a subscription leaves it; not swept
+2119786479	757	ok	ok	
+933183009	758	-	-	a translation: installed disabled, as a subscription leaves it; not swept
+2877460966	759	ok	ok	
+3744532814	760	ok	ok	
+3341977181	761	ok	ok	
+2455735197	762	ok	ok	
+2836891839	763	ok	ok	
+3726410223	764	ok	ok	
+2874440740	765	ok	ok	
+2019356525	766	ok	ok	
+3438001141	767	ok	ok	
+3093901934	768	-	-	a translation: installed disabled, as a subscription leaves it; not swept
+1843834993	770	ok	ok	
+3145638633	771	ok	ok	
+3497166042	772	ok	ok	
+2859413444	773	ok	ok	
+3648432502	774	ok	ok	
+2868798283	775	ok	ok	
+2026932869	776	ok	ok	
+2976666381	777	ok	ok	
+2998905657	778	ok	ok	
+1950944765	780	ok	ok	
+3671679281	782	ok	ok	
+2999435124	783	ok	ok	
+3718696016	784	ok	ok	
+2870002358	785	ok	ok	
+2172549146	786	ok	ok	
+3405082060	787	ok	ok	
+3794018361	789	ok	ok	
+2984793466	790	ok	ok	
+3054711075	791	ok	ok	
+3406758275	793	ok	ok	
+2558057221	795	ok	ok	
+2646217495	796	ok	ok	
+3732005635	797	ok	ok	
+3221051163	798	ok	ok	
+1996618130	800	ok	ok	
+2987670505	801	ok	ok	
+3281716506	802	ok	ok	
+2993850936	803	ok	ok	
+3042467105	804	colony	-	the crash screen opens while the save loads; System.MissingFieldException: Field not found: int .CavityInfo.numCells Due to: Could not find field in class @ Darkness
+3464314625	806	ok	ok	
+3743015529	807	ok	ok	
+3334327664	808	ok	ok	
+3561866116	809	ok	ok	
+3460554894	810	ok	ok	
+3001972449	811	ok	ok	
+2793754960	812	ok	ok	
+2984782696	813	ok	ok	
+3750737880	815	ok	ok	
+3447551899	816	ok	ok	
+1248960307	817	-	-	a translation: installed disabled, as a subscription leaves it; not swept
+2866118101	818	ok	ok	
+2845739096	819	ok	ok	
+3775109476	820	ok	ok	
+2990501709	821	ok	ok	
+2942005501	824	ok	ok	
+2557247469	826	ok	ok	
+3709844715	827	ok	ok	
+2863558330	828	ok	ok	
+3678142367	829	ok	ok	
+2820163949	830	ok	ok	
+3609476592	831	ok	menu	the player exits (1) while loading; DarknessNotExcluded: Failed to patch Workable.GetEfficiencyMultiplier()
+2924528762	832	ok	ok	
+2881769456	833	ok	ok	
+2954005789	834	ok	ok	
+2584106067	835	ok	ok	
+2876288128	836	ok	ok	
+3671379574	837	ok	ok	
+2557246397	838	ok	ok	
+3078504174	839	ok	ok	
+2999788349	840	ok	ok	
+2962822663	841	ok	ok	
+2737502623	842	ok	ok	
+2481823855	843	ok	ok	
+3606719577	845	ok	ok	
+2034132436	846	menu	-	the original disables it ("Failed to load mod ...disabling"): step start: the player exited (1) while loading; System.MissingMethodException: Method not found: EdiblesManager/FoodInfo .FoodInfo.AddEffects(System.Collections.Generic.List`N<string>,string[]) @ EntityConfigManager.RegisterEntity; System.MissingMethodException: Method not found: void Klei.CustomSettings.SettingLevel..ctor(string,string,string,int,object) @ KMod.DLLLoader.LoadDLLs
+3071641802	847	colony	-	the player exits (1) while loading; ArgumentException: The Object you want to instantiate is null @ UnityEngine.Object.Instantiate; ArgumentOutOfRangeException: Index was out of range. Must be non-negative and less than the size of the collection @ BackwallManager+BackwallIndexer.get_Element
+2470399096	848	ok	ok	
+2130729222	850	ok	ok	
+2816175461	851	ok	ok	
+2517456276	852	ok	ok	
+3538072658	853	ok	ok	
+2845493570	855	ok	ok	
+2587551532	856	ok	ok	
+3243965346	857	ok	ok	
+3518862481	858	ok	ok	
+2992152587	859	ok	ok	
+3731631427	860	-	-	a translation: installed disabled, as a subscription leaves it; not swept
+3262486834	861	ok	ok	
+3244925649	862	ok	ok	
+2659596916	863	colony	-	the crash screen opens while the save loads; DoorComplete Exception in: (Door).Door+Controller.root.closed.SetWorldStateClosed; System.MissingMethodException: Method not f
+3810697122	864	ok	ok	
+2601665313	865	ok	ok	
+2791973376	866	ok	ok	
+3757698960	867	ok	ok	
+3599468153	868	ok	ok	
+2881000917	870	ok	ok	
+3739024899	871	ok	ok	
+2755454101	872	ok	ok	
+3728428669	873	ok	ok	
+2870926065	874	ok	ok	
+3021827424	875	ok	ok	
+3794979035	876	ok	ok	
+2847163162	877	ok	ok	
+3052222549	879	ok	ok	
+1842284802	880	colony	-	the player exits (-6) while loading; Assert failed: Cannot send a frame to the sim with zero active regions; Assert failed: NewGameFrame cannot be called with zero activeRegions
+2955350267	881	ok	ok	
+2810438800	882	ok	ok	
+3718142949	883	ok	ok	
+3008287025	884	ok	ok	
+2908269000	885	ok	ok	
+3129448555	886	ok	ok	
+3689351875	887	ok	ok	
+3447175832	888	ok	ok	
+3004770489	889	ok	ok	
+3247617445	890	ok	ok	
+3016925992	891	ok	ok	
+2223751324	892	ok	ok	
+3427974009	893	ok	ok	
+3408518726	894	ok	ok	
+2975152457	895	ok	ok	
+3478214979	896	ok	ok	
+1921058858	897	ok	ok	
+2631256908	898	ok	ok	
+3104741758	899	ok	ok	
+3522638280	900	ok	ok	
+2889776196	901	ok	ok	
+3623778703	902	ok	ok	
+3510014731	904	ok	ok	
+3746027329	906	ok	ok	
+3703748819	907	ok	ok	
+3606741605	908	ok	ok	
+3621278256	909	ok	ok	
+3018763783	910	ok	ok	
+2001154549	911	menu	-	the player exits (1) while loading; System.NullReferenceException: Object reference not set to an instance of an object @ CustomGameSettings.OnPrefabInit; System.MissingMethodException: Method not found: void .Constraint..ctor(System.Func`N<KPrefabID, bool>,System.Func`N<Room, bool>,int,string,string,System.Collections.Generic.List`N<RoomConstraints/Constraint>)
+2911545239	912	ok	ok	
+3520953238	913	ok	ok	
+2860569135	914	ok	ok	
+2627657947	915	ok	ok	
+3016368916	917	ok	ok	
+3291978062	918	ok	ok	
+3627507304	919	ok	ok	
+3757075889	920	ok	ok	
+2900816401	921	ok	ok	
+3129436780	922	ok	ok	
+3426316307	924	ok	ok	
+2493249462	925	ok	ok	
+3339050792	926	ok	ok	
+3343067865	929	ok	ok	
+1837044017	930	ok	ok	
+2705421437	931	colony	-	the crash screen opens while the save loads; PeterHan.PLib.Detours.DetourException: Unable to find sideScreenConfigContentBody on type DetailsScre
+2886144715	932	ok	ok	
+2995869375	933	ok	ok	
+3352492406	934	ok	ok	
+3246425770	935	ok	ok	
+2940372971	936	ok	ok	
+1730968929	937	colony	-	the crash screen opens while the save loads; Chlorine Gas Vent NAN‑N ~~~!System.NullReferenceException: Object reference not set to an instance of an object @ HexiGeyserCr
+3020589190	938	ok	ok	
+3160450307	939	ok	ok	
+3687352069	940	ok	ok	
+2428180934	941	ok	ok	
+3738243630	943	ok	ok	
+2996322065	944	ok	ok	
+3287791163	945	ok	ok	
+3383357240	946	ok	ok	
+2295306784	947	ok	ok	
+2821189161	948	ok	ok	
+2923696064	949	ok	ok	
+3424175679	950	-	-	a translation: installed disabled, as a subscription leaves it; not swept
+3080318955	951	ok	ok	
+2574634278	952	ok	ok	
+2997898111	953	ok	ok	
+3793606130	954	ok	ok	
+2044840370	955	menu	-	the original disables it ("Failed to load mod ...disabling"): step start: the player exited (1) while loading; System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation. ---> System.TypeInitializationException: The type initializer for "SleepNotIncluded.SleepNotIncluded" threw an exception. ---> System.MissingMethodException: Method not found: void Klei.CustomSettings.SettingLevel..ctor(string,string,string,int,object); null Exception while loading mod Zonkeeh.SleepNotIncluded at RUN/home/config/unityNd/Klei/Oxyg
+3464929672	956	ok	ok	
+2853460032	957	ok	ok	
+2848299481	958	ok	ok	
+2995869693	960	ok	ok	
+2981741974	961	ok	ok	
+2689785207	963	ok	ok	
+2400500058	964	ok	ok	
+3344810103	965	ok	ok	
+3591826138	966	ok	ok	
+2693498411	967	ok	ok	
+3387132147	968	ok	ok	
+3765355897	969	ok	ok	
+2283591824	971	ok	ok	
+2894982816	972	ok	ok	
+3740131305	973	ok	ok	
+3573674982	974	ok	ok	
+2266128365	975	ok	ok	
+3242595525	976	ok	ok	
+2586992909	977	ok	ok	
+3640719341	978	ok	ok	
+3383726669	979	ok	ok	
+1764502347	980	-	-	a translation: installed disabled, as a subscription leaves it; not swept
+3504886133	981	ok	ok	
+3641397524	982	ok	ok	
+3583419724	983	ok	ok	
+3357219777	984	ok	ok	
+2845382372	985	ok	ok	
+1727987491	986	ok	ok	
+3165114076	987	ok	menu	step start: <urlopen error [Errno 111] Connection refused>; ours disables it ("Failed to load mod ...disabling"); ---> System.InvalidProgramException: Common Language Runtime detected an invalid program @ HarmonyLib.PatchFunctions.UpdateWrapper_PatchN; HarmonyLib.HarmonyException: Patching exception in method TMPro.EditState TMPro.TMP_InputField::KeyPressed(UnityEngine.Event evt) @ HarmonyLib.PatchFunctions.UpdateWrapper_PatchN; null Exception while loading mod Aze.DeleteFullWord at RUN/home/config/unityNd/Klei/Oxygen Not Included/mods/Local/N @ HarmonyLib.PatchFunctions.UpdateWrapper_PatchN
+2549477669	988	ok	ok	
+3447554654	989	ok	ok	
+2558070245	990	menu	-	the original disables it ("Failed to load mod ...disabling"): step start: the player exited (1) while loading; HarmonyLib.HarmonyException: Patching exception in method null ---> System.ArgumentException: Undefined target method for patch method static System.Void SuperMiner.AutoMiner_DigBlockingCB::Postfix(System.IntN cell, System.Boolean& __result) @ HarmonyLib.PatchClassProcessor.PatchWithAttributes; [ReversibleHeaterClones] Failed patch HeaterSideScreen_PrepareTarget_CloneCleanupPatch: HarmonyLib.HarmonyException: Patching exception in method null --->
+3029304394	991	ok	ok	
+3690514626	992	ok	ok	
+2857018172	993	ok	ok	
+2128525958	994	ok	ok	
+2902461362	995	ok	ok	
+2377629562	996	ok	ok	
+3362048907	997	ok	ok	
+2915322068	998	ok	ok	
+3710035894	999	ok	colony	---> System.ArgumentException: Undefined target method for patch method static System.Boolean ReversibleHeaterClones.SpaceHeater_BoolModeSetter_CloneBlockPatch::Prefix(SpaceHeater __instance, System.Reflection.MethodBase __originalMethod) @ HarmonyLib.PatchClassProcessor.PatchWithAttributes; ---> System.ArgumentException: Undefined target method for patch method static System.Void ReversibleHeaterClones.HeaterSideScreen_PrepareTarget_CloneCleanupPatch::Prefix(System.Object[] __args) @ HarmonyLib.PatchClassProcessor.PatchWithAttributes; [ReversibleHeaterClones] Failed patch HeaterSideScreen_Pre
+3286478591	1000	ok	ok	
+3003736085	1001	ok	ok	
+2167499088	1002	ok	ok	
+2894769948	1004	ok	ok	
+2673317898	1006	ok	ok	
+3317506652	1007	ok	ok	
+2598601623	1008	ok	ok	
+2970435539	1009	ok	ok	
+1959636284	1010	ok	ok	
+3759181620	1011	ok	ok	
+2998869133	1012	ok	ok	
+3045956572	1013	ok	ok	
+2931324205	1014	ok	ok	
+1870621007	1016	ok	ok	
+3555374847	1017	colony	-	the crash screen opens while the save loads; NullReferenceException: Object reference not set to an instance of an object @ OverlayScreen.LateUpdate; NullReferenceExceptio
+1969458444	1018	ok	ok	
+1934714769	1020	ok	ok	
+3344327222	1021	ok	ok	
+3119833849	1022	ok	ok	
+3357294645	1023	ok	ok	
+3231852237	1024	ok	ok	
+2721559364	1025	colony	-	the player exits (1) while loading; System.MissingMethodException: Method not found: void .ConsumedElement..ctor(Tag,single) @ BuildingConfigManager.RegisterBuilding; null Exception in RegisterBuilding for type ElectrolyzerVN.ElectrolyzerVNConfig from ElectrolyzerVN @ BuildingConfigManager.RegisterBuilding
+3029077166	1026	ok	ok	
+2022824531	1028	ok	ok	
+2942359329	1029	ok	ok	
+1266052762	1030	-	-	a translation: installed disabled, as a subscription leaves it; not swept
+3371878052	1031	ok	ok	
+3746622017	1032	ok	ok	
+3467986764	1033	ok	ok	
+3760101842	1034	ok	ok	
+2880489644	1035	ok	ok	
+3625100610	1036	ok	ok	
+2867460635	1037	ok	ok	
+2997605883	1038	ok	ok	
+2839892979	1039	colony	-	the player exits (1) while loading; System.UnauthorizedAccessException: Access to the path "/home/nigit\AppData\Local\BDR\ONI\LargerGasStorage" is denied. ---> System.IO.IOException: Permission denied @ LargerGasStorage.LargerGasStoragePatches+GasReservoirConfig_ConfigureBuildingTemplate_Patch.Prefix; null Exception in RegisterBuilding for type GasReservoirConfig from Assembly-CSharp @ LargerGasStorage.LargerGasStoragePatches+GasReservoirConfig_ConfigureBuildingTemplate_Patch.Prefix
+3743875118	1040	ok	ok	
+3371129389	1041	colony	-	the crash screen opens while the save loads; System.MethodAccessException: Method `MonoMod.Utils.Extensions.AddRange[HashedString, System.Func`N<bool>](System.Collections.Generic.Di
+2945098028	1042	ok	ok	
+2854756453	1043	ok	ok	
+3010226731	1044	ok	ok	
+3741717611	1046	ok	ok	
+3379701036	1047	ok	ok	
+2839508628	1048	ok	ok	
+2895288475	1049	ok	ok	
+2018086455	1050	ok	ok	
+2995870038	1051	ok	ok	
+2994004260	1052	ok	ok	
+3618564887	1053	ok	ok	
+3525432758	1054	ok	ok	
+3323729185	1055	ok	ok	
+1889255373	1056	ok	ok	
+3432731289	1058	ok	ok	
+3568711018	1059	ok	ok	
+2699868121	1060	ok	ok	
+3747421197	1061	ok	ok	
+3766829264	1062	ok	ok	
+3414157541	1063	ok	ok	
+2326745828	1064	ok	ok	
+3614348529	1065	ok	ok	
+3714990201	1066	ok	ok	
+1886183536	1067	ok	ok	
+3386552780	1068	ok	ok	
+3736878109	1069	ok	ok	
+1963992940	1070	ok	ok	
+3398520692	1071	ok	colony	the player exits (1) while loading; System.MissingMethodException: Cannot dynamically create an instance of type "SonJeremy.TrashCans.AutoConsumption.AutoFluidTrashCans". Reason: No parameterless constructor defined @ UnityEngine.Object.ConstructBound[T](Type type, NativeObject native) in /home/nigit/projects/oni-brutal/.claude/worktrees/agent-aNdNfNeNfN/src/OniBrutal.UnityEngine/Core/Object.cs.line N; null Exception in RegisterBuilding for type SonJeremy.TrashCans.BuildingConfig.GasTrashCanConfig from TrashCans @ UnityEngine.Object.ConstructBound[T](Type type, NativeObject native
+3719204845	1072	ok	ok	
+3006715942	1073	ok	ok	
+1999001228	1074	ok	ok	
+3494066563	1075	ok	ok	
+3235904679	1077	ok	ok	
+3556910379	1078	ok	ok	
+3456696039	1079	ok	ok	
+3637505541	1080	ok	colony	[GravitasMod] Patch failed for KModalScreen.OnCmpDisable: System.ArgumentException: You can only patch implemented methods/constructors. Patch the declared method virtual System.Void KModalScreen::OnCmpDisable() instead @ HarmonyLib.PatchProcessor.Patch_PatchN; [GravitasMod] Patch failed for KModalScreen.OnDeactivate: System.ArgumentException: You can only patch implemented methods/constructors. Patch the declared method virtual System.Void KModalScreen::OnDeactivate() instead @ HarmonyLib.PatchProcessor.Patch_PatchN; [GravitasMod] Patch failed for KScreen.OnCleanUp: System.ArgumentException:
+3380780873	1081	ok	ok	
+1332127867	1083	-	-	a translation: installed disabled, as a subscription leaves it; not swept
+3625551075	1084	ok	ok	
+3373024595	1085	ok	ok	
+3462398525	1086	ok	ok	
+3346698308	1087	ok	ok	
+3374595157	1088	ok	ok	
+2302559484	1089	menu	-	the player exits (1) while loading; System.Collections.Generic.KeyNotFoundException: The given key "Database.Personalities+PersonalityLoader" was not present in the dictionary @ AsyncLoadManager`N.GetLoader; System.DllNotFoundException: mxN.rN assembly:<unknown assembly> type:<unknown type> member:(null)
+3010706556	1090	ok	ok	
+3563131181	1091	menu	-	the original disables it ("Failed to load mod ...disabling"): step start: the player exited (1) while loading; System.Collections.Generic.KeyNotFoundException: The given key "Database.Personalities+PersonalityLoader" was not present in the dictionary @ AsyncLoadManager`N.GetLoader; System.DllNotFoundException: mxN.rN assembly:<unknown assembly> type:<unknown type> member:(null)
+2785073113	1092	ok	ok	
+3419419199	1093	ok	ok	
+3651879332	1094	ok	ok	
+2667192005	1095	ok	ok	
+2862928002	1097	ok	ok	
+2833476342	1098	ok	ok	
+3594387679	1099	ok	ok	
+1749025321	1101	ok	ok	
+3743438381	1102	ok	ok	
+2906743782	1103	ok	ok	
+2901813453	1104	ok	ok	
+3247021036	1105	ok	ok	
+2841918251	1106	ok	ok	
+3130411418	1107	ok	ok	
+2712885117	1108	ok	ok	
+3207798260	1109	ok	ok	
+3011189357	1110	ok	ok	
+2848829914	1111	ok	ok	
+3170592482	1112	ok	ok	
+3768766063	1113	ok	ok	
+1962983262	1115	ok	ok	
+2777145427	1117	ok	ok	
+3753181401	1119	ok	ok	
+3773818206	1120	ok	colony	the crash screen opens while the save loads; ---> System.InvalidCastException: Unable to cast object of type "Context[Rottable,Rottable+Instance,IStateMachineTarget,Rottable+Def]" to type "Context[CritterCondoInteractMontior,CritterCondoInteractMontior+Instance,IStateMac
+3415553359	1121	ok	ok	
+2880319200	1122	colony	-	the crash screen opens while the save loads; System.ArgumentException: An item with the same key has already been added. Key: WoodenDoor @ PlanScreen.BuildB
+1927259233	1123	ok	ok	
+3329512249	1124	ok	ok	
+3022610348	1125	ok	ok	
+3316755325	1126	ok	ok	
+3805601277	1127	ok	menu	step start: Remote end closed connection without response; [更好的存档] OnLoad 失败: System.MissingMethodException: Method not found: "Void UnityEngine.Application.add_quitting(System.Action)" @ SaveOpt.ModLoader.InstallQuitHook
+3759482835	1128	ok	ok	
+2094022117	1129	ok	ok	
+2633732356	1130	ok	ok	
+3240628520	1131	ok	ok	
+1870873514	1133	ok	ok	
+1863180631	1134	ok	ok	
+3302049214	1135	ok	ok	
+2570834434	1138	ok	ok	
+2746246303	1139	-	-	a translation: installed disabled, as a subscription leaves it; not swept
+2868395237	1140	ok	ok	
+3638972299	1141	ok	colony	the crash screen opens while the save loads; TypeLoadException: Could not load type "LimitVelocityOverLifetimeModule" from assembly "UnityEngine.ParticleSystemModule, Version=N.N, Culture=neutral, PublicKeyToken=null" @ CursorLaserMining.Visual_Classic.ConfigureMasterFX
+2814417161	1143	menu	-	the original disables it ("Failed to load mod ...disabling"): step start: the player exited (1) while loading; HarmonyLib.HarmonyException: Patching exception in method Klei.AI.AttributeConverter Database.AttributeConverters::Create(System.String id, System.String name, System.String description, Klei.AI.Attribute attribute, System.Single multiplier, System.Single base_value, IAttributeFormatter formatter, System.String[] requiredDlcIds, System.String[] forbiddenDlcIds) ---> System.Exception: Parameter "available_dlcs" not found in method Klei.AI.Attribute
+2843896901	1144	ok	ok	
+3308456170	1145	ok	ok	
+2959309464	1146	ok	ok	
+3263949642	1147	-	-	a translation: installed disabled, as a subscription leaves it; not swept
+3733064550	1148	ok	ok	
+3260591912	1149	ok	ok	
+3630055851	1150	ok	ok	
+3523317587	1151	ok	ok	
+2963257205	1152	ok	menu	step start: [Errno 104] Connection reset by peer; ---> System.NullReferenceException: Object reference not set to an instance of an object @ DeliveryTemperatureLimit.StatusItemsUpdaterPatch.RenderNms; DeliveryTemperatureLimit: Failed to find FetchAreaChore.StatesInstance.Begin() delegate for patching; System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation @ DeliveryTemperatureLimit.StatusItemsUpdaterPatch.RenderNms (and 1 more)
+3566906492	1153	ok	ok	
+3002268593	1154	menu	-	fails alone in the original too: its DLL references PLib but ships without it (a FileNotFoundException for PLib in its OnLoad), so it loads only beside a mod of its batch that ships PLib
+2719163704	1155	ok	ok	
+3377035496	1157	ok	ok	
+2627892585	1159	ok	ok	
+3306319445	1160	ok	ok	
+1856796585	1161	ok	ok	
+2851100066	1162	ok	ok	
+3606730745	1163	ok	ok	
+3732732522	1164	ok	ok	
+3566537088	1165	ok	ok	
+2044107742	1166	menu	-	the original disables it ("Failed to load mod ...disabling"): step start: the player exited (1) before OniMcp started; System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation. ---> System.TypeInitializationException: The type initializer for "BladderNotIncluded.BladderNotIncludedPatches" threw an exception. ---> System.MissingMethodException: Method not found: void Klei.CustomSettings.SettingLevel..ctor(string,string,string,int,object); null Exception while loading mod Zonkeeh.BladderNotIncluded at RUN/home/con
+2138696495	1167	ok	ok	
+3635077282	1168	ok	ok	
+2871667916	1169	ok	ok	
+3138192254	1171	ok	ok	
+3716115973	1173	ok	ok	
+3519596146	1174	menu	-	the player exits (1) while loading; NullReferenceException: Object reference not set to an instance of an object @ TMPro.TMP_Settings.get_fallbackFontAssets
+2032688772	1175	ok	ok	
+3380661336	1177	ok	ok	
+3129405632	1178	ok	ok	
+3004006350	1179	ok	ok	
+2158035413	1180	ok	ok	
+3318646518	1181	ok	ok	
+3103089853	1182	ok	ok	
+2950199712	1183	ok	ok	
+2971588345	1186	ok	ok	
+930994104	1187	-	-	a translation: installed disabled, as a subscription leaves it; not swept
+2858196664	1188	ok	ok	
+2885981437	1189	ok	ok	
+1722812098	1190	ok	ok	
+2106223486	1191	ok	ok	
+3798979006	1192	ok	ok	
+3479234230	1193	ok	ok	
+2624509351	1194	ok	ok	
+3706917570	1195	ok	ok	
+3021138574	1196	ok	ok	
+2998321975	1197	ok	ok	
+3803506841	1198	ok	ok	
+3174662603	1199	ok	ok	
+2462236549	1200	ok	ok	
+2848571032	1201	ok	ok	
+3257382751	1202	ok	ok	
+3486126706	1203	ok	ok	
+3094695022	1204	ok	ok	
+3671458367	1205	ok	ok	
+1872113768	1206	ok	ok	
+2879691917	1207	ok	ok	
+3586981589	1208	ok	ok	
+2967596358	1209	ok	menu	step start: [Errno 104] Connection reset by peer; ours disables it ("Failed to load mod ...disabling"); ---> System.InvalidProgramException: Common Language Runtime detected an invalid program @ HarmonyLib.PatchFunctions.UpdateWrapper_PatchN; HarmonyLib.HarmonyException: Patching exception in method System.Void Timelapser::SetPostionAndOrtho(System.IntN world_id) @ HarmonyLib.PatchFunctions.UpdateWrapper_PatchN; null Exception while loading mod llunak.FixesAndTweaks at RUN/home/config/unityNd/Klei/Oxygen Not Included/mods/Local/N @ HarmonyLib.PatchFunctions.UpdateWrapper_PatchN
+2682170372	1210	ok	ok	
+3100867929	1211	ok	ok	
+3571290810	1212	ok	ok	
+3376657142	1213	ok	ok	
+3227539567	1214	ok	ok	
+3609497880	1215	ok	ok	
+3519403656	1216	ok	ok	
+3427945960	1217	ok	ok	
+3177260238	1218	ok	ok	
+2962524595	1220	ok	ok	
+2161936214	1221	ok	ok	
+2315290740	1222	ok	ok	
+3143341732	1224	ok	ok	
+2839171298	1225	ok	ok	
+3474301255	1226	ok	ok	
+2832650525	1227	ok	ok	
+2857940400	1228	ok	menu	step start: the player exited (1) before OniMcp started; ours disables it ("Failed to load mod ...disabling"); System.IO.FileNotFoundException: Could not load file or assembly "PLib, Version=N.N, Culture=neutral, PublicKeyToken=null". The system cannot find the file specified @ Stacking_bed_叠叠床.ModLoad.OnLoad; null Exception while loading mod N.Local at RUN/home/config/unityNd/Klei/Oxygen Not Included/mods/Local/N @ Stacking_bed_叠叠床.ModLoad.OnLoad
+3100888062	1229	ok	ok	
+3799038247	1230	ok	colony	the crash screen opens while the save loads; System.Collections.Generic.KeyNotFoundException: The given key "N" was not present in the dictionary @ ColonyDiagnosticUtility.GetDiagnostic; Assert failed: Clustercraft Exterior Door has no targetDoor
+3297925875	1232	ok	ok	
+2994335358	1233	ok	ok	
+3340413393	1234	ok	ok	
+2616743480	1235	menu	-	the original disables it ("Failed to load mod ...disabling"): step start: the player exited (1) before OniMcp started; System.NullReferenceException: Object reference not set to an instance of an object @ CustomGameSettings.OnPrefabInit; System.NullReferenceException: Object reference not set to an instance of an object @ OniPowerSensorMod.Mod.Prefix
+3686492383	1236	ok	ok	
+3417626005	1237	ok	ok	
+3743166025	1238	ok	ok	
+3087504657	1240	ok	ok	
+3429341925	1241	ok	ok	
+2686262124	1242	ok	ok	
+3537327790	1243	ok	ok	
+3276461530	1245	ok	ok	
+1994613812	1246	ok	ok	
+3608466042	1247	ok	ok	
+2982751229	1248	ok	ok	
+3734363283	1249	ok	ok	
+3019685469	1250	ok	ok	
+1994592210	1251	ok	ok	
+3339017519	1253	ok	ok	
+3006462315	1254	ok	ok	
+2983351482	1255	ok	menu	step start: the player exited (1) before OniMcp started; ours disables it ("Failed to load mod ...disabling"); System.NullReferenceException: Object reference not set to an instance of an object @ ONITwitch.DefaultCommands.SetupCommands; System.MissingMethodException: Method not found: "Void UnityEngine.PhysicsND.IgnoreLayerCollision(IntN, IntN, Boolean)" @ ONITwitch.Patches.PhysicsPatches.MainMenu_OnSpawn_Patch.Postfix; System.TypeLoadException: Could not load type "UnityEngine.Bindings.NativeHeaderAttribute" from assembly "UnityEngine.SharedIntern
+3521556826	1256	ok	ok	
+2876954518	1257	ok	ok	
+3247018513	1258	ok	ok	
+2849947497	1261	menu	-	the original disables it ("Failed to load mod ...disabling"): step start: the player exited (1) before OniMcp started; ---> (Inner Exception #N) System.Threading.ThreadAbortException: Thread was being aborted @ ONITwitch.Voting.TwitchConnection.Writer; HarmonyLib.HarmonyException: Patching exception in method null ---> System.ArgumentException: Undefined target method for patch method static System.Void Control_Mining.Patch_d::Postfix(System.IntN cell, System.Boolean& __result) @ HarmonyLib.PatchClassProcessor.PatchWithAttributes
+2641977549	1262	ok	ok	
+2553830824	1263	ok	ok	
+3017358638	1264	ok	ok	
+2997380964	1265	ok	ok	
+2842066009	1266	ok	ok	
+2581938773	1267	ok	ok	
+2366912027	1268	ok	ok	
+3782701870	1269	ok	ok	
+3663491695	1270	ok	ok	
+3518867699	1271	ok	ok	
+3047817227	1272	menu	-	the original disables it ("Failed to load mod ...disabling"): step start: the player exited (1) while loading; HarmonyLib.HarmonyException: Patching exception in method null ---> System.ArgumentException: Undefined target method for patch method static System.Void ONIPatchAutoMinerHardness.Patch_AutoMiner_DigBlockingCB::Prefix(System.IntN cell, System.Boolean& __state) @ HarmonyLib.PatchClassProcessor.PatchWithAttributes; null Exception while loading mod N.Local at RUN/home/config/unityNd/Klei/Oxygen Not Included/mods/Local/N @ HarmonyLib.PatchClassProcess
+2700665718	1273	ok	ok	
+1876444268	1274	colony	-	the crash screen opens while the save loads; N Exception in: (BionicMinion).DuplicantLifecycles.Traits.AgingTrait+States.root.noage @ DuplicantLifecycles.Traits.AgingTrait
+3319924525	1275	ok	ok	
+3098068395	1276	ok	ok	
+2946478258	1277	ok	ok	
+3235954752	1278	ok	ok	
+1516818219	1279	-	-	a translation: installed disabled, as a subscription leaves it; not swept
+3390256280	1280	ok	ok	
+2900275864	1281	colony	-	the crash screen opens while the save loads; System.NullReferenceException: Object reference not set to an instance of an object @ WaterCooler.OnSp
+3235885361	1282	ok	ok	
+3733686186	1283	ok	ok	
+3137678878	1285	ok	ok	
+2871814023	1286	ok	ok	
+2870776303	1287	ok	ok	
+2863350317	1288	ok	ok	
+2658864677	1289	ok	ok	
+3468473855	1290	ok	ok	
+3464435901	1293	ok	ok	
+3593359023	1294	ok	ok	
+2282851240	1295	colony	-	the player exits (1) while loading; System.MissingMethodException: Method not found: void .ConsumedElement..ctor(Tag,single); null Exception in RegisterBuilding for type OilWellCapConfig from Assembly-CSharp
+3377698389	1296	ok	ok	
+3715884370	1299	ok	ok	
+3582320363	1300	ok	ok	
+2561983293	1301	ok	ok	
+3038950355	1302	ok	ok	
+2845882251	1303	ok	ok	
+3749738996	1304	ok	ok	
+3208492885	1305	ok	ok	
+3075237915	1306	ok	ok	
+3629077549	1307	ok	ok	
+3642824463	1308	ok	ok	
+3652188798	1309	ok	ok	
+3633033132	1310	ok	ok	
+2275705494	1311	menu	-	the original disables it ("Failed to load mod ...disabling"): step start: the player exited (1) before OniMcp started; System.NullReferenceException: Object reference not set to an instance of an object @ RonivansLegacy_ChemicalProcessing.Content.ModDb.BuildingDatabase.RegisterOilWellCapCustomPiping; HarmonyLib.HarmonyException: Patching exception in method System.Void ProcGenGame.WorldGen::DrawWorldBorder(ProcGenGame.WorldgenSimData& simData, Chunk world, SeededRandom rnd, System.Collections.Generic.HashSet`N& borderCells, System.Col
+3307141077	1312	ok	ok	
+3417326857	1313	ok	ok	
+3751316059	1314	ok	ok	
+3369091307	1315	ok	ok	
+2967059775	1316	ok	ok	
+3545919882	1317	ok	ok	
+2223329900	1318	colony	-	the crash screen opens while the save loads; Out of nav links on grid "FlyerNavGridNxN" at cell N. Needed N links but maxLinksPerCell is N. Increase maxLinksPerCell to at
+3403693391	1319	colony	-	the player exits (-11) while loading
+2899109675	1320	ok	ok	
+2877478087	1321	ok	ok	
+3151236853	1322	ok	ok	
+3294665522	1323	ok	ok	
+3436166490	1324	ok	ok	
+2251056721	1325	ok	ok	
+3752819733	1327	ok	ok	
+3158699666	1328	colony	-	the crash screen opens while the save loads; System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation. ---> System.Typ
+2994137080	1329	ok	ok	
+3050890676	1330	menu	-	the original disables it ("Failed to load mod ...disabling"): step start: the player exited (1) before OniMcp started; System.MissingMethodException: Method not found: EdiblesManager/FoodInfo .FoodInfo.AddEffects(System.Collections.Generic.List`N<string>,string[]) @ EntityConfigManager.RegisterEntity; HarmonyLib.HarmonyException: Patching exception in method null ---> System.ArgumentException: Undefined target method for patch method static System.Void _N_优化矿机.mmNggN::Postfix(System.IntN cell, System.Boolean& __result) @ HarmonyLib.Pa
+3686726286	1332	ok	ok	
+3496634352	1333	ok	ok	
+3077533003	1334	colony	-	the player exits (1) while loading; System.NullReferenceException: Object reference not set to an instance of an object @ DiscoveredResources.Discover; System.MissingMethodException: Method not found: EdiblesManager/FoodInfo .FoodInfo.AddEffects(System.Collections.Generic.List`N<string>,string[]) @ EntityConfigManager.RegisterEntity
+2880488690	1335	ok	ok	
+3408422056	1336	ok	ok	
+3804257326	1337	colony	-	fails in the original only with its batch: the crash screen opens while the save loads; System.ArgumentException: An item with the same key has already been added. Key: LiquidBuildOrb @ PlanScreen.BuildButtonList; System.ArgumentException: A
+3762029573	1338	colony	-	fails in the original only with its batch: the crash screen opens while the save loads; System.ArgumentException: An item with the same key has already been added. Key: LiquidBuildOrb @ PlanScreen.BuildButtonList; System.ArgumentException: A
+2844088155	1339	colony	-	fails in the original only with its batch: the crash screen opens while the save loads; System.ArgumentException: An item with the same key has already been added. Key: LiquidBuildOrb @ PlanScreen.BuildButtonList; System.ArgumentException: A
+3384096443	1340	colony	-	fails in the original only with its batch: the crash screen opens while the save loads; System.ArgumentException: An item with the same key has already been added. Key: LiquidBuildOrb @ PlanScreen.BuildButtonList; System.ArgumentException: A
+3527869170	1341	colony	-	fails in the original only with its batch: the crash screen opens while the save loads; System.ArgumentException: An item with the same key has already been added. Key: LiquidBuildOrb @ PlanScreen.BuildButtonList; System.ArgumentException: A
+3754754434	1343	colony	-	fails in the original only with its batch: the crash screen opens while the save loads; System.ArgumentException: An item with the same key has already been added. Key: LiquidBuildOrb @ PlanScreen.BuildButtonList; System.ArgumentException: A
+3173524865	1344	colony	-	fails in the original only with its batch: the crash screen opens while the save loads; System.ArgumentException: An item with the same key has already been added. Key: LiquidBuildOrb @ PlanScreen.BuildButtonList; System.ArgumentException: A
+2021224960	1345	colony	-	fails in the original only with its batch: the crash screen opens while the save loads; System.ArgumentException: An item with the same key has already been added. Key: LiquidBuildOrb @ PlanScreen.BuildButtonList; System.ArgumentException: A
+3653933323	1346	colony	-	fails in the original only with its batch: the crash screen opens while the save loads; System.ArgumentException: An item with the same key has already been added. Key: LiquidBuildOrb @ PlanScreen.BuildButtonList; System.ArgumentException: A
+3742805804	1347	colony	-	fails in the original only with its batch: the crash screen opens while the save loads; System.ArgumentException: An item with the same key has already been added. Key: LiquidBuildOrb @ PlanScreen.BuildButtonList; System.ArgumentException: A
+3520927380	1348	colony	-	fails in the original only with its batch: the crash screen opens while the save loads; System.ArgumentException: An item with the same key has already been added. Key: LiquidBuildOrb @ PlanScreen.BuildButtonList; System.ArgumentException: A
+3644196006	1349	colony	-	fails in the original only with its batch: the crash screen opens while the save loads; System.ArgumentException: An item with the same key has already been added. Key: LiquidBuildOrb @ PlanScreen.BuildButtonList; System.ArgumentException: A
+2390576196	1350	colony	-	fails in the original only with its batch: the crash screen opens while the save loads; System.ArgumentException: An item with the same key has already been added. Key: LiquidBuildOrb @ PlanScreen.BuildButtonList; System.ArgumentException: A
+2533799658	1351	colony	-	fails in the original only with its batch: the crash screen opens while the save loads; System.ArgumentException: An item with the same key has already been added. Key: LiquidBuildOrb @ PlanScreen.BuildButtonList; System.ArgumentException: A
+2873511998	1352	colony	-	fails in the original only with its batch: the crash screen opens while the save loads; System.ArgumentException: An item with the same key has already been added. Key: LiquidBuildOrb @ PlanScreen.BuildButtonList; System.ArgumentException: A
+3369647711	1353	menu	-	the original disables it ("Failed to load mod ...disabling"): step start: the player exited (1) while loading; HarmonyLib.HarmonyException: Patching exception in method null ---> System.ArgumentException: Undefined target method for patch method static System.Void 挖机::delete_hardnessN(System.IntN cell, System.Boolean& __result) @ HarmonyLib.PatchClassProcessor.PatchWithAttributes; null Exception while loading mod N.Local at RUN/home/config/unityNd/Klei/Oxygen Not Included/mods/Local/N @ HarmonyLib.PatchClassProcessor.PatchWithAttributes
+3298924449	1354	colony	-	fails in the original only with its batch: the crash screen opens while the save loads; System.ArgumentException: An item with the same key has already been added. Key: LiquidBuildOrb @ PlanScreen.BuildButtonList; System.ArgumentException: A
+2910303439	1355	colony	-	fails in the original only with its batch: the crash screen opens while the save loads; System.ArgumentException: An item with the same key has already been added. Key: LiquidBuildOrb @ PlanScreen.BuildButtonList; System.ArgumentException: A
+3576799899	1356	colony	-	fails in the original only with its batch: the crash screen opens while the save loads; System.ArgumentException: An item with the same key has already been added. Key: LiquidBuildOrb @ PlanScreen.BuildButtonList; System.ArgumentException: A
+2794594117	1357	colony	-	the crash screen opens while the save loads; DoorComplete Exception in: (Door).Door+Controller.root.closed.SetWorldStateClosed; System.MissingMethodException: Method not f
+2841162578	1358	colony	-	the crash screen opens while the save loads; PeterHan.PLib.Detours.DetourException: Unable to find sideScreenConfigContentBody on type DetailsScre
+2904048344	1360	colony	-	fails in the original only with its batch: the crash screen opens while the save loads; System.ArgumentException: An item with the same key has already been added. Key: LiquidBuildOrb @ PlanScreen.BuildButtonList; System.ArgumentException: A
+2570841961	1361	ok	ok	
+2871615016	1362	ok	ok	
+3532900285	1363	ok	ok	
+2791613657	1364	ok	ok	
+2922482730	1366	-	-	a translation: installed disabled, as a subscription leaves it; not swept
+3494305999	1367	ok	ok	
+2957155887	1368	ok	ok	
+3080513426	1369	ok	ok	
+2558069681	1370	ok	ok	
+2582168293	1371	ok	ok	
+3617546696	1372	ok	ok	
+3020979372	1373	ok	ok	
+2951159669	1374	ok	ok	
+3674972348	1375	ok	ok	
+1892748957	1376	ok	ok	
+3626760918	1377	ok	ok	
+3651614675	1378	ok	ok	
+3757139552	1379	colony	-	the crash screen opens while the save loads; ArgumentOutOfRangeException: Index was out of range. Must be non-negative and less than the size of the collection @ ConduitFl
+2385787103	1380	ok	ok	
+3712019800	1381	ok	ok	
+2862067964	1382	ok	ok	
+2983485002	1385	ok	ok	
+2883456864	1386	ok	ok	
+3278197623	1387	ok	ok	
+3302604134	1388	ok	ok	
+3630448775	1389	ok	ok	
+3732422991	1392	ok	ok	
+3785413427	1393	ok	ok	
+3614378759	1394	ok	ok	
+2861096848	1395	ok	ok	
+3387705078	1396	ok	ok	
+3439686467	1397	ok	ok	
+3248219744	1399	ok	ok	
+3794025758	1400	ok	ok	
+3499114295	1401	ok	ok	
+2669076399	1402	ok	ok	
+2999492290	1403	ok	ok	
+2031115024	1404	ok	ok	
+3535712801	1405	ok	ok	
+3387669033	1407	menu	-	the original disables it ("Failed to load mod ...disabling"):
+3126557675	1408	ok	ok	
+3747002507	1409	ok	ok	
+3027108354	1410	ok	ok	
+3133678595	1411	ok	ok	
+2804447598	1412	ok	ok	
+2984873958	1413	ok	ok	
+3662450561	1414	ok	ok	
+2841251487	1415	ok	ok	
+1733126901	1416	ok	ok	
+2885701792	1417	ok	ok	
+3576363415	1418	colony	-	the crash screen opens while the save loads; NullReferenceException: Object reference not set to an instance of an object @ OverlayScreen.LateUpdate; NullReferenceExceptio
+3015603486	1419	ok	ok	
+2968172437	1420	menu	-	the original disables it ("Failed to load mod ...disabling"): step start: the player exited (1) before OniMcp started; HarmonyLib.HarmonyException: Patching exception in method null ---> System.ArgumentException: Undefined target method for patch method static System.Boolean RobotMinerNotBlocked.Patches::DigBlockingCB(System.IntN cell, System.Boolean& __result) @ HarmonyLib.PatchClassProcessor.PatchWithAttributes; null Exception while loading mod RobotMinerNotBlocked at RUN/home/config/unityNd/Klei/Oxygen Not Included/mods/Local/N @ HarmonyLib.PatchClassPr
+2879715930	1421	ok	ok	
+3015929280	1422	ok	ok	
+3536161381	1423	ok	ok	
+3479021027	1424	ok	ok	
+2985335138	1425	colony	-	the crash screen opens while the save loads; ArgumentException: Accessing mismatched handle version. Expected version=N but got version=N @ HandleVector`N.UnpackHandle; Nu
+2141411697	1426	ok	ok	
+2897919789	1428	ok	ok	
+2363171361	1429	ok	colony	the crash screen opens while the save loads; N Exception in: (Minion).SleepChoreMonitor.root.checkforbed @ Public_Luxury_Beds.Patches.Patches.Postfix_UpdateBed(Instance __instance) in C.\Repos\MrPurpleN\ONI\Public Luxury Beds\Patches\Patches.cs.line N; System.MethodAcces
+3002566087	1430	ok	ok	
+3523056620	1431	-	-	a translation: installed disabled, as a subscription leaves it; not swept
+3022436400	1432	ok	ok	
+2999464166	1434	ok	ok	
+2872005064	1435	ok	ok	
+3580813956	1436	ok	ok	
+2369401506	1437	ok	ok	
+3609531831	1439	ok	colony	NullReferenceException: Object reference not set to an instance of an object @ UnityEngine.Object.ThrowNullReference; SeaTurtle Exception in: (SeaTurtle).EatStates.root.eating.loop @ Rephysicalized.FueledDietController.TryApplyFuelConversion; System.NullReferenceException: Object reference not set to an instance of an object @ Rephysicalized.FueledDietController.TryApplyFuelConversion
+3760466471	1440	ok	ok	
+2781529336	1441	ok	ok	
+1725334376	1442	ok	ok	
+2598059646	1443	ok	ok	
+2858701369	1444	ok	ok	
+2596397252	1445	ok	ok	
+2744013381	1446	ok	ok	
+2278463564	1447	ok	ok	
+3292573924	1448	ok	ok	
+2075672160	1451	ok	ok	
+3012838836	1452	ok	ok	
+3815691075	1453	ok	ok	
+2979315574	1454	ok	ok	
+3080879491	1455	ok	ok	
+2146410674	1456	colony	-	the player exits (1) while loading; System.FieldAccessException: Field `ManualDeliveryKG:requestedItemTag" is inaccessible from method `NeutroniumEnergy.NeutroniumGeneratorConfig:ConfigureBuildingTemplate (UnityEngine.GameObject,Tag)" @ BuildingConfigManager.RegisterBuilding; System.MissingMethodException: Method not found: void .ConsumedElement..ctor(Tag,single) @ BuildingConfigManager.RegisterBuilding
+3658365488	1457	ok	ok	
+3699800250	1458	menu	-	step start: the player exited (1) before OniMcp started; System.NullReferenceException: Object reference not set to an instance of an object @ Database.Personalities..ctor; System.Reflection.ReflectionTypeLoadException: Exception of type "System.Reflection.ReflectionTypeLoadException" was thrown
+2877166424	1459	ok	ok	
+3748029158	1460	ok	ok	
+3422648901	1461	colony	-	the crash screen opens while the save loads; NullReferenceException: Object reference not set to an instance of an object @ OverlayScreen.LateUpdate; NullReferenceExceptio
+3253994678	1462	ok	ok	
+2871615937	1463	ok	ok	
+3799841474	1464	ok	ok	
+1882035088	1466	ok	ok	
+3765092134	1467	ok	ok	
+3152316922	1468	menu	-	step start: the player exited (1) before OniMcp started; NullReferenceException: Object reference not set to an instance of an object @ TMPro.TMP_Settings.get_fallbackFontAssets
+2996623294	1469	ok	ok	
+3442937887	1470	ok	ok	
+3635020106	1471	ok	ok	
+2927019052	1472	ok	ok	
+2763419886	1473	ok	ok	
+3161746013	1474	ok	ok	
+2361698345	1475	ok	ok	
+2126597863	1476	ok	ok	
+2479453490	1477	ok	ok	
+2873467357	1478	menu	-	the original disables it ("Failed to load mod ...disabling"): step start: the player exited (1) before OniMcp started; HarmonyLib.HarmonyException: Patching exception in method System.Boolean ProcGenGame.WorldGen::RenderOffline(System.Boolean doSettle, System.UIntN simSeed, System.IO.BinaryWriter writer, ProcGenGame.WorldgenSimData& simData, System.IntN baseId, System.Collections.Generic.List`N& placedStoryTraits, System.Boolean isStartingWorld) ---> System.Exception: Parameter "cells" not found in method System.Boolean ProcGenGame.WorldGen::RenderOffline(
+3802049911	1479	ok	ok	
+2931131695	1480	ok	ok	
+3689543178	1481	ok	ok	
+2688793227	1482	ok	ok	
+2836439995	1483	colony	-	the player exits (1) while loading; System.MissingMethodException: Method not found: void .ConsumedElement..ctor(Tag,single); null Exception in RegisterBuilding for type OilWellCapConfig from Assembly-CSharp
+2933501288	1484	ok	ok	
+3064859946	1485	ok	ok	
+2553394896	1486	ok	ok	
+2620167879	1487	ok	ok	
+3561927851	1488	ok	ok	
+2661900022	1489	ok	ok	
+2870764515	1490	ok	ok	
+3749047120	1491	ok	ok	
+2984782124	1492	ok	ok	
+2822339758	1493	-	-	a translation: installed disabled, as a subscription leaves it; not swept
+2943021953	1494	ok	ok	
+3802147067	1495	ok	ok	
+3420943389	1496	ok	ok	
+1741146856	1497	ok	ok	
+2633799000	1498	colony	-	the player exits (-11) while loading
+3804723854	1499	ok	ok	
+2018469750	1500	ok	ok	
+2872811575	1501	ok	ok	
+3490800912	1502	ok	ok	
+2778228823	1504	ok	ok	
+2896083956	1505	ok	ok	
+3598090645	1506	ok	ok	
+2846982791	1508	ok	ok	
+2839845786	1509	ok	ok	
+2846672855	1511	ok	ok	
+2900831873	1512	ok	ok	
+2122585608	1513	colony	-	the player exits (1) while loading; ArgumentException: The Object you want to instantiate is null @ UnityEngine.Object.Instantiate; ArgumentOutOfRangeException: Index was out of range. Must be non-negative and less than the size of the collection @ BackwallManager+BackwallIndexer.get_Element
+3133795636	1514	ok	ok	
+3765340857	1515	ok	ok	
+3587387898	1516	ok	ok	
+3819173399	1517	ok	ok	
+3519438603	1519	ok	ok	
+3620851546	1520	colony	-	the crash screen opens while the save loads; DoorComplete Exception in: (Door).Door+Controller.root.closed.SetWorldStateClosed; System.MissingMethodException: Method not found: void .SimMessages.SetCellProperties(int,byte)
+3709304542	1521	ok	ok	
+2755150556	1522	ok	ok	
+3463668759	1523	ok	ok	
+2662113602	1524	ok	ok	
+3639188007	1525	ok	ok	
+3037633290	1526	ok	ok	
+1955246030	1527	ok	ok	
+3747771996	1529	ok	ok	
+3673526385	1530	ok	ok	
+3745253371	1531	ok	ok	
+2594664745	1532	ok	ok	
+3686522238	1533	ok	ok	
+3558002322	1534	ok	ok	
+3380824584	1535	ok	ok	
+3043109730	1536	colony	-	the player exits (1) while loading; ArgumentException: The Object you want to instantiate is null @ UnityEngine.Object.Instantiate; ArgumentOutOfRangeException: Index was out of range. Must be non-negative and less than the size of the collection @ BackwallManager+BackwallIndexer.get_Element
+3598373160	1537	ok	ok	
+3554578231	1538	ok	ok	
+3329613555	1539	menu	-	the original disables it ("Failed to load mod ...disabling"): step start: the player exited (1) before OniMcp started; System.IO.FileNotFoundException: Could not find file "RUN/home/config/unityNd/Klei/Oxygen Not Included/mods/Local/N/asteroid_minibase.png"; HarmonyLib.HarmonyException: Patching exception in method System.Boolean ProcGenGame.WorldGen::RenderOffline(System.Boolean doSettle, System.UIntN simSeed, System.IO.BinaryWriter writer, ProcGenGame.WorldgenSimData& simData, System.IntN baseId, System.Collections.Generic.List`N& p
+3664817564	1540	ok	ok	
+2368685352	1541	ok	ok	
+3669083158	1544	ok	ok	
+3315374510	1546	ok	ok	
+3600136029	1547	ok	ok	
+2852156682	1548	ok	ok	
+3577468014	1549	ok	ok	
+3752112457	1550	ok	ok	
+3418019940	1551	ok	ok	
+3344136862	1552	ok	ok	
+3381590308	1553	ok	ok	
+3761372593	1557	ok	ok	
+2903353773	1558	ok	ok	
+2959805230	1559	ok	ok	
+3665333463	1560	ok	ok	
+1878289465	1561	ok	ok	
+3091810586	1562	ok	ok	
+3552320454	1563	ok	ok	
+3479125383	1564	ok	ok	
+3736804781	1565	ok	ok	
+3175775975	1566	ok	ok	
+2586076206	1567	colony	-	the crash screen opens while the save loads; System.NullReferenceException: Object reference not set to an instance of an object @ SearchUtil.CanonicalizePh
+2031107595	1568	ok	ok	
+3807584811	1569	ok	ok	
+3777868198	1570	ok	ok	
+2147011067	1571	ok	ok	
+3377022279	1572	ok	ok	
+3002713481	1573	ok	ok	
+3786116196	1574	ok	ok	
+2977493575	1576	ok	ok	
+3426499384	1577	ok	ok	
+3208353436	1579	ok	ok	
+3798248283	1580	ok	ok	
+3163125334	1581	ok	ok	
+3001135560	1582	ok	ok	
+3743125812	1583	ok	ok	
+3308085465	1584	ok	ok	
+3304951452	1585	ok	ok	
+3623018439	1586	ok	ok	
+3528100424	1587	ok	ok	
+3616794207	1588	-	-	not downloadable with SteamCMD
+3286948775	1589	ok	ok	
+3434789737	1590	ok	ok	
+2779162200	1591	colony	-	the crash screen opens while the save loads; PeterHan.PLib.Detours.DetourException: Unable to find sideScreenContentBody on type DetailsScreen @ P
+3438530909	1592	ok	ok	
+3013130259	1593	ok	ok	
+2339405225	1594	ok	ok	
+929247646	1595	-	-	a translation: installed disabled, as a subscription leaves it; not swept
+2813526647	1596	ok	ok	
+2361043018	1597	ok	colony	the crash screen opens while the save loads; N Exception in: (Minion).SleepChoreMonitor.root.checkforbed @ Public_Cots.Patches.Patches.Postfix_UpdateBed(Instance __instance) in C.\Repos\MrPurpleN\ONI\Public Cots\Patches\Patches.cs.line N; System.MethodAccessException: At
+3674542335	1598	ok	ok	
+2932976861	1599	ok	ok	
+2845508297	1600	ok	ok	
+3744164922	1601	ok	ok	
+2928148711	1602	ok	ok	
+3137470934	1603	ok	ok	
+3038061222	1604	ok	ok	
+2807545527	1605	ok	ok	
+3733622245	1606	ok	ok	
+3130228843	1607	ok	ok	
+2938461528	1608	ok	ok	
+1862419428	1609	ok	ok	
+3269820224	1610	ok	ok	
+2844082940	1611	ok	ok	
+2830365640	1612	ok	ok	
+3637756953	1614	ok	ok	
+3322961363	1615	ok	ok	
+2841507339	1616	ok	ok	
+3816744732	1617	ok	ok	
+3244175954	1618	ok	ok	
+3684473759	1619	ok	ok	
+2959340381	1620	ok	ok	
+3240895274	1621	ok	ok	
+3349984754	1622	ok	ok	
+2897349471	1623	ok	ok	
+3648996222	1624	ok	ok	
+3606733579	1625	ok	ok	
+3480374510	1626	ok	ok	
+3168592570	1627	ok	ok	
+2366126698	1628	ok	ok	
+2933355725	1629	ok	ok	
+3667070295	1630	-	-	a translation: installed disabled, as a subscription leaves it; not swept
+2062103370	1631	ok	ok	
+2545317979	1632	menu	-	the original disables it ("Failed to load mod ...disabling"): step start: the player exited (1) before OniMcp started; System.TypeLoadException: Could not resolve type with token N from typeref (expected class "Harmony.HarmonyPatch" in assembly "NHarmony, Version=N.N, Culture=neutral, PublicKeyToken=null"); null Exception while loading mod N.Local at RUN/home/config/unityNd/Klei/Oxygen Not Included/mods/Local/N
+1900617368	1633	ok	ok	
+3807698557	1634	ok	ok	
+3389100014	1635	ok	ok	
+2588729110	1637	ok	ok	
+1848839827	1638	ok	ok	
+2557253018	1639	menu	-	the original disables it ("Failed to load mod ...disabling"): step start: the player exited (1) while loading; System.MissingMethodException: Method not found: void Database.BuildingFacades.Add(string,LocString,LocString,Database.PermitRarity,string,string,System.Collections.Generic.Dictionary`N<string, string>); HarmonyLib.HarmonyException: Patching exception in method System.Boolean SolidTransferArm::AsyncUpdate() ---> System.Exception: Parameter "cell" not found in method System.Boolean SolidTransferArm::AsyncUpdate() @ HarmonyLib.
+3768907966	1640	ok	ok	
+3466461752	1641	ok	ok	
+3022469420	1642	ok	ok	
+3789181880	1643	ok	ok	
+2893409616	1644	ok	ok	
+3468457710	1645	ok	ok	
+3807965885	1646	ok	ok	
+2845278436	1647	ok	ok	
+3534405622	1649	ok	ok	
+3767691401	1650	ok	ok	
+3624622229	1651	ok	ok	
+3067514896	1652	ok	ok	
+3473481199	1653	ok	ok	
+3464293843	1655	ok	ok	
+3025055489	1656	colony	-	the player exits (1) while loading; ArgumentOutOfRangeException: Index was out of range. Must be non-negative and less than the size of the collection @ BackwallManager+BackwallIndexer.get_Element; Assert failed: Cannot send a frame to the sim with zero active regions @ SubworldZoneRenderData.GenerateTexture
+2984769656	1657	ok	ok	
+2846006297	1658	ok	ok	
+3159785377	1660	ok	ok	
+3794321811	1661	ok	ok	
+3226787971	1662	ok	ok	
+3747871003	1664	ok	ok	
+3139285721	1665	ok	ok	
+2658738587	1666	ok	ok	
+2850723145	1667	ok	ok	
+3635863743	1669	ok	ok	
+3387528357	1670	menu	-	the original disables it ("Failed to load mod ...disabling"):
+2874123092	1671	ok	ok	
+2747526061	1672	ok	ok	
+3656635556	1673	ok	ok	
+3640737967	1674	ok	ok	
+3034422919	1675	ok	ok	
+3241644477	1676	ok	ok	
+1793933820	1677	ok	ok	
+3332098282	1678	ok	ok	
+2768128560	1679	ok	ok	
+3012182492	1680	ok	ok	
+3772304726	1681	ok	ok	
+3519929015	1682	ok	ok	
+3527264251	1684	ok	ok	
+2687208049	1685	ok	ok	
+3770883011	1687	ok	ok	
+2639316397	1688	colony	-	the crash screen opens while the save loads; System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation. ---> System.
+2009051942	1689	ok	ok	
+3726131088	1690	ok	ok	
+3610828533	1691	ok	ok	
+3695988693	1692	ok	ok	
+3420064522	1693	menu	-	the player exits (1) while loading; System.IO.FileNotFoundException: Could not load file or assembly "PLib, Version=N.N, Culture=neutral, PublicKeyToken=null" or one of its dependencies; null Exception while loading mod GetAllTheGoodTraits at RUN/home/config/unityNd/Klei/Oxygen Not Included/mods/Local/N
+3546567438	1694	ok	colony	IndexOutOfRangeException: Index was outside the bounds of the array @ Internal.Runtime.CompilerHelpers.ThrowHelpers.ThrowIndexOutOfRangeException
+2837711870	1695	menu	-	the original disables it ("Failed to load mod ...disabling"): step start: the player exited (1) before OniMcp started; HarmonyLib.HarmonyException: Patching exception in method null ---> System.ArgumentException: Undefined target method for patch method static System.Void AutomaticOilRefinery.ElementConverterHasEnoughMass::Postfix(ElementConverter __instance, System.Boolean& __result) @ HarmonyLib.PatchClassProcessor.PatchWithAttributes; System.MissingMethodException: Method not found: void .ConsumedElement..ctor(Tag,single)
+3506650482	1696	ok	ok	
+1956033615	1698	ok	ok	
+3673652718	1699	-	-	a translation: installed disabled, as a subscription leaves it; not swept
+2990535748	1700	ok	ok	
+2984783275	1701	ok	ok	
+3481545178	1702	ok	ok	
+2901544995	1703	ok	ok	
+3136742398	1704	ok	ok	
+3016468268	1705	ok	ok	
+2878495368	1706	ok	ok	
+3744428492	1707	ok	ok	
+2573950398	1708	ok	ok	
+3229764220	1709	ok	ok	
+3733715767	1710	ok	ok	
+3469200379	1711	ok	ok	
+3802090892	1712	ok	ok	
+3785020293	1713	ok	ok	
+3257388693	1714	ok	ok	
+2778875391	1716	ok	ok	
+2546671384	1717	ok	ok	
+1579169540	1718	-	-	a translation: installed disabled, as a subscription leaves it; not swept
+3438586580	1719	ok	ok	
+3138268148	1720	ok	ok	
+2964396728	1721	ok	ok	
+3771254169	1722	ok	ok	
+3326254533	1723	ok	ok	
+3018359549	1724	colony	-	the player exits (1) while loading; System.IndexOutOfRangeException: Index was outside the bounds of the array @ BuildingLoader.GetEffectiveMass; null Exception in RegisterBuilding for type SmallTanks.GasCargoBaySmallConfig from SmallTanks @ BuildingLoader.GetEffectiveMass
+3514600142	1725	ok	ok	
+3734915386	1726	colony	-	the crash screen opens while the save loads; System.ArgumentException: An item with the same key has already been added. Key: PiapiPlantHelper @ PlanScreen.BuildButtonList; System.ArgumentException:
+2931997161	1728	colony	-	step start: the fixture did not load within 15 minutes; ---> (Inner Exception #N) System.IO.FileNotFoundException: YamlIO tried loading a file that doesn"t exist: /home/nigit/projects/oni-brutal/.claude/worktrees/agent-aNdNfNeNfN/out/sweep/.original-N/OxygenNotIncluded_Data/StreamingAssets/templates/poi/Baator_Geyser_Natoriumusen.yaml @ Klei.YamlIO.LoadFile[T]; FileNotFoundException: YamlIO tried loading a file that doesn"t exist: /home/nigit/projects/oni-brutal/.claude/worktrees/agent-aNdNfNeNf
+3012530445	1729	ok	ok	
+3789151799	1730	ok	ok	
+3341550483	1731	ok	ok	
+2787109631	1732	ok	ok	
+3075494652	1733	ok	ok	
+3044677825	1734	ok	ok	
+2467498655	1735	ok	ok	
+3514022158	1736	ok	ok	
+2645894652	1738	ok	ok	
+3753632924	1739	ok	ok	
+3546375849	1740	ok	ok	
+3667413507	1741	ok	ok	
+2984798228	1742	ok	ok	
+3674429822	1743	ok	ok	
+3005077708	1744	ok	ok	
+3664816241	1745	ok	ok	
+2482057864	1746	ok	ok	
+3109494913	1747	menu	-	the original disables it ("Failed to load mod ...disabling"): step start: the player exited (1) while loading; FileNotFoundException: YamlIO tried loading a file that doesn"t exist: /home/nigit/projects/oni-brutal/.claude/worktrees/agent-aNdNfNeNfN/out/sweep/.original-N/OxygenNotIncluded_Data/StreamingAssets/worldgen/subworlds/Terr/Start_Default.yaml @ Klei.YamlIO.LoadFile[T]; First anim file needs to be non-null. TorchComplete (UnityEngine.GameObject) @ KAnimControllerBase.set_AnimFiles
+2399652032	1748	menu	-	the original disables it ("Failed to load mod ...disabling"): step start: the player exited (1) while loading; FileNotFoundException: YamlIO tried loading a file that doesn"t exist: /home/nigit/projects/oni-brutal/.claude/worktrees/agent-aNdNfNeNfN/out/sweep/.original-N/OxygenNotIncluded_Data/StreamingAssets/worldgen/subworlds/Terr/Start_Default.yaml @ Klei.YamlIO.LoadFile[T]; First anim file needs to be non-null. TorchComplete (UnityEngine.GameObject) @ KAnimControllerBase.set_AnimFiles
+3772549326	1750	ok	ok	
+2907583139	1751	ok	ok	
+3482358273	1752	ok	ok	
+2664006534	1753	ok	ok	
+3738526308	1754	ok	ok	
+3728274068	1755	ok	ok	
+3589054256	1757	ok	ok	
+3744010266	1758	ok	ok	
+3577962693	1759	ok	ok	
+3620202317	1761	-	-	a translation: installed disabled, as a subscription leaves it; not swept
+3683507975	1763	menu	-	the original disables it ("Failed to load mod ...disabling"): step start: the player exited (1) while loading; FileNotFoundException: YamlIO tried loading a file that doesn"t exist: /home/nigit/projects/oni-brutal/.claude/worktrees/agent-aNdNfNeNfN/out/sweep/.original-N/OxygenNotIncluded_Data/StreamingAssets/worldgen/subworlds/Terr/Start_Default.yaml @ Klei.YamlIO.LoadFile[T]; First anim file needs to be non-null. TorchComplete (UnityEngine.GameObject) @ KAnimControllerBase.set_AnimFiles
+3759075866	1764	ok	menu	step start: the player exited (1) before OniMcp started; DeliveryTemperatureLimit: Failed to find FetchAreaChore.StatesInstance.Begin() delegate for patching
+3025430728	1765	ok	ok	
+1368234558	1766	-	-	a translation: installed disabled, as a subscription leaves it; not swept
+3474203860	1767	ok	ok	
+2843427720	1768	ok	ok	
+2543933197	1769	ok	ok	
+2563149160	1770	ok	ok	
+2995808112	1771	ok	ok	
+3806581240	1772	ok	ok	
+3131826185	1773	ok	ok	
+3035467814	1774	ok	ok	
+1387598596	1775	-	-	a translation: installed disabled, as a subscription leaves it; not swept
+3780815871	1776	ok	ok	
+3232567876	1777	colony	-	the player exits (1) while loading; ArgumentOutOfRangeException: Index was out of range. Must be non-negative and less than the size of the collection @ BackwallManager+BackwallIndexer.get_Element; Assert failed: Cannot send a frame to the sim with zero active regions @ SubworldZoneRenderData.GenerateTexture
+3091670103	1778	ok	ok	
+2906165124	1779	ok	ok	
+3775498466	1780	ok	ok	
+3501501795	1781	ok	ok	
+3747850787	1783	ok	ok	
+3024606677	1784	ok	ok	
+2006586451	1785	ok	ok	
+3439346200	1786	ok	ok	
+3626072188	1787	ok	ok	
+3412947176	1788	ok	ok	
+3630596422	1789	ok	ok	
+3189266934	1790	ok	ok	
+3809267164	1791	ok	ok	
+2951142821	1792	ok	ok	
+3803708767	1793	ok	ok	
+3701580252	1794	ok	ok	
+3771250086	1796	ok	ok	
+3655492674	1797	ok	ok	
+3478682836	1798	ok	ok	
+3545917660	1799	ok	ok	
+2838619875	1800	ok	ok	
+2804306647	1801	colony	-	the player exits (1) while loading; ArgumentException: The Object you want to instantiate is null @ UnityEngine.Object.Instantiate; ArgumentOutOfRangeException: Index was out of range. Must be non-negative and less than the size of the collection @ BackwallManager+BackwallIndexer.get_Element
+1718257423	1802	ok	ok	
+1403530171	1804	-	-	a translation: installed disabled, as a subscription leaves it; not swept
+3723792761	1805	ok	ok	
+3033510103	1806	ok	ok	
+3414689587	1807	ok	ok	
+2672305657	1808	colony	-	the player exits (1) while loading; System.NullReferenceException: Object reference not set to an instance of an object @ DiscoveredResources.Discover; System.MissingMethodException: Method not found: EdiblesManager/FoodInfo .FoodInfo.AddEffects(System.Collections.Generic.List`N<string>,string[]) @ EntityConfigManager.RegisterEntity
+2361374172	1809	ok	ok	
+3286903205	1810	ok	ok	
+3653679511	1811	ok	ok	
+3128126787	1812	ok	ok	
+2961593835	1813	ok	ok	
+2846822603	1814	ok	ok	
+2547745654	1815	ok	ok	
+3433108302	1817	ok	colony	the player exits (1) while loading; ---> System.ArgumentException: The Object you want to instantiate is null @ UnityEngine.Object.Instantiate(Object original) in /home/nigit/projects/oni-brutal/.claude/worktrees/agent-aNdNfNeNfN/src/OniBrutal.UnityEngine/Core/Instantiate.cs.line N; ArgumentException: The Object you want to instantiate is null @ UnityEngine.Object.Instantiate; ArgumentOutOfRangeException: Index was out of range. Must be non-negative and less than the size of the collection. (Parameter "index") @ BackwallManager+BackwallIndexer.get_Element (and 55 more)
+2853421859	1818	ok	ok	
+3743339926	1819	ok	ok	
+3762252757	1820	ok	ok	
+3452857906	1821	ok	ok	
+1748408711	1824	ok	ok	
+3766516655	1825	ok	ok	
+3753518460	1826	ok	ok	
+3654813505	1827	-	-	a translation: installed disabled, as a subscription leaves it; not swept
+3548583609	1828	ok	ok	
+3799614365	1830	ok	ok	
+1812965265	1832	ok	ok	
+2984783787	1833	ok	ok	
+3642179304	1834	ok	ok	
+3342288080	1835	ok	ok	
+3636600859	1837	ok	ok	
+3473019759	1838	ok	ok	
+3531123422	1839	ok	ok	
+2646143900	1840	ok	ok	
+3361635195	1841	ok	ok	
+2857925888	1842	ok	ok	
+3772248976	1843	ok	ok	
+2980240880	1844	menu	-	the original disables it ("Failed to load mod ...disabling"): step start: the player exited (1) before OniMcp started; Fatal parse error in /home/nigit/projects/oni-brutal/.claude/worktrees/agent-aNdNfNeNfN/out/sweep/.original-N/OxygenNotIncluded_Data/StreamingAssets/dlc/expansionN/worldgen/subworlds/sandstone/SandstoneStart.yaml; System.MissingMethodException: Method not found: UnityEngine.GameObject .BionicUpgradeComponentConfig.CreateNewUpgradeComponent(string,string,string,single,System.Func`N<StateMachine/Instance, StateMachine/I
+3509802691	1845	ok	ok	
+2906182469	1846	ok	ok	
+2126470999	1847	colony	-	the crash screen opens while the save loads; KeyNotFoundException: The given key "N" was not present in the dictionary @ PlanScreen.Refresh; NullReferenceException: Object
+3519081396	1848	ok	ok	
+3772839873	1849	ok	ok	
+2807313402	1850	ok	ok	
+3803052734	1851	ok	ok	
+3779620887	1852	ok	ok	
+2919045981	1853	ok	ok	
+3752029503	1854	ok	ok	
+3404416193	1855	ok	ok	
+3743535837	1856	ok	ok	
+3577617954	1857	colony	-	the player exits (1) while loading; ArgumentException: The Object you want to instantiate is null @ UnityEngine.Object.Instantiate; ArgumentOutOfRangeException: Index was out of range. Must be non-negative and less than the size of the collection @ BackwallManager+BackwallIndexer.get_Element
+3753045682	1858	ok	ok	
+2972754416	1859	ok	ok	
+3800125328	1860	ok	ok	
+3547626800	1861	ok	ok	
+3577975375	1862	ok	ok	
+3375382664	1864	ok	ok	
+3814416287	1865	ok	ok	
+3810757236	1866	ok	ok	
+3760385522	1867	ok	ok	
+3085261382	1868	colony	-	the crash screen opens while the save loads; NullReferenceException: Object reference not set to an instance of an object @ NotificationsPauseINnMod.NotificationsPause+Notification_IsReady_Patch.P
+3745300476	1870	ok	ok	
+2306600428	1871	ok	ok	
+2553917491	1872	ok	ok	
+1880389930	1874	menu	-	the original disables it ("Failed to load mod ...disabling"): step start: the player exited (1) while loading; System.NullReferenceException: Object reference not set to an instance of an object @ Database.Personalities..ctor; Fatal parse error in /home/nigit/projects/oni-brutal/.claude/worktrees/agent-aNdNfNeNfN/out/sweep/.original-N/OxygenNotIncluded_Data/StreamingAssets/worldgen/subworlds/forest/ForestStartHot.yaml
+2757266274	1875	menu	-	the original disables it ("Failed to load mod ...disabling"): step start: the player exited (1) while loading; System.NullReferenceException: Object reference not set to an instance of an object @ Database.Personalities..ctor; Fatal parse error in /home/nigit/projects/oni-brutal/.claude/worktrees/agent-aNdNfNeNfN/out/sweep/.original-N/OxygenNotIncluded_Data/StreamingAssets/worldgen/subworlds/forest/ForestStartHot.yaml
+3078596122	1876	ok	ok	
+3784380147	1877	ok	ok	
+3767758558	1878	ok	ok	
+3292488355	1879	ok	ok	
+3797722065	1881	ok	ok	
+3248848464	1882	ok	ok	
+2983164192	1883	ok	ok	
+2839691577	1884	ok	ok	
+2841373684	1885	ok	ok	
+3792459208	1886	ok	ok	
+3038102790	1887	ok	ok	
+3542413342	1890	ok	ok	
+3590596912	1891	ok	ok	
+3252090977	1892	ok	ok	
+3509238377	1893	ok	ok	
+3095401174	1895	ok	ok	
+3739578072	1896	ok	ok	
+3670573352	1897	ok	ok	
+2405919736	1898	ok	ok	
+3792532797	1899	ok	ok	
+3818420082	1900	ok	ok	
+3634548850	1902	ok	ok	
+3807135177	1903	ok	ok	
+3689864363	1904	ok	ok	
+3222491570	1905	colony	-	the player exits (1) while loading; System.NullReferenceException: Object reference not set to an instance of an object @ Util.KInstantiate; Assert failed: Clustercraft Exterior Door has no targetDoor @ ClusterUtil.GetMyWorld
+2014940545	1906	ok	ok	
+2844428595	1907	ok	ok	
+2915321826	1908	ok	ok	
+3744782341	1909	ok	ok	
+3025506650	1910	ok	ok	
+2711203625	1911	ok	ok	
+3771247584	1912	ok	ok	
+2858439107	1913	ok	ok	
+3771253264	1914	ok	ok	
+2514097176	1915	ok	ok	
+3305749173	1916	ok	ok	
+2934219021	1917	ok	ok	
+2841504136	1918	ok	ok	
+3493536777	1919	ok	ok	
+2918431513	1920	ok	ok	
+3789688350	1921	ok	ok	
+3627267062	1922	ok	ok	
+3713083599	1923	ok	ok	
+3747744676	1924	ok	ok	
+3674785519	1925	ok	ok	
+3594192836	1926	ok	ok	
+3691848497	1928	ok	ok	
+3752346568	1929	ok	ok	
+2567161929	1931	ok	ok	
+2991018571	1933	ok	ok	
+2800997047	1934	ok	ok	
+3454818548	1935	ok	ok	
+3803418607	1936	ok	ok	
+3752842483	1937	ok	ok	
+3095987024	1938	-	-	a translation: installed disabled, as a subscription leaves it; not swept
+2847963606	1939	ok	ok	
+3051161533	1940	ok	ok	
+2790414858	1941	ok	ok	
+2729922307	1942	ok	ok	
+3719939081	1943	ok	ok	
+3742958503	1944	ok	ok	
+3053330755	1945	ok	ok	
+3600537542	1946	ok	menu	the player exits (1) while loading; ours disables it ("Failed to load mod ...disabling"); System.BadImageFormatException: Enclosing type(s) not found for type "‭⁬‪‌‎‫​⁯‭⁫‌‍‏⁪‪‭​‎‬​‎​⁭​‫‭‮⁮‏‌‫​‍‍⁮⁪‪‌‍⁬‮" in assembly "Katairite, Version=N.N, Culture=neutral, PublicKeyToken=null" @ KMod.DLLLoader.LoadDLLs; null Exception while loading mod Abyssalite at RUN/home/config/unityNd/Klei/Oxygen Not Included/mods/Local/N @ KMod.DLLLoader.LoadDLLs
+3478498118	1947	ok	ok	
+2865091697	1948	ok	ok	
+3772297140	1949	ok	ok	
+3678742887	1950	ok	ok	
+2515073640	1951	ok	ok	
+3744473442	1952	ok	ok	
+3636578165	1953	ok	ok	
+3457655108	1956	ok	ok	
+3639032470	1957	ok	ok	
+3737965162	1958	ok	ok	
+3257386232	1959	ok	ok	
+2817183839	1960	-	-	a translation: installed disabled, as a subscription leaves it; not swept
+2710574991	1961	colony	-	the crash screen opens while the save loads; NullReferenceException: Object reference not set to an instance of an object @ PopulistChallenge.AutoOpenImmigrantScreen.Postf
+2535676257	1962	ok	ok	
+3815497375	1964	colony	-	the player exits (1) while loading; FileNotFoundException: YamlIO tried loading a file that doesn"t exist: /home/nigit/projects/oni-brutal/.claude/worktrees/agent-aNdNfNeNfN/out/sweep/.original-N/OxygenNotIncluded_Data/StreamingAssets/worldgen/subworlds/Jungle/CGM_JungleMix.yaml @ Klei.YamlIO.LoadFile[T]; Rethrow as AggregateException: One or more errors occurred. (YamlIO tried loading a file that doesn"t exist: /home/nigit/projects/oni-brutal/.claude/worktrees/agent-aNdNfNeNfN/out/
+3762973536	1965	ok	ok	
+3613508049	1966	ok	ok	
+3195409590	1967	ok	ok	
+3241546548	1968	ok	ok	
+2894589931	1969	colony	-	the player exits (1) while loading; System.NullReferenceException: Object reference not set to an instance of an object @ DiscoveredResources.Discover; System.MissingMethodException: Method not found: UnityEngine.GameObject .EntityTemplates.ExtendEntityToBasicPlant(UnityEngine.GameObject,single,single,single,single,SimHashes[],bool,single,single,string,bool,bool,bool,bool,single,single,single,string,string) @ EntityConfigManager.Regist
+3512323881	2052	-	-	a translation: installed disabled, as a subscription leaves it; not swept
+3740803157	2151	-	-	a translation: installed disabled, as a subscription leaves it; not swept
+3617182868	2200	-	-	a translation: installed disabled, as a subscription leaves it; not swept
+2733975631	2271	-	-	a translation: installed disabled, as a subscription leaves it; not swept

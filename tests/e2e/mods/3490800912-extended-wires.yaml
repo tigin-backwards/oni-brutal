@@ -1,0 +1,24 @@
+# Extended Wires Mod (3490800912), class B.
+#
+# What it does: adds three wires to the Power menu: Economic Wire (WireEconomy, after the Wire,
+# no research: 5 kg of metal, built in 1 s, 500 W, decor +), High Wattage Wire MK2 and High
+# Refined Wattage Wire MK2 (after the game's, researched with Pretty Good Conductors), which
+# go anywhere, through tiles too, and build ten times slower.
+# How a player reaches it: the build menu (Power).
+# What changes: cheap wires, and heavy wires that run through tiles.
+#
+# Three cells of Economic Wire are ordered in the dug-out corridor west of the printing pod;
+# the Duplicants build them, and the wire is rated 500 W. The MK2 wires are researched with
+# Pretty Good Conductors.
+from: early-base
+mods: [3490800912]
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"PrettyGoodConductors\").unlockedItemIDs": [{contains: HighWattageWireMK2}, {contains: WireRefinedHighWattageMK2}]
+      "Assets.GetBuildingDef(\"HighWattageWireMK2\").BuildLocationRule": Anywhere
+      "Assets.GetBuildingDef(\"WireEconomy\").ConstructionTime": 1
+  - build: {prefab: WireEconomy, cells: [[110, 207], [111, 207], [112, 207]]}
+  - expect: {blueprints: {WireEconomy: 3}}
+  - run: {seconds: 900, until: {buildings: {WireEconomy: 3}, pending_construction: 0}}
+  - expect_state:
+      "count:all:Wire::[*] if .GetComponent<KPrefabID>.PrefabTag.Name == WireEconomy and .MaxWattageRating == Max500": 3

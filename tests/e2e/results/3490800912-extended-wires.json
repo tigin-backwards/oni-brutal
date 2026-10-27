@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3490800912-extended-wires.yaml",
+ "mods": [
+  "3490800912"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the MK2 wires are researchable; three Economic Wire cells ordered and built, rated 500 W",
+ "updated": "2026-10-27",
+ "commit": "267893ef",
+ "mod_dlls": {
+  "3490800912": {
+   "ExtendedWiringMod.dll": "b9bfa21c76ee849a6676a69da325f45dc0fd4c80f3375c9d4975c092bae6dc5e"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-042211-787cf357",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T04:57:41",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-084848-d2fb0662",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T08:48:48",
+    "lane": 14,
+    "reference_run": "20261027-042211-787cf357",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-084848-d2fb0662",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T08:50:05",
+    "lane": 14,
+    "reference_run": "20261027-042211-787cf357",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -1,0 +1,17 @@
+# Dupery Addon - Echo and the Chaos Crew (3015603486), class X (content for another mod).
+#
+# What it does: a PERSONALITIES.json and accessory kanims (hair and the rest) for Dupery: a
+# dozen personalities (Echo, Carrots, Crypto, Crystal Lilac and others) join the pool of
+# printable Duplicants. It has no code; Dupery (3172734005, installed first) imports it.
+# How a player reaches it: printing pod and new-colony Duplicants.
+# What changes: who can be printed.
+#
+# Dupery logs the import of the mod's personalities and accessories and writes the mod's
+# override file; the personality pool holds as many as in the original.
+from: early-base
+mods: [3172734005, 3015603486]
+require_log: ['\[Dupery\] Found PERSONALITIES.json file belonging to mod Echo and the Chaos Crew', '\[Dupery\] \d+ personalities imported from Echo and the Chaos Crew', '\[Dupery\] \d+ accessories imported successfully']
+steps:
+  - expect_state:
+      "file:mods/config/DuperyConfigs/OVERRIDE.echoChaosCrew.json": exists
+      "Db.Get().Personalities.Count": "== original"

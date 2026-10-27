@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2361698345-no-splash-screen.yaml",
+ "mods": [
+  "2361698345"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the mod logs; from the colony to the main menu, no splash screen, and the Mods screen lists it",
+ "updated": "2026-10-27",
+ "commit": "41a75a7e",
+ "mod_dlls": {
+  "2361698345": {
+   "NoSplashScreen.dll": "7d875cf4a446ae24d27ad5f2180c8c2c5f04d53d18712d19023c0ad1686d3ce3"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-042211-787cf357",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T04:25:54",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-075731-b74288db",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T07:57:31",
+    "lane": 14,
+    "reference_run": "20261027-042211-787cf357",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-075731-b74288db",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T08:06:22",
+    "lane": 14,
+    "reference_run": "20261027-042211-787cf357",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -1,0 +1,31 @@
+# [Deprecated] No Splash Screen (2361698345), class M.
+#
+# What it does: a postfix on SplashMessageScreen.OnPrefabInit deactivates and destroys the
+# splash message that beta and early-access builds show over the main menu; it logs its
+# version when it loads.
+# How a player reaches it: starting the game.
+# What changes: no splash message at the main menu (the release shows none anyway).
+#
+# The mod loads and logs. From the colony, the pause menu's Main Menu and Quit Without Saving
+# lead to the main menu: it comes up with no SplashMessageScreen, and its Mods screen opens,
+# lists the mod, and closes.
+from: early-base
+mods: [2361698345]
+require_log: ['Mod NoSplashScreen initialized']
+steps:
+  - key: {code: Escape}
+  - ui_wait: {path: "**/PauseScreen/**/Main MenuButton", cond: stable}
+  - click: {ui: "**/PauseScreen/**/Main MenuButton"}
+  - ui_wait: {path: "**/ConfirmDialog/GameObject/Panel/ConfigurableButton", cond: stable}
+  - click: {ui: "**/ConfirmDialog/GameObject/Panel/ConfigurableButton"}   # Quit Without Saving
+  - ui_wait: {path: "**/MainMenu_SpacedOut/MainMenuMenubar/MainMenuButtons", cond: stable, frames: 3000}
+  - expect_state:
+      "all:SplashMessageScreen::Length": 0
+  - expect_ui:
+      "**/SplashMessageScreen": {exists: false}
+  - click: {text: "MODS", under: "**/MainMenuButtons"}
+  - ui_wait: {path: "**/ModsScreen/Panel", cond: stable}
+  - expect_ui:
+      "**/ModsScreen/**/Content/No Splash Screen": {active: true}
+  - key: {code: Escape}
+  - ui_wait: {path: "**/ModsScreen", cond: gone}

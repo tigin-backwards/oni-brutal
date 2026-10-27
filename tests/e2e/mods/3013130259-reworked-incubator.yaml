@@ -1,0 +1,31 @@
+# Reworked Incubator (3013130259), class P; options.
+#
+# What it does: the Incubator no longer needs a Duplicant's lullaby: while powered it sings
+# to its egg itself (a postfix on EggIncubator.EggNeedsAttention applies the song buff and
+# reports no errand), the song effect lasts 1 s and speeds incubation by 400 % (option
+# IncubationRate), and the incubator draws 120 W with 2 kDTU/s of heat (options). Option
+# FetchAutomation lets its logic port pause egg deliveries.
+# How a player reaches it: build an Incubator and give it an egg.
+# What changes: incubators work without ranchers.
+#
+# The song effect and the incubator's def carry the options; setup builds an Incubator in the
+# corridor west of the printing pod, and selected it draws 120 W.
+from: early-base
+mods: [3013130259]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"EggIncubator\")", method: Build, args: [131765, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().effects.Get(\"EggSong\").duration": 1
+      "Db.Get().effects.Get(\"EggSong\").SelfModifiers[0].Value": 4
+      "Assets.GetBuildingDef(\"EggIncubator\").EnergyConsumptionWhenActive": 120
+      "Assets.GetBuildingDef(\"EggIncubator\").SelfHeatKilowattsWhenActive": 2
+  - run: {seconds: 2}
+  - expect: {buildings: {EggIncubator: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: EggIncubator}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<EnergyConsumer>.WattsNeededWhenActive": 120
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Incubator"}
